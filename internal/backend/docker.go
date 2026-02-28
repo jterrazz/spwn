@@ -9,6 +9,7 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	imagetypes "github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -33,6 +34,11 @@ func NewDockerBackend() (*DockerBackend, error) {
 }
 
 func (d *DockerBackend) Create(ctx context.Context, cfg *config.UniverseConfig) (string, error) {
+	// Pull image if not available locally.
+	if err := d.ensureImage(ctx, cfg.Image); err != nil {
+		return "", err
+	}
+
 	id := uuid.New().String()
 	shortID := id[:8]
 	containerName := "universe-" + shortID
@@ -211,6 +217,22 @@ func (d *DockerBackend) Inspect(ctx context.Context, id string) (*ContainerInfo,
 		Mind:      labels["universe.mind"],
 		Workspace: labels["universe.workspace"],
 	}, nil
+}
+
+func (d *DockerBackend) ensureImage(ctx context.Context, image string) error {
+	_, _, err := d.client.ImageInspectWithRaw(ctx, image)
+	if err == nil {
+		return nil // image exists locally
+	}
+
+	reader, err := d.client.ImagePull(ctx, image, imagetypes.PullOptions{})
+	if err != nil {
+		return fmt.Errorf("pulling image %s: %w", image, err)
+	}
+	defer reader.Close()
+	// Drain the reader to complete the pull.
+	_, _ = io.Copy(io.Discard, reader)
+	return nil
 }
 
 func (d *DockerBackend) containerName(ctx context.Context, universeID string) (string, error) {
