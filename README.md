@@ -1,52 +1,37 @@
 # Universe
 
-> Creating realities where agents can think, act, and evolve.
+> We're not giving agents tools. We're creating realities where they can think, act, and evolve.
 
-AI agents today can reason brilliantly but can't *do* anything real. They call predefined functions, one at a time, in sequences someone had to design in advance.
+## Start With Nothing
 
-But a developer at a terminal doesn't use 20 predefined tools. They have `bash` — and with it, the entire Unix ecosystem. Fifty years of composable commands, piped and chained in ways no one could anticipate. That's not more tools. That's a categorically different kind of power.
+An empty Docker image. No tools, no network, no data. A vacuum. This is a world with physics but no matter — like a universe after the Big Bang, before atoms formed.
 
-Claude Code proved it — give an LLM a real terminal and it becomes 100x more capable than a chatbot. Universe builds on this: Claude Code provides the raw reasoning and autonomy — reading files, writing code, composing commands, adapting its approach. Universe provides the cognitive architecture (Mind — persistent memory, skills, identity) and the physical reality (isolated environments with their own laws, tools, and resources). Together, they form a complete agent — reasoning within a structured, evolving identity, operating inside a contained world.
+The physics are already interesting. Filesystem is gravity — structure is imposed, not chosen. Compute is energy — finite, consumed by every action, subject to entropy. And absence is the strongest force — what doesn't exist can't be jailbroken, injected, or bypassed. You can't prompt-inject the absence of `curl`.
+
+## Add Elements
+
+Install tools. Each one is an element in your periodic table. With `grep`, `sort`, and `uniq`, chemistry becomes possible — they combine in ways no one designed. N tools don't give you N capabilities. They give you N! — a combinatorial explosion of possible reactions.
+
+Open a network port: you've just increased the speed of light. The universe can now perceive things beyond itself.
+
+The Docker image doesn't configure a container. It defines the laws of nature for a world.
 
 ```bash
 universe spawn --mind my-agent --image ubuntu:24.04 --workspace ./project
 ```
 
-## The Deeper Idea
+## Add Life
 
-Universe isn't just "Docker for AI." Each universe is a **contained reality** with its own physics. The Docker image doesn't configure a container — it defines the laws of nature for that world. If `curl` isn't installed, HTTP doesn't exist — not as a rule, but as a fact of physics. Security isn't about telling agents what not to do. It's about creating worlds where dangerous actions are physically impossible.
+Place a Mind inside the world. Not a prompt — an identity. It has memory, personality, and senses that connect it to the outside world through the Gate.
 
-Inside that reality, a **Mind** operates with genuine agency — free to think, decide, combine any tool with any other, and adapt its own approach. No behavioral chains. No guardrails. Full autonomy within the physics of its world.
-
-And Minds aren't static. They're **living identities** that grow over time — accumulating experience in journals, refining strategies through Reflexion, sleeping to consolidate what they know, and forking into parallel branches that evolve independently. They don't just complete tasks. They get better at completing tasks.
-
-> *No chains on the mind. Chains in the physics.*
-
-## The Concepts
-
-```
-Substrate            The base reality — your machine
-  └── Architect         The builder of worlds
-       └── Universe        A contained reality — its own physics, tools, and laws
-            ├── Mind           A living identity — learns, sleeps, evolves
-            └── Gate           The wormhole — connects Universe to Substrate
-```
-
-| Concept | What it is |
-| --- | --- |
-| **Universe** | A contained reality. The Docker image defines the physics — what tools exist, what network is possible, what resources are available. |
-| **Mind** | A living identity. Personas, skills, knowledge, playbooks, and a journal of lived experience. Grows over time. |
-| **Gate** | The wormhole between realities. Bridges external services (MCP servers) into the universe as native CLI commands. |
-| **Architect** | The builder of worlds. Creates, manages, and destroys universes on demand. |
-| **Substrate** | The base reality — the machine from which all universes are spawned. |
-
-## How It Works
-
-The Architect creates a Docker container, mounts a Mind (persistent identity) and a workspace (project files), auto-generates a `physics.md` manifest describing the universe's reality, and spawns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) inside. When the task ends, the universe is destroyed — but the Mind persists.
-
-### The Mind
-
-A persistent directory structure mounted into every universe. Not just memory — a complete identity:
+| Life | Mind | What it holds |
+| --- | --- | --- |
+| Episodic memory | Journal | What happened to me |
+| Semantic memory | Knowledge | What I know — distilled from experience |
+| Procedural memory | Playbooks | What I know how to do — earned, not taught |
+| Personality | Personas | Who I am |
+| Senses | Interactions | How I perceive beyond my body |
+| Nervous system | Gate | How signals travel between mind and world |
 
 ```
 mind/
@@ -58,27 +43,52 @@ mind/
 └── sessions/      # CONTINUITY — Claude Code resume tokens
 ```
 
-Without a Mind, every universe starts from zero. With one, agents accumulate expertise, refine their approach, and learn from their own history.
+The Mind has free will. No guardrails, no behavioral chains. Why? Because dangerous actions aren't forbidden — they're physically impossible. You don't need to tell a creature "don't fly" in a world without atmosphere.
 
-### The Physics
+> *No chains on the mind. Chains in the physics.*
 
-Each universe gets an auto-generated `/universe/physics.md` describing its reality — constants (resource limits), laws (invariant rules), elements (installed binaries), interactions (bridged MCP servers), and topology (filesystem layout). The agent reads the physics to understand its world. Everything else doesn't exist.
+## Let It Evolve
 
-### The Gate
+After each session, the mind reflects. What strategies worked? Those survive. What failed? Discarded. This is natural selection for behavior — not training, not fine-tuning, but evolution.
 
-An HTTP-over-Unix-socket server that bridges external services into the universe as CLI commands. The agent calls `slack-send` and the Gate routes it through the socket to the Substrate's MCP server. From the agent's perspective, the command just *exists* — part of the physics.
+Periodically, the mind sleeps. Not resting — reorganizing. Raw experience consolidates into durable knowledge. Stale strategies get pruned. Contradictions resolve. The mind dreams, cross-referencing disparate experiences, surfacing patterns no single session would catch.
 
-## Why This Matters
+Fork the mind. Two copies, two environments, two evolutionary paths. Speciation. Merge the successful branches back. Population-level adaptation.
 
-| | Tool-call agents | Universe agents |
-| --- | --- | --- |
-| **Execution** | Call predefined functions one at a time | Full shell — any command, any pipe, any composition |
-| **Capabilities** | N tools = N capabilities | N tools = N! capabilities (combinatorial explosion) |
-| **Learning** | Static — same behavior every time | Learn, sleep, evolve — get better over time |
-| **Security** | Guardrails ("don't do X") | Physics ("X doesn't exist") |
-| **Agency** | Tools to be controlled | Autonomous entities with genuine agency |
+Model weights never change. What evolves is the Mind.
 
-> MCP gives agents a Swiss Army knife. Universe gives them a workshop.
+## How It Works
+
+The Architect creates a Docker container, mounts a Mind (persistent identity) and a workspace (project files), auto-generates a `physics.md` manifest describing the universe's reality, and spawns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) inside. When the task ends, the universe is destroyed — but the Mind persists.
+
+```
+┌──────────────────────────────────────────────┐
+│  CLI (cobra)                                 │
+│  create · spawn · list · inspect · destroy   │
+└──────────────┬───────────────────────────────┘
+               │
+      ┌────────▼────────┐
+      │    Architect     │  Orchestrator
+      └────────┬────────┘
+               │
+  ┌────────────┼────────────┬─────────────┐
+  │            │            │             │
+┌─▼──────┐ ┌──▼────┐ ┌─────▼─────┐ ┌────▼─────┐
+│Backend │ │Session│ │ Journal   │ │ Physics  │
+│(Docker)│ │Store  │ │Generator  │ │Generator │
+└────┬───┘ └───────┘ └───────────┘ └──────────┘
+     │
+┌────▼────────────────────────────────────┐
+│  Docker Container                       │
+│                                         │
+│  Claude Code CLI (agent runtime)        │
+│  ├── /mind       (persistent identity)  │
+│  ├── /workspace  (project files)        │
+│  ├── /gate       (Unix socket + bins)   │
+│  └── /universe/physics.md (read-only)   │
+│                                         │
+└─────────────────────────────────────────┘
+```
 
 ## Quick Start
 
@@ -124,38 +134,27 @@ universe mind export     # Export a mind as tar.gz
 | `--timeout` | Execution timeout | — |
 | `--interaction` | MCP interaction bridge (`source:as:cap1,cap2`) | — |
 
-## Architecture
+## The Concepts
 
 ```
-┌──────────────────────────────────────────────┐
-│  CLI (cobra)                                 │
-│  create · spawn · list · inspect · destroy   │
-└──────────────┬───────────────────────────────┘
-               │
-      ┌────────▼────────┐
-      │    Architect     │  Orchestrator
-      └────────┬────────┘
-               │
-  ┌────────────┼────────────┬─────────────┐
-  │            │            │             │
-┌─▼──────┐ ┌──▼────┐ ┌─────▼─────┐ ┌────▼─────┐
-│Backend │ │Session│ │ Journal   │ │ Physics  │
-│(Docker)│ │Store  │ │Generator  │ │Generator │
-└────┬───┘ └───────┘ └───────────┘ └──────────┘
-     │
-┌────▼────────────────────────────────────┐
-│  Docker Container                       │
-│                                         │
-│  Claude Code CLI (agent runtime)        │
-│  ├── /mind       (persistent identity)  │
-│  ├── /workspace  (project files)        │
-│  ├── /gate       (Unix socket + bins)   │
-│  └── /universe/physics.md (read-only)   │
-│                                         │
-└─────────────────────────────────────────┘
+Substrate            The base reality — your machine
+  └── Architect         The builder of worlds
+       └── Universe        A contained reality — its own physics, tools, and laws
+            ├── Mind           A living identity — learns, sleeps, evolves
+            └── Gate           The wormhole — connects Universe to Substrate
 ```
 
-### Project Structure
+## How It Compares
+
+| Solution | Approach | Universe difference |
+| --- | --- | --- |
+| **MCP** | Exposes individual tools | Universe gives the full shell — N! compositions |
+| **LangChain / CrewAI** | Chains tool calls | Universe gives combinatorial freedom, not chains |
+| **E2B** | Cloud sandboxes | Universe is self-hosted with persistent Mind and self-learning |
+| **Claude Code alone** | Operates on your machine | Universe adds isolation, persistent identity, physics |
+| **Docker** | Container runtime | Docker is the backend; Universe adds Mind, Gate, and agent spawning |
+
+## Project Structure
 
 ```
 cmd/universe/          CLI entry point + cobra commands
@@ -173,16 +172,6 @@ internal/
 test/e2e/              End-to-end integration tests
 ```
 
-## How It Compares
-
-| Solution | Approach | Universe difference |
-| --- | --- | --- |
-| **MCP** | Exposes individual tools | Universe gives the full shell — N! compositions |
-| **LangChain / CrewAI** | Chains tool calls | Universe gives combinatorial freedom, not chains |
-| **E2B** | Cloud sandboxes | Universe is self-hosted with persistent Mind and self-learning |
-| **Claude Code alone** | Operates on your machine | Universe adds isolation, persistent identity, physics |
-| **Docker** | Container runtime | Docker is the backend; Universe adds Mind, Gate, and agent spawning |
-
 ## Development
 
 ```bash
@@ -198,7 +187,7 @@ make test-clean         # Clean up orphan test containers
 - [x] **Phase 1** — Go core + CLI (lifecycle, Docker backend, Claude Code spawning)
 - [x] **Phase 2** — Full Mind + session persistence (6-layer Mind, journal, resume)
 - [x] **Phase 3** — Interactions (Gate server, MCP bridging, process manager)
-- [ ] **Phase 4** — Multiverse (fork, merge, reflexion, sleep) ← *current*
+- [ ] **Phase 4** — Multiverse (fork, merge, reflexion, sleep) *current*
 - [ ] **Phase 5** — Firecracker backend (microVMs, vsock, virtio-fs)
 - [ ] **Phase 6** — Thin SDKs (TypeScript, Python)
 - [ ] **Phase 7** — Ecosystem (templates, Mind marketplace, multi-universe orchestration)
