@@ -5,7 +5,7 @@
 Intelligence is pattern recognition—and models like Claude have mastered it. But intelligence without a world is a brain in a jar. Universe builds the missing half: not a better toolchain, but a **reality**—a world with physics, populated with elements, inhabited by a conscious entity that remembers, reflects, and evolves.
 
 ```bash
-universe spawn --mind my-agent --image node:22 --workspace ./my-project
+universe spawn --agent leonardo --image node:22 --workspace ./my-project
 ```
 
 One command. A world is created with its own laws of nature. An agent's Mind—its persistent blueprint—is mounted inside. Claude Code is dropped in with full shell access. When the task ends, the world is destroyed—but the Mind persists. The agent remembers what it learned.
@@ -100,17 +100,17 @@ The Architect creates a Docker container, mounts the Mind and workspace, auto-ge
 git clone https://github.com/jterrazz/universe.git
 cd universe && make build
 
-# Create a Mind (persistent agent identity)
-mkdir -p ~/.universe/minds/my-agent/{personas,skills,knowledge,playbooks,journal,sessions}
+# Create an agent (persistent identity)
+mkdir -p ~/.universe/agents/leonardo/{personas,skills,knowledge,playbooks,journal,sessions}
 
 # Spawn an agent
-universe spawn --mind my-agent --workspace ./my-project
+universe spawn --agent leonardo --workspace ./my-project
 
 # With a custom image and memory limit
-universe spawn --mind my-agent --image node:22 --workspace ./app --memory 2g
+universe spawn --agent leonardo --image node:22 --workspace ./app --memory 2g
 
 # With external service bridging (MCP → CLI wrapper)
-universe spawn --mind my-agent --workspace ./app \
+universe spawn --agent leonardo --workspace ./app \
   --interaction "mcp/slack:slack-send:chat.postMessage,channels.list"
 ```
 
@@ -123,15 +123,15 @@ universe list            # List all universes
 universe inspect <id>    # Inspect a universe
 universe destroy <id>    # Stop and remove a universe
 
-universe mind list       # List all minds
-universe mind inspect    # Inspect mind structure and sessions
-universe mind export     # Export a mind as tar.gz
+universe agent list      # List all agents
+universe agent inspect   # Inspect agent structure and sessions
+universe agent export    # Export an agent as tar.gz
 ```
 
 | Flag | Description | Default |
 | --- | --- | --- |
 | `--image` | Docker image (defines physics and elements) | `ubuntu:24.04` |
-| `--mind` | Mind ID (persistent identity) | — |
+| `--agent` | Agent name (persistent identity) | — |
 | `--workspace` | Host directory to mount at `/workspace` | — |
 | `--memory` | Container memory limit | — |
 | `--timeout` | Execution timeout | — |
