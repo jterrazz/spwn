@@ -6,15 +6,15 @@
 
 An empty Docker image. No tools, no network, no data. A vacuum. This is a world with physics but no matter — like a universe after the Big Bang, before atoms formed.
 
-The physics are already interesting. Filesystem is gravity — structure is imposed, not chosen. Compute is energy — finite, consumed by every action, subject to entropy. And absence is the strongest force — what doesn't exist can't be jailbroken, injected, or bypassed. You can't prompt-inject the absence of `curl`.
+The physics are already interesting. Filesystem is gravity — structure is imposed, not chosen. Compute is energy — finite, consumed by every action, subject to entropy. No network interface means the outside world doesn't exist — not forbidden, physically absent. You can't prompt-inject a missing network interface.
 
 ## Add Elements
 
-Install tools. Each one is an element in your periodic table. With `grep`, `sort`, and `uniq`, chemistry becomes possible — they combine in ways no one designed. N tools don't give you N capabilities. They give you N! — a combinatorial explosion of possible reactions.
+Install tools. Each one is a manufactured object in your world — a screwdriver, a hammer. With `grep`, `sort`, and `uniq`, chemistry becomes possible — they combine in ways no one designed. N tools don't give you N capabilities. They give you N! — a combinatorial explosion of possible reactions.
 
-Open a network port: you've just increased the speed of light. The universe can now perceive things beyond itself.
+Open a network port: you've just expanded the speed of light. The universe can now perceive things beyond itself. Install `curl`: someone has now built an HTTP client. Remove `apt`: no one can manufacture new tools — the element set is locked.
 
-The Docker image doesn't configure a container. It defines the laws of nature for a world.
+The Docker image defines two things: the laws of nature and the tools that exist in that world.
 
 ```bash
 universe spawn --mind my-agent --image ubuntu:24.04 --workspace ./project
@@ -22,9 +22,9 @@ universe spawn --mind my-agent --image ubuntu:24.04 --workspace ./project
 
 ## Add Life
 
-Place a Mind inside the world. Not a prompt — an identity. It has memory, personality, and senses that connect it to the outside world through the Gate.
+Place an agent inside the world. Not a prompt — a living identity, backed by a Mind (its persistent blueprint). It has memory, personality, and senses that connect it to the outside world through the Gate.
 
-| Life | Mind | What it holds |
+| Life | Agent's Mind | What it holds |
 | --- | --- | --- |
 | Episodic memory | Journal | What happened to me |
 | Semantic memory | Knowledge | What I know — distilled from experience |
@@ -43,23 +43,23 @@ mind/
 └── sessions/      # CONTINUITY — Claude Code resume tokens
 ```
 
-The Mind has free will. No guardrails, no behavioral chains. Why? Because dangerous actions aren't forbidden — they're physically impossible. You don't need to tell a creature "don't fly" in a world without atmosphere.
+The agent has free will. No guardrails, no behavioral chains. Why? Because dangerous actions aren't forbidden — they're physically impossible. You don't need to tell a creature "don't fly" in a world without atmosphere.
 
-> *No chains on the mind. Chains in the physics.*
+> *No chains on the agent. Chains in the physics.*
 
 ## Let It Evolve
 
-After each session, the mind reflects. What strategies worked? Those survive. What failed? Discarded. This is natural selection for behavior — not training, not fine-tuning, but evolution.
+After each session, the agent reflects. What strategies worked? Those survive. What failed? Discarded. This is natural selection for behavior — not training, not fine-tuning, but evolution.
 
 Periodically, the mind sleeps. Not resting — reorganizing. Raw experience consolidates into durable knowledge. Stale strategies get pruned. Contradictions resolve. The mind dreams, cross-referencing disparate experiences, surfacing patterns no single session would catch.
 
-Fork the mind. Two copies, two environments, two evolutionary paths. Speciation. Merge the successful branches back. Population-level adaptation.
+Fork the agent. Two copies, two environments, two evolutionary paths. Speciation. Merge the successful branches back. Population-level adaptation.
 
-Model weights never change. What evolves is the Mind.
+Model weights never change. What evolves is the agent's Mind.
 
 ## How It Works
 
-The Architect creates a Docker container, mounts a Mind (persistent identity) and a workspace (project files), auto-generates a `physics.md` manifest describing the universe's reality, and spawns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) inside. When the task ends, the universe is destroyed — but the Mind persists.
+The Architect creates a Docker container, mounts a Mind (the agent's blueprint) and a workspace (project files), auto-generates a `physics.md` manifest describing the universe's reality, and spawns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) inside. When the task ends, the universe is destroyed — but the agent's Mind persists.
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -82,7 +82,7 @@ The Architect creates a Docker container, mounts a Mind (persistent identity) an
 │  Docker Container                       │
 │                                         │
 │  Claude Code CLI (agent runtime)        │
-│  ├── /mind       (persistent identity)  │
+│  ├── /mind       (agent blueprint)      │
 │  ├── /workspace  (project files)        │
 │  ├── /gate       (Unix socket + bins)   │
 │  └── /universe/physics.md (read-only)   │
@@ -127,7 +127,7 @@ universe mind export     # Export a mind as tar.gz
 
 | Flag | Description | Default |
 | --- | --- | --- |
-| `--image` | Docker image (defines the physics) | `ubuntu:24.04` |
+| `--image` | Docker image (defines physics and elements) | `ubuntu:24.04` |
 | `--mind` | Mind ID (persistent identity) | — |
 | `--workspace` | Host directory to mount at `/workspace` | — |
 | `--memory` | Container memory limit | — |
@@ -140,7 +140,8 @@ universe mind export     # Export a mind as tar.gz
 Substrate            The base reality — your machine
   └── Architect         The builder of worlds
        └── Universe        A contained reality — its own physics, tools, and laws
-            ├── Mind           A living identity — learns, sleeps, evolves
+            ├── Agent          A living identity — learns, sleeps, evolves
+            │    └── Mind         Its blueprint — personas, skills, knowledge, playbooks, journal
             └── Gate           The wormhole — connects Universe to Substrate
 ```
 
