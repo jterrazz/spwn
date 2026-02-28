@@ -40,3 +40,67 @@ func TestEnsureDir(t *testing.T) {
 		}
 	}
 }
+
+func TestSubdirs(t *testing.T) {
+	got := Subdirs()
+	if len(got) != 6 {
+		t.Fatalf("expected 6 subdirs, got %d", len(got))
+	}
+	expected := []string{"personas", "skills", "knowledge", "playbooks", "journal", "sessions"}
+	for i, name := range expected {
+		if got[i] != name {
+			t.Errorf("subdirs[%d] = %q, want %q", i, got[i], name)
+		}
+	}
+	// Verify it returns a copy.
+	got[0] = "modified"
+	if Subdirs()[0] == "modified" {
+		t.Error("Subdirs should return a copy, not the original slice")
+	}
+}
+
+func TestValidate_Valid(t *testing.T) {
+	tmp := t.TempDir()
+	mindPath := filepath.Join(tmp, "valid-mind")
+	if err := EnsureDir(mindPath); err != nil {
+		t.Fatalf("EnsureDir: %v", err)
+	}
+	if err := Validate(mindPath); err != nil {
+		t.Errorf("Validate should pass for complete mind, got: %v", err)
+	}
+}
+
+func TestValidate_Missing(t *testing.T) {
+	tmp := t.TempDir()
+	mindPath := filepath.Join(tmp, "incomplete-mind")
+	// Create only some subdirs.
+	os.MkdirAll(filepath.Join(mindPath, "personas"), 0o755)
+	os.MkdirAll(filepath.Join(mindPath, "skills"), 0o755)
+
+	err := Validate(mindPath)
+	if err == nil {
+		t.Fatal("Validate should return error for incomplete mind")
+	}
+	if !strings.Contains(err.Error(), "knowledge") {
+		t.Errorf("error should mention missing 'knowledge', got: %v", err)
+	}
+}
+
+func TestListMinds(t *testing.T) {
+	// ListMinds reads from ~/.universe/minds/ which may or may not exist.
+	// We just verify it doesn't crash.
+	_, err := ListMinds()
+	if err != nil {
+		t.Fatalf("ListMinds: %v", err)
+	}
+}
+
+func TestBasePath(t *testing.T) {
+	path, err := BasePath()
+	if err != nil {
+		t.Fatalf("BasePath: %v", err)
+	}
+	if !strings.HasSuffix(path, filepath.Join(".universe", "minds")) {
+		t.Errorf("BasePath should end with .universe/minds, got %s", path)
+	}
+}

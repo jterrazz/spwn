@@ -14,6 +14,7 @@ func Root() *cobra.Command {
 	cmd.AddCommand(listCmd())
 	cmd.AddCommand(inspectCmd())
 	cmd.AddCommand(destroyCmd())
+	cmd.AddCommand(mindCmd())
 
 	return cmd
 }

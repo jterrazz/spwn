@@ -183,3 +183,27 @@ func TestArchitectDestroyNotFound(t *testing.T) {
 		t.Fatal("Destroy with bogus ID should error")
 	}
 }
+
+func TestArchitectPhysicsIntrospection(t *testing.T) {
+	a, b, ctx := testArchitect(t)
+	cfg := &config.UniverseConfig{Image: TestImage}
+	u := mustCreateUniverse(t, a, b, ctx, cfg)
+
+	// Start container and read physics.md.
+	if err := b.Start(ctx, u.ID); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+
+	result, err := b.Exec(ctx, u.ID, []string{"cat", "/universe/physics.md"})
+	if err != nil {
+		t.Fatalf("Exec cat: %v", err)
+	}
+	if result.ExitCode != 0 {
+		t.Fatalf("cat /universe/physics.md failed: exit %d, stderr: %s", result.ExitCode, result.Stderr)
+	}
+
+	// Alpine should at least have "sh" detected.
+	if !strings.Contains(result.Stdout, "sh") {
+		t.Errorf("physics.md should contain detected element 'sh', got:\n%s", result.Stdout)
+	}
+}

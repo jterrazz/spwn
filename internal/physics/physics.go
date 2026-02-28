@@ -1,14 +1,43 @@
 package physics
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/jterrazz/universe/internal/backend"
 	"github.com/jterrazz/universe/internal/config"
 )
 
-// Generate produces the physics.md content for a universe.
-func Generate(cfg *config.UniverseConfig) string {
+// DefaultElements is the hardcoded list used when introspection is unavailable.
+var DefaultElements = []string{"bash", "git", "node", "python3", "curl", "claude (Claude Code CLI)"}
+
+// ProbeTargets lists binaries to check for in a container.
+var ProbeTargets = []string{
+	"bash", "sh", "git", "node", "npm", "python3",
+	"curl", "wget", "jq", "claude", "go", "rustc", "gcc", "make",
+}
+
+// DetectElements probes a running container for common binaries.
+func DetectElements(ctx context.Context, b backend.Backend, universeID string) ([]string, error) {
+	var found []string
+	for _, bin := range ProbeTargets {
+		result, err := b.Exec(ctx, universeID, []string{"sh", "-c", "command -v " + bin})
+		if err != nil {
+			continue
+		}
+		if result.ExitCode == 0 {
+			found = append(found, bin)
+		}
+	}
+	if len(found) == 0 {
+		return nil, fmt.Errorf("no elements detected")
+	}
+	return found, nil
+}
+
+// GenerateWithElements produces the physics.md content with a dynamic element list.
+func GenerateWithElements(cfg *config.UniverseConfig, elements []string) string {
 	memory := cfg.Memory
 	if memory == "" {
 		memory = "512m"
@@ -37,6 +66,12 @@ func Generate(cfg *config.UniverseConfig) string {
 		mountSection = strings.Join(mounts, "\n")
 	}
 
+	var elementLines []string
+	for _, e := range elements {
+		elementLines = append(elementLines, "  - "+e)
+	}
+	elementSection := strings.Join(elementLines, "\n")
+
 	return fmt.Sprintf(`# Physics
 
 This file describes the constants, topology, and laws of this universe.
@@ -57,12 +92,7 @@ Mounted volumes:
 ## Elements
 
 Available tools:
-  - bash
-  - git
-  - node
-  - python3
-  - curl
-  - claude (Claude Code CLI)
+%s
 
 ## Laws
 
@@ -71,5 +101,10 @@ Available tools:
 3. The agent operates within the resource limits defined in Constants.
 4. /mind is shared identity — treat it as long-term memory across universes.
 5. /workspace is the project context — the current task lives here.
-`, memory, cpu, timeoutStr, cfg.Image, mountSection)
+`, memory, cpu, timeoutStr, cfg.Image, mountSection, elementSection)
+}
+
+// Generate produces the physics.md content for a universe using default elements.
+func Generate(cfg *config.UniverseConfig) string {
+	return GenerateWithElements(cfg, DefaultElements)
 }

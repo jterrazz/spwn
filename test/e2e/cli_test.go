@@ -68,4 +68,26 @@ func TestCLIHelpOutput(t *testing.T) {
 	AssertContains(t, r.Stdout, "list")
 	AssertContains(t, r.Stdout, "inspect")
 	AssertContains(t, r.Stdout, "destroy")
+	AssertContains(t, r.Stdout, "mind")
+}
+
+func TestCLIMindList(t *testing.T) {
+	// Create a universe with a mind to ensure a mind directory exists.
+	r := MustRunCLI(t, "create", "--image", TestImage, "--mind", "test-mind-list")
+	id := ExtractUniverseID(t, r.Stdout)
+	CLICleanup(t, id)
+
+	r = MustRunCLI(t, "mind", "list")
+	AssertContains(t, r.Stdout, "test-mind-list")
+}
+
+func TestCLIMindInspect(t *testing.T) {
+	// Create a universe with a mind to ensure a mind directory exists.
+	r := MustRunCLI(t, "create", "--image", TestImage, "--mind", "test-mind-inspect")
+	id := ExtractUniverseID(t, r.Stdout)
+	CLICleanup(t, id)
+
+	r = MustRunCLI(t, "mind", "inspect", "test-mind-inspect")
+	AssertContains(t, r.Stdout, "test-mind-inspect")
+	AssertContains(t, r.Stdout, "Structure:")
 }
