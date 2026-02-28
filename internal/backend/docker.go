@@ -240,10 +240,24 @@ func (d *DockerBackend) containerName(ctx context.Context, universeID string) (s
 	if err != nil {
 		return "", err
 	}
+	// Exact match first.
 	for _, c := range containers {
 		if c.ID == universeID {
 			return c.Name, nil
 		}
+	}
+	// Prefix match for short IDs.
+	var match *ContainerInfo
+	for i, c := range containers {
+		if strings.HasPrefix(c.ID, universeID) {
+			if match != nil {
+				return "", fmt.Errorf("ambiguous universe ID: %s", universeID)
+			}
+			match = &containers[i]
+		}
+	}
+	if match != nil {
+		return match.Name, nil
 	}
 	return "", fmt.Errorf("universe not found: %s", universeID)
 }

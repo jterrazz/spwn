@@ -51,7 +51,7 @@ func spawnCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&image, "image", "ubuntu:22.04", "Docker image to use")
+	cmd.Flags().StringVar(&image, "image", "ubuntu:24.04", "Docker image to use")
 	cmd.Flags().StringVar(&mind, "mind", "", "Mind identity to mount")
 	cmd.Flags().StringVar(&workspace, "workspace", "", "Host workspace directory to mount")
 	cmd.Flags().StringVar(&memory, "memory", "", "Memory limit (e.g. 512m, 1g)")
