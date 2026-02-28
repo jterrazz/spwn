@@ -76,3 +76,41 @@ func TestGenerate_UsesDefaultElements(t *testing.T) {
 		t.Error("default output should contain claude")
 	}
 }
+
+func TestGenerateWithInteractions(t *testing.T) {
+	cfg := &config.UniverseConfig{
+		Image: "ubuntu:22.04",
+		Interactions: []config.Interaction{
+			{Source: "mcp/slack", As: "slack-send", Description: "Send a message to Slack"},
+			{Source: "mcp/db", As: "db-query", Capabilities: []string{"read"}},
+		},
+	}
+	output := Generate(cfg)
+
+	if !strings.Contains(output, "## Interactions") {
+		t.Error("output should contain Interactions section")
+	}
+	if !strings.Contains(output, "`slack-send`") {
+		t.Error("output should contain slack-send command")
+	}
+	if !strings.Contains(output, "Send a message to Slack") {
+		t.Error("output should contain custom description")
+	}
+	if !strings.Contains(output, "`db-query`") {
+		t.Error("output should contain db-query command")
+	}
+	if !strings.Contains(output, "mcp/db") {
+		t.Error("output should contain auto-generated description with source")
+	}
+}
+
+func TestGenerateWithoutInteractions(t *testing.T) {
+	cfg := &config.UniverseConfig{
+		Image: "ubuntu:22.04",
+	}
+	output := Generate(cfg)
+
+	if strings.Contains(output, "## Interactions") {
+		t.Error("output should not contain Interactions section when none configured")
+	}
+}

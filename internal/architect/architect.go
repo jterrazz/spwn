@@ -5,11 +5,13 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/jterrazz/universe/internal/agent"
 	"github.com/jterrazz/universe/internal/backend"
 	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/universe/internal/gate"
 	"github.com/jterrazz/universe/internal/journal"
 	"github.com/jterrazz/universe/internal/physics"
 	"github.com/jterrazz/universe/internal/session"
@@ -63,6 +65,15 @@ func (a *Architect) Create(ctx context.Context, cfg *config.UniverseConfig) (*co
 		return nil, fmt.Errorf("writing physics.md: %w", err)
 	}
 
+	// Install gate wrapper scripts if interactions are configured.
+	if len(cfg.Interactions) > 0 {
+		for _, cmd := range gate.AllWrapperCommands(cfg.Interactions) {
+			if _, err := a.backend.Exec(ctx, id, []string{"sh", "-c", cmd}); err != nil {
+				slog.Warn("failed to install gate wrapper", "error", err)
+			}
+		}
+	}
+
 	if err := a.backend.Stop(ctx, id); err != nil {
 		return nil, fmt.Errorf("stopping container after physics write: %w", err)
 	}
@@ -78,6 +89,27 @@ func (a *Architect) Create(ctx context.Context, cfg *config.UniverseConfig) (*co
 
 // Spawn creates, starts, and spawns an agent in a universe.
 func (a *Architect) Spawn(ctx context.Context, cfg *config.UniverseConfig) (*config.Universe, error) {
+	// Set up gate server if interactions are configured.
+	var g *gate.Gate
+	if len(cfg.Interactions) > 0 {
+		gateDir, err := os.MkdirTemp("", "universe-gate-*")
+		if err != nil {
+			return nil, fmt.Errorf("creating gate directory: %w", err)
+		}
+		defer os.RemoveAll(gateDir)
+
+		g = gate.New(gateDir)
+		for _, ia := range cfg.Interactions {
+			g.RegisterHandler(ia.As, gate.NewEchoHandler())
+		}
+		if err := g.Start(); err != nil {
+			return nil, fmt.Errorf("starting gate: %w", err)
+		}
+		defer g.Stop(ctx)
+
+		cfg.GateDir = gateDir
+	}
+
 	u, err := a.Create(ctx, cfg)
 	if err != nil {
 		return nil, err

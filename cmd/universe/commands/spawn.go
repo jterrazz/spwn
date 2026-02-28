@@ -12,11 +12,12 @@ import (
 
 func spawnCmd() *cobra.Command {
 	var (
-		image     string
-		mind      string
-		workspace string
-		memory    string
-		timeout   time.Duration
+		image        string
+		mind         string
+		workspace    string
+		memory       string
+		timeout      time.Duration
+		interactions []string
 	)
 
 	cmd := &cobra.Command{
@@ -28,12 +29,18 @@ func spawnCmd() *cobra.Command {
 				return err
 			}
 
+			parsedInteractions, err := parseInteractions(interactions)
+			if err != nil {
+				return err
+			}
+
 			cfg := &config.UniverseConfig{
-				Image:     image,
-				Mind:      mind,
-				Workspace: workspace,
-				Memory:    memory,
-				Timeout:   timeout,
+				Image:        image,
+				Mind:         mind,
+				Workspace:    workspace,
+				Memory:       memory,
+				Timeout:      timeout,
+				Interactions: parsedInteractions,
 			}
 
 			u, err := a.Spawn(cmd.Context(), cfg)
@@ -56,6 +63,7 @@ func spawnCmd() *cobra.Command {
 	cmd.Flags().StringVar(&workspace, "workspace", "", "Host workspace directory to mount")
 	cmd.Flags().StringVar(&memory, "memory", "", "Memory limit (e.g. 512m, 1g)")
 	cmd.Flags().DurationVar(&timeout, "timeout", 0, "Timeout (e.g. 5m, 1h)")
+	cmd.Flags().StringArrayVar(&interactions, "interaction", nil, `Interaction bridge (format: "source:as:cap1,cap2")`)
 
 	return cmd
 }

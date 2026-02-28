@@ -9,10 +9,12 @@ Go project with standard layout:
 - `internal/architect/` — Architect: main orchestrator (create, spawn, list, inspect, destroy)
 - `internal/agent/` — Claude Code CLI spawning with session resume (--resume)
 - `internal/backend/` — Backend interface + Docker implementation (auto-pulls images)
-- `internal/config/` — UniverseConfig and Universe types
+- `internal/config/` — UniverseConfig, Universe, Interaction types
+- `internal/gate/` — Gate server (HTTP-over-Unix-socket), wrapper script generation, handlers
 - `internal/journal/` — Automatic spawn journal (markdown entries per session)
 - `internal/mind/` — Mind path resolution, validation, listing (6 subdirs)
 - `internal/physics/` — physics.md generation + container element introspection
+- `internal/procmgr/` — Process manager with crash recovery and exponential backoff
 - `internal/session/` — Session persistence (JSON per mind+universe pair)
 
 ## Conventions

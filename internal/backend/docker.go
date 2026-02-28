@@ -74,6 +74,15 @@ func (d *DockerBackend) Create(ctx context.Context, cfg *config.UniverseConfig) 
 		})
 	}
 
+	if cfg.GateDir != "" {
+		labels["universe.gate"] = cfg.GateDir
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: cfg.GateDir,
+			Target: "/gate",
+		})
+	}
+
 	containerCfg := &container.Config{
 		Image:     cfg.Image,
 		Labels:    labels,

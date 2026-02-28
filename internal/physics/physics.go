@@ -72,6 +72,23 @@ func GenerateWithElements(cfg *config.UniverseConfig, elements []string) string 
 	}
 	elementSection := strings.Join(elementLines, "\n")
 
+	var interactionSection string
+	if len(cfg.Interactions) > 0 {
+		var lines []string
+		for _, ia := range cfg.Interactions {
+			desc := ia.Description
+			if desc == "" {
+				if len(ia.Capabilities) > 0 {
+					desc = fmt.Sprintf("Bridge to %s (%s)", ia.Source, strings.Join(ia.Capabilities, ", "))
+				} else {
+					desc = fmt.Sprintf("Bridge to %s", ia.Source)
+				}
+			}
+			lines = append(lines, fmt.Sprintf("  - `%s` — %s", ia.As, desc))
+		}
+		interactionSection = fmt.Sprintf("\n## Interactions\n\nAvailable bridges to external services:\n%s\n", strings.Join(lines, "\n"))
+	}
+
 	return fmt.Sprintf(`# Physics
 
 This file describes the constants, topology, and laws of this universe.
@@ -93,7 +110,7 @@ Mounted volumes:
 
 Available tools:
 %s
-
+%s
 ## Laws
 
 1. The filesystem is ephemeral — only /workspace and /mind persist across restarts.
@@ -101,7 +118,7 @@ Available tools:
 3. The agent operates within the resource limits defined in Constants.
 4. /mind is shared identity — treat it as long-term memory across universes.
 5. /workspace is the project context — the current task lives here.
-`, memory, cpu, timeoutStr, cfg.Image, mountSection, elementSection)
+`, memory, cpu, timeoutStr, cfg.Image, mountSection, elementSection, interactionSection)
 }
 
 // Generate produces the physics.md content for a universe using default elements.
