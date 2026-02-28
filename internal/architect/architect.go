@@ -17,13 +17,18 @@ type Architect struct {
 	backend backend.Backend
 }
 
+// NewWithBackend creates a new Architect with the given backend.
+func NewWithBackend(b backend.Backend) *Architect {
+	return &Architect{backend: b}
+}
+
 // New creates a new Architect with a Docker backend.
 func New() (*Architect, error) {
 	b, err := backend.NewDockerBackend()
 	if err != nil {
 		return nil, err
 	}
-	return &Architect{backend: b}, nil
+	return NewWithBackend(b), nil
 }
 
 // Create provisions a new universe without starting it.
