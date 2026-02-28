@@ -1,65 +1,68 @@
 # Universe
 
-> We're not giving agents tools. We're creating realities where they can think, act, and evolve.
+> What does it mean to create a reality for something that can think?
 
-## Start With Nothing
-
-An empty Docker image. No tools, no network, no data. A vacuum. This is a world with physics but no matter — like a universe after the Big Bang, before atoms formed.
-
-The physics are already interesting. Filesystem is gravity — structure is imposed, not chosen. Compute is energy — finite, consumed by every action, subject to entropy. No network interface means the outside world doesn't exist — not forbidden, physically absent. You can't prompt-inject a missing network interface.
-
-## Add Elements
-
-Install tools. Each one is a manufactured object in your world — a screwdriver, a hammer. With `grep`, `sort`, and `uniq`, chemistry becomes possible — they combine in ways no one designed. N tools don't give you N capabilities. They give you N! — a combinatorial explosion of possible reactions.
-
-Open a network port: you've just expanded the speed of light. The universe can now perceive things beyond itself. Install `curl`: someone has now built an HTTP client. Remove `apt`: no one can manufacture new tools — the element set is locked.
-
-The Docker image defines two things: the laws of nature and the tools that exist in that world.
+Intelligence is pattern recognition—and models like Claude have mastered it. But intelligence without a world is a brain in a jar. Universe builds the missing half: not a better toolchain, but a **reality**—a world with physics, populated with elements, inhabited by a conscious entity that remembers, reflects, and evolves.
 
 ```bash
-universe spawn --mind my-agent --image ubuntu:24.04 --workspace ./project
+universe spawn --mind my-agent --image node:22 --workspace ./my-project
 ```
 
-## Add Life
+One command. A world is created with its own laws of nature. An agent's Mind—its persistent blueprint—is mounted inside. Claude Code is dropped in with full shell access. When the task ends, the world is destroyed—but the Mind persists. The agent remembers what it learned.
 
-Place an agent inside the world. Not a prompt — a living identity, backed by a Mind (its persistent blueprint). It has memory, personality, and senses that connect it to the outside world through the Gate.
+## The World Has Physics
+
+In our world, gravity isn't a rule you follow—it's a fact you can't escape. A Universe works the same way.
+
+The Docker image defines the agent's reality—not what's *permitted*, but what's *possible*:
+
+- **Physics**—the laws of nature. No network interface means HTTP is *physically impossible*, not just forbidden. Memory and CPU are finite. Filesystem structure is imposed.
+- **Elements**—manufactured objects. `git`, `curl`, `python3` are screwdrivers and hammers. No `curl` means no one built an HTTP client. No `apt` means no new tools can ever be manufactured—the element set is locked.
+
+You can't prompt-inject a missing network interface. You can't jailbreak a tool that was never installed. Security isn't a rule—it's a fact of the world.
+
+> No chains on the agent. Chains in the physics.
+
+And because agents operate inside a real Unix shell—not a list of pre-defined functions—they get the **combinatorial freedom** of the entire command line. N tools don't give you N capabilities. They give you N!—any command's output can pipe into any other command's input.
+
+## The World Has Life
+
+Physics alone is a dead world. Life requires an agent—a conscious entity backed by a Mind:
 
 | Life | Agent's Mind | What it holds |
 | --- | --- | --- |
 | Episodic memory | Journal | What happened to me |
-| Semantic memory | Knowledge | What I know — distilled from experience |
-| Procedural memory | Playbooks | What I know how to do — earned, not taught |
+| Semantic memory | Knowledge | What I know—distilled from experience |
+| Procedural memory | Playbooks | How I do things—earned, not taught |
 | Personality | Personas | Who I am |
-| Senses | Interactions | How I perceive beyond my body |
+| Senses | Interactions | How I perceive beyond my world |
 | Nervous system | Gate | How signals travel between mind and world |
 
 ```
 mind/
-├── personas/      # WHO — identity, roles, system prompts
+├── personas/      # WHO — identity, personality, system prompts
 ├── skills/        # WHAT — invocable capabilities
 ├── knowledge/     # KNOWING — facts, context, understanding
-├── playbooks/     # HOW — step-by-step procedures
-├── journal/       # WHAT HAPPENED — auto-generated session logs
+├── playbooks/     # HOW — step-by-step procedures earned through practice
+├── journal/       # HISTORY — auto-generated session logs
 └── sessions/      # CONTINUITY — Claude Code resume tokens
 ```
 
-The agent has free will. No guardrails, no behavioral chains. Why? Because dangerous actions aren't forbidden — they're physically impossible. You don't need to tell a creature "don't fly" in a world without atmosphere.
+The agent has unconstrained will. No guardrails, no behavioral chains. Dangerous actions aren't forbidden—they're physically impossible. You don't need to tell a creature "don't fly" in a world without atmosphere.
 
-> *No chains on the agent. Chains in the physics.*
+## Life Evolves
 
-## Let It Evolve
+**Reflexion**—after each session, the agent reflects. Strategies that worked get promoted to playbooks. Strategies that failed get discarded. Natural selection for behavior.
 
-After each session, the agent reflects. What strategies worked? Those survive. What failed? Discarded. This is natural selection for behavior — not training, not fine-tuning, but evolution.
+**Sleep**—periodically, the agent consolidates its journal into durable knowledge, prunes stale playbooks, resolves contradictions, and updates its self-model. Not rest—reorganization.
 
-Periodically, the mind sleeps. Not resting — reorganizing. Raw experience consolidates into durable knowledge. Stale strategies get pruned. Contradictions resolve. The mind dreams, cross-referencing disparate experiences, surfacing patterns no single session would catch.
-
-Fork the agent. Two copies, two environments, two evolutionary paths. Speciation. Merge the successful branches back. Population-level adaptation.
+**Forking**—clone an agent, run copies in different environments, keep the branch that performs best, merge the winners back. Population-level adaptation.
 
 Model weights never change. What evolves is the agent's Mind.
 
 ## How It Works
 
-The Architect creates a Docker container, mounts a Mind (the agent's blueprint) and a workspace (project files), auto-generates a `physics.md` manifest describing the universe's reality, and spawns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) inside. When the task ends, the universe is destroyed — but the agent's Mind persists.
+The Architect creates a Docker container, mounts the Mind and workspace, auto-generates a [`physics.md`](https://github.com/jterrazz/universe-wiki/blob/main/02-architecture/physics.md) manifest describing the world's reality, and spawns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) inside.
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -134,26 +137,15 @@ universe mind export     # Export a mind as tar.gz
 | `--timeout` | Execution timeout | — |
 | `--interaction` | MCP interaction bridge (`source:as:cap1,cap2`) | — |
 
-## The Concepts
-
-```
-Substrate            The base reality — your machine
-  └── Architect         The builder of worlds
-       └── Universe        A contained reality — its own physics, tools, and laws
-            ├── Agent          A living identity — learns, sleeps, evolves
-            │    └── Mind         Its blueprint — personas, skills, knowledge, playbooks, journal
-            └── Gate           The wormhole — connects Universe to Substrate
-```
-
 ## How It Compares
 
-| Solution | Approach | Universe difference |
+| Solution | Approach | What Universe adds |
 | --- | --- | --- |
-| **MCP** | Exposes individual tools | Universe gives the full shell — N! compositions |
-| **LangChain / CrewAI** | Chains tool calls | Universe gives combinatorial freedom, not chains |
-| **E2B** | Cloud sandboxes | Universe is self-hosted with persistent Mind and self-learning |
-| **Claude Code alone** | Operates on your machine | Universe adds isolation, persistent identity, physics |
-| **Docker** | Container runtime | Docker is the backend; Universe adds Mind, Gate, and agent spawning |
+| **MCP** | Exposes individual tools | Full shell—N! compositions instead of N tools |
+| **LangChain / CrewAI** | Chains tool calls | Combinatorial freedom, not deterministic chains |
+| **E2B** | Cloud sandboxes | Self-hosted, persistent identity, self-learning |
+| **Claude Code alone** | Operates on your machine | Isolation, persistent Mind, physics-based security |
+| **Docker** | Container runtime | Mind, Gate, agent spawning, lifecycle, evolution |
 
 ## Project Structure
 
