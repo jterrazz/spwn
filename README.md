@@ -6,7 +6,7 @@ AI agents today can reason brilliantly but can't *do* anything real. They call p
 
 But a developer at a terminal doesn't use 20 predefined tools. They have `bash` — and with it, the entire Unix ecosystem. Fifty years of composable commands, piped and chained in ways no one could anticipate. That's not more tools. That's a categorically different kind of power.
 
-Claude Code proved it — give an LLM a real terminal and it becomes 100x more capable than a chatbot. **Claude Code is the brain. Universe is the body.** Universe creates isolated Linux environments, injects a persistent identity (Mind), and spawns Claude Code inside — with the full combinatorial freedom of Unix.
+Claude Code proved it — give an LLM a real terminal and it becomes 100x more capable than a chatbot. Universe builds on this: Claude Code provides the raw reasoning and autonomy — reading files, writing code, composing commands, adapting its approach. Universe provides the cognitive architecture (Mind — persistent memory, skills, identity) and the physical reality (isolated environments with their own laws, tools, and resources). Together, they form a complete agent — reasoning within a structured, evolving identity, operating inside a contained world.
 
 ```bash
 universe spawn --mind my-agent --image ubuntu:24.04 --workspace ./project
@@ -146,7 +146,7 @@ universe mind export     # Export a mind as tar.gz
 ┌────▼────────────────────────────────────┐
 │  Docker Container                       │
 │                                         │
-│  Claude Code CLI (agent brain)          │
+│  Claude Code CLI (agent runtime)        │
 │  ├── /mind       (persistent identity)  │
 │  ├── /workspace  (project files)        │
 │  ├── /gate       (Unix socket + bins)   │
