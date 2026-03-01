@@ -1,32 +1,80 @@
 # Universe
 
-**Create realities for things that can think.**
+> We're not building an agent framework. We're building the infrastructure for artificial life.
 
----
+## Intelligence Is Solved. Architecture Is the Frontier.
 
 Models like Claude can reason, write code, and solve problems. The intelligence is there. But drop that intelligence into a blank API call and it has no tools, no filesystem, no memory of yesterday. It's a brain in a jar.
 
-A developer at a real terminal is dramatically more capable — not because of any single command, but because Unix is composable. `grep | sort | uniq`. Fifty years of tools, all piping into each other. Claude Code proved this: give an LLM a real terminal and it outperforms any chatbot with pre-wired tools. The difference isn't the model. It's the world around it.
+Universe builds the missing half. Not a better toolchain—a **reality**. A world with physics, populated with elements, inhabited by a conscious entity that remembers, reflects, and evolves.
 
-Universe builds that world.
+## Life Emerges From the Architecture
 
-```bash
-universe spawn --agent leonardo --workspace ./my-project
-```
+Most agent frameworks ask: *"How do we give an AI access to tools?"* Universe asks: *"What does it mean to create a reality for something that can think?"*
 
-A contained Linux environment is created. The agent's persistent identity is mounted inside. Claude Code is spawned with full shell access. When the task ends, the world is destroyed — but the agent's Mind survives. Next time it runs, it remembers what it learned.
+The answer comes from simulation theory. You define physics—laws that govern what's possible. You populate the world with elements. You place a conscious entity inside. You let it act, learn, sleep, evolve. This isn't a metaphor—it's the literal design:
 
-Three things Claude Code alone can't give you: **isolation** (each agent gets its own world), **persistent identity** (memory that survives across sessions), and **evolution** (agents that get better over time).
+- **Origins** define physics. **Minds** define identity. **Agents** are the conscious entities.
+- **The Multiverse** is parallel evolution. **Reflexion** is natural selection for behavior.
+- **Sleep** is memory consolidation. **Faculties** are the senses.
+
+## Agency Is What Makes Intelligence Alive
+
+Weights give you pattern recognition. But thinking alone doesn't scale. What makes life adaptable isn't the neural architecture—it's the freedom to act within a real environment.
+
+Tool-call agents are a brain connected to buttons—they can only press what someone pre-wired. That's an animal in a zoo. Universe gives agents genuine agency—an animal in the wild:
+
+- **Discover**—`man`, `--help`, `apt search`—self-directed exploration no one pre-programmed
+- **Compose**—pipe anything into anything, combine tools in ways no designer anticipated
+- **Create**—write scripts, build new tools, invent solutions that didn't exist before
+- **Adapt**—install packages, modify configs, restructure its own approach on the fly
+
+Tool-call frameworks scale linearly (more tools = more schemas). Agency scales combinatorially—you don't pre-engineer every behavior, you create the conditions for behavior to emerge.
+
+> MCP gives agents a Swiss Army knife. Universe gives them a workshop.
+
+## Agents That Evolve
+
+Model weights never change. What evolves is the Mind.
+
+**Reflexion.** After each session, the agent reviews its journal. Strategies that worked get promoted to playbooks. Strategies that failed are discarded. Natural selection for behavior—over dozens of sessions, the agent becomes genuinely better at its job.
+
+**Sleep.** Raw experience consolidates into durable knowledge. Stale strategies get pruned. Contradictions resolve. Reflexion asks *"what did I learn just now?"* Sleep asks *"given everything I've lived through, who am I now?"*
+
+**Forking.** Clone a Mind. Run copies in different environments. Keep the branch that performs best. Merge the winner back. Population-level adaptation, not sequential trial-and-error.
+
+## Security You Can't Jailbreak
+
+You don't *tell* the agent "don't access the network." You create a world where the network doesn't exist. No interface to bind. No packets to send. HTTP isn't forbidden—it's physically impossible, like trying to swim in a world without water.
+
+You can't prompt-inject a missing network interface. You can't social-engineer a binary that doesn't exist. You can't trick physics.
+
+> No chains on the agent. Chains in the physics.
 
 ---
 
-## Physics
+## Quick Start
 
-Gravity isn't a rule you choose to follow. It's a fact of the world you're in.
+```bash
+# Install
+go install github.com/jterrazz/universe/cmd/universe@latest
 
-A Universe works the same way. You don't *tell* the agent "don't access the network." You create a world where the network doesn't exist. No interface to bind. No packets to send. HTTP isn't forbidden — it's physically impossible, like trying to swim in a world without water.
+# Create an agent identity
+universe agent init leonardo
 
-This is defined in `universe.yaml`:
+# Spawn a world with the agent inside
+universe spawn --agent leonardo --workspace ./my-project
+```
+
+A contained Linux environment is created. The agent's persistent identity is mounted inside. Claude Code is spawned with full shell access. When the task ends, the world is destroyed—but the agent's Mind survives. Next time it runs, it remembers what it learned.
+
+---
+
+## How It Works
+
+### Physics
+
+The universe manifest defines the agent's reality:
 
 ```yaml
 physics:
@@ -47,29 +95,19 @@ physics:
     - npm
     - jq
 
-gate:                          # Bridges to the outside world — senses
+gate:                          # Bridges to the outside world — faculties
   - source: mcp/slack
     as: slack-send
     capabilities: [send]
 ```
 
-Two concepts make this work:
+**Physics** are the laws of nature—things you can't opt out of. No network interface means the outside world doesn't exist. CPU and memory are finite. These are gravity.
 
-**Physics** are the laws of nature — things you can't opt out of. No network interface means the outside world doesn't exist. CPU and memory are finite. Filesystem permissions are structural. These are gravity.
+**Elements** are the manufactured objects—tools someone built. `git`, `curl`, `python3` are screwdrivers and hammers. If `curl` isn't installed, nobody built an HTTP client. If there's no `apt`, no new tools can ever be created—the element set is locked forever. Elements are verified at creation time and exposed in the agent's `/universe/physics.md`.
 
-**Elements** are the manufactured objects — tools someone built. `git`, `curl`, `python3` are screwdrivers and hammers. If `curl` isn't installed, nobody built an HTTP client. The physics might allow networking, but the tool to use it was never manufactured. And if there's no `apt`, no new tools can ever be created — the element set is locked forever. Elements listed in the manifest are verified at creation time and exposed to the agent in its `/universe/physics.md` — that's how the agent knows what tools exist in its world. You can list individual binaries or use **packs** like `ubuntu` (common shell tools) or `node` (node, npm, npx) for convenience.
+### Mind
 
-This is why Universe's security can't be jailbroken. You can't prompt-inject a missing network interface. You can't social-engineer a binary that doesn't exist. You can't trick physics.
-
-> No chains on the agent. Chains in the physics.
-
----
-
-## Mind
-
-A world with physics but nothing alive in it is just an empty room. The agent is the living entity — and its **Mind** is the persistent identity it carries between worlds.
-
-Think of the Mind as the agent's brain structure, modeled after how biological memory works:
+The agent's persistent identity, modeled after biological memory:
 
 | Biology | Mind Layer | What it stores | Example |
 | --- | --- | --- | --- |
@@ -80,41 +118,9 @@ Think of the Mind as the agent's brain structure, modeled after how biological m
 | Episodic memory | **Journal** | What happened to me | *"Session 47: migrated auth to sessions. Took 3 attempts."* |
 | Senses | **Faculties** | How I perceive beyond my world | Slack messages, GitHub PRs via MCP bridges |
 
-The Mind is declared in `mind.yaml` and mounted into every world the agent enters:
+The Mind is declared in `mind.yaml` and mounted into every world the agent enters. Under the hood, it's a directory of markdown files—human-readable, version-controllable, no database. The agent has full autonomy inside its world. Dangerous actions aren't forbidden—they're physically impossible.
 
-```yaml
-name: leonardo
-
-personas:
-  - personas/backend-engineer.md
-
-skills:
-  - skills/deploy.md
-  - skills/debug.md
-
-knowledge:
-  - knowledge/domain.md
-```
-
-Under the hood, it's a directory of markdown files — human-readable, version-controllable, no database. Claude Code reads markdown natively, so the Mind requires zero custom loaders.
-
-The agent has full autonomy inside its world. No behavioral guardrails. No "don't do X" instructions. Dangerous actions aren't forbidden — they're physically impossible. You don't tell a fish "don't walk" in a world without land.
-
----
-
-## Evolution
-
-The model's weights never change. What evolves is the Mind.
-
-**Reflexion.** After each session, the agent reviews its journal. What worked? Promote it to a playbook — a reusable procedure for next time. What failed? Discard it. This is natural selection applied to behavior: successful strategies survive, unsuccessful ones die. Over dozens of sessions, the agent becomes genuinely better at its job.
-
-**Sleep.** An agent that only accumulates eventually drowns in its own experience — contradictions pile up, stale knowledge lingers, context gets noisy. Sleep is the fix. The agent pauses, consolidates raw journal entries into durable knowledge, prunes outdated playbooks, resolves contradictions, and updates its self-model. Reflexion asks *"what did I learn just now?"* Sleep asks *"given everything I've lived through, who am I now?"*
-
-**Forking.** Clone a Mind. Run two copies in different environments with different strategies. Keep the branch that performs better. Merge the winner back. This is evolution at the population level — not sequential trial-and-error, but parallel exploration with selection.
-
----
-
-## Architecture
+### Architecture
 
 ```
 Substrate (your machine)
@@ -126,65 +132,19 @@ Substrate (your machine)
             └── physics.md         The laws of this reality
 ```
 
-When you run `universe spawn`, here's what happens:
+When you run `universe spawn`:
 
 1. The **Architect** reads `universe.yaml` and provisions a Docker container
 2. The agent's **Mind** is mounted at `/mind`, the project at `/workspace`
-3. The Architect generates **`physics.md`** — a description of the world's reality that the agent reads on boot
-4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol) (Agent Client Protocol)
+3. The Architect generates **`physics.md`**—a description of the world's reality
+4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol)
 5. The agent reads its Mind, reads the physics, and starts working
 
-The Gate deserves a note — it's a two-sided bridge. The host side handles file mounts and faculty bridging (turning MCP servers into shell commands). The container side wraps an ACP client that communicates with the agent CLI over stdio. A single Unix socket connects the two halves — the only thing that crosses the container boundary.
-
-Because the Gate speaks ACP, swapping agent runtimes is a container image change. Claude Code today. Codex CLI or Gemini CLI tomorrow. Same protocol, same Mind, same physics.
-
-```
-┌──────────────────────────────────────────────────┐
-│  CLI                                             │
-│  spawn · list · inspect · destroy · agent        │
-└──────────────┬───────────────────────────────────┘
-               ▼
-         ┌───────────┐
-         │ Architect  │
-         └─────┬─────┘
-               │
-  ┌────────────┼────────────┬──────────────┐
-  ▼            ▼            ▼              ▼
-Backend    Manifest      Mind          Physics
-(Docker)   Resolver     Manager       Generator
-  │
-  ▼
-┌───────────────────────────────────────────────┐
-│  Universe (Docker container)                  │
-│                                               │
-│  Gate (container-side)                        │
-│  └── ACP → stdio → Claude Code               │
-│                                               │
-│  /mind        personas, skills, knowledge     │
-│  /workspace   your project files              │
-│  /gate        Unix socket, faculty bridge │
-│  /universe    physics.md                      │
-└───────────────────────────────────────────────┘
-```
+The Gate is a two-sided bridge. The host side handles file mounts and faculty bridging (MCP servers → shell commands). The container side wraps an ACP client. Because it speaks ACP, swapping agent runtimes is a container image change—Claude Code today, Codex CLI or Gemini CLI tomorrow.
 
 ---
 
-## Usage
-
-```bash
-# Install
-go install github.com/jterrazz/universe/cmd/universe@latest
-
-# Create an agent identity
-universe agent init leonardo
-
-# Spawn a world with the agent inside
-universe spawn --agent leonardo --workspace ./my-project
-```
-
-Every universe gets a human-readable ID — `u-bright-comet-84721`, `u-calm-nebula-39205`. Two words plus a 5-digit suffix, easy to type, zero collisions.
-
-### Commands
+## Commands
 
 ```bash
 # World
@@ -245,7 +205,7 @@ $ universe destroy u-bright-comet-84721
 | **Claude Code** | Runs on your machine | Isolation, physics-based security, persistent Mind |
 | **Docker** | Container runtime | Agent lifecycle, identity, Gate, evolution |
 
-Universe isn't another link in the tool chain — it replaces the chain. And it's not a competitor to Claude Code — it's the complement. Claude Code is the intelligence. Universe is the world to be intelligent in.
+Universe isn't another link in the tool chain—it replaces the chain. And it's not a competitor to Claude Code—it's the complement. Claude Code is the intelligence. Universe is the world to be intelligent in.
 
 ---
 
@@ -285,11 +245,11 @@ container/              Container-side Gate (ACP client + crash recovery)
 Early development. Architecture designed, [wiki](https://github.com/jterrazz/universe-wiki) complete, implementation underway.
 
 **Learn more:**
-[Vision](https://github.com/jterrazz/universe-wiki/blob/main/01-overview/vision.md) ·
-[Philosophy](https://github.com/jterrazz/universe-wiki/blob/main/01-overview/philosophy.md) ·
-[Mind Framework](https://github.com/jterrazz/universe-wiki/blob/main/02-architecture/mind-framework.md) ·
-[Roadmap](https://github.com/jterrazz/universe-wiki/blob/main/01-overview/roadmap.md) ·
-[Architecture Decisions](https://github.com/jterrazz/universe-wiki/blob/main/05-decisions/)
+[Vision](https://github.com/jterrazz/universe-wiki/blob/main/blueprint/vision.md) ·
+[Philosophy](https://github.com/jterrazz/universe-wiki/blob/main/blueprint/philosophy.md) ·
+[Mind Framework](https://github.com/jterrazz/universe-wiki/blob/main/domains/systems/mind-framework.md) ·
+[Epochs](https://github.com/jterrazz/universe-wiki/blob/main/epochs/) ·
+[Architecture Decisions](https://github.com/jterrazz/universe-wiki/blob/main/domains/)
 
 ## License
 
