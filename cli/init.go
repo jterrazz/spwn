@@ -6,7 +6,7 @@ import (
 
 	"github.com/jterrazz/universe/internal/config"
 	"github.com/jterrazz/universe/internal/manifest"
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/universe/internal/wordlist"
 	"github.com/spf13/cobra"
 )
 
@@ -15,11 +15,17 @@ func init() {
 }
 
 var initCmd = &cobra.Command{
-	Use:   "init <name>",
-	Short: "First-time setup — create ~/.universe/ with a named config and agent",
-	Args:  cobra.ExactArgs(1),
+	Use:   "init [name]",
+	Short: "First-time setup — create ~/.universe/ and a named universe config",
+	Long:  "Creates the ~/.universe/ directory structure and a named universe config. If no name is provided, a random cosmos-themed word is picked.",
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		name := ""
+		if len(args) > 0 {
+			name = args[0]
+		} else {
+			name = wordlist.PickConfig()
+		}
 
 		// Create base directory
 		baseDir := config.BaseDir()
@@ -32,27 +38,16 @@ var initCmd = &cobra.Command{
 			fmt.Println()
 		}
 
-		// Create default universe config
-		if err := manifest.CreateDefault(); err != nil {
-			if !quiet {
-				fmt.Printf("  (default.yaml already exists, skipping)\n")
-			}
-		} else if !quiet {
-			fmt.Printf("  ✓ Created %s/universes/default.yaml\n", baseDir)
-		}
-
-		// Create named agent
-		path, err := mind.Init(name)
-		if err != nil {
-			return fmt.Errorf("error: cannot create agent %q.\n%w", name, err)
+		// Create named universe config
+		if err := manifest.CreateConfig(name); err != nil {
+			return fmt.Errorf("error: cannot create config %q.\n%w", name, err)
 		}
 
 		if !quiet {
-			fmt.Printf("  ✓ Created agent %q (6-layer Mind)\n", name)
+			fmt.Printf("  ✓ Created %s/universes/%s.yaml\n", baseDir, name)
 			fmt.Println()
-			fmt.Printf("  Ready. Run 'universe spawn --agent %s' to create your first world.\n", name)
-			fmt.Printf("  Run 'universe config init node-dev' to create a named universe config.\n")
-			_ = path
+			fmt.Printf("  Ready. Create an agent with 'universe agent init' then spawn a world.\n")
+			fmt.Printf("  Example: universe spawn %s --agent <agent-name> -w ./my-project\n\n", name)
 		}
 
 		return nil

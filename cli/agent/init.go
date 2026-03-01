@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/universe/internal/wordlist"
 	"github.com/spf13/cobra"
 )
 
@@ -12,11 +13,17 @@ func init() {
 }
 
 var initCmd = &cobra.Command{
-	Use:   "init <name>",
-	Short: "Create a new agent config template",
-	Args:  cobra.ExactArgs(1),
+	Use:   "init [name]",
+	Short: "Create a new agent with a 6-layer Mind",
+	Long:  "Creates a new agent directory with the 6-layer Mind structure. If no name is provided, a random name is picked.",
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+		name := ""
+		if len(args) > 0 {
+			name = args[0]
+		} else {
+			name = wordlist.PickAgent()
+		}
 
 		path, err := mind.Init(name)
 		if err != nil {
@@ -32,7 +39,7 @@ var initCmd = &cobra.Command{
 		fmt.Printf("  ✓ Created journal/      (empty)\n")
 		fmt.Printf("  ✓ Created sessions/     (empty)\n")
 		fmt.Println()
-		fmt.Printf("  Agent config initialized at %s/\n", path)
+		fmt.Printf("  Agent initialized at %s/\n", path)
 		fmt.Printf("  Edit personas/default.md to define identity.\n")
 		fmt.Printf("  Spawn with: universe spawn --agent %s\n\n", name)
 

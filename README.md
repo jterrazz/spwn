@@ -57,8 +57,11 @@ You can't prompt-inject a missing network interface. You can't social-engineer a
 # Install
 go install github.com/jterrazz/universe/cmd/universe@latest
 
-# First-time setup — creates ~/.universe/ and a named agent
-universe init leonardo
+# First-time setup — creates ~/.universe/ and a universe config
+universe init
+
+# Create an agent
+universe agent init leonardo
 
 # Spawn a world with the agent inside
 universe spawn --agent leonardo -w ./my-project
@@ -152,13 +155,13 @@ universe inspect <universe-id>   # Show details, physics, agent status
 universe logs <universe-id>      # Stream agent output
 universe attach <universe-id>    # Interactive shell into a running universe
 universe destroy <universe-id>   # Destroy a universe (agent survives)
-universe init <name>             # First-time setup
+universe init [name]             # First-time setup (random name if omitted)
 
 # Life
 universe agent spawn [name]        # Bring an agent to life in an existing universe
 universe agent list                 # List all agents
 universe agent inspect <agent-id>   # Show agent details, Mind layers, journal
-universe agent init <name>          # Create a new agent
+universe agent init [name]          # Create a new agent (random name if omitted)
 universe agent export <agent-id>    # Export an agent as tar.gz
 ```
 
