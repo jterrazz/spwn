@@ -14,9 +14,7 @@ Most agent frameworks ask: *"How do we give an AI access to tools?"* Universe as
 
 The answer comes from simulation theory. You define physics—laws that govern what's possible. You populate the world with elements. You place a conscious entity inside. You let it act, learn, sleep, evolve. This isn't a metaphor—it's the literal design:
 
-- **Origins** define physics. **Minds** define identity. **Agents** are the conscious entities.
-- **The Multiverse** is parallel evolution. **Reflexion** is natural selection for behavior.
-- **Sleep** is memory consolidation. **Faculties** are the abilities to perceive and act.
+This isn't a metaphor. The physics define what's possible. The Mind defines who the agent is. We are building simulated realities for digital minds.
 
 ## Agency Is What Makes Intelligence Alive
 
