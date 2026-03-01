@@ -55,7 +55,7 @@ You can't prompt-inject a missing network interface. You can't social-engineer a
 
 ```bash
 # Install
-go install github.com/jterrazz/universe/cmd/universe@latest
+go install spwn.sh/universe@latest
 
 # First-time setup — creates ~/.universe/ and a universe config
 universe init
@@ -243,6 +243,8 @@ container/              Container-side Gate (Rust: ACP client via agent-client-p
 ## Status
 
 Early development. Architecture designed, [wiki](https://github.com/jterrazz/universe-wiki) complete, implementation underway.
+
+**Website:** [spwn.sh](https://spwn.sh)
 
 **Learn more:**
 [Vision](https://github.com/jterrazz/universe-wiki/blob/main/blueprint/vision.md) ·
