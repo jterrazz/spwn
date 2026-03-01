@@ -2,28 +2,49 @@
 
 > What does it mean to create a reality for something that can think?
 
-Intelligence is pattern recognition—and models like Claude have mastered it. But intelligence without a world is a brain in a jar. Universe builds the missing half: not a better toolchain, but a **reality**—a world with physics, populated with elements, inhabited by a conscious entity that remembers, reflects, and evolves.
+Intelligence is pattern recognition—and models like Claude have mastered it. But intelligence without a world is a brain in a jar. Universe builds the missing half: not a better toolchain, but a **reality**—a world with physics, inhabited by a conscious entity that remembers, reflects, and evolves.
 
 ```bash
-universe spawn --agent leonardo --image node:22 --workspace ./my-project
+universe spawn --agent leonardo --workspace ./my-project
 ```
 
-One command. A world is created with its own laws of nature. An agent's Mind—its persistent blueprint—is mounted inside. Claude Code is dropped in with full shell access. When the task ends, the world is destroyed—but the Mind persists. The agent remembers what it learned.
+One command. A world is created from the origin declared in `universe.yaml`. The agent's Mind—its persistent blueprint—is mounted inside. Claude Code is dropped in with full shell access. When the task ends, the world is destroyed. The Mind persists. The agent remembers.
+
+> Intelligence is solved. Architecture is the frontier.
 
 ## The World Has Physics
 
-In our world, gravity isn't a rule you follow—it's a fact you can't escape. A Universe works the same way.
+Gravity isn't a rule you follow—it's a fact you can't escape. A Universe works the same way.
 
-The Docker image defines the agent's reality—not what's *permitted*, but what's *possible*:
+The origin—declared in `universe.yaml`—defines the agent's reality. Not what's *permitted*, but what's *possible*:
 
-- **Physics**—the laws of nature. No network interface means HTTP is *physically impossible*, not just forbidden. Memory and CPU are finite. Filesystem structure is imposed.
-- **Elements**—manufactured objects. `git`, `curl`, `python3` are screwdrivers and hammers. No `curl` means no one built an HTTP client. No `apt` means no new tools can ever be manufactured—the element set is locked.
+- **Physics**—the laws of nature. No network interface means HTTP is *physically impossible*. Memory and CPU are finite. Filesystem structure is imposed.
+- **Elements**—manufactured objects. `git`, `curl`, `python3` are screwdrivers and hammers. No `curl` means no one built an HTTP client. No `apt` means no new tools can ever be manufactured.
+
+```yaml
+# universe.yaml
+origin: node:22
+
+constants:
+  cpu: 2
+  memory: 1GB
+  timeout: 30m
+
+laws:
+  network: none
+
+elements:
+  require: [git, node, npm, jq]
+
+interactions:
+  - source: mcp/slack
+    as: slack-send
+    capabilities: [send]
+```
 
 You can't prompt-inject a missing network interface. You can't jailbreak a tool that was never installed. Security isn't a rule—it's a fact of the world.
 
 > No chains on the agent. Chains in the physics.
-
-And because agents operate inside a real Unix shell—not a list of pre-defined functions—they get the **combinatorial freedom** of the entire command line. N tools don't give you N capabilities. They give you N!—any command's output can pipe into any other command's input.
 
 ## The World Has Life
 
@@ -31,24 +52,31 @@ Physics alone is a dead world. Life requires an agent—a conscious entity backe
 
 | Life | Agent's Mind | What it holds |
 | --- | --- | --- |
-| Episodic memory | Journal | What happened to me |
+| Personality | Personas | Who I am |
+| Capabilities | Skills | What I can do |
 | Semantic memory | Knowledge | What I know—distilled from experience |
 | Procedural memory | Playbooks | How I do things—earned, not taught |
-| Personality | Personas | Who I am |
+| Episodic memory | Journal | What happened to me |
 | Senses | Interactions | How I perceive beyond my world |
-| Nervous system | Gate | How signals travel between mind and world |
 
-```
-mind/
-├── personas/      # WHO — identity, personality, system prompts
-├── skills/        # WHAT — invocable capabilities
-├── knowledge/     # KNOWING — facts, context, understanding
-├── playbooks/     # HOW — step-by-step procedures earned through practice
-├── journal/       # HISTORY — auto-generated session logs
-└── sessions/      # CONTINUITY — Claude Code resume tokens
+The Mind is composable. Declare it in `mind.yaml`—mix personas, skills, and knowledge from local files or shared packs:
+
+```yaml
+# mind.yaml
+name: leonardo
+
+personas:
+  - personas/backend-engineer.md
+
+skills:
+  - skills/deploy.md
+  - skills/debug.md
+
+knowledge:
+  - knowledge/domain.md
 ```
 
-The agent has unconstrained will. No guardrails, no behavioral chains. Dangerous actions aren't forbidden—they're physically impossible. You don't need to tell a creature "don't fly" in a world without atmosphere.
+The agent has unconstrained will. No guardrails. Dangerous actions aren't forbidden—they're physically impossible. You don't tell a creature "don't fly" in a world without atmosphere.
 
 ## Life Evolves
 
@@ -60,37 +88,46 @@ The agent has unconstrained will. No guardrails, no behavioral chains. Dangerous
 
 Model weights never change. What evolves is the agent's Mind.
 
-## How It Works
-
-The Architect creates a Docker container, mounts the Mind and workspace, auto-generates a [`physics.md`](https://github.com/jterrazz/universe-wiki/blob/main/02-architecture/physics.md) manifest describing the world's reality, and spawns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) inside.
+## Architecture
 
 ```
-┌──────────────────────────────────────────────┐
-│  CLI (cobra)                                 │
-│  create · spawn · list · inspect · destroy   │
-└──────────────┬───────────────────────────────┘
+Substrate (your machine)
+  └── Architect                    Orchestrator
+       └── Universe                A contained world
+            ├── Agent              Lives, thinks, acts
+            │    └── Mind          Persistent blueprint
+            ├── Gate               Bridge to Substrate
+            └── physics.md         Laws of this reality
+```
+
+The Architect reads `universe.yaml`, provisions a container (or microVM), mounts the Mind and workspace, auto-generates `physics.md` describing the world's reality, and spawns Claude Code inside.
+
+```
+┌──────────────────────────────────────────────────┐
+│  CLI (cobra)                                     │
+│  create · spawn · list · inspect · destroy       │
+└──────────────┬───────────────────────────────────┘
                │
       ┌────────▼────────┐
-      │    Architect     │  Orchestrator
+      │    Architect     │
       └────────┬────────┘
                │
-  ┌────────────┼────────────┬─────────────┐
-  │            │            │             │
-┌─▼──────┐ ┌──▼────┐ ┌─────▼─────┐ ┌────▼─────┐
-│Backend │ │Session│ │ Journal   │ │ Physics  │
-│(Docker)│ │Store  │ │Generator  │ │Generator │
-└────┬───┘ └───────┘ └───────────┘ └──────────┘
+  ┌────────────┼────────────┬──────────────┐
+  │            │            │              │
+┌─▼──────┐ ┌──▼─────┐ ┌────▼────┐ ┌──────▼───┐
+│Backend │ │Manifest│ │ Mind    │ │ Physics  │
+│(Docker)│ │Resolver│ │Manager  │ │Generator │
+└────┬───┘ └────────┘ └─────────┘ └──────────┘
      │
-┌────▼────────────────────────────────────┐
-│  Docker Container                       │
-│                                         │
-│  Claude Code CLI (agent runtime)        │
-│  ├── /mind       (agent blueprint)      │
-│  ├── /workspace  (project files)        │
-│  ├── /gate       (Unix socket + bins)   │
-│  └── /universe/physics.md (read-only)   │
-│                                         │
-└─────────────────────────────────────────┘
+┌────▼──────────────────────────────────────┐
+│  Universe (container / microVM)           │
+│                                           │
+│  Claude Code CLI (agent runtime)          │
+│  ├── /mind       (agent blueprint)        │
+│  ├── /workspace  (project files)          │
+│  ├── /gate       (Unix socket + bins)     │
+│  └── /universe/physics.md                 │
+└───────────────────────────────────────────┘
 ```
 
 ## Quick Start
@@ -100,69 +137,63 @@ The Architect creates a Docker container, mounts the Mind and workspace, auto-ge
 git clone https://github.com/jterrazz/universe.git
 cd universe && make build
 
-# Create an agent (persistent identity)
+# Create an agent
 mkdir -p ~/.universe/agents/leonardo/{personas,skills,knowledge,playbooks,journal,sessions}
 
-# Spawn an agent
+# Spawn — reads universe.yaml from current directory
 universe spawn --agent leonardo --workspace ./my-project
 
-# With a custom image and memory limit
-universe spawn --agent leonardo --image node:22 --workspace ./app --memory 2g
+# Or specify origin directly
+universe spawn --agent leonardo --origin node:22 --workspace ./my-project
 
-# With external service bridging (MCP → CLI wrapper)
+# With interactions (MCP → CLI wrapper)
 universe spawn --agent leonardo --workspace ./app \
-  --interaction "mcp/slack:slack-send:chat.postMessage,channels.list"
+  --interaction "mcp/slack:slack-send:send"
 ```
 
 ## CLI
 
 ```bash
 universe create          # Create a universe (container only)
-universe spawn           # Create + start + spawn agent (all-in-one)
+universe spawn           # Create + spawn agent (all-in-one)
 universe list            # List all universes
 universe inspect <id>    # Inspect a universe
-universe destroy <id>    # Stop and remove a universe
+universe destroy <id>    # Destroy a universe
 
 universe agent list      # List all agents
-universe agent inspect   # Inspect agent structure and sessions
-universe agent export    # Export an agent as tar.gz
+universe agent inspect   # Inspect agent Mind and sessions
+universe agent export    # Export an agent
+
+universe template list      # List available universe manifests
+universe template inspect   # Inspect a manifest
 ```
 
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--image` | Docker image (defines physics and elements) | `ubuntu:24.04` |
-| `--agent` | Agent name (persistent identity) | — |
-| `--workspace` | Host directory to mount at `/workspace` | — |
-| `--memory` | Container memory limit | — |
-| `--timeout` | Execution timeout | — |
-| `--interaction` | MCP interaction bridge (`source:as:cap1,cap2`) | — |
-
-## How It Compares
-
-| Solution | Approach | What Universe adds |
-| --- | --- | --- |
-| **MCP** | Exposes individual tools | Full shell—N! compositions instead of N tools |
-| **LangChain / CrewAI** | Chains tool calls | Combinatorial freedom, not deterministic chains |
-| **E2B** | Cloud sandboxes | Self-hosted, persistent identity, self-learning |
-| **Claude Code alone** | Operates on your machine | Isolation, persistent Mind, physics-based security |
-| **Docker** | Container runtime | Mind, Gate, agent spawning, lifecycle, evolution |
+| Flag | Description |
+| --- | --- |
+| `--agent` | Agent name (persistent identity) |
+| `--universe` | Universe manifest name or path |
+| `--origin` | Origin (overrides manifest) |
+| `--workspace` | Host directory to mount at `/workspace` |
+| `--interaction` | MCP bridge (`source:as:cap1,cap2`) |
+| `--backend` | `docker` or `firecracker` |
 
 ## Project Structure
 
 ```
-cmd/universe/          CLI entry point + cobra commands
+cmd/universe/           CLI entry point + cobra commands
 internal/
-├── architect/         Orchestrator — create, spawn, list, inspect, destroy
-├── agent/             Claude Code CLI spawning with session resume
-├── backend/           Backend interface + Docker implementation
-├── config/            Data structures (UniverseConfig, Interaction types)
-├── gate/              HTTP-over-Unix-socket server + wrapper scripts
-├── journal/           Auto-generated markdown session logs
-├── mind/              Mind path resolution, validation, listing
-├── physics/           physics.md generation + container introspection
-├── procmgr/           Process manager with crash recovery
-└── session/           Session persistence (JSON per mind+universe pair)
-test/e2e/              End-to-end integration tests
+├── architect/          Orchestrator—create, spawn, list, inspect, destroy
+├── agent/              Claude Code CLI spawning with session resume
+├── backend/            Backend interface + Docker/Firecracker adapters
+├── config/             Types: UniverseConfig, UniverseManifest, MindManifest
+├── gate/               HTTP-over-Unix-socket server + wrapper scripts
+├── journal/            Auto-generated markdown session logs
+├── manifest/           Manifest parsing—universe.yaml and mind.yaml
+├── mind/               Mind path resolution, validation, listing
+├── physics/            physics.md generation + container introspection
+├── procmgr/            Process manager with crash recovery
+└── session/            Session persistence (JSON per agent+universe pair)
+test/e2e/               Integration tests
 ```
 
 ## Development
@@ -172,20 +203,21 @@ make build              # Build the CLI binary
 make vet                # Lint
 make test               # Unit tests
 make test-integration   # E2E tests (requires Docker)
-make test-clean         # Clean up orphan test containers
 ```
 
-## Roadmap
+## How It Compares
 
-- [x] **Phase 1** — Go core + CLI (lifecycle, Docker backend, Claude Code spawning)
-- [x] **Phase 2** — Full Mind + session persistence (6-layer Mind, journal, resume)
-- [x] **Phase 3** — Interactions (Gate server, MCP bridging, process manager)
-- [ ] **Phase 4** — Multiverse (fork, merge, reflexion, sleep) *current*
-- [ ] **Phase 5** — Firecracker backend (microVMs, vsock, virtio-fs)
-- [ ] **Phase 6** — Thin SDKs (TypeScript, Python)
-- [ ] **Phase 7** — Ecosystem (templates, Mind marketplace, multi-universe orchestration)
+| Solution | Approach | What Universe adds |
+| --- | --- | --- |
+| **MCP** | Exposes individual tools | Full shell—N! compositions instead of N tools |
+| **LangChain / CrewAI** | Chains tool calls | Combinatorial freedom, not deterministic chains |
+| **E2B** | Cloud sandboxes | Self-hosted, persistent identity, self-learning |
+| **Claude Code alone** | Operates on your machine | Isolation, persistent Mind, physics-based security |
+| **Docker** | Container runtime | Mind, Gate, agent spawning, evolution |
 
-See the full [Roadmap](https://github.com/jterrazz/universe-wiki/blob/main/01-overview/roadmap.md) and [Wiki](https://github.com/jterrazz/universe-wiki) for deep dives into architecture, philosophy, and design decisions.
+## Learn More
+
+See the [Wiki](https://github.com/jterrazz/universe-wiki) for deep dives into architecture, philosophy, and design decisions.
 
 ## License
 
