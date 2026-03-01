@@ -16,7 +16,7 @@ The answer comes from simulation theory. You define physics—laws that govern w
 
 - **Origins** define physics. **Minds** define identity. **Agents** are the conscious entities.
 - **The Multiverse** is parallel evolution. **Reflexion** is natural selection for behavior.
-- **Sleep** is memory consolidation. **Faculties** are the senses.
+- **Sleep** is memory consolidation. **Faculties** are the abilities to perceive and act.
 
 ## Agency Is What Makes Intelligence Alive
 
@@ -116,7 +116,7 @@ The agent's persistent identity, modeled after biological memory:
 | Semantic memory | **Knowledge** | What I know | *"This codebase uses PostgreSQL 15 with pgvector"* |
 | Procedural memory | **Playbooks** | How I do things | *"To deploy: test, bump version, build, push, tag"* |
 | Episodic memory | **Journal** | What happened to me | *"Session 47: migrated auth to sessions. Took 3 attempts."* |
-| Senses | **Faculties** | How I perceive beyond my world | Slack messages, GitHub PRs via MCP bridges |
+| Abilities | **Faculties** | How I perceive and act beyond my world | Slack messages, GitHub PRs via MCP bridges |
 
 The Mind is declared in `mind.yaml` and mounted into every world the agent enters. Under the hood, it's a directory of markdown files—human-readable, version-controllable, no database. The agent has full autonomy inside its world. Dangerous actions aren't forbidden—they're physically impossible.
 
