@@ -33,7 +33,7 @@ Tool-call frameworks scale linearly (more tools = more schemas). Agency scales c
 
 ## Agents That Evolve
 
-Model weights never change. What evolves is the Mind.
+Model weights never change. What evolves is the agent's Mind.
 
 **Reflexion.** After each session, the agent reviews its journal. Strategies that worked get promoted to playbooks. Strategies that failed are discarded. Natural selection for behavior—over dozens of sessions, the agent becomes genuinely better at its job.
 
@@ -57,14 +57,15 @@ You can't prompt-inject a missing network interface. You can't social-engineer a
 # Install
 go install github.com/jterrazz/universe/cmd/universe@latest
 
-# Create an agent identity
-universe agent init leonardo
+# First-time setup — creates ~/.universe/ and a named agent
+universe init leonardo
 
 # Spawn a world with the agent inside
-universe spawn --agent leonardo --workspace ./my-project
+universe spawn --agent leonardo -w ./my-project
+# → u-default-84721
 ```
 
-A contained Linux environment is created. The agent's persistent identity is mounted inside. Claude Code is spawned with full shell access. When the task ends, the world is destroyed—but the agent's Mind survives. Next time it runs, it remembers what it learned.
+A contained Linux environment is created. The agent's persistent identity is mounted inside. Claude Code is spawned with full shell access. When the task ends, the world is destroyed—but the agent survives. Next time it runs, it remembers what it learned.
 
 ---
 
@@ -76,8 +77,6 @@ The universe manifest defines the agent's reality:
 
 ```yaml
 physics:
-  origin: ubuntu:24.04        # The starting point — what this world is made of
-
   constants:                   # Finite resources, like physical constants
     cpu: 2
     memory: 1GB
@@ -133,13 +132,13 @@ Substrate (your machine)
 
 When you run `universe spawn`:
 
-1. The **Architect** reads `universe.yaml` and provisions a Docker container
+1. The **Architect** loads the named universe config and provisions a Docker container
 2. The agent's **Mind** is mounted at `/mind`, the project at `/workspace`
 3. The Architect generates **`physics.md`** (constraints) and **`faculties.md`** (verified technologies + gate bridges)
 4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol)
 5. The agent reads its Mind, reads the physics and faculties, and starts working
 
-The Gate is a two-sided bridge. The host side handles file mounts and technology bridging (MCP servers → shell commands). The container side wraps an ACP client. Because it speaks ACP, swapping agent runtimes is a container image change—Claude Code today, Codex CLI or Gemini CLI tomorrow.
+The Gate is a two-sided bridge. The host side (Go) handles file mounts and technology bridging (MCP servers → shell commands). The container side (Rust) wraps the official ACP SDK (`agent-client-protocol` crate). Because it speaks ACP, swapping agent runtimes is a container image change—Claude Code today, Codex CLI or Gemini CLI tomorrow.
 
 ---
 
@@ -147,49 +146,48 @@ The Gate is a two-sided bridge. The host side handles file mounts and technology
 
 ```bash
 # World
-universe spawn              # Create a universe
-universe list               # List all universes
-universe inspect <id>       # Show details, physics, agent status
-universe logs <id>          # Stream agent output
-universe attach <id>        # Interactive shell into a running universe
-universe destroy <id>       # Destroy a universe (Mind survives)
-universe init               # Scaffold universe.yaml + agent.yaml
+universe spawn [name]            # Create a universe and spawn an agent inside it
+universe list                    # List all universes
+universe inspect <universe-id>   # Show details, physics, agent status
+universe logs <universe-id>      # Stream agent output
+universe attach <universe-id>    # Interactive shell into a running universe
+universe destroy <universe-id>   # Destroy a universe (agent survives)
+universe init <name>             # First-time setup
 
 # Life
-universe agent spawn <id>   # Bring an agent to life in an existing universe
-universe agent list          # List all agents
-universe agent inspect <id>  # Show Mind layers, journal, sessions
-universe agent init <name>   # Create a new Mind
-universe agent export <name> # Export a Mind as tar.gz
+universe agent spawn [name]        # Bring an agent to life in an existing universe
+universe agent list                 # List all agents
+universe agent inspect <agent-id>   # Show agent details, Mind layers, journal
+universe agent init <name>          # Create a new agent
+universe agent export <agent-id>    # Export an agent as tar.gz
 ```
 
 ### A typical session
 
 ```
-$ universe spawn --agent leonardo --workspace ./acme-api
+$ universe spawn --agent leonardo -w ./acme-api
 
   Spawning universe...
 
-  ✓ Provisioned container from origin ubuntu:24.04
+  ✓ Provisioned container (ubuntu:24.04)
   ✓ Mounted workspace ./acme-api → /workspace
   ✓ Generated faculties.md (14 technologies verified)
-  ✓ Mounted Mind "leonardo" → /mind
+  ✓ Mounted Mind leonardo → /mind
   ✓ Spawned Claude Code (session a1b2c3d4)
 
   Universe is alive.
 
-  ID:       u-bright-comet-84721
-  Agent:    leonardo
-  Origin:   ubuntu:24.04
-  Status:   running
+  Universe:  u-default-84721
+  Agent:     a-leonardo-52103
+  Status:    running
 
-$ universe destroy u-bright-comet-84721
+$ universe destroy u-default-84721
 
   ✓ Stopped agent
   ✓ Removed container
-  ✓ Mind persisted at ~/.universe/agents/leonardo
+  ✓ Agent persisted at ~/.universe/agents/leonardo
 
-  Universe destroyed. Mind survives.
+  Universe destroyed. Agent survives.
 ```
 
 ---
@@ -217,7 +215,7 @@ Universe isn't another link in the tool chain—it replaces the chain. And it's 
 | **Agent** | Claude Code CLI | Best Unix-native agent. Reads markdown natively. |
 | **Protocol** | [ACP](https://github.com/agentclientprotocol/agent-client-protocol) | Standard protocol, 34+ agent CLIs. Session management for free. |
 | **Isolation** | Docker | Each agent gets its own container |
-| **Bridge** | Gate | Two-sided. Host: mounts + technologies. Container: ACP client. |
+| **Bridge** | Gate | Two-sided. Host (Go): mounts + technologies. Container (Rust): ACP client via official SDK. |
 
 ### Project layout
 
@@ -227,14 +225,14 @@ internal/
 ├── architect/          Orchestrator — create, spawn, destroy
 ├── agent/              Agent selection and ACP spawning
 ├── backend/            Backend interface + Docker adapter
-├── config/             Types and manifest definitions
+├── config/             Types and config definitions
 ├── gate/               Host-side Gate: technology bridge, session relay
 ├── journal/            Automatic spawn logs (markdown)
-├── manifest/           universe.yaml + agent.yaml parsing
-├── mind/               Mind directory management and validation
+├── manifest/           Named universe config + agent manifest parsing
+├── mind/               Agent Mind directory management and validation
 ├── physics/            physics.md + faculties.md generation via container introspection
 └── session/            Session persistence (JSON per agent+universe)
-container/              Container-side Gate (ACP client + crash recovery)
+container/              Container-side Gate (Rust: ACP client via agent-client-protocol crate + crash recovery)
 ```
 
 ---
