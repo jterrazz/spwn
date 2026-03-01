@@ -29,20 +29,25 @@ A Universe works the same way. You don't *tell* the agent "don't access the netw
 This is defined in `universe.yaml`:
 
 ```yaml
-origin: ubuntu:24.04        # The starting point — what this world is made of
+physics:
+  origin: ubuntu:24.04        # The starting point — what this world is made of
 
-constants:                   # Finite resources, like physical constants
-  cpu: 2
-  memory: 1GB
-  timeout: 30m
+  constants:                   # Finite resources, like physical constants
+    cpu: 2
+    memory: 1GB
+    timeout: 30m
 
-laws:                        # Structural constraints — cannot be broken
-  network: none
+  laws:                        # Structural constraints — cannot be broken
+    network: none
 
-elements:                    # Installed tools — the manufactured objects in this world
-  require: [git, node, npm, jq]
+  elements:                    # Tools the agent can use — listed in physics.md
+    - ubuntu                   # Pack: bash, coreutils, grep, sed, awk, find, etc.
+    - git
+    - node
+    - npm
+    - jq
 
-interactions:                # Bridges to the outside — senses
+gate:                          # Bridges to the outside world — senses
   - source: mcp/slack
     as: slack-send
     capabilities: [send]
@@ -52,7 +57,7 @@ Two concepts make this work:
 
 **Physics** are the laws of nature — things you can't opt out of. No network interface means the outside world doesn't exist. CPU and memory are finite. Filesystem permissions are structural. These are gravity.
 
-**Elements** are the manufactured objects — tools someone built. `git`, `curl`, `python3` are screwdrivers and hammers. If `curl` isn't installed, nobody built an HTTP client. The physics might allow networking, but the tool to use it was never manufactured. And if there's no `apt`, no new tools can ever be created — the element set is locked forever.
+**Elements** are the manufactured objects — tools someone built. `git`, `curl`, `python3` are screwdrivers and hammers. If `curl` isn't installed, nobody built an HTTP client. The physics might allow networking, but the tool to use it was never manufactured. And if there's no `apt`, no new tools can ever be created — the element set is locked forever. Elements listed in the manifest are verified at creation time and exposed to the agent in its `/universe/physics.md` — that's how the agent knows what tools exist in its world. You can list individual binaries or use **packs** like `ubuntu` (common shell tools) or `node` (node, npm, npx) for convenience.
 
 This is why Universe's security can't be jailbroken. You can't prompt-inject a missing network interface. You can't social-engineer a binary that doesn't exist. You can't trick physics.
 
@@ -123,7 +128,7 @@ Substrate (your machine)
 
 When you run `universe spawn`, here's what happens:
 
-1. The **Architect** reads `universe.yaml` and provisions a container (Docker) or microVM (Firecracker)
+1. The **Architect** reads `universe.yaml` and provisions a Docker container
 2. The agent's **Mind** is mounted at `/mind`, the project at `/workspace`
 3. The Architect generates **`physics.md`** — a description of the world's reality that the agent reads on boot
 4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol) (Agent Client Protocol)
@@ -150,7 +155,7 @@ Backend    Manifest      Mind          Physics
   │
   ▼
 ┌───────────────────────────────────────────────┐
-│  Universe (container / microVM)               │
+│  Universe (Docker container)                  │
 │                                               │
 │  Gate (container-side)                        │
 │  └── ACP → stdio → Claude Code               │
@@ -177,7 +182,7 @@ universe agent init leonardo
 universe spawn --agent leonardo --workspace ./my-project
 ```
 
-Every universe gets a human-readable ID — `u-bright-comet`, `u-calm-nebula`. Two words, easy to type, easy to say.
+Every universe gets a human-readable ID — `u-bright-comet-84721`, `u-calm-nebula-39205`. Two words plus a 5-digit suffix, easy to type, zero collisions.
 
 ### Commands
 
@@ -214,12 +219,12 @@ $ universe spawn --agent leonardo --workspace ./acme-api
 
   Universe is alive.
 
-  ID:       u-bright-comet
+  ID:       u-bright-comet-84721
   Agent:    leonardo
   Origin:   ubuntu:24.04
   Status:   running
 
-$ universe destroy u-bright-comet
+$ universe destroy u-bright-comet-84721
 
   ✓ Stopped agent
   ✓ Removed container
@@ -252,7 +257,7 @@ Universe isn't another link in the tool chain — it replaces the chain. And it'
 | **CLI** | Cobra | The standard for Go CLIs (kubectl, docker, gh) |
 | **Agent** | Claude Code CLI | Best Unix-native agent. Reads markdown natively. |
 | **Protocol** | [ACP](https://github.com/agentclientprotocol/agent-client-protocol) | Standard protocol, 34+ agent CLIs. Session management for free. |
-| **Isolation** | Docker / Firecracker | Containers for dev, microVMs for production |
+| **Isolation** | Docker | Each agent gets its own container |
 | **Bridge** | Gate | Two-sided. Host: mounts + interactions. Container: ACP client. |
 
 ### Project layout
@@ -262,7 +267,7 @@ cmd/universe/           CLI entry point (cobra)
 internal/
 ├── architect/          Orchestrator — create, spawn, destroy
 ├── agent/              Agent selection and ACP spawning
-├── backend/            Docker / Firecracker adapters
+├── backend/            Backend interface + Docker adapter
 ├── config/             Types and manifest definitions
 ├── gate/               Host-side Gate: interaction bridge, session relay
 ├── journal/            Automatic spawn logs (markdown)
