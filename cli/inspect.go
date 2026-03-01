@@ -73,7 +73,7 @@ func runInspect(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(u.Manifest.Gate) > 0 {
-		fmt.Println("  Interactions:")
+		fmt.Println("  Faculties:")
 		for _, g := range u.Manifest.Gate {
 			caps := "all"
 			if len(g.Capabilities) > 0 {

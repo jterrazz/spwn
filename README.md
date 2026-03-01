@@ -78,7 +78,7 @@ Think of the Mind as the agent's brain structure, modeled after how biological m
 | Semantic memory | **Knowledge** | What I know | *"This codebase uses PostgreSQL 15 with pgvector"* |
 | Procedural memory | **Playbooks** | How I do things | *"To deploy: test, bump version, build, push, tag"* |
 | Episodic memory | **Journal** | What happened to me | *"Session 47: migrated auth to sessions. Took 3 attempts."* |
-| Senses | **Interactions** | How I perceive beyond my world | Slack messages, GitHub PRs via MCP bridges |
+| Senses | **Faculties** | How I perceive beyond my world | Slack messages, GitHub PRs via MCP bridges |
 
 The Mind is declared in `mind.yaml` and mounted into every world the agent enters:
 
@@ -134,7 +134,7 @@ When you run `universe spawn`, here's what happens:
 4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol) (Agent Client Protocol)
 5. The agent reads its Mind, reads the physics, and starts working
 
-The Gate deserves a note — it's a two-sided bridge. The host side handles file mounts and interaction bridging (turning MCP servers into shell commands). The container side wraps an ACP client that communicates with the agent CLI over stdio. A single Unix socket connects the two halves — the only thing that crosses the container boundary.
+The Gate deserves a note — it's a two-sided bridge. The host side handles file mounts and faculty bridging (turning MCP servers into shell commands). The container side wraps an ACP client that communicates with the agent CLI over stdio. A single Unix socket connects the two halves — the only thing that crosses the container boundary.
 
 Because the Gate speaks ACP, swapping agent runtimes is a container image change. Claude Code today. Codex CLI or Gemini CLI tomorrow. Same protocol, same Mind, same physics.
 
@@ -162,7 +162,7 @@ Backend    Manifest      Mind          Physics
 │                                               │
 │  /mind        personas, skills, knowledge     │
 │  /workspace   your project files              │
-│  /gate        Unix socket, interaction bridge │
+│  /gate        Unix socket, faculty bridge │
 │  /universe    physics.md                      │
 └───────────────────────────────────────────────┘
 ```
@@ -258,7 +258,7 @@ Universe isn't another link in the tool chain — it replaces the chain. And it'
 | **Agent** | Claude Code CLI | Best Unix-native agent. Reads markdown natively. |
 | **Protocol** | [ACP](https://github.com/agentclientprotocol/agent-client-protocol) | Standard protocol, 34+ agent CLIs. Session management for free. |
 | **Isolation** | Docker | Each agent gets its own container |
-| **Bridge** | Gate | Two-sided. Host: mounts + interactions. Container: ACP client. |
+| **Bridge** | Gate | Two-sided. Host: mounts + faculties. Container: ACP client. |
 
 ### Project layout
 
@@ -269,7 +269,7 @@ internal/
 ├── agent/              Agent selection and ACP spawning
 ├── backend/            Backend interface + Docker adapter
 ├── config/             Types and manifest definitions
-├── gate/               Host-side Gate: interaction bridge, session relay
+├── gate/               Host-side Gate: faculty bridge, session relay
 ├── journal/            Automatic spawn logs (markdown)
 ├── manifest/           universe.yaml + mind.yaml parsing
 ├── mind/               Mind directory management and validation

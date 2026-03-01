@@ -51,9 +51,9 @@ func Generate(m config.UniverseManifest, verifiedElements []string) string {
 		b.WriteString("If a tool is not listed above, it does not exist in this world.\n\n")
 	}
 
-	// Gate (interactions).
+	// Gate (faculties).
 	if len(m.Gate) > 0 {
-		b.WriteString("## Interactions\n\n")
+		b.WriteString("## Faculties\n\n")
 		b.WriteString("These bridges connect you to the Substrate (the outside world):\n\n")
 		for _, g := range m.Gate {
 			caps := "all"
