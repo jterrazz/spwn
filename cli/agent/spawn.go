@@ -1,0 +1,73 @@
+package agent
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/jterrazz/universe/internal/architect"
+	"github.com/jterrazz/universe/internal/backend"
+	"github.com/jterrazz/universe/internal/state"
+	"github.com/spf13/cobra"
+)
+
+var agentSpawnUniverse string
+
+func init() {
+	spawnCmd.Flags().StringVarP(&agentSpawnUniverse, "universe", "u", "", "Target universe ID")
+	Cmd.AddCommand(spawnCmd)
+}
+
+var spawnCmd = &cobra.Command{
+	Use:   "spawn [name]",
+	Short: "Bring an agent to life inside an existing universe",
+	Args:  cobra.MaximumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
+		agentName := "default"
+		if len(args) > 0 {
+			agentName = args[0]
+		}
+
+		docker, err := backend.NewDocker()
+		if err != nil {
+			return fmt.Errorf("error: cannot connect to Docker.\n%w", err)
+		}
+
+		store, err := state.NewStore()
+		if err != nil {
+			return fmt.Errorf("error: cannot initialize state store.\n%w", err)
+		}
+
+		arc := architect.New(docker, store)
+
+		// Resolve universe ID
+		universeID := agentSpawnUniverse
+		if universeID == "" {
+			universes, err := arc.List(ctx)
+			if err != nil {
+				return fmt.Errorf("error: cannot list universes.\n%w", err)
+			}
+			if len(universes) == 0 {
+				return fmt.Errorf("error: no active universes.\nRun 'universe spawn --no-agent' first")
+			}
+			if len(universes) > 1 {
+				fmt.Println("\n  error: multiple active universes found. Specify one with --universe:")
+				for _, u := range universes {
+					fmt.Printf("    %-20s (%s)\n", u.ID, u.Status)
+				}
+				fmt.Printf("\n  Use: universe agent spawn %s -u <universe-id>\n\n", agentName)
+				return fmt.Errorf("multiple active universes")
+			}
+			universeID = universes[0].ID
+		}
+
+		fmt.Printf("\n  Spawning agent into universe %s...\n\n", universeID)
+
+		if err := arc.SpawnAgent(ctx, universeID, agentName); err != nil {
+			return fmt.Errorf("error: agent spawn failed.\n%w", err)
+		}
+
+		return nil
+	},
+}
