@@ -8,7 +8,7 @@ Intelligence is pattern recognition—and models like Claude have mastered it. B
 universe spawn --agent leonardo --workspace ./my-project
 ```
 
-One command. A world is created from the origin declared in `universe.yaml`. The agent's Mind—its persistent blueprint—is mounted inside. Claude Code is dropped in with full shell access. When the task ends, the world is destroyed. The Mind persists. The agent remembers.
+One command. A world is created from the origin declared in `universe.yaml`. The agent's Mind—its persistent blueprint—is mounted inside. The container-side Gate spawns Claude Code via [ACP](https://github.com/agentclientprotocol/agent-client-protocol) with full shell access. When the task ends, the world is destroyed. The Mind persists. The agent remembers.
 
 > Intelligence is solved. Architecture is the frontier.
 
@@ -23,7 +23,7 @@ The origin—declared in `universe.yaml`—defines the agent's reality. Not what
 
 ```yaml
 # universe.yaml
-origin: node:22
+origin: ubuntu:24.04
 
 constants:
   cpu: 2
@@ -100,12 +100,12 @@ Substrate (your machine)
             └── physics.md         Laws of this reality
 ```
 
-The Architect reads `universe.yaml`, provisions a container (or microVM), mounts the Mind and workspace, auto-generates `physics.md` describing the world's reality, and spawns Claude Code inside.
+The Architect reads `universe.yaml`, provisions a container (or microVM), mounts the Mind and workspace, auto-generates `physics.md`, and the container-side Gate spawns the agent via ACP.
 
 ```
 ┌──────────────────────────────────────────────────┐
 │  CLI (cobra)                                     │
-│  create · spawn · list · inspect · destroy       │
+│  spawn · list · inspect · destroy · agent        │
 └──────────────┬───────────────────────────────────┘
                │
       ┌────────▼────────┐
@@ -119,15 +119,19 @@ The Architect reads `universe.yaml`, provisions a container (or microVM), mounts
 │(Docker)│ │Resolver│ │Manager  │ │Generator │
 └────┬───┘ └────────┘ └─────────┘ └──────────┘
      │
-┌────▼──────────────────────────────────────┐
-│  Universe (container / microVM)           │
-│                                           │
-│  Claude Code CLI (agent runtime)          │
-│  ├── /mind       (agent blueprint)        │
-│  ├── /workspace  (project files)          │
-│  ├── /gate       (Unix socket + bins)     │
-│  └── /universe/physics.md                 │
-└───────────────────────────────────────────┘
+┌────▼──────────────────────────────────────────┐
+│  Universe (container / microVM)               │
+│                                               │
+│  Container-side Gate                          │
+│  └── ACP Client → stdio → Agent CLI          │
+│       (Claude Code, Codex, Gemini, etc.)      │
+│                                               │
+│  ├── /mind       (agent blueprint)            │
+│  ├── /workspace  (project files)              │
+│  ├── /gate       (Unix socket + interaction   │
+│  │                wrappers)                   │
+│  └── /universe/physics.md                     │
+└───────────────────────────────────────────────┘
 ```
 
 ## Quick Start
@@ -143,9 +147,6 @@ mkdir -p ~/.universe/agents/leonardo/{personas,skills,knowledge,playbooks,journa
 # Spawn — reads universe.yaml from current directory
 universe spawn --agent leonardo --workspace ./my-project
 
-# Or specify origin directly
-universe spawn --agent leonardo --origin node:22 --workspace ./my-project
-
 # With interactions (MCP → CLI wrapper)
 universe spawn --agent leonardo --workspace ./app \
   --interaction "mcp/slack:slack-send:send"
@@ -154,28 +155,29 @@ universe spawn --agent leonardo --workspace ./app \
 ## CLI
 
 ```bash
-universe create          # Create a universe (container only)
-universe spawn           # Create + spawn agent (all-in-one)
-universe list            # List all universes
-universe inspect <id>    # Inspect a universe
+# The World
+universe spawn           # Create a universe (the Big Bang)
+universe list            # List all universes and templates
+universe inspect <id>    # Inspect a universe or template
+universe logs <id>       # Stream agent output
+universe attach <id>     # Open interactive session
 universe destroy <id>    # Destroy a universe
+universe init            # Generate universe.yaml and mind.yaml
 
-universe agent list      # List all agents
-universe agent inspect   # Inspect agent Mind and sessions
-universe agent export    # Export an agent
-
-universe template list      # List available universe manifests
-universe template inspect   # Inspect a manifest
+# Life
+universe agent spawn <id>    # Bring an agent to life inside a universe
+universe agent list          # List all agents
+universe agent inspect <name|id>  # Inspect agent Mind and sessions
+universe agent init <name>   # Scaffold a new Mind
+universe agent export <name> # Export a Mind as tar.gz
 ```
 
 | Flag | Description |
 | --- | --- |
-| `--agent` | Agent name (persistent identity) |
-| `--universe` | Universe manifest name or path |
-| `--origin` | Origin (overrides manifest) |
+| `--agent` | Agent name—also spawn an agent in one step |
 | `--workspace` | Host directory to mount at `/workspace` |
 | `--interaction` | MCP bridge (`source:as:cap1,cap2`) |
-| `--backend` | `docker` or `firecracker` |
+| `--backend` | `docker` (default) or `firecracker` |
 
 ## Project Structure
 
@@ -183,16 +185,16 @@ universe template inspect   # Inspect a manifest
 cmd/universe/           CLI entry point + cobra commands
 internal/
 ├── architect/          Orchestrator—create, spawn, list, inspect, destroy
-├── agent/              Claude Code CLI spawning with session resume
+├── agent/              Agent configuration and selection (which CLI to spawn via ACP)
 ├── backend/            Backend interface + Docker/Firecracker adapters
 ├── config/             Types: UniverseConfig, UniverseManifest, MindManifest
-├── gate/               HTTP-over-Unix-socket server + wrapper scripts
+├── gate/               Host-side Gate: HTTP-over-Unix-socket, interaction bridge, session relay
 ├── journal/            Auto-generated markdown session logs
 ├── manifest/           Manifest parsing—universe.yaml and mind.yaml
 ├── mind/               Mind path resolution, validation, listing
 ├── physics/            physics.md generation + container introspection
-├── procmgr/            Process manager with crash recovery
 └── session/            Session persistence (JSON per agent+universe pair)
+container/                Container-side Gate binary (ACP client + crash recovery)
 test/e2e/               Integration tests
 ```
 
