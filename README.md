@@ -6,13 +6,13 @@
 
 Models like Claude can reason, write code, and solve problems. The intelligence is there. But drop that intelligence into a blank API call and it has no tools, no filesystem, no memory of yesterday. It's a brain in a jar.
 
-Universe builds the missing half. Not a better toolchain—a **reality**. A world with physics, populated with elements, inhabited by a conscious entity that remembers, reflects, and evolves.
+Universe builds the missing half. Not a better toolchain—a **reality**. A world with physics, evolved technologies, inhabited by a conscious entity that remembers, reflects, and evolves.
 
 ## Life Emerges From the Architecture
 
 Most agent frameworks ask: *"How do we give an AI access to tools?"* Universe asks: *"What does it mean to create a reality for something that can think?"*
 
-The answer comes from simulation theory. You define physics—laws that govern what's possible. You populate the world with elements. You place a conscious entity inside. You let it act, learn, sleep, evolve. This isn't a metaphor—it's the literal design:
+The answer comes from simulation theory. You define physics—laws that govern what's possible. You give the world technologies—capabilities it has evolved. You place a conscious entity inside. You let it act, learn, sleep, evolve.
 
 This isn't a metaphor. The physics define what's possible. The Mind defines who the agent is. We are building simulated realities for digital minds.
 
@@ -70,7 +70,7 @@ A contained Linux environment is created. The agent's persistent identity is mou
 
 ## How It Works
 
-### Physics
+### Physics & Technologies
 
 The universe manifest defines the agent's reality:
 
@@ -86,26 +86,27 @@ physics:
   laws:                        # Structural constraints — cannot be broken
     network: none
 
-  elements:                    # Tools the agent can use — listed in physics.md
-    - ubuntu                   # Pack: bash, coreutils, grep, sed, awk, find, etc.
-    - git
-    - node
-    - npm
-    - jq
+  elements:                    # Raw matter — files, data, mounts
+    - workspace: ./my-project
 
-gate:                          # Bridges to the outside world — faculties
-  - source: mcp/slack
-    as: slack-send
-    capabilities: [send]
+technologies:                  # What this world has evolved (Civ tech tree)
+  - @unix                      # Pack: bash, coreutils, grep, sed, awk, find, etc.
+  - @git
+  - @node
+  - jq
+  gate:                        # Technologies bridged from Substrate
+    - source: mcp/slack
+      as: slack-send
+      capabilities: [send]
 ```
 
-**Physics** are the laws of nature—things you can't opt out of. No network interface means the outside world doesn't exist. CPU and memory are finite. These are gravity.
+**Physics** are the laws of nature—things you can't opt out of. No network interface means the outside world doesn't exist. CPU and memory are finite. Elements are the raw matter—files and mounts. These are gravity.
 
-**Elements** are the manufactured objects—tools someone built. `git`, `curl`, `python3` are screwdrivers and hammers. If `curl` isn't installed, nobody built an HTTP client. If there's no `apt`, no new tools can ever be created—the element set is locked forever. Elements are verified at creation time and exposed in the agent's `/universe/physics.md`.
+**Technologies** are what the world has evolved—like a Civilization tech tree. `@unix`, `@git`, `@node` are capability packs. `jq` is an individual tool. If `curl` isn't in the tech tree, that technology was never developed. If there's no `apt`, no new technologies can ever be evolved—the tech tree is frozen forever. Technologies are verified at creation time and exposed in the agent's `/universe/faculties.md`.
 
 ### Mind
 
-The agent's persistent identity, modeled after biological memory:
+The agent's persistent identity, configured via `agent.yaml` and modeled after biological memory:
 
 | Biology | Mind Layer | What it stores | Example |
 | --- | --- | --- | --- |
@@ -114,9 +115,8 @@ The agent's persistent identity, modeled after biological memory:
 | Semantic memory | **Knowledge** | What I know | *"This codebase uses PostgreSQL 15 with pgvector"* |
 | Procedural memory | **Playbooks** | How I do things | *"To deploy: test, bump version, build, push, tag"* |
 | Episodic memory | **Journal** | What happened to me | *"Session 47: migrated auth to sessions. Took 3 attempts."* |
-| Abilities | **Faculties** | How I perceive and act beyond my world | Slack messages, GitHub PRs via MCP bridges |
 
-The Mind is declared in `mind.yaml` and mounted into every world the agent enters. Under the hood, it's a directory of markdown files—human-readable, version-controllable, no database. The agent has full autonomy inside its world. Dangerous actions aren't forbidden—they're physically impossible.
+The Mind is declared as the `mind` section of `agent.yaml` and mounted into every world the agent enters. Under the hood, it's a directory of markdown files—human-readable, version-controllable, no database. The agent has full autonomy inside its world. Dangerous actions aren't forbidden—they're physically impossible.
 
 ### Architecture
 
@@ -127,18 +127,19 @@ Substrate (your machine)
             ├── Agent              The living entity inside
             │    └── Mind          Its persistent identity
             ├── Gate               Bridge between worlds
-            └── physics.md         The laws of this reality
+            ├── physics.md         The constraints of this reality
+            └── faculties.md       What the agent can do
 ```
 
 When you run `universe spawn`:
 
 1. The **Architect** reads `universe.yaml` and provisions a Docker container
 2. The agent's **Mind** is mounted at `/mind`, the project at `/workspace`
-3. The Architect generates **`physics.md`**—a description of the world's reality
+3. The Architect generates **`physics.md`** (constraints) and **`faculties.md`** (verified technologies + gate bridges)
 4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol)
-5. The agent reads its Mind, reads the physics, and starts working
+5. The agent reads its Mind, reads the physics and faculties, and starts working
 
-The Gate is a two-sided bridge. The host side handles file mounts and faculty bridging (MCP servers → shell commands). The container side wraps an ACP client. Because it speaks ACP, swapping agent runtimes is a container image change—Claude Code today, Codex CLI or Gemini CLI tomorrow.
+The Gate is a two-sided bridge. The host side handles file mounts and technology bridging (MCP servers → shell commands). The container side wraps an ACP client. Because it speaks ACP, swapping agent runtimes is a container image change—Claude Code today, Codex CLI or Gemini CLI tomorrow.
 
 ---
 
@@ -152,7 +153,7 @@ universe inspect <id>       # Show details, physics, agent status
 universe logs <id>          # Stream agent output
 universe attach <id>        # Interactive shell into a running universe
 universe destroy <id>       # Destroy a universe (Mind survives)
-universe init               # Scaffold universe.yaml + mind.yaml
+universe init               # Scaffold universe.yaml + agent.yaml
 
 # Life
 universe agent spawn <id>   # Bring an agent to life in an existing universe
@@ -171,7 +172,7 @@ $ universe spawn --agent leonardo --workspace ./acme-api
 
   ✓ Provisioned container from origin ubuntu:24.04
   ✓ Mounted workspace ./acme-api → /workspace
-  ✓ Generated physics.md (14 elements detected)
+  ✓ Generated faculties.md (14 technologies verified)
   ✓ Mounted Mind "leonardo" → /mind
   ✓ Spawned Claude Code (session a1b2c3d4)
 
@@ -216,7 +217,7 @@ Universe isn't another link in the tool chain—it replaces the chain. And it's 
 | **Agent** | Claude Code CLI | Best Unix-native agent. Reads markdown natively. |
 | **Protocol** | [ACP](https://github.com/agentclientprotocol/agent-client-protocol) | Standard protocol, 34+ agent CLIs. Session management for free. |
 | **Isolation** | Docker | Each agent gets its own container |
-| **Bridge** | Gate | Two-sided. Host: mounts + faculties. Container: ACP client. |
+| **Bridge** | Gate | Two-sided. Host: mounts + technologies. Container: ACP client. |
 
 ### Project layout
 
@@ -227,11 +228,11 @@ internal/
 ├── agent/              Agent selection and ACP spawning
 ├── backend/            Backend interface + Docker adapter
 ├── config/             Types and manifest definitions
-├── gate/               Host-side Gate: faculty bridge, session relay
+├── gate/               Host-side Gate: technology bridge, session relay
 ├── journal/            Automatic spawn logs (markdown)
-├── manifest/           universe.yaml + mind.yaml parsing
+├── manifest/           universe.yaml + agent.yaml parsing
 ├── mind/               Mind directory management and validation
-├── physics/            physics.md generation via container introspection
+├── physics/            physics.md + faculties.md generation via container introspection
 └── session/            Session persistence (JSON per agent+universe)
 container/              Container-side Gate (ACP client + crash recovery)
 ```
