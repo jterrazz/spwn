@@ -10,8 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// TechnologyPacks maps @pack names to their constituent binaries.
-var TechnologyPacks = map[string][]string{
+// ElementPacks maps @pack names to their constituent binaries.
+var ElementPacks = map[string][]string{
 	"@unix":   {"bash", "sh", "ls", "cat", "cp", "mv", "rm", "mkdir", "rmdir", "chmod", "chown", "grep", "sed", "awk", "find", "xargs", "curl", "wget"},
 	"@git":    {"git"},
 	"@node":   {"node", "npm", "npx"},
@@ -24,9 +24,9 @@ type rawManifest struct {
 	Physics struct {
 		Constants config.ConstantsManifest `yaml:"constants"`
 		Laws      config.LawsManifest      `yaml:"laws"`
-		Elements  []map[string]string      `yaml:"elements"`
+		Elements  yaml.Node                `yaml:"elements"`
 	} `yaml:"physics"`
-	Technologies yaml.Node `yaml:"technologies"`
+	Gate []config.GateBridge `yaml:"gate"`
 }
 
 // Load reads a named universe config from ~/.universe/universes/{name}.yaml.
@@ -52,59 +52,27 @@ func LoadPath(path string) (config.UniverseManifest, error) {
 			Constants: raw.Physics.Constants,
 			Laws:      raw.Physics.Laws,
 		},
+		Gate: raw.Gate,
 	}
 
-	// Parse elements
-	for _, elem := range raw.Physics.Elements {
-		for name, path := range elem {
-			m.Physics.Elements = append(m.Physics.Elements, config.ElementMount{Name: name, Path: path})
-		}
-	}
-
-	// Parse technologies (mixed list of strings + gate subsection)
-	if raw.Technologies.Kind == yaml.MappingNode || raw.Technologies.Kind == yaml.SequenceNode {
-		m.Technologies, m.Gate = parseTechnologies(&raw.Technologies)
+	// Parse elements (plain list of strings)
+	if raw.Physics.Elements.Kind == yaml.SequenceNode {
+		m.Elements = parseElements(&raw.Physics.Elements)
 	}
 
 	ApplyDefaults(&m)
 	return m, nil
 }
 
-// parseTechnologies handles the mixed technologies YAML:
-//
-//	technologies:
-//	  - @unix
-//	  - @git
-//	  - jq
-//	  gate:
-//	    - source: mcp/slack
-//	      as: slack-send
-//	      capabilities: [send]
-func parseTechnologies(node *yaml.Node) ([]string, []config.GateBridge) {
-	var techs []string
-	var gates []config.GateBridge
-
-	if node.Kind == yaml.SequenceNode {
-		for _, item := range node.Content {
-			if item.Kind == yaml.ScalarNode {
-				techs = append(techs, item.Value)
-			}
-		}
-	} else if node.Kind == yaml.MappingNode {
-		for i := 0; i < len(node.Content)-1; i += 2 {
-			key := node.Content[i]
-			val := node.Content[i+1]
-			if key.Value == "gate" && val.Kind == yaml.SequenceNode {
-				for _, gateItem := range val.Content {
-					var gb config.GateBridge
-					gateItem.Decode(&gb)
-					gates = append(gates, gb)
-				}
-			}
+// parseElements extracts element names from a YAML sequence node.
+func parseElements(node *yaml.Node) []string {
+	var elems []string
+	for _, item := range node.Content {
+		if item.Kind == yaml.ScalarNode {
+			elems = append(elems, item.Value)
 		}
 	}
-
-	return techs, gates
+	return elems
 }
 
 // ListConfigs returns the names of all universe configs in ~/.universe/universes/.
@@ -153,9 +121,9 @@ physics:
     network: none
     max-processes: 128
 
-technologies:
-  - "@unix"
-  - "@git"
+  elements:
+    - "@unix"
+    - "@git"
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -185,29 +153,29 @@ physics:
     network: none
     max-processes: 128
 
-technologies:
-  - "@unix"
-  - "@git"
+  elements:
+    - "@unix"
+    - "@git"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
 }
 
-// ExpandTechnologies expands @packs into individual binaries and deduplicates.
-func ExpandTechnologies(techs []string) []string {
+// ExpandElements expands @packs into individual binaries and deduplicates.
+func ExpandElements(elems []string) []string {
 	seen := make(map[string]bool)
 	var result []string
 
-	for _, t := range techs {
-		if binaries, ok := TechnologyPacks[t]; ok {
+	for _, e := range elems {
+		if binaries, ok := ElementPacks[e]; ok {
 			for _, b := range binaries {
 				if !seen[b] {
 					seen[b] = true
 					result = append(result, b)
 				}
 			}
-		} else if !seen[t] {
-			seen[t] = true
-			result = append(result, t)
+		} else if !seen[e] {
+			seen[e] = true
+			result = append(result, e)
 		}
 	}
 	return result

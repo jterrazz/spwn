@@ -76,8 +76,8 @@ physics:
   laws:
     network: none
     max-processes: 64
-technologies:
-  - "@unix"
+  elements:
+    - "@unix"
 `).
 		NoAgent().
 		Execute().

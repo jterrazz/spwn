@@ -34,16 +34,15 @@ var MindLayers = []string{"personas", "skills", "knowledge", "playbooks", "journ
 
 // UniverseManifest is the parsed representation of a universe config YAML.
 type UniverseManifest struct {
-	Physics      PhysicsManifest `yaml:"physics"`
-	Technologies []string        `yaml:"-"`
-	Gate         []GateBridge    `yaml:"-"`
+	Physics  PhysicsManifest `yaml:"physics"`
+	Elements []string        `yaml:"-"`
+	Gate     []GateBridge    `yaml:"-"`
 }
 
 // PhysicsManifest defines the physical constraints of a universe.
 type PhysicsManifest struct {
 	Constants ConstantsManifest `yaml:"constants"`
 	Laws      LawsManifest      `yaml:"laws"`
-	Elements  []ElementMount    `yaml:"elements"`
 }
 
 // ConstantsManifest defines fixed resource limits.
@@ -60,13 +59,7 @@ type LawsManifest struct {
 	MaxProcesses int    `yaml:"max-processes"`
 }
 
-// ElementMount represents raw matter in the universe.
-type ElementMount struct {
-	Name string
-	Path string
-}
-
-// GateBridge represents a technology bridged from the Substrate.
+// GateBridge represents an element bridged from the Substrate.
 type GateBridge struct {
 	Source       string   `yaml:"source"`
 	As           string   `yaml:"as"`
@@ -83,6 +76,7 @@ type Universe struct {
 	ContainerID string           `json:"container_id"`
 	Workspace   string           `json:"workspace,omitempty"`
 	MindPath    string           `json:"mind_path,omitempty"`
+	GateDir     string           `json:"gate_dir,omitempty"`
 	Status      UniverseStatus   `json:"status"`
 	CreatedAt   time.Time        `json:"created_at"`
 	Manifest    UniverseManifest `json:"-"`

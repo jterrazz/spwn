@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/jterrazz/universe/internal/architect"
 	"github.com/jterrazz/universe/internal/config"
@@ -17,6 +18,7 @@ var (
 	spawnUniverse  string
 	spawnDetach    bool
 	spawnNoAgent   bool
+	spawnGate      []string
 )
 
 func init() {
@@ -25,6 +27,7 @@ func init() {
 	spawnCmd.Flags().StringVarP(&spawnUniverse, "universe", "u", "", "Explicit path to a YAML config file")
 	spawnCmd.Flags().BoolVarP(&spawnDetach, "detach", "d", false, "Run in background")
 	spawnCmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
+	spawnCmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Substrate: "source:as:cap1,cap2"`)
 
 	rootCmd.AddCommand(spawnCmd)
 }
@@ -65,6 +68,15 @@ is an optional positional argument.`,
 			return fmt.Errorf("error: invalid config.\n%w", err)
 		}
 
+		// Parse --gate flags and merge with manifest gates
+		for _, g := range spawnGate {
+			bridge, err := parseGateFlag(g)
+			if err != nil {
+				return fmt.Errorf("error: invalid --gate flag %q.\n%w", g, err)
+			}
+			m.Gate = append(m.Gate, bridge)
+		}
+
 		// Build spawn opts
 		agentName := ""
 		if !spawnNoAgent {
@@ -97,6 +109,9 @@ is an optional positional argument.`,
 				fmt.Printf("  ✓ Mounted workspace %s → /workspace\n", spawnWorkspace)
 			}
 			fmt.Printf("  ✓ Generated faculties.md\n")
+			if len(m.Gate) > 0 {
+				fmt.Printf("  ✓ Gate bridges installed (%d element(s))\n", len(m.Gate))
+			}
 			if agentName != "" {
 				fmt.Printf("  ✓ Mounted Mind %s → /mind\n", agentName)
 			}
@@ -141,4 +156,23 @@ is an optional positional argument.`,
 
 		return nil
 	},
+}
+
+// parseGateFlag parses "source:as:cap1,cap2" into a GateBridge.
+func parseGateFlag(s string) (config.GateBridge, error) {
+	parts := strings.SplitN(s, ":", 3)
+	if len(parts) < 2 {
+		return config.GateBridge{}, fmt.Errorf("expected format \"source:as[:cap1,cap2]\", got %q", s)
+	}
+
+	bridge := config.GateBridge{
+		Source: parts[0],
+		As:     parts[1],
+	}
+
+	if len(parts) == 3 && parts[2] != "" {
+		bridge.Capabilities = strings.Split(parts[2], ",")
+	}
+
+	return bridge, nil
 }

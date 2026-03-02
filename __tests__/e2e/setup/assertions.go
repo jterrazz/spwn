@@ -6,6 +6,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/jterrazz/universe/internal/config"
@@ -25,6 +26,12 @@ type AssertionChain struct {
 // Universe returns the underlying universe record.
 func (a *AssertionChain) Universe() *config.Universe {
 	return a.universe
+}
+
+// ExecInContainer runs a command inside the universe's container and returns stdout.
+func (a *AssertionChain) ExecInContainer(cmd []string) string {
+	a.tc.T.Helper()
+	return a.tc.ExecInContainer(a.universe.ContainerID, cmd)
 }
 
 // ExpectState asserts against the state.json contents.
@@ -56,6 +63,13 @@ func (a *AssertionChain) ExpectMock(fn func(m *MockAssertion)) *AssertionChain {
 	a.tc.T.Helper()
 	mock := a.tc.ReadMockOutput(a.universe.ContainerID)
 	fn(&MockAssertion{tc: a.tc, mock: mock})
+	return a
+}
+
+// ExpectGate asserts against the gate bridges inside the container.
+func (a *AssertionChain) ExpectGate(fn func(g *GateAssertion)) *AssertionChain {
+	a.tc.T.Helper()
+	fn(&GateAssertion{tc: a.tc, containerID: a.universe.ContainerID})
 	return a
 }
 
@@ -537,5 +551,60 @@ func (m *MindAssertion) HasJournalEntries(minCount int) {
 	}
 	if len(entries) < minCount {
 		m.tc.T.Fatalf("Expected at least %d journal entries, got %d", minCount, len(entries))
+	}
+}
+
+// --- GateAssertion ---
+
+type GateAssertion struct {
+	tc          *TestContext
+	containerID string
+}
+
+func (g *GateAssertion) HasBridge(name string) {
+	g.tc.T.Helper()
+	if !g.tc.FileExistsInContainer(g.containerID, "/gate/bin/"+name) {
+		g.tc.T.Fatalf("Expected gate bridge %q at /gate/bin/%s, not found", name, name)
+	}
+}
+
+func (g *GateAssertion) BridgeIsExecutable(name string) {
+	g.tc.T.Helper()
+	_, err := g.tc.Backend.ExecOutput(context.Background(), g.containerID, []string{
+		"test", "-x", "/gate/bin/" + name,
+	})
+	if err != nil {
+		g.tc.T.Fatalf("Expected bridge %q to be executable, but it's not", name)
+	}
+}
+
+func (g *GateAssertion) HasSocket() {
+	g.tc.T.Helper()
+	// Use test -e (exists, any type) instead of test -f (regular file only) since sockets are special files.
+	// On macOS Docker Desktop, sockets through bind mounts are not visible inside the container.
+	_, err := g.tc.Backend.ExecOutput(context.Background(), g.containerID, []string{"test", "-e", "/gate/gate.sock"})
+	if err != nil {
+		if runtime.GOOS == "darwin" {
+			g.tc.T.Skip("unix socket not visible through Docker bind mount on macOS")
+		}
+		g.tc.T.Fatal("Expected gate socket at /gate/gate.sock, not found")
+	}
+}
+
+func (g *GateAssertion) NoSocket() {
+	g.tc.T.Helper()
+	if g.tc.DirExistsInContainer(g.containerID, "/gate") {
+		g.tc.T.Fatal("Expected no /gate directory, but it exists")
+	}
+}
+
+func (g *GateAssertion) NoBridge(name string) {
+	g.tc.T.Helper()
+	if g.tc.FileExistsInContainer(g.containerID, "/gate/bin/"+name) {
+		g.tc.T.Fatalf("Expected NO gate bridge %q, but it exists", name)
+	}
+	// Also check /usr/local/bin
+	if g.tc.FileExistsInContainer(g.containerID, "/usr/local/bin/"+name) {
+		g.tc.T.Fatalf("Expected NO bridge symlink for %q in /usr/local/bin, but it exists", name)
 	}
 }

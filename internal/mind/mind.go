@@ -46,7 +46,7 @@ of your universe.
 
 ## Operating Principles
 - Read /universe/physics.md at startup to understand the world's constraints
-- Read /universe/faculties.md to understand available technologies
+- Read /universe/faculties.md to understand available elements
 - Stay within the Laws — they describe what's physically possible
 `
 	personaPath := filepath.Join(dir, "personas", "default.md")

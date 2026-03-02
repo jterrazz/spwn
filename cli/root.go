@@ -15,7 +15,7 @@ var rootCmd = &cobra.Command{
 	Use:   "universe",
 	Short: "Universe — create realities for things that can think",
 	Long: `Universe creates isolated Docker environments for AI agents.
-Each universe has physics (constraints), technologies (capabilities),
+Each universe has physics (constants, laws, elements),
 and a Mind (persistent agent identity).`,
 }
 

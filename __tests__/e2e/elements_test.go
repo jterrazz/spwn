@@ -8,13 +8,13 @@ import (
 	"github.com/jterrazz/universe/__tests__/e2e/setup"
 )
 
-func TestSpawn_TechnologiesVerified(t *testing.T) {
+func TestSpawn_ElementsVerified(t *testing.T) {
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics: {}
-technologies:
-  - "@unix"
-  - "@git"
+physics:
+  elements:
+    - "@unix"
+    - "@git"
 `).
 		NoAgent().
 		Execute().
@@ -24,12 +24,12 @@ technologies:
 		})
 }
 
-func TestSpawn_MissingTechnologyFails(t *testing.T) {
+func TestSpawn_MissingElementFails(t *testing.T) {
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics: {}
-technologies:
-  - totally-fake-binary
+physics:
+  elements:
+    - totally-fake-binary
 `).
 		NoAgent().
 		ExecuteExpectError("does not provide it")
@@ -38,9 +38,9 @@ technologies:
 func TestSpawn_PackExpansion(t *testing.T) {
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics: {}
-technologies:
-  - "@unix"
+physics:
+  elements:
+    - "@unix"
 `).
 		NoAgent().
 		Execute().
