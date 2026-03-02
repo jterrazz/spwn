@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jterrazz/universe/cli/ui"
+	"github.com/jterrazz/universe/internal/architect"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ var destroyCmd = &cobra.Command{
 		universeID := args[0]
 		s := ui.New(quiet, verbose, jsonOutput)
 
-		arc, err := newArchitect()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return err
 		}

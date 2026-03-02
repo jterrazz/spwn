@@ -9,10 +9,10 @@ import (
 )
 
 // GenerateWrapperScript returns a shell script that bridges an element invocation
-// through the Gate's Unix socket.
-func GenerateWrapperScript(elementName string) string {
+// through the Gate's TCP server on the host.
+func GenerateWrapperScript(elementName string, gatePort int) string {
 	return fmt.Sprintf(`#!/bin/sh
-# Gate bridge wrapper for %q — forwards to host-side Gate via Unix socket.
+# Gate bridge wrapper for %q — forwards to host-side Gate via TCP.
 # Auto-generated at universe creation time.
 
 ARGS=""
@@ -25,8 +25,8 @@ for arg in "$@"; do
   fi
 done
 
-RESPONSE=$(curl -s --unix-socket /gate/gate.sock \
-  -X POST http://localhost/invoke \
+RESPONSE=$(curl -s \
+  -X POST http://host.docker.internal:%d/invoke \
   -H 'Content-Type: application/json' \
   -d "{\"element\":\"%s\",\"args\":[$ARGS]}" 2>/dev/null)
 
@@ -43,18 +43,18 @@ EXIT_CODE=$(printf '%%s' "$RESPONSE" | sed -n 's/.*"exit_code":\([0-9]*\).*/\1/p
 [ -n "$STDOUT" ] && printf '%%s\n' "$STDOUT"
 [ -n "$STDERR" ] && printf '%%s\n' "$STDERR" >&2
 exit ${EXIT_CODE:-1}
-`, elementName, elementName)
+`, elementName, gatePort, elementName)
 }
 
 // SetupBridges writes wrapper scripts for each gate bridge into gateDir/bin/.
-func SetupBridges(gateDir string, bridges []config.GateBridge) error {
+func SetupBridges(gateDir string, bridges []config.GateBridge, gatePort int) error {
 	binDir := filepath.Join(gateDir, "bin")
 	if err := os.MkdirAll(binDir, 0755); err != nil {
 		return fmt.Errorf("create gate bin dir: %w", err)
 	}
 
 	for _, bridge := range bridges {
-		script := GenerateWrapperScript(bridge.As)
+		script := GenerateWrapperScript(bridge.As, gatePort)
 		path := filepath.Join(binDir, bridge.As)
 		if err := os.WriteFile(path, []byte(script), 0755); err != nil {
 			return fmt.Errorf("write bridge wrapper %q: %w", bridge.As, err)

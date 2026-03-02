@@ -85,7 +85,7 @@ is an optional positional argument.`,
 			agentName = spawnAgent
 		}
 
-		arc, err := newArchitect()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ is an optional positional argument.`,
 		s.Blank()
 		s.Start("Spawning universe...")
 
-		u, err := arc.Spawn(ctx, architect.SpawnOpts{
+		result, err := arc.Spawn(ctx, architect.SpawnOpts{
 			ConfigName: configName,
 			AgentName:  agentName,
 			Workspace:  spawnWorkspace,
@@ -118,6 +118,13 @@ is an optional positional argument.`,
 		if err != nil {
 			s.Fail("Spawn failed", err)
 			return err
+		}
+
+		u := result.Universe
+
+		// Show non-fatal warnings
+		for _, w := range result.Warnings {
+			s.Warn("Warning", w)
 		}
 
 		// Spawn agent if not --no-agent

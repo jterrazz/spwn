@@ -6,13 +6,13 @@
 
 Models like Claude can reason, write code, and solve problems. The intelligence is there. But drop that intelligence into a blank API call and it has no tools, no filesystem, no memory of yesterday. It's a brain in a jar.
 
-Universe builds the missing half. Not a better toolchain—a **reality**. A world with physics, evolved technologies, inhabited by a conscious entity that remembers, reflects, and evolves.
+Universe builds the missing half. Not a better toolchain—a **reality**. A world with physics, elements, inhabited by a conscious entity that remembers, reflects, and evolves.
 
 ## Life Emerges From the Architecture
 
 Most agent frameworks ask: *"How do we give an AI access to tools?"* Universe asks: *"What does it mean to create a reality for something that can think?"*
 
-The answer comes from simulation theory. You define physics—laws that govern what's possible. You give the world technologies—capabilities it has evolved. You place a conscious entity inside. You let it act, learn, sleep, evolve.
+The answer comes from simulation theory. You define physics—laws that govern what's possible. You populate it with elements—the building blocks that exist. You place a conscious entity inside. You let it act, learn, sleep, evolve.
 
 This isn't a metaphor. The physics define what's possible. The Mind defines who the agent is. We are building simulated realities for digital minds.
 
@@ -74,7 +74,7 @@ A contained Linux environment is created. The agent's persistent identity is mou
 
 ## How It Works
 
-### Physics & Technologies
+### Physics & Elements
 
 The universe manifest defines the agent's reality:
 
@@ -88,23 +88,20 @@ physics:
   laws:                        # Structural constraints — cannot be broken
     network: none
 
-  elements:                    # Raw matter — files, data, mounts
-    - workspace: ./my-project
-
-technologies:                  # What this world has evolved (Civ tech tree)
-  - @unix                      # Pack: bash, coreutils, grep, sed, awk, find, etc.
-  - @git
-  - @node
-  - jq
-  gate:                        # Technologies bridged from Substrate
-    - source: mcp/slack
-      as: slack-send
-      capabilities: [send]
+  elements:                    # Building blocks of this world (like a periodic table)
+    - @unix                    # Pack: bash, coreutils, grep, sed, awk, find, etc.
+    - @git
+    - @node
+    - jq
+    gate:                      # Elements bridged from Substrate
+      - source: mcp/slack
+        as: slack-send
+        capabilities: [send]
 ```
 
-**Physics** are the laws of nature—things you can't opt out of. No network interface means the outside world doesn't exist. CPU and memory are finite. Elements are the raw matter—files and mounts. These are gravity.
+**Physics** defines the reality—constants (finite resources), laws (structural constraints), and elements (the building blocks). No network interface means the outside world doesn't exist. CPU and memory are finite. These are gravity.
 
-**Technologies** are what the world has evolved—like a Civilization tech tree. `@unix`, `@git`, `@node` are capability packs. `jq` is an individual tool. If `curl` isn't in the tech tree, that technology was never developed. If there's no `apt`, no new technologies can ever be evolved—the tech tree is frozen forever. Technologies are verified at creation time and exposed in the agent's `/universe/faculties.md`.
+**Elements** are the building blocks of the world—like a periodic table. `@unix`, `@git`, `@node` are @packs (curated collections). `jq` is an individual element. If `curl` isn't in the element list, it doesn't exist in this reality. Elements are verified at creation time and exposed in the agent's `/universe/faculties.md`.
 
 ### Mind
 
@@ -137,11 +134,11 @@ When you run `universe spawn`:
 
 1. The **Architect** loads the named universe config and provisions a Docker container
 2. The agent's **Mind** is mounted at `/mind`, the project at `/workspace`
-3. The Architect generates **`physics.md`** (constraints) and **`faculties.md`** (verified technologies + gate bridges)
+3. The Architect generates **`physics.md`** (constraints) and **`faculties.md`** (verified elements + gate bridges)
 4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol)
 5. The agent reads its Mind, reads the physics and faculties, and starts working
 
-The Gate is a two-sided bridge. The host side (Go) handles file mounts and technology bridging (MCP servers → shell commands). The container side (Rust) wraps the official ACP SDK (`agent-client-protocol` crate). Because it speaks ACP, swapping agent runtimes is a container image change—Claude Code today, Codex CLI or Gemini CLI tomorrow.
+The Gate is a two-sided bridge. The host side (Go) handles file mounts and element bridging (MCP servers → shell commands). The container side (Rust) wraps the official ACP SDK (`agent-client-protocol` crate). Because it speaks ACP, swapping agent runtimes is a container image change—Claude Code today, Codex CLI or Gemini CLI tomorrow.
 
 ---
 
@@ -174,7 +171,7 @@ $ universe spawn --agent leonardo -w ./acme-api
 
   ✓ Provisioned container (ubuntu:24.04)
   ✓ Mounted workspace ./acme-api → /workspace
-  ✓ Generated faculties.md (14 technologies verified)
+  ✓ Generated faculties.md (14 elements verified)
   ✓ Mounted Mind leonardo → /mind
   ✓ Spawned Claude Code (session a1b2c3d4)
 
@@ -218,7 +215,7 @@ Universe isn't another link in the tool chain—it replaces the chain. And it's 
 | **Agent** | Claude Code CLI | Best Unix-native agent. Reads markdown natively. |
 | **Protocol** | [ACP](https://github.com/agentclientprotocol/agent-client-protocol) | Standard protocol, 34+ agent CLIs. Session management for free. |
 | **Isolation** | Docker | Each agent gets its own container |
-| **Bridge** | Gate | Two-sided. Host (Go): mounts + technologies. Container (Rust): ACP client via official SDK. |
+| **Bridge** | Gate | Two-sided. Host (Go): mounts + elements. Container (Rust): ACP client via official SDK. |
 
 ### Project layout
 
@@ -229,7 +226,7 @@ internal/
 ├── agent/              Agent selection and ACP spawning
 ├── backend/            Backend interface + Docker adapter
 ├── config/             Types and config definitions
-├── gate/               Host-side Gate: technology bridge, session relay
+├── gate/               Host-side Gate: element bridge, session relay
 ├── journal/            Automatic spawn logs (markdown)
 ├── manifest/           Named universe config + agent manifest parsing
 ├── mind/               Agent Mind directory management and validation

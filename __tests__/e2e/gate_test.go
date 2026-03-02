@@ -3,7 +3,6 @@
 package e2e
 
 import (
-	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -28,7 +27,6 @@ func TestSpawn_GateBridgeInjected(t *testing.T) {
 		ExpectGate(func(g *setup.GateAssertion) {
 			g.HasBridge("slack-send")
 			g.BridgeIsExecutable("slack-send")
-			g.HasSocket()
 		})
 }
 
@@ -74,20 +72,16 @@ func TestSpawn_GateBridgeAppearsInFaculties(t *testing.T) {
 		})
 }
 
-func TestSpawn_NoGateBridges_NoSocket(t *testing.T) {
+func TestSpawn_NoGateBridges_NoGateDir(t *testing.T) {
 	setup.NewSpawnBuilder(t).
 		NoAgent().
 		Execute().
 		ExpectGate(func(g *setup.GateAssertion) {
-			g.NoSocket()
+			g.NoGateDir()
 		})
 }
 
 func TestGate_BridgeProxiesThroughSocket(t *testing.T) {
-	if runtime.GOOS == "darwin" {
-		t.Skip("unix socket proxying through Docker bind mounts is not supported on macOS Docker Desktop")
-	}
-
 	var mu sync.Mutex
 	var calls []gate.InvokeRequest
 
@@ -130,10 +124,6 @@ func TestGate_BridgeProxiesThroughSocket(t *testing.T) {
 }
 
 func TestGate_MultipleCallsRecorded(t *testing.T) {
-	if runtime.GOOS == "darwin" {
-		t.Skip("unix socket proxying through Docker bind mounts is not supported on macOS Docker Desktop")
-	}
-
 	var mu sync.Mutex
 	var calls []gate.InvokeRequest
 

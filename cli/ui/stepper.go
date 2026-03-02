@@ -160,6 +160,21 @@ func (s *Stepper) Success(msg string) {
 	fmt.Fprintf(s.w, "  %s %s\n", check(), green.Sprint(msg))
 }
 
+// Warn prints a warning line with a yellow "!" prefix.
+func (s *Stepper) Warn(label, detail string) {
+	if s.mode == ModeQuiet || s.mode == ModeJSON {
+		return
+	}
+
+	s.stopSpinner()
+
+	if detail != "" {
+		fmt.Fprintf(s.w, "  %s %-*s %s\n", warn(), labelWidth, yellow.Sprint(label), faint(detail))
+	} else {
+		fmt.Fprintf(s.w, "  %s %s\n", warn(), yellow.Sprint(label))
+	}
+}
+
 // Info prints a label-value pair for summary output.
 func (s *Stepper) Info(label, value string) {
 	if s.mode == ModeQuiet || s.mode == ModeJSON {

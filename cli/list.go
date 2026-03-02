@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/universe/cli/ui"
+	"github.com/jterrazz/universe/internal/architect"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ var listCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		arc, err := newArchitect()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return err
 		}

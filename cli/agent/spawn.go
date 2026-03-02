@@ -5,9 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jterrazz/universe/internal/architect"
-	"github.com/jterrazz/universe/internal/backend"
 	"github.com/jterrazz/universe/internal/mind"
-	"github.com/jterrazz/universe/internal/state"
 	"github.com/spf13/cobra"
 )
 
@@ -46,17 +44,10 @@ var spawnCmd = &cobra.Command{
 			s.Done("Imported agent", agentName)
 		}
 
-		docker, err := backend.NewDocker()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
-			return fmt.Errorf("error: cannot connect to Docker.\n%w", err)
+			return err
 		}
-
-		store, err := state.NewStore()
-		if err != nil {
-			return fmt.Errorf("error: cannot initialize state store.\n%w", err)
-		}
-
-		arc := architect.New(docker, store)
 
 		// Resolve universe ID
 		universeID := agentSpawnUniverse
