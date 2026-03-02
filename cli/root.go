@@ -17,6 +17,9 @@ var rootCmd = &cobra.Command{
 	Long: `Universe creates isolated Docker environments for AI agents.
 Each universe has physics (constants, laws, elements),
 and a Mind (persistent agent identity).`,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return ensureDefaults()
+	},
 }
 
 func init() {

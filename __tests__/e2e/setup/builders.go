@@ -193,12 +193,14 @@ func (b *SpawnBuilder) buildManifest() config.UniverseManifest {
 		return b.parseInlineYAML()
 	}
 
-	// Write a default config to disk and load it
+	// Ensure config exists on disk (idempotent — no-ops if already present)
 	configPath := filepath.Join(b.tc.BaseDir, "universes", b.configName+".yaml")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		defaultYAML := "physics:\n  constants:\n    cpu: 1\n    memory: 512m\n    disk: 2g\n    timeout: 30m\n  laws:\n    network: none\n    max-processes: 128\n  elements:\n    - \"@unix\"\n    - \"@git\"\n"
-		os.MkdirAll(filepath.Dir(configPath), 0755)
-		os.WriteFile(configPath, []byte(defaultYAML), 0644)
+		if b.configName == "default" {
+			manifest.CreateDefault()
+		} else {
+			manifest.CreateConfig(b.configName)
+		}
 	}
 
 	m, err := manifest.LoadPath(configPath)

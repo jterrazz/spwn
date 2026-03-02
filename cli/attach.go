@@ -2,8 +2,8 @@ package cli
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -18,15 +18,16 @@ var attachCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		universeID := args[0]
+		s := ui.New(quiet, verbose, jsonOutput)
 
 		arc, err := newArchitect()
 		if err != nil {
 			return err
 		}
 
-		if !quiet {
-			fmt.Printf("\n  Attaching to universe %s...\n\n", universeID)
-		}
+		s.Blank()
+		s.Done("Attaching to", universeID)
+		s.Blank()
 
 		return arc.Attach(ctx, universeID)
 	},

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/jterrazz/universe/internal/mind"
 	"github.com/spf13/cobra"
 )
@@ -30,18 +31,22 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
+		s := newStepper(cmd)
+
 		if len(agents) == 0 {
-			fmt.Println("\n  No agents found.")
-			fmt.Println("  Run 'universe agent init [name]' to create one.")
+			s.Blank()
+			s.Success("No agents found.")
+			s.Log("Run 'universe agent init [name]' to create one.")
+			s.Blank()
 			return nil
 		}
 
-		fmt.Printf("\n  %-20s %-10s\n", "NAME", "LAYERS")
+		t := ui.NewTable(ui.ModeNormal, "NAME", "LAYERS")
 		for _, a := range agents {
 			layerCount := mind.LayerCount(&a)
-			fmt.Printf("  %-20s %d/6\n", a.Name, layerCount)
+			t.AddRow(a.Name, fmt.Sprintf("%d/6", layerCount))
 		}
-		fmt.Println()
+		t.Render()
 
 		return nil
 	},

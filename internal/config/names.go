@@ -15,7 +15,7 @@ var CosmosWords = []string{
 
 // AgentNames are curated names for agents.
 var AgentNames = []string{
-	"leonardo", "aurora", "felix", "atlas", "iris",
+	"neo", "aurora", "felix", "atlas", "iris",
 	"orion", "luna", "nova", "sage", "echo",
 	"aria", "theo", "zara", "kai", "lyra",
 	"dante", "cleo", "niko", "mira", "juno",

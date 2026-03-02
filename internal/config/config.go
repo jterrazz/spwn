@@ -123,7 +123,7 @@ func GenerateUniverseID(configName string) string {
 	return fmt.Sprintf("u-%s-%s", configName, randDigits(5))
 }
 
-// GenerateAgentID returns an ID like a-leonardo-52103.
+// GenerateAgentID returns an ID like a-neo-52103.
 func GenerateAgentID(agentName string) string {
 	return fmt.Sprintf("a-%s-%s", agentName, randDigits(5))
 }

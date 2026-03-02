@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -43,6 +44,7 @@ func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error
 		},
 		NetworkMode: containerTypes.NetworkMode(cfg.NetworkMode),
 		Binds:       cfg.Binds,
+		ExtraHosts:  cfg.ExtraHosts,
 	}
 
 	containerCfg := &containerTypes.Config{
@@ -180,6 +182,65 @@ func (d *Docker) ImageExists(ctx context.Context, image string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (d *Docker) EnsureImage(ctx context.Context, tag string, dockerfile []byte, logw io.Writer) error {
+	exists, err := d.ImageExists(ctx, tag)
+	if err != nil {
+		return fmt.Errorf("check image: %w", err)
+	}
+	if exists {
+		return nil
+	}
+
+	if logw == nil {
+		logw = io.Discard
+	}
+
+	// Create tar context containing only the Dockerfile
+	buf := new(bytes.Buffer)
+	tw := tar.NewWriter(buf)
+	hdr := &tar.Header{Name: "Dockerfile", Size: int64(len(dockerfile)), Mode: 0644}
+	if err := tw.WriteHeader(hdr); err != nil {
+		return fmt.Errorf("tar header: %w", err)
+	}
+	if _, err := tw.Write(dockerfile); err != nil {
+		return fmt.Errorf("tar write: %w", err)
+	}
+	if err := tw.Close(); err != nil {
+		return fmt.Errorf("tar close: %w", err)
+	}
+
+	resp, err := d.client.ImageBuild(ctx, buf, types.ImageBuildOptions{
+		Tags:       []string{tag},
+		Dockerfile: "Dockerfile",
+		Remove:     true,
+	})
+	if err != nil {
+		return fmt.Errorf("build image: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Stream build output — Docker returns JSON lines with a "stream" field.
+	type buildMsg struct {
+		Stream string `json:"stream"`
+		Error  string `json:"error"`
+	}
+	decoder := json.NewDecoder(resp.Body)
+	for decoder.More() {
+		var msg buildMsg
+		if err := decoder.Decode(&msg); err != nil {
+			break
+		}
+		if msg.Error != "" {
+			return fmt.Errorf("image build: %s", msg.Error)
+		}
+		if msg.Stream != "" {
+			fmt.Fprint(logw, msg.Stream)
+		}
+	}
+
+	return nil
 }
 
 func (d *Docker) Logs(ctx context.Context, containerID string, cfg LogsConfig) (io.ReadCloser, error) {

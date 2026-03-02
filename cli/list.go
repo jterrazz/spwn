@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -35,20 +36,27 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		if len(universes) == 0 {
-			fmt.Println("\n  No active universes.")
+		if quiet {
 			return nil
 		}
 
-		fmt.Printf("\n  %-20s %-20s %-10s %s\n", "ID", "AGENT", "STATUS", "CREATED")
+		if len(universes) == 0 {
+			s := ui.New(quiet, verbose, jsonOutput)
+			s.Blank()
+			s.Success("No active universes.")
+			s.Blank()
+			return nil
+		}
+
+		t := ui.NewTable(ui.ModeNormal, "ID", "AGENT", "STATUS", "CREATED")
 		for _, u := range universes {
 			agent := "—"
 			if u.AgentID != "" {
 				agent = u.AgentID
 			}
-			fmt.Printf("  %-20s %-20s %-10s %s\n", u.ID, agent, u.Status, timeAgo(u.CreatedAt))
+			t.AddRow(u.ID, agent, string(u.Status), timeAgo(u.CreatedAt))
 		}
-		fmt.Println()
+		t.Render()
 
 		return nil
 	},
