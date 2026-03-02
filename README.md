@@ -55,7 +55,7 @@ You can't prompt-inject a missing network interface. You can't social-engineer a
 
 ```bash
 # Install
-go install spwn.sh/universe@latest
+curl -fsSL https://spwn.sh/universe.sh | bash
 
 # First-time setup — creates ~/.universe/ and a universe config
 universe init
