@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 )
 
 // InvokeRequest is the wire format for element bridge calls.
@@ -25,32 +24,29 @@ type InvokeResult struct {
 // InvokeHandler processes an element bridge invocation.
 type InvokeHandler func(element string, args []string) (InvokeResult, error)
 
-// Server is an HTTP-over-Unix-socket server for the host-side Gate.
+// Server is an HTTP-over-TCP server for the host-side Gate.
 type Server struct {
-	socketPath string
 	listener   net.Listener
 	handler    InvokeHandler
 	httpServer *http.Server
+	port       int
 }
 
-// NewServer creates a Gate server that listens on a Unix socket.
-func NewServer(socketPath string, handler InvokeHandler) *Server {
+// NewServer creates a Gate server that listens on an ephemeral TCP port.
+func NewServer(handler InvokeHandler) *Server {
 	return &Server{
-		socketPath: socketPath,
-		handler:    handler,
+		handler: handler,
 	}
 }
 
-// Start begins listening on the Unix socket.
+// Start begins listening on an ephemeral TCP port on localhost.
 func (s *Server) Start() error {
-	// Remove stale socket file
-	os.Remove(s.socketPath)
-
-	ln, err := net.Listen("unix", s.socketPath)
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		return fmt.Errorf("listen on %s: %w", s.socketPath, err)
+		return fmt.Errorf("listen on tcp: %w", err)
 	}
 	s.listener = ln
+	s.port = ln.Addr().(*net.TCPAddr).Port
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/invoke", s.handleInvoke)
@@ -62,18 +58,17 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Stop shuts down the server and removes the socket file.
+// Stop shuts down the server.
 func (s *Server) Stop() error {
 	if s.httpServer != nil {
 		s.httpServer.Shutdown(context.Background())
 	}
-	os.Remove(s.socketPath)
 	return nil
 }
 
-// SocketPath returns the path to the Unix socket.
-func (s *Server) SocketPath() string {
-	return s.socketPath
+// Port returns the TCP port the server is listening on.
+func (s *Server) Port() int {
+	return s.port
 }
 
 func (s *Server) handleInvoke(w http.ResponseWriter, r *http.Request) {

@@ -3,8 +3,9 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
-	"time"
+	"strings"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/jterrazz/universe/internal/config"
 	"github.com/jterrazz/universe/internal/journal"
 	"github.com/jterrazz/universe/internal/mind"
@@ -49,7 +50,7 @@ var inspectCmd = &cobra.Command{
 			} else {
 				detail := fmt.Sprintf("%d file(s)", len(files))
 				if len(files) <= 3 {
-					detail = fmt.Sprintf("%d file(s)  (%s)", len(files), joinFiles(files))
+					detail = fmt.Sprintf("%d file(s)  (%s)", len(files), strings.Join(files, ", "))
 				}
 				s.Info(layer+"/", detail)
 			}
@@ -61,7 +62,7 @@ var inspectCmd = &cobra.Command{
 			s.Blank()
 			for _, e := range entries {
 				ts := e.CreatedAt.Format("2006-01-02 15:04")
-				s.Info(ts, fmt.Sprintf("%-24s %-10s %s", e.UniverseID, e.Outcome, formatJournalDuration(e.Duration)))
+				s.Info(ts, fmt.Sprintf("%-24s %-10s %s", e.UniverseID, e.Outcome, ui.FormatDuration(e.Duration)))
 			}
 		}
 
@@ -69,25 +70,4 @@ var inspectCmd = &cobra.Command{
 
 		return nil
 	},
-}
-
-func formatJournalDuration(d time.Duration) string {
-	if d < time.Minute {
-		return fmt.Sprintf("%ds", int(d.Seconds()))
-	}
-	if d < time.Hour {
-		return fmt.Sprintf("%dm", int(d.Minutes()))
-	}
-	return fmt.Sprintf("%dh%dm", int(d.Hours()), int(d.Minutes())%60)
-}
-
-func joinFiles(files []string) string {
-	s := ""
-	for i, f := range files {
-		if i > 0 {
-			s += ", "
-		}
-		s += f
-	}
-	return s
 }

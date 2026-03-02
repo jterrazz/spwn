@@ -124,11 +124,12 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 		opts.Workspace = abs
 	}
 
-	u, err := b.tc.Arc.Spawn(context.Background(), opts)
+	result, err := b.tc.Arc.Spawn(context.Background(), opts)
 	if err != nil {
 		b.tc.T.Fatalf("Spawn failed: %v", err)
 	}
 
+	u := result.Universe
 	b.tc.TrackUniverse(u.ID)
 
 	// Run agent if requested
@@ -175,9 +176,9 @@ func (b *SpawnBuilder) ExecuteExpectError(substring string) {
 		opts.Workspace = abs
 	}
 
-	u, err := b.tc.Arc.Spawn(context.Background(), opts)
+	result, err := b.tc.Arc.Spawn(context.Background(), opts)
 	if err == nil {
-		b.tc.TrackUniverse(u.ID)
+		b.tc.TrackUniverse(result.Universe.ID)
 		b.tc.T.Fatalf("Expected spawn to fail with %q, but it succeeded", substring)
 	}
 

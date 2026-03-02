@@ -6,7 +6,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/jterrazz/universe/internal/config"
@@ -578,20 +577,7 @@ func (g *GateAssertion) BridgeIsExecutable(name string) {
 	}
 }
 
-func (g *GateAssertion) HasSocket() {
-	g.tc.T.Helper()
-	// Use test -e (exists, any type) instead of test -f (regular file only) since sockets are special files.
-	// On macOS Docker Desktop, sockets through bind mounts are not visible inside the container.
-	_, err := g.tc.Backend.ExecOutput(context.Background(), g.containerID, []string{"test", "-e", "/gate/gate.sock"})
-	if err != nil {
-		if runtime.GOOS == "darwin" {
-			g.tc.T.Skip("unix socket not visible through Docker bind mount on macOS")
-		}
-		g.tc.T.Fatal("Expected gate socket at /gate/gate.sock, not found")
-	}
-}
-
-func (g *GateAssertion) NoSocket() {
+func (g *GateAssertion) NoGateDir() {
 	g.tc.T.Helper()
 	if g.tc.DirExistsInContainer(g.containerID, "/gate") {
 		g.tc.T.Fatal("Expected no /gate directory, but it exists")

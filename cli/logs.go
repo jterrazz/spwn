@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/jterrazz/universe/internal/architect"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +31,7 @@ var logsCmd = &cobra.Command{
 		ctx := context.Background()
 		universeID := args[0]
 
-		arc, err := newArchitect()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return err
 		}
