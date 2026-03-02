@@ -6,14 +6,19 @@ import (
 
 	"github.com/jterrazz/universe/internal/architect"
 	"github.com/jterrazz/universe/internal/backend"
+	"github.com/jterrazz/universe/internal/mind"
 	"github.com/jterrazz/universe/internal/state"
 	"github.com/spf13/cobra"
 )
 
-var agentSpawnUniverse string
+var (
+	agentSpawnUniverse string
+	agentSpawnImport   string
+)
 
 func init() {
 	spawnCmd.Flags().StringVarP(&agentSpawnUniverse, "universe", "u", "", "Target universe ID")
+	spawnCmd.Flags().StringVar(&agentSpawnImport, "import", "", "Import Mind from tar.gz before spawning")
 	Cmd.AddCommand(spawnCmd)
 }
 
@@ -27,6 +32,15 @@ var spawnCmd = &cobra.Command{
 		agentName := "default"
 		if len(args) > 0 {
 			agentName = args[0]
+		}
+
+		// Import Mind archive if requested
+		if agentSpawnImport != "" {
+			fmt.Printf("\n  Importing agent from %s...\n", agentSpawnImport)
+			if err := mind.Import(agentName, agentSpawnImport); err != nil {
+				return fmt.Errorf("error: import failed.\n%w", err)
+			}
+			fmt.Printf("  ✓ Imported agent %s\n", agentName)
 		}
 
 		docker, err := backend.NewDocker()

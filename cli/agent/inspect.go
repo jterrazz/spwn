@@ -3,8 +3,10 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/universe/internal/journal"
 	"github.com/jterrazz/universe/internal/mind"
 	"github.com/spf13/cobra"
 )
@@ -49,10 +51,30 @@ var inspectCmd = &cobra.Command{
 				fmt.Printf("    %-14s %s\n", layer+"/", detail)
 			}
 		}
+		// Show recent journal entries
+		entries, err := journal.List(info.Path, 5)
+		if err == nil && len(entries) > 0 {
+			fmt.Printf("\n  Recent journal:\n")
+			for _, e := range entries {
+				ts := e.CreatedAt.Format("2006-01-02 15:04")
+				fmt.Printf("    %-18s %-24s %-10s %s\n", ts, e.UniverseID, e.Outcome, formatJournalDuration(e.Duration))
+			}
+		}
+
 		fmt.Println()
 
 		return nil
 	},
+}
+
+func formatJournalDuration(d time.Duration) string {
+	if d < time.Minute {
+		return fmt.Sprintf("%ds", int(d.Seconds()))
+	}
+	if d < time.Hour {
+		return fmt.Sprintf("%dm", int(d.Minutes()))
+	}
+	return fmt.Sprintf("%dh%dm", int(d.Hours()), int(d.Minutes())%60)
 }
 
 func joinFiles(files []string) string {

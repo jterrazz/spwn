@@ -104,15 +104,17 @@ func (tc *TestContext) InitAgent(name string) {
 
 // MockOutput represents the JSON recorded by the mock Claude binary.
 type MockOutput struct {
-	MindExists      bool   `json:"mind_exists"`
-	MindPersonas    bool   `json:"mind_personas"`
-	PhysicsExists   bool   `json:"physics_exists"`
-	FacultiesExists bool   `json:"faculties_exists"`
-	WorkspaceExists bool   `json:"workspace_exists"`
-	PhysicsContent  string `json:"physics_content"`
+	MindExists       bool   `json:"mind_exists"`
+	MindPersonas     bool   `json:"mind_personas"`
+	PhysicsExists    bool   `json:"physics_exists"`
+	FacultiesExists  bool   `json:"faculties_exists"`
+	WorkspaceExists  bool   `json:"workspace_exists"`
+	PhysicsContent   string `json:"physics_content"`
 	FacultiesContent string `json:"faculties_content"`
-	PID             int    `json:"pid"`
-	ExitCode        int    `json:"exit_code"`
+	SessionID        string `json:"session_id"`
+	Resume           bool   `json:"resume"`
+	PID              int    `json:"pid"`
+	ExitCode         int    `json:"exit_code"`
 }
 
 // ReadMockOutput reads and parses the mock claude output from inside a container.

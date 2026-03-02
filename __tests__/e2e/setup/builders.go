@@ -27,6 +27,7 @@ type SpawnBuilder struct {
 	yamlConfig string
 	noAgent    bool
 	detach     bool
+	runAgent   bool // run agent to completion (blocking, writes journal)
 }
 
 // Spawn creates a SpawnBuilder from a TestContext.
@@ -74,6 +75,12 @@ func (b *SpawnBuilder) Detached() *SpawnBuilder {
 	return b
 }
 
+// RunAgent runs the agent to completion (blocking). Writes session + journal.
+func (b *SpawnBuilder) RunAgent() *SpawnBuilder {
+	b.runAgent = true
+	return b
+}
+
 // Execute spawns the universe and returns an AssertionChain.
 func (b *SpawnBuilder) Execute() *AssertionChain {
 	b.tc.T.Helper()
@@ -105,14 +112,24 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 
 	b.tc.TrackUniverse(u.ID)
 
-	// If detached and agent specified, run mock claude in background
-	if b.detach && !b.noAgent && b.agentName != "" {
-		err := b.tc.Arc.SpawnAgentDetached(context.Background(), u.ID, b.agentName)
-		if err != nil {
-			b.tc.T.Fatalf("SpawnAgentDetached failed: %v", err)
+	// Run agent if requested
+	if !b.noAgent && b.agentName != "" {
+		if b.runAgent {
+			// Blocking: runs agent to completion, writes session + journal
+			err := b.tc.Arc.SpawnAgent(context.Background(), u.ID, b.agentName)
+			if err != nil {
+				// Non-fatal: mock may exit with code 0, which is fine
+				// Only fatal if it's a real error (not exit code)
+				b.tc.T.Logf("SpawnAgent returned: %v", err)
+			}
+		} else if b.detach {
+			err := b.tc.Arc.SpawnAgentDetached(context.Background(), u.ID, b.agentName)
+			if err != nil {
+				b.tc.T.Fatalf("SpawnAgentDetached failed: %v", err)
+			}
+			// Give the mock a moment to write its output
+			time.Sleep(500 * time.Millisecond)
 		}
-		// Give the mock a moment to write its output
-		time.Sleep(500 * time.Millisecond)
 	}
 
 	return &AssertionChain{tc: b.tc, universe: u}

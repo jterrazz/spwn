@@ -4,10 +4,14 @@ package setup
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/universe/internal/journal"
 	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/universe/internal/session"
 )
 
 // --- AssertionChain ---
@@ -52,6 +56,26 @@ func (a *AssertionChain) ExpectMock(fn func(m *MockAssertion)) *AssertionChain {
 	a.tc.T.Helper()
 	mock := a.tc.ReadMockOutput(a.universe.ContainerID)
 	fn(&MockAssertion{tc: a.tc, mock: mock})
+	return a
+}
+
+// ExpectSession asserts against the session persistence.
+func (a *AssertionChain) ExpectSession(fn func(s *SessionAssertion)) *AssertionChain {
+	a.tc.T.Helper()
+	if a.universe.Agent == "" {
+		a.tc.T.Fatal("ExpectSession called but no agent is set")
+	}
+	fn(&SessionAssertion{tc: a.tc, agentName: a.universe.Agent})
+	return a
+}
+
+// ExpectJournal asserts against journal entries.
+func (a *AssertionChain) ExpectJournal(fn func(j *JournalAssertion)) *AssertionChain {
+	a.tc.T.Helper()
+	if a.universe.Agent == "" {
+		a.tc.T.Fatal("ExpectJournal called but no agent is set")
+	}
+	fn(&JournalAssertion{tc: a.tc, agentName: a.universe.Agent})
 	return a
 }
 
@@ -279,6 +303,137 @@ func (m *MockAssertion) FacultiesContains(substring string) {
 	}
 }
 
+func (m *MockAssertion) HasSessionID() {
+	m.tc.T.Helper()
+	if m.mock.SessionID == "" {
+		m.tc.T.Fatal("Expected mock to receive --session-id, but it was empty")
+	}
+}
+
+func (m *MockAssertion) SessionIDEquals(expected string) {
+	m.tc.T.Helper()
+	if m.mock.SessionID != expected {
+		m.tc.T.Fatalf("Expected session ID %q, got %q", expected, m.mock.SessionID)
+	}
+}
+
+func (m *MockAssertion) WasResumed() {
+	m.tc.T.Helper()
+	if !m.mock.Resume {
+		m.tc.T.Fatal("Expected mock to be called with --resume, but it wasn't")
+	}
+}
+
+func (m *MockAssertion) WasNotResumed() {
+	m.tc.T.Helper()
+	if m.mock.Resume {
+		m.tc.T.Fatal("Expected mock NOT to be called with --resume, but it was")
+	}
+}
+
+// --- SessionAssertion ---
+
+type SessionAssertion struct {
+	tc        *TestContext
+	agentName string
+}
+
+func (s *SessionAssertion) HasSessionFile(universeID string) {
+	s.tc.T.Helper()
+	mindPath := mind.AgentDir(s.agentName)
+	sess, err := session.Load(mindPath, universeID)
+	if err != nil {
+		s.tc.T.Fatalf("Failed to load session: %v", err)
+	}
+	if sess == nil {
+		s.tc.T.Fatalf("Expected session file for universe %s, not found", universeID)
+	}
+}
+
+func (s *SessionAssertion) SessionIDIsDeterministic(universeID string) {
+	s.tc.T.Helper()
+	id1 := session.DeterministicID(s.agentName, universeID)
+	id2 := session.DeterministicID(s.agentName, universeID)
+	if id1 != id2 {
+		s.tc.T.Fatalf("Session IDs not deterministic: %q != %q", id1, id2)
+	}
+	if len(id1) != 16 {
+		s.tc.T.Fatalf("Expected 16-char session ID, got %d: %q", len(id1), id1)
+	}
+}
+
+// --- JournalAssertion ---
+
+type JournalAssertion struct {
+	tc        *TestContext
+	agentName string
+}
+
+func (j *JournalAssertion) HasEntries(minCount int) {
+	j.tc.T.Helper()
+	mindPath := mind.AgentDir(j.agentName)
+	entries, err := journal.List(mindPath, 0)
+	if err != nil {
+		j.tc.T.Fatalf("Failed to list journal: %v", err)
+	}
+	if len(entries) < minCount {
+		j.tc.T.Fatalf("Expected at least %d journal entries, got %d", minCount, len(entries))
+	}
+}
+
+func (j *JournalAssertion) LatestOutcome(expected string) {
+	j.tc.T.Helper()
+	mindPath := mind.AgentDir(j.agentName)
+	entries, err := journal.List(mindPath, 1)
+	if err != nil || len(entries) == 0 {
+		j.tc.T.Fatalf("No journal entries found")
+	}
+	if entries[0].Outcome != expected {
+		j.tc.T.Fatalf("Expected latest journal outcome %q, got %q", expected, entries[0].Outcome)
+	}
+}
+
+func (j *JournalAssertion) LatestUniverseID(expected string) {
+	j.tc.T.Helper()
+	mindPath := mind.AgentDir(j.agentName)
+	entries, err := journal.List(mindPath, 1)
+	if err != nil || len(entries) == 0 {
+		j.tc.T.Fatalf("No journal entries found")
+	}
+	if entries[0].UniverseID != expected {
+		j.tc.T.Fatalf("Expected latest journal universe ID %q, got %q", expected, entries[0].UniverseID)
+	}
+}
+
+// --- ExportAssertion ---
+
+type ExportAssertion struct {
+	tc          *TestContext
+	archivePath string
+}
+
+func (e *ExportAssertion) ArchiveExists() {
+	e.tc.T.Helper()
+	if _, err := os.Stat(e.archivePath); err != nil {
+		e.tc.T.Fatalf("Expected archive at %s, not found", e.archivePath)
+	}
+}
+
+func (e *ExportAssertion) ArchiveNonEmpty() {
+	e.tc.T.Helper()
+	info, err := os.Stat(e.archivePath)
+	if err != nil {
+		e.tc.T.Fatalf("Archive not found: %v", err)
+	}
+	if info.Size() == 0 {
+		e.tc.T.Fatal("Expected non-empty archive")
+	}
+}
+
+func (e *ExportAssertion) Path() string {
+	return e.archivePath
+}
+
 // --- ListAssertionChain ---
 
 type ListAssertionChain struct {
@@ -343,4 +498,44 @@ func (a *AgentAssertionChain) ExpectMind(fn func(m *MindAssertion)) *AgentAssert
 	a.tc.T.Helper()
 	fn(&MindAssertion{tc: a.tc, agentName: a.agentName})
 	return a
+}
+
+func (a *AgentAssertionChain) Export(outputDir string, exclude []string) *ExportAssertion {
+	a.tc.T.Helper()
+	archivePath, err := mind.Export(a.agentName, outputDir, exclude)
+	if err != nil {
+		a.tc.T.Fatalf("Export failed: %v", err)
+	}
+	return &ExportAssertion{tc: a.tc, archivePath: archivePath}
+}
+
+func (a *AgentAssertionChain) ImportFrom(archivePath string) *AgentAssertionChain {
+	a.tc.T.Helper()
+	if err := mind.Import(a.agentName, archivePath); err != nil {
+		a.tc.T.Fatalf("Import failed: %v", err)
+	}
+	return a
+}
+
+// HasSessionFile checks that a session file exists for this agent+universe combo.
+func (m *MindAssertion) HasSessionFile(universeID string) {
+	m.tc.T.Helper()
+	mindPath := mind.AgentDir(m.agentName)
+	sessionPath := filepath.Join(mindPath, "sessions", universeID+".json")
+	if _, err := os.Stat(sessionPath); err != nil {
+		m.tc.T.Fatalf("Expected session file at %s, not found", sessionPath)
+	}
+}
+
+// HasJournalEntries checks that the journal directory has entries.
+func (m *MindAssertion) HasJournalEntries(minCount int) {
+	m.tc.T.Helper()
+	mindPath := mind.AgentDir(m.agentName)
+	entries, err := journal.List(mindPath, 0)
+	if err != nil {
+		m.tc.T.Fatalf("Failed to list journal: %v", err)
+	}
+	if len(entries) < minCount {
+		m.tc.T.Fatalf("Expected at least %d journal entries, got %d", minCount, len(entries))
+	}
 }
