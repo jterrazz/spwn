@@ -25,6 +25,15 @@ func NewStore() (*Store, error) {
 	return &Store{path: config.StatePath()}, nil
 }
 
+// NewStoreAt creates a Store at an explicit path, creating parent directories if needed.
+func NewStoreAt(path string) (*Store, error) {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return nil, fmt.Errorf("create dir: %w", err)
+	}
+	return &Store{path: path}, nil
+}
+
 // List returns all universes.
 func (s *Store) List() ([]config.Universe, error) {
 	s.mu.Lock()

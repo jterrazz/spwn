@@ -28,6 +28,7 @@ type SpawnOpts struct {
 	AgentName  string
 	Workspace  string
 	Manifest   config.UniverseManifest
+	Image      string // Override base image (used for testing). Defaults to config.BaseImage.
 }
 
 // New creates an Architect with the given backend and state store.
@@ -78,18 +79,24 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 		binds = append(binds, mindPath+":/mind")
 	}
 
+	// Resolve image
+	image := config.BaseImage
+	if opts.Image != "" {
+		image = opts.Image
+	}
+
 	// Check image exists
-	exists, err := a.backend.ImageExists(ctx, config.BaseImage)
+	exists, err := a.backend.ImageExists(ctx, image)
 	if err != nil {
 		return nil, fmt.Errorf("check image: %w", err)
 	}
 	if !exists {
-		return nil, fmt.Errorf("base image %s not found. Run 'make build-image' first", config.BaseImage)
+		return nil, fmt.Errorf("base image %s not found. Run 'make build-image' first", image)
 	}
 
 	// Create container
 	containerCfg := backend.ContainerConfig{
-		Image:       config.BaseImage,
+		Image:       image,
 		Name:        id,
 		CPU:         int64(opts.Manifest.Physics.Constants.CPU),
 		Memory:      memBytes,

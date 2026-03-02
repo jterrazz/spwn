@@ -1,0 +1,13 @@
+FROM ubuntu:24.04
+
+RUN apt-get update && apt-get install -y \
+    bash coreutils findutils grep sed gawk \
+    ca-certificates curl wget git jq python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Mock claude binary (no Node.js, no npm, no real Claude Code)
+COPY mock-claude.sh /usr/local/bin/claude
+RUN chmod +x /usr/local/bin/claude
+
+VOLUME ["/workspace", "/mind", "/universe"]
+ENTRYPOINT ["sleep", "infinity"]

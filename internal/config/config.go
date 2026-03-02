@@ -100,7 +100,11 @@ const (
 )
 
 // BaseDir returns the path to ~/.universe/.
+// If UNIVERSE_HOME is set, it overrides the default (used for test isolation).
 func BaseDir() string {
+	if dir := os.Getenv("UNIVERSE_HOME"); dir != "" {
+		return dir
+	}
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, UniverseBaseDir)
 }

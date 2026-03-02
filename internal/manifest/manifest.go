@@ -154,8 +154,8 @@ physics:
     max-processes: 128
 
 technologies:
-  - @unix
-  - @git
+  - "@unix"
+  - "@git"
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -186,8 +186,8 @@ physics:
     max-processes: 128
 
 technologies:
-  - @unix
-  - @git
+  - "@unix"
+  - "@git"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
 }
