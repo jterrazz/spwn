@@ -7,8 +7,13 @@ RUN apt-get update && apt-get install -y \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
+# Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
 # Claude Code CLI
-RUN curl -fsSL https://spwn.sh/universe.sh | bash
+RUN npm install -g @anthropic-ai/claude-code
 
 # Mount points
 VOLUME ["/workspace", "/mind", "/universe"]
