@@ -2,8 +2,8 @@ package cli
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -18,28 +18,31 @@ var destroyCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		universeID := args[0]
+		s := ui.New(quiet, verbose, jsonOutput)
 
 		arc, err := newArchitect()
 		if err != nil {
 			return err
 		}
 
+		s.Blank()
+		s.Start("Destroying universe...")
+
 		u, err := arc.Destroy(ctx, universeID)
 		if err != nil {
-			return fmt.Errorf("error: cannot destroy universe %s.\n%w", universeID, err)
+			s.Fail("Destroy failed", err)
+			return err
 		}
 
-		if !quiet {
-			fmt.Printf("\n  Destroying universe %s...\n\n", universeID)
-			fmt.Printf("  ✓ Stopped agent\n")
-			fmt.Printf("  ✓ Removed container\n")
-			if u.MindPath != "" {
-				fmt.Printf("  ✓ Agent persisted at %s\n", u.MindPath)
-			}
-			fmt.Println()
-			fmt.Println("  Universe destroyed. Agent survives.")
-			fmt.Println()
+		s.Done("Stopped agent", "")
+		s.Done("Removed container", "")
+		if u.MindPath != "" {
+			s.Done("Mind persisted", u.MindPath)
 		}
+
+		s.Blank()
+		s.Success("Universe destroyed. Agent survives.")
+		s.Blank()
 
 		return nil
 	},

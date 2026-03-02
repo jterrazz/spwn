@@ -28,6 +28,7 @@ var spawnCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+		s := newStepper(cmd)
 
 		agentName := "default"
 		if len(args) > 0 {
@@ -36,11 +37,13 @@ var spawnCmd = &cobra.Command{
 
 		// Import Mind archive if requested
 		if agentSpawnImport != "" {
-			fmt.Printf("\n  Importing agent from %s...\n", agentSpawnImport)
+			s.Blank()
+			s.Start("Importing agent...")
 			if err := mind.Import(agentName, agentSpawnImport); err != nil {
+				s.Fail("Import failed", err)
 				return fmt.Errorf("error: import failed.\n%w", err)
 			}
-			fmt.Printf("  ✓ Imported agent %s\n", agentName)
+			s.Done("Imported agent", agentName)
 		}
 
 		docker, err := backend.NewDocker()
@@ -66,17 +69,20 @@ var spawnCmd = &cobra.Command{
 				return fmt.Errorf("error: no active universes.\nRun 'universe spawn --no-agent' first")
 			}
 			if len(universes) > 1 {
-				fmt.Println("\n  error: multiple active universes found. Specify one with --universe:")
+				s.Blank()
+				s.Fail("Multiple active universes", fmt.Errorf("specify one with --universe"))
 				for _, u := range universes {
-					fmt.Printf("    %-20s (%s)\n", u.ID, u.Status)
+					s.Info("", fmt.Sprintf("%-20s (%s)", u.ID, u.Status))
 				}
-				fmt.Printf("\n  Use: universe agent spawn %s -u <universe-id>\n\n", agentName)
+				s.Blank()
 				return fmt.Errorf("multiple active universes")
 			}
 			universeID = universes[0].ID
 		}
 
-		fmt.Printf("\n  Spawning agent into universe %s...\n\n", universeID)
+		s.Blank()
+		s.Done("Spawning agent into", universeID)
+		s.Blank()
 
 		if err := arc.SpawnAgent(ctx, universeID, agentName); err != nil {
 			return fmt.Errorf("error: agent spawn failed.\n%w", err)

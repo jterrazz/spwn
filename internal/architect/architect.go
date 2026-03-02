@@ -3,6 +3,7 @@ package architect
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/jterrazz/universe/container"
 	"github.com/jterrazz/universe/internal/backend"
 	"github.com/jterrazz/universe/internal/config"
 	"github.com/jterrazz/universe/internal/gate"
@@ -35,13 +37,28 @@ type SpawnOpts struct {
 	AgentName     string
 	Workspace     string
 	Manifest      config.UniverseManifest
-	Image         string         // Override base image (used for testing). Defaults to config.BaseImage.
-	InvokeHandler gate.InvokeHandler // Override gate handler (used for testing). Defaults to stub.
+	Image         string                  // Override base image (used for testing). Defaults to config.BaseImage.
+	InvokeHandler gate.InvokeHandler      // Override gate handler (used for testing). Defaults to stub.
+	OnProgress    func(event, detail string) // Optional callback at each milestone.
+	LogWriter     io.Writer               // Receives Docker build output. nil defaults to io.Discard.
 }
 
 // New creates an Architect with the given backend and state store.
 func New(b backend.Backend, s *state.Store) *Architect {
 	return &Architect{backend: b, state: s, gates: make(map[string]*gate.Server)}
+}
+
+func (opts *SpawnOpts) progress(event, detail string) {
+	if opts.OnProgress != nil {
+		opts.OnProgress(event, detail)
+	}
+}
+
+func (opts *SpawnOpts) logWriter() io.Writer {
+	if opts.LogWriter != nil {
+		return opts.LogWriter
+	}
+	return io.Discard
 }
 
 var defaultProbeList = []string{
@@ -97,19 +114,33 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 				return nil, err
 			}
 		}
+		opts.progress("mind_mounted", opts.AgentName+" → /mind")
 	}
 
-	// Set up gate directory if bridges are configured
+	// Start gate TCP server and set up bridge scripts if bridges are configured
 	gateDir := ""
+	var gateSrv *gate.Server
 	if len(opts.Manifest.Gate) > 0 {
+		handler := opts.InvokeHandler
+		if handler == nil {
+			handler = gate.StubHandler()
+		}
+
+		gateSrv = gate.NewServer(handler)
+		if err := gateSrv.Start(); err != nil {
+			return nil, fmt.Errorf("start gate server: %w", err)
+		}
+
 		gateDir, err = os.MkdirTemp("", "universe-gate-")
 		if err != nil {
+			gateSrv.Stop()
 			return nil, fmt.Errorf("create gate dir: %w", err)
 		}
 		binds = append(binds, gateDir+":/gate")
 
-		// Write wrapper scripts to gate dir (visible inside container via bind mount)
-		if err := gate.SetupBridges(gateDir, opts.Manifest.Gate); err != nil {
+		// Write wrapper scripts with the TCP port baked in
+		if err := gate.SetupBridges(gateDir, opts.Manifest.Gate, gateSrv.Port()); err != nil {
+			gateSrv.Stop()
 			os.RemoveAll(gateDir)
 			return nil, fmt.Errorf("setup gate bridges: %w", err)
 		}
@@ -121,14 +152,21 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 		image = opts.Image
 	}
 
-	// Check image exists
-	exists, err := a.backend.ImageExists(ctx, image)
-	if err != nil {
-		return nil, fmt.Errorf("check image: %w", err)
+	// Ensure image exists (auto-build for default image, fail for custom/test images)
+	if opts.Image == "" {
+		if err := a.backend.EnsureImage(ctx, image, container.Dockerfile, opts.logWriter()); err != nil {
+			return nil, fmt.Errorf("ensure base image: %w", err)
+		}
+	} else {
+		exists, err := a.backend.ImageExists(ctx, image)
+		if err != nil {
+			return nil, fmt.Errorf("check image: %w", err)
+		}
+		if !exists {
+			return nil, fmt.Errorf("image %s not found", image)
+		}
 	}
-	if !exists {
-		return nil, fmt.Errorf("base image %s not found. Run 'make build-image' first", image)
-	}
+	opts.progress("image_ready", image)
 
 	// Create container
 	containerCfg := backend.ContainerConfig{
@@ -141,31 +179,33 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 		Binds:       binds,
 	}
 
+	// Gate bridges require network access to reach the host-side server.
+	if gateSrv != nil {
+		if containerCfg.NetworkMode == "none" {
+			containerCfg.NetworkMode = "bridge"
+		}
+		containerCfg.ExtraHosts = []string{"host.docker.internal:host-gateway"}
+	}
+
 	containerID, err := a.backend.Create(ctx, containerCfg)
 	if err != nil {
+		if gateSrv != nil {
+			gateSrv.Stop()
+		}
 		return nil, fmt.Errorf("create container: %w", err)
 	}
 
 	if err := a.backend.Start(ctx, containerID); err != nil {
 		a.backend.Remove(ctx, containerID)
+		if gateSrv != nil {
+			gateSrv.Stop()
+		}
 		return nil, fmt.Errorf("start container: %w", err)
 	}
+	opts.progress("container_created", id)
 
-	// Start gate server and install bridges inside container
-	if gateDir != "" {
-		handler := opts.InvokeHandler
-		if handler == nil {
-			handler = gate.StubHandler()
-		}
-
-		srv := gate.NewServer(filepath.Join(gateDir, "gate.sock"), handler)
-		if err := srv.Start(); err != nil {
-			a.backend.Stop(ctx, containerID)
-			a.backend.Remove(ctx, containerID)
-			os.RemoveAll(gateDir)
-			return nil, fmt.Errorf("start gate server: %w", err)
-		}
-
+	// Install gate bridges inside container
+	if gateSrv != nil {
 		// Symlink bridge wrappers to /usr/local/bin/ and extend PATH
 		for _, bridge := range opts.Manifest.Gate {
 			_, symErr := a.backend.ExecOutput(ctx, containerID, []string{
@@ -182,7 +222,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 			log.Printf("warning: failed to write gate PATH extension: %v", err)
 		}
 
-		a.gates[id] = srv
+		a.gates[id] = gateSrv
+		opts.progress("gates_bridged", fmt.Sprintf("%d element(s)", len(opts.Manifest.Gate)))
 	}
 
 	// Probe elements
@@ -208,6 +249,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("copy faculties.md: %w", err)
 	}
+	opts.progress("faculties_generated", "physics.md, faculties.md")
 
 	// Build universe record
 	u := config.Universe{

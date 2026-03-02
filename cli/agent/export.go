@@ -25,20 +25,24 @@ var exportCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
+		s := newStepper(cmd)
 
 		// Validate output directory
 		if _, err := os.Stat(exportOutput); err != nil {
 			return fmt.Errorf("error: output directory %q not found", exportOutput)
 		}
 
-		fmt.Printf("\n  Exporting agent %s...\n\n", name)
+		s.Blank()
+		s.Start(fmt.Sprintf("Exporting agent %s...", name))
 
 		archivePath, err := mind.Export(name, exportOutput, exportExclude)
 		if err != nil {
+			s.Fail("Export failed", err)
 			return fmt.Errorf("error: export failed.\n%w", err)
 		}
 
-		fmt.Printf("  ✓ Written to %s\n\n", archivePath)
+		s.Done("Exported", archivePath)
+		s.Blank()
 		return nil
 	},
 }

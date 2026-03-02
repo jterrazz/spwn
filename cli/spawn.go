@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/jterrazz/universe/internal/architect"
 	"github.com/jterrazz/universe/internal/config"
 	"github.com/jterrazz/universe/internal/manifest"
@@ -43,6 +44,7 @@ is an optional positional argument.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+		s := ui.New(quiet, verbose, jsonOutput)
 
 		// Resolve config name
 		configName := "default"
@@ -88,50 +90,51 @@ is an optional positional argument.`,
 			return err
 		}
 
-		if !quiet {
-			fmt.Println("\n  Spawning universe...")
-			fmt.Println()
-		}
+		s.Blank()
+		s.Start("Spawning universe...")
 
 		u, err := arc.Spawn(ctx, architect.SpawnOpts{
 			ConfigName: configName,
 			AgentName:  agentName,
 			Workspace:  spawnWorkspace,
 			Manifest:   m,
+			LogWriter:  s.Writer(),
+			OnProgress: func(event, detail string) {
+				switch event {
+				case "image_ready":
+					s.Done("Built image", detail)
+					s.Start("Spawning universe...")
+				case "container_created":
+					s.Done("Spawned universe", detail)
+				case "mind_mounted":
+					s.Done("Mounted mind", detail)
+				case "gates_bridged":
+					s.Done("Bridged gate", detail)
+				case "faculties_generated":
+					s.Done("Generated faculties", detail)
+				}
+			},
 		})
 		if err != nil {
-			return fmt.Errorf("error: spawn failed.\n%w", err)
-		}
-
-		if !quiet {
-			fmt.Printf("  ✓ Provisioned container (ubuntu:24.04)\n")
-			if spawnWorkspace != "" {
-				fmt.Printf("  ✓ Mounted workspace %s → /workspace\n", spawnWorkspace)
-			}
-			fmt.Printf("  ✓ Generated faculties.md\n")
-			if len(m.Gate) > 0 {
-				fmt.Printf("  ✓ Gate bridges installed (%d element(s))\n", len(m.Gate))
-			}
-			if agentName != "" {
-				fmt.Printf("  ✓ Mounted Mind %s → /mind\n", agentName)
-			}
+			s.Fail("Spawn failed", err)
+			return err
 		}
 
 		// Spawn agent if not --no-agent
 		if agentName != "" {
 			if spawnDetach {
+				s.Start("Spawning agent...")
 				if err := arc.SpawnAgentDetached(ctx, u.ID, agentName); err != nil {
-					return fmt.Errorf("error: agent spawn failed.\n%w", err)
+					s.Fail("Agent spawn failed", err)
+					return err
 				}
-				if !quiet {
-					fmt.Printf("  ✓ Spawned Claude Code CLI (detached)\n")
-				}
+				s.Done("Agent spawned", "detached")
 			} else {
-				if !quiet {
-					fmt.Printf("  ✓ Spawning Claude Code CLI...\n\n")
-				}
+				s.Blank()
+				s.Success("Agent is alive.")
+				s.Blank()
 				if err := arc.SpawnAgent(ctx, u.ID, agentName); err != nil {
-					return fmt.Errorf("error: agent spawn failed.\n%w", err)
+					return err
 				}
 			}
 		}
@@ -139,19 +142,19 @@ is an optional positional argument.`,
 		if jsonOutput {
 			data, _ := json.MarshalIndent(u, "", "  ")
 			fmt.Println(string(data))
-		} else if !quiet && (spawnNoAgent || spawnDetach) {
-			fmt.Println()
+		} else if spawnNoAgent || spawnDetach {
+			s.Blank()
 			if spawnNoAgent {
-				fmt.Println("  Universe spawned.")
+				s.Success("Universe spawned.")
 			} else {
-				fmt.Println("  Universe spawned. Agent is alive.")
+				s.Success("Agent is alive.")
 			}
-			fmt.Println()
-			fmt.Printf("  Universe:  %s\n", u.ID)
+			s.Blank()
+			s.Info("Universe:", u.ID)
 			if u.AgentID != "" {
-				fmt.Printf("  Agent:     %s\n", u.AgentID)
+				s.Info("Agent:", u.AgentID)
 			}
-			fmt.Printf("  Status:    %s\n", u.Status)
+			s.Info("Status:", string(u.Status))
 		}
 
 		return nil

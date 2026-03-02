@@ -19,9 +19,9 @@ RUN npm install -g @anthropic-ai/claude-code
 # Built separately via: cd container/gate && cargo build --release --target x86_64-unknown-linux-musl
 # COPY universe-gate /usr/local/bin/gate
 
-# Mount points — /gate is for the host-side Gate socket and bridge wrappers
+# Mount points — /gate is for the host-side Gate bridge wrappers
 VOLUME ["/workspace", "/mind", "/universe"]
 
 # Default entrypoint. When the container-side Gate binary is included,
-# change to: ENTRYPOINT ["gate", "--listen", "/gate/gate.sock"]
+# change to: ENTRYPOINT ["gate"]
 ENTRYPOINT ["sleep", "infinity"]

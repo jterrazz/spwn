@@ -24,6 +24,7 @@ var inspectCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
+		s := newStepper(cmd)
 
 		info, err := mind.Inspect(name)
 		if err != nil {
@@ -36,32 +37,35 @@ var inspectCmd = &cobra.Command{
 			return nil
 		}
 
-		fmt.Printf("\n  Agent: %s\n", info.Name)
-		fmt.Printf("  Path:  %s\n\n", info.Path)
-		fmt.Printf("  Layers:\n")
+		s.Blank()
+		s.Info("Agent:", info.Name)
+		s.Info("Path:", info.Path)
+		s.Blank()
+
 		for _, layer := range config.MindLayers {
 			files := info.Layers[layer]
 			if len(files) == 0 {
-				fmt.Printf("    %-14s (empty)\n", layer+"/")
+				s.Info(layer+"/", "(empty)")
 			} else {
 				detail := fmt.Sprintf("%d file(s)", len(files))
 				if len(files) <= 3 {
 					detail = fmt.Sprintf("%d file(s)  (%s)", len(files), joinFiles(files))
 				}
-				fmt.Printf("    %-14s %s\n", layer+"/", detail)
-			}
-		}
-		// Show recent journal entries
-		entries, err := journal.List(info.Path, 5)
-		if err == nil && len(entries) > 0 {
-			fmt.Printf("\n  Recent journal:\n")
-			for _, e := range entries {
-				ts := e.CreatedAt.Format("2006-01-02 15:04")
-				fmt.Printf("    %-18s %-24s %-10s %s\n", ts, e.UniverseID, e.Outcome, formatJournalDuration(e.Duration))
+				s.Info(layer+"/", detail)
 			}
 		}
 
-		fmt.Println()
+		// Show recent journal entries
+		entries, err := journal.List(info.Path, 5)
+		if err == nil && len(entries) > 0 {
+			s.Blank()
+			for _, e := range entries {
+				ts := e.CreatedAt.Format("2006-01-02 15:04")
+				s.Info(ts, fmt.Sprintf("%-24s %-10s %s", e.UniverseID, e.Outcome, formatJournalDuration(e.Duration)))
+			}
+		}
+
+		s.Blank()
 
 		return nil
 	},

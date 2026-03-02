@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +20,7 @@ var inspectCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		universeID := args[0]
+		s := ui.New(quiet, verbose, jsonOutput)
 
 		arc, err := newArchitect()
 		if err != nil {
@@ -36,40 +38,43 @@ var inspectCmd = &cobra.Command{
 			return nil
 		}
 
-		fmt.Printf("\n  Universe %s\n\n", u.ID)
-		fmt.Printf("  Config:     %s\n", u.Config)
-		fmt.Printf("  Backend:    %s\n", u.Backend)
-		fmt.Printf("  Status:     %s\n", u.Status)
-		fmt.Printf("  Created:    %s (%s)\n", u.CreatedAt.Format("2006-01-02 15:04:05"), timeAgo(u.CreatedAt))
+		s.Blank()
+		s.Info("Universe:", u.ID)
+		s.Blank()
+		s.Info("Config:", u.Config)
+		s.Info("Backend:", u.Backend)
+		s.Info("Status:", string(u.Status))
+		s.Info("Created:", fmt.Sprintf("%s (%s)", u.CreatedAt.Format("2006-01-02 15:04:05"), timeAgo(u.CreatedAt)))
 
 		if u.AgentID != "" {
-			fmt.Printf("\n  Agent:      %s\n", u.AgentID)
+			s.Blank()
+			s.Info("Agent:", u.AgentID)
 		}
 
-		fmt.Printf("\n  Constants:\n")
-		fmt.Printf("    CPU: %d core(s) | Memory: %s | Disk: %s | Timeout: %s\n",
+		s.Blank()
+		s.Info("Constants:", fmt.Sprintf("CPU: %d core(s) | Memory: %s | Disk: %s | Timeout: %s",
 			u.Manifest.Physics.Constants.CPU,
 			u.Manifest.Physics.Constants.Memory,
 			u.Manifest.Physics.Constants.Disk,
 			u.Manifest.Physics.Constants.Timeout,
-		)
+		))
 
-		fmt.Printf("\n  Laws:\n")
-		fmt.Printf("    Network: %s\n", u.Manifest.Physics.Laws.Network)
-		fmt.Printf("    Max processes: %d\n", u.Manifest.Physics.Laws.MaxProcesses)
+		s.Info("Laws:", fmt.Sprintf("Network: %s | Max processes: %d",
+			u.Manifest.Physics.Laws.Network,
+			u.Manifest.Physics.Laws.MaxProcesses,
+		))
 
-		if u.Workspace != "" {
-			fmt.Printf("\n  Mounts:\n")
-			fmt.Printf("    /workspace → %s (read-write)\n", u.Workspace)
-		}
-		if u.MindPath != "" {
-			if u.Workspace == "" {
-				fmt.Printf("\n  Mounts:\n")
+		if u.Workspace != "" || u.MindPath != "" {
+			s.Blank()
+			if u.Workspace != "" {
+				s.Info("Workspace:", u.Workspace+" → /workspace")
 			}
-			fmt.Printf("    /mind      → %s (read-write)\n", u.MindPath)
+			if u.MindPath != "" {
+				s.Info("Mind:", u.MindPath+" → /mind")
+			}
 		}
 
-		fmt.Println()
+		s.Blank()
 		return nil
 	},
 }

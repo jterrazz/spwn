@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jterrazz/universe/cli/ui"
 	"github.com/jterrazz/universe/internal/config"
 	"github.com/jterrazz/universe/internal/manifest"
 	"github.com/spf13/cobra"
@@ -22,6 +23,8 @@ universe config. If no name is provided, a random cosmos-themed word is picked.
 On first run, also creates default.yaml as the default config.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		s := ui.New(quiet, verbose, jsonOutput)
+
 		name := ""
 		if len(args) > 0 {
 			name = args[0]
@@ -35,38 +38,27 @@ On first run, also creates default.yaml as the default config.`,
 			return fmt.Errorf("error: cannot create %s.\n%w", baseDir, err)
 		}
 
-		if !quiet {
-			fmt.Println("\n  Initializing Universe...")
-			fmt.Println()
-		}
+		s.Blank()
 
 		// Create default universe config
 		if err := manifest.CreateDefault(); err != nil {
-			if !quiet {
-				fmt.Printf("  (default.yaml already exists, skipping)\n")
-			}
-		} else if !quiet {
-			fmt.Printf("  ✓ Created %s/universes/default.yaml\n", baseDir)
+			s.Log("default.yaml already exists, skipping")
+		} else {
+			s.Done("Created config", "default.yaml")
 		}
 
 		// Create named config
 		if name != "default" {
 			if err := manifest.CreateConfig(name); err != nil {
-				if !quiet {
-					fmt.Printf("  (%s.yaml already exists, skipping)\n", name)
-				}
-			} else if !quiet {
-				fmt.Printf("  ✓ Created %s/universes/%s.yaml\n", baseDir, name)
+				s.Log("%s.yaml already exists, skipping", name)
+			} else {
+				s.Done("Created config", name+".yaml")
 			}
 		}
 
-		if !quiet {
-			fmt.Println()
-			fmt.Println("  Ready. Next steps:")
-			fmt.Printf("    universe agent init              # create an agent\n")
-			fmt.Printf("    universe spawn --agent <name>    # create your first world\n")
-			fmt.Println()
-		}
+		s.Blank()
+		s.Success(fmt.Sprintf("Ready. Run: universe spawn %s", name))
+		s.Blank()
 
 		return nil
 	},
