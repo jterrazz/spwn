@@ -12,6 +12,7 @@ import (
 
 	"github.com/jterrazz/universe/internal/architect"
 	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/universe/internal/gate"
 	"github.com/jterrazz/universe/internal/manifest"
 	"github.com/jterrazz/universe/internal/mind"
 )
@@ -20,14 +21,16 @@ import (
 
 // SpawnBuilder configures and executes a universe spawn.
 type SpawnBuilder struct {
-	tc         *TestContext
-	configName string
-	agentName  string
-	workspace  string
-	yamlConfig string
-	noAgent    bool
-	detach     bool
-	runAgent   bool // run agent to completion (blocking, writes journal)
+	tc            *TestContext
+	configName    string
+	agentName     string
+	workspace     string
+	yamlConfig    string
+	noAgent       bool
+	detach        bool
+	runAgent      bool // run agent to completion (blocking, writes journal)
+	gates         []config.GateBridge
+	invokeHandler gate.InvokeHandler
 }
 
 // Spawn creates a SpawnBuilder from a TestContext.
@@ -65,6 +68,16 @@ func (b *SpawnBuilder) WithWorkspace(path string) *SpawnBuilder {
 	return b
 }
 
+func (b *SpawnBuilder) WithGate(bridges ...config.GateBridge) *SpawnBuilder {
+	b.gates = append(b.gates, bridges...)
+	return b
+}
+
+func (b *SpawnBuilder) WithInvokeHandler(h gate.InvokeHandler) *SpawnBuilder {
+	b.invokeHandler = h
+	return b
+}
+
 func (b *SpawnBuilder) NoAgent() *SpawnBuilder {
 	b.noAgent = true
 	return b
@@ -87,10 +100,16 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 
 	m := b.buildManifest()
 
+	// Merge gate bridges from builder into manifest
+	if len(b.gates) > 0 {
+		m.Gate = append(m.Gate, b.gates...)
+	}
+
 	opts := architect.SpawnOpts{
-		ConfigName: b.configName,
-		Manifest:   m,
-		Image:      b.tc.Image,
+		ConfigName:    b.configName,
+		Manifest:      m,
+		Image:         b.tc.Image,
+		InvokeHandler: b.invokeHandler,
 	}
 
 	if !b.noAgent && b.agentName != "" {
@@ -177,7 +196,7 @@ func (b *SpawnBuilder) buildManifest() config.UniverseManifest {
 	// Write a default config to disk and load it
 	configPath := filepath.Join(b.tc.BaseDir, "universes", b.configName+".yaml")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		defaultYAML := "physics:\n  constants:\n    cpu: 1\n    memory: 512m\n    disk: 2g\n    timeout: 30m\n  laws:\n    network: none\n    max-processes: 128\ntechnologies:\n  - \"@unix\"\n  - \"@git\"\n"
+		defaultYAML := "physics:\n  constants:\n    cpu: 1\n    memory: 512m\n    disk: 2g\n    timeout: 30m\n  laws:\n    network: none\n    max-processes: 128\n  elements:\n    - \"@unix\"\n    - \"@git\"\n"
 		os.MkdirAll(filepath.Dir(configPath), 0755)
 		os.WriteFile(configPath, []byte(defaultYAML), 0644)
 	}

@@ -31,19 +31,19 @@ func TestPhysics_ContainsLaws(t *testing.T) {
 		})
 }
 
-func TestFaculties_ContainsTechnologies(t *testing.T) {
+func TestFaculties_ContainsElements(t *testing.T) {
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics: {}
-technologies:
-  - "@unix"
-  - "@git"
+physics:
+  elements:
+    - "@unix"
+    - "@git"
 `).
 		NoAgent().
 		Execute().
 		ExpectContainer(func(c *setup.ContainerAssertion) {
 			c.HasFile("/universe/faculties.md")
-			c.FileContains("/universe/faculties.md", "Technologies")
+			c.FileContains("/universe/faculties.md", "Elements")
 			c.FileContains("/universe/faculties.md", "bash")
 			c.FileContains("/universe/faculties.md", "git")
 		})

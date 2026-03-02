@@ -51,15 +51,15 @@ func GeneratePhysics(m config.UniverseManifest) string {
 }
 
 // GenerateFaculties returns the contents of /universe/faculties.md.
-func GenerateFaculties(verifiedTechnologies []string, gateBridges []config.GateBridge) string {
+func GenerateFaculties(verifiedElements []string, gateBridges []config.GateBridge) string {
 	var sb strings.Builder
 
 	sb.WriteString("# Faculties\n\n")
 
-	// Technologies
-	sb.WriteString("## Technologies\n")
-	if len(verifiedTechnologies) > 0 {
-		sb.WriteString(strings.Join(verifiedTechnologies, ", "))
+	// Elements
+	sb.WriteString("## Elements\n")
+	if len(verifiedElements) > 0 {
+		sb.WriteString(strings.Join(verifiedElements, ", "))
 		sb.WriteString("\n")
 	} else {
 		sb.WriteString("(none verified)\n")

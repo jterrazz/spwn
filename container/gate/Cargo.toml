@@ -1,0 +1,20 @@
+[package]
+name = "universe-gate"
+version = "0.1.0"
+edition = "2021"
+description = "Container-side Gate for Universe — ACP client and crash recovery"
+
+[[bin]]
+name = "universe-gate"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

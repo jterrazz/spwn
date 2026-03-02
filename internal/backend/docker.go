@@ -130,7 +130,18 @@ func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []strin
 
 	var buf bytes.Buffer
 	stdcopy.StdCopy(&buf, io.Discard, resp.Reader)
-	return strings.TrimSpace(buf.String()), nil
+	output := strings.TrimSpace(buf.String())
+
+	// Check exit code
+	inspect, err := d.client.ContainerExecInspect(ctx, execID.ID)
+	if err != nil {
+		return output, fmt.Errorf("exec inspect: %w", err)
+	}
+	if inspect.ExitCode != 0 {
+		return output, fmt.Errorf("exit code %d", inspect.ExitCode)
+	}
+
+	return output, nil
 }
 
 func (d *Docker) CopyTo(ctx context.Context, containerID string, destPath string, content []byte) error {

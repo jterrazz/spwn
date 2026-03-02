@@ -13,6 +13,7 @@ import (
 
 	"github.com/jterrazz/universe/internal/backend"
 	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/universe/internal/gate"
 	"github.com/jterrazz/universe/internal/journal"
 	"github.com/jterrazz/universe/internal/manifest"
 	"github.com/jterrazz/universe/internal/mind"
@@ -25,20 +26,22 @@ import (
 type Architect struct {
 	backend backend.Backend
 	state   *state.Store
+	gates   map[string]*gate.Server // universeID → running gate server
 }
 
 // SpawnOpts configures universe creation.
 type SpawnOpts struct {
-	ConfigName string
-	AgentName  string
-	Workspace  string
-	Manifest   config.UniverseManifest
-	Image      string // Override base image (used for testing). Defaults to config.BaseImage.
+	ConfigName    string
+	AgentName     string
+	Workspace     string
+	Manifest      config.UniverseManifest
+	Image         string         // Override base image (used for testing). Defaults to config.BaseImage.
+	InvokeHandler gate.InvokeHandler // Override gate handler (used for testing). Defaults to stub.
 }
 
 // New creates an Architect with the given backend and state store.
 func New(b backend.Backend, s *state.Store) *Architect {
-	return &Architect{backend: b, state: s}
+	return &Architect{backend: b, state: s, gates: make(map[string]*gate.Server)}
 }
 
 var defaultProbeList = []string{
@@ -82,6 +85,34 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 		}
 		mindPath = mind.AgentDir(opts.AgentName)
 		binds = append(binds, mindPath+":/mind")
+
+		// Validate life manifest body requirements
+		life, err := manifest.LoadLife(mindPath)
+		if err != nil {
+			return nil, fmt.Errorf("load life manifest: %w", err)
+		}
+		if life != nil {
+			expandedElements := manifest.ExpandElements(opts.Manifest.Elements)
+			if err := manifest.ValidateBody(life, expandedElements); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Set up gate directory if bridges are configured
+	gateDir := ""
+	if len(opts.Manifest.Gate) > 0 {
+		gateDir, err = os.MkdirTemp("", "universe-gate-")
+		if err != nil {
+			return nil, fmt.Errorf("create gate dir: %w", err)
+		}
+		binds = append(binds, gateDir+":/gate")
+
+		// Write wrapper scripts to gate dir (visible inside container via bind mount)
+		if err := gate.SetupBridges(gateDir, opts.Manifest.Gate); err != nil {
+			os.RemoveAll(gateDir)
+			return nil, fmt.Errorf("setup gate bridges: %w", err)
+		}
 	}
 
 	// Resolve image
@@ -120,8 +151,42 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 		return nil, fmt.Errorf("start container: %w", err)
 	}
 
-	// Probe technologies
-	verifiedTechs, err := a.probeTechnologies(ctx, containerID, opts.Manifest.Technologies)
+	// Start gate server and install bridges inside container
+	if gateDir != "" {
+		handler := opts.InvokeHandler
+		if handler == nil {
+			handler = gate.StubHandler()
+		}
+
+		srv := gate.NewServer(filepath.Join(gateDir, "gate.sock"), handler)
+		if err := srv.Start(); err != nil {
+			a.backend.Stop(ctx, containerID)
+			a.backend.Remove(ctx, containerID)
+			os.RemoveAll(gateDir)
+			return nil, fmt.Errorf("start gate server: %w", err)
+		}
+
+		// Symlink bridge wrappers to /usr/local/bin/ and extend PATH
+		for _, bridge := range opts.Manifest.Gate {
+			_, symErr := a.backend.ExecOutput(ctx, containerID, []string{
+				"ln", "-sf", "/gate/bin/" + bridge.As, "/usr/local/bin/" + bridge.As,
+			})
+			if symErr != nil {
+				log.Printf("warning: failed to symlink bridge %s: %v", bridge.As, symErr)
+			}
+		}
+
+		// Add /gate/bin to PATH for all shells
+		pathScript := []byte("export PATH=/gate/bin:$PATH\n")
+		if err := a.backend.CopyTo(ctx, containerID, "etc/profile.d/gate.sh", pathScript); err != nil {
+			log.Printf("warning: failed to write gate PATH extension: %v", err)
+		}
+
+		a.gates[id] = srv
+	}
+
+	// Probe elements
+	verifiedElements, err := a.probeElements(ctx, containerID, opts.Manifest.Elements)
 	if err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
@@ -137,7 +202,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 	}
 
 	// Generate faculties.md
-	facultiesContent := physics.GenerateFaculties(verifiedTechs, opts.Manifest.Gate)
+	facultiesContent := physics.GenerateFaculties(verifiedElements, opts.Manifest.Gate)
 	if err := a.backend.CopyTo(ctx, containerID, "universe/faculties.md", []byte(facultiesContent)); err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
@@ -153,6 +218,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*config.Universe
 		ContainerID: containerID,
 		Workspace:   workspace,
 		MindPath:    mindPath,
+		GateDir:     gateDir,
 		Status:      config.StatusIdle,
 		Manifest:    opts.Manifest,
 	}
@@ -318,8 +384,19 @@ func (a *Architect) Destroy(ctx context.Context, universeID string) (*config.Uni
 		return nil, err
 	}
 
+	// Stop gate server if running
+	if srv, ok := a.gates[universeID]; ok {
+		srv.Stop()
+		delete(a.gates, universeID)
+	}
+
 	a.backend.Stop(ctx, u.ContainerID)
 	a.backend.Remove(ctx, u.ContainerID)
+
+	// Clean up gate temp directory
+	if u.GateDir != "" {
+		os.RemoveAll(u.GateDir)
+	}
 
 	a.state.Delete(universeID)
 
@@ -370,10 +447,10 @@ func (a *Architect) Attach(ctx context.Context, universeID string) error {
 	return err
 }
 
-// probeTechnologies verifies which technologies are available in the container.
-func (a *Architect) probeTechnologies(ctx context.Context, containerID string, declaredTechs []string) ([]string, error) {
+// probeElements verifies which elements are available in the container.
+func (a *Architect) probeElements(ctx context.Context, containerID string, declaredElements []string) ([]string, error) {
 	// Expand @packs and merge with default probe list
-	expanded := manifest.ExpandTechnologies(declaredTechs)
+	expanded := manifest.ExpandElements(declaredElements)
 	probeList := mergeUnique(expanded, defaultProbeList)
 
 	// Build probe command
@@ -381,11 +458,11 @@ func (a *Architect) probeTechnologies(ctx context.Context, containerID string, d
 	for _, b := range probeList {
 		checks = append(checks, fmt.Sprintf(`command -v "%s" >/dev/null 2>&1 && echo "%s"`, b, b))
 	}
-	cmd := []string{"sh", "-c", strings.Join(checks, "; ")}
+	cmd := []string{"sh", "-c", strings.Join(checks, "; ") + "; true"}
 
 	output, err := a.backend.ExecOutput(ctx, containerID, cmd)
 	if err != nil {
-		return nil, fmt.Errorf("probe technologies: %w", err)
+		return nil, fmt.Errorf("probe elements: %w", err)
 	}
 
 	verified := make(map[string]bool)
@@ -396,18 +473,18 @@ func (a *Architect) probeTechnologies(ctx context.Context, containerID string, d
 		}
 	}
 
-	// Verify all declared technologies exist
-	for _, t := range expanded {
-		if !verified[t] {
-			return nil, fmt.Errorf("universe requires technology '%s' but the base image does not provide it.\nHint: Add %s to the container image, or remove it from the config's technologies", t, t)
+	// Verify all declared elements exist
+	for _, e := range expanded {
+		if !verified[e] {
+			return nil, fmt.Errorf("universe requires element '%s' but the base image does not provide it.\nHint: Add %s to the container image, or remove it from the config's elements", e, e)
 		}
 	}
 
-	// Return all verified technologies
+	// Return all verified elements
 	var result []string
-	for _, t := range probeList {
-		if verified[t] {
-			result = append(result, t)
+	for _, e := range probeList {
+		if verified[e] {
+			result = append(result, e)
 		}
 	}
 	return result, nil
