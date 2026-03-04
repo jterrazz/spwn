@@ -93,7 +93,7 @@ physics:
     - @git
     - @node
     - jq
-    gate:                      # Elements bridged from Substrate
+    gate:                      # Elements bridged from Host
       - source: mcp/slack
         as: slack-send
         capabilities: [send]
@@ -120,7 +120,7 @@ The Mind is declared as the `mind` section of `agent.yaml` and mounted into ever
 ### Architecture
 
 ```
-Substrate (your machine)
+Host (your machine)
   └── Architect                    Creates and destroys worlds
        └── Universe                A contained reality
             ├── Agent              The living entity inside

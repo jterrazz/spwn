@@ -8,10 +8,10 @@
 - **Elements**: Building blocks of the world (@packs or individual binaries), declared under `physics.elements`
 - **Faculties**: What the agent can actually do (verified elements + gate bridges)
 - **Mind**: The agent's persistent identity (6 layers of markdown)
-- **Gate**: Two-sided bridge between Substrate and Universe. Host-side (Go) manages mounts and element bridging. Container-side (Rust) speaks ACP to the agent CLI.
-- **Gate Bridge**: An MCP server on the Substrate exposed as a CLI command inside the universe via wrapper scripts at `/gate/bin/`
+- **Gate**: Two-sided bridge between Host and Universe. Host-side (Go) manages mounts and element bridging. Container-side (Rust) speaks ACP to the agent CLI.
+- **Gate Bridge**: An MCP server on the Host exposed as a CLI command inside the universe via wrapper scripts at `/gate/bin/`
 - **Life Manifest**: Optional `life.yaml` in agent dir — declares identity (soul/mind) and body requirements
-- **Substrate**: The host machine
+- **Host**: The host machine
 - **Operator**: Any entity (human, agent, or code) that interacts with an agent at runtime
 
 ## IDs

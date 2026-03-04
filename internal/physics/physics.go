@@ -37,13 +37,13 @@ func GeneratePhysics(m config.UniverseManifest) string {
 
 	// Elements
 	sb.WriteString("## Elements\n")
-	sb.WriteString("/workspace — project files, mounted from Substrate (read-write)\n")
+	sb.WriteString("/workspace — project files, mounted from Host (read-write)\n")
 	sb.WriteString("/mind — agent identity and memory (read-write)\n")
 	sb.WriteString("/tmp — ephemeral scratch space\n\n")
 
 	// Topology
 	sb.WriteString("## Topology\n")
-	sb.WriteString("/workspace — project files, mounted from Substrate (read-write)\n")
+	sb.WriteString("/workspace — project files, mounted from Host (read-write)\n")
 	sb.WriteString("/mind — agent identity and memory (read-write)\n")
 	sb.WriteString("/tmp — ephemeral scratch space\n")
 

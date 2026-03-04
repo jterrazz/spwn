@@ -18,7 +18,7 @@ func init() {
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all agents on this Substrate",
+	Short: "List all agents on this Host",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agents, err := mind.List()
 		if err != nil {

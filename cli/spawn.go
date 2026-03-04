@@ -28,7 +28,7 @@ func init() {
 	spawnCmd.Flags().StringVarP(&spawnUniverse, "universe", "u", "", "Explicit path to a YAML config file")
 	spawnCmd.Flags().BoolVarP(&spawnDetach, "detach", "d", false, "Run in background")
 	spawnCmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
-	spawnCmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Substrate: "source:as:cap1,cap2"`)
+	spawnCmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
 
 	rootCmd.AddCommand(spawnCmd)
 }

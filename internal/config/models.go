@@ -29,7 +29,7 @@ type LawsManifest struct {
 	MaxProcesses int    `yaml:"max-processes"`
 }
 
-// GateBridge represents an element bridged from the Substrate.
+// GateBridge represents an element bridged from the Host.
 type GateBridge struct {
 	Source       string   `yaml:"source"`
 	As           string   `yaml:"as"`
