@@ -32,6 +32,11 @@ func StubHandler() InvokeHandler {
 	return server.StubHandler()
 }
 
+// ExecHandler returns a handler that executes bridge sources on the host.
+func ExecHandler(bridges []Bridge) InvokeHandler {
+	return server.ExecHandler(bridges)
+}
+
 // SetupBridges writes wrapper scripts for each gate bridge into gateDir/bin/.
 func SetupBridges(gateDir string, bridges []Bridge, gatePort int) error {
 	return bridge.SetupBridges(gateDir, bridges, gatePort)
