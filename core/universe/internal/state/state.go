@@ -120,6 +120,71 @@ func (s *Store) UpdateStatus(id string, status models.Status) error {
 	return fmt.Errorf("universe %s not found", id)
 }
 
+// AddAgent adds an agent record to a universe.
+func (s *Store) AddAgent(universeID string, agent models.AgentRecord) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	universes, err := s.load()
+	if err != nil {
+		return err
+	}
+	for i := range universes {
+		if universes[i].ID == universeID {
+			universes[i].Agents = append(universes[i].Agents, agent)
+			return s.save(universes)
+		}
+	}
+	return fmt.Errorf("universe %s not found", universeID)
+}
+
+// RemoveAgent removes an agent from a universe.
+func (s *Store) RemoveAgent(universeID, agentID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	universes, err := s.load()
+	if err != nil {
+		return err
+	}
+	for i := range universes {
+		if universes[i].ID == universeID {
+			filtered := make([]models.AgentRecord, 0, len(universes[i].Agents))
+			for _, a := range universes[i].Agents {
+				if a.AgentID != agentID {
+					filtered = append(filtered, a)
+				}
+			}
+			universes[i].Agents = filtered
+			return s.save(universes)
+		}
+	}
+	return fmt.Errorf("universe %s not found", universeID)
+}
+
+// UpdateAgentStatus updates a specific agent's status within a universe.
+func (s *Store) UpdateAgentStatus(universeID, agentID string, status models.Status) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	universes, err := s.load()
+	if err != nil {
+		return err
+	}
+	for i := range universes {
+		if universes[i].ID == universeID {
+			for j := range universes[i].Agents {
+				if universes[i].Agents[j].AgentID == agentID {
+					universes[i].Agents[j].Status = status
+					return s.save(universes)
+				}
+			}
+			return fmt.Errorf("agent %s not found in universe %s", agentID, universeID)
+		}
+	}
+	return fmt.Errorf("universe %s not found", universeID)
+}
+
 func (s *Store) load() ([]models.World, error) {
 	data, err := os.ReadFile(s.path)
 	if err != nil {

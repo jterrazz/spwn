@@ -61,4 +61,16 @@ func TestDirectoryConstants_NonEmpty(t *testing.T) {
 	if StateFileName == "" {
 		t.Error("StateFileName is empty")
 	}
+	if OrgFileName == "" {
+		t.Error("OrgFileName is empty")
+	}
+	if ClawStateFileName == "" {
+		t.Error("ClawStateFileName is empty")
+	}
+	if SkillsSubDir == "" {
+		t.Error("SkillsSubDir is empty")
+	}
+	if ClawSubDir == "" {
+		t.Error("ClawSubDir is empty")
+	}
 }

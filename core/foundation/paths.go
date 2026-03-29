@@ -35,3 +35,18 @@ func AgentsDir() string {
 func StatePath() string {
 	return filepath.Join(BaseDir(), StateFileName)
 }
+
+// OrgPath returns the path to the organization manifest.
+func OrgPath() string {
+	return filepath.Join(BaseDir(), OrgFileName)
+}
+
+// ClawStatePath returns the path to the Claw state file.
+func ClawStatePath() string {
+	return filepath.Join(BaseDir(), ClawSubDir, ClawStateFileName)
+}
+
+// SkillsDir returns the path to the skills directory.
+func SkillsDir() string {
+	return filepath.Join(BaseDir(), SkillsSubDir)
+}

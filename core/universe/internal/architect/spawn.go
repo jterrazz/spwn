@@ -35,6 +35,7 @@ type SpawnOpts struct {
 	InvokeHandler gate.InvokeHandler         // Override gate handler (used for testing). Defaults to stub.
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
+	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
 }
 
 func (opts *SpawnOpts) progress(event, detail string) {
@@ -84,9 +85,34 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		binds = append(binds, workspace+":/workspace")
 	}
 
-	// Mount Mind if agent specified
+	// Mount Mind(s) for agents
 	mindPath := ""
-	if opts.AgentName != "" {
+	if len(opts.Agents) > 0 {
+		// Multi-agent: mount each agent's mind at /mind/<name>
+		for _, spec := range opts.Agents {
+			if err := agent.ValidateMind(spec.Name); err != nil {
+				return nil, err
+			}
+			agentDir := agent.AgentDir(spec.Name)
+			binds = append(binds, agentDir+":/mind/"+spec.Name)
+
+			// Validate life manifest body requirements
+			life, err := manifest.LoadLife(agentDir)
+			if err != nil {
+				return nil, fmt.Errorf("load life manifest for %s: %w", spec.Name, err)
+			}
+			if life != nil {
+				expandedElements := manifest.ExpandElements(opts.Manifest.Elements)
+				if err := manifest.ValidateBody(life, expandedElements); err != nil {
+					return nil, err
+				}
+			}
+			opts.progress("mind_mounted", spec.Name+" → /mind/"+spec.Name)
+		}
+		// Use first agent's dir as primary mindPath for backward compat
+		mindPath = agent.AgentDir(opts.Agents[0].Name)
+	} else if opts.AgentName != "" {
+		// Single-agent (backward compatible)
 		if err := agent.ValidateMind(opts.AgentName); err != nil {
 			return nil, err
 		}
@@ -255,7 +281,20 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Manifest:    opts.Manifest,
 	}
 
-	if opts.AgentName != "" {
+	if len(opts.Agents) > 0 {
+		// Multi-agent: populate Agents slice and set primary Agent/AgentID for backward compat
+		u.Agent = opts.Agents[0].Name
+		u.AgentID = foundation.GenerateAgentID(opts.Agents[0].Name)
+		for _, spec := range opts.Agents {
+			tier := manifest.DefaultTier(spec.Tier)
+			u.Agents = append(u.Agents, models.AgentRecord{
+				Name:    spec.Name,
+				AgentID: foundation.GenerateAgentID(spec.Name),
+				Tier:    tier,
+				Status:  models.StatusIdle,
+			})
+		}
+	} else if opts.AgentName != "" {
 		u.AgentID = foundation.GenerateAgentID(opts.AgentName)
 	}
 

@@ -12,17 +12,45 @@ import (
 // LifeManifest declares an agent's identity structure and requirements.
 // Optional: if life.yaml doesn't exist in the agent directory, the agent dir is used as-is.
 type LifeManifest struct {
-	Soul struct {
-		Personas []string `yaml:"personas"`
-	} `yaml:"soul"`
-	Mind struct {
-		Skills    []string `yaml:"skills"`
-		Knowledge []string `yaml:"knowledge"`
-		Playbooks []string `yaml:"playbooks"`
-	} `yaml:"mind"`
-	Body struct {
-		Requires []string `yaml:"requires"`
-	} `yaml:"body"`
+	Name    string        `yaml:"name"`
+	Tier    string        `yaml:"tier"`    // "governor" or "citizen" (default: "citizen")
+	Runtime RuntimeConfig `yaml:"runtime"` // optional runtime override
+	Soul    SoulManifest  `yaml:"soul"`
+	Mind    MindManifest  `yaml:"mind"`
+	Body    BodyManifest  `yaml:"body"`
+}
+
+// RuntimeConfig allows per-agent runtime override.
+type RuntimeConfig struct {
+	Backend  string `yaml:"backend"`  // "claude-code", "pi", "codex", etc.
+	Provider string `yaml:"provider"` // "anthropic", "openai", "google", etc.
+	Model    string `yaml:"model"`    // "claude-sonnet-4-6", etc.
+	Auth     string `yaml:"auth"`     // "api-key" or "subscription"
+}
+
+// SoulManifest declares the agent's persona layers.
+type SoulManifest struct {
+	Personas []string `yaml:"personas"`
+}
+
+// MindManifest declares the agent's cognitive assets.
+type MindManifest struct {
+	Skills    []string `yaml:"skills"`
+	Knowledge []string `yaml:"knowledge"`
+	Playbooks []string `yaml:"playbooks"`
+}
+
+// BodyManifest declares the agent's physical requirements.
+type BodyManifest struct {
+	Requires []string `yaml:"requires"`
+}
+
+// DefaultTier returns the effective tier, defaulting to "citizen" if empty.
+func DefaultTier(tier string) string {
+	if tier == "" {
+		return "citizen"
+	}
+	return tier
 }
 
 // LoadLife reads life.yaml from an agent directory.

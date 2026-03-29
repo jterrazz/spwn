@@ -20,6 +20,7 @@ var (
 	spawnDetach    bool
 	spawnNoAgent   bool
 	spawnGate      []string
+	spawnGovernor  string
 )
 
 func init() {
@@ -30,6 +31,7 @@ func init() {
 	Cmd.Flags().BoolVarP(&spawnDetach, "detach", "d", false, "Run in background")
 	Cmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
 	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
+	Cmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this universe")
 }
 
 // Cmd is the universe command — spawns a universe when run directly,
@@ -87,6 +89,17 @@ Subcommands: list, inspect, logs, attach, destroy.`,
 			agentName = spawnAgent
 		}
 
+		// Build multi-agent list when --governor is used
+		var agents []universe.AgentSpec
+		if spawnGovernor != "" {
+			agents = append(agents, universe.AgentSpec{Name: spawnGovernor, Tier: "governor"})
+			if agentName != "" {
+				agents = append(agents, universe.AgentSpec{Name: agentName, Tier: "citizen"})
+			}
+			// Clear single-agent name since we're using multi-agent
+			agentName = ""
+		}
+
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
 			return err
@@ -100,6 +113,7 @@ Subcommands: list, inspect, logs, attach, destroy.`,
 			AgentName:  agentName,
 			Workspace:  spawnWorkspace,
 			Manifest:   m,
+			Agents:     agents,
 			LogWriter:  s.Writer(),
 			OnProgress: func(event, detail string) {
 				switch event {
@@ -129,8 +143,17 @@ Subcommands: list, inspect, logs, attach, destroy.`,
 			s.Warn("Warning", w)
 		}
 
-		// Spawn agent if not --no-agent
-		if agentName != "" {
+		// Spawn agents
+		if len(agents) > 0 {
+			// Multi-agent mode
+			s.Start("Spawning colony...")
+			if err := arc.SpawnAgents(ctx, u.ID, agents); err != nil {
+				s.Fail("Colony spawn failed", err)
+				return err
+			}
+			s.Done("Colony spawned", fmt.Sprintf("%d agent(s)", len(agents)))
+		} else if agentName != "" {
+			// Single-agent mode (backward compatible)
 			if spawnDetach {
 				s.Start("Spawning agent...")
 				if err := arc.SpawnAgentDetached(ctx, u.ID, agentName); err != nil {

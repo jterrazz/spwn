@@ -14,10 +14,14 @@ const (
 
 // Directory layout constants.
 const (
-	SpwnBaseDir     = ".spwn"
-	UniversesSubDir = "universes"
-	AgentsSubDir    = "agents"
-	StateFileName   = "state.json"
+	SpwnBaseDir       = ".spwn"
+	UniversesSubDir   = "universes"
+	AgentsSubDir      = "agents"
+	StateFileName     = "state.json"
+	OrgFileName       = "org.yaml"
+	ClawStateFileName = "claw.json"
+	SkillsSubDir      = "skills"
+	ClawSubDir        = "claw"
 )
 
 // MindLayers defines the six-layer Mind structure.
