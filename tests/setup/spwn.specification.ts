@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
+import { createSpwnHome, createAgent } from "./helpers.js";
 
 // Build the binary path
 const SPWN_BIN = resolve(import.meta.dirname, "../../bin/spwn");
@@ -51,4 +52,106 @@ export function spwn(label: string) {
       };
     },
   };
+}
+
+/**
+ * Execute the spwn binary with custom environment variables.
+ */
+function spwnWithEnv(
+  args: string[],
+  envOverrides: Record<string, string>,
+  timeout = 30_000,
+): {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  output: string;
+} {
+  const env = {
+    ...process.env,
+    INIT_CWD: undefined,
+    ...envOverrides,
+  };
+
+  const result = spawnSync(SPWN_BIN, args, {
+    encoding: "utf-8",
+    env: env as NodeJS.ProcessEnv,
+    stdio: ["pipe", "pipe", "pipe"],
+    timeout,
+  });
+
+  const stdout = result.stdout ?? "";
+  const stderr = result.stderr ?? "";
+  const exitCode = result.status ?? 1;
+
+  return {
+    exitCode,
+    stdout,
+    stderr,
+    output: stdout + stderr,
+  };
+}
+
+/**
+ * Parse a universe ID (u-{name}-{5digits}) from command output.
+ */
+export function parseUniverseId(output: string): string | null {
+  const match = output.match(/u-[\w]+-\d{5}/);
+  return match ? match[0] : null;
+}
+
+/**
+ * Parse all universe IDs from output (e.g., from list command).
+ */
+export function parseAllUniverseIds(output: string): string[] {
+  const matches = output.matchAll(/u-[\w]+-\d{5}/g);
+  return [...matches].map((m) => m[0]);
+}
+
+export interface TestContext {
+  home: string;
+  spwn: (args: string[], timeout?: number) => {
+    exitCode: number;
+    stdout: string;
+    stderr: string;
+    output: string;
+  };
+  /** Destroy all active universes and clean up temp directory */
+  cleanup: () => void;
+}
+
+/**
+ * Create an isolated test context with its own SPWN_HOME.
+ * Each context uses SPWN_BASE_IMAGE=spwn-test:latest.
+ */
+export function createTestContext(): TestContext {
+  const home = createSpwnHome();
+  createAgent(home, "neo");
+
+  const envOverrides = {
+    SPWN_HOME: home,
+    SPWN_BASE_IMAGE: "spwn-test:latest",
+  };
+
+  const ctx: TestContext = {
+    home,
+    spwn: (args: string[], timeout = 30_000) =>
+      spwnWithEnv(args, envOverrides, timeout),
+    cleanup: () => {
+      // Destroy all active universes
+      const listResult = spwnWithEnv(["universe", "list"], envOverrides);
+      const ids = parseAllUniverseIds(listResult.output);
+      for (const id of ids) {
+        spwnWithEnv(["universe", "destroy", id], envOverrides, 30_000);
+      }
+      // Clean up temp dir
+      try {
+        spawnSync("rm", ["-rf", home], { timeout: 5000 });
+      } catch {
+        // best effort
+      }
+    },
+  };
+
+  return ctx;
 }
