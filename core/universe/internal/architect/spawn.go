@@ -162,8 +162,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Resolve image
+	// Resolve image (env override for testing, then opts, then default)
 	image := foundation.BaseImage
+	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
+		image = envImage
+	}
 	if opts.Image != "" {
 		image = opts.Image
 	}

@@ -1,9 +1,84 @@
-import { describe, test } from "vitest";
+import { describe, test, expect, afterEach } from "vitest";
+import {
+  createTestContext,
+  parseUniverseId,
+  type TestContext,
+} from "../../setup/spwn.specification.js";
 
-// TODO: requires Docker + running containers to spawn universes
-describe.skip("universe lifecycle", () => {
-  test("list shows spawned universes", () => {});
-  test("inspect shows universe details", () => {});
-  test("logs shows universe output", () => {});
-  test("full lifecycle: spawn, inspect, destroy", () => {});
+describe("universe lifecycle", () => {
+  let ctx: TestContext;
+
+  afterEach(() => {
+    ctx?.cleanup();
+  });
+
+  test("list shows spawned universes", async () => {
+    // GIVEN — a spawned universe
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const spawnResult = ctx.spwn(
+      ["universe", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseUniverseId(spawnResult.output)!;
+    expect(id).toBeTruthy();
+
+    // WHEN — listing universes
+    const listResult = ctx.spwn(["universe", "list"]);
+
+    // THEN — shows the universe with agent info
+    expect(listResult.exitCode).toBe(0);
+    expect(listResult.output).toContain(id);
+    expect(listResult.output).toContain("neo");
+  });
+
+  test("inspect shows universe details", async () => {
+    // GIVEN — a spawned universe
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const spawnResult = ctx.spwn(
+      ["universe", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseUniverseId(spawnResult.output)!;
+
+    // WHEN — inspecting the universe
+    const inspectResult = ctx.spwn(["universe", "inspect", id]);
+
+    // THEN — shows universe details
+    expect(inspectResult.exitCode).toBe(0);
+    expect(inspectResult.output).toContain(id);
+    expect(inspectResult.output).toContain("docker");
+    expect(inspectResult.output).toContain("neo");
+  });
+
+  test("full lifecycle: spawn, inspect, destroy", async () => {
+    // GIVEN — an initialized SPWN_HOME
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+
+    // WHEN — spawn
+    const spawnResult = ctx.spwn(
+      ["universe", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    expect(spawnResult.exitCode).toBe(0);
+    const id = parseUniverseId(spawnResult.output)!;
+    expect(id).toBeTruthy();
+
+    // THEN — inspect works
+    const inspectResult = ctx.spwn(["universe", "inspect", id]);
+    expect(inspectResult.exitCode).toBe(0);
+    expect(inspectResult.output).toContain(id);
+
+    // AND — destroy works
+    const destroyResult = ctx.spwn(["universe", "destroy", id], 30_000);
+    expect(destroyResult.exitCode).toBe(0);
+    expect(destroyResult.output).toContain("Universe destroyed");
+
+    // AND — list shows empty
+    const listResult = ctx.spwn(["universe", "list"]);
+    expect(listResult.exitCode).toBe(0);
+    expect(listResult.output).not.toContain(id);
+  });
 });
