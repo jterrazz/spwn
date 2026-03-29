@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"spwn.sh/apps/cli/ui"
@@ -52,18 +53,41 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "ID", "AGENT", "STATUS", "CREATED")
+		t := ui.NewTable(ui.ModeNormal, "ID", "CONFIG", "AGENTS", "STATUS", "CREATED")
 		for _, u := range universes {
-			agent := "—"
-			if u.AgentID != "" {
-				agent = u.AgentID
+			agents := collectAgentNames(u)
+			config := u.Config
+			if config == "" {
+				config = "default"
 			}
-			t.AddRow(u.ID, agent, string(u.Status), timeAgo(u.CreatedAt))
+			t.AddRow(u.ID, config, agents, string(u.Status), timeAgo(u.CreatedAt))
 		}
 		t.Render()
 
 		return nil
 	},
+}
+
+// collectAgentNames returns a comma-separated list of agent names for a universe.
+func collectAgentNames(u universe.World) string {
+	names := make([]string, 0)
+
+	// Primary agent
+	if u.Agent != "" {
+		names = append(names, u.Agent)
+	}
+
+	// Multi-agent records (avoid duplicating the primary agent)
+	for _, a := range u.Agents {
+		if a.Name != u.Agent {
+			names = append(names, a.Name)
+		}
+	}
+
+	if len(names) == 0 {
+		return "\u2014"
+	}
+	return strings.Join(names, ", ")
 }
 
 func timeAgo(t time.Time) string {

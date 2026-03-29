@@ -3,6 +3,8 @@
 package agent
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"spwn.sh/core/agent/internal/evolution"
@@ -28,6 +30,16 @@ type SleepResult = evolution.SleepResult
 
 // ForkResult holds the outcome of a fork operation.
 type ForkResult = evolution.ForkResult
+
+// DeleteAgent removes the agent's Mind directory entirely.
+// Returns an error if the agent does not exist.
+func DeleteAgent(name string) error {
+	dir := AgentDir(name)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return fmt.Errorf("agent %q not found", name)
+	}
+	return os.RemoveAll(dir)
+}
 
 // --- Mind operations ---
 

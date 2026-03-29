@@ -75,9 +75,30 @@ func TestCLI_AgentHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"init", "list", "inspect", "export", "reflect", "sleep", "fork", "talk"} {
+	for _, sub := range []string{"init", "list", "inspect", "export", "reflect", "sleep", "fork", "talk", "delete"} {
 		assertContains(t, out, sub, "agent help")
 	}
+}
+
+func TestCLI_AgentTalkHelp(t *testing.T) {
+	out, _, err := executeCommand("agent", "talk", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertContains(t, out, "talk", "agent talk help")
+	assertContains(t, out, "agent-name", "agent talk usage")
+	assertContains(t, out, "interactive", "agent talk description")
+}
+
+func TestCLI_AgentDeleteHelp(t *testing.T) {
+	out, _, err := executeCommand("agent", "delete", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertContains(t, out, "delete", "agent delete help")
+	assertContains(t, out, "agent-name", "agent delete usage")
 }
 
 // --- Claw help ---

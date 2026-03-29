@@ -94,4 +94,63 @@ describe("agent CRUD", () => {
     // THEN — exits with error
     expect(result.exitCode).not.toBe(0);
   });
+
+  test("delete removes agent", async () => {
+    // GIVEN — an agent exists
+    await spwn("create temp").exec("agent init temp").run();
+
+    // WHEN — deleting the agent
+    const result = await spwn("delete agent")
+      .exec("agent delete temp")
+      .run();
+
+    // THEN — exits successfully
+    expect(result.exitCode).toBe(0);
+
+    // AND — agent no longer appears in list
+    const list = await spwn("list after delete")
+      .exec("agent list")
+      .run();
+    expect(list.output).not.toContain("temp");
+  });
+
+  test("delete non-existent agent fails", async () => {
+    // WHEN — deleting an agent that does not exist
+    const result = await spwn("delete missing")
+      .exec("agent delete nonexistent")
+      .run();
+
+    // THEN — exits with error
+    expect(result.exitCode).not.toBe(0);
+  });
+
+  test("talk requires running universe", async () => {
+    // GIVEN — an agent exists but is not in any universe
+    await spwn("create neo for talk").exec("agent init neo").run();
+
+    // WHEN — trying to talk to the agent
+    const result = await spwn("talk without universe")
+      .exec("agent talk neo hello")
+      .run();
+
+    // THEN — exits with error about no active universe
+    expect(result.exitCode).not.toBe(0);
+    expect(result.output).toContain("not in any active universe");
+  });
+
+  test("list shows universe column headers", async () => {
+    // GIVEN — an agent has been created
+    await spwn("create for list").exec("agent init atlas").run();
+
+    // WHEN — listing agents
+    const result = await spwn("list with universe")
+      .exec("agent list")
+      .run();
+
+    // THEN — output includes universe-related columns
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toContain("atlas");
+    expect(result.output).toContain("UNIVERSE");
+    expect(result.output).toContain("STATUS");
+  });
 });

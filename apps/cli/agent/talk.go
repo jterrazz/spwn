@@ -1,9 +1,15 @@
 package agent
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"strings"
 
 	agentDomain "spwn.sh/core/agent"
+	"spwn.sh/core/foundation"
+	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
 
@@ -12,12 +18,19 @@ func init() {
 }
 
 var talkCmd = &cobra.Command{
-	Use:   "talk <agent-name> <message>",
-	Short: "Open a one-shot conversation with a named agent",
-	Args:  cobra.ExactArgs(2),
+	Use:   "talk <agent-name> [message]",
+	Short: "Talk to a running agent — interactive or one-shot",
+	Long: `Open a conversation with a named agent running inside a universe.
+
+If a message is provided, runs a one-shot query and prints the response.
+If no message is provided, opens an interactive Claude session inside the container.`,
+	Args: cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		message := args[1]
+		message := ""
+		if len(args) > 1 {
+			message = args[1]
+		}
 		s := newStepper(cmd)
 
 		// Validate the agent exists
@@ -25,32 +38,106 @@ var talkCmd = &cobra.Command{
 			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
 		}
 
-		info, err := agentDomain.InspectAgent(name)
+		// Find which universe this agent is in
+		containerID, universeID, err := findAgentContainer(name)
 		if err != nil {
-			return fmt.Errorf("error: cannot inspect agent %q.\n%w", name, err)
+			return err
 		}
 
+		// Read the OAuth token
+		token := readAuthToken()
+
 		s.Blank()
-		s.Info("Agent:", info.Name)
-		s.Info("Mind:", info.Path)
+		s.Info("Agent:", name)
+		s.Info("Universe:", universeID)
 		s.Blank()
 
-		// Show recent journal entries
-		entries, err := agentDomain.ListJournal(info.Path, 5)
-		if err == nil && len(entries) > 0 {
-			s.Info("Recent journal:", "")
-			for _, e := range entries {
-				ts := e.CreatedAt.Format("2006-01-02 15:04")
-				s.Info("  "+ts, fmt.Sprintf("%-24s %s", e.UniverseID, e.Outcome))
+		if message != "" {
+			// One-shot mode: run claude with --print
+			dockerArgs := []string{"exec"}
+			if token != "" {
+				dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
 			}
-			s.Blank()
-		}
+			dockerArgs = append(dockerArgs, containerID, "claude", "--dangerously-skip-permissions", "-p", message, "--print")
 
-		s.Info("Message:", message)
-		s.Blank()
-		s.Log("Direct agent conversation not yet fully implemented — requires active universe.")
-		s.Blank()
+			execCmd := exec.Command("docker", dockerArgs...)
+			output, err := execCmd.CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("error: claude exec failed.\n%s\n%w", string(output), err)
+			}
+
+			fmt.Fprint(os.Stdout, string(output))
+		} else {
+			// Interactive mode: attach stdin/stdout/stderr
+			dockerArgs := []string{"exec", "-it"}
+			if token != "" {
+				dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
+			}
+			dockerArgs = append(dockerArgs, containerID, "claude", "--dangerously-skip-permissions")
+
+			execCmd := exec.Command("docker", dockerArgs...)
+			execCmd.Stdin = os.Stdin
+			execCmd.Stdout = os.Stdout
+			execCmd.Stderr = os.Stderr
+
+			if err := execCmd.Run(); err != nil {
+				return fmt.Errorf("error: interactive session failed.\n%w", err)
+			}
+		}
 
 		return nil
 	},
+}
+
+// findAgentContainer looks up state.json to find a running universe
+// that contains the given agent. Returns (containerID, universeID, error).
+func findAgentContainer(agentName string) (string, string, error) {
+	ctx := context.Background()
+
+	arc, err := universe.NewArchitectFromEnv()
+	if err != nil {
+		return "", "", fmt.Errorf("error: cannot connect to backend.\n%w", err)
+	}
+
+	universes, err := arc.List(ctx)
+	if err != nil {
+		return "", "", fmt.Errorf("error: cannot list universes.\n%w", err)
+	}
+
+	// Check the primary agent field, then the agents array
+	for _, u := range universes {
+		if u.Status != universe.StatusRunning && u.Status != universe.StatusIdle {
+			continue
+		}
+
+		// Check primary agent
+		if u.Agent == agentName {
+			if u.ContainerID == "" {
+				return "", "", fmt.Errorf("error: universe %s has no container ID", u.ID)
+			}
+			return u.ContainerID, u.ID, nil
+		}
+
+		// Check multi-agent records
+		for _, a := range u.Agents {
+			if a.Name == agentName && (a.Status == universe.StatusRunning || a.Status == universe.StatusIdle) {
+				if u.ContainerID == "" {
+					return "", "", fmt.Errorf("error: universe %s has no container ID", u.ID)
+				}
+				return u.ContainerID, u.ID, nil
+			}
+		}
+	}
+
+	return "", "", fmt.Errorf("error: agent %q is not in any active universe.\nSpawn it first with: spwn universe --agent %s", agentName, agentName)
+}
+
+// readAuthToken reads the cached OAuth token from ~/.spwn/.auth-token.
+func readAuthToken() string {
+	cachePath := foundation.BaseDir() + "/.auth-token"
+	data, err := os.ReadFile(cachePath)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(data))
 }
