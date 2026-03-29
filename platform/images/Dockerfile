@@ -18,9 +18,10 @@ RUN npm install -g @anthropic-ai/claude-code
 RUN useradd -m -s /bin/bash spwn \
     && echo "spwn ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Create mount points owned by spwn user
+# Create mount points + Claude onboarding flag (required for headless auth)
 RUN mkdir -p /workspace /mind /universe /home/spwn/.claude \
-    && chown -R spwn:spwn /workspace /mind /universe /home/spwn
+    && echo '{"hasCompletedOnboarding":true}' > /home/spwn/.claude.json \
+    && chown -R spwn:spwn /workspace /mind /universe /home/spwn /home/spwn/.claude.json
 
 USER spwn
 WORKDIR /home/spwn
