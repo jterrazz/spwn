@@ -1,53 +1,78 @@
 # Spwn — Project Conventions
 
+## Core Principle: Framework, Not a Product
+
+Spwn is a **framework for orchestrating artificial life**. Every layer is an interface (port) with swappable implementations (adapters). If a tool dies tomorrow, swap one adapter. Core logic never changes.
+
+### The 8 Ports
+
+| Port | What it abstracts | Default adapter |
+|------|-------------------|-----------------|
+| **Runtime** | How agents think | Claude Code (ACP) |
+| **Provider** | Which LLM | Anthropic |
+| **Channel** | How Claw talks to outside | CLI |
+| **Backend** | Where universes run | Docker |
+| **Memory** | How Minds persist | Filesystem (markdown) |
+| **Store** | How state is tracked | JSON file |
+| **Tool** | What agents can do | Built-in + MCP |
+| **Skill** | Reusable capabilities | Local files |
+
 ## Vocabulary
 
+### The Hierarchy
+- **Organization**: Top-level manifest (org.yaml). Org-wide defaults, shared skills, governance, config sync.
+- **Claw**: The God. Always-on ZeroClaw daemon in Docker. Connected to all channels. Creates/destroys universes. Self-manages via spwn.
+- **Universe**: A contained reality. Org-scale, cross-repo. Has physics, elements, and inhabitants. Multiple agents collaborate inside.
+- **Governor**: Leader agent inside a universe. Decomposes tasks, delegates to citizens, aggregates results.
+- **Citizen**: Persistent worker agent. Has a Mind — remembers, learns, evolves.
+- **Visitor**: Ephemeral agent. No Mind, no memory. Single task, fire & forget.
+- **Observatory**: Visual dashboard. Real-time view of everything.
+
 ### The World
-- **Universe**: An isolated Docker container — a reality for an agent. Defined by physics (constants, laws, elements).
-- **Physics**: The reality definition. Constants (CPU, memory, timeout) are finite resources. Laws (network, max-processes) are structural constraints. Elements (@unix, @git, jq) are the building blocks.
-- **Elements**: Building blocks of the world. @packs expand to collections (`@unix` → bash, coreutils, grep…). Individual binaries can be added. If it's not in the element list, it doesn't exist in this reality.
-- **Faculties**: What the agent can actually do — verified elements + gate bridges, auto-generated as `/universe/faculties.md` inside the container.
+- **Physics**: Constants (CPU, memory, timeout), laws (network, max-processes), elements (@unix, @git, jq).
+- **Elements**: Building blocks. @packs expand to collections. If not listed, doesn't exist.
+- **Faculties**: Verified elements + gate bridges, auto-generated as `/universe/faculties.md`.
 
 ### The Life
-- **Agent**: A living entity with persistent identity. Has a Soul (immutable purpose/values), Mind (evolving knowledge), and Body (physical capabilities).
-- **Mind**: The agent's persistent identity — 6 layers of markdown files: personas, skills, knowledge, playbooks, journal, sessions. Mounted at `/mind` inside every universe.
-- **Soul**: Immutable core — purpose, values, bonds. Never changes. Defined in `soul/` directory.
-- **Life Manifest**: Optional `life.yaml` in agent dir — declares identity (soul/mind) and body requirements.
+- **Mind**: Persistent identity — 6 layers: personas, skills, knowledge, playbooks, journal, sessions.
+- **Soul**: Immutable core — purpose, values, bonds. Never changes.
+- **Life Manifest**: `life.yaml` — declares tier, runtime, identity, body requirements.
 
 ### The Bridge
-- **Gate**: Two-sided bridge between Host and Universe. Host-side (Go) manages mounts and element bridging. Container-side (Rust) speaks ACP to the agent CLI.
-- **Gate Bridge**: An MCP server on the Host exposed as a CLI command inside the universe via wrapper scripts at `/gate/bin/`.
-
-### The Infrastructure
-- **Host**: The machine running spwn — physical reality.
-- **Architect**: The orchestrator that creates, manages, and destroys universes.
-- **Operator**: Any entity (human, agent, or code) that interacts with an agent at runtime.
+- **Gate**: Bridge between universe and host. Host-side (Go) manages element bridging. Container-side (Rivet) normalizes runtimes.
+- **Rivet**: Runtime normalization layer. One API across all agent runtimes. Event streaming, session persistence.
 
 ### Evolution (future)
-- **Reflexion**: After each session, review journal → promote successes to playbooks. Natural selection for behavior.
-- **Sleep**: Consolidate raw experience into durable knowledge. Prune stale strategies. Resolve contradictions.
+- **Reflexion**: Review journal → promote successes to playbooks.
+- **Sleep**: Consolidate experience into durable knowledge.
 - **Forking**: Clone a Mind, run experiments, keep the best branch.
 
 ## CLI Commands
 
 ```bash
-spwn init [name]                       # First-time setup (~/.spwn/)
+# Claw (the God)
+spwn claw start / stop / status
+spwn claw connect telegram / slack / discord
+spwn claw "migrate auth to sessions"     # Talk to it
 
-spwn universe                          # Spawn universe with default config
-spwn universe -c node-dev              # Spawn with named config
-spwn universe --agent neo -w .         # Spawn with agent + workspace
-spwn universe list                     # List active universes
-spwn universe inspect <id>             # Show details
-spwn universe logs <id>                # Stream agent output
-spwn universe attach <id>              # Interactive shell
-spwn universe destroy <id>             # Destroy (agent survives)
+# Universe (the world)
+spwn universe                            # Spawn with defaults
+spwn universe -c acme-org                # Named config
+spwn universe --governor morpheus -w ~/acme-org
+spwn universe list / inspect / logs / attach / destroy
 
-spwn agent                             # Spawn default agent
-spwn agent -n neo                      # Spawn named agent
-spwn agent init [name]                 # Create new agent identity
-spwn agent list                        # List all agents
-spwn agent inspect <name>              # Show agent details
-spwn agent export <name>               # Export as tar.gz
+# Agent (citizens)
+spwn agent -n neo --universe u-acme-84721
+spwn agent init [name]
+spwn agent list / inspect / export
+spwn agent talk neo "how's the migration?"
+
+# Visitor (ephemeral)
+spwn visitor "lint src/" --universe u-acme-84721
+spwn visitor "run tests" --universe u-acme-84721
+
+# Observatory
+spwn observatory start / open
 ```
 
 **Design rules:**
@@ -65,12 +90,16 @@ spwn agent export <name>               # Export as tar.gz
 
 ```
 ~/.spwn/
-├── universes/           # Named universe configs (YAML)
+├── org.yaml                 # Organization manifest (source of truth)
+├── claw/
+│   ├── state.json           # Active universes, channels
+│   └── claw.yaml            # Claw runtime config
+├── universes/
 │   ├── default.yaml
-│   └── node-dev.yaml
-├── agents/              # Agent Minds (persistent)
+│   └── acme-org.yaml
+├── agents/
 │   └── neo/
-│       ├── soul/        # purpose.md, values.md, bonds.md
+│       ├── soul/            # purpose.md, values.md, bonds.md
 │       ├── mind/
 │       │   ├── personas/
 │       │   ├── skills/
@@ -78,9 +107,13 @@ spwn agent export <name>               # Export as tar.gz
 │       │   ├── playbooks/
 │       │   └── journal/
 │       ├── sessions/
-│       └── life.yaml    # Optional life manifest
-└── state.json           # Active universe registry
+│       └── life.yaml        # Tier, runtime, identity, body
+└── skills/
+    ├── local/               # Custom skills
+    └── marketplace/         # Downloaded from marketplace
 ```
+
+**Manifest hierarchy (cascading overrides):** `org.yaml` → `universe.yaml` → `life.yaml`. Each level inherits from parent and can override.
 
 ## Repository Structure
 
@@ -175,10 +208,9 @@ Each `core/` module exposes a public API in its root `.go` file. The `internal/`
 
 - No cgo
 - Errors: `error: lowercase message.\nActionable hint.`
-- One agent per universe
+- **Ports & Adapters everywhere** — every external dependency goes through an interface (port). Adapters are swappable.
 - Domain modules own all business logic — CLI is a thin wrapper (parse flags → call domain API → format output)
-- Backend interface abstracts Docker — no direct Docker calls outside `core/universe/internal/backend/`
-- Container-side Gate is Rust (`platform/gate-runtime/`) — separate binary, TCP to host
+- Backend is a port — Docker is just one adapter. No direct Docker calls outside the backend adapter.
 - Types avoid stutter: `universe.World` not `universe.Universe`, `agent.Info` not `agent.AgentInfo`, `gate.Bridge` not `gate.GateBridge`
 - Package name provides context — don't repeat it in type names
 
