@@ -12,35 +12,46 @@ import (
 )
 
 func TestDetach_AgentRunsInBackground(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a universe spawned with a detached agent
+	chain := setup.NewSpawnBuilder(t).
 		WithAgent("detach-agent").
 		Detached().
-		Execute().
-		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-		}).
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.IsRunning()
-		}).
-		ExpectMock(func(m *setup.MockAssertion) {
-			m.WasCalled()
-		})
+		Execute()
+
+	// THEN the state should show one universe
+	chain.ExpectState(func(s *setup.StateAssertion) {
+		s.UniverseCount(1)
+	})
+
+	// AND the container should be running
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.IsRunning()
+	})
+
+	// AND the mock agent should have been invoked
+	chain.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+	})
 }
 
 func TestDetach_MockSeesEnvironment(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a universe spawned with a detached agent
+	chain := setup.NewSpawnBuilder(t).
 		WithAgent("detach-env-agent").
 		Detached().
-		Execute().
-		ExpectMock(func(m *setup.MockAssertion) {
-			m.WasCalled()
-			m.SawMind()
-			m.SawPhysics()
-			m.SawFaculties()
-		})
+		Execute()
+
+	// THEN the mock should see the full agent environment
+	chain.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+		m.SawMind()
+		m.SawPhysics()
+		m.SawFaculties()
+	})
 }
 
 func TestDetach_StatusShowsRunning(t *testing.T) {
+	// GIVEN a universe spawned with a detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("detach-status-agent")
 
@@ -49,7 +60,7 @@ func TestDetach_StatusShowsRunning(t *testing.T) {
 		Detached().
 		Execute()
 
-	// Immediately after detached spawn, status should be running
+	// THEN the state should show the universe as running
 	universes := tc.LoadState()
 	found := false
 	for _, u := range universes {
@@ -66,6 +77,7 @@ func TestDetach_StatusShowsRunning(t *testing.T) {
 }
 
 func TestDetach_MultipleAgentsInSameUniverse(t *testing.T) {
+	// GIVEN a universe with an initial detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("multi-agent")
 
@@ -78,28 +90,32 @@ func TestDetach_MultipleAgentsInSameUniverse(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// Spawn a second agent detached in the same universe
+	// WHEN a second agent is spawned detached in the same universe
 	err := tc.Arc.SpawnAgentDetached(context.Background(), chain.Universe().ID, "multi-agent")
 	if err != nil {
 		t.Fatalf("Second detached agent spawn failed: %v", err)
 	}
 
-	// Give the second agent time to execute
-	time.Sleep(500 * time.Millisecond)
+	// THEN the mock should have been called again (wait for output)
+	setup.WaitFor(t, 5*time.Second, 100*time.Millisecond, "second mock to write output", func() bool {
+		output := tc.TryReadMockOutput(chain.Universe().ContainerID)
+		return output != nil
+	})
 
-	// Container should still be running
+	// AND the container should still be running
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
 	})
 
-	// Mock should have been called (second invocation overwrites the mock output)
+	// AND the mock should confirm it was called
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 	})
 }
 
 func TestDetach_VsNoDetach(t *testing.T) {
-	// Without Detached(), a spawn with agent but no RunAgent() should leave the universe idle
+	// GIVEN a universe spawned with an agent but WITHOUT Detached()
+	// THEN the universe should be idle (agent not started in background)
 	setup.NewSpawnBuilder(t).
 		WithAgent("no-detach-agent").
 		Execute().

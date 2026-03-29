@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/spwn/core/agent"
 	"github.com/jterrazz/spwn/core/universe"
@@ -157,6 +158,35 @@ func (tc *TestContext) DirExistsInContainer(containerID, path string) bool {
 func (tc *TestContext) ReadFileInContainer(containerID, path string) string {
 	tc.T.Helper()
 	return tc.ExecInContainer(containerID, []string{"cat", path})
+}
+
+// WaitFor polls a condition until it returns true or times out.
+// Replaces time.Sleep with proper polling.
+func WaitFor(t *testing.T, timeout time.Duration, interval time.Duration, desc string, condition func() bool) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if condition() {
+			return
+		}
+		time.Sleep(interval)
+	}
+	t.Fatalf("timed out waiting for: %s", desc)
+}
+
+// TryReadMockOutput attempts to read the mock output without fataling.
+// Returns nil if the file doesn't exist or can't be parsed yet.
+func (tc *TestContext) TryReadMockOutput(containerID string) *MockOutput {
+	output, err := tc.Backend.ExecOutput(context.Background(), containerID, []string{"cat", "/tmp/claude-mock.json"})
+	if err != nil {
+		return nil
+	}
+
+	var mock MockOutput
+	if err := json.Unmarshal([]byte(output), &mock); err != nil {
+		return nil
+	}
+	return &mock
 }
 
 // TestdataDir returns the absolute path to platform/fixtures/testdata/ in the repo.

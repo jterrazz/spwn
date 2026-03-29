@@ -7,20 +7,23 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 	agentDomain "github.com/jterrazz/spwn/core/agent"
+	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 )
 
 func TestAgent_ExportCreatesArchive(t *testing.T) {
+	// GIVEN an initialized agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("export-agent")
 
+	// WHEN the agent's Mind is exported
 	outputDir := t.TempDir()
 	archivePath, err := agentDomain.ExportMind("export-agent", outputDir, nil)
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
+	// THEN the archive should exist and be non-empty
 	info, err := os.Stat(archivePath)
 	if err != nil {
 		t.Fatalf("Archive not found: %v", err)
@@ -31,29 +34,28 @@ func TestAgent_ExportCreatesArchive(t *testing.T) {
 }
 
 func TestAgent_ImportRestoresMind(t *testing.T) {
+	// GIVEN an exported agent archive
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("import-src")
 
-	// Export
 	outputDir := t.TempDir()
 	archivePath, err := agentDomain.ExportMind("import-src", outputDir, nil)
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
-	// Import into new agent
+	// WHEN importing the archive into a new agent
 	err = agentDomain.ImportMind("import-dst", archivePath)
 	if err != nil {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// Verify imported agent has the same structure
+	// THEN the imported agent should have personas/default.md
 	info, err := agentDomain.InspectAgent("import-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
 	}
 
-	// Should have personas/default.md
 	files := info.Layers["personas"]
 	found := false
 	for _, f := range files {
@@ -67,31 +69,32 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 }
 
 func TestAgent_ExportWithExclude(t *testing.T) {
+	// GIVEN an agent with a journal entry
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("exclude-agent")
 
-	// Write a file to journal to ensure it exists
 	journalDir := filepath.Join(agentDomain.AgentDir("exclude-agent"), "journal")
 	os.WriteFile(filepath.Join(journalDir, "test.md"), []byte("test"), 0644)
 
+	// WHEN exporting with the journal excluded
 	outputDir := t.TempDir()
 	archivePath, err := agentDomain.ExportMind("exclude-agent", outputDir, []string{"journal"})
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
-	// Import and verify journal was excluded
+	// AND importing into a new agent
 	err = agentDomain.ImportMind("exclude-dst", archivePath)
 	if err != nil {
 		t.Fatalf("Import failed: %v", err)
 	}
 
+	// THEN the imported agent's journal should be empty
 	info, err := agentDomain.InspectAgent("exclude-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
 	}
 
-	// Journal should be empty (excluded from export)
 	if len(info.Layers["journal"]) > 0 {
 		t.Fatalf("Expected empty journal after exclude, got: %v", info.Layers["journal"])
 	}

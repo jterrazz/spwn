@@ -7,25 +7,28 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 	"github.com/jterrazz/spwn/core/universe"
+	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 )
 
 func TestLife_ManifestOptional(t *testing.T) {
-	// No life.yaml → spawn succeeds, agent dir used as-is
-	setup.NewSpawnBuilder(t).
+	// GIVEN an agent without a life.yaml manifest
+	// WHEN a universe is spawned with that agent
+	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
-		Execute().
-		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-		}).
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.IsRunning()
-		})
+		Execute()
+
+	// THEN the spawn should succeed and the container should be running
+	chain.ExpectState(func(s *setup.StateAssertion) {
+		s.UniverseCount(1)
+	})
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.IsRunning()
+	})
 }
 
 func TestLife_BodyRequiresValidation(t *testing.T) {
-	// Create a test context and init agent with life.yaml requiring @node
+	// GIVEN an agent with a life.yaml requiring @node
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("life-agent")
 
@@ -38,14 +41,15 @@ func TestLife_BodyRequiresValidation(t *testing.T) {
 		t.Fatalf("Failed to write life.yaml: %v", err)
 	}
 
-	// Spawn with default config (no @node) — should fail
+	// WHEN spawning with the default config (which does not include @node)
+	// THEN it should fail because the requirement is not satisfied
 	tc.Spawn().
 		WithAgent("life-agent").
 		ExecuteExpectError("requires element")
 }
 
 func TestLife_BodyRequiresSatisfied(t *testing.T) {
-	// Create a test context and init agent with life.yaml requiring @unix
+	// GIVEN an agent with a life.yaml requiring @unix
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("life-agent")
 
@@ -58,12 +62,14 @@ func TestLife_BodyRequiresSatisfied(t *testing.T) {
 		t.Fatalf("Failed to write life.yaml: %v", err)
 	}
 
-	// Default config has @unix — should succeed
-	tc.Spawn().
+	// WHEN spawning with the default config (which includes @unix)
+	chain := tc.Spawn().
 		WithAgent("life-agent").
-		Execute().
-		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-			s.UniverseStatus(universe.StatusIdle)
-		})
+		Execute()
+
+	// THEN the spawn should succeed
+	chain.ExpectState(func(s *setup.StateAssertion) {
+		s.UniverseCount(1)
+		s.UniverseStatus(universe.StatusIdle)
+	})
 }

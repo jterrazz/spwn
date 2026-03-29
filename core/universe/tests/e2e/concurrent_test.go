@@ -12,6 +12,7 @@ import (
 )
 
 func TestConcurrent_SpawnThreeUniverses(t *testing.T) {
+	// GIVEN three different universe configurations
 	tc := setup.NewTestContext(t)
 
 	var mu sync.Mutex
@@ -45,6 +46,7 @@ physics:
 `,
 	}
 
+	// WHEN spawning all three concurrently
 	wg.Add(len(configs))
 	for _, cfg := range configs {
 		cfg := cfg // capture loop variable
@@ -61,17 +63,18 @@ physics:
 	}
 	wg.Wait()
 
+	// THEN all three should be created successfully
 	if len(chains) != 3 {
 		t.Fatalf("Expected 3 chains, got %d", len(chains))
 	}
 
-	// All should be tracked in state
+	// AND state should track all three
 	universes := tc.LoadState()
 	if len(universes) != 3 {
 		t.Fatalf("Expected 3 universes in state, got %d", len(universes))
 	}
 
-	// All IDs should be unique
+	// AND all IDs should be unique
 	ids := make(map[string]bool)
 	for _, chain := range chains {
 		id := chain.Universe().ID
@@ -83,23 +86,24 @@ physics:
 }
 
 func TestConcurrent_ListShowsAll(t *testing.T) {
+	// GIVEN three sequentially spawned universes
 	tc := setup.NewTestContext(t)
 
-	// Spawn 3 universes sequentially (to avoid race in inline YAML file writing)
 	chain1 := tc.Spawn().NoAgent().Execute()
 	chain2 := tc.Spawn().NoAgent().Execute()
 	chain3 := tc.Spawn().NoAgent().Execute()
 
+	// WHEN listing all universes
 	list, err := tc.Arc.List(context.Background())
 	if err != nil {
 		t.Fatalf("List failed: %v", err)
 	}
 
+	// THEN all three should be present and idle
 	if len(list) != 3 {
 		t.Fatalf("Expected 3 universes in list, got %d", len(list))
 	}
 
-	// Each should be idle
 	for _, u := range list {
 		if u.Status != universe.StatusIdle {
 			t.Fatalf("Expected status %q, got %q for universe %s", universe.StatusIdle, u.Status, u.ID)
@@ -112,6 +116,7 @@ func TestConcurrent_ListShowsAll(t *testing.T) {
 }
 
 func TestConcurrent_DestroyAllCleansState(t *testing.T) {
+	// GIVEN three spawned universes
 	tc := setup.NewTestContext(t)
 
 	chains := make([]*setup.AssertionChain, 3)
@@ -119,13 +124,12 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 		chains[i] = tc.Spawn().NoAgent().Execute()
 	}
 
-	// Verify all 3 exist
 	universes := tc.LoadState()
 	if len(universes) != 3 {
 		t.Fatalf("Expected 3 universes before destroy, got %d", len(universes))
 	}
 
-	// Destroy all
+	// WHEN all three are destroyed
 	for _, chain := range chains {
 		_, err := tc.Arc.Destroy(context.Background(), chain.Universe().ID)
 		if err != nil {
@@ -133,7 +137,7 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 		}
 	}
 
-	// State should be empty
+	// THEN the state should be empty
 	universes = tc.LoadState()
 	if len(universes) != 0 {
 		t.Fatalf("Expected 0 universes after destroy all, got %d", len(universes))
@@ -141,6 +145,7 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 }
 
 func TestConcurrent_UniqueIDs(t *testing.T) {
+	// GIVEN five sequentially spawned universes
 	tc := setup.NewTestContext(t)
 
 	const count = 5
@@ -149,6 +154,7 @@ func TestConcurrent_UniqueIDs(t *testing.T) {
 		chains[i] = tc.Spawn().NoAgent().Execute()
 	}
 
+	// THEN all IDs should be unique
 	ids := make(map[string]bool)
 	for _, chain := range chains {
 		id := chain.Universe().ID

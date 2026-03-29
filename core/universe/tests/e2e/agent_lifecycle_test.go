@@ -6,13 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	agentDomain "github.com/jterrazz/spwn/core/agent"
 	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 )
 
 func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {
+	// GIVEN a universe with an agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("lifecycle-agent")
 
@@ -20,19 +20,18 @@ func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {
 		WithAgent("lifecycle-agent").
 		Execute()
 
-	// Verify agent is in the universe
 	chain.ExpectMind(func(m *setup.MindAssertion) {
 		m.HasLayer("personas")
 		m.HasFile("personas/default.md")
 	})
 
-	// Destroy the universe
+	// WHEN the universe is destroyed
 	chain.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
 			s.UniverseCount(0)
 		})
 
-	// Agent should still exist on host
+	// THEN the agent Mind should still exist on the host
 	info, err := agentDomain.InspectAgent("lifecycle-agent")
 	if err != nil {
 		t.Fatalf("Agent should survive universe destruction: %v", err)
@@ -43,10 +42,10 @@ func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {
 }
 
 func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
+	// GIVEN an agent spawned in universe A
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("roaming-agent")
 
-	// Spawn in universe A
 	chainA := tc.Spawn().
 		WithAgent("roaming-agent").
 		Detached().
@@ -59,10 +58,9 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 		m.HasSessionID()
 	})
 
-	// Destroy universe A
+	// WHEN universe A is destroyed and the agent is spawned in universe B
 	chainA.Destroy()
 
-	// Spawn in universe B
 	chainB := tc.Spawn().
 		WithAgent("roaming-agent").
 		Detached().
@@ -75,12 +73,12 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 		m.HasSessionID()
 	})
 
-	// Universe IDs must be different
+	// THEN the universe IDs should differ
 	if universeAID == universeBID {
 		t.Fatalf("Expected different universe IDs, both are %s", universeAID)
 	}
 
-	// Agent Mind should persist across both
+	// AND the agent Mind should persist across both
 	info, err := agentDomain.InspectAgent("roaming-agent")
 	if err != nil {
 		t.Fatalf("Agent inspect failed: %v", err)
@@ -91,10 +89,10 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 }
 
 func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
+	// GIVEN an agent that runs to completion in a first universe
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("journal-multi-agent")
 
-	// First universe — RunAgent writes journal entry
 	chain1 := tc.Spawn().
 		WithAgent("journal-multi-agent").
 		RunAgent().
@@ -105,21 +103,19 @@ func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
 		j.LatestUniverseID(chain1.Universe().ID)
 	})
 
-	// Small delay for timestamp ordering
-	time.Sleep(100 * time.Millisecond)
-
-	// Second universe — RunAgent writes another journal entry
+	// WHEN the agent runs to completion in a second universe
 	chain2 := tc.Spawn().
 		WithAgent("journal-multi-agent").
 		RunAgent().
 		Execute()
 
+	// THEN the journal should have entries from both universes
 	chain2.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(2)
 		j.LatestUniverseID(chain2.Universe().ID)
 	})
 
-	// Verify both entries exist via direct API
+	// AND the entries should reference different universes
 	mindPath := agentDomain.AgentDir("journal-multi-agent")
 	entries, err := agentDomain.ListJournal(mindPath, 0)
 	if err != nil {
@@ -129,7 +125,6 @@ func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
 		t.Fatalf("Expected at least 2 journal entries, got %d", len(entries))
 	}
 
-	// Entries should reference different universes
 	universeIDs := make(map[string]bool)
 	for _, entry := range entries {
 		universeIDs[entry.UniverseID] = true
@@ -140,28 +135,27 @@ func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
 }
 
 func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
+	// GIVEN an agent with a custom knowledge file
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("export-src-agent")
 
-	// Write a custom file into the agent's knowledge layer
 	knowledgePath := filepath.Join(agentDomain.AgentDir("export-src-agent"), "knowledge")
 	os.MkdirAll(knowledgePath, 0755)
 	os.WriteFile(filepath.Join(knowledgePath, "custom.md"), []byte("# Custom Knowledge\nThis is unique."), 0644)
 
-	// Export the agent
+	// WHEN the agent is exported and imported into a new agent
 	outputDir := t.TempDir()
 	archivePath, err := agentDomain.ExportMind("export-src-agent", outputDir, nil)
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
-	// Import into a new agent
 	err = agentDomain.ImportMind("export-dst-agent", archivePath)
 	if err != nil {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// Verify imported agent has the same structure
+	// THEN the imported agent should have the same layer structure
 	srcInfo, err := agentDomain.InspectAgent("export-src-agent")
 	if err != nil {
 		t.Fatalf("Inspect source failed: %v", err)
@@ -171,14 +165,13 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 		t.Fatalf("Inspect destination failed: %v", err)
 	}
 
-	// Both should have the same layers
 	for layer := range srcInfo.Layers {
 		if _, ok := dstInfo.Layers[layer]; !ok {
 			t.Fatalf("Imported agent missing layer %q", layer)
 		}
 	}
 
-	// Verify the custom knowledge file was preserved
+	// AND the custom knowledge file should be preserved
 	customPath := filepath.Join(agentDomain.AgentDir("export-dst-agent"), "knowledge", "custom.md")
 	content, err := os.ReadFile(customPath)
 	if err != nil {
@@ -190,32 +183,35 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 }
 
 func TestAgentLifecycle_CustomPersonasFile(t *testing.T) {
+	// GIVEN an agent with a custom persona file
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("persona-agent")
 
-	// Write a custom personas file
 	personasDir := filepath.Join(agentDomain.AgentDir("persona-agent"), "personas")
 	os.WriteFile(filepath.Join(personasDir, "custom.md"), []byte("# Custom Persona\nYou are a specialist."), 0644)
 
-	// Spawn with agent and verify mock sees the Mind (which includes custom persona)
-	tc.Spawn().
+	// WHEN the agent is spawned in a universe
+	chain := tc.Spawn().
 		WithAgent("persona-agent").
 		Detached().
-		Execute().
-		ExpectMock(func(m *setup.MockAssertion) {
-			m.WasCalled()
-			m.SawMind()
-		}).
-		ExpectMind(func(m *setup.MindAssertion) {
-			m.HasFile("personas/custom.md")
-		})
+		Execute()
+
+	// THEN the mock should see the Mind with the custom persona
+	chain.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+		m.SawMind()
+	})
+
+	chain.ExpectMind(func(m *setup.MindAssertion) {
+		m.HasFile("personas/custom.md")
+	})
 }
 
 func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
+	// GIVEN an agent spawned in universe A
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("session-diff-agent")
 
-	// Spawn in universe A
 	chainA := tc.Spawn().
 		WithAgent("session-diff-agent").
 		Detached().
@@ -226,10 +222,9 @@ func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
 		m.HasSessionID()
 	})
 
-	// Destroy universe A
+	// WHEN universe A is destroyed and the agent is spawned in universe B
 	chainA.Destroy()
 
-	// Spawn in universe B
 	chainB := tc.Spawn().
 		WithAgent("session-diff-agent").
 		Detached().
@@ -240,7 +235,7 @@ func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
 		m.HasSessionID()
 	})
 
-	// Session IDs should be deterministic but different per universe
+	// THEN the session IDs should be deterministic but different per universe
 	sessionA := agentDomain.DeterministicSessionID("session-diff-agent", chainA.Universe().ID)
 	sessionB := agentDomain.DeterministicSessionID("session-diff-agent", chainB.Universe().ID)
 

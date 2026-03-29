@@ -6,38 +6,14 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 )
 
-func TestLogs_ReturnsReaderFromRunningUniverse(t *testing.T) {
-	tc := setup.NewTestContext(t)
-	tc.InitAgent("logs-agent")
-
-	chain := tc.Spawn().
-		WithAgent("logs-agent").
-		Detached().
-		Execute()
-
-	reader, err := tc.Arc.Logs(context.Background(), chain.Universe().ID, false, "10")
-	if err != nil {
-		t.Fatalf("Logs() returned error: %v", err)
-	}
-	defer reader.Close()
-
-	// Read available output — mock writes to stdout, so we should get something
-	buf := make([]byte, 4096)
-	n, err := reader.Read(buf)
-	if err != nil && err != io.EOF {
-		t.Fatalf("Failed to read logs: %v", err)
-	}
-	if n == 0 {
-		t.Log("No log output captured (mock may not have written to stdout yet)")
-	}
-}
-
 func TestLogs_ContainsMockOutput(t *testing.T) {
+	// GIVEN a universe with a detached agent that writes to stdout
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("logs-content-agent")
 
@@ -46,7 +22,7 @@ func TestLogs_ContainsMockOutput(t *testing.T) {
 		Detached().
 		Execute()
 
-	// Verify mock was called first
+	// WHEN we read the logs
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 	})
@@ -60,11 +36,16 @@ func TestLogs_ContainsMockOutput(t *testing.T) {
 	var output bytes.Buffer
 	io.Copy(&output, reader)
 
-	// The reader should be valid and readable (content depends on mock behavior)
-	t.Logf("Captured %d bytes of log output", output.Len())
+	// THEN the log output should contain content from the mock's stdout
+	logContent := output.String()
+	if output.Len() == 0 {
+		t.Fatal("Expected log output to contain bytes, got 0")
+	}
+	t.Logf("Captured %d bytes of log output: %s", output.Len(), logContent)
 }
 
 func TestLogs_NoFollowReturnsImmediately(t *testing.T) {
+	// GIVEN a universe with a detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("logs-nofollow-agent")
 
@@ -73,45 +54,90 @@ func TestLogs_NoFollowReturnsImmediately(t *testing.T) {
 		Detached().
 		Execute()
 
-	// With follow=false, Logs should return and the reader should be finite
+	// WHEN we read logs with follow=false
 	reader, err := tc.Arc.Logs(context.Background(), chain.Universe().ID, false, "5")
 	if err != nil {
 		t.Fatalf("Logs(follow=false) returned error: %v", err)
 	}
 	defer reader.Close()
 
-	// Reading should eventually reach EOF (not hang forever)
+	// THEN reading should reach EOF (not hang forever) and return bytes
 	var buf bytes.Buffer
 	_, err = io.Copy(&buf, reader)
 	if err != nil {
 		t.Fatalf("Failed to read all log output: %v", err)
 	}
-}
-
-func TestLogs_NonExistentUniverseReturnsError(t *testing.T) {
-	tc := setup.NewTestContext(t)
-
-	_, err := tc.Arc.Logs(context.Background(), "u-nonexistent-12345", false, "10")
-	if err == nil {
-		t.Fatal("Expected error when getting logs for non-existent universe, got nil")
+	if buf.Len() == 0 {
+		t.Fatal("Expected non-empty log output from follow=false reader")
 	}
 }
 
 func TestLogs_IdleUniverseWithoutAgent(t *testing.T) {
+	// GIVEN a universe with no agent (idle)
 	tc := setup.NewTestContext(t)
 
 	chain := tc.Spawn().
 		NoAgent().
 		Execute()
 
-	// Logs should still work on an idle container (just no agent output)
+	// WHEN we read logs from the idle container
 	reader, err := tc.Arc.Logs(context.Background(), chain.Universe().ID, false, "5")
 	if err != nil {
 		t.Fatalf("Logs() on idle universe returned error: %v", err)
 	}
 	defer reader.Close()
 
+	// THEN the reader should return without error (content may be empty for idle container)
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, reader)
+	if err != nil {
+		t.Fatalf("Reading logs from idle universe should not error: %v", err)
+	}
+}
+
+func TestLogs_NonExistentUniverseReturnsError(t *testing.T) {
+	// GIVEN a test context with no universes
+	tc := setup.NewTestContext(t)
+
+	// WHEN we request logs for a non-existent universe
+	_, err := tc.Arc.Logs(context.Background(), "u-nonexistent-12345", false, "10")
+
+	// THEN it should return an error
+	if err == nil {
+		t.Fatal("Expected error when getting logs for non-existent universe, got nil")
+	}
+}
+
+func TestLogs_ReturnsReaderFromRunningUniverse(t *testing.T) {
+	// GIVEN a universe with a detached agent
+	tc := setup.NewTestContext(t)
+	tc.InitAgent("logs-agent")
+
+	chain := tc.Spawn().
+		WithAgent("logs-agent").
+		Detached().
+		Execute()
+
+	// WHEN we request a log reader
+	reader, err := tc.Arc.Logs(context.Background(), chain.Universe().ID, false, "10")
+	if err != nil {
+		t.Fatalf("Logs() returned error: %v", err)
+	}
+	defer reader.Close()
+
+	// THEN the reader should provide output from the running container
 	var buf bytes.Buffer
 	io.Copy(&buf, reader)
-	// No assertion on content — idle container may have no output
+
+	// The mock writes a JSON blob and echoes to stdout; we should see something
+	if buf.Len() == 0 {
+		t.Fatal("Expected log output from running universe, got 0 bytes")
+	}
+
+	// Verify the output looks like it came from the mock (it writes JSON to a file
+	// but the container entrypoint or mock may echo to stdout)
+	logStr := buf.String()
+	if !strings.Contains(logStr, "{") && buf.Len() < 10 {
+		t.Logf("Log output was short and didn't contain JSON markers: %q", logStr)
+	}
 }

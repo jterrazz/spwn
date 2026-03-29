@@ -5,24 +5,30 @@ package e2e
 import (
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 	agentDomain "github.com/jterrazz/spwn/core/agent"
+	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 )
 
 func TestDestroy_RemovesContainer(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a universe with no agent
+	// WHEN the universe is destroyed
+	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
-		Execute().
-		Destroy().
+		Execute()
+
+	chain.Destroy().
+		// THEN the state should have no universes
 		ExpectState(func(s *setup.StateAssertion) {
 			s.UniverseCount(0)
 		}).
+		// AND the container should no longer exist
 		ExpectContainer(func(c *setup.ContainerAssertion) {
 			c.NotExists()
 		})
 }
 
 func TestDestroy_AgentSurvives(t *testing.T) {
+	// GIVEN a universe with an agent
 	ctx := setup.NewTestContext(t)
 	ctx.InitAgent("survivor-agent")
 
@@ -30,12 +36,13 @@ func TestDestroy_AgentSurvives(t *testing.T) {
 		WithAgent("survivor-agent").
 		Execute()
 
+	// WHEN the universe is destroyed
 	u.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
 			s.UniverseCount(0)
 		})
 
-	// Agent Mind still exists on host
+	// THEN the agent Mind should still exist on the host
 	info, err := agentDomain.InspectAgent("survivor-agent")
 	if err != nil {
 		t.Fatalf("Agent should survive after destroy: %v", err)
