@@ -187,6 +187,25 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("image_ready", image)
 
+	// Forward AI provider credentials to the container
+	var env []string
+	for _, key := range []string{
+		"ANTHROPIC_API_KEY",
+		"OPENAI_API_KEY",
+		"GOOGLE_API_KEY",
+	} {
+		if val := os.Getenv(key); val != "" {
+			env = append(env, key+"="+val)
+		}
+	}
+
+	// Mount Claude auth directory for subscription mode (~/.claude/)
+	home, _ := os.UserHomeDir()
+	claudeAuthDir := filepath.Join(home, ".claude")
+	if _, err := os.Stat(claudeAuthDir); err == nil {
+		binds = append(binds, claudeAuthDir+":/root/.claude:ro")
+	}
+
 	// Create container
 	containerCfg := backend.ContainerConfig{
 		Image:       image,
@@ -196,6 +215,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		PidsLimit:   int64(opts.Manifest.Physics.Laws.MaxProcesses),
 		NetworkMode: opts.Manifest.Physics.Laws.Network,
 		Binds:       binds,
+		Env:         env,
 	}
 
 	// Gate bridges require network access to reach the host-side server.

@@ -1,10 +1,9 @@
 FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    curl \
-    git \
-    jq \
+    bash coreutils findutils grep sed gawk \
+    ca-certificates curl wget git jq \
+    python3 make gcc g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Node.js 20
