@@ -1,0 +1,213 @@
+package ui
+
+import (
+	"bytes"
+	"errors"
+	"io"
+	"strings"
+	"testing"
+)
+
+// newTestStepper creates a Stepper that writes to a buffer instead of stderr.
+func newTestStepper(mode Mode) (*Stepper, *bytes.Buffer) {
+	buf := &bytes.Buffer{}
+	s := &Stepper{
+		mode:  mode,
+		w:     buf,
+		isTTY: false, // non-TTY so spinners don't run
+	}
+	return s, buf
+}
+
+func TestStepper_Done_WithDetail(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Done("Built image", "sha256:abc")
+
+	out := buf.String()
+	if !strings.Contains(out, "Built image") {
+		t.Errorf("Done() output missing label, got %q", out)
+	}
+	if !strings.Contains(out, "sha256:abc") {
+		t.Errorf("Done() output missing detail, got %q", out)
+	}
+}
+
+func TestStepper_Done_WithoutDetail(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Done("Complete", "")
+
+	out := buf.String()
+	if !strings.Contains(out, "Complete") {
+		t.Errorf("Done() output missing label, got %q", out)
+	}
+}
+
+func TestStepper_Fail_WithError(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Fail("Spawn failed", errors.New("container timeout"))
+
+	out := buf.String()
+	if !strings.Contains(out, "Spawn failed") {
+		t.Errorf("Fail() output missing label, got %q", out)
+	}
+	if !strings.Contains(out, "container timeout") {
+		t.Errorf("Fail() output missing error message, got %q", out)
+	}
+}
+
+func TestStepper_Fail_WithoutError(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Fail("Something broke", nil)
+
+	out := buf.String()
+	if !strings.Contains(out, "Something broke") {
+		t.Errorf("Fail() output missing label, got %q", out)
+	}
+}
+
+func TestStepper_Log_VerboseMode(t *testing.T) {
+	s, buf := newTestStepper(ModeVerbose)
+	s.Log("pulling layer %d", 3)
+
+	out := buf.String()
+	if !strings.Contains(out, "pulling layer 3") {
+		t.Errorf("Log() in verbose mode should output message, got %q", out)
+	}
+}
+
+func TestStepper_Log_NormalMode_Suppressed(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Log("should not appear")
+
+	if buf.Len() != 0 {
+		t.Errorf("Log() in normal mode should be suppressed, got %q", buf.String())
+	}
+}
+
+func TestStepper_QuietMode_SuppressesAll(t *testing.T) {
+	s, buf := newTestStepper(ModeQuiet)
+
+	s.Done("label", "detail")
+	s.Fail("err", errors.New("oops"))
+	s.Blank()
+	s.Success("yay")
+	s.Warn("caution", "something")
+	s.Info("key", "val")
+
+	if buf.Len() != 0 {
+		t.Errorf("quiet mode should suppress all output, got %q", buf.String())
+	}
+}
+
+func TestStepper_JSONMode_SuppressesAll(t *testing.T) {
+	s, buf := newTestStepper(ModeJSON)
+
+	s.Done("label", "detail")
+	s.Fail("err", errors.New("oops"))
+	s.Blank()
+	s.Success("yay")
+	s.Warn("caution", "something")
+	s.Info("key", "val")
+
+	if buf.Len() != 0 {
+		t.Errorf("JSON mode should suppress all output, got %q", buf.String())
+	}
+}
+
+func TestStepper_Success(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Success("Universe spawned.")
+
+	out := buf.String()
+	if !strings.Contains(out, "Universe spawned.") {
+		t.Errorf("Success() output missing message, got %q", out)
+	}
+}
+
+func TestStepper_Warn_WithDetail(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Warn("Deprecated", "use --new-flag")
+
+	out := buf.String()
+	if !strings.Contains(out, "Deprecated") {
+		t.Errorf("Warn() output missing label, got %q", out)
+	}
+	if !strings.Contains(out, "use --new-flag") {
+		t.Errorf("Warn() output missing detail, got %q", out)
+	}
+}
+
+func TestStepper_Info(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Info("Universe:", "u-nebula-12345")
+
+	out := buf.String()
+	if !strings.Contains(out, "Universe:") {
+		t.Errorf("Info() output missing label, got %q", out)
+	}
+	if !strings.Contains(out, "u-nebula-12345") {
+		t.Errorf("Info() output missing value, got %q", out)
+	}
+}
+
+func TestStepper_Blank(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.Blank()
+
+	if buf.String() != "\n" {
+		t.Errorf("Blank() should output a single newline, got %q", buf.String())
+	}
+}
+
+func TestStepper_Writer_VerboseMode(t *testing.T) {
+	s, _ := newTestStepper(ModeVerbose)
+	w := s.Writer()
+	if w == io.Discard {
+		t.Error("Writer() in verbose mode should not return io.Discard")
+	}
+}
+
+func TestStepper_Writer_NormalMode(t *testing.T) {
+	s, _ := newTestStepper(ModeNormal)
+	w := s.Writer()
+	if w != io.Discard {
+		t.Error("Writer() in normal mode should return io.Discard")
+	}
+}
+
+func TestStepper_Start_VerboseMode(t *testing.T) {
+	s, buf := newTestStepper(ModeVerbose)
+	s.Start("Building image...")
+
+	out := buf.String()
+	if !strings.Contains(out, "Building image...") {
+		t.Errorf("Start() in verbose mode should print message, got %q", out)
+	}
+}
+
+func TestStepper_Start_QuietMode_Suppressed(t *testing.T) {
+	s, buf := newTestStepper(ModeQuiet)
+	s.Start("Building image...")
+
+	if buf.Len() != 0 {
+		t.Errorf("Start() in quiet mode should be suppressed, got %q", buf.String())
+	}
+}
+
+func TestIndentWriter(t *testing.T) {
+	var buf bytes.Buffer
+	iw := &indentWriter{w: &buf, prefix: "    "}
+
+	_, err := iw.Write([]byte("line1\nline2\nline3\n"))
+	if err != nil {
+		t.Fatalf("Write error: %v", err)
+	}
+
+	out := buf.String()
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	for i, line := range lines {
+		if !strings.HasPrefix(line, "    ") {
+			t.Errorf("line %d missing indent prefix: %q", i, line)
+		}
+	}
+}
