@@ -100,8 +100,17 @@ If no message is provided, opens an interactive Claude session inside the contai
 	},
 }
 
+// isContainerRunning checks if a Docker container is actually alive.
+func isContainerRunning(containerID string) bool {
+	out, err := exec.Command("docker", "inspect", "--format", "{{.State.Running}}", containerID).Output()
+	if err != nil {
+		return false
+	}
+	return strings.TrimSpace(string(out)) == "true"
+}
+
 // findAgentContainer looks up state.json to find a running universe
-// that contains the given agent. Returns (containerID, universeID, error).
+// that contains the given agent. Verifies the container is actually alive.
 func findAgentContainer(agentName string) (string, string, error) {
 	ctx := context.Background()
 
@@ -117,21 +126,23 @@ func findAgentContainer(agentName string) (string, string, error) {
 
 	// Check the primary agent field, then the agents array
 	for _, u := range universes {
-		if u.Status != universe.StatusRunning && u.Status != universe.StatusIdle {
+		if u.ContainerID == "" {
+			continue
+		}
+
+		// Verify the container is actually running (not just in state.json)
+		if !isContainerRunning(u.ContainerID) {
 			continue
 		}
 
 		// Check primary agent
 		if u.Agent == agentName {
-			if u.ContainerID == "" {
-				return "", "", fmt.Errorf("error: universe %s has no container ID", u.ID)
-			}
 			return u.ContainerID, u.ID, nil
 		}
 
 		// Check multi-agent records
 		for _, a := range u.Agents {
-			if a.Name == agentName && (a.Status == universe.StatusRunning || a.Status == universe.StatusIdle) {
+			if a.Name == agentName {
 				if u.ContainerID == "" {
 					return "", "", fmt.Errorf("error: universe %s has no container ID", u.ID)
 				}
