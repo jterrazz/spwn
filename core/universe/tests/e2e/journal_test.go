@@ -4,13 +4,13 @@ package e2e
 
 import (
 	"testing"
-	"time"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 	agentDomain "github.com/jterrazz/spwn/core/agent"
+	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 )
 
 func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
+	// GIVEN a universe with an agent that runs to completion
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("journal-agent")
 
@@ -19,6 +19,7 @@ func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
 		RunAgent().
 		Execute()
 
+	// THEN a journal entry should be created with the correct outcome and universe ID
 	chain.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(1)
 		j.LatestOutcome("completed")
@@ -27,35 +28,33 @@ func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
 }
 
 func TestJournal_ListReturnsNewestFirst(t *testing.T) {
+	// GIVEN an agent that has run in two separate universes
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("journal-order")
 
-	// First spawn
 	chain1 := tc.Spawn().
 		WithAgent("journal-order").
 		RunAgent().
 		Execute()
 
-	// Small delay to ensure different timestamps
-	time.Sleep(100 * time.Millisecond)
-
-	// Second spawn (new universe)
 	chain2 := tc.Spawn().
 		WithAgent("journal-order").
 		RunAgent().
 		Execute()
 
+	// WHEN listing journal entries
 	mindPath := agentDomain.AgentDir("journal-order")
 	entries, err := agentDomain.ListJournal(mindPath, 0)
 	if err != nil {
 		t.Fatalf("Failed to list journal: %v", err)
 	}
 
+	// THEN there should be at least 2 entries
 	if len(entries) < 2 {
 		t.Fatalf("Expected at least 2 journal entries, got %d", len(entries))
 	}
 
-	// Newest first — second spawn's universe ID should be first
+	// AND the newest entry (index 0) should reference the second universe
 	if entries[0].UniverseID != chain2.Universe().ID {
 		t.Fatalf("Expected newest entry to be %s, got %s", chain2.Universe().ID, entries[0].UniverseID)
 	}

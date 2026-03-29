@@ -145,8 +145,10 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 			if err != nil {
 				b.tc.T.Fatalf("SpawnAgentDetached failed: %v", err)
 			}
-			// Give the mock a moment to write its output
-			time.Sleep(500 * time.Millisecond)
+			// Wait for the mock to write its output
+			WaitFor(b.tc.T, 5*time.Second, 100*time.Millisecond, "mock to write output", func() bool {
+				return b.tc.TryReadMockOutput(u.ContainerID) != nil
+			})
 		}
 	}
 

@@ -7,54 +7,63 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
-	"github.com/jterrazz/spwn/core/universe"
 	agentDomain "github.com/jterrazz/spwn/core/agent"
 	"github.com/jterrazz/spwn/core/foundation"
+	"github.com/jterrazz/spwn/core/universe"
+	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
 )
 
 func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
-	// Fresh test context — no init, no agent init, nothing.
-	// Simulate what ensureDefaults() does in PersistentPreRunE.
+	// GIVEN default config and default agent are created (simulating ensureDefaults)
 	universe.CreateDefaultConfig()
 	agentDomain.InitMind("default")
 
-	setup.NewSpawnBuilder(t).
+	// WHEN a universe is spawned with no agent
+	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
-		Execute().
-		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-			s.UniverseStatus(universe.StatusIdle)
-		}).
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.IsRunning()
-			c.HasFile("/universe/physics.md")
-			c.HasFile("/universe/faculties.md")
-		})
+		Execute()
+
+	// THEN the state should show one idle universe with physics and faculties
+	chain.ExpectState(func(s *setup.StateAssertion) {
+		s.UniverseCount(1)
+		s.UniverseStatus(universe.StatusIdle)
+	})
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.IsRunning()
+		c.HasFile("/universe/physics.md")
+		c.HasFile("/universe/faculties.md")
+	})
 }
 
 func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
+	// GIVEN default config and default agent
 	universe.CreateDefaultConfig()
 	agentDomain.InitMind("default")
 
-	setup.NewSpawnBuilder(t).
+	// WHEN a universe is spawned with the default agent
+	chain := setup.NewSpawnBuilder(t).
 		WithAgent("default").
-		Execute().
-		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-			s.HasAgent("default")
-		}).
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.IsRunning()
-			c.HasMount("/mind")
-		}).
-		ExpectMind(func(m *setup.MindAssertion) {
-			m.HasLayer("personas")
-			m.HasFile("personas/default.md")
-		})
+		Execute()
+
+	// THEN the state should track the agent
+	chain.ExpectState(func(s *setup.StateAssertion) {
+		s.UniverseCount(1)
+		s.HasAgent("default")
+	})
+
+	// AND the Mind should be mounted with standard layers
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.IsRunning()
+		c.HasMount("/mind")
+	})
+	chain.ExpectMind(func(m *setup.MindAssertion) {
+		m.HasLayer("personas")
+		m.HasFile("personas/default.md")
+	})
 }
 
 func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
+	// GIVEN a fresh SPWN_HOME with the default config created
 	tmpDir := t.TempDir()
 	t.Setenv("SPWN_HOME", tmpDir)
 
@@ -62,11 +71,13 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 		t.Fatalf("CreateDefault failed: %v", err)
 	}
 
+	// WHEN the manifest is loaded
 	m, err := universe.LoadManifest("default")
 	if err != nil {
 		t.Fatalf("Load default failed: %v", err)
 	}
 
+	// THEN it should have the expected foundation defaults
 	if m.Physics.Constants.CPU != foundation.DefaultCPU {
 		t.Errorf("Expected CPU %d, got %d", foundation.DefaultCPU, m.Physics.Constants.CPU)
 	}
@@ -79,9 +90,9 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 }
 
 func TestDefaults_DefaultAgentIsValid(t *testing.T) {
+	// GIVEN a fresh SPWN_HOME with the default agent initialized
 	tmpDir := t.TempDir()
 	t.Setenv("SPWN_HOME", tmpDir)
-
 	os.MkdirAll(filepath.Join(tmpDir, "agents"), 0755)
 
 	_, err := agentDomain.InitMind("default")
@@ -89,18 +100,21 @@ func TestDefaults_DefaultAgentIsValid(t *testing.T) {
 		t.Fatalf("Init failed: %v", err)
 	}
 
-	if err := agentDomain.ValidateMind("default"); err != nil {
+	// WHEN validating the agent
+	err = agentDomain.ValidateMind("default")
+
+	// THEN it should pass validation
+	if err != nil {
 		t.Fatalf("Validate after Init failed: %v", err)
 	}
 }
 
 func TestDefaults_IdempotentRerun(t *testing.T) {
+	// GIVEN default config and agent are created once
 	tmpDir := t.TempDir()
 	t.Setenv("SPWN_HOME", tmpDir)
-
 	os.MkdirAll(filepath.Join(tmpDir, "agents"), 0755)
 
-	// First run
 	if err := universe.CreateDefaultConfig(); err != nil {
 		t.Fatalf("First CreateDefault failed: %v", err)
 	}
@@ -108,11 +122,11 @@ func TestDefaults_IdempotentRerun(t *testing.T) {
 		t.Fatalf("First Init failed: %v", err)
 	}
 
-	// Second run — should not corrupt files (errors are expected, just ignore them)
+	// WHEN creating them again (idempotent re-run)
 	universe.CreateDefaultConfig()
 	agentDomain.InitMind("default")
 
-	// Everything should still be valid
+	// THEN the config and agent should still be valid
 	if _, err := universe.LoadManifest("default"); err != nil {
 		t.Fatalf("Load after idempotent create failed: %v", err)
 	}

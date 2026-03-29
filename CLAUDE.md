@@ -266,3 +266,28 @@ Three-layer pyramid:
 | **Cross-domain** | `apps/cli/tests/integration/` | ~2min | Docker |
 
 Each domain tests only its own contract. Cross-domain flows (spawn universe + agent → verify journal) are the CLI's responsibility.
+
+## Development Methodology: Spec-First
+
+Spwn follows a **spec-first** development process:
+
+1. **Specify** — Define behavior in the blueprint (what the system SHOULD do)
+2. **Encode** — Write tests that encode those specs (they fail initially)
+3. **Implement** — Write code that makes the tests pass
+4. **Verify** — The test suite IS the living specification
+
+The E2E test suite is the behavioral specification of spwn. Each test describes a user-visible behavior:
+
+```go
+// GIVEN a universe with a governor and two citizens
+// WHEN the governor delegates a task
+// THEN both citizens receive work
+// AND the governor aggregates results
+```
+
+### Test layers:
+- **Behavioral specs** (`core/*/tests/`) — what the system does (the specification)
+- **CLI specs** (`apps/cli/cli_test.go`) — what the user sees (flag parsing, help, output)
+- **Unit tests** (`*_test.go` next to source) — how the code works (implementation details)
+
+The behavioral specs are the source of truth. If a spec fails, the implementation is wrong — not the spec.

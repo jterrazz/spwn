@@ -11,50 +11,58 @@ import (
 )
 
 func TestConfig_SpawnWithNamedConfig(t *testing.T) {
+	// GIVEN a named config "custom"
 	tc := setup.NewTestContext(t)
 
-	// Create a named config
 	if err := universe.CreateConfig("custom"); err != nil {
 		t.Fatalf("CreateConfig failed: %v", err)
 	}
 
-	tc.Spawn().
+	// WHEN a universe is spawned with that config
+	chain := tc.Spawn().
 		WithConfig("custom").
 		NoAgent().
-		Execute().
-		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-			s.UniverseStatus(universe.StatusIdle)
-		}).
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.IsRunning()
-		}).
-		Inspect().
-		ExpectConfig("custom")
+		Execute()
+
+	// THEN the state should show one idle universe
+	chain.ExpectState(func(s *setup.StateAssertion) {
+		s.UniverseCount(1)
+		s.UniverseStatus(universe.StatusIdle)
+	})
+
+	// AND the container should be running with the custom config
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.IsRunning()
+	})
+	chain.Inspect().ExpectConfig("custom")
 }
 
 func TestConfig_DefaultsApplied(t *testing.T) {
-	// Spawn with minimal YAML — defaults should fill in the rest
-	setup.NewSpawnBuilder(t).
+	// GIVEN a minimal YAML config with only elements specified
+	// WHEN a universe is spawned
+	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   elements:
     - "@unix"
 `).
 		NoAgent().
-		Execute().
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.IsRunning()
-			c.HasFile("/universe/physics.md")
-			c.HasFile("/universe/faculties.md")
-			// Defaults should be applied for constants
-			c.FileContains("/universe/physics.md", "core(s)")
-			c.FileContains("/universe/physics.md", "m")
-		})
+		Execute()
+
+	// THEN default constants should be applied
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.IsRunning()
+		c.HasFile("/universe/physics.md")
+		c.HasFile("/universe/faculties.md")
+		c.FileContains("/universe/physics.md", "core(s)")
+		c.FileContains("/universe/physics.md", "m")
+	})
 }
 
 func TestConfig_CustomCPUReflectedInPhysics(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a config with custom CPU, memory, disk, and timeout
+	// WHEN a universe is spawned
+	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   constants:
@@ -64,17 +72,21 @@ physics:
     timeout: 120m
 `).
 		NoAgent().
-		Execute().
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.FileContains("/universe/physics.md", "4 core(s)")
-			c.FileContains("/universe/physics.md", "2g")
-			c.FileContains("/universe/physics.md", "8g")
-			c.FileContains("/universe/physics.md", "120m")
-		})
+		Execute()
+
+	// THEN the physics file should reflect the custom values
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.FileContains("/universe/physics.md", "4 core(s)")
+		c.FileContains("/universe/physics.md", "2g")
+		c.FileContains("/universe/physics.md", "8g")
+		c.FileContains("/universe/physics.md", "120m")
+	})
 }
 
 func TestConfig_CustomElementsReflectedInFaculties(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a config with @unix and @git elements
+	// WHEN a universe is spawned
+	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   elements:
@@ -82,32 +94,39 @@ physics:
     - "@git"
 `).
 		NoAgent().
-		Execute().
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.HasFile("/universe/faculties.md")
-			c.FileContains("/universe/faculties.md", "bash")
-			c.FileContains("/universe/faculties.md", "git")
-		})
+		Execute()
+
+	// THEN the faculties file should list bash and git
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.HasFile("/universe/faculties.md")
+		c.FileContains("/universe/faculties.md", "bash")
+		c.FileContains("/universe/faculties.md", "git")
+	})
 }
 
 func TestConfig_CustomNetworkLawReflectedInPhysics(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a config with bridge network mode
+	// WHEN a universe is spawned
+	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   laws:
     network: bridge
 `).
 		NoAgent().
-		Execute().
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.HasFile("/universe/physics.md")
-			// Bridge mode should not say "No outbound network"
-			c.FileContains("/universe/physics.md", "bridge")
-		})
+		Execute()
+
+	// THEN the physics file should reflect bridge mode
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.HasFile("/universe/physics.md")
+		c.FileContains("/universe/physics.md", "bridge")
+	})
 }
 
 func TestConfig_CustomMaxProcesses(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a config with a custom max-processes law
+	// WHEN a universe is spawned
+	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   laws:
@@ -115,45 +134,55 @@ physics:
     max-processes: 256
 `).
 		NoAgent().
-		Execute().
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.FileContains("/universe/physics.md", "256")
-		})
+		Execute()
+
+	// THEN the physics file should contain the custom process limit
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.FileContains("/universe/physics.md", "256")
+	})
 }
 
 func TestConfig_GateBridgesInConfig(t *testing.T) {
+	// GIVEN a config with a gate bridge
 	bridge := gate.Bridge{
 		Source:       "mcp/config-tool",
 		As:           "config-bridge",
 		Capabilities: []string{"read", "write"},
 	}
 
-	setup.NewSpawnBuilder(t).
+	// WHEN a universe is spawned with the bridge
+	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
 		WithGate(bridge).
-		Execute().
-		ExpectGate(func(g *setup.GateAssertion) {
-			g.HasBridge("config-bridge")
-			g.BridgeIsExecutable("config-bridge")
-		}).
-		ExpectContainer(func(c *setup.ContainerAssertion) {
-			c.FileContains("/universe/faculties.md", "config-bridge")
-		})
+		Execute()
+
+	// THEN the bridge should be installed and executable
+	chain.ExpectGate(func(g *setup.GateAssertion) {
+		g.HasBridge("config-bridge")
+		g.BridgeIsExecutable("config-bridge")
+	})
+
+	// AND the faculties should reference the bridge
+	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
+		c.FileContains("/universe/faculties.md", "config-bridge")
+	})
 }
 
 func TestConfig_LoadAndVerifyManifest(t *testing.T) {
+	// GIVEN the default config has been created
 	tc := setup.NewTestContext(t)
 
 	if err := universe.CreateDefaultConfig(); err != nil {
 		t.Fatalf("CreateDefaultConfig failed: %v", err)
 	}
 
+	// WHEN loading the manifest
 	m, err := universe.LoadManifest("default")
 	if err != nil {
 		t.Fatalf("LoadManifest failed: %v", err)
 	}
 
-	// Verify defaults are reasonable
+	// THEN the defaults should have reasonable values
 	if m.Physics.Constants.CPU == 0 {
 		t.Fatal("Expected non-zero CPU in default config")
 	}
@@ -168,6 +197,7 @@ func TestConfig_LoadAndVerifyManifest(t *testing.T) {
 }
 
 func TestConfig_ValidateRejectsInvalidManifest(t *testing.T) {
+	// GIVEN a manifest with an invalid network mode
 	m := universe.Manifest{
 		Physics: universe.PhysicsManifest{
 			Laws: universe.LawsManifest{
@@ -176,7 +206,10 @@ func TestConfig_ValidateRejectsInvalidManifest(t *testing.T) {
 		},
 	}
 
+	// WHEN validating the manifest
 	err := universe.ValidateManifest(m)
+
+	// THEN it should return an error
 	if err == nil {
 		t.Fatal("Expected validation error for invalid network mode, got nil")
 	}

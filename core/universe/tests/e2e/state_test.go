@@ -13,16 +13,16 @@ import (
 )
 
 func TestState_FileCreatedOnFirstSpawn(t *testing.T) {
+	// GIVEN a fresh test context
 	tc := setup.NewTestContext(t)
-
 	statePath := filepath.Join(tc.BaseDir, "state.json")
 
-	// State file should exist (created by NewTestContext via NewStoreAt)
+	// THEN the state file should already exist (created by NewStoreAt)
 	if _, err := os.Stat(statePath); err != nil {
 		t.Fatalf("State file should exist after test context creation: %v", err)
 	}
 
-	// Spawn a universe
+	// WHEN a universe is spawned
 	tc.Spawn().
 		NoAgent().
 		Execute().
@@ -30,7 +30,7 @@ func TestState_FileCreatedOnFirstSpawn(t *testing.T) {
 			s.UniverseCount(1)
 		})
 
-	// State file should still exist and be non-empty
+	// THEN the state file should be non-empty
 	info, err := os.Stat(statePath)
 	if err != nil {
 		t.Fatalf("State file missing after spawn: %v", err)
@@ -41,18 +41,19 @@ func TestState_FileCreatedOnFirstSpawn(t *testing.T) {
 }
 
 func TestState_UpdatedOnDestroy(t *testing.T) {
+	// GIVEN a universe exists in the state
 	tc := setup.NewTestContext(t)
 
 	chain := tc.Spawn().
 		NoAgent().
 		Execute()
 
-	// Should have 1 universe
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.UniverseCount(1)
 	})
 
-	// Destroy removes it from state
+	// WHEN the universe is destroyed
+	// THEN the state should be empty
 	chain.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
 			s.UniverseCount(0)
@@ -60,18 +61,19 @@ func TestState_UpdatedOnDestroy(t *testing.T) {
 }
 
 func TestState_MultipleUniversesTracked(t *testing.T) {
+	// GIVEN three spawned universes
 	tc := setup.NewTestContext(t)
 
 	tc.Spawn().NoAgent().Execute()
 	tc.Spawn().NoAgent().Execute()
 	tc.Spawn().NoAgent().Execute()
 
+	// THEN the state should track all three with unique IDs
 	universes := tc.LoadState()
 	if len(universes) != 3 {
 		t.Fatalf("Expected 3 universes in state, got %d", len(universes))
 	}
 
-	// Each should have a unique ID
 	ids := make(map[string]bool)
 	for _, u := range universes {
 		if ids[u.ID] {
@@ -82,6 +84,8 @@ func TestState_MultipleUniversesTracked(t *testing.T) {
 }
 
 func TestState_StatusIdleAfterSpawnWithoutAgent(t *testing.T) {
+	// GIVEN a universe spawned without an agent
+	// THEN the status should be idle
 	setup.NewSpawnBuilder(t).
 		NoAgent().
 		Execute().
@@ -92,6 +96,7 @@ func TestState_StatusIdleAfterSpawnWithoutAgent(t *testing.T) {
 }
 
 func TestState_StatusRunningWithDetachedAgent(t *testing.T) {
+	// GIVEN a universe with a detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("state-running-agent")
 
@@ -100,6 +105,7 @@ func TestState_StatusRunningWithDetachedAgent(t *testing.T) {
 		Detached().
 		Execute()
 
+	// THEN the status should be running
 	universes := tc.LoadState()
 	found := false
 	for _, u := range universes {
@@ -116,6 +122,7 @@ func TestState_StatusRunningWithDetachedAgent(t *testing.T) {
 }
 
 func TestState_StatusIdleAfterAgentCompletes(t *testing.T) {
+	// GIVEN a universe where an agent has run to completion
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("state-complete-agent")
 
@@ -124,6 +131,7 @@ func TestState_StatusIdleAfterAgentCompletes(t *testing.T) {
 		RunAgent().
 		Execute()
 
+	// THEN the status should be idle (agent finished)
 	universes := tc.LoadState()
 	found := false
 	for _, u := range universes {
@@ -140,24 +148,25 @@ func TestState_StatusIdleAfterAgentCompletes(t *testing.T) {
 }
 
 func TestState_PartialDestroyLeavesOthers(t *testing.T) {
+	// GIVEN three spawned universes
 	tc := setup.NewTestContext(t)
 
 	chain1 := tc.Spawn().NoAgent().Execute()
 	chain2 := tc.Spawn().NoAgent().Execute()
 	chain3 := tc.Spawn().NoAgent().Execute()
 
-	// Destroy only the second one
+	// WHEN only the second universe is destroyed
 	_, err := tc.Arc.Destroy(context.Background(), chain2.Universe().ID)
 	if err != nil {
 		t.Fatalf("Destroy failed: %v", err)
 	}
 
+	// THEN only the first and third should remain
 	universes := tc.LoadState()
 	if len(universes) != 2 {
 		t.Fatalf("Expected 2 universes after partial destroy, got %d", len(universes))
 	}
 
-	// Remaining should be chain1 and chain3
 	remainingIDs := make(map[string]bool)
 	for _, u := range universes {
 		remainingIDs[u.ID] = true
@@ -174,9 +183,11 @@ func TestState_PartialDestroyLeavesOthers(t *testing.T) {
 }
 
 func TestState_AgentNameTracked(t *testing.T) {
+	// GIVEN a universe spawned with a named agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("tracked-agent")
 
+	// THEN the state should track the agent name
 	tc.Spawn().
 		WithAgent("tracked-agent").
 		Execute().
@@ -187,6 +198,8 @@ func TestState_AgentNameTracked(t *testing.T) {
 }
 
 func TestState_NoAgentNameWhenSpawnedWithoutAgent(t *testing.T) {
+	// GIVEN a universe spawned without an agent
+	// THEN the state should have no agent
 	setup.NewSpawnBuilder(t).
 		NoAgent().
 		Execute().

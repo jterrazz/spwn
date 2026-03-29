@@ -9,9 +9,12 @@ import (
 )
 
 func TestInspect_ShowsDetails(t *testing.T) {
-	setup.NewSpawnBuilder(t).
+	// GIVEN a universe spawned with the default config
+	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
-		Execute().
-		Inspect().
-		ExpectConfig("default")
+		Execute()
+
+	// WHEN inspecting the universe
+	// THEN it should report the default config
+	chain.Inspect().ExpectConfig("default")
 }

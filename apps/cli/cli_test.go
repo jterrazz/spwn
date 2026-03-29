@@ -1,0 +1,177 @@
+package cli
+
+import (
+	"bytes"
+	"strings"
+	"testing"
+)
+
+// executeCommand runs rootCmd with the given args and captures stdout/stderr.
+// Cobra commands maintain state between calls, so we reset args each time.
+// --help short-circuits before PersistentPreRunE, avoiding filesystem side effects.
+func executeCommand(args ...string) (string, string, error) {
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+
+	rootCmd.SetOut(stdout)
+	rootCmd.SetErr(stderr)
+	rootCmd.SetArgs(args)
+
+	err := rootCmd.Execute()
+
+	return stdout.String(), stderr.String(), err
+}
+
+// assertContains checks that output contains the given substring.
+func assertContains(t *testing.T, output, substring, context string) {
+	t.Helper()
+	if !strings.Contains(output, substring) {
+		t.Errorf("%s: output missing %q\n--- output ---\n%s", context, substring, output)
+	}
+}
+
+// --- Root help ---
+
+func TestCLI_Help(t *testing.T) {
+	out, _, err := executeCommand("--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify all top-level subcommands are listed.
+	for _, sub := range []string{"universe", "agent", "claw", "visitor", "observatory", "skill", "init"} {
+		assertContains(t, out, sub, "root help")
+	}
+}
+
+func TestCLI_HelpContainsDescription(t *testing.T) {
+	out, _, err := executeCommand("--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertContains(t, out, "spwn", "root help description")
+	assertContains(t, out, "Docker", "root help long description")
+}
+
+// --- Universe help ---
+
+func TestCLI_UniverseHelp(t *testing.T) {
+	out, _, err := executeCommand("universe", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, sub := range []string{"list", "inspect", "logs", "attach", "destroy"} {
+		assertContains(t, out, sub, "universe help")
+	}
+}
+
+// --- Agent help ---
+
+func TestCLI_AgentHelp(t *testing.T) {
+	out, _, err := executeCommand("agent", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, sub := range []string{"init", "list", "inspect", "export", "reflect", "sleep", "fork", "talk"} {
+		assertContains(t, out, sub, "agent help")
+	}
+}
+
+// --- Claw help ---
+
+func TestCLI_ClawHelp(t *testing.T) {
+	out, _, err := executeCommand("claw", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, sub := range []string{"start", "stop", "status", "connect"} {
+		assertContains(t, out, sub, "claw help")
+	}
+}
+
+// --- Visitor help ---
+
+func TestCLI_VisitorHelp(t *testing.T) {
+	out, _, err := executeCommand("visitor", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertContains(t, out, "--universe", "visitor help flags")
+	assertContains(t, out, "ephemeral", "visitor help description")
+}
+
+// --- Skill help ---
+
+func TestCLI_SkillHelp(t *testing.T) {
+	out, _, err := executeCommand("skill", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, sub := range []string{"list", "install", "remove"} {
+		assertContains(t, out, sub, "skill help")
+	}
+}
+
+// --- Observatory help ---
+
+func TestCLI_ObservatoryHelp(t *testing.T) {
+	out, _, err := executeCommand("observatory", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, sub := range []string{"start", "open"} {
+		assertContains(t, out, sub, "observatory help")
+	}
+}
+
+// --- Init help ---
+
+func TestCLI_InitHelp(t *testing.T) {
+	out, _, err := executeCommand("init", "--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertContains(t, out, "init", "init help")
+	assertContains(t, out, ".spwn", "init help mentions config dir")
+}
+
+// --- Unknown command ---
+
+func TestCLI_UnknownCommand(t *testing.T) {
+	_, _, err := executeCommand("nonexistent")
+	if err == nil {
+		t.Error("expected error for unknown command")
+	}
+}
+
+// --- Global flags ---
+
+func TestCLI_GlobalFlags(t *testing.T) {
+	out, _, err := executeCommand("--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, flag := range []string{"--json", "--quiet", "--verbose"} {
+		assertContains(t, out, flag, "global flags")
+	}
+}
+
+func TestCLI_GlobalFlagShortcuts(t *testing.T) {
+	out, _, err := executeCommand("--help")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Short flags -q and -v should appear in the help output.
+	assertContains(t, out, "-q", "global short flag quiet")
+	assertContains(t, out, "-v", "global short flag verbose")
+}
