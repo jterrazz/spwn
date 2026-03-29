@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jterrazz/spwn/internal/mind"
+	agentDomain "github.com/jterrazz/spwn/domains/agent"
 	"github.com/spf13/cobra"
 )
 
@@ -35,7 +35,7 @@ var exportCmd = &cobra.Command{
 		s.Blank()
 		s.Start(fmt.Sprintf("Exporting agent %s...", name))
 
-		archivePath, err := mind.Export(name, exportOutput, exportExclude)
+		archivePath, err := agentDomain.ExportMind(name, exportOutput, exportExclude)
 		if err != nil {
 			s.Fail("Export failed", err)
 			return fmt.Errorf("error: export failed.\n%w", err)

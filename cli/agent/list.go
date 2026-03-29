@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jterrazz/spwn/cli/ui"
-	"github.com/jterrazz/spwn/internal/mind"
+	agentDomain "github.com/jterrazz/spwn/domains/agent"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all agents on this Host",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		agents, err := mind.List()
+		agents, err := agentDomain.ListAgents()
 		if err != nil {
 			return fmt.Errorf("error: cannot list agents.\n%w", err)
 		}
@@ -43,7 +43,7 @@ var listCmd = &cobra.Command{
 
 		t := ui.NewTable(ui.ModeNormal, "NAME", "LAYERS")
 		for _, a := range agents {
-			layerCount := mind.LayerCount(&a)
+			layerCount := agentDomain.LayerCount(&a)
 			t.AddRow(a.Name, fmt.Sprintf("%d/6", layerCount))
 		}
 		t.Render()

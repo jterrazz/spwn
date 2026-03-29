@@ -6,9 +6,8 @@ import (
 	"strings"
 
 	"github.com/jterrazz/spwn/cli/ui"
-	"github.com/jterrazz/spwn/internal/config"
-	"github.com/jterrazz/spwn/internal/journal"
-	"github.com/jterrazz/spwn/internal/mind"
+	agentDomain "github.com/jterrazz/spwn/domains/agent"
+	"github.com/jterrazz/spwn/shared/config"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,7 @@ var inspectCmd = &cobra.Command{
 		name := args[0]
 		s := newStepper(cmd)
 
-		info, err := mind.Inspect(name)
+		info, err := agentDomain.InspectAgent(name)
 		if err != nil {
 			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
 		}
@@ -57,7 +56,7 @@ var inspectCmd = &cobra.Command{
 		}
 
 		// Show recent journal entries
-		entries, err := journal.List(info.Path, 5)
+		entries, err := agentDomain.ListJournal(info.Path, 5)
 		if err == nil && len(entries) > 0 {
 			s.Blank()
 			for _, e := range entries {

@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/jterrazz/spwn/cli/ui"
-	"github.com/jterrazz/spwn/internal/config"
-	"github.com/jterrazz/spwn/internal/manifest"
+	"github.com/jterrazz/spwn/domains/universe"
+	"github.com/jterrazz/spwn/shared/config"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +41,7 @@ On first run, also creates default.yaml as the default config.`,
 		s.Blank()
 
 		// Create default universe config
-		if err := manifest.CreateDefault(); err != nil {
+		if err := universe.CreateDefaultConfig(); err != nil {
 			s.Log("default.yaml already exists, skipping")
 		} else {
 			s.Done("Created config", "default.yaml")
@@ -49,7 +49,7 @@ On first run, also creates default.yaml as the default config.`,
 
 		// Create named config
 		if name != "default" {
-			if err := manifest.CreateConfig(name); err != nil {
+			if err := universe.CreateConfig(name); err != nil {
 				s.Log("%s.yaml already exists, skipping", name)
 			} else {
 				s.Done("Created config", name+".yaml")

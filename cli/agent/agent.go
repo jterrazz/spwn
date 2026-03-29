@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/jterrazz/spwn/cli/ui"
-	"github.com/jterrazz/spwn/internal/architect"
-	"github.com/jterrazz/spwn/internal/mind"
+	agentDomain "github.com/jterrazz/spwn/domains/agent"
+	"github.com/jterrazz/spwn/domains/universe"
 	"github.com/spf13/cobra"
 )
 
@@ -47,14 +47,14 @@ Subcommands: init, list, inspect, export.`,
 		if spawnImport != "" {
 			s.Blank()
 			s.Start("Importing agent...")
-			if err := mind.Import(agentName, spawnImport); err != nil {
+			if err := agentDomain.ImportMind(agentName, spawnImport); err != nil {
 				s.Fail("Import failed", err)
 				return fmt.Errorf("error: import failed.\n%w", err)
 			}
 			s.Done("Imported agent", agentName)
 		}
 
-		arc, err := architect.NewFromEnv()
+		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
 			return err
 		}
