@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/foundation"
 )
 
 // ClawState represents the persistent state of the Claw daemon.

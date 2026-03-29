@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/models"
 )
 
 // Destroy stops and removes a universe.

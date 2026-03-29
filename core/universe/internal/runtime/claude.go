@@ -1,7 +1,7 @@
 package runtime
 
 import (
-	"github.com/jterrazz/spwn/core/agent"
+	"spwn.sh/core/agent"
 )
 
 // SpawnConfig holds the parameters needed to build a runtime command.

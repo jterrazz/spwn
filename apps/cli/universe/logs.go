@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/docker/docker/pkg/stdcopy"
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
 

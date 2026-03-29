@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe/internal/models"
 )
 
 func TestGeneratePhysics(t *testing.T) {

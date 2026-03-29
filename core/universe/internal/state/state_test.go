@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/models"
 )
 
 func tempStore(t *testing.T) *Store {

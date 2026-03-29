@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
-	agentDomain "github.com/jterrazz/spwn/core/agent"
+	"spwn.sh/core/universe/tests/e2e/setup"
+	agentDomain "spwn.sh/core/agent"
 )
 
 func TestSession_FirstSpawnCreatesSession(t *testing.T) {

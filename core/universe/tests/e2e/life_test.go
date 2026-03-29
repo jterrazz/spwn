@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe"
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	"spwn.sh/core/universe"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestLife_ManifestOptional(t *testing.T) {

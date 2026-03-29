@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/foundation"
 )
 
 // AgentInfo describes an agent's Mind structure.

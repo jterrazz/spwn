@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	agentDomain "github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/foundation"
-	"github.com/jterrazz/spwn/core/universe"
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	agentDomain "spwn.sh/core/agent"
+	"spwn.sh/core/foundation"
+	"spwn.sh/core/universe"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {

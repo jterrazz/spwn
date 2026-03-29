@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/foundation"
 )
 
 // Inspect returns detailed information about an agent's Mind.

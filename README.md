@@ -1,5 +1,9 @@
 # Spwn
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/badge/Go-1.25-00ADD8.svg)](https://go.dev)
+[![Tests](https://img.shields.io/badge/Tests-291-green.svg)]()
+
 > We're not building an agent framework. We're building the infrastructure for artificial life.
 
 ## Intelligence Is Solved. Architecture Is the Frontier.

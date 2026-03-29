@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jterrazz/spwn/apps/cli/ui"
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
 

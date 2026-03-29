@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/foundation"
 )
 
 // SyncToGit commits and pushes ~/.spwn/ changes to the configured git repo.

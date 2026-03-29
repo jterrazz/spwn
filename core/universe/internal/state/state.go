@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/jterrazz/spwn/core/universe/internal/models"
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/foundation"
 )
 
 // Store provides mutex-protected JSON persistence for universe state.

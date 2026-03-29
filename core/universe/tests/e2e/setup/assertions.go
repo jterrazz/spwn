@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/core/agent"
+	"spwn.sh/core/universe"
 )
 
 // --- AssertionChain ---

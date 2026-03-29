@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	agentpkg "github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/universe/internal/state"
+	agentpkg "spwn.sh/core/agent"
+	"spwn.sh/core/universe/internal/state"
 )
 
 // Server serves the Observatory HTTP API.

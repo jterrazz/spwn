@@ -3,7 +3,7 @@ package manifest
 import (
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/models"
 )
 
 func TestExpandElements(t *testing.T) {

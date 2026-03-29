@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jterrazz/spwn/apps/cli/ui"
-	agentDomain "github.com/jterrazz/spwn/core/agent"
+	"spwn.sh/apps/cli/ui"
+	agentDomain "spwn.sh/core/agent"
 	"github.com/spf13/cobra"
 )
 

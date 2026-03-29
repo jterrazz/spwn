@@ -1,7 +1,7 @@
-module github.com/jterrazz/spwn/core/agent
+module spwn.sh/core/agent
 
 go 1.25.0
 
-require github.com/jterrazz/spwn/core/foundation v0.0.0
+require spwn.sh/core/foundation v0.0.0
 
-replace github.com/jterrazz/spwn/core/foundation => ../foundation
+replace spwn.sh/core/foundation => ../foundation

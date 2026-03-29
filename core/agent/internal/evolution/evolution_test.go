@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/spwn/core/agent/internal/journal"
+	"spwn.sh/core/agent/internal/journal"
 )
 
 // --- Reflect tests ---

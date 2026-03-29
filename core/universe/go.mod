@@ -1,13 +1,13 @@
-module github.com/jterrazz/spwn/core/universe
+module spwn.sh/core/universe
 
 go 1.25.0
 
 require (
 	github.com/docker/docker v27.5.1+incompatible
-	github.com/jterrazz/spwn/core/agent v0.0.0
-	github.com/jterrazz/spwn/core/foundation v0.0.0
-	github.com/jterrazz/spwn/core/gate v0.0.0
-	github.com/jterrazz/spwn/platform/images v0.0.0
+	spwn.sh/core/agent v0.0.0
+	spwn.sh/core/foundation v0.0.0
+	spwn.sh/core/gate v0.0.0
+	spwn.sh/platform/images v0.0.0
 	golang.org/x/term v0.28.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -41,8 +41,8 @@ require (
 )
 
 replace (
-	github.com/jterrazz/spwn/core/agent => ../agent
-	github.com/jterrazz/spwn/core/foundation => ../foundation
-	github.com/jterrazz/spwn/core/gate => ../gate
-	github.com/jterrazz/spwn/platform/images => ../../platform/images
+	spwn.sh/core/agent => ../agent
+	spwn.sh/core/foundation => ../foundation
+	spwn.sh/core/gate => ../gate
+	spwn.sh/platform/images => ../../platform/images
 )

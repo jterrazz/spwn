@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/jterrazz/spwn/core/agent/internal/mind"
+	"spwn.sh/core/agent/internal/mind"
 )
 
 // AgentInfo describes an agent's Mind structure.

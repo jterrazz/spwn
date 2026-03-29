@@ -1,3 +1,3 @@
-module github.com/jterrazz/spwn/core/gate
+module spwn.sh/core/gate
 
 go 1.25.0

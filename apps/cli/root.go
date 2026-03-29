@@ -1,12 +1,12 @@
 package cli
 
 import (
-	"github.com/jterrazz/spwn/apps/cli/agent"
-	"github.com/jterrazz/spwn/apps/cli/claw"
-	"github.com/jterrazz/spwn/apps/cli/observatory"
-	"github.com/jterrazz/spwn/apps/cli/skill"
-	"github.com/jterrazz/spwn/apps/cli/universe"
-	"github.com/jterrazz/spwn/apps/cli/visitor"
+	"spwn.sh/apps/cli/agent"
+	"spwn.sh/apps/cli/claw"
+	"spwn.sh/apps/cli/observatory"
+	"spwn.sh/apps/cli/skill"
+	"spwn.sh/apps/cli/universe"
+	"spwn.sh/apps/cli/visitor"
 	"github.com/spf13/cobra"
 )
 

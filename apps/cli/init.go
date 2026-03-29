@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jterrazz/spwn/apps/cli/ui"
-	"github.com/jterrazz/spwn/core/universe"
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/core/universe"
+	"spwn.sh/core/foundation"
 	"github.com/spf13/cobra"
 )
 
