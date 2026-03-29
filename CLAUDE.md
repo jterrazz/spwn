@@ -42,10 +42,10 @@ Spwn is a **framework for orchestrating artificial life**. Every layer is an int
 - **Gate**: Bridge between universe and host. Host-side (Go) manages element bridging. Container-side (Rivet) normalizes runtimes.
 - **Rivet**: Runtime normalization layer. One API across all agent runtimes. Event streaming, session persistence.
 
-### Evolution (future)
-- **Reflexion**: Review journal → promote successes to playbooks.
-- **Sleep**: Consolidate experience into durable knowledge.
-- **Forking**: Clone a Mind, run experiments, keep the best branch.
+### Evolution
+- **Reflexion**: Review journal → promote successes to playbooks (auto-reflexion.md). `spwn agent reflect`
+- **Sleep**: Archive stale files, prune old sessions. `spwn agent sleep`
+- **Forking**: Clone a Mind from source to target agent. `spwn agent fork`
 
 ## CLI Commands
 
@@ -136,37 +136,42 @@ spwn/
 │
 ├── core/                            # Domain libraries (the product)
 │   ├── universe/                    #   go.mod — world management
-│   │   ├── universe.go              #   Public API (World, Manifest, Architect)
-│   │   ├── internal/                #   Private implementation
-│   │   │   ├── architect/           #     Orchestration (spawn, destroy, list)
-│   │   │   ├── backend/             #     Docker adapter
-│   │   │   ├── physics/             #     Physics/faculties generation
-│   │   │   ├── manifest/            #     Config parsing + validation
-│   │   │   ├── state/               #     Universe registry (state.json)
-│   │   │   └── models/              #     Domain types (World, Manifest, Status)
-│   │   └── tests/
-│   │       ├── unit/
-│   │       └── integration/         #   Universe-only E2E (Docker required)
+│   │   ├── universe.go              #   Public API (World, Manifest, Architect, Observatory)
+│   │   └── internal/
+│   │       ├── architect/           #     Orchestration (spawn, destroy, list)
+│   │       │   ├── colony.go        #       Multi-agent: SpawnAgents, Governor/Citizen
+│   │       │   └── visitor.go       #       Ephemeral: SpawnVisitor
+│   │       ├── backend/             #     Docker adapter (Backend port)
+│   │       ├── runtime/             #     Claude Code adapter (Runtime port)
+│   │       ├── provider/            #     Anthropic + OpenAI adapters (Provider port)
+│   │       ├── channel/             #     CLI adapter (Channel port)
+│   │       ├── skill/               #     LocalRegistry adapter (Skill port)
+│   │       ├── observatory/         #     HTTP API server (/api/universes, /api/agents)
+│   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
+│   │       ├── physics/             #     Physics/faculties generation
+│   │       ├── manifest/            #     Config parsing (universe.yaml, life.yaml, org.yaml)
+│   │       ├── state/               #     Universe + Claw state (JSON)
+│   │       ├── models/              #     Domain types (World, Manifest, Status, AgentRecord)
+│   │       └── ports/               #     8 port interfaces (Runtime, Backend, Provider, etc.)
 │   │
 │   ├── agent/                       #   go.mod — life management
-│   │   ├── agent.go                 #   Public API (Info, InitMind, ExportMind)
-│   │   ├── internal/
-│   │   │   ├── mind/                #     Mind CRUD (init, validate, list, inspect, export)
-│   │   │   ├── journal/             #     Episodic memory (append, list)
-│   │   │   └── session/             #     Session persistence (load, save)
-│   │   └── tests/
-│   │       ├── unit/
-│   │       └── integration/         #   Agent-only E2E (filesystem, no Docker)
+│   │   ├── agent.go                 #   Public API (Info, InitMind, Reflect, Sleep, Fork)
+│   │   └── internal/
+│   │       ├── mind/                #     Mind CRUD (init, validate, list, inspect, export)
+│   │       ├── journal/             #     Episodic memory (append, list)
+│   │       ├── session/             #     Session persistence (load, save)
+│   │       ├── evolution/           #     Reflexion, Sleep, Forking
+│   │       └── memory/              #     Filesystem adapter (Memory port)
 │   │
 │   ├── gate/                        #   go.mod — bridge protocol
-│   │   ├── gate.go                  #   Public API (Server, Bridge, SetupBridges)
+│   │   ├── gate.go                  #   Public API (Server, Bridge, ExecHandler)
 │   │   └── internal/
-│   │       ├── bridge/              #     Wrapper script generation
+│   │       ├── bridge/              #     Wrapper scripts + capability enforcement
 │   │       └── server/              #     HTTP-over-TCP gate server
 │   │
 │   └── foundation/                  #   go.mod — cross-cutting primitives
 │       ├── constants.go             #     Defaults, MindLayers, BaseImage
-│       ├── paths.go                 #     BaseDir(), UniversesDir(), AgentsDir()
+│       ├── paths.go                 #     BaseDir(), UniversesDir(), AgentsDir(), OrgPath()
 │       ├── identity.go              #     GenerateUniverseID(), GenerateAgentID()
 │       └── names.go                 #     RandomCosmosWord(), RandomAgentName()
 │
@@ -177,12 +182,16 @@ spwn/
 │   │   ├── init.go                  #     spwn init
 │   │   ├── defaults.go              #     Auto-create defaults on first run
 │   │   ├── universe/                #     Universe subcommands (thin wrappers)
-│   │   ├── agent/                   #     Agent subcommands (thin wrappers)
+│   │   ├── agent/                   #     Agent subcommands (+ reflect, sleep, fork)
+│   │   ├── claw/                    #     Claw subcommands (start, stop, status, connect)
+│   │   ├── visitor/                 #     Visitor subcommands
+│   │   ├── skill/                   #     Skill subcommands (list, install, remove)
+│   │   ├── observatory/             #     Observatory subcommands (start, open)
 │   │   ├── ui/                      #     Stepper, table, style, format
 │   │   └── tests/
 │   │       └── integration/         #   Cross-domain flows (universe + agent)
 │   │
-│   └── observatory/                 #   Future: visual dashboard (Next.js)
+│   └── observatory/                 #   Visual dashboard (CLI placeholder, Next.js planned)
 │       └── package.json
 │
 ├── platform/                        # Build infrastructure
@@ -211,7 +220,7 @@ core/agent ──→ core/foundation
 core/gate ──→ core/foundation
 ```
 
-Each `core/` module exposes a public API in its root `.go` file. The `internal/` packages are private per module — no cross-module access.
+4 Go modules + `platform/images`. Each `core/` module exposes a public API in its root `.go` file. Adapters (runtime, provider, channel, skill, etc.) live inside `core/universe/internal/` — private per module.
 
 ## Code Style
 
@@ -232,9 +241,11 @@ make build-test-image    # docker build spwn-test:latest for E2E
 make build-gate          # cd platform/gate-runtime && cargo build --release
 
 make test                # Unit tests across all modules
-make test-universe       # cd core/universe && go test ./...
-make test-agent          # cd core/agent && go test ./...
-make test-gate           # cd core/gate && go test ./...
+make test-foundation     # cd core/foundation && go test -v ./...
+make test-universe       # cd core/universe && go test -v ./...
+make test-agent          # cd core/agent && go test -v ./...
+make test-gate           # cd core/gate && go test -v ./...
+make test-cli            # cd apps/cli && go test -v ./...
 
 make test-e2e            # All integration/E2E tests
 make test-e2e-universe   # Universe integration (Docker required)

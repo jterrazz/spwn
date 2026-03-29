@@ -40,6 +40,13 @@ On first run, also creates default.yaml as the default config.`,
 
 		s.Blank()
 
+		// Create organization manifest
+		if err := universe.CreateOrg(name); err != nil {
+			s.Log("org.yaml already exists, skipping")
+		} else {
+			s.Done("Created organization", "org.yaml")
+		}
+
 		// Create default universe config
 		if err := universe.CreateDefaultConfig(); err != nil {
 			s.Log("default.yaml already exists, skipping")

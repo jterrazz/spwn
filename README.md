@@ -290,13 +290,13 @@ spwn/
     └── fixtures/               #   Test fixtures
 ```
 
-**Dependency graph:** `apps/cli` → `core/universe`, `core/agent`, `core/gate`, `core/foundation` · `core/universe` → `core/agent`, `core/gate`, `core/foundation` · `core/agent` → `core/foundation`
+**Dependency graph:** `apps/cli` → all `core/*` modules · `core/universe` → `core/agent`, `core/gate`, `core/runtime`, `core/colony`, `core/visitor`, `core/foundation` · `core/evolution` → `core/agent`, `core/foundation` · `core/agent` → `core/foundation`
 
 ---
 
 ## Status
 
-Early development. Architecture designed, [wiki](https://github.com/jterrazz/spwn-wiki) complete, implementation underway.
+Active development. Epochs 1-5, 8-9 complete. Ports & Adapters architecture with 8 port interfaces. Multi-agent colonies, evolution (reflexion/sleep/fork), and visitors implemented. Claw, Observatory, and Marketplace partially built.
 
 **Website:** [spwn.sh](https://spwn.sh)
 

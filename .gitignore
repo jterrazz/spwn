@@ -1,3 +1,3 @@
 bin/
-container/gate/target/
+platform/gate-runtime/target/
 e2e.test
