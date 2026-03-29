@@ -1,0 +1,126 @@
+package manifest
+
+import (
+	"os"
+
+	"github.com/jterrazz/spwn/core/foundation"
+	"gopkg.in/yaml.v3"
+)
+
+// OrgManifest represents the organization-level configuration.
+type OrgManifest struct {
+	Name       string        `yaml:"name"`
+	Version    int           `yaml:"version"`
+	Defaults   OrgDefaults   `yaml:"defaults"`
+	Skills     []string      `yaml:"skills"`
+	Governance OrgGovernance `yaml:"governance"`
+	Claw       ClawConfig    `yaml:"claw"`
+}
+
+// OrgDefaults holds organization-wide default settings.
+type OrgDefaults struct {
+	Runtime RuntimeDefaults `yaml:"runtime"`
+	Backend string          `yaml:"backend"`
+	Memory  string          `yaml:"memory"`
+	Store   string          `yaml:"store"`
+	Physics PhysicsDefaults `yaml:"physics"`
+}
+
+// RuntimeDefaults holds default runtime configuration.
+type RuntimeDefaults struct {
+	Backend  string `yaml:"backend"`
+	Provider string `yaml:"provider"`
+	Model    string `yaml:"model"`
+	Auth     string `yaml:"auth"`
+}
+
+// PhysicsDefaults holds default physics configuration for new universes.
+type PhysicsDefaults struct {
+	Constants ConstantsManifest `yaml:"constants"`
+	Laws      LawsManifest      `yaml:"laws"`
+	Elements  []string          `yaml:"elements"`
+}
+
+// ConstantsManifest mirrors the universe constants for org defaults.
+type ConstantsManifest struct {
+	CPU     int    `yaml:"cpu"`
+	Memory  string `yaml:"memory"`
+	Disk    string `yaml:"disk"`
+	Timeout string `yaml:"timeout"`
+}
+
+// LawsManifest mirrors the universe laws for org defaults.
+type LawsManifest struct {
+	Network      string `yaml:"network"`
+	MaxProcesses int    `yaml:"max-processes"`
+}
+
+// OrgGovernance holds governance limits and policies.
+type OrgGovernance struct {
+	MaxUniverses           int      `yaml:"max-universes"`
+	MaxCitizensPerUniverse int      `yaml:"max-citizens-per-universe"`
+	AllowedProviders       []string `yaml:"allowed-providers"`
+	CostLimit              string   `yaml:"cost-limit"`
+	Audit                  bool     `yaml:"audit"`
+}
+
+// ClawConfig holds Claw daemon configuration.
+type ClawConfig struct {
+	Channels []ChannelConfig `yaml:"channels"`
+	Sync     SyncConfig      `yaml:"sync"`
+}
+
+// ChannelConfig holds a single channel configuration.
+type ChannelConfig struct {
+	Type      string `yaml:"type"`
+	Token     string `yaml:"token"`
+	Workspace string `yaml:"workspace"`
+}
+
+// SyncConfig holds sync/git configuration for the Claw.
+type SyncConfig struct {
+	Repo     string `yaml:"repo"`
+	Branch   string `yaml:"branch"`
+	AutoPush bool   `yaml:"auto-push"`
+	AutoPull bool   `yaml:"auto-pull"`
+}
+
+// LoadOrg reads the organization manifest from ~/.spwn/org.yaml.
+func LoadOrg() (*OrgManifest, error) {
+	return LoadOrgPath(foundation.OrgPath())
+}
+
+// LoadOrgPath reads an organization manifest from an explicit path.
+func LoadOrgPath(path string) (*OrgManifest, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var org OrgManifest
+	if err := yaml.Unmarshal(data, &org); err != nil {
+		return nil, err
+	}
+	return &org, nil
+}
+
+// CreateOrg creates a default org.yaml at ~/.spwn/org.yaml.
+func CreateOrg(name string) error {
+	org := OrgManifest{
+		Name:    name,
+		Version: 1,
+		Defaults: OrgDefaults{
+			Runtime: RuntimeDefaults{
+				Backend:  "claude-code",
+				Provider: "anthropic",
+			},
+			Backend: "docker",
+			Memory:  "filesystem",
+			Store:   "json",
+		},
+	}
+	data, err := yaml.Marshal(&org)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(foundation.OrgPath(), data, 0644)
+}

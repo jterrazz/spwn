@@ -31,6 +31,8 @@ const (
 type Architect = architect.Architect
 type SpawnResult = architect.SpawnResult
 type SpawnOpts = architect.SpawnOpts
+type AgentSpec = architect.AgentSpec
+type AgentRecord = models.AgentRecord
 
 // Re-export backend types.
 type Backend = backend.Backend
@@ -38,6 +40,10 @@ type Store = state.Store
 
 // Re-export manifest types.
 type LifeManifest = manifest.LifeManifest
+type OrgManifest = manifest.OrgManifest
+
+// Re-export state types.
+type ClawState = state.ClawState
 
 // --- Architect constructors ---
 
@@ -111,3 +117,22 @@ func ApplyDefaults(m *Manifest) {
 func ExpandElements(elems []string) []string {
 	return manifest.ExpandElements(elems)
 }
+
+// --- Organization manifest operations ---
+
+// LoadOrg reads the organization manifest from ~/.spwn/org.yaml.
+func LoadOrg() (*OrgManifest, error) { return manifest.LoadOrg() }
+
+// LoadOrgPath reads an organization manifest from an explicit path.
+func LoadOrgPath(path string) (*OrgManifest, error) { return manifest.LoadOrgPath(path) }
+
+// CreateOrg creates a default org.yaml at ~/.spwn/org.yaml.
+func CreateOrg(name string) error { return manifest.CreateOrg(name) }
+
+// --- Claw state operations ---
+
+// LoadClawState reads the Claw state from disk.
+func LoadClawState() (*ClawState, error) { return state.LoadClawState() }
+
+// SaveClawState writes the Claw state to disk.
+func SaveClawState(s *ClawState) error { return state.SaveClawState(s) }

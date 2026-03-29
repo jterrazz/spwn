@@ -33,20 +33,29 @@ type LawsManifest struct {
 	MaxProcesses int    `yaml:"max-processes"`
 }
 
+// AgentRecord represents a single agent within a universe colony.
+type AgentRecord struct {
+	Name    string `json:"name"`
+	AgentID string `json:"agent_id"`
+	Tier    string `json:"tier"`   // "governor" or "citizen"
+	Status  Status `json:"status"`
+}
+
 // World represents a running or stopped universe instance.
 type World struct {
-	ID          string   `json:"id"`
-	Config      string   `json:"config"`
-	Agent       string   `json:"agent,omitempty"`
-	AgentID     string   `json:"agent_id,omitempty"`
-	Backend     string   `json:"backend"`
-	ContainerID string   `json:"container_id"`
-	Workspace   string   `json:"workspace,omitempty"`
-	MindPath    string   `json:"mind_path,omitempty"`
-	GateDir     string   `json:"gate_dir,omitempty"`
-	Status      Status   `json:"status"`
-	CreatedAt   time.Time `json:"created_at"`
-	Manifest    Manifest `json:"-"`
+	ID          string        `json:"id"`
+	Config      string        `json:"config"`
+	Agent       string        `json:"agent,omitempty"`
+	AgentID     string        `json:"agent_id,omitempty"`
+	Backend     string        `json:"backend"`
+	ContainerID string        `json:"container_id"`
+	Workspace   string        `json:"workspace,omitempty"`
+	MindPath    string        `json:"mind_path,omitempty"`
+	GateDir     string        `json:"gate_dir,omitempty"`
+	Status      Status        `json:"status"`
+	CreatedAt   time.Time     `json:"created_at"`
+	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support
+	Manifest    Manifest      `json:"-"`
 }
 
 // Status tracks the lifecycle state of a universe.

@@ -84,3 +84,36 @@ func TestStatePath(t *testing.T) {
 		t.Errorf("StatePath() = %q, want %q", got, want)
 	}
 }
+
+func TestOrgPath(t *testing.T) {
+	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
+	t.Setenv("UNIVERSE_HOME", "")
+
+	want := "/tmp/test-spwn/org.yaml"
+	got := OrgPath()
+	if got != want {
+		t.Errorf("OrgPath() = %q, want %q", got, want)
+	}
+}
+
+func TestClawStatePath(t *testing.T) {
+	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
+	t.Setenv("UNIVERSE_HOME", "")
+
+	want := "/tmp/test-spwn/claw/claw.json"
+	got := ClawStatePath()
+	if got != want {
+		t.Errorf("ClawStatePath() = %q, want %q", got, want)
+	}
+}
+
+func TestSkillsDir(t *testing.T) {
+	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
+	t.Setenv("UNIVERSE_HOME", "")
+
+	want := "/tmp/test-spwn/skills"
+	got := SkillsDir()
+	if got != want {
+		t.Errorf("SkillsDir() = %q, want %q", got, want)
+	}
+}

@@ -2,7 +2,11 @@ package cli
 
 import (
 	"github.com/jterrazz/spwn/apps/cli/agent"
+	"github.com/jterrazz/spwn/apps/cli/claw"
+	"github.com/jterrazz/spwn/apps/cli/observatory"
+	"github.com/jterrazz/spwn/apps/cli/skill"
 	"github.com/jterrazz/spwn/apps/cli/universe"
+	"github.com/jterrazz/spwn/apps/cli/visitor"
 	"github.com/spf13/cobra"
 )
 
@@ -30,6 +34,10 @@ func init() {
 
 	rootCmd.AddCommand(universe.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
+	rootCmd.AddCommand(claw.Cmd)
+	rootCmd.AddCommand(visitor.Cmd)
+	rootCmd.AddCommand(observatory.Cmd)
+	rootCmd.AddCommand(skill.Cmd)
 }
 
 // Execute runs the root command.

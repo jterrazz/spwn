@@ -9,6 +9,7 @@ type SpawnConfig struct {
 	MindPath   string
 	AgentName  string
 	UniverseID string
+	Prompt     string // If set, passed as the initial prompt (used for visitors).
 }
 
 // ClaudeCode implements the Runtime port for Claude Code CLI via ACP.
@@ -39,6 +40,10 @@ func (c *ClaudeCode) BuildCommand(cfg SpawnConfig) []string {
 	existing, err := agent.LoadSession(cfg.MindPath, cfg.UniverseID)
 	if err == nil && existing != nil {
 		cmd = append(cmd, "--resume")
+	}
+
+	if cfg.Prompt != "" {
+		cmd = append(cmd, "-p", cfg.Prompt)
 	}
 
 	return cmd
