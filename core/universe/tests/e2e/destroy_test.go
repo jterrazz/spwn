@@ -1,0 +1,46 @@
+//go:build e2e
+
+package e2e
+
+import (
+	"testing"
+
+	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	agentDomain "github.com/jterrazz/spwn/core/agent"
+)
+
+func TestDestroy_RemovesContainer(t *testing.T) {
+	setup.NewSpawnBuilder(t).
+		NoAgent().
+		Execute().
+		Destroy().
+		ExpectState(func(s *setup.StateAssertion) {
+			s.UniverseCount(0)
+		}).
+		ExpectContainer(func(c *setup.ContainerAssertion) {
+			c.NotExists()
+		})
+}
+
+func TestDestroy_AgentSurvives(t *testing.T) {
+	ctx := setup.NewTestContext(t)
+	ctx.InitAgent("survivor-agent")
+
+	u := ctx.Spawn().
+		WithAgent("survivor-agent").
+		Execute()
+
+	u.Destroy().
+		ExpectState(func(s *setup.StateAssertion) {
+			s.UniverseCount(0)
+		})
+
+	// Agent Mind still exists on host
+	info, err := agentDomain.InspectAgent("survivor-agent")
+	if err != nil {
+		t.Fatalf("Agent should survive after destroy: %v", err)
+	}
+	if _, ok := info.Layers["personas"]; !ok {
+		t.Fatal("Agent Mind should still have personas layer")
+	}
+}

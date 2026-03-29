@@ -225,22 +225,31 @@ Spwn isn't another link in the tool chain—it replaces the chain. And it's not 
 
 ### Project layout
 
-Multi-module Go monorepo managed with `go.work`:
+Multi-module Go monorepo + Turborepo-ready JS workspace:
 
 ```
 spwn/
-├── go.work
-├── cli/                 # go.mod — CLI consumer (cobra commands, entry point at cmd/spwn/)
-├── domains/
-│   ├── universe/        # go.mod — world management (architect, backend, physics, manifest, state)
-│   ├── agent/           # go.mod — life management (mind, journal, session)
-│   └── gate/            # go.mod — bridge protocol (server, bridge)
-├── shared/              # go.mod — cross-cutting (config paths, constants, IDs)
-├── container/           # Build infra (Dockerfile.test, Rust gate)
-└── __tests__/mock/      # Test fixtures
+├── go.work                     # Go workspace
+├── pnpm-workspace.yaml         # JS workspace
+├── turbo.json                  # Task orchestration
+│
+├── core/                       # Domain libraries
+│   ├── universe/               #   World management (architect, backend, physics)
+│   ├── agent/                  #   Life management (mind, journal, session)
+│   ├── gate/                   #   Bridge protocol (server, bridge)
+│   └── foundation/             #   Cross-cutting primitives (paths, IDs, constants)
+│
+├── apps/                       # Deployable consumers
+│   ├── cli/                    #   The spwn binary (cobra → domain APIs → output)
+│   └── observatory/            #   Visual dashboard (planned)
+│
+└── platform/                   # Build infrastructure
+    ├── images/                 #   Docker images (base, test)
+    ├── gate-runtime/           #   Container-side Rust gate
+    └── fixtures/               #   Test fixtures
 ```
 
-**Dependency graph:** `cli` -> `universe`, `agent`, `gate`, `shared` / `universe` -> `agent`, `gate`, `shared` / `agent` -> `shared` / `gate` -> `shared`
+**Dependency graph:** `apps/cli` → `core/universe`, `core/agent`, `core/gate`, `core/foundation` · `core/universe` → `core/agent`, `core/gate`, `core/foundation` · `core/agent` → `core/foundation`
 
 ---
 

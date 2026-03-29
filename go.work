@@ -1,9 +1,10 @@
 go 1.25.0
 
 use (
-	./cli
-	./domains/agent
-	./domains/gate
-	./domains/universe
-	./shared
+	./apps/cli
+	./core/agent
+	./core/foundation
+	./core/gate
+	./core/universe
+	./platform/images
 )

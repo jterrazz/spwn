@@ -1,0 +1,10 @@
+{
+  "name": "@spwn/observatory",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Observatory not yet implemented'",
+    "build": "echo 'Observatory not yet implemented'",
+    "test": "echo 'No tests yet'"
+  }
+}
