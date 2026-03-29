@@ -1,0 +1,26 @@
+import { defineWorkspace } from "vitest/config";
+
+export default defineWorkspace([
+  {
+    test: {
+      name: "cli",
+      include: ["e2e/cli/**/*.e2e.test.ts", "e2e/init/**/*.e2e.test.ts"],
+    },
+  },
+  {
+    test: {
+      name: "docker",
+      fileParallelism: false,
+      include: [
+        "e2e/universe/**/*.e2e.test.ts",
+        "e2e/agent/**/*.e2e.test.ts",
+        "e2e/colony/**/*.e2e.test.ts",
+        "e2e/gate/**/*.e2e.test.ts",
+        "e2e/visitor/**/*.e2e.test.ts",
+        "e2e/config/**/*.e2e.test.ts",
+        "e2e/state/**/*.e2e.test.ts",
+        "e2e/errors/**/*.e2e.test.ts",
+      ],
+    },
+  },
+]);

@@ -1,0 +1,16 @@
+{
+  "name": "@spwn/tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@jterrazz/test": "latest",
+    "vitest": "^3.0.0",
+    "typescript": "^5.7.0",
+    "hono": "^4.0.0"
+  }
+}
