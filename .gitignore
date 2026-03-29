@@ -1,4 +1,3 @@
 bin/
-universe
 container/gate/target/
 e2e.test

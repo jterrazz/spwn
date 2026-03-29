@@ -3,8 +3,8 @@ package agent
 import (
 	"fmt"
 
-	"github.com/jterrazz/spwn/internal/config"
-	"github.com/jterrazz/spwn/internal/mind"
+	agentDomain "github.com/jterrazz/spwn/domains/agent"
+	"github.com/jterrazz/spwn/shared/config"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,7 @@ provided, a random name is picked from a curated dictionary.`,
 		s.Blank()
 		s.Start(fmt.Sprintf("Creating agent %q...", name))
 
-		_, err := mind.Init(name)
+		_, err := agentDomain.InitMind(name)
 		if err != nil {
 			s.Fail("Agent creation failed", err)
 			return fmt.Errorf("error: cannot create agent %q.\n%w", name, err)

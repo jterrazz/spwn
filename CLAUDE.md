@@ -1,4 +1,4 @@
-# Universe — Project Conventions
+# Spwn — Project Conventions
 
 ## Vocabulary
 
@@ -29,23 +29,44 @@
 - Gate bridges: top-level `gate:` key in universe YAML, or `--gate "source:as:caps"` CLI flag on `spwn universe`
 - No project-local manifests — configs are infrastructure, not project code
 
+## Project Layout
+
+Multi-module Go monorepo managed with `go.work`:
+
+```
+spwn/
+├── go.work
+├── cli/                 # go.mod — CLI consumer (cobra commands, entry point at cmd/spwn/)
+├── domains/
+│   ├── universe/        # go.mod — world management (architect, backend, physics, manifest, state)
+│   ├── agent/           # go.mod — life management (mind, journal, session)
+│   └── gate/            # go.mod — bridge protocol (server, bridge)
+├── shared/              # go.mod — cross-cutting (config paths, constants, IDs)
+├── container/           # Build infra (Dockerfile.test, Rust gate)
+└── __tests__/mock/      # Test fixtures
+```
+
+**Dependency graph:** `cli` -> `universe`, `agent`, `gate`, `shared` / `universe` -> `agent`, `gate`, `shared` / `agent` -> `shared` / `gate` -> `shared`
+
 ## Code Style
 
 - No cgo
 - Errors: `error: lowercase message.\nActionable hint.`
 - One agent per universe
-- `internal/` for all business logic — CLI is a thin wrapper
-- Backend interface abstracts Docker — no direct Docker calls outside `internal/backend/`
-- Container-side Gate is Rust (`container/gate/`) — separate binary, communicates via Unix socket
+- Domain modules own their business logic — CLI is a thin wrapper
+- Backend interface abstracts Docker — no direct Docker calls outside `domains/universe/backend/`
+- Container-side Gate is Rust (`container/`) — separate binary, communicates via Unix socket
 
 ## Build
 
 ```
-make build        # → bin/spwn
-make build-image  # → spwn-base:latest
-make build-gate   # → container/gate/target/release/spwn-gate
-make test
-make test-e2e     # requires Docker + spwn-test:latest image
+make build            # cd cli && go build -o ../bin/spwn ./cmd/spwn
+make build-image      # → spwn-base:latest
+make build-gate       # → container Rust gate binary
+make test             # go vet all modules
+make test-e2e         # per-domain E2E tests
+make test-universe    # cd domains/universe && go test ./...
+make test-agent       # cd domains/agent && go test ./...
 make lint
 make clean
 ```

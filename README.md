@@ -1,4 +1,4 @@
-# Universe
+# Spwn
 
 > We're not building an agent framework. We're building the infrastructure for artificial life.
 
@@ -6,11 +6,11 @@
 
 Models like Claude can reason, write code, and solve problems. The intelligence is there. But drop that intelligence into a blank API call and it has no tools, no filesystem, no memory of yesterday. It's a brain in a jar.
 
-Universe builds the missing half. Not a better toolchain—a **reality**. A world with physics, elements, inhabited by a conscious entity that remembers, reflects, and evolves.
+Spwn builds the missing half. Not a better toolchain—a **reality**. A world with physics, elements, inhabited by a conscious entity that remembers, reflects, and evolves.
 
 ## Life Emerges From the Architecture
 
-Most agent frameworks ask: *"How do we give an AI access to tools?"* Universe asks: *"What does it mean to create a reality for something that can think?"*
+Most agent frameworks ask: *"How do we give an AI access to tools?"* Spwn asks: *"What does it mean to create a reality for something that can think?"*
 
 The answer comes from simulation theory. You define physics—laws that govern what's possible. You populate it with elements—the building blocks that exist. You place a conscious entity inside. You let it act, learn, sleep, evolve.
 
@@ -20,7 +20,7 @@ This isn't a metaphor. The physics define what's possible. The Mind defines who 
 
 Weights give you pattern recognition. But thinking alone doesn't scale. What makes life adaptable isn't the neural architecture—it's the freedom to act within a real environment.
 
-Tool-call agents are a brain connected to buttons—they can only press what someone pre-wired. That's an animal in a zoo. Universe gives agents genuine agency—an animal in the wild:
+Tool-call agents are a brain connected to buttons—they can only press what someone pre-wired. That's an animal in a zoo. Spwn gives agents genuine agency—an animal in the wild:
 
 - **Discover**—`man`, `--help`, `apt search`—self-directed exploration no one pre-programmed
 - **Compose**—pipe anything into anything, combine tools in ways no designer anticipated
@@ -29,7 +29,7 @@ Tool-call agents are a brain connected to buttons—they can only press what som
 
 Tool-call frameworks scale linearly (more tools = more schemas). Agency scales combinatorially—you don't pre-engineer every behavior, you create the conditions for behavior to emerge.
 
-> MCP gives agents a Swiss Army knife. Universe gives them a workshop.
+> MCP gives agents a Swiss Army knife. Spwn gives them a workshop.
 
 ## Agents That Evolve
 
@@ -200,7 +200,7 @@ $ spwn universe destroy u-default-84721
 
 ## Comparison
 
-| | Approach | What Universe adds |
+| | Approach | What Spwn adds |
 | --- | --- | --- |
 | **MCP** | Exposes tools one at a time | Full shell — N! compositions, not N tools |
 | **LangChain / CrewAI** | Chains function calls | Emergent behavior, not deterministic chains |
@@ -208,7 +208,7 @@ $ spwn universe destroy u-default-84721
 | **Claude Code** | Runs on your machine | Isolation, physics-based security, persistent Mind |
 | **Docker** | Container runtime | Agent lifecycle, identity, Gate, evolution |
 
-Universe isn't another link in the tool chain—it replaces the chain. And it's not a competitor to Claude Code—it's the complement. Claude Code is the intelligence. Universe is the world to be intelligent in.
+Spwn isn't another link in the tool chain—it replaces the chain. And it's not a competitor to Claude Code—it's the complement. Claude Code is the intelligence. Spwn is the world to be intelligent in.
 
 ---
 
@@ -225,36 +225,37 @@ Universe isn't another link in the tool chain—it replaces the chain. And it's 
 
 ### Project layout
 
+Multi-module Go monorepo managed with `go.work`:
+
 ```
-cmd/spwn/              CLI entry point (cobra)
-internal/
-├── architect/          Orchestrator — create, spawn, destroy
-├── agent/              Agent selection and ACP spawning
-├── backend/            Backend interface + Docker adapter
-├── config/             Types and config definitions
-├── gate/               Host-side Gate: element bridge, session relay
-├── journal/            Automatic spawn logs (markdown)
-├── manifest/           Named universe config + agent manifest parsing
-├── mind/               Agent Mind directory management and validation
-├── physics/            physics.md + faculties.md generation via container introspection
-└── session/            Session persistence (JSON per agent+universe)
-container/              Container-side Gate (Rust: ACP client via agent-client-protocol crate + crash recovery)
+spwn/
+├── go.work
+├── cli/                 # go.mod — CLI consumer (cobra commands, entry point at cmd/spwn/)
+├── domains/
+│   ├── universe/        # go.mod — world management (architect, backend, physics, manifest, state)
+│   ├── agent/           # go.mod — life management (mind, journal, session)
+│   └── gate/            # go.mod — bridge protocol (server, bridge)
+├── shared/              # go.mod — cross-cutting (config paths, constants, IDs)
+├── container/           # Build infra (Dockerfile.test, Rust gate)
+└── __tests__/mock/      # Test fixtures
 ```
+
+**Dependency graph:** `cli` -> `universe`, `agent`, `gate`, `shared` / `universe` -> `agent`, `gate`, `shared` / `agent` -> `shared` / `gate` -> `shared`
 
 ---
 
 ## Status
 
-Early development. Architecture designed, [wiki](https://github.com/jterrazz/universe-wiki) complete, implementation underway.
+Early development. Architecture designed, [wiki](https://github.com/jterrazz/spwn-wiki) complete, implementation underway.
 
 **Website:** [spwn.sh](https://spwn.sh)
 
 **Learn more:**
-[Vision](https://github.com/jterrazz/universe-wiki/blob/main/blueprint/vision.md) ·
-[Philosophy](https://github.com/jterrazz/universe-wiki/blob/main/blueprint/philosophy.md) ·
-[Mind Framework](https://github.com/jterrazz/universe-wiki/blob/main/domains/systems/mind-framework.md) ·
-[Epochs](https://github.com/jterrazz/universe-wiki/blob/main/epochs/) ·
-[Architecture Decisions](https://github.com/jterrazz/universe-wiki/blob/main/domains/)
+[Vision](https://github.com/jterrazz/spwn-wiki/blob/main/blueprint/vision.md) ·
+[Philosophy](https://github.com/jterrazz/spwn-wiki/blob/main/blueprint/philosophy.md) ·
+[Mind Framework](https://github.com/jterrazz/spwn-wiki/blob/main/domains/systems/life-framework.md) ·
+[Epochs](https://github.com/jterrazz/spwn-wiki/blob/main/epochs/) ·
+[Architecture Decisions](https://github.com/jterrazz/spwn-wiki/blob/main/domains/)
 
 ## License
 
