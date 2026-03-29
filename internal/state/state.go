@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/spwn/internal/config"
 )
 
 // Store provides mutex-protected JSON persistence for universe state.
@@ -16,7 +16,7 @@ type Store struct {
 	mu   sync.Mutex
 }
 
-// NewStore creates a Store at ~/.universe/state.json, creating the directory if needed.
+// NewStore creates a Store at ~/.spwn/state.json, creating the directory if needed.
 func NewStore() (*Store, error) {
 	dir := config.BaseDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {

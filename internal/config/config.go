@@ -9,12 +9,12 @@ const (
 	DefaultNetwork  = "none"
 	DefaultMaxProcs = 128
 	DefaultBackend  = "docker"
-	BaseImage       = "universe-base:latest"
+	BaseImage       = "spwn-base:latest"
 )
 
 // Directory layout constants.
 const (
-	UniverseBaseDir = ".universe"
+	SpwnBaseDir = ".spwn"
 	UniversesSubDir = "universes"
 	AgentsSubDir    = "agents"
 	StateFileName   = "state.json"

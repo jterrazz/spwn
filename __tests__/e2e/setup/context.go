@@ -9,14 +9,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/universe/internal/architect"
-	"github.com/jterrazz/universe/internal/backend"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/mind"
-	"github.com/jterrazz/universe/internal/state"
+	"github.com/jterrazz/spwn/internal/architect"
+	"github.com/jterrazz/spwn/internal/backend"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/mind"
+	"github.com/jterrazz/spwn/internal/state"
 )
 
-const TestImage = "universe-test:latest"
+const TestImage = "spwn-test:latest"
 
 // TestContext provides isolated E2E test infrastructure.
 type TestContext struct {
@@ -34,7 +34,7 @@ func NewTestContext(t *testing.T) *TestContext {
 	t.Helper()
 
 	baseDir := t.TempDir()
-	t.Setenv("UNIVERSE_HOME", baseDir)
+	t.Setenv("SPWN_HOME", baseDir)
 
 	// Create required subdirectories
 	os.MkdirAll(filepath.Join(baseDir, "universes"), 0755)

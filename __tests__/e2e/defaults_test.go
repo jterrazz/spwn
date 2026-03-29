@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/universe/__tests__/e2e/setup"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/manifest"
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/spwn/__tests__/e2e/setup"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/manifest"
+	"github.com/jterrazz/spwn/internal/mind"
 )
 
 func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
@@ -56,7 +56,7 @@ func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
 
 func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 	tmpDir := t.TempDir()
-	t.Setenv("UNIVERSE_HOME", tmpDir)
+	t.Setenv("SPWN_HOME", tmpDir)
 
 	if err := manifest.CreateDefault(); err != nil {
 		t.Fatalf("CreateDefault failed: %v", err)
@@ -80,7 +80,7 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 
 func TestDefaults_DefaultAgentIsValid(t *testing.T) {
 	tmpDir := t.TempDir()
-	t.Setenv("UNIVERSE_HOME", tmpDir)
+	t.Setenv("SPWN_HOME", tmpDir)
 
 	os.MkdirAll(filepath.Join(tmpDir, "agents"), 0755)
 
@@ -96,7 +96,7 @@ func TestDefaults_DefaultAgentIsValid(t *testing.T) {
 
 func TestDefaults_IdempotentRerun(t *testing.T) {
 	tmpDir := t.TempDir()
-	t.Setenv("UNIVERSE_HOME", tmpDir)
+	t.Setenv("SPWN_HOME", tmpDir)
 
 	os.MkdirAll(filepath.Join(tmpDir, "agents"), 0755)
 

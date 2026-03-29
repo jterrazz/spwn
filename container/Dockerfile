@@ -17,7 +17,7 @@ RUN npm install -g @anthropic-ai/claude-code
 
 # Container-side Gate binary (Rust, static)
 # Built separately via: cd container/gate && cargo build --release --target x86_64-unknown-linux-musl
-# COPY universe-gate /usr/local/bin/gate
+# COPY spwn-gate /usr/local/bin/gate
 
 # Mount points — /gate is for the host-side Gate bridge wrappers
 VOLUME ["/workspace", "/mind", "/universe"]

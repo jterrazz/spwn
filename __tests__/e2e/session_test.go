@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/universe/__tests__/e2e/setup"
-	"github.com/jterrazz/universe/internal/session"
+	"github.com/jterrazz/spwn/__tests__/e2e/setup"
+	"github.com/jterrazz/spwn/internal/session"
 )
 
 func waitForMock(t *testing.T, tc *setup.TestContext, containerID string) {

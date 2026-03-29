@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/spwn/internal/config"
 )
 
 // AgentInfo describes an agent's Mind structure.
@@ -15,7 +15,7 @@ type AgentInfo struct {
 	Layers map[string][]string `json:"layers"`
 }
 
-// AgentDir returns the path to ~/.universe/agents/{name}/.
+// AgentDir returns the path to ~/.spwn/agents/{name}/.
 func AgentDir(name string) string {
 	return filepath.Join(config.AgentsDir(), name)
 }
@@ -71,7 +71,7 @@ func Validate(name string) error {
 	return nil
 }
 
-// List returns all agents in ~/.universe/agents/.
+// List returns all agents in ~/.spwn/agents/.
 func List() ([]AgentInfo, error) {
 	dir := config.AgentsDir()
 	entries, err := os.ReadDir(dir)

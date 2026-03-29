@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/universe/internal/architect"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/gate"
-	"github.com/jterrazz/universe/internal/manifest"
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/spwn/internal/architect"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/gate"
+	"github.com/jterrazz/spwn/internal/manifest"
+	"github.com/jterrazz/spwn/internal/mind"
 )
 
 // --- SpawnBuilder ---

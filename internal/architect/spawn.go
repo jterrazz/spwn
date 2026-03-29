@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jterrazz/universe/container"
-	"github.com/jterrazz/universe/internal/backend"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/gate"
-	"github.com/jterrazz/universe/internal/manifest"
-	"github.com/jterrazz/universe/internal/mind"
-	"github.com/jterrazz/universe/internal/physics"
+	"github.com/jterrazz/spwn/container"
+	"github.com/jterrazz/spwn/internal/backend"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/gate"
+	"github.com/jterrazz/spwn/internal/manifest"
+	"github.com/jterrazz/spwn/internal/mind"
+	"github.com/jterrazz/spwn/internal/physics"
 )
 
 // SpawnResult is returned by Spawn with the universe and any non-fatal warnings.
@@ -120,7 +120,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, fmt.Errorf("start gate server: %w", err)
 		}
 
-		gateDir, err = os.MkdirTemp("", "universe-gate-")
+		gateDir, err = os.MkdirTemp("", "spwn-gate-")
 		if err != nil {
 			gateSrv.Stop()
 			return nil, fmt.Errorf("create gate dir: %w", err)

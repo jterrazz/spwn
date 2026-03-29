@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/jterrazz/universe/internal/backend"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/journal"
-	"github.com/jterrazz/universe/internal/session"
+	"github.com/jterrazz/spwn/internal/backend"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/journal"
+	"github.com/jterrazz/spwn/internal/session"
 )
 
 // SpawnAgent execs Claude Code interactively inside a universe.
