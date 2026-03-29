@@ -5,6 +5,7 @@ package agent
 import (
 	"time"
 
+	"github.com/jterrazz/spwn/core/agent/internal/evolution"
 	"github.com/jterrazz/spwn/core/agent/internal/journal"
 	"github.com/jterrazz/spwn/core/agent/internal/mind"
 	"github.com/jterrazz/spwn/core/agent/internal/session"
@@ -18,6 +19,15 @@ type JournalEntry = journal.Entry
 
 // Session tracks an agent's conversation state within a universe.
 type Session = session.Session
+
+// ReflexionResult holds the outcome of a reflexion analysis.
+type ReflexionResult = evolution.ReflexionResult
+
+// SleepResult holds the outcome of a sleep cycle.
+type SleepResult = evolution.SleepResult
+
+// ForkResult holds the outcome of a fork operation.
+type ForkResult = evolution.ForkResult
 
 // --- Mind operations ---
 
@@ -88,4 +98,23 @@ func LoadSession(mindPath, universeID string) (*Session, error) {
 // SaveSession writes a session file to the Mind's sessions directory.
 func SaveSession(mindPath string, s *Session) error {
 	return session.Save(mindPath, s)
+}
+
+// --- Evolution operations ---
+
+// Reflect analyzes recent journal entries and promotes successful patterns to playbooks.
+func Reflect(name string) (*ReflexionResult, error) {
+	mindPath := AgentDir(name)
+	return evolution.Reflect(mindPath)
+}
+
+// Sleep consolidates experience into durable knowledge.
+func Sleep(name string) (*SleepResult, error) {
+	mindPath := AgentDir(name)
+	return evolution.Sleep(mindPath)
+}
+
+// Fork clones a Mind from source agent to target agent.
+func Fork(source, target string, layers []string) (*ForkResult, error) {
+	return evolution.Fork(source, target, layers)
 }
