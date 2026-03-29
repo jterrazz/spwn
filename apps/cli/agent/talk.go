@@ -52,13 +52,23 @@ If no message is provided, opens an interactive Claude session inside the contai
 		s.Info("Universe:", universeID)
 		s.Blank()
 
+		// Base claude command: continue latest session in /workspace
+		claudeArgs := []string{
+			"claude",
+			"--dangerously-skip-permissions",
+			"--continue",
+		}
+
 		if message != "" {
 			// One-shot mode: run claude with --print
-			dockerArgs := []string{"exec"}
+			claudeArgs = append(claudeArgs, "-p", message, "--print")
+
+			dockerArgs := []string{"exec", "-w", "/workspace"}
 			if token != "" {
 				dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
 			}
-			dockerArgs = append(dockerArgs, containerID, "claude", "--dangerously-skip-permissions", "-p", message, "--print")
+			dockerArgs = append(dockerArgs, containerID)
+			dockerArgs = append(dockerArgs, claudeArgs...)
 
 			execCmd := exec.Command("docker", dockerArgs...)
 			output, err := execCmd.CombinedOutput()
@@ -69,11 +79,12 @@ If no message is provided, opens an interactive Claude session inside the contai
 			fmt.Fprint(os.Stdout, string(output))
 		} else {
 			// Interactive mode: attach stdin/stdout/stderr
-			dockerArgs := []string{"exec", "-it"}
+			dockerArgs := []string{"exec", "-it", "-w", "/workspace"}
 			if token != "" {
 				dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
 			}
-			dockerArgs = append(dockerArgs, containerID, "claude", "--dangerously-skip-permissions")
+			dockerArgs = append(dockerArgs, containerID)
+			dockerArgs = append(dockerArgs, claudeArgs...)
 
 			execCmd := exec.Command("docker", dockerArgs...)
 			execCmd.Stdin = os.Stdin
