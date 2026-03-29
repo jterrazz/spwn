@@ -4,6 +4,11 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import {
+  expectLine,
+  expectTableHeader,
+  expectTableRow,
+} from "../../setup/output-helpers.js";
 
 describe("agent talk", () => {
   let ctx: TestContext;
@@ -28,10 +33,10 @@ describe("agent talk", () => {
       60_000,
     );
 
-    // THEN — the agent responds (not an error about empty dir)
+    // THEN — the agent responds with world context
     expect(talkResult.exitCode).toBe(0);
-    expect(talkResult.output).toContain("neo");
-    expect(talkResult.output).toContain("World");
+    expectLine(talkResult.output, /neo/);
+    expectLine(talkResult.output, /World/);
     // The agent should see files (state.json, worlds/, agents/ etc.)
     expect(talkResult.output.length).toBeGreaterThan(50);
   });
@@ -59,8 +64,8 @@ describe("agent talk", () => {
     // THEN — both succeed (agent is still available)
     expect(talk1.exitCode).toBe(0);
     expect(talk2.exitCode).toBe(0);
-    expect(talk1.output).toContain("neo");
-    expect(talk2.output).toContain("neo");
+    expectLine(talk1.output, /neo/);
+    expectLine(talk2.output, /neo/);
   });
 
   test("talk to unattached agent fails", () => {
@@ -74,7 +79,8 @@ describe("agent talk", () => {
 
     // THEN — error about no active world
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("not in any active world");
+    expectLine(result.output, /agent "orphan" is not in any active world/);
+    expectLine(result.output, /Spawn it first with: spwn world --agent orphan/);
   });
 
   test("agent list shows world association after spawn", () => {
@@ -90,10 +96,10 @@ describe("agent talk", () => {
     // WHEN — listing agents
     const listResult = ctx.spwn(["agent", "list"]);
 
-    // THEN — agent shows its world and status
+    // THEN — agent shows its world and status in table
     expect(listResult.exitCode).toBe(0);
-    expect(listResult.output).toContain("neo");
-    expect(listResult.output).toContain(id);
+    expectTableHeader(listResult.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableRow(listResult.output, ["neo", id]);
   });
 
   test("world list shows agent names", () => {
@@ -110,8 +116,8 @@ describe("agent talk", () => {
 
     // THEN — shows agent name in AGENTS column
     expect(listResult.exitCode).toBe(0);
-    expect(listResult.output).toContain("neo");
-    expect(listResult.output).toContain("AGENTS");
+    expectTableHeader(listResult.output, ["ID", "CONFIG", "AGENTS", "STATUS", "CREATED"]);
+    expectTableRow(listResult.output, ["neo"]);
   });
 
   test("talk skips dead containers and finds the live one", () => {
@@ -144,8 +150,7 @@ describe("agent talk", () => {
 
     // THEN — connects to the live world (id2), not the dead one (id1)
     expect(talkResult.exitCode).toBe(0);
-    expect(talkResult.output).toContain(id2);
-    expect(talkResult.output).not.toContain(id1);
+    expectLine(talkResult.output, new RegExp(id2.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   });
 
   test("talk to non-existent agent fails", () => {
@@ -155,7 +160,7 @@ describe("agent talk", () => {
 
     // THEN — error about agent not found
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("not found");
+    expectLine(result.output, /agent "ghost" not found/);
   });
 
   test("agent list shows unattached after destroy", () => {
@@ -170,7 +175,7 @@ describe("agent talk", () => {
 
     // Verify attached first
     const listBefore = ctx.spwn(["agent", "list"]);
-    expect(listBefore.output).toContain(id);
+    expectTableRow(listBefore.output, [id]);
 
     // Destroy
     ctx.spwn(["world", "destroy", id]);
@@ -179,8 +184,7 @@ describe("agent talk", () => {
     const listAfter = ctx.spwn(["agent", "list"]);
 
     // THEN — agent still exists but is unattached
-    expect(listAfter.output).toContain("neo");
-    expect(listAfter.output).toContain("unattached");
+    expectTableRow(listAfter.output, ["neo", "unattached"]);
   });
 
   test("agent inspect shows world when attached", () => {
@@ -196,9 +200,9 @@ describe("agent talk", () => {
     // WHEN — inspecting the agent
     const inspectResult = ctx.spwn(["agent", "inspect", "neo"]);
 
-    // THEN — shows world association
+    // THEN — shows agent details with Mind layers
     expect(inspectResult.exitCode).toBe(0);
-    expect(inspectResult.output).toContain("neo");
-    expect(inspectResult.output).toContain("personas");
+    expectLine(inspectResult.output, /Agent:\s+neo/);
+    expectLine(inspectResult.output, /personas\/\s+default\.md/);
   });
 });

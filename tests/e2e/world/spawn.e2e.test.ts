@@ -4,6 +4,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine, expectNoLine } from "../../setup/output-helpers.js";
 
 describe("world spawn", () => {
   let ctx: TestContext;
@@ -23,9 +24,13 @@ describe("world spawn", () => {
       60_000,
     );
 
-    // THEN — exits successfully and outputs a world ID
+    // THEN — exits successfully with structured status lines
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Spawned world");
+    expectLine(result.output, /✓ Mounted mind\s+neo → \/mind/);
+    expectLine(result.output, /✓ Built image\s+spwn-test:latest/);
+    expectLine(result.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(result.output, /✓ Generated faculties\s+physics\.md, faculties\.md/);
+    expectLine(result.output, /✓ Agent is alive\./);
     const id = parseWorldId(result.output)!;
     expect(id).toBeTruthy();
     expect(id).toMatch(/^w-default-\d{5}$/);
@@ -53,7 +58,7 @@ describe("world spawn", () => {
 
     // THEN — exits successfully with correct ID prefix
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Spawned world");
+    expectLine(result.output, /✓ Spawned world\s+w-myconfig-\d{5}/);
     const id = parseWorldId(result.output)!;
     expect(id).toMatch(/^w-myconfig-\d{5}$/);
 
@@ -92,9 +97,9 @@ describe("world spawn", () => {
     // WHEN — listing worlds
     const listResult = ctx.spwn(["world", "list"]);
 
-    // THEN — the spawned world appears
+    // THEN — the spawned world appears in the table
     expect(listResult.exitCode).toBe(0);
-    expect(listResult.output).toContain(id);
+    expectLine(listResult.output, new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
     // AND — state.json tracks it
     ctx.state().hasWorld(id).hasAgent(id, "neo");
@@ -126,9 +131,9 @@ describe("world spawn", () => {
 
     // Read physics.md from inside the container
     const physics = ctx.universe(id).physics();
-    expect(physics).toContain("CPU");
-    expect(physics).toContain("Memory");
-    expect(physics).toContain("Timeout");
+    expect(physics).toMatch(/CPU/);
+    expect(physics).toMatch(/Memory/);
+    expect(physics).toMatch(/Timeout/);
   });
 
   test("faculties.md lists verified elements", () => {
@@ -141,7 +146,7 @@ describe("world spawn", () => {
     const id = parseWorldId(result.output)!;
 
     const faculties = ctx.universe(id).faculties();
-    expect(faculties).toContain("bash");
+    expect(faculties).toMatch(/bash/);
   });
 
   test("container removed after destroy", () => {

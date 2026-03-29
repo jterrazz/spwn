@@ -4,6 +4,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine } from "../../setup/output-helpers.js";
 
 describe("world physics", () => {
   let ctx: TestContext;
@@ -25,11 +26,10 @@ describe("world physics", () => {
     // WHEN — inspecting the world
     const inspectResult = ctx.spwn(["world", "inspect", id]);
 
-    // THEN — physics constants are shown
+    // THEN — physics constants are shown in structured format
     expect(inspectResult.exitCode).toBe(0);
-    expect(inspectResult.output).toContain("Constants");
-    expect(inspectResult.output).toContain("CPU");
-    expect(inspectResult.output).toContain("Memory");
+    expectLine(inspectResult.output, /Constants:\s+CPU:.*Memory:.*Timeout:/);
+    expectLine(inspectResult.output, /Laws:\s+Network:.*Max processes:/);
   });
 
   test("physics.md contains constants inside container", () => {
@@ -44,9 +44,9 @@ describe("world physics", () => {
 
     // THEN — physics.md inside container contains expected fields
     const physics = ctx.universe(id).physics();
-    expect(physics).toContain("CPU");
-    expect(physics).toContain("Memory");
-    expect(physics).toContain("Timeout");
+    expect(physics).toMatch(/CPU/);
+    expect(physics).toMatch(/Memory/);
+    expect(physics).toMatch(/Timeout/);
   });
 
   test("physics.md contains laws", () => {
@@ -59,7 +59,7 @@ describe("world physics", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     const physics = ctx.universe(id).physics();
-    expect(physics).toContain("network");
+    expect(physics).toMatch(/network/i);
   });
 
   test("faculties.md is generated inside the world", () => {
@@ -74,13 +74,11 @@ describe("world physics", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     // THEN — the spawn output mentions faculties generation
-    expect(spawnResult.output).toContain("Generated faculties");
-    expect(spawnResult.output).toContain("physics.md");
-    expect(spawnResult.output).toContain("faculties.md");
+    expectLine(spawnResult.output, /✓ Generated faculties\s+physics\.md, faculties\.md/);
 
     // AND — faculties.md actually exists and lists elements
     const faculties = ctx.universe(id).faculties();
-    expect(faculties).toContain("bash");
+    expect(faculties).toMatch(/bash/);
   });
 
   test("world includes declared elements", () => {

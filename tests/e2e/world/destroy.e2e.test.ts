@@ -4,6 +4,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine, expectNoLine } from "../../setup/output-helpers.js";
 
 describe("world destroy", () => {
   let ctx: TestContext;
@@ -29,9 +30,13 @@ describe("world destroy", () => {
     // WHEN — destroying it
     const destroyResult = ctx.spwn(["world", "destroy", id], 30_000);
 
-    // THEN — exits successfully
+    // THEN — exits successfully with structured status lines
     expect(destroyResult.exitCode).toBe(0);
-    expect(destroyResult.output).toContain("World destroyed");
+    expectLine(destroyResult.output, /→ Destroying world\.\.\./);
+    expectLine(destroyResult.output, /✓ Stopped agent/);
+    expectLine(destroyResult.output, /✓ Removed container/);
+    expectLine(destroyResult.output, /✓ Mind persisted/);
+    expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
     // AND — container no longer exists
     ctx.universe(id).toNotExist();
@@ -57,7 +62,7 @@ describe("world destroy", () => {
 
     // THEN — the destroyed world is gone from list
     expect(listResult.exitCode).toBe(0);
-    expect(listResult.output).not.toContain(id);
+    expectNoLine(listResult.output, new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
     // AND — gone from state.json
     ctx.state().noWorld(id);
@@ -74,8 +79,8 @@ describe("world destroy", () => {
       30_000,
     );
 
-    // THEN — exits with non-zero code
+    // THEN — exits with non-zero code and structured error
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("not found");
+    expectLine(result.output, /✗ Destroy failed\s+world w-nonexistent-00000 not found/);
   });
 });

@@ -4,6 +4,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine } from "../../setup/output-helpers.js";
 
 describe("visitor", () => {
   let ctx: TestContext;
@@ -20,9 +21,9 @@ describe("visitor", () => {
     // WHEN — running visitor without world flag
     const result = ctx.spwn(["visitor", "do something"]);
 
-    // THEN — exits with error mentioning world requirement
+    // THEN — exits with error about required world flag
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("world");
+    expectLine(result.output, /required flag\(s\) "world" not set/);
   });
 
   test("visitor with non-existent world dispatches (fire-and-forget)", () => {
@@ -40,7 +41,7 @@ describe("visitor", () => {
 
     // THEN — dispatches anyway (visitor is fire-and-forget)
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Visitor dispatched");
+    expectLine(result.output, /Visitor dispatched: "do something" → w-nonexistent-00000/);
   });
 
   test("visitor runs ephemeral task in a world", () => {
@@ -63,9 +64,9 @@ describe("visitor", () => {
       30_000,
     );
 
-    // THEN — succeeds and confirms dispatch
+    // THEN — succeeds and confirms dispatch with structured output
     expect(visitorResult.exitCode).toBe(0);
-    expect(visitorResult.output).toContain("Visitor dispatched");
+    expectLine(visitorResult.output, new RegExp(`Visitor dispatched: "lint the code" → ${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
 
     // AND — container is still running after visitor
     ctx.universe(id).toBeRunning();
