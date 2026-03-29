@@ -1,76 +1,76 @@
 import { describe, test, expect, afterEach } from "vitest";
 import {
   createTestContext,
-  parseUniverseId,
+  parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
-describe("universe destroy", () => {
+describe("world destroy", () => {
   let ctx: TestContext;
 
   afterEach(() => {
     ctx?.cleanup();
   });
 
-  test("destroys a running universe", () => {
-    // GIVEN — a spawned universe
+  test("destroys a running world", () => {
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
     // Verify container is running before destroy
     ctx.universe(id).toBeRunning();
 
     // WHEN — destroying it
-    const destroyResult = ctx.spwn(["universe", "destroy", id], 30_000);
+    const destroyResult = ctx.spwn(["world", "destroy", id], 30_000);
 
     // THEN — exits successfully
     expect(destroyResult.exitCode).toBe(0);
-    expect(destroyResult.output).toContain("Universe destroyed");
+    expect(destroyResult.output).toContain("World destroyed");
 
     // AND — container no longer exists
     ctx.universe(id).toNotExist();
   });
 
-  test("destroy removes universe from list and state", () => {
-    // GIVEN — a spawned and destroyed universe
+  test("destroy removes world from list and state", () => {
+    // GIVEN — a spawned and destroyed world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
 
     // Verify it exists in state before destroy
-    ctx.state().hasUniverse(id);
+    ctx.state().hasWorld(id);
 
-    ctx.spwn(["universe", "destroy", id], 30_000);
+    ctx.spwn(["world", "destroy", id], 30_000);
 
-    // WHEN — listing universes
-    const listResult = ctx.spwn(["universe", "list"]);
+    // WHEN — listing worlds
+    const listResult = ctx.spwn(["world", "list"]);
 
-    // THEN — the destroyed universe is gone from list
+    // THEN — the destroyed world is gone from list
     expect(listResult.exitCode).toBe(0);
     expect(listResult.output).not.toContain(id);
 
     // AND — gone from state.json
-    ctx.state().noUniverse(id);
+    ctx.state().noWorld(id);
   });
 
-  test("destroy non-existent universe fails", () => {
+  test("destroy non-existent world fails", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — destroying a universe that does not exist
+    // WHEN — destroying a world that does not exist
     const result = ctx.spwn(
-      ["universe", "destroy", "u-nonexistent-00000"],
+      ["world", "destroy", "w-nonexistent-00000"],
       30_000,
     );
 

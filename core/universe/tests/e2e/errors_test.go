@@ -35,12 +35,12 @@ func TestError_DestroyNonExistentUniverse(t *testing.T) {
 	// GIVEN a test context with no universes
 	tc := setup.NewTestContext(t)
 
-	// WHEN destroying a non-existent universe
+	// WHEN destroying a non-existent world
 	_, err := tc.Arc.Destroy(context.Background(), "u-nonexistent-99999")
 
 	// THEN it should return an error
 	if err == nil {
-		t.Fatal("Expected error when destroying non-existent universe, got nil")
+		t.Fatal("Expected error when destroying non-existent world, got nil")
 	}
 }
 
@@ -48,12 +48,12 @@ func TestError_InspectNonExistentUniverse(t *testing.T) {
 	// GIVEN a test context with no universes
 	tc := setup.NewTestContext(t)
 
-	// WHEN inspecting a non-existent universe
+	// WHEN inspecting a non-existent world
 	_, err := tc.Arc.Inspect(context.Background(), "u-nonexistent-99999")
 
 	// THEN it should return an error
 	if err == nil {
-		t.Fatal("Expected error when inspecting non-existent universe, got nil")
+		t.Fatal("Expected error when inspecting non-existent world, got nil")
 	}
 }
 
@@ -97,15 +97,15 @@ func TestError_DoubleDestroySameUniverse(t *testing.T) {
 
 	chain.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(0)
+			s.WorldCount(0)
 		})
 
-	// WHEN destroying the same universe again
+	// WHEN destroying the same world again
 	_, err := tc.Arc.Destroy(context.Background(), universeID)
 
 	// THEN it should return an error
 	if err == nil {
-		t.Fatal("Expected error on second destroy of same universe, got nil")
+		t.Fatal("Expected error on second destroy of same world, got nil")
 	}
 }
 
@@ -113,40 +113,40 @@ func TestError_LogsOnNonExistentUniverse(t *testing.T) {
 	// GIVEN a test context with no universes
 	tc := setup.NewTestContext(t)
 
-	// WHEN requesting logs for a non-existent universe
+	// WHEN requesting logs for a non-existent world
 	_, err := tc.Arc.Logs(context.Background(), "u-nonexistent-99999", false, "10")
 
 	// THEN it should return an error
 	if err == nil {
-		t.Fatal("Expected error when getting logs for non-existent universe, got nil")
+		t.Fatal("Expected error when getting logs for non-existent world, got nil")
 	}
 }
 
 func TestError_SpawnAgentDetachedOnNonExistentUniverse(t *testing.T) {
-	// GIVEN an agent and a non-existent universe ID
+	// GIVEN an agent and a non-existent world ID
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("orphan-agent")
 
-	// WHEN spawning the agent in the non-existent universe
+	// WHEN spawning the agent in the non-existent world
 	err := tc.Arc.SpawnAgentDetached(context.Background(), "u-nonexistent-99999", "orphan-agent")
 
 	// THEN it should return an error
 	if err == nil {
-		t.Fatal("Expected error when spawning agent in non-existent universe, got nil")
+		t.Fatal("Expected error when spawning agent in non-existent world, got nil")
 	}
 }
 
 func TestError_SpawnAgentOnNonExistentUniverse(t *testing.T) {
-	// GIVEN an agent and a non-existent universe ID
+	// GIVEN an agent and a non-existent world ID
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("orphan-agent-2")
 
-	// WHEN spawning the agent (blocking) in the non-existent universe
+	// WHEN spawning the agent (blocking) in the non-existent world
 	err := tc.Arc.SpawnAgent(context.Background(), "u-nonexistent-99999", "orphan-agent-2")
 
 	// THEN it should return an error
 	if err == nil {
-		t.Fatal("Expected error when spawning agent in non-existent universe, got nil")
+		t.Fatal("Expected error when spawning agent in non-existent world, got nil")
 	}
 }
 

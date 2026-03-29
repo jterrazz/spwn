@@ -15,7 +15,7 @@ const (
 // Directory layout constants.
 const (
 	SpwnBaseDir       = ".spwn"
-	UniversesSubDir   = "universes"
+	WorldsSubDir      = "worlds"
 	AgentsSubDir      = "agents"
 	StateFileName     = "state.json"
 	OrgFileName       = "org.yaml"

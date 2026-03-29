@@ -116,10 +116,10 @@ func TestStepper_JSONMode_SuppressesAll(t *testing.T) {
 
 func TestStepper_Success(t *testing.T) {
 	s, buf := newTestStepper(ModeNormal)
-	s.Success("Universe spawned.")
+	s.Success("World spawned.")
 
 	out := buf.String()
-	if !strings.Contains(out, "Universe spawned.") {
+	if !strings.Contains(out, "World spawned.") {
 		t.Errorf("Success() output missing message, got %q", out)
 	}
 }
@@ -139,13 +139,13 @@ func TestStepper_Warn_WithDetail(t *testing.T) {
 
 func TestStepper_Info(t *testing.T) {
 	s, buf := newTestStepper(ModeNormal)
-	s.Info("Universe:", "u-nebula-12345")
+	s.Info("World:", "w-nebula-12345")
 
 	out := buf.String()
-	if !strings.Contains(out, "Universe:") {
+	if !strings.Contains(out, "World:") {
 		t.Errorf("Info() output missing label, got %q", out)
 	}
-	if !strings.Contains(out, "u-nebula-12345") {
+	if !strings.Contains(out, "w-nebula-12345") {
 		t.Errorf("Info() output missing value, got %q", out)
 	}
 }

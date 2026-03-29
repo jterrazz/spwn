@@ -1,23 +1,23 @@
 import { describe, test, expect, afterEach } from "vitest";
 import {
   createTestContext,
-  parseUniverseId,
+  parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
-describe("agent inside universe", () => {
+describe("agent inside world", () => {
   let ctx: TestContext;
 
   afterEach(() => {
     ctx?.cleanup();
   });
 
-  test("agent receives Mind inside universe container", () => {
-    // GIVEN — a spawned universe with agent neo
+  test("agent receives Mind inside world container", () => {
+    // GIVEN — a spawned world with agent neo
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
@@ -28,7 +28,7 @@ describe("agent inside universe", () => {
     expect(spawnResult.output).toContain("/mind");
 
     // AND — mind directory actually exists inside the container
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     ctx
       .universe(id)
       .toHaveDirectory("/mind")
@@ -37,11 +37,11 @@ describe("agent inside universe", () => {
   });
 
   test("spawn confirms agent is alive", () => {
-    // GIVEN — a spawned universe
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
@@ -50,22 +50,22 @@ describe("agent inside universe", () => {
     expect(spawnResult.output).toContain("Agent is alive");
 
     // AND — container is running
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     ctx.universe(id).toBeRunning();
   });
 
   test("inspect shows agent info", () => {
-    // GIVEN — a spawned universe
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
 
     // WHEN — inspecting
-    const inspectResult = ctx.spwn(["universe", "inspect", id]);
+    const inspectResult = ctx.spwn(["world", "inspect", id]);
 
     // THEN — agent is shown
     expect(inspectResult.exitCode).toBe(0);
@@ -80,10 +80,10 @@ describe("agent inside universe", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(result.output)!;
+    const id = parseWorldId(result.output)!;
 
     // Attempt to read mock agent probe — only if the mock agent writes it
     try {
@@ -109,7 +109,7 @@ describe("agent inside universe", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 

@@ -21,17 +21,18 @@ Spwn is a **framework for orchestrating artificial life**. Every layer is an int
 
 ### The Hierarchy
 - **Organization**: Top-level manifest (org.yaml). Org-wide defaults, shared skills, governance, config sync.
-- **Claw**: The God. Always-on ZeroClaw daemon in Docker. Connected to all channels. Creates/destroys universes. Self-manages via spwn.
-- **Universe**: A contained reality. Org-scale, cross-repo. Has physics, elements, and inhabitants. Multiple agents collaborate inside.
-- **Governor**: Leader agent inside a universe. Decomposes tasks, delegates to citizens, aggregates results.
+- **Claw**: The God. Always-on ZeroClaw daemon in Docker. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
+- **Universe**: The reality — physics, constants, resource limits. One per org. Configured in `universe.yaml`. Defines what is physically possible.
+- **World**: A living workspace inside the universe. Has agents, elements, and a project. Many per universe. Configured in `~/.spwn/worlds/`.
+- **Governor**: Leader agent inside a world. Decomposes tasks, delegates to citizens, aggregates results.
 - **Citizen**: Persistent worker agent. Has a Mind — remembers, learns, evolves.
 - **Visitor**: Ephemeral agent. No Mind, no memory. Single task, fire & forget.
 - **Observatory**: Visual dashboard. Real-time view of everything.
 
-### The World
+### The Physics
 - **Physics**: Constants (CPU, memory, timeout), laws (network, max-processes), elements (@unix, @git, jq).
 - **Elements**: Building blocks. @packs expand to collections. If not listed, doesn't exist.
-- **Faculties**: Verified elements + gate bridges, auto-generated as `/universe/faculties.md`.
+- **Faculties**: Verified elements + gate bridges, auto-generated as `/world/faculties.md`.
 
 ### The Life
 - **Mind**: Persistent identity — 6 layers: personas, skills, knowledge, playbooks, journal, sessions.
@@ -53,18 +54,18 @@ Spwn is a **framework for orchestrating artificial life**. Every layer is an int
 # Claw (the God)
 spwn claw start                          # Start the Claw daemon
 spwn claw stop                           # Stop the Claw daemon
-spwn claw status                         # Show status, channels, active universes
+spwn claw status                         # Show status, channels, active worlds
 spwn claw connect <channel>              # Connect to a messaging channel
 spwn claw "migrate auth to sessions"     # Talk to it (planned)
 
-# Universe (the world)
-spwn universe                            # Spawn with defaults
-spwn universe -c acme-org                # Named config
-spwn universe --governor morpheus -w ~/acme-org
-spwn universe list / inspect / logs / attach / destroy
+# World (a living workspace inside the universe)
+spwn world                               # Spawn with defaults
+spwn world -c acme-org                   # Named config
+spwn world --governor morpheus -w ~/acme-org
+spwn world list / inspect / logs / attach / destroy
 
 # Agent (citizens + evolution)
-spwn agent -n neo --universe u-acme-84721
+spwn agent -n neo --world w-acme-84721
 spwn agent init [name]
 spwn agent list / inspect / export
 spwn agent talk neo "how's the migration?"
@@ -73,7 +74,7 @@ spwn agent sleep <agent-id>              # Sleep: archive stale, prune sessions
 spwn agent fork <agent-id>               # Fork: clone Mind to new agent
 
 # Visitor (ephemeral)
-spwn visitor "task" --universe u-acme-84721
+spwn visitor "task" --world w-acme-84721
 
 # Observatory
 spwn observatory start / open
@@ -91,7 +92,7 @@ spwn skill remove <skill>                # Remove a skill
 
 ## IDs
 
-- Universe: `u-{config-name}-{5digits}` (e.g. `u-default-84721`)
+- World: `w-{config-name}-{5digits}` (e.g. `w-default-84721`)
 - Agent: `a-{agent-name}-{5digits}` (e.g. `a-leonardo-52103`)
 - Generated with `crypto/rand`
 
@@ -101,9 +102,9 @@ spwn skill remove <skill>                # Remove a skill
 ~/.spwn/
 ├── org.yaml                 # Organization manifest (source of truth)
 ├── claw/
-│   ├── state.json           # Active universes, channels
+│   ├── state.json           # Active worlds, channels
 │   └── claw.yaml            # Claw runtime config
-├── universes/
+├── worlds/
 │   ├── default.yaml
 │   └── acme-org.yaml
 ├── agents/
@@ -146,7 +147,7 @@ spwn/
 │   │       ├── provider/            #     Anthropic + OpenAI adapters (Provider port)
 │   │       ├── channel/             #     CLI adapter (Channel port)
 │   │       ├── skill/               #     LocalRegistry adapter (Skill port)
-│   │       ├── observatory/         #     HTTP API server (/api/universes, /api/agents)
+│   │       ├── observatory/         #     HTTP API server (/api/worlds, /api/agents)
 │   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
 │   │       ├── physics/             #     Physics/faculties generation
 │   │       ├── manifest/            #     Config parsing (universe.yaml, life.yaml, org.yaml)
@@ -171,8 +172,8 @@ spwn/
 │   │
 │   └── foundation/                  #   go.mod — cross-cutting primitives
 │       ├── constants.go             #     Defaults, MindLayers, BaseImage
-│       ├── paths.go                 #     BaseDir(), UniversesDir(), AgentsDir(), OrgPath()
-│       ├── identity.go              #     GenerateUniverseID(), GenerateAgentID()
+│       ├── paths.go                 #     BaseDir(), WorldsDir(), AgentsDir(), OrgPath()
+│       ├── identity.go              #     GenerateWorldID(), GenerateAgentID()
 │       └── names.go                 #     RandomCosmosWord(), RandomAgentName()
 │
 ├── apps/                            # Deployable consumers
@@ -181,7 +182,7 @@ spwn/
 │   │   ├── root.go                  #     Root cobra command
 │   │   ├── init.go                  #     spwn init
 │   │   ├── defaults.go              #     Auto-create defaults on first run
-│   │   ├── universe/                #     Universe subcommands (thin wrappers)
+│   │   ├── world/                   #     World subcommands (thin wrappers)
 │   │   ├── agent/                   #     Agent subcommands (+ reflect, sleep, fork)
 │   │   ├── claw/                    #     Claw subcommands (start, stop, status, connect)
 │   │   ├── visitor/                 #     Visitor subcommands
@@ -189,7 +190,7 @@ spwn/
 │   │   ├── observatory/             #     Observatory subcommands (start, open)
 │   │   ├── ui/                      #     Stepper, table, style, format
 │   │   └── tests/
-│   │       └── integration/         #   Cross-domain flows (universe + agent)
+│   │       └── integration/         #   Cross-domain flows (world + agent)
 │   │
 │   └── observatory/                 #   Visual dashboard (CLI placeholder, Next.js planned)
 │       └── package.json

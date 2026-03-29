@@ -124,33 +124,33 @@ describe("agent CRUD", () => {
     expect(result.exitCode).not.toBe(0);
   });
 
-  test("talk requires running universe", async () => {
-    // GIVEN — an agent exists but is not in any universe
+  test("talk requires running world", async () => {
+    // GIVEN — an agent exists but is not in any world
     await spwn("create neo for talk").exec("agent init neo").run();
 
     // WHEN — trying to talk to the agent
-    const result = await spwn("talk without universe")
+    const result = await spwn("talk without world")
       .exec("agent talk neo hello")
       .run();
 
-    // THEN — exits with error about no active universe
+    // THEN — exits with error about no active world
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("not in any active universe");
+    expect(result.output).toContain("not in any active world");
   });
 
-  test("list shows universe column headers", async () => {
+  test("list shows world column headers", async () => {
     // GIVEN — an agent has been created
     await spwn("create for list").exec("agent init atlas").run();
 
     // WHEN — listing agents
-    const result = await spwn("list with universe")
+    const result = await spwn("list with world")
       .exec("agent list")
       .run();
 
-    // THEN — output includes universe-related columns
+    // THEN — output includes world-related columns
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("atlas");
-    expect(result.output).toContain("UNIVERSE");
+    expect(result.output).toContain("WORLD");
     expect(result.output).toContain("STATUS");
   });
 });

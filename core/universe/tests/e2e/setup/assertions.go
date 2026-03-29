@@ -49,7 +49,7 @@ func (a *AssertionChain) ExpectContainer(fn func(c *ContainerAssertion)) *Assert
 func (a *AssertionChain) ExpectMind(fn func(m *MindAssertion)) *AssertionChain {
 	a.tc.T.Helper()
 	if a.universe.Agent == "" {
-		a.tc.T.Fatal("ExpectMind called but no agent is set on this universe")
+		a.tc.T.Fatal("ExpectMind called but no agent is set on this world")
 	}
 	fn(&MindAssertion{tc: a.tc, agentName: a.universe.Agent})
 	return a
@@ -126,22 +126,22 @@ type StateAssertion struct {
 	tc *TestContext
 }
 
-func (s *StateAssertion) UniverseCount(expected int) {
+func (s *StateAssertion) WorldCount(expected int) {
 	s.tc.T.Helper()
-	universes := s.tc.LoadState()
-	if len(universes) != expected {
-		s.tc.T.Fatalf("Expected %d universe(s), got %d", expected, len(universes))
+	worlds := s.tc.LoadState()
+	if len(worlds) != expected {
+		s.tc.T.Fatalf("Expected %d world(s), got %d", expected, len(worlds))
 	}
 }
 
-func (s *StateAssertion) UniverseStatus(expected universe.Status) {
+func (s *StateAssertion) WorldStatus(expected universe.Status) {
 	s.tc.T.Helper()
-	universes := s.tc.LoadState()
-	if len(universes) == 0 {
-		s.tc.T.Fatal("No universes in state")
+	worlds := s.tc.LoadState()
+	if len(worlds) == 0 {
+		s.tc.T.Fatal("No worlds in state")
 	}
-	if universes[0].Status != expected {
-		s.tc.T.Fatalf("Expected status %q, got %q", expected, universes[0].Status)
+	if worlds[0].Status != expected {
+		s.tc.T.Fatalf("Expected status %q, got %q", expected, worlds[0].Status)
 	}
 }
 
@@ -357,7 +357,7 @@ func (s *SessionAssertion) HasSessionFile(universeID string) {
 		s.tc.T.Fatalf("Failed to load session: %v", err)
 	}
 	if sess == nil {
-		s.tc.T.Fatalf("Expected session file for universe %s, not found", universeID)
+		s.tc.T.Fatalf("Expected session file for world %s, not found", universeID)
 	}
 }
 
@@ -412,7 +412,7 @@ func (j *JournalAssertion) LatestUniverseID(expected string) {
 		j.tc.T.Fatalf("No journal entries found")
 	}
 	if entries[0].UniverseID != expected {
-		j.tc.T.Fatalf("Expected latest journal universe ID %q, got %q", expected, entries[0].UniverseID)
+		j.tc.T.Fatalf("Expected latest journal world ID %q, got %q", expected, entries[0].UniverseID)
 	}
 }
 
@@ -455,15 +455,15 @@ type ListAssertionChain struct {
 func (l *ListAssertionChain) ExpectCount(n int) *ListAssertionChain {
 	l.tc.T.Helper()
 	if len(l.universes) != n {
-		l.tc.T.Fatalf("Expected %d universe(s) in list, got %d", n, len(l.universes))
+		l.tc.T.Fatalf("Expected %d world(s) in list, got %d", n, len(l.universes))
 	}
 	return l
 }
 
-func (l *ListAssertionChain) ExpectUniverse(index int, fn func(e *ListEntryAssertion)) *ListAssertionChain {
+func (l *ListAssertionChain) ExpectWorld(index int, fn func(e *ListEntryAssertion)) *ListAssertionChain {
 	l.tc.T.Helper()
 	if index >= len(l.universes) {
-		l.tc.T.Fatalf("Index %d out of range (have %d universes)", index, len(l.universes))
+		l.tc.T.Fatalf("Index %d out of range (have %d worlds)", index, len(l.universes))
 	}
 	fn(&ListEntryAssertion{tc: l.tc, universe: l.universes[index]})
 	return l

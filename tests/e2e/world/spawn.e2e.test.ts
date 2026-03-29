@@ -1,11 +1,11 @@
 import { describe, test, expect, afterEach } from "vitest";
 import {
   createTestContext,
-  parseUniverseId,
+  parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
-describe("universe spawn", () => {
+describe("world spawn", () => {
   let ctx: TestContext;
 
   afterEach(() => {
@@ -17,18 +17,18 @@ describe("universe spawn", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — spawning a universe
+    // WHEN — spawning a world
     const result = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — exits successfully and outputs a universe ID
+    // THEN — exits successfully and outputs a world ID
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Spawned universe");
-    const id = parseUniverseId(result.output)!;
+    expect(result.output).toContain("Spawned world");
+    const id = parseWorldId(result.output)!;
     expect(id).toBeTruthy();
-    expect(id).toMatch(/^u-default-\d{5}$/);
+    expect(id).toMatch(/^w-default-\d{5}$/);
 
     // AND — the container is actually running
     ctx.universe(id).toBeRunning();
@@ -40,64 +40,64 @@ describe("universe spawn", () => {
       .toHaveFile("/universe/faculties.md");
   });
 
-  test("spawns a universe with named config via -c flag", () => {
+  test("spawns a world with named config via -c flag", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init", "myconfig"]);
 
     // WHEN — spawning with a named config
     const result = ctx.spwn(
-      ["universe", "-c", "myconfig", "--agent", "neo", "-w", ctx.home],
+      ["world", "-c", "myconfig", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
     // THEN — exits successfully with correct ID prefix
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Spawned universe");
-    const id = parseUniverseId(result.output)!;
-    expect(id).toMatch(/^u-myconfig-\d{5}$/);
+    expect(result.output).toContain("Spawned world");
+    const id = parseWorldId(result.output)!;
+    expect(id).toMatch(/^w-myconfig-\d{5}$/);
 
     // AND — container is running
     ctx.universe(id).toBeRunning();
   });
 
-  test("universe ID format is u-{name}-{5digits}", () => {
+  test("world ID format is w-{name}-{5digits}", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — spawning a universe
+    // WHEN — spawning a world
     const result = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
     // THEN — the ID matches the expected format
-    const id = parseUniverseId(result.output);
+    const id = parseWorldId(result.output);
     expect(id).toBeTruthy();
-    expect(id).toMatch(/^u-\w+-\d{5}$/);
+    expect(id).toMatch(/^w-\w+-\d{5}$/);
   });
 
-  test("spawned universe appears in list", () => {
-    // GIVEN — a spawned universe
+  test("spawned world appears in list", () => {
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // WHEN — listing universes
-    const listResult = ctx.spwn(["universe", "list"]);
+    // WHEN — listing worlds
+    const listResult = ctx.spwn(["world", "list"]);
 
-    // THEN — the spawned universe appears
+    // THEN — the spawned world appears
     expect(listResult.exitCode).toBe(0);
     expect(listResult.output).toContain(id);
 
     // AND — state.json tracks it
-    ctx.state().hasUniverse(id).hasAgent(id, "neo");
+    ctx.state().hasWorld(id).hasAgent(id, "neo");
   });
 
   test("fails with non-existent config", () => {
@@ -107,7 +107,7 @@ describe("universe spawn", () => {
 
     // WHEN — spawning with a non-existent config
     const result = ctx.spwn(
-      ["universe", "-c", "nonexistent", "--agent", "neo", "-w", ctx.home],
+      ["world", "-c", "nonexistent", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
@@ -119,10 +119,10 @@ describe("universe spawn", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(result.output)!;
+    const id = parseWorldId(result.output)!;
 
     // Read physics.md from inside the container
     const physics = ctx.universe(id).physics();
@@ -135,10 +135,10 @@ describe("universe spawn", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(result.output)!;
+    const id = parseWorldId(result.output)!;
 
     const faculties = ctx.universe(id).faculties();
     expect(faculties).toContain("bash");
@@ -148,13 +148,13 @@ describe("universe spawn", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(result.output)!;
+    const id = parseWorldId(result.output)!;
 
     ctx.universe(id).toBeRunning();
-    ctx.spwn(["universe", "destroy", id], 30_000);
+    ctx.spwn(["world", "destroy", id], 30_000);
     ctx.universe(id).toNotExist();
   });
 });

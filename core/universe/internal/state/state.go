@@ -11,7 +11,7 @@ import (
 	"spwn.sh/core/foundation"
 )
 
-// Store provides mutex-protected JSON persistence for universe state.
+// Store provides mutex-protected JSON persistence for world state.
 type Store struct {
 	path string
 	mu   sync.Mutex
@@ -35,14 +35,14 @@ func NewStoreAt(path string) (*Store, error) {
 	return &Store{path: path}, nil
 }
 
-// List returns all universes.
+// List returns all worlds.
 func (s *Store) List() ([]models.World, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.load()
 }
 
-// Get returns a universe by ID.
+// Get returns a world by ID.
 func (s *Store) Get(id string) (*models.World, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -56,10 +56,10 @@ func (s *Store) Get(id string) (*models.World, error) {
 			return &universes[i], nil
 		}
 	}
-	return nil, fmt.Errorf("universe %s not found", id)
+	return nil, fmt.Errorf("world %s not found", id)
 }
 
-// Save adds or updates a universe.
+// Save adds or updates a world.
 func (s *Store) Save(u models.World) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -83,7 +83,7 @@ func (s *Store) Save(u models.World) error {
 	return s.save(universes)
 }
 
-// Delete removes a universe by ID.
+// Delete removes a world by ID.
 func (s *Store) Delete(id string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -102,7 +102,7 @@ func (s *Store) Delete(id string) error {
 	return s.save(filtered)
 }
 
-// UpdateStatus changes the status of a universe.
+// UpdateStatus changes the status of a world.
 func (s *Store) UpdateStatus(id string, status models.Status) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -117,10 +117,10 @@ func (s *Store) UpdateStatus(id string, status models.Status) error {
 			return s.save(universes)
 		}
 	}
-	return fmt.Errorf("universe %s not found", id)
+	return fmt.Errorf("world %s not found", id)
 }
 
-// AddAgent adds an agent record to a universe.
+// AddAgent adds an agent record to a world.
 func (s *Store) AddAgent(universeID string, agent models.AgentRecord) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -135,10 +135,10 @@ func (s *Store) AddAgent(universeID string, agent models.AgentRecord) error {
 			return s.save(universes)
 		}
 	}
-	return fmt.Errorf("universe %s not found", universeID)
+	return fmt.Errorf("world %s not found", universeID)
 }
 
-// RemoveAgent removes an agent from a universe.
+// RemoveAgent removes an agent from a world.
 func (s *Store) RemoveAgent(universeID, agentID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -159,10 +159,10 @@ func (s *Store) RemoveAgent(universeID, agentID string) error {
 			return s.save(universes)
 		}
 	}
-	return fmt.Errorf("universe %s not found", universeID)
+	return fmt.Errorf("world %s not found", universeID)
 }
 
-// UpdateAgentStatus updates a specific agent's status within a universe.
+// UpdateAgentStatus updates a specific agent's status within a world.
 func (s *Store) UpdateAgentStatus(universeID, agentID string, status models.Status) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -179,10 +179,10 @@ func (s *Store) UpdateAgentStatus(universeID, agentID string, status models.Stat
 					return s.save(universes)
 				}
 			}
-			return fmt.Errorf("agent %s not found in universe %s", agentID, universeID)
+			return fmt.Errorf("agent %s not found in world %s", agentID, universeID)
 		}
 	}
-	return fmt.Errorf("universe %s not found", universeID)
+	return fmt.Errorf("world %s not found", universeID)
 }
 
 func (s *Store) load() ([]models.World, error) {

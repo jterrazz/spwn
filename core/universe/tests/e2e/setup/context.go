@@ -24,7 +24,7 @@ type TestContext struct {
 	Backend universe.Backend
 	State   *universe.Store
 	Arc     *universe.Architect
-	Spawned []string // universe IDs to clean up
+	Spawned []string // world IDs to clean up
 }
 
 // NewTestContext creates an isolated test environment with temp dirs and real Docker.
@@ -35,7 +35,7 @@ func NewTestContext(t *testing.T) *TestContext {
 	t.Setenv("SPWN_HOME", baseDir)
 
 	// Create required subdirectories
-	os.MkdirAll(filepath.Join(baseDir, "universes"), 0755)
+	os.MkdirAll(filepath.Join(baseDir, "worlds"), 0755)
 	os.MkdirAll(filepath.Join(baseDir, "agents"), 0755)
 
 	docker, err := universe.NewDocker()
@@ -76,19 +76,19 @@ func NewTestContext(t *testing.T) *TestContext {
 	return ctx
 }
 
-// TrackUniverse adds a universe ID for cleanup.
-func (tc *TestContext) TrackUniverse(id string) {
+// TrackWorld adds a world ID for cleanup.
+func (tc *TestContext) TrackWorld(id string) {
 	tc.Spawned = append(tc.Spawned, id)
 }
 
-// LoadState reads the state.json file and returns the list of universes.
+// LoadState reads the state.json file and returns the list of worlds.
 func (tc *TestContext) LoadState() []universe.World {
 	tc.T.Helper()
-	universes, err := tc.State.List()
+	worlds, err := tc.State.List()
 	if err != nil {
 		tc.T.Fatalf("Failed to load state: %v", err)
 	}
-	return universes
+	return worlds
 }
 
 // InitAgent creates an agent Mind in the temp directory.

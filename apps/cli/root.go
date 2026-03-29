@@ -5,7 +5,7 @@ import (
 	"spwn.sh/apps/cli/claw"
 	"spwn.sh/apps/cli/observatory"
 	"spwn.sh/apps/cli/skill"
-	"spwn.sh/apps/cli/universe"
+	"spwn.sh/apps/cli/world"
 	"spwn.sh/apps/cli/visitor"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +23,7 @@ var rootCmd = &cobra.Command{
 	Use:   "spwn",
 	Short: "spwn — create realities for things that can think",
 	Long: `spwn creates isolated Docker environments for AI agents.
-Each universe has physics (constants, laws, elements),
+Each world has physics (constants, laws, elements),
 and a Mind (persistent agent identity).`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return ensureDefaults()
@@ -37,7 +37,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-essential output")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show debug information")
 
-	rootCmd.AddCommand(universe.Cmd)
+	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 	rootCmd.AddCommand(claw.Cmd)
 	rootCmd.AddCommand(visitor.Cmd)

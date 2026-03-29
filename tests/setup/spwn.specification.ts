@@ -96,18 +96,18 @@ function spwnWithEnv(
 }
 
 /**
- * Parse a universe ID (u-{name}-{5digits}) from command output.
+ * Parse a world ID (w-{name}-{5digits}) from command output.
  */
-export function parseUniverseId(output: string): string | null {
-  const match = output.match(/u-[\w]+-\d{5}/);
+export function parseWorldId(output: string): string | null {
+  const match = output.match(/w-[\w]+-\d{5}/);
   return match ? match[0] : null;
 }
 
 /**
- * Parse all universe IDs from output (e.g., from list command).
+ * Parse all world IDs from output (e.g., from list command).
  */
-export function parseAllUniverseIds(output: string): string[] {
-  const matches = output.matchAll(/u-[\w]+-\d{5}/g);
+export function parseAllWorldIds(output: string): string[] {
+  const matches = output.matchAll(/w-[\w]+-\d{5}/g);
   return [...matches].map((m) => m[0]);
 }
 
@@ -119,13 +119,13 @@ export interface TestContext {
     stderr: string;
     output: string;
   };
-  /** Inspect a running universe container */
-  universe: (universeId: string) => UniverseAssertion;
+  /** Inspect a running world container */
+  universe: (worldId: string) => UniverseAssertion;
   /** Inspect an agent Mind on disk */
   mind: (agentName: string) => MindAssertion;
   /** Inspect the state.json file */
   state: () => StateAssertion;
-  /** Destroy all active universes and clean up temp directory */
+  /** Destroy all active worlds and clean up temp directory */
   cleanup: () => void;
 }
 
@@ -146,16 +146,16 @@ export function createTestContext(): TestContext {
     home,
     spwn: (args: string[], timeout = 30_000) =>
       spwnWithEnv(args, envOverrides, timeout),
-    universe: (universeId: string) =>
-      new UniverseAssertion(universeId, home),
+    universe: (worldId: string) =>
+      new UniverseAssertion(worldId, home),
     mind: (agentName: string) => new MindAssertion(home, agentName),
     state: () => new StateAssertion(home),
     cleanup: () => {
-      // Destroy all active universes
-      const listResult = spwnWithEnv(["universe", "list"], envOverrides);
-      const ids = parseAllUniverseIds(listResult.output);
+      // Destroy all active worlds
+      const listResult = spwnWithEnv(["world", "list"], envOverrides);
+      const ids = parseAllWorldIds(listResult.output);
       for (const id of ids) {
-        spwnWithEnv(["universe", "destroy", id], envOverrides, 30_000);
+        spwnWithEnv(["world", "destroy", id], envOverrides, 30_000);
       }
       // Clean up temp dir
       try {

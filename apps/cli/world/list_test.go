@@ -1,4 +1,4 @@
-package universe
+package world
 
 import (
 	"testing"

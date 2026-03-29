@@ -20,7 +20,7 @@ func init() {
 var talkCmd = &cobra.Command{
 	Use:   "talk <agent-name> [message]",
 	Short: "Talk to a running agent — interactive or one-shot",
-	Long: `Open a conversation with a named agent running inside a universe.
+	Long: `Open a conversation with a named agent running inside a world.
 
 If a message is provided, runs a one-shot query and prints the response.
 If no message is provided, opens an interactive Claude session inside the container.`,
@@ -38,8 +38,8 @@ If no message is provided, opens an interactive Claude session inside the contai
 			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
 		}
 
-		// Find which universe this agent is in
-		containerID, universeID, err := findAgentContainer(name)
+		// Find which world this agent is in
+		containerID, worldID, err := findAgentContainer(name)
 		if err != nil {
 			return err
 		}
@@ -49,7 +49,7 @@ If no message is provided, opens an interactive Claude session inside the contai
 
 		s.Blank()
 		s.Info("Agent:", name)
-		s.Info("Universe:", universeID)
+		s.Info("World:", worldID)
 		s.Blank()
 
 		// Base claude command: continue latest session in /workspace
@@ -109,7 +109,7 @@ func isContainerRunning(containerID string) bool {
 	return strings.TrimSpace(string(out)) == "true"
 }
 
-// findAgentContainer looks up state.json to find a running universe
+// findAgentContainer looks up state.json to find a running world
 // that contains the given agent. Verifies the container is actually alive.
 func findAgentContainer(agentName string) (string, string, error) {
 	ctx := context.Background()
@@ -119,13 +119,13 @@ func findAgentContainer(agentName string) (string, string, error) {
 		return "", "", fmt.Errorf("error: cannot connect to backend.\n%w", err)
 	}
 
-	universes, err := arc.List(ctx)
+	worlds, err := arc.List(ctx)
 	if err != nil {
-		return "", "", fmt.Errorf("error: cannot list universes.\n%w", err)
+		return "", "", fmt.Errorf("error: cannot list worlds.\n%w", err)
 	}
 
 	// Check the primary agent field, then the agents array
-	for _, u := range universes {
+	for _, u := range worlds {
 		if u.ContainerID == "" {
 			continue
 		}
@@ -144,14 +144,14 @@ func findAgentContainer(agentName string) (string, string, error) {
 		for _, a := range u.Agents {
 			if a.Name == agentName {
 				if u.ContainerID == "" {
-					return "", "", fmt.Errorf("error: universe %s has no container ID", u.ID)
+					return "", "", fmt.Errorf("error: world %s has no container ID", u.ID)
 				}
 				return u.ContainerID, u.ID, nil
 			}
 		}
 	}
 
-	return "", "", fmt.Errorf("error: agent %q is not in any active universe.\nSpawn it first with: spwn universe --agent %s", agentName, agentName)
+	return "", "", fmt.Errorf("error: agent %q is not in any active world.\nSpawn it first with: spwn world --agent %s", agentName, agentName)
 }
 
 // readAuthToken reads the cached OAuth token from ~/.spwn/.auth-token.

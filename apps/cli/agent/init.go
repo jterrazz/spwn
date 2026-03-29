@@ -41,7 +41,7 @@ provided, a random name is picked from a curated dictionary.`,
 		s.Done("Created persona", "default.md")
 
 		s.Blank()
-		s.Success(fmt.Sprintf("Spawn with: spwn universe --agent %s", name))
+		s.Success(fmt.Sprintf("Spawn with: spwn world --agent %s", name))
 		s.Blank()
 
 		return nil

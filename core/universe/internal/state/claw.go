@@ -13,7 +13,7 @@ import (
 type ClawState struct {
 	Active    bool      `json:"active"`
 	StartedAt time.Time `json:"started_at,omitempty"`
-	Universes []string  `json:"universe_ids"`
+	Worlds    []string  `json:"world_ids"`
 }
 
 // LoadClawState reads the Claw state from ~/.spwn/claw/claw.json.

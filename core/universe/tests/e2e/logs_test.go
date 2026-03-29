@@ -83,7 +83,7 @@ func TestLogs_IdleUniverseWithoutAgent(t *testing.T) {
 	// WHEN we read logs from the idle container
 	reader, err := tc.Arc.Logs(context.Background(), chain.Universe().ID, false, "5")
 	if err != nil {
-		t.Fatalf("Logs() on idle universe returned error: %v", err)
+		t.Fatalf("Logs() on idle world returned error: %v", err)
 	}
 	defer reader.Close()
 
@@ -91,7 +91,7 @@ func TestLogs_IdleUniverseWithoutAgent(t *testing.T) {
 	var buf bytes.Buffer
 	_, err = io.Copy(&buf, reader)
 	if err != nil {
-		t.Fatalf("Reading logs from idle universe should not error: %v", err)
+		t.Fatalf("Reading logs from idle world should not error: %v", err)
 	}
 }
 
@@ -99,12 +99,12 @@ func TestLogs_NonExistentUniverseReturnsError(t *testing.T) {
 	// GIVEN a test context with no universes
 	tc := setup.NewTestContext(t)
 
-	// WHEN we request logs for a non-existent universe
+	// WHEN we request logs for a non-existent world
 	_, err := tc.Arc.Logs(context.Background(), "u-nonexistent-12345", false, "10")
 
 	// THEN it should return an error
 	if err == nil {
-		t.Fatal("Expected error when getting logs for non-existent universe, got nil")
+		t.Fatal("Expected error when getting logs for non-existent world, got nil")
 	}
 }
 
@@ -131,7 +131,7 @@ func TestLogs_ReturnsReaderFromRunningUniverse(t *testing.T) {
 
 	// The mock writes a JSON blob and echoes to stdout; we should see something
 	if buf.Len() == 0 {
-		t.Fatal("Expected log output from running universe, got 0 bytes")
+		t.Fatal("Expected log output from running world, got 0 bytes")
 	}
 
 	// Verify the output looks like it came from the mock (it writes JSON to a file

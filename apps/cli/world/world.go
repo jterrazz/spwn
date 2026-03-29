@@ -1,4 +1,4 @@
-package universe
+package world
 
 import (
 	"context"
@@ -16,7 +16,7 @@ var (
 	spawnConfig    string
 	spawnAgent     string
 	spawnWorkspace string
-	spawnUniverse  string
+	spawnWorld     string
 	spawnDetach    bool
 	spawnNoAgent   bool
 	spawnGate      []string
@@ -24,25 +24,25 @@ var (
 )
 
 func init() {
-	Cmd.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named universe config (default: default)")
+	Cmd.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named world config (default: default)")
 	Cmd.Flags().StringVarP(&spawnAgent, "agent", "a", "default", "Agent name")
 	Cmd.Flags().StringVarP(&spawnWorkspace, "workspace", "w", "", "Host directory to mount at /workspace")
-	Cmd.Flags().StringVarP(&spawnUniverse, "universe", "u", "", "Explicit path to a YAML config file")
+	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	Cmd.Flags().BoolVarP(&spawnDetach, "detach", "d", false, "Run in background")
 	Cmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
 	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
-	Cmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this universe")
+	Cmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this world")
 }
 
-// Cmd is the universe command — spawns a universe when run directly,
+// Cmd is the world command — spawns a world when run directly,
 // and groups subcommands (list, inspect, logs, attach, destroy).
 var Cmd = &cobra.Command{
-	Use:   "universe",
-	Short: "Spawn a universe — an isolated reality for agents",
-	Long: `Spawn a universe — the Big Bang.
+	Use:   "world",
+	Short: "Spawn a world — an isolated reality for agents",
+	Long: `Spawn a world — the Big Bang.
 
-Creates a world and brings an agent to life inside it. Uses a named universe
-config from ~/.spwn/universes/ (default: default.yaml). Specify a config with
+Creates a world and brings an agent to life inside it. Uses a named world
+config from ~/.spwn/worlds/ (default: default.yaml). Specify a config with
 the -c flag.
 
 Subcommands: list, inspect, logs, attach, destroy.`,
@@ -61,8 +61,8 @@ Subcommands: list, inspect, logs, attach, destroy.`,
 			m   universe.Manifest
 			err error
 		)
-		if spawnUniverse != "" {
-			m, err = universe.LoadManifestPath(spawnUniverse)
+		if spawnWorld != "" {
+			m, err = universe.LoadManifestPath(spawnWorld)
 		} else {
 			m, err = universe.LoadManifest(configName)
 		}
@@ -106,7 +106,7 @@ Subcommands: list, inspect, logs, attach, destroy.`,
 		}
 
 		s.Blank()
-		s.Start("Spawning universe...")
+		s.Start("Spawning world...")
 
 		result, err := arc.Spawn(ctx, universe.SpawnOpts{
 			ConfigName: configName,
@@ -119,9 +119,9 @@ Subcommands: list, inspect, logs, attach, destroy.`,
 				switch event {
 				case "image_ready":
 					s.Done("Built image", detail)
-					s.Start("Spawning universe...")
+					s.Start("Spawning world...")
 				case "container_created":
-					s.Done("Spawned universe", detail)
+					s.Done("Spawned world", detail)
 				case "mind_mounted":
 					s.Done("Mounted mind", detail)
 				case "gates_bridged":
@@ -178,12 +178,12 @@ Subcommands: list, inspect, logs, attach, destroy.`,
 		} else if spawnNoAgent || spawnDetach {
 			s.Blank()
 			if spawnNoAgent {
-				s.Success("Universe spawned.")
+				s.Success("World spawned.")
 			} else {
 				s.Success("Agent is alive.")
 			}
 			s.Blank()
-			s.Info("Universe:", u.ID)
+			s.Info("World:", u.ID)
 			if u.AgentID != "" {
 				s.Info("Agent:", u.AgentID)
 			}

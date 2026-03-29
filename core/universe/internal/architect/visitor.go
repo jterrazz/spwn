@@ -15,7 +15,7 @@ import (
 func (a *Architect) SpawnVisitor(ctx context.Context, universeID string, task string) error {
 	u, err := a.state.Get(universeID)
 	if err != nil {
-		return fmt.Errorf("universe %s not found", universeID)
+		return fmt.Errorf("world %s not found", universeID)
 	}
 
 	running, err := a.backend.IsRunning(ctx, u.ContainerID)
@@ -23,7 +23,7 @@ func (a *Architect) SpawnVisitor(ctx context.Context, universeID string, task st
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("universe %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", universeID)
 	}
 
 	a.state.UpdateStatus(universeID, models.StatusRunning)

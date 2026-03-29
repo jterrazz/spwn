@@ -74,7 +74,7 @@ func TestSession_SecondSpawnResumes(t *testing.T) {
 		m.WasNotResumed()
 	})
 
-	// WHEN a second agent is spawned in the same universe
+	// WHEN a second agent is spawned in the same world
 	err := tc.Arc.SpawnAgentDetached(context.Background(), universeID, "resume-agent")
 	if err != nil {
 		t.Fatalf("Second spawn failed: %v", err)

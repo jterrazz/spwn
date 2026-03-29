@@ -1,4 +1,4 @@
-package universe
+package world
 
 import (
 	"context"
@@ -14,12 +14,12 @@ func init() {
 }
 
 var inspectCmd = &cobra.Command{
-	Use:   "inspect <universe-id>",
-	Short: "Show universe details, physics, and agent status",
+	Use:   "inspect <world-id>",
+	Short: "Show world details, physics, and agent status",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		universeID := args[0]
+		worldID := args[0]
 		s := newStepper(cmd)
 
 		j, _ := cmd.Flags().GetBool("json")
@@ -29,9 +29,9 @@ var inspectCmd = &cobra.Command{
 			return err
 		}
 
-		u, err := arc.Inspect(ctx, universeID)
+		u, err := arc.Inspect(ctx, worldID)
 		if err != nil {
-			return fmt.Errorf("error: universe %s not found.\nRun 'spwn universe list' to see available universes.", universeID)
+			return fmt.Errorf("error: world %s not found.\nRun 'spwn world list' to see available worlds.", worldID)
 		}
 
 		if j {
@@ -41,7 +41,7 @@ var inspectCmd = &cobra.Command{
 		}
 
 		s.Blank()
-		s.Info("Universe:", u.ID)
+		s.Info("World:", u.ID)
 		s.Blank()
 		s.Info("Config:", u.Config)
 		s.Info("Backend:", u.Backend)

@@ -24,10 +24,10 @@ func TestConfig_SpawnWithNamedConfig(t *testing.T) {
 		NoAgent().
 		Execute()
 
-	// THEN the state should show one idle universe
+	// THEN the state should show one idle world
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
-		s.UniverseStatus(universe.StatusIdle)
+		s.WorldCount(1)
+		s.WorldStatus(universe.StatusIdle)
 	})
 
 	// AND the container should be running with the custom config

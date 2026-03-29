@@ -16,7 +16,7 @@ type AgentSpec struct {
 	Tier string // "governor" or "citizen"
 }
 
-// SpawnAgents spawns multiple agents in a universe.
+// SpawnAgents spawns multiple agents in a world.
 // Governors are spawned first (blocking), then citizens (detached).
 func (a *Architect) SpawnAgents(ctx context.Context, universeID string, agents []AgentSpec) error {
 	if len(agents) == 0 {

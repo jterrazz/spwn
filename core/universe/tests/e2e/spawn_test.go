@@ -17,10 +17,10 @@ func TestSpawn_DefaultConfig(t *testing.T) {
 		WithAgent("test-agent").
 		Execute()
 
-	// THEN the state should contain one idle universe
+	// THEN the state should contain one idle world
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
-		s.UniverseStatus(universe.StatusIdle)
+		s.WorldCount(1)
+		s.WorldStatus(universe.StatusIdle)
 	})
 
 	// AND the container should have physics and faculties files
@@ -40,7 +40,7 @@ func TestSpawn_NoAgent(t *testing.T) {
 
 	// THEN the state should show one universe with no agent
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
+		s.WorldCount(1)
 		s.HasNoAgent()
 	})
 }

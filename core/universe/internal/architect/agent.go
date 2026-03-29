@@ -27,7 +27,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("universe %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", universeID)
 	}
 
 	// Update status
@@ -102,7 +102,7 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, universeID, agentNam
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("universe %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", universeID)
 	}
 
 	a.state.UpdateStatus(universeID, models.StatusRunning)

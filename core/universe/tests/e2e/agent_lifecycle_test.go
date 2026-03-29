@@ -28,21 +28,21 @@ func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {
 	// WHEN the universe is destroyed
 	chain.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(0)
+			s.WorldCount(0)
 		})
 
 	// THEN the agent Mind should still exist on the host
 	info, err := agentDomain.InspectAgent("lifecycle-agent")
 	if err != nil {
-		t.Fatalf("Agent should survive universe destruction: %v", err)
+		t.Fatalf("Agent should survive world destruction: %v", err)
 	}
 	if _, ok := info.Layers["personas"]; !ok {
-		t.Fatal("Agent Mind should still have personas layer after universe destruction")
+		t.Fatal("Agent Mind should still have personas layer after world destruction")
 	}
 }
 
 func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
-	// GIVEN an agent spawned in universe A
+	// GIVEN an agent spawned in world A
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("roaming-agent")
 
@@ -58,7 +58,7 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 		m.HasSessionID()
 	})
 
-	// WHEN universe A is destroyed and the agent is spawned in universe B
+	// WHEN world A is destroyed and the agent is spawned in world B
 	chainA.Destroy()
 
 	chainB := tc.Spawn().
@@ -75,7 +75,7 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 
 	// THEN the universe IDs should differ
 	if universeAID == universeBID {
-		t.Fatalf("Expected different universe IDs, both are %s", universeAID)
+		t.Fatalf("Expected different world IDs, both are %s", universeAID)
 	}
 
 	// AND the agent Mind should persist across both
@@ -84,12 +84,12 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 		t.Fatalf("Agent inspect failed: %v", err)
 	}
 	if _, ok := info.Layers["personas"]; !ok {
-		t.Fatal("Agent should retain Mind layers after spanning multiple universes")
+		t.Fatal("Agent should retain Mind layers after spanning multiple worlds")
 	}
 }
 
 func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
-	// GIVEN an agent that runs to completion in a first universe
+	// GIVEN an agent that runs to completion in a first world
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("journal-multi-agent")
 
@@ -103,19 +103,19 @@ func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
 		j.LatestUniverseID(chain1.Universe().ID)
 	})
 
-	// WHEN the agent runs to completion in a second universe
+	// WHEN the agent runs to completion in a second world
 	chain2 := tc.Spawn().
 		WithAgent("journal-multi-agent").
 		RunAgent().
 		Execute()
 
-	// THEN the journal should have entries from both universes
+	// THEN the journal should have entries from both worlds
 	chain2.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(2)
 		j.LatestUniverseID(chain2.Universe().ID)
 	})
 
-	// AND the entries should reference different universes
+	// AND the entries should reference different worlds
 	mindPath := agentDomain.AgentDir("journal-multi-agent")
 	entries, err := agentDomain.ListJournal(mindPath, 0)
 	if err != nil {
@@ -208,7 +208,7 @@ func TestAgentLifecycle_CustomPersonasFile(t *testing.T) {
 }
 
 func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
-	// GIVEN an agent spawned in universe A
+	// GIVEN an agent spawned in world A
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("session-diff-agent")
 
@@ -222,7 +222,7 @@ func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
 		m.HasSessionID()
 	})
 
-	// WHEN universe A is destroyed and the agent is spawned in universe B
+	// WHEN world A is destroyed and the agent is spawned in world B
 	chainA.Destroy()
 
 	chainB := tc.Spawn().
@@ -240,6 +240,6 @@ func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
 	sessionB := agentDomain.DeterministicSessionID("session-diff-agent", chainB.Universe().ID)
 
 	if sessionA == sessionB {
-		t.Fatalf("Expected different session IDs for different universes, both are %q", sessionA)
+		t.Fatalf("Expected different session IDs for different worlds, both are %q", sessionA)
 	}
 }

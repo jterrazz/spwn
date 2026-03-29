@@ -39,7 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"universe", "agent", "claw", "visitor", "observatory", "skill", "init"} {
+	for _, sub := range []string{"world", "agent", "claw", "visitor", "observatory", "skill", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -54,16 +54,16 @@ func TestCLI_HelpContainsDescription(t *testing.T) {
 	assertContains(t, out, "Docker", "root help long description")
 }
 
-// --- Universe help ---
+// --- World help ---
 
-func TestCLI_UniverseHelp(t *testing.T) {
-	out, _, err := executeCommand("universe", "--help")
+func TestCLI_WorldHelp(t *testing.T) {
+	out, _, err := executeCommand("world", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, sub := range []string{"list", "inspect", "logs", "attach", "destroy"} {
-		assertContains(t, out, sub, "universe help")
+		assertContains(t, out, sub, "world help")
 	}
 }
 
@@ -122,7 +122,7 @@ func TestCLI_VisitorHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "--universe", "visitor help flags")
+	assertContains(t, out, "--world", "visitor help flags")
 	assertContains(t, out, "ephemeral", "visitor help description")
 }
 

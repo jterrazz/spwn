@@ -1,4 +1,4 @@
-package universe
+package world
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func init() {
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all active universes",
+	Short: "List all active worlds",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		s := newStepper(cmd)
@@ -31,13 +31,13 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		universes, err := arc.List(ctx)
+		worlds, err := arc.List(ctx)
 		if err != nil {
-			return fmt.Errorf("error: cannot list universes.\n%w", err)
+			return fmt.Errorf("error: cannot list worlds.\n%w", err)
 		}
 
 		if j {
-			data, _ := json.MarshalIndent(map[string]interface{}{"active": universes}, "", "  ")
+			data, _ := json.MarshalIndent(map[string]interface{}{"active": worlds}, "", "  ")
 			fmt.Println(string(data))
 			return nil
 		}
@@ -46,15 +46,15 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		if len(universes) == 0 {
+		if len(worlds) == 0 {
 			s.Blank()
-			s.Success("No active universes.")
+			s.Success("No active worlds.")
 			s.Blank()
 			return nil
 		}
 
 		t := ui.NewTable(ui.ModeNormal, "ID", "CONFIG", "AGENTS", "STATUS", "CREATED")
-		for _, u := range universes {
+		for _, u := range worlds {
 			agents := collectAgentNames(u)
 			config := u.Config
 			if config == "" {
@@ -68,7 +68,7 @@ var listCmd = &cobra.Command{
 	},
 }
 
-// collectAgentNames returns a comma-separated list of agent names for a universe.
+// collectAgentNames returns a comma-separated list of agent names for a world.
 func collectAgentNames(u universe.World) string {
 	names := make([]string, 0)
 

@@ -27,7 +27,7 @@ func TestState_FileCreatedOnFirstSpawn(t *testing.T) {
 		NoAgent().
 		Execute().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
+			s.WorldCount(1)
 		})
 
 	// THEN the state file should be non-empty
@@ -49,14 +49,14 @@ func TestState_UpdatedOnDestroy(t *testing.T) {
 		Execute()
 
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
+		s.WorldCount(1)
 	})
 
 	// WHEN the universe is destroyed
 	// THEN the state should be empty
 	chain.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(0)
+			s.WorldCount(0)
 		})
 }
 
@@ -71,7 +71,7 @@ func TestState_MultipleUniversesTracked(t *testing.T) {
 	// THEN the state should track all three with unique IDs
 	universes := tc.LoadState()
 	if len(universes) != 3 {
-		t.Fatalf("Expected 3 universes in state, got %d", len(universes))
+		t.Fatalf("Expected 3 worlds in state, got %d", len(universes))
 	}
 
 	ids := make(map[string]bool)
@@ -90,8 +90,8 @@ func TestState_StatusIdleAfterSpawnWithoutAgent(t *testing.T) {
 		NoAgent().
 		Execute().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-			s.UniverseStatus(universe.StatusIdle)
+			s.WorldCount(1)
+			s.WorldStatus(universe.StatusIdle)
 		})
 }
 
@@ -164,7 +164,7 @@ func TestState_PartialDestroyLeavesOthers(t *testing.T) {
 	// THEN only the first and third should remain
 	universes := tc.LoadState()
 	if len(universes) != 2 {
-		t.Fatalf("Expected 2 universes after partial destroy, got %d", len(universes))
+		t.Fatalf("Expected 2 worlds after partial destroy, got %d", len(universes))
 	}
 
 	remainingIDs := make(map[string]bool)
@@ -192,7 +192,7 @@ func TestState_AgentNameTracked(t *testing.T) {
 		WithAgent("tracked-agent").
 		Execute().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
+			s.WorldCount(1)
 			s.HasAgent("tracked-agent")
 		})
 }
@@ -204,7 +204,7 @@ func TestState_NoAgentNameWhenSpawnedWithoutAgent(t *testing.T) {
 		NoAgent().
 		Execute().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
+			s.WorldCount(1)
 			s.HasNoAgent()
 		})
 }

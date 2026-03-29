@@ -6,31 +6,31 @@ import (
 	"unicode"
 )
 
-func TestGenerateUniverseID_Format(t *testing.T) {
+func TestGenerateWorldID_Format(t *testing.T) {
 	tests := []struct {
 		name       string
 		configName string
 		wantPrefix string
 	}{
-		{"default config", "default", "u-default-"},
-		{"custom config", "nebula", "u-nebula-"},
-		{"single char", "x", "u-x-"},
-		{"hyphenated name", "my-config", "u-my-config-"},
+		{"default config", "default", "w-default-"},
+		{"custom config", "nebula", "w-nebula-"},
+		{"single char", "x", "w-x-"},
+		{"hyphenated name", "my-config", "w-my-config-"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			id := GenerateUniverseID(tt.configName)
+			id := GenerateWorldID(tt.configName)
 			if !strings.HasPrefix(id, tt.wantPrefix) {
-				t.Errorf("GenerateUniverseID(%q) = %q, want prefix %q", tt.configName, id, tt.wantPrefix)
+				t.Errorf("GenerateWorldID(%q) = %q, want prefix %q", tt.configName, id, tt.wantPrefix)
 			}
 		})
 	}
 }
 
-func TestGenerateUniverseID_SuffixIs5Digits(t *testing.T) {
-	id := GenerateUniverseID("test")
-	// Format: u-test-XXXXX
+func TestGenerateWorldID_SuffixIs5Digits(t *testing.T) {
+	id := GenerateWorldID("test")
+	// Format: w-test-XXXXX
 	parts := strings.SplitN(id, "-", 3)
 	if len(parts) != 3 {
 		t.Fatalf("expected 3 parts separated by '-', got %d in %q", len(parts), id)
@@ -47,10 +47,10 @@ func TestGenerateUniverseID_SuffixIs5Digits(t *testing.T) {
 	}
 }
 
-func TestGenerateUniverseID_Uniqueness(t *testing.T) {
+func TestGenerateWorldID_Uniqueness(t *testing.T) {
 	seen := make(map[string]bool)
 	for i := 0; i < 50; i++ {
-		id := GenerateUniverseID("test")
+		id := GenerateWorldID("test")
 		if seen[id] {
 			t.Logf("warning: duplicate ID %q after %d iterations (unlikely but possible)", id, i)
 		}

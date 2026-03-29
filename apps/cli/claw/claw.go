@@ -12,7 +12,7 @@ import (
 var Cmd = &cobra.Command{
 	Use:   "claw",
 	Short: "Manage the Claw — the always-on orchestration daemon",
-	Long:  `The Claw is the God-layer of spwn. It manages universes, connects to messaging channels, and orchestrates artificial life.`,
+	Long:  `The Claw is the God-layer of spwn. It manages worlds, connects to messaging channels, and orchestrates artificial life.`,
 }
 
 var startCmd = &cobra.Command{
@@ -43,7 +43,7 @@ var stopCmd = &cobra.Command{
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show Claw status — channels, universes, agents",
+	Short: "Show Claw status — channels, worlds, agents",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		org, _ := universe.LoadOrg()
 		if org != nil {

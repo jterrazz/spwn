@@ -20,10 +20,10 @@ describe("error handling", () => {
     }
   });
 
-  test("destroy non-existent universe", async () => {
-    // WHEN — destroying a universe that does not exist
+  test("destroy non-existent world", async () => {
+    // WHEN — destroying a world that does not exist
     const result = await spwn("destroy missing")
-      .exec("universe destroy u-nonexistent-00000")
+      .exec("world destroy w-nonexistent-00000")
       .run();
 
     // THEN — exits with non-zero code and helpful message
@@ -31,25 +31,25 @@ describe("error handling", () => {
     expect(result.output).toContain("not found");
   });
 
-  test("inspect non-existent universe", async () => {
-    // WHEN — inspecting a universe that does not exist
+  test("inspect non-existent world", async () => {
+    // WHEN — inspecting a world that does not exist
     const result = await spwn("inspect missing")
-      .exec("universe inspect u-nonexistent-00000")
+      .exec("world inspect w-nonexistent-00000")
       .run();
 
     // THEN — exits with error
     expect(result.exitCode).not.toBe(0);
   });
 
-  test("visitor without --universe flag", async () => {
-    // WHEN — running visitor without specifying a universe
-    const result = await spwn("visitor no universe")
+  test("visitor without --world flag", async () => {
+    // WHEN — running visitor without specifying a world
+    const result = await spwn("visitor no world")
       .exec('visitor "lint src/"')
       .run();
 
-    // THEN — exits with error mentioning universe requirement
+    // THEN — exits with error mentioning world requirement
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("universe");
+    expect(result.output).toContain("world");
   });
 
   test("agent reflect non-existent agent skips gracefully", async () => {
@@ -83,10 +83,10 @@ describe("error handling", () => {
     expect(result.exitCode).not.toBe(0);
   });
 
-  test("universe logs for non-existent universe", async () => {
-    // WHEN — fetching logs for a universe that does not exist
+  test("world logs for non-existent world", async () => {
+    // WHEN — fetching logs for a world that does not exist
     const result = await spwn("logs missing")
-      .exec("universe logs u-nonexistent-00000")
+      .exec("world logs w-nonexistent-00000")
       .run();
 
     // THEN — exits with error
@@ -104,9 +104,9 @@ describe("error handling", () => {
   });
 
   test("error messages are lowercase with actionable hint", async () => {
-    // WHEN — triggering an error (destroy missing universe)
+    // WHEN — triggering an error (destroy missing world)
     const result = await spwn("error format check")
-      .exec("universe destroy u-nonexistent-00000")
+      .exec("world destroy w-nonexistent-00000")
       .run();
 
     // THEN — error message follows convention: lowercase, with hint

@@ -20,7 +20,7 @@ func TestDetach_AgentRunsInBackground(t *testing.T) {
 
 	// THEN the state should show one universe
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
+		s.WorldCount(1)
 	})
 
 	// AND the container should be running
@@ -67,7 +67,7 @@ func TestDetach_StatusShowsRunning(t *testing.T) {
 		if u.ID == chain.Universe().ID {
 			found = true
 			if u.Status != universe.StatusRunning {
-				t.Fatalf("Expected status %q for detached universe, got %q", universe.StatusRunning, u.Status)
+				t.Fatalf("Expected status %q for detached world, got %q", universe.StatusRunning, u.Status)
 			}
 		}
 	}
@@ -90,7 +90,7 @@ func TestDetach_MultipleAgentsInSameUniverse(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// WHEN a second agent is spawned detached in the same universe
+	// WHEN a second agent is spawned detached in the same world
 	err := tc.Arc.SpawnAgentDetached(context.Background(), chain.Universe().ID, "multi-agent")
 	if err != nil {
 		t.Fatalf("Second detached agent spawn failed: %v", err)
@@ -120,7 +120,7 @@ func TestDetach_VsNoDetach(t *testing.T) {
 		WithAgent("no-detach-agent").
 		Execute().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(1)
-			s.UniverseStatus(universe.StatusIdle)
+			s.WorldCount(1)
+			s.WorldStatus(universe.StatusIdle)
 		})
 }

@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
   createTestContext,
-  parseUniverseId,
+  parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
@@ -26,28 +26,28 @@ describe("config cascade", () => {
     expect(existsSync(join(ctx.home, "org.yaml"))).toBe(true);
   });
 
-  test("init creates default universe config", () => {
+  test("init creates default world config", () => {
     // GIVEN — a fresh SPWN_HOME
     ctx = createTestContext();
 
     // WHEN — running init
     const result = ctx.spwn(["init"]);
 
-    // THEN — a default.yaml exists in universes/
+    // THEN — a default.yaml exists in worlds/
     expect(result.exitCode).toBe(0);
-    expect(existsSync(join(ctx.home, "universes", "default.yaml"))).toBe(true);
+    expect(existsSync(join(ctx.home, "worlds", "default.yaml"))).toBe(true);
   });
 
-  test("multiple universe configs coexist", () => {
+  test("multiple world configs coexist", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init", "alpha"]);
     ctx.spwn(["init", "beta"]);
 
     // THEN — both configs exist alongside default
-    expect(existsSync(join(ctx.home, "universes", "alpha.yaml"))).toBe(true);
-    expect(existsSync(join(ctx.home, "universes", "beta.yaml"))).toBe(true);
-    expect(existsSync(join(ctx.home, "universes", "default.yaml"))).toBe(true);
+    expect(existsSync(join(ctx.home, "worlds", "alpha.yaml"))).toBe(true);
+    expect(existsSync(join(ctx.home, "worlds", "beta.yaml"))).toBe(true);
+    expect(existsSync(join(ctx.home, "worlds", "default.yaml"))).toBe(true);
   });
 
   test("named config is used when spawning with -c flag", () => {
@@ -57,19 +57,19 @@ describe("config cascade", () => {
 
     // WHEN — spawning with that config
     const spawnResult = ctx.spwn(
-      ["universe", "-c", "custom", "--agent", "neo", "-w", ctx.home],
+      ["world", "-c", "custom", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — universe ID reflects the config name
+    // THEN — world ID reflects the config name
     expect(spawnResult.exitCode).toBe(0);
-    expect(spawnResult.output).toContain("u-custom-");
+    expect(spawnResult.output).toContain("w-custom-");
 
     // AND — container is running
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     ctx.universe(id).toBeRunning();
 
     // AND — state tracks it with the right config
-    ctx.state().hasUniverse(id);
+    ctx.state().hasWorld(id);
   });
 });

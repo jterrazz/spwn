@@ -1,7 +1,7 @@
 import { describe, test, expect, afterEach } from "vitest";
 import {
   createTestContext,
-  parseUniverseId,
+  parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
@@ -20,7 +20,7 @@ describe("gate bridge", () => {
     // WHEN — spawning with a gate bridge
     const spawnResult = ctx.spwn(
       [
-        "universe",
+        "world",
         "--agent",
         "neo",
         "--gate",
@@ -37,7 +37,7 @@ describe("gate bridge", () => {
     expect(spawnResult.output).toContain("1 element(s)");
 
     // AND — container is running
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     ctx.universe(id).toBeRunning();
 
     // AND — faculties.md reflects bridged elements
@@ -51,7 +51,7 @@ describe("gate bridge", () => {
 
     // WHEN — spawning without gate
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
@@ -59,8 +59,8 @@ describe("gate bridge", () => {
     expect(spawnResult.exitCode).toBe(0);
     expect(spawnResult.output).not.toContain("Bridged gate");
 
-    // AND — container is still running with universe files
-    const id = parseUniverseId(spawnResult.output)!;
+    // AND — container is still running with world files
+    const id = parseWorldId(spawnResult.output)!;
     ctx
       .universe(id)
       .toBeRunning()
@@ -69,12 +69,12 @@ describe("gate bridge", () => {
   });
 
   test("faculties.md reflects bridged elements", () => {
-    // GIVEN — a universe with gate bridge
+    // GIVEN — a world with gate bridge
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
       [
-        "universe",
+        "world",
         "--agent",
         "neo",
         "--gate",
@@ -90,7 +90,7 @@ describe("gate bridge", () => {
     expect(spawnResult.output).toContain("Generated faculties");
 
     // AND — faculties.md inside container mentions the bridged element
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     const faculties = ctx.universe(id).faculties();
     expect(faculties).toBeTruthy();
   });

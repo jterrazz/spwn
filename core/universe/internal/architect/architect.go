@@ -11,7 +11,7 @@ import (
 	"spwn.sh/core/universe/internal/state"
 )
 
-// Architect orchestrates universe lifecycle.
+// Architect orchestrates world lifecycle.
 type Architect struct {
 	backend backend.Backend
 	state   *state.Store
@@ -44,12 +44,12 @@ func NewFromEnv() (*Architect, error) {
 	return New(docker, store), nil
 }
 
-// List returns all universes.
+// List returns all worlds.
 func (a *Architect) List(ctx context.Context) ([]models.World, error) {
 	return a.state.List()
 }
 
-// Inspect returns a universe by ID.
+// Inspect returns a world by ID.
 func (a *Architect) Inspect(ctx context.Context, universeID string) (*models.World, error) {
 	return a.state.Get(universeID)
 }
@@ -66,7 +66,7 @@ func (a *Architect) Logs(ctx context.Context, universeID string, follow bool, ta
 	})
 }
 
-// Attach opens an interactive shell into a running universe.
+// Attach opens an interactive shell into a running world.
 func (a *Architect) Attach(ctx context.Context, universeID string) error {
 	u, err := a.state.Get(universeID)
 	if err != nil {
@@ -78,7 +78,7 @@ func (a *Architect) Attach(ctx context.Context, universeID string) error {
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("universe %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", universeID)
 	}
 
 	_, err = a.backend.Exec(ctx, u.ContainerID, backend.ExecConfig{

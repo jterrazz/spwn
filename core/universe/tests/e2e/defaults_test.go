@@ -23,10 +23,10 @@ func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
 		NoAgent().
 		Execute()
 
-	// THEN the state should show one idle universe with physics and faculties
+	// THEN the state should show one idle world with physics and faculties
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
-		s.UniverseStatus(universe.StatusIdle)
+		s.WorldCount(1)
+		s.WorldStatus(universe.StatusIdle)
 	})
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
@@ -47,7 +47,7 @@ func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
 
 	// THEN the state should track the agent
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
+		s.WorldCount(1)
 		s.HasAgent("default")
 	})
 
