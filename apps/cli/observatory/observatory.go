@@ -3,6 +3,7 @@ package observatory
 import (
 	"fmt"
 
+	"github.com/jterrazz/spwn/core/universe"
 	"github.com/spf13/cobra"
 )
 
@@ -15,11 +16,15 @@ var Cmd = &cobra.Command{
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start the Observatory dashboard server",
+	Short: "Start the Observatory API server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("  Observatory starting on http://localhost:3001")
-		fmt.Println("  (Not yet implemented — coming in Epoch 7)")
-		return nil
+		store, err := universe.NewStore()
+		if err != nil {
+			return err
+		}
+		srv := universe.NewObservatoryServer(store, ":3001")
+		fmt.Println("  Observatory API on http://localhost:3001")
+		return srv.Start()
 	},
 }
 

@@ -7,7 +7,9 @@ import (
 	"github.com/jterrazz/spwn/core/universe/internal/backend"
 	"github.com/jterrazz/spwn/core/universe/internal/manifest"
 	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"github.com/jterrazz/spwn/core/universe/internal/observatory"
 	"github.com/jterrazz/spwn/core/universe/internal/state"
+	"github.com/jterrazz/spwn/core/universe/internal/sync"
 )
 
 // Re-export model types so consumers don't need to reach into internal packages.
@@ -128,6 +130,24 @@ func LoadOrgPath(path string) (*OrgManifest, error) { return manifest.LoadOrgPat
 
 // CreateOrg creates a default org.yaml at ~/.spwn/org.yaml.
 func CreateOrg(name string) error { return manifest.CreateOrg(name) }
+
+// --- Observatory ---
+
+// ObservatoryServer is the Observatory HTTP API server type.
+type ObservatoryServer = observatory.Server
+
+// NewObservatoryServer creates a new Observatory API server.
+func NewObservatoryServer(s *Store, addr string) *ObservatoryServer {
+	return observatory.New(s, addr)
+}
+
+// --- Git sync operations ---
+
+// SyncToGit commits and pushes ~/.spwn/ changes to the configured git repo.
+func SyncToGit(repo, branch string) error { return sync.SyncToGit(repo, branch) }
+
+// PullFromGit pulls latest changes from the configured git repo.
+func PullFromGit(repo, branch string) error { return sync.PullFromGit(repo, branch) }
 
 // --- Claw state operations ---
 

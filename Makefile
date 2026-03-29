@@ -1,5 +1,9 @@
-.PHONY: build build-image build-test-image build-gate test test-universe test-agent test-gate test-e2e test-e2e-universe test-e2e-agent lint clean
+.PHONY: build build-image build-test-image build-gate \
+        test test-universe test-agent test-gate test-foundation \
+        test-e2e test-e2e-universe test-e2e-agent \
+        lint clean
 
+# Build
 build:
 	cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
 
@@ -12,6 +16,7 @@ build-test-image:
 build-gate:
 	cd platform/gate-runtime && cargo build --release
 
+# Unit tests (per domain)
 test:
 	cd core/foundation && go test ./...
 	cd core/agent && go test ./...
@@ -19,16 +24,24 @@ test:
 	cd core/universe && go test ./...
 	cd apps/cli && go test ./...
 
-test-universe:
-	cd core/universe && go test ./...
+test-foundation:
+	cd core/foundation && go test -v ./...
 
 test-agent:
-	cd core/agent && go test ./...
+	cd core/agent && go test -v ./...
 
 test-gate:
-	cd core/gate && go test ./...
+	cd core/gate && go test -v ./...
 
-test-e2e: test-e2e-universe test-e2e-agent
+test-universe:
+	cd core/universe && go test -v ./...
+
+test-cli:
+	cd apps/cli && go test -v ./...
+
+# E2E tests (Docker required)
+test-e2e: build-test-image
+	cd core/universe && go test -v -tags=e2e -timeout=5m ./tests/e2e/...
 
 test-e2e-universe: build-test-image
 	cd core/universe && go test -v -tags=e2e -timeout=5m ./tests/e2e/...
@@ -36,6 +49,7 @@ test-e2e-universe: build-test-image
 test-e2e-agent:
 	cd core/agent && go test -v -tags=e2e -timeout=3m ./tests/e2e/...
 
+# Lint
 lint:
 	cd core/foundation && go vet ./...
 	cd core/agent && go vet ./...
@@ -43,6 +57,7 @@ lint:
 	cd core/universe && go vet ./...
 	cd apps/cli && go vet ./...
 
+# Clean
 clean:
 	rm -rf bin/
 	cd platform/gate-runtime && cargo clean 2>/dev/null || true
