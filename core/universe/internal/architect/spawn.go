@@ -2,9 +2,11 @@ package architect
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -193,21 +195,26 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		"ANTHROPIC_API_KEY",
 		"OPENAI_API_KEY",
 		"GOOGLE_API_KEY",
+		"CLAUDE_CODE_OAUTH_TOKEN",
+		"ANTHROPIC_AUTH_TOKEN",
 	} {
 		if val := os.Getenv(key); val != "" {
 			env = append(env, key+"="+val)
 		}
 	}
 
-	// Mount Claude auth for subscription mode
+	// Auto-extract OAuth token from macOS Keychain for subscription auth
+	if !hasEnv(env, "CLAUDE_CODE_OAUTH_TOKEN") && !hasEnv(env, "ANTHROPIC_API_KEY") {
+		if token := extractKeychainToken(); token != "" {
+			env = append(env, "CLAUDE_CODE_OAUTH_TOKEN="+token)
+		}
+	}
+
+	// Mount Claude auth directory (for config, not credentials — token via env var)
 	home, _ := os.UserHomeDir()
 	claudeAuthDir := filepath.Join(home, ".claude")
 	if _, err := os.Stat(claudeAuthDir); err == nil {
 		binds = append(binds, claudeAuthDir+":/home/spwn/.claude")
-	}
-	claudeConfigFile := filepath.Join(home, ".claude.json")
-	if _, err := os.Stat(claudeConfigFile); err == nil {
-		binds = append(binds, claudeConfigFile+":/home/spwn/.claude.json")
 	}
 
 	// Create container
@@ -394,6 +401,36 @@ func mergeUnique(a, b []string) []string {
 		}
 	}
 	return result
+}
+
+func hasEnv(env []string, key string) bool {
+	prefix := key + "="
+	for _, e := range env {
+		if strings.HasPrefix(e, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// extractKeychainToken attempts to read the Claude OAuth token from macOS Keychain.
+func extractKeychainToken() string {
+	out, err := exec.Command("security", "find-generic-password", "-s", "Claude Code-credentials", "-w").Output()
+	if err != nil {
+		return ""
+	}
+
+	// Parse JSON to extract accessToken
+	var creds struct {
+		ClaudeAiOauth struct {
+			AccessToken string `json:"accessToken"`
+		} `json:"claudeAiOauth"`
+	}
+
+	if err := json.Unmarshal(out, &creds); err != nil {
+		return ""
+	}
+	return creds.ClaudeAiOauth.AccessToken
 }
 
 func parseMemory(s string) (int64, error) {
