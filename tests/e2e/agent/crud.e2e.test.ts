@@ -1,6 +1,11 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome } from "../../setup/helpers.js";
+import {
+  expectLine,
+  expectTableHeader,
+  expectTableRow,
+} from "../../setup/output-helpers.js";
 
 describe("agent CRUD", () => {
   let home: string;
@@ -26,9 +31,12 @@ describe("agent CRUD", () => {
       .exec("agent init neo")
       .run();
 
-    // THEN — agent is created successfully
+    // THEN — agent is created with structured status output
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("neo");
+    expectLine(result.output, /→ Creating agent "neo"\.\.\./);
+    expectLine(result.output, /✓ Created agent\s+neo/);
+    expectLine(result.output, /✓ Created persona\s+default\.md/);
+    expectLine(result.output, /✓ Spawn with: spwn world --agent neo/);
   });
 
   test("init duplicate fails", async () => {
@@ -40,8 +48,9 @@ describe("agent CRUD", () => {
       .exec("agent init neo")
       .run();
 
-    // THEN — exits with error
+    // THEN — exits with error showing duplicate message
     expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /✗ Agent creation failed\s+agent "neo" already exists/);
   });
 
   test("list shows created agents", async () => {
@@ -54,10 +63,11 @@ describe("agent CRUD", () => {
       .exec("agent list")
       .run();
 
-    // THEN — both agents appear in the list
+    // THEN — both agents appear in a table with correct columns
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("neo");
-    expect(result.output).toContain("trinity");
+    expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableRow(result.output, ["neo", "1/6", "unattached"]);
+    expectTableRow(result.output, ["trinity", "1/6", "unattached"]);
   });
 
   test("inspect shows agent details", async () => {
@@ -69,10 +79,16 @@ describe("agent CRUD", () => {
       .exec("agent inspect neo")
       .run();
 
-    // THEN — details include Mind layers
+    // THEN — details include agent name, path, world status, and Mind layers
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("neo");
-    expect(result.output).toContain("personas");
+    expectLine(result.output, /Agent:\s+neo/);
+    expectLine(result.output, /World:\s+unattached/);
+    expectLine(result.output, /personas\/\s+default\.md/);
+    expectLine(result.output, /skills\/\s+\(empty\)/);
+    expectLine(result.output, /knowledge\/\s+\(empty\)/);
+    expectLine(result.output, /playbooks\/\s+\(empty\)/);
+    expectLine(result.output, /journal\/\s+\(empty\)/);
+    expectLine(result.output, /sessions\/\s+\(empty\)/);
   });
 
   test("list on empty home returns no agents", async () => {
@@ -81,8 +97,9 @@ describe("agent CRUD", () => {
       .exec("agent list")
       .run();
 
-    // THEN — exits successfully with empty or informational output
+    // THEN — exits successfully with table header (default agent may exist)
     expect(result.exitCode).toBe(0);
+    expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
   });
 
   test("inspect non-existent agent fails", async () => {
@@ -91,8 +108,9 @@ describe("agent CRUD", () => {
       .exec("agent inspect nonexistent")
       .run();
 
-    // THEN — exits with error
+    // THEN — exits with error showing not found
     expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /agent "nonexistent" not found/);
   });
 
   test("delete removes agent", async () => {
@@ -104,14 +122,19 @@ describe("agent CRUD", () => {
       .exec("agent delete temp")
       .run();
 
-    // THEN — exits successfully
+    // THEN — exits successfully with structured status
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /→ Deleting agent "temp"\.\.\./);
+    expectLine(result.output, /✓ Deleted agent\s+temp/);
 
     // AND — agent no longer appears in list
     const list = await spwn("list after delete")
       .exec("agent list")
       .run();
-    expect(list.output).not.toContain("temp");
+    const listOutput = list.output;
+    // The table should not contain a row for "temp"
+    const tableLines = listOutput.split("\n").filter((l) => l.includes("temp"));
+    expect(tableLines.length).toBe(0);
   });
 
   test("delete non-existent agent fails", async () => {
@@ -120,8 +143,9 @@ describe("agent CRUD", () => {
       .exec("agent delete nonexistent")
       .run();
 
-    // THEN — exits with error
+    // THEN — exits with error showing not found
     expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /✗ Delete failed\s+agent "nonexistent" not found/);
   });
 
   test("talk requires running world", async () => {
@@ -135,7 +159,8 @@ describe("agent CRUD", () => {
 
     // THEN — exits with error about no active world
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("not in any active world");
+    expectLine(result.output, /agent "neo" is not in any active world/);
+    expectLine(result.output, /Spawn it first with: spwn world --agent neo/);
   });
 
   test("list shows world column headers", async () => {
@@ -147,10 +172,9 @@ describe("agent CRUD", () => {
       .exec("agent list")
       .run();
 
-    // THEN — output includes world-related columns
+    // THEN — output includes table with world-related columns
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("atlas");
-    expect(result.output).toContain("WORLD");
-    expect(result.output).toContain("STATUS");
+    expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableRow(result.output, ["atlas", "1/6", "unattached"]);
   });
 });

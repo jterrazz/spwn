@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome, createAgent } from "../../setup/helpers.js";
+import { expectLine } from "../../setup/output-helpers.js";
 
 describe("agent evolution", () => {
   let home: string;
@@ -27,9 +28,10 @@ describe("agent evolution", () => {
       .exec("agent reflect neo")
       .run();
 
-    // THEN — exits successfully with a skip message
+    // THEN — exits successfully with structured skip message
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("no journal");
+    expectLine(result.output, /→ Reflecting on agent "neo"\.\.\./);
+    expectLine(result.output, /Skipped\s+no journal entries/);
   });
 
   test("sleep on fresh agent — nothing to archive", async () => {
@@ -38,8 +40,12 @@ describe("agent evolution", () => {
       .exec("agent sleep neo")
       .run();
 
-    // THEN — exits successfully
+    // THEN — exits successfully with archive counts at 0
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /→ Sleep cycle for agent "neo"\.\.\./);
+    expectLine(result.output, /✓ Archived playbooks\s+0/);
+    expectLine(result.output, /✓ Archived knowledge\s+0/);
+    expectLine(result.output, /✓ Pruned sessions\s+0/);
   });
 
   test("fork creates new agent", async () => {
@@ -48,9 +54,12 @@ describe("agent evolution", () => {
       .exec("agent fork neo neo-v2")
       .run();
 
-    // THEN — new agent is created
+    // THEN — new agent is created with structured output
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("neo-v2");
+    expectLine(result.output, /→ Forking "neo" -> "neo-v2"\.\.\./);
+    expectLine(result.output, /✓ Source\s+neo/);
+    expectLine(result.output, /✓ Target\s+neo-v2/);
+    expectLine(result.output, /✓ Layers copied\s+personas, skills, knowledge, playbooks, journal, sessions/);
   });
 
   test("fork duplicate target fails", async () => {
@@ -62,8 +71,9 @@ describe("agent evolution", () => {
       .exec("agent fork neo neo-v2")
       .run();
 
-    // THEN — exits with error
+    // THEN — exits with error showing duplicate
     expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /✗ Fork failed\s+target agent "neo-v2" already exists/);
   });
 
   test("fork preserves source Mind layers", async () => {
@@ -78,7 +88,8 @@ describe("agent evolution", () => {
       .exec("agent inspect neo-clone")
       .run();
     expect(inspectResult.exitCode).toBe(0);
-    expect(inspectResult.output).toContain("personas");
+    expectLine(inspectResult.output, /Agent:\s+neo-clone/);
+    expectLine(inspectResult.output, /personas\/\s+default\.md/);
   });
 
   test("reflect on non-existent agent skips gracefully", async () => {
@@ -89,7 +100,8 @@ describe("agent evolution", () => {
 
     // THEN — exits successfully with skip message (no journal entries found)
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("no journal");
+    expectLine(result.output, /→ Reflecting on agent "nonexistent"\.\.\./);
+    expectLine(result.output, /Skipped\s+no journal entries/);
   });
 
   test("sleep on non-existent agent is a no-op", async () => {
@@ -98,7 +110,11 @@ describe("agent evolution", () => {
       .exec("agent sleep nonexistent")
       .run();
 
-    // THEN — exits successfully with nothing to archive
+    // THEN — exits successfully with archive counts at 0
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /→ Sleep cycle for agent "nonexistent"\.\.\./);
+    expectLine(result.output, /✓ Archived playbooks\s+0/);
+    expectLine(result.output, /✓ Archived knowledge\s+0/);
+    expectLine(result.output, /✓ Pruned sessions\s+0/);
   });
 });

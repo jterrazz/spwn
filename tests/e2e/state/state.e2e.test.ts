@@ -4,6 +4,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine } from "../../setup/output-helpers.js";
 
 describe("state management", () => {
   let ctx: TestContext;
@@ -22,7 +23,10 @@ describe("state management", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // THEN — state.json exists and contains the world
+    // THEN — spawn output confirms structured status
+    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+
+    // AND — state.json exists and contains the world
     ctx
       .state()
       .exists()
@@ -47,7 +51,8 @@ describe("state management", () => {
     // Verify state before destroy
     ctx.state().hasWorld(id);
 
-    ctx.spwn(["world", "destroy", id], 30_000);
+    const destroyResult = ctx.spwn(["world", "destroy", id], 30_000);
+    expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
     // THEN — state.json no longer contains the world
     ctx.state().noWorld(id);
@@ -70,9 +75,10 @@ describe("state management", () => {
     const list1 = ctx.spwn(["world", "list"]);
     const list2 = ctx.spwn(["world", "list"]);
 
-    // THEN — both calls show the same world
-    expect(list1.output).toContain(id);
-    expect(list2.output).toContain(id);
+    // THEN — both calls show the same world in the table
+    const idPattern = new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    expectLine(list1.output, idPattern);
+    expectLine(list2.output, idPattern);
 
     // AND — state is consistent
     ctx.state().hasWorld(id).worldCount(1);
@@ -88,12 +94,14 @@ describe("state management", () => {
       60_000,
     );
     const id1 = parseWorldId(r1.output)!;
+    expectLine(r1.output, /✓ Spawned world\s+w-default-\d{5}/);
 
     const r2 = ctx.spwn(
       ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
     const id2 = parseWorldId(r2.output)!;
+    expectLine(r2.output, /✓ Spawned world\s+w-default-\d{5}/);
 
     // THEN — both are tracked
     ctx

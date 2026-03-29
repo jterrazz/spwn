@@ -4,6 +4,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine } from "../../setup/output-helpers.js";
 
 describe("agent inside world", () => {
   let ctx: TestContext;
@@ -21,11 +22,10 @@ describe("agent inside world", () => {
       60_000,
     );
 
-    // THEN — the output confirms mind was mounted
+    // THEN — the output confirms mind was mounted with structured status
     expect(spawnResult.exitCode).toBe(0);
-    expect(spawnResult.output).toContain("Mounted mind");
-    expect(spawnResult.output).toContain("neo");
-    expect(spawnResult.output).toContain("/mind");
+    expectLine(spawnResult.output, /✓ Mounted mind\s+neo → \/mind/);
+    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
 
     // AND — mind directory actually exists inside the container
     const id = parseWorldId(spawnResult.output)!;
@@ -45,9 +45,10 @@ describe("agent inside world", () => {
       60_000,
     );
 
-    // THEN — agent is reported as alive
+    // THEN — agent is reported as alive with structured output
     expect(spawnResult.exitCode).toBe(0);
-    expect(spawnResult.output).toContain("Agent is alive");
+    expectLine(spawnResult.output, /✓ Agent is alive\./);
+    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;
@@ -67,10 +68,12 @@ describe("agent inside world", () => {
     // WHEN — inspecting
     const inspectResult = ctx.spwn(["world", "inspect", id]);
 
-    // THEN — agent is shown
+    // THEN — agent is shown with structured details
     expect(inspectResult.exitCode).toBe(0);
-    expect(inspectResult.output).toContain("Agent");
-    expect(inspectResult.output).toContain("neo");
+    expectLine(inspectResult.output, /World:\s+/);
+    expectLine(inspectResult.output, /Agent:\s+a-neo-\d{5}/);
+    expectLine(inspectResult.output, /Backend:\s+docker/);
+    expectLine(inspectResult.output, /Status:\s+(running|idle)/);
 
     // AND — state tracks the agent
     ctx.state().hasAgent(id, "neo");

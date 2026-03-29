@@ -4,6 +4,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine, expectNoLine } from "../../setup/output-helpers.js";
 
 describe("gate bridge", () => {
   let ctx: TestContext;
@@ -31,10 +32,10 @@ describe("gate bridge", () => {
       60_000,
     );
 
-    // THEN — the output confirms gate was bridged
+    // THEN — the output confirms gate was bridged with structured status
     expect(spawnResult.exitCode).toBe(0);
-    expect(spawnResult.output).toContain("Bridged gate");
-    expect(spawnResult.output).toContain("1 element(s)");
+    expectLine(spawnResult.output, /✓ Bridged gate\s+1 element\(s\)/);
+    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;
@@ -57,7 +58,7 @@ describe("gate bridge", () => {
 
     // THEN — no gate bridging in output
     expect(spawnResult.exitCode).toBe(0);
-    expect(spawnResult.output).not.toContain("Bridged gate");
+    expectNoLine(spawnResult.output, /Bridged gate/);
 
     // AND — container is still running with world files
     const id = parseWorldId(spawnResult.output)!;
@@ -87,7 +88,7 @@ describe("gate bridge", () => {
 
     // THEN — faculties were generated (they include bridged elements)
     expect(spawnResult.exitCode).toBe(0);
-    expect(spawnResult.output).toContain("Generated faculties");
+    expectLine(spawnResult.output, /✓ Generated faculties\s+physics\.md, faculties\.md/);
 
     // AND — faculties.md inside container mentions the bridged element
     const id = parseWorldId(spawnResult.output)!;

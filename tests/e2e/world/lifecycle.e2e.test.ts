@@ -4,6 +4,12 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import {
+  expectLine,
+  expectNoLine,
+  expectTableHeader,
+  expectTableRow,
+} from "../../setup/output-helpers.js";
 
 describe("world lifecycle", () => {
   let ctx: TestContext;
@@ -26,10 +32,10 @@ describe("world lifecycle", () => {
     // WHEN — listing worlds
     const listResult = ctx.spwn(["world", "list"]);
 
-    // THEN — shows the world with agent info
+    // THEN — shows the world with agent info in a table
     expect(listResult.exitCode).toBe(0);
-    expect(listResult.output).toContain(id);
-    expect(listResult.output).toContain("neo");
+    expectTableHeader(listResult.output, ["ID", "CONFIG", "AGENTS", "STATUS", "CREATED"]);
+    expectTableRow(listResult.output, [id, "default", "neo"]);
 
     // AND — state tracks it with running status
     ctx.state().hasWorld(id).hasAgent(id, "neo");
@@ -48,11 +54,16 @@ describe("world lifecycle", () => {
     // WHEN — inspecting the world
     const inspectResult = ctx.spwn(["world", "inspect", id]);
 
-    // THEN — shows world details
+    // THEN — shows world details in structured format
     expect(inspectResult.exitCode).toBe(0);
-    expect(inspectResult.output).toContain(id);
-    expect(inspectResult.output).toContain("docker");
-    expect(inspectResult.output).toContain("neo");
+    expectLine(inspectResult.output, new RegExp(`World:\\s+${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+    expectLine(inspectResult.output, /Config:\s+default/);
+    expectLine(inspectResult.output, /Backend:\s+docker/);
+    expectLine(inspectResult.output, /Status:\s+(running|idle)/);
+    expectLine(inspectResult.output, /Agent:\s+a-neo-\d{5}/);
+    expectLine(inspectResult.output, /Constants:/);
+    expectLine(inspectResult.output, /Workspace:/);
+    expectLine(inspectResult.output, /Mind:/);
 
     // AND — the container is actually running
     ctx.universe(id).toBeRunning();
@@ -69,6 +80,8 @@ describe("world lifecycle", () => {
       60_000,
     );
     expect(spawnResult.exitCode).toBe(0);
+    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(spawnResult.output, /✓ Agent is alive\./);
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
@@ -82,15 +95,16 @@ describe("world lifecycle", () => {
     // AND — state tracks it
     ctx.state().hasWorld(id).worldCount(1);
 
-    // AND — inspect works
+    // AND — inspect works with structured output
     const inspectResult = ctx.spwn(["world", "inspect", id]);
     expect(inspectResult.exitCode).toBe(0);
-    expect(inspectResult.output).toContain(id);
+    expectLine(inspectResult.output, new RegExp(`World:\\s+${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+    expectLine(inspectResult.output, /Status:\s+(running|idle)/);
 
-    // AND — destroy works
+    // AND — destroy works with structured status
     const destroyResult = ctx.spwn(["world", "destroy", id], 30_000);
     expect(destroyResult.exitCode).toBe(0);
-    expect(destroyResult.output).toContain("World destroyed");
+    expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
     // AND — container is gone
     ctx.universe(id).toNotExist();
@@ -98,7 +112,7 @@ describe("world lifecycle", () => {
     // AND — list shows empty
     const listResult = ctx.spwn(["world", "list"]);
     expect(listResult.exitCode).toBe(0);
-    expect(listResult.output).not.toContain(id);
+    expectNoLine(listResult.output, new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
     // AND — state no longer has it
     ctx.state().noWorld(id);

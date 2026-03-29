@@ -6,6 +6,7 @@ import {
   parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
+import { expectLine } from "../../setup/output-helpers.js";
 
 describe("config cascade", () => {
   let ctx: TestContext;
@@ -21,8 +22,9 @@ describe("config cascade", () => {
     // WHEN — running init
     const result = ctx.spwn(["init"]);
 
-    // THEN — org.yaml exists
+    // THEN — org.yaml exists and output confirms creation
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Created organization\s+org\.yaml/);
     expect(existsSync(join(ctx.home, "org.yaml"))).toBe(true);
   });
 
@@ -33,18 +35,23 @@ describe("config cascade", () => {
     // WHEN — running init
     const result = ctx.spwn(["init"]);
 
-    // THEN — a default.yaml exists in worlds/
+    // THEN — a default.yaml exists in worlds/ and output confirms
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
     expect(existsSync(join(ctx.home, "worlds", "default.yaml"))).toBe(true);
   });
 
   test("multiple world configs coexist", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
-    ctx.spwn(["init", "alpha"]);
-    ctx.spwn(["init", "beta"]);
+    const r1 = ctx.spwn(["init", "alpha"]);
+    const r2 = ctx.spwn(["init", "beta"]);
 
-    // THEN — both configs exist alongside default
+    // THEN — init outputs confirm named configs
+    expectLine(r1.output, /✓ Created config\s+alpha\.yaml/);
+    expectLine(r2.output, /✓ Created config\s+beta\.yaml/);
+
+    // AND — both configs exist alongside default
     expect(existsSync(join(ctx.home, "worlds", "alpha.yaml"))).toBe(true);
     expect(existsSync(join(ctx.home, "worlds", "beta.yaml"))).toBe(true);
     expect(existsSync(join(ctx.home, "worlds", "default.yaml"))).toBe(true);
@@ -63,7 +70,7 @@ describe("config cascade", () => {
 
     // THEN — world ID reflects the config name
     expect(spawnResult.exitCode).toBe(0);
-    expect(spawnResult.output).toContain("w-custom-");
+    expectLine(spawnResult.output, /✓ Spawned world\s+w-custom-\d{5}/);
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;

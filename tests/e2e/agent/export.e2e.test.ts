@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome, createAgent } from "../../setup/helpers.js";
+import { expectLine } from "../../setup/output-helpers.js";
 
 describe("agent export", () => {
   let home: string;
@@ -27,9 +28,10 @@ describe("agent export", () => {
       .exec("agent export neo")
       .run();
 
-    // THEN — a tar.gz archive is created
+    // THEN — a tar.gz archive is created with structured output
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("tar.gz");
+    expectLine(result.output, /→ Exporting agent neo\.\.\./);
+    expectLine(result.output, /✓ Exported\s+neo\.tar\.gz/);
   });
 
   test("export with exclude layers", async () => {
@@ -38,8 +40,10 @@ describe("agent export", () => {
       .exec("agent export neo --exclude journal,sessions")
       .run();
 
-    // THEN — export completes successfully
+    // THEN — export completes successfully with same output format
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /→ Exporting agent neo\.\.\./);
+    expectLine(result.output, /✓ Exported\s+neo\.tar\.gz/);
   });
 
   test("export non-existent agent fails", async () => {
@@ -48,8 +52,9 @@ describe("agent export", () => {
       .exec("agent export nonexistent")
       .run();
 
-    // THEN — exits with error
+    // THEN — exits with error showing not found
     expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /✗ Export failed\s+agent "nonexistent" not found/);
   });
 
   test("export includes all Mind layers by default", async () => {
@@ -58,7 +63,8 @@ describe("agent export", () => {
       .exec("agent export neo")
       .run();
 
-    // THEN — export is successful and includes all layers
+    // THEN — export is successful
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Exported\s+neo\.tar\.gz/);
   });
 });

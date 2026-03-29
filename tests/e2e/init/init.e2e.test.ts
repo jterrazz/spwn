@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome } from "../../setup/helpers.js";
+import { expectLine, lines } from "../../setup/output-helpers.js";
 
 describe("spwn init", () => {
   let home: string;
@@ -27,9 +28,11 @@ describe("spwn init", () => {
       .exec("init")
       .run();
 
-    // THEN — exits successfully and confirms creation
+    // THEN — exits successfully and outputs structured status lines
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Created");
+    expectLine(result.output, /✓ Created organization\s+org\.yaml/);
+    expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
+    expectLine(result.output, /✓ Ready\. Run: spwn world -c \w+/);
   });
 
   test("creates org.yaml", async () => {
@@ -38,9 +41,9 @@ describe("spwn init", () => {
       .exec("init")
       .run();
 
-    // THEN — org.yaml is mentioned in output
+    // THEN — org.yaml creation is confirmed in output
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("org.yaml");
+    expectLine(result.output, /✓ Created organization\s+org\.yaml/);
   });
 
   test("creates a world config", async () => {
@@ -51,7 +54,7 @@ describe("spwn init", () => {
 
     // THEN — a .yaml config is created (with a random cosmos-themed name)
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain(".yaml");
+    expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
   });
 
   test("is idempotent", async () => {
@@ -63,6 +66,8 @@ describe("spwn init", () => {
 
     // THEN — succeeds (creates another config with a different name)
     expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
+    expectLine(result.output, /✓ Ready\./);
   });
 
   test("uses random name when none provided", async () => {
@@ -73,7 +78,7 @@ describe("spwn init", () => {
 
     // THEN — a random name is generated and setup completes
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Ready");
+    expectLine(result.output, /✓ Ready\. Run: spwn world -c \w+/);
   });
 
   test("accepts custom name", async () => {
@@ -84,6 +89,7 @@ describe("spwn init", () => {
 
     // THEN — the custom name is used in the config
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("acme.yaml");
+    expectLine(result.output, /✓ Created config\s+acme\.yaml/);
+    expectLine(result.output, /✓ Ready\. Run: spwn world -c acme/);
   });
 });
