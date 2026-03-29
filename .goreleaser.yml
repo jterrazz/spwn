@@ -4,7 +4,7 @@ project_name: spwn
 
 before:
   hooks:
-    - cd apps/cli && go mod tidy
+    - sh -c "cd apps/cli && go mod tidy"
 
 builds:
   - id: spwn
