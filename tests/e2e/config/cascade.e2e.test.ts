@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
   createTestContext,
+  parseUniverseId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
@@ -13,7 +14,7 @@ describe("config cascade", () => {
     ctx?.cleanup();
   });
 
-  test("init creates org.yaml", async () => {
+  test("init creates org.yaml", () => {
     // GIVEN — a fresh SPWN_HOME
     ctx = createTestContext();
 
@@ -25,7 +26,7 @@ describe("config cascade", () => {
     expect(existsSync(join(ctx.home, "org.yaml"))).toBe(true);
   });
 
-  test("init creates default universe config", async () => {
+  test("init creates default universe config", () => {
     // GIVEN — a fresh SPWN_HOME
     ctx = createTestContext();
 
@@ -37,7 +38,7 @@ describe("config cascade", () => {
     expect(existsSync(join(ctx.home, "universes", "default.yaml"))).toBe(true);
   });
 
-  test("multiple universe configs coexist", async () => {
+  test("multiple universe configs coexist", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init", "alpha"]);
@@ -49,7 +50,7 @@ describe("config cascade", () => {
     expect(existsSync(join(ctx.home, "universes", "default.yaml"))).toBe(true);
   });
 
-  test("named config is used when spawning with -c flag", async () => {
+  test("named config is used when spawning with -c flag", () => {
     // GIVEN — a named config
     ctx = createTestContext();
     ctx.spwn(["init", "custom"]);
@@ -63,5 +64,12 @@ describe("config cascade", () => {
     // THEN — universe ID reflects the config name
     expect(spawnResult.exitCode).toBe(0);
     expect(spawnResult.output).toContain("u-custom-");
+
+    // AND — container is running
+    const id = parseUniverseId(spawnResult.output)!;
+    ctx.universe(id).toBeRunning();
+
+    // AND — state tracks it with the right config
+    ctx.state().hasUniverse(id);
   });
 });

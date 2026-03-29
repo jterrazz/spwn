@@ -12,7 +12,7 @@ describe("universe lifecycle", () => {
     ctx?.cleanup();
   });
 
-  test("list shows spawned universes", async () => {
+  test("list shows spawned universes", () => {
     // GIVEN — a spawned universe
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -30,9 +30,12 @@ describe("universe lifecycle", () => {
     expect(listResult.exitCode).toBe(0);
     expect(listResult.output).toContain(id);
     expect(listResult.output).toContain("neo");
+
+    // AND — state tracks it with running status
+    ctx.state().hasUniverse(id).hasAgent(id, "neo");
   });
 
-  test("inspect shows universe details", async () => {
+  test("inspect shows universe details", () => {
     // GIVEN — a spawned universe
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -50,9 +53,12 @@ describe("universe lifecycle", () => {
     expect(inspectResult.output).toContain(id);
     expect(inspectResult.output).toContain("docker");
     expect(inspectResult.output).toContain("neo");
+
+    // AND — the container is actually running
+    ctx.universe(id).toBeRunning();
   });
 
-  test("full lifecycle: spawn, inspect, destroy", async () => {
+  test("full lifecycle: spawn, inspect, destroy", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -66,7 +72,17 @@ describe("universe lifecycle", () => {
     const id = parseUniverseId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — inspect works
+    // THEN — container is running and has universe files
+    ctx
+      .universe(id)
+      .toBeRunning()
+      .toHaveFile("/universe/physics.md")
+      .toHaveFile("/universe/faculties.md");
+
+    // AND — state tracks it
+    ctx.state().hasUniverse(id).universeCount(1);
+
+    // AND — inspect works
     const inspectResult = ctx.spwn(["universe", "inspect", id]);
     expect(inspectResult.exitCode).toBe(0);
     expect(inspectResult.output).toContain(id);
@@ -76,9 +92,15 @@ describe("universe lifecycle", () => {
     expect(destroyResult.exitCode).toBe(0);
     expect(destroyResult.output).toContain("Universe destroyed");
 
+    // AND — container is gone
+    ctx.universe(id).toNotExist();
+
     // AND — list shows empty
     const listResult = ctx.spwn(["universe", "list"]);
     expect(listResult.exitCode).toBe(0);
     expect(listResult.output).not.toContain(id);
+
+    // AND — state no longer has it
+    ctx.state().noUniverse(id);
   });
 });

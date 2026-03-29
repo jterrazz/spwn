@@ -12,7 +12,7 @@ describe("visitor", () => {
     ctx?.cleanup();
   });
 
-  test("visitor without --universe flag fails", async () => {
+  test("visitor without --universe flag fails", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -25,7 +25,7 @@ describe("visitor", () => {
     expect(result.output).toContain("universe");
   });
 
-  test("visitor with non-existent universe dispatches (fire-and-forget)", async () => {
+  test("visitor with non-existent universe dispatches (fire-and-forget)", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -43,7 +43,7 @@ describe("visitor", () => {
     expect(result.output).toContain("Visitor dispatched");
   });
 
-  test("visitor runs ephemeral task in a universe", async () => {
+  test("visitor runs ephemeral task in a universe", () => {
     // GIVEN — a running universe
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -54,6 +54,9 @@ describe("visitor", () => {
     const id = parseUniverseId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
+    // Verify container is running before dispatching visitor
+    ctx.universe(id).toBeRunning();
+
     // WHEN — dispatching a visitor task
     const visitorResult = ctx.spwn(
       ["visitor", "lint the code", "--universe", id],
@@ -63,5 +66,8 @@ describe("visitor", () => {
     // THEN — succeeds and confirms dispatch
     expect(visitorResult.exitCode).toBe(0);
     expect(visitorResult.output).toContain("Visitor dispatched");
+
+    // AND — container is still running after visitor
+    ctx.universe(id).toBeRunning();
   });
 });

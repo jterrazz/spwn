@@ -44,7 +44,7 @@ describe("error handling", () => {
   test("visitor without --universe flag", async () => {
     // WHEN — running visitor without specifying a universe
     const result = await spwn("visitor no universe")
-      .exec("visitor \"lint src/\"")
+      .exec('visitor "lint src/"')
       .run();
 
     // THEN — exits with error mentioning universe requirement
@@ -96,7 +96,7 @@ describe("error handling", () => {
   test("agent talk to non-existent agent", async () => {
     // WHEN — talking to an agent that does not exist
     const result = await spwn("talk missing")
-      .exec("agent talk nonexistent \"hello\"")
+      .exec('agent talk nonexistent "hello"')
       .run();
 
     // THEN — exits with error

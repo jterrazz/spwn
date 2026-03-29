@@ -13,7 +13,7 @@ describe("colony multi-agent", () => {
     ctx?.cleanup();
   });
 
-  test("spawn universe with governor agent", async () => {
+  test("spawn universe with governor agent", () => {
     // GIVEN — two agents: neo as citizen, morpheus as governor
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
@@ -38,9 +38,21 @@ describe("colony multi-agent", () => {
     expect(spawnResult.output).toContain("Spawned universe");
     expect(spawnResult.output).toContain("neo");
     expect(spawnResult.output).toContain("morpheus");
+
+    // AND — container is running with universe files
+    const id = parseUniverseId(spawnResult.output)!;
+    ctx
+      .universe(id)
+      .toBeRunning()
+      .toHaveFile("/universe/physics.md")
+      .toHaveFile("/universe/faculties.md");
+
+    // AND — both agents exist on host
+    ctx.mind("neo").exists();
+    ctx.mind("morpheus").exists();
   });
 
-  test("destroying universe with governor cleans up", async () => {
+  test("destroying universe with governor cleans up", () => {
     // GIVEN — a universe with governor
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
@@ -60,6 +72,9 @@ describe("colony multi-agent", () => {
     const id = parseUniverseId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
+    // Verify running before destroy
+    ctx.universe(id).toBeRunning();
+
     // WHEN — destroying
     const destroyResult = ctx.spwn(["universe", "destroy", id], 30_000);
 
@@ -67,8 +82,14 @@ describe("colony multi-agent", () => {
     expect(destroyResult.exitCode).toBe(0);
     expect(destroyResult.output).toContain("Universe destroyed");
 
+    // AND — container is gone
+    ctx.universe(id).toNotExist();
+
     // AND — list is empty
     const listResult = ctx.spwn(["universe", "list"]);
     expect(listResult.output).not.toContain(id);
+
+    // AND — state no longer has it
+    ctx.state().noUniverse(id);
   });
 });

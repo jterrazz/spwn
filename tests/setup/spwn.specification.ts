@@ -1,6 +1,9 @@
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { createSpwnHome, createAgent } from "./helpers.js";
+import { UniverseAssertion } from "./universe-assertion.js";
+import { MindAssertion } from "./mind-assertion.js";
+import { StateAssertion } from "./state-assertion.js";
 
 // Build the binary path
 const SPWN_BIN = resolve(import.meta.dirname, "../../bin/spwn");
@@ -116,6 +119,12 @@ export interface TestContext {
     stderr: string;
     output: string;
   };
+  /** Inspect a running universe container */
+  universe: (universeId: string) => UniverseAssertion;
+  /** Inspect an agent Mind on disk */
+  mind: (agentName: string) => MindAssertion;
+  /** Inspect the state.json file */
+  state: () => StateAssertion;
   /** Destroy all active universes and clean up temp directory */
   cleanup: () => void;
 }
@@ -137,6 +146,10 @@ export function createTestContext(): TestContext {
     home,
     spwn: (args: string[], timeout = 30_000) =>
       spwnWithEnv(args, envOverrides, timeout),
+    universe: (universeId: string) =>
+      new UniverseAssertion(universeId, home),
+    mind: (agentName: string) => new MindAssertion(home, agentName),
+    state: () => new StateAssertion(home),
     cleanup: () => {
       // Destroy all active universes
       const listResult = spwnWithEnv(["universe", "list"], envOverrides);
