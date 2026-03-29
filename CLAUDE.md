@@ -51,9 +51,11 @@ Spwn is a **framework for orchestrating artificial life**. Every layer is an int
 
 ```bash
 # Claw (the God)
-spwn claw start / stop / status
-spwn claw connect telegram / slack / discord
-spwn claw "migrate auth to sessions"     # Talk to it
+spwn claw start                          # Start the Claw daemon
+spwn claw stop                           # Stop the Claw daemon
+spwn claw status                         # Show status, channels, active universes
+spwn claw connect <channel>              # Connect to a messaging channel
+spwn claw "migrate auth to sessions"     # Talk to it (planned)
 
 # Universe (the world)
 spwn universe                            # Spawn with defaults
@@ -61,18 +63,25 @@ spwn universe -c acme-org                # Named config
 spwn universe --governor morpheus -w ~/acme-org
 spwn universe list / inspect / logs / attach / destroy
 
-# Agent (citizens)
+# Agent (citizens + evolution)
 spwn agent -n neo --universe u-acme-84721
 spwn agent init [name]
 spwn agent list / inspect / export
 spwn agent talk neo "how's the migration?"
+spwn agent reflect <agent-id>            # Reflexion: journal → auto-reflexion.md
+spwn agent sleep <agent-id>              # Sleep: archive stale, prune sessions
+spwn agent fork <agent-id>               # Fork: clone Mind to new agent
 
 # Visitor (ephemeral)
-spwn visitor "lint src/" --universe u-acme-84721
-spwn visitor "run tests" --universe u-acme-84721
+spwn visitor "task" --universe u-acme-84721
 
 # Observatory
 spwn observatory start / open
+
+# Skills (marketplace)
+spwn skill list                          # List available skills
+spwn skill install <skill>               # Install a skill
+spwn skill remove <skill>                # Remove a skill
 ```
 
 **Design rules:**

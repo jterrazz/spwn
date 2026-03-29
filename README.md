@@ -119,13 +119,16 @@ The Mind is declared as the `mind` section of `agent.yaml` and mounted into ever
 
 ### Architecture
 
+Built on a **Ports & Adapters** pattern with 8 port interfaces (Runtime, Backend, Provider, Memory, Store, Channel, Skill, Tool) and swappable adapters for each.
+
 ```
 Host (your machine)
   └── Architect                    Creates and destroys worlds
        └── Universe                A contained reality
-            ├── Agent              The living entity inside
-            │    └── Mind          Its persistent identity
-            ├── Gate               Bridge between worlds
+            ├── Governor           Leader agent (decomposes tasks, delegates)
+            ├── Citizens           Persistent worker agents (many per universe)
+            ├── Visitors           Ephemeral agents (fire & forget)
+            ├── Gate               Bridge between worlds (capability-enforced)
             ├── physics.md         The constraints of this reality
             └── faculties.md       What the agent can do
 ```
@@ -152,6 +155,7 @@ spwn init [name]                       # First-time setup (random name if omitte
 spwn universe                          # Spawn a universe with default config
 spwn universe -c node-dev              # Spawn with named config
 spwn universe --agent neo -w .         # Spawn with agent and workspace
+spwn universe --governor morpheus -w . # Spawn with a Governor agent
 spwn universe list                     # List all universes
 spwn universe inspect <universe-id>    # Show details, physics, agent status
 spwn universe logs <universe-id>       # Stream agent output
@@ -166,6 +170,27 @@ spwn agent list                        # List all agents
 spwn agent inspect <agent-id>          # Show agent details, Mind layers, journal
 spwn agent init [name]                 # Create a new agent (random name if omitted)
 spwn agent export <agent-id>           # Export an agent as tar.gz
+spwn agent reflect <agent-id>          # Reflexion: journal analysis → auto-reflexion.md
+spwn agent sleep <agent-id>            # Sleep: archive stale files, prune old sessions
+spwn agent fork <agent-id>             # Fork: clone Mind from source to new agent
+
+# Visitor
+spwn visitor "task" --universe <id>    # Fire ephemeral agent inside a universe
+
+# Claw (the God)
+spwn claw start                        # Start the Claw daemon
+spwn claw stop                         # Stop the Claw daemon
+spwn claw status                       # Show status, connected channels, active universes
+spwn claw connect <channel>            # Connect to a messaging channel
+
+# Observatory
+spwn observatory start                 # Start the Observatory dashboard
+spwn observatory open                  # Open dashboard in browser
+
+# Skill Marketplace
+spwn skill list                        # List available skills
+spwn skill install <skill>             # Install a skill
+spwn skill remove <skill>              # Remove a skill
 ```
 
 ### A typical session
@@ -195,6 +220,14 @@ $ spwn universe destroy u-default-84721
 
   Universe destroyed. Agent survives.
 ```
+
+### Evolution
+
+Agents evolve through three mechanisms, all available via `spwn agent`:
+
+- **Reflexion** (`spwn agent reflect`) — Analyzes journal entries and promotes successful strategies to `playbooks/auto-reflexion.md`. Natural selection for behavior.
+- **Sleep** (`spwn agent sleep`) — Archives stale files and prunes old sessions. Consolidates raw experience into durable knowledge.
+- **Forking** (`spwn agent fork`) — Clones a Mind from one agent to another. Run copies in different environments, keep what works.
 
 ---
 
@@ -237,11 +270,19 @@ spwn/
 │   ├── universe/               #   World management (architect, backend, physics)
 │   ├── agent/                  #   Life management (mind, journal, session)
 │   ├── gate/                   #   Bridge protocol (server, bridge)
+│   ├── runtime/                #   Runtime adapters (Claude Code, etc.)
+│   ├── provider/               #   LLM provider adapters (Anthropic, OpenAI)
+│   ├── channel/                #   Communication adapters (CLI)
+│   ├── skill/                  #   Skill registry (local)
+│   ├── colony/                 #   Multi-agent orchestration (governor, citizens)
+│   ├── evolution/              #   Reflexion, sleep, forking
+│   ├── visitor/                #   Ephemeral agent management
+│   ├── sync/                   #   Claw state + org.yaml
 │   └── foundation/             #   Cross-cutting primitives (paths, IDs, constants)
 │
 ├── apps/                       # Deployable consumers
 │   ├── cli/                    #   The spwn binary (cobra → domain APIs → output)
-│   └── observatory/            #   Visual dashboard (planned)
+│   └── observatory/            #   Visual dashboard (CLI placeholder, dashboard planned)
 │
 └── platform/                   # Build infrastructure
     ├── images/                 #   Docker images (base, test)
