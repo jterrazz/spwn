@@ -413,23 +413,39 @@ func hasEnv(env []string, key string) bool {
 	return false
 }
 
-// extractKeychainToken attempts to read the Claude OAuth token from macOS Keychain.
+// extractKeychainToken reads the cached Claude OAuth token from ~/.spwn/.auth-token.
+// If not cached, attempts to extract from macOS Keychain and caches for future use.
 func extractKeychainToken() string {
+	// Try cached token first (no keychain popup)
+	cachePath := filepath.Join(foundation.BaseDir(), ".auth-token")
+	if data, err := os.ReadFile(cachePath); err == nil {
+		token := strings.TrimSpace(string(data))
+		if token != "" {
+			return token
+		}
+	}
+
+	// Fall back to macOS Keychain (will prompt user once)
 	out, err := exec.Command("security", "find-generic-password", "-s", "Claude Code-credentials", "-w").Output()
 	if err != nil {
 		return ""
 	}
 
-	// Parse JSON to extract accessToken
 	var creds struct {
 		ClaudeAiOauth struct {
 			AccessToken string `json:"accessToken"`
 		} `json:"claudeAiOauth"`
 	}
-
 	if err := json.Unmarshal(out, &creds); err != nil {
 		return ""
 	}
+
+	// Cache for future use
+	if creds.ClaudeAiOauth.AccessToken != "" {
+		os.MkdirAll(foundation.BaseDir(), 0755)
+		os.WriteFile(cachePath, []byte(creds.ClaudeAiOauth.AccessToken), 0600)
+	}
+
 	return creds.ClaudeAiOauth.AccessToken
 }
 
