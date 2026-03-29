@@ -17,11 +17,14 @@ type Session struct {
 	Resumed    bool   `json:"resumed"`
 }
 
-// DeterministicID generates a session ID from agent name and universe ID.
+// DeterministicID generates a UUID-formatted session ID from agent name and universe ID.
 // Same agent+universe pair always produces the same session ID.
+// Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (UUID v4 layout with deterministic bytes).
 func DeterministicID(agentName, universeID string) string {
 	h := sha256.Sum256([]byte(agentName + ":" + universeID))
-	return hex.EncodeToString(h[:])[:16]
+	hex := hex.EncodeToString(h[:16])
+	// Format as UUID: 8-4-4-4-12
+	return hex[0:8] + "-" + hex[8:12] + "-4" + hex[13:16] + "-a" + hex[17:20] + "-" + hex[20:32]
 }
 
 // Load reads a session file from the Mind's sessions directory.

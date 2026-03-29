@@ -3,7 +3,7 @@ FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y \
     bash coreutils findutils grep sed gawk \
     ca-certificates curl wget git jq \
-    python3 make gcc g++ \
+    python3 make gcc g++ sudo \
     && rm -rf /var/lib/apt/lists/*
 
 # Node.js 20
@@ -14,13 +14,16 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
-# Container-side Gate binary (Rust, static)
-# Built separately via: cd container/gate && cargo build --release --target x86_64-unknown-linux-musl
-# COPY spwn-gate /usr/local/bin/gate
+# Non-root user (Claude Code refuses --dangerously-skip-permissions as root)
+RUN useradd -m -s /bin/bash spwn \
+    && echo "spwn ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Mount points — /gate is for the host-side Gate bridge wrappers
+# Create mount points owned by spwn user
+RUN mkdir -p /workspace /mind /universe /home/spwn/.claude \
+    && chown -R spwn:spwn /workspace /mind /universe /home/spwn
+
+USER spwn
+WORKDIR /home/spwn
+
 VOLUME ["/workspace", "/mind", "/universe"]
-
-# Default entrypoint. When the container-side Gate binary is included,
-# change to: ENTRYPOINT ["gate"]
 ENTRYPOINT ["sleep", "infinity"]
