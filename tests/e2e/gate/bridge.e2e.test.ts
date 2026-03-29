@@ -12,7 +12,7 @@ describe("gate bridge", () => {
     ctx?.cleanup();
   });
 
-  test("gate bridges element access into container", async () => {
+  test("gate bridges element access into container", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -35,9 +35,16 @@ describe("gate bridge", () => {
     expect(spawnResult.exitCode).toBe(0);
     expect(spawnResult.output).toContain("Bridged gate");
     expect(spawnResult.output).toContain("1 element(s)");
+
+    // AND — container is running
+    const id = parseUniverseId(spawnResult.output)!;
+    ctx.universe(id).toBeRunning();
+
+    // AND — faculties.md reflects bridged elements
+    ctx.universe(id).toHaveFile("/universe/faculties.md");
   });
 
-  test("spawn without gate does not mention bridging", async () => {
+  test("spawn without gate does not mention bridging", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -51,9 +58,17 @@ describe("gate bridge", () => {
     // THEN — no gate bridging in output
     expect(spawnResult.exitCode).toBe(0);
     expect(spawnResult.output).not.toContain("Bridged gate");
+
+    // AND — container is still running with universe files
+    const id = parseUniverseId(spawnResult.output)!;
+    ctx
+      .universe(id)
+      .toBeRunning()
+      .toHaveFile("/universe/physics.md")
+      .toHaveFile("/universe/faculties.md");
   });
 
-  test("faculties.md reflects bridged elements", async () => {
+  test("faculties.md reflects bridged elements", () => {
     // GIVEN — a universe with gate bridge
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -73,5 +88,10 @@ describe("gate bridge", () => {
     // THEN — faculties were generated (they include bridged elements)
     expect(spawnResult.exitCode).toBe(0);
     expect(spawnResult.output).toContain("Generated faculties");
+
+    // AND — faculties.md inside container mentions the bridged element
+    const id = parseUniverseId(spawnResult.output)!;
+    const faculties = ctx.universe(id).faculties();
+    expect(faculties).toBeTruthy();
   });
 });

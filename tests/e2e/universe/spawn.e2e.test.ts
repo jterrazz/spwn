@@ -12,7 +12,7 @@ describe("universe spawn", () => {
     ctx?.cleanup();
   });
 
-  test("spawns a universe with default config", async () => {
+  test("creates a running Docker container", () => {
     // GIVEN — an initialized SPWN_HOME with agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -26,12 +26,21 @@ describe("universe spawn", () => {
     // THEN — exits successfully and outputs a universe ID
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("Spawned universe");
-    const id = parseUniverseId(result.output);
+    const id = parseUniverseId(result.output)!;
     expect(id).toBeTruthy();
     expect(id).toMatch(/^u-default-\d{5}$/);
+
+    // AND — the container is actually running
+    ctx.universe(id).toBeRunning();
+
+    // AND — has /universe directory with physics + faculties
+    ctx
+      .universe(id)
+      .toHaveFile("/universe/physics.md")
+      .toHaveFile("/universe/faculties.md");
   });
 
-  test("spawns a universe with named config via -c flag", async () => {
+  test("spawns a universe with named config via -c flag", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init", "myconfig"]);
@@ -42,14 +51,17 @@ describe("universe spawn", () => {
       60_000,
     );
 
-    // THEN — exits successfully
+    // THEN — exits successfully with correct ID prefix
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("Spawned universe");
-    const id = parseUniverseId(result.output);
+    const id = parseUniverseId(result.output)!;
     expect(id).toMatch(/^u-myconfig-\d{5}$/);
+
+    // AND — container is running
+    ctx.universe(id).toBeRunning();
   });
 
-  test("universe ID format is u-{name}-{5digits}", async () => {
+  test("universe ID format is u-{name}-{5digits}", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -66,7 +78,7 @@ describe("universe spawn", () => {
     expect(id).toMatch(/^u-\w+-\d{5}$/);
   });
 
-  test("spawned universe appears in list", async () => {
+  test("spawned universe appears in list", () => {
     // GIVEN — a spawned universe
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -74,7 +86,7 @@ describe("universe spawn", () => {
       ["universe", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output);
+    const id = parseUniverseId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
     // WHEN — listing universes
@@ -82,10 +94,13 @@ describe("universe spawn", () => {
 
     // THEN — the spawned universe appears
     expect(listResult.exitCode).toBe(0);
-    expect(listResult.output).toContain(id!);
+    expect(listResult.output).toContain(id);
+
+    // AND — state.json tracks it
+    ctx.state().hasUniverse(id).hasAgent(id, "neo");
   });
 
-  test("fails with non-existent config", async () => {
+  test("fails with non-existent config", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -98,5 +113,48 @@ describe("universe spawn", () => {
 
     // THEN — exits with error
     expect(result.exitCode).not.toBe(0);
+  });
+
+  test("physics.md contains declared constants", () => {
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const result = ctx.spwn(
+      ["universe", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseUniverseId(result.output)!;
+
+    // Read physics.md from inside the container
+    const physics = ctx.universe(id).physics();
+    expect(physics).toContain("CPU");
+    expect(physics).toContain("Memory");
+    expect(physics).toContain("Timeout");
+  });
+
+  test("faculties.md lists verified elements", () => {
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const result = ctx.spwn(
+      ["universe", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseUniverseId(result.output)!;
+
+    const faculties = ctx.universe(id).faculties();
+    expect(faculties).toContain("bash");
+  });
+
+  test("container removed after destroy", () => {
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const result = ctx.spwn(
+      ["universe", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseUniverseId(result.output)!;
+
+    ctx.universe(id).toBeRunning();
+    ctx.spwn(["universe", "destroy", id], 30_000);
+    ctx.universe(id).toNotExist();
   });
 });
