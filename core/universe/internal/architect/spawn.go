@@ -199,11 +199,15 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Mount Claude auth directory for subscription mode (~/.claude/)
+	// Mount Claude auth for subscription mode
 	home, _ := os.UserHomeDir()
 	claudeAuthDir := filepath.Join(home, ".claude")
 	if _, err := os.Stat(claudeAuthDir); err == nil {
-		binds = append(binds, claudeAuthDir+":/root/.claude:ro")
+		binds = append(binds, claudeAuthDir+":/home/spwn/.claude")
+	}
+	claudeConfigFile := filepath.Join(home, ".claude.json")
+	if _, err := os.Stat(claudeConfigFile); err == nil {
+		binds = append(binds, claudeConfigFile+":/home/spwn/.claude.json")
 	}
 
 	// Create container
