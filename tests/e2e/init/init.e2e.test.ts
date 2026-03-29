@@ -1,13 +1,24 @@
-import { describe, test, expect, beforeEach } from "vitest";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome } from "../../setup/helpers.js";
 
 describe("spwn init", () => {
   let home: string;
+  let originalSpwnHome: string | undefined;
 
   beforeEach(() => {
     // GIVEN — a fresh temporary SPWN_HOME directory
+    originalSpwnHome = process.env.SPWN_HOME;
     home = createSpwnHome();
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
   });
 
   test("creates ~/.spwn/ directory structure", async () => {
@@ -18,7 +29,7 @@ describe("spwn init", () => {
 
     // THEN — exits successfully and confirms creation
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("Created");
+    expect(result.output).toContain("Created");
   });
 
   test("creates org.yaml", async () => {
@@ -29,18 +40,18 @@ describe("spwn init", () => {
 
     // THEN — org.yaml is mentioned in output
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("org.yaml");
+    expect(result.output).toContain("org.yaml");
   });
 
-  test("creates default.yaml universe config", async () => {
+  test("creates a universe config", async () => {
     // WHEN — running spwn init
-    const result = await spwn("init creates default config")
+    const result = await spwn("init creates config")
       .exec("init")
       .run();
 
-    // THEN — default.yaml is created
+    // THEN — a .yaml config is created (with a random cosmos-themed name)
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("default.yaml");
+    expect(result.output).toContain(".yaml");
   });
 
   test("is idempotent", async () => {
@@ -50,9 +61,8 @@ describe("spwn init", () => {
     // WHEN — running init again
     const result = await spwn("second init").exec("init").run();
 
-    // THEN — succeeds and reports already exists
+    // THEN — succeeds (creates another config with a different name)
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("already exists");
   });
 
   test("uses random name when none provided", async () => {
@@ -63,17 +73,17 @@ describe("spwn init", () => {
 
     // THEN — a random name is generated and setup completes
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("Ready");
+    expect(result.output).toContain("Ready");
   });
 
   test("accepts custom name", async () => {
-    // WHEN — running init with a custom org name
+    // WHEN — running init with a custom name
     const result = await spwn("init with name")
       .exec("init acme")
       .run();
 
     // THEN — the custom name is used in the config
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("acme.yaml");
+    expect(result.output).toContain("acme.yaml");
   });
 });

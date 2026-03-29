@@ -1,13 +1,23 @@
-import { describe, test, expect, beforeEach } from "vitest";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome } from "../../setup/helpers.js";
 
 describe("agent CRUD", () => {
   let home: string;
+  let originalSpwnHome: string | undefined;
 
   beforeEach(() => {
-    // GIVEN — a fresh SPWN_HOME directory
+    originalSpwnHome = process.env.SPWN_HOME;
     home = createSpwnHome();
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
   });
 
   test("init creates agent with 6-layer Mind", async () => {
@@ -18,7 +28,7 @@ describe("agent CRUD", () => {
 
     // THEN — agent is created successfully
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("neo");
+    expect(result.output).toContain("neo");
   });
 
   test("init duplicate fails", async () => {
@@ -46,8 +56,8 @@ describe("agent CRUD", () => {
 
     // THEN — both agents appear in the list
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("neo");
-    expect(result.stdout).toContain("trinity");
+    expect(result.output).toContain("neo");
+    expect(result.output).toContain("trinity");
   });
 
   test("inspect shows agent details", async () => {
@@ -61,8 +71,8 @@ describe("agent CRUD", () => {
 
     // THEN — details include Mind layers
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("neo");
-    expect(result.stdout).toContain("personas");
+    expect(result.output).toContain("neo");
+    expect(result.output).toContain("personas");
   });
 
   test("list on empty home returns no agents", async () => {

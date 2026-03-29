@@ -1,14 +1,24 @@
-import { describe, test, expect, beforeEach } from "vitest";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome, createAgent } from "../../setup/helpers.js";
 
 describe("agent export", () => {
   let home: string;
+  let originalSpwnHome: string | undefined;
 
   beforeEach(() => {
-    // GIVEN — a fresh SPWN_HOME with an existing agent
+    originalSpwnHome = process.env.SPWN_HOME;
     home = createSpwnHome();
     createAgent(home, "neo");
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
   });
 
   test("export creates tar.gz", async () => {
@@ -19,7 +29,7 @@ describe("agent export", () => {
 
     // THEN — a tar.gz archive is created
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain("tar.gz");
+    expect(result.output).toContain("tar.gz");
   });
 
   test("export with exclude layers", async () => {
