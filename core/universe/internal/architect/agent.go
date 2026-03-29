@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/spwn/core/agent"
 	"github.com/jterrazz/spwn/core/universe/internal/backend"
 	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"github.com/jterrazz/spwn/core/universe/internal/runtime"
 )
 
 // SpawnAgent execs Claude Code interactively inside a universe.
@@ -32,7 +33,11 @@ func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string
 
 	// Session management
 	mindPath := u.MindPath
-	cmd := a.buildClaudeCmd(mindPath, agentName, universeID)
+	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
+		MindPath:   mindPath,
+		AgentName:  agentName,
+		UniverseID: universeID,
+	})
 
 	// Pass ANTHROPIC_API_KEY
 	var env []string
@@ -104,7 +109,11 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, universeID, agentNam
 	a.state.UpdateStatus(universeID, models.StatusRunning)
 
 	mindPath := u.MindPath
-	cmd := a.buildClaudeCmd(mindPath, agentName, universeID)
+	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
+		MindPath:   mindPath,
+		AgentName:  agentName,
+		UniverseID: universeID,
+	})
 
 	var env []string
 	if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
@@ -132,22 +141,3 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, universeID, agentNam
 	})
 }
 
-// buildClaudeCmd constructs the Claude Code command with session flags.
-func (a *Architect) buildClaudeCmd(mindPath, agentName, universeID string) []string {
-	cmd := []string{"claude", "--dangerously-skip-permissions"}
-
-	if mindPath == "" {
-		return cmd
-	}
-
-	sessID := agent.DeterministicSessionID(agentName, universeID)
-	cmd = append(cmd, "--session-id", sessID)
-
-	// Check if session exists (resume vs new)
-	existing, err := agent.LoadSession(mindPath, universeID)
-	if err == nil && existing != nil {
-		cmd = append(cmd, "--resume")
-	}
-
-	return cmd
-}

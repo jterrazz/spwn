@@ -7,6 +7,7 @@ import (
 	"github.com/jterrazz/spwn/core/gate"
 	"github.com/jterrazz/spwn/core/universe/internal/backend"
 	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"github.com/jterrazz/spwn/core/universe/internal/runtime"
 	"github.com/jterrazz/spwn/core/universe/internal/state"
 )
 
@@ -15,11 +16,17 @@ type Architect struct {
 	backend backend.Backend
 	state   *state.Store
 	gates   map[string]*gate.Server // universeID → running gate server
+	runtime *runtime.ClaudeCode     // injected runtime adapter
 }
 
 // New creates an Architect with the given backend and state store.
 func New(b backend.Backend, s *state.Store) *Architect {
-	return &Architect{backend: b, state: s, gates: make(map[string]*gate.Server)}
+	return &Architect{
+		backend: b,
+		state:   s,
+		gates:   make(map[string]*gate.Server),
+		runtime: runtime.NewClaudeCode(),
+	}
 }
 
 // NewFromEnv creates an Architect using the default Docker backend and state store.
