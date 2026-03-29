@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/spwn/internal/config"
 )
 
 // Inspect returns detailed information about an agent's Mind.

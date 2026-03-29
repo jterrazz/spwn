@@ -5,8 +5,8 @@ package e2e
 import (
 	"testing"
 
-	"github.com/jterrazz/universe/__tests__/e2e/setup"
-	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/spwn/__tests__/e2e/setup"
+	"github.com/jterrazz/spwn/internal/config"
 )
 
 func TestList_ReturnsSpawnedUniverses(t *testing.T) {

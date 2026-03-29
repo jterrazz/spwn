@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jterrazz/universe/internal/backend"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/gate"
-	"github.com/jterrazz/universe/internal/state"
+	"github.com/jterrazz/spwn/internal/backend"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/gate"
+	"github.com/jterrazz/spwn/internal/state"
 )
 
 // Architect orchestrates universe lifecycle.

@@ -1,11 +1,11 @@
 [package]
-name = "universe-gate"
+name = "spwn-gate"
 version = "0.1.0"
 edition = "2021"
-description = "Container-side Gate for Universe — ACP client and crash recovery"
+description = "Container-side Gate for spwn — ACP client and crash recovery"
 
 [[bin]]
-name = "universe-gate"
+name = "spwn-gate"
 path = "src/main.rs"
 
 [dependencies]

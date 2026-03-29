@@ -1,4 +1,4 @@
-module github.com/jterrazz/universe
+module github.com/jterrazz/spwn
 
 go 1.24.0
 

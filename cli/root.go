@@ -1,7 +1,8 @@
 package cli
 
 import (
-	"github.com/jterrazz/universe/cli/agent"
+	"github.com/jterrazz/spwn/cli/agent"
+	"github.com/jterrazz/spwn/cli/universe"
 	"github.com/spf13/cobra"
 )
 
@@ -12,9 +13,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "universe",
-	Short: "Universe — create realities for things that can think",
-	Long: `Universe creates isolated Docker environments for AI agents.
+	Use:   "spwn",
+	Short: "spwn — create realities for things that can think",
+	Long: `spwn creates isolated Docker environments for AI agents.
 Each universe has physics (constants, laws, elements),
 and a Mind (persistent agent identity).`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -27,6 +28,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-essential output")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show debug information")
 
+	rootCmd.AddCommand(universe.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 }
 

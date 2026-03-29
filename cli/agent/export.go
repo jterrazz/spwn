@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/spwn/internal/mind"
 	"github.com/spf13/cobra"
 )
 

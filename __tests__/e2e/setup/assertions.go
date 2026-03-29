@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/journal"
-	"github.com/jterrazz/universe/internal/mind"
-	"github.com/jterrazz/universe/internal/session"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/journal"
+	"github.com/jterrazz/spwn/internal/mind"
+	"github.com/jterrazz/spwn/internal/session"
 )
 
 // --- AssertionChain ---

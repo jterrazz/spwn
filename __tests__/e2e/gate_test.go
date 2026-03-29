@@ -7,10 +7,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/gate"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/gate"
 
-	"github.com/jterrazz/universe/__tests__/e2e/setup"
+	"github.com/jterrazz/spwn/__tests__/e2e/setup"
 )
 
 func TestSpawn_GateBridgeInjected(t *testing.T) {

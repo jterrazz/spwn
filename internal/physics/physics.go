@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/spwn/internal/config"
 )
 
 // GeneratePhysics returns the contents of /universe/physics.md.

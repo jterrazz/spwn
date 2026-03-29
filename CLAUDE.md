@@ -22,11 +22,11 @@
 
 ## Config
 
-- Named universe configs: `~/.universe/universes/{name}.yaml`
-- Agent Minds: `~/.universe/agents/{name}/`
-- Life manifest: `~/.universe/agents/{name}/life.yaml` (optional)
-- State: `~/.universe/state.json`
-- Gate bridges: top-level `gate:` key in universe YAML, or `--gate "source:as:caps"` CLI flag
+- Named universe configs: `~/.spwn/universes/{name}.yaml`
+- Agent Minds: `~/.spwn/agents/{name}/`
+- Life manifest: `~/.spwn/agents/{name}/life.yaml` (optional)
+- State: `~/.spwn/state.json`
+- Gate bridges: top-level `gate:` key in universe YAML, or `--gate "source:as:caps"` CLI flag on `spwn universe`
 - No project-local manifests — configs are infrastructure, not project code
 
 ## Code Style
@@ -41,11 +41,11 @@
 ## Build
 
 ```
-make build        # → bin/universe
-make build-image  # → universe-base:latest
-make build-gate   # → container/gate/target/release/universe-gate
+make build        # → bin/spwn
+make build-image  # → spwn-base:latest
+make build-gate   # → container/gate/target/release/spwn-gate
 make test
-make test-e2e     # requires Docker + universe-test:latest image
+make test-e2e     # requires Docker + spwn-test:latest image
 make lint
 make clean
 ```

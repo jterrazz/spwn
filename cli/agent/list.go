@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jterrazz/universe/cli/ui"
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/spwn/cli/ui"
+	"github.com/jterrazz/spwn/internal/mind"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ var listCmd = &cobra.Command{
 		if len(agents) == 0 {
 			s.Blank()
 			s.Success("No agents found.")
-			s.Log("Run 'universe agent init [name]' to create one.")
+			s.Log("Run 'spwn agent init [name]' to create one.")
 			s.Blank()
 			return nil
 		}

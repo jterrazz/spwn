@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/spwn/internal/config"
 )
 
 // GenerateWrapperScript returns a shell script that bridges an element invocation

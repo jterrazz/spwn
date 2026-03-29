@@ -3,8 +3,8 @@ package agent
 import (
 	"fmt"
 
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/mind"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +41,7 @@ provided, a random name is picked from a curated dictionary.`,
 		s.Done("Created persona", "default.md")
 
 		s.Blank()
-		s.Success(fmt.Sprintf("Spawn with: universe spawn --agent %s", name))
+		s.Success(fmt.Sprintf("Spawn with: spwn universe --agent %s", name))
 		s.Blank()
 
 		return nil

@@ -6,7 +6,7 @@ mod health;
 mod recovery;
 
 #[derive(Parser)]
-#[command(name = "universe-gate", about = "Container-side Gate for Universe")]
+#[command(name = "spwn-gate", about = "Container-side Gate for Universe")]
 struct Args {
     /// Path to the Unix socket for host-side communication
     #[arg(long, default_value = "/gate/gate.sock")]
@@ -25,7 +25,7 @@ struct Args {
 async fn main() {
     let args = Args::parse();
 
-    eprintln!("[gate] universe-gate starting");
+    eprintln!("[gate] spwn-gate starting");
     eprintln!("[gate] socket: {}", args.listen.display());
     eprintln!("[gate] agent CLI: {}", args.agent_cli);
 

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jterrazz/universe/__tests__/e2e/setup"
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/spwn/__tests__/e2e/setup"
+	"github.com/jterrazz/spwn/internal/mind"
 )
 
 func TestAgent_ExportCreatesArchive(t *testing.T) {

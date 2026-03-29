@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jterrazz/universe/cli/ui"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/journal"
-	"github.com/jterrazz/universe/internal/mind"
+	"github.com/jterrazz/spwn/cli/ui"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/journal"
+	"github.com/jterrazz/spwn/internal/mind"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ var inspectCmd = &cobra.Command{
 
 		info, err := mind.Inspect(name)
 		if err != nil {
-			return fmt.Errorf("error: agent %q not found.\nRun 'universe agent list' to see available agents.", name)
+			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
 		}
 
 		if inspectJSON {

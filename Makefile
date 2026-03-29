@@ -1,13 +1,13 @@
 .PHONY: build build-image build-test-image build-gate test test-e2e lint clean
 
 build:
-	go build -o bin/universe ./cmd/universe
+	go build -o bin/spwn ./cmd/spwn
 
 build-image:
-	docker build -t universe-base:latest ./container
+	docker build -t spwn-base:latest ./container
 
 build-test-image:
-	docker build -t universe-test:latest -f container/Dockerfile.test ./__tests__/mock
+	docker build -t spwn-test:latest -f container/Dockerfile.test ./__tests__/mock
 
 build-gate:
 	cd container/gate && cargo build --release

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jterrazz/universe/internal/config"
+	"github.com/jterrazz/spwn/internal/config"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,7 +29,7 @@ type rawManifest struct {
 	Gate []config.GateBridge `yaml:"gate"`
 }
 
-// Load reads a named universe config from ~/.universe/universes/{name}.yaml.
+// Load reads a named universe config from ~/.spwn/universes/{name}.yaml.
 func Load(name string) (config.UniverseManifest, error) {
 	path := filepath.Join(config.UniversesDir(), name+".yaml")
 	return LoadPath(path)
@@ -75,7 +75,7 @@ func parseElements(node *yaml.Node) []string {
 	return elems
 }
 
-// ListConfigs returns the names of all universe configs in ~/.universe/universes/.
+// ListConfigs returns the names of all universe configs in ~/.spwn/universes/.
 func ListConfigs() ([]string, error) {
 	dir := config.UniversesDir()
 	entries, err := os.ReadDir(dir)
@@ -95,7 +95,7 @@ func ListConfigs() ([]string, error) {
 	return names, nil
 }
 
-// CreateDefault creates a default.yaml in ~/.universe/universes/.
+// CreateDefault creates a default.yaml in ~/.spwn/universes/.
 func CreateDefault() error {
 	dir := config.UniversesDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {

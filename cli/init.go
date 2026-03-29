@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jterrazz/universe/cli/ui"
-	"github.com/jterrazz/universe/internal/config"
-	"github.com/jterrazz/universe/internal/manifest"
+	"github.com/jterrazz/spwn/cli/ui"
+	"github.com/jterrazz/spwn/internal/config"
+	"github.com/jterrazz/spwn/internal/manifest"
 	"github.com/spf13/cobra"
 )
 
@@ -16,8 +16,8 @@ func init() {
 
 var initCmd = &cobra.Command{
 	Use:   "init [name]",
-	Short: "First-time setup — create ~/.universe/ and a named universe config",
-	Long: `First-time setup. Creates the ~/.universe/ directory structure and a named
+	Short: "First-time setup — create ~/.spwn/ and a named universe config",
+	Long: `First-time setup. Creates the ~/.spwn/ directory structure and a named
 universe config. If no name is provided, a random cosmos-themed word is picked.
 
 On first run, also creates default.yaml as the default config.`,
@@ -57,7 +57,7 @@ On first run, also creates default.yaml as the default config.`,
 		}
 
 		s.Blank()
-		s.Success(fmt.Sprintf("Ready. Run: universe spawn %s", name))
+		s.Success(fmt.Sprintf("Ready. Run: spwn universe -c %s", name))
 		s.Blank()
 
 		return nil

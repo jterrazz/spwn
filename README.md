@@ -55,16 +55,16 @@ You can't prompt-inject a missing network interface. You can't social-engineer a
 
 ```bash
 # Install
-curl -fsSL https://spwn.sh/universe.sh | bash
+curl -fsSL https://spwn.sh/install.sh | bash
 
-# First-time setup — creates ~/.universe/ and a universe config
-universe init
+# First-time setup — creates ~/.spwn/ and a universe config
+spwn init
 
 # Create an agent
-universe agent init leonardo
+spwn agent init leonardo
 
-# Spawn a world with the agent inside
-universe spawn --agent leonardo -w ./my-project
+# Create a world with the agent inside
+spwn universe --agent leonardo -w ./my-project
 # → u-default-84721
 ```
 
@@ -130,7 +130,7 @@ Host (your machine)
             └── faculties.md       What the agent can do
 ```
 
-When you run `universe spawn`:
+When you run `spwn universe`:
 
 1. The **Architect** loads the named universe config and provisions a Docker container
 2. The agent's **Mind** is mounted at `/mind`, the project at `/workspace`
@@ -145,27 +145,33 @@ The Gate is a two-sided bridge. The host side (Go) handles file mounts and eleme
 ## Commands
 
 ```bash
-# World
-universe spawn [name]            # Create a universe and spawn an agent inside it
-universe list                    # List all universes
-universe inspect <universe-id>   # Show details, physics, agent status
-universe logs <universe-id>      # Stream agent output
-universe attach <universe-id>    # Interactive shell into a running universe
-universe destroy <universe-id>   # Destroy a universe (agent survives)
-universe init [name]             # First-time setup (random name if omitted)
+# Setup
+spwn init [name]                       # First-time setup (random name if omitted)
 
-# Life
-universe agent spawn [name]        # Bring an agent to life in an existing universe
-universe agent list                 # List all agents
-universe agent inspect <agent-id>   # Show agent details, Mind layers, journal
-universe agent init [name]          # Create a new agent (random name if omitted)
-universe agent export <agent-id>    # Export an agent as tar.gz
+# Universe
+spwn universe                          # Spawn a universe with default config
+spwn universe -c node-dev              # Spawn with named config
+spwn universe --agent neo -w .         # Spawn with agent and workspace
+spwn universe list                     # List all universes
+spwn universe inspect <universe-id>    # Show details, physics, agent status
+spwn universe logs <universe-id>       # Stream agent output
+spwn universe attach <universe-id>     # Interactive shell into a running universe
+spwn universe destroy <universe-id>    # Destroy a universe (agent survives)
+
+# Agent
+spwn agent                             # Spawn default agent into a universe
+spwn agent -n neo                      # Spawn named agent
+spwn agent -n neo --universe u-id      # Spawn into specific universe
+spwn agent list                        # List all agents
+spwn agent inspect <agent-id>          # Show agent details, Mind layers, journal
+spwn agent init [name]                 # Create a new agent (random name if omitted)
+spwn agent export <agent-id>           # Export an agent as tar.gz
 ```
 
 ### A typical session
 
 ```
-$ universe spawn --agent leonardo -w ./acme-api
+$ spwn universe --agent leonardo -w ./acme-api
 
   Spawning universe...
 
@@ -181,11 +187,11 @@ $ universe spawn --agent leonardo -w ./acme-api
   Agent:     a-leonardo-52103
   Status:    running
 
-$ universe destroy u-default-84721
+$ spwn universe destroy u-default-84721
 
   ✓ Stopped agent
   ✓ Removed container
-  ✓ Agent persisted at ~/.universe/agents/leonardo
+  ✓ Agent persisted at ~/.spwn/agents/leonardo
 
   Universe destroyed. Agent survives.
 ```
@@ -220,7 +226,7 @@ Universe isn't another link in the tool chain—it replaces the chain. And it's 
 ### Project layout
 
 ```
-cmd/universe/           CLI entry point (cobra)
+cmd/spwn/              CLI entry point (cobra)
 internal/
 ├── architect/          Orchestrator — create, spawn, destroy
 ├── agent/              Agent selection and ACP spawning
