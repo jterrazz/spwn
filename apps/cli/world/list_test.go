@@ -35,8 +35,8 @@ func TestTimeAgo_Days(t *testing.T) {
 
 func TestTimeAgo_Zero(t *testing.T) {
 	got := timeAgo(time.Time{})
-	if got != "unknown" {
-		t.Errorf("timeAgo(zero) = %q, want %q", got, "unknown")
+	if got != "\u2014" {
+		t.Errorf("timeAgo(zero) = %q, want %q", got, "\u2014")
 	}
 }
 

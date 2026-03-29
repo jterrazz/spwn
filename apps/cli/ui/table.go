@@ -4,70 +4,87 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 // Table formats columnar data with auto-width and styled headers.
 type Table struct {
 	w       io.Writer
 	headers []string
-	widths  []int
 	rows    [][]string
 	mode    Mode
 }
 
 // NewTable creates a table with the given headers.
 func NewTable(mode Mode, headers ...string) *Table {
-	widths := make([]int, len(headers))
-	for i, h := range headers {
-		widths[i] = len(h)
-	}
 	return &Table{
 		w:       os.Stderr,
 		headers: headers,
-		widths:  widths,
 		mode:    mode,
 	}
 }
 
 // AddRow adds a row to the table. The number of columns must match the headers.
 func (t *Table) AddRow(cols ...string) {
-	for i, c := range cols {
-		if i < len(t.widths) && len(c) > t.widths[i] {
-			t.widths[i] = len(c)
-		}
-	}
 	t.rows = append(t.rows, cols)
 }
 
-// Render prints the table with bold headers and 2-space indent.
+// pad returns s padded with trailing spaces to width w.
+// This avoids %-*s issues with ANSI escape codes.
+func pad(s string, w int) string {
+	if len(s) >= w {
+		return s
+	}
+	return s + strings.Repeat(" ", w-len(s))
+}
+
+// Render prints the table with dimmed headers and 2-space indent.
 func (t *Table) Render() {
 	if t.mode == ModeQuiet || t.mode == ModeJSON {
 		return
 	}
 
-	// Print header
-	fmt.Fprintf(t.w, "\n  ")
+	// Calculate column widths from plain text (headers + all rows).
+	widths := make([]int, len(t.headers))
 	for i, h := range t.headers {
-		fmt.Fprintf(t.w, "%-*s ", t.widths[i]+2, strong(h))
+		widths[i] = len(h)
+	}
+	for _, row := range t.rows {
+		for i, cell := range row {
+			if i < len(widths) && len(cell) > widths[i] {
+				widths[i] = len(cell)
+			}
+		}
+	}
+
+	const gap = 3 // spaces between columns
+
+	// Print header (dimmed)
+	fmt.Fprint(t.w, "\n  ")
+	for i, h := range t.headers {
+		fmt.Fprint(t.w, faint(pad(h, widths[i]+gap)))
 	}
 	fmt.Fprintln(t.w)
 
 	// Print rows
 	for _, row := range t.rows {
-		fmt.Fprintf(t.w, "  ")
-		for i, col := range row {
-			if i < len(t.widths) {
-				// Color status column
-				if t.headers[i] == "STATUS" {
-					switch col {
-					case "running":
-						col = green.Sprint(col)
-					case "idle":
-						col = faint(col)
-					}
-				}
-				fmt.Fprintf(t.w, "%-*s ", t.widths[i]+2, col)
+		fmt.Fprint(t.w, "  ")
+		for i, cell := range row {
+			if i >= len(widths) {
+				break
 			}
+			// Colorize status values
+			display := cell
+			if t.headers[i] == "STATUS" {
+				switch cell {
+				case "running":
+					display = green.Sprint(cell)
+				case "idle":
+					display = faint(cell)
+				}
+			}
+			// Pad based on plain-text cell length, then replace plain text with styled version.
+			fmt.Fprint(t.w, pad(display, widths[i]+gap+(len(display)-len(cell))))
 		}
 		fmt.Fprintln(t.w)
 	}
