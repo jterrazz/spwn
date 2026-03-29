@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"spwn.sh/core/agent"
+	"spwn.sh/core/foundation"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/runtime"
@@ -39,11 +41,8 @@ func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string
 		UniverseID: universeID,
 	})
 
-	// Pass ANTHROPIC_API_KEY
-	var env []string
-	if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
-		env = append(env, "ANTHROPIC_API_KEY="+apiKey)
-	}
+	// Forward auth credentials to the exec
+	env := agentEnv()
 
 	startTime := time.Now()
 
@@ -115,10 +114,7 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, universeID, agentNam
 		UniverseID: universeID,
 	})
 
-	var env []string
-	if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
-		env = append(env, "ANTHROPIC_API_KEY="+apiKey)
-	}
+	env := agentEnv()
 
 	// Save session for detached mode (best-effort, no journal since exit unknown)
 	if mindPath != "" {
@@ -139,5 +135,41 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, universeID, agentNam
 		Env: env,
 		TTY: false,
 	})
+}
+
+// agentEnv builds environment variables for agent execution inside containers.
+func agentEnv() []string {
+	var env []string
+	for _, key := range []string{
+		"ANTHROPIC_API_KEY",
+		"CLAUDE_CODE_OAUTH_TOKEN",
+		"ANTHROPIC_AUTH_TOKEN",
+	} {
+		if val := os.Getenv(key); val != "" {
+			env = append(env, key+"="+val)
+		}
+	}
+
+	// Read cached OAuth token if no explicit auth set
+	if !hasAgentEnv(env, "CLAUDE_CODE_OAUTH_TOKEN") && !hasAgentEnv(env, "ANTHROPIC_API_KEY") {
+		cachePath := foundation.BaseDir() + "/.auth-token"
+		if data, err := os.ReadFile(cachePath); err == nil {
+			token := strings.TrimSpace(string(data))
+			if token != "" {
+				env = append(env, "CLAUDE_CODE_OAUTH_TOKEN="+token)
+			}
+		}
+	}
+	return env
+}
+
+func hasAgentEnv(env []string, key string) bool {
+	prefix := key + "="
+	for _, e := range env {
+		if strings.HasPrefix(e, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
