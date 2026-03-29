@@ -10,6 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is set by goreleaser via ldflags.
+var Version = "dev"
+
 var (
 	jsonOutput bool
 	quiet      bool
@@ -28,6 +31,8 @@ and a Mind (persistent agent identity).`,
 }
 
 func init() {
+	rootCmd.Version = Version
+
 	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Output as JSON")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-essential output")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show debug information")

@@ -1,4 +1,5 @@
 bin/
+dist/
 platform/gate-runtime/target/
 e2e.test
 node_modules/

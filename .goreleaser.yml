@@ -1,0 +1,52 @@
+version: 2
+
+project_name: spwn
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: spwn
+    dir: apps/cli
+    main: ./cmd/spwn
+    binary: spwn
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X spwn.sh/apps/cli.Version={{.Version}}
+
+archives:
+  - id: spwn
+    builds:
+      - spwn
+    name_template: "spwn_{{ .Os }}_{{ .Arch }}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  github:
+    owner: jterrazz
+    name: spwn
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"
