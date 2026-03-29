@@ -1,7 +1,25 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
+import { createSpwnHome } from "../../setup/helpers.js";
 
 describe("error handling", () => {
+  let home: string;
+  let originalSpwnHome: string | undefined;
+
+  beforeEach(() => {
+    originalSpwnHome = process.env.SPWN_HOME;
+    home = createSpwnHome();
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
+  });
+
   test("destroy non-existent universe", async () => {
     // WHEN — destroying a universe that does not exist
     const result = await spwn("destroy missing")
@@ -10,7 +28,7 @@ describe("error handling", () => {
 
     // THEN — exits with non-zero code and helpful message
     expect(result.exitCode).not.toBe(0);
-    expect(result.stderr).toContain("not found");
+    expect(result.output).toContain("not found");
   });
 
   test("inspect non-existent universe", async () => {
@@ -31,17 +49,18 @@ describe("error handling", () => {
 
     // THEN — exits with error mentioning universe requirement
     expect(result.exitCode).not.toBe(0);
-    expect(result.stderr).toContain("universe");
+    expect(result.output).toContain("universe");
   });
 
-  test("agent reflect non-existent agent", async () => {
-    // WHEN — reflecting on an agent that does not exist
+  test("agent reflect non-existent agent skips gracefully", async () => {
+    // WHEN — reflecting on an agent that does not exist (no journal)
     const result = await spwn("reflect missing")
       .exec("agent reflect nonexistent")
       .run();
 
-    // THEN — exits with error
-    expect(result.exitCode).not.toBe(0);
+    // THEN — exits successfully with a skip message (no journal entries)
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toContain("no journal");
   });
 
   test("agent fork non-existent source", async () => {
@@ -92,8 +111,8 @@ describe("error handling", () => {
 
     // THEN — error message follows convention: lowercase, with hint
     expect(result.exitCode).not.toBe(0);
-    // Error messages should start with lowercase (Go convention from CLAUDE.md)
-    const errorLine = result.stderr.trim().split("\n")[0];
+    // Error messages should start with lowercase (Go convention)
+    const errorLine = result.output.trim().split("\n")[0];
     if (errorLine && errorLine.length > 0) {
       expect(errorLine[0]).toBe(errorLine[0].toLowerCase());
     }

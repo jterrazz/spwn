@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "test": "vitest --run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:cli": "vitest --run --project cli",
+    "test:docker": "vitest --run --project docker"
   },
   "devDependencies": {
     "@jterrazz/test": "latest",
-    "vitest": "^3.0.0",
+    "vitest": "^4.0.0",
     "typescript": "^5.7.0",
-    "hono": "^4.0.0"
+    "hono": "^4.0.0",
+    "@hono/node-server": "^1.0.0"
   }
 }
