@@ -128,7 +128,7 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 	}
 
 	u := result.Universe
-	b.tc.TrackUniverse(u.ID)
+	b.tc.TrackWorld(u.ID)
 
 	// Run agent if requested
 	if !b.noAgent && b.agentName != "" {
@@ -178,7 +178,7 @@ func (b *SpawnBuilder) ExecuteExpectError(substring string) {
 
 	result, err := b.tc.Arc.Spawn(context.Background(), opts)
 	if err == nil {
-		b.tc.TrackUniverse(result.Universe.ID)
+		b.tc.TrackWorld(result.Universe.ID)
 		b.tc.T.Fatalf("Expected spawn to fail with %q, but it succeeded", substring)
 	}
 
@@ -195,7 +195,7 @@ func (b *SpawnBuilder) buildManifest() universe.Manifest {
 	}
 
 	// Ensure config exists on disk (idempotent — no-ops if already present)
-	configPath := filepath.Join(b.tc.BaseDir, "universes", b.configName+".yaml")
+	configPath := filepath.Join(b.tc.BaseDir, "worlds", b.configName+".yaml")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		if b.configName == "default" {
 			universe.CreateDefaultConfig()
@@ -218,7 +218,7 @@ func (b *SpawnBuilder) parseInlineYAML() universe.Manifest {
 	// Strip leading tabs from inline YAML (Go source uses tabs for indentation)
 	cleaned := dedentYAML(b.yamlConfig)
 
-	tmpPath := filepath.Join(b.tc.BaseDir, "universes", "_inline.yaml")
+	tmpPath := filepath.Join(b.tc.BaseDir, "worlds", "_inline.yaml")
 	os.MkdirAll(filepath.Dir(tmpPath), 0755)
 	if err := os.WriteFile(tmpPath, []byte(cleaned), 0644); err != nil {
 		b.tc.T.Fatalf("Failed to write inline YAML: %v", err)

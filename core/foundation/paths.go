@@ -21,9 +21,9 @@ func BaseDir() string {
 	return filepath.Join(home, SpwnBaseDir)
 }
 
-// UniversesDir returns the path to ~/.spwn/universes/.
-func UniversesDir() string {
-	return filepath.Join(BaseDir(), UniversesSubDir)
+// WorldsDir returns the path to ~/.spwn/worlds/.
+func WorldsDir() string {
+	return filepath.Join(BaseDir(), WorldsSubDir)
 }
 
 // AgentsDir returns the path to ~/.spwn/agents/.

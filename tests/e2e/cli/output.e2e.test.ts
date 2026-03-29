@@ -11,7 +11,7 @@ describe("CLI output", () => {
     // THEN — all top-level subcommands are listed
     expect(result.exitCode).toBe(0);
     for (const cmd of [
-      "universe",
+      "world",
       "agent",
       "claw",
       "visitor",
@@ -23,13 +23,13 @@ describe("CLI output", () => {
     }
   });
 
-  test("universe help lists subcommands", async () => {
-    // WHEN — running spwn universe --help
-    const result = await spwn("universe help")
-      .exec("universe --help")
+  test("world help lists subcommands", async () => {
+    // WHEN — running spwn world --help
+    const result = await spwn("world help")
+      .exec("world --help")
       .run();
 
-    // THEN — universe subcommands are listed
+    // THEN — world subcommands are listed
     expect(result.exitCode).toBe(0);
     for (const sub of ["list", "inspect", "logs", "attach", "destroy"]) {
       expect(result.output).toContain(sub);

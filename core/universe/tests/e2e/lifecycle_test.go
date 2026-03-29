@@ -19,10 +19,10 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 		WithAgent("e2e-agent").
 		Execute()
 
-	// THEN the state should show one idle universe
+	// THEN the state should show one idle world
 	u.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
-		s.UniverseStatus(universe.StatusIdle)
+		s.WorldCount(1)
+		s.WorldStatus(universe.StatusIdle)
 	})
 
 	// AND the container should be running with physics, faculties, and mind
@@ -44,7 +44,7 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 	u.Destroy().
 		// THEN the state should be empty
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(0)
+			s.WorldCount(0)
 		}).
 		// AND the container should no longer exist
 		ExpectContainer(func(c *setup.ContainerAssertion) {

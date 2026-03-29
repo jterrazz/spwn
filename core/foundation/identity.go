@@ -6,9 +6,9 @@ import (
 	"math/big"
 )
 
-// GenerateUniverseID returns an ID like u-default-84721.
-func GenerateUniverseID(configName string) string {
-	return fmt.Sprintf("u-%s-%s", configName, randDigits(5))
+// GenerateWorldID returns an ID like w-default-84721.
+func GenerateWorldID(configName string) string {
+	return fmt.Sprintf("w-%s-%s", configName, randDigits(5))
 }
 
 // GenerateAgentID returns an ID like a-neo-52103.

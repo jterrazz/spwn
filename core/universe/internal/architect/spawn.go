@@ -27,7 +27,7 @@ type SpawnResult struct {
 	Warnings []string
 }
 
-// SpawnOpts configures universe creation.
+// SpawnOpts configures world creation.
 type SpawnOpts struct {
 	ConfigName    string
 	AgentName     string
@@ -57,11 +57,11 @@ var defaultProbeList = []string{
 	"bash", "sh", "git", "node", "npm", "python3", "curl", "wget", "jq", "claude", "go", "rustc", "gcc", "make",
 }
 
-// Spawn creates a new universe.
+// Spawn creates a new world.
 func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, error) {
 	var warnings []string
 	// Generate ID
-	id := foundation.GenerateUniverseID(opts.ConfigName)
+	id := foundation.GenerateWorldID(opts.ConfigName)
 
 	// Parse memory
 	memBytes, err := parseMemory(opts.Manifest.Physics.Constants.Memory)
@@ -371,7 +371,7 @@ func (a *Architect) probeElements(ctx context.Context, containerID string, decla
 	// Verify all declared elements exist
 	for _, e := range expanded {
 		if !verified[e] {
-			return nil, fmt.Errorf("universe requires element '%s' but the base image does not provide it.\nHint: Add %s to the container image, or remove it from the config's elements", e, e)
+			return nil, fmt.Errorf("world requires element '%s' but the base image does not provide it.\nHint: Add %s to the container image, or remove it from the config's elements", e, e)
 		}
 	}
 

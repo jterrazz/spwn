@@ -16,9 +16,9 @@ func init() {
 
 var initCmd = &cobra.Command{
 	Use:   "init [name]",
-	Short: "First-time setup — create ~/.spwn/ and a named universe config",
+	Short: "First-time setup — create ~/.spwn/ and a named world config",
 	Long: `First-time setup. Creates the ~/.spwn/ directory structure and a named
-universe config. If no name is provided, a random cosmos-themed word is picked.
+world config. If no name is provided, a random cosmos-themed word is picked.
 
 On first run, also creates default.yaml as the default config.`,
 	Args: cobra.MaximumNArgs(1),
@@ -64,7 +64,7 @@ On first run, also creates default.yaml as the default config.`,
 		}
 
 		s.Blank()
-		s.Success(fmt.Sprintf("Ready. Run: spwn universe -c %s", name))
+		s.Success(fmt.Sprintf("Ready. Run: spwn world -c %s", name))
 		s.Blank()
 
 		return nil

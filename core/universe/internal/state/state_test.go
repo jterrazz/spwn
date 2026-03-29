@@ -18,7 +18,7 @@ func tempStore(t *testing.T) *Store {
 	return s
 }
 
-func seedUniverse(t *testing.T, s *Store, id string) {
+func seedWorld(t *testing.T, s *Store, id string) {
 	t.Helper()
 	if err := s.Save(models.World{ID: id, Status: models.StatusIdle}); err != nil {
 		t.Fatalf("Save: %v", err)
@@ -27,7 +27,7 @@ func seedUniverse(t *testing.T, s *Store, id string) {
 
 func TestAddAgent(t *testing.T) {
 	s := tempStore(t)
-	seedUniverse(t, s, "u1")
+	seedWorld(t, s, "u1")
 
 	agent := models.AgentRecord{
 		Name:    "neo",
@@ -56,7 +56,7 @@ func TestAddAgent(t *testing.T) {
 
 func TestAddAgent_MultipleAgents(t *testing.T) {
 	s := tempStore(t)
-	seedUniverse(t, s, "u1")
+	seedWorld(t, s, "u1")
 
 	a1 := models.AgentRecord{Name: "gov", AgentID: "a-gov-111", Tier: "governor", Status: models.StatusIdle}
 	a2 := models.AgentRecord{Name: "cit", AgentID: "a-cit-222", Tier: "citizen", Status: models.StatusIdle}
@@ -74,17 +74,17 @@ func TestAddAgent_MultipleAgents(t *testing.T) {
 	}
 }
 
-func TestAddAgent_UniverseNotFound(t *testing.T) {
+func TestAddAgent_WorldNotFound(t *testing.T) {
 	s := tempStore(t)
 	agent := models.AgentRecord{Name: "neo", AgentID: "a-neo-12345"}
 	if err := s.AddAgent("nonexistent", agent); err == nil {
-		t.Fatal("expected error for nonexistent universe")
+		t.Fatal("expected error for nonexistent world")
 	}
 }
 
 func TestRemoveAgent(t *testing.T) {
 	s := tempStore(t)
-	seedUniverse(t, s, "u1")
+	seedWorld(t, s, "u1")
 
 	a1 := models.AgentRecord{Name: "gov", AgentID: "a-gov-111", Tier: "governor"}
 	a2 := models.AgentRecord{Name: "cit", AgentID: "a-cit-222", Tier: "citizen"}
@@ -104,16 +104,16 @@ func TestRemoveAgent(t *testing.T) {
 	}
 }
 
-func TestRemoveAgent_UniverseNotFound(t *testing.T) {
+func TestRemoveAgent_WorldNotFound(t *testing.T) {
 	s := tempStore(t)
 	if err := s.RemoveAgent("nonexistent", "a-neo-12345"); err == nil {
-		t.Fatal("expected error for nonexistent universe")
+		t.Fatal("expected error for nonexistent world")
 	}
 }
 
 func TestUpdateAgentStatus(t *testing.T) {
 	s := tempStore(t)
-	seedUniverse(t, s, "u1")
+	seedWorld(t, s, "u1")
 
 	agent := models.AgentRecord{Name: "neo", AgentID: "a-neo-12345", Status: models.StatusIdle}
 	s.AddAgent("u1", agent)
@@ -130,17 +130,17 @@ func TestUpdateAgentStatus(t *testing.T) {
 
 func TestUpdateAgentStatus_AgentNotFound(t *testing.T) {
 	s := tempStore(t)
-	seedUniverse(t, s, "u1")
+	seedWorld(t, s, "u1")
 
 	if err := s.UpdateAgentStatus("u1", "nonexistent", models.StatusRunning); err == nil {
 		t.Fatal("expected error for nonexistent agent")
 	}
 }
 
-func TestUpdateAgentStatus_UniverseNotFound(t *testing.T) {
+func TestUpdateAgentStatus_WorldNotFound(t *testing.T) {
 	s := tempStore(t)
 	if err := s.UpdateAgentStatus("nonexistent", "a-1", models.StatusRunning); err == nil {
-		t.Fatal("expected error for nonexistent universe")
+		t.Fatal("expected error for nonexistent world")
 	}
 }
 
@@ -150,7 +150,7 @@ func TestStatePersistence(t *testing.T) {
 	path := filepath.Join(dir, "state.json")
 
 	s1, _ := NewStoreAt(path)
-	seedUniverse(t, s1, "u1")
+	seedWorld(t, s1, "u1")
 	s1.AddAgent("u1", models.AgentRecord{Name: "neo", AgentID: "a-neo-111", Tier: "governor", Status: models.StatusIdle})
 
 	// Create a fresh store pointing at the same file

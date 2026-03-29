@@ -85,28 +85,28 @@ func NewStoreAt(path string) (*Store, error) {
 
 // --- Manifest operations ---
 
-// LoadManifest reads and parses the universe config named {name} from
-// ~/.spwn/universes/{name}.yaml.
+// LoadManifest reads and parses the world config named {name} from
+// ~/.spwn/worlds/{name}.yaml.
 func LoadManifest(name string) (Manifest, error) {
 	return manifest.Load(name)
 }
 
-// LoadManifestPath reads a universe config from an explicit file path.
+// LoadManifestPath reads a world config from an explicit file path.
 func LoadManifestPath(path string) (Manifest, error) {
 	return manifest.LoadPath(path)
 }
 
-// ListConfigs returns the names of all universe configs found in ~/.spwn/universes/.
+// ListConfigs returns the names of all world configs found in ~/.spwn/worlds/.
 func ListConfigs() ([]string, error) {
 	return manifest.ListConfigs()
 }
 
-// CreateDefaultConfig writes a default.yaml universe config to ~/.spwn/universes/.
+// CreateDefaultConfig writes a default.yaml world config to ~/.spwn/worlds/.
 func CreateDefaultConfig() error {
 	return manifest.CreateDefault()
 }
 
-// CreateConfig scaffolds a new named universe config file in ~/.spwn/universes/.
+// CreateConfig scaffolds a new named world config file in ~/.spwn/worlds/.
 func CreateConfig(name string) error {
 	return manifest.CreateConfig(name)
 }
@@ -146,7 +146,7 @@ func CreateOrg(name string) error { return manifest.CreateOrg(name) }
 type ObservatoryServer = observatory.Server
 
 // NewObservatoryServer returns an Observatory API server bound to addr that
-// serves universe and agent state from the provided Store.
+// serves world and agent state from the provided Store.
 func NewObservatoryServer(s *Store, addr string) *ObservatoryServer {
 	return observatory.New(s, addr)
 }

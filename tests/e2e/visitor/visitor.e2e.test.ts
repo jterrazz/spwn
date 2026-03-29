@@ -1,7 +1,7 @@
 import { describe, test, expect, afterEach } from "vitest";
 import {
   createTestContext,
-  parseUniverseId,
+  parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
@@ -12,30 +12,30 @@ describe("visitor", () => {
     ctx?.cleanup();
   });
 
-  test("visitor without --universe flag fails", () => {
+  test("visitor without --world flag fails", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — running visitor without universe flag
+    // WHEN — running visitor without world flag
     const result = ctx.spwn(["visitor", "do something"]);
 
-    // THEN — exits with error mentioning universe requirement
+    // THEN — exits with error mentioning world requirement
     expect(result.exitCode).not.toBe(0);
-    expect(result.output).toContain("universe");
+    expect(result.output).toContain("world");
   });
 
-  test("visitor with non-existent universe dispatches (fire-and-forget)", () => {
+  test("visitor with non-existent world dispatches (fire-and-forget)", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — running visitor with a non-existent universe
+    // WHEN — running visitor with a non-existent world
     const result = ctx.spwn([
       "visitor",
       "do something",
-      "--universe",
-      "u-nonexistent-00000",
+      "--world",
+      "w-nonexistent-00000",
     ]);
 
     // THEN — dispatches anyway (visitor is fire-and-forget)
@@ -43,15 +43,15 @@ describe("visitor", () => {
     expect(result.output).toContain("Visitor dispatched");
   });
 
-  test("visitor runs ephemeral task in a universe", () => {
-    // GIVEN — a running universe
+  test("visitor runs ephemeral task in a world", () => {
+    // GIVEN — a running world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
     // Verify container is running before dispatching visitor
@@ -59,7 +59,7 @@ describe("visitor", () => {
 
     // WHEN — dispatching a visitor task
     const visitorResult = ctx.spwn(
-      ["visitor", "lint the code", "--universe", id],
+      ["visitor", "lint the code", "--world", id],
       30_000,
     );
 

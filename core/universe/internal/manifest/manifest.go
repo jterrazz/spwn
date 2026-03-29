@@ -21,7 +21,7 @@ var ElementPacks = map[string][]string{
 	"@build":  {"make", "gcc", "g++"},
 }
 
-// rawManifest is the intermediate YAML structure before conversion to UniverseManifest.
+// rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
 	Physics struct {
 		Constants models.ConstantsManifest `yaml:"constants"`
@@ -31,13 +31,13 @@ type rawManifest struct {
 	Gate []gate.Bridge `yaml:"gate"`
 }
 
-// Load reads a named universe config from ~/.spwn/universes/{name}.yaml.
+// Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
 func Load(name string) (models.Manifest, error) {
-	path := filepath.Join(foundation.UniversesDir(), name+".yaml")
+	path := filepath.Join(foundation.WorldsDir(), name+".yaml")
 	return LoadPath(path)
 }
 
-// LoadPath reads a universe config from an explicit file path.
+// LoadPath reads a world config from an explicit file path.
 func LoadPath(path string) (models.Manifest, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -77,9 +77,9 @@ func parseElements(node *yaml.Node) []string {
 	return elems
 }
 
-// ListConfigs returns the names of all universe configs in ~/.spwn/universes/.
+// ListConfigs returns the names of all world configs in ~/.spwn/worlds/.
 func ListConfigs() ([]string, error) {
-	dir := foundation.UniversesDir()
+	dir := foundation.WorldsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -97,9 +97,9 @@ func ListConfigs() ([]string, error) {
 	return names, nil
 }
 
-// CreateDefault creates a default.yaml in ~/.spwn/universes/.
+// CreateDefault creates a default.yaml in ~/.spwn/worlds/.
 func CreateDefault() error {
-	dir := foundation.UniversesDir()
+	dir := foundation.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -109,8 +109,8 @@ func CreateDefault() error {
 		return fmt.Errorf("default.yaml already exists")
 	}
 
-	content := `# Default universe config
-# Edit to change default behavior. See: universe config inspect default
+	content := `# Default world config
+# Edit to change default behavior. See: world config inspect default
 
 physics:
   constants:
@@ -132,7 +132,7 @@ physics:
 
 // CreateConfig scaffolds a new named config.
 func CreateConfig(name string) error {
-	dir := foundation.UniversesDir()
+	dir := foundation.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func CreateConfig(name string) error {
 		return fmt.Errorf("config %q already exists", name)
 	}
 
-	content := fmt.Sprintf(`# Universe config: %s
+	content := fmt.Sprintf(`# World config: %s
 
 physics:
   constants:

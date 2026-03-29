@@ -12,7 +12,7 @@ export default defineWorkspace([
       name: "docker",
       fileParallelism: false,
       include: [
-        "e2e/universe/**/*.e2e.test.ts",
+        "e2e/world/**/*.e2e.test.ts",
         "e2e/agent/**/*.e2e.test.ts",
         "e2e/colony/**/*.e2e.test.ts",
         "e2e/gate/**/*.e2e.test.ts",

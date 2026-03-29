@@ -52,14 +52,14 @@ func TestBaseDir_DefaultPath(t *testing.T) {
 	}
 }
 
-func TestUniversesDir(t *testing.T) {
+func TestWorldsDir(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
 	t.Setenv("UNIVERSE_HOME", "")
 
-	want := "/tmp/test-spwn/universes"
-	got := UniversesDir()
+	want := "/tmp/test-spwn/worlds"
+	got := WorldsDir()
 	if got != want {
-		t.Errorf("UniversesDir() = %q, want %q", got, want)
+		t.Errorf("WorldsDir() = %q, want %q", got, want)
 	}
 }
 

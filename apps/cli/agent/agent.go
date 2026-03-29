@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	spawnName     string
-	spawnUniverse string
-	spawnImport   string
+	spawnName  string
+	spawnWorld string
+	spawnImport string
 )
 
 func init() {
 	Cmd.Flags().StringVarP(&spawnName, "name", "n", "", "Agent name (default: default)")
-	Cmd.Flags().StringVarP(&spawnUniverse, "universe", "u", "", "Target universe ID")
+	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Target world ID")
 	Cmd.Flags().StringVar(&spawnImport, "import", "", "Import Mind from tar.gz before spawning")
 }
 
@@ -26,12 +26,12 @@ func init() {
 // and groups subcommands (init, list, inspect, export).
 var Cmd = &cobra.Command{
 	Use:   "agent",
-	Short: "Spawn an agent — a living identity that inhabits a universe",
-	Long: `Spawn an agent into an existing universe.
+	Short: "Spawn an agent — a living identity that inhabits a world",
+	Long: `Spawn an agent into an existing world.
 
 An agent is backed by a Mind — a persistent directory of personas, skills,
 knowledge, playbooks, journal entries, and session state. One agent per
-universe. The agent survives after the universe is destroyed.
+world. The agent survives after the world is destroyed.
 
 Subcommands: init, list, inspect, export.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -59,33 +59,33 @@ Subcommands: init, list, inspect, export.`,
 			return err
 		}
 
-		// Resolve universe ID
-		universeID := spawnUniverse
-		if universeID == "" {
-			universes, err := arc.List(ctx)
+		// Resolve world ID
+		worldID := spawnWorld
+		if worldID == "" {
+			worlds, err := arc.List(ctx)
 			if err != nil {
-				return fmt.Errorf("error: cannot list universes.\n%w", err)
+				return fmt.Errorf("error: cannot list worlds.\n%w", err)
 			}
-			if len(universes) == 0 {
-				return fmt.Errorf("error: no active universes.\nRun 'spwn universe --no-agent' first")
+			if len(worlds) == 0 {
+				return fmt.Errorf("error: no active worlds.\nRun 'spwn world --no-agent' first")
 			}
-			if len(universes) > 1 {
+			if len(worlds) > 1 {
 				s.Blank()
-				s.Fail("Multiple active universes", fmt.Errorf("specify one with --universe"))
-				for _, u := range universes {
+				s.Fail("Multiple active worlds", fmt.Errorf("specify one with --world"))
+				for _, u := range worlds {
 					s.Info("", fmt.Sprintf("%-20s (%s)", u.ID, u.Status))
 				}
 				s.Blank()
-				return fmt.Errorf("multiple active universes")
+				return fmt.Errorf("multiple active worlds")
 			}
-			universeID = universes[0].ID
+			worldID = worlds[0].ID
 		}
 
 		s.Blank()
-		s.Done("Spawning agent into", universeID)
+		s.Done("Spawning agent into", worldID)
 		s.Blank()
 
-		if err := arc.SpawnAgent(ctx, universeID, agentName); err != nil {
+		if err := arc.SpawnAgent(ctx, worldID, agentName); err != nil {
 			return fmt.Errorf("error: agent spawn failed.\n%w", err)
 		}
 

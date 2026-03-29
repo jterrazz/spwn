@@ -5,7 +5,7 @@ import (
 	"spwn.sh/core/universe"
 )
 
-// ensureDefaults creates the default universe config and default agent
+// ensureDefaults creates the default world config and default agent
 // if they don't already exist. This makes the CLI work out of the box
 // without requiring `spwn init` or `spwn agent init` first.
 func ensureDefaults() error {

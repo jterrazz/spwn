@@ -43,7 +43,7 @@ describe("spwn init", () => {
     expect(result.output).toContain("org.yaml");
   });
 
-  test("creates a universe config", async () => {
+  test("creates a world config", async () => {
     // WHEN — running spwn init
     const result = await spwn("init creates config")
       .exec("init")

@@ -10,8 +10,8 @@ import (
 // Cmd is the parent command for Observatory operations.
 var Cmd = &cobra.Command{
 	Use:   "observatory",
-	Short: "Visual dashboard for monitoring universes and agents",
-	Long:  `The Observatory is the eye of God — a real-time visual dashboard showing all universes, agents, and their evolution.`,
+	Short: "Visual dashboard for monitoring worlds and agents",
+	Long:  `The Observatory is the eye of God — a real-time visual dashboard showing all worlds, agents, and their evolution.`,
 }
 
 var startCmd = &cobra.Command{

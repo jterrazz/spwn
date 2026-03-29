@@ -22,7 +22,7 @@ func init() {
 
 var inspectCmd = &cobra.Command{
 	Use:   "inspect <agent-name>",
-	Short: "Show agent details, Mind layers, universe status, and history",
+	Short: "Show agent details, Mind layers, world status, and history",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -43,13 +43,13 @@ var inspectCmd = &cobra.Command{
 		s.Info("Agent:", info.Name)
 		s.Info("Path:", info.Path)
 
-		// Show universe association
-		agentMap := buildAgentUniverseMap()
-		if uInfo, ok := agentMap[name]; ok {
-			s.Info("Universe:", uInfo.UniverseID)
-			s.Info("Status:", uInfo.Status)
+		// Show world association
+		agentMap := buildAgentWorldMap()
+		if wInfo, ok := agentMap[name]; ok {
+			s.Info("World:", wInfo.WorldID)
+			s.Info("Status:", wInfo.Status)
 		} else {
-			s.Info("Universe:", "unattached")
+			s.Info("World:", "unattached")
 		}
 
 		s.Blank()

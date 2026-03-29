@@ -5,7 +5,7 @@ import { join } from "node:path";
 /** Create an isolated SPWN_HOME directory */
 export function createSpwnHome(): string {
   const dir = mkdtempSync(join(tmpdir(), "spwn-test-"));
-  mkdirSync(join(dir, "universes"), { recursive: true });
+  mkdirSync(join(dir, "worlds"), { recursive: true });
   mkdirSync(join(dir, "agents"), { recursive: true });
   return dir;
 }
@@ -30,8 +30,8 @@ export function createAgent(spwnHome: string, name: string) {
   );
 }
 
-/** Create a minimal universe config */
-export function createUniverseConfig(
+/** Create a minimal world config */
+export function createWorldConfig(
   spwnHome: string,
   name: string,
   overrides: Record<string, unknown> = {},
@@ -48,7 +48,7 @@ export function createUniverseConfig(
     ...overrides,
   };
   writeFileSync(
-    join(spwnHome, "universes", `${name}.yaml`),
+    join(spwnHome, "worlds", `${name}.yaml`),
     Object.entries(config)
       .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
       .join("\n"),

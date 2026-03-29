@@ -7,7 +7,7 @@ import (
 	"spwn.sh/core/universe/internal/models"
 )
 
-// Destroy stops and removes a universe.
+// Destroy stops and removes a world.
 func (a *Architect) Destroy(ctx context.Context, universeID string) (*models.World, error) {
 	u, err := a.state.Get(universeID)
 	if err != nil {

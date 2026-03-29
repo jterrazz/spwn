@@ -68,8 +68,8 @@ spwn init
 spwn agent init leonardo
 
 # Create a world with the agent inside
-spwn universe --agent leonardo -w ./my-project
-# → u-default-84721
+spwn world --agent leonardo -w ./my-project
+# → w-default-84721
 ```
 
 A contained Linux environment is created. The agent's persistent identity is mounted inside. Claude Code is spawned with full shell access. When the task ends, the world is destroyed—but the agent survives. Next time it runs, it remembers what it learned.
@@ -78,9 +78,13 @@ A contained Linux environment is created. The agent's persistent identity is mou
 
 ## How It Works
 
+### Universe & World
+
+The **universe** defines the underlying reality — physics, constants, and resource limits. One universe per organization, configured in `universe.yaml`. A **world** is a living workspace inside the universe — it has agents, elements, and a project. Many worlds can exist per universe, each configured in `~/.spwn/worlds/`.
+
 ### Physics & Elements
 
-The universe manifest defines the agent's reality:
+The universe manifest defines the physics of the reality. Each world inherits these physics:
 
 ```yaml
 physics:
@@ -105,7 +109,7 @@ physics:
 
 **Physics** defines the reality—constants (finite resources), laws (structural constraints), and elements (the building blocks). No network interface means the outside world doesn't exist. CPU and memory are finite. These are gravity.
 
-**Elements** are the building blocks of the world—like a periodic table. `@unix`, `@git`, `@node` are @packs (curated collections). `jq` is an individual element. If `curl` isn't in the element list, it doesn't exist in this reality. Elements are verified at creation time and exposed in the agent's `/universe/faculties.md`.
+**Elements** are the building blocks of the world—like a periodic table. `@unix`, `@git`, `@node` are @packs (curated collections). `jq` is an individual element. If `curl` isn't in the element list, it doesn't exist in this reality. Elements are verified at creation time and exposed in the agent's `/world/faculties.md`.
 
 ### Mind
 
@@ -128,18 +132,18 @@ Built on a **Ports & Adapters** pattern with 8 port interfaces (Runtime, Backend
 ```
 Host (your machine)
   └── Architect                    Creates and destroys worlds
-       └── Universe                A contained reality
+       └── World                   A living workspace inside the universe
             ├── Governor           Leader agent (decomposes tasks, delegates)
-            ├── Citizens           Persistent worker agents (many per universe)
+            ├── Citizens           Persistent worker agents (many per world)
             ├── Visitors           Ephemeral agents (fire & forget)
             ├── Gate               Bridge between worlds (capability-enforced)
             ├── physics.md         The constraints of this reality
             └── faculties.md       What the agent can do
 ```
 
-When you run `spwn universe`:
+When you run `spwn world`:
 
-1. The **Architect** loads the named universe config and provisions a Docker container
+1. The **Architect** loads the named world config and provisions a Docker container
 2. The agent's **Mind** is mounted at `/mind`, the project at `/workspace`
 3. The Architect generates **`physics.md`** (constraints) and **`faculties.md`** (verified elements + gate bridges)
 4. The container-side **Gate** spawns the agent CLI via [ACP](https://github.com/agentclientprotocol/agent-client-protocol)
@@ -155,21 +159,21 @@ The Gate is a two-sided bridge. The host side (Go) handles file mounts and eleme
 # Setup
 spwn init [name]                       # First-time setup (random name if omitted)
 
-# Universe
-spwn universe                          # Spawn a universe with default config
-spwn universe -c node-dev              # Spawn with named config
-spwn universe --agent neo -w .         # Spawn with agent and workspace
-spwn universe --governor morpheus -w . # Spawn with a Governor agent
-spwn universe list                     # List all universes
-spwn universe inspect <universe-id>    # Show details, physics, agent status
-spwn universe logs <universe-id>       # Stream agent output
-spwn universe attach <universe-id>     # Interactive shell into a running universe
-spwn universe destroy <universe-id>    # Destroy a universe (agent survives)
+# World
+spwn world                             # Spawn a world with default config
+spwn world -c node-dev                 # Spawn with named config
+spwn world --agent neo -w .            # Spawn with agent and workspace
+spwn world --governor morpheus -w .    # Spawn with a Governor agent
+spwn world list                        # List all worlds
+spwn world inspect <world-id>          # Show details, physics, agent status
+spwn world logs <world-id>             # Stream agent output
+spwn world attach <world-id>           # Interactive shell into a running world
+spwn world destroy <world-id>          # Destroy a world (agent survives)
 
 # Agent
-spwn agent                             # Spawn default agent into a universe
+spwn agent                             # Spawn default agent into a world
 spwn agent -n neo                      # Spawn named agent
-spwn agent -n neo --universe u-id      # Spawn into specific universe
+spwn agent -n neo --world w-id         # Spawn into specific world
 spwn agent list                        # List all agents
 spwn agent inspect <agent-id>          # Show agent details, Mind layers, journal
 spwn agent init [name]                 # Create a new agent (random name if omitted)
@@ -179,12 +183,12 @@ spwn agent sleep <agent-id>            # Sleep: archive stale files, prune old s
 spwn agent fork <agent-id>             # Fork: clone Mind from source to new agent
 
 # Visitor
-spwn visitor "task" --universe <id>    # Fire ephemeral agent inside a universe
+spwn visitor "task" --world <id>       # Fire ephemeral agent inside a world
 
 # Claw (the God)
 spwn claw start                        # Start the Claw daemon
 spwn claw stop                         # Stop the Claw daemon
-spwn claw status                       # Show status, connected channels, active universes
+spwn claw status                       # Show status, connected channels, active worlds
 spwn claw connect <channel>            # Connect to a messaging channel
 
 # Observatory
@@ -200,9 +204,9 @@ spwn skill remove <skill>              # Remove a skill
 ### A typical session
 
 ```
-$ spwn universe --agent leonardo -w ./acme-api
+$ spwn world --agent leonardo -w ./acme-api
 
-  Spawning universe...
+  Spawning world...
 
   ✓ Provisioned container (ubuntu:24.04)
   ✓ Mounted workspace ./acme-api → /workspace
@@ -210,19 +214,19 @@ $ spwn universe --agent leonardo -w ./acme-api
   ✓ Mounted Mind leonardo → /mind
   ✓ Spawned Claude Code (session a1b2c3d4)
 
-  Universe is alive.
+  World is alive.
 
-  Universe:  u-default-84721
+  World:     w-default-84721
   Agent:     a-leonardo-52103
   Status:    running
 
-$ spwn universe destroy u-default-84721
+$ spwn world destroy w-default-84721
 
   ✓ Stopped agent
   ✓ Removed container
   ✓ Agent persisted at ~/.spwn/agents/leonardo
 
-  Universe destroyed. Agent survives.
+  World destroyed. Agent survives.
 ```
 
 ### Evolution
@@ -271,7 +275,7 @@ spwn/
 ├── turbo.json                  # Task orchestration
 │
 ├── core/                       # Domain libraries
-│   ├── universe/               #   World management (architect, backend, physics)
+│   ├── universe/               #   Universe & world management (architect, backend, physics)
 │   ├── agent/                  #   Life management (mind, journal, session)
 │   ├── gate/                   #   Bridge protocol (server, bridge)
 │   ├── runtime/                #   Runtime adapters (Claude Code, etc.)

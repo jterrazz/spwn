@@ -97,7 +97,7 @@ func ValidateBody(life *LifeManifest, availableElements []string) error {
 	}
 
 	if len(missing) > 0 {
-		return fmt.Errorf("agent requires element(s) not provided by this universe: %s.\nHint: Add them to the universe config's elements, or remove them from life.yaml body.requires",
+		return fmt.Errorf("agent requires element(s) not provided by this world: %s.\nHint: Add them to the world config's elements, or remove them from life.yaml body.requires",
 			strings.Join(missing, ", "))
 	}
 

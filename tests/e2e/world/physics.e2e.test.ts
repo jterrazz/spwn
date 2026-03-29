@@ -1,11 +1,11 @@
 import { describe, test, expect, afterEach } from "vitest";
 import {
   createTestContext,
-  parseUniverseId,
+  parseWorldId,
   type TestContext,
 } from "../../setup/spwn.specification.js";
 
-describe("universe physics", () => {
+describe("world physics", () => {
   let ctx: TestContext;
 
   afterEach(() => {
@@ -13,17 +13,17 @@ describe("universe physics", () => {
   });
 
   test("inspect shows physics constants", () => {
-    // GIVEN — a spawned universe
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — inspecting the universe
-    const inspectResult = ctx.spwn(["universe", "inspect", id]);
+    // WHEN — inspecting the world
+    const inspectResult = ctx.spwn(["world", "inspect", id]);
 
     // THEN — physics constants are shown
     expect(inspectResult.exitCode).toBe(0);
@@ -33,14 +33,14 @@ describe("universe physics", () => {
   });
 
   test("physics.md contains constants inside container", () => {
-    // GIVEN — a spawned universe
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
 
     // THEN — physics.md inside container contains expected fields
     const physics = ctx.universe(id).physics();
@@ -53,25 +53,25 @@ describe("universe physics", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
 
     const physics = ctx.universe(id).physics();
     expect(physics).toContain("network");
   });
 
-  test("faculties.md is generated inside the universe", () => {
-    // GIVEN — a spawned universe
+  test("faculties.md is generated inside the world", () => {
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
     expect(spawnResult.exitCode).toBe(0);
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
 
     // THEN — the spawn output mentions faculties generation
     expect(spawnResult.output).toContain("Generated faculties");
@@ -83,18 +83,18 @@ describe("universe physics", () => {
     expect(faculties).toContain("bash");
   });
 
-  test("universe includes declared elements", () => {
-    // GIVEN — a spawned universe (default config has @unix, @git elements)
+  test("world includes declared elements", () => {
+    // GIVEN — a spawned world (default config has @unix, @git elements)
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(spawnResult.output)!;
+    const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — inspecting the universe
-    const inspectResult = ctx.spwn(["universe", "inspect", id]);
+    // WHEN — inspecting the world
+    const inspectResult = ctx.spwn(["world", "inspect", id]);
 
     // THEN — exits successfully (elements are part of physics config)
     expect(inspectResult.exitCode).toBe(0);
@@ -111,10 +111,10 @@ describe("universe physics", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["universe", "--agent", "neo", "-w", ctx.home],
+      ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseUniverseId(result.output)!;
+    const id = parseWorldId(result.output)!;
 
     // Try to curl from inside — should fail with network=none
     try {

@@ -20,7 +20,7 @@ func TestLife_ManifestOptional(t *testing.T) {
 
 	// THEN the spawn should succeed and the container should be running
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
+		s.WorldCount(1)
 	})
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
@@ -69,7 +69,7 @@ func TestLife_BodyRequiresSatisfied(t *testing.T) {
 
 	// THEN the spawn should succeed
 	chain.ExpectState(func(s *setup.StateAssertion) {
-		s.UniverseCount(1)
-		s.UniverseStatus(universe.StatusIdle)
+		s.WorldCount(1)
+		s.WorldStatus(universe.StatusIdle)
 	})
 }

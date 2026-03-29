@@ -12,20 +12,20 @@ import (
 )
 
 var (
-	listJSON          bool
-	listFilterUniverse string
+	listJSON       bool
+	listFilterWorld string
 )
 
 func init() {
 	listCmd.Flags().BoolVar(&listJSON, "json", false, "Output as JSON")
-	listCmd.Flags().StringVar(&listFilterUniverse, "universe", "", "Filter agents by universe ID")
+	listCmd.Flags().StringVar(&listFilterWorld, "world", "", "Filter agents by world ID")
 	Cmd.AddCommand(listCmd)
 }
 
-// agentUniverseInfo holds cross-referenced universe data for an agent.
-type agentUniverseInfo struct {
-	UniverseID string
-	Status     string
+// agentWorldInfo holds cross-referenced world data for an agent.
+type agentWorldInfo struct {
+	WorldID string
+	Status  string
 }
 
 var listCmd = &cobra.Command{
@@ -37,14 +37,14 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("error: cannot list agents.\n%w", err)
 		}
 
-		// Build agent -> universe mapping from state
-		agentMap := buildAgentUniverseMap()
+		// Build agent -> world mapping from state
+		agentMap := buildAgentWorldMap()
 
-		// Filter by universe if requested
-		if listFilterUniverse != "" {
+		// Filter by world if requested
+		if listFilterWorld != "" {
 			filtered := make([]agentDomain.Info, 0)
 			for _, a := range agents {
-				if info, ok := agentMap[a.Name]; ok && info.UniverseID == listFilterUniverse {
+				if info, ok := agentMap[a.Name]; ok && info.WorldID == listFilterWorld {
 					filtered = append(filtered, a)
 				}
 			}
@@ -67,18 +67,18 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "NAME", "LAYERS", "UNIVERSE", "STATUS")
+		t := ui.NewTable(ui.ModeNormal, "NAME", "LAYERS", "WORLD", "STATUS")
 		for _, a := range agents {
 			layerCount := agentDomain.LayerCount(&a)
-			universeID := "\u2014"
+			worldID := "\u2014"
 			status := "unattached"
 
 			if info, ok := agentMap[a.Name]; ok {
-				universeID = info.UniverseID
+				worldID = info.WorldID
 				status = info.Status
 			}
 
-			t.AddRow(a.Name, fmt.Sprintf("%d/6", layerCount), universeID, status)
+			t.AddRow(a.Name, fmt.Sprintf("%d/6", layerCount), worldID, status)
 		}
 		t.Render()
 
@@ -86,10 +86,10 @@ var listCmd = &cobra.Command{
 	},
 }
 
-// buildAgentUniverseMap reads state.json and returns a map of agent name
-// to the universe it is currently attached to.
-func buildAgentUniverseMap() map[string]agentUniverseInfo {
-	result := make(map[string]agentUniverseInfo)
+// buildAgentWorldMap reads state.json and returns a map of agent name
+// to the world it is currently attached to.
+func buildAgentWorldMap() map[string]agentWorldInfo {
+	result := make(map[string]agentWorldInfo)
 
 	ctx := context.Background()
 	arc, err := universe.NewArchitectFromEnv()
@@ -97,29 +97,29 @@ func buildAgentUniverseMap() map[string]agentUniverseInfo {
 		return result
 	}
 
-	universes, err := arc.List(ctx)
+	worlds, err := arc.List(ctx)
 	if err != nil {
 		return result
 	}
 
-	for _, u := range universes {
+	for _, u := range worlds {
 		if u.Status == universe.StatusDestroyed {
 			continue
 		}
 
 		// Check primary agent
 		if u.Agent != "" {
-			result[u.Agent] = agentUniverseInfo{
-				UniverseID: u.ID,
-				Status:     string(u.Status),
+			result[u.Agent] = agentWorldInfo{
+				WorldID: u.ID,
+				Status:  string(u.Status),
 			}
 		}
 
 		// Check multi-agent records
 		for _, a := range u.Agents {
-			result[a.Name] = agentUniverseInfo{
-				UniverseID: u.ID,
-				Status:     string(a.Status),
+			result[a.Name] = agentWorldInfo{
+				WorldID: u.ID,
+				Status:  string(a.Status),
 			}
 		}
 	}

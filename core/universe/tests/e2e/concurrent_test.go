@@ -71,7 +71,7 @@ physics:
 	// AND state should track all three
 	universes := tc.LoadState()
 	if len(universes) != 3 {
-		t.Fatalf("Expected 3 universes in state, got %d", len(universes))
+		t.Fatalf("Expected 3 worlds in state, got %d", len(universes))
 	}
 
 	// AND all IDs should be unique
@@ -79,7 +79,7 @@ physics:
 	for _, chain := range chains {
 		id := chain.Universe().ID
 		if ids[id] {
-			t.Fatalf("Duplicate universe ID: %s", id)
+			t.Fatalf("Duplicate world ID: %s", id)
 		}
 		ids[id] = true
 	}
@@ -101,7 +101,7 @@ func TestConcurrent_ListShowsAll(t *testing.T) {
 
 	// THEN all three should be present and idle
 	if len(list) != 3 {
-		t.Fatalf("Expected 3 universes in list, got %d", len(list))
+		t.Fatalf("Expected 3 worlds in list, got %d", len(list))
 	}
 
 	for _, u := range list {
@@ -126,7 +126,7 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 
 	universes := tc.LoadState()
 	if len(universes) != 3 {
-		t.Fatalf("Expected 3 universes before destroy, got %d", len(universes))
+		t.Fatalf("Expected 3 worlds before destroy, got %d", len(universes))
 	}
 
 	// WHEN all three are destroyed
@@ -140,7 +140,7 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 	// THEN the state should be empty
 	universes = tc.LoadState()
 	if len(universes) != 0 {
-		t.Fatalf("Expected 0 universes after destroy all, got %d", len(universes))
+		t.Fatalf("Expected 0 worlds after destroy all, got %d", len(universes))
 	}
 }
 
@@ -159,7 +159,7 @@ func TestConcurrent_UniqueIDs(t *testing.T) {
 	for _, chain := range chains {
 		id := chain.Universe().ID
 		if ids[id] {
-			t.Fatalf("Duplicate universe ID detected: %s", id)
+			t.Fatalf("Duplicate world ID detected: %s", id)
 		}
 		ids[id] = true
 	}

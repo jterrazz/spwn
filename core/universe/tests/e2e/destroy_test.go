@@ -19,7 +19,7 @@ func TestDestroy_RemovesContainer(t *testing.T) {
 	chain.Destroy().
 		// THEN the state should have no universes
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(0)
+			s.WorldCount(0)
 		}).
 		// AND the container should no longer exist
 		ExpectContainer(func(c *setup.ContainerAssertion) {
@@ -39,7 +39,7 @@ func TestDestroy_AgentSurvives(t *testing.T) {
 	// WHEN the universe is destroyed
 	u.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
-			s.UniverseCount(0)
+			s.WorldCount(0)
 		})
 
 	// THEN the agent Mind should still exist on the host

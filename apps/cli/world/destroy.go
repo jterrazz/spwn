@@ -1,4 +1,4 @@
-package universe
+package world
 
 import (
 	"context"
@@ -12,12 +12,12 @@ func init() {
 }
 
 var destroyCmd = &cobra.Command{
-	Use:   "destroy <universe-id>",
-	Short: "Destroy a universe",
+	Use:   "destroy <world-id>",
+	Short: "Destroy a world",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		universeID := args[0]
+		worldID := args[0]
 		s := newStepper(cmd)
 
 		arc, err := universe.NewArchitectFromEnv()
@@ -26,9 +26,9 @@ var destroyCmd = &cobra.Command{
 		}
 
 		s.Blank()
-		s.Start("Destroying universe...")
+		s.Start("Destroying world...")
 
-		u, err := arc.Destroy(ctx, universeID)
+		u, err := arc.Destroy(ctx, worldID)
 		if err != nil {
 			s.Fail("Destroy failed", err)
 			return err
@@ -41,7 +41,7 @@ var destroyCmd = &cobra.Command{
 		}
 
 		s.Blank()
-		s.Success("Universe destroyed. Agent survives.")
+		s.Success("World destroyed. Agent survives.")
 		s.Blank()
 
 		return nil

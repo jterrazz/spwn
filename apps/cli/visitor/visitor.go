@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var universeFlag string
+var worldFlag string
 
 // Cmd spawns an ephemeral agent with a single task.
 var Cmd = &cobra.Command{
@@ -18,15 +18,15 @@ Perfect for linting, testing, health checks, and one-off validations.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		task := args[0]
-		if universeFlag == "" {
-			return fmt.Errorf("error: --universe is required.\nRun 'spwn universe list' to see active universes.")
+		if worldFlag == "" {
+			return fmt.Errorf("error: --world is required.\nRun 'spwn world list' to see active worlds.")
 		}
-		fmt.Printf("  Visitor dispatched: %q → %s\n", task, universeFlag)
+		fmt.Printf("  Visitor dispatched: %q → %s\n", task, worldFlag)
 		return nil
 	},
 }
 
 func init() {
-	Cmd.Flags().StringVar(&universeFlag, "universe", "", "Target universe ID (required)")
-	Cmd.MarkFlagRequired("universe")
+	Cmd.Flags().StringVar(&worldFlag, "world", "", "Target world ID (required)")
+	Cmd.MarkFlagRequired("world")
 }
