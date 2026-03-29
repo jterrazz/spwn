@@ -3,7 +3,7 @@ package observatory
 import (
 	"fmt"
 
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
 

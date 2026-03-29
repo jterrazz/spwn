@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/core/universe"
 )
 
 // Cmd is the parent command for Claw operations.

@@ -1,14 +1,14 @@
-module github.com/jterrazz/spwn/apps/cli
+module spwn.sh/apps/cli
 
 go 1.25.0
 
 require (
 	github.com/docker/docker v27.5.1+incompatible
 	github.com/fatih/color v1.18.0
-	github.com/jterrazz/spwn/core/agent v0.0.0
-	github.com/jterrazz/spwn/core/foundation v0.0.0
-	github.com/jterrazz/spwn/core/gate v0.0.0
-	github.com/jterrazz/spwn/core/universe v0.0.0
+	spwn.sh/core/agent v0.0.0
+	spwn.sh/core/foundation v0.0.0
+	spwn.sh/core/gate v0.0.0
+	spwn.sh/core/universe v0.0.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.28.0
 )
@@ -47,9 +47,9 @@ require (
 )
 
 replace (
-	github.com/jterrazz/spwn/core/agent => ../../core/agent
-	github.com/jterrazz/spwn/core/foundation => ../../core/foundation
-	github.com/jterrazz/spwn/core/gate => ../../core/gate
-	github.com/jterrazz/spwn/core/universe => ../../core/universe
-	github.com/jterrazz/spwn/platform/images => ../../platform/images
+	spwn.sh/core/agent => ../../core/agent
+	spwn.sh/core/foundation => ../../core/foundation
+	spwn.sh/core/gate => ../../core/gate
+	spwn.sh/core/universe => ../../core/universe
+	spwn.sh/platform/images => ../../platform/images
 )

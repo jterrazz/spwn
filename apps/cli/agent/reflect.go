@@ -3,7 +3,7 @@ package agent
 import (
 	"fmt"
 
-	agentDomain "github.com/jterrazz/spwn/core/agent"
+	agentDomain "spwn.sh/core/agent"
 	"github.com/spf13/cobra"
 )
 

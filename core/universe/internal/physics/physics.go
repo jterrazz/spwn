@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe/internal/models"
 )
 
 // GeneratePhysics returns the contents of /universe/physics.md.

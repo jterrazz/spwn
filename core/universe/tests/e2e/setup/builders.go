@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/core/agent"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe"
 )
 
 // --- SpawnBuilder ---

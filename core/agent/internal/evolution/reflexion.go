@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/spwn/core/agent/internal/journal"
+	"spwn.sh/core/agent/internal/journal"
 )
 
 // Reflect analyzes recent journal entries and promotes successful patterns to playbooks.

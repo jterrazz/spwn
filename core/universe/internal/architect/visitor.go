@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jterrazz/spwn/core/universe/internal/backend"
-	"github.com/jterrazz/spwn/core/universe/internal/models"
-	"github.com/jterrazz/spwn/core/universe/internal/runtime"
+	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/runtime"
 )
 
 // SpawnVisitor runs an ephemeral agent with a single task, no Mind, no persistence.

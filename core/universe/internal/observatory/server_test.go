@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jterrazz/spwn/core/universe/internal/state"
+	"spwn.sh/core/universe/internal/state"
 )
 
 func TestHealthEndpoint(t *testing.T) {

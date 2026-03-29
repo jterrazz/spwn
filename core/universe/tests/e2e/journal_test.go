@@ -5,8 +5,8 @@ package e2e
 import (
 	"testing"
 
-	agentDomain "github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	agentDomain "spwn.sh/core/agent"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestJournal_EntryCreatedOnCompletion(t *testing.T) {

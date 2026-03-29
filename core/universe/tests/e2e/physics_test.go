@@ -5,7 +5,7 @@ package e2e
 import (
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestPhysics_ContainsConstants(t *testing.T) {

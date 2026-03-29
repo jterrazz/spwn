@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/core/agent"
+	"spwn.sh/core/universe"
 )
 
 // ensureDefaults creates the default universe config and default agent

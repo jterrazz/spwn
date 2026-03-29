@@ -3,7 +3,7 @@ package architect
 import (
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/internal/manifest"
+	"spwn.sh/core/universe/internal/manifest"
 )
 
 func TestAgentSpec_DefaultTier(t *testing.T) {

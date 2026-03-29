@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestFailure_AgentExitsNonZero(t *testing.T) {

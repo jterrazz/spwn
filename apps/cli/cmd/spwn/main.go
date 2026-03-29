@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jterrazz/spwn/apps/cli"
+	"spwn.sh/apps/cli"
 )
 
 func main() {

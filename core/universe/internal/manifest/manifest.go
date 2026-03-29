@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe/internal/models"
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/foundation"
 	"gopkg.in/yaml.v3"
 )
 

@@ -3,13 +3,13 @@
 package universe
 
 import (
-	"github.com/jterrazz/spwn/core/universe/internal/architect"
-	"github.com/jterrazz/spwn/core/universe/internal/backend"
-	"github.com/jterrazz/spwn/core/universe/internal/manifest"
-	"github.com/jterrazz/spwn/core/universe/internal/models"
-	"github.com/jterrazz/spwn/core/universe/internal/observatory"
-	"github.com/jterrazz/spwn/core/universe/internal/state"
-	"github.com/jterrazz/spwn/core/universe/internal/sync"
+	"spwn.sh/core/universe/internal/architect"
+	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/manifest"
+	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/observatory"
+	"spwn.sh/core/universe/internal/state"
+	"spwn.sh/core/universe/internal/sync"
 )
 
 // Re-export model types so consumers don't need to reach into internal packages.
@@ -49,38 +49,44 @@ type ClawState = state.ClawState
 
 // --- Architect constructors ---
 
-// NewArchitect creates an Architect with the given backend and state store.
+// NewArchitect returns an Architect that provisions and destroys worlds using
+// the given container backend and persists state through the provided store.
 func NewArchitect(b Backend, s *Store) *Architect {
 	return architect.New(b, s)
 }
 
-// NewArchitectFromEnv creates an Architect using the default Docker backend and state store.
+// NewArchitectFromEnv returns an Architect configured from the host environment,
+// using the default Docker backend and the standard state store at ~/.spwn/state.json.
 func NewArchitectFromEnv() (*Architect, error) {
 	return architect.NewFromEnv()
 }
 
 // --- Backend constructors ---
 
-// NewDocker creates a Docker backend from the environment.
+// NewDocker returns a Docker-based container backend initialised from the
+// host's Docker daemon environment (DOCKER_HOST, etc.).
 func NewDocker() (*backend.Docker, error) {
 	return backend.NewDocker()
 }
 
 // --- State constructors ---
 
-// NewStore creates a state Store at ~/.spwn/state.json.
+// NewStore returns a Store backed by ~/.spwn/state.json, creating the file
+// if it does not exist.
 func NewStore() (*Store, error) {
 	return state.NewStore()
 }
 
-// NewStoreAt creates a state Store at an explicit path.
+// NewStoreAt returns a Store backed by the file at the given path, creating it
+// if it does not exist.
 func NewStoreAt(path string) (*Store, error) {
 	return state.NewStoreAt(path)
 }
 
 // --- Manifest operations ---
 
-// LoadManifest reads a named universe config from ~/.spwn/universes/{name}.yaml.
+// LoadManifest reads and parses the universe config named {name} from
+// ~/.spwn/universes/{name}.yaml.
 func LoadManifest(name string) (Manifest, error) {
 	return manifest.Load(name)
 }
@@ -90,45 +96,48 @@ func LoadManifestPath(path string) (Manifest, error) {
 	return manifest.LoadPath(path)
 }
 
-// ListConfigs returns the names of all universe configs.
+// ListConfigs returns the names of all universe configs found in ~/.spwn/universes/.
 func ListConfigs() ([]string, error) {
 	return manifest.ListConfigs()
 }
 
-// CreateDefaultConfig creates a default.yaml in ~/.spwn/universes/.
+// CreateDefaultConfig writes a default.yaml universe config to ~/.spwn/universes/.
 func CreateDefaultConfig() error {
 	return manifest.CreateDefault()
 }
 
-// CreateConfig scaffolds a new named config.
+// CreateConfig scaffolds a new named universe config file in ~/.spwn/universes/.
 func CreateConfig(name string) error {
 	return manifest.CreateConfig(name)
 }
 
-// ValidateManifest checks that a manifest is well-formed.
+// ValidateManifest checks that a Manifest is well-formed, returning an error
+// describing the first problem found.
 func ValidateManifest(m Manifest) error {
 	return manifest.Validate(m)
 }
 
-// ApplyDefaults fills zero-value fields with built-in defaults.
+// ApplyDefaults fills zero-value fields in the given Manifest with built-in
+// defaults (CPU, memory, timeout, base elements).
 func ApplyDefaults(m *Manifest) {
 	manifest.ApplyDefaults(m)
 }
 
-// ExpandElements expands @packs into individual binaries and deduplicates.
+// ExpandElements resolves @pack references into individual binary names and
+// deduplicates the resulting list.
 func ExpandElements(elems []string) []string {
 	return manifest.ExpandElements(elems)
 }
 
 // --- Organization manifest operations ---
 
-// LoadOrg reads the organization manifest from ~/.spwn/org.yaml.
+// LoadOrg reads and parses the organization manifest from ~/.spwn/org.yaml.
 func LoadOrg() (*OrgManifest, error) { return manifest.LoadOrg() }
 
-// LoadOrgPath reads an organization manifest from an explicit path.
+// LoadOrgPath reads and parses an organization manifest from the given path.
 func LoadOrgPath(path string) (*OrgManifest, error) { return manifest.LoadOrgPath(path) }
 
-// CreateOrg creates a default org.yaml at ~/.spwn/org.yaml.
+// CreateOrg writes a default org.yaml for the given organization name to ~/.spwn/org.yaml.
 func CreateOrg(name string) error { return manifest.CreateOrg(name) }
 
 // --- Observatory ---
@@ -136,23 +145,26 @@ func CreateOrg(name string) error { return manifest.CreateOrg(name) }
 // ObservatoryServer is the Observatory HTTP API server type.
 type ObservatoryServer = observatory.Server
 
-// NewObservatoryServer creates a new Observatory API server.
+// NewObservatoryServer returns an Observatory API server bound to addr that
+// serves universe and agent state from the provided Store.
 func NewObservatoryServer(s *Store, addr string) *ObservatoryServer {
 	return observatory.New(s, addr)
 }
 
 // --- Git sync operations ---
 
-// SyncToGit commits and pushes ~/.spwn/ changes to the configured git repo.
+// SyncToGit commits and pushes pending ~/.spwn/ changes to the given git
+// repository and branch.
 func SyncToGit(repo, branch string) error { return sync.SyncToGit(repo, branch) }
 
-// PullFromGit pulls latest changes from the configured git repo.
+// PullFromGit fetches and applies the latest changes from the given git
+// repository and branch into ~/.spwn/.
 func PullFromGit(repo, branch string) error { return sync.PullFromGit(repo, branch) }
 
 // --- Claw state operations ---
 
-// LoadClawState reads the Claw state from disk.
+// LoadClawState reads the Claw daemon state from disk (~/.spwn/claw.json).
 func LoadClawState() (*ClawState, error) { return state.LoadClawState() }
 
-// SaveClawState writes the Claw state to disk.
+// SaveClawState persists the Claw daemon state to disk (~/.spwn/claw.json).
 func SaveClawState(s *ClawState) error { return state.SaveClawState(s) }

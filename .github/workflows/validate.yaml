@@ -1,0 +1,48 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Vet all modules
+        run: |
+          cd core/foundation && go vet ./...
+          cd ../agent && go vet ./...
+          cd ../gate && go vet ./...
+          cd ../universe && go vet ./...
+          cd ../../apps/cli && go vet ./...
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Unit tests
+        run: |
+          cd core/foundation && go test ./...
+          cd ../agent && go test ./...
+          cd ../gate && go test ./...
+          cd ../universe && go test ./internal/...
+          cd ../../apps/cli && go test ./...
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Build binary
+        run: cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn

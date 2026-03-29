@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	agentDomain "github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	agentDomain "spwn.sh/core/agent"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {

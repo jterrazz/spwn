@@ -5,9 +5,9 @@ package e2e
 import (
 	"testing"
 
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe"
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestConfig_SpawnWithNamedConfig(t *testing.T) {

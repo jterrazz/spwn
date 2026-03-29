@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jterrazz/spwn/apps/cli/ui"
-	agentDomain "github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/universe"
+	"spwn.sh/apps/cli/ui"
+	agentDomain "spwn.sh/core/agent"
+	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
 

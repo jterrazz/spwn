@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestSpawn_GateBridgeInjected(t *testing.T) {

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/foundation"
-	"github.com/jterrazz/spwn/core/universe/internal/manifest"
-	"github.com/jterrazz/spwn/core/universe/internal/models"
+	"spwn.sh/core/agent"
+	"spwn.sh/core/foundation"
+	"spwn.sh/core/universe/internal/manifest"
+	"spwn.sh/core/universe/internal/models"
 )
 
 // AgentSpec describes an agent to spawn in a universe.

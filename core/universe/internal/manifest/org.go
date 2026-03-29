@@ -3,7 +3,7 @@ package manifest
 import (
 	"os"
 
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/foundation"
 	"gopkg.in/yaml.v3"
 )
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/universe/tests/e2e/setup"
+	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestLogs_ContainsMockOutput(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jterrazz/spwn/apps/cli/ui"
-	agentDomain "github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/apps/cli/ui"
+	agentDomain "spwn.sh/core/agent"
+	"spwn.sh/core/foundation"
 	"github.com/spf13/cobra"
 )
 

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/jterrazz/spwn/core/gate/internal/bridge"
+	"spwn.sh/core/gate/internal/bridge"
 )
 
 // ExecHandler returns an InvokeHandler that executes bridge sources on the host.

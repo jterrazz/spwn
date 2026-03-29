@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/jterrazz/spwn/core/gate/internal/bridge"
+	"spwn.sh/core/gate/internal/bridge"
 )
 
 func TestExecHandler_Echo(t *testing.T) {

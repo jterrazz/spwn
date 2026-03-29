@@ -9,14 +9,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jterrazz/spwn/core/agent"
-	"github.com/jterrazz/spwn/core/gate"
-	"github.com/jterrazz/spwn/core/universe/internal/backend"
-	"github.com/jterrazz/spwn/platform/images"
-	"github.com/jterrazz/spwn/core/universe/internal/manifest"
-	"github.com/jterrazz/spwn/core/universe/internal/models"
-	"github.com/jterrazz/spwn/core/universe/internal/physics"
-	"github.com/jterrazz/spwn/core/foundation"
+	"spwn.sh/core/agent"
+	"spwn.sh/core/gate"
+	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/platform/images"
+	"spwn.sh/core/universe/internal/manifest"
+	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/physics"
+	"spwn.sh/core/foundation"
 )
 
 // SpawnResult is returned by Spawn with the universe and any non-fatal warnings.

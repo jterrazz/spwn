@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/jterrazz/spwn/core/gate"
+	"spwn.sh/core/gate"
 )
 
 // Manifest is the parsed representation of a universe config YAML.
