@@ -2,9 +2,17 @@ package ui
 
 import (
 	"bytes"
+	"regexp"
 	"strings"
 	"testing"
 )
+
+// stripANSI removes ANSI escape sequences for test assertions.
+var ansiRe = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+func stripANSI(s string) string {
+	return ansiRe.ReplaceAllString(s, "")
+}
 
 func TestTable_BasicRender(t *testing.T) {
 	tbl := NewTable(ModeNormal, "NAME", "VALUE")
@@ -25,6 +33,48 @@ func TestTable_BasicRender(t *testing.T) {
 	}
 	if !strings.Contains(out, "world") {
 		t.Error("output should contain row value world")
+	}
+}
+
+func TestTable_ColumnAlignment(t *testing.T) {
+	tbl := NewTable(ModeNormal, "ID", "CONFIG", "STATUS")
+	buf := &bytes.Buffer{}
+	tbl.w = buf
+	tbl.AddRow("w-default-13182", "default", "running")
+	tbl.AddRow("w-prod-99", "production", "idle")
+	tbl.Render()
+
+	out := stripANSI(buf.String())
+	// Output starts with \n, so trim leading newline then split
+	out = strings.TrimPrefix(out, "\n")
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	if len(lines) != 3 {
+		t.Fatalf("expected 3 lines (header + 2 rows), got %d: %v", len(lines), lines)
+	}
+
+	// All lines should start with 2-space indent
+	for i, line := range lines {
+		if !strings.HasPrefix(line, "  ") {
+			t.Errorf("line %d should start with 2-space indent: %q", i, line)
+		}
+	}
+
+	// The STATUS column values should start at the same position in rows.
+	// Use "running" and "idle" which are unique per row.
+	header := lines[0]
+	row1 := lines[1]
+	row2 := lines[2]
+
+	// Find where "STATUS" starts in header, and where "running"/"idle" start in rows.
+	hIdx := strings.Index(header, "STATUS")
+	idx1 := strings.Index(row1, "running")
+	idx2 := strings.Index(row2, "idle")
+	if hIdx < 0 || idx1 < 0 || idx2 < 0 {
+		t.Fatal("could not find expected column values")
+	}
+	// All should start at the same column offset
+	if idx1 != hIdx || idx2 != hIdx {
+		t.Errorf("STATUS column not aligned: header at %d, 'running' at %d, 'idle' at %d", hIdx, idx1, idx2)
 	}
 }
 
@@ -93,6 +143,45 @@ func TestTable_MultipleRows(t *testing.T) {
 	for _, val := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "i"} {
 		if !strings.Contains(out, val) {
 			t.Errorf("output missing expected value %q", val)
+		}
+	}
+}
+
+func TestTable_ConsistentColumnWidth(t *testing.T) {
+	tbl := NewTable(ModeNormal, "NAME", "VALUE")
+	buf := &bytes.Buffer{}
+	tbl.w = buf
+	tbl.AddRow("short", "1")
+	tbl.AddRow("a-much-longer-name", "2")
+	tbl.AddRow("mid", "3")
+	tbl.Render()
+
+	out := stripANSI(buf.String())
+	lines := strings.Split(strings.TrimSpace(out), "\n")
+	if len(lines) != 4 {
+		t.Fatalf("expected 4 lines, got %d", len(lines))
+	}
+
+	// VALUE column values ("1", "2", "3") should all start at the same position.
+	// Find the position of the value digit in each data row.
+	positions := make([]int, 0, 3)
+	for _, line := range lines[1:] {
+		// Find the value column: after the NAME column gap
+		// The value is at a fixed offset from the start
+		for i := len(line) - 1; i >= 0; i-- {
+			if line[i] >= '1' && line[i] <= '3' {
+				positions = append(positions, i)
+				break
+			}
+		}
+	}
+	if len(positions) != 3 {
+		t.Fatalf("expected 3 value positions, got %d", len(positions))
+	}
+	for i := 1; i < len(positions); i++ {
+		if positions[i] != positions[0] {
+			t.Errorf("VALUE column not consistently aligned: positions %v", positions)
+			break
 		}
 	}
 }

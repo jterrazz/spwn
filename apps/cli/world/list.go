@@ -92,7 +92,7 @@ func collectAgentNames(u universe.World) string {
 
 func timeAgo(t time.Time) string {
 	if t.IsZero() {
-		return "unknown"
+		return "\u2014"
 	}
 	d := time.Since(t)
 	switch {
