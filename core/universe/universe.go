@@ -38,6 +38,7 @@ type AgentRecord = models.AgentRecord
 
 // Re-export backend types.
 type Backend = backend.Backend
+type ImageInfo = backend.ImageInfo
 type Store = state.Store
 
 // Re-export manifest types.

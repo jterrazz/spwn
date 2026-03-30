@@ -9,9 +9,11 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	containerTypes "github.com/docker/docker/api/types/container"
+	imageTypes "github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"golang.org/x/term"
@@ -270,4 +272,37 @@ func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecC
 	}
 
 	return d.client.ContainerExecStart(ctx, execID.ID, types.ExecStartCheck{Detach: true})
+}
+
+func (d *Docker) Commit(ctx context.Context, containerID string, imageTag string) error {
+	_, err := d.client.ContainerCommit(ctx, containerID, containerTypes.CommitOptions{
+		Reference: imageTag,
+		Comment:   "spwn world snapshot",
+	})
+	return err
+}
+
+func (d *Docker) ImageList(ctx context.Context, prefix string) ([]ImageInfo, error) {
+	images, err := d.client.ImageList(ctx, imageTypes.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var result []ImageInfo
+	for _, img := range images {
+		for _, tag := range img.RepoTags {
+			if strings.HasPrefix(tag, prefix) {
+				result = append(result, ImageInfo{
+					Tag:     tag,
+					Size:    img.Size,
+					Created: time.Unix(img.Created, 0),
+				})
+			}
+		}
+	}
+	return result, nil
+}
+
+func (d *Docker) ImageRemove(ctx context.Context, imageTag string) error {
+	_, err := d.client.ImageRemove(ctx, imageTag, imageTypes.RemoveOptions{})
+	return err
 }
