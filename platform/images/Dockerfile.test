@@ -2,12 +2,24 @@ FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
     bash coreutils findutils grep sed gawk \
-    ca-certificates curl wget git jq python3 \
+    ca-certificates curl wget git jq python3 sudo \
     && rm -rf /var/lib/apt/lists/*
 
 # Mock claude binary (no Node.js, no npm, no real Claude Code)
 COPY mock-claude.sh /usr/local/bin/claude
 RUN chmod +x /usr/local/bin/claude
 
-VOLUME ["/workspace", "/mind", "/universe"]
+# Non-root user (matching production image)
+RUN useradd -m -s /bin/bash spwn \
+    && echo "spwn ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Create mount points owned by spwn user
+RUN mkdir -p /workspace /mind /universe /world /home/spwn/.claude \
+    && echo '{"hasCompletedOnboarding":true}' > /home/spwn/.claude.json \
+    && chown -R spwn:spwn /workspace /mind /universe /world /home/spwn /home/spwn/.claude.json
+
+USER spwn
+WORKDIR /home/spwn
+
+VOLUME ["/workspace", "/mind", "/universe", "/world"]
 ENTRYPOINT ["sleep", "infinity"]
