@@ -17,6 +17,9 @@ func SyncToGit(repo, branch string) error {
 		if err := gitCmd(baseDir, "init"); err != nil {
 			return fmt.Errorf("git init failed: %w", err)
 		}
+		// Configure git user for commits (safe defaults if not set globally)
+		gitCmd(baseDir, "config", "user.email", "spwn@spwn.sh")
+		gitCmd(baseDir, "config", "user.name", "spwn")
 		if repo != "" {
 			if err := gitCmd(baseDir, "remote", "add", "origin", repo); err != nil {
 				return fmt.Errorf("git remote add failed: %w", err)
