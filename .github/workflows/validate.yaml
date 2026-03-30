@@ -14,6 +14,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache-dependency-path: apps/cli/go.sum
       - name: Vet all modules
         run: |
           cd core/foundation && go vet ./...
@@ -29,6 +30,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache-dependency-path: apps/cli/go.sum
       - name: Unit tests
         run: |
           cd core/foundation && go test ./...
@@ -44,5 +46,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'
+          cache-dependency-path: apps/cli/go.sum
       - name: Build binary
         run: cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
