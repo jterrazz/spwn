@@ -16,7 +16,6 @@ describe("CLI output", () => {
       "world",
       "agent",
       "claw",
-      "visitor",
       "observatory",
       "skill",
       "init",

@@ -16,7 +16,6 @@ export default defineWorkspace([
         "e2e/agent/**/*.e2e.test.ts",
         "e2e/colony/**/*.e2e.test.ts",
         "e2e/gate/**/*.e2e.test.ts",
-        "e2e/visitor/**/*.e2e.test.ts",
         "e2e/config/**/*.e2e.test.ts",
         "e2e/state/**/*.e2e.test.ts",
         "e2e/errors/**/*.e2e.test.ts",

@@ -14,12 +14,14 @@ var (
 	spawnName  string
 	spawnWorld string
 	spawnImport string
+	npcTask    string
 )
 
 func init() {
 	Cmd.Flags().StringVarP(&spawnName, "name", "n", "", "Agent name (default: default)")
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Target world ID")
 	Cmd.Flags().StringVar(&spawnImport, "import", "", "Import Mind from tar.gz before spawning")
+	Cmd.Flags().StringVar(&npcTask, "npc", "", "Run as NPC — no Mind, no memory, just execute this task")
 }
 
 // Cmd is the agent command — spawns an agent when run directly,
@@ -37,6 +39,22 @@ Subcommands: init, list, inspect, export.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		s := newStepper(cmd)
+
+		// NPC mode — no Mind, no identity, just execute
+		if npcTask != "" {
+			worldID := spawnWorld
+			if worldID == "" {
+				return fmt.Errorf("error: --world is required for NPC mode.\nRun 'spwn world list' to see active worlds.")
+			}
+			arc, err := universe.NewArchitectFromEnv()
+			if err != nil {
+				return err
+			}
+			s.Blank()
+			s.Done("NPC dispatched", fmt.Sprintf("%q → %s", npcTask, worldID))
+			s.Blank()
+			return arc.SpawnNPC(ctx, worldID, npcTask)
+		}
 
 		agentName := "default"
 		if spawnName != "" {

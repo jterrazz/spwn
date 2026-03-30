@@ -6,7 +6,6 @@ import (
 	"spwn.sh/apps/cli/observatory"
 	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/world"
-	"spwn.sh/apps/cli/visitor"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +39,6 @@ func init() {
 	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 	rootCmd.AddCommand(claw.Cmd)
-	rootCmd.AddCommand(visitor.Cmd)
 	rootCmd.AddCommand(observatory.Cmd)
 	rootCmd.AddCommand(skill.Cmd)
 }

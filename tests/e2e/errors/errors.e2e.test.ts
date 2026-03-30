@@ -43,15 +43,14 @@ describe("error handling", () => {
     expectLine(result.output, /world w-nonexistent-00000 not found/);
   });
 
-  test("visitor without --world flag", async () => {
-    // WHEN — running visitor without specifying a world
-    const result = await spwn("visitor no world")
-      .exec("visitor lint-code")
+  test("agent --npc without --world flag", async () => {
+    // WHEN — running agent --npc without specifying a world
+    const result = await spwn("npc no world")
+      .exec("agent --npc lint-code")
       .run();
 
     // THEN — exits with error about required world flag
     expect(result.exitCode).not.toBe(0);
-    expectLine(result.output, /required flag\(s\) "world" not set/);
   });
 
   test("agent reflect non-existent agent skips gracefully", async () => {

@@ -26,7 +26,7 @@ Spwn is a **framework for orchestrating artificial life**. Every layer is an int
 - **World**: A living workspace inside the universe. Has agents, elements, and a project. Many per universe. Configured in `~/.spwn/worlds/`.
 - **Governor**: Leader agent inside a world. Decomposes tasks, delegates to citizens, aggregates results.
 - **Citizen**: Persistent worker agent. Has a Mind — remembers, learns, evolves.
-- **Visitor**: Ephemeral agent. No Mind, no memory. Single task, fire & forget.
+- **NPC**: Ephemeral agent. No Mind, no memory. Single task, fire & forget.
 - **Observatory**: Visual dashboard. Real-time view of everything.
 
 ### The Physics
@@ -73,8 +73,8 @@ spwn agent reflect <agent-id>            # Reflexion: journal → auto-reflexion
 spwn agent sleep <agent-id>              # Sleep: archive stale, prune sessions
 spwn agent fork <agent-id>               # Fork: clone Mind to new agent
 
-# Visitor (ephemeral)
-spwn visitor "task" --world w-acme-84721
+# NPC (ephemeral)
+spwn agent --npc "task" --world w-acme-84721
 
 # Observatory
 spwn observatory start / open
@@ -141,7 +141,7 @@ spwn/
 │   │   └── internal/
 │   │       ├── architect/           #     Orchestration (spawn, destroy, list)
 │   │       │   ├── colony.go        #       Multi-agent: SpawnAgents, Governor/Citizen
-│   │       │   └── visitor.go       #       Ephemeral: SpawnVisitor
+│   │       │   └── npc.go           #       Ephemeral: SpawnNPC
 │   │       ├── backend/             #     Docker adapter (Backend port)
 │   │       ├── runtime/             #     Claude Code adapter (Runtime port)
 │   │       ├── provider/            #     Anthropic + OpenAI adapters (Provider port)
@@ -185,7 +185,6 @@ spwn/
 │   │   ├── world/                   #     World subcommands (thin wrappers)
 │   │   ├── agent/                   #     Agent subcommands (+ reflect, sleep, fork)
 │   │   ├── claw/                    #     Claw subcommands (start, stop, status, connect)
-│   │   ├── visitor/                 #     Visitor subcommands
 │   │   ├── skill/                   #     Skill subcommands (list, install, remove)
 │   │   ├── observatory/             #     Observatory subcommands (start, open)
 │   │   ├── ui/                      #     Stepper, table, style, format
