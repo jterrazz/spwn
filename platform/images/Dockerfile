@@ -19,12 +19,12 @@ RUN useradd -m -s /bin/bash spwn \
     && echo "spwn ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create mount points + Claude onboarding flag (required for headless auth)
-RUN mkdir -p /workspace /mind /universe /home/spwn/.claude \
+RUN mkdir -p /workspace /mind /universe /world /home/spwn/.claude \
     && echo '{"hasCompletedOnboarding":true}' > /home/spwn/.claude.json \
-    && chown -R spwn:spwn /workspace /mind /universe /home/spwn /home/spwn/.claude.json
+    && chown -R spwn:spwn /workspace /mind /universe /world /home/spwn /home/spwn/.claude.json
 
 USER spwn
 WORKDIR /home/spwn
 
-VOLUME ["/workspace", "/mind", "/universe"]
+VOLUME ["/workspace", "/mind", "/universe", "/world"]
 ENTRYPOINT ["sleep", "infinity"]
