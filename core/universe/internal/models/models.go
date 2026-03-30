@@ -29,8 +29,7 @@ type ConstantsManifest struct {
 
 // LawsManifest defines invariant rules.
 type LawsManifest struct {
-	Network      string `yaml:"network"`
-	MaxProcesses int    `yaml:"max-processes"`
+	MaxProcesses int `yaml:"max-processes"`
 }
 
 // AgentRecord represents a single agent within a universe colony.

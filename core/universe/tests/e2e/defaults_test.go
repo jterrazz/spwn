@@ -84,9 +84,6 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 	if m.Physics.Constants.Memory != foundation.DefaultMemory {
 		t.Errorf("Expected memory %q, got %q", foundation.DefaultMemory, m.Physics.Constants.Memory)
 	}
-	if m.Physics.Laws.Network != foundation.DefaultNetwork {
-		t.Errorf("Expected network %q, got %q", foundation.DefaultNetwork, m.Physics.Laws.Network)
-	}
 }
 
 func TestDefaults_DefaultAgentIsValid(t *testing.T) {

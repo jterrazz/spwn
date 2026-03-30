@@ -224,16 +224,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		CPU:         int64(opts.Manifest.Physics.Constants.CPU),
 		Memory:      memBytes,
 		PidsLimit:   int64(opts.Manifest.Physics.Laws.MaxProcesses),
-		NetworkMode: opts.Manifest.Physics.Laws.Network,
+		NetworkMode: "bridge",
 		Binds:       binds,
 		Env:         env,
 	}
 
-	// Gate bridges require network access to reach the host-side server.
+	// Gate bridges require host access to reach the host-side server.
 	if gateSrv != nil {
-		if containerCfg.NetworkMode == "none" {
-			containerCfg.NetworkMode = "bridge"
-		}
 		containerCfg.ExtraHosts = []string{"host.docker.internal:host-gateway"}
 	}
 

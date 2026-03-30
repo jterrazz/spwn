@@ -22,7 +22,7 @@ func TestGeneratePhysics(t *testing.T) {
 						CPU: 2, Memory: "1g", Disk: "5g", Timeout: "1h",
 					},
 					Laws: models.LawsManifest{
-						Network: "none", MaxProcesses: 64,
+						MaxProcesses: 64,
 					},
 				},
 			},
@@ -34,32 +34,12 @@ func TestGeneratePhysics(t *testing.T) {
 				"5g",
 				"1h",
 				"## Laws",
-				"No outbound network access",
+				"bridge (outbound access enabled)",
 				"64",
 				"## Elements",
 				"/workspace",
 				"/mind",
 			},
-		},
-		{
-			name: "bridge_network",
-			manifest: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Constants: models.ConstantsManifest{CPU: 1, Memory: "512m", Disk: "2g", Timeout: "30m"},
-					Laws:      models.LawsManifest{Network: "bridge", MaxProcesses: 128},
-				},
-			},
-			wantParts: []string{"bridge mode"},
-		},
-		{
-			name: "host_network",
-			manifest: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Constants: models.ConstantsManifest{CPU: 1, Memory: "512m", Disk: "2g", Timeout: "30m"},
-					Laws:      models.LawsManifest{Network: "host", MaxProcesses: 128},
-				},
-			},
-			wantParts: []string{"host mode"},
 		},
 	}
 

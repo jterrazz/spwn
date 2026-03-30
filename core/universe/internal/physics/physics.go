@@ -25,14 +25,7 @@ func GeneratePhysics(m models.Manifest) string {
 
 	// Laws
 	sb.WriteString("## Laws\n")
-	switch m.Physics.Laws.Network {
-	case "none":
-		sb.WriteString("- No outbound network access\n")
-	case "bridge":
-		sb.WriteString("- Network: bridge mode (filtered outbound access)\n")
-	case "host":
-		sb.WriteString("- Network: host mode (full network access)\n")
-	}
+	sb.WriteString("- Network: bridge (outbound access enabled)\n")
 	sb.WriteString(fmt.Sprintf("- Maximum process count: %d\n", m.Physics.Laws.MaxProcesses))
 	sb.WriteString("- Filesystem is ephemeral except /workspace and /mind\n\n")
 
