@@ -120,12 +120,13 @@ physics:
     timeout: 30m
 
   laws:
-    network: none
-    max-processes: 128
+    network: bridge
+    max-processes: 256
 
   elements:
     - "@unix"
     - "@git"
+    - "@node"
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -152,12 +153,13 @@ physics:
     timeout: 30m
 
   laws:
-    network: none
-    max-processes: 128
+    network: bridge
+    max-processes: 256
 
   elements:
     - "@unix"
     - "@git"
+    - "@node"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
 }
