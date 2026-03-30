@@ -1,7 +1,7 @@
 .PHONY: build build-image build-test-image build-gate \
         test test-universe test-agent test-gate test-foundation \
         test-e2e test-e2e-universe test-e2e-agent \
-        lint clean
+        lint clean docs
 
 # Build
 build:
@@ -56,6 +56,10 @@ lint:
 	cd core/gate && go vet ./...
 	cd core/universe && go vet ./...
 	cd apps/cli && go vet ./...
+
+# Docs
+docs:
+	cd apps/cli && go run ./cmd/gen-docs ../../docs/cli
 
 # Clean
 clean:

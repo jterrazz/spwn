@@ -49,3 +49,8 @@ func init() {
 func Execute() error {
 	return rootCmd.Execute()
 }
+
+// GetRootCmd returns the root command for documentation generation.
+func GetRootCmd() *cobra.Command {
+	return rootCmd
+}
