@@ -63,6 +63,9 @@ spwn world                               # Spawn with defaults
 spwn world -c acme-org                   # Named config
 spwn world --governor morpheus -w ~/acme-org
 spwn world list / inspect / logs / attach / destroy
+spwn world send <id> --from <a> --to <b> "msg"  # Send message between agents
+spwn world inbox <id> [agent]            # Show inbox messages
+spwn world watch <id>                    # Watch for new messages (foreground)
 
 # Agent (citizens + evolution)
 spwn agent -n neo --world w-acme-84721
@@ -170,6 +173,12 @@ spwn/
 │   │       ├── bridge/              #     Wrapper scripts + capability enforcement
 │   │       └── server/              #     HTTP-over-TCP gate server
 │   │
+│   ├── messenger/                   #   go.mod — agent-to-agent communication
+│   │   ├── messenger.go             #   Public API (Send, Check, CheckUnread, MarkRead, ListAll)
+│   │   └── internal/
+│   │       ├── inbox/               #     Filesystem-based inbox read/write
+│   │       └── models/              #     Message type
+│   │
 │   └── foundation/                  #   go.mod — cross-cutting primitives
 │       ├── constants.go             #     Defaults, MindLayers, BaseImage
 │       ├── paths.go                 #     BaseDir(), WorldsDir(), AgentsDir(), OrgPath()
@@ -214,13 +223,14 @@ spwn/
 ## Dependency Graph
 
 ```
-apps/cli ──→ core/universe, core/agent, core/gate, core/foundation
+apps/cli ──→ core/universe, core/agent, core/gate, core/messenger, core/foundation
 core/universe ──→ core/agent, core/gate, core/foundation
 core/agent ──→ core/foundation
 core/gate ──→ core/foundation
+core/messenger ──→ core/foundation
 ```
 
-4 Go modules + `platform/images`. Each `core/` module exposes a public API in its root `.go` file. Adapters (runtime, provider, channel, skill, etc.) live inside `core/universe/internal/` — private per module.
+5 Go modules + `platform/images`. Each `core/` module exposes a public API in its root `.go` file. Adapters (runtime, provider, channel, skill, etc.) live inside `core/universe/internal/` — private per module.
 
 ## Code Style
 

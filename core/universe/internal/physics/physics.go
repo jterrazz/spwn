@@ -35,6 +35,12 @@ func GeneratePhysics(m models.Manifest) string {
 	sb.WriteString("/mind — agent identity and memory (read-write)\n")
 	sb.WriteString("/tmp — ephemeral scratch space\n\n")
 
+	// Communication
+	sb.WriteString("## Communication\n")
+	sb.WriteString("Agents communicate via the inbox at /world/inbox/.\n")
+	sb.WriteString("To send a message: write a JSON file to /world/inbox/{recipient}/.\n")
+	sb.WriteString("To check messages: read files from /world/inbox/{your-name}/.\n\n")
+
 	// Topology
 	sb.WriteString("## Topology\n")
 	sb.WriteString("/workspace — project files, mounted from Host (read-write)\n")

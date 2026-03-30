@@ -8,6 +8,7 @@ require (
 	spwn.sh/core/agent v0.0.0
 	spwn.sh/core/foundation v0.0.0
 	spwn.sh/core/gate v0.0.0
+	spwn.sh/core/messenger v0.0.0
 	spwn.sh/core/universe v0.0.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.28.0
@@ -50,6 +51,7 @@ replace (
 	spwn.sh/core/agent => ../../core/agent
 	spwn.sh/core/foundation => ../../core/foundation
 	spwn.sh/core/gate => ../../core/gate
+	spwn.sh/core/messenger => ../../core/messenger
 	spwn.sh/core/universe => ../../core/universe
 	spwn.sh/platform/images => ../../platform/images
 )

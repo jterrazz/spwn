@@ -298,6 +298,16 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("faculties_generated", "physics.md, faculties.md")
 
+	// Create inbox directories for agent communication
+	a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox"})
+	if len(opts.Agents) > 0 {
+		for _, spec := range opts.Agents {
+			a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox/" + spec.Name})
+		}
+	} else if opts.AgentName != "" {
+		a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox/" + opts.AgentName})
+	}
+
 	// Build universe record
 	u := models.World{
 		ID:          id,
