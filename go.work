@@ -5,6 +5,7 @@ use (
 	./core/agent
 	./core/foundation
 	./core/gate
+	./core/messenger
 	./core/universe
 	./platform/images
 )
