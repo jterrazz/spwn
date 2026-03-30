@@ -3,6 +3,7 @@ package architect
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"spwn.sh/core/gate"
 	"spwn.sh/core/universe/internal/backend"
@@ -64,6 +65,40 @@ func (a *Architect) Logs(ctx context.Context, universeID string, follow bool, ta
 		Follow: follow,
 		Tail:   tail,
 	})
+}
+
+// Snapshot commits the current state of a world's container as a Docker image.
+func (a *Architect) Snapshot(ctx context.Context, worldID, name string) (string, error) {
+	u, err := a.state.Get(worldID)
+	if err != nil {
+		return "", fmt.Errorf("world %s not found", worldID)
+	}
+
+	tag := fmt.Sprintf("spwn-snapshot:%s--%s", worldID, name)
+	if name == "" {
+		tag = fmt.Sprintf("spwn-snapshot:%s--%s", worldID, time.Now().Format("2006-01-02T15-04"))
+	}
+
+	if err := a.backend.Commit(ctx, u.ContainerID, tag); err != nil {
+		return "", fmt.Errorf("snapshot failed: %w", err)
+	}
+	return tag, nil
+}
+
+// ListSnapshots returns all snapshot images.
+func (a *Architect) ListSnapshots(ctx context.Context) ([]backend.ImageInfo, error) {
+	return a.backend.ImageList(ctx, "spwn-snapshot:")
+}
+
+// RestoreSnapshot creates a new world from a snapshot image.
+func (a *Architect) RestoreSnapshot(ctx context.Context, snapshotTag string, opts SpawnOpts) (*SpawnResult, error) {
+	opts.Image = snapshotTag
+	return a.Spawn(ctx, opts)
+}
+
+// DeleteSnapshot removes a snapshot image.
+func (a *Architect) DeleteSnapshot(ctx context.Context, snapshotTag string) error {
+	return a.backend.ImageRemove(ctx, snapshotTag)
 }
 
 // Attach opens an interactive shell into a running world.

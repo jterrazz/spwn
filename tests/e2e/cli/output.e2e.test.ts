@@ -40,7 +40,7 @@ describe("CLI output", () => {
     // THEN — world subcommands are listed
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /Available Commands:/);
-    for (const sub of ["list", "inspect", "logs", "attach", "destroy"]) {
+    for (const sub of ["list", "inspect", "logs", "attach", "destroy", "snapshot", "snapshots", "restore"]) {
       expectLine(result.output, new RegExp(`^\\s*${sub}\\s+`));
     }
   });

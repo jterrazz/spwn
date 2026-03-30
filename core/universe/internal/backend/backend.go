@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"io"
+	"time"
 )
 
 // LogsConfig controls log streaming behavior.
@@ -31,6 +32,13 @@ type ExecConfig struct {
 	TTY bool
 }
 
+// ImageInfo describes a Docker image.
+type ImageInfo struct {
+	Tag     string
+	Size    int64
+	Created time.Time
+}
+
 // Backend abstracts the container runtime.
 type Backend interface {
 	Create(ctx context.Context, cfg ContainerConfig) (string, error)
@@ -45,4 +53,13 @@ type Backend interface {
 	EnsureImage(ctx context.Context, tag string, dockerfile []byte, logw io.Writer) error
 	Logs(ctx context.Context, containerID string, cfg LogsConfig) (io.ReadCloser, error)
 	ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error
+
+	// Commit creates a snapshot image from a running container.
+	Commit(ctx context.Context, containerID string, imageTag string) error
+
+	// ImageList returns images matching a filter prefix.
+	ImageList(ctx context.Context, prefix string) ([]ImageInfo, error)
+
+	// ImageRemove removes a Docker image.
+	ImageRemove(ctx context.Context, imageTag string) error
 }
