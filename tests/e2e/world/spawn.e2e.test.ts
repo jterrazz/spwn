@@ -1,4 +1,6 @@
 import { describe, test, expect, afterEach } from "vitest";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   createTestContext,
   parseWorldId,
@@ -161,5 +163,53 @@ describe("world spawn", () => {
     ctx.universe(id).toBeRunning();
     ctx.spwn(["world", "destroy", id], 30_000);
     ctx.universe(id).toNotExist();
+  });
+
+  test("workspace files visible inside container", () => {
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+
+    // Create a test file in workspace
+    writeFileSync(join(ctx.home, "test-file.txt"), "hello from workspace");
+
+    const result = ctx.spwn(
+      ["world", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseWorldId(result.output)!;
+
+    // Verify file exists inside container
+    ctx.universe(id).toHaveFile("/workspace/test-file.txt", "hello from workspace");
+  });
+
+  test("Mind has all 6 layers inside container", () => {
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const result = ctx.spwn(
+      ["world", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseWorldId(result.output)!;
+
+    for (const layer of ["personas", "skills", "knowledge", "playbooks", "journal", "sessions"]) {
+      ctx.universe(id).toHaveDirectory(`/mind/${layer}`);
+    }
+  });
+
+  test("--no-agent spawns world without agent", () => {
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const result = ctx.spwn(
+      ["world", "--no-agent", "-w", ctx.home],
+      60_000,
+    );
+
+    expect(result.exitCode).toBe(0);
+    const id = parseWorldId(result.output)!;
+    expect(id).toBeTruthy();
+    ctx.universe(id).toBeRunning();
+
+    // World exists in state
+    ctx.state().hasWorld(id);
   });
 });

@@ -1,7 +1,10 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { writeFileSync, utimesSync, mkdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome, createAgent } from "../../setup/helpers.js";
 import { expectLine } from "../../setup/output-helpers.js";
+import { MindAssertion } from "../../setup/mind-assertion.js";
 
 describe("agent evolution", () => {
   let home: string;
@@ -116,5 +119,90 @@ describe("agent evolution", () => {
     expectLine(result.output, /✓ Archived playbooks\s+0/);
     expectLine(result.output, /✓ Archived knowledge\s+0/);
     expectLine(result.output, /✓ Pruned sessions\s+0/);
+  });
+
+  test("reflect with journal entries creates auto-reflexion.md", async () => {
+    // GIVEN — an agent with journal entries
+    const journalDir = join(home, "agents", "neo", "journal");
+    writeFileSync(
+      join(journalDir, "2024-01-01.md"),
+      "# Journal 2024-01-01\n## Session w-test-00001\n- Outcome: success\n- Duration: 5m",
+    );
+    writeFileSync(
+      join(journalDir, "2024-01-02.md"),
+      "# Journal 2024-01-02\n## Session w-test-00002\n- Outcome: failure\n- Duration: 3m",
+    );
+
+    // WHEN — reflecting
+    const result = await spwn("reflect with journal")
+      .exec("agent reflect neo")
+      .run();
+
+    // THEN — auto-reflexion.md is created in playbooks/
+    expect(result.exitCode).toBe(0);
+    new MindAssertion(home, "neo").hasFile("playbooks/auto-reflexion.md");
+
+    // AND — output shows analysis stats
+    expectLine(result.output, /Entries analyzed\s+2/);
+  });
+
+  test("reflect output includes success rate", async () => {
+    // GIVEN — an agent with journal entries (1 success, 1 failure)
+    const journalDir = join(home, "agents", "neo", "journal");
+    writeFileSync(
+      join(journalDir, "2024-02-01.md"),
+      "# Journal 2024-02-01\n## Session w-test-00010\n- Outcome: success\n- Duration: 2m",
+    );
+    writeFileSync(
+      join(journalDir, "2024-02-02.md"),
+      "# Journal 2024-02-02\n## Session w-test-00011\n- Outcome: failure\n- Duration: 4m",
+    );
+
+    // WHEN — reflecting
+    const result = await spwn("reflect success rate")
+      .exec("agent reflect neo")
+      .run();
+
+    // THEN — output contains success rate
+    expect(result.exitCode).toBe(0);
+    expectLine(result.output, /Success rate\s+\d+%/);
+    expectLine(result.output, /Completed\s+\d+/);
+    expectLine(result.output, /Failed\s+\d+/);
+  });
+
+  test("sleep archives stale playbooks", async () => {
+    // GIVEN — an agent with old playbook files
+    const playbooksDir = join(home, "agents", "neo", "playbooks");
+    const stalePath = join(playbooksDir, "old-strategy.md");
+    writeFileSync(stalePath, "# Old strategy\nThis is outdated.");
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    utimesSync(stalePath, sixtyDaysAgo, sixtyDaysAgo);
+
+    // WHEN — sleeping
+    const result = await spwn("sleep stale")
+      .exec("agent sleep neo")
+      .run();
+
+    // THEN — stale file is archived (removed from playbooks/)
+    expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Archived playbooks\s+1/);
+    expect(existsSync(stalePath)).toBe(false);
+  });
+
+  test("sleep preserves fresh files", async () => {
+    // GIVEN — an agent with recent playbook files
+    const playbooksDir = join(home, "agents", "neo", "playbooks");
+    const freshPath = join(playbooksDir, "fresh-strategy.md");
+    writeFileSync(freshPath, "# Fresh strategy\nThis is current.");
+
+    // WHEN — sleeping
+    const result = await spwn("sleep fresh files")
+      .exec("agent sleep neo")
+      .run();
+
+    // THEN — fresh file remains in playbooks/
+    expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Archived playbooks\s+0/);
+    expect(existsSync(freshPath)).toBe(true);
   });
 });
