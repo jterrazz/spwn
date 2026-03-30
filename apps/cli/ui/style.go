@@ -13,5 +13,11 @@ var (
 func check() string         { return green.Sprint("✓") }
 func warn() string          { return yellow.Sprint("!") }
 func cross() string         { return red.Sprint("✗") }
-func faint(s string) string { return dim.Sprint(s) }
+func faint(s string) string  { return dim.Sprint(s) }
 func strong(s string) string { return bold.Sprint(s) }
+
+// Exported color helpers for use outside the ui package.
+func Faint(s string) string  { return dim.Sprint(s) }
+func Strong(s string) string { return bold.Sprint(s) }
+func Green(s string) string  { return green.Sprint(s) }
+func Yellow(s string) string { return yellow.Sprint(s) }
