@@ -1,4 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome } from "../../setup/helpers.js";
 import {
@@ -6,6 +8,7 @@ import {
   expectTableHeader,
   expectTableRow,
 } from "../../setup/output-helpers.js";
+import { MindAssertion } from "../../setup/mind-assertion.js";
 
 describe("agent CRUD", () => {
   let home: string;
@@ -176,5 +179,37 @@ describe("agent CRUD", () => {
     expect(result.exitCode).toBe(0);
     expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
     expectTableRow(result.output, ["atlas", "1/6", "unattached"]);
+  });
+
+  test("delete actually removes Mind directory from disk", async () => {
+    // GIVEN — agent exists
+    await spwn("create temp for disk check").exec("agent init temp").run();
+    // Verify Mind directory exists
+    new MindAssertion(home, "temp").exists().hasLayer("personas");
+
+    // WHEN — deleting the agent
+    const result = await spwn("delete temp disk")
+      .exec("agent delete temp")
+      .run();
+
+    // THEN — Mind directory is gone from filesystem
+    expect(result.exitCode).toBe(0);
+    const agentDir = join(home, "agents", "temp");
+    expect(existsSync(agentDir)).toBe(false);
+  });
+
+  test("cannot inspect agent after delete", async () => {
+    // GIVEN — agent is created then deleted
+    await spwn("create for inspect-delete").exec("agent init temp").run();
+    await spwn("delete for inspect-delete").exec("agent delete temp").run();
+
+    // WHEN — inspecting the deleted agent
+    const result = await spwn("inspect after delete")
+      .exec("agent inspect temp")
+      .run();
+
+    // THEN — exits with error showing not found
+    expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /agent "temp" not found/);
   });
 });

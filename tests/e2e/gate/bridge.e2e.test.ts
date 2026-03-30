@@ -95,4 +95,32 @@ describe("gate bridge", () => {
     const faculties = ctx.universe(id).faculties();
     expect(faculties).toBeTruthy();
   });
+
+  test("faculties.md documents bridge capabilities", () => {
+    // GIVEN — an initialized SPWN_HOME
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+
+    // WHEN — spawning with a named gate bridge
+    const spawnResult = ctx.spwn(
+      [
+        "world",
+        "--agent",
+        "neo",
+        "--gate",
+        "bash:test-bridge:exec",
+        "-w",
+        ctx.home,
+      ],
+      60_000,
+    );
+
+    // THEN — the spawn succeeds
+    expect(spawnResult.exitCode).toBe(0);
+    const id = parseWorldId(spawnResult.output)!;
+
+    // AND — faculties.md mentions the bridge name
+    const faculties = ctx.universe(id).faculties();
+    expect(faculties).toContain("test-bridge");
+  });
 });

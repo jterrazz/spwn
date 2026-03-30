@@ -125,7 +125,6 @@ physics:
   elements:
     - "@unix"
     - "@git"
-    - "@node"
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -157,7 +156,6 @@ physics:
   elements:
     - "@unix"
     - "@git"
-    - "@node"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
 }
