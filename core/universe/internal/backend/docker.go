@@ -303,6 +303,6 @@ func (d *Docker) ImageList(ctx context.Context, prefix string) ([]ImageInfo, err
 }
 
 func (d *Docker) ImageRemove(ctx context.Context, imageTag string) error {
-	_, err := d.client.ImageRemove(ctx, imageTag, imageTypes.RemoveOptions{})
+	_, err := d.client.ImageRemove(ctx, imageTag, imageTypes.RemoveOptions{Force: true})
 	return err
 }
