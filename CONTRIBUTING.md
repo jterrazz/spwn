@@ -60,7 +60,7 @@ platform/           Build infrastructure
 Use imperative mood, lowercase, no period:
 
 ```
-add visitor fire command
+add NPC mode to agent command
 fix universe destroy when agent is running
 refactor mind export to support layer filtering
 ```

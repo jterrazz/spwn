@@ -39,7 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"world", "agent", "claw", "visitor", "observatory", "skill", "init"} {
+	for _, sub := range []string{"world", "agent", "claw", "observatory", "skill", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -114,16 +114,15 @@ func TestCLI_ClawHelp(t *testing.T) {
 	}
 }
 
-// --- Visitor help ---
+// --- Agent --npc flag ---
 
-func TestCLI_VisitorHelp(t *testing.T) {
-	out, _, err := executeCommand("visitor", "--help")
+func TestCLI_AgentNPCFlag(t *testing.T) {
+	out, _, err := executeCommand("agent", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "--world", "visitor help flags")
-	assertContains(t, out, "ephemeral", "visitor help description")
+	assertContains(t, out, "--npc", "agent help npc flag")
 }
 
 // --- Skill help ---

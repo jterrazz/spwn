@@ -10,9 +10,9 @@ import (
 	"spwn.sh/core/universe/internal/runtime"
 )
 
-// SpawnVisitor runs an ephemeral agent with a single task, no Mind, no persistence.
-// Visitors have no persistent identity, no journal, and no session state.
-func (a *Architect) SpawnVisitor(ctx context.Context, universeID string, task string) error {
+// SpawnNPC runs an NPC — an ephemeral agent with a single task, no Mind, no persistence.
+// NPCs have no persistent identity, no journal, and no session state.
+func (a *Architect) SpawnNPC(ctx context.Context, universeID string, task string) error {
 	u, err := a.state.Get(universeID)
 	if err != nil {
 		return fmt.Errorf("world %s not found", universeID)
@@ -47,10 +47,10 @@ func (a *Architect) SpawnVisitor(ctx context.Context, universeID string, task st
 	a.state.UpdateStatus(universeID, models.StatusIdle)
 
 	if err != nil {
-		return fmt.Errorf("exec visitor: %w", err)
+		return fmt.Errorf("exec NPC: %w", err)
 	}
 	if exitCode != 0 {
-		return fmt.Errorf("visitor exited with code %d", exitCode)
+		return fmt.Errorf("NPC exited with code %d", exitCode)
 	}
 	return nil
 }

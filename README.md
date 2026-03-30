@@ -135,7 +135,7 @@ Host (your machine)
        └── World                   A living workspace inside the universe
             ├── Governor           Leader agent (decomposes tasks, delegates)
             ├── Citizens           Persistent worker agents (many per world)
-            ├── Visitors           Ephemeral agents (fire & forget)
+            ├── NPCs               Ephemeral agents (fire & forget)
             ├── Gate               Bridge between worlds (capability-enforced)
             ├── physics.md         The constraints of this reality
             └── faculties.md       What the agent can do
@@ -182,8 +182,8 @@ spwn agent reflect <agent-id>          # Reflexion: journal analysis → auto-re
 spwn agent sleep <agent-id>            # Sleep: archive stale files, prune old sessions
 spwn agent fork <agent-id>             # Fork: clone Mind from source to new agent
 
-# Visitor
-spwn visitor "task" --world <id>       # Fire ephemeral agent inside a world
+# NPC (ephemeral)
+spwn agent --npc "task" --world <id>   # Fire ephemeral agent inside a world
 
 # Claw (the God)
 spwn claw start                        # Start the Claw daemon
@@ -284,7 +284,7 @@ spwn/
 │   ├── skill/                  #   Skill registry (local)
 │   ├── colony/                 #   Multi-agent orchestration (governor, citizens)
 │   ├── evolution/              #   Reflexion, sleep, forking
-│   ├── visitor/                #   Ephemeral agent management
+│   ├── npc/                   #   Ephemeral agent management (NPC)
 │   ├── sync/                   #   Claw state + org.yaml
 │   └── foundation/             #   Cross-cutting primitives (paths, IDs, constants)
 │
@@ -298,13 +298,13 @@ spwn/
     └── fixtures/               #   Test fixtures
 ```
 
-**Dependency graph:** `apps/cli` → all `core/*` modules · `core/universe` → `core/agent`, `core/gate`, `core/runtime`, `core/colony`, `core/visitor`, `core/foundation` · `core/evolution` → `core/agent`, `core/foundation` · `core/agent` → `core/foundation`
+**Dependency graph:** `apps/cli` → all `core/*` modules · `core/universe` → `core/agent`, `core/gate`, `core/runtime`, `core/colony`, `core/foundation` · `core/evolution` → `core/agent`, `core/foundation` · `core/agent` → `core/foundation`
 
 ---
 
 ## Status
 
-Active development. Epochs 1-5, 8-9 complete. Ports & Adapters architecture with 8 port interfaces. Multi-agent colonies, evolution (reflexion/sleep/fork), and visitors implemented. Claw, Observatory, and Marketplace partially built.
+Active development. Epochs 1-5, 8-9 complete. Ports & Adapters architecture with 8 port interfaces. Multi-agent colonies, evolution (reflexion/sleep/fork), and NPCs implemented. Claw, Observatory, and Marketplace partially built.
 
 **Website:** [spwn.sh](https://spwn.sh)
 

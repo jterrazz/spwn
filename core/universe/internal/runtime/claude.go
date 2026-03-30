@@ -9,7 +9,7 @@ type SpawnConfig struct {
 	MindPath   string
 	AgentName  string
 	UniverseID string
-	Prompt     string // If set, passed as the initial prompt (used for visitors).
+	Prompt     string // If set, passed as the initial prompt (used for NPCs).
 }
 
 // ClaudeCode implements the Runtime port for Claude Code CLI via ACP.
