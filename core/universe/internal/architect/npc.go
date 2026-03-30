@@ -7,6 +7,7 @@ import (
 
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/physics"
 	"spwn.sh/core/universe/internal/runtime"
 )
 
@@ -27,6 +28,19 @@ func (a *Architect) SpawnNPC(ctx context.Context, universeID string, task string
 	}
 
 	a.state.UpdateStatus(universeID, models.StatusRunning)
+
+	// Generate AGENT.md for NPC (minimal context)
+	agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
+		Tier:      "npc",
+		WorldID:   universeID,
+		NPCTask:   task,
+		Workspace: u.Workspace,
+		Elements:  u.Manifest.Elements,
+	})
+	if err := a.backend.CopyTo(ctx, u.ContainerID, "world/AGENT.md", []byte(agentCtx)); err != nil {
+		// Non-fatal: log warning but continue
+		fmt.Fprintf(os.Stderr, "warning: failed to write NPC AGENT.md: %v\n", err)
+	}
 
 	// Build a minimal claude command — no Mind, no session
 	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{

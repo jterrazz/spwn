@@ -298,6 +298,63 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("faculties_generated", "physics.md, faculties.md")
 
+	// Generate AGENT.md (personalized agent context)
+	if len(opts.Agents) > 0 {
+		// Multi-agent: generate AGENT-{name}.md for each agent
+		for i, spec := range opts.Agents {
+			tier := manifest.DefaultTier(spec.Tier)
+
+			// Build list of other agents (everyone except this one)
+			var others []physics.AgentInfo
+			var governorName string
+			for j, other := range opts.Agents {
+				if i == j {
+					continue
+				}
+				otherTier := manifest.DefaultTier(other.Tier)
+				others = append(others, physics.AgentInfo{Name: other.Name, Tier: otherTier})
+				if otherTier == "governor" {
+					governorName = other.Name
+				}
+			}
+
+			agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
+				AgentName:   spec.Name,
+				Tier:        tier,
+				WorldID:     id,
+				Workspace:   workspace,
+				Elements:    verifiedElements,
+				CPU:         opts.Manifest.Physics.Constants.CPU,
+				Memory:      opts.Manifest.Physics.Constants.Memory,
+				Timeout:     opts.Manifest.Physics.Constants.Timeout,
+				OtherAgents: others,
+				Governor:    governorName,
+			})
+			if err := a.backend.CopyTo(ctx, containerID, "world/AGENT-"+spec.Name+".md", []byte(agentCtx)); err != nil {
+				a.backend.Stop(ctx, containerID)
+				a.backend.Remove(ctx, containerID)
+				return nil, fmt.Errorf("copy AGENT-%s.md: %w", spec.Name, err)
+			}
+		}
+	} else if opts.AgentName != "" {
+		// Single agent: generate /world/AGENT.md
+		agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
+			AgentName: opts.AgentName,
+			Tier:      "citizen",
+			WorldID:   id,
+			Workspace: workspace,
+			Elements:  verifiedElements,
+			CPU:       opts.Manifest.Physics.Constants.CPU,
+			Memory:    opts.Manifest.Physics.Constants.Memory,
+			Timeout:   opts.Manifest.Physics.Constants.Timeout,
+		})
+		if err := a.backend.CopyTo(ctx, containerID, "world/AGENT.md", []byte(agentCtx)); err != nil {
+			a.backend.Stop(ctx, containerID)
+			a.backend.Remove(ctx, containerID)
+			return nil, fmt.Errorf("copy AGENT.md: %w", err)
+		}
+	}
+
 	// Create inbox directories for agent communication
 	a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox"})
 	if len(opts.Agents) > 0 {
