@@ -51,8 +51,7 @@ type ConstantsManifest struct {
 
 // LawsManifest mirrors the universe laws for org defaults.
 type LawsManifest struct {
-	Network      string `yaml:"network"`
-	MaxProcesses int    `yaml:"max-processes"`
+	MaxProcesses int `yaml:"max-processes"`
 }
 
 // OrgGovernance holds governance limits and policies.

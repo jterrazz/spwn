@@ -104,25 +104,6 @@ physics:
 	})
 }
 
-func TestConfig_CustomNetworkLawReflectedInPhysics(t *testing.T) {
-	// GIVEN a config with bridge network mode
-	// WHEN a universe is spawned
-	chain := setup.NewSpawnBuilder(t).
-		WithConfigYAML(`
-physics:
-  laws:
-    network: bridge
-`).
-		NoAgent().
-		Execute()
-
-	// THEN the physics file should reflect bridge mode
-	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasFile("/universe/physics.md")
-		c.FileContains("/universe/physics.md", "bridge")
-	})
-}
-
 func TestConfig_CustomMaxProcesses(t *testing.T) {
 	// GIVEN a config with a custom max-processes law
 	// WHEN a universe is spawned
@@ -130,7 +111,6 @@ func TestConfig_CustomMaxProcesses(t *testing.T) {
 		WithConfigYAML(`
 physics:
   laws:
-    network: none
     max-processes: 256
 `).
 		NoAgent().
@@ -189,28 +169,6 @@ func TestConfig_LoadAndVerifyManifest(t *testing.T) {
 	if m.Physics.Constants.Memory == "" {
 		t.Fatal("Expected non-empty memory in default config")
 	}
-	if m.Physics.Laws.Network == "" {
-		t.Fatal("Expected non-empty network law in default config")
-	}
-
 	_ = tc
 }
 
-func TestConfig_ValidateRejectsInvalidManifest(t *testing.T) {
-	// GIVEN a manifest with an invalid network mode
-	m := universe.Manifest{
-		Physics: universe.PhysicsManifest{
-			Laws: universe.LawsManifest{
-				Network: "invalid-mode",
-			},
-		},
-	}
-
-	// WHEN validating the manifest
-	err := universe.ValidateManifest(m)
-
-	// THEN it should return an error
-	if err == nil {
-		t.Fatal("Expected validation error for invalid network mode, got nil")
-	}
-}

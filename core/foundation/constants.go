@@ -6,7 +6,6 @@ const (
 	DefaultMemory   = "512m"
 	DefaultDisk     = "2g"
 	DefaultTimeout  = "30m"
-	DefaultNetwork  = "none"
 	DefaultMaxProcs = 128
 	DefaultBackend  = "docker"
 	BaseImage       = "spwn-base:latest"

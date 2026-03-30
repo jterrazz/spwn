@@ -61,8 +61,7 @@ var inspectCmd = &cobra.Command{
 			u.Manifest.Physics.Constants.Timeout,
 		))
 
-		s.Info("Laws:", fmt.Sprintf("Network: %s | Max processes: %d",
-			u.Manifest.Physics.Laws.Network,
+		s.Info("Laws:", fmt.Sprintf("Network: bridge | Max processes: %d",
 			u.Manifest.Physics.Laws.MaxProcesses,
 		))
 

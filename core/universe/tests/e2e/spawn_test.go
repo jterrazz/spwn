@@ -96,7 +96,6 @@ physics:
     disk: 4g
     timeout: 60m
   laws:
-    network: none
     max-processes: 64
   elements:
     - "@unix"

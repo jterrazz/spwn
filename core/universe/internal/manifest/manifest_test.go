@@ -84,9 +84,6 @@ func TestApplyDefaults(t *testing.T) {
 		if m.Physics.Constants.Timeout == "" {
 			t.Error("Timeout should not be empty after ApplyDefaults")
 		}
-		if m.Physics.Laws.Network == "" {
-			t.Error("Network should not be empty after ApplyDefaults")
-		}
 		if m.Physics.Laws.MaxProcesses == 0 {
 			t.Error("MaxProcesses should not be zero after ApplyDefaults")
 		}
@@ -102,7 +99,6 @@ func TestApplyDefaults(t *testing.T) {
 					Timeout: "1h",
 				},
 				Laws: models.LawsManifest{
-					Network:      "bridge",
 					MaxProcesses: 256,
 				},
 			},
@@ -121,9 +117,6 @@ func TestApplyDefaults(t *testing.T) {
 		if m.Physics.Constants.Timeout != "1h" {
 			t.Errorf("Timeout = %q, want %q", m.Physics.Constants.Timeout, "1h")
 		}
-		if m.Physics.Laws.Network != "bridge" {
-			t.Errorf("Network = %q, want %q", m.Physics.Laws.Network, "bridge")
-		}
 		if m.Physics.Laws.MaxProcesses != 256 {
 			t.Errorf("MaxProcesses = %d, want 256", m.Physics.Laws.MaxProcesses)
 		}
@@ -137,45 +130,18 @@ func TestValidate(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "valid_none_network",
+			name: "valid_manifest",
 			m: models.Manifest{
 				Physics: models.PhysicsManifest{
 					Constants: models.ConstantsManifest{CPU: 1},
-					Laws:      models.LawsManifest{Network: "none"},
 				},
 			},
-		},
-		{
-			name: "valid_bridge_network",
-			m: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Laws: models.LawsManifest{Network: "bridge"},
-				},
-			},
-		},
-		{
-			name: "valid_host_network",
-			m: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Laws: models.LawsManifest{Network: "host"},
-				},
-			},
-		},
-		{
-			name: "invalid_network",
-			m: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Laws: models.LawsManifest{Network: "custom"},
-				},
-			},
-			wantErr: true,
 		},
 		{
 			name: "negative_cpu",
 			m: models.Manifest{
 				Physics: models.PhysicsManifest{
 					Constants: models.ConstantsManifest{CPU: -1},
-					Laws:      models.LawsManifest{Network: "none"},
 				},
 			},
 			wantErr: true,

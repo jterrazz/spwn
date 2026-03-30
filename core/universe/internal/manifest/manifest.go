@@ -120,7 +120,6 @@ physics:
     timeout: 30m
 
   laws:
-    network: bridge
     max-processes: 256
 
   elements:
@@ -153,7 +152,6 @@ physics:
     timeout: 30m
 
   laws:
-    network: bridge
     max-processes: 256
 
   elements:
@@ -199,9 +197,6 @@ func ApplyDefaults(m *models.Manifest) {
 	if m.Physics.Constants.Timeout == "" {
 		m.Physics.Constants.Timeout = foundation.DefaultTimeout
 	}
-	if m.Physics.Laws.Network == "" {
-		m.Physics.Laws.Network = foundation.DefaultNetwork
-	}
 	if m.Physics.Laws.MaxProcesses == 0 {
 		m.Physics.Laws.MaxProcesses = foundation.DefaultMaxProcs
 	}
@@ -209,11 +204,6 @@ func ApplyDefaults(m *models.Manifest) {
 
 // Validate checks that a manifest is well-formed.
 func Validate(m models.Manifest) error {
-	switch m.Physics.Laws.Network {
-	case "none", "bridge", "host":
-	default:
-		return fmt.Errorf("invalid network law %q (must be none, bridge, or host)", m.Physics.Laws.Network)
-	}
 	if m.Physics.Constants.CPU < 0 {
 		return fmt.Errorf("CPU must be >= 0")
 	}
