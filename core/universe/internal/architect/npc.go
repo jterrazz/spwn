@@ -47,15 +47,12 @@ func (a *Architect) SpawnNPC(ctx context.Context, universeID string, task string
 		Prompt: task,
 	})
 
-	var env []string
-	if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
-		env = append(env, "ANTHROPIC_API_KEY="+apiKey)
-	}
+	env := agentEnv()
 
 	exitCode, err := a.backend.Exec(ctx, u.ContainerID, backend.ExecConfig{
 		Cmd: cmd,
 		Env: env,
-		TTY: true,
+		TTY: false,
 	})
 
 	a.state.UpdateStatus(universeID, models.StatusIdle)

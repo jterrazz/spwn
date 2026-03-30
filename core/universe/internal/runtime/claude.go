@@ -29,14 +29,18 @@ func (c *ClaudeCode) Name() string {
 func (c *ClaudeCode) BuildCommand(cfg SpawnConfig) []string {
 	cmd := []string{"claude", "--dangerously-skip-permissions"}
 
+	// NPC mode: no Mind, no session — just run the prompt and exit
 	if cfg.MindPath == "" {
+		if cfg.Prompt != "" {
+			cmd = append(cmd, "-p", cfg.Prompt, "--print")
+		}
 		return cmd
 	}
 
+	// Citizen/Governor mode: session management
 	sessID := agent.DeterministicSessionID(cfg.AgentName, cfg.UniverseID)
 	cmd = append(cmd, "--session-id", sessID)
 
-	// Check if session exists (resume vs new)
 	existing, err := agent.LoadSession(cfg.MindPath, cfg.UniverseID)
 	if err == nil && existing != nil {
 		cmd = append(cmd, "--resume")
