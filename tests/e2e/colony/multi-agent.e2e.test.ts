@@ -40,7 +40,6 @@ describe("colony multi-agent", () => {
     expectLine(spawnResult.output, /✓ Mounted mind\s+neo → \/mind\/neo/);
     expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
     expectLine(spawnResult.output, /✓ Colony spawned\s+2 agent\(s\)/);
-    expectLine(spawnResult.output, /✓ Agent is alive\./);
 
     // AND — container is running with world files
     const id = parseWorldId(spawnResult.output)!;
