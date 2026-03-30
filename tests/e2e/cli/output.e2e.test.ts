@@ -20,6 +20,7 @@ describe("CLI output", () => {
       "observatory",
       "skill",
       "init",
+      "status",
     ]) {
       expectLine(result.output, new RegExp(`^\\s*${cmd}\\s+`));
     }
