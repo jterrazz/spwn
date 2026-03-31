@@ -32,7 +32,7 @@ describe("spwn init", () => {
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Created organization\s+org\.yaml/);
     expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
-    expectLine(result.output, /✓ Ready\. Run: spwn world -c \w+/);
+    expectLine(result.output, /✓ Ready\. Next steps:/);
   });
 
   test("creates org.yaml", async () => {
@@ -78,7 +78,7 @@ describe("spwn init", () => {
 
     // THEN — a random name is generated and setup completes
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Ready\. Run: spwn world -c \w+/);
+    expectLine(result.output, /✓ Ready\. Next steps:/);
   });
 
   test("accepts custom name", async () => {
@@ -90,6 +90,6 @@ describe("spwn init", () => {
     // THEN — the custom name is used in the config
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Created config\s+acme\.yaml/);
-    expectLine(result.output, /✓ Ready\. Run: spwn world -c acme/);
+    expectLine(result.output, /✓ Ready\. Next steps:/);
   });
 });
