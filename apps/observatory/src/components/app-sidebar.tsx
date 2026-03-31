@@ -2,6 +2,18 @@
 
 import { usePathname } from "next/navigation";
 import {
+  IconWorldFilled,
+  IconCpuFilled,
+  IconSearch,
+  IconBoltFilled,
+  IconMessageFilled,
+  IconMoonFilled,
+  IconCircleFilled,
+  IconPointFilled,
+  IconChevronDown,
+  IconGhostFilled,
+} from "@tabler/icons-react";
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -30,11 +42,20 @@ interface AppSidebarProps {
   currentWorldId?: string;
 }
 
-const STATUS_DOT: Record<string, string> = {
-  running: "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]",
-  idle: "bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.5)]",
-  stopped: "bg-white/20",
-  creating: "bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.5)]",
+// Agent status → Tabler filled icon + color
+const AGENT_ICON: Record<string, { icon: typeof IconBoltFilled; color: string; dim: boolean }> = {
+  running:  { icon: IconBoltFilled, color: "text-green-400", dim: false },
+  waiting:  { icon: IconMessageFilled, color: "text-amber-400 animate-pulse", dim: false },
+  sleeping: { icon: IconMoonFilled, color: "text-purple-400", dim: false },
+  idle:     { icon: IconPointFilled, color: "text-white/20", dim: true },
+  stopped:  { icon: IconPointFilled, color: "text-white/10", dim: true },
+};
+
+const WORLD_DOT: Record<string, string> = {
+  running: "text-green-500",
+  idle: "text-white/25",
+  stopped: "text-white/10",
+  creating: "text-blue-400",
 };
 
 function extractName(id: string): string {
@@ -60,9 +81,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
           className="mt-3 w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-white/[0.03] transition-colors"
           onClick={() => {/* TODO: command palette */}}
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
-            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <IconSearch size={13} className="opacity-40" />
           <span className="flex-1 text-left">Search...</span>
           <kbd className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06]">⌘K</kbd>
         </button>
@@ -77,7 +96,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
                 isActive={pathname === "/"}
                 onClick={() => window.location.href = "/"}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-60"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /></svg>
+                <IconWorldFilled size={16} className="opacity-50" />
                 <span>Overview</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -86,7 +105,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
                 isActive={pathname === "/architect"}
                 onClick={() => window.location.href = "/architect"}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-60"><rect x="2" y="2" width="20" height="20" rx="2" /><line x1="12" y1="2" x2="12" y2="22" /><line x1="2" y1="12" x2="22" y2="12" /></svg>
+                <IconCpuFilled size={16} className="opacity-50" />
                 <span>Architect</span>
                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
               </SidebarMenuButton>
@@ -114,28 +133,31 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
                         href={`/world/${world.id}`}
                         className={`flex flex-1 items-center gap-2.5 rounded-md px-2 py-1.5 text-xs transition-colors ${isWorldActive ? "bg-white/[0.06] text-foreground" : "text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.03]"}`}
                       >
-                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[world.status]}`} />
+                        <IconCircleFilled size={8} className={`shrink-0 ${WORLD_DOT[world.status] ?? "text-white/10"}`} />
                         <span className="font-medium">{name}</span>
                       </a>
                       <CollapsibleTrigger className="px-2 py-1.5 text-muted-foreground/25 hover:text-muted-foreground/50 transition-colors">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                        <IconChevronDown size={12} />
                       </CollapsibleTrigger>
                     </div>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {world.agents.map((agent) => (
-                          <SidebarMenuSubItem key={agent.name}>
-                            <SidebarMenuSubButton
-                              isActive={pathname === `/world/${world.id}/${agent.name}`}
-                              onClick={() => window.location.href = `/world/${world.id}/${agent.name}`}
-                              className="text-[11px]"
-                            >
-                              <div className={`w-1 h-1 rounded-full shrink-0 ${STATUS_DOT[agent.status]}`} />
-                              <span>{agent.name}</span>
-                              <span className="ml-auto text-[9px] text-muted-foreground/25 capitalize">{agent.tier}</span>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
+                        {world.agents.map((agent) => {
+                          const s = AGENT_ICON[agent.status] ?? AGENT_ICON.stopped;
+                          const StatusIcon = s.icon;
+                          return (
+                            <SidebarMenuSubItem key={agent.name}>
+                              <SidebarMenuSubButton
+                                isActive={pathname === `/world/${world.id}/${agent.name}`}
+                                onClick={() => window.location.href = `/world/${world.id}/${agent.name}`}
+                                className="text-[11px]"
+                              >
+                                <span className={s.dim ? "opacity-40" : ""}>{agent.name}</span>
+                                <StatusIcon size={12} className={`ml-auto shrink-0 ${s.color}`} />
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -155,7 +177,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
               {limboAgents.map((agent) => (
                 <SidebarMenuItem key={agent.name}>
                   <SidebarMenuButton className="text-[11px] text-muted-foreground/35">
-                    <div className="w-1 h-1 rounded-full bg-white/10 shrink-0" />
+                    <IconGhostFilled size={12} className="opacity-20 shrink-0" />
                     <span>{agent.name}</span>
                     <span className="ml-auto text-[9px] font-mono text-muted-foreground/20">
                       {agent.layers}/6
