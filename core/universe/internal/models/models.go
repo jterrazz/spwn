@@ -54,7 +54,7 @@ type World struct {
 	Status      Status        `json:"status"`
 	CreatedAt   time.Time     `json:"created_at"`
 	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support
-	Manifest    Manifest      `json:"-"`
+	Manifest    Manifest      `json:"manifest,omitempty"`
 }
 
 // Status tracks the lifecycle state of a universe.
