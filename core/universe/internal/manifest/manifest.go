@@ -106,7 +106,7 @@ func CreateDefault() error {
 
 	path := filepath.Join(dir, "default.yaml")
 	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("default.yaml already exists")
+		return fmt.Errorf("default.yaml already exists.\nEdit it at %s or remove it first", path)
 	}
 
 	content := `# Default world config — defines the physics of your world.
@@ -144,7 +144,7 @@ func CreateConfig(name string) error {
 
 	path := filepath.Join(dir, name+".yaml")
 	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("config %q already exists", name)
+		return fmt.Errorf("config %q already exists.\nEdit it at %s or remove it first", name, path)
 	}
 
 	content := fmt.Sprintf(`# World config: %s
@@ -210,7 +210,7 @@ func ApplyDefaults(m *models.Manifest) {
 // Validate checks that a manifest is well-formed.
 func Validate(m models.Manifest) error {
 	if m.Physics.Constants.CPU < 0 {
-		return fmt.Errorf("CPU must be >= 0")
+		return fmt.Errorf("cpu must be >= 0.\nSet a positive CPU value in your world config")
 	}
 	return nil
 }

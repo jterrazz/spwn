@@ -40,12 +40,12 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		case "citizen":
 			citizens = append(citizens, spec)
 		default:
-			return fmt.Errorf("agent %q: invalid tier %q (must be \"governor\" or \"citizen\")", spec.Name, spec.Tier)
+			return fmt.Errorf("agent %q: invalid tier %q.\nUse \"governor\" or \"citizen\" in the colony spec", spec.Name, spec.Tier)
 		}
 	}
 
 	if len(governors) > 1 {
-		return fmt.Errorf("at most one governor allowed, got %d", len(governors))
+		return fmt.Errorf("at most one governor allowed, got %d.\nRemove extra governors from the colony spec", len(governors))
 	}
 
 	// 3. Register all agent records in state

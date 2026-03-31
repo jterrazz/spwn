@@ -26,7 +26,7 @@ export const MOCK_WORLDS: World[] = [
     agent: "neo",
     agents: [{ name: "neo", tier: "citizen", status: "running" }],
     status: "running",
-    created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+    created_at: "2026-04-01T16:00:00Z",
     workspace: "~/acme-api",
   },
   {
@@ -38,7 +38,7 @@ export const MOCK_WORLDS: World[] = [
       { name: "trinity", tier: "citizen", status: "idle" },
     ],
     status: "running",
-    created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    created_at: "2026-04-01T15:30:00Z",
     workspace: "~/signews",
   },
   {
@@ -47,7 +47,7 @@ export const MOCK_WORLDS: World[] = [
     agent: "atlas",
     agents: [{ name: "atlas", tier: "citizen", status: "idle" }],
     status: "idle",
-    created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+    created_at: "2026-04-01T14:00:00Z",
     workspace: "~/infra",
   },
 ];

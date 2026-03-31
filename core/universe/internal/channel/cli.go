@@ -32,7 +32,7 @@ func (c *CLIChannel) Send(ctx context.Context, msg ChannelMessage) error {
 
 // Receive is not supported for the CLI channel.
 func (c *CLIChannel) Receive(ctx context.Context) (<-chan ChannelMessage, error) {
-	return nil, fmt.Errorf("CLI channel does not support async receive")
+	return nil, fmt.Errorf("cli channel does not support async receive.\nUse a different channel type for async messaging")
 }
 
 // Close is a no-op for the CLI channel.

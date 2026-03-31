@@ -22,25 +22,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ThemeToggle } from "@/components/theme-toggle";
-
-interface Agent {
-  name: string;
-  tier: string;
-  status: string;
-}
-
-interface World {
-  id: string;
-  config: string;
-  agent: string;
-  agents: Agent[];
-  status: string;
-}
-
-interface LimboAgent {
-  name: string;
-  layers: number;
-}
+import type { World, LimboAgent } from "@/lib/mock-data";
 
 interface AppSidebarProps {
   worlds: World[];
@@ -55,12 +37,6 @@ const STATUS_DOT: Record<string, string> = {
   creating: "bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.5)]",
 };
 
-const TIER_ICON: Record<string, string> = {
-  governor: "♛",
-  citizen: "◉",
-  npc: "◌",
-};
-
 function extractName(id: string): string {
   const parts = id.split("-");
   return parts.length >= 2
@@ -70,35 +46,30 @@ function extractName(id: string): string {
 
 export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarProps) {
   const pathname = usePathname();
-  const currentWorld = worlds.find((w) => w.id === currentWorldId);
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-4 space-y-3">
-        <a href="/" className="flex items-center gap-2.5">
-          <span className="text-sm tracking-[0.2em] font-heading text-foreground/90">
-            ⬡ observatory
+      {/* ── Header: brand + search hint ── */}
+      <SidebarHeader className="px-4 pt-4 pb-2">
+        <a href="/" className="flex items-center gap-2">
+          <span className="text-sm tracking-[0.15em] font-heading text-foreground/90">
+            ⬡ spwn
           </span>
         </a>
-
-        {/* World selector dropdown */}
-        {currentWorld && (
-          <div className="glass-subtle px-3 py-2 flex items-center gap-2">
-            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[currentWorld.status]}`} />
-            <span className="text-xs font-heading text-foreground/70 flex-1">
-              {extractName(currentWorld.id)}
-            </span>
-            <span className="text-[10px] font-mono text-muted-foreground/30">
-              ⌄
-            </span>
-          </div>
-        )}
+        <button
+          className="mt-3 w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-white/[0.03] transition-colors"
+          onClick={() => {/* TODO: command palette */}}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <span className="flex-1 text-left">Search...</span>
+          <kbd className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06]">⌘K</kbd>
+        </button>
       </SidebarHeader>
 
-      <SidebarSeparator />
-
       <SidebarContent>
-        {/* Universe overview */}
+        {/* ── Navigation ── */}
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
@@ -106,8 +77,18 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
                 isActive={pathname === "/"}
                 onClick={() => window.location.href = "/"}
               >
-                <span className="text-sm">◉</span>
-                <span>Universe</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-60"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /></svg>
+                <span>Overview</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={pathname === "/architect"}
+                onClick={() => window.location.href = "/architect"}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-60"><rect x="2" y="2" width="20" height="20" rx="2" /><line x1="12" y1="2" x2="12" y2="22" /><line x1="2" y1="12" x2="22" y2="12" /></svg>
+                <span>Architect</span>
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -115,80 +96,88 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
 
         <SidebarSeparator />
 
-        {/* Worlds */}
+        {/* ── Worlds ── */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/40">
+          <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
             Worlds
           </SidebarGroupLabel>
           <SidebarMenu>
-            {worlds.map((world) => (
-              <Collapsible key={world.id} defaultOpen>
-                <SidebarMenuItem>
-                  <div className="flex w-full items-center">
-                    <a
-                      href={`/world/${world.id}`}
-                      className={`flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-xs font-mono hover:bg-sidebar-accent transition-colors ${pathname === `/world/${world.id}` ? "bg-sidebar-accent text-foreground" : "text-muted-foreground/70"}`}
-                    >
-                      <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[world.status]}`} />
-                      <span>{extractName(world.id)}</span>
-                    </a>
-                    <CollapsibleTrigger className="px-1.5 py-1 text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-colors">
-                      ⌄
-                    </CollapsibleTrigger>
-                  </div>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {world.agents.map((agent) => (
-                        <SidebarMenuSubItem key={agent.name}>
-                          <SidebarMenuSubButton
-                            isActive={pathname === `/world/${world.id}/${agent.name}`}
-                            onClick={() => window.location.href = `/world/${world.id}/${agent.name}`}
-                          >
-                            <span className="text-[10px] text-muted-foreground/50">
-                              {TIER_ICON[agent.tier] ?? "◌"}
-                            </span>
-                            <span className="text-xs">{agent.name}</span>
-                            <div className={`w-1 h-1 rounded-full ml-auto shrink-0 ${STATUS_DOT[agent.status]}`} />
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            ))}
+            {worlds.map((world) => {
+              const name = extractName(world.id);
+              const isWorldActive = pathname.startsWith(`/world/${world.id}`);
+
+              return (
+                <Collapsible key={world.id} defaultOpen={isWorldActive || worlds.length <= 4}>
+                  <SidebarMenuItem>
+                    <div className="flex w-full items-center">
+                      <a
+                        href={`/world/${world.id}`}
+                        className={`flex flex-1 items-center gap-2.5 rounded-md px-2 py-1.5 text-xs transition-colors ${isWorldActive ? "bg-white/[0.06] text-foreground" : "text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.03]"}`}
+                      >
+                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[world.status]}`} />
+                        <span className="font-medium">{name}</span>
+                      </a>
+                      <CollapsibleTrigger className="px-2 py-1.5 text-muted-foreground/25 hover:text-muted-foreground/50 transition-colors">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                      </CollapsibleTrigger>
+                    </div>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {world.agents.map((agent) => (
+                          <SidebarMenuSubItem key={agent.name}>
+                            <SidebarMenuSubButton
+                              isActive={pathname === `/world/${world.id}/${agent.name}`}
+                              onClick={() => window.location.href = `/world/${world.id}/${agent.name}`}
+                              className="text-[11px]"
+                            >
+                              <div className={`w-1 h-1 rounded-full shrink-0 ${STATUS_DOT[agent.status]}`} />
+                              <span>{agent.name}</span>
+                              <span className="ml-auto text-[9px] text-muted-foreground/25 capitalize">{agent.tier}</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Limbo agents */}
+        {/* ── Limbo agents ── */}
         {limboAgents.length > 0 && (
-          <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/40">
-                Limbo
-              </SidebarGroupLabel>
-              <SidebarMenu>
-                {limboAgents.map((agent) => (
-                  <SidebarMenuItem key={agent.name}>
-                    <SidebarMenuButton className="text-xs text-muted-foreground/50">
-                      <span className="text-[10px]">◌</span>
-                      <span>{agent.name}</span>
-                      <span className="ml-auto text-[10px] text-muted-foreground/30 font-mono">
-                        {agent.layers}/6
-                      </span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroup>
-          </>
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
+              Limbo
+            </SidebarGroupLabel>
+            <SidebarMenu>
+              {limboAgents.map((agent) => (
+                <SidebarMenuItem key={agent.name}>
+                  <SidebarMenuButton className="text-[11px] text-muted-foreground/35">
+                    <div className="w-1 h-1 rounded-full bg-white/10 shrink-0" />
+                    <span>{agent.name}</span>
+                    <span className="ml-auto text-[9px] font-mono text-muted-foreground/20">
+                      {agent.layers}/6
+                    </span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
         )}
+
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      {/* ── Footer ── */}
+      <SidebarFooter className="px-4 py-3">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-mono text-muted-foreground/30">spwn vdev</span>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">
+              J
+            </div>
+            <span className="text-[11px] text-muted-foreground/40">jterrazz</span>
+          </div>
           <ThemeToggle />
         </div>
       </SidebarFooter>
