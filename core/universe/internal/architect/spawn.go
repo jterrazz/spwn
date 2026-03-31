@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"spwn.sh/core/agent"
 	"spwn.sh/core/gate"
@@ -376,6 +377,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		MindPath:    mindPath,
 		GateDir:     gateDir,
 		Status:      models.StatusIdle,
+		CreatedAt:   time.Now(),
 		Manifest:    opts.Manifest,
 	}
 
