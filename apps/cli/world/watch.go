@@ -31,7 +31,7 @@ the recipient agent via 'spwn agent talk'.`,
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		u, err := arc.Inspect(ctx, worldID)

@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/core/agent"
@@ -55,7 +56,7 @@ after the world is destroyed.`,
 			}
 			arc, err := universe.NewArchitectFromEnv()
 			if err != nil {
-				return err
+				return dockerHint(err)
 			}
 			s.Blank()
 			s.Done("NPC dispatched", fmt.Sprintf("%q → %s", npcTask, worldID))
@@ -81,7 +82,7 @@ after the world is destroyed.`,
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		// Resolve world ID
@@ -116,6 +117,15 @@ after the world is destroyed.`,
 
 		return nil
 	},
+}
+
+// dockerHint wraps a NewArchitectFromEnv error with a user-friendly hint
+// when Docker is not running.
+func dockerHint(err error) error {
+	if strings.Contains(err.Error(), "cannot connect to Docker") {
+		return fmt.Errorf("error: Docker is not running.\nRun 'docker info' to check, or start Docker Desktop.")
+	}
+	return err
 }
 
 // newStepper creates a Stepper using the persistent root flags.

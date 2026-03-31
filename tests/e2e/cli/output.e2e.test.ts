@@ -17,7 +17,7 @@ describe("CLI output", () => {
     expectLine(result.output, /System:/);
     expectLine(result.output, /Flags:/);
     // Key commands present (lines are trimmed, so cmd is at start)
-    for (const cmd of ["world", "agent", "init", "status", "claw", "observatory", "skill", "upgrade"]) {
+    for (const cmd of ["world", "agent", "init", "status", "doctor", "claw", "observatory", "skill", "upgrade"]) {
       expectLine(result.output, new RegExp(`${cmd}\\s+`));
     }
     // Flags
@@ -151,5 +151,24 @@ describe("CLI output", () => {
 
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("latest");
+  });
+
+  test("doctor runs diagnostic checks", async () => {
+    const result = await spwn("doctor")
+      .exec("doctor")
+      .run();
+
+    expect(result.exitCode).toBe(0);
+    expect(stripAnsi(result.output)).toContain("Docker");
+    expect(stripAnsi(result.output)).toContain("Version");
+  });
+
+  test("help lists doctor command", async () => {
+    const result = await spwn("help with doctor")
+      .exec("--help")
+      .run();
+
+    expect(result.exitCode).toBe(0);
+    expectLine(result.output, /doctor\s+/);
   });
 });

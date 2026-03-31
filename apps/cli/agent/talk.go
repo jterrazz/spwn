@@ -116,7 +116,7 @@ func findAgentContainer(agentName string) (string, string, error) {
 
 	arc, err := universe.NewArchitectFromEnv()
 	if err != nil {
-		return "", "", fmt.Errorf("error: cannot connect to backend.\n%w", err)
+		return "", "", dockerHint(err)
 	}
 
 	worlds, err := arc.List(ctx)
