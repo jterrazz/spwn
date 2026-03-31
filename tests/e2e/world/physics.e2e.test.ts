@@ -114,14 +114,23 @@ describe("world physics", () => {
     );
     const id = parseWorldId(result.output)!;
 
+    // Verify network mode is set to none via docker inspect
+    const inspectData = ctx.universe(id).inspect() as {
+      HostConfig?: { NetworkMode?: string };
+    };
+    expect(inspectData.HostConfig?.NetworkMode).toBe("none");
+
     // Try to curl from inside — should fail with network=none
+    // We use exec and expect it to throw (non-zero exit code)
+    let curlSucceeded = false;
     try {
       ctx
         .universe(id)
         .exec("curl -s --connect-timeout 2 http://example.com");
-      // If curl succeeds, network is not isolated — but curl might not exist
+      curlSucceeded = true;
     } catch {
-      // Expected: either curl not found or connection refused
+      // Expected: connection fails because network is disabled
     }
+    expect(curlSucceeded).toBe(false);
   });
 });

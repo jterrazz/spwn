@@ -1,6 +1,6 @@
 #!/bin/bash
 # Mock Claude Code CLI for E2E testing
-# Records what it observed and exits
+# Records what it observed, writes to workspace, and exits
 
 OUTPUT="/tmp/claude-mock.json"
 EXIT_CODE=0
@@ -24,6 +24,7 @@ cat > "$OUTPUT" <<RECORD
 {
   "mind_exists": $([ -d /mind ] && echo true || echo false),
   "mind_personas": $([ -d /mind/personas ] && echo true || echo false),
+  "mind_identity": $([ -d /mind/identity ] && echo true || echo false),
   "physics_exists": $([ -f /universe/physics.md ] && echo true || echo false),
   "faculties_exists": $([ -f /universe/faculties.md ] && echo true || echo false),
   "workspace_exists": $([ -d /workspace ] && echo true || echo false),
@@ -35,6 +36,11 @@ cat > "$OUTPUT" <<RECORD
   "exit_code": $EXIT_CODE
 }
 RECORD
+
+# Write to workspace to prove the agent can DO something (not just observe)
+if [ -d /workspace ]; then
+  echo "mock-claude was here" > /workspace/mock-output.txt
+fi
 
 [ "$SLEEP" -gt 0 ] && sleep "$SLEEP"
 exit "$EXIT_CODE"

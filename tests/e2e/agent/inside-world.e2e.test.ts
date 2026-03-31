@@ -88,24 +88,14 @@ describe("agent inside world", () => {
     );
     const id = parseWorldId(result.output)!;
 
-    // Attempt to read mock agent probe — only if the mock agent writes it
-    try {
-      ctx
-        .universe(id)
-        .agentProbe()
-        .sawMind()
-        .sawIdentity()
-        .sawPhysics()
-        .sawFaculties();
-    } catch {
-      // If probe not found, the test image may not have a mock agent
-      // Fall back to direct file checks
-      ctx
-        .universe(id)
-        .toHaveDirectory("/mind")
-        .toHaveFile("/universe/physics.md")
-        .toHaveFile("/universe/faculties.md");
-    }
+    // Read mock agent probe — it MUST exist if the mock agent ran
+    ctx
+      .universe(id)
+      .agentProbe()
+      .sawMind()
+      .sawIdentity()
+      .sawPhysics()
+      .sawFaculties();
   });
 
   test("mind agent exists on host filesystem", () => {

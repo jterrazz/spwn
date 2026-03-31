@@ -218,4 +218,18 @@ export class UniverseAssertion {
     expect(data.HostConfig?.Memory).toBe(bytes);
     return this;
   }
+
+  /** Assert CPU limit (in nanocpus) */
+  toHaveCpuLimit(nanoCpus: number): this {
+    const data = this.inspect() as { HostConfig?: { NanoCpus?: number } };
+    expect(data.HostConfig?.NanoCpus).toBe(nanoCpus);
+    return this;
+  }
+
+  /** Assert pids limit */
+  toHavePidsLimit(limit: number): this {
+    const data = this.inspect() as { HostConfig?: { PidsLimit?: number } };
+    expect(data.HostConfig?.PidsLimit).toBe(limit);
+    return this;
+  }
 }
