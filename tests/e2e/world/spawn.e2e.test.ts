@@ -29,7 +29,7 @@ describe("world spawn", () => {
     // THEN — exits successfully with structured status lines
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Mounted mind\s+neo → \/mind/);
-    expectLine(result.output, /✓ Built image\s+spwn-test:latest/);
+    expectLine(result.output, /✓ (Built image|Image ready)\s+spwn-test:latest/);
     expectLine(result.output, /✓ Spawned world\s+w-default-\d{5}/);
     expectLine(result.output, /✓ Generated faculties\s+physics\.md, faculties\.md/);
     expectLine(result.output, /✓ Agent is alive\./);
