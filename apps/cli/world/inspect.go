@@ -26,7 +26,7 @@ var inspectCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		u, err := arc.Inspect(ctx, worldID)

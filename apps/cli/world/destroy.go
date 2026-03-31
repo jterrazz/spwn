@@ -22,7 +22,7 @@ var destroyCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		s.Blank()

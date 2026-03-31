@@ -28,7 +28,7 @@ var listCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		worlds, err := arc.List(ctx)
