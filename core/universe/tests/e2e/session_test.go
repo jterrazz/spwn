@@ -66,7 +66,7 @@ func TestSession_SecondSpawnResumes(t *testing.T) {
 		Detached().
 		Execute()
 
-	universeID := chain.Universe().ID
+	worldID := chain.Universe().ID
 
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
@@ -75,7 +75,7 @@ func TestSession_SecondSpawnResumes(t *testing.T) {
 	})
 
 	// WHEN a second agent is spawned in the same world
-	err := tc.Arc.SpawnAgentDetached(context.Background(), universeID, "resume-agent")
+	err := tc.Arc.SpawnAgentDetached(context.Background(), worldID, "resume-agent")
 	if err != nil {
 		t.Fatalf("Second spawn failed: %v", err)
 	}

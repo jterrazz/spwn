@@ -44,7 +44,7 @@ func TestGenerateGovernorContext(t *testing.T) {
 	}
 
 	// Governor should NOT reference /mind/ layers
-	if strings.Contains(ctx, "/mind/personas") {
+	if strings.Contains(ctx, "/mind/identity") {
 		t.Error("governor should not reference mind layers")
 	}
 }
@@ -70,11 +70,11 @@ func TestGenerateCitizenContext(t *testing.T) {
 		"neo":            "missing name",
 		"morpheus":       "missing governor",
 		"trinity":        "missing peer",
-		"/mind/personas": "missing mind personas",
-		"/mind/skills":   "missing mind skills",
-		"/mind/knowledge":"missing mind knowledge",
-		"/mind/playbooks":"missing mind playbooks",
-		"/mind/journal":  "missing mind journal",
+		"/mind/identity/":         "missing mind identity",
+		"/mind/skills/":           "missing mind skills",
+		"/mind/memory/knowledge/": "missing mind knowledge",
+		"/mind/memory/playbooks/": "missing mind playbooks",
+		"/mind/memory/journal/":   "missing mind journal",
 		"/world/inbox":   "missing inbox",
 		"Messaging":      "missing messaging skill",
 		"w-acme-28373":   "missing world ID",

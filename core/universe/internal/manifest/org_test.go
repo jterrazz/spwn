@@ -20,7 +20,7 @@ defaults:
   memory: filesystem
   store: json
 governance:
-  max-universes: 10
+  max-worlds: 10
   audit: true
 `
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
@@ -47,8 +47,8 @@ governance:
 	if org.Defaults.Backend != "docker" {
 		t.Errorf("Defaults.Backend = %q, want %q", org.Defaults.Backend, "docker")
 	}
-	if org.Governance.MaxUniverses != 10 {
-		t.Errorf("Governance.MaxUniverses = %d, want 10", org.Governance.MaxUniverses)
+	if org.Governance.MaxWorlds != 10 {
+		t.Errorf("Governance.MaxWorlds = %d, want 10", org.Governance.MaxWorlds)
 	}
 	if !org.Governance.Audit {
 		t.Error("Governance.Audit should be true")

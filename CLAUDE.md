@@ -10,9 +10,9 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 |------|-------------------|-----------------|
 | **Runtime** | How agents think | Claude Code (ACP) |
 | **Provider** | Which LLM | Anthropic |
-| **Channel** | How Claw talks to outside | CLI |
+| **Channel** | How Architect talks to outside | CLI |
 | **Backend** | Where universes run | Docker |
-| **Memory** | How Minds persist | Filesystem (markdown) |
+| **Memory** | How profiles persist | Filesystem (markdown) |
 | **Store** | How state is tracked | JSON file |
 | **Tool** | What agents can do | Built-in + MCP |
 | **Skill** | Reusable capabilities | Local files |
@@ -21,12 +21,12 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 
 ### The Hierarchy
 - **Organization**: Top-level manifest (org.yaml). Org-wide defaults, shared skills, governance, config sync.
-- **Claw**: The God. Always-on ZeroClaw daemon in Docker. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
+- **Architect**: The always-on orchestration daemon (ZeroClaw implementation). Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 - **Universe**: The reality — physics, constants, resource limits. One per org. Configured in `universe.yaml`. Defines what is physically possible.
 - **World**: A living workspace inside the universe. Has agents, elements, and a project. Many per universe. Configured in `~/.spwn/worlds/`.
 - **Governor**: Leader agent inside a world. Decomposes tasks, delegates to citizens, aggregates results.
-- **Citizen**: Persistent worker agent. Has a Mind — remembers, learns, evolves.
-- **NPC**: Ephemeral agent. No Mind, no memory. Single task, fire & forget.
+- **Citizen**: Persistent worker agent. Has a Profile — remembers, learns, evolves.
+- **NPC**: Ephemeral agent. No Profile, no memory. Single task, fire & forget.
 - **Observatory**: Visual dashboard. Real-time view of everything.
 
 ### The Physics
@@ -34,62 +34,93 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 - **Elements**: Building blocks. @packs expand to collections. If not listed, doesn't exist.
 - **Faculties**: Verified elements + gate bridges, auto-generated as `/world/faculties.md`.
 
-### The Life
-- **Mind**: Persistent identity — 6 layers: personas, skills, knowledge, playbooks, journal, sessions.
-- **Soul**: Immutable core — purpose, values, bonds. Never changes.
-- **Life Manifest**: `life.yaml` — declares tier, runtime, identity, body requirements.
+### The Profile
+- **Profile**: Persistent identity — persona, traits, purpose, bonds, skills, memory (knowledge, playbooks, journal), sessions.
+- **Identity**: Core character — persona, purpose, traits. Lives in `identity/` directory.
+- **Profile Manifest**: `profile.yaml` — declares tier, engine, identity, requires, delegation.
 
 ### The Bridge
 - **Gate**: Bridge between universe and host. Host-side (Go) manages element bridging. Container-side (Rivet) normalizes runtimes.
 - **Rivet**: Runtime normalization layer. One API across all agent runtimes. Event streaming, session persistence.
 
 ### Evolution
-- **Reflexion**: Review journal → promote successes to playbooks (auto-reflexion.md). `spwn agent reflect`
-- **Sleep**: Archive stale files, prune old sessions. `spwn agent sleep`
-- **Forking**: Clone a Mind from source to target agent. `spwn agent fork`
+- **Reflexion**: Review journal → promote successes to playbooks (auto-reflexion.md). `spwn profile <name> reflect`
+- **Sleep**: Archive stale files, prune old sessions. `spwn profile <name> sleep`
+- **Forking**: Clone an agent from source to target. `spwn agent fork`
 
 ## CLI Commands
 
 ```bash
-# Claw (the God)
-spwn claw start                          # Start the Claw daemon
-spwn claw stop                           # Stop the Claw daemon
-spwn claw status                         # Show status, channels, active worlds
-spwn claw connect <channel>              # Connect to a messaging channel
-spwn claw "migrate auth to sessions"     # Talk to it (planned)
+# World operations (top-level)
+spwn up --agent neo -w ./my-project --detach   # Spawn a world
+spwn up -c acme-org                            # Named config
+spwn up --governor morpheus -w ~/acme-org
+spwn ls                                        # List active worlds
+spwn inspect <id>                              # Show world details
+spwn down <id>                                 # Destroy a world
+spwn logs <id>                                 # Stream agent output
+spwn attach <id>                               # Interactive shell
 
-# World (a living workspace inside the universe)
-spwn world                               # Spawn with defaults
-spwn world -c acme-org                   # Named config
-spwn world --governor morpheus -w ~/acme-org
-spwn world list / inspect / logs / attach / destroy
-spwn world send <id> --from <a> --to <b> "msg"  # Send message between agents
-spwn world inbox <id> [agent]            # Show inbox messages
-spwn world watch <id>                    # Watch for new messages (foreground)
+# Agent management
+spwn agent new <name>                          # Create a new agent
+spwn agent ls                                  # List all agents
+spwn agent rm <name>                           # Remove an agent
+spwn agent talk <name> [message]               # Talk to a running agent
+spwn agent fork <src> <dst>                    # Clone an agent
+spwn agent export <name>                       # Export agent as tar.gz
+spwn agent import <file>                       # Import agent from tar.gz
 
-# Agent (citizens + evolution)
-spwn agent -n neo --world w-acme-84721
-spwn agent init [name]
-spwn agent list / inspect / export
-spwn agent talk neo "how's the migration?"
-spwn agent reflect <agent-id>            # Reflexion: journal → auto-reflexion.md
-spwn agent sleep <agent-id>              # Sleep: archive stale, prune sessions
-spwn agent fork <agent-id>               # Fork: clone Mind to new agent
+# Profile (full character sheet)
+spwn profile <name>                            # Show full character sheet
+spwn profile <name> purpose                    # Show/edit purpose
+spwn profile <name> traits                     # Show/edit traits
+spwn profile <name> persona                    # Show/edit persona
+spwn profile <name> bonds                      # Show/edit bonds
+spwn profile <name> skills                     # List skills
+spwn profile <name> playbooks                  # List playbooks
+spwn profile <name> knowledge                  # List knowledge
+spwn profile <name> journal                    # Session history
+spwn profile <name> sessions                   # Active sessions
+spwn profile <name> reflect                    # Promote patterns to playbooks
+spwn profile <name> sleep                      # Consolidate experience
+spwn profile <name> edit                       # Edit profile.yaml
+spwn profile <name> tier                       # Show/set agent tier
+spwn profile <name> engine                     # Show/set runtime engine
+
+# Messaging
+spwn msg send <agent> --from <sender> "msg"    # Send message to agent
+spwn msg inbox <agent>                         # Show inbox messages
+spwn msg watch <agent>                         # Watch for new messages
+
+# Snapshots
+spwn snap save <id>                            # Save world state
+spwn snap ls                                   # List snapshots
+spwn snap restore <snap>                       # Restore from snapshot
+spwn snap rm <snap>                            # Remove a snapshot
+
+# Architect (orchestration daemon)
+spwn architect start                           # Start the Architect daemon
+spwn architect stop                            # Stop the Architect daemon
+spwn architect status                          # Show status, channels, active worlds
+spwn architect connect <channel>               # Connect to a messaging channel
+
+# Skills (marketplace)
+spwn skill ls                                  # List available skills
+spwn skill install <skill>                     # Install a skill
+spwn skill rm <skill>                          # Remove a skill
+
+# Authentication
+spwn auth login                                # Login
+spwn auth logout                               # Logout
+spwn auth token                                # Show/manage tokens
 
 # NPC (ephemeral)
 spwn agent --npc "task" --world w-acme-84721
-
-# Observatory
-spwn observatory start / open
-
-# Skills (marketplace)
-spwn skill list                          # List available skills
-spwn skill install <skill>               # Install a skill
-spwn skill remove <skill>                # Remove a skill
 ```
 
 **Design rules:**
 - `spwn` IS the verb — no "create" or "spawn" subcommand
+- Top-level commands for world operations: up, down, ls, logs, attach, inspect
 - Config name via `-c` flag, agent name via `-n` flag (not positional — avoids conflict with subcommands)
 - Global flags: `--json`, `--quiet`/`-q`, `--verbose`/`-v`
 
@@ -112,21 +143,21 @@ spwn skill remove <skill>                # Remove a skill
 │   └── acme-org.yaml
 ├── agents/
 │   └── neo/
-│       ├── soul/            # purpose.md, values.md, bonds.md
-│       ├── mind/
-│       │   ├── personas/
-│       │   ├── skills/
-│       │   ├── knowledge/
-│       │   ├── playbooks/
-│       │   └── journal/
-│       ├── sessions/
-│       └── life.yaml        # Tier, runtime, identity, body
+│       ├── profile.yaml     # Tier, engine, identity, requires, delegation
+│       ├── identity/        # persona.md, purpose.md, traits.md
+│       ├── skills/          # Agent skills
+│       ├── memory/
+│       │   ├── knowledge/   # Facts, codebase info
+│       │   ├── playbooks/   # Step-by-step workflows
+│       │   └── journal/     # Session logs
+│       ├── sessions/        # Active session state
+│       └── bonds.md         # Relationships with other agents
 └── skills/
     ├── local/               # Custom skills
     └── marketplace/         # Downloaded from marketplace
 ```
 
-**Manifest hierarchy (cascading overrides):** `org.yaml` → `universe.yaml` → `life.yaml`. Each level inherits from parent and can override.
+**Manifest hierarchy (cascading overrides):** `org.yaml` → `universe.yaml` → `profile.yaml`. Each level inherits from parent and can override.
 
 ## Repository Structure
 
@@ -153,15 +184,15 @@ spwn/
 │   │       ├── observatory/         #     HTTP API server (/api/worlds, /api/agents)
 │   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
 │   │       ├── physics/             #     Physics/faculties generation
-│   │       ├── manifest/            #     Config parsing (universe.yaml, life.yaml, org.yaml)
+│   │       ├── manifest/            #     Config parsing (universe.yaml, profile.yaml, org.yaml)
 │   │       ├── state/               #     Universe + Claw state (JSON)
 │   │       ├── models/              #     Domain types (World, Manifest, Status, AgentRecord)
 │   │       └── ports/               #     8 port interfaces (Runtime, Backend, Provider, etc.)
 │   │
-│   ├── agent/                       #   go.mod — life management
-│   │   ├── agent.go                 #   Public API (Info, InitMind, Reflect, Sleep, Fork)
+│   ├── agent/                       #   go.mod — agent management
+│   │   ├── agent.go                 #   Public API (Info, InitProfile, Reflect, Sleep, Fork)
 │   │   └── internal/
-│   │       ├── mind/                #     Mind CRUD (init, validate, list, inspect, export)
+│   │       ├── profile/             #     Profile CRUD (init, validate, list, inspect, export)
 │   │       ├── journal/             #     Episodic memory (append, list)
 │   │       ├── session/             #     Session persistence (load, save)
 │   │       ├── evolution/           #     Reflexion, Sleep, Forking
@@ -180,7 +211,7 @@ spwn/
 │   │       └── models/              #     Message type
 │   │
 │   └── foundation/                  #   go.mod — cross-cutting primitives
-│       ├── constants.go             #     Defaults, MindLayers, BaseImage
+│       ├── constants.go             #     Defaults, ProfileLayers, BaseImage
 │       ├── paths.go                 #     BaseDir(), WorldsDir(), AgentsDir(), OrgPath()
 │       ├── identity.go              #     GenerateWorldID(), GenerateAgentID()
 │       └── names.go                 #     RandomCosmosWord(), RandomAgentName()
@@ -189,13 +220,15 @@ spwn/
 │   ├── cli/                         #   go.mod — the spwn binary
 │   │   ├── cmd/spwn/main.go         #     Entry point
 │   │   ├── root.go                  #     Root cobra command
-│   │   ├── init.go                  #     spwn init
 │   │   ├── defaults.go              #     Auto-create defaults on first run
-│   │   ├── world/                   #     World subcommands (thin wrappers)
-│   │   ├── agent/                   #     Agent subcommands (+ reflect, sleep, fork)
-│   │   ├── claw/                    #     Claw subcommands (start, stop, status, connect)
-│   │   ├── skill/                   #     Skill subcommands (list, install, remove)
-│   │   ├── observatory/             #     Observatory subcommands (start, open)
+│   │   ├── world/                   #     World subcommands (up, down, ls, logs, attach, inspect)
+│   │   ├── agent/                   #     Agent subcommands (new, ls, rm, talk, fork, export, import)
+│   │   ├── profile/                 #     Profile subcommands (full character sheet)
+│   │   ├── msg/                     #     Messaging subcommands (send, inbox, watch)
+│   │   ├── snap/                    #     Snapshot subcommands (save, ls, restore, rm)
+│   │   ├── architect/                #     Architect subcommands (start, stop, status, connect)
+│   │   ├── skill/                   #     Skill subcommands (ls, install, rm)
+│   │   ├── auth/                    #     Auth subcommands (login, logout, token)
 │   │   ├── ui/                      #     Stepper, table, style, format
 │   │   └── tests/
 │   │       └── integration/         #   Cross-domain flows (world + agent)

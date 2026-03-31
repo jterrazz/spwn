@@ -29,8 +29,7 @@ var snapshotCmd = &cobra.Command{
 		s.Start("Saving snapshot...")
 		tag, err := arc.Snapshot(context.Background(), worldID, snapshotName)
 		if err != nil {
-			s.Fail("Snapshot failed", err)
-			return err
+			return s.FailHint("Snapshot failed", err, "Check that the world is running with \"spwn world list\"")
 		}
 
 		s.Done("Saved snapshot", tag)
@@ -99,7 +98,7 @@ var restoreCmd = &cobra.Command{
 		}
 		m, err := universe.LoadManifest(configName)
 		if err != nil {
-			return fmt.Errorf("error: cannot load config %q.\n%w", configName, err)
+			return fmt.Errorf("cannot load config %q: %w", configName, err)
 		}
 		universe.ApplyDefaults(&m)
 
@@ -114,8 +113,7 @@ var restoreCmd = &cobra.Command{
 		s.Start("Restoring from snapshot...")
 		result, err := arc.Spawn(context.Background(), opts)
 		if err != nil {
-			s.Fail("Restore failed", err)
-			return err
+			return s.FailHint("Restore failed", err, "Check available snapshots with \"spwn world snapshots\"")
 		}
 
 		s.Done("Restored world", result.Universe.ID)
@@ -140,8 +138,7 @@ var snapshotDeleteCmd = &cobra.Command{
 		imageTag := "spwn-snapshot:" + snapshotRef
 		s.Start("Deleting snapshot...")
 		if err := arc.DeleteSnapshot(context.Background(), imageTag); err != nil {
-			s.Fail("Delete failed", err)
-			return err
+			return s.FailHint("Delete failed", err, "Check available snapshots with \"spwn world snapshots\"")
 		}
 
 		s.Done("Deleted snapshot", snapshotRef)

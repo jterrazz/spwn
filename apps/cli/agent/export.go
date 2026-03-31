@@ -29,7 +29,7 @@ var exportCmd = &cobra.Command{
 
 		// Validate output directory
 		if _, err := os.Stat(exportOutput); err != nil {
-			return fmt.Errorf("error: output directory %q not found.\nCheck the path exists and try again.", exportOutput)
+			return fmt.Errorf("output directory %q not found", exportOutput)
 		}
 
 		s.Blank()
@@ -37,8 +37,8 @@ var exportCmd = &cobra.Command{
 
 		archivePath, err := agentDomain.ExportMind(name, exportOutput, exportExclude)
 		if err != nil {
-			s.Fail("Export failed", err)
-			return fmt.Errorf("error: export failed.\n%w", err)
+			return s.FailHint("Export failed", err,
+				fmt.Sprintf("Check that agent %q exists with \"spwn agent list\"", name))
 		}
 
 		s.Done("Exported", archivePath)

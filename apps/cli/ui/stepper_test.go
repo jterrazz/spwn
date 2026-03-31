@@ -194,6 +194,61 @@ func TestStepper_Start_QuietMode_Suppressed(t *testing.T) {
 	}
 }
 
+func TestStepper_FailHint_ShowsHint(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	err := s.FailHint("Agent failed", errors.New("not found"), `Run "spwn agent init neo"`)
+
+	out := buf.String()
+	if !strings.Contains(out, "Agent failed") {
+		t.Errorf("FailHint() missing label, got %q", out)
+	}
+	if !strings.Contains(out, "not found") {
+		t.Errorf("FailHint() missing error, got %q", out)
+	}
+	if !strings.Contains(out, "spwn agent init neo") {
+		t.Errorf("FailHint() missing hint, got %q", out)
+	}
+
+	// Should return a DisplayedError
+	if _, ok := err.(*DisplayedError); !ok {
+		t.Errorf("FailHint() should return *DisplayedError, got %T", err)
+	}
+}
+
+func TestStepper_FailHint_QuietMode_Suppressed(t *testing.T) {
+	s, buf := newTestStepper(ModeQuiet)
+	err := s.FailHint("Agent failed", errors.New("not found"), "some hint")
+
+	if buf.Len() != 0 {
+		t.Errorf("FailHint() in quiet mode should suppress output, got %q", buf.String())
+	}
+	if _, ok := err.(*DisplayedError); !ok {
+		t.Error("FailHint() should still return DisplayedError in quiet mode")
+	}
+}
+
+func TestStepper_FailHint_EmptyHint(t *testing.T) {
+	s, buf := newTestStepper(ModeNormal)
+	s.FailHint("Failed", errors.New("oops"), "")
+
+	out := buf.String()
+	if !strings.Contains(out, "Failed") {
+		t.Error("FailHint with empty hint should still show label")
+	}
+}
+
+func TestDisplayedError(t *testing.T) {
+	inner := errors.New("inner error")
+	de := &DisplayedError{Err: inner}
+
+	if de.Error() != "inner error" {
+		t.Errorf("expected 'inner error', got %q", de.Error())
+	}
+	if de.Unwrap() != inner {
+		t.Error("Unwrap should return inner error")
+	}
+}
+
 func TestIndentWriter(t *testing.T) {
 	var buf bytes.Buffer
 	iw := &indentWriter{w: &buf, prefix: "    "}

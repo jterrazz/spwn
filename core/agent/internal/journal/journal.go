@@ -11,16 +11,16 @@ import (
 
 // Entry represents a parsed journal entry.
 type Entry struct {
-	Filename   string
-	UniverseID string
-	Outcome    string
-	ExitCode   int
-	Duration   time.Duration
-	CreatedAt  time.Time
+	Filename  string
+	WorldID   string
+	Outcome   string
+	ExitCode  int
+	Duration  time.Duration
+	CreatedAt time.Time
 }
 
 // Append writes a new journal entry to the Mind's journal directory.
-func Append(mindPath, universeID string, exitCode int, duration time.Duration) error {
+func Append(mindPath, worldID string, exitCode int, duration time.Duration) error {
 	dir := filepath.Join(mindPath, "journal")
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("create journal dir: %w", err)
@@ -32,17 +32,17 @@ func Append(mindPath, universeID string, exitCode int, duration time.Duration) e
 		outcome = "failed"
 	}
 
-	filename := fmt.Sprintf("%s_%s.md", now.Format("2006-01-02_150405"), universeID)
+	filename := fmt.Sprintf("%s_%s.md", now.Format("2006-01-02_150405"), worldID)
 
 	content := fmt.Sprintf(`# Session Journal
 
-- **Universe:** %s
+- **World:** %s
 - **Outcome:** %s
 - **Exit Code:** %d
 - **Duration:** %s
 - **Started:** %s
 - **Ended:** %s
-`, universeID, outcome, exitCode, formatDuration(duration), now.Add(-duration).Format(time.RFC3339), now.Format(time.RFC3339))
+`, worldID, outcome, exitCode, formatDuration(duration), now.Add(-duration).Format(time.RFC3339), now.Format(time.RFC3339))
 
 	path := filepath.Join(dir, filename)
 	return os.WriteFile(path, []byte(content), 0644)
@@ -91,14 +91,14 @@ func parseEntry(dir, filename string) (*Entry, error) {
 
 	entry := &Entry{Filename: filename}
 
-	// Parse filename for timestamp: 2006-01-02_150405_universe-id.md
+	// Parse filename for timestamp: 2006-01-02_150405_world-id.md
 	parts := strings.SplitN(strings.TrimSuffix(filename, ".md"), "_", 3)
 	if len(parts) == 3 {
 		t, err := time.Parse("2006-01-02_150405", parts[0]+"_"+parts[1])
 		if err == nil {
 			entry.CreatedAt = t
 		}
-		entry.UniverseID = parts[2]
+		entry.WorldID = parts[2]
 	}
 
 	// Parse metadata from content

@@ -39,6 +39,7 @@ type SpawnOpts struct {
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
+	IsGod         bool                       // When true, mounts Docker socket + SPWN_HOME for God mode.
 }
 
 func (opts *SpawnOpts) progress(event, detail string) {
@@ -88,6 +89,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		binds = append(binds, workspace+":/workspace")
 	}
 
+	// God mode: mount Docker socket + SPWN state directory
+	if opts.IsGod {
+		binds = append(binds, "/var/run/docker.sock:/var/run/docker.sock")
+		binds = append(binds, foundation.BaseDir()+":/home/spwn/.spwn")
+	}
+
 	// Mount Mind(s) for agents
 	mindPath := ""
 	if len(opts.Agents) > 0 {
@@ -96,17 +103,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			if err := agent.ValidateMind(spec.Name); err != nil {
 				return nil, err
 			}
+			opts.progress("mind_validated", spec.Name)
 			agentDir := agent.AgentDir(spec.Name)
 			binds = append(binds, agentDir+":/mind/"+spec.Name)
 
-			// Validate life manifest body requirements
-			life, err := manifest.LoadLife(agentDir)
+			// Validate profile manifest requirements
+			profile, err := manifest.LoadProfile(agentDir)
 			if err != nil {
-				return nil, fmt.Errorf("load life manifest for %s: %w", spec.Name, err)
+				return nil, fmt.Errorf("load profile manifest for %s: %w", spec.Name, err)
 			}
-			if life != nil {
+			if profile != nil {
 				expandedElements := manifest.ExpandElements(opts.Manifest.Elements)
-				if err := manifest.ValidateBody(life, expandedElements); err != nil {
+				if err := manifest.ValidateRequires(profile, expandedElements); err != nil {
 					return nil, err
 				}
 			}
@@ -119,17 +127,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		if err := agent.ValidateMind(opts.AgentName); err != nil {
 			return nil, err
 		}
+		opts.progress("mind_validated", opts.AgentName)
 		mindPath = agent.AgentDir(opts.AgentName)
 		binds = append(binds, mindPath+":/mind")
 
-		// Validate life manifest body requirements
-		life, err := manifest.LoadLife(mindPath)
+		// Validate profile manifest requirements
+		profile, err := manifest.LoadProfile(mindPath)
 		if err != nil {
-			return nil, fmt.Errorf("load life manifest: %w", err)
+			return nil, fmt.Errorf("load profile manifest: %w", err)
 		}
-		if life != nil {
+		if profile != nil {
 			expandedElements := manifest.ExpandElements(opts.Manifest.Elements)
-			if err := manifest.ValidateBody(life, expandedElements); err != nil {
+			if err := manifest.ValidateRequires(profile, expandedElements); err != nil {
 				return nil, err
 			}
 		}
@@ -167,6 +176,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Resolve image (env override for testing, then opts, then default)
 	image := foundation.BaseImage
+	if opts.IsGod {
+		image = foundation.GodImage
+	}
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
 	}
@@ -181,7 +193,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, fmt.Errorf("check image: %w", err)
 		}
 		if !alreadyCached {
-			if err := a.backend.EnsureImage(ctx, image, images.Dockerfile, opts.logWriter()); err != nil {
+			opts.progress("image_building", image)
+			dockerfile := images.Dockerfile
+			if opts.IsGod {
+				dockerfile = images.DockerfileGod
+			}
+			if err := a.backend.EnsureImage(ctx, image, dockerfile, opts.logWriter()); err != nil {
 				return nil, fmt.Errorf("ensure base image: %w", err)
 			}
 			opts.progress("image_built", image)
@@ -213,19 +230,28 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Auto-extract OAuth token from macOS Keychain for subscription auth
-	if !hasEnv(env, "CLAUDE_CODE_OAUTH_TOKEN") && !hasEnv(env, "ANTHROPIC_API_KEY") {
-		if token := extractKeychainToken(); token != "" {
-			env = append(env, "CLAUDE_CODE_OAUTH_TOKEN="+token)
-		}
+	// God mode env vars
+	if opts.IsGod {
+		env = append(env, "SPWN_GOD_MODE=1")
+		env = append(env, "SPWN_HOME=/home/spwn/.spwn")
 	}
 
-	// Mount Claude auth directory (for config, not credentials — token via env var)
-	home, _ := os.UserHomeDir()
-	claudeAuthDir := filepath.Join(home, ".claude")
-	if _, err := os.Stat(claudeAuthDir); err == nil {
-		binds = append(binds, claudeAuthDir+":/home/spwn/.claude")
+	// Auto-extract OAuth token from macOS Keychain for subscription auth
+	credSource := "none"
+	if hasEnv(env, "ANTHROPIC_API_KEY") {
+		credSource = "API key"
+	} else if hasEnv(env, "CLAUDE_CODE_OAUTH_TOKEN") {
+		credSource = "OAuth token"
+	} else {
+		if token := extractKeychainToken(); token != "" {
+			env = append(env, "CLAUDE_CODE_OAUTH_TOKEN="+token)
+			credSource = "subscription"
+		}
 	}
+	opts.progress("credentials_resolved", credSource)
+
+	// Note: ~/.claude/ is NOT mounted — the container has its own Claude config
+	// with pre-approved workspace trust. Credentials are passed via env vars.
 
 	// Create container
 	containerCfg := backend.ContainerConfig{
@@ -290,6 +316,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.Remove(ctx, containerID)
 		return nil, err
 	}
+	opts.progress("elements_probed", fmt.Sprintf("%d verified", len(verifiedElements)))
 
 	// Generate physics.md
 	physicsContent := physics.GeneratePhysics(opts.Manifest)
@@ -500,8 +527,10 @@ func extractKeychainToken() string {
 		}
 	}
 
-	// Fall back to macOS Keychain (will prompt user once)
-	out, err := exec.Command("security", "find-generic-password", "-s", "Claude Code-credentials", "-w").Output()
+	// Fall back to macOS Keychain with timeout (avoids hanging on Keychain dialog)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "security", "find-generic-password", "-s", "Claude Code-credentials", "-w").Output()
 	if err != nil {
 		return ""
 	}

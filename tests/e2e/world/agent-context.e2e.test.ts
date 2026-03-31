@@ -62,7 +62,7 @@ describe("agent context (AGENT.md)", () => {
     expect(content).toContain("bash");
   });
 
-  test("AGENT.md contains Mind layer descriptions for citizen", () => {
+  test("AGENT.md contains Mind layer descriptions for citizen (new structure)", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawn = ctx.spwn(
@@ -72,10 +72,35 @@ describe("agent context (AGENT.md)", () => {
     const id = parseWorldId(spawn.output)!;
 
     const content = ctx.universe(id).readFile("/world/AGENT.md");
-    expect(content).toContain("/mind/personas");
-    expect(content).toContain("/mind/skills");
-    expect(content).toContain("/mind/knowledge");
-    expect(content).toContain("/mind/journal");
+    // New directory structure: identity, skills, memory/knowledge, memory/playbooks, memory/journal
+    expect(content).toContain("/mind/identity/");
+    expect(content).toContain("/mind/skills/");
+    expect(content).toContain("/mind/memory/knowledge/");
+    expect(content).toContain("/mind/memory/playbooks/");
+    expect(content).toContain("/mind/memory/journal/");
+    // Should NOT contain old paths
+    expect(content).not.toContain("/mind/personas");
+    expect(content).not.toContain("/mind/knowledge/");
+  });
+
+  test("container has new Mind directory structure mounted", () => {
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+    const spawn = ctx.spwn(
+      ["world", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+    const id = parseWorldId(spawn.output)!;
+
+    // Verify the new directory structure inside the container
+    ctx.universe(id)
+      .toHaveDirectory("/mind/identity")
+      .toHaveDirectory("/mind/skills")
+      .toHaveDirectory("/mind/memory/knowledge")
+      .toHaveDirectory("/mind/memory/playbooks")
+      .toHaveDirectory("/mind/memory/journal")
+      .toHaveDirectory("/mind/sessions")
+      .toHaveFile("/mind/identity/default.md");
   });
 
   test("no AGENT.md when --no-agent is used", () => {

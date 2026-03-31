@@ -30,7 +30,7 @@ describe("agent detail commands", () => {
     // THEN — shows Mind structure
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("neo");
-    expect(stripAnsi(result.output)).toContain("personas");
+    expect(stripAnsi(result.output)).toContain("identity");
     expect(stripAnsi(result.output)).toContain("default.md");
   });
 

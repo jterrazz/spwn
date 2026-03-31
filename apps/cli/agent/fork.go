@@ -26,8 +26,7 @@ var forkCmd = &cobra.Command{
 
 		result, err := agentDomain.Fork(source, target, nil)
 		if err != nil {
-			s.Fail("Fork failed", err)
-			return fmt.Errorf("error: fork failed.\n%w", err)
+			return s.FailHint("Fork failed", err, "Check agents exist with \"spwn agent list\"")
 		}
 
 		s.Done("Source", result.Source)

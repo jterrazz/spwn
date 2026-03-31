@@ -22,12 +22,12 @@ var journalCmd = &cobra.Command{
 
 		mindPath := agentDomain.AgentDir(name)
 		if err := agentDomain.ValidateMind(name); err != nil {
-			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
+			return fmt.Errorf("agent %q not found", name)
 		}
 
 		entries, err := agentDomain.ListJournal(mindPath, 20)
 		if err != nil {
-			return fmt.Errorf("error: cannot read journal.\n%w", err)
+			return fmt.Errorf("cannot read journal: %w", err)
 		}
 
 		if len(entries) == 0 {
@@ -42,7 +42,7 @@ var journalCmd = &cobra.Command{
 		for _, e := range entries {
 			t.AddRow(
 				e.CreatedAt.Format("2006-01-02"),
-				e.UniverseID,
+				e.WorldID,
 				fmt.Sprintf("%d", e.ExitCode),
 				ui.FormatDuration(e.Duration),
 			)

@@ -35,7 +35,7 @@ describe("gate bridge", () => {
     // THEN — the output confirms gate was bridged with structured status
     expect(spawnResult.exitCode).toBe(0);
     expectLine(spawnResult.output, /✓ Bridged gate\s+1 element\(s\)/);
-    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;
@@ -88,7 +88,7 @@ describe("gate bridge", () => {
 
     // THEN — faculties were generated (they include bridged elements)
     expect(spawnResult.exitCode).toBe(0);
-    expectLine(spawnResult.output, /✓ Generated faculties\s+physics\.md, faculties\.md/);
+    expectLine(spawnResult.output, /✓ Generated physics\s+physics\.md, faculties\.md/);
 
     // AND — faculties.md inside container mentions the bridged element
     const id = parseWorldId(spawnResult.output)!;

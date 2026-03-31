@@ -9,19 +9,19 @@ import (
 	"path/filepath"
 )
 
-// Session tracks an agent's conversation state within a universe.
+// Session tracks an agent's conversation state within a world.
 type Session struct {
-	ID         string `json:"id"`
-	AgentName  string `json:"agent_name"`
-	UniverseID string `json:"universe_id"`
-	Resumed    bool   `json:"resumed"`
+	ID        string `json:"id"`
+	AgentName string `json:"agent_name"`
+	WorldID   string `json:"world_id"`
+	Resumed   bool   `json:"resumed"`
 }
 
-// DeterministicID generates a UUID-formatted session ID from agent name and universe ID.
-// Same agent+universe pair always produces the same session ID.
+// DeterministicID generates a UUID-formatted session ID from agent name and world ID.
+// Same agent+world pair always produces the same session ID.
 // Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (UUID v4 layout with deterministic bytes).
-func DeterministicID(agentName, universeID string) string {
-	h := sha256.Sum256([]byte(agentName + ":" + universeID))
+func DeterministicID(agentName, worldID string) string {
+	h := sha256.Sum256([]byte(agentName + ":" + worldID))
 	hex := hex.EncodeToString(h[:16])
 	// Format as UUID: 8-4-4-4-12
 	return hex[0:8] + "-" + hex[8:12] + "-4" + hex[13:16] + "-a" + hex[17:20] + "-" + hex[20:32]
@@ -29,8 +29,8 @@ func DeterministicID(agentName, universeID string) string {
 
 // Load reads a session file from the Mind's sessions directory.
 // Returns nil if no session file exists (first spawn).
-func Load(mindPath, universeID string) (*Session, error) {
-	path := filePath(mindPath, universeID)
+func Load(mindPath, worldID string) (*Session, error) {
+	path := filePath(mindPath, worldID)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -58,7 +58,7 @@ func Save(mindPath string, s *Session) error {
 		return fmt.Errorf("marshal session: %w", err)
 	}
 
-	path := filePath(mindPath, s.UniverseID)
+	path := filePath(mindPath, s.WorldID)
 	return os.WriteFile(path, data, 0644)
 }
 
@@ -91,6 +91,6 @@ func List(mindPath string) ([]Session, error) {
 	return sessions, nil
 }
 
-func filePath(mindPath, universeID string) string {
-	return filepath.Join(mindPath, "sessions", universeID+".json")
+func filePath(mindPath, worldID string) string {
+	return filepath.Join(mindPath, "sessions", worldID+".json")
 }

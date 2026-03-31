@@ -32,7 +32,7 @@ func TestInit(t *testing.T) {
 		}
 
 		// Verify default persona exists
-		personaPath := filepath.Join(dir, "personas", "default.md")
+		personaPath := filepath.Join(dir, "identity", "default.md")
 		if _, err := os.Stat(personaPath); err != nil {
 			t.Errorf("expected default persona to exist: %v", err)
 		}
@@ -78,18 +78,18 @@ func TestValidate(t *testing.T) {
 		}
 	})
 
-	t.Run("missing_personas_dir_fails", func(t *testing.T) {
+	t.Run("missing_identity_dir_fails", func(t *testing.T) {
 		tmp := t.TempDir()
 		t.Setenv("SPWN_HOME", tmp)
 
-		// Create agent dir without personas
+		// Create agent dir without identity
 		agentDir := filepath.Join(tmp, "agents", "broken")
 		if err := os.MkdirAll(agentDir, 0755); err != nil {
 			t.Fatal(err)
 		}
 
 		if err := Validate("broken"); err == nil {
-			t.Error("expected error for missing personas dir, got nil")
+			t.Error("expected error for missing identity dir, got nil")
 		}
 	})
 }

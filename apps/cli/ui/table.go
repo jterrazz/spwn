@@ -49,7 +49,11 @@ func pad(s string, w int) string {
 	return s + strings.Repeat(" ", w-len(s))
 }
 
-// padVisible pads s so that its visible width (ignoring ANSI codes) reaches w.
+// PadVisible pads s so that its visible width (ignoring ANSI codes) reaches w.
+func PadVisible(s string, w int) string {
+	return padVisible(s, w)
+}
+
 func padVisible(s string, w int) string {
 	vis := visibleWidth(s)
 	if vis >= w {

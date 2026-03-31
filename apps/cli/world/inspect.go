@@ -31,7 +31,7 @@ var inspectCmd = &cobra.Command{
 
 		u, err := arc.Inspect(ctx, worldID)
 		if err != nil {
-			return fmt.Errorf("error: world %s not found.\nRun 'spwn world list' to see available worlds.", worldID)
+			return fmt.Errorf("world %s not found", worldID)
 		}
 
 		if j {

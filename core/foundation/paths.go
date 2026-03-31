@@ -36,7 +36,7 @@ func StatePath() string {
 	return filepath.Join(BaseDir(), StateFileName)
 }
 
-// OrgPath returns the path to the organization manifest.
+// OrgPath returns the path to the universe manifest (org.yaml).
 func OrgPath() string {
 	return filepath.Join(BaseDir(), OrgFileName)
 }

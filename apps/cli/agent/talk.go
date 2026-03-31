@@ -35,7 +35,7 @@ If no message is provided, opens an interactive Claude session inside the contai
 
 		// Validate the agent exists
 		if err := agentDomain.ValidateMind(name); err != nil {
-			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
+			return fmt.Errorf("agent %q not found", name)
 		}
 
 		// Find which world this agent is in
@@ -52,47 +52,50 @@ If no message is provided, opens an interactive Claude session inside the contai
 		s.Info("World:", worldID)
 		s.Blank()
 
-		// Base claude command: continue latest session in /workspace
+		// Base claude command — continue latest session in this workspace
 		claudeArgs := []string{
 			"claude",
 			"--dangerously-skip-permissions",
 			"--continue",
 		}
 
+		// Build docker exec args with auth env vars
+		buildDockerArgs := func(interactive bool) []string {
+			args := []string{"exec"}
+			if interactive {
+				args = append(args, "-it")
+			}
+			args = append(args, "-w", "/workspace")
+			// Pass all available auth credentials
+			for _, kv := range authEnvVars(token) {
+				args = append(args, "-e", kv)
+			}
+			args = append(args, containerID)
+			return args
+		}
+
 		if message != "" {
 			// One-shot mode: run claude with --print
 			claudeArgs = append(claudeArgs, "-p", message, "--print")
 
-			dockerArgs := []string{"exec", "-w", "/workspace"}
-			if token != "" {
-				dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
-			}
-			dockerArgs = append(dockerArgs, containerID)
-			dockerArgs = append(dockerArgs, claudeArgs...)
-
+			dockerArgs := append(buildDockerArgs(false), claudeArgs...)
 			execCmd := exec.Command("docker", dockerArgs...)
 			output, err := execCmd.CombinedOutput()
 			if err != nil {
-				return fmt.Errorf("error: claude exec failed.\n%s\n%w", string(output), err)
+				return fmt.Errorf("exec failed: %w", err)
 			}
 
 			fmt.Fprint(os.Stdout, string(output))
 		} else {
 			// Interactive mode: attach stdin/stdout/stderr
-			dockerArgs := []string{"exec", "-it", "-w", "/workspace"}
-			if token != "" {
-				dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
-			}
-			dockerArgs = append(dockerArgs, containerID)
-			dockerArgs = append(dockerArgs, claudeArgs...)
-
+			dockerArgs := append(buildDockerArgs(true), claudeArgs...)
 			execCmd := exec.Command("docker", dockerArgs...)
 			execCmd.Stdin = os.Stdin
 			execCmd.Stdout = os.Stdout
 			execCmd.Stderr = os.Stderr
 
 			if err := execCmd.Run(); err != nil {
-				return fmt.Errorf("error: interactive session failed.\n%w", err)
+				return fmt.Errorf("interactive session: %w", err)
 			}
 		}
 
@@ -116,12 +119,15 @@ func findAgentContainer(agentName string) (string, string, error) {
 
 	arc, err := universe.NewArchitectFromEnv()
 	if err != nil {
-		return "", "", dockerHint(err)
+		if strings.Contains(err.Error(), "cannot connect to Docker") {
+			return "", "", fmt.Errorf("Docker is not running")
+		}
+		return "", "", err
 	}
 
 	worlds, err := arc.List(ctx)
 	if err != nil {
-		return "", "", fmt.Errorf("error: cannot list worlds.\n%w", err)
+		return "", "", fmt.Errorf("cannot list worlds: %w", err)
 	}
 
 	// Check the primary agent field, then the agents array
@@ -144,14 +150,14 @@ func findAgentContainer(agentName string) (string, string, error) {
 		for _, a := range u.Agents {
 			if a.Name == agentName {
 				if u.ContainerID == "" {
-					return "", "", fmt.Errorf("error: world %s has no container ID.\nCheck 'spwn world list' for world status.", u.ID)
+					return "", "", fmt.Errorf("world %s has no container", u.ID)
 				}
 				return u.ContainerID, u.ID, nil
 			}
 		}
 	}
 
-	return "", "", fmt.Errorf("error: agent %q is not in any active world.\nSpawn it first with: spwn world --agent %s", agentName, agentName)
+	return "", "", fmt.Errorf("agent %q is not in any active world", agentName)
 }
 
 // readAuthToken reads the cached OAuth token from ~/.spwn/.auth-token.
@@ -162,4 +168,19 @@ func readAuthToken() string {
 		return ""
 	}
 	return strings.TrimSpace(string(data))
+}
+
+// authEnvVars returns Docker -e flags for all available auth credentials.
+func authEnvVars(cachedToken string) []string {
+	var envs []string
+	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
+		if val := os.Getenv(key); val != "" {
+			envs = append(envs, key+"="+val)
+		}
+	}
+	// Use cached token if CLAUDE_CODE_OAUTH_TOKEN not already set
+	if cachedToken != "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
+		envs = append(envs, "CLAUDE_CODE_OAUTH_TOKEN="+cachedToken)
+	}
+	return envs
 }

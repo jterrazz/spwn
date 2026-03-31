@@ -11,69 +11,49 @@ describe("CLI output", () => {
 
     // THEN — custom grouped help with all sections
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /Quick Start:/);
-    expectLine(result.output, /World:/);
-    expectLine(result.output, /Agent:/);
-    expectLine(result.output, /System:/);
-    expectLine(result.output, /Flags:/);
-    // Key commands present (lines are trimmed, so cmd is at start)
-    for (const cmd of ["world", "agent", "init", "status", "doctor", "claw", "observatory", "skill", "upgrade"]) {
-      expectLine(result.output, new RegExp(`${cmd}\\s+`));
+    const out = stripAnsi(result.output);
+    expect(out).toContain("Quick Start:");
+    expect(out).toContain("Core:");
+    expect(out).toContain("System:");
+    // Key commands present
+    for (const cmd of ["world", "agent", "init", "status", "doctor", "god", "observatory", "skill", "upgrade", "up", "down", "ls", "profile", "msg", "snap"]) {
+      expect(out).toContain(cmd);
     }
     // Flags
-    expectLine(result.output, /--json/);
-    expectLine(result.output, /--quiet/);
-    expectLine(result.output, /--verbose/);
+    expect(out).toContain("--json");
+    expect(out).toContain("--quiet");
+    expect(out).toContain("--verbose");
   });
 
   test("world help lists subcommands", async () => {
-    // WHEN — running spwn world --help
-    const result = await spwn("world help")
-      .exec("world --help")
-      .run();
+    const result = await spwn("world help").exec("world --help").run();
 
-    // THEN — world subcommands are listed
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /Available Commands:/);
-    for (const sub of ["list", "inspect", "logs", "attach", "destroy", "snapshot", "snapshots", "restore"]) {
-      expectLine(result.output, new RegExp(`^\\s*${sub}\\s+`));
+    const out = stripAnsi(result.output);
+    // Custom grouped help uses section titles like "Lifecycle:", "Control:"
+    for (const sub of ["list", "inspect", "logs", "attach", "destroy", "snapshot", "restore"]) {
+      expect(out).toContain(sub);
     }
   });
 
   test("agent help lists subcommands", async () => {
-    // WHEN — running spwn agent --help
-    const result = await spwn("agent help")
-      .exec("agent --help")
-      .run();
+    const result = await spwn("agent help").exec("agent --help").run();
 
-    // THEN — agent subcommands are listed
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /Available Commands:/);
-    for (const sub of [
-      "init",
-      "list",
-      "inspect",
-      "export",
-      "reflect",
-      "sleep",
-      "fork",
-      "talk",
-    ]) {
-      expectLine(result.output, new RegExp(`^\\s*${sub}\\s+`));
+    const out = stripAnsi(result.output);
+    for (const sub of ["init", "list", "inspect", "export", "reflect", "sleep", "fork", "talk"]) {
+      expect(out).toContain(sub);
     }
   });
 
-  test("claw help lists subcommands", async () => {
-    // WHEN — running spwn claw --help
-    const result = await spwn("claw help")
-      .exec("claw --help")
-      .run();
+  test("god help lists subcommands", async () => {
+    const result = await spwn("god help").exec("god --help").run();
 
-    // THEN — claw subcommands are listed
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /Available Commands:/);
+    const out = stripAnsi(result.output);
+    expect(out).toContain("Commands:");
     for (const sub of ["start", "stop", "status", "connect"]) {
-      expectLine(result.output, new RegExp(`^\\s*${sub}\\s+`));
+      expect(out).toContain(sub);
     }
   });
 
@@ -170,5 +150,52 @@ describe("CLI output", () => {
 
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /doctor\s+/);
+  });
+
+  test("help lists auth command", async () => {
+    const result = await spwn("help with auth")
+      .exec("--help")
+      .run();
+
+    expect(result.exitCode).toBe(0);
+    expectLine(result.output, /auth\s+/);
+  });
+
+  test("auth shows authentication status", async () => {
+    const result = await spwn("auth status")
+      .exec("auth")
+      .run();
+
+    expect(result.exitCode).toBe(0);
+    const out = stripAnsi(result.output);
+    expect(out).toContain("PROVIDER");
+    expect(out).toContain("STATUS");
+    expect(out).toContain("Anthropic");
+  });
+
+  test("auth help lists subcommands", async () => {
+    const result = await spwn("auth help")
+      .exec("auth --help")
+      .run();
+
+    expect(result.exitCode).toBe(0);
+    const out = stripAnsi(result.output);
+    expect(out).toContain("login");
+    expect(out).toContain("logout");
+    expect(out).toContain("token");
+  });
+
+
+
+  test("doctor shows Universe label", async () => {
+    const result = await spwn("doctor universe")
+      .exec("doctor")
+      .run();
+
+    expect(result.exitCode).toBe(0);
+    const out = stripAnsi(result.output);
+    expect(out).toContain("Universe");
+    // Should NOT contain old "Organization" label
+    expect(out).not.toContain("Organization");
   });
 });

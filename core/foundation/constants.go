@@ -1,6 +1,6 @@
 package foundation
 
-// Universe config defaults.
+// Default physics constants.
 const (
 	DefaultCPU      = 1
 	DefaultMemory   = "512m"
@@ -9,6 +9,7 @@ const (
 	DefaultMaxProcs = 128
 	DefaultBackend  = "docker"
 	BaseImage       = "spwn-base:latest"
+	GodImage        = "spwn-god:latest"
 )
 
 // Directory layout constants.
@@ -24,4 +25,4 @@ const (
 )
 
 // MindLayers defines the six-layer Mind structure.
-var MindLayers = []string{"personas", "skills", "knowledge", "playbooks", "journal", "sessions"}
+var MindLayers = []string{"identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"}

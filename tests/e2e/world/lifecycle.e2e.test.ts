@@ -80,7 +80,7 @@ describe("world lifecycle", () => {
       60_000,
     );
     expect(spawnResult.exitCode).toBe(0);
-    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
     expectLine(spawnResult.output, /✓ Agent is alive\./);
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();

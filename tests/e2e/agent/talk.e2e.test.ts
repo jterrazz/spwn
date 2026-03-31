@@ -80,7 +80,6 @@ describe("agent talk", () => {
     // THEN — error about no active world
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /agent "orphan" is not in any active world/);
-    expectLine(result.output, /Spawn it first with: spwn world --agent orphan/);
   });
 
   test("agent list shows world association after spawn", () => {
@@ -203,6 +202,6 @@ describe("agent talk", () => {
     // THEN — shows agent details with Mind layers
     expect(inspectResult.exitCode).toBe(0);
     expectLine(inspectResult.output, /Agent:\s+neo/);
-    expectLine(inspectResult.output, /personas\/\s+default\.md/);
+    expectLine(inspectResult.output, /identity\/\s+default\.md/);
   });
 });

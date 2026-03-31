@@ -74,7 +74,7 @@ describe("world physics", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     // THEN — the spawn output mentions faculties generation
-    expectLine(spawnResult.output, /✓ Generated faculties\s+physics\.md, faculties\.md/);
+    expectLine(spawnResult.output, /✓ Generated physics\s+physics\.md, faculties\.md/);
 
     // AND — faculties.md actually exists and lists elements
     const faculties = ctx.universe(id).faculties();

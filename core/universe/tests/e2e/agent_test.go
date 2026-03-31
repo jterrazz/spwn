@@ -17,13 +17,13 @@ func TestAgent_Init(t *testing.T) {
 
 	// THEN the Mind should have all standard layers and a default persona
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("personas")
+		m.HasLayer("identity")
 		m.HasLayer("skills")
-		m.HasLayer("knowledge")
-		m.HasLayer("playbooks")
-		m.HasLayer("journal")
+		m.HasLayer("memory/knowledge")
+		m.HasLayer("memory/playbooks")
+		m.HasLayer("memory/journal")
 		m.HasLayer("sessions")
-		m.HasFile("personas/default.md")
+		m.HasFile("identity/default.md")
 	})
 }
 
@@ -80,14 +80,14 @@ func TestAgent_Inspect(t *testing.T) {
 	}
 
 	// AND all 6 standard layers should exist
-	for _, layer := range []string{"personas", "skills", "knowledge", "playbooks", "journal", "sessions"} {
+	for _, layer := range []string{"identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"} {
 		if _, ok := info.Layers[layer]; !ok {
 			t.Fatalf("Missing layer %q", layer)
 		}
 	}
 
-	// AND personas should contain default.md
-	if files, ok := info.Layers["personas"]; ok {
+	// AND identity should contain default.md
+	if files, ok := info.Layers["identity"]; ok {
 		found := false
 		for _, f := range files {
 			if f == "default.md" {
@@ -95,7 +95,7 @@ func TestAgent_Inspect(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Fatal("Expected default.md in personas layer")
+			t.Fatal("Expected default.md in identity layer")
 		}
 	}
 }

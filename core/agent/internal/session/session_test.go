@@ -33,7 +33,7 @@ func TestSaveAndLoad(t *testing.T) {
 	s := &Session{
 		ID:         "test-session-id",
 		AgentName:  "neo",
-		UniverseID: "w-default-12345",
+		WorldID: "w-default-12345",
 		Resumed:    false,
 	}
 
@@ -71,8 +71,8 @@ func TestList(t *testing.T) {
 	tmp := t.TempDir()
 
 	// Save two sessions
-	Save(tmp, &Session{ID: "s1", AgentName: "neo", UniverseID: "w-1"})
-	Save(tmp, &Session{ID: "s2", AgentName: "neo", UniverseID: "w-2"})
+	Save(tmp, &Session{ID: "s1", AgentName: "neo", WorldID: "w-1"})
+	Save(tmp, &Session{ID: "s2", AgentName: "neo", WorldID: "w-2"})
 
 	sessions, err := List(tmp)
 	if err != nil {
@@ -96,7 +96,7 @@ func TestListEmpty(t *testing.T) {
 
 func TestSessionFilePersistence(t *testing.T) {
 	tmp := t.TempDir()
-	Save(tmp, &Session{ID: "persist", AgentName: "neo", UniverseID: "w-test"})
+	Save(tmp, &Session{ID: "persist", AgentName: "neo", WorldID: "w-test"})
 
 	// Verify file exists
 	path := filepath.Join(tmp, "sessions", "w-test.json")

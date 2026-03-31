@@ -9,7 +9,7 @@ type SpawnConfig struct {
 	Provider   string
 	MindPath   string
 	AgentName  string
-	UniverseID string
+	WorldID    string
 	ExtraFlags []string
 }
 
@@ -31,4 +31,6 @@ type Runtime interface {
 	SystemPackages() []string
 	// SupportsSession returns true if the runtime can resume sessions.
 	SupportsSession() bool
+	// Available returns true if the runtime is production-ready.
+	Available() bool
 }

@@ -32,10 +32,10 @@ spwn world [flags]
 ```
   -a, --agent string       Agent name (default "default")
   -c, --config string      Named world config (default: default)
-  -d, --detach             Run in background
       --gate stringArray   Bridge element from Host: "source:as:cap1,cap2"
       --governor string    Governor agent for this world
   -h, --help               help for world
+  -i, --interactive        Attach to agent interactively
       --no-agent           Create the world without spawning an agent
       --runtime string     Agent runtime (claude-code, pi, codex, opencode, gemini, aider) (default "claude-code")
   -w, --workspace string   Host directory to mount at /workspace
@@ -55,14 +55,10 @@ spwn world [flags]
 * [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
 * [spwn world attach](/docs/cli/spwn-world-attach)	 - Open interactive session into a running world
 * [spwn world destroy](/docs/cli/spwn-world-destroy)	 - Destroy a world
-* [spwn world inbox](/docs/cli/spwn-world-inbox)	 - Show messages in a world's inbox
 * [spwn world inspect](/docs/cli/spwn-world-inspect)	 - Show world details, physics, and agent status
 * [spwn world list](/docs/cli/spwn-world-list)	 - List all active worlds
 * [spwn world logs](/docs/cli/spwn-world-logs)	 - Stream agent output from a running world
 * [spwn world restore](/docs/cli/spwn-world-restore)	 - Restore a world from a snapshot
-* [spwn world runtimes](/docs/cli/spwn-world-runtimes)	 - List available agent runtimes and claws
-* [spwn world send](/docs/cli/spwn-world-send)	 - Send a message between agents in a world
 * [spwn world snapshot](/docs/cli/spwn-world-snapshot)	 - Save a running world as a snapshot
 * [spwn world snapshots](/docs/cli/spwn-world-snapshots)	 - List all world snapshots
-* [spwn world watch](/docs/cli/spwn-world-watch)	 - Watch for new messages in a world
 

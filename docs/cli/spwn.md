@@ -25,8 +25,9 @@ and a Mind (persistent agent identity).
 ### SEE ALSO
 
 * [spwn agent](/docs/cli/spwn-agent)	 - Spawn an agent — a living identity that inhabits a world
-* [spwn claw](/docs/cli/spwn-claw)	 - Manage the Claw — the always-on orchestration daemon
+* [spwn auth](/docs/cli/spwn-auth)	 - Manage credentials — login, logout, status
 * [spwn doctor](/docs/cli/spwn-doctor)	 - Check your spwn environment for issues
+* [spwn architect](/docs/cli/spwn-architect)	 - The Architect — always-on orchestration daemon
 * [spwn init](/docs/cli/spwn-init)	 - First-time setup — create ~/.spwn/ and a named world config
 * [spwn observatory](/docs/cli/spwn-observatory)	 - Visual dashboard for monitoring worlds and agents
 * [spwn skill](/docs/cli/spwn-skill)	 - Manage skills — reusable capabilities for agents

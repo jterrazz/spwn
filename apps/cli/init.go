@@ -35,19 +35,19 @@ On first run, also creates default.yaml as the default config.`,
 		// Create base directory
 		baseDir := foundation.BaseDir()
 		if err := os.MkdirAll(baseDir, 0755); err != nil {
-			return fmt.Errorf("error: cannot create %s.\n%w", baseDir, err)
+			return fmt.Errorf("cannot create %s: %w", baseDir, err)
 		}
 
 		s.Blank()
 
-		// Create organization manifest
+		// Create universe manifest
 		if err := universe.CreateOrg(name); err != nil {
 			s.Log("org.yaml already exists, skipping")
 		} else {
-			s.Done("Created organization", "org.yaml")
+			s.Done("Created universe", "org.yaml")
 		}
 
-		// Create default universe config
+		// Create default world config
 		if err := universe.CreateDefaultConfig(); err != nil {
 			s.Log("default.yaml already exists, skipping")
 		} else {

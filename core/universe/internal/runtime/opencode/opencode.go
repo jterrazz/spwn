@@ -45,3 +45,4 @@ func (o *OpenCode) SystemPackages() []string { return []string{"git", "curl", "c
 
 // SupportsSession returns true if the runtime can resume sessions.
 func (o *OpenCode) SupportsSession() bool { return true }
+func (o *OpenCode) Available() bool       { return false }

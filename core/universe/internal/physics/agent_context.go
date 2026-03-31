@@ -32,6 +32,8 @@ func GenerateAgentContext(opts AgentContextOpts) string {
 	var b strings.Builder
 
 	switch opts.Tier {
+	case "god":
+		generateGodContext(&b, opts)
 	case "governor":
 		generateGovernorContext(&b, opts)
 	case "npc":
@@ -107,11 +109,11 @@ func generateCitizenContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("Message peers: write to /world/inbox/{peer}/\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/personas/ — who you are\n")
+	b.WriteString("- /mind/identity/ — who you are\n")
 	b.WriteString("- /mind/skills/ — what you can do\n")
-	b.WriteString("- /mind/knowledge/ — facts you've learned\n")
-	b.WriteString("- /mind/playbooks/ — procedures that work\n")
-	b.WriteString("- /mind/journal/ — session history\n\n")
+	b.WriteString("- /mind/memory/knowledge/ — facts you've learned\n")
+	b.WriteString("- /mind/memory/playbooks/ — procedures that work\n")
+	b.WriteString("- /mind/memory/journal/ — session history\n\n")
 
 	writeWorldInfo(b, opts)
 }
@@ -134,6 +136,42 @@ func generateNPCContext(b *strings.Builder, opts AgentContextOpts) {
 	if len(opts.Elements) > 0 {
 		b.WriteString(fmt.Sprintf("- Elements: %s\n", strings.Join(opts.Elements, ", ")))
 	}
+}
+
+func generateGodContext(b *strings.Builder, opts AgentContextOpts) {
+	b.WriteString("# You are the Architect — the orchestration daemon\n\n")
+
+	b.WriteString("## Your Role\n")
+	b.WriteString("You are the Architect of this universe. You manage the lifecycle of all worlds and agents.\n")
+	b.WriteString("You receive messages from external channels, spawn worlds, delegate work to agents,\n")
+	b.WriteString("and ensure the universe is healthy.\n\n")
+
+	b.WriteString("## Available Commands\n")
+	b.WriteString("You have the `spwn` CLI installed. Key commands:\n\n")
+	b.WriteString("### World Management\n")
+	b.WriteString("- `spwn world list` — list all active worlds\n")
+	b.WriteString("- `spwn world --agent <name> -w <path>` — spawn a new world\n")
+	b.WriteString("- `spwn world --agent <name> -w <path> --detach` — spawn in background\n")
+	b.WriteString("- `spwn world destroy <id>` — destroy a world\n")
+	b.WriteString("- `spwn world inspect <id>` — show world details\n")
+	b.WriteString("- `spwn world logs <id>` — stream agent output\n\n")
+
+	b.WriteString("### Agent Management\n")
+	b.WriteString("- `spwn agent init <name>` — create a new agent\n")
+	b.WriteString("- `spwn agent list` — list all agents\n")
+	b.WriteString("- `spwn agent talk <name> <message>` — send a message to an agent\n")
+	b.WriteString("- `spwn agent inspect <name>` — show agent details\n")
+	b.WriteString("- `spwn agent delete <name>` — remove an agent\n\n")
+
+	b.WriteString("### Messaging\n")
+	b.WriteString("- `spwn agent send <agent-name> --from <sender> <message>` — inter-agent message (auto-resolves world)\n")
+	b.WriteString("- `spwn agent inbox <agent-name>` — check inbox (auto-resolves world)\n")
+	b.WriteString("- `spwn agent watch <agent-name>` — watch for new messages (auto-resolves world)\n\n")
+
+	b.WriteString("### Status\n")
+	b.WriteString("- `spwn status` — environment overview\n\n")
+
+	writeWorldInfo(b, opts)
 }
 
 func writeWorldInfo(b *strings.Builder, opts AgentContextOpts) {

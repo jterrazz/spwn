@@ -39,7 +39,7 @@ var logsCmd = &cobra.Command{
 		tail := fmt.Sprintf("%d", logsTail)
 		reader, err := arc.Logs(ctx, worldID, !logsNoFollow, tail)
 		if err != nil {
-			return fmt.Errorf("error: cannot stream logs for %s.\n%w", worldID, err)
+			return fmt.Errorf("cannot stream logs for %s: %w", worldID, err)
 		}
 		defer reader.Close()
 

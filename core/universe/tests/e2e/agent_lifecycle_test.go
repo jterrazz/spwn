@@ -21,8 +21,8 @@ func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {
 		Execute()
 
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("personas")
-		m.HasFile("personas/default.md")
+		m.HasLayer("identity")
+		m.HasFile("identity/default.md")
 	})
 
 	// WHEN the universe is destroyed
@@ -36,8 +36,8 @@ func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Agent should survive world destruction: %v", err)
 	}
-	if _, ok := info.Layers["personas"]; !ok {
-		t.Fatal("Agent Mind should still have personas layer after world destruction")
+	if _, ok := info.Layers["identity"]; !ok {
+		t.Fatal("Agent Mind should still have identity layer after world destruction")
 	}
 }
 
@@ -83,7 +83,7 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Agent inspect failed: %v", err)
 	}
-	if _, ok := info.Layers["personas"]; !ok {
+	if _, ok := info.Layers["identity"]; !ok {
 		t.Fatal("Agent should retain Mind layers after spanning multiple worlds")
 	}
 }
@@ -100,7 +100,7 @@ func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
 
 	chain1.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(1)
-		j.LatestUniverseID(chain1.Universe().ID)
+		j.LatestWorldID(chain1.Universe().ID)
 	})
 
 	// WHEN the agent runs to completion in a second world
@@ -112,7 +112,7 @@ func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
 	// THEN the journal should have entries from both worlds
 	chain2.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(2)
-		j.LatestUniverseID(chain2.Universe().ID)
+		j.LatestWorldID(chain2.Universe().ID)
 	})
 
 	// AND the entries should reference different worlds
@@ -125,12 +125,12 @@ func TestAgentLifecycle_JournalAcrossUniverses(t *testing.T) {
 		t.Fatalf("Expected at least 2 journal entries, got %d", len(entries))
 	}
 
-	universeIDs := make(map[string]bool)
+	worldIDs := make(map[string]bool)
 	for _, entry := range entries {
-		universeIDs[entry.UniverseID] = true
+		worldIDs[entry.WorldID] = true
 	}
-	if len(universeIDs) < 2 {
-		t.Fatalf("Expected journal entries from at least 2 universes, got %d", len(universeIDs))
+	if len(worldIDs) < 2 {
+		t.Fatalf("Expected journal entries from at least 2 worlds, got %d", len(worldIDs))
 	}
 }
 
@@ -139,7 +139,7 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("export-src-agent")
 
-	knowledgePath := filepath.Join(agentDomain.AgentDir("export-src-agent"), "knowledge")
+	knowledgePath := filepath.Join(agentDomain.AgentDir("export-src-agent"), "memory", "knowledge")
 	os.MkdirAll(knowledgePath, 0755)
 	os.WriteFile(filepath.Join(knowledgePath, "custom.md"), []byte("# Custom Knowledge\nThis is unique."), 0644)
 
@@ -172,7 +172,7 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 	}
 
 	// AND the custom knowledge file should be preserved
-	customPath := filepath.Join(agentDomain.AgentDir("export-dst-agent"), "knowledge", "custom.md")
+	customPath := filepath.Join(agentDomain.AgentDir("export-dst-agent"), "memory", "knowledge", "custom.md")
 	content, err := os.ReadFile(customPath)
 	if err != nil {
 		t.Fatalf("Custom knowledge file not found in imported agent: %v", err)
@@ -182,13 +182,13 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 	}
 }
 
-func TestAgentLifecycle_CustomPersonasFile(t *testing.T) {
-	// GIVEN an agent with a custom persona file
+func TestAgentLifecycle_CustomIdentityFile(t *testing.T) {
+	// GIVEN an agent with a custom persona file in the identity layer
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("persona-agent")
 
-	personasDir := filepath.Join(agentDomain.AgentDir("persona-agent"), "personas")
-	os.WriteFile(filepath.Join(personasDir, "custom.md"), []byte("# Custom Persona\nYou are a specialist."), 0644)
+	identityDir := filepath.Join(agentDomain.AgentDir("persona-agent"), "identity")
+	os.WriteFile(filepath.Join(identityDir, "custom.md"), []byte("# Custom Persona\nYou are a specialist."), 0644)
 
 	// WHEN the agent is spawned in a universe
 	chain := tc.Spawn().
@@ -203,7 +203,7 @@ func TestAgentLifecycle_CustomPersonasFile(t *testing.T) {
 	})
 
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasFile("personas/custom.md")
+		m.HasFile("identity/custom.md")
 	})
 }
 

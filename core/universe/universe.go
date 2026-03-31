@@ -47,6 +47,7 @@ type Store = state.Store
 
 // Re-export manifest types.
 type LifeManifest = manifest.LifeManifest
+type ProfileManifest = manifest.ProfileManifest
 type OrgManifest = manifest.OrgManifest
 
 // Re-export state types.
@@ -134,15 +135,15 @@ func ExpandElements(elems []string) []string {
 	return manifest.ExpandElements(elems)
 }
 
-// --- Organization manifest operations ---
+// --- Universe manifest operations ---
 
-// LoadOrg reads and parses the organization manifest from ~/.spwn/org.yaml.
+// LoadOrg reads and parses the universe manifest from ~/.spwn/org.yaml.
 func LoadOrg() (*OrgManifest, error) { return manifest.LoadOrg() }
 
-// LoadOrgPath reads and parses an organization manifest from the given path.
+// LoadOrgPath reads and parses a universe manifest from the given path.
 func LoadOrgPath(path string) (*OrgManifest, error) { return manifest.LoadOrgPath(path) }
 
-// CreateOrg writes a default org.yaml for the given organization name to ~/.spwn/org.yaml.
+// CreateOrg writes a default universe manifest to ~/.spwn/org.yaml.
 func CreateOrg(name string) error { return manifest.CreateOrg(name) }
 
 // --- Observatory ---
@@ -205,4 +206,22 @@ func ListClaws() []string {
 	}
 	sort.Strings(names)
 	return names
+}
+
+// RuntimeAvailable returns true if the named runtime is production-ready.
+func RuntimeAvailable(name string) bool {
+	r, err := runtime.Get(name)
+	if err != nil {
+		return false
+	}
+	return r.Available()
+}
+
+// ClawAvailable returns true if the named claw adapter is production-ready.
+func ClawAvailable(name string) bool {
+	c, err := claw.Get(name)
+	if err != nil {
+		return false
+	}
+	return c.Available()
 }

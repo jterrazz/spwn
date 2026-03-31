@@ -19,7 +19,7 @@ type Info = mind.AgentInfo
 // JournalEntry represents a parsed journal entry.
 type JournalEntry = journal.Entry
 
-// Session tracks an agent's conversation state within a universe.
+// Session tracks an agent's conversation state within a world.
 type Session = session.Session
 
 // ReflexionResult holds the outcome of a reflexion analysis.
@@ -92,10 +92,10 @@ func ImportMind(name string, archivePath string) error {
 
 // --- Journal operations ---
 
-// AppendJournal writes a timestamped journal entry for the given universe
+// AppendJournal writes a timestamped journal entry for the given world
 // session to the agent's journal directory.
-func AppendJournal(mindPath, universeID string, exitCode int, duration time.Duration) error {
-	return journal.Append(mindPath, universeID, exitCode, duration)
+func AppendJournal(mindPath, worldID string, exitCode int, duration time.Duration) error {
+	return journal.Append(mindPath, worldID, exitCode, duration)
 }
 
 // ListJournal returns the last n journal entries from the agent's journal
@@ -107,15 +107,15 @@ func ListJournal(mindPath string, n int) ([]JournalEntry, error) {
 // --- Session operations ---
 
 // DeterministicSessionID generates a stable session ID derived from the agent
-// name and universe ID, ensuring the same pair always maps to the same session.
-func DeterministicSessionID(agentName, universeID string) string {
-	return session.DeterministicID(agentName, universeID)
+// name and world ID, ensuring the same pair always maps to the same session.
+func DeterministicSessionID(agentName, worldID string) string {
+	return session.DeterministicID(agentName, worldID)
 }
 
-// LoadSession reads and parses the session file for the given universe from the
+// LoadSession reads and parses the session file for the given world from the
 // agent's sessions directory.
-func LoadSession(mindPath, universeID string) (*Session, error) {
-	return session.Load(mindPath, universeID)
+func LoadSession(mindPath, worldID string) (*Session, error) {
+	return session.Load(mindPath, worldID)
 }
 
 // SaveSession persists the given session to the agent's sessions directory,

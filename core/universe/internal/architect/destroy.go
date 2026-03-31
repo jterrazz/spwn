@@ -8,16 +8,16 @@ import (
 )
 
 // Destroy stops and removes a world.
-func (a *Architect) Destroy(ctx context.Context, universeID string) (*models.World, error) {
-	u, err := a.state.Get(universeID)
+func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World, error) {
+	u, err := a.state.Get(worldID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Stop gate server if running
-	if srv, ok := a.gates[universeID]; ok {
+	if srv, ok := a.gates[worldID]; ok {
 		srv.Stop()
-		delete(a.gates, universeID)
+		delete(a.gates, worldID)
 	}
 
 	a.backend.Stop(ctx, u.ContainerID)
@@ -28,7 +28,7 @@ func (a *Architect) Destroy(ctx context.Context, universeID string) (*models.Wor
 		os.RemoveAll(u.GateDir)
 	}
 
-	a.state.Delete(universeID)
+	a.state.Delete(worldID)
 
 	return u, nil
 }

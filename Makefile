@@ -1,11 +1,60 @@
-.PHONY: build build-image build-test-image build-gate \
+.PHONY: build install uninstall \
+        build-image build-test-image build-gate \
         test test-universe test-agent test-gate test-foundation test-messenger \
         test-e2e test-e2e-universe test-e2e-agent \
         lint clean docs
 
+INSTALL_DIR ?= $(HOME)/.local/bin
+PATH_EXPORT := export PATH="$$HOME/.local/bin:$$PATH"
+
 # Build
 build:
 	cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
+
+# Install — builds from source and installs to ~/.local/bin (same as install.sh)
+install: build
+	@mkdir -p $(INSTALL_DIR)
+	@cp bin/spwn $(INSTALL_DIR)/spwn
+	@chmod +x $(INSTALL_DIR)/spwn
+	@# Ensure ~/.local/bin is in PATH
+	@case ":$$PATH:" in \
+		*":$(INSTALL_DIR):"*) ;; \
+		*) \
+			ADDED=false; \
+			for rc in "$$HOME/.zshrc" "$$HOME/.bashrc" "$$HOME/.bash_profile" "$$HOME/.profile"; do \
+				if [ -f "$$rc" ]; then \
+					if ! grep -q '.local/bin' "$$rc" 2>/dev/null; then \
+						echo "" >> "$$rc"; \
+						echo "# Added by spwn (make install)" >> "$$rc"; \
+						echo '$(PATH_EXPORT)' >> "$$rc"; \
+						echo "  Added ~/.local/bin to PATH in $$(basename $$rc)"; \
+					fi; \
+					ADDED=true; \
+					break; \
+				fi; \
+			done; \
+			if [ "$$ADDED" = false ]; then \
+				echo "" >> "$$HOME/.profile"; \
+				echo "# Added by spwn (make install)" >> "$$HOME/.profile"; \
+				echo '$(PATH_EXPORT)' >> "$$HOME/.profile"; \
+				echo "  Added ~/.local/bin to PATH in .profile"; \
+			fi; \
+			export PATH="$(INSTALL_DIR):$$PATH"; \
+		;; \
+	esac
+	@echo ""
+	@echo "  ✓ spwn installed to $(INSTALL_DIR)/spwn"
+	@echo ""
+	@echo "  Get started:"
+	@echo "    spwn init"
+	@echo "    spwn agent init neo"
+	@echo "    spwn world --agent neo -w ."
+	@echo ""
+
+# Uninstall
+uninstall:
+	@rm -f $(INSTALL_DIR)/spwn
+	@echo "  ✓ spwn removed from $(INSTALL_DIR)"
 
 build-image:
 	docker build -t spwn-base:latest ./platform/images

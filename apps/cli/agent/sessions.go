@@ -22,12 +22,12 @@ var sessionsCmd = &cobra.Command{
 
 		mindPath := agentDomain.AgentDir(name)
 		if err := agentDomain.ValidateMind(name); err != nil {
-			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
+			return fmt.Errorf("agent %q not found", name)
 		}
 
 		sessions, err := agentDomain.ListSessions(mindPath)
 		if err != nil {
-			return fmt.Errorf("error: cannot read sessions.\n%w", err)
+			return fmt.Errorf("cannot read sessions: %w", err)
 		}
 
 		if len(sessions) == 0 {
@@ -44,7 +44,7 @@ var sessionsCmd = &cobra.Command{
 			if sess.Resumed {
 				resumed = "yes"
 			}
-			t.AddRow(sess.UniverseID, sess.ID, resumed)
+			t.AddRow(sess.WorldID, sess.ID, resumed)
 		}
 		t.Render()
 

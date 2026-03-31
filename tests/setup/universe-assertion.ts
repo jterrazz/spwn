@@ -10,8 +10,8 @@ export class AgentProbeAssertion {
     return this;
   }
 
-  sawPersonas(): this {
-    expect(this.probe.mind_personas).toBe(true);
+  sawIdentity(): this {
+    expect(this.probe.mind_identity).toBe(true);
     return this;
   }
 

@@ -24,7 +24,7 @@ describe("state management", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     // THEN — spawn output confirms structured status
-    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
 
     // AND — state.json exists and contains the world
     ctx
@@ -94,14 +94,14 @@ describe("state management", () => {
       60_000,
     );
     const id1 = parseWorldId(r1.output)!;
-    expectLine(r1.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(r1.output, /✓ Created container\s+w-\w+-\d{5}/);
 
     const r2 = ctx.spwn(
       ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
     const id2 = parseWorldId(r2.output)!;
-    expectLine(r2.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(r2.output, /✓ Created container\s+w-\w+-\d{5}/);
 
     // THEN — both are tracked
     ctx

@@ -40,3 +40,4 @@ func (a *Aider) SystemPackages() []string { return []string{"git"} }
 
 // SupportsSession returns true if the runtime can resume sessions.
 func (a *Aider) SupportsSession() bool { return false }
+func (a *Aider) Available() bool       { return false }

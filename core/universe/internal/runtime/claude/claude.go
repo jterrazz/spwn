@@ -26,10 +26,10 @@ func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
 	}
 
 	// Citizen/Governor: session management
-	sessID := agent.DeterministicSessionID(cfg.AgentName, cfg.UniverseID)
+	sessID := agent.DeterministicSessionID(cfg.AgentName, cfg.WorldID)
 	cmd = append(cmd, "--session-id", sessID)
 
-	existing, err := agent.LoadSession(cfg.MindPath, cfg.UniverseID)
+	existing, err := agent.LoadSession(cfg.MindPath, cfg.WorldID)
 	if err == nil && existing != nil {
 		cmd = append(cmd, "--resume")
 	}
@@ -66,3 +66,4 @@ func (c *Claude) SystemPackages() []string {
 
 // SupportsSession returns true if the runtime can resume sessions.
 func (c *Claude) SupportsSession() bool { return true }
+func (c *Claude) Available() bool       { return true }

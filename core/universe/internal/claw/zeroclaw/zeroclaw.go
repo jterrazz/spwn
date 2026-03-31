@@ -45,3 +45,4 @@ func (z *ZeroClaw) BaseImage() string { return "debian:bookworm-slim" }
 
 // SystemPackages returns apt packages needed.
 func (z *ZeroClaw) SystemPackages() []string { return []string{"ca-certificates", "curl"} }
+func (z *ZeroClaw) Available() bool          { return false }

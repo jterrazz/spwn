@@ -56,7 +56,7 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Agent should survive after destroy: %v", err)
 	}
-	if _, ok := info.Layers["personas"]; !ok {
-		t.Fatal("Agent Mind should still have personas layer")
+	if _, ok := info.Layers["identity"]; !ok {
+		t.Fatal("Agent Mind should still have identity layer")
 	}
 }

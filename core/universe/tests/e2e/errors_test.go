@@ -93,7 +93,7 @@ func TestError_DoubleDestroySameUniverse(t *testing.T) {
 		NoAgent().
 		Execute()
 
-	universeID := chain.Universe().ID
+	worldID := chain.Universe().ID
 
 	chain.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
@@ -101,7 +101,7 @@ func TestError_DoubleDestroySameUniverse(t *testing.T) {
 		})
 
 	// WHEN destroying the same world again
-	_, err := tc.Arc.Destroy(context.Background(), universeID)
+	_, err := tc.Arc.Destroy(context.Background(), worldID)
 
 	// THEN it should return an error
 	if err == nil {

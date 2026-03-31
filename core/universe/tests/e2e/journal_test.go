@@ -23,7 +23,7 @@ func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
 	chain.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(1)
 		j.LatestOutcome("completed")
-		j.LatestUniverseID(chain.Universe().ID)
+		j.LatestWorldID(chain.Universe().ID)
 	})
 }
 
@@ -55,8 +55,8 @@ func TestJournal_ListReturnsNewestFirst(t *testing.T) {
 	}
 
 	// AND the newest entry (index 0) should reference the second universe
-	if entries[0].UniverseID != chain2.Universe().ID {
-		t.Fatalf("Expected newest entry to be %s, got %s", chain2.Universe().ID, entries[0].UniverseID)
+	if entries[0].WorldID != chain2.Universe().ID {
+		t.Fatalf("Expected newest entry to be %s, got %s", chain2.Universe().ID, entries[0].WorldID)
 	}
 
 	_ = chain1 // used above implicitly

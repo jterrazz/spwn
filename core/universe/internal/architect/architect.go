@@ -29,7 +29,7 @@ import (
 type Architect struct {
 	backend backend.Backend
 	state   *state.Store
-	gates   map[string]*gate.Server // universeID → running gate server
+	gates   map[string]*gate.Server // worldID → running gate server
 	runtime runtime.Runtime          // injected runtime adapter
 }
 
@@ -65,13 +65,13 @@ func (a *Architect) List(ctx context.Context) ([]models.World, error) {
 }
 
 // Inspect returns a world by ID.
-func (a *Architect) Inspect(ctx context.Context, universeID string) (*models.World, error) {
-	return a.state.Get(universeID)
+func (a *Architect) Inspect(ctx context.Context, worldID string) (*models.World, error) {
+	return a.state.Get(worldID)
 }
 
 // Logs streams container output.
-func (a *Architect) Logs(ctx context.Context, universeID string, follow bool, tail string) (interface{ Read([]byte) (int, error); Close() error }, error) {
-	u, err := a.state.Get(universeID)
+func (a *Architect) Logs(ctx context.Context, worldID string, follow bool, tail string) (interface{ Read([]byte) (int, error); Close() error }, error) {
+	u, err := a.state.Get(worldID)
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +116,8 @@ func (a *Architect) DeleteSnapshot(ctx context.Context, snapshotTag string) erro
 }
 
 // Attach opens an interactive shell into a running world.
-func (a *Architect) Attach(ctx context.Context, universeID string) error {
-	u, err := a.state.Get(universeID)
+func (a *Architect) Attach(ctx context.Context, worldID string) error {
+	u, err := a.state.Get(worldID)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func (a *Architect) Attach(ctx context.Context, universeID string) error {
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", worldID)
 	}
 
 	_, err = a.backend.Exec(ctx, u.ContainerID, backend.ExecConfig{

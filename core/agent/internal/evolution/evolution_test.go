@@ -63,7 +63,7 @@ func TestSleep_StaleFiles(t *testing.T) {
 	mindPath := t.TempDir()
 
 	// Create a playbook with old modification time
-	playbooksDir := filepath.Join(mindPath, "playbooks")
+	playbooksDir := filepath.Join(mindPath, "memory", "playbooks")
 	os.MkdirAll(playbooksDir, 0755)
 	staleFile := filepath.Join(playbooksDir, "old-playbook.md")
 	os.WriteFile(staleFile, []byte("stale"), 0644)
@@ -81,7 +81,7 @@ func TestSleep_StaleFiles(t *testing.T) {
 	}
 
 	// Verify file was moved to archive
-	archived := filepath.Join(mindPath, "archive", "playbooks", "old-playbook.md")
+	archived := filepath.Join(mindPath, "archive", "memory", "playbooks", "old-playbook.md")
 	if _, err := os.Stat(archived); err != nil {
 		t.Errorf("archived file not found: %v", err)
 	}
@@ -94,7 +94,7 @@ func TestSleep_FreshFiles(t *testing.T) {
 	mindPath := t.TempDir()
 
 	// Create a fresh playbook
-	playbooksDir := filepath.Join(mindPath, "playbooks")
+	playbooksDir := filepath.Join(mindPath, "memory", "playbooks")
 	os.MkdirAll(playbooksDir, 0755)
 	freshFile := filepath.Join(playbooksDir, "fresh-playbook.md")
 	os.WriteFile(freshFile, []byte("fresh"), 0644)
@@ -152,10 +152,10 @@ func TestFork_AllLayers(t *testing.T) {
 
 	// Create source agent with some layers
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"personas", "skills", "knowledge", "playbooks", "journal", "sessions"} {
+	for _, layer := range []string{"identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "personas", "default.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "identity", "default.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 
 	result, err := Fork("source-agent", "target-agent", nil)
@@ -170,7 +170,7 @@ func TestFork_AllLayers(t *testing.T) {
 	}
 
 	// Verify files exist in target
-	targetPersona := filepath.Join(home, "agents", "target-agent", "personas", "default.md")
+	targetPersona := filepath.Join(home, "agents", "target-agent", "identity", "default.md")
 	if _, err := os.Stat(targetPersona); err != nil {
 		t.Errorf("target persona not found: %v", err)
 	}
@@ -186,21 +186,21 @@ func TestFork_SpecificLayers(t *testing.T) {
 
 	// Create source agent
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"personas", "skills", "knowledge"} {
+	for _, layer := range []string{"identity", "skills", "memory/knowledge"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "personas", "default.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "identity", "default.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
-	os.WriteFile(filepath.Join(sourceDir, "knowledge", "facts.md"), []byte("# Facts"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "memory", "knowledge", "facts.md"), []byte("# Facts"), 0644)
 
-	// Fork only personas layer
-	result, err := Fork("source-agent", "target-agent", []string{"personas"})
+	// Fork only identity layer
+	result, err := Fork("source-agent", "target-agent", []string{"identity"})
 	if err != nil {
 		t.Fatalf("Fork() error: %v", err)
 	}
 
-	// Verify personas was copied
-	targetPersona := filepath.Join(home, "agents", "target-agent", "personas", "default.md")
+	// Verify identity was copied
+	targetPersona := filepath.Join(home, "agents", "target-agent", "identity", "default.md")
 	if _, err := os.Stat(targetPersona); err != nil {
 		t.Errorf("target persona not found: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestFork_SpecificLayers(t *testing.T) {
 	// Verify skills was NOT copied (no file inside)
 	targetSkill := filepath.Join(home, "agents", "target-agent", "skills", "coding.md")
 	if _, err := os.Stat(targetSkill); !os.IsNotExist(err) {
-		t.Error("skills should not have been copied when only personas specified")
+		t.Error("skills should not have been copied when only identity specified")
 	}
 
 	if len(result.LayersCopied) == 0 {

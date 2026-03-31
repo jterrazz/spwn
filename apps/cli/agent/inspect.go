@@ -30,7 +30,7 @@ var inspectCmd = &cobra.Command{
 
 		info, err := agentDomain.InspectAgent(name)
 		if err != nil {
-			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
+			return fmt.Errorf("agent %q not found", name)
 		}
 
 		if inspectJSON {
@@ -102,7 +102,7 @@ var inspectCmd = &cobra.Command{
 			s.Info("Journal:", fmt.Sprintf("last %d entries", len(entries)))
 			for _, e := range entries {
 				ts := e.CreatedAt.Format("2006-01-02 15:04")
-				s.Info(ts, fmt.Sprintf("%-24s %-10s %s", e.UniverseID, e.Outcome, ui.FormatDuration(e.Duration)))
+				s.Info(ts, fmt.Sprintf("%-24s %-10s %s", e.WorldID, e.Outcome, ui.FormatDuration(e.Duration)))
 			}
 		}
 

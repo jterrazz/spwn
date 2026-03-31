@@ -51,10 +51,10 @@ func TestFailure_RecoveryAfterCrash(t *testing.T) {
 		m.WasCalled()
 	})
 
-	universeID := chain.Universe().ID
+	worldID := chain.Universe().ID
 
 	// WHEN a second agent is spawned in the same world (blocking)
-	err := tc.Arc.SpawnAgent(context.Background(), universeID, "recovery-agent")
+	err := tc.Arc.SpawnAgent(context.Background(), worldID, "recovery-agent")
 	if err != nil {
 		t.Logf("Second spawn returned (expected for mock): %v", err)
 	}
