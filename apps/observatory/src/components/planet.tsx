@@ -87,12 +87,6 @@ function agentToLocation(name: string): [number, number] {
   return [lat, lng];
 }
 
-// Bright marker colors per agent tier
-const MARKER_COLORS: Record<string, [number, number, number]> = {
-  governor: [1, 0.85, 0.2],   // gold
-  citizen: [0.3, 0.9, 0.5],   // green
-  npc: [0.5, 0.7, 1],         // blue
-};
 
 export function Planet({ world, index, onClick, isSelected }: PlanetProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -102,6 +96,9 @@ export function Planet({ world, index, onClick, isSelected }: PlanetProps) {
   const config = STATUS_CONFIG[world.status] ?? STATUS_CONFIG.stopped;
   const name = extractName(world.id);
   const size = isSelected ? 240 : 180;
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const glowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -113,26 +110,48 @@ export function Planet({ world, index, onClick, isSelected }: PlanetProps) {
       phi: phiRef.current,
       theta: 0.15 + index * 0.3,
       dark: 1,
-      diffuse: 1.4,
+      diffuse: 1.2 + (hashCode(world.id) % 10) * 0.08,
       mapSamples: 16000,
-      mapBrightness: config.brightness,
+      mapBrightness: 6,
       mapBaseBrightness: 0.02,
       baseColor: config.base,
       markerColor: [1, 1, 1],
       glowColor: config.glow,
       markers: world.agents.map((a) => ({
         location: agentToLocation(a.name),
-        size: a.tier === "governor" ? 0.12 : 0.08,
+        size: 0.01,
+        id: a.name,
       })),
       markerElevation: 0,
     });
     globeRef.current = globe;
 
-    // Auto-rotate via requestAnimationFrame
+    // Auto-rotate + sync glow positions from cobe's anchor divs
     let raf: number;
     const spin = () => {
       phiRef.current += isSelected ? 0.004 : 0.002;
       globe.update({ phi: phiRef.current });
+
+      // Sync glow overlay positions from cobe's auto-generated anchor divs
+      const wrapper = wrapperRef.current;
+      if (wrapper) {
+        world.agents.forEach((a) => {
+          const anchor = wrapper.querySelector(
+            `[style*="--cobe-marker-${a.name}"]`
+          ) as HTMLElement | null;
+          const glow = glowRefs.current.get(a.name);
+          if (anchor && glow) {
+            glow.style.left = anchor.style.left;
+            glow.style.top = anchor.style.top;
+            // Check visibility via computed custom property
+            const vis = getComputedStyle(anchor).getPropertyValue(
+              `--cobe-marker-visible-${a.name}`
+            );
+            glow.style.opacity = vis ? "1" : "0";
+          }
+        });
+      }
+
       raf = requestAnimationFrame(spin);
     };
     raf = requestAnimationFrame(spin);
@@ -144,9 +163,11 @@ export function Planet({ world, index, onClick, isSelected }: PlanetProps) {
   }, [world.id, world.status, isSelected, size]);
 
   return (
-    <button
+    <div
       onClick={onClick}
-      className="group relative flex flex-col items-center transition-all duration-500 focus:outline-none"
+      role="button"
+      tabIndex={0}
+      className="group relative flex flex-col items-center transition-all duration-500 focus:outline-none cursor-pointer"
       style={{
         transform: isSelected ? "translateY(-20px)" : "translateY(0)",
       }}
@@ -185,6 +206,7 @@ export function Planet({ world, index, onClick, isSelected }: PlanetProps) {
 
       {/* ── Globe ── */}
       <div
+        ref={wrapperRef}
         className="relative transition-all duration-500"
         style={{
           width: size,
@@ -203,6 +225,26 @@ export function Planet({ world, index, onClick, isSelected }: PlanetProps) {
             transition: "opacity 0.5s",
           }}
         />
+        {/* Glow overlays — positioned by JS sync from cobe anchors */}
+        {world.agents.map((a) => (
+          <div
+            key={`glow-${a.name}`}
+            ref={(el) => {
+              if (el) glowRefs.current.set(a.name, el);
+            }}
+            className="absolute pointer-events-none"
+            style={{
+              width: 28,
+              height: 28,
+              transform: "translate(-50%, -50%)",
+              opacity: 0,
+              background: "radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.35) 20%, rgba(255,255,255,0) 65%)",
+              boxShadow: "0 0 12px 5px rgba(255,255,255,0.5), 0 0 28px 10px rgba(255,255,255,0.15)",
+              borderRadius: "50%",
+              transition: "opacity 0.3s",
+            }}
+          />
+        ))}
       </div>
 
       {/* ── Bottom HUD: metadata (selected only) ── */}
@@ -265,6 +307,6 @@ export function Planet({ world, index, onClick, isSelected }: PlanetProps) {
           ↵ Enter World
         </button>
       </div>
-    </button>
+    </div>
   );
 }

@@ -35,7 +35,7 @@ provided, a random name is picked from a curated dictionary.`,
 		if err != nil {
 			hint := "Check that ~/.spwn/agents/ is writable"
 			if strings.Contains(err.Error(), "already exists") {
-				hint = fmt.Sprintf("Run \"spwn agent delete %s\" first, or choose a different name", name)
+				hint = fmt.Sprintf("Run \"spwn agent rm %s\" first, or choose a different name", name)
 			}
 			return s.FailHint("Agent creation failed", err, hint)
 		}

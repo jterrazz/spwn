@@ -16,7 +16,7 @@ describe("CLI output", () => {
     expect(out).toContain("Core:");
     expect(out).toContain("System:");
     // Key commands present
-    for (const cmd of ["world", "agent", "init", "status", "doctor", "god", "observatory", "skill", "upgrade", "up", "down", "ls", "profile", "msg", "snap"]) {
+    for (const cmd of ["world", "agent", "init", "status", "doctor", "architect", "observatory", "skill", "upgrade", "up", "down", "ls", "profile", "msg", "snap"]) {
       expect(out).toContain(cmd);
     }
     // Flags
@@ -46,8 +46,8 @@ describe("CLI output", () => {
     }
   });
 
-  test("god help lists subcommands", async () => {
-    const result = await spwn("god help").exec("god --help").run();
+  test("architect help lists subcommands", async () => {
+    const result = await spwn("architect help").exec("architect --help").run();
 
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
