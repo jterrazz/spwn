@@ -26,6 +26,7 @@ export default defineWorkspace([
         "e2e/config/**/*.e2e.test.ts",
         "e2e/state/**/*.e2e.test.ts",
         "e2e/messaging/**/*.e2e.test.ts",
+        "e2e/lifecycle/**/*.e2e.test.ts",
       ],
     },
   },
