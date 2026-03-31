@@ -47,6 +47,14 @@ the -c flag.
 
 Subcommands: list, inspect, logs, attach, destroy.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// If no flags set at all, show help instead of spawning with defaults
+		if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("agent") &&
+			!cmd.Flags().Changed("workspace") && !cmd.Flags().Changed("world") &&
+			!cmd.Flags().Changed("detach") && !cmd.Flags().Changed("no-agent") &&
+			!cmd.Flags().Changed("governor") && !cmd.Flags().Changed("gate") {
+			return cmd.Help()
+		}
+
 		ctx := context.Background()
 		s := newStepper(cmd)
 

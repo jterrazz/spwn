@@ -37,6 +37,12 @@ world. The agent survives after the world is destroyed.
 
 Subcommands: init, list, inspect, export.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// If no flags set at all, show help
+		if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
+			!cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {
+			return cmd.Help()
+		}
+
 		ctx := context.Background()
 		s := newStepper(cmd)
 
