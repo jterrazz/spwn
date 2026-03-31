@@ -61,18 +61,25 @@ You can't prompt-inject a missing network interface. You can't social-engineer a
 # Install
 curl -fsSL https://spwn.sh/install.sh | bash
 
-# First-time setup — creates ~/.spwn/ and a universe config
+# First-time setup
 spwn init
 
 # Create an agent
-spwn agent init leonardo
+spwn agent init neo
 
-# Create a world with the agent inside
-spwn world --agent leonardo -w ./my-project
+# Spawn a world with the agent inside
+spwn world --agent neo -w ./my-project --detach
 # → w-default-84721
+
+# Talk to the agent
+spwn agent talk neo "What is this project?"
+# → neo analyzes the workspace and responds
+
+# Check the environment
+spwn status
 ```
 
-A contained Linux environment is created. The agent's persistent identity is mounted inside. Claude Code is spawned with full shell access. When the task ends, the world is destroyed—but the agent survives. Next time it runs, it remembers what it learned.
+A contained Docker world is created. The agent's persistent Mind is mounted inside. Claude Code is spawned with full shell access. The agent reads its AGENT.md briefing, understands its role, and starts working. When the world is destroyed, the agent survives—next time it runs, it remembers everything.
 
 ---
 
