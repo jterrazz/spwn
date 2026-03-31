@@ -1,8 +1,8 @@
 # Spwn — Project Conventions
 
-## Core Principle: Framework, Not a Product
+## Core Principle: The Control Plane for AI Agents
 
-Spwn is a **framework for orchestrating artificial life**. Every layer is an interface (port) with swappable implementations (adapters). If a tool dies tomorrow, swap one adapter. Core logic never changes.
+Spwn is the **control plane for AI agents** — bringing order to agent chaos. Isolated worlds, persistent identity, physics-based security, multi-agent collaboration. Every layer is an interface (port) with swappable adapters. If a tool dies tomorrow, swap one adapter. Core logic never changes.
 
 ### The 8 Ports
 
