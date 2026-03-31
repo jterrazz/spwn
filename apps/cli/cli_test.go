@@ -101,8 +101,8 @@ func TestCLI_AgentDeleteHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "delete", "agent delete help")
-	assertContains(t, out, "agent-name", "agent delete usage")
+	assertContains(t, out, "delete", "agent rm help")
+	assertContains(t, out, "agent-name", "agent rm usage")
 }
 
 // --- Architect help ---

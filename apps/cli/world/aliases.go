@@ -15,7 +15,7 @@ var UpCmd = &cobra.Command{
 	RunE: Cmd.RunE,
 }
 
-// DownCmd is the top-level alias for `spwn world destroy`.
+// DownCmd is the top-level alias for spwn down.
 var DownCmd = &cobra.Command{
 	Use:   "down <world-id>",
 	Short: "Destroy a world",
@@ -23,14 +23,14 @@ var DownCmd = &cobra.Command{
 	RunE:  destroyCmd.RunE,
 }
 
-// LsCmd is the top-level alias for `spwn world list`.
+// LsCmd is the top-level alias for spwn ls.
 var LsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List active worlds",
 	RunE:  listCmd.RunE,
 }
 
-// LogsTopCmd is the top-level alias for `spwn world logs`.
+// LogsTopCmd is the top-level alias for spwn logs.
 var LogsTopCmd = &cobra.Command{
 	Use:   "logs <world-id>",
 	Short: "Stream agent output from a running world",
@@ -38,7 +38,7 @@ var LogsTopCmd = &cobra.Command{
 	RunE:  logsCmd.RunE,
 }
 
-// AttachTopCmd is the top-level alias for `spwn world attach`.
+// AttachTopCmd is the top-level alias for spwn attach.
 var AttachTopCmd = &cobra.Command{
 	Use:   "attach <world-id>",
 	Short: "Open interactive session into a running world",
@@ -46,7 +46,7 @@ var AttachTopCmd = &cobra.Command{
 	RunE:  attachCmd.RunE,
 }
 
-// InspectTopCmd is the top-level alias for `spwn world inspect`.
+// InspectTopCmd is the top-level alias for spwn inspect.
 var InspectTopCmd = &cobra.Command{
 	Use:   "inspect <world-id>",
 	Short: "Show world details, physics, and agent status",

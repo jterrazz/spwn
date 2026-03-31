@@ -231,7 +231,7 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 			// Multi-agent mode
 			s.Start("Spawning colony...")
 			if err := arc.SpawnAgents(ctx, u.ID, agents); err != nil {
-				return s.FailHint("Colony failed", err, "Check agent logs with \"spwn world logs "+u.ID+"\"")
+				return s.FailHint("Colony failed", err, "Check agent logs with \"spwn logs "+u.ID+"\"")
 			}
 			s.Done("Colony spawned", fmt.Sprintf("%d agent(s)", len(agents)))
 		} else if agentName != "" {
@@ -246,7 +246,7 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 			} else {
 				s.Start("Spawning agent...")
 				if err := arc.SpawnAgentDetached(ctx, u.ID, agentName); err != nil {
-					return s.FailHint("Agent failed", err, "Check agent logs with \"spwn world logs "+u.ID+"\"")
+					return s.FailHint("Agent failed", err, "Check agent logs with \"spwn logs "+u.ID+"\"")
 				}
 				s.Done("Agent spawned", "detached")
 			}
@@ -272,7 +272,7 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 			if agentName != "" {
 				s.Blank()
 				fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Talk: spwn agent talk %s", agentName)))
-				fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Logs: spwn world logs %s", u.ID)))
+				fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Logs: spwn logs %s", u.ID)))
 			}
 		}
 

@@ -30,8 +30,8 @@ describe("agent CRUD", () => {
 
   test("init creates agent with 6-layer Mind (identity, skills, memory/*, sessions)", async () => {
     // WHEN — initializing a new agent
-    const result = await spwn("agent init")
-      .exec("agent init neo")
+    const result = await spwn("agent new")
+      .exec("agent new neo")
       .run();
 
     // THEN — agent is created with structured status output
@@ -44,11 +44,11 @@ describe("agent CRUD", () => {
 
   test("init duplicate fails", async () => {
     // GIVEN — an agent already exists
-    await spwn("first init").exec("agent init neo").run();
+    await spwn("first new").exec("agent new neo").run();
 
     // WHEN — creating the same agent again
     const result = await spwn("duplicate init")
-      .exec("agent init neo")
+      .exec("agent new neo")
       .run();
 
     // THEN — exits with error showing duplicate message
@@ -58,8 +58,8 @@ describe("agent CRUD", () => {
 
   test("list shows created agents", async () => {
     // GIVEN — two agents have been created
-    await spwn("create neo").exec("agent init neo").run();
-    await spwn("create trinity").exec("agent init trinity").run();
+    await spwn("create neo").exec("agent new neo").run();
+    await spwn("create trinity").exec("agent new trinity").run();
 
     // WHEN — listing agents
     const result = await spwn("list agents")
@@ -75,7 +75,7 @@ describe("agent CRUD", () => {
 
   test("inspect shows agent details", async () => {
     // GIVEN — an agent exists
-    await spwn("create for inspect").exec("agent init neo").run();
+    await spwn("create for inspect").exec("agent new neo").run();
 
     // WHEN — inspecting the agent
     const result = await spwn("inspect agent")
@@ -118,7 +118,7 @@ describe("agent CRUD", () => {
 
   test("delete removes agent", async () => {
     // GIVEN — an agent exists
-    await spwn("create temp").exec("agent init temp").run();
+    await spwn("create temp").exec("agent new temp").run();
 
     // WHEN — deleting the agent
     const result = await spwn("delete agent")
@@ -153,7 +153,7 @@ describe("agent CRUD", () => {
 
   test("talk requires running world", async () => {
     // GIVEN — an agent exists but is not in any world
-    await spwn("create neo for talk").exec("agent init neo").run();
+    await spwn("create neo for talk").exec("agent new neo").run();
 
     // WHEN — trying to talk to the agent
     const result = await spwn("talk without world")
@@ -167,7 +167,7 @@ describe("agent CRUD", () => {
 
   test("list shows world column headers", async () => {
     // GIVEN — an agent has been created
-    await spwn("create for list").exec("agent init atlas").run();
+    await spwn("create for list").exec("agent new atlas").run();
 
     // WHEN — listing agents
     const result = await spwn("list with world")
@@ -182,7 +182,7 @@ describe("agent CRUD", () => {
 
   test("delete actually removes Mind directory from disk", async () => {
     // GIVEN — agent exists
-    await spwn("create temp for disk check").exec("agent init temp").run();
+    await spwn("create temp for disk check").exec("agent new temp").run();
     // Verify Mind directory exists
     new MindAssertion(home, "temp").exists().hasLayer("identity");
 
@@ -199,7 +199,7 @@ describe("agent CRUD", () => {
 
   test("cannot inspect agent after delete", async () => {
     // GIVEN — agent is created then deleted
-    await spwn("create for inspect-delete").exec("agent init temp").run();
+    await spwn("create for inspect-delete").exec("agent new temp").run();
     await spwn("delete for inspect-delete").exec("agent rm temp").run();
 
     // WHEN — inspecting the deleted agent
