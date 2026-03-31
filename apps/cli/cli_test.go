@@ -39,7 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"world", "agent", "profile", "msg", "snap", "architect", "observatory", "skill", "init"} {
+	for _, sub := range []string{"world", "agent", "profile", "msg", "snap", "architect", "dash", "get", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -79,7 +79,7 @@ func TestCLI_AgentHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"new", "ls", "rm", "talk", "inspect", "fork", "export", "import"} {
+	for _, sub := range []string{"new", "ls", "rm", "talk", "inspect", "reflect", "sleep", "fork", "export", "import"} {
 		assertContains(t, out, sub, "agent help")
 	}
 }
@@ -129,29 +129,29 @@ func TestCLI_AgentNPCFlag(t *testing.T) {
 	assertContains(t, out, "--npc", "agent help npc flag")
 }
 
-// --- Skill help ---
+// --- Get help ---
 
-func TestCLI_SkillHelp(t *testing.T) {
-	out, _, err := executeCommand("skill", "--help")
+func TestCLI_GetHelp(t *testing.T) {
+	out, _, err := executeCommand("get", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"list", "install", "remove"} {
-		assertContains(t, out, sub, "skill help")
+	for _, sub := range []string{"install", "ls", "search", "rm"} {
+		assertContains(t, out, sub, "get help")
 	}
 }
 
-// --- Observatory help ---
+// --- Dash help ---
 
-func TestCLI_ObservatoryHelp(t *testing.T) {
-	out, _, err := executeCommand("observatory", "--help")
+func TestCLI_DashHelp(t *testing.T) {
+	out, _, err := executeCommand("dash", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, sub := range []string{"start", "open"} {
-		assertContains(t, out, sub, "observatory help")
+		assertContains(t, out, sub, "dash help")
 	}
 }
 

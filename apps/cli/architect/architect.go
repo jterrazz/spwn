@@ -14,8 +14,8 @@ var defaultArchitectHelp func(*cobra.Command, []string)
 // Cmd is the parent command for Architect operations.
 var Cmd = &cobra.Command{
 	Use:   "architect",
-	Short: "The Architect — always-on orchestration daemon",
-	Long:  `The Architect is the orchestration daemon of spwn. It manages worlds, connects to messaging channels, and orchestrates artificial life.`,
+	Short: "Your always-on world builder",
+	Long:  `The Architect is your always-on world builder. It manages worlds, connects to messaging channels, and orchestrates artificial life.`,
 }
 
 var startCmd = &cobra.Command{
@@ -88,7 +88,7 @@ func architectHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ architect")+" "+ui.Faint("— always-on orchestration daemon"),
+		ui.Strong("⬡ architect")+" "+ui.Faint("— your always-on world builder"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
 				{"start", "Start the Architect daemon"},

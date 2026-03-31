@@ -4,6 +4,7 @@ import "./globals.css";
 import { Aurora } from "@/components/aurora";
 import { Stars } from "@/components/stars";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,11 +38,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full`}
       suppressHydrationWarning
     >
-      <body className="min-h-full relative overflow-hidden">
+      <body className="min-h-full relative overflow-x-hidden overflow-y-auto">
         <ThemeProvider>
-          <Aurora />
-          <Stars />
-          <div className="relative z-10 min-h-screen">{children}</div>
+          <TooltipProvider>
+            <Aurora />
+            <Stars />
+            <div className="relative z-10 min-h-screen">
+              {children}
+            </div>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

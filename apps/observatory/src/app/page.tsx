@@ -1,61 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
-import { Header } from "@/components/header";
-
-interface Agent {
-  name: string;
-  tier: string;
-  status: string;
-}
+import { MOCK_WORLDS } from "@/lib/mock-data";
 
 export interface World {
   id: string;
   config: string;
   agent: string;
-  agents: Agent[];
+  agents: { name: string; tier: string; status: string }[];
   status: "running" | "idle" | "stopped" | "creating";
   created_at: string;
   workspace: string;
 }
 
-const MOCK_WORLDS: World[] = [
-  {
-    id: "w-titan-84721",
-    config: "default",
-    agent: "neo",
-    agents: [{ name: "neo", tier: "citizen", status: "running" }],
-    status: "running",
-    created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-    workspace: "~/acme-api",
-  },
-  {
-    id: "w-europa-39205",
-    config: "default",
-    agent: "morpheus",
-    agents: [
-      { name: "morpheus", tier: "governor", status: "running" },
-      { name: "trinity", tier: "citizen", status: "idle" },
-    ],
-    status: "running",
-    created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    workspace: "~/signews",
-  },
-  {
-    id: "w-ganymede-51003",
-    config: "backend",
-    agent: "atlas",
-    agents: [{ name: "atlas", tier: "citizen", status: "idle" }],
-    status: "idle",
-    created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    workspace: "~/infra",
-  },
-];
-
-export default function UniversePage() {
+export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
   const [selected, setSelected] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     setWorlds(MOCK_WORLDS);
@@ -69,29 +32,40 @@ export default function UniversePage() {
       } else if (e.key === "ArrowLeft" || e.key === "a") {
         setSelected((s) => (s - 1 + worlds.length) % worlds.length);
       } else if (e.key === "Enter") {
-        // TODO: navigate into world
+        router.push(`/world/${worlds[selected].id}`);
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [worlds.length]);
+  }, [worlds, selected, router]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <Header worldCount={worlds.length} />
+    <div className="flex flex-col min-h-screen">
+      {/* Minimal header */}
+      <header className="relative z-20 flex items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-3">
+          <span className="text-lg tracking-[0.2em] font-heading text-foreground/90">
+            ⬡ observatory
+          </span>
+          <span className="text-xs font-mono text-muted-foreground/30">spwn</span>
+        </div>
+        <div className="glass-subtle px-3 py-1.5 flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-xs font-mono text-muted-foreground">
+            {worlds.length} world{worlds.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      </header>
 
-      <main className="flex-1 relative flex items-center justify-center">
+      {/* Universe canvas */}
+      <main className="flex-1 flex items-center justify-center py-16">
         {worlds.length === 0 ? (
           <div className="text-center">
-            <p className="text-[rgba(255,255,255,0.3)] text-lg font-heading">
-              No active worlds
-            </p>
-            <p className="text-[rgba(255,255,255,0.2)] text-sm mt-2 font-mono">
-              spwn up --agent neo -w .
-            </p>
+            <p className="text-muted-foreground/30 text-lg font-heading">No active worlds</p>
+            <p className="text-muted-foreground/20 text-sm mt-2 font-mono">spwn up --agent neo -w .</p>
           </div>
         ) : (
-          <div className="flex items-end gap-12 md:gap-20">
+          <div className="flex items-center gap-12 md:gap-20">
             {worlds.map((world, i) => (
               <Planet
                 key={world.id}
@@ -99,6 +73,7 @@ export default function UniversePage() {
                 index={i}
                 isSelected={selected === i}
                 onClick={() => setSelected(i)}
+                onEnter={() => router.push(`/world/${worlds[i].id}`)}
               />
             ))}
           </div>
