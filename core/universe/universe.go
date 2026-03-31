@@ -3,11 +3,15 @@
 package universe
 
 import (
+	"sort"
+
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/claw"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/observatory"
+	"spwn.sh/core/universe/internal/runtime"
 	"spwn.sh/core/universe/internal/state"
 	"spwn.sh/core/universe/internal/sync"
 )
@@ -169,3 +173,36 @@ func LoadClawState() (*ClawState, error) { return state.LoadClawState() }
 
 // SaveClawState persists the Claw daemon state to disk (~/.spwn/claw.json).
 func SaveClawState(s *ClawState) error { return state.SaveClawState(s) }
+
+// --- Runtime / Claw discovery ---
+
+// GenerateRuntimeDockerfile creates a Dockerfile for the given runtime.
+func GenerateRuntimeDockerfile(runtimeName string) (string, error) {
+	rt, err := runtime.Get(runtimeName)
+	if err != nil {
+		return "", err
+	}
+	return runtime.GenerateDockerfile(rt), nil
+}
+
+// ListRuntimes returns all registered runtime names.
+func ListRuntimes() []string {
+	all := runtime.All()
+	names := make([]string, 0, len(all))
+	for name := range all {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
+// ListClaws returns all registered claw names.
+func ListClaws() []string {
+	all := claw.All()
+	names := make([]string, 0, len(all))
+	for name := range all {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
