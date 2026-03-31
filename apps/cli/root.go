@@ -118,6 +118,8 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "agent delete <name>", "Remove an agent")
 	printHelpCmd(w, "agent export <name>", "Export as tar.gz")
 	printHelpCmd(w, "agent fork <src> <dst>", "Clone an agent")
+	printHelpCmd(w, "agent journal <name>", "View session history")
+	printHelpCmd(w, "agent sessions <name>", "View saved sessions")
 	printHelpCmd(w, "agent reflect <name>", "Analyze journal")
 	printHelpCmd(w, "agent sleep <name>", "Archive stale knowledge")
 	fmt.Fprintln(w)

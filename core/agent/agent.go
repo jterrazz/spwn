@@ -124,6 +124,11 @@ func SaveSession(mindPath string, s *Session) error {
 	return session.Save(mindPath, s)
 }
 
+// ListSessions returns all sessions from the agent's sessions directory.
+func ListSessions(mindPath string) ([]Session, error) {
+	return session.List(mindPath)
+}
+
 // --- Evolution operations ---
 
 // Reflect analyzes the named agent's recent journal entries and promotes

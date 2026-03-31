@@ -3,8 +3,9 @@
 ## Prerequisites
 
 - **Go 1.25+** (monorepo uses `go.work`)
-- **Docker** (for E2E tests and universe provisioning)
-- **Rust** (for `platform/gate-runtime` only)
+- **Docker** (for E2E tests and world provisioning)
+- **Node.js 20+** (for TypeScript E2E tests)
+- **Rust** (only for `platform/gate-runtime`)
 
 ## Getting Started
 
@@ -12,61 +13,92 @@
 git clone https://github.com/jterrazz/spwn.git
 cd spwn
 go work sync
-make build        # builds bin/spwn
-make test         # runs all unit tests
-make lint         # go vet across all modules
+make build              # builds bin/spwn
+make test               # runs all Go unit tests
+make lint               # go vet across all modules
+
+# TypeScript E2E tests
+cd tests && pnpm install && pnpm test
 ```
 
 ## Project Structure
 
 ```
-core/               Domain libraries (no CLI, no IO at the boundary)
-  foundation/         Cross-cutting primitives (paths, IDs, constants)
-  agent/              Agent lifecycle (mind, journal, session, evolution)
-  gate/               Host-container bridge (server, bridge scripts)
-  universe/           World management (architect, backend, manifest, state)
-apps/               Deployable binaries
-  cli/                The spwn binary (Cobra commands -> domain APIs -> output)
-  observatory/        Dashboard (planned)
-platform/           Build infrastructure
-  images/             Docker images (base, test)
-  gate-runtime/       Container-side Rust gate
-  fixtures/           Test fixtures
+core/                   Domain libraries (pure logic, no I/O at boundary)
+  universe/               World management (architect, backend, runtime adapters)
+  agent/                  Agent lifecycle (mind, journal, session, evolution)
+  gate/                   Host↔container bridge (server, bridge scripts)
+  messenger/              Inter-agent messaging (inbox, models)
+  foundation/             Cross-cutting primitives (paths, IDs, constants)
+
+apps/                   Deployable consumers
+  cli/                    The spwn binary (Cobra → domain APIs → output)
+  observatory/            Dashboard (planned)
+
+platform/               Build infrastructure
+  images/                 Docker images (base, test)
+  gate-runtime/           Container-side Rust gate
+  fixtures/               Mock claude, test data
+
+tests/                  TypeScript E2E test suite
+  e2e/                    Behavioral specs (world, agent, messaging, etc.)
+  setup/                  Test infrastructure (runners, assertions, mock LLM)
 ```
 
-## Adding a Port Adapter
+## Adding a Runtime Adapter
 
-1. Define the port interface in the relevant `core/` module (e.g., `core/universe/internal/backend/backend.go`).
-2. Create an adapter package implementing that interface (e.g., `backend/docker.go`).
-3. Wire it in the module's public API file (`core/universe/universe.go`).
-4. Add unit tests covering the adapter contract.
+1. Create `core/universe/internal/runtime/{name}/{name}.go`
+2. Implement the `runtime.Runtime` interface
+3. Call `runtime.Register(&YourRuntime{})` in `init()`
+4. The adapter auto-registers via blank import in `architect.go`
+
+```go
+package myruntime
+
+import rt "spwn.sh/core/universe/internal/runtime"
+
+type MyRuntime struct{}
+func init() { rt.Register(&MyRuntime{}) }
+func (r *MyRuntime) Name() string { return "my-runtime" }
+func (r *MyRuntime) BuildCommand(cfg rt.SpawnConfig) []string { ... }
+func (r *MyRuntime) BaseImage() string { return "node:20" }
+// ... implement remaining interface methods
+```
 
 ## Adding a CLI Command
 
-1. Create a new file in `apps/cli/cmd/` (e.g., `cmd_foo.go`).
-2. Register it in the parent command's `init()`.
-3. The command should call domain APIs from `core/` and format output -- no business logic in the CLI layer.
+1. Create `apps/cli/{domain}/{command}.go`
+2. Register with `Cmd.AddCommand(yourCmd)` in `init()`
+3. Command calls domain APIs — no business logic in CLI layer
+4. Use `ui.New()` stepper for output (✓/✗/→)
+5. Add to custom help in `apps/cli/root.go`
 
-## Testing Conventions
+## Testing
 
-- **Spec-first**: write the test before or alongside the implementation.
-- **Naming**: use `GIVEN_WHEN_THEN` style -- `TestArchitect_Spawn_CreatesContainer`.
-- **Unit tests**: `go test ./...` in each module. No Docker required.
-- **E2E tests**: `make test-e2e`. Requires Docker and the test image (`make build-test-image`).
-- **Tags**: E2E tests use `//go:build e2e` so they don't run in CI by default.
+- **Spec-first**: write the test before the implementation
+- **Go unit tests**: `*_test.go` next to source. No Docker needed.
+- **Go E2E tests**: `core/universe/tests/e2e/`. Build tag `//go:build e2e`. Needs Docker.
+- **TypeScript E2E**: `tests/e2e/`. Runs against real `spwn` binary. Needs Docker.
+- **Output assertions**: use `expectLine()`, `expectTableHeader()` — not weak `toContain()`
+
+```bash
+make test               # Go unit tests (fast, no Docker)
+make test-e2e           # Go E2E tests (Docker required)
+cd tests && pnpm test   # TypeScript E2E (Docker required)
+```
 
 ## Commit Messages
 
-Use imperative mood, lowercase, no period:
-
+Imperative mood, lowercase:
 ```
-add NPC mode to agent command
-fix universe destroy when agent is running
-refactor mind export to support layer filtering
+feat: add world snapshot restore
+fix: agent talk skips dead containers
+test: add messaging inbox E2E specs
+docs: update CLI reference
 ```
 
-Prefix with the domain when helpful: `universe: add attach command`.
+## Resources
 
-## Architecture Decisions
-
-See the [blueprint wiki](https://github.com/jterrazz/spwn-wiki/blob/main/domains/) for ADRs, domain models, and epoch plans.
+- [Blueprint Wiki](https://github.com/jterrazz/spwn-wiki) — ADRs, domain models, epoch plans
+- [CLI Reference](https://spwn.sh/docs) — auto-generated from source
+- [CLAUDE.md](./CLAUDE.md) — full project conventions

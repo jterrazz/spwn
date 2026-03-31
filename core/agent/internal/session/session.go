@@ -62,6 +62,35 @@ func Save(mindPath string, s *Session) error {
 	return os.WriteFile(path, data, 0644)
 }
 
+// List returns all session files from the Mind's sessions directory.
+func List(mindPath string) ([]Session, error) {
+	dir := filepath.Join(mindPath, "sessions")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var sessions []Session
+	for _, e := range entries {
+		if e.IsDir() || filepath.Ext(e.Name()) != ".json" {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		if err != nil {
+			continue
+		}
+		var s Session
+		if err := json.Unmarshal(data, &s); err != nil {
+			continue
+		}
+		sessions = append(sessions, s)
+	}
+	return sessions, nil
+}
+
 func filePath(mindPath, universeID string) string {
 	return filepath.Join(mindPath, "sessions", universeID+".json")
 }
