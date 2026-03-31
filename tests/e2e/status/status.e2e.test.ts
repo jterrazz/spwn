@@ -186,4 +186,34 @@ describe("spwn status", () => {
       expect(out).toMatch(/\d+ cpu/);
     });
   });
+
+  // ── Negative tests ──────────────────────────────────────────
+
+  describe("error handling", () => {
+    let home: string;
+    let originalSpwnHome: string | undefined;
+
+    beforeEach(() => {
+      originalSpwnHome = process.env.SPWN_HOME;
+      home = createSpwnHome();
+      process.env.SPWN_HOME = home;
+    });
+
+    afterEach(() => {
+      if (originalSpwnHome !== undefined)
+        process.env.SPWN_HOME = originalSpwnHome;
+      else delete process.env.SPWN_HOME;
+    });
+
+    test("status on uninitialized home still works", async () => {
+      // WHEN — running status without init
+      const result = await spwn("status no init").exec("status").run();
+
+      // THEN — still exits successfully (status should be resilient)
+      expect(result.exitCode).toBe(0);
+      const out = stripAnsi(result.output);
+      // Header should always show
+      expect(out).toContain("s p w n");
+    });
+  });
 });

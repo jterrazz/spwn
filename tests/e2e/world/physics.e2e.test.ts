@@ -115,9 +115,7 @@ describe("world physics", () => {
     const id = parseWorldId(result.output)!;
 
     // Verify network mode is set to none via docker inspect
-    const inspectData = ctx.universe(id).inspect() as {
-      HostConfig?: { NetworkMode?: string };
-    };
+    const inspectData = ctx.universe(id).inspect();
     expect(inspectData.HostConfig?.NetworkMode).toBe("none");
 
     // Try to curl from inside — should fail with network=none

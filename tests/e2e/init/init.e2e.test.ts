@@ -92,4 +92,18 @@ describe("spwn init", () => {
     expectLine(result.output, /✓ Created config\s+acme\.yaml/);
     expectLine(result.output, /✓ Ready\. Next steps:/);
   });
+
+  test("init with special characters in name handles gracefully", async () => {
+    // WHEN — running init with a name containing special chars
+    const result = await spwn("init special chars")
+      .exec("init my/bad:name")
+      .run();
+
+    // THEN — either succeeds with sanitized name or fails with clean error
+    const out = lines(result.output);
+    expect(out.length).toBeGreaterThan(0);
+    // Should not contain stack traces
+    expect(result.output).not.toContain("TypeError");
+    expect(result.output).not.toContain("FATAL");
+  });
 });

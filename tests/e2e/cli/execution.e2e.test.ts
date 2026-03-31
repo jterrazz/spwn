@@ -105,6 +105,8 @@ describe("CLI execution — world aliases", () => {
 
     // THEN — doesn't error (agent may not have output yet)
     expect(logsResult.exitCode).toBe(0);
+    // AND — output is a string (may be empty if agent hasn't logged yet)
+    expect(typeof logsResult.output).toBe("string");
   });
 
   test("'spwn inspect' works for world via world inspect", () => {

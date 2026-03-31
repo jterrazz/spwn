@@ -3,7 +3,12 @@ import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
-/** Create an isolated SPWN_HOME directory */
+/**
+ * Create an isolated SPWN_HOME directory with the required subdirectories.
+ * Each call creates a unique temporary directory under the system temp path.
+ *
+ * @returns Absolute path to the new SPWN_HOME directory
+ */
 export function createSpwnHome(): string {
   const dir = mkdtempSync(join(tmpdir(), "spwn-test-"));
   mkdirSync(join(dir, "worlds"), { recursive: true });
@@ -11,8 +16,14 @@ export function createSpwnHome(): string {
   return dir;
 }
 
-/** Create a minimal agent Mind */
-export function createAgent(spwnHome: string, name: string) {
+/**
+ * Create a minimal agent Mind with the standard 6-layer directory structure.
+ * Writes a default identity file so the agent is immediately usable.
+ *
+ * @param spwnHome - Path to the SPWN_HOME directory
+ * @param name - Agent name (used as directory name under agents/)
+ */
+export function createAgent(spwnHome: string, name: string): void {
   const agentDir = join(spwnHome, "agents", name);
   const layers = [
     "identity",
@@ -31,12 +42,18 @@ export function createAgent(spwnHome: string, name: string) {
   );
 }
 
-/** Create a minimal world config */
+/**
+ * Create a minimal world config YAML file in the worlds/ directory.
+ *
+ * @param spwnHome - Path to the SPWN_HOME directory
+ * @param name - Config name (used as filename: {name}.yaml)
+ * @param overrides - Additional config fields to merge
+ */
 export function createWorldConfig(
   spwnHome: string,
   name: string,
   overrides: Record<string, unknown> = {},
-) {
+): void {
   const config = {
     name,
     physics: {
@@ -56,8 +73,13 @@ export function createWorldConfig(
   );
 }
 
-/** Create a minimal org.yaml */
-export function createOrgManifest(spwnHome: string, name = "test-org") {
+/**
+ * Create a minimal org.yaml manifest file in the SPWN_HOME directory.
+ *
+ * @param spwnHome - Path to the SPWN_HOME directory
+ * @param name - Organization name (default: "test-org")
+ */
+export function createOrgManifest(spwnHome: string, name = "test-org"): void {
   writeFileSync(
     join(spwnHome, "org.yaml"),
     `name: ${name}\nversion: "1.0"\n`,

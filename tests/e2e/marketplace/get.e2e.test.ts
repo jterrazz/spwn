@@ -76,4 +76,15 @@ describe("marketplace — spwn get", () => {
     expect(out).not.toContain("TypeError");
     expect(out).not.toContain("ReferenceError");
   });
+
+  test("'spwn get' without subcommand shows help", async () => {
+    const result = await spwn("get bare").exec("get").run();
+
+    // THEN — shows help or usage info (no crash)
+    const out = stripAnsi(result.output);
+    expect(out.length).toBeGreaterThan(0);
+    expect(out).not.toContain("TypeError");
+    // Should mention available subcommands
+    expect(out).toMatch(/install|search|ls|rm|help/i);
+  });
 });

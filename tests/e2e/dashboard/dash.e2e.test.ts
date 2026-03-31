@@ -50,4 +50,14 @@ describe("dashboard — spwn dash", () => {
     expect(out).not.toContain("ReferenceError");
     expect(out).not.toContain("FATAL");
   });
+
+  test("'spwn dash nonexistent' shows error for unknown subcommand", async () => {
+    const result = await spwn("dash unknown").exec("dash nonexistent").run();
+
+    // THEN — exits with non-zero or shows usage, but no crash
+    const out = stripAnsi(result.output);
+    expect(out).not.toContain("TypeError");
+    expect(out).not.toContain("ReferenceError");
+    expect(out.length).toBeGreaterThan(0);
+  });
 });

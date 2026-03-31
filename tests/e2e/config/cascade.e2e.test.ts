@@ -79,4 +79,21 @@ describe("config cascade", () => {
     // AND — state tracks it with the right config
     ctx.state().hasWorld(id);
   });
+
+  test("spawning with non-existent config fails with actionable error", () => {
+    // GIVEN — an initialized SPWN_HOME (but no 'ghost' config)
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+
+    // WHEN — spawning with a config that doesn't exist
+    const result = ctx.spwn(
+      ["world", "-c", "ghost", "--agent", "neo", "-w", ctx.home],
+      60_000,
+    );
+
+    // THEN — exits with non-zero code and actionable error
+    expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /✗ Config failed/);
+    expectLine(result.output, /spwn init/);
+  });
 });
