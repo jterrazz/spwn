@@ -86,9 +86,10 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	// Quick Start
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Quick Start:"))
-	printHelpCmd(w, "spwn init", "Create your first world config")
-	printHelpCmd(w, "spwn world -w .", "Spawn a world with workspace")
-	printHelpCmd(w, "spwn agent talk neo", "Talk to an agent")
+	printHelpCmd(w, "spwn init", "First-time setup")
+	printHelpCmd(w, "spwn agent init neo", "Create an agent")
+	printHelpCmd(w, "spwn world --agent neo -w .", "Spawn a world")
+	printHelpCmd(w, "spwn agent talk neo", "Talk to the agent")
 	fmt.Fprintln(w)
 
 	// World
