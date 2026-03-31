@@ -23,7 +23,7 @@ var snapshotCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		s.Start("Saving snapshot...")
@@ -44,7 +44,7 @@ var snapshotsCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		snapshots, err := arc.ListSnapshots(context.Background())
@@ -86,7 +86,7 @@ var restoreCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		// Build the full image tag
@@ -134,7 +134,7 @@ var snapshotDeleteCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		imageTag := "spwn-snapshot:" + snapshotRef

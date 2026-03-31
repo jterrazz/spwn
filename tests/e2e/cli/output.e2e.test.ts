@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { spwn } from "../../setup/spwn.specification.js";
-import { expectLine, lines } from "../../setup/output-helpers.js";
+import { expectLine, lines, stripAnsi } from "../../setup/output-helpers.js";
 
 describe("CLI output", () => {
   test("root help lists all subcommands", async () => {
@@ -17,7 +17,7 @@ describe("CLI output", () => {
     expectLine(result.output, /System:/);
     expectLine(result.output, /Flags:/);
     // Key commands present (lines are trimmed, so cmd is at start)
-    for (const cmd of ["world", "agent", "init", "status", "claw", "observatory", "skill"]) {
+    for (const cmd of ["world", "agent", "init", "status", "claw", "observatory", "skill", "upgrade"]) {
       expectLine(result.output, new RegExp(`${cmd}\\s+`));
     }
     // Flags
@@ -142,5 +142,14 @@ describe("CLI output", () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toMatch(/spwn version/);
+  });
+
+  test("upgrade help shows version info", async () => {
+    const result = await spwn("upgrade help")
+      .exec("upgrade --help")
+      .run();
+
+    expect(result.exitCode).toBe(0);
+    expect(stripAnsi(result.output)).toContain("latest");
   });
 });

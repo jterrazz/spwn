@@ -33,7 +33,7 @@ var logsCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		tail := fmt.Sprintf("%d", logsTail)

@@ -113,11 +113,11 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		s.Blank()
-		s.Start("Spawning world...")
+		s.Start("Preparing world...")
 
 		result, err := arc.Spawn(ctx, universe.SpawnOpts{
 			ConfigName: configName,
@@ -128,8 +128,11 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 			LogWriter:  s.Writer(),
 			OnProgress: func(event, detail string) {
 				switch event {
-				case "image_ready":
+				case "image_built":
 					s.Done("Built image", detail)
+					s.Start("Spawning world...")
+				case "image_ready":
+					s.Done("Image ready", detail)
 					s.Start("Spawning world...")
 				case "container_created":
 					s.Done("Spawned world", detail)
@@ -211,6 +214,15 @@ func newStepper(cmd *cobra.Command) *ui.Stepper {
 	v, _ := cmd.Flags().GetBool("verbose")
 	j, _ := cmd.Flags().GetBool("json")
 	return ui.New(q, v, j)
+}
+
+// dockerHint wraps a NewArchitectFromEnv error with a user-friendly hint
+// when Docker is not running.
+func dockerHint(err error) error {
+	if strings.Contains(err.Error(), "cannot connect to Docker") {
+		return fmt.Errorf("error: Docker is not running.\nRun 'docker info' to check, or start Docker Desktop.")
+	}
+	return err
 }
 
 // parseGateFlag parses "source:as:cap1,cap2" into a GateBridge.

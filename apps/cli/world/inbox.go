@@ -39,7 +39,7 @@ If not, shows all messages across all inboxes.`,
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return err
+			return dockerHint(err)
 		}
 
 		u, err := arc.Inspect(ctx, worldID)

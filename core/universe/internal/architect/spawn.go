@@ -176,8 +176,17 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Ensure image exists (auto-build for default image, fail for custom/test images)
 	if opts.Image == "" {
-		if err := a.backend.EnsureImage(ctx, image, images.Dockerfile, opts.logWriter()); err != nil {
-			return nil, fmt.Errorf("ensure base image: %w", err)
+		alreadyCached, err := a.backend.ImageExists(ctx, image)
+		if err != nil {
+			return nil, fmt.Errorf("check image: %w", err)
+		}
+		if !alreadyCached {
+			if err := a.backend.EnsureImage(ctx, image, images.Dockerfile, opts.logWriter()); err != nil {
+				return nil, fmt.Errorf("ensure base image: %w", err)
+			}
+			opts.progress("image_built", image)
+		} else {
+			opts.progress("image_ready", image)
 		}
 	} else {
 		exists, err := a.backend.ImageExists(ctx, image)
@@ -187,8 +196,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		if !exists {
 			return nil, fmt.Errorf("image %s not found", image)
 		}
+		opts.progress("image_ready", image)
 	}
-	opts.progress("image_ready", image)
 
 	// Forward AI provider credentials to the container
 	var env []string

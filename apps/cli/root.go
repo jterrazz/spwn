@@ -126,6 +126,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintf(w, "  %s\n", ui.Strong("System:"))
 	printHelpCmd(w, "init", "First-time setup")
 	printHelpCmd(w, "status", "Full environment overview")
+	printHelpCmd(w, "doctor", "Diagnose environment issues")
 	printHelpCmd(w, "upgrade", "Upgrade to latest version")
 	printHelpCmd(w, "claw", "Orchestration daemon")
 	printHelpCmd(w, "observatory", "Visual dashboard")
