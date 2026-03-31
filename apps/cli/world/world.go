@@ -41,11 +41,12 @@ var Cmd = &cobra.Command{
 	Short: "Spawn a world — an isolated reality for agents",
 	Long: `Spawn a world — the Big Bang.
 
-Creates a world and brings an agent to life inside it. Uses a named world
-config from ~/.spwn/worlds/ (default: default.yaml). Specify a config with
-the -c flag.
-
-Subcommands: list, inspect, logs, attach, destroy.`,
+Creates an isolated Docker environment and brings an agent to life inside it.
+Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
+	Example: `  spwn world -w .                    Spawn with current directory
+  spwn world -c acme -w ~/project   Named config + workspace
+  spwn world --governor morpheus     With a governor agent
+  spwn world --no-agent              Empty world (no agent)`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// If no flags set at all, show help instead of spawning with defaults
 		if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("agent") &&
