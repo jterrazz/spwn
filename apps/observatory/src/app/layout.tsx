@@ -5,6 +5,7 @@ import { Aurora } from "@/components/aurora";
 import { Stars } from "@/components/stars";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppShell } from "@/components/app-shell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,7 +45,7 @@ export default function RootLayout({
             <Aurora />
             <Stars />
             <div className="relative z-10 min-h-screen">
-              {children}
+              <AppShell>{children}</AppShell>
             </div>
           </TooltipProvider>
         </ThemeProvider>

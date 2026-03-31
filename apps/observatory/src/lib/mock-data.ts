@@ -14,7 +14,7 @@ export interface World {
   workspace: string;
 }
 
-export interface DriftingAgent {
+export interface LimboAgent {
   name: string;
   layers: number;
 }
@@ -52,7 +52,7 @@ export const MOCK_WORLDS: World[] = [
   },
 ];
 
-export const MOCK_DRIFTING: DriftingAgent[] = [
+export const MOCK_LIMBO: LimboAgent[] = [
   { name: "iris", layers: 3 },
   { name: "sage", layers: 1 },
 ];

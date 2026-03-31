@@ -56,13 +56,13 @@ describe("spwn status", () => {
       expect(out).toContain("Universe");
     });
 
-    test("shows drifting agents", async () => {
+    test("shows limbo agents", async () => {
       await spwn("init").exec("init").run();
       await spwn("agent init").exec("agent init neo").run();
       const result = await spwn("status").exec("status").run();
 
       const out = stripAnsi(result.output);
-      expect(out).toContain("Drifting");
+      expect(out).toContain("Limbo");
       expect(out).toContain("neo");
     });
 
@@ -111,13 +111,13 @@ describe("spwn status", () => {
       expect(out).toMatch(/\d+ skills/);
     });
 
-    test("shows drifting section even with no agents", async () => {
+    test("shows limbo section even with no agents", async () => {
       // init creates a default agent, so we just check the section exists
       await spwn("init").exec("init").run();
       const result = await spwn("status").exec("status").run();
 
       const out = stripAnsi(result.output);
-      expect(out).toContain("Drifting");
+      expect(out).toContain("Limbo");
     });
 
     test("uses box-drawing characters", async () => {

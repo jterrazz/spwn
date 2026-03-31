@@ -64,7 +64,7 @@
 /* Dark-only cosmic palette — matching spwn-web landing page */
 :root {
   --radius: 0.625rem;
-  --background: #0a0a0a;
+  --background: transparent;
   --foreground: #ffffff;
   --card: rgba(255, 255, 255, 0.04);
   --card-foreground: #ffffff;
@@ -82,18 +82,18 @@
   --input: rgba(255, 255, 255, 0.1);
   --ring: rgba(255, 255, 255, 0.3);
   --destructive: oklch(0.704 0.191 22.216);
-  --sidebar: rgba(10, 10, 10, 0.95);
+  --sidebar: rgba(10, 10, 10, 0.4);
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #ffffff;
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: rgba(255, 255, 255, 0.06);
   --sidebar-accent-foreground: rgba(255, 255, 255, 0.9);
-  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
   --sidebar-ring: rgba(255, 255, 255, 0.3);
 }
 
 .light {
-  --background: #222222;
+  --background: transparent;
   --foreground: #f0f0f0;
   --card: rgba(255, 255, 255, 0.05);
   --card-foreground: #f0f0f0;
@@ -111,7 +111,7 @@
   --input: rgba(255, 255, 255, 0.1);
   --ring: rgba(255, 255, 255, 0.3);
   --destructive: oklch(0.704 0.191 22.216);
-  --sidebar: rgba(30, 30, 30, 0.95);
+  --sidebar: rgba(30, 30, 30, 0.4);
   --sidebar-foreground: #f0f0f0;
   --sidebar-primary: #f0f0f0;
   --sidebar-primary-foreground: #1a1a1a;
@@ -125,8 +125,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    background: #0a0a0a;
+  }
+  html.light {
+    background: #222222;
+  }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-transparent text-foreground antialiased;
   }
 }
 
@@ -145,20 +151,20 @@ body::before {
 
 /* ── Glass panels ── */
 .glass {
-  background: rgba(20, 20, 20, 0.2);
+  background: rgba(20, 20, 20, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 1rem;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
   isolation: isolate;
 }
 
 .glass-subtle {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 0.75rem;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  backdrop-filter: blur(12px) saturate(1.1);
 }
 
 /* ── World planet glow ── */
@@ -166,6 +172,17 @@ body::before {
   box-shadow:
     0 0 20px rgba(var(--glow-color), 0.3),
     0 0 60px rgba(var(--glow-color), 0.1);
+}
+
+/* ── Sidebar glass ── */
+[data-sidebar="sidebar"] {
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+}
+
+/* ── Content area — transparent so space shows through ── */
+[data-sidebar="inset"] {
+  background: transparent !important;
 }
 
 /* Scrollbar */
