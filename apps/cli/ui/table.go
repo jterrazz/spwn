@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
 // Table formats columnar data with auto-width and styled headers.
@@ -29,6 +31,15 @@ func (t *Table) AddRow(cols ...string) {
 	t.rows = append(t.rows, cols)
 }
 
+// ansiPattern matches ANSI escape sequences.
+var ansiPattern = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+// visibleWidth returns the number of visible runes in a string,
+// ignoring ANSI escape sequences.
+func visibleWidth(s string) int {
+	return utf8.RuneCountInString(ansiPattern.ReplaceAllString(s, ""))
+}
+
 // pad returns s padded with trailing spaces to width w.
 // This avoids %-*s issues with ANSI escape codes.
 func pad(s string, w int) string {
@@ -38,21 +49,39 @@ func pad(s string, w int) string {
 	return s + strings.Repeat(" ", w-len(s))
 }
 
+// padVisible pads s so that its visible width (ignoring ANSI codes) reaches w.
+func padVisible(s string, w int) string {
+	vis := visibleWidth(s)
+	if vis >= w {
+		return s
+	}
+	return s + strings.Repeat(" ", w-vis)
+}
+
 // Render prints the table with dimmed headers and 2-space indent.
 func (t *Table) Render() {
 	if t.mode == ModeQuiet || t.mode == ModeJSON {
 		return
 	}
 
-	// Calculate column widths from plain text (headers + all rows).
+	// Calculate column widths from visible text (headers + all rows).
+	// For STATUS columns, account for the added icon prefix.
 	widths := make([]int, len(t.headers))
 	for i, h := range t.headers {
 		widths[i] = len(h)
 	}
 	for _, row := range t.rows {
 		for i, cell := range row {
-			if i < len(widths) && len(cell) > widths[i] {
-				widths[i] = len(cell)
+			if i >= len(widths) {
+				continue
+			}
+			w := len(cell)
+			// Account for status icon prefix that will be added during rendering.
+			if t.headers[i] == "STATUS" {
+				w += 2 // "● " / "◌ " / "○ " prefix
+			}
+			if w > widths[i] {
+				widths[i] = w
 			}
 		}
 	}
@@ -78,13 +107,17 @@ func (t *Table) Render() {
 			if t.headers[i] == "STATUS" {
 				switch cell {
 				case "running":
-					display = green.Sprint(cell)
+					display = green.Sprint("● " + cell)
 				case "idle":
-					display = faint(cell)
+					display = yellow.Sprint("◌ " + cell)
+				case "unattached":
+					display = faint("○ " + cell)
+				default:
+					display = faint("○ " + cell)
 				}
 			}
-			// Pad based on plain-text cell length, then replace plain text with styled version.
-			fmt.Fprint(t.w, pad(display, widths[i]+gap+(len(display)-len(cell))))
+			// Pad based on visible width to handle ANSI codes and status icons.
+			fmt.Fprint(t.w, padVisible(display, widths[i]+gap))
 		}
 		fmt.Fprintln(t.w)
 	}

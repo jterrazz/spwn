@@ -59,22 +59,23 @@ func TestTable_ColumnAlignment(t *testing.T) {
 		}
 	}
 
-	// The STATUS column values should start at the same position in rows.
-	// Use "running" and "idle" which are unique per row.
+	// The STATUS column should start at the same position across rows.
+	// Status values now have icon prefixes (● / ◌), so find the icon position
+	// which marks the start of the STATUS column.
 	header := lines[0]
 	row1 := lines[1]
 	row2 := lines[2]
 
-	// Find where "STATUS" starts in header, and where "running"/"idle" start in rows.
 	hIdx := strings.Index(header, "STATUS")
-	idx1 := strings.Index(row1, "running")
-	idx2 := strings.Index(row2, "idle")
+	// Find the status icon which marks the column start
+	idx1 := strings.Index(row1, "●")
+	idx2 := strings.Index(row2, "◌")
 	if hIdx < 0 || idx1 < 0 || idx2 < 0 {
-		t.Fatal("could not find expected column values")
+		t.Fatalf("could not find expected column values in:\n%s\n%s\n%s", header, row1, row2)
 	}
 	// All should start at the same column offset
 	if idx1 != hIdx || idx2 != hIdx {
-		t.Errorf("STATUS column not aligned: header at %d, 'running' at %d, 'idle' at %d", hIdx, idx1, idx2)
+		t.Errorf("STATUS column not aligned: header at %d, row1 icon at %d, row2 icon at %d", hIdx, idx1, idx2)
 	}
 }
 
