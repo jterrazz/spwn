@@ -99,7 +99,7 @@ var restoreCmd = &cobra.Command{
 		}
 		m, err := universe.LoadManifest(configName)
 		if err != nil {
-			return fmt.Errorf("load config %q: %w", configName, err)
+			return fmt.Errorf("error: cannot load config %q.\n%w", configName, err)
 		}
 		universe.ApplyDefaults(&m)
 

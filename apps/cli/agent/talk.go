@@ -144,7 +144,7 @@ func findAgentContainer(agentName string) (string, string, error) {
 		for _, a := range u.Agents {
 			if a.Name == agentName {
 				if u.ContainerID == "" {
-					return "", "", fmt.Errorf("error: world %s has no container ID", u.ID)
+					return "", "", fmt.Errorf("error: world %s has no container ID.\nCheck 'spwn world list' for world status.", u.ID)
 				}
 				return u.ContainerID, u.ID, nil
 			}

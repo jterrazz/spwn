@@ -274,19 +274,14 @@ spwn/
 ├── pnpm-workspace.yaml         # JS workspace
 ├── turbo.json                  # Task orchestration
 │
-├── core/                       # Domain libraries
-│   ├── universe/               #   Universe & world management (architect, backend, physics)
-│   ├── agent/                  #   Life management (mind, journal, session)
-│   ├── gate/                   #   Bridge protocol (server, bridge)
-│   ├── runtime/                #   Runtime adapters (Claude Code, etc.)
-│   ├── provider/               #   LLM provider adapters (Anthropic, OpenAI)
-│   ├── channel/                #   Communication adapters (CLI)
-│   ├── skill/                  #   Skill registry (local)
-│   ├── colony/                 #   Multi-agent orchestration (governor, citizens)
-│   ├── evolution/              #   Reflexion, sleep, forking
-│   ├── npc/                   #   Ephemeral agent management (NPC)
-│   ├── sync/                   #   Claw state + org.yaml
-│   └── foundation/             #   Cross-cutting primitives (paths, IDs, constants)
+├── core/                       # Domain libraries (5 Go modules)
+│   ├── universe/               #   go.mod — world management, ports & adapters
+│   │   └── internal/           #     runtime/, provider/, channel/, skill/, backend/,
+│   │                           #     architect/, colony/, observatory/, sync/, physics/, etc.
+│   ├── agent/                  #   go.mod — life management (mind, journal, session, evolution)
+│   ├── gate/                   #   go.mod — bridge protocol (server, bridge)
+│   ├── messenger/              #   go.mod — agent-to-agent communication
+│   └── foundation/             #   go.mod — cross-cutting primitives (paths, IDs, constants)
 │
 ├── apps/                       # Deployable consumers
 │   ├── cli/                    #   The spwn binary (cobra → domain APIs → output)
@@ -298,7 +293,7 @@ spwn/
     └── fixtures/               #   Test fixtures
 ```
 
-**Dependency graph:** `apps/cli` → all `core/*` modules · `core/universe` → `core/agent`, `core/gate`, `core/runtime`, `core/colony`, `core/foundation` · `core/evolution` → `core/agent`, `core/foundation` · `core/agent` → `core/foundation`
+**Dependency graph:** `apps/cli` → all `core/*` modules · `core/universe` → `core/agent`, `core/gate`, `core/foundation` · `core/agent` → `core/foundation` · `core/gate` → `core/foundation` · `core/messenger` → `core/foundation`
 
 ---
 

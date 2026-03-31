@@ -271,9 +271,9 @@ Three-layer pyramid:
 
 | Layer | Location | Speed | Infra |
 |-------|----------|-------|-------|
-| **Unit** | `core/*/tests/unit/` | ~1s | None |
-| **Domain integration** | `core/*/tests/integration/` | ~30s | Docker (universe) or filesystem (agent) |
-| **Cross-domain** | `apps/cli/tests/integration/` | ~2min | Docker |
+| **Unit** | `*_test.go` next to source files | ~1s | None |
+| **E2E (Go)** | `core/universe/tests/e2e/` | ~30s | Docker |
+| **E2E (TS)** | `tests/e2e/` | ~2min | Built binary |
 
 Each domain tests only its own contract. Cross-domain flows (spawn universe + agent → verify journal) are the CLI's responsibility.
 
@@ -296,7 +296,7 @@ The E2E test suite is the behavioral specification of spwn. Each test describes 
 ```
 
 ### Test layers:
-- **Behavioral specs** (`core/*/tests/`) — what the system does (the specification)
+- **Behavioral specs** (`core/universe/tests/e2e/`, `tests/e2e/`) — what the system does (the specification)
 - **CLI specs** (`apps/cli/cli_test.go`) — what the user sees (flag parsing, help, output)
 - **Unit tests** (`*_test.go` next to source) — how the code works (implementation details)
 
