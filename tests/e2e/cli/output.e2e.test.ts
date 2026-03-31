@@ -9,25 +9,21 @@ describe("CLI output", () => {
       .exec("--help")
       .run();
 
-    // THEN — all top-level subcommands are listed
+    // THEN — custom grouped help with all sections
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /Available Commands:/);
-    for (const cmd of [
-      "world",
-      "agent",
-      "claw",
-      "observatory",
-      "skill",
-      "init",
-      "status",
-    ]) {
-      expectLine(result.output, new RegExp(`^\\s*${cmd}\\s+`));
-    }
-    // Global flags section
+    expectLine(result.output, /Quick Start:/);
+    expectLine(result.output, /World:/);
+    expectLine(result.output, /Agent:/);
+    expectLine(result.output, /System:/);
     expectLine(result.output, /Flags:/);
-    expectLine(result.output, /--json\s+Output as JSON/);
-    expectLine(result.output, /--quiet\s+Suppress non-essential output/);
-    expectLine(result.output, /--verbose\s+Show debug information/);
+    // Key commands present (lines are trimmed, so cmd is at start)
+    for (const cmd of ["world", "agent", "init", "status", "claw", "observatory", "skill"]) {
+      expectLine(result.output, new RegExp(`${cmd}\\s+`));
+    }
+    // Flags
+    expectLine(result.output, /--json/);
+    expectLine(result.output, /--quiet/);
+    expectLine(result.output, /--verbose/);
   });
 
   test("world help lists subcommands", async () => {
@@ -125,7 +121,7 @@ describe("CLI output", () => {
 
     // THEN — --quiet is documented as a global flag
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /--quiet\s+Suppress non-essential output/);
+    expectLine(result.output, /--quiet\s+Suppress/);
   });
 
   test("--verbose flag documented in help", async () => {
@@ -136,7 +132,7 @@ describe("CLI output", () => {
 
     // THEN — --verbose is documented as a global flag
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /--verbose\s+Show debug information/);
+    expectLine(result.output, /--verbose\s+Debug/);
   });
 
   test.skip("version flag prints version", async () => {

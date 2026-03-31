@@ -4,7 +4,11 @@ export default defineWorkspace([
   {
     test: {
       name: "cli",
-      include: ["e2e/cli/**/*.e2e.test.ts", "e2e/init/**/*.e2e.test.ts"],
+      include: [
+        "e2e/cli/**/*.e2e.test.ts",
+        "e2e/init/**/*.e2e.test.ts",
+        "e2e/runtime/**/*.e2e.test.ts",
+      ],
     },
   },
   {
