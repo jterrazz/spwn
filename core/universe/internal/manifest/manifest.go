@@ -109,22 +109,28 @@ func CreateDefault() error {
 		return fmt.Errorf("default.yaml already exists")
 	}
 
-	content := `# Default world config
-# Edit to change default behavior. See: world config inspect default
+	content := `# Default world config — defines the physics of your world.
+# Docs: https://spwn.sh/docs/cli/spwn-world
 
 physics:
+  # Resource limits (the constants of this reality)
   constants:
-    cpu: 1
-    memory: 512m
-    disk: 2g
-    timeout: 30m
+    cpu: 1           # CPU cores
+    memory: 512m     # RAM limit (512m, 1g, 4g, etc.)
+    disk: 2g         # Disk limit
+    timeout: 30m     # Max session duration
 
+  # Structural constraints
   laws:
     max-processes: 256
 
+  # Available tools (@unix = bash, grep, sed, awk, etc.)
   elements:
-    - "@unix"
-    - "@git"
+    - "@unix"        # Core Unix tools
+    - "@git"         # Git version control
+    # - "@node"      # Node.js + npm
+    # - "@python"    # Python 3
+    # - "@build"     # make, gcc, g++
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -142,6 +148,7 @@ func CreateConfig(name string) error {
 	}
 
 	content := fmt.Sprintf(`# World config: %s
+# Customize the physics of this world.
 
 physics:
   constants:
