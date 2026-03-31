@@ -21,6 +21,7 @@ var (
 	spawnNoAgent   bool
 	spawnGate      []string
 	spawnGovernor  string
+	spawnRuntime   string
 )
 
 func init() {
@@ -32,6 +33,7 @@ func init() {
 	Cmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
 	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
 	Cmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this world")
+	Cmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime (claude-code, pi, codex, opencode, gemini, aider)")
 }
 
 // Cmd is the world command — spawns a world when run directly,

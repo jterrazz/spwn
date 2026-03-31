@@ -10,6 +10,19 @@ import (
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/runtime"
 	"spwn.sh/core/universe/internal/state"
+
+	// Register all runtime adapters
+	_ "spwn.sh/core/universe/internal/runtime/aider"
+	_ "spwn.sh/core/universe/internal/runtime/claude"
+	_ "spwn.sh/core/universe/internal/runtime/codex"
+	_ "spwn.sh/core/universe/internal/runtime/gemini"
+	_ "spwn.sh/core/universe/internal/runtime/opencode"
+	_ "spwn.sh/core/universe/internal/runtime/pi"
+
+	// Register all claw adapters
+	_ "spwn.sh/core/universe/internal/claw/hermes"
+	_ "spwn.sh/core/universe/internal/claw/openclaw"
+	_ "spwn.sh/core/universe/internal/claw/zeroclaw"
 )
 
 // Architect orchestrates world lifecycle.
@@ -17,16 +30,17 @@ type Architect struct {
 	backend backend.Backend
 	state   *state.Store
 	gates   map[string]*gate.Server // universeID → running gate server
-	runtime *runtime.ClaudeCode     // injected runtime adapter
+	runtime runtime.Runtime          // injected runtime adapter
 }
 
 // New creates an Architect with the given backend and state store.
 func New(b backend.Backend, s *state.Store) *Architect {
+	rt, _ := runtime.Get("claude-code") // default runtime
 	return &Architect{
 		backend: b,
 		state:   s,
 		gates:   make(map[string]*gate.Server),
-		runtime: runtime.NewClaudeCode(),
+		runtime: rt,
 	}
 }
 
