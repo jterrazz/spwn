@@ -53,8 +53,10 @@ spwn agent [flags]
 * [spwn agent fork](/docs/cli/spwn-agent-fork)	 - Clone a Mind from one agent to another
 * [spwn agent init](/docs/cli/spwn-agent-init)	 - Create a new agent with a 6-layer Mind
 * [spwn agent inspect](/docs/cli/spwn-agent-inspect)	 - Show agent details, Mind layers, world status, and history
+* [spwn agent journal](/docs/cli/spwn-agent-journal)	 - View an agent's journal history
 * [spwn agent list](/docs/cli/spwn-agent-list)	 - List all agents on this Host
 * [spwn agent reflect](/docs/cli/spwn-agent-reflect)	 - Analyze journal and promote patterns to playbooks
+* [spwn agent sessions](/docs/cli/spwn-agent-sessions)	 - View an agent's session history
 * [spwn agent sleep](/docs/cli/spwn-agent-sleep)	 - Consolidate experience — archive stale files, prune old sessions
 * [spwn agent talk](/docs/cli/spwn-agent-talk)	 - Talk to a running agent — interactive or one-shot
 
