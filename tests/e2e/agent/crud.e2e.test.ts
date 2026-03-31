@@ -63,7 +63,7 @@ describe("agent CRUD", () => {
 
     // WHEN — listing agents
     const result = await spwn("list agents")
-      .exec("agent list")
+      .exec("agent ls")
       .run();
 
     // THEN — both agents appear in a table with correct columns
@@ -97,7 +97,7 @@ describe("agent CRUD", () => {
   test("list on empty home returns no agents", async () => {
     // WHEN — listing agents with no agents created
     const result = await spwn("list empty")
-      .exec("agent list")
+      .exec("agent ls")
       .run();
 
     // THEN — exits successfully with table header (default agent may exist)
@@ -122,7 +122,7 @@ describe("agent CRUD", () => {
 
     // WHEN — deleting the agent
     const result = await spwn("delete agent")
-      .exec("agent delete temp")
+      .exec("agent rm temp")
       .run();
 
     // THEN — exits successfully with structured status
@@ -132,7 +132,7 @@ describe("agent CRUD", () => {
 
     // AND — agent no longer appears in list
     const list = await spwn("list after delete")
-      .exec("agent list")
+      .exec("agent ls")
       .run();
     const listOutput = list.output;
     // The table should not contain a row for "temp"
@@ -143,7 +143,7 @@ describe("agent CRUD", () => {
   test("delete non-existent agent fails", async () => {
     // WHEN — deleting an agent that does not exist
     const result = await spwn("delete missing")
-      .exec("agent delete nonexistent")
+      .exec("agent rm nonexistent")
       .run();
 
     // THEN — exits with error showing not found
@@ -171,7 +171,7 @@ describe("agent CRUD", () => {
 
     // WHEN — listing agents
     const result = await spwn("list with world")
-      .exec("agent list")
+      .exec("agent ls")
       .run();
 
     // THEN — output includes table with world-related columns
@@ -188,7 +188,7 @@ describe("agent CRUD", () => {
 
     // WHEN — deleting the agent
     const result = await spwn("delete temp disk")
-      .exec("agent delete temp")
+      .exec("agent rm temp")
       .run();
 
     // THEN — Mind directory is gone from filesystem
@@ -200,7 +200,7 @@ describe("agent CRUD", () => {
   test("cannot inspect agent after delete", async () => {
     // GIVEN — agent is created then deleted
     await spwn("create for inspect-delete").exec("agent init temp").run();
-    await spwn("delete for inspect-delete").exec("agent delete temp").run();
+    await spwn("delete for inspect-delete").exec("agent rm temp").run();
 
     // WHEN — inspecting the deleted agent
     const result = await spwn("inspect after delete")

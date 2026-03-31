@@ -24,7 +24,7 @@ describe("error handling", () => {
   test("destroy non-existent world", async () => {
     // WHEN — destroying a world that does not exist
     const result = await spwn("destroy missing")
-      .exec("world destroy w-nonexistent-00000")
+      .exec("down w-nonexistent-00000")
       .run();
 
     // THEN — exits with non-zero code and structured error
@@ -35,7 +35,7 @@ describe("error handling", () => {
   test("inspect non-existent world", async () => {
     // WHEN — inspecting a world that does not exist
     const result = await spwn("inspect missing")
-      .exec("world inspect w-nonexistent-00000")
+      .exec("inspect w-nonexistent-00000")
       .run();
 
     // THEN — exits with error showing not found
@@ -97,7 +97,7 @@ describe("error handling", () => {
   test("world logs for non-existent world", async () => {
     // WHEN — fetching logs for a world that does not exist
     const result = await spwn("logs missing")
-      .exec("world logs w-nonexistent-00000")
+      .exec("logs w-nonexistent-00000")
       .run();
 
     // THEN — exits with error showing not found
@@ -135,7 +135,7 @@ describe("error handling", () => {
     await spwn("init").exec("init").run();
 
     const result = await spwn("delete ghost")
-      .exec("agent delete ghost")
+      .exec("agent rm ghost")
       .run();
 
     expect(result.exitCode).not.toBe(0);
@@ -145,7 +145,7 @@ describe("error handling", () => {
   test("no usage dump on errors", async () => {
     // WHEN — triggering an error
     const result = await spwn("error no usage")
-      .exec("world destroy w-nonexistent-00000")
+      .exec("down w-nonexistent-00000")
       .run();
 
     // THEN — no cobra usage dump
@@ -159,7 +159,7 @@ describe("error handling", () => {
   test("error messages are lowercase with actionable hint", async () => {
     // WHEN — triggering an error (destroy missing world)
     const result = await spwn("error format check")
-      .exec("world destroy w-nonexistent-00000")
+      .exec("down w-nonexistent-00000")
       .run();
 
     // THEN — error message follows convention: structured with ✗ prefix

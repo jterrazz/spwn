@@ -1,6 +1,6 @@
 package claw
 
-// Claw defines the adapter interface for the God daemon.
+// Claw defines the adapter interface for the Architect daemon.
 type Claw interface {
 	// Name returns the claw identifier.
 	Name() string

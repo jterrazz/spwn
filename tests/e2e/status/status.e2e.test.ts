@@ -153,7 +153,7 @@ describe("spwn status", () => {
       const id = parseWorldId(spawnResult.output)!;
 
       // Verify the world exists in the list
-      const listResult = ctx.spwn(["world", "list"]);
+      const listResult = ctx.spwn(["ls"]);
       const listOut = stripAnsi(listResult.output);
 
       const result = ctx.spwn(["status"]);
@@ -166,7 +166,7 @@ describe("spwn status", () => {
       expect(out).toContain("\u256d");
       expect(out).toContain("\u2570");
 
-      // If the world list shows the ID, status should too
+      // If the ls output shows the ID, status should too
       if (listOut.includes(id)) {
         expect(out).toContain(id);
         expect(out).toContain("neo");

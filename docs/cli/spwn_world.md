@@ -53,12 +53,9 @@ spwn world [flags]
 ### SEE ALSO
 
 * [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
-* [spwn world attach](/docs/cli/spwn-world-attach)	 - Open interactive session into a running world
-* [spwn world destroy](/docs/cli/spwn-world-destroy)	 - Destroy a world
-* [spwn world inspect](/docs/cli/spwn-world-inspect)	 - Show world details, physics, and agent status
-* [spwn world list](/docs/cli/spwn-world-list)	 - List all active worlds
-* [spwn world logs](/docs/cli/spwn-world-logs)	 - Stream agent output from a running world
-* [spwn world restore](/docs/cli/spwn-world-restore)	 - Restore a world from a snapshot
-* [spwn world snapshot](/docs/cli/spwn-world-snapshot)	 - Save a running world as a snapshot
-* [spwn world snapshots](/docs/cli/spwn-world-snapshots)	 - List all world snapshots
+* `spwn down <id>` — Destroy a world (top-level command)
+* `spwn inspect <id>` — Show world details, physics, and agent status (top-level command)
+* `spwn ls` — List all active worlds (top-level command)
+* `spwn logs <id>` — Stream agent output from a running world (top-level command)
+* `spwn attach <id>` — Open interactive session into a running world (top-level command)
 

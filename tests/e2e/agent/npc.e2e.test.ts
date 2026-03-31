@@ -65,8 +65,8 @@ describe("agent --npc", () => {
     // WHEN — dispatching an NPC task
     ctx.spwn(["agent", "--npc", "check health", "--world", id]);
 
-    // THEN — no NPC agent should appear in agent list
-    const list = ctx.spwn(["agent", "list"]);
+    // THEN — no NPC agent should appear in agent ls
+    const list = ctx.spwn(["agent", "ls"]);
     expect(stripAnsi(list.output)).not.toContain("npc");
   });
 });
