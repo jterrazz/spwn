@@ -30,6 +30,5 @@ and a Mind (persistent agent identity).
 * [spwn observatory](/docs/cli/spwn-observatory)	 - Visual dashboard for monitoring worlds and agents
 * [spwn skill](/docs/cli/spwn-skill)	 - Manage skills — reusable capabilities for agents
 * [spwn status](/docs/cli/spwn-status)	 - Show the full status of your spwn environment
-* [spwn agent --npc](/docs/cli/spwn-agent)	 - Run as NPC — no Mind, no memory, just execute a task
 * [spwn world](/docs/cli/spwn-world)	 - Spawn a world — an isolated reality for agents
 

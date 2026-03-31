@@ -12,13 +12,19 @@ Spawn an agent — a living identity that inhabits a world
 Spawn an agent into an existing world.
 
 An agent is backed by a Mind — a persistent directory of personas, skills,
-knowledge, playbooks, journal entries, and session state. One agent per
-world. The agent survives after the world is destroyed.
-
-Subcommands: init, list, inspect, export.
+knowledge, playbooks, journal entries, and session state. The agent survives
+after the world is destroyed.
 
 ```
 spwn agent [flags]
+```
+
+### Examples
+
+```
+  spwn agent -n neo -u w-abc123      Spawn named agent into world
+  spwn agent --npc "run tests"       Fire-and-forget NPC task
+  spwn agent --import backup.tar.gz  Import a Mind archive first
 ```
 
 ### Options
@@ -27,6 +33,7 @@ spwn agent [flags]
   -h, --help            help for agent
       --import string   Import Mind from tar.gz before spawning
   -n, --name string     Agent name (default: default)
+      --npc string      Run as NPC — no Mind, no memory, just execute this task
   -u, --world string    Target world ID
 ```
 

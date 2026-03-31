@@ -29,7 +29,7 @@ var exportCmd = &cobra.Command{
 
 		// Validate output directory
 		if _, err := os.Stat(exportOutput); err != nil {
-			return fmt.Errorf("error: output directory %q not found", exportOutput)
+			return fmt.Errorf("error: output directory %q not found.\nCheck the path exists and try again.", exportOutput)
 		}
 
 		s.Blank()

@@ -217,7 +217,7 @@ func newStepper(cmd *cobra.Command) *ui.Stepper {
 func parseGateFlag(s string) (gate.Bridge, error) {
 	parts := strings.SplitN(s, ":", 3)
 	if len(parts) < 2 {
-		return gate.Bridge{}, fmt.Errorf("expected format \"source:as[:cap1,cap2]\", got %q", s)
+		return gate.Bridge{}, fmt.Errorf("error: expected format \"source:as[:cap1,cap2]\", got %q.", s)
 	}
 
 	bridge := gate.Bridge{

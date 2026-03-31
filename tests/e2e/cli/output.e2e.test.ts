@@ -135,13 +135,12 @@ describe("CLI output", () => {
     expectLine(result.output, /--verbose\s+Debug/);
   });
 
-  test.skip("version flag prints version", async () => {
-    // TODO: spwn binary does not support --version flag yet
-    const result = await spwn("version flag")
+  test("--version shows version", async () => {
+    const result = await spwn("version")
       .exec("--version")
       .run();
 
     expect(result.exitCode).toBe(0);
-    expect(result.output).toMatch(/\d+\.\d+/);
+    expect(result.output).toMatch(/spwn version/);
   });
 });

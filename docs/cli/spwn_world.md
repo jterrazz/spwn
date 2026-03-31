@@ -11,14 +11,20 @@ Spawn a world — an isolated reality for agents
 
 Spawn a world — the Big Bang.
 
-Creates a world and brings an agent to life inside it. Uses a named world
-config from ~/.spwn/worlds/ (default: default.yaml). Specify a config with
-the -c flag.
-
-Subcommands: list, inspect, logs, attach, destroy.
+Creates an isolated Docker environment and brings an agent to life inside it.
+Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).
 
 ```
 spwn world [flags]
+```
+
+### Examples
+
+```
+  spwn world -w .                    Spawn with current directory
+  spwn world -c acme -w ~/project   Named config + workspace
+  spwn world --governor morpheus     With a governor agent
+  spwn world --no-agent              Empty world (no agent)
 ```
 
 ### Options
@@ -31,6 +37,7 @@ spwn world [flags]
       --governor string    Governor agent for this world
   -h, --help               help for world
       --no-agent           Create the world without spawning an agent
+      --runtime string     Agent runtime (claude-code, pi, codex, opencode, gemini, aider) (default "claude-code")
   -w, --workspace string   Host directory to mount at /workspace
   -u, --world string       Explicit path to a YAML config file
 ```
@@ -48,10 +55,14 @@ spwn world [flags]
 * [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
 * [spwn world attach](/docs/cli/spwn-world-attach)	 - Open interactive session into a running world
 * [spwn world destroy](/docs/cli/spwn-world-destroy)	 - Destroy a world
+* [spwn world inbox](/docs/cli/spwn-world-inbox)	 - Show messages in a world's inbox
 * [spwn world inspect](/docs/cli/spwn-world-inspect)	 - Show world details, physics, and agent status
 * [spwn world list](/docs/cli/spwn-world-list)	 - List all active worlds
 * [spwn world logs](/docs/cli/spwn-world-logs)	 - Stream agent output from a running world
 * [spwn world restore](/docs/cli/spwn-world-restore)	 - Restore a world from a snapshot
+* [spwn world runtimes](/docs/cli/spwn-world-runtimes)	 - List available agent runtimes and claws
+* [spwn world send](/docs/cli/spwn-world-send)	 - Send a message between agents in a world
 * [spwn world snapshot](/docs/cli/spwn-world-snapshot)	 - Save a running world as a snapshot
 * [spwn world snapshots](/docs/cli/spwn-world-snapshots)	 - List all world snapshots
+* [spwn world watch](/docs/cli/spwn-world-watch)	 - Watch for new messages in a world
 

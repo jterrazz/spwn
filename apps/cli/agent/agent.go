@@ -96,12 +96,12 @@ after the world is destroyed.`,
 			}
 			if len(worlds) > 1 {
 				s.Blank()
-				s.Fail("Multiple active worlds", fmt.Errorf("specify one with --world"))
+				s.Fail("Multiple active worlds", fmt.Errorf("error: specify one with --world."))
 				for _, u := range worlds {
 					s.Info("", fmt.Sprintf("%-20s (%s)", u.ID, u.Status))
 				}
 				s.Blank()
-				return fmt.Errorf("multiple active worlds")
+				return fmt.Errorf("error: multiple active worlds.\nSpecify one with --world.")
 			}
 			worldID = worlds[0].ID
 		}
