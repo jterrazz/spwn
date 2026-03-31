@@ -81,10 +81,10 @@ func getHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ get")+" "+ui.Faint("— install from the marketplace"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
-				{"install <name>", "Install a package"},
-				{"ls", "List installed packages"},
-				{"search <query>", "Search the marketplace"},
-				{"rm <name>", "Remove a package"},
+				{Name: "install <name>", Desc: "Install a package"},
+				{Name: "ls", Desc: "List installed packages"},
+				{Name: "search <query>", Desc: "Search the marketplace"},
+				{Name: "rm <name>", Desc: "Remove a package"},
 			}},
 		},
 		"spwn get [command]",

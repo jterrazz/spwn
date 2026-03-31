@@ -95,14 +95,14 @@ func authHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ auth")+" "+ui.Faint("— manage credentials"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
-				{"login", "Set up credentials (Keychain or manual)"},
-				{"logout", "Clear cached credentials"},
-				{"token <token>", "Set a token directly (CI / scripts)"},
+				{Name: "login", Desc: "Set up credentials (Keychain or manual)"},
+				{Name: "logout", Desc: "Clear cached credentials"},
+				{Name: "token <token>", Desc: "Set a token directly (CI / scripts)"},
 			}},
 			{Title: "Environment Variables", Commands: []ui.HelpEntry{
-				{"ANTHROPIC_API_KEY", "Anthropic Claude API key"},
-				{"OPENAI_API_KEY", "OpenAI API key"},
-				{"GOOGLE_API_KEY", "Google Gemini API key"},
+				{Name: "ANTHROPIC_API_KEY", Desc: "Anthropic Claude API key"},
+				{Name: "OPENAI_API_KEY", Desc: "OpenAI API key"},
+				{Name: "GOOGLE_API_KEY", Desc: "Google Gemini API key"},
 			}},
 		},
 		"spwn auth              Show authentication status\n    spwn auth [command]",

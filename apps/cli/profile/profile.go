@@ -49,24 +49,24 @@ func profileHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ profile")+" "+ui.Faint("— view and edit an agent's character sheet"),
 		[]ui.HelpGroup{
 			{Title: "Identity", Commands: []ui.HelpEntry{
-				{"purpose", "Why the agent exists"},
-				{"traits", "Core principles and character"},
-				{"persona", "Personality and role"},
-				{"bonds", "Relationships and trust"},
+				{Name: "purpose", Desc: "Why the agent exists"},
+				{Name: "traits", Desc: "Core principles and character"},
+				{Name: "persona", Desc: "Personality and role"},
+				{Name: "bonds", Desc: "Relationships and trust"},
 			}},
 			{Title: "Capabilities", Commands: []ui.HelpEntry{
-				{"skills", "Learned capabilities"},
-				{"playbooks", "Step-by-step procedures"},
+				{Name: "skills", Desc: "Learned capabilities"},
+				{Name: "playbooks", Desc: "Step-by-step procedures"},
 			}},
 			{Title: "Memory", Commands: []ui.HelpEntry{
-				{"knowledge", "Facts and context"},
-				{"journal", "Session history"},
-				{"sessions", "Saved session state"},
+				{Name: "knowledge", Desc: "Facts and context"},
+				{Name: "journal", Desc: "Session history"},
+				{Name: "sessions", Desc: "Saved session state"},
 			}},
 			{Title: "Config", Commands: []ui.HelpEntry{
-				{"edit", "Open profile.yaml in $EDITOR"},
-				{"tier", "View/change tier"},
-				{"engine", "View/change runtime engine"},
+				{Name: "edit", Desc: "Open profile.yaml in $EDITOR"},
+				{Name: "tier", Desc: "View/change tier"},
+				{Name: "engine", Desc: "View/change runtime engine"},
 			}},
 		},
 		"spwn profile <name>          Show full character sheet\n    spwn profile <name> [aspect]",
@@ -442,13 +442,6 @@ func printSheetRow(w io.Writer, inner int, label, value string) {
 		padding = 1
 	}
 	fmt.Fprintf(w, "  │%s%s│\n", line, strings.Repeat(" ", padding))
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 // titleCase capitalises the first rune of a string (replaces deprecated strings.Title).

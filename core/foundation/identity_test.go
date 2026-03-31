@@ -103,6 +103,75 @@ func TestGenerateAgentID_Format(t *testing.T) {
 	}
 }
 
+func TestGenerateWorldID_Uniqueness1000(t *testing.T) {
+	seen := make(map[string]bool, 1000)
+	dupes := 0
+	for i := 0; i < 1000; i++ {
+		id := GenerateWorldID("test")
+		if seen[id] {
+			dupes++
+		}
+		seen[id] = true
+	}
+	// With 5 digits (100K space), birthday paradox gives ~1% collision chance per pair.
+	// We expect some dupes in 1000 iterations, but should have >950 unique.
+	if len(seen) < 950 {
+		t.Errorf("expected at least 950 unique IDs out of 1000, got %d (dupes=%d)", len(seen), dupes)
+	}
+}
+
+func TestGenerateAgentID_Uniqueness1000(t *testing.T) {
+	seen := make(map[string]bool, 1000)
+	dupes := 0
+	for i := 0; i < 1000; i++ {
+		id := GenerateAgentID("test")
+		if seen[id] {
+			dupes++
+		}
+		seen[id] = true
+	}
+	if len(seen) < 950 {
+		t.Errorf("expected at least 950 unique IDs out of 1000, got %d (dupes=%d)", len(seen), dupes)
+	}
+}
+
+func TestGenerateWorldID_EmptyConfig(t *testing.T) {
+	id := GenerateWorldID("")
+	if !strings.HasPrefix(id, "w--") {
+		t.Errorf("empty config should produce 'w--' prefix, got %q", id)
+	}
+}
+
+func TestGenerateAgentID_EmptyName(t *testing.T) {
+	id := GenerateAgentID("")
+	if !strings.HasPrefix(id, "a--") {
+		t.Errorf("empty name should produce 'a--' prefix, got %q", id)
+	}
+}
+
+func TestGenerateAgentID_SpecialChars(t *testing.T) {
+	tests := []struct {
+		name      string
+		agentName string
+	}{
+		{"unicode", "ñoño"},
+		{"spaces", "my agent"},
+		{"symbols", "agent@v2"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			id := GenerateAgentID(tt.agentName)
+			if id == "" {
+				t.Error("expected non-empty ID")
+			}
+			if !strings.HasPrefix(id, "a-") {
+				t.Errorf("expected 'a-' prefix, got %q", id)
+			}
+		})
+	}
+}
+
 func TestGenerateAgentID_SuffixIs5Digits(t *testing.T) {
 	id := GenerateAgentID("neo")
 	// Format: a-neo-XXXXX — but name could contain hyphens, so split carefully
