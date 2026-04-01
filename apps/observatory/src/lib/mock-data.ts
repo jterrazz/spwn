@@ -102,7 +102,7 @@ export const MOCK_ACTIVITY = [
   { time: "2m ago", event: "neo completed task", world: "Titan", type: "success" },
   { time: "12m ago", event: "morpheus delegated to trinity", world: "Europa", type: "info" },
   { time: "45m ago", event: "atlas session started", world: "Ganymede", type: "info" },
-  { time: "1h ago", event: "trinity mind updated — 3 new playbooks", world: "Europa", type: "success" },
+  { time: "1h ago", event: "trinity profile updated — 3 new playbooks", world: "Europa", type: "success" },
   { time: "2h ago", event: "neo reflected — patterns promoted", world: "Titan", type: "info" },
 ];
 

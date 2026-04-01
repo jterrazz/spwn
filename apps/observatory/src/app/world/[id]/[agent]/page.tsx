@@ -38,9 +38,9 @@ const TIER_LABEL: Record<string, string> = {
   npc: "NPC",
 };
 
-// Mock mind layers
+// Mock profile layers
 const MOCK_MIND = {
-  identity: ["default.md"],
+  identity: ["persona.md"],
   skills: ["code-review.md", "testing.md"],
   "memory/knowledge": ["project-structure.md", "api-patterns.md"],
   "memory/playbooks": ["delegate-subtask.md"],
@@ -127,7 +127,7 @@ export default function AgentPage() {
   const tabs: { id: Tab; label: string; icon: typeof IconMessageFilled }[] = [
     { id: "chat", label: "Chat", icon: IconMessageFilled },
     { id: "profile", label: "Profile", icon: IconUserFilled },
-    { id: "mind", label: "Mind", icon: IconBrain },
+    { id: "mind", label: "Files", icon: IconBrain },
     { id: "messages", label: "Inbox", icon: IconMessageFilled },
   ];
 
@@ -500,11 +500,11 @@ function ProfileView({ profile }: { profile: AgentProfile }) {
   );
 }
 
-/* ── Mind View Component ── */
+/* ── Files View Component ── */
 function MindView() {
   return (
     <div className="space-y-1 max-w-lg">
-      <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Mind Layers</h2>
+      <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Profile Layers</h2>
       {Object.entries(MOCK_MIND).map(([layer, files]) => (
         <div key={layer} className="glass-subtle px-3 py-2">
           <div className="flex items-center justify-between">
