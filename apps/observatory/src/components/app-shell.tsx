@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MOCK_WORLDS, MOCK_LIMBO } from "@/lib/mock-data";
@@ -16,7 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const worldMatch = pathname.match(/^\/world\/([^/]+)/);
   const currentWorldId = worldMatch?.[1];
 
-  useEffect(() => {
+  const fetchWorlds = useCallback(() => {
     fetch("/api/worlds")
       .then((r) => r.json())
       .then((data: World[]) => {
@@ -26,6 +26,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         // keep mock data on error
       });
   }, []);
+
+  useEffect(() => {
+    fetchWorlds();
+    const interval = setInterval(fetchWorlds, 5000);
+    return () => clearInterval(interval);
+  }, [fetchWorlds]);
 
   return (
     <SidebarProvider>

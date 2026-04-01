@@ -91,6 +91,7 @@ export default function AgentPage() {
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("chat");
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -106,6 +107,28 @@ export default function AgentPage() {
   const showFeedback = (msg: string) => {
     setActionFeedback(msg);
     setTimeout(() => setActionFeedback(null), 2000);
+  };
+
+  const callAgentAction = async (action: string, body?: object): Promise<boolean> => {
+    setActionLoading(action);
+    try {
+      const res = await fetch(`/api/agents/${agentName}/${action}`, {
+        method: "POST",
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showFeedback(`Error: ${data.error || "Unknown error"}`);
+        return false;
+      }
+      return true;
+    } catch {
+      showFeedback("Error: Failed to connect to API");
+      return false;
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const send = () => {
@@ -162,35 +185,69 @@ export default function AgentPage() {
             {/* Agent actions */}
             <div className="flex items-center gap-1">
               <button
-                onClick={() => showFeedback("Reflecting...")}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                onClick={async () => {
+                  const ok = await callAgentAction("reflect");
+                  if (ok) showFeedback("Reflection complete!");
+                }}
+                disabled={actionLoading !== null}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
                 title="Reflect"
               >
-                <IconRefresh size={14} />
+                {actionLoading === "reflect" ? (
+                  <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                ) : (
+                  <IconRefresh size={14} />
+                )}
                 <span className="hidden sm:inline">Reflect</span>
               </button>
               <button
-                onClick={() => showFeedback("Sleeping...")}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                onClick={async () => {
+                  const ok = await callAgentAction("sleep");
+                  if (ok) showFeedback("Agent is sleeping");
+                }}
+                disabled={actionLoading !== null}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
                 title="Sleep"
               >
-                <IconMoonFilled size={14} />
+                {actionLoading === "sleep" ? (
+                  <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                ) : (
+                  <IconMoonFilled size={14} />
+                )}
                 <span className="hidden sm:inline">Sleep</span>
               </button>
               <button
-                onClick={() => showFeedback("Forking agent...")}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                onClick={async () => {
+                  const target = prompt("Fork target name:");
+                  if (!target) return;
+                  const ok = await callAgentAction("fork", { target });
+                  if (ok) showFeedback(`Forked to "${target}"`);
+                }}
+                disabled={actionLoading !== null}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
                 title="Fork"
               >
-                <IconGitFork size={14} />
+                {actionLoading === "fork" ? (
+                  <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                ) : (
+                  <IconGitFork size={14} />
+                )}
                 <span className="hidden sm:inline">Fork</span>
               </button>
               <button
-                onClick={() => showFeedback("Exporting...")}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                onClick={async () => {
+                  const ok = await callAgentAction("export");
+                  if (ok) showFeedback("Export complete!");
+                }}
+                disabled={actionLoading !== null}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
                 title="Export"
               >
-                <IconDownload size={14} />
+                {actionLoading === "export" ? (
+                  <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                ) : (
+                  <IconDownload size={14} />
+                )}
                 <span className="hidden sm:inline">Export</span>
               </button>
             </div>
