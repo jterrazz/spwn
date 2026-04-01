@@ -16,7 +16,7 @@ import (
 func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) error {
 	u, err := a.state.Get(worldID)
 	if err != nil {
-		return fmt.Errorf("world %s not found", worldID)
+		return fmt.Errorf("world %s not found.\nRun 'spwn list' to see active worlds", worldID)
 	}
 
 	running, err := a.backend.IsRunning(ctx, u.ContainerID)
@@ -24,7 +24,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", worldID)
+		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
 	a.state.UpdateStatus(worldID, models.StatusRunning)
@@ -61,7 +61,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		return fmt.Errorf("exec NPC: %w", err)
 	}
 	if exitCode != 0 {
-		return fmt.Errorf("NPC exited with code %d", exitCode)
+		return fmt.Errorf("npc exited with code %d.\nCheck container logs with 'spwn logs %s' for details", exitCode, worldID)
 	}
 	return nil
 }

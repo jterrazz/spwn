@@ -27,7 +27,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", worldID)
+		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
 	// Update status
@@ -85,7 +85,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 		return fmt.Errorf("exec claude: %w", err)
 	}
 	if exitCode != 0 {
-		return fmt.Errorf("agent exited with code %d", exitCode)
+		return fmt.Errorf("agent exited with code %d.\nCheck container logs with 'spwn logs %s' for details", exitCode, worldID)
 	}
 	return nil
 }
@@ -102,7 +102,7 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", worldID)
+		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
 	a.state.UpdateStatus(worldID, models.StatusRunning)

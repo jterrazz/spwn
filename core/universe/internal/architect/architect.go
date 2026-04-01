@@ -85,7 +85,7 @@ func (a *Architect) Logs(ctx context.Context, worldID string, follow bool, tail 
 func (a *Architect) Snapshot(ctx context.Context, worldID, name string) (string, error) {
 	u, err := a.state.Get(worldID)
 	if err != nil {
-		return "", fmt.Errorf("world %s not found", worldID)
+		return "", fmt.Errorf("world %s not found.\nRun 'spwn list' to see active worlds", worldID)
 	}
 
 	tag := fmt.Sprintf("spwn-snapshot:%s--%s", worldID, name)
@@ -127,7 +127,7 @@ func (a *Architect) Attach(ctx context.Context, worldID string) error {
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", worldID)
+		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
 	_, err = a.backend.Exec(ctx, u.ContainerID, backend.ExecConfig{

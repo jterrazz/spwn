@@ -37,6 +37,7 @@ func NewDocker() (*Docker, error) {
 	return &Docker{client: c}, nil
 }
 
+// Create provisions a new container with the given configuration and returns its ID.
 func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error) {
 	hostCfg := &containerTypes.HostConfig{
 		Resources: containerTypes.Resources{
@@ -62,18 +63,22 @@ func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error
 	return resp.ID, nil
 }
 
+// Start starts a previously created container.
 func (d *Docker) Start(ctx context.Context, containerID string) error {
 	return d.client.ContainerStart(ctx, containerID, containerTypes.StartOptions{})
 }
 
+// Stop gracefully stops a running container.
 func (d *Docker) Stop(ctx context.Context, containerID string) error {
 	return d.client.ContainerStop(ctx, containerID, containerTypes.StopOptions{})
 }
 
+// Remove forcibly removes a container.
 func (d *Docker) Remove(ctx context.Context, containerID string) error {
 	return d.client.ContainerRemove(ctx, containerID, containerTypes.RemoveOptions{Force: true})
 }
 
+// Exec runs a command inside a container and returns the exit code.
 func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (int, error) {
 	execCfg := types.ExecConfig{
 		Cmd:          cfg.Cmd,
@@ -114,6 +119,7 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 	return inspect.ExitCode, nil
 }
 
+// ExecOutput runs a command inside a container and returns its stdout as a string.
 func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []string) (string, error) {
 	execCfg := types.ExecConfig{
 		Cmd:          cmd,
@@ -148,6 +154,7 @@ func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []strin
 	return output, nil
 }
 
+// CopyTo writes content into a file at destPath inside the container.
 func (d *Docker) CopyTo(ctx context.Context, containerID string, destPath string, content []byte) error {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)

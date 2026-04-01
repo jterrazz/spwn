@@ -79,7 +79,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, fmt.Errorf("resolve workspace: %w", err)
 		}
 		if _, err := os.Stat(workspace); err != nil {
-			return nil, fmt.Errorf("workspace %s not found", workspace)
+			return nil, fmt.Errorf("workspace %s not found.\nCheck the path exists and is accessible", workspace)
 		}
 	}
 
@@ -211,7 +211,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, fmt.Errorf("check image: %w", err)
 		}
 		if !exists {
-			return nil, fmt.Errorf("image %s not found", image)
+			return nil, fmt.Errorf("image %s not found.\nBuild it first or use the default base image", image)
 		}
 		opts.progress("image_ready", image)
 	}
@@ -556,7 +556,7 @@ func extractKeychainToken() string {
 func parseMemory(s string) (int64, error) {
 	s = strings.TrimSpace(strings.ToLower(s))
 	if s == "" {
-		return 0, fmt.Errorf("empty memory string")
+		return 0, fmt.Errorf("empty memory string.\nSpecify memory like '512m', '1g', or '4g'")
 	}
 
 	var multiplier int64

@@ -42,7 +42,9 @@ const INITIAL_MESSAGES: Message[] = [
 ];
 
 function timeStr(d: Date) {
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const h = d.getHours().toString().padStart(2, "0");
+  const m = d.getMinutes().toString().padStart(2, "0");
+  return `${h}:${m}`;
 }
 
 export default function AgentPage() {
@@ -53,11 +55,17 @@ export default function AgentPage() {
   const world = MOCK_WORLDS.find((w) => w.id === worldId);
   const agent = world?.agents.find((a) => a.name === agentName);
 
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMessages(INITIAL_MESSAGES);
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -118,7 +126,7 @@ export default function AgentPage() {
                   {msg.content}
                 </div>
                 <p className="text-[9px] font-mono text-muted-foreground/25 mt-1 px-1">
-                  {timeStr(msg.timestamp)}
+                  {mounted ? timeStr(msg.timestamp) : ""}
                 </p>
               </div>
             </div>

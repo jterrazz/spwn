@@ -41,6 +41,24 @@ export default function UniverseMapPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Universe header */}
+      <div className="px-8 pt-8">
+        <h1 className="text-3xl font-heading tracking-wide text-foreground/90">Meson</h1>
+        <p className="text-[11px] font-mono text-muted-foreground/30 mt-1.5 flex items-center gap-3">
+          <span>orbstack</span>
+          <span className="text-muted-foreground/15">·</span>
+          <span>docker v28.5.2</span>
+          <span className="text-muted-foreground/15">·</span>
+          <span>claude-code</span>
+          <span className="text-muted-foreground/15">·</span>
+          <span>{worlds.length} worlds</span>
+          <span className="text-muted-foreground/15">·</span>
+          <span>{worlds.reduce((n, w) => n + w.agents.length, 0)} agents</span>
+          <span className="text-muted-foreground/15">·</span>
+          <span>~/.spwn</span>
+        </p>
+      </div>
+
       <main className="flex-1 flex items-center justify-center py-16">
         {worlds.length === 0 ? (
           <div className="text-center">

@@ -88,7 +88,7 @@
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: rgba(255, 255, 255, 0.06);
   --sidebar-accent-foreground: rgba(255, 255, 255, 0.9);
-  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-border: transparent;
   --sidebar-ring: rgba(255, 255, 255, 0.3);
 }
 
@@ -117,7 +117,7 @@
   --sidebar-primary-foreground: #1a1a1a;
   --sidebar-accent: rgba(255, 255, 255, 0.06);
   --sidebar-accent-foreground: rgba(255, 255, 255, 0.9);
-  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-border: transparent;
   --sidebar-ring: rgba(255, 255, 255, 0.3);
 }
 
@@ -174,15 +174,46 @@ body::before {
     0 0 60px rgba(var(--glow-color), 0.1);
 }
 
-/* ── Sidebar glass ── */
-[data-sidebar="sidebar"] {
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  backdrop-filter: blur(16px) saturate(1.2);
+/* ── Sidebar — macOS floating glass panel ── */
+[data-slot="sidebar"],
+[data-slot="sidebar-container"],
+[data-slot="sidebar-gap"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-slot="sidebar-inner"] {
+  background: rgba(15, 15, 15, 0.35) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  backdrop-filter: blur(32px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px !important;
+  margin: 10px !important;
+  margin-right: 0 !important;
+  height: calc(100vh - 20px) !important;
+  overflow: hidden;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* ── Content area — transparent so space shows through ── */
-[data-sidebar="inset"] {
+[data-sidebar="inset"],
+[data-slot="sidebar-inset"] {
   background: transparent !important;
+}
+
+/* ── Interactive defaults ── */
+button, [role="button"], a {
+  cursor: pointer;
+}
+
+/* ── Smooth transitions everywhere ── */
+*, *::before, *::after {
+  transition-property: color, background-color, border-color, opacity, box-shadow, filter, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 
 /* Scrollbar */
