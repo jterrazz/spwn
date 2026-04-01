@@ -313,3 +313,47 @@ func (d *Docker) ImageRemove(ctx context.Context, imageTag string) error {
 	_, err := d.client.ImageRemove(ctx, imageTag, imageTypes.RemoveOptions{Force: true})
 	return err
 }
+
+// Inspect returns information about a container by name or ID.
+func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, error) {
+	info, err := d.client.ContainerInspect(ctx, nameOrID)
+	if err != nil {
+		return nil, err
+	}
+
+	var startedAt time.Time
+	if info.State != nil && info.State.StartedAt != "" {
+		startedAt, _ = time.Parse(time.RFC3339Nano, info.State.StartedAt)
+	}
+
+	name := info.Name
+	if len(name) > 0 && name[0] == '/' {
+		name = name[1:]
+	}
+
+	status := ""
+	running := false
+	if info.State != nil {
+		status = info.State.Status
+		running = info.State.Running
+	}
+
+	return &ContainerInfo{
+		ID:        info.ID,
+		Name:      name,
+		Image:     info.Config.Image,
+		Status:    status,
+		Running:   running,
+		StartedAt: startedAt,
+	}, nil
+}
+
+// CreateNamedContainer creates a container with explicit config and host config.
+// Unlike Create(), this allows full control (e.g., custom restart policy, entrypoint).
+func (d *Docker) CreateNamedContainer(ctx context.Context, name string, cfg *containerTypes.Config, hostCfg *containerTypes.HostConfig) (string, error) {
+	resp, err := d.client.ContainerCreate(ctx, cfg, hostCfg, nil, nil, name)
+	if err != nil {
+		return "", fmt.Errorf("create container: %w", err)
+	}
+	return resp.ID, nil
+}

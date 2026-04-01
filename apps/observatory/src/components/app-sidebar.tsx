@@ -3,13 +3,12 @@
 import { usePathname } from "next/navigation";
 import {
   IconWorldFilled,
-  IconCpuFilled,
+  IconHexagonFilled,
   IconSearch,
   IconBoltFilled,
   IconMessageFilled,
   IconMoonFilled,
   IconCircleFilled,
-  IconPointFilled,
   IconChevronDown,
   IconGhostFilled,
 } from "@tabler/icons-react";
@@ -47,8 +46,8 @@ const AGENT_ICON: Record<string, { icon: typeof IconBoltFilled; color: string; d
   running:  { icon: IconBoltFilled, color: "text-green-400", dim: false },
   waiting:  { icon: IconMessageFilled, color: "text-amber-400 animate-pulse", dim: false },
   sleeping: { icon: IconMoonFilled, color: "text-purple-400", dim: false },
-  idle:     { icon: IconPointFilled, color: "text-white/20", dim: true },
-  stopped:  { icon: IconPointFilled, color: "text-white/10", dim: true },
+  idle:     { icon: IconCircleFilled, color: "text-white/20", dim: true },
+  stopped:  { icon: IconCircleFilled, color: "text-white/10", dim: true },
 };
 
 const WORLD_DOT: Record<string, string> = {
@@ -105,7 +104,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
                 isActive={pathname === "/architect"}
                 onClick={() => window.location.href = "/architect"}
               >
-                <IconCpuFilled size={16} className="opacity-50" />
+                <IconHexagonFilled size={16} className="opacity-50" />
                 <span>Architect</span>
                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
               </SidebarMenuButton>
