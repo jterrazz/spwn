@@ -108,6 +108,46 @@ func TestLogs_NonExistentUniverseReturnsError(t *testing.T) {
 	}
 }
 
+func TestLogs_NoErrorTraces(t *testing.T) {
+	// GIVEN a universe with a detached agent (mock-claude succeeds)
+	tc := setup.NewTestContext(t)
+	tc.InitAgent("logs-noerror-agent")
+
+	chain := tc.Spawn().
+		WithAgent("logs-noerror-agent").
+		Detached().
+		Execute()
+
+	chain.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+	})
+
+	// WHEN we read the logs
+	reader, err := tc.Arc.Logs(context.Background(), chain.Universe().ID, false, "100")
+	if err != nil {
+		t.Fatalf("Logs() returned error: %v", err)
+	}
+	defer reader.Close()
+
+	var output bytes.Buffer
+	io.Copy(&output, reader)
+
+	// THEN the output should NOT contain Go panic/error traces
+	logContent := output.String()
+	errorPatterns := []string{
+		"panic:",
+		"goroutine ",
+		"runtime error:",
+		"fatal error:",
+		"SIGSEGV",
+	}
+	for _, pattern := range errorPatterns {
+		if strings.Contains(logContent, pattern) {
+			t.Errorf("Log output contains error trace pattern %q:\n%s", pattern, logContent)
+		}
+	}
+}
+
 func TestLogs_ReturnsReaderFromRunningUniverse(t *testing.T) {
 	// GIVEN a universe with a detached agent
 	tc := setup.NewTestContext(t)

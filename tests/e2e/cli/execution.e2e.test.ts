@@ -280,6 +280,57 @@ describe("CLI execution — agent commands", () => {
   });
 });
 
+// ── Attach command ──────────────────────────────────────────
+
+describe("CLI execution — attach command", () => {
+  let home: string;
+  let originalSpwnHome: string | undefined;
+
+  beforeEach(() => {
+    originalSpwnHome = process.env.SPWN_HOME;
+    home = createSpwnHome();
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
+  });
+
+  test("'spwn world attach <nonexistent-id>' returns clean error", async () => {
+    // WHEN — attaching to a non-existent world
+    const result = await spwn("attach nonexistent")
+      .exec("world attach w-fake-99999")
+      .run();
+
+    // THEN — returns non-zero exit code
+    expect(result.exitCode).not.toBe(0);
+
+    // AND — error output contains useful message (not a raw stack trace)
+    const output = stripAnsi(result.output);
+    expectNoLine(result.output, /panic:/);
+    expectNoLine(result.output, /goroutine /);
+  });
+
+  test("'spwn world attach --help' shows usage", async () => {
+    // WHEN — requesting attach help
+    const result = await spwn("attach help")
+      .exec("world attach --help")
+      .run();
+
+    // THEN — exit code 0
+    expect(result.exitCode).toBe(0);
+
+    // AND — output contains usage information
+    const output = stripAnsi(result.output);
+    expect(output).toContain("attach");
+    expect(output).toContain("world-id");
+  });
+});
+
 // ── Global flags ─────────────────────────────────────────────
 
 describe("CLI execution — global flags", () => {

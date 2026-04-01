@@ -9,7 +9,10 @@ import (
 )
 
 func TestTimeout_ShortTimeoutStopsContainer(t *testing.T) {
-	// TODO: Container-level timeout enforcement is not yet implemented in the architect.
+	// BLOCKED: Container-level timeout enforcement is not yet implemented in the architect.
+	// The timeout value in physics.constants.timeout is currently only informational
+	// (written to physics.md and AGENT.md) and not enforced as a container stop-timeout.
+	//
 	// When implemented, this test should:
 	// 1. Spawn a world with a very short timeout (e.g., 10s)
 	// 2. Start a long-running agent (mock-claude sleeps forever)
@@ -17,8 +20,8 @@ func TestTimeout_ShortTimeoutStopsContainer(t *testing.T) {
 	// 4. Verify the container is no longer running
 	// 5. Verify the agent's journal records the timeout
 	//
-	// The timeout value in physics.constants.timeout is currently only informational
-	// (written to physics.md) and not enforced as a container stop-timeout.
+	// Tracking: requires Architect to pass --stop-timeout to Docker or use
+	// context.WithTimeout when spawning agents.
 	t.Skip("Container timeout enforcement not yet implemented — timeout is informational only")
 
 	// Placeholder for future implementation:

@@ -56,6 +56,115 @@ func TestSession_DeterministicID(t *testing.T) {
 	}
 }
 
+func TestSession_FileContainsCorrectWorldID(t *testing.T) {
+	// GIVEN a universe with a detached agent
+	tc := setup.NewTestContext(t)
+	tc.InitAgent("sess-wid-agent")
+
+	chain := tc.Spawn().
+		WithAgent("sess-wid-agent").
+		Detached().
+		Execute()
+
+	worldID := chain.Universe().ID
+
+	chain.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+	})
+
+	// THEN the session file should contain the correct world ID
+	mindPath := agentDomain.AgentDir("sess-wid-agent")
+	sess, err := agentDomain.LoadSession(mindPath, worldID)
+	if err != nil {
+		t.Fatalf("Failed to load session: %v", err)
+	}
+	if sess == nil {
+		t.Fatalf("Expected session file for world %s, not found", worldID)
+	}
+	if sess.WorldID != worldID {
+		t.Fatalf("Session world ID mismatch: expected %q, got %q", worldID, sess.WorldID)
+	}
+}
+
+func TestSession_PersistsAfterDestroy(t *testing.T) {
+	// GIVEN a universe where an agent has been spawned and a session created
+	tc := setup.NewTestContext(t)
+	tc.InitAgent("persist-agent")
+
+	chain := tc.Spawn().
+		WithAgent("persist-agent").
+		Detached().
+		Execute()
+
+	worldID := chain.Universe().ID
+
+	chain.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+	})
+
+	// Verify session file exists before destroy
+	chain.ExpectMind(func(m *setup.MindAssertion) {
+		m.HasSessionFile(worldID)
+	})
+
+	// WHEN the world is destroyed
+	chain.Destroy()
+
+	// THEN the session file should still exist (persist after destruction)
+	mindPath := agentDomain.AgentDir("persist-agent")
+	sess, err := agentDomain.LoadSession(mindPath, worldID)
+	if err != nil {
+		t.Fatalf("Failed to load session after destroy: %v", err)
+	}
+	if sess == nil {
+		t.Fatalf("Session file should persist after world destruction, but it's gone")
+	}
+}
+
+func TestSession_DifferentWorldsDifferentSessions(t *testing.T) {
+	// GIVEN two separate worlds with the same agent
+	tc := setup.NewTestContext(t)
+	tc.InitAgent("multi-sess-agent")
+
+	chain1 := tc.Spawn().
+		WithAgent("multi-sess-agent").
+		Detached().
+		Execute()
+
+	chain1.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+	})
+
+	chain2 := tc.Spawn().
+		WithAgent("multi-sess-agent").
+		Detached().
+		Execute()
+
+	chain2.ExpectMock(func(m *setup.MockAssertion) {
+		m.WasCalled()
+	})
+
+	worldID1 := chain1.Universe().ID
+	worldID2 := chain2.Universe().ID
+
+	// THEN each world should have its own session file
+	mindPath := agentDomain.AgentDir("multi-sess-agent")
+
+	sess1, err := agentDomain.LoadSession(mindPath, worldID1)
+	if err != nil || sess1 == nil {
+		t.Fatalf("Expected session for world %s", worldID1)
+	}
+	sess2, err := agentDomain.LoadSession(mindPath, worldID2)
+	if err != nil || sess2 == nil {
+		t.Fatalf("Expected session for world %s", worldID2)
+	}
+
+	// AND the session IDs should be different
+	if sess1.ID == sess2.ID {
+		t.Fatalf("Different worlds should have different session IDs, both got %q", sess1.ID)
+	}
+}
+
 func TestSession_SecondSpawnResumes(t *testing.T) {
 	// GIVEN a universe where an agent has already been spawned once
 	tc := setup.NewTestContext(t)
