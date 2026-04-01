@@ -33,7 +33,7 @@ var listCmd = &cobra.Command{
 
 		worlds, err := arc.List(ctx)
 		if err != nil {
-			return fmt.Errorf("error: cannot list worlds.\n%w", err)
+			return fmt.Errorf("cannot list worlds: %w", err)
 		}
 
 		if j {

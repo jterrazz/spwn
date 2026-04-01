@@ -24,7 +24,7 @@ describe("config cascade", () => {
 
     // THEN — org.yaml exists and output confirms creation
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created organization\s+org\.yaml/);
+    expectLine(result.output, /✓ Created universe\s+org\.yaml/);
     expect(existsSync(join(ctx.home, "org.yaml"))).toBe(true);
   });
 
@@ -70,7 +70,7 @@ describe("config cascade", () => {
 
     // THEN — world ID reflects the config name
     expect(spawnResult.exitCode).toBe(0);
-    expectLine(spawnResult.output, /✓ Spawned world\s+w-custom-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+w-custom-\d{5}/);
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;

@@ -42,7 +42,7 @@ func Reflect(mindPath string) (*ReflexionResult, error) {
 	result.SuccessRate = float64(completed) / float64(len(entries))
 
 	// 3. Write reflexion summary to playbooks
-	playbooksDir := filepath.Join(mindPath, "playbooks")
+	playbooksDir := filepath.Join(mindPath, "memory", "playbooks")
 	os.MkdirAll(playbooksDir, 0755)
 
 	summary := formatReflexionSummary(result, entries)
@@ -84,7 +84,7 @@ func formatReflexionSummary(r *ReflexionResult, entries []journal.Entry) string 
 		if e.ExitCode != 0 {
 			outcome = fmt.Sprintf("failed (exit %d)", e.ExitCode)
 		}
-		b.WriteString(fmt.Sprintf("- %s: %s (%s)\n", e.UniverseID, outcome, e.Duration))
+		b.WriteString(fmt.Sprintf("- %s: %s (%s)\n", e.WorldID, outcome, e.Duration))
 	}
 
 	return b.String()

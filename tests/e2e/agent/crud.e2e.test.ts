@@ -28,7 +28,7 @@ describe("agent CRUD", () => {
     }
   });
 
-  test("init creates agent with 6-layer Mind", async () => {
+  test("init creates agent with 6-layer Mind (identity, skills, memory/*, sessions)", async () => {
     // WHEN — initializing a new agent
     const result = await spwn("agent init")
       .exec("agent init neo")
@@ -39,7 +39,7 @@ describe("agent CRUD", () => {
     expectLine(result.output, /→ Creating agent "neo"\.\.\./);
     expectLine(result.output, /✓ Created agent\s+neo/);
     expectLine(result.output, /✓ Created persona\s+default\.md/);
-    expectLine(result.output, /✓ Spawn with: spwn world --agent neo/);
+    expectLine(result.output, /✓ Spawn with: spwn (world --agent|up --agent) neo/);
   });
 
   test("init duplicate fails", async () => {
@@ -86,11 +86,11 @@ describe("agent CRUD", () => {
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /Agent:\s+neo/);
     expectLine(result.output, /World:\s+unattached/);
-    expectLine(result.output, /personas\/\s+default\.md/);
+    expectLine(result.output, /identity\/\s+default\.md/);
     expectLine(result.output, /skills\/\s+\(empty\)/);
-    expectLine(result.output, /knowledge\/\s+\(empty\)/);
-    expectLine(result.output, /playbooks\/\s+\(empty\)/);
-    expectLine(result.output, /journal\/\s+\(empty\)/);
+    expectLine(result.output, /memory\/knowledge\/\s+\(empty\)/);
+    expectLine(result.output, /memory\/playbooks\/\s+\(empty\)/);
+    expectLine(result.output, /memory\/journal\/\s+\(empty\)/);
     expectLine(result.output, /sessions\/\s+\(empty\)/);
   });
 
@@ -163,7 +163,6 @@ describe("agent CRUD", () => {
     // THEN — exits with error about no active world
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /agent "neo" is not in any active world/);
-    expectLine(result.output, /Spawn it first with: spwn world --agent neo/);
   });
 
   test("list shows world column headers", async () => {
@@ -185,7 +184,7 @@ describe("agent CRUD", () => {
     // GIVEN — agent exists
     await spwn("create temp for disk check").exec("agent init temp").run();
     // Verify Mind directory exists
-    new MindAssertion(home, "temp").exists().hasLayer("personas");
+    new MindAssertion(home, "temp").exists().hasLayer("identity");
 
     // WHEN — deleting the agent
     const result = await spwn("delete temp disk")

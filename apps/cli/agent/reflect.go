@@ -24,8 +24,8 @@ var reflectCmd = &cobra.Command{
 
 		result, err := agentDomain.Reflect(name)
 		if err != nil {
-			s.Fail("Reflexion failed", err)
-			return fmt.Errorf("error: reflexion failed.\n%w", err)
+			return s.FailHint("Reflect failed", err,
+				fmt.Sprintf("Check that agent %q exists with \"spwn agent inspect %s\"", name, name))
 		}
 
 		if result.Skipped {

@@ -12,7 +12,6 @@ func TestGenerateWorldID_Format(t *testing.T) {
 		configName string
 		wantPrefix string
 	}{
-		{"default config", "default", "w-default-"},
 		{"custom config", "nebula", "w-nebula-"},
 		{"single char", "x", "w-x-"},
 		{"hyphenated name", "my-config", "w-my-config-"},
@@ -25,6 +24,27 @@ func TestGenerateWorldID_Format(t *testing.T) {
 				t.Errorf("GenerateWorldID(%q) = %q, want prefix %q", tt.configName, id, tt.wantPrefix)
 			}
 		})
+	}
+}
+
+func TestGenerateWorldID_DefaultUsesPlanetName(t *testing.T) {
+	planetSet := make(map[string]bool)
+	for _, p := range PlanetNames {
+		planetSet[p] = true
+	}
+
+	for i := 0; i < 20; i++ {
+		id := GenerateWorldID("default")
+		if strings.HasPrefix(id, "w-default-") {
+			t.Errorf("default config should use planet name, got %q", id)
+		}
+		// Extract planet name: w-{planet}-{digits}
+		trimmed := strings.TrimPrefix(id, "w-")
+		lastDash := strings.LastIndex(trimmed, "-")
+		planet := trimmed[:lastDash]
+		if !planetSet[planet] {
+			t.Errorf("planet name %q not in PlanetNames list, from id %q", planet, id)
+		}
 	}
 }
 

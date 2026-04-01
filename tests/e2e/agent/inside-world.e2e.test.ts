@@ -25,15 +25,15 @@ describe("agent inside world", () => {
     // THEN — the output confirms mind was mounted with structured status
     expect(spawnResult.exitCode).toBe(0);
     expectLine(spawnResult.output, /✓ Mounted mind\s+neo → \/mind/);
-    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
 
     // AND — mind directory actually exists inside the container
     const id = parseWorldId(spawnResult.output)!;
     ctx
       .universe(id)
       .toHaveDirectory("/mind")
-      .toHaveDirectory("/mind/personas")
-      .toHaveFile("/mind/personas/default.md");
+      .toHaveDirectory("/mind/identity")
+      .toHaveFile("/mind/identity/default.md");
   });
 
   test("spawn confirms agent is alive", () => {
@@ -48,7 +48,7 @@ describe("agent inside world", () => {
     // THEN — agent is reported as alive with structured output
     expect(spawnResult.exitCode).toBe(0);
     expectLine(spawnResult.output, /✓ Agent is alive\./);
-    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;
@@ -94,7 +94,7 @@ describe("agent inside world", () => {
         .universe(id)
         .agentProbe()
         .sawMind()
-        .sawPersonas()
+        .sawIdentity()
         .sawPhysics()
         .sawFaculties();
     } catch {
@@ -120,11 +120,11 @@ describe("agent inside world", () => {
     ctx
       .mind("neo")
       .exists()
-      .hasLayer("personas")
+      .hasLayer("identity")
       .hasLayer("skills")
-      .hasLayer("knowledge")
-      .hasLayer("journal")
+      .hasLayer("memory/knowledge")
+      .hasLayer("memory/journal")
       .hasLayer("sessions")
-      .hasFile("personas/default.md");
+      .hasFile("identity/default.md");
   });
 });

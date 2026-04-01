@@ -21,7 +21,7 @@ Everyone is building with AI agents — Claude Code, Codex, Aider, Pi. But there
 
 ## The Solution
 
-spwn creates isolated Docker worlds for AI agents. Each world has physics (what is physically possible), and each agent has a Mind (persistent identity that survives across worlds).
+spwn creates isolated Docker worlds for AI agents. Each world has physics (what is physically possible), and each agent has a Profile (persistent identity that survives across worlds).
 
 ```
 Organization (org.yaml)          governance, defaults, shared skills
@@ -31,24 +31,42 @@ Organization (org.yaml)          governance, defaults, shared skills
        └── NPCs                  fire-and-forget tasks
 ```
 
-The agent's Mind persists. When the world is destroyed, the agent survives. Next time it runs, it remembers everything.
+The agent's identity persists. When the world is destroyed, the agent survives. Next time it runs, it remembers everything.
+
+---
+
+## Install
+
+```bash
+# One-liner (downloads latest release to ~/.local/bin)
+curl -fsSL https://spwn.sh/install.sh | bash
+
+# Or build from source
+git clone https://github.com/jterrazz/spwn.git && cd spwn
+make install
+```
+
+Both methods install to `~/.local/bin` and auto-add it to your PATH if needed. Override the install directory with `INSTALL_DIR`:
+
+```bash
+make install INSTALL_DIR=/usr/local/bin    # system-wide (needs sudo)
+make install INSTALL_DIR=~/.bin            # custom location
+```
+
+Uninstall with `make uninstall` or `rm ~/.local/bin/spwn`.
+
+**Requirements:** Go 1.25+, Docker.
 
 ---
 
 ## Quick Start
 
 ```bash
-# Install
-curl -fsSL https://spwn.sh/install.sh | bash
-
-# First-time setup
-spwn init
-
 # Create an agent
-spwn agent init neo
+spwn agent new neo
 
 # Spawn a world with the agent inside
-spwn world --agent neo -w ./my-project --detach
+spwn up --agent neo -w ./my-project --detach
 # → w-default-84721
 
 # Talk to the agent
@@ -56,26 +74,26 @@ spwn agent talk neo "What is this project?"
 # → neo analyzes the workspace and responds
 
 # Check the environment
-spwn status
+spwn ls
 ```
 
-A Docker container is created. The agent's persistent Mind is mounted inside. The runtime (Claude Code by default) is spawned with full shell access. The agent reads its briefing, understands its role, and starts working.
+A Docker container is created. The agent's persistent profile is mounted inside. The runtime (Claude Code by default) is spawned with full shell access. The agent reads its briefing, understands its role, and starts working.
 
 ---
 
 ## Key Features
 
-**Persistent Identity** — Agents have a Mind: personas, skills, knowledge, playbooks, journal, sessions. It survives across worlds and runtimes. An agent that worked on your codebase last week remembers it today.
+**Persistent Identity** — Agents have a Profile: persona, traits, purpose, bonds, skills, knowledge, playbooks, journal, sessions. It survives across worlds and runtimes. An agent that worked on your codebase last week remembers it today.
 
 **Physics-Based Security** — No network interface? HTTP doesn't exist. Not "forbidden" — physically impossible. You can't prompt-inject a missing binary. You can't social-engineer a network stack that was never installed.
 
-**Pluggable Everything** — 6 runtime adapters (Claude Code, Pi, Codex, OpenCode, Gemini, Aider) + 3 claw adapters. Swap any piece. The core never changes.
+**Pluggable Everything** — Claude Code runtime + Hermes architect adapter today. Pi, Codex, OpenCode, Gemini, Aider runtimes planned. Swap any piece. The core never changes.
 
 **Agent Collaboration** — Governors delegate to citizens via an inbox. Agents message each other, check inboxes, report back. Multi-agent workflows with clear hierarchy.
 
-**Declarative Configuration** — `org.yaml` -> `world.yaml` -> `life.yaml`. Cascading overrides. Version-controllable. Reproducible across machines.
+**Declarative Configuration** — `org.yaml` -> `world.yaml` -> `profile.yaml`. Cascading overrides. Version-controllable. Reproducible across machines.
 
-**Full Visibility** — `spwn status` shows every world, agent, and their state. `spwn agent mind` shows what an agent knows. `spwn world inspect` shows physics and resource usage.
+**Full Visibility** — `spwn ls` shows every world, agent, and their state. `spwn profile <name>` shows the full character sheet. `spwn inspect <id>` shows physics and resource usage.
 
 ---
 
@@ -84,7 +102,7 @@ A Docker container is created. The agent's persistent Mind is mounted inside. Th
 ### Solo developer
 
 ```bash
-spwn world --agent neo -w ./my-app
+spwn up --agent neo -w ./my-app
 spwn agent talk neo "Refactor the auth module to use sessions"
 # neo works on it, remembers the codebase next time
 ```
@@ -92,17 +110,17 @@ spwn agent talk neo "Refactor the auth module to use sessions"
 ### Team with a governor
 
 ```bash
-spwn world --governor morpheus --agent neo --agent trinity -w ./acme-api
-spwn world send w-acme-12345 --from morpheus --to neo "Implement Stripe webhooks"
-spwn world send w-acme-12345 --from morpheus --to trinity "Write tests for webhooks"
+spwn up --governor morpheus --agent neo --agent trinity -w ./acme-api
+spwn msg send neo --from morpheus "Implement Stripe webhooks"
+spwn msg send trinity --from morpheus "Write tests for webhooks"
 ```
 
 ### Multi-runtime
 
 ```bash
-spwn world --agent neo --runtime pi -w .           # Pi runtime
-spwn world --agent smith --runtime aider -w .       # Aider for code review
-spwn world --agent oracle --runtime codex -w .      # OpenAI Codex
+spwn up --agent neo --runtime pi -w .           # Pi runtime
+spwn up --agent smith --runtime aider -w .       # Aider for code review
+spwn up --agent oracle --runtime codex -w .      # OpenAI Codex
 ```
 
 ### Organization-wide governance
@@ -124,33 +142,52 @@ governance:
 |---------|------|----------|
 | **Organization** | Governance, defaults, shared skills | `org.yaml` |
 | **World** | Isolated workspace with physics | Docker container |
-| **Governor** | Leader agent, delegates to citizens | Mind persists |
-| **Citizen** | Persistent worker agent | Mind persists |
+| **Governor** | Leader agent, delegates to citizens | Profile persists |
+| **Citizen** | Persistent worker agent | Profile persists |
 | **NPC** | One-shot task, no memory | Nothing |
-| **Mind** | 6-layer identity (personas, skills, knowledge, playbooks, journal, sessions) | Survives world destruction |
+| **Profile** | Full character sheet (persona, traits, purpose, bonds, skills, memory) | Survives world destruction |
 | **Physics** | Constants + laws + elements | Per world config |
 | **Gate** | Bridge between host and world | Capability-enforced |
 
-### Mind layers
+### Agent directory
 
-The Mind is modeled after biological memory. It's a directory of markdown files — human-readable, version-controllable, no database.
+The agent's identity is a directory of markdown files — human-readable, version-controllable, no database.
 
-| Biology | Mind Layer | What it stores |
-|---------|-----------|----------------|
-| Personality | **Personas** | Who I am — role, style, preferences |
+```
+~/.spwn/agents/neo/
+├── profile.yaml              # tier, engine, identity, requires, delegation
+├── identity/                 # who the agent is
+│   ├── persona.md            # role, style, preferences
+│   ├── purpose.md            # mission and goals
+│   └── traits.md             # values and behavioral traits
+├── skills/                   # what the agent can do
+├── memory/                   # what the agent knows and remembers
+│   ├── knowledge/            # facts about the codebase
+│   ├── playbooks/            # step-by-step workflows
+│   └── journal/              # session logs
+├── sessions/                 # active session state
+└── bonds.md                  # relationships with other agents
+```
+
+| Biology | Layer | What it stores |
+|---------|-------|----------------|
+| Personality | **Persona** | Who I am — role, style, preferences |
+| Core values | **Traits** | What I believe — values and behavioral traits |
+| Mission | **Purpose** | Why I exist — mission and goals |
 | Skills | **Skills** | What I can do — procedures, checklists |
 | Semantic memory | **Knowledge** | What I know — facts about the codebase |
 | Procedural memory | **Playbooks** | How I do things — step-by-step workflows |
 | Episodic memory | **Journal** | What happened to me — session logs |
 | Working memory | **Sessions** | Active session state |
+| Social | **Bonds** | Who I know — relationships with other agents |
 
 ### Evolution
 
 Agents evolve through three mechanisms:
 
-- **Reflexion** (`spwn agent reflect`) — Reviews journal entries. Strategies that worked get promoted to playbooks. Failed ones are discarded. Natural selection for behavior.
-- **Sleep** (`spwn agent sleep`) — Archives stale files, prunes old sessions. Raw experience consolidates into durable knowledge.
-- **Forking** (`spwn agent fork`) — Clones a Mind. Run copies in different environments, keep the branch that performs best.
+- **Reflexion** (`spwn profile <name> reflect`) — Reviews journal entries. Strategies that worked get promoted to playbooks. Failed ones are discarded. Natural selection for behavior.
+- **Sleep** (`spwn profile <name> sleep`) — Archives stale files, prunes old sessions. Raw experience consolidates into durable knowledge.
+- **Forking** (`spwn agent fork`) — Clones an agent. Run copies in different environments, keep the branch that performs best.
 
 ### Physics
 
@@ -181,84 +218,75 @@ If `curl` is not in the element list, it does not exist. Elements are verified a
 
 ## CLI Reference
 
-### World
+### World Operations (top-level)
 
 ```
-spwn world                             Spawn a world with default config
-spwn world -c node-dev                 Spawn with named config
-spwn world --agent neo -w .            Spawn with agent and workspace
-spwn world --governor morpheus -w .    Spawn with a governor agent
-spwn world list                        List active worlds
-spwn world inspect <id>                Show world details, physics, agents
-spwn world logs <id>                   Stream agent output
-spwn world attach <id>                 Interactive shell into a running world
-spwn world destroy <id>                Destroy a world (agent survives)
-spwn world snapshot <id>               Save world state
-spwn world snapshots                   List snapshots
-spwn world restore <snap>              Restore from snapshot
-spwn world send <id>                   Send message between agents
-spwn world inbox <id>                  Show messages
-spwn world watch <id>                  Watch for new messages
+spwn up --agent neo -w .              Spawn a world with an agent
+spwn ls                               List active worlds
+spwn inspect <id>                     Show world details and physics
+spwn down <id>                        Destroy a world (agent survives)
+spwn logs <id>                        Stream agent output
+spwn attach <id>                      Interactive shell
 ```
 
-### Agent
+### Agent Management
 
 ```
-spwn agent                             Spawn an agent into a world
-spwn agent -n neo                      Spawn named agent
-spwn agent -n neo --world w-id         Spawn into specific world
-spwn agent --npc "task" --world <id>   Fire ephemeral NPC
-spwn agent init [name]                 Create a new agent
-spwn agent list                        List all agents
-spwn agent inspect <name>              Show agent details and Mind layers
-spwn agent talk <name> [message]       Talk to a running agent
-spwn agent delete <name>               Remove an agent
-spwn agent export <name>               Export as tar.gz
-spwn agent fork <src> <dst>            Clone an agent's Mind
-spwn agent journal <name>              View session history
-spwn agent sessions <name>             View saved sessions
-spwn agent mind <name>                 Show Mind directory tree
-spwn agent stats <name>                Show agent statistics
-spwn agent reflect <name>              Analyze journal, promote playbooks
-spwn agent sleep <name>                Archive stale knowledge
+spwn agent new <name>                 Create a new agent
+spwn agent ls                         List all agents
+spwn agent rm <name>                  Remove an agent
+spwn agent talk <name> [message]      Talk to a running agent
+spwn agent fork <src> <dst>           Clone an agent
+spwn agent export <name>              Export agent as tar.gz
+spwn agent import <file>              Import agent from tar.gz
 ```
 
-### System
+### Profile (full character sheet)
 
 ```
-spwn init [name]                       First-time setup
-spwn status                            Full environment overview
-spwn doctor                            Diagnose environment issues
-spwn upgrade                           Upgrade to latest version
+spwn profile <name>                   Show full character sheet
+spwn profile <name> purpose           Show/edit purpose
+spwn profile <name> traits            Show/edit traits
+spwn profile <name> persona           Show/edit persona
+spwn profile <name> bonds             Show/edit bonds
+spwn profile <name> skills            List skills
+spwn profile <name> playbooks         List playbooks
+spwn profile <name> knowledge         List knowledge
+spwn profile <name> journal           Session history
+spwn profile <name> sessions          Active sessions
+spwn profile <name> reflect           Promote patterns to playbooks
+spwn profile <name> sleep             Consolidate experience
+spwn profile <name> edit              Edit profile.yaml
+spwn profile <name> tier              Show/set agent tier
+spwn profile <name> engine            Show/set runtime engine
 ```
 
-### Claw (orchestration daemon)
+### Messaging
 
 ```
-spwn claw start                        Start the Claw daemon
-spwn claw stop                         Stop the Claw daemon
-spwn claw status                       Show status, channels, active worlds
-spwn claw connect <channel>            Connect to a messaging channel
+spwn msg send <agent> --from <sender> "msg"   Send message to agent
+spwn msg inbox <agent>                         Show agent inbox
+spwn msg watch <agent>                         Watch for new messages
 ```
 
-### Observatory and Skills
+### Snapshots
 
 ```
-spwn observatory start                 Start the visual dashboard
-spwn observatory open                  Open dashboard in browser
-spwn skill list                        List available skills
-spwn skill install <skill>             Install a skill
-spwn skill remove <skill>              Remove a skill
+spwn snap save <id>                   Save world state
+spwn snap ls                          List snapshots
+spwn snap restore <snap>              Restore from snapshot
+spwn snap rm <snap>                   Remove a snapshot
 ```
 
-### Global flags
+### Platform & System
 
 ```
---json                                 Output as JSON
--q, --quiet                            Suppress non-essential output
--v, --verbose                          Show debug information
---version                              Show version
+spwn architect start|stop|status|connect  Orchestration daemon
+spwn skill ls|install|rm              Manage agent skills
+spwn auth login|logout|token          Authentication
 ```
+
+Use `spwn <command> --help` for full details on any command.
 
 ---
 
@@ -274,9 +302,9 @@ codex         node:20               runtime
 opencode      debian:bookworm-slim  runtime
 gemini        node:20               runtime
 aider         python:3.12-slim      runtime
-zeroclaw      debian:bookworm-slim  claw
-hermes        debian:bookworm       claw
-openclaw      node:20               claw
+zeroclaw      debian:bookworm-slim  architect Planned
+hermes        debian:bookworm       architect Available
+openclaw      node:20               architect Planned
 ```
 
 ---
@@ -291,7 +319,7 @@ Multi-module Go monorepo with Ports and Adapters architecture. 8 port interfaces
 | Provider | Which LLM | Anthropic |
 | Backend | Where worlds run | Docker |
 | Channel | External communication | CLI |
-| Memory | How Minds persist | Filesystem (markdown) |
+| Memory | How profiles persist | Filesystem (markdown) |
 | Store | How state is tracked | JSON file |
 | Tool | What agents can do | Built-in + MCP |
 | Skill | Reusable capabilities | Local files |
@@ -302,7 +330,7 @@ Multi-module Go monorepo with Ports and Adapters architecture. 8 port interfaces
 spwn/
 ├── core/                       Domain libraries
 │   ├── universe/                 World management, ports & adapters
-│   ├── agent/                    Agent lifecycle, mind, evolution
+│   ├── agent/                    Agent lifecycle, profile, evolution
 │   ├── gate/                     Host-container bridge
 │   ├── messenger/                Inter-agent messaging
 │   └── foundation/               Primitives (paths, IDs, constants)
@@ -336,7 +364,7 @@ core/messenger ──> core/foundation
 | **MCP** | Exposes tools one at a time | Full shell — N! compositions, not N tools |
 | **LangChain / CrewAI** | Chains function calls | Emergent behavior, not deterministic chains |
 | **E2B** | Cloud sandboxes | Self-hosted, persistent identity, evolution |
-| **Claude Code** | Runs on your machine | Isolation, physics-based security, persistent Mind |
+| **Claude Code** | Runs on your machine | Isolation, physics-based security, persistent profile |
 | **Docker** | Container runtime | Agent lifecycle, identity, Gate, evolution |
 
 spwn is not a competitor to Claude Code — it is the complement. Claude Code is the intelligence. spwn is the world to be intelligent in.

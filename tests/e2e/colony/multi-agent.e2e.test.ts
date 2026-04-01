@@ -38,7 +38,7 @@ describe("colony multi-agent", () => {
     expect(spawnResult.exitCode).toBe(0);
     expectLine(spawnResult.output, /✓ Mounted mind\s+morpheus → \/mind\/morpheus/);
     expectLine(spawnResult.output, /✓ Mounted mind\s+neo → \/mind\/neo/);
-    expectLine(spawnResult.output, /✓ Spawned world\s+w-default-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
     expectLine(spawnResult.output, /✓ Colony spawned\s+2 agent\(s\)/);
 
     // AND — container is running with world files

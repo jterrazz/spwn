@@ -2,6 +2,7 @@ package world
 
 import (
 	"context"
+	"fmt"
 
 	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
@@ -22,7 +23,7 @@ var destroyCmd = &cobra.Command{
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return dockerHint(err)
+			return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 		}
 
 		s.Blank()
@@ -30,8 +31,8 @@ var destroyCmd = &cobra.Command{
 
 		u, err := arc.Destroy(ctx, worldID)
 		if err != nil {
-			s.Fail("Destroy failed", err)
-			return err
+			return s.FailHint("Destroy failed", err,
+				fmt.Sprintf("Check that world %q exists with \"spwn world list\"", worldID))
 		}
 
 		s.Done("Stopped agent", "")

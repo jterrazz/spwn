@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// OrgManifest represents the organization-level configuration.
+// OrgManifest represents the universe-level configuration (org.yaml).
 type OrgManifest struct {
 	Name       string        `yaml:"name"`
 	Version    int           `yaml:"version"`
@@ -17,7 +17,7 @@ type OrgManifest struct {
 	Claw       ClawConfig    `yaml:"claw"`
 }
 
-// OrgDefaults holds organization-wide default settings.
+// OrgDefaults holds universe-wide default settings.
 type OrgDefaults struct {
 	Runtime RuntimeDefaults `yaml:"runtime"`
 	Backend string          `yaml:"backend"`
@@ -34,7 +34,7 @@ type RuntimeDefaults struct {
 	Auth     string `yaml:"auth"`
 }
 
-// PhysicsDefaults holds default physics configuration for new universes.
+// PhysicsDefaults holds default physics for new worlds.
 type PhysicsDefaults struct {
 	Constants ConstantsManifest `yaml:"constants"`
 	Laws      LawsManifest      `yaml:"laws"`
@@ -56,8 +56,8 @@ type LawsManifest struct {
 
 // OrgGovernance holds governance limits and policies.
 type OrgGovernance struct {
-	MaxUniverses           int      `yaml:"max-universes"`
-	MaxCitizensPerUniverse int      `yaml:"max-citizens-per-universe"`
+	MaxWorlds           int      `yaml:"max-worlds"`
+	MaxCitizensPerWorld int      `yaml:"max-citizens-per-world"`
 	AllowedProviders       []string `yaml:"allowed-providers"`
 	CostLimit              string   `yaml:"cost-limit"`
 	Audit                  bool     `yaml:"audit"`
@@ -84,12 +84,12 @@ type SyncConfig struct {
 	AutoPull bool   `yaml:"auto-pull"`
 }
 
-// LoadOrg reads the organization manifest from ~/.spwn/org.yaml.
+// LoadOrg reads the universe manifest from ~/.spwn/org.yaml.
 func LoadOrg() (*OrgManifest, error) {
 	return LoadOrgPath(foundation.OrgPath())
 }
 
-// LoadOrgPath reads an organization manifest from an explicit path.
+// LoadOrgPath reads a universe manifest from an explicit path.
 func LoadOrgPath(path string) (*OrgManifest, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -102,7 +102,7 @@ func LoadOrgPath(path string) (*OrgManifest, error) {
 	return &org, nil
 }
 
-// CreateOrg creates a default org.yaml at ~/.spwn/org.yaml.
+// CreateOrg creates a default universe manifest at ~/.spwn/org.yaml.
 func CreateOrg(name string) error {
 	org := OrgManifest{
 		Name:    name,

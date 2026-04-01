@@ -34,7 +34,7 @@ var listCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agents, err := agentDomain.ListAgents()
 		if err != nil {
-			return fmt.Errorf("error: cannot list agents.\n%w", err)
+			return fmt.Errorf("cannot list agents: %w", err)
 		}
 
 		// Build agent -> world mapping from state

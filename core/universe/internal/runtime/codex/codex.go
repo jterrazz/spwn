@@ -41,3 +41,4 @@ func (c *Codex) SystemPackages() []string { return []string{"git", "curl"} }
 
 // SupportsSession returns true if the runtime can resume sessions.
 func (c *Codex) SupportsSession() bool { return true }
+func (c *Codex) Available() bool       { return false }

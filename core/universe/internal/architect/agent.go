@@ -15,9 +15,9 @@ import (
 	"spwn.sh/core/universe/internal/runtime"
 )
 
-// SpawnAgent execs Claude Code interactively inside a universe.
-func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string) error {
-	u, err := a.state.Get(universeID)
+// SpawnAgent execs Claude Code interactively inside a world.
+func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) error {
+	u, err := a.state.Get(worldID)
 	if err != nil {
 		return err
 	}
@@ -27,18 +27,18 @@ func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", worldID)
 	}
 
 	// Update status
-	a.state.UpdateStatus(universeID, models.StatusRunning)
+	a.state.UpdateStatus(worldID, models.StatusRunning)
 
 	// Session management
 	mindPath := u.MindPath
 	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
-		MindPath:   mindPath,
-		AgentName:  agentName,
-		UniverseID: universeID,
+		MindPath:  mindPath,
+		AgentName: agentName,
+		WorldID:   worldID,
 	})
 
 	// Forward auth credentials to the exec
@@ -56,12 +56,12 @@ func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string
 
 	// Save session (best-effort)
 	if mindPath != "" {
-		sessID := agent.DeterministicSessionID(agentName, universeID)
+		sessID := agent.DeterministicSessionID(agentName, worldID)
 		sess := &agent.Session{
-			ID:         sessID,
-			AgentName:  agentName,
-			UniverseID: universeID,
-			Resumed:    true,
+			ID:        sessID,
+			AgentName: agentName,
+			WorldID:   worldID,
+			Resumed:   true,
 		}
 		if saveErr := agent.SaveSession(mindPath, sess); saveErr != nil {
 			log.Printf("warning: failed to save session: %v", saveErr)
@@ -74,12 +74,12 @@ func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string
 		if err != nil {
 			ec = 1
 		}
-		if journalErr := agent.AppendJournal(mindPath, universeID, ec, duration); journalErr != nil {
+		if journalErr := agent.AppendJournal(mindPath, worldID, ec, duration); journalErr != nil {
 			log.Printf("warning: failed to write journal: %v", journalErr)
 		}
 	}
 
-	a.state.UpdateStatus(universeID, models.StatusIdle)
+	a.state.UpdateStatus(worldID, models.StatusIdle)
 
 	if err != nil {
 		return fmt.Errorf("exec claude: %w", err)
@@ -91,8 +91,8 @@ func (a *Architect) SpawnAgent(ctx context.Context, universeID, agentName string
 }
 
 // SpawnAgentDetached starts Claude Code in the background.
-func (a *Architect) SpawnAgentDetached(ctx context.Context, universeID, agentName string) error {
-	u, err := a.state.Get(universeID)
+func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName string) error {
+	u, err := a.state.Get(worldID)
 	if err != nil {
 		return err
 	}
@@ -102,28 +102,28 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, universeID, agentNam
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", worldID)
 	}
 
-	a.state.UpdateStatus(universeID, models.StatusRunning)
+	a.state.UpdateStatus(worldID, models.StatusRunning)
 
 	mindPath := u.MindPath
 	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
-		MindPath:   mindPath,
-		AgentName:  agentName,
-		UniverseID: universeID,
+		MindPath:  mindPath,
+		AgentName: agentName,
+		WorldID:   worldID,
 	})
 
 	env := agentEnv()
 
 	// Save session for detached mode (best-effort, no journal since exit unknown)
 	if mindPath != "" {
-		sessID := agent.DeterministicSessionID(agentName, universeID)
+		sessID := agent.DeterministicSessionID(agentName, worldID)
 		sess := &agent.Session{
-			ID:         sessID,
-			AgentName:  agentName,
-			UniverseID: universeID,
-			Resumed:    false,
+			ID:        sessID,
+			AgentName: agentName,
+			WorldID:   worldID,
+			Resumed:   false,
 		}
 		if saveErr := agent.SaveSession(mindPath, sess); saveErr != nil {
 			log.Printf("warning: failed to save session: %v", saveErr)

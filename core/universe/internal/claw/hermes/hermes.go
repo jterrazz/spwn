@@ -45,3 +45,4 @@ func (h *Hermes) BaseImage() string { return "debian:bookworm" }
 
 // SystemPackages returns apt packages needed.
 func (h *Hermes) SystemPackages() []string { return []string{"python3", "nodejs", "git", "curl"} }
+func (h *Hermes) Available() bool          { return true }

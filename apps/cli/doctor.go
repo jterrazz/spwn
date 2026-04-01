@@ -71,17 +71,17 @@ and authentication. Reports issues with suggested fixes.`,
 			s.Fail("Config", fmt.Errorf("%s not found", abbreviatePath(baseDir)))
 		}
 
-		// 5. Organization manifest
+		// 5. Universe manifest
 		total++
 		if org, err := universe.LoadOrg(); err == nil && org != nil {
 			name := org.Name
 			if name == "" {
 				name = "unnamed"
 			}
-			s.Done("Organization", fmt.Sprintf("org.yaml (%s)", name))
+			s.Done("Universe", fmt.Sprintf("org.yaml (%s)", name))
 			passed++
 		} else {
-			s.Fail("Organization", fmt.Errorf("org.yaml not found"))
+			s.Fail("Universe", fmt.Errorf("org.yaml not found"))
 		}
 
 		// 6. World configs

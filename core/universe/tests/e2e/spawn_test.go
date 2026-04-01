@@ -74,13 +74,13 @@ func TestSpawn_WithAgent(t *testing.T) {
 
 	// AND the Mind should have all standard layers
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("personas")
+		m.HasLayer("identity")
 		m.HasLayer("skills")
-		m.HasLayer("knowledge")
-		m.HasLayer("playbooks")
-		m.HasLayer("journal")
+		m.HasLayer("memory/knowledge")
+		m.HasLayer("memory/playbooks")
+		m.HasLayer("memory/journal")
 		m.HasLayer("sessions")
-		m.HasFile("personas/default.md")
+		m.HasFile("identity/default.md")
 	})
 }
 

@@ -116,6 +116,46 @@ describe("error handling", () => {
     expectLine(result.output, /agent "nonexistent" not found/);
   });
 
+  test("init agent that already exists shows hint", async () => {
+    await spwn("init").exec("init").run();
+    await spwn("init agent").exec("agent init neo").run();
+
+    // WHEN — init-ing an agent that already exists
+    const result = await spwn("init existing")
+      .exec("agent init neo")
+      .run();
+
+    // THEN — exits with error and actionable hint
+    expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /✗ Agent creation failed\s+agent "neo" already exists/);
+    expectLine(result.output, /spwn agent delete neo/);
+  });
+
+  test("delete non-existent agent shows error", async () => {
+    await spwn("init").exec("init").run();
+
+    const result = await spwn("delete ghost")
+      .exec("agent delete ghost")
+      .run();
+
+    expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /✗ Delete failed\s+agent "ghost" not found/);
+  });
+
+  test("no usage dump on errors", async () => {
+    // WHEN — triggering an error
+    const result = await spwn("error no usage")
+      .exec("world destroy w-nonexistent-00000")
+      .run();
+
+    // THEN — no cobra usage dump
+    expect(result.exitCode).not.toBe(0);
+    const output = result.output;
+    expect(output).not.toContain("Available Commands:");
+    expect(output).not.toContain("Global Flags:");
+    expect(output).not.toContain("Use \"spwn");
+  });
+
   test("error messages are lowercase with actionable hint", async () => {
     // WHEN — triggering an error (destroy missing world)
     const result = await spwn("error format check")

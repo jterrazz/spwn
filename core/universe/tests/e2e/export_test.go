@@ -50,13 +50,13 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// THEN the imported agent should have personas/default.md
+	// THEN the imported agent should have identity/default.md
 	info, err := agentDomain.InspectAgent("import-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
 	}
 
-	files := info.Layers["personas"]
+	files := info.Layers["identity"]
 	found := false
 	for _, f := range files {
 		if f == "default.md" {
@@ -64,7 +64,7 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Fatalf("Expected personas/default.md in imported Mind, got: %v", files)
+		t.Fatalf("Expected identity/default.md in imported Mind, got: %v", files)
 	}
 }
 
@@ -73,12 +73,12 @@ func TestAgent_ExportWithExclude(t *testing.T) {
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("exclude-agent")
 
-	journalDir := filepath.Join(agentDomain.AgentDir("exclude-agent"), "journal")
+	journalDir := filepath.Join(agentDomain.AgentDir("exclude-agent"), "memory", "journal")
 	os.WriteFile(filepath.Join(journalDir, "test.md"), []byte("test"), 0644)
 
 	// WHEN exporting with the journal excluded
 	outputDir := t.TempDir()
-	archivePath, err := agentDomain.ExportMind("exclude-agent", outputDir, []string{"journal"})
+	archivePath, err := agentDomain.ExportMind("exclude-agent", outputDir, []string{"memory/journal"})
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
@@ -95,7 +95,7 @@ func TestAgent_ExportWithExclude(t *testing.T) {
 		t.Fatalf("Inspect failed: %v", err)
 	}
 
-	if len(info.Layers["journal"]) > 0 {
-		t.Fatalf("Expected empty journal after exclude, got: %v", info.Layers["journal"])
+	if len(info.Layers["memory/journal"]) > 0 {
+		t.Fatalf("Expected empty journal after exclude, got: %v", info.Layers["memory/journal"])
 	}
 }

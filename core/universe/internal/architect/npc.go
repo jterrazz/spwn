@@ -13,10 +13,10 @@ import (
 
 // SpawnNPC runs an NPC — an ephemeral agent with a single task, no Mind, no persistence.
 // NPCs have no persistent identity, no journal, and no session state.
-func (a *Architect) SpawnNPC(ctx context.Context, universeID string, task string) error {
-	u, err := a.state.Get(universeID)
+func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) error {
+	u, err := a.state.Get(worldID)
 	if err != nil {
-		return fmt.Errorf("world %s not found", universeID)
+		return fmt.Errorf("world %s not found", worldID)
 	}
 
 	running, err := a.backend.IsRunning(ctx, u.ContainerID)
@@ -24,15 +24,15 @@ func (a *Architect) SpawnNPC(ctx context.Context, universeID string, task string
 		return fmt.Errorf("check container: %w", err)
 	}
 	if !running {
-		return fmt.Errorf("world %s is not running", universeID)
+		return fmt.Errorf("world %s is not running", worldID)
 	}
 
-	a.state.UpdateStatus(universeID, models.StatusRunning)
+	a.state.UpdateStatus(worldID, models.StatusRunning)
 
 	// Generate AGENT.md for NPC (minimal context)
 	agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
 		Tier:      "npc",
-		WorldID:   universeID,
+		WorldID:   worldID,
 		NPCTask:   task,
 		Workspace: u.Workspace,
 		Elements:  u.Manifest.Elements,
@@ -55,7 +55,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, universeID string, task string
 		TTY: false,
 	})
 
-	a.state.UpdateStatus(universeID, models.StatusIdle)
+	a.state.UpdateStatus(worldID, models.StatusIdle)
 
 	if err != nil {
 		return fmt.Errorf("exec NPC: %w", err)

@@ -2,6 +2,7 @@ package agent
 
 import (
 	"fmt"
+	"strings"
 
 	agentDomain "spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
@@ -30,11 +31,13 @@ provided, a random name is picked from a curated dictionary.`,
 
 		s.Blank()
 		s.Start(fmt.Sprintf("Creating agent %q...", name))
-
 		_, err := agentDomain.InitMind(name)
 		if err != nil {
-			s.Fail("Agent creation failed", err)
-			return fmt.Errorf("error: cannot create agent %q.\n%w", name, err)
+			hint := "Check that ~/.spwn/agents/ is writable"
+			if strings.Contains(err.Error(), "already exists") {
+				hint = fmt.Sprintf("Run \"spwn agent delete %s\" first, or choose a different name", name)
+			}
+			return s.FailHint("Agent creation failed", err, hint)
 		}
 
 		s.Done("Created agent", name)

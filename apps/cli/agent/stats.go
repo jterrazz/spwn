@@ -25,12 +25,12 @@ var statsCmd = &cobra.Command{
 		s := newStepper(cmd)
 
 		if err := agentDomain.ValidateMind(name); err != nil {
-			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
+			return fmt.Errorf("agent %q not found", name)
 		}
 
 		info, err := agentDomain.InspectAgent(name)
 		if err != nil {
-			return fmt.Errorf("error: cannot inspect agent.\n%w", err)
+			return fmt.Errorf("cannot inspect agent: %w", err)
 		}
 
 		mindPath := agentDomain.AgentDir(name)
@@ -48,8 +48,8 @@ var statsCmd = &cobra.Command{
 		// Unique worlds from sessions
 		worldSet := make(map[string]struct{})
 		for _, sess := range sessions {
-			if sess.UniverseID != "" {
-				worldSet[sess.UniverseID] = struct{}{}
+			if sess.WorldID != "" {
+				worldSet[sess.WorldID] = struct{}{}
 			}
 		}
 
@@ -65,8 +65,8 @@ var statsCmd = &cobra.Command{
 
 		// Also count unique worlds from journal
 		for _, e := range journalEntries {
-			if e.UniverseID != "" {
-				worldSet[e.UniverseID] = struct{}{}
+			if e.WorldID != "" {
+				worldSet[e.WorldID] = struct{}{}
 			}
 		}
 
@@ -76,7 +76,7 @@ var statsCmd = &cobra.Command{
 		if len(journalEntries) > 0 {
 			newest := journalEntries[0] // already sorted newest-first
 			lastActive = newest.CreatedAt.Format("2006-01-02")
-			lastWorld = newest.UniverseID
+			lastWorld = newest.WorldID
 		}
 
 		// Display header

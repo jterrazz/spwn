@@ -3,9 +3,9 @@ package agent
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"spwn.sh/apps/cli/ui"
+
 	agentDomain "spwn.sh/core/agent"
 	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
@@ -23,6 +23,43 @@ func init() {
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Target world ID")
 	Cmd.Flags().StringVar(&spawnImport, "import", "", "Import Mind from tar.gz before spawning")
 	Cmd.Flags().StringVar(&npcTask, "npc", "", "Run as NPC — no Mind, no memory, just execute this task")
+
+	defaultAgentHelp = Cmd.HelpFunc()
+	Cmd.SetHelpFunc(agentHelp)
+}
+
+var defaultAgentHelp func(*cobra.Command, []string)
+
+func agentHelp(cmd *cobra.Command, args []string) {
+	if cmd.Name() != "agent" {
+		if defaultAgentHelp != nil {
+			defaultAgentHelp(cmd, args)
+		}
+		return
+	}
+
+	w := cmd.OutOrStdout()
+	ui.RenderGroupedHelp(w,
+		ui.Strong("⬡ agent")+" "+ui.Faint("— create and manage agents"),
+		[]ui.HelpGroup{
+			{Title: "Commands", Commands: []ui.HelpEntry{
+				{"new <name>", "Create a new agent (interactive wizard)"},
+				{"ls", "List all agents"},
+				{"rm <name>", "Remove an agent"},
+				{"talk <name> [msg]", "Talk to a running agent"},
+				{"inspect <name>", "Show agent overview"},
+				{"fork <src> <dst>", "Clone an agent's profile"},
+				{"export <name>", "Export profile as tar.gz"},
+				{"import <path>", "Import profile from tar.gz"},
+			}},
+			{Title: "Spawn Flags", Commands: []ui.HelpEntry{
+				{"--npc <task>", "Run as NPC (fire-and-forget)"},
+				{"-u, --world <id>", "Target world ID"},
+			}},
+		},
+		"spwn agent [command]",
+		"Use \"spwn agent <command> --help\" for more information.",
+	)
 }
 
 // Cmd is the agent command — spawns an agent when run directly,
@@ -52,11 +89,14 @@ after the world is destroyed.`,
 		if npcTask != "" {
 			worldID := spawnWorld
 			if worldID == "" {
-				return fmt.Errorf("error: --world is required for NPC mode.\nRun 'spwn world list' to see active worlds.")
+				s.Blank()
+				return s.FailHint("NPC requires --world", fmt.Errorf("no world specified"),
+					"Run \"spwn world list\" to see active worlds")
 			}
 			arc, err := universe.NewArchitectFromEnv()
 			if err != nil {
-				return dockerHint(err)
+				s.Blank()
+				return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 			}
 			s.Blank()
 			s.Done("NPC dispatched", fmt.Sprintf("%q → %s", npcTask, worldID))
@@ -74,15 +114,15 @@ after the world is destroyed.`,
 			s.Blank()
 			s.Start("Importing agent...")
 			if err := agentDomain.ImportMind(agentName, spawnImport); err != nil {
-				s.Fail("Import failed", err)
-				return fmt.Errorf("error: import failed.\n%w", err)
+				return s.FailHint("Import failed", err, "Check that the archive exists and is a valid tar.gz")
 			}
 			s.Done("Imported agent", agentName)
 		}
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
-			return dockerHint(err)
+			s.Blank()
+			return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 		}
 
 		// Resolve world ID
@@ -90,19 +130,21 @@ after the world is destroyed.`,
 		if worldID == "" {
 			worlds, err := arc.List(ctx)
 			if err != nil {
-				return fmt.Errorf("error: cannot list worlds.\n%w", err)
+				s.Blank()
+				return s.FailHint("Cannot list worlds", err, "Run \"spwn doctor\" to diagnose")
 			}
 			if len(worlds) == 0 {
-				return fmt.Errorf("error: no active worlds.\nRun 'spwn world --no-agent' first")
+				s.Blank()
+				return s.FailHint("No active worlds", fmt.Errorf("nothing to spawn into"),
+					"Run \"spwn world -w .\" to create a world first")
 			}
 			if len(worlds) > 1 {
 				s.Blank()
-				s.Fail("Multiple active worlds", fmt.Errorf("error: specify one with --world."))
+				s.Fail("Multiple worlds", fmt.Errorf("specify one with --world"))
 				for _, u := range worlds {
 					s.Info("", fmt.Sprintf("%-20s (%s)", u.ID, u.Status))
 				}
-				s.Blank()
-				return fmt.Errorf("error: multiple active worlds.\nSpecify one with --world.")
+				return &ui.DisplayedError{Err: fmt.Errorf("multiple worlds")}
 			}
 			worldID = worlds[0].ID
 		}
@@ -112,20 +154,11 @@ after the world is destroyed.`,
 		s.Blank()
 
 		if err := arc.SpawnAgent(ctx, worldID, agentName); err != nil {
-			return fmt.Errorf("error: agent spawn failed.\n%w", err)
+			return fmt.Errorf("agent spawn failed: %w", err)
 		}
 
 		return nil
 	},
-}
-
-// dockerHint wraps a NewArchitectFromEnv error with a user-friendly hint
-// when Docker is not running.
-func dockerHint(err error) error {
-	if strings.Contains(err.Error(), "cannot connect to Docker") {
-		return fmt.Errorf("error: Docker is not running.\nRun 'docker info' to check, or start Docker Desktop.")
-	}
-	return err
 }
 
 // newStepper creates a Stepper using the persistent root flags.

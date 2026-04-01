@@ -37,14 +37,24 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		LayersCopied: []string{},
 	}
 
-	// Copy soul directory if it exists
-	soulSrc := filepath.Join(sourceDir, "soul")
-	soulDst := filepath.Join(targetDir, "soul")
-	if _, err := os.Stat(soulSrc); err == nil {
-		if err := copyDir(soulSrc, soulDst); err != nil {
-			return nil, fmt.Errorf("copying soul: %w", err)
+	// Copy identity directory if it exists (formerly "soul")
+	identitySrc := filepath.Join(sourceDir, "identity")
+	identityDst := filepath.Join(targetDir, "identity")
+	if _, err := os.Stat(identitySrc); err == nil {
+		if err := copyDir(identitySrc, identityDst); err != nil {
+			return nil, fmt.Errorf("copying identity: %w", err)
 		}
-		result.LayersCopied = append(result.LayersCopied, "soul")
+		result.LayersCopied = append(result.LayersCopied, "identity")
+	} else {
+		// Backward compatibility: check for legacy soul/ directory
+		soulSrc := filepath.Join(sourceDir, "soul")
+		soulDst := filepath.Join(targetDir, "identity")
+		if _, err := os.Stat(soulSrc); err == nil {
+			if err := copyDir(soulSrc, soulDst); err != nil {
+				return nil, fmt.Errorf("copying soul: %w", err)
+			}
+			result.LayersCopied = append(result.LayersCopied, "identity")
+		}
 	}
 
 	// Copy mind layers
@@ -61,11 +71,17 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		result.LayersCopied = append(result.LayersCopied, layer)
 	}
 
-	// Copy life.yaml if it exists
-	lifeYaml := filepath.Join(sourceDir, "life.yaml")
-	if _, err := os.Stat(lifeYaml); err == nil {
-		data, _ := os.ReadFile(lifeYaml)
-		os.WriteFile(filepath.Join(targetDir, "life.yaml"), data, 0644)
+	// Copy profile.yaml if it exists (with fallback to legacy life.yaml)
+	profileYaml := filepath.Join(sourceDir, "profile.yaml")
+	if _, err := os.Stat(profileYaml); err == nil {
+		data, _ := os.ReadFile(profileYaml)
+		os.WriteFile(filepath.Join(targetDir, "profile.yaml"), data, 0644)
+	} else {
+		lifeYaml := filepath.Join(sourceDir, "life.yaml")
+		if _, err := os.Stat(lifeYaml); err == nil {
+			data, _ := os.ReadFile(lifeYaml)
+			os.WriteFile(filepath.Join(targetDir, "profile.yaml"), data, 0644)
+		}
 	}
 
 	return result, nil

@@ -43,3 +43,4 @@ func (o *OpenClaw) BaseImage() string { return "node:20" }
 
 // SystemPackages returns apt packages needed.
 func (o *OpenClaw) SystemPackages() []string { return []string{"git", "curl"} }
+func (o *OpenClaw) Available() bool          { return false }

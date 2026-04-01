@@ -6,9 +6,14 @@ import (
 	"math/big"
 )
 
-// GenerateWorldID returns an ID like w-default-84721.
+// GenerateWorldID returns an ID like w-titan-84721.
+// When the config is "default", a random planet name is used instead.
 func GenerateWorldID(configName string) string {
-	return fmt.Sprintf("w-%s-%s", configName, randDigits(5))
+	name := configName
+	if name == "default" {
+		name = RandomPlanetName()
+	}
+	return fmt.Sprintf("w-%s-%s", name, randDigits(5))
 }
 
 // GenerateAgentID returns an ID like a-neo-52103.

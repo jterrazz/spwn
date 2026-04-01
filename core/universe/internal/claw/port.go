@@ -20,4 +20,6 @@ type Claw interface {
 	BaseImage() string
 	// SystemPackages returns apt packages needed.
 	SystemPackages() []string
+	// Available returns true if the claw is production-ready.
+	Available() bool
 }

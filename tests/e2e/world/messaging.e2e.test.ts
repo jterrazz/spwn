@@ -10,14 +10,14 @@ import {
   stripAnsi,
 } from "../../setup/output-helpers.js";
 
-describe("world messaging", () => {
+describe("agent messaging", () => {
   let ctx: TestContext;
 
   afterEach(() => {
     ctx?.cleanup();
   });
 
-  test("send creates message in world inbox", () => {
+  test("send creates message in agent inbox", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawn = ctx.spwn(
@@ -27,9 +27,8 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     const result = ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "implement webhooks",
     ]);
     expect(result.exitCode).toBe(0);
@@ -46,13 +45,12 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "implement webhooks",
     ]);
 
-    const result = ctx.spwn(["world", "inbox", id, "neo"]);
+    const result = ctx.spwn(["agent", "inbox", "neo"]);
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("morpheus");
     expect(stripAnsi(result.output)).toContain("implement webhooks");
@@ -68,22 +66,19 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "task 1",
     ]);
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "morpheus",
       "--from", "neo",
-      "--to", "morpheus",
       "reply",
     ]);
 
-    const result = ctx.spwn(["world", "inbox", id]);
+    const result = ctx.spwn(["agent", "inbox", "neo"]);
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("morpheus");
-    expect(stripAnsi(result.output)).toContain("neo");
   });
 
   test("inbox is empty initially", () => {
@@ -95,7 +90,7 @@ describe("world messaging", () => {
     );
     const id = parseWorldId(spawn.output)!;
 
-    const result = ctx.spwn(["world", "inbox", id]);
+    const result = ctx.spwn(["agent", "inbox", "neo"]);
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("No messages");
   });
@@ -110,9 +105,8 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "check persistence",
     ]);
 
@@ -129,25 +123,22 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "first message",
     ]);
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "second message",
     ]);
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "third message",
     ]);
 
-    const result = ctx.spwn(["world", "inbox", id, "neo"]);
+    const result = ctx.spwn(["agent", "inbox", "neo"]);
     expect(result.exitCode).toBe(0);
     const output = stripAnsi(result.output);
     expect(output).toContain("first message");
@@ -165,13 +156,12 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "table test",
     ]);
 
-    const result = ctx.spwn(["world", "inbox", id]);
+    const result = ctx.spwn(["agent", "inbox", "neo"]);
     expect(result.exitCode).toBe(0);
     expectTableHeader(result.output, ["FROM", "TO", "TYPE", "STATUS"]);
   });
@@ -186,25 +176,23 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "--type", "question",
       "what is the matrix?",
     ]);
 
-    const result = ctx.spwn(["world", "inbox", id, "neo"]);
+    const result = ctx.spwn(["agent", "inbox", "neo"]);
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("question");
   });
 
-  test("send to non-existent world fails", () => {
+  test("send to non-existent agent fails", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn([
-      "world", "send", "w-nonexistent-00000",
+      "agent", "send", "nonexistent",
       "--from", "morpheus",
-      "--to", "neo",
       "hello",
     ]);
     expect(result.exitCode).not.toBe(0);
@@ -220,34 +208,16 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     const result = ctx.spwn([
-      "world", "send", id,
-      "--to", "neo",
+      "agent", "send", "neo",
       "missing from",
     ]);
     expect(result.exitCode).not.toBe(0);
   });
 
-  test("send without --to fails", () => {
+  test("inbox on non-existent agent fails", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
-    const spawn = ctx.spwn(
-      ["world", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    const id = parseWorldId(spawn.output)!;
-
-    const result = ctx.spwn([
-      "world", "send", id,
-      "--from", "morpheus",
-      "missing to",
-    ]);
-    expect(result.exitCode).not.toBe(0);
-  });
-
-  test("inbox on non-existent world fails", () => {
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const result = ctx.spwn(["world", "inbox", "w-nonexistent-00000"]);
+    const result = ctx.spwn(["agent", "inbox", "nonexistent"]);
     expect(result.exitCode).not.toBe(0);
   });
 
@@ -287,9 +257,8 @@ describe("world messaging", () => {
     const id = parseWorldId(spawn.output)!;
 
     const result = ctx.spwn([
-      "world", "send", id,
+      "agent", "send", "neo",
       "--from", "morpheus",
-      "--to", "neo",
       "output format test",
     ]);
     expect(result.exitCode).toBe(0);

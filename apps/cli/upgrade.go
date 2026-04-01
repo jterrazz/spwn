@@ -55,7 +55,7 @@ and replaces the current installation.`,
 		s.Start("Downloading " + latest + "...")
 		tmpDir, err := os.MkdirTemp("", "spwn-upgrade-")
 		if err != nil {
-			return fmt.Errorf("error: cannot create temp dir.\n%w", err)
+			return fmt.Errorf("cannot create temp dir: %w", err)
 		}
 		defer os.RemoveAll(tmpDir)
 
@@ -63,7 +63,7 @@ and replaces the current installation.`,
 		dlCmd := exec.Command("curl", "-fsSL", url, "-o", tarPath)
 		if output, err := dlCmd.CombinedOutput(); err != nil {
 			s.Fail("Download failed", fmt.Errorf("%s", string(output)))
-			return fmt.Errorf("error: download failed.\n%w", err)
+			return fmt.Errorf("download failed: %w", err)
 		}
 		s.Done("Downloaded", filename)
 
@@ -72,20 +72,20 @@ and replaces the current installation.`,
 		extractCmd := exec.Command("tar", "-xzf", tarPath, "-C", tmpDir)
 		if output, err := extractCmd.CombinedOutput(); err != nil {
 			s.Fail("Extract failed", fmt.Errorf("%s", string(output)))
-			return fmt.Errorf("error: extract failed.\n%w", err)
+			return fmt.Errorf("extract failed: %w", err)
 		}
 
 		// Find current binary path
 		currentBin, err := os.Executable()
 		if err != nil {
-			return fmt.Errorf("error: cannot find current binary.\n%w", err)
+			return fmt.Errorf("cannot find current binary: %w", err)
 		}
 
 		// Replace
 		s.Start("Installing...")
 		newBin := tmpDir + "/spwn"
 		if _, err := os.Stat(newBin); os.IsNotExist(err) {
-			return fmt.Errorf("error: extracted binary not found at %s", newBin)
+			return fmt.Errorf("extracted binary not found at %s", newBin)
 		}
 
 		// Copy new binary over current (using cp to preserve permissions)
@@ -96,7 +96,7 @@ and replaces the current installation.`,
 			sudoCmd.Stdin = os.Stdin
 			if sudoOutput, sudoErr := sudoCmd.CombinedOutput(); sudoErr != nil {
 				s.Fail("Install failed", fmt.Errorf("%s\n%s", string(output), string(sudoOutput)))
-				return fmt.Errorf("error: cannot replace binary.\n%w", sudoErr)
+				return fmt.Errorf("cannot replace binary: %w", sudoErr)
 			}
 		}
 

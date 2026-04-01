@@ -39,7 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"world", "agent", "claw", "observatory", "skill", "init"} {
+	for _, sub := range []string{"world", "agent", "profile", "msg", "snap", "architect", "observatory", "skill", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -53,7 +53,8 @@ func TestCLI_HelpContainsDescription(t *testing.T) {
 	assertContains(t, out, "spwn", "root help description")
 	assertContains(t, out, "Quick Start", "root help quick start section")
 	assertContains(t, out, "World:", "root help world section")
-	assertContains(t, out, "Agent:", "root help agent section")
+	assertContains(t, out, "world", "root help world command")
+	assertContains(t, out, "agent", "root help agent command")
 	assertContains(t, out, "System:", "root help system section")
 }
 
@@ -78,7 +79,7 @@ func TestCLI_AgentHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"init", "list", "inspect", "export", "reflect", "sleep", "fork", "talk", "delete"} {
+	for _, sub := range []string{"new", "ls", "rm", "talk", "inspect", "fork", "export", "import"} {
 		assertContains(t, out, sub, "agent help")
 	}
 }
@@ -104,16 +105,16 @@ func TestCLI_AgentDeleteHelp(t *testing.T) {
 	assertContains(t, out, "agent-name", "agent delete usage")
 }
 
-// --- Claw help ---
+// --- Architect help ---
 
-func TestCLI_ClawHelp(t *testing.T) {
-	out, _, err := executeCommand("claw", "--help")
+func TestCLI_ArchitectHelp(t *testing.T) {
+	out, _, err := executeCommand("architect", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, sub := range []string{"start", "stop", "status", "connect"} {
-		assertContains(t, out, sub, "claw help")
+		assertContains(t, out, sub, "architect help")
 	}
 }
 

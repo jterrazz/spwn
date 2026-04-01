@@ -197,10 +197,10 @@ var statusCmd = &cobra.Command{
 		// Bottom border
 		pr("  %s%s%s\n", "\u2570", repeatStr("\u2500", boxWidth-2), "\u256f")
 
-		// ── Claw section ────────────────────────────────────────────────
+	// ── Architect section ────────────────────────────────────────────
 
-		pr("\n")
-		pr("  \u2726 %s \u00b7 %s\n", ui.Strong("Claw"), ui.Faint("offline"))
+	pr("\n")
+	pr("  \u2726 %s \u00b7 %s\n", ui.Strong("Architect"), ui.Faint("offline"))
 		pr("  \u2502  %s   %s\n", ui.Faint("channels"), "\u2014")
 		pr("  \u2502  %s       %s\n", ui.Faint("sync"), "\u2014")
 

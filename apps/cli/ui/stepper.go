@@ -71,10 +71,12 @@ func (s *Stepper) Start(msg string) {
 	s.mu.Lock()
 	s.stopCh = make(chan struct{})
 	s.doneCh = make(chan struct{})
+	stopCh := s.stopCh
+	doneCh := s.doneCh
 	s.mu.Unlock()
 
 	go func() {
-		defer close(s.doneCh)
+		defer close(doneCh)
 		i := 0
 		ticker := time.NewTicker(80 * time.Millisecond)
 		defer ticker.Stop()
@@ -85,10 +87,9 @@ func (s *Stepper) Start(msg string) {
 			i++
 
 			select {
-			case <-s.stopCh:
-				// Clear the spinner line
-				clearLen := len(msg) + 10
-				fmt.Fprintf(s.w, "\r%s\r", strings.Repeat(" ", clearLen))
+			case <-stopCh:
+				// Clear the spinner line using ANSI escape (handles color codes)
+				fmt.Fprintf(s.w, "\r\033[2K")
 				return
 			case <-ticker.C:
 			}
@@ -125,6 +126,23 @@ func (s *Stepper) Fail(label string, err error) {
 		fmt.Fprintf(s.w, "  %s %s\n", cross(), red.Sprint(label))
 	}
 }
+
+// FailHint displays an error with an actionable hint and returns a
+// displayedError so Execute() won't re-print it.
+func (s *Stepper) FailHint(label string, err error, hint string) error {
+	s.Fail(label, err)
+	if hint != "" && s.mode != ModeQuiet && s.mode != ModeJSON {
+		fmt.Fprintf(s.w, "  %s %s\n", " ", faint(hint))
+	}
+	s.Blank()
+	return &DisplayedError{Err: err}
+}
+
+// DisplayedError wraps an error that was already shown to the user.
+type DisplayedError struct{ Err error }
+
+func (e *DisplayedError) Error() string { return e.Err.Error() }
+func (e *DisplayedError) Unwrap() error { return e.Err }
 
 // Log writes a line of output during an active step (verbose mode only).
 func (s *Stepper) Log(format string, args ...any) {

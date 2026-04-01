@@ -37,7 +37,7 @@ export class MindAssertion {
   }
 
   hasJournalEntries(minCount: number): this {
-    const journalDir = join(this.agentDir, "journal");
+    const journalDir = join(this.agentDir, "memory", "journal");
     if (!existsSync(journalDir)) {
       if (minCount > 0) throw new Error("No journal directory");
       return this;
@@ -48,7 +48,7 @@ export class MindAssertion {
   }
 
   journalContains(text: string): this {
-    const journalDir = join(this.agentDir, "journal");
+    const journalDir = join(this.agentDir, "memory", "journal");
     const entries = readdirSync(journalDir).filter((f) => f.endsWith(".md"));
     const allContent = entries
       .map((f) => readFileSync(join(journalDir, f), "utf-8"))

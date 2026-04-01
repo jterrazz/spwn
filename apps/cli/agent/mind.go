@@ -23,12 +23,12 @@ var mindCmd = &cobra.Command{
 		s := newStepper(cmd)
 
 		if err := agentDomain.ValidateMind(name); err != nil {
-			return fmt.Errorf("error: agent %q not found.\nRun 'spwn agent list' to see available agents.", name)
+			return fmt.Errorf("agent %q not found", name)
 		}
 
 		info, err := agentDomain.InspectAgent(name)
 		if err != nil {
-			return fmt.Errorf("error: cannot inspect agent.\n%w", err)
+			return fmt.Errorf("cannot inspect agent: %w", err)
 		}
 
 		layerCount := agentDomain.LayerCount(info)

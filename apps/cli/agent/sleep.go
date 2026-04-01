@@ -24,8 +24,8 @@ var sleepCmd = &cobra.Command{
 
 		result, err := agentDomain.Sleep(name)
 		if err != nil {
-			s.Fail("Sleep failed", err)
-			return fmt.Errorf("error: sleep failed.\n%w", err)
+			return s.FailHint("Sleep failed", err,
+				fmt.Sprintf("Check that agent %q exists with \"spwn agent inspect %s\"", name, name))
 		}
 
 		s.Done("Archived playbooks", fmt.Sprintf("%d", result.ArchivedPlaybooks))

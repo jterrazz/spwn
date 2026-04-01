@@ -239,23 +239,39 @@ func (m *MindAssertion) HasFile(relPath string) {
 		m.tc.T.Fatalf("Failed to inspect agent: %v", err)
 	}
 
-	// relPath is like "personas/default.md"
-	parts := strings.SplitN(relPath, "/", 2)
-	if len(parts) != 2 {
-		m.tc.T.Fatalf("Invalid relPath %q, expected layer/file", relPath)
+	// relPath is like "identity/default.md" or "memory/knowledge/facts.md"
+	// Try to match against known layers (longest prefix first)
+	var matchedLayer, file string
+	for layer := range info.Layers {
+		prefix := layer + "/"
+		if strings.HasPrefix(relPath, prefix) {
+			// Pick the longest matching layer prefix
+			if len(layer) > len(matchedLayer) {
+				matchedLayer = layer
+				file = relPath[len(prefix):]
+			}
+		}
 	}
-	layer, file := parts[0], parts[1]
 
-	files, ok := info.Layers[layer]
+	if matchedLayer == "" {
+		// Fallback: simple split for single-level layers
+		parts := strings.SplitN(relPath, "/", 2)
+		if len(parts) != 2 {
+			m.tc.T.Fatalf("Invalid relPath %q, expected layer/file", relPath)
+		}
+		matchedLayer, file = parts[0], parts[1]
+	}
+
+	files, ok := info.Layers[matchedLayer]
 	if !ok {
-		m.tc.T.Fatalf("Mind layer %q not found", layer)
+		m.tc.T.Fatalf("Mind layer %q not found", matchedLayer)
 	}
 	for _, f := range files {
 		if f == file {
 			return
 		}
 	}
-	m.tc.T.Fatalf("Expected file %q in Mind layer %q, not found. Files: %v", file, layer, files)
+	m.tc.T.Fatalf("Expected file %q in Mind layer %q, not found. Files: %v", file, matchedLayer, files)
 }
 
 // --- MockAssertion ---
@@ -349,22 +365,22 @@ type SessionAssertion struct {
 	agentName string
 }
 
-func (s *SessionAssertion) HasSessionFile(universeID string) {
+func (s *SessionAssertion) HasSessionFile(worldID string) {
 	s.tc.T.Helper()
 	mindPath := agent.AgentDir(s.agentName)
-	sess, err := agent.LoadSession(mindPath, universeID)
+	sess, err := agent.LoadSession(mindPath, worldID)
 	if err != nil {
 		s.tc.T.Fatalf("Failed to load session: %v", err)
 	}
 	if sess == nil {
-		s.tc.T.Fatalf("Expected session file for world %s, not found", universeID)
+		s.tc.T.Fatalf("Expected session file for world %s, not found", worldID)
 	}
 }
 
-func (s *SessionAssertion) SessionIDIsDeterministic(universeID string) {
+func (s *SessionAssertion) SessionIDIsDeterministic(worldID string) {
 	s.tc.T.Helper()
-	id1 := agent.DeterministicSessionID(s.agentName, universeID)
-	id2 := agent.DeterministicSessionID(s.agentName, universeID)
+	id1 := agent.DeterministicSessionID(s.agentName, worldID)
+	id2 := agent.DeterministicSessionID(s.agentName, worldID)
 	if id1 != id2 {
 		s.tc.T.Fatalf("Session IDs not deterministic: %q != %q", id1, id2)
 	}
@@ -404,15 +420,15 @@ func (j *JournalAssertion) LatestOutcome(expected string) {
 	}
 }
 
-func (j *JournalAssertion) LatestUniverseID(expected string) {
+func (j *JournalAssertion) LatestWorldID(expected string) {
 	j.tc.T.Helper()
 	mindPath := agent.AgentDir(j.agentName)
 	entries, err := agent.ListJournal(mindPath, 1)
 	if err != nil || len(entries) == 0 {
 		j.tc.T.Fatalf("No journal entries found")
 	}
-	if entries[0].UniverseID != expected {
-		j.tc.T.Fatalf("Expected latest journal world ID %q, got %q", expected, entries[0].UniverseID)
+	if entries[0].WorldID != expected {
+		j.tc.T.Fatalf("Expected latest journal world ID %q, got %q", expected, entries[0].WorldID)
 	}
 }
 
@@ -529,10 +545,10 @@ func (a *AgentAssertionChain) ImportFrom(archivePath string) *AgentAssertionChai
 }
 
 // HasSessionFile checks that a session file exists for this agent+universe combo.
-func (m *MindAssertion) HasSessionFile(universeID string) {
+func (m *MindAssertion) HasSessionFile(worldID string) {
 	m.tc.T.Helper()
 	mindPath := agent.AgentDir(m.agentName)
-	sessionPath := filepath.Join(mindPath, "sessions", universeID+".json")
+	sessionPath := filepath.Join(mindPath, "sessions", worldID+".json")
 	if _, err := os.Stat(sessionPath); err != nil {
 		m.tc.T.Fatalf("Expected session file at %s, not found", sessionPath)
 	}

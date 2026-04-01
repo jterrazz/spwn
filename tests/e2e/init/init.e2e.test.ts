@@ -30,7 +30,7 @@ describe("spwn init", () => {
 
     // THEN — exits successfully and outputs structured status lines
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created organization\s+org\.yaml/);
+    expectLine(result.output, /✓ Created universe\s+org\.yaml/);
     expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
     expectLine(result.output, /✓ Ready\. Next steps:/);
   });
@@ -43,7 +43,7 @@ describe("spwn init", () => {
 
     // THEN — org.yaml creation is confirmed in output
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created organization\s+org\.yaml/);
+    expectLine(result.output, /✓ Created universe\s+org\.yaml/);
   });
 
   test("creates a world config", async () => {

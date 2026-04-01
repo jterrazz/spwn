@@ -23,8 +23,8 @@ var deleteCmd = &cobra.Command{
 		s.Start(fmt.Sprintf("Deleting agent %q...", name))
 
 		if err := agentDomain.DeleteAgent(name); err != nil {
-			s.Fail("Delete failed", err)
-			return fmt.Errorf("error: cannot delete agent %q.\n%w", name, err)
+			return s.FailHint("Delete failed", err,
+				fmt.Sprintf("Check that agent %q exists with \"spwn agent list\"", name))
 		}
 
 		s.Done("Deleted agent", name)

@@ -14,18 +14,18 @@ export function createSpwnHome(): string {
 export function createAgent(spwnHome: string, name: string) {
   const agentDir = join(spwnHome, "agents", name);
   const layers = [
-    "personas",
+    "identity",
     "skills",
-    "knowledge",
-    "playbooks",
-    "journal",
+    "memory/knowledge",
+    "memory/playbooks",
+    "memory/journal",
     "sessions",
   ];
   for (const layer of layers) {
     mkdirSync(join(agentDir, layer), { recursive: true });
   }
   writeFileSync(
-    join(agentDir, "personas", "default.md"),
+    join(agentDir, "identity", "default.md"),
     `# ${name}\nYou are a test agent.`,
   );
 }

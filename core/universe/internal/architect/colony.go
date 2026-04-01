@@ -18,7 +18,7 @@ type AgentSpec struct {
 
 // SpawnAgents spawns multiple agents in a world.
 // Governors are spawned first (blocking), then citizens (detached).
-func (a *Architect) SpawnAgents(ctx context.Context, universeID string, agents []AgentSpec) error {
+func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []AgentSpec) error {
 	if len(agents) == 0 {
 		return nil
 	}
@@ -57,21 +57,21 @@ func (a *Architect) SpawnAgents(ctx context.Context, universeID string, agents [
 			Tier:    tier,
 			Status:  models.StatusCreating,
 		}
-		if err := a.state.AddAgent(universeID, rec); err != nil {
+		if err := a.state.AddAgent(worldID, rec); err != nil {
 			return fmt.Errorf("register agent %q: %w", spec.Name, err)
 		}
 	}
 
 	// 4. Spawn governor first (blocking)
 	for _, gov := range governors {
-		if err := a.SpawnAgent(ctx, universeID, gov.Name); err != nil {
+		if err := a.SpawnAgent(ctx, worldID, gov.Name); err != nil {
 			return fmt.Errorf("spawn governor %q: %w", gov.Name, err)
 		}
 	}
 
 	// 5. Spawn citizens detached
 	for _, cit := range citizens {
-		if err := a.SpawnAgentDetached(ctx, universeID, cit.Name); err != nil {
+		if err := a.SpawnAgentDetached(ctx, worldID, cit.Name); err != nil {
 			return fmt.Errorf("spawn citizen %q: %w", cit.Name, err)
 		}
 	}

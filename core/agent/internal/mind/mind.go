@@ -39,8 +39,8 @@ func Init(name string) (string, error) {
 You are a spwn agent — a persistent AI citizen living inside an isolated world.
 
 ## Your Identity
-- You have a Mind that persists across sessions at /mind (personas, skills, knowledge, playbooks, journal)
-- Your Soul (persona) defines your purpose and values — you are reading it now
+- You have a Mind that persists across sessions at /mind (identity, skills, memory/knowledge, memory/playbooks, memory/journal)
+- Your identity defines your purpose and values — you are reading it now
 - You evolve through experience: reflect on tasks, learn from outcomes, update your knowledge
 
 ## Your World
@@ -52,14 +52,14 @@ You are a spwn agent — a persistent AI citizen living inside an isolated world
 ## Communication
 - Check your inbox at /world/inbox/{your-name}/ for messages from other agents
 - Send messages to other agents by writing to /world/inbox/{their-name}/
-- Save important learnings to /mind/knowledge/
+- Save important learnings to /mind/memory/knowledge/
 
 ## Behavior
 - Be concise and action-oriented — execute tasks directly
 - Use your full Unix shell access (bash, git, curl, etc.)
 - Stay within the Laws — they describe what is physically possible
 `
-	personaPath := filepath.Join(dir, "personas", "default.md")
+	personaPath := filepath.Join(dir, "identity", "default.md")
 	if err := os.WriteFile(personaPath, []byte(persona), 0644); err != nil {
 		return "", fmt.Errorf("create persona: %w", err)
 	}
@@ -78,9 +78,13 @@ func Validate(name string) error {
 		return fmt.Errorf("agent %q is not a directory", name)
 	}
 
-	personas := filepath.Join(dir, "personas")
-	if _, err := os.Stat(personas); err != nil {
-		return fmt.Errorf("agent %q is missing the personas/ layer", name)
+	identity := filepath.Join(dir, "identity")
+	if _, err := os.Stat(identity); err != nil {
+		// Backward compatibility: check for legacy personas/ directory
+		personas := filepath.Join(dir, "personas")
+		if _, err := os.Stat(personas); err != nil {
+			return fmt.Errorf("agent %q is missing the identity/ layer", name)
+		}
 	}
 	return nil
 }

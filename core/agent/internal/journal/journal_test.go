@@ -20,8 +20,8 @@ func TestAppend(t *testing.T) {
 	if len(entries) != 1 {
 		t.Fatalf("expected 1 entry, got %d", len(entries))
 	}
-	if entries[0].UniverseID != "w-default-12345" {
-		t.Errorf("expected universe w-default-12345, got %s", entries[0].UniverseID)
+	if entries[0].WorldID != "w-default-12345" {
+		t.Errorf("expected world w-default-12345, got %s", entries[0].WorldID)
 	}
 	if entries[0].ExitCode != 0 {
 		t.Errorf("expected exit 0, got %d", entries[0].ExitCode)
@@ -56,8 +56,8 @@ func TestListNewestFirst(t *testing.T) {
 		t.Fatalf("expected 2, got %d", len(entries))
 	}
 	// Newest first
-	if entries[0].UniverseID != "w-second-00002" {
-		t.Errorf("expected newest first, got %s", entries[0].UniverseID)
+	if entries[0].WorldID != "w-second-00002" {
+		t.Errorf("expected newest first, got %s", entries[0].WorldID)
 	}
 }
 

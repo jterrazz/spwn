@@ -9,6 +9,7 @@ var (
 	cyan   = color.New(color.FgCyan)
 	dim    = color.New(color.Faint)
 	bold   = color.New(color.Bold)
+	white  = color.New(color.FgWhite, color.Bold)
 )
 
 func check() string         { return green.Sprint("✓") }
