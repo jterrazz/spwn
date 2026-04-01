@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MOCK_WORLDS, MOCK_ACTIVITY, MOCK_SNAPSHOTS, MOCK_LOGS } from "@/lib/mock-data";
+import type { World } from "@/lib/mock-data";
 import {
   IconTrash,
   IconCamera,
@@ -57,13 +58,28 @@ type Panel = null | "logs" | "snapshots";
 export default function WorldDashboard() {
   const params = useParams();
   const worldId = params.id as string;
-  const world = MOCK_WORLDS.find((w) => w.id === worldId);
+  const [world, setWorld] = useState<World | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [showDestroyConfirm, setShowDestroyConfirm] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [newAgentName, setNewAgentName] = useState("");
   const [newAgentTier, setNewAgentTier] = useState("citizen");
   const [showNewAgent, setShowNewAgent] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/worlds")
+      .then((r) => r.json())
+      .then((worlds: World[]) => {
+        const found = worlds.find((w) => w.id === worldId);
+        setWorld(found ?? MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
+        setLoading(false);
+      })
+      .catch(() => {
+        setWorld(MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
+        setLoading(false);
+      });
+  }, [worldId]);
 
   const snapshots = MOCK_SNAPSHOTS.filter((s) => s.worldId === worldId);
   const logs = MOCK_LOGS;
@@ -72,6 +88,14 @@ export default function WorldDashboard() {
     setActionFeedback(msg);
     setTimeout(() => setActionFeedback(null), 2500);
   };
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <p className="text-muted-foreground/30 animate-pulse">Loading world...</p>
+      </div>
+    );
+  }
 
   if (!world) {
     return (
