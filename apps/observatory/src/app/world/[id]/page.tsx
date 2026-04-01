@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import { MOCK_WORLDS, MOCK_ACTIVITY, MOCK_SNAPSHOTS, MOCK_LOGS } from "@/lib/mock-data";
 import type { World } from "@/lib/mock-data";
 import {
@@ -57,17 +57,19 @@ type Panel = null | "logs" | "snapshots";
 
 export default function WorldDashboard() {
   const params = useParams();
+  const router = useRouter();
   const worldId = params.id as string;
   const [world, setWorld] = useState<World | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [showDestroyConfirm, setShowDestroyConfirm] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [newAgentName, setNewAgentName] = useState("");
   const [newAgentTier, setNewAgentTier] = useState("citizen");
   const [showNewAgent, setShowNewAgent] = useState(false);
 
-  useEffect(() => {
+  const fetchWorld = useCallback(() => {
     fetch("/api/worlds")
       .then((r) => r.json())
       .then((worlds: World[]) => {
@@ -80,6 +82,30 @@ export default function WorldDashboard() {
         setLoading(false);
       });
   }, [worldId]);
+
+  useEffect(() => {
+    fetchWorld();
+    const interval = setInterval(fetchWorld, 5000);
+    return () => clearInterval(interval);
+  }, [fetchWorld]);
+
+  const callAction = async (url: string, options?: RequestInit) => {
+    setActionLoading(url);
+    try {
+      const res = await fetch(url, { method: "POST", ...options });
+      const data = await res.json();
+      if (!res.ok) {
+        showFeedback(`Error: ${data.error || "Unknown error"}`);
+        return false;
+      }
+      return true;
+    } catch {
+      showFeedback("Error: Failed to connect to API");
+      return false;
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const snapshots = MOCK_SNAPSHOTS.filter((s) => s.worldId === worldId);
   const logs = MOCK_LOGS;
@@ -126,11 +152,19 @@ export default function WorldDashboard() {
           {/* World Actions */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => showFeedback("Snapshot saved!")}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+              onClick={async () => {
+                const ok = await callAction(`/api/worlds/${worldId}/snapshot`);
+                if (ok) showFeedback("Snapshot saved!");
+              }}
+              disabled={actionLoading !== null}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
               title="Snapshot"
             >
-              <IconCamera size={15} />
+              {actionLoading?.includes("snapshot") ? (
+                <div className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+              ) : (
+                <IconCamera size={15} />
+              )}
               <span className="hidden sm:inline">Snapshot</span>
             </button>
             <button
@@ -182,13 +216,20 @@ export default function WorldDashboard() {
                 </p>
                 <div className="flex gap-2 mt-4">
                   <button
-                    onClick={() => {
-                      setShowDestroyConfirm(false);
-                      showFeedback("World destroyed");
+                    onClick={async () => {
+                      const ok = await callAction(`/api/worlds/${worldId}/destroy`);
+                      if (ok) {
+                        showFeedback("World destroyed");
+                        setShowDestroyConfirm(false);
+                        router.push("/");
+                      } else {
+                        setShowDestroyConfirm(false);
+                      }
                     }}
-                    className="px-4 py-2 rounded-lg text-xs bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 transition-colors"
+                    disabled={actionLoading !== null}
+                    className="px-4 py-2 rounded-lg text-xs bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 transition-colors disabled:opacity-30"
                   >
-                    Yes, destroy it
+                    {actionLoading?.includes("destroy") ? "Destroying..." : "Yes, destroy it"}
                   </button>
                   <button
                     onClick={() => setShowDestroyConfirm(false)}
@@ -258,14 +299,23 @@ export default function WorldDashboard() {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    showFeedback(`Agent "${newAgentName || "unnamed"}" created`);
-                    setShowNewAgent(false);
-                    setNewAgentName("");
+                  onClick={async () => {
+                    if (!newAgentName.trim()) return;
+                    const ok = await callAction("/api/agents/create", {
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ name: newAgentName.trim() }),
+                    });
+                    if (ok) {
+                      showFeedback(`Agent "${newAgentName}" created`);
+                      setShowNewAgent(false);
+                      setNewAgentName("");
+                      fetchWorld();
+                    }
                   }}
-                  className="px-3 py-1.5 rounded-lg text-[11px] bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] transition-colors"
+                  disabled={!newAgentName.trim() || actionLoading !== null}
+                  className="px-3 py-1.5 rounded-lg text-[11px] bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] transition-colors disabled:opacity-30"
                 >
-                  Create Agent
+                  {actionLoading ? "Creating..." : "Create Agent"}
                 </button>
               </div>
             </div>

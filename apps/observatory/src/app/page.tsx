@@ -22,7 +22,7 @@ export default function UniverseMapPage() {
   const [showSpawn, setShowSpawn] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
+  const fetchWorlds = () => {
     fetch("/api/worlds")
       .then((r) => r.json())
       .then((data: World[]) => {
@@ -35,6 +35,12 @@ export default function UniverseMapPage() {
       .catch(() => {
         setWorlds(MOCK_WORLDS);
       });
+  };
+
+  useEffect(() => {
+    fetchWorlds();
+    const interval = setInterval(fetchWorlds, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -128,11 +134,28 @@ function SpawnWorldDialog({ onClose }: { onClose: () => void }) {
   const [tier, setTier] = useState("citizen");
   const [spawning, setSpawning] = useState(false);
 
-  const handleSpawn = () => {
+  const [error, setError] = useState("");
+
+  const handleSpawn = async () => {
     setSpawning(true);
-    setTimeout(() => {
+    setError("");
+    try {
+      const res = await fetch("/api/worlds/spawn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent: agentName.trim(), workspace, config, tier }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to spawn world");
+        setSpawning(false);
+        return;
+      }
       onClose();
-    }, 1500);
+    } catch {
+      setError("Failed to connect to API");
+      setSpawning(false);
+    }
   };
 
   return (
@@ -221,6 +244,13 @@ function SpawnWorldDialog({ onClose }: { onClose: () => void }) {
           <div className="rounded-lg bg-white/[0.02] border border-white/[0.05] px-3 py-2.5 font-mono text-[11px] text-muted-foreground/35">
             spwn up --agent {agentName || "‹name›"} --tier {tier} --config {config} -w {workspace}
           </div>
+
+          {/* Error display */}
+          {error && (
+            <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-xs text-red-400 font-mono">
+              {error}
+            </div>
+          )}
 
           {/* Spawn button */}
           <button

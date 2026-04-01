@@ -33,6 +33,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LiveStatus } from "@/components/live-status";
 import type { World, LimboAgent } from "@/lib/mock-data";
 
 interface AppSidebarProps {
@@ -191,15 +192,16 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
       </SidebarContent>
 
       {/* ── Footer ── */}
-      <SidebarFooter className="px-4 py-3">
+      <SidebarFooter className="px-4 py-3 space-y-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">
-              J
-            </div>
-            <span className="text-[11px] text-muted-foreground/40">jterrazz</span>
-          </div>
+          <LiveStatus />
           <ThemeToggle />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">
+            J
+          </div>
+          <span className="text-[11px] text-muted-foreground/40">jterrazz</span>
         </div>
       </SidebarFooter>
     </Sidebar>
