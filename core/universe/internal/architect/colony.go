@@ -67,9 +67,9 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		}
 	}
 
-	// 4. Spawn governor first (blocking)
+	// 4. Spawn governor first (detached — governors run in background like citizens)
 	for _, gov := range governors {
-		if err := a.SpawnAgent(ctx, worldID, gov.Name); err != nil {
+		if err := a.SpawnAgentDetached(ctx, worldID, gov.Name); err != nil {
 			return fmt.Errorf("spawn governor %q: %w", gov.Name, err)
 		}
 	}
