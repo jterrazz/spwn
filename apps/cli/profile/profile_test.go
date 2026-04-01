@@ -23,7 +23,7 @@ func setupTestAgent(t *testing.T, name string) string {
 		}
 	}
 	// Create default persona
-	os.WriteFile(filepath.Join(agentDir, "identity", "default.md"), []byte("# Default\nYou are a test agent.\n"), 0644)
+	os.WriteFile(filepath.Join(agentDir, "identity", "persona.md"), []byte("# Default\nYou are a test agent.\n"), 0644)
 	return home
 }
 

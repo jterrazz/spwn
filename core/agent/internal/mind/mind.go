@@ -59,7 +59,7 @@ You are a spwn agent — a persistent AI citizen living inside an isolated world
 - Use your full Unix shell access (bash, git, curl, etc.)
 - Stay within the Laws — they describe what is physically possible
 `
-	personaPath := filepath.Join(dir, "identity", "default.md")
+	personaPath := filepath.Join(dir, "identity", "persona.md")
 	if err := os.WriteFile(personaPath, []byte(persona), 0644); err != nil {
 		return "", fmt.Errorf("create persona: %w", err)
 	}

@@ -32,7 +32,7 @@ func TestInit(t *testing.T) {
 		}
 
 		// Verify default persona exists
-		personaPath := filepath.Join(dir, "identity", "default.md")
+		personaPath := filepath.Join(dir, "identity", "persona.md")
 		if _, err := os.Stat(personaPath); err != nil {
 			t.Errorf("expected default persona to exist: %v", err)
 		}

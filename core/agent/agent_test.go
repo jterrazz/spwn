@@ -195,7 +195,7 @@ func TestLayerCount_MixedLayers(t *testing.T) {
 	info := &Info{
 		Name: "mixed",
 		Layers: map[string][]string{
-			"identity":         {"default.md"},
+			"identity":         {"persona.md"},
 			"skills":           {},
 			"memory/knowledge": {"fact.md"},
 			"sessions":         nil,

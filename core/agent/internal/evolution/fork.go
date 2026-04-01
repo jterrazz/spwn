@@ -37,27 +37,7 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		LayersCopied: []string{},
 	}
 
-	// Copy identity directory if it exists (formerly "soul")
-	identitySrc := filepath.Join(sourceDir, "identity")
-	identityDst := filepath.Join(targetDir, "identity")
-	if _, err := os.Stat(identitySrc); err == nil {
-		if err := copyDir(identitySrc, identityDst); err != nil {
-			return nil, fmt.Errorf("copying identity: %w", err)
-		}
-		result.LayersCopied = append(result.LayersCopied, "identity")
-	} else {
-		// Backward compatibility: check for legacy soul/ directory
-		soulSrc := filepath.Join(sourceDir, "soul")
-		soulDst := filepath.Join(targetDir, "identity")
-		if _, err := os.Stat(soulSrc); err == nil {
-			if err := copyDir(soulSrc, soulDst); err != nil {
-				return nil, fmt.Errorf("copying soul: %w", err)
-			}
-			result.LayersCopied = append(result.LayersCopied, "identity")
-		}
-	}
-
-	// Copy mind layers
+	// Copy mind layers (includes identity)
 	for _, layer := range allLayers {
 		src := filepath.Join(sourceDir, layer)
 		dst := filepath.Join(targetDir, layer)

@@ -2,8 +2,11 @@ package architect
 
 import (
 	"context"
+	"log"
 	"os"
+	"time"
 
+	"spwn.sh/core/agent"
 	"spwn.sh/core/universe/internal/models"
 )
 
@@ -22,6 +25,14 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 
 	a.backend.Stop(ctx, u.ContainerID)
 	a.backend.Remove(ctx, u.ContainerID)
+
+	// Write journal entry for this world session (best-effort)
+	if u.MindPath != "" {
+		duration := time.Since(u.CreatedAt)
+		if journalErr := agent.AppendJournal(u.MindPath, worldID, -1, duration); journalErr != nil {
+			log.Printf("warning: failed to write journal on destroy: %v", journalErr)
+		}
+	}
 
 	// Clean up gate temp directory
 	if u.GateDir != "" {
