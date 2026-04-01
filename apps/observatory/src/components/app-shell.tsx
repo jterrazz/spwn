@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MOCK_WORLDS, MOCK_LIMBO } from "@/lib/mock-data";
 import type { World, LimboAgent } from "@/lib/mock-data";
 
@@ -40,7 +41,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         limboAgents={limboAgents}
         currentWorldId={currentWorldId}
       />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        <Breadcrumbs />
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }

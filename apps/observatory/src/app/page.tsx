@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { MOCK_WORLDS, AVAILABLE_CONFIGS } from "@/lib/mock-data";
 import { IconPlus, IconRocket, IconX } from "@tabler/icons-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface World {
   id: string;
@@ -20,6 +21,7 @@ export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
   const [selected, setSelected] = useState(0);
   const [showSpawn, setShowSpawn] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const fetchWorlds = () => {
@@ -31,9 +33,11 @@ export default function UniverseMapPage() {
         } else {
           setWorlds(MOCK_WORLDS);
         }
+        setLoading(false);
       })
       .catch(() => {
         setWorlds(MOCK_WORLDS);
+        setLoading(false);
       });
   };
 
@@ -91,7 +95,17 @@ export default function UniverseMapPage() {
       </div>
 
       <main className="flex-1 flex items-center justify-center py-16">
-        {worlds.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center gap-12 md:gap-20">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex flex-col items-center gap-4">
+                <Skeleton className="w-24 h-24 rounded-full" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            ))}
+          </div>
+        ) : worlds.length === 0 ? (
           <div className="text-center">
             <p className="text-muted-foreground/30 text-lg font-heading">No active worlds</p>
             <p className="text-muted-foreground/20 text-sm mt-2 font-mono">spwn up --agent neo -w .</p>

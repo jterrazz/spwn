@@ -1,8 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MOCK_WORLDS } from "@/lib/mock-data";
-import type { World } from "@/lib/mock-data";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface ArchitectStatus {
+  status: "running" | "stopped";
+  containerId: string | null;
+  uptime: string | null;
+  channels: string[];
+  error?: string;
+}
+
+interface StatusData {
+  worlds: number;
+  agents: number;
+  running: number;
+  limbo: number;
+}
 
 const CHANNELS = [
   { type: "cli", status: "connected", label: "CLI", icon: "⬡" },
@@ -38,7 +52,16 @@ const LEVEL_DOT: Record<string, string> = {
   error: "bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.5)]",
 };
 
-function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: string }) {
+function StatCard({ label, value, sub, accent, loading: isLoading }: { label: string; value: string; sub?: string; accent?: string; loading?: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="glass-subtle px-5 py-4 flex-1 min-w-[140px]">
+        <Skeleton className="h-3 w-16 mb-2" />
+        <Skeleton className="h-7 w-12 mb-1" />
+        <Skeleton className="h-3 w-20" />
+      </div>
+    );
+  }
   return (
     <div className="glass-subtle px-5 py-4 flex-1 min-w-[140px]">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-1">{label}</p>
@@ -50,19 +73,65 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
 
 export default function ArchitectPage() {
   const [logFilter, setLogFilter] = useState<string>("all");
-  const [worlds, setWorlds] = useState<World[]>(MOCK_WORLDS);
+  const [architectStatus, setArchitectStatus] = useState<ArchitectStatus | null>(null);
+  const [statusData, setStatusData] = useState<StatusData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/worlds")
-      .then((r) => r.json())
-      .then((data: World[]) => {
-        if (data && data.length > 0) setWorlds(data);
-      })
-      .catch(() => {});
+    Promise.all([
+      fetch("/api/architect/status").then((r) => r.json()).catch(() => ({ status: "stopped", containerId: null, uptime: null, channels: [] })),
+      fetch("/api/status").then((r) => r.json()).catch(() => null),
+    ]).then(([archStatus, sData]) => {
+      setArchitectStatus(archStatus);
+      setStatusData(sData);
+      setLoading(false);
+    });
   }, []);
 
-  const totalAgents = worlds.reduce((n, w) => n + w.agents.length, 0);
-  const running = worlds.filter((w) => w.status === "running").length;
+  const showFeedback = (msg: string) => {
+    setFeedback(msg);
+    setTimeout(() => setFeedback(null), 3000);
+  };
+
+  const handleStart = async () => {
+    setActionLoading("start");
+    try {
+      const res = await fetch("/api/architect/start", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        showFeedback("Architect started successfully");
+        setArchitectStatus((s) => s ? { ...s, status: "running" } : s);
+      } else {
+        showFeedback(`Error: ${data.error}`);
+      }
+    } catch {
+      showFeedback("Error: Failed to connect to API");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleStop = async () => {
+    setActionLoading("stop");
+    try {
+      const res = await fetch("/api/architect/stop", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        showFeedback("Architect stopped");
+        setArchitectStatus((s) => s ? { ...s, status: "stopped" } : s);
+      } else {
+        showFeedback(`Error: ${data.error}`);
+      }
+    } catch {
+      showFeedback("Error: Failed to connect to API");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const isRunning = architectStatus?.status === "running";
   const connectedChannels = CHANNELS.filter((c) => c.status === "connected").length;
 
   const filteredLogs = logFilter === "all"
@@ -76,30 +145,91 @@ export default function ArchitectPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" />
+          {loading ? (
+            <Skeleton className="w-3 h-3 rounded-full" />
+          ) : (
+            <div className={`w-3 h-3 rounded-full ${isRunning ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" : "bg-white/20"}`} />
+          )}
           <div>
             <h1 className="text-2xl font-heading tracking-wide text-foreground/90">Architect</h1>
-            <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
-              Orchestration daemon · PID 48291 · uptime 4h12m
-            </p>
+            {loading ? (
+              <Skeleton className="h-3 w-48 mt-1" />
+            ) : (
+              <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
+                Orchestration daemon · {isRunning ? "running" : "stopped"}
+                {architectStatus?.containerId && ` · ${architectStatus.containerId.slice(0, 12)}`}
+                {architectStatus?.uptime && ` · uptime ${architectStatus.uptime}`}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
-          <button className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-muted-foreground/50 hover:text-foreground transition-colors">
-            Restart
-          </button>
-          <button className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-red-400/50 hover:text-red-400 transition-colors">
-            Stop
-          </button>
+          {isRunning ? (
+            <>
+              <button
+                onClick={handleStart}
+                disabled={actionLoading !== null}
+                className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-30"
+              >
+                {actionLoading === "start" ? "Restarting..." : "Restart"}
+              </button>
+              <button
+                onClick={handleStop}
+                disabled={actionLoading !== null}
+                className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-red-400/50 hover:text-red-400 transition-colors disabled:opacity-30"
+              >
+                {actionLoading === "stop" ? "Stopping..." : "Stop"}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleStart}
+              disabled={actionLoading !== null}
+              className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-green-400/50 hover:text-green-400 transition-colors disabled:opacity-30"
+            >
+              {actionLoading === "start" ? "Starting..." : "Start"}
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Feedback toast */}
+      {feedback && (
+        <div className={`px-4 py-2 rounded-lg text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-200 ${
+          feedback.startsWith("Error")
+            ? "bg-red-500/10 border border-red-500/20 text-red-400"
+            : "bg-green-500/10 border border-green-500/20 text-green-400"
+        }`}>
+          {feedback}
+        </div>
+      )}
+
       {/* Stats */}
       <div className="flex gap-4 flex-wrap">
-        <StatCard label="Status" value="Online" accent="text-green-400" />
-        <StatCard label="Worlds" value={String(worlds.length)} sub={`${running} running`} />
-        <StatCard label="Agents" value={String(totalAgents)} sub="across all worlds" />
-        <StatCard label="Channels" value={`${connectedChannels}/${CHANNELS.length}`} sub="connected" />
+        <StatCard
+          label="Status"
+          value={loading ? "" : isRunning ? "Online" : "Offline"}
+          accent={isRunning ? "text-green-400" : "text-red-400/60"}
+          loading={loading}
+        />
+        <StatCard
+          label="Worlds"
+          value={statusData ? String(statusData.worlds) : "—"}
+          sub={statusData ? `${statusData.running} running` : undefined}
+          loading={loading}
+        />
+        <StatCard
+          label="Agents"
+          value={statusData ? String(statusData.agents) : "—"}
+          sub="across all worlds"
+          loading={loading}
+        />
+        <StatCard
+          label="Channels"
+          value={`${connectedChannels}/${CHANNELS.length}`}
+          sub="connected"
+          loading={loading}
+        />
       </div>
 
       {/* Two-column layout */}
@@ -156,7 +286,12 @@ export default function ArchitectPage() {
         {/* Logs — right 2 columns */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Event Stream</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Event Stream</h2>
+              <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
+                mock data · real log streaming coming soon
+              </span>
+            </div>
             <div className="flex gap-1">
               <button
                 onClick={() => setLogFilter("all")}
