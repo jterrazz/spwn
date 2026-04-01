@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	Cmd.AddCommand(statsCmd)
+	// Removed: now handled by `spwn profile <name>`
 }
 
 var statsCmd = &cobra.Command{

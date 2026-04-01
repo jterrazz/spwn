@@ -12,8 +12,9 @@ func init() {
 }
 
 var deleteCmd = &cobra.Command{
-	Use:   "delete <agent-name>",
-	Short: "Remove an agent and its Mind directory",
+	Use:     "rm <agent-name>",
+	Aliases: []string{"delete"},
+	Short:   "Remove an agent and its Mind directory",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -24,7 +25,7 @@ var deleteCmd = &cobra.Command{
 
 		if err := agentDomain.DeleteAgent(name); err != nil {
 			return s.FailHint("Delete failed", err,
-				fmt.Sprintf("Check that agent %q exists with \"spwn agent list\"", name))
+				fmt.Sprintf("Check that agent %q exists with \"spwn agent ls\"", name))
 		}
 
 		s.Done("Deleted agent", name)

@@ -47,8 +47,8 @@ install: build
 	@echo ""
 	@echo "  Get started:"
 	@echo "    spwn init"
-	@echo "    spwn agent init neo"
-	@echo "    spwn world --agent neo -w ."
+	@echo "    spwn agent new neo"
+	@echo "    spwn up --agent neo -w ."
 	@echo ""
 
 # Uninstall

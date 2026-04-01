@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	Cmd.AddCommand(mindCmd)
+	// Removed: now handled by `spwn profile <name>`
 }
 
 var mindCmd = &cobra.Command{

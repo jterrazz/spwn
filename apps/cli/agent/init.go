@@ -14,8 +14,9 @@ func init() {
 }
 
 var initCmd = &cobra.Command{
-	Use:   "init [name]",
-	Short: "Create a new agent with a 6-layer Mind",
+	Use:     "new [name]",
+	Aliases: []string{"init"},
+	Short:   "Create a new agent with a 6-layer Mind",
 	Long: `Create a new agent with the 6-layer Mind structure. If no name is
 provided, a random name is picked from a curated dictionary.`,
 	Args: cobra.MaximumNArgs(1),
@@ -44,7 +45,7 @@ provided, a random name is picked from a curated dictionary.`,
 		s.Done("Created persona", "default.md")
 
 		s.Blank()
-		s.Success(fmt.Sprintf("Spawn with: spwn world --agent %s", name))
+		s.Success(fmt.Sprintf("Spawn with: spwn up --agent %s", name))
 		s.Blank()
 
 		return nil
