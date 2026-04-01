@@ -174,6 +174,36 @@ func generateGodContext(b *strings.Builder, opts AgentContextOpts) {
 	writeWorldInfo(b, opts)
 }
 
+// ColonyAgentSpec mirrors the architect AgentSpec for generating colony context.
+type ColonyAgentSpec struct {
+	Name string
+	Tier string
+}
+
+// GenerateColonyContext generates a combined /world/AGENT.md for multi-agent worlds
+// listing all agents, their tiers, and how to find per-agent context files.
+func GenerateColonyContext(worldID string, agents []ColonyAgentSpec) string {
+	var b strings.Builder
+
+	b.WriteString(fmt.Sprintf("# Colony — %s\n\n", worldID))
+	b.WriteString("This world has multiple agents. Each agent has a personalized context file.\n\n")
+
+	b.WriteString("## Agents\n")
+	for _, a := range agents {
+		b.WriteString(fmt.Sprintf("- **%s** (%s) — see /world/AGENT-%s.md\n", a.Name, a.Tier, a.Name))
+	}
+	b.WriteString("\n")
+
+	b.WriteString("## Communication\n")
+	b.WriteString("Agents communicate via inbox directories:\n")
+	for _, a := range agents {
+		b.WriteString(fmt.Sprintf("- /world/inbox/%s/ — messages for %s\n", a.Name, a.Name))
+	}
+	b.WriteString("\nWrite JSON files with fields: from, to, type, content.\n")
+
+	return b.String()
+}
+
 func writeWorldInfo(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Your World\n")
 	if opts.Workspace != "" {

@@ -48,17 +48,22 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		return fmt.Errorf("at most one governor allowed, got %d.\nRemove extra governors from the colony spec", len(governors))
 	}
 
-	// 3. Register all agent records in state
+	// 3. Update existing agent records to "creating" status
+	// (agents are already registered by Spawn() — avoid duplicates)
 	for _, spec := range agents {
-		tier := manifest.DefaultTier(spec.Tier)
-		rec := models.AgentRecord{
-			Name:    spec.Name,
-			AgentID: foundation.GenerateAgentID(spec.Name),
-			Tier:    tier,
-			Status:  models.StatusCreating,
-		}
-		if err := a.state.AddAgent(worldID, rec); err != nil {
-			return fmt.Errorf("register agent %q: %w", spec.Name, err)
+		agentID := foundation.GenerateAgentID(spec.Name)
+		if err := a.state.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
+			// Agent not yet registered (shouldn't happen in normal flow) — add it
+			tier := manifest.DefaultTier(spec.Tier)
+			rec := models.AgentRecord{
+				Name:    spec.Name,
+				AgentID: agentID,
+				Tier:    tier,
+				Status:  models.StatusCreating,
+			}
+			if addErr := a.state.AddAgent(worldID, rec); addErr != nil {
+				return fmt.Errorf("register agent %q: %w", spec.Name, addErr)
+			}
 		}
 	}
 

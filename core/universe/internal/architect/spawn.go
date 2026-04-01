@@ -373,6 +373,21 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 				return nil, fmt.Errorf("copy AGENT-%s.md: %w", spec.Name, err)
 			}
 		}
+
+		// Also generate a combined /world/AGENT.md listing all agents
+		var colonySpecs []physics.ColonyAgentSpec
+		for _, spec := range opts.Agents {
+			colonySpecs = append(colonySpecs, physics.ColonyAgentSpec{
+				Name: spec.Name,
+				Tier: manifest.DefaultTier(spec.Tier),
+			})
+		}
+		combinedCtx := physics.GenerateColonyContext(id, colonySpecs)
+		if err := a.backend.CopyTo(ctx, containerID, "world/AGENT.md", []byte(combinedCtx)); err != nil {
+			a.backend.Stop(ctx, containerID)
+			a.backend.Remove(ctx, containerID)
+			return nil, fmt.Errorf("copy colony AGENT.md: %w", err)
+		}
 	} else if opts.AgentName != "" {
 		// Single agent: generate /world/AGENT.md
 		agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
@@ -515,19 +530,9 @@ func hasEnv(env []string, key string) bool {
 	return false
 }
 
-// extractKeychainToken reads the cached Claude OAuth token from ~/.spwn/.auth-token.
-// If not cached, attempts to extract from macOS Keychain and caches for future use.
-func extractKeychainToken() string {
-	// Try cached token first (no keychain popup)
-	cachePath := filepath.Join(foundation.BaseDir(), ".auth-token")
-	if data, err := os.ReadFile(cachePath); err == nil {
-		token := strings.TrimSpace(string(data))
-		if token != "" {
-			return token
-		}
-	}
-
-	// Fall back to macOS Keychain with timeout (avoids hanging on Keychain dialog)
+// readKeychainOAuthToken reads the Claude OAuth token directly from macOS Keychain.
+// Returns empty string if keychain is unavailable or token not found.
+func readKeychainOAuthToken() string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	out, err := exec.CommandContext(ctx, "security", "find-generic-password", "-s", "Claude Code-credentials", "-w").Output()
@@ -543,14 +548,31 @@ func extractKeychainToken() string {
 	if err := json.Unmarshal(out, &creds); err != nil {
 		return ""
 	}
+	return creds.ClaudeAiOauth.AccessToken
+}
 
-	// Cache for future use
-	if creds.ClaudeAiOauth.AccessToken != "" {
+// extractKeychainToken reads the Claude OAuth token, preferring a fresh keychain
+// read over the cached value so that expired tokens are automatically refreshed.
+func extractKeychainToken() string {
+	cachePath := filepath.Join(foundation.BaseDir(), ".auth-token")
+
+	// Try keychain first — always returns a fresh token
+	if token := readKeychainOAuthToken(); token != "" {
+		// Cache the fresh token for offline/fallback use
 		os.MkdirAll(foundation.BaseDir(), 0755)
-		os.WriteFile(cachePath, []byte(creds.ClaudeAiOauth.AccessToken), 0600)
+		os.WriteFile(cachePath, []byte(token), 0600)
+		return token
 	}
 
-	return creds.ClaudeAiOauth.AccessToken
+	// Fall back to cached token (keychain unavailable, e.g. Linux or no GUI)
+	if data, err := os.ReadFile(cachePath); err == nil {
+		token := strings.TrimSpace(string(data))
+		if token != "" {
+			return token
+		}
+	}
+
+	return ""
 }
 
 func parseMemory(s string) (int64, error) {
