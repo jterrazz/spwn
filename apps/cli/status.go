@@ -147,7 +147,7 @@ var statusCmd = &cobra.Command{
 		// Agents
 		agentList, _ := agentDomain.ListAgents()
 
-		// Build map: agent name → world (to identify drifting agents)
+		// Build map: agent name → world (to identify limbo agents)
 		worldMap := make(map[string]*universe.World)
 		for i := range worlds {
 			w := &worlds[i]
@@ -225,21 +225,21 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// ── Drifting section ────────────────────────────────────────────
+		// ── Limbo section ────────────────────────────────────────────
 
-		// Drifting agents: those not attached to any world
-		var drifting []agentDomain.Info
+		// Limbo agents: those not attached to any world
+		var limbo []agentDomain.Info
 		for _, a := range agentList {
 			if _, attached := worldMap[a.Name]; !attached {
-				drifting = append(drifting, a)
+				limbo = append(limbo, a)
 			}
 		}
 
 		pr("  \u2502\n")
-		pr("  \u2570\u2500\u2500\u25cc %s\n", ui.Strong("Drifting"))
+		pr("  \u2570\u2500\u2500\u25cc %s\n", ui.Strong("Limbo"))
 
-		if len(drifting) > 0 {
-			for _, a := range drifting {
+		if len(limbo) > 0 {
+			for _, a := range limbo {
 				layers := fmt.Sprintf("%d/6", agentDomain.LayerCount(&a))
 				pr("     \u2502\n")
 				pr("     \u2502  \u25cc %s    %s\n", padRight(a.Name, 10), ui.Faint(layers))

@@ -37,14 +37,14 @@ interface World {
   status: string;
 }
 
-interface DriftingAgent {
+interface LimboAgent {
   name: string;
   layers: number;
 }
 
 interface AppSidebarProps {
   worlds: World[];
-  driftingAgents: DriftingAgent[];
+  limboAgents: LimboAgent[];
   currentWorldId?: string;
 }
 
@@ -68,7 +68,7 @@ function extractName(id: string): string {
     : id;
 }
 
-export function AppSidebar({ worlds, driftingAgents, currentWorldId }: AppSidebarProps) {
+export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarProps) {
   const pathname = usePathname();
   const currentWorld = worlds.find((w) => w.id === currentWorldId);
 
@@ -160,16 +160,16 @@ export function AppSidebar({ worlds, driftingAgents, currentWorldId }: AppSideba
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Drifting agents */}
-        {driftingAgents.length > 0 && (
+        {/* Limbo agents */}
+        {limboAgents.length > 0 && (
           <>
             <SidebarSeparator />
             <SidebarGroup>
               <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/40">
-                Drifting
+                Limbo
               </SidebarGroupLabel>
               <SidebarMenu>
-                {driftingAgents.map((agent) => (
+                {limboAgents.map((agent) => (
                   <SidebarMenuItem key={agent.name}>
                     <SidebarMenuButton className="text-xs text-muted-foreground/50">
                       <span className="text-[10px]">◌</span>

@@ -41,23 +41,6 @@ export default function UniverseMapPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Minimal header */}
-      <header className="relative z-20 flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <span className="text-lg tracking-[0.2em] font-heading text-foreground/90">
-            ⬡ observatory
-          </span>
-          <span className="text-xs font-mono text-muted-foreground/30">spwn</span>
-        </div>
-        <div className="glass-subtle px-3 py-1.5 flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-xs font-mono text-muted-foreground">
-            {worlds.length} world{worlds.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-      </header>
-
-      {/* Universe canvas */}
       <main className="flex-1 flex items-center justify-center py-16">
         {worlds.length === 0 ? (
           <div className="text-center">
