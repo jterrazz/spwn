@@ -1,5 +1,12 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { writeFileSync, utimesSync, mkdirSync, existsSync } from "node:fs";
+import {
+  writeFileSync,
+  readFileSync,
+  utimesSync,
+  mkdirSync,
+  existsSync,
+  readdirSync,
+} from "node:fs";
 import { join } from "node:path";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome, createAgent } from "../../setup/helpers.js";
@@ -204,5 +211,165 @@ describe("agent evolution", () => {
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Archived playbooks\s+0/);
     expect(existsSync(freshPath)).toBe(true);
+  });
+
+  // ── Deep verification: reflect file content ────────────────
+
+  test("reflect auto-reflexion.md content references journal entries", async () => {
+    // GIVEN — an agent with multiple diverse journal entries
+    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    writeFileSync(
+      join(journalDir, "2024-03-01.md"),
+      "# Journal 2024-03-01\n## Session w-alpha-00001\n- Outcome: success\n- Duration: 10m\n- Task: deployed new API endpoint\n",
+    );
+    writeFileSync(
+      join(journalDir, "2024-03-02.md"),
+      "# Journal 2024-03-02\n## Session w-alpha-00002\n- Outcome: failure\n- Duration: 8m\n- Task: database migration crashed\n",
+    );
+    writeFileSync(
+      join(journalDir, "2024-03-03.md"),
+      "# Journal 2024-03-03\n## Session w-alpha-00003\n- Outcome: success\n- Duration: 15m\n- Task: fixed CI pipeline\n",
+    );
+
+    // WHEN — reflecting
+    const result = await spwn("reflect content check")
+      .exec("agent reflect neo")
+      .run();
+
+    // THEN — auto-reflexion.md is created
+    expect(result.exitCode).toBe(0);
+    const reflexionPath = join(
+      home, "agents", "neo", "memory", "playbooks", "auto-reflexion.md",
+    );
+    expect(existsSync(reflexionPath)).toBe(true);
+
+    // AND — its content is non-empty and structured
+    const content = readFileSync(reflexionPath, "utf-8");
+    expect(content.trim().length).toBeGreaterThan(0);
+
+    // AND — output reports correct entry count
+    expectLine(result.output, /Entries analyzed\s+3/);
+  });
+
+  test("reflect is idempotent — running twice overwrites cleanly", async () => {
+    // GIVEN — an agent with journal entries
+    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    writeFileSync(
+      join(journalDir, "2024-04-01.md"),
+      "# Journal 2024-04-01\n## Session w-test-00010\n- Outcome: success\n- Duration: 5m\n",
+    );
+
+    // WHEN — reflecting twice
+    await spwn("reflect first").exec("agent reflect neo").run();
+    const result = await spwn("reflect second")
+      .exec("agent reflect neo")
+      .run();
+
+    // THEN — second reflect succeeds without error
+    expect(result.exitCode).toBe(0);
+
+    // AND — only one auto-reflexion.md exists (not duplicated)
+    const playbooksDir = join(home, "agents", "neo", "memory", "playbooks");
+    const reflexionFiles = readdirSync(playbooksDir).filter(
+      (f) => f.includes("auto-reflexion"),
+    );
+    expect(reflexionFiles.length).toBe(1);
+  });
+
+  // ── Deep verification: sleep with mixed fresh/stale ────────
+
+  test("sleep archives stale but keeps fresh in same directory", async () => {
+    // GIVEN — an agent with both stale and fresh playbooks
+    const playbooksDir = join(home, "agents", "neo", "memory", "playbooks");
+
+    const stalePath = join(playbooksDir, "ancient-patterns.md");
+    writeFileSync(stalePath, "# Ancient patterns\nVery old strategies.");
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    utimesSync(stalePath, ninetyDaysAgo, ninetyDaysAgo);
+
+    const freshPath = join(playbooksDir, "current-strategy.md");
+    writeFileSync(freshPath, "# Current strategy\nRecent and relevant.");
+
+    // WHEN — sleeping
+    const result = await spwn("sleep mixed")
+      .exec("agent sleep neo")
+      .run();
+
+    // THEN — stale file is archived, fresh file survives
+    expect(result.exitCode).toBe(0);
+    expect(existsSync(stalePath)).toBe(false);
+    expect(existsSync(freshPath)).toBe(true);
+    expectLine(result.output, /✓ Archived playbooks\s+1/);
+  });
+
+  test("sleep archives stale knowledge files", async () => {
+    // GIVEN — an agent with old knowledge files
+    const knowledgeDir = join(home, "agents", "neo", "memory", "knowledge");
+    const stalePath = join(knowledgeDir, "old-facts.md");
+    writeFileSync(stalePath, "# Old facts\nOutdated information.");
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    utimesSync(stalePath, sixtyDaysAgo, sixtyDaysAgo);
+
+    // WHEN — sleeping
+    const result = await spwn("sleep knowledge")
+      .exec("agent sleep neo")
+      .run();
+
+    // THEN — stale knowledge file is archived
+    expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Archived knowledge\s+1/);
+    expect(existsSync(stalePath)).toBe(false);
+  });
+
+  test("sleep prunes old sessions", async () => {
+    // GIVEN — an agent with old session directories
+    const sessionsDir = join(home, "agents", "neo", "sessions");
+    const oldSessionDir = join(sessionsDir, "w-old-00001");
+    mkdirSync(oldSessionDir, { recursive: true });
+    const logFile = join(oldSessionDir, "session.log");
+    writeFileSync(logFile, "Old session log data\n");
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    utimesSync(logFile, ninetyDaysAgo, ninetyDaysAgo);
+    utimesSync(oldSessionDir, ninetyDaysAgo, ninetyDaysAgo);
+
+    // WHEN — sleeping
+    const result = await spwn("sleep prune sessions")
+      .exec("agent sleep neo")
+      .run();
+
+    // THEN — old session is pruned
+    expect(result.exitCode).toBe(0);
+    expectLine(result.output, /✓ Pruned sessions\s+\d+/);
+  });
+
+  // ── Reflect + Sleep combined workflow ──────────────────────
+
+  test("reflect then sleep preserves auto-reflexion.md (it is fresh)", async () => {
+    // GIVEN — an agent with journal entries
+    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    writeFileSync(
+      join(journalDir, "2024-05-01.md"),
+      "# Journal 2024-05-01\n## Session w-test-00020\n- Outcome: success\n- Duration: 7m\n",
+    );
+
+    // WHEN — reflecting to create auto-reflexion.md
+    const reflectResult = await spwn("reflect before sleep")
+      .exec("agent reflect neo")
+      .run();
+    expect(reflectResult.exitCode).toBe(0);
+
+    const reflexionPath = join(
+      home, "agents", "neo", "memory", "playbooks", "auto-reflexion.md",
+    );
+    expect(existsSync(reflexionPath)).toBe(true);
+
+    // AND — sleeping immediately after (auto-reflexion is fresh)
+    const sleepResult = await spwn("sleep after reflect")
+      .exec("agent sleep neo")
+      .run();
+    expect(sleepResult.exitCode).toBe(0);
+
+    // THEN — auto-reflexion.md should survive (it was just created)
+    expect(existsSync(reflexionPath)).toBe(true);
   });
 });
