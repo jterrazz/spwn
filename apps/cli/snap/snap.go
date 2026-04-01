@@ -25,10 +25,10 @@ func snapHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ snap")+" "+ui.Faint("— world snapshots"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
-				{"save <world-id>", "Save world state"},
-				{"ls", "List all snapshots"},
-				{"restore <snap-id>", "Restore from snapshot"},
-				{"rm <snap-id>", "Remove a snapshot"},
+				{Name: "save <world-id>", Desc: "Save world state"},
+				{Name: "ls", Desc: "List all snapshots"},
+				{Name: "restore <snap-id>", Desc: "Restore from snapshot"},
+				{Name: "rm <snap-id>", Desc: "Remove a snapshot"},
 			}},
 		},
 		"spwn snap [command]",

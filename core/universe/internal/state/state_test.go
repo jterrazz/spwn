@@ -144,6 +144,148 @@ func TestUpdateAgentStatus_WorldNotFound(t *testing.T) {
 	}
 }
 
+func TestConcurrentReadWrite(t *testing.T) {
+	s := tempStore(t)
+	seedWorld(t, s, "concurrent-world")
+
+	// Run concurrent reads and writes
+	done := make(chan error, 20)
+	for i := 0; i < 10; i++ {
+		go func(idx int) {
+			agent := models.AgentRecord{
+				Name:    "agent",
+				AgentID: "a-agent-" + string(rune('A'+idx)),
+				Status:  models.StatusIdle,
+			}
+			done <- s.AddAgent("concurrent-world", agent)
+		}(i)
+		go func() {
+			_, err := s.List()
+			done <- err
+		}()
+	}
+
+	for i := 0; i < 20; i++ {
+		if err := <-done; err != nil {
+			t.Errorf("concurrent op failed: %v", err)
+		}
+	}
+}
+
+func TestCorruptedJSON(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "state.json")
+
+	// Write corrupt JSON
+	os.WriteFile(path, []byte("{not valid json!!!"), 0644)
+
+	s, err := NewStoreAt(path)
+	if err != nil {
+		t.Fatalf("NewStoreAt: %v", err)
+	}
+
+	_, err = s.List()
+	if err == nil {
+		t.Error("expected error for corrupted JSON, got nil")
+	}
+}
+
+func TestEmptyFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "state.json")
+
+	// Write empty file
+	os.WriteFile(path, []byte(""), 0644)
+
+	s, err := NewStoreAt(path)
+	if err != nil {
+		t.Fatalf("NewStoreAt: %v", err)
+	}
+
+	worlds, err := s.List()
+	if err != nil {
+		t.Fatalf("List on empty file: %v", err)
+	}
+	if worlds != nil {
+		t.Errorf("expected nil for empty file, got %v", worlds)
+	}
+}
+
+func TestReadOnlyDirectory(t *testing.T) {
+	dir := t.TempDir()
+	roDir := filepath.Join(dir, "readonly")
+	os.MkdirAll(roDir, 0755)
+
+	path := filepath.Join(roDir, "state.json")
+	s, err := NewStoreAt(path)
+	if err != nil {
+		t.Fatalf("NewStoreAt: %v", err)
+	}
+
+	// Save a world first
+	seedWorld(t, s, "u1")
+
+	// Make directory read-only
+	os.Chmod(roDir, 0555)
+	defer os.Chmod(roDir, 0755) // restore for cleanup
+
+	// Writing should fail
+	err = s.Save(models.World{ID: "u2", Status: models.StatusIdle})
+	if err == nil {
+		// Some systems (e.g. root) may still allow writes — log but don't fail
+		t.Log("write to read-only dir succeeded (may be running as root)")
+	}
+}
+
+func TestGetNonexistentWorld(t *testing.T) {
+	s := tempStore(t)
+
+	_, err := s.Get("nonexistent")
+	if err == nil {
+		t.Error("expected error for nonexistent world, got nil")
+	}
+}
+
+func TestDeleteNonexistentWorld(t *testing.T) {
+	s := tempStore(t)
+
+	// Deleting a world that doesn't exist should not error (it just filters empty list)
+	err := s.Delete("nonexistent")
+	if err != nil {
+		t.Errorf("Delete nonexistent: %v", err)
+	}
+}
+
+func TestSaveAndUpdate(t *testing.T) {
+	s := tempStore(t)
+
+	// Save
+	w := models.World{ID: "u1", Status: models.StatusIdle}
+	if err := s.Save(w); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	// Update
+	w.Status = models.StatusRunning
+	if err := s.Save(w); err != nil {
+		t.Fatalf("Save update: %v", err)
+	}
+
+	got, err := s.Get("u1")
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if got.Status != models.StatusRunning {
+		t.Errorf("expected status running, got %v", got.Status)
+	}
+
+	// Should still be exactly 1 world
+	worlds, _ := s.List()
+	if len(worlds) != 1 {
+		t.Errorf("expected 1 world after update, got %d", len(worlds))
+	}
+}
+
 // TestStatePersistence verifies agents survive a reload from disk.
 func TestStatePersistence(t *testing.T) {
 	dir := t.TempDir()

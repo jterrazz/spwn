@@ -61,8 +61,8 @@ func dashHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ dash")+" "+ui.Faint("— visual dashboard"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
-				{"start", "Start the dashboard server"},
-				{"open", "Open in browser"},
+				{Name: "start", Desc: "Start the dashboard server"},
+				{Name: "open", Desc: "Open in browser"},
 			}},
 		},
 		"spwn dash [command]",

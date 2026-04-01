@@ -25,9 +25,9 @@ func msgHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ msg")+" "+ui.Faint("— inter-agent messaging"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
-				{"send <to> --from <from> \"text\"", "Send a message"},
-				{"inbox <name>", "Show inbox messages"},
-				{"watch <name>", "Watch for new messages"},
+				{Name: "send <to> --from <from> \"text\"", Desc: "Send a message"},
+				{Name: "inbox <name>", Desc: "Show inbox messages"},
+				{Name: "watch <name>", Desc: "Watch for new messages"},
 			}},
 		},
 		"spwn msg [command]",

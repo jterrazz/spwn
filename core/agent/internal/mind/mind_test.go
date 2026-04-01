@@ -141,6 +141,85 @@ func TestList(t *testing.T) {
 	})
 }
 
+func TestInit_SpecialCharactersInName(t *testing.T) {
+	tests := []struct {
+		name      string
+		agentName string
+	}{
+		{"spaces", "my agent"},
+		{"unicode", "agënt-ñ"},
+		{"dots", "agent.v2"},
+		{"at_sign", "agent@home"},
+		{"hash", "agent#1"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmp := t.TempDir()
+			t.Setenv("SPWN_HOME", tmp)
+
+			dir, err := Init(tt.agentName)
+			if err != nil {
+				t.Fatalf("Init(%q): %v", tt.agentName, err)
+			}
+
+			// Should create directory and pass validation
+			if _, err := os.Stat(dir); err != nil {
+				t.Errorf("expected agent dir to exist: %v", err)
+			}
+		})
+	}
+}
+
+func TestInit_VeryLongName(t *testing.T) {
+	tmp := t.TempDir()
+	t.Setenv("SPWN_HOME", tmp)
+
+	longName := ""
+	for i := 0; i < 50; i++ {
+		longName += "abcdefghij"
+	}
+	// 500-char name
+	dir, err := Init(longName)
+	if err != nil {
+		// Some filesystems may reject very long paths — that's acceptable
+		t.Logf("Init with 500-char name failed (acceptable): %v", err)
+		return
+	}
+	if _, err := os.Stat(dir); err != nil {
+		t.Errorf("expected agent dir to exist: %v", err)
+	}
+}
+
+func TestValidate_FileInsteadOfDir(t *testing.T) {
+	tmp := t.TempDir()
+	t.Setenv("SPWN_HOME", tmp)
+
+	// Create a file where the agent directory should be
+	agentPath := filepath.Join(tmp, "agents", "fakefile")
+	os.MkdirAll(filepath.Dir(agentPath), 0755)
+	os.WriteFile(agentPath, []byte("not a dir"), 0644)
+
+	err := Validate("fakefile")
+	if err == nil {
+		t.Error("expected error when agent path is a file, got nil")
+	}
+}
+
+func TestValidate_LegacyPersonasDir(t *testing.T) {
+	tmp := t.TempDir()
+	t.Setenv("SPWN_HOME", tmp)
+
+	// Create agent dir with legacy personas/ instead of identity/
+	agentDir := filepath.Join(tmp, "agents", "legacy")
+	os.MkdirAll(filepath.Join(agentDir, "personas"), 0755)
+
+	err := Validate("legacy")
+	if err != nil {
+		t.Errorf("expected legacy personas/ dir to pass validation, got: %v", err)
+	}
+}
+
 func TestLayerCount(t *testing.T) {
 	tests := []struct {
 		name string

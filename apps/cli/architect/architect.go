@@ -91,10 +91,10 @@ func architectHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ architect")+" "+ui.Faint("— your always-on world builder"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
-				{"start", "Start the Architect daemon"},
-				{"stop", "Stop the Architect daemon"},
-				{"status", "Show status, channels, active worlds"},
-				{"connect <channel>", "Connect a messaging channel"},
+				{Name: "start", Desc: "Start the Architect daemon"},
+				{Name: "stop", Desc: "Stop the Architect daemon"},
+				{Name: "status", Desc: "Show status, channels, active worlds"},
+				{Name: "connect <channel>", Desc: "Connect a messaging channel"},
 			}},
 		},
 		"spwn architect [command]",
