@@ -94,7 +94,7 @@ func TestCLI_AgentHelpGrouped(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Commands:", "Spawn Flags:"} {
+	for _, section := range []string{"Lifecycle:", "Evolution:", "Portability:", "Spawn Flags:"} {
 		assertContains(t, out, section, "agent help sections")
 	}
 }
@@ -129,7 +129,7 @@ func TestCLI_RootHelpSections(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Quick Start:", "World:", "Agents & Profiles:", "Platform:", "System:", "Flags:"} {
+	for _, section := range []string{"Quick Start:", "Orchestration:", "World:", "Agent:", "Marketplace:", "System:", "Flags:"} {
 		assertContains(t, out, section, "root help sections")
 	}
 }
@@ -187,5 +187,5 @@ func TestCLI_BareAgentShowsHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "Commands:", "bare agent shows grouped help")
+	assertContains(t, out, "Lifecycle:", "bare agent shows grouped help")
 }

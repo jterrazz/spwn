@@ -231,17 +231,21 @@ spwn attach <id>                      Interactive shell
 
 ### Agent Management
 
+> Profile is the passport. Agent is the person.
+
 ```
 spwn agent new <name>                 Create a new agent
 spwn agent ls                         List all agents
 spwn agent rm <name>                  Remove an agent
 spwn agent talk <name> [message]      Talk to a running agent
+spwn agent reflect <name>             Promote journal patterns to playbooks
+spwn agent sleep <name>               Consolidate and prune memory
 spwn agent fork <src> <dst>           Clone an agent
 spwn agent export <name>              Export agent as tar.gz
 spwn agent import <file>              Import agent from tar.gz
 ```
 
-### Profile (full character sheet)
+### Profile (character sheet — the passport, not the person)
 
 ```
 spwn profile <name>                   Show full character sheet
@@ -254,8 +258,6 @@ spwn profile <name> playbooks         List playbooks
 spwn profile <name> knowledge         List knowledge
 spwn profile <name> journal           Session history
 spwn profile <name> sessions          Active sessions
-spwn profile <name> reflect           Promote patterns to playbooks
-spwn profile <name> sleep             Consolidate experience
 spwn profile <name> edit              Edit profile.yaml
 spwn profile <name> tier              Show/set agent tier
 spwn profile <name> engine            Show/set runtime engine
@@ -281,8 +283,9 @@ spwn snap rm <snap>                   Remove a snapshot
 ### Platform & System
 
 ```
-spwn architect start|stop|status|connect  Orchestration daemon
-spwn skill ls|install|rm              Manage agent skills
+spwn architect start|stop|status|connect  Your always-on world builder
+spwn dash start|open                 Visual dashboard
+spwn get install|ls|search|rm        Install from the marketplace
 spwn auth login|logout|token          Authentication
 ```
 
@@ -337,7 +340,7 @@ spwn/
 │
 ├── apps/                       Consumers
 │   ├── cli/                      The spwn binary
-│   └── observatory/              Visual dashboard
+│   └── dash/                     Visual dashboard
 │
 └── platform/                   Build infrastructure
     ├── images/                   Docker images (base, test)

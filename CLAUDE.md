@@ -61,16 +61,18 @@ spwn down <id>                                 # Destroy a world
 spwn logs <id>                                 # Stream agent output
 spwn attach <id>                               # Interactive shell
 
-# Agent management
+# Agent management — "Profile is the passport. Agent is the person."
 spwn agent new <name>                          # Create a new agent
 spwn agent ls                                  # List all agents
 spwn agent rm <name>                           # Remove an agent
 spwn agent talk <name> [message]               # Talk to a running agent
+spwn agent reflect <name>                      # Promote journal patterns to playbooks
+spwn agent sleep <name>                        # Consolidate and prune memory
 spwn agent fork <src> <dst>                    # Clone an agent
 spwn agent export <name>                       # Export agent as tar.gz
 spwn agent import <file>                       # Import agent from tar.gz
 
-# Profile (full character sheet)
+# Profile (character sheet — the passport, not the person)
 spwn profile <name>                            # Show full character sheet
 spwn profile <name> purpose                    # Show/edit purpose
 spwn profile <name> traits                     # Show/edit traits
@@ -81,8 +83,6 @@ spwn profile <name> playbooks                  # List playbooks
 spwn profile <name> knowledge                  # List knowledge
 spwn profile <name> journal                    # Session history
 spwn profile <name> sessions                   # Active sessions
-spwn profile <name> reflect                    # Promote patterns to playbooks
-spwn profile <name> sleep                      # Consolidate experience
 spwn profile <name> edit                       # Edit profile.yaml
 spwn profile <name> tier                       # Show/set agent tier
 spwn profile <name> engine                     # Show/set runtime engine
@@ -98,16 +98,21 @@ spwn snap ls                                   # List snapshots
 spwn snap restore <snap>                       # Restore from snapshot
 spwn snap rm <snap>                            # Remove a snapshot
 
-# Architect (orchestration daemon)
+# Architect (your always-on world builder)
 spwn architect start                           # Start the Architect daemon
 spwn architect stop                            # Stop the Architect daemon
 spwn architect status                          # Show status, channels, active worlds
 spwn architect connect <channel>               # Connect to a messaging channel
 
-# Skills (marketplace)
-spwn skill ls                                  # List available skills
-spwn skill install <skill>                     # Install a skill
-spwn skill rm <skill>                          # Remove a skill
+# Dashboard
+spwn dash start                                # Start the dashboard server
+spwn dash open                                 # Open in browser
+
+# Marketplace
+spwn get install <name>                        # Install a package
+spwn get ls                                    # List installed packages
+spwn get search <query>                        # Search the marketplace
+spwn get rm <name>                             # Remove a package
 
 # Authentication
 spwn auth login                                # Login
@@ -180,7 +185,7 @@ spwn/
 │   │       ├── runtime/             #     Claude Code adapter (Runtime port)
 │   │       ├── provider/            #     Anthropic + OpenAI adapters (Provider port)
 │   │       ├── channel/             #     CLI adapter (Channel port)
-│   │       ├── skill/               #     LocalRegistry adapter (Skill port)
+│   │       ├── get/                  #     LocalRegistry adapter (Get/Marketplace port)
 │   │       ├── observatory/         #     HTTP API server (/api/worlds, /api/agents)
 │   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
 │   │       ├── physics/             #     Physics/faculties generation
@@ -227,13 +232,13 @@ spwn/
 │   │   ├── msg/                     #     Messaging subcommands (send, inbox, watch)
 │   │   ├── snap/                    #     Snapshot subcommands (save, ls, restore, rm)
 │   │   ├── architect/                #     Architect subcommands (start, stop, status, connect)
-│   │   ├── skill/                   #     Skill subcommands (ls, install, rm)
+│   │   ├── get/                     #     Marketplace subcommands (install, ls, search, rm)
 │   │   ├── auth/                    #     Auth subcommands (login, logout, token)
 │   │   ├── ui/                      #     Stepper, table, style, format
 │   │   └── tests/
 │   │       └── integration/         #   Cross-domain flows (world + agent)
 │   │
-│   └── observatory/                 #   Visual dashboard (CLI placeholder, Next.js planned)
+│   └── dash/                        #   Visual dashboard (CLI placeholder, Next.js planned)
 │       └── package.json
 │
 ├── platform/                        # Build infrastructure

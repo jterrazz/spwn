@@ -13,10 +13,10 @@ describe("CLI output", () => {
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("Quick Start:");
-    expect(out).toContain("Core:");
+    expect(out).toContain("Orchestration:");
     expect(out).toContain("System:");
     // Key commands present
-    for (const cmd of ["world", "agent", "init", "status", "doctor", "architect", "observatory", "skill", "upgrade", "up", "down", "ls", "profile", "msg", "snap"]) {
+    for (const cmd of ["world", "agent", "init", "status", "doctor", "architect", "dash", "get", "upgrade", "up", "down", "ls", "profile", "msg", "snap"]) {
       expect(out).toContain(cmd);
     }
     // Flags
@@ -57,17 +57,17 @@ describe("CLI output", () => {
     }
   });
 
-  test("skill help lists subcommands", async () => {
-    // WHEN — running spwn skill --help
-    const result = await spwn("skill help")
-      .exec("skill --help")
+  test("get help lists subcommands", async () => {
+    // WHEN — running spwn get --help
+    const result = await spwn("get help")
+      .exec("get --help")
       .run();
 
-    // THEN — skill subcommands are listed
+    // THEN — get subcommands are listed
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /Available Commands:/);
-    for (const sub of ["list", "install", "remove"]) {
-      expectLine(result.output, new RegExp(`^\\s*${sub}\\s+`));
+    const out = stripAnsi(result.output);
+    for (const sub of ["install", "ls", "search", "rm"]) {
+      expect(out).toContain(sub);
     }
   });
 

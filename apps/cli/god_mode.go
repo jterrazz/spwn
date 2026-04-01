@@ -13,8 +13,8 @@ var godModeAllowed = map[string]bool{
 	"agent":       true,
 	"status":      true,
 	"architect":   true,
-	"observatory": true,
-	"skill":       true,
+	"dash": true,
+	"get":  true,
 	"help":        true,
 }
 

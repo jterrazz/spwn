@@ -6,12 +6,12 @@ import (
 	"os"
 
 	"spwn.sh/apps/cli/agent"
-	"spwn.sh/apps/cli/auth"
 	"spwn.sh/apps/cli/architect"
+	"spwn.sh/apps/cli/auth"
+	"spwn.sh/apps/cli/dash"
+	"spwn.sh/apps/cli/get"
 	"spwn.sh/apps/cli/msg"
-	"spwn.sh/apps/cli/observatory"
 	"spwn.sh/apps/cli/profile"
-	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
@@ -72,8 +72,8 @@ func init() {
 	rootCmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
-	rootCmd.AddCommand(observatory.Cmd)
-	rootCmd.AddCommand(skill.Cmd)
+	rootCmd.AddCommand(dash.Cmd)
+	rootCmd.AddCommand(get.Cmd)
 }
 
 // Execute runs the root command.
@@ -125,51 +125,52 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	// Quick Start
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Quick Start:"))
-	printHelpCmd(w, "spwn init", "First-time setup")
-	printHelpCmd(w, "spwn up --agent neo -w .", "Spawn a world with an agent")
+	printHelpCmd(w, "spwn architect start", "Start the world builder daemon")
+	printHelpCmd(w, "spwn agent new neo", "Create an agent")
+	printHelpCmd(w, "spwn up --agent neo -w .", "Spawn a world")
 	printHelpCmd(w, "spwn agent talk neo", "Talk to the agent")
+	printHelpCmd(w, "spwn dash open", "Open the visual dashboard")
 	fmt.Fprintln(w)
 
-	// World shortcuts
+	// Orchestration
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Orchestration:"))
+	printHelpCmd(w, "architect", "Your always-on world builder "+ui.Faint("(start, stop, status, connect)"))
+	printHelpCmd(w, "dash", "Visual dashboard "+ui.Faint("(start, open)"))
+	fmt.Fprintln(w)
+
+	// World
 	fmt.Fprintf(w, "  %s\n", ui.Strong("World:"))
-	printHelpCmd(w, "up", "Spawn a world "+ui.Faint("(alias: world)"))
+	printHelpCmd(w, "up", "Spawn a world")
 	printHelpCmd(w, "down <id>", "Destroy a world")
 	printHelpCmd(w, "ls", "List active worlds")
 	printHelpCmd(w, "logs <id>", "Stream agent output")
-	printHelpCmd(w, "attach <id>", "Open interactive shell")
-	printHelpCmd(w, "inspect <id>", "Show world details")
+	printHelpCmd(w, "attach <id>", "Interactive shell")
+	printHelpCmd(w, "inspect <id>", "World details and physics")
+	printHelpCmd(w, "snap", "Snapshots "+ui.Faint("(save, ls, restore, rm)"))
 	fmt.Fprintln(w)
 
-	// Command groups
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Agents & Profiles:"))
-	printHelpCmd(w, "agent", "Create and manage agents "+ui.Faint("(new, ls, rm, talk, fork, export)"))
-	printHelpCmd(w, "profile <name>", "View/edit agent profile "+ui.Faint("(purpose, traits, skills, journal)"))
-	printHelpCmd(w, "msg", "Agent messaging "+ui.Faint("(send, inbox, watch)"))
-	printHelpCmd(w, "snap", "World snapshots "+ui.Faint("(save, ls, restore, rm)"))
+	// Agent
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Agent:"))
+	printHelpCmd(w, "agent", "Lifecycle "+ui.Faint("(new, ls, rm, talk, inspect, fork, export)"))
+	printHelpCmd(w, "agent reflect <name>", "Promote journal patterns to playbooks")
+	printHelpCmd(w, "agent sleep <name>", "Consolidate and prune memory")
+	printHelpCmd(w, "profile <name>", "Character sheet — the passport, not the person")
+	printHelpCmd(w, "msg", "Messaging "+ui.Faint("(send, inbox, watch)"))
 	fmt.Fprintln(w)
 
-	// Platform
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Platform:"))
-	printHelpCmd(w, "architect", "Orchestration daemon "+ui.Faint("(start, stop, status, connect)"))
-	printHelpCmd(w, "observatory", "Visual dashboard")
-	printHelpCmd(w, "skill", "Manage agent skills "+ui.Faint("(list, install, remove)"))
+	// Marketplace
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Marketplace:"))
+	printHelpCmd(w, "get", "Install packages "+ui.Faint("(skill, world, pack, adapter)"))
 	fmt.Fprintln(w)
 
 	// System
 	fmt.Fprintf(w, "  %s\n", ui.Strong("System:"))
-	printHelpCmd(w, "init", "First-time setup")
-	printHelpCmd(w, "status", "Environment overview")
-	printHelpCmd(w, "auth", "Manage credentials "+ui.Faint("(login, logout, token)"))
-	printHelpCmd(w, "doctor", "Diagnose issues")
-	printHelpCmd(w, "upgrade", "Upgrade to latest version")
+	printHelpCmd(w, "init · status · auth · doctor · upgrade", "")
 	fmt.Fprintln(w)
 
 	// Flags
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Flags:"))
-	printHelpFlag(w, "--json", "Output as JSON")
-	printHelpFlag(w, "-q, --quiet", "Suppress output")
-	printHelpFlag(w, "-v, --verbose", "Debug info")
-	printHelpFlag(w, "--version", "Show version")
+	printHelpFlag(w, "--json · -q/--quiet · -v/--verbose · --version", "")
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "  %s\n", ui.Faint("Use \"spwn <command> --help\" for more information about a command."))

@@ -63,10 +63,6 @@ func profileHelp(cmd *cobra.Command, args []string) {
 				{"journal", "Session history"},
 				{"sessions", "Saved session state"},
 			}},
-			{Title: "Evolution", Commands: []ui.HelpEntry{
-				{"reflect", "Promote patterns to playbooks"},
-				{"sleep", "Consolidate and prune memory"},
-			}},
 			{Title: "Config", Commands: []ui.HelpEntry{
 				{"edit", "Open profile.yaml in $EDITOR"},
 				{"tier", "View/change tier"},
@@ -130,12 +126,6 @@ var Cmd = &cobra.Command{
 			return showOrSetEngine(cmd, name)
 		case "edit":
 			return editProfile(cmd, name)
-
-		// Evolution
-		case "reflect":
-			return runReflect(cmd, name)
-		case "sleep":
-			return runSleep(cmd, name)
 
 		default:
 			_ = rest
@@ -748,61 +738,4 @@ func editProfile(cmd *cobra.Command, name string) error {
 	c.Stderr = os.Stderr
 	return c.Run()
 }
-
-// ── reflect & sleep ─────────────────────────────────────────────────────────
-
-func runReflect(cmd *cobra.Command, name string) error {
-	if !agentExists(name) {
-		return agentNotFoundError(name)
-	}
-
-	s := newStepper(cmd)
-	s.Blank()
-	s.Start(fmt.Sprintf("Reflecting on agent %q...", name))
-
-	result, err := agentDomain.Reflect(name)
-	if err != nil {
-		return s.FailHint("Reflect failed", err,
-			fmt.Sprintf("Check that agent %q exists with \"spwn profile %s\"", name, name))
-	}
-
-	if result.Skipped {
-		s.Info("Skipped", result.Reason)
-		s.Blank()
-		return nil
-	}
-
-	s.Done("Entries analyzed", fmt.Sprintf("%d", result.EntriesAnalyzed))
-	s.Done("Completed", fmt.Sprintf("%d", result.CompletedTasks))
-	s.Done("Failed", fmt.Sprintf("%d", result.FailedTasks))
-	s.Done("Success rate", fmt.Sprintf("%.0f%%", result.SuccessRate*100))
-	s.Done("Written to", result.OutputPath)
-	s.Blank()
-
-	return nil
-}
-
-func runSleep(cmd *cobra.Command, name string) error {
-	if !agentExists(name) {
-		return agentNotFoundError(name)
-	}
-
-	s := newStepper(cmd)
-	s.Blank()
-	s.Start(fmt.Sprintf("Sleep cycle for agent %q...", name))
-
-	result, err := agentDomain.Sleep(name)
-	if err != nil {
-		return s.FailHint("Sleep failed", err,
-			fmt.Sprintf("Check that agent %q exists with \"spwn profile %s\"", name, name))
-	}
-
-	s.Done("Archived playbooks", fmt.Sprintf("%d", result.ArchivedPlaybooks))
-	s.Done("Archived knowledge", fmt.Sprintf("%d", result.ArchivedKnowledge))
-	s.Done("Pruned sessions", fmt.Sprintf("%d", result.PrunedSessions))
-	s.Blank()
-
-	return nil
-}
-
 

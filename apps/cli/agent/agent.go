@@ -42,12 +42,18 @@ func agentHelp(cmd *cobra.Command, args []string) {
 	ui.RenderGroupedHelp(w,
 		ui.Strong("⬡ agent")+" "+ui.Faint("— create and manage agents"),
 		[]ui.HelpGroup{
-			{Title: "Commands", Commands: []ui.HelpEntry{
+			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{"new <name>", "Create a new agent (interactive wizard)"},
 				{"ls", "List all agents"},
 				{"rm <name>", "Remove an agent"},
 				{"talk <name> [msg]", "Talk to a running agent"},
 				{"inspect <name>", "Show agent overview"},
+			}},
+			{Title: "Evolution", Commands: []ui.HelpEntry{
+				{"reflect <name>", "Promote journal patterns to playbooks"},
+				{"sleep <name>", "Consolidate and prune memory"},
+			}},
+			{Title: "Portability", Commands: []ui.HelpEntry{
 				{"fork <src> <dst>", "Clone an agent's profile"},
 				{"export <name>", "Export profile as tar.gz"},
 				{"import <path>", "Import profile from tar.gz"},
@@ -58,7 +64,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			}},
 		},
 		"spwn agent [command]",
-		"Use \"spwn agent <command> --help\" for more information.",
+		"Profile is the passport. Agent is the person.\n\n    Use \"spwn agent <command> --help\" for more information.",
 	)
 }
 
