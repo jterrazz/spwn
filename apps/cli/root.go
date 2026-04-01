@@ -152,8 +152,8 @@ func customHelp(cmd *cobra.Command, args []string) {
 	// Agent
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Agent:"))
 	printHelpCmd(w, "agent", "Lifecycle "+ui.Faint("(new, ls, rm, talk, inspect, fork, export)"))
-	printHelpCmd(w, "agent reflect <name>", "Promote journal patterns to playbooks")
-	printHelpCmd(w, "agent sleep <name>", "Consolidate and prune memory")
+	printHelpCmd(w, "agent dream <name>", "Analyze experience, discover patterns, promote playbooks")
+	printHelpCmd(w, "agent sleep <name>", "Shutdown — save state, consolidate, archive")
 	printHelpCmd(w, "profile <name>", "Character sheet — the passport, not the person")
 	printHelpCmd(w, "msg", "Messaging "+ui.Faint("(send, inbox, watch)"))
 	fmt.Fprintln(w)

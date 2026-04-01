@@ -1,20 +1,20 @@
 ---
-title: "spwn agent reflect"
-slug: "spwn-agent-reflect"
+title: "spwn agent dream"
+slug: "spwn-agent-dream"
 ---
 
-## spwn agent reflect
+## spwn agent dream
 
-Analyze journal and promote patterns to playbooks
+Analyze experience, discover patterns, promote playbooks
 
 ```
-spwn agent reflect <agent-name> [flags]
+spwn agent dream <agent-name> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for reflect
+  -h, --help   help for dream
 ```
 
 ### Options inherited from parent commands

@@ -41,7 +41,7 @@ describe("CLI output", () => {
 
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
-    for (const sub of ["init", "list", "inspect", "export", "reflect", "sleep", "fork", "talk"]) {
+    for (const sub of ["init", "list", "inspect", "export", "dream", "sleep", "fork", "talk"]) {
       expect(out).toContain(sub);
     }
   });

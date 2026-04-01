@@ -32,15 +32,15 @@ describe("agent evolution", () => {
     }
   });
 
-  test("reflect with no journal skips", async () => {
-    // WHEN — reflecting on an agent with no journal entries
-    const result = await spwn("reflect empty")
-      .exec("agent reflect neo")
+  test("dream with no journal skips", async () => {
+    // WHEN — dreaming on an agent with no journal entries
+    const result = await spwn("dream empty")
+      .exec("agent dream neo")
       .run();
 
     // THEN — exits successfully with structured skip message
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /→ Reflecting on agent "neo"\.\.\./);
+    expectLine(result.output, /→ Dreaming for agent "neo"\.\.\./);
     expectLine(result.output, /Skipped\s+no journal entries/);
   });
 
@@ -102,15 +102,15 @@ describe("agent evolution", () => {
     expectLine(inspectResult.output, /identity\/\s+default\.md/);
   });
 
-  test("reflect on non-existent agent skips gracefully", async () => {
-    // WHEN — reflecting on an agent that does not exist (no journal)
-    const result = await spwn("reflect missing")
-      .exec("agent reflect nonexistent")
+  test("dream on non-existent agent skips gracefully", async () => {
+    // WHEN — dreaming on an agent that does not exist (no journal)
+    const result = await spwn("dream missing")
+      .exec("agent dream nonexistent")
       .run();
 
     // THEN — exits successfully with skip message (no journal entries found)
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /→ Reflecting on agent "nonexistent"\.\.\./);
+    expectLine(result.output, /→ Dreaming for agent "nonexistent"\.\.\./);
     expectLine(result.output, /Skipped\s+no journal entries/);
   });
 
@@ -128,7 +128,7 @@ describe("agent evolution", () => {
     expectLine(result.output, /✓ Pruned sessions\s+0/);
   });
 
-  test("reflect with journal entries creates auto-reflexion.md", async () => {
+  test("dream with journal entries creates auto-reflexion.md", async () => {
     // GIVEN — an agent with journal entries
     const journalDir = join(home, "agents", "neo", "memory", "journal");
     writeFileSync(
@@ -140,9 +140,9 @@ describe("agent evolution", () => {
       "# Journal 2024-01-02\n## Session w-test-00002\n- Outcome: failure\n- Duration: 3m",
     );
 
-    // WHEN — reflecting
-    const result = await spwn("reflect with journal")
-      .exec("agent reflect neo")
+    // WHEN — dreaming
+    const result = await spwn("dream with journal")
+      .exec("agent dream neo")
       .run();
 
     // THEN — auto-reflexion.md is created in playbooks/
@@ -153,7 +153,7 @@ describe("agent evolution", () => {
     expectLine(result.output, /Entries analyzed\s+2/);
   });
 
-  test("reflect output includes success rate", async () => {
+  test("dream output includes success rate", async () => {
     // GIVEN — an agent with journal entries (1 success, 1 failure)
     const journalDir = join(home, "agents", "neo", "memory", "journal");
     writeFileSync(
@@ -165,9 +165,9 @@ describe("agent evolution", () => {
       "# Journal 2024-02-02\n## Session w-test-00011\n- Outcome: failure\n- Duration: 4m",
     );
 
-    // WHEN — reflecting
-    const result = await spwn("reflect success rate")
-      .exec("agent reflect neo")
+    // WHEN — dreaming
+    const result = await spwn("dream success rate")
+      .exec("agent dream neo")
       .run();
 
     // THEN — output contains success rate
@@ -213,9 +213,9 @@ describe("agent evolution", () => {
     expect(existsSync(freshPath)).toBe(true);
   });
 
-  // ── Deep verification: reflect file content ────────────────
+  // ── Deep verification: dream file content ────────────────
 
-  test("reflect auto-reflexion.md content references journal entries", async () => {
+  test("dream auto-reflexion.md content references journal entries", async () => {
     // GIVEN — an agent with multiple diverse journal entries
     const journalDir = join(home, "agents", "neo", "memory", "journal");
     writeFileSync(
@@ -231,9 +231,9 @@ describe("agent evolution", () => {
       "# Journal 2024-03-03\n## Session w-alpha-00003\n- Outcome: success\n- Duration: 15m\n- Task: fixed CI pipeline\n",
     );
 
-    // WHEN — reflecting
-    const result = await spwn("reflect content check")
-      .exec("agent reflect neo")
+    // WHEN — dreaming
+    const result = await spwn("dream content check")
+      .exec("agent dream neo")
       .run();
 
     // THEN — auto-reflexion.md is created
@@ -251,7 +251,7 @@ describe("agent evolution", () => {
     expectLine(result.output, /Entries analyzed\s+3/);
   });
 
-  test("reflect is idempotent — running twice overwrites cleanly", async () => {
+  test("dream is idempotent — running twice overwrites cleanly", async () => {
     // GIVEN — an agent with journal entries
     const journalDir = join(home, "agents", "neo", "memory", "journal");
     writeFileSync(
@@ -259,13 +259,13 @@ describe("agent evolution", () => {
       "# Journal 2024-04-01\n## Session w-test-00010\n- Outcome: success\n- Duration: 5m\n",
     );
 
-    // WHEN — reflecting twice
-    await spwn("reflect first").exec("agent reflect neo").run();
-    const result = await spwn("reflect second")
-      .exec("agent reflect neo")
+    // WHEN — dreaming twice
+    await spwn("reflect first").exec("agent dream neo").run();
+    const result = await spwn("dream second")
+      .exec("agent dream neo")
       .run();
 
-    // THEN — second reflect succeeds without error
+    // THEN — second dream succeeds without error
     expect(result.exitCode).toBe(0);
 
     // AND — only one auto-reflexion.md exists (not duplicated)
@@ -342,9 +342,9 @@ describe("agent evolution", () => {
     expectLine(result.output, /✓ Pruned sessions\s+\d+/);
   });
 
-  // ── Reflect + Sleep combined workflow ──────────────────────
+  // ── Dream + Sleep combined workflow ──────────────────────
 
-  test("reflect then sleep preserves auto-reflexion.md (it is fresh)", async () => {
+  test("dream then sleep preserves auto-reflexion.md (it is fresh)", async () => {
     // GIVEN — an agent with journal entries
     const journalDir = join(home, "agents", "neo", "memory", "journal");
     writeFileSync(
@@ -352,9 +352,9 @@ describe("agent evolution", () => {
       "# Journal 2024-05-01\n## Session w-test-00020\n- Outcome: success\n- Duration: 7m\n",
     );
 
-    // WHEN — reflecting to create auto-reflexion.md
-    const reflectResult = await spwn("reflect before sleep")
-      .exec("agent reflect neo")
+    // WHEN — dreaming to create auto-reflexion.md
+    const reflectResult = await spwn("dream before sleep")
+      .exec("agent dream neo")
       .run();
     expect(reflectResult.exitCode).toBe(0);
 
@@ -364,7 +364,7 @@ describe("agent evolution", () => {
     expect(existsSync(reflexionPath)).toBe(true);
 
     // AND — sleeping immediately after (auto-reflexion is fresh)
-    const sleepResult = await spwn("sleep after reflect")
+    const sleepResult = await spwn("sleep after dream")
       .exec("agent sleep neo")
       .run();
     expect(sleepResult.exitCode).toBe(0);

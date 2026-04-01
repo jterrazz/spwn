@@ -44,8 +44,8 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 - **Rivet**: Runtime normalization layer. One API across all agent runtimes. Event streaming, session persistence.
 
 ### Evolution
-- **Reflexion**: Review journal → promote successes to playbooks (auto-reflexion.md). `spwn agent reflect <name>`
-- **Sleep**: Archive stale files, prune old sessions. `spwn agent sleep <name>`
+- **Dream**: Analyze experience → discover patterns → promote successes to playbooks (auto-reflexion.md). `spwn agent dream <name>`
+- **Sleep**: Graceful shutdown — save state, consolidate, prune. `spwn agent sleep <name>`
 - **Forking**: Clone an agent from source to target. `spwn agent fork`
 
 ## CLI Commands
@@ -66,8 +66,8 @@ spwn agent new <name>                          # Create a new agent
 spwn agent ls                                  # List all agents
 spwn agent rm <name>                           # Remove an agent
 spwn agent talk <name> [message]               # Talk to a running agent
-spwn agent reflect <name>                      # Promote journal patterns to playbooks
-spwn agent sleep <name>                        # Consolidate and prune memory
+spwn agent dream <name>                        # Analyze experience, discover patterns, promote playbooks
+spwn agent sleep <name>                        # Shutdown — save state, consolidate, archive
 spwn agent fork <src> <dst>                    # Clone an agent
 spwn agent export <name>                       # Export agent as tar.gz
 spwn agent import <file>                       # Import agent from tar.gz

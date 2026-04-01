@@ -50,8 +50,8 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "inspect <name>", Desc: "Show agent overview"},
 			}},
 			{Title: "Evolution", Commands: []ui.HelpEntry{
-				{Name: "reflect <name>", Desc: "Promote journal patterns to playbooks"},
-				{Name: "sleep <name>", Desc: "Consolidate and prune memory"},
+				{Name: "dream <name>", Desc: "Analyze experience, discover patterns, promote playbooks"},
+				{Name: "sleep <name>", Desc: "Shutdown — save state, consolidate, archive"},
 			}},
 			{Title: "Portability", Commands: []ui.HelpEntry{
 				{Name: "fork <src> <dst>", Desc: "Clone an agent's profile"},

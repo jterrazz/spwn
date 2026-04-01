@@ -53,15 +53,15 @@ describe("error handling", () => {
     expect(result.exitCode).not.toBe(0);
   });
 
-  test("agent reflect non-existent agent skips gracefully", async () => {
-    // WHEN — reflecting on an agent that does not exist (no journal)
-    const result = await spwn("reflect missing")
-      .exec("agent reflect nonexistent")
+  test("agent dream non-existent agent skips gracefully", async () => {
+    // WHEN — dreaming on an agent that does not exist (no journal)
+    const result = await spwn("dream missing")
+      .exec("agent dream nonexistent")
       .run();
 
     // THEN — exits successfully with structured skip message
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /→ Reflecting on agent "nonexistent"\.\.\./);
+    expectLine(result.output, /→ Dreaming for agent "nonexistent"\.\.\./);
     expectLine(result.output, /Skipped\s+no journal entries/);
   });
 

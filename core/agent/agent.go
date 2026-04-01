@@ -131,11 +131,16 @@ func ListSessions(mindPath string) ([]Session, error) {
 
 // --- Evolution operations ---
 
-// Reflect analyzes the named agent's recent journal entries and promotes
+// Dream analyzes the named agent's recent journal entries and promotes
 // successful strategies into playbooks/auto-reflexion.md.
-func Reflect(name string) (*ReflexionResult, error) {
+func Dream(name string) (*ReflexionResult, error) {
 	mindPath := AgentDir(name)
-	return evolution.Reflect(mindPath)
+	return evolution.Dream(mindPath)
+}
+
+// Reflect is a backward-compatible alias for Dream.
+func Reflect(name string) (*ReflexionResult, error) {
+	return Dream(name)
 }
 
 // Sleep consolidates the named agent's raw experience into durable knowledge,

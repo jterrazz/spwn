@@ -37,7 +37,7 @@ const LOGS = [
   { time: "17:02:10", level: "warn", msg: "Agent atlas idle for >60m in w-ganymede-51003", source: "health" },
   { time: "17:05:33", level: "info", msg: "neo completed task — exit 0, 2m34s", source: "journal" },
   { time: "17:12:01", level: "info", msg: "morpheus delegated subtask to trinity", source: "msg" },
-  { time: "17:14:22", level: "info", msg: "Reflexion triggered for neo — 2 patterns promoted", source: "evolution" },
+  { time: "17:14:22", level: "info", msg: "Dream cycle triggered for neo — 2 patterns promoted", source: "evolution" },
 ];
 
 const LEVEL_COLOR: Record<string, string> = {
