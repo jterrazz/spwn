@@ -21,6 +21,16 @@ var Cmd = &cobra.Command{
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the Architect daemon",
+	Long: `Start the Architect daemon in a Docker container.
+
+The Architect runs the spwn binary inside a long-lived container with the
+host's Docker socket mounted (DooD — Docker-outside-of-Docker), allowing it
+to create and manage world containers as siblings. Channels (Telegram, Slack,
+etc.) connect here.
+
+The container mounts:
+  /var/run/docker.sock    Docker daemon access (sibling containers, not nested)
+  ~/.spwn/                Shared configuration and state`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		org, _ := universe.LoadOrg()
 		name := "default"

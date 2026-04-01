@@ -325,7 +325,23 @@ Multi-module Go monorepo with Ports and Adapters architecture. 8 port interfaces
 | Memory | How profiles persist | Filesystem (markdown) |
 | Store | How state is tracked | JSON file |
 | Tool | What agents can do | Built-in + MCP |
-| Skill | Reusable capabilities | Local files |
+|| Skill | Reusable capabilities | Local files |
+
+### Container Architecture: Docker-outside-of-Docker (DooD)
+
+spwn uses **DooD (Docker-outside-of-Docker)**, not DinD (Docker-in-Docker). The host's Docker daemon is shared via socket mount. All containers are **siblings** on the same daemon — no nesting, no privilege escalation, no performance overhead.
+
+```
+Host machine
+└── Docker daemon (/var/run/docker.sock)
+    ├── Architect container (always-on, socket-mounted)
+    ├── World containers (siblings, created by Architect)
+    └── Observatory container (sibling)
+```
+
+**Two modes of operation:**
+- **Local CLI (direct)** — `spwn up` calls Docker directly from your machine. No Architect container needed.
+- **Hosted Architect (containerized)** — `spwn architect start` launches the Architect in a long-lived container with the Docker socket mounted. It creates and manages world containers as siblings. Channels (Telegram, Slack, etc.) connect here.
 
 ### Project layout
 

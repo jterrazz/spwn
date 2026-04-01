@@ -1,0 +1,16 @@
+FROM debian:bookworm-slim
+
+# Install Docker CLI (not daemon — we use the host's daemon via socket mount, DooD)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl && \
+    curl -fsSL https://get.docker.com | sh && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy spwn binary
+COPY bin/spwn /usr/local/bin/spwn
+
+# Default config location
+ENV SPWN_HOME=/root/.spwn
+
+# The Architect listens for channel messages and manages worlds as sibling containers
+ENTRYPOINT ["spwn", "architect", "serve"]
