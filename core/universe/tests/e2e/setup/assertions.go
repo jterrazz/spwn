@@ -214,6 +214,14 @@ func (c *ContainerAssertion) FileContains(path, substring string) {
 	}
 }
 
+func (c *ContainerAssertion) FileNotContains(path, substring string) {
+	c.tc.T.Helper()
+	content := c.tc.ReadFileInContainer(c.containerID, path)
+	if strings.Contains(content, substring) {
+		c.tc.T.Fatalf("Expected %s NOT to contain %q, but it does", path, substring)
+	}
+}
+
 // --- MindAssertion ---
 
 type MindAssertion struct {

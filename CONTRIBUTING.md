@@ -75,17 +75,43 @@ func (r *MyRuntime) BaseImage() string { return "node:20" }
 
 ## Testing
 
+### Running Tests
+
+```bash
+# Unit tests — fast, no Docker required
+make test
+
+# Go E2E tests — requires Docker + test image
+make build-test-image   # build spwn-test:latest (once)
+make test-e2e           # run Go E2E suite
+
+# TypeScript E2E tests — requires built binary + Docker + test image
+make build              # build bin/spwn
+cd tests && npx vitest run
+
+# Type-check TypeScript tests (no execution)
+cd tests && npx tsc --noEmit
+
+# Lint all Go modules
+make lint
+```
+
+### Test Pyramid
+
+| Layer | Command | Docker? | Speed | What it tests |
+|-------|---------|---------|-------|---------------|
+| Unit | `make test` | No | Fast | Pure logic, parsers, helpers |
+| Go E2E | `make test-e2e` | Yes | Medium | Architect API, containers, state |
+| TS E2E | `cd tests && npx vitest run` | Yes | Slow | Full CLI binary, end-to-end |
+
+### Writing New Tests
+
 - **Spec-first**: write the test before the implementation
 - **Go unit tests**: `*_test.go` next to source. No Docker needed.
 - **Go E2E tests**: `core/universe/tests/e2e/`. Build tag `//go:build e2e`. Needs Docker.
 - **TypeScript E2E**: `tests/e2e/`. Runs against real `spwn` binary. Needs Docker.
 - **Output assertions**: use `expectLine()`, `expectTableHeader()` — not weak `toContain()`
-
-```bash
-make test               # Go unit tests (fast, no Docker)
-make test-e2e           # Go E2E tests (Docker required)
-cd tests && pnpm test   # TypeScript E2E (Docker required)
-```
+- See [tests/README.md](./tests/README.md) for full testing documentation and patterns
 
 ## Commit Messages
 

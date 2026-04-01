@@ -119,6 +119,76 @@ func TestGenerateNPCContext(t *testing.T) {
 	}
 }
 
+func TestGenerateGodContext_ContainsNewCLICommands(t *testing.T) {
+	ctx := GenerateAgentContext(AgentContextOpts{
+		AgentName: "architect",
+		Tier:      "god",
+		WorldID:   "w-test-99999",
+	})
+
+	// New CLI commands that MUST appear in god-tier AGENT.md
+	mustContain := []string{
+		"spwn ls",
+		"spwn down",
+		"spwn agent new",
+		"spwn agent ls",
+		"spwn agent rm",
+	}
+	for _, cmd := range mustContain {
+		if !strings.Contains(ctx, cmd) {
+			t.Errorf("God-tier AGENT.md missing new command %q", cmd)
+		}
+	}
+
+	// Old CLI commands that must NOT appear
+	mustNotContain := []string{
+		"spwn world list",
+		"spwn world destroy",
+		"spwn agent init",
+		"spwn agent list",
+		"spwn agent delete",
+	}
+	for _, cmd := range mustNotContain {
+		if strings.Contains(ctx, cmd) {
+			t.Errorf("God-tier AGENT.md still contains old command %q", cmd)
+		}
+	}
+}
+
+func TestGenerateGodContext_ContainsAllSections(t *testing.T) {
+	ctx := GenerateAgentContext(AgentContextOpts{
+		AgentName: "architect",
+		Tier:      "god",
+		WorldID:   "w-test-99999",
+		Elements:  []string{"bash", "git"},
+		CPU:       4,
+		Memory:    "8g",
+		Timeout:   "60m",
+	})
+
+	sections := []string{
+		"Architect",
+		"World Management",
+		"Agent Management",
+		"Messaging",
+		"Status",
+		"spwn up",
+		"spwn inspect",
+		"spwn logs",
+		"spwn agent talk",
+		"spwn agent inspect",
+		"spwn agent send",
+		"spwn agent inbox",
+		"spwn agent watch",
+		"spwn status",
+	}
+	for _, s := range sections {
+		if !strings.Contains(ctx, s) {
+			t.Errorf("God-tier AGENT.md missing section/command %q", s)
+		}
+	}
+}
+
 func TestGenerateCitizenContext_DefaultTier(t *testing.T) {
 	// Empty tier should default to citizen
 	ctx := GenerateAgentContext(AgentContextOpts{
