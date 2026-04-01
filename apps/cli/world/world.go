@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/core/agent"
 	"spwn.sh/core/gate"
 	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
@@ -153,6 +154,10 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 		agentName := ""
 		if !spawnNoAgent {
 			agentName = spawnAgent
+			// Auto-create the default agent on-demand (only when using the default name)
+			if agentName == "default" && !cmd.Flags().Changed("agent") {
+				agent.InitMind("default") // ignore error if already exists
+			}
 		}
 
 		// Build multi-agent list when --governor is used

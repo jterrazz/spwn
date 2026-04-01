@@ -155,7 +155,7 @@ func TestFork_AllLayers(t *testing.T) {
 	for _, layer := range []string{"identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "identity", "default.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "identity", "persona.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 
 	result, err := Fork("source-agent", "target-agent", nil)
@@ -170,7 +170,7 @@ func TestFork_AllLayers(t *testing.T) {
 	}
 
 	// Verify files exist in target
-	targetPersona := filepath.Join(home, "agents", "target-agent", "identity", "default.md")
+	targetPersona := filepath.Join(home, "agents", "target-agent", "identity", "persona.md")
 	if _, err := os.Stat(targetPersona); err != nil {
 		t.Errorf("target persona not found: %v", err)
 	}
@@ -189,7 +189,7 @@ func TestFork_SpecificLayers(t *testing.T) {
 	for _, layer := range []string{"identity", "skills", "memory/knowledge"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "identity", "default.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "identity", "persona.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "memory", "knowledge", "facts.md"), []byte("# Facts"), 0644)
 
@@ -200,7 +200,7 @@ func TestFork_SpecificLayers(t *testing.T) {
 	}
 
 	// Verify identity was copied
-	targetPersona := filepath.Join(home, "agents", "target-agent", "identity", "default.md")
+	targetPersona := filepath.Join(home, "agents", "target-agent", "identity", "persona.md")
 	if _, err := os.Stat(targetPersona); err != nil {
 		t.Errorf("target persona not found: %v", err)
 	}

@@ -67,6 +67,6 @@ func init() {
 	UpCmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime")
 
 	// Copy flags for logs
-	LogsTopCmd.Flags().BoolVar(&logsNoFollow, "no-follow", false, "Print current logs and exit")
+	LogsTopCmd.Flags().BoolVarP(&logsFollow, "follow", "f", false, "Follow log output")
 	LogsTopCmd.Flags().IntVarP(&logsTail, "n", "n", 100, "Number of lines to show")
 }

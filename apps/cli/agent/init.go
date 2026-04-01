@@ -42,7 +42,7 @@ provided, a random name is picked from a curated dictionary.`,
 		}
 
 		s.Done("Created agent", name)
-		s.Done("Created persona", "default.md")
+		s.Done("Created persona", "persona.md")
 
 		s.Blank()
 		s.Success(fmt.Sprintf("Spawn with: spwn up --agent %s", name))
