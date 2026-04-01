@@ -23,6 +23,9 @@ describe("agent --npc", () => {
 
     // THEN — exits with error about required world flag
     expect(result.exitCode).not.toBe(0);
+    // AND — output indicates the --world flag is required (no stack traces)
+    expect(stripAnsi(result.output)).not.toContain("TypeError");
+    expect(stripAnsi(result.output)).not.toContain("ReferenceError");
   });
 
   test("npc dispatches task in world", () => {
@@ -45,8 +48,9 @@ describe("agent --npc", () => {
       30_000,
     );
 
-    // THEN — succeeds
+    // THEN — succeeds and produces output
     expect(npcResult.exitCode).toBe(0);
+    expect(npcResult.output.length).toBeGreaterThan(0);
 
     // AND — container is still running after NPC
     ctx.universe(id).toBeRunning();

@@ -90,4 +90,21 @@ describe("world workspace persistence", () => {
     const mockOutput = ctx.universe(id).readFile("/workspace/mock-output.txt");
     expect(mockOutput).toContain("mock-claude was here");
   });
+
+  test("spawn with non-existent workspace path fails gracefully", () => {
+    // GIVEN — an initialized context
+    ctx = createTestContext();
+    ctx.spwn(["init"]);
+
+    // WHEN — spawning with a workspace path that doesn't exist
+    const result = ctx.spwn(
+      ["world", "--agent", "neo", "-w", "/tmp/nonexistent-path-12345"],
+      60_000,
+    );
+
+    // THEN — exits with error (no stack trace)
+    expect(result.exitCode).not.toBe(0);
+    expect(result.output).not.toContain("TypeError");
+    expect(result.output).not.toContain("FATAL");
+  });
 });

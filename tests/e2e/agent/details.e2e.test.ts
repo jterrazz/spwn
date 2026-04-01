@@ -45,6 +45,7 @@ describe("agent detail commands", () => {
   test("mind on non-existent agent fails", async () => {
     const result = await spwn("mind missing").exec("agent mind ghost").run();
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).toContain("ghost");
   });
 
   // ── stats command ─────────────────────────────────────────
@@ -62,6 +63,7 @@ describe("agent detail commands", () => {
   test("stats on non-existent agent fails", async () => {
     const result = await spwn("stats missing").exec("agent stats ghost").run();
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).toContain("ghost");
   });
 
   // ── journal command ───────────────────────────────────────
@@ -77,6 +79,7 @@ describe("agent detail commands", () => {
   test("journal on non-existent agent fails", async () => {
     const result = await spwn("journal missing").exec("agent journal ghost").run();
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).toContain("ghost");
   });
 
   // ── sessions command ──────────────────────────────────────
@@ -92,6 +95,7 @@ describe("agent detail commands", () => {
   test("sessions on non-existent agent fails", async () => {
     const result = await spwn("sessions missing").exec("agent sessions ghost").run();
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).toContain("ghost");
   });
 
   // ── doctor command ────────────────────────────────────────

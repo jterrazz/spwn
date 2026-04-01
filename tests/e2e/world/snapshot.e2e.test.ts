@@ -103,6 +103,7 @@ describe("world snapshots", () => {
     ctx = createTestContext();
     const result = ctx.spwn(["world", "snapshot", "w-nonexistent-00000"]);
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).toContain("w-nonexistent-00000");
   });
 
   test("snapshots empty list", () => {

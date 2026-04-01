@@ -196,6 +196,7 @@ describe("agent messaging", () => {
       "hello",
     ]);
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).not.toContain("TypeError");
   });
 
   test("send without --from fails", () => {
@@ -212,6 +213,7 @@ describe("agent messaging", () => {
       "missing from",
     ]);
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).not.toContain("TypeError");
   });
 
   test("inbox on non-existent agent fails", () => {
@@ -219,6 +221,7 @@ describe("agent messaging", () => {
     ctx.spwn(["init"]);
     const result = ctx.spwn(["agent", "inbox", "nonexistent"]);
     expect(result.exitCode).not.toBe(0);
+    expect(stripAnsi(result.output)).not.toContain("TypeError");
   });
 
   test("/world/inbox directory exists after spawn", () => {

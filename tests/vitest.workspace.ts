@@ -7,7 +7,7 @@ export default defineWorkspace([
       include: [
         "e2e/cli/**/*.e2e.test.ts",
         "e2e/init/**/*.e2e.test.ts",
-        "e2e/runtime/**/*.e2e.test.ts",
+        "e2e/errors/**/*.e2e.test.ts",
         "e2e/marketplace/**/*.e2e.test.ts",
         "e2e/dashboard/**/*.e2e.test.ts",
         "e2e/status/**/*.e2e.test.ts",
@@ -25,7 +25,6 @@ export default defineWorkspace([
         "e2e/gate/**/*.e2e.test.ts",
         "e2e/config/**/*.e2e.test.ts",
         "e2e/state/**/*.e2e.test.ts",
-        "e2e/errors/**/*.e2e.test.ts",
         "e2e/messaging/**/*.e2e.test.ts",
       ],
     },

@@ -2,6 +2,59 @@ import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { expect } from "vitest";
 
+/**
+ * Docker inspect JSON structure (subset of fields we care about).
+ * Used for type-safe access to container metadata.
+ */
+export interface DockerInspectData {
+  Id?: string;
+  State?: {
+    Status?: string;
+    Running?: boolean;
+    Pid?: number;
+    ExitCode?: number;
+    StartedAt?: string;
+    FinishedAt?: string;
+  };
+  HostConfig?: {
+    Memory?: number;
+    NanoCpus?: number;
+    CpuQuota?: number;
+    CpuPeriod?: number;
+    PidsLimit?: number;
+    NetworkMode?: string;
+    Binds?: string[];
+  };
+  Config?: {
+    Image?: string;
+    Env?: string[];
+    Cmd?: string[];
+    WorkingDir?: string;
+  };
+  Mounts?: Array<{
+    Type?: string;
+    Source?: string;
+    Destination?: string;
+    Mode?: string;
+    RW?: boolean;
+  }>;
+}
+
+/**
+ * Structured result from the mock agent probe inside a container.
+ */
+export interface AgentProbeData {
+  mind_exists?: boolean;
+  mind_identity?: boolean;
+  physics_exists?: boolean;
+  physics_content?: string;
+  faculties_exists?: boolean;
+  faculties_content?: string;
+  workspace_exists?: boolean;
+  session_id?: string;
+  resume?: boolean;
+}
+
 export class AgentProbeAssertion {
   constructor(private probe: Record<string, unknown>) {}
 
@@ -195,40 +248,44 @@ export class UniverseAssertion {
     }).trim();
   }
 
-  /** Get docker inspect data */
-  inspect(): Record<string, unknown> {
+  /**
+   * Get the full Docker inspect data for the container.
+   * Returns a typed DockerInspectData object for safe access.
+   */
+  inspect(): DockerInspectData {
     const cid = this.requireContainerId();
     const raw = execSync(`docker inspect ${cid}`, {
       encoding: "utf-8",
       timeout: 5000,
     });
-    return (JSON.parse(raw) as Record<string, unknown>[])[0];
+    const parsed = JSON.parse(raw) as DockerInspectData[];
+    return parsed[0];
   }
 
   /** Assert network mode */
   toHaveNetwork(mode: string): this {
-    const data = this.inspect() as { HostConfig?: { NetworkMode?: string } };
+    const data = this.inspect();
     expect(data.HostConfig?.NetworkMode).toContain(mode);
     return this;
   }
 
   /** Assert memory limit */
   toHaveMemoryLimit(bytes: number): this {
-    const data = this.inspect() as { HostConfig?: { Memory?: number } };
+    const data = this.inspect();
     expect(data.HostConfig?.Memory).toBe(bytes);
     return this;
   }
 
   /** Assert CPU limit (in nanocpus) */
   toHaveCpuLimit(nanoCpus: number): this {
-    const data = this.inspect() as { HostConfig?: { NanoCpus?: number } };
+    const data = this.inspect();
     expect(data.HostConfig?.NanoCpus).toBe(nanoCpus);
     return this;
   }
 
   /** Assert pids limit */
   toHavePidsLimit(limit: number): this {
-    const data = this.inspect() as { HostConfig?: { PidsLimit?: number } };
+    const data = this.inspect();
     expect(data.HostConfig?.PidsLimit).toBe(limit);
     return this;
   }
