@@ -289,12 +289,12 @@ func (b *AgentBuilder) Init(name string) *AgentAssertionChain {
 	return &AgentAssertionChain{tc: b.tc, agentName: name}
 }
 
-// InitExpectError expects agent init to fail.
+// InitExpectError expects agent new to fail.
 func (b *AgentBuilder) InitExpectError(name, substring string) {
 	b.tc.T.Helper()
 	_, err := agent.InitMind(name)
 	if err == nil {
-		b.tc.T.Fatalf("Expected agent init to fail with %q, but it succeeded", substring)
+		b.tc.T.Fatalf("Expected agent new to fail with %q, but it succeeded", substring)
 	}
 	if !strings.Contains(err.Error(), substring) {
 		b.tc.T.Fatalf("Expected error containing %q, got: %v", substring, err)

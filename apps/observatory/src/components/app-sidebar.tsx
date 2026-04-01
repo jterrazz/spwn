@@ -124,17 +124,18 @@ export function AppSidebar({ worlds, driftingAgents, currentWorldId }: AppSideba
             {worlds.map((world) => (
               <Collapsible key={world.id} defaultOpen>
                 <SidebarMenuItem>
-                  <CollapsibleTrigger
-                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs font-mono hover:bg-sidebar-accent transition-colors"
-                  >
-                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[world.status]}`} />
-                    <span className={pathname.startsWith(`/world/${world.id}`) ? "text-foreground" : "text-muted-foreground/70"}>
-                      {extractName(world.id)}
-                    </span>
-                    <span className="ml-auto text-[10px] text-muted-foreground/40 font-mono">
-                      {world.agents.length}
-                    </span>
-                  </CollapsibleTrigger>
+                  <div className="flex w-full items-center">
+                    <a
+                      href={`/world/${world.id}`}
+                      className={`flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-xs font-mono hover:bg-sidebar-accent transition-colors ${pathname === `/world/${world.id}` ? "bg-sidebar-accent text-foreground" : "text-muted-foreground/70"}`}
+                    >
+                      <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[world.status]}`} />
+                      <span>{extractName(world.id)}</span>
+                    </a>
+                    <CollapsibleTrigger className="px-1.5 py-1 text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                      ⌄
+                    </CollapsibleTrigger>
+                  </div>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {world.agents.map((agent) => (

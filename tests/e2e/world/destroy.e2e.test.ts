@@ -6,7 +6,7 @@ import {
 } from "../../setup/spwn.specification.js";
 import { expectLine, expectNoLine } from "../../setup/output-helpers.js";
 
-describe("world destroy", () => {
+describe("down", () => {
   let ctx: TestContext;
 
   afterEach(() => {
@@ -28,7 +28,7 @@ describe("world destroy", () => {
     ctx.universe(id).toBeRunning();
 
     // WHEN — destroying it
-    const destroyResult = ctx.spwn(["world", "destroy", id], 30_000);
+    const destroyResult = ctx.spwn(["down", id], 30_000);
 
     // THEN — exits successfully with structured status lines
     expect(destroyResult.exitCode).toBe(0);
@@ -55,10 +55,10 @@ describe("world destroy", () => {
     // Verify it exists in state before destroy
     ctx.state().hasWorld(id);
 
-    ctx.spwn(["world", "destroy", id], 30_000);
+    ctx.spwn(["down", id], 30_000);
 
     // WHEN — listing worlds
-    const listResult = ctx.spwn(["world", "list"]);
+    const listResult = ctx.spwn(["ls"]);
 
     // THEN — the destroyed world is gone from list
     expect(listResult.exitCode).toBe(0);
@@ -75,7 +75,7 @@ describe("world destroy", () => {
 
     // WHEN — destroying a world that does not exist
     const result = ctx.spwn(
-      ["world", "destroy", "w-nonexistent-00000"],
+      ["down", "w-nonexistent-00000"],
       30_000,
     );
 

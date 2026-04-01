@@ -185,8 +185,8 @@ The agent's identity is a directory of markdown files — human-readable, versio
 
 Agents evolve through three mechanisms:
 
-- **Reflexion** (`spwn profile <name> reflect`) — Reviews journal entries. Strategies that worked get promoted to playbooks. Failed ones are discarded. Natural selection for behavior.
-- **Sleep** (`spwn profile <name> sleep`) — Archives stale files, prunes old sessions. Raw experience consolidates into durable knowledge.
+- **Reflexion** (`spwn agent reflect <name>`) — Reviews journal entries. Strategies that worked get promoted to playbooks. Failed ones are discarded. Natural selection for behavior.
+- **Sleep** (`spwn agent sleep <name>`) — Archives stale files, prunes old sessions. Raw experience consolidates into durable knowledge.
 - **Forking** (`spwn agent fork`) — Clones an agent. Run copies in different environments, keep the branch that performs best.
 
 ### Physics

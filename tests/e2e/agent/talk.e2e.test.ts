@@ -82,7 +82,7 @@ describe("agent talk", () => {
     expectLine(result.output, /agent "orphan" is not in any active world/);
   });
 
-  test("agent list shows world association after spawn", () => {
+  test("agent ls shows world association after spawn", () => {
     // GIVEN — a world with an agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -93,7 +93,7 @@ describe("agent talk", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     // WHEN — listing agents
-    const listResult = ctx.spwn(["agent", "list"]);
+    const listResult = ctx.spwn(["agent", "ls"]);
 
     // THEN — agent shows its world and status in table
     expect(listResult.exitCode).toBe(0);
@@ -101,7 +101,7 @@ describe("agent talk", () => {
     expectTableRow(listResult.output, ["neo", id]);
   });
 
-  test("world list shows agent names", () => {
+  test("ls shows agent names", () => {
     // GIVEN — a world with an agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -111,7 +111,7 @@ describe("agent talk", () => {
     );
 
     // WHEN — listing worlds
-    const listResult = ctx.spwn(["world", "list"]);
+    const listResult = ctx.spwn(["ls"]);
 
     // THEN — shows agent name in AGENTS column
     expect(listResult.exitCode).toBe(0);
@@ -132,7 +132,7 @@ describe("agent talk", () => {
     const id1 = parseWorldId(spawn1.output)!;
 
     // Destroy first world
-    ctx.spwn(["world", "destroy", id1]);
+    ctx.spwn(["down", id1]);
 
     // Spawn second world with same agent
     const spawn2 = ctx.spwn(
@@ -162,7 +162,7 @@ describe("agent talk", () => {
     expectLine(result.output, /agent "ghost" not found/);
   });
 
-  test("agent list shows unattached after destroy", () => {
+  test("agent ls shows unattached after destroy", () => {
     // GIVEN — an agent was in a world, then world destroyed
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -173,14 +173,14 @@ describe("agent talk", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     // Verify attached first
-    const listBefore = ctx.spwn(["agent", "list"]);
+    const listBefore = ctx.spwn(["agent", "ls"]);
     expectTableRow(listBefore.output, [id]);
 
     // Destroy
-    ctx.spwn(["world", "destroy", id]);
+    ctx.spwn(["down", id]);
 
     // WHEN — listing agents after destroy
-    const listAfter = ctx.spwn(["agent", "list"]);
+    const listAfter = ctx.spwn(["agent", "ls"]);
 
     // THEN — agent still exists but is unattached
     expectTableRow(listAfter.output, ["neo", "unattached"]);

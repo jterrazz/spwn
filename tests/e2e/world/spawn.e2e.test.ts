@@ -144,7 +144,7 @@ describe("world spawn", () => {
 
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /✗ Spawn failed/);
-    expectLine(result.output, /spwn agent init ghost/);
+    expectLine(result.output, /spwn agent new ghost/);
     expectNoLine(result.output, /Available Commands:/);
   });
 

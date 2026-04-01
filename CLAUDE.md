@@ -44,8 +44,8 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 - **Rivet**: Runtime normalization layer. One API across all agent runtimes. Event streaming, session persistence.
 
 ### Evolution
-- **Reflexion**: Review journal → promote successes to playbooks (auto-reflexion.md). `spwn profile <name> reflect`
-- **Sleep**: Archive stale files, prune old sessions. `spwn profile <name> sleep`
+- **Reflexion**: Review journal → promote successes to playbooks (auto-reflexion.md). `spwn agent reflect <name>`
+- **Sleep**: Archive stale files, prune old sessions. `spwn agent sleep <name>`
 - **Forking**: Clone an agent from source to target. `spwn agent fork`
 
 ## CLI Commands
