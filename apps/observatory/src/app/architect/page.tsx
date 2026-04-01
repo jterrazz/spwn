@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MOCK_WORLDS } from "@/lib/mock-data";
+import type { World } from "@/lib/mock-data";
 
 const CHANNELS = [
   { type: "cli", status: "connected", label: "CLI", icon: "⬡" },
@@ -49,9 +50,19 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
 
 export default function ArchitectPage() {
   const [logFilter, setLogFilter] = useState<string>("all");
+  const [worlds, setWorlds] = useState<World[]>(MOCK_WORLDS);
 
-  const totalAgents = MOCK_WORLDS.reduce((n, w) => n + w.agents.length, 0);
-  const running = MOCK_WORLDS.filter((w) => w.status === "running").length;
+  useEffect(() => {
+    fetch("/api/worlds")
+      .then((r) => r.json())
+      .then((data: World[]) => {
+        if (data && data.length > 0) setWorlds(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const totalAgents = worlds.reduce((n, w) => n + w.agents.length, 0);
+  const running = worlds.filter((w) => w.status === "running").length;
   const connectedChannels = CHANNELS.filter((c) => c.status === "connected").length;
 
   const filteredLogs = logFilter === "all"
@@ -86,7 +97,7 @@ export default function ArchitectPage() {
       {/* Stats */}
       <div className="flex gap-4 flex-wrap">
         <StatCard label="Status" value="Online" accent="text-green-400" />
-        <StatCard label="Worlds" value={String(MOCK_WORLDS.length)} sub={`${running} running`} />
+        <StatCard label="Worlds" value={String(worlds.length)} sub={`${running} running`} />
         <StatCard label="Agents" value={String(totalAgents)} sub="across all worlds" />
         <StatCard label="Channels" value={`${connectedChannels}/${CHANNELS.length}`} sub="connected" />
       </div>

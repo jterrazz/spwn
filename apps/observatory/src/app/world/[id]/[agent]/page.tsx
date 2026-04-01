@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { MOCK_WORLDS, MOCK_PROFILES, MOCK_MESSAGES } from "@/lib/mock-data";
-import type { AgentProfile, AgentMessage } from "@/lib/mock-data";
+import type { AgentProfile, AgentMessage, World } from "@/lib/mock-data";
 import {
   IconBrain,
   IconMessageFilled,
@@ -38,16 +38,6 @@ const TIER_LABEL: Record<string, string> = {
   npc: "NPC",
 };
 
-// Mock profile layers
-const MOCK_MIND = {
-  identity: ["persona.md"],
-  skills: ["code-review.md", "testing.md"],
-  "memory/knowledge": ["project-structure.md", "api-patterns.md"],
-  "memory/playbooks": ["delegate-subtask.md"],
-  "memory/journal": ["2026-03-31_w-titan.md", "2026-04-01_w-titan.md"],
-  sessions: ["w-titan-84721.json"],
-};
-
 // Mock conversation
 const INITIAL_MESSAGES: Message[] = [
   {
@@ -70,9 +60,27 @@ export default function AgentPage() {
   const worldId = params.id as string;
   const agentName = params.agent as string;
 
-  const world = MOCK_WORLDS.find((w) => w.id === worldId);
+  const [world, setWorld] = useState<World | null>(null);
+  const [profile, setProfile] = useState<AgentProfile | null>(null);
+  const [mindTree, setMindTree] = useState<Record<string, string[]>>({});
+  const [loading, setLoading] = useState(true);
+
+  // Fetch world + agent data from API
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/worlds").then((r) => r.json()).catch(() => MOCK_WORLDS),
+      fetch(`/api/agents/${agentName}`).then((r) => r.ok ? r.json() : null).catch(() => null),
+      fetch(`/api/agents/${agentName}/mind`).then((r) => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([worlds, agentProfile, tree]) => {
+      const found = (worlds as World[]).find((w) => w.id === worldId);
+      setWorld(found ?? MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
+      setProfile(agentProfile ?? MOCK_PROFILES[agentName] ?? null);
+      setMindTree(tree ?? {});
+      setLoading(false);
+    });
+  }, [worldId, agentName]);
+
   const agent = world?.agents.find((a) => a.name === agentName);
-  const profile = MOCK_PROFILES[agentName];
   const agentMessages = MOCK_MESSAGES.filter(
     (m) => m.from === agentName || m.to === agentName
   );
@@ -119,6 +127,10 @@ export default function AgentPage() {
       setIsTyping(false);
     }, 1500);
   };
+
+  if (loading) {
+    return <div className="p-8 text-muted-foreground/30 animate-pulse">Loading agent...</div>;
+  }
 
   if (!world || !agent) {
     return <div className="p-8 text-muted-foreground/50">Agent not found</div>;
@@ -290,7 +302,7 @@ export default function AgentPage() {
 
         {activeTab === "mind" && (
           <div className="flex-1 overflow-y-auto px-6 py-6">
-            <MindView />
+            <MindView mindTree={mindTree} />
           </div>
         )}
 
@@ -343,20 +355,20 @@ export default function AgentPage() {
             <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Stats</h2>
             <div className="grid grid-cols-2 gap-2">
               <div className="glass-subtle p-3 text-center">
-                <p className="text-lg font-heading text-foreground/80">14</p>
-                <p className="text-[9px] text-muted-foreground/35 uppercase">Sessions</p>
+                <p className="text-lg font-heading text-foreground/80">{Object.values(mindTree).reduce((n, f) => n + f.length, 0) || 14}</p>
+                <p className="text-[9px] text-muted-foreground/35 uppercase">Files</p>
               </div>
               <div className="glass-subtle p-3 text-center">
-                <p className="text-lg font-heading text-foreground/80">2h</p>
-                <p className="text-[9px] text-muted-foreground/35 uppercase">Total time</p>
+                <p className="text-lg font-heading text-foreground/80">{Object.keys(mindTree).filter(k => (mindTree[k]?.length ?? 0) > 0).length || 6}</p>
+                <p className="text-[9px] text-muted-foreground/35 uppercase">Layers</p>
               </div>
               <div className="glass-subtle p-3 text-center">
-                <p className="text-lg font-heading text-foreground/80">91%</p>
-                <p className="text-[9px] text-muted-foreground/35 uppercase">Success</p>
+                <p className="text-lg font-heading text-foreground/80">{profile?.journal.length ?? 0}</p>
+                <p className="text-[9px] text-muted-foreground/35 uppercase">Journal</p>
               </div>
               <div className="glass-subtle p-3 text-center">
-                <p className="text-lg font-heading text-foreground/80">3</p>
-                <p className="text-[9px] text-muted-foreground/35 uppercase">Reflections</p>
+                <p className="text-lg font-heading text-foreground/80">{profile?.bonds.length ?? 0}</p>
+                <p className="text-[9px] text-muted-foreground/35 uppercase">Bonds</p>
               </div>
             </div>
           </div>
@@ -501,11 +513,23 @@ function ProfileView({ profile }: { profile: AgentProfile }) {
 }
 
 /* ── Files View Component ── */
-function MindView() {
+function MindView({ mindTree }: { mindTree: Record<string, string[]> }) {
+  // Fallback to mock mind data if no real data
+  const data = Object.keys(mindTree).length > 0
+    ? mindTree
+    : {
+        identity: ["persona.md"],
+        skills: ["code-review.md", "testing.md"],
+        "memory/knowledge": ["project-structure.md", "api-patterns.md"],
+        "memory/playbooks": ["delegate-subtask.md"],
+        "memory/journal": ["2026-03-31_w-titan.md", "2026-04-01_w-titan.md"],
+        sessions: ["w-titan-84721.json"],
+      };
+
   return (
     <div className="space-y-1 max-w-lg">
       <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Profile Layers</h2>
-      {Object.entries(MOCK_MIND).map(([layer, files]) => (
+      {Object.entries(data).map(([layer, files]) => (
         <div key={layer} className="glass-subtle px-3 py-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono text-foreground/60">{layer}/</span>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
-import { MOCK_WORLDS, AVAILABLE_CONFIGS, MOCK_LIMBO } from "@/lib/mock-data";
+import { MOCK_WORLDS, AVAILABLE_CONFIGS } from "@/lib/mock-data";
 import { IconPlus, IconRocket, IconX } from "@tabler/icons-react";
 
 export interface World {
@@ -23,7 +23,18 @@ export default function UniverseMapPage() {
   const router = useRouter();
 
   useEffect(() => {
-    setWorlds(MOCK_WORLDS);
+    fetch("/api/worlds")
+      .then((r) => r.json())
+      .then((data: World[]) => {
+        if (data && data.length > 0) {
+          setWorlds(data);
+        } else {
+          setWorlds(MOCK_WORLDS);
+        }
+      })
+      .catch(() => {
+        setWorlds(MOCK_WORLDS);
+      });
   }, []);
 
   useEffect(() => {
