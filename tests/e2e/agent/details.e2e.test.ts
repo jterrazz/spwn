@@ -22,7 +22,7 @@ describe("agent detail commands", () => {
 
   test("mind shows Mind directory tree", async () => {
     // GIVEN — an agent exists
-    await spwn("create").exec("agent init neo").run();
+    await spwn("create").exec("agent new neo").run();
 
     // WHEN — showing mind
     const result = await spwn("mind").exec("agent mind neo").run();
@@ -35,7 +35,7 @@ describe("agent detail commands", () => {
   });
 
   test("mind shows empty layers", async () => {
-    await spwn("create").exec("agent init neo").run();
+    await spwn("create").exec("agent new neo").run();
     const result = await spwn("mind").exec("agent mind neo").run();
 
     expect(result.exitCode).toBe(0);
@@ -50,7 +50,7 @@ describe("agent detail commands", () => {
   // ── stats command ─────────────────────────────────────────
 
   test("stats shows agent overview", async () => {
-    await spwn("create").exec("agent init neo").run();
+    await spwn("create").exec("agent new neo").run();
     const result = await spwn("stats").exec("agent stats neo").run();
 
     expect(result.exitCode).toBe(0);
@@ -67,7 +67,7 @@ describe("agent detail commands", () => {
   // ── journal command ───────────────────────────────────────
 
   test("journal on fresh agent shows no entries", async () => {
-    await spwn("create").exec("agent init neo").run();
+    await spwn("create").exec("agent new neo").run();
     const result = await spwn("journal").exec("agent journal neo").run();
 
     expect(result.exitCode).toBe(0);
@@ -82,7 +82,7 @@ describe("agent detail commands", () => {
   // ── sessions command ──────────────────────────────────────
 
   test("sessions on fresh agent shows no sessions", async () => {
-    await spwn("create").exec("agent init neo").run();
+    await spwn("create").exec("agent new neo").run();
     const result = await spwn("sessions").exec("agent sessions neo").run();
 
     expect(result.exitCode).toBe(0);

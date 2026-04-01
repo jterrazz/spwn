@@ -29,7 +29,7 @@ var snapshotCmd = &cobra.Command{
 		s.Start("Saving snapshot...")
 		tag, err := arc.Snapshot(context.Background(), worldID, snapshotName)
 		if err != nil {
-			return s.FailHint("Snapshot failed", err, "Check that the world is running with \"spwn world list\"")
+			return s.FailHint("Snapshot failed", err, "Check that the world is running with \"spwn ls\"")
 		}
 
 		s.Done("Saved snapshot", tag)

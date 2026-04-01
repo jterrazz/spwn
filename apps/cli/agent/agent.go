@@ -97,7 +97,7 @@ after the world is destroyed.`,
 			if worldID == "" {
 				s.Blank()
 				return s.FailHint("NPC requires --world", fmt.Errorf("no world specified"),
-					"Run \"spwn world list\" to see active worlds")
+					"Run \"spwn ls\" to see active worlds")
 			}
 			arc, err := universe.NewArchitectFromEnv()
 			if err != nil {

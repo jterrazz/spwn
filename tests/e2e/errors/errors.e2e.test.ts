@@ -94,7 +94,7 @@ describe("error handling", () => {
     expectLine(result.output, /✗ Export failed\s+agent "nonexistent" not found/);
   });
 
-  test("world logs for non-existent world", async () => {
+  test("logs for non-existent world", async () => {
     // WHEN — fetching logs for a world that does not exist
     const result = await spwn("logs missing")
       .exec("logs w-nonexistent-00000")
