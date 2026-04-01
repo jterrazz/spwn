@@ -38,7 +38,7 @@ var exportCmd = &cobra.Command{
 		archivePath, err := agentDomain.ExportMind(name, exportOutput, exportExclude)
 		if err != nil {
 			return s.FailHint("Export failed", err,
-				fmt.Sprintf("Check that agent %q exists with \"spwn agent list\"", name))
+				fmt.Sprintf("Check that agent %q exists with \"spwn agent ls\"", name))
 		}
 
 		s.Done("Exported", archivePath)

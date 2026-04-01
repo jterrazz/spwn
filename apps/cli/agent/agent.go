@@ -142,7 +142,7 @@ after the world is destroyed.`,
 			if len(worlds) == 0 {
 				s.Blank()
 				return s.FailHint("No active worlds", fmt.Errorf("nothing to spawn into"),
-					"Run \"spwn world -w .\" to create a world first")
+					"Run \"spwn up -w .\" to create a world first")
 			}
 			if len(worlds) > 1 {
 				s.Blank()

@@ -196,7 +196,7 @@ func TestStepper_Start_QuietMode_Suppressed(t *testing.T) {
 
 func TestStepper_FailHint_ShowsHint(t *testing.T) {
 	s, buf := newTestStepper(ModeNormal)
-	err := s.FailHint("Agent failed", errors.New("not found"), `Run "spwn agent init neo"`)
+	err := s.FailHint("Agent failed", errors.New("not found"), `Run "spwn agent new neo"`)
 
 	out := buf.String()
 	if !strings.Contains(out, "Agent failed") {
@@ -205,7 +205,7 @@ func TestStepper_FailHint_ShowsHint(t *testing.T) {
 	if !strings.Contains(out, "not found") {
 		t.Errorf("FailHint() missing error, got %q", out)
 	}
-	if !strings.Contains(out, "spwn agent init neo") {
+	if !strings.Contains(out, "spwn agent new neo") {
 		t.Errorf("FailHint() missing hint, got %q", out)
 	}
 

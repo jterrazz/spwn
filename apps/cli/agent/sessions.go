@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Cmd.AddCommand(sessionsCmd)
+	// Removed: now handled by `spwn profile <name> sessions`
 }
 
 var sessionsCmd = &cobra.Command{

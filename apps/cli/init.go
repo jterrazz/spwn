@@ -67,7 +67,7 @@ On first run, also creates default.yaml as the default config.`,
 		s.Success("Ready. Next steps:")
 		s.Blank()
 		fmt.Fprintln(os.Stderr, "  spwn agent new neo           Create an agent")
-		fmt.Fprintln(os.Stderr, "  spwn world --agent neo -w .  Spawn a world")
+		fmt.Fprintln(os.Stderr, "  spwn up --agent neo -w .     Spawn a world")
 		fmt.Fprintln(os.Stderr, "  spwn agent talk neo          Talk to the agent")
 		s.Blank()
 

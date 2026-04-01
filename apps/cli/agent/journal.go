@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Cmd.AddCommand(journalCmd)
+	// Removed: now handled by `spwn profile <name> journal`
 }
 
 var journalCmd = &cobra.Command{

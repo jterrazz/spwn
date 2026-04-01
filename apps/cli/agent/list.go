@@ -29,8 +29,9 @@ type agentWorldInfo struct {
 }
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all agents on this Host",
+	Use:     "ls",
+	Aliases: []string{"list"},
+	Short:   "List all agents on this Host",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agents, err := agentDomain.ListAgents()
 		if err != nil {
@@ -61,8 +62,8 @@ var listCmd = &cobra.Command{
 
 		if len(agents) == 0 {
 			s.Blank()
-			s.Success("No agents found.")
-			s.Log("Run 'spwn agent init [name]' to create one.")
+			s.Success("No agents yet.")
+			s.Log("Create one with: spwn agent new <name>")
 			s.Blank()
 			return nil
 		}
