@@ -57,7 +57,7 @@ spwn agent [flags]
 * [spwn agent journal](/docs/cli/spwn-agent-journal)	 - View an agent's journal history
 * [spwn agent ls](/docs/cli/spwn-agent-ls)	 - List all agents on this Host
 * [spwn agent mind](/docs/cli/spwn-agent-mind)	 - Show the agent's Mind directory tree with file sizes
-* [spwn agent reflect](/docs/cli/spwn-agent-reflect)	 - Analyze journal and promote patterns to playbooks
+* [spwn agent dream](/docs/cli/spwn-agent-dream)	 - Analyze experience, discover patterns, promote playbooks
 * [spwn agent send](/docs/cli/spwn-agent-send)	 - Send a message to an agent's inbox
 * [spwn agent sessions](/docs/cli/spwn-agent-sessions)	 - View an agent's session history
 * [spwn agent sleep](/docs/cli/spwn-agent-sleep)	 - Consolidate experience — archive stale files, prune old sessions

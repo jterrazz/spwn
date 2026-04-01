@@ -103,7 +103,7 @@ export const MOCK_ACTIVITY = [
   { time: "12m ago", event: "morpheus delegated to trinity", world: "Europa", type: "info" },
   { time: "45m ago", event: "atlas session started", world: "Ganymede", type: "info" },
   { time: "1h ago", event: "trinity profile updated — 3 new playbooks", world: "Europa", type: "success" },
-  { time: "2h ago", event: "neo reflected — patterns promoted", world: "Titan", type: "info" },
+  { time: "2h ago", event: "neo dreamed — patterns promoted", world: "Titan", type: "info" },
 ];
 
 export const MOCK_PROFILES: Record<string, AgentProfile> = {
@@ -274,7 +274,7 @@ export const MOCK_LOGS: LogEntry[] = [
   { timestamp: "2026-04-01T17:29:45Z", level: "info", source: "neo", message: "Task completed: implement-auth-endpoints" },
   { timestamp: "2026-04-01T17:28:30Z", level: "debug", source: "neo", message: "Running test suite: 24 passed, 0 failed" },
   { timestamp: "2026-04-01T17:25:00Z", level: "info", source: "architect", message: "Snapshot created: api-complete" },
-  { timestamp: "2026-04-01T17:20:15Z", level: "warn", source: "neo", message: "Memory usage at 78% — consider reflecting" },
+  { timestamp: "2026-04-01T17:20:15Z", level: "warn", source: "neo", message: "Memory usage at 78% — consider dreaming" },
   { timestamp: "2026-04-01T17:15:00Z", level: "info", source: "neo", message: "Started task: implement-auth-endpoints" },
   { timestamp: "2026-04-01T17:10:00Z", level: "info", source: "architect", message: "World w-titan-84721 status: running" },
   { timestamp: "2026-04-01T17:05:22Z", level: "error", source: "neo", message: "Build failed: missing dependency @types/bcrypt" },

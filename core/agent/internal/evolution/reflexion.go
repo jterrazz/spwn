@@ -10,8 +10,9 @@ import (
 	"spwn.sh/core/agent/internal/journal"
 )
 
-// Reflect analyzes recent journal entries and promotes successful patterns to playbooks.
-func Reflect(mindPath string) (*ReflexionResult, error) {
+// Dream analyzes recent journal entries and promotes successful patterns to playbooks.
+// This is the primary function — formerly called Reflect.
+func Dream(mindPath string) (*ReflexionResult, error) {
 	// 1. Read journal entries
 	entries, err := journal.List(mindPath, 20)
 	if err != nil {
@@ -100,4 +101,9 @@ func formatReflexionSummary(r *ReflexionResult, entries []journal.Entry) string 
 	}
 
 	return b.String()
+}
+
+// Reflect is a backward-compatible alias for Dream.
+func Reflect(mindPath string) (*ReflexionResult, error) {
+	return Dream(mindPath)
 }

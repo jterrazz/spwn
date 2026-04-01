@@ -119,18 +119,18 @@ export default function AgentProfilePage() {
         <div className="flex items-center gap-1">
           <button
             onClick={async () => {
-              const ok = await callAction("reflect");
-              if (ok) showFeedback("Reflection complete!");
+              const ok = await callAction("dream");
+              if (ok) showFeedback("Dream cycle complete!");
             }}
             disabled={actionLoading !== null}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
           >
-            {actionLoading === "reflect" ? (
+            {actionLoading === "dream" ? (
               <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
             ) : (
               <IconRefresh size={14} />
             )}
-            Reflect
+            Dream
           </button>
           <button
             onClick={async () => {
@@ -329,7 +329,7 @@ export default function AgentProfilePage() {
         <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Commands</h2>
         <div className="glass-subtle p-3 font-mono text-[10px] text-muted-foreground/35 space-y-1">
           <p>spwn agent inspect {agentName}</p>
-          <p>spwn agent reflect {agentName}</p>
+          <p>spwn agent dream {agentName}</p>
           <p>spwn agent fork {agentName} --to &lt;name&gt;</p>
           <p>spwn agent export {agentName}</p>
         </div>

@@ -79,7 +79,7 @@ func TestCLI_AgentHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"new", "ls", "rm", "talk", "inspect", "reflect", "sleep", "fork", "export", "import"} {
+	for _, sub := range []string{"new", "ls", "rm", "talk", "inspect", "dream", "sleep", "fork", "export", "import"} {
 		assertContains(t, out, sub, "agent help")
 	}
 }

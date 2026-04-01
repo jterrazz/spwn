@@ -8,23 +8,24 @@ import (
 )
 
 func init() {
-	Cmd.AddCommand(reflectCmd)
+	Cmd.AddCommand(dreamCmd)
 }
 
-var reflectCmd = &cobra.Command{
-	Use:   "reflect <agent-name>",
-	Short: "Analyze journal and promote patterns to playbooks",
-	Args:  cobra.ExactArgs(1),
+var dreamCmd = &cobra.Command{
+	Use:     "dream <agent-name>",
+	Aliases: []string{"reflect"},
+	Short:   "Analyze experience, discover patterns, promote playbooks",
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		s := newStepper(cmd)
 
 		s.Blank()
-		s.Start(fmt.Sprintf("Reflecting on agent %q...", name))
+		s.Start(fmt.Sprintf("Dreaming for agent %q...", name))
 
-		result, err := agentDomain.Reflect(name)
+		result, err := agentDomain.Dream(name)
 		if err != nil {
-			return s.FailHint("Reflect failed", err,
+			return s.FailHint("Dream failed", err,
 				fmt.Sprintf("Check that agent %q exists with \"spwn agent inspect %s\"", name, name))
 		}
 

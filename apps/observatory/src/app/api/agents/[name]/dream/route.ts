@@ -3,7 +3,6 @@ import { spwnExec } from "@/lib/spwn-exec";
 
 export const dynamic = "force-dynamic";
 
-// Backward-compatible alias — redirects to dream
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ name: string }> }

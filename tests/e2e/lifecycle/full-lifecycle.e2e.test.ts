@@ -21,7 +21,7 @@ import { MindAssertion } from "../../setup/mind-assertion.js";
  *
  * Tests the complete user journey end-to-end:
  *   init → agent new → profile → write identity → up (Docker) →
- *   ls → inspect → logs → down → journal → reflect → sleep →
+ *   ls → inspect → logs → down → journal → dream → sleep →
  *   fork → export → rm → verify cleanup
  *
  * This is the ultimate integration test — exercises the entire CLI
@@ -119,10 +119,10 @@ describe("full agent lifecycle", () => {
     // we just verify the command works
     expect(typeof journalResult.output).toBe("string");
 
-    // ── STEP 12: spwn agent reflect neo ────────────────────────
-    const reflectResult = ctx.spwn(["agent", "reflect", "neo"]);
+    // ── STEP 12: spwn agent dream neo ────────────────────────
+    const reflectResult = ctx.spwn(["agent", "dream", "neo"]);
     expect(reflectResult.exitCode).toBe(0);
-    expectLine(reflectResult.output, /→ Reflecting on agent "neo"\.\.\./);
+    expectLine(reflectResult.output, /→ Dreaming for agent "neo"\.\.\./);
 
     // ── STEP 13: spwn agent sleep neo ──────────────────────────
     const sleepResult = ctx.spwn(["agent", "sleep", "neo"]);
@@ -200,7 +200,7 @@ describe("full agent lifecycle", () => {
     expect(forkResult.exitCode).not.toBe(0);
 
     // Reflect/sleep on missing agent should still handle gracefully (no crash)
-    const reflectResult = ctx.spwn(["agent", "reflect", "neo"]);
+    const reflectResult = ctx.spwn(["agent", "dream", "neo"]);
     expect(reflectResult.output).not.toContain("FATAL");
     expect(reflectResult.output).not.toContain("panic");
 
