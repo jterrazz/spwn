@@ -12,6 +12,12 @@ const (
 	GodImage        = "spwn-god:latest"
 )
 
+// Architect daemon constants.
+const (
+	ArchitectContainerName = "spwn-architect"
+	ArchitectImage         = "spwn-architect:latest"
+)
+
 // Directory layout constants.
 const (
 	SpwnBaseDir       = ".spwn"

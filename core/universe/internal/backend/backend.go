@@ -39,6 +39,16 @@ type ImageInfo struct {
 	Created time.Time
 }
 
+// ContainerInfo describes a running container's state.
+type ContainerInfo struct {
+	ID        string
+	Name      string
+	Image     string
+	Status    string
+	Running   bool
+	StartedAt time.Time
+}
+
 // Backend abstracts the container runtime.
 type Backend interface {
 	Create(ctx context.Context, cfg ContainerConfig) (string, error)

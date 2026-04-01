@@ -3,8 +3,12 @@
 package universe
 
 import (
+	"context"
+	"fmt"
 	"sort"
+	"time"
 
+	"spwn.sh/core/foundation"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/claw"
@@ -14,6 +18,9 @@ import (
 	"spwn.sh/core/universe/internal/runtime"
 	"spwn.sh/core/universe/internal/state"
 	"spwn.sh/core/universe/internal/sync"
+
+	containerTypes "github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 )
 
 // Re-export model types so consumers don't need to reach into internal packages.
@@ -43,6 +50,7 @@ type AgentRecord = models.AgentRecord
 // Re-export backend types.
 type Backend = backend.Backend
 type ImageInfo = backend.ImageInfo
+type ContainerInfo = backend.ContainerInfo
 type Store = state.Store
 
 // Re-export manifest types.
@@ -224,4 +232,161 @@ func ClawAvailable(name string) bool {
 		return false
 	}
 	return c.Available()
+}
+
+// --- Architect Daemon operations ---
+
+// ArchitectDaemonInfo describes the state of the Architect daemon container.
+type ArchitectDaemonInfo struct {
+	ContainerID string
+	Image       string
+	Status      string
+	Running     bool
+	StartedAt   time.Time
+	Uptime      time.Duration
+	OrgName     string
+	Channels    []string
+}
+
+// StartArchitectDaemon creates and starts the spwn-architect Docker container.
+// It returns the container ID. If the container is already running, it returns
+// an error indicating that.
+func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, error) {
+	docker, err := backend.NewDocker()
+	if err != nil {
+		return "", fmt.Errorf("docker is not reachable: %w", err)
+	}
+
+	// Check if already running
+	info, err := docker.Inspect(ctx, foundation.ArchitectContainerName)
+	if err == nil && info.Running {
+		return info.ID, fmt.Errorf("architect is already running (container %s)", foundation.ArchitectContainerName)
+	}
+
+	// If container exists but stopped, remove it first
+	if err == nil && !info.Running {
+		_ = docker.Remove(ctx, foundation.ArchitectContainerName)
+	}
+
+	// Resolve image
+	image := foundation.ArchitectImage
+	if imageOverride != "" {
+		image = imageOverride
+	}
+
+	// Check image exists
+	exists, err := docker.ImageExists(ctx, image)
+	if err != nil {
+		return "", fmt.Errorf("checking image: %w", err)
+	}
+	if !exists {
+		return "", fmt.Errorf("image %s not found. Build it with: make build-architect-image", image)
+	}
+
+	// Create container
+	containerCfg := &containerTypes.Config{
+		Image: image,
+		Env: []string{
+			"SPWN_HOME=/root/.spwn",
+		},
+	}
+	hostCfg := &containerTypes.HostConfig{
+		Binds: []string{
+			"/var/run/docker.sock:/var/run/docker.sock",
+			foundation.BaseDir() + ":/root/.spwn",
+		},
+		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
+	}
+
+	id, err := docker.CreateNamedContainer(ctx, foundation.ArchitectContainerName, containerCfg, hostCfg)
+	if err != nil {
+		return "", fmt.Errorf("creating architect container: %w", err)
+	}
+
+	if err := docker.Start(ctx, id); err != nil {
+		_ = docker.Remove(ctx, id)
+		return "", fmt.Errorf("starting architect container: %w", err)
+	}
+
+	// Save claw state
+	clawState := &state.ClawState{
+		Active:    true,
+		StartedAt: time.Now(),
+	}
+	_ = state.SaveClawState(clawState)
+
+	return id, nil
+}
+
+// StopArchitectDaemon stops and removes the spwn-architect container.
+func StopArchitectDaemon(ctx context.Context) error {
+	docker, err := backend.NewDocker()
+	if err != nil {
+		return fmt.Errorf("docker is not reachable: %w", err)
+	}
+
+	info, err := docker.Inspect(ctx, foundation.ArchitectContainerName)
+	if err != nil {
+		if client.IsErrNotFound(err) {
+			return fmt.Errorf("architect is not running")
+		}
+		return fmt.Errorf("inspecting architect container: %w", err)
+	}
+
+	if info.Running {
+		if err := docker.Stop(ctx, foundation.ArchitectContainerName); err != nil {
+			return fmt.Errorf("stopping architect container: %w", err)
+		}
+	}
+
+	if err := docker.Remove(ctx, foundation.ArchitectContainerName); err != nil {
+		return fmt.Errorf("removing architect container: %w", err)
+	}
+
+	// Update claw state
+	clawState := &state.ClawState{
+		Active: false,
+	}
+	_ = state.SaveClawState(clawState)
+
+	return nil
+}
+
+// GetArchitectDaemonStatus queries Docker for the architect container status.
+func GetArchitectDaemonStatus(ctx context.Context) (*ArchitectDaemonInfo, error) {
+	docker, err := backend.NewDocker()
+	if err != nil {
+		return nil, fmt.Errorf("docker is not reachable: %w", err)
+	}
+
+	info, err := docker.Inspect(ctx, foundation.ArchitectContainerName)
+	if err != nil {
+		if client.IsErrNotFound(err) {
+			return &ArchitectDaemonInfo{Running: false, Status: "not running"}, nil
+		}
+		return nil, fmt.Errorf("inspecting architect container: %w", err)
+	}
+
+	result := &ArchitectDaemonInfo{
+		ContainerID: info.ID[:12],
+		Image:       info.Image,
+		Status:      info.Status,
+		Running:     info.Running,
+		StartedAt:   info.StartedAt,
+	}
+
+	if info.Running {
+		result.Uptime = time.Since(info.StartedAt)
+	}
+
+	// Load org info if available
+	org, err := manifest.LoadOrg()
+	if err == nil && org != nil {
+		result.OrgName = org.Name
+		for _, ch := range org.Claw.Channels {
+			result.Channels = append(result.Channels, ch.Type)
+		}
+	}
+
+	return result, nil
 }
