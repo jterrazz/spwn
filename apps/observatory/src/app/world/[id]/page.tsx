@@ -15,6 +15,7 @@ import {
   IconRestore,
   IconPlus,
 } from "@tabler/icons-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function extractName(id: string): string {
   const parts = id.split("-");
@@ -117,8 +118,30 @@ export default function WorldDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <p className="text-muted-foreground/30 animate-pulse">Loading world...</p>
+      <div className="p-8 space-y-8">
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-2.5 h-2.5 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-32" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+        </div>
+        <div className="flex gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="glass-subtle px-5 py-4 flex-1 min-w-[140px]">
+              <Skeleton className="h-3 w-16 mb-2" />
+              <Skeleton className="h-7 w-12" />
+            </div>
+          ))}
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-24" />
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-16 rounded-xl" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

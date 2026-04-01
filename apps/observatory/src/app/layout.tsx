@@ -5,6 +5,7 @@ import { Aurora } from "@/components/aurora";
 import { Stars } from "@/components/stars";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ToastProvider } from "@/components/toast-provider";
 import { AppShell } from "@/components/app-shell";
 
 const geistSans = Geist({
@@ -42,11 +43,13 @@ export default function RootLayout({
       <body className="min-h-full relative overflow-x-hidden overflow-y-auto">
         <ThemeProvider>
           <TooltipProvider>
-            <Aurora />
-            <Stars />
-            <div className="relative z-10 min-h-screen">
-              <AppShell>{children}</AppShell>
-            </div>
+            <ToastProvider>
+              <Aurora />
+              <Stars />
+              <div className="relative z-10 min-h-screen">
+                <AppShell>{children}</AppShell>
+              </div>
+            </ToastProvider>
           </TooltipProvider>
         </ThemeProvider>
       </body>

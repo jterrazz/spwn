@@ -11,6 +11,8 @@ import {
   IconCircleFilled,
   IconChevronDown,
   IconGhostFilled,
+  IconPackage,
+  IconPlus,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -110,6 +112,15 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
               </SidebarMenuButton>
             </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={pathname === "/marketplace"}
+                onClick={() => window.location.href = "/marketplace"}
+              >
+                <IconPackage size={16} className="opacity-50" />
+                <span>Marketplace</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
 
@@ -168,26 +179,50 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
         </SidebarGroup>
 
         {/* ── Limbo agents ── */}
-        {limboAgents.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
-              Limbo
-            </SidebarGroupLabel>
-            <SidebarMenu>
-              {limboAgents.map((agent) => (
-                <SidebarMenuItem key={agent.name}>
-                  <SidebarMenuButton className="text-[11px] text-muted-foreground/35">
-                    <IconGhostFilled size={12} className="opacity-20 shrink-0" />
-                    <span>{agent.name}</span>
-                    <span className="ml-auto text-[9px] font-mono text-muted-foreground/20">
-                      {agent.layers}/6
-                    </span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
+            Limbo
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {limboAgents.map((agent) => (
+              <SidebarMenuItem key={agent.name}>
+                <SidebarMenuButton
+                  className="text-[11px] text-muted-foreground/35"
+                  isActive={pathname === `/agents/${agent.name}`}
+                  onClick={() => window.location.href = `/agents/${agent.name}`}
+                >
+                  <IconGhostFilled size={12} className="opacity-20 shrink-0" />
+                  <span>{agent.name}</span>
+                  <span className="ml-auto text-[9px] font-mono text-muted-foreground/20">
+                    {agent.layers}/6
+                  </span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+            {limboAgents.length === 0 && (
+              <SidebarMenuItem>
+                <span className="text-[10px] text-muted-foreground/20 px-2 py-1">No agents in limbo</span>
+              </SidebarMenuItem>
+            )}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                className="text-[11px] text-muted-foreground/25 hover:text-muted-foreground/50"
+                onClick={() => {
+                  const name = prompt("Agent name:");
+                  if (!name?.trim()) return;
+                  fetch("/api/agents/create", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: name.trim() }),
+                  }).then(() => window.location.reload());
+                }}
+              >
+                <IconPlus size={12} className="opacity-30 shrink-0" />
+                <span>New Agent</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
 
       </SidebarContent>
 
