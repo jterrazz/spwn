@@ -48,14 +48,14 @@ spwn agent [flags]
 ### SEE ALSO
 
 * [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
-* [spwn agent delete](/docs/cli/spwn-agent-delete)	 - Remove an agent and its Mind directory
+* [spwn agent rm](/docs/cli/spwn-agent-rm)	 - Remove an agent and its Mind directory
 * [spwn agent export](/docs/cli/spwn-agent-export)	 - Export an agent as tar.gz
 * [spwn agent fork](/docs/cli/spwn-agent-fork)	 - Clone a Mind from one agent to another
 * [spwn agent inbox](/docs/cli/spwn-agent-inbox)	 - Show messages in an agent's inbox
-* [spwn agent init](/docs/cli/spwn-agent-init)	 - Create a new agent with a 6-layer Mind
+* [spwn agent new](/docs/cli/spwn-agent-new)	 - Create a new agent with a 6-layer Mind
 * [spwn agent inspect](/docs/cli/spwn-agent-inspect)	 - Show agent details, Mind layers, world status, and history
 * [spwn agent journal](/docs/cli/spwn-agent-journal)	 - View an agent's journal history
-* [spwn agent list](/docs/cli/spwn-agent-list)	 - List all agents on this Host
+* [spwn agent ls](/docs/cli/spwn-agent-ls)	 - List all agents on this Host
 * [spwn agent mind](/docs/cli/spwn-agent-mind)	 - Show the agent's Mind directory tree with file sizes
 * [spwn agent reflect](/docs/cli/spwn-agent-reflect)	 - Analyze journal and promote patterns to playbooks
 * [spwn agent send](/docs/cli/spwn-agent-send)	 - Send a message to an agent's inbox

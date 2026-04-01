@@ -128,7 +128,7 @@ describe("error handling", () => {
     // THEN — exits with error and actionable hint
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /✗ Agent creation failed\s+agent "neo" already exists/);
-    expectLine(result.output, /spwn agent delete neo/);
+    expectLine(result.output, /spwn agent rm neo/);
   });
 
   test("delete non-existent agent shows error", async () => {

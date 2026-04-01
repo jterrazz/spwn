@@ -39,12 +39,12 @@ describe("spwn status", () => {
       expect(out).toContain("\u2570");
     });
 
-    test("shows god section as offline", async () => {
+    test("shows architect section as offline", async () => {
       await spwn("init").exec("init").run();
       const result = await spwn("status").exec("status").run();
 
       const out = stripAnsi(result.output);
-      expect(out).toContain("God");
+      expect(out).toContain("Architect");
       expect(out).toContain("offline");
     });
 
