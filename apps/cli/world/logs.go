@@ -43,9 +43,12 @@ var logsCmd = &cobra.Command{
 		}
 		defer reader.Close()
 
-		stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
+		n, _ := stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
 		if !logsFollow {
-			io.Copy(os.Stdout, reader)
+			m, _ := io.Copy(os.Stdout, reader)
+			if n+m == 0 {
+				fmt.Fprintln(os.Stderr, "No output yet. Use -f to follow live output.")
+			}
 		}
 
 		return nil

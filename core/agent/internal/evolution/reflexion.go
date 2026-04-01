@@ -27,19 +27,27 @@ func Reflect(mindPath string) (*ReflexionResult, error) {
 		Timestamp:       time.Now(),
 	}
 
-	// Count outcomes
+	// Count outcomes: 0 = success, -1 = destroyed (neutral), >0 = failed
 	completed := 0
 	failed := 0
+	destroyed := 0
 	for _, e := range entries {
-		if e.ExitCode == 0 {
+		switch {
+		case e.ExitCode == 0:
 			completed++
-		} else {
+		case e.ExitCode < 0:
+			destroyed++
+		default:
 			failed++
 		}
 	}
 	result.CompletedTasks = completed
 	result.FailedTasks = failed
-	result.SuccessRate = float64(completed) / float64(len(entries))
+	result.DestroyedTasks = destroyed
+	scorable := completed + failed
+	if scorable > 0 {
+		result.SuccessRate = float64(completed) / float64(scorable)
+	}
 
 	// 3. Write reflexion summary to playbooks
 	playbooksDir := filepath.Join(mindPath, "memory", "playbooks")
@@ -62,6 +70,7 @@ type ReflexionResult struct {
 	EntriesAnalyzed int
 	CompletedTasks  int
 	FailedTasks     int
+	DestroyedTasks  int
 	SuccessRate     float64
 	OutputPath      string
 	Timestamp       time.Time
@@ -75,13 +84,16 @@ func formatReflexionSummary(r *ReflexionResult, entries []journal.Entry) string 
 	b.WriteString(fmt.Sprintf("- Entries analyzed: %d\n", r.EntriesAnalyzed))
 	b.WriteString(fmt.Sprintf("- Completed: %d\n", r.CompletedTasks))
 	b.WriteString(fmt.Sprintf("- Failed: %d\n", r.FailedTasks))
+	b.WriteString(fmt.Sprintf("- Destroyed: %d\n", r.DestroyedTasks))
 	b.WriteString(fmt.Sprintf("- Success rate: %.0f%%\n\n", r.SuccessRate*100))
 
 	// List recent sessions
 	b.WriteString("## Recent Sessions\n\n")
 	for _, e := range entries {
 		outcome := "completed"
-		if e.ExitCode != 0 {
+		if e.ExitCode < 0 {
+			outcome = "destroyed"
+		} else if e.ExitCode > 0 {
 			outcome = fmt.Sprintf("failed (exit %d)", e.ExitCode)
 		}
 		b.WriteString(fmt.Sprintf("- %s: %s (%s)\n", e.WorldID, outcome, e.Duration))
