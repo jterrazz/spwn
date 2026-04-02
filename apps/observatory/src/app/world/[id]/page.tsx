@@ -2,8 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { MOCK_WORLDS, MOCK_ACTIVITY, MOCK_SNAPSHOTS, MOCK_LOGS } from "@/lib/mock-data";
-import type { World } from "@/lib/mock-data";
+import type { World } from "@/lib/types";
 import { apiGet, apiAction } from "@/lib/api-client";
 import {
   IconTrash,
@@ -75,11 +74,11 @@ export default function WorldDashboard() {
     apiGet<World[]>("/api/universes", "/api/worlds")
       .then((worlds) => {
         const found = worlds.find((w) => w.id === worldId);
-        setWorld(found ?? MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
+        setWorld(found ?? null);
         setLoading(false);
       })
       .catch(() => {
-        setWorld(MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
+        setWorld(null);
         setLoading(false);
       });
   }, [worldId]);
@@ -107,8 +106,9 @@ export default function WorldDashboard() {
     }
   };
 
-  const snapshots = MOCK_SNAPSHOTS.filter((s) => s.worldId === worldId);
-  const logs = MOCK_LOGS;
+  // Logs and snapshots are not yet available from the API
+  const snapshots: { id: string; worldId: string; name: string; created_at: string; size: string; agents: number }[] = [];
+  const logs: { timestamp: string; level: string; source: string; message: string }[] = [];
 
   const showFeedback = (msg: string) => {
     setActionFeedback(msg);
@@ -363,20 +363,8 @@ export default function WorldDashboard() {
         {/* Activity */}
         <div>
           <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Recent Activity</h2>
-          <div className="glass-subtle divide-y divide-border/30">
-            {MOCK_ACTIVITY.filter((a) => a.world === name).map((item, i) => (
-              <div key={i} className="px-5 py-3 flex items-center gap-4">
-                <span className="text-[10px] font-mono text-muted-foreground/30 w-14 shrink-0">{item.time}</span>
-                <div
-                  className="w-1 h-1 rounded-full shrink-0"
-                  style={{
-                    backgroundColor: item.type === "success" ? "#22c55e" : "rgba(255,255,255,0.3)",
-                    boxShadow: item.type === "success" ? "0 0 4px rgba(34,197,94,0.5)" : "none",
-                  }}
-                />
-                <span className="text-xs text-foreground/70">{item.event}</span>
-              </div>
-            ))}
+          <div className="glass-subtle px-5 py-8 text-center">
+            <p className="text-sm text-muted-foreground/30">No activity recorded yet</p>
           </div>
         </div>
 
@@ -408,18 +396,22 @@ export default function WorldDashboard() {
           <div className="flex-1 overflow-y-auto">
             {activePanel === "logs" && (
               <div className="p-4 space-y-0.5 font-mono text-[11px]">
-                {logs.map((log, i) => (
-                  <div key={i} className="flex gap-2 py-1.5 border-b border-border/10 last:border-0">
-                    <span className="text-muted-foreground/25 shrink-0 w-14">
-                      {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                    </span>
-                    <span className={`shrink-0 w-10 uppercase ${LOG_LEVEL_COLORS[log.level]}`}>
-                      {log.level}
-                    </span>
-                    <span className="text-muted-foreground/40 shrink-0 w-16">{log.source}</span>
-                    <span className="text-foreground/60">{log.message}</span>
-                  </div>
-                ))}
+                {logs.length === 0 ? (
+                  <p className="text-sm text-muted-foreground/30 text-center py-8">No logs available. Use the CLI: spwn logs {worldId}</p>
+                ) : (
+                  logs.map((log, i) => (
+                    <div key={i} className="flex gap-2 py-1.5 border-b border-border/10 last:border-0">
+                      <span className="text-muted-foreground/25 shrink-0 w-14">
+                        {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      </span>
+                      <span className={`shrink-0 w-10 uppercase ${LOG_LEVEL_COLORS[log.level]}`}>
+                        {log.level}
+                      </span>
+                      <span className="text-muted-foreground/40 shrink-0 w-16">{log.source}</span>
+                      <span className="text-foreground/60">{log.message}</span>
+                    </div>
+                  ))
+                )}
               </div>
             )}
 

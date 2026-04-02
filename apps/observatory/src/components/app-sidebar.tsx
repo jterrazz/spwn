@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LiveStatus } from "@/components/live-status";
-import type { World, LimboAgent } from "@/lib/mock-data";
+import type { World, LimboAgent } from "@/lib/types";
 import { apiAction } from "@/lib/api-client";
 
 interface AppSidebarProps {

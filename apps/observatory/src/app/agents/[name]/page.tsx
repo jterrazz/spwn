@@ -2,8 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { MOCK_PROFILES } from "@/lib/mock-data";
-import type { AgentProfile } from "@/lib/mock-data";
+import type { AgentProfile } from "@/lib/types";
 import { apiGet, apiAction } from "@/lib/api-client";
 import {
   IconBrain,
@@ -33,7 +32,7 @@ export default function AgentProfilePage() {
       apiGet<AgentProfile>(`/api/agents/${agentName}`, `/api/agents/${agentName}`).catch(() => null),
       apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`, `/api/agents/${agentName}/mind`).catch(() => null),
     ]).then(([agentProfile, tree]) => {
-      setProfile(agentProfile ?? MOCK_PROFILES[agentName] ?? null);
+      setProfile(agentProfile ?? null);
       setMindTree(tree ?? {});
       setLoading(false);
     });
@@ -181,11 +180,11 @@ export default function AgentProfilePage() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">
         <div className="glass-subtle p-3 text-center">
-          <p className="text-lg font-heading text-foreground/80">{totalFiles || 14}</p>
+          <p className="text-lg font-heading text-foreground/80">{totalFiles}</p>
           <p className="text-[9px] text-muted-foreground/35 uppercase">Files</p>
         </div>
         <div className="glass-subtle p-3 text-center">
-          <p className="text-lg font-heading text-foreground/80">{activeLayers || 6}</p>
+          <p className="text-lg font-heading text-foreground/80">{activeLayers}</p>
           <p className="text-[9px] text-muted-foreground/35 uppercase">Layers</p>
         </div>
         <div className="glass-subtle p-3 text-center">
@@ -205,7 +204,7 @@ export default function AgentProfilePage() {
           Purpose
         </h2>
         <div className="glass-subtle p-4">
-          <p className="text-sm text-foreground/70 leading-relaxed">{profile.purpose}</p>
+          <p className="text-sm text-foreground/70 leading-relaxed">{profile.purpose || "Not configured yet"}</p>
         </div>
       </div>
 

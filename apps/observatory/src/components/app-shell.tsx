@@ -5,27 +5,46 @@ import { useState, useEffect, useCallback } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { MOCK_WORLDS, MOCK_LIMBO } from "@/lib/mock-data";
-import type { World, LimboAgent } from "@/lib/mock-data";
+import type { World, LimboAgent } from "@/lib/types";
 import { apiGet } from "@/lib/api-client";
+
+interface AgentListItem {
+  name: string;
+  path: string;
+  layers: Record<string, string[]>;
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [worlds, setWorlds] = useState<World[]>(MOCK_WORLDS);
-  const [limboAgents, setLimboAgents] = useState<LimboAgent[]>(MOCK_LIMBO);
+  const [worlds, setWorlds] = useState<World[]>([]);
+  const [limboAgents, setLimboAgents] = useState<LimboAgent[]>([]);
 
   // Extract current world ID from URL if on a world page
   const worldMatch = pathname.match(/^\/world\/([^/]+)/);
   const currentWorldId = worldMatch?.[1];
 
   const fetchWorlds = useCallback(() => {
-    apiGet<World[]>("/api/universes", "/api/worlds")
-      .then((data) => {
-        if (data && data.length > 0) setWorlds(data);
-      })
-      .catch(() => {
-        // keep mock data on error
-      });
+    Promise.all([
+      apiGet<World[]>("/api/universes", "/api/worlds").catch(() => [] as World[]),
+      apiGet<AgentListItem[]>("/api/agents", "/api/agents").catch(() => [] as AgentListItem[]),
+    ]).then(([worldData, agentData]) => {
+      const w = worldData ?? [];
+      setWorlds(w);
+      // Limbo agents = agents not in any active world
+      const activeAgentNames = new Set<string>();
+      for (const world of w) {
+        for (const a of world.agents) {
+          activeAgentNames.add(a.name);
+        }
+      }
+      const limbo = (agentData ?? [])
+        .filter((a) => !activeAgentNames.has(a.name))
+        .map((a) => ({
+          name: a.name,
+          layers: Object.values(a.layers ?? {}).filter((f) => f.length > 0).length,
+        }));
+      setLimboAgents(limbo);
+    });
   }, []);
 
   useEffect(() => {

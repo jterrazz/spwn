@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -90,6 +91,13 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /api/agents/{name}/dream", cors(s.handleDream))
 	mux.HandleFunc("POST /api/agents/{name}/sleep", cors(s.handleSleep))
 	mux.HandleFunc("POST /api/agents/{name}/fork", cors(s.handleFork))
+	mux.HandleFunc("POST /api/worlds/{id}/talk", cors(s.handleTalk))
+	mux.HandleFunc("POST /api/agents/{name}/export", cors(s.handleExport))
+
+	// --- Architect endpoints ---
+	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
+	mux.HandleFunc("POST /api/architect/start", cors(s.handleArchitectStart))
+	mux.HandleFunc("POST /api/architect/stop", cors(s.handleArchitectStop))
 
 	// --- CORS preflight for all paths ---
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
@@ -638,4 +646,88 @@ func (s *Server) handleFork(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	jsonOK(w, result)
+}
+
+func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
+	worldID := r.PathValue("id")
+	if worldID == "" {
+		jsonError(w, "world id is required", 400)
+		return
+	}
+
+	var body struct {
+		Message string `json:"message"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Message == "" {
+		jsonError(w, "message is required", 400)
+		return
+	}
+
+	// Find the world to get agent name
+	universes, err := s.state.List()
+	if err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	var agentName string
+	for _, u := range universes {
+		if u.ID == worldID {
+			agentName = u.Agent
+			break
+		}
+	}
+	if agentName == "" {
+		jsonError(w, "world not found or has no agent", 404)
+		return
+	}
+
+	// Execute spwn agent talk
+	cmd := exec.CommandContext(r.Context(), "spwn", "agent", "talk", agentName, body.Message)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		jsonError(w, fmt.Sprintf("talk failed: %s — %s", err.Error(), string(out)), 500)
+		return
+	}
+
+	jsonOK(w, map[string]string{"response": strings.TrimSpace(string(out))})
+}
+
+func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if name == "" {
+		jsonError(w, "agent name is required", 400)
+		return
+	}
+
+	tarPath, err := agentpkg.ExportMind(name, "", nil)
+	if err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/gzip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.tar.gz", name))
+	http.ServeFile(w, r, tarPath)
+}
+
+func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
+	status := "stopped"
+	if s.arch != nil {
+		status = "running"
+	}
+	jsonOK(w, map[string]interface{}{
+		"status":      status,
+		"containerId": nil,
+		"uptime":      nil,
+		"channels":    []string{},
+	})
+}
+
+func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
+	// The architect is already running if we can serve this request
+	jsonOK(w, map[string]string{"status": "running"})
+}
+
+func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
+	jsonOK(w, map[string]string{"status": "stopping"})
 }

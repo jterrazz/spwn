@@ -2,9 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { MOCK_WORLDS, MOCK_PROFILES, MOCK_MESSAGES } from "@/lib/mock-data";
-import type { AgentProfile, AgentMessage, World } from "@/lib/mock-data";
-import { apiGet, apiAction } from "@/lib/api-client";
+import type { AgentProfile, AgentMessage, World } from "@/lib/types";
+import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
 import {
   IconBrain,
   IconMessageFilled,
@@ -39,14 +38,7 @@ const TIER_LABEL: Record<string, string> = {
   npc: "NPC",
 };
 
-// Mock conversation
-const INITIAL_MESSAGES: Message[] = [
-  {
-    role: "agent",
-    content: "I'm online and ready. I've read the AGENT.md and understand my role as a citizen in this world. My workspace is at /workspace and I have access to the full unix toolchain.\n\nWhat would you like me to work on?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
-  },
-];
+const INITIAL_MESSAGES: Message[] = [];
 
 function timeStr(d: Date) {
   const h = d.getHours().toString().padStart(2, "0");
@@ -69,22 +61,20 @@ export default function AgentPage() {
   // Fetch world + agent data from API (Go API with Next.js fallback)
   useEffect(() => {
     Promise.all([
-      apiGet<World[]>("/api/universes", "/api/worlds").catch(() => MOCK_WORLDS),
+      apiGet<World[]>("/api/universes", "/api/worlds").catch(() => [] as World[]),
       apiGet<AgentProfile>(`/api/agents/${agentName}`, `/api/agents/${agentName}`).catch(() => null),
       apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`, `/api/agents/${agentName}/mind`).catch(() => null),
     ]).then(([worlds, agentProfile, tree]) => {
       const found = (worlds as World[]).find((w) => w.id === worldId);
-      setWorld(found ?? MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
-      setProfile(agentProfile ?? MOCK_PROFILES[agentName] ?? null);
+      setWorld(found ?? null);
+      setProfile(agentProfile ?? null);
       setMindTree(tree ?? {});
       setLoading(false);
     });
   }, [worldId, agentName]);
 
   const agent = world?.agents.find((a) => a.name === agentName);
-  const agentMessages = MOCK_MESSAGES.filter(
-    (m) => m.from === agentName || m.to === agentName
-  );
+  const agentMessages: AgentMessage[] = [];
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -131,24 +121,41 @@ export default function AgentPage() {
     }
   };
 
-  const send = () => {
+  const send = async () => {
     if (!input.trim()) return;
     const userMsg: Message = { role: "user", content: input.trim(), timestamp: new Date() };
     setMessages((m) => [...m, userMsg]);
+    const message = input.trim();
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch(goApiUrl(`/api/worlds/${worldId}/talk`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+        signal: AbortSignal.timeout(120000),
+      });
+      const data = await res.json();
+      if (res.ok && data.response) {
+        setMessages((m) => [
+          ...m,
+          { role: "agent", content: data.response, timestamp: new Date() },
+        ]);
+      } else {
+        setMessages((m) => [
+          ...m,
+          { role: "agent", content: `Error: ${data.error || "Failed to get response"}`, timestamp: new Date() },
+        ]);
+      }
+    } catch {
       setMessages((m) => [
         ...m,
-        {
-          role: "agent",
-          content: `I'll look into that. Let me check the codebase...\n\n\`\`\`bash\nls /workspace/src/\n\`\`\`\n\nI found the relevant files. Working on it now.`,
-          timestamp: new Date(),
-        },
+        { role: "agent", content: "Error: Failed to connect to API. Make sure the Go server is running.", timestamp: new Date() },
       ]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   if (loading) {
@@ -412,11 +419,11 @@ export default function AgentPage() {
             <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Stats</h2>
             <div className="grid grid-cols-2 gap-2">
               <div className="glass-subtle p-3 text-center">
-                <p className="text-lg font-heading text-foreground/80">{Object.values(mindTree).reduce((n, f) => n + f.length, 0) || 14}</p>
+                <p className="text-lg font-heading text-foreground/80">{Object.values(mindTree).reduce((n, f) => n + f.length, 0)}</p>
                 <p className="text-[9px] text-muted-foreground/35 uppercase">Files</p>
               </div>
               <div className="glass-subtle p-3 text-center">
-                <p className="text-lg font-heading text-foreground/80">{Object.keys(mindTree).filter(k => (mindTree[k]?.length ?? 0) > 0).length || 6}</p>
+                <p className="text-lg font-heading text-foreground/80">{Object.keys(mindTree).filter(k => (mindTree[k]?.length ?? 0) > 0).length}</p>
                 <p className="text-[9px] text-muted-foreground/35 uppercase">Layers</p>
               </div>
               <div className="glass-subtle p-3 text-center">
@@ -459,14 +466,14 @@ function ProfileView({ profile }: { profile: AgentProfile }) {
           Purpose
         </h2>
         <div className="glass-subtle p-4">
-          <p className="text-sm text-foreground/70 leading-relaxed">{profile.purpose}</p>
+          <p className="text-sm text-foreground/70 leading-relaxed">{profile.purpose || "Not configured yet"}</p>
         </div>
       </div>
 
       <div>
         <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Persona</h2>
         <div className="glass-subtle p-4">
-          <p className="text-sm text-foreground/60 leading-relaxed italic">{profile.persona}</p>
+          <p className="text-sm text-foreground/60 leading-relaxed italic">{profile.persona || "Not configured yet"}</p>
         </div>
       </div>
 
@@ -571,17 +578,16 @@ function ProfileView({ profile }: { profile: AgentProfile }) {
 
 /* ── Files View Component ── */
 function MindView({ mindTree }: { mindTree: Record<string, string[]> }) {
-  // Fallback to mock mind data if no real data
-  const data = Object.keys(mindTree).length > 0
-    ? mindTree
-    : {
-        identity: ["persona.md"],
-        skills: ["code-review.md", "testing.md"],
-        "memory/knowledge": ["project-structure.md", "api-patterns.md"],
-        "memory/playbooks": ["delegate-subtask.md"],
-        "memory/journal": ["2026-03-31_w-titan.md", "2026-04-01_w-titan.md"],
-        sessions: ["w-titan-84721.json"],
-      };
+  const data = mindTree;
+
+  if (Object.keys(data).length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-sm text-muted-foreground/30">No mind files found</p>
+        <p className="text-xs text-muted-foreground/20 mt-1 font-mono">Agent mind directory is empty</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-1 max-w-lg">
