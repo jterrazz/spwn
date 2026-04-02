@@ -11,8 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import type { World, LimboAgent, AgentProfile } from "./mock-data";
-import { MOCK_WORLDS, MOCK_LIMBO, MOCK_PROFILES } from "./mock-data";
+import type { World, LimboAgent, AgentProfile } from "./types";
 
 // ── Paths ──
 
@@ -88,14 +87,13 @@ function rawToWorld(raw: RawWorld): World {
 export async function getWorlds(): Promise<World[]> {
   try {
     const data = await fs.promises.readFile(statePath(), "utf-8");
-    if (!data.trim()) return MOCK_WORLDS;
+    if (!data.trim()) return [];
     const raw: RawWorld[] = JSON.parse(data);
-    const worlds = raw
+    return raw
       .filter((w) => w.status !== "destroyed")
       .map(rawToWorld);
-    return worlds.length > 0 ? worlds : MOCK_WORLDS;
   } catch {
-    return MOCK_WORLDS;
+    return [];
   }
 }
 
@@ -178,7 +176,7 @@ export async function getAgents(): Promise<AgentMindInfo[]> {
  */
 export async function getLimboAgents(worlds: World[]): Promise<LimboAgent[]> {
   const agents = await getAgents();
-  if (agents.length === 0) return MOCK_LIMBO;
+  if (agents.length === 0) return [];
 
   const activeAgentNames = new Set<string>();
   for (const w of worlds) {
@@ -204,7 +202,7 @@ export async function getLimboAgents(worlds: World[]): Promise<LimboAgent[]> {
 export async function getAgentProfile(name: string): Promise<AgentProfile | null> {
   const info = await inspectAgent(name);
   if (!info) {
-    return MOCK_PROFILES[name] ?? null;
+    return null;
   }
 
   // Read persona file for purpose/persona
@@ -278,25 +276,19 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
   const playbooks = (info.layers["memory/playbooks"] ?? []).map((f) => f.replace(/\.md$/, ""));
   const knowledge = info.layers["memory/knowledge"] ?? [];
 
-  // If we have very little data, merge with mock profile
-  const mockProfile = MOCK_PROFILES[name];
-  if (mockProfile && !purpose && journal.length === 0) {
-    return mockProfile;
-  }
-
   return {
     name,
     tier: "citizen" as const,
     engine: "claude-code",
     provider: "anthropic",
-    purpose: purpose || mockProfile?.purpose || `Agent ${name}`,
-    persona: persona || mockProfile?.persona || "",
-    traits: mockProfile?.traits || [],
-    skills: skills.length > 0 ? skills : mockProfile?.skills || [],
-    playbooks: playbooks.length > 0 ? playbooks : mockProfile?.playbooks || [],
-    knowledge: knowledge.length > 0 ? knowledge : mockProfile?.knowledge || [],
-    journal: journal.length > 0 ? journal : mockProfile?.journal || [],
-    bonds: bonds.length > 0 ? bonds : mockProfile?.bonds || [],
+    purpose: purpose || "",
+    persona: persona || "",
+    traits: [],
+    skills,
+    playbooks,
+    knowledge,
+    journal,
+    bonds,
   };
 }
 

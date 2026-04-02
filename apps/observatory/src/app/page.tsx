@@ -3,20 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
-import { MOCK_WORLDS, AVAILABLE_CONFIGS } from "@/lib/mock-data";
+import { AVAILABLE_CONFIGS } from "@/lib/types";
+import type { World } from "@/lib/types";
 import { IconPlus, IconRocket, IconX } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction } from "@/lib/api-client";
-
-export interface World {
-  id: string;
-  config: string;
-  agent: string;
-  agents: { name: string; tier: string; status: string }[];
-  status: "running" | "idle" | "stopped" | "creating";
-  created_at: string;
-  workspace: string;
-}
 
 export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
@@ -28,15 +19,11 @@ export default function UniverseMapPage() {
   const fetchWorlds = () => {
     apiGet<World[]>("/api/universes", "/api/worlds")
       .then((data) => {
-        if (data && data.length > 0) {
-          setWorlds(data);
-        } else {
-          setWorlds(MOCK_WORLDS);
-        }
+        setWorlds(data ?? []);
         setLoading(false);
       })
       .catch(() => {
-        setWorlds(MOCK_WORLDS);
+        setWorlds([]);
         setLoading(false);
       });
   };
@@ -107,8 +94,8 @@ export default function UniverseMapPage() {
           </div>
         ) : worlds.length === 0 ? (
           <div className="text-center">
-            <p className="text-muted-foreground/30 text-lg font-heading">No active worlds</p>
-            <p className="text-muted-foreground/20 text-sm mt-2 font-mono">spwn up --agent neo -w .</p>
+          <p className="text-muted-foreground/30 text-lg font-heading">No worlds running</p>
+          <p className="text-muted-foreground/20 text-sm mt-2 font-mono">Spawn one to get started</p>
             <button
               onClick={() => setShowSpawn(true)}
               className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm mx-auto bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"

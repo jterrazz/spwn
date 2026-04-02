@@ -2,7 +2,7 @@
 
 import createGlobe from "cobe";
 import { useEffect, useRef } from "react";
-import type { World } from "@/lib/mock-data";
+import type { World } from "@/lib/types";
 
 interface PlanetProps {
   world: World;
