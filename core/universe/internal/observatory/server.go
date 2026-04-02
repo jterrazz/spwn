@@ -1,16 +1,22 @@
 package observatory
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	agentpkg "spwn.sh/core/agent"
 	"spwn.sh/core/universe/internal/architect"
+	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/state"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Server serves the Observatory HTTP API.
@@ -139,6 +145,154 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, agents)
 }
 
+// profileYAML represents the profile.yaml manifest for an agent.
+type profileYAML struct {
+	Tier    string `yaml:"tier,omitempty" json:"tier,omitempty"`
+	Runtime struct {
+		Engine   string `yaml:"engine,omitempty" json:"engine,omitempty"`
+		Provider string `yaml:"provider,omitempty" json:"provider,omitempty"`
+		Model    string `yaml:"model,omitempty" json:"model,omitempty"`
+	} `yaml:"runtime,omitempty" json:"runtime,omitempty"`
+}
+
+// agentProfileResponse is the full profile sent to the frontend.
+type agentProfileResponse struct {
+	Name      string            `json:"name"`
+	Path      string            `json:"path"`
+	Tier      string            `json:"tier"`
+	Engine    string            `json:"engine"`
+	Provider  string            `json:"provider"`
+	Purpose   string            `json:"purpose"`
+	Persona   string            `json:"persona"`
+	Traits    []string          `json:"traits"`
+	Skills    []string          `json:"skills"`
+	Playbooks []string          `json:"playbooks"`
+	Knowledge []string          `json:"knowledge"`
+	Journal   []journalEntry    `json:"journal"`
+	Bonds     []bondEntry       `json:"bonds"`
+	Layers    map[string][]string `json:"layers"`
+}
+
+type journalEntry struct {
+	Date    string `json:"date"`
+	Summary string `json:"summary"`
+}
+
+type bondEntry struct {
+	Agent        string `json:"agent"`
+	Relationship string `json:"relationship"`
+}
+
+// readFirstLineContent reads the first non-empty, non-heading line of a file.
+func readFirstLineContent(path string) string {
+	f, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line != "" && !strings.HasPrefix(line, "#") {
+			return line
+		}
+	}
+	return ""
+}
+
+// listMdFiles returns base names (without .md extension) of markdown files in a directory.
+func listMdFiles(dir string) []string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var result []string
+	for _, e := range entries {
+		if !e.IsDir() && strings.HasSuffix(e.Name(), ".md") {
+			result = append(result, strings.TrimSuffix(e.Name(), ".md"))
+		}
+	}
+	return result
+}
+
+// parseTraits reads a traits.md file and returns individual traits as a slice.
+func parseTraits(path string) []string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var traits []string
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		// Strip leading list markers (-, *, •)
+		line = strings.TrimLeft(line, "-*• ")
+		line = strings.TrimSpace(line)
+		if line != "" {
+			traits = append(traits, line)
+		}
+	}
+	return traits
+}
+
+// parseBonds reads bonds.md and returns structured bond entries.
+func parseBonds(path string) []bondEntry {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var bonds []bondEntry
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		line = strings.TrimLeft(line, "-*• ")
+		line = strings.TrimSpace(line)
+		// Try "agent: relationship" or "agent — relationship" format
+		var agent, rel string
+		if idx := strings.Index(line, ":"); idx > 0 {
+			agent = strings.TrimSpace(line[:idx])
+			rel = strings.TrimSpace(line[idx+1:])
+		} else if idx := strings.Index(line, "—"); idx > 0 {
+			agent = strings.TrimSpace(line[:idx])
+			rel = strings.TrimSpace(line[idx+len("—"):])
+		} else if idx := strings.Index(line, "-"); idx > 0 {
+			agent = strings.TrimSpace(line[:idx])
+			rel = strings.TrimSpace(line[idx+1:])
+		} else {
+			agent = line
+			rel = "connected"
+		}
+		if agent != "" {
+			bonds = append(bonds, bondEntry{Agent: agent, Relationship: rel})
+		}
+	}
+	return bonds
+}
+
+// parseJournalFiles reads journal directory and returns structured entries.
+func parseJournalFiles(dir string) []journalEntry {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var journal []journalEntry
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+			continue
+		}
+		date := strings.TrimSuffix(e.Name(), ".md")
+		// Try to read first content line as summary
+		summary := readFirstLineContent(filepath.Join(dir, e.Name()))
+		journal = append(journal, journalEntry{Date: date, Summary: summary})
+	}
+	return journal
+}
+
 func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	if name == "" {
@@ -151,7 +305,85 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), 404)
 		return
 	}
-	jsonOK(w, info)
+
+	mindPath := info.Path
+
+	// Load profile.yaml for tier/engine/provider
+	tier := "citizen"
+	engine := "claude-code"
+	provider := "anthropic"
+	profilePath := filepath.Join(mindPath, "profile.yaml")
+	if data, err := os.ReadFile(profilePath); err == nil {
+		var p profileYAML
+		if err := yaml.Unmarshal(data, &p); err == nil {
+			if p.Tier != "" {
+				tier = p.Tier
+			}
+			if p.Runtime.Engine != "" {
+				engine = p.Runtime.Engine
+			}
+			if p.Runtime.Provider != "" {
+				provider = p.Runtime.Provider
+			}
+		}
+	}
+
+	// Read identity files
+	purpose := readFirstLineContent(filepath.Join(mindPath, "identity", "purpose.md"))
+	persona := readFirstLineContent(filepath.Join(mindPath, "identity", "persona.md"))
+	traits := parseTraits(filepath.Join(mindPath, "identity", "traits.md"))
+	if traits == nil {
+		traits = []string{}
+	}
+
+	// List capability files
+	skills := listMdFiles(filepath.Join(mindPath, "skills"))
+	if skills == nil {
+		skills = []string{}
+	}
+	playbooks := listMdFiles(filepath.Join(mindPath, "memory", "playbooks"))
+	if playbooks == nil {
+		playbooks = []string{}
+	}
+	knowledge := listMdFiles(filepath.Join(mindPath, "memory", "knowledge"))
+	if knowledge == nil {
+		knowledge = []string{}
+	}
+
+	// Journal entries
+	journal := parseJournalFiles(filepath.Join(mindPath, "memory", "journal"))
+	if journal == nil {
+		// Try legacy path
+		journal = parseJournalFiles(filepath.Join(mindPath, "journal"))
+	}
+	if journal == nil {
+		journal = []journalEntry{}
+	}
+
+	// Bonds
+	bonds := parseBonds(filepath.Join(mindPath, "bonds.md"))
+	if bonds == nil {
+		bonds = []bondEntry{}
+	}
+
+	resp := agentProfileResponse{
+		Name:      info.Name,
+		Path:      info.Path,
+		Tier:      tier,
+		Engine:    engine,
+		Provider:  provider,
+		Purpose:   purpose,
+		Persona:   persona,
+		Traits:    traits,
+		Skills:    skills,
+		Playbooks: playbooks,
+		Knowledge: knowledge,
+		Journal:   journal,
+		Bonds:     bonds,
+		Layers:    info.Layers,
+	}
+
+	jsonOK(w, resp)
 }
 
 func (s *Server) handleGetAgentJournal(w http.ResponseWriter, r *http.Request) {
@@ -247,10 +479,23 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Load manifest with defaults (same as CLI does)
+	cfgName := body.ConfigName
+	if cfgName == "" {
+		cfgName = "default"
+	}
+	m, err := manifest.Load(cfgName)
+	if err != nil {
+		jsonError(w, "config not found: "+err.Error(), 400)
+		return
+	}
+	manifest.ApplyDefaults(&m)
+
 	result, err := s.arch.Spawn(r.Context(), architect.SpawnOpts{
-		ConfigName: body.ConfigName,
+		ConfigName: cfgName,
 		AgentName:  body.AgentName,
 		Workspace:  body.Workspace,
+		Manifest:   m,
 	})
 	if err != nil {
 		jsonError(w, err.Error(), 500)

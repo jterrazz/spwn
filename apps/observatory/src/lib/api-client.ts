@@ -32,6 +32,43 @@ async function fallbackNextApi<T>(path: string, init?: RequestInit): Promise<T> 
   return res.json();
 }
 
+// ── Data normalization ──
+
+/**
+ * Normalize Go API world data to match frontend World interface.
+ * Go returns `agent` (string), frontend expects `agents` (array).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeWorlds(data: any[]): any[] {
+  return data.map((w) => ({
+    ...w,
+    status: w.status || "idle",
+    agents: w.agents ?? (w.agent ? [{ name: w.agent, tier: "citizen", status: w.status || "idle" }] : []),
+  }));
+}
+
+/**
+ * Normalize Go API agent data to match frontend AgentProfile interface.
+ * Fills in defaults for any missing fields so the UI never crashes on undefined arrays.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeAgent(data: any): any {
+  return {
+    tier: 'citizen',
+    engine: 'claude-code',
+    provider: 'anthropic',
+    purpose: '',
+    persona: '',
+    traits: [],
+    skills: [],
+    playbooks: [],
+    knowledge: [],
+    journal: [],
+    bonds: [],
+    ...data,
+  };
+}
+
 // ── Public API ──
 
 /**
@@ -39,7 +76,17 @@ async function fallbackNextApi<T>(path: string, init?: RequestInit): Promise<T> 
  */
 export async function apiGet<T>(goPath: string, nextFallback?: string): Promise<T> {
   const data = await tryGoApi<T>(goPath);
-  if (data !== null) return data;
+  if (data !== null) {
+    // Normalize world data from Go API
+    if (goPath === "/api/universes" && Array.isArray(data)) {
+      return normalizeWorlds(data) as T;
+    }
+    // Normalize agent profile data from Go API
+    if (goPath.match(/^\/api\/agents\/[^/]+$/) && data && typeof data === 'object' && 'name' in (data as object)) {
+      return normalizeAgent(data) as T;
+    }
+    return data;
+  }
   return fallbackNextApi<T>(nextFallback ?? goPath);
 }
 
