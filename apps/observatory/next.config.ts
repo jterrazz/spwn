@@ -1,12 +1,10 @@
 import type { NextConfig } from "next";
 
-const isTauri = process.env.TAURI_ENV_PLATFORM !== undefined;
+// Only use static export for explicit Tauri production builds (npm run build:static)
+const isStaticExport = process.env.TAURI_STATIC_BUILD === "1";
 
 const nextConfig: NextConfig = {
-  // Static export for Tauri (native app bundles static files)
-  ...(isTauri ? { output: "export" } : {}),
-
-  // Allow images from any source
+  ...(isStaticExport ? { output: "export" } : {}),
   images: {
     unoptimized: true,
   },

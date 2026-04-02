@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "build:static": "TAURI_ENV_PLATFORM=1 next build",
+    "build:static": "TAURI_STATIC_BUILD=1 next build",
     "tauri": "cargo tauri"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "productName": "spwn Observatory",
-  "version": "0.10.4",
+  "version": "0.11.0",
   "identifier": "sh.spwn.observatory",
   "build": {
     "devUrl": "http://localhost:1420",
@@ -17,11 +17,10 @@
         "minHeight": 600,
         "resizable": true,
         "fullscreen": false,
-        "decorations": false,
-        "transparent": true,
+        "decorations": true,
+        "transparent": false,
         "hiddenTitle": true,
-        "titleBarStyle": "Overlay",
-        "shadow": true
+        "titleBarStyle": "Overlay"
       }
     ],
     "security": {
