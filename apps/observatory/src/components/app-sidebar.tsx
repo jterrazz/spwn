@@ -39,6 +39,8 @@ import {
 } from "@/components/ui/collapsible";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LiveStatus } from "@/components/live-status";
+import { UpgradeBanner } from "@/components/upgrade-banner";
+import { useVersion } from "@/hooks/use-version";
 import type { World, LimboAgent } from "@/lib/types";
 import { apiAction } from "@/lib/api-client";
 
@@ -85,6 +87,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
   const [newAgentName, setNewAgentName] = useState("");
   const [creating, setCreating] = useState(false);
   const newAgentInputRef = useRef<HTMLInputElement>(null);
+  const { version } = useVersion();
 
   useEffect(() => {
     if (showNewAgent) {
@@ -325,6 +328,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
 
       {/* ── Footer ── */}
       <SidebarFooter className="px-4 py-3 space-y-3">
+        {version?.updateAvailable && <UpgradeBanner version={version} />}
         <div className="flex items-center justify-between">
           <LiveStatus />
           <ThemeToggle />
@@ -337,7 +341,15 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
           <a href="https://github.com/jterrazz/spwn" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
             GitHub
           </a>
-          <span className="ml-auto text-muted-foreground/15">v0.1.0</span>
+          <span className="ml-auto flex items-center gap-1.5 text-muted-foreground/15">
+            {version && (
+              <span className={`inline-block w-1.5 h-1.5 rounded-full ${version.updateAvailable ? "bg-amber-400" : "bg-green-500"}`} />
+            )}
+            v{version?.current ?? "…"}
+            {version?.updateAvailable && (
+              <span className="text-amber-400/60">⬆</span>
+            )}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">

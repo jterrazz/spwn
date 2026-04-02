@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"spwn.sh/core/foundation"
 )
 
 func TestVersionCheckCache_FreshCacheReturnsValue(t *testing.T) {
@@ -15,10 +17,10 @@ func TestVersionCheckCache_FreshCacheReturnsValue(t *testing.T) {
 
 	// Write a fresh cache
 	cacheContent := time.Now().UTC().Format(time.RFC3339) + "\nv1.2.3"
-	os.WriteFile(filepath.Join(tmpDir, versionCheckFile), []byte(cacheContent), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".version-check"), []byte(cacheContent), 0644)
 
 	// Should return cached value without hitting network
-	result := checkVersionCached()
+	result := foundation.CheckLatestVersion(versionCheckInterval)
 	if result != "v1.2.3" {
 		t.Errorf("expected v1.2.3, got %q", result)
 	}
@@ -31,10 +33,10 @@ func TestVersionCheckCache_StaleCacheHitsNetwork(t *testing.T) {
 	// Write a stale cache (25 hours old)
 	staleTime := time.Now().Add(-25 * time.Hour).UTC().Format(time.RFC3339)
 	cacheContent := staleTime + "\nv0.0.1"
-	os.WriteFile(filepath.Join(tmpDir, versionCheckFile), []byte(cacheContent), 0644)
+	os.WriteFile(filepath.Join(tmpDir, ".version-check"), []byte(cacheContent), 0644)
 
 	// This will try to hit the network (may fail in CI, that's OK)
-	result := checkVersionCached()
+	result := foundation.CheckLatestVersion(versionCheckInterval)
 	// If network is available, result should be non-empty and different from stale
 	// If not, it returns "" which is also acceptable
 	_ = result
@@ -45,7 +47,7 @@ func TestVersionCheckCache_MissingCacheFile(t *testing.T) {
 	t.Setenv("SPWN_HOME", tmpDir)
 
 	// No cache file — will try network, may return "" in offline env
-	result := checkVersionCached()
+	result := foundation.CheckLatestVersion(versionCheckInterval)
 	_ = result // just ensure no panic
 }
 

@@ -15,6 +15,7 @@ import (
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
+	"spwn.sh/core/foundation"
 	"github.com/spf13/cobra"
 )
 
@@ -49,6 +50,8 @@ and a Mind (persistent agent identity).`,
 
 func init() {
 	rootCmd.Version = Version
+	// Sync CLI version to the shared foundation package so observatory can use it
+	foundation.Version = Version
 	defaultHelpFunc = rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(customHelp)
 

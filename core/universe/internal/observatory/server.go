@@ -14,12 +14,15 @@ import (
 	"time"
 
 	agentpkg "spwn.sh/core/agent"
+	"spwn.sh/core/foundation"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/state"
 
 	"gopkg.in/yaml.v3"
 )
+
+const webVersionCheckInterval = 1 * time.Hour
 
 // Server serves the Observatory HTTP API.
 type Server struct {
@@ -77,6 +80,7 @@ func (s *Server) Start() error {
 	// --- READ endpoints ---
 	mux.HandleFunc("GET /api/health", cors(s.handleHealth))
 	mux.HandleFunc("GET /api/status", cors(s.handleStatus))
+	mux.HandleFunc("GET /api/version", cors(s.handleVersion))
 	mux.HandleFunc("GET /api/universes", cors(s.handleListUniverses))
 	mux.HandleFunc("GET /api/agents", cors(s.handleListAgents))
 	mux.HandleFunc("GET /api/agents/{name}", cors(s.handleGetAgent))
@@ -134,12 +138,22 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
 
+	vi := foundation.GetVersionInfo(webVersionCheckInterval)
+
 	status := map[string]interface{}{
-		"worlds":    len(worlds),
-		"agents":    len(agents),
-		"architect": s.arch != nil,
+		"worlds":          len(worlds),
+		"agents":          len(agents),
+		"architect":       s.arch != nil,
+		"version":         vi.Current,
+		"latestVersion":   vi.Latest,
+		"updateAvailable": vi.UpdateAvailable,
 	}
 	jsonOK(w, status)
+}
+
+func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
+	vi := foundation.GetVersionInfo(webVersionCheckInterval)
+	jsonOK(w, vi)
 }
 
 func (s *Server) handleListUniverses(w http.ResponseWriter, r *http.Request) {
