@@ -16,6 +16,8 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { STATUS_DOT, STATUS_BADGE, TIER_BADGE } from "@/lib/status";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function extractName(id: string): string {
   const parts = id.split("-");
@@ -30,12 +32,6 @@ function timeAgo(iso: string): string {
   if (h < 24) return `${h}h ago`;
   return `${Math.floor(h / 24)}d ago`;
 }
-
-const STATUS_DOT: Record<string, string> = {
-  running: "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]",
-  idle: "bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.5)]",
-  stopped: "bg-white/20",
-};
 
 const LOG_LEVEL_COLORS: Record<string, string> = {
   info: "text-blue-400/70",
@@ -69,6 +65,9 @@ export default function WorldDashboard() {
   const [newAgentName, setNewAgentName] = useState("");
   const [newAgentTier, setNewAgentTier] = useState("citizen");
   const [showNewAgent, setShowNewAgent] = useState(false);
+
+  const worldName = world ? extractName(world.id) : null;
+  usePageTitle(worldName);
 
   const fetchWorld = useCallback(() => {
     apiGet<World[]>("/api/universes", "/api/worlds")
@@ -221,9 +220,26 @@ export default function WorldDashboard() {
             <div className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT[world.status]}`} />
             <div>
               <h1 className="text-2xl font-heading tracking-wide text-foreground/90">{name}</h1>
-              <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
-                {world.id} · {world.config} · {timeAgo(world.created_at)}
-              </p>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span className="text-xs font-mono text-muted-foreground/40">{world.id.substring(0, 12)}</span>
+                <span className="text-muted-foreground/15">·</span>
+                <span className="text-xs font-mono text-muted-foreground/40">{world.config}</span>
+                <span className="text-muted-foreground/15">·</span>
+                <span className="text-xs font-mono text-muted-foreground/40">{timeAgo(world.created_at)}</span>
+                {world.workspace && (
+                  <>
+                    <span className="text-muted-foreground/15">·</span>
+                    <span className="text-xs font-mono text-muted-foreground/30">
+                      {world.workspace.split("/").map((seg, i, arr) => (
+                        <span key={i}>
+                          {i > 0 && <span className="text-muted-foreground/15">/</span>}
+                          <span className={i === arr.length - 1 ? "text-muted-foreground/50" : ""}>{seg}</span>
+                        </span>
+                      ))}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
@@ -330,7 +346,7 @@ export default function WorldDashboard() {
 
         {/* Stats */}
         <div className="flex gap-4 flex-wrap">
-          <StatCard label="Status" value={world.status} />
+          <StatCard label="Status" value={world.status} sub={world.id.substring(0, 12)} />
           <StatCard label="Agents" value={String(world.agents.length)} />
           <StatCard label="Config" value={world.config} />
           <StatCard label="Uptime" value={timeAgo(world.created_at)} />
@@ -441,22 +457,32 @@ export default function WorldDashboard() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {world.agents.map((agent) => (
-              <a
-                key={agent.name}
-                href={`/world/${worldId}/${agent.name}`}
-                className="glass-subtle p-4 flex items-center justify-between hover:bg-white/[0.04] transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${STATUS_DOT[agent.status] ?? "bg-white/20"}`} />
-                  <div>
-                    <p className="text-sm text-foreground/80 group-hover:text-foreground/90">{agent.name}</p>
-                    <p className="text-[10px] font-mono text-muted-foreground/40 capitalize">{agent.tier}</p>
+            {world.agents.map((agent) => {
+              const tierStyle = TIER_BADGE[agent.tier] ?? TIER_BADGE.citizen;
+              const statusStyle = STATUS_BADGE[agent.status] ?? STATUS_BADGE.stopped;
+              return (
+                <a
+                  key={agent.name}
+                  href={`/world/${worldId}/${agent.name}`}
+                  className="glass-subtle p-4 flex items-center justify-between hover:bg-white/[0.04] transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${STATUS_DOT[agent.status] ?? "bg-white/20"}`} />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-foreground/80 group-hover:text-foreground/90">{agent.name}</p>
+                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-mono border ${tierStyle}`}>
+                          {agent.tier}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <span className="text-[10px] font-mono text-muted-foreground/30 uppercase">{agent.status}</span>
-              </a>
-            ))}
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${statusStyle}`}>
+                    {agent.status}
+                  </span>
+                </a>
+              );
+            })}
           </div>
         </div>
 

@@ -110,6 +110,25 @@ export async function apiPost<T>(
 }
 
 /**
+ * PUT to Go API, fall back to Next.js route.
+ */
+export async function apiPut<T>(
+  goPath: string,
+  body?: unknown,
+  nextFallback?: string
+): Promise<T> {
+  const init: RequestInit = {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  };
+
+  const data = await tryGoApi<T>(goPath, init);
+  if (data !== null) return data;
+  return fallbackNextApi<T>(nextFallback ?? goPath, init);
+}
+
+/**
  * DELETE on Go API, fall back to Next.js route.
  */
 export async function apiDelete(goPath: string, nextFallback?: string): Promise<void> {

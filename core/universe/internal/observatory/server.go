@@ -37,7 +37,7 @@ func New(s *state.Store, arch *architect.Architect, addr string) *Server {
 func cors(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
@@ -80,6 +80,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/agents", cors(s.handleListAgents))
 	mux.HandleFunc("GET /api/agents/{name}", cors(s.handleGetAgent))
 	mux.HandleFunc("GET /api/agents/{name}/journal", cors(s.handleGetAgentJournal))
+	mux.HandleFunc("GET /api/agents/{name}/mind", cors(s.handleGetAgentMind))
 	mux.HandleFunc("GET /api/worlds/{id}/logs", cors(s.handleWorldLogs))
 
 	// --- WRITE endpoints ---
@@ -93,6 +94,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /api/agents/{name}/fork", cors(s.handleFork))
 	mux.HandleFunc("POST /api/worlds/{id}/talk", cors(s.handleTalk))
 	mux.HandleFunc("POST /api/agents/{name}/export", cors(s.handleExport))
+	mux.HandleFunc("PUT /api/agents/{name}/identity", cors(s.handleUpdateIdentity))
 
 	// --- Architect endpoints ---
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
@@ -730,4 +732,71 @@ func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "stopping"})
+}
+
+// handleGetAgentMind returns the mind tree (layers → files) for an agent.
+func (s *Server) handleGetAgentMind(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if name == "" {
+		jsonError(w, "agent name is required", 400)
+		return
+	}
+
+	info, err := agentpkg.InspectAgent(name)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+
+	jsonOK(w, info.Layers)
+}
+
+// handleUpdateIdentity updates a single identity field for an agent.
+func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if name == "" {
+		jsonError(w, "agent name is required", 400)
+		return
+	}
+
+	var body struct {
+		Field   string `json:"field"`
+		Content string `json:"content"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+
+	// Validate field name to prevent directory traversal
+	allowed := map[string]bool{"purpose": true, "persona": true, "traits": true, "bonds": true}
+	if !allowed[body.Field] {
+		jsonError(w, "invalid field: must be one of purpose, persona, traits, bonds", 400)
+		return
+	}
+
+	info, err := agentpkg.InspectAgent(name)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+
+	identityDir := filepath.Join(info.Path, "identity")
+	if err := os.MkdirAll(identityDir, 0755); err != nil {
+		jsonError(w, "failed to create identity dir: "+err.Error(), 500)
+		return
+	}
+
+	filePath := filepath.Join(identityDir, body.Field+".md")
+
+	// Write content with a heading
+	heading := strings.ToUpper(body.Field[:1]) + body.Field[1:]
+	content := fmt.Sprintf("# %s\n\n%s\n", heading, body.Content)
+
+	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+		jsonError(w, "failed to write file: "+err.Error(), 500)
+		return
+	}
+
+	jsonOK(w, map[string]string{"status": "ok", "field": body.Field})
 }
