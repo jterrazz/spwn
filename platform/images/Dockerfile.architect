@@ -16,7 +16,18 @@ RUN useradd -m -s /bin/bash architect
 COPY bin/spwn-linux /usr/local/bin/spwn
 
 # Copy Architect identity file
-COPY platform/fixtures/architect/ARCHITECT.md /world/ARCHITECT.md
+COPY platform/system/architect/ARCHITECT.md /world/ARCHITECT.md
+
+# Copy global agent operating manual and system skills
+COPY platform/system/AGENTS.md /world/AGENTS.md
+COPY platform/system/skills/ /world/skills/
+
+# Copy architect-specific skills (merged into /world/skills/)
+COPY platform/system/architect/skills/ /world/skills/
+
+# Copy default architect TODO (overridden by runtime mount)
+COPY platform/system/architect/todo.md /world/todo.md
+
 RUN mkdir -p /world && chown -R architect:architect /world
 
 # Container runs as ROOT for file access (bind mounts from host)
