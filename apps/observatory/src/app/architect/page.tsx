@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiGet, apiAction } from "@/lib/api-client";
 
 interface ArchitectStatus {
   status: "running" | "stopped";
@@ -81,8 +82,8 @@ export default function ArchitectPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/architect/status").then((r) => r.json()).catch(() => ({ status: "stopped", containerId: null, uptime: null, channels: [] })),
-      fetch("/api/status").then((r) => r.json()).catch(() => null),
+      apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status").catch(() => ({ status: "stopped" as const, containerId: null, uptime: null, channels: [] })),
+      apiGet<StatusData>("/api/status", "/api/status").catch(() => null),
     ]).then(([archStatus, sData]) => {
       setArchitectStatus(archStatus);
       setStatusData(sData);
@@ -98,13 +99,12 @@ export default function ArchitectPage() {
   const handleStart = async () => {
     setActionLoading("start");
     try {
-      const res = await fetch("/api/architect/start", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
+      const result = await apiAction("/api/architect/start", undefined, "/api/architect/start");
+      if (result.ok) {
         showFeedback("Architect started successfully");
         setArchitectStatus((s) => s ? { ...s, status: "running" } : s);
       } else {
-        showFeedback(`Error: ${data.error}`);
+        showFeedback(`Error: ${result.error}`);
       }
     } catch {
       showFeedback("Error: Failed to connect to API");
@@ -116,13 +116,12 @@ export default function ArchitectPage() {
   const handleStop = async () => {
     setActionLoading("stop");
     try {
-      const res = await fetch("/api/architect/stop", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
+      const result = await apiAction("/api/architect/stop", undefined, "/api/architect/stop");
+      if (result.ok) {
         showFeedback("Architect stopped");
         setArchitectStatus((s) => s ? { ...s, status: "stopped" } : s);
       } else {
-        showFeedback(`Error: ${data.error}`);
+        showFeedback(`Error: ${result.error}`);
       }
     } catch {
       showFeedback("Error: Failed to connect to API");

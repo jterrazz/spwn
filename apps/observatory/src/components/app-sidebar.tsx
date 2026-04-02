@@ -37,6 +37,7 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LiveStatus } from "@/components/live-status";
 import type { World, LimboAgent } from "@/lib/mock-data";
+import { apiAction } from "@/lib/api-client";
 
 interface AppSidebarProps {
   worlds: World[];
@@ -207,14 +208,11 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
             <SidebarMenuItem>
               <SidebarMenuButton
                 className="text-[11px] text-muted-foreground/25 hover:text-muted-foreground/50"
-                onClick={() => {
+                onClick={async () => {
                   const name = prompt("Agent name:");
                   if (!name?.trim()) return;
-                  fetch("/api/agents/create", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: name.trim() }),
-                  }).then(() => window.location.reload());
+                  await apiAction("/api/agents", { name: name.trim() }, "/api/agents/create");
+                  window.location.reload();
                 }}
               >
                 <IconPlus size={12} className="opacity-30 shrink-0" />

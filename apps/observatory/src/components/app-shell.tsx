@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { MOCK_WORLDS, MOCK_LIMBO } from "@/lib/mock-data";
 import type { World, LimboAgent } from "@/lib/mock-data";
+import { apiGet } from "@/lib/api-client";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -18,9 +19,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const currentWorldId = worldMatch?.[1];
 
   const fetchWorlds = useCallback(() => {
-    fetch("/api/worlds")
-      .then((r) => r.json())
-      .then((data: World[]) => {
+    apiGet<World[]>("/api/universes", "/api/worlds")
+      .then((data) => {
         if (data && data.length > 0) setWorlds(data);
       })
       .catch(() => {

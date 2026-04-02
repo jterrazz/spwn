@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { isGoApiAvailable } from "@/lib/api-client";
 
 export function LiveStatus() {
   const [isLive, setIsLive] = useState(true);
 
   useEffect(() => {
-    const check = () => {
-      fetch("/api/status")
-        .then((r) => {
-          setIsLive(r.ok);
-        })
-        .catch(() => {
-          setIsLive(false);
-        });
+    const check = async () => {
+      const goUp = await isGoApiAvailable();
+      if (goUp) {
+        setIsLive(true);
+        return;
+      }
+      // Fall back to Next.js API route check
+      try {
+        const res = await fetch("/api/status");
+        setIsLive(res.ok);
+      } catch {
+        setIsLive(false);
+      }
     };
 
     check();
