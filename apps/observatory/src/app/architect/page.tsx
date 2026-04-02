@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiGet } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
 import {
   IconSend,
@@ -11,7 +11,6 @@ import {
   IconUsers,
   IconClock,
   IconCircleCheck,
-  IconPlus,
   IconChevronDown,
   IconChevronRight,
 } from "@tabler/icons-react";
@@ -29,11 +28,19 @@ interface ArchitectStatus {
   };
 }
 
+interface TodoActionData {
+  type: "add" | "done" | "update";
+  title: string;
+  priority?: string;
+  description?: string;
+}
+
 interface ChatMessage {
   role: "user" | "architect";
   content: string;
   timestamp: Date;
   error?: boolean;
+  todoAction?: TodoActionData;
 }
 
 interface TodoItem {
@@ -70,33 +77,8 @@ function StatCard({ label, value, sub, accent, icon, loading: isLoading }: { lab
   );
 }
 
-function TodoPanel({ todo, onRefresh }: { todo: TodoData | null; onRefresh: () => void }) {
+function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightTitle: string | null }) {
   const [showCompleted, setShowCompleted] = useState(false);
-  const [newItem, setNewItem] = useState("");
-  const [adding, setAdding] = useState(false);
-
-  const handleAddItem = async () => {
-    const text = newItem.trim();
-    if (!text || adding) return;
-    setAdding(true);
-    try {
-      const currentRaw = todo?.raw ?? "";
-      // Append to backlog section
-      let updated = currentRaw;
-      if (updated.includes("## Backlog")) {
-        updated = updated.replace("## Backlog", `## Backlog\n- [ ] ${text}`);
-      } else {
-        updated += `\n## Backlog\n- [ ] ${text}\n`;
-      }
-      await apiPost("/api/architect/todo", { content: updated });
-      setNewItem("");
-      onRefresh();
-    } catch {
-      // ignore
-    } finally {
-      setAdding(false);
-    }
-  };
 
   if (!todo) {
     return (
@@ -107,9 +89,20 @@ function TodoPanel({ todo, onRefresh }: { todo: TodoData | null; onRefresh: () =
     );
   }
 
+  const isEmpty = todo.inProgress.length === 0 && todo.backlog.length === 0 && todo.completed.length === 0;
+
   return (
     <div className="glass-subtle rounded-xl p-4 space-y-3">
-      <h3 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">TODO</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">TODO</h3>
+        <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
+          managed by architect
+        </span>
+      </div>
+
+      {isEmpty && (
+        <p className="text-xs text-muted-foreground/25 italic">No tasks yet. Ask the Architect to do something.</p>
+      )}
 
       {/* In Progress */}
       {todo.inProgress.length > 0 && (
@@ -117,7 +110,12 @@ function TodoPanel({ todo, onRefresh }: { todo: TodoData | null; onRefresh: () =
           <p className="text-[10px] uppercase tracking-wider text-yellow-400/50 mb-1.5">In Progress</p>
           <div className="space-y-1">
             {todo.inProgress.map((item, i) => (
-              <div key={`ip-${i}`} className="flex items-start gap-2 text-xs text-foreground/70">
+              <div
+                key={`ip-${i}`}
+                className={`flex items-start gap-2 text-xs text-foreground/70 transition-all duration-700 ${
+                  highlightTitle && item.text.includes(highlightTitle) ? "bg-yellow-400/10 rounded px-1 -mx-1" : ""
+                }`}
+              >
                 <span className="mt-0.5 w-3.5 h-3.5 rounded border border-yellow-400/30 flex items-center justify-center flex-shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/50" />
                 </span>
@@ -134,7 +132,12 @@ function TodoPanel({ todo, onRefresh }: { todo: TodoData | null; onRefresh: () =
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground/30 mb-1.5">Backlog</p>
           <div className="space-y-1">
             {todo.backlog.map((item, i) => (
-              <div key={`bl-${i}`} className="flex items-start gap-2 text-xs text-foreground/50">
+              <div
+                key={`bl-${i}`}
+                className={`flex items-start gap-2 text-xs text-foreground/50 transition-all duration-700 ${
+                  highlightTitle && item.text.includes(highlightTitle) ? "bg-blue-400/10 rounded px-1 -mx-1" : ""
+                }`}
+              >
                 <span className="mt-0.5 w-3.5 h-3.5 rounded border border-white/10 flex-shrink-0" />
                 <span>{item.text}</span>
               </div>
@@ -142,30 +145,6 @@ function TodoPanel({ todo, onRefresh }: { todo: TodoData | null; onRefresh: () =
           </div>
         </div>
       )}
-
-      {/* Add new item */}
-      <div className="flex gap-2 pt-1">
-        <input
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleAddItem();
-            }
-          }}
-          placeholder="Add TODO item..."
-          className="flex-1 bg-transparent text-xs text-foreground/70 placeholder:text-muted-foreground/20 focus:outline-none border-b border-white/[0.06] pb-1"
-          disabled={adding}
-        />
-        <button
-          onClick={handleAddItem}
-          disabled={!newItem.trim() || adding}
-          className="p-1 text-muted-foreground/30 hover:text-foreground/60 transition-colors disabled:opacity-20"
-        >
-          <IconPlus size={14} />
-        </button>
-      </div>
 
       {/* Completed (collapsed) */}
       {todo.completed.length > 0 && (
@@ -261,6 +240,7 @@ export default function ArchitectPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [highlightTitle, setHighlightTitle] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -334,6 +314,24 @@ export default function ArchitectPage() {
     }
   };
 
+  const handleTalkResponse = (data: { response?: string; error?: string; todoAction?: TodoActionData }) => {
+    const archMsg: ChatMessage = {
+      role: "architect",
+      content: data.response || data.error || "No response",
+      timestamp: new Date(),
+      error: !!data.error && !data.response,
+      todoAction: data.todoAction,
+    };
+    setMessages((prev) => [...prev, archMsg]);
+
+    // If there's a TODO action, refresh the TODO list and highlight the item
+    if (data.todoAction) {
+      fetchTodo();
+      setHighlightTitle(data.todoAction.title);
+      setTimeout(() => setHighlightTitle(null), 3000);
+    }
+  };
+
   const handleSendMessage = async () => {
     const msg = chatInput.trim();
     if (!msg || sending) return;
@@ -351,13 +349,7 @@ export default function ArchitectPage() {
         signal: AbortSignal.timeout(60000),
       });
       const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
-      const archMsg: ChatMessage = {
-        role: "architect",
-        content: data.response || data.error || "No response",
-        timestamp: new Date(),
-        error: !!data.error && !data.response,
-      };
-      setMessages((prev) => [...prev, archMsg]);
+      handleTalkResponse(data);
     } catch {
       // Fallback to Next.js route
       try {
@@ -367,13 +359,7 @@ export default function ArchitectPage() {
           body: JSON.stringify({ message: msg }),
         });
         const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
-        const archMsg: ChatMessage = {
-          role: "architect",
-          content: data.response || data.error || "No response",
-          timestamp: new Date(),
-          error: !!data.error && !data.response,
-        };
-        setMessages((prev) => [...prev, archMsg]);
+        handleTalkResponse(data);
       } catch {
         setMessages((prev) => [...prev, {
           role: "architect",
@@ -515,7 +501,7 @@ export default function ArchitectPage() {
                 </div>
               )}
               {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                   <div className={`max-w-[80%] rounded-xl px-3.5 py-2.5 ${
                     msg.role === "user"
                       ? "bg-white/[0.08] text-foreground/80"
@@ -532,6 +518,20 @@ export default function ArchitectPage() {
                       {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                     </p>
                   </div>
+                  {msg.todoAction && (
+                    <div className="max-w-[80%] mt-1.5 rounded-lg px-3 py-2 bg-blue-500/10 border border-blue-500/15 text-blue-300/80">
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-blue-400/60 mb-1">
+                        📋 {msg.todoAction.type === "add" ? "Added to TODO" : msg.todoAction.type === "done" ? "Task Completed" : "Task Updated"}
+                      </div>
+                      <p className="text-xs font-medium text-blue-300/90">&quot;{msg.todoAction.title}&quot;</p>
+                      {msg.todoAction.priority && (
+                        <p className="text-[10px] text-blue-400/50 mt-0.5">Priority: {msg.todoAction.priority}</p>
+                      )}
+                      {msg.todoAction.description && (
+                        <p className="text-[10px] text-blue-400/40 mt-0.5">{msg.todoAction.description}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
               {sending && (
@@ -579,7 +579,7 @@ export default function ArchitectPage() {
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Tasks</h2>
           </div>
-          <TodoPanel todo={todo} onRefresh={fetchTodo} />
+          <TodoPanel todo={todo} highlightTitle={highlightTitle} />
         </div>
       </div>
     </div>
