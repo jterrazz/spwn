@@ -186,18 +186,30 @@ export default function AgentProfilePage() {
         <div className="flex items-center gap-1">
           <button
             onClick={async () => {
+              if ((profile?.journal?.length ?? 0) === 0) {
+                showFeedback("Nothing to dream about yet — spawn the agent in a world first");
+                return;
+              }
               const ok = await callAction("dream");
-              if (ok) showFeedback("Dream cycle complete!");
+              if (ok) {
+                showFeedback("Dream cycle complete — check playbooks for promoted patterns");
+                fetchProfile();
+              }
             }}
             disabled={actionLoading !== null}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
           >
             {actionLoading === "dream" ? (
-              <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+              <>
+                <div className="w-3 h-3 border-2 border-purple-400/50 border-t-purple-400 rounded-full animate-spin" />
+                <span className="text-purple-400/70">Dreaming...</span>
+              </>
             ) : (
-              <IconRefresh size={14} />
+              <>
+                <IconRefresh size={14} />
+                Dream
+              </>
             )}
-            Dream
           </button>
           <button
             onClick={async () => {

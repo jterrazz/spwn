@@ -14,11 +14,18 @@ interface AgentListItem {
   layers: Record<string, string[]>;
 }
 
+interface StatusData {
+  worlds: number;
+  agents: number;
+  running: number;
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [worlds, setWorlds] = useState<World[]>([]);
   const [limboAgents, setLimboAgents] = useState<LimboAgent[]>([]);
   const [sidebarLoading, setSidebarLoading] = useState(true);
+  const [statusData, setStatusData] = useState<StatusData | null>(null);
 
   // Extract current world ID from URL if on a world page
   const worldMatch = pathname.match(/^\/world\/([^/]+)/);
@@ -28,7 +35,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     Promise.all([
       apiGet<World[]>("/api/universes", "/api/worlds").catch(() => [] as World[]),
       apiGet<AgentListItem[]>("/api/agents", "/api/agents").catch(() => [] as AgentListItem[]),
-    ]).then(([worldData, agentData]) => {
+      apiGet<StatusData>("/api/status", "/api/status").catch(() => null),
+    ]).then(([worldData, agentData, sData]) => {
+      setStatusData(sData);
       const w = worldData ?? [];
       setWorlds(w);
       setSidebarLoading(false);
@@ -62,6 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         limboAgents={limboAgents}
         currentWorldId={currentWorldId}
         loading={sidebarLoading}
+        statusData={statusData}
       />
       <SidebarInset>
         <Breadcrumbs />
