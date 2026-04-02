@@ -170,7 +170,7 @@ export default function AgentProfilePage() {
     );
   }
 
-  const totalFiles = Object.values(mindTree).reduce((n, f) => n + f.length, 0);
+  const totalFiles = Object.values(mindTree).reduce((n, f) => n + (f?.length ?? 0), 0);
   const activeLayers = Object.keys(mindTree).filter((k) => (mindTree[k]?.length ?? 0) > 0).length;
 
   const tierStyle = TIER_BADGE[profile.tier] ?? TIER_BADGE.citizen;
