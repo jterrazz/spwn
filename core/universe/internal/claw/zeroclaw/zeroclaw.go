@@ -20,11 +20,6 @@ func (z *ZeroClaw) StopCommand() []string {
 	return []string{"zeroclaw", "daemon", "stop"}
 }
 
-// ConnectChannel returns the command to connect a messaging channel.
-func (z *ZeroClaw) ConnectChannel(channel string) []string {
-	return []string{"zeroclaw", "channel", "add", channel}
-}
-
 // InstallCommands returns shell commands to install ZeroClaw.
 func (z *ZeroClaw) InstallCommands() []string {
 	return []string{
@@ -34,11 +29,6 @@ func (z *ZeroClaw) InstallCommands() []string {
 
 // RequiredEnvVars returns env vars needed for the daemon.
 func (z *ZeroClaw) RequiredEnvVars() []string { return []string{} }
-
-// SupportedChannels returns the list of messaging channels supported.
-func (z *ZeroClaw) SupportedChannels() []string {
-	return []string{"telegram", "slack", "discord", "whatsapp", "signal", "matrix", "irc", "email"}
-}
 
 // BaseImage returns the Docker base image.
 func (z *ZeroClaw) BaseImage() string { return "debian:bookworm-slim" }

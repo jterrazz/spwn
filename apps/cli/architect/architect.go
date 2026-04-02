@@ -18,7 +18,7 @@ var defaultArchitectHelp func(*cobra.Command, []string)
 var Cmd = &cobra.Command{
 	Use:   "architect",
 	Short: "Your always-on world builder",
-	Long:  `The Architect is your always-on world builder. It manages worlds, connects to messaging channels, and orchestrates artificial life.`,
+	Long:  `The Architect is your always-on world builder. It manages worlds and orchestrates artificial life.`,
 }
 
 var startCmd = &cobra.Command{
@@ -28,8 +28,7 @@ var startCmd = &cobra.Command{
 
 The Architect runs the spwn binary inside a long-lived container with the
 host's Docker socket mounted (DooD — Docker-outside-of-Docker), allowing it
-to create and manage world containers as siblings. Channels (Telegram, Slack,
-etc.) connect here.
+to create and manage world containers as siblings.
 
 The container mounts:
   /var/run/docker.sock    Docker daemon access (sibling containers, not nested)
@@ -46,20 +45,9 @@ var stopCmd = &cobra.Command{
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show Architect status — channels, worlds, agents",
-	Long:  `Query Docker to show whether the Architect container is running, its uptime, and connected channels.`,
+	Short: "Show Architect status — worlds, agents",
+	Long:  `Query Docker to show whether the Architect container is running, its uptime, and active worlds.`,
 	RunE:  runStatus,
-}
-
-var connectCmd = &cobra.Command{
-	Use:   "connect [channel]",
-	Short: "Connect a messaging channel (telegram, slack, discord, ...)",
-	Args:  cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		channel := args[0]
-		fmt.Printf("  Channel %q connected.\n", channel)
-		return nil
-	},
 }
 
 func init() {
@@ -69,7 +57,6 @@ func init() {
 	Cmd.AddCommand(startCmd)
 	Cmd.AddCommand(stopCmd)
 	Cmd.AddCommand(statusCmd)
-	Cmd.AddCommand(connectCmd)
 }
 
 func runStart(cmd *cobra.Command, args []string) error {
@@ -189,12 +176,6 @@ func runStatus(cmd *cobra.Command, args []string) error {
 		s.Info("Universe:", info.OrgName)
 	}
 
-	if len(info.Channels) > 0 {
-		s.Info("Channels:", strings.Join(info.Channels, ", "))
-	} else {
-		s.Info("Channels:", "none")
-	}
-
 	s.Blank()
 
 	return nil
@@ -239,8 +220,7 @@ func architectHelp(cmd *cobra.Command, args []string) {
 			{Title: "Commands", Commands: []ui.HelpEntry{
 				{Name: "start", Desc: "Start the Architect daemon"},
 				{Name: "stop", Desc: "Stop the Architect daemon"},
-				{Name: "status", Desc: "Show status, channels, active worlds"},
-				{Name: "connect <channel>", Desc: "Connect a messaging channel"},
+				{Name: "status", Desc: "Show status and active worlds"},
 			}},
 		},
 		"spwn architect [command]",

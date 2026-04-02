@@ -111,10 +111,6 @@ func TestLoadOrgPath_WithClaw(t *testing.T) {
 	content := `name: claw-org
 version: 1
 claw:
-  channels:
-    - type: slack
-      token: xoxb-test
-      workspace: my-workspace
   sync:
     repo: git@github.com:test/repo.git
     branch: main
@@ -130,12 +126,6 @@ claw:
 		t.Fatalf("LoadOrgPath() error: %v", err)
 	}
 
-	if len(org.Claw.Channels) != 1 {
-		t.Fatalf("expected 1 channel, got %d", len(org.Claw.Channels))
-	}
-	if org.Claw.Channels[0].Type != "slack" {
-		t.Errorf("Channel.Type = %q, want %q", org.Claw.Channels[0].Type, "slack")
-	}
 	if org.Claw.Sync.Repo != "git@github.com:test/repo.git" {
 		t.Errorf("Sync.Repo = %q, want %q", org.Claw.Sync.Repo, "git@github.com:test/repo.git")
 	}

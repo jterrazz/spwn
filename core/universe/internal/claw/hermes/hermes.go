@@ -20,11 +20,6 @@ func (h *Hermes) StopCommand() []string {
 	return []string{"hermes", "gateway", "stop"}
 }
 
-// ConnectChannel returns the command to connect a messaging channel.
-func (h *Hermes) ConnectChannel(channel string) []string {
-	return []string{"hermes", "channel", "add", channel}
-}
-
 // InstallCommands returns shell commands to install Hermes.
 func (h *Hermes) InstallCommands() []string {
 	return []string{
@@ -34,11 +29,6 @@ func (h *Hermes) InstallCommands() []string {
 
 // RequiredEnvVars returns env vars needed for the daemon.
 func (h *Hermes) RequiredEnvVars() []string { return []string{} }
-
-// SupportedChannels returns the list of messaging channels supported.
-func (h *Hermes) SupportedChannels() []string {
-	return []string{"telegram", "discord", "slack", "whatsapp"}
-}
 
 // BaseImage returns the Docker base image.
 func (h *Hermes) BaseImage() string { return "debian:bookworm" }

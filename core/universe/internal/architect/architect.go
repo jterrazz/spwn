@@ -21,7 +21,6 @@ import (
 
 	// Register all claw adapters
 	_ "spwn.sh/core/universe/internal/claw/hermes"
-	_ "spwn.sh/core/universe/internal/claw/openclaw"
 	_ "spwn.sh/core/universe/internal/claw/zeroclaw"
 )
 

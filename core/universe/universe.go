@@ -246,7 +246,6 @@ type ArchitectDaemonInfo struct {
 	StartedAt   time.Time
 	Uptime      time.Duration
 	OrgName     string
-	Channels    []string
 }
 
 // StartArchitectDaemon creates and starts the spwn-architect Docker container.
@@ -384,9 +383,6 @@ func GetArchitectDaemonStatus(ctx context.Context) (*ArchitectDaemonInfo, error)
 	org, err := manifest.LoadOrg()
 	if err == nil && org != nil {
 		result.OrgName = org.Name
-		for _, ch := range org.Claw.Channels {
-			result.Channels = append(result.Channels, ch.Type)
-		}
 	}
 
 	return result, nil

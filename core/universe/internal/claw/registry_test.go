@@ -7,12 +7,11 @@ import (
 
 	// Register all claw adapters
 	_ "spwn.sh/core/universe/internal/claw/hermes"
-	_ "spwn.sh/core/universe/internal/claw/openclaw"
 	_ "spwn.sh/core/universe/internal/claw/zeroclaw"
 )
 
 func TestAllClawsRegistered(t *testing.T) {
-	expected := []string{"zeroclaw", "hermes", "openclaw"}
+	expected := []string{"zeroclaw", "hermes"}
 	for _, name := range expected {
 		c, err := claw.Get(name)
 		if err != nil {
@@ -26,7 +25,7 @@ func TestAllClawsRegistered(t *testing.T) {
 }
 
 func TestAllClawsStartStop(t *testing.T) {
-	names := []string{"zeroclaw", "hermes", "openclaw"}
+	names := []string{"zeroclaw", "hermes"}
 	for _, name := range names {
 		t.Run(name, func(t *testing.T) {
 			c, _ := claw.Get(name)
@@ -46,57 +45,8 @@ func TestAllClawsStartStop(t *testing.T) {
 	}
 }
 
-func TestAllClawsChannels(t *testing.T) {
-	names := []string{"zeroclaw", "hermes", "openclaw"}
-	for _, name := range names {
-		t.Run(name, func(t *testing.T) {
-			c, _ := claw.Get(name)
-			channels := c.SupportedChannels()
-			if len(channels) == 0 {
-				t.Error("no supported channels")
-			}
-
-			// All claws must support at least telegram and slack
-			supported := make(map[string]bool)
-			for _, ch := range channels {
-				supported[ch] = true
-			}
-			if !supported["telegram"] {
-				t.Error("missing telegram")
-			}
-			if !supported["slack"] {
-				t.Error("missing slack")
-			}
-		})
-	}
-}
-
-func TestAllClawsConnectChannel(t *testing.T) {
-	names := []string{"zeroclaw", "hermes", "openclaw"}
-	for _, name := range names {
-		t.Run(name, func(t *testing.T) {
-			c, _ := claw.Get(name)
-			cmd := c.ConnectChannel("telegram")
-			if len(cmd) == 0 {
-				t.Error("empty connect command")
-			}
-			// Command should contain the channel name
-			found := false
-			for _, arg := range cmd {
-				if arg == "telegram" {
-					found = true
-					break
-				}
-			}
-			if !found {
-				t.Error("channel name not in connect command")
-			}
-		})
-	}
-}
-
 func TestAllClawsMetadata(t *testing.T) {
-	names := []string{"zeroclaw", "hermes", "openclaw"}
+	names := []string{"zeroclaw", "hermes"}
 	for _, name := range names {
 		t.Run(name, func(t *testing.T) {
 			c, _ := claw.Get(name)
@@ -122,7 +72,7 @@ func TestGetUnknownClaw(t *testing.T) {
 
 func TestAllReturnsAllClaws(t *testing.T) {
 	all := claw.All()
-	if len(all) < 3 {
-		t.Errorf("expected at least 3 claws, got %d", len(all))
+	if len(all) < 2 {
+		t.Errorf("expected at least 2 claws, got %d", len(all))
 	}
 }
