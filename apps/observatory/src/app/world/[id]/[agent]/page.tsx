@@ -527,7 +527,7 @@ export default function AgentPage() {
             <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Stats</h2>
             <div className="grid grid-cols-2 gap-2">
               <div className="glass-subtle p-3 text-center">
-                <p className="text-lg font-heading text-foreground/80">{Object.values(mindTree).reduce((n, f) => n + f.length, 0)}</p>
+                <p className="text-lg font-heading text-foreground/80">{Object.values(mindTree).reduce((n, f) => n + (f?.length ?? 0), 0)}</p>
                 <p className="text-[9px] text-muted-foreground/35 uppercase">Files</p>
               </div>
               <div className="glass-subtle p-3 text-center">

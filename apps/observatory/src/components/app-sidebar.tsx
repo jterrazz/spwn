@@ -285,7 +285,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
             ))}
             {limboAgents.length === 0 && (
               <SidebarMenuItem>
-                <span className="text-[10px] text-muted-foreground/20 px-2 py-1">No agents in limbo</span>
+                <span className="text-[10px] text-muted-foreground/20 px-2 py-1">No agents yet</span>
               </SidebarMenuItem>
             )}
             <SidebarMenuItem>
@@ -350,6 +350,10 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
           <span className="text-muted-foreground/10">·</span>
           <a href="https://github.com/jterrazz/spwn" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
             GitHub
+          </a>
+          <span className="text-muted-foreground/10">·</span>
+          <a href="https://github.com/jterrazz/spwn/issues/new" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
+            Report Bug
           </a>
           <span className="ml-auto flex items-center gap-1.5 text-muted-foreground/15">
             {version && (

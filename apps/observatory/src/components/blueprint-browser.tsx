@@ -293,8 +293,16 @@ export function BlueprintBrowser({ compact = false }: { compact?: boolean }) {
           ) : tree.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <IconBook2 size={28} className="text-muted-foreground/15 mb-3" />
-              <p className="text-xs text-muted-foreground/35">No blueprint files</p>
-              <p className="text-[10px] text-muted-foreground/20 mt-1">Talk to the Architect to get started</p>
+              <p className="text-xs text-muted-foreground/35">No blueprint files yet</p>
+              <p className="text-[10px] text-muted-foreground/20 mt-1 max-w-[200px]">
+                Talk to the Architect to start building your knowledge base
+              </p>
+              <a
+                href="/architect"
+                className="mt-3 text-[10px] font-mono text-blue-400/50 hover:text-blue-400/80 transition-colors"
+              >
+                Go to Architect →
+              </a>
             </div>
           ) : (
             <div className="py-1">
