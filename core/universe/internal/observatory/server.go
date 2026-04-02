@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	agentpkg "spwn.sh/core/agent"
 	"spwn.sh/core/universe/internal/architect"
@@ -715,24 +716,62 @@ func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
-	status := "stopped"
-	if s.arch != nil {
-		status = "running"
+	// Check if the spwn-architect Docker container is actually running
+	cmd := exec.CommandContext(r.Context(), "docker", "inspect", "--format", "{{.State.Status}}|{{.Id}}|{{.State.StartedAt}}", "spwn-architect")
+	output, err := cmd.Output()
+	if err != nil {
+		// Container doesn't exist or Docker is not available
+		jsonOK(w, map[string]interface{}{
+			"status":      "stopped",
+			"containerId": nil,
+			"uptime":      nil,
+		})
+		return
 	}
+
+	parts := strings.SplitN(strings.TrimSpace(string(output)), "|", 3)
+	status := "stopped"
+	var containerID interface{} = nil
+	var uptime interface{} = nil
+
+	if len(parts) >= 1 && parts[0] == "running" {
+		status = "running"
+		if len(parts) >= 2 {
+			containerID = parts[1]
+		}
+		if len(parts) >= 3 {
+			if started, err := time.Parse(time.RFC3339Nano, parts[2]); err == nil {
+				dur := time.Since(started).Truncate(time.Second)
+				uptime = dur.String()
+			}
+		}
+	}
+
 	jsonOK(w, map[string]interface{}{
 		"status":      status,
-		"containerId": nil,
-		"uptime":      nil,
+		"containerId": containerID,
+		"uptime":      uptime,
 	})
 }
 
 func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
-	// The architect is already running if we can serve this request
+	// Try to start the spwn-architect container
+	cmd := exec.CommandContext(r.Context(), "docker", "start", "spwn-architect")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		jsonError(w, fmt.Sprintf("failed to start architect container: %s (%s)", strings.TrimSpace(string(output)), err), 500)
+		return
+	}
 	jsonOK(w, map[string]string{"status": "running"})
 }
 
 func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
-	jsonOK(w, map[string]string{"status": "stopping"})
+	// Try to stop the spwn-architect container
+	cmd := exec.CommandContext(r.Context(), "docker", "stop", "spwn-architect")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		jsonError(w, fmt.Sprintf("failed to stop architect container: %s (%s)", strings.TrimSpace(string(output)), err), 500)
+		return
+	}
+	jsonOK(w, map[string]string{"status": "stopped"})
 }
 
 func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
@@ -748,16 +787,16 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse the message into spwn command arguments
-	// For now, execute as a spwn CLI command
-	args := strings.Fields(body.Message)
-	if len(args) == 0 {
-		jsonError(w, "empty command", 400)
-		return
+	// Docker exec into the architect container running Claude Code
+	containerName := "spwn-architect"
+	dockerArgs := []string{
+		"exec", "-w", "/world",
+		containerName,
+		"claude", "--dangerously-skip-permissions",
+		"-p", body.Message, "--print",
 	}
 
-	// Execute the command via the spwn CLI
-	cmd := exec.CommandContext(r.Context(), "spwn", args...)
+	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		jsonOK(w, map[string]interface{}{
