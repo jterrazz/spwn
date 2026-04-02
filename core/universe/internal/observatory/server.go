@@ -862,8 +862,8 @@ func (s *Server) handleArchitectTodoUpdate(w http.ResponseWriter, r *http.Reques
 }
 
 func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
-	// Try to start the spwn-architect container
-	cmd := exec.CommandContext(r.Context(), "docker", "start", "spwn-architect")
+	// Use `spwn architect start` which handles container creation + startup
+	cmd := exec.CommandContext(r.Context(), "spwn", "architect", "start")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		jsonError(w, fmt.Sprintf("failed to start architect container: %s (%s)", strings.TrimSpace(string(output)), err), 500)
 		return
@@ -1009,8 +1009,30 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 
 	// Docker exec into the architect container running Claude Code
 	dockerArgs := []string{
-		"exec", "-w", "/world",
-		containerName,
+		"exec", "-u", "architect", "-w", "/world",
+		"-e", "SPWN_HOME=/spwn-data",
+	}
+	// Pass auth tokens
+	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
+		if val := os.Getenv(key); val != "" {
+			dockerArgs = append(dockerArgs, "-e", key+"="+val)
+		}
+	}
+	// Also try cached token
+	if os.Getenv("ANTHROPIC_API_KEY") == "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
+		tokenPath := filepath.Join(foundation.BaseDir(), ".auth-token")
+		if data, err := os.ReadFile(tokenPath); err == nil {
+			token := strings.TrimSpace(string(data))
+			if token != "" {
+				if strings.HasPrefix(token, "sk-ant-") {
+					dockerArgs = append(dockerArgs, "-e", "ANTHROPIC_API_KEY="+token)
+				} else {
+					dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
+				}
+			}
+		}
+	}
+	dockerArgs = append(dockerArgs, containerName,
 		"claude", "--dangerously-skip-permissions",
 		"-p", body.Message, "--print",
 		"--append-system-prompt",
@@ -1023,7 +1045,7 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 			"BLUEPRINT: You maintain /blueprint/ as the single source of truth. " +
 			"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. " +
 			"Every conversation should result in blueprint updates.",
-	}
+	)
 
 	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)
 	output, err := cmd.CombinedOutput()
