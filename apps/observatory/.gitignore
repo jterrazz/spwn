@@ -40,3 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 morpheus.tar.gz
+src-tauri/target/
+src-tauri/gen/

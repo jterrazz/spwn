@@ -7,11 +7,31 @@
  */
 
 import type { World, AgentProfile } from "./types";
+import { getTauriApiBase, isTauri } from "./tauri";
 
-const GO_API_BASE =
-  typeof window !== "undefined"
+// Dynamic API base — Tauri app uses a random port, browser defaults to 3001
+let _goApiBase: string | null = null;
+
+function getGoApiBase(): string {
+  if (_goApiBase) return _goApiBase;
+  // Check Tauri first
+  const tauriBase = getTauriApiBase();
+  if (tauriBase) {
+    _goApiBase = tauriBase;
+    return tauriBase;
+  }
+  // Default
+  return typeof window !== "undefined"
     ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001")
     : "http://localhost:3001";
+}
+
+// Allow Tauri to set the port after initialization
+export function setApiBase(base: string) {
+  _goApiBase = base;
+}
+
+// getGoApiBase() is now dynamic — use getGoApiBase() everywhere
 
 // ── Connection status tracking ──
 
@@ -40,7 +60,7 @@ export function onConnectionStatusChange(fn: (status: ConnectionStatus) => void)
 
 async function tryGoApi<T>(path: string, init?: RequestInit): Promise<T | null> {
   try {
-    const res = await fetch(`${GO_API_BASE}${path}`, {
+    const res = await fetch(`${getGoApiBase()}${path}`, {
       ...init,
       signal: AbortSignal.timeout(3000),
     });
@@ -207,7 +227,7 @@ export async function apiAction(
   };
 
   try {
-    const res = await fetch(`${GO_API_BASE}${goPath}`, {
+    const res = await fetch(`${getGoApiBase()}${goPath}`, {
       ...init,
       signal: AbortSignal.timeout(10000),
     });
@@ -235,7 +255,7 @@ export async function apiAction(
  */
 export async function isGoApiAvailable(): Promise<boolean> {
   try {
-    const res = await fetch(`${GO_API_BASE}/api/status`, {
+    const res = await fetch(`${getGoApiBase()}/api/status`, {
       signal: AbortSignal.timeout(2000),
     });
     return res.ok;
@@ -248,5 +268,5 @@ export async function isGoApiAvailable(): Promise<boolean> {
  * Build the full Go API URL for a path (useful for direct fetch calls).
  */
 export function goApiUrl(path: string): string {
-  return `${GO_API_BASE}${path}`;
+  return `${getGoApiBase()}${path}`;
 }
