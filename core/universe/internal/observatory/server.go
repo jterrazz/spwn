@@ -115,7 +115,20 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/blueprint/{path...}", cors(s.handleBlueprintRead))
 	mux.HandleFunc("PUT /api/blueprint/{path...}", cors(s.handleBlueprintWrite))
 
-	// --- CORS preflight for all paths ---
+	// --- Root redirect + CORS ---
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{
+				"name":    "spwn observatory API",
+				"version": foundation.Version,
+				"docs":    "/api/health",
+				"dashboard": "http://localhost:3000",
+			})
+			return
+		}
+		http.NotFound(w, r)
+	})
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
 
 	s.srv = &http.Server{Addr: s.addr, Handler: mux}
