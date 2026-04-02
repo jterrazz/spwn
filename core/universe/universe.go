@@ -287,7 +287,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 
 	// Build env vars — always set SPWN_HOME, pass through auth credentials
 	envVars := []string{
-		"SPWN_HOME=/home/architect/.spwn",
+		"SPWN_HOME=/spwn-data",
 	}
 	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
 		if val := os.Getenv(key); val != "" {
@@ -319,7 +319,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
-			foundation.BaseDir() + ":/home/architect/.spwn",
+			foundation.BaseDir() + ":/spwn-data",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
@@ -429,7 +429,10 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 		args = append(args, "-it")
 	}
 
+	// Run as 'architect' user (Claude Code refuses --dangerously-skip-permissions as root)
 	args = append(args, "-u", "architect", "-w", "/world")
+	// Pass SPWN_HOME so spwn CLI works inside the exec
+	args = append(args, "-e", "SPWN_HOME=/spwn-data")
 
 	// Pass auth env vars into the exec (in case container env was not set at start)
 	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
