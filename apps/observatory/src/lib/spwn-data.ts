@@ -82,7 +82,7 @@ function rawToWorld(raw: RawWorld): World {
 
 /**
  * Read worlds from ~/.spwn/state.json.
- * Returns mock data as fallback if the file doesn't exist.
+ * Returns an empty array if the file doesn't exist.
  */
 export async function getWorlds(): Promise<World[]> {
   try {
@@ -197,7 +197,7 @@ export async function getLimboAgents(worlds: World[]): Promise<LimboAgent[]> {
 
 /**
  * Get full agent profile by reading their mind directory.
- * Falls back to mock data if the agent dir doesn't exist.
+ * Returns null if the agent directory doesn't exist.
  */
 export async function getAgentProfile(name: string): Promise<AgentProfile | null> {
   const info = await inspectAgent(name);

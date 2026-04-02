@@ -4,6 +4,7 @@ import { spwnExec } from "@/lib/spwn-exec";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  try {
   const body = await request.json();
   const { message } = body as { message?: string };
 
@@ -22,4 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ response: result.stdout });
   }
   return NextResponse.json({ response: result.error, error: result.error }, { status: 200 });
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 }

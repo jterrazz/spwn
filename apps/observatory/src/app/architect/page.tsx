@@ -351,10 +351,6 @@ export default function ArchitectPage() {
           <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Config</h2>
           <div className="glass-subtle p-4 space-y-2">
             <div className="flex justify-between">
-              <span className="text-[10px] text-muted-foreground/40">Organization</span>
-              <span className="text-xs font-mono text-foreground/60">meson</span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-[10px] text-muted-foreground/40">Runtime</span>
               <span className="text-xs font-mono text-foreground/60">claude-code</span>
             </div>
@@ -363,8 +359,8 @@ export default function ArchitectPage() {
               <span className="text-xs font-mono text-foreground/60">docker</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[10px] text-muted-foreground/40">Auth</span>
-              <span className="text-xs font-mono text-foreground/60">subscription</span>
+              <span className="text-[10px] text-muted-foreground/40">API</span>
+              <span className="text-xs font-mono text-foreground/60">localhost:3001</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[10px] text-muted-foreground/40">Max worlds</span>
