@@ -14,7 +14,9 @@ import {
   IconChevronRight,
   IconClipboardList,
   IconArrowUp,
+  IconBook2,
 } from "@tabler/icons-react";
+import { BlueprintBrowser, BlueprintUpdateCard } from "@/components/blueprint-browser";
 
 interface ArchitectStatus {
   status: "running" | "stopped";
@@ -36,12 +38,18 @@ interface TodoActionData {
   description?: string;
 }
 
+interface BlueprintUpdateData {
+  path: string;
+  description?: string;
+}
+
 interface ChatMessage {
   role: "user" | "architect";
   content: string;
   timestamp: Date;
   error?: boolean;
   todoAction?: TodoActionData;
+  blueprintUpdate?: BlueprintUpdateData;
 }
 
 interface TodoItem {
@@ -347,6 +355,9 @@ export default function ArchitectPage() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [todo, setTodo] = useState<TodoData | null>(null);
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<"chat" | "blueprint" | "tasks">("chat");
+
   // Chat state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -425,13 +436,14 @@ export default function ArchitectPage() {
     }
   };
 
-  const handleTalkResponse = (data: { response?: string; error?: string; todoAction?: TodoActionData }) => {
+  const handleTalkResponse = (data: { response?: string; error?: string; todoAction?: TodoActionData; blueprintUpdate?: BlueprintUpdateData }) => {
     const archMsg: ChatMessage = {
       role: "architect",
       content: data.response || data.error || "No response",
       timestamp: new Date(),
       error: !!data.error && !data.response,
       todoAction: data.todoAction,
+      blueprintUpdate: data.blueprintUpdate,
     };
     setMessages((prev) => [...prev, archMsg]);
 
@@ -588,16 +600,33 @@ export default function ArchitectPage() {
         />
       </div>
 
-      {/* Main content: Chat + TODO side by side */}
+      {/* Tab bar */}
+      <div className="flex items-center gap-1 border-b border-white/[0.06] pb-0">
+        {([
+          { key: "chat", label: "Chat", icon: <IconMessageCircle size={14} /> },
+          { key: "blueprint", label: "Blueprint", icon: <IconBook2 size={14} /> },
+          { key: "tasks", label: "Task Board", icon: <IconClipboardList size={14} /> },
+        ] as const).map(({ key, label, icon }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-[1px] ${
+              activeTab === key
+                ? "text-foreground/80 border-foreground/50"
+                : "text-muted-foreground/40 border-transparent hover:text-muted-foreground/60"
+            }`}
+          >
+            <span className="opacity-60">{icon}</span>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === "chat" && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chat Interface (2/3 width) */}
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Chat</h2>
-            <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
-              natural language
-            </span>
-          </div>
 
           <div className="glass-subtle rounded-xl overflow-hidden flex flex-col" style={{ height: "480px" }}>
             {/* Messages area */}
@@ -660,6 +689,12 @@ export default function ArchitectPage() {
                       </div>
                     </div>
                   )}
+                  {msg.blueprintUpdate && (
+                    <BlueprintUpdateCard
+                      path={msg.blueprintUpdate.path}
+                      description={msg.blueprintUpdate.description}
+                    />
+                  )}
                 </div>
               ))}
               {sending && (
@@ -706,11 +741,20 @@ export default function ArchitectPage() {
           </div>
         </div>
 
-        {/* Task Board (1/3 width) */}
+        {/* Task Board sidebar (1/3 width) */}
         <div>
           <TodoPanel todo={todo} highlightTitle={highlightTitle} />
         </div>
       </div>
+      )}
+
+      {activeTab === "blueprint" && (
+        <BlueprintBrowser compact />
+      )}
+
+      {activeTab === "tasks" && (
+        <TodoPanel todo={todo} highlightTitle={highlightTitle} />
+      )}
     </div>
   );
 }

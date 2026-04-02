@@ -13,6 +13,7 @@ import {
   IconChevronDown,
   IconGhostFilled,
   IconPackage,
+  IconBook2,
   IconPlus,
   IconCheck,
   IconX,
@@ -166,6 +167,15 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
                 <IconHexagonFilled size={16} className="opacity-50" />
                 <span>Architect</span>
                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={pathname === "/blueprint"}
+                onClick={() => window.location.href = "/blueprint"}
+              >
+                <IconBook2 size={16} className="opacity-50" />
+                <span>Blueprint</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
