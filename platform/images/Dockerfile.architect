@@ -10,15 +10,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     npm install -g @anthropic-ai/claude-code && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user (Claude Code refuses --dangerously-skip-permissions as root)
+RUN useradd -m -s /bin/bash architect && \
+    mkdir -p /world /home/architect/.spwn && \
+    chown -R architect:architect /world /home/architect/.spwn
+
 # Copy spwn binary
 COPY bin/spwn /usr/local/bin/spwn
 
 # Copy Architect identity file
 COPY platform/fixtures/architect/ARCHITECT.md /world/ARCHITECT.md
+RUN chown architect:architect /world/ARCHITECT.md
 
 # Default config location
-ENV SPWN_HOME=/root/.spwn
+ENV SPWN_HOME=/home/architect/.spwn
 
+USER architect
 WORKDIR /world
 
 # The Architect stays alive; we docker exec claude into it when talking

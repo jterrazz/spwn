@@ -287,7 +287,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 
 	// Build env vars — always set SPWN_HOME, pass through auth credentials
 	envVars := []string{
-		"SPWN_HOME=/root/.spwn",
+		"SPWN_HOME=/home/architect/.spwn",
 	}
 	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
 		if val := os.Getenv(key); val != "" {
@@ -295,12 +295,17 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		}
 	}
 	// Also try the cached auth token file
-	if os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
+	if os.Getenv("ANTHROPIC_API_KEY") == "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
 		tokenPath := foundation.BaseDir() + "/.auth-token"
 		if data, err := os.ReadFile(tokenPath); err == nil {
 			token := strings.TrimSpace(string(data))
 			if token != "" {
-				envVars = append(envVars, "CLAUDE_CODE_OAUTH_TOKEN="+token)
+				// Detect token type: sk-ant-* is an API key, otherwise OAuth
+				if strings.HasPrefix(token, "sk-ant-") {
+					envVars = append(envVars, "ANTHROPIC_API_KEY="+token)
+				} else {
+					envVars = append(envVars, "CLAUDE_CODE_OAUTH_TOKEN="+token)
+				}
 			}
 		}
 	}
@@ -314,7 +319,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
-			foundation.BaseDir() + ":/root/.spwn",
+			foundation.BaseDir() + ":/home/architect/.spwn",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
@@ -424,7 +429,7 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 		args = append(args, "-it")
 	}
 
-	args = append(args, "-w", "/world")
+	args = append(args, "-u", "architect", "-w", "/world")
 
 	// Pass auth env vars into the exec (in case container env was not set at start)
 	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
@@ -432,12 +437,16 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 			args = append(args, "-e", key+"="+val)
 		}
 	}
-	if os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
+	if os.Getenv("ANTHROPIC_API_KEY") == "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
 		tokenPath := foundation.BaseDir() + "/.auth-token"
 		if data, err := os.ReadFile(tokenPath); err == nil {
 			token := strings.TrimSpace(string(data))
 			if token != "" {
-				args = append(args, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
+				if strings.HasPrefix(token, "sk-ant-") {
+					args = append(args, "-e", "ANTHROPIC_API_KEY="+token)
+				} else {
+					args = append(args, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
+				}
 			}
 		}
 	}
