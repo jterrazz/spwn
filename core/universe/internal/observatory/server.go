@@ -81,6 +81,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/agents/{name}", cors(s.handleGetAgent))
 	mux.HandleFunc("GET /api/agents/{name}/journal", cors(s.handleGetAgentJournal))
 	mux.HandleFunc("GET /api/agents/{name}/mind", cors(s.handleGetAgentMind))
+	mux.HandleFunc("GET /api/agents/{name}/files/{path...}", cors(s.handleGetAgentFile))
 	mux.HandleFunc("GET /api/worlds/{id}/logs", cors(s.handleWorldLogs))
 
 	// --- WRITE endpoints ---
@@ -799,4 +800,44 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonOK(w, map[string]string{"status": "ok", "field": body.Field})
+}
+
+// handleGetAgentFile returns the content of a specific file within the agent's mind directory.
+// The path is validated to prevent directory traversal.
+func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	filePath := r.PathValue("path")
+	if name == "" || filePath == "" {
+		jsonError(w, "agent name and file path are required", 400)
+		return
+	}
+
+	// Prevent directory traversal
+	if strings.Contains(filePath, "..") {
+		jsonError(w, "invalid path", 400)
+		return
+	}
+
+	info, err := agentpkg.InspectAgent(name)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+
+	absPath := filepath.Join(info.Path, filePath)
+
+	// Ensure the resolved path is still under the agent's mind directory
+	cleanPath := filepath.Clean(absPath)
+	if !strings.HasPrefix(cleanPath, filepath.Clean(info.Path)) {
+		jsonError(w, "path outside agent directory", 400)
+		return
+	}
+
+	data, err := os.ReadFile(absPath)
+	if err != nil {
+		jsonError(w, "file not found: "+err.Error(), 404)
+		return
+	}
+
+	jsonOK(w, map[string]string{"path": filePath, "content": string(data)})
 }
