@@ -11,6 +11,7 @@ import { apiGet, apiAction } from "@/lib/api-client";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { RecentActivity } from "@/components/recent-activity";
 import { useRefetch } from "@/components/app-shell";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
@@ -21,6 +22,7 @@ export default function UniverseMapPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const refetchSidebar = useRefetch();
+  usePageTitle("Worlds");
 
   const fetchWorlds = () => {
     apiGet<World[]>("/api/universes", "/api/worlds")

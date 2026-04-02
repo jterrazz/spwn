@@ -123,7 +123,7 @@ export default function MarketplacePage() {
             </a>
             <button
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm text-muted-foreground/40 hover:text-foreground/60 hover:bg-white/[0.04] transition-all"
-              onClick={() => {/* TODO: install dialog */}}
+              disabled
             >
               <IconDownload size={16} />
               Install from URL
@@ -135,7 +135,7 @@ export default function MarketplacePage() {
             </p>
           )}
           <div className="mt-8 glass-subtle inline-block px-4 py-2.5 font-mono text-[11px] text-muted-foreground/30">
-            spwn get install &lt;package&gt;
+            spwn install &lt;package&gt;
           </div>
         </div>
       )}

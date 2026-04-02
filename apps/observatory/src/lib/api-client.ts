@@ -6,6 +6,8 @@
  * (fast, native) and fall back to the local /api/* Next.js routes (exec-based).
  */
 
+import type { World, AgentProfile } from "./types";
+
 const GO_API_BASE =
   typeof window !== "undefined"
     ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001")
@@ -59,16 +61,23 @@ async function fallbackNextApi<T>(path: string, init?: RequestInit): Promise<T> 
 
 // ── Data normalization ──
 
+/** Raw world data from the Go API (may have `agent` string instead of `agents` array). */
+interface RawWorld extends Omit<World, "agent" | "agents" | "status"> {
+  agent?: string;
+  agents?: World["agents"];
+  status?: World["status"];
+}
+
 /**
  * Normalize Go API world data to match frontend World interface.
  * Go returns `agent` (string), frontend expects `agents` (array).
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeWorlds(data: any[]): any[] {
-  return data.map((w) => ({
+function normalizeWorlds(data: RawWorld[]): World[] {
+  return data.map(({ agent: _agent, ...w }) => ({
     ...w,
+    agent: _agent ?? "",
     status: w.status || "idle",
-    agents: w.agents ?? (w.agent ? [{ name: w.agent, tier: "citizen", status: w.status || "idle" }] : []),
+    agents: w.agents ?? (_agent ? [{ name: _agent, tier: "citizen", status: w.status || "idle" }] : []),
   }));
 }
 
@@ -76,8 +85,7 @@ function normalizeWorlds(data: any[]): any[] {
  * Normalize Go API agent data to match frontend AgentProfile interface.
  * Fills in defaults for any missing fields so the UI never crashes on undefined arrays.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeAgent(data: any): any {
+function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentProfile {
   return {
     tier: 'citizen',
     engine: 'claude-code',
@@ -108,7 +116,7 @@ export async function apiGet<T>(goPath: string, nextFallback?: string): Promise<
     }
     // Normalize agent profile data from Go API
     if (goPath.match(/^\/api\/agents\/[^/]+$/) && data && typeof data === 'object' && 'name' in (data as object)) {
-      return normalizeAgent(data) as T;
+      return normalizeAgent(data as unknown as Partial<AgentProfile> & { name: string }) as T;
     }
     return data;
   }

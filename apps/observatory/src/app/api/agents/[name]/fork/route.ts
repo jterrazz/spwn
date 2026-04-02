@@ -8,6 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ name: string }> }
 ) {
   const { name } = await params;
+  try {
   const body = await request.json();
   const { target } = body as { target?: string };
 
@@ -20,4 +21,7 @@ export async function POST(
     return NextResponse.json({ ok: true, output: result.stdout });
   }
   return NextResponse.json({ error: result.error }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 }

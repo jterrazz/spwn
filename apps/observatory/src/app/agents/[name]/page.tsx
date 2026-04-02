@@ -26,6 +26,7 @@ import {
   IconFile,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export default function AgentProfilePage() {
   const params = useParams();
@@ -40,6 +41,8 @@ export default function AgentProfilePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "files">("profile");
+
+  usePageTitle(agentName, "Agent");
 
   const fetchProfile = useCallback(() => {
     Promise.all([
