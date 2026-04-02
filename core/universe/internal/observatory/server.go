@@ -749,88 +749,98 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Parse TODO file for KPIs
+	// Build KPIs
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
-	todoItems, todoCounts := parseTodoFile()
+
+	// Count tasks from TODO file
+	tasksPending := 0
+	tasksCompleted := 0
+	todoPath := s.architectTodoPath()
+	if data, err := os.ReadFile(todoPath); err == nil {
+		for _, line := range strings.Split(string(data), "\n") {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
+				tasksCompleted++
+			} else if strings.HasPrefix(trimmed, "- [ ]") {
+				tasksPending++
+			}
+		}
+	}
 
 	jsonOK(w, map[string]interface{}{
 		"status":      status,
 		"containerId": containerID,
 		"uptime":      uptime,
 		"kpis": map[string]interface{}{
-			"worlds":        len(worlds),
-			"agents":        len(agents),
-			"todoInProgress": todoCounts["in_progress"],
-			"todoBacklog":    todoCounts["backlog"],
-			"todoCompleted":  todoCounts["completed"],
+			"worlds":         len(worlds),
+			"agents":         len(agents),
+			"tasksPending":   tasksPending,
+			"tasksCompleted": tasksCompleted,
 		},
-		"todo": todoItems,
 	})
 }
 
-// todoItem represents a single TODO item with its status.
-type todoItem struct {
-	Status string `json:"status"`
-	Text   string `json:"text"`
-}
-
-// parseTodoFile reads ~/.spwn/architect/todo.md and extracts tasks by section.
-func parseTodoFile() ([]todoItem, map[string]int) {
-	counts := map[string]int{"in_progress": 0, "backlog": 0, "completed": 0}
-	var items []todoItem
-
+// architectTodoPath returns the path to the architect's TODO file.
+func (s *Server) architectTodoPath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return items, counts
+		return ""
 	}
-
-	// Check SPWN_HOME first, fall back to ~/.spwn
 	spwnHome := os.Getenv("SPWN_HOME")
 	if spwnHome == "" {
 		spwnHome = filepath.Join(home, ".spwn")
 	}
-	todoPath := filepath.Join(spwnHome, "architect", "todo.md")
+	return filepath.Join(spwnHome, "architect", "todo.md")
+}
+
+// handleArchitectTodoGet returns the raw content of the architect TODO file.
+func (s *Server) handleArchitectTodoGet(w http.ResponseWriter, r *http.Request) {
+	todoPath := s.architectTodoPath()
+	if todoPath == "" {
+		jsonError(w, "could not determine todo path", 500)
+		return
+	}
 
 	data, err := os.ReadFile(todoPath)
 	if err != nil {
-		return items, counts
+		// Return empty template if file doesn't exist
+		defaultContent := "# Architect TODO\n\n## In Progress\n\n## Backlog\n\n## Completed\n"
+		jsonOK(w, map[string]string{"content": defaultContent})
+		return
 	}
 
-	currentSection := ""
-	for _, line := range strings.Split(string(data), "\n") {
-		trimmed := strings.TrimSpace(line)
-		lower := strings.ToLower(trimmed)
+	jsonOK(w, map[string]string{"content": string(data)})
+}
 
-		// Detect section headers
-		if strings.HasPrefix(trimmed, "## ") {
-			switch {
-			case strings.Contains(lower, "in progress"):
-				currentSection = "in_progress"
-			case strings.Contains(lower, "backlog"):
-				currentSection = "backlog"
-			case strings.Contains(lower, "completed"):
-				currentSection = "completed"
-			default:
-				currentSection = ""
-			}
-			continue
-		}
-
-		// Parse task lines (- [ ] or - [x])
-		if currentSection != "" && (strings.HasPrefix(trimmed, "- [ ]") || strings.HasPrefix(trimmed, "- [x]")) {
-			text := trimmed
-			if strings.HasPrefix(trimmed, "- [ ] ") {
-				text = strings.TrimPrefix(trimmed, "- [ ] ")
-			} else if strings.HasPrefix(trimmed, "- [x] ") {
-				text = strings.TrimPrefix(trimmed, "- [x] ")
-			}
-			counts[currentSection]++
-			items = append(items, todoItem{Status: currentSection, Text: text})
-		}
+// handleArchitectTodoUpdate writes new content to the architect TODO file.
+func (s *Server) handleArchitectTodoUpdate(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Content string `json:"content"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
 	}
 
-	return items, counts
+	todoPath := s.architectTodoPath()
+	if todoPath == "" {
+		jsonError(w, "could not determine todo path", 500)
+		return
+	}
+
+	// Ensure directory exists
+	if err := os.MkdirAll(filepath.Dir(todoPath), 0755); err != nil {
+		jsonError(w, "failed to create directory: "+err.Error(), 500)
+		return
+	}
+
+	if err := os.WriteFile(todoPath, []byte(body.Content), 0644); err != nil {
+		jsonError(w, "failed to write todo file: "+err.Error(), 500)
+		return
+	}
+
+	jsonOK(w, map[string]string{"status": "ok"})
 }
 
 func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
