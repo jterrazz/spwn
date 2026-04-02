@@ -91,7 +91,7 @@ export default function UniverseMapPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Universe header */}
-      <div className="px-8 pt-8 flex items-start justify-between">
+      <div className="px-4 md:px-8 pt-6 md:pt-8 flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-heading tracking-wide text-foreground/90">Worlds</h1>
           <p className="text-xs font-mono text-muted-foreground/30 mt-1">
@@ -150,7 +150,7 @@ export default function UniverseMapPage() {
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-12 md:gap-20">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-20">
             {worlds.map((world, i) => (
               <Planet
                 key={world.id}
@@ -164,6 +164,46 @@ export default function UniverseMapPage() {
           </div>
         )}
       </main>
+
+      {/* Quick Actions */}
+      {!loading && (
+        <div className="px-8 pb-4">
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button
+              onClick={() => {
+                // Create agent then navigate
+                const name = prompt("Agent name:");
+                if (!name?.trim()) return;
+                apiAction("/api/agents", { name: name.trim() }, "/api/agents/create").then((result) => {
+                  if (result.ok) {
+                    refetchSidebar();
+                    router.push(`/agents/${name.trim()}`);
+                  }
+                });
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs bg-white/[0.03] text-foreground/50 hover:text-foreground/70 hover:bg-white/[0.06] border border-white/[0.06] transition-all"
+            >
+              <IconPlus size={14} />
+              New Agent
+            </button>
+            <button
+              disabled
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs bg-white/[0.02] text-muted-foreground/25 border border-white/[0.04] cursor-not-allowed"
+              title="Coming soon"
+            >
+              <IconRocket size={14} />
+              Import Agent
+            </button>
+            <button
+              onClick={() => router.push("/marketplace")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs bg-white/[0.03] text-foreground/50 hover:text-foreground/70 hover:bg-white/[0.06] border border-white/[0.06] transition-all"
+            >
+              <IconPlanet size={14} />
+              Browse Marketplace
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Recent Activity */}
       {!loading && worlds.length > 0 && <RecentActivity worlds={worlds} />}

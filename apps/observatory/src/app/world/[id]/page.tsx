@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { World } from "@/lib/types";
-import { apiGet, apiAction } from "@/lib/api-client";
+import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
 import {
   IconTrash,
   IconCamera,
@@ -14,6 +14,8 @@ import {
   IconAlertTriangle,
   IconRestore,
   IconPlus,
+  IconSend,
+  IconMessageCircle,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { STATUS_DOT, STATUS_BADGE, TIER_BADGE } from "@/lib/status";
@@ -222,7 +224,7 @@ export default function WorldDashboard() {
   return (
     <div className="flex h-[calc(100vh-1px)] overflow-hidden">
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-8">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
@@ -354,7 +356,7 @@ export default function WorldDashboard() {
         )}
 
         {/* Stats */}
-        <div className="flex gap-4 flex-wrap">
+        <div className="grid grid-cols-2 md:flex md:flex-row gap-3 md:gap-4">
           <StatCard label="Status" value={world.status} sub={world.id.substring(0, 12)} />
           <StatCard label="Agents" value={String(world.agents.length)} />
           <StatCard label="Config" value={world.config} />
@@ -495,6 +497,15 @@ export default function WorldDashboard() {
           </div>
         </div>
 
+        {/* Quick Talk */}
+        {world.agents.length > 0 && (
+          <QuickTalk
+            worldId={worldId}
+            agents={world.agents}
+            onFeedback={showFeedback}
+          />
+        )}
+
         {/* Activity */}
         <div>
           <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Recent Activity</h2>
@@ -521,7 +532,7 @@ export default function WorldDashboard() {
 
       {/* ── Side panel for Logs/Snapshots ── */}
       {activePanel && (
-        <div className="w-96 border-l border-border/30 flex flex-col shrink-0 overflow-hidden">
+        <div className="hidden md:flex w-96 border-l border-border/30 flex-col shrink-0 overflow-hidden">
           <div className="px-5 py-4 border-b border-border/30 flex items-center justify-between shrink-0">
             <h2 className="text-sm font-heading text-foreground/80 capitalize">{activePanel}</h2>
             <button
@@ -608,6 +619,117 @@ export default function WorldDashboard() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Quick Talk Component ── */
+
+interface QuickTalkProps {
+  worldId: string;
+  agents: { name: string; tier: string; status: string }[];
+  onFeedback: (msg: string) => void;
+}
+
+function QuickTalk({ worldId, agents, onFeedback }: QuickTalkProps) {
+  const [selectedAgent, setSelectedAgent] = useState(agents[0]?.name ?? "");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [lastReply, setLastReply] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleSend = async () => {
+    const msg = message.trim();
+    if (!msg || sending || !selectedAgent) return;
+
+    setSending(true);
+    setMessage("");
+    setLastReply(null);
+
+    try {
+      const res = await fetch(goApiUrl(`/api/agents/${selectedAgent}/talk`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json().catch(() => ({}));
+      const reply = data.response || data.output || data.error || "No response";
+      setLastReply(reply);
+    } catch {
+      try {
+        const res = await fetch(`/api/agents/${selectedAgent}/talk`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await res.json().catch(() => ({}));
+        setLastReply(data.response || data.output || "No response");
+      } catch {
+        onFeedback("Error: Failed to connect to agent");
+      }
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 flex items-center gap-2">
+        <IconMessageCircle size={14} className="opacity-40" />
+        Quick Talk
+      </h2>
+      <div className="glass-subtle p-4 space-y-3">
+        <div className="flex gap-2">
+          {agents.length > 1 && (
+            <select
+              value={selectedAgent}
+              onChange={(e) => setSelectedAgent(e.target.value)}
+              className="bg-transparent text-xs text-foreground/60 border border-white/[0.08] rounded-lg px-2 py-2 focus:outline-none"
+            >
+              {agents.map((a) => (
+                <option key={a.name} value={a.name}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <input
+            ref={inputRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder={`Message ${selectedAgent}...`}
+            className="flex-1 bg-transparent text-sm text-foreground/70 placeholder:text-muted-foreground/25 border border-white/[0.08] rounded-lg px-3 py-2 focus:outline-none focus:border-white/[0.15] transition-colors"
+            disabled={sending}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!message.trim() || sending}
+            className="p-2 rounded-lg text-muted-foreground/40 hover:text-foreground/70 hover:bg-white/[0.04] border border-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            {sending ? (
+              <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+            ) : (
+              <IconSend size={16} />
+            )}
+          </button>
+        </div>
+        {lastReply && (
+          <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-3">
+            <p className="text-[10px] text-muted-foreground/30 mb-1 font-mono">{selectedAgent} replied:</p>
+            <pre className="text-xs font-mono text-foreground/60 whitespace-pre-wrap break-words leading-relaxed max-h-32 overflow-y-auto">
+              {lastReply}
+            </pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

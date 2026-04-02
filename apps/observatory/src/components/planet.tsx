@@ -1,7 +1,7 @@
 "use client";
 
 import createGlobe from "cobe";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { World } from "@/lib/types";
 
 interface PlanetProps {
@@ -28,6 +28,12 @@ const STATUS_CONFIG: Record<
     marker: [1, 0.85, 0.3],
     brightness: 5,
   },
+  error: {
+    base: [0.14, 0.06, 0.06],
+    glow: [0.15, 0.04, 0.04],
+    marker: [1, 0.3, 0.3],
+    brightness: 4,
+  },
   stopped: {
     base: [0.08, 0.08, 0.08],
     glow: [0.04, 0.04, 0.04],
@@ -45,6 +51,7 @@ const STATUS_CONFIG: Record<
 const STATUS_DOT_CSS: Record<string, string> = {
   running: "#22c55e",
   idle: "#eab308",
+  error: "#ef4444",
   stopped: "rgba(255,255,255,0.2)",
   creating: "#60a5fa",
 };
@@ -96,7 +103,16 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
   const phiRef = useRef(hashCode(world.id) % 628 / 100); // unique starting angle
   const config = STATUS_CONFIG[world.status] ?? STATUS_CONFIG.stopped;
   const name = extractName(world.id);
-  const size = 200; // constant canvas size — CSS scale handles selection
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const size = isMobile ? 140 : 200; // smaller on mobile
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const glowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -205,15 +221,23 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
           {name}
         </p>
         <div className="flex items-center justify-center gap-2 mt-1.5">
-          <div
-            className="w-1.5 h-1.5 rounded-full transition-all duration-500"
-            style={{
-              backgroundColor: STATUS_DOT_CSS[world.status],
-              boxShadow: isSelected
-                ? `0 0 8px ${STATUS_DOT_CSS[world.status]}`
-                : "none",
-            }}
-          />
+          <div className="relative">
+            <div
+              className="w-1.5 h-1.5 rounded-full transition-all duration-500"
+              style={{
+                backgroundColor: STATUS_DOT_CSS[world.status],
+                boxShadow: isSelected
+                  ? `0 0 8px ${STATUS_DOT_CSS[world.status]}`
+                  : "none",
+              }}
+            />
+            {world.status === "running" && (
+              <div
+                className="absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping"
+                style={{ backgroundColor: STATUS_DOT_CSS[world.status], opacity: 0.6 }}
+              />
+            )}
+          </div>
           <span className="font-mono text-[10px] uppercase tracking-widest text-[rgba(255,255,255,0.3)]">
             {world.status}
           </span>
@@ -227,7 +251,7 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
         style={{
           width: size,
           height: size,
-          transform: `scale(${isSelected ? 1.8 : 0.85})`,
+          transform: `scale(${isSelected ? (isMobile ? 1.3 : 1.8) : (isMobile ? 0.7 : 0.85)})`,
           filter: isSelected
             ? `brightness(1.1) drop-shadow(0 0 24px ${STATUS_DOT_CSS[world.status]}40)`
             : "blur(1.5px) brightness(0.6)",

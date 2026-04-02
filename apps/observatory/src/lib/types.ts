@@ -16,7 +16,7 @@ export interface World {
   config: string;
   agent: string;
   agents: Agent[];
-  status: "running" | "idle" | "stopped" | "creating";
+  status: "running" | "idle" | "stopped" | "creating" | "error";
   created_at: string;
   workspace: string;
   manifest?: WorldManifest;
