@@ -63,19 +63,9 @@ export default function UniverseMapPage() {
       {/* Universe header */}
       <div className="px-8 pt-8 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-heading tracking-wide text-foreground/90">Meson</h1>
-          <p className="text-[11px] font-mono text-muted-foreground/30 mt-1.5 flex items-center gap-3">
-            <span>orbstack</span>
-            <span className="text-muted-foreground/15">·</span>
-            <span>docker v28.5.2</span>
-            <span className="text-muted-foreground/15">·</span>
-            <span>claude-code</span>
-            <span className="text-muted-foreground/15">·</span>
-            <span>{worlds.length} worlds</span>
-            <span className="text-muted-foreground/15">·</span>
-            <span>{worlds.reduce((n, w) => n + w.agents.length, 0)} agents</span>
-            <span className="text-muted-foreground/15">·</span>
-            <span>~/.spwn</span>
+          <h1 className="text-2xl font-heading tracking-wide text-foreground/90">Worlds</h1>
+          <p className="text-xs font-mono text-muted-foreground/30 mt-1">
+            {worlds.length} active{worlds.length !== 1 ? " worlds" : " world"}
           </p>
         </div>
 

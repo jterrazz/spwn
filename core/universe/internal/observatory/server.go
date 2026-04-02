@@ -101,6 +101,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
 	mux.HandleFunc("POST /api/architect/start", cors(s.handleArchitectStart))
 	mux.HandleFunc("POST /api/architect/stop", cors(s.handleArchitectStop))
+	mux.HandleFunc("POST /api/architect/talk", cors(s.handleArchitectTalk))
 
 	// --- CORS preflight for all paths ---
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
@@ -722,7 +723,6 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 		"status":      status,
 		"containerId": nil,
 		"uptime":      nil,
-		"channels":    []string{},
 	})
 }
 
@@ -733,6 +733,43 @@ func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "stopping"})
+}
+
+func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Message string `json:"message"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+	if body.Message == "" {
+		jsonError(w, "message is required", 400)
+		return
+	}
+
+	// Parse the message into spwn command arguments
+	// For now, execute as a spwn CLI command
+	args := strings.Fields(body.Message)
+	if len(args) == 0 {
+		jsonError(w, "empty command", 400)
+		return
+	}
+
+	// Execute the command via the spwn CLI
+	cmd := exec.CommandContext(r.Context(), "spwn", args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		jsonOK(w, map[string]interface{}{
+			"response": string(output),
+			"error":    err.Error(),
+		})
+		return
+	}
+
+	jsonOK(w, map[string]interface{}{
+		"response": string(output),
+	})
 }
 
 // handleGetAgentMind returns the mind tree (layers → files) for an agent.

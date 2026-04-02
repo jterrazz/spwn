@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { IconSend, IconTerminal } from "@tabler/icons-react";
 
 interface ArchitectStatus {
   status: "running" | "stopped";
@@ -20,39 +21,12 @@ interface StatusData {
   limbo: number;
 }
 
-const CHANNELS = [
-  { type: "cli", status: "connected", label: "CLI", icon: "⬡" },
-  { type: "slack", status: "connected", label: "Slack", icon: "◧" },
-  { type: "telegram", status: "disconnected", label: "Telegram", icon: "◈" },
-  { type: "discord", status: "disconnected", label: "Discord", icon: "◉" },
-];
-
-const LOGS = [
-  { time: "17:01:02", level: "info", msg: "Architect daemon started", source: "core" },
-  { time: "17:01:03", level: "info", msg: "Docker backend connected (v28.5.2)", source: "backend" },
-  { time: "17:01:03", level: "info", msg: "Loaded universe manifest — meson", source: "manifest" },
-  { time: "17:01:04", level: "info", msg: "Channel connected: cli", source: "channel" },
-  { time: "17:01:04", level: "info", msg: "Channel connected: slack → #agents", source: "channel" },
-  { time: "17:01:05", level: "info", msg: "Restored 3 worlds from state.json", source: "state" },
-  { time: "17:01:12", level: "info", msg: "Spawned agent neo in w-titan-84721", source: "spawn" },
-  { time: "17:01:45", level: "info", msg: "Spawned colony (morpheus+trinity) in w-europa-39205", source: "spawn" },
-  { time: "17:02:10", level: "warn", msg: "Agent atlas idle for >60m in w-ganymede-51003", source: "health" },
-  { time: "17:05:33", level: "info", msg: "neo completed task — exit 0, 2m34s", source: "journal" },
-  { time: "17:12:01", level: "info", msg: "morpheus delegated subtask to trinity", source: "msg" },
-  { time: "17:14:22", level: "info", msg: "Dream cycle triggered for neo — 2 patterns promoted", source: "evolution" },
-];
-
-const LEVEL_COLOR: Record<string, string> = {
-  info: "text-muted-foreground/50",
-  warn: "text-yellow-500/80",
-  error: "text-red-400/80",
-};
-
-const LEVEL_DOT: Record<string, string> = {
-  info: "bg-muted-foreground/30",
-  warn: "bg-yellow-500 shadow-[0_0_4px_rgba(234,179,8,0.5)]",
-  error: "bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.5)]",
-};
+interface ChatMessage {
+  role: "user" | "architect";
+  content: string;
+  timestamp: Date;
+  error?: boolean;
+}
 
 function StatCard({ label, value, sub, accent, loading: isLoading }: { label: string; value: string; sub?: string; accent?: string; loading?: boolean }) {
   if (isLoading) {
@@ -75,23 +49,38 @@ function StatCard({ label, value, sub, accent, loading: isLoading }: { label: st
 
 export default function ArchitectPage() {
   usePageTitle("Architect");
-  const [logFilter, setLogFilter] = useState<string>("all");
   const [architectStatus, setArchitectStatus] = useState<ArchitectStatus | null>(null);
   const [statusData, setStatusData] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    Promise.all([
-      apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status").catch(() => ({ status: "stopped" as const, containerId: null, uptime: null, channels: [] })),
-      apiGet<StatusData>("/api/status", "/api/status").catch(() => null),
-    ]).then(([archStatus, sData]) => {
-      setArchitectStatus(archStatus);
-      setStatusData(sData);
-      setLoading(false);
-    });
+    const fetchData = () => {
+      Promise.all([
+        apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status").catch(() => ({ status: "stopped" as const, containerId: null, uptime: null, channels: [] })),
+        apiGet<StatusData>("/api/status", "/api/status").catch(() => null),
+      ]).then(([archStatus, sData]) => {
+        setArchitectStatus(archStatus);
+        setStatusData(sData);
+        setLoading(false);
+      });
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const showFeedback = (msg: string) => {
     setFeedback(msg);
@@ -132,14 +121,61 @@ export default function ArchitectPage() {
     }
   };
 
+  const handleSendMessage = async () => {
+    const msg = chatInput.trim();
+    if (!msg || sending) return;
+
+    const userMsg: ChatMessage = { role: "user", content: msg, timestamp: new Date() };
+    setMessages((prev) => [...prev, userMsg]);
+    setChatInput("");
+    setSending(true);
+
+    try {
+      const res = await fetch("http://localhost:3001/api/architect/talk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
+      const archMsg: ChatMessage = {
+        role: "architect",
+        content: data.response || data.error || "No response",
+        timestamp: new Date(),
+        error: !!data.error && !data.response,
+      };
+      setMessages((prev) => [...prev, archMsg]);
+    } catch {
+      // Fallback to Next.js route
+      try {
+        const res = await fetch("/api/architect/talk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
+        const archMsg: ChatMessage = {
+          role: "architect",
+          content: data.response || data.error || "No response",
+          timestamp: new Date(),
+          error: !!data.error && !data.response,
+        };
+        setMessages((prev) => [...prev, archMsg]);
+      } catch {
+        setMessages((prev) => [...prev, {
+          role: "architect",
+          content: "Failed to connect to Architect",
+          timestamp: new Date(),
+          error: true,
+        }]);
+      }
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
+    }
+  };
+
   const isRunning = architectStatus?.status === "running";
-  const connectedChannels = CHANNELS.filter((c) => c.status === "connected").length;
-
-  const filteredLogs = logFilter === "all"
-    ? LOGS
-    : LOGS.filter((l) => l.source === logFilter);
-
-  const sources = [...new Set(LOGS.map((l) => l.source))];
 
   return (
     <div className="p-8 space-y-8">
@@ -216,7 +252,7 @@ export default function ArchitectPage() {
         <StatCard
           label="Worlds"
           value={statusData ? String(statusData.worlds) : "—"}
-          sub={statusData ? `${statusData.running} running` : undefined}
+          sub={statusData ? `${statusData.running ?? 0} running` : undefined}
           loading={loading}
         />
         <StatCard
@@ -225,44 +261,97 @@ export default function ArchitectPage() {
           sub="across all worlds"
           loading={loading}
         />
-        <StatCard
-          label="Channels"
-          value={`${connectedChannels}/${CHANNELS.length}`}
-          sub="connected"
-          loading={loading}
-        />
       </div>
 
-      {/* Two-column layout */}
+      {/* Two-column layout: Chat + Config */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Channels — left column */}
-        <div>
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Channels</h2>
-          <div className="space-y-2">
-            {CHANNELS.map((ch) => (
-              <div key={ch.type} className="glass-subtle px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm">{ch.icon}</span>
-                  <div>
-                    <p className="text-sm text-foreground/80">{ch.label}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-1.5 h-1.5 rounded-full ${ch.status === "connected" ? "bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" : "bg-white/15"}`} />
-                  <span className="text-[10px] font-mono text-muted-foreground/30 uppercase">{ch.status}</span>
-                </div>
-              </div>
-            ))}
-            <button className="w-full glass-subtle px-4 py-2.5 text-[11px] font-mono text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors text-center">
-              + Connect channel
-            </button>
+        {/* Chat — left 2 columns */}
+        <div className="lg:col-span-2">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Chat</h2>
+            <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
+              send spwn commands
+            </span>
           </div>
 
-          {/* Config */}
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 mt-8">Config</h2>
+          <div className="glass-subtle rounded-xl overflow-hidden flex flex-col" style={{ height: "420px" }}>
+            {/* Messages area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {messages.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <IconTerminal size={28} className="text-muted-foreground/15 mb-3" />
+                  <p className="text-sm text-muted-foreground/30">Talk to the Architect</p>
+                  <p className="text-[11px] text-muted-foreground/20 mt-1">
+                    Try: <span className="font-mono">ls</span>, <span className="font-mono">agent new atlas</span>, or <span className="font-mono">status</span>
+                  </p>
+                </div>
+              )}
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[80%] rounded-xl px-3.5 py-2.5 ${
+                    msg.role === "user"
+                      ? "bg-white/[0.08] text-foreground/80"
+                      : msg.error
+                        ? "bg-red-500/10 border border-red-500/15 text-red-400/80"
+                        : "bg-white/[0.03] border border-white/[0.06] text-foreground/70"
+                  }`}>
+                    {msg.role === "architect" ? (
+                      <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed">{msg.content}</pre>
+                    ) : (
+                      <p className="text-xs font-mono">{msg.content}</p>
+                    )}
+                    <p className="text-[9px] text-muted-foreground/20 mt-1">
+                      {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {sending && (
+                <div className="flex justify-start">
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-foreground/30 animate-pulse" />
+                      <span className="text-xs text-muted-foreground/40">Processing...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Input area */}
+            <div className="border-t border-white/[0.06] p-3 flex gap-2">
+              <input
+                ref={inputRef}
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                placeholder="Type a spwn command... (e.g. ls, agent new neo)"
+                className="flex-1 bg-transparent text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none"
+                disabled={sending}
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!chatInput.trim() || sending}
+                className="p-2 rounded-lg text-muted-foreground/40 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+              >
+                <IconSend size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Config — right column */}
+        <div>
+          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Config</h2>
           <div className="glass-subtle p-4 space-y-2">
             <div className="flex justify-between">
-              <span className="text-[10px] text-muted-foreground/40">Universe</span>
+              <span className="text-[10px] text-muted-foreground/40">Organization</span>
               <span className="text-xs font-mono text-foreground/60">meson</span>
             </div>
             <div className="flex justify-between">
@@ -282,63 +371,26 @@ export default function ArchitectPage() {
               <span className="text-xs font-mono text-foreground/60">10</span>
             </div>
           </div>
-        </div>
 
-        {/* Logs — right 2 columns */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Event Stream</h2>
-              <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
-                mock data · real log streaming coming soon
-              </span>
-            </div>
-            <div className="flex gap-1">
+          {/* Quick Commands */}
+          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 mt-8">Quick Commands</h2>
+          <div className="space-y-1.5">
+            {[
+              { label: "List worlds", cmd: "ls" },
+              { label: "List agents", cmd: "agent ls" },
+              { label: "System status", cmd: "status" },
+            ].map((item) => (
               <button
-                onClick={() => setLogFilter("all")}
-                className={`px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider rounded transition-colors ${logFilter === "all" ? "text-foreground/70 glass-subtle" : "text-muted-foreground/30 hover:text-muted-foreground/50"}`}
+                key={item.cmd}
+                onClick={() => {
+                  setChatInput(item.cmd);
+                  inputRef.current?.focus();
+                }}
+                className="w-full glass-subtle px-3 py-2 text-left text-[11px] font-mono text-muted-foreground/40 hover:text-foreground/60 hover:bg-white/[0.04] transition-colors"
               >
-                All
+                <span className="text-muted-foreground/25">$ spwn </span>{item.cmd}
               </button>
-              {sources.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setLogFilter(s)}
-                  className={`px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider rounded transition-colors ${logFilter === s ? "text-foreground/70 glass-subtle" : "text-muted-foreground/30 hover:text-muted-foreground/50"}`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="glass-subtle rounded-xl overflow-hidden">
-            <div className="divide-y divide-border/20 max-h-[500px] overflow-y-auto">
-              {filteredLogs.map((log, i) => (
-                <div key={i} className="px-4 py-2.5 flex items-start gap-3 hover:bg-white/[0.02] transition-colors">
-                  <span className="text-[10px] font-mono text-muted-foreground/25 w-16 shrink-0 pt-0.5">
-                    {log.time}
-                  </span>
-                  <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${LEVEL_DOT[log.level]}`} />
-                  <span className={`text-xs flex-1 ${LEVEL_COLOR[log.level]}`}>
-                    {log.msg}
-                  </span>
-                  <span className="text-[9px] font-mono text-muted-foreground/20 shrink-0">
-                    {log.source}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Commands */}
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 mt-8">Commands</h2>
-          <div className="glass-subtle p-4 font-mono text-[10px] text-muted-foreground/35 space-y-1.5">
-            <p>spwn architect start</p>
-            <p>spwn architect stop</p>
-            <p>spwn architect status</p>
-            <p>spwn architect connect slack</p>
-            <p>spwn architect connect telegram</p>
+            ))}
           </div>
         </div>
       </div>

@@ -42,11 +42,18 @@ import { LiveStatus } from "@/components/live-status";
 import type { World, LimboAgent } from "@/lib/types";
 import { apiAction } from "@/lib/api-client";
 
+interface StatusData {
+  worlds: number;
+  agents: number;
+  running: number;
+}
+
 interface AppSidebarProps {
   worlds: World[];
   limboAgents: LimboAgent[];
   currentWorldId?: string;
   loading?: boolean;
+  statusData?: StatusData | null;
 }
 
 // Agent status → Tabler filled icon + color
@@ -72,7 +79,7 @@ function extractName(id: string): string {
     : id;
 }
 
-export function AppSidebar({ worlds, limboAgents, currentWorldId, loading }: AppSidebarProps) {
+export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statusData }: AppSidebarProps) {
   const pathname = usePathname();
   const [showNewAgent, setShowNewAgent] = useState(false);
   const [newAgentName, setNewAgentName] = useState("");
@@ -89,10 +96,14 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading }: App
     if (!newAgentName.trim() || creating) return;
     setCreating(true);
     try {
-      await apiAction("/api/agents", { name: newAgentName.trim() }, "/api/agents/create");
-      setNewAgentName("");
-      setShowNewAgent(false);
-      window.location.reload();
+      const result = await apiAction("/api/agents", { name: newAgentName.trim() }, "/api/agents/create");
+      if (result.ok) {
+        const name = newAgentName.trim();
+        setNewAgentName("");
+        setShowNewAgent(false);
+        // Navigate to the new agent's profile page
+        window.location.href = `/agents/${name}`;
+      }
     } catch {
       // silently fail
     } finally {
@@ -102,13 +113,22 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading }: App
 
   return (
     <Sidebar>
-      {/* ── Header: brand + search hint ── */}
+      {/* ── Header: brand + status + search hint ── */}
       <SidebarHeader className="px-4 pt-4 pb-2">
         <a href="/" className="flex items-center gap-2">
           <span className="text-sm tracking-[0.15em] font-heading text-foreground/90">
             ⬡ spwn
           </span>
         </a>
+        <p className="text-[10px] font-mono text-muted-foreground/30 mt-1 leading-relaxed">
+          <span>orbstack</span>
+          <span className="text-muted-foreground/15"> · </span>
+          <span>docker</span>
+          <br />
+          <span>{statusData?.worlds ?? worlds.length} worlds</span>
+          <span className="text-muted-foreground/15"> · </span>
+          <span>{statusData?.agents ?? limboAgents.length + worlds.reduce((n, w) => n + w.agents.length, 0)} agents</span>
+        </p>
         <button
           className="mt-3 w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-white/[0.03] transition-colors"
           onClick={() => {
