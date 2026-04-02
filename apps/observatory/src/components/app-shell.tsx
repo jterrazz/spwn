@@ -80,8 +80,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           statusData={statusData}
         />
         <SidebarInset>
-          {/* Top padding for macOS title bar overlay */}
-          <div className="h-8 w-full shrink-0" />
+          {/* Drag region for main content — matches sidebar height for consistent drag strip */}
+          <div
+            data-tauri-drag-region="true"
+            className="h-[52px] w-full shrink-0 cursor-default"
+            style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+          />
           <Breadcrumbs />
           <ErrorBoundary>
             {children}
