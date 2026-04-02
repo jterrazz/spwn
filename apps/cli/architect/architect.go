@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/core/foundation"
 	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
@@ -53,6 +55,22 @@ var statusCmd = &cobra.Command{
 	RunE:  runStatus,
 }
 
+var talkCmd = &cobra.Command{
+	Use:   "talk [message]",
+	Short: "Talk to the Architect — ask it to manage worlds and agents",
+	Long: `Send a message to the Architect (Claude Code running inside Docker).
+
+If a message is provided, runs a one-shot query and prints the response.
+If no message is provided, opens an interactive Claude session.
+
+Examples:
+  spwn architect talk "list all agents"
+  spwn architect talk "create a new agent called neo"
+  spwn architect talk                    # interactive mode`,
+	Args: cobra.MaximumNArgs(1),
+	RunE: runTalk,
+}
+
 func init() {
 	defaultArchitectHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(architectHelp)
@@ -60,6 +78,7 @@ func init() {
 	Cmd.AddCommand(startCmd)
 	Cmd.AddCommand(stopCmd)
 	Cmd.AddCommand(statusCmd)
+	Cmd.AddCommand(talkCmd)
 }
 
 func runStart(cmd *cobra.Command, args []string) error {
@@ -184,6 +203,75 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func runTalk(cmd *cobra.Command, args []string) error {
+	ctx := context.Background()
+	s := newStepper(cmd)
+
+	// Check if architect container is running
+	info, err := universe.GetArchitectDaemonStatus(ctx)
+	if err != nil {
+		return s.FailHint("Architect", err, "")
+	}
+	if !info.Running {
+		return s.FailHint("Architect", fmt.Errorf("architect is not running"),
+			"Start it with: spwn architect start")
+	}
+
+	message := ""
+	if len(args) > 0 {
+		message = args[0]
+	}
+
+	// Check the container exists and is responsive
+	checkCmd := exec.Command("docker", "inspect", "--format", "{{.State.Running}}", foundation.ArchitectContainerName)
+	checkOut, err := checkCmd.Output()
+	if err != nil || strings.TrimSpace(string(checkOut)) != "true" {
+		return s.FailHint("Container", fmt.Errorf("architect container is not running"),
+			"Start it with: spwn architect start")
+	}
+
+	// Get docker exec args from universe package
+	dockerArgs, err := universe.TalkToArchitectExecArgs(message)
+	if err != nil {
+		return s.FailHint("Talk", err, "")
+	}
+
+	if message != "" {
+		// One-shot mode
+		s.Blank()
+		s.Info("Architect:", "thinking...")
+		s.Blank()
+
+		execCmd := exec.Command("docker", dockerArgs...)
+		output, err := execCmd.CombinedOutput()
+		if err != nil {
+			// Still print output — it may contain useful error info
+			if len(output) > 0 {
+				fmt.Fprint(os.Stdout, string(output))
+			}
+			return fmt.Errorf("architect exec failed: %w", err)
+		}
+		fmt.Fprint(os.Stdout, string(output))
+	} else {
+		// Interactive mode
+		s.Blank()
+		s.Info("Architect:", "entering interactive session")
+		s.Info("Container:", foundation.ArchitectContainerName)
+		s.Blank()
+
+		execCmd := exec.Command("docker", dockerArgs...)
+		execCmd.Stdin = os.Stdin
+		execCmd.Stdout = os.Stdout
+		execCmd.Stderr = os.Stderr
+
+		if err := execCmd.Run(); err != nil {
+			return fmt.Errorf("interactive session: %w", err)
+		}
+	}
+
+	return nil
+}
+
 // newStepper creates a Stepper using the persistent root flags.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
 	q, _ := cmd.Flags().GetBool("quiet")
@@ -224,6 +312,7 @@ func architectHelp(cmd *cobra.Command, args []string) {
 				{Name: "start", Desc: "Start the Architect daemon"},
 				{Name: "stop", Desc: "Stop the Architect daemon"},
 				{Name: "status", Desc: "Show status and active worlds"},
+				{Name: "talk", Desc: "Talk to the Architect (Claude Code)"},
 			}},
 		},
 		"spwn architect [command]",

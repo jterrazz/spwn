@@ -5,7 +5,9 @@ package universe
 import (
 	"context"
 	"fmt"
+	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"spwn.sh/core/foundation"
@@ -283,12 +285,31 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		return "", fmt.Errorf("image %s not found. Build it with: make build-architect-image", image)
 	}
 
-	// Create container
+	// Build env vars — always set SPWN_HOME, pass through auth credentials
+	envVars := []string{
+		"SPWN_HOME=/root/.spwn",
+	}
+	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
+		if val := os.Getenv(key); val != "" {
+			envVars = append(envVars, key+"="+val)
+		}
+	}
+	// Also try the cached auth token file
+	if os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
+		tokenPath := foundation.BaseDir() + "/.auth-token"
+		if data, err := os.ReadFile(tokenPath); err == nil {
+			token := strings.TrimSpace(string(data))
+			if token != "" {
+				envVars = append(envVars, "CLAUDE_CODE_OAUTH_TOKEN="+token)
+			}
+		}
+	}
+
+	// Create container — entrypoint is "sleep infinity" (set in Dockerfile),
+	// we docker exec claude into it when we want to talk.
 	containerCfg := &containerTypes.Config{
 		Image: image,
-		Env: []string{
-			"SPWN_HOME=/root/.spwn",
-		},
+		Env:   envVars,
 	}
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
@@ -386,4 +407,49 @@ func GetArchitectDaemonStatus(ctx context.Context) (*ArchitectDaemonInfo, error)
 	}
 
 	return result, nil
+}
+
+// TalkToArchitectExecArgs returns the docker exec arguments needed to talk to
+// the Architect. The caller is responsible for executing the command (so it can
+// handle interactive vs one-shot modes and streaming).
+//
+// If message is non-empty a one-shot --print invocation is returned; otherwise
+// an interactive Claude session is returned.
+func TalkToArchitectExecArgs(message string) ([]string, error) {
+	// Build docker exec args
+	args := []string{"exec"}
+
+	if message == "" {
+		// interactive
+		args = append(args, "-it")
+	}
+
+	args = append(args, "-w", "/world")
+
+	// Pass auth env vars into the exec (in case container env was not set at start)
+	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
+		if val := os.Getenv(key); val != "" {
+			args = append(args, "-e", key+"="+val)
+		}
+	}
+	if os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
+		tokenPath := foundation.BaseDir() + "/.auth-token"
+		if data, err := os.ReadFile(tokenPath); err == nil {
+			token := strings.TrimSpace(string(data))
+			if token != "" {
+				args = append(args, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
+			}
+		}
+	}
+
+	args = append(args, foundation.ArchitectContainerName)
+
+	// Claude Code invocation
+	claudeArgs := []string{"claude", "--dangerously-skip-permissions"}
+	if message != "" {
+		claudeArgs = append(claudeArgs, "-p", message, "--print")
+	}
+
+	args = append(args, claudeArgs...)
+	return args, nil
 }
