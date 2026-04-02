@@ -103,6 +103,8 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /api/architect/start", cors(s.handleArchitectStart))
 	mux.HandleFunc("POST /api/architect/stop", cors(s.handleArchitectStop))
 	mux.HandleFunc("POST /api/architect/talk", cors(s.handleArchitectTalk))
+	mux.HandleFunc("GET /api/architect/todo", cors(s.handleArchitectTodoGet))
+	mux.HandleFunc("POST /api/architect/todo", cors(s.handleArchitectTodoUpdate))
 
 	// --- CORS preflight for all paths ---
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
@@ -747,11 +749,88 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Parse TODO file for KPIs
+	worlds, _ := s.state.List()
+	agents, _ := agentpkg.ListAgents()
+	todoItems, todoCounts := parseTodoFile()
+
 	jsonOK(w, map[string]interface{}{
 		"status":      status,
 		"containerId": containerID,
 		"uptime":      uptime,
+		"kpis": map[string]interface{}{
+			"worlds":        len(worlds),
+			"agents":        len(agents),
+			"todoInProgress": todoCounts["in_progress"],
+			"todoBacklog":    todoCounts["backlog"],
+			"todoCompleted":  todoCounts["completed"],
+		},
+		"todo": todoItems,
 	})
+}
+
+// todoItem represents a single TODO item with its status.
+type todoItem struct {
+	Status string `json:"status"`
+	Text   string `json:"text"`
+}
+
+// parseTodoFile reads ~/.spwn/architect/todo.md and extracts tasks by section.
+func parseTodoFile() ([]todoItem, map[string]int) {
+	counts := map[string]int{"in_progress": 0, "backlog": 0, "completed": 0}
+	var items []todoItem
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return items, counts
+	}
+
+	// Check SPWN_HOME first, fall back to ~/.spwn
+	spwnHome := os.Getenv("SPWN_HOME")
+	if spwnHome == "" {
+		spwnHome = filepath.Join(home, ".spwn")
+	}
+	todoPath := filepath.Join(spwnHome, "architect", "todo.md")
+
+	data, err := os.ReadFile(todoPath)
+	if err != nil {
+		return items, counts
+	}
+
+	currentSection := ""
+	for _, line := range strings.Split(string(data), "\n") {
+		trimmed := strings.TrimSpace(line)
+		lower := strings.ToLower(trimmed)
+
+		// Detect section headers
+		if strings.HasPrefix(trimmed, "## ") {
+			switch {
+			case strings.Contains(lower, "in progress"):
+				currentSection = "in_progress"
+			case strings.Contains(lower, "backlog"):
+				currentSection = "backlog"
+			case strings.Contains(lower, "completed"):
+				currentSection = "completed"
+			default:
+				currentSection = ""
+			}
+			continue
+		}
+
+		// Parse task lines (- [ ] or - [x])
+		if currentSection != "" && (strings.HasPrefix(trimmed, "- [ ]") || strings.HasPrefix(trimmed, "- [x]")) {
+			text := trimmed
+			if strings.HasPrefix(trimmed, "- [ ] ") {
+				text = strings.TrimPrefix(trimmed, "- [ ] ")
+			} else if strings.HasPrefix(trimmed, "- [x] ") {
+				text = strings.TrimPrefix(trimmed, "- [x] ")
+			}
+			counts[currentSection]++
+			items = append(items, todoItem{Status: currentSection, Text: text})
+		}
+	}
+
+	return items, counts
 }
 
 func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {

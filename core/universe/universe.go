@@ -316,10 +316,18 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		Image: image,
 		Env:   envVars,
 	}
+	// Ensure architect TODO file exists on the host
+	architectTodoPath := foundation.BaseDir() + "/architect/todo.md"
+	if _, err := os.Stat(architectTodoPath); os.IsNotExist(err) {
+		_ = os.MkdirAll(foundation.BaseDir()+"/architect", 0755)
+		_ = os.WriteFile(architectTodoPath, []byte("# Architect TODO\n\n## In Progress\n\n## Backlog\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Completed\n"), 0644)
+	}
+
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
 			foundation.BaseDir() + ":/spwn-data",
+			architectTodoPath + ":/world/todo.md",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}

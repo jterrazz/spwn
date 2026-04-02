@@ -407,6 +407,21 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
+	// Write system files: AGENTS.md (operating manual) + skill guides
+	if err := a.backend.CopyTo(ctx, containerID, "world/AGENTS.md", []byte(physics.AgentsBook)); err != nil {
+		a.backend.Stop(ctx, containerID)
+		a.backend.Remove(ctx, containerID)
+		return nil, fmt.Errorf("copy AGENTS.md: %w", err)
+	}
+	for skillName, skillContent := range physics.SystemSkills() {
+		if err := a.backend.CopyTo(ctx, containerID, "world/skills/"+skillName, []byte(skillContent)); err != nil {
+			a.backend.Stop(ctx, containerID)
+			a.backend.Remove(ctx, containerID)
+			return nil, fmt.Errorf("copy skill %s: %w", skillName, err)
+		}
+	}
+	opts.progress("system_files_written", "AGENTS.md, 4 skill guides")
+
 	// Create inbox directories for agent communication
 	a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox"})
 	if len(opts.Agents) > 0 {
