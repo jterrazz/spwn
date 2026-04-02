@@ -5,7 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
 import {
-  IconSend,
   IconMessageCircle,
   IconWorld,
   IconUsers,
@@ -13,6 +12,8 @@ import {
   IconCircleCheck,
   IconChevronDown,
   IconChevronRight,
+  IconClipboardList,
+  IconArrowUp,
 } from "@tabler/icons-react";
 
 interface ArchitectStatus {
@@ -46,6 +47,8 @@ interface ChatMessage {
 interface TodoItem {
   text: string;
   done: boolean;
+  priority?: "high" | "medium" | "low";
+  description?: string;
 }
 
 interface TodoData {
@@ -77,50 +80,128 @@ function StatCard({ label, value, sub, accent, icon, loading: isLoading }: { lab
   );
 }
 
+function PriorityBadge({ priority }: { priority?: "high" | "medium" | "low" }) {
+  if (!priority) return null;
+  const colors = {
+    high: "bg-red-500/15 text-red-400/90 border-red-500/20",
+    medium: "bg-amber-500/15 text-amber-400/90 border-amber-500/20",
+    low: "bg-green-500/15 text-green-400/90 border-green-500/20",
+  };
+  return (
+    <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${colors[priority]}`}>
+      {priority}
+    </span>
+  );
+}
+
+function StatusDot({ status }: { status: "inProgress" | "backlog" | "done" }) {
+  if (status === "done") {
+    return <IconCircleCheck size={16} className="text-green-400/70 flex-shrink-0" />;
+  }
+  if (status === "inProgress") {
+    return (
+      <span className="relative flex h-3 w-3 flex-shrink-0">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400/40" />
+        <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-400/70" />
+      </span>
+    );
+  }
+  return <span className="w-3 h-3 rounded-full bg-white/15 flex-shrink-0" />;
+}
+
+function TaskCard({ item, status, isHighlighted }: { item: TodoItem; status: "inProgress" | "backlog" | "done"; isHighlighted: boolean }) {
+  return (
+    <div
+      className={`group rounded-lg border px-3 py-2.5 transition-all duration-500 ${
+        isHighlighted
+          ? "animate-in slide-in-from-right-4 fade-in duration-500 bg-blue-500/8 border-blue-500/20 shadow-[0_0_12px_rgba(59,130,246,0.08)]"
+          : status === "done"
+            ? "bg-white/[0.01] border-white/[0.04] opacity-60"
+            : "bg-white/[0.03] border-white/[0.07] hover:border-white/[0.12] hover:bg-white/[0.05]"
+      }`}
+    >
+      <div className="flex items-start gap-2.5">
+        <div className="mt-0.5">
+          <StatusDot status={status} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-xs font-medium leading-tight ${status === "done" ? "line-through text-muted-foreground/30" : "text-foreground/80"}`}>
+              {item.text}
+            </span>
+            <PriorityBadge priority={item.priority} />
+          </div>
+          {item.description && (
+            <p className="text-[11px] text-muted-foreground/35 mt-1 leading-relaxed">{item.description}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightTitle: string | null }) {
   const [showCompleted, setShowCompleted] = useState(false);
 
   if (!todo) {
     return (
-      <div className="glass-subtle rounded-xl p-4 space-y-3">
-        <h3 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">TODO</h3>
-        <p className="text-xs text-muted-foreground/30">Loading...</p>
+      <div className="glass-subtle rounded-xl p-5 space-y-3">
+        <div className="flex items-center gap-2.5">
+          <IconClipboardList size={18} className="text-muted-foreground/30" />
+          <h3 className="text-sm font-heading tracking-wide text-muted-foreground/50">Task Board</h3>
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <Skeleton className="h-12 w-3/4 rounded-lg" />
+        </div>
       </div>
     );
   }
 
   const isEmpty = todo.inProgress.length === 0 && todo.backlog.length === 0 && todo.completed.length === 0;
+  const totalActive = todo.inProgress.length + todo.backlog.length;
 
   return (
-    <div className="glass-subtle rounded-xl p-4 space-y-3">
+    <div className="glass-subtle rounded-xl p-5 space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">TODO</h3>
-        <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
-          managed by architect
+        <div className="flex items-center gap-2.5">
+          <IconClipboardList size={18} className="text-muted-foreground/40" />
+          <h3 className="text-sm font-heading tracking-wide text-foreground/60">Task Board</h3>
+        </div>
+        <span className="text-[9px] font-mono text-muted-foreground/25 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.05]">
+          {totalActive > 0 ? `${totalActive} active` : "managed by architect"}
         </span>
       </div>
 
+      {/* Empty state */}
       {isEmpty && (
-        <p className="text-xs text-muted-foreground/25 italic">No tasks yet. Ask the Architect to do something.</p>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="w-10 h-10 rounded-full bg-white/[0.04] flex items-center justify-center mb-3">
+            <IconClipboardList size={20} className="text-muted-foreground/20" />
+          </div>
+          <p className="text-xs text-muted-foreground/35 font-medium">No tasks yet</p>
+          <p className="text-[11px] text-muted-foreground/20 mt-1">Talk to the Architect to get started</p>
+        </div>
       )}
 
       {/* In Progress */}
       {todo.inProgress.length > 0 && (
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-yellow-400/50 mb-1.5">In Progress</p>
-          <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/60" />
+            <p className="text-[10px] uppercase tracking-wider font-medium text-yellow-400/60">In Progress</p>
+            <span className="text-[9px] font-mono text-yellow-400/30 ml-auto">{todo.inProgress.length}</span>
+          </div>
+          <div className="space-y-1.5">
             {todo.inProgress.map((item, i) => (
-              <div
+              <TaskCard
                 key={`ip-${i}`}
-                className={`flex items-start gap-2 text-xs text-foreground/70 transition-all duration-700 ${
-                  highlightTitle && item.text.includes(highlightTitle) ? "bg-yellow-400/10 rounded px-1 -mx-1" : ""
-                }`}
-              >
-                <span className="mt-0.5 w-3.5 h-3.5 rounded border border-yellow-400/30 flex items-center justify-center flex-shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/50" />
-                </span>
-                <span>{item.text}</span>
-              </div>
+                item={item}
+                status="inProgress"
+                isHighlighted={!!highlightTitle && item.text.includes(highlightTitle)}
+              />
             ))}
           </div>
         </div>
@@ -129,40 +210,46 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
       {/* Backlog */}
       {todo.backlog.length > 0 && (
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/30 mb-1.5">Backlog</p>
-          <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
+            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground/35">Backlog</p>
+            <span className="text-[9px] font-mono text-muted-foreground/20 ml-auto">{todo.backlog.length}</span>
+          </div>
+          <div className="space-y-1.5">
             {todo.backlog.map((item, i) => (
-              <div
+              <TaskCard
                 key={`bl-${i}`}
-                className={`flex items-start gap-2 text-xs text-foreground/50 transition-all duration-700 ${
-                  highlightTitle && item.text.includes(highlightTitle) ? "bg-blue-400/10 rounded px-1 -mx-1" : ""
-                }`}
-              >
-                <span className="mt-0.5 w-3.5 h-3.5 rounded border border-white/10 flex-shrink-0" />
-                <span>{item.text}</span>
-              </div>
+                item={item}
+                status="backlog"
+                isHighlighted={!!highlightTitle && item.text.includes(highlightTitle)}
+              />
             ))}
           </div>
         </div>
       )}
 
-      {/* Completed (collapsed) */}
+      {/* Completed (collapsible) */}
       {todo.completed.length > 0 && (
-        <div>
+        <div className="pt-1 border-t border-white/[0.05]">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground/25 hover:text-muted-foreground/40 transition-colors"
+            className="flex items-center gap-2 w-full text-[10px] uppercase tracking-wider text-muted-foreground/25 hover:text-muted-foreground/40 transition-colors py-1"
           >
             {showCompleted ? <IconChevronDown size={12} /> : <IconChevronRight size={12} />}
-            Completed ({todo.completed.length})
+            <span>Completed</span>
+            <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400/40 border border-green-500/10">
+              {todo.completed.length}
+            </span>
           </button>
           {showCompleted && (
-            <div className="space-y-1 mt-1.5">
+            <div className="space-y-1.5 mt-2">
               {todo.completed.map((item, i) => (
-                <div key={`done-${i}`} className="flex items-start gap-2 text-xs text-muted-foreground/25 line-through">
-                  <IconCircleCheck size={14} className="mt-0.5 flex-shrink-0" />
-                  <span>{item.text}</span>
-                </div>
+                <TaskCard
+                  key={`done-${i}`}
+                  item={item}
+                  status="done"
+                  isHighlighted={false}
+                />
               ))}
             </div>
           )}
@@ -170,6 +257,28 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
       )}
     </div>
   );
+}
+
+function extractPriority(text: string): { cleanText: string; priority?: "high" | "medium" | "low"; description?: string } {
+  let cleanText = text;
+  let priority: "high" | "medium" | "low" | undefined;
+  let description: string | undefined;
+
+  // Extract priority markers like [HIGH], [MEDIUM], [LOW], (high), (medium), (low), or **HIGH**
+  const priorityMatch = cleanText.match(/\s*[\[(]*\*{0,2}(HIGH|MEDIUM|LOW)\*{0,2}[\])]*\s*/i);
+  if (priorityMatch) {
+    priority = priorityMatch[1].toLowerCase() as "high" | "medium" | "low";
+    cleanText = cleanText.replace(priorityMatch[0], " ").trim();
+  }
+
+  // Extract description after " - " or " — " separator
+  const descSep = cleanText.match(/\s+[-—]\s+(.+)$/);
+  if (descSep) {
+    description = descSep[1];
+    cleanText = cleanText.slice(0, cleanText.length - descSep[0].length).trim();
+  }
+
+  return { cleanText, priority, description };
 }
 
 function parseTodoMd(raw: string): TodoData {
@@ -200,13 +309,14 @@ function parseTodoMd(raw: string): TodoData {
     const checkMatch = trimmed.match(/^-\s*\[([ xX])\]\s*(.+)/);
     if (checkMatch) {
       const done = checkMatch[1] !== " ";
-      const text = checkMatch[2];
+      const { cleanText, priority, description } = extractPriority(checkMatch[2]);
+      const item: TodoItem = { text: cleanText, done, priority, description };
       if (done) {
-        completed.push({ text, done: true });
+        completed.push(item);
       } else if (section === "inProgress") {
-        inProgress.push({ text, done: false });
+        inProgress.push(item);
       } else {
-        backlog.push({ text, done: false });
+        backlog.push(item);
       }
       continue;
     }
@@ -214,13 +324,14 @@ function parseTodoMd(raw: string): TodoData {
     // Parse plain list items
     const listMatch = trimmed.match(/^-\s+(.+)/);
     if (listMatch) {
-      const text = listMatch[1];
+      const { cleanText, priority, description } = extractPriority(listMatch[1]);
+      const item: TodoItem = { text: cleanText, done: section === "completed", priority, description };
       if (section === "inProgress") {
-        inProgress.push({ text, done: false });
+        inProgress.push(item);
       } else if (section === "completed") {
-        completed.push({ text, done: true });
+        completed.push(item);
       } else {
-        backlog.push({ text, done: false });
+        backlog.push(item);
       }
     }
   }
@@ -519,17 +630,34 @@ export default function ArchitectPage() {
                     </p>
                   </div>
                   {msg.todoAction && (
-                    <div className="max-w-[80%] mt-1.5 rounded-lg px-3 py-2 bg-blue-500/10 border border-blue-500/15 text-blue-300/80">
-                      <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-blue-400/60 mb-1">
-                        📋 {msg.todoAction.type === "add" ? "Added to TODO" : msg.todoAction.type === "done" ? "Task Completed" : "Task Updated"}
+                    <div className="max-w-[80%] mt-1.5 animate-in slide-in-from-bottom-2 fade-in duration-300">
+                      <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-blue-500/[0.06]">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 border-b border-blue-500/15">
+                          <span className="text-[10px]">📋</span>
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400/70">
+                            {msg.todoAction.type === "add" ? "Added to Task Board" : msg.todoAction.type === "done" ? "Task Completed" : "Task Updated"}
+                          </span>
+                        </div>
+                        <div className="px-3 py-2">
+                          <p className="text-xs font-medium text-blue-200/90">{msg.todoAction.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {msg.todoAction.priority && (
+                              <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
+                                msg.todoAction.priority.toUpperCase() === "HIGH"
+                                  ? "bg-red-500/15 text-red-400/80 border-red-500/20"
+                                  : msg.todoAction.priority.toUpperCase() === "MEDIUM"
+                                    ? "bg-amber-500/15 text-amber-400/80 border-amber-500/20"
+                                    : "bg-green-500/15 text-green-400/80 border-green-500/20"
+                              }`}>
+                                {msg.todoAction.priority}
+                              </span>
+                            )}
+                            {msg.todoAction.description && (
+                              <span className="text-[10px] text-blue-400/40">{msg.todoAction.description}</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-xs font-medium text-blue-300/90">&quot;{msg.todoAction.title}&quot;</p>
-                      {msg.todoAction.priority && (
-                        <p className="text-[10px] text-blue-400/50 mt-0.5">Priority: {msg.todoAction.priority}</p>
-                      )}
-                      {msg.todoAction.description && (
-                        <p className="text-[10px] text-blue-400/40 mt-0.5">{msg.todoAction.description}</p>
-                      )}
                     </div>
                   )}
                 </div>
@@ -566,19 +694,20 @@ export default function ArchitectPage() {
               <button
                 onClick={handleSendMessage}
                 disabled={!chatInput.trim() || sending}
-                className="p-2 rounded-lg text-muted-foreground/40 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                className={`p-2 rounded-lg transition-all disabled:opacity-20 disabled:cursor-not-allowed ${
+                  chatInput.trim()
+                    ? "bg-white/[0.08] text-foreground/70 hover:bg-white/[0.12]"
+                    : "text-muted-foreground/40"
+                }`}
               >
-                <IconSend size={16} />
+                <IconArrowUp size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* TODO Panel (1/3 width) */}
+        {/* Task Board (1/3 width) */}
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Tasks</h2>
-          </div>
           <TodoPanel todo={todo} highlightTitle={highlightTitle} />
         </div>
       </div>
