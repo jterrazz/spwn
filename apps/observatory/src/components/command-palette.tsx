@@ -20,6 +20,8 @@ import {
   IconCamera,
   IconTrash,
   IconPlus,
+  IconBook2,
+  IconPackage,
 } from "@tabler/icons-react";
 import type { World } from "@/lib/types";
 import { apiGet } from "@/lib/api-client";
@@ -137,9 +139,9 @@ export function CommandPalette() {
             </>
           )}
 
-          {/* Commands */}
+          {/* Navigation */}
           <CommandSeparator />
-          <CommandGroup heading="Commands">
+          <CommandGroup heading="Navigation">
             <CommandItem onSelect={() => navigate("/")}>
               <IconWorldFilled size={14} className="text-muted-foreground/50" />
               <span>Go to Overview</span>
@@ -148,9 +150,40 @@ export function CommandPalette() {
               <IconBrain size={14} className="text-muted-foreground/50" />
               <span>Go to Architect</span>
             </CommandItem>
+            <CommandItem onSelect={() => navigate("/blueprint")}>
+              <IconBook2 size={14} className="text-muted-foreground/50" />
+              <span>Go to Blueprint</span>
+            </CommandItem>
             <CommandItem onSelect={() => navigate("/marketplace")}>
-              <IconRocket size={14} className="text-muted-foreground/50" />
+              <IconPackage size={14} className="text-muted-foreground/50" />
               <span>Go to Marketplace</span>
+            </CommandItem>
+          </CommandGroup>
+
+          {/* Actions */}
+          <CommandSeparator />
+          <CommandGroup heading="Actions">
+            <CommandItem onSelect={() => {
+              setOpen(false);
+              // Trigger spawn world dialog on home page
+              navigate("/");
+              setTimeout(() => {
+                window.dispatchEvent(new KeyboardEvent("keydown", { key: "n", metaKey: true, bubbles: true }));
+              }, 100);
+            }}>
+              <IconRocket size={14} className="text-muted-foreground/50" />
+              <span>Spawn World</span>
+              <span className="ml-auto text-[10px] font-mono text-muted-foreground/20">⌘N</span>
+            </CommandItem>
+            <CommandItem onSelect={() => {
+              setOpen(false);
+              const name = prompt("Agent name:");
+              if (name?.trim()) {
+                navigate(`/agents/${name.trim()}`);
+              }
+            }}>
+              <IconPlus size={14} className="text-muted-foreground/50" />
+              <span>Create Agent</span>
             </CommandItem>
           </CommandGroup>
         </CommandList>

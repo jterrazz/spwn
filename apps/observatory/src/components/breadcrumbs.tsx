@@ -26,6 +26,8 @@ export function Breadcrumbs() {
 
   if (pathname === "/architect") {
     crumbs.push({ label: "Architect", href: "/architect" });
+  } else if (pathname === "/blueprint") {
+    crumbs.push({ label: "Blueprint", href: "/blueprint" });
   } else if (pathname === "/marketplace") {
     crumbs.push({ label: "Marketplace", href: "/marketplace" });
   } else if (pathname.startsWith("/world/")) {
