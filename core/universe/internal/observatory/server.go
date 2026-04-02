@@ -715,7 +715,15 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonOK(w, map[string]string{"response": strings.TrimSpace(string(out))})
+	// Strip CLI header from response (e.g. "Agent: neo\n  World: w-triton\n\nHello!")
+	response := strings.TrimSpace(string(out))
+	if strings.HasPrefix(response, "Agent:") {
+		if idx := strings.Index(response, "\n\n"); idx != -1 {
+			response = strings.TrimSpace(response[idx:])
+		}
+	}
+
+	jsonOK(w, map[string]string{"response": response})
 }
 
 func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
@@ -978,8 +986,28 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Docker exec into the architect container running Claude Code
+	// Check if architect is running, auto-start if needed
 	containerName := "spwn-architect"
+	checkCmd := exec.CommandContext(r.Context(), "docker", "inspect", "--format", "{{.State.Status}}", containerName)
+	checkOut, checkErr := checkCmd.Output()
+	isRunning := checkErr == nil && strings.TrimSpace(string(checkOut)) == "running"
+
+	if !isRunning {
+		// Try to start the architect container
+		startCmd := exec.CommandContext(r.Context(), "docker", "start", containerName)
+		if startErr := startCmd.Run(); startErr != nil {
+			// Container doesn't exist, try spwn architect start
+			spwnCmd := exec.CommandContext(r.Context(), "spwn", "architect", "start")
+			if spwnErr := spwnCmd.Run(); spwnErr != nil {
+				jsonError(w, "failed to start architect: "+spwnErr.Error(), 500)
+				return
+			}
+		}
+		// Wait for container to be ready
+		time.Sleep(3 * time.Second)
+	}
+
+	// Docker exec into the architect container running Claude Code
 	dockerArgs := []string{
 		"exec", "-w", "/world",
 		containerName,

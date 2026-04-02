@@ -153,10 +153,20 @@ export default function AgentPage() {
         signal: AbortSignal.timeout(120000),
       });
       const data = await res.json();
-      if (res.ok && data.response) {
+      // Accept response from either `response` or `message` field
+      const rawResponse = data.response || data.message;
+      if (res.ok && rawResponse) {
+        // Strip CLI header if present (e.g. "Agent: neo\n  World: w-triton\n\nHello!")
+        let cleanResponse = rawResponse;
+        if (cleanResponse.startsWith("Agent:")) {
+          const idx = cleanResponse.indexOf("\n\n");
+          if (idx !== -1) {
+            cleanResponse = cleanResponse.slice(idx).trim();
+          }
+        }
         setMessages((m) => [
           ...m,
-          { role: "agent", content: data.response, timestamp: new Date() },
+          { role: "agent", content: cleanResponse, timestamp: new Date() },
         ]);
       } else {
         setMessages((m) => [
@@ -165,10 +175,40 @@ export default function AgentPage() {
         ]);
       }
     } catch {
-      setMessages((m) => [
-        ...m,
-        { role: "agent", content: "Error: Failed to connect to API. Make sure the Go server is running.", timestamp: new Date() },
-      ]);
+      // Fallback to Next.js route
+      try {
+        const fallbackRes = await fetch(`/api/worlds/${worldId}/talk`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, agent: agentName }),
+          signal: AbortSignal.timeout(120000),
+        });
+        const fallbackData = await fallbackRes.json();
+        const rawResponse = fallbackData.response || fallbackData.message;
+        if (fallbackRes.ok && rawResponse) {
+          let cleanResponse = rawResponse;
+          if (cleanResponse.startsWith("Agent:")) {
+            const idx = cleanResponse.indexOf("\n\n");
+            if (idx !== -1) {
+              cleanResponse = cleanResponse.slice(idx).trim();
+            }
+          }
+          setMessages((m) => [
+            ...m,
+            { role: "agent", content: cleanResponse, timestamp: new Date() },
+          ]);
+        } else {
+          setMessages((m) => [
+            ...m,
+            { role: "agent", content: `Error: ${fallbackData.error || "Failed to get response"}`, timestamp: new Date() },
+          ]);
+        }
+      } catch {
+        setMessages((m) => [
+          ...m,
+          { role: "agent", content: "Error: Failed to connect to API. Make sure the Go server is running.", timestamp: new Date() },
+        ]);
+      }
     } finally {
       setIsTyping(false);
     }
@@ -346,7 +386,18 @@ export default function AgentPage() {
           <>
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-              {messages.length === 0 && !isTyping && (
+              {world && world.status !== "running" && messages.length === 0 && !isTyping && (
+                <div className="flex-1 flex flex-col items-center justify-center h-full gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                    <IconSparkles size={20} className="text-amber-400/60" />
+                  </div>
+                  <p className="text-sm text-amber-300/60 font-heading">World is not running</p>
+                  <p className="text-xs text-muted-foreground/30 font-mono text-center max-w-xs">
+                    The agent needs an active world to chat. Start the world first from the world dashboard.
+                  </p>
+                </div>
+              )}
+              {(world?.status === "running" || messages.length > 0) && messages.length === 0 && !isTyping && (
                 <div className="flex-1 flex items-center justify-center h-full">
                   <p className="text-sm text-muted-foreground/25 font-mono">
                     Send a message to start chatting with {agentName}

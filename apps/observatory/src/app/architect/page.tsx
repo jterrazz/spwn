@@ -455,6 +455,61 @@ export default function ArchitectPage() {
     }
   };
 
+  const doTalk = async (msg: string) => {
+    try {
+      const res = await fetch("http://localhost:3001/api/architect/talk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+        signal: AbortSignal.timeout(120000),
+      });
+      const data = await res.json().catch(() => null);
+      if (!data) {
+        setMessages((prev) => [...prev, {
+          role: "architect", content: "Failed to parse response from Architect.",
+          timestamp: new Date(), error: true,
+        }]);
+        return;
+      }
+      // Check if the response contains a Docker/daemon error
+      if (data.error && (!data.response || data.response.includes("No such container") || data.response.includes("Error response from daemon"))) {
+        setMessages((prev) => [...prev, {
+          role: "architect",
+          content: `Architect container error: ${data.error}. Try restarting the Architect.`,
+          timestamp: new Date(), error: true,
+        }]);
+        return;
+      }
+      handleTalkResponse(data);
+    } catch {
+      // Fallback to Next.js route
+      try {
+        const res = await fetch("/api/architect/talk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg }),
+          signal: AbortSignal.timeout(120000),
+        });
+        const data = await res.json().catch(() => null);
+        if (!data) {
+          setMessages((prev) => [...prev, {
+            role: "architect", content: "Failed to parse response.",
+            timestamp: new Date(), error: true,
+          }]);
+          return;
+        }
+        handleTalkResponse(data);
+      } catch {
+        setMessages((prev) => [...prev, {
+          role: "architect",
+          content: "Failed to connect to Architect. Make sure the container is running.",
+          timestamp: new Date(),
+          error: true,
+        }]);
+      }
+    }
+  };
+
   const handleSendMessage = async () => {
     const msg = chatInput.trim();
     if (!msg || sending) return;
@@ -465,32 +520,75 @@ export default function ArchitectPage() {
     setSending(true);
 
     try {
-      const res = await fetch("http://localhost:3001/api/architect/talk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
-        signal: AbortSignal.timeout(60000),
-      });
-      const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
-      handleTalkResponse(data);
-    } catch {
-      // Fallback to Next.js route
-      try {
-        const res = await fetch("/api/architect/talk", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg }),
-        });
-        const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
-        handleTalkResponse(data);
-      } catch {
+      // Check if architect is running
+      let running = architectStatus?.status === "running";
+
+      if (!running) {
+        // Show starting message
         setMessages((prev) => [...prev, {
           role: "architect",
-          content: "Failed to connect to Architect. Make sure the container is running.",
+          content: "Starting Architect...",
           timestamp: new Date(),
-          error: true,
         }]);
+
+        // Start it (try Go API, fallback to Next.js)
+        try {
+          await fetch("http://localhost:3001/api/architect/start", { method: "POST" });
+        } catch {
+          try {
+            await fetch("/api/architect/start", { method: "POST" });
+          } catch {
+            setMessages((prev) => [...prev, {
+              role: "architect",
+              content: "Failed to auto-start Architect. Please start it manually.",
+              timestamp: new Date(),
+              error: true,
+            }]);
+            setSending(false);
+            inputRef.current?.focus();
+            return;
+          }
+        }
+
+        // Wait for it to be ready (poll every 2s, max 30s)
+        for (let i = 0; i < 15; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          try {
+            const statusRes = await fetch("http://localhost:3001/api/architect/status");
+            const statusData = await statusRes.json();
+            if (statusData.status === "running") {
+              running = true;
+              setArchitectStatus((s) => s ? { ...s, status: "running" } : { status: "running", containerId: null, uptime: null });
+              break;
+            }
+          } catch {
+            // Ignore polling errors, keep trying
+          }
+        }
+
+        if (!running) {
+          setMessages((prev) => [...prev, {
+            role: "architect",
+            content: "Architect failed to start after 30s. Please try starting it manually.",
+            timestamp: new Date(),
+            error: true,
+          }]);
+          setSending(false);
+          inputRef.current?.focus();
+          return;
+        }
       }
+
+      // Now talk
+      await doTalk(msg);
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : "Unknown error";
+      setMessages((prev) => [...prev, {
+        role: "architect",
+        content: `Error: ${errMsg}`,
+        timestamp: new Date(),
+        error: true,
+      }]);
     } finally {
       setSending(false);
       inputRef.current?.focus();
@@ -638,6 +736,11 @@ export default function ArchitectPage() {
                   <p className="text-[11px] text-muted-foreground/20 mt-1 max-w-sm">
                     Ask anything in natural language. For example: &quot;Create a new agent for the API project&quot; or &quot;What agents are running?&quot;
                   </p>
+                  {!isRunning && (
+                    <p className="text-[10px] text-yellow-400/40 mt-2 font-mono">
+                      Architect is offline — it will auto-start when you send a message
+                    </p>
+                  )}
                 </div>
               )}
               {messages.map((msg, i) => (
