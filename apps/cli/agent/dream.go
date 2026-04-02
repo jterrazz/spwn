@@ -31,6 +31,7 @@ var dreamCmd = &cobra.Command{
 
 		if result.Skipped {
 			s.Info("Skipped", result.Reason)
+			s.Info("Hint", "Journal entries are created when worlds are destroyed. Use \"spwn down <world>\" first.")
 			s.Blank()
 			return nil
 		}
