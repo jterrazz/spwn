@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { STATUS_DOT, STATUS_BADGE, TIER_BADGE } from "@/lib/status";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useToast } from "@/components/toast-provider";
+import { useRefetch } from "@/components/app-shell";
 
 function extractName(id: string): string {
   const parts = id.split("-");
@@ -68,6 +69,7 @@ export default function WorldDashboard() {
   const [showNewAgent, setShowNewAgent] = useState(false);
 
   const { toast } = useToast();
+  const refetchSidebar = useRefetch();
   const worldName = world ? extractName(world.id) : null;
   usePageTitle(worldName);
 
@@ -98,6 +100,9 @@ export default function WorldDashboard() {
         showFeedback(`Error: ${result.error || "Unknown error"}`);
         return false;
       }
+      // Immediately refetch data after successful mutation
+      fetchWorld();
+      refetchSidebar();
       return true;
     } catch {
       showFeedback("Error: Failed to connect to API");

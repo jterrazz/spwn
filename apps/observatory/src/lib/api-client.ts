@@ -11,6 +11,29 @@ const GO_API_BASE =
     ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001")
     : "http://localhost:3001";
 
+// ── Connection status tracking ──
+
+export type ConnectionStatus = "connected" | "degraded" | "disconnected";
+
+let _connectionStatus: ConnectionStatus = "disconnected";
+const _statusListeners: Set<(status: ConnectionStatus) => void> = new Set();
+
+function setConnectionStatus(status: ConnectionStatus) {
+  if (_connectionStatus !== status) {
+    _connectionStatus = status;
+    _statusListeners.forEach((fn) => fn(status));
+  }
+}
+
+export function getConnectionStatus(): ConnectionStatus {
+  return _connectionStatus;
+}
+
+export function onConnectionStatusChange(fn: (status: ConnectionStatus) => void): () => void {
+  _statusListeners.add(fn);
+  return () => { _statusListeners.delete(fn); };
+}
+
 // ── Core fetch helpers ──
 
 async function tryGoApi<T>(path: string, init?: RequestInit): Promise<T | null> {
@@ -20,6 +43,7 @@ async function tryGoApi<T>(path: string, init?: RequestInit): Promise<T | null> 
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
+    setConnectionStatus("connected");
     return res.json();
   } catch {
     return null;
@@ -29,6 +53,7 @@ async function tryGoApi<T>(path: string, init?: RequestInit): Promise<T | null> 
 async function fallbackNextApi<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, init);
   if (!res.ok) throw new Error(await res.text());
+  setConnectionStatus("degraded");
   return res.json();
 }
 
@@ -87,7 +112,12 @@ export async function apiGet<T>(goPath: string, nextFallback?: string): Promise<
     }
     return data;
   }
-  return fallbackNextApi<T>(nextFallback ?? goPath);
+  try {
+    return await fallbackNextApi<T>(nextFallback ?? goPath);
+  } catch {
+    setConnectionStatus("disconnected");
+    throw new Error("Failed to connect to any API");
+  }
 }
 
 /**
@@ -106,7 +136,12 @@ export async function apiPost<T>(
 
   const data = await tryGoApi<T>(goPath, init);
   if (data !== null) return data;
-  return fallbackNextApi<T>(nextFallback ?? goPath, init);
+  try {
+    return await fallbackNextApi<T>(nextFallback ?? goPath, init);
+  } catch {
+    setConnectionStatus("disconnected");
+    throw new Error("Failed to connect to any API");
+  }
 }
 
 /**
@@ -125,7 +160,12 @@ export async function apiPut<T>(
 
   const data = await tryGoApi<T>(goPath, init);
   if (data !== null) return data;
-  return fallbackNextApi<T>(nextFallback ?? goPath, init);
+  try {
+    return await fallbackNextApi<T>(nextFallback ?? goPath, init);
+  } catch {
+    setConnectionStatus("disconnected");
+    throw new Error("Failed to connect to any API");
+  }
 }
 
 /**
@@ -135,7 +175,12 @@ export async function apiDelete(goPath: string, nextFallback?: string): Promise<
   const init: RequestInit = { method: "DELETE" };
   const goRes = await tryGoApi<unknown>(goPath, init);
   if (goRes !== null) return;
-  await fallbackNextApi<unknown>(nextFallback ?? goPath, init);
+  try {
+    await fallbackNextApi<unknown>(nextFallback ?? goPath, init);
+  } catch {
+    setConnectionStatus("disconnected");
+    throw new Error("Failed to connect to any API");
+  }
 }
 
 /**
@@ -160,6 +205,7 @@ export async function apiAction(
     });
     const data = await res.json();
     if (!res.ok) return { ok: false, error: data.error || "Unknown error" };
+    setConnectionStatus("connected");
     return { ok: true };
   } catch {
     // Fall back to Next.js route
@@ -167,8 +213,10 @@ export async function apiAction(
       const res = await fetch(nextFallback ?? goPath, init);
       const data = await res.json();
       if (!res.ok) return { ok: false, error: data.error || "Unknown error" };
+      setConnectionStatus("degraded");
       return { ok: true };
     } catch {
+      setConnectionStatus("disconnected");
       return { ok: false, error: "Failed to connect to API" };
     }
   }

@@ -1,12 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ErrorBoundary } from "@/components/error-boundary";
 import type { World, LimboAgent } from "@/lib/types";
 import { apiGet } from "@/lib/api-client";
+
+// ── Refetch context: allows any child to trigger an immediate data refetch ──
+const RefetchContext = createContext<() => void>(() => {});
+export function useRefetch() { return useContext(RefetchContext); }
 
 interface AgentListItem {
   name: string;
@@ -65,18 +70,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [fetchWorlds]);
 
   return (
-    <SidebarProvider>
-      <AppSidebar
-        worlds={worlds}
-        limboAgents={limboAgents}
-        currentWorldId={currentWorldId}
-        loading={sidebarLoading}
-        statusData={statusData}
-      />
-      <SidebarInset>
-        <Breadcrumbs />
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+    <RefetchContext.Provider value={fetchWorlds}>
+      <SidebarProvider>
+        <AppSidebar
+          worlds={worlds}
+          limboAgents={limboAgents}
+          currentWorldId={currentWorldId}
+          loading={sidebarLoading}
+          statusData={statusData}
+        />
+        <SidebarInset>
+          <Breadcrumbs />
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+        </SidebarInset>
+      </SidebarProvider>
+    </RefetchContext.Provider>
   );
 }

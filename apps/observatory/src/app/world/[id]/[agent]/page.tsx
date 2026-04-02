@@ -6,6 +6,7 @@ import type { AgentProfile, AgentMessage, World } from "@/lib/types";
 import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useToast } from "@/components/toast-provider";
+import { useRefetch } from "@/components/app-shell";
 import {
   IconBrain,
   IconMessageFilled,
@@ -59,6 +60,7 @@ export default function AgentPage() {
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [mindTree, setMindTree] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+  const refetchSidebar = useRefetch();
 
   // Extract world name for title
   const worldName = world ? (() => {
@@ -124,6 +126,8 @@ export default function AgentPage() {
         showFeedback(`Error: ${result.error || "Unknown error"}`);
         return false;
       }
+      // Immediately refetch sidebar data after mutation
+      refetchSidebar();
       return true;
     } catch {
       showFeedback("Error: Failed to connect to API");
