@@ -4,21 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { IconSend, IconTerminal } from "@tabler/icons-react";
+import { IconSend, IconMessageCircle } from "@tabler/icons-react";
 
 interface ArchitectStatus {
   status: "running" | "stopped";
   containerId: string | null;
   uptime: string | null;
-
   error?: string;
-}
-
-interface StatusData {
-  worlds: number;
-  agents: number;
-  running: number;
-  limbo: number;
 }
 
 interface ChatMessage {
@@ -50,7 +42,6 @@ function StatCard({ label, value, sub, accent, loading: isLoading }: { label: st
 export default function ArchitectPage() {
   usePageTitle("Architect");
   const [architectStatus, setArchitectStatus] = useState<ArchitectStatus | null>(null);
-  const [statusData, setStatusData] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -64,14 +55,12 @@ export default function ArchitectPage() {
 
   useEffect(() => {
     const fetchData = () => {
-      Promise.all([
-        apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status").catch(() => ({ status: "stopped" as const, containerId: null, uptime: null })),
-        apiGet<StatusData>("/api/status", "/api/status").catch(() => null),
-      ]).then(([archStatus, sData]) => {
-        setArchitectStatus(archStatus);
-        setStatusData(sData);
-        setLoading(false);
-      });
+      apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status")
+        .catch(() => ({ status: "stopped" as const, containerId: null, uptime: null }))
+        .then((archStatus) => {
+          setArchitectStatus(archStatus);
+          setLoading(false);
+        });
     };
     fetchData();
     const interval = setInterval(fetchData, 10000);
@@ -135,7 +124,7 @@ export default function ArchitectPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: msg }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(60000),
       });
       const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
       const archMsg: ChatMessage = {
@@ -164,7 +153,7 @@ export default function ArchitectPage() {
       } catch {
         setMessages((prev) => [...prev, {
           role: "architect",
-          content: "Failed to connect to Architect",
+          content: "Failed to connect to Architect. Make sure the container is running.",
           timestamp: new Date(),
           error: true,
         }]);
@@ -193,7 +182,7 @@ export default function ArchitectPage() {
               <Skeleton className="h-3 w-48 mt-1" />
             ) : (
               <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
-                Orchestration daemon · {isRunning ? "running" : "stopped"}
+                {isRunning ? "Online" : "Offline"}
                 {architectStatus?.containerId && ` · ${architectStatus.containerId.slice(0, 12)}`}
                 {architectStatus?.uptime && ` · uptime ${architectStatus.uptime}`}
               </p>
@@ -241,7 +230,7 @@ export default function ArchitectPage() {
         </div>
       )}
 
-      {/* Stats */}
+      {/* Status Cards */}
       <div className="flex gap-4 flex-wrap">
         <StatCard
           label="Status"
@@ -250,143 +239,96 @@ export default function ArchitectPage() {
           loading={loading}
         />
         <StatCard
-          label="Worlds"
-          value={statusData ? String(statusData.worlds) : "—"}
-          sub={statusData ? `${statusData.running ?? 0} running` : undefined}
+          label="Container"
+          value={loading ? "" : architectStatus?.containerId ? architectStatus.containerId.slice(0, 12) : "—"}
+          sub="spwn-architect"
           loading={loading}
         />
         <StatCard
-          label="Agents"
-          value={statusData ? String(statusData.agents) : "—"}
-          sub="across all worlds"
+          label="Uptime"
+          value={loading ? "" : architectStatus?.uptime ?? "—"}
+          sub={isRunning ? "since last start" : undefined}
           loading={loading}
         />
       </div>
 
-      {/* Two-column layout: Chat + Config */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chat — left 2 columns */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Chat</h2>
-            <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
-              send spwn commands
-            </span>
-          </div>
-
-          <div className="glass-subtle rounded-xl overflow-hidden flex flex-col" style={{ height: "420px" }}>
-            {/* Messages area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <IconTerminal size={28} className="text-muted-foreground/15 mb-3" />
-                  <p className="text-sm text-muted-foreground/30">Talk to the Architect</p>
-                  <p className="text-[11px] text-muted-foreground/20 mt-1">
-                    Try: <span className="font-mono">ls</span>, <span className="font-mono">agent new atlas</span>, or <span className="font-mono">status</span>
-                  </p>
-                </div>
-              )}
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-xl px-3.5 py-2.5 ${
-                    msg.role === "user"
-                      ? "bg-white/[0.08] text-foreground/80"
-                      : msg.error
-                        ? "bg-red-500/10 border border-red-500/15 text-red-400/80"
-                        : "bg-white/[0.03] border border-white/[0.06] text-foreground/70"
-                  }`}>
-                    {msg.role === "architect" ? (
-                      <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed">{msg.content}</pre>
-                    ) : (
-                      <p className="text-xs font-mono">{msg.content}</p>
-                    )}
-                    <p className="text-[9px] text-muted-foreground/20 mt-1">
-                      {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              {sending && (
-                <div className="flex justify-start">
-                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-foreground/30 animate-pulse" />
-                      <span className="text-xs text-muted-foreground/40">Processing...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Input area */}
-            <div className="border-t border-white/[0.06] p-3 flex gap-2">
-              <input
-                ref={inputRef}
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                placeholder="Type a spwn command... (e.g. ls, agent new neo)"
-                className="flex-1 bg-transparent text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none"
-                disabled={sending}
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!chatInput.trim() || sending}
-                className="p-2 rounded-lg text-muted-foreground/40 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-              >
-                <IconSend size={16} />
-              </button>
-            </div>
-          </div>
+      {/* Chat Interface */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Chat</h2>
+          <span className="text-[9px] font-mono text-muted-foreground/20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
+            natural language
+          </span>
         </div>
 
-        {/* Config — right column */}
-        <div>
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Config</h2>
-          <div className="glass-subtle p-4 space-y-2">
-            <div className="flex justify-between">
-              <span className="text-[10px] text-muted-foreground/40">Runtime</span>
-              <span className="text-xs font-mono text-foreground/60">claude-code</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[10px] text-muted-foreground/40">Backend</span>
-              <span className="text-xs font-mono text-foreground/60">docker</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[10px] text-muted-foreground/40">API</span>
-              <span className="text-xs font-mono text-foreground/60">localhost:3001</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[10px] text-muted-foreground/40">Max worlds</span>
-              <span className="text-xs font-mono text-foreground/60">10</span>
-            </div>
+        <div className="glass-subtle rounded-xl overflow-hidden flex flex-col" style={{ height: "480px" }}>
+          {/* Messages area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <IconMessageCircle size={28} className="text-muted-foreground/15 mb-3" />
+                <p className="text-sm text-muted-foreground/30">Talk to the Architect</p>
+                <p className="text-[11px] text-muted-foreground/20 mt-1 max-w-sm">
+                  Ask anything in natural language. For example: &quot;Create a new agent for the API project&quot; or &quot;What agents are running?&quot;
+                </p>
+              </div>
+            )}
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[80%] rounded-xl px-3.5 py-2.5 ${
+                  msg.role === "user"
+                    ? "bg-white/[0.08] text-foreground/80"
+                    : msg.error
+                      ? "bg-red-500/10 border border-red-500/15 text-red-400/80"
+                      : "bg-white/[0.03] border border-white/[0.06] text-foreground/70"
+                }`}>
+                  {msg.role === "architect" ? (
+                    <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed">{msg.content}</pre>
+                  ) : (
+                    <p className="text-xs">{msg.content}</p>
+                  )}
+                  <p className="text-[9px] text-muted-foreground/20 mt-1">
+                    {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                  </p>
+                </div>
+              </div>
+            ))}
+            {sending && (
+              <div className="flex justify-start">
+                <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-foreground/30 animate-pulse" />
+                    <span className="text-xs text-muted-foreground/40">Architect is thinking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
           </div>
 
-          {/* Quick Commands */}
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 mt-8">Quick Commands</h2>
-          <div className="space-y-1.5">
-            {[
-              { label: "List worlds", cmd: "ls" },
-              { label: "List agents", cmd: "agent ls" },
-              { label: "System status", cmd: "status" },
-            ].map((item) => (
-              <button
-                key={item.cmd}
-                onClick={() => {
-                  setChatInput(item.cmd);
-                  inputRef.current?.focus();
-                }}
-                className="w-full glass-subtle px-3 py-2 text-left text-[11px] font-mono text-muted-foreground/40 hover:text-foreground/60 hover:bg-white/[0.04] transition-colors"
-              >
-                <span className="text-muted-foreground/25">$ spwn </span>{item.cmd}
-              </button>
-            ))}
+          {/* Input area */}
+          <div className="border-t border-white/[0.06] p-3 flex gap-2">
+            <input
+              ref={inputRef}
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              placeholder="Talk to the Architect..."
+              className="flex-1 bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none"
+              disabled={sending}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={!chatInput.trim() || sending}
+              className="p-2 rounded-lg text-muted-foreground/40 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+            >
+              <IconSend size={16} />
+            </button>
           </div>
         </div>
       </div>

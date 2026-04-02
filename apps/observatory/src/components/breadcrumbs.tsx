@@ -46,7 +46,7 @@ export function Breadcrumbs() {
     }
   } else if (pathname.startsWith("/agents/")) {
     const agentName = pathname.split("/")[2];
-    crumbs.push({ label: "Agents", href: "/" });
+    crumbs.push({ label: "Agents", href: "/agents" });
     if (agentName) {
       crumbs.push({ label: agentName, href: pathname });
     }
