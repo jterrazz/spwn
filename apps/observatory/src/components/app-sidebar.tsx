@@ -183,6 +183,9 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
         <SidebarGroup>
           <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
             Worlds
+            {worlds.length > 0 && (
+              <span className="ml-1.5 text-[9px] font-mono text-muted-foreground/20">{worlds.length}</span>
+            )}
           </SidebarGroupLabel>
           <SidebarMenu>
             {loading && worlds.length === 0 && (
@@ -247,6 +250,9 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
         <SidebarGroup>
           <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
             Limbo
+            {limboAgents.length > 0 && (
+              <span className="ml-1.5 text-[9px] font-mono text-muted-foreground/20">{limboAgents.length}</span>
+            )}
           </SidebarGroupLabel>
           <SidebarMenu>
             {limboAgents.map((agent) => (
@@ -318,10 +324,20 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
       </SidebarContent>
 
       {/* ── Footer ── */}
-      <SidebarFooter className="px-4 py-3 space-y-2">
+      <SidebarFooter className="px-4 py-3 space-y-3">
         <div className="flex items-center justify-between">
           <LiveStatus />
           <ThemeToggle />
+        </div>
+        <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground/25">
+          <a href="https://spwn.sh/docs" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
+            Docs
+          </a>
+          <span className="text-muted-foreground/10">·</span>
+          <a href="https://github.com/jterrazz/spwn" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
+            GitHub
+          </a>
+          <span className="ml-auto text-muted-foreground/15">v0.1.0</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">
