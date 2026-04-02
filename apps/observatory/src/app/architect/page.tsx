@@ -10,7 +10,7 @@ interface ArchitectStatus {
   status: "running" | "stopped";
   containerId: string | null;
   uptime: string | null;
-  channels: string[];
+
   error?: string;
 }
 
@@ -65,7 +65,7 @@ export default function ArchitectPage() {
   useEffect(() => {
     const fetchData = () => {
       Promise.all([
-        apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status").catch(() => ({ status: "stopped" as const, containerId: null, uptime: null, channels: [] })),
+        apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status").catch(() => ({ status: "stopped" as const, containerId: null, uptime: null })),
         apiGet<StatusData>("/api/status", "/api/status").catch(() => null),
       ]).then(([archStatus, sData]) => {
         setArchitectStatus(archStatus);

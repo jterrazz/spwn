@@ -100,7 +100,7 @@ type Store interface {
 // Channel
 // ---------------------------------------------------------------------------
 
-// Channel abstracts communication channels (CLI, Telegram, Slack, etc.)
+// Channel abstracts communication channels (currently CLI only).
 type Channel interface {
 	Name() string
 	Send(ctx context.Context, msg ChannelMessage) error

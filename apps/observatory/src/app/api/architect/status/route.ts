@@ -11,7 +11,6 @@ export async function GET() {
       status: "stopped",
       containerId: null,
       uptime: null,
-      channels: [],
       error: result.error,
     });
   }
@@ -22,13 +21,11 @@ export async function GET() {
   const running = /running|up|online/i.test(stdout);
   const containerMatch = stdout.match(/container[:\s]+([a-f0-9]{12,})/i);
   const uptimeMatch = stdout.match(/uptime[:\s]+([\dhms]+)/i);
-  const channelMatches = [...stdout.matchAll(/channel[:\s]+(\w+)/gi)];
 
   return NextResponse.json({
     status: running ? "running" : "stopped",
     containerId: containerMatch?.[1] ?? null,
     uptime: uptimeMatch?.[1] ?? null,
-    channels: channelMatches.map((m) => m[1]),
     raw: stdout,
   });
 }

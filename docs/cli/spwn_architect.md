@@ -9,7 +9,7 @@ The Architect — always-on orchestration daemon
 
 ### Synopsis
 
-The Architect is the orchestration daemon of spwn. It manages worlds, connects to messaging channels, and orchestrates artificial life.
+The Architect is the orchestration daemon of spwn. It manages worlds and orchestrates artificial life.
 
 ### Options
 
@@ -28,8 +28,7 @@ The Architect is the orchestration daemon of spwn. It manages worlds, connects t
 ### SEE ALSO
 
 * [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
-* [spwn architect connect](/docs/cli/spwn-architect-connect)	 - Connect a messaging channel (telegram, slack, discord, ...)
 * [spwn architect start](/docs/cli/spwn-architect-start)	 - Start the Architect daemon
-* [spwn architect status](/docs/cli/spwn-architect-status)	 - Show Architect status — channels, worlds, agents
+* [spwn architect status](/docs/cli/spwn-architect-status)	 - Show Architect status — worlds, agents
 * [spwn architect stop](/docs/cli/spwn-architect-stop)	 - Stop the Architect daemon
 

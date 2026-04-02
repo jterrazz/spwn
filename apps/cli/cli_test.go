@@ -113,7 +113,7 @@ func TestCLI_ArchitectHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"start", "stop", "status", "connect"} {
+	for _, sub := range []string{"start", "stop", "status"} {
 		assertContains(t, out, sub, "architect help")
 	}
 }

@@ -65,15 +65,7 @@ type OrgGovernance struct {
 
 // ClawConfig holds Claw daemon configuration.
 type ClawConfig struct {
-	Channels []ChannelConfig `yaml:"channels"`
-	Sync     SyncConfig      `yaml:"sync"`
-}
-
-// ChannelConfig holds a single channel configuration.
-type ChannelConfig struct {
-	Type      string `yaml:"type"`
-	Token     string `yaml:"token"`
-	Workspace string `yaml:"workspace"`
+	Sync SyncConfig `yaml:"sync"`
 }
 
 // SyncConfig holds sync/git configuration for the Claw.
