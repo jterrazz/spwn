@@ -947,6 +947,13 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		containerName,
 		"claude", "--dangerously-skip-permissions",
 		"-p", body.Message, "--print",
+		"--append-system-prompt",
+		"You are the Architect. Read /world/ARCHITECT.md for your identity. " +
+			"IMPORTANT: When a user asks you to do something, you MUST include a [TODO_ADD] marker in your response. " +
+			"Format: [TODO_ADD] Short task title\nPriority: high|medium|low\nBrief description. " +
+			"Also update /world/todo.md with the new task. " +
+			"When completing a task use [TODO_DONE] Short task title. " +
+			"Read /world/skills/ for detailed guides.",
 	}
 
 	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)

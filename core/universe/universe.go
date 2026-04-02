@@ -467,7 +467,14 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	// Claude Code invocation
 	claudeArgs := []string{"claude", "--dangerously-skip-permissions"}
 	if message != "" {
-		claudeArgs = append(claudeArgs, "-p", message, "--print")
+		claudeArgs = append(claudeArgs, "-p", message, "--print",
+			"--append-system-prompt",
+			"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
+				"IMPORTANT: When a user asks you to do something, you MUST include a [TODO_ADD] marker in your response. "+
+				"Format: [TODO_ADD] Short task title\\nPriority: high|medium|low\\nBrief description. "+
+				"Also update /world/todo.md with the new task. "+
+				"When completing a task use [TODO_DONE] Short task title. "+
+				"Read /world/skills/ for detailed guides.")
 	}
 
 	args = append(args, claudeArgs...)
