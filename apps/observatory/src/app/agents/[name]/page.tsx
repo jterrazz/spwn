@@ -27,6 +27,7 @@ import {
   IconMessageCircle,
   IconSend,
   IconTerminal,
+  IconX,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/use-page-title";
@@ -44,6 +45,7 @@ export default function AgentProfilePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "chat" | "files">("profile");
+  const [showWizard, setShowWizard] = useState(false);
 
   usePageTitle(agentName, "Agent");
 
@@ -55,6 +57,10 @@ export default function AgentProfilePage() {
       setProfile(agentProfile ?? null);
       setMindTree(tree ?? {});
       setLoading(false);
+      // Show wizard for new agents without a purpose
+      if (agentProfile && !agentProfile.purpose) {
+        setShowWizard(true);
+      }
     });
   }, [agentName]);
 
@@ -170,9 +176,9 @@ export default function AgentProfilePage() {
   const tierStyle = TIER_BADGE[profile.tier] ?? TIER_BADGE.citizen;
 
   return (
-    <div className="p-8 space-y-8 max-w-3xl">
+    <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-3xl">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between flex-wrap gap-3">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-lg font-heading text-foreground/60">
             {agentName.charAt(0).toUpperCase()}
@@ -289,6 +295,86 @@ export default function AgentProfilePage() {
         </div>
       )}
 
+      {/* Get Started Wizard Banner */}
+      {showWizard && profile && !profile.purpose && (
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <h3 className="text-sm font-heading text-emerald-300">
+                Welcome to {agentName}! Let&apos;s set up their identity.
+              </h3>
+              <p className="text-[11px] text-emerald-300/50 mt-1">
+                Fill in at least a purpose to get started.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowWizard(false)}
+              className="text-emerald-300/30 hover:text-emerald-300/60 transition-colors"
+            >
+              <IconX size={16} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-widest text-emerald-300/40 block mb-1.5">
+                Purpose
+              </label>
+              <input
+                placeholder="What is this agent's purpose?"
+                className="w-full bg-white/[0.03] border border-emerald-500/15 rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter") {
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val) {
+                      await saveIdentityField("purpose", val);
+                      setShowWizard(false);
+                    }
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-emerald-300/40 block mb-1.5">
+                  Persona
+                </label>
+                <input
+                  placeholder="Describe their persona..."
+                  className="w-full bg-white/[0.03] border border-emerald-500/15 rounded-lg px-3 py-2 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                  onKeyDown={async (e) => {
+                    if (e.key === "Enter") {
+                      const val = (e.target as HTMLInputElement).value.trim();
+                      if (val) await saveIdentityField("persona", val);
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-emerald-300/40 block mb-1.5">
+                  Traits
+                </label>
+                <input
+                  placeholder="e.g. curious, creative, diligent"
+                  className="w-full bg-white/[0.03] border border-emerald-500/15 rounded-lg px-3 py-2 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                  onKeyDown={async (e) => {
+                    if (e.key === "Enter") {
+                      const val = (e.target as HTMLInputElement).value.trim();
+                      if (val) {
+                        const traits = val.split(",").map((t) => `- ${t.trim()}`).join("\n");
+                        await saveIdentityField("traits", traits);
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-emerald-300/30 font-mono">
+              Press Enter in any field to save. Fill purpose to dismiss this banner.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Tab switcher */}
       <div className="flex gap-1 border-b border-white/[0.06] pb-px">
         <button
@@ -339,7 +425,7 @@ export default function AgentProfilePage() {
       {activeTab === "profile" && (<>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="glass-subtle p-3 text-center">
           <p className="text-lg font-heading text-foreground/80">{totalFiles}</p>
           <p className="text-[9px] text-muted-foreground/35 uppercase">Files</p>
