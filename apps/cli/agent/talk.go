@@ -35,7 +35,7 @@ If no message is provided, opens an interactive Claude session inside the contai
 
 		// Validate the agent exists
 		if err := agentDomain.ValidateMind(name); err != nil {
-			return fmt.Errorf("agent %q not found", name)
+			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent new %s", name, name)
 		}
 
 		// Find which world this agent is in
@@ -157,7 +157,7 @@ func findAgentContainer(agentName string) (string, string, error) {
 		}
 	}
 
-	return "", "", fmt.Errorf("agent %q is not in any active world", agentName)
+	return "", "", fmt.Errorf("agent %q is not in any active world\n\n  Spawn one with: spwn up --agent %s -w <workspace>", agentName, agentName)
 }
 
 // readAuthToken reads the cached OAuth token from ~/.spwn/.auth-token.

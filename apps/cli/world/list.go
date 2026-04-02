@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -35,6 +36,18 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("cannot list worlds: %w", err)
 		}
+
+		// Auto-cleanup: remove stale worlds whose containers no longer exist
+		var liveWorlds []universe.World
+		for _, w := range worlds {
+			if w.ContainerID != "" && !containerExists(w.ContainerID) {
+				// Container is gone — clean up state silently
+				arc.Destroy(ctx, w.ID)
+				continue
+			}
+			liveWorlds = append(liveWorlds, w)
+		}
+		worlds = liveWorlds
 
 		if j {
 			data, _ := json.MarshalIndent(map[string]interface{}{"active": worlds}, "", "  ")
@@ -88,6 +101,12 @@ func collectAgentNames(u universe.World) string {
 		return "\u2014"
 	}
 	return strings.Join(names, ", ")
+}
+
+// containerExists checks if a Docker container exists (running or stopped).
+func containerExists(containerID string) bool {
+	err := exec.Command("docker", "inspect", "--format", "{{.Id}}", containerID).Run()
+	return err == nil
 }
 
 func timeAgo(t time.Time) string {
