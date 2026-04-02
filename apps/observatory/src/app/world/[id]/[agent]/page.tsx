@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import type { AgentProfile, AgentMessage, World } from "@/lib/types";
 import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { useToast } from "@/components/toast-provider";
 import {
   IconBrain,
   IconMessageFilled,
@@ -103,7 +104,10 @@ export default function AgentPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  const { toast } = useToast();
   const showFeedback = (msg: string) => {
+    const isError = msg.toLowerCase().startsWith("error");
+    toast(msg, isError ? "error" : "success");
     setActionFeedback(msg);
     setTimeout(() => setActionFeedback(null), 2000);
   };

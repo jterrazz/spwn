@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastProvider } from "@/components/toast-provider";
 import { AppShell } from "@/components/app-shell";
+import { CommandPalette } from "@/components/command-palette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({
               <Stars />
               <div className="relative z-10 min-h-screen">
                 <AppShell>{children}</AppShell>
+                <CommandPalette />
               </div>
             </ToastProvider>
           </TooltipProvider>

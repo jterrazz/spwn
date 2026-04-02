@@ -18,6 +18,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { STATUS_DOT, STATUS_BADGE, TIER_BADGE } from "@/lib/status";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { useToast } from "@/components/toast-provider";
 
 function extractName(id: string): string {
   const parts = id.split("-");
@@ -66,6 +67,7 @@ export default function WorldDashboard() {
   const [newAgentTier, setNewAgentTier] = useState("citizen");
   const [showNewAgent, setShowNewAgent] = useState(false);
 
+  const { toast } = useToast();
   const worldName = world ? extractName(world.id) : null;
   usePageTitle(worldName);
 
@@ -166,6 +168,8 @@ export default function WorldDashboard() {
   }, [activePanel, worldId]);
 
   const showFeedback = (msg: string) => {
+    const isError = msg.toLowerCase().startsWith("error");
+    toast(msg, isError ? "error" : "success");
     setActionFeedback(msg);
     setTimeout(() => setActionFeedback(null), 2500);
   };
