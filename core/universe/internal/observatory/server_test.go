@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -74,6 +75,8 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 
 	// Architect endpoints
 	mux.HandleFunc("GET /api/architect/status", cors(srv.handleArchitectStatus))
+	mux.HandleFunc("GET /api/architect/todo", cors(srv.handleArchitectTodoGet))
+	mux.HandleFunc("POST /api/architect/todo", cors(srv.handleArchitectTodoUpdate))
 
 	// CORS preflight
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
@@ -781,6 +784,226 @@ func TestStatusCountsAgents(t *testing.T) {
 	body = decodeBody(t, w)
 	if body["agents"].(float64) != 1 {
 		t.Errorf("expected 1 agent after create, got %v", body["agents"])
+	}
+}
+
+// ============================================================
+// TODO API endpoint tests
+// ============================================================
+
+func TestGetArchitectTodo_DefaultTemplate(t *testing.T) {
+	_, mux := newFullTestServer(t)
+
+	// No todo file exists — should return default template
+	w := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
+	}
+
+	body := decodeBody(t, w)
+	content, ok := body["content"].(string)
+	if !ok || content == "" {
+		t.Fatalf("expected content string, got %v", body["content"])
+	}
+
+	// Verify default template has expected sections
+	if !strings.Contains(content, "# Architect TODO") {
+		t.Errorf("default template missing '# Architect TODO' heading")
+	}
+	if !strings.Contains(content, "## In Progress") {
+		t.Errorf("default template missing '## In Progress' section")
+	}
+	if !strings.Contains(content, "## Backlog") {
+		t.Errorf("default template missing '## Backlog' section")
+	}
+	if !strings.Contains(content, "## Completed") {
+		t.Errorf("default template missing '## Completed' section")
+	}
+}
+
+func TestPostArchitectTodo(t *testing.T) {
+	_, mux := newFullTestServer(t)
+
+	todoContent := "# Architect TODO\n\n## In Progress\n- [ ] Deploy v2\n\n## Backlog\n- [ ] Write docs\n\n## Completed\n- [x] Setup CI\n"
+
+	// Write content
+	w := doJSON(t, mux, "POST", "/api/architect/todo", map[string]string{
+		"content": todoContent,
+	})
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
+	}
+
+	body := decodeBody(t, w)
+	if body["status"] != "ok" {
+		t.Errorf("expected status=ok, got %v", body["status"])
+	}
+
+	// Verify the file was written to disk
+	home := os.Getenv("SPWN_HOME")
+	todoPath := filepath.Join(home, "architect", "todo.md")
+	data, err := os.ReadFile(todoPath)
+	if err != nil {
+		t.Fatalf("failed to read todo file from disk: %v", err)
+	}
+	if string(data) != todoContent {
+		t.Errorf("on-disk content mismatch:\ngot:  %q\nwant: %q", string(data), todoContent)
+	}
+
+	// Verify GET returns the same content
+	w2 := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	if w2.Code != 200 {
+		t.Fatalf("expected 200 on GET, got %d", w2.Code)
+	}
+	body2 := decodeBody(t, w2)
+	if body2["content"] != todoContent {
+		t.Errorf("GET content mismatch after POST:\ngot:  %q\nwant: %q", body2["content"], todoContent)
+	}
+}
+
+func TestArchitectStatusKPIs(t *testing.T) {
+	_, mux := newFullTestServer(t)
+
+	// Create some agents to populate KPIs
+	createTestAgent(t, "kpi-agent-1")
+	createTestAgent(t, "kpi-agent-2")
+
+	// Write a TODO file with known task counts
+	home := os.Getenv("SPWN_HOME")
+	todoDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(todoDir, 0755); err != nil {
+		t.Fatalf("mkdir architect: %v", err)
+	}
+	todoContent := "# Architect TODO\n\n## In Progress\n- [ ] Task A\n- [ ] Task B\n- [ ] Task C\n\n## Completed\n- [x] Task D\n- [X] Task E\n"
+	writeFile(t, filepath.Join(todoDir, "todo.md"), todoContent)
+
+	w := doJSON(t, mux, "GET", "/api/architect/status", nil)
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
+	}
+
+	body := decodeBody(t, w)
+
+	// Verify kpis object exists
+	kpis, ok := body["kpis"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected kpis to be an object, got %T: %v", body["kpis"], body["kpis"])
+	}
+
+	// Verify agent count
+	agents, ok := kpis["agents"].(float64)
+	if !ok {
+		t.Fatalf("expected agents to be a number, got %T", kpis["agents"])
+	}
+	if agents != 2 {
+		t.Errorf("expected 2 agents, got %v", agents)
+	}
+
+	// Verify worlds count (should be 0, no worlds created)
+	worlds, ok := kpis["worlds"].(float64)
+	if !ok {
+		t.Fatalf("expected worlds to be a number, got %T", kpis["worlds"])
+	}
+	if worlds != 0 {
+		t.Errorf("expected 0 worlds, got %v", worlds)
+	}
+
+	// Verify task counts
+	tasksPending, ok := kpis["tasksPending"].(float64)
+	if !ok {
+		t.Fatalf("expected tasksPending to be a number, got %T", kpis["tasksPending"])
+	}
+	if tasksPending != 3 {
+		t.Errorf("expected 3 pending tasks, got %v", tasksPending)
+	}
+
+	tasksCompleted, ok := kpis["tasksCompleted"].(float64)
+	if !ok {
+		t.Fatalf("expected tasksCompleted to be a number, got %T", kpis["tasksCompleted"])
+	}
+	if tasksCompleted != 2 {
+		t.Errorf("expected 2 completed tasks, got %v", tasksCompleted)
+	}
+}
+
+func TestArchitectStatusTodoParsing(t *testing.T) {
+	_, mux := newFullTestServer(t)
+
+	home := os.Getenv("SPWN_HOME")
+	todoDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(todoDir, 0755); err != nil {
+		t.Fatalf("mkdir architect: %v", err)
+	}
+
+	tests := []struct {
+		name              string
+		content           string
+		expectedPending   float64
+		expectedCompleted float64
+	}{
+		{
+			name:              "empty file",
+			content:           "",
+			expectedPending:   0,
+			expectedCompleted: 0,
+		},
+		{
+			name:              "only pending",
+			content:           "# TODO\n- [ ] Task 1\n- [ ] Task 2\n",
+			expectedPending:   2,
+			expectedCompleted: 0,
+		},
+		{
+			name:              "only completed",
+			content:           "# TODO\n- [x] Done 1\n- [X] Done 2\n- [x] Done 3\n",
+			expectedPending:   0,
+			expectedCompleted: 3,
+		},
+		{
+			name:              "mixed tasks",
+			content:           "# TODO\n\n## In Progress\n- [ ] Active 1\n\n## Backlog\n- [ ] Backlog 1\n- [ ] Backlog 2\n\n## Completed\n- [x] Done 1\n",
+			expectedPending:   3,
+			expectedCompleted: 1,
+		},
+		{
+			name:              "indented tasks",
+			content:           "# TODO\n  - [ ] Indented pending\n  - [x] Indented done\n",
+			expectedPending:   1,
+			expectedCompleted: 1,
+		},
+		{
+			name:              "non-task lines ignored",
+			content:           "# TODO\n\nSome text\n- Regular bullet\n- [ ] Real task\n## Heading\n- [x] Done task\n",
+			expectedPending:   1,
+			expectedCompleted: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			writeFile(t, filepath.Join(todoDir, "todo.md"), tt.content)
+
+			w := doJSON(t, mux, "GET", "/api/architect/status", nil)
+			if w.Code != 200 {
+				t.Fatalf("expected 200, got %d", w.Code)
+			}
+
+			body := decodeBody(t, w)
+			kpis, ok := body["kpis"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("expected kpis object, got %T", body["kpis"])
+			}
+
+			pending := kpis["tasksPending"].(float64)
+			completed := kpis["tasksCompleted"].(float64)
+
+			if pending != tt.expectedPending {
+				t.Errorf("tasksPending: got %v, want %v", pending, tt.expectedPending)
+			}
+			if completed != tt.expectedCompleted {
+				t.Errorf("tasksCompleted: got %v, want %v", completed, tt.expectedCompleted)
+			}
+		})
 	}
 }
 
