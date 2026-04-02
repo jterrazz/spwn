@@ -117,9 +117,11 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
 
   return (
     <Sidebar>
-      {/* ── Header: brand + status + search hint ── */}
-      <SidebarHeader className="px-4 pt-4 pb-2">
-        <a href="/" className="flex items-center gap-2">
+      {/* ── Header: drag region + brand (macOS traffic lights sit here) ── */}
+      <SidebarHeader className="px-4 pt-3 pb-2" style={{ paddingTop: "env(safe-area-inset-top, 12px)" }}>
+        {/* Drag region for native window — macOS traffic lights appear in this space */}
+        <div data-tauri-drag-region="true" className="h-3 -mx-4 -mt-3 mb-1" />
+        <a href="/" className="flex items-center gap-2 pl-[4px]">
           <span className="text-sm tracking-[0.15em] font-heading text-foreground/90">
             ⬡ spwn
           </span>

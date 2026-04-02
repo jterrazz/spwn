@@ -80,6 +80,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           statusData={statusData}
         />
         <SidebarInset>
+          {/* Drag region for native window title bar area */}
+          <div data-tauri-drag-region="true" className="h-3 w-full shrink-0" />
           <Breadcrumbs />
           <ErrorBoundary>
             {children}
