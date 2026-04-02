@@ -25,7 +25,14 @@ var startCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		srv := universe.NewObservatoryServer(store, ":3001")
+
+		// Try to create architect for full CRUD; fall back to read-only.
+		arch, archErr := universe.NewArchitectFromEnv()
+		if archErr != nil {
+			fmt.Println("  ⚠ Docker not available — running in read-only mode")
+		}
+
+		srv := universe.NewObservatoryServer(store, arch, ":3001")
 		fmt.Println("  Dashboard API on http://localhost:3001")
 		return srv.Start()
 	},

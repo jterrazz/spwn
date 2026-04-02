@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { MOCK_WORLDS, MOCK_PROFILES, MOCK_MESSAGES } from "@/lib/mock-data";
 import type { AgentProfile, AgentMessage, World } from "@/lib/mock-data";
+import { apiGet, apiAction } from "@/lib/api-client";
 import {
   IconBrain,
   IconMessageFilled,
@@ -65,12 +66,12 @@ export default function AgentPage() {
   const [mindTree, setMindTree] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
 
-  // Fetch world + agent data from API
+  // Fetch world + agent data from API (Go API with Next.js fallback)
   useEffect(() => {
     Promise.all([
-      fetch("/api/worlds").then((r) => r.json()).catch(() => MOCK_WORLDS),
-      fetch(`/api/agents/${agentName}`).then((r) => r.ok ? r.json() : null).catch(() => null),
-      fetch(`/api/agents/${agentName}/mind`).then((r) => r.ok ? r.json() : null).catch(() => null),
+      apiGet<World[]>("/api/universes", "/api/worlds").catch(() => MOCK_WORLDS),
+      apiGet<AgentProfile>(`/api/agents/${agentName}`, `/api/agents/${agentName}`).catch(() => null),
+      apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`, `/api/agents/${agentName}/mind`).catch(() => null),
     ]).then(([worlds, agentProfile, tree]) => {
       const found = (worlds as World[]).find((w) => w.id === worldId);
       setWorld(found ?? MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
@@ -112,14 +113,13 @@ export default function AgentPage() {
   const callAgentAction = async (action: string, body?: object): Promise<boolean> => {
     setActionLoading(action);
     try {
-      const res = await fetch(`/api/agents/${agentName}/${action}`, {
-        method: "POST",
-        headers: body ? { "Content-Type": "application/json" } : undefined,
-        body: body ? JSON.stringify(body) : undefined,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showFeedback(`Error: ${data.error || "Unknown error"}`);
+      const result = await apiAction(
+        `/api/agents/${agentName}/${action}`,
+        body,
+        `/api/agents/${agentName}/${action}`
+      );
+      if (!result.ok) {
+        showFeedback(`Error: ${result.error || "Unknown error"}`);
         return false;
       }
       return true;

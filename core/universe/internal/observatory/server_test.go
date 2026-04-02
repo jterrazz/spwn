@@ -22,7 +22,7 @@ func newTestServer(t *testing.T) (*Server, *http.ServeMux) {
 		t.Fatalf("create store: %v", err)
 	}
 
-	srv := New(store, "127.0.0.1:0")
+	srv := New(store, nil, "127.0.0.1:0")
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", srv.handleHealth)
 	mux.HandleFunc("GET /api/universes", srv.handleListUniverses)
@@ -148,7 +148,7 @@ func TestServerStop_NilServer(t *testing.T) {
 		t.Fatalf("create store: %v", err)
 	}
 
-	srv := New(store, "127.0.0.1:0")
+	srv := New(store, nil, "127.0.0.1:0")
 	// srv.srv is nil — Stop should be a no-op
 	err = srv.Stop(context.Background())
 	if err != nil {
@@ -165,7 +165,7 @@ func TestServerGracefulShutdown(t *testing.T) {
 		t.Fatalf("create store: %v", err)
 	}
 
-	srv := New(store, "127.0.0.1:0")
+	srv := New(store, nil, "127.0.0.1:0")
 
 	// Build server manually on a random port
 	mux := http.NewServeMux()
