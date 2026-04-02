@@ -145,8 +145,10 @@ func runStop(cmd *cobra.Command, args []string) error {
 		msg := err.Error()
 		switch {
 		case strings.Contains(msg, "not running"):
-			return s.FailHint("Architect", err,
-				"Start it with: spwn architect start")
+			s.Blank()
+			s.Info("Architect:", "not running")
+			s.Blank()
+			return nil
 		case strings.Contains(msg, "not reachable"):
 			return s.FailHint("Docker", err,
 				"Install Docker Desktop or start the daemon")
@@ -207,14 +209,22 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	s := newStepper(cmd)
 
-	// Check if architect container is running
+	// Check if architect container is running. If not, auto-start it.
 	info, err := universe.GetArchitectDaemonStatus(ctx)
-	if err != nil {
-		return s.FailHint("Architect", err, "")
-	}
-	if !info.Running {
-		return s.FailHint("Architect", fmt.Errorf("architect is not running"),
-			"Start it with: spwn architect start")
+	if err != nil || !info.Running {
+		fmt.Fprintf(cmd.ErrOrStderr(), "\n  Architect not running. Starting...\n")
+		imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
+		_, startErr := universe.StartArchitectDaemon(ctx, imageOverride)
+		if startErr != nil {
+			if strings.Contains(startErr.Error(), "already running") {
+				// Race condition — it started between check and start, that's fine
+			} else {
+				return s.FailHint("Architect", fmt.Errorf("failed to auto-start architect: %w", startErr),
+					"Start manually with: spwn architect start")
+			}
+		}
+		time.Sleep(2 * time.Second) // Wait for container to be ready
+		fmt.Fprintf(cmd.ErrOrStderr(), "  ✓ Architect started\n\n")
 	}
 
 	message := ""
