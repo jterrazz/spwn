@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy spwn binary
 COPY bin/spwn /usr/local/bin/spwn
 
+# Copy Architect identity file
+COPY platform/fixtures/architect/ARCHITECT.md /world/ARCHITECT.md
+
 # Default config location
 ENV SPWN_HOME=/root/.spwn
 

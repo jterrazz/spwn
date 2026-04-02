@@ -32,7 +32,10 @@ to create and manage world containers as siblings.
 
 The container mounts:
   /var/run/docker.sock    Docker daemon access (sibling containers, not nested)
-  ~/.spwn/                Shared configuration and state`,
+  ~/.spwn/                Shared configuration and state
+
+The Architect's identity is defined in /world/ARCHITECT.md inside the container,
+which describes its capabilities and role as the always-on world builder.`,
 	RunE: runStart,
 }
 
