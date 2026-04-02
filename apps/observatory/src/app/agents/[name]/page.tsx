@@ -1,9 +1,9 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import type { AgentProfile } from "@/lib/types";
-import { apiGet, apiPut, apiAction } from "@/lib/api-client";
+import { apiGet, apiPut, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { InlineEdit, InlineTagsEdit } from "@/components/inline-edit";
 import { TIER_BADGE } from "@/lib/status";
 import {
@@ -18,11 +18,18 @@ import {
   IconDownload,
   IconUser,
   IconRocket,
+  IconTrash,
+  IconFolder,
+  IconFolderOpen,
+  IconChevronRight,
+  IconChevronDown,
+  IconFile,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AgentProfilePage() {
   const params = useParams();
+  const router = useRouter();
   const agentName = params.name as string;
 
   const [profile, setProfile] = useState<AgentProfile | null>(null);
@@ -30,6 +37,9 @@ export default function AgentProfilePage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"profile" | "files">("profile");
 
   const fetchProfile = useCallback(() => {
     Promise.all([
@@ -81,6 +91,18 @@ export default function AgentProfilePage() {
       return false;
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await apiDelete(`/api/agents/${agentName}`);
+      router.push("/");
+    } catch {
+      showFeedback("Error: Failed to delete agent");
+      setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -209,7 +231,68 @@ export default function AgentProfilePage() {
             )}
             Export
           </button>
+          <div className="w-px h-4 bg-white/[0.06]" />
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={actionLoading !== null || deleting}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-red-400/50 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-30"
+          >
+            <IconTrash size={14} />
+            Delete
+          </button>
         </div>
+      </div>
+
+      {/* Delete confirmation dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
+            <h3 className="text-lg font-heading text-foreground/90 mb-2">Delete Agent</h3>
+            <p className="text-sm text-muted-foreground/50 mb-6">
+              Are you sure you want to delete <span className="font-mono text-foreground/70">{agentName}</span>? This will permanently remove all mind files, memories, and identity data.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/20 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete Agent"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab switcher */}
+      <div className="flex gap-1 border-b border-white/[0.06] pb-px">
+        <button
+          onClick={() => setActiveTab("profile")}
+          className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+            activeTab === "profile"
+              ? "border-foreground/50 text-foreground/80"
+              : "border-transparent text-muted-foreground/40 hover:text-muted-foreground/60"
+          }`}
+        >
+          Profile
+        </button>
+        <button
+          onClick={() => setActiveTab("files")}
+          className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+            activeTab === "files"
+              ? "border-foreground/50 text-foreground/80"
+              : "border-transparent text-muted-foreground/40 hover:text-muted-foreground/60"
+          }`}
+        >
+          Files ({totalFiles})
+        </button>
       </div>
 
       {/* Feedback toast */}
@@ -222,6 +305,9 @@ export default function AgentProfilePage() {
           {feedback}
         </div>
       )}
+
+      {/* Profile tab */}
+      {activeTab === "profile" && (<>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">
@@ -388,6 +474,171 @@ export default function AgentProfilePage() {
           <p>spwn agent export {agentName}</p>
         </div>
       </div>
+
+      </>)}
+
+      {/* Files tab */}
+      {activeTab === "files" && (
+        <MindFileViewer agentName={agentName} mindTree={mindTree} />
+      )}
+    </div>
+  );
+}
+
+/* ── Mind File Viewer ── */
+
+const LAYER_ICONS: Record<string, typeof IconFolder> = {
+  identity: IconUser,
+  skills: IconBrain,
+  "memory/knowledge": IconBook,
+  "memory/playbooks": IconBook,
+  "memory/journal": IconNotebook,
+  sessions: IconFileText,
+};
+
+function MindFileViewer({ agentName, mindTree }: { agentName: string; mindTree: Record<string, string[]> }) {
+  const [expandedLayers, setExpandedLayers] = useState<Set<string>>(new Set());
+  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
+  const [fileContents, setFileContents] = useState<Record<string, string>>({});
+  const [loadingFiles, setLoadingFiles] = useState<Set<string>>(new Set());
+
+  const toggleLayer = (layer: string) => {
+    setExpandedLayers((prev) => {
+      const next = new Set(prev);
+      if (next.has(layer)) next.delete(layer);
+      else next.add(layer);
+      return next;
+    });
+  };
+
+  const toggleFile = async (layer: string, file: string) => {
+    const key = `${layer}/${file}`;
+    const fullPath = file.endsWith(".md") ? `${layer}/${file}` : `${layer}/${file}.md`;
+
+    if (expandedFiles.has(key)) {
+      setExpandedFiles((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+      return;
+    }
+
+    setExpandedFiles((prev) => new Set(prev).add(key));
+
+    // Fetch content if not cached
+    if (!fileContents[key]) {
+      setLoadingFiles((prev) => new Set(prev).add(key));
+      try {
+        const res = await fetch(goApiUrl(`/api/agents/${agentName}/files/${fullPath}`));
+        if (res.ok) {
+          const data = await res.json();
+          setFileContents((prev) => ({ ...prev, [key]: data.content }));
+        } else {
+          setFileContents((prev) => ({ ...prev, [key]: "⚠ Failed to load file content" }));
+        }
+      } catch {
+        setFileContents((prev) => ({ ...prev, [key]: "⚠ Failed to connect to API" }));
+      } finally {
+        setLoadingFiles((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+      }
+    }
+  };
+
+  const sortedLayers = Object.keys(mindTree).sort((a, b) => {
+    const order = ["identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"];
+    return (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b));
+  });
+
+  if (sortedLayers.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <IconFolder size={32} className="mx-auto text-muted-foreground/15 mb-3" />
+        <p className="text-muted-foreground/40 text-sm">No mind files found</p>
+        <p className="text-muted-foreground/25 text-xs mt-1 font-mono">Create files with: spwn agent dream {agentName}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {sortedLayers.map((layer) => {
+        const files = mindTree[layer] ?? [];
+        const isExpanded = expandedLayers.has(layer);
+        const LayerIcon = LAYER_ICONS[layer] ?? IconFolder;
+
+        return (
+          <div key={layer} className="glass-subtle overflow-hidden">
+            {/* Layer header */}
+            <button
+              onClick={() => toggleLayer(layer)}
+              className="w-full flex items-center gap-2.5 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
+            >
+              {isExpanded ? (
+                <IconChevronDown size={14} className="text-muted-foreground/40 shrink-0" />
+              ) : (
+                <IconChevronRight size={14} className="text-muted-foreground/40 shrink-0" />
+              )}
+              {isExpanded ? (
+                <IconFolderOpen size={16} className="text-foreground/50 shrink-0" />
+              ) : (
+                <LayerIcon size={16} className="text-foreground/40 shrink-0" />
+              )}
+              <span className="text-xs font-mono text-foreground/70 flex-1">{layer}/</span>
+              <span className="text-[10px] font-mono text-muted-foreground/30">{files.length} files</span>
+            </button>
+
+            {/* Files list */}
+            {isExpanded && files.length > 0 && (
+              <div className="border-t border-white/[0.04]">
+                {files.map((file) => {
+                  const key = `${layer}/${file}`;
+                  const isFileExpanded = expandedFiles.has(key);
+                  const isLoading = loadingFiles.has(key);
+                  const content = fileContents[key];
+
+                  return (
+                    <div key={file}>
+                      <button
+                        onClick={() => toggleFile(layer, file)}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 pl-10 text-left hover:bg-white/[0.02] transition-colors"
+                      >
+                        {isFileExpanded ? (
+                          <IconChevronDown size={12} className="text-muted-foreground/30 shrink-0" />
+                        ) : (
+                          <IconChevronRight size={12} className="text-muted-foreground/30 shrink-0" />
+                        )}
+                        <IconFile size={13} className="text-muted-foreground/30 shrink-0" />
+                        <span className="text-[11px] font-mono text-foreground/60">{file}</span>
+                      </button>
+
+                      {/* File content */}
+                      {isFileExpanded && (
+                        <div className="px-4 py-3 pl-16 border-t border-white/[0.03] bg-white/[0.01]">
+                          {isLoading ? (
+                            <div className="flex items-center gap-2 text-muted-foreground/30 text-xs">
+                              <div className="w-3 h-3 border-2 border-foreground/20 border-t-foreground/50 rounded-full animate-spin" />
+                              Loading...
+                            </div>
+                          ) : (
+                            <pre className="text-[11px] font-mono text-foreground/50 whitespace-pre-wrap leading-relaxed overflow-x-auto max-h-96 overflow-y-auto">
+                              {content ?? "No content"}
+                            </pre>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
