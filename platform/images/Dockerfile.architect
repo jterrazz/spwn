@@ -1,7 +1,6 @@
 FROM debian:bookworm-slim
 
-# Install Docker CLI (not daemon — we use the host's daemon via socket mount, DooD)
-# Install Node.js 20 (required for Claude Code)
+# Install Docker CLI + Node.js 20 (for Claude Code)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl gnupg && \
     curl -fsSL https://get.docker.com | sh && \
@@ -10,23 +9,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     npm install -g @anthropic-ai/claude-code && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user (Claude Code refuses --dangerously-skip-permissions as root)
-RUN useradd -m -s /bin/bash architect && \
-    mkdir -p /world /home/architect/.spwn && \
-    chown -R architect:architect /world /home/architect/.spwn
+# Create non-root user for Claude Code (refuses --dangerously-skip-permissions as root)
+RUN useradd -m -s /bin/bash architect
 
-# Copy spwn binary
-COPY bin/spwn /usr/local/bin/spwn
+# Copy spwn binary (cross-compiled for linux/amd64)
+COPY bin/spwn-linux /usr/local/bin/spwn
 
 # Copy Architect identity file
 COPY platform/fixtures/architect/ARCHITECT.md /world/ARCHITECT.md
-RUN chown architect:architect /world/ARCHITECT.md
+RUN mkdir -p /world && chown -R architect:architect /world
 
-# Default config location
-ENV SPWN_HOME=/home/architect/.spwn
-
-USER architect
+# Container runs as ROOT for file access (bind mounts from host)
+# But `docker exec -u architect` is used when running Claude Code
+# Shared data dir — mounted from host, accessible to all users
+RUN mkdir -p /spwn-data && chmod 777 /spwn-data
+ENV SPWN_HOME=/spwn-data
 WORKDIR /world
 
-# The Architect stays alive; we docker exec claude into it when talking
 ENTRYPOINT ["sleep", "infinity"]

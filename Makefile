@@ -59,7 +59,10 @@ uninstall:
 build-image:
 	docker build -t spwn-base:latest ./platform/images
 
-build-architect-image: build
+build-architect-binary:
+	cd apps/cli && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ../../bin/spwn-linux ./cmd/spwn
+
+build-architect-image: build-architect-binary build
 	docker build -t spwn-architect:latest -f platform/images/Dockerfile.architect .
 
 build-test-image:
