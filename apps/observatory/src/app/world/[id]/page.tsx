@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { World } from "@/lib/types";
 import { apiGet, apiAction } from "@/lib/api-client";
 import {
@@ -106,9 +106,65 @@ export default function WorldDashboard() {
     }
   };
 
-  // Logs and snapshots are not yet available from the API
+  // Snapshots are not yet available from the API
   const snapshots: { id: string; worldId: string; name: string; created_at: string; size: string; agents: number }[] = [];
-  const logs: { timestamp: string; level: string; source: string; message: string }[] = [];
+
+  // Log streaming state
+  const [logs, setLogs] = useState<{ timestamp: string; level: string; source: string; message: string }[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch logs when panel is opened
+  useEffect(() => {
+    if (activePanel !== "logs") return;
+    setLogsLoading(true);
+    const controller = new AbortController();
+
+    fetch(`http://localhost:3001/api/worlds/${worldId}/logs`, { signal: controller.signal })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch logs");
+        const reader = res.body?.getReader();
+        if (!reader) return;
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith(":")) continue;
+            if (trimmed.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(trimmed.slice(6));
+                setLogs((prev) => [...prev.slice(-500), {
+                  timestamp: data.timestamp || new Date().toISOString(),
+                  level: data.level || "info",
+                  source: data.source || "world",
+                  message: data.message || data.line || trimmed.slice(6),
+                }]);
+              } catch {
+                setLogs((prev) => [...prev.slice(-500), {
+                  timestamp: new Date().toISOString(),
+                  level: "info",
+                  source: "world",
+                  message: trimmed.slice(6),
+                }]);
+              }
+            }
+          }
+        }
+      })
+      .catch(() => {
+        // Logs endpoint not available — that's OK
+      })
+      .finally(() => setLogsLoading(false));
+
+    return () => controller.abort();
+  }, [activePanel, worldId]);
 
   const showFeedback = (msg: string) => {
     setActionFeedback(msg);
@@ -280,6 +336,50 @@ export default function WorldDashboard() {
           <StatCard label="Uptime" value={timeAgo(world.created_at)} />
         </div>
 
+        {/* Physics / Manifest Info */}
+        {world.manifest && (
+          <div>
+            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Physics</h2>
+            <div className="flex gap-3 flex-wrap">
+              {world.manifest.cpu && (
+                <div className="glass-subtle px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-0.5">CPU</p>
+                  <p className="text-sm font-mono text-foreground/70">{world.manifest.cpu}</p>
+                </div>
+              )}
+              {world.manifest.memory && (
+                <div className="glass-subtle px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-0.5">Memory</p>
+                  <p className="text-sm font-mono text-foreground/70">{world.manifest.memory}</p>
+                </div>
+              )}
+              {world.manifest.timeout && (
+                <div className="glass-subtle px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-0.5">Timeout</p>
+                  <p className="text-sm font-mono text-foreground/70">{world.manifest.timeout}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Elements */}
+        {world.manifest?.elements && world.manifest.elements.length > 0 && (
+          <div>
+            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Elements</h2>
+            <div className="flex flex-wrap gap-2">
+              {world.manifest.elements.map((el) => (
+                <span
+                  key={el}
+                  className="px-3 py-1.5 rounded-lg text-[11px] font-mono bg-blue-500/10 text-blue-300/80 border border-blue-500/20"
+                >
+                  {el}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Agents */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -372,10 +472,14 @@ export default function WorldDashboard() {
         <div>
           <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Commands</h2>
           <div className="glass-subtle p-4 font-mono text-xs text-muted-foreground/40 space-y-1.5">
-            <p>spwn agent talk {world.agent}</p>
-            <p>spwn logs {world.id}</p>
-            <p>spwn down {world.id}</p>
-            <p>spwn snap {world.id}</p>
+            {world.agents.length > 0 && (
+              <p>spwn agent talk {world.agents[0].name} &quot;message&quot;</p>
+            )}
+            <p>spwn agent dream {world.agents[0]?.name ?? "‹agent›"}</p>
+            <p>spwn agent sleep {world.agents[0]?.name ?? "‹agent›"}</p>
+            <p>spwn profile {world.agents[0]?.name ?? "‹agent›"}</p>
+            <p>spwn agent fork {world.agents[0]?.name ?? "‹agent›"} &lt;new&gt;</p>
+            <p>spwn agent export {world.agents[0]?.name ?? "‹agent›"}</p>
           </div>
         </div>
       </div>
@@ -396,22 +500,31 @@ export default function WorldDashboard() {
           <div className="flex-1 overflow-y-auto">
             {activePanel === "logs" && (
               <div className="p-4 space-y-0.5 font-mono text-[11px]">
-                {logs.length === 0 ? (
-                  <p className="text-sm text-muted-foreground/30 text-center py-8">No logs available. Use the CLI: spwn logs {worldId}</p>
-                ) : (
-                  logs.map((log, i) => (
-                    <div key={i} className="flex gap-2 py-1.5 border-b border-border/10 last:border-0">
-                      <span className="text-muted-foreground/25 shrink-0 w-14">
-                        {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                      </span>
-                      <span className={`shrink-0 w-10 uppercase ${LOG_LEVEL_COLORS[log.level]}`}>
-                        {log.level}
-                      </span>
-                      <span className="text-muted-foreground/40 shrink-0 w-16">{log.source}</span>
-                      <span className="text-foreground/60">{log.message}</span>
-                    </div>
-                  ))
+                {logsLoading && logs.length === 0 && (
+                  <div className="flex items-center gap-2 text-muted-foreground/30 py-8 justify-center">
+                    <div className="w-3 h-3 border-2 border-foreground/20 border-t-foreground/50 rounded-full animate-spin" />
+                    <span className="text-sm">Connecting to log stream...</span>
+                  </div>
                 )}
+                {!logsLoading && logs.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground/30">No logs available</p>
+                    <p className="text-[10px] text-muted-foreground/20 font-mono mt-1">Use the CLI: spwn logs {worldId}</p>
+                  </div>
+                )}
+                {logs.map((log, i) => (
+                  <div key={i} className="flex gap-2 py-1.5 border-b border-border/10 last:border-0">
+                    <span className="text-muted-foreground/25 shrink-0 w-14">
+                      {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                    </span>
+                    <span className={`shrink-0 w-10 uppercase ${LOG_LEVEL_COLORS[log.level]}`}>
+                      {log.level}
+                    </span>
+                    <span className="text-muted-foreground/40 shrink-0 w-16">{log.source}</span>
+                    <span className="text-foreground/60 break-all">{log.message}</span>
+                  </div>
+                ))}
+                <div ref={logsEndRef} />
               </div>
             )}
 

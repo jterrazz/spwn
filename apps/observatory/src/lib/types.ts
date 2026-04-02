@@ -4,6 +4,13 @@ export interface Agent {
   status: string;
 }
 
+export interface WorldManifest {
+  cpu?: string;
+  memory?: string;
+  timeout?: string;
+  elements?: string[];
+}
+
 export interface World {
   id: string;
   config: string;
@@ -12,6 +19,7 @@ export interface World {
   status: "running" | "idle" | "stopped" | "creating";
   created_at: string;
   workspace: string;
+  manifest?: WorldManifest;
 }
 
 export interface LimboAgent {

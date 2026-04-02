@@ -7,7 +7,7 @@ import { AVAILABLE_CONFIGS } from "@/lib/types";
 import type { World } from "@/lib/types";
 import { IconPlus, IconRocket, IconX } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiGet, apiAction } from "@/lib/api-client";
+import { apiGet } from "@/lib/api-client";
 
 export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
@@ -128,30 +128,57 @@ export default function UniverseMapPage() {
   );
 }
 
+interface AgentListItem {
+  name: string;
+  path: string;
+  layers: Record<string, string[]>;
+}
+
 function SpawnWorldDialog({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
   const [agentName, setAgentName] = useState("");
   const [workspace, setWorkspace] = useState("~/");
   const [config, setConfig] = useState("default");
   const [tier, setTier] = useState("citizen");
   const [spawning, setSpawning] = useState(false);
+  const [availableAgents, setAvailableAgents] = useState<AgentListItem[]>([]);
 
   const [error, setError] = useState("");
+
+  // Fetch available agents for dropdown
+  useEffect(() => {
+    apiGet<AgentListItem[]>("/api/agents", "/api/agents")
+      .then((agents) => {
+        setAvailableAgents(agents ?? []);
+        if (agents && agents.length > 0 && !agentName) {
+          setAgentName(agents[0].name);
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSpawn = async () => {
     setSpawning(true);
     setError("");
     try {
-      const result = await apiAction(
-        "/api/worlds",
-        { agent: agentName.trim(), workspace, config, tier },
-        "/api/worlds/spawn"
-      );
-      if (!result.ok) {
-        setError(result.error || "Failed to spawn world");
+      const res = await fetch("http://localhost:3001/api/worlds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent: agentName.trim(), workspace, config, tier }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Failed to spawn world");
         setSpawning(false);
         return;
       }
       onClose();
+      // Redirect to the new world if we got an ID back
+      if (data.id) {
+        router.push(`/world/${data.id}`);
+      }
     } catch {
       setError("Failed to connect to API");
       setSpawning(false);
@@ -181,18 +208,31 @@ function SpawnWorldDialog({ onClose }: { onClose: () => void }) {
 
         {/* Form */}
         <div className="px-6 pb-6 space-y-4">
-          {/* Agent name */}
+          {/* Agent name — dropdown if agents exist, text input as fallback */}
           <div>
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
-              Agent Name
+              Agent
             </label>
-            <input
-              value={agentName}
-              onChange={(e) => setAgentName(e.target.value)}
-              placeholder="e.g. neo, morpheus, atlas..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
-              autoFocus
-            />
+            {availableAgents.length > 0 ? (
+              <select
+                value={agentName}
+                onChange={(e) => setAgentName(e.target.value)}
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.15] transition-colors"
+                autoFocus
+              >
+                {availableAgents.map((a) => (
+                  <option key={a.name} value={a.name}>{a.name}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={agentName}
+                onChange={(e) => setAgentName(e.target.value)}
+                placeholder="e.g. neo, morpheus, atlas..."
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                autoFocus
+              />
+            )}
           </div>
 
           {/* Workspace */}

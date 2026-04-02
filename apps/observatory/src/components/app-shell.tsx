@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         .filter((a) => !activeAgentNames.has(a.name))
         .map((a) => ({
           name: a.name,
-          layers: Object.values(a.layers ?? {}).filter((f) => f.length > 0).length,
+          layers: Object.values(a.layers ?? {}).filter((f) => Array.isArray(f) && f.length > 0).length,
         }));
       setLimboAgents(limbo);
     });
