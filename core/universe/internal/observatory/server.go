@@ -719,37 +719,28 @@ func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 	// Check if the spwn-architect Docker container is actually running
-	cmd := exec.CommandContext(r.Context(), "docker", "inspect", "--format", "{{.State.Status}}|{{.Id}}|{{.State.StartedAt}}", "spwn-architect")
-	output, err := cmd.Output()
-	if err != nil {
-		// Container doesn't exist or Docker is not available
-		jsonOK(w, map[string]interface{}{
-			"status":      "stopped",
-			"containerId": nil,
-			"uptime":      nil,
-		})
-		return
-	}
-
-	parts := strings.SplitN(strings.TrimSpace(string(output)), "|", 3)
 	status := "stopped"
 	var containerID interface{} = nil
 	var uptime interface{} = nil
 
-	if len(parts) >= 1 && parts[0] == "running" {
-		status = "running"
-		if len(parts) >= 2 {
-			containerID = parts[1]
-		}
-		if len(parts) >= 3 {
-			if started, err := time.Parse(time.RFC3339Nano, parts[2]); err == nil {
-				dur := time.Since(started).Truncate(time.Second)
-				uptime = dur.String()
+	cmd := exec.CommandContext(r.Context(), "docker", "inspect", "--format", "{{.State.Status}}|{{.Id}}|{{.State.StartedAt}}", "spwn-architect")
+	if output, err := cmd.Output(); err == nil {
+		parts := strings.SplitN(strings.TrimSpace(string(output)), "|", 3)
+		if len(parts) >= 1 && parts[0] == "running" {
+			status = "running"
+			if len(parts) >= 2 {
+				containerID = parts[1]
+			}
+			if len(parts) >= 3 {
+				if started, err := time.Parse(time.RFC3339Nano, parts[2]); err == nil {
+					dur := time.Since(started).Truncate(time.Second)
+					uptime = dur.String()
+				}
 			}
 		}
 	}
 
-	// Build KPIs
+	// Build KPIs — always included regardless of Docker status
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
 
