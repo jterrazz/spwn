@@ -9,6 +9,7 @@ import { IconPlus, IconRocket, IconX, IconPlanet } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet } from "@/lib/api-client";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { RecentActivity } from "@/components/recent-activity";
 
 export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
@@ -130,6 +131,9 @@ export default function UniverseMapPage() {
           </div>
         )}
       </main>
+
+      {/* Recent Activity */}
+      {!loading && worlds.length > 0 && <RecentActivity worlds={worlds} />}
 
       {/* Spawn World Dialog */}
       {showSpawn && (

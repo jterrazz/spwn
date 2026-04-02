@@ -111,7 +111,10 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading }: App
         </a>
         <button
           className="mt-3 w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-white/[0.03] transition-colors"
-          onClick={() => {/* TODO: command palette */}}
+          onClick={() => {
+            // Trigger Cmd+K to open command palette
+            window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+          }}
         >
           <IconSearch size={13} className="opacity-40" />
           <span className="flex-1 text-left">Search...</span>
