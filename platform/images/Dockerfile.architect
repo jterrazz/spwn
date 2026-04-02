@@ -1,9 +1,13 @@
 FROM debian:bookworm-slim
 
 # Install Docker CLI (not daemon — we use the host's daemon via socket mount, DooD)
+# Install Node.js 20 (required for Claude Code)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl && \
+    ca-certificates curl gnupg && \
     curl -fsSL https://get.docker.com | sh && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g @anthropic-ai/claude-code && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy spwn binary
@@ -15,5 +19,7 @@ COPY platform/fixtures/architect/ARCHITECT.md /world/ARCHITECT.md
 # Default config location
 ENV SPWN_HOME=/root/.spwn
 
-# The Architect listens for channel messages and manages worlds as sibling containers
-ENTRYPOINT ["spwn", "architect", "serve"]
+WORKDIR /world
+
+# The Architect stays alive; we docker exec claude into it when talking
+ENTRYPOINT ["sleep", "infinity"]
