@@ -8,6 +8,7 @@ import (
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
+	"spwn.sh/apps/cli/blueprint"
 	"spwn.sh/apps/cli/dash"
 	"spwn.sh/apps/cli/get"
 	"spwn.sh/apps/cli/msg"
@@ -75,6 +76,7 @@ func init() {
 	rootCmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
+	rootCmd.AddCommand(blueprint.Cmd)
 	rootCmd.AddCommand(dash.Cmd)
 	rootCmd.AddCommand(get.Cmd)
 }
@@ -138,6 +140,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	// Orchestration
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Orchestration:"))
 	printHelpCmd(w, "architect", "Your always-on world builder "+ui.Faint("(start, stop, status, connect)"))
+	printHelpCmd(w, "blueprint", "Universe knowledge base "+ui.Faint("(ls, show, search)"))
 	printHelpCmd(w, "dash", "Visual dashboard "+ui.Faint("(start, open)"))
 	fmt.Fprintln(w)
 

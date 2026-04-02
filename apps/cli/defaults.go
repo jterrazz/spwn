@@ -13,5 +13,8 @@ func ensureDefaults() error {
 	// CreateDefaultConfig returns an error when the file already exists — ignore it.
 	universe.CreateDefaultConfig()
 
+	// Create default blueprint if it doesn't exist.
+	universe.InitBlueprint()
+
 	return nil
 }
