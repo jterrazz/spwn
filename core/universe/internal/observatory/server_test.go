@@ -1007,5 +1007,236 @@ func TestArchitectStatusTodoParsing(t *testing.T) {
 	}
 }
 
+// ============================================================
+// parseTodoAction tests
+// ============================================================
+
+func TestParseTodoAction_Add(t *testing.T) {
+	input := "[TODO_ADD] Deploy API\nPriority: high\nI'll set it up."
+	action := parseTodoAction(input)
+	if action == nil {
+		t.Fatal("expected a TodoAction, got nil")
+	}
+	if action.Type != "add" {
+		t.Errorf("expected type 'add', got %q", action.Type)
+	}
+	if action.Title != "Deploy API" {
+		t.Errorf("expected title 'Deploy API', got %q", action.Title)
+	}
+	if action.Priority != "high" {
+		t.Errorf("expected priority 'high', got %q", action.Priority)
+	}
+	if action.Description != "I'll set it up." {
+		t.Errorf("expected description 'I'll set it up.', got %q", action.Description)
+	}
+}
+
+func TestParseTodoAction_Done(t *testing.T) {
+	input := "[TODO_DONE] Deploy API\nCompleted: deployed to prod"
+	action := parseTodoAction(input)
+	if action == nil {
+		t.Fatal("expected a TodoAction, got nil")
+	}
+	if action.Type != "done" {
+		t.Errorf("expected type 'done', got %q", action.Type)
+	}
+	if action.Title != "Deploy API" {
+		t.Errorf("expected title 'Deploy API', got %q", action.Title)
+	}
+	if action.Description != "deployed to prod" {
+		t.Errorf("expected description 'deployed to prod', got %q", action.Description)
+	}
+}
+
+func TestParseTodoAction_Update(t *testing.T) {
+	input := "[TODO_UPDATE] Deploy API\nProgress: 50% complete"
+	action := parseTodoAction(input)
+	if action == nil {
+		t.Fatal("expected a TodoAction, got nil")
+	}
+	if action.Type != "update" {
+		t.Errorf("expected type 'update', got %q", action.Type)
+	}
+	if action.Title != "Deploy API" {
+		t.Errorf("expected title 'Deploy API', got %q", action.Title)
+	}
+	if action.Description != "50% complete" {
+		t.Errorf("expected description '50%% complete', got %q", action.Description)
+	}
+}
+
+func TestParseTodoAction_NoAction(t *testing.T) {
+	input := "Just a regular response without any TODO markers.\nAnother line here."
+	action := parseTodoAction(input)
+	if action != nil {
+		t.Errorf("expected nil for regular text, got %+v", action)
+	}
+}
+
+func TestParseTodoAction_MultipleActions(t *testing.T) {
+	input := "[TODO_ADD] First task\nPriority: high\n\n[TODO_ADD] Second task\nPriority: low"
+	action := parseTodoAction(input)
+	if action == nil {
+		t.Fatal("expected a TodoAction, got nil")
+	}
+	// Only the first action should be parsed
+	if action.Title != "First task" {
+		t.Errorf("expected first action title 'First task', got %q", action.Title)
+	}
+	if action.Priority != "high" {
+		t.Errorf("expected priority 'high', got %q", action.Priority)
+	}
+}
+
+func TestParseTodoAction_InlineText(t *testing.T) {
+	input := "Sure! I'll add that.\n[TODO_ADD] Review code\nPriority: low\nWill do."
+	action := parseTodoAction(input)
+	if action == nil {
+		t.Fatal("expected a TodoAction, got nil")
+	}
+	if action.Type != "add" {
+		t.Errorf("expected type 'add', got %q", action.Type)
+	}
+	if action.Title != "Review code" {
+		t.Errorf("expected title 'Review code', got %q", action.Title)
+	}
+	if action.Priority != "low" {
+		t.Errorf("expected priority 'low', got %q", action.Priority)
+	}
+}
+
+func TestParseTodoAction_EmptyInput(t *testing.T) {
+	action := parseTodoAction("")
+	if action != nil {
+		t.Errorf("expected nil for empty input, got %+v", action)
+	}
+}
+
+func TestParseTodoAction_TableDriven(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		wantType  string
+		wantTitle string
+	}{
+		{"add task", "[TODO_ADD] Deploy API\nPriority: high\nI'll set it up.", "add", "Deploy API"},
+		{"done task", "[TODO_DONE] Deploy API\nCompleted: deployed to prod", "done", "Deploy API"},
+		{"update task", "[TODO_UPDATE] Fix bug\nProgress: investigating", "update", "Fix bug"},
+		{"no action", "Just a regular response", "", ""},
+		{"action with surrounding text", "Sure!\n[TODO_ADD] Review code\nPriority: low\nWill do.", "add", "Review code"},
+		{"empty string", "", "", ""},
+		{"marker only no title", "[TODO_ADD] \nPriority: medium", "add", ""},
+		{"done with no details", "[TODO_DONE] Ship v2", "done", "Ship v2"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			action := parseTodoAction(tt.input)
+			if tt.wantType == "" {
+				if action != nil {
+					t.Errorf("expected nil action, got %+v", action)
+				}
+				return
+			}
+			if action == nil {
+				t.Fatalf("expected action with type %q, got nil", tt.wantType)
+			}
+			if action.Type != tt.wantType {
+				t.Errorf("type: got %q, want %q", action.Type, tt.wantType)
+			}
+			if action.Title != tt.wantTitle {
+				t.Errorf("title: got %q, want %q", action.Title, tt.wantTitle)
+			}
+		})
+	}
+}
+
+// ============================================================
+// TODO file operations tests
+// ============================================================
+
+func TestGetArchitectTodo_EmptyFile(t *testing.T) {
+	_, mux := newFullTestServer(t)
+
+	// Write an empty todo file
+	home := os.Getenv("SPWN_HOME")
+	todoDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(todoDir, 0755); err != nil {
+		t.Fatalf("mkdir architect: %v", err)
+	}
+	writeFile(t, filepath.Join(todoDir, "todo.md"), "")
+
+	w := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+
+	body := decodeBody(t, w)
+	content, ok := body["content"].(string)
+	if !ok {
+		t.Fatalf("expected content string, got %T", body["content"])
+	}
+	// Empty file should return the empty string (not default template)
+	if content != "" {
+		t.Errorf("expected empty content for empty file, got %q", content)
+	}
+}
+
+func TestGetArchitectTodo_WithContent(t *testing.T) {
+	_, mux := newFullTestServer(t)
+
+	home := os.Getenv("SPWN_HOME")
+	todoDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(todoDir, 0755); err != nil {
+		t.Fatalf("mkdir architect: %v", err)
+	}
+
+	expected := "# Architect TODO\n\n## In Progress\n- [ ] Build API\n\n## Backlog\n- [ ] Write docs\n\n## Completed\n- [x] Setup\n"
+	writeFile(t, filepath.Join(todoDir, "todo.md"), expected)
+
+	w := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+
+	body := decodeBody(t, w)
+	content := body["content"].(string)
+	if content != expected {
+		t.Errorf("content mismatch:\ngot:  %q\nwant: %q", content, expected)
+	}
+}
+
+func TestArchitectStatusKPIs_TodoCounting(t *testing.T) {
+	_, mux := newFullTestServer(t)
+
+	home := os.Getenv("SPWN_HOME")
+	todoDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(todoDir, 0755); err != nil {
+		t.Fatalf("mkdir architect: %v", err)
+	}
+
+	// 5 pending, 3 completed
+	todoContent := "# TODO\n\n## In Progress\n- [ ] A\n- [ ] B\n\n## Backlog\n- [ ] C\n- [ ] D\n- [ ] E\n\n## Completed\n- [x] F\n- [X] G\n- [x] H\n"
+	writeFile(t, filepath.Join(todoDir, "todo.md"), todoContent)
+
+	w := doJSON(t, mux, "GET", "/api/architect/status", nil)
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+
+	body := decodeBody(t, w)
+	kpis := body["kpis"].(map[string]interface{})
+
+	pending := kpis["tasksPending"].(float64)
+	completed := kpis["tasksCompleted"].(float64)
+
+	if pending != 5 {
+		t.Errorf("tasksPending: got %v, want 5", pending)
+	}
+	if completed != 3 {
+		t.Errorf("tasksCompleted: got %v, want 3", completed)
+	}
+}
+
 // Ensure unused import of fmt is used
 var _ = fmt.Sprintf

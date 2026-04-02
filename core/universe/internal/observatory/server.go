@@ -868,6 +868,65 @@ func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "stopped"})
 }
 
+// TodoAction represents a parsed TODO action from the architect's response.
+type TodoAction struct {
+	Type        string `json:"type"`                  // "add", "done", "update"
+	Title       string `json:"title"`
+	Priority    string `json:"priority,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+// parseTodoAction extracts a TODO action marker from the architect's response.
+// It looks for [TODO_ADD], [TODO_DONE], or [TODO_UPDATE] at the start of lines.
+func parseTodoAction(text string) *TodoAction {
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		var actionType string
+		var prefix string
+		switch {
+		case strings.HasPrefix(trimmed, "[TODO_ADD]"):
+			actionType = "add"
+			prefix = "[TODO_ADD]"
+		case strings.HasPrefix(trimmed, "[TODO_DONE]"):
+			actionType = "done"
+			prefix = "[TODO_DONE]"
+		case strings.HasPrefix(trimmed, "[TODO_UPDATE]"):
+			actionType = "update"
+			prefix = "[TODO_UPDATE]"
+		default:
+			continue
+		}
+
+		title := strings.TrimSpace(strings.TrimPrefix(trimmed, prefix))
+		action := &TodoAction{
+			Type:  actionType,
+			Title: title,
+		}
+
+		// Look at subsequent lines for Priority: and description
+		for j := i + 1; j < len(lines) && j <= i+3; j++ {
+			next := strings.TrimSpace(lines[j])
+			if next == "" {
+				break
+			}
+			if strings.HasPrefix(next, "Priority:") {
+				action.Priority = strings.TrimSpace(strings.TrimPrefix(next, "Priority:"))
+			} else if strings.HasPrefix(next, "Completed:") {
+				action.Description = strings.TrimSpace(strings.TrimPrefix(next, "Completed:"))
+			} else if strings.HasPrefix(next, "Progress:") {
+				action.Description = strings.TrimSpace(strings.TrimPrefix(next, "Progress:"))
+			} else if action.Description == "" {
+				action.Description = next
+			}
+		}
+
+		return action
+	}
+	return nil
+}
+
 func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Message string `json:"message"`
@@ -892,17 +951,30 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 
 	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)
 	output, err := cmd.CombinedOutput()
+	responseText := string(output)
+
+	// Parse TODO action from the response
+	todoAction := parseTodoAction(responseText)
+
 	if err != nil {
-		jsonOK(w, map[string]interface{}{
-			"response": string(output),
+		resp := map[string]interface{}{
+			"response": responseText,
 			"error":    err.Error(),
-		})
+		}
+		if todoAction != nil {
+			resp["todoAction"] = todoAction
+		}
+		jsonOK(w, resp)
 		return
 	}
 
-	jsonOK(w, map[string]interface{}{
-		"response": string(output),
-	})
+	resp := map[string]interface{}{
+		"response": responseText,
+	}
+	if todoAction != nil {
+		resp["todoAction"] = todoAction
+	}
+	jsonOK(w, resp)
 }
 
 // handleGetAgentMind returns the mind tree (layers → files) for an agent.
