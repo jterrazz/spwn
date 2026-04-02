@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +23,8 @@ var upgradeCmd = &cobra.Command{
 	Long: `Downloads and installs the latest spwn release from GitHub.
 
 Detects your OS and architecture, downloads the matching binary,
-and replaces the current installation.`,
+and replaces the current installation. Running worlds are stopped
+gracefully before the upgrade.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := ui.New(quiet, verbose, jsonOutput)
 		s.Blank()
@@ -44,6 +47,37 @@ and replaces the current installation.`,
 		}
 
 		s.Done("New version available", latest)
+
+		// Gracefully stop all running worlds before upgrading
+		ctx := context.Background()
+		if arc, arcErr := universe.NewArchitectFromEnv(); arcErr == nil {
+			worlds, _ := arc.List(ctx)
+			if len(worlds) > 0 {
+				s.Info("Running worlds:", fmt.Sprintf("%d", len(worlds)))
+				s.Start("Stopping all worlds gracefully...")
+				for _, w := range worlds {
+					if _, destroyErr := arc.Destroy(ctx, w.ID); destroyErr != nil {
+						s.Warn("Warning", fmt.Sprintf("failed to stop %s: %v", w.ID, destroyErr))
+					} else {
+						label := w.ID
+						if w.Agent != "" {
+							label += " (" + w.Agent + ")"
+						}
+						s.Done("Stopped", label)
+					}
+				}
+			}
+
+			// Also stop the architect daemon if running
+			if info, statusErr := universe.GetArchitectDaemonStatus(ctx); statusErr == nil && info.Running {
+				s.Start("Stopping Architect...")
+				if stopErr := universe.StopArchitectDaemon(ctx); stopErr != nil {
+					s.Warn("Warning", fmt.Sprintf("failed to stop architect: %v", stopErr))
+				} else {
+					s.Done("Architect stopped", "")
+				}
+			}
+		}
 
 		// Detect OS/arch
 		goos := runtime.GOOS

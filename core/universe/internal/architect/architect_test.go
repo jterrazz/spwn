@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/models"
@@ -296,6 +298,131 @@ func TestDestroy_NotFound(t *testing.T) {
 	_, err := arch.Destroy(context.Background(), "w-ghost-00000")
 	if err == nil {
 		t.Fatal("expected error destroying nonexistent world")
+	}
+}
+
+func TestDestroy_WritesJournal(t *testing.T) {
+	mb := newMockBackend()
+	arch, store := newTestArchitect(t, mb)
+
+	// Create a temp agent Mind directory with journal layer
+	// Note: journal.Append writes to mindPath/journal/ (not memory/journal)
+	mindDir := t.TempDir()
+	journalDir := mindDir + "/journal"
+	if err := os.MkdirAll(journalDir, 0755); err != nil {
+		t.Fatalf("create journal dir: %v", err)
+	}
+
+	w := models.World{
+		ID:          "w-journal-11111",
+		Config:      "journal-test",
+		ContainerID: "mock-jrnl-1",
+		Status:      models.StatusRunning,
+		MindPath:    mindDir,
+		CreatedAt:   time.Now().Add(-5 * time.Minute),
+	}
+	store.Save(w)
+
+	_, err := arch.Destroy(context.Background(), "w-journal-11111")
+	if err != nil {
+		t.Fatalf("Destroy() error: %v", err)
+	}
+
+	// Check that a journal entry was written
+	entries, err := os.ReadDir(journalDir)
+	if err != nil {
+		t.Fatalf("read journal dir: %v", err)
+	}
+	if len(entries) == 0 {
+		t.Error("expected at least one journal entry after destroy")
+	}
+}
+
+func TestDestroy_MultiAgentWritesAllJournals(t *testing.T) {
+	mb := newMockBackend()
+	arch, store := newTestArchitect(t, mb)
+
+	// Create temp agent Mind directories
+	agentsBase := t.TempDir()
+	t.Setenv("SPWN_HOME", agentsBase)
+
+	for _, name := range []string{"governor-a", "citizen-b"} {
+		journalDir := agentsBase + "/agents/" + name + "/journal"
+		if err := os.MkdirAll(journalDir, 0755); err != nil {
+			t.Fatalf("create journal dir for %s: %v", name, err)
+		}
+	}
+
+	w := models.World{
+		ID:          "w-multi-22222",
+		Config:      "multi-test",
+		ContainerID: "mock-multi-1",
+		Status:      models.StatusRunning,
+		CreatedAt:   time.Now().Add(-10 * time.Minute),
+		Agents: []models.AgentRecord{
+			{Name: "governor-a", AgentID: "a-governor-a-11111", Tier: "governor", Status: models.StatusRunning},
+			{Name: "citizen-b", AgentID: "a-citizen-b-22222", Tier: "citizen", Status: models.StatusRunning},
+		},
+	}
+	store.Save(w)
+
+	_, err := arch.Destroy(context.Background(), "w-multi-22222")
+	if err != nil {
+		t.Fatalf("Destroy() error: %v", err)
+	}
+
+	// Check journal entries for both agents
+	for _, name := range []string{"governor-a", "citizen-b"} {
+		journalDir := agentsBase + "/agents/" + name + "/journal"
+		entries, err := os.ReadDir(journalDir)
+		if err != nil {
+			t.Fatalf("read journal dir for %s: %v", name, err)
+		}
+		if len(entries) == 0 {
+			t.Errorf("expected journal entry for agent %s after destroy", name)
+		}
+	}
+}
+
+func TestDestroyAll_RemovesAllWorlds(t *testing.T) {
+	mb := newMockBackend()
+	arch, store := newTestArchitect(t, mb)
+
+	// Save multiple worlds
+	for _, id := range []string{"w-all-11111", "w-all-22222", "w-all-33333"} {
+		store.Save(models.World{
+			ID:          id,
+			Config:      "test",
+			ContainerID: "ctr-" + id,
+			Status:      models.StatusRunning,
+		})
+	}
+
+	destroyed, err := arch.DestroyAll(context.Background())
+	if err != nil {
+		t.Fatalf("DestroyAll() error: %v", err)
+	}
+	if len(destroyed) != 3 {
+		t.Errorf("expected 3 destroyed worlds, got %d", len(destroyed))
+	}
+
+	// Verify all worlds are gone from state
+	worlds, _ := store.List()
+	if len(worlds) != 0 {
+		t.Errorf("expected 0 worlds after DestroyAll, got %d", len(worlds))
+	}
+}
+
+func TestDestroyAll_EmptyState(t *testing.T) {
+	mb := newMockBackend()
+	arch, _ := newTestArchitect(t, mb)
+
+	destroyed, err := arch.DestroyAll(context.Background())
+	if err != nil {
+		t.Fatalf("DestroyAll() error: %v", err)
+	}
+	if len(destroyed) != 0 {
+		t.Errorf("expected 0 destroyed worlds, got %d", len(destroyed))
 	}
 }
 

@@ -17,9 +17,9 @@ var UpCmd = &cobra.Command{
 
 // DownCmd is the top-level alias for spwn down.
 var DownCmd = &cobra.Command{
-	Use:   "down <world-id>",
+	Use:   "down [world-id]",
 	Short: "Destroy a world",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	RunE:  destroyCmd.RunE,
 }
 
@@ -65,6 +65,9 @@ func init() {
 	UpCmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
 	UpCmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this world")
 	UpCmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime")
+
+	// Copy --all flag for DownCmd
+	DownCmd.Flags().BoolVar(&destroyAll, "all", false, "Destroy all running worlds")
 
 	// Copy flags for logs
 	LogsTopCmd.Flags().BoolVarP(&logsFollow, "follow", "f", false, "Follow log output")
