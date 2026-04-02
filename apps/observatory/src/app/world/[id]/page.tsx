@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { MOCK_WORLDS, MOCK_ACTIVITY, MOCK_SNAPSHOTS, MOCK_LOGS } from "@/lib/mock-data";
 import type { World } from "@/lib/mock-data";
+import { apiGet, apiAction } from "@/lib/api-client";
 import {
   IconTrash,
   IconCamera,
@@ -71,9 +72,8 @@ export default function WorldDashboard() {
   const [showNewAgent, setShowNewAgent] = useState(false);
 
   const fetchWorld = useCallback(() => {
-    fetch("/api/worlds")
-      .then((r) => r.json())
-      .then((worlds: World[]) => {
+    apiGet<World[]>("/api/universes", "/api/worlds")
+      .then((worlds) => {
         const found = worlds.find((w) => w.id === worldId);
         setWorld(found ?? MOCK_WORLDS.find((w) => w.id === worldId) ?? null);
         setLoading(false);
@@ -90,13 +90,12 @@ export default function WorldDashboard() {
     return () => clearInterval(interval);
   }, [fetchWorld]);
 
-  const callAction = async (url: string, options?: RequestInit) => {
-    setActionLoading(url);
+  const callAction = async (goPath: string, nextFallback: string, body?: unknown) => {
+    setActionLoading(goPath);
     try {
-      const res = await fetch(url, { method: "POST", ...options });
-      const data = await res.json();
-      if (!res.ok) {
-        showFeedback(`Error: ${data.error || "Unknown error"}`);
+      const result = await apiAction(goPath, body, nextFallback);
+      if (!result.ok) {
+        showFeedback(`Error: ${result.error || "Unknown error"}`);
         return false;
       }
       return true;
@@ -176,7 +175,7 @@ export default function WorldDashboard() {
           <div className="flex items-center gap-1">
             <button
               onClick={async () => {
-                const ok = await callAction(`/api/worlds/${worldId}/snapshot`);
+                const ok = await callAction(`/api/worlds/${worldId}/snapshot`, `/api/worlds/${worldId}/snapshot`);
                 if (ok) showFeedback("Snapshot saved!");
               }}
               disabled={actionLoading !== null}
@@ -240,7 +239,7 @@ export default function WorldDashboard() {
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={async () => {
-                      const ok = await callAction(`/api/worlds/${worldId}/destroy`);
+                      const ok = await callAction(`/api/worlds/${worldId}`, `/api/worlds/${worldId}/destroy`);
                       if (ok) {
                         showFeedback("World destroyed");
                         setShowDestroyConfirm(false);
@@ -324,10 +323,7 @@ export default function WorldDashboard() {
                 <button
                   onClick={async () => {
                     if (!newAgentName.trim()) return;
-                    const ok = await callAction("/api/agents/create", {
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ name: newAgentName.trim() }),
-                    });
+                    const ok = await callAction("/api/agents", "/api/agents/create", { name: newAgentName.trim() });
                     if (ok) {
                       showFeedback(`Agent "${newAgentName}" created`);
                       setShowNewAgent(false);

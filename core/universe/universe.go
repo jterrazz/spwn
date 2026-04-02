@@ -160,9 +160,10 @@ func CreateOrg(name string) error { return manifest.CreateOrg(name) }
 type ObservatoryServer = observatory.Server
 
 // NewObservatoryServer returns an Observatory API server bound to addr that
-// serves world and agent state from the provided Store.
-func NewObservatoryServer(s *Store, addr string) *ObservatoryServer {
-	return observatory.New(s, addr)
+// serves world and agent state from the provided Store. arch may be nil for
+// read-only mode (no world spawn/destroy).
+func NewObservatoryServer(s *Store, arch *Architect, addr string) *ObservatoryServer {
+	return observatory.New(s, arch, addr)
 }
 
 // --- Git sync operations ---

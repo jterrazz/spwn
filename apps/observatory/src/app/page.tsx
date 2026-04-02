@@ -6,6 +6,7 @@ import { Planet } from "@/components/planet";
 import { MOCK_WORLDS, AVAILABLE_CONFIGS } from "@/lib/mock-data";
 import { IconPlus, IconRocket, IconX } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiGet, apiAction } from "@/lib/api-client";
 
 export interface World {
   id: string;
@@ -25,9 +26,8 @@ export default function UniverseMapPage() {
   const router = useRouter();
 
   const fetchWorlds = () => {
-    fetch("/api/worlds")
-      .then((r) => r.json())
-      .then((data: World[]) => {
+    apiGet<World[]>("/api/universes", "/api/worlds")
+      .then((data) => {
         if (data && data.length > 0) {
           setWorlds(data);
         } else {
@@ -154,14 +154,13 @@ function SpawnWorldDialog({ onClose }: { onClose: () => void }) {
     setSpawning(true);
     setError("");
     try {
-      const res = await fetch("/api/worlds/spawn", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent: agentName.trim(), workspace, config, tier }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Failed to spawn world");
+      const result = await apiAction(
+        "/api/worlds",
+        { agent: agentName.trim(), workspace, config, tier },
+        "/api/worlds/spawn"
+      );
+      if (!result.ok) {
+        setError(result.error || "Failed to spawn world");
         setSpawning(false);
         return;
       }
