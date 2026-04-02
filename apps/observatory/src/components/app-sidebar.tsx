@@ -117,9 +117,15 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
 
   return (
     <Sidebar>
-      {/* ── Header: macOS traffic lights sit in the top-left, brand below ── */}
-      <SidebarHeader className="px-4 pb-2" style={{ paddingTop: "48px" }}>
-        <a href="/" className="flex items-center gap-2">
+      {/* ── Drag region: sits behind macOS traffic lights, makes window draggable ── */}
+      <div
+        data-tauri-drag-region="true"
+        className="h-[52px] w-full shrink-0 cursor-default"
+        style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+      />
+      {/* ── Header: brand + status below the drag zone ── */}
+      <SidebarHeader className="px-4 pb-2 -mt-1">
+        <a href="/" className="flex items-center gap-2" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
           <span className="text-sm tracking-[0.15em] font-heading text-foreground/90">
             ⬡ spwn
           </span>
