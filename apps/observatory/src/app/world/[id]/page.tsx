@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { World } from "@/lib/types";
-import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
+import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import {
   IconTrash,
   IconCamera,
@@ -322,13 +322,18 @@ export default function WorldDashboard() {
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={async () => {
-                      const ok = await callAction(`/api/worlds/${worldId}`, `/api/worlds/${worldId}/destroy`);
-                      if (ok) {
+                      setActionLoading("destroy");
+                      try {
+                        await apiDelete(`/api/worlds/${worldId}`, `/api/worlds/${worldId}/destroy`);
                         showFeedback("World destroyed");
                         setShowDestroyConfirm(false);
+                        refetchSidebar();
                         router.push("/");
-                      } else {
+                      } catch {
+                        showFeedback("Error: Failed to destroy world");
                         setShowDestroyConfirm(false);
+                      } finally {
+                        setActionLoading(null);
                       }
                     }}
                     disabled={actionLoading !== null}

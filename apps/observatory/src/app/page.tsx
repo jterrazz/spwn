@@ -7,7 +7,7 @@ import { AVAILABLE_CONFIGS } from "@/lib/types";
 import type { World } from "@/lib/types";
 import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiGet, apiAction } from "@/lib/api-client";
+import { apiGet, apiAction, apiDelete } from "@/lib/api-client";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { RecentActivity } from "@/components/recent-activity";
 import { useRefetch } from "@/components/app-shell";
@@ -67,9 +67,9 @@ export default function UniverseMapPage() {
   const handleDestroyAll = async () => {
     setDestroyingAll(true);
     try {
-      // Destroy each world sequentially
+      // Destroy each world sequentially (Go API uses DELETE method)
       for (const world of worlds) {
-        await apiAction(`/api/worlds/${world.id}`, undefined, `/api/worlds/${world.id}/destroy`);
+        await apiDelete(`/api/worlds/${world.id}`, `/api/worlds/${world.id}/destroy`);
       }
       // Immediately refetch
       fetchWorlds();
