@@ -441,11 +441,11 @@ export default function AgentPage() {
           <div>
             <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Commands</h2>
             <div className="glass-subtle p-3 font-mono text-[10px] text-muted-foreground/35 space-y-1">
-              <p>spwn agent talk {agentName}</p>
-              <p>spwn agent inspect {agentName}</p>
+              <p>spwn agent talk {agentName} &quot;message&quot;</p>
               <p>spwn agent dream {agentName}</p>
               <p>spwn agent sleep {agentName}</p>
-              <p>spwn agent fork {agentName}</p>
+              <p>spwn profile {agentName}</p>
+              <p>spwn agent fork {agentName} &lt;new&gt;</p>
               <p>spwn agent export {agentName}</p>
             </div>
           </div>

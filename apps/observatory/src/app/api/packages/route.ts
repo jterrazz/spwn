@@ -16,7 +16,14 @@ export async function GET() {
     .map((l) => l.trim())
     .filter((l) => l && !l.startsWith("NAME") && !l.startsWith("---"));
 
-  const packages = lines.map((line) => {
+  // Filter out CLI messages that aren't actual package entries
+  const packageLines = lines.filter((l) =>
+    !l.toLowerCase().includes("no packages") &&
+    !l.toLowerCase().includes("run '") &&
+    !l.toLowerCase().includes("run \"")
+  );
+
+  const packages = packageLines.map((line) => {
     const parts = line.split(/\s{2,}|\t/);
     return {
       name: parts[0] ?? line,
