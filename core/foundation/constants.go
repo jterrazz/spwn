@@ -28,6 +28,7 @@ const (
 	ClawStateFileName = "claw.json"
 	SkillsSubDir      = "skills"
 	ClawSubDir        = "claw"
+	BlueprintSubDir   = "blueprint"
 )
 
 // MindLayers defines the six-layer Mind structure.

@@ -25,6 +25,7 @@ Your current environment. Read-only system files.
 - ` + "`/world/AGENT.md`" + ` — your role in THIS world (tier, physics, elements)
 - ` + "`/world/AGENTS.md`" + ` — this file (the operating manual)
 - ` + "`/world/skills/`" + ` — system skills (guides for common tasks)
+- ` + "`/world/blueprint/`" + ` — universe knowledge base (read-only, managed by the Architect)
 
 ## Your Workspace (/workspace/)
 The project you're working on. Read-write. Persists on the host.

@@ -13,6 +13,7 @@ import (
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/blueprint"
 	"spwn.sh/core/universe/internal/claw"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
@@ -166,6 +167,37 @@ type ObservatoryServer = observatory.Server
 // read-only mode (no world spawn/destroy).
 func NewObservatoryServer(s *Store, arch *Architect, addr string) *ObservatoryServer {
 	return observatory.New(s, arch, addr)
+}
+
+// --- Blueprint operations ---
+
+// BlueprintFileInfo describes a file in the blueprint.
+type BlueprintFileInfo = blueprint.FileInfo
+
+// InitBlueprint creates the blueprint directory and writes default files
+// if they don't already exist.
+func InitBlueprint() error {
+	return blueprint.Init(foundation.BlueprintDir())
+}
+
+// ListBlueprintFiles returns all files in the blueprint directory.
+func ListBlueprintFiles() ([]BlueprintFileInfo, error) {
+	return blueprint.ListFiles(foundation.BlueprintDir())
+}
+
+// ReadBlueprintFile reads a specific file from the blueprint.
+func ReadBlueprintFile(relPath string) (string, error) {
+	return blueprint.ReadFile(foundation.BlueprintDir(), relPath)
+}
+
+// WriteBlueprintFile writes content to a file in the blueprint.
+func WriteBlueprintFile(relPath, content string) error {
+	return blueprint.WriteFile(foundation.BlueprintDir(), relPath, content)
+}
+
+// SearchBlueprint searches for a query string across all blueprint files.
+func SearchBlueprint(query string) (map[string][]string, error) {
+	return blueprint.Search(foundation.BlueprintDir(), query)
 }
 
 // --- Git sync operations ---
@@ -323,11 +355,15 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		_ = os.WriteFile(architectTodoPath, []byte("# Architect TODO\n\n## In Progress\n\n## Backlog\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Completed\n"), 0644)
 	}
 
+	// Ensure blueprint directory exists with defaults
+	_ = blueprint.Init(foundation.BlueprintDir())
+
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
 			foundation.BaseDir() + ":/spwn-data",
 			architectTodoPath + ":/world/todo.md",
+			foundation.BlueprintDir() + ":/blueprint",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
@@ -474,7 +510,10 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 				"Format: [TODO_ADD] Short task title\\nPriority: high|medium|low\\nBrief description. "+
 				"Also update /world/todo.md with the new task. "+
 				"When completing a task use [TODO_DONE] Short task title. "+
-				"Read /world/skills/ for detailed guides.")
+				"Read /world/skills/ for detailed guides. "+
+				"BLUEPRINT: You maintain /blueprint/ as the single source of truth. "+
+				"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. "+
+				"Every conversation should result in blueprint updates.")
 	}
 
 	args = append(args, claudeArgs...)

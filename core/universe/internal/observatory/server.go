@@ -110,6 +110,11 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/architect/todo", cors(s.handleArchitectTodoGet))
 	mux.HandleFunc("POST /api/architect/todo", cors(s.handleArchitectTodoUpdate))
 
+	// --- Blueprint endpoints ---
+	mux.HandleFunc("GET /api/blueprint", cors(s.handleBlueprintList))
+	mux.HandleFunc("GET /api/blueprint/{path...}", cors(s.handleBlueprintRead))
+	mux.HandleFunc("PUT /api/blueprint/{path...}", cors(s.handleBlueprintWrite))
+
 	// --- CORS preflight for all paths ---
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
 
@@ -876,6 +881,12 @@ type TodoAction struct {
 	Description string `json:"description,omitempty"`
 }
 
+// BlueprintUpdate represents a parsed blueprint update marker from the architect's response.
+type BlueprintUpdate struct {
+	Path        string `json:"path"`
+	Description string `json:"description,omitempty"`
+}
+
 // parseTodoAction extracts a TODO action marker from the architect's response.
 // It looks for [TODO_ADD], [TODO_DONE], or [TODO_UPDATE] at the start of lines.
 func parseTodoAction(text string) *TodoAction {
@@ -927,6 +938,33 @@ func parseTodoAction(text string) *TodoAction {
 	return nil
 }
 
+// parseBlueprintUpdate extracts a [BLUEPRINT_UPDATE] marker from the architect's response.
+func parseBlueprintUpdate(text string) *BlueprintUpdate {
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "[BLUEPRINT_UPDATE]") {
+			continue
+		}
+
+		path := strings.TrimSpace(strings.TrimPrefix(trimmed, "[BLUEPRINT_UPDATE]"))
+		update := &BlueprintUpdate{
+			Path: path,
+		}
+
+		// Look at the next line for a description
+		if i+1 < len(lines) {
+			next := strings.TrimSpace(lines[i+1])
+			if next != "" && !strings.HasPrefix(next, "[") {
+				update.Description = next
+			}
+		}
+
+		return update
+	}
+	return nil
+}
+
 func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Message string `json:"message"`
@@ -953,15 +991,19 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 			"Format: [TODO_ADD] Short task title\nPriority: high|medium|low\nBrief description. " +
 			"Also update /world/todo.md with the new task. " +
 			"When completing a task use [TODO_DONE] Short task title. " +
-			"Read /world/skills/ for detailed guides.",
+			"Read /world/skills/ for detailed guides. " +
+			"BLUEPRINT: You maintain /blueprint/ as the single source of truth. " +
+			"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. " +
+			"Every conversation should result in blueprint updates.",
 	}
 
 	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)
 	output, err := cmd.CombinedOutput()
 	responseText := string(output)
 
-	// Parse TODO action from the response
+	// Parse TODO action and blueprint update from the response
 	todoAction := parseTodoAction(responseText)
+	blueprintUpdate := parseBlueprintUpdate(responseText)
 
 	if err != nil {
 		resp := map[string]interface{}{
@@ -970,6 +1012,9 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		}
 		if todoAction != nil {
 			resp["todoAction"] = todoAction
+		}
+		if blueprintUpdate != nil {
+			resp["blueprintUpdate"] = blueprintUpdate
 		}
 		jsonOK(w, resp)
 		return
@@ -981,7 +1026,147 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	if todoAction != nil {
 		resp["todoAction"] = todoAction
 	}
+	if blueprintUpdate != nil {
+		resp["blueprintUpdate"] = blueprintUpdate
+	}
 	jsonOK(w, resp)
+}
+
+// blueprintBasePath returns the path to the blueprint directory.
+func (s *Server) blueprintBasePath() string {
+	return filepath.Join(foundation.BaseDir(), "blueprint")
+}
+
+// handleBlueprintList returns all files in the blueprint directory.
+func (s *Server) handleBlueprintList(w http.ResponseWriter, r *http.Request) {
+	basePath := s.blueprintBasePath()
+
+	type fileEntry struct {
+		Path     string `json:"path"`
+		Size     int64  `json:"size"`
+		Modified string `json:"modified"`
+	}
+
+	var files []fileEntry
+
+	err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if strings.HasPrefix(info.Name(), ".") {
+			return nil
+		}
+
+		relPath, err := filepath.Rel(basePath, path)
+		if err != nil {
+			return err
+		}
+
+		files = append(files, fileEntry{
+			Path:     relPath,
+			Size:     info.Size(),
+			Modified: info.ModTime().Format(time.RFC3339),
+		})
+		return nil
+	})
+
+	if err != nil {
+		// If directory doesn't exist, return empty list
+		if os.IsNotExist(err) {
+			jsonOK(w, map[string]interface{}{"files": []fileEntry{}})
+			return
+		}
+		jsonError(w, "failed to list blueprint files: "+err.Error(), 500)
+		return
+	}
+
+	if files == nil {
+		files = []fileEntry{}
+	}
+
+	jsonOK(w, map[string]interface{}{"files": files})
+}
+
+// handleBlueprintRead returns the content of a specific blueprint file.
+func (s *Server) handleBlueprintRead(w http.ResponseWriter, r *http.Request) {
+	relPath := r.PathValue("path")
+	if relPath == "" {
+		jsonError(w, "file path is required", 400)
+		return
+	}
+
+	// Prevent directory traversal
+	if strings.Contains(relPath, "..") {
+		jsonError(w, "invalid path", 400)
+		return
+	}
+
+	absPath := filepath.Join(s.blueprintBasePath(), relPath)
+
+	// Ensure the resolved path is still under the blueprint directory
+	cleanPath := filepath.Clean(absPath)
+	cleanBase := filepath.Clean(s.blueprintBasePath())
+	if !strings.HasPrefix(cleanPath, cleanBase) {
+		jsonError(w, "path outside blueprint directory", 400)
+		return
+	}
+
+	data, err := os.ReadFile(absPath)
+	if err != nil {
+		jsonError(w, "file not found: "+err.Error(), 404)
+		return
+	}
+
+	jsonOK(w, map[string]string{"path": relPath, "content": string(data)})
+}
+
+// handleBlueprintWrite writes content to a specific blueprint file.
+func (s *Server) handleBlueprintWrite(w http.ResponseWriter, r *http.Request) {
+	relPath := r.PathValue("path")
+	if relPath == "" {
+		jsonError(w, "file path is required", 400)
+		return
+	}
+
+	// Prevent directory traversal
+	if strings.Contains(relPath, "..") {
+		jsonError(w, "invalid path", 400)
+		return
+	}
+
+	var body struct {
+		Content string `json:"content"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+
+	absPath := filepath.Join(s.blueprintBasePath(), relPath)
+
+	// Ensure the resolved path is still under the blueprint directory
+	cleanPath := filepath.Clean(absPath)
+	cleanBase := filepath.Clean(s.blueprintBasePath())
+	if !strings.HasPrefix(cleanPath, cleanBase) {
+		jsonError(w, "path outside blueprint directory", 400)
+		return
+	}
+
+	// Ensure parent directory exists
+	if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
+		jsonError(w, "failed to create directory: "+err.Error(), 500)
+		return
+	}
+
+	if err := os.WriteFile(absPath, []byte(body.Content), 0644); err != nil {
+		jsonError(w, "failed to write file: "+err.Error(), 500)
+		return
+	}
+
+	jsonOK(w, map[string]string{"status": "ok", "path": relPath})
 }
 
 // handleGetAgentMind returns the mind tree (layers → files) for an agent.

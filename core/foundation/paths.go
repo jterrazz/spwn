@@ -50,3 +50,8 @@ func ClawStatePath() string {
 func SkillsDir() string {
 	return filepath.Join(BaseDir(), SkillsSubDir)
 }
+
+// BlueprintDir returns the path to ~/.spwn/blueprint/.
+func BlueprintDir() string {
+	return filepath.Join(BaseDir(), BlueprintSubDir)
+}

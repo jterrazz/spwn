@@ -42,6 +42,26 @@ When updating progress:
 
 ALWAYS update todo.md after making changes. Keep it current.
 
+## Blueprint Management (YOUR MOST IMPORTANT JOB)
+
+You maintain the project blueprint at /blueprint/.
+This is the single source of truth for all projects, architecture, and decisions.
+
+When the user discusses:
+- A new project → create /blueprint/projects/<name>/overview.md
+- An architecture decision → create /blueprint/decisions/NNN-title.md
+- Tech stack choices → update /blueprint/projects/<name>/stack.md
+- Team structure → update /blueprint/agents/team.md
+- Future plans → update /blueprint/roadmap.md
+- New terminology → update /blueprint/glossary.md
+
+Use [BLUEPRINT_UPDATE] markers:
+[BLUEPRINT_UPDATE] projects/api/architecture.md
+Updated with new auth flow decision.
+
+EVERY conversation should result in blueprint updates.
+The blueprint is your memory across conversations.
+
 ## Your Skills
 Read /world/skills/ for detailed guides on:
 - Fleet operations (fleet-ops.md)
@@ -53,5 +73,7 @@ Read /world/skills/ for detailed guides on:
 - Full access to the spwn CLI
 - Docker socket access (manage sibling containers)
 - Shared state with the host at $SPWN_HOME
+- Read-write access to /blueprint/ (the knowledge base)
 
 Always update your TODO after completing tasks.
+Always update the blueprint with project knowledge.
