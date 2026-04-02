@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   IconWorldFilled,
@@ -13,6 +14,8 @@ import {
   IconGhostFilled,
   IconPackage,
   IconPlus,
+  IconCheck,
+  IconX,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -43,6 +46,7 @@ interface AppSidebarProps {
   worlds: World[];
   limboAgents: LimboAgent[];
   currentWorldId?: string;
+  loading?: boolean;
 }
 
 // Agent status → Tabler filled icon + color
@@ -50,14 +54,14 @@ const AGENT_ICON: Record<string, { icon: typeof IconBoltFilled; color: string; d
   running:  { icon: IconBoltFilled, color: "text-green-400", dim: false },
   waiting:  { icon: IconMessageFilled, color: "text-amber-400 animate-pulse", dim: false },
   sleeping: { icon: IconMoonFilled, color: "text-purple-400", dim: false },
-  idle:     { icon: IconCircleFilled, color: "text-white/20", dim: true },
-  stopped:  { icon: IconCircleFilled, color: "text-white/10", dim: true },
+  idle:     { icon: IconCircleFilled, color: "text-amber-400/50", dim: true },
+  stopped:  { icon: IconCircleFilled, color: "text-zinc-500/30", dim: true },
 };
 
 const WORLD_DOT: Record<string, string> = {
   running: "text-green-500",
-  idle: "text-white/25",
-  stopped: "text-white/10",
+  idle: "text-amber-400",
+  stopped: "text-zinc-400/30",
   creating: "text-blue-400",
 };
 
@@ -68,8 +72,33 @@ function extractName(id: string): string {
     : id;
 }
 
-export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarProps) {
+export function AppSidebar({ worlds, limboAgents, currentWorldId, loading }: AppSidebarProps) {
   const pathname = usePathname();
+  const [showNewAgent, setShowNewAgent] = useState(false);
+  const [newAgentName, setNewAgentName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const newAgentInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showNewAgent) {
+      newAgentInputRef.current?.focus();
+    }
+  }, [showNewAgent]);
+
+  const handleCreateAgent = async () => {
+    if (!newAgentName.trim() || creating) return;
+    setCreating(true);
+    try {
+      await apiAction("/api/agents", { name: newAgentName.trim() }, "/api/agents/create");
+      setNewAgentName("");
+      setShowNewAgent(false);
+      window.location.reload();
+    } catch {
+      // silently fail
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <Sidebar>
@@ -133,6 +162,18 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
             Worlds
           </SidebarGroupLabel>
           <SidebarMenu>
+            {loading && worlds.length === 0 && (
+              <>
+                {[1, 2].map((i) => (
+                  <SidebarMenuItem key={i}>
+                    <div className="flex items-center gap-2.5 px-2 py-1.5">
+                      <div className="w-2 h-2 rounded-full bg-white/[0.06] animate-pulse" />
+                      <div className="h-3 w-20 rounded bg-white/[0.06] animate-pulse" />
+                    </div>
+                  </SidebarMenuItem>
+                ))}
+              </>
+            )}
             {worlds.map((world) => {
               const name = extractName(world.id);
               const isWorldActive = pathname.startsWith(`/world/${world.id}`);
@@ -206,18 +247,47 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId }: AppSidebarPr
               </SidebarMenuItem>
             )}
             <SidebarMenuItem>
-              <SidebarMenuButton
-                className="text-[11px] text-muted-foreground/25 hover:text-muted-foreground/50"
-                onClick={async () => {
-                  const name = prompt("Agent name:");
-                  if (!name?.trim()) return;
-                  await apiAction("/api/agents", { name: name.trim() }, "/api/agents/create");
-                  window.location.reload();
-                }}
-              >
-                <IconPlus size={12} className="opacity-30 shrink-0" />
-                <span>New Agent</span>
-              </SidebarMenuButton>
+              {showNewAgent ? (
+                <div className="flex items-center gap-1 px-2 py-1">
+                  <input
+                    ref={newAgentInputRef}
+                    value={newAgentName}
+                    onChange={(e) => setNewAgentName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCreateAgent();
+                      if (e.key === "Escape") { setShowNewAgent(false); setNewAgentName(""); }
+                    }}
+                    placeholder="agent name..."
+                    className="flex-1 min-w-0 bg-transparent text-[11px] text-foreground/70 placeholder:text-muted-foreground/25 border-b border-white/[0.08] pb-0.5 focus:outline-none focus:border-white/[0.2]"
+                    disabled={creating}
+                  />
+                  <button
+                    onClick={handleCreateAgent}
+                    disabled={!newAgentName.trim() || creating}
+                    className="p-0.5 text-green-400/60 hover:text-green-400 transition-colors disabled:opacity-30"
+                  >
+                    {creating ? (
+                      <div className="w-3 h-3 border border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                    ) : (
+                      <IconCheck size={12} />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => { setShowNewAgent(false); setNewAgentName(""); }}
+                    className="p-0.5 text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
+                  >
+                    <IconX size={12} />
+                  </button>
+                </div>
+              ) : (
+                <SidebarMenuButton
+                  className="text-[11px] text-muted-foreground/25 hover:text-muted-foreground/50"
+                  onClick={() => setShowNewAgent(true)}
+                >
+                  <IconPlus size={12} className="opacity-30 shrink-0" />
+                  <span>New Agent</span>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>

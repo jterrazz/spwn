@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import type { AgentProfile, AgentMessage, World } from "@/lib/types";
 import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
+import { usePageTitle } from "@/hooks/use-page-title";
 import {
   IconBrain,
   IconMessageFilled,
@@ -57,6 +58,13 @@ export default function AgentPage() {
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [mindTree, setMindTree] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+
+  // Extract world name for title
+  const worldName = world ? (() => {
+    const parts = world.id.split("-");
+    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : world.id;
+  })() : null;
+  usePageTitle(agentName, worldName);
 
   // Fetch world + agent data from API (Go API with Next.js fallback)
   useEffect(() => {
@@ -159,7 +167,41 @@ export default function AgentPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-muted-foreground/30 animate-pulse">Loading agent...</div>;
+    return (
+      <div className="flex h-[calc(100vh-1px)] overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="px-6 py-4 border-b border-border/30 shrink-0">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-2 h-2 rounded-full bg-white/10 animate-pulse" />
+              <div className="space-y-1.5">
+                <div className="h-4 w-24 rounded bg-white/[0.06] animate-pulse" />
+                <div className="h-3 w-40 rounded bg-white/[0.04] animate-pulse" />
+              </div>
+            </div>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-7 w-16 rounded-lg bg-white/[0.04] animate-pulse" />
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-muted-foreground/20 text-sm animate-pulse">Loading agent...</div>
+          </div>
+        </div>
+        <div className="w-72 border-l border-border/30 hidden lg:block p-5 space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="space-y-3">
+              <div className="h-3 w-16 rounded bg-white/[0.04] animate-pulse" />
+              <div className="rounded-xl bg-white/[0.02] p-4 space-y-2">
+                {[1, 2, 3].map((j) => (
+                  <div key={j} className="h-3 w-full rounded bg-white/[0.04] animate-pulse" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!world || !agent) {
@@ -296,6 +338,13 @@ export default function AgentPage() {
           <>
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+              {messages.length === 0 && !isTyping && (
+                <div className="flex-1 flex items-center justify-center h-full">
+                  <p className="text-sm text-muted-foreground/25 font-mono">
+                    Send a message to start chatting with {agentName}
+                  </p>
+                </div>
+              )}
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[75%] ${msg.role === "user" ? "text-right" : ""}`}>

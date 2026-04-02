@@ -1,9 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { AgentProfile } from "@/lib/types";
-import { apiGet, apiAction } from "@/lib/api-client";
+import { apiGet, apiPut, apiAction } from "@/lib/api-client";
+import { InlineEdit, InlineTagsEdit } from "@/components/inline-edit";
+import { TIER_BADGE } from "@/lib/status";
 import {
   IconBrain,
   IconSparkles,
@@ -14,6 +16,8 @@ import {
   IconRefresh,
   IconGitFork,
   IconDownload,
+  IconUser,
+  IconRocket,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -27,7 +31,7 @@ export default function AgentProfilePage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchProfile = useCallback(() => {
     Promise.all([
       apiGet<AgentProfile>(`/api/agents/${agentName}`, `/api/agents/${agentName}`).catch(() => null),
       apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`, `/api/agents/${agentName}/mind`).catch(() => null),
@@ -38,9 +42,25 @@ export default function AgentProfilePage() {
     });
   }, [agentName]);
 
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   const showFeedback = (msg: string) => {
     setFeedback(msg);
     setTimeout(() => setFeedback(null), 2500);
+  };
+
+  const saveIdentityField = async (field: string, content: string): Promise<boolean> => {
+    try {
+      await apiPut(`/api/agents/${agentName}/identity`, { field, content });
+      showFeedback(`${field} updated`);
+      fetchProfile(); // Refresh data
+      return true;
+    } catch {
+      showFeedback(`Error: failed to update ${field}`);
+      return false;
+    }
   };
 
   const callAction = async (action: string, body?: object): Promise<boolean> => {
@@ -88,17 +108,38 @@ export default function AgentProfilePage() {
 
   if (!profile) {
     return (
-      <div className="p-8">
-        <p className="text-muted-foreground/50">Agent &quot;{agentName}&quot; not found</p>
+      <div className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
+          <IconUser size={28} className="text-muted-foreground/20" />
+        </div>
+        <p className="text-muted-foreground/50 text-lg font-heading">Agent &quot;{agentName}&quot; not found</p>
         <p className="text-xs text-muted-foreground/30 mt-2 font-mono">
           Create this agent with: spwn agent create {agentName}
         </p>
+        <button
+          onClick={() => {
+            apiAction("/api/agents", { name: agentName }, "/api/agents/create").then((result) => {
+              if (result.ok) {
+                fetchProfile();
+                showFeedback("Agent created!");
+              } else {
+                showFeedback(`Error: ${result.error}`);
+              }
+            });
+          }}
+          className="mt-6 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
+        >
+          <IconRocket size={16} />
+          Create &quot;{agentName}&quot;
+        </button>
       </div>
     );
   }
 
   const totalFiles = Object.values(mindTree).reduce((n, f) => n + f.length, 0);
   const activeLayers = Object.keys(mindTree).filter((k) => (mindTree[k]?.length ?? 0) > 0).length;
+
+  const tierStyle = TIER_BADGE[profile.tier] ?? TIER_BADGE.citizen;
 
   return (
     <div className="p-8 space-y-8 max-w-3xl">
@@ -109,9 +150,14 @@ export default function AgentProfilePage() {
             {agentName.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-heading tracking-wide text-foreground/90">{agentName}</h1>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl font-heading tracking-wide text-foreground/90">{agentName}</h1>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${tierStyle}`}>
+                {profile.tier}
+              </span>
+            </div>
             <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
-              {profile.tier} · {profile.engine} · {profile.provider}
+              {profile.engine} · {profile.provider}
             </p>
           </div>
         </div>
@@ -197,42 +243,49 @@ export default function AgentProfilePage() {
         </div>
       </div>
 
-      {/* Purpose & Persona */}
+      {/* Purpose — inline editable */}
       <div>
         <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3 flex items-center gap-1.5">
           <IconSparkles size={12} />
           Purpose
         </h2>
         <div className="glass-subtle p-4">
-          <p className="text-sm text-foreground/70 leading-relaxed">{profile.purpose || "Not configured yet"}</p>
+          <InlineEdit
+            value={profile.purpose || ""}
+            placeholder="Define this agent's purpose..."
+            onSave={(v) => saveIdentityField("purpose", v)}
+            multiline
+            className="text-sm text-foreground/70 leading-relaxed"
+          />
         </div>
       </div>
 
-      {profile.persona && (
-        <div>
-          <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Persona</h2>
-          <div className="glass-subtle p-4">
-            <p className="text-sm text-foreground/60 leading-relaxed italic">{profile.persona}</p>
-          </div>
+      {/* Persona — inline editable */}
+      <div>
+        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Persona</h2>
+        <div className="glass-subtle p-4">
+          <InlineEdit
+            value={profile.persona || ""}
+            placeholder="Describe the agent's persona..."
+            onSave={(v) => saveIdentityField("persona", v)}
+            multiline
+            className="text-sm text-foreground/60 leading-relaxed italic"
+          />
         </div>
-      )}
+      </div>
 
-      {/* Traits */}
-      {(profile.traits?.length ?? 0) > 0 && (
-        <div>
-          <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Traits</h2>
-          <div className="flex flex-wrap gap-2">
-            {(profile.traits ?? []).map((trait) => (
-              <span
-                key={trait}
-                className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-purple-500/10 text-purple-300/80 border border-purple-500/20"
-              >
-                {trait}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Traits — inline tag editing */}
+      <div>
+        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Traits</h2>
+        <InlineTagsEdit
+          tags={profile.traits ?? []}
+          onSave={async (tags) => {
+            const ok = await saveIdentityField("traits", tags.map((t) => `- ${t}`).join("\n"));
+            return ok;
+          }}
+          color="bg-purple-500/10 text-purple-300/80 border-purple-500/20"
+        />
+      </div>
 
       {/* Skills */}
       {(profile.skills?.length ?? 0) > 0 && (

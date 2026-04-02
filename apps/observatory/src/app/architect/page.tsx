@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction } from "@/lib/api-client";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 interface ArchitectStatus {
   status: "running" | "stopped";
@@ -73,6 +74,7 @@ function StatCard({ label, value, sub, accent, loading: isLoading }: { label: st
 }
 
 export default function ArchitectPage() {
+  usePageTitle("Architect");
   const [logFilter, setLogFilter] = useState<string>("all");
   const [architectStatus, setArchitectStatus] = useState<ArchitectStatus | null>(null);
   const [statusData, setStatusData] = useState<StatusData | null>(null);

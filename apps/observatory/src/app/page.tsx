@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS } from "@/lib/types";
 import type { World } from "@/lib/types";
-import { IconPlus, IconRocket, IconX } from "@tabler/icons-react";
+import { IconPlus, IconRocket, IconX, IconPlanet } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet } from "@/lib/api-client";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
@@ -49,6 +50,12 @@ export default function UniverseMapPage() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [worlds, selected, router, showSpawn]);
+
+  // Global keyboard shortcuts
+  useKeyboardShortcuts({
+    onSpawnWorld: () => setShowSpawn(true),
+    onEscape: () => setShowSpawn(false),
+  });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -94,8 +101,12 @@ export default function UniverseMapPage() {
           </div>
         ) : worlds.length === 0 ? (
           <div className="text-center">
-          <p className="text-muted-foreground/30 text-lg font-heading">No worlds running</p>
-          <p className="text-muted-foreground/20 text-sm mt-2 font-mono">Spawn one to get started</p>
+            <div className="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-5">
+              <IconPlanet size={36} className="text-muted-foreground/15" />
+            </div>
+            <p className="text-muted-foreground/30 text-lg font-heading">No worlds running</p>
+            <p className="text-muted-foreground/20 text-sm mt-2 font-mono">Spawn one to get started</p>
+            <p className="text-muted-foreground/15 text-xs mt-1 font-mono">or press ⌘N</p>
             <button
               onClick={() => setShowSpawn(true)}
               className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm mx-auto bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"

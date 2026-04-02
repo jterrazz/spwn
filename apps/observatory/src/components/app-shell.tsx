@@ -18,6 +18,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [worlds, setWorlds] = useState<World[]>([]);
   const [limboAgents, setLimboAgents] = useState<LimboAgent[]>([]);
+  const [sidebarLoading, setSidebarLoading] = useState(true);
 
   // Extract current world ID from URL if on a world page
   const worldMatch = pathname.match(/^\/world\/([^/]+)/);
@@ -30,6 +31,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     ]).then(([worldData, agentData]) => {
       const w = worldData ?? [];
       setWorlds(w);
+      setSidebarLoading(false);
       // Limbo agents = agents not in any active world
       const activeAgentNames = new Set<string>();
       for (const world of w) {
@@ -59,6 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         worlds={worlds}
         limboAgents={limboAgents}
         currentWorldId={currentWorldId}
+        loading={sidebarLoading}
       />
       <SidebarInset>
         <Breadcrumbs />

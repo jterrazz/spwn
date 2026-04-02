@@ -25,8 +25,11 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "spwn observatory",
+  title: "Observatory · spwn",
   description: "Visual dashboard for your universe",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({

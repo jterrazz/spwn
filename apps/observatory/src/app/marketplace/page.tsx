@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { IconPackage, IconDownload, IconExternalLink } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 interface Package {
   name: string;
@@ -11,6 +12,7 @@ interface Package {
 }
 
 export default function MarketplacePage() {
+  usePageTitle("Marketplace");
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
