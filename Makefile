@@ -16,6 +16,7 @@ install: build
 	@mkdir -p $(INSTALL_DIR)
 	@cp bin/spwn $(INSTALL_DIR)/spwn
 	@chmod +x $(INSTALL_DIR)/spwn
+	@codesign -s - $(INSTALL_DIR)/spwn 2>/dev/null || true
 	@# Ensure ~/.local/bin is in PATH
 	@case ":$$PATH:" in \
 		*":$(INSTALL_DIR):"*) ;; \
