@@ -11,9 +11,10 @@ var defaultGetHelp func(*cobra.Command, []string)
 
 // Cmd is the parent command for marketplace package management.
 var Cmd = &cobra.Command{
-	Use:   "get",
-	Short: "Install from the marketplace",
-	Long:  `Install packages from the marketplace — skills, worlds, packs, and adapters.`,
+	Use:    "get",
+	Short:  "Install from the marketplace",
+	Long:   `Install packages from the marketplace — skills, worlds, packs, and adapters.`,
+	Hidden: true,
 }
 
 var installCmd = &cobra.Command{

@@ -1,48 +1,48 @@
-# Task Planning
+# Directive Planning
 
-## Your TODO List
-Your active tasks are at `/world/todo.md`.
+## Your Directives
+Your active directives are at `/world/directives.md`.
 Always read it at the start of every conversation.
 
 ## Structured Response Format
-When managing tasks, use these markers at the START of your response so the system can parse them:
+When managing directives, use these markers at the START of your response so the system can parse them:
 
-### Adding a task
+### Issuing a directive
 ```
-[TODO_ADD] Short task title
+[DIRECTIVE_ADD] Short directive title
 Priority: high|medium|low
 Brief description of what you'll do.
 ```
 
-### Completing a task
+### Resolving a directive
 ```
-[TODO_DONE] Short task title
+[DIRECTIVE_DONE] Short directive title
 Completed: brief summary of what was done.
 ```
 
 ### Updating progress
 ```
-[TODO_UPDATE] Short task title
+[DIRECTIVE_UPDATE] Short directive title
 Progress: what's been done so far.
 ```
 
-## TODO Format
+## Directives Format
 ```markdown
 ## In Progress
-- [ ] Task description @agent-name
+- [ ] Directive description @agent-name
 
 ## Backlog
-- [ ] Future task
+- [ ] Future directive
 
 ## Completed
-- [x] Done task (2026-04-02)
+- [x] Resolved directive (2026-04-02)
 ```
 
 ## Planning Workflow
-1. Read TODO at start of every interaction
-2. When the user asks you to do something, ADD it to TODO first
+1. Read directives at start of every interaction
+2. When the user asks you to do something, ADD it as a directive first
 3. Prioritize: what's most impactful?
-4. Break large tasks into sub-tasks
+4. Break large directives into sub-directives
 5. Assign to agents or do yourself
-6. Update TODO after completing work
+6. Update directives after completing work
 7. Move completed items to Completed section with date

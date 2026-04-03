@@ -176,15 +176,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
                 <span>Blueprint</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={pathname === "/marketplace"}
-                onClick={() => window.location.href = "/marketplace"}
-              >
-                <IconPackage size={16} className="opacity-50" />
-                <span>Marketplace</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {/* Marketplace — hidden until ready */}
           </SidebarMenu>
         </SidebarGroup>
 
@@ -356,13 +348,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
           <span className="ml-auto text-muted-foreground/15">v{version?.current ?? "..."}</span>
         </div>
 
-        {/* User */}
-        <div className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-white/[0.03] transition-colors cursor-pointer">
-          <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-medium text-muted-foreground/50 ring-1 ring-white/[0.06]">
-            J
-          </div>
-          <span className="text-xs text-muted-foreground/50">jterrazz</span>
-        </div>
+
       </SidebarFooter>
     </Sidebar>
   );

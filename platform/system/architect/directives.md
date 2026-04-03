@@ -1,4 +1,4 @@
-# Architect TODO
+# Architect Directives
 
 ## In Progress
 

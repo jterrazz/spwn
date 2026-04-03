@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet } from "@/lib/api-client";
+import { streamChat } from "@/lib/stream-chat";
+import type { ActivityBlock } from "@/lib/activity-types";
+import { ActivityMessageView } from "@/components/activity-blocks";
 import { usePageTitle } from "@/hooks/use-page-title";
 import {
   IconMessageCircle,
@@ -31,7 +34,7 @@ interface ArchitectStatus {
   };
 }
 
-interface TodoActionData {
+interface DirectiveActionData {
   type: "add" | "done" | "update";
   title: string;
   priority?: string;
@@ -46,23 +49,26 @@ interface BlueprintUpdateData {
 interface ChatMessage {
   role: "user" | "architect";
   content: string;
+  blocks: ActivityBlock[];
   timestamp: Date;
   error?: boolean;
-  todoAction?: TodoActionData;
+  cost?: number;
+  duration?: number;
+  directiveAction?: DirectiveActionData;
   blueprintUpdate?: BlueprintUpdateData;
 }
 
-interface TodoItem {
+interface Directive {
   text: string;
   done: boolean;
   priority?: "high" | "medium" | "low";
   description?: string;
 }
 
-interface TodoData {
-  inProgress: TodoItem[];
-  backlog: TodoItem[];
-  completed: TodoItem[];
+interface DirectivesData {
+  inProgress: Directive[];
+  backlog: Directive[];
+  completed: Directive[];
   raw: string;
 }
 
@@ -117,7 +123,7 @@ function StatusDot({ status }: { status: "inProgress" | "backlog" | "done" }) {
   return <span className="w-3 h-3 rounded-full bg-white/15 flex-shrink-0" />;
 }
 
-function TaskCard({ item, status, isHighlighted }: { item: TodoItem; status: "inProgress" | "backlog" | "done"; isHighlighted: boolean }) {
+function DirectiveCard({ item, status, isHighlighted }: { item: Directive; status: "inProgress" | "backlog" | "done"; isHighlighted: boolean }) {
   return (
     <div
       className={`group rounded-lg border px-3 py-2.5 transition-all duration-500 ${
@@ -148,15 +154,15 @@ function TaskCard({ item, status, isHighlighted }: { item: TodoItem; status: "in
   );
 }
 
-function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightTitle: string | null }) {
+function DirectivesPanel({ directives, highlightTitle }: { directives: DirectivesData | null; highlightTitle: string | null }) {
   const [showCompleted, setShowCompleted] = useState(false);
 
-  if (!todo) {
+  if (!directives) {
     return (
       <div className="glass-subtle rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2.5">
           <IconClipboardList size={18} className="text-muted-foreground/30" />
-          <h3 className="text-sm font-heading tracking-wide text-muted-foreground/50">Task Board</h3>
+          <h3 className="text-sm font-heading tracking-wide text-muted-foreground/50">Directives</h3>
         </div>
         <div className="space-y-2">
           <Skeleton className="h-12 w-full rounded-lg" />
@@ -167,8 +173,8 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
     );
   }
 
-  const isEmpty = todo.inProgress.length === 0 && todo.backlog.length === 0 && todo.completed.length === 0;
-  const totalActive = todo.inProgress.length + todo.backlog.length;
+  const isEmpty = directives.inProgress.length === 0 && directives.backlog.length === 0 && directives.completed.length === 0;
+  const totalActive = directives.inProgress.length + directives.backlog.length;
 
   return (
     <div className="glass-subtle rounded-xl p-5 space-y-4">
@@ -176,7 +182,7 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <IconClipboardList size={18} className="text-muted-foreground/40" />
-          <h3 className="text-sm font-heading tracking-wide text-foreground/60">Task Board</h3>
+          <h3 className="text-sm font-heading tracking-wide text-foreground/60">Directives</h3>
         </div>
         <span className="text-[9px] font-mono text-muted-foreground/25 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.05]">
           {totalActive > 0 ? `${totalActive} active` : "managed by architect"}
@@ -189,22 +195,22 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
           <div className="w-10 h-10 rounded-full bg-white/[0.04] flex items-center justify-center mb-3">
             <IconClipboardList size={20} className="text-muted-foreground/20" />
           </div>
-          <p className="text-xs text-muted-foreground/35 font-medium">No tasks yet</p>
+          <p className="text-xs text-muted-foreground/35 font-medium">No directives yet</p>
           <p className="text-[11px] text-muted-foreground/20 mt-1">Talk to the Architect to get started</p>
         </div>
       )}
 
       {/* In Progress */}
-      {todo.inProgress.length > 0 && (
+      {directives.inProgress.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/60" />
             <p className="text-[10px] uppercase tracking-wider font-medium text-yellow-400/60">In Progress</p>
-            <span className="text-[9px] font-mono text-yellow-400/30 ml-auto">{todo.inProgress.length}</span>
+            <span className="text-[9px] font-mono text-yellow-400/30 ml-auto">{directives.inProgress.length}</span>
           </div>
           <div className="space-y-1.5">
-            {todo.inProgress.map((item, i) => (
-              <TaskCard
+            {directives.inProgress.map((item, i) => (
+              <DirectiveCard
                 key={`ip-${i}`}
                 item={item}
                 status="inProgress"
@@ -216,16 +222,16 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
       )}
 
       {/* Backlog */}
-      {todo.backlog.length > 0 && (
+      {directives.backlog.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
             <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground/35">Backlog</p>
-            <span className="text-[9px] font-mono text-muted-foreground/20 ml-auto">{todo.backlog.length}</span>
+            <span className="text-[9px] font-mono text-muted-foreground/20 ml-auto">{directives.backlog.length}</span>
           </div>
           <div className="space-y-1.5">
-            {todo.backlog.map((item, i) => (
-              <TaskCard
+            {directives.backlog.map((item, i) => (
+              <DirectiveCard
                 key={`bl-${i}`}
                 item={item}
                 status="backlog"
@@ -237,7 +243,7 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
       )}
 
       {/* Completed (collapsible) */}
-      {todo.completed.length > 0 && (
+      {directives.completed.length > 0 && (
         <div className="pt-1 border-t border-white/[0.05]">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
@@ -246,13 +252,13 @@ function TodoPanel({ todo, highlightTitle }: { todo: TodoData | null; highlightT
             {showCompleted ? <IconChevronDown size={12} /> : <IconChevronRight size={12} />}
             <span>Completed</span>
             <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400/40 border border-green-500/10">
-              {todo.completed.length}
+              {directives.completed.length}
             </span>
           </button>
           {showCompleted && (
             <div className="space-y-1.5 mt-2">
-              {todo.completed.map((item, i) => (
-                <TaskCard
+              {directives.completed.map((item, i) => (
+                <DirectiveCard
                   key={`done-${i}`}
                   item={item}
                   status="done"
@@ -289,11 +295,11 @@ function extractPriority(text: string): { cleanText: string; priority?: "high" |
   return { cleanText, priority, description };
 }
 
-function parseTodoMd(raw: string): TodoData {
+function parseDirectivesMd(raw: string): DirectivesData {
   const lines = raw.split("\n");
-  const inProgress: TodoItem[] = [];
-  const backlog: TodoItem[] = [];
-  const completed: TodoItem[] = [];
+  const inProgress: Directive[] = [];
+  const backlog: Directive[] = [];
+  const completed: Directive[] = [];
 
   let section = "backlog";
 
@@ -318,7 +324,7 @@ function parseTodoMd(raw: string): TodoData {
     if (checkMatch) {
       const done = checkMatch[1] !== " ";
       const { cleanText, priority, description } = extractPriority(checkMatch[2]);
-      const item: TodoItem = { text: cleanText, done, priority, description };
+      const item: Directive = { text: cleanText, done, priority, description };
       if (done) {
         completed.push(item);
       } else if (section === "inProgress") {
@@ -333,7 +339,7 @@ function parseTodoMd(raw: string): TodoData {
     const listMatch = trimmed.match(/^-\s+(.+)/);
     if (listMatch) {
       const { cleanText, priority, description } = extractPriority(listMatch[1]);
-      const item: TodoItem = { text: cleanText, done: section === "completed", priority, description };
+      const item: Directive = { text: cleanText, done: section === "completed", priority, description };
       if (section === "inProgress") {
         inProgress.push(item);
       } else if (section === "completed") {
@@ -353,7 +359,7 @@ export default function ArchitectPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [todo, setTodo] = useState<TodoData | null>(null);
+  const [directives, setDirectives] = useState<DirectivesData | null>(null);
 
   // Tab state
   const [activeTab, setActiveTab] = useState<"chat" | "blueprint" | "tasks">("chat");
@@ -366,13 +372,13 @@ export default function ArchitectPage() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const fetchTodo = () => {
-    apiGet<{ content: string }>("/api/architect/todo")
+  const fetchDirectives = () => {
+    apiGet<{ content: string }>("/api/architect/directives")
       .then((data) => {
-        setTodo(parseTodoMd(data.content));
+        setDirectives(parseDirectivesMd(data.content));
       })
       .catch(() => {
-        // No TODO available
+        // No directives available
       });
   };
 
@@ -386,7 +392,7 @@ export default function ArchitectPage() {
         });
     };
     fetchData();
-    fetchTodo();
+    fetchDirectives();
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -438,85 +444,85 @@ export default function ArchitectPage() {
     }
   };
 
-  const handleTalkResponse = (data: { response?: string; error?: string; todoAction?: TodoActionData; blueprintUpdate?: BlueprintUpdateData }) => {
+  const handleTalkResponse = (data: { response?: string; error?: string; directiveAction?: DirectiveActionData; blueprintUpdate?: BlueprintUpdateData }) => {
+    const text = data.response || data.error || "No response";
     const archMsg: ChatMessage = {
       role: "architect",
-      content: data.response || data.error || "No response",
+      content: text,
+      blocks: [{ type: data.error && !data.response ? "error" as const : "text" as const, content: text }],
       timestamp: new Date(),
       error: !!data.error && !data.response,
-      todoAction: data.todoAction,
+      directiveAction: data.directiveAction,
       blueprintUpdate: data.blueprintUpdate,
     };
     setMessages((prev) => [...prev, archMsg]);
 
-    // If there's a TODO action, refresh the TODO list and highlight the item
-    if (data.todoAction) {
-      fetchTodo();
-      setHighlightTitle(data.todoAction.title);
+    // If there's a directive action, refresh directives and highlight the item
+    if (data.directiveAction) {
+      fetchDirectives();
+      setHighlightTitle(data.directiveAction.title);
       setTimeout(() => setHighlightTitle(null), 3000);
     }
   };
 
   const doTalk = async (msg: string) => {
-    try {
-      const res = await fetch("http://localhost:3001/api/architect/talk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
-        signal: AbortSignal.timeout(120000),
-      });
-      const data = await res.json().catch(() => null);
-      if (!data) {
-        setMessages((prev) => [...prev, {
-          role: "architect", content: "Failed to parse response from Architect.",
-          timestamp: new Date(), error: true,
-        }]);
-        return;
-      }
-      // Check if the response contains a Docker/daemon error
-      if (data.error && (!data.response || data.response.includes("No such container") || data.response.includes("Error response from daemon"))) {
-        setMessages((prev) => [...prev, {
-          role: "architect",
-          content: `Architect container error: ${data.error}. Try restarting the Architect.`,
-          timestamp: new Date(), error: true,
-        }]);
-        return;
-      }
-      handleTalkResponse(data);
-    } catch {
-      // Fallback to Next.js route
-      try {
-        const res = await fetch("/api/architect/talk", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg }),
-          signal: AbortSignal.timeout(120000),
+    const msgIndex = messages.length + 1;
+    setMessages((prev) => [...prev, {
+      role: "architect" as const, content: "", blocks: [], timestamp: new Date(),
+    }]);
+
+    await streamChat({
+      url: "http://localhost:3001/api/architect/talk",
+      fallbackUrl: "/api/architect/talk",
+      body: { message: msg },
+      onBlocks: (newBlocks) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "architect") {
+            const allBlocks = [...last.blocks, ...newBlocks];
+            const textContent = allBlocks
+              .filter((b) => b.type === "text")
+              .map((b) => (b as { content: string }).content)
+              .join("");
+            updated[msgIndex] = { ...last, blocks: allBlocks, content: textContent };
+          }
+          return updated;
         });
-        const data = await res.json().catch(() => null);
-        if (!data) {
-          setMessages((prev) => [...prev, {
-            role: "architect", content: "Failed to parse response.",
-            timestamp: new Date(), error: true,
-          }]);
-          return;
-        }
-        handleTalkResponse(data);
-      } catch {
-        setMessages((prev) => [...prev, {
-          role: "architect",
-          content: "Failed to connect to Architect. Make sure the container is running.",
-          timestamp: new Date(),
-          error: true,
-        }]);
-      }
-    }
+      },
+      onDone: (meta) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "architect") {
+            updated[msgIndex] = { ...last, cost: meta.cost, duration: meta.duration };
+          }
+          return updated;
+        });
+      },
+      onError: (error) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "architect") {
+            updated[msgIndex] = {
+              ...last,
+              blocks: [...last.blocks, { type: "error" as const, content: error }],
+              content: error,
+              error: true,
+            };
+          }
+          return updated;
+        });
+      },
+    });
   };
 
   const handleSendMessage = async () => {
     const msg = chatInput.trim();
     if (!msg || sending) return;
 
-    const userMsg: ChatMessage = { role: "user", content: msg, timestamp: new Date() };
+    const userMsg: ChatMessage = { role: "user", content: msg, blocks: [{ type: "text", content: msg }], timestamp: new Date() };
     setMessages((prev) => [...prev, userMsg]);
     setChatInput("");
     setSending(true);
@@ -530,6 +536,7 @@ export default function ArchitectPage() {
         setMessages((prev) => [...prev, {
           role: "architect",
           content: "Starting Architect...",
+          blocks: [{ type: "text" as const, content: "Starting Architect..." }],
           timestamp: new Date(),
         }]);
 
@@ -543,6 +550,7 @@ export default function ArchitectPage() {
             setMessages((prev) => [...prev, {
               role: "architect",
               content: "Failed to auto-start Architect. Please start it manually.",
+              blocks: [{ type: "error" as const, content: "Failed to auto-start Architect. Please start it manually." }],
               timestamp: new Date(),
               error: true,
             }]);
@@ -572,6 +580,7 @@ export default function ArchitectPage() {
           setMessages((prev) => [...prev, {
             role: "architect",
             content: "Architect failed to start after 30s. Please try starting it manually.",
+            blocks: [{ type: "error" as const, content: "Architect failed to start after 30s." }],
             timestamp: new Date(),
             error: true,
           }]);
@@ -588,6 +597,7 @@ export default function ArchitectPage() {
       setMessages((prev) => [...prev, {
         role: "architect",
         content: `Error: ${errMsg}`,
+        blocks: [{ type: "error" as const, content: errMsg }],
         timestamp: new Date(),
         error: true,
       }]);
@@ -683,7 +693,7 @@ export default function ArchitectPage() {
           loading={loading}
         />
         <StatCard
-          label="Tasks"
+          label="Directives"
           value={loading ? "" : String(kpis?.tasksPending ?? 0)}
           sub="pending"
           accent="text-yellow-400"
@@ -705,7 +715,7 @@ export default function ArchitectPage() {
         {([
           { key: "chat", label: "Chat", icon: <IconMessageCircle size={14} /> },
           { key: "blueprint", label: "Blueprint", icon: <IconBook2 size={14} /> },
-          { key: "tasks", label: "Task Board", icon: <IconClipboardList size={14} /> },
+          { key: "tasks", label: "Directives", icon: <IconClipboardList size={14} /> },
         ] as const).map(({ key, label, icon }) => (
           <button
             key={key}
@@ -754,7 +764,9 @@ export default function ArchitectPage() {
                         ? "bg-red-500/10 border border-red-500/15 text-red-400/80"
                         : "bg-white/[0.03] border border-white/[0.06] text-foreground/70"
                   }`}>
-                    {msg.role === "architect" ? (
+                    {msg.role === "architect" && msg.blocks.length > 0 ? (
+                      <ActivityMessageView message={{ role: "agent", blocks: msg.blocks, timestamp: msg.timestamp, cost: msg.cost, duration: msg.duration }} />
+                    ) : msg.role === "architect" ? (
                       <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed">{msg.content}</pre>
                     ) : (
                       <p className="text-xs">{msg.content}</p>
@@ -763,31 +775,31 @@ export default function ArchitectPage() {
                       {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                     </p>
                   </div>
-                  {msg.todoAction && (
+                  {msg.directiveAction && (
                     <div className="max-w-[80%] mt-1.5 animate-in slide-in-from-bottom-2 fade-in duration-300">
                       <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-blue-500/[0.06]">
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 border-b border-blue-500/15">
                           <span className="text-[10px]">📋</span>
                           <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400/70">
-                            {msg.todoAction.type === "add" ? "Added to Task Board" : msg.todoAction.type === "done" ? "Task Completed" : "Task Updated"}
+                            {msg.directiveAction.type === "add" ? "Directive Issued" : msg.directiveAction.type === "done" ? "Directive Resolved" : "Directive Updated"}
                           </span>
                         </div>
                         <div className="px-3 py-2">
-                          <p className="text-xs font-medium text-blue-200/90">{msg.todoAction.title}</p>
+                          <p className="text-xs font-medium text-blue-200/90">{msg.directiveAction.title}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            {msg.todoAction.priority && (
+                            {msg.directiveAction.priority && (
                               <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
-                                msg.todoAction.priority.toUpperCase() === "HIGH"
+                                msg.directiveAction.priority.toUpperCase() === "HIGH"
                                   ? "bg-red-500/15 text-red-400/80 border-red-500/20"
-                                  : msg.todoAction.priority.toUpperCase() === "MEDIUM"
+                                  : msg.directiveAction.priority.toUpperCase() === "MEDIUM"
                                     ? "bg-amber-500/15 text-amber-400/80 border-amber-500/20"
                                     : "bg-green-500/15 text-green-400/80 border-green-500/20"
                               }`}>
-                                {msg.todoAction.priority}
+                                {msg.directiveAction.priority}
                               </span>
                             )}
-                            {msg.todoAction.description && (
-                              <span className="text-[10px] text-blue-400/40">{msg.todoAction.description}</span>
+                            {msg.directiveAction.description && (
+                              <span className="text-[10px] text-blue-400/40">{msg.directiveAction.description}</span>
                             )}
                           </div>
                         </div>
@@ -846,9 +858,9 @@ export default function ArchitectPage() {
           </div>
         </div>
 
-        {/* Task Board sidebar (1/3 width) */}
+        {/* Directives sidebar (1/3 width) */}
         <div>
-          <TodoPanel todo={todo} highlightTitle={highlightTitle} />
+          <DirectivesPanel directives={directives} highlightTitle={highlightTitle} />
         </div>
       </div>
       )}
@@ -858,7 +870,7 @@ export default function ArchitectPage() {
       )}
 
       {activeTab === "tasks" && (
-        <TodoPanel todo={todo} highlightTitle={highlightTitle} />
+        <DirectivesPanel directives={directives} highlightTitle={highlightTitle} />
       )}
     </div>
   );

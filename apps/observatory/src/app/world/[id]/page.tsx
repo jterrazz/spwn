@@ -4,6 +4,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { World } from "@/lib/types";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
+import { streamChat } from "@/lib/stream-chat";
+import type { ActivityBlock } from "@/lib/activity-types";
+import { ActivityBlocksRenderer } from "@/components/activity-blocks";
 import {
   IconTrash,
   IconCamera,
@@ -640,7 +643,7 @@ function QuickTalk({ worldId, agents, onFeedback }: QuickTalkProps) {
   const [selectedAgent, setSelectedAgent] = useState(agents[0]?.name ?? "");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const [lastReply, setLastReply] = useState<string | null>(null);
+  const [lastReplyBlocks, setLastReplyBlocks] = useState<ActivityBlock[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = async () => {
@@ -649,34 +652,25 @@ function QuickTalk({ worldId, agents, onFeedback }: QuickTalkProps) {
 
     setSending(true);
     setMessage("");
-    setLastReply(null);
+    setLastReplyBlocks([]);
 
-    try {
-      const res = await fetch(goApiUrl(`/api/agents/${selectedAgent}/talk`), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
-        signal: AbortSignal.timeout(30000),
-      });
-      const data = await res.json().catch(() => ({}));
-      const reply = data.response || data.output || data.error || "No response";
-      setLastReply(reply);
-    } catch {
-      try {
-        const res = await fetch(`/api/agents/${selectedAgent}/talk`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg }),
-        });
-        const data = await res.json().catch(() => ({}));
-        setLastReply(data.response || data.output || "No response");
-      } catch {
-        onFeedback("Error: Failed to connect to agent");
-      }
-    } finally {
-      setSending(false);
-      inputRef.current?.focus();
-    }
+    await streamChat({
+      url: goApiUrl(`/api/agents/${selectedAgent}/talk`),
+      fallbackUrl: `/api/agents/${selectedAgent}/talk`,
+      body: { message: msg },
+      timeout: 30000,
+      onBlocks: (newBlocks) => {
+        setLastReplyBlocks((prev) => [...prev, ...newBlocks]);
+      },
+      onDone: () => {},
+      onError: (error) => {
+        setLastReplyBlocks([{ type: "error", content: error }]);
+        onFeedback(`Error: ${error}`);
+      },
+    });
+
+    setSending(false);
+    inputRef.current?.focus();
   };
 
   return (
@@ -726,12 +720,12 @@ function QuickTalk({ worldId, agents, onFeedback }: QuickTalkProps) {
             )}
           </button>
         </div>
-        {lastReply && (
+        {lastReplyBlocks.length > 0 && (
           <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-3">
             <p className="text-[10px] text-muted-foreground/30 mb-1 font-mono">{selectedAgent} replied:</p>
-            <pre className="text-xs font-mono text-foreground/60 whitespace-pre-wrap break-words leading-relaxed max-h-32 overflow-y-auto">
-              {lastReply}
-            </pre>
+            <div className="max-h-32 overflow-y-auto">
+              <ActivityBlocksRenderer blocks={lastReplyBlocks} />
+            </div>
           </div>
         )}
       </div>

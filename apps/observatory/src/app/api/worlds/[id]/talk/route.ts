@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { spwnExec } from "@/lib/spwn-exec";
+import { spwnStream } from "@/lib/spwn-stream";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +13,11 @@ export async function POST(
     const { message, agent } = body as { message?: string; agent?: string };
 
     if (!message) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+      return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // If agent name is provided directly, use it
     let agentName = agent;
 
-    // Otherwise, find the agent for this world
     if (!agentName) {
       const lsResult = spwnExec(["ls", "--json"]);
       if (lsResult.ok && lsResult.stdout) {
@@ -32,38 +30,29 @@ export async function POST(
             agentName = world.agent;
           }
         } catch {
-          // Failed to parse ls output
+          // Failed to parse
         }
       }
     }
 
     if (!agentName) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Could not find agent for world " + id },
         { status: 404 }
       );
     }
 
-    const result = spwnExec(["agent", "talk", agentName, message], 120000);
+    const stream = spwnStream(["agent", "talk", agentName, message], 120000);
 
-    if (result.ok && result.stdout) {
-      // Strip CLI header from response
-      let response = result.stdout.trim();
-      if (response.startsWith("Agent:")) {
-        const idx = response.indexOf("\n\n");
-        if (idx !== -1) {
-          response = response.slice(idx).trim();
-        }
-      }
-      return NextResponse.json({ response });
-    }
-
-    return NextResponse.json(
-      { error: result.error || "Failed to talk to agent" },
-      { status: 500 }
-    );
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+        "Cache-Control": "no-cache",
+      },
+    });
   } catch {
-    return NextResponse.json(
+    return Response.json(
       { error: "Invalid request body" },
       { status: 400 }
     );

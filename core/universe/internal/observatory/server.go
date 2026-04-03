@@ -107,8 +107,8 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /api/architect/start", cors(s.handleArchitectStart))
 	mux.HandleFunc("POST /api/architect/stop", cors(s.handleArchitectStop))
 	mux.HandleFunc("POST /api/architect/talk", cors(s.handleArchitectTalk))
-	mux.HandleFunc("GET /api/architect/todo", cors(s.handleArchitectTodoGet))
-	mux.HandleFunc("POST /api/architect/todo", cors(s.handleArchitectTodoUpdate))
+	mux.HandleFunc("GET /api/architect/directives", cors(s.handleArchitectDirectivesGet))
+	mux.HandleFunc("POST /api/architect/directives", cors(s.handleArchitectDirectivesUpdate))
 
 	// --- Blueprint endpoints ---
 	mux.HandleFunc("GET /api/blueprint", cors(s.handleBlueprintList))
@@ -720,23 +720,46 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute spwn agent talk
-	cmd := exec.CommandContext(r.Context(), "spwn", "agent", "talk", agentName, body.Message)
-	out, err := cmd.CombinedOutput()
+	// Execute spwn agent talk with streaming JSON output
+	cmd := exec.CommandContext(r.Context(), "spwn", "agent", "talk", agentName, body.Message,
+		"--output-format", "stream-json", "--verbose")
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		jsonError(w, fmt.Sprintf("talk failed: %s — %s", err.Error(), string(out)), 500)
+		jsonError(w, "failed to create stdout pipe: "+err.Error(), 500)
+		return
+	}
+	cmd.Stderr = nil // ignore stderr
+
+	if err := cmd.Start(); err != nil {
+		jsonError(w, "failed to start agent talk: "+err.Error(), 500)
 		return
 	}
 
-	// Strip CLI header from response (e.g. "Agent: neo\n  World: w-triton\n\nHello!")
-	response := strings.TrimSpace(string(out))
-	if strings.HasPrefix(response, "Agent:") {
-		if idx := strings.Index(response, "\n\n"); idx != -1 {
-			response = strings.TrimSpace(response[idx:])
+	// Stream as SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	flusher, _ := w.(http.Flusher)
+
+	scanner := bufio.NewScanner(stdout)
+	scanner.Buffer(make([]byte, 1024*1024), 1024*1024) // 1MB buffer for large tool results
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			continue
+		}
+		fmt.Fprintf(w, "data: %s\n\n", line)
+		if flusher != nil {
+			flusher.Flush()
 		}
 	}
 
-	jsonOK(w, map[string]string{"response": response})
+	cmd.Wait()
+	fmt.Fprintf(w, "data: [DONE]\n\n")
+	if flusher != nil {
+		flusher.Flush()
+	}
 }
 
 func (s *Server) handleExport(w http.ResponseWriter, r *http.Request) {
@@ -784,11 +807,11 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
 
-	// Count tasks from TODO file
+	// Count directives from file
 	tasksPending := 0
 	tasksCompleted := 0
-	todoPath := s.architectTodoPath()
-	if data, err := os.ReadFile(todoPath); err == nil {
+	directivesPath := s.architectDirectivesPath()
+	if data, err := os.ReadFile(directivesPath); err == nil {
 		for _, line := range strings.Split(string(data), "\n") {
 			trimmed := strings.TrimSpace(line)
 			if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
@@ -812,8 +835,8 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// architectTodoPath returns the path to the architect's TODO file.
-func (s *Server) architectTodoPath() string {
+// architectDirectivesPath returns the path to the architect's directives file.
+func (s *Server) architectDirectivesPath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return ""
@@ -822,21 +845,21 @@ func (s *Server) architectTodoPath() string {
 	if spwnHome == "" {
 		spwnHome = filepath.Join(home, ".spwn")
 	}
-	return filepath.Join(spwnHome, "architect", "todo.md")
+	return filepath.Join(spwnHome, "architect", "directives.md")
 }
 
-// handleArchitectTodoGet returns the raw content of the architect TODO file.
-func (s *Server) handleArchitectTodoGet(w http.ResponseWriter, r *http.Request) {
-	todoPath := s.architectTodoPath()
-	if todoPath == "" {
-		jsonError(w, "could not determine todo path", 500)
+// handleArchitectDirectivesGet returns the raw content of the architect TODO file.
+func (s *Server) handleArchitectDirectivesGet(w http.ResponseWriter, r *http.Request) {
+	directivesPath := s.architectDirectivesPath()
+	if directivesPath == "" {
+		jsonError(w, "could not determine directives path", 500)
 		return
 	}
 
-	data, err := os.ReadFile(todoPath)
+	data, err := os.ReadFile(directivesPath)
 	if err != nil {
 		// Return empty template if file doesn't exist
-		defaultContent := "# Architect TODO\n\n## In Progress\n\n## Backlog\n\n## Completed\n"
+		defaultContent := "# Architect Directives\n\n## In Progress\n\n## Backlog\n\n## Completed\n"
 		jsonOK(w, map[string]string{"content": defaultContent})
 		return
 	}
@@ -844,8 +867,8 @@ func (s *Server) handleArchitectTodoGet(w http.ResponseWriter, r *http.Request) 
 	jsonOK(w, map[string]string{"content": string(data)})
 }
 
-// handleArchitectTodoUpdate writes new content to the architect TODO file.
-func (s *Server) handleArchitectTodoUpdate(w http.ResponseWriter, r *http.Request) {
+// handleArchitectDirectivesUpdate writes new content to the architect TODO file.
+func (s *Server) handleArchitectDirectivesUpdate(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Content string `json:"content"`
 	}
@@ -854,20 +877,20 @@ func (s *Server) handleArchitectTodoUpdate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	todoPath := s.architectTodoPath()
-	if todoPath == "" {
-		jsonError(w, "could not determine todo path", 500)
+	directivesPath := s.architectDirectivesPath()
+	if directivesPath == "" {
+		jsonError(w, "could not determine directives path", 500)
 		return
 	}
 
 	// Ensure directory exists
-	if err := os.MkdirAll(filepath.Dir(todoPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(directivesPath), 0755); err != nil {
 		jsonError(w, "failed to create directory: "+err.Error(), 500)
 		return
 	}
 
-	if err := os.WriteFile(todoPath, []byte(body.Content), 0644); err != nil {
-		jsonError(w, "failed to write todo file: "+err.Error(), 500)
+	if err := os.WriteFile(directivesPath, []byte(body.Content), 0644); err != nil {
+		jsonError(w, "failed to write directives file: "+err.Error(), 500)
 		return
 	}
 
@@ -894,8 +917,8 @@ func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "stopped"})
 }
 
-// TodoAction represents a parsed TODO action from the architect's response.
-type TodoAction struct {
+// DirectiveAction represents a parsed directive action from the architect's response.
+type DirectiveAction struct {
 	Type        string `json:"type"`                  // "add", "done", "update"
 	Title       string `json:"title"`
 	Priority    string `json:"priority,omitempty"`
@@ -908,9 +931,9 @@ type BlueprintUpdate struct {
 	Description string `json:"description,omitempty"`
 }
 
-// parseTodoAction extracts a TODO action marker from the architect's response.
-// It looks for [TODO_ADD], [TODO_DONE], or [TODO_UPDATE] at the start of lines.
-func parseTodoAction(text string) *TodoAction {
+// parseDirectiveAction extracts a TODO action marker from the architect's response.
+// It looks for [DIRECTIVE_ADD], [DIRECTIVE_DONE], or [DIRECTIVE_UPDATE] at the start of lines.
+func parseDirectiveAction(text string) *DirectiveAction {
 	lines := strings.Split(text, "\n")
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
@@ -918,21 +941,21 @@ func parseTodoAction(text string) *TodoAction {
 		var actionType string
 		var prefix string
 		switch {
-		case strings.HasPrefix(trimmed, "[TODO_ADD]"):
+		case strings.HasPrefix(trimmed, "[DIRECTIVE_ADD]"):
 			actionType = "add"
-			prefix = "[TODO_ADD]"
-		case strings.HasPrefix(trimmed, "[TODO_DONE]"):
+			prefix = "[DIRECTIVE_ADD]"
+		case strings.HasPrefix(trimmed, "[DIRECTIVE_DONE]"):
 			actionType = "done"
-			prefix = "[TODO_DONE]"
-		case strings.HasPrefix(trimmed, "[TODO_UPDATE]"):
+			prefix = "[DIRECTIVE_DONE]"
+		case strings.HasPrefix(trimmed, "[DIRECTIVE_UPDATE]"):
 			actionType = "update"
-			prefix = "[TODO_UPDATE]"
+			prefix = "[DIRECTIVE_UPDATE]"
 		default:
 			continue
 		}
 
 		title := strings.TrimSpace(strings.TrimPrefix(trimmed, prefix))
-		action := &TodoAction{
+		action := &DirectiveAction{
 			Type:  actionType,
 			Title: title,
 		}
@@ -1047,52 +1070,58 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	}
 	dockerArgs = append(dockerArgs, containerName,
 		"claude", "--dangerously-skip-permissions",
-		"-p", body.Message, "--print",
+		"-p", body.Message,
+		"--output-format", "stream-json", "--verbose",
 		"--append-system-prompt",
-		"You are the Architect. Read /world/ARCHITECT.md for your identity. " +
-			"IMPORTANT: When a user asks you to do something, you MUST include a [TODO_ADD] marker in your response. " +
-			"Format: [TODO_ADD] Short task title\nPriority: high|medium|low\nBrief description. " +
-			"Also update /world/todo.md with the new task. " +
-			"When completing a task use [TODO_DONE] Short task title. " +
-			"Read /world/skills/ for detailed guides. " +
-			"BLUEPRINT: You maintain /blueprint/ as the single source of truth. " +
-			"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. " +
+		"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
+			"IMPORTANT: When a user asks you to do something, you MUST include a [DIRECTIVE_ADD] marker in your response. "+
+			"Format: [DIRECTIVE_ADD] Short directive title\nPriority: high|medium|low\nBrief description. "+
+			"Also update /world/directives.md with the new directive. "+
+			"When completing a directive use [DIRECTIVE_DONE] Short directive title. "+
+			"Read /world/skills/ for detailed guides. "+
+			"BLUEPRINT: You maintain /blueprint/ as the single source of truth. "+
+			"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. "+
 			"Every conversation should result in blueprint updates.",
 	)
 
 	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)
-	output, err := cmd.CombinedOutput()
-	responseText := string(output)
-
-	// Parse TODO action and blueprint update from the response
-	todoAction := parseTodoAction(responseText)
-	blueprintUpdate := parseBlueprintUpdate(responseText)
-
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		resp := map[string]interface{}{
-			"response": responseText,
-			"error":    err.Error(),
-		}
-		if todoAction != nil {
-			resp["todoAction"] = todoAction
-		}
-		if blueprintUpdate != nil {
-			resp["blueprintUpdate"] = blueprintUpdate
-		}
-		jsonOK(w, resp)
+		jsonError(w, "failed to create stdout pipe: "+err.Error(), 500)
+		return
+	}
+	cmd.Stderr = nil
+
+	if err := cmd.Start(); err != nil {
+		jsonError(w, "failed to start architect talk: "+err.Error(), 500)
 		return
 	}
 
-	resp := map[string]interface{}{
-		"response": responseText,
+	// Stream as SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	flusher, _ := w.(http.Flusher)
+
+	scanner := bufio.NewScanner(stdout)
+	scanner.Buffer(make([]byte, 1024*1024), 1024*1024)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			continue
+		}
+		fmt.Fprintf(w, "data: %s\n\n", line)
+		if flusher != nil {
+			flusher.Flush()
+		}
 	}
-	if todoAction != nil {
-		resp["todoAction"] = todoAction
+
+	cmd.Wait()
+	fmt.Fprintf(w, "data: [DONE]\n\n")
+	if flusher != nil {
+		flusher.Flush()
 	}
-	if blueprintUpdate != nil {
-		resp["blueprintUpdate"] = blueprintUpdate
-	}
-	jsonOK(w, resp)
 }
 
 // blueprintBasePath returns the path to the blueprint directory.

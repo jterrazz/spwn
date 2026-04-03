@@ -75,8 +75,8 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 
 	// Architect endpoints
 	mux.HandleFunc("GET /api/architect/status", cors(srv.handleArchitectStatus))
-	mux.HandleFunc("GET /api/architect/todo", cors(srv.handleArchitectTodoGet))
-	mux.HandleFunc("POST /api/architect/todo", cors(srv.handleArchitectTodoUpdate))
+	mux.HandleFunc("GET /api/architect/directives", cors(srv.handleArchitectDirectivesGet))
+	mux.HandleFunc("POST /api/architect/directives", cors(srv.handleArchitectDirectivesUpdate))
 
 	// CORS preflight
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
@@ -791,11 +791,11 @@ func TestStatusCountsAgents(t *testing.T) {
 // TODO API endpoint tests
 // ============================================================
 
-func TestGetArchitectTodo_DefaultTemplate(t *testing.T) {
+func TestGetArchitectDirectives_DefaultTemplate(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
 	// No todo file exists — should return default template
-	w := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	w := doJSON(t, mux, "GET", "/api/architect/directives", nil)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
 	}
@@ -807,8 +807,8 @@ func TestGetArchitectTodo_DefaultTemplate(t *testing.T) {
 	}
 
 	// Verify default template has expected sections
-	if !strings.Contains(content, "# Architect TODO") {
-		t.Errorf("default template missing '# Architect TODO' heading")
+	if !strings.Contains(content, "# Architect Directives") {
+		t.Errorf("default template missing '# Architect Directives' heading")
 	}
 	if !strings.Contains(content, "## In Progress") {
 		t.Errorf("default template missing '## In Progress' section")
@@ -821,14 +821,14 @@ func TestGetArchitectTodo_DefaultTemplate(t *testing.T) {
 	}
 }
 
-func TestPostArchitectTodo(t *testing.T) {
+func TestPostArchitectDirectives(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
-	todoContent := "# Architect TODO\n\n## In Progress\n- [ ] Deploy v2\n\n## Backlog\n- [ ] Write docs\n\n## Completed\n- [x] Setup CI\n"
+	directivesContent := "# Architect Directives\n\n## In Progress\n- [ ] Deploy v2\n\n## Backlog\n- [ ] Write docs\n\n## Completed\n- [x] Setup CI\n"
 
 	// Write content
-	w := doJSON(t, mux, "POST", "/api/architect/todo", map[string]string{
-		"content": todoContent,
+	w := doJSON(t, mux, "POST", "/api/architect/directives", map[string]string{
+		"content": directivesContent,
 	})
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
@@ -841,23 +841,23 @@ func TestPostArchitectTodo(t *testing.T) {
 
 	// Verify the file was written to disk
 	home := os.Getenv("SPWN_HOME")
-	todoPath := filepath.Join(home, "architect", "todo.md")
-	data, err := os.ReadFile(todoPath)
+	directivesPath := filepath.Join(home, "architect", "directives.md")
+	data, err := os.ReadFile(directivesPath)
 	if err != nil {
 		t.Fatalf("failed to read todo file from disk: %v", err)
 	}
-	if string(data) != todoContent {
-		t.Errorf("on-disk content mismatch:\ngot:  %q\nwant: %q", string(data), todoContent)
+	if string(data) != directivesContent {
+		t.Errorf("on-disk content mismatch:\ngot:  %q\nwant: %q", string(data), directivesContent)
 	}
 
 	// Verify GET returns the same content
-	w2 := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	w2 := doJSON(t, mux, "GET", "/api/architect/directives", nil)
 	if w2.Code != 200 {
 		t.Fatalf("expected 200 on GET, got %d", w2.Code)
 	}
 	body2 := decodeBody(t, w2)
-	if body2["content"] != todoContent {
-		t.Errorf("GET content mismatch after POST:\ngot:  %q\nwant: %q", body2["content"], todoContent)
+	if body2["content"] != directivesContent {
+		t.Errorf("GET content mismatch after POST:\ngot:  %q\nwant: %q", body2["content"], directivesContent)
 	}
 }
 
@@ -870,12 +870,12 @@ func TestArchitectStatusKPIs(t *testing.T) {
 
 	// Write a TODO file with known task counts
 	home := os.Getenv("SPWN_HOME")
-	todoDir := filepath.Join(home, "architect")
-	if err := os.MkdirAll(todoDir, 0755); err != nil {
+	directivesDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(directivesDir, 0755); err != nil {
 		t.Fatalf("mkdir architect: %v", err)
 	}
-	todoContent := "# Architect TODO\n\n## In Progress\n- [ ] Task A\n- [ ] Task B\n- [ ] Task C\n\n## Completed\n- [x] Task D\n- [X] Task E\n"
-	writeFile(t, filepath.Join(todoDir, "todo.md"), todoContent)
+	directivesContent := "# Architect Directives\n\n## In Progress\n- [ ] Task A\n- [ ] Task B\n- [ ] Task C\n\n## Completed\n- [x] Task D\n- [X] Task E\n"
+	writeFile(t, filepath.Join(directivesDir, "directives.md"), directivesContent)
 
 	w := doJSON(t, mux, "GET", "/api/architect/status", nil)
 	if w.Code != 200 {
@@ -926,12 +926,12 @@ func TestArchitectStatusKPIs(t *testing.T) {
 	}
 }
 
-func TestArchitectStatusTodoParsing(t *testing.T) {
+func TestArchitectStatusDirectivesParsing(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
 	home := os.Getenv("SPWN_HOME")
-	todoDir := filepath.Join(home, "architect")
-	if err := os.MkdirAll(todoDir, 0755); err != nil {
+	directivesDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(directivesDir, 0755); err != nil {
 		t.Fatalf("mkdir architect: %v", err)
 	}
 
@@ -981,7 +981,7 @@ func TestArchitectStatusTodoParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			writeFile(t, filepath.Join(todoDir, "todo.md"), tt.content)
+			writeFile(t, filepath.Join(directivesDir, "directives.md"), tt.content)
 
 			w := doJSON(t, mux, "GET", "/api/architect/status", nil)
 			if w.Code != 200 {
@@ -1008,14 +1008,14 @@ func TestArchitectStatusTodoParsing(t *testing.T) {
 }
 
 // ============================================================
-// parseTodoAction tests
+// parseDirectiveAction tests
 // ============================================================
 
-func TestParseTodoAction_Add(t *testing.T) {
-	input := "[TODO_ADD] Deploy API\nPriority: high\nI'll set it up."
-	action := parseTodoAction(input)
+func TestParseDirectiveAction_Add(t *testing.T) {
+	input := "[DIRECTIVE_ADD] Deploy API\nPriority: high\nI'll set it up."
+	action := parseDirectiveAction(input)
 	if action == nil {
-		t.Fatal("expected a TodoAction, got nil")
+		t.Fatal("expected a DirectiveAction, got nil")
 	}
 	if action.Type != "add" {
 		t.Errorf("expected type 'add', got %q", action.Type)
@@ -1031,11 +1031,11 @@ func TestParseTodoAction_Add(t *testing.T) {
 	}
 }
 
-func TestParseTodoAction_Done(t *testing.T) {
-	input := "[TODO_DONE] Deploy API\nCompleted: deployed to prod"
-	action := parseTodoAction(input)
+func TestParseDirectiveAction_Done(t *testing.T) {
+	input := "[DIRECTIVE_DONE] Deploy API\nCompleted: deployed to prod"
+	action := parseDirectiveAction(input)
 	if action == nil {
-		t.Fatal("expected a TodoAction, got nil")
+		t.Fatal("expected a DirectiveAction, got nil")
 	}
 	if action.Type != "done" {
 		t.Errorf("expected type 'done', got %q", action.Type)
@@ -1048,11 +1048,11 @@ func TestParseTodoAction_Done(t *testing.T) {
 	}
 }
 
-func TestParseTodoAction_Update(t *testing.T) {
-	input := "[TODO_UPDATE] Deploy API\nProgress: 50% complete"
-	action := parseTodoAction(input)
+func TestParseDirectiveAction_Update(t *testing.T) {
+	input := "[DIRECTIVE_UPDATE] Deploy API\nProgress: 50% complete"
+	action := parseDirectiveAction(input)
 	if action == nil {
-		t.Fatal("expected a TodoAction, got nil")
+		t.Fatal("expected a DirectiveAction, got nil")
 	}
 	if action.Type != "update" {
 		t.Errorf("expected type 'update', got %q", action.Type)
@@ -1065,19 +1065,19 @@ func TestParseTodoAction_Update(t *testing.T) {
 	}
 }
 
-func TestParseTodoAction_NoAction(t *testing.T) {
+func TestParseDirectiveAction_NoAction(t *testing.T) {
 	input := "Just a regular response without any TODO markers.\nAnother line here."
-	action := parseTodoAction(input)
+	action := parseDirectiveAction(input)
 	if action != nil {
 		t.Errorf("expected nil for regular text, got %+v", action)
 	}
 }
 
-func TestParseTodoAction_MultipleActions(t *testing.T) {
-	input := "[TODO_ADD] First task\nPriority: high\n\n[TODO_ADD] Second task\nPriority: low"
-	action := parseTodoAction(input)
+func TestParseDirectiveAction_MultipleActions(t *testing.T) {
+	input := "[DIRECTIVE_ADD] First task\nPriority: high\n\n[DIRECTIVE_ADD] Second task\nPriority: low"
+	action := parseDirectiveAction(input)
 	if action == nil {
-		t.Fatal("expected a TodoAction, got nil")
+		t.Fatal("expected a DirectiveAction, got nil")
 	}
 	// Only the first action should be parsed
 	if action.Title != "First task" {
@@ -1088,11 +1088,11 @@ func TestParseTodoAction_MultipleActions(t *testing.T) {
 	}
 }
 
-func TestParseTodoAction_InlineText(t *testing.T) {
-	input := "Sure! I'll add that.\n[TODO_ADD] Review code\nPriority: low\nWill do."
-	action := parseTodoAction(input)
+func TestParseDirectiveAction_InlineText(t *testing.T) {
+	input := "Sure! I'll add that.\n[DIRECTIVE_ADD] Review code\nPriority: low\nWill do."
+	action := parseDirectiveAction(input)
 	if action == nil {
-		t.Fatal("expected a TodoAction, got nil")
+		t.Fatal("expected a DirectiveAction, got nil")
 	}
 	if action.Type != "add" {
 		t.Errorf("expected type 'add', got %q", action.Type)
@@ -1105,33 +1105,33 @@ func TestParseTodoAction_InlineText(t *testing.T) {
 	}
 }
 
-func TestParseTodoAction_EmptyInput(t *testing.T) {
-	action := parseTodoAction("")
+func TestParseDirectiveAction_EmptyInput(t *testing.T) {
+	action := parseDirectiveAction("")
 	if action != nil {
 		t.Errorf("expected nil for empty input, got %+v", action)
 	}
 }
 
-func TestParseTodoAction_TableDriven(t *testing.T) {
+func TestParseDirectiveAction_TableDriven(t *testing.T) {
 	tests := []struct {
 		name      string
 		input     string
 		wantType  string
 		wantTitle string
 	}{
-		{"add task", "[TODO_ADD] Deploy API\nPriority: high\nI'll set it up.", "add", "Deploy API"},
-		{"done task", "[TODO_DONE] Deploy API\nCompleted: deployed to prod", "done", "Deploy API"},
-		{"update task", "[TODO_UPDATE] Fix bug\nProgress: investigating", "update", "Fix bug"},
+		{"add task", "[DIRECTIVE_ADD] Deploy API\nPriority: high\nI'll set it up.", "add", "Deploy API"},
+		{"done task", "[DIRECTIVE_DONE] Deploy API\nCompleted: deployed to prod", "done", "Deploy API"},
+		{"update task", "[DIRECTIVE_UPDATE] Fix bug\nProgress: investigating", "update", "Fix bug"},
 		{"no action", "Just a regular response", "", ""},
-		{"action with surrounding text", "Sure!\n[TODO_ADD] Review code\nPriority: low\nWill do.", "add", "Review code"},
+		{"action with surrounding text", "Sure!\n[DIRECTIVE_ADD] Review code\nPriority: low\nWill do.", "add", "Review code"},
 		{"empty string", "", "", ""},
-		{"marker only no title", "[TODO_ADD] \nPriority: medium", "add", ""},
-		{"done with no details", "[TODO_DONE] Ship v2", "done", "Ship v2"},
+		{"marker only no title", "[DIRECTIVE_ADD] \nPriority: medium", "add", ""},
+		{"done with no details", "[DIRECTIVE_DONE] Ship v2", "done", "Ship v2"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			action := parseTodoAction(tt.input)
+			action := parseDirectiveAction(tt.input)
 			if tt.wantType == "" {
 				if action != nil {
 					t.Errorf("expected nil action, got %+v", action)
@@ -1160,13 +1160,13 @@ func TestGetArchitectTodo_EmptyFile(t *testing.T) {
 
 	// Write an empty todo file
 	home := os.Getenv("SPWN_HOME")
-	todoDir := filepath.Join(home, "architect")
-	if err := os.MkdirAll(todoDir, 0755); err != nil {
+	directivesDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(directivesDir, 0755); err != nil {
 		t.Fatalf("mkdir architect: %v", err)
 	}
-	writeFile(t, filepath.Join(todoDir, "todo.md"), "")
+	writeFile(t, filepath.Join(directivesDir, "directives.md"), "")
 
-	w := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	w := doJSON(t, mux, "GET", "/api/architect/directives", nil)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d", w.Code)
 	}
@@ -1186,15 +1186,15 @@ func TestGetArchitectTodo_WithContent(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
 	home := os.Getenv("SPWN_HOME")
-	todoDir := filepath.Join(home, "architect")
-	if err := os.MkdirAll(todoDir, 0755); err != nil {
+	directivesDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(directivesDir, 0755); err != nil {
 		t.Fatalf("mkdir architect: %v", err)
 	}
 
-	expected := "# Architect TODO\n\n## In Progress\n- [ ] Build API\n\n## Backlog\n- [ ] Write docs\n\n## Completed\n- [x] Setup\n"
-	writeFile(t, filepath.Join(todoDir, "todo.md"), expected)
+	expected := "# Architect Directives\n\n## In Progress\n- [ ] Build API\n\n## Backlog\n- [ ] Write docs\n\n## Completed\n- [x] Setup\n"
+	writeFile(t, filepath.Join(directivesDir, "directives.md"), expected)
 
-	w := doJSON(t, mux, "GET", "/api/architect/todo", nil)
+	w := doJSON(t, mux, "GET", "/api/architect/directives", nil)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d", w.Code)
 	}
@@ -1210,14 +1210,14 @@ func TestArchitectStatusKPIs_TodoCounting(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
 	home := os.Getenv("SPWN_HOME")
-	todoDir := filepath.Join(home, "architect")
-	if err := os.MkdirAll(todoDir, 0755); err != nil {
+	directivesDir := filepath.Join(home, "architect")
+	if err := os.MkdirAll(directivesDir, 0755); err != nil {
 		t.Fatalf("mkdir architect: %v", err)
 	}
 
 	// 5 pending, 3 completed
-	todoContent := "# TODO\n\n## In Progress\n- [ ] A\n- [ ] B\n\n## Backlog\n- [ ] C\n- [ ] D\n- [ ] E\n\n## Completed\n- [x] F\n- [X] G\n- [x] H\n"
-	writeFile(t, filepath.Join(todoDir, "todo.md"), todoContent)
+	directivesContent := "# TODO\n\n## In Progress\n- [ ] A\n- [ ] B\n\n## Backlog\n- [ ] C\n- [ ] D\n- [ ] E\n\n## Completed\n- [x] F\n- [X] G\n- [x] H\n"
+	writeFile(t, filepath.Join(directivesDir, "directives.md"), directivesContent)
 
 	w := doJSON(t, mux, "GET", "/api/architect/status", nil)
 	if w.Code != 200 {
