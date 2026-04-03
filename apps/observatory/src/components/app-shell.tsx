@@ -72,6 +72,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <RefetchContext.Provider value={fetchWorlds}>
       <SidebarProvider>
+        {/* Drag region covering the full top 22px — above both sidebar and content */}
+        <div
+          data-tauri-drag-region="true"
+          className="fixed top-0 left-0 right-0 h-[22px] z-[9999]"
+          style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+        />
         <AppSidebar
           worlds={worlds}
           limboAgents={limboAgents}

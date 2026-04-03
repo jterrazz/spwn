@@ -226,6 +226,7 @@ html::-webkit-scrollbar {
 
 /* ── Tauri native app: push sidebar below macOS traffic lights ── */
 body.tauri [data-slot="sidebar-container"] {
-  margin-top: 52px;
-  height: calc(100svh - 52px);
+  margin-top: 22px;
+  height: calc(100svh - 22px);
 }
+

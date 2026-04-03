@@ -117,7 +117,6 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
 
   return (
     <Sidebar>
-
       <SidebarHeader className="px-4 pb-2 -mt-1">
         <a href="/" className="flex items-center gap-2">
           <span className="text-sm tracking-[0.15em] font-heading text-foreground/90">
