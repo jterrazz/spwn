@@ -11,6 +11,46 @@ fn get_api_port(state: tauri::State<'_, ApiPort>) -> u16 {
 
 struct ApiPort(u16);
 
+// Traffic light position inside the sidebar glass panel
+#[cfg(target_os = "macos")]
+const TRAFFIC_LIGHT_X: f64 = 24.0;
+#[cfg(target_os = "macos")]
+const TRAFFIC_LIGHT_Y: f64 = 42.0;
+
+#[cfg(target_os = "macos")]
+fn position_traffic_lights(ns_window: cocoa::base::id) {
+    use cocoa::appkit::{NSView, NSWindow, NSWindowButton};
+    use cocoa::foundation::NSRect;
+    use objc::{msg_send, sel, sel_impl};
+
+    unsafe {
+        let close = ns_window.standardWindowButton_(NSWindowButton::NSWindowCloseButton);
+        let miniaturize = ns_window.standardWindowButton_(NSWindowButton::NSWindowMiniaturizeButton);
+        let zoom = ns_window.standardWindowButton_(NSWindowButton::NSWindowZoomButton);
+
+        let title_bar_container_view = close.superview().superview();
+
+        let close_rect: NSRect = msg_send![close, frame];
+        let button_height = close_rect.size.height;
+
+        let title_bar_frame_height = button_height + TRAFFIC_LIGHT_Y;
+        let mut title_bar_rect = NSView::frame(title_bar_container_view);
+        title_bar_rect.size.height = title_bar_frame_height;
+        title_bar_rect.origin.y = NSView::frame(ns_window).size.height - title_bar_frame_height;
+        let _: () = msg_send![title_bar_container_view, setFrame: title_bar_rect];
+
+        let buttons = [close, miniaturize, zoom];
+        let space_between = 20.0;
+
+        for (i, button) in buttons.iter().enumerate() {
+            let mut rect: NSRect = NSView::frame(*button);
+            rect.origin.x = TRAFFIC_LIGHT_X + (i as f64 * space_between);
+            rect.origin.y = (title_bar_frame_height - button_height) / 2.0;
+            button.setFrameOrigin(rect.origin);
+        }
+    }
+}
+
 pub fn run() {
     // Pick a random available port for the Go API
     let api_port = portpicker::pick_unused_port().expect("No free port available");
@@ -49,9 +89,22 @@ pub fn run() {
             std::thread::sleep(std::time::Duration::from_secs(2));
 
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_title(&format!("⬡ spwn Observatory — API on port {api_port}"));
                 // Add tauri class to html element for native app styling
                 let _ = window.eval("document.documentElement.classList.add('tauri')");
+
+                // Position traffic lights AFTER everything else (set_title resets them)
+                #[cfg(target_os = "macos")]
+                {
+                    let win = window.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_millis(500));
+                        let win2 = win.clone();
+                        let _ = win.run_on_main_thread(move || {
+                            let ns_win = win2.ns_window().expect("Failed to get NS window") as cocoa::base::id;
+                            position_traffic_lights(ns_win);
+                        });
+                    });
+                }
             }
 
             println!("[spwn] Observatory ready");
@@ -59,18 +112,27 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| {
-            // Gracefully stop the API server when the window closes
-            if let tauri::WindowEvent::Destroyed = event {
-                if let Some(state) = window.try_state::<ApiProcess>() {
-                    if let Ok(mut guard) = state.0.lock() {
-                        if let Some(ref mut child) = *guard {
-                            println!("[spwn] Stopping API server...");
-                            let _ = child.kill();
-                            let _ = child.wait();
-                            println!("[spwn] API server stopped");
+            match event {
+                // Reapply traffic light position on resize
+                #[cfg(target_os = "macos")]
+                tauri::WindowEvent::Resized(..) => {
+                    let ns_win = window.ns_window().expect("Failed to get NS window") as cocoa::base::id;
+                    position_traffic_lights(ns_win);
+                }
+                // Gracefully stop the API server when the window closes
+                tauri::WindowEvent::Destroyed => {
+                    if let Some(state) = window.try_state::<ApiProcess>() {
+                        if let Ok(mut guard) = state.0.lock() {
+                            if let Some(ref mut child) = *guard {
+                                println!("[spwn] Stopping API server...");
+                                let _ = child.kill();
+                                let _ = child.wait();
+                                println!("[spwn] API server stopped");
+                            }
                         }
                     }
                 }
+                _ => {}
             }
         })
         .run(tauri::generate_context!())
