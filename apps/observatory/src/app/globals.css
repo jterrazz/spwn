@@ -224,14 +224,14 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-/* ── Tauri native app: push sidebar below macOS traffic lights ── */
-body.tauri [data-slot="sidebar-container"] {
-  margin-top: 22px;
-  height: calc(100svh - 22px);
+/* ── Tauri native app: offset everything below traffic lights ── */
+html.tauri {
+  --tauri-titlebar: 22px;
 }
 
-/* Main content also needs top offset to match sidebar */
-body.tauri .peer + [data-slot="sidebar-inset"] {
-  padding-top: 22px;
+html.tauri .tauri-offset {
+  padding-top: var(--tauri-titlebar);
 }
+
+
 

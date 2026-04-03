@@ -52,21 +52,24 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `try{if(window.__TAURI_INTERNALS__||window.__TAURI__)document.documentElement.classList.add('tauri')}catch(e){}` }} />
+      </head>
       <body className="min-h-full relative overflow-x-hidden overflow-y-auto">
-        {/* Detect Tauri native app */}
-        <script dangerouslySetInnerHTML={{ __html: `if(window.__TAURI_INTERNALS__||window.__TAURI__)document.body.classList.add('tauri');else document.addEventListener('DOMContentLoaded',function(){if(window.__TAURI_INTERNALS__||window.__TAURI__)document.body.classList.add('tauri')})` }} />
-        <ThemeProvider>
-          <TooltipProvider>
-            <ToastProvider>
-              <Aurora />
-              <Stars />
-              <div className="relative z-10 min-h-screen">
-                <AppShell>{children}</AppShell>
-                <CommandPalette />
-              </div>
-            </ToastProvider>
-          </TooltipProvider>
-        </ThemeProvider>
+        <div className="tauri-offset">
+          <ThemeProvider>
+            <TooltipProvider>
+              <ToastProvider>
+                <Aurora />
+                <Stars />
+                <div className="relative z-10 min-h-screen">
+                  <AppShell>{children}</AppShell>
+                  <CommandPalette />
+                </div>
+              </ToastProvider>
+            </TooltipProvider>
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );
