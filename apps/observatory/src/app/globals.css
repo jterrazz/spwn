@@ -230,3 +230,8 @@ body.tauri [data-slot="sidebar-container"] {
   height: calc(100svh - 22px);
 }
 
+/* Main content also needs top offset to match sidebar */
+body.tauri .peer + [data-slot="sidebar-inset"] {
+  padding-top: 22px;
+}
+
