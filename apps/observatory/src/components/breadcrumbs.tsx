@@ -57,7 +57,7 @@ export function Breadcrumbs() {
   if (crumbs.length <= 1) return null;
 
   return (
-    <nav className="flex items-center gap-1 px-6 pt-4 pb-0">
+    <nav className="flex items-center gap-1 px-6 pt-[46px] pb-0">
       {crumbs.map((crumb, i) => (
         <span key={crumb.href} className="flex items-center gap-1">
           {i > 0 && (

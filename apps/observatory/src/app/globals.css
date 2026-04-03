@@ -223,3 +223,17 @@ html, body {
 html::-webkit-scrollbar {
   display: none;
 }
+
+/* ── Tauri window drag regions ── */
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+[data-tauri-drag-region] a,
+[data-tauri-drag-region] button,
+[data-tauri-drag-region] input,
+[data-tauri-drag-region] select,
+[data-tauri-drag-region] textarea,
+[data-tauri-drag-region] [role="button"] {
+  -webkit-app-region: no-drag;
+}
