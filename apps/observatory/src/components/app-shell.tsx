@@ -80,12 +80,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           statusData={statusData}
         />
         <SidebarInset>
-          {/* Thin drag strip for main content area — only the top 38px is draggable */}
-          <div
-            data-tauri-drag-region="true"
-            className="absolute top-0 left-0 right-0 h-[38px] z-10"
-          />
-          {/* Breadcrumbs with top padding for macOS title bar overlay */}
           <Breadcrumbs />
           <ErrorBoundary>
             {children}

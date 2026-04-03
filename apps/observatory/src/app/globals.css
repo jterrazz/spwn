@@ -224,16 +224,11 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-/* ── Tauri window drag regions ── */
-[data-tauri-drag-region] {
-  -webkit-app-region: drag;
+/* ── Tauri native app: spacer for macOS traffic lights ── */
+/* Hidden by default (browser). Shown when Tauri sets body.tauri class. */
+.tauri-only {
+  display: none;
 }
-
-[data-tauri-drag-region] a,
-[data-tauri-drag-region] button,
-[data-tauri-drag-region] input,
-[data-tauri-drag-region] select,
-[data-tauri-drag-region] textarea,
-[data-tauri-drag-region] [role="button"] {
-  -webkit-app-region: no-drag;
+body.tauri .tauri-only {
+  display: block;
 }
