@@ -1,0 +1,37 @@
+name: Feature / Behavioral Change
+description: Propose a new feature or a change in behavior. Describe what should happen — not how to implement it.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Describe the desired outcome, not the implementation.**
+        Our agents will design and implement the solution following project conventions. Focus on *what* and *why*, not *how*.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What's missing, broken, or frustrating? Why does this matter?
+      placeholder: "When I try to X, I expect Y but instead Z happens..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Desired behavior
+      description: Describe how it should work from a user's perspective. Include CLI examples, expected output, or workflows.
+      placeholder: |
+        spwn agent dream neo --dry-run
+        # Should show what would change without actually modifying the profile
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else — edge cases, related features, screenshots, links.
+    validations:
+      required: false
