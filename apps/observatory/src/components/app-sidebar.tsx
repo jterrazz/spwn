@@ -117,8 +117,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
 
   return (
     <Sidebar>
-      {/* ── Spacer: pushes content below macOS traffic lights in Tauri native app ── */}
-      <div className="h-[52px] w-full shrink-0 tauri-only" />
+
       <SidebarHeader className="px-4 pb-2 -mt-1">
         <a href="/" className="flex items-center gap-2">
           <span className="text-sm tracking-[0.15em] font-heading text-foreground/90">

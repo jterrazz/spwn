@@ -224,11 +224,8 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-/* ── Tauri native app: spacer for macOS traffic lights ── */
-/* Hidden by default (browser). Shown when Tauri sets body.tauri class. */
-.tauri-only {
-  display: none;
-}
-body.tauri .tauri-only {
-  display: block;
+/* ── Tauri native app: push sidebar below macOS traffic lights ── */
+body.tauri [data-slot="sidebar-container"] {
+  margin-top: 52px;
+  height: calc(100svh - 52px);
 }
