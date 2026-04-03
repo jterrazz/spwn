@@ -13,7 +13,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var talkOutputFormat string
+
 func init() {
+	talkCmd.Flags().StringVar(&talkOutputFormat, "output-format", "", "Output format: text (default) or stream-json")
 	Cmd.AddCommand(talkCmd)
 }
 
@@ -75,17 +78,32 @@ If no message is provided, opens an interactive Claude session inside the contai
 		}
 
 		if message != "" {
-			// One-shot mode: run claude with --print
-			claudeArgs = append(claudeArgs, "-p", message, "--print")
+			// One-shot mode
+			claudeArgs = append(claudeArgs, "-p", message)
+
+			if talkOutputFormat == "stream-json" {
+				claudeArgs = append(claudeArgs, "--output-format", "stream-json", "--verbose")
+			} else {
+				claudeArgs = append(claudeArgs, "--print")
+			}
 
 			dockerArgs := append(buildDockerArgs(false), claudeArgs...)
 			execCmd := exec.Command("docker", dockerArgs...)
-			output, err := execCmd.CombinedOutput()
-			if err != nil {
-				return fmt.Errorf("exec failed: %w", err)
-			}
 
-			fmt.Fprint(os.Stdout, string(output))
+			if talkOutputFormat == "stream-json" {
+				// Stream stdout directly for real-time output
+				execCmd.Stdout = os.Stdout
+				execCmd.Stderr = os.Stderr
+				if err := execCmd.Run(); err != nil {
+					return fmt.Errorf("exec failed: %w", err)
+				}
+			} else {
+				output, err := execCmd.CombinedOutput()
+				if err != nil {
+					return fmt.Errorf("exec failed: %w", err)
+				}
+				fmt.Fprint(os.Stdout, string(output))
+			}
 		} else {
 			// Interactive mode: attach stdin/stdout/stderr
 			dockerArgs := append(buildDockerArgs(true), claudeArgs...)

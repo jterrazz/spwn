@@ -4,6 +4,9 @@ import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import type { AgentProfile, AgentMessage, World } from "@/lib/types";
 import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
+import { streamChat } from "@/lib/stream-chat";
+import type { ActivityBlock } from "@/lib/activity-types";
+import { ActivityMessageView } from "@/components/activity-blocks";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useToast } from "@/components/toast-provider";
 import { useRefetch } from "@/components/app-shell";
@@ -26,7 +29,10 @@ import {
 interface Message {
   role: "user" | "agent";
   content: string;
+  blocks: ActivityBlock[];
   timestamp: Date;
+  cost?: number;
+  duration?: number;
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -139,79 +145,51 @@ export default function AgentPage() {
 
   const send = async () => {
     if (!input.trim()) return;
-    const userMsg: Message = { role: "user", content: input.trim(), timestamp: new Date() };
-    setMessages((m) => [...m, userMsg]);
     const message = input.trim();
+    setMessages((m) => [...m, { role: "user", content: message, blocks: [], timestamp: new Date() }]);
     setInput("");
     setIsTyping(true);
 
-    try {
-      const res = await fetch(goApiUrl(`/api/worlds/${worldId}/talk`), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-        signal: AbortSignal.timeout(120000),
-      });
-      const data = await res.json();
-      // Accept response from either `response` or `message` field
-      const rawResponse = data.response || data.message;
-      if (res.ok && rawResponse) {
-        // Strip CLI header if present (e.g. "Agent: neo\n  World: w-triton\n\nHello!")
-        let cleanResponse = rawResponse;
-        if (cleanResponse.startsWith("Agent:")) {
-          const idx = cleanResponse.indexOf("\n\n");
-          if (idx !== -1) {
-            cleanResponse = cleanResponse.slice(idx).trim();
+    const msgIndex = messages.length + 1;
+    setMessages((m) => [...m, { role: "agent", content: "", blocks: [], timestamp: new Date() }]);
+
+    await streamChat({
+      url: goApiUrl(`/api/worlds/${worldId}/talk`),
+      fallbackUrl: `/api/worlds/${worldId}/talk`,
+      body: { message, agent: agentName },
+      onBlocks: (newBlocks) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "agent") {
+            updated[msgIndex] = { ...last, blocks: [...last.blocks, ...newBlocks] };
           }
-        }
-        setMessages((m) => [
-          ...m,
-          { role: "agent", content: cleanResponse, timestamp: new Date() },
-        ]);
-      } else {
-        setMessages((m) => [
-          ...m,
-          { role: "agent", content: `Error: ${data.error || "Failed to get response"}`, timestamp: new Date() },
-        ]);
-      }
-    } catch {
-      // Fallback to Next.js route
-      try {
-        const fallbackRes = await fetch(`/api/worlds/${worldId}/talk`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message, agent: agentName }),
-          signal: AbortSignal.timeout(120000),
+          return updated;
         });
-        const fallbackData = await fallbackRes.json();
-        const rawResponse = fallbackData.response || fallbackData.message;
-        if (fallbackRes.ok && rawResponse) {
-          let cleanResponse = rawResponse;
-          if (cleanResponse.startsWith("Agent:")) {
-            const idx = cleanResponse.indexOf("\n\n");
-            if (idx !== -1) {
-              cleanResponse = cleanResponse.slice(idx).trim();
-            }
+      },
+      onDone: (meta: { cost?: number; duration?: number }) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "agent") {
+            updated[msgIndex] = { ...last, cost: meta.cost, duration: meta.duration };
           }
-          setMessages((m) => [
-            ...m,
-            { role: "agent", content: cleanResponse, timestamp: new Date() },
-          ]);
-        } else {
-          setMessages((m) => [
-            ...m,
-            { role: "agent", content: `Error: ${fallbackData.error || "Failed to get response"}`, timestamp: new Date() },
-          ]);
-        }
-      } catch {
-        setMessages((m) => [
-          ...m,
-          { role: "agent", content: "Error: Failed to connect to API. Make sure the Go server is running.", timestamp: new Date() },
-        ]);
-      }
-    } finally {
-      setIsTyping(false);
-    }
+          return updated;
+        });
+      },
+      onError: (error) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "agent") {
+            updated[msgIndex] = { ...last, blocks: [...last.blocks, { type: "error", content: error }] };
+          }
+          return updated;
+        });
+      },
+    });
+
+    setIsTyping(false);
   };
 
   if (loading) {
@@ -407,15 +385,21 @@ export default function AgentPage() {
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[75%] ${msg.role === "user" ? "text-right" : ""}`}>
-                    <div
-                      className={`inline-block px-4 py-2.5 rounded-xl text-sm leading-relaxed whitespace-pre-wrap ${
-                        msg.role === "user"
-                          ? "glass-subtle text-foreground/80"
-                          : "text-foreground/70"
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
+                    {msg.role === "agent" && msg.blocks.length > 0 ? (
+                      <div className="px-4 py-2.5 rounded-xl">
+                        <ActivityMessageView message={{ role: "agent", blocks: msg.blocks, timestamp: msg.timestamp, cost: msg.cost, duration: msg.duration }} />
+                      </div>
+                    ) : (
+                      <div
+                        className={`inline-block px-4 py-2.5 rounded-xl text-sm leading-relaxed whitespace-pre-wrap ${
+                          msg.role === "user"
+                            ? "glass-subtle text-foreground/80"
+                            : "text-foreground/70"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    )}
                     <p className="text-[9px] font-mono text-muted-foreground/25 mt-1 px-1">
                       {mounted ? timeStr(msg.timestamp) : ""}
                     </p>

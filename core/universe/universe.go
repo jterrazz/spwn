@@ -348,11 +348,11 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		Image: image,
 		Env:   envVars,
 	}
-	// Ensure architect TODO file exists on the host
-	architectTodoPath := foundation.BaseDir() + "/architect/todo.md"
-	if _, err := os.Stat(architectTodoPath); os.IsNotExist(err) {
+	// Ensure architect directives file exists on the host
+	architectDirectivesPath := foundation.BaseDir() + "/architect/directives.md"
+	if _, err := os.Stat(architectDirectivesPath); os.IsNotExist(err) {
 		_ = os.MkdirAll(foundation.BaseDir()+"/architect", 0755)
-		_ = os.WriteFile(architectTodoPath, []byte("# Architect TODO\n\n## In Progress\n\n## Backlog\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Completed\n"), 0644)
+		_ = os.WriteFile(architectDirectivesPath, []byte("# Architect Directives\n\n## In Progress\n\n## Backlog\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Completed\n"), 0644)
 	}
 
 	// Ensure blueprint directory exists with defaults
@@ -362,7 +362,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
 			foundation.BaseDir() + ":/spwn-data",
-			architectTodoPath + ":/world/todo.md",
+			architectDirectivesPath + ":/world/directives.md",
 			foundation.BlueprintDir() + ":/blueprint",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
@@ -506,10 +506,10 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 		claudeArgs = append(claudeArgs, "-p", message, "--print",
 			"--append-system-prompt",
 			"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
-				"IMPORTANT: When a user asks you to do something, you MUST include a [TODO_ADD] marker in your response. "+
-				"Format: [TODO_ADD] Short task title\\nPriority: high|medium|low\\nBrief description. "+
-				"Also update /world/todo.md with the new task. "+
-				"When completing a task use [TODO_DONE] Short task title. "+
+				"IMPORTANT: When a user asks you to do something, you MUST include a [DIRECTIVE_ADD] marker in your response. "+
+				"Format: [DIRECTIVE_ADD] Short directive title\\nPriority: high|medium|low\\nBrief description. "+
+				"Also update /world/directives.md with the new directive. "+
+				"When completing a directive use [DIRECTIVE_DONE] Short directive title. "+
 				"Read /world/skills/ for detailed guides. "+
 				"BLUEPRINT: You maintain /blueprint/ as the single source of truth. "+
 				"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. "+

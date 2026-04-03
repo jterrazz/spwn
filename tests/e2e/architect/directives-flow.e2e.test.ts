@@ -10,16 +10,16 @@ import { join } from "node:path";
 import { createSpwnHome } from "../../setup/helpers.js";
 
 /**
- * Comprehensive E2E tests for the Architect TODO system.
+ * Comprehensive E2E tests for the Architect Directives system.
  *
  * Tests cover:
- * - TODO file initialization and default template
- * - TODO file read/write operations
+ * - Directives file initialization and default template
+ * - Directives file read/write operations
  * - Task counting (pending/completed KPIs)
- * - TODO response parsing (action markers)
- * - Observatory read-only TODO panel constraints
+ * - Directives response parsing (action markers)
+ * - Observatory read-only Directives panel constraints
  */
-describe("architect TODO flow", () => {
+describe("architect Directives flow", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 
@@ -38,40 +38,40 @@ describe("architect TODO flow", () => {
   });
 
   // ──────────────────────────────────────────────
-  // Test 10: TODO file is initialized with default template
+  // Test 10: Directives file is initialized with default template
   // ──────────────────────────────────────────────
-  test("architect TODO file is initialized with default template", () => {
+  test("architect Directives file is initialized with default template", () => {
     // GIVEN — an architect directory
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
     // WHEN — writing the default template (as the system would)
     const defaultContent =
-      "# Architect TODO\n\n## In Progress\n\n## Backlog\n\n## Completed\n";
-    const todoPath = join(architectDir, "todo.md");
-    writeFileSync(todoPath, defaultContent);
+      "# Architect Directives\n\n## In Progress\n\n## Backlog\n\n## Completed\n";
+    const directivesPath = join(architectDir, "directives.md");
+    writeFileSync(directivesPath, defaultContent);
 
     // THEN — file exists
-    expect(existsSync(todoPath)).toBe(true);
+    expect(existsSync(directivesPath)).toBe(true);
 
     // AND — it has all required sections
-    const content = readFileSync(todoPath, "utf-8");
-    expect(content).toContain("# Architect TODO");
+    const content = readFileSync(directivesPath, "utf-8");
+    expect(content).toContain("# Architect Directives");
     expect(content).toContain("## In Progress");
     expect(content).toContain("## Backlog");
     expect(content).toContain("## Completed");
   });
 
   // ──────────────────────────────────────────────
-  // Test 11: TODO can be read (simulated API read)
+  // Test 11: Directives can be read (simulated API read)
   // ──────────────────────────────────────────────
-  test("architect TODO can be read from file system", () => {
-    // GIVEN — a TODO file with content
+  test("architect Directives can be read from file system", () => {
+    // GIVEN — a Directives file with content
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
-    const todoContent = [
-      "# Architect TODO",
+    const directivesContent = [
+      "# Architect Directives",
       "",
       "## In Progress",
       "- [ ] Deploy API v2",
@@ -85,29 +85,29 @@ describe("architect TODO flow", () => {
       "",
     ].join("\n");
 
-    const todoPath = join(architectDir, "todo.md");
-    writeFileSync(todoPath, todoContent);
+    const directivesPath = join(architectDir, "directives.md");
+    writeFileSync(directivesPath, directivesContent);
 
     // WHEN — reading the file (as the API handler would)
-    const content = readFileSync(todoPath, "utf-8");
+    const content = readFileSync(directivesPath, "utf-8");
 
     // THEN — content matches what was written
-    expect(content).toBe(todoContent);
+    expect(content).toBe(directivesContent);
     expect(content).toContain("Deploy API v2");
     expect(content).toContain("Write documentation");
     expect(content).toContain("Setup CI/CD");
   });
 
   // ──────────────────────────────────────────────
-  // Test 12: Status includes TODO KPIs
+  // Test 12: Status includes Directives KPIs
   // ──────────────────────────────────────────────
-  test("architect status includes TODO KPIs with correct counts", () => {
-    // GIVEN — a TODO file with known task counts
+  test("architect status includes Directives KPIs with correct counts", () => {
+    // GIVEN — a Directives file with known task counts
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
-    const todoContent = [
-      "# Architect TODO",
+    const directivesContent = [
+      "# Architect Directives",
       "",
       "## In Progress",
       "- [ ] Deploy API v2",
@@ -121,11 +121,11 @@ describe("architect TODO flow", () => {
       "",
     ].join("\n");
 
-    writeFileSync(join(architectDir, "todo.md"), todoContent);
+    writeFileSync(join(architectDir, "directives.md"), directivesContent);
 
     // WHEN — parsing the file for KPIs (same logic as Go server)
     const content = readFileSync(
-      join(architectDir, "todo.md"),
+      join(architectDir, "directives.md"),
       "utf-8",
     );
     const pendingMatches = content.match(/- \[ \]/g) ?? [];
@@ -139,17 +139,17 @@ describe("architect TODO flow", () => {
   // ──────────────────────────────────────────────
   // Test 13: Architect talk response shape
   // ──────────────────────────────────────────────
-  test("architect talk response includes todoAction when present", () => {
+  test("architect talk response includes directiveAction when present", () => {
     // We can't test the actual architect container, but we can verify
     // the response parsing logic that the API uses.
 
-    // GIVEN — a simulated architect response with TODO action
+    // GIVEN — a simulated architect response with Directives action
     const response =
-      "Sure, I'll add that to the list.\n[TODO_ADD] Deploy API\nPriority: high\nSetting up the deployment pipeline.";
+      "Sure, I'll add that to the list.\n[DIRECTIVE_ADD] Deploy API\nPriority: high\nSetting up the deployment pipeline.";
 
     // WHEN — parsing the response (same regex as Go server)
     const todoAddMatch = response.match(
-      /\[TODO_ADD\]\s*(.*?)(?:\n|$)/,
+      /\[Directives_ADD\]\s*(.*?)(?:\n|$)/,
     );
     const priorityMatch = response.match(/Priority:\s*(.*?)(?:\n|$)/);
 
@@ -162,7 +162,7 @@ describe("architect TODO flow", () => {
     // Verify the response shape matches what the API would return
     const apiResponse = {
       response: response,
-      todoAction: {
+      directiveAction: {
         type: "add",
         title: todoAddMatch![1].trim(),
         priority: priorityMatch![1].trim(),
@@ -170,20 +170,20 @@ describe("architect TODO flow", () => {
     };
 
     expect(apiResponse).toHaveProperty("response");
-    expect(apiResponse).toHaveProperty("todoAction");
-    expect(apiResponse.todoAction.type).toBe("add");
-    expect(apiResponse.todoAction.title).toBe("Deploy API");
+    expect(apiResponse).toHaveProperty("directiveAction");
+    expect(apiResponse.directiveAction.type).toBe("add");
+    expect(apiResponse.directiveAction.title).toBe("Deploy API");
   });
 
-  test("architect talk response without TODO action has no todoAction field", () => {
-    // GIVEN — a regular response with no TODO markers
+  test("architect talk response without Directives action has no directiveAction field", () => {
+    // GIVEN — a regular response with no Directives markers
     const response =
       "The system is running well. All agents are healthy and no issues detected.";
 
     // WHEN — parsing the response
-    const todoAddMatch = response.match(/\[TODO_ADD\]/);
-    const todoDoneMatch = response.match(/\[TODO_DONE\]/);
-    const todoUpdateMatch = response.match(/\[TODO_UPDATE\]/);
+    const todoAddMatch = response.match(/\[Directives_ADD\]/);
+    const todoDoneMatch = response.match(/\[Directives_DONE\]/);
+    const todoUpdateMatch = response.match(/\[Directives_UPDATE\]/);
 
     // THEN — no action markers found
     expect(todoAddMatch).toBeNull();
@@ -192,12 +192,12 @@ describe("architect TODO flow", () => {
   });
 
   // ──────────────────────────────────────────────
-  // Test 14: TODO panel in observatory is read-only
+  // Test 14: Directives panel in observatory is read-only
   // ──────────────────────────────────────────────
-  test("TODO panel in observatory is read-only (no Add TODO input)", () => {
+  test("Directives panel in observatory is read-only (no Add Directives input)", () => {
     // We verify this by checking the Observatory page source.
-    // The architect page.tsx uses parseTodoMd() to display TODOs
-    // but does NOT expose any "add" input/form for manual TODO creation.
+    // The architect page.tsx uses parseDirectivesMd() to display Directivess
+    // but does NOT expose any "add" input/form for manual Directives creation.
 
     // GIVEN — the Observatory architect page source
     const pagePath = join(
@@ -234,26 +234,26 @@ describe("architect TODO flow", () => {
 
     const source = readFileSync(projectPagePath, "utf-8");
 
-    // THEN — the page should NOT have add/edit TODO form elements
-    // The TODO panel only displays data fetched from the API.
-    // It should have parseTodoMd (read) but not a TODO creation form.
-    expect(source).toContain("parseTodoMd"); // read-only parser exists
+    // THEN — the page should NOT have add/edit Directives form elements
+    // The Directives panel only displays data fetched from the API.
+    // It should have parseDirectivesMd (read) but not a Directives creation form.
+    expect(source).toContain("parseDirectivesMd"); // read-only parser exists
     expect(source).not.toMatch(/name=["']addTodo["']/); // no add form input
-    expect(source).not.toMatch(/placeholder=["']Add.*TODO["']/i); // no add TODO placeholder
+    expect(source).not.toMatch(/placeholder=["']Add.*Directives["']/i); // no add Directives placeholder
     expect(source).not.toMatch(
       /handleAddTodo|handleCreateTodo|onAddTodo/,
     ); // no add handlers
   });
 
   // ──────────────────────────────────────────────
-  // Additional: TODO_DONE response parsing
+  // Additional: Directives_DONE response parsing
   // ──────────────────────────────────────────────
-  test("architect TODO_DONE response parsing extracts completion info", () => {
+  test("architect Directives_DONE response parsing extracts completion info", () => {
     const response =
-      "Done! I've completed the task.\n[TODO_DONE] Setup CI/CD\nCompleted: deployed pipeline to GitHub Actions";
+      "Done! I've completed the task.\n[DIRECTIVE_DONE] Setup CI/CD\nCompleted: deployed pipeline to GitHub Actions";
 
     const todoDoneMatch = response.match(
-      /\[TODO_DONE\]\s*(.*?)(?:\n|$)/,
+      /\[Directives_DONE\]\s*(.*?)(?:\n|$)/,
     );
     const completedMatch = response.match(
       /Completed:\s*(.*?)(?:\n|$)/,
@@ -268,14 +268,14 @@ describe("architect TODO flow", () => {
   });
 
   // ──────────────────────────────────────────────
-  // Additional: TODO_UPDATE response parsing
+  // Additional: Directives_UPDATE response parsing
   // ──────────────────────────────────────────────
-  test("architect TODO_UPDATE response parsing extracts progress info", () => {
+  test("architect Directives_UPDATE response parsing extracts progress info", () => {
     const response =
-      "Making progress on this.\n[TODO_UPDATE] Deploy API\nProgress: 75% complete, testing in staging";
+      "Making progress on this.\n[DIRECTIVE_UPDATE] Deploy API\nProgress: 75% complete, testing in staging";
 
     const todoUpdateMatch = response.match(
-      /\[TODO_UPDATE\]\s*(.*?)(?:\n|$)/,
+      /\[Directives_UPDATE\]\s*(.*?)(?:\n|$)/,
     );
     const progressMatch = response.match(
       /Progress:\s*(.*?)(?:\n|$)/,
@@ -290,14 +290,14 @@ describe("architect TODO flow", () => {
   });
 
   // ──────────────────────────────────────────────
-  // Additional: TODO file with edge cases
+  // Additional: Directives file with edge cases
   // ──────────────────────────────────────────────
-  test("TODO counting handles uppercase X checkboxes", () => {
+  test("Directives counting handles uppercase X checkboxes", () => {
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
-    const todoContent = [
-      "# TODO",
+    const directivesContent = [
+      "# Directives",
       "## In Progress",
       "- [ ] Task A",
       "## Completed",
@@ -305,10 +305,10 @@ describe("architect TODO flow", () => {
       "- [X] Done uppercase",
     ].join("\n");
 
-    writeFileSync(join(architectDir, "todo.md"), todoContent);
+    writeFileSync(join(architectDir, "directives.md"), directivesContent);
 
     const content = readFileSync(
-      join(architectDir, "todo.md"),
+      join(architectDir, "directives.md"),
       "utf-8",
     );
     const pendingMatches = content.match(/- \[ \]/g) ?? [];
@@ -318,17 +318,17 @@ describe("architect TODO flow", () => {
     expect(doneMatches.length).toBe(2);
   });
 
-  test("TODO counting with empty sections returns zero", () => {
+  test("Directives counting with empty sections returns zero", () => {
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
-    const todoContent =
-      "# Architect TODO\n\n## In Progress\n\n## Backlog\n\n## Completed\n";
+    const directivesContent =
+      "# Architect Directives\n\n## In Progress\n\n## Backlog\n\n## Completed\n";
 
-    writeFileSync(join(architectDir, "todo.md"), todoContent);
+    writeFileSync(join(architectDir, "directives.md"), directivesContent);
 
     const content = readFileSync(
-      join(architectDir, "todo.md"),
+      join(architectDir, "directives.md"),
       "utf-8",
     );
     const pendingMatches = content.match(/- \[ \]/g) ?? [];
@@ -338,23 +338,23 @@ describe("architect TODO flow", () => {
     expect(doneMatches.length).toBe(0);
   });
 
-  test("TODO file write and re-read roundtrip preserves content", () => {
+  test("Directives file write and re-read roundtrip preserves content", () => {
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
-    const todoPath = join(architectDir, "todo.md");
+    const directivesPath = join(architectDir, "directives.md");
 
     // Write
     const content =
-      "# Architect TODO\n\n## In Progress\n- [ ] Task 1\n\n## Backlog\n- [ ] Task 2\n\n## Completed\n- [x] Task 3\n";
-    writeFileSync(todoPath, content);
+      "# Architect Directives\n\n## In Progress\n- [ ] Task 1\n\n## Backlog\n- [ ] Task 2\n\n## Completed\n- [x] Task 3\n";
+    writeFileSync(directivesPath, content);
 
     // Update (overwrite)
     const updated =
-      "# Architect TODO\n\n## In Progress\n- [ ] Task 1\n- [ ] Task 4 (new)\n\n## Backlog\n\n## Completed\n- [x] Task 2 (moved)\n- [x] Task 3\n";
-    writeFileSync(todoPath, updated);
+      "# Architect Directives\n\n## In Progress\n- [ ] Task 1\n- [ ] Task 4 (new)\n\n## Backlog\n\n## Completed\n- [x] Task 2 (moved)\n- [x] Task 3\n";
+    writeFileSync(directivesPath, updated);
 
     // Read back
-    const result = readFileSync(todoPath, "utf-8");
+    const result = readFileSync(directivesPath, "utf-8");
     expect(result).toBe(updated);
     expect(result).toContain("Task 4 (new)");
     expect(result).toContain("Task 2 (moved)");
@@ -367,28 +367,28 @@ describe("architect TODO flow", () => {
   });
 
   // ──────────────────────────────────────────────
-  // Multiple TODO actions: only first is recognized
+  // Multiple Directives actions: only first is recognized
   // ──────────────────────────────────────────────
-  test("multiple TODO actions in response — only first is recognized", () => {
+  test("multiple Directives actions in response — only first is recognized", () => {
     const response = [
       "I'll handle both tasks.",
-      "[TODO_ADD] First task",
+      "[DIRECTIVE_ADD] First task",
       "Priority: high",
       "",
-      "[TODO_ADD] Second task",
+      "[DIRECTIVE_ADD] Second task",
       "Priority: low",
     ].join("\n");
 
     // The Go parser returns only the first match.
     // We simulate that behavior here.
     const firstMatch = response.match(
-      /\[TODO_ADD\]\s*(.*?)(?:\n|$)/,
+      /\[Directives_ADD\]\s*(.*?)(?:\n|$)/,
     );
     expect(firstMatch).not.toBeNull();
     expect(firstMatch![1].trim()).toBe("First task");
 
     // Count total matches — there should be 2 in the text
-    const allMatches = response.match(/\[TODO_ADD\]/g) ?? [];
+    const allMatches = response.match(/\[Directives_ADD\]/g) ?? [];
     expect(allMatches.length).toBe(2);
   });
 });

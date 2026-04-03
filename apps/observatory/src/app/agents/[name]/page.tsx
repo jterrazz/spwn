@@ -4,6 +4,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { AgentProfile } from "@/lib/types";
 import { apiGet, apiPut, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
+import { streamChat } from "@/lib/stream-chat";
+import type { ActivityBlock } from "@/lib/activity-types";
+import { ActivityMessageView } from "@/components/activity-blocks";
 import { InlineEdit, InlineTagsEdit } from "@/components/inline-edit";
 import { TIER_BADGE } from "@/lib/status";
 import {
@@ -610,8 +613,11 @@ export default function AgentProfilePage() {
 interface ChatMessage {
   role: "user" | "agent";
   content: string;
+  blocks: ActivityBlock[];
   timestamp: Date;
   error?: boolean;
+  cost?: number;
+  duration?: number;
 }
 
 function AgentChat({ agentName }: { agentName: string }) {
@@ -633,54 +639,56 @@ function AgentChat({ agentName }: { agentName: string }) {
     const msg = input.trim();
     if (!msg || sending) return;
 
-    const userMsg: ChatMessage = { role: "user", content: msg, timestamp: new Date() };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, { role: "user", content: msg, blocks: [{ type: "text", content: msg }], timestamp: new Date() }]);
     setInput("");
     setSending(true);
 
-    try {
-      const res = await fetch(goApiUrl(`/api/agents/${agentName}/talk`), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg }),
-        signal: AbortSignal.timeout(30000),
-      });
-      const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
-      const agentMsg: ChatMessage = {
-        role: "agent",
-        content: data.response || data.output || data.error || "No response",
-        timestamp: new Date(),
-        error: !!data.error && !data.response && !data.output,
-      };
-      setMessages((prev) => [...prev, agentMsg]);
-    } catch {
-      // Fallback to Next.js route
-      try {
-        const res = await fetch(`/api/agents/${agentName}/talk`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg }),
+    const msgIndex = messages.length + 1;
+    setMessages((prev) => [...prev, { role: "agent", content: "", blocks: [], timestamp: new Date() }]);
+
+    await streamChat({
+      url: goApiUrl(`/api/agents/${agentName}/talk`),
+      fallbackUrl: `/api/agents/${agentName}/talk`,
+      body: { message: msg },
+      onBlocks: (newBlocks) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "agent") {
+            const allBlocks = [...last.blocks, ...newBlocks];
+            const textContent = allBlocks
+              .filter((b): b is { type: "text"; content: string } => b.type === "text")
+              .map((b) => b.content)
+              .join("");
+            updated[msgIndex] = { ...last, blocks: allBlocks, content: textContent };
+          }
+          return updated;
         });
-        const data = await res.json().catch(() => ({ response: "Failed to parse response" }));
-        const agentMsg: ChatMessage = {
-          role: "agent",
-          content: data.response || data.output || data.error || "No response",
-          timestamp: new Date(),
-          error: !!data.error && !data.response && !data.output,
-        };
-        setMessages((prev) => [...prev, agentMsg]);
-      } catch {
-        setMessages((prev) => [...prev, {
-          role: "agent",
-          content: "Failed to connect to agent. Make sure the agent is running in a world.",
-          timestamp: new Date(),
-          error: true,
-        }]);
-      }
-    } finally {
-      setSending(false);
-      inputRef.current?.focus();
-    }
+      },
+      onDone: (meta) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "agent") {
+            updated[msgIndex] = { ...last, cost: meta.cost, duration: meta.duration };
+          }
+          return updated;
+        });
+      },
+      onError: (error) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[msgIndex];
+          if (last && last.role === "agent") {
+            updated[msgIndex] = { ...last, content: error, blocks: [{ type: "error", content: error }], error: true };
+          }
+          return updated;
+        });
+      },
+    });
+
+    setSending(false);
+    inputRef.current?.focus();
   };
 
   return (
@@ -721,7 +729,7 @@ function AgentChat({ agentName }: { agentName: string }) {
                     : "bg-white/[0.03] border border-white/[0.06] text-foreground/70"
               }`}>
                 {msg.role === "agent" ? (
-                  <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed">{msg.content}</pre>
+                  <ActivityMessageView message={{ role: "agent", blocks: msg.blocks, timestamp: msg.timestamp, cost: msg.cost, duration: msg.duration }} />
                 ) : (
                   <p className="text-xs">{msg.content}</p>
                 )}

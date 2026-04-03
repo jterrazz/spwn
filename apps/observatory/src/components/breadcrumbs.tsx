@@ -28,8 +28,6 @@ export function Breadcrumbs() {
     crumbs.push({ label: "Architect", href: "/architect" });
   } else if (pathname === "/blueprint") {
     crumbs.push({ label: "Blueprint", href: "/blueprint" });
-  } else if (pathname === "/marketplace") {
-    crumbs.push({ label: "Marketplace", href: "/marketplace" });
   } else if (pathname.startsWith("/world/")) {
     const parts = pathname.split("/").filter(Boolean);
     const worldId = parts[1];

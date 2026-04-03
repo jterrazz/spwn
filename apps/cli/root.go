@@ -164,11 +164,6 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "msg", "Messaging "+ui.Faint("(send, inbox, watch)"))
 	fmt.Fprintln(w)
 
-	// Marketplace
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Marketplace:"))
-	printHelpCmd(w, "get", "Install packages "+ui.Faint("(skill, world, pack, adapter)"))
-	fmt.Fprintln(w)
-
 	// System
 	fmt.Fprintf(w, "  %s\n", ui.Strong("System:"))
 	printHelpCmd(w, "init · status · auth · doctor · upgrade", "")

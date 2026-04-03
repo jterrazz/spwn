@@ -217,13 +217,7 @@ export default function UniverseMapPage() {
               <IconRocket size={14} />
               Import Agent
             </button>
-            <button
-              onClick={() => router.push("/marketplace")}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs bg-white/[0.03] text-foreground/50 hover:text-foreground/70 hover:bg-white/[0.06] border border-white/[0.06] transition-all"
-            >
-              <IconPlanet size={14} />
-              Browse Marketplace
-            </button>
+            {/* Marketplace — hidden until ready */}
           </div>
         </div>
       )}

@@ -154,10 +154,7 @@ export function CommandPalette() {
               <IconBook2 size={14} className="text-muted-foreground/50" />
               <span>Go to Blueprint</span>
             </CommandItem>
-            <CommandItem onSelect={() => navigate("/marketplace")}>
-              <IconPackage size={14} className="text-muted-foreground/50" />
-              <span>Go to Marketplace</span>
-            </CommandItem>
+            {/* Marketplace — hidden until ready */}
           </CommandGroup>
 
           {/* Actions */}
