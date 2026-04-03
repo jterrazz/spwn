@@ -53,8 +53,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full relative overflow-x-hidden overflow-y-auto">
-        {/* Detect Tauri native app and add body class for traffic light spacer */}
-        <script dangerouslySetInnerHTML={{ __html: `if(window.__TAURI__)document.body.classList.add('tauri')` }} />
+        {/* Detect Tauri native app */}
+        <script dangerouslySetInnerHTML={{ __html: `if(window.__TAURI_INTERNALS__||window.__TAURI__)document.body.classList.add('tauri');else document.addEventListener('DOMContentLoaded',function(){if(window.__TAURI_INTERNALS__||window.__TAURI__)document.body.classList.add('tauri')})` }} />
         <ThemeProvider>
           <TooltipProvider>
             <ToastProvider>
