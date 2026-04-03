@@ -48,9 +48,10 @@ pub fn run() {
             // Give the API server a moment to start
             std::thread::sleep(std::time::Duration::from_secs(2));
 
-            // Set the window URL to include the API port
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_title(&format!("⬡ spwn Observatory — API on port {api_port}"));
+                // Add tauri class to html element for native app styling
+                let _ = window.eval("document.documentElement.classList.add('tauri')");
             }
 
             println!("[spwn] Observatory ready");
