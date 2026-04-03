@@ -117,13 +117,13 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
 
   return (
     <Sidebar>
-      <SidebarHeader className="px-4 pb-2 -mt-1">
-        <a href="/" className="flex items-center gap-2">
+      <SidebarHeader className="px-3 pb-0">
+        <a href="/" className="flex items-center gap-2 px-1">
           <span className="text-sm tracking-[0.15em] font-heading text-foreground/90">
             ⬡ spwn
           </span>
         </a>
-        <p className="text-[10px] font-mono text-muted-foreground/30 mt-1 leading-relaxed">
+        <p className="text-[10px] font-mono text-muted-foreground/30 mt-0.5 px-1 leading-relaxed">
           <span>orbstack</span>
           <span className="text-muted-foreground/15"> · </span>
           <span>docker</span>
@@ -133,13 +133,12 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
           <span>{statusData?.agents ?? limboAgents.length + worlds.reduce((n, w) => n + w.agents.length, 0)} agents</span>
         </p>
         <button
-          className="mt-3 w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-white/[0.03] transition-colors"
+          className="mt-2 w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-white/[0.06] bg-white/[0.02] text-[11px] text-muted-foreground/30 hover:text-muted-foreground/50 hover:bg-white/[0.04] transition-colors"
           onClick={() => {
-            // Trigger Cmd+K to open command palette
             window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
           }}
         >
-          <IconSearch size={13} className="opacity-40" />
+          <IconSearch size={12} className="opacity-40" />
           <span className="flex-1 text-left">Search...</span>
           <kbd className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06]">⌘K</kbd>
         </button>
@@ -192,7 +191,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
         <SidebarSeparator />
 
         {/* ── Worlds ── */}
-        <SidebarGroup>
+        <SidebarGroup className="py-0">
           <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
             Worlds
             {worlds.length > 0 && (
@@ -259,7 +258,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
         </SidebarGroup>
 
         {/* ── Limbo agents ── */}
-        <SidebarGroup>
+        <SidebarGroup className="py-0">
           <SidebarGroupLabel className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/30 font-mono">
             Limbo
             {limboAgents.length > 0 && (
@@ -336,39 +335,33 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
       </SidebarContent>
 
       {/* ── Footer ── */}
-      <SidebarFooter className="px-4 py-3 space-y-3">
+      <SidebarFooter className="px-3 py-3 gap-2">
         {version?.updateAvailable && <UpgradeBanner version={version} />}
-        <div className="flex items-center justify-between">
+
+        <SidebarSeparator className="mx-0" />
+
+        {/* Status + theme toggle */}
+        <div className="flex items-center justify-between px-1">
           <LiveStatus />
           <ThemeToggle />
         </div>
-        <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground/25">
-          <a href="https://spwn.sh/docs" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
-            Docs
-          </a>
+
+        {/* Links + version */}
+        <div className="flex items-center gap-2 px-1 text-[10px] font-mono text-muted-foreground/20">
+          <a href="https://spwn.sh/docs" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Docs</a>
           <span className="text-muted-foreground/10">·</span>
-          <a href="https://github.com/jterrazz/spwn" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
-            GitHub
-          </a>
+          <a href="https://github.com/jterrazz/spwn" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">GitHub</a>
           <span className="text-muted-foreground/10">·</span>
-          <a href="https://github.com/jterrazz/spwn/issues/new" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">
-            Report Bug
-          </a>
-          <span className="ml-auto flex items-center gap-1.5 text-muted-foreground/15">
-            {version && (
-              <span className={`inline-block w-1.5 h-1.5 rounded-full ${version.updateAvailable ? "bg-amber-400" : "bg-green-500"}`} />
-            )}
-            v{version?.current ?? "…"}
-            {version?.updateAvailable && (
-              <span className="text-amber-400/60">⬆</span>
-            )}
-          </span>
+          <a href="https://github.com/jterrazz/spwn/issues/new" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground/50 transition-colors">Bug</a>
+          <span className="ml-auto text-muted-foreground/15">v{version?.current ?? "..."}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">
+
+        {/* User */}
+        <div className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+          <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-medium text-muted-foreground/50 ring-1 ring-white/[0.06]">
             J
           </div>
-          <span className="text-[11px] text-muted-foreground/40">jterrazz</span>
+          <span className="text-xs text-muted-foreground/50">jterrazz</span>
         </div>
       </SidebarFooter>
     </Sidebar>

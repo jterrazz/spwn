@@ -110,9 +110,9 @@ export default function UniverseMapPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-full">
       {/* Universe header */}
-      <div className="px-4 md:px-8 pt-[58px] md:pt-[58px] flex items-start justify-between flex-wrap gap-3">
+      <div className="px-4 md:px-8 pt-4 flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-heading tracking-wide text-foreground/90">Worlds</h1>
           <p className="text-xs font-mono text-muted-foreground/30 mt-1">

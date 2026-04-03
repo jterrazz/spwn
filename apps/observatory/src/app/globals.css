@@ -191,7 +191,7 @@ body::before {
   border-radius: 14px !important;
   margin: 10px !important;
   margin-right: 0 !important;
-  height: calc(100vh - 20px) !important;
+  height: calc(100% - 20px) !important;
   overflow: hidden;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
@@ -224,13 +224,28 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-/* ── Tauri native app: offset everything below traffic lights ── */
-html.tauri {
-  --tauri-titlebar: 22px;
+/* ── Tauri: interactive elements sit above the drag region strip ── */
+html.tauri button,
+html.tauri [role="button"],
+html.tauri a,
+html.tauri input,
+html.tauri select,
+html.tauri textarea {
+  position: relative;
+  z-index: 200;
 }
 
-html.tauri .tauri-offset {
-  padding-top: var(--tauri-titlebar);
+/* ── Tauri: space below traffic lights ── */
+html.tauri [data-slot="sidebar-header"] {
+  padding-top: 42px;
+}
+
+/* ── Tauri native scroll: no rubber-band bounce ── */
+html.tauri,
+html.tauri body,
+html.tauri [data-slot="sidebar-content"],
+html.tauri [data-slot="sidebar-inset"] {
+  overscroll-behavior: none;
 }
 
 

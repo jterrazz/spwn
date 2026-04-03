@@ -55,14 +55,14 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: `try{if(window.__TAURI_INTERNALS__||window.__TAURI__)document.documentElement.classList.add('tauri')}catch(e){}` }} />
       </head>
-      <body className="min-h-full relative overflow-x-hidden overflow-y-auto">
-        <div className="tauri-offset">
+      <body className="h-svh overflow-hidden relative">
+        <div className="flex flex-col h-full">
           <ThemeProvider>
             <TooltipProvider>
               <ToastProvider>
                 <Aurora />
                 <Stars />
-                <div className="relative z-10 min-h-screen">
+                <div className="relative z-10 flex-1 min-h-0 h-full">
                   <AppShell>{children}</AppShell>
                   <CommandPalette />
                 </div>

@@ -72,10 +72,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <RefetchContext.Provider value={fetchWorlds}>
       <SidebarProvider>
-        {/* Drag region covering the full top 22px — above both sidebar and content */}
+        {/* Drag region for window movement */}
         <div
           data-tauri-drag-region="true"
-          className="fixed top-0 left-0 right-0 h-[22px] z-[9999]"
+          className="tauri-drag-region fixed top-0 left-0 right-0 h-[28px] z-[100]"
           style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
         />
         <AppSidebar

@@ -392,7 +392,9 @@ export default function ArchitectPage() {
   }, []);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > 0) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }, [messages]);
 
   const showFeedback = (msg: string) => {
