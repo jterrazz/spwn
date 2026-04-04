@@ -265,7 +265,7 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
         style={{
           width: size,
           height: size,
-          transform: `scale(${isSelected ? (isMobile ? 1.3 : (compact ? 1.5 : 1.8)) : (isMobile ? 0.7 : (compact ? 0.9 : 0.85))})`,
+          transform: `scale(${isSelected ? (isMobile ? 1.3 : (compact ? 1.5 : 1.8)) : (isMobile ? 0.7 : (compact ? 1.15 : 0.85))})`,
           filter: isSelected
             ? `brightness(1.2) drop-shadow(0 0 28px ${STATUS_DOT_CSS[world.status]}60)`
             : `brightness(1) drop-shadow(0 0 12px ${STATUS_DOT_CSS[world.status]}30)`,

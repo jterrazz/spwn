@@ -14,8 +14,8 @@ import (
 	"spwn.sh/core/foundation/auth"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/backend"
-	"spwn.sh/core/universe/internal/blueprint"
 	"spwn.sh/core/universe/internal/claw"
+	"spwn.sh/core/universe/internal/knowledge"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/observatory"
@@ -170,35 +170,35 @@ func NewObservatoryServer(s *Store, arch *Architect, addr string) *ObservatorySe
 	return observatory.New(s, arch, addr)
 }
 
-// --- Blueprint operations ---
+// --- Knowledge operations ---
 
-// BlueprintFileInfo describes a file in the blueprint.
-type BlueprintFileInfo = blueprint.FileInfo
+// KnowledgeFileInfo describes a file in the knowledge.
+type KnowledgeFileInfo = knowledge.FileInfo
 
-// InitBlueprint creates the blueprint directory and writes default files
+// InitKnowledge creates the knowledge directory and writes default files
 // if they don't already exist.
-func InitBlueprint() error {
-	return blueprint.Init(foundation.BlueprintDir())
+func InitKnowledge() error {
+	return knowledge.Init(foundation.KnowledgeDir())
 }
 
-// ListBlueprintFiles returns all files in the blueprint directory.
-func ListBlueprintFiles() ([]BlueprintFileInfo, error) {
-	return blueprint.ListFiles(foundation.BlueprintDir())
+// ListKnowledgeFiles returns all files in the knowledge directory.
+func ListKnowledgeFiles() ([]KnowledgeFileInfo, error) {
+	return knowledge.ListFiles(foundation.KnowledgeDir())
 }
 
-// ReadBlueprintFile reads a specific file from the blueprint.
-func ReadBlueprintFile(relPath string) (string, error) {
-	return blueprint.ReadFile(foundation.BlueprintDir(), relPath)
+// ReadKnowledgeFile reads a specific file from the knowledge.
+func ReadKnowledgeFile(relPath string) (string, error) {
+	return knowledge.ReadFile(foundation.KnowledgeDir(), relPath)
 }
 
-// WriteBlueprintFile writes content to a file in the blueprint.
-func WriteBlueprintFile(relPath, content string) error {
-	return blueprint.WriteFile(foundation.BlueprintDir(), relPath, content)
+// WriteKnowledgeFile writes content to a file in the knowledge.
+func WriteKnowledgeFile(relPath, content string) error {
+	return knowledge.WriteFile(foundation.KnowledgeDir(), relPath, content)
 }
 
-// SearchBlueprint searches for a query string across all blueprint files.
-func SearchBlueprint(query string) (map[string][]string, error) {
-	return blueprint.Search(foundation.BlueprintDir(), query)
+// SearchKnowledge searches for a query string across all knowledge files.
+func SearchKnowledge(query string) (map[string][]string, error) {
+	return knowledge.Search(foundation.KnowledgeDir(), query)
 }
 
 // --- Git sync operations ---
@@ -337,15 +337,15 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		_ = os.WriteFile(architectStackPath, []byte("# Architect Stack\n\n## Focus\n\n## Queued\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Done\n"), 0644)
 	}
 
-	// Ensure blueprint directory exists with defaults
-	_ = blueprint.Init(foundation.BlueprintDir())
+	// Ensure knowledge directory exists with defaults
+	_ = knowledge.Init(foundation.KnowledgeDir())
 
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
 			foundation.BaseDir() + ":/spwn-data",
 			architectStackPath + ":/world/stack.md",
-			foundation.BlueprintDir() + ":/blueprint",
+			foundation.KnowledgeDir() + ":/knowledge",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
@@ -492,9 +492,9 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 				"Also update /world/stack.md with the new task. "+
 				"When completing a task use [STACK_POP] Short task title. "+
 				"Read /world/skills/ for detailed guides. "+
-				"BLUEPRINT: You maintain /blueprint/ as the single source of truth. "+
-				"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. "+
-				"Every conversation should result in blueprint updates.")
+				"KNOWLEDGE: You maintain /knowledge/ as the single source of truth. "+
+				"When updating knowledge files, include [KNOWLEDGE_UPDATE] path/to/file.md in your response. "+
+				"Every conversation should result in knowledge updates.")
 	}
 
 	args = append(args, claudeArgs...)

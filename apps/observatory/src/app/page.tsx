@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { RecentActivity } from "@/components/recent-activity";
+import { PageHeader } from "@/components/page-header";
+import { Page } from "@/components/page";
 import { useRefetch } from "@/components/app-shell";
 import { usePageTitle } from "@/hooks/use-page-title";
 
@@ -250,23 +252,20 @@ export default function UniverseMapPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-heading tracking-wide text-foreground/90">Dashboard</h1>
-          <p className="text-xs text-muted-foreground/30 mt-0.5">
-            Orchestrate AI agents across your projects, persist their minds, scale at will — your AI matrix.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowSpawn(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all"
-        >
-          <IconPlus size={14} />
-          Spawn World
-        </button>
-      </div>
+    <Page>
+      <PageHeader
+        title="Dashboard"
+        description="Orchestrate AI agents across your projects, persist their minds, scale at will — your AI matrix."
+        actions={
+          <button
+            onClick={() => setShowSpawn(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all"
+          >
+            <IconPlus size={14} />
+            Spawn World
+          </button>
+        }
+      />
 
       {/* ── Quick Stats Bar ── */}
       {!loading && worlds.length > 0 && (() => {
@@ -601,7 +600,7 @@ export default function UniverseMapPage() {
       {showSpawn && (
         <SpawnWorldDialog onClose={() => setShowSpawn(false)} onComplete={handleSpawnComplete} />
       )}
-    </div>
+    </Page>
   );
 }
 

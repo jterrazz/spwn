@@ -9,22 +9,22 @@ import {
 import { stripAnsi } from "../../setup/output-helpers.js";
 import { createSpwnHome } from "../../setup/helpers.js";
 
-describe("blueprint integration", () => {
+describe("knowledge integration", () => {
   let ctx: TestContext;
 
   afterEach(() => {
     ctx?.cleanup();
   });
 
-  test("blueprint is mounted read-only in agent world", () => {
-    // GIVEN — an initialized context with blueprint files
+  test("knowledge is mounted read-only in agent world", () => {
+    // GIVEN — an initialized context with knowledge files
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // Create a blueprint directory with a file
-    const blueprintDir = join(ctx.home, "blueprint");
-    mkdirSync(blueprintDir, { recursive: true });
-    writeFileSync(join(blueprintDir, "overview.md"), "# Test Blueprint\n\nRead-only test content.\n");
+    // Create a knowledge directory with a file
+    const knowledgeDir = join(ctx.home, "knowledge");
+    mkdirSync(knowledgeDir, { recursive: true });
+    writeFileSync(join(knowledgeDir, "overview.md"), "# Test Knowledge\n\nRead-only test content.\n");
 
     // WHEN — spawning a world
     const spawnResult = ctx.spwn(
@@ -41,16 +41,16 @@ describe("blueprint integration", () => {
 
     const universe = ctx.universe(worldId);
 
-    // THEN — blueprint directory exists inside container
-    universe.toHaveDirectory("/world/blueprint");
+    // THEN — knowledge directory exists inside container
+    universe.toHaveDirectory("/world/knowledge");
 
     // THEN — overview.md is readable
-    universe.toHaveFile("/world/blueprint/overview.md", "Test Blueprint");
+    universe.toHaveFile("/world/knowledge/overview.md", "Test Knowledge");
 
-    // THEN — writing to blueprint directory should fail (read-only)
+    // THEN — writing to knowledge directory should fail (read-only)
     try {
       const writeResult = universe.exec(
-        "echo test > /world/blueprint/write-test.txt 2>&1 || echo READONLY",
+        "echo test > /world/knowledge/write-test.txt 2>&1 || echo READONLY",
       );
       // If mount is read-only, writing should fail
       expect(
@@ -64,18 +64,18 @@ describe("blueprint integration", () => {
     }
   });
 
-  test("blueprint files are accessible via simulated API structure", () => {
-    // GIVEN — a SPWN_HOME with blueprint files
+  test("knowledge files are accessible via simulated API structure", () => {
+    // GIVEN — a SPWN_HOME with knowledge files
     const home = createSpwnHome();
-    const blueprintDir = join(home, "blueprint");
-    mkdirSync(blueprintDir, { recursive: true });
+    const knowledgeDir = join(home, "knowledge");
+    mkdirSync(knowledgeDir, { recursive: true });
 
-    writeFileSync(join(blueprintDir, "overview.md"), "# Overview\n\nMain overview content.\n");
-    writeFileSync(join(blueprintDir, "glossary.md"), "# Glossary\n\nTerms and definitions.\n");
-    mkdirSync(join(blueprintDir, "projects"), { recursive: true });
-    writeFileSync(join(blueprintDir, "projects", "api.md"), "# API Project\n");
+    writeFileSync(join(knowledgeDir, "overview.md"), "# Overview\n\nMain overview content.\n");
+    writeFileSync(join(knowledgeDir, "glossary.md"), "# Glossary\n\nTerms and definitions.\n");
+    mkdirSync(join(knowledgeDir, "projects"), { recursive: true });
+    writeFileSync(join(knowledgeDir, "projects", "api.md"), "# API Project\n");
 
-    // WHEN — listing files (simulating GET /api/blueprint)
+    // WHEN — listing files (simulating GET /api/knowledge)
     const { readdirSync, statSync } = require("node:fs");
     const walkFiles = (dir: string, base: string): string[] => {
       const results: string[] = [];
@@ -91,31 +91,31 @@ describe("blueprint integration", () => {
       return results;
     };
 
-    const files = walkFiles(blueprintDir, blueprintDir);
+    const files = walkFiles(knowledgeDir, knowledgeDir);
 
     // THEN — file list includes expected files
     expect(files).toContain("overview.md");
     expect(files).toContain("glossary.md");
     expect(files).toContain("projects/api.md");
 
-    // WHEN — reading a specific file (simulating GET /api/blueprint/overview.md)
-    const content = readFileSync(join(blueprintDir, "overview.md"), "utf-8");
+    // WHEN — reading a specific file (simulating GET /api/knowledge/overview.md)
+    const content = readFileSync(join(knowledgeDir, "overview.md"), "utf-8");
 
     // THEN — content is correct
     expect(content).toContain("# Overview");
     expect(content).toContain("Main overview content");
   });
 
-  test("blueprint update via API persists to disk", () => {
-    // GIVEN — a SPWN_HOME with blueprint directory
+  test("knowledge update via API persists to disk", () => {
+    // GIVEN — a SPWN_HOME with knowledge directory
     const home = createSpwnHome();
-    const blueprintDir = join(home, "blueprint");
-    mkdirSync(blueprintDir, { recursive: true });
+    const knowledgeDir = join(home, "knowledge");
+    mkdirSync(knowledgeDir, { recursive: true });
 
-    const testFilePath = join(blueprintDir, "test-file.md");
+    const testFilePath = join(knowledgeDir, "test-file.md");
     const testContent = "# Test File\n\nCreated via API simulation.\n\n## Details\nThis file was written programmatically.\n";
 
-    // WHEN — writing a file (simulating PUT /api/blueprint/test-file.md)
+    // WHEN — writing a file (simulating PUT /api/knowledge/test-file.md)
     writeFileSync(testFilePath, testContent);
 
     // THEN — file exists on disk
@@ -140,15 +140,15 @@ describe("blueprint integration", () => {
     expect(existsSync(testFilePath)).toBe(false);
   });
 
-  test("blueprint write to nested path creates subdirectories", () => {
-    // GIVEN — a SPWN_HOME with blueprint directory
+  test("knowledge write to nested path creates subdirectories", () => {
+    // GIVEN — a SPWN_HOME with knowledge directory
     const home = createSpwnHome();
-    const blueprintDir = join(home, "blueprint");
-    mkdirSync(blueprintDir, { recursive: true });
+    const knowledgeDir = join(home, "knowledge");
+    mkdirSync(knowledgeDir, { recursive: true });
 
     // WHEN — writing to a nested path (simulating WriteFile with subdirs)
-    const nestedPath = join(blueprintDir, "projects", "backend", "architecture.md");
-    mkdirSync(join(blueprintDir, "projects", "backend"), { recursive: true });
+    const nestedPath = join(knowledgeDir, "projects", "backend", "architecture.md");
+    mkdirSync(join(knowledgeDir, "projects", "backend"), { recursive: true });
     writeFileSync(nestedPath, "# Backend Architecture\n\nMicroservices design.\n");
 
     // THEN — file exists at nested location
@@ -157,26 +157,26 @@ describe("blueprint integration", () => {
     expect(content).toContain("Microservices design");
   });
 
-  test("blueprint search across multiple files returns correct results", () => {
-    // GIVEN — blueprint with multiple files containing a search term
+  test("knowledge search across multiple files returns correct results", () => {
+    // GIVEN — knowledge with multiple files containing a search term
     const home = createSpwnHome();
-    const blueprintDir = join(home, "blueprint");
-    mkdirSync(blueprintDir, { recursive: true });
+    const knowledgeDir = join(home, "knowledge");
+    mkdirSync(knowledgeDir, { recursive: true });
 
     writeFileSync(
-      join(blueprintDir, "overview.md"),
+      join(knowledgeDir, "overview.md"),
       "# Overview\n\nThe authentication system uses JWT tokens for auth.\n",
     );
     writeFileSync(
-      join(blueprintDir, "glossary.md"),
+      join(knowledgeDir, "glossary.md"),
       "# Glossary\n\n| Term | Definition |\n| authentication | Verifying user identity |\n",
     );
     writeFileSync(
-      join(blueprintDir, "roadmap.md"),
+      join(knowledgeDir, "roadmap.md"),
       "# Roadmap\n\n## Current Focus\n- Improve performance\n- Add caching layer\n",
     );
     writeFileSync(
-      join(blueprintDir, "security.md"),
+      join(knowledgeDir, "security.md"),
       "# Security\n\nAuthentication and authorization best practices.\n",
     );
 
@@ -185,9 +185,9 @@ describe("blueprint integration", () => {
     const results: Record<string, string[]> = {};
 
     const { readdirSync } = require("node:fs");
-    const allFiles = readdirSync(blueprintDir);
+    const allFiles = readdirSync(knowledgeDir);
     for (const file of allFiles) {
-      const filePath = join(blueprintDir, file);
+      const filePath = join(knowledgeDir, file);
       const stat = require("node:fs").statSync(filePath);
       if (!stat.isFile()) continue;
 

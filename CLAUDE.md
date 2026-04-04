@@ -335,7 +335,7 @@ Each domain tests only its own contract. Cross-domain flows (spawn universe + ag
 
 Spwn follows a **spec-first** development process:
 
-1. **Specify** — Define behavior in the blueprint (what the system SHOULD do)
+1. **Specify** — Define behavior in the knowledge (what the system SHOULD do)
 2. **Encode** — Write tests that encode those specs (they fail initially)
 3. **Implement** — Write code that makes the tests pass
 4. **Verify** — The test suite IS the living specification

@@ -394,7 +394,7 @@ spwn is not a competitor to Claude Code — it is the complement. Claude Code is
 
 - **Website:** [spwn.sh](https://spwn.sh)
 - **Docs:** [spwn.sh/docs](https://spwn.sh/docs)
-- **Blueprint:** [github.com/jterrazz/spwn-wiki](https://github.com/jterrazz/spwn-wiki)
+- **Knowledge:** [github.com/jterrazz/spwn-wiki](https://github.com/jterrazz/spwn-wiki)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { goApiUrl } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { PageHeader } from "@/components/page-header";
+import { Page } from "@/components/page";
 import {
   IconKey,
   IconPlugConnected,
@@ -513,19 +515,11 @@ export default function ProvidersPage() {
   const totalCount = providers.length;
 
   return (
-    <div className="flex flex-col min-h-full">
-      {/* Page Header */}
-      <div className="px-6 pt-6 pb-2">
-        <h1 className="text-2xl font-heading tracking-wide text-foreground/90">
-          Settings
-        </h1>
-        <p className="text-xs font-mono text-muted-foreground/30 mt-1">
-          Platform configuration
-        </p>
-      </div>
+    <Page>
+      <PageHeader title="Settings" description="Platform configuration — providers, authentication, and universe defaults." />
 
       {/* AI Providers Section */}
-      <div className="px-6 pt-4 flex items-start justify-between flex-wrap gap-3">
+      <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-heading tracking-wide text-foreground/80">
@@ -562,7 +556,7 @@ export default function ProvidersPage() {
 
       {/* Feedback toast */}
       {feedback && (
-        <div className="px-6 mt-4">
+        <div className="mt-4">
           <div
             className={`rounded-lg px-4 py-2.5 flex items-center gap-2 text-xs font-mono ${
               feedback.type === "success"
@@ -581,7 +575,7 @@ export default function ProvidersPage() {
       )}
 
       {/* Content */}
-      <main className="flex-1 px-6 py-6">
+      <main className="flex-1 py-2">
         {error && !loading && (
           <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-5 py-4 mb-6 flex items-start gap-3">
             <IconAlertTriangle
@@ -680,6 +674,6 @@ export default function ProvidersPage() {
           onSave={(token) => handleConfigure(configuring, token)}
         />
       )}
-    </div>
+    </Page>
   );
 }

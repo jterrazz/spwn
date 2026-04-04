@@ -21,6 +21,7 @@ import {
   IconMessageCircle,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/page-header";
 import { STATUS_DOT, STATUS_BADGE, TIER_BADGE } from "@/lib/status";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useToast } from "@/components/toast-provider";
@@ -227,38 +228,12 @@ export default function WorldDashboard() {
   return (
     <div className="flex h-[calc(100vh-1px)] overflow-hidden">
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT[world.status]}`} />
-            <div>
-              <h1 className="text-2xl font-heading tracking-wide text-foreground/90">{name}</h1>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="text-xs font-mono text-muted-foreground/40">{world.id.substring(0, 12)}</span>
-                <span className="text-muted-foreground/15">·</span>
-                <span className="text-xs font-mono text-muted-foreground/40">{world.config}</span>
-                <span className="text-muted-foreground/15">·</span>
-                <span className="text-xs font-mono text-muted-foreground/40">{timeAgo(world.created_at)}</span>
-                {world.workspace && (
-                  <>
-                    <span className="text-muted-foreground/15">·</span>
-                    <span className="text-xs font-mono text-muted-foreground/30">
-                      {world.workspace.split("/").map((seg, i, arr) => (
-                        <span key={i}>
-                          {i > 0 && <span className="text-muted-foreground/15">/</span>}
-                          <span className={i === arr.length - 1 ? "text-muted-foreground/50" : ""}>{seg}</span>
-                        </span>
-                      ))}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* World Actions */}
-          <div className="flex items-center gap-1">
+      <div className="flex-1 overflow-y-auto px-6 md:px-8 pt-6 md:pt-8 pb-12 space-y-6 md:space-y-8">
+        <PageHeader
+          title={name}
+          description={`${world.config} · ${timeAgo(world.created_at)}${world.workspace ? " · " + world.workspace : ""}`}
+          actions={
+            <div className="flex items-center gap-1">
             <button
               onClick={async () => {
                 const ok = await callAction(`/api/worlds/${worldId}/snapshot`);
@@ -309,7 +284,8 @@ export default function WorldDashboard() {
               <span className="hidden sm:inline">Destroy</span>
             </button>
           </div>
-        </div>
+          }
+        />
 
         {/* Destroy confirmation */}
         {showDestroyConfirm && (

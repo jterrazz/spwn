@@ -74,10 +74,10 @@
   --primary-foreground: #000000;
   --secondary: rgba(255, 255, 255, 0.08);
   --secondary-foreground: rgba(255, 255, 255, 0.9);
-  --muted: rgba(255, 255, 255, 0.06);
-  --muted-foreground: rgba(255, 255, 255, 0.5);
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(255, 255, 255, 0.95);
   --accent: rgba(255, 255, 255, 0.06);
-  --accent-foreground: rgba(255, 255, 255, 0.9);
+  --accent-foreground: rgba(255, 255, 255, 0.95);
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.1);
   --ring: rgba(255, 255, 255, 0.3);
@@ -94,17 +94,17 @@
 
 .light {
   --background: transparent;
-  --foreground: #f0f0f0;
+  --foreground: #ffffff;
   --card: rgba(255, 255, 255, 0.05);
-  --card-foreground: #f0f0f0;
+  --card-foreground: #ffffff;
   --popover: rgba(255, 255, 255, 0.05);
-  --popover-foreground: #f0f0f0;
-  --primary: #f0f0f0;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
   --primary-foreground: #1a1a1a;
-  --secondary: rgba(255, 255, 255, 0.08);
-  --secondary-foreground: rgba(255, 255, 255, 0.9);
-  --muted: rgba(255, 255, 255, 0.06);
-  --muted-foreground: rgba(255, 255, 255, 0.55);
+  --secondary: rgba(255, 255, 255, 0.14);
+  --secondary-foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.12);
+  --muted-foreground: rgba(255, 255, 255, 1);
   --accent: rgba(255, 255, 255, 0.06);
   --accent-foreground: rgba(255, 255, 255, 0.9);
   --border: rgba(255, 255, 255, 0.1);
@@ -129,7 +129,7 @@
     background: #0a0a0a;
   }
   html.light {
-    background: #222222;
+    background: #2a2a2a;
   }
   body {
     @apply bg-transparent text-foreground antialiased;
@@ -243,8 +243,14 @@ html.tauri textarea {
 }
 
 /* ── Tauri: fixed overlays (modals, dialogs) must sit above everything ── */
-html.tauri [class*="fixed"][class*="inset-0"] {
+/* Exclude pointer-events-none elements (stars, aurora) which are background decorations */
+html.tauri [class*="fixed"][class*="inset-0"]:not([class*="pointer-events-none"]) {
   z-index: 500 !important;
+}
+
+/* ── Tauri: ensure background decorations stay behind content ── */
+html.tauri [class*="fixed"][class*="inset-0"][class*="pointer-events-none"] {
+  z-index: -1 !important;
 }
 
 /* ── Tauri: space below traffic lights ── */

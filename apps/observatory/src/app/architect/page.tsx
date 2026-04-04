@@ -19,6 +19,8 @@ import {
 } from "@tabler/icons-react";
 import { KnowledgeBrowser, KnowledgeUpdateCard } from "@/components/knowledge-browser";
 import { useArchitectChat, type StackData, type StackItem } from "@/contexts/architect-chat-context";
+import { PageHeader } from "@/components/page-header";
+import { Page } from "@/components/page";
 
 function StatCard({ label, value, sub, accent, icon, loading: isLoading }: { label: string; value: string; sub?: string; accent?: string; icon?: React.ReactNode; loading?: boolean }) {
   if (isLoading) {
@@ -294,30 +296,12 @@ export default function ArchitectPage() {
   const kpis = architectStatus?.kpis;
 
   return (
-    <div className="p-8 space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {loading ? (
-            <Skeleton className="w-3 h-3 rounded-full" />
-          ) : (
-            <div className={`w-3 h-3 rounded-full ${isRunning ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" : "bg-white/20"}`} />
-          )}
-          <div>
-            <h1 className="text-2xl font-heading tracking-wide text-foreground/90">Architect</h1>
-            {loading ? (
-              <Skeleton className="h-3 w-48 mt-1" />
-            ) : (
-              <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
-                {isRunning ? "Online" : "Offline"}
-                {architectStatus?.containerId && ` · ${architectStatus.containerId.slice(0, 12)}`}
-                {architectStatus?.uptime && ` · uptime ${architectStatus.uptime}`}
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="flex gap-2">
-          {isRunning ? (
+    <Page>
+      <PageHeader
+        title="Architect"
+        description="Your always-on world builder — creates agents, spawns worlds, manages tasks."
+        actions={
+          isRunning ? (
             <>
               <button
                 onClick={handleStart}
@@ -342,9 +326,9 @@ export default function ArchitectPage() {
             >
               {actionLoading === "start" ? "Starting..." : "Start"}
             </button>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       {/* Feedback toast */}
       {feedback && (
@@ -555,6 +539,6 @@ export default function ArchitectPage() {
       {activeTab === "tasks" && (
         <StackPanel stack={stack} highlightTitle={highlightTitle} />
       )}
-    </div>
+    </Page>
   );
 }

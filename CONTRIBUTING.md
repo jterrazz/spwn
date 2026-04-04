@@ -125,6 +125,6 @@ docs: update CLI reference
 
 ## Resources
 
-- [Blueprint Wiki](https://github.com/jterrazz/spwn-wiki) — ADRs, domain models, epoch plans
+- [Knowledge Wiki](https://github.com/jterrazz/spwn-wiki) — ADRs, domain models, epoch plans
 - [CLI Reference](https://spwn.sh/docs) — auto-generated from source
 - [CLAUDE.md](./CLAUDE.md) — full project conventions

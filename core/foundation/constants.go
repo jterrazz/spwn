@@ -28,7 +28,7 @@ const (
 	ClawStateFileName = "claw.json"
 	SkillsSubDir      = "skills"
 	ClawSubDir        = "claw"
-	BlueprintSubDir   = "blueprint"
+	KnowledgeSubDir   = "knowledge"
 	ActivityFileName  = "activity.jsonl"
 )
 

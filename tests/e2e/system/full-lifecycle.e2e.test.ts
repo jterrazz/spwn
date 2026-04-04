@@ -21,7 +21,7 @@ import { MindAssertion } from "../../setup/mind-assertion.js";
  * Tests the full user journey:
  *   create → configure → spawn → inspect → destroy → dream
  *
- * This exercises the complete end-to-end flow including blueprint access,
+ * This exercises the complete end-to-end flow including knowledge access,
  * identity configuration, world management, and agent evolution.
  */
 describe("complete agent lifecycle", () => {
