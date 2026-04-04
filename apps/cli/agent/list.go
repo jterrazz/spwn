@@ -68,9 +68,9 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "NAME", "LAYERS", "WORLD", "STATUS")
+		t := ui.NewTable(ui.ModeNormal, "NAME", "WORLD", "STATUS")
 		for _, a := range agents {
-			layerCount := agentDomain.LayerCount(&a)
+			_ = agentDomain.LayerCount(&a) // used internally
 			worldID := "\u2014"
 			status := "unattached"
 
@@ -79,7 +79,7 @@ var listCmd = &cobra.Command{
 				status = info.Status
 			}
 
-			t.AddRow(a.Name, fmt.Sprintf("%d/6", layerCount), worldID, status)
+			t.AddRow(a.Name, worldID, status)
 		}
 		t.Render()
 

@@ -39,7 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"world", "agent", "profile", "msg", "snap", "architect", "dash", "get", "init"} {
+	for _, sub := range []string{"world", "agent", "profile", "msg", "snap", "architect", "dash", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }

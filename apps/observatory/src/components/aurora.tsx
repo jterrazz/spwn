@@ -14,7 +14,7 @@ export function Aurora({ className }: { className?: string }) {
       <div
         className={cn(
           "absolute -inset-[10px]",
-          "opacity-[0.14] blur-[12px] will-change-transform",
+          "opacity-[0.06] blur-[18px] will-change-transform",
           "dark:invert-0 invert filter",
 
           // Aurora gradient — slightly varied angles to break parallelism

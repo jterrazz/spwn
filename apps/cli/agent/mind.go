@@ -31,10 +31,10 @@ var mindCmd = &cobra.Command{
 			return fmt.Errorf("cannot inspect agent: %w", err)
 		}
 
-		layerCount := agentDomain.LayerCount(info)
+		_ = agentDomain.LayerCount(info)
 
 		s.Blank()
-		s.Info("Mind:", fmt.Sprintf("%s (%d/%d layers)", name, layerCount, len(foundation.MindLayers)))
+		s.Info("Mind:", name)
 		s.Blank()
 
 		for _, layer := range foundation.MindLayers {

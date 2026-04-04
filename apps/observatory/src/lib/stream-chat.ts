@@ -1,6 +1,5 @@
 /**
- * Shared utility for consuming streaming chat responses.
- * Supports both SSE (Go API) and plain text (Next.js fallback).
+ * Shared utility for consuming streaming chat responses from the Go API.
  * Parses Claude Code stream-json events into ActivityBlocks.
  */
 
@@ -10,7 +9,7 @@ import { parseStreamEvent, deduplicateBlocks } from "./activity-types";
 export interface StreamChatOptions {
   /** Primary URL (Go API) */
   url: string;
-  /** Fallback URL (Next.js route) */
+  /** @deprecated No longer used — Go API is the sole backend */
   fallbackUrl?: string;
   /** POST body */
   body: Record<string, unknown>;

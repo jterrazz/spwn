@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { IconPackage, IconDownload, IconExternalLink } from "@tabler/icons-react";
+import { goApiUrl } from "@/lib/api-client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/use-page-title";
 
@@ -18,7 +19,7 @@ export default function MarketplacePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/packages")
+    fetch(goApiUrl("/api/packages"))
       .then((r) => r.json())
       .then((data) => {
         setPackages(data.packages ?? []);

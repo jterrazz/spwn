@@ -1,9 +1,6 @@
 /**
- * API client for the Go API server (port 3001).
- * Falls back to Next.js API routes if the Go API is unavailable.
- *
- * Client components call these functions directly — they try the Go API first
- * (fast, native) and fall back to the local /api/* Next.js routes (exec-based).
+ * API client for the Go API server.
+ * The Go API is the sole backend — no fallback to Next.js API routes.
  */
 
 import type { World, AgentProfile } from "./types";
@@ -20,10 +17,12 @@ function getGoApiBase(): string {
     _goApiBase = tauriBase;
     return tauriBase;
   }
-  // Default
-  return typeof window !== "undefined"
-    ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001")
-    : "http://localhost:3001";
+  // Default: use the same hostname as the current page (works on LAN)
+  // so 192.168.1.137:3000 → 192.168.1.137:3001
+  if (typeof window !== "undefined") {
+    return process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:3001`;
+  }
+  return "http://localhost:3001";
 }
 
 // Allow Tauri to set the port after initialization
@@ -31,11 +30,9 @@ export function setApiBase(base: string) {
   _goApiBase = base;
 }
 
-// getGoApiBase() is now dynamic — use getGoApiBase() everywhere
-
 // ── Connection status tracking ──
 
-export type ConnectionStatus = "connected" | "degraded" | "disconnected";
+export type ConnectionStatus = "connected" | "disconnected";
 
 let _connectionStatus: ConnectionStatus = "disconnected";
 const _statusListeners: Set<(status: ConnectionStatus) => void> = new Set();
@@ -56,27 +53,30 @@ export function onConnectionStatusChange(fn: (status: ConnectionStatus) => void)
   return () => { _statusListeners.delete(fn); };
 }
 
-// ── Core fetch helpers ──
+// ── Core fetch helper ──
 
-async function tryGoApi<T>(path: string, init?: RequestInit): Promise<T | null> {
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     const res = await fetch(`${getGoApiBase()}${path}`, {
       ...init,
-      signal: AbortSignal.timeout(3000),
+      signal: init?.signal ?? AbortSignal.timeout(10000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      setConnectionStatus("disconnected");
+      const body = await res.text().catch(() => "");
+      let msg = `API error ${res.status}`;
+      try { const j = JSON.parse(body); if (j.error) msg = j.error; } catch {}
+      throw new Error(msg);
+    }
     setConnectionStatus("connected");
     return res.json();
-  } catch {
-    return null;
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith("API error")) {
+      throw err;
+    }
+    setConnectionStatus("disconnected");
+    throw new Error("Failed to connect to API");
   }
-}
-
-async function fallbackNextApi<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, init);
-  if (!res.ok) throw new Error(await res.text());
-  setConnectionStatus("degraded");
-  return res.json();
 }
 
 // ── Data normalization ──
@@ -125,110 +125,68 @@ function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentPr
 // ── Public API ──
 
 /**
- * GET from Go API, fall back to Next.js route.
+ * GET from Go API.
  */
-export async function apiGet<T>(goPath: string, nextFallback?: string): Promise<T> {
-  const data = await tryGoApi<T>(goPath);
-  if (data !== null) {
-    // Normalize world data from Go API
-    if (goPath === "/api/universes" && Array.isArray(data)) {
-      return normalizeWorlds(data) as T;
-    }
-    // Normalize agent profile data from Go API
-    if (goPath.match(/^\/api\/agents\/[^/]+$/) && data && typeof data === 'object' && 'name' in (data as object)) {
-      return normalizeAgent(data as unknown as Partial<AgentProfile> & { name: string }) as T;
-    }
-    return data;
+export async function apiGet<T>(goPath: string): Promise<T> {
+  const data = await apiFetch<T>(goPath);
+  // Normalize world data from Go API
+  if (goPath === "/api/universes" && Array.isArray(data)) {
+    return normalizeWorlds(data) as T;
   }
-  try {
-    return await fallbackNextApi<T>(nextFallback ?? goPath);
-  } catch {
-    setConnectionStatus("disconnected");
-    throw new Error("Failed to connect to any API");
+  // Normalize agent profile data from Go API
+  if (goPath.match(/^\/api\/agents\/[^/]+$/) && data && typeof data === 'object' && 'name' in (data as object)) {
+    return normalizeAgent(data as unknown as Partial<AgentProfile> & { name: string }) as T;
   }
+  return data;
 }
 
 /**
- * POST to Go API, fall back to Next.js route.
+ * POST to Go API.
  */
 export async function apiPost<T>(
   goPath: string,
   body?: unknown,
-  nextFallback?: string
 ): Promise<T> {
-  const init: RequestInit = {
+  return apiFetch<T>(goPath, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
-  };
-
-  const data = await tryGoApi<T>(goPath, init);
-  if (data !== null) return data;
-  try {
-    return await fallbackNextApi<T>(nextFallback ?? goPath, init);
-  } catch {
-    setConnectionStatus("disconnected");
-    throw new Error("Failed to connect to any API");
-  }
+  });
 }
 
 /**
- * PUT to Go API, fall back to Next.js route.
+ * PUT to Go API.
  */
 export async function apiPut<T>(
   goPath: string,
   body?: unknown,
-  nextFallback?: string
 ): Promise<T> {
-  const init: RequestInit = {
+  return apiFetch<T>(goPath, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
-  };
-
-  const data = await tryGoApi<T>(goPath, init);
-  if (data !== null) return data;
-  try {
-    return await fallbackNextApi<T>(nextFallback ?? goPath, init);
-  } catch {
-    setConnectionStatus("disconnected");
-    throw new Error("Failed to connect to any API");
-  }
+  });
 }
 
 /**
- * DELETE on Go API, fall back to Next.js route.
+ * DELETE on Go API.
  */
-export async function apiDelete(goPath: string, nextFallback?: string): Promise<void> {
-  const init: RequestInit = { method: "DELETE" };
-  const goRes = await tryGoApi<unknown>(goPath, init);
-  if (goRes !== null) return;
-  try {
-    await fallbackNextApi<unknown>(nextFallback ?? goPath, init);
-  } catch {
-    setConnectionStatus("disconnected");
-    throw new Error("Failed to connect to any API");
-  }
+export async function apiDelete(goPath: string): Promise<void> {
+  await apiFetch<unknown>(goPath, { method: "DELETE" });
 }
 
 /**
  * POST that returns { ok, error } shape — used for action buttons.
- * Tries Go API first, then Next.js fallback.
  */
 export async function apiAction(
   goPath: string,
   body?: unknown,
-  nextFallback?: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const init: RequestInit = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  };
-
   try {
     const res = await fetch(`${getGoApiBase()}${goPath}`, {
-      ...init,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(10000),
     });
     const data = await res.json();
@@ -236,17 +194,8 @@ export async function apiAction(
     setConnectionStatus("connected");
     return { ok: true };
   } catch {
-    // Fall back to Next.js route
-    try {
-      const res = await fetch(nextFallback ?? goPath, init);
-      const data = await res.json();
-      if (!res.ok) return { ok: false, error: data.error || "Unknown error" };
-      setConnectionStatus("degraded");
-      return { ok: true };
-    } catch {
-      setConnectionStatus("disconnected");
-      return { ok: false, error: "Failed to connect to API" };
-    }
+    setConnectionStatus("disconnected");
+    return { ok: false, error: "Failed to connect to API" };
   }
 }
 

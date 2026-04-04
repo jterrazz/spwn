@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 	"time"
 
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/auth"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/blueprint"
@@ -321,26 +321,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 	envVars := []string{
 		"SPWN_HOME=/spwn-data",
 	}
-	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
-		if val := os.Getenv(key); val != "" {
-			envVars = append(envVars, key+"="+val)
-		}
-	}
-	// Also try the cached auth token file
-	if os.Getenv("ANTHROPIC_API_KEY") == "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
-		tokenPath := foundation.BaseDir() + "/.auth-token"
-		if data, err := os.ReadFile(tokenPath); err == nil {
-			token := strings.TrimSpace(string(data))
-			if token != "" {
-				// Detect token type: sk-ant-* is an API key, otherwise OAuth
-				if strings.HasPrefix(token, "sk-ant-") {
-					envVars = append(envVars, "ANTHROPIC_API_KEY="+token)
-				} else {
-					envVars = append(envVars, "CLAUDE_CODE_OAUTH_TOKEN="+token)
-				}
-			}
-		}
-	}
+	envVars = append(envVars, auth.DockerEnvVars()...)
 
 	// Create container — entrypoint is "sleep infinity" (set in Dockerfile),
 	// we docker exec claude into it when we want to talk.
@@ -348,11 +329,11 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		Image: image,
 		Env:   envVars,
 	}
-	// Ensure architect directives file exists on the host
-	architectDirectivesPath := foundation.BaseDir() + "/architect/directives.md"
-	if _, err := os.Stat(architectDirectivesPath); os.IsNotExist(err) {
+	// Ensure architect stack file exists on the host
+	architectStackPath := foundation.BaseDir() + "/architect/stack.md"
+	if _, err := os.Stat(architectStackPath); os.IsNotExist(err) {
 		_ = os.MkdirAll(foundation.BaseDir()+"/architect", 0755)
-		_ = os.WriteFile(architectDirectivesPath, []byte("# Architect Directives\n\n## In Progress\n\n## Backlog\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Completed\n"), 0644)
+		_ = os.WriteFile(architectStackPath, []byte("# Architect Stack\n\n## Focus\n\n## Queued\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Done\n"), 0644)
 	}
 
 	// Ensure blueprint directory exists with defaults
@@ -362,7 +343,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		Binds: []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
 			foundation.BaseDir() + ":/spwn-data",
-			architectDirectivesPath + ":/world/directives.md",
+			architectStackPath + ":/world/stack.md",
 			foundation.BlueprintDir() + ":/blueprint",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
@@ -479,24 +460,7 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	args = append(args, "-e", "SPWN_HOME=/spwn-data")
 
 	// Pass auth env vars into the exec (in case container env was not set at start)
-	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
-		if val := os.Getenv(key); val != "" {
-			args = append(args, "-e", key+"="+val)
-		}
-	}
-	if os.Getenv("ANTHROPIC_API_KEY") == "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
-		tokenPath := foundation.BaseDir() + "/.auth-token"
-		if data, err := os.ReadFile(tokenPath); err == nil {
-			token := strings.TrimSpace(string(data))
-			if token != "" {
-				if strings.HasPrefix(token, "sk-ant-") {
-					args = append(args, "-e", "ANTHROPIC_API_KEY="+token)
-				} else {
-					args = append(args, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
-				}
-			}
-		}
-	}
+	args = append(args, auth.DockerEnvArgs()...)
 
 	args = append(args, foundation.ArchitectContainerName)
 
@@ -505,11 +469,11 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	if message != "" {
 		claudeArgs = append(claudeArgs, "-p", message, "--print",
 			"--append-system-prompt",
-			"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
-				"IMPORTANT: When a user asks you to do something, you MUST include a [DIRECTIVE_ADD] marker in your response. "+
-				"Format: [DIRECTIVE_ADD] Short directive title\\nPriority: high|medium|low\\nBrief description. "+
-				"Also update /world/directives.md with the new directive. "+
-				"When completing a directive use [DIRECTIVE_DONE] Short directive title. "+
+		"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
+				"IMPORTANT: When a user asks you to do something, you MUST include a [STACK_PUSH] marker in your response. "+
+				"Format: [STACK_PUSH] Short task title\\nPriority: blocking|queued\\nBrief description. "+
+				"Also update /world/stack.md with the new task. "+
+				"When completing a task use [STACK_POP] Short task title. "+
 				"Read /world/skills/ for detailed guides. "+
 				"BLUEPRINT: You maintain /blueprint/ as the single source of truth. "+
 				"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. "+

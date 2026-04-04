@@ -54,8 +54,8 @@ export default function AgentProfilePage() {
 
   const fetchProfile = useCallback(() => {
     Promise.all([
-      apiGet<AgentProfile>(`/api/agents/${agentName}`, `/api/agents/${agentName}`).catch(() => null),
-      apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`, `/api/agents/${agentName}/mind`).catch(() => null),
+      apiGet<AgentProfile>(`/api/agents/${agentName}`).catch(() => null),
+      apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`).catch(() => null),
     ]).then(([agentProfile, tree]) => {
       setProfile(agentProfile ?? null);
       setMindTree(tree ?? {});
@@ -94,7 +94,6 @@ export default function AgentProfilePage() {
       const result = await apiAction(
         `/api/agents/${agentName}/${action}`,
         body,
-        `/api/agents/${agentName}/${action}`
       );
       if (!result.ok) {
         showFeedback(`Error: ${result.error || "Unknown error"}`);
@@ -155,7 +154,7 @@ export default function AgentProfilePage() {
         </p>
         <button
           onClick={() => {
-            apiAction("/api/agents", { name: agentName }, "/api/agents/create").then((result) => {
+            apiAction("/api/agents", { name: agentName }).then((result) => {
               if (result.ok) {
                 fetchProfile();
                 showFeedback("Agent created!");
@@ -648,7 +647,6 @@ function AgentChat({ agentName }: { agentName: string }) {
 
     await streamChat({
       url: goApiUrl(`/api/agents/${agentName}/talk`),
-      fallbackUrl: `/api/agents/${agentName}/talk`,
       body: { message: msg },
       onBlocks: (newBlocks) => {
         setMessages((prev) => {

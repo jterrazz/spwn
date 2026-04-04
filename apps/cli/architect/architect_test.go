@@ -80,6 +80,16 @@ func TestArchitectCmd_HasAllSubcommands(t *testing.T) {
 	}
 }
 
+func TestTalkCmd_HasOutputFormatFlag(t *testing.T) {
+	f := talkCmd.Flags().Lookup("output-format")
+	if f == nil {
+		t.Error("missing --output-format flag on talk command")
+	}
+	if f != nil && f.DefValue != "" {
+		t.Errorf("expected default value empty, got %q", f.DefValue)
+	}
+}
+
 func TestTalkCmd_DescriptionMentionsAutoStart(t *testing.T) {
 	// The runTalk function auto-starts the architect if not running.
 	// While we can't easily unit-test the full runTalk without Docker,

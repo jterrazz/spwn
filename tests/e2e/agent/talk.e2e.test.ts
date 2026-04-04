@@ -162,6 +162,18 @@ describe("agent talk", () => {
     expectLine(result.output, /agent "ghost" not found/);
   });
 
+  test("talk to nonexistent agent shows helpful error with agent new hint", () => {
+    // WHEN — talking to an agent that was never created
+    ctx = createTestContext();
+    const result = ctx.spwn(["agent", "talk", "does-not-exist", "hello"]);
+
+    // THEN — error is helpful (suggests spwn agent new) and no raw exit status
+    expect(result.exitCode).not.toBe(0);
+    expectLine(result.output, /spwn agent new/);
+    // Should NOT show raw Go error output
+    expect(result.output).not.toContain("exit status 1");
+  });
+
   test("agent ls shows unattached after destroy", () => {
     // GIVEN — an agent was in a world, then world destroyed
     ctx = createTestContext();

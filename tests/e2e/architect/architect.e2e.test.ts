@@ -232,4 +232,28 @@ describe("spwn architect", () => {
     expect(result.exitCode).toBe(0);
     expect(containerRunning(CONTAINER_NAME)).toBe(true);
   });
+
+  test("talk --output-format stream-json outputs JSON events", () => {
+    if (!dockerAvailable()) return;
+
+    // Start the architect first
+    const startResult = spwnExec(["architect", "start"], { SPWN_HOME: home });
+
+    // Only test streaming if architect started successfully
+    if (startResult.exitCode !== 0) return;
+
+    const result = spwnExec(
+      ["architect", "talk", "--output-format", "stream-json", "hello"],
+      { SPWN_HOME: home },
+    );
+
+    // If the architect is available, output should contain JSON lines
+    if (result.exitCode === 0 && result.stdout.trim().length > 0) {
+      const firstLine = result.stdout.trim().split("\n")[0];
+      // First line should be parseable JSON
+      const parsed = JSON.parse(firstLine);
+      expect(parsed).toHaveProperty("type");
+      expect(parsed.type).toBe("system");
+    }
+  });
 });

@@ -39,7 +39,7 @@ type SpawnOpts struct {
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
-	IsGod         bool                       // When true, mounts Docker socket + SPWN_HOME for God mode.
+	IsArchitect   bool                       // When true, mounts Docker socket + SPWN_HOME for Architect mode.
 }
 
 func (opts *SpawnOpts) progress(event, detail string) {
@@ -89,8 +89,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		binds = append(binds, workspace+":/workspace")
 	}
 
-	// God mode: mount Docker socket + SPWN state directory
-	if opts.IsGod {
+	// Architect mode: mount Docker socket + SPWN state directory
+	if opts.IsArchitect {
 		binds = append(binds, "/var/run/docker.sock:/var/run/docker.sock")
 		binds = append(binds, foundation.BaseDir()+":/home/spwn/.spwn")
 	}
@@ -182,7 +182,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Resolve image (env override for testing, then opts, then default)
 	image := foundation.BaseImage
-	if opts.IsGod {
+	if opts.IsArchitect {
 		image = foundation.GodImage
 	}
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
@@ -201,8 +201,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		if !alreadyCached {
 			opts.progress("image_building", image)
 			dockerfile := images.Dockerfile
-			if opts.IsGod {
-				dockerfile = images.DockerfileGod
+			if opts.IsArchitect {
+				dockerfile = images.DockerfileWorld
 			}
 			if err := a.backend.EnsureImage(ctx, image, dockerfile, opts.logWriter()); err != nil {
 				return nil, fmt.Errorf("ensure base image: %w", err)
@@ -236,9 +236,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// God mode env vars
-	if opts.IsGod {
-		env = append(env, "SPWN_GOD_MODE=1")
+	// Architect mode env vars
+	if opts.IsArchitect {
+		env = append(env, "SPWN_ARCHITECT_MODE=1")
 		env = append(env, "SPWN_HOME=/home/spwn/.spwn")
 	}
 
