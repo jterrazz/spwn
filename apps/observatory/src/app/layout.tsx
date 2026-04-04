@@ -8,6 +8,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastProvider } from "@/components/toast-provider";
 import { AppShell } from "@/components/app-shell";
 import { CommandPalette } from "@/components/command-palette";
+import { ArchitectChatProvider } from "@/contexts/architect-chat-context";
+import { ArchitectChatWidget } from "@/components/architect-chat-widget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,7 +65,10 @@ export default function RootLayout({
                 <Aurora />
                 <Stars />
                 <div className="relative z-10 flex-1 min-h-0 h-full">
-                  <AppShell>{children}</AppShell>
+                  <ArchitectChatProvider>
+                    <AppShell>{children}</AppShell>
+                    <ArchitectChatWidget />
+                  </ArchitectChatProvider>
                   <CommandPalette />
                 </div>
               </ToastProvider>

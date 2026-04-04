@@ -12,7 +12,7 @@ import {
 } from "@tabler/icons-react";
 import { goApiUrl } from "@/lib/api-client";
 
-interface BlueprintFile {
+interface KnowledgeFile {
   path: string;
   size: number;
   modified: string;
@@ -23,10 +23,10 @@ interface TreeNode {
   path: string;
   isDir: boolean;
   children: TreeNode[];
-  file?: BlueprintFile;
+  file?: KnowledgeFile;
 }
 
-function buildTree(files: BlueprintFile[]): TreeNode[] {
+function buildTree(files: KnowledgeFile[]): TreeNode[] {
   const root: TreeNode[] = [];
 
   for (const file of files) {
@@ -172,39 +172,37 @@ function FileTreeNode({
   );
 }
 
-export function BlueprintBrowser({ compact = false }: { compact?: boolean }) {
-  const [files, setFiles] = useState<BlueprintFile[]>([]);
+export function KnowledgeBrowser({ compact = false, worldId, architectMode = false }: { compact?: boolean; worldId?: string; architectMode?: boolean }) {
+  const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
 
+  // Compute the correct API base path
+  const knowledgeApiBase = architectMode
+    ? "/api/architect/knowledge"
+    : worldId
+      ? `/api/worlds/${worldId}/knowledge`
+      : "/api/knowledge"; // fallback (shouldn't happen)
+
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await fetch(goApiUrl("/api/blueprint"));
+        const res = await fetch(goApiUrl(knowledgeApiBase));
         if (res.ok) {
           const data = await res.json();
           setFiles(data.files ?? []);
         }
       } catch {
-        // fall back to Next.js route
-        try {
-          const res = await fetch("/api/blueprint");
-          if (res.ok) {
-            const data = await res.json();
-            setFiles(data.files ?? []);
-          }
-        } catch {
-          // ignore
-        }
+        // ignore
       } finally {
         setLoading(false);
       }
     };
     fetchFiles();
-  }, []);
+  }, [knowledgeApiBase]);
 
   const filteredFiles = useMemo(() => {
     if (!searchQuery.trim()) return files;
@@ -226,7 +224,7 @@ export function BlueprintBrowser({ compact = false }: { compact?: boolean }) {
     setFileContent(null);
 
     try {
-      const res = await fetch(goApiUrl(`/api/blueprint/${path}`));
+      const res = await fetch(goApiUrl(`${knowledgeApiBase}/${path}`));
       if (res.ok) {
         const data = await res.json();
         setFileContent(data.content ?? "");
@@ -234,17 +232,7 @@ export function BlueprintBrowser({ compact = false }: { compact?: boolean }) {
         setFileContent("⚠ Failed to load file");
       }
     } catch {
-      try {
-        const res = await fetch(`/api/blueprint/${path}`);
-        if (res.ok) {
-          const data = await res.json();
-          setFileContent(data.content ?? "");
-        } else {
-          setFileContent("⚠ Failed to load file");
-        }
-      } catch {
-        setFileContent("⚠ Failed to connect to API");
-      }
+      setFileContent("⚠ Failed to connect to API");
     } finally {
       setContentLoading(false);
     }
@@ -257,7 +245,7 @@ export function BlueprintBrowser({ compact = false }: { compact?: boolean }) {
       {/* Header */}
       <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/[0.06]">
         <IconBook2 size={16} className="text-muted-foreground/40" />
-        <h3 className="text-xs font-heading tracking-wide text-foreground/60 flex-1">Blueprint</h3>
+        <h3 className="text-xs font-heading tracking-wide text-foreground/60 flex-1">Knowledge</h3>
         <span className="text-[9px] font-mono text-muted-foreground/25 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.05]">
           managed by architect
         </span>
@@ -293,7 +281,7 @@ export function BlueprintBrowser({ compact = false }: { compact?: boolean }) {
           ) : tree.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <IconBook2 size={28} className="text-muted-foreground/15 mb-3" />
-              <p className="text-xs text-muted-foreground/35">No blueprint files yet</p>
+              <p className="text-xs text-muted-foreground/35">No knowledge files yet</p>
               <p className="text-[10px] text-muted-foreground/20 mt-1 max-w-[200px]">
                 Talk to the Architect to start building your knowledge base
               </p>
@@ -350,15 +338,15 @@ export function BlueprintBrowser({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/** Inline card shown in chat when architect updates a blueprint file. */
-export function BlueprintUpdateCard({ path, description }: { path: string; description?: string }) {
+/** Inline card shown in chat when architect updates a knowledge file. */
+export function KnowledgeUpdateCard({ path, description }: { path: string; description?: string }) {
   return (
     <div className="max-w-[80%] mt-1.5 animate-in slide-in-from-bottom-2 fade-in duration-300">
       <div className="rounded-lg overflow-hidden border border-indigo-500/20 bg-indigo-500/[0.06]">
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 border-b border-indigo-500/15">
           <span className="text-[10px]">📘</span>
           <span className="text-[10px] font-mono uppercase tracking-wider text-indigo-400/70">
-            Blueprint Updated
+            Knowledge Updated
           </span>
         </div>
         <div className="px-3 py-2">

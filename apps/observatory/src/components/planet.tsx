@@ -10,6 +10,7 @@ interface PlanetProps {
   onClick: () => void;
   onEnter?: () => void;
   isSelected: boolean;
+  compact?: boolean;
 }
 
 const STATUS_CONFIG: Record<
@@ -96,7 +97,7 @@ function agentToLocation(name: string): [number, number] {
 }
 
 
-export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetProps) {
+export function Planet({ world, index, onClick, onEnter, isSelected, compact }: PlanetProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
@@ -112,7 +113,7 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const size = isMobile ? 140 : 200; // smaller on mobile
+  const size = compact ? 80 : isMobile ? 140 : 200;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const glowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -151,7 +152,14 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
     const spin = () => {
       frame++;
       const sel = selectedRef.current;
-      phiRef.current += sel ? 0.005 : 0.002;
+
+      // Throttle non-selected compact planets to every 3rd frame for performance
+      if (compact && !sel && frame % 3 !== 0) {
+        raf = requestAnimationFrame(spin);
+        return;
+      }
+
+      phiRef.current += sel ? 0.005 : (compact ? 0.006 : 0.002);
 
       // Selected: gentle theta wobble + breathing diffuse
       const theta = sel
@@ -201,21 +209,26 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
       onClick={onClick}
       role="button"
       tabIndex={0}
-      className="group relative flex flex-col items-center transition-all duration-500 focus:outline-none cursor-pointer"
+      className="group relative flex flex-col items-center focus:outline-none cursor-pointer will-change-transform"
     >
       {/* ── Top HUD: name + status ── */}
       <div
-        className="text-center transition-all duration-500"
-        style={{ marginBottom: isSelected ? 64 : 12, opacity: isSelected ? 1 : 0.4 }}
+        className="text-center"
+        style={{
+          marginBottom: isSelected ? 16 : 8,
+          opacity: isSelected ? 1 : 0.4,
+          transition: "margin-bottom 0.7s ease-out, opacity 0.7s ease-out",
+        }}
       >
         <p
-          className="font-heading tracking-wider transition-all duration-500"
+          className="font-heading tracking-wider"
           style={{
             color: isSelected
               ? "rgba(255,255,255,0.95)"
               : "rgba(255,255,255,0.4)",
             fontSize: isSelected ? "1.15rem" : "0.8rem",
             letterSpacing: isSelected ? "0.12em" : "0.05em",
+            transition: "color 0.7s ease-out, font-size 0.7s ease-out, letter-spacing 0.7s ease-out",
           }}
         >
           {name}
@@ -223,12 +236,13 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
         <div className="flex items-center justify-center gap-2 mt-1.5">
           <div className="relative">
             <div
-              className="w-1.5 h-1.5 rounded-full transition-all duration-500"
+              className="w-1.5 h-1.5 rounded-full"
               style={{
                 backgroundColor: STATUS_DOT_CSS[world.status],
                 boxShadow: isSelected
                   ? `0 0 8px ${STATUS_DOT_CSS[world.status]}`
                   : "none",
+                transition: "box-shadow 0.7s ease-out",
               }}
             />
             {world.status === "running" && (
@@ -247,14 +261,15 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
       {/* ── Globe ── */}
       <div
         ref={wrapperRef}
-        className="relative transition-all duration-700 ease-out"
+        className="relative will-change-[transform,filter]"
         style={{
           width: size,
           height: size,
-          transform: `scale(${isSelected ? (isMobile ? 1.3 : 1.8) : (isMobile ? 0.7 : 0.85)})`,
+          transform: `scale(${isSelected ? (isMobile ? 1.2 : (compact ? 1.3 : 1.8)) : (isMobile ? 0.7 : 0.85)})`,
           filter: isSelected
             ? `brightness(1.1) drop-shadow(0 0 24px ${STATUS_DOT_CSS[world.status]}40)`
             : "blur(1.5px) brightness(0.6)",
+          transition: "transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <canvas
@@ -287,71 +302,6 @@ export function Planet({ world, index, onClick, onEnter, isSelected }: PlanetPro
         ))}
       </div>
 
-      {/* ── Bottom HUD: metadata (selected only) ── */}
-      <div
-        className="transition-all duration-500 w-52"
-        style={{
-          marginTop: isSelected ? 64 : 12,
-          opacity: isSelected ? 1 : 0,
-          transform: isSelected ? "translateY(0)" : "translateY(12px)",
-          pointerEvents: isSelected ? "auto" : "none",
-        }}
-      >
-        {/* Agents row */}
-        <div className="flex items-center justify-center gap-3 mb-3">
-          {world.agents.map((a) => (
-            <div key={a.name} className="flex items-center gap-1.5">
-              <div
-                className="w-1 h-1 rounded-full"
-                style={{
-                  backgroundColor: STATUS_DOT_CSS[a.status] ?? STATUS_DOT_CSS.stopped,
-                  boxShadow: `0 0 4px ${STATUS_DOT_CSS[a.status] ?? STATUS_DOT_CSS.stopped}`,
-                }}
-              />
-              <span className="text-[11px] font-mono text-[rgba(255,255,255,0.6)]">
-                {a.name}
-              </span>
-              <span className="text-[9px] text-[rgba(255,255,255,0.25)]">
-                {TIER_ICON[a.tier] ?? "◌"}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Stat grid */}
-        <div className="glass-subtle px-4 py-3">
-          <div className="grid grid-cols-3 gap-y-2.5 text-center">
-            <div>
-              <p className="text-[9px] uppercase tracking-widest text-[rgba(255,255,255,0.2)] mb-0.5">Config</p>
-              <p className="text-[11px] font-mono text-[rgba(255,255,255,0.6)]">{world.config}</p>
-            </div>
-            <div>
-              <p className="text-[9px] uppercase tracking-widest text-[rgba(255,255,255,0.2)] mb-0.5">Uptime</p>
-              <p className="text-[11px] font-mono text-[rgba(255,255,255,0.6)]">{timeAgo(world.created_at)}</p>
-            </div>
-            <div>
-              <p className="text-[9px] uppercase tracking-widest text-[rgba(255,255,255,0.2)] mb-0.5">Agents</p>
-              <p className="text-[11px] font-mono text-[rgba(255,255,255,0.6)]">{world.agents.length}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Path */}
-        <p className="text-center text-[10px] font-mono text-[rgba(255,255,255,0.2)] mt-2 truncate px-2">
-          {world.workspace}
-        </p>
-
-        {/* Enter button */}
-        <button
-          className="mt-3 w-full py-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[rgba(255,255,255,0.4)] glass-subtle transition-all duration-200 hover:text-white hover:border-[rgba(255,255,255,0.2)] active:scale-[0.97]"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEnter?.();
-          }}
-        >
-          ↵ Enter
-        </button>
-      </div>
     </div>
   );
 }

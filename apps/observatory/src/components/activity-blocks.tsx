@@ -100,7 +100,7 @@ function ToolUseBlockView({ block, result }: { block: { tool: string; input: Rec
     >
       {/* Input */}
       <div className="space-y-1">
-        {Object.entries(block.input).map(([key, value]) => (
+        {Object.entries(block.input || {}).map(([key, value]) => (
           <div key={key} className="flex gap-2">
             <span className="text-muted-foreground/30 shrink-0">{key}:</span>
             <span className="text-foreground/50 break-all">

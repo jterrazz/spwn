@@ -67,7 +67,7 @@ export function RecentActivity({ worlds }: { worlds: World[] }) {
     }
 
     const fetchPromises = Array.from(agentNames).map((name) =>
-      apiGet<AgentProfile>(`/api/agents/${name}`, `/api/agents/${name}`)
+      apiGet<AgentProfile>(`/api/agents/${name}`)
         .then((profile) => {
           if (profile?.journal) {
             for (const entry of profile.journal) {
@@ -95,7 +95,7 @@ export function RecentActivity({ worlds }: { worlds: World[] }) {
 
   if (loading && worlds.length > 0) {
     return (
-      <div className="mt-8 px-8 pb-8">
+      <div className="mt-8 px-6 pb-8">
         <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 flex items-center gap-2">
           <IconActivity size={14} className="opacity-40" />
           Recent Activity
@@ -129,7 +129,7 @@ export function RecentActivity({ worlds }: { worlds: World[] }) {
   };
 
   return (
-    <div className="mt-8 px-8 pb-8">
+    <div className="mt-8 px-6 pb-8">
       <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 flex items-center gap-2">
         <IconActivity size={14} className="opacity-40" />
         Recent Activity

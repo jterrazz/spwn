@@ -113,9 +113,12 @@ pub fn run() {
         })
         .on_window_event(|window, event| {
             match event {
-                // Reapply traffic light position on resize
+                // Reapply traffic light position on resize, move, and focus changes
+                // (moving between screens with different DPI resets them)
                 #[cfg(target_os = "macos")]
-                tauri::WindowEvent::Resized(..) => {
+                tauri::WindowEvent::Resized(..)
+                | tauri::WindowEvent::Moved(..)
+                | tauri::WindowEvent::Focused(true) => {
                     let ns_win = window.ns_window().expect("Failed to get NS window") as cocoa::base::id;
                     position_traffic_lights(ns_win);
                 }

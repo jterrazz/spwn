@@ -54,8 +54,8 @@ export function CommandPalette() {
   useEffect(() => {
     if (!open) return;
     Promise.all([
-      apiGet<World[]>("/api/universes", "/api/worlds").catch(() => [] as World[]),
-      apiGet<AgentListItem[]>("/api/agents", "/api/agents").catch(() => [] as AgentListItem[]),
+      apiGet<World[]>("/api/universes").catch(() => [] as World[]),
+      apiGet<AgentListItem[]>("/api/agents").catch(() => [] as AgentListItem[]),
     ]).then(([w, a]) => {
       setWorlds(w ?? []);
       setAgents(a ?? []);
@@ -144,15 +144,15 @@ export function CommandPalette() {
           <CommandGroup heading="Navigation">
             <CommandItem onSelect={() => navigate("/")}>
               <IconWorldFilled size={14} className="text-muted-foreground/50" />
-              <span>Go to Overview</span>
+              <span>Go to Dashboard</span>
             </CommandItem>
             <CommandItem onSelect={() => navigate("/architect")}>
               <IconBrain size={14} className="text-muted-foreground/50" />
               <span>Go to Architect</span>
             </CommandItem>
-            <CommandItem onSelect={() => navigate("/blueprint")}>
+            <CommandItem onSelect={() => navigate("/knowledge")}>
               <IconBook2 size={14} className="text-muted-foreground/50" />
-              <span>Go to Blueprint</span>
+              <span>Go to Knowledge</span>
             </CommandItem>
             {/* Marketplace — hidden until ready */}
           </CommandGroup>

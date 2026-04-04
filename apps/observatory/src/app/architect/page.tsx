@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiGet } from "@/lib/api-client";
-import { streamChat } from "@/lib/stream-chat";
-import type { ActivityBlock } from "@/lib/activity-types";
+import { goApiUrl } from "@/lib/api-client";
 import { ActivityMessageView } from "@/components/activity-blocks";
 import { usePageTitle } from "@/hooks/use-page-title";
 import {
@@ -19,58 +17,8 @@ import {
   IconArrowUp,
   IconBook2,
 } from "@tabler/icons-react";
-import { BlueprintBrowser, BlueprintUpdateCard } from "@/components/blueprint-browser";
-
-interface ArchitectStatus {
-  status: "running" | "stopped";
-  containerId: string | null;
-  uptime: string | null;
-  error?: string;
-  kpis?: {
-    worlds: number;
-    agents: number;
-    tasksPending: number;
-    tasksCompleted: number;
-  };
-}
-
-interface DirectiveActionData {
-  type: "add" | "done" | "update";
-  title: string;
-  priority?: string;
-  description?: string;
-}
-
-interface BlueprintUpdateData {
-  path: string;
-  description?: string;
-}
-
-interface ChatMessage {
-  role: "user" | "architect";
-  content: string;
-  blocks: ActivityBlock[];
-  timestamp: Date;
-  error?: boolean;
-  cost?: number;
-  duration?: number;
-  directiveAction?: DirectiveActionData;
-  blueprintUpdate?: BlueprintUpdateData;
-}
-
-interface Directive {
-  text: string;
-  done: boolean;
-  priority?: "high" | "medium" | "low";
-  description?: string;
-}
-
-interface DirectivesData {
-  inProgress: Directive[];
-  backlog: Directive[];
-  completed: Directive[];
-  raw: string;
-}
+import { KnowledgeBrowser, KnowledgeUpdateCard } from "@/components/knowledge-browser";
+import { useArchitectChat, type StackData, type StackItem } from "@/contexts/architect-chat-context";
 
 function StatCard({ label, value, sub, accent, icon, loading: isLoading }: { label: string; value: string; sub?: string; accent?: string; icon?: React.ReactNode; loading?: boolean }) {
   if (isLoading) {
@@ -108,11 +56,11 @@ function PriorityBadge({ priority }: { priority?: "high" | "medium" | "low" }) {
   );
 }
 
-function StatusDot({ status }: { status: "inProgress" | "backlog" | "done" }) {
+function StatusDot({ status }: { status: "focus" | "queued" | "done" }) {
   if (status === "done") {
     return <IconCircleCheck size={16} className="text-green-400/70 flex-shrink-0" />;
   }
-  if (status === "inProgress") {
+  if (status === "focus") {
     return (
       <span className="relative flex h-3 w-3 flex-shrink-0">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400/40" />
@@ -123,7 +71,7 @@ function StatusDot({ status }: { status: "inProgress" | "backlog" | "done" }) {
   return <span className="w-3 h-3 rounded-full bg-white/15 flex-shrink-0" />;
 }
 
-function DirectiveCard({ item, status, isHighlighted }: { item: Directive; status: "inProgress" | "backlog" | "done"; isHighlighted: boolean }) {
+function StackCard({ item, status, isHighlighted }: { item: StackItem; status: "focus" | "queued" | "done"; isHighlighted: boolean }) {
   return (
     <div
       className={`group rounded-lg border px-3 py-2.5 transition-all duration-500 ${
@@ -154,15 +102,15 @@ function DirectiveCard({ item, status, isHighlighted }: { item: Directive; statu
   );
 }
 
-function DirectivesPanel({ directives, highlightTitle }: { directives: DirectivesData | null; highlightTitle: string | null }) {
+function StackPanel({ stack, highlightTitle }: { stack: StackData | null; highlightTitle: string | null }) {
   const [showCompleted, setShowCompleted] = useState(false);
 
-  if (!directives) {
+  if (!stack) {
     return (
       <div className="glass-subtle rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2.5">
           <IconClipboardList size={18} className="text-muted-foreground/30" />
-          <h3 className="text-sm font-heading tracking-wide text-muted-foreground/50">Directives</h3>
+          <h3 className="text-sm font-heading tracking-wide text-muted-foreground/50">Stack</h3>
         </div>
         <div className="space-y-2">
           <Skeleton className="h-12 w-full rounded-lg" />
@@ -173,47 +121,44 @@ function DirectivesPanel({ directives, highlightTitle }: { directives: Directive
     );
   }
 
-  const isEmpty = directives.inProgress.length === 0 && directives.backlog.length === 0 && directives.completed.length === 0;
-  const totalActive = directives.inProgress.length + directives.backlog.length;
+  const isEmpty = stack.focus.length === 0 && stack.queued.length === 0 && stack.done.length === 0;
+  const totalActive = stack.focus.length + stack.queued.length;
 
   return (
     <div className="glass-subtle rounded-xl p-5 space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <IconClipboardList size={18} className="text-muted-foreground/40" />
-          <h3 className="text-sm font-heading tracking-wide text-foreground/60">Directives</h3>
+          <h3 className="text-sm font-heading tracking-wide text-foreground/60">Stack</h3>
         </div>
         <span className="text-[9px] font-mono text-muted-foreground/25 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.05]">
           {totalActive > 0 ? `${totalActive} active` : "managed by architect"}
         </span>
       </div>
 
-      {/* Empty state */}
       {isEmpty && (
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="w-10 h-10 rounded-full bg-white/[0.04] flex items-center justify-center mb-3">
             <IconClipboardList size={20} className="text-muted-foreground/20" />
           </div>
-          <p className="text-xs text-muted-foreground/35 font-medium">No directives yet</p>
+          <p className="text-xs text-muted-foreground/35 font-medium">No tasks yet</p>
           <p className="text-[11px] text-muted-foreground/20 mt-1">Talk to the Architect to get started</p>
         </div>
       )}
 
-      {/* In Progress */}
-      {directives.inProgress.length > 0 && (
+      {stack.focus.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/60" />
-            <p className="text-[10px] uppercase tracking-wider font-medium text-yellow-400/60">In Progress</p>
-            <span className="text-[9px] font-mono text-yellow-400/30 ml-auto">{directives.inProgress.length}</span>
+            <p className="text-[10px] uppercase tracking-wider font-medium text-yellow-400/60">Focus</p>
+            <span className="text-[9px] font-mono text-yellow-400/30 ml-auto">{stack.focus.length}</span>
           </div>
           <div className="space-y-1.5">
-            {directives.inProgress.map((item, i) => (
-              <DirectiveCard
+            {stack.focus.map((item, i) => (
+              <StackCard
                 key={`ip-${i}`}
                 item={item}
-                status="inProgress"
+                status="focus"
                 isHighlighted={!!highlightTitle && item.text.includes(highlightTitle)}
               />
             ))}
@@ -221,20 +166,19 @@ function DirectivesPanel({ directives, highlightTitle }: { directives: Directive
         </div>
       )}
 
-      {/* Backlog */}
-      {directives.backlog.length > 0 && (
+      {stack.queued.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground/35">Backlog</p>
-            <span className="text-[9px] font-mono text-muted-foreground/20 ml-auto">{directives.backlog.length}</span>
+            <p className="text-[10px] uppercase tracking-wider font-medium text-muted-foreground/35">Queued</p>
+            <span className="text-[9px] font-mono text-muted-foreground/20 ml-auto">{stack.queued.length}</span>
           </div>
           <div className="space-y-1.5">
-            {directives.backlog.map((item, i) => (
-              <DirectiveCard
+            {stack.queued.map((item, i) => (
+              <StackCard
                 key={`bl-${i}`}
                 item={item}
-                status="backlog"
+                status="queued"
                 isHighlighted={!!highlightTitle && item.text.includes(highlightTitle)}
               />
             ))}
@@ -242,23 +186,22 @@ function DirectivesPanel({ directives, highlightTitle }: { directives: Directive
         </div>
       )}
 
-      {/* Completed (collapsible) */}
-      {directives.completed.length > 0 && (
+      {stack.done.length > 0 && (
         <div className="pt-1 border-t border-white/[0.05]">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
             className="flex items-center gap-2 w-full text-[10px] uppercase tracking-wider text-muted-foreground/25 hover:text-muted-foreground/40 transition-colors py-1"
           >
             {showCompleted ? <IconChevronDown size={12} /> : <IconChevronRight size={12} />}
-            <span>Completed</span>
+            <span>Done</span>
             <span className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400/40 border border-green-500/10">
-              {directives.completed.length}
+              {stack.done.length}
             </span>
           </button>
           {showCompleted && (
             <div className="space-y-1.5 mt-2">
-              {directives.completed.map((item, i) => (
-                <DirectiveCard
+              {stack.done.map((item, i) => (
+                <StackCard
                   key={`done-${i}`}
                   item={item}
                   status="done"
@@ -273,129 +216,29 @@ function DirectivesPanel({ directives, highlightTitle }: { directives: Directive
   );
 }
 
-function extractPriority(text: string): { cleanText: string; priority?: "high" | "medium" | "low"; description?: string } {
-  let cleanText = text;
-  let priority: "high" | "medium" | "low" | undefined;
-  let description: string | undefined;
-
-  // Extract priority markers like [HIGH], [MEDIUM], [LOW], (high), (medium), (low), or **HIGH**
-  const priorityMatch = cleanText.match(/\s*[\[(]*\*{0,2}(HIGH|MEDIUM|LOW)\*{0,2}[\])]*\s*/i);
-  if (priorityMatch) {
-    priority = priorityMatch[1].toLowerCase() as "high" | "medium" | "low";
-    cleanText = cleanText.replace(priorityMatch[0], " ").trim();
-  }
-
-  // Extract description after " - " or " — " separator
-  const descSep = cleanText.match(/\s+[-—]\s+(.+)$/);
-  if (descSep) {
-    description = descSep[1];
-    cleanText = cleanText.slice(0, cleanText.length - descSep[0].length).trim();
-  }
-
-  return { cleanText, priority, description };
-}
-
-function parseDirectivesMd(raw: string): DirectivesData {
-  const lines = raw.split("\n");
-  const inProgress: Directive[] = [];
-  const backlog: Directive[] = [];
-  const completed: Directive[] = [];
-
-  let section = "backlog";
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.toLowerCase().startsWith("## in progress") || trimmed.toLowerCase().startsWith("## in-progress")) {
-      section = "inProgress";
-      continue;
-    }
-    if (trimmed.toLowerCase().startsWith("## backlog")) {
-      section = "backlog";
-      continue;
-    }
-    if (trimmed.toLowerCase().startsWith("## completed") || trimmed.toLowerCase().startsWith("## done")) {
-      section = "completed";
-      continue;
-    }
-    if (trimmed.startsWith("#")) continue;
-
-    // Parse checkbox items
-    const checkMatch = trimmed.match(/^-\s*\[([ xX])\]\s*(.+)/);
-    if (checkMatch) {
-      const done = checkMatch[1] !== " ";
-      const { cleanText, priority, description } = extractPriority(checkMatch[2]);
-      const item: Directive = { text: cleanText, done, priority, description };
-      if (done) {
-        completed.push(item);
-      } else if (section === "inProgress") {
-        inProgress.push(item);
-      } else {
-        backlog.push(item);
-      }
-      continue;
-    }
-
-    // Parse plain list items
-    const listMatch = trimmed.match(/^-\s+(.+)/);
-    if (listMatch) {
-      const { cleanText, priority, description } = extractPriority(listMatch[1]);
-      const item: Directive = { text: cleanText, done: section === "completed", priority, description };
-      if (section === "inProgress") {
-        inProgress.push(item);
-      } else if (section === "completed") {
-        completed.push(item);
-      } else {
-        backlog.push(item);
-      }
-    }
-  }
-
-  return { inProgress, backlog, completed, raw };
-}
-
 export default function ArchitectPage() {
   usePageTitle("Architect");
-  const [architectStatus, setArchitectStatus] = useState<ArchitectStatus | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const {
+    messages,
+    chatInput,
+    setChatInput,
+    sending,
+    sendMessage,
+    architectStatus,
+    isRunning,
+    stack,
+    highlightTitle,
+    setArchitectStatus,
+    loading,
+  } = useArchitectChat();
+
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [directives, setDirectives] = useState<DirectivesData | null>(null);
+  const [activeTab, setActiveTab] = useState<"chat" | "knowledge" | "tasks">("chat");
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState<"chat" | "blueprint" | "tasks">("chat");
-
-  // Chat state
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [highlightTitle, setHighlightTitle] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const fetchDirectives = () => {
-    apiGet<{ content: string }>("/api/architect/directives")
-      .then((data) => {
-        setDirectives(parseDirectivesMd(data.content));
-      })
-      .catch(() => {
-        // No directives available
-      });
-  };
-
-  useEffect(() => {
-    const fetchData = () => {
-      apiGet<ArchitectStatus>("/api/architect/status", "/api/architect/status")
-        .catch(() => ({ status: "stopped" as const, containerId: null, uptime: null }))
-        .then((archStatus) => {
-          setArchitectStatus(archStatus);
-          setLoading(false);
-        });
-    };
-    fetchData();
-    fetchDirectives();
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -411,7 +254,7 @@ export default function ArchitectPage() {
   const handleStart = async () => {
     setActionLoading("start");
     try {
-      const res = await fetch("http://localhost:3001/api/architect/start", { method: "POST" });
+      const res = await fetch(goApiUrl("/api/architect/start"), { method: "POST" });
       if (res.ok) {
         showFeedback("Architect started successfully");
         setArchitectStatus((s) => s ? { ...s, status: "running" } : s);
@@ -429,7 +272,7 @@ export default function ArchitectPage() {
   const handleStop = async () => {
     setActionLoading("stop");
     try {
-      const res = await fetch("http://localhost:3001/api/architect/stop", { method: "POST" });
+      const res = await fetch(goApiUrl("/api/architect/stop"), { method: "POST" });
       if (res.ok) {
         showFeedback("Architect stopped");
         setArchitectStatus((s) => s ? { ...s, status: "stopped" } : s);
@@ -444,170 +287,10 @@ export default function ArchitectPage() {
     }
   };
 
-  const handleTalkResponse = (data: { response?: string; error?: string; directiveAction?: DirectiveActionData; blueprintUpdate?: BlueprintUpdateData }) => {
-    const text = data.response || data.error || "No response";
-    const archMsg: ChatMessage = {
-      role: "architect",
-      content: text,
-      blocks: [{ type: data.error && !data.response ? "error" as const : "text" as const, content: text }],
-      timestamp: new Date(),
-      error: !!data.error && !data.response,
-      directiveAction: data.directiveAction,
-      blueprintUpdate: data.blueprintUpdate,
-    };
-    setMessages((prev) => [...prev, archMsg]);
-
-    // If there's a directive action, refresh directives and highlight the item
-    if (data.directiveAction) {
-      fetchDirectives();
-      setHighlightTitle(data.directiveAction.title);
-      setTimeout(() => setHighlightTitle(null), 3000);
-    }
+  const handleSendMessage = () => {
+    sendMessage();
   };
 
-  const doTalk = async (msg: string) => {
-    const msgIndex = messages.length + 1;
-    setMessages((prev) => [...prev, {
-      role: "architect" as const, content: "", blocks: [], timestamp: new Date(),
-    }]);
-
-    await streamChat({
-      url: "http://localhost:3001/api/architect/talk",
-      fallbackUrl: "/api/architect/talk",
-      body: { message: msg },
-      onBlocks: (newBlocks) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[msgIndex];
-          if (last && last.role === "architect") {
-            const allBlocks = [...last.blocks, ...newBlocks];
-            const textContent = allBlocks
-              .filter((b) => b.type === "text")
-              .map((b) => (b as { content: string }).content)
-              .join("");
-            updated[msgIndex] = { ...last, blocks: allBlocks, content: textContent };
-          }
-          return updated;
-        });
-      },
-      onDone: (meta) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[msgIndex];
-          if (last && last.role === "architect") {
-            updated[msgIndex] = { ...last, cost: meta.cost, duration: meta.duration };
-          }
-          return updated;
-        });
-      },
-      onError: (error) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[msgIndex];
-          if (last && last.role === "architect") {
-            updated[msgIndex] = {
-              ...last,
-              blocks: [...last.blocks, { type: "error" as const, content: error }],
-              content: error,
-              error: true,
-            };
-          }
-          return updated;
-        });
-      },
-    });
-  };
-
-  const handleSendMessage = async () => {
-    const msg = chatInput.trim();
-    if (!msg || sending) return;
-
-    const userMsg: ChatMessage = { role: "user", content: msg, blocks: [{ type: "text", content: msg }], timestamp: new Date() };
-    setMessages((prev) => [...prev, userMsg]);
-    setChatInput("");
-    setSending(true);
-
-    try {
-      // Check if architect is running
-      let running = architectStatus?.status === "running";
-
-      if (!running) {
-        // Show starting message
-        setMessages((prev) => [...prev, {
-          role: "architect",
-          content: "Starting Architect...",
-          blocks: [{ type: "text" as const, content: "Starting Architect..." }],
-          timestamp: new Date(),
-        }]);
-
-        // Start it (try Go API, fallback to Next.js)
-        try {
-          await fetch("http://localhost:3001/api/architect/start", { method: "POST" });
-        } catch {
-          try {
-            await fetch("/api/architect/start", { method: "POST" });
-          } catch {
-            setMessages((prev) => [...prev, {
-              role: "architect",
-              content: "Failed to auto-start Architect. Please start it manually.",
-              blocks: [{ type: "error" as const, content: "Failed to auto-start Architect. Please start it manually." }],
-              timestamp: new Date(),
-              error: true,
-            }]);
-            setSending(false);
-            inputRef.current?.focus();
-            return;
-          }
-        }
-
-        // Wait for it to be ready (poll every 2s, max 30s)
-        for (let i = 0; i < 15; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          try {
-            const statusRes = await fetch("http://localhost:3001/api/architect/status");
-            const statusData = await statusRes.json();
-            if (statusData.status === "running") {
-              running = true;
-              setArchitectStatus((s) => s ? { ...s, status: "running" } : { status: "running", containerId: null, uptime: null });
-              break;
-            }
-          } catch {
-            // Ignore polling errors, keep trying
-          }
-        }
-
-        if (!running) {
-          setMessages((prev) => [...prev, {
-            role: "architect",
-            content: "Architect failed to start after 30s. Please try starting it manually.",
-            blocks: [{ type: "error" as const, content: "Architect failed to start after 30s." }],
-            timestamp: new Date(),
-            error: true,
-          }]);
-          setSending(false);
-          inputRef.current?.focus();
-          return;
-        }
-      }
-
-      // Now talk
-      await doTalk(msg);
-    } catch (e: unknown) {
-      const errMsg = e instanceof Error ? e.message : "Unknown error";
-      setMessages((prev) => [...prev, {
-        role: "architect",
-        content: `Error: ${errMsg}`,
-        blocks: [{ type: "error" as const, content: errMsg }],
-        timestamp: new Date(),
-        error: true,
-      }]);
-    } finally {
-      setSending(false);
-      inputRef.current?.focus();
-    }
-  };
-
-  const isRunning = architectStatus?.status === "running";
   const kpis = architectStatus?.kpis;
 
   return (
@@ -693,7 +376,7 @@ export default function ArchitectPage() {
           loading={loading}
         />
         <StatCard
-          label="Directives"
+          label="Stack"
           value={loading ? "" : String(kpis?.tasksPending ?? 0)}
           sub="pending"
           accent="text-yellow-400"
@@ -703,7 +386,7 @@ export default function ArchitectPage() {
         <StatCard
           label="Done"
           value={loading ? "" : String(kpis?.tasksCompleted ?? 0)}
-          sub="completed"
+          sub="done"
           accent="text-green-400"
           icon={<IconCircleCheck size={14} />}
           loading={loading}
@@ -714,8 +397,8 @@ export default function ArchitectPage() {
       <div className="flex items-center gap-1 border-b border-white/[0.06] pb-0">
         {([
           { key: "chat", label: "Chat", icon: <IconMessageCircle size={14} /> },
-          { key: "blueprint", label: "Blueprint", icon: <IconBook2 size={14} /> },
-          { key: "tasks", label: "Directives", icon: <IconClipboardList size={14} /> },
+          { key: "knowledge", label: "Knowledge", icon: <IconBook2 size={14} /> },
+          { key: "tasks", label: "Stack", icon: <IconClipboardList size={14} /> },
         ] as const).map(({ key, label, icon }) => (
           <button
             key={key}
@@ -775,41 +458,41 @@ export default function ArchitectPage() {
                       {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                     </p>
                   </div>
-                  {msg.directiveAction && (
+                  {msg.stackAction && (
                     <div className="max-w-[80%] mt-1.5 animate-in slide-in-from-bottom-2 fade-in duration-300">
                       <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-blue-500/[0.06]">
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 border-b border-blue-500/15">
                           <span className="text-[10px]">📋</span>
                           <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400/70">
-                            {msg.directiveAction.type === "add" ? "Directive Issued" : msg.directiveAction.type === "done" ? "Directive Resolved" : "Directive Updated"}
+                            {msg.stackAction.type === "push" ? "Task Pushed" : msg.stackAction.type === "pop" ? "Task Popped" : "Task Updated"}
                           </span>
                         </div>
                         <div className="px-3 py-2">
-                          <p className="text-xs font-medium text-blue-200/90">{msg.directiveAction.title}</p>
+                          <p className="text-xs font-medium text-blue-200/90">{msg.stackAction.title}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            {msg.directiveAction.priority && (
+                            {msg.stackAction.priority && (
                               <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
-                                msg.directiveAction.priority.toUpperCase() === "HIGH"
+                                msg.stackAction.priority.toUpperCase() === "HIGH"
                                   ? "bg-red-500/15 text-red-400/80 border-red-500/20"
-                                  : msg.directiveAction.priority.toUpperCase() === "MEDIUM"
+                                  : msg.stackAction.priority.toUpperCase() === "MEDIUM"
                                     ? "bg-amber-500/15 text-amber-400/80 border-amber-500/20"
                                     : "bg-green-500/15 text-green-400/80 border-green-500/20"
                               }`}>
-                                {msg.directiveAction.priority}
+                                {msg.stackAction.priority}
                               </span>
                             )}
-                            {msg.directiveAction.description && (
-                              <span className="text-[10px] text-blue-400/40">{msg.directiveAction.description}</span>
+                            {msg.stackAction.description && (
+                              <span className="text-[10px] text-blue-400/40">{msg.stackAction.description}</span>
                             )}
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
-                  {msg.blueprintUpdate && (
-                    <BlueprintUpdateCard
-                      path={msg.blueprintUpdate.path}
-                      description={msg.blueprintUpdate.description}
+                  {msg.knowledgeUpdate && (
+                    <KnowledgeUpdateCard
+                      path={msg.knowledgeUpdate.path}
+                      description={msg.knowledgeUpdate.description}
                     />
                   )}
                 </div>
@@ -858,19 +541,19 @@ export default function ArchitectPage() {
           </div>
         </div>
 
-        {/* Directives sidebar (1/3 width) */}
+        {/* Stack sidebar (1/3 width) */}
         <div>
-          <DirectivesPanel directives={directives} highlightTitle={highlightTitle} />
+          <StackPanel stack={stack} highlightTitle={highlightTitle} />
         </div>
       </div>
       )}
 
-      {activeTab === "blueprint" && (
-        <BlueprintBrowser compact />
+      {activeTab === "knowledge" && (
+        <KnowledgeBrowser compact architectMode />
       )}
 
       {activeTab === "tasks" && (
-        <DirectivesPanel directives={directives} highlightTitle={highlightTitle} />
+        <StackPanel stack={stack} highlightTitle={highlightTitle} />
       )}
     </div>
   );

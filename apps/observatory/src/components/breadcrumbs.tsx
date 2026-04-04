@@ -26,8 +26,8 @@ export function Breadcrumbs() {
 
   if (pathname === "/architect") {
     crumbs.push({ label: "Architect", href: "/architect" });
-  } else if (pathname === "/blueprint") {
-    crumbs.push({ label: "Blueprint", href: "/blueprint" });
+  } else if (pathname === "/knowledge") {
+    crumbs.push({ label: "Knowledge", href: "/knowledge" });
   } else if (pathname.startsWith("/world/")) {
     const parts = pathname.split("/").filter(Boolean);
     const worldId = parts[1];
