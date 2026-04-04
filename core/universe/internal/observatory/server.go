@@ -10,11 +10,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	agentpkg "spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/foundation/auth"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/manifest"
@@ -114,6 +116,9 @@ func (s *Server) Start() error {
 
 	// --- History endpoints ---
 	mux.HandleFunc("GET /api/worlds/{id}/history", cors(s.handleWorldHistory))
+
+	// --- Activity log ---
+	mux.HandleFunc("GET /api/activity", cors(s.handleActivity))
 
 	// --- Auth endpoints ---
 	mux.HandleFunc("GET /api/auth/providers", cors(s.handleAuthProviders))
@@ -1711,4 +1716,40 @@ func (s *Server) handleWorldHistory(w http.ResponseWriter, r *http.Request) {
 		sessions = []historySession{}
 	}
 	jsonOK(w, map[string]interface{}{"sessions": sessions})
+}
+
+// handleActivity serves the activity log, newest first.
+// Query params: limit (default 50, max 500), type, world, agent, actor, since (RFC3339).
+func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	opts := activity.ReadOpts{
+		Limit:   50,
+		Type:    activity.Type(q.Get("type")),
+		WorldID: q.Get("world"),
+		AgentID: q.Get("agent"),
+		Actor:   q.Get("actor"),
+	}
+	if l := q.Get("limit"); l != "" {
+		if n, err := strconv.Atoi(l); err == nil && n > 0 {
+			if n > 500 {
+				n = 500
+			}
+			opts.Limit = n
+		}
+	}
+	if since := q.Get("since"); since != "" {
+		if t, err := time.Parse(time.RFC3339, since); err == nil {
+			opts.Since = t
+		}
+	}
+
+	events, err := activity.Read(opts)
+	if err != nil {
+		jsonError(w, "failed to read activity log: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if events == nil {
+		events = []activity.Event{}
+	}
+	jsonOK(w, map[string]interface{}{"events": events})
 }

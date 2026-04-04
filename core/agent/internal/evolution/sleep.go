@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"spwn.sh/core/foundation/activity"
 )
 
 // Sleep consolidates experience into durable knowledge.
@@ -40,6 +42,22 @@ func Sleep(mindPath string) (*SleepResult, error) {
 	logPath := filepath.Join(journalDir, fmt.Sprintf("sleep-%s.md", time.Now().Format("2006-01-02")))
 	summary := formatSleepSummary(result)
 	os.WriteFile(logPath, []byte(summary), 0644)
+
+	// Emit activity event
+	agentName := filepath.Base(mindPath)
+	activity.Log(activity.Event{
+		Type:    activity.TypeAgentSlept,
+		Actor:   agentName,
+		Verb:    "slept",
+		Target:  agentName,
+		Phrase:  activity.PhraseAgentSlept(agentName, result.ArchivedPlaybooks),
+		AgentID: agentName,
+		Metadata: map[string]any{
+			"archived_playbooks": result.ArchivedPlaybooks,
+			"archived_knowledge": result.ArchivedKnowledge,
+			"pruned_sessions":    result.PrunedSessions,
+		},
+	})
 
 	return result, nil
 }

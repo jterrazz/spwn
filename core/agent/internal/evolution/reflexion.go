@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"spwn.sh/core/agent/internal/journal"
+	"spwn.sh/core/foundation/activity"
 )
 
 // Dream analyzes recent journal entries and promotes successful patterns to playbooks.
@@ -60,6 +61,21 @@ func Dream(mindPath string) (*ReflexionResult, error) {
 		return nil, fmt.Errorf("cannot write reflexion: %w", err)
 	}
 	result.OutputPath = outPath
+
+	// Emit activity event. Agent name = last path component of mindPath.
+	agentName := filepath.Base(mindPath)
+	activity.Log(activity.Event{
+		Type:    activity.TypeAgentDreamed,
+		Actor:   agentName,
+		Verb:    "dreamed",
+		Target:  agentName,
+		Phrase:  activity.PhraseAgentDreamed(agentName, completed),
+		AgentID: agentName,
+		Metadata: map[string]any{
+			"entries_analyzed": result.EntriesAnalyzed,
+			"success_rate":     result.SuccessRate,
+		},
+	})
 
 	return result, nil
 }

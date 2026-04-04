@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/gate"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/models"
@@ -95,6 +96,16 @@ func (a *Architect) Snapshot(ctx context.Context, worldID, name string) (string,
 	if err := a.backend.Commit(ctx, u.ContainerID, tag); err != nil {
 		return "", fmt.Errorf("snapshot failed: %w", err)
 	}
+
+	activity.Log(activity.Event{
+		Type:    activity.TypeWorldSnapshot,
+		Actor:   "user",
+		Verb:    "snapshotted",
+		Target:  worldID,
+		Phrase:  activity.PhraseWorldSnapshot(worldID, tag),
+		WorldID: worldID,
+	})
+
 	return tag, nil
 }
 

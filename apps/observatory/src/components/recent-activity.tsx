@@ -1,15 +1,41 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IconActivity } from "@tabler/icons-react";
-import type { World, AgentProfile } from "@/lib/types";
+import {
+  IconWorldFilled,
+  IconTrashFilled,
+  IconUserFilled,
+  IconUserOff,
+  IconBrain,
+  IconMoonFilled,
+  IconGitFork,
+  IconMessageFilled,
+  IconHexagonFilled,
+  IconHexagonOff,
+  IconCamera,
+  IconSparkles,
+} from "@tabler/icons-react";
 import { apiGet } from "@/lib/api-client";
+
+type ActivityType =
+  | "world.spawned" | "world.destroyed" | "world.snapshot" | "world.state_changed"
+  | "agent.created" | "agent.deleted" | "agent.joined" | "agent.left"
+  | "agent.dreamed" | "agent.slept" | "agent.forked" | "agent.talked"
+  | "architect.started" | "architect.stopped" | "architect.talked"
+  | "world.session_ended";
 
 interface ActivityEvent {
   id: string;
-  text: string;
-  time: string;
-  type: "spawn" | "dream" | "create" | "info";
+  timestamp: string;
+  type: ActivityType;
+  actor: string;
+  verb: string;
+  target?: string;
+  phrase: string;
+  world_id?: string;
+  agent_id?: string;
+  duration_ms?: number;
+  cost_usd?: number;
 }
 
 function timeAgo(iso: string): string {
@@ -24,134 +50,95 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-function extractName(id: string): string {
-  const parts = id.split("-");
-  return parts.length >= 2
-    ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1)
-    : id;
-}
+const TYPE_CONFIG: Record<ActivityType, { icon: typeof IconWorldFilled; color: string; bg: string }> = {
+  "world.spawned":        { icon: IconWorldFilled,      color: "text-green-400/70",  bg: "bg-green-500/[0.08]" },
+  "world.destroyed":      { icon: IconTrashFilled,      color: "text-red-400/70",    bg: "bg-red-500/[0.08]" },
+  "world.snapshot":       { icon: IconCamera,           color: "text-blue-400/70",   bg: "bg-blue-500/[0.08]" },
+  "world.state_changed":  { icon: IconSparkles,         color: "text-amber-400/70",  bg: "bg-amber-500/[0.08]" },
+  "world.session_ended":  { icon: IconSparkles,         color: "text-foreground/50", bg: "bg-white/[0.04]" },
+  "agent.created":        { icon: IconUserFilled,       color: "text-blue-400/70",   bg: "bg-blue-500/[0.08]" },
+  "agent.deleted":        { icon: IconUserOff,          color: "text-red-400/70",    bg: "bg-red-500/[0.08]" },
+  "agent.joined":         { icon: IconUserFilled,       color: "text-blue-400/70",   bg: "bg-blue-500/[0.08]" },
+  "agent.left":           { icon: IconUserOff,          color: "text-zinc-400/60",   bg: "bg-zinc-500/[0.08]" },
+  "agent.dreamed":        { icon: IconBrain,            color: "text-purple-400/70", bg: "bg-purple-500/[0.08]" },
+  "agent.slept":          { icon: IconMoonFilled,       color: "text-purple-400/70", bg: "bg-purple-500/[0.08]" },
+  "agent.forked":         { icon: IconGitFork,          color: "text-cyan-400/70",   bg: "bg-cyan-500/[0.08]" },
+  "agent.talked":         { icon: IconMessageFilled,    color: "text-foreground/50", bg: "bg-white/[0.04]" },
+  "architect.started":    { icon: IconHexagonFilled,    color: "text-green-400/70",  bg: "bg-green-500/[0.08]" },
+  "architect.stopped":    { icon: IconHexagonOff,       color: "text-zinc-400/60",   bg: "bg-zinc-500/[0.08]" },
+  "architect.talked":     { icon: IconHexagonFilled,    color: "text-foreground/50", bg: "bg-white/[0.04]" },
+};
 
-export function RecentActivity({ worlds }: { worlds: World[] }) {
+export function RecentActivity() {
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const allEvents: ActivityEvent[] = [];
-
-    // Add world creation events
-    for (const world of worlds) {
-      allEvents.push({
-        id: `world-${world.id}`,
-        text: `${extractName(world.id)} was spawned`,
-        time: world.created_at,
-        type: "spawn",
-      });
-
-      // Add agent events from worlds
-      for (const agent of world.agents) {
-        allEvents.push({
-          id: `agent-${world.id}-${agent.name}`,
-          text: `${agent.name} joined ${extractName(world.id)}`,
-          time: world.created_at,
-          type: "create",
-        });
+    const fetchEvents = async () => {
+      try {
+        const data = await apiGet<{ events: ActivityEvent[] }>("/api/activity?limit=12");
+        setEvents(data.events ?? []);
+      } catch {
+        // keep old events
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+    fetchEvents();
+    const interval = setInterval(fetchEvents, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
-    // Fetch journal entries from all agents in worlds
-    const agentNames = new Set<string>();
-    for (const world of worlds) {
-      for (const agent of world.agents) {
-        agentNames.add(agent.name);
-      }
-    }
-
-    const fetchPromises = Array.from(agentNames).map((name) =>
-      apiGet<AgentProfile>(`/api/agents/${name}`)
-        .then((profile) => {
-          if (profile?.journal) {
-            for (const entry of profile.journal) {
-              allEvents.push({
-                id: `journal-${name}-${entry.date}`,
-                text: `${name}: ${entry.summary}`,
-                time: entry.date,
-                type: "dream",
-              });
-            }
-          }
-        })
-        .catch(() => {})
-    );
-
-    Promise.all(fetchPromises).then(() => {
-      // Sort by most recent first
-      allEvents.sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
-      setEvents(allEvents.slice(0, 10));
-      setLoading(false);
-    });
-  }, [worlds]);
-
-  if (loading && worlds.length > 0) {
+  if (loading) {
     return (
-      <div className="mt-8 px-6 pb-8">
-        <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 flex items-center gap-2">
-          <IconActivity size={14} className="opacity-40" />
-          Recent Activity
-        </h2>
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-8 rounded-lg bg-white/[0.02] animate-pulse"
-            />
-          ))}
-        </div>
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-14 rounded-xl bg-white/[0.02] animate-pulse" />
+        ))}
       </div>
     );
   }
 
-  if (events.length === 0) return null;
-
-  const typeColors: Record<string, string> = {
-    spawn: "text-green-400/60",
-    dream: "text-purple-400/60",
-    create: "text-blue-400/60",
-    info: "text-muted-foreground/40",
-  };
-
-  const typeDots: Record<string, string> = {
-    spawn: "bg-green-500",
-    dream: "bg-purple-500",
-    create: "bg-blue-500",
-    info: "bg-white/20",
-  };
+  if (events.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground/30 px-4 py-6 text-center">
+        No activity yet — spawn a world to get started
+      </p>
+    );
+  }
 
   return (
-    <div className="mt-8 px-6 pb-8">
-      <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 flex items-center gap-2">
-        <IconActivity size={14} className="opacity-40" />
-        Recent Activity
-      </h2>
-      <div className="space-y-1">
-        {events.map((event) => (
+    <div className="space-y-2">
+      {events.map((event) => {
+        const cfg = TYPE_CONFIG[event.type] ?? TYPE_CONFIG["world.session_ended"];
+        const Icon = cfg.icon;
+        const meta = [];
+        if (event.cost_usd) meta.push(`$${event.cost_usd.toFixed(3)}`);
+        if (event.duration_ms) {
+          const s = Math.floor(event.duration_ms / 1000);
+          meta.push(s < 60 ? `${s}s` : `${Math.floor(s / 60)}m`);
+        }
+
+        return (
           <div
             key={event.id}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.02] transition-colors"
+            className="group flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/[0.03] transition-all"
           >
-            <div
-              className={`w-1.5 h-1.5 rounded-full shrink-0 ${typeDots[event.type]}`}
-            />
-            <span className="text-xs text-foreground/60 truncate flex-1">
-              {event.text}
-            </span>
-            <span className="text-[10px] font-mono text-muted-foreground/25 shrink-0">
-              {timeAgo(event.time)}
+            <div className={`w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0`}>
+              <Icon size={14} className={cfg.color} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-foreground/70 truncate">{event.phrase}</p>
+              {meta.length > 0 && (
+                <p className="text-[10px] font-mono text-muted-foreground/25 mt-0.5">{meta.join(" · ")}</p>
+              )}
+            </div>
+            <span className="text-[10px] font-mono text-muted-foreground/20 shrink-0">
+              {timeAgo(event.timestamp)}
             </span>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

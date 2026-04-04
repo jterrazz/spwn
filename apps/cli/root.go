@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 
+	"spwn.sh/apps/cli/activity"
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
@@ -79,6 +80,7 @@ func init() {
 	rootCmd.AddCommand(blueprint.Cmd)
 	rootCmd.AddCommand(dash.Cmd)
 	rootCmd.AddCommand(get.Cmd)
+	rootCmd.AddCommand(activity.Cmd)
 }
 
 // Execute runs the root command.
@@ -142,6 +144,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "architect", "Your always-on world builder "+ui.Faint("(start, stop, status, connect)"))
 	printHelpCmd(w, "blueprint", "Universe knowledge base "+ui.Faint("(ls, show, search)"))
 	printHelpCmd(w, "dash", "Visual dashboard "+ui.Faint("(start, open)"))
+	printHelpCmd(w, "activity", "View recent activity across worlds and agents")
 	fmt.Fprintln(w)
 
 	// World

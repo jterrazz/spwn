@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS } from "@/lib/types";
 import type { World } from "@/lib/types";
-import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles } from "@tabler/icons-react";
+import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconBoltFilled, IconMoonFilled, IconCircleFilled, IconMessageFilled } from "@tabler/icons-react";
 import { Planet as PlanetGlobe } from "@/components/planet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
@@ -255,8 +255,8 @@ export default function UniverseMapPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-heading tracking-wide text-foreground/90">Dashboard</h1>
-          <p className="text-xs font-mono text-muted-foreground/30 mt-0.5">
-            {worlds.length} world{worlds.length !== 1 ? "s" : ""} · {agents.length} agent{agents.length !== 1 ? "s" : ""}
+          <p className="text-xs text-muted-foreground/30 mt-0.5">
+            Orchestrate AI agents across your projects, persist their minds, scale at will — your AI matrix.
           </p>
         </div>
         <button
@@ -267,6 +267,33 @@ export default function UniverseMapPage() {
           Spawn World
         </button>
       </div>
+
+      {/* ── Quick Stats Bar ── */}
+      {!loading && worlds.length > 0 && (() => {
+        const totalAgents = worlds.reduce((n, w) => n + w.agents.length, 0);
+        const runningWorlds = worlds.filter(w => w.status === "running" || w.status === "idle").length;
+        const runningAgents = worlds.reduce((n, w) => n + w.agents.filter(a => a.status === "running").length, 0);
+        const idleAgents = worlds.reduce((n, w) => n + w.agents.filter(a => a.status === "idle" || a.status === "waiting").length, 0);
+
+        return (
+          <div className="flex items-center gap-6 px-1">
+            {[
+              { label: "Worlds", value: worlds.length, sub: `${runningWorlds} active`, color: "text-foreground/70" },
+              { label: "Agents", value: totalAgents, sub: `${runningAgents} running`, color: "text-foreground/70" },
+              { label: "Running", value: runningAgents, icon: <IconBoltFilled size={12} className="text-green-400/60" />, color: "text-green-400/80" },
+              { label: "Idle", value: idleAgents, icon: <IconMoonFilled size={12} className="text-amber-400/60" />, color: "text-amber-400/80" },
+            ].map(({ label, value, sub, icon, color }) => (
+              <div key={label} className="flex items-center gap-2.5">
+                {icon}
+                <div>
+                  <p className={`text-sm font-mono font-medium ${color}`}>{value}</p>
+                  <p className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/25">{sub ?? label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -284,7 +311,7 @@ export default function UniverseMapPage() {
               {/* Planets — full width scrollable */}
               <div
                 ref={scrollRef}
-                className="flex gap-3 items-center will-change-transform select-none"
+                className="flex gap-10 items-center will-change-transform select-none"
                 style={{
                   transform: `translateX(${totalTx}px)`,
                   transition: isDragging ? "none" : "transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -348,72 +375,101 @@ export default function UniverseMapPage() {
                 const name = extractName(w.id);
                 const isRunning = w.status === "running" || w.status === "idle";
                 return (
-                  <div ref={panelRef} className="absolute top-1/2 -translate-y-1/2 right-0 w-[380px] z-10 rounded-2xl bg-foreground/[0.04] dark:bg-white/[0.04] backdrop-blur-xl border border-foreground/[0.06] dark:border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)] p-5 flex flex-col animate-in fade-in slide-in-from-right-6 duration-500 ease-out">
-                    {/* Title + actions */}
-                    <div className="flex items-center gap-3 mb-5">
-                      <div className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_6px_currentColor] ${STATUS_DOT[w.status] ?? "bg-white/10"}`} />
-                      <span className="font-heading text-base text-foreground/90">{name}</span>
-                      <div className="ml-auto flex items-center gap-1.5">
-                        {isRunning ? (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); apiDelete(`/api/worlds/${w.id}`).then(() => { fetchWorlds(); refetchSidebar(); setSelected(null); }); }}
-                            className="text-[11px] px-2.5 py-1 rounded-full text-muted-foreground/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
-                          >
-                            Shutdown
-                          </button>
-                        ) : (
-                          <span className="text-[11px] px-2.5 py-1 text-muted-foreground/25 font-mono">stopped</span>
-                        )}
-                        <button
-                          onClick={() => router.push(`/world/${w.id}`)}
-                          className="text-[11px] px-3 py-1.5 rounded-full bg-white/[0.06] dark:bg-white/[0.08] text-foreground/70 hover:text-foreground/90 hover:bg-white/[0.1] border border-white/[0.08] dark:border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all flex items-center gap-1.5"
-                        >
-                          Open
-                          <IconArrowRight size={12} />
-                        </button>
+                  <div
+                    ref={panelRef}
+                    className="absolute top-1/2 -translate-y-1/2 right-4 w-[360px] z-10 rounded-3xl overflow-hidden animate-in fade-in slide-in-from-right-8 duration-600 ease-out"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
+                      backdropFilter: "blur(24px) saturate(1.2)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: "0 24px 48px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    {/* Header */}
+                    <div className="px-6 pt-5 pb-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className={`w-3 h-3 rounded-full ${STATUS_DOT[w.status] ?? "bg-white/10"}`} style={{ boxShadow: `0 0 10px ${w.status === "running" ? "rgba(34,197,94,0.5)" : w.status === "idle" ? "rgba(234,179,8,0.4)" : "transparent"}` }} />
+                            {w.status === "running" && (
+                              <div className={`absolute inset-0 w-3 h-3 rounded-full animate-ping ${STATUS_DOT[w.status]}`} style={{ opacity: 0.4 }} />
+                            )}
+                          </div>
+                          <h3 className="font-heading text-lg tracking-wide text-foreground/95">{name}</h3>
+                        </div>
                         <button
                           onClick={() => setSelected(null)}
-                          className="w-7 h-7 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.06] transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground/25 hover:text-foreground/60 hover:bg-white/[0.06] transition-all"
                         >
-                          <IconX size={14} />
+                          <IconX size={16} />
                         </button>
                       </div>
+                      <p className="text-[11px] font-mono text-muted-foreground/30 pl-6">
+                        {w.config ?? "default"} · {w.workspace ?? "/tmp"}
+                      </p>
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-5 gap-3 mb-5">
-                      {[
-                        { label: "Status", value: w.status },
-                        { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "—" },
-                        { label: "Agents", value: String(w.agents.length) },
-                        { label: "Config", value: w.config ?? "default" },
-                        { label: "Workspace", value: w.workspace ?? "/tmp" },
-                      ].map(({ label, value }) => (
-                        <div key={label}>
-                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground/25 mb-1">{label}</p>
-                          <p className="text-xs font-mono text-foreground/60 truncate">{value}</p>
-                        </div>
-                      ))}
-                    </div>
+                    {/* Divider */}
+                    <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
-                    {/* Agents */}
-                    {w.agents.length > 0 && (
-                      <div>
-                        <p className="text-[9px] uppercase tracking-widest text-muted-foreground/25 mb-2">Agents</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {w.agents.map((a) => (
-                            <button
-                              key={a.name}
-                              onClick={(e) => { e.stopPropagation(); router.push(`/world/${w.id}/${a.name}`); }}
-                              className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all"
-                            >
-                              <span className={`w-1.5 h-1.5 rounded-full ${a.status === "running" ? "bg-green-500" : a.status === "idle" ? "bg-amber-400/50" : "bg-zinc-500/30"}`} />
-                              {a.name}
-                            </button>
-                          ))}
-                        </div>
+                    {/* Stats grid */}
+                    <div className="px-6 py-4">
+                      <div className="grid grid-cols-3 gap-4">
+                        {[
+                          { label: "Status", value: w.status, accent: w.status === "running" ? "text-green-400/80" : w.status === "idle" ? "text-amber-400/80" : "text-muted-foreground/50" },
+                          { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "—", accent: "text-foreground/60" },
+                          { label: "Agents", value: String(w.agents.length), accent: "text-foreground/60" },
+                        ].map(({ label, value, accent }) => (
+                          <div key={label} className="text-center">
+                            <p className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/25 mb-1.5">{label}</p>
+                            <p className={`text-sm font-mono font-medium ${accent}`}>{value}</p>
+                          </div>
+                        ))}
                       </div>
+                    </div>
+
+                    {/* Agents section */}
+                    {w.agents.length > 0 && (
+                      <>
+                        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                        <div className="px-6 py-4">
+                          <p className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/25 mb-3">Agents</p>
+                          <div className="flex flex-wrap gap-2">
+                            {w.agents.map((a) => (
+                              <button
+                                key={a.name}
+                                onClick={(e) => { e.stopPropagation(); router.push(`/world/${w.id}/${a.name}`); }}
+                                className="group/agent inline-flex items-center gap-2 text-xs font-mono pl-2.5 pr-3 py-1.5 rounded-xl bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/80 hover:border-white/[0.12] transition-all"
+                              >
+                                <span className={`w-2 h-2 rounded-full transition-shadow ${a.status === "running" ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" : a.status === "idle" ? "bg-amber-400 shadow-[0_0_6px_rgba(234,179,8,0.3)]" : "bg-zinc-500/30"}`} />
+                                {a.name}
+                                <IconArrowRight size={11} className="opacity-0 -ml-1 group-hover/agent:opacity-50 group-hover/agent:ml-0 transition-all" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </>
                     )}
+
+                    {/* Actions */}
+                    <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                    <div className="px-6 py-4 flex items-center gap-2">
+                      <button
+                        onClick={() => router.push(`/world/${w.id}`)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium bg-white/[0.06] text-foreground/70 hover:text-foreground/95 hover:bg-white/[0.1] border border-white/[0.06] hover:border-white/[0.12] transition-all"
+                      >
+                        Enter World
+                        <IconArrowRight size={14} />
+                      </button>
+                      {isRunning && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); apiDelete(`/api/worlds/${w.id}`).then(() => { fetchWorlds(); refetchSidebar(); setSelected(null); }); }}
+                          className="py-2.5 px-4 rounded-xl text-xs text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/[0.06] border border-transparent hover:border-red-500/15 transition-all"
+                        >
+                          Shutdown
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })()}
@@ -435,8 +491,67 @@ export default function UniverseMapPage() {
             </div>
           )}
 
-          {/* Recent Activity */}
-          {worlds.length > 0 && <RecentActivity worlds={worlds} />}
+          {/* ── Agent Activity Feed ── */}
+          {worlds.length > 0 && (() => {
+            const allAgents = worlds.flatMap(w => w.agents.map(a => ({ ...a, worldName: extractName(w.id), worldId: w.id })));
+            if (allAgents.length === 0) return null;
+
+            const statusIcon: Record<string, { icon: typeof IconBoltFilled; color: string; label: string }> = {
+              running:  { icon: IconBoltFilled,    color: "text-green-400",  label: "Running" },
+              waiting:  { icon: IconMessageFilled, color: "text-amber-400",  label: "Waiting" },
+              idle:     { icon: IconCircleFilled,  color: "text-amber-400/50", label: "Idle" },
+              sleeping: { icon: IconMoonFilled,    color: "text-purple-400", label: "Sleeping" },
+              stopped:  { icon: IconCircleFilled,  color: "text-zinc-500/30",  label: "Stopped" },
+            };
+
+            return (
+              <div>
+                <h3 className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/30 mb-3 flex items-center gap-2">
+                  <IconActivity size={12} className="opacity-50" />
+                  Agent Activity
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {allAgents.map((a) => {
+                    const s = statusIcon[a.status] ?? statusIcon.stopped;
+                    const Icon = s.icon;
+                    return (
+                      <button
+                        key={`${a.worldId}-${a.name}`}
+                        onClick={() => router.push(`/world/${a.worldId}/${a.name}`)}
+                        className="group flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06]"
+                      >
+                        <div className="relative">
+                          <Icon size={14} className={`${s.color} transition-colors`} />
+                          {a.status === "running" && (
+                            <div className="absolute -top-0.5 -right-0.5 w-2 h-2">
+                              <div className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-40" />
+                              <div className="absolute inset-0 rounded-full bg-green-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-mono text-foreground/70 group-hover:text-foreground/90 truncate transition-colors">{a.name}</p>
+                          <p className="text-[10px] text-muted-foreground/25">{a.worldName} · {s.label}</p>
+                        </div>
+                        <IconArrowRight size={12} className="text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ── Recent Activity Timeline ── */}
+          {worlds.length > 0 && (
+            <div>
+              <h3 className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/30 mb-3 flex items-center gap-2">
+                <IconSparkles size={12} className="opacity-50" />
+                Recent Activity
+              </h3>
+              <RecentActivity />
+            </div>
+          )}
         </>
       )}
 

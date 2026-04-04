@@ -2,6 +2,7 @@ package architect
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -9,8 +10,23 @@ import (
 
 	"spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/universe/internal/models"
 )
+
+// formatUptime returns a human-readable duration like "47m" or "2h".
+func formatUptime(d time.Duration) string {
+	if d < time.Minute {
+		return "just now"
+	}
+	if d < time.Hour {
+		return fmt.Sprintf("%dm", int(d/time.Minute))
+	}
+	if d < 24*time.Hour {
+		return fmt.Sprintf("%dh", int(d/time.Hour))
+	}
+	return fmt.Sprintf("%dd", int(d/(24*time.Hour)))
+}
 
 // Destroy stops and removes a world.
 func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World, error) {
@@ -51,6 +67,37 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 	}
 
 	a.state.Delete(worldID)
+
+	// Emit activity events
+	uptime := formatUptime(duration)
+	agentNames := []string{}
+	for _, rec := range u.Agents {
+		agentNames = append(agentNames, rec.Name)
+	}
+	if len(agentNames) == 0 && u.Agent != "" {
+		agentNames = append(agentNames, u.Agent)
+	}
+	for _, name := range agentNames {
+		activity.Log(activity.Event{
+			Type:       activity.TypeAgentLeft,
+			Actor:      "architect",
+			Verb:       "left",
+			Target:     worldID,
+			Phrase:     activity.PhraseAgentLeft(name, worldID, uptime),
+			WorldID:    worldID,
+			AgentID:    name,
+			DurationMs: duration.Milliseconds(),
+		})
+	}
+	activity.Log(activity.Event{
+		Type:       activity.TypeWorldDestroyed,
+		Actor:      "architect",
+		Verb:       "destroyed",
+		Target:     worldID,
+		Phrase:     activity.PhraseWorldDestroyed(worldID, uptime),
+		WorldID:    worldID,
+		DurationMs: duration.Milliseconds(),
+	})
 
 	return u, nil
 }
