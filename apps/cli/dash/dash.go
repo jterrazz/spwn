@@ -2,6 +2,7 @@ package dash
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -40,19 +41,22 @@ var startCmd = &cobra.Command{
 		observatoryDir := findObservatoryDir()
 		var webCmd *exec.Cmd
 		if _, err := os.Stat(filepath.Join(observatoryDir, "package.json")); err == nil {
-			webCmd = exec.Command("npx", "next", "start", "-p", "3000")
+			webCmd = exec.Command("npx", "next", "start", "-p", "3000", "-H", "0.0.0.0")
 			webCmd.Dir = observatoryDir
 			webCmd.Stdout = nil // suppress output
 			webCmd.Stderr = nil
 			if err := webCmd.Start(); err == nil {
 				fmt.Fprintf(w, "  %s  %s\n", ui.Green("✓"), "Dashboard")
 				fmt.Fprintf(w, "     %s\n", ui.Cyan("http://localhost:3000"))
+				if lanIP := getLanIP(); lanIP != "" {
+					fmt.Fprintf(w, "     %s\n", ui.Faint("http://"+lanIP+":3000"))
+				}
 			} else {
-				fmt.Fprintf(w, "  %s  Dashboard  %s\n", ui.Yellow("⚠"), ui.Faint("not available (run: cd apps/observatory && npm run build)"))
+				fmt.Fprintf(w, "  %s  Dashboard  %s\n", ui.Yellow("⚠"), ui.Faint("not available (run: cd apps/dashboard && npm run build)"))
 			}
 		} else {
 			// Try dev mode
-			webCmd = exec.Command("npx", "next", "dev", "-p", "3000")
+			webCmd = exec.Command("npx", "next", "dev", "-p", "3000", "-H", "0.0.0.0")
 			webCmd.Dir = observatoryDir
 			webCmd.Stdout = nil
 			webCmd.Stderr = nil
@@ -141,6 +145,20 @@ func findObservatoryDir() string {
 		}
 	}
 	return "apps/observatory" // fallback
+}
+
+// getLanIP returns the first non-loopback IPv4 address, or "" if none found.
+func getLanIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, addr := range addrs {
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() && ipNet.IP.To4() != nil {
+			return ipNet.IP.String()
+		}
+	}
+	return ""
 }
 
 func dashHelp(cmd *cobra.Command, args []string) {

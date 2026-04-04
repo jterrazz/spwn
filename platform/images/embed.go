@@ -5,5 +5,5 @@ import _ "embed"
 //go:embed Dockerfile
 var Dockerfile []byte
 
-//go:embed Dockerfile.god
-var DockerfileGod []byte
+//go:embed Dockerfile.world
+var DockerfileWorld []byte

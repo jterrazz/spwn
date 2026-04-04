@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AgentLoading() {
   return (
-    <div className="px-8 pt-8 pb-16 space-y-8">
+    <div className="px-6 pt-8 pb-16 space-y-8">
       <div className="flex items-center gap-4">
         <Skeleton className="w-12 h-12 rounded-full" />
         <div>

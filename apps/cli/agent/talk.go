@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	agentDomain "spwn.sh/core/agent"
-	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/auth"
 	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
@@ -47,9 +47,6 @@ If no message is provided, opens an interactive Claude session inside the contai
 			return err
 		}
 
-		// Read the OAuth token
-		token := readAuthToken()
-
 		s.Blank()
 		s.Info("Agent:", name)
 		s.Info("World:", worldID)
@@ -70,9 +67,7 @@ If no message is provided, opens an interactive Claude session inside the contai
 			}
 			args = append(args, "-w", "/workspace")
 			// Pass all available auth credentials
-			for _, kv := range authEnvVars(token) {
-				args = append(args, "-e", kv)
-			}
+			args = append(args, authEnvArgs()...)
 			args = append(args, containerID)
 			return args
 		}
@@ -95,12 +90,12 @@ If no message is provided, opens an interactive Claude session inside the contai
 				execCmd.Stdout = os.Stdout
 				execCmd.Stderr = os.Stderr
 				if err := execCmd.Run(); err != nil {
-					return fmt.Errorf("exec failed: %w", err)
+					return formatExecError(err, nil)
 				}
 			} else {
 				output, err := execCmd.CombinedOutput()
 				if err != nil {
-					return fmt.Errorf("exec failed: %w", err)
+					return formatExecError(err, output)
 				}
 				fmt.Fprint(os.Stdout, string(output))
 			}
@@ -178,27 +173,45 @@ func findAgentContainer(agentName string) (string, string, error) {
 	return "", "", fmt.Errorf("agent %q is not in any active world\n\n  Spawn one with: spwn up --agent %s -w <workspace>", agentName, agentName)
 }
 
-// readAuthToken reads the cached OAuth token from ~/.spwn/.auth-token.
-func readAuthToken() string {
-	cachePath := foundation.BaseDir() + "/.auth-token"
-	data, err := os.ReadFile(cachePath)
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(data))
+// authEnvArgs returns Docker -e flags for all available auth credentials.
+func authEnvArgs() []string {
+	return auth.DockerEnvArgs()
 }
 
-// authEnvVars returns Docker -e flags for all available auth credentials.
-func authEnvVars(cachedToken string) []string {
-	var envs []string
-	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
-		if val := os.Getenv(key); val != "" {
-			envs = append(envs, key+"="+val)
+// formatExecError parses docker exec output for common auth errors
+// and returns an actionable error message.
+func formatExecError(err error, output []byte) error {
+	out := string(output)
+
+	// Check for common auth-related errors
+	switch {
+	case strings.Contains(out, "authentication_error"):
+		return fmt.Errorf("authentication failed — your API key or OAuth token was rejected\n\n  %s\n  %s",
+			"Run: spwn auth check    (validate credentials)",
+			"Run: spwn auth login    (refresh credentials)")
+	case strings.Contains(out, "OAuth token has expired"):
+		return fmt.Errorf("OAuth token has expired\n\n  %s\n  %s",
+			"Run: spwn auth login    (refresh from Keychain)",
+			"Or re-authenticate in Claude Code CLI first")
+	case strings.Contains(out, "Invalid API key") || strings.Contains(out, "invalid x-api-key"):
+		return fmt.Errorf("invalid API key\n\n  %s\n  %s",
+			"Run: spwn auth login    (set up fresh credentials)",
+			"Run: spwn auth token <key>  (set key directly)")
+	case strings.Contains(out, "Could not resolve host") || strings.Contains(out, "connection refused"):
+		return fmt.Errorf("network error — cannot reach API\n\n  Output: %s", strings.TrimSpace(out))
+	case strings.Contains(out, "rate_limit") || strings.Contains(out, "overloaded"):
+		return fmt.Errorf("rate limited or API overloaded — try again in a moment\n\n  Output: %s", strings.TrimSpace(out))
+	}
+
+	// Generic fallback: include the output so users can see what happened
+	if out != "" {
+		// Truncate very long output
+		if len(out) > 500 {
+			out = out[:500] + "..."
 		}
+		return fmt.Errorf("agent exec failed: %w\n\n  Output:\n  %s\n\n  Hint: Run 'spwn auth check' to verify credentials",
+			err, strings.TrimSpace(out))
 	}
-	// Use cached token if CLAUDE_CODE_OAUTH_TOKEN not already set
-	if cachedToken != "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
-		envs = append(envs, "CLAUDE_CODE_OAUTH_TOKEN="+cachedToken)
-	}
-	return envs
+
+	return fmt.Errorf("agent exec failed: %w\n\n  Hint: Run 'spwn auth check' to verify credentials", err)
 }

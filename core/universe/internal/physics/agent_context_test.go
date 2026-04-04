@@ -136,7 +136,7 @@ func TestGenerateGodContext_ContainsNewCLICommands(t *testing.T) {
 	}
 	for _, cmd := range mustContain {
 		if !strings.Contains(ctx, cmd) {
-			t.Errorf("God-tier AGENT.md missing new command %q", cmd)
+			t.Errorf("Architect-tier AGENT.md missing new command %q", cmd)
 		}
 	}
 
@@ -150,7 +150,7 @@ func TestGenerateGodContext_ContainsNewCLICommands(t *testing.T) {
 	}
 	for _, cmd := range mustNotContain {
 		if strings.Contains(ctx, cmd) {
-			t.Errorf("God-tier AGENT.md still contains old command %q", cmd)
+			t.Errorf("Architect-tier AGENT.md still contains old command %q", cmd)
 		}
 	}
 }
@@ -184,7 +184,7 @@ func TestGenerateGodContext_ContainsAllSections(t *testing.T) {
 	}
 	for _, s := range sections {
 		if !strings.Contains(ctx, s) {
-			t.Errorf("God-tier AGENT.md missing section/command %q", s)
+			t.Errorf("Architect-tier AGENT.md missing section/command %q", s)
 		}
 	}
 }

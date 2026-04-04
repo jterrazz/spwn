@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { writeFileSync, readFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome, createAgent } from "../../setup/helpers.js";
 import { expectLine, stripAnsi } from "../../setup/output-helpers.js";
@@ -190,5 +191,57 @@ describe("zero-friction UX", () => {
 
     // THEN — the talk command exists
     expect(result.exitCode).toBe(0);
+  });
+
+  // ── 8. God→Architect rename is complete (regression guard) ──
+
+  test("no relative /api/ fetch calls in frontend (must use goApiUrl)", async () => {
+    const result = await spwn("no-relative-api-fetch")
+      .exec("grep", "-rn", 'fetch("/api/\\|fetch(`/api/',
+        "apps/observatory/src/", "--include=*.tsx", "--include=*.ts")
+      .run();
+    // grep returns exit 1 when no matches (which is what we want)
+    const out = stripAnsi(result.output).trim();
+    expect(out).not.toContain('fetch("/api/');
+    expect(out).not.toContain("fetch(`/api/");
+  });
+
+  test("no references to 'God' remain in source code (rename regression)", async () => {
+    const repoRoot = resolve(import.meta.dirname, "../../..");
+
+    // grep -rn for word-boundary 'God' in Go and TS source files
+    // excluding tests, node_modules, .git, and binary dirs
+    const result = spawnSync(
+      "grep",
+      [
+        "-rn",
+        "--include=*.go",
+        "--include=*.ts",
+        "--include=*.tsx",
+        "--exclude-dir=node_modules",
+        "--exclude-dir=.git",
+        "--exclude-dir=.next",
+        "--exclude-dir=tests",
+        "-w",
+        "God",
+        ".",
+      ],
+      {
+        cwd: repoRoot,
+        encoding: "utf-8",
+        timeout: 15_000,
+      },
+    );
+
+    const stdout = result.stdout ?? "";
+    const matches = stdout
+      .split("\n")
+      .filter((line) => line.trim().length > 0);
+
+    // Should be zero — all God references should be renamed to Architect
+    expect(
+      matches.length,
+      `Found ${matches.length} remaining 'God' references:\n${matches.join("\n")}`,
+    ).toBe(0);
   });
 });

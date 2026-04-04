@@ -6,22 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/auth"
 	"github.com/spf13/cobra"
 )
-
-// token cache file name inside SPWN_HOME
-const tokenFile = ".auth-token"
-
-func tokenPath() string {
-	return filepath.Join(foundation.BaseDir(), tokenFile)
-}
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
 	q, _ := cmd.Flags().GetBool("quiet")
@@ -40,31 +32,56 @@ var Cmd = &cobra.Command{
 	Short: "Manage credentials — login, logout, status",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
-		s.Blank()
+		jsonOut, _ := cmd.Flags().GetBool("json")
 
-		// Detect each provider
-		anthropic := detectAnthropic()
-		openai := detectProvider("OPENAI_API_KEY", "OpenAI")
-		google := detectProvider("GOOGLE_API_KEY", "Google")
+		// Resolve all providers via auth package
+		creds := auth.ResolveAll()
+
+		anthropic := creds[auth.ProviderAnthropic]
+		openai := creds[auth.ProviderOpenAI]
+		google := creds[auth.ProviderGoogle]
+
+		if jsonOut {
+			type providerJSON struct {
+				Provider string `json:"provider"`
+				OK       bool   `json:"ok"`
+				Source   string `json:"source"`
+				Type     string `json:"type"`
+			}
+			out := []providerJSON{
+				{Provider: "anthropic", OK: anthropic.Type != auth.CredTypeNone, Source: anthropic.Source, Type: string(anthropic.Type)},
+				{Provider: "openai", OK: openai.Type != auth.CredTypeNone, Source: openai.Source, Type: string(openai.Type)},
+				{Provider: "google", OK: google.Type != auth.CredTypeNone, Source: google.Source, Type: string(google.Type)},
+			}
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			return enc.Encode(out)
+		}
+
+		s.Blank()
 
 		// Table
 		t := ui.NewTable(ui.ModeNormal, "PROVIDER", "STATUS", "SOURCE")
-		t.AddRow("Anthropic", statusText(anthropic.ok), anthropic.source)
-		t.AddRow("OpenAI", statusText(openai.ok), openai.source)
-		t.AddRow("Google", statusText(google.ok), google.source)
+		t.AddRow("Anthropic", statusText(anthropic.Type != auth.CredTypeNone), anthropic.Source)
+		t.AddRow("OpenAI", statusText(openai.Type != auth.CredTypeNone), openai.Source)
+		t.AddRow("Google", statusText(google.Type != auth.CredTypeNone), google.Source)
 		t.Render()
 
 		// Token cache info
 		s.Blank()
-		if info, err := os.Stat(tokenPath()); err == nil {
-			age := time.Since(info.ModTime())
-			s.Info("Cached token:", fmt.Sprintf("%s (%s ago)", abbreviate(tokenPath()), formatAge(age)))
+		cached := auth.ReadCachedToken()
+		if cached != "" {
+			tokenPath := foundation.BaseDir() + "/.auth-token"
+			if info, err := os.Stat(tokenPath); err == nil {
+				age := time.Since(info.ModTime())
+				s.Info("Cached token:", fmt.Sprintf("%s (%s ago)", abbreviate(tokenPath), formatAge(age)))
+			}
 		} else {
 			s.Info("Cached token:", ui.Faint("none"))
 		}
 
 		s.Blank()
-		if !anthropic.ok {
+		if anthropic.Type == auth.CredTypeNone {
 			fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint(`Run "spwn auth login" to set up credentials`))
 			s.Blank()
 		}
@@ -80,6 +97,7 @@ func init() {
 	Cmd.AddCommand(loginCmd)
 	Cmd.AddCommand(logoutCmd)
 	Cmd.AddCommand(tokenCmd)
+	Cmd.AddCommand(checkCmd)
 }
 
 func authHelp(cmd *cobra.Command, args []string) {
@@ -98,6 +116,7 @@ func authHelp(cmd *cobra.Command, args []string) {
 				{Name: "login", Desc: "Set up credentials (Keychain or manual)"},
 				{Name: "logout", Desc: "Clear cached credentials"},
 				{Name: "token <token>", Desc: "Set a token directly (CI / scripts)"},
+				{Name: "check", Desc: "Validate credentials for all AI providers"},
 			}},
 			{Title: "Environment Variables", Commands: []ui.HelpEntry{
 				{Name: "ANTHROPIC_API_KEY", Desc: "Anthropic Claude API key"},
@@ -119,14 +138,13 @@ var loginCmd = &cobra.Command{
 		s := newStepper(cmd)
 		s.Blank()
 
-		// 1. Try macOS Keychain
+		// 1. Try macOS Keychain via auth package
 		s.Start("Checking Keychain...")
-		token := extractKeychainToken()
-		if token != "" {
+		cred := auth.Resolve(auth.ProviderAnthropic)
+		if cred.Type == auth.CredTypeKeychain {
 			// Cache it
-			os.MkdirAll(foundation.BaseDir(), 0755)
-			os.WriteFile(tokenPath(), []byte(token), 0600)
-			s.Done("Found subscription", "cached to "+abbreviate(tokenPath()))
+			_ = auth.SaveToken(cred.Token)
+			s.Done("Found subscription", "cached to "+abbreviate(foundation.BaseDir()+"/.auth-token"))
 			s.Blank()
 			s.Success("Authenticated.")
 			s.Blank()
@@ -134,9 +152,9 @@ var loginCmd = &cobra.Command{
 		}
 		s.Done("Keychain", ui.Faint("no Claude Code credentials found"))
 
-		// 2. Check env vars
-		if os.Getenv("ANTHROPIC_API_KEY") != "" {
-			s.Done("Environment", "ANTHROPIC_API_KEY is set")
+		// 2. Check if already configured via env
+		if cred.Type != auth.CredTypeNone {
+			s.Done("Environment", cred.Source+" is set")
 			s.Blank()
 			s.Success("Authenticated via environment.")
 			s.Blank()
@@ -164,13 +182,12 @@ var loginCmd = &cobra.Command{
 		}
 
 		// Save
-		os.MkdirAll(foundation.BaseDir(), 0755)
-		if err := os.WriteFile(tokenPath(), []byte(input), 0600); err != nil {
+		if err := auth.SaveToken(input); err != nil {
 			return s.FailHint("Save failed", err, "Check permissions on "+abbreviate(foundation.BaseDir()))
 		}
 
 		s.Blank()
-		s.Done("Saved "+kind, abbreviate(tokenPath()))
+		s.Done("Saved "+kind, abbreviate(foundation.BaseDir()+"/.auth-token"))
 		s.Blank()
 		s.Success("Authenticated.")
 		s.Blank()
@@ -187,18 +204,18 @@ var logoutCmd = &cobra.Command{
 		s := newStepper(cmd)
 		s.Blank()
 
-		path := tokenPath()
-		if _, err := os.Stat(path); os.IsNotExist(err) {
+		cached := auth.ReadCachedToken()
+		if cached == "" {
 			s.Info("No cached token", "nothing to clear")
 			s.Blank()
 			return nil
 		}
 
-		if err := os.Remove(path); err != nil {
-			return s.FailHint("Clear failed", err, "Try removing manually: rm "+path)
+		if err := auth.ClearToken(); err != nil {
+			return s.FailHint("Clear failed", err, "Try removing manually: rm "+foundation.BaseDir()+"/.auth-token")
 		}
 
-		s.Done("Cleared cached token", abbreviate(path))
+		s.Done("Cleared cached token", abbreviate(foundation.BaseDir()+"/.auth-token"))
 
 		// Warn about lingering env vars
 		var active []string
@@ -232,8 +249,7 @@ var tokenCmd = &cobra.Command{
 			return s.FailHint("Empty token", fmt.Errorf("no token provided"), "Pass a non-empty token")
 		}
 
-		os.MkdirAll(foundation.BaseDir(), 0755)
-		if err := os.WriteFile(tokenPath(), []byte(input), 0600); err != nil {
+		if err := auth.SaveToken(input); err != nil {
 			return s.FailHint("Save failed", err, "Check permissions on "+abbreviate(foundation.BaseDir()))
 		}
 
@@ -242,74 +258,84 @@ var tokenCmd = &cobra.Command{
 			kind = "API key"
 		}
 
-		s.Done("Saved "+kind, abbreviate(tokenPath()))
+		s.Done("Saved "+kind, abbreviate(foundation.BaseDir()+"/.auth-token"))
 		s.Blank()
 		return nil
 	},
 }
 
+// --- spwn auth check ---
+
+var checkCmd = &cobra.Command{
+	Use:   "check",
+	Short: "Validate credentials for all AI providers",
+	RunE:  runCheck,
+}
+
+func runCheck(cmd *cobra.Command, _ []string) error {
+	s := newStepper(cmd)
+	jsonOut, _ := cmd.Flags().GetBool("json")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	s.Blank()
+	s.Start("Validating credentials...")
+
+	results := auth.ValidateAll(ctx)
+
+	if jsonOut {
+		s.Done("Validation complete", "")
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(results)
+	}
+
+	s.Done("Validation complete", fmt.Sprintf("%d providers checked", len(results)))
+	s.Blank()
+
+	t := ui.NewTable(ui.ModeNormal, "PROVIDER", "STATUS", "TYPE", "SOURCE")
+	for _, r := range results {
+		status := ui.Green("✓") + " connected"
+		if !r.Connected {
+			if r.Error != "" {
+				status = ui.Red("✗") + " " + r.Error
+			} else {
+				status = ui.Faint("○") + " not configured"
+			}
+		}
+		t.AddRow(string(r.Provider), status, string(r.CredType), r.Source)
+	}
+	t.Render()
+
+	// Show usage details for connected providers
+	for _, r := range results {
+		if r.Usage != nil && r.Connected {
+			s.Blank()
+			s.Info(string(r.Provider)+" usage:", "")
+			if r.Usage.SessionPercent > 0 {
+				s.Info("  Session:", fmt.Sprintf("%.1f%% used", r.Usage.SessionPercent))
+			}
+			if r.Usage.WeeklyPercent > 0 {
+				s.Info("  Weekly:", fmt.Sprintf("%.1f%% used", r.Usage.WeeklyPercent))
+			}
+			if r.Usage.CreditsLimit > 0 {
+				s.Info("  Credits:", fmt.Sprintf("%.2f / %.2f %s", r.Usage.CreditsUsed, r.Usage.CreditsLimit, r.Usage.Currency))
+			}
+		}
+	}
+
+	s.Blank()
+	return nil
+}
+
 // --- Helpers ---
-
-type providerStatus struct {
-	ok     bool
-	source string
-}
-
-func detectAnthropic() providerStatus {
-	if os.Getenv("ANTHROPIC_API_KEY") != "" {
-		return providerStatus{true, "ANTHROPIC_API_KEY"}
-	}
-	if os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") != "" {
-		return providerStatus{true, "CLAUDE_CODE_OAUTH_TOKEN"}
-	}
-	if os.Getenv("ANTHROPIC_AUTH_TOKEN") != "" {
-		return providerStatus{true, "ANTHROPIC_AUTH_TOKEN"}
-	}
-
-	// Check cached token
-	if data, err := os.ReadFile(tokenPath()); err == nil && strings.TrimSpace(string(data)) != "" {
-		return providerStatus{true, "cached token"}
-	}
-
-	// Try Keychain (non-blocking, quick check)
-	if token := extractKeychainToken(); token != "" {
-		return providerStatus{true, "Keychain"}
-	}
-
-	return providerStatus{false, "\u2014"}
-}
-
-func detectProvider(envKey, name string) providerStatus {
-	if os.Getenv(envKey) != "" {
-		return providerStatus{true, envKey}
-	}
-	return providerStatus{false, "\u2014"}
-}
 
 func statusText(ok bool) string {
 	if ok {
 		return ui.Green("\u2713") + " configured"
 	}
 	return ui.Faint("\u25CB") + " not set"
-}
-
-func extractKeychainToken() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	out, err := exec.CommandContext(ctx, "security", "find-generic-password", "-s", "Claude Code-credentials", "-w").Output()
-	if err != nil {
-		return ""
-	}
-
-	var creds struct {
-		ClaudeAiOauth struct {
-			AccessToken string `json:"accessToken"`
-		} `json:"claudeAiOauth"`
-	}
-	if err := json.Unmarshal(out, &creds); err != nil {
-		return ""
-	}
-	return creds.ClaudeAiOauth.AccessToken
 }
 
 func abbreviate(path string) string {

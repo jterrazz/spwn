@@ -71,10 +71,13 @@ Examples:
 	RunE: runTalk,
 }
 
+var talkOutputFormat string
+
 func init() {
 	defaultArchitectHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(architectHelp)
 
+	talkCmd.Flags().StringVar(&talkOutputFormat, "output-format", "", "Output format: text (default) or stream-json")
 	Cmd.AddCommand(startCmd)
 	Cmd.AddCommand(stopCmd)
 	Cmd.AddCommand(statusCmd)
@@ -246,22 +249,45 @@ func runTalk(cmd *cobra.Command, args []string) error {
 		return s.FailHint("Talk", err, "")
 	}
 
-	if message != "" {
-		// One-shot mode
-		s.Blank()
-		s.Info("Architect:", "thinking...")
-		s.Blank()
-
-		execCmd := exec.Command("docker", dockerArgs...)
-		output, err := execCmd.CombinedOutput()
-		if err != nil {
-			// Still print output — it may contain useful error info
-			if len(output) > 0 {
-				fmt.Fprint(os.Stdout, string(output))
+	// If stream-json output requested, swap --print for --output-format stream-json --verbose
+	if talkOutputFormat == "stream-json" && message != "" {
+		// Replace --print with --output-format stream-json --verbose in the args
+		filtered := make([]string, 0, len(dockerArgs))
+		for _, a := range dockerArgs {
+			if a == "--print" {
+				continue
 			}
-			return fmt.Errorf("architect exec failed: %w", err)
+			filtered = append(filtered, a)
 		}
-		fmt.Fprint(os.Stdout, string(output))
+		filtered = append(filtered, "--output-format", "stream-json", "--verbose")
+		dockerArgs = filtered
+	}
+
+	if message != "" {
+		if talkOutputFormat == "stream-json" {
+			// Stream mode: pipe stdout directly for real-time output
+			execCmd := exec.Command("docker", dockerArgs...)
+			execCmd.Stdout = os.Stdout
+			execCmd.Stderr = os.Stderr
+			if err := execCmd.Run(); err != nil {
+				return fmt.Errorf("architect exec failed: %w", err)
+			}
+		} else {
+			// One-shot text mode
+			s.Blank()
+			s.Info("Architect:", "thinking...")
+			s.Blank()
+
+			execCmd := exec.Command("docker", dockerArgs...)
+			output, err := execCmd.CombinedOutput()
+			if err != nil {
+				if len(output) > 0 {
+					fmt.Fprint(os.Stdout, string(output))
+				}
+				return fmt.Errorf("architect exec failed: %w", err)
+			}
+			fmt.Fprint(os.Stdout, string(output))
+		}
 	} else {
 		// Interactive mode
 		s.Blank()

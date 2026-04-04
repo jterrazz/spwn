@@ -25,8 +25,8 @@ COPY platform/system/skills/ /world/skills/
 # Copy architect-specific skills (merged into /world/skills/)
 COPY platform/system/architect/skills/ /world/skills/
 
-# Copy default architect TODO (overridden by runtime mount)
-COPY platform/system/architect/todo.md /world/todo.md
+# Copy default architect stack (overridden by runtime mount)
+COPY platform/system/architect/stack.md /world/stack.md
 
 RUN mkdir -p /world && chown -R architect:architect /world
 

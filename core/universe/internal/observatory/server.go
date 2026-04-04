@@ -15,6 +15,7 @@ import (
 
 	agentpkg "spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/auth"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/state"
@@ -104,16 +105,29 @@ func (s *Server) Start() error {
 
 	// --- Architect endpoints ---
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
+	mux.HandleFunc("GET /api/architect/history", cors(s.handleArchitectHistory))
 	mux.HandleFunc("POST /api/architect/start", cors(s.handleArchitectStart))
 	mux.HandleFunc("POST /api/architect/stop", cors(s.handleArchitectStop))
 	mux.HandleFunc("POST /api/architect/talk", cors(s.handleArchitectTalk))
-	mux.HandleFunc("GET /api/architect/directives", cors(s.handleArchitectDirectivesGet))
-	mux.HandleFunc("POST /api/architect/directives", cors(s.handleArchitectDirectivesUpdate))
+	mux.HandleFunc("GET /api/architect/stack", cors(s.handleArchitectStackGet))
+	mux.HandleFunc("POST /api/architect/stack", cors(s.handleArchitectStackUpdate))
 
-	// --- Blueprint endpoints ---
-	mux.HandleFunc("GET /api/blueprint", cors(s.handleBlueprintList))
-	mux.HandleFunc("GET /api/blueprint/{path...}", cors(s.handleBlueprintRead))
-	mux.HandleFunc("PUT /api/blueprint/{path...}", cors(s.handleBlueprintWrite))
+	// --- History endpoints ---
+	mux.HandleFunc("GET /api/worlds/{id}/history", cors(s.handleWorldHistory))
+
+	// --- Auth endpoints ---
+	mux.HandleFunc("GET /api/auth/providers", cors(s.handleAuthProviders))
+	mux.HandleFunc("POST /api/auth/check", cors(s.handleAuthCheck))
+	mux.HandleFunc("POST /api/auth/configure", cors(s.handleAuthConfigure))
+
+	// --- Blueprint endpoints (per-world, via docker exec) ---
+	mux.HandleFunc("GET /api/worlds/{id}/blueprint", cors(s.handleWorldBlueprintList))
+	mux.HandleFunc("GET /api/worlds/{id}/blueprint/{path...}", cors(s.handleWorldBlueprintRead))
+	mux.HandleFunc("PUT /api/worlds/{id}/blueprint/{path...}", cors(s.handleWorldBlueprintWrite))
+
+	// --- Architect blueprint endpoints (reads from architect container) ---
+	mux.HandleFunc("GET /api/architect/blueprint", cors(s.handleArchitectBlueprintList))
+	mux.HandleFunc("GET /api/architect/blueprint/{path...}", cors(s.handleArchitectBlueprintRead))
 
 	// --- Root redirect + CORS ---
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
@@ -807,11 +821,11 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
 
-	// Count directives from file
+	// Count stack tasks from file
 	tasksPending := 0
 	tasksCompleted := 0
-	directivesPath := s.architectDirectivesPath()
-	if data, err := os.ReadFile(directivesPath); err == nil {
+	stackPath := s.architectStackPath()
+	if data, err := os.ReadFile(stackPath); err == nil {
 		for _, line := range strings.Split(string(data), "\n") {
 			trimmed := strings.TrimSpace(line)
 			if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
@@ -835,8 +849,8 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// architectDirectivesPath returns the path to the architect's directives file.
-func (s *Server) architectDirectivesPath() string {
+// architectStackPath returns the path to the architect's stack file.
+func (s *Server) architectStackPath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return ""
@@ -845,21 +859,21 @@ func (s *Server) architectDirectivesPath() string {
 	if spwnHome == "" {
 		spwnHome = filepath.Join(home, ".spwn")
 	}
-	return filepath.Join(spwnHome, "architect", "directives.md")
+	return filepath.Join(spwnHome, "architect", "stack.md")
 }
 
-// handleArchitectDirectivesGet returns the raw content of the architect TODO file.
-func (s *Server) handleArchitectDirectivesGet(w http.ResponseWriter, r *http.Request) {
-	directivesPath := s.architectDirectivesPath()
-	if directivesPath == "" {
-		jsonError(w, "could not determine directives path", 500)
+// handleArchitectStackGet returns the raw content of the architect stack file.
+func (s *Server) handleArchitectStackGet(w http.ResponseWriter, r *http.Request) {
+	stackPath := s.architectStackPath()
+	if stackPath == "" {
+		jsonError(w, "could not determine stack path", 500)
 		return
 	}
 
-	data, err := os.ReadFile(directivesPath)
+	data, err := os.ReadFile(stackPath)
 	if err != nil {
 		// Return empty template if file doesn't exist
-		defaultContent := "# Architect Directives\n\n## In Progress\n\n## Backlog\n\n## Completed\n"
+		defaultContent := "# Architect Stack\n\n## Focus\n\n## Queued\n\n## Done\n"
 		jsonOK(w, map[string]string{"content": defaultContent})
 		return
 	}
@@ -867,8 +881,8 @@ func (s *Server) handleArchitectDirectivesGet(w http.ResponseWriter, r *http.Req
 	jsonOK(w, map[string]string{"content": string(data)})
 }
 
-// handleArchitectDirectivesUpdate writes new content to the architect TODO file.
-func (s *Server) handleArchitectDirectivesUpdate(w http.ResponseWriter, r *http.Request) {
+// handleArchitectStackUpdate writes new content to the architect stack file.
+func (s *Server) handleArchitectStackUpdate(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Content string `json:"content"`
 	}
@@ -877,20 +891,20 @@ func (s *Server) handleArchitectDirectivesUpdate(w http.ResponseWriter, r *http.
 		return
 	}
 
-	directivesPath := s.architectDirectivesPath()
-	if directivesPath == "" {
-		jsonError(w, "could not determine directives path", 500)
+	stackPath := s.architectStackPath()
+	if stackPath == "" {
+		jsonError(w, "could not determine stack path", 500)
 		return
 	}
 
 	// Ensure directory exists
-	if err := os.MkdirAll(filepath.Dir(directivesPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(stackPath), 0755); err != nil {
 		jsonError(w, "failed to create directory: "+err.Error(), 500)
 		return
 	}
 
-	if err := os.WriteFile(directivesPath, []byte(body.Content), 0644); err != nil {
-		jsonError(w, "failed to write directives file: "+err.Error(), 500)
+	if err := os.WriteFile(stackPath, []byte(body.Content), 0644); err != nil {
+		jsonError(w, "failed to write stack file: "+err.Error(), 500)
 		return
 	}
 
@@ -917,9 +931,9 @@ func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "stopped"})
 }
 
-// DirectiveAction represents a parsed directive action from the architect's response.
-type DirectiveAction struct {
-	Type        string `json:"type"`                  // "add", "done", "update"
+// StackAction represents a parsed stack action from the architect's response.
+type StackAction struct {
+	Type        string `json:"type"`                  // "push", "pop", "update"
 	Title       string `json:"title"`
 	Priority    string `json:"priority,omitempty"`
 	Description string `json:"description,omitempty"`
@@ -931,9 +945,9 @@ type BlueprintUpdate struct {
 	Description string `json:"description,omitempty"`
 }
 
-// parseDirectiveAction extracts a TODO action marker from the architect's response.
-// It looks for [DIRECTIVE_ADD], [DIRECTIVE_DONE], or [DIRECTIVE_UPDATE] at the start of lines.
-func parseDirectiveAction(text string) *DirectiveAction {
+// parseStackAction extracts a stack action marker from the architect's response.
+// It looks for [STACK_PUSH], [STACK_POP], or [STACK_UPDATE] at the start of lines.
+func parseStackAction(text string) *StackAction {
 	lines := strings.Split(text, "\n")
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
@@ -941,21 +955,21 @@ func parseDirectiveAction(text string) *DirectiveAction {
 		var actionType string
 		var prefix string
 		switch {
-		case strings.HasPrefix(trimmed, "[DIRECTIVE_ADD]"):
-			actionType = "add"
-			prefix = "[DIRECTIVE_ADD]"
-		case strings.HasPrefix(trimmed, "[DIRECTIVE_DONE]"):
-			actionType = "done"
-			prefix = "[DIRECTIVE_DONE]"
-		case strings.HasPrefix(trimmed, "[DIRECTIVE_UPDATE]"):
+		case strings.HasPrefix(trimmed, "[STACK_PUSH]"):
+			actionType = "push"
+			prefix = "[STACK_PUSH]"
+		case strings.HasPrefix(trimmed, "[STACK_POP]"):
+			actionType = "pop"
+			prefix = "[STACK_POP]"
+		case strings.HasPrefix(trimmed, "[STACK_UPDATE]"):
 			actionType = "update"
-			prefix = "[DIRECTIVE_UPDATE]"
+			prefix = "[STACK_UPDATE]"
 		default:
 			continue
 		}
 
 		title := strings.TrimSpace(strings.TrimPrefix(trimmed, prefix))
-		action := &DirectiveAction{
+		action := &StackAction{
 			Type:  actionType,
 			Title: title,
 		}
@@ -968,8 +982,8 @@ func parseDirectiveAction(text string) *DirectiveAction {
 			}
 			if strings.HasPrefix(next, "Priority:") {
 				action.Priority = strings.TrimSpace(strings.TrimPrefix(next, "Priority:"))
-			} else if strings.HasPrefix(next, "Completed:") {
-				action.Description = strings.TrimSpace(strings.TrimPrefix(next, "Completed:"))
+			} else if strings.HasPrefix(next, "Done:") {
+				action.Description = strings.TrimSpace(strings.TrimPrefix(next, "Done:"))
 			} else if strings.HasPrefix(next, "Progress:") {
 				action.Description = strings.TrimSpace(strings.TrimPrefix(next, "Progress:"))
 			} else if action.Description == "" {
@@ -1049,35 +1063,17 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		"-e", "SPWN_HOME=/spwn-data",
 	}
 	// Pass auth tokens
-	for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
-		if val := os.Getenv(key); val != "" {
-			dockerArgs = append(dockerArgs, "-e", key+"="+val)
-		}
-	}
-	// Also try cached token
-	if os.Getenv("ANTHROPIC_API_KEY") == "" && os.Getenv("CLAUDE_CODE_OAUTH_TOKEN") == "" {
-		tokenPath := filepath.Join(foundation.BaseDir(), ".auth-token")
-		if data, err := os.ReadFile(tokenPath); err == nil {
-			token := strings.TrimSpace(string(data))
-			if token != "" {
-				if strings.HasPrefix(token, "sk-ant-") {
-					dockerArgs = append(dockerArgs, "-e", "ANTHROPIC_API_KEY="+token)
-				} else {
-					dockerArgs = append(dockerArgs, "-e", "CLAUDE_CODE_OAUTH_TOKEN="+token)
-				}
-			}
-		}
-	}
+	dockerArgs = append(dockerArgs, auth.DockerEnvArgs()...)
 	dockerArgs = append(dockerArgs, containerName,
 		"claude", "--dangerously-skip-permissions",
 		"-p", body.Message,
 		"--output-format", "stream-json", "--verbose",
 		"--append-system-prompt",
 		"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
-			"IMPORTANT: When a user asks you to do something, you MUST include a [DIRECTIVE_ADD] marker in your response. "+
-			"Format: [DIRECTIVE_ADD] Short directive title\nPriority: high|medium|low\nBrief description. "+
-			"Also update /world/directives.md with the new directive. "+
-			"When completing a directive use [DIRECTIVE_DONE] Short directive title. "+
+			"IMPORTANT: When a user asks you to do something, you MUST include a [STACK_PUSH] marker in your response. "+
+			"Format: [STACK_PUSH] Short task title\nPriority: blocking|queued\nBrief description. "+
+			"Also update /world/stack.md with the new task. "+
+			"When completing a task use [STACK_POP] Short task title. "+
 			"Read /world/skills/ for detailed guides. "+
 			"BLUEPRINT: You maintain /blueprint/ as the single source of truth. "+
 			"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. "+
@@ -1125,13 +1121,54 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 }
 
 // blueprintBasePath returns the path to the blueprint directory.
-func (s *Server) blueprintBasePath() string {
-	return filepath.Join(foundation.BaseDir(), "blueprint")
+// getWorldContainerID looks up the container ID for a world by its ID.
+func (s *Server) getWorldContainerID(worldID string) (string, error) {
+	universes, err := s.state.List()
+	if err != nil {
+		return "", fmt.Errorf("failed to list worlds: %w", err)
+	}
+	for _, u := range universes {
+		if u.ID == worldID {
+			if u.ContainerID == "" {
+				return "", fmt.Errorf("world %s has no container", worldID)
+			}
+			return u.ContainerID, nil
+		}
+	}
+	return "", fmt.Errorf("world not found: %s", worldID)
 }
 
-// handleBlueprintList returns all files in the blueprint directory.
-func (s *Server) handleBlueprintList(w http.ResponseWriter, r *http.Request) {
-	basePath := s.blueprintBasePath()
+// dockerExecOutput runs a command inside a container and returns stdout.
+func dockerExecOutput(ctx context.Context, containerID string, args ...string) (string, error) {
+	cmdArgs := append([]string{"exec", containerID}, args...)
+	cmd := exec.CommandContext(ctx, "docker", cmdArgs...)
+	out, err := cmd.Output()
+	return string(out), err
+}
+
+// handleWorldBlueprintList returns all files in the blueprint directory inside a world container.
+func (s *Server) handleWorldBlueprintList(w http.ResponseWriter, r *http.Request) {
+	worldID := r.PathValue("id")
+	if worldID == "" {
+		jsonError(w, "world id is required", 400)
+		return
+	}
+
+	containerID, err := s.getWorldContainerID(worldID)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+
+	// Use find inside the container to list all files under /world/blueprint/
+	out, err := dockerExecOutput(r.Context(), containerID,
+		"find", "/world/blueprint/", "-type", "f", "-not", "-name", ".*",
+		"-printf", "%P\\t%s\\t%T@\\n")
+	if err != nil {
+		// Directory might not exist yet — return empty list
+		jsonOK(w, map[string]interface{}{"files": []interface{}{}})
+		return
+	}
 
 	type fileEntry struct {
 		Path     string `json:"path"`
@@ -1140,39 +1177,26 @@ func (s *Server) handleBlueprintList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var files []fileEntry
-
-	err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
+		if line == "" {
+			continue
 		}
-		if info.IsDir() {
-			return nil
+		parts := strings.SplitN(line, "\t", 3)
+		if len(parts) < 3 {
+			continue
 		}
-		if strings.HasPrefix(info.Name(), ".") {
-			return nil
-		}
-
-		relPath, err := filepath.Rel(basePath, path)
-		if err != nil {
-			return err
-		}
+		var size int64
+		fmt.Sscanf(parts[1], "%d", &size)
+		// Parse epoch timestamp to RFC3339
+		var epoch float64
+		fmt.Sscanf(parts[2], "%f", &epoch)
+		modified := time.Unix(int64(epoch), 0).Format(time.RFC3339)
 
 		files = append(files, fileEntry{
-			Path:     relPath,
-			Size:     info.Size(),
-			Modified: info.ModTime().Format(time.RFC3339),
+			Path:     parts[0],
+			Size:     size,
+			Modified: modified,
 		})
-		return nil
-	})
-
-	if err != nil {
-		// If directory doesn't exist, return empty list
-		if os.IsNotExist(err) {
-			jsonOK(w, map[string]interface{}{"files": []fileEntry{}})
-			return
-		}
-		jsonError(w, "failed to list blueprint files: "+err.Error(), 500)
-		return
 	}
 
 	if files == nil {
@@ -1182,8 +1206,14 @@ func (s *Server) handleBlueprintList(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]interface{}{"files": files})
 }
 
-// handleBlueprintRead returns the content of a specific blueprint file.
-func (s *Server) handleBlueprintRead(w http.ResponseWriter, r *http.Request) {
+// handleWorldBlueprintRead returns the content of a specific blueprint file from a world container.
+func (s *Server) handleWorldBlueprintRead(w http.ResponseWriter, r *http.Request) {
+	worldID := r.PathValue("id")
+	if worldID == "" {
+		jsonError(w, "world id is required", 400)
+		return
+	}
+
 	relPath := r.PathValue("path")
 	if relPath == "" {
 		jsonError(w, "file path is required", 400)
@@ -1196,27 +1226,30 @@ func (s *Server) handleBlueprintRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	absPath := filepath.Join(s.blueprintBasePath(), relPath)
-
-	// Ensure the resolved path is still under the blueprint directory
-	cleanPath := filepath.Clean(absPath)
-	cleanBase := filepath.Clean(s.blueprintBasePath())
-	if !strings.HasPrefix(cleanPath, cleanBase) {
-		jsonError(w, "path outside blueprint directory", 400)
-		return
-	}
-
-	data, err := os.ReadFile(absPath)
+	containerID, err := s.getWorldContainerID(worldID)
 	if err != nil {
-		jsonError(w, "file not found: "+err.Error(), 404)
+		jsonError(w, err.Error(), 404)
 		return
 	}
 
-	jsonOK(w, map[string]string{"path": relPath, "content": string(data)})
+	fullPath := "/world/blueprint/" + relPath
+	out, err := dockerExecOutput(r.Context(), containerID, "cat", fullPath)
+	if err != nil {
+		jsonError(w, "file not found: "+relPath, 404)
+		return
+	}
+
+	jsonOK(w, map[string]string{"path": relPath, "content": out})
 }
 
-// handleBlueprintWrite writes content to a specific blueprint file.
-func (s *Server) handleBlueprintWrite(w http.ResponseWriter, r *http.Request) {
+// handleWorldBlueprintWrite writes content to a specific blueprint file inside a world container.
+func (s *Server) handleWorldBlueprintWrite(w http.ResponseWriter, r *http.Request) {
+	worldID := r.PathValue("id")
+	if worldID == "" {
+		jsonError(w, "world id is required", 400)
+		return
+	}
+
 	relPath := r.PathValue("path")
 	if relPath == "" {
 		jsonError(w, "file path is required", 400)
@@ -1237,28 +1270,108 @@ func (s *Server) handleBlueprintWrite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	absPath := filepath.Join(s.blueprintBasePath(), relPath)
-
-	// Ensure the resolved path is still under the blueprint directory
-	cleanPath := filepath.Clean(absPath)
-	cleanBase := filepath.Clean(s.blueprintBasePath())
-	if !strings.HasPrefix(cleanPath, cleanBase) {
-		jsonError(w, "path outside blueprint directory", 400)
+	containerID, err := s.getWorldContainerID(worldID)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
 		return
 	}
 
-	// Ensure parent directory exists
-	if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
+	fullPath := "/world/blueprint/" + relPath
+
+	// Ensure parent directory exists inside container
+	dir := filepath.Dir(fullPath)
+	if _, err := dockerExecOutput(r.Context(), containerID, "mkdir", "-p", dir); err != nil {
 		jsonError(w, "failed to create directory: "+err.Error(), 500)
 		return
 	}
 
-	if err := os.WriteFile(absPath, []byte(body.Content), 0644); err != nil {
+	// Write file using docker exec -i ... tee
+	cmdArgs := []string{"exec", "-i", containerID, "tee", fullPath}
+	cmd := exec.CommandContext(r.Context(), "docker", cmdArgs...)
+	cmd.Stdin = strings.NewReader(body.Content)
+	if err := cmd.Run(); err != nil {
 		jsonError(w, "failed to write file: "+err.Error(), 500)
 		return
 	}
 
 	jsonOK(w, map[string]string{"status": "ok", "path": relPath})
+}
+
+// handleArchitectBlueprintList returns all files in the architect container's /blueprint/ directory.
+func (s *Server) handleArchitectBlueprintList(w http.ResponseWriter, r *http.Request) {
+	const containerName = "spwn-architect"
+
+	out, err := dockerExecOutput(r.Context(), containerName,
+		"find", "/blueprint/", "-type", "f", "-not", "-name", ".*",
+		"-printf", "%P\\t%s\\t%T@\\n")
+	if err != nil {
+		// Directory might not exist yet — return empty list
+		jsonOK(w, map[string]interface{}{"files": []interface{}{}})
+		return
+	}
+
+	type fileEntry struct {
+		Path     string `json:"path"`
+		Size     int64  `json:"size"`
+		Modified string `json:"modified"`
+	}
+
+	var files []fileEntry
+	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
+		if line == "" {
+			continue
+		}
+		parts := strings.SplitN(line, "\t", 3)
+		if len(parts) < 3 {
+			continue
+		}
+		var size int64
+		fmt.Sscanf(parts[1], "%d", &size)
+		var epoch float64
+		fmt.Sscanf(parts[2], "%f", &epoch)
+		modified := time.Unix(int64(epoch), 0).Format(time.RFC3339)
+
+		files = append(files, fileEntry{
+			Path:     parts[0],
+			Size:     size,
+			Modified: modified,
+		})
+	}
+
+	if files == nil {
+		files = []fileEntry{}
+	}
+
+	jsonOK(w, map[string]interface{}{"files": files})
+}
+
+// handleArchitectBlueprintRead returns the content of a specific blueprint file from the architect container.
+func (s *Server) handleArchitectBlueprintRead(w http.ResponseWriter, r *http.Request) {
+	relPath := r.PathValue("path")
+	if relPath == "" {
+		jsonError(w, "file path is required", 400)
+		return
+	}
+
+	if strings.Contains(relPath, "..") {
+		jsonError(w, "invalid path", 400)
+		return
+	}
+
+	const containerName = "spwn-architect"
+	fullPath := "/blueprint/" + relPath
+	out, err := dockerExecOutput(r.Context(), containerName, "cat", fullPath)
+	if err != nil {
+		jsonError(w, "file not found: "+relPath, 404)
+		return
+	}
+
+	jsonOK(w, map[string]string{"path": relPath, "content": out})
+}
+
+// blueprintBasePath kept for any legacy use — points to host filesystem.
+func (s *Server) blueprintBasePath() string {
+	return filepath.Join(foundation.BaseDir(), "blueprint")
 }
 
 // handleGetAgentMind returns the mind tree (layers → files) for an agent.
@@ -1366,4 +1479,236 @@ func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonOK(w, map[string]string{"path": filePath, "content": string(data)})
+}
+
+// ============================================================
+// Auth handlers
+// ============================================================
+
+func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
+	creds := auth.ResolveAll()
+	type providerInfo struct {
+		Provider       string         `json:"provider"`
+		Connected      bool           `json:"connected"`
+		CredentialType string         `json:"credentialType"`
+		Source         string         `json:"source"`
+		Error          string         `json:"error,omitempty"`
+		Plan           string         `json:"plan,omitempty"`
+		Usage          *auth.UsageInfo `json:"usage,omitempty"`
+	}
+	var providers []providerInfo
+	for _, cred := range creds {
+		info := providerInfo{
+			Provider:       string(cred.Provider),
+			CredentialType: string(cred.Type),
+			Source:         cred.Source,
+			Connected:      cred.Type != auth.CredTypeNone,
+		}
+		providers = append(providers, info)
+	}
+	jsonOK(w, map[string]interface{}{"providers": providers})
+}
+
+func (s *Server) handleAuthCheck(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Provider string `json:"provider"`
+	}
+	json.NewDecoder(r.Body).Decode(&body)
+	cred := auth.Resolve(auth.Provider(body.Provider))
+	status := auth.Validate(r.Context(), cred)
+	jsonOK(w, status)
+}
+
+func (s *Server) handleAuthConfigure(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Provider string `json:"provider"`
+		Token    string `json:"token"`
+	}
+	json.NewDecoder(r.Body).Decode(&body)
+	if body.Token == "" {
+		jsonError(w, "token required", 400)
+		return
+	}
+	if err := auth.SaveToken(body.Token); err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+// ============================================================
+// History handlers — read Claude Code JSONL conversation logs
+// ============================================================
+
+type historyMessage struct {
+	Role      string  `json:"role"`
+	Content   string  `json:"content"`
+	Timestamp string  `json:"timestamp"`
+	SessionID string  `json:"sessionId"`
+	Type      string  `json:"type"`
+	ToolName  string  `json:"toolName,omitempty"`
+	Cost      float64 `json:"cost,omitempty"`
+	Duration  int     `json:"durationMs,omitempty"`
+}
+
+type historySession struct {
+	ID        string           `json:"id"`
+	Messages  []historyMessage `json:"messages"`
+	StartedAt string           `json:"startedAt"`
+	Cost      float64          `json:"cost,omitempty"`
+}
+
+// parseJSONLSessions reads JSONL files from a container and returns parsed sessions.
+func (s *Server) parseJSONLSessions(ctx context.Context, container, user, basePath string, limit int) []historySession {
+	lsCmd := exec.CommandContext(ctx, "docker", "exec", "-u", user,
+		container, "ls", "-t", basePath)
+	lsOut, err := lsCmd.Output()
+	if err != nil {
+		return nil
+	}
+
+	files := strings.Fields(strings.TrimSpace(string(lsOut)))
+	if len(files) == 0 {
+		return nil
+	}
+	if len(files) > limit {
+		files = files[:limit]
+	}
+
+	var sessions []historySession
+	for _, file := range files {
+		if !strings.HasSuffix(file, ".jsonl") {
+			continue
+		}
+		path := basePath + file
+		catCmd := exec.CommandContext(ctx, "docker", "exec", "-u", user,
+			container, "cat", path)
+		data, err := catCmd.Output()
+		if err != nil {
+			continue
+		}
+
+		session := historySession{ID: strings.TrimSuffix(file, ".jsonl")}
+		var msgs []historyMessage
+
+		for _, line := range strings.Split(string(data), "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" {
+				continue
+			}
+
+			var event map[string]interface{}
+			if err := json.Unmarshal([]byte(line), &event); err != nil {
+				continue
+			}
+
+			eventType, _ := event["type"].(string)
+			timestamp, _ := event["timestamp"].(string)
+			sessionID, _ := event["sessionId"].(string)
+
+			if session.StartedAt == "" && timestamp != "" {
+				session.StartedAt = timestamp
+			}
+
+			switch eventType {
+			case "user":
+				msg, _ := event["message"].(map[string]interface{})
+				content, _ := msg["content"].(string)
+				if content != "" {
+					msgs = append(msgs, historyMessage{
+						Role: "user", Content: content,
+						Timestamp: timestamp, SessionID: sessionID, Type: "text",
+					})
+				}
+			case "assistant":
+				msg, _ := event["message"].(map[string]interface{})
+				contentArr, _ := msg["content"].([]interface{})
+				for _, c := range contentArr {
+					block, _ := c.(map[string]interface{})
+					blockType, _ := block["type"].(string)
+					switch blockType {
+					case "text":
+						text, _ := block["text"].(string)
+						if text != "" {
+							msgs = append(msgs, historyMessage{
+								Role: "assistant", Content: text,
+								Timestamp: timestamp, SessionID: sessionID, Type: "text",
+							})
+						}
+					case "tool_use":
+						toolName, _ := block["name"].(string)
+						msgs = append(msgs, historyMessage{
+							Role: "assistant", Type: "tool_use",
+							ToolName: toolName, Timestamp: timestamp, SessionID: sessionID,
+						})
+					}
+				}
+			case "result":
+				cost, _ := event["total_cost_usd"].(float64)
+				dur, _ := event["duration_ms"].(float64)
+				session.Cost = cost
+				msgs = append(msgs, historyMessage{
+					Role: "assistant", Type: "result",
+					Cost: cost, Duration: int(dur),
+					Timestamp: timestamp, SessionID: sessionID,
+				})
+			}
+		}
+
+		session.Messages = msgs
+		if len(msgs) > 0 {
+			sessions = append(sessions, session)
+		}
+	}
+
+	// Reverse so oldest session is first (chronological order)
+	for i, j := 0, len(sessions)-1; i < j; i, j = i+1, j-1 {
+		sessions[i], sessions[j] = sessions[j], sessions[i]
+	}
+
+	return sessions
+}
+
+func (s *Server) handleArchitectHistory(w http.ResponseWriter, r *http.Request) {
+	sessions := s.parseJSONLSessions(r.Context(),
+		"spwn-architect", "architect",
+		"/home/architect/.claude/projects/-world/", 5)
+	if sessions == nil {
+		sessions = []historySession{}
+	}
+	jsonOK(w, map[string]interface{}{"sessions": sessions})
+}
+
+func (s *Server) handleWorldHistory(w http.ResponseWriter, r *http.Request) {
+	worldID := r.PathValue("id")
+	if worldID == "" {
+		jsonError(w, "world id is required", 400)
+		return
+	}
+
+	// Find container ID from state
+	universes, err := s.state.List()
+	if err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	var containerID string
+	for _, u := range universes {
+		if u.ID == worldID {
+			containerID = u.ContainerID
+			break
+		}
+	}
+	if containerID == "" {
+		jsonError(w, "world not found", 404)
+		return
+	}
+
+	sessions := s.parseJSONLSessions(r.Context(),
+		containerID, "spwn",
+		"/home/spwn/.claude/projects/-workspace/", 5)
+	if sessions == nil {
+		sessions = []historySession{}
+	}
+	jsonOK(w, map[string]interface{}{"sessions": sessions})
 }

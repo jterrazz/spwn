@@ -38,8 +38,8 @@ and a Mind (persistent agent identity).`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if isGodMode() {
-			return validateGodCommand(cmd)
+		if isArchitectMode() {
+			return validateArchitectCommand(cmd)
 		}
 		startVersionCheck()
 		return ensureDefaults()
