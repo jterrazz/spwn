@@ -19,32 +19,32 @@ const STATUS_CONFIG: Record<
   { base: [number, number, number]; glow: [number, number, number]; marker: [number, number, number]; brightness: number }
 > = {
   running: {
-    base: [0.18, 0.2, 0.18],
-    glow: [0.12, 0.25, 0.12],
+    base: [0.35, 0.4, 0.35],
+    glow: [0.15, 0.35, 0.15],
     marker: [0.5, 1, 0.5],
     brightness: 10,
   },
   idle: {
-    base: [0.2, 0.18, 0.12],
-    glow: [0.2, 0.16, 0.06],
+    base: [0.4, 0.35, 0.25],
+    glow: [0.3, 0.25, 0.1],
     marker: [1, 0.85, 0.4],
     brightness: 8,
   },
   error: {
-    base: [0.22, 0.08, 0.08],
-    glow: [0.25, 0.06, 0.06],
+    base: [0.4, 0.15, 0.15],
+    glow: [0.35, 0.1, 0.1],
     marker: [1, 0.4, 0.4],
     brightness: 7,
   },
   stopped: {
-    base: [0.14, 0.14, 0.14],
-    glow: [0.08, 0.08, 0.08],
+    base: [0.28, 0.28, 0.28],
+    glow: [0.15, 0.15, 0.15],
     marker: [0.6, 0.6, 0.6],
     brightness: 5,
   },
   creating: {
-    base: [0.12, 0.12, 0.22],
-    glow: [0.08, 0.12, 0.25],
+    base: [0.25, 0.25, 0.4],
+    glow: [0.15, 0.2, 0.35],
     marker: [0.5, 0.7, 1],
     brightness: 8,
   },
@@ -178,7 +178,7 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
       phi: phiRef.current,
       theta: 0.15 + index * 0.3,
       dark: 1,
-      diffuse: 1.2 + (hashCode(world.id) % 10) * 0.08,
+      diffuse: 2.0 + (hashCode(world.id) % 10) * 0.1,
       mapSamples: 0,        // disable Earth map entirely
       mapBrightness: 0,
       mapBaseBrightness: 0,
@@ -210,8 +210,8 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
         ? 0.15 + index * 0.3 + Math.sin(frame * 0.008) * 0.12
         : 0.15 + index * 0.3;
       const diffuse = sel
-        ? 1.4 + Math.sin(frame * 0.015) * 0.4
-        : 1.2 + (hashCode(world.id) % 10) * 0.08;
+        ? 2.5 + Math.sin(frame * 0.015) * 0.5
+        : 2.0 + (hashCode(world.id) % 10) * 0.1;
       const scale = sel
         ? 1.0 + Math.sin(frame * 0.012) * 0.015
         : 1.0;
