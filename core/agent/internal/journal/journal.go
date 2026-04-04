@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"spwn.sh/core/foundation/activity"
 )
 
 // Entry represents a parsed journal entry.
@@ -45,7 +47,23 @@ func Append(mindPath, worldID string, exitCode int, duration time.Duration) erro
 `, worldID, outcome, exitCode, formatDuration(duration), now.Add(-duration).Format(time.RFC3339), now.Format(time.RFC3339))
 
 	path := filepath.Join(dir, filename)
-	return os.WriteFile(path, []byte(content), 0644)
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		return err
+	}
+
+	// Emit session-ended activity event
+	agentName := filepath.Base(mindPath)
+	activity.Log(activity.Event{
+		Type:       activity.TypeSessionEnded,
+		Actor:      agentName,
+		Verb:       outcome,
+		Target:     worldID,
+		Phrase:     activity.PhraseSessionEnded(agentName, worldID, formatDuration(duration), outcome),
+		WorldID:    worldID,
+		AgentID:    agentName,
+		DurationMs: duration.Milliseconds(),
+	})
+	return nil
 }
 
 // List returns the last n journal entries, newest first.

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/foundation/auth"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/backend"
@@ -366,6 +367,14 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 	}
 	_ = state.SaveClawState(clawState)
 
+	activity.Log(activity.Event{
+		Type:   activity.TypeArchitectStarted,
+		Actor:  "architect",
+		Verb:   "started",
+		Target: "architect",
+		Phrase: activity.PhraseArchitectStarted(),
+	})
+
 	return id, nil
 }
 
@@ -399,6 +408,14 @@ func StopArchitectDaemon(ctx context.Context) error {
 		Active: false,
 	}
 	_ = state.SaveClawState(clawState)
+
+	activity.Log(activity.Event{
+		Type:   activity.TypeArchitectStopped,
+		Actor:  "architect",
+		Verb:   "stopped",
+		Target: "architect",
+		Phrase: activity.PhraseArchitectStopped(),
+	})
 
 	return nil
 }

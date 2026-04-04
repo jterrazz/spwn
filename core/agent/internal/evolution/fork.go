@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/activity"
 )
 
 // Fork clones a Mind from source agent to target agent.
@@ -63,6 +64,20 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 			os.WriteFile(filepath.Join(targetDir, "profile.yaml"), data, 0644)
 		}
 	}
+
+	// Emit activity event
+	activity.Log(activity.Event{
+		Type:    activity.TypeAgentForked,
+		Actor:   "user",
+		Verb:    "forked",
+		Target:  targetName,
+		Phrase:  activity.PhraseAgentForked(sourceName, targetName),
+		AgentID: targetName,
+		Metadata: map[string]any{
+			"source": sourceName,
+			"layers": result.LayersCopied,
+		},
+	})
 
 	return result, nil
 }

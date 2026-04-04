@@ -55,3 +55,8 @@ func SkillsDir() string {
 func BlueprintDir() string {
 	return filepath.Join(BaseDir(), BlueprintSubDir)
 }
+
+// ActivityPath returns the path to ~/.spwn/activity.jsonl.
+func ActivityPath() string {
+	return filepath.Join(BaseDir(), ActivityFileName)
+}

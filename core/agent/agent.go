@@ -11,6 +11,7 @@ import (
 	"spwn.sh/core/agent/internal/journal"
 	"spwn.sh/core/agent/internal/mind"
 	"spwn.sh/core/agent/internal/session"
+	"spwn.sh/core/foundation/activity"
 )
 
 // Info describes an agent's Mind structure.
@@ -38,7 +39,18 @@ func DeleteAgent(name string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		return fmt.Errorf("agent %q not found", name)
 	}
-	return os.RemoveAll(dir)
+	if err := os.RemoveAll(dir); err != nil {
+		return err
+	}
+	activity.Log(activity.Event{
+		Type:    activity.TypeAgentDeleted,
+		Actor:   "user",
+		Verb:    "deleted",
+		Target:  name,
+		Phrase:  activity.PhraseAgentDeleted(name),
+		AgentID: name,
+	})
+	return nil
 }
 
 // --- Mind operations ---
@@ -53,7 +65,19 @@ func AgentDir(name string) string {
 // (personas, skills, knowledge, playbooks, journal, sessions) and returning
 // the directory path.
 func InitMind(name string) (string, error) {
-	return mind.Init(name)
+	dir, err := mind.Init(name)
+	if err != nil {
+		return "", err
+	}
+	activity.Log(activity.Event{
+		Type:    activity.TypeAgentCreated,
+		Actor:   "user",
+		Verb:    "created",
+		Target:  name,
+		Phrase:  activity.PhraseAgentCreated(name),
+		AgentID: name,
+	})
+	return dir, nil
 }
 
 // ValidateMind checks that the named agent's Mind directory exists and contains

@@ -20,6 +20,7 @@ import (
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/physics"
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/activity"
 )
 
 // SpawnResult is returned by Spawn with the universe and any non-fatal warnings.
@@ -475,6 +476,34 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("save state: %w", err)
+	}
+
+	// Emit activity events
+	agentNames := []string{}
+	for _, ag := range u.Agents {
+		agentNames = append(agentNames, ag.Name)
+	}
+	if len(agentNames) == 0 && u.Agent != "" {
+		agentNames = append(agentNames, u.Agent)
+	}
+	activity.Log(activity.Event{
+		Type:    activity.TypeWorldSpawned,
+		Actor:   "architect",
+		Verb:    "spawned",
+		Target:  u.ID,
+		Phrase:  activity.PhraseWorldSpawned(u.ID, agentNames),
+		WorldID: u.ID,
+	})
+	for _, name := range agentNames {
+		activity.Log(activity.Event{
+			Type:    activity.TypeAgentJoined,
+			Actor:   "architect",
+			Verb:    "joined",
+			Target:  u.ID,
+			Phrase:  activity.PhraseAgentJoined(name, u.ID),
+			WorldID: u.ID,
+			AgentID: name,
+		})
 	}
 
 	return &SpawnResult{Universe: &u, Warnings: warnings}, nil
