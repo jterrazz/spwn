@@ -125,14 +125,14 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /api/auth/check", cors(s.handleAuthCheck))
 	mux.HandleFunc("POST /api/auth/configure", cors(s.handleAuthConfigure))
 
-	// --- Blueprint endpoints (per-world, via docker exec) ---
-	mux.HandleFunc("GET /api/worlds/{id}/blueprint", cors(s.handleWorldBlueprintList))
-	mux.HandleFunc("GET /api/worlds/{id}/blueprint/{path...}", cors(s.handleWorldBlueprintRead))
-	mux.HandleFunc("PUT /api/worlds/{id}/blueprint/{path...}", cors(s.handleWorldBlueprintWrite))
+	// --- Knowledge endpoints (per-world, via docker exec) ---
+	mux.HandleFunc("GET /api/worlds/{id}/knowledge", cors(s.handleWorldKnowledgeList))
+	mux.HandleFunc("GET /api/worlds/{id}/knowledge/{path...}", cors(s.handleWorldKnowledgeRead))
+	mux.HandleFunc("PUT /api/worlds/{id}/knowledge/{path...}", cors(s.handleWorldKnowledgeWrite))
 
-	// --- Architect blueprint endpoints (reads from architect container) ---
-	mux.HandleFunc("GET /api/architect/blueprint", cors(s.handleArchitectBlueprintList))
-	mux.HandleFunc("GET /api/architect/blueprint/{path...}", cors(s.handleArchitectBlueprintRead))
+	// --- Architect knowledge endpoints (reads from architect container) ---
+	mux.HandleFunc("GET /api/architect/knowledge", cors(s.handleArchitectKnowledgeList))
+	mux.HandleFunc("GET /api/architect/knowledge/{path...}", cors(s.handleArchitectKnowledgeRead))
 
 	// --- Root redirect + CORS ---
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
@@ -944,8 +944,8 @@ type StackAction struct {
 	Description string `json:"description,omitempty"`
 }
 
-// BlueprintUpdate represents a parsed blueprint update marker from the architect's response.
-type BlueprintUpdate struct {
+// KnowledgeUpdate represents a parsed knowledge update marker from the architect's response.
+type KnowledgeUpdate struct {
 	Path        string `json:"path"`
 	Description string `json:"description,omitempty"`
 }
@@ -1001,17 +1001,17 @@ func parseStackAction(text string) *StackAction {
 	return nil
 }
 
-// parseBlueprintUpdate extracts a [BLUEPRINT_UPDATE] marker from the architect's response.
-func parseBlueprintUpdate(text string) *BlueprintUpdate {
+// parseKnowledgeUpdate extracts a [KNOWLEDGE_UPDATE] marker from the architect's response.
+func parseKnowledgeUpdate(text string) *KnowledgeUpdate {
 	lines := strings.Split(text, "\n")
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
-		if !strings.HasPrefix(trimmed, "[BLUEPRINT_UPDATE]") {
+		if !strings.HasPrefix(trimmed, "[KNOWLEDGE_UPDATE]") {
 			continue
 		}
 
-		path := strings.TrimSpace(strings.TrimPrefix(trimmed, "[BLUEPRINT_UPDATE]"))
-		update := &BlueprintUpdate{
+		path := strings.TrimSpace(strings.TrimPrefix(trimmed, "[KNOWLEDGE_UPDATE]"))
+		update := &KnowledgeUpdate{
 			Path: path,
 		}
 
@@ -1080,9 +1080,9 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 			"Also update /world/stack.md with the new task. "+
 			"When completing a task use [STACK_POP] Short task title. "+
 			"Read /world/skills/ for detailed guides. "+
-			"BLUEPRINT: You maintain /blueprint/ as the single source of truth. "+
-			"When updating blueprint files, include [BLUEPRINT_UPDATE] path/to/file.md in your response. "+
-			"Every conversation should result in blueprint updates.",
+			"KNOWLEDGE: You maintain /knowledge/ as the single source of truth. "+
+			"When updating knowledge files, include [KNOWLEDGE_UPDATE] path/to/file.md in your response. "+
+			"Every conversation should result in knowledge updates.",
 	)
 
 	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)
@@ -1125,7 +1125,7 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// blueprintBasePath returns the path to the blueprint directory.
+// knowledgeBasePath returns the path to the knowledge directory.
 // getWorldContainerID looks up the container ID for a world by its ID.
 func (s *Server) getWorldContainerID(worldID string) (string, error) {
 	universes, err := s.state.List()
@@ -1151,8 +1151,8 @@ func dockerExecOutput(ctx context.Context, containerID string, args ...string) (
 	return string(out), err
 }
 
-// handleWorldBlueprintList returns all files in the blueprint directory inside a world container.
-func (s *Server) handleWorldBlueprintList(w http.ResponseWriter, r *http.Request) {
+// handleWorldKnowledgeList returns all files in the knowledge directory inside a world container.
+func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request) {
 	worldID := r.PathValue("id")
 	if worldID == "" {
 		jsonError(w, "world id is required", 400)
@@ -1165,9 +1165,9 @@ func (s *Server) handleWorldBlueprintList(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Use find inside the container to list all files under /world/blueprint/
+	// Use find inside the container to list all files under /world/knowledge/
 	out, err := dockerExecOutput(r.Context(), containerID,
-		"find", "/world/blueprint/", "-type", "f", "-not", "-name", ".*",
+		"find", "/world/knowledge/", "-type", "f", "-not", "-name", ".*",
 		"-printf", "%P\\t%s\\t%T@\\n")
 	if err != nil {
 		// Directory might not exist yet — return empty list
@@ -1211,8 +1211,8 @@ func (s *Server) handleWorldBlueprintList(w http.ResponseWriter, r *http.Request
 	jsonOK(w, map[string]interface{}{"files": files})
 }
 
-// handleWorldBlueprintRead returns the content of a specific blueprint file from a world container.
-func (s *Server) handleWorldBlueprintRead(w http.ResponseWriter, r *http.Request) {
+// handleWorldKnowledgeRead returns the content of a specific knowledge file from a world container.
+func (s *Server) handleWorldKnowledgeRead(w http.ResponseWriter, r *http.Request) {
 	worldID := r.PathValue("id")
 	if worldID == "" {
 		jsonError(w, "world id is required", 400)
@@ -1237,7 +1237,7 @@ func (s *Server) handleWorldBlueprintRead(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fullPath := "/world/blueprint/" + relPath
+	fullPath := "/world/knowledge/" + relPath
 	out, err := dockerExecOutput(r.Context(), containerID, "cat", fullPath)
 	if err != nil {
 		jsonError(w, "file not found: "+relPath, 404)
@@ -1247,8 +1247,8 @@ func (s *Server) handleWorldBlueprintRead(w http.ResponseWriter, r *http.Request
 	jsonOK(w, map[string]string{"path": relPath, "content": out})
 }
 
-// handleWorldBlueprintWrite writes content to a specific blueprint file inside a world container.
-func (s *Server) handleWorldBlueprintWrite(w http.ResponseWriter, r *http.Request) {
+// handleWorldKnowledgeWrite writes content to a specific knowledge file inside a world container.
+func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Request) {
 	worldID := r.PathValue("id")
 	if worldID == "" {
 		jsonError(w, "world id is required", 400)
@@ -1281,7 +1281,7 @@ func (s *Server) handleWorldBlueprintWrite(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	fullPath := "/world/blueprint/" + relPath
+	fullPath := "/world/knowledge/" + relPath
 
 	// Ensure parent directory exists inside container
 	dir := filepath.Dir(fullPath)
@@ -1302,12 +1302,12 @@ func (s *Server) handleWorldBlueprintWrite(w http.ResponseWriter, r *http.Reques
 	jsonOK(w, map[string]string{"status": "ok", "path": relPath})
 }
 
-// handleArchitectBlueprintList returns all files in the architect container's /blueprint/ directory.
-func (s *Server) handleArchitectBlueprintList(w http.ResponseWriter, r *http.Request) {
+// handleArchitectKnowledgeList returns all files in the architect container's /knowledge/ directory.
+func (s *Server) handleArchitectKnowledgeList(w http.ResponseWriter, r *http.Request) {
 	const containerName = "spwn-architect"
 
 	out, err := dockerExecOutput(r.Context(), containerName,
-		"find", "/blueprint/", "-type", "f", "-not", "-name", ".*",
+		"find", "/knowledge/", "-type", "f", "-not", "-name", ".*",
 		"-printf", "%P\\t%s\\t%T@\\n")
 	if err != nil {
 		// Directory might not exist yet — return empty list
@@ -1350,8 +1350,8 @@ func (s *Server) handleArchitectBlueprintList(w http.ResponseWriter, r *http.Req
 	jsonOK(w, map[string]interface{}{"files": files})
 }
 
-// handleArchitectBlueprintRead returns the content of a specific blueprint file from the architect container.
-func (s *Server) handleArchitectBlueprintRead(w http.ResponseWriter, r *http.Request) {
+// handleArchitectKnowledgeRead returns the content of a specific knowledge file from the architect container.
+func (s *Server) handleArchitectKnowledgeRead(w http.ResponseWriter, r *http.Request) {
 	relPath := r.PathValue("path")
 	if relPath == "" {
 		jsonError(w, "file path is required", 400)
@@ -1364,7 +1364,7 @@ func (s *Server) handleArchitectBlueprintRead(w http.ResponseWriter, r *http.Req
 	}
 
 	const containerName = "spwn-architect"
-	fullPath := "/blueprint/" + relPath
+	fullPath := "/knowledge/" + relPath
 	out, err := dockerExecOutput(r.Context(), containerName, "cat", fullPath)
 	if err != nil {
 		jsonError(w, "file not found: "+relPath, 404)
@@ -1374,9 +1374,9 @@ func (s *Server) handleArchitectBlueprintRead(w http.ResponseWriter, r *http.Req
 	jsonOK(w, map[string]string{"path": relPath, "content": out})
 }
 
-// blueprintBasePath kept for any legacy use — points to host filesystem.
-func (s *Server) blueprintBasePath() string {
-	return filepath.Join(foundation.BaseDir(), "blueprint")
+// knowledgeBasePath kept for any legacy use — points to host filesystem.
+func (s *Server) knowledgeBasePath() string {
+	return filepath.Join(foundation.BaseDir(), "knowledge")
 }
 
 // handleGetAgentMind returns the mind tree (layers → files) for an agent.

@@ -1,6 +1,6 @@
-// Package blueprint manages the universe blueprint — the knowledge base
-// maintained by the Architect as the single source of truth.
-package blueprint
+// Package knowledge manages the universe knowledge base — the single
+// source of truth maintained by the Architect.
+package knowledge
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 
 // DefaultFiles maps relative paths to their default content.
 var DefaultFiles = map[string]string{
-	"overview.md": `# Universe Blueprint
+	"overview.md": `# Universe Knowledge
 
 This is the knowledge base for your spwn universe.
 The Architect maintains this as the single source of truth.
@@ -31,7 +31,7 @@ Key terms and concepts used across projects.
 | World | An isolated Docker container where an agent works |
 | Agent | A persistent AI citizen with identity and memory |
 | Architect | The always-on daemon that manages worlds and agents |
-| Blueprint | This knowledge base — the single source of truth |
+| Knowledge | This knowledge base — the single source of truth |
 | Mind | An agent's persistent memory (identity, skills, knowledge) |
 `,
 	"roadmap.md": `# Roadmap
@@ -58,36 +58,28 @@ var DefaultDirs = []string{
 	"projects",
 }
 
-// Init creates the blueprint directory at basePath and writes default files
+// Init creates the knowledge directory at basePath and writes default files
 // if they don't already exist. It never overwrites existing files.
 func Init(basePath string) error {
-	// Create the base directory
 	if err := os.MkdirAll(basePath, 0755); err != nil {
-		return fmt.Errorf("create blueprint dir: %w", err)
+		return fmt.Errorf("create knowledge dir: %w", err)
 	}
 
-	// Create default subdirectories
 	for _, dir := range DefaultDirs {
 		dirPath := filepath.Join(basePath, dir)
 		if err := os.MkdirAll(dirPath, 0755); err != nil {
-			return fmt.Errorf("create blueprint subdir %s: %w", dir, err)
+			return fmt.Errorf("create knowledge subdir %s: %w", dir, err)
 		}
 	}
 
-	// Write default files (don't overwrite existing)
 	for relPath, content := range DefaultFiles {
 		absPath := filepath.Join(basePath, relPath)
-
-		// Skip if file already exists
 		if _, err := os.Stat(absPath); err == nil {
 			continue
 		}
-
-		// Ensure parent directory exists
 		if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
 			return fmt.Errorf("create parent dir for %s: %w", relPath, err)
 		}
-
 		if err := os.WriteFile(absPath, []byte(content), 0644); err != nil {
 			return fmt.Errorf("write default %s: %w", relPath, err)
 		}
@@ -96,14 +88,14 @@ func Init(basePath string) error {
 	return nil
 }
 
-// FileInfo describes a file in the blueprint.
+// FileInfo describes a file in the knowledge base.
 type FileInfo struct {
 	Path     string    `json:"path"`
 	Size     int64     `json:"size"`
 	Modified time.Time `json:"modified"`
 }
 
-// ListFiles returns all files in the blueprint directory recursively.
+// ListFiles returns all files in the knowledge directory recursively.
 func ListFiles(basePath string) ([]FileInfo, error) {
 	var files []FileInfo
 
@@ -114,7 +106,6 @@ func ListFiles(basePath string) ([]FileInfo, error) {
 		if info.IsDir() {
 			return nil
 		}
-		// Skip hidden files like .gitkeep
 		if strings.HasPrefix(info.Name(), ".") {
 			return nil
 		}
@@ -133,26 +124,23 @@ func ListFiles(basePath string) ([]FileInfo, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("walk blueprint: %w", err)
+		return nil, fmt.Errorf("walk knowledge: %w", err)
 	}
 
 	return files, nil
 }
 
-// ReadFile reads a specific file from the blueprint.
+// ReadFile reads a specific file from the knowledge base.
 func ReadFile(basePath, relPath string) (string, error) {
-	// Prevent directory traversal
 	if strings.Contains(relPath, "..") {
 		return "", fmt.Errorf("invalid path: directory traversal not allowed")
 	}
 
 	absPath := filepath.Join(basePath, relPath)
-
-	// Ensure the resolved path is still under basePath
 	cleanPath := filepath.Clean(absPath)
 	cleanBase := filepath.Clean(basePath)
 	if !strings.HasPrefix(cleanPath, cleanBase) {
-		return "", fmt.Errorf("path outside blueprint directory")
+		return "", fmt.Errorf("path outside knowledge directory")
 	}
 
 	data, err := os.ReadFile(absPath)
@@ -163,23 +151,19 @@ func ReadFile(basePath, relPath string) (string, error) {
 	return string(data), nil
 }
 
-// WriteFile writes content to a file in the blueprint.
+// WriteFile writes content to a file in the knowledge base.
 func WriteFile(basePath, relPath, content string) error {
-	// Prevent directory traversal
 	if strings.Contains(relPath, "..") {
 		return fmt.Errorf("invalid path: directory traversal not allowed")
 	}
 
 	absPath := filepath.Join(basePath, relPath)
-
-	// Ensure the resolved path is still under basePath
 	cleanPath := filepath.Clean(absPath)
 	cleanBase := filepath.Clean(basePath)
 	if !strings.HasPrefix(cleanPath, cleanBase) {
-		return fmt.Errorf("path outside blueprint directory")
+		return fmt.Errorf("path outside knowledge directory")
 	}
 
-	// Ensure parent directory exists
 	if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
 		return fmt.Errorf("create parent dir: %w", err)
 	}
@@ -191,7 +175,7 @@ func WriteFile(basePath, relPath, content string) error {
 	return nil
 }
 
-// Search searches for a query string across all blueprint files.
+// Search searches for a query string across all knowledge files.
 // Returns a map of file path → matching lines.
 func Search(basePath, query string) (map[string][]string, error) {
 	results := make(map[string][]string)

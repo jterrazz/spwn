@@ -1,4 +1,4 @@
-package blueprint
+package knowledge
 
 import (
 	"os"
@@ -6,9 +6,9 @@ import (
 	"testing"
 )
 
-func TestInitBlueprint_CreatesDefaults(t *testing.T) {
+func TestInitKnowledge_CreatesDefaults(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -34,9 +34,9 @@ func TestInitBlueprint_CreatesDefaults(t *testing.T) {
 	}
 }
 
-func TestInitBlueprint_DoesNotOverwrite(t *testing.T) {
+func TestInitKnowledge_DoesNotOverwrite(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	// First init
 	if err := Init(basePath); err != nil {
@@ -100,7 +100,7 @@ func TestDefaultFilesContent(t *testing.T) {
 
 func TestListFiles(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -130,7 +130,7 @@ func TestListFiles(t *testing.T) {
 
 func TestReadFile(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -148,7 +148,7 @@ func TestReadFile(t *testing.T) {
 
 func TestReadFile_TraversalBlocked(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -162,25 +162,25 @@ func TestReadFile_TraversalBlocked(t *testing.T) {
 
 func TestSearch(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 
-	results, err := Search(basePath, "Blueprint")
+	results, err := Search(basePath, "Knowledge")
 	if err != nil {
 		t.Fatalf("Search failed: %v", err)
 	}
 
 	if len(results) == 0 {
-		t.Error("expected search results for 'Blueprint', got none")
+		t.Error("expected search results for 'Knowledge', got none")
 	}
 }
 
 func TestWriteFile(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -205,7 +205,7 @@ func TestWriteFile(t *testing.T) {
 
 func TestWriteFile_CreatesSubdirs(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -236,7 +236,7 @@ func TestWriteFile_CreatesSubdirs(t *testing.T) {
 
 func TestWriteFile_TraversalBlocked(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -250,7 +250,7 @@ func TestWriteFile_TraversalBlocked(t *testing.T) {
 
 func TestSearch_MultipleResults(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -290,7 +290,7 @@ func TestSearch_MultipleResults(t *testing.T) {
 
 func TestListFiles_WithSubdirs(t *testing.T) {
 	dir := t.TempDir()
-	basePath := filepath.Join(dir, "blueprint")
+	basePath := filepath.Join(dir, "knowledge")
 
 	if err := Init(basePath); err != nil {
 		t.Fatalf("Init failed: %v", err)

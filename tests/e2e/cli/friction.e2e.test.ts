@@ -84,42 +84,42 @@ describe("zero-friction UX", () => {
     expect(out).toContain("spwn ls");
   });
 
-  // ── 5. Blueprint commands work ──────────────────────────────
+  // ── 5. Knowledge commands work ──────────────────────────────
 
-  test("blueprint help works", async () => {
-    // WHEN — running blueprint subcommand
-    const result = await spwn("blueprint help")
-      .exec("blueprint --help")
+  test("knowledge help works", async () => {
+    // WHEN — running knowledge subcommand
+    const result = await spwn("knowledge help")
+      .exec("knowledge --help")
       .run();
 
-    // THEN — output mentions blueprint
+    // THEN — output mentions knowledge
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
-    expect(out.toLowerCase()).toContain("blueprint");
+    expect(out.toLowerCase()).toContain("knowledge");
   });
 
-  test("blueprint ls lists files", async () => {
-    // GIVEN — init the universe so blueprint dir is created with defaults
+  test("knowledge ls lists files", async () => {
+    // GIVEN — init the universe so knowledge dir is created with defaults
     await spwn("bp init").exec("init").run();
 
-    // WHEN — listing blueprint files
-    const result = await spwn("blueprint ls")
-      .exec("blueprint ls")
+    // WHEN — listing knowledge files
+    const result = await spwn("knowledge ls")
+      .exec("knowledge ls")
       .run();
 
-    // THEN — output includes overview.md (default blueprint file)
+    // THEN — output includes overview.md (default knowledge file)
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("overview.md");
   });
 
-  test("blueprint show displays content", async () => {
+  test("knowledge show displays content", async () => {
     // GIVEN — init the universe
     await spwn("bp init for show").exec("init").run();
 
-    // WHEN — showing a specific blueprint file
-    const result = await spwn("blueprint show")
-      .exec("blueprint show overview.md")
+    // WHEN — showing a specific knowledge file
+    const result = await spwn("knowledge show")
+      .exec("knowledge show overview.md")
       .run();
 
     // THEN — output contains markdown content
@@ -129,13 +129,13 @@ describe("zero-friction UX", () => {
     expect(out.length).toBeGreaterThan(10);
   });
 
-  test("blueprint search finds matches", async () => {
+  test("knowledge search finds matches", async () => {
     // GIVEN — init the universe
     await spwn("bp init for search").exec("init").run();
 
-    // WHEN — searching for "Agent" in blueprint files
-    const result = await spwn("blueprint search")
-      .exec("blueprint search Agent")
+    // WHEN — searching for "Agent" in knowledge files
+    const result = await spwn("knowledge search")
+      .exec("knowledge search Agent")
       .run();
 
     // THEN — exits successfully (matches may or may not be found depending on defaults)

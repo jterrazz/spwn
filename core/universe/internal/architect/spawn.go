@@ -96,10 +96,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		binds = append(binds, foundation.BaseDir()+":/home/spwn/.spwn")
 	}
 
-	// Mount blueprint read-only into agent worlds
-	blueprintDir := foundation.BlueprintDir()
-	if _, statErr := os.Stat(blueprintDir); statErr == nil {
-		binds = append(binds, blueprintDir+":/world/blueprint:ro")
+	// Mount knowledge read-only into agent worlds
+	knowledgeDir := foundation.KnowledgeDir()
+	if _, statErr := os.Stat(knowledgeDir); statErr == nil {
+		binds = append(binds, knowledgeDir+":/world/knowledge:ro")
 	}
 
 	// Mount Mind(s) for agents

@@ -5,6 +5,8 @@ import { IconPackage, IconDownload, IconExternalLink } from "@tabler/icons-react
 import { goApiUrl } from "@/lib/api-client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { PageHeader } from "@/components/page-header";
+import { Page } from "@/components/page";
 
 interface Package {
   name: string;
@@ -32,25 +34,23 @@ export default function MarketplacePage() {
   }, []);
 
   return (
-    <div className="p-8 space-y-8">
+    <Page>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-heading tracking-wide text-foreground/90">Marketplace</h1>
-          <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
-            Installed packages and extensions
-          </p>
-        </div>
-        <a
-          href="https://spwn.sh/marketplace"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
-        >
-          <IconExternalLink size={16} />
-          Browse Marketplace
-        </a>
-      </div>
+      <PageHeader
+        title="Marketplace"
+        description="Installed packages and extensions for your spwn universe."
+        actions={
+          <a
+            href="https://spwn.sh/marketplace"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
+          >
+            <IconExternalLink size={16} />
+            Browse Marketplace
+          </a>
+        }
+      />
 
       {/* Loading state */}
       {loading && (
@@ -140,6 +140,6 @@ export default function MarketplacePage() {
           </div>
         </div>
       )}
-    </div>
+    </Page>
   );
 }

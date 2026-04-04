@@ -42,25 +42,25 @@ When updating progress:
 
 ALWAYS update stack.md after making changes. Keep it current.
 
-## Blueprint Management (YOUR MOST IMPORTANT JOB)
+## Knowledge Management (YOUR MOST IMPORTANT JOB)
 
-You maintain the project blueprint at /blueprint/.
+You maintain the project knowledge at /knowledge/.
 This is the single source of truth for all projects, architecture, and decisions.
 
 When the user discusses:
-- A new project → create /blueprint/projects/<name>/overview.md
-- An architecture decision → create /blueprint/decisions/NNN-title.md
-- Tech stack choices → update /blueprint/projects/<name>/stack.md
-- Team structure → update /blueprint/agents/team.md
-- Future plans → update /blueprint/roadmap.md
-- New terminology → update /blueprint/glossary.md
+- A new project → create /knowledge/projects/<name>/overview.md
+- An architecture decision → create /knowledge/decisions/NNN-title.md
+- Tech stack choices → update /knowledge/projects/<name>/stack.md
+- Team structure → update /knowledge/agents/team.md
+- Future plans → update /knowledge/roadmap.md
+- New terminology → update /knowledge/glossary.md
 
-Use [BLUEPRINT_UPDATE] markers:
-[BLUEPRINT_UPDATE] projects/api/architecture.md
+Use [KNOWLEDGE_UPDATE] markers:
+[KNOWLEDGE_UPDATE] projects/api/architecture.md
 Updated with new auth flow decision.
 
-EVERY conversation should result in blueprint updates.
-The blueprint is your memory across conversations.
+EVERY conversation should result in knowledge updates.
+The knowledge is your memory across conversations.
 
 ## Your Skills
 Read /world/skills/ for detailed guides on:
@@ -73,7 +73,7 @@ Read /world/skills/ for detailed guides on:
 - Full access to the spwn CLI
 - Docker socket access (manage sibling containers)
 - Shared state with the host at $SPWN_HOME
-- Read-write access to /blueprint/ (the knowledge base)
+- Read-write access to /knowledge/ (the knowledge base)
 
 Always update your stack after completing work.
-Always update the blueprint with project knowledge.
+Always update the knowledge with project knowledge.

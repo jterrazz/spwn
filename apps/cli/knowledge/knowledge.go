@@ -1,4 +1,4 @@
-package blueprint
+package knowledge
 
 import (
 	"fmt"
@@ -9,39 +9,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var defaultBlueprintHelp func(*cobra.Command, []string)
+var defaultKnowledgeHelp func(*cobra.Command, []string)
 
-// Cmd is the parent command for blueprint operations.
+// Cmd is the parent command for knowledge operations.
 var Cmd = &cobra.Command{
-	Use:   "blueprint",
+	Use:   "knowledge",
 	Short: "Universe knowledge base — the single source of truth",
-	Long:  `The blueprint is the knowledge base for your spwn universe. The Architect maintains it as the single source of truth for projects, architecture, decisions, and team structure.`,
+	Long:  `The knowledge is the knowledge base for your spwn universe. The Architect maintains it as the single source of truth for projects, architecture, decisions, and team structure.`,
 	RunE:  runOverview,
 }
 
 var lsCmd = &cobra.Command{
 	Use:   "ls",
-	Short: "List all files in the blueprint",
+	Short: "List all files in the knowledge",
 	RunE:  runLs,
 }
 
 var showCmd = &cobra.Command{
 	Use:   "show <path>",
-	Short: "Show the contents of a blueprint file",
+	Short: "Show the contents of a knowledge file",
 	Args:  cobra.ExactArgs(1),
 	RunE:  runShow,
 }
 
 var searchCmd = &cobra.Command{
 	Use:   "search <query>",
-	Short: "Search across all blueprint files",
+	Short: "Search across all knowledge files",
 	Args:  cobra.ExactArgs(1),
 	RunE:  runSearch,
 }
 
 func init() {
-	defaultBlueprintHelp = Cmd.HelpFunc()
-	Cmd.SetHelpFunc(blueprintHelp)
+	defaultKnowledgeHelp = Cmd.HelpFunc()
+	Cmd.SetHelpFunc(knowledgeHelp)
 
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(showCmd)
@@ -51,14 +51,14 @@ func init() {
 func runOverview(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
-	// Ensure blueprint exists
-	if err := universe.InitBlueprint(); err != nil {
-		return s.FailHint("Blueprint", err, "")
+	// Ensure knowledge exists
+	if err := universe.InitKnowledge(); err != nil {
+		return s.FailHint("Knowledge", err, "")
 	}
 
-	content, err := universe.ReadBlueprintFile("overview.md")
+	content, err := universe.ReadKnowledgeFile("overview.md")
 	if err != nil {
-		return s.FailHint("Blueprint", err, "Run 'spwn blueprint ls' to see available files")
+		return s.FailHint("Knowledge", err, "Run 'spwn knowledge ls' to see available files")
 	}
 
 	s.Blank()
@@ -71,25 +71,25 @@ func runOverview(cmd *cobra.Command, args []string) error {
 func runLs(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
-	// Ensure blueprint exists
-	if err := universe.InitBlueprint(); err != nil {
-		return s.FailHint("Blueprint", err, "")
+	// Ensure knowledge exists
+	if err := universe.InitKnowledge(); err != nil {
+		return s.FailHint("Knowledge", err, "")
 	}
 
-	files, err := universe.ListBlueprintFiles()
+	files, err := universe.ListKnowledgeFiles()
 	if err != nil {
-		return s.FailHint("Blueprint", err, "")
+		return s.FailHint("Knowledge", err, "")
 	}
 
 	if len(files) == 0 {
 		s.Blank()
-		s.Info("Blueprint:", "empty")
+		s.Info("Knowledge:", "empty")
 		s.Blank()
 		return nil
 	}
 
 	s.Blank()
-	fmt.Fprintf(cmd.OutOrStdout(), "  %s\n", ui.Strong("Blueprint Files:"))
+	fmt.Fprintf(cmd.OutOrStdout(), "  %s\n", ui.Strong("Knowledge Files:"))
 	s.Blank()
 
 	for _, f := range files {
@@ -100,7 +100,7 @@ func runLs(cmd *cobra.Command, args []string) error {
 	}
 
 	s.Blank()
-	fmt.Fprintf(cmd.OutOrStdout(), "  %s\n", ui.Faint("Use \"spwn blueprint show <path>\" to read a file."))
+	fmt.Fprintf(cmd.OutOrStdout(), "  %s\n", ui.Faint("Use \"spwn knowledge show <path>\" to read a file."))
 	s.Blank()
 
 	return nil
@@ -109,9 +109,9 @@ func runLs(cmd *cobra.Command, args []string) error {
 func runShow(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
-	content, err := universe.ReadBlueprintFile(args[0])
+	content, err := universe.ReadKnowledgeFile(args[0])
 	if err != nil {
-		return s.FailHint("Blueprint", err, "Run 'spwn blueprint ls' to see available files")
+		return s.FailHint("Knowledge", err, "Run 'spwn knowledge ls' to see available files")
 	}
 
 	s.Blank()
@@ -124,9 +124,9 @@ func runShow(cmd *cobra.Command, args []string) error {
 func runSearch(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
-	results, err := universe.SearchBlueprint(args[0])
+	results, err := universe.SearchKnowledge(args[0])
 	if err != nil {
-		return s.FailHint("Blueprint", err, "")
+		return s.FailHint("Knowledge", err, "")
 	}
 
 	if len(results) == 0 {
@@ -168,26 +168,26 @@ func formatSize(bytes int64) string {
 	return fmt.Sprintf("%.1f KB", float64(bytes)/1024)
 }
 
-func blueprintHelp(cmd *cobra.Command, args []string) {
-	if cmd.Name() != "blueprint" {
-		if defaultBlueprintHelp != nil {
-			defaultBlueprintHelp(cmd, args)
+func knowledgeHelp(cmd *cobra.Command, args []string) {
+	if cmd.Name() != "knowledge" {
+		if defaultKnowledgeHelp != nil {
+			defaultKnowledgeHelp(cmd, args)
 		}
 		return
 	}
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ blueprint")+" "+ui.Faint("— universe knowledge base"),
+		ui.Strong("⬡ knowledge")+" "+ui.Faint("— universe knowledge base"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
-				{Name: "blueprint", Desc: "Show the overview (default)"},
-				{Name: "ls", Desc: "List all files in the blueprint"},
+				{Name: "knowledge", Desc: "Show the overview (default)"},
+				{Name: "ls", Desc: "List all files in the knowledge"},
 				{Name: "show <path>", Desc: "Show the contents of a file"},
 				{Name: "search <query>", Desc: "Search across all files"},
 			}},
 		},
-		"spwn blueprint [command]",
-		"Use \"spwn blueprint <command> --help\" for more information.",
+		"spwn knowledge [command]",
+		"Use \"spwn knowledge <command> --help\" for more information.",
 	)
 }
