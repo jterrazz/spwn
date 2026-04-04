@@ -11,6 +11,7 @@ interface PlanetProps {
   onEnter?: () => void;
   isSelected: boolean;
   compact?: boolean;
+  hideLabels?: boolean;
 }
 
 const STATUS_CONFIG: Record<
@@ -18,34 +19,34 @@ const STATUS_CONFIG: Record<
   { base: [number, number, number]; glow: [number, number, number]; marker: [number, number, number]; brightness: number }
 > = {
   running: {
-    base: [0.12, 0.12, 0.12],
-    glow: [0.08, 0.15, 0.08],
-    marker: [0.4, 1, 0.4],
-    brightness: 8,
+    base: [0.18, 0.2, 0.18],
+    glow: [0.12, 0.25, 0.12],
+    marker: [0.5, 1, 0.5],
+    brightness: 10,
   },
   idle: {
-    base: [0.12, 0.12, 0.1],
-    glow: [0.12, 0.1, 0.04],
-    marker: [1, 0.85, 0.3],
-    brightness: 5,
+    base: [0.2, 0.18, 0.12],
+    glow: [0.2, 0.16, 0.06],
+    marker: [1, 0.85, 0.4],
+    brightness: 8,
   },
   error: {
-    base: [0.14, 0.06, 0.06],
-    glow: [0.15, 0.04, 0.04],
-    marker: [1, 0.3, 0.3],
-    brightness: 4,
+    base: [0.22, 0.08, 0.08],
+    glow: [0.25, 0.06, 0.06],
+    marker: [1, 0.4, 0.4],
+    brightness: 7,
   },
   stopped: {
-    base: [0.08, 0.08, 0.08],
-    glow: [0.04, 0.04, 0.04],
-    marker: [0.5, 0.5, 0.5],
-    brightness: 3,
+    base: [0.14, 0.14, 0.14],
+    glow: [0.08, 0.08, 0.08],
+    marker: [0.6, 0.6, 0.6],
+    brightness: 5,
   },
   creating: {
-    base: [0.1, 0.1, 0.14],
-    glow: [0.06, 0.08, 0.15],
-    marker: [0.4, 0.6, 1],
-    brightness: 6,
+    base: [0.12, 0.12, 0.22],
+    glow: [0.08, 0.12, 0.25],
+    marker: [0.5, 0.7, 1],
+    brightness: 8,
   },
 };
 
@@ -88,16 +89,53 @@ function hashCode(s: string): number {
   return Math.abs(h);
 }
 
-// Generate a deterministic globe coordinate from an agent name
-function agentToLocation(name: string): [number, number] {
+// Generate a deterministic globe coordinate from a string
+function stringToLocation(name: string): [number, number] {
   const h = hashCode(name);
-  const lat = ((h % 1000) / 1000) * 140 - 70; // -70 to 70
-  const lng = (((h >> 10) % 1000) / 1000) * 360 - 180; // -180 to 180
+  const lat = ((h % 1000) / 1000) * 140 - 70;
+  const lng = (((h >> 10) % 1000) / 1000) * 360 - 180;
   return [lat, lng];
 }
 
+// Seeded pseudo-random
+function seeded(seed: number) {
+  let s = seed;
+  return () => { s = (s * 16807 + 0) % 2147483647; return s / 2147483647; };
+}
 
-export function Planet({ world, index, onClick, onEnter, isSelected, compact }: PlanetProps) {
+// Generate procedural "continent" markers — clusters of dots that form landmass shapes
+function generateContinents(worldId: string, count: number): { location: [number, number]; size: number }[] {
+  const rng = seeded(hashCode(worldId));
+  const markers: { location: [number, number]; size: number }[] = [];
+
+  // Generate 5-9 continent centers (more landmasses = less water)
+  const numContinents = 5 + Math.floor(rng() * 5);
+  const centers: [number, number][] = [];
+  for (let i = 0; i < numContinents; i++) {
+    centers.push([rng() * 140 - 70, rng() * 360 - 180]);
+  }
+
+  // Scatter dots around each center — wider spread, more overlap between continents
+  const dotsPerContinent = Math.floor(count / numContinents);
+  for (const [cLat, cLng] of centers) {
+    const spread = 25 + rng() * 35; // wider continents
+    for (let j = 0; j < dotsPerContinent; j++) {
+      const angle = rng() * Math.PI * 2;
+      const dist = (rng() + rng() + rng()) / 3 * spread; // smoother bell curve, tighter core
+      const lat = cLat + Math.cos(angle) * dist;
+      const lng = cLng + Math.sin(angle) * dist;
+      markers.push({
+        location: [Math.max(-85, Math.min(85, lat)), ((lng + 180) % 360) - 180],
+        size: 0.006 + rng() * 0.012,
+      });
+    }
+  }
+
+  return markers;
+}
+
+
+export function Planet({ world, index, onClick, onEnter, isSelected, compact, hideLabels }: PlanetProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
@@ -113,7 +151,7 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact }: 
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const size = compact ? 80 : isMobile ? 140 : 200;
+  const size = compact ? 140 : isMobile ? 140 : 200;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const glowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -123,6 +161,16 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact }: 
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    // Scale dot count to globe size for consistent density
+    const dotCount = Math.round(size * 5);
+    const continentMarkers = generateContinents(world.id, dotCount);
+
+    // Agent markers (slightly larger, on top)
+    const agentMarkers = world.agents.map((a) => ({
+      location: stringToLocation(a.name),
+      size: 0.03,
+    }));
+
     const globe = createGlobe(canvasRef.current, {
       devicePixelRatio: 2,
       width: size * 2,
@@ -131,17 +179,13 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact }: 
       theta: 0.15 + index * 0.3,
       dark: 1,
       diffuse: 1.2 + (hashCode(world.id) % 10) * 0.08,
-      mapSamples: 16000,
-      mapBrightness: 6,
-      mapBaseBrightness: 0.02,
+      mapSamples: 0,        // disable Earth map entirely
+      mapBrightness: 0,
+      mapBaseBrightness: 0,
       baseColor: config.base,
-      markerColor: [1, 1, 1],
+      markerColor: config.marker,
       glowColor: config.glow,
-      markers: world.agents.map((a) => ({
-        location: agentToLocation(a.name),
-        size: 0.01,
-        id: a.name,
-      })),
+      markers: [...continentMarkers, ...agentMarkers],
       markerElevation: 0,
     });
     globeRef.current = globe;
@@ -204,93 +248,41 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact }: 
     };
   }, [world.id, world.status]);
 
+  const GAP = isSelected ? 40 : 12;
+
   return (
     <div
       onClick={onClick}
       role="button"
       tabIndex={0}
-      className="group relative flex flex-col items-center focus:outline-none cursor-pointer will-change-transform"
+      className="relative flex items-center justify-center focus:outline-none cursor-pointer will-change-transform"
+      style={{ width: size, height: size }}
     >
-      {/* ── Top HUD: name + status ── */}
-      <div
-        className="text-center"
-        style={{
-          marginBottom: isSelected ? 16 : 8,
-          opacity: isSelected ? 1 : 0.4,
-          transition: "margin-bottom 0.7s ease-out, opacity 0.7s ease-out",
-        }}
-      >
-        <p
-          className="font-heading tracking-wider"
-          style={{
-            color: isSelected
-              ? "rgba(255,255,255,0.95)"
-              : "rgba(255,255,255,0.4)",
-            fontSize: isSelected ? "1.15rem" : "0.8rem",
-            letterSpacing: isSelected ? "0.12em" : "0.05em",
-            transition: "color 0.7s ease-out, font-size 0.7s ease-out, letter-spacing 0.7s ease-out",
-          }}
-        >
-          {name}
-        </p>
-        <div className="flex items-center justify-center gap-2 mt-1.5">
-          <div className="relative">
-            <div
-              className="w-1.5 h-1.5 rounded-full"
-              style={{
-                backgroundColor: STATUS_DOT_CSS[world.status],
-                boxShadow: isSelected
-                  ? `0 0 8px ${STATUS_DOT_CSS[world.status]}`
-                  : "none",
-                transition: "box-shadow 0.7s ease-out",
-              }}
-            />
-            {world.status === "running" && (
-              <div
-                className="absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping"
-                style={{ backgroundColor: STATUS_DOT_CSS[world.status], opacity: 0.6 }}
-              />
-            )}
-          </div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[rgba(255,255,255,0.3)]">
-            {world.status}
-          </span>
-        </div>
-      </div>
-
-      {/* ── Globe ── */}
+      {/* ── Globe (layout anchor) ── */}
       <div
         ref={wrapperRef}
-        className="relative will-change-[transform,filter]"
+        className="will-change-[transform,filter]"
         style={{
           width: size,
           height: size,
-          transform: `scale(${isSelected ? (isMobile ? 1.2 : (compact ? 1.3 : 1.8)) : (isMobile ? 0.7 : 0.85)})`,
+          transform: `scale(${isSelected ? (isMobile ? 1.3 : (compact ? 1.5 : 1.8)) : (isMobile ? 0.7 : (compact ? 0.9 : 0.85))})`,
           filter: isSelected
-            ? `brightness(1.1) drop-shadow(0 0 24px ${STATUS_DOT_CSS[world.status]}40)`
-            : "blur(1.5px) brightness(0.6)",
+            ? `brightness(1.2) drop-shadow(0 0 28px ${STATUS_DOT_CSS[world.status]}60)`
+            : `brightness(1) drop-shadow(0 0 12px ${STATUS_DOT_CSS[world.status]}30)`,
           transition: "transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <canvas
           ref={canvasRef}
-          style={{
-            width: size,
-            height: size,
-            transition: "opacity 0.5s",
-          }}
+          style={{ width: size, height: size }}
         />
-        {/* Glow overlays — positioned by JS sync from cobe anchors */}
         {world.agents.map((a) => (
           <div
             key={`glow-${a.name}`}
-            ref={(el) => {
-              if (el) glowRefs.current.set(a.name, el);
-            }}
+            ref={(el) => { if (el) glowRefs.current.set(a.name, el); }}
             className="absolute pointer-events-none"
             style={{
-              width: 28,
-              height: 28,
+              width: 28, height: 28,
               transform: "translate(-50%, -50%)",
               opacity: 0,
               background: "radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.35) 20%, rgba(255,255,255,0) 65%)",
@@ -302,6 +294,54 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact }: 
         ))}
       </div>
 
+      {/* ── Name (absolute, above globe) ── */}
+      {!hideLabels && (
+      <p
+        className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-heading tracking-wider text-center pointer-events-none"
+        style={{
+          bottom: `calc(100% + ${GAP}px)`,
+          color: isSelected ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.5)",
+          fontSize: isSelected ? "1.15rem" : "0.8rem",
+          letterSpacing: isSelected ? "0.12em" : "0.05em",
+          opacity: isSelected ? 1 : 0.6,
+          transition: "bottom 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s ease-out, color 0.7s ease-out, font-size 0.7s ease-out, letter-spacing 0.7s ease-out",
+        }}
+      >
+        {name}
+      </p>
+      )}
+
+      {/* ── Status (absolute, below globe) ── */}
+      {!hideLabels && (
+      <div
+        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap pointer-events-none"
+        style={{
+          top: `calc(100% + ${GAP}px)`,
+          opacity: isSelected ? 1 : 0.5,
+          transition: "top 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s ease-out",
+        }}
+      >
+        <div className="relative">
+          <div
+            className="w-1.5 h-1.5 rounded-full"
+            style={{
+              backgroundColor: STATUS_DOT_CSS[world.status],
+              boxShadow: isSelected ? `0 0 8px ${STATUS_DOT_CSS[world.status]}` : "none",
+              transition: "box-shadow 0.7s ease-out",
+            }}
+          />
+          {world.status === "running" && (
+            <div
+              className="absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping"
+              style={{ backgroundColor: STATUS_DOT_CSS[world.status], opacity: 0.6 }}
+            />
+          )}
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-[rgba(255,255,255,0.3)]">
+          {world.status}
+        </span>
+      </div>
+      )}
     </div>
   );
 }

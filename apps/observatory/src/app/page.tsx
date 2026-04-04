@@ -84,117 +84,130 @@ export default function UniverseMapPage() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [worlds, selected, router, showSpawn]);
 
-  // ── Centering system: GPU-composited transform, always centered ──
-  const PANEL_WIDTH = 396;
-  const [centerX, setCenterX] = useState(0);
-  const [dragX, setDragX] = useState(0);
+  // ── Planet centering + drag system ──
+  // Uses offsetLeft (static layout position, unaffected by transform) to avoid circular deps.
+  // Single `tx` state = final translateX. Drag adds delta on top during gesture.
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [, forceRender] = useState(0);
+  const [tx, setTx] = useState(0);
+  const [dragDelta, setDragDelta] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const dragState = useRef({ startX: 0, startDragX: 0, moved: false });
+  const dragRef = useRef({ startX: 0, startTx: 0, moved: false });
   const wasDragging = useRef(false);
+  const lastFocusIdx = useRef<number | null>(null);
 
-  // Helper: compute the X offset to center a given planet index
-  const computeCenterX = useCallback((idx: number | null, hasPanel: boolean) => {
-    const container = scrollRef.current;
-    if (!container) return 0;
-    const parentWidth = container.parentElement?.clientWidth ?? container.clientWidth;
-    const visibleWidth = hasPanel ? parentWidth - PANEL_WIDTH : parentWidth;
-    const visibleCenter = visibleWidth / 2;
-
-    // Find the center point to target
-    let targetCenter: number;
-
-    if (idx !== null) {
-      // Center on specific planet
-      const planet = planetRefs.current[idx];
-      if (!planet) return 0;
-      targetCenter = planet.offsetLeft + planet.offsetWidth / 2;
-    } else {
-      // No selection: center the midpoint of all real planets (excluding "New" ghost)
-      const realPlanets = planetRefs.current.filter(Boolean);
-      if (realPlanets.length === 0) return 0;
-      const first = realPlanets[0]!;
-      const last = realPlanets[realPlanets.length - 1]!;
-      targetCenter = (first.offsetLeft + last.offsetLeft + last.offsetWidth) / 2;
-    }
-
-    return visibleCenter - targetCenter;
+  // Get the visible width of the viewport area (minus panel if showing)
+  const getVisibleWidth = useCallback((withPanel: boolean) => {
+    const parent = scrollRef.current?.parentElement;
+    if (!parent) return 800;
+    if (!withPanel) return parent.clientWidth;
+    const panelW = panelRef.current?.offsetWidth ?? 380;
+    return parent.clientWidth - panelW - 24; // 24px gap between planet and panel
   }, []);
 
-  // Recenter when selection changes or on mount
-  useEffect(() => {
-    // Small delay on mount to let layout settle
-    const raf = requestAnimationFrame(() => {
-      setCenterX(computeCenterX(selected, selected !== null));
-      setDragX(0);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [selected, worlds.length, computeCenterX]);
+  // Get the static center X of a planet (its layout position, not affected by transform)
+  const getPlanetCenter = useCallback((idx: number) => {
+    const el = planetRefs.current[idx];
+    if (!el) return 0;
+    return el.offsetLeft + el.offsetWidth / 2;
+  }, []);
 
-  // Drag handlers
-  const handleDragStart = useCallback((clientX: number) => {
-    dragState.current = { startX: clientX, startDragX: dragX, moved: false };
-    setIsDragging(true);
-  }, [dragX]);
+  // Compute translateX to center a planet (or group) in the visible area
+  const centerOn = useCallback((idx: number | null, withPanel: boolean) => {
+    const vw = getVisibleWidth(withPanel);
+    const target = vw / 2;
 
-  const handleDragMove = useCallback((clientX: number) => {
-    if (!isDragging) return;
-    const dx = clientX - dragState.current.startX;
-    if (Math.abs(dx) > 3) dragState.current.moved = true;
-    setDragX(dragState.current.startDragX + dx);
-  }, [isDragging]);
-
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-    if (!dragState.current.moved) return;
-
-    // Snap to nearest planet
-    const container = scrollRef.current;
-    if (!container || worlds.length === 0) { setDragX(0); return; }
-
-    const parentWidth = container.parentElement?.clientWidth ?? container.clientWidth;
-    const hasPanel = selected !== null;
-    const visibleWidth = hasPanel ? parentWidth - PANEL_WIDTH : parentWidth;
-    const visibleCenter = visibleWidth / 2;
-    const currentOffset = centerX + dragX;
-
-    let closestIdx = 0;
-    let closestDist = Infinity;
-    for (let i = 0; i < worlds.length; i++) {
-      const planet = planetRefs.current[i];
-      if (!planet) continue;
-      const planetScreenCenter = planet.offsetLeft + planet.offsetWidth / 2 + currentOffset;
-      const dist = Math.abs(planetScreenCenter - visibleCenter);
-      if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+    if (idx !== null) {
+      return target - getPlanetCenter(idx);
     }
 
-    // Snap center without changing selection
-    const planet = planetRefs.current[closestIdx];
-    if (!planet) { setDragX(0); return; }
-    setDragX(0);
-    setCenterX(visibleCenter - (planet.offsetLeft + planet.offsetWidth / 2));
-  }, [centerX, dragX, selected, worlds.length]);
+    // Center the group of real planets
+    const count = planetRefs.current.filter(Boolean).length;
+    if (count === 0) return 0;
+    const first = getPlanetCenter(0);
+    const last = getPlanetCenter(Math.min(count - 1, planetRefs.current.length - 1));
+    return target - (first + last) / 2;
+  }, [getVisibleWidth, getPlanetCenter]);
+
+  // Recenter when selection changes (double-RAF to ensure panel is mounted and measured)
+  useEffect(() => {
+    if (selected !== null) lastFocusIdx.current = selected;
+    const focusIdx = selected ?? lastFocusIdx.current;
+
+    // Double rAF: first lets React render the panel, second measures it
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTx(centerOn(focusIdx, selected !== null));
+        setDragDelta(0);
+      });
+    });
+  }, [selected, worlds.length, centerOn]);
+
+  // Drag handlers
+  const onDragStart = useCallback((x: number) => {
+    dragRef.current = { startX: x, startTx: 0, moved: false };
+    setIsDragging(true);
+  }, []);
+
+  const onDragMove = useCallback((x: number) => {
+    if (!isDragging) return;
+    const dx = x - dragRef.current.startX;
+    if (Math.abs(dx) > 3) dragRef.current.moved = true;
+    setDragDelta(dx);
+  }, [isDragging]);
+
+  const onDragEnd = useCallback(() => {
+    setIsDragging(false);
+    if (!dragRef.current.moved) { setDragDelta(0); return; }
+
+    // Snap to nearest planet
+    const vw = getVisibleWidth(selected !== null);
+    const target = vw / 2;
+    const currentTx = tx + dragDelta;
+
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < worlds.length; i++) {
+      const screenX = getPlanetCenter(i) + currentTx;
+      const dist = Math.abs(screenX - target);
+      if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+    }
+
+    setDragDelta(0);
+    setTx(target - getPlanetCenter(bestIdx));
+  }, [tx, dragDelta, selected, worlds.length, getVisibleWidth, getPlanetCenter]);
 
   // Global pointer listeners
   useEffect(() => {
     if (!isDragging) return;
-    const onMove = (e: MouseEvent) => handleDragMove(e.clientX);
-    const onUp = () => handleDragEnd();
-    const onTouchMove = (e: TouchEvent) => handleDragMove(e.touches[0].clientX);
-    const onTouchEnd = () => handleDragEnd();
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchend", onTouchEnd);
+    const move = (e: MouseEvent) => onDragMove(e.clientX);
+    const up = () => onDragEnd();
+    const tmove = (e: TouchEvent) => onDragMove(e.touches[0].clientX);
+    const tend = () => onDragEnd();
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    window.addEventListener("touchmove", tmove, { passive: true });
+    window.addEventListener("touchend", tend);
     return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchmove", tmove);
+      window.removeEventListener("touchend", tend);
     };
-  }, [isDragging, handleDragMove, handleDragEnd]);
+  }, [isDragging, onDragMove, onDragEnd]);
 
-  const totalTranslateX = centerX + dragX;
-  useEffect(() => { wasDragging.current = dragState.current.moved; }, [isDragging]);
+  const totalTx = tx + dragDelta;
+  useEffect(() => { wasDragging.current = dragRef.current.moved; }, [isDragging]);
+
+  // Recenter on window resize
+  useEffect(() => {
+    const onResize = () => {
+      const focusIdx = selected ?? lastFocusIdx.current;
+      setTx(centerOn(focusIdx, selected !== null));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [selected, centerOn]);
 
   // Global keyboard shortcuts
   useKeyboardShortcuts({
@@ -267,18 +280,18 @@ export default function UniverseMapPage() {
         <>
           {/* Worlds */}
           {worlds.length > 0 ? (
-            <div className="relative overflow-hidden min-h-[420px]">
+            <div className="relative overflow-hidden min-h-[320px] flex items-center" onClick={(e) => { if (e.target === e.currentTarget && selected !== null) setSelected(null); }}>
               {/* Planets — full width scrollable */}
               <div
                 ref={scrollRef}
-                className="flex gap-3 items-center pb-4 will-change-transform select-none"
+                className="flex gap-3 items-center will-change-transform select-none"
                 style={{
-                  transform: `translateX(${totalTranslateX}px)`,
+                  transform: `translateX(${totalTx}px)`,
                   transition: isDragging ? "none" : "transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
                   cursor: isDragging ? "grabbing" : "grab",
                 }}
-                onMouseDown={(e) => { e.preventDefault(); handleDragStart(e.clientX); }}
-                onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+                onMouseDown={(e) => { e.preventDefault(); onDragStart(e.clientX); }}
+                onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
               >
                 {worlds.map((world, i) => {
                   const isActive = selected === i;
@@ -292,7 +305,8 @@ export default function UniverseMapPage() {
                         opacity: hasSelection && !isActive ? 0.35 : 1,
                         transform: hasSelection && !isActive ? "scale(0.9)" : "scale(1)",
                         filter: hasSelection && !isActive ? "blur(1px)" : "blur(0px)",
-                        transition: "opacity 0.7s ease-out, transform 0.7s ease-out, filter 0.7s ease-out",
+                        margin: isActive ? "0 36px" : "0",
+                        transition: "opacity 0.7s ease-out, transform 0.7s ease-out, filter 0.7s ease-out, margin 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
                       }}
                       onClick={() => { if (!wasDragging.current) setSelected(selected === i ? null : i); }}
                     >
@@ -307,26 +321,24 @@ export default function UniverseMapPage() {
                     </div>
                   );
                 })}
-                {/* New world — ghost style */}
+                {/* New world */}
                 <div
                   className="flex flex-col items-center shrink-0 cursor-pointer"
                   style={{
-                    opacity: selected !== null ? 0.15 : 0.3,
+                    opacity: selected !== null ? 0.2 : 0.5,
                     transform: selected !== null ? "scale(0.85)" : "scale(1)",
                     transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
                   }}
                   onClick={() => setShowSpawn(true)}
                 >
                   <PlanetGlobe
-                    world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "stopped", created_at: "", container_id: "", workspace: "" } as World}
+                    world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "creating", created_at: "", container_id: "", workspace: "" } as World}
                     index={worlds.length}
                     isSelected={false}
                     onClick={() => setShowSpawn(true)}
                     compact
+                    hideLabels
                   />
-                  <p className="text-[11px] font-heading mt-0.5 text-muted-foreground/25">
-                    New
-                  </p>
                 </div>
               </div>
 
@@ -336,7 +348,7 @@ export default function UniverseMapPage() {
                 const name = extractName(w.id);
                 const isRunning = w.status === "running" || w.status === "idle";
                 return (
-                  <div className="absolute top-0 right-0 w-[380px] z-10 rounded-2xl bg-foreground/[0.04] dark:bg-white/[0.04] backdrop-blur-xl border border-foreground/[0.06] dark:border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)] p-5 flex flex-col animate-in fade-in slide-in-from-right-6 duration-500 ease-out">
+                  <div ref={panelRef} className="absolute top-1/2 -translate-y-1/2 right-0 w-[380px] z-10 rounded-2xl bg-foreground/[0.04] dark:bg-white/[0.04] backdrop-blur-xl border border-foreground/[0.06] dark:border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)] p-5 flex flex-col animate-in fade-in slide-in-from-right-6 duration-500 ease-out">
                     {/* Title + actions */}
                     <div className="flex items-center gap-3 mb-5">
                       <div className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_6px_currentColor] ${STATUS_DOT[w.status] ?? "bg-white/10"}`} />
