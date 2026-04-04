@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS } from "@/lib/types";
 import type { World } from "@/lib/types";
 import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles } from "@tabler/icons-react";
+import { Planet as PlanetGlobe } from "@/components/planet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiGet, apiAction, apiDelete } from "@/lib/api-client";
+import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { RecentActivity } from "@/components/recent-activity";
 import { useRefetch } from "@/components/app-shell";
@@ -22,7 +23,9 @@ interface AgentListItem {
 export default function UniverseMapPage() {
   const [worlds, setWorlds] = useState<World[]>([]);
   const [agents, setAgents] = useState<AgentListItem[]>([]);
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const planetRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [showSpawn, setShowSpawn] = useState(false);
   const [showDestroyAll, setShowDestroyAll] = useState(false);
   const [destroyingAll, setDestroyingAll] = useState(false);
@@ -30,10 +33,10 @@ export default function UniverseMapPage() {
   const [agentsLoading, setAgentsLoading] = useState(true);
   const router = useRouter();
   const refetchSidebar = useRefetch();
-  usePageTitle("Worlds");
+  usePageTitle("Dashboard");
 
   const fetchWorlds = () => {
-    apiGet<World[]>("/api/universes", "/api/worlds")
+    apiGet<World[]>("/api/universes")
       .then((data) => {
         setWorlds(data ?? []);
         setLoading(false);
@@ -45,7 +48,7 @@ export default function UniverseMapPage() {
   };
 
   const fetchAgents = () => {
-    apiGet<AgentListItem[]>("/api/agents", "/api/agents")
+    apiGet<AgentListItem[]>("/api/agents")
       .then((data) => {
         setAgents(data ?? []);
         setAgentsLoading(false);
@@ -68,16 +71,130 @@ export default function UniverseMapPage() {
       if (showSpawn) return;
       if (worlds.length === 0) return;
       if (e.key === "ArrowRight" || e.key === "d") {
-        setSelected((s) => (s + 1) % worlds.length);
+        setSelected((s) => s === null ? 0 : (s + 1) % worlds.length);
       } else if (e.key === "ArrowLeft" || e.key === "a") {
-        setSelected((s) => (s - 1 + worlds.length) % worlds.length);
-      } else if (e.key === "Enter") {
+        setSelected((s) => s === null ? worlds.length - 1 : (s - 1 + worlds.length) % worlds.length);
+      } else if (e.key === "Enter" && selected !== null) {
         router.push(`/world/${worlds[selected].id}`);
+      } else if (e.key === "Escape" && selected !== null) {
+        setSelected(null);
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [worlds, selected, router, showSpawn]);
+
+  // ── Centering system: GPU-composited transform, always centered ──
+  const PANEL_WIDTH = 396;
+  const [centerX, setCenterX] = useState(0);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragState = useRef({ startX: 0, startDragX: 0, moved: false });
+  const wasDragging = useRef(false);
+
+  // Helper: compute the X offset to center a given planet index
+  const computeCenterX = useCallback((idx: number | null, hasPanel: boolean) => {
+    const container = scrollRef.current;
+    if (!container) return 0;
+    const parentWidth = container.parentElement?.clientWidth ?? container.clientWidth;
+    const visibleWidth = hasPanel ? parentWidth - PANEL_WIDTH : parentWidth;
+    const visibleCenter = visibleWidth / 2;
+
+    // Find the center point to target
+    let targetCenter: number;
+
+    if (idx !== null) {
+      // Center on specific planet
+      const planet = planetRefs.current[idx];
+      if (!planet) return 0;
+      targetCenter = planet.offsetLeft + planet.offsetWidth / 2;
+    } else {
+      // No selection: center the midpoint of all real planets (excluding "New" ghost)
+      const realPlanets = planetRefs.current.filter(Boolean);
+      if (realPlanets.length === 0) return 0;
+      const first = realPlanets[0]!;
+      const last = realPlanets[realPlanets.length - 1]!;
+      targetCenter = (first.offsetLeft + last.offsetLeft + last.offsetWidth) / 2;
+    }
+
+    return visibleCenter - targetCenter;
+  }, []);
+
+  // Recenter when selection changes or on mount
+  useEffect(() => {
+    // Small delay on mount to let layout settle
+    const raf = requestAnimationFrame(() => {
+      setCenterX(computeCenterX(selected, selected !== null));
+      setDragX(0);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [selected, worlds.length, computeCenterX]);
+
+  // Drag handlers
+  const handleDragStart = useCallback((clientX: number) => {
+    dragState.current = { startX: clientX, startDragX: dragX, moved: false };
+    setIsDragging(true);
+  }, [dragX]);
+
+  const handleDragMove = useCallback((clientX: number) => {
+    if (!isDragging) return;
+    const dx = clientX - dragState.current.startX;
+    if (Math.abs(dx) > 3) dragState.current.moved = true;
+    setDragX(dragState.current.startDragX + dx);
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+    if (!dragState.current.moved) return;
+
+    // Snap to nearest planet
+    const container = scrollRef.current;
+    if (!container || worlds.length === 0) { setDragX(0); return; }
+
+    const parentWidth = container.parentElement?.clientWidth ?? container.clientWidth;
+    const hasPanel = selected !== null;
+    const visibleWidth = hasPanel ? parentWidth - PANEL_WIDTH : parentWidth;
+    const visibleCenter = visibleWidth / 2;
+    const currentOffset = centerX + dragX;
+
+    let closestIdx = 0;
+    let closestDist = Infinity;
+    for (let i = 0; i < worlds.length; i++) {
+      const planet = planetRefs.current[i];
+      if (!planet) continue;
+      const planetScreenCenter = planet.offsetLeft + planet.offsetWidth / 2 + currentOffset;
+      const dist = Math.abs(planetScreenCenter - visibleCenter);
+      if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+    }
+
+    // Snap center without changing selection
+    const planet = planetRefs.current[closestIdx];
+    if (!planet) { setDragX(0); return; }
+    setDragX(0);
+    setCenterX(visibleCenter - (planet.offsetLeft + planet.offsetWidth / 2));
+  }, [centerX, dragX, selected, worlds.length]);
+
+  // Global pointer listeners
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e: MouseEvent) => handleDragMove(e.clientX);
+    const onUp = () => handleDragEnd();
+    const onTouchMove = (e: TouchEvent) => handleDragMove(e.touches[0].clientX);
+    const onTouchEnd = () => handleDragEnd();
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
+  const totalTranslateX = centerX + dragX;
+  useEffect(() => { wasDragging.current = dragState.current.moved; }, [isDragging]);
 
   // Global keyboard shortcuts
   useKeyboardShortcuts({
@@ -90,16 +207,17 @@ export default function UniverseMapPage() {
     try {
       // Destroy each world sequentially (Go API uses DELETE method)
       for (const world of worlds) {
-        await apiDelete(`/api/worlds/${world.id}`, `/api/worlds/${world.id}/destroy`);
+        await apiDelete(`/api/worlds/${world.id}`);
       }
       // Immediately refetch
       fetchWorlds();
       refetchSidebar();
       setShowDestroyAll(false);
     } catch {
-      // ignore
+      // ignore errors — worlds may already be gone
     } finally {
       setDestroyingAll(false);
+      setShowDestroyAll(false);
     }
   };
 
@@ -109,121 +227,206 @@ export default function UniverseMapPage() {
     refetchSidebar();
   };
 
+  const extractName = (id: string) => {
+    const parts = id.split("-");
+    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
+  };
+
+  const STATUS_DOT: Record<string, string> = {
+    running: "bg-green-500", idle: "bg-amber-400", stopped: "bg-zinc-500/30", creating: "bg-blue-400",
+  };
+
   return (
-    <div className="flex flex-col min-h-full">
-      {/* Universe header */}
-      <div className="px-4 md:px-8 pt-4 flex items-start justify-between flex-wrap gap-3">
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading tracking-wide text-foreground/90">Worlds</h1>
-          <p className="text-xs font-mono text-muted-foreground/30 mt-1">
-            {worlds.length} active{worlds.length !== 1 ? " worlds" : " world"}
+          <h1 className="text-lg font-heading tracking-wide text-foreground/90">Dashboard</h1>
+          <p className="text-xs font-mono text-muted-foreground/30 mt-0.5">
+            {worlds.length} world{worlds.length !== 1 ? "s" : ""} · {agents.length} agent{agents.length !== 1 ? "s" : ""}
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          {/* Destroy All button — only show when worlds exist */}
-          {worlds.length > 0 && (
-            <button
-              onClick={() => setShowDestroyAll(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-red-400/60 hover:text-red-400 hover:bg-red-500/10 border border-red-500/20 transition-all"
-            >
-              <IconTrash size={16} />
-              Destroy All
-            </button>
-          )}
-
-          {/* Spawn World button */}
-          <button
-            onClick={() => setShowSpawn(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
-          >
-            <IconPlus size={16} />
-            Spawn World
-          </button>
-        </div>
+        <button
+          onClick={() => setShowSpawn(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all"
+        >
+          <IconPlus size={14} />
+          Spawn World
+        </button>
       </div>
 
-      <main className="flex-1 flex items-center justify-center py-16">
-        {loading ? (
-          <div className="flex items-center gap-12 md:gap-20">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col items-center gap-4">
-                <Skeleton className="w-24 h-24 rounded-full" />
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-3 w-24" />
-              </div>
-            ))}
-          </div>
-        ) : worlds.length === 0 && agents.length === 0 && !agentsLoading ? (
-          <QuickStartWizard onComplete={() => { fetchWorlds(); fetchAgents(); refetchSidebar(); }} />
-        ) : worlds.length === 0 ? (
-          <div className="text-center">
-            <div className="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-5">
-              <IconPlanet size={36} className="text-muted-foreground/15" />
-            </div>
-            <p className="text-muted-foreground/30 text-lg font-heading">No worlds running</p>
-            <p className="text-muted-foreground/20 text-sm mt-2 font-mono">Spawn one to get started</p>
-            <p className="text-muted-foreground/15 text-xs mt-1 font-mono">or press ⌘N</p>
-            <button
-              onClick={() => setShowSpawn(true)}
-              className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm mx-auto bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
-            >
-              <IconRocket size={16} />
-              Spawn your first world
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-20">
-            {worlds.map((world, i) => (
-              <Planet
-                key={world.id}
-                world={world}
-                index={i}
-                isSelected={selected === i}
-                onClick={() => setSelected(i)}
-                onEnter={() => router.push(`/world/${worlds[i].id}`)}
-              />
-            ))}
-          </div>
-        )}
-      </main>
-
-      {/* Quick Actions */}
-      {!loading && (
-        <div className="px-8 pb-4">
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <button
-              onClick={() => {
-                // Create agent then navigate
-                const name = prompt("Agent name:");
-                if (!name?.trim()) return;
-                apiAction("/api/agents", { name: name.trim() }, "/api/agents/create").then((result) => {
-                  if (result.ok) {
-                    refetchSidebar();
-                    router.push(`/agents/${name.trim()}`);
-                  }
-                });
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs bg-white/[0.03] text-foreground/50 hover:text-foreground/70 hover:bg-white/[0.06] border border-white/[0.06] transition-all"
-            >
-              <IconPlus size={14} />
-              New Agent
-            </button>
-            <button
-              disabled
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs bg-white/[0.02] text-muted-foreground/25 border border-white/[0.04] cursor-not-allowed"
-              title="Coming soon"
-            >
-              <IconRocket size={14} />
-              Import Agent
-            </button>
-            {/* Marketplace — hidden until ready */}
-          </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-lg" />
+          ))}
         </div>
-      )}
+      ) : worlds.length === 0 && agents.length === 0 && !agentsLoading ? (
+        <QuickStartWizard onComplete={() => { fetchWorlds(); fetchAgents(); refetchSidebar(); }} />
+      ) : (
+        <>
+          {/* Worlds */}
+          {worlds.length > 0 ? (
+            <div className="relative overflow-hidden min-h-[420px]">
+              {/* Planets — full width scrollable */}
+              <div
+                ref={scrollRef}
+                className="flex gap-3 items-center pb-4 will-change-transform select-none"
+                style={{
+                  transform: `translateX(${totalTranslateX}px)`,
+                  transition: isDragging ? "none" : "transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+                  cursor: isDragging ? "grabbing" : "grab",
+                }}
+                onMouseDown={(e) => { e.preventDefault(); handleDragStart(e.clientX); }}
+                onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+              >
+                {worlds.map((world, i) => {
+                  const isActive = selected === i;
+                  const hasSelection = selected !== null;
+                  return (
+                    <div
+                      key={world.id}
+                      ref={(el) => { planetRefs.current[i] = el; }}
+                      className="flex flex-col items-center shrink-0 cursor-pointer"
+                      style={{
+                        opacity: hasSelection && !isActive ? 0.35 : 1,
+                        transform: hasSelection && !isActive ? "scale(0.9)" : "scale(1)",
+                        filter: hasSelection && !isActive ? "blur(1px)" : "blur(0px)",
+                        transition: "opacity 0.7s ease-out, transform 0.7s ease-out, filter 0.7s ease-out",
+                      }}
+                      onClick={() => { if (!wasDragging.current) setSelected(selected === i ? null : i); }}
+                    >
+                      <PlanetGlobe
+                        world={world}
+                        index={i}
+                        isSelected={isActive}
+                        onClick={() => { if (!wasDragging.current) setSelected(selected === i ? null : i); }}
+                        onEnter={() => router.push(`/world/${world.id}`)}
+                        compact
+                      />
+                    </div>
+                  );
+                })}
+                {/* New world — ghost style */}
+                <div
+                  className="flex flex-col items-center shrink-0 cursor-pointer"
+                  style={{
+                    opacity: selected !== null ? 0.15 : 0.3,
+                    transform: selected !== null ? "scale(0.85)" : "scale(1)",
+                    transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
+                  }}
+                  onClick={() => setShowSpawn(true)}
+                >
+                  <PlanetGlobe
+                    world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "stopped", created_at: "", container_id: "", workspace: "" } as World}
+                    index={worlds.length}
+                    isSelected={false}
+                    onClick={() => setShowSpawn(true)}
+                    compact
+                  />
+                  <p className="text-[11px] font-heading mt-0.5 text-muted-foreground/25">
+                    New
+                  </p>
+                </div>
+              </div>
 
-      {/* Recent Activity */}
-      {!loading && worlds.length > 0 && <RecentActivity worlds={worlds} />}
+              {/* Floating world info panel */}
+              {selected !== null && worlds[selected] && (() => {
+                const w = worlds[selected];
+                const name = extractName(w.id);
+                const isRunning = w.status === "running" || w.status === "idle";
+                return (
+                  <div className="absolute top-0 right-0 w-[380px] z-10 rounded-2xl bg-foreground/[0.04] dark:bg-white/[0.04] backdrop-blur-xl border border-foreground/[0.06] dark:border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)] p-5 flex flex-col animate-in fade-in slide-in-from-right-6 duration-500 ease-out">
+                    {/* Title + actions */}
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_6px_currentColor] ${STATUS_DOT[w.status] ?? "bg-white/10"}`} />
+                      <span className="font-heading text-base text-foreground/90">{name}</span>
+                      <div className="ml-auto flex items-center gap-1.5">
+                        {isRunning ? (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); apiDelete(`/api/worlds/${w.id}`).then(() => { fetchWorlds(); refetchSidebar(); setSelected(null); }); }}
+                            className="text-[11px] px-2.5 py-1 rounded-full text-muted-foreground/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
+                          >
+                            Shutdown
+                          </button>
+                        ) : (
+                          <span className="text-[11px] px-2.5 py-1 text-muted-foreground/25 font-mono">stopped</span>
+                        )}
+                        <button
+                          onClick={() => router.push(`/world/${w.id}`)}
+                          className="text-[11px] px-3 py-1.5 rounded-full bg-white/[0.06] dark:bg-white/[0.08] text-foreground/70 hover:text-foreground/90 hover:bg-white/[0.1] border border-white/[0.08] dark:border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all flex items-center gap-1.5"
+                        >
+                          Open
+                          <IconArrowRight size={12} />
+                        </button>
+                        <button
+                          onClick={() => setSelected(null)}
+                          className="w-7 h-7 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.06] transition-colors"
+                        >
+                          <IconX size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-5 gap-3 mb-5">
+                      {[
+                        { label: "Status", value: w.status },
+                        { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "—" },
+                        { label: "Agents", value: String(w.agents.length) },
+                        { label: "Config", value: w.config ?? "default" },
+                        { label: "Workspace", value: w.workspace ?? "/tmp" },
+                      ].map(({ label, value }) => (
+                        <div key={label}>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground/25 mb-1">{label}</p>
+                          <p className="text-xs font-mono text-foreground/60 truncate">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Agents */}
+                    {w.agents.length > 0 && (
+                      <div>
+                        <p className="text-[9px] uppercase tracking-widest text-muted-foreground/25 mb-2">Agents</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {w.agents.map((a) => (
+                            <button
+                              key={a.name}
+                              onClick={(e) => { e.stopPropagation(); router.push(`/world/${w.id}/${a.name}`); }}
+                              className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all"
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${a.status === "running" ? "bg-green-500" : a.status === "idle" ? "bg-amber-400/50" : "bg-zinc-500/30"}`} />
+                              {a.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <div className="flex justify-center py-12">
+              <div
+                className="flex flex-col items-center cursor-pointer opacity-40 hover:opacity-70 transition-opacity"
+                onClick={() => setShowSpawn(true)}
+              >
+                <PlanetGlobe
+                  world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "stopped", created_at: "", container_id: "", workspace: "" } as World}
+                  index={0}
+                  isSelected={false}
+                  onClick={() => setShowSpawn(true)}
+                />
+                <p className="text-sm font-heading text-muted-foreground/30 mt-2">Spawn your first world</p>
+              </div>
+            </div>
+          )}
+
+          {/* Recent Activity */}
+          {worlds.length > 0 && <RecentActivity worlds={worlds} />}
+        </>
+      )}
 
       {/* Destroy All Confirmation Dialog */}
       {showDestroyAll && (
@@ -291,7 +494,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
     setWorking(true);
     setError("");
     try {
-      const result = await apiAction("/api/agents", { name: agentName.trim() }, "/api/agents/create");
+      const result = await apiAction("/api/agents", { name: agentName.trim() });
       if (!result.ok) {
         setError(result.error || "Failed to create agent");
         setWorking(false);
@@ -315,7 +518,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
     setError("");
     const effectiveWorkspace = workspace.trim() || `/tmp/spwn-${agentName.trim()}-${Math.random().toString(36).substring(2, 6)}`;
     try {
-      const res = await fetch("http://localhost:3001/api/worlds", {
+      const res = await fetch(goApiUrl("/api/worlds"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agent: agentName.trim(), workspace: effectiveWorkspace, config: "default", tier: "citizen" }),
@@ -527,7 +730,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
 
   // Fetch available agents for dropdown
   useEffect(() => {
-    apiGet<SpawnAgentListItem[]>("/api/agents", "/api/agents")
+    apiGet<SpawnAgentListItem[]>("/api/agents")
       .then((agents) => {
         setAvailableAgents(agents ?? []);
         if (agents && agents.length > 0 && !agentName) {
@@ -543,7 +746,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
     setCreatingAgent(true);
     setError("");
     try {
-      const result = await apiAction("/api/agents", { name: newAgentName.trim() }, "/api/agents/create");
+      const result = await apiAction("/api/agents", { name: newAgentName.trim() });
       if (!result.ok) {
         setError(result.error || "Failed to create agent");
         return;
@@ -565,7 +768,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
     setSpawning(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:3001/api/worlds", {
+      const res = await fetch(goApiUrl("/api/worlds"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agent: agentName.trim(), workspace: effectiveWorkspace, config, tier }),

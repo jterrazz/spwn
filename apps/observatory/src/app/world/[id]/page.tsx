@@ -79,7 +79,7 @@ export default function WorldDashboard() {
   usePageTitle(worldName);
 
   const fetchWorld = useCallback(() => {
-    apiGet<World[]>("/api/universes", "/api/worlds")
+    apiGet<World[]>("/api/universes")
       .then((worlds) => {
         const found = worlds.find((w) => w.id === worldId);
         setWorld(found ?? null);
@@ -97,10 +97,10 @@ export default function WorldDashboard() {
     return () => clearInterval(interval);
   }, [fetchWorld]);
 
-  const callAction = async (goPath: string, nextFallback: string, body?: unknown) => {
+  const callAction = async (goPath: string, body?: unknown) => {
     setActionLoading(goPath);
     try {
-      const result = await apiAction(goPath, body, nextFallback);
+      const result = await apiAction(goPath, body);
       if (!result.ok) {
         showFeedback(`Error: ${result.error || "Unknown error"}`);
         return false;
@@ -131,7 +131,7 @@ export default function WorldDashboard() {
     setLogsLoading(true);
     const controller = new AbortController();
 
-    fetch(`http://localhost:3001/api/worlds/${worldId}/logs`, { signal: controller.signal })
+    fetch(goApiUrl(`/api/worlds/${worldId}/logs`), { signal: controller.signal })
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch logs");
         const reader = res.body?.getReader();
@@ -261,7 +261,7 @@ export default function WorldDashboard() {
           <div className="flex items-center gap-1">
             <button
               onClick={async () => {
-                const ok = await callAction(`/api/worlds/${worldId}/snapshot`, `/api/worlds/${worldId}/snapshot`);
+                const ok = await callAction(`/api/worlds/${worldId}/snapshot`);
                 if (ok) showFeedback("Snapshot saved!");
               }}
               disabled={actionLoading !== null}
@@ -327,7 +327,7 @@ export default function WorldDashboard() {
                     onClick={async () => {
                       setActionLoading("destroy");
                       try {
-                        await apiDelete(`/api/worlds/${worldId}`, `/api/worlds/${worldId}/destroy`);
+                        await apiDelete(`/api/worlds/${worldId}`);
                         showFeedback("World destroyed");
                         setShowDestroyConfirm(false);
                         refetchSidebar();
@@ -458,7 +458,7 @@ export default function WorldDashboard() {
                 <button
                   onClick={async () => {
                     if (!newAgentName.trim()) return;
-                    const ok = await callAction("/api/agents", "/api/agents/create", { name: newAgentName.trim() });
+                    const ok = await callAction("/api/agents", { name: newAgentName.trim() });
                     if (ok) {
                       showFeedback(`Agent "${newAgentName}" created`);
                       setShowNewAgent(false);
@@ -504,15 +504,6 @@ export default function WorldDashboard() {
             })}
           </div>
         </div>
-
-        {/* Quick Talk */}
-        {world.agents.length > 0 && (
-          <QuickTalk
-            worldId={worldId}
-            agents={world.agents}
-            onFeedback={showFeedback}
-          />
-        )}
 
         {/* Activity */}
         <div>
@@ -631,104 +622,4 @@ export default function WorldDashboard() {
   );
 }
 
-/* ── Quick Talk Component ── */
 
-interface QuickTalkProps {
-  worldId: string;
-  agents: { name: string; tier: string; status: string }[];
-  onFeedback: (msg: string) => void;
-}
-
-function QuickTalk({ worldId, agents, onFeedback }: QuickTalkProps) {
-  const [selectedAgent, setSelectedAgent] = useState(agents[0]?.name ?? "");
-  const [message, setMessage] = useState("");
-  const [sending, setSending] = useState(false);
-  const [lastReplyBlocks, setLastReplyBlocks] = useState<ActivityBlock[]>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleSend = async () => {
-    const msg = message.trim();
-    if (!msg || sending || !selectedAgent) return;
-
-    setSending(true);
-    setMessage("");
-    setLastReplyBlocks([]);
-
-    await streamChat({
-      url: goApiUrl(`/api/agents/${selectedAgent}/talk`),
-      fallbackUrl: `/api/agents/${selectedAgent}/talk`,
-      body: { message: msg },
-      timeout: 30000,
-      onBlocks: (newBlocks) => {
-        setLastReplyBlocks((prev) => [...prev, ...newBlocks]);
-      },
-      onDone: () => {},
-      onError: (error) => {
-        setLastReplyBlocks([{ type: "error", content: error }]);
-        onFeedback(`Error: ${error}`);
-      },
-    });
-
-    setSending(false);
-    inputRef.current?.focus();
-  };
-
-  return (
-    <div>
-      <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4 flex items-center gap-2">
-        <IconMessageCircle size={14} className="opacity-40" />
-        Quick Talk
-      </h2>
-      <div className="glass-subtle p-4 space-y-3">
-        <div className="flex gap-2">
-          {agents.length > 1 && (
-            <select
-              value={selectedAgent}
-              onChange={(e) => setSelectedAgent(e.target.value)}
-              className="bg-transparent text-xs text-foreground/60 border border-white/[0.08] rounded-lg px-2 py-2 focus:outline-none"
-            >
-              {agents.map((a) => (
-                <option key={a.name} value={a.name}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          )}
-          <input
-            ref={inputRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder={`Message ${selectedAgent}...`}
-            className="flex-1 bg-transparent text-sm text-foreground/70 placeholder:text-muted-foreground/25 border border-white/[0.08] rounded-lg px-3 py-2 focus:outline-none focus:border-white/[0.15] transition-colors"
-            disabled={sending}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!message.trim() || sending}
-            className="p-2 rounded-lg text-muted-foreground/40 hover:text-foreground/70 hover:bg-white/[0.04] border border-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-          >
-            {sending ? (
-              <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
-            ) : (
-              <IconSend size={16} />
-            )}
-          </button>
-        </div>
-        {lastReplyBlocks.length > 0 && (
-          <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-3">
-            <p className="text-[10px] text-muted-foreground/30 mb-1 font-mono">{selectedAgent} replied:</p>
-            <div className="max-h-32 overflow-y-auto">
-              <ActivityBlocksRenderer blocks={lastReplyBlocks} />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}

@@ -223,8 +223,15 @@ html, body {
 html::-webkit-scrollbar {
   display: none;
 }
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 
-/* ── Tauri: interactive elements sit above the drag region strip ── */
+/* ── Tauri: interactive elements sit above the drag region strip (z-100) ── */
 html.tauri button,
 html.tauri [role="button"],
 html.tauri a,
@@ -232,12 +239,22 @@ html.tauri input,
 html.tauri select,
 html.tauri textarea {
   position: relative;
-  z-index: 200;
+  z-index: 101;
+}
+
+/* ── Tauri: fixed overlays (modals, dialogs) must sit above everything ── */
+html.tauri [class*="fixed"][class*="inset-0"] {
+  z-index: 500 !important;
 }
 
 /* ── Tauri: space below traffic lights ── */
 html.tauri [data-slot="sidebar-header"] {
-  padding-top: 42px;
+  padding-top: 36px;
+}
+
+/* ── Tauri: main content area also needs top space ── */
+html.tauri [data-slot="sidebar-inset"] {
+  padding-top: 8px;
 }
 
 /* ── Tauri native scroll: no rubber-band bounce ── */

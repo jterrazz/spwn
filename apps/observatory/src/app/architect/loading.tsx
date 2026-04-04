@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ArchitectLoading() {
   return (
-    <div className="px-8 pt-8 pb-16 space-y-8">
+    <div className="px-6 pt-8 pb-16 space-y-8">
       <div>
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-3 w-56 mt-2" />

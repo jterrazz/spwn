@@ -3,21 +3,18 @@
 import { useState, useEffect } from "react";
 import { isGoApiAvailable, onConnectionStatusChange, getConnectionStatus, type ConnectionStatus } from "@/lib/api-client";
 
-const STATUS_CONFIG: Record<ConnectionStatus, { dot: string; label: string; labelColor: string }> = {
+const STATUS_CONFIG: Record<ConnectionStatus, { dot: string; label: string; labelColor: string; title: string }> = {
   connected: {
     dot: "bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.6)]",
     label: "Connected",
     labelColor: "text-green-500/60",
-  },
-  degraded: {
-    dot: "bg-yellow-500 shadow-[0_0_4px_rgba(234,179,8,0.6)]",
-    label: "Degraded",
-    labelColor: "text-yellow-500/60",
+    title: "Connected — Go API responding",
   },
   disconnected: {
     dot: "bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.5)]",
     label: "Disconnected",
     labelColor: "text-red-400/60",
+    title: "Disconnected — API unreachable",
   },
 };
 
@@ -25,23 +22,11 @@ export function LiveStatus() {
   const [status, setStatus] = useState<ConnectionStatus>(getConnectionStatus());
 
   useEffect(() => {
-    // Subscribe to status changes from the API client
     const unsub = onConnectionStatusChange(setStatus);
 
-    // Also do periodic direct checks
     const check = async () => {
       const goUp = await isGoApiAvailable();
-      if (goUp) {
-        setStatus("connected");
-        return;
-      }
-      // Fall back to Next.js API route check
-      try {
-        const res = await fetch("/api/status");
-        setStatus(res.ok ? "degraded" : "disconnected");
-      } catch {
-        setStatus("disconnected");
-      }
+      setStatus(goUp ? "connected" : "disconnected");
     };
 
     check();
@@ -53,18 +38,16 @@ export function LiveStatus() {
   }, []);
 
   const config = STATUS_CONFIG[status];
-  const title = status === "connected"
-    ? "Go API responding"
-    : status === "degraded"
-      ? "Using fallback (exec mode)"
-      : "API disconnected";
 
   return (
-    <div className="flex items-center gap-1.5" title={title}>
+    <div
+      className="h-8 flex items-center gap-1.5 rounded-full bg-foreground/[0.06] dark:bg-white/[0.08] backdrop-blur-md border border-foreground/[0.08] dark:border-white/[0.1] px-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]"
+      title={config.title}
+    >
       <div
-        className={`w-1.5 h-1.5 rounded-full transition-colors ${config.dot}`}
+        className={`w-2 h-2 rounded-full transition-colors ${config.dot}`}
       />
-      <span className={`text-[9px] font-mono uppercase tracking-wider ${config.labelColor}`}>
+      <span className={`text-[10px] font-mono uppercase tracking-wider ${config.labelColor}`}>
         {config.label}
       </span>
     </div>

@@ -75,12 +75,12 @@ export default function AgentPage() {
   })() : null;
   usePageTitle(agentName, worldName);
 
-  // Fetch world + agent data from API (Go API with Next.js fallback)
+  // Fetch world + agent data from Go API
   useEffect(() => {
     Promise.all([
-      apiGet<World[]>("/api/universes", "/api/worlds").catch(() => [] as World[]),
-      apiGet<AgentProfile>(`/api/agents/${agentName}`, `/api/agents/${agentName}`).catch(() => null),
-      apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`, `/api/agents/${agentName}/mind`).catch(() => null),
+      apiGet<World[]>("/api/universes").catch(() => [] as World[]),
+      apiGet<AgentProfile>(`/api/agents/${agentName}`).catch(() => null),
+      apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`).catch(() => null),
     ]).then(([worlds, agentProfile, tree]) => {
       const found = (worlds as World[]).find((w) => w.id === worldId);
       setWorld(found ?? null);
@@ -103,10 +103,44 @@ export default function AgentPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Load conversation history on mount
   useEffect(() => {
-    setMessages(INITIAL_MESSAGES);
     setMounted(true);
-  }, []);
+    apiGet<{ sessions: { id: string; messages: { role: string; content: string; timestamp: string; type: string; toolName?: string; cost?: number; durationMs?: number }[]; startedAt: string; cost?: number }[] }>(`/api/worlds/${worldId}/history?agent=${agentName}`)
+      .then((data) => {
+        if (!data?.sessions?.length) return;
+        const historyMsgs: Message[] = [];
+        for (const session of data.sessions) {
+          for (const msg of session.messages) {
+            if (msg.type === "text" && msg.content) {
+              historyMsgs.push({
+                role: msg.role === "user" ? "user" : "agent",
+                content: msg.content,
+                blocks: [{ type: "text" as const, content: msg.content }],
+                timestamp: new Date(msg.timestamp),
+              });
+            } else if (msg.type === "tool_use" && msg.toolName) {
+              historyMsgs.push({
+                role: "agent",
+                content: `Used tool: ${msg.toolName}`,
+                blocks: [{ type: "tool_use" as const, tool: msg.toolName, input: {}, id: `hist-${historyMsgs.length}` }],
+                timestamp: new Date(msg.timestamp),
+              });
+            } else if (msg.type === "result" && msg.cost) {
+              const lastAgent = [...historyMsgs].reverse().find(m => m.role === "agent");
+              if (lastAgent) {
+                lastAgent.cost = msg.cost;
+                lastAgent.duration = msg.durationMs;
+              }
+            }
+          }
+        }
+        if (historyMsgs.length > 0) {
+          setMessages(historyMsgs);
+        }
+      })
+      .catch(() => { /* history not available */ });
+  }, [worldId, agentName]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -126,7 +160,6 @@ export default function AgentPage() {
       const result = await apiAction(
         `/api/agents/${agentName}/${action}`,
         body,
-        `/api/agents/${agentName}/${action}`
       );
       if (!result.ok) {
         showFeedback(`Error: ${result.error || "Unknown error"}`);
@@ -155,7 +188,6 @@ export default function AgentPage() {
 
     await streamChat({
       url: goApiUrl(`/api/worlds/${worldId}/talk`),
-      fallbackUrl: `/api/worlds/${worldId}/talk`,
       body: { message, agent: agentName },
       onBlocks: (newBlocks) => {
         setMessages((prev) => {
@@ -516,7 +548,7 @@ export default function AgentPage() {
               </div>
               <div className="glass-subtle p-3 text-center">
                 <p className="text-lg font-heading text-foreground/80">{Object.keys(mindTree).filter(k => (mindTree[k]?.length ?? 0) > 0).length}</p>
-                <p className="text-[9px] text-muted-foreground/35 uppercase">Layers</p>
+                <p className="text-[9px] text-muted-foreground/35 uppercase">Files</p>
               </div>
               <div className="glass-subtle p-3 text-center">
                 <p className="text-lg font-heading text-foreground/80">{profile?.journal?.length ?? 0}</p>

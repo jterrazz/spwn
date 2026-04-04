@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ErrorBoundary } from "@/components/error-boundary";
 import type { World, LimboAgent } from "@/lib/types";
 import { apiGet } from "@/lib/api-client";
@@ -38,9 +37,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const fetchWorlds = useCallback(() => {
     Promise.all([
-      apiGet<World[]>("/api/universes", "/api/worlds").catch(() => [] as World[]),
-      apiGet<AgentListItem[]>("/api/agents", "/api/agents").catch(() => [] as AgentListItem[]),
-      apiGet<StatusData>("/api/status", "/api/status").catch(() => null),
+      apiGet<World[]>("/api/universes").catch(() => [] as World[]),
+      apiGet<AgentListItem[]>("/api/agents").catch(() => [] as AgentListItem[]),
+      apiGet<StatusData>("/api/status").catch(() => null),
     ]).then(([worldData, agentData, sData]) => {
       setStatusData(sData);
       const w = worldData ?? [];
@@ -75,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Drag region for window movement */}
         <div
           data-tauri-drag-region="true"
-          className="tauri-drag-region fixed top-0 left-0 right-0 h-[28px] z-[100]"
+          className="tauri-drag-region fixed top-0 left-0 right-0 h-[32px] z-[100]"
           style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
         />
         <AppSidebar
@@ -86,7 +85,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           statusData={statusData}
         />
         <SidebarInset>
-          <Breadcrumbs />
           <ErrorBoundary>
             {children}
           </ErrorBoundary>
