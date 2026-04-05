@@ -69,6 +69,14 @@ func (a *Architect) Inspect(ctx context.Context, worldID string) (*models.World,
 	return a.state.Get(worldID)
 }
 
+// Rename updates a world's display name. Empty name clears the field (UIs fall back to the ID).
+func (a *Architect) Rename(ctx context.Context, worldID, name string) error {
+	if _, err := a.state.Get(worldID); err != nil {
+		return err
+	}
+	return a.state.Rename(worldID, name)
+}
+
 // Logs streams container output.
 func (a *Architect) Logs(ctx context.Context, worldID string, follow bool, tail string) (interface{ Read([]byte) (int, error); Close() error }, error) {
 	u, err := a.state.Get(worldID)

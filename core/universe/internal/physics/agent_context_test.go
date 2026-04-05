@@ -3,6 +3,8 @@ package physics
 import (
 	"strings"
 	"testing"
+
+	"spwn.sh/core/universe/internal/models"
 )
 
 func TestGenerateGovernorContext(t *testing.T) {
@@ -10,7 +12,7 @@ func TestGenerateGovernorContext(t *testing.T) {
 		AgentName: "morpheus",
 		Tier:      "governor",
 		WorldID:   "w-acme-28373",
-		Workspace: "/workspace",
+		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
 		Elements:  []string{"bash", "git", "node"},
 		CPU:       2,
 		Memory:    "4g",
@@ -30,7 +32,7 @@ func TestGenerateGovernorContext(t *testing.T) {
 		"/world/inbox":     "missing inbox reference",
 		"Delegation":       "missing delegation pattern",
 		"w-acme-28373":     "missing world ID",
-		"/workspace":       "missing workspace",
+		"/host/project":    "missing workspace path",
 		"bash, git, node":  "missing elements",
 		"2 cpu":            "missing CPU",
 		"4g":               "missing memory",
@@ -54,7 +56,7 @@ func TestGenerateCitizenContext(t *testing.T) {
 		AgentName: "neo",
 		Tier:      "citizen",
 		WorldID:   "w-acme-28373",
-		Workspace: "/workspace",
+		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
 		Elements:  []string{"bash", "git"},
 		CPU:       2,
 		Memory:    "4g",
@@ -78,7 +80,7 @@ func TestGenerateCitizenContext(t *testing.T) {
 		"/world/inbox":   "missing inbox",
 		"Messaging":      "missing messaging skill",
 		"w-acme-28373":   "missing world ID",
-		"/workspace":     "missing workspace",
+		"/host/project":  "missing workspace path",
 		"bash, git":      "missing elements",
 	}
 

@@ -102,6 +102,24 @@ func (s *Store) Delete(id string) error {
 	return s.save(filtered)
 }
 
+// Rename updates the display name of a world.
+func (s *Store) Rename(id, name string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	universes, err := s.load()
+	if err != nil {
+		return err
+	}
+	for i := range universes {
+		if universes[i].ID == id {
+			universes[i].Name = name
+			return s.save(universes)
+		}
+	}
+	return fmt.Errorf("world %s not found", id)
+}
+
 // UpdateStatus changes the status of a world.
 func (s *Store) UpdateStatus(id string, status models.Status) error {
 	s.mu.Lock()
@@ -199,6 +217,13 @@ func (s *Store) load() ([]models.World, error) {
 	var universes []models.World
 	if err := json.Unmarshal(data, &universes); err != nil {
 		return nil, fmt.Errorf("parse state: %w", err)
+	}
+	// Migrate legacy single-workspace field into Workspaces slice.
+	for i := range universes {
+		if len(universes[i].Workspaces) == 0 && universes[i].Workspace != "" {
+			universes[i].Workspaces = []models.Workspace{{Name: "default", Path: universes[i].Workspace}}
+		}
+		universes[i].Workspace = ""
 	}
 	return universes, nil
 }

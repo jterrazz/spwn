@@ -102,10 +102,15 @@ var restoreCmd = &cobra.Command{
 		}
 		universe.ApplyDefaults(&m)
 
+		workspaces, wsErr := parseWorkspaceFlags(spawnWorkspaces)
+		if wsErr != nil {
+			return fmt.Errorf("parse workspace: %w", wsErr)
+		}
+
 		opts := universe.SpawnOpts{
 			ConfigName: configName,
 			AgentName:  spawnAgent,
-			Workspace:  spawnWorkspace,
+			Workspaces: workspaces,
 			Manifest:   m,
 			Image:      imageTag,
 		}

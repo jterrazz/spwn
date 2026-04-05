@@ -58,7 +58,7 @@ func init() {
 	// Copy flags from world Cmd to UpCmd
 	UpCmd.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named world config (default: default)")
 	UpCmd.Flags().StringVarP(&spawnAgent, "agent", "a", "default", "Agent name")
-	UpCmd.Flags().StringVarP(&spawnWorkspace, "workspace", "w", "", "Host directory to mount at /workspace")
+	UpCmd.Flags().StringArrayVarP(&spawnWorkspaces, "workspace", "w", nil, `Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 	UpCmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	UpCmd.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Attach to agent interactively")
 	UpCmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")

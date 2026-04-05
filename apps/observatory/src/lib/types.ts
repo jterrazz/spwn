@@ -11,15 +11,43 @@ export interface WorldManifest {
   elements?: string[];
 }
 
+export interface Workspace {
+  name: string;
+  path: string;
+  readonly?: boolean;
+}
+
 export interface World {
   id: string;
+  name?: string;
   config: string;
   agent: string;
   agents: Agent[];
   status: "running" | "idle" | "stopped" | "creating" | "error";
   created_at: string;
-  workspace: string;
+  workspaces?: Workspace[];
   manifest?: WorldManifest;
+}
+
+/**
+ * Short human-readable summary of a world's workspace mounts, for display.
+ * Empty for ephemeral worlds (no host mounts).
+ */
+export function getWorkspaceSummary(world: Pick<World, "workspaces">): string {
+  const ws = world.workspaces;
+  if (!ws || ws.length === 0) return "ephemeral";
+  if (ws.length === 1) return ws[0].path;
+  return `${ws.length} workspaces`;
+}
+
+/**
+ * Returns the user-facing name of a world: custom name if set, otherwise the
+ * capitalized middle segment of the world id (e.g. "w-titan-abc123" → "Titan").
+ */
+export function getWorldName(world: Pick<World, "id" | "name">): string {
+  if (world.name && world.name.trim()) return world.name.trim();
+  const parts = world.id.split("-");
+  return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : world.id;
 }
 
 export interface LimboAgent {

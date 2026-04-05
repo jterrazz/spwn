@@ -32,8 +32,9 @@ type SpawnResult struct {
 // SpawnOpts configures world creation.
 type SpawnOpts struct {
 	ConfigName    string
+	Name          string // Optional user-facing display name.
 	AgentName     string
-	Workspace     string
+	Workspaces    []models.Workspace
 	Manifest      models.Manifest
 	Image         string                     // Override base image (used for testing). Defaults to foundation.BaseImage.
 	InvokeHandler gate.InvokeHandler         // Override gate handler (used for testing). Defaults to stub.
@@ -72,23 +73,34 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("invalid memory: %w", err)
 	}
 
-	// Resolve workspace to absolute path
-	workspace := ""
-	if opts.Workspace != "" {
-		workspace, err = filepath.Abs(opts.Workspace)
-		if err != nil {
-			return nil, fmt.Errorf("resolve workspace: %w", err)
+	// Resolve each workspace to absolute path and validate it exists.
+	// Layout inside the container:
+	//   - 0 workspaces (ephemeral): no mounts, container uses its image's /workspace dir.
+	//   - 1+ workspaces: each mounted at /workspaces/<name>. The first is also
+	//     mounted at /workspace for legacy tools that expect a single root.
+	resolvedWorkspaces := make([]models.Workspace, 0, len(opts.Workspaces))
+	seenNames := map[string]bool{}
+	for i, ws := range opts.Workspaces {
+		abs, absErr := filepath.Abs(ws.Path)
+		if absErr != nil {
+			return nil, fmt.Errorf("resolve workspace %q: %w", ws.Path, absErr)
 		}
-		if _, err := os.Stat(workspace); err != nil {
-			return nil, fmt.Errorf("workspace %s not found.\nCheck the path exists and is accessible", workspace)
+		if _, statErr := os.Stat(abs); statErr != nil {
+			return nil, fmt.Errorf("workspace %s not found.\nCheck the path exists and is accessible", abs)
 		}
+		name := strings.TrimSpace(ws.Name)
+		if name == "" {
+			name = fmt.Sprintf("w%d", i)
+		}
+		if seenNames[name] {
+			return nil, fmt.Errorf("duplicate workspace name %q", name)
+		}
+		seenNames[name] = true
+		resolvedWorkspaces = append(resolvedWorkspaces, models.Workspace{Name: name, Path: abs, ReadOnly: ws.ReadOnly})
 	}
 
-	// Build mounts
-	var binds []string
-	if workspace != "" {
-		binds = append(binds, workspace+":/workspace")
-	}
+	// Build mounts.
+	binds := buildWorkspaceBinds(resolvedWorkspaces)
 
 	// Architect mode: mount Docker socket + SPWN state directory
 	if opts.IsArchitect {
@@ -243,6 +255,17 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		env = append(env, "SPWN_HOME=/home/spwn/.spwn")
 	}
 
+	// Workspace discovery env vars: "name:container_path,name:container_path"
+	if len(resolvedWorkspaces) > 0 {
+		total := len(resolvedWorkspaces)
+		pairs := make([]string, 0, total)
+		for _, ws := range resolvedWorkspaces {
+			pairs = append(pairs, fmt.Sprintf("%s:%s", ws.Name, workspaceContainerPath(ws.Name, total)))
+		}
+		env = append(env, "SPWN_WORKSPACES="+strings.Join(pairs, ","))
+		env = append(env, "SPWN_WORKSPACE_DEFAULT="+workspaceContainerPath(resolvedWorkspaces[0].Name, total))
+	}
+
 	// Auto-extract OAuth token from macOS Keychain for subscription auth
 	credSource := "none"
 	if hasEnv(env, "ANTHROPIC_API_KEY") {
@@ -366,7 +389,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 				AgentName:   spec.Name,
 				Tier:        tier,
 				WorldID:     id,
-				Workspace:   workspace,
+				Workspaces:  resolvedWorkspaces,
 				Elements:    verifiedElements,
 				CPU:         opts.Manifest.Physics.Constants.CPU,
 				Memory:      opts.Manifest.Physics.Constants.Memory,
@@ -398,11 +421,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	} else if opts.AgentName != "" {
 		// Single agent: generate /world/AGENT.md
 		agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
-			AgentName: opts.AgentName,
-			Tier:      "citizen",
-			WorldID:   id,
-			Workspace: workspace,
-			Elements:  verifiedElements,
+			AgentName:  opts.AgentName,
+			Tier:       "citizen",
+			WorldID:    id,
+			Workspaces: resolvedWorkspaces,
+			Elements:   verifiedElements,
 			CPU:       opts.Manifest.Physics.Constants.CPU,
 			Memory:    opts.Manifest.Physics.Constants.Memory,
 			Timeout:   opts.Manifest.Physics.Constants.Timeout,
@@ -442,11 +465,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Build universe record
 	u := models.World{
 		ID:          id,
+		Name:        opts.Name,
 		Config:      opts.ConfigName,
 		Agent:       opts.AgentName,
 		Backend:     foundation.DefaultBackend,
 		ContainerID: containerID,
-		Workspace:   workspace,
+		Workspaces:  resolvedWorkspaces,
 		MindPath:    mindPath,
 		GateDir:     gateDir,
 		Status:      models.StatusIdle,
@@ -662,4 +686,44 @@ func parseMemory(s string) (int64, error) {
 		return 0, fmt.Errorf("parse memory %q: %w", s, err)
 	}
 	return n * multiplier, nil
+}
+
+// buildWorkspaceBinds generates Docker bind specs for the resolved workspaces.
+// Layout (always rooted at /workspace so `ls /workspace` tells the agent what
+// it can work with):
+//   - 0 workspaces: no binds — container uses image-baked /workspace.
+//   - 1 workspace:  mounted directly at /workspace (legacy flat layout).
+//   - 2+:           each mounted at /workspace/<name>. Running `ls /workspace`
+//                   shows the workspace names; agents cd into one to drill in.
+func buildWorkspaceBinds(workspaces []models.Workspace) []string {
+	if len(workspaces) == 0 {
+		return nil
+	}
+	binds := make([]string, 0, len(workspaces))
+	if len(workspaces) == 1 {
+		ws := workspaces[0]
+		ro := ""
+		if ws.ReadOnly {
+			ro = ":ro"
+		}
+		return append(binds, fmt.Sprintf("%s:/workspace%s", ws.Path, ro))
+	}
+	for _, ws := range workspaces {
+		ro := ""
+		if ws.ReadOnly {
+			ro = ":ro"
+		}
+		binds = append(binds, fmt.Sprintf("%s:/workspace/%s%s", ws.Path, ws.Name, ro))
+	}
+	return binds
+}
+
+// workspaceContainerPath returns the absolute path inside the container where
+// a workspace named `name` is mounted, given the total number of workspaces.
+// This is the single source of truth for the container-side path scheme.
+func workspaceContainerPath(name string, totalWorkspaces int) string {
+	if totalWorkspaces == 1 {
+		return "/workspace"
+	}
+	return "/workspace/" + name
 }

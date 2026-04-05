@@ -3,14 +3,13 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
-import { AVAILABLE_CONFIGS } from "@/lib/types";
+import { AVAILABLE_CONFIGS, getWorkspaceSummary, getWorldName } from "@/lib/types";
 import type { World } from "@/lib/types";
-import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconBoltFilled, IconMoonFilled, IconCircleFilled, IconMessageFilled, IconWorldFilled } from "@tabler/icons-react";
+import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconMoonFilled, IconWorldFilled } from "@tabler/icons-react";
 import { Planet as PlanetGlobe } from "@/components/planet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
-import { RecentActivity } from "@/components/recent-activity";
 import { PageHeader } from "@/components/page-header";
 import { Page } from "@/components/page";
 import { useRefetch } from "@/components/app-shell";
@@ -242,23 +241,18 @@ export default function UniverseMapPage() {
     refetchSidebar();
   };
 
-  const extractName = (id: string) => {
-    const parts = id.split("-");
-    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
-  };
-
   const STATUS_DOT: Record<string, string> = {
-    running: "bg-green-500", idle: "bg-amber-400", stopped: "bg-zinc-500/30", creating: "bg-blue-400",
+    running: "bg-green-500", idle: "bg-amber-400", stopped: "bg-zinc-500/30", creating: "bg-white/80",
   };
 
   const runningAgents = worlds.reduce((n, w) => n + w.agents.filter((a) => a.status === "running").length, 0);
   const idleAgents = worlds.reduce((n, w) => n + w.agents.filter((a) => a.status === "idle" || a.status === "waiting").length, 0);
 
   return (
-    <Page>
+    <Page className="flex flex-col h-full">
       <PageHeader
         title="Dashboard"
-        description="Orchestrate AI agents across your projects, persist their minds, scale at will — your AI matrix."
+        description="Build AI agent systems that feel alive."
         actions={
           <DashboardHeaderStats
             worldsCount={worlds.length}
@@ -281,7 +275,11 @@ export default function UniverseMapPage() {
         <>
           {/* Worlds */}
           {worlds.length > 0 ? (
-            <div className="relative overflow-hidden min-h-[320px] flex items-center" onClick={(e) => { if (e.target === e.currentTarget && selected !== null) setSelected(null); }}>
+            <div
+              className="relative overflow-hidden flex-1 min-h-[320px] flex items-center pb-24"
+              style={{ marginLeft: "calc(-50vw + 50%)", marginRight: "calc(-50vw + 50%)" }}
+              onClick={(e) => { if (e.target === e.currentTarget && selected !== null) setSelected(null); }}
+            >
               {/* Planets — full width scrollable */}
               <div
                 ref={scrollRef}
@@ -333,7 +331,7 @@ export default function UniverseMapPage() {
                   onClick={() => setShowSpawn(true)}
                 >
                   <PlanetGlobe
-                    world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "creating", created_at: "", container_id: "", workspace: "" } as World}
+                    world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "creating", created_at: "" } as World}
                     index={worlds.length}
                     isSelected={false}
                     onClick={() => setShowSpawn(true)}
@@ -346,7 +344,7 @@ export default function UniverseMapPage() {
               {/* Floating world info panel */}
               {selected !== null && worlds[selected] && (() => {
                 const w = worlds[selected];
-                const name = extractName(w.id);
+                const name = getWorldName(w);
                 const isRunning = w.status === "running" || w.status === "idle";
                 return (
                   <div
@@ -379,7 +377,7 @@ export default function UniverseMapPage() {
                         </button>
                       </div>
                       <p className="text-[11px] font-mono text-muted-foreground/30 pl-6">
-                        {w.config ?? "default"} · {w.workspace ?? "/tmp"}
+                        {w.config ?? "default"} · {getWorkspaceSummary(w)}
                       </p>
                     </div>
 
@@ -455,7 +453,7 @@ export default function UniverseMapPage() {
                 onClick={() => setShowSpawn(true)}
               >
                 <PlanetGlobe
-                  world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "stopped", created_at: "", container_id: "", workspace: "" } as World}
+                  world={{ id: "w-new-00000", config: "default", agent: "", agents: [], status: "stopped", created_at: "" } as World}
                   index={0}
                   isSelected={false}
                   onClick={() => setShowSpawn(true)}
@@ -465,67 +463,6 @@ export default function UniverseMapPage() {
             </div>
           )}
 
-          {/* ── Agent Activity Feed ── */}
-          {worlds.length > 0 && (() => {
-            const allAgents = worlds.flatMap(w => w.agents.map(a => ({ ...a, worldName: extractName(w.id), worldId: w.id })));
-            if (allAgents.length === 0) return null;
-
-            const statusIcon: Record<string, { icon: typeof IconBoltFilled; color: string; label: string }> = {
-              running:  { icon: IconBoltFilled,    color: "text-green-400",  label: "Running" },
-              waiting:  { icon: IconMessageFilled, color: "text-amber-400",  label: "Waiting" },
-              idle:     { icon: IconCircleFilled,  color: "text-amber-400/50", label: "Idle" },
-              sleeping: { icon: IconMoonFilled,    color: "text-purple-400", label: "Sleeping" },
-              stopped:  { icon: IconCircleFilled,  color: "text-zinc-500/30",  label: "Stopped" },
-            };
-
-            return (
-              <div>
-                <h3 className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/30 mb-3 flex items-center gap-2">
-                  <IconActivity size={12} className="opacity-50" />
-                  Agent Activity
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {allAgents.map((a) => {
-                    const s = statusIcon[a.status] ?? statusIcon.stopped;
-                    const Icon = s.icon;
-                    return (
-                      <button
-                        key={`${a.worldId}-${a.name}`}
-                        onClick={() => router.push(`/world/${a.worldId}/${a.name}`)}
-                        className="group flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06]"
-                      >
-                        <div className="relative">
-                          <Icon size={14} className={`${s.color} transition-colors`} />
-                          {a.status === "running" && (
-                            <div className="absolute -top-0.5 -right-0.5 w-2 h-2">
-                              <div className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-40" />
-                              <div className="absolute inset-0 rounded-full bg-green-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-mono text-foreground/70 group-hover:text-foreground/90 truncate transition-colors">{a.name}</p>
-                          <p className="text-[10px] text-muted-foreground/25">{a.worldName} · {s.label}</p>
-                        </div>
-                        <IconArrowRight size={12} className="text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* ── Recent Activity Timeline ── */}
-          {worlds.length > 0 && (
-            <div>
-              <h3 className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/30 mb-3 flex items-center gap-2">
-                <IconSparkles size={12} className="opacity-50" />
-                Recent Activity
-              </h3>
-              <RecentActivity />
-            </div>
-          )}
         </>
       )}
 
@@ -725,7 +662,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
       const res = await fetch(goApiUrl("/api/worlds"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent: agentName.trim(), workspace: effectiveWorkspace, config: "default", tier: "citizen" }),
+        body: JSON.stringify({ agent: agentName.trim(), workspaces: [{ name: "default", path: effectiveWorkspace }], config: "default", tier: "citizen" }),
         signal: AbortSignal.timeout(30000),
       });
       const data = await res.json().catch(() => ({}));
@@ -913,10 +850,17 @@ interface SpawnAgentListItem {
   layers: Record<string, string[]>;
 }
 
+interface WorkspaceDraft {
+  name: string;
+  path: string;
+  readonly: boolean;
+}
+
 function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) {
   const router = useRouter();
+  const [worldName, setWorldName] = useState("");
   const [agentName, setAgentName] = useState("");
-  const [workspace, setWorkspace] = useState("");
+  const [workspaces, setWorkspaces] = useState<WorkspaceDraft[]>([{ name: "default", path: "", readonly: false }]);
   const [config, setConfig] = useState("default");
   const [tier, setTier] = useState("citizen");
   const [spawning, setSpawning] = useState(false);
@@ -925,8 +869,8 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
   const [creatingAgent, setCreatingAgent] = useState(false);
   const [newAgentName, setNewAgentName] = useState("");
 
-  // Generate a sensible default workspace when agent is selected
-  const defaultWorkspace = useMemo(() => {
+  // Generate a sensible default workspace path when agent is selected
+  const defaultWorkspacePath = useMemo(() => {
     if (!agentName) return "/tmp/spwn-world";
     const rand = Math.random().toString(36).substring(2, 6);
     return `/tmp/spwn-${agentName}-${rand}`;
@@ -966,16 +910,22 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
     }
   };
 
-  const effectiveWorkspace = workspace || defaultWorkspace;
-
   const handleSpawn = async () => {
     setSpawning(true);
     setError("");
+    // Filter out blank rows and fill in defaults. A fully empty list = ephemeral world.
+    const cleanWorkspaces = workspaces
+      .map((w, i) => ({
+        name: w.name.trim() || (workspaces.length === 1 ? "default" : `w${i}`),
+        path: (w.path.trim() || (i === 0 ? defaultWorkspacePath : "")),
+        readonly: w.readonly,
+      }))
+      .filter((w) => w.path !== "");
     try {
       const res = await fetch(goApiUrl("/api/worlds"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent: agentName.trim(), workspace: effectiveWorkspace, config, tier }),
+        body: JSON.stringify({ name: worldName.trim(), agent: agentName.trim(), workspaces: cleanWorkspaces, config, tier }),
         signal: AbortSignal.timeout(30000),
       });
       const data = await res.json().catch(() => ({}));
@@ -1019,6 +969,19 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
 
         {/* Form */}
         <div className="px-6 pb-6 space-y-4">
+          {/* World name (optional) */}
+          <div>
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+              Name <span className="text-muted-foreground/25 normal-case tracking-normal">(optional)</span>
+            </label>
+            <input
+              value={worldName}
+              onChange={(e) => setWorldName(e.target.value)}
+              placeholder="My Project"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+            />
+          </div>
+
           {/* Agent name — dropdown if agents exist, inline creation if not */}
           <div>
             <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
@@ -1061,17 +1024,63 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
             )}
           </div>
 
-          {/* Workspace */}
+          {/* Workspaces */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
-              Workspace Path
-            </label>
-            <input
-              value={workspace}
-              onChange={(e) => setWorkspace(e.target.value)}
-              placeholder={defaultWorkspace}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
-            />
+            <div className="flex items-baseline justify-between mb-1.5">
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40">
+                Workspaces {workspaces.length === 0 && <span className="text-muted-foreground/25 normal-case tracking-normal">(ephemeral)</span>}
+              </label>
+              <button
+                type="button"
+                onClick={() => setWorkspaces((prev) => [...prev, { name: prev.length === 0 ? "default" : `w${prev.length}`, path: "", readonly: false }])}
+                className="text-[10px] text-muted-foreground/50 hover:text-foreground/80 transition-colors"
+              >
+                + Add
+              </button>
+            </div>
+            {workspaces.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => setWorkspaces([{ name: "default", path: "", readonly: false }])}
+                className="w-full text-left px-3 py-2.5 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.08] text-[11px] text-muted-foreground/40 hover:text-foreground/60 hover:border-white/[0.15] transition-colors"
+              >
+                Ephemeral world — click to add a host mount
+              </button>
+            ) : (
+              <div className="space-y-2">
+                {workspaces.map((ws, idx) => (
+                  <div key={idx} className="flex gap-1.5 items-center">
+                    <input
+                      value={ws.name}
+                      onChange={(e) => setWorkspaces((prev) => prev.map((w, i) => i === idx ? { ...w, name: e.target.value } : w))}
+                      placeholder="name"
+                      className="w-24 shrink-0 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2.5 py-2 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                    />
+                    <input
+                      value={ws.path}
+                      onChange={(e) => setWorkspaces((prev) => prev.map((w, i) => i === idx ? { ...w, path: e.target.value } : w))}
+                      placeholder={idx === 0 ? defaultWorkspacePath : "/path/to/dir"}
+                      className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2.5 py-2 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setWorkspaces((prev) => prev.map((w, i) => i === idx ? { ...w, readonly: !w.readonly } : w))}
+                      title={ws.readonly ? "Read-only" : "Read-write"}
+                      className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-[10px] font-mono transition-colors ${ws.readonly ? "bg-amber-500/15 border border-amber-500/25 text-amber-300" : "bg-white/[0.03] border border-white/[0.08] text-muted-foreground/40 hover:text-foreground/70"}`}
+                    >
+                      ro
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWorkspaces((prev) => prev.filter((_, i) => i !== idx))}
+                      className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                      <IconX size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Config + Tier row */}
@@ -1107,17 +1116,31 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
           </div>
 
           {/* Preview of what will happen */}
-          <div className="rounded-lg bg-white/[0.02] border border-white/[0.05] px-3 py-3 space-y-2">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-1">Preview</p>
-            <div className="font-mono text-[11px] text-muted-foreground/35">
-              spwn up --agent {agentName || "‹name›"} --tier {tier} --config {config} -w {effectiveWorkspace}
-            </div>
-            <div className="text-[10px] text-muted-foreground/25 space-y-0.5">
-              <p>→ Creates isolated Docker container</p>
-              <p>→ Mounts agent mind from <span className="font-mono">~/.spwn/agents/{agentName || "‹name›"}</span></p>
-              <p>→ Workspace: <span className="font-mono">{effectiveWorkspace}</span></p>
-            </div>
-          </div>
+          {(() => {
+            const wsFlags = workspaces
+              .filter((w) => w.path.trim())
+              .map((w) => `-w ${w.name}=${w.path.trim()}${w.readonly ? ":ro" : ""}`)
+              .join(" ");
+            return (
+              <div className="rounded-lg bg-white/[0.02] border border-white/[0.05] px-3 py-3 space-y-2">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-1">Preview</p>
+                <div className="font-mono text-[11px] text-muted-foreground/35 break-all">
+                  spwn up --agent {agentName || "‹name›"} --tier {tier} --config {config}{wsFlags ? " " + wsFlags : " (ephemeral)"}
+                </div>
+                <div className="text-[10px] text-muted-foreground/25 space-y-0.5">
+                  <p>→ Creates isolated Docker container</p>
+                  <p>→ Mounts agent mind from <span className="font-mono">~/.spwn/agents/{agentName || "‹name›"}</span></p>
+                  {workspaces.filter((w) => w.path.trim()).length === 0 ? (
+                    <p>→ No host workspace (uses image&apos;s /workspace)</p>
+                  ) : (
+                    workspaces.filter((w) => w.path.trim()).map((w, i) => (
+                      <p key={i}>→ {w.name}: <span className="font-mono">{w.path.trim()}</span>{w.readonly ? " (read-only)" : ""}</p>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Error display */}
           {error && (

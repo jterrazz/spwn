@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   IconLayoutDashboardFilled,
-  IconEyeFilled,
+  IconHomeFilled,
   IconHexagonFilled,
   IconSearch,
   IconBoltFilled,
@@ -38,7 +38,7 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UpgradeBanner } from "@/components/upgrade-banner";
 import { useVersion } from "@/hooks/use-version";
-import type { World, LimboAgent } from "@/lib/types";
+import { getWorldName, type World, type LimboAgent } from "@/lib/types";
 import { apiAction, apiDelete, isGoApiAvailable, onConnectionStatusChange, getConnectionStatus, type ConnectionStatus } from "@/lib/api-client";
 
 interface StatusData { worlds: number; agents: number; running: number; }
@@ -59,12 +59,20 @@ const AGENT_ICON: Record<string, { icon: typeof IconBoltFilled; color: string; d
 };
 
 const WORLD_DOT: Record<string, string> = {
-  running: "bg-green-500", idle: "bg-amber-400", stopped: "bg-zinc-400/30", creating: "bg-blue-400",
+  running: "bg-green-500", idle: "bg-amber-400", stopped: "bg-zinc-400/30", creating: "bg-white/80",
 };
 
+// Thin wrapper for legacy callers that only have an id. When a full World is available,
+// prefer getWorldName(world) so a custom display name is respected.
 function extractName(id: string): string {
   const parts = id.split("-");
   return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
+}
+
+function hashHue(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h % 360;
 }
 
 export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statusData }: AppSidebarProps) {
@@ -73,6 +81,7 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
   const [showNewAgent, setShowNewAgent] = useState(false);
   const [newAgentName, setNewAgentName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [worldsExpanded, setWorldsExpanded] = useState(false);
 
   const newAgentInputRef = useRef<HTMLInputElement>(null);
   const { version } = useVersion();
@@ -109,8 +118,8 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
     <Sidebar>
       {/* ── Header ── */}
       <SidebarHeader className="gap-0 pt-4 pb-4">
-        <div className="flex items-center justify-between px-2">
-          <div className="group/logo flex items-center w-full">
+        <div className="flex items-center justify-between gap-2 px-2">
+          <div className="group/logo flex items-center flex-1 min-w-0">
             <Link href="/" className="flex items-center gap-1.5">
               <span className={`text-base font-heading transition-colors ${connectionStatus === "connected" ? "text-green-500" : "text-red-400"}`}>⬡</span>
               <span className="text-base tracking-[0.12em] font-heading text-foreground">spwn</span>
@@ -119,25 +128,12 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
               {connectionStatus}
             </span>
           </div>
-        </div>
-        <div className="flex items-center gap-1 px-1.5 mt-4">
-          <ThemeToggle />
-          <a href="https://spwn.sh/docs" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="Docs">
-            <IconBookFilled size={14} />
-          </a>
-          <a href="https://github.com/jterrazz/spwn" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="GitHub">
-            <IconBrandGithubFilled size={14} />
-          </a>
-          <a href="https://github.com/jterrazz/spwn/issues/new" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="Feedback">
-            <IconAlertTriangleFilled size={14} />
-          </a>
-          <div className="flex-1" />
           <button
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground/[0.06] dark:bg-white/[0.08] backdrop-blur-md border border-foreground/[0.08] dark:border-white/[0.1] text-muted-foreground/40 hover:text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors shrink-0"
             onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }))}
             aria-label="Search (⌘K)"
           >
-            <IconSearch size={15} />
+            <IconSearch size={16} stroke={2.5} />
           </button>
         </div>
       </SidebarHeader>
@@ -171,38 +167,124 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
 
         {/* ── Worlds ── */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-sidebar-foreground/30">Worlds</SidebarGroupLabel>
-          {worlds.length > 0 ? (
-            <div className="flex flex-wrap gap-1 px-0 pb-1">
-              {worlds.map((world) => {
-                const name = extractName(world.id);
-                const isSelected = selectedWorld?.id === world.id;
-                const statusColor = WORLD_DOT[world.status]?.replace("bg-", "text-") ?? "text-white/10";
+          {worlds.length > 0 && selectedWorld ? (
+            <div className="px-1 space-y-1.5">
+              {/* Hero: current world */}
+              {(() => {
+                const hue = hashHue(selectedWorld.id);
+                const isActive =
+                  selectedWorld.status === "running" || selectedWorld.status === "creating";
+                const sat = isActive ? 70 : 15;
                 return (
                   <button
-                    key={world.id}
-                    onClick={() => router.push(`/world/${world.id}`)}
-                    className={`flex items-center gap-2 rounded-full h-8 px-2 text-sm transition-all ${
-                      isSelected
-                        ? "bg-foreground/[0.06] dark:bg-white/[0.08] backdrop-blur-md border border-foreground/[0.08] dark:border-white/[0.1] text-foreground/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]"
-                        : "border border-transparent text-muted-foreground/40 hover:text-muted-foreground/60 hover:bg-sidebar-accent"
-                    }`}
+                    onClick={() => router.push(`/world/${selectedWorld.id}`)}
+                    className="w-full flex items-center gap-3 px-2 py-2 rounded-md bg-sidebar-accent/50 hover:bg-sidebar-accent transition-colors text-left"
                   >
-                    <IconCircleFilled size={8} className={statusColor} />
-                    <span>{name}</span>
+                    <span className="relative shrink-0 w-7 h-7 flex items-center justify-center">
+                      <span
+                        className="absolute inset-[-3px] rounded-full blur-md pointer-events-none"
+                        style={{ background: `hsl(${hue} ${sat}% 60% / 0.45)` }}
+                      />
+                      <span
+                        className="relative block w-6 h-6 rounded-full"
+                        style={{
+                          background: `radial-gradient(circle at 32% 30%, hsl(${hue} ${sat}% 78%), hsl(${hue} ${sat}% 48%) 55%, hsl(${hue} ${sat}% 22%))`,
+                          boxShadow: `0 0 0 1.5px hsl(${hue} ${sat}% 72% / 0.9), inset 0 -1px 2px rgba(0,0,0,0.35)`,
+                        }}
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium text-foreground truncate">
+                        {getWorldName(selectedWorld)}
+                      </span>
+                      <span className="block text-[10px] uppercase tracking-widest text-muted-foreground/40">
+                        {selectedWorld.status} · {selectedWorld.agents.length} agent
+                        {selectedWorld.agents.length === 1 ? "" : "s"}
+                      </span>
+                    </span>
                   </button>
                 );
-              })}
+              })()}
+
+              {/* Quick-switch: other worlds. Condensed to one line with "+N" overflow; click to expand into a masonry wrap. */}
+              {(() => {
+                const others = worlds.filter((w) => w.id !== selectedWorld.id);
+                if (others.length === 0) return null;
+
+                // Character-budget heuristic: fit as many pills on one line as reasonably possible.
+                // Each pill costs name.length + 3 (planet + padding/gap). Adjust budget if sidebar width changes.
+                const INLINE_CHAR_BUDGET = 22;
+                const inlineItems: typeof others = [];
+                const overflowItems: typeof others = [];
+                let budget = INLINE_CHAR_BUDGET;
+                for (const w of others) {
+                  const cost = getWorldName(w).length + 3;
+                  if (!worldsExpanded && budget - cost < 0 && inlineItems.length > 0) {
+                    overflowItems.push(w);
+                  } else {
+                    inlineItems.push(w);
+                    budget -= cost;
+                  }
+                }
+                if (worldsExpanded) {
+                  overflowItems.length = 0; // all visible when expanded
+                }
+
+                const renderPill = (world: (typeof others)[number]) => {
+                  const hue = hashHue(world.id);
+                  const isActive =
+                    world.status === "running" || world.status === "creating";
+                  const sat = isActive ? 70 : 15;
+                  return (
+                    <button
+                      key={world.id}
+                      onClick={() => router.push(`/world/${world.id}`)}
+                      className="group/switch shrink-0 flex items-center gap-1.5 h-6 pl-1 pr-2 rounded-md text-xs text-muted-foreground/50 hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
+                    >
+                      <span
+                        className="block w-3 h-3 rounded-full opacity-80 group-hover/switch:opacity-100 transition-opacity"
+                        style={{
+                          background: `radial-gradient(circle at 32% 30%, hsl(${hue} ${sat}% 78%), hsl(${hue} ${sat}% 48%) 55%, hsl(${hue} ${sat}% 22%))`,
+                          boxShadow: "inset 0 -1px 1px rgba(0,0,0,0.35)",
+                        }}
+                      />
+                      <span>{getWorldName(world)}</span>
+                    </button>
+                  );
+                };
+
+                const toggleBtn = (label: string) => (
+                  <button
+                    onClick={() => setWorldsExpanded((v) => !v)}
+                    className="shrink-0 flex items-center justify-center h-6 min-w-6 px-1.5 rounded-md text-[11px] font-medium text-muted-foreground/40 hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
+                    aria-label={worldsExpanded ? "Collapse worlds" : "Show all worlds"}
+                  >
+                    {label}
+                  </button>
+                );
+
+                return (
+                  <div
+                    className={`${
+                      worldsExpanded ? "flex flex-wrap" : "flex items-center overflow-hidden"
+                    } gap-1 -mx-1 px-1`}
+                  >
+                    {inlineItems.map(renderPill)}
+                    {!worldsExpanded && overflowItems.length > 0 && toggleBtn(`+${overflowItems.length}`)}
+                    {worldsExpanded && others.length > 0 && toggleBtn("Hide")}
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             <p className="px-2 py-1.5 text-xs text-muted-foreground/25">No worlds running</p>
           )}
           {selectedWorld && (
-            <SidebarMenu>
+            <SidebarMenu className="mt-3">
               <SidebarMenuItem>
                 <SidebarMenuButton isActive={pathname === `/world/${selectedWorld.id}`} onClick={() => router.push(`/world/${selectedWorld.id}`)}>
-                  <IconEyeFilled size={16} />
-                  <span>Overview</span>
+                  <IconHomeFilled size={16} />
+                  <span>Home</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -308,6 +390,19 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
       {/* ── Footer ── */}
       <SidebarFooter>
         {version?.updateAvailable && <UpgradeBanner version={version} />}
+        <div className="flex items-center gap-1 px-1.5 pb-1">
+          <a href="https://spwn.sh/docs" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="Docs">
+            <IconBookFilled size={15} />
+          </a>
+          <a href="https://github.com/jterrazz/spwn" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="GitHub">
+            <IconBrandGithubFilled size={15} />
+          </a>
+          <a href="https://github.com/jterrazz/spwn/issues/new" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="Feedback">
+            <IconAlertTriangleFilled size={15} />
+          </a>
+          <div className="flex-1" />
+          <ThemeToggle />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

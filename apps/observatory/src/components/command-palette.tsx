@@ -94,7 +94,7 @@ export function CommandPalette() {
                 >
                   <IconWorldFilled size={14} className="text-muted-foreground/50" />
                   <span>{extractName(world.id)}</span>
-                  <span className="ml-auto text-[10px] font-mono text-muted-foreground/30">
+                  <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/30">
                     {world.agents.length} agents · {world.status}
                   </span>
                 </CommandItem>
@@ -123,12 +123,12 @@ export function CommandPalette() {
                       <IconUserFilled size={14} className="text-muted-foreground/50" />
                       <span>{agent.name}</span>
                       {agentWorld && (
-                        <span className="ml-auto text-[10px] font-mono text-muted-foreground/30">
+                        <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/30">
                           in {extractName(agentWorld.id)}
                         </span>
                       )}
                       {!agentWorld && (
-                        <span className="ml-auto text-[10px] font-mono text-muted-foreground/20">
+                        <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/20">
                           limbo
                         </span>
                       )}
@@ -170,7 +170,7 @@ export function CommandPalette() {
             }}>
               <IconRocket size={14} className="text-muted-foreground/50" />
               <span>Spawn World</span>
-              <span className="ml-auto text-[10px] font-mono text-muted-foreground/20">⌘N</span>
+              <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/20">⌘N</span>
             </CommandItem>
             <CommandItem onSelect={() => {
               setOpen(false);

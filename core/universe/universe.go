@@ -29,6 +29,7 @@ import (
 
 // Re-export model types so consumers don't need to reach into internal packages.
 type World = models.World
+type Workspace = models.Workspace
 type Manifest = models.Manifest
 type PhysicsManifest = models.PhysicsManifest
 type ConstantsManifest = models.ConstantsManifest

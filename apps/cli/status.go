@@ -332,12 +332,10 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 		minWidth = headerMin
 	}
 
-	// Workspace line
+	// Workspace line (shows first workspace host path for brevity)
 	wsAbbrev := ""
-	if ww.Workspace != "" {
-		wsAbbrev = abbreviatePath(ww.Workspace)
-	}
-	if ww.Workspace != "" {
+	if primary := ww.PrimaryWorkspacePath(); primary != "" {
+		wsAbbrev = abbreviatePath(primary)
 		wsLineLen := 14 + len(wsAbbrev) + 4
 		if wsLineLen > minWidth {
 			minWidth = wsLineLen
@@ -396,8 +394,12 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 	pr("  \u2502  \u2502%s\u2502\n", strings.Repeat(" ", bubbleInner))
 
 	// Workspace
-	if ww.Workspace != "" {
-		wsLine := fmt.Sprintf("   workspace  %s", wsAbbrev)
+	if wsAbbrev != "" {
+		label := "workspace"
+		if len(ww.Workspaces) > 1 {
+			label = fmt.Sprintf("workspaces (%d)", len(ww.Workspaces))
+		}
+		wsLine := fmt.Sprintf("   %s  %s", label, wsAbbrev)
 		pr("  \u2502  \u2502%s\u2502\n", padRight(wsLine, bubbleInner))
 	}
 
