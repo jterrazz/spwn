@@ -38,22 +38,9 @@ Models mastered thinking. Spwn builds the missing half: a reality for them to li
 
 <br/>
 
-<div align="center">
-<table>
-  <tr>
-    <td align="center"><strong>Works<br/>with</strong></td>
-    <td align="center"><strong>Claude Code</strong></td>
-    <td align="center"><strong>Pi</strong></td>
-    <td align="center"><strong>Aider</strong></td>
-    <td align="center"><strong>Codex</strong></td>
-    <td align="center"><strong>OpenCode</strong></td>
-    <td align="center"><strong>Gemini</strong></td>
-  </tr>
-</table>
-
-<em>If it speaks ACP, it's hired.</em>
-
-</div>
+<p align="center">
+  <img src="doc/app-screenshot.webp" alt="Spwn Observatory — Worlds dashboard" width="720" />
+</p>
 
 <br/>
 
