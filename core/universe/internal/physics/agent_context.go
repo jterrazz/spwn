@@ -3,6 +3,8 @@ package physics
 import (
 	"fmt"
 	"strings"
+
+	"spwn.sh/core/universe/internal/models"
 )
 
 // AgentContextOpts configures the generation of an AGENT.md context file.
@@ -10,7 +12,7 @@ type AgentContextOpts struct {
 	AgentName   string
 	Tier        string // "governor", "citizen", or "npc"
 	WorldID     string
-	Workspace   string
+	Workspaces  []models.Workspace
 	Elements    []string
 	CPU         int
 	Memory      string
@@ -130,9 +132,7 @@ func generateNPCContext(b *strings.Builder, opts AgentContextOpts) {
 	}
 
 	b.WriteString("## Your World\n")
-	if opts.Workspace != "" {
-		b.WriteString(fmt.Sprintf("- Workspace: %s\n", opts.Workspace))
-	}
+	writeWorkspaces(b, opts.Workspaces)
 	if len(opts.Elements) > 0 {
 		b.WriteString(fmt.Sprintf("- Elements: %s\n", strings.Join(opts.Elements, ", ")))
 	}
@@ -204,11 +204,30 @@ func GenerateColonyContext(worldID string, agents []ColonyAgentSpec) string {
 	return b.String()
 }
 
+// writeWorkspaces renders the Workspace: line(s) of the agent context.
+// When no workspaces are mounted the world is "ephemeral" and uses the
+// container's internal /workspace.
+func writeWorkspaces(b *strings.Builder, workspaces []models.Workspace) {
+	switch len(workspaces) {
+	case 0:
+		b.WriteString("- Workspace: /workspace (ephemeral — no host mount)\n")
+	case 1:
+		b.WriteString(fmt.Sprintf("- Workspace: /workspace (host: %s)\n", workspaces[0].Path))
+	default:
+		b.WriteString("- Workspaces (rooted at /workspace):\n")
+		for _, ws := range workspaces {
+			ro := ""
+			if ws.ReadOnly {
+				ro = " (read-only)"
+			}
+			b.WriteString(fmt.Sprintf("    - /workspace/%s → host %s%s\n", ws.Name, ws.Path, ro))
+		}
+	}
+}
+
 func writeWorldInfo(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Your World\n")
-	if opts.Workspace != "" {
-		b.WriteString(fmt.Sprintf("- Workspace: %s\n", opts.Workspace))
-	}
+	writeWorkspaces(b, opts.Workspaces)
 	if len(opts.Elements) > 0 {
 		b.WriteString(fmt.Sprintf("- Elements: %s\n", strings.Join(opts.Elements, ", ")))
 	}

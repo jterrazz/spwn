@@ -16,7 +16,7 @@ var (
 	snapName      string
 	snapConfig    string
 	snapAgent     string
-	snapWorkspace string
+	snapWorkspace []string
 )
 
 func init() {
@@ -24,7 +24,7 @@ func init() {
 
 	restoreCmd.Flags().StringVarP(&snapConfig, "config", "c", "", "Named world config (default: default)")
 	restoreCmd.Flags().StringVarP(&snapAgent, "agent", "a", "default", "Agent name")
-	restoreCmd.Flags().StringVarP(&snapWorkspace, "workspace", "w", "", "Host directory to mount at /workspace")
+	restoreCmd.Flags().StringArrayVarP(&snapWorkspace, "workspace", "w", nil, `Host dir to mount. Repeatable: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 
 	Cmd.AddCommand(saveCmd)
 	Cmd.AddCommand(lsCmd)
@@ -139,10 +139,15 @@ var restoreCmd = &cobra.Command{
 		}
 		universe.ApplyDefaults(&m)
 
+		workspaces, wsErr := parseSnapWorkspaces(snapWorkspace)
+		if wsErr != nil {
+			return fmt.Errorf("parse workspace: %w", wsErr)
+		}
+
 		opts := universe.SpawnOpts{
 			ConfigName: configName,
 			AgentName:  snapAgent,
-			Workspace:  snapWorkspace,
+			Workspaces: workspaces,
 			Manifest:   m,
 			Image:      imageTag,
 		}
@@ -186,6 +191,44 @@ var rmCmd = &cobra.Command{
 }
 
 // --- helpers ---
+
+// parseSnapWorkspaces parses -w values into universe.Workspace. Mirrors the
+// parser in apps/cli/world so snap restores accept the same syntax.
+func parseSnapWorkspaces(flags []string) ([]universe.Workspace, error) {
+	if len(flags) == 0 {
+		return nil, nil
+	}
+	result := make([]universe.Workspace, 0, len(flags))
+	for i, raw := range flags {
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			continue
+		}
+		readOnly := false
+		if strings.HasSuffix(raw, ":ro") {
+			readOnly = true
+			raw = strings.TrimSuffix(raw, ":ro")
+		}
+		name := ""
+		path := raw
+		if eq := strings.Index(raw, "="); eq > 0 {
+			name = strings.TrimSpace(raw[:eq])
+			path = strings.TrimSpace(raw[eq+1:])
+		}
+		if path == "" {
+			return nil, fmt.Errorf("workspace #%d has empty path", i+1)
+		}
+		if name == "" {
+			if i == 0 && len(flags) == 1 {
+				name = "default"
+			} else {
+				name = fmt.Sprintf("w%d", i)
+			}
+		}
+		result = append(result, universe.Workspace{Name: name, Path: path, ReadOnly: readOnly})
+	}
+	return result, nil
+}
 
 func formatSize(bytes int64) string {
 	const (

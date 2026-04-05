@@ -82,23 +82,33 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 // ── Data normalization ──
 
 /** Raw world data from the Go API (may have `agent` string instead of `agents` array). */
-interface RawWorld extends Omit<World, "agent" | "agents" | "status"> {
+interface RawWorld extends Omit<World, "agent" | "agents" | "status" | "workspaces"> {
   agent?: string;
   agents?: World["agents"];
   status?: World["status"];
+  workspaces?: World["workspaces"];
+  workspace?: string; // legacy single-workspace field
 }
 
 /**
  * Normalize Go API world data to match frontend World interface.
  * Go returns `agent` (string), frontend expects `agents` (array).
+ * Also migrates legacy `workspace` string into `workspaces` array.
  */
 function normalizeWorlds(data: RawWorld[]): World[] {
-  return data.map(({ agent: _agent, ...w }) => ({
-    ...w,
-    agent: _agent ?? "",
-    status: w.status || "idle",
-    agents: w.agents ?? (_agent ? [{ name: _agent, tier: "citizen", status: w.status || "idle" }] : []),
-  }));
+  return data.map(({ agent: _agent, workspace: _legacyWs, workspaces, ...w }) => {
+    let wsList = workspaces;
+    if ((!wsList || wsList.length === 0) && _legacyWs) {
+      wsList = [{ name: "default", path: _legacyWs }];
+    }
+    return {
+      ...w,
+      agent: _agent ?? "",
+      status: w.status || "idle",
+      agents: w.agents ?? (_agent ? [{ name: _agent, tier: "citizen", status: w.status || "idle" }] : []),
+      workspaces: wsList,
+    };
+  });
 }
 
 /**

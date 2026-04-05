@@ -950,10 +950,10 @@ func TestArchitectStatusStackParsing(t *testing.T) {
 	}
 
 	tests := []struct {
-		name              string
-		content           string
-		expectedPending   float64
-		expectedCompleted float64
+		name            string
+		content         string
+		expectedPending float64
+		expectedDone    float64
 	}{
 		{
 			name:              "empty file",
@@ -1014,8 +1014,8 @@ func TestArchitectStatusStackParsing(t *testing.T) {
 			if pending != tt.expectedPending {
 				t.Errorf("tasksPending: got %v, want %v", pending, tt.expectedPending)
 			}
-			if completed != tt.expectedCompleted {
-				t.Errorf("tasksDone: got %v, want %v", completed, tt.expectedCompleted)
+			if completed != tt.expectedDone {
+				t.Errorf("tasksDone: got %v, want %v", completed, tt.expectedDone)
 			}
 		})
 	}

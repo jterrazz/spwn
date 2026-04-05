@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { AgentProfile } from "@/lib/types";
 import { apiGet, apiPut, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
+import { useRefetch } from "@/components/app-shell";
 import { streamChat } from "@/lib/stream-chat";
 import type { ActivityBlock } from "@/lib/activity-types";
 import { ActivityMessageView } from "@/components/activity-blocks";
@@ -21,6 +22,7 @@ import {
   IconDownload,
   IconUser,
   IconRocket,
+  IconPlanet,
   IconTrash,
   IconFolder,
   IconFolderOpen,
@@ -49,6 +51,11 @@ export default function AgentProfilePage() {
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "chat" | "files">("profile");
   const [showWizard, setShowWizard] = useState(false);
+  const [showDeployDialog, setShowDeployDialog] = useState(false);
+  const [deployWorkspace, setDeployWorkspace] = useState("");
+  const [deploying, setDeploying] = useState(false);
+  const [deployError, setDeployError] = useState("");
+  const refetchSidebar = useRefetch();
 
   usePageTitle(agentName, "Agent");
 
@@ -117,6 +124,36 @@ export default function AgentProfilePage() {
       showFeedback("Error: Failed to delete agent");
       setDeleting(false);
       setShowDeleteConfirm(false);
+    }
+  };
+
+  const defaultDeployWorkspace = `/tmp/spwn-${agentName}-${Math.random().toString(36).substring(2, 6)}`;
+
+  const handleDeploy = async () => {
+    setDeploying(true);
+    setDeployError("");
+    try {
+      const workspace = deployWorkspace.trim() || defaultDeployWorkspace;
+      const res = await fetch(goApiUrl("/api/worlds"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent: agentName, workspace, config: "default" }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeployError(data.error || "Failed to deploy");
+        setDeploying(false);
+        return;
+      }
+      refetchSidebar();
+      setShowDeployDialog(false);
+      if (data.id) {
+        router.push(`/world/${data.id}`);
+      }
+    } catch {
+      setDeployError("Failed to connect to API");
+      setDeploying(false);
     }
   };
 
@@ -259,6 +296,15 @@ export default function AgentProfilePage() {
           </button>
           <div className="w-px h-4 bg-white/[0.06]" />
           <button
+            onClick={() => { setDeployError(""); setShowDeployDialog(true); }}
+            disabled={actionLoading !== null || deploying}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-emerald-400/60 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors disabled:opacity-30"
+          >
+            <IconPlanet size={14} />
+            Deploy
+          </button>
+          <div className="w-px h-4 bg-white/[0.06]" />
+          <button
             onClick={() => setShowDeleteConfirm(true)}
             disabled={actionLoading !== null || deleting}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-red-400/50 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-30"
@@ -268,6 +314,59 @@ export default function AgentProfilePage() {
           </button>
         </div>
       </div>
+
+      {/* Deploy dialog */}
+      {showDeployDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !deploying && setShowDeployDialog(false)} />
+          <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
+            <h3 className="text-lg font-heading text-foreground/90 mb-1">Deploy to World</h3>
+            <p className="text-sm text-muted-foreground/50 mb-5">
+              Spawn a new world with <span className="font-mono text-foreground/70">{agentName}</span> inside.
+            </p>
+            <label className="block text-[10px] uppercase tracking-[0.15em] text-muted-foreground/40 mb-2">Workspace</label>
+            <input
+              type="text"
+              value={deployWorkspace}
+              onChange={(e) => setDeployWorkspace(e.target.value)}
+              placeholder={defaultDeployWorkspace}
+              disabled={deploying}
+              className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 font-mono placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+              onKeyDown={(e) => { if (e.key === "Enter") handleDeploy(); }}
+              autoFocus
+            />
+            {deployError && (
+              <p className="text-xs text-red-400/80 mt-3">{deployError}</p>
+            )}
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                onClick={() => setShowDeployDialog(false)}
+                disabled={deploying}
+                className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeploy}
+                disabled={deploying}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/20 transition-colors disabled:opacity-50"
+              >
+                {deploying ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-emerald-300/40 border-t-emerald-300 rounded-full animate-spin" />
+                    Deploying…
+                  </>
+                ) : (
+                  <>
+                    <IconPlanet size={14} />
+                    Deploy
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete confirmation dialog */}
       {showDeleteConfirm && (

@@ -13,10 +13,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var talkOutputFormat string
+var (
+	talkOutputFormat string
+	talkWorldID      string
+)
 
 func init() {
 	talkCmd.Flags().StringVar(&talkOutputFormat, "output-format", "", "Output format: text (default) or stream-json")
+	talkCmd.Flags().StringVar(&talkWorldID, "world", "", "World ID to target (disambiguates when the same agent exists in multiple worlds)")
 	Cmd.AddCommand(talkCmd)
 }
 
@@ -41,8 +45,10 @@ If no message is provided, opens an interactive Claude session inside the contai
 			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent new %s", name, name)
 		}
 
-		// Find which world this agent is in
-		containerID, worldID, err := findAgentContainer(name)
+		// Find which world this agent is in. When --world is set, pin to that
+		// world so we don't accidentally route to a different container that
+		// happens to share the same agent name.
+		containerID, worldID, err := findAgentContainer(name, talkWorldID)
 		if err != nil {
 			return err
 		}
@@ -125,9 +131,15 @@ func isContainerRunning(containerID string) bool {
 	return strings.TrimSpace(string(out)) == "true"
 }
 
-// findAgentContainer looks up state.json to find a running world
-// that contains the given agent. Verifies the container is actually alive.
-func findAgentContainer(agentName string) (string, string, error) {
+// findAgentContainer looks up state.json to find a running world that contains
+// the given agent. Verifies the container is actually alive.
+//
+// When worldID is non-empty, only that specific world is considered — this
+// disambiguates when the same agent name exists in multiple worlds (e.g.
+// talking to "qa" from the "The Test" world must not route to the "Matrix"
+// world's qa container). When worldID is empty, returns the first running
+// world that contains the agent.
+func findAgentContainer(agentName, worldID string) (string, string, error) {
 	ctx := context.Background()
 
 	arc, err := universe.NewArchitectFromEnv()
@@ -143,30 +155,59 @@ func findAgentContainer(agentName string) (string, string, error) {
 		return "", "", fmt.Errorf("cannot list worlds: %w", err)
 	}
 
-	// Check the primary agent field, then the agents array
-	for _, u := range worlds {
-		if u.ContainerID == "" {
-			continue
-		}
+	return routeAgentToWorld(worlds, agentName, worldID, isContainerRunning)
+}
 
-		// Verify the container is actually running (not just in state.json)
-		if !isContainerRunning(u.ContainerID) {
-			continue
+// worldHasAgent returns true when the given agent name matches the world's
+// primary agent or any entry in its agents slice.
+func worldHasAgent(u universe.World, agentName string) bool {
+	if u.Agent == agentName {
+		return true
+	}
+	for _, a := range u.Agents {
+		if a.Name == agentName {
+			return true
 		}
+	}
+	return false
+}
 
-		// Check primary agent
-		if u.Agent == agentName {
+// routeAgentToWorld contains the pure routing logic used by findAgentContainer.
+// Split out from the Docker-calling outer function so it can be unit-tested.
+// isRunning is a predicate that tells whether a container is alive.
+func routeAgentToWorld(
+	worlds []universe.World,
+	agentName, worldID string,
+	isRunning func(containerID string) bool,
+) (string, string, error) {
+	// Pinned lookup: only the specified world is considered. This exists to
+	// prevent cross-world bleed when multiple worlds share the same agent name.
+	if worldID != "" {
+		for _, u := range worlds {
+			if u.ID != worldID {
+				continue
+			}
+			if u.ContainerID == "" {
+				return "", "", fmt.Errorf("world %s has no container", u.ID)
+			}
+			if !isRunning(u.ContainerID) {
+				return "", "", fmt.Errorf("world %s is not running", u.ID)
+			}
+			if !worldHasAgent(u, agentName) {
+				return "", "", fmt.Errorf("world %s does not contain agent %q", u.ID, agentName)
+			}
 			return u.ContainerID, u.ID, nil
 		}
+		return "", "", fmt.Errorf("world %q not found", worldID)
+	}
 
-		// Check multi-agent records
-		for _, a := range u.Agents {
-			if a.Name == agentName {
-				if u.ContainerID == "" {
-					return "", "", fmt.Errorf("world %s has no container", u.ID)
-				}
-				return u.ContainerID, u.ID, nil
-			}
+	// Unpinned lookup: first running world that contains the agent.
+	for _, u := range worlds {
+		if u.ContainerID == "" || !isRunning(u.ContainerID) {
+			continue
+		}
+		if worldHasAgent(u, agentName) {
+			return u.ContainerID, u.ID, nil
 		}
 	}
 

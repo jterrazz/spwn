@@ -20,6 +20,7 @@ import (
 	"spwn.sh/core/foundation/auth"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/manifest"
+	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/state"
 
 	"gopkg.in/yaml.v3"
@@ -44,7 +45,7 @@ func New(s *state.Store, arch *architect.Architect, addr string) *Server {
 func cors(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
@@ -94,6 +95,7 @@ func (s *Server) Start() error {
 
 	// --- WRITE endpoints ---
 	mux.HandleFunc("POST /api/worlds", cors(s.handleCreateWorld))
+	mux.HandleFunc("PATCH /api/worlds/{id}", cors(s.handleRenameWorld))
 	mux.HandleFunc("DELETE /api/worlds/{id}", cors(s.handleDestroyWorld))
 	mux.HandleFunc("POST /api/worlds/{id}/snapshot", cors(s.handleSnapshot))
 	mux.HandleFunc("POST /api/agents", cors(s.handleCreateAgent))
@@ -530,20 +532,40 @@ func (s *Server) handleWorldLogs(w http.ResponseWriter, r *http.Request) {
 // WRITE handlers
 // ============================================================
 
+// createWorldRequest is the JSON body accepted by POST /api/worlds.
+// Exported at package scope so its JSON shape can be unit-tested — a stale
+// binary once silently dropped the `workspaces` field when the struct had
+// only the legacy `workspace` string, spawning empty worlds.
+type createWorldRequest struct {
+	ConfigName string             `json:"config"`
+	Name       string             `json:"name"`
+	AgentName  string             `json:"agent"`
+	Workspaces []models.Workspace `json:"workspaces"`
+	// Legacy single-workspace field; accepted for backward compatibility.
+	Workspace string `json:"workspace"`
+}
+
+// resolveWorkspaces returns the effective workspace list, migrating the
+// legacy single-workspace field into the new slice when the slice is empty.
+func (req createWorldRequest) resolveWorkspaces() []models.Workspace {
+	if len(req.Workspaces) == 0 && req.Workspace != "" {
+		return []models.Workspace{{Name: "default", Path: req.Workspace}}
+	}
+	return req.Workspaces
+}
+
 func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 	if !s.requireArch(w) {
 		return
 	}
 
-	var body struct {
-		ConfigName string `json:"config"`
-		AgentName  string `json:"agent"`
-		Workspace  string `json:"workspace"`
-	}
+	var body createWorldRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
 	}
+
+	workspaces := body.resolveWorkspaces()
 
 	// Load manifest with defaults (same as CLI does)
 	cfgName := body.ConfigName
@@ -559,8 +581,9 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 
 	result, err := s.arch.Spawn(r.Context(), architect.SpawnOpts{
 		ConfigName: cfgName,
+		Name:       body.Name,
 		AgentName:  body.AgentName,
-		Workspace:  body.Workspace,
+		Workspaces: workspaces,
 		Manifest:   m,
 	})
 	if err != nil {
@@ -570,6 +593,38 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	jsonOK(w, result)
+}
+
+func (s *Server) handleRenameWorld(w http.ResponseWriter, r *http.Request) {
+	if !s.requireArch(w) {
+		return
+	}
+
+	worldID := r.PathValue("id")
+	if worldID == "" {
+		jsonError(w, "world id is required", 400)
+		return
+	}
+
+	var body struct {
+		Name string `json:"name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+
+	if err := s.arch.Rename(r.Context(), worldID, body.Name); err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+
+	world, err := s.arch.Inspect(r.Context(), worldID)
+	if err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	jsonOK(w, world)
 }
 
 func (s *Server) handleDestroyWorld(w http.ResponseWriter, r *http.Request) {
@@ -739,8 +794,11 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Execute spwn agent talk with streaming JSON output
+	// Execute spwn agent talk with streaming JSON output, pinned to the
+	// world from the URL path so the same agent name in other worlds
+	// doesn't capture the request.
 	cmd := exec.CommandContext(r.Context(), "spwn", "agent", "talk", agentName, body.Message,
+		"--world", worldID,
 		"--output-format", "stream-json", "--verbose")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

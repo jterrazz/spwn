@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { World } from "@/lib/types";
+import { getWorkspaceSummary, getWorldName, type World } from "@/lib/types";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { streamChat } from "@/lib/stream-chat";
 import type { ActivityBlock } from "@/lib/activity-types";
@@ -19,6 +19,7 @@ import {
   IconPlus,
   IconSend,
   IconMessageCircle,
+  IconPencil,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
@@ -26,11 +27,6 @@ import { STATUS_DOT, STATUS_BADGE, TIER_BADGE } from "@/lib/status";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useToast } from "@/components/toast-provider";
 import { useRefetch } from "@/components/app-shell";
-
-function extractName(id: string): string {
-  const parts = id.split("-");
-  return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
-}
 
 function timeAgo(iso: string): string {
   const d = Date.now() - new Date(iso).getTime();
@@ -73,10 +69,13 @@ export default function WorldDashboard() {
   const [newAgentName, setNewAgentName] = useState("");
   const [newAgentTier, setNewAgentTier] = useState("citizen");
   const [showNewAgent, setShowNewAgent] = useState(false);
+  const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const [renameInput, setRenameInput] = useState("");
+  const [renaming, setRenaming] = useState(false);
 
   const { toast } = useToast();
   const refetchSidebar = useRefetch();
-  const worldName = world ? extractName(world.id) : null;
+  const worldName = world ? getWorldName(world) : null;
   usePageTitle(worldName);
 
   const fetchWorld = useCallback(() => {
@@ -115,6 +114,30 @@ export default function WorldDashboard() {
       return false;
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleRename = async () => {
+    setRenaming(true);
+    try {
+      const res = await fetch(goApiUrl(`/api/worlds/${worldId}`), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: renameInput.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showFeedback(`Error: ${data.error || "Failed to rename"}`);
+        setRenaming(false);
+        return;
+      }
+      fetchWorld();
+      refetchSidebar();
+      setShowRenameDialog(false);
+    } catch {
+      showFeedback("Error: Failed to connect to API");
+    } finally {
+      setRenaming(false);
     }
   };
 
@@ -223,7 +246,7 @@ export default function WorldDashboard() {
     );
   }
 
-  const name = extractName(world.id);
+  const name = getWorldName(world);
 
   return (
     <div className="flex h-[calc(100vh-1px)] overflow-hidden">
@@ -231,7 +254,7 @@ export default function WorldDashboard() {
       <div className="flex-1 overflow-y-auto px-6 md:px-8 pt-6 md:pt-8 pb-12 space-y-6 md:space-y-8">
         <PageHeader
           title={name}
-          description={`${world.config} · ${timeAgo(world.created_at)}${world.workspace ? " · " + world.workspace : ""}`}
+          description={`${world.config} · ${timeAgo(world.created_at)} · ${getWorkspaceSummary(world)}`}
           actions={
             <div className="flex items-center gap-1">
             <button
@@ -276,6 +299,14 @@ export default function WorldDashboard() {
             </button>
             <div className="w-px h-5 bg-border/20 mx-1" />
             <button
+              onClick={() => { setRenameInput(world.name ?? ""); setShowRenameDialog(true); }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+              title="Rename World"
+            >
+              <IconPencil size={15} />
+              <span className="hidden sm:inline">Rename</span>
+            </button>
+            <button
               onClick={() => setShowDestroyConfirm(true)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors"
               title="Destroy World"
@@ -286,6 +317,52 @@ export default function WorldDashboard() {
           </div>
           }
         />
+
+        {/* Rename dialog */}
+        {showRenameDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !renaming && setShowRenameDialog(false)} />
+            <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
+              <h3 className="text-lg font-heading text-foreground/90 mb-1">Rename World</h3>
+              <p className="text-sm text-muted-foreground/50 mb-5">
+                Leave empty to fall back to the auto-generated name (<span className="font-mono">{world.id.split("-")[1] ?? world.id}</span>).
+              </p>
+              <input
+                type="text"
+                value={renameInput}
+                onChange={(e) => setRenameInput(e.target.value)}
+                placeholder="My Project"
+                disabled={renaming}
+                className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+                onKeyDown={(e) => { if (e.key === "Enter") handleRename(); }}
+                autoFocus
+              />
+              <div className="flex gap-3 justify-end mt-6">
+                <button
+                  onClick={() => setShowRenameDialog(false)}
+                  disabled={renaming}
+                  className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRename}
+                  disabled={renaming}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-white/[0.1] text-foreground/90 hover:bg-white/[0.16] border border-white/[0.08] transition-colors disabled:opacity-50"
+                >
+                  {renaming ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/80 rounded-full animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    "Save"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Destroy confirmation */}
         {showDestroyConfirm && (

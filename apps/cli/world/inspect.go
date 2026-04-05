@@ -65,10 +65,22 @@ var inspectCmd = &cobra.Command{
 			u.Manifest.Physics.Laws.MaxProcesses,
 		))
 
-		if u.Workspace != "" || u.MindPath != "" {
+		if len(u.Workspaces) > 0 || u.MindPath != "" {
 			s.Blank()
-			if u.Workspace != "" {
-				s.Info("Workspace:", u.Workspace+" → /workspace")
+			switch len(u.Workspaces) {
+			case 0:
+				// ephemeral — no workspace line
+			case 1:
+				s.Info("Workspace:", u.Workspaces[0].Path+" → /workspace")
+			default:
+				s.Info("Workspaces:", fmt.Sprintf("%d mounted at /workspaces/*", len(u.Workspaces)))
+				for _, ws := range u.Workspaces {
+					ro := ""
+					if ws.ReadOnly {
+						ro = " (ro)"
+					}
+					s.Info("  "+ws.Name+":", ws.Path+" → /workspaces/"+ws.Name+ro)
+				}
 			}
 			if u.MindPath != "" {
 				s.Info("Mind:", u.MindPath+" → /mind")

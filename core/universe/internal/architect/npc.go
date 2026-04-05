@@ -31,11 +31,11 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 
 	// Generate AGENT.md for NPC (minimal context)
 	agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
-		Tier:      "npc",
-		WorldID:   worldID,
-		NPCTask:   task,
-		Workspace: u.Workspace,
-		Elements:  u.Manifest.Elements,
+		Tier:       "npc",
+		WorldID:    worldID,
+		NPCTask:    task,
+		Workspaces: u.Workspaces,
+		Elements:   u.Manifest.Elements,
 	})
 	if err := a.backend.CopyTo(ctx, u.ContainerID, "world/AGENT.md", []byte(agentCtx)); err != nil {
 		// Non-fatal: log warning but continue

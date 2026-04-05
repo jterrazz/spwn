@@ -14,10 +14,11 @@ import (
 )
 
 var (
-	spawnConfig    string
-	spawnAgent     string
-	spawnWorkspace string
-	spawnWorld     string
+	spawnConfig     string
+	spawnName       string
+	spawnAgent      string
+	spawnWorkspaces []string
+	spawnWorld      string
 	spawnInteractive    bool
 	spawnNoAgent   bool
 	spawnGate      []string
@@ -27,8 +28,9 @@ var (
 
 func init() {
 	Cmd.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named world config (default: default)")
+	Cmd.Flags().StringVarP(&spawnName, "name", "n", "", "Display name for the world")
 	Cmd.Flags().StringVarP(&spawnAgent, "agent", "a", "default", "Agent name")
-	Cmd.Flags().StringVarP(&spawnWorkspace, "workspace", "w", "", "Host directory to mount at /workspace")
+	Cmd.Flags().StringArrayVarP(&spawnWorkspaces, "workspace", "w", nil, `Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	Cmd.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Attach to agent interactively")
 	Cmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
@@ -58,6 +60,7 @@ func worldHelp(cmd *cobra.Command, args []string) {
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "list", Desc: "List active worlds"},
 				{Name: "inspect <id>", Desc: "Show world details and physics"},
+				{Name: "rename <id> <name>", Desc: "Rename a world (empty name clears)"},
 				{Name: "destroy <id>", Desc: "Destroy a world"},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
@@ -72,7 +75,8 @@ func worldHelp(cmd *cobra.Command, args []string) {
 {Title: "Spawn Flags", Commands: []ui.HelpEntry{
 				{Name: "-a, --agent <name>", Desc: "Agent name (default: default)"},
 				{Name: "-c, --config <name>", Desc: "Named world config"},
-				{Name: "-w, --workspace <dir>", Desc: "Host directory to mount"},
+				{Name: "-n, --name <name>", Desc: "Display name for the world"},
+				{Name: "-w, --workspace <[name=]path[:ro]>", Desc: "Host dir to mount (repeatable; omit for ephemeral)"},
 				{Name: "-i, --interactive", Desc: "Attach to agent interactively"},
 				{Name: "--no-agent", Desc: "Create world without agent"},
 				{Name: "--governor <name>", Desc: "Governor agent"},
@@ -94,10 +98,12 @@ var Cmd = &cobra.Command{
 
 Creates an isolated Docker environment and brings an agent to life inside it.
 Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
-	Example: `  spwn world -w .                    Spawn with current directory
-  spwn world -c acme -w ~/project   Named config + workspace
-  spwn world --governor morpheus     With a governor agent
-  spwn world --no-agent              Empty world (no agent)`,
+	Example: `  spwn world -w .                         Spawn with current directory
+  spwn world -w web=./frontend -w api=./backend   Multi-workspace
+  spwn world -w docs=./docs:ro -w code=./src      Read-only reference
+  spwn world --name "Big Refactor"        Ephemeral (no host mount)
+  spwn world --governor morpheus          With a governor agent
+  spwn world --no-agent                   Empty world (no agent)`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// If no flags set at all, show help instead of spawning with defaults
 		if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("agent") &&
@@ -180,10 +186,17 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 		s.Done("Docker connected", "")
 		s.Start("Validating agent...")
 
+		workspaces, wsErr := parseWorkspaceFlags(spawnWorkspaces)
+		if wsErr != nil {
+			return s.FailHint("Invalid workspace", wsErr,
+				`Expected: "path", "name=path", or "name=path:ro"`)
+		}
+
 		result, err := arc.Spawn(ctx, universe.SpawnOpts{
 			ConfigName: configName,
+			Name:       spawnName,
 			AgentName:  agentName,
-			Workspace:  spawnWorkspace,
+			Workspaces: workspaces,
 			Manifest:   m,
 			Agents:     agents,
 			LogWriter:  s.Writer(),
@@ -319,6 +332,53 @@ func parseGateFlag(s string) (gate.Bridge, error) {
 	}
 
 	return bridge, nil
+}
+
+// parseWorkspaceFlags parses a list of "-w" values into universe.Workspace.
+// Accepted forms:
+//   "/host/path"             → {Name: "default" or "wN", Path: "/host/path"}
+//   "name=/host/path"        → {Name: "name", Path: "/host/path"}
+//   "name=/host/path:ro"     → read-only
+// Empty input returns a nil slice (ephemeral world — no mounts).
+func parseWorkspaceFlags(flags []string) ([]universe.Workspace, error) {
+	if len(flags) == 0 {
+		return nil, nil
+	}
+	result := make([]universe.Workspace, 0, len(flags))
+	for i, raw := range flags {
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			continue
+		}
+
+		// Strip optional :ro suffix. Be careful not to confuse with a colon inside the path
+		// — we only accept :ro at the very end.
+		readOnly := false
+		if strings.HasSuffix(raw, ":ro") {
+			readOnly = true
+			raw = strings.TrimSuffix(raw, ":ro")
+		}
+
+		// name=path or bare path
+		name := ""
+		path := raw
+		if eq := strings.Index(raw, "="); eq > 0 {
+			name = strings.TrimSpace(raw[:eq])
+			path = strings.TrimSpace(raw[eq+1:])
+		}
+		if path == "" {
+			return nil, fmt.Errorf("workspace #%d has empty path", i+1)
+		}
+		if name == "" {
+			if i == 0 && len(flags) == 1 {
+				name = "default"
+			} else {
+				name = fmt.Sprintf("w%d", i)
+			}
+		}
+		result = append(result, universe.Workspace{Name: name, Path: path, ReadOnly: readOnly})
+	}
+	return result, nil
 }
 
 // spawnHint returns an actionable hint for common spawn errors.

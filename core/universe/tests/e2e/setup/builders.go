@@ -22,7 +22,7 @@ type SpawnBuilder struct {
 	tc            *TestContext
 	configName    string
 	agentName     string
-	workspace     string
+	workspaces    []universe.Workspace
 	yamlConfig    string
 	noAgent       bool
 	detach        bool
@@ -62,7 +62,19 @@ func (b *SpawnBuilder) WithAgent(name string) *SpawnBuilder {
 }
 
 func (b *SpawnBuilder) WithWorkspace(path string) *SpawnBuilder {
-	b.workspace = path
+	b.workspaces = append(b.workspaces, universe.Workspace{Name: "default", Path: path})
+	return b
+}
+
+// WithNamedWorkspace adds a workspace with a specific name (use for multi-workspace tests).
+func (b *SpawnBuilder) WithNamedWorkspace(name, path string) *SpawnBuilder {
+	b.workspaces = append(b.workspaces, universe.Workspace{Name: name, Path: path})
+	return b
+}
+
+// WithReadOnlyWorkspace adds a read-only workspace.
+func (b *SpawnBuilder) WithReadOnlyWorkspace(name, path string) *SpawnBuilder {
+	b.workspaces = append(b.workspaces, universe.Workspace{Name: name, Path: path, ReadOnly: true})
 	return b
 }
 
@@ -114,12 +126,12 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 		opts.AgentName = b.agentName
 	}
 
-	if b.workspace != "" {
-		abs, err := filepath.Abs(b.workspace)
+	for _, ws := range b.workspaces {
+		abs, err := filepath.Abs(ws.Path)
 		if err != nil {
 			b.tc.T.Fatalf("Failed to resolve workspace: %v", err)
 		}
-		opts.Workspace = abs
+		opts.Workspaces = append(opts.Workspaces, universe.Workspace{Name: ws.Name, Path: abs, ReadOnly: ws.ReadOnly})
 	}
 
 	result, err := b.tc.Arc.Spawn(context.Background(), opts)
@@ -171,9 +183,9 @@ func (b *SpawnBuilder) ExecuteExpectError(substring string) {
 		opts.AgentName = b.agentName
 	}
 
-	if b.workspace != "" {
-		abs, _ := filepath.Abs(b.workspace)
-		opts.Workspace = abs
+	for _, ws := range b.workspaces {
+		abs, _ := filepath.Abs(ws.Path)
+		opts.Workspaces = append(opts.Workspaces, universe.Workspace{Name: ws.Name, Path: abs, ReadOnly: ws.ReadOnly})
 	}
 
 	result, err := b.tc.Arc.Spawn(context.Background(), opts)

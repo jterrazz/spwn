@@ -3,6 +3,8 @@ package physics
 import (
 	"strings"
 	"testing"
+
+	"spwn.sh/core/universe/internal/models"
 )
 
 func TestAgentsBookContent(t *testing.T) {
@@ -11,7 +13,7 @@ func TestAgentsBookContent(t *testing.T) {
 		AgentName: "test-agent",
 		Tier:      "citizen",
 		WorldID:   "w-test-12345",
-		Workspace: "/workspace",
+		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
 		Elements:  []string{"bash", "git"},
 		CPU:       2,
 		Memory:    "4g",
@@ -55,7 +57,7 @@ func TestSystemSkillsExist(t *testing.T) {
 		AgentName: "neo",
 		Tier:      "citizen",
 		WorldID:   "w-test-99999",
-		Workspace: "/workspace",
+		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
 		Elements:  []string{"bash"},
 		Governor:  "morpheus",
 		OtherAgents: []AgentInfo{

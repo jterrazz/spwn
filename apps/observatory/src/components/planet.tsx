@@ -2,7 +2,7 @@
 
 import createGlobe from "cobe";
 import { useEffect, useRef, useState } from "react";
-import type { World } from "@/lib/types";
+import { getWorldName, type World } from "@/lib/types";
 
 interface PlanetProps {
   world: World;
@@ -14,40 +14,14 @@ interface PlanetProps {
   hideLabels?: boolean;
 }
 
-const STATUS_CONFIG: Record<
-  string,
-  { base: [number, number, number]; glow: [number, number, number]; marker: [number, number, number]; brightness: number }
-> = {
-  running: {
-    base: [0.35, 0.4, 0.35],
-    glow: [0.15, 0.35, 0.15],
-    marker: [0.5, 1, 0.5],
-    brightness: 10,
-  },
-  idle: {
-    base: [0.4, 0.35, 0.25],
-    glow: [0.3, 0.25, 0.1],
-    marker: [1, 0.85, 0.4],
-    brightness: 8,
-  },
-  error: {
-    base: [0.4, 0.15, 0.15],
-    glow: [0.35, 0.1, 0.1],
-    marker: [1, 0.4, 0.4],
-    brightness: 7,
-  },
-  stopped: {
-    base: [0.28, 0.28, 0.28],
-    glow: [0.15, 0.15, 0.15],
-    marker: [0.6, 0.6, 0.6],
-    brightness: 5,
-  },
-  creating: {
-    base: [0.25, 0.25, 0.4],
-    glow: [0.15, 0.2, 0.35],
-    marker: [0.5, 0.7, 1],
-    brightness: 8,
-  },
+// Status → planet "life signal": saturation (how vivid the hue renders) + brightness tier.
+// We keep a semantic bottom-dot color independent so status is still readable at a glance.
+const STATUS_SAT: Record<string, number> = {
+  running: 100,
+  creating: 100,
+  idle: 80,
+  error: 100,
+  stopped: 20,
 };
 
 const STATUS_DOT_CSS: Record<string, string> = {
@@ -55,8 +29,43 @@ const STATUS_DOT_CSS: Record<string, string> = {
   idle: "#eab308",
   error: "#ef4444",
   stopped: "rgba(255,255,255,0.2)",
-  creating: "#60a5fa",
+  creating: "rgba(255,255,255,0.95)",
 };
+
+// Deterministic hue from world id — matches the sidebar's hashHue() so the same world reads as the same planet everywhere.
+function hashHue(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h % 360;
+}
+
+// HSL → RGB normalized to [0,1] (cobe expects 0-1 tuples).
+function hslToRgb01(h: number, s: number, l: number): [number, number, number] {
+  const sN = s / 100;
+  const lN = l / 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = sN * Math.min(lN, 1 - lN);
+  const f = (n: number) => lN - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return [f(0), f(8), f(4)];
+}
+
+function getPlanetConfig(worldId: string, status: string) {
+  // Error worlds snap to red hue so they stand out regardless of their id hash.
+  const hue = status === "error" ? 0 : hashHue(worldId);
+  const sat = STATUS_SAT[status] ?? 20;
+  return {
+    hue,
+    sat,
+    // Key: glowColor must be DARKER than baseColor, otherwise cobe renders an inside-out halo
+    // (bright rim, dark center). We want a bright solid sphere with the halo coming from the outer
+    // CSS drop-shadow instead — matching the flat sidebar icon's look.
+    base: hslToRgb01(hue, sat, 30),
+    glow: hslToRgb01(hue, sat, 12),
+    marker: hslToRgb01(hue, sat, 92),
+    // CSS color for the outer drop-shadow halo — matches the sidebar hero glow.
+    haloCss: `hsl(${hue}, ${sat}%, 62%)`,
+  };
+}
 
 const TIER_ICON: Record<string, string> = {
   governor: "♛",
@@ -140,8 +149,8 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const phiRef = useRef(hashCode(world.id) % 628 / 100); // unique starting angle
-  const config = STATUS_CONFIG[world.status] ?? STATUS_CONFIG.stopped;
-  const name = extractName(world.id);
+  const config = getPlanetConfig(world.id, world.status);
+  const name = getWorldName(world);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -178,7 +187,7 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
       phi: phiRef.current,
       theta: 0.15 + index * 0.3,
       dark: 1,
-      diffuse: 2.0 + (hashCode(world.id) % 10) * 0.1,
+      diffuse: 1.3 + (hashCode(world.id) % 10) * 0.05,
       mapSamples: 0,        // disable Earth map entirely
       mapBrightness: 0,
       mapBaseBrightness: 0,
@@ -210,8 +219,8 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
         ? 0.15 + index * 0.3 + Math.sin(frame * 0.008) * 0.12
         : 0.15 + index * 0.3;
       const diffuse = sel
-        ? 2.5 + Math.sin(frame * 0.015) * 0.5
-        : 2.0 + (hashCode(world.id) % 10) * 0.1;
+        ? 1.6 + Math.sin(frame * 0.015) * 0.3
+        : 1.3 + (hashCode(world.id) % 10) * 0.05;
       const scale = sel
         ? 1.0 + Math.sin(frame * 0.012) * 0.015
         : 1.0;
@@ -267,8 +276,8 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
           height: size,
           transform: `scale(${isSelected ? (isMobile ? 1.3 : (compact ? 1.5 : 1.8)) : (isMobile ? 0.7 : (compact ? 1.15 : 0.85))})`,
           filter: isSelected
-            ? `brightness(1.2) drop-shadow(0 0 28px ${STATUS_DOT_CSS[world.status]}60)`
-            : `brightness(1) drop-shadow(0 0 12px ${STATUS_DOT_CSS[world.status]}30)`,
+            ? `brightness(1.2) drop-shadow(0 0 28px hsl(${config.hue}, ${config.sat}%, 62%))`
+            : `brightness(1) drop-shadow(0 0 12px hsla(${config.hue}, ${config.sat}%, 60%, 0.45))`,
           transition: "transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
@@ -276,6 +285,15 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
           ref={canvasRef}
           style={{ width: size, height: size }}
         />
+        {world.id === "w-new-00000" && (
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.14] bg-black/25 backdrop-blur-sm text-white/90 shadow-[0_6px_20px_rgba(0,0,0,0.22)]">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 4.5V15.5M4.5 10H15.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+        )}
         {world.agents.map((a) => (
           <div
             key={`glow-${a.name}`}

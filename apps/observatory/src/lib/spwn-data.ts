@@ -43,7 +43,8 @@ interface RawWorld {
   agent_id?: string;
   backend?: string;
   container_id?: string;
-  workspace?: string;
+  workspaces?: { name: string; path: string; readonly?: boolean }[];
+  workspace?: string; // legacy
   mind_path?: string;
   gate_dir?: string;
   status: string;
@@ -69,6 +70,12 @@ function rawToWorld(raw: RawWorld): World {
     });
   }
 
+  // Prefer the new `workspaces` array; migrate legacy `workspace` string.
+  let workspaces = raw.workspaces;
+  if ((!workspaces || workspaces.length === 0) && raw.workspace) {
+    workspaces = [{ name: "default", path: raw.workspace }];
+  }
+
   return {
     id: raw.id,
     config: raw.config || "default",
@@ -76,7 +83,7 @@ function rawToWorld(raw: RawWorld): World {
     agents,
     status: raw.status as World["status"],
     created_at: raw.created_at,
-    workspace: raw.workspace || "",
+    workspaces,
   };
 }
 

@@ -32,6 +32,15 @@ type LawsManifest struct {
 	MaxProcesses int `yaml:"max-processes"`
 }
 
+// Workspace is a single host directory mounted into a world. A world may have
+// zero or more workspaces. When a world has zero workspaces it is "ephemeral"
+// and works inside the image's pre-baked /workspace dir.
+type Workspace struct {
+	Name     string `json:"name"`              // Mount subdirectory under /workspaces (e.g. "web", "api").
+	Path     string `json:"path"`              // Absolute host path.
+	ReadOnly bool   `json:"readonly,omitempty"`
+}
+
 // AgentRecord represents a single agent within a universe colony.
 type AgentRecord struct {
 	Name    string `json:"name"`
@@ -43,11 +52,15 @@ type AgentRecord struct {
 // World represents a running or stopped universe instance.
 type World struct {
 	ID          string        `json:"id"`
+	Name        string        `json:"name,omitempty"` // Optional display name; when empty UIs fall back to the ID.
 	Config      string        `json:"config"`
 	Agent       string        `json:"agent,omitempty"`
 	AgentID     string        `json:"agent_id,omitempty"`
 	Backend     string        `json:"backend"`
 	ContainerID string        `json:"container_id"`
+	Workspaces  []Workspace   `json:"workspaces,omitempty"`
+	// Legacy single-workspace field. Retained so old state files unmarshal cleanly.
+	// The state store migrates this into Workspaces on load and clears it.
 	Workspace   string        `json:"workspace,omitempty"`
 	MindPath    string        `json:"mind_path,omitempty"`
 	GateDir     string        `json:"gate_dir,omitempty"`
@@ -55,6 +68,15 @@ type World struct {
 	CreatedAt   time.Time     `json:"created_at"`
 	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support
 	Manifest    Manifest      `json:"manifest,omitempty"`
+}
+
+// PrimaryWorkspacePath returns the first workspace's host path, or empty if
+// the world is ephemeral (no host mounts).
+func (w World) PrimaryWorkspacePath() string {
+	if len(w.Workspaces) == 0 {
+		return ""
+	}
+	return w.Workspaces[0].Path
 }
 
 // Status tracks the lifecycle state of a universe.
