@@ -16,14 +16,14 @@ import {
   IconX,
   IconAlertTriangle,
   IconRestore,
-  IconPlus,
   IconSend,
   IconMessageCircle,
   IconPencil,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
-import { STATUS_DOT, STATUS_BADGE, TIER_BADGE } from "@/lib/status";
+import { WorldPlanet } from "@/components/world-planet";
+import { STATUS_BADGE, TIER_BADGE } from "@/lib/status";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useToast } from "@/components/toast-provider";
 import { useRefetch } from "@/components/app-shell";
@@ -67,8 +67,7 @@ export default function WorldDashboard() {
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [newAgentName, setNewAgentName] = useState("");
-  const [newAgentTier, setNewAgentTier] = useState("citizen");
-  const [showNewAgent, setShowNewAgent] = useState(false);
+  const [availableAgents, setAvailableAgents] = useState<{ name: string }[]>([]);
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [renameInput, setRenameInput] = useState("");
   const [renaming, setRenaming] = useState(false);
@@ -96,6 +95,14 @@ export default function WorldDashboard() {
     const interval = setInterval(fetchWorld, 5000);
     return () => clearInterval(interval);
   }, [fetchWorld]);
+
+  // Fetch every agent so we can show a checkable list of all of them,
+  // marking which ones are already deployed to this world.
+  useEffect(() => {
+    apiGet<{ name: string }[]>("/api/agents")
+      .then((a) => setAvailableAgents(a ?? []))
+      .catch(() => {});
+  }, []);
 
   const callAction = async (goPath: string, body?: unknown) => {
     setActionLoading(goPath);
@@ -253,6 +260,7 @@ export default function WorldDashboard() {
       {/* Main content */}
       <div className="flex-1 overflow-y-auto px-6 md:px-8 pt-6 md:pt-8 pb-12 space-y-6 md:space-y-8">
         <PageHeader
+          leading={<WorldPlanet world={world} size="lg" />}
           title={name}
           description={`${world.config} · ${timeAgo(world.created_at)} · ${getWorkspaceSummary(world)}`}
           actions={
@@ -424,33 +432,6 @@ export default function WorldDashboard() {
           <StatCard label="Uptime" value={timeAgo(world.created_at)} />
         </div>
 
-        {/* Physics / Manifest Info */}
-        {world.manifest && (
-          <div>
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Physics</h2>
-            <div className="flex gap-3 flex-wrap">
-              {world.manifest.cpu && (
-                <div className="glass-subtle px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-0.5">CPU</p>
-                  <p className="text-sm font-mono text-foreground/70">{world.manifest.cpu}</p>
-                </div>
-              )}
-              {world.manifest.memory && (
-                <div className="glass-subtle px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-0.5">Memory</p>
-                  <p className="text-sm font-mono text-foreground/70">{world.manifest.memory}</p>
-                </div>
-              )}
-              {world.manifest.timeout && (
-                <div className="glass-subtle px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-0.5">Timeout</p>
-                  <p className="text-sm font-mono text-foreground/70">{world.manifest.timeout}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Elements */}
         {world.manifest?.elements && world.manifest.elements.length > 0 && (
           <div>
@@ -468,94 +449,112 @@ export default function WorldDashboard() {
           </div>
         )}
 
-        {/* Agents */}
+        {/* Agents — checkable list of all agents, marking the ones
+            deployed here. Clicking a deployed agent navigates to its
+            detail page; the "+ Add" row creates a fresh agent. */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">Agents</h2>
-            <button
-              onClick={() => setShowNewAgent(!showNewAgent)}
-              className="flex items-center gap-1 text-[11px] text-muted-foreground/40 hover:text-foreground/60 hover:bg-white/[0.04] px-2.5 py-1.5 rounded-lg transition-colors"
-            >
-              <IconPlus size={13} />
-              New Agent
-            </button>
-          </div>
-
-          {/* New Agent form */}
-          {showNewAgent && (
-            <div className="glass-subtle p-4 mb-3 space-y-3">
-              <div className="flex gap-3">
-                <input
-                  value={newAgentName}
-                  onChange={(e) => setNewAgentName(e.target.value)}
-                  placeholder="Agent name..."
-                  className="flex-1 bg-transparent text-sm text-foreground/70 placeholder:text-muted-foreground/30 border-b border-border/20 pb-2 focus:outline-none"
-                />
-                <select
-                  value={newAgentTier}
-                  onChange={(e) => setNewAgentTier(e.target.value)}
-                  className="bg-transparent text-sm text-foreground/70 border-b border-border/20 pb-2 focus:outline-none"
-                >
-                  <option value="governor">Governor</option>
-                  <option value="citizen">Citizen</option>
-                  <option value="npc">NPC</option>
-                </select>
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowNewAgent(false)}
-                  className="px-3 py-1.5 rounded-lg text-[11px] text-muted-foreground/40 hover:text-foreground/60 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={async () => {
-                    if (!newAgentName.trim()) return;
+          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-3">
+            Agents <span className="normal-case tracking-normal text-muted-foreground/30">({world.agents.length} deployed)</span>
+          </h2>
+          <div className="rounded-lg bg-white/[0.02] border border-white/[0.08] max-h-64 overflow-y-auto">
+            {(() => {
+              const deployedNames = new Set(world.agents.map((a) => a.name));
+              const deployedByName = new Map(world.agents.map((a) => [a.name, a]));
+              // Union of available (known) agents + anyone deployed here.
+              // Deduplicate in case the /api/agents list and the world's
+              // agents drift between polls.
+              const allNames = new Set<string>([
+                ...availableAgents.map((a) => a.name),
+                ...world.agents.map((a) => a.name),
+              ]);
+              const sortedNames = Array.from(allNames).sort();
+              if (sortedNames.length === 0) {
+                return (
+                  <p className="text-[11px] text-muted-foreground/40 px-3 py-2.5">
+                    No agents yet — create one below.
+                  </p>
+                );
+              }
+              return (
+                <ul className="divide-y divide-white/[0.04]">
+                  {sortedNames.map((name) => {
+                    const deployed = deployedNames.has(name);
+                    const detail = deployedByName.get(name);
+                    const tierStyle = detail ? (TIER_BADGE[detail.tier] ?? TIER_BADGE.citizen) : null;
+                    const statusStyle = detail ? (STATUS_BADGE[detail.status] ?? STATUS_BADGE.stopped) : null;
+                    return (
+                      <li key={name}>
+                        <a
+                          href={deployed ? `/world/${worldId}/${name}` : `/agents/${name}`}
+                          className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer hover:bg-white/[0.03] transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={deployed}
+                            readOnly
+                            className="w-3.5 h-3.5 rounded border-white/[0.15] bg-white/[0.04] accent-foreground pointer-events-none"
+                          />
+                          <span className={`text-sm font-mono flex-1 ${deployed ? "text-foreground/90" : "text-foreground/40"}`}>
+                            {name}
+                          </span>
+                          {detail && tierStyle && statusStyle && (
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-mono border ${tierStyle}`}>
+                                {detail.tier}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${statusStyle}`}>
+                                {detail.status}
+                              </span>
+                            </div>
+                          )}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              );
+            })()}
+            {/* Inline "add new" row */}
+            <div className="flex gap-2 px-3 py-2 border-t border-white/[0.06]">
+              <input
+                value={newAgentName}
+                onChange={(e) => setNewAgentName(e.target.value)}
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter" && newAgentName.trim()) {
                     const ok = await callAction("/api/agents", { name: newAgentName.trim() });
                     if (ok) {
                       showFeedback(`Agent "${newAgentName}" created`);
-                      setShowNewAgent(false);
+                      setAvailableAgents((prev) => [...prev, { name: newAgentName.trim() }]);
                       setNewAgentName("");
-                      fetchWorld();
                     }
-                  }}
-                  disabled={!newAgentName.trim() || actionLoading !== null}
-                  className="px-3 py-1.5 rounded-lg text-[11px] bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] transition-colors disabled:opacity-30"
-                >
-                  {actionLoading ? "Creating..." : "Create Agent"}
-                </button>
-              </div>
+                  }
+                }}
+                placeholder="New agent name…"
+                className="flex-1 bg-transparent text-xs text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!newAgentName.trim()) return;
+                  const ok = await callAction("/api/agents", { name: newAgentName.trim() });
+                  if (ok) {
+                    showFeedback(`Agent "${newAgentName}" created`);
+                    setAvailableAgents((prev) => [...prev, { name: newAgentName.trim() }]);
+                    setNewAgentName("");
+                  }
+                }}
+                disabled={!newAgentName.trim() || actionLoading !== null}
+                className="shrink-0 px-2.5 py-1 rounded text-[11px] bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {actionLoading ? "…" : "+ Add"}
+              </button>
             </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {world.agents.map((agent) => {
-              const tierStyle = TIER_BADGE[agent.tier] ?? TIER_BADGE.citizen;
-              const statusStyle = STATUS_BADGE[agent.status] ?? STATUS_BADGE.stopped;
-              return (
-                <a
-                  key={agent.name}
-                  href={`/world/${worldId}/${agent.name}`}
-                  className="glass-subtle p-4 flex items-center justify-between hover:bg-white/[0.04] transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${STATUS_DOT[agent.status] ?? "bg-white/20"}`} />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-foreground/80 group-hover:text-foreground/90">{agent.name}</p>
-                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-mono border ${tierStyle}`}>
-                          {agent.tier}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${statusStyle}`}>
-                    {agent.status}
-                  </span>
-                </a>
-              );
-            })}
           </div>
+          {world.agents.length > 0 && (
+            <p className="text-[10px] text-muted-foreground/30 mt-2">
+              To add an existing agent to this world, destroy and respawn with that agent selected.
+            </p>
+          )}
         </div>
 
         {/* Activity */}

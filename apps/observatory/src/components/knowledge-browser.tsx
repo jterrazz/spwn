@@ -172,10 +172,24 @@ function FileTreeNode({
   );
 }
 
-export function KnowledgeBrowser({ compact = false, worldId, architectMode = false }: { compact?: boolean; worldId?: string; architectMode?: boolean }) {
+interface KnowledgeBrowserProps {
+  compact?: boolean;
+  worldId?: string;
+  architectMode?: boolean;
+  /** When provided, the parent owns the search state and this component
+   *  hides its own search input (e.g. when a PageHeader action bar
+   *  hosts an ExpandingSearch). */
+  searchQuery?: string;
+  onSearchChange?: (value: string) => void;
+}
+
+export function KnowledgeBrowser({ compact = false, worldId, architectMode = false, searchQuery: externalSearch, onSearchChange }: KnowledgeBrowserProps) {
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [internalSearch, setInternalSearch] = useState("");
+  const searchControlled = externalSearch !== undefined && onSearchChange !== undefined;
+  const searchQuery = searchControlled ? externalSearch : internalSearch;
+  const setSearchQuery = searchControlled ? onSearchChange : setInternalSearch;
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
@@ -251,22 +265,25 @@ export function KnowledgeBrowser({ compact = false, worldId, architectMode = fal
         </span>
       </div>
 
-      {/* Search */}
-      <div className="px-3 py-2 border-b border-white/[0.04]">
-        <div className="relative">
-          <IconSearch size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/25" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search files..."
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg text-[11px] text-foreground/70 placeholder:text-muted-foreground/25 pl-8 pr-3 py-1.5 focus:outline-none focus:border-white/[0.12]"
-          />
+      {/* Search — hidden when a parent controls searchQuery externally
+          (e.g. an ExpandingSearch in the page header). */}
+      {!searchControlled && (
+        <div className="px-3 py-2 border-b border-white/[0.04]">
+          <div className="relative">
+            <IconSearch size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/25" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search files..."
+              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg text-[11px] text-foreground/70 placeholder:text-muted-foreground/25 pl-8 pr-3 py-1.5 focus:outline-none focus:border-white/[0.12]"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Content */}
-      <div className="flex h-[calc(100%-88px)]">
+      <div className={`flex ${searchControlled ? "h-[calc(100%-40px)]" : "h-[calc(100%-88px)]"}`}>
         {/* File tree */}
         <div className={`overflow-y-auto border-r border-white/[0.05] ${selectedPath ? "w-1/3 min-w-[200px]" : "w-full"}`}>
           {loading ? (

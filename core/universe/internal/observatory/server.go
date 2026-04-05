@@ -532,6 +532,12 @@ func (s *Server) handleWorldLogs(w http.ResponseWriter, r *http.Request) {
 // WRITE handlers
 // ============================================================
 
+// agentSpec is one entry in the multi-agent `agents` field.
+type agentSpec struct {
+	Name string `json:"name"`
+	Tier string `json:"tier,omitempty"`
+}
+
 // createWorldRequest is the JSON body accepted by POST /api/worlds.
 // Exported at package scope so its JSON shape can be unit-tested — a stale
 // binary once silently dropped the `workspaces` field when the struct had
@@ -539,7 +545,8 @@ func (s *Server) handleWorldLogs(w http.ResponseWriter, r *http.Request) {
 type createWorldRequest struct {
 	ConfigName string             `json:"config"`
 	Name       string             `json:"name"`
-	AgentName  string             `json:"agent"`
+	AgentName  string             `json:"agent"`  // Legacy single-agent field.
+	Agents     []agentSpec        `json:"agents"` // New multi-agent list.
 	Workspaces []models.Workspace `json:"workspaces"`
 	// Legacy single-workspace field; accepted for backward compatibility.
 	Workspace string `json:"workspace"`
@@ -552,6 +559,25 @@ func (req createWorldRequest) resolveWorkspaces() []models.Workspace {
 		return []models.Workspace{{Name: "default", Path: req.Workspace}}
 	}
 	return req.Workspaces
+}
+
+// resolveAgents returns the architect's AgentSpec slice. When the
+// client sent the multi-agent `agents` field, that wins. Otherwise we
+// fall back to the legacy single `agent` field (for backward compat
+// with older UIs and CLI callers). A fully empty list means spawn the
+// world with no agents.
+func (req createWorldRequest) resolveAgents() []architect.AgentSpec {
+	if len(req.Agents) > 0 {
+		out := make([]architect.AgentSpec, 0, len(req.Agents))
+		for _, a := range req.Agents {
+			if a.Name == "" {
+				continue
+			}
+			out = append(out, architect.AgentSpec{Name: a.Name, Tier: a.Tier})
+		}
+		return out
+	}
+	return nil
 }
 
 func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
@@ -583,6 +609,7 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 		ConfigName: cfgName,
 		Name:       body.Name,
 		AgentName:  body.AgentName,
+		Agents:     body.resolveAgents(),
 		Workspaces: workspaces,
 		Manifest:   m,
 	})

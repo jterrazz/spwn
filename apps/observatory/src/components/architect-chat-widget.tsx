@@ -10,7 +10,7 @@ import {
   IconMessageCircle,
 } from "@tabler/icons-react";
 import { useArchitectChat } from "@/contexts/architect-chat-context";
-import { ActivityMessageView } from "@/components/activity-blocks";
+import { Chat, type ChatBubble } from "@/components/chat";
 import { KnowledgeUpdateCard } from "@/components/knowledge-browser";
 
 function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive: boolean }) {
@@ -48,8 +48,6 @@ export function ArchitectChatWidget() {
   const pathname = usePathname();
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -60,20 +58,6 @@ export function ArchitectChatWidget() {
     sendMessage,
     isRunning,
   } = useArchitectChat();
-
-  // Auto-scroll when new messages arrive
-  useEffect(() => {
-    if (expanded && messages.length > 0) {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-  }, [messages, expanded]);
-
-  // Focus input when expanding
-  useEffect(() => {
-    if (expanded) {
-      inputRef.current?.focus();
-    }
-  }, [expanded]);
 
   // Close when clicking outside the expanded panel
   useEffect(() => {
@@ -99,15 +83,22 @@ export function ArchitectChatWidget() {
     return null;
   }
 
-  const handleSend = () => {
-    sendMessage();
-  };
+  // Adapt the architect context's messages into the shared ChatBubble shape.
+  const bubbles: ChatBubble[] = messages.map((m) => ({
+    role: m.role === "architect" ? "assistant" : "user",
+    blocks: m.blocks,
+    content: m.content,
+    timestamp: m.timestamp,
+    error: m.error,
+    cost: m.cost,
+    duration: m.duration,
+  }));
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  // Chat is controlled via chatInput/setChatInput — at send time the
+  // context's chatInput is already the latest value, so sendMessage()
+  // reads it directly. The `text` arg is the same as chatInput here.
+  const handleSend = () => {
+    void sendMessage();
   };
 
   // ── Expanded panel ──
@@ -137,10 +128,20 @@ export function ArchitectChatWidget() {
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
+        {/* Messages + input via shared Chat — indexed by the original
+            messages array so the extras closure can read stackAction etc. */}
+        <Chat
+          className="flex-1 px-3 pb-3"
+          messages={bubbles}
+          onSend={handleSend}
+          disabled={sending}
+          typingText="Thinking…"
+          placeholder="Talk to the Architect..."
+          autoFocus={expanded}
+          input={chatInput}
+          onInputChange={setChatInput}
+          emptyState={
+            <div className="flex flex-col items-center justify-center text-center">
               <IconMessageCircle size={24} className="text-muted-foreground/15 mb-2" />
               <p className="text-xs text-muted-foreground/30">Talk to the Architect</p>
               <p className="text-[10px] text-muted-foreground/20 mt-1 max-w-[260px]">
@@ -152,86 +153,37 @@ export function ArchitectChatWidget() {
                 </p>
               )}
             </div>
-          )}
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-              <div className={`max-w-[85%] rounded-xl px-3 py-2 ${
-                msg.role === "user"
-                  ? "bg-white/[0.08] text-foreground/80"
-                  : msg.error
-                    ? "bg-red-500/10 border border-red-500/15 text-red-400/80"
-                    : "bg-white/[0.03] border border-white/[0.06] text-foreground/70"
-              }`}>
-                {msg.role === "architect" && msg.blocks.length > 0 ? (
-                  <ActivityMessageView message={{ role: "agent", blocks: msg.blocks, timestamp: msg.timestamp, cost: msg.cost, duration: msg.duration }} />
-                ) : msg.role === "architect" ? (
-                  <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed">{msg.content}</pre>
-                ) : (
-                  <p className="text-xs">{msg.content}</p>
-                )}
-                <p className="text-[9px] text-muted-foreground/20 mt-1">
-                  {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </p>
-              </div>
-              {msg.stackAction && (
-                <div className="max-w-[85%] mt-1 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                  <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-blue-500/[0.06]">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border-b border-blue-500/15">
-                      <span className="text-[9px]">📋</span>
-                      <span className="text-[9px] font-mono uppercase tracking-wider text-blue-400/70">
-                        {msg.stackAction.type === "push" ? "Task Pushed" : msg.stackAction.type === "pop" ? "Task Popped" : "Task Updated"}
-                      </span>
-                    </div>
-                    <div className="px-2.5 py-1.5">
-                      <p className="text-[11px] font-medium text-blue-200/90">{msg.stackAction.title}</p>
+          }
+          extras={(_, i) => {
+            const raw = messages[i];
+            if (!raw) return null;
+            return (
+              <>
+                {raw.stackAction && (
+                  <div className="max-w-[85%] mt-1 animate-in slide-in-from-bottom-2 fade-in duration-300">
+                    <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-blue-500/[0.06]">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border-b border-blue-500/15">
+                        <span className="text-[9px]">📋</span>
+                        <span className="text-[9px] font-mono uppercase tracking-wider text-blue-400/70">
+                          {raw.stackAction.type === "push" ? "Task Pushed" : raw.stackAction.type === "pop" ? "Task Popped" : "Task Updated"}
+                        </span>
+                      </div>
+                      <div className="px-2.5 py-1.5">
+                        <p className="text-[11px] font-medium text-blue-200/90">{raw.stackAction.title}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {msg.knowledgeUpdate && (
-                <KnowledgeUpdateCard
-                  path={msg.knowledgeUpdate.path}
-                  description={msg.knowledgeUpdate.description}
-                />
-              )}
-            </div>
-          ))}
-          {sending && (
-            <div className="flex justify-start">
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-pulse" />
-                  <span className="text-[11px] text-muted-foreground/40">Thinking...</span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={chatEndRef} />
-        </div>
-
-        {/* Input */}
-        <div className="border-t border-white/[0.06] p-2.5 flex gap-2">
-          <input
-            ref={inputRef}
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Talk to the Architect..."
-            className="flex-1 bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none"
-            disabled={sending}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!chatInput.trim() || sending}
-            className={`p-1.5 rounded-lg transition-all disabled:opacity-20 disabled:cursor-not-allowed ${
-              chatInput.trim()
-                ? "bg-white/[0.08] text-foreground/70 hover:bg-white/[0.12]"
-                : "text-muted-foreground/40"
-            }`}
-          >
-            <IconArrowUp size={14} />
-          </button>
-        </div>
+                )}
+                {raw.knowledgeUpdate && (
+                  <KnowledgeUpdateCard
+                    path={raw.knowledgeUpdate.path}
+                    description={raw.knowledgeUpdate.description}
+                  />
+                )}
+              </>
+            );
+          }}
+        />
       </div>
     );
   }

@@ -16,20 +16,16 @@ interface PlanetProps {
 
 // Status → planet "life signal": saturation (how vivid the hue renders) + brightness tier.
 // We keep a semantic bottom-dot color independent so status is still readable at a glance.
+// Saturation is deliberately muted — each world still has a recognizable
+// hue, but the palette leans toward grey so the planets read as part of
+// one cohesive set rather than a rainbow of competing colors. Error
+// worlds stay vivid so they stand out.
 const STATUS_SAT: Record<string, number> = {
-  running: 100,
-  creating: 100,
-  idle: 80,
-  error: 100,
-  stopped: 20,
-};
-
-const STATUS_DOT_CSS: Record<string, string> = {
-  running: "#22c55e",
-  idle: "#eab308",
-  error: "#ef4444",
-  stopped: "rgba(255,255,255,0.2)",
-  creating: "rgba(255,255,255,0.95)",
+  running: 55,
+  creating: 55,
+  idle: 40,
+  error: 85,
+  stopped: 15,
 };
 
 // Deterministic hue from world id — matches the sidebar's hashHue() so the same world reads as the same planet everywhere.
@@ -50,9 +46,12 @@ function hslToRgb01(h: number, s: number, l: number): [number, number, number] {
 }
 
 function getPlanetConfig(worldId: string, status: string) {
+  // The "new world" placeholder is an abstract grey orb (saturation 0)
+  // so it reads as a creation affordance, not a specific world identity.
+  const isPlaceholder = worldId === "w-new-00000";
   // Error worlds snap to red hue so they stand out regardless of their id hash.
   const hue = status === "error" ? 0 : hashHue(worldId);
-  const sat = STATUS_SAT[status] ?? 20;
+  const sat = isPlaceholder ? 0 : (STATUS_SAT[status] ?? 20);
   return {
     hue,
     sat,
@@ -286,13 +285,16 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
           style={{ width: size, height: size }}
         />
         {world.id === "w-new-00000" && (
-          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.14] bg-black/25 backdrop-blur-sm text-white/90 shadow-[0_6px_20px_rgba(0,0,0,0.22)]">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M10 4.5V15.5M4.5 10H15.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
+          <svg
+            className="pointer-events-none absolute inset-0 z-20 m-auto text-white/90"
+            width="28"
+            height="28"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M10 4.5V15.5M4.5 10H15.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
         )}
         {world.agents.map((a) => (
           <div
@@ -329,37 +331,6 @@ export function Planet({ world, index, onClick, onEnter, isSelected, compact, hi
       </p>
       )}
 
-      {/* ── Status (absolute, below globe) ── */}
-      {!hideLabels && (
-      <div
-        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap pointer-events-none"
-        style={{
-          top: `calc(100% + ${GAP}px)`,
-          opacity: isSelected ? 1 : 0.5,
-          transition: "top 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s ease-out",
-        }}
-      >
-        <div className="relative">
-          <div
-            className="w-1.5 h-1.5 rounded-full"
-            style={{
-              backgroundColor: STATUS_DOT_CSS[world.status],
-              boxShadow: isSelected ? `0 0 8px ${STATUS_DOT_CSS[world.status]}` : "none",
-              transition: "box-shadow 0.7s ease-out",
-            }}
-          />
-          {world.status === "running" && (
-            <div
-              className="absolute inset-0 w-1.5 h-1.5 rounded-full animate-ping"
-              style={{ backgroundColor: STATUS_DOT_CSS[world.status], opacity: 0.6 }}
-            />
-          )}
-        </div>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-[rgba(255,255,255,0.3)]">
-          {world.status}
-        </span>
-      </div>
-      )}
     </div>
   );
 }

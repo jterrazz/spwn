@@ -42,6 +42,13 @@
   "plugins": {
     "shell": {
       "open": true
+    },
+    "updater": {
+      "pubkey": "REPLACE_WITH_TAURI_UPDATER_PUBKEY",
+      "endpoints": [
+        "https://github.com/jterrazz/spwn/releases/latest/download/latest.json"
+      ],
+      "dialog": false
     }
   }
 }
