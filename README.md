@@ -4,11 +4,11 @@
 [![Go](https://img.shields.io/badge/Go-1.25-00ADD8.svg)](https://go.dev)
 [![Tests](https://img.shields.io/badge/Tests-291-green.svg)]()
 
-**The control plane for persistent AI agent systems.**
+**Build AI agent systems that feel alive.**
 
-spwn helps developers, AI startups, and research teams run agents inside isolated worlds with persistent identity, reproducible environments, and multi-agent coordination.
+You define the worlds. You define the rules. Your agents remember, adapt, and collaborate, while your systems keep evolving under your command.
 
-Instead of disposable chats and one-off sessions, you get systems you can inspect, version, replay, and evolve.
+spwn lets you run agents inside isolated worlds with persistent identity, reproducible environments, and multi-agent coordination.
 
 - Agents keep identity and memory
 - Worlds define environment and physics
