@@ -37,4 +37,10 @@ RUN mkdir -p /spwn-data && chmod 777 /spwn-data
 ENV SPWN_HOME=/spwn-data
 WORKDIR /world
 
-ENTRYPOINT ["sleep", "infinity"]
+# Entrypoint aligns the architect user's groups with the host's
+# docker.sock GID so docker exec -u architect can run docker commands.
+COPY platform/images/architect-entrypoint.sh /usr/local/bin/architect-entrypoint.sh
+RUN chmod +x /usr/local/bin/architect-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/architect-entrypoint.sh"]
+CMD ["sleep", "infinity"]

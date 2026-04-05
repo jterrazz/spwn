@@ -6,8 +6,7 @@ import type { AgentProfile } from "@/lib/types";
 import { apiGet, apiPut, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { useRefetch } from "@/components/app-shell";
 import { streamChat } from "@/lib/stream-chat";
-import type { ActivityBlock } from "@/lib/activity-types";
-import { ActivityMessageView } from "@/components/activity-blocks";
+import { Chat, ChatSuggestions, type ChatBubble } from "@/components/chat";
 import { InlineEdit, InlineTagsEdit } from "@/components/inline-edit";
 import { TIER_BADGE } from "@/lib/status";
 import {
@@ -30,7 +29,6 @@ import {
   IconChevronDown,
   IconFile,
   IconMessageCircle,
-  IconSend,
   IconTerminal,
   IconX,
 } from "@tabler/icons-react";
@@ -708,41 +706,22 @@ export default function AgentProfilePage() {
 
 /* ── Agent Chat ── */
 
-interface ChatMessage {
-  role: "user" | "agent";
-  content: string;
-  blocks: ActivityBlock[];
-  timestamp: Date;
-  error?: boolean;
-  cost?: number;
-  duration?: number;
-}
-
 function AgentChat({ agentName }: { agentName: string }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatBubble[]>([]);
   const [sending, setSending] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleSend = async () => {
-    const msg = input.trim();
-    if (!msg || sending) return;
-
-    setMessages((prev) => [...prev, { role: "user", content: msg, blocks: [{ type: "text", content: msg }], timestamp: new Date() }]);
-    setInput("");
+  const handleSend = async (msg: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: msg, blocks: [{ type: "text", content: msg }], timestamp: new Date() },
+    ]);
     setSending(true);
 
-    const msgIndex = messages.length + 1;
-    setMessages((prev) => [...prev, { role: "agent", content: "", blocks: [], timestamp: new Date() }]);
+    const assistantIndex = messages.length + 1;
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "", blocks: [], timestamp: new Date() },
+    ]);
 
     await streamChat({
       url: goApiUrl(`/api/agents/${agentName}/talk`),
@@ -750,14 +729,14 @@ function AgentChat({ agentName }: { agentName: string }) {
       onBlocks: (newBlocks) => {
         setMessages((prev) => {
           const updated = [...prev];
-          const last = updated[msgIndex];
-          if (last && last.role === "agent") {
+          const last = updated[assistantIndex];
+          if (last && last.role === "assistant") {
             const allBlocks = [...last.blocks, ...newBlocks];
             const textContent = allBlocks
               .filter((b): b is { type: "text"; content: string } => b.type === "text")
               .map((b) => b.content)
               .join("");
-            updated[msgIndex] = { ...last, blocks: allBlocks, content: textContent };
+            updated[assistantIndex] = { ...last, blocks: allBlocks, content: textContent };
           }
           return updated;
         });
@@ -765,9 +744,9 @@ function AgentChat({ agentName }: { agentName: string }) {
       onDone: (meta) => {
         setMessages((prev) => {
           const updated = [...prev];
-          const last = updated[msgIndex];
-          if (last && last.role === "agent") {
-            updated[msgIndex] = { ...last, cost: meta.cost, duration: meta.duration };
+          const last = updated[assistantIndex];
+          if (last && last.role === "assistant") {
+            updated[assistantIndex] = { ...last, cost: meta.cost, duration: meta.duration };
           }
           return updated;
         });
@@ -775,9 +754,14 @@ function AgentChat({ agentName }: { agentName: string }) {
       onError: (error) => {
         setMessages((prev) => {
           const updated = [...prev];
-          const last = updated[msgIndex];
-          if (last && last.role === "agent") {
-            updated[msgIndex] = { ...last, content: error, blocks: [{ type: "error", content: error }], error: true };
+          const last = updated[assistantIndex];
+          if (last && last.role === "assistant") {
+            updated[assistantIndex] = {
+              ...last,
+              content: error,
+              blocks: [{ type: "error", content: error }],
+              error: true,
+            };
           }
           return updated;
         });
@@ -785,100 +769,32 @@ function AgentChat({ agentName }: { agentName: string }) {
     });
 
     setSending(false);
-    inputRef.current?.focus();
   };
 
   return (
-    <div className="flex flex-col" style={{ height: "520px" }}>
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto glass-subtle rounded-xl mb-3">
-        <div className="p-4 space-y-3 h-full">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <IconTerminal size={28} className="text-muted-foreground/15 mb-3" />
-              <p className="text-sm text-muted-foreground/30">Chat with {agentName}</p>
-              <p className="text-[11px] text-muted-foreground/20 mt-1">
-                Send messages directly to this agent in real-time
-              </p>
-              <div className="flex gap-2 mt-4">
-                {["What are you working on?", "Show me the project structure", "Run the tests"].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => {
-                      setInput(suggestion);
-                      inputRef.current?.focus();
-                    }}
-                    className="px-3 py-1.5 rounded-lg text-[10px] font-mono text-muted-foreground/30 bg-white/[0.03] border border-white/[0.06] hover:text-muted-foreground/50 hover:bg-white/[0.05] transition-colors"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] rounded-xl px-3.5 py-2.5 ${
-                msg.role === "user"
-                  ? "bg-white/[0.08] text-foreground/80"
-                  : msg.error
-                    ? "bg-red-500/10 border border-red-500/15 text-red-400/80"
-                    : "bg-white/[0.03] border border-white/[0.06] text-foreground/70"
-              }`}>
-                {msg.role === "agent" ? (
-                  <ActivityMessageView message={{ role: "agent", blocks: msg.blocks, timestamp: msg.timestamp, cost: msg.cost, duration: msg.duration }} />
-                ) : (
-                  <p className="text-xs">{msg.content}</p>
-                )}
-                <p className="text-[9px] text-muted-foreground/20 mt-1">
-                  {msg.role === "agent" ? agentName : "you"} · {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                </p>
-              </div>
-            </div>
-          ))}
-          {sending && (
-            <div className="flex justify-start">
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <div className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <div className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "300ms" }} />
-                  </div>
-                  <span className="text-xs text-muted-foreground/40">{agentName} is thinking...</span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={chatEndRef} />
+    <Chat
+      messages={messages}
+      onSend={handleSend}
+      disabled={sending}
+      placeholder={`Message ${agentName}...`}
+      assistantLabel={agentName}
+      typingText={`${agentName} is thinking…`}
+      autoFocus
+      className="h-[520px]"
+      emptyState={
+        <div className="flex flex-col items-center justify-center text-center">
+          <IconTerminal size={28} className="text-muted-foreground/15 mb-3" />
+          <p className="text-sm text-muted-foreground/30">Chat with {agentName}</p>
+          <p className="text-[11px] text-muted-foreground/20 mt-1 mb-4">
+            Send messages directly to this agent in real-time
+          </p>
+          <ChatSuggestions
+            suggestions={["What are you working on?", "Show me the project structure", "Run the tests"]}
+            onPick={(s) => handleSend(s)}
+          />
         </div>
-      </div>
-
-      {/* Input area */}
-      <div className="glass-subtle rounded-xl p-3 flex gap-2">
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          placeholder={`Message ${agentName}...`}
-          className="flex-1 bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none"
-          disabled={sending}
-        />
-        <button
-          onClick={handleSend}
-          disabled={!input.trim() || sending}
-          className="p-2 rounded-lg text-muted-foreground/40 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-        >
-          <IconSend size={16} />
-        </button>
-      </div>
-    </div>
+      }
+    />
   );
 }
 

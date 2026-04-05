@@ -5,18 +5,13 @@ import { useState, useEffect, useCallback, createContext, useContext } from "rea
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ErrorBoundary } from "@/components/error-boundary";
-import type { World, LimboAgent } from "@/lib/types";
+import type { World } from "@/lib/types";
 import { apiGet } from "@/lib/api-client";
+import { checkForUpdatesOnStartup } from "@/lib/tauri-updater";
 
 // ── Refetch context: allows any child to trigger an immediate data refetch ──
 const RefetchContext = createContext<() => void>(() => {});
 export function useRefetch() { return useContext(RefetchContext); }
-
-interface AgentListItem {
-  name: string;
-  path: string;
-  layers: Record<string, string[]>;
-}
 
 interface StatusData {
   worlds: number;
@@ -27,7 +22,6 @@ interface StatusData {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [worlds, setWorlds] = useState<World[]>([]);
-  const [limboAgents, setLimboAgents] = useState<LimboAgent[]>([]);
   const [sidebarLoading, setSidebarLoading] = useState(true);
   const [statusData, setStatusData] = useState<StatusData | null>(null);
 
@@ -38,27 +32,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const fetchWorlds = useCallback(() => {
     Promise.all([
       apiGet<World[]>("/api/universes").catch(() => [] as World[]),
-      apiGet<AgentListItem[]>("/api/agents").catch(() => [] as AgentListItem[]),
       apiGet<StatusData>("/api/status").catch(() => null),
-    ]).then(([worldData, agentData, sData]) => {
+    ]).then(([worldData, sData]) => {
       setStatusData(sData);
-      const w = worldData ?? [];
-      setWorlds(w);
+      setWorlds(worldData ?? []);
       setSidebarLoading(false);
-      // Limbo agents = agents not in any active world
-      const activeAgentNames = new Set<string>();
-      for (const world of w) {
-        for (const a of world.agents) {
-          activeAgentNames.add(a.name);
-        }
-      }
-      const limbo = (agentData ?? [])
-        .filter((a) => !activeAgentNames.has(a.name))
-        .map((a) => ({
-          name: a.name,
-          layers: Object.values(a.layers ?? {}).filter((f) => Array.isArray(f) && f.length > 0).length,
-        }));
-      setLimboAgents(limbo);
     });
   }, []);
 
@@ -67,6 +45,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     const interval = setInterval(fetchWorlds, 5000);
     return () => clearInterval(interval);
   }, [fetchWorlds]);
+
+  // One-shot update check when the native Tauri app boots.
+  useEffect(() => { void checkForUpdatesOnStartup(); }, []);
 
   return (
     <RefetchContext.Provider value={fetchWorlds}>
@@ -79,7 +60,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         />
         <AppSidebar
           worlds={worlds}
-          limboAgents={limboAgents}
           currentWorldId={currentWorldId}
           loading={sidebarLoading}
           statusData={statusData}
