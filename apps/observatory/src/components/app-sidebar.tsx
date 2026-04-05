@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   IconLayoutDashboardFilled,
@@ -110,10 +111,10 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
       <SidebarHeader className="gap-0 pt-4 pb-4">
         <div className="flex items-center justify-between px-2">
           <div className="group/logo flex items-center w-full">
-            <a href="/" className="flex items-center gap-1.5">
+            <Link href="/" className="flex items-center gap-1.5">
               <span className={`text-base font-heading transition-colors ${connectionStatus === "connected" ? "text-green-500" : "text-red-400"}`}>⬡</span>
               <span className="text-base tracking-[0.12em] font-heading text-foreground">spwn</span>
-            </a>
+            </Link>
             <span className={`ml-auto text-[10px] font-mono uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity ${connectionStatus === "connected" ? "text-green-500/60" : "text-red-400/60"}`}>
               {connectionStatus}
             </span>
@@ -121,13 +122,13 @@ export function AppSidebar({ worlds, limboAgents, currentWorldId, loading, statu
         </div>
         <div className="flex items-center gap-1 px-1.5 mt-4">
           <ThemeToggle />
-          <a href="https://spwn.sh/docs" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground/[0.06] dark:bg-white/[0.08] backdrop-blur-md border border-foreground/[0.08] dark:border-white/[0.1] text-muted-foreground/30 hover:text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)] transition-colors" aria-label="Docs">
+          <a href="https://spwn.sh/docs" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="Docs">
             <IconBookFilled size={14} />
           </a>
-          <a href="https://github.com/jterrazz/spwn" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground/[0.06] dark:bg-white/[0.08] backdrop-blur-md border border-foreground/[0.08] dark:border-white/[0.1] text-muted-foreground/30 hover:text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)] transition-colors" aria-label="GitHub">
+          <a href="https://github.com/jterrazz/spwn" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="GitHub">
             <IconBrandGithubFilled size={14} />
           </a>
-          <a href="https://github.com/jterrazz/spwn/issues/new" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground/[0.06] dark:bg-white/[0.08] backdrop-blur-md border border-foreground/[0.08] dark:border-white/[0.1] text-muted-foreground/30 hover:text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)] transition-colors" aria-label="Feedback">
+          <a href="https://github.com/jterrazz/spwn/issues/new" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="Feedback">
             <IconAlertTriangleFilled size={14} />
           </a>
           <div className="flex-1" />

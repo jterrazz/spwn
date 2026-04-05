@@ -13,12 +13,44 @@ import { useArchitectChat } from "@/contexts/architect-chat-context";
 import { ActivityMessageView } from "@/components/activity-blocks";
 import { KnowledgeUpdateCard } from "@/components/knowledge-browser";
 
+function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive: boolean }) {
+  return (
+    <span className="relative inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center self-center overflow-visible">
+      <style jsx>{`
+        @keyframes architect-rainbow-hue {
+          0% { filter: hue-rotate(0deg) brightness(1.2); }
+          100% { filter: hue-rotate(360deg) brightness(1.2); }
+        }
+      `}</style>
+      {isRunning && isActive ? (
+        <>
+          <IconHexagonFilled
+            size={14}
+            className="absolute inset-0 m-auto blur-[6px] opacity-70 text-pink-400"
+            style={{ animation: "architect-rainbow-hue 3s linear infinite" }}
+          />
+          <IconHexagonFilled
+            size={14}
+            className="absolute inset-0 m-auto text-pink-400"
+            style={{ animation: "architect-rainbow-hue 3s linear infinite" }}
+          />
+        </>
+      ) : (
+        <span className="block leading-none translate-y-[0.5px]">
+          <IconHexagonFilled size={14} className="text-muted-foreground/45" />
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function ArchitectChatWidget() {
   const pathname = usePathname();
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const {
     messages,
@@ -43,6 +75,25 @@ export function ArchitectChatWidget() {
     }
   }, [expanded]);
 
+  // Close when clicking outside the expanded panel
+  useEffect(() => {
+    if (!expanded) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (panelRef.current?.contains(target)) return;
+      setExpanded(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [expanded]);
+
   // Hide on architect page — the full page takes over
   if (pathname === "/architect" || pathname.startsWith("/architect/")) {
     return null;
@@ -62,15 +113,11 @@ export function ArchitectChatWidget() {
   // ── Expanded panel ──
   if (expanded) {
     return (
-      <div className="fixed bottom-4 right-4 z-50 w-[420px] h-[540px] flex flex-col rounded-2xl border border-white/[0.08] bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/30 animate-in slide-in-from-bottom-4 fade-in duration-200 overflow-hidden">
+      <div ref={panelRef} className="fixed bottom-4 right-4 z-[200] w-[420px] h-[540px] flex flex-col rounded-2xl border border-white/[0.08] bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/30 animate-in slide-in-from-bottom-4 fade-in duration-200 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2.5">
-            <IconHexagonFilled size={16} className={isRunning ? "text-green-500" : "text-muted-foreground/30"} />
-            <span className="text-sm font-heading tracking-wide text-foreground/80">Architect</span>
-            <span className={`text-[9px] font-mono uppercase tracking-wider ${isRunning ? "text-green-500/50" : "text-muted-foreground/25"}`}>
-              {isRunning ? "online" : "offline"}
-            </span>
+          <div className="flex items-center gap-1 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] backdrop-blur-md">
+            <ArchitectGlyph isRunning={isRunning} isActive={sending} />
           </div>
           <div className="flex items-center gap-1">
             <button
@@ -191,13 +238,15 @@ export function ArchitectChatWidget() {
 
   // ── Collapsed bar ──
   return (
-    <div className="fixed bottom-4 right-4 z-50 animate-in fade-in duration-200">
-      <div className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-background/90 backdrop-blur-xl shadow-lg shadow-black/20 px-3 py-2 w-[320px] hover:border-white/[0.12] transition-colors">
+    <>
+      <div className="fixed bottom-4 right-4 z-[200] animate-in fade-in duration-200">
+        <div className="flex items-center gap-2 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] px-2.5 py-1.5 w-[300px]">
         <button
           onClick={() => setExpanded(true)}
-          className="flex items-center gap-2 shrink-0"
+          className="flex h-[30px] items-center justify-center rounded-full border border-transparent px-2 shrink-0"
+          title={isRunning ? "Architect alive" : "Architect offline"}
         >
-          <IconHexagonFilled size={16} className={isRunning ? "text-green-500" : "text-muted-foreground/30"} />
+          <ArchitectGlyph isRunning={isRunning} isActive={sending} />
         </button>
         <input
           value={chatInput}
@@ -213,25 +262,19 @@ export function ArchitectChatWidget() {
           }}
           onFocus={() => setExpanded(true)}
           placeholder="Ask the Architect..."
-          className="flex-1 bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none min-w-0"
+          className="flex-1 bg-transparent text-[13px] text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none min-w-0"
           disabled={sending}
         />
         {chatInput.trim() ? (
           <button
             onClick={() => { handleSend(); setExpanded(true); }}
-            className="p-1.5 rounded-lg bg-white/[0.08] text-foreground/70 hover:bg-white/[0.12] transition-all shrink-0"
+            className="p-1.5 rounded-full bg-white/[0.08] text-foreground/70 hover:bg-white/[0.12] transition-all shrink-0"
           >
             <IconArrowUp size={14} />
           </button>
-        ) : (
-          <button
-            onClick={() => setExpanded(true)}
-            className="p-1.5 text-muted-foreground/25 hover:text-muted-foreground/50 transition-colors shrink-0"
-          >
-            <IconMessageCircle size={14} />
-          </button>
-        )}
+        ) : null}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

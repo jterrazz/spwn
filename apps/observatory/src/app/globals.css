@@ -248,6 +248,13 @@ html.tauri [class*="fixed"][class*="inset-0"]:not([class*="pointer-events-none"]
   z-index: 500 !important;
 }
 
+/* ── Tauri: dialog content (centered modals) must sit above their overlay ── */
+html.tauri [data-slot="dialog-content"],
+html.tauri [data-slot="command"],
+html.tauri [role="dialog"] {
+  z-index: 501 !important;
+}
+
 /* ── Tauri: ensure background decorations stay behind content ── */
 html.tauri [class*="fixed"][class*="inset-0"][class*="pointer-events-none"] {
   z-index: -1 !important;

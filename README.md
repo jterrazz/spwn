@@ -4,7 +4,19 @@
 [![Go](https://img.shields.io/badge/Go-1.25-00ADD8.svg)](https://go.dev)
 [![Tests](https://img.shields.io/badge/Tests-291-green.svg)]()
 
-**The control plane for AI agents.** Isolated worlds, persistent identity, physics-based security, multi-agent collaboration. One CLI to manage them all.
+**The control plane for persistent AI agent systems.**
+
+spwn helps developers, AI startups, and research teams run agents inside isolated worlds with persistent identity, reproducible environments, and multi-agent coordination.
+
+Instead of disposable chats and one-off sessions, you get systems you can inspect, version, replay, and evolve.
+
+- Agents keep identity and memory
+- Worlds define environment and physics
+- Organizations define governance and defaults
+
+[CLI SCREENSHOT PLACEHOLDER — show spawning a world, talking to an agent, and inspecting state]
+
+[APP SCREENSHOT PLACEHOLDER — show dashboard, world status, and architect activity]
 
 Everyone is building with AI agents — Claude Code, Codex, Aider, Pi. But there is no structure. Agents forget everything between sessions. Configs are scattered across machines. You have no visibility into what tools are exposed, what an agent learned, or whether your setup is reproducible. spwn brings order to this chaos.
 
