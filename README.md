@@ -59,12 +59,12 @@ Models mastered thinking. Spwn builds the missing half: a reality for them to li
 
 ## Spwn is right for you if
 
-- ✅ You want agents that **discover and compose tools** instead of calling pre-defined functions
+- ✅ You're building **multi-agent systems** where agents collaborate, delegate, and communicate
+- ✅ You want **reproducible agent setups** that are version-controllable and shareable
 - ✅ You need **isolated, sandboxed environments** where agents can act without risk to your host
 - ✅ You want agents with **persistent memory and identity** that evolve across tasks
-- ✅ You're building **multi-agent systems** where agents collaborate, delegate, and communicate
+- ✅ You want agents that **discover and compose tools** instead of calling pre-defined functions
 - ✅ You want **physics-based security** — if curl isn't installed, HTTP is physically impossible
-- ✅ You want **reproducible agent setups** that are version-controllable and shareable
 - ✅ You want **full visibility** into what your agents can do, what they learned, and what they're doing
 - ✅ You want all of this **open source, self-hosted, on your machine**
 
