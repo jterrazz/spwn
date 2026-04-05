@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS } from "@/lib/types";
 import type { World } from "@/lib/types";
-import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconBoltFilled, IconMoonFilled, IconCircleFilled, IconMessageFilled } from "@tabler/icons-react";
+import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconBoltFilled, IconMoonFilled, IconCircleFilled, IconMessageFilled, IconWorldFilled } from "@tabler/icons-react";
 import { Planet as PlanetGlobe } from "@/components/planet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
@@ -251,48 +251,23 @@ export default function UniverseMapPage() {
     running: "bg-green-500", idle: "bg-amber-400", stopped: "bg-zinc-500/30", creating: "bg-blue-400",
   };
 
+  const runningAgents = worlds.reduce((n, w) => n + w.agents.filter((a) => a.status === "running").length, 0);
+  const idleAgents = worlds.reduce((n, w) => n + w.agents.filter((a) => a.status === "idle" || a.status === "waiting").length, 0);
+
   return (
     <Page>
       <PageHeader
         title="Dashboard"
         description="Orchestrate AI agents across your projects, persist their minds, scale at will — your AI matrix."
         actions={
-          <button
-            onClick={() => setShowSpawn(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 transition-all"
-          >
-            <IconPlus size={14} />
-            Spawn World
-          </button>
+          <DashboardHeaderStats
+            worldsCount={worlds.length}
+            runningAgents={runningAgents}
+            idleAgents={idleAgents}
+            onSpawn={() => setShowSpawn(true)}
+          />
         }
       />
-
-      {/* ── Quick Stats Bar ── */}
-      {!loading && worlds.length > 0 && (() => {
-        const totalAgents = worlds.reduce((n, w) => n + w.agents.length, 0);
-        const runningWorlds = worlds.filter(w => w.status === "running" || w.status === "idle").length;
-        const runningAgents = worlds.reduce((n, w) => n + w.agents.filter(a => a.status === "running").length, 0);
-        const idleAgents = worlds.reduce((n, w) => n + w.agents.filter(a => a.status === "idle" || a.status === "waiting").length, 0);
-
-        return (
-          <div className="flex items-center gap-6 px-1">
-            {[
-              { label: "Worlds", value: worlds.length, sub: `${runningWorlds} active`, color: "text-foreground/70" },
-              { label: "Agents", value: totalAgents, sub: `${runningAgents} running`, color: "text-foreground/70" },
-              { label: "Running", value: runningAgents, icon: <IconBoltFilled size={12} className="text-green-400/60" />, color: "text-green-400/80" },
-              { label: "Idle", value: idleAgents, icon: <IconMoonFilled size={12} className="text-amber-400/60" />, color: "text-amber-400/80" },
-            ].map(({ label, value, sub, icon, color }) => (
-              <div key={label} className="flex items-center gap-2.5">
-                {icon}
-                <div>
-                  <p className={`text-sm font-mono font-medium ${color}`}>{value}</p>
-                  <p className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/25">{sub ?? label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-      })()}
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -605,6 +580,109 @@ export default function UniverseMapPage() {
 }
 
 /* ── Quick Start Wizard ── */
+
+function DashboardHeaderStats({
+  worldsCount,
+  runningAgents,
+  idleAgents,
+  onSpawn,
+}: {
+  worldsCount: number;
+  runningAgents: number;
+  idleAgents: number;
+  onSpawn: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  const items = [
+    {
+      key: "worlds",
+      icon: <IconWorldFilled size={15} />,
+      value: worldsCount,
+      label: "worlds",
+      pillClass: "text-foreground/78",
+      iconWrapClass: "",
+      labelClass: "tracking-[0.13em]",
+      widthCollapsed: 52,
+      widthExpanded: 102,
+    },
+    {
+      key: "running",
+      icon: <IconActivity size={14} stroke={2.2} />,
+      value: runningAgents,
+      label: "alive",
+      pillClass: "text-emerald-100/95",
+      iconWrapClass: "",
+      labelClass: "tracking-[0.13em]",
+      widthCollapsed: 52,
+      widthExpanded: 92,
+    },
+    {
+      key: "idle",
+      icon: <IconMoonFilled size={14} />,
+      value: idleAgents,
+      label: "sleeping",
+      pillClass: "text-amber-100/95",
+      iconWrapClass: "",
+      labelClass: "tracking-[0.11em]",
+      widthCollapsed: 52,
+      widthExpanded: 112,
+    },
+  ];
+
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-2 md:max-w-[620px] -translate-y-1">
+      <button
+        type="button"
+        onClick={onSpawn}
+        className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] text-foreground/78 hover:text-foreground transition-colors"
+        aria-label="Spawn World"
+        title="Spawn World"
+      >
+        <IconPlus size={18} stroke={2.4} />
+      </button>
+
+      <div
+        className="flex flex-wrap items-center justify-end gap-1 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] backdrop-blur-md transition-all duration-300 ease-out"
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+        onFocus={() => setExpanded(true)}
+        onBlur={() => setExpanded(false)}
+      >
+        {items.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className={`flex h-[30px] items-center gap-1.5 overflow-hidden rounded-full border border-transparent px-2 ${item.pillClass}`}
+            style={{
+              width: expanded ? item.widthExpanded : item.widthCollapsed,
+              transition: "width 280ms cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center self-center ${item.iconWrapClass}`}>
+              <span className="block leading-none translate-y-[0.5px]">
+                {item.icon}
+              </span>
+            </span>
+            <span className="flex items-baseline gap-1.5 self-center whitespace-nowrap">
+              <span className="text-[12px] font-mono font-medium leading-none">{item.value}</span>
+              <span
+                className={`text-[9px] uppercase font-medium leading-none ${item.labelClass}`}
+                style={{
+                  opacity: expanded ? 1 : 0,
+                  transform: expanded ? "translateX(0)" : "translateX(-6px)",
+                  transition: "opacity 180ms ease, transform 280ms cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              >
+                {item.label}
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
   const router = useRouter();
