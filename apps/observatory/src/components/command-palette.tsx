@@ -113,8 +113,8 @@ export function CommandPalette() {
                     w.agents.some((a) => a.name === agent.name)
                   );
                   const href = agentWorld
-                    ? `/world/${agentWorld.id}/${agent.name}`
-                    : `/agents/${agent.name}`;
+                    ? `/agents/${encodeURIComponent(agent.name)}?world=${agentWorld.id}`
+                    : `/agents/${encodeURIComponent(agent.name)}`;
                   return (
                     <CommandItem
                       key={agent.name}

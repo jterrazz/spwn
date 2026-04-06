@@ -286,8 +286,8 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
                   return (
                     <SidebarMenuItem key={agent.name}>
                       <SidebarMenuButton
-                        isActive={pathname === `/world/${selectedWorld.id}/${agent.name}`}
-                        onClick={() => router.push(`/world/${selectedWorld.id}/${agent.name}`)}
+                        isActive={decodeURIComponent(pathname) === `/agents/${agent.name}` && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("world") === selectedWorld.id}
+                        onClick={() => router.push(`/agents/${encodeURIComponent(agent.name)}?world=${selectedWorld.id}`)}
                       >
                         <span className="w-[20px] h-[20px] -mx-[2px] -translate-x-[0.5px] rounded-full flex items-center justify-center shrink-0 bg-white/[0.15]">
                           <StatusIcon className={`!size-[12px] ${s.color}`} />

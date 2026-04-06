@@ -7,9 +7,6 @@ import { Chat, type ChatBubble } from "@/components/chat";
 import { usePageTitle } from "@/hooks/use-page-title";
 import {
   IconMessageCircle,
-  IconWorld,
-  IconUsers,
-  IconClock,
   IconCircleCheck,
   IconChevronDown,
   IconChevronRight,
@@ -24,28 +21,7 @@ import { useArchitectChat, type StackData, type StackItem } from "@/contexts/arc
 import { PageHeader } from "@/components/page-header";
 import { Page } from "@/components/page";
 import { ActionButton } from "@/components/action-button";
-
-function StatCard({ label, value, sub, accent, icon, loading: isLoading }: { label: string; value: string; sub?: string; accent?: string; icon?: React.ReactNode; loading?: boolean }) {
-  if (isLoading) {
-    return (
-      <div className="glass-subtle px-5 py-4 flex-1 min-w-[140px]">
-        <Skeleton className="h-3 w-16 mb-2" />
-        <Skeleton className="h-7 w-12 mb-1" />
-        <Skeleton className="h-3 w-20" />
-      </div>
-    );
-  }
-  return (
-    <div className="glass-subtle px-5 py-4 flex-1 min-w-[140px]">
-      <div className="flex items-center gap-2 mb-1">
-        {icon && <span className="text-muted-foreground/30">{icon}</span>}
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40">{label}</p>
-      </div>
-      <p className={`text-2xl font-heading ${accent ?? "text-foreground/90"}`}>{value}</p>
-      {sub && <p className="text-[11px] font-mono text-muted-foreground/40 mt-0.5">{sub}</p>}
-    </div>
-  );
-}
+import { MetricGrid } from "@/components/ds";
 
 function PriorityBadge({ priority }: { priority?: "high" | "medium" | "low" }) {
   if (!priority) return null;
@@ -347,41 +323,24 @@ export default function ArchitectPage() {
         </div>
       )}
 
-      {/* KPI Cards */}
-      <div className="flex gap-4 flex-wrap">
-        <StatCard
-          label="Worlds"
-          value={loading ? "" : String(kpis?.worlds ?? 0)}
-          sub="running"
-          accent="text-blue-400"
-          icon={<IconWorld size={14} />}
-          loading={loading}
-        />
-        <StatCard
-          label="Agents"
-          value={loading ? "" : String(kpis?.agents ?? 0)}
-          sub="managed"
-          accent="text-purple-400"
-          icon={<IconUsers size={14} />}
-          loading={loading}
-        />
-        <StatCard
-          label="Stack"
-          value={loading ? "" : String(kpis?.tasksPending ?? 0)}
-          sub="pending"
-          accent="text-yellow-400"
-          icon={<IconClock size={14} />}
-          loading={loading}
-        />
-        <StatCard
-          label="Done"
-          value={loading ? "" : String(kpis?.tasksCompleted ?? 0)}
-          sub="done"
-          accent="text-green-400"
-          icon={<IconCircleCheck size={14} />}
-          loading={loading}
-        />
-      </div>
+      {/* KPI Metrics */}
+      {loading ? (
+        <div className="flex gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex-1">
+              <Skeleton className="h-3 w-14 mb-2" />
+              <Skeleton className="h-7 w-10" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <MetricGrid columns={4} className="w-fit gap-x-10" items={[
+          { label: "Worlds", value: kpis?.worlds ?? 0 },
+          { label: "Agents", value: kpis?.agents ?? 0 },
+          { label: "Stack", value: kpis?.tasksPending ?? 0 },
+          { label: "Done", value: kpis?.tasksCompleted ?? 0 },
+        ]} />
+      )}
 
       {/* Tab bar */}
       <div className="flex items-center gap-1 border-b border-white/[0.06] pb-0">
