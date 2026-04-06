@@ -36,24 +36,21 @@ interface EnrichedAgent {
   status: string;                     // running/waiting/idle/sleeping/stopped/limbo
   worldID?: string;
   worldName?: string;
-  layersCount: number;
   journalEntries: number;
   sessionsCount: number;
 }
 
 type StatusFilter = "all" | "deployed" | "limbo";
 
-function countLayerFiles(layers: Record<string, string[] | null>): { nonEmpty: number; journal: number; sessions: number } {
-  let nonEmpty = 0;
+function countLayerFiles(layers: Record<string, string[] | null>): { journal: number; sessions: number } {
   let journal = 0;
   let sessions = 0;
   for (const [key, val] of Object.entries(layers ?? {})) {
     if (!Array.isArray(val) || val.length === 0) continue;
-    nonEmpty++;
     if (key === "memory/journal") journal = val.length;
     if (key === "sessions") sessions = val.length;
   }
-  return { nonEmpty, journal, sessions };
+  return { journal, sessions };
 }
 
 export default function AgentsPage() {
@@ -112,7 +109,6 @@ export default function AgentsPage() {
           status: p?.status ?? "limbo",
           worldID: p?.worldID,
           worldName: p?.worldName,
-          layersCount: counts.nonEmpty,
           journalEntries: counts.journal,
           sessionsCount: counts.sessions,
         };
@@ -384,12 +380,6 @@ export default function AgentsPage() {
                     render: (a) => a.worldName
                       ? <span className="text-[11px] font-mono text-foreground/60 truncate">{a.worldName}</span>
                       : <span className="text-[11px] font-mono text-muted-foreground/25">—</span>,
-                  },
-                  {
-                    key: "layers",
-                    label: "Layers",
-                    width: "60px",
-                    render: (a) => <span className="text-[11px] font-mono text-muted-foreground/40">{a.layersCount}</span>,
                   },
                 ]}
               />

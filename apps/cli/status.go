@@ -240,9 +240,8 @@ var statusCmd = &cobra.Command{
 
 		if len(limbo) > 0 {
 			for _, a := range limbo {
-				layers := fmt.Sprintf("%d/6", agentDomain.LayerCount(&a))
 				pr("     \u2502\n")
-				pr("     \u2502  \u25cc %s    %s\n", padRight(a.Name, 10), ui.Faint(layers))
+				pr("     \u2502  \u25cc %s\n", a.Name)
 			}
 			pr("     \u2502\n")
 			pr("     \u2570%s\n", repeatStr("\u2500", 20))
@@ -262,7 +261,6 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 	type agentEntry struct {
 		name   string
 		role   string
-		layers string
 		status string
 	}
 
@@ -275,13 +273,6 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 			if role == "" {
 				role = "worker"
 			}
-			layers := "?/6"
-			for _, ai := range allAgents {
-				if ai.Name == ar.Name {
-					layers = fmt.Sprintf("%d/6", agentDomain.LayerCount(&ai))
-					break
-				}
-			}
 			statusIcon := "\u25cc idle"
 			if ar.Status == universe.StatusRunning {
 				statusIcon = "\u25cf active"
@@ -289,20 +280,12 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 			agents = append(agents, agentEntry{
 				name:   ar.Name,
 				role:   role,
-				layers: layers,
 				status: statusIcon,
 			})
 		}
 	} else if ww.Agent != "" {
 		// Legacy single-agent
 		role := "worker"
-		layers := "?/6"
-		for _, ai := range allAgents {
-			if ai.Name == ww.Agent {
-				layers = fmt.Sprintf("%d/6", agentDomain.LayerCount(&ai))
-				break
-			}
-		}
 		statusIcon := "\u25cc idle"
 		if ww.Status == universe.StatusRunning {
 			statusIcon = "\u25cf active"
@@ -310,16 +293,15 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 		agents = append(agents, agentEntry{
 			name:   ww.Agent,
 			role:   role,
-			layers: layers,
 			status: statusIcon,
 		})
 	}
 
 	// Calculate bubble width based on content
 	minWidth := 47
-	// Check agent lines: icon(2) + space + name(10) + gap(3) + role(10) + gap(3) + layers(3) + gap(3) + status(8) + trail(4)
+	// Check agent lines: icon(2) + space + name(10) + gap(3) + role(10) + gap(3) + status(8) + trail(4)
 	for _, a := range agents {
-		lineLen := 4 + utf8.RuneCountInString(a.name) + 3 + utf8.RuneCountInString(a.role) + 3 + utf8.RuneCountInString(a.layers) + 3 + utf8.RuneCountInString(a.status) + 6
+		lineLen := 4 + utf8.RuneCountInString(a.name) + 3 + utf8.RuneCountInString(a.role) + 3 + utf8.RuneCountInString(a.status) + 6
 		if lineLen > minWidth {
 			minWidth = lineLen
 		}
@@ -380,11 +362,10 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 		if a.role == "chief" {
 			icon = "\u2605" // ★
 		}
-		agentLine := fmt.Sprintf("   %s %s   %s   %s   %s",
+		agentLine := fmt.Sprintf("   %s %s   %s   %s",
 			icon,
 			padRight(a.name, 10),
 			padRight(a.role, 10),
-			a.layers,
 			a.status,
 		)
 		pr("  \u2502  \u2502%s\u2502\n", padRight(agentLine, bubbleInner))

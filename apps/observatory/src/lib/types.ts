@@ -52,7 +52,6 @@ export function getWorldName(world: Pick<World, "id" | "name">): string {
 
 export interface LimboAgent {
   name: string;
-  layers: number;
 }
 
 export interface Team {

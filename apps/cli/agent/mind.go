@@ -31,8 +31,6 @@ var mindCmd = &cobra.Command{
 			return fmt.Errorf("cannot inspect agent: %w", err)
 		}
 
-		_ = agentDomain.LayerCount(info)
-
 		s.Blank()
 		s.Info("Mind:", name)
 		s.Blank()

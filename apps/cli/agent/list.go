@@ -70,7 +70,6 @@ var listCmd = &cobra.Command{
 
 		t := ui.NewTable(ui.ModeNormal, "NAME", "WORLD", "STATUS")
 		for _, a := range agents {
-			_ = agentDomain.LayerCount(&a) // used internally
 			worldID := "\u2014"
 			status := "unattached"
 
