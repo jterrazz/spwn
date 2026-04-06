@@ -114,6 +114,13 @@ func (s *Server) Start() error {
 	mux.HandleFunc("PUT /api/teams/{slug}", cors(s.handleUpdateTeam))
 	mux.HandleFunc("DELETE /api/teams/{slug}", cors(s.handleDeleteTeam))
 
+	// --- Hierarchy endpoints ---
+	mux.HandleFunc("GET /api/hierarchies", cors(s.handleListHierarchies))
+	mux.HandleFunc("GET /api/hierarchies/{slug}", cors(s.handleGetHierarchy))
+	mux.HandleFunc("POST /api/hierarchies", cors(s.handleCreateHierarchy))
+	mux.HandleFunc("PUT /api/hierarchies/{slug}", cors(s.handleUpdateHierarchy))
+	mux.HandleFunc("DELETE /api/hierarchies/{slug}", cors(s.handleDeleteHierarchy))
+
 	// --- Architect endpoints ---
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
 	mux.HandleFunc("GET /api/architect/history", cors(s.handleArchitectHistory))
@@ -1692,6 +1699,104 @@ func (s *Server) handleDeleteTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+// ============================================================
+// Hierarchy handlers
+// ============================================================
+
+func (s *Server) handleListHierarchies(w http.ResponseWriter, r *http.Request) {
+	hierarchies, err := agentpkg.ListHierarchies()
+	if err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	if hierarchies == nil {
+		hierarchies = []agentpkg.Hierarchy{}
+	}
+	jsonOK(w, hierarchies)
+}
+
+func (s *Server) handleGetHierarchy(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	if slug == "" {
+		jsonError(w, "hierarchy slug is required", 400)
+		return
+	}
+	h, err := agentpkg.GetHierarchy(slug)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+	jsonOK(w, h)
+}
+
+func (s *Server) handleCreateHierarchy(w http.ResponseWriter, r *http.Request) {
+	var body agentpkg.Hierarchy
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+	if body.Name == "" {
+		jsonError(w, "hierarchy name is required", 400)
+		return
+	}
+	if body.Slug == "" {
+		body.Slug = agentpkg.Slugify(body.Name)
+	}
+	if err := agentpkg.CreateHierarchy(body); err != nil {
+		jsonError(w, err.Error(), 400)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	jsonOK(w, body)
+}
+
+func (s *Server) handleUpdateHierarchy(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	if slug == "" {
+		jsonError(w, "hierarchy slug is required", 400)
+		return
+	}
+	existing, err := agentpkg.GetHierarchy(slug)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+	var body agentpkg.Hierarchy
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+	// Merge: only overwrite fields that are non-empty in the request.
+	if body.Name != "" {
+		existing.Name = body.Name
+	}
+	if body.Description != "" {
+		existing.Description = body.Description
+	}
+	if body.Roles != nil {
+		existing.Roles = body.Roles
+	}
+	existing.Slug = slug
+	if err := agentpkg.UpdateHierarchy(*existing); err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	jsonOK(w, existing)
+}
+
+func (s *Server) handleDeleteHierarchy(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	if slug == "" {
+		jsonError(w, "hierarchy slug is required", 400)
+		return
+	}
+	if err := agentpkg.DeleteHierarchy(slug); err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // handleGetAgentFile returns the content of a specific file within the agent's mind directory.

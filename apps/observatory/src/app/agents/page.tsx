@@ -19,6 +19,7 @@ import { useRefetch } from "@/components/app-shell";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { getWorldName, type World, type Team } from "@/lib/types";
 import { DataTable, StatusDot, SectionLabel } from "@/components/ds";
+import { ROLE_BADGE } from "@/lib/status";
 
 interface AgentListItem {
   name: string;
@@ -356,7 +357,14 @@ export default function AgentsPage() {
                     key: "role",
                     label: "Role",
                     width: "80px",
-                    render: (a) => <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.role}</span>,
+                    render: (a) => {
+                      const badge = ROLE_BADGE[a.role] ?? ROLE_BADGE.default;
+                      return (
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}>
+                          {a.role}
+                        </span>
+                      );
+                    },
                   },
                   {
                     key: "status",

@@ -73,6 +73,13 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	mux.HandleFunc("PUT /api/teams/{slug}", cors(srv.handleUpdateTeam))
 	mux.HandleFunc("DELETE /api/teams/{slug}", cors(srv.handleDeleteTeam))
 
+	// Hierarchy endpoints
+	mux.HandleFunc("GET /api/hierarchies", cors(srv.handleListHierarchies))
+	mux.HandleFunc("GET /api/hierarchies/{slug}", cors(srv.handleGetHierarchy))
+	mux.HandleFunc("POST /api/hierarchies", cors(srv.handleCreateHierarchy))
+	mux.HandleFunc("PUT /api/hierarchies/{slug}", cors(srv.handleUpdateHierarchy))
+	mux.HandleFunc("DELETE /api/hierarchies/{slug}", cors(srv.handleDeleteHierarchy))
+
 	// Docker-dependent endpoints (read-only mode — arch is nil)
 	mux.HandleFunc("POST /api/worlds", cors(srv.handleCreateWorld))
 	mux.HandleFunc("POST /api/worlds/{id}/agents", cors(srv.handleDeployAgent))
