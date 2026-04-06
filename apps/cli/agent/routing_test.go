@@ -107,16 +107,16 @@ func TestRouteAgentToWorld_PinnedWorldLacksAgent(t *testing.T) {
 }
 
 func TestRouteAgentToWorld_FindsAgentInAgentsSlice(t *testing.T) {
-	// Multi-agent worlds list citizens in the Agents slice, not just the
+	// Multi-agent worlds list workers in the Agents slice, not just the
 	// primary Agent field. Routing must check both.
 	worlds := []universe.World{
 		{
 			ID:          "w-multi",
 			ContainerID: "cMulti",
-			Agent:       "governor",
+			Agent:       "chief",
 			Agents: []universe.AgentRecord{
-				{Name: "governor", Role: "governor"},
-				{Name: "qa", Role: "citizen"},
+				{Name: "chief", Role: "chief"},
+				{Name: "qa", Role: "worker"},
 			},
 		},
 	}

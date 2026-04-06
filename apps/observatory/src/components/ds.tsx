@@ -245,8 +245,8 @@ export function StatusDot({ status, size = "sm", className }: StatusDotProps) {
 //   ┌─────────────────────────────────────────────┐
 //   │ NAME           ROLE        STATUS            │
 //   ├─────────────────────────────────────────────┤
-//   │ QA Eng         citizen     ● running         │
-//   │ Coder          governor    ● idle            │
+//   │ QA Eng         worker      ● running         │
+//   │ Coder          chief       ● idle            │
 //   └─────────────────────────────────────────────┘
 
 interface DataTableColumn<T> {

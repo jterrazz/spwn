@@ -7,10 +7,10 @@ import (
 	"spwn.sh/core/universe/internal/models"
 )
 
-func TestGenerateGovernorContext(t *testing.T) {
+func TestGenerateChiefContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "morpheus",
-		Role:      "governor",
+		Role:      "chief",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
 		Elements:  []string{"bash", "git", "node"},
@@ -18,16 +18,16 @@ func TestGenerateGovernorContext(t *testing.T) {
 		Memory:    "4g",
 		Timeout:   "30m",
 		OtherAgents: []AgentInfo{
-			{Name: "neo", Role: "citizen"},
-			{Name: "trinity", Role: "citizen"},
+			{Name: "neo", Role: "worker"},
+			{Name: "trinity", Role: "worker"},
 		},
 	})
 
 	checks := map[string]string{
-		"Governor":         "missing Governor role",
+		"Chief":            "missing Chief role",
 		"morpheus":         "missing agent name",
-		"neo":              "missing citizen neo",
-		"trinity":          "missing citizen trinity",
+		"neo":              "missing worker neo",
+		"trinity":          "missing worker trinity",
 		"Messaging":        "missing messaging skill",
 		"/world/inbox":     "missing inbox reference",
 		"Delegation":       "missing delegation pattern",
@@ -45,32 +45,32 @@ func TestGenerateGovernorContext(t *testing.T) {
 		}
 	}
 
-	// Governor should NOT reference /mind/ layers
+	// Chief should NOT reference /mind/ layers
 	if strings.Contains(ctx, "/mind/identity") {
-		t.Error("governor should not reference mind layers")
+		t.Error("chief should not reference mind layers")
 	}
 }
 
-func TestGenerateCitizenContext(t *testing.T) {
+func TestGenerateWorkerContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "neo",
-		Role:      "citizen",
+		Role:      "worker",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
 		Elements:  []string{"bash", "git"},
 		CPU:       2,
 		Memory:    "4g",
 		Timeout:   "30m",
-		Governor:  "morpheus",
+		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
-			{Name: "trinity", Role: "citizen"},
+			{Name: "trinity", Role: "worker"},
 		},
 	})
 
 	checks := map[string]string{
-		"Citizen":        "missing Citizen role",
+		"Worker":         "missing Worker role",
 		"neo":            "missing name",
-		"morpheus":       "missing governor",
+		"morpheus":       "missing chief",
 		"trinity":        "missing peer",
 		"/mind/identity/":         "missing mind identity",
 		"/mind/skills/":           "missing mind skills",
@@ -191,15 +191,15 @@ func TestGenerateGodContext_ContainsAllSections(t *testing.T) {
 	}
 }
 
-func TestGenerateCitizenContext_DefaultRole(t *testing.T) {
-	// Empty role should default to citizen
+func TestGenerateWorkerContext_DefaultRole(t *testing.T) {
+	// Empty role should default to worker
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "agent1",
 		Role:      "",
 		WorldID:   "w-test-00001",
 	})
 
-	if !strings.Contains(ctx, "Citizen") {
-		t.Error("empty role should default to citizen")
+	if !strings.Contains(ctx, "Worker") {
+		t.Error("empty role should default to worker")
 	}
 }

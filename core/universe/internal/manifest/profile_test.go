@@ -10,7 +10,7 @@ import (
 func TestLoadProfile_ValidProfileYAML(t *testing.T) {
 	dir := t.TempDir()
 	content := `name: neo
-role: governor
+role: chief
 runtime:
   backend: claude-code
   provider: anthropic
@@ -41,8 +41,8 @@ requires:
 	if profile.Name != "neo" {
 		t.Errorf("Name = %q, want \"neo\"", profile.Name)
 	}
-	if profile.Role != "governor" {
-		t.Errorf("Role = %q, want \"governor\"", profile.Role)
+	if profile.Role != "chief" {
+		t.Errorf("Role = %q, want \"chief\"", profile.Role)
 	}
 	if profile.Runtime.Provider != "anthropic" {
 		t.Errorf("Runtime.Provider = %q, want \"anthropic\"", profile.Runtime.Provider)
@@ -64,7 +64,7 @@ requires:
 func TestLoadProfile_FallsBackToLifeYAML(t *testing.T) {
 	dir := t.TempDir()
 	content := `name: legacy-agent
-role: citizen
+role: worker
 soul:
   personas:
     - helper
@@ -93,8 +93,8 @@ body:
 	if profile.Name != "legacy-agent" {
 		t.Errorf("Name = %q, want \"legacy-agent\"", profile.Name)
 	}
-	if profile.Role != "citizen" {
-		t.Errorf("Role = %q, want \"citizen\"", profile.Role)
+	if profile.Role != "worker" {
+		t.Errorf("Role = %q, want \"worker\"", profile.Role)
 	}
 	if len(profile.Skills) != 1 || profile.Skills[0] != "debugging" {
 		t.Errorf("Skills = %v, want [debugging]", profile.Skills)
@@ -127,10 +127,10 @@ func TestLoadProfile_ProfileYAMLTakesPrecedence(t *testing.T) {
 
 	// Both files exist — profile.yaml should win
 	profileContent := `name: profile-agent
-role: governor
+role: chief
 `
 	lifeContent := `name: life-agent
-role: citizen
+role: worker
 `
 	os.WriteFile(filepath.Join(dir, "profile.yaml"), []byte(profileContent), 0644)
 	os.WriteFile(filepath.Join(dir, "life.yaml"), []byte(lifeContent), 0644)
@@ -244,8 +244,8 @@ func TestProfileManifest_Defaults(t *testing.T) {
 	profile := ProfileManifest{}
 
 	// Role defaults via DefaultRole
-	if DefaultRole(profile.Role) != "citizen" {
-		t.Errorf("default role should be citizen, got %q", DefaultRole(profile.Role))
+	if DefaultRole(profile.Role) != "worker" {
+		t.Errorf("default role should be worker, got %q", DefaultRole(profile.Role))
 	}
 
 	// Empty runtime

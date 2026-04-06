@@ -79,7 +79,7 @@ func TestAddAgent(t *testing.T) {
 	agent := models.AgentRecord{
 		Name:    "neo",
 		AgentID: "a-neo-12345",
-		Role:    "governor",
+		Role:    "chief",
 		Status:  models.StatusIdle,
 	}
 	if err := s.AddAgent("u1", agent); err != nil {
@@ -96,8 +96,8 @@ func TestAddAgent(t *testing.T) {
 	if u.Agents[0].Name != "neo" {
 		t.Errorf("expected agent name 'neo', got %q", u.Agents[0].Name)
 	}
-	if u.Agents[0].Role != "governor" {
-		t.Errorf("expected role 'governor', got %q", u.Agents[0].Role)
+	if u.Agents[0].Role != "chief" {
+		t.Errorf("expected role 'chief', got %q", u.Agents[0].Role)
 	}
 }
 
@@ -105,14 +105,14 @@ func TestAddAgent_MultipleAgents(t *testing.T) {
 	s := tempStore(t)
 	seedWorld(t, s, "u1")
 
-	a1 := models.AgentRecord{Name: "gov", AgentID: "a-gov-111", Role: "governor", Status: models.StatusIdle}
-	a2 := models.AgentRecord{Name: "cit", AgentID: "a-cit-222", Role: "citizen", Status: models.StatusIdle}
+	a1 := models.AgentRecord{Name: "chief", AgentID: "a-chief-111", Role: "chief", Status: models.StatusIdle}
+	a2 := models.AgentRecord{Name: "wkr", AgentID: "a-wkr-222", Role: "worker", Status: models.StatusIdle}
 
 	if err := s.AddAgent("u1", a1); err != nil {
-		t.Fatalf("AddAgent gov: %v", err)
+		t.Fatalf("AddAgent chief: %v", err)
 	}
 	if err := s.AddAgent("u1", a2); err != nil {
-		t.Fatalf("AddAgent cit: %v", err)
+		t.Fatalf("AddAgent wkr: %v", err)
 	}
 
 	u, _ := s.Get("u1")
@@ -133,12 +133,12 @@ func TestRemoveAgent(t *testing.T) {
 	s := tempStore(t)
 	seedWorld(t, s, "u1")
 
-	a1 := models.AgentRecord{Name: "gov", AgentID: "a-gov-111", Role: "governor"}
-	a2 := models.AgentRecord{Name: "cit", AgentID: "a-cit-222", Role: "citizen"}
+	a1 := models.AgentRecord{Name: "chief", AgentID: "a-chief-111", Role: "chief"}
+	a2 := models.AgentRecord{Name: "wkr", AgentID: "a-wkr-222", Role: "worker"}
 	s.AddAgent("u1", a1)
 	s.AddAgent("u1", a2)
 
-	if err := s.RemoveAgent("u1", "a-gov-111"); err != nil {
+	if err := s.RemoveAgent("u1", "a-chief-111"); err != nil {
 		t.Fatalf("RemoveAgent: %v", err)
 	}
 
@@ -146,8 +146,8 @@ func TestRemoveAgent(t *testing.T) {
 	if len(u.Agents) != 1 {
 		t.Fatalf("expected 1 agent after removal, got %d", len(u.Agents))
 	}
-	if u.Agents[0].AgentID != "a-cit-222" {
-		t.Errorf("expected remaining agent 'a-cit-222', got %q", u.Agents[0].AgentID)
+	if u.Agents[0].AgentID != "a-wkr-222" {
+		t.Errorf("expected remaining agent 'a-wkr-222', got %q", u.Agents[0].AgentID)
 	}
 }
 
@@ -340,7 +340,7 @@ func TestStatePersistence(t *testing.T) {
 
 	s1, _ := NewStoreAt(path)
 	seedWorld(t, s1, "u1")
-	s1.AddAgent("u1", models.AgentRecord{Name: "neo", AgentID: "a-neo-111", Role: "governor", Status: models.StatusIdle})
+	s1.AddAgent("u1", models.AgentRecord{Name: "neo", AgentID: "a-neo-111", Role: "chief", Status: models.StatusIdle})
 
 	// Create a fresh store pointing at the same file
 	s2, _ := NewStoreAt(path)

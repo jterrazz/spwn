@@ -69,7 +69,7 @@ function AgentProfilePage() {
   const [deployTargetWorld, setDeployTargetWorld] = useState("");
   const [deploying, setDeploying] = useState(false);
   const [deployError, setDeployError] = useState("");
-  const [deployRole, setDeployRole] = useState("citizen");
+  const [deployRole, setDeployRole] = useState("worker");
   const [hierarchies, setHierarchies] = useState<Hierarchy[]>([]);
   const [worldData, setWorldData] = useState<World | null>(null);
   const refetchSidebar = useRefetch();
@@ -232,7 +232,7 @@ function AgentProfilePage() {
   const totalFiles = Object.values(mindTree).reduce((n, f) => n + (f?.length ?? 0), 0);
   const activeLayers = Object.keys(mindTree).filter((k) => (mindTree[k]?.length ?? 0) > 0).length;
 
-  const roleStyle = ROLE_BADGE[profile.role] ?? ROLE_BADGE.citizen;
+  const roleStyle = ROLE_BADGE[profile.role] ?? ROLE_BADGE.worker;
   const deployedAgent = worldData?.agents.find((a) => a.name === agentName);
   const worldName = worldData ? getWorldName(worldData) : undefined;
 

@@ -1,24 +1,31 @@
 package agent
 
-// DefaultHierarchy is the built-in two-role hierarchy used when no custom
-// hierarchy is specified. It contains a governor (level 0) who commands
-// citizens (level 1).
+// DefaultHierarchy is the built-in three-role hierarchy used when no custom
+// hierarchy is specified. It contains a chief (level 0) who commands
+// managers (level 1) and workers (level 2).
 var DefaultHierarchy = Hierarchy{
 	Slug:        "default",
 	Name:        "Default",
-	Description: "Built-in governor/citizen hierarchy",
+	Description: "Built-in three-tier hierarchy",
 	Roles: []Role{
 		{
-			Name:        "governor",
+			Name:        "chief",
 			Level:       0,
-			CanCommand:  []string{"citizen"},
+			CanCommand:  []string{"manager", "worker"},
 			MaxPerWorld: 1,
 			Permissions: []string{"delegate", "review", "orchestrate"},
 		},
 		{
-			Name:        "citizen",
+			Name:        "manager",
 			Level:       1,
-			ReportsTo:   "governor",
+			CanCommand:  []string{"worker"},
+			ReportsTo:   "chief",
+			Permissions: []string{"delegate", "review", "execute"},
+		},
+		{
+			Name:        "worker",
+			Level:       2,
+			ReportsTo:   "manager",
 			Permissions: []string{"execute", "report"},
 		},
 	},

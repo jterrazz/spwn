@@ -95,7 +95,7 @@ func TestTeamMembers(t *testing.T) {
 	// One agent without team
 	soloDir := filepath.Join(agentsDir, "qa")
 	os.MkdirAll(soloDir, 0755)
-	os.WriteFile(filepath.Join(soloDir, "profile.yaml"), []byte("role: citizen\n"), 0644)
+	os.WriteFile(filepath.Join(soloDir, "profile.yaml"), []byte("role: worker\n"), 0644)
 
 	members, err := TeamMembers("ops")
 	if err != nil {

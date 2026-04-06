@@ -273,7 +273,7 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 		for _, ar := range ww.Agents {
 			role := ar.Role
 			if role == "" {
-				role = "citizen"
+				role = "worker"
 			}
 			layers := "?/6"
 			for _, ai := range allAgents {
@@ -295,7 +295,7 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 		}
 	} else if ww.Agent != "" {
 		// Legacy single-agent
-		role := "citizen"
+		role := "worker"
 		layers := "?/6"
 		for _, ai := range allAgents {
 			if ai.Name == ww.Agent {
@@ -377,7 +377,7 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 	// Agent lines
 	for _, a := range agents {
 		icon := "\u25cf" // ●
-		if a.role == "governor" {
+		if a.role == "chief" {
 			icon = "\u2605" // ★
 		}
 		agentLine := fmt.Sprintf("   %s %s   %s   %s   %s",

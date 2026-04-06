@@ -38,27 +38,27 @@ describe("profile.yaml roundtrip", () => {
 
   // ── CLI → Disk: role --set writes profile.yaml ─────────────
 
-  test("role --set governor writes profile.yaml with role: governor", async () => {
+  test("role --set chief writes profile.yaml with role: chief", async () => {
     // GIVEN — an agent exists
     createAgent(home, "neo");
 
     // WHEN — setting the role via CLI
     const result = await spwn("set role")
-      .exec("profile neo role --set governor")
+      .exec("profile neo role --set chief")
       .run();
 
     // THEN — CLI reports success
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("Role updated");
-    expect(out).toContain("governor");
+    expect(out).toContain("chief");
 
     // AND — profile.yaml on disk contains the correct role
     const profilePath = join(home, "agents", "neo", "profile.yaml");
     expect(existsSync(profilePath)).toBe(true);
     const content = readFileSync(profilePath, "utf-8");
     expect(content).toContain("role");
-    expect(content).toContain("governor");
+    expect(content).toContain("chief");
   });
 
   test("engine --set codex writes profile.yaml with engine info", async () => {
@@ -112,7 +112,7 @@ describe("profile.yaml roundtrip", () => {
     const profilePath = join(home, "agents", "neo", "profile.yaml");
     writeFileSync(
       profilePath,
-      "role: citizen\nengine:\n  runtime: codex\n  provider: openai\n  model: o3\n",
+      "role: worker\nengine:\n  runtime: codex\n  provider: openai\n  model: o3\n",
     );
 
     // WHEN — reading the engine via CLI
@@ -135,7 +135,7 @@ describe("profile.yaml roundtrip", () => {
 
     // WHEN — setting the role
     const result = await spwn("set role yaml check")
-      .exec("profile neo role --set governor")
+      .exec("profile neo role --set chief")
       .run();
     expect(result.exitCode).toBe(0);
 
@@ -172,17 +172,17 @@ describe("profile.yaml roundtrip", () => {
     const profilePath = join(home, "agents", "neo", "profile.yaml");
 
     // WHEN — changing role multiple times
-    await spwn("set role 1").exec("profile neo role --set governor").run();
-    await spwn("set role 2").exec("profile neo role --set citizen").run();
+    await spwn("set role 1").exec("profile neo role --set chief").run();
+    await spwn("set role 2").exec("profile neo role --set worker").run();
     const result = await spwn("set role 3")
-      .exec("profile neo role --set governor")
+      .exec("profile neo role --set chief")
       .run();
 
     // THEN — final value is correct
     expect(result.exitCode).toBe(0);
     expect(existsSync(profilePath)).toBe(true);
     const content = readFileSync(profilePath, "utf-8");
-    expect(content).toContain("governor");
+    expect(content).toContain("chief");
 
     // AND — file is not corrupted (should not have duplicate role keys at root)
     const roleMatches = content.match(/^role:/gm);
@@ -207,7 +207,7 @@ describe("profile.yaml roundtrip", () => {
     // THEN — shows default values
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
-    expect(out).toContain("citizen"); // default role
+    expect(out).toContain("worker"); // default role
   });
 
   test("profile on nonexistent agent returns error", async () => {

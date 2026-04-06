@@ -8,10 +8,10 @@ import (
 )
 
 func TestAgentsBookContent(t *testing.T) {
-	// Verify that AGENT.md content for a citizen has key sections
+	// Verify that AGENT.md content for a worker has key sections
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "test-agent",
-		Role:      "citizen",
+		Role:      "worker",
 		WorldID:   "w-test-12345",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
 		Elements:  []string{"bash", "git"},
@@ -30,7 +30,7 @@ func TestAgentsBookContent(t *testing.T) {
 
 	for _, section := range keySections {
 		if !strings.Contains(ctx, section) {
-			t.Errorf("AGENT.md (citizen) missing key section %q", section)
+			t.Errorf("AGENT.md (worker) missing key section %q", section)
 		}
 	}
 
@@ -45,45 +45,45 @@ func TestAgentsBookContent(t *testing.T) {
 
 	for _, path := range mindPaths {
 		if !strings.Contains(ctx, path) {
-			t.Errorf("AGENT.md (citizen) missing mind path %q", path)
+			t.Errorf("AGENT.md (worker) missing mind path %q", path)
 		}
 	}
 }
 
 func TestSystemSkillsExist(t *testing.T) {
 	// Verify that the system generates content for all 4 skill contexts
-	// (mind management, messaging, workspace, journal) in citizen context
+	// (mind management, messaging, workspace, journal) in worker context
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "neo",
-		Role:      "citizen",
+		Role:      "worker",
 		WorldID:   "w-test-99999",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
 		Elements:  []string{"bash"},
-		Governor:  "morpheus",
+		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
-			{Name: "trinity", Role: "citizen"},
+			{Name: "trinity", Role: "worker"},
 		},
 	})
 
-	// System skills are embedded in the AGENT.md for citizens
+	// System skills are embedded in the AGENT.md for workers
 	// 1. Mind management skill
 	if !strings.Contains(ctx, "/mind/") {
-		t.Error("citizen context missing mind management skill references")
+		t.Error("worker context missing mind management skill references")
 	}
 
 	// 2. Messaging / collaboration skill
 	if !strings.Contains(ctx, "/world/inbox") {
-		t.Error("citizen context missing messaging/collaboration skill")
+		t.Error("worker context missing messaging/collaboration skill")
 	}
 
 	// 3. World awareness skill (elements, workspace)
 	if !strings.Contains(ctx, "/workspace") {
-		t.Error("citizen context missing workspace/world awareness")
+		t.Error("worker context missing workspace/world awareness")
 	}
 
 	// 4. Other agents awareness
 	if !strings.Contains(ctx, "trinity") {
-		t.Error("citizen context missing other agents awareness")
+		t.Error("worker context missing other agents awareness")
 	}
 }
 

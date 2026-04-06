@@ -67,8 +67,9 @@ function getPlanetConfig(worldId: string, status: string) {
 }
 
 const ROLE_ICON: Record<string, string> = {
-  governor: "♛",
-  citizen: "◉",
+  chief: "♛",
+  manager: "♜",
+  worker: "◉",
   npc: "◌",
 };
 

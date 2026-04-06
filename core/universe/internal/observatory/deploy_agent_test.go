@@ -10,7 +10,7 @@ import (
 // "deploy agent to running world" endpoint can never silently regress.
 
 func TestDeployAgentRequest_DecodesNameAndRole(t *testing.T) {
-	raw := `{"name": "neo", "role": "governor"}`
+	raw := `{"name": "neo", "role": "chief"}`
 	var body struct {
 		Name string `json:"name"`
 		Role string `json:"role"`
@@ -18,8 +18,8 @@ func TestDeployAgentRequest_DecodesNameAndRole(t *testing.T) {
 	if err := json.NewDecoder(strings.NewReader(raw)).Decode(&body); err != nil {
 		t.Fatalf("decode: %v", err)
 	}
-	if body.Name != "neo" || body.Role != "governor" {
-		t.Errorf("expected neo/governor, got %q/%q", body.Name, body.Role)
+	if body.Name != "neo" || body.Role != "chief" {
+		t.Errorf("expected neo/chief, got %q/%q", body.Name, body.Role)
 	}
 }
 
@@ -35,14 +35,14 @@ func TestDeployAgentRequest_RoleDefaults(t *testing.T) {
 	if body.Name != "qa" {
 		t.Errorf("name = %q", body.Name)
 	}
-	// Empty role: the handler should default to "citizen" via manifest.DefaultRole.
+	// Empty role: the handler should default to "worker" via manifest.DefaultRole.
 	if body.Role != "" {
 		t.Errorf("role should be empty (defaulted server-side), got %q", body.Role)
 	}
 }
 
 func TestDeployAgentRequest_EmptyNameRejected(t *testing.T) {
-	raw := `{"role": "citizen"}`
+	raw := `{"role": "worker"}`
 	var body struct {
 		Name string `json:"name"`
 	}

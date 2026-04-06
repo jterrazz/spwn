@@ -179,7 +179,7 @@ spwn/
 │   │   ├── universe.go              #   Public API (World, Manifest, Architect, Observatory)
 │   │   └── internal/
 │   │       ├── architect/           #     Orchestration (spawn, destroy, list)
-│   │       │   ├── colony.go        #       Multi-agent: SpawnAgents, Governor/Citizen
+│   │       │   ├── colony.go        #       Multi-agent: SpawnAgents, Chief/Manager/Worker
 │   │       │   └── npc.go           #       Ephemeral: SpawnNPC
 │   │       ├── backend/             #     Docker adapter (Backend port)
 │   │       ├── runtime/             #     Claude Code adapter (Runtime port)
@@ -343,10 +343,10 @@ Spwn follows a **spec-first** development process:
 The E2E test suite is the behavioral specification of spwn. Each test describes a user-visible behavior:
 
 ```go
-// GIVEN a universe with a governor and two citizens
-// WHEN the governor delegates a task
-// THEN both citizens receive work
-// AND the governor aggregates results
+// GIVEN a universe with a chief and two workers
+// WHEN the chief delegates a task
+// THEN both workers receive work
+// AND the chief aggregates results
 ```
 
 ### Test layers:

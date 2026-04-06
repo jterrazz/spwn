@@ -15,7 +15,7 @@ describe("colony multi-agent", () => {
   });
 
   test("spawn world with leader agent", () => {
-    // GIVEN — two agents: neo as citizen, morpheus as leader
+    // GIVEN — two agents: neo as worker, morpheus as leader
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);

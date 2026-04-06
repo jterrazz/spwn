@@ -248,16 +248,16 @@ func TestEnsureDefaultHierarchy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetHierarchy default: %v", err)
 	}
-	if len(h.Roles) != 2 {
-		t.Errorf("default hierarchy roles = %d, want 2", len(h.Roles))
+	if len(h.Roles) != 3 {
+		t.Errorf("default hierarchy roles = %d, want 3", len(h.Roles))
 	}
 
-	gov := h.GetRole("governor")
-	if gov == nil {
-		t.Fatal("expected governor role in default hierarchy")
+	chief := h.GetRole("chief")
+	if chief == nil {
+		t.Fatal("expected chief role in default hierarchy")
 	}
-	if gov.MaxPerWorld != 1 {
-		t.Errorf("governor max_per_world = %d, want 1", gov.MaxPerWorld)
+	if chief.MaxPerWorld != 1 {
+		t.Errorf("chief max_per_world = %d, want 1", chief.MaxPerWorld)
 	}
 }
 

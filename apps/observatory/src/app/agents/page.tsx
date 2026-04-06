@@ -96,7 +96,7 @@ export default function AgentsPage() {
           placement.set(a.name, {
             worldID: w.id,
             worldName: getWorldName(w),
-            role: a.role ?? "citizen",
+            role: a.role ?? "worker",
             status: a.status ?? "idle",
           });
         }
@@ -107,7 +107,7 @@ export default function AgentsPage() {
         const p = placement.get(a.name);
         return {
           name: a.name,
-          role: p?.role ?? "citizen",
+          role: p?.role ?? "worker",
           team: a.team,
           status: p?.status ?? "limbo",
           worldID: p?.worldID,

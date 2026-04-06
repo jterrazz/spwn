@@ -346,7 +346,7 @@ func TestDestroy_MultiAgentWritesAllJournals(t *testing.T) {
 	agentsBase := t.TempDir()
 	t.Setenv("SPWN_HOME", agentsBase)
 
-	for _, name := range []string{"governor-a", "citizen-b"} {
+	for _, name := range []string{"chief-a", "worker-b"} {
 		journalDir := agentsBase + "/agents/" + name + "/journal"
 		if err := os.MkdirAll(journalDir, 0755); err != nil {
 			t.Fatalf("create journal dir for %s: %v", name, err)
@@ -360,8 +360,8 @@ func TestDestroy_MultiAgentWritesAllJournals(t *testing.T) {
 		Status:      models.StatusRunning,
 		CreatedAt:   time.Now().Add(-10 * time.Minute),
 		Agents: []models.AgentRecord{
-			{Name: "governor-a", AgentID: "a-governor-a-11111", Role: "governor", Status: models.StatusRunning},
-			{Name: "citizen-b", AgentID: "a-citizen-b-22222", Role: "citizen", Status: models.StatusRunning},
+			{Name: "chief-a", AgentID: "a-chief-a-11111", Role: "chief", Status: models.StatusRunning},
+			{Name: "worker-b", AgentID: "a-worker-b-22222", Role: "worker", Status: models.StatusRunning},
 		},
 	}
 	store.Save(w)
@@ -372,7 +372,7 @@ func TestDestroy_MultiAgentWritesAllJournals(t *testing.T) {
 	}
 
 	// Check journal entries for both agents
-	for _, name := range []string{"governor-a", "citizen-b"} {
+	for _, name := range []string{"chief-a", "worker-b"} {
 		journalDir := agentsBase + "/agents/" + name + "/journal"
 		entries, err := os.ReadDir(journalDir)
 		if err != nil {

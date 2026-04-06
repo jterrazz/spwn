@@ -57,7 +57,7 @@ type LawsManifest struct {
 // OrgGovernance holds governance limits and policies.
 type OrgGovernance struct {
 	MaxWorlds           int      `yaml:"max-worlds"`
-	MaxCitizensPerWorld int      `yaml:"max-citizens-per-world"`
+	MaxWorkersPerWorld int      `yaml:"max-workers-per-world"`
 	AllowedProviders       []string `yaml:"allowed-providers"`
 	CostLimit              string   `yaml:"cost-limit"`
 	Audit                  bool     `yaml:"audit"`

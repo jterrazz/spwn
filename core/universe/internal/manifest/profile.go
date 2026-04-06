@@ -14,7 +14,7 @@ import (
 // Backward compatible: falls back to life.yaml if profile.yaml is not found.
 type ProfileManifest struct {
 	Name       string        `yaml:"name"`
-	Role       string        `yaml:"role"`       // "governor" or "citizen" (default: "citizen")
+	Role       string        `yaml:"role"`       // "chief", "manager", or "worker" (default: "worker")
 	Team       string        `yaml:"team"`       // team slug (references ~/.spwn/teams/{slug}.yaml)
 	Runtime    RuntimeConfig `yaml:"runtime"`     // optional runtime override
 	Identity   IdentityManifest `yaml:"identity"` // formerly "soul"

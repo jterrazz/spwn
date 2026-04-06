@@ -31,7 +31,7 @@ func TestDeployAgent_ToRunningWorld(t *testing.T) {
 
 	// Deploy agent-b to the running world
 	worldID := chain.Universe().ID
-	err := tc.Arc.DeployAgent(t.Context(), worldID, "agent-b", "citizen")
+	err := tc.Arc.DeployAgent(t.Context(), worldID, "agent-b", "worker")
 	if err != nil {
 		t.Fatalf("DeployAgent failed: %v", err)
 	}
@@ -50,8 +50,8 @@ func TestDeployAgent_ToRunningWorld(t *testing.T) {
 	for _, a := range world.Agents {
 		if a.Name == "agent-b" {
 			found = true
-			if a.Role != "citizen" {
-				t.Errorf("agent-b role = %q, want citizen", a.Role)
+			if a.Role != "worker" {
+				t.Errorf("agent-b role = %q, want worker", a.Role)
 			}
 		}
 	}
@@ -71,7 +71,7 @@ func TestDeployAgent_AlreadyDeployed(t *testing.T) {
 		Execute()
 
 	worldID := chain.Universe().ID
-	err := tc.Arc.DeployAgent(t.Context(), worldID, "agent-x", "citizen")
+	err := tc.Arc.DeployAgent(t.Context(), worldID, "agent-x", "worker")
 	if err == nil || !strings.Contains(err.Error(), "already deployed") {
 		t.Errorf("expected 'already deployed' error, got: %v", err)
 	}
@@ -94,7 +94,7 @@ func TestDeployAgent_TalkAfterDeploy(t *testing.T) {
 	worldID := chain.Universe().ID
 
 	// Deploy the agent
-	if err := tc.Arc.DeployAgent(t.Context(), worldID, "talker", "citizen"); err != nil {
+	if err := tc.Arc.DeployAgent(t.Context(), worldID, "talker", "worker"); err != nil {
 		t.Fatalf("DeployAgent: %v", err)
 	}
 
@@ -119,7 +119,7 @@ func TestDeployAgent_AgentNotFound(t *testing.T) {
 		Execute()
 
 	worldID := chain.Universe().ID
-	err := tc.Arc.DeployAgent(t.Context(), worldID, "ghost", "citizen")
+	err := tc.Arc.DeployAgent(t.Context(), worldID, "ghost", "worker")
 	if err == nil {
 		t.Error("expected error for nonexistent agent")
 	}

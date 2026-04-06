@@ -57,7 +57,7 @@ interface RawWorld {
 function rawToWorld(raw: RawWorld): World {
   const agents = (raw.agents ?? []).map((a) => ({
     name: a.name,
-    role: a.role || "citizen",
+    role: a.role || "worker",
     status: a.status,
   }));
 
@@ -65,7 +65,7 @@ function rawToWorld(raw: RawWorld): World {
   if (agents.length === 0 && raw.agent) {
     agents.push({
       name: raw.agent,
-      role: "citizen",
+      role: "worker",
       status: raw.status,
     });
   }
@@ -285,7 +285,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
 
   return {
     name,
-    role: "citizen" as const,
+    role: "worker" as const,
     engine: "claude-code",
     provider: "anthropic",
     purpose: purpose || "",
