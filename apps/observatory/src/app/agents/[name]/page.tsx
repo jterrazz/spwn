@@ -78,7 +78,7 @@ function AgentProfilePage() {
 
   const deployProgressMessage = useProgressMessages(deploying, [
     { after: 0, text: "Deploying agent..." },
-    { after: 5, text: "Building Docker image (first run takes a few minutes)..." },
+    { after: 5, text: "Building Docker image (first run could take a few minutes)..." },
     { after: 30, text: "Still building... installing dependencies..." },
     { after: 60, text: "Almost there..." },
   ]);

@@ -224,7 +224,7 @@ export default function ArchitectPage() {
 
   const startProgressMessage = useProgressMessages(actionLoading === "start", [
     { after: 0, text: "Starting architect..." },
-    { after: 5, text: "Building image..." },
+    { after: 5, text: "Building Docker image (first run could take a few minutes)..." },
     { after: 30, text: "Installing dependencies..." },
     { after: 60, text: "Almost ready..." },
   ]);
