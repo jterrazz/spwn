@@ -7,3 +7,6 @@ var Dockerfile []byte
 
 //go:embed Dockerfile.world
 var DockerfileWorld []byte
+
+//go:embed Dockerfile.architect
+var DockerfileArchitect []byte

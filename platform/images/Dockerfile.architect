@@ -1,4 +1,5 @@
 FROM debian:bookworm-slim
+LABEL sh.spwn.image-version="1.0.0"
 
 # Install Docker CLI + Node.js 20 (for Claude Code)
 RUN apt-get update && apt-get install -y --no-install-recommends \

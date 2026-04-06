@@ -18,6 +18,14 @@ const (
 	ArchitectImage         = "spwn-architect:latest"
 )
 
+// Image versioning constants.
+const (
+	BaseImageVersion      = "1.0.0"
+	GodImageVersion       = "1.0.0"
+	ArchitectImageVersion = "1.0.0"
+	ImageVersionLabel     = "sh.spwn.image-version"
+)
+
 // Directory layout constants.
 const (
 	SpwnBaseDir       = ".spwn"

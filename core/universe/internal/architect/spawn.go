@@ -207,23 +207,17 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Ensure image exists (auto-build for default image, fail for custom/test images)
 	if opts.Image == "" {
-		alreadyCached, err := a.backend.ImageExists(ctx, image)
-		if err != nil {
-			return nil, fmt.Errorf("check image: %w", err)
+		dockerfile := images.Dockerfile
+		expectedVersion := foundation.BaseImageVersion
+		if opts.IsArchitect {
+			dockerfile = images.DockerfileWorld
+			expectedVersion = foundation.GodImageVersion
 		}
-		if !alreadyCached {
-			opts.progress("image_building", image)
-			dockerfile := images.Dockerfile
-			if opts.IsArchitect {
-				dockerfile = images.DockerfileWorld
-			}
-			if err := a.backend.EnsureImage(ctx, image, dockerfile, opts.logWriter()); err != nil {
-				return nil, fmt.Errorf("ensure base image: %w", err)
-			}
-			opts.progress("image_built", image)
-		} else {
-			opts.progress("image_ready", image)
+		opts.progress("image_building", image)
+		if err := a.backend.EnsureImage(ctx, image, expectedVersion, dockerfile, opts.logWriter()); err != nil {
+			return nil, fmt.Errorf("ensure base image: %w", err)
 		}
+		opts.progress("image_ready", image)
 	} else {
 		exists, err := a.backend.ImageExists(ctx, image)
 		if err != nil {
