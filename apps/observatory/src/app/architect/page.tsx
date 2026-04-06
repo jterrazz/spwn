@@ -229,6 +229,12 @@ export default function ArchitectPage() {
     { after: 60, text: "Almost ready..." },
   ]);
 
+  const stopProgressMessage = useProgressMessages(actionLoading === "stop", [
+    { after: 0, text: "Stopping architect..." },
+    { after: 5, text: "Shutting down container..." },
+    { after: 15, text: "Cleaning up..." },
+  ]);
+
   // Map architect messages into the shared chat bubble shape.
   const bubbles: ChatBubble[] = messages.map((m) => ({
     role: m.role === "architect" ? "assistant" : "user",
@@ -348,9 +354,12 @@ export default function ArchitectPage() {
         }
       />
 
-      {/* Start progress indicator */}
+      {/* Action progress indicator */}
       {actionLoading === "start" && (
         <ProgressShimmer active message={startProgressMessage} />
+      )}
+      {actionLoading === "stop" && (
+        <ProgressShimmer active message={stopProgressMessage} />
       )}
 
       {/* Feedback toast */}

@@ -2,6 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useProgressMessages } from "@/hooks/use-progress-messages";
+import { ProgressShimmer } from "@/components/progress-shimmer";
 import { getWorkspaceSummary, getWorldName, type World, type Agent } from "@/lib/types";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { streamChat } from "@/lib/stream-chat";
@@ -60,6 +62,12 @@ export default function WorldDashboard() {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [renameInput, setRenameInput] = useState("");
   const [renaming, setRenaming] = useState(false);
+
+  const destroyProgressMessage = useProgressMessages(actionLoading === "destroy", [
+    { after: 0, text: "Destroying world..." },
+    { after: 5, text: "Stopping containers..." },
+    { after: 15, text: "Cleaning up..." },
+  ]);
 
   const { toast } = useToast();
   const refetchSidebar = useRefetch();
@@ -343,6 +351,9 @@ export default function WorldDashboard() {
                   This will permanently destroy <span className="font-mono">{world.id}</span> and all its agents.
                   This action cannot be undone.
                 </p>
+                {actionLoading === "destroy" && (
+                  <ProgressShimmer active message={destroyProgressMessage} className="mt-2 mb-1" />
+                )}
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={async () => {
@@ -363,7 +374,12 @@ export default function WorldDashboard() {
                     disabled={actionLoading !== null}
                     className="px-4 py-2 rounded-lg text-xs bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 transition-colors disabled:opacity-30"
                   >
-                    {actionLoading?.includes("destroy") ? "Destroying..." : "Yes, destroy it"}
+                    {actionLoading === "destroy" ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-3 h-3 border-2 border-red-300/40 border-t-red-300 rounded-full animate-spin" />
+                        {destroyProgressMessage}
+                      </span>
+                    ) : "Yes, destroy it"}
                   </button>
                   <button
                     onClick={() => setShowDestroyConfirm(false)}
