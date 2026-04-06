@@ -1,0 +1,21 @@
+[
+  {
+    "id": "w-mars-99999",
+    "config": "default",
+    "workspaces": [
+      {
+        "name": "default",
+        "path": "/tmp/project"
+      }
+    ],
+    "status": "running",
+    "agents": [
+      {
+        "name": "coder",
+        "agent_id": "a-1",
+        "role": "citizen",
+        "status": "running"
+      }
+    ]
+  }
+]

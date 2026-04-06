@@ -1,0 +1,4 @@
+tier: citizen
+runtime:
+  engine: claude-code
+  provider: anthropic

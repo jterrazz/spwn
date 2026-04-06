@@ -7,6 +7,7 @@ require (
 	github.com/fatih/color v1.18.0
 	spwn.sh/core/agent v0.0.0
 	spwn.sh/core/foundation v0.0.0
+	spwn.sh/core/migration v0.0.0
 	spwn.sh/core/gate v0.0.0
 	spwn.sh/core/messenger v0.0.0
 	spwn.sh/core/universe v0.0.0
@@ -50,6 +51,7 @@ require (
 replace (
 	spwn.sh/core/agent => ../../core/agent
 	spwn.sh/core/foundation => ../../core/foundation
+	spwn.sh/core/migration => ../../core/migration
 	spwn.sh/core/gate => ../../core/gate
 	spwn.sh/core/messenger => ../../core/messenger
 	spwn.sh/core/universe => ../../core/universe
