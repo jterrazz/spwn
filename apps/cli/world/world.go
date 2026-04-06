@@ -24,6 +24,7 @@ var (
 	spawnGate      []string
 	spawnGovernor  string
 	spawnRuntime   string
+	spawnTeam      string
 )
 
 func init() {
@@ -37,6 +38,7 @@ func init() {
 	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
 	Cmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this world")
 	Cmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime (claude-code, pi, codex, opencode, gemini, aider)")
+	Cmd.Flags().StringVar(&spawnTeam, "team", "", "Deploy all agents in a team (team slug)")
 
 	defaultWorldHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(worldHelp)
@@ -166,9 +168,24 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 			}
 		}
 
-		// Build multi-agent list when --governor is used
+		// Build multi-agent list when --governor or --team is used
 		var agents []universe.AgentSpec
-		if spawnGovernor != "" {
+		if spawnTeam != "" {
+			// Resolve team → members
+			members, teamErr := agent.TeamMembers(spawnTeam)
+			if teamErr != nil {
+				return s.FailHint("Team resolve failed", teamErr, "Run \"spwn team ls\" to see teams")
+			}
+			if len(members) == 0 {
+				return s.FailHint("Team empty", fmt.Errorf("team %q has no agents", spawnTeam),
+					"Assign agents with: spwn team assign <agent> "+spawnTeam)
+			}
+			for _, m := range members {
+				agents = append(agents, universe.AgentSpec{Name: m, Tier: "citizen"})
+			}
+			agentName = "" // multi-agent mode
+			s.Done("Team", fmt.Sprintf("%s → %d agent(s)", spawnTeam, len(members)))
+		} else if spawnGovernor != "" {
 			agents = append(agents, universe.AgentSpec{Name: spawnGovernor, Tier: "governor"})
 			if agentName != "" {
 				agents = append(agents, universe.AgentSpec{Name: agentName, Tier: "citizen"})

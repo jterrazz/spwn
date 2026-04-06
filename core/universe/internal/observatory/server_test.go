@@ -67,10 +67,18 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	mux.HandleFunc("POST /api/agents/{name}/fork", cors(srv.handleFork))
 	mux.HandleFunc("PUT /api/agents/{name}/identity", cors(srv.handleUpdateIdentity))
 
+	// Team endpoints
+	mux.HandleFunc("GET /api/teams", cors(srv.handleListTeams))
+	mux.HandleFunc("POST /api/teams", cors(srv.handleCreateTeam))
+	mux.HandleFunc("PUT /api/teams/{slug}", cors(srv.handleUpdateTeam))
+	mux.HandleFunc("DELETE /api/teams/{slug}", cors(srv.handleDeleteTeam))
+
 	// Docker-dependent endpoints (read-only mode — arch is nil)
 	mux.HandleFunc("POST /api/worlds", cors(srv.handleCreateWorld))
+	mux.HandleFunc("POST /api/worlds/{id}/agents", cors(srv.handleDeployAgent))
 	mux.HandleFunc("DELETE /api/worlds/{id}", cors(srv.handleDestroyWorld))
 	mux.HandleFunc("POST /api/worlds/{id}/snapshot", cors(srv.handleSnapshot))
+	mux.HandleFunc("POST /api/worlds/{id}/talk", cors(srv.handleTalk))
 	mux.HandleFunc("GET /api/worlds/{id}/logs", cors(srv.handleWorldLogs))
 
 	// Architect endpoints

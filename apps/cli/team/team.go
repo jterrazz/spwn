@@ -1,0 +1,218 @@
+package team
+
+import (
+	"fmt"
+	"strings"
+
+	"spwn.sh/apps/cli/ui"
+	agentDomain "spwn.sh/core/agent"
+	"github.com/spf13/cobra"
+)
+
+// Cmd is the top-level `spwn team` command.
+var Cmd = &cobra.Command{
+	Use:   "team",
+	Short: "Manage teams — create, list, edit, and remove agent groups",
+}
+
+var (
+	newIcon  string
+	newColor string
+	newDesc  string
+)
+
+func init() {
+	newCmd.Flags().StringVar(&newIcon, "icon", "", "Emoji or single-char icon")
+	newCmd.Flags().StringVar(&newColor, "color", "", "Hex accent color (e.g. #8B5CF6)")
+	newCmd.Flags().StringVar(&newDesc, "description", "", "Short description")
+
+	Cmd.AddCommand(newCmd)
+	Cmd.AddCommand(lsCmd)
+	Cmd.AddCommand(editCmd)
+	Cmd.AddCommand(rmCmd)
+	Cmd.AddCommand(assignCmd)
+}
+
+func newStepper(cmd *cobra.Command) *ui.Stepper {
+	return ui.New(false, false, false)
+}
+
+// ── spwn team new ──
+
+var newCmd = &cobra.Command{
+	Use:   "new <name>",
+	Short: "Create a new team",
+	Example: `  spwn team new "Matrix Ops" --icon ⬡ --color "#8B5CF6"
+  spwn team new infra --icon ⚙`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		s := newStepper(cmd)
+		name := args[0]
+		slug := agentDomain.Slugify(name)
+
+		t := agentDomain.Team{
+			Slug:        slug,
+			Name:        name,
+			Icon:        newIcon,
+			Color:       newColor,
+			Description: newDesc,
+		}
+		if err := agentDomain.CreateTeam(t); err != nil {
+			return s.FailHint("Team creation failed", err, "Choose a different name")
+		}
+
+		s.Blank()
+		s.Done("Created team", fmt.Sprintf("%s (%s)", name, slug))
+		s.Blank()
+		return nil
+	},
+}
+
+// ── spwn team ls ──
+
+var lsCmd = &cobra.Command{
+	Use:     "ls",
+	Aliases: []string{"list"},
+	Short:   "List all teams",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		teams, err := agentDomain.ListTeams()
+		if err != nil {
+			return err
+		}
+		if len(teams) == 0 {
+			fmt.Println("No teams yet. Create one with: spwn team new \"Team Name\"")
+			return nil
+		}
+		for _, t := range teams {
+			members, _ := agentDomain.TeamMembers(t.Slug)
+			icon := t.Icon
+			if icon == "" {
+				icon = "●"
+			}
+			line := fmt.Sprintf("  %s  %-20s %d agent(s)", icon, t.Name, len(members))
+			if len(members) > 0 {
+				line += "   " + strings.Join(members, ", ")
+			}
+			fmt.Println(line)
+		}
+		return nil
+	},
+}
+
+// ── spwn team edit ──
+
+var editCmd = &cobra.Command{
+	Use:   "edit <slug>",
+	Short: "Edit a team's metadata",
+	Example: `  spwn team edit matrix-ops --icon 🔮 --color "#A855F7"
+  spwn team edit infra --description "Infrastructure & ops"`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		s := newStepper(cmd)
+		slug := args[0]
+
+		t, err := agentDomain.GetTeam(slug)
+		if err != nil {
+			return s.FailHint("Team not found", err, "Run \"spwn team ls\" to see all teams")
+		}
+
+		changed := false
+		if f := cmd.Flag("icon"); f != nil && f.Changed {
+			t.Icon = newIcon
+			changed = true
+		}
+		if f := cmd.Flag("color"); f != nil && f.Changed {
+			t.Color = newColor
+			changed = true
+		}
+		if f := cmd.Flag("description"); f != nil && f.Changed {
+			t.Description = newDesc
+			changed = true
+		}
+
+		if !changed {
+			fmt.Printf("  %s  %s (%s)\n", t.Icon, t.Name, t.Slug)
+			if t.Color != "" {
+				fmt.Printf("     color: %s\n", t.Color)
+			}
+			if t.Description != "" {
+				fmt.Printf("     %s\n", t.Description)
+			}
+			return nil
+		}
+
+		if err := agentDomain.UpdateTeam(*t); err != nil {
+			return err
+		}
+		s.Blank()
+		s.Done("Updated", t.Name)
+		s.Blank()
+		return nil
+	},
+}
+
+func init() {
+	editCmd.Flags().StringVar(&newIcon, "icon", "", "Emoji or single-char icon")
+	editCmd.Flags().StringVar(&newColor, "color", "", "Hex accent color")
+	editCmd.Flags().StringVar(&newDesc, "description", "", "Short description")
+}
+
+// ── spwn team rm ──
+
+var rmCmd = &cobra.Command{
+	Use:     "rm <slug>",
+	Aliases: []string{"remove", "delete"},
+	Short:   "Delete a team (agents become solo)",
+	Args:    cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		s := newStepper(cmd)
+		slug := args[0]
+
+		if err := agentDomain.DeleteTeam(slug); err != nil {
+			return s.FailHint("Delete failed", err, "Run \"spwn team ls\" to see teams")
+		}
+
+		s.Blank()
+		s.Done("Deleted team", slug)
+		s.Info("Note:", "Agents that referenced this team are now solo")
+		s.Blank()
+		return nil
+	},
+}
+
+// ── spwn team assign (shorthand for spwn agent team) ──
+
+var assignCmd = &cobra.Command{
+	Use:   "assign <agent-name> <team-slug>",
+	Short: "Assign an agent to a team (or --clear to remove)",
+	Example: `  spwn team assign neo matrix-ops
+  spwn team assign qa --clear`,
+	Args: cobra.RangeArgs(1, 2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		s := newStepper(cmd)
+		agentName := args[0]
+		teamSlug := ""
+
+		clear, _ := cmd.Flags().GetBool("clear")
+		if !clear && len(args) > 1 {
+			teamSlug = args[1]
+		}
+
+		if err := agentDomain.SetAgentTeam(agentName, teamSlug); err != nil {
+			return s.FailHint("Assign failed", err, "Check agent exists")
+		}
+
+		s.Blank()
+		if teamSlug == "" {
+			s.Done("Cleared team", agentName)
+		} else {
+			s.Done("Assigned", fmt.Sprintf("%s → %s", agentName, teamSlug))
+		}
+		s.Blank()
+		return nil
+	},
+}
+
+func init() {
+	assignCmd.Flags().Bool("clear", false, "Remove agent from team")
+}

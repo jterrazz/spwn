@@ -25,9 +25,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarLoading, setSidebarLoading] = useState(true);
   const [statusData, setStatusData] = useState<StatusData | null>(null);
 
-  // Extract current world ID from URL if on a world page
+  // Track the last-visited world so the sidebar remembers the selection
+  // across page navigations (e.g. going from /world/w-x to /agents).
   const worldMatch = pathname.match(/^\/world\/([^/]+)/);
-  const currentWorldId = worldMatch?.[1];
+  const urlWorldId = worldMatch?.[1];
+  const [lastWorldId, setLastWorldId] = useState<string | undefined>(urlWorldId);
+
+  useEffect(() => {
+    if (urlWorldId) setLastWorldId(urlWorldId);
+  }, [urlWorldId]);
+
+  const currentWorldId = urlWorldId ?? lastWorldId;
 
   const fetchWorlds = useCallback(() => {
     Promise.all([

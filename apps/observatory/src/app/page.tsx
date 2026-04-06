@@ -275,12 +275,11 @@ export default function UniverseMapPage() {
         <>
           {/* Worlds */}
           {worlds.length > 0 ? (
-            <div className="relative flex-1 min-h-[320px]">
             <div
-              className="overflow-hidden h-full flex items-center pb-24"
-              style={{ marginLeft: "calc(-50vw + 50%)", marginRight: "calc(-50vw + 50%)" }}
+              className="relative flex-1 min-h-[320px] -mx-6 md:-mx-8 overflow-hidden"
               onClick={(e) => { if (e.target === e.currentTarget && selected !== null) setSelected(null); }}
             >
+            <div className="h-full flex items-center pb-24">
               {/* Planets — full width scrollable */}
               <div
                 ref={scrollRef}
@@ -340,10 +339,10 @@ export default function UniverseMapPage() {
               const name = getWorldName(w);
               const isRunning = w.status === "running" || w.status === "idle";
               return (
+                <div className="absolute inset-y-0 right-6 md:right-8 w-[340px] z-10 flex items-center pb-24 pointer-events-none">
                 <div
                   ref={panelRef}
-                  className="absolute top-1/2 right-0 w-[340px] z-10 rounded-2xl overflow-hidden border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] animate-in fade-in slide-in-from-right-8 duration-600 ease-out"
-                  style={{ transform: "translateY(-50%)" }}
+                  className="w-full rounded-2xl overflow-hidden border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] pointer-events-auto animate-in fade-in slide-in-from-right-12 duration-500 ease-out"
                 >
                   {/* Header */}
                   <div className="px-5 pt-4 pb-3 flex items-center justify-between">
@@ -352,7 +351,7 @@ export default function UniverseMapPage() {
                       <div className="min-w-0">
                         <h3 className="font-heading text-sm tracking-wide text-foreground/90 truncate">{name}</h3>
                         <p className="text-[10px] font-mono text-muted-foreground/35 truncate">
-                          {w.config} · {w.agents.length} agent{w.agents.length === 1 ? "" : "s"}
+                          {w.config} · {w.status}
                         </p>
                       </div>
                     </div>
@@ -364,19 +363,56 @@ export default function UniverseMapPage() {
                     </button>
                   </div>
 
+                  {/* Stats row */}
+                  <div className="mx-5 border-t border-white/[0.06]" />
+                  <div className="px-5 py-3 flex gap-4">
+                    {[
+                      { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "—" },
+                      { label: "Agents", value: String(w.agents.length) },
+                      { label: "Workspaces", value: String(w.workspaces?.length ?? 0) },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="flex-1 text-center">
+                        <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/30">{label}</p>
+                        <p className="text-sm font-mono font-medium text-foreground/70 mt-0.5">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mx-5 border-t border-white/[0.06]" />
+
                   {/* Agents */}
                   {w.agents.length > 0 && (
-                    <div className="px-5 pb-3 flex flex-wrap gap-1.5">
-                      {w.agents.map((a) => (
-                        <button
-                          key={a.name}
-                          onClick={(e) => { e.stopPropagation(); router.push(`/world/${w.id}/${a.name}`); }}
-                          className="group/agent inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-full bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/80 transition-all"
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${a.status === "running" ? "bg-green-500" : a.status === "idle" ? "bg-amber-400" : "bg-zinc-500/30"}`} />
-                          {a.name}
-                        </button>
-                      ))}
+                    <div className="px-5 pb-3 pt-3">
+                      <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/30 mb-2">Agents</p>
+                      <div className="space-y-1">
+                        {w.agents.map((a) => (
+                          <button
+                            key={a.name}
+                            onClick={(e) => { e.stopPropagation(); router.push(`/world/${w.id}/${a.name}`); }}
+                            className="group/agent w-full flex items-center gap-2 text-[11px] font-mono px-2.5 py-1.5 rounded-lg hover:bg-white/[0.04] transition-all text-left"
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.status === "running" ? "bg-green-500" : a.status === "idle" ? "bg-amber-400" : "bg-zinc-500/30"}`} />
+                            <span className="flex-1 text-foreground/70 group-hover/agent:text-foreground/90 truncate">{a.name}</span>
+                            <span className="text-[9px] text-muted-foreground/30 uppercase tracking-wider">{a.status}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Workspaces */}
+                  {w.workspaces && w.workspaces.length > 0 && (
+                    <div className="px-5 pb-3">
+                      <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/30 mb-1.5">Workspaces</p>
+                      <div className="space-y-0.5">
+                        {w.workspaces.map((ws) => (
+                          <div key={ws.name} className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground/40">
+                            <span className="text-foreground/50">{ws.name}</span>
+                            <span className="truncate flex-1">{ws.path}</span>
+                            {ws.readonly && <span className="text-amber-400/50 text-[9px]">ro</span>}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -398,6 +434,7 @@ export default function UniverseMapPage() {
                       </button>
                     )}
                   </div>
+                </div>
                 </div>
               );
             })()}
@@ -453,7 +490,7 @@ export default function UniverseMapPage() {
         </div>
       )}
 
-      {/* Spawn World Dialog */}
+      {/* New World Dialog */}
       {showSpawn && (
         <SpawnWorldDialog onClose={() => setShowSpawn(false)} onComplete={handleSpawnComplete} />
       )}
@@ -514,13 +551,6 @@ function DashboardHeaderStats({
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-2 md:max-w-[620px]">
-      <ActionButton
-        compact
-        onClick={onSpawn}
-        label="Spawn World"
-        icon={<IconPlus size={18} stroke={2.4} />}
-      />
-
       <div
         className={`${GLASS_PILL_CLASS} flex h-[42px] flex-nowrap items-center justify-end gap-1 px-2.5 transition-all duration-300 ease-out`}
         onMouseEnter={() => setExpanded(true)}
@@ -559,6 +589,13 @@ function DashboardHeaderStats({
           </button>
         ))}
       </div>
+
+      <ActionButton
+        compact
+        onClick={onSpawn}
+        label="New World"
+        icon={<IconPlus size={18} stroke={2.4} />}
+      />
     </div>
   );
 }
@@ -626,7 +663,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
   const steps = [
     { num: 1, label: "Create Agent", icon: <IconUser size={14} /> },
     { num: 2, label: "Set Purpose", icon: <IconBulb size={14} /> },
-    { num: 3, label: "Spawn World", icon: <IconWorld size={14} /> },
+    { num: 3, label: "New World", icon: <IconWorld size={14} /> },
   ];
 
   return (
@@ -767,7 +804,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
               ) : (
                 <>
                   <IconRocket size={16} />
-                  Spawn World
+                  New World
                 </>
               )}
             </button>
@@ -784,7 +821,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-/* ── Spawn World Dialog ── */
+/* ── New World Dialog ── */
 
 interface SpawnAgentListItem {
   name: string;
@@ -909,7 +946,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-heading text-foreground/90">Spawn World</h2>
+            <h2 className="text-lg font-heading text-foreground/90">New World</h2>
             <p className="text-[11px] text-muted-foreground/40 mt-0.5">Create a new isolated world for your agent</p>
           </div>
           <button
@@ -1148,7 +1185,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
             ) : (
               <>
                 <IconRocket size={16} />
-                Spawn World
+                New World
               </>
             )}
           </button>

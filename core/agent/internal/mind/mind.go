@@ -12,6 +12,7 @@ import (
 type AgentInfo struct {
 	Name   string              `json:"name"`
 	Path   string              `json:"path"`
+	Team   string              `json:"team,omitempty"`
 	Layers map[string][]string `json:"layers"`
 }
 

@@ -6,6 +6,7 @@ import { goApiUrl } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { PageHeader } from "@/components/page-header";
 import { Page } from "@/components/page";
+import { ActionButton } from "@/components/action-button";
 import {
   IconKey,
   IconPlugConnected,
@@ -516,7 +517,19 @@ export default function ProvidersPage() {
 
   return (
     <Page>
-      <PageHeader title="Settings" description="Platform configuration — providers, authentication, and universe defaults." />
+      <PageHeader
+        title="Settings"
+        description="Platform configuration — providers, authentication, and universe defaults."
+        actions={
+          <ActionButton
+            compact
+            onClick={() => fetchProviders()}
+            disabled={loading}
+            label="Refresh"
+            icon={<IconRefresh size={16} stroke={2.2} className={loading ? "animate-spin" : ""} />}
+          />
+        }
+      />
 
       {/* AI Providers Section */}
       <div className="flex items-start justify-between flex-wrap gap-3">
@@ -544,14 +557,6 @@ export default function ProvidersPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => fetchProviders()}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all disabled:opacity-40"
-        >
-          <IconRefresh size={16} className={loading ? "animate-spin" : ""} />
-          Refresh
-        </button>
       </div>
 
       {/* Feedback toast */}

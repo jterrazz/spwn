@@ -15,6 +15,7 @@ import (
 	"spwn.sh/apps/cli/msg"
 	"spwn.sh/apps/cli/profile"
 	"spwn.sh/apps/cli/snap"
+	"spwn.sh/apps/cli/team"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/core/foundation"
@@ -75,6 +76,7 @@ func init() {
 	rootCmd.AddCommand(profile.Cmd)
 	rootCmd.AddCommand(msg.Cmd)
 	rootCmd.AddCommand(snap.Cmd)
+	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
 	rootCmd.AddCommand(knowledge.Cmd)

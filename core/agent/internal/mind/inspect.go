@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"spwn.sh/core/foundation"
+	"gopkg.in/yaml.v3"
 )
 
 // Inspect returns detailed information about an agent's Mind.
@@ -19,6 +20,17 @@ func Inspect(name string) (*AgentInfo, error) {
 		Name:   name,
 		Path:   dir,
 		Layers: make(map[string][]string),
+	}
+
+	// Read team from profile.yaml (if exists).
+	profilePath := filepath.Join(dir, "profile.yaml")
+	if data, err := os.ReadFile(profilePath); err == nil {
+		var p struct {
+			Team string `yaml:"team"`
+		}
+		if yaml.Unmarshal(data, &p) == nil {
+			info.Team = p.Team
+		}
 	}
 
 	for _, layer := range foundation.MindLayers {

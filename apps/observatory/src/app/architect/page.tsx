@@ -15,11 +15,15 @@ import {
   IconChevronRight,
   IconClipboardList,
   IconBook2,
+  IconPlayerPlay,
+  IconRefresh,
+  IconPlayerStop,
 } from "@tabler/icons-react";
 import { KnowledgeBrowser, KnowledgeUpdateCard } from "@/components/knowledge-browser";
 import { useArchitectChat, type StackData, type StackItem } from "@/contexts/architect-chat-context";
 import { PageHeader } from "@/components/page-header";
 import { Page } from "@/components/page";
+import { ActionButton } from "@/components/action-button";
 
 function StatCard({ label, value, sub, accent, icon, loading: isLoading }: { label: string; value: string; sub?: string; accent?: string; icon?: React.ReactNode; loading?: boolean }) {
   if (isLoading) {
@@ -304,29 +308,30 @@ export default function ArchitectPage() {
         actions={
           isRunning ? (
             <>
-              <button
+              <ActionButton
+                compact
                 onClick={handleStart}
                 disabled={actionLoading !== null}
-                className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-30"
-              >
-                {actionLoading === "start" ? "Restarting..." : "Restart"}
-              </button>
-              <button
+                label={actionLoading === "start" ? "Restarting…" : "Restart"}
+                icon={<IconRefresh size={16} stroke={2.2} />}
+              />
+              <ActionButton
+                compact
+                danger
                 onClick={handleStop}
                 disabled={actionLoading !== null}
-                className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-red-400/50 hover:text-red-400 transition-colors disabled:opacity-30"
-              >
-                {actionLoading === "stop" ? "Stopping..." : "Stop"}
-              </button>
+                label={actionLoading === "stop" ? "Stopping…" : "Stop"}
+                icon={<IconPlayerStop size={16} stroke={2.2} />}
+              />
             </>
           ) : (
-            <button
+            <ActionButton
+              compact
               onClick={handleStart}
               disabled={actionLoading !== null}
-              className="glass-subtle px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-green-400/50 hover:text-green-400 transition-colors disabled:opacity-30"
-            >
-              {actionLoading === "start" ? "Starting..." : "Start"}
-            </button>
+              label={actionLoading === "start" ? "Starting…" : "Start"}
+              icon={<IconPlayerPlay size={16} stroke={2.2} />}
+            />
           )
         }
       />
