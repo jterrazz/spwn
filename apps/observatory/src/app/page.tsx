@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useProgressMessages } from "@/hooks/use-progress-messages";
+import { ProgressShimmer } from "@/components/progress-shimmer";
 import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS, getWorkspaceSummary, getWorldName } from "@/lib/types";
@@ -599,6 +601,13 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
   const [error, setError] = useState("");
   const [working, setWorking] = useState(false);
 
+  const spawnProgressMessage = useProgressMessages(working && step === 3, [
+    { after: 0, text: "Creating world..." },
+    { after: 5, text: "Building Docker image (first run takes a few minutes)..." },
+    { after: 30, text: "Still building... installing dependencies..." },
+    { after: 60, text: "Almost there..." },
+  ]);
+
   const handleCreateAgent = async () => {
     if (!agentName.trim()) return;
     setWorking(true);
@@ -632,7 +641,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agent: agentName.trim(), workspaces: [{ name: "default", path: effectiveWorkspace }], config: "default", role: "worker" }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(600000), // 10 min — first run may build Docker images
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -784,7 +793,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
             <button
               onClick={handleSpawnWorld}
               disabled={working}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed ${working ? "animate-pulse" : ""}`}
             >
               {working ? (
                 <>
@@ -798,6 +807,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 </>
               )}
             </button>
+            <ProgressShimmer active={working} message={spawnProgressMessage} />
           </>
         )}
 
@@ -837,6 +847,13 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
   const [error, setError] = useState("");
   const [creatingAgent, setCreatingAgent] = useState(false);
   const [newAgentName, setNewAgentName] = useState("");
+
+  const spawnProgressMessage = useProgressMessages(spawning, [
+    { after: 0, text: "Creating world..." },
+    { after: 5, text: "Building Docker image (first run takes a few minutes)..." },
+    { after: 30, text: "Still building... installing dependencies..." },
+    { after: 60, text: "Almost there..." },
+  ]);
 
   // Generate a sensible default workspace path. Uses the first selected
   // agent's name when one exists, else a generic suffix.
@@ -906,7 +923,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
           config,
           role,
         }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(600000), // 10 min — first run may build Docker images
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -929,10 +946,19 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !spawning && onClose()} />
 
       {/* Dialog */}
-      <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl">
+      <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl overflow-hidden">
+        {/* Top shimmer bar */}
+        {spawning && (
+          <div className="w-full h-0.5 overflow-hidden bg-white/[0.04]">
+            <div
+              className="h-full w-1/3 rounded-full bg-emerald-500/30"
+              style={{ animation: "progressSlide 1.5s ease-in-out infinite" }}
+            />
+          </div>
+        )}
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-center justify-between">
           <div>
@@ -941,7 +967,8 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
           </div>
           <button
             onClick={onClose}
-            className="text-muted-foreground/40 hover:text-foreground/60 transition-colors"
+            disabled={spawning}
+            className="text-muted-foreground/40 hover:text-foreground/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <IconX size={18} />
           </button>
@@ -1165,7 +1192,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
           <button
             onClick={handleSpawn}
             disabled={spawning}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] hover:text-foreground/90 border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] hover:text-foreground/90 border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed ${spawning ? "animate-pulse" : ""}`}
           >
             {spawning ? (
               <>
@@ -1179,6 +1206,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
               </>
             )}
           </button>
+          <ProgressShimmer active={spawning} message={spawnProgressMessage} />
         </div>
       </div>
     </div>

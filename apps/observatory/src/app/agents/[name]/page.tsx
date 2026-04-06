@@ -34,6 +34,8 @@ import {
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { useProgressMessages } from "@/hooks/use-progress-messages";
+import { ProgressShimmer } from "@/components/progress-shimmer";
 import { ActionButton } from "@/components/action-button";
 import { PageHeader } from "@/components/page-header";
 import { SectionHeader, SectionLabel, SubLabel, Separator, MetricGrid, ItemList, StatusDot, KeyValue } from "@/components/ds";
@@ -73,6 +75,13 @@ function AgentProfilePage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [worldData, setWorldData] = useState<World | null>(null);
   const refetchSidebar = useRefetch();
+
+  const deployProgressMessage = useProgressMessages(deploying, [
+    { after: 0, text: "Deploying agent..." },
+    { after: 5, text: "Building Docker image (first run takes a few minutes)..." },
+    { after: 30, text: "Still building... installing dependencies..." },
+    { after: 60, text: "Almost there..." },
+  ]);
 
   usePageTitle(agentName, "Agent");
 
@@ -159,7 +168,7 @@ function AgentProfilePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: agentName, role: deployRole }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(600000), // 10 min — first run may build Docker images
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -304,7 +313,17 @@ function AgentProfilePage() {
       {showDeployDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !deploying && setShowDeployDialog(false)} />
-          <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
+          <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl overflow-hidden">
+            {/* Top shimmer bar */}
+            {deploying && (
+              <div className="w-full h-0.5 overflow-hidden bg-white/[0.04]">
+                <div
+                  className="h-full w-1/3 rounded-full bg-emerald-500/30"
+                  style={{ animation: "progressSlide 1.5s ease-in-out infinite" }}
+                />
+              </div>
+            )}
+            <div className="p-6">
             <h3 className="text-lg font-heading text-foreground/90 mb-1">Deploy to World</h3>
             <p className="text-sm text-muted-foreground/50 mb-5">
               Add <span className="font-mono text-foreground/70">{agentName}</span> to a running world.
@@ -399,6 +418,8 @@ function AgentProfilePage() {
                   </>
                 )}
               </button>
+            </div>
+            <ProgressShimmer active={deploying} message={deployProgressMessage} />
             </div>
           </div>
         </div>
