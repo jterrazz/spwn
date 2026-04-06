@@ -45,6 +45,9 @@ and a Mind (persistent agent identity).`,
 			return validateArchitectCommand(cmd)
 		}
 		startVersionCheck()
+		if err := runMigrations(); err != nil {
+			return err
+		}
 		return ensureDefaults()
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {

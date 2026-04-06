@@ -1,7 +1,6 @@
 package state
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -215,21 +214,9 @@ func (s *Store) load() ([]models.World, error) {
 	if len(data) == 0 {
 		return nil, nil
 	}
-	// One-time migration: rename legacy "tier" keys to "role" in raw JSON.
-	if bytes.Contains(data, []byte(`"tier"`)) {
-		data = bytes.ReplaceAll(data, []byte(`"tier"`), []byte(`"role"`))
-		_ = os.WriteFile(s.path, data, 0644)
-	}
 	var universes []models.World
 	if err := json.Unmarshal(data, &universes); err != nil {
 		return nil, fmt.Errorf("parse state: %w", err)
-	}
-	// Migrate legacy single-workspace field into Workspaces slice.
-	for i := range universes {
-		if len(universes[i].Workspaces) == 0 && universes[i].Workspace != "" {
-			universes[i].Workspaces = []models.Workspace{{Name: "default", Path: universes[i].Workspace}}
-		}
-		universes[i].Workspace = ""
 	}
 	return universes, nil
 }

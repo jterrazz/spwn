@@ -79,9 +79,6 @@ func (s *Server) requireArch(w http.ResponseWriter) bool {
 
 // Start begins serving the API.
 func (s *Server) Start() error {
-	// Ensure the default hierarchy exists on disk.
-	_ = agentpkg.EnsureDefaultHierarchy()
-
 	mux := http.NewServeMux()
 
 	// --- READ endpoints ---

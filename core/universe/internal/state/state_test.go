@@ -51,38 +51,8 @@ func TestRename(t *testing.T) {
 	}
 }
 
-// TestLoad_MigratesLegacyWorkspace verifies that a state file written before
-// multi-workspace support (single `workspace` string) is transparently migrated
-// into the Workspaces slice on load.
-func TestLoad_MigratesLegacyWorkspace(t *testing.T) {
-	dir := t.TempDir()
-	statePath := filepath.Join(dir, "state.json")
-
-	// Write a legacy-shaped state file by hand.
-	legacy := `[{"id":"u1","config":"default","backend":"docker","container_id":"c1","workspace":"/host/legacy","status":"idle","created_at":"0001-01-01T00:00:00Z"}]`
-	if err := os.WriteFile(statePath, []byte(legacy), 0644); err != nil {
-		t.Fatalf("write legacy state: %v", err)
-	}
-
-	s, err := NewStoreAt(statePath)
-	if err != nil {
-		t.Fatalf("NewStoreAt: %v", err)
-	}
-
-	u, err := s.Get("u1")
-	if err != nil {
-		t.Fatalf("Get: %v", err)
-	}
-	if len(u.Workspaces) != 1 {
-		t.Fatalf("expected 1 migrated workspace, got %d", len(u.Workspaces))
-	}
-	if u.Workspaces[0].Path != "/host/legacy" || u.Workspaces[0].Name != "default" {
-		t.Errorf("unexpected migrated workspace: %+v", u.Workspaces[0])
-	}
-	if u.Workspace != "" {
-		t.Errorf("expected legacy field cleared, got %q", u.Workspace)
-	}
-}
+// Legacy workspace migration is now handled by core/migration (migration 004).
+// The state store no longer does inline migration on load.
 
 // TestLoad_PreservesNewWorkspacesWhenBothPresent ensures that if a state file
 // somehow has both the legacy field and the new slice, the new slice wins.

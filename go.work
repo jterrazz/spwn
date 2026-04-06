@@ -6,6 +6,7 @@ use (
 	./core/foundation
 	./core/gate
 	./core/messenger
+	./core/migration
 	./core/universe
 	./platform/images
 )
