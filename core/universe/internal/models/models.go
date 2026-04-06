@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 
 	"spwn.sh/core/gate"
@@ -43,10 +44,28 @@ type Workspace struct {
 
 // AgentRecord represents a single agent within a universe colony.
 type AgentRecord struct {
-	Name    string `json:"name"`
-	AgentID string `json:"agent_id"`
-	Tier    string `json:"tier"`   // "governor" or "citizen"
-	Status  Status `json:"status"`
+	Name      string `json:"name"`
+	AgentID   string `json:"agent_id"`
+	Role      string `json:"role"`               // "governor", "citizen", or "npc"
+	Ephemeral bool   `json:"ephemeral,omitempty"` // true for NPC-style throwaway agents
+	Status    Status `json:"status"`
+}
+
+// UnmarshalJSON provides backward compatibility by reading the legacy "tier"
+// field into Role when Role is empty.
+func (a *AgentRecord) UnmarshalJSON(data []byte) error {
+	type Alias AgentRecord
+	aux := &struct {
+		Tier string `json:"tier"`
+		*Alias
+	}{Alias: (*Alias)(a)}
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+	if a.Role == "" && aux.Tier != "" {
+		a.Role = aux.Tier
+	}
+	return nil
 }
 
 // World represents a running or stopped universe instance.
@@ -64,6 +83,7 @@ type World struct {
 	Workspace   string        `json:"workspace,omitempty"`
 	MindPath    string        `json:"mind_path,omitempty"`
 	GateDir     string        `json:"gate_dir,omitempty"`
+	Hierarchy   string        `json:"hierarchy,omitempty"` // optional hierarchy name
 	Status      Status        `json:"status"`
 	CreatedAt   time.Time     `json:"created_at"`
 	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support

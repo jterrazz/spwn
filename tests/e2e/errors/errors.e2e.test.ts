@@ -43,10 +43,10 @@ describe("error handling", () => {
     expectLine(result.output, /world w-nonexistent-00000 not found/);
   });
 
-  test("agent --npc without --world flag", async () => {
-    // WHEN — running agent --npc without specifying a world
+  test("agent --ephemeral without --world flag", async () => {
+    // WHEN — running agent --ephemeral without specifying a world
     const result = await spwn("npc no world")
-      .exec("agent --npc lint-code")
+      .exec("agent --ephemeral lint-code")
       .run();
 
     // THEN — exits with error about required world flag

@@ -631,7 +631,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
       const res = await fetch(goApiUrl("/api/worlds"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent: agentName.trim(), workspaces: [{ name: "default", path: effectiveWorkspace }], config: "default", tier: "citizen" }),
+        body: JSON.stringify({ agent: agentName.trim(), workspaces: [{ name: "default", path: effectiveWorkspace }], config: "default", role: "citizen" }),
         signal: AbortSignal.timeout(30000),
       });
       const data = await res.json().catch(() => ({}));
@@ -831,7 +831,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
   const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
   const [workspaces, setWorkspaces] = useState<WorkspaceDraft[]>([{ name: "default", path: "", readonly: false }]);
   const [config, setConfig] = useState("default");
-  const [tier, setTier] = useState("citizen");
+  const [role, setRole] = useState("citizen");
   const [spawning, setSpawning] = useState(false);
   const [availableAgents, setAvailableAgents] = useState<SpawnAgentListItem[]>([]);
   const [error, setError] = useState("");
@@ -901,10 +901,10 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: worldName.trim(),
-          agents: Array.from(selectedAgents).map((n) => ({ name: n, tier })),
+          agents: Array.from(selectedAgents).map((n) => ({ name: n, role })),
           workspaces: cleanWorkspaces,
           config,
-          tier,
+          role,
         }),
         signal: AbortSignal.timeout(30000),
       });
@@ -1087,7 +1087,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
             )}
           </div>
 
-          {/* Config + Tier row */}
+          {/* Config + Role row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
@@ -1105,16 +1105,15 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
-                Agent Tier
+                Agent Role
               </label>
               <select
-                value={tier}
-                onChange={(e) => setTier(e.target.value)}
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.15] transition-colors"
               >
                 <option value="governor">Governor</option>
                 <option value="citizen">Citizen</option>
-                <option value="npc">NPC</option>
               </select>
             </div>
           </div>
@@ -1133,7 +1132,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
               <div className="rounded-lg bg-white/[0.02] border border-white/[0.05] px-3 py-3 space-y-2">
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-1">Preview</p>
                 <div className="font-mono text-[11px] text-muted-foreground/35 break-all">
-                  spwn up {agentFlags} --tier {tier} --config {config}{wsFlags ? " " + wsFlags : " (ephemeral)"}
+                  spwn up {agentFlags} --role {role} --config {config}{wsFlags ? " " + wsFlags : " (ephemeral)"}
                 </div>
                 <div className="text-[10px] text-muted-foreground/25 space-y-0.5">
                   <p>→ Creates isolated Docker container</p>

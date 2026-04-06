@@ -1,6 +1,6 @@
 export interface Agent {
   name: string;
-  tier: string;
+  role: string;
   status: string;
 }
 
@@ -66,7 +66,7 @@ export interface Team {
 
 export interface AgentProfile {
   name: string;
-  tier: "governor" | "citizen" | "npc";
+  role: string;
   team?: string;
   engine: string;
   provider: string;
@@ -109,5 +109,21 @@ export interface LogEntry {
 // Available configs for the Create World dialog
 export const AVAILABLE_CONFIGS = ["default", "backend", "frontend", "fullstack", "devops", "minimal"];
 
-// Available tiers for the Create Agent dialog
-export const AVAILABLE_TIERS = ["governor", "citizen", "npc"] as const;
+// Available roles for the Create Agent dialog
+export const AVAILABLE_ROLES = ["governor", "citizen"] as const;
+
+export interface HierarchyRole {
+  name: string;
+  level: number;
+  can_command?: string[];
+  reports_to?: string;
+  max_per_world?: number;
+  permissions?: string[];
+}
+
+export interface Hierarchy {
+  slug: string;
+  name: string;
+  description?: string;
+  roles: HierarchyRole[];
+}

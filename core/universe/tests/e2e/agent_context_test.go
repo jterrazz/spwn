@@ -15,8 +15,8 @@ func TestAgentContext_ContainsNewCLICommands(t *testing.T) {
 		NoAgent().
 		Execute()
 
-	// The AGENT.md is only generated for god-tier (via spawn with god config).
-	// For citizen tier, AGENT.md is generated when an agent is attached.
+	// The AGENT.md is only generated for god-role (via spawn with god config).
+	// For citizen role, AGENT.md is generated when an agent is attached.
 	// We need a world WITH an agent to get AGENT.md.
 	chain2 := setup.NewSpawnBuilder(t).
 		WithAgent("ctx-agent").
@@ -36,9 +36,9 @@ func TestAgentContext_ContainsNewCLICommands(t *testing.T) {
 	_ = chain // use chain to avoid unused variable
 }
 
-func TestAgentContext_GodTierContainsNewCommands(t *testing.T) {
-	// GIVEN a universe spawned with a god-tier agent context
-	// The god tier AGENT.md is the one that contains CLI commands.
+func TestAgentContext_GodRoleContainsNewCommands(t *testing.T) {
+	// GIVEN a universe spawned with a god-role agent context
+	// The god role AGENT.md is the one that contains CLI commands.
 	// We test the GenerateAgentContext function directly via the container output.
 
 	tc := setup.NewTestContext(t)
@@ -48,7 +48,7 @@ func TestAgentContext_GodTierContainsNewCommands(t *testing.T) {
 		WithAgent("god-agent").
 		Execute()
 
-	// The AGENT.md for a citizen won't have CLI commands (only god tier does).
+	// The AGENT.md for a citizen won't have CLI commands (only god role does).
 	// But we can verify the citizen AGENT.md has correct structure.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()

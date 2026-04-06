@@ -61,6 +61,11 @@ func TeamsDir() string {
 	return filepath.Join(BaseDir(), TeamsSubDir)
 }
 
+// HierarchiesDir returns the path to ~/.spwn/hierarchies/.
+func HierarchiesDir() string {
+	return filepath.Join(BaseDir(), HierarchiesSubDir)
+}
+
 // ActivityPath returns the path to ~/.spwn/activity.jsonl.
 func ActivityPath() string {
 	return filepath.Join(BaseDir(), ActivityFileName)

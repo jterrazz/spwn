@@ -24,9 +24,9 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 - **Architect**: The always-on orchestration daemon (ZeroClaw implementation). Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 - **Universe**: The reality — physics, constants, resource limits. One per org. Configured in `universe.yaml`. Defines what is physically possible.
 - **World**: A living workspace inside the universe. Has agents, elements, and a project. Many per universe. Configured in `~/.spwn/worlds/`.
-- **Governor**: Leader agent inside a world. Decomposes tasks, delegates to citizens, aggregates results.
-- **Citizen**: Persistent worker agent. Has a Profile — remembers, learns, evolves.
-- **NPC**: Ephemeral agent. No Profile, no memory. Single task, fire & forget.
+- **Leader**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
+- **Worker**: Persistent worker agent. Has a Profile — remembers, learns, evolves.
+- **Ephemeral**: Ephemeral agent. No Profile, no memory. Single task, fire & forget.
 - **Observatory**: Visual dashboard. Real-time view of everything.
 
 ### The Physics
@@ -37,7 +37,7 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 ### The Profile
 - **Profile**: Persistent identity — persona, traits, purpose, bonds, skills, memory (knowledge, playbooks, journal), sessions.
 - **Identity**: Core character — persona, purpose, traits. Lives in `identity/` directory.
-- **Profile Manifest**: `profile.yaml` — declares tier, engine, identity, requires, delegation.
+- **Profile Manifest**: `profile.yaml` — declares role, engine, identity, requires, delegation.
 
 ### The Bridge
 - **Gate**: Bridge between universe and host. Host-side (Go) manages element bridging. Container-side (Rivet) normalizes runtimes.
@@ -54,7 +54,7 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 # World operations (top-level)
 spwn up --agent neo -w ./my-project --detach   # Spawn a world
 spwn up -c acme-org                            # Named config
-spwn up --governor morpheus -w ~/acme-org
+spwn up --leader morpheus -w ~/acme-org
 spwn ls                                        # List active worlds
 spwn inspect <id>                              # Show world details
 spwn down <id>                                 # Destroy a world
@@ -84,7 +84,7 @@ spwn profile <name> knowledge                  # List knowledge
 spwn profile <name> journal                    # Session history
 spwn profile <name> sessions                   # Active sessions
 spwn profile <name> edit                       # Edit profile.yaml
-spwn profile <name> tier                       # Show/set agent tier
+spwn profile <name> role                       # Show/set agent role
 spwn profile <name> engine                     # Show/set runtime engine
 
 # Messaging
@@ -119,8 +119,8 @@ spwn auth login                                # Login
 spwn auth logout                               # Logout
 spwn auth token                                # Show/manage tokens
 
-# NPC (ephemeral)
-spwn agent --npc "task" --world w-acme-84721
+# Ephemeral agent
+spwn agent --ephemeral "task" --world w-acme-84721
 ```
 
 **Design rules:**
@@ -148,7 +148,7 @@ spwn agent --npc "task" --world w-acme-84721
 │   └── acme-org.yaml
 ├── agents/
 │   └── neo/
-│       ├── profile.yaml     # Tier, engine, identity, requires, delegation
+│       ├── profile.yaml     # Role, engine, identity, requires, delegation
 │       ├── identity/        # persona.md, purpose.md, traits.md
 │       ├── skills/          # Agent skills
 │       ├── memory/

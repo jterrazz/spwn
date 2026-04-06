@@ -243,7 +243,7 @@ export function StatusDot({ status, size = "sm", className }: StatusDotProps) {
 // Each column is defined by a key, label, and optional render function.
 //
 //   ┌─────────────────────────────────────────────┐
-//   │ NAME           TIER        STATUS            │
+//   │ NAME           ROLE        STATUS            │
 //   ├─────────────────────────────────────────────┤
 //   │ QA Eng         citizen     ● running         │
 //   │ Coder          governor    ● idle            │

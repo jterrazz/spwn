@@ -360,8 +360,8 @@ func TestDestroy_MultiAgentWritesAllJournals(t *testing.T) {
 		Status:      models.StatusRunning,
 		CreatedAt:   time.Now().Add(-10 * time.Minute),
 		Agents: []models.AgentRecord{
-			{Name: "governor-a", AgentID: "a-governor-a-11111", Tier: "governor", Status: models.StatusRunning},
-			{Name: "citizen-b", AgentID: "a-citizen-b-22222", Tier: "citizen", Status: models.StatusRunning},
+			{Name: "governor-a", AgentID: "a-governor-a-11111", Role: "governor", Status: models.StatusRunning},
+			{Name: "citizen-b", AgentID: "a-citizen-b-22222", Role: "citizen", Status: models.StatusRunning},
 		},
 	}
 	store.Save(w)

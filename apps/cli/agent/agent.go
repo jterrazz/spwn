@@ -12,17 +12,20 @@ import (
 )
 
 var (
-	spawnName  string
-	spawnWorld string
-	spawnImport string
-	npcTask    string
+	spawnName     string
+	spawnWorld    string
+	spawnImport   string
+	ephemeralTask string
+	npcTaskCompat string // deprecated alias for ephemeralTask
 )
 
 func init() {
 	Cmd.Flags().StringVarP(&spawnName, "name", "n", "", "Agent name (default: default)")
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Target world ID")
 	Cmd.Flags().StringVar(&spawnImport, "import", "", "Import Mind from tar.gz before spawning")
-	Cmd.Flags().StringVar(&npcTask, "npc", "", "Run as NPC — no Mind, no memory, just execute this task")
+	Cmd.Flags().StringVar(&ephemeralTask, "ephemeral", "", "Run as ephemeral agent — no Mind, no memory, just execute this task")
+	Cmd.Flags().StringVar(&npcTaskCompat, "npc", "", "Run as ephemeral agent (deprecated: use --ephemeral)")
+	_ = Cmd.Flags().MarkHidden("npc")
 
 	defaultAgentHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(agentHelp)
@@ -59,7 +62,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "import <path>", Desc: "Import profile from tar.gz"},
 			}},
 			{Title: "Spawn Flags", Commands: []ui.HelpEntry{
-				{Name: "--npc <task>", Desc: "Run as NPC (fire-and-forget)"},
+				{Name: "--ephemeral <task>", Desc: "Run as ephemeral agent (fire-and-forget)"},
 				{Name: "-u, --world <id>", Desc: "Target world ID"},
 			}},
 		},
@@ -79,24 +82,30 @@ An agent is backed by a Mind — a persistent directory of personas, skills,
 knowledge, playbooks, journal entries, and session state. The agent survives
 after the world is destroyed.`,
 	Example: `  spwn agent -n neo -u w-abc123      Spawn named agent into world
-  spwn agent --npc "run tests"       Fire-and-forget NPC task
+  spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task
   spwn agent --import backup.tar.gz  Import a Mind archive first`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// If no flags set at all, show help
 		if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
-			!cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {
+			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {
 			return cmd.Help()
 		}
 
 		ctx := context.Background()
 		s := newStepper(cmd)
 
-		// NPC mode — no Mind, no identity, just execute
-		if npcTask != "" {
+		// Support deprecated --npc alias
+		task := ephemeralTask
+		if task == "" {
+			task = npcTaskCompat
+		}
+
+		// Ephemeral mode — no Mind, no identity, just execute
+		if task != "" {
 			worldID := spawnWorld
 			if worldID == "" {
 				s.Blank()
-				return s.FailHint("NPC requires --world", fmt.Errorf("no world specified"),
+				return s.FailHint("Ephemeral requires --world", fmt.Errorf("no world specified"),
 					"Run \"spwn ls\" to see active worlds")
 			}
 			arc, err := universe.NewArchitectFromEnv()
@@ -105,9 +114,9 @@ after the world is destroyed.`,
 				return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 			}
 			s.Blank()
-			s.Done("NPC dispatched", fmt.Sprintf("%q → %s", npcTask, worldID))
+			s.Done("Ephemeral dispatched", fmt.Sprintf("%q → %s", task, worldID))
 			s.Blank()
-			return arc.SpawnNPC(ctx, worldID, npcTask)
+			return arc.SpawnNPC(ctx, worldID, task)
 		}
 
 		agentName := "default"

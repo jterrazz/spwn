@@ -55,7 +55,7 @@ describe("full agent lifecycle", () => {
     expect(profileResult.exitCode).toBe(0);
     const profileOut = stripAnsi(profileResult.output);
     expect(profileOut).toContain("neo");
-    expect(profileOut).toContain("Tier");
+    expect(profileOut).toContain("Role");
     expect(profileOut).toContain("citizen");
     expect(profileOut).toContain("Identity");
 
@@ -141,7 +141,7 @@ describe("full agent lifecycle", () => {
     expect(forkProfileResult.exitCode).toBe(0);
     const forkProfileOut = stripAnsi(forkProfileResult.output);
     expect(forkProfileOut).toContain("neo-v2");
-    expect(forkProfileOut).toContain("Tier");
+    expect(forkProfileOut).toContain("Role");
     expect(forkProfileOut).toContain("Identity");
 
     // Verify forked agent has identity layer on disk

@@ -65,7 +65,7 @@ func profileHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Config", Commands: []ui.HelpEntry{
 				{Name: "edit", Desc: "Open profile.yaml in $EDITOR"},
-				{Name: "tier", Desc: "View/change tier"},
+				{Name: "role", Desc: "View/change role"},
 				{Name: "engine", Desc: "View/change runtime engine"},
 			}},
 		},
@@ -120,8 +120,8 @@ var Cmd = &cobra.Command{
 			return showSessions(cmd, name)
 
 		// Config
-		case "tier":
-			return showOrSetTier(cmd, name)
+		case "role", "tier":
+			return showOrSetRole(cmd, name)
 		case "engine":
 			return showOrSetEngine(cmd, name)
 		case "edit":
@@ -164,7 +164,7 @@ func agentNotFoundError(name string) error {
 
 // ProfileYAML represents the profile.yaml manifest.
 type ProfileYAML struct {
-	Tier    string        `yaml:"tier,omitempty"`
+	Role    string        `yaml:"role,omitempty"`
 	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
 }
 
@@ -208,8 +208,8 @@ func defaultProfile() *ProfileYAML {
 }
 
 func applyProfileDefaults(p *ProfileYAML) {
-	if p.Tier == "" {
-		p.Tier = "citizen"
+	if p.Role == "" {
+		p.Role = "citizen"
 	}
 	if p.Runtime.Engine == "" {
 		p.Runtime.Engine = "claude-code"
@@ -397,7 +397,11 @@ func showCharacterSheet(cmd *cobra.Command, name string) error {
 	fmt.Fprintf(w, "  │%s│\n", strings.Repeat(" ", inner+2))
 
 	// General
-	printSheetRow(w, inner, "Tier", profile.Tier)
+	roleLabel := profile.Role
+	if roleLabel == "" {
+		roleLabel = "(none)"
+	}
+	printSheetRow(w, inner, "Role", roleLabel)
 	printSheetRow(w, inner, "Engine", engineStr)
 	printSheetRow(w, inner, "Created", created)
 	printSheetRow(w, inner, "Sessions", fmt.Sprintf("%d total", sessionCount))
@@ -628,28 +632,25 @@ func showSessions(cmd *cobra.Command, name string) error {
 	return nil
 }
 
-// ── tier ────────────────────────────────────────────────────────────────────
+// ── role ────────────────────────────────────────────────────────────────────
 
-func showOrSetTier(cmd *cobra.Command, name string) error {
+func showOrSetRole(cmd *cobra.Command, name string) error {
 	if !agentExists(name) {
 		return agentNotFoundError(name)
 	}
 
 	if setFlag != "" {
-		if setFlag != "governor" && setFlag != "citizen" {
-			return fmt.Errorf("tier must be \"governor\" or \"citizen\"")
-		}
 		p, err := loadProfileYAML(name)
 		if err != nil {
 			return err
 		}
-		p.Tier = setFlag
+		p.Role = setFlag
 		if err := saveProfileYAML(name, p); err != nil {
 			return err
 		}
 		s := newStepper(cmd)
 		s.Blank()
-		s.Done("Tier updated", setFlag)
+		s.Done("Role updated", setFlag)
 		s.Blank()
 		return nil
 	}
@@ -661,7 +662,11 @@ func showOrSetTier(cmd *cobra.Command, name string) error {
 
 	s := newStepper(cmd)
 	s.Blank()
-	s.Info("Tier:", p.Tier)
+	roleLabel := p.Role
+	if roleLabel == "" {
+		roleLabel = "(none)"
+	}
+	s.Info("Role:", roleLabel)
 	s.Blank()
 	return nil
 }

@@ -15,7 +15,7 @@ func TestColony_GovernorAndCitizenSpawn(t *testing.T) {
 	// similar), this test should:
 	// 1. Spawn a world with a governor + citizen agent spec
 	// 2. Verify both agents' Mind directories are mounted
-	// 3. Verify AGENT.md for each tier is correct
+	// 3. Verify AGENT.md for each role is correct
 	// 4. Verify messaging between governor and citizen works
 	//
 	// Tracking: requires Architect.SpawnColony() or multi-agent SpawnOpts.
@@ -28,7 +28,7 @@ func TestColony_GovernorAndCitizenSpawn(t *testing.T) {
 	//
 	// Write profile.yaml for governor:
 	// govDir := filepath.Join(tc.BaseDir, "agents", "gov-agent")
-	// os.WriteFile(filepath.Join(govDir, "profile.yaml"), []byte("tier: governor\n"), 0644)
+	// os.WriteFile(filepath.Join(govDir, "profile.yaml"), []byte("role: governor\n"), 0644)
 	//
 	// chain := tc.Spawn().
 	//     WithAgent("gov-agent").
@@ -43,13 +43,13 @@ func TestColony_GovernorAndCitizenSpawn(t *testing.T) {
 }
 
 func TestColony_SingleAgentDefaultsToCitizen(t *testing.T) {
-	// GIVEN an agent without a profile.yaml (no tier specified)
+	// GIVEN an agent without a profile.yaml (no role specified)
 	// WHEN spawned into a world
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		Execute()
 
-	// THEN the state should track it (tier defaults to citizen internally)
+	// THEN the state should track it (role defaults to citizen internally)
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 		s.HasAgent("test-agent")
@@ -80,14 +80,14 @@ func TestColony_AgentMindLayersPresent(t *testing.T) {
 	})
 }
 
-func TestColony_TierFromProfileYAML(t *testing.T) {
-	// BLOCKED: Tier assignment from profile.yaml requires multi-agent colony support.
-	// The profile.yaml tier field is parsed but not yet used in spawn because
+func TestColony_RoleFromProfileYAML(t *testing.T) {
+	// BLOCKED: Role assignment from profile.yaml requires multi-agent colony support.
+	// The profile.yaml role field is parsed but not yet used in spawn because
 	// the Architect only supports single-agent worlds. When colony spawn is
-	// added, verify that the tier from profile.yaml is reflected in AgentRecord.
+	// added, verify that the role from profile.yaml is reflected in AgentRecord.
 	//
 	// Tracking: depends on TestColony_GovernorAndCitizenSpawn being unblocked.
-	t.Skip("Colony tier assignment from profile.yaml not yet testable via E2E")
+	t.Skip("Colony role assignment from profile.yaml not yet testable via E2E")
 }
 
 func TestColony_MessagingBetweenAgents(t *testing.T) {

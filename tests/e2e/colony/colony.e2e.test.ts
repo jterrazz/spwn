@@ -18,21 +18,21 @@ describe("colony E2E", () => {
     ctx?.cleanup();
   });
 
-  // ── Governor + Citizen spawn together ─────────────────────
+  // ── Leader + Worker spawn together ─────────────────────
 
-  test("governor and citizen both appear in running world", () => {
-    // GIVEN — two agents: morpheus (governor) and neo (citizen, auto-created)
+  test("leader and worker both appear in running world", () => {
+    // GIVEN — two agents: morpheus (leader) and neo (worker, auto-created)
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
 
-    // WHEN — spawning with governor + citizen using 'up' alias
+    // WHEN — spawning with leader + worker using 'up' alias
     const spawnResult = ctx.spwn(
       [
         "up",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -54,8 +54,8 @@ describe("colony E2E", () => {
     expect(stripAnsi(listResult.output)).toContain(id);
   });
 
-  test("governor AGENT.md says tier governor", () => {
-    // GIVEN — colony with governor
+  test("leader AGENT.md says role governor", () => {
+    // GIVEN — colony with leader
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
@@ -64,7 +64,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -74,14 +74,14 @@ describe("colony E2E", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — governor's AGENT.md mentions governor tier
+    // THEN — leader's AGENT.md mentions governor role
     const agentMd = ctx.universe(id).readFile("/world/AGENT.md");
     expect(agentMd).toContain("Governor");
     expect(agentMd).toContain("morpheus");
   });
 
-  test("citizen AGENT.md says tier citizen in colony", () => {
-    // GIVEN — colony with governor + citizen
+  test("worker AGENT.md says role citizen in colony", () => {
+    // GIVEN — colony with leader + worker
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
@@ -90,7 +90,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -100,7 +100,7 @@ describe("colony E2E", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — citizen's context references citizen role
+    // THEN — worker's context references citizen role
     const agentMd = ctx.universe(id).readFile("/world/AGENT.md");
     expect(agentMd).toContain("Citizen");
     expect(agentMd).toContain("neo");
@@ -108,7 +108,7 @@ describe("colony E2E", () => {
 
   // ── Inter-agent messaging in colony ──────────────────────
 
-  test("governor can send message to citizen in colony", () => {
+  test("leader can send message to worker in colony", () => {
     // GIVEN — colony running
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
@@ -118,7 +118,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -128,7 +128,7 @@ describe("colony E2E", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // WHEN — governor sends message to citizen
+    // WHEN — leader sends message to worker
     const sendResult = ctx.spwn([
       "agent",
       "send",
@@ -143,7 +143,7 @@ describe("colony E2E", () => {
     expectLine(sendResult.output, /Sent message\s+morpheus → neo/);
   });
 
-  test("citizen inbox shows message from governor in colony", () => {
+  test("worker inbox shows message from leader in colony", () => {
     // GIVEN — colony running with message sent
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
@@ -153,7 +153,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -171,7 +171,7 @@ describe("colony E2E", () => {
       "implement auth module",
     ]);
 
-    // WHEN — checking citizen inbox
+    // WHEN — checking worker inbox
     const inboxResult = ctx.spwn(["agent", "inbox", "neo"]);
 
     // THEN — message appears with correct sender and content
@@ -191,7 +191,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -213,10 +213,10 @@ describe("colony E2E", () => {
     ctx.universe(id).toHaveDirectory("/world/inbox/neo");
   });
 
-  // ── Governor sees all citizens ────────────────────────────
+  // ── Leader sees all workers ────────────────────────────
 
   test("AGENT.md references both agents in colony", () => {
-    // GIVEN — colony with governor + citizen
+    // GIVEN — colony with leader + worker
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
@@ -225,7 +225,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -251,7 +251,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -279,7 +279,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -323,7 +323,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -357,7 +357,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -387,7 +387,7 @@ describe("colony E2E", () => {
 
   // ── Multiple messages in colony ───────────────────────────
 
-  test("multiple messages between governor and citizen all appear", () => {
+  test("multiple messages between leader and worker all appear", () => {
     // GIVEN — colony running
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
@@ -397,7 +397,7 @@ describe("colony E2E", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,

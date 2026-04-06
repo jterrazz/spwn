@@ -14,7 +14,7 @@ interface PlanetProps {
   hideLabels?: boolean;
 }
 
-// Status → planet "life signal": saturation (how vivid the hue renders) + brightness tier.
+// Status → planet "life signal": saturation (how vivid the hue renders) + brightness level.
 // We keep a semantic bottom-dot color independent so status is still readable at a glance.
 // Saturation is deliberately muted — each world still has a recognizable
 // hue, but the palette leans toward grey so the planets read as part of
@@ -66,7 +66,7 @@ function getPlanetConfig(worldId: string, status: string) {
   };
 }
 
-const TIER_ICON: Record<string, string> = {
+const ROLE_ICON: Record<string, string> = {
   governor: "♛",
   citizen: "◉",
   npc: "◌",

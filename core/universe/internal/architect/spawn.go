@@ -369,7 +369,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	if len(opts.Agents) > 0 {
 		// Multi-agent: generate AGENT-{name}.md for each agent
 		for i, spec := range opts.Agents {
-			tier := manifest.DefaultTier(spec.Tier)
+			role := manifest.DefaultRole(spec.Role)
 
 			// Build list of other agents (everyone except this one)
 			var others []physics.AgentInfo
@@ -378,16 +378,16 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 				if i == j {
 					continue
 				}
-				otherTier := manifest.DefaultTier(other.Tier)
-				others = append(others, physics.AgentInfo{Name: other.Name, Tier: otherTier})
-				if otherTier == "governor" {
+				otherRole := manifest.DefaultRole(other.Role)
+				others = append(others, physics.AgentInfo{Name: other.Name, Role: otherRole})
+				if otherRole == "governor" {
 					governorName = other.Name
 				}
 			}
 
 			agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
 				AgentName:   spec.Name,
-				Tier:        tier,
+				Role:        role,
 				WorldID:     id,
 				Workspaces:  resolvedWorkspaces,
 				Elements:    verifiedElements,
@@ -409,7 +409,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		for _, spec := range opts.Agents {
 			colonySpecs = append(colonySpecs, physics.ColonyAgentSpec{
 				Name: spec.Name,
-				Tier: manifest.DefaultTier(spec.Tier),
+				Role: manifest.DefaultRole(spec.Role),
 			})
 		}
 		combinedCtx := physics.GenerateColonyContext(id, colonySpecs)
@@ -422,7 +422,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		// Single agent: generate /world/AGENT.md
 		agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
 			AgentName:  opts.AgentName,
-			Tier:       "citizen",
+			Role:       "citizen",
 			WorldID:    id,
 			Workspaces: resolvedWorkspaces,
 			Elements:   verifiedElements,
@@ -483,11 +483,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		u.Agent = opts.Agents[0].Name
 		u.AgentID = foundation.GenerateAgentID(opts.Agents[0].Name)
 		for _, spec := range opts.Agents {
-			tier := manifest.DefaultTier(spec.Tier)
+			role := manifest.DefaultRole(spec.Role)
 			u.Agents = append(u.Agents, models.AgentRecord{
 				Name:    spec.Name,
 				AgentID: foundation.GenerateAgentID(spec.Name),
-				Tier:    tier,
+				Role:    role,
 				Status:  models.StatusIdle,
 			})
 		}

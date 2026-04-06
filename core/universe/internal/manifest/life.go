@@ -13,7 +13,7 @@ import (
 // Optional: if life.yaml doesn't exist in the agent directory, the agent dir is used as-is.
 type LifeManifest struct {
 	Name    string        `yaml:"name"`
-	Tier    string        `yaml:"tier"`    // "governor" or "citizen" (default: "citizen")
+	Role    string        `yaml:"role"`    // "governor" or "citizen" (default: "citizen")
 	Runtime RuntimeConfig `yaml:"runtime"` // optional runtime override
 	Soul    SoulManifest  `yaml:"soul"`
 	Mind    MindManifest  `yaml:"mind"`
@@ -45,12 +45,17 @@ type BodyManifest struct {
 	Requires []string `yaml:"requires"`
 }
 
-// DefaultTier returns the effective tier, defaulting to "citizen" if empty.
-func DefaultTier(tier string) string {
-	if tier == "" {
+// DefaultRole returns the effective role, defaulting to "citizen" if empty.
+func DefaultRole(role string) string {
+	if role == "" {
 		return "citizen"
 	}
-	return tier
+	return role
+}
+
+// DefaultTier is a deprecated wrapper for DefaultRole. Use DefaultRole instead.
+func DefaultTier(tier string) string {
+	return DefaultRole(tier)
 }
 
 // LoadLife reads life.yaml from an agent directory.

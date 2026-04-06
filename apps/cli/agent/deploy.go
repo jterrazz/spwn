@@ -8,10 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var deployTier string
+var deployRole string
 
 func init() {
-	deployCmd.Flags().StringVar(&deployTier, "tier", "citizen", "Agent tier: governor or citizen")
+	deployCmd.Flags().StringVar(&deployRole, "role", "citizen", "Agent role in the world hierarchy")
 	Cmd.AddCommand(deployCmd)
 }
 
@@ -24,7 +24,7 @@ mounted and a Claude Code session starts in the background.
 The world must be running (idle or active). The agent must not already
 be deployed in that world.`,
 	Example: `  spwn agent deploy neo w-mars-47965
-  spwn agent deploy morpheus w-mars-47965 --tier governor`,
+  spwn agent deploy morpheus w-mars-47965 --role governor`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agentName := args[0]
@@ -40,12 +40,12 @@ be deployed in that world.`,
 		s.Blank()
 		s.Start(fmt.Sprintf("Deploying %s to %s...", agentName, worldID))
 
-		if err := arc.DeployAgent(ctx, worldID, agentName, deployTier); err != nil {
+		if err := arc.DeployAgent(ctx, worldID, agentName, deployRole); err != nil {
 			return s.FailHint("Deploy failed", err,
 				fmt.Sprintf("Check that %q exists and world %q is running", agentName, worldID))
 		}
 
-		s.Done("Deployed", fmt.Sprintf("%s → %s (%s)", agentName, worldID, deployTier))
+		s.Done("Deployed", fmt.Sprintf("%s → %s (%s)", agentName, worldID, deployRole))
 		s.Blank()
 		return nil
 	},

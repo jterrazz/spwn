@@ -9,25 +9,25 @@ import (
 // These tests pin the JSON shape of POST /api/worlds/{id}/agents so the
 // "deploy agent to running world" endpoint can never silently regress.
 
-func TestDeployAgentRequest_DecodesNameAndTier(t *testing.T) {
-	raw := `{"name": "neo", "tier": "governor"}`
+func TestDeployAgentRequest_DecodesNameAndRole(t *testing.T) {
+	raw := `{"name": "neo", "role": "governor"}`
 	var body struct {
 		Name string `json:"name"`
-		Tier string `json:"tier"`
+		Role string `json:"role"`
 	}
 	if err := json.NewDecoder(strings.NewReader(raw)).Decode(&body); err != nil {
 		t.Fatalf("decode: %v", err)
 	}
-	if body.Name != "neo" || body.Tier != "governor" {
-		t.Errorf("expected neo/governor, got %q/%q", body.Name, body.Tier)
+	if body.Name != "neo" || body.Role != "governor" {
+		t.Errorf("expected neo/governor, got %q/%q", body.Name, body.Role)
 	}
 }
 
-func TestDeployAgentRequest_TierDefaults(t *testing.T) {
+func TestDeployAgentRequest_RoleDefaults(t *testing.T) {
 	raw := `{"name": "qa"}`
 	var body struct {
 		Name string `json:"name"`
-		Tier string `json:"tier"`
+		Role string `json:"role"`
 	}
 	if err := json.NewDecoder(strings.NewReader(raw)).Decode(&body); err != nil {
 		t.Fatalf("decode: %v", err)
@@ -35,14 +35,14 @@ func TestDeployAgentRequest_TierDefaults(t *testing.T) {
 	if body.Name != "qa" {
 		t.Errorf("name = %q", body.Name)
 	}
-	// Empty tier: the handler should default to "citizen" via manifest.DefaultTier.
-	if body.Tier != "" {
-		t.Errorf("tier should be empty (defaulted server-side), got %q", body.Tier)
+	// Empty role: the handler should default to "citizen" via manifest.DefaultRole.
+	if body.Role != "" {
+		t.Errorf("role should be empty (defaulted server-side), got %q", body.Role)
 	}
 }
 
 func TestDeployAgentRequest_EmptyNameRejected(t *testing.T) {
-	raw := `{"tier": "citizen"}`
+	raw := `{"role": "citizen"}`
 	var body struct {
 		Name string `json:"name"`
 	}

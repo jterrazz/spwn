@@ -10,7 +10,7 @@ import (
 func TestGenerateGovernorContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "morpheus",
-		Tier:      "governor",
+		Role:      "governor",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
 		Elements:  []string{"bash", "git", "node"},
@@ -18,8 +18,8 @@ func TestGenerateGovernorContext(t *testing.T) {
 		Memory:    "4g",
 		Timeout:   "30m",
 		OtherAgents: []AgentInfo{
-			{Name: "neo", Tier: "citizen"},
-			{Name: "trinity", Tier: "citizen"},
+			{Name: "neo", Role: "citizen"},
+			{Name: "trinity", Role: "citizen"},
 		},
 	})
 
@@ -54,7 +54,7 @@ func TestGenerateGovernorContext(t *testing.T) {
 func TestGenerateCitizenContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "neo",
-		Tier:      "citizen",
+		Role:      "citizen",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
 		Elements:  []string{"bash", "git"},
@@ -63,7 +63,7 @@ func TestGenerateCitizenContext(t *testing.T) {
 		Timeout:   "30m",
 		Governor:  "morpheus",
 		OtherAgents: []AgentInfo{
-			{Name: "trinity", Tier: "citizen"},
+			{Name: "trinity", Role: "citizen"},
 		},
 	})
 
@@ -93,7 +93,7 @@ func TestGenerateCitizenContext(t *testing.T) {
 
 func TestGenerateNPCContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
-		Tier:     "npc",
+		Role:     "npc",
 		WorldID:  "w-acme-28373",
 		NPCTask:  "lint src/",
 		Elements: []string{"bash"},
@@ -124,7 +124,7 @@ func TestGenerateNPCContext(t *testing.T) {
 func TestGenerateGodContext_ContainsNewCLICommands(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "architect",
-		Tier:      "god",
+		Role:      "god",
 		WorldID:   "w-test-99999",
 	})
 
@@ -160,7 +160,7 @@ func TestGenerateGodContext_ContainsNewCLICommands(t *testing.T) {
 func TestGenerateGodContext_ContainsAllSections(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "architect",
-		Tier:      "god",
+		Role:      "god",
 		WorldID:   "w-test-99999",
 		Elements:  []string{"bash", "git"},
 		CPU:       4,
@@ -191,15 +191,15 @@ func TestGenerateGodContext_ContainsAllSections(t *testing.T) {
 	}
 }
 
-func TestGenerateCitizenContext_DefaultTier(t *testing.T) {
-	// Empty tier should default to citizen
+func TestGenerateCitizenContext_DefaultRole(t *testing.T) {
+	// Empty role should default to citizen
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "agent1",
-		Tier:      "",
+		Role:      "",
 		WorldID:   "w-test-00001",
 	})
 
 	if !strings.Contains(ctx, "Citizen") {
-		t.Error("empty tier should default to citizen")
+		t.Error("empty role should default to citizen")
 	}
 }

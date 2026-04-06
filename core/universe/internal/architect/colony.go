@@ -12,14 +12,15 @@ import (
 
 // AgentSpec describes an agent to spawn in a universe.
 type AgentSpec struct {
-	Name string
-	Tier string // "governor" or "citizen"
+	Name      string
+	Role      string // "governor", "citizen", or "npc"
+	Ephemeral bool   // true for NPC-style throwaway agents
 }
 
 // DeployAgent adds a single agent to a running world: validates the mind,
 // registers it in state, and starts the agent process in the background.
 // Safe to call on a world that's already running with other agents.
-func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, tier string) error {
+func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role string) error {
 	if err := agent.ValidateMind(agentName); err != nil {
 		return fmt.Errorf("agent %q: %w", agentName, err)
 	}
@@ -38,12 +39,12 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, tier st
 		}
 	}
 
-	resolvedTier := manifest.DefaultTier(tier)
+	resolvedRole := manifest.DefaultRole(role)
 	agentID := foundation.GenerateAgentID(agentName)
 	rec := models.AgentRecord{
 		Name:    agentName,
 		AgentID: agentID,
-		Tier:    resolvedTier,
+		Role:    resolvedRole,
 		Status:  models.StatusRunning,
 	}
 	if err := a.state.AddAgent(worldID, rec); err != nil {
@@ -75,14 +76,14 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 	// 2. Separate governors and citizens
 	var governors, citizens []AgentSpec
 	for _, spec := range agents {
-		tier := manifest.DefaultTier(spec.Tier)
-		switch tier {
+		role := manifest.DefaultRole(spec.Role)
+		switch role {
 		case "governor":
 			governors = append(governors, spec)
 		case "citizen":
 			citizens = append(citizens, spec)
 		default:
-			return fmt.Errorf("agent %q: invalid tier %q.\nUse \"governor\" or \"citizen\" in the colony spec", spec.Name, spec.Tier)
+			return fmt.Errorf("agent %q: invalid role %q.\nUse a valid role in the colony spec", spec.Name, spec.Role)
 		}
 	}
 
@@ -96,11 +97,11 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		agentID := foundation.GenerateAgentID(spec.Name)
 		if err := a.state.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
 			// Agent not yet registered (shouldn't happen in normal flow) — add it
-			tier := manifest.DefaultTier(spec.Tier)
+			role := manifest.DefaultRole(spec.Role)
 			rec := models.AgentRecord{
 				Name:    spec.Name,
 				AgentID: agentID,
-				Tier:    tier,
+				Role:    role,
 				Status:  models.StatusCreating,
 			}
 			if addErr := a.state.AddAgent(worldID, rec); addErr != nil {

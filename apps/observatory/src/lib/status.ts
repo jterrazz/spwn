@@ -31,9 +31,10 @@ export const STATUS_BADGE: Record<string, string> = {
   creating: "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
 
-/** Tier badge colors */
-export const TIER_BADGE: Record<string, string> = {
+/** Role badge colors */
+export const ROLE_BADGE: Record<string, string> = {
   governor: "bg-amber-500/10 text-amber-300 border-amber-500/20",
   citizen: "bg-blue-500/10 text-blue-300 border-blue-500/20",
   npc: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+  default: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
 };

@@ -121,22 +121,22 @@ func TestProfile_Journal_ShowsEntries(t *testing.T) {
 	}
 }
 
-func TestProfile_Tier_NoProfileYaml(t *testing.T) {
+func TestProfile_Role_NoProfileYaml(t *testing.T) {
 	setupTestAgent(t, "neo")
 
-	err := Cmd.RunE(Cmd, []string{"neo", "tier"})
+	err := Cmd.RunE(Cmd, []string{"neo", "role"})
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
 }
 
-func TestProfile_Tier_ShowsCurrent(t *testing.T) {
+func TestProfile_Role_ShowsCurrent(t *testing.T) {
 	home := setupTestAgent(t, "neo")
 
 	profilePath := filepath.Join(home, "agents", "neo", "profile.yaml")
-	os.WriteFile(profilePath, []byte("tier: governor\n"), 0644)
+	os.WriteFile(profilePath, []byte("role: governor\n"), 0644)
 
-	err := Cmd.RunE(Cmd, []string{"neo", "tier"})
+	err := Cmd.RunE(Cmd, []string{"neo", "role"})
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
@@ -165,8 +165,8 @@ func TestProfile_Edit_CreatesDefault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("profile.yaml should have been created: %s", err)
 	}
-	if !strings.Contains(string(data), "tier") {
-		t.Error("profile.yaml should contain tier field")
+	if !strings.Contains(string(data), "role") {
+		t.Error("profile.yaml should contain role field")
 	}
 }
 
@@ -234,8 +234,8 @@ func TestLoadProfileYAML_Defaults(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
-	if p.Tier != "citizen" {
-		t.Errorf("expected default tier 'citizen', got %q", p.Tier)
+	if p.Role != "citizen" {
+		t.Errorf("expected default role 'citizen', got %q", p.Role)
 	}
 	if p.Runtime.Engine != "claude-code" {
 		t.Errorf("expected default engine 'claude-code', got %q", p.Runtime.Engine)
@@ -246,14 +246,14 @@ func TestLoadProfileYAML_CustomValues(t *testing.T) {
 	home := setupTestAgent(t, "neo")
 
 	profilePath := filepath.Join(home, "agents", "neo", "profile.yaml")
-	os.WriteFile(profilePath, []byte("tier: governor\nruntime:\n  engine: gpt\n  provider: openai\n  model: gpt-4\n"), 0644)
+	os.WriteFile(profilePath, []byte("role: governor\nruntime:\n  engine: gpt\n  provider: openai\n  model: gpt-4\n"), 0644)
 
 	p, err := loadProfileYAML("neo")
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
-	if p.Tier != "governor" {
-		t.Errorf("expected tier 'governor', got %q", p.Tier)
+	if p.Role != "governor" {
+		t.Errorf("expected role 'governor', got %q", p.Role)
 	}
 	if p.Runtime.Engine != "gpt" {
 		t.Errorf("expected engine 'gpt', got %q", p.Runtime.Engine)
