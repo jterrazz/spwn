@@ -1,5 +1,5 @@
 FROM debian:bookworm-slim
-LABEL sh.spwn.image-version="1.0.0"
+LABEL sh.spwn.image-version="1.1.0"
 
 # Install Docker CLI + Node.js 20 (for Claude Code)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,27 +17,21 @@ RUN useradd -m -s /bin/bash architect
 COPY spwn /usr/local/bin/spwn
 RUN chmod +x /usr/local/bin/spwn
 
-# Copy Architect identity file
-COPY system/architect/ARCHITECT.md /world/ARCHITECT.md
+# Architect identity and skills (baked in image)
+COPY system/architect/ARCHITECT.md /me/ARCHITECT.md
+COPY system/AGENTS.md /me/AGENTS.md
+COPY system/skills/ /me/skills/
+COPY system/architect/skills/ /me/skills/
+COPY system/architect/stack.md /me/stack.md
 
-# Copy global agent operating manual and system skills
-COPY system/AGENTS.md /world/AGENTS.md
-COPY system/skills/ /world/skills/
-
-# Copy architect-specific skills (merged into /world/skills/)
-COPY system/architect/skills/ /world/skills/
-
-# Copy default architect stack (overridden by runtime mount)
-COPY system/architect/stack.md /world/stack.md
-
-RUN mkdir -p /world && chown -R architect:architect /world
+RUN mkdir -p /me && chown -R architect:architect /me
 
 # Container runs as ROOT for file access (bind mounts from host)
 # But `docker exec -u architect` is used when running Claude Code
-# Shared data dir — mounted from host, accessible to all users
-RUN mkdir -p /spwn-data && chmod 777 /spwn-data
-ENV SPWN_HOME=/spwn-data
-WORKDIR /world
+# Universe data dir — mounted from host, accessible to all users
+RUN mkdir -p /universe && chmod 777 /universe
+ENV SPWN_HOME=/universe
+WORKDIR /me
 
 # Entrypoint aligns the architect user's groups with the host's
 # docker.sock GID so docker exec -u architect can run docker commands.

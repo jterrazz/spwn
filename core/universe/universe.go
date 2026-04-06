@@ -332,7 +332,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 
 	// Build env vars — always set SPWN_HOME, pass through auth credentials
 	envVars := []string{
-		"SPWN_HOME=/spwn-data",
+		"SPWN_HOME=/universe",
 	}
 	envVars = append(envVars, auth.DockerEnvVars()...)
 
@@ -354,10 +354,9 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
+			foundation.BaseDir() + ":/universe",
+			architectStackPath + ":/me/stack.md",
 			"/var/run/docker.sock:/var/run/docker.sock",
-			foundation.BaseDir() + ":/spwn-data",
-			architectStackPath + ":/world/stack.md",
-			foundation.KnowledgeDir() + ":/knowledge",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
@@ -484,9 +483,9 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	}
 
 	// Run as 'architect' user (Claude Code refuses --dangerously-skip-permissions as root)
-	args = append(args, "-u", "architect", "-w", "/world")
+	args = append(args, "-u", "architect", "-w", "/me")
 	// Pass SPWN_HOME so spwn CLI works inside the exec
-	args = append(args, "-e", "SPWN_HOME=/spwn-data")
+	args = append(args, "-e", "SPWN_HOME=/universe")
 
 	// Pass auth env vars into the exec (in case container env was not set at start)
 	args = append(args, auth.DockerEnvArgs()...)
@@ -498,13 +497,13 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	if message != "" {
 		claudeArgs = append(claudeArgs, "-p", message, "--print",
 			"--append-system-prompt",
-		"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
+		"You are the Architect. Read /me/ARCHITECT.md for your identity. "+
 				"IMPORTANT: When a user asks you to do something, you MUST include a [STACK_PUSH] marker in your response. "+
 				"Format: [STACK_PUSH] Short task title\\nPriority: blocking|queued\\nBrief description. "+
-				"Also update /world/stack.md with the new task. "+
+				"Also update /me/stack.md with the new task. "+
 				"When completing a task use [STACK_POP] Short task title. "+
-				"Read /world/skills/ for detailed guides. "+
-				"KNOWLEDGE: You maintain /knowledge/ as the single source of truth. "+
+				"Read /me/skills/ for detailed guides. "+
+				"KNOWLEDGE: You maintain /universe/knowledge/ as the single source of truth. "+
 				"When updating knowledge files, include [KNOWLEDGE_UPDATE] path/to/file.md in your response. "+
 				"Every conversation should result in knowledge updates.")
 	}
