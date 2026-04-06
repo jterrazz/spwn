@@ -107,7 +107,7 @@ function normalizeWorlds(data: RawWorld[]): World[] {
       status: w.status || "idle",
       agents: (w.agents ?? (_agent ? [{ name: _agent, role: "citizen", status: w.status || "idle" }] : [])).map(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (a: any) => ({ ...a, role: a.role || a.tier || "citizen" })
+        (a: any) => ({ ...a, role: a.role || "citizen" })
       ),
       workspaces: wsList,
     };
@@ -121,7 +121,7 @@ function normalizeWorlds(data: RawWorld[]): World[] {
 function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentProfile {
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    role: (data as any).role || (data as any).tier || 'citizen',
+    role: (data as any).role || 'citizen',
     engine: 'claude-code',
     provider: 'anthropic',
     purpose: '',

@@ -120,7 +120,7 @@ var Cmd = &cobra.Command{
 			return showSessions(cmd, name)
 
 		// Config
-		case "role", "tier":
+		case "role":
 			return showOrSetRole(cmd, name)
 		case "engine":
 			return showOrSetEngine(cmd, name)
@@ -138,7 +138,7 @@ func init() {
 	Cmd.Flags().BoolVar(&editFlag, "edit", false, "Open file in $EDITOR")
 	Cmd.Flags().IntVar(&limitFlag, "limit", 10, "Number of journal entries to show")
 	Cmd.Flags().BoolVar(&allFlag, "all", false, "Show all journal entries")
-	Cmd.Flags().StringVar(&setFlag, "set", "", "Set value (for tier/engine)")
+	Cmd.Flags().StringVar(&setFlag, "set", "", "Set value (for role/engine)")
 }
 
 // ── helpers ─────────────────────────────────────────────────────────────────

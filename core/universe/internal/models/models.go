@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"time"
 
 	"spwn.sh/core/gate"
@@ -49,23 +48,6 @@ type AgentRecord struct {
 	Role      string `json:"role"`               // "governor", "citizen", or "npc"
 	Ephemeral bool   `json:"ephemeral,omitempty"` // true for NPC-style throwaway agents
 	Status    Status `json:"status"`
-}
-
-// UnmarshalJSON provides backward compatibility by reading the legacy "tier"
-// field into Role when Role is empty.
-func (a *AgentRecord) UnmarshalJSON(data []byte) error {
-	type Alias AgentRecord
-	aux := &struct {
-		Tier string `json:"tier"`
-		*Alias
-	}{Alias: (*Alias)(a)}
-	if err := json.Unmarshal(data, aux); err != nil {
-		return err
-	}
-	if a.Role == "" && aux.Tier != "" {
-		a.Role = aux.Tier
-	}
-	return nil
 }
 
 // World represents a running or stopped universe instance.

@@ -53,11 +53,6 @@ func DefaultRole(role string) string {
 	return role
 }
 
-// DefaultTier is a deprecated wrapper for DefaultRole. Use DefaultRole instead.
-func DefaultTier(tier string) string {
-	return DefaultRole(tier)
-}
-
 // LoadLife reads life.yaml from an agent directory.
 // Returns nil (no error) if life.yaml doesn't exist — it's optional.
 func LoadLife(agentDir string) (*LifeManifest, error) {
