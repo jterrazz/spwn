@@ -32,7 +32,8 @@ function agentsDir(): string {
 interface RawAgentRecord {
   name: string;
   agent_id: string;
-  role: string;
+  role?: string;
+  tier?: string; // legacy compat
   status: string;
 }
 
@@ -57,7 +58,7 @@ interface RawWorld {
 function rawToWorld(raw: RawWorld): World {
   const agents = (raw.agents ?? []).map((a) => ({
     name: a.name,
-    role: a.role,
+    role: a.role || a.tier || "citizen",
     status: a.status,
   }));
 
