@@ -13,7 +13,7 @@ import (
 // Optional: if life.yaml doesn't exist in the agent directory, the agent dir is used as-is.
 type LifeManifest struct {
 	Name    string        `yaml:"name"`
-	Role    string        `yaml:"role"`    // "governor" or "citizen" (default: "citizen")
+	Role    string        `yaml:"role"`    // "chief", "manager", or "worker" (default: "worker")
 	Runtime RuntimeConfig `yaml:"runtime"` // optional runtime override
 	Soul    SoulManifest  `yaml:"soul"`
 	Mind    MindManifest  `yaml:"mind"`
@@ -45,10 +45,10 @@ type BodyManifest struct {
 	Requires []string `yaml:"requires"`
 }
 
-// DefaultRole returns the effective role, defaulting to "citizen" if empty.
+// DefaultRole returns the effective role, defaulting to "worker" if empty.
 func DefaultRole(role string) string {
 	if role == "" {
-		return "citizen"
+		return "worker"
 	}
 	return role
 }

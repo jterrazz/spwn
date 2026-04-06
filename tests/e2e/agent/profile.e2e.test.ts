@@ -31,7 +31,7 @@ describe("spwn profile", () => {
     const out = stripAnsi(result.output);
     expect(out).toContain("neo");
     expect(out).toContain("Role");
-    expect(out).toContain("citizen");
+    expect(out).toContain("worker");
     expect(out).toContain("Engine");
     expect(out).toContain("Identity");
     expect(out).toContain("Capabilities");
@@ -137,20 +137,20 @@ describe("spwn profile", () => {
 
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
-    expect(out).toContain("citizen");
+    expect(out).toContain("worker");
   });
 
-  test("role --set governor updates profile", async () => {
+  test("role --set chief updates profile", async () => {
     createAgent(home, "neo");
 
     const result = await spwn("profile neo role set")
-      .exec("profile neo role --set governor")
+      .exec("profile neo role --set chief")
       .run();
 
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("Role updated");
-    expect(out).toContain("governor");
+    expect(out).toContain("chief");
   });
 
   // ── engine ───────────────────────────────────────────────────

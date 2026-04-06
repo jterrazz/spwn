@@ -13,7 +13,7 @@ import (
 // AgentSpec describes an agent to spawn in a universe.
 type AgentSpec struct {
 	Name      string
-	Role      string // "governor", "citizen", or "npc"
+	Role      string // "chief", "manager", "worker", or "npc"
 	Ephemeral bool   // true for NPC-style throwaway agents
 }
 
@@ -60,7 +60,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 }
 
 // SpawnAgents spawns multiple agents in a world.
-// Governors are spawned first (blocking), then citizens (detached).
+// Chiefs are spawned first (blocking), then managers and workers (detached).
 func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []AgentSpec) error {
 	if len(agents) == 0 {
 		return nil
@@ -73,22 +73,24 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		}
 	}
 
-	// 2. Separate governors and citizens
-	var governors, citizens []AgentSpec
+	// 2. Separate chiefs, managers, and workers
+	var chiefs, managers, workers []AgentSpec
 	for _, spec := range agents {
 		role := manifest.DefaultRole(spec.Role)
 		switch role {
-		case "governor":
-			governors = append(governors, spec)
-		case "citizen":
-			citizens = append(citizens, spec)
+		case "chief":
+			chiefs = append(chiefs, spec)
+		case "manager":
+			managers = append(managers, spec)
+		case "worker":
+			workers = append(workers, spec)
 		default:
 			return fmt.Errorf("agent %q: invalid role %q.\nUse a valid role in the colony spec", spec.Name, spec.Role)
 		}
 	}
 
-	if len(governors) > 1 {
-		return fmt.Errorf("at most one governor allowed, got %d.\nRemove extra governors from the colony spec", len(governors))
+	if len(chiefs) > 1 {
+		return fmt.Errorf("at most one chief allowed, got %d.\nRemove extra chiefs from the colony spec", len(chiefs))
 	}
 
 	// 3. Update existing agent records to "creating" status
@@ -110,17 +112,24 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		}
 	}
 
-	// 4. Spawn governor first (detached — governors run in background like citizens)
-	for _, gov := range governors {
-		if err := a.SpawnAgentDetached(ctx, worldID, gov.Name); err != nil {
-			return fmt.Errorf("spawn governor %q: %w", gov.Name, err)
+	// 4. Spawn chief first (detached — chiefs run in background like others)
+	for _, ch := range chiefs {
+		if err := a.SpawnAgentDetached(ctx, worldID, ch.Name); err != nil {
+			return fmt.Errorf("spawn chief %q: %w", ch.Name, err)
 		}
 	}
 
-	// 5. Spawn citizens detached
-	for _, cit := range citizens {
-		if err := a.SpawnAgentDetached(ctx, worldID, cit.Name); err != nil {
-			return fmt.Errorf("spawn citizen %q: %w", cit.Name, err)
+	// 5. Spawn managers detached
+	for _, mgr := range managers {
+		if err := a.SpawnAgentDetached(ctx, worldID, mgr.Name); err != nil {
+			return fmt.Errorf("spawn manager %q: %w", mgr.Name, err)
+		}
+	}
+
+	// 6. Spawn workers detached
+	for _, wkr := range workers {
+		if err := a.SpawnAgentDetached(ctx, worldID, wkr.Name); err != nil {
+			return fmt.Errorf("spawn worker %q: %w", wkr.Name, err)
 		}
 	}
 

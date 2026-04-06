@@ -143,7 +143,7 @@ func createTestAgent(t *testing.T, name string) string {
 	writeFile(t, filepath.Join(agentDir, "skills", "coding.md"), "# Coding\n\nWrites Go code.\n")
 
 	// Write profile.yaml
-	writeFile(t, filepath.Join(agentDir, "profile.yaml"), "role: citizen\nruntime:\n  engine: claude-code\n  provider: anthropic\n  model: claude-4\n")
+	writeFile(t, filepath.Join(agentDir, "profile.yaml"), "role: worker\nruntime:\n  engine: claude-code\n  provider: anthropic\n  model: claude-4\n")
 
 	return agentDir
 }
@@ -443,8 +443,8 @@ func TestGetAgentProfile(t *testing.T) {
 	if body["name"] != "alice" {
 		t.Errorf("expected name=alice, got %v", body["name"])
 	}
-	if body["role"] != "citizen" {
-		t.Errorf("expected role=citizen, got %v", body["role"])
+	if body["role"] != "worker" {
+		t.Errorf("expected role=worker, got %v", body["role"])
 	}
 	if body["engine"] != "claude-code" {
 		t.Errorf("expected engine=claude-code, got %v", body["engine"])

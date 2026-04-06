@@ -16,7 +16,7 @@ func TestAgentContext_ContainsNewCLICommands(t *testing.T) {
 		Execute()
 
 	// The AGENT.md is only generated for god-role (via spawn with god config).
-	// For citizen role, AGENT.md is generated when an agent is attached.
+	// For worker role, AGENT.md is generated when an agent is attached.
 	// We need a world WITH an agent to get AGENT.md.
 	chain2 := setup.NewSpawnBuilder(t).
 		WithAgent("ctx-agent").
@@ -28,9 +28,9 @@ func TestAgentContext_ContainsNewCLICommands(t *testing.T) {
 		c.HasFile("/world/AGENT.md")
 	})
 
-	// Verify new commands are present (citizen context has "Your World" section)
+	// Verify new commands are present (worker context has "Your World" section)
 	chain2.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/world/AGENT.md", "Citizen")
+		c.FileContains("/world/AGENT.md", "Worker")
 	})
 
 	_ = chain // use chain to avoid unused variable
@@ -48,12 +48,12 @@ func TestAgentContext_GodRoleContainsNewCommands(t *testing.T) {
 		WithAgent("god-agent").
 		Execute()
 
-	// The AGENT.md for a citizen won't have CLI commands (only god role does).
-	// But we can verify the citizen AGENT.md has correct structure.
+	// The AGENT.md for a worker won't have CLI commands (only god role does).
+	// But we can verify the worker AGENT.md has correct structure.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
 		c.HasFile("/world/AGENT.md")
-		// Citizen AGENT.md should contain Mind layer references
+		// Worker AGENT.md should contain Mind layer references
 		c.FileContains("/world/AGENT.md", "/mind/identity/")
 		c.FileContains("/world/AGENT.md", "/mind/skills/")
 		c.FileContains("/world/AGENT.md", "/mind/memory/knowledge/")

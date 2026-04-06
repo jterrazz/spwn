@@ -56,7 +56,7 @@ describe("full agent lifecycle", () => {
     const profileOut = stripAnsi(profileResult.output);
     expect(profileOut).toContain("neo");
     expect(profileOut).toContain("Role");
-    expect(profileOut).toContain("citizen");
+    expect(profileOut).toContain("worker");
     expect(profileOut).toContain("Identity");
 
     // ── STEP 4: Write identity/purpose.md manually ─────────────

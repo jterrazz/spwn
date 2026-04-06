@@ -209,7 +209,7 @@ func defaultProfile() *ProfileYAML {
 
 func applyProfileDefaults(p *ProfileYAML) {
 	if p.Role == "" {
-		p.Role = "citizen"
+		p.Role = "worker"
 	}
 	if p.Runtime.Engine == "" {
 		p.Runtime.Engine = "claude-code"

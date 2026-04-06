@@ -8,15 +8,15 @@ import (
 	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
-func TestColony_GovernorAndCitizenSpawn(t *testing.T) {
+func TestColony_ChiefAndWorkerSpawn(t *testing.T) {
 	// BLOCKED: Multi-agent (colony) spawning via the Architect public API
 	// is not yet fully wired. The Architect currently supports single-agent
 	// spawn only. When multi-agent support is added (Architect.SpawnColony or
 	// similar), this test should:
-	// 1. Spawn a world with a governor + citizen agent spec
+	// 1. Spawn a world with a chief + worker agent spec
 	// 2. Verify both agents' Mind directories are mounted
 	// 3. Verify AGENT.md for each role is correct
-	// 4. Verify messaging between governor and citizen works
+	// 4. Verify messaging between chief and worker works
 	//
 	// Tracking: requires Architect.SpawnColony() or multi-agent SpawnOpts.
 	t.Skip("Colony multi-agent spawn not yet exposed via Architect public API")
@@ -24,32 +24,32 @@ func TestColony_GovernorAndCitizenSpawn(t *testing.T) {
 	// Placeholder for future implementation:
 	// tc := setup.NewTestContext(t)
 	// tc.InitAgent("gov-agent")
-	// tc.InitAgent("citizen-agent")
+	// tc.InitAgent("worker-agent")
 	//
-	// Write profile.yaml for governor:
+	// Write profile.yaml for chief:
 	// govDir := filepath.Join(tc.BaseDir, "agents", "gov-agent")
-	// os.WriteFile(filepath.Join(govDir, "profile.yaml"), []byte("role: governor\n"), 0644)
+	// os.WriteFile(filepath.Join(govDir, "profile.yaml"), []byte("role: chief\n"), 0644)
 	//
 	// chain := tc.Spawn().
 	//     WithAgent("gov-agent").
 	//     Execute()
 	//
-	// Spawn citizen into same world:
-	// tc.Arc.SpawnAgent(ctx, chain.Universe().ID, "citizen-agent")
+	// Spawn worker into same world:
+	// tc.Arc.SpawnAgent(ctx, chain.Universe().ID, "worker-agent")
 	//
 	// chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 	//     c.HasMount("/mind")
 	// })
 }
 
-func TestColony_SingleAgentDefaultsToCitizen(t *testing.T) {
+func TestColony_SingleAgentDefaultsToWorker(t *testing.T) {
 	// GIVEN an agent without a profile.yaml (no role specified)
 	// WHEN spawned into a world
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		Execute()
 
-	// THEN the state should track it (role defaults to citizen internally)
+	// THEN the state should track it (role defaults to worker internally)
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 		s.HasAgent("test-agent")
@@ -86,7 +86,7 @@ func TestColony_RoleFromProfileYAML(t *testing.T) {
 	// the Architect only supports single-agent worlds. When colony spawn is
 	// added, verify that the role from profile.yaml is reflected in AgentRecord.
 	//
-	// Tracking: depends on TestColony_GovernorAndCitizenSpawn being unblocked.
+	// Tracking: depends on TestColony_ChiefAndWorkerSpawn being unblocked.
 	t.Skip("Colony role assignment from profile.yaml not yet testable via E2E")
 }
 
@@ -97,11 +97,11 @@ func TestColony_MessagingBetweenAgents(t *testing.T) {
 	// spawn is available.
 	//
 	// When implemented:
-	// 1. Spawn world with governor + citizen
-	// 2. Governor sends a message to citizen via messenger
-	// 3. Citizen checks inbox and sees the message
-	// 4. Citizen replies
-	// 5. Governor reads the reply
+	// 1. Spawn world with chief + worker
+	// 2. Chief sends a message to worker via messenger
+	// 3. Worker checks inbox and sees the message
+	// 4. Worker replies
+	// 5. Chief reads the reply
 	//
 	// Tracking: depends on Architect.SpawnColony() or multi-agent SpawnOpts.
 	t.Skip("Colony messaging requires multi-agent spawn — not yet available")

@@ -184,14 +184,14 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 					"Assign agents with: spwn team assign <agent> "+spawnTeam)
 			}
 			for _, m := range members {
-				agents = append(agents, universe.AgentSpec{Name: m, Role: "citizen"})
+				agents = append(agents, universe.AgentSpec{Name: m, Role: "worker"})
 			}
 			agentName = "" // multi-agent mode
 			s.Done("Team", fmt.Sprintf("%s → %d agent(s)", spawnTeam, len(members)))
 		} else if spawnLeader != "" {
-			agents = append(agents, universe.AgentSpec{Name: spawnLeader, Role: "governor"})
+			agents = append(agents, universe.AgentSpec{Name: spawnLeader, Role: "chief"})
 			if agentName != "" {
-				agents = append(agents, universe.AgentSpec{Name: agentName, Role: "citizen"})
+				agents = append(agents, universe.AgentSpec{Name: agentName, Role: "worker"})
 			}
 			// Clear single-agent name since we're using multi-agent
 			agentName = ""

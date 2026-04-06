@@ -45,7 +45,7 @@ type Workspace struct {
 type AgentRecord struct {
 	Name      string `json:"name"`
 	AgentID   string `json:"agent_id"`
-	Role      string `json:"role"`               // "governor", "citizen", or "npc"
+	Role      string `json:"role"`               // "chief", "manager", "worker", or "npc"
 	Ephemeral bool   `json:"ephemeral,omitempty"` // true for NPC-style throwaway agents
 	Status    Status `json:"status"`
 }

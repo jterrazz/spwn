@@ -25,7 +25,7 @@ func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
 		return cmd
 	}
 
-	// Citizen/Governor: session management
+	// Worker/Manager/Chief: session management
 	sessID := agent.DeterministicSessionID(cfg.AgentName, cfg.WorldID)
 	cmd = append(cmd, "--session-id", sessID)
 

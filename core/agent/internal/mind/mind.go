@@ -37,7 +37,7 @@ func Init(name string) (string, error) {
 	// Create default persona
 	persona := `# Default Persona
 
-You are a spwn agent — a persistent AI citizen living inside an isolated world.
+You are a spwn agent — a persistent AI worker living inside an isolated world.
 
 ## Your Identity
 - You have a Mind that persists across sessions at /mind (identity, skills, memory/knowledge, memory/playbooks, memory/journal)

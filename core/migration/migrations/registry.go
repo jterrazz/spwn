@@ -9,5 +9,6 @@ func All() []migration.Migration {
 	r.Register(TierToRoleProfiles)    // 002
 	r.Register(EnsureDefaultHierarchy) // 003
 	r.Register(WorkspaceToWorkspaces) // 004
+	r.Register(RenameDefaultRoles)   // 005
 	return r.All()
 }

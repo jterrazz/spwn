@@ -10,7 +10,7 @@ import (
 // AgentContextOpts configures the generation of an AGENT.md context file.
 type AgentContextOpts struct {
 	AgentName     string
-	Role          string // "governor", "citizen", "npc", or "god"
+	Role          string // "chief", "manager", "worker", "npc", or "god"
 	Ephemeral     bool   // true for NPC-style throwaway agents
 	RoleLevel     int
 	Permissions   []string
@@ -23,8 +23,8 @@ type AgentContextOpts struct {
 	Memory        string
 	Timeout       string
 	OtherAgents   []AgentInfo // other agents in the world
-	Governor      string      // governor name (empty if this IS the governor or no governor)
-	NPCTask       string      // task for NPC (empty for governor/citizen)
+	Chief         string      // chief name (empty if this IS the chief or no chief)
+	NPCTask       string      // task for NPC (empty for chief/manager/worker)
 }
 
 // AgentInfo describes another agent in the world.
@@ -41,27 +41,29 @@ func GenerateAgentContext(opts AgentContextOpts) string {
 	switch opts.Role {
 	case "god":
 		generateGodContext(&b, opts)
-	case "governor":
-		generateGovernorContext(&b, opts)
+	case "chief":
+		generateChiefContext(&b, opts)
+	case "manager":
+		generateManagerContext(&b, opts)
 	case "npc":
 		generateNPCContext(&b, opts)
-	default: // citizen
-		generateCitizenContext(&b, opts)
+	default: // worker
+		generateWorkerContext(&b, opts)
 	}
 
 	return b.String()
 }
 
-func generateGovernorContext(b *strings.Builder, opts AgentContextOpts) {
-	b.WriteString(fmt.Sprintf("# You are %s — Governor of %s\n\n", opts.AgentName, opts.WorldID))
+func generateChiefContext(b *strings.Builder, opts AgentContextOpts) {
+	b.WriteString(fmt.Sprintf("# You are %s — Chief of %s\n\n", opts.AgentName, opts.WorldID))
 
 	b.WriteString("## Your Role\n")
-	b.WriteString("You are the Governor — the supreme leader of this world. You set direction,\n")
-	b.WriteString("make final decisions, delegate work to citizens, and review their output.\n\n")
+	b.WriteString("You are the Chief — the supreme leader of this world. You set direction,\n")
+	b.WriteString("make final decisions, delegate work to managers and workers, and review their output.\n\n")
 
-	// Citizens list
+	// Team list
 	if len(opts.OtherAgents) > 0 {
-		b.WriteString("## Your Citizens\n")
+		b.WriteString("## Your Team\n")
 		for _, a := range opts.OtherAgents {
 			b.WriteString(fmt.Sprintf("- %s (%s)\n", a.Name, a.Role))
 		}
@@ -71,35 +73,35 @@ func generateGovernorContext(b *strings.Builder, opts AgentContextOpts) {
 	// Skills
 	b.WriteString("## Skills\n\n")
 	b.WriteString("### Messaging\n")
-	b.WriteString("Send tasks to citizens by writing JSON files to their inbox:\n")
+	b.WriteString("Send tasks to your team by writing JSON files to their inbox:\n")
 	b.WriteString("Write a JSON file to /world/inbox/{recipient}/ with fields: from, to, type, content.\n")
 	b.WriteString(fmt.Sprintf("Check responses in /world/inbox/%s/\n\n", opts.AgentName))
 
 	b.WriteString("### Delegation Pattern\n")
 	b.WriteString("1. Decompose the task into subtasks\n")
-	b.WriteString("2. Send each subtask to the appropriate citizen via inbox\n")
+	b.WriteString("2. Send each subtask to the appropriate manager or worker via inbox\n")
 	b.WriteString("3. Monitor progress by checking your inbox for replies\n")
 	b.WriteString("4. Aggregate results and make the final call\n\n")
 
 	writeWorldInfo(b, opts)
 }
 
-func generateCitizenContext(b *strings.Builder, opts AgentContextOpts) {
-	b.WriteString(fmt.Sprintf("# You are %s — Citizen of %s\n\n", opts.AgentName, opts.WorldID))
+func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
+	b.WriteString(fmt.Sprintf("# You are %s — Manager in %s\n\n", opts.AgentName, opts.WorldID))
 
 	b.WriteString("## Your Role\n")
-	b.WriteString("You are a Citizen — a persistent worker. You have a Mind that persists\n")
-	b.WriteString("across sessions. Execute tasks, learn from experience, collaborate.\n\n")
+	b.WriteString("You are a Manager — you coordinate workers, delegate tasks, review output,\n")
+	b.WriteString("and execute work yourself when needed.\n\n")
 
-	// Governor
-	if opts.Governor != "" {
-		b.WriteString("## Your Governor\n")
-		b.WriteString(fmt.Sprintf("%s — check /world/inbox/%s/ for tasks.\n\n", opts.Governor, opts.AgentName))
+	// Chief
+	if opts.Chief != "" {
+		b.WriteString("## Your Chief\n")
+		b.WriteString(fmt.Sprintf("%s — check /world/inbox/%s/ for tasks.\n\n", opts.Chief, opts.AgentName))
 	}
 
-	// Other citizens
+	// Other agents
 	if len(opts.OtherAgents) > 0 {
-		b.WriteString("## Other Citizens\n")
+		b.WriteString("## Other Agents\n")
 		for _, a := range opts.OtherAgents {
 			b.WriteString(fmt.Sprintf("- %s (%s)\n", a.Name, a.Role))
 		}
@@ -110,8 +112,55 @@ func generateCitizenContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Skills\n\n")
 	b.WriteString("### Messaging\n")
 	b.WriteString(fmt.Sprintf("Check your inbox: read files from /world/inbox/%s/\n", opts.AgentName))
-	if opts.Governor != "" {
-		b.WriteString(fmt.Sprintf("Reply: write to /world/inbox/%s/\n", opts.Governor))
+	if opts.Chief != "" {
+		b.WriteString(fmt.Sprintf("Reply to chief: write to /world/inbox/%s/\n", opts.Chief))
+	}
+	b.WriteString("Message peers: write to /world/inbox/{peer}/\n\n")
+
+	b.WriteString("### Delegation Pattern\n")
+	b.WriteString("1. Break tasks from your chief into subtasks for workers\n")
+	b.WriteString("2. Send each subtask to the appropriate worker via inbox\n")
+	b.WriteString("3. Monitor progress and review results\n")
+	b.WriteString("4. Report back to your chief\n\n")
+
+	b.WriteString("### Your Mind\n")
+	b.WriteString("- /mind/identity/ — who you are\n")
+	b.WriteString("- /mind/skills/ — what you can do\n")
+	b.WriteString("- /mind/memory/knowledge/ — facts you've learned\n")
+	b.WriteString("- /mind/memory/playbooks/ — procedures that work\n")
+	b.WriteString("- /mind/memory/journal/ — session history\n\n")
+
+	writeWorldInfo(b, opts)
+}
+
+func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
+	b.WriteString(fmt.Sprintf("# You are %s — Worker in %s\n\n", opts.AgentName, opts.WorldID))
+
+	b.WriteString("## Your Role\n")
+	b.WriteString("You are a Worker — a persistent executor. You have a Mind that persists\n")
+	b.WriteString("across sessions. Execute tasks, learn from experience, collaborate.\n\n")
+
+	// Chief
+	if opts.Chief != "" {
+		b.WriteString("## Your Chief\n")
+		b.WriteString(fmt.Sprintf("%s — check /world/inbox/%s/ for tasks.\n\n", opts.Chief, opts.AgentName))
+	}
+
+	// Other agents
+	if len(opts.OtherAgents) > 0 {
+		b.WriteString("## Other Agents\n")
+		for _, a := range opts.OtherAgents {
+			b.WriteString(fmt.Sprintf("- %s (%s)\n", a.Name, a.Role))
+		}
+		b.WriteString("\n")
+	}
+
+	// Skills
+	b.WriteString("## Skills\n\n")
+	b.WriteString("### Messaging\n")
+	b.WriteString(fmt.Sprintf("Check your inbox: read files from /world/inbox/%s/\n", opts.AgentName))
+	if opts.Chief != "" {
+		b.WriteString(fmt.Sprintf("Reply: write to /world/inbox/%s/\n", opts.Chief))
 	}
 	b.WriteString("Message peers: write to /world/inbox/{peer}/\n\n")
 

@@ -12,7 +12,7 @@ describe("agent context (AGENT.md)", () => {
     ctx?.cleanup();
   });
 
-  test("AGENT.md generated inside container for citizen", () => {
+  test("AGENT.md generated inside container for worker", () => {
     // GIVEN — an initialized SPWN_HOME with agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -28,9 +28,9 @@ describe("agent context (AGENT.md)", () => {
     // THEN — AGENT.md exists inside container
     ctx.universe(id).toHaveFile("/world/AGENT.md");
 
-    // AND — contains citizen role
+    // AND — contains worker role
     const content = ctx.universe(id).readFile("/world/AGENT.md");
-    expect(content).toContain("Citizen");
+    expect(content).toContain("Worker");
     expect(content).toContain("neo");
   });
 
@@ -62,7 +62,7 @@ describe("agent context (AGENT.md)", () => {
     expect(content).toContain("bash");
   });
 
-  test("AGENT.md contains Mind layer descriptions for citizen (new structure)", () => {
+  test("AGENT.md contains Mind layer descriptions for worker (new structure)", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawn = ctx.spwn(

@@ -373,15 +373,15 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 			// Build list of other agents (everyone except this one)
 			var others []physics.AgentInfo
-			var governorName string
+			var chiefName string
 			for j, other := range opts.Agents {
 				if i == j {
 					continue
 				}
 				otherRole := manifest.DefaultRole(other.Role)
 				others = append(others, physics.AgentInfo{Name: other.Name, Role: otherRole})
-				if otherRole == "governor" {
-					governorName = other.Name
+				if otherRole == "chief" {
+					chiefName = other.Name
 				}
 			}
 
@@ -395,7 +395,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 				Memory:      opts.Manifest.Physics.Constants.Memory,
 				Timeout:     opts.Manifest.Physics.Constants.Timeout,
 				OtherAgents: others,
-				Governor:    governorName,
+				Chief:       chiefName,
 			})
 			if err := a.backend.CopyTo(ctx, containerID, "world/AGENT-"+spec.Name+".md", []byte(agentCtx)); err != nil {
 				a.backend.Stop(ctx, containerID)
@@ -422,7 +422,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		// Single agent: generate /world/AGENT.md
 		agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
 			AgentName:  opts.AgentName,
-			Role:       "citizen",
+			Role:       "worker",
 			WorldID:    id,
 			Workspaces: resolvedWorkspaces,
 			Elements:   verifiedElements,

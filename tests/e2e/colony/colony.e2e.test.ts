@@ -54,7 +54,7 @@ describe("colony E2E", () => {
     expect(stripAnsi(listResult.output)).toContain(id);
   });
 
-  test("leader AGENT.md says role governor", () => {
+  test("leader AGENT.md says role chief", () => {
     // GIVEN — colony with leader
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
@@ -74,13 +74,13 @@ describe("colony E2E", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — leader's AGENT.md mentions governor role
+    // THEN — leader's AGENT.md mentions chief role
     const agentMd = ctx.universe(id).readFile("/world/AGENT.md");
-    expect(agentMd).toContain("Governor");
+    expect(agentMd).toContain("Chief");
     expect(agentMd).toContain("morpheus");
   });
 
-  test("worker AGENT.md says role citizen in colony", () => {
+  test("worker AGENT.md says role worker in colony", () => {
     // GIVEN — colony with leader + worker
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
@@ -100,9 +100,9 @@ describe("colony E2E", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — worker's context references citizen role
+    // THEN — worker's context references worker role
     const agentMd = ctx.universe(id).readFile("/world/AGENT.md");
-    expect(agentMd).toContain("Citizen");
+    expect(agentMd).toContain("Worker");
     expect(agentMd).toContain("neo");
   });
 

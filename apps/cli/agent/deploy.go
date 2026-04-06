@@ -11,7 +11,7 @@ import (
 var deployRole string
 
 func init() {
-	deployCmd.Flags().StringVar(&deployRole, "role", "citizen", "Agent role in the world hierarchy")
+	deployCmd.Flags().StringVar(&deployRole, "role", "worker", "Agent role in the world hierarchy")
 	Cmd.AddCommand(deployCmd)
 }
 
@@ -24,7 +24,7 @@ mounted and a Claude Code session starts in the background.
 The world must be running (idle or active). The agent must not already
 be deployed in that world.`,
 	Example: `  spwn agent deploy neo w-mars-47965
-  spwn agent deploy morpheus w-mars-47965 --role governor`,
+  spwn agent deploy morpheus w-mars-47965 --role chief`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agentName := args[0]

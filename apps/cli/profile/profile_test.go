@@ -134,7 +134,7 @@ func TestProfile_Role_ShowsCurrent(t *testing.T) {
 	home := setupTestAgent(t, "neo")
 
 	profilePath := filepath.Join(home, "agents", "neo", "profile.yaml")
-	os.WriteFile(profilePath, []byte("role: governor\n"), 0644)
+	os.WriteFile(profilePath, []byte("role: chief\n"), 0644)
 
 	err := Cmd.RunE(Cmd, []string{"neo", "role"})
 	if err != nil {
@@ -234,8 +234,8 @@ func TestLoadProfileYAML_Defaults(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
-	if p.Role != "citizen" {
-		t.Errorf("expected default role 'citizen', got %q", p.Role)
+	if p.Role != "worker" {
+		t.Errorf("expected default role 'worker', got %q", p.Role)
 	}
 	if p.Runtime.Engine != "claude-code" {
 		t.Errorf("expected default engine 'claude-code', got %q", p.Runtime.Engine)
@@ -246,14 +246,14 @@ func TestLoadProfileYAML_CustomValues(t *testing.T) {
 	home := setupTestAgent(t, "neo")
 
 	profilePath := filepath.Join(home, "agents", "neo", "profile.yaml")
-	os.WriteFile(profilePath, []byte("role: governor\nruntime:\n  engine: gpt\n  provider: openai\n  model: gpt-4\n"), 0644)
+	os.WriteFile(profilePath, []byte("role: chief\nruntime:\n  engine: gpt\n  provider: openai\n  model: gpt-4\n"), 0644)
 
 	p, err := loadProfileYAML("neo")
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
-	if p.Role != "governor" {
-		t.Errorf("expected role 'governor', got %q", p.Role)
+	if p.Role != "chief" {
+		t.Errorf("expected role 'chief', got %q", p.Role)
 	}
 	if p.Runtime.Engine != "gpt" {
 		t.Errorf("expected engine 'gpt', got %q", p.Runtime.Engine)

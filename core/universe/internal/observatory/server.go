@@ -393,7 +393,7 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	mindPath := info.Path
 
 	// Load profile.yaml for role/engine/provider
-	role := "citizen"
+	role := "worker"
 	engine := "claude-code"
 	provider := "anthropic"
 	profilePath := filepath.Join(mindPath, "profile.yaml")

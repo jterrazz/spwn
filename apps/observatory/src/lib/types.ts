@@ -110,7 +110,7 @@ export interface LogEntry {
 export const AVAILABLE_CONFIGS = ["default", "backend", "frontend", "fullstack", "devops", "minimal"];
 
 // Available roles for the Create Agent dialog
-export const AVAILABLE_ROLES = ["governor", "citizen"] as const;
+export const AVAILABLE_ROLES = ["chief", "manager", "worker"] as const;
 
 export interface HierarchyRole {
   name: string;

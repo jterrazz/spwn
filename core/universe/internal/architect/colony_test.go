@@ -13,9 +13,9 @@ func TestAgentSpec_DefaultRole(t *testing.T) {
 		role     string
 		wantRole string
 	}{
-		{name: "empty_defaults_to_citizen", role: "", wantRole: "citizen"},
-		{name: "citizen_stays_citizen", role: "citizen", wantRole: "citizen"},
-		{name: "governor_stays_governor", role: "governor", wantRole: "governor"},
+		{name: "empty_defaults_to_worker", role: "", wantRole: "worker"},
+		{name: "worker_stays_worker", role: "worker", wantRole: "worker"},
+		{name: "chief_stays_chief", role: "chief", wantRole: "chief"},
 		{name: "custom_role_passthrough", role: "custom", wantRole: "custom"},
 	}
 
@@ -33,19 +33,19 @@ func TestAgentSpec_DefaultRole(t *testing.T) {
 func TestAgentSpec_Validation(t *testing.T) {
 	spec := AgentSpec{
 		Name: "neo",
-		Role: "governor",
+		Role: "chief",
 	}
 
 	if spec.Name != "neo" {
 		t.Errorf("expected name 'neo', got %q", spec.Name)
 	}
-	if spec.Role != "governor" {
-		t.Errorf("expected role 'governor', got %q", spec.Role)
+	if spec.Role != "chief" {
+		t.Errorf("expected role 'chief', got %q", spec.Role)
 	}
 }
 
 func TestAgentSpec_EmptyNameIsInvalid(t *testing.T) {
-	spec := AgentSpec{Name: "", Role: "citizen"}
+	spec := AgentSpec{Name: "", Role: "worker"}
 	if spec.Name != "" {
 		t.Error("expected empty name")
 	}
@@ -53,114 +53,114 @@ func TestAgentSpec_EmptyNameIsInvalid(t *testing.T) {
 	// This validates the struct allows empty names (validation is at call-site).
 }
 
-func TestGovernorLimit(t *testing.T) {
+func TestChiefLimit(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "gov1", Role: "governor"},
-		{Name: "gov2", Role: "governor"},
+		{Name: "ch1", Role: "chief"},
+		{Name: "ch2", Role: "chief"},
 	}
 
-	governors := 0
+	chiefs := 0
 	for _, a := range agents {
-		if manifest.DefaultRole(a.Role) == "governor" {
-			governors++
+		if manifest.DefaultRole(a.Role) == "chief" {
+			chiefs++
 		}
 	}
 
-	if governors <= 1 {
-		t.Error("expected multiple governors to be detected")
+	if chiefs <= 1 {
+		t.Error("expected multiple chiefs to be detected")
 	}
-	// SpawnAgents enforces: "at most one governor allowed, got N"
+	// SpawnAgents enforces: "at most one chief allowed, got N"
 }
 
-func TestGovernorLimit_ErrorMessage(t *testing.T) {
+func TestChiefLimit_ErrorMessage(t *testing.T) {
 	// Verify the error message format from SpawnAgents is actionable.
 	// We can't call SpawnAgents (needs full Architect), but we verify the pattern.
 	count := 3
-	msg := "at most one governor allowed"
-	if !strings.Contains(msg, "at most one governor") {
-		t.Error("governor limit error should mention the constraint")
+	msg := "at most one chief allowed"
+	if !strings.Contains(msg, "at most one chief") {
+		t.Error("chief limit error should mention the constraint")
 	}
 	_ = count
 }
 
 func TestMixedColony(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "gov", Role: "governor"},
-		{Name: "worker1", Role: "citizen"},
+		{Name: "ch", Role: "chief"},
+		{Name: "worker1", Role: "worker"},
 		{Name: "worker2", Role: ""},
 	}
 
-	var govs, cits int
+	var chs, wkrs int
 	for _, a := range agents {
 		switch manifest.DefaultRole(a.Role) {
-		case "governor":
-			govs++
-		case "citizen":
-			cits++
+		case "chief":
+			chs++
+		case "worker":
+			wkrs++
 		}
 	}
 
-	if govs != 1 {
-		t.Errorf("expected 1 governor, got %d", govs)
+	if chs != 1 {
+		t.Errorf("expected 1 chief, got %d", chs)
 	}
-	if cits != 2 {
-		t.Errorf("expected 2 citizens, got %d", cits)
+	if wkrs != 2 {
+		t.Errorf("expected 2 workers, got %d", wkrs)
 	}
 }
 
 func TestInvalidRole_Detection(t *testing.T) {
-	// SpawnAgents rejects unknown roles that aren't "governor" or "citizen"
-	invalidRoles := []string{"admin", "root", "superuser", "GOVERNOR", "Citizen"}
+	// SpawnAgents rejects unknown roles that aren't "chief", "manager", or "worker"
+	invalidRoles := []string{"admin", "root", "superuser", "CHIEF", "Worker"}
 	for _, role := range invalidRoles {
 		resolved := manifest.DefaultRole(role)
-		if resolved == "governor" || resolved == "citizen" {
+		if resolved == "chief" || resolved == "manager" || resolved == "worker" {
 			t.Errorf("role %q should not resolve to a valid role, got %q", role, resolved)
 		}
 	}
 }
 
-func TestDefaultRole_IsCitizen(t *testing.T) {
-	// Explicitly verify the default is "citizen", not something else
+func TestDefaultRole_IsWorker(t *testing.T) {
+	// Explicitly verify the default is "worker", not something else
 	got := manifest.DefaultRole("")
-	if got != "citizen" {
-		t.Errorf("DefaultRole(\"\") = %q, want \"citizen\"", got)
+	if got != "worker" {
+		t.Errorf("DefaultRole(\"\") = %q, want \"worker\"", got)
 	}
 }
 
-func TestSingleGovernorIsValid(t *testing.T) {
+func TestSingleChiefIsValid(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "gov", Role: "governor"},
-		{Name: "cit1", Role: "citizen"},
-		{Name: "cit2", Role: "citizen"},
+		{Name: "ch", Role: "chief"},
+		{Name: "wkr1", Role: "worker"},
+		{Name: "wkr2", Role: "worker"},
 	}
 
-	governors := 0
+	chiefs := 0
 	for _, a := range agents {
-		if manifest.DefaultRole(a.Role) == "governor" {
-			governors++
+		if manifest.DefaultRole(a.Role) == "chief" {
+			chiefs++
 		}
 	}
 
-	if governors != 1 {
-		t.Errorf("expected exactly 1 governor, got %d", governors)
+	if chiefs != 1 {
+		t.Errorf("expected exactly 1 chief, got %d", chiefs)
 	}
 }
 
-func TestNoGovernorIsValid(t *testing.T) {
+func TestNoChiefIsValid(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "cit1", Role: "citizen"},
-		{Name: "cit2", Role: ""},
+		{Name: "wkr1", Role: "worker"},
+		{Name: "wkr2", Role: ""},
 	}
 
-	governors := 0
+	chiefs := 0
 	for _, a := range agents {
-		if manifest.DefaultRole(a.Role) == "governor" {
-			governors++
+		if manifest.DefaultRole(a.Role) == "chief" {
+			chiefs++
 		}
 	}
 
-	if governors != 0 {
-		t.Errorf("expected 0 governors, got %d", governors)
+	if chiefs != 0 {
+		t.Errorf("expected 0 chiefs, got %d", chiefs)
 	}
 }
 
