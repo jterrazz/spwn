@@ -94,10 +94,10 @@ function AgentProfilePage() {
   useEffect(() => {
     fetchProfile();
     apiGet<Team[]>("/api/teams").then((t) => setAvailableTeams(t ?? [])).catch(() => {});
-    apiGet<World[]>("/api/universes").then((w) => setAvailableWorlds(w ?? [])).catch(() => {});
+    apiGet<World[]>("/api/worlds").then((w) => setAvailableWorlds(w ?? [])).catch(() => {});
     apiGet<Hierarchy[]>("/api/hierarchies").then((h) => setHierarchies(h ?? [])).catch(() => {});
     if (worldId) {
-      apiGet<World>(`/api/universes/${worldId}`).then((w) => setWorldData(w ?? null)).catch(() => {});
+      apiGet<World>(`/api/worlds/${worldId}`).then((w) => setWorldData(w ?? null)).catch(() => {});
     }
   }, [fetchProfile, worldId]);
 

@@ -54,7 +54,7 @@ export function CommandPalette() {
   useEffect(() => {
     if (!open) return;
     Promise.all([
-      apiGet<World[]>("/api/universes").catch(() => [] as World[]),
+      apiGet<World[]>("/api/worlds").catch(() => [] as World[]),
       apiGet<AgentListItem[]>("/api/agents").catch(() => [] as AgentListItem[]),
     ]).then(([w, a]) => {
       setWorlds(w ?? []);

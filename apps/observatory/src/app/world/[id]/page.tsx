@@ -67,7 +67,7 @@ export default function WorldDashboard() {
   usePageTitle(worldName);
 
   const fetchWorld = useCallback(() => {
-    apiGet<World[]>("/api/universes")
+    apiGet<World[]>("/api/worlds")
       .then((worlds) => {
         const found = worlds.find((w) => w.id === worldId);
         setWorld(found ?? null);

@@ -79,7 +79,7 @@ export default function AgentsPage() {
   const fetchAll = useCallback(async () => {
     try {
       const [worlds, rawAgents, rawTeams] = await Promise.all([
-        apiGet<World[]>("/api/universes").catch(() => [] as World[]),
+        apiGet<World[]>("/api/worlds").catch(() => [] as World[]),
         apiGet<AgentListItem[]>("/api/agents").catch(() => [] as AgentListItem[]),
         apiGet<Team[]>("/api/teams").catch(() => [] as Team[]),
       ]);

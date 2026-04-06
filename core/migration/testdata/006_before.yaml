@@ -1,0 +1,13 @@
+name: my-org
+version: 1
+defaults:
+  runtime:
+    backend: claude-code
+    provider: anthropic
+governance:
+  max-universes: 10
+  max-citizens-per-universe: 5
+  allowed-providers:
+    - anthropic
+  cost-limit: "$100"
+  audit: true

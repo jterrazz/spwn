@@ -39,7 +39,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const fetchWorlds = useCallback(() => {
     Promise.all([
-      apiGet<World[]>("/api/universes").catch(() => [] as World[]),
+      apiGet<World[]>("/api/worlds").catch(() => [] as World[]),
       apiGet<StatusData>("/api/status").catch(() => null),
     ]).then(([worldData, sData]) => {
       setStatusData(sData);
