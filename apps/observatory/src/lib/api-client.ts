@@ -152,7 +152,7 @@ export function encPath(segment: string): string {
 export async function apiGet<T>(goPath: string): Promise<T> {
   const data = await apiFetch<T>(goPath);
   // Normalize world data from Go API
-  if (goPath === "/api/universes" && Array.isArray(data)) {
+  if (goPath === "/api/worlds" && Array.isArray(data)) {
     return normalizeWorlds(data) as T;
   }
   // Normalize agent profile data from Go API

@@ -42,7 +42,7 @@ export default function UniverseMapPage() {
   usePageTitle("Worlds");
 
   const fetchWorlds = () => {
-    apiGet<World[]>("/api/universes")
+    apiGet<World[]>("/api/worlds")
       .then((data) => {
         setWorlds(data ?? []);
         setLoading(false);

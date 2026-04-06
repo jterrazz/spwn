@@ -85,7 +85,8 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/health", cors(s.handleHealth))
 	mux.HandleFunc("GET /api/status", cors(s.handleStatus))
 	mux.HandleFunc("GET /api/version", cors(s.handleVersion))
-	mux.HandleFunc("GET /api/universes", cors(s.handleListUniverses))
+	mux.HandleFunc("GET /api/worlds", cors(s.handleListUniverses))
+	mux.HandleFunc("GET /api/universes", cors(s.handleListUniverses)) // legacy alias
 	mux.HandleFunc("GET /api/agents", cors(s.handleListAgents))
 	mux.HandleFunc("GET /api/agents/{name}", cors(s.handleGetAgent))
 	mux.HandleFunc("GET /api/agents/{name}/journal", cors(s.handleGetAgentJournal))

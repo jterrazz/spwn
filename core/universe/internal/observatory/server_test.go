@@ -30,7 +30,8 @@ func newTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	srv := New(store, nil, "127.0.0.1:0")
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", srv.handleHealth)
-	mux.HandleFunc("GET /api/universes", srv.handleListUniverses)
+	mux.HandleFunc("GET /api/worlds", srv.handleListUniverses)
+	mux.HandleFunc("GET /api/universes", srv.handleListUniverses) // legacy alias
 	mux.HandleFunc("GET /api/agents", srv.handleListAgents)
 	return srv, mux
 }
@@ -52,7 +53,8 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	// READ endpoints
 	mux.HandleFunc("GET /api/health", cors(srv.handleHealth))
 	mux.HandleFunc("GET /api/status", cors(srv.handleStatus))
-	mux.HandleFunc("GET /api/universes", cors(srv.handleListUniverses))
+	mux.HandleFunc("GET /api/worlds", cors(srv.handleListUniverses))
+	mux.HandleFunc("GET /api/universes", cors(srv.handleListUniverses)) // legacy alias
 	mux.HandleFunc("GET /api/agents", cors(srv.handleListAgents))
 	mux.HandleFunc("GET /api/agents/{name}", cors(srv.handleGetAgent))
 	mux.HandleFunc("GET /api/agents/{name}/journal", cors(srv.handleGetAgentJournal))
@@ -218,7 +220,7 @@ func TestHealthEndpoint_ContentType(t *testing.T) {
 func TestListUniverses_Empty(t *testing.T) {
 	_, mux := newTestServer(t)
 
-	req := httptest.NewRequest("GET", "/api/universes", nil)
+	req := httptest.NewRequest("GET", "/api/worlds", nil)
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)
 
