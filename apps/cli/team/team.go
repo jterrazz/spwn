@@ -29,6 +29,7 @@ func init() {
 	Cmd.AddCommand(editCmd)
 	Cmd.AddCommand(rmCmd)
 	Cmd.AddCommand(assignCmd)
+	Cmd.AddCommand(membersCmd)
 }
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
@@ -203,4 +204,28 @@ var assignCmd = &cobra.Command{
 
 func init() {
 	assignCmd.Flags().Bool("clear", false, "Remove agent from team")
+}
+
+// ── spwn team members ──
+
+var membersCmd = &cobra.Command{
+	Use:     "members <slug>",
+	Short:   "List agents in a team",
+	Example: `  spwn team members matrix-ops`,
+	Args:    cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		slug := args[0]
+		members, err := agentDomain.TeamMembers(slug)
+		if err != nil {
+			return err
+		}
+		if len(members) == 0 {
+			fmt.Printf("No agents in team %q\n", slug)
+			return nil
+		}
+		for _, name := range members {
+			fmt.Println("  " + name)
+		}
+		return nil
+	},
 }
