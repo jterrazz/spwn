@@ -1188,8 +1188,8 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 
 	// Docker exec into the architect container running Claude Code
 	dockerArgs := []string{
-		"exec", "-u", "architect", "-w", "/world",
-		"-e", "SPWN_HOME=/spwn-data",
+		"exec", "-u", "architect", "-w", "/me",
+		"-e", "SPWN_HOME=/universe",
 	}
 	// Pass auth tokens
 	dockerArgs = append(dockerArgs, auth.DockerEnvArgs()...)
@@ -1198,13 +1198,13 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		"-p", body.Message,
 		"--output-format", "stream-json", "--verbose",
 		"--append-system-prompt",
-		"You are the Architect. Read /world/ARCHITECT.md for your identity. "+
+		"You are the Architect. Read /me/ARCHITECT.md for your identity. "+
 			"IMPORTANT: When a user asks you to do something, you MUST include a [STACK_PUSH] marker in your response. "+
 			"Format: [STACK_PUSH] Short task title\nPriority: blocking|queued\nBrief description. "+
-			"Also update /world/stack.md with the new task. "+
+			"Also update /me/stack.md with the new task. "+
 			"When completing a task use [STACK_POP] Short task title. "+
-			"Read /world/skills/ for detailed guides. "+
-			"KNOWLEDGE: You maintain /knowledge/ as the single source of truth. "+
+			"Read /me/skills/ for detailed guides. "+
+			"KNOWLEDGE: You maintain /universe/knowledge/ as the single source of truth. "+
 			"When updating knowledge files, include [KNOWLEDGE_UPDATE] path/to/file.md in your response. "+
 			"Every conversation should result in knowledge updates.",
 	)
@@ -1426,12 +1426,12 @@ func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Reques
 	jsonOK(w, map[string]string{"status": "ok", "path": relPath})
 }
 
-// handleArchitectKnowledgeList returns all files in the architect container's /knowledge/ directory.
+// handleArchitectKnowledgeList returns all files in the architect container's /universe/knowledge/ directory.
 func (s *Server) handleArchitectKnowledgeList(w http.ResponseWriter, r *http.Request) {
 	const containerName = "spwn-architect"
 
 	out, err := dockerExecOutput(r.Context(), containerName,
-		"find", "/knowledge/", "-type", "f", "-not", "-name", ".*",
+		"find", "/universe/knowledge/", "-type", "f", "-not", "-name", ".*",
 		"-printf", "%P\\t%s\\t%T@\\n")
 	if err != nil {
 		// Directory might not exist yet — return empty list
@@ -1488,7 +1488,7 @@ func (s *Server) handleArchitectKnowledgeRead(w http.ResponseWriter, r *http.Req
 	}
 
 	const containerName = "spwn-architect"
-	fullPath := "/knowledge/" + relPath
+	fullPath := "/universe/knowledge/" + relPath
 	out, err := dockerExecOutput(r.Context(), containerName, "cat", fullPath)
 	if err != nil {
 		jsonError(w, "file not found: "+relPath, 404)
