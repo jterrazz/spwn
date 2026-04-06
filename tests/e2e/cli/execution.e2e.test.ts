@@ -258,7 +258,7 @@ describe("CLI execution — agent commands", () => {
 
     // THEN — table has correct headers and both agents
     expect(result.exitCode).toBe(0);
-    expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableHeader(result.output, ["NAME", "WORLD", "STATUS"]);
     expect(stripAnsi(result.output)).toContain("alpha");
     expect(stripAnsi(result.output)).toContain("beta");
   });

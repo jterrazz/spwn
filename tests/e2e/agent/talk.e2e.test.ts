@@ -97,7 +97,7 @@ describe("agent talk", () => {
 
     // THEN — agent shows its world and status in table
     expect(listResult.exitCode).toBe(0);
-    expectTableHeader(listResult.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableHeader(listResult.output, ["NAME", "WORLD", "STATUS"]);
     expectTableRow(listResult.output, ["neo", id]);
   });
 

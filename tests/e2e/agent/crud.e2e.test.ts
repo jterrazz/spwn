@@ -68,9 +68,9 @@ describe("agent CRUD", () => {
 
     // THEN — both agents appear in a table with correct columns
     expect(result.exitCode).toBe(0);
-    expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
-    expectTableRow(result.output, ["neo", "1/6", "unattached"]);
-    expectTableRow(result.output, ["trinity", "1/6", "unattached"]);
+    expectTableHeader(result.output, ["NAME", "WORLD", "STATUS"]);
+    expectTableRow(result.output, ["neo", "unattached"]);
+    expectTableRow(result.output, ["trinity", "unattached"]);
   });
 
   test("inspect shows agent details", async () => {
@@ -102,7 +102,7 @@ describe("agent CRUD", () => {
 
     // THEN — exits successfully with table header (default agent may exist)
     expect(result.exitCode).toBe(0);
-    expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableHeader(result.output, ["NAME", "WORLD", "STATUS"]);
   });
 
   test("inspect non-existent agent fails", async () => {
@@ -176,8 +176,8 @@ describe("agent CRUD", () => {
 
     // THEN — output includes table with world-related columns
     expect(result.exitCode).toBe(0);
-    expectTableHeader(result.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
-    expectTableRow(result.output, ["atlas", "1/6", "unattached"]);
+    expectTableHeader(result.output, ["NAME", "WORLD", "STATUS"]);
+    expectTableRow(result.output, ["atlas", "unattached"]);
   });
 
   test("delete actually removes Mind directory from disk", async () => {

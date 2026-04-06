@@ -155,9 +155,6 @@ async function inspectAgent(name: string): Promise<AgentMindInfo | null> {
   return { name, path: agentPath, layers };
 }
 
-function countLayers(info: AgentMindInfo): number {
-  return Object.values(info.layers).filter((files) => files.length > 0).length;
-}
 
 /**
  * List all agents from ~/.spwn/agents/.
@@ -196,7 +193,6 @@ export async function getLimboAgents(worlds: World[]): Promise<LimboAgent[]> {
     .filter((a) => !activeAgentNames.has(a.name))
     .map((a) => ({
       name: a.name,
-      layers: countLayers(a),
     }));
 
   return limbo;

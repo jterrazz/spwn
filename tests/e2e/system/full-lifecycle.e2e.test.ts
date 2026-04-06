@@ -40,7 +40,7 @@ describe("complete agent lifecycle", () => {
     // ── STEP 2: Verify agent exists ─────────────────────────────
     const agentLs = ctx.spwn(["agent", "ls"]);
     expect(agentLs.exitCode).toBe(0);
-    expectTableHeader(agentLs.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableHeader(agentLs.output, ["NAME", "WORLD", "STATUS"]);
     expectTableRow(agentLs.output, ["neo"]);
 
     // ── STEP 3: Write purpose and traits ────────────────────────

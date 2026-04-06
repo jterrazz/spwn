@@ -230,7 +230,6 @@ function AgentProfilePage() {
   }
 
   const totalFiles = Object.values(mindTree).reduce((n, f) => n + (f?.length ?? 0), 0);
-  const activeLayers = Object.keys(mindTree).filter((k) => (mindTree[k]?.length ?? 0) > 0).length;
 
   const roleStyle = ROLE_BADGE[profile.role] ?? ROLE_BADGE.worker;
   const deployedAgent = worldData?.agents.find((a) => a.name === agentName);
@@ -564,8 +563,8 @@ function AgentProfilePage() {
 
       <MetricGrid columns={2} items={[
         { label: "Files", value: totalFiles },
-        { label: "Layers", value: activeLayers },
         { label: "Journal", value: profile.journal?.length ?? 0 },
+        { label: "Skills", value: profile.skills?.length ?? 0 },
         { label: "Bonds", value: profile.bonds?.length ?? 0 },
       ]} className="gap-x-8 gap-y-4" />
 
@@ -795,8 +794,8 @@ function AgentProfilePage() {
             <SectionLabel>Metrics</SectionLabel>
             <MetricGrid columns={2} items={[
               { label: "Files", value: totalFiles },
-              { label: "Layers", value: activeLayers },
               { label: "Journal", value: profile.journal?.length ?? 0 },
+              { label: "Skills", value: profile.skills?.length ?? 0 },
               { label: "Bonds", value: profile.bonds?.length ?? 0 },
             ]} />
           </div>

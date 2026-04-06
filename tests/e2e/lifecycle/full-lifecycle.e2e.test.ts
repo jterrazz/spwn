@@ -47,7 +47,7 @@ describe("full agent lifecycle", () => {
     // the agent exists via agent ls
     const lsResult1 = ctx.spwn(["agent", "ls"]);
     expect(lsResult1.exitCode).toBe(0);
-    expectTableHeader(lsResult1.output, ["NAME", "LAYERS", "WORLD", "STATUS"]);
+    expectTableHeader(lsResult1.output, ["NAME", "WORLD", "STATUS"]);
     expectTableRow(lsResult1.output, ["neo"]);
 
     // ── STEP 3: spwn profile neo — verify character sheet ──────
