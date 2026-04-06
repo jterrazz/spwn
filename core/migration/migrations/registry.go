@@ -12,6 +12,7 @@ func All() []migration.Migration {
 	r.Register(RenameDefaultRoles)      // 005
 	r.Register(OrgYAMLFieldRename)      // 006
 	r.Register(ConsolidateJournal)      // 007
-	r.Register(RemoveOrphanedUniverses) // 008
+	r.Register(RemoveOrphanedUniverses)      // 008
+	r.Register(MergeBlueprintIntoKnowledge) // 009
 	return r.All()
 }
