@@ -4,10 +4,10 @@
  * Usage:
  *   <ProgressShimmer active={isLoading} message="Building image..." />
  */
-export function ProgressShimmer({ active, message }: { active: boolean; message?: string }) {
+export function ProgressShimmer({ active, message, className }: { active: boolean; message?: string; className?: string }) {
   if (!active) return null;
   return (
-    <div className="w-full space-y-1.5">
+    <div className={`w-full space-y-1.5 ${className ?? ""}`}>
       {/* Shimmer bar */}
       <div className="w-full h-0.5 overflow-hidden rounded-full bg-white/[0.04]">
         <div

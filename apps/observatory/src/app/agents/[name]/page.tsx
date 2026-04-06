@@ -446,7 +446,12 @@ function AgentProfilePage() {
                 disabled={deleting}
                 className="px-4 py-2 rounded-lg text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/20 transition-colors disabled:opacity-50"
               >
-                {deleting ? "Deleting..." : "Delete Agent"}
+                {deleting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-3 h-3 border-2 border-red-400/40 border-t-red-400 rounded-full animate-spin" />
+                    Deleting...
+                  </span>
+                ) : "Delete Agent"}
               </button>
             </div>
           </div>
