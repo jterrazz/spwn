@@ -8,8 +8,20 @@ import (
 // Phrase helpers centralize natural-language event descriptions.
 // All phrases are authored here so the copy stays consistent.
 
-// extractName pulls the human-readable name out of an ID like "w-saturn-12345".
+// extractName pulls the human-readable name out of a world ID.
+// Supports both legacy "w-saturn-12345" and new "spwn-world-saturn-12345" formats.
 func extractName(id string) string {
+	// New format: spwn-world-{name}-{digits}
+	if strings.HasPrefix(id, "spwn-world-") {
+		trimmed := strings.TrimPrefix(id, "spwn-world-")
+		if idx := strings.LastIndex(trimmed, "-"); idx > 0 {
+			n := trimmed[:idx]
+			if len(n) > 0 {
+				return strings.ToUpper(n[:1]) + n[1:]
+			}
+		}
+	}
+	// Legacy format: w-{name}-{digits}
 	parts := strings.Split(id, "-")
 	if len(parts) >= 2 {
 		n := parts[1]

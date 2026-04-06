@@ -88,11 +88,11 @@ func TestSystemSkillsExist(t *testing.T) {
 }
 
 func TestArchitectSkillsExist(t *testing.T) {
-	// Verify that the architect (god tier) has all 3 key skill sections
+	// Verify that the architect tier has all 3 key skill sections
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "architect",
-		Role:      "god",
-		WorldID:   "w-god-00001",
+		Role:      "architect",
+		WorldID:   "spwn-world-architect-00001",
 		Tools:  []string{"bash", "git", "docker"},
 		CPU:       4,
 		Memory:    "8g",

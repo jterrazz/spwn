@@ -6,14 +6,16 @@ import (
 	"math/big"
 )
 
-// GenerateWorldID returns an ID like w-titan-84721.
+// GenerateWorldID returns an ID like spwn-world-titan-84721.
 // When the config is "default", a random planet name is used instead.
+// Legacy note: worlds created before v1.1.0 used the "w-" prefix (e.g. w-titan-84721).
+// Those IDs are still valid and stored in state.json; only new worlds get the new format.
 func GenerateWorldID(configName string) string {
 	name := configName
 	if name == "default" {
 		name = RandomPlanetName()
 	}
-	return fmt.Sprintf("w-%s-%s", name, randDigits(5))
+	return fmt.Sprintf("spwn-world-%s-%s", name, randDigits(5))
 }
 
 // GenerateAgentID returns an ID like a-neo-52103.

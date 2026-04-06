@@ -121,14 +121,14 @@ func TestGenerateNPCContext(t *testing.T) {
 	}
 }
 
-func TestGenerateGodContext_ContainsNewCLICommands(t *testing.T) {
+func TestGenerateArchitectContext_ContainsNewCLICommands(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "architect",
-		Role:      "god",
+		Role:      "architect",
 		WorldID:   "w-test-99999",
 	})
 
-	// New CLI commands that MUST appear in god-tier AGENT.md
+	// New CLI commands that MUST appear in architect-tier AGENT.md
 	mustContain := []string{
 		"spwn ls",
 		"spwn down",
@@ -157,10 +157,10 @@ func TestGenerateGodContext_ContainsNewCLICommands(t *testing.T) {
 	}
 }
 
-func TestGenerateGodContext_ContainsAllSections(t *testing.T) {
+func TestGenerateArchitectContext_ContainsAllSections(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "architect",
-		Role:      "god",
+		Role:      "architect",
 		WorldID:   "w-test-99999",
 		Tools:  []string{"bash", "git"},
 		CPU:       4,

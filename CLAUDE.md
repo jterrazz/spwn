@@ -243,7 +243,7 @@ spwn/
 │
 ├── platform/                        # Build infrastructure
 │   ├── images/                      #   Docker images
-│   │   ├── Dockerfile               #     spwn-base production image
+│   │   ├── Dockerfile               #     spwn/world production image
 │   │   ├── Dockerfile.test          #     Test image with mock Claude
 │   │   └── embed.go                 #     go:embed for runtime auto-build
 │   ├── gate-runtime/                #   Container-side gate (Rust)
@@ -300,7 +300,7 @@ core/messenger ──→ core/foundation
 
 ```bash
 make build               # cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
-make build-image         # docker build spwn-base:latest from platform/images/
+make build-image         # docker build spwn/world:latest from platform/images/
 make build-test-image    # docker build spwn-test:latest for E2E
 make build-gate          # cd platform/gate-runtime && cargo build --release
 

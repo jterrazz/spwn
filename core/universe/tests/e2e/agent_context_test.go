@@ -15,7 +15,7 @@ func TestAgentContext_ContainsNewCLICommands(t *testing.T) {
 		NoAgent().
 		Execute()
 
-	// The AGENT.md is only generated for god-role (via spawn with god config).
+	// The AGENT.md is only generated for architect-role (via spawn with architect config).
 	// For worker role, AGENT.md is generated when an agent is attached.
 	// We need a world WITH an agent to get AGENT.md.
 	chain2 := setup.NewSpawnBuilder(t).
@@ -36,19 +36,19 @@ func TestAgentContext_ContainsNewCLICommands(t *testing.T) {
 	_ = chain // use chain to avoid unused variable
 }
 
-func TestAgentContext_GodRoleContainsNewCommands(t *testing.T) {
-	// GIVEN a universe spawned with a god-role agent context
-	// The god role AGENT.md is the one that contains CLI commands.
+func TestAgentContext_ArchitectRoleContainsNewCommands(t *testing.T) {
+	// GIVEN a universe spawned with an architect-role agent context
+	// The architect role AGENT.md is the one that contains CLI commands.
 	// We test the GenerateAgentContext function directly via the container output.
 
 	tc := setup.NewTestContext(t)
-	tc.InitAgent("god-agent")
+	tc.InitAgent("arch-agent")
 
 	chain := tc.Spawn().
-		WithAgent("god-agent").
+		WithAgent("arch-agent").
 		Execute()
 
-	// The AGENT.md for a worker won't have CLI commands (only god role does).
+	// The AGENT.md for a worker won't have CLI commands (only architect role does).
 	// But we can verify the worker AGENT.md has correct structure.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()

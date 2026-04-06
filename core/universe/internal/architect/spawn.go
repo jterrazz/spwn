@@ -36,7 +36,7 @@ type SpawnOpts struct {
 	AgentName     string
 	Workspaces    []models.Workspace
 	Manifest      models.Manifest
-	Image         string                     // Override base image (used for testing). Defaults to foundation.BaseImage.
+	Image         string                     // Override base image (used for testing). Defaults to foundation.WorldImage.
 	InvokeHandler gate.InvokeHandler         // Override gate handler (used for testing). Defaults to stub.
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
@@ -194,10 +194,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Resolve image (env override for testing, then opts, then default)
-	image := foundation.BaseImage
-	if opts.IsArchitect {
-		image = foundation.GodImage
-	}
+	image := foundation.WorldImage
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
 	}
@@ -207,15 +204,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Ensure image exists (auto-build for default image, fail for custom/test images)
 	if opts.Image == "" {
-		dockerfile := images.Dockerfile
-		expectedVersion := foundation.BaseImageVersion
-		if opts.IsArchitect {
-			dockerfile = images.DockerfileWorld
-			expectedVersion = foundation.GodImageVersion
-		}
 		opts.progress("image_building", image)
-		if err := a.backend.EnsureImage(ctx, image, expectedVersion, dockerfile, opts.logWriter()); err != nil {
-			return nil, fmt.Errorf("ensure base image: %w", err)
+		if err := a.backend.EnsureImage(ctx, image, foundation.WorldImageVersion, images.Dockerfile, opts.logWriter()); err != nil {
+			return nil, fmt.Errorf("ensure world image: %w", err)
 		}
 		opts.progress("image_ready", image)
 	} else {

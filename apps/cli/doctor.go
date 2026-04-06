@@ -44,7 +44,7 @@ and authentication. Reports issues with suggested fixes.`,
 
 		// 2. Base image
 		total++
-		if detail, ok := checkImage("spwn-base:latest"); ok {
+		if detail, ok := checkImage("spwn/world:latest"); ok {
 			s.Done("Base image", detail)
 			passed++
 		} else {

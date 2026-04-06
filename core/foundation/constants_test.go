@@ -40,8 +40,8 @@ func TestDefaultConstants_Sanity(t *testing.T) {
 	if DefaultBackend == "" {
 		t.Error("DefaultBackend is empty")
 	}
-	if BaseImage == "" {
-		t.Error("BaseImage is empty")
+	if WorldImage == "" {
+		t.Error("WorldImage is empty")
 	}
 	if DefaultMaxProcs <= 0 {
 		t.Errorf("DefaultMaxProcs = %d, want > 0", DefaultMaxProcs)
