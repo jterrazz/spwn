@@ -193,17 +193,42 @@ func (d *Docker) ImageExists(ctx context.Context, image string) (bool, error) {
 	return true, nil
 }
 
-func (d *Docker) EnsureImage(ctx context.Context, tag string, dockerfile []byte, logw io.Writer) error {
-	exists, err := d.ImageExists(ctx, tag)
+func (d *Docker) ImageVersion(ctx context.Context, image string, label string) (string, error) {
+	inspect, _, err := d.client.ImageInspectWithRaw(ctx, image)
 	if err != nil {
-		return fmt.Errorf("check image: %w", err)
+		if client.IsErrNotFound(err) {
+			return "", nil
+		}
+		return "", err
 	}
-	if exists {
+	if inspect.Config == nil || inspect.Config.Labels == nil {
+		return "", nil
+	}
+	return inspect.Config.Labels[label], nil
+}
+
+func (d *Docker) EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) error {
+	if logw == nil {
+		logw = io.Discard
+	}
+
+	// Check current version
+	currentVersion, err := d.ImageVersion(ctx, tag, "sh.spwn.image-version")
+	if err != nil {
+		return fmt.Errorf("check image version: %w", err)
+	}
+
+	if !NeedsRebuild(currentVersion, expectedVersion) {
 		return nil
 	}
 
-	if logw == nil {
-		logw = io.Discard
+	// Log what we're doing
+	if currentVersion == "" {
+		fmt.Fprintf(logw, "Building %s (v%s)...\n", tag, expectedVersion)
+	} else {
+		fmt.Fprintf(logw, "Rebuilding %s (v%s → v%s)...\n", tag, currentVersion, expectedVersion)
+		// Remove old image before rebuilding
+		_ = d.ImageRemove(ctx, tag)
 	}
 
 	// Create tar context containing only the Dockerfile

@@ -309,13 +309,18 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		image = imageOverride
 	}
 
-	// Check image exists
-	exists, err := docker.ImageExists(ctx, image)
+	// Check image exists and version
+	currentVersion, err := docker.ImageVersion(ctx, image, foundation.ImageVersionLabel)
 	if err != nil {
 		return "", fmt.Errorf("checking image: %w", err)
 	}
-	if !exists {
-		return "", fmt.Errorf("image %s not found. Build it with: make build-architect-image", image)
+	expectedVersion := foundation.ArchitectImageVersion
+	if backend.NeedsRebuild(currentVersion, expectedVersion) {
+		have := "none"
+		if currentVersion != "" {
+			have = "v" + currentVersion
+		}
+		return "", fmt.Errorf("image %s needs to be built (have: %s, need: v%s).\nRun: make build-architect-image", image, have, expectedVersion)
 	}
 
 	// Build env vars — always set SPWN_HOME, pass through auth credentials

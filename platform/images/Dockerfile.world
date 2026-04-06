@@ -1,4 +1,5 @@
 FROM ubuntu:24.04
+LABEL sh.spwn.image-version="1.0.0"
 
 RUN apt-get update && apt-get install -y \
     bash coreutils findutils grep sed gawk \
