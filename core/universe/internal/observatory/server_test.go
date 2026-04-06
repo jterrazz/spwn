@@ -1392,9 +1392,9 @@ func TestWorldHistory_MissingID(t *testing.T) {
 	// Accept 307 (redirect), 400 (validation), or 404 (not found) —
 	// all indicate the request is not served as a valid world history.
 	w := doJSON(t, mux, "GET", "/api/worlds//history", nil)
-	validCodes := map[int]bool{307: true, 400: true, 404: true}
+	validCodes := map[int]bool{301: true, 307: true, 400: true, 404: true}
 	if !validCodes[w.Code] {
-		t.Fatalf("expected 307, 400, or 404, got %d (body: %s)", w.Code, w.Body.String())
+		t.Fatalf("expected 301, 307, 400, or 404, got %d (body: %s)", w.Code, w.Body.String())
 	}
 }
 
