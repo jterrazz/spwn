@@ -58,6 +58,22 @@ pub fn run() {
     // Find spwn binary — check PATH first, then common locations
     let spwn_bin = which_spwn();
 
+    // Run migrations before starting the API server.
+    // This ensures the user's ~/.spwn data is up-to-date even if they
+    // haven't used the CLI directly since updating the app.
+    match Command::new(&spwn_bin).args(["version"]).output() {
+        Ok(output) if output.status.success() => {
+            println!("[spwn] Migrations applied (via CLI pre-run hook)");
+        }
+        Ok(output) => {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            eprintln!("[spwn] Migration pre-flight warning: {stderr}");
+        }
+        Err(e) => {
+            eprintln!("[spwn] Could not run migrations: {e}");
+        }
+    }
+
     // Start the Go API server as a child process
     let child = Command::new(&spwn_bin)
         .args(["dash", "start", "--port", &api_port.to_string()])
