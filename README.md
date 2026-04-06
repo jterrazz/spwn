@@ -18,6 +18,12 @@
 
 <br/>
 
+<p align="center">
+  <img src="doc/app-screenshot.webp" alt="Spwn Observatory — Worlds dashboard" width="720" />
+</p>
+
+<br/>
+
 ## What is Spwn?
 
 # Build AI agent systems that feel alive
@@ -35,12 +41,6 @@ Models mastered thinking. Spwn builds the missing half: a reality for them to li
 | **01** | Create an agent | `spwn agent new neo`                                               |
 | **02** | Spawn a world   | `spwn up --agent neo -w ./my-project`                              |
 | **03** | Watch it live   | Agent discovers tools, works on your code, remembers everything.   |
-
-<br/>
-
-<p align="center">
-  <img src="doc/app-screenshot.webp" alt="Spwn Observatory — Worlds dashboard" width="720" />
-</p>
 
 <br/>
 
