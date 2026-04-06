@@ -37,7 +37,7 @@ import { usePageTitle } from "@/hooks/use-page-title";
 import { ActionButton } from "@/components/action-button";
 import { PageHeader } from "@/components/page-header";
 import { SectionHeader, SectionLabel, SubLabel, Separator, MetricGrid, ItemList, StatusDot, KeyValue } from "@/components/ds";
-import { getWorldName, type Team, type World } from "@/lib/types";
+import { getWorldName, AVAILABLE_ROLES, type Hierarchy, type Team, type World } from "@/lib/types";
 
 export default function AgentProfilePageWrapper() {
   return (
@@ -69,6 +69,8 @@ function AgentProfilePage() {
   const [deployTargetWorld, setDeployTargetWorld] = useState("");
   const [deploying, setDeploying] = useState(false);
   const [deployError, setDeployError] = useState("");
+  const [deployRole, setDeployRole] = useState("citizen");
+  const [hierarchies, setHierarchies] = useState<Hierarchy[]>([]);
   const [worldData, setWorldData] = useState<World | null>(null);
   const refetchSidebar = useRefetch();
 
@@ -93,6 +95,7 @@ function AgentProfilePage() {
     fetchProfile();
     apiGet<Team[]>("/api/teams").then((t) => setAvailableTeams(t ?? [])).catch(() => {});
     apiGet<World[]>("/api/universes").then((w) => setAvailableWorlds(w ?? [])).catch(() => {});
+    apiGet<Hierarchy[]>("/api/hierarchies").then((h) => setHierarchies(h ?? [])).catch(() => {});
     if (worldId) {
       apiGet<World>(`/api/universes/${worldId}`).then((w) => setWorldData(w ?? null)).catch(() => {});
     }
@@ -155,7 +158,7 @@ function AgentProfilePage() {
       const res = await fetch(goApiUrl(`/api/worlds/${deployTargetWorld}/agents`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: agentName, role: "citizen" }),
+        body: JSON.stringify({ name: agentName, role: deployRole }),
         signal: AbortSignal.timeout(30000),
       });
       const data = await res.json().catch(() => ({}));
@@ -346,6 +349,29 @@ function AgentProfilePage() {
                 })}
               </div>
             )}
+            {/* Role selector */}
+            <label className="block text-[10px] uppercase tracking-[0.15em] text-muted-foreground/40 mt-4 mb-2">Role</label>
+            <select
+              value={deployRole}
+              onChange={(e) => setDeployRole(e.target.value)}
+              disabled={deploying}
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+            >
+              {(() => {
+                // Try to get roles from the selected world's hierarchy, fall back to AVAILABLE_ROLES
+                const selectedWorld = availableWorlds.find((w) => w.id === deployTargetWorld);
+                const worldHierarchySlug = (selectedWorld as Record<string, unknown> | undefined)?.hierarchy as string | undefined;
+                const hierarchy = worldHierarchySlug
+                  ? hierarchies.find((h) => h.slug === worldHierarchySlug)
+                  : null;
+                const roleNames = hierarchy
+                  ? hierarchy.roles.map((r) => r.name)
+                  : [...AVAILABLE_ROLES];
+                return roleNames.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ));
+              })()}
+            </select>
             {deployError && (
               <p className="text-xs text-red-400/80 mt-3">{deployError}</p>
             )}
@@ -735,7 +761,18 @@ function AgentProfilePage() {
             <SectionLabel>Identity</SectionLabel>
             <div className="space-y-2">
               <KeyValue label="Name" value={agentName} />
-              <KeyValue label="Role" value={deployedAgent?.role ?? profile.role} />
+              <div className="flex items-center justify-between">
+                <SubLabel>Role</SubLabel>
+                {(() => {
+                  const role = deployedAgent?.role ?? profile.role;
+                  const badge = ROLE_BADGE[role] ?? ROLE_BADGE.default;
+                  return (
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}>
+                      {role}
+                    </span>
+                  );
+                })()}
+              </div>
               {deployedAgent && (
                 <div className="flex items-center justify-between">
                   <SubLabel>Status</SubLabel>

@@ -15,6 +15,7 @@ import {
   IconCircleFilled,
   IconBookFilled as IconKnowledgeFilled,
   IconSettingsFilled,
+  IconBinaryTreeFilled,
   IconBookFilled,
   IconBrandGithubFilled,
   IconAlertTriangleFilled,
@@ -135,6 +136,12 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
               <SidebarMenuButton isActive={pathname === "/providers"} onClick={() => router.push("/providers")}>
                 <IconSettingsFilled size={16} />
                 <span>Settings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={pathname === "/hierarchies"} onClick={() => router.push("/hierarchies")}>
+                <IconBinaryTreeFilled size={16} />
+                <span>Hierarchies</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
