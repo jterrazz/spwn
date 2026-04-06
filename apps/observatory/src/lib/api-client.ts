@@ -132,6 +132,14 @@ function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentPr
   };
 }
 
+/**
+ * Encode a value for use as a URL path segment. Handles spaces, special
+ * chars, and non-ASCII — so agent names like "QA Eng" don't break API calls.
+ */
+export function encPath(segment: string): string {
+  return encodeURIComponent(segment);
+}
+
 // ── Public API ──
 
 /**

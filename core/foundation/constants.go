@@ -30,6 +30,7 @@ const (
 	ClawSubDir        = "claw"
 	KnowledgeSubDir   = "knowledge"
 	ActivityFileName  = "activity.jsonl"
+	TeamsSubDir       = "teams"
 )
 
 // MindLayers defines the six-layer Mind structure.

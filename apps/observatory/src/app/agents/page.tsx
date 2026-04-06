@@ -14,32 +14,35 @@ import {
   IconMoonFilled,
   IconX,
   IconCheck,
+  IconUsers,
 } from "@tabler/icons-react";
 import { Page } from "@/components/page";
 import { PageHeader } from "@/components/page-header";
 import { ActionButton } from "@/components/action-button";
 import { ExpandingSearch } from "@/components/expanding-search";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiGet, apiAction } from "@/lib/api-client";
+import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
 import { useRefetch } from "@/components/app-shell";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { getWorldName, type World } from "@/lib/types";
+import { getWorldName, type World, type Team } from "@/lib/types";
 import { TIER_BADGE } from "@/lib/status";
 
 interface AgentListItem {
   name: string;
   path: string;
+  team?: string;
   layers: Record<string, string[] | null>;
 }
 
 // An agent enriched with its current deployment (if any).
 interface EnrichedAgent {
   name: string;
-  tier: string;                       // from world membership, else "citizen"
+  tier: string;
+  team?: string;                      // team slug
   status: string;                     // running/waiting/idle/sleeping/stopped/limbo
-  worldID?: string;                   // when deployed
+  worldID?: string;
   worldName?: string;
-  layersCount: number;                // non-empty mind layers
+  layersCount: number;
   journalEntries: number;
   sessionsCount: number;
 }
@@ -74,20 +77,32 @@ export default function AgentsPage() {
   usePageTitle("Agents");
 
   const [agents, setAgents] = useState<EnrichedAgent[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [query, setQuery] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [newName, setNewName] = useState("");
+  const [newTeam, setNewTeam] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [showTeamDialog, setShowTeamDialog] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [teamName, setTeamName] = useState("");
+  const [teamIcon, setTeamIcon] = useState("");
+  const [teamColor, setTeamColor] = useState("");
+  const [teamDesc, setTeamDesc] = useState("");
+  const [savingTeam, setSavingTeam] = useState(false);
 
   const fetchAll = useCallback(async () => {
     try {
-      const [worlds, rawAgents] = await Promise.all([
+      const [worlds, rawAgents, rawTeams] = await Promise.all([
         apiGet<World[]>("/api/universes").catch(() => [] as World[]),
         apiGet<AgentListItem[]>("/api/agents").catch(() => [] as AgentListItem[]),
+        apiGet<Team[]>("/api/teams").catch(() => [] as Team[]),
       ]);
+
+      setTeams(rawTeams ?? []);
 
       // Build name → { worldID, worldName, tier, status } map from world records.
       const placement = new Map<string, { worldID: string; worldName: string; tier: string; status: string }>();
@@ -108,6 +123,7 @@ export default function AgentsPage() {
         return {
           name: a.name,
           tier: p?.tier ?? "citizen",
+          team: a.team,
           status: p?.status ?? "limbo",
           worldID: p?.worldID,
           worldName: p?.worldName,
@@ -146,6 +162,36 @@ export default function AgentsPage() {
     limbo: agents.filter((a) => !a.worldID).length,
   }), [agents]);
 
+  // Group filtered agents by team for the list view.
+  const grouped = useMemo(() => {
+    const teamMap = new Map<string, Team>();
+    for (const t of teams) teamMap.set(t.slug, t);
+
+    const groups: { team: Team | null; agents: EnrichedAgent[] }[] = [];
+    const bySlug = new Map<string, EnrichedAgent[]>();
+    const solo: EnrichedAgent[] = [];
+
+    for (const a of filtered) {
+      if (a.team) {
+        const list = bySlug.get(a.team) ?? [];
+        list.push(a);
+        bySlug.set(a.team, list);
+      } else {
+        solo.push(a);
+      }
+    }
+
+    // Teams first (sorted by name), then solo
+    for (const [slug, members] of bySlug) {
+      groups.push({ team: teamMap.get(slug) ?? { slug, name: slug }, agents: members });
+    }
+    groups.sort((a, b) => (a.team?.name ?? "").localeCompare(b.team?.name ?? ""));
+    if (solo.length > 0) {
+      groups.push({ team: null, agents: solo });
+    }
+    return groups;
+  }, [filtered, teams]);
+
   const handleCreate = async () => {
     const name = newName.trim();
     if (!name) return;
@@ -158,7 +204,16 @@ export default function AgentsPage() {
         setCreating(false);
         return;
       }
+      // Assign team if selected
+      if (newTeam) {
+        await fetch(goApiUrl(`/api/agents/${encodeURIComponent(name)}/identity`), {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field: "team", content: newTeam }),
+        }).catch(() => {});
+      }
       setNewName("");
+      setNewTeam("");
       setShowNew(false);
       refetchSidebar();
       await fetchAll();
@@ -168,6 +223,55 @@ export default function AgentsPage() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const openTeamDialog = (t?: Team) => {
+    if (t) {
+      setEditingTeam(t);
+      setTeamName(t.name);
+      setTeamIcon(t.icon ?? "");
+      setTeamColor(t.color ?? "");
+      setTeamDesc(t.description ?? "");
+    } else {
+      setEditingTeam(null);
+      setTeamName("");
+      setTeamIcon("");
+      setTeamColor("");
+      setTeamDesc("");
+    }
+    setShowTeamDialog(true);
+  };
+
+  const handleSaveTeam = async () => {
+    if (!teamName.trim()) return;
+    setSavingTeam(true);
+    try {
+      const body = { name: teamName.trim(), icon: teamIcon.trim(), color: teamColor.trim(), description: teamDesc.trim() };
+      if (editingTeam) {
+        await fetch(goApiUrl(`/api/teams/${editingTeam.slug}`), {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } else {
+        await fetch(goApiUrl("/api/teams"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+      setShowTeamDialog(false);
+      await fetchAll();
+    } catch {
+      // ignore
+    } finally {
+      setSavingTeam(false);
+    }
+  };
+
+  const handleDeleteTeam = async (slug: string) => {
+    await fetch(goApiUrl(`/api/teams/${slug}`), { method: "DELETE" }).catch(() => {});
+    await fetchAll();
   };
 
   return (
@@ -180,7 +284,13 @@ export default function AgentsPage() {
             <ExpandingSearch value={query} onChange={setQuery} placeholder="Search agents…" />
             <ActionButton
               compact
-              onClick={() => { setCreateError(""); setShowNew(true); }}
+              onClick={() => openTeamDialog()}
+              label="New Team"
+              icon={<IconUsers size={16} stroke={2.2} />}
+            />
+            <ActionButton
+              compact
+              onClick={() => { setCreateError(""); setNewTeam(""); setShowNew(true); }}
               label="New Agent"
               icon={<IconPlus size={18} stroke={2.4} />}
             />
@@ -222,47 +332,78 @@ export default function AgentsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-1">
-          {filtered.map((a) => {
-            const s = STATUS_ICON[a.status] ?? STATUS_ICON.limbo;
-            const Icon = s.icon;
-            const tierStyle = TIER_BADGE[a.tier] ?? TIER_BADGE.citizen;
-            return (
-              <Link
-                key={a.name}
-                href={`/agents/${a.name}`}
-                className="group flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent hover:border-white/[0.08] hover:bg-white/[0.03] transition-all"
-              >
-                <Icon size={16} className={`${s.color} shrink-0`} />
-                <div className="min-w-0 flex-1 flex items-center gap-3">
-                  <span className="font-mono text-sm text-foreground/85 group-hover:text-foreground transition-colors truncate">
-                    {a.name}
-                  </span>
-                  <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${tierStyle}`}>
-                    {a.tier}
-                  </span>
-                </div>
+        <div className="space-y-6">
+          {grouped.map(({ team: t, agents: groupAgents }) => (
+            <div key={t?.slug ?? "solo"}>
+              {/* Team header */}
+              <div className="flex items-center gap-2 mb-2 group/team-header">
+                {t ? (
+                  <>
+                    {t.icon && <span className="text-base">{t.icon}</span>}
+                    <button
+                      onClick={() => openTeamDialog(t)}
+                      className="text-[10px] uppercase tracking-[0.15em] font-medium hover:underline underline-offset-2 transition-colors"
+                      style={t.color ? { color: t.color } : undefined}
+                    >
+                      {t.name}
+                    </button>
+                    <span className="text-[10px] text-muted-foreground/30 font-mono">{groupAgents.length}</span>
+                    {t.description && (
+                      <span className="text-[10px] text-muted-foreground/25 ml-1 hidden sm:inline">— {t.description}</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/30">No team</span>
+                    <span className="text-[10px] text-muted-foreground/20 font-mono">{groupAgents.length}</span>
+                  </>
+                )}
+              </div>
+              {/* Agent rows */}
+              <div className="space-y-0.5">
+                {groupAgents.map((a) => {
+                  const s = STATUS_ICON[a.status] ?? STATUS_ICON.limbo;
+                  const Icon = s.icon;
+                  const tierStyle = TIER_BADGE[a.tier] ?? TIER_BADGE.citizen;
+                  return (
+                    <Link
+                      key={a.name}
+                      href={`/agents/${a.name}`}
+                      className="group flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent hover:border-white/[0.08] hover:bg-white/[0.03] transition-all"
+                    >
+                      <Icon size={16} className={`${s.color} shrink-0`} />
+                      <div className="min-w-0 flex-1 flex items-center gap-3">
+                        <span className="font-mono text-sm text-foreground/85 group-hover:text-foreground transition-colors truncate">
+                          {a.name}
+                        </span>
+                        <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${tierStyle}`}>
+                          {a.tier}
+                        </span>
+                      </div>
 
-                <div className="hidden sm:flex items-center gap-4 text-[11px] font-mono text-muted-foreground/40 shrink-0">
-                  <span title="Mind layers">{a.layersCount} layers</span>
-                  <span title="Sessions">{a.sessionsCount} sessions</span>
-                </div>
+                      <div className="hidden sm:flex items-center gap-4 text-[11px] font-mono text-muted-foreground/40 shrink-0">
+                        <span title="Mind layers">{a.layersCount} layers</span>
+                        <span title="Sessions">{a.sessionsCount} sessions</span>
+                      </div>
 
-                <div className="shrink-0 min-w-[110px] text-right text-xs text-muted-foreground/50">
-                  {a.worldID ? (
-                    <>
-                      <span className="text-muted-foreground/30">in </span>
-                      <span className="text-foreground/65">{a.worldName}</span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground/30 uppercase tracking-wider text-[10px] font-mono">Limbo</span>
-                  )}
-                </div>
+                      <div className="shrink-0 min-w-[110px] text-right text-xs text-muted-foreground/50">
+                        {a.worldID ? (
+                          <>
+                            <span className="text-muted-foreground/30">in </span>
+                            <span className="text-foreground/65">{a.worldName}</span>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground/30 uppercase tracking-wider text-[10px] font-mono">Limbo</span>
+                        )}
+                      </div>
 
-                <IconArrowRight size={14} className="text-muted-foreground/20 group-hover:text-muted-foreground/60 transition-colors shrink-0" />
-              </Link>
-            );
-          })}
+                      <IconArrowRight size={14} className="text-muted-foreground/20 group-hover:text-muted-foreground/60 transition-colors shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -284,6 +425,20 @@ export default function AgentsPage() {
               onKeyDown={(e) => { if (e.key === "Enter") handleCreate(); if (e.key === "Escape") setShowNew(false); }}
               className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
             />
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mt-4 mb-1.5">
+              Team <span className="text-muted-foreground/25 normal-case tracking-normal">(optional)</span>
+            </label>
+            <select
+              value={newTeam}
+              onChange={(e) => setNewTeam(e.target.value)}
+              disabled={creating}
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+            >
+              <option value="">No team</option>
+              {teams.map((t) => (
+                <option key={t.slug} value={t.slug}>{t.icon ? `${t.icon} ` : ""}{t.name}</option>
+              ))}
+            </select>
             {createError && <p className="text-xs text-red-400/80 mt-3">{createError}</p>}
             <div className="flex gap-3 justify-end mt-6">
               <button
@@ -316,6 +471,100 @@ export default function AgentsPage() {
               onClick={() => !creating && setShowNew(false)}
               className="absolute top-4 right-4 text-muted-foreground/30 hover:text-foreground/60 transition-colors disabled:opacity-30"
               disabled={creating}
+            >
+              <IconX size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Team create/edit dialog */}
+      {showTeamDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !savingTeam && setShowTeamDialog(false)} />
+          <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
+            <h3 className="text-lg font-heading text-foreground/90 mb-1">
+              {editingTeam ? "Edit Team" : "New Team"}
+            </h3>
+            <p className="text-sm text-muted-foreground/50 mb-5">
+              {editingTeam ? `Editing ${editingTeam.name}` : "Create a new team to group agents together."}
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Name</label>
+                <input
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  placeholder="e.g. Matrix Ops"
+                  autoFocus
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSaveTeam(); }}
+                  className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Icon</label>
+                  <input
+                    value={teamIcon}
+                    onChange={(e) => setTeamIcon(e.target.value)}
+                    placeholder="⬡"
+                    className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Color</label>
+                  <input
+                    value={teamColor}
+                    onChange={(e) => setTeamColor(e.target.value)}
+                    placeholder="#8B5CF6"
+                    className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                  Description <span className="text-muted-foreground/25 normal-case tracking-normal">(optional)</span>
+                </label>
+                <input
+                  value={teamDesc}
+                  onChange={(e) => setTeamDesc(e.target.value)}
+                  placeholder="What this team does…"
+                  className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-6">
+              <div>
+                {editingTeam && (
+                  <button
+                    onClick={() => { handleDeleteTeam(editingTeam.slug); setShowTeamDialog(false); }}
+                    className="text-[11px] text-red-400/60 hover:text-red-400 transition-colors"
+                  >
+                    Delete team
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowTeamDialog(false)}
+                  disabled={savingTeam}
+                  className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveTeam}
+                  disabled={savingTeam || !teamName.trim()}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-white/[0.1] text-foreground/90 hover:bg-white/[0.16] border border-white/[0.08] transition-colors disabled:opacity-50"
+                >
+                  {savingTeam ? "Saving…" : editingTeam ? "Save" : "Create"}
+                </button>
+              </div>
+            </div>
+            <button
+              aria-label="Close"
+              onClick={() => !savingTeam && setShowTeamDialog(false)}
+              className="absolute top-4 right-4 text-muted-foreground/30 hover:text-foreground/60 transition-colors"
+              disabled={savingTeam}
             >
               <IconX size={16} />
             </button>

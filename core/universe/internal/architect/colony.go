@@ -16,6 +16,48 @@ type AgentSpec struct {
 	Tier string // "governor" or "citizen"
 }
 
+// DeployAgent adds a single agent to a running world: validates the mind,
+// registers it in state, and starts the agent process in the background.
+// Safe to call on a world that's already running with other agents.
+func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, tier string) error {
+	if err := agent.ValidateMind(agentName); err != nil {
+		return fmt.Errorf("agent %q: %w", agentName, err)
+	}
+
+	u, err := a.state.Get(worldID)
+	if err != nil {
+		return err
+	}
+	if u.Status != models.StatusRunning && u.Status != models.StatusIdle {
+		return fmt.Errorf("world %s is not running (status: %s)", worldID, u.Status)
+	}
+
+	for _, existing := range u.Agents {
+		if existing.Name == agentName {
+			return fmt.Errorf("agent %q is already deployed in world %s", agentName, worldID)
+		}
+	}
+
+	resolvedTier := manifest.DefaultTier(tier)
+	agentID := foundation.GenerateAgentID(agentName)
+	rec := models.AgentRecord{
+		Name:    agentName,
+		AgentID: agentID,
+		Tier:    resolvedTier,
+		Status:  models.StatusRunning,
+	}
+	if err := a.state.AddAgent(worldID, rec); err != nil {
+		return fmt.Errorf("register agent: %w", err)
+	}
+
+	if err := a.SpawnAgentDetached(ctx, worldID, agentName); err != nil {
+		_ = a.state.RemoveAgent(worldID, agentID)
+		return fmt.Errorf("start agent: %w", err)
+	}
+
+	return nil
+}
+
 // SpawnAgents spawns multiple agents in a world.
 // Governors are spawned first (blocking), then citizens (detached).
 func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []AgentSpec) error {

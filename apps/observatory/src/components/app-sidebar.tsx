@@ -35,9 +35,9 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UpgradeBanner } from "@/components/upgrade-banner";
 import { useVersion } from "@/hooks/use-version";
-import { getWorldName, type World } from "@/lib/types";
+import { getWorldName, type World, type Team } from "@/lib/types";
 import { WorldPlanet } from "@/components/world-planet";
-import { isGoApiAvailable, onConnectionStatusChange, getConnectionStatus, type ConnectionStatus } from "@/lib/api-client";
+import { apiGet, isGoApiAvailable, onConnectionStatusChange, getConnectionStatus, type ConnectionStatus } from "@/lib/api-client";
 
 interface StatusData { worlds: number; agents: number; running: number; }
 interface AppSidebarProps {
@@ -70,8 +70,14 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
   const pathname = usePathname();
   const router = useRouter();
   const [worldsExpanded, setWorldsExpanded] = useState(false);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   const { version } = useVersion();
+
+  // Fetch teams to group agents in the selected world by team
+  useEffect(() => {
+    apiGet<Team[]>("/api/teams").then((t) => setTeams(t ?? [])).catch(() => {});
+  }, []);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(getConnectionStatus());
 
   useEffect(() => {
@@ -116,8 +122,26 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
 
       <SidebarContent>
 
-        {/* ── Navigation ── */}
+        {/* ── Global ── */}
         <SidebarGroup className="pt-0">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={pathname === "/architect"} onClick={() => router.push("/architect")}>
+                <IconHexagonFilled size={16} />
+                <span>Architect</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={pathname === "/providers"} onClick={() => router.push("/providers")}>
+                <IconSettingsFilled size={16} />
+                <span>Settings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* ── Universe ── */}
+        <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-sidebar-foreground/30">Universe</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
@@ -130,18 +154,6 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
               <SidebarMenuButton isActive={pathname === "/agents" || pathname.startsWith("/agents/")} onClick={() => router.push("/agents")}>
                 <IconUserFilled size={16} />
                 <span>Agents</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={pathname === "/architect"} onClick={() => router.push("/architect")}>
-                <IconHexagonFilled size={16} />
-                <span>Architect</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={pathname === "/providers"} onClick={() => router.push("/providers")}>
-                <IconSettingsFilled size={16} />
-                <span>Settings</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -244,25 +256,80 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              {selectedWorld.agents.map((agent) => {
-                const s = AGENT_ICON[agent.status] ?? AGENT_ICON.stopped;
-                const StatusIcon = s.icon;
-                return (
-                  <SidebarMenuItem key={agent.name}>
-                    <SidebarMenuButton
-                      isActive={pathname === `/world/${selectedWorld.id}/${agent.name}`}
-                      onClick={() => router.push(`/world/${selectedWorld.id}/${agent.name}`)}
-                    >
-                      <StatusIcon size={16} className={s.color} />
-                      <span className={s.dim ? "opacity-50" : ""}>{agent.name}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {(() => {
+                // Build agent-name → team lookup from teams data
+                const agentTeamMap = new Map<string, Team>();
+                for (const t of teams) {
+                  for (const m of t.members ?? []) {
+                    agentTeamMap.set(m, t);
+                  }
+                }
 
-              {selectedWorld.agents.length === 0 && (
-                <p className="px-2 py-1.5 text-xs text-muted-foreground/25">No agents deployed</p>
-              )}
+                // Group world agents by team
+                const grouped = new Map<string, { team: Team | null; agents: typeof selectedWorld.agents }>();
+                const soloAgents: typeof selectedWorld.agents = [];
+
+                for (const agent of selectedWorld.agents) {
+                  const team = agentTeamMap.get(agent.name);
+                  if (team) {
+                    const group = grouped.get(team.slug) ?? { team, agents: [] };
+                    group.agents.push(agent);
+                    grouped.set(team.slug, group);
+                  } else {
+                    soloAgents.push(agent);
+                  }
+                }
+
+                const renderAgent = (agent: typeof selectedWorld.agents[number]) => {
+                  const s = AGENT_ICON[agent.status] ?? AGENT_ICON.stopped;
+                  const StatusIcon = s.icon;
+                  return (
+                    <SidebarMenuItem key={agent.name}>
+                      <SidebarMenuButton
+                        isActive={pathname === `/world/${selectedWorld.id}/${agent.name}`}
+                        onClick={() => router.push(`/world/${selectedWorld.id}/${agent.name}`)}
+                      >
+                        <span className="w-[20px] h-[20px] -mx-[2px] -translate-x-[0.5px] rounded-full flex items-center justify-center shrink-0 bg-white/[0.15]">
+                          <StatusIcon className={`!size-[12px] ${s.color}`} />
+                        </span>
+                        <span className={s.dim ? "opacity-50" : ""}>{agent.name}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                };
+
+                if (selectedWorld.agents.length === 0) {
+                  return <p className="px-2 py-1.5 text-xs text-muted-foreground/25">No agents deployed</p>;
+                }
+
+                // If no teams, render flat list (no headers)
+                if (grouped.size === 0) {
+                  return soloAgents.map(renderAgent);
+                }
+
+                // Render grouped: team sections + solo at bottom
+                return (
+                  <>
+                    {Array.from(grouped.values()).map(({ team, agents }) => (
+                      <div key={team!.slug} className="mt-1">
+                        <p className="px-2 py-1 text-[9px] uppercase tracking-[0.12em] text-sidebar-foreground/25 flex items-center gap-1.5">
+                          {team!.icon && <span className="text-[10px]">{team!.icon}</span>}
+                          <span style={team!.color ? { color: team!.color } : undefined}>{team!.name}</span>
+                        </p>
+                        {agents.map(renderAgent)}
+                      </div>
+                    ))}
+                    {soloAgents.length > 0 && (
+                      <div className="mt-1">
+                        {grouped.size > 0 && (
+                          <p className="px-2 py-1 text-[9px] uppercase tracking-[0.12em] text-sidebar-foreground/20">No team</p>
+                        )}
+                        {soloAgents.map(renderAgent)}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </SidebarMenu>
           )}
         </SidebarGroup>

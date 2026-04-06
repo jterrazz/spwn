@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { AgentProfile } from "@/lib/types";
-import { apiGet, apiPut, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
+import { apiGet, apiPut, apiAction, apiDelete, goApiUrl, encPath } from "@/lib/api-client";
 import { useRefetch } from "@/components/app-shell";
 import { streamChat } from "@/lib/stream-chat";
 import { Chat, ChatSuggestions, type ChatBubble } from "@/components/chat";
@@ -34,11 +34,14 @@ import {
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { ActionButton } from "@/components/action-button";
+import { PageHeader } from "@/components/page-header";
+import { getWorldName, type Team, type World } from "@/lib/types";
 
 export default function AgentProfilePage() {
   const params = useParams();
   const router = useRouter();
-  const agentName = params.name as string;
+  const agentName = decodeURIComponent(params.name as string);
 
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [mindTree, setMindTree] = useState<Record<string, string[]>>({});
@@ -50,7 +53,9 @@ export default function AgentProfilePage() {
   const [activeTab, setActiveTab] = useState<"profile" | "chat" | "files">("profile");
   const [showWizard, setShowWizard] = useState(false);
   const [showDeployDialog, setShowDeployDialog] = useState(false);
-  const [deployWorkspace, setDeployWorkspace] = useState("");
+  const [availableTeams, setAvailableTeams] = useState<Team[]>([]);
+  const [availableWorlds, setAvailableWorlds] = useState<World[]>([]);
+  const [deployTargetWorld, setDeployTargetWorld] = useState("");
   const [deploying, setDeploying] = useState(false);
   const [deployError, setDeployError] = useState("");
   const refetchSidebar = useRefetch();
@@ -59,7 +64,7 @@ export default function AgentProfilePage() {
 
   const fetchProfile = useCallback(() => {
     Promise.all([
-      apiGet<AgentProfile>(`/api/agents/${agentName}`).catch(() => null),
+      apiGet<AgentProfile>(`/api/agents/${encPath(agentName)}`).catch(() => null),
       apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`).catch(() => null),
     ]).then(([agentProfile, tree]) => {
       setProfile(agentProfile ?? null);
@@ -74,6 +79,8 @@ export default function AgentProfilePage() {
 
   useEffect(() => {
     fetchProfile();
+    apiGet<Team[]>("/api/teams").then((t) => setAvailableTeams(t ?? [])).catch(() => {});
+    apiGet<World[]>("/api/universes").then((w) => setAvailableWorlds(w ?? [])).catch(() => {});
   }, [fetchProfile]);
 
   const showFeedback = (msg: string) => {
@@ -116,7 +123,7 @@ export default function AgentProfilePage() {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await apiDelete(`/api/agents/${agentName}`);
+      await apiDelete(`/api/agents/${encPath(agentName)}`);
       router.push("/");
     } catch {
       showFeedback("Error: Failed to delete agent");
@@ -125,32 +132,29 @@ export default function AgentProfilePage() {
     }
   };
 
-  const defaultDeployWorkspace = `/tmp/spwn-${agentName}-${Math.random().toString(36).substring(2, 6)}`;
-
   const handleDeploy = async () => {
+    if (!deployTargetWorld) return;
     setDeploying(true);
     setDeployError("");
     try {
-      const workspace = deployWorkspace.trim() || defaultDeployWorkspace;
-      const res = await fetch(goApiUrl("/api/worlds"), {
+      const res = await fetch(goApiUrl(`/api/worlds/${deployTargetWorld}/agents`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent: agentName, workspace, config: "default" }),
+        body: JSON.stringify({ name: agentName, tier: "citizen" }),
         signal: AbortSignal.timeout(30000),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setDeployError(data.error || "Failed to deploy");
+        setDeployError(data.error || `Deploy failed (HTTP ${res.status})`);
         setDeploying(false);
         return;
       }
       refetchSidebar();
       setShowDeployDialog(false);
-      if (data.id) {
-        router.push(`/world/${data.id}`);
-      }
-    } catch {
-      setDeployError("Failed to connect to API");
+      router.push(`/world/${deployTargetWorld}/${agentName}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setDeployError(`Failed to connect: ${msg}`);
       setDeploying(false);
     }
   };
@@ -214,125 +218,117 @@ export default function AgentProfilePage() {
 
   return (
     <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-3xl">
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-lg font-heading text-foreground/60">
-            {agentName.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-heading tracking-wide text-foreground/90">{agentName}</h1>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${tierStyle}`}>
-                {profile.tier}
-              </span>
-            </div>
-            <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">
-              {profile.engine} · {profile.provider}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={async () => {
-              if ((profile?.journal?.length ?? 0) === 0) {
-                showFeedback("Nothing to dream about yet — spawn the agent in a world first");
-                return;
-              }
-              const ok = await callAction("dream");
-              if (ok) {
-                showFeedback("Dream cycle complete — check playbooks for promoted patterns");
-                fetchProfile();
-              }
-            }}
-            disabled={actionLoading !== null}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
-          >
-            {actionLoading === "dream" ? (
-              <>
-                <div className="w-3 h-3 border-2 border-purple-400/50 border-t-purple-400 rounded-full animate-spin" />
-                <span className="text-purple-400/70">Dreaming...</span>
-              </>
-            ) : (
-              <>
-                <IconRefresh size={14} />
-                Dream
-              </>
-            )}
-          </button>
-          <button
-            onClick={async () => {
-              const target = prompt("Fork target name:");
-              if (!target) return;
-              const ok = await callAction("fork", { target });
-              if (ok) showFeedback(`Forked to "${target}"`);
-            }}
-            disabled={actionLoading !== null}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
-          >
-            {actionLoading === "fork" ? (
-              <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
-            ) : (
-              <IconGitFork size={14} />
-            )}
-            Fork
-          </button>
-          <button
-            onClick={async () => {
-              const ok = await callAction("export");
-              if (ok) showFeedback("Export complete!");
-            }}
-            disabled={actionLoading !== null}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
-          >
-            {actionLoading === "export" ? (
-              <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
-            ) : (
-              <IconDownload size={14} />
-            )}
-            Export
-          </button>
-          <div className="w-px h-4 bg-white/[0.06]" />
-          <button
-            onClick={() => { setDeployError(""); setShowDeployDialog(true); }}
-            disabled={actionLoading !== null || deploying}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-emerald-400/60 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors disabled:opacity-30"
-          >
-            <IconPlanet size={14} />
-            Deploy
-          </button>
-          <div className="w-px h-4 bg-white/[0.06]" />
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={actionLoading !== null || deleting}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-red-400/50 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-30"
-          >
-            <IconTrash size={14} />
-            Delete
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={agentName}
+        description={`${profile.engine} · ${profile.provider} · ${profile.tier}`}
+        actions={
+          <>
+            <ActionButton
+              compact
+              onClick={async () => {
+                if ((profile?.journal?.length ?? 0) === 0) {
+                  showFeedback("Nothing to dream about yet — spawn the agent in a world first");
+                  return;
+                }
+                const ok = await callAction("dream");
+                if (ok) {
+                  showFeedback("Dream cycle complete — check playbooks for promoted patterns");
+                  fetchProfile();
+                }
+              }}
+              disabled={actionLoading !== null}
+              label="Dream"
+              icon={<IconRefresh size={16} stroke={2.2} />}
+            />
+            <ActionButton
+              compact
+              onClick={async () => {
+                const target = prompt("Fork target name:");
+                if (!target) return;
+                const ok = await callAction("fork", { target });
+                if (ok) showFeedback(`Forked to "${target}"`);
+              }}
+              disabled={actionLoading !== null}
+              label="Fork"
+              icon={<IconGitFork size={16} stroke={2.2} />}
+            />
+            <ActionButton
+              compact
+              onClick={async () => {
+                const ok = await callAction("export");
+                if (ok) showFeedback("Export complete!");
+              }}
+              disabled={actionLoading !== null}
+              label="Export"
+              icon={<IconDownload size={16} stroke={2.2} />}
+            />
+            <ActionButton
+              compact
+              onClick={() => { setDeployError(""); setShowDeployDialog(true); }}
+              disabled={actionLoading !== null || deploying}
+              label="Deploy"
+              icon={<IconPlanet size={16} stroke={2.2} />}
+            />
+            <ActionButton
+              compact
+              danger
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={actionLoading !== null || deleting}
+              label="Delete"
+              icon={<IconTrash size={16} stroke={2.2} />}
+            />
+          </>
+        }
+      />
 
-      {/* Deploy dialog */}
+      {/* Deploy dialog — select a running world to deploy this agent into */}
       {showDeployDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !deploying && setShowDeployDialog(false)} />
           <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
             <h3 className="text-lg font-heading text-foreground/90 mb-1">Deploy to World</h3>
             <p className="text-sm text-muted-foreground/50 mb-5">
-              Spawn a new world with <span className="font-mono text-foreground/70">{agentName}</span> inside.
+              Add <span className="font-mono text-foreground/70">{agentName}</span> to a running world.
             </p>
-            <label className="block text-[10px] uppercase tracking-[0.15em] text-muted-foreground/40 mb-2">Workspace</label>
-            <input
-              type="text"
-              value={deployWorkspace}
-              onChange={(e) => setDeployWorkspace(e.target.value)}
-              placeholder={defaultDeployWorkspace}
-              disabled={deploying}
-              className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 font-mono placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
-              onKeyDown={(e) => { if (e.key === "Enter") handleDeploy(); }}
-              autoFocus
-            />
+            <label className="block text-[10px] uppercase tracking-[0.15em] text-muted-foreground/40 mb-2">Select World</label>
+            {availableWorlds.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground/40 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                No running worlds. Spawn one first from the Worlds page.
+              </p>
+            ) : (
+              <div className="rounded-lg bg-white/[0.02] border border-white/[0.08] max-h-48 overflow-y-auto">
+                {availableWorlds.map((w) => {
+                  const wName = getWorldName(w);
+                  const isSelected = deployTargetWorld === w.id;
+                  const alreadyDeployed = w.agents.some((a) => a.name === agentName);
+                  return (
+                    <button
+                      key={w.id}
+                      onClick={() => !alreadyDeployed && setDeployTargetWorld(w.id)}
+                      disabled={alreadyDeployed}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+                        alreadyDeployed
+                          ? "opacity-40 cursor-not-allowed"
+                          : isSelected
+                            ? "bg-white/[0.06]"
+                            : "hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${
+                        isSelected ? "bg-emerald-400" : "bg-white/[0.15]"
+                      }`} />
+                      <span className="flex-1 min-w-0">
+                        <span className="text-sm text-foreground/80 truncate block">{wName}</span>
+                        <span className="text-[10px] text-muted-foreground/35 font-mono">
+                          {w.agents.length} agent{w.agents.length === 1 ? "" : "s"}
+                          {alreadyDeployed && " · already deployed"}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             {deployError && (
               <p className="text-xs text-red-400/80 mt-3">{deployError}</p>
             )}
@@ -346,7 +342,7 @@ export default function AgentProfilePage() {
               </button>
               <button
                 onClick={handleDeploy}
-                disabled={deploying}
+                disabled={deploying || !deployTargetWorld}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/20 transition-colors disabled:opacity-50"
               >
                 {deploying ? (
@@ -542,6 +538,56 @@ export default function AgentProfilePage() {
           <p className="text-[9px] text-muted-foreground/35 uppercase">Bonds</p>
         </div>
       </div>
+
+      {/* Team selector */}
+      <div>
+        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-2">Team</h2>
+        <select
+          value={profile.team ?? ""}
+          onChange={async (e) => {
+            const ok = await saveIdentityField("team", e.target.value);
+            if (ok) fetchProfile();
+          }}
+          className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.16] transition-colors"
+        >
+          <option value="">No team</option>
+          {availableTeams.map((t) => (
+            <option key={t.slug} value={t.slug}>{t.icon ? `${t.icon} ` : ""}{t.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Deployment history — derived from sessions */}
+      {(() => {
+        const sessionFiles = mindTree["sessions"] ?? [];
+        const worldIds = sessionFiles
+          .filter((f) => f.endsWith(".json"))
+          .map((f) => f.replace(".json", ""));
+        if (worldIds.length === 0) return null;
+        return (
+          <div>
+            <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-2 flex items-center gap-1.5">
+              Worlds
+            </h2>
+            <div className="flex flex-wrap gap-1.5">
+              {worldIds.map((wid) => {
+                const parts = wid.split("-");
+                const worldName = parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : wid;
+                return (
+                  <a
+                    key={wid}
+                    href={`/world/${wid}/${agentName}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/80 transition-all"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+                    {worldName}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Purpose — inline editable */}
       <div>

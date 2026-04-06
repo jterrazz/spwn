@@ -55,9 +55,19 @@ export interface LimboAgent {
   layers: number;
 }
 
+export interface Team {
+  slug: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  description?: string;
+  members?: string[];
+}
+
 export interface AgentProfile {
   name: string;
   tier: "governor" | "citizen" | "npc";
+  team?: string;
   engine: string;
   provider: string;
   purpose: string;

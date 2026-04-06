@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import type { AgentProfile, AgentMessage, World } from "@/lib/types";
-import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
+import { apiGet, apiAction, goApiUrl, encPath } from "@/lib/api-client";
 import { streamChat } from "@/lib/stream-chat";
 import type { ActivityBlock } from "@/lib/activity-types";
 import { ActivityMessageView } from "@/components/activity-blocks";
@@ -60,7 +60,7 @@ type Tab = "chat" | "profile" | "mind" | "messages";
 export default function AgentPage() {
   const params = useParams();
   const worldId = params.id as string;
-  const agentName = params.agent as string;
+  const agentName = decodeURIComponent(params.agent as string);
 
   const [world, setWorld] = useState<World | null>(null);
   const [profile, setProfile] = useState<AgentProfile | null>(null);
@@ -79,8 +79,8 @@ export default function AgentPage() {
   useEffect(() => {
     Promise.all([
       apiGet<World[]>("/api/universes").catch(() => [] as World[]),
-      apiGet<AgentProfile>(`/api/agents/${agentName}`).catch(() => null),
-      apiGet<Record<string, string[]>>(`/api/agents/${agentName}/mind`).catch(() => null),
+      apiGet<AgentProfile>(`/api/agents/${encPath(agentName)}`).catch(() => null),
+      apiGet<Record<string, string[]>>(`/api/agents/${encPath(agentName)}/mind`).catch(() => null),
     ]).then(([worlds, agentProfile, tree]) => {
       const found = (worlds as World[]).find((w) => w.id === worldId);
       setWorld(found ?? null);
@@ -106,7 +106,7 @@ export default function AgentPage() {
   // Load conversation history on mount
   useEffect(() => {
     setMounted(true);
-    apiGet<{ sessions: { id: string; messages: { role: string; content: string; timestamp: string; type: string; toolName?: string; cost?: number; durationMs?: number }[]; startedAt: string; cost?: number }[] }>(`/api/worlds/${worldId}/history?agent=${agentName}`)
+    apiGet<{ sessions: { id: string; messages: { role: string; content: string; timestamp: string; type: string; toolName?: string; cost?: number; durationMs?: number }[]; startedAt: string; cost?: number }[] }>(`/api/worlds/${worldId}/history?agent=${encPath(agentName)}`)
       .then((data) => {
         if (!data?.sessions?.length) return;
         const historyMsgs: Message[] = [];
@@ -158,7 +158,7 @@ export default function AgentPage() {
     setActionLoading(action);
     try {
       const result = await apiAction(
-        `/api/agents/${agentName}/${action}`,
+        `/api/agents/${encPath(agentName)}/${action}`,
         body,
       );
       if (!result.ok) {

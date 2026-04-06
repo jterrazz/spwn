@@ -9,7 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var initTeam string
+
 func init() {
+	initCmd.Flags().StringVar(&initTeam, "team", "", "Assign agent to a team (slug)")
 	Cmd.AddCommand(initCmd)
 }
 
@@ -43,6 +46,15 @@ provided, a random name is picked from a curated dictionary.`,
 
 		s.Done("Created agent", name)
 		s.Done("Created persona", "persona.md")
+
+		// Assign team if provided
+		if initTeam != "" {
+			if err := agentDomain.SetAgentTeam(name, initTeam); err != nil {
+				s.Warn("Warning", fmt.Sprintf("could not set team: %v", err))
+			} else {
+				s.Done("Team", initTeam)
+			}
+		}
 
 		s.Blank()
 		s.Success(fmt.Sprintf("Spawn with: spwn up --agent %s", name))

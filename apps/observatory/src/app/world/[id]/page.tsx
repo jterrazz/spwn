@@ -19,9 +19,11 @@ import {
   IconSend,
   IconMessageCircle,
   IconPencil,
+  IconArrowRight,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
+import { ActionButton } from "@/components/action-button";
 import { WorldPlanet } from "@/components/world-planet";
 import { STATUS_BADGE, TIER_BADGE } from "@/lib/status";
 import { usePageTitle } from "@/hooks/use-page-title";
@@ -66,8 +68,6 @@ export default function WorldDashboard() {
   const [showDestroyConfirm, setShowDestroyConfirm] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [newAgentName, setNewAgentName] = useState("");
-  const [availableAgents, setAvailableAgents] = useState<{ name: string }[]>([]);
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [renameInput, setRenameInput] = useState("");
   const [renaming, setRenaming] = useState(false);
@@ -96,13 +96,6 @@ export default function WorldDashboard() {
     return () => clearInterval(interval);
   }, [fetchWorld]);
 
-  // Fetch every agent so we can show a checkable list of all of them,
-  // marking which ones are already deployed to this world.
-  useEffect(() => {
-    apiGet<{ name: string }[]>("/api/agents")
-      .then((a) => setAvailableAgents(a ?? []))
-      .catch(() => {});
-  }, []);
 
   const callAction = async (goPath: string, body?: unknown) => {
     setActionLoading(goPath);
@@ -264,65 +257,43 @@ export default function WorldDashboard() {
           title={name}
           description={`${world.config} · ${timeAgo(world.created_at)} · ${getWorkspaceSummary(world)}`}
           actions={
-            <div className="flex items-center gap-1">
-            <button
-              onClick={async () => {
-                const ok = await callAction(`/api/worlds/${worldId}/snapshot`);
-                if (ok) showFeedback("Snapshot saved!");
-              }}
-              disabled={actionLoading !== null}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
-              title="Snapshot"
-            >
-              {actionLoading?.includes("snapshot") ? (
-                <div className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
-              ) : (
-                <IconCamera size={15} />
-              )}
-              <span className="hidden sm:inline">Snapshot</span>
-            </button>
-            <button
-              onClick={() => setActivePanel(activePanel === "logs" ? null : "logs")}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] transition-colors ${
-                activePanel === "logs"
-                  ? "bg-white/[0.08] text-foreground/70"
-                  : "text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04]"
-              }`}
-              title="View Logs"
-            >
-              <IconFileText size={15} />
-              <span className="hidden sm:inline">Logs</span>
-            </button>
-            <button
-              onClick={() => setActivePanel(activePanel === "snapshots" ? null : "snapshots")}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] transition-colors ${
-                activePanel === "snapshots"
-                  ? "bg-white/[0.08] text-foreground/70"
-                  : "text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04]"
-              }`}
-              title="Snapshots"
-            >
-              <IconRestore size={15} />
-              <span className="hidden sm:inline">Snapshots</span>
-            </button>
-            <div className="w-px h-5 bg-border/20 mx-1" />
-            <button
-              onClick={() => { setRenameInput(world.name ?? ""); setShowRenameDialog(true); }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
-              title="Rename World"
-            >
-              <IconPencil size={15} />
-              <span className="hidden sm:inline">Rename</span>
-            </button>
-            <button
-              onClick={() => setShowDestroyConfirm(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-              title="Destroy World"
-            >
-              <IconTrash size={15} />
-              <span className="hidden sm:inline">Destroy</span>
-            </button>
-          </div>
+            <>
+              <ActionButton
+                compact
+                onClick={async () => {
+                  const ok = await callAction(`/api/worlds/${worldId}/snapshot`);
+                  if (ok) showFeedback("Snapshot saved!");
+                }}
+                disabled={actionLoading !== null}
+                label="Snapshot"
+                icon={<IconCamera size={16} stroke={2.2} />}
+              />
+              <ActionButton
+                compact
+                onClick={() => setActivePanel(activePanel === "logs" ? null : "logs")}
+                label="Logs"
+                icon={<IconFileText size={16} stroke={2.2} />}
+              />
+              <ActionButton
+                compact
+                onClick={() => setActivePanel(activePanel === "snapshots" ? null : "snapshots")}
+                label="Snapshots"
+                icon={<IconRestore size={16} stroke={2.2} />}
+              />
+              <ActionButton
+                compact
+                onClick={() => { setRenameInput(world.name ?? ""); setShowRenameDialog(true); }}
+                label="Rename"
+                icon={<IconPencil size={16} stroke={2.2} />}
+              />
+              <ActionButton
+                compact
+                danger
+                onClick={() => setShowDestroyConfirm(true)}
+                label="Destroy"
+                icon={<IconTrash size={16} stroke={2.2} />}
+              />
+            </>
           }
         />
 
@@ -449,135 +420,84 @@ export default function WorldDashboard() {
           </div>
         )}
 
-        {/* Agents — checkable list of all agents, marking the ones
-            deployed here. Clicking a deployed agent navigates to its
-            detail page; the "+ Add" row creates a fresh agent. */}
+        {/* Agents — rich cards for deployed agents */}
         <div>
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-3">
-            Agents <span className="normal-case tracking-normal text-muted-foreground/30">({world.agents.length} deployed)</span>
-          </h2>
-          <div className="rounded-lg bg-white/[0.02] border border-white/[0.08] max-h-64 overflow-y-auto">
-            {(() => {
-              const deployedNames = new Set(world.agents.map((a) => a.name));
-              const deployedByName = new Map(world.agents.map((a) => [a.name, a]));
-              // Union of available (known) agents + anyone deployed here.
-              // Deduplicate in case the /api/agents list and the world's
-              // agents drift between polls.
-              const allNames = new Set<string>([
-                ...availableAgents.map((a) => a.name),
-                ...world.agents.map((a) => a.name),
-              ]);
-              const sortedNames = Array.from(allNames).sort();
-              if (sortedNames.length === 0) {
-                return (
-                  <p className="text-[11px] text-muted-foreground/40 px-3 py-2.5">
-                    No agents yet — create one below.
-                  </p>
-                );
-              }
-              return (
-                <ul className="divide-y divide-white/[0.04]">
-                  {sortedNames.map((name) => {
-                    const deployed = deployedNames.has(name);
-                    const detail = deployedByName.get(name);
-                    const tierStyle = detail ? (TIER_BADGE[detail.tier] ?? TIER_BADGE.citizen) : null;
-                    const statusStyle = detail ? (STATUS_BADGE[detail.status] ?? STATUS_BADGE.stopped) : null;
-                    return (
-                      <li key={name}>
-                        <a
-                          href={deployed ? `/world/${worldId}/${name}` : `/agents/${name}`}
-                          className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer hover:bg-white/[0.03] transition-colors"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={deployed}
-                            readOnly
-                            className="w-3.5 h-3.5 rounded border-white/[0.15] bg-white/[0.04] accent-foreground pointer-events-none"
-                          />
-                          <span className={`text-sm font-mono flex-1 ${deployed ? "text-foreground/90" : "text-foreground/40"}`}>
-                            {name}
-                          </span>
-                          {detail && tierStyle && statusStyle && (
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-mono border ${tierStyle}`}>
-                                {detail.tier}
-                              </span>
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${statusStyle}`}>
-                                {detail.status}
-                              </span>
-                            </div>
-                          )}
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
-              );
-            })()}
-            {/* Inline "add new" row */}
-            <div className="flex gap-2 px-3 py-2 border-t border-white/[0.06]">
-              <input
-                value={newAgentName}
-                onChange={(e) => setNewAgentName(e.target.value)}
-                onKeyDown={async (e) => {
-                  if (e.key === "Enter" && newAgentName.trim()) {
-                    const ok = await callAction("/api/agents", { name: newAgentName.trim() });
-                    if (ok) {
-                      showFeedback(`Agent "${newAgentName}" created`);
-                      setAvailableAgents((prev) => [...prev, { name: newAgentName.trim() }]);
-                      setNewAgentName("");
-                    }
-                  }
-                }}
-                placeholder="New agent name…"
-                className="flex-1 bg-transparent text-xs text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!newAgentName.trim()) return;
-                  const ok = await callAction("/api/agents", { name: newAgentName.trim() });
-                  if (ok) {
-                    showFeedback(`Agent "${newAgentName}" created`);
-                    setAvailableAgents((prev) => [...prev, { name: newAgentName.trim() }]);
-                    setNewAgentName("");
-                  }
-                }}
-                disabled={!newAgentName.trim() || actionLoading !== null}
-                className="shrink-0 px-2.5 py-1 rounded text-[11px] bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {actionLoading ? "…" : "+ Add"}
-              </button>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">
+              Agents <span className="normal-case tracking-normal text-muted-foreground/30">({world.agents.length})</span>
+            </h2>
+            <button
+              onClick={() => router.push("/agents")}
+              className="text-[11px] text-muted-foreground/40 hover:text-foreground/70 transition-colors"
+            >
+              + Deploy agent
+            </button>
+          </div>
+          {world.agents.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/[0.08] px-5 py-8 text-center">
+              <p className="text-sm text-muted-foreground/40">No agents deployed</p>
+              <p className="text-[11px] text-muted-foreground/25 mt-1">
+                Deploy an agent from the Agents page.
+              </p>
             </div>
-          </div>
-          {world.agents.length > 0 && (
-            <p className="text-[10px] text-muted-foreground/30 mt-2">
-              To add an existing agent to this world, destroy and respawn with that agent selected.
-            </p>
+          ) : (
+            <div className="space-y-2">
+              {world.agents.map((agent) => {
+                const tierStyle = TIER_BADGE[agent.tier] ?? TIER_BADGE.citizen;
+                const isActive = agent.status === "running" || agent.status === "waiting";
+                return (
+                  <div
+                    key={agent.name}
+                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 flex items-center gap-4 group hover:border-white/[0.1] hover:bg-white/[0.03] transition-all"
+                  >
+                    {/* Status dot */}
+                    <div className="relative shrink-0">
+                      <div className={`w-2.5 h-2.5 rounded-full ${
+                        agent.status === "running" ? "bg-green-500" :
+                        agent.status === "idle" ? "bg-amber-400" :
+                        agent.status === "waiting" ? "bg-amber-400 animate-pulse" :
+                        "bg-zinc-500/30"
+                      }`} />
+                    </div>
+
+                    {/* Name + tier */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`/world/${worldId}/${agent.name}`}
+                          className="text-sm font-mono text-foreground/85 hover:text-foreground transition-colors truncate"
+                        >
+                          {agent.name}
+                        </a>
+                        <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${tierStyle}`}>
+                          {agent.tier}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/35 mt-0.5 capitalize">{agent.status}</p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => router.push(`/world/${worldId}/${agent.name}`)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/80 transition-all"
+                      >
+                        <IconMessageCircle size={12} />
+                        Talk
+                      </button>
+                      <a
+                        href={`/agents/${agent.name}`}
+                        className="flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-colors"
+                        title="View profile"
+                      >
+                        <IconArrowRight size={13} />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
-        </div>
-
-        {/* Activity */}
-        <div>
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Recent Activity</h2>
-          <div className="glass-subtle px-5 py-8 text-center">
-            <p className="text-sm text-muted-foreground/30">No activity recorded yet</p>
-          </div>
-        </div>
-
-        {/* Quick commands */}
-        <div>
-          <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Commands</h2>
-          <div className="glass-subtle p-4 font-mono text-xs text-muted-foreground/40 space-y-1.5">
-            {world.agents.length > 0 && (
-              <p>spwn agent talk {world.agents[0].name} &quot;message&quot;</p>
-            )}
-            <p>spwn agent dream {world.agents[0]?.name ?? "‹agent›"}</p>
-            <p>spwn agent sleep {world.agents[0]?.name ?? "‹agent›"}</p>
-            <p>spwn profile {world.agents[0]?.name ?? "‹agent›"}</p>
-            <p>spwn agent fork {world.agents[0]?.name ?? "‹agent›"} &lt;new&gt;</p>
-            <p>spwn agent export {world.agents[0]?.name ?? "‹agent›"}</p>
-          </div>
         </div>
       </div>
 

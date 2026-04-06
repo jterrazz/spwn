@@ -103,9 +103,16 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /api/agents/{name}/dream", cors(s.handleDream))
 	mux.HandleFunc("POST /api/agents/{name}/sleep", cors(s.handleSleep))
 	mux.HandleFunc("POST /api/agents/{name}/fork", cors(s.handleFork))
+	mux.HandleFunc("POST /api/worlds/{id}/agents", cors(s.handleDeployAgent))
 	mux.HandleFunc("POST /api/worlds/{id}/talk", cors(s.handleTalk))
 	mux.HandleFunc("POST /api/agents/{name}/export", cors(s.handleExport))
 	mux.HandleFunc("PUT /api/agents/{name}/identity", cors(s.handleUpdateIdentity))
+
+	// --- Team endpoints ---
+	mux.HandleFunc("GET /api/teams", cors(s.handleListTeams))
+	mux.HandleFunc("POST /api/teams", cors(s.handleCreateTeam))
+	mux.HandleFunc("PUT /api/teams/{slug}", cors(s.handleUpdateTeam))
+	mux.HandleFunc("DELETE /api/teams/{slug}", cors(s.handleDeleteTeam))
 
 	// --- Architect endpoints ---
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
@@ -216,6 +223,7 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 // profileYAML represents the profile.yaml manifest for an agent.
 type profileYAML struct {
 	Tier    string `yaml:"tier,omitempty" json:"tier,omitempty"`
+	Team    string `yaml:"team,omitempty" json:"team,omitempty"`
 	Runtime struct {
 		Engine   string `yaml:"engine,omitempty" json:"engine,omitempty"`
 		Provider string `yaml:"provider,omitempty" json:"provider,omitempty"`
@@ -228,6 +236,7 @@ type agentProfileResponse struct {
 	Name      string            `json:"name"`
 	Path      string            `json:"path"`
 	Tier      string            `json:"tier"`
+	Team      string            `json:"team,omitempty"`
 	Engine    string            `json:"engine"`
 	Provider  string            `json:"provider"`
 	Purpose   string            `json:"purpose"`
@@ -438,6 +447,7 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		Name:      info.Name,
 		Path:      info.Path,
 		Tier:      tier,
+		Team:      info.Team,
 		Engine:    engine,
 		Provider:  provider,
 		Purpose:   purpose,
@@ -654,6 +664,35 @@ func (s *Server) handleRenameWorld(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, world)
 }
 
+func (s *Server) handleDeployAgent(w http.ResponseWriter, r *http.Request) {
+	if !s.requireArch(w) {
+		return
+	}
+	worldID := r.PathValue("id")
+	if worldID == "" {
+		jsonError(w, "world id is required", 400)
+		return
+	}
+	var body struct {
+		Name string `json:"name"`
+		Tier string `json:"tier"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Name == "" {
+		jsonError(w, "agent name is required", 400)
+		return
+	}
+	if err := s.arch.DeployAgent(r.Context(), worldID, body.Name, body.Tier); err != nil {
+		status := 500
+		if err.Error() == fmt.Sprintf("agent %q is already deployed in world %s", body.Name, worldID) {
+			status = 409
+		}
+		jsonError(w, err.Error(), status)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	jsonOK(w, map[string]string{"status": "ok", "agent": body.Name, "world": worldID})
+}
+
 func (s *Server) handleDestroyWorld(w http.ResponseWriter, r *http.Request) {
 	if !s.requireArch(w) {
 		return
@@ -797,27 +836,42 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 
 	var body struct {
 		Message string `json:"message"`
+		Agent   string `json:"agent"` // which agent to talk to (required for multi-agent worlds)
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Message == "" {
 		jsonError(w, "message is required", 400)
 		return
 	}
 
-	// Find the world to get agent name
+	// Resolve which agent to talk to. Priority:
+	// 1. Explicit agent field in request body (multi-agent aware)
+	// 2. Legacy single-agent field on the world (u.Agent)
+	// 3. First agent in the world's Agents slice
 	universes, err := s.state.List()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
-	var agentName string
+	agentName := body.Agent
+	worldFound := false
 	for _, u := range universes {
 		if u.ID == worldID {
-			agentName = u.Agent
+			worldFound = true
+			if agentName == "" {
+				agentName = u.Agent
+			}
+			if agentName == "" && len(u.Agents) > 0 {
+				agentName = u.Agents[0].Name
+			}
 			break
 		}
 	}
+	if !worldFound {
+		jsonError(w, "world not found", 404)
+		return
+	}
 	if agentName == "" {
-		jsonError(w, "world not found or has no agent", 404)
+		jsonError(w, "world has no agent", 404)
 		return
 	}
 
@@ -1498,10 +1552,20 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Special case: "team" writes to profile.yaml, not identity/*.md.
+	if body.Field == "team" {
+		if err := agentpkg.SetAgentTeam(name, body.Content); err != nil {
+			jsonError(w, err.Error(), 500)
+			return
+		}
+		jsonOK(w, map[string]string{"status": "ok", "field": "team"})
+		return
+	}
+
 	// Validate field name to prevent directory traversal
 	allowed := map[string]bool{"purpose": true, "persona": true, "traits": true, "bonds": true}
 	if !allowed[body.Field] {
-		jsonError(w, "invalid field: must be one of purpose, persona, traits, bonds", 400)
+		jsonError(w, "invalid field: must be one of purpose, persona, traits, bonds, team", 400)
 		return
 	}
 
@@ -1529,6 +1593,105 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonOK(w, map[string]string{"status": "ok", "field": body.Field})
+}
+
+// ============================================================
+// Team handlers
+// ============================================================
+
+func (s *Server) handleListTeams(w http.ResponseWriter, r *http.Request) {
+	teams, err := agentpkg.ListTeams()
+	if err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	if teams == nil {
+		teams = []agentpkg.Team{}
+	}
+	// Enrich each team with its member names.
+	type teamWithMembers struct {
+		agentpkg.Team
+		Members []string `json:"members"`
+	}
+	result := make([]teamWithMembers, 0, len(teams))
+	for _, t := range teams {
+		members, _ := agentpkg.TeamMembers(t.Slug)
+		if members == nil {
+			members = []string{}
+		}
+		result = append(result, teamWithMembers{Team: t, Members: members})
+	}
+	jsonOK(w, result)
+}
+
+func (s *Server) handleCreateTeam(w http.ResponseWriter, r *http.Request) {
+	var body agentpkg.Team
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+	if body.Name == "" {
+		jsonError(w, "team name is required", 400)
+		return
+	}
+	if body.Slug == "" {
+		body.Slug = agentpkg.Slugify(body.Name)
+	}
+	if err := agentpkg.CreateTeam(body); err != nil {
+		jsonError(w, err.Error(), 400)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	jsonOK(w, body)
+}
+
+func (s *Server) handleUpdateTeam(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	if slug == "" {
+		jsonError(w, "team slug is required", 400)
+		return
+	}
+	existing, err := agentpkg.GetTeam(slug)
+	if err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+	var body agentpkg.Team
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body: "+err.Error(), 400)
+		return
+	}
+	// Merge: only overwrite fields that are non-empty in the request.
+	if body.Name != "" {
+		existing.Name = body.Name
+	}
+	if body.Icon != "" {
+		existing.Icon = body.Icon
+	}
+	if body.Color != "" {
+		existing.Color = body.Color
+	}
+	if body.Description != "" {
+		existing.Description = body.Description
+	}
+	if err := agentpkg.UpdateTeam(*existing); err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	jsonOK(w, existing)
+}
+
+func (s *Server) handleDeleteTeam(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	if slug == "" {
+		jsonError(w, "team slug is required", 400)
+		return
+	}
+	if err := agentpkg.DeleteTeam(slug); err != nil {
+		jsonError(w, err.Error(), 404)
+		return
+	}
+	jsonOK(w, map[string]string{"status": "ok"})
 }
 
 // handleGetAgentFile returns the content of a specific file within the agent's mind directory.

@@ -15,6 +15,7 @@ import (
 type ProfileManifest struct {
 	Name       string        `yaml:"name"`
 	Tier       string        `yaml:"tier"`       // "governor" or "citizen" (default: "citizen")
+	Team       string        `yaml:"team"`       // team slug (references ~/.spwn/teams/{slug}.yaml)
 	Runtime    RuntimeConfig `yaml:"runtime"`     // optional runtime override
 	Identity   IdentityManifest `yaml:"identity"` // formerly "soul"
 	Skills     []string      `yaml:"skills"`      // formerly under "mind"
