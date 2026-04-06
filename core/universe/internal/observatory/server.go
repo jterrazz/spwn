@@ -219,13 +219,43 @@ func (s *Server) handleListUniverses(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, universes)
 }
 
+// agentListItem is the enriched response for GET /api/agents, including the
+// role read from profile.yaml so the frontend can display it for undeployed agents.
+type agentListItem struct {
+	Name   string              `json:"name"`
+	Path   string              `json:"path"`
+	Team   string              `json:"team,omitempty"`
+	Role   string              `json:"role"`
+	Layers map[string][]string `json:"layers"`
+}
+
 func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	agents, err := agentpkg.ListAgents()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
-	jsonOK(w, agents)
+
+	result := make([]agentListItem, 0, len(agents))
+	for _, a := range agents {
+		role := "worker"
+		profilePath := filepath.Join(a.Path, "profile.yaml")
+		if data, readErr := os.ReadFile(profilePath); readErr == nil {
+			var p profileYAML
+			if yamlErr := yaml.Unmarshal(data, &p); yamlErr == nil && p.Role != "" {
+				role = p.Role
+			}
+		}
+		result = append(result, agentListItem{
+			Name:   a.Name,
+			Path:   a.Path,
+			Team:   a.Team,
+			Role:   role,
+			Layers: a.Layers,
+		})
+	}
+
+	jsonOK(w, result)
 }
 
 // profileYAML represents the profile.yaml manifest for an agent.
@@ -1723,6 +1753,10 @@ func (s *Server) handleDeleteOrganization(w http.ResponseWriter, r *http.Request
 	slug := r.PathValue("slug")
 	if slug == "" {
 		jsonError(w, "organization slug is required", 400)
+		return
+	}
+	if slug == "default" {
+		jsonError(w, "cannot delete the default organization", 400)
 		return
 	}
 	if err := agentpkg.DeleteOrganization(slug); err != nil {

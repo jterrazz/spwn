@@ -25,6 +25,7 @@ interface AgentListItem {
   name: string;
   path: string;
   team?: string;
+  role?: string;
   layers: Record<string, string[] | null>;
 }
 
@@ -103,7 +104,7 @@ export default function AgentsPage() {
         const p = placement.get(a.name);
         return {
           name: a.name,
-          role: p?.role ?? "worker",
+          role: p?.role ?? a.role ?? "worker",
           team: a.team,
           status: p?.status ?? "limbo",
           worldID: p?.worldID,
