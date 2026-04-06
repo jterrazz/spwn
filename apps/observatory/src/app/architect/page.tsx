@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useProgressMessages } from "@/hooks/use-progress-messages";
+import { ProgressShimmer } from "@/components/progress-shimmer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { goApiUrl } from "@/lib/api-client";
 import { Chat, type ChatBubble } from "@/components/chat";
@@ -217,6 +219,15 @@ export default function ArchitectPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"chat" | "knowledge" | "tasks">("chat");
+  const [startPolling, setStartPolling] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startProgressMessage = useProgressMessages(actionLoading === "start", [
+    { after: 0, text: "Starting architect..." },
+    { after: 5, text: "Building image..." },
+    { after: 30, text: "Installing dependencies..." },
+    { after: 60, text: "Almost ready..." },
+  ]);
 
   // Map architect messages into the shared chat bubble shape.
   const bubbles: ChatBubble[] = messages.map((m) => ({
@@ -234,20 +245,45 @@ export default function ArchitectPage() {
     setTimeout(() => setFeedback(null), 3000);
   };
 
+  // Poll for architect status after starting
+  useEffect(() => {
+    if (!startPolling) return;
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(goApiUrl("/api/architect/status"));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === "running") {
+            setStartPolling(false);
+            setActionLoading(null);
+            setArchitectStatus((s) => s ? { ...s, status: "running" } : s);
+            setFeedback("Architect started successfully");
+            setTimeout(() => setFeedback(null), 3000);
+          }
+        }
+      } catch {
+        // ignore polling errors
+      }
+    }, 3000);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [startPolling, setArchitectStatus]);
+
   const handleStart = async () => {
     setActionLoading("start");
     try {
       const res = await fetch(goApiUrl("/api/architect/start"), { method: "POST" });
       if (res.ok) {
-        showFeedback("Architect started successfully");
-        setArchitectStatus((s) => s ? { ...s, status: "running" } : s);
+        // API returns immediately (background build), start polling for actual readiness
+        setStartPolling(true);
       } else {
         const data = await res.json().catch(() => ({ error: "Unknown error" }));
         showFeedback(`Error: ${data.error}`);
+        setActionLoading(null);
       }
     } catch {
       showFeedback("Error: Failed to connect to API");
-    } finally {
       setActionLoading(null);
     }
   };
@@ -311,6 +347,11 @@ export default function ArchitectPage() {
           )
         }
       />
+
+      {/* Start progress indicator */}
+      {actionLoading === "start" && (
+        <ProgressShimmer active message={startProgressMessage} />
+      )}
 
       {/* Feedback toast */}
       {feedback && (
