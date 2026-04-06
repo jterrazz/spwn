@@ -10,7 +10,7 @@ import (
 // AgentContextOpts configures the generation of an AGENT.md context file.
 type AgentContextOpts struct {
 	AgentName     string
-	Role          string // "chief", "manager", "worker", "npc", or "god"
+	Role          string // "chief", "manager", "worker", "npc", or "architect"
 	Ephemeral     bool   // true for NPC-style throwaway agents
 	RoleLevel     int
 	Permissions   []string
@@ -39,8 +39,8 @@ func GenerateAgentContext(opts AgentContextOpts) string {
 	var b strings.Builder
 
 	switch opts.Role {
-	case "god":
-		generateGodContext(&b, opts)
+	case "architect":
+		generateArchitectContext(&b, opts)
 	case "chief":
 		generateChiefContext(&b, opts)
 	case "manager":
@@ -192,7 +192,7 @@ func generateNPCContext(b *strings.Builder, opts AgentContextOpts) {
 	}
 }
 
-func generateGodContext(b *strings.Builder, opts AgentContextOpts) {
+func generateArchitectContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("# You are the Architect — the orchestration daemon\n\n")
 
 	b.WriteString("## Your Role\n")

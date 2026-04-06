@@ -63,7 +63,7 @@ type execCall struct {
 func newMockBackend() *mockBackend {
 	return &mockBackend{
 		containers:   make(map[string]*mockContainer),
-		images:       map[string]bool{"spwn-base:latest": true},
+		images:       map[string]bool{"spwn/world:latest": true},
 		isRunningVal: true,
 		imageExistsV: true,
 		execOutput:   "bash\nsh\ngit",

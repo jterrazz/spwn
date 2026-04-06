@@ -193,7 +193,7 @@ describe("zero-friction UX", () => {
     expect(result.exitCode).toBe(0);
   });
 
-  // ── 8. God→Architect rename is complete (regression guard) ──
+  // ── 8. Regression guards ──
 
   test("no relative /api/ fetch calls in frontend (must use goApiUrl)", async () => {
     const result = await spwn("no-relative-api-fetch")
@@ -206,7 +206,7 @@ describe("zero-friction UX", () => {
     expect(out).not.toContain("fetch(`/api/");
   });
 
-  test("no references to 'God' remain in source code (rename regression)", async () => {
+  test("no references to 'God' or 'god' role remain in source code (rename regression)", async () => {
     const repoRoot = resolve(import.meta.dirname, "../../..");
 
     // grep -rn for word-boundary 'God' in Go and TS source files

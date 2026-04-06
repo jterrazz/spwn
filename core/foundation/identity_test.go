@@ -12,9 +12,9 @@ func TestGenerateWorldID_Format(t *testing.T) {
 		configName string
 		wantPrefix string
 	}{
-		{"custom config", "nebula", "w-nebula-"},
-		{"single char", "x", "w-x-"},
-		{"hyphenated name", "my-config", "w-my-config-"},
+		{"custom config", "nebula", "spwn-world-nebula-"},
+		{"single char", "x", "spwn-world-x-"},
+		{"hyphenated name", "my-config", "spwn-world-my-config-"},
 	}
 
 	for _, tt := range tests {
@@ -35,11 +35,11 @@ func TestGenerateWorldID_DefaultUsesPlanetName(t *testing.T) {
 
 	for i := 0; i < 20; i++ {
 		id := GenerateWorldID("default")
-		if strings.HasPrefix(id, "w-default-") {
+		if strings.HasPrefix(id, "spwn-world-default-") {
 			t.Errorf("default config should use planet name, got %q", id)
 		}
-		// Extract planet name: w-{planet}-{digits}
-		trimmed := strings.TrimPrefix(id, "w-")
+		// Extract planet name: spwn-world-{planet}-{digits}
+		trimmed := strings.TrimPrefix(id, "spwn-world-")
 		lastDash := strings.LastIndex(trimmed, "-")
 		planet := trimmed[:lastDash]
 		if !planetSet[planet] {
@@ -50,13 +50,13 @@ func TestGenerateWorldID_DefaultUsesPlanetName(t *testing.T) {
 
 func TestGenerateWorldID_SuffixIs5Digits(t *testing.T) {
 	id := GenerateWorldID("test")
-	// Format: w-test-XXXXX
-	parts := strings.SplitN(id, "-", 3)
-	if len(parts) != 3 {
-		t.Fatalf("expected 3 parts separated by '-', got %d in %q", len(parts), id)
+	// Format: spwn-world-test-XXXXX
+	const prefix = "spwn-world-test-"
+	if !strings.HasPrefix(id, prefix) {
+		t.Fatalf("expected prefix %q, got %q", prefix, id)
 	}
 
-	suffix := parts[2]
+	suffix := id[len(prefix):]
 	if len(suffix) != 5 {
 		t.Errorf("suffix length = %d, want 5, in %q", len(suffix), id)
 	}
@@ -137,8 +137,8 @@ func TestGenerateAgentID_Uniqueness1000(t *testing.T) {
 
 func TestGenerateWorldID_EmptyConfig(t *testing.T) {
 	id := GenerateWorldID("")
-	if !strings.HasPrefix(id, "w--") {
-		t.Errorf("empty config should produce 'w--' prefix, got %q", id)
+	if !strings.HasPrefix(id, "spwn-world--") {
+		t.Errorf("empty config should produce 'spwn-world--' prefix, got %q", id)
 	}
 }
 

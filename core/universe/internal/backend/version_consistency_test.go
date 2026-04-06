@@ -19,8 +19,7 @@ func TestDockerfileVersionMatchesConstant(t *testing.T) {
 		dockerfile      []byte
 		expectedVersion string
 	}{
-		{"Dockerfile (base)", images.Dockerfile, foundation.BaseImageVersion},
-		{"Dockerfile.world (god)", images.DockerfileWorld, foundation.GodImageVersion},
+		{"Dockerfile (world)", images.Dockerfile, foundation.WorldImageVersion},
 		{"Dockerfile.architect", images.DockerfileArchitect, foundation.ArchitectImageVersion},
 	}
 
