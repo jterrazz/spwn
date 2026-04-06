@@ -14,7 +14,7 @@ import (
 // Backward compatible: falls back to life.yaml if profile.yaml is not found.
 type ProfileManifest struct {
 	Name       string        `yaml:"name"`
-	Tier       string        `yaml:"tier"`       // "governor" or "citizen" (default: "citizen")
+	Role       string        `yaml:"role"`       // "governor" or "citizen" (default: "citizen")
 	Team       string        `yaml:"team"`       // team slug (references ~/.spwn/teams/{slug}.yaml)
 	Runtime    RuntimeConfig `yaml:"runtime"`     // optional runtime override
 	Identity   IdentityManifest `yaml:"identity"` // formerly "soul"
@@ -81,7 +81,7 @@ func loadProfileFromLife(agentDir string) (*ProfileManifest, error) {
 	// Convert LifeManifest to ProfileManifest
 	profile := &ProfileManifest{
 		Name:    life.Name,
-		Tier:    life.Tier,
+		Role:    life.Role,
 		Runtime: life.Runtime,
 		Identity: IdentityManifest{
 			Personas: life.Soul.Personas,

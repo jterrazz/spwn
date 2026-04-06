@@ -8,7 +8,7 @@ import { useRefetch } from "@/components/app-shell";
 import { streamChat } from "@/lib/stream-chat";
 import { Chat, ChatSuggestions, type ChatBubble } from "@/components/chat";
 import { InlineEdit, InlineTagsEdit } from "@/components/inline-edit";
-import { TIER_BADGE } from "@/lib/status";
+import { ROLE_BADGE } from "@/lib/status";
 import {
   IconBrain,
   IconSparkles,
@@ -155,7 +155,7 @@ function AgentProfilePage() {
       const res = await fetch(goApiUrl(`/api/worlds/${deployTargetWorld}/agents`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: agentName, tier: "citizen" }),
+        body: JSON.stringify({ name: agentName, role: "citizen" }),
         signal: AbortSignal.timeout(30000),
       });
       const data = await res.json().catch(() => ({}));
@@ -229,7 +229,7 @@ function AgentProfilePage() {
   const totalFiles = Object.values(mindTree).reduce((n, f) => n + (f?.length ?? 0), 0);
   const activeLayers = Object.keys(mindTree).filter((k) => (mindTree[k]?.length ?? 0) > 0).length;
 
-  const tierStyle = TIER_BADGE[profile.tier] ?? TIER_BADGE.citizen;
+  const roleStyle = ROLE_BADGE[profile.role] ?? ROLE_BADGE.citizen;
   const deployedAgent = worldData?.agents.find((a) => a.name === agentName);
   const worldName = worldData ? getWorldName(worldData) : undefined;
 
@@ -237,7 +237,7 @@ function AgentProfilePage() {
     <div className="flex-1 min-w-0 p-4 md:p-8 space-y-6 md:space-y-8">
       <PageHeader
         title={agentName}
-        description={`${profile.engine} · ${profile.provider} · ${profile.tier}`}
+        description={`${profile.engine} · ${profile.provider} · ${profile.role}`}
         actions={
           <>
             <ActionButton
@@ -735,7 +735,7 @@ function AgentProfilePage() {
             <SectionLabel>Identity</SectionLabel>
             <div className="space-y-2">
               <KeyValue label="Name" value={agentName} />
-              <KeyValue label="Tier" value={deployedAgent?.tier ?? profile.tier} />
+              <KeyValue label="Role" value={deployedAgent?.role ?? profile.role} />
               {deployedAgent && (
                 <div className="flex items-center justify-between">
                   <SubLabel>Status</SubLabel>

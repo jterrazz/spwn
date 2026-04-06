@@ -22,7 +22,8 @@ var (
 	spawnInteractive    bool
 	spawnNoAgent   bool
 	spawnGate      []string
-	spawnGovernor  string
+	spawnLeader    string
+	spawnHierarchy string
 	spawnRuntime   string
 	spawnTeam      string
 )
@@ -36,7 +37,8 @@ func init() {
 	Cmd.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Attach to agent interactively")
 	Cmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
 	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
-	Cmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this world")
+	Cmd.Flags().StringVar(&spawnLeader, "leader", "", "Leader agent for this world (gets the top role in the hierarchy)")
+	Cmd.Flags().StringVar(&spawnHierarchy, "hierarchy", "default", "Hierarchy to use for role assignment")
 	Cmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime (claude-code, pi, codex, opencode, gemini, aider)")
 	Cmd.Flags().StringVar(&spawnTeam, "team", "", "Deploy all agents in a team (team slug)")
 
@@ -81,7 +83,8 @@ func worldHelp(cmd *cobra.Command, args []string) {
 				{Name: "-w, --workspace <[name=]path[:ro]>", Desc: "Host dir to mount (repeatable; omit for ephemeral)"},
 				{Name: "-i, --interactive", Desc: "Attach to agent interactively"},
 				{Name: "--no-agent", Desc: "Create world without agent"},
-				{Name: "--governor <name>", Desc: "Governor agent"},
+				{Name: "--leader <name>", Desc: "Leader agent (top role in the hierarchy)"},
+				{Name: "--hierarchy <slug>", Desc: "Hierarchy for role assignment (default: default)"},
 				{Name: "--runtime <name>", Desc: "Agent runtime (default: claude-code)"},
 				{Name: "--gate <spec>", Desc: "Bridge element from host"},
 			}},
@@ -104,14 +107,14 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
   spwn world -w web=./frontend -w api=./backend   Multi-workspace
   spwn world -w docs=./docs:ro -w code=./src      Read-only reference
   spwn world --name "Big Refactor"        Ephemeral (no host mount)
-  spwn world --governor morpheus          With a governor agent
+  spwn world --leader morpheus            With a leader agent
   spwn world --no-agent                   Empty world (no agent)`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// If no flags set at all, show help instead of spawning with defaults
 		if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("agent") &&
 			!cmd.Flags().Changed("workspace") && !cmd.Flags().Changed("world") &&
 			!cmd.Flags().Changed("interactive") && !cmd.Flags().Changed("no-agent") &&
-			!cmd.Flags().Changed("governor") && !cmd.Flags().Changed("gate") {
+			!cmd.Flags().Changed("leader") && !cmd.Flags().Changed("gate") {
 			return cmd.Help()
 		}
 
@@ -168,7 +171,7 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 			}
 		}
 
-		// Build multi-agent list when --governor or --team is used
+		// Build multi-agent list when --leader or --team is used
 		var agents []universe.AgentSpec
 		if spawnTeam != "" {
 			// Resolve team → members
@@ -181,14 +184,14 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 					"Assign agents with: spwn team assign <agent> "+spawnTeam)
 			}
 			for _, m := range members {
-				agents = append(agents, universe.AgentSpec{Name: m, Tier: "citizen"})
+				agents = append(agents, universe.AgentSpec{Name: m, Role: "citizen"})
 			}
 			agentName = "" // multi-agent mode
 			s.Done("Team", fmt.Sprintf("%s → %d agent(s)", spawnTeam, len(members)))
-		} else if spawnGovernor != "" {
-			agents = append(agents, universe.AgentSpec{Name: spawnGovernor, Tier: "governor"})
+		} else if spawnLeader != "" {
+			agents = append(agents, universe.AgentSpec{Name: spawnLeader, Role: "governor"})
 			if agentName != "" {
-				agents = append(agents, universe.AgentSpec{Name: agentName, Tier: "citizen"})
+				agents = append(agents, universe.AgentSpec{Name: agentName, Role: "citizen"})
 			}
 			// Clear single-agent name since we're using multi-agent
 			agentName = ""

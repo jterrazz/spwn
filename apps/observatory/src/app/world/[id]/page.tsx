@@ -437,10 +437,10 @@ export default function WorldDashboard() {
                 render: (a) => <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>,
               },
               {
-                key: "tier",
-                label: "Tier",
+                key: "role",
+                label: "Role",
                 width: "80px",
-                render: (a) => <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.tier}</span>,
+                render: (a) => <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.role}</span>,
               },
               {
                 key: "status",

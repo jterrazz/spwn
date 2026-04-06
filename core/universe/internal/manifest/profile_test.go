@@ -10,7 +10,7 @@ import (
 func TestLoadProfile_ValidProfileYAML(t *testing.T) {
 	dir := t.TempDir()
 	content := `name: neo
-tier: governor
+role: governor
 runtime:
   backend: claude-code
   provider: anthropic
@@ -41,8 +41,8 @@ requires:
 	if profile.Name != "neo" {
 		t.Errorf("Name = %q, want \"neo\"", profile.Name)
 	}
-	if profile.Tier != "governor" {
-		t.Errorf("Tier = %q, want \"governor\"", profile.Tier)
+	if profile.Role != "governor" {
+		t.Errorf("Role = %q, want \"governor\"", profile.Role)
 	}
 	if profile.Runtime.Provider != "anthropic" {
 		t.Errorf("Runtime.Provider = %q, want \"anthropic\"", profile.Runtime.Provider)
@@ -64,7 +64,7 @@ requires:
 func TestLoadProfile_FallsBackToLifeYAML(t *testing.T) {
 	dir := t.TempDir()
 	content := `name: legacy-agent
-tier: citizen
+role: citizen
 soul:
   personas:
     - helper
@@ -93,8 +93,8 @@ body:
 	if profile.Name != "legacy-agent" {
 		t.Errorf("Name = %q, want \"legacy-agent\"", profile.Name)
 	}
-	if profile.Tier != "citizen" {
-		t.Errorf("Tier = %q, want \"citizen\"", profile.Tier)
+	if profile.Role != "citizen" {
+		t.Errorf("Role = %q, want \"citizen\"", profile.Role)
 	}
 	if len(profile.Skills) != 1 || profile.Skills[0] != "debugging" {
 		t.Errorf("Skills = %v, want [debugging]", profile.Skills)
@@ -127,10 +127,10 @@ func TestLoadProfile_ProfileYAMLTakesPrecedence(t *testing.T) {
 
 	// Both files exist — profile.yaml should win
 	profileContent := `name: profile-agent
-tier: governor
+role: governor
 `
 	lifeContent := `name: life-agent
-tier: citizen
+role: citizen
 `
 	os.WriteFile(filepath.Join(dir, "profile.yaml"), []byte(profileContent), 0644)
 	os.WriteFile(filepath.Join(dir, "life.yaml"), []byte(lifeContent), 0644)
@@ -243,9 +243,9 @@ func TestProfileManifest_Defaults(t *testing.T) {
 	// Zero value ProfileManifest should have reasonable defaults
 	profile := ProfileManifest{}
 
-	// Tier defaults via DefaultTier
-	if DefaultTier(profile.Tier) != "citizen" {
-		t.Errorf("default tier should be citizen, got %q", DefaultTier(profile.Tier))
+	// Role defaults via DefaultRole
+	if DefaultRole(profile.Role) != "citizen" {
+		t.Errorf("default role should be citizen, got %q", DefaultRole(profile.Role))
 	}
 
 	// Empty runtime

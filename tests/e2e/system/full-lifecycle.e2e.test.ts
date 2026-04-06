@@ -120,7 +120,7 @@ describe("complete agent lifecycle", () => {
     expect(initialProfile.exitCode).toBe(0);
     const initialOut = stripAnsi(initialProfile.output);
     expect(initialOut).toContain("neo");
-    expect(initialOut).toContain("Tier");
+    expect(initialOut).toContain("Role");
 
     // WHEN — adding identity content
     const identityPath = join(ctx.home, "agents", "neo", "identity", "default.md");

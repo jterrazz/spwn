@@ -14,19 +14,19 @@ describe("colony multi-agent", () => {
     ctx?.cleanup();
   });
 
-  test("spawn world with governor agent", () => {
-    // GIVEN — two agents: neo as citizen, morpheus as governor
+  test("spawn world with leader agent", () => {
+    // GIVEN — two agents: neo as citizen, morpheus as leader
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
 
-    // WHEN — spawning with governor
+    // WHEN — spawning with leader
     const spawnResult = ctx.spwn(
       [
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,
@@ -54,8 +54,8 @@ describe("colony multi-agent", () => {
     ctx.mind("morpheus").exists();
   });
 
-  test("destroying world with governor cleans up", () => {
-    // GIVEN — a world with governor
+  test("destroying world with leader cleans up", () => {
+    // GIVEN — a world with leader
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
@@ -64,7 +64,7 @@ describe("colony multi-agent", () => {
         "world",
         "--agent",
         "neo",
-        "--governor",
+        "--leader",
         "morpheus",
         "-w",
         ctx.home,

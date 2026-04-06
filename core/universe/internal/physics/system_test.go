@@ -11,7 +11,7 @@ func TestAgentsBookContent(t *testing.T) {
 	// Verify that AGENT.md content for a citizen has key sections
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "test-agent",
-		Tier:      "citizen",
+		Role:      "citizen",
 		WorldID:   "w-test-12345",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
 		Elements:  []string{"bash", "git"},
@@ -55,13 +55,13 @@ func TestSystemSkillsExist(t *testing.T) {
 	// (mind management, messaging, workspace, journal) in citizen context
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "neo",
-		Tier:      "citizen",
+		Role:      "citizen",
 		WorldID:   "w-test-99999",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
 		Elements:  []string{"bash"},
 		Governor:  "morpheus",
 		OtherAgents: []AgentInfo{
-			{Name: "trinity", Tier: "citizen"},
+			{Name: "trinity", Role: "citizen"},
 		},
 	})
 
@@ -91,7 +91,7 @@ func TestArchitectSkillsExist(t *testing.T) {
 	// Verify that the architect (god tier) has all 3 key skill sections
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "architect",
-		Tier:      "god",
+		Role:      "god",
 		WorldID:   "w-god-00001",
 		Elements:  []string{"bash", "git", "docker"},
 		CPU:       4,

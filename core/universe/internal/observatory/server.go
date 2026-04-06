@@ -222,7 +222,7 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 
 // profileYAML represents the profile.yaml manifest for an agent.
 type profileYAML struct {
-	Tier    string `yaml:"tier,omitempty" json:"tier,omitempty"`
+	Role    string `yaml:"role,omitempty" json:"role,omitempty"`
 	Team    string `yaml:"team,omitempty" json:"team,omitempty"`
 	Runtime struct {
 		Engine   string `yaml:"engine,omitempty" json:"engine,omitempty"`
@@ -235,7 +235,7 @@ type profileYAML struct {
 type agentProfileResponse struct {
 	Name      string            `json:"name"`
 	Path      string            `json:"path"`
-	Tier      string            `json:"tier"`
+	Role      string            `json:"role"`
 	Team      string            `json:"team,omitempty"`
 	Engine    string            `json:"engine"`
 	Provider  string            `json:"provider"`
@@ -385,16 +385,16 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 
 	mindPath := info.Path
 
-	// Load profile.yaml for tier/engine/provider
-	tier := "citizen"
+	// Load profile.yaml for role/engine/provider
+	role := "citizen"
 	engine := "claude-code"
 	provider := "anthropic"
 	profilePath := filepath.Join(mindPath, "profile.yaml")
 	if data, err := os.ReadFile(profilePath); err == nil {
 		var p profileYAML
 		if err := yaml.Unmarshal(data, &p); err == nil {
-			if p.Tier != "" {
-				tier = p.Tier
+			if p.Role != "" {
+				role = p.Role
 			}
 			if p.Runtime.Engine != "" {
 				engine = p.Runtime.Engine
@@ -446,7 +446,7 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	resp := agentProfileResponse{
 		Name:      info.Name,
 		Path:      info.Path,
-		Tier:      tier,
+		Role:      role,
 		Team:      info.Team,
 		Engine:    engine,
 		Provider:  provider,
@@ -545,7 +545,7 @@ func (s *Server) handleWorldLogs(w http.ResponseWriter, r *http.Request) {
 // agentSpec is one entry in the multi-agent `agents` field.
 type agentSpec struct {
 	Name string `json:"name"`
-	Tier string `json:"tier,omitempty"`
+	Role string `json:"role,omitempty"`
 }
 
 // createWorldRequest is the JSON body accepted by POST /api/worlds.
@@ -583,7 +583,7 @@ func (req createWorldRequest) resolveAgents() []architect.AgentSpec {
 			if a.Name == "" {
 				continue
 			}
-			out = append(out, architect.AgentSpec{Name: a.Name, Tier: a.Tier})
+			out = append(out, architect.AgentSpec{Name: a.Name, Role: a.Role})
 		}
 		return out
 	}
@@ -675,13 +675,13 @@ func (s *Server) handleDeployAgent(w http.ResponseWriter, r *http.Request) {
 	}
 	var body struct {
 		Name string `json:"name"`
-		Tier string `json:"tier"`
+		Role string `json:"role"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Name == "" {
 		jsonError(w, "agent name is required", 400)
 		return
 	}
-	if err := s.arch.DeployAgent(r.Context(), worldID, body.Name, body.Tier); err != nil {
+	if err := s.arch.DeployAgent(r.Context(), worldID, body.Name, body.Role); err != nil {
 		status := 500
 		if err.Error() == fmt.Sprintf("agent %q is already deployed in world %s", body.Name, worldID) {
 			status = 409

@@ -115,8 +115,8 @@ func TestRouteAgentToWorld_FindsAgentInAgentsSlice(t *testing.T) {
 			ContainerID: "cMulti",
 			Agent:       "governor",
 			Agents: []universe.AgentRecord{
-				{Name: "governor", Tier: "governor"},
-				{Name: "qa", Tier: "citizen"},
+				{Name: "governor", Role: "governor"},
+				{Name: "qa", Role: "citizen"},
 			},
 		},
 	}

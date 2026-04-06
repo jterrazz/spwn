@@ -23,7 +23,7 @@ spwn agent [flags]
 
 ```
   spwn agent -n neo -u w-abc123      Spawn named agent into world
-  spwn agent --npc "run tests"       Fire-and-forget NPC task
+  spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task
   spwn agent --import backup.tar.gz  Import a Mind archive first
 ```
 
@@ -33,7 +33,7 @@ spwn agent [flags]
   -h, --help            help for agent
       --import string   Import Mind from tar.gz before spawning
   -n, --name string     Agent name (default: default)
-      --npc string      Run as NPC — no Mind, no memory, just execute this task
+      --ephemeral string   Run as ephemeral agent — no Mind, no memory, just execute this task
   -u, --world string    Target world ID
 ```
 

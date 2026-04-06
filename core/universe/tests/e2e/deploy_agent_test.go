@@ -50,8 +50,8 @@ func TestDeployAgent_ToRunningWorld(t *testing.T) {
 	for _, a := range world.Agents {
 		if a.Name == "agent-b" {
 			found = true
-			if a.Tier != "citizen" {
-				t.Errorf("agent-b tier = %q, want citizen", a.Tier)
+			if a.Role != "citizen" {
+				t.Errorf("agent-b role = %q, want citizen", a.Role)
 			}
 		}
 	}

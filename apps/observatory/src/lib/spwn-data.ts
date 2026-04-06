@@ -32,7 +32,7 @@ function agentsDir(): string {
 interface RawAgentRecord {
   name: string;
   agent_id: string;
-  tier: string;
+  role: string;
   status: string;
 }
 
@@ -57,7 +57,7 @@ interface RawWorld {
 function rawToWorld(raw: RawWorld): World {
   const agents = (raw.agents ?? []).map((a) => ({
     name: a.name,
-    tier: a.tier,
+    role: a.role,
     status: a.status,
   }));
 
@@ -65,7 +65,7 @@ function rawToWorld(raw: RawWorld): World {
   if (agents.length === 0 && raw.agent) {
     agents.push({
       name: raw.agent,
-      tier: "citizen",
+      role: "citizen",
       status: raw.status,
     });
   }
@@ -285,7 +285,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
 
   return {
     name,
-    tier: "citizen" as const,
+    role: "citizen" as const,
     engine: "claude-code",
     provider: "anthropic",
     purpose: purpose || "",

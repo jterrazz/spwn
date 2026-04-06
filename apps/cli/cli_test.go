@@ -118,15 +118,15 @@ func TestCLI_ArchitectHelp(t *testing.T) {
 	}
 }
 
-// --- Agent --npc flag ---
+// --- Agent --ephemeral flag ---
 
-func TestCLI_AgentNPCFlag(t *testing.T) {
+func TestCLI_AgentEphemeralFlag(t *testing.T) {
 	out, _, err := executeCommand("agent", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "--npc", "agent help npc flag")
+	assertContains(t, out, "--ephemeral", "agent help ephemeral flag")
 }
 
 // --- Get help ---

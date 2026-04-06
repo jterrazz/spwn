@@ -30,7 +30,7 @@ interface AgentListItem {
 // An agent enriched with its current deployment (if any).
 interface EnrichedAgent {
   name: string;
-  tier: string;
+  role: string;
   team?: string;                      // team slug
   status: string;                     // running/waiting/idle/sleeping/stopped/limbo
   worldID?: string;
@@ -88,14 +88,14 @@ export default function AgentsPage() {
 
       setTeams(rawTeams ?? []);
 
-      // Build name → { worldID, worldName, tier, status } map from world records.
-      const placement = new Map<string, { worldID: string; worldName: string; tier: string; status: string }>();
+      // Build name → { worldID, worldName, role, status } map from world records.
+      const placement = new Map<string, { worldID: string; worldName: string; role: string; status: string }>();
       for (const w of worlds) {
         for (const a of w.agents ?? []) {
           placement.set(a.name, {
             worldID: w.id,
             worldName: getWorldName(w),
-            tier: a.tier ?? "citizen",
+            role: a.role ?? "citizen",
             status: a.status ?? "idle",
           });
         }
@@ -106,7 +106,7 @@ export default function AgentsPage() {
         const p = placement.get(a.name);
         return {
           name: a.name,
-          tier: p?.tier ?? "citizen",
+          role: p?.role ?? "citizen",
           team: a.team,
           status: p?.status ?? "limbo",
           worldID: p?.worldID,
@@ -353,10 +353,10 @@ export default function AgentsPage() {
                     render: (a) => <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>,
                   },
                   {
-                    key: "tier",
-                    label: "Tier",
+                    key: "role",
+                    label: "Role",
                     width: "80px",
-                    render: (a) => <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.tier}</span>,
+                    render: (a) => <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.role}</span>,
                   },
                   {
                     key: "status",

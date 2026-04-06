@@ -9,23 +9,28 @@ import (
 
 // AgentContextOpts configures the generation of an AGENT.md context file.
 type AgentContextOpts struct {
-	AgentName   string
-	Tier        string // "governor", "citizen", or "npc"
-	WorldID     string
-	Workspaces  []models.Workspace
-	Elements    []string
-	CPU         int
-	Memory      string
-	Timeout     string
-	OtherAgents []AgentInfo // other agents in the world
-	Governor    string      // governor name (empty if this IS the governor or no governor)
-	NPCTask     string      // task for NPC (empty for governor/citizen)
+	AgentName     string
+	Role          string // "governor", "citizen", "npc", or "god"
+	Ephemeral     bool   // true for NPC-style throwaway agents
+	RoleLevel     int
+	Permissions   []string
+	Superior      string
+	HierarchyName string
+	WorldID       string
+	Workspaces    []models.Workspace
+	Elements      []string
+	CPU           int
+	Memory        string
+	Timeout       string
+	OtherAgents   []AgentInfo // other agents in the world
+	Governor      string      // governor name (empty if this IS the governor or no governor)
+	NPCTask       string      // task for NPC (empty for governor/citizen)
 }
 
 // AgentInfo describes another agent in the world.
 type AgentInfo struct {
 	Name string
-	Tier string
+	Role string
 }
 
 // GenerateAgentContext returns the contents of an AGENT.md file personalized
@@ -33,7 +38,7 @@ type AgentInfo struct {
 func GenerateAgentContext(opts AgentContextOpts) string {
 	var b strings.Builder
 
-	switch opts.Tier {
+	switch opts.Role {
 	case "god":
 		generateGodContext(&b, opts)
 	case "governor":
@@ -58,7 +63,7 @@ func generateGovernorContext(b *strings.Builder, opts AgentContextOpts) {
 	if len(opts.OtherAgents) > 0 {
 		b.WriteString("## Your Citizens\n")
 		for _, a := range opts.OtherAgents {
-			b.WriteString(fmt.Sprintf("- %s (%s)\n", a.Name, a.Tier))
+			b.WriteString(fmt.Sprintf("- %s (%s)\n", a.Name, a.Role))
 		}
 		b.WriteString("\n")
 	}
@@ -96,7 +101,7 @@ func generateCitizenContext(b *strings.Builder, opts AgentContextOpts) {
 	if len(opts.OtherAgents) > 0 {
 		b.WriteString("## Other Citizens\n")
 		for _, a := range opts.OtherAgents {
-			b.WriteString(fmt.Sprintf("- %s (%s)\n", a.Name, a.Tier))
+			b.WriteString(fmt.Sprintf("- %s (%s)\n", a.Name, a.Role))
 		}
 		b.WriteString("\n")
 	}
@@ -177,7 +182,7 @@ func generateGodContext(b *strings.Builder, opts AgentContextOpts) {
 // ColonyAgentSpec mirrors the architect AgentSpec for generating colony context.
 type ColonyAgentSpec struct {
 	Name string
-	Tier string
+	Role string
 }
 
 // GenerateColonyContext generates a combined /world/AGENT.md for multi-agent worlds
@@ -190,7 +195,7 @@ func GenerateColonyContext(worldID string, agents []ColonyAgentSpec) string {
 
 	b.WriteString("## Agents\n")
 	for _, a := range agents {
-		b.WriteString(fmt.Sprintf("- **%s** (%s) — see /world/AGENT-%s.md\n", a.Name, a.Tier, a.Name))
+		b.WriteString(fmt.Sprintf("- **%s** (%s) — see /world/AGENT-%s.md\n", a.Name, a.Role, a.Name))
 	}
 	b.WriteString("\n")
 

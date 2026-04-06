@@ -23,7 +23,7 @@ spwn world [flags]
 ```
   spwn world -w .                    Spawn with current directory
   spwn world -c acme -w ~/project   Named config + workspace
-  spwn world --governor morpheus     With a governor agent
+  spwn world --leader morpheus       With a leader agent
   spwn world --no-agent              Empty world (no agent)
 ```
 
@@ -33,7 +33,7 @@ spwn world [flags]
   -a, --agent string       Agent name (default "default")
   -c, --config string      Named world config (default: default)
       --gate stringArray   Bridge element from Host: "source:as:cap1,cap2"
-      --governor string    Governor agent for this world
+      --leader string     Leader agent for this world
   -h, --help               help for world
   -i, --interactive        Attach to agent interactively
       --no-agent           Create the world without spawning an agent

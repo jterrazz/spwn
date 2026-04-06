@@ -7,24 +7,24 @@ import (
 	"spwn.sh/core/universe/internal/manifest"
 )
 
-func TestAgentSpec_DefaultTier(t *testing.T) {
+func TestAgentSpec_DefaultRole(t *testing.T) {
 	tests := []struct {
 		name     string
-		tier     string
-		wantTier string
+		role     string
+		wantRole string
 	}{
-		{name: "empty_defaults_to_citizen", tier: "", wantTier: "citizen"},
-		{name: "citizen_stays_citizen", tier: "citizen", wantTier: "citizen"},
-		{name: "governor_stays_governor", tier: "governor", wantTier: "governor"},
-		{name: "custom_tier_passthrough", tier: "custom", wantTier: "custom"},
+		{name: "empty_defaults_to_citizen", role: "", wantRole: "citizen"},
+		{name: "citizen_stays_citizen", role: "citizen", wantRole: "citizen"},
+		{name: "governor_stays_governor", role: "governor", wantRole: "governor"},
+		{name: "custom_role_passthrough", role: "custom", wantRole: "custom"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			spec := AgentSpec{Name: "test", Tier: tt.tier}
-			got := manifest.DefaultTier(spec.Tier)
-			if got != tt.wantTier {
-				t.Errorf("DefaultTier(%q) = %q, want %q", tt.tier, got, tt.wantTier)
+			spec := AgentSpec{Name: "test", Role: tt.role}
+			got := manifest.DefaultRole(spec.Role)
+			if got != tt.wantRole {
+				t.Errorf("DefaultRole(%q) = %q, want %q", tt.role, got, tt.wantRole)
 			}
 		})
 	}
@@ -33,19 +33,19 @@ func TestAgentSpec_DefaultTier(t *testing.T) {
 func TestAgentSpec_Validation(t *testing.T) {
 	spec := AgentSpec{
 		Name: "neo",
-		Tier: "governor",
+		Role: "governor",
 	}
 
 	if spec.Name != "neo" {
 		t.Errorf("expected name 'neo', got %q", spec.Name)
 	}
-	if spec.Tier != "governor" {
-		t.Errorf("expected tier 'governor', got %q", spec.Tier)
+	if spec.Role != "governor" {
+		t.Errorf("expected role 'governor', got %q", spec.Role)
 	}
 }
 
 func TestAgentSpec_EmptyNameIsInvalid(t *testing.T) {
-	spec := AgentSpec{Name: "", Tier: "citizen"}
+	spec := AgentSpec{Name: "", Role: "citizen"}
 	if spec.Name != "" {
 		t.Error("expected empty name")
 	}
@@ -55,13 +55,13 @@ func TestAgentSpec_EmptyNameIsInvalid(t *testing.T) {
 
 func TestGovernorLimit(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "gov1", Tier: "governor"},
-		{Name: "gov2", Tier: "governor"},
+		{Name: "gov1", Role: "governor"},
+		{Name: "gov2", Role: "governor"},
 	}
 
 	governors := 0
 	for _, a := range agents {
-		if manifest.DefaultTier(a.Tier) == "governor" {
+		if manifest.DefaultRole(a.Role) == "governor" {
 			governors++
 		}
 	}
@@ -85,14 +85,14 @@ func TestGovernorLimit_ErrorMessage(t *testing.T) {
 
 func TestMixedColony(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "gov", Tier: "governor"},
-		{Name: "worker1", Tier: "citizen"},
-		{Name: "worker2", Tier: ""},
+		{Name: "gov", Role: "governor"},
+		{Name: "worker1", Role: "citizen"},
+		{Name: "worker2", Role: ""},
 	}
 
 	var govs, cits int
 	for _, a := range agents {
-		switch manifest.DefaultTier(a.Tier) {
+		switch manifest.DefaultRole(a.Role) {
 		case "governor":
 			govs++
 		case "citizen":
@@ -108,35 +108,35 @@ func TestMixedColony(t *testing.T) {
 	}
 }
 
-func TestInvalidTier_Detection(t *testing.T) {
-	// SpawnAgents rejects unknown tiers that aren't "governor" or "citizen"
-	invalidTiers := []string{"admin", "root", "superuser", "GOVERNOR", "Citizen"}
-	for _, tier := range invalidTiers {
-		resolved := manifest.DefaultTier(tier)
+func TestInvalidRole_Detection(t *testing.T) {
+	// SpawnAgents rejects unknown roles that aren't "governor" or "citizen"
+	invalidRoles := []string{"admin", "root", "superuser", "GOVERNOR", "Citizen"}
+	for _, role := range invalidRoles {
+		resolved := manifest.DefaultRole(role)
 		if resolved == "governor" || resolved == "citizen" {
-			t.Errorf("tier %q should not resolve to a valid tier, got %q", tier, resolved)
+			t.Errorf("role %q should not resolve to a valid role, got %q", role, resolved)
 		}
 	}
 }
 
-func TestDefaultTier_IsCitizen(t *testing.T) {
+func TestDefaultRole_IsCitizen(t *testing.T) {
 	// Explicitly verify the default is "citizen", not something else
-	got := manifest.DefaultTier("")
+	got := manifest.DefaultRole("")
 	if got != "citizen" {
-		t.Errorf("DefaultTier(\"\") = %q, want \"citizen\"", got)
+		t.Errorf("DefaultRole(\"\") = %q, want \"citizen\"", got)
 	}
 }
 
 func TestSingleGovernorIsValid(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "gov", Tier: "governor"},
-		{Name: "cit1", Tier: "citizen"},
-		{Name: "cit2", Tier: "citizen"},
+		{Name: "gov", Role: "governor"},
+		{Name: "cit1", Role: "citizen"},
+		{Name: "cit2", Role: "citizen"},
 	}
 
 	governors := 0
 	for _, a := range agents {
-		if manifest.DefaultTier(a.Tier) == "governor" {
+		if manifest.DefaultRole(a.Role) == "governor" {
 			governors++
 		}
 	}
@@ -148,13 +148,13 @@ func TestSingleGovernorIsValid(t *testing.T) {
 
 func TestNoGovernorIsValid(t *testing.T) {
 	agents := []AgentSpec{
-		{Name: "cit1", Tier: "citizen"},
-		{Name: "cit2", Tier: ""},
+		{Name: "cit1", Role: "citizen"},
+		{Name: "cit2", Role: ""},
 	}
 
 	governors := 0
 	for _, a := range agents {
-		if manifest.DefaultTier(a.Tier) == "governor" {
+		if manifest.DefaultRole(a.Role) == "governor" {
 			governors++
 		}
 	}

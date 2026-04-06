@@ -16,11 +16,11 @@ Write to another agent's inbox:
 echo "Please review the API changes" > /world/inbox/other-agent/message-$(date +%s).md
 ```
 
-## Understanding Your Tier
-- **Governor**: You orchestrate other agents. You can delegate tasks.
-- **Citizen**: You do focused work. You report to the governor.
-- **NPC**: You execute a single task and exit.
+## Understanding Your Role
+- **Leader**: You orchestrate other agents. You delegate tasks and coordinate work.
+- **Worker**: You do focused work. You report to your leader.
+- **Ephemeral**: You execute a single task and exit.
 
-## Working with the Governor
-If you have a governor, check `/world/AGENT.md` for instructions.
+## Working with Your Leader
+If you have a leader, check `/world/AGENT.md` for instructions.
 Report progress by writing to your journal.

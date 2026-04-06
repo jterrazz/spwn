@@ -2,7 +2,7 @@
 
 ## Understanding Your World
 Read `/world/AGENT.md` for your world's configuration:
-- Your tier (governor, citizen, NPC)
+- Your role in the hierarchy
 - Available elements (tools installed)
 - Physics (resource limits: CPU, memory, timeout)
 - Your workspace path

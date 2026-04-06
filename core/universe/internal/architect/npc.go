@@ -31,7 +31,8 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 
 	// Generate AGENT.md for NPC (minimal context)
 	agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
-		Tier:       "npc",
+		Role:       "npc",
+		Ephemeral:  true,
 		WorldID:    worldID,
 		NPCTask:    task,
 		Workspaces: u.Workspaces,

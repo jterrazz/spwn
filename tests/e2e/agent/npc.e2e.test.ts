@@ -6,20 +6,20 @@ import {
 } from "../../setup/spwn.specification.js";
 import { expectLine, stripAnsi } from "../../setup/output-helpers.js";
 
-describe("agent --npc", () => {
+describe("agent --ephemeral", () => {
   let ctx: TestContext;
 
   afterEach(() => {
     ctx?.cleanup();
   });
 
-  test("npc without --world flag fails", () => {
+  test("ephemeral without --world flag fails", () => {
     // GIVEN — an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — running agent --npc without world flag
-    const result = ctx.spwn(["agent", "--npc", "do something"]);
+    // WHEN — running agent --ephemeral without --world flag
+    const result = ctx.spwn(["agent", "--ephemeral", "do something"]);
 
     // THEN — exits with error about required world flag
     expect(result.exitCode).not.toBe(0);
@@ -28,7 +28,7 @@ describe("agent --npc", () => {
     expect(stripAnsi(result.output)).not.toContain("ReferenceError");
   });
 
-  test("npc dispatches task in world", () => {
+  test("ephemeral dispatches task in world", () => {
     // GIVEN — a running world
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -39,12 +39,12 @@ describe("agent --npc", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // Verify container is running before dispatching NPC
+    // Verify container is running before dispatching ephemeral
     ctx.universe(id).toBeRunning();
 
-    // WHEN — dispatching an NPC task
+    // WHEN — dispatching an ephemeral task
     const npcResult = ctx.spwn(
-      ["agent", "--npc", "lint the code", "--world", id],
+      ["agent", "--ephemeral", "lint the code", "--world", id],
       30_000,
     );
 
@@ -52,11 +52,11 @@ describe("agent --npc", () => {
     expect(npcResult.exitCode).toBe(0);
     expect(npcResult.output.length).toBeGreaterThan(0);
 
-    // AND — container is still running after NPC
+    // AND — container is still running after ephemeral
     ctx.universe(id).toBeRunning();
   });
 
-  test("npc does not create Mind directory", () => {
+  test("ephemeral does not create Mind directory", () => {
     // GIVEN — a running world
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -66,10 +66,10 @@ describe("agent --npc", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — dispatching an NPC task
-    ctx.spwn(["agent", "--npc", "check health", "--world", id]);
+    // WHEN — dispatching an ephemeral task
+    ctx.spwn(["agent", "--ephemeral", "check health", "--world", id]);
 
-    // THEN — no NPC agent should appear in agent ls
+    // THEN — no ephemeral agent should appear in agent ls
     const list = ctx.spwn(["agent", "ls"]);
     expect(stripAnsi(list.output)).not.toContain("npc");
   });

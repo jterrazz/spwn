@@ -11,7 +11,7 @@ var UpCmd = &cobra.Command{
 	Long:    Cmd.Long,
 	Example: `  spwn up -w .                    Spawn with current directory
   spwn up -c acme -w ~/project   Named config + workspace
-  spwn up --governor morpheus     With a governor agent`,
+  spwn up --leader morpheus       With a leader agent`,
 	RunE: Cmd.RunE,
 }
 
@@ -63,7 +63,8 @@ func init() {
 	UpCmd.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Attach to agent interactively")
 	UpCmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
 	UpCmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
-	UpCmd.Flags().StringVar(&spawnGovernor, "governor", "", "Governor agent for this world")
+	UpCmd.Flags().StringVar(&spawnLeader, "leader", "", "Leader agent for this world (gets the top role in the hierarchy)")
+	UpCmd.Flags().StringVar(&spawnHierarchy, "hierarchy", "default", "Hierarchy to use for role assignment")
 	UpCmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime")
 
 	// Copy --all flag for DownCmd

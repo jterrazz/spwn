@@ -30,7 +30,7 @@ describe("spwn profile", () => {
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("neo");
-    expect(out).toContain("Tier");
+    expect(out).toContain("Role");
     expect(out).toContain("citizen");
     expect(out).toContain("Engine");
     expect(out).toContain("Identity");
@@ -126,13 +126,13 @@ describe("spwn profile", () => {
     expect(out).toContain("No sessions yet");
   });
 
-  // ── tier ─────────────────────────────────────────────────────
+  // ── role ─────────────────────────────────────────────────────
 
-  test("tier shows current tier", async () => {
+  test("role shows current role", async () => {
     createAgent(home, "neo");
 
-    const result = await spwn("profile neo tier")
-      .exec("profile neo tier")
+    const result = await spwn("profile neo role")
+      .exec("profile neo role")
       .run();
 
     expect(result.exitCode).toBe(0);
@@ -140,16 +140,16 @@ describe("spwn profile", () => {
     expect(out).toContain("citizen");
   });
 
-  test("tier --set governor updates profile", async () => {
+  test("role --set governor updates profile", async () => {
     createAgent(home, "neo");
 
-    const result = await spwn("profile neo tier set")
-      .exec("profile neo tier --set governor")
+    const result = await spwn("profile neo role set")
+      .exec("profile neo role --set governor")
       .run();
 
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
-    expect(out).toContain("Tier updated");
+    expect(out).toContain("Role updated");
     expect(out).toContain("governor");
   });
 

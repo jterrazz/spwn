@@ -79,7 +79,7 @@ Companies, sleep cycles, natural selection — these patterns aren't arbitrary. 
 <tr>
 <td align="center" width="33%">
 <h3>🏗️ Multi-Agent Hierarchy</h3>
-Governors delegate to citizens via inboxes. Citizens report back. NPCs handle one-shot tasks. Clear hierarchy, clear delegation.
+Leaders delegate to workers via inboxes. Workers report back. Ephemeral agents handle one-shot tasks. Flexible hierarchy, clear delegation.
 </td>
 <td align="center" width="33%">
 <h3>📋 Declarative Config</h3>
@@ -126,7 +126,7 @@ Save a world at any point. Roll back to retry a different approach. Deterministi
 
 | Without Spwn | With Spwn |
 | --- | --- |
-| ❌ No structure for managing multiple agents. You're wiring custom glue code and losing track. | ✅ Built-in hierarchy — governors, citizens, NPCs — with messaging, delegation, and activity log. |
+| ❌ No structure for managing multiple agents. You're wiring custom glue code and losing track. | ✅ Flexible hierarchy system — define roles, assign at deployment — with messaging, delegation, and activity log. |
 | ❌ Your setup isn't reproducible or shareable. It works on your machine. | ✅ Declarative YAML config. `org.yaml` → `world.yaml` → `profile.yaml`. Git-friendly, shareable. |
 | ❌ You can't see what tools and skills are exposed. What MCP servers? What capabilities? Nobody knows. | ✅ `/world/faculties.md` shows exactly what's physically possible. `spwn inspect` shows everything. |
 | ❌ Zero governance. No cost limits. No resource constraints. No audit trail. | ✅ `org.yaml` defines governance. Cost limits, resource caps, allowed providers, activity log. |
@@ -139,7 +139,7 @@ Save a world at any point. Roll back to retry a different approach. Deterministi
 
 |                                     |                                                                                                               |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Hierarchy over flat pools.**      | Architect → Universe → World → Governor → Citizen → NPC. Clear structure, clear delegation.                  |
+| **Hierarchy over flat pools.**      | Architect → Universe → World → Hierarchy roles. Clear structure, clear delegation.                            |
 | **Worlds over wrappers.**           | Not another API layer. A full environment with filesystem, compute, memory, and network.                      |
 | **Identity over instances.**        | Agents have persistent purpose, traits, skills, and memory. They're individuals, not stateless functions.     |
 | **Agency over tools.**              | MCP gives agents a Swiss Army knife. Spwn gives them a workshop. They discover, compose, and create.          |
@@ -198,10 +198,10 @@ make install
 
 ## Use Cases
 
-### Team with a governor
+### Team with a leader
 
 ```bash
-spwn up --governor morpheus --agent neo --agent trinity -w ./acme-api
+spwn up --leader morpheus --agent neo --agent trinity -w ./acme-api
 spwn msg send neo --from morpheus "Implement Stripe webhooks"
 spwn msg send trinity --from morpheus "Write tests for webhooks"
 ```
@@ -212,7 +212,7 @@ spwn msg send trinity --from morpheus "Write tests for webhooks"
 # org.yaml
 governance:
   max-worlds: 10
-  max-citizens-per-world: 8
+  max-agents-per-world: 8
   allowed-providers: [anthropic, openai]
   cost-limit: $50/day
 ```
@@ -241,7 +241,7 @@ The agent's identity is a directory of markdown files — human-readable, versio
 
 ```
 ~/.spwn/agents/neo/
-├── profile.yaml              # tier, engine, identity, requires, delegation
+├── profile.yaml              # role, engine, identity, requires, delegation
 ├── identity/                 # who the agent is
 │   ├── persona.md            # role, style, preferences
 │   ├── purpose.md            # mission and goals

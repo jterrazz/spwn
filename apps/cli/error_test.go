@@ -116,7 +116,7 @@ func TestCLI_AgentHelpShowsSpawnFlags(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, flag := range []string{"--world", "--npc"} {
+	for _, flag := range []string{"--world", "--ephemeral"} {
 		assertContains(t, out, flag, "agent spawn flags")
 	}
 }

@@ -261,7 +261,7 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 	// Collect agents in this world
 	type agentEntry struct {
 		name   string
-		tier   string
+		role   string
 		layers string
 		status string
 	}
@@ -271,9 +271,9 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 	// Multi-agent worlds
 	if len(ww.Agents) > 0 {
 		for _, ar := range ww.Agents {
-			tier := ar.Tier
-			if tier == "" {
-				tier = "citizen"
+			role := ar.Role
+			if role == "" {
+				role = "citizen"
 			}
 			layers := "?/6"
 			for _, ai := range allAgents {
@@ -288,14 +288,14 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 			}
 			agents = append(agents, agentEntry{
 				name:   ar.Name,
-				tier:   tier,
+				role:   role,
 				layers: layers,
 				status: statusIcon,
 			})
 		}
 	} else if ww.Agent != "" {
 		// Legacy single-agent
-		tier := "citizen"
+		role := "citizen"
 		layers := "?/6"
 		for _, ai := range allAgents {
 			if ai.Name == ww.Agent {
@@ -309,7 +309,7 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 		}
 		agents = append(agents, agentEntry{
 			name:   ww.Agent,
-			tier:   tier,
+			role:   role,
 			layers: layers,
 			status: statusIcon,
 		})
@@ -317,9 +317,9 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 
 	// Calculate bubble width based on content
 	minWidth := 47
-	// Check agent lines: icon(2) + space + name(10) + gap(3) + tier(10) + gap(3) + layers(3) + gap(3) + status(8) + trail(4)
+	// Check agent lines: icon(2) + space + name(10) + gap(3) + role(10) + gap(3) + layers(3) + gap(3) + status(8) + trail(4)
 	for _, a := range agents {
-		lineLen := 4 + utf8.RuneCountInString(a.name) + 3 + utf8.RuneCountInString(a.tier) + 3 + utf8.RuneCountInString(a.layers) + 3 + utf8.RuneCountInString(a.status) + 6
+		lineLen := 4 + utf8.RuneCountInString(a.name) + 3 + utf8.RuneCountInString(a.role) + 3 + utf8.RuneCountInString(a.layers) + 3 + utf8.RuneCountInString(a.status) + 6
 		if lineLen > minWidth {
 			minWidth = lineLen
 		}
@@ -377,13 +377,13 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 	// Agent lines
 	for _, a := range agents {
 		icon := "\u25cf" // ●
-		if a.tier == "governor" {
+		if a.role == "governor" {
 			icon = "\u2605" // ★
 		}
 		agentLine := fmt.Sprintf("   %s %s   %s   %s   %s",
 			icon,
 			padRight(a.name, 10),
-			padRight(a.tier, 10),
+			padRight(a.role, 10),
 			a.layers,
 			a.status,
 		)

@@ -5,7 +5,7 @@ Key terms and concepts used across projects.
 | Term | Definition |
 |------|------------|
 | World | An isolated Docker container where an agent works |
-| Agent | A persistent AI citizen with identity and memory |
+| Agent | A persistent AI entity with identity and memory, assigned a role in the hierarchy |
 | Architect | The always-on daemon that manages worlds and agents |
 | Knowledge | This knowledge base — the single source of truth |
 | Mind | An agent's persistent memory (identity, skills, knowledge) |

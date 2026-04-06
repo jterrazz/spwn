@@ -105,7 +105,7 @@ function normalizeWorlds(data: RawWorld[]): World[] {
       ...w,
       agent: _agent ?? "",
       status: w.status || "idle",
-      agents: w.agents ?? (_agent ? [{ name: _agent, tier: "citizen", status: w.status || "idle" }] : []),
+      agents: w.agents ?? (_agent ? [{ name: _agent, role: "citizen", status: w.status || "idle" }] : []),
       workspaces: wsList,
     };
   });
@@ -117,7 +117,7 @@ function normalizeWorlds(data: RawWorld[]): World[] {
  */
 function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentProfile {
   return {
-    tier: 'citizen',
+    role: 'citizen',
     engine: 'claude-code',
     provider: 'anthropic',
     purpose: '',

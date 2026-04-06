@@ -226,7 +226,7 @@ describe("CLI execution — agent commands", () => {
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("testbot");
-    expect(out).toContain("Tier");
+    expect(out).toContain("Role");
     expect(out).toContain("citizen");
     expect(out).toContain("Identity");
   });
