@@ -158,9 +158,9 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={pathname === "/hierarchies"} onClick={() => router.push("/hierarchies")}>
+              <SidebarMenuButton isActive={pathname === "/organizations"} onClick={() => router.push("/organizations")}>
                 <IconBinaryTreeFilled size={16} />
-                <span>Hierarchies</span>
+                <span>Organizations</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -320,7 +320,6 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
                     {Array.from(grouped.values()).map(({ team, agents }) => (
                       <div key={team!.slug} className="mt-1">
                         <p className="px-2 py-1 text-[9px] uppercase tracking-[0.12em] text-sidebar-foreground/25 flex items-center gap-1.5">
-                          {team!.icon && <span className="text-[10px]">{team!.icon}</span>}
                           <span style={team!.color ? { color: team!.color } : undefined}>{team!.name}</span>
                         </p>
                         {agents.map(renderAgent)}

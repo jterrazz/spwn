@@ -74,13 +74,12 @@ func TestSpawn_WithAgent(t *testing.T) {
 
 	// AND the Mind should have all standard layers
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("identity")
+		m.HasLayer("core")
 		m.HasLayer("skills")
-		m.HasLayer("memory/knowledge")
-		m.HasLayer("memory/playbooks")
-		m.HasLayer("memory/journal")
-		m.HasLayer("sessions")
-		m.HasFile("identity/default.md")
+		m.HasLayer("knowledge")
+		m.HasLayer("playbooks")
+		m.HasLayer("journal")
+		m.HasFile("core/default.md")
 	})
 }
 
@@ -95,9 +94,7 @@ physics:
     memory: 1g
     disk: 4g
     timeout: 60m
-  laws:
-    max-processes: 64
-  elements:
+  tools:
     - "@unix"
 `).
 		NoAgent().

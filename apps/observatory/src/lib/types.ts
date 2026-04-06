@@ -57,7 +57,6 @@ export interface LimboAgent {
 export interface Team {
   slug: string;
   name: string;
-  icon?: string;
   color?: string;
   description?: string;
   members?: string[];
@@ -69,14 +68,11 @@ export interface AgentProfile {
   team?: string;
   engine: string;
   provider: string;
-  purpose: string;
-  persona: string;
-  traits: string[];
+  purpose: string;    // read from core/purpose.md
+  persona: string;    // read from core/persona.md
+  traits: string[];   // read from core/traits.md
   skills: string[];
-  playbooks: string[];
-  knowledge: string[];
   journal: { date: string; summary: string }[];
-  bonds: { agent: string; relationship: string }[];
 }
 
 export interface AgentMessage {
@@ -111,7 +107,7 @@ export const AVAILABLE_CONFIGS = ["default", "backend", "frontend", "fullstack",
 // Available roles for the Create Agent dialog
 export const AVAILABLE_ROLES = ["chief", "manager", "worker"] as const;
 
-export interface HierarchyRole {
+export interface OrganizationRole {
   name: string;
   level: number;
   can_command?: string[];
@@ -120,9 +116,9 @@ export interface HierarchyRole {
   permissions?: string[];
 }
 
-export interface Hierarchy {
+export interface Organization {
   slug: string;
   name: string;
   description?: string;
-  roles: HierarchyRole[];
+  roles: OrganizationRole[];
 }

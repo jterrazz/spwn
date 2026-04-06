@@ -54,11 +54,11 @@ func TestAgentContext_GodRoleContainsNewCommands(t *testing.T) {
 		c.IsRunning()
 		c.HasFile("/world/AGENT.md")
 		// Worker AGENT.md should contain Mind layer references
-		c.FileContains("/world/AGENT.md", "/mind/identity/")
+		c.FileContains("/world/AGENT.md", "/mind/core/")
 		c.FileContains("/world/AGENT.md", "/mind/skills/")
-		c.FileContains("/world/AGENT.md", "/mind/memory/knowledge/")
-		c.FileContains("/world/AGENT.md", "/mind/memory/playbooks/")
-		c.FileContains("/world/AGENT.md", "/mind/memory/journal/")
+		c.FileContains("/world/AGENT.md", "/mind/knowledge/")
+		c.FileContains("/world/AGENT.md", "/mind/playbooks/")
+		c.FileContains("/world/AGENT.md", "/mind/journal/")
 	})
 }
 

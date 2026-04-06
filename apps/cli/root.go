@@ -11,7 +11,7 @@ import (
 	"spwn.sh/apps/cli/auth"
 	"spwn.sh/apps/cli/dash"
 	"spwn.sh/apps/cli/get"
-	"spwn.sh/apps/cli/hierarchy"
+	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/knowledge"
 	"spwn.sh/apps/cli/msg"
 	"spwn.sh/apps/cli/profile"
@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 	Use:   "spwn",
 	Short: "spwn — create realities for things that can think",
 	Long: `spwn creates isolated Docker environments for AI agents.
-Each world has physics (constants, laws, elements),
+Each world has physics (constants, laws, tools),
 and a Mind (persistent agent identity).`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -81,7 +81,7 @@ func init() {
 	rootCmd.AddCommand(msg.Cmd)
 	rootCmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(team.Cmd)
-	rootCmd.AddCommand(hierarchy.Cmd)
+	rootCmd.AddCommand(organization.Cmd)
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
 	rootCmd.AddCommand(knowledge.Cmd)

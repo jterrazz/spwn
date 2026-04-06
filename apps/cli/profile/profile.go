@@ -48,11 +48,10 @@ func profileHelp(cmd *cobra.Command, args []string) {
 	ui.RenderGroupedHelp(w,
 		ui.Strong("⬡ profile")+" "+ui.Faint("— view and edit an agent's character sheet"),
 		[]ui.HelpGroup{
-			{Title: "Identity", Commands: []ui.HelpEntry{
+			{Title: "Core", Commands: []ui.HelpEntry{
 				{Name: "purpose", Desc: "Why the agent exists"},
 				{Name: "traits", Desc: "Core principles and character"},
 				{Name: "persona", Desc: "Personality and role"},
-				{Name: "bonds", Desc: "Relationships and trust"},
 			}},
 			{Title: "Capabilities", Commands: []ui.HelpEntry{
 				{Name: "skills", Desc: "Learned capabilities"},
@@ -60,8 +59,7 @@ func profileHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Memory", Commands: []ui.HelpEntry{
 				{Name: "knowledge", Desc: "Facts and context"},
-				{Name: "journal", Desc: "Session history"},
-				{Name: "sessions", Desc: "Saved session state"},
+				{Name: "journal", Desc: "Session and deployment history"},
 			}},
 			{Title: "Config", Commands: []ui.HelpEntry{
 				{Name: "edit", Desc: "Open profile.yaml in $EDITOR"},
@@ -93,31 +91,25 @@ var Cmd = &cobra.Command{
 		rest := args[2:]
 
 		switch aspect {
-		// Identity files
+		// Core identity files
 		case "purpose":
-			return showFile(cmd, name, filepath.Join("identity", "purpose.md"), "purpose")
+			return showFile(cmd, name, filepath.Join("core", "purpose.md"), "purpose")
 		case "traits":
-			return showFile(cmd, name, filepath.Join("identity", "traits.md"), "traits")
+			return showFile(cmd, name, filepath.Join("core", "traits.md"), "traits")
 		case "persona":
-			return showFile(cmd, name, filepath.Join("identity", "persona.md"), "persona")
-		case "bonds":
-			return showFile(cmd, name, "bonds.md", "bonds")
+			return showFile(cmd, name, filepath.Join("core", "persona.md"), "persona")
 
 		// Directory listings
 		case "skills":
 			return listDir(cmd, name, "skills", "skills")
 		case "playbooks":
-			return listDir(cmd, name, filepath.Join("memory", "playbooks"), "playbooks")
+			return listDir(cmd, name, "playbooks", "playbooks")
 		case "knowledge":
-			return listDir(cmd, name, filepath.Join("memory", "knowledge"), "knowledge")
+			return listDir(cmd, name, "knowledge", "knowledge")
 
-		// Journal
+		// Journal (merged with sessions)
 		case "journal":
 			return showJournal(cmd, name)
-
-		// Sessions
-		case "sessions":
-			return showSessions(cmd, name)
 
 		// Config
 		case "role":
@@ -344,44 +336,30 @@ func showCharacterSheet(cmd *cobra.Command, name string) error {
 		created = timeAgo(fi.ModTime())
 	}
 
-	sessions, _ := agentDomain.ListSessions(mindPath)
-	sessionCount := len(sessions)
-
 	journalEntries, _ := agentDomain.ListJournal(mindPath, 0)
 	journalCount := len(journalEntries)
 
-	// Identity
-	purposeLine := readFirstLine(filepath.Join(mindPath, "identity", "purpose.md"))
+	// Core identity
+	purposeLine := readFirstLine(filepath.Join(mindPath, "core", "purpose.md"))
 	if purposeLine == "" {
 		purposeLine = "not set"
 	}
-	traitsLine := readFirstLine(filepath.Join(mindPath, "identity", "traits.md"))
+	traitsLine := readFirstLine(filepath.Join(mindPath, "core", "traits.md"))
 	if traitsLine == "" {
 		traitsLine = "not set"
 	}
-	personaLine := readFirstLine(filepath.Join(mindPath, "identity", "persona.md"))
+	personaLine := readFirstLine(filepath.Join(mindPath, "core", "persona.md"))
 	if personaLine == "" {
 		personaLine = "not set"
-	}
-
-	// Bonds
-	bondsPath := filepath.Join(mindPath, "bonds.md")
-	bondsLabel := "none"
-	if _, err := os.Stat(bondsPath); err == nil {
-		bondsLabel = "defined"
 	}
 
 	// Capabilities
 	skillCount, _ := countFiles(filepath.Join(mindPath, "skills"))
 	skillNames := fileNames(filepath.Join(mindPath, "skills"))
-	playbookCount, _ := countFiles(filepath.Join(mindPath, "memory", "playbooks"))
+	playbookCount, _ := countFiles(filepath.Join(mindPath, "playbooks"))
 
 	// Memory
-	knowledgeCount, knowledgeSize := countFiles(filepath.Join(mindPath, "memory", "knowledge"))
-	savedSessions := 0
-	if entries, err := os.ReadDir(filepath.Join(mindPath, "sessions")); err == nil {
-		savedSessions = len(entries)
-	}
+	knowledgeCount, knowledgeSize := countFiles(filepath.Join(mindPath, "knowledge"))
 
 	// Engine string
 	engineStr := fmt.Sprintf("%s · %s · %s", profile.Runtime.Engine, profile.Runtime.Provider, profile.Runtime.Model)
@@ -404,15 +382,13 @@ func showCharacterSheet(cmd *cobra.Command, name string) error {
 	printSheetRow(w, inner, "Role", roleLabel)
 	printSheetRow(w, inner, "Engine", engineStr)
 	printSheetRow(w, inner, "Created", created)
-	printSheetRow(w, inner, "Sessions", fmt.Sprintf("%d total", sessionCount))
 
-	// Identity section
+	// Core identity section
 	fmt.Fprintf(w, "  │%s│\n", strings.Repeat(" ", inner+2))
-	fmt.Fprintf(w, "  │  ── Identity %s│\n", strings.Repeat("─", max(1, inner-14)))
+	fmt.Fprintf(w, "  │  ── Core %s│\n", strings.Repeat("─", max(1, inner-10)))
 	printSheetRow(w, inner, "Purpose", purposeLine)
 	printSheetRow(w, inner, "Traits", traitsLine)
 	printSheetRow(w, inner, "Persona", personaLine)
-	printSheetRow(w, inner, "Bonds", bondsLabel)
 
 	// Capabilities section
 	fmt.Fprintf(w, "  │%s│\n", strings.Repeat(" ", inner+2))
@@ -429,7 +405,6 @@ func showCharacterSheet(cmd *cobra.Command, name string) error {
 	fmt.Fprintf(w, "  │  ── Memory %s│\n", strings.Repeat("─", max(1, inner-12)))
 	printSheetRow(w, inner, "Knowledge", fmt.Sprintf("%d files · %s", knowledgeCount, formatSize(knowledgeSize)))
 	printSheetRow(w, inner, "Journal", fmt.Sprintf("%d entries", journalCount))
-	printSheetRow(w, inner, "Sessions", fmt.Sprintf("%d saved", savedSessions))
 
 	// Bottom
 	fmt.Fprintf(w, "  │%s│\n", strings.Repeat(" ", inner+2))
@@ -593,40 +568,6 @@ func showJournal(cmd *cobra.Command, name string) error {
 			fmt.Sprintf("%d", e.ExitCode),
 			ui.FormatDuration(e.Duration),
 		)
-	}
-	t.Render()
-	return nil
-}
-
-// ── sessions ────────────────────────────────────────────────────────────────
-
-func showSessions(cmd *cobra.Command, name string) error {
-	if !agentExists(name) {
-		return agentNotFoundError(name)
-	}
-
-	mindPath := agentDomain.AgentDir(name)
-	sessions, err := agentDomain.ListSessions(mindPath)
-	if err != nil {
-		return fmt.Errorf("cannot read sessions: %w", err)
-	}
-
-	if len(sessions) == 0 {
-		s := newStepper(cmd)
-		s.Blank()
-		s.Info("Sessions:", "No sessions yet.")
-		s.Log("Spawn the agent into a world to create sessions.")
-		s.Blank()
-		return nil
-	}
-
-	t := ui.NewTable(ui.ModeNormal, "WORLD", "SESSION ID", "RESUMED")
-	for _, sess := range sessions {
-		resumed := "no"
-		if sess.Resumed {
-			resumed = "yes"
-		}
-		t.AddRow(sess.WorldID, sess.ID, resumed)
 	}
 	t.Render()
 	return nil

@@ -40,27 +40,27 @@ func Init(name string) (string, error) {
 You are a spwn agent — a persistent AI worker living inside an isolated world.
 
 ## Your Identity
-- You have a Mind that persists across sessions at /mind (identity, skills, memory/knowledge, memory/playbooks, memory/journal)
+- You have a Mind that persists across sessions at /mind (core, skills, knowledge, playbooks, journal)
 - Your identity defines your purpose and values — you are reading it now
 - You evolve through experience: dream to analyze tasks, learn from outcomes, update your knowledge
 
 ## Your World
 - Read /universe/physics.md to understand your world's constants and laws
-- Read /universe/faculties.md for available tools and elements
+- Read /universe/faculties.md for available tools
 - Check /world/AGENT.md for your specific role and instructions
 - Your workspace is at /workspace
 
 ## Communication
 - Check your inbox at /world/inbox/{your-name}/ for messages from other agents
 - Send messages to other agents by writing to /world/inbox/{their-name}/
-- Save important learnings to /mind/memory/knowledge/
+- Save important learnings to /mind/knowledge/
 
 ## Behavior
 - Be concise and action-oriented — execute tasks directly
 - Use your full Unix shell access (bash, git, curl, etc.)
 - Stay within the Laws — they describe what is physically possible
 `
-	personaPath := filepath.Join(dir, "identity", "persona.md")
+	personaPath := filepath.Join(dir, "core", "persona.md")
 	if err := os.WriteFile(personaPath, []byte(persona), 0644); err != nil {
 		return "", fmt.Errorf("create persona: %w", err)
 	}
@@ -79,12 +79,15 @@ func Validate(name string) error {
 		return fmt.Errorf("agent %q is not a directory", name)
 	}
 
-	identity := filepath.Join(dir, "identity")
-	if _, err := os.Stat(identity); err != nil {
-		// Backward compatibility: check for legacy personas/ directory
-		personas := filepath.Join(dir, "personas")
-		if _, err := os.Stat(personas); err != nil {
-			return fmt.Errorf("agent %q is missing the identity/ layer", name)
+	coreDir := filepath.Join(dir, "core")
+	if _, err := os.Stat(coreDir); err != nil {
+		// Backward compatibility: check for legacy identity/ or personas/ directory
+		identityDir := filepath.Join(dir, "identity")
+		if _, errI := os.Stat(identityDir); errI != nil {
+			personas := filepath.Join(dir, "personas")
+			if _, errP := os.Stat(personas); errP != nil {
+				return fmt.Errorf("agent %q is missing the core/ layer", name)
+			}
 		}
 	}
 	return nil

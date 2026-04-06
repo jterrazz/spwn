@@ -3,13 +3,13 @@ package foundation
 import "testing"
 
 func TestMindLayers_Count(t *testing.T) {
-	if got := len(MindLayers); got != 6 {
-		t.Errorf("len(MindLayers) = %d, want 6", got)
+	if got := len(MindLayers); got != 5 {
+		t.Errorf("len(MindLayers) = %d, want 5", got)
 	}
 }
 
 func TestMindLayers_Contents(t *testing.T) {
-	expected := []string{"identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"}
+	expected := []string{"core", "skills", "knowledge", "playbooks", "journal"}
 	for _, want := range expected {
 		found := false
 		for _, layer := range MindLayers {

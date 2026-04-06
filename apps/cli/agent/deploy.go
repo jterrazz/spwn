@@ -11,7 +11,7 @@ import (
 var deployRole string
 
 func init() {
-	deployCmd.Flags().StringVar(&deployRole, "role", "worker", "Agent role in the world hierarchy")
+	deployCmd.Flags().StringVar(&deployRole, "role", "worker", "Agent role in the world organization")
 	Cmd.AddCommand(deployCmd)
 }
 

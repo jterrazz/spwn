@@ -71,7 +71,6 @@ export default function AgentsPage() {
   const [showTeamDialog, setShowTeamDialog] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [teamName, setTeamName] = useState("");
-  const [teamIcon, setTeamIcon] = useState("");
   const [teamColor, setTeamColor] = useState("");
   const [teamDesc, setTeamDesc] = useState("");
   const [savingTeam, setSavingTeam] = useState(false);
@@ -210,13 +209,11 @@ export default function AgentsPage() {
     if (t) {
       setEditingTeam(t);
       setTeamName(t.name);
-      setTeamIcon(t.icon ?? "");
       setTeamColor(t.color ?? "");
       setTeamDesc(t.description ?? "");
     } else {
       setEditingTeam(null);
       setTeamName("");
-      setTeamIcon("");
       setTeamColor("");
       setTeamDesc("");
     }
@@ -227,7 +224,7 @@ export default function AgentsPage() {
     if (!teamName.trim()) return;
     setSavingTeam(true);
     try {
-      const body = { name: teamName.trim(), icon: teamIcon.trim(), color: teamColor.trim(), description: teamDesc.trim() };
+      const body = { name: teamName.trim(), color: teamColor.trim(), description: teamDesc.trim() };
       if (editingTeam) {
         await fetch(goApiUrl(`/api/teams/${editingTeam.slug}`), {
           method: "PUT",
@@ -320,7 +317,6 @@ export default function AgentsPage() {
               <div className="flex items-center gap-2 mb-3">
                 {t ? (
                   <>
-                    {t.icon && <span className="text-base">{t.icon}</span>}
                     <button
                       onClick={() => openTeamDialog(t)}
                       className="hover:underline underline-offset-2 transition-colors"
@@ -417,7 +413,7 @@ export default function AgentsPage() {
             >
               <option value="">No team</option>
               {teams.map((t) => (
-                <option key={t.slug} value={t.slug}>{t.icon ? `${t.icon} ` : ""}{t.name}</option>
+                <option key={t.slug} value={t.slug}>{t.name}</option>
               ))}
             </select>
             {createError && <p className="text-xs text-red-400/80 mt-3">{createError}</p>}
@@ -481,25 +477,14 @@ export default function AgentsPage() {
                   className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Icon</label>
-                  <input
-                    value={teamIcon}
-                    onChange={(e) => setTeamIcon(e.target.value)}
-                    placeholder="⬡"
-                    className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Color</label>
-                  <input
-                    value={teamColor}
-                    onChange={(e) => setTeamColor(e.target.value)}
-                    placeholder="#8B5CF6"
-                    className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
-                  />
-                </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Color</label>
+                <input
+                  value={teamColor}
+                  onChange={(e) => setTeamColor(e.target.value)}
+                  placeholder="#8B5CF6 or purple"
+                  className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                />
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">

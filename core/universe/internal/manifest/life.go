@@ -73,22 +73,22 @@ func LoadLife(agentDir string) (*LifeManifest, error) {
 	return &life, nil
 }
 
-// ValidateBody checks that all elements in body.requires are available in the universe.
-// availableElements should be the expanded element list from the universe manifest.
-func ValidateBody(life *LifeManifest, availableElements []string) error {
+// ValidateBody checks that all tools in body.requires are available in the universe.
+// availableTools should be the expanded tool list from the universe manifest.
+func ValidateBody(life *LifeManifest, availableTools []string) error {
 	if life == nil || len(life.Body.Requires) == 0 {
 		return nil
 	}
 
 	available := make(map[string]bool)
-	for _, e := range availableElements {
+	for _, e := range availableTools {
 		available[e] = true
 	}
 
 	var missing []string
 	for _, req := range life.Body.Requires {
 		// Expand @packs to check individual binaries
-		expanded := ExpandElements([]string{req})
+		expanded := ExpandTools([]string{req})
 		for _, e := range expanded {
 			if !available[e] {
 				missing = append(missing, e)
@@ -97,7 +97,7 @@ func ValidateBody(life *LifeManifest, availableElements []string) error {
 	}
 
 	if len(missing) > 0 {
-		return fmt.Errorf("agent requires element(s) not provided by this world: %s.\nHint: Add them to the world config's elements, or remove them from life.yaml body.requires",
+		return fmt.Errorf("agent requires tool(s) not provided by this world: %s.\nHint: Add them to the world config's tools, or remove them from life.yaml body.requires",
 			strings.Join(missing, ", "))
 	}
 

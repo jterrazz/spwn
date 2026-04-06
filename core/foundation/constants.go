@@ -31,8 +31,8 @@ const (
 	KnowledgeSubDir   = "knowledge"
 	ActivityFileName  = "activity.jsonl"
 	TeamsSubDir       = "teams"
-	HierarchiesSubDir = "hierarchies"
+	OrganizationsSubDir = "organizations"
 )
 
-// MindLayers defines the six-layer Mind structure.
-var MindLayers = []string{"identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"}
+// MindLayers defines the five-layer Mind structure.
+var MindLayers = []string{"core", "skills", "knowledge", "playbooks", "journal"}

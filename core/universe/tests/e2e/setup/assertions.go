@@ -247,7 +247,7 @@ func (m *MindAssertion) HasFile(relPath string) {
 		m.tc.T.Fatalf("Failed to inspect agent: %v", err)
 	}
 
-	// relPath is like "identity/default.md" or "memory/knowledge/facts.md"
+	// relPath is like "core/default.md" or "knowledge/facts.md"
 	// Try to match against known layers (longest prefix first)
 	var matchedLayer, file string
 	for layer := range info.Layers {
@@ -556,7 +556,7 @@ func (a *AgentAssertionChain) ImportFrom(archivePath string) *AgentAssertionChai
 func (m *MindAssertion) HasSessionFile(worldID string) {
 	m.tc.T.Helper()
 	mindPath := agent.AgentDir(m.agentName)
-	sessionPath := filepath.Join(mindPath, "sessions", worldID+".json")
+	sessionPath := filepath.Join(mindPath, "journal", worldID+".json")
 	if _, err := os.Stat(sessionPath); err != nil {
 		m.tc.T.Fatalf("Expected session file at %s, not found", sessionPath)
 	}

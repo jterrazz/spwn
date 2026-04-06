@@ -31,7 +31,7 @@ func TestTeamCRUD(t *testing.T) {
 	t.Setenv("SPWN_HOME", tmp)
 
 	// Create
-	team := Team{Name: "Matrix Ops", Slug: "matrix-ops", Icon: "⬡", Color: "#8B5CF6", Description: "Core team"}
+	team := Team{Name: "Matrix Ops", Slug: "matrix-ops", Color: "#8B5CF6", Description: "Core team"}
 	if err := CreateTeam(team); err != nil {
 		t.Fatalf("CreateTeam: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestTeamCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetTeam: %v", err)
 	}
-	if got.Name != "Matrix Ops" || got.Icon != "⬡" || got.Color != "#8B5CF6" {
+	if got.Name != "Matrix Ops" || got.Color != "#8B5CF6" {
 		t.Errorf("unexpected team: %+v", got)
 	}
 

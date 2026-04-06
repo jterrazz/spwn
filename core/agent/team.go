@@ -2,7 +2,7 @@
 //
 // A team is a first-class entity stored as a YAML file under ~/.spwn/teams/.
 // Each agent's profile can reference a team by slug. Teams carry display
-// metadata (name, icon, color, description) for the UI.
+// metadata (name, color, description) for the UI.
 
 package agent
 
@@ -21,7 +21,6 @@ import (
 type Team struct {
 	Slug        string `json:"slug" yaml:"-"`
 	Name        string `json:"name" yaml:"name"`
-	Icon        string `json:"icon,omitempty" yaml:"icon,omitempty"`
 	Color       string `json:"color,omitempty" yaml:"color,omitempty"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }

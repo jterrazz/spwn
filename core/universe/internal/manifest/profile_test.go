@@ -15,17 +15,9 @@ runtime:
   backend: claude-code
   provider: anthropic
   model: claude-sonnet-4-6
-identity:
-  purpose: "coding assistant"
-  traits:
-    - precise
-    - helpful
 skills:
   - golang
   - python
-requires:
-  - git
-  - node
 `
 	if err := os.WriteFile(filepath.Join(dir, "profile.yaml"), []byte(content), 0644); err != nil {
 		t.Fatalf("write profile.yaml: %v", err)
@@ -52,12 +44,6 @@ requires:
 	}
 	if len(profile.Skills) != 2 {
 		t.Errorf("Skills count = %d, want 2", len(profile.Skills))
-	}
-	if len(profile.Requires) != 2 {
-		t.Errorf("Requires count = %d, want 2", len(profile.Requires))
-	}
-	if profile.Identity.Purpose != "coding assistant" {
-		t.Errorf("Identity.Purpose = %q, want \"coding assistant\"", profile.Identity.Purpose)
 	}
 }
 
@@ -98,15 +84,6 @@ body:
 	}
 	if len(profile.Skills) != 1 || profile.Skills[0] != "debugging" {
 		t.Errorf("Skills = %v, want [debugging]", profile.Skills)
-	}
-	if len(profile.Requires) != 1 || profile.Requires[0] != "git" {
-		t.Errorf("Requires = %v, want [git]", profile.Requires)
-	}
-	if len(profile.Memory.Knowledge) != 1 || profile.Memory.Knowledge[0] != "go-patterns" {
-		t.Errorf("Memory.Knowledge = %v, want [go-patterns]", profile.Memory.Knowledge)
-	}
-	if len(profile.Identity.Personas) != 1 || profile.Identity.Personas[0] != "helper" {
-		t.Errorf("Identity.Personas = %v, want [helper]", profile.Identity.Personas)
 	}
 }
 
@@ -177,65 +154,12 @@ func TestValidateRequires_NilProfile(t *testing.T) {
 	}
 }
 
-func TestValidateRequires_EmptyRequires(t *testing.T) {
-	profile := &ProfileManifest{Requires: []string{}}
+func TestValidateRequires_AlwaysReturnsNil(t *testing.T) {
+	// ValidateRequires is deprecated (requires removed from ProfileManifest)
+	profile := &ProfileManifest{}
 	err := ValidateRequires(profile, []string{"git"})
 	if err != nil {
-		t.Errorf("expected nil error for empty requires, got: %v", err)
-	}
-}
-
-func TestValidateRequires_AllPresent(t *testing.T) {
-	profile := &ProfileManifest{
-		Requires: []string{"git", "node"},
-	}
-	available := ExpandElements([]string{"@git", "@node"})
-	err := ValidateRequires(profile, available)
-	if err != nil {
-		t.Errorf("expected nil error when all requires satisfied, got: %v", err)
-	}
-}
-
-func TestValidateRequires_MissingElement(t *testing.T) {
-	profile := &ProfileManifest{
-		Requires: []string{"git", "docker"},
-	}
-	available := ExpandElements([]string{"@git"})
-	err := ValidateRequires(profile, available)
-	if err == nil {
-		t.Error("expected error when element is missing")
-	}
-	if !strings.Contains(err.Error(), "docker") {
-		t.Errorf("error should mention missing element 'docker', got: %v", err)
-	}
-}
-
-func TestValidateRequires_PackExpansion(t *testing.T) {
-	profile := &ProfileManifest{
-		Requires: []string{"@node"},
-	}
-	// World only provides @unix, not @node
-	available := ExpandElements([]string{"@unix"})
-	err := ValidateRequires(profile, available)
-	if err == nil {
-		t.Error("expected error: @node binaries not in @unix")
-	}
-	// Should mention specific missing binary (node, npm, or npx)
-	if !strings.Contains(err.Error(), "node") {
-		t.Errorf("error should mention missing 'node' binary, got: %v", err)
-	}
-}
-
-func TestValidateRequires_HintInError(t *testing.T) {
-	profile := &ProfileManifest{
-		Requires: []string{"docker"},
-	}
-	err := ValidateRequires(profile, []string{})
-	if err == nil {
-		t.Fatal("expected error")
-	}
-	if !strings.Contains(err.Error(), "Hint") {
-		t.Errorf("error should contain a hint, got: %v", err)
+		t.Errorf("expected nil error (deprecated), got: %v", err)
 	}
 }
 

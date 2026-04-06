@@ -15,10 +15,10 @@ type AgentContextOpts struct {
 	RoleLevel     int
 	Permissions   []string
 	Superior      string
-	HierarchyName string
+	OrganizationName string
 	WorldID       string
 	Workspaces    []models.Workspace
-	Elements      []string
+	Tools      []string
 	CPU           int
 	Memory        string
 	Timeout       string
@@ -124,11 +124,11 @@ func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("4. Report back to your chief\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/identity/ — who you are\n")
+	b.WriteString("- /mind/core/ — who you are (persona, purpose, traits)\n")
 	b.WriteString("- /mind/skills/ — what you can do\n")
-	b.WriteString("- /mind/memory/knowledge/ — facts you've learned\n")
-	b.WriteString("- /mind/memory/playbooks/ — procedures that work\n")
-	b.WriteString("- /mind/memory/journal/ — session history\n\n")
+	b.WriteString("- /mind/knowledge/ — facts you've learned\n")
+	b.WriteString("- /mind/playbooks/ — procedures that work\n")
+	b.WriteString("- /mind/journal/ — session history\n\n")
 
 	writeWorldInfo(b, opts)
 }
@@ -165,11 +165,11 @@ func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("Message peers: write to /world/inbox/{peer}/\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/identity/ — who you are\n")
+	b.WriteString("- /mind/core/ — who you are (persona, purpose, traits)\n")
 	b.WriteString("- /mind/skills/ — what you can do\n")
-	b.WriteString("- /mind/memory/knowledge/ — facts you've learned\n")
-	b.WriteString("- /mind/memory/playbooks/ — procedures that work\n")
-	b.WriteString("- /mind/memory/journal/ — session history\n\n")
+	b.WriteString("- /mind/knowledge/ — facts you've learned\n")
+	b.WriteString("- /mind/playbooks/ — procedures that work\n")
+	b.WriteString("- /mind/journal/ — session history\n\n")
 
 	writeWorldInfo(b, opts)
 }
@@ -187,8 +187,8 @@ func generateNPCContext(b *strings.Builder, opts AgentContextOpts) {
 
 	b.WriteString("## Your World\n")
 	writeWorkspaces(b, opts.Workspaces)
-	if len(opts.Elements) > 0 {
-		b.WriteString(fmt.Sprintf("- Elements: %s\n", strings.Join(opts.Elements, ", ")))
+	if len(opts.Tools) > 0 {
+		b.WriteString(fmt.Sprintf("- Tools: %s\n", strings.Join(opts.Tools, ", ")))
 	}
 }
 
@@ -282,8 +282,8 @@ func writeWorkspaces(b *strings.Builder, workspaces []models.Workspace) {
 func writeWorldInfo(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Your World\n")
 	writeWorkspaces(b, opts.Workspaces)
-	if len(opts.Elements) > 0 {
-		b.WriteString(fmt.Sprintf("- Elements: %s\n", strings.Join(opts.Elements, ", ")))
+	if len(opts.Tools) > 0 {
+		b.WriteString(fmt.Sprintf("- Tools: %s\n", strings.Join(opts.Tools, ", ")))
 	}
 	if opts.CPU > 0 || opts.Memory != "" || opts.Timeout != "" {
 		b.WriteString(fmt.Sprintf("- Physics: %d cpu, %s, %s\n", opts.CPU, opts.Memory, opts.Timeout))

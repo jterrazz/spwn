@@ -23,7 +23,7 @@ var (
 	spawnNoAgent   bool
 	spawnGate      []string
 	spawnLeader    string
-	spawnHierarchy string
+	spawnOrganization string
 	spawnRuntime   string
 	spawnTeam      string
 )
@@ -36,9 +36,9 @@ func init() {
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	Cmd.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Attach to agent interactively")
 	Cmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
-	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
-	Cmd.Flags().StringVar(&spawnLeader, "leader", "", "Leader agent for this world (gets the top role in the hierarchy)")
-	Cmd.Flags().StringVar(&spawnHierarchy, "hierarchy", "default", "Hierarchy to use for role assignment")
+	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge tool from Host: "source:as:cap1,cap2"`)
+	Cmd.Flags().StringVar(&spawnLeader, "leader", "", "Leader agent for this world (gets the top role in the organization)")
+	Cmd.Flags().StringVar(&spawnOrganization, "organization", "default", "Organization to use for role assignment")
 	Cmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime (claude-code, pi, codex, opencode, gemini, aider)")
 	Cmd.Flags().StringVar(&spawnTeam, "team", "", "Deploy all agents in a team (team slug)")
 
@@ -83,10 +83,10 @@ func worldHelp(cmd *cobra.Command, args []string) {
 				{Name: "-w, --workspace <[name=]path[:ro]>", Desc: "Host dir to mount (repeatable; omit for ephemeral)"},
 				{Name: "-i, --interactive", Desc: "Attach to agent interactively"},
 				{Name: "--no-agent", Desc: "Create world without agent"},
-				{Name: "--leader <name>", Desc: "Leader agent (top role in the hierarchy)"},
-				{Name: "--hierarchy <slug>", Desc: "Hierarchy for role assignment (default: default)"},
+				{Name: "--leader <name>", Desc: "Leader agent (top role in the organization)"},
+				{Name: "--organization <slug>", Desc: "Organization for role assignment (default: default)"},
 				{Name: "--runtime <name>", Desc: "Agent runtime (default: claude-code)"},
-				{Name: "--gate <spec>", Desc: "Bridge element from host"},
+				{Name: "--gate <spec>", Desc: "Bridge tool from host"},
 			}},
 		},
 		"spwn world [flags]\n    spwn world [command]",
@@ -242,11 +242,11 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 					s.Start("Creating container...")
 				case "container_created":
 					s.Done("Created container", detail)
-					s.Start("Probing elements...")
+					s.Start("Probing tools...")
 				case "gates_bridged":
 					s.Done("Bridged gates", detail)
-				case "elements_probed":
-					s.Done("Probed elements", detail)
+				case "tools_probed":
+					s.Done("Probed tools", detail)
 					s.Start("Generating physics...")
 				case "faculties_generated":
 					s.Done("Generated physics", detail)
@@ -421,8 +421,8 @@ func spawnHint(err error, agentName string, agents []universe.AgentSpec) string 
 		return "Run \"spwn doctor\" to check your Docker images"
 	case strings.Contains(msg, "workspace") && strings.Contains(msg, "not found"):
 		return "Check that the -w path exists"
-	case strings.Contains(msg, "element"):
-		return "Remove the missing element from your world config, or add it to the base image"
+	case strings.Contains(msg, "tool"):
+		return "Remove the missing tool from your world config, or add it to the base image"
 	case strings.Contains(msg, "docker") || strings.Contains(msg, "Docker"):
 		return "Start Docker Desktop or OrbStack, then try again"
 	default:

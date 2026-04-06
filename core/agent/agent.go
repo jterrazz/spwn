@@ -61,9 +61,8 @@ func AgentDir(name string) string {
 	return mind.AgentDir(name)
 }
 
-// InitMind scaffolds a new Mind for the named agent, creating all 6 layers
-// (personas, skills, knowledge, playbooks, journal, sessions) and returning
-// the directory path.
+// InitMind scaffolds a new Mind for the named agent, creating all 5 layers
+// (core, skills, knowledge, playbooks, journal) and returning the directory path.
 func InitMind(name string) (string, error) {
 	dir, err := mind.Init(name)
 	if err != nil {

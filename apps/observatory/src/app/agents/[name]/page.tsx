@@ -37,7 +37,7 @@ import { usePageTitle } from "@/hooks/use-page-title";
 import { ActionButton } from "@/components/action-button";
 import { PageHeader } from "@/components/page-header";
 import { SectionHeader, SectionLabel, SubLabel, Separator, MetricGrid, ItemList, StatusDot, KeyValue } from "@/components/ds";
-import { getWorldName, AVAILABLE_ROLES, type Hierarchy, type Team, type World } from "@/lib/types";
+import { getWorldName, AVAILABLE_ROLES, type Organization, type Team, type World } from "@/lib/types";
 
 export default function AgentProfilePageWrapper() {
   return (
@@ -70,7 +70,7 @@ function AgentProfilePage() {
   const [deploying, setDeploying] = useState(false);
   const [deployError, setDeployError] = useState("");
   const [deployRole, setDeployRole] = useState("worker");
-  const [hierarchies, setHierarchies] = useState<Hierarchy[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [worldData, setWorldData] = useState<World | null>(null);
   const refetchSidebar = useRefetch();
 
@@ -95,7 +95,7 @@ function AgentProfilePage() {
     fetchProfile();
     apiGet<Team[]>("/api/teams").then((t) => setAvailableTeams(t ?? [])).catch(() => {});
     apiGet<World[]>("/api/worlds").then((w) => setAvailableWorlds(w ?? [])).catch(() => {});
-    apiGet<Hierarchy[]>("/api/hierarchies").then((h) => setHierarchies(h ?? [])).catch(() => {});
+    apiGet<Organization[]>("/api/organizations").then((h) => setOrganizations(h ?? [])).catch(() => {});
     if (worldId) {
       apiGet<World>(`/api/worlds/${worldId}`).then((w) => setWorldData(w ?? null)).catch(() => {});
     }
@@ -357,14 +357,14 @@ function AgentProfilePage() {
               className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
             >
               {(() => {
-                // Try to get roles from the selected world's hierarchy, fall back to AVAILABLE_ROLES
+                // Try to get roles from the selected world's organization, fall back to AVAILABLE_ROLES
                 const selectedWorld = availableWorlds.find((w) => w.id === deployTargetWorld);
-                const worldHierarchySlug = (selectedWorld as Record<string, unknown> | undefined)?.hierarchy as string | undefined;
-                const hierarchy = worldHierarchySlug
-                  ? hierarchies.find((h) => h.slug === worldHierarchySlug)
+                const worldOrganizationSlug = (selectedWorld as Record<string, unknown> | undefined)?.organization as string | undefined;
+                const org = worldOrganizationSlug
+                  ? organizations.find((h) => h.slug === worldOrganizationSlug)
                   : null;
-                const roleNames = hierarchy
-                  ? hierarchy.roles.map((r) => r.name)
+                const roleNames = org
+                  ? org.roles.map((r) => r.name)
                   : [...AVAILABLE_ROLES];
                 return roleNames.map((r) => (
                   <option key={r} value={r}>{r}</option>
@@ -565,7 +565,7 @@ function AgentProfilePage() {
         { label: "Files", value: totalFiles },
         { label: "Journal", value: profile.journal?.length ?? 0 },
         { label: "Skills", value: profile.skills?.length ?? 0 },
-        { label: "Bonds", value: profile.bonds?.length ?? 0 },
+        { label: "Traits", value: profile.traits?.length ?? 0 },
       ]} className="gap-x-8 gap-y-4" />
 
       <Separator />
@@ -583,15 +583,15 @@ function AgentProfilePage() {
         >
           <option value="">—</option>
           {availableTeams.map((t) => (
-            <option key={t.slug} value={t.slug}>{t.icon ? `${t.icon} ` : ""}{t.name}</option>
+            <option key={t.slug} value={t.slug}>{t.name}</option>
           ))}
         </select>
       </div>
 
       {/* Deployment History */}
       {(() => {
-        const sessionFiles = mindTree["sessions"] ?? [];
-        const worldIds = sessionFiles
+        const journalFiles = mindTree["journal"] ?? [];
+        const worldIds = journalFiles
           .filter((f) => f.endsWith(".json"))
           .map((f) => f.replace(".json", ""));
         if (worldIds.length === 0) return null;
@@ -651,39 +651,19 @@ function AgentProfilePage() {
         </div>
       </div>
 
-      {/* Capabilities */}
-      {((profile.skills?.length ?? 0) > 0 || (profile.playbooks?.length ?? 0) > 0 || (profile.knowledge?.length ?? 0) > 0) && (
+      {/* Skills */}
+      {(profile.skills?.length ?? 0) > 0 && (
         <>
           <Separator />
           <div>
-            <SectionHeader>Capabilities</SectionHeader>
-
-            {(profile.skills?.length ?? 0) > 0 && (
-              <div className="mb-4">
-                <SubLabel className="mb-2">Skills</SubLabel>
-                <div className="flex flex-wrap gap-1.5">
-                  {(profile.skills ?? []).map((skill) => (
-                    <span key={skill} className="px-2.5 py-1 text-[11px] font-mono text-foreground/60 bg-white/[0.04] border border-white/[0.06]">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(profile.playbooks?.length ?? 0) > 0 && (
-              <div className="mb-4">
-                <SubLabel className="mb-2">Playbooks</SubLabel>
-                <ItemList items={(profile.playbooks ?? []).map((pb) => ({ name: pb }))} />
-              </div>
-            )}
-
-            {(profile.knowledge?.length ?? 0) > 0 && (
-              <div>
-                <SubLabel className="mb-2">Knowledge</SubLabel>
-                <ItemList items={(profile.knowledge ?? []).map((k) => ({ name: k }))} />
-              </div>
-            )}
+            <SectionHeader>Skills</SectionHeader>
+            <div className="flex flex-wrap gap-1.5">
+              {(profile.skills ?? []).map((skill) => (
+                <span key={skill} className="px-2.5 py-1 text-[11px] font-mono text-foreground/60 bg-white/[0.04] border border-white/[0.06]">
+                  {skill}
+                </span>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -702,17 +682,6 @@ function AgentProfilePage() {
                 </div>
               ))}
             </div>
-          </div>
-        </>
-      )}
-
-      {/* Bonds */}
-      {(profile.bonds?.length ?? 0) > 0 && (
-        <>
-          <Separator />
-          <div>
-            <SectionHeader>Bonds</SectionHeader>
-            <ItemList items={(profile.bonds ?? []).map((b) => ({ name: b.agent, detail: b.relationship }))} />
           </div>
         </>
       )}
@@ -796,7 +765,7 @@ function AgentProfilePage() {
               { label: "Files", value: totalFiles },
               { label: "Journal", value: profile.journal?.length ?? 0 },
               { label: "Skills", value: profile.skills?.length ?? 0 },
-              { label: "Bonds", value: profile.bonds?.length ?? 0 },
+              { label: "Traits", value: profile.traits?.length ?? 0 },
             ]} />
           </div>
 
@@ -972,12 +941,11 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
 /* ── Mind File Viewer ── */
 
 const LAYER_ICONS: Record<string, typeof IconFolder> = {
-  identity: IconUser,
+  core: IconUser,
   skills: IconBrain,
-  "memory/knowledge": IconBook,
-  "memory/playbooks": IconBook,
-  "memory/journal": IconNotebook,
-  sessions: IconFileText,
+  knowledge: IconBook,
+  playbooks: IconBook,
+  journal: IconNotebook,
 };
 
 function MindFileViewer({ agentName, mindTree }: { agentName: string; mindTree: Record<string, string[]> }) {
@@ -1034,7 +1002,7 @@ function MindFileViewer({ agentName, mindTree }: { agentName: string; mindTree: 
   };
 
   const sortedLayers = Object.keys(mindTree).sort((a, b) => {
-    const order = ["identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"];
+    const order = ["core", "skills", "knowledge", "playbooks", "journal"];
     return (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b));
   });
 

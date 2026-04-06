@@ -121,12 +121,11 @@ interface AgentMindInfo {
 }
 
 const MIND_LAYERS = [
-  "identity",
+  "core",
   "skills",
-  "memory/knowledge",
-  "memory/playbooks",
-  "memory/journal",
-  "sessions",
+  "knowledge",
+  "playbooks",
+  "journal",
 ];
 
 async function readDirSafe(dir: string): Promise<string[]> {
@@ -208,15 +207,15 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     return null;
   }
 
-  // Read persona file for purpose/persona
+  // Read core identity files for purpose/persona
   let purpose = "";
   let persona = "";
-  const identityFiles = info.layers["identity"] ?? [];
-  for (const file of identityFiles) {
+  const coreFiles = info.layers["core"] ?? [];
+  for (const file of coreFiles) {
     if (file.endsWith(".md")) {
       try {
         const content = await fs.promises.readFile(
-          path.join(info.path, "identity", file),
+          path.join(info.path, "core", file),
           "utf-8"
         );
         // Extract purpose from content
@@ -232,12 +231,12 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
   }
 
   // Read journal entries
-  const journalFiles = info.layers["memory/journal"] ?? [];
+  const journalFiles = (info.layers["journal"] ?? []).filter((f) => f.endsWith(".md"));
   const journal: { date: string; summary: string }[] = [];
   for (const file of journalFiles.slice(-10).reverse()) {
     try {
       const content = await fs.promises.readFile(
-        path.join(info.path, "memory/journal", file),
+        path.join(info.path, "journal", file),
         "utf-8"
       );
       // Extract date from filename (e.g., 2026-04-01_w-titan.md)
@@ -256,28 +255,8 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     }
   }
 
-  // Read bonds.md if exists
-  const bonds: { agent: string; relationship: string }[] = [];
-  try {
-    const bondsContent = await fs.promises.readFile(
-      path.join(info.path, "bonds.md"),
-      "utf-8"
-    );
-    const bondLines = bondsContent.split("\n").filter((l) => l.startsWith("- "));
-    for (const line of bondLines) {
-      const match = line.match(/- \*\*(.+?)\*\*:\s*(.+)/);
-      if (match) {
-        bonds.push({ agent: match[1], relationship: match[2] });
-      }
-    }
-  } catch {
-    // no bonds file
-  }
-
   // Build skills list from skills/ directory
   const skills = (info.layers["skills"] ?? []).map((f) => f.replace(/\.md$/, ""));
-  const playbooks = (info.layers["memory/playbooks"] ?? []).map((f) => f.replace(/\.md$/, ""));
-  const knowledge = info.layers["memory/knowledge"] ?? [];
 
   return {
     name,
@@ -288,10 +267,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     persona: persona || "",
     traits: [],
     skills,
-    playbooks,
-    knowledge,
     journal,
-    bonds,
   };
 }
 

@@ -82,8 +82,8 @@ var inspectCmd = &cobra.Command{
 			}
 		}
 
-		// Show session files
-		sessDir := filepath.Join(info.Path, "sessions")
+		// Show session files (now stored in journal/)
+		sessDir := filepath.Join(info.Path, "journal")
 		if entries, err := os.ReadDir(sessDir); err == nil && len(entries) > 0 {
 			s.Blank()
 			s.Info("Sessions:", fmt.Sprintf("%d file(s)", len(entries)))

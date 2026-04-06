@@ -33,7 +33,6 @@ type Workspace = models.Workspace
 type Manifest = models.Manifest
 type PhysicsManifest = models.PhysicsManifest
 type ConstantsManifest = models.ConstantsManifest
-type LawsManifest = models.LawsManifest
 type Status = models.Status
 
 // Re-export status constants.
@@ -137,15 +136,15 @@ func ValidateManifest(m Manifest) error {
 }
 
 // ApplyDefaults fills zero-value fields in the given Manifest with built-in
-// defaults (CPU, memory, timeout, base elements).
+// defaults (CPU, memory, timeout, base tools).
 func ApplyDefaults(m *Manifest) {
 	manifest.ApplyDefaults(m)
 }
 
-// ExpandElements resolves @pack references into individual binary names and
+// ExpandTools resolves @pack references into individual binary names and
 // deduplicates the resulting list.
-func ExpandElements(elems []string) []string {
-	return manifest.ExpandElements(elems)
+func ExpandTools(elems []string) []string {
+	return manifest.ExpandTools(elems)
 }
 
 // --- Universe manifest operations ---

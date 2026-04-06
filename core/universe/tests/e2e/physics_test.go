@@ -39,23 +39,23 @@ func TestPhysics_ContainsLaws(t *testing.T) {
 	})
 }
 
-func TestFaculties_ContainsElements(t *testing.T) {
-	// GIVEN a config with @unix and @git elements
+func TestFaculties_ContainsTools(t *testing.T) {
+	// GIVEN a config with @unix and @git tools
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  elements:
+  tools:
     - "@unix"
     - "@git"
 `).
 		NoAgent().
 		Execute()
 
-	// THEN the faculties file should list the available elements
+	// THEN the faculties file should list the available tools
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasFile("/universe/faculties.md")
-		c.FileContains("/universe/faculties.md", "Elements")
+		c.FileContains("/universe/faculties.md", "Tools")
 		c.FileContains("/universe/faculties.md", "bash")
 		c.FileContains("/universe/faculties.md", "git")
 	})

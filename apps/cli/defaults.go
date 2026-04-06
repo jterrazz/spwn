@@ -5,7 +5,7 @@ import (
 )
 
 // ensureDefaults creates the default world config if it doesn't already exist.
-// Hierarchy and schema migrations are handled by runMigrations() which runs first.
+// Organization and schema migrations are handled by runMigrations() which runs first.
 func ensureDefaults() error {
 	universe.CreateDefaultConfig()
 	universe.InitKnowledge()

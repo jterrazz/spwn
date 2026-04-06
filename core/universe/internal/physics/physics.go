@@ -26,11 +26,10 @@ func GeneratePhysics(m models.Manifest) string {
 	// Laws
 	sb.WriteString("## Laws\n")
 	sb.WriteString("- Network: bridge (outbound access enabled)\n")
-	sb.WriteString(fmt.Sprintf("- Maximum process count: %d\n", m.Physics.Laws.MaxProcesses))
 	sb.WriteString("- Filesystem is ephemeral except /workspace and /mind\n\n")
 
-	// Elements
-	sb.WriteString("## Elements\n")
+	// Tools
+	sb.WriteString("## Tools\n")
 	sb.WriteString("/workspace — project files, mounted from Host (read-write)\n")
 	sb.WriteString("/mind — agent identity and memory (read-write)\n")
 	sb.WriteString("/tmp — ephemeral scratch space\n\n")
@@ -51,15 +50,15 @@ func GeneratePhysics(m models.Manifest) string {
 }
 
 // GenerateFaculties returns the contents of /universe/faculties.md.
-func GenerateFaculties(verifiedElements []string, gateBridges []gate.Bridge) string {
+func GenerateFaculties(verifiedTools []string, gateBridges []gate.Bridge) string {
 	var sb strings.Builder
 
 	sb.WriteString("# Faculties\n\n")
 
-	// Elements
-	sb.WriteString("## Elements\n")
-	if len(verifiedElements) > 0 {
-		sb.WriteString(strings.Join(verifiedElements, ", "))
+	// Tools
+	sb.WriteString("## Tools\n")
+	if len(verifiedTools) > 0 {
+		sb.WriteString(strings.Join(verifiedTools, ", "))
 		sb.WriteString("\n")
 	} else {
 		sb.WriteString("(none verified)\n")

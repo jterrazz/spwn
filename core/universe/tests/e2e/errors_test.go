@@ -71,14 +71,14 @@ physics:
 		ExecuteExpectError("invalid network law")
 }
 
-func TestError_SpawnWithInvalidElement(t *testing.T) {
-	// GIVEN a config with a non-existent element binary
+func TestError_SpawnWithInvalidTool(t *testing.T) {
+	// GIVEN a config with a non-existent tool binary
 	// WHEN a universe is spawned
 	// THEN it should fail because the image does not provide it
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  elements:
+  tools:
     - "completely-nonexistent-binary-xyz"
 `).
 		NoAgent().

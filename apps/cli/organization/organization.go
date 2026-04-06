@@ -1,4 +1,4 @@
-package hierarchy
+package organization
 
 import (
 	"fmt"
@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Cmd is the top-level `spwn hierarchy` command.
+// Cmd is the top-level `spwn organization` command.
 var Cmd = &cobra.Command{
-	Use:   "hierarchy",
-	Short: "Manage hierarchies — list and inspect role structures",
+	Use:   "organization",
+	Short: "Manage organizations — list and inspect role structures",
 }
 
 func init() {
@@ -24,28 +24,28 @@ func newStepper(cmd *cobra.Command) *ui.Stepper {
 	return ui.New(false, false, false)
 }
 
-// ── spwn hierarchy ls ──
+// ── spwn organization ls ──
 
 var lsCmd = &cobra.Command{
 	Use:   "ls",
-	Short: "List all hierarchies",
+	Short: "List all organizations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		hierarchies, err := agentDomain.ListHierarchies()
+		organizations, err := agentDomain.ListOrganizations()
 		if err != nil {
-			return fmt.Errorf("cannot list hierarchies: %w", err)
+			return fmt.Errorf("cannot list organizations: %w", err)
 		}
 
-		if len(hierarchies) == 0 {
+		if len(organizations) == 0 {
 			s := newStepper(cmd)
 			s.Blank()
-			s.Info("Hierarchies:", "None found.")
-			s.Log("Create one with: spwn hierarchy new")
+			s.Info("Organizations:", "None found.")
+			s.Log("Create one with: spwn organization new")
 			s.Blank()
 			return nil
 		}
 
 		t := ui.NewTable(ui.ModeNormal, "SLUG", "NAME", "ROLES", "DESCRIPTION")
-		for _, h := range hierarchies {
+		for _, h := range organizations {
 			roleNames := make([]string, 0, len(h.Roles))
 			for _, r := range h.Roles {
 				roleNames = append(roleNames, r.Name)
@@ -62,17 +62,17 @@ var lsCmd = &cobra.Command{
 	},
 }
 
-// ── spwn hierarchy inspect ──
+// ── spwn organization inspect ──
 
 var inspectCmd = &cobra.Command{
 	Use:   "inspect <slug>",
-	Short: "Show roles in a hierarchy",
+	Short: "Show roles in an organization",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		slug := args[0]
-		h, err := agentDomain.GetHierarchy(slug)
+		h, err := agentDomain.GetOrganization(slug)
 		if err != nil {
-			return fmt.Errorf("cannot load hierarchy: %w", err)
+			return fmt.Errorf("cannot load organization: %w", err)
 		}
 
 		w := cmd.ErrOrStderr()

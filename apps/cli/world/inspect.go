@@ -61,9 +61,7 @@ var inspectCmd = &cobra.Command{
 			u.Manifest.Physics.Constants.Timeout,
 		))
 
-		s.Info("Laws:", fmt.Sprintf("Network: bridge | Max processes: %d",
-			u.Manifest.Physics.Laws.MaxProcesses,
-		))
+		s.Info("Laws:", "Network: bridge")
 
 		if len(u.Workspaces) > 0 || u.MindPath != "" {
 			s.Blank()

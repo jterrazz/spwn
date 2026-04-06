@@ -14,7 +14,7 @@ func TestAgentsBookContent(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-test-12345",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
-		Elements:  []string{"bash", "git"},
+		Tools:  []string{"bash", "git"},
 		CPU:       2,
 		Memory:    "4g",
 		Timeout:   "30m",
@@ -34,13 +34,13 @@ func TestAgentsBookContent(t *testing.T) {
 		}
 	}
 
-	// Must contain identity and skills references
+	// Must contain core and skills references
 	mindPaths := []string{
-		"/mind/identity/",
+		"/mind/core/",
 		"/mind/skills/",
-		"/mind/memory/knowledge/",
-		"/mind/memory/playbooks/",
-		"/mind/memory/journal/",
+		"/mind/knowledge/",
+		"/mind/playbooks/",
+		"/mind/journal/",
 	}
 
 	for _, path := range mindPaths {
@@ -58,7 +58,7 @@ func TestSystemSkillsExist(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-test-99999",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
-		Elements:  []string{"bash"},
+		Tools:  []string{"bash"},
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
 			{Name: "trinity", Role: "worker"},
@@ -76,7 +76,7 @@ func TestSystemSkillsExist(t *testing.T) {
 		t.Error("worker context missing messaging/collaboration skill")
 	}
 
-	// 3. World awareness skill (elements, workspace)
+	// 3. World awareness skill (tools, workspace)
 	if !strings.Contains(ctx, "/workspace") {
 		t.Error("worker context missing workspace/world awareness")
 	}
@@ -93,7 +93,7 @@ func TestArchitectSkillsExist(t *testing.T) {
 		AgentName: "architect",
 		Role:      "god",
 		WorldID:   "w-god-00001",
-		Elements:  []string{"bash", "git", "docker"},
+		Tools:  []string{"bash", "git", "docker"},
 		CPU:       4,
 		Memory:    "8g",
 		Timeout:   "60m",

@@ -8,15 +8,14 @@ import (
 
 // Manifest is the parsed representation of a universe config YAML.
 type Manifest struct {
-	Physics  PhysicsManifest   `yaml:"physics"`
-	Elements []string          `yaml:"-"`
-	Gate     []gate.Bridge `yaml:"-"`
+	Physics PhysicsManifest `yaml:"physics"`
+	Tools   []string        `yaml:"-"`
+	Gate    []gate.Bridge   `yaml:"-"`
 }
 
 // PhysicsManifest defines the physical constraints of a universe.
 type PhysicsManifest struct {
 	Constants ConstantsManifest `yaml:"constants"`
-	Laws      LawsManifest      `yaml:"laws"`
 }
 
 // ConstantsManifest defines fixed resource limits.
@@ -25,11 +24,6 @@ type ConstantsManifest struct {
 	Memory  string `yaml:"memory"`
 	Disk    string `yaml:"disk"`
 	Timeout string `yaml:"timeout"`
-}
-
-// LawsManifest defines invariant rules.
-type LawsManifest struct {
-	MaxProcesses int `yaml:"max-processes"`
 }
 
 // Workspace is a single host directory mounted into a world. A world may have
@@ -65,7 +59,7 @@ type World struct {
 	Workspace   string        `json:"workspace,omitempty"`
 	MindPath    string        `json:"mind_path,omitempty"`
 	GateDir     string        `json:"gate_dir,omitempty"`
-	Hierarchy   string        `json:"hierarchy,omitempty"` // optional hierarchy name
+	Organization string       `json:"organization,omitempty"` // optional organization name
 	Status      Status        `json:"status"`
 	CreatedAt   time.Time     `json:"created_at"`
 	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support

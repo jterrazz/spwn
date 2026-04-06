@@ -38,12 +38,12 @@ func TestConfig_SpawnWithNamedConfig(t *testing.T) {
 }
 
 func TestConfig_DefaultsApplied(t *testing.T) {
-	// GIVEN a minimal YAML config with only elements specified
+	// GIVEN a minimal YAML config with only tools specified
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  elements:
+  tools:
     - "@unix"
 `).
 		NoAgent().
@@ -83,13 +83,13 @@ physics:
 	})
 }
 
-func TestConfig_CustomElementsReflectedInFaculties(t *testing.T) {
-	// GIVEN a config with @unix and @git elements
+func TestConfig_CustomToolsReflectedInFaculties(t *testing.T) {
+	// GIVEN a config with @unix and @git tools
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  elements:
+  tools:
     - "@unix"
     - "@git"
 `).
@@ -101,24 +101,6 @@ physics:
 		c.HasFile("/universe/faculties.md")
 		c.FileContains("/universe/faculties.md", "bash")
 		c.FileContains("/universe/faculties.md", "git")
-	})
-}
-
-func TestConfig_CustomMaxProcesses(t *testing.T) {
-	// GIVEN a config with a custom max-processes law
-	// WHEN a universe is spawned
-	chain := setup.NewSpawnBuilder(t).
-		WithConfigYAML(`
-physics:
-  laws:
-    max-processes: 256
-`).
-		NoAgent().
-		Execute()
-
-	// THEN the physics file should contain the custom process limit
-	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/universe/physics.md", "256")
 	})
 }
 

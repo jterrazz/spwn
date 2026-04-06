@@ -32,7 +32,7 @@ func TestInit(t *testing.T) {
 		}
 
 		// Verify default persona exists
-		personaPath := filepath.Join(dir, "identity", "persona.md")
+		personaPath := filepath.Join(dir, "core", "persona.md")
 		if _, err := os.Stat(personaPath); err != nil {
 			t.Errorf("expected default persona to exist: %v", err)
 		}
@@ -78,18 +78,18 @@ func TestValidate(t *testing.T) {
 		}
 	})
 
-	t.Run("missing_identity_dir_fails", func(t *testing.T) {
+	t.Run("missing_core_dir_fails", func(t *testing.T) {
 		tmp := t.TempDir()
 		t.Setenv("SPWN_HOME", tmp)
 
-		// Create agent dir without identity
+		// Create agent dir without core
 		agentDir := filepath.Join(tmp, "agents", "broken")
 		if err := os.MkdirAll(agentDir, 0755); err != nil {
 			t.Fatal(err)
 		}
 
 		if err := Validate("broken"); err == nil {
-			t.Error("expected error for missing identity dir, got nil")
+			t.Error("expected error for missing core dir, got nil")
 		}
 	})
 }
@@ -210,13 +210,27 @@ func TestValidate_LegacyPersonasDir(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	// Create agent dir with legacy personas/ instead of identity/
+	// Create agent dir with legacy personas/ instead of core/
 	agentDir := filepath.Join(tmp, "agents", "legacy")
 	os.MkdirAll(filepath.Join(agentDir, "personas"), 0755)
 
 	err := Validate("legacy")
 	if err != nil {
 		t.Errorf("expected legacy personas/ dir to pass validation, got: %v", err)
+	}
+}
+
+func TestValidate_LegacyIdentityDir(t *testing.T) {
+	tmp := t.TempDir()
+	t.Setenv("SPWN_HOME", tmp)
+
+	// Create agent dir with legacy identity/ instead of core/
+	agentDir := filepath.Join(tmp, "agents", "legacy-id")
+	os.MkdirAll(filepath.Join(agentDir, "identity"), 0755)
+
+	err := Validate("legacy-id")
+	if err != nil {
+		t.Errorf("expected legacy identity/ dir to pass validation, got: %v", err)
 	}
 }
 

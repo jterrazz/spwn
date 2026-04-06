@@ -37,8 +37,7 @@ type RuntimeDefaults struct {
 // PhysicsDefaults holds default physics for new worlds.
 type PhysicsDefaults struct {
 	Constants ConstantsManifest `yaml:"constants"`
-	Laws      LawsManifest      `yaml:"laws"`
-	Elements  []string          `yaml:"elements"`
+	Tools     []string          `yaml:"tools"`
 }
 
 // ConstantsManifest mirrors the universe constants for org defaults.
@@ -47,11 +46,6 @@ type ConstantsManifest struct {
 	Memory  string `yaml:"memory"`
 	Disk    string `yaml:"disk"`
 	Timeout string `yaml:"timeout"`
-}
-
-// LawsManifest mirrors the universe laws for org defaults.
-type LawsManifest struct {
-	MaxProcesses int `yaml:"max-processes"`
 }
 
 // OrgGovernance holds governance limits and policies.
