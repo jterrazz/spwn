@@ -603,7 +603,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
 
   const spawnProgressMessage = useProgressMessages(working && step === 3, [
     { after: 0, text: "Creating world..." },
-    { after: 5, text: "Building Docker image (first run takes a few minutes)..." },
+    { after: 5, text: "Building Docker image (first run could take a few minutes)..." },
     { after: 30, text: "Still building... installing dependencies..." },
     { after: 60, text: "Almost there..." },
   ]);
@@ -850,7 +850,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
 
   const spawnProgressMessage = useProgressMessages(spawning, [
     { after: 0, text: "Creating world..." },
-    { after: 5, text: "Building Docker image (first run takes a few minutes)..." },
+    { after: 5, text: "Building Docker image (first run could take a few minutes)..." },
     { after: 30, text: "Still building... installing dependencies..." },
     { after: 60, text: "Almost there..." },
   ]);
