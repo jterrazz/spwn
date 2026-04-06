@@ -146,6 +146,10 @@ func (m *mockBackend) EnsureImage(_ context.Context, _ string, _ string, _ []byt
 	return m.ensureImgErr
 }
 
+func (m *mockBackend) EnsureImageWithContext(_ context.Context, _ string, _ string, _ []byte, _ map[string][]byte, _ io.Writer) error {
+	return m.ensureImgErr
+}
+
 func (m *mockBackend) ImageVersion(_ context.Context, image string, label string) (string, error) {
 	return "", nil
 }

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -208,6 +209,10 @@ func (d *Docker) ImageVersion(ctx context.Context, image string, label string) (
 }
 
 func (d *Docker) EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) error {
+	return d.EnsureImageWithContext(ctx, tag, expectedVersion, dockerfile, nil, logw)
+}
+
+func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error {
 	if logw == nil {
 		logw = io.Discard
 	}
@@ -231,7 +236,7 @@ func (d *Docker) EnsureImage(ctx context.Context, tag string, expectedVersion st
 		_ = d.ImageRemove(ctx, tag)
 	}
 
-	// Create tar context containing only the Dockerfile
+	// Create tar context containing the Dockerfile and any extra files
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
 	hdr := &tar.Header{Name: "Dockerfile", Size: int64(len(dockerfile)), Mode: 0644}
@@ -241,6 +246,30 @@ func (d *Docker) EnsureImage(ctx context.Context, tag string, expectedVersion st
 	if _, err := tw.Write(dockerfile); err != nil {
 		return fmt.Errorf("tar write: %w", err)
 	}
+
+	// Add extra context files (create parent directories first)
+	dirs := make(map[string]bool)
+	for name := range extraFiles {
+		parts := strings.Split(filepath.Dir(name), string(filepath.Separator))
+		for i := range parts {
+			d := strings.Join(parts[:i+1], "/")
+			if d != "." && !dirs[d] {
+				dirs[d] = true
+				dirHdr := &tar.Header{Name: d + "/", Typeflag: tar.TypeDir, Mode: 0755}
+				tw.WriteHeader(dirHdr)
+			}
+		}
+	}
+	for name, content := range extraFiles {
+		fileHdr := &tar.Header{Name: name, Size: int64(len(content)), Mode: 0755}
+		if err := tw.WriteHeader(fileHdr); err != nil {
+			return fmt.Errorf("tar header %s: %w", name, err)
+		}
+		if _, err := tw.Write(content); err != nil {
+			return fmt.Errorf("tar write %s: %w", name, err)
+		}
+	}
+
 	if err := tw.Close(); err != nil {
 		return fmt.Errorf("tar close: %w", err)
 	}

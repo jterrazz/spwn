@@ -89,12 +89,12 @@ func runStart(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
 	s.Blank()
-	s.Start("Connecting to Docker...")
+	s.Start("Starting Architect (building image if needed)...")
 
 	// Resolve image (allow override via env var for testing)
 	imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
 
-	id, err := universe.StartArchitectDaemon(ctx, imageOverride)
+	id, err := universe.StartArchitectDaemon(ctx, imageOverride, cmd.ErrOrStderr())
 	if err != nil {
 		msg := err.Error()
 		switch {
@@ -106,9 +106,9 @@ func runStart(cmd *cobra.Command, args []string) error {
 		case strings.Contains(msg, "not reachable"):
 			return s.FailHint("Docker", err,
 				"Install Docker Desktop or start the daemon")
-		case strings.Contains(msg, "not found"):
-			return s.FailHint("Image", err,
-				"Build it with: make build-architect-image")
+		case strings.Contains(msg, "source tree"):
+			return s.FailHint("Image build", err,
+				"Run from the spwn source directory, or build manually: make build-architect-image")
 		default:
 			return s.FailHint("Start failed", err, "")
 		}
@@ -217,7 +217,7 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	if err != nil || !info.Running {
 		fmt.Fprintf(cmd.ErrOrStderr(), "\n  Architect not running. Starting...\n")
 		imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
-		_, startErr := universe.StartArchitectDaemon(ctx, imageOverride)
+		_, startErr := universe.StartArchitectDaemon(ctx, imageOverride, cmd.ErrOrStderr())
 		if startErr != nil {
 			if strings.Contains(startErr.Error(), "already running") {
 				// Race condition — it started between check and start, that's fine

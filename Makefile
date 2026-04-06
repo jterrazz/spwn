@@ -1,5 +1,5 @@
 .PHONY: build install uninstall \
-        build-image build-architect-image build-test-image build-gate \
+        build-test-image build-gate \
         test test-universe test-agent test-gate test-foundation test-messenger \
         test-e2e test-e2e-universe test-e2e-agent \
         lint clean docs
@@ -56,15 +56,6 @@ install: build
 uninstall:
 	@rm -f $(INSTALL_DIR)/spwn
 	@echo "  ✓ spwn removed from $(INSTALL_DIR)"
-
-build-image:
-	docker build -t spwn-base:latest ./platform/images
-
-build-architect-binary:
-	cd apps/cli && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ../../bin/spwn-linux ./cmd/spwn
-
-build-architect-image: build-architect-binary build
-	docker build -t spwn-architect:latest -f platform/images/Dockerfile.architect .
 
 build-test-image:
 	docker build -t spwn-test:latest -f platform/images/Dockerfile.test ./platform/fixtures/mock-claude

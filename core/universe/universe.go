@@ -5,6 +5,7 @@ package universe
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"time"
@@ -286,7 +287,7 @@ type ArchitectDaemonInfo struct {
 // StartArchitectDaemon creates and starts the spwn-architect Docker container.
 // It returns the container ID. If the container is already running, it returns
 // an error indicating that.
-func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, error) {
+func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters ...io.Writer) (string, error) {
 	docker, err := backend.NewDocker()
 	if err != nil {
 		return "", fmt.Errorf("docker is not reachable: %w", err)
@@ -309,18 +310,24 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string) (string, er
 		image = imageOverride
 	}
 
-	// Check image exists and version
-	currentVersion, err := docker.ImageVersion(ctx, image, foundation.ImageVersionLabel)
-	if err != nil {
-		return "", fmt.Errorf("checking image: %w", err)
-	}
-	expectedVersion := foundation.ArchitectImageVersion
-	if backend.NeedsRebuild(currentVersion, expectedVersion) {
-		have := "none"
-		if currentVersion != "" {
-			have = "v" + currentVersion
+	// Ensure architect image exists and is up to date (auto-build if needed)
+	if imageOverride == "" {
+		var logw io.Writer = io.Discard
+		if len(logWriters) > 0 && logWriters[0] != nil {
+			logw = logWriters[0]
 		}
-		return "", fmt.Errorf("image %s needs to be built (have: %s, need: v%s).\nRun: make build-architect-image", image, have, expectedVersion)
+		if err := architect.BuildArchitectImage(ctx, docker, logw); err != nil {
+			return "", fmt.Errorf("ensure architect image: %w", err)
+		}
+	} else {
+		// Custom image override: just check it exists
+		exists, err := docker.ImageExists(ctx, image)
+		if err != nil {
+			return "", fmt.Errorf("checking image: %w", err)
+		}
+		if !exists {
+			return "", fmt.Errorf("image %s not found", image)
+		}
 	}
 
 	// Build env vars — always set SPWN_HOME, pass through auth credentials
