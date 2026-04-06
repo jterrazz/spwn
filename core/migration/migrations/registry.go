@@ -15,6 +15,8 @@ func All() []migration.Migration {
 	r.Register(RemoveOrphanedUniverses)      // 008
 	r.Register(MergeBlueprintIntoKnowledge) // 009
 	r.Register(SimplifyArchitectDir)       // 010
-	r.Register(RestructureAgentDirs)       // 011
+	r.Register(RestructureAgentDirs)              // 011
+	r.Register(RenameHierarchiesToOrganizations) // 012
+	r.Register(EnsureDefaultOrganization)        // 013
 	return r.All()
 }
