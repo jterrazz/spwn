@@ -132,8 +132,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 				return nil, fmt.Errorf("load profile manifest for %s: %w", spec.Name, err)
 			}
 			if profile != nil {
-				expandedElements := manifest.ExpandElements(opts.Manifest.Elements)
-				if err := manifest.ValidateRequires(profile, expandedElements); err != nil {
+				expandedTools := manifest.ExpandTools(opts.Manifest.Tools)
+				if err := manifest.ValidateRequires(profile, expandedTools); err != nil {
 					return nil, err
 				}
 			}
@@ -156,8 +156,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, fmt.Errorf("load profile manifest: %w", err)
 		}
 		if profile != nil {
-			expandedElements := manifest.ExpandElements(opts.Manifest.Elements)
-			if err := manifest.ValidateRequires(profile, expandedElements); err != nil {
+			expandedTools := manifest.ExpandTools(opts.Manifest.Tools)
+			if err := manifest.ValidateRequires(profile, expandedTools); err != nil {
 				return nil, err
 			}
 		}
@@ -289,7 +289,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Name:        id,
 		CPU:         int64(opts.Manifest.Physics.Constants.CPU),
 		Memory:      memBytes,
-		PidsLimit:   int64(opts.Manifest.Physics.Laws.MaxProcesses),
+		PidsLimit:   256,
 		NetworkMode: "bridge",
 		Binds:       binds,
 		Env:         env,
@@ -336,17 +336,17 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 
 		a.gates[id] = gateSrv
-		opts.progress("gates_bridged", fmt.Sprintf("%d element(s)", len(opts.Manifest.Gate)))
+		opts.progress("gates_bridged", fmt.Sprintf("%d bridge(s)", len(opts.Manifest.Gate)))
 	}
 
-	// Probe elements
-	verifiedElements, err := a.probeElements(ctx, containerID, opts.Manifest.Elements)
+	// Probe tools
+	verifiedTools, err := a.probeTools(ctx, containerID, opts.Manifest.Tools)
 	if err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
 		return nil, err
 	}
-	opts.progress("elements_probed", fmt.Sprintf("%d verified", len(verifiedElements)))
+	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
 
 	// Generate physics.md
 	physicsContent := physics.GeneratePhysics(opts.Manifest)
@@ -357,7 +357,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Generate faculties.md
-	facultiesContent := physics.GenerateFaculties(verifiedElements, opts.Manifest.Gate)
+	facultiesContent := physics.GenerateFaculties(verifiedTools, opts.Manifest.Gate)
 	if err := a.backend.CopyTo(ctx, containerID, "universe/faculties.md", []byte(facultiesContent)); err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
@@ -390,7 +390,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 				Role:        role,
 				WorldID:     id,
 				Workspaces:  resolvedWorkspaces,
-				Elements:    verifiedElements,
+				Tools:       verifiedTools,
 				CPU:         opts.Manifest.Physics.Constants.CPU,
 				Memory:      opts.Manifest.Physics.Constants.Memory,
 				Timeout:     opts.Manifest.Physics.Constants.Timeout,
@@ -425,7 +425,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			Role:       "worker",
 			WorldID:    id,
 			Workspaces: resolvedWorkspaces,
-			Elements:   verifiedElements,
+			Tools:      verifiedTools,
 			CPU:       opts.Manifest.Physics.Constants.CPU,
 			Memory:    opts.Manifest.Physics.Constants.Memory,
 			Timeout:   opts.Manifest.Physics.Constants.Timeout,
@@ -533,10 +533,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	return &SpawnResult{Universe: &u, Warnings: warnings}, nil
 }
 
-// probeElements verifies which elements are available in the container.
-func (a *Architect) probeElements(ctx context.Context, containerID string, declaredElements []string) ([]string, error) {
+// probeTools verifies which tools are available in the container.
+func (a *Architect) probeTools(ctx context.Context, containerID string, declaredTools []string) ([]string, error) {
 	// Expand @packs and merge with default probe list
-	expanded := manifest.ExpandElements(declaredElements)
+	expanded := manifest.ExpandTools(declaredTools)
 	probeList := mergeUnique(expanded, defaultProbeList)
 
 	// Build probe command
@@ -548,7 +548,7 @@ func (a *Architect) probeElements(ctx context.Context, containerID string, decla
 
 	output, err := a.backend.ExecOutput(ctx, containerID, cmd)
 	if err != nil {
-		return nil, fmt.Errorf("probe elements: %w", err)
+		return nil, fmt.Errorf("probe tools: %w", err)
 	}
 
 	verified := make(map[string]bool)
@@ -559,14 +559,14 @@ func (a *Architect) probeElements(ctx context.Context, containerID string, decla
 		}
 	}
 
-	// Verify all declared elements exist
+	// Verify all declared tools exist
 	for _, e := range expanded {
 		if !verified[e] {
-			return nil, fmt.Errorf("world requires element '%s' but the base image does not provide it.\nHint: Add %s to the container image, or remove it from the config's elements", e, e)
+			return nil, fmt.Errorf("world requires tool '%s' but the base image does not provide it.\nHint: Add %s to the container image, or remove it from the config's tools", e, e)
 		}
 	}
 
-	// Return all verified elements
+	// Return all verified tools
 	var result []string
 	for _, e := range probeList {
 		if verified[e] {

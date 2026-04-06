@@ -32,7 +32,7 @@ func TestTimeout_ShortTimeoutStopsContainer(t *testing.T) {
 	//     cpu: 1
 	//     memory: 256m
 	//     timeout: 10s
-	//   elements:
+	//   tools:
 	//     - "@unix"
 	// `).
 	//     WithAgent("test-agent").
@@ -61,7 +61,7 @@ physics:
     cpu: 1
     memory: 256m
     timeout: 45m
-  elements:
+  tools:
     - "@unix"
 `).
 		NoAgent().
@@ -83,7 +83,7 @@ physics:
   constants:
     cpu: 1
     memory: 256m
-  elements:
+  tools:
     - "@unix"
 `).
 		NoAgent().

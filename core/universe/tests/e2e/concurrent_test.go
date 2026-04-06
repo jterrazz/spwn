@@ -28,7 +28,7 @@ physics:
   constants:
     cpu: 1
     memory: 256m
-  elements:
+  tools:
     - "@unix"
 `,
 		`
@@ -36,7 +36,7 @@ physics:
   constants:
     cpu: 1
     memory: 512m
-  elements:
+  tools:
     - "@unix"
 `,
 		`
@@ -44,7 +44,7 @@ physics:
   constants:
     cpu: 1
     memory: 384m
-  elements:
+  tools:
     - "@unix"
 `,
 	}

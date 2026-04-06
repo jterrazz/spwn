@@ -4,24 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
-// ProfileManifest declares an agent's identity structure and requirements.
+// ProfileManifest declares an agent's operational configuration.
 // Optional: if profile.yaml doesn't exist in the agent directory, the agent dir is used as-is.
 // Backward compatible: falls back to life.yaml if profile.yaml is not found.
+// Identity fields (purpose, traits, persona, bonds) now live in core/*.md files, not profile.yaml.
 type ProfileManifest struct {
-	Name       string        `yaml:"name"`
-	Role       string        `yaml:"role"`       // "chief", "manager", or "worker" (default: "worker")
-	Team       string        `yaml:"team"`       // team slug (references ~/.spwn/teams/{slug}.yaml)
-	Runtime    RuntimeConfig `yaml:"runtime"`     // optional runtime override
-	Identity   IdentityManifest `yaml:"identity"` // formerly "soul"
-	Skills     []string      `yaml:"skills"`      // formerly under "mind"
-	Requires   []string      `yaml:"requires"`    // formerly under "body"
-	Delegation string        `yaml:"delegation"`  // formerly "body.orchestration"
-	Memory     MemoryManifest `yaml:"memory"`
+	Name    string        `yaml:"name,omitempty"`
+	Role    string        `yaml:"role,omitempty"`    // "chief", "manager", or "worker" (default: "worker")
+	Team    string        `yaml:"team,omitempty"`    // team slug (references ~/.spwn/teams/{slug}.yaml)
+	Runtime RuntimeConfig `yaml:"runtime,omitempty"` // optional runtime override
+	Skills  []string      `yaml:"skills,omitempty"`  // formerly under "mind"
 }
 
 // IdentityManifest declares the agent's identity/persona layers.
@@ -78,52 +74,21 @@ func loadProfileFromLife(agentDir string) (*ProfileManifest, error) {
 		return nil, fmt.Errorf("parse life manifest: %w", err)
 	}
 
-	// Convert LifeManifest to ProfileManifest
+	// Convert LifeManifest to ProfileManifest (slimmed — identity/memory now in .md files)
 	profile := &ProfileManifest{
 		Name:    life.Name,
 		Role:    life.Role,
 		Runtime: life.Runtime,
-		Identity: IdentityManifest{
-			Personas: life.Soul.Personas,
-		},
-		Skills:   life.Mind.Skills,
-		Requires: life.Body.Requires,
-		Memory: MemoryManifest{
-			Knowledge: life.Mind.Knowledge,
-			Playbooks: life.Mind.Playbooks,
-		},
+		Skills:  life.Mind.Skills,
 	}
 
 	return profile, nil
 }
 
-// ValidateRequires checks that all elements in requires are available in the universe.
-// availableElements should be the expanded element list from the universe manifest.
-func ValidateRequires(profile *ProfileManifest, availableElements []string) error {
-	if profile == nil || len(profile.Requires) == 0 {
-		return nil
-	}
-
-	available := make(map[string]bool)
-	for _, e := range availableElements {
-		available[e] = true
-	}
-
-	var missing []string
-	for _, req := range profile.Requires {
-		// Expand @packs to check individual binaries
-		expanded := ExpandElements([]string{req})
-		for _, e := range expanded {
-			if !available[e] {
-				missing = append(missing, e)
-			}
-		}
-	}
-
-	if len(missing) > 0 {
-		return fmt.Errorf("agent requires element(s) not provided by this world: %s.\nHint: Add them to the world config's elements, or remove them from profile.yaml requires",
-			strings.Join(missing, ", "))
-	}
-
+// ValidateRequires checks that all tools in requires are available in the universe.
+// availableTools should be the expanded tool list from the universe manifest.
+// Deprecated: requires was removed from ProfileManifest. Kept for backward compatibility
+// with code that may still call it — always returns nil now.
+func ValidateRequires(profile *ProfileManifest, availableTools []string) error {
 	return nil
 }

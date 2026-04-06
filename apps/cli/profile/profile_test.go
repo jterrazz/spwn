@@ -16,14 +16,14 @@ func setupTestAgent(t *testing.T, name string) string {
 	t.Setenv("SPWN_HOME", home)
 
 	agentDir := filepath.Join(home, foundation.AgentsSubDir, name)
-	layers := []string{"identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"}
+	layers := []string{"core", "skills", "knowledge", "playbooks", "journal"}
 	for _, layer := range layers {
 		if err := os.MkdirAll(filepath.Join(agentDir, layer), 0755); err != nil {
 			t.Fatal(err)
 		}
 	}
 	// Create default persona
-	os.WriteFile(filepath.Join(agentDir, "identity", "persona.md"), []byte("# Default\nYou are a test agent.\n"), 0644)
+	os.WriteFile(filepath.Join(agentDir, "core", "persona.md"), []byte("# Default\nYou are a test agent.\n"), 0644)
 	return home
 }
 
@@ -67,7 +67,7 @@ func TestProfile_Purpose_FileNotFound(t *testing.T) {
 func TestProfile_Purpose_ShowsContent(t *testing.T) {
 	home := setupTestAgent(t, "neo")
 
-	purposePath := filepath.Join(home, "agents", "neo", "identity", "purpose.md")
+	purposePath := filepath.Join(home, "agents", "neo", "core", "purpose.md")
 	os.WriteFile(purposePath, []byte("Build the future.\n"), 0644)
 
 	err := Cmd.RunE(Cmd, []string{"neo", "purpose"})
@@ -110,7 +110,7 @@ func TestProfile_Journal_Empty(t *testing.T) {
 func TestProfile_Journal_ShowsEntries(t *testing.T) {
 	home := setupTestAgent(t, "neo")
 
-	journalDir := filepath.Join(home, "agents", "neo", "memory", "journal")
+	journalDir := filepath.Join(home, "agents", "neo", "journal")
 	// Write a journal entry in the expected format
 	entry := "---\nworld: w-test-123\nexit_code: 0\nduration: 5m\ncreated_at: 2025-01-15T10:00:00Z\n---\nSession completed successfully.\n"
 	os.WriteFile(filepath.Join(journalDir, "2025-01-15T10-00-00.md"), []byte(entry), 0644)
@@ -182,15 +182,6 @@ func TestProfile_UnknownAspect(t *testing.T) {
 	}
 }
 
-func TestProfile_Sessions_Empty(t *testing.T) {
-	setupTestAgent(t, "neo")
-
-	err := Cmd.RunE(Cmd, []string{"neo", "sessions"})
-	if err != nil {
-		t.Fatalf("unexpected error: %s", err)
-	}
-}
-
 func TestProfile_Knowledge_Empty(t *testing.T) {
 	setupTestAgent(t, "neo")
 
@@ -204,15 +195,6 @@ func TestProfile_Playbooks_Empty(t *testing.T) {
 	setupTestAgent(t, "neo")
 
 	err := Cmd.RunE(Cmd, []string{"neo", "playbooks"})
-	if err != nil {
-		t.Fatalf("unexpected error: %s", err)
-	}
-}
-
-func TestProfile_Bonds_FileNotFound(t *testing.T) {
-	setupTestAgent(t, "neo")
-
-	err := Cmd.RunE(Cmd, []string{"neo", "bonds"})
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}

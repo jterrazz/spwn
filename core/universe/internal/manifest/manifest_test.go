@@ -6,7 +6,7 @@ import (
 	"spwn.sh/core/universe/internal/models"
 )
 
-func TestExpandElements(t *testing.T) {
+func TestExpandTools(t *testing.T) {
 	tests := []struct {
 		name string
 		in   []string
@@ -15,7 +15,7 @@ func TestExpandElements(t *testing.T) {
 		{
 			name: "unix_pack",
 			in:   []string{"@unix"},
-			want: ElementPacks["@unix"],
+			want: ToolPacks["@unix"],
 		},
 		{
 			name: "git_pack",
@@ -38,7 +38,7 @@ func TestExpandElements(t *testing.T) {
 			want: nil,
 		},
 		{
-			name: "unknown_pack_treated_as_element",
+			name: "unknown_pack_treated_as_tool",
 			in:   []string{"@nonexistent"},
 			want: []string{"@nonexistent"},
 		},
@@ -46,21 +46,21 @@ func TestExpandElements(t *testing.T) {
 			name: "multiple_packs_overlap",
 			in:   []string{"@unix", "bash"},
 			// bash is in @unix, so it should not appear twice
-			want: ElementPacks["@unix"],
+			want: ToolPacks["@unix"],
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ExpandElements(tt.in)
+			got := ExpandTools(tt.in)
 			if len(got) != len(tt.want) {
-				t.Errorf("ExpandElements(%v) = %v (len %d), want %v (len %d)",
+				t.Errorf("ExpandTools(%v) = %v (len %d), want %v (len %d)",
 					tt.in, got, len(got), tt.want, len(tt.want))
 				return
 			}
 			for i := range got {
 				if got[i] != tt.want[i] {
-					t.Errorf("ExpandElements(%v)[%d] = %q, want %q", tt.in, i, got[i], tt.want[i])
+					t.Errorf("ExpandTools(%v)[%d] = %q, want %q", tt.in, i, got[i], tt.want[i])
 				}
 			}
 		})
@@ -84,9 +84,6 @@ func TestApplyDefaults(t *testing.T) {
 		if m.Physics.Constants.Timeout == "" {
 			t.Error("Timeout should not be empty after ApplyDefaults")
 		}
-		if m.Physics.Laws.MaxProcesses == 0 {
-			t.Error("MaxProcesses should not be zero after ApplyDefaults")
-		}
 	})
 
 	t.Run("does_not_overwrite_set_values", func(t *testing.T) {
@@ -97,9 +94,6 @@ func TestApplyDefaults(t *testing.T) {
 					Memory:  "2g",
 					Disk:    "10g",
 					Timeout: "1h",
-				},
-				Laws: models.LawsManifest{
-					MaxProcesses: 256,
 				},
 			},
 		}
@@ -116,9 +110,6 @@ func TestApplyDefaults(t *testing.T) {
 		}
 		if m.Physics.Constants.Timeout != "1h" {
 			t.Errorf("Timeout = %q, want %q", m.Physics.Constants.Timeout, "1h")
-		}
-		if m.Physics.Laws.MaxProcesses != 256 {
-			t.Errorf("MaxProcesses = %d, want 256", m.Physics.Laws.MaxProcesses)
 		}
 	})
 }

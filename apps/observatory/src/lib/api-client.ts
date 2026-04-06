@@ -128,10 +128,7 @@ function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentPr
     persona: '',
     traits: [],
     skills: [],
-    playbooks: [],
-    knowledge: [],
     journal: [],
-    bonds: [],
     ...data,
   };
 }

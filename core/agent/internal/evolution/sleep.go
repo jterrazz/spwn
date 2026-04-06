@@ -16,28 +16,28 @@ func Sleep(mindPath string) (*SleepResult, error) {
 	result := &SleepResult{Timestamp: time.Now()}
 
 	// 1. Archive stale playbooks (older than 30 days, not recently referenced)
-	archived, err := archiveStaleFiles(mindPath, filepath.Join("memory", "playbooks"), 30*24*time.Hour)
+	archived, err := archiveStaleFiles(mindPath, "playbooks", 30*24*time.Hour)
 	if err != nil {
 		return nil, fmt.Errorf("archiving playbooks: %w", err)
 	}
 	result.ArchivedPlaybooks = archived
 
 	// 2. Archive stale knowledge
-	archived, err = archiveStaleFiles(mindPath, filepath.Join("memory", "knowledge"), 60*24*time.Hour)
+	archived, err = archiveStaleFiles(mindPath, "knowledge", 60*24*time.Hour)
 	if err != nil {
 		return nil, fmt.Errorf("archiving knowledge: %w", err)
 	}
 	result.ArchivedKnowledge = archived
 
-	// 3. Prune old sessions
+	// 3. Prune old journal entries (sessions merged into journal)
 	pruned, err := pruneOldSessions(mindPath, 90*24*time.Hour)
 	if err != nil {
-		return nil, fmt.Errorf("pruning sessions: %w", err)
+		return nil, fmt.Errorf("pruning journal: %w", err)
 	}
 	result.PrunedSessions = pruned
 
 	// 4. Write sleep log
-	journalDir := filepath.Join(mindPath, "memory", "journal")
+	journalDir := filepath.Join(mindPath, "journal")
 	os.MkdirAll(journalDir, 0755)
 	logPath := filepath.Join(journalDir, fmt.Sprintf("sleep-%s.md", time.Now().Format("2006-01-02")))
 	summary := formatSleepSummary(result)
@@ -108,7 +108,7 @@ func archiveStaleFiles(mindPath, layer string, maxAge time.Duration) (int, error
 }
 
 func pruneOldSessions(mindPath string, maxAge time.Duration) (int, error) {
-	sessionsDir := filepath.Join(mindPath, "sessions")
+	sessionsDir := filepath.Join(mindPath, "journal")
 	entries, err := os.ReadDir(sessionsDir)
 	if err != nil {
 		if os.IsNotExist(err) {

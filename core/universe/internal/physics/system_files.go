@@ -11,18 +11,17 @@ Your memory survives world destruction. You grow through experience.
 
 ## Your Mind (/mind/)
 Your persistent memory. It survives when worlds are destroyed.
-- ` + "`/mind/identity/purpose.md`" + ` — why you exist
-- ` + "`/mind/identity/persona.md`" + ` — who you are
-- ` + "`/mind/identity/traits.md`" + ` — your core principles
+- ` + "`/mind/core/purpose.md`" + ` — why you exist
+- ` + "`/mind/core/persona.md`" + ` — who you are
+- ` + "`/mind/core/traits.md`" + ` — your core principles
 - ` + "`/mind/skills/`" + ` — capabilities you've learned
-- ` + "`/mind/memory/knowledge/`" + ` — facts and context you've saved
-- ` + "`/mind/memory/playbooks/`" + ` — step-by-step procedures
-- ` + "`/mind/memory/journal/`" + ` — auto-logged session history
-- ` + "`/mind/bonds.md`" + ` — your relationships with other agents
+- ` + "`/mind/knowledge/`" + ` — facts and context you've saved
+- ` + "`/mind/playbooks/`" + ` — step-by-step procedures
+- ` + "`/mind/journal/`" + ` — auto-logged session and deployment history
 
 ## Your World (/world/)
 Your current environment. Read-only system files.
-- ` + "`/world/AGENT.md`" + ` — your role in THIS world (role, physics, elements)
+- ` + "`/world/AGENT.md`" + ` — your role in THIS world (role, physics, tools)
 - ` + "`/world/AGENTS.md`" + ` — this file (the operating manual)
 - ` + "`/world/skills/`" + ` — system skills (guides for common tasks)
 - ` + "`/world/knowledge/`" + ` — universe knowledge base (read-only, managed by the Architect)
@@ -34,12 +33,12 @@ The project you're working on. Read-write. Persists on the host.
 Read ` + "`/world/skills/`" + ` for detailed guides:
 - ` + "`mind-management.md`" + ` — how to read/write your identity and memory
 - ` + "`collaboration.md`" + ` — how to communicate with other agents
-- ` + "`world-awareness.md`" + ` — understanding physics, elements, faculties
+- ` + "`world-awareness.md`" + ` — understanding physics, tools, faculties
 - ` + "`self-evolution.md`" + ` — how to improve through dream cycles
 
 ## Conventions
 1. Read your purpose and traits before starting any task
-2. Save important discoveries to ` + "`/mind/memory/knowledge/`" + `
+2. Save important discoveries to ` + "`/mind/knowledge/`" + `
 3. After significant work, check if a playbook should be created
 4. When asked to dream, analyze your journal and promote patterns
 5. Communicate with other agents through ` + "`/world/inbox/`" + `
@@ -52,36 +51,35 @@ const SkillMindManagement = `# Mind Management
 ## Reading Your Identity
 Before starting any task, read your identity files:
 ` + "```bash" + `
-cat /mind/identity/purpose.md   # Why you exist
-cat /mind/identity/persona.md   # Who you are
-cat /mind/identity/traits.md    # Your principles
-cat /mind/bonds.md              # Your relationships
+cat /mind/core/purpose.md   # Why you exist
+cat /mind/core/persona.md   # Who you are
+cat /mind/core/traits.md    # Your principles
 ` + "```" + `
 
 ## Saving Knowledge
 When you discover something worth remembering:
 ` + "```bash" + `
 # Create a knowledge file with a descriptive name
-echo "# What I learned about X" > /mind/memory/knowledge/topic-name.md
+echo "# What I learned about X" > /mind/knowledge/topic-name.md
 ` + "```" + `
 Keep files focused on ONE topic. Use clear filenames.
 
 ## Creating Playbooks
 When you find a reusable procedure:
 ` + "```bash" + `
-echo "# How to Deploy" > /mind/memory/playbooks/deploy.md
+echo "# How to Deploy" > /mind/playbooks/deploy.md
 # Include: trigger conditions, numbered steps, pitfalls
 ` + "```" + `
 
 ## Journal Entries
 Journal entries are auto-created by the system after each session.
-You can read them at ` + "`/mind/memory/journal/`" + `.
+You can read them at ` + "`/mind/journal/`" + `.
 
 ## Updating Your Identity
 You can evolve your own identity:
 ` + "```bash" + `
 # Update your purpose as you learn
-echo "# Purpose\nI exist to maintain the production API" > /mind/identity/purpose.md
+echo "# Purpose\nI exist to maintain the production API" > /mind/core/purpose.md
 ` + "```" + `
 `
 
@@ -119,8 +117,8 @@ const SkillWorldAwareness = `# World Awareness
 
 ## Understanding Your World
 Read ` + "`/world/AGENT.md`" + ` for your world's configuration:
-- Your role in the hierarchy
-- Available elements (tools installed)
+- Your role in the organization
+- Available tools (tools installed)
 - Physics (resource limits: CPU, memory, timeout)
 - Your workspace path
 
@@ -130,8 +128,8 @@ Your world has resource limits:
 - A timeout after which the world is destroyed
 Read ` + "`/world/physics.md`" + ` for exact values.
 
-## Elements
-Elements are tools available in your world:
+## Tools
+Tools are capabilities available in your world:
 - ` + "`@unix`" + ` — bash, coreutils, standard CLI tools
 - ` + "`@git`" + ` — version control
 - ` + "`@node`" + ` — Node.js runtime
@@ -166,17 +164,9 @@ Sleep is graceful shutdown + consolidation:
 ## Growing Your Skills
 When you discover a reusable approach:
 1. Test it in multiple contexts
-2. Write it as a playbook in ` + "`/mind/memory/playbooks/`" + `
+2. Write it as a playbook in ` + "`/mind/playbooks/`" + `
 3. Include: trigger conditions, steps, pitfalls, verification
 
-## Bonds
-Track relationships in ` + "`/mind/bonds.md`" + `:
-` + "```markdown" + `
-# Bonds
-- @architect: creator, full trust
-- @neo: peer, shared codebase work
-- @sentinel: monitoring partner
-` + "```" + `
 `
 
 // SystemSkills returns a map of filename → content for all system skill files.

@@ -326,13 +326,13 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 
 	bubbleInner := minWidth
 
-	// Elements from manifest
-	elements := ""
-	if len(ww.Manifest.Elements) > 0 {
+	// Tools from manifest
+	tools := ""
+	if len(ww.Manifest.Tools) > 0 {
 		// Show @pack names (not expanded)
-		elems := make([]string, len(ww.Manifest.Elements))
-		copy(elems, ww.Manifest.Elements)
-		elements = strings.Join(elems, " ")
+		elems := make([]string, len(ww.Manifest.Tools))
+		copy(elems, ww.Manifest.Tools)
+		tools = strings.Join(elems, " ")
 	}
 
 	// Uptime
@@ -384,10 +384,10 @@ func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
 		pr("  \u2502  \u2502%s\u2502\n", padRight(wsLine, bubbleInner))
 	}
 
-	// Elements
-	if elements != "" {
-		elemLine := fmt.Sprintf("   elements   %s", elements)
-		pr("  \u2502  \u2502%s\u2502\n", padRight(elemLine, bubbleInner))
+	// Tools
+	if tools != "" {
+		toolsLine := fmt.Sprintf("   tools      %s", tools)
+		pr("  \u2502  \u2502%s\u2502\n", padRight(toolsLine, bubbleInner))
 	}
 
 	// Uptime

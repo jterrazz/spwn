@@ -27,7 +27,7 @@ func DeterministicID(agentName, worldID string) string {
 	return hex[0:8] + "-" + hex[8:12] + "-4" + hex[13:16] + "-a" + hex[17:20] + "-" + hex[20:32]
 }
 
-// Load reads a session file from the Mind's sessions directory.
+// Load reads a session file from the Mind's journal directory.
 // Returns nil if no session file exists (first spawn).
 func Load(mindPath, worldID string) (*Session, error) {
 	path := filePath(mindPath, worldID)
@@ -46,11 +46,11 @@ func Load(mindPath, worldID string) (*Session, error) {
 	return &s, nil
 }
 
-// Save writes a session file to the Mind's sessions directory.
+// Save writes a session file to the Mind's journal directory.
 func Save(mindPath string, s *Session) error {
-	dir := filepath.Join(mindPath, "sessions")
+	dir := filepath.Join(mindPath, "journal")
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("create sessions dir: %w", err)
+		return fmt.Errorf("create journal dir: %w", err)
 	}
 
 	data, err := json.MarshalIndent(s, "", "  ")
@@ -62,9 +62,9 @@ func Save(mindPath string, s *Session) error {
 	return os.WriteFile(path, data, 0644)
 }
 
-// List returns all session files from the Mind's sessions directory.
+// List returns all session files from the Mind's journal directory.
 func List(mindPath string) ([]Session, error) {
-	dir := filepath.Join(mindPath, "sessions")
+	dir := filepath.Join(mindPath, "journal")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -92,5 +92,5 @@ func List(mindPath string) ([]Session, error) {
 }
 
 func filePath(mindPath, worldID string) string {
-	return filepath.Join(mindPath, "sessions", worldID+".json")
+	return filepath.Join(mindPath, "journal", worldID+".json")
 }

@@ -62,9 +62,9 @@ func init() {
 	UpCmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	UpCmd.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Attach to agent interactively")
 	UpCmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
-	UpCmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge element from Host: "source:as:cap1,cap2"`)
-	UpCmd.Flags().StringVar(&spawnLeader, "leader", "", "Leader agent for this world (gets the top role in the hierarchy)")
-	UpCmd.Flags().StringVar(&spawnHierarchy, "hierarchy", "default", "Hierarchy to use for role assignment")
+	UpCmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge tool from Host: "source:as:cap1,cap2"`)
+	UpCmd.Flags().StringVar(&spawnLeader, "leader", "", "Leader agent for this world (gets the top role in the organization)")
+	UpCmd.Flags().StringVar(&spawnOrganization, "organization", "default", "Organization to use for role assignment")
 	UpCmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime")
 
 	// Copy --all flag for DownCmd

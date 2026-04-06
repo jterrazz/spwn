@@ -1,7 +1,7 @@
-// Package agent provides hierarchy management for defining role structures.
+// Package agent provides organization management for defining role structures.
 //
-// A hierarchy is a first-class entity stored as a YAML file under ~/.spwn/hierarchies/.
-// Each hierarchy defines a set of roles with levels, command relationships,
+// An organization is a first-class entity stored as a YAML file under ~/.spwn/organizations/.
+// Each organization defines a set of roles with levels, command relationships,
 // and permissions that govern how agents interact within a world.
 
 package agent
@@ -16,7 +16,7 @@ import (
 	"spwn.sh/core/foundation"
 )
 
-// Role defines a position within a hierarchy with its level and permissions.
+// Role defines a position within an organization with its level and permissions.
 type Role struct {
 	Name        string   `json:"name" yaml:"name"`
 	Level       int      `json:"level" yaml:"level"`
@@ -26,33 +26,33 @@ type Role struct {
 	Permissions []string `json:"permissions,omitempty" yaml:"permissions,omitempty"`
 }
 
-// Hierarchy is a named set of roles that defines an organisational structure.
-type Hierarchy struct {
+// Organization is a named set of roles that defines an organisational structure.
+type Organization struct {
 	Slug        string `json:"slug" yaml:"-"`
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	Roles       []Role `json:"roles" yaml:"roles"`
 }
 
-func hierarchyPath(slug string) string {
-	return filepath.Join(foundation.HierarchiesDir(), slug+".yaml")
+func organizationPath(slug string) string {
+	return filepath.Join(foundation.OrganizationsDir(), slug+".yaml")
 }
 
-// ValidateHierarchy checks that a hierarchy has a valid slug, name, and at
+// ValidateOrganization checks that an organization has a valid slug, name, and at
 // least one role. It also ensures role names are unique and that can_command
 // and reports_to references point to existing roles.
-func ValidateHierarchy(h Hierarchy) error {
+func ValidateOrganization(h Organization) error {
 	if h.Slug == "" {
-		return fmt.Errorf("hierarchy slug is required")
+		return fmt.Errorf("organization slug is required")
 	}
 	if !slugRe.MatchString(h.Slug) {
-		return fmt.Errorf("invalid hierarchy slug: %q", h.Slug)
+		return fmt.Errorf("invalid organization slug: %q", h.Slug)
 	}
 	if h.Name == "" {
-		return fmt.Errorf("hierarchy name is required")
+		return fmt.Errorf("organization name is required")
 	}
 	if len(h.Roles) == 0 {
-		return fmt.Errorf("hierarchy must have at least one role")
+		return fmt.Errorf("organization must have at least one role")
 	}
 
 	names := make(map[string]struct{}, len(h.Roles))
@@ -82,46 +82,46 @@ func ValidateHierarchy(h Hierarchy) error {
 	return nil
 }
 
-// CreateHierarchy persists a new hierarchy. Returns an error if the slug
+// CreateOrganization persists a new organization. Returns an error if the slug
 // already exists or if validation fails.
-func CreateHierarchy(h Hierarchy) error {
+func CreateOrganization(h Organization) error {
 	if h.Slug == "" {
 		h.Slug = Slugify(h.Name)
 	}
-	if err := ValidateHierarchy(h); err != nil {
+	if err := ValidateOrganization(h); err != nil {
 		return err
 	}
-	dir := foundation.HierarchiesDir()
+	dir := foundation.OrganizationsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("create hierarchies dir: %w", err)
+		return fmt.Errorf("create organizations dir: %w", err)
 	}
-	path := hierarchyPath(h.Slug)
+	path := organizationPath(h.Slug)
 	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("hierarchy %q already exists", h.Slug)
+		return fmt.Errorf("organization %q already exists", h.Slug)
 	}
-	return writeHierarchy(path, h)
+	return writeOrganization(path, h)
 }
 
-// GetHierarchy reads a hierarchy by slug.
-func GetHierarchy(slug string) (*Hierarchy, error) {
-	data, err := os.ReadFile(hierarchyPath(slug))
+// GetOrganization reads an organization by slug.
+func GetOrganization(slug string) (*Organization, error) {
+	data, err := os.ReadFile(organizationPath(slug))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("hierarchy %q not found", slug)
+			return nil, fmt.Errorf("organization %q not found", slug)
 		}
 		return nil, err
 	}
-	var h Hierarchy
+	var h Organization
 	if err := yaml.Unmarshal(data, &h); err != nil {
-		return nil, fmt.Errorf("parse hierarchy %q: %w", slug, err)
+		return nil, fmt.Errorf("parse organization %q: %w", slug, err)
 	}
 	h.Slug = slug
 	return &h, nil
 }
 
-// ListHierarchies returns all hierarchies sorted alphabetically by slug.
-func ListHierarchies() ([]Hierarchy, error) {
-	dir := foundation.HierarchiesDir()
+// ListOrganizations returns all organizations sorted alphabetically by slug.
+func ListOrganizations() ([]Organization, error) {
+	dir := foundation.OrganizationsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -129,48 +129,48 @@ func ListHierarchies() ([]Hierarchy, error) {
 		}
 		return nil, err
 	}
-	var hierarchies []Hierarchy
+	var organizations []Organization
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
 			continue
 		}
 		slug := strings.TrimSuffix(e.Name(), ".yaml")
-		h, err := GetHierarchy(slug)
+		h, err := GetOrganization(slug)
 		if err != nil {
 			continue // skip corrupted files
 		}
-		hierarchies = append(hierarchies, *h)
+		organizations = append(organizations, *h)
 	}
-	return hierarchies, nil
+	return organizations, nil
 }
 
-// UpdateHierarchy overwrites an existing hierarchy's metadata.
-func UpdateHierarchy(h Hierarchy) error {
+// UpdateOrganization overwrites an existing organization's metadata.
+func UpdateOrganization(h Organization) error {
 	if h.Slug == "" {
-		return fmt.Errorf("hierarchy slug is required")
+		return fmt.Errorf("organization slug is required")
 	}
-	if err := ValidateHierarchy(h); err != nil {
+	if err := ValidateOrganization(h); err != nil {
 		return err
 	}
-	path := hierarchyPath(h.Slug)
+	path := organizationPath(h.Slug)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return fmt.Errorf("hierarchy %q not found", h.Slug)
+		return fmt.Errorf("organization %q not found", h.Slug)
 	}
-	return writeHierarchy(path, h)
+	return writeOrganization(path, h)
 }
 
-// DeleteHierarchy removes a hierarchy file.
-func DeleteHierarchy(slug string) error {
-	path := hierarchyPath(slug)
+// DeleteOrganization removes an organization file.
+func DeleteOrganization(slug string) error {
+	path := organizationPath(slug)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return fmt.Errorf("hierarchy %q not found", slug)
+		return fmt.Errorf("organization %q not found", slug)
 	}
 	return os.Remove(path)
 }
 
-// GetRole returns a pointer to the named role within the hierarchy, or nil
+// GetRole returns a pointer to the named role within the organization, or nil
 // if the role does not exist.
-func (h *Hierarchy) GetRole(name string) *Role {
+func (h *Organization) GetRole(name string) *Role {
 	for i := range h.Roles {
 		if h.Roles[i].Name == name {
 			return &h.Roles[i]
@@ -181,7 +181,7 @@ func (h *Hierarchy) GetRole(name string) *Role {
 
 // RoleCanCommand reports whether the role identified by roleName is allowed
 // to command the role identified by targetName.
-func (h *Hierarchy) RoleCanCommand(roleName, targetName string) bool {
+func (h *Organization) RoleCanCommand(roleName, targetName string) bool {
 	r := h.GetRole(roleName)
 	if r == nil {
 		return false
@@ -194,7 +194,7 @@ func (h *Hierarchy) RoleCanCommand(roleName, targetName string) bool {
 	return false
 }
 
-func writeHierarchy(path string, h Hierarchy) error {
+func writeOrganization(path string, h Organization) error {
 	data, err := yaml.Marshal(h)
 	if err != nil {
 		return err

@@ -18,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet, apiPost, apiDelete } from "@/lib/api-client";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { SectionHeader, SubLabel, KeyValue, Separator } from "@/components/ds";
-import type { Hierarchy, HierarchyRole } from "@/lib/types";
+import type { Organization, OrganizationRole } from "@/lib/types";
 
 // ── Role colors by level ──────────────────────────────────────────
 const LEVEL_COLORS: Record<number, { border: string; text: string; bg: string; glow: string }> = {
@@ -32,7 +32,7 @@ function roleColor(level: number) {
 
 // ── Custom React Flow node ────────────────────────────────────────
 type RoleNodeData = {
-  role: HierarchyRole;
+  role: OrganizationRole;
   isFirst: boolean;
   isLast: boolean;
 };
@@ -96,18 +96,18 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
 
 const nodeTypes = { roleNode: RoleNodeComponent };
 
-// ── Build React Flow nodes + edges from hierarchy roles ───────────
+// ── Build React Flow nodes + edges from organization roles ───────────
 const NODE_WIDTH = 220;
 const NODE_HEIGHT_BASE = 120;
 const NODE_GAP_Y = 80;
 
-function buildFlowElements(roles: HierarchyRole[]): { nodes: Node<RoleNodeData>[]; edges: Edge[] } {
+function buildFlowElements(roles: OrganizationRole[]): { nodes: Node<RoleNodeData>[]; edges: Edge[] } {
   const sorted = [...roles].sort((a, b) => a.level - b.level);
   const nodes: Node<RoleNodeData>[] = [];
   const edges: Edge[] = [];
 
   // Group by level for horizontal spreading
-  const levels = new Map<number, HierarchyRole[]>();
+  const levels = new Map<number, OrganizationRole[]>();
   for (const r of sorted) {
     const list = levels.get(r.level) ?? [];
     list.push(r);
@@ -173,12 +173,12 @@ function buildFlowElements(roles: HierarchyRole[]): { nodes: Node<RoleNodeData>[
   return { nodes, edges };
 }
 
-// ── Hierarchy Flow Visualization ──────────────────────────────────
-function HierarchyFlow({ hierarchy }: { hierarchy: Hierarchy }) {
-  const { nodes, edges } = useMemo(() => buildFlowElements(hierarchy.roles), [hierarchy.roles]);
+// ── Organization Flow Visualization ──────────────────────────────────
+function OrganizationFlow({ organization }: { organization: Organization }) {
+  const { nodes, edges } = useMemo(() => buildFlowElements(organization.roles), [organization.roles]);
 
   // Compute height based on number of levels
-  const levels = new Set(hierarchy.roles.map((r) => r.level));
+  const levels = new Set(organization.roles.map((r) => r.level));
   const height = Math.max(300, levels.size * (NODE_HEIGHT_BASE + NODE_GAP_Y) + 40);
 
   return (
@@ -205,7 +205,7 @@ function HierarchyFlow({ hierarchy }: { hierarchy: Hierarchy }) {
   );
 }
 
-// ── Create Hierarchy Dialog ───────────────────────────────────────
+// ── Create Organization Dialog ───────────────────────────────────────
 
 interface RoleDraft {
   name: string;
@@ -219,7 +219,7 @@ function emptyRoleDraft(): RoleDraft {
   return { name: "", level: 0, reports_to: "", can_command: "", permissions: "" };
 }
 
-function CreateHierarchyDialog({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) {
+function CreateOrganizationDialog({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [roles, setRoles] = useState<RoleDraft[]>([emptyRoleDraft()]);
@@ -242,7 +242,7 @@ function CreateHierarchyDialog({ onClose, onComplete }: { onClose: () => void; o
     setCreating(true);
     setError("");
     const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const body: Hierarchy = {
+    const body: Organization = {
       slug,
       name: name.trim(),
       description: description.trim() || undefined,
@@ -257,11 +257,11 @@ function CreateHierarchyDialog({ onClose, onComplete }: { onClose: () => void; o
         })),
     };
     try {
-      await apiPost("/api/hierarchies", body);
+      await apiPost("/api/organizations", body);
       onComplete();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create hierarchy");
+      setError(err instanceof Error ? err.message : "Failed to create organization");
       setCreating(false);
     }
   };
@@ -274,7 +274,7 @@ function CreateHierarchyDialog({ onClose, onComplete }: { onClose: () => void; o
       <div className="relative z-10 w-full max-w-lg mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl max-h-[85vh] flex flex-col">
         <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-lg font-heading text-foreground/90">New Hierarchy</h2>
+            <h2 className="text-lg font-heading text-foreground/90">New Organization</h2>
             <p className="text-[11px] text-muted-foreground/40 mt-0.5">Define a role structure for organizing agents</p>
           </div>
           <button onClick={onClose} className="text-muted-foreground/40 hover:text-foreground/60 transition-colors">
@@ -360,7 +360,7 @@ function CreateHierarchyDialog({ onClose, onComplete }: { onClose: () => void; o
 }
 
 // ── Delete Confirmation Dialog ────────────────────────────────────
-function DeleteHierarchyDialog({ hierarchy, onClose, onComplete }: { hierarchy: Hierarchy; onClose: () => void; onComplete: () => void }) {
+function DeleteOrganizationDialog({ organization, onClose, onComplete }: { organization: Organization; onClose: () => void; onComplete: () => void }) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
@@ -368,11 +368,11 @@ function DeleteHierarchyDialog({ hierarchy, onClose, onComplete }: { hierarchy: 
     setDeleting(true);
     setError("");
     try {
-      await apiDelete(`/api/hierarchies/${hierarchy.slug}`);
+      await apiDelete(`/api/organizations/${organization.slug}`);
       onComplete();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete hierarchy");
+      setError(err instanceof Error ? err.message : "Failed to delete organization");
       setDeleting(false);
     }
   };
@@ -381,9 +381,9 @@ function DeleteHierarchyDialog({ hierarchy, onClose, onComplete }: { hierarchy: 
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
-        <h3 className="text-lg font-heading text-foreground/90 mb-2">Delete Hierarchy</h3>
+        <h3 className="text-lg font-heading text-foreground/90 mb-2">Delete Organization</h3>
         <p className="text-sm text-muted-foreground/50 mb-6">
-          Are you sure you want to delete <span className="font-mono text-foreground/70">{hierarchy.name}</span>?
+          Are you sure you want to delete <span className="font-mono text-foreground/70">{organization.name}</span>?
         </p>
         {error && <p className="text-xs text-red-400/80 mb-3">{error}</p>}
         <div className="flex gap-3 justify-end">
@@ -401,34 +401,34 @@ function DeleteHierarchyDialog({ hierarchy, onClose, onComplete }: { hierarchy: 
 
 // ── Main Page ─────────────────────────────────────────────────────
 
-export default function HierarchiesPage() {
-  usePageTitle("Hierarchies");
+export default function OrganizationsPage() {
+  usePageTitle("Organizations");
 
-  const [hierarchies, setHierarchies] = useState<Hierarchy[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<Hierarchy | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Organization | null>(null);
 
-  const fetchHierarchies = useCallback(async () => {
+  const fetchOrganizations = useCallback(async () => {
     try {
-      const data = await apiGet<Hierarchy[]>("/api/hierarchies").catch(() => [] as Hierarchy[]);
-      setHierarchies(data ?? []);
+      const data = await apiGet<Organization[]>("/api/organizations").catch(() => [] as Organization[]);
+      setOrganizations(data ?? []);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchHierarchies();
-  }, [fetchHierarchies]);
+    fetchOrganizations();
+  }, [fetchOrganizations]);
 
   return (
     <Page>
       <PageHeader
-        title="Hierarchies"
+        title="Organizations"
         description="Role structures for organizing agents within worlds."
         actions={
-          <ActionButton compact onClick={() => setShowCreate(true)} label="New Hierarchy" icon={<IconPlus size={18} stroke={2.4} />} />
+          <ActionButton compact onClick={() => setShowCreate(true)} label="New Organization" icon={<IconPlus size={18} stroke={2.4} />} />
         }
       />
 
@@ -436,23 +436,23 @@ export default function HierarchiesPage() {
         <div className="space-y-6">
           <Skeleton className="h-[300px] w-full rounded-xl" />
         </div>
-      ) : hierarchies.length === 0 ? (
+      ) : organizations.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-sm text-muted-foreground/50">No hierarchies defined yet.</p>
+          <p className="text-sm text-muted-foreground/50">No organizations defined yet.</p>
           <button onClick={() => setShowCreate(true)}
             className="mt-3 text-xs font-mono text-muted-foreground/40 hover:text-foreground/60 transition-colors underline underline-offset-2">
-            Create your first hierarchy
+            Create your first organization
           </button>
         </div>
       ) : (
         <div className="space-y-10">
-          {hierarchies.map((h, idx) => (
+          {organizations.map((h, idx) => (
             <div key={h.slug}>
               <div className="flex items-center gap-3 mb-6">
                 <SectionHeader className="flex-1 mb-0">{h.name}</SectionHeader>
                 {h.slug !== "default" && (
                   <button onClick={() => setDeleteTarget(h)}
-                    className="text-muted-foreground/20 hover:text-red-400/70 transition-colors p-1" title="Delete hierarchy">
+                    className="text-muted-foreground/20 hover:text-red-400/70 transition-colors p-1" title="Delete organization">
                     <IconTrash size={14} />
                   </button>
                 )}
@@ -461,7 +461,7 @@ export default function HierarchiesPage() {
               <div className="flex flex-col lg:flex-row gap-8">
                 {/* React Flow visualization */}
                 <div className="flex-1 min-w-0">
-                  <HierarchyFlow hierarchy={h} />
+                  <OrganizationFlow organization={h} />
                 </div>
 
                 {/* Metadata sidebar */}
@@ -474,14 +474,14 @@ export default function HierarchiesPage() {
                 </div>
               </div>
 
-              {idx < hierarchies.length - 1 && <Separator className="mt-10" />}
+              {idx < organizations.length - 1 && <Separator className="mt-10" />}
             </div>
           ))}
         </div>
       )}
 
-      {showCreate && <CreateHierarchyDialog onClose={() => setShowCreate(false)} onComplete={fetchHierarchies} />}
-      {deleteTarget && <DeleteHierarchyDialog hierarchy={deleteTarget} onClose={() => setDeleteTarget(null)} onComplete={fetchHierarchies} />}
+      {showCreate && <CreateOrganizationDialog onClose={() => setShowCreate(false)} onComplete={fetchOrganizations} />}
+      {deleteTarget && <DeleteOrganizationDialog organization={deleteTarget} onClose={() => setDeleteTarget(null)} onComplete={fetchOrganizations} />}
     </Page>
   );
 }

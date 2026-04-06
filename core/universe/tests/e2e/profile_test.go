@@ -44,7 +44,7 @@ func TestProfile_RequiresValidation(t *testing.T) {
 	// THEN it should fail because the requirement is not satisfied
 	tc.Spawn().
 		WithAgent("profile-agent").
-		ExecuteExpectError("requires element")
+		ExecuteExpectError("requires tool")
 }
 
 func TestProfile_RequiresSatisfied(t *testing.T) {

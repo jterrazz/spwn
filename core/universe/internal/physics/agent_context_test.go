@@ -13,7 +13,7 @@ func TestGenerateChiefContext(t *testing.T) {
 		Role:      "chief",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Elements:  []string{"bash", "git", "node"},
+		Tools:  []string{"bash", "git", "node"},
 		CPU:       2,
 		Memory:    "4g",
 		Timeout:   "30m",
@@ -33,7 +33,7 @@ func TestGenerateChiefContext(t *testing.T) {
 		"Delegation":       "missing delegation pattern",
 		"w-acme-28373":     "missing world ID",
 		"/host/project":    "missing workspace path",
-		"bash, git, node":  "missing elements",
+		"bash, git, node":  "missing tools",
 		"2 cpu":            "missing CPU",
 		"4g":               "missing memory",
 		"30m":              "missing timeout",
@@ -57,7 +57,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Elements:  []string{"bash", "git"},
+		Tools:  []string{"bash", "git"},
 		CPU:       2,
 		Memory:    "4g",
 		Timeout:   "30m",
@@ -72,16 +72,16 @@ func TestGenerateWorkerContext(t *testing.T) {
 		"neo":            "missing name",
 		"morpheus":       "missing chief",
 		"trinity":        "missing peer",
-		"/mind/identity/":         "missing mind identity",
-		"/mind/skills/":           "missing mind skills",
-		"/mind/memory/knowledge/": "missing mind knowledge",
-		"/mind/memory/playbooks/": "missing mind playbooks",
-		"/mind/memory/journal/":   "missing mind journal",
+		"/mind/core/":      "missing mind core",
+		"/mind/skills/":    "missing mind skills",
+		"/mind/knowledge/": "missing mind knowledge",
+		"/mind/playbooks/": "missing mind playbooks",
+		"/mind/journal/":   "missing mind journal",
 		"/world/inbox":   "missing inbox",
 		"Messaging":      "missing messaging skill",
 		"w-acme-28373":   "missing world ID",
 		"/host/project":  "missing workspace path",
-		"bash, git":      "missing elements",
+		"bash, git":      "missing tools",
 	}
 
 	for want, msg := range checks {
@@ -96,14 +96,14 @@ func TestGenerateNPCContext(t *testing.T) {
 		Role:     "npc",
 		WorldID:  "w-acme-28373",
 		NPCTask:  "lint src/",
-		Elements: []string{"bash"},
+		Tools: []string{"bash"},
 	})
 
 	checks := map[string]string{
 		"NPC":          "missing NPC role",
 		"lint src/":    "missing task",
 		"w-acme-28373": "missing world ID",
-		"bash":         "missing elements",
+		"bash":         "missing tools",
 	}
 
 	for want, msg := range checks {
@@ -162,7 +162,7 @@ func TestGenerateGodContext_ContainsAllSections(t *testing.T) {
 		AgentName: "architect",
 		Role:      "god",
 		WorldID:   "w-test-99999",
-		Elements:  []string{"bash", "git"},
+		Tools:  []string{"bash", "git"},
 		CPU:       4,
 		Memory:    "8g",
 		Timeout:   "60m",

@@ -21,9 +21,6 @@ func TestGeneratePhysics(t *testing.T) {
 					Constants: models.ConstantsManifest{
 						CPU: 2, Memory: "1g", Disk: "5g", Timeout: "1h",
 					},
-					Laws: models.LawsManifest{
-						MaxProcesses: 64,
-					},
 				},
 			},
 			wantParts: []string{
@@ -35,8 +32,7 @@ func TestGeneratePhysics(t *testing.T) {
 				"1h",
 				"## Laws",
 				"bridge (outbound access enabled)",
-				"64",
-				"## Elements",
+				"## Tools",
 				"/workspace",
 				"/mind",
 			},
@@ -58,19 +54,19 @@ func TestGeneratePhysics(t *testing.T) {
 func TestGenerateFaculties(t *testing.T) {
 	tests := []struct {
 		name      string
-		elements  []string
+		tools     []string
 		bridges   []gate.Bridge
 		wantParts []string
 	}{
 		{
-			name:     "with_elements_and_bridges",
-			elements: []string{"bash", "git", "node"},
+			name:     "with_tools_and_bridges",
+			tools:    []string{"bash", "git", "node"},
 			bridges: []gate.Bridge{
 				{Source: "host:claude", As: "claude", Capabilities: []string{"code", "chat"}},
 			},
 			wantParts: []string{
 				"# Faculties",
-				"## Elements",
+				"## Tools",
 				"bash, git, node",
 				"## Gate Bridges",
 				"`claude`",
@@ -79,16 +75,16 @@ func TestGenerateFaculties(t *testing.T) {
 			},
 		},
 		{
-			name:     "no_elements",
-			elements: nil,
+			name:     "no_tools",
+			tools:    nil,
 			bridges:  nil,
 			wantParts: []string{
 				"(none verified)",
 			},
 		},
 		{
-			name:     "elements_no_bridges",
-			elements: []string{"curl"},
+			name:     "tools_no_bridges",
+			tools:    []string{"curl"},
 			bridges:  nil,
 			wantParts: []string{
 				"curl",
@@ -96,7 +92,7 @@ func TestGenerateFaculties(t *testing.T) {
 		},
 		{
 			name:     "bridge_without_capabilities",
-			elements: []string{"sh"},
+			tools:    []string{"sh"},
 			bridges: []gate.Bridge{
 				{Source: "host:tool", As: "tool"},
 			},
@@ -109,7 +105,7 @@ func TestGenerateFaculties(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GenerateFaculties(tt.elements, tt.bridges)
+			got := GenerateFaculties(tt.tools, tt.bridges)
 			for _, part := range tt.wantParts {
 				if !strings.Contains(got, part) {
 					t.Errorf("GenerateFaculties() missing %q in output:\n%s", part, got)

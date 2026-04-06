@@ -99,7 +99,7 @@ func TestSessionFilePersistence(t *testing.T) {
 	Save(tmp, &Session{ID: "persist", AgentName: "neo", WorldID: "w-test"})
 
 	// Verify file exists
-	path := filepath.Join(tmp, "sessions", "w-test.json")
+	path := filepath.Join(tmp, "journal", "w-test.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		t.Error("session file not created")
 	}

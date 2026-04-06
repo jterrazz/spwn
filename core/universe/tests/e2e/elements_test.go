@@ -8,13 +8,13 @@ import (
 	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
-func TestSpawn_ElementsVerified(t *testing.T) {
-	// GIVEN a config requesting @unix and @git elements
+func TestSpawn_ToolsVerified(t *testing.T) {
+	// GIVEN a config requesting @unix and @git tools
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  elements:
+  tools:
     - "@unix"
     - "@git"
 `).
@@ -28,14 +28,14 @@ physics:
 	})
 }
 
-func TestSpawn_MissingElementFails(t *testing.T) {
-	// GIVEN a config requesting a non-existent element
+func TestSpawn_MissingToolFails(t *testing.T) {
+	// GIVEN a config requesting a non-existent tool
 	// WHEN a universe is spawned
-	// THEN it should fail with an error about the missing element
+	// THEN it should fail with an error about the missing tool
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  elements:
+  tools:
     - totally-fake-binary
 `).
 		NoAgent().
@@ -48,7 +48,7 @@ func TestSpawn_PackExpansion(t *testing.T) {
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  elements:
+  tools:
     - "@unix"
 `).
 		NoAgent().

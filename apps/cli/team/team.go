@@ -16,14 +16,12 @@ var Cmd = &cobra.Command{
 }
 
 var (
-	newIcon  string
 	newColor string
 	newDesc  string
 )
 
 func init() {
-	newCmd.Flags().StringVar(&newIcon, "icon", "", "Emoji or single-char icon")
-	newCmd.Flags().StringVar(&newColor, "color", "", "Hex accent color (e.g. #8B5CF6)")
+	newCmd.Flags().StringVar(&newColor, "color", "", "Accent color — hex (#8B5CF6) or name (purple, blue, red, amber, emerald)")
 	newCmd.Flags().StringVar(&newDesc, "description", "", "Short description")
 
 	Cmd.AddCommand(newCmd)
@@ -42,8 +40,8 @@ func newStepper(cmd *cobra.Command) *ui.Stepper {
 var newCmd = &cobra.Command{
 	Use:   "new <name>",
 	Short: "Create a new team",
-	Example: `  spwn team new "Matrix Ops" --icon ⬡ --color "#8B5CF6"
-  spwn team new infra --icon ⚙`,
+	Example: `  spwn team new "Matrix Ops" --color "#8B5CF6"
+  spwn team new infra --color purple`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
@@ -53,7 +51,6 @@ var newCmd = &cobra.Command{
 		t := agentDomain.Team{
 			Slug:        slug,
 			Name:        name,
-			Icon:        newIcon,
 			Color:       newColor,
 			Description: newDesc,
 		}
@@ -85,11 +82,7 @@ var lsCmd = &cobra.Command{
 		}
 		for _, t := range teams {
 			members, _ := agentDomain.TeamMembers(t.Slug)
-			icon := t.Icon
-			if icon == "" {
-				icon = "●"
-			}
-			line := fmt.Sprintf("  %s  %-20s %d agent(s)", icon, t.Name, len(members))
+			line := fmt.Sprintf("  ●  %-20s %d agent(s)", t.Name, len(members))
 			if len(members) > 0 {
 				line += "   " + strings.Join(members, ", ")
 			}
@@ -104,7 +97,7 @@ var lsCmd = &cobra.Command{
 var editCmd = &cobra.Command{
 	Use:   "edit <slug>",
 	Short: "Edit a team's metadata",
-	Example: `  spwn team edit matrix-ops --icon 🔮 --color "#A855F7"
+	Example: `  spwn team edit matrix-ops --color "#A855F7"
   spwn team edit infra --description "Infrastructure & ops"`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -117,10 +110,6 @@ var editCmd = &cobra.Command{
 		}
 
 		changed := false
-		if f := cmd.Flag("icon"); f != nil && f.Changed {
-			t.Icon = newIcon
-			changed = true
-		}
 		if f := cmd.Flag("color"); f != nil && f.Changed {
 			t.Color = newColor
 			changed = true
@@ -131,7 +120,7 @@ var editCmd = &cobra.Command{
 		}
 
 		if !changed {
-			fmt.Printf("  %s  %s (%s)\n", t.Icon, t.Name, t.Slug)
+			fmt.Printf("  %s (%s)\n", t.Name, t.Slug)
 			if t.Color != "" {
 				fmt.Printf("     color: %s\n", t.Color)
 			}
@@ -152,8 +141,7 @@ var editCmd = &cobra.Command{
 }
 
 func init() {
-	editCmd.Flags().StringVar(&newIcon, "icon", "", "Emoji or single-char icon")
-	editCmd.Flags().StringVar(&newColor, "color", "", "Hex accent color")
+	editCmd.Flags().StringVar(&newColor, "color", "", "Accent color — hex or name")
 	editCmd.Flags().StringVar(&newDesc, "description", "", "Short description")
 }
 

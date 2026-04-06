@@ -115,12 +115,12 @@ func (s *Server) Start() error {
 	mux.HandleFunc("PUT /api/teams/{slug}", cors(s.handleUpdateTeam))
 	mux.HandleFunc("DELETE /api/teams/{slug}", cors(s.handleDeleteTeam))
 
-	// --- Hierarchy endpoints ---
-	mux.HandleFunc("GET /api/hierarchies", cors(s.handleListHierarchies))
-	mux.HandleFunc("GET /api/hierarchies/{slug}", cors(s.handleGetHierarchy))
-	mux.HandleFunc("POST /api/hierarchies", cors(s.handleCreateHierarchy))
-	mux.HandleFunc("PUT /api/hierarchies/{slug}", cors(s.handleUpdateHierarchy))
-	mux.HandleFunc("DELETE /api/hierarchies/{slug}", cors(s.handleDeleteHierarchy))
+	// --- Organization endpoints ---
+	mux.HandleFunc("GET /api/organizations", cors(s.handleListOrganizations))
+	mux.HandleFunc("GET /api/organizations/{slug}", cors(s.handleGetOrganization))
+	mux.HandleFunc("POST /api/organizations", cors(s.handleCreateOrganization))
+	mux.HandleFunc("PUT /api/organizations/{slug}", cors(s.handleUpdateOrganization))
+	mux.HandleFunc("DELETE /api/organizations/{slug}", cors(s.handleDeleteOrganization))
 
 	// --- Architect endpoints ---
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
@@ -241,31 +241,23 @@ type profileYAML struct {
 
 // agentProfileResponse is the full profile sent to the frontend.
 type agentProfileResponse struct {
-	Name      string            `json:"name"`
-	Path      string            `json:"path"`
-	Role      string            `json:"role"`
-	Team      string            `json:"team,omitempty"`
-	Engine    string            `json:"engine"`
-	Provider  string            `json:"provider"`
-	Purpose   string            `json:"purpose"`
-	Persona   string            `json:"persona"`
-	Traits    []string          `json:"traits"`
-	Skills    []string          `json:"skills"`
-	Playbooks []string          `json:"playbooks"`
-	Knowledge []string          `json:"knowledge"`
-	Journal   []journalEntry    `json:"journal"`
-	Bonds     []bondEntry       `json:"bonds"`
-	Layers    map[string][]string `json:"layers"`
+	Name     string              `json:"name"`
+	Path     string              `json:"path"`
+	Role     string              `json:"role"`
+	Team     string              `json:"team,omitempty"`
+	Engine   string              `json:"engine"`
+	Provider string              `json:"provider"`
+	Purpose  string              `json:"purpose"`
+	Persona  string              `json:"persona"`
+	Traits   []string            `json:"traits"`
+	Skills   []string            `json:"skills"`
+	Journal  []journalEntry      `json:"journal"`
+	Layers   map[string][]string `json:"layers"`
 }
 
 type journalEntry struct {
 	Date    string `json:"date"`
 	Summary string `json:"summary"`
-}
-
-type bondEntry struct {
-	Agent        string `json:"agent"`
-	Relationship string `json:"relationship"`
 }
 
 // readFirstLineContent reads the first non-empty, non-heading line of a file.
@@ -323,42 +315,6 @@ func parseTraits(path string) []string {
 	return traits
 }
 
-// parseBonds reads bonds.md and returns structured bond entries.
-func parseBonds(path string) []bondEntry {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil
-	}
-	var bonds []bondEntry
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		line = strings.TrimLeft(line, "-*• ")
-		line = strings.TrimSpace(line)
-		// Try "agent: relationship" or "agent — relationship" format
-		var agent, rel string
-		if idx := strings.Index(line, ":"); idx > 0 {
-			agent = strings.TrimSpace(line[:idx])
-			rel = strings.TrimSpace(line[idx+1:])
-		} else if idx := strings.Index(line, "—"); idx > 0 {
-			agent = strings.TrimSpace(line[:idx])
-			rel = strings.TrimSpace(line[idx+len("—"):])
-		} else if idx := strings.Index(line, "-"); idx > 0 {
-			agent = strings.TrimSpace(line[:idx])
-			rel = strings.TrimSpace(line[idx+1:])
-		} else {
-			agent = line
-			rel = "connected"
-		}
-		if agent != "" {
-			bonds = append(bonds, bondEntry{Agent: agent, Relationship: rel})
-		}
-	}
-	return bonds
-}
-
 // parseJournalFiles reads journal directory and returns structured entries.
 func parseJournalFiles(dir string) []journalEntry {
 	entries, err := os.ReadDir(dir)
@@ -413,10 +369,10 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Read identity files
-	purpose := readFirstLineContent(filepath.Join(mindPath, "identity", "purpose.md"))
-	persona := readFirstLineContent(filepath.Join(mindPath, "identity", "persona.md"))
-	traits := parseTraits(filepath.Join(mindPath, "identity", "traits.md"))
+	// Read core identity files
+	purpose := readFirstLineContent(filepath.Join(mindPath, "core", "purpose.md"))
+	persona := readFirstLineContent(filepath.Join(mindPath, "core", "persona.md"))
+	traits := parseTraits(filepath.Join(mindPath, "core", "traits.md"))
 	if traits == nil {
 		traits = []string{}
 	}
@@ -426,47 +382,26 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	if skills == nil {
 		skills = []string{}
 	}
-	playbooks := listMdFiles(filepath.Join(mindPath, "memory", "playbooks"))
-	if playbooks == nil {
-		playbooks = []string{}
-	}
-	knowledge := listMdFiles(filepath.Join(mindPath, "memory", "knowledge"))
-	if knowledge == nil {
-		knowledge = []string{}
-	}
 
-	// Journal entries
-	journal := parseJournalFiles(filepath.Join(mindPath, "memory", "journal"))
-	if journal == nil {
-		// Try legacy path
-		journal = parseJournalFiles(filepath.Join(mindPath, "journal"))
-	}
+	// Journal entries (now at root level)
+	journal := parseJournalFiles(filepath.Join(mindPath, "journal"))
 	if journal == nil {
 		journal = []journalEntry{}
 	}
 
-	// Bonds
-	bonds := parseBonds(filepath.Join(mindPath, "bonds.md"))
-	if bonds == nil {
-		bonds = []bondEntry{}
-	}
-
 	resp := agentProfileResponse{
-		Name:      info.Name,
-		Path:      info.Path,
-		Role:      role,
-		Team:      info.Team,
-		Engine:    engine,
-		Provider:  provider,
-		Purpose:   purpose,
-		Persona:   persona,
-		Traits:    traits,
-		Skills:    skills,
-		Playbooks: playbooks,
-		Knowledge: knowledge,
-		Journal:   journal,
-		Bonds:     bonds,
-		Layers:    info.Layers,
+		Name:     info.Name,
+		Path:     info.Path,
+		Role:     role,
+		Team:     info.Team,
+		Engine:   engine,
+		Provider: provider,
+		Purpose:  purpose,
+		Persona:  persona,
+		Traits:   traits,
+		Skills:   skills,
+		Journal:  journal,
+		Layers:   info.Layers,
 	}
 
 	jsonOK(w, resp)
@@ -1571,9 +1506,9 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate field name to prevent directory traversal
-	allowed := map[string]bool{"purpose": true, "persona": true, "traits": true, "bonds": true}
+	allowed := map[string]bool{"purpose": true, "persona": true, "traits": true}
 	if !allowed[body.Field] {
-		jsonError(w, "invalid field: must be one of purpose, persona, traits, bonds, team", 400)
+		jsonError(w, "invalid field: must be one of purpose, persona, traits, team", 400)
 		return
 	}
 
@@ -1583,13 +1518,13 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	identityDir := filepath.Join(info.Path, "identity")
-	if err := os.MkdirAll(identityDir, 0755); err != nil {
-		jsonError(w, "failed to create identity dir: "+err.Error(), 500)
+	coreDir := filepath.Join(info.Path, "core")
+	if err := os.MkdirAll(coreDir, 0755); err != nil {
+		jsonError(w, "failed to create core dir: "+err.Error(), 500)
 		return
 	}
 
-	filePath := filepath.Join(identityDir, body.Field+".md")
+	filePath := filepath.Join(coreDir, body.Field+".md")
 
 	// Write content with a heading
 	heading := strings.ToUpper(body.Field[:1]) + body.Field[1:]
@@ -1673,9 +1608,6 @@ func (s *Server) handleUpdateTeam(w http.ResponseWriter, r *http.Request) {
 	if body.Name != "" {
 		existing.Name = body.Name
 	}
-	if body.Icon != "" {
-		existing.Icon = body.Icon
-	}
 	if body.Color != "" {
 		existing.Color = body.Color
 	}
@@ -1703,28 +1635,28 @@ func (s *Server) handleDeleteTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 // ============================================================
-// Hierarchy handlers
+// Organization handlers
 // ============================================================
 
-func (s *Server) handleListHierarchies(w http.ResponseWriter, r *http.Request) {
-	hierarchies, err := agentpkg.ListHierarchies()
+func (s *Server) handleListOrganizations(w http.ResponseWriter, r *http.Request) {
+	organizations, err := agentpkg.ListOrganizations()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
-	if hierarchies == nil {
-		hierarchies = []agentpkg.Hierarchy{}
+	if organizations == nil {
+		organizations = []agentpkg.Organization{}
 	}
-	jsonOK(w, hierarchies)
+	jsonOK(w, organizations)
 }
 
-func (s *Server) handleGetHierarchy(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetOrganization(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 	if slug == "" {
-		jsonError(w, "hierarchy slug is required", 400)
+		jsonError(w, "organization slug is required", 400)
 		return
 	}
-	h, err := agentpkg.GetHierarchy(slug)
+	h, err := agentpkg.GetOrganization(slug)
 	if err != nil {
 		jsonError(w, err.Error(), 404)
 		return
@@ -1732,20 +1664,20 @@ func (s *Server) handleGetHierarchy(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, h)
 }
 
-func (s *Server) handleCreateHierarchy(w http.ResponseWriter, r *http.Request) {
-	var body agentpkg.Hierarchy
+func (s *Server) handleCreateOrganization(w http.ResponseWriter, r *http.Request) {
+	var body agentpkg.Organization
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
 	}
 	if body.Name == "" {
-		jsonError(w, "hierarchy name is required", 400)
+		jsonError(w, "organization name is required", 400)
 		return
 	}
 	if body.Slug == "" {
 		body.Slug = agentpkg.Slugify(body.Name)
 	}
-	if err := agentpkg.CreateHierarchy(body); err != nil {
+	if err := agentpkg.CreateOrganization(body); err != nil {
 		jsonError(w, err.Error(), 400)
 		return
 	}
@@ -1753,18 +1685,18 @@ func (s *Server) handleCreateHierarchy(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, body)
 }
 
-func (s *Server) handleUpdateHierarchy(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleUpdateOrganization(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 	if slug == "" {
-		jsonError(w, "hierarchy slug is required", 400)
+		jsonError(w, "organization slug is required", 400)
 		return
 	}
-	existing, err := agentpkg.GetHierarchy(slug)
+	existing, err := agentpkg.GetOrganization(slug)
 	if err != nil {
 		jsonError(w, err.Error(), 404)
 		return
 	}
-	var body agentpkg.Hierarchy
+	var body agentpkg.Organization
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
@@ -1780,20 +1712,20 @@ func (s *Server) handleUpdateHierarchy(w http.ResponseWriter, r *http.Request) {
 		existing.Roles = body.Roles
 	}
 	existing.Slug = slug
-	if err := agentpkg.UpdateHierarchy(*existing); err != nil {
+	if err := agentpkg.UpdateOrganization(*existing); err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
 	jsonOK(w, existing)
 }
 
-func (s *Server) handleDeleteHierarchy(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleDeleteOrganization(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 	if slug == "" {
-		jsonError(w, "hierarchy slug is required", 400)
+		jsonError(w, "organization slug is required", 400)
 		return
 	}
-	if err := agentpkg.DeleteHierarchy(slug); err != nil {
+	if err := agentpkg.DeleteOrganization(slug); err != nil {
 		jsonError(w, err.Error(), 404)
 		return
 	}

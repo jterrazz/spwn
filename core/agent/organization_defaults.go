@@ -1,12 +1,12 @@
 package agent
 
-// DefaultHierarchy is the built-in three-role hierarchy used when no custom
-// hierarchy is specified. It contains a chief (level 0) who commands
+// DefaultOrganization is the built-in three-role organization used when no custom
+// organization is specified. It contains a chief (level 0) who commands
 // managers (level 1) and workers (level 2).
-var DefaultHierarchy = Hierarchy{
+var DefaultOrganization = Organization{
 	Slug:        "default",
 	Name:        "Default",
-	Description: "Built-in three-tier hierarchy",
+	Description: "Built-in three-tier organization",
 	Roles: []Role{
 		{
 			Name:        "chief",
@@ -31,11 +31,11 @@ var DefaultHierarchy = Hierarchy{
 	},
 }
 
-// EnsureDefaultHierarchy creates the default hierarchy on disk if it does
+// EnsureDefaultOrganization creates the default organization on disk if it does
 // not already exist. It is safe to call multiple times.
-func EnsureDefaultHierarchy() error {
-	if _, err := GetHierarchy(DefaultHierarchy.Slug); err == nil {
+func EnsureDefaultOrganization() error {
+	if _, err := GetOrganization(DefaultOrganization.Slug); err == nil {
 		return nil // already exists
 	}
-	return CreateHierarchy(DefaultHierarchy)
+	return CreateOrganization(DefaultOrganization)
 }

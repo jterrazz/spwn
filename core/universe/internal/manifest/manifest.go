@@ -12,8 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ElementPacks maps @pack names to their constituent binaries.
-var ElementPacks = map[string][]string{
+// ToolPacks maps @pack names to their constituent binaries.
+var ToolPacks = map[string][]string{
 	"@unix":   {"bash", "sh", "ls", "cat", "cp", "mv", "rm", "mkdir", "rmdir", "chmod", "chown", "grep", "sed", "awk", "find", "xargs", "curl", "wget"},
 	"@git":    {"git"},
 	"@node":   {"node", "npm", "npx"},
@@ -25,10 +25,9 @@ var ElementPacks = map[string][]string{
 type rawManifest struct {
 	Physics struct {
 		Constants models.ConstantsManifest `yaml:"constants"`
-		Laws      models.LawsManifest      `yaml:"laws"`
-		Elements  yaml.Node                `yaml:"elements"`
 	} `yaml:"physics"`
-	Gate []gate.Bridge `yaml:"gate"`
+	Tools yaml.Node     `yaml:"tools"`
+	Gate  []gate.Bridge `yaml:"gate"`
 }
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
@@ -52,22 +51,21 @@ func LoadPath(path string) (models.Manifest, error) {
 	m := models.Manifest{
 		Physics: models.PhysicsManifest{
 			Constants: raw.Physics.Constants,
-			Laws:      raw.Physics.Laws,
 		},
 		Gate: raw.Gate,
 	}
 
-	// Parse elements (plain list of strings)
-	if raw.Physics.Elements.Kind == yaml.SequenceNode {
-		m.Elements = parseElements(&raw.Physics.Elements)
+	// Parse tools (plain list of strings, root-level)
+	if raw.Tools.Kind == yaml.SequenceNode {
+		m.Tools = parseTools(&raw.Tools)
 	}
 
 	ApplyDefaults(&m)
 	return m, nil
 }
 
-// parseElements extracts element names from a YAML sequence node.
-func parseElements(node *yaml.Node) []string {
+// parseTools extracts tool names from a YAML sequence node.
+func parseTools(node *yaml.Node) []string {
 	var elems []string
 	for _, item := range node.Content {
 		if item.Kind == yaml.ScalarNode {
@@ -120,17 +118,13 @@ physics:
     disk: 2g         # Disk limit
     timeout: 30m     # Max session duration
 
-  # Structural constraints
-  laws:
-    max-processes: 256
-
-  # Available tools (@unix = bash, grep, sed, awk, etc.)
-  elements:
-    - "@unix"        # Core Unix tools
-    - "@git"         # Git version control
-    # - "@node"      # Node.js + npm
-    # - "@python"    # Python 3
-    # - "@build"     # make, gcc, g++
+# Available tools (@unix = bash, grep, sed, awk, etc.)
+tools:
+  - "@unix"          # Core Unix tools
+  - "@git"           # Git version control
+  # - "@node"        # Node.js + npm
+  # - "@python"      # Python 3
+  # - "@build"       # make, gcc, g++
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -157,23 +151,20 @@ physics:
     disk: 2g
     timeout: 30m
 
-  laws:
-    max-processes: 256
-
-  elements:
-    - "@unix"
-    - "@git"
+tools:
+  - "@unix"
+  - "@git"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
 }
 
-// ExpandElements expands @packs into individual binaries and deduplicates.
-func ExpandElements(elems []string) []string {
+// ExpandTools expands @packs into individual binaries and deduplicates.
+func ExpandTools(elems []string) []string {
 	seen := make(map[string]bool)
 	var result []string
 
 	for _, e := range elems {
-		if binaries, ok := ElementPacks[e]; ok {
+		if binaries, ok := ToolPacks[e]; ok {
 			for _, b := range binaries {
 				if !seen[b] {
 					seen[b] = true
@@ -201,9 +192,6 @@ func ApplyDefaults(m *models.Manifest) {
 	}
 	if m.Physics.Constants.Timeout == "" {
 		m.Physics.Constants.Timeout = foundation.DefaultTimeout
-	}
-	if m.Physics.Laws.MaxProcesses == 0 {
-		m.Physics.Laws.MaxProcesses = foundation.DefaultMaxProcs
 	}
 }
 
