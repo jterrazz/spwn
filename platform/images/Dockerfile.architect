@@ -13,21 +13,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create non-root user for Claude Code (refuses --dangerously-skip-permissions as root)
 RUN useradd -m -s /bin/bash architect
 
-# Copy spwn binary (cross-compiled for linux/amd64)
-COPY bin/spwn-linux /usr/local/bin/spwn
+# Copy spwn binary (cross-compiled for linux/amd64, provided in build context)
+COPY spwn /usr/local/bin/spwn
+RUN chmod +x /usr/local/bin/spwn
 
 # Copy Architect identity file
-COPY platform/system/architect/ARCHITECT.md /world/ARCHITECT.md
+COPY system/architect/ARCHITECT.md /world/ARCHITECT.md
 
 # Copy global agent operating manual and system skills
-COPY platform/system/AGENTS.md /world/AGENTS.md
-COPY platform/system/skills/ /world/skills/
+COPY system/AGENTS.md /world/AGENTS.md
+COPY system/skills/ /world/skills/
 
 # Copy architect-specific skills (merged into /world/skills/)
-COPY platform/system/architect/skills/ /world/skills/
+COPY system/architect/skills/ /world/skills/
 
 # Copy default architect stack (overridden by runtime mount)
-COPY platform/system/architect/stack.md /world/stack.md
+COPY system/architect/stack.md /world/stack.md
 
 RUN mkdir -p /world && chown -R architect:architect /world
 
@@ -40,7 +41,7 @@ WORKDIR /world
 
 # Entrypoint aligns the architect user's groups with the host's
 # docker.sock GID so docker exec -u architect can run docker commands.
-COPY platform/images/architect-entrypoint.sh /usr/local/bin/architect-entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/architect-entrypoint.sh
 RUN chmod +x /usr/local/bin/architect-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/architect-entrypoint.sh"]

@@ -10,3 +10,6 @@ var DockerfileWorld []byte
 
 //go:embed Dockerfile.architect
 var DockerfileArchitect []byte
+
+//go:embed architect-entrypoint.sh
+var ArchitectEntrypoint []byte

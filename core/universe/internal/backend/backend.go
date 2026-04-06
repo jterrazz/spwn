@@ -61,6 +61,7 @@ type Backend interface {
 	IsRunning(ctx context.Context, containerID string) (bool, error)
 	ImageExists(ctx context.Context, image string) (bool, error)
 	EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) error
+	EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error
 	ImageVersion(ctx context.Context, image string, label string) (string, error)
 	Logs(ctx context.Context, containerID string, cfg LogsConfig) (io.ReadCloser, error)
 	ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error
