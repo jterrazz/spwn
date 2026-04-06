@@ -1029,13 +1029,24 @@ func (s *Server) handleArchitectStackUpdate(w http.ResponseWriter, r *http.Reque
 }
 
 func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
-	// Use `spwn architect start` which handles container creation + startup
-	cmd := exec.CommandContext(r.Context(), "spwn", "architect", "start")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		jsonError(w, fmt.Sprintf("failed to start architect container: %s (%s)", strings.TrimSpace(string(output)), err), 500)
+	// Use a background context — image builds can take minutes (npm install etc.)
+	// and we don't want the HTTP request timeout to kill the build.
+	ctx := context.Background()
+
+	// Check if already running first (fast path)
+	checkCmd := exec.CommandContext(ctx, "docker", "inspect", "--format", "{{.State.Running}}", "spwn-architect")
+	if out, err := checkCmd.Output(); err == nil && strings.TrimSpace(string(out)) == "true" {
+		jsonOK(w, map[string]string{"status": "running", "message": "already running"})
 		return
 	}
-	jsonOK(w, map[string]string{"status": "running"})
+
+	// Start in background — return immediately so the UI doesn't timeout
+	go func() {
+		cmd := exec.CommandContext(ctx, "spwn", "architect", "start")
+		cmd.CombinedOutput() // fire and forget — errors logged by spwn CLI
+	}()
+
+	jsonOK(w, map[string]string{"status": "starting", "message": "architect is starting (image build may take a few minutes on first run)"})
 }
 
 func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
@@ -1160,11 +1171,12 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	isRunning := checkErr == nil && strings.TrimSpace(string(checkOut)) == "running"
 
 	if !isRunning {
-		// Try to start the architect container
-		startCmd := exec.CommandContext(r.Context(), "docker", "start", containerName)
+		// Use background context — image builds can take minutes
+		bgCtx := context.Background()
+		startCmd := exec.CommandContext(bgCtx, "docker", "start", containerName)
 		if startErr := startCmd.Run(); startErr != nil {
 			// Container doesn't exist, try spwn architect start
-			spwnCmd := exec.CommandContext(r.Context(), "spwn", "architect", "start")
+			spwnCmd := exec.CommandContext(bgCtx, "spwn", "architect", "start")
 			if spwnErr := spwnCmd.Run(); spwnErr != nil {
 				jsonError(w, "failed to start architect: "+spwnErr.Error(), 500)
 				return
