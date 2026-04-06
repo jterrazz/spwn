@@ -138,12 +138,6 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
                 <span>Settings</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={pathname === "/hierarchies"} onClick={() => router.push("/hierarchies")}>
-                <IconBinaryTreeFilled size={16} />
-                <span>Hierarchies</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
 
@@ -161,6 +155,12 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
               <SidebarMenuButton isActive={pathname === "/agents" || pathname.startsWith("/agents/")} onClick={() => router.push("/agents")}>
                 <IconUserFilled size={16} />
                 <span>Agents</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={pathname === "/hierarchies"} onClick={() => router.push("/hierarchies")}>
+                <IconBinaryTreeFilled size={16} />
+                <span>Hierarchies</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
