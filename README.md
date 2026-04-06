@@ -44,17 +44,6 @@ Models mastered thinking. Spwn builds the missing half: a reality for them to li
 
 <br/>
 
-## Principles
-
-|                                        |                                                                                                               |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Context is everything.**             | The #1 skill with AI is maximizing shared context. Spwn's architecture — profiles, knowledge, playbooks — is designed to give agents the highest bandwidth understanding of their world. |
-| **CLI gives agents a body.**           | A shell is not just an interface — it's a nervous system. Agents discover commands, pipe outputs, compose tools. CLI domains become organs: each one a new sense, a new capability the agent can feel and act through. |
-| **Identity creates focus.**            | One mind, one purpose. Each agent has a persistent identity that shapes what it notices and what it ignores. Collaboration, teams, and companies emerge from architecture — not configuration. |
-| **Human patterns are the blueprint.**  | Companies, teams, hierarchies, sleep cycles — these aren't arbitrary. They're evolution's most refined answer to coordination. Spwn borrows from biology, not computer science. |
-
-<br/>
-
 ## Spwn is right for you if
 
 - ✅ You're building **multi-agent systems** where agents collaborate, delegate, and communicate
@@ -65,6 +54,22 @@ Models mastered thinking. Spwn builds the missing half: a reality for them to li
 - ✅ You want **physics-based security** — if curl isn't installed, HTTP is physically impossible
 - ✅ You want **full visibility** into what your agents can do, what they learned, and what they're doing
 - ✅ You want all of this **open source, self-hosted, on your machine**
+
+<br/>
+
+## Built on four principles
+
+### 1. Context is everything
+The #1 skill with AI is maximizing shared context — not prompting, not fine-tuning. Spwn's architecture exists to give agents the widest possible bandwidth: persistent profiles, knowledge bases, playbooks, and session memory.
+
+### 2. CLI gives agents a body
+A shell isn't just an interface — it's a nervous system. Every CLI domain becomes a new organ: file systems are touch, network is sight, databases are long-term memory. Agents don't call tools. They *feel* their environment and act through it.
+
+### 3. One mind, one purpose
+Identity creates focus. Each agent has a persistent role that shapes what it notices and what it ignores. Teams, companies, and hierarchies aren't configured — they emerge from the architecture, the same way they emerge in life.
+
+### 4. Borrow from biology, not CS
+Companies, sleep cycles, natural selection — these patterns aren't arbitrary. They're evolution's most refined solutions to coordination. Spwn applies them to agents: dream to learn, sleep to consolidate, fork to evolve.
 
 <br/>
 
