@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getWorkspaceSummary, getWorldName, type World } from "@/lib/types";
+import { getWorkspaceSummary, getWorldName, type World, type Agent } from "@/lib/types";
 import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { streamChat } from "@/lib/stream-chat";
 import type { ActivityBlock } from "@/lib/activity-types";
@@ -17,17 +17,15 @@ import {
   IconAlertTriangle,
   IconRestore,
   IconSend,
-  IconMessageCircle,
   IconPencil,
-  IconArrowRight,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
 import { ActionButton } from "@/components/action-button";
 import { WorldPlanet } from "@/components/world-planet";
-import { STATUS_BADGE, TIER_BADGE } from "@/lib/status";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useToast } from "@/components/toast-provider";
+import { MetricGrid, SectionHeader, SectionLabel, SubLabel, Separator, StatusDot as DSStatusDot, KeyValue, DataTable } from "@/components/ds";
 import { useRefetch } from "@/components/app-shell";
 
 function timeAgo(iso: string): string {
@@ -45,16 +43,6 @@ const LOG_LEVEL_COLORS: Record<string, string> = {
   error: "text-red-400/70",
   debug: "text-muted-foreground/40",
 };
-
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="glass-subtle px-5 py-4 flex-1 min-w-[140px]">
-      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-1">{label}</p>
-      <p className="text-2xl font-heading text-foreground/90">{value}</p>
-      {sub && <p className="text-[11px] font-mono text-muted-foreground/40 mt-0.5">{sub}</p>}
-    </div>
-  );
-}
 
 type Panel = null | "logs" | "snapshots";
 
@@ -218,11 +206,11 @@ export default function WorldDashboard() {
             <Skeleton className="h-3 w-48" />
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-10">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="glass-subtle px-5 py-4 flex-1 min-w-[140px]">
-              <Skeleton className="h-3 w-16 mb-2" />
-              <Skeleton className="h-7 w-12" />
+            <div key={i}>
+              <Skeleton className="h-3 w-14 mb-2" />
+              <Skeleton className="h-7 w-10" />
             </div>
           ))}
         </div>
@@ -396,108 +384,77 @@ export default function WorldDashboard() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:flex md:flex-row gap-3 md:gap-4">
-          <StatCard label="Status" value={world.status} sub={world.id.substring(0, 12)} />
-          <StatCard label="Agents" value={String(world.agents.length)} />
-          <StatCard label="Config" value={world.config} />
-          <StatCard label="Uptime" value={timeAgo(world.created_at)} />
-        </div>
+        <MetricGrid columns={4} className="w-fit gap-x-10" items={[
+          { label: "Status", value: world.status },
+          { label: "Agents", value: world.agents.length },
+          { label: "Config", value: world.config },
+          { label: "Uptime", value: timeAgo(world.created_at) },
+        ]} />
+
+        <Separator />
 
         {/* Elements */}
         {world.manifest?.elements && world.manifest.elements.length > 0 && (
-          <div>
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">Elements</h2>
-            <div className="flex flex-wrap gap-2">
-              {world.manifest.elements.map((el) => (
-                <span
-                  key={el}
-                  className="px-3 py-1.5 rounded-lg text-[11px] font-mono bg-blue-500/10 text-blue-300/80 border border-blue-500/20"
-                >
-                  {el}
-                </span>
-              ))}
+          <>
+            <div>
+              <SectionHeader>Elements</SectionHeader>
+              <div className="flex flex-wrap gap-1.5">
+                {world.manifest.elements.map((el) => (
+                  <span
+                    key={el}
+                    className="px-2.5 py-1 text-[11px] font-mono text-foreground/60 bg-white/[0.04] border border-white/[0.06]"
+                  >
+                    {el}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+            <Separator />
+          </>
         )}
 
-        {/* Agents — rich cards for deployed agents */}
+        {/* Agents */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40">
-              Agents <span className="normal-case tracking-normal text-muted-foreground/30">({world.agents.length})</span>
-            </h2>
+            <SectionHeader className="mb-0">Agents</SectionHeader>
             <button
               onClick={() => router.push("/agents")}
-              className="text-[11px] text-muted-foreground/40 hover:text-foreground/70 transition-colors"
+              className="text-[10px] font-mono text-muted-foreground/35 hover:text-foreground/70 transition-colors"
             >
-              + Deploy agent
+              + Deploy
             </button>
           </div>
-          {world.agents.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/[0.08] px-5 py-8 text-center">
-              <p className="text-sm text-muted-foreground/40">No agents deployed</p>
-              <p className="text-[11px] text-muted-foreground/25 mt-1">
-                Deploy an agent from the Agents page.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {world.agents.map((agent) => {
-                const tierStyle = TIER_BADGE[agent.tier] ?? TIER_BADGE.citizen;
-                const isActive = agent.status === "running" || agent.status === "waiting";
-                return (
-                  <div
-                    key={agent.name}
-                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 flex items-center gap-4 group hover:border-white/[0.1] hover:bg-white/[0.03] transition-all"
-                  >
-                    {/* Status dot */}
-                    <div className="relative shrink-0">
-                      <div className={`w-2.5 h-2.5 rounded-full ${
-                        agent.status === "running" ? "bg-green-500" :
-                        agent.status === "idle" ? "bg-amber-400" :
-                        agent.status === "waiting" ? "bg-amber-400 animate-pulse" :
-                        "bg-zinc-500/30"
-                      }`} />
-                    </div>
-
-                    {/* Name + tier */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={`/world/${worldId}/${agent.name}`}
-                          className="text-sm font-mono text-foreground/85 hover:text-foreground transition-colors truncate"
-                        >
-                          {agent.name}
-                        </a>
-                        <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${tierStyle}`}>
-                          {agent.tier}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground/35 mt-0.5 capitalize">{agent.status}</p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        onClick={() => router.push(`/world/${worldId}/${agent.name}`)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/80 transition-all"
-                      >
-                        <IconMessageCircle size={12} />
-                        Talk
-                      </button>
-                      <a
-                        href={`/agents/${agent.name}`}
-                        className="flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-colors"
-                        title="View profile"
-                      >
-                        <IconArrowRight size={13} />
-                      </a>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <DataTable<Agent>
+            rows={world.agents}
+            rowKey={(a) => a.name}
+            rowHref={(a) => `/agents/${encodeURIComponent(a.name)}?world=${worldId}`}
+            emptyText="No agents deployed — deploy from the Agents page."
+            columns={[
+              {
+                key: "name",
+                label: "Name",
+                width: "1fr",
+                render: (a) => <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>,
+              },
+              {
+                key: "tier",
+                label: "Tier",
+                width: "80px",
+                render: (a) => <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.tier}</span>,
+              },
+              {
+                key: "status",
+                label: "Status",
+                width: "100px",
+                render: (a) => (
+                  <span className="flex items-center gap-1.5">
+                    <DSStatusDot status={a.status} />
+                    <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.status}</span>
+                  </span>
+                ),
+              },
+            ]}
+          />
         </div>
       </div>
 

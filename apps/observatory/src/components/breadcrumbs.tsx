@@ -45,10 +45,17 @@ export function Breadcrumbs() {
       });
     }
   } else if (pathname.startsWith("/agents/")) {
-    const agentName = pathname.split("/")[2];
-    crumbs.push({ label: "Agents", href: "/agents" });
+    const agentName = decodeURIComponent(pathname.split("/")[2] ?? "");
+    const worldIdParam = typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("world")
+      : null;
+    if (worldIdParam) {
+      crumbs.push({ label: extractWorldName(worldIdParam), href: `/world/${worldIdParam}` });
+    } else {
+      crumbs.push({ label: "Agents", href: "/agents" });
+    }
     if (agentName) {
-      crumbs.push({ label: agentName, href: pathname });
+      crumbs.push({ label: agentName, href: pathname + (worldIdParam ? `?world=${worldIdParam}` : "") });
     }
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import type { AgentProfile } from "@/lib/types";
 import { apiGet, apiPut, apiAction, apiDelete, goApiUrl, encPath } from "@/lib/api-client";
 import { useRefetch } from "@/components/app-shell";
@@ -36,12 +36,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { ActionButton } from "@/components/action-button";
 import { PageHeader } from "@/components/page-header";
+import { SectionHeader, SectionLabel, SubLabel, Separator, MetricGrid, ItemList, StatusDot, KeyValue } from "@/components/ds";
 import { getWorldName, type Team, type World } from "@/lib/types";
 
-export default function AgentProfilePage() {
+export default function AgentProfilePageWrapper() {
+  return (
+    <Suspense>
+      <AgentProfilePage />
+    </Suspense>
+  );
+}
+
+function AgentProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const agentName = decodeURIComponent(params.name as string);
+  const worldId = searchParams.get("world") ?? undefined;
 
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [mindTree, setMindTree] = useState<Record<string, string[]>>({});
@@ -58,6 +69,7 @@ export default function AgentProfilePage() {
   const [deployTargetWorld, setDeployTargetWorld] = useState("");
   const [deploying, setDeploying] = useState(false);
   const [deployError, setDeployError] = useState("");
+  const [worldData, setWorldData] = useState<World | null>(null);
   const refetchSidebar = useRefetch();
 
   usePageTitle(agentName, "Agent");
@@ -81,7 +93,10 @@ export default function AgentProfilePage() {
     fetchProfile();
     apiGet<Team[]>("/api/teams").then((t) => setAvailableTeams(t ?? [])).catch(() => {});
     apiGet<World[]>("/api/universes").then((w) => setAvailableWorlds(w ?? [])).catch(() => {});
-  }, [fetchProfile]);
+    if (worldId) {
+      apiGet<World>(`/api/universes/${worldId}`).then((w) => setWorldData(w ?? null)).catch(() => {});
+    }
+  }, [fetchProfile, worldId]);
 
   const showFeedback = (msg: string) => {
     setFeedback(msg);
@@ -151,7 +166,7 @@ export default function AgentProfilePage() {
       }
       refetchSidebar();
       setShowDeployDialog(false);
-      router.push(`/world/${deployTargetWorld}/${agentName}`);
+      router.push(`/agents/${encPath(agentName)}?world=${deployTargetWorld}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
       setDeployError(`Failed to connect: ${msg}`);
@@ -215,9 +230,11 @@ export default function AgentProfilePage() {
   const activeLayers = Object.keys(mindTree).filter((k) => (mindTree[k]?.length ?? 0) > 0).length;
 
   const tierStyle = TIER_BADGE[profile.tier] ?? TIER_BADGE.citizen;
+  const deployedAgent = worldData?.agents.find((a) => a.name === agentName);
+  const worldName = worldData ? getWorldName(worldData) : undefined;
 
-  return (
-    <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-3xl">
+  const mainContent = (
+    <div className="flex-1 min-w-0 p-4 md:p-8 space-y-6 md:space-y-8">
       <PageHeader
         title={agentName}
         description={`${profile.engine} · ${profile.provider} · ${profile.tier}`}
@@ -516,48 +533,37 @@ export default function AgentProfilePage() {
         </div>
       )}
 
-      {/* Profile tab */}
+      {/* Profile tab — diagnostics panel style */}
       {activeTab === "profile" && (<>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="glass-subtle p-3 text-center">
-          <p className="text-lg font-heading text-foreground/80">{totalFiles}</p>
-          <p className="text-[9px] text-muted-foreground/35 uppercase">Files</p>
-        </div>
-        <div className="glass-subtle p-3 text-center">
-          <p className="text-lg font-heading text-foreground/80">{activeLayers}</p>
-          <p className="text-[9px] text-muted-foreground/35 uppercase">Layers</p>
-        </div>
-        <div className="glass-subtle p-3 text-center">
-          <p className="text-lg font-heading text-foreground/80">{profile.journal?.length ?? 0}</p>
-          <p className="text-[9px] text-muted-foreground/35 uppercase">Journal</p>
-        </div>
-        <div className="glass-subtle p-3 text-center">
-          <p className="text-lg font-heading text-foreground/80">{profile.bonds?.length ?? 0}</p>
-          <p className="text-[9px] text-muted-foreground/35 uppercase">Bonds</p>
-        </div>
-      </div>
+      <MetricGrid columns={2} items={[
+        { label: "Files", value: totalFiles },
+        { label: "Layers", value: activeLayers },
+        { label: "Journal", value: profile.journal?.length ?? 0 },
+        { label: "Bonds", value: profile.bonds?.length ?? 0 },
+      ]} className="gap-x-8 gap-y-4" />
 
-      {/* Team selector */}
-      <div>
-        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-2">Team</h2>
+      <Separator />
+
+      {/* Team */}
+      <div className="flex items-center justify-between">
+        <SubLabel>Team</SubLabel>
         <select
           value={profile.team ?? ""}
           onChange={async (e) => {
             const ok = await saveIdentityField("team", e.target.value);
             if (ok) fetchProfile();
           }}
-          className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.16] transition-colors"
+          className="bg-transparent text-sm font-mono text-foreground/80 focus:outline-none cursor-pointer text-right"
         >
-          <option value="">No team</option>
+          <option value="">—</option>
           {availableTeams.map((t) => (
             <option key={t.slug} value={t.slug}>{t.icon ? `${t.icon} ` : ""}{t.name}</option>
           ))}
         </select>
       </div>
 
-      {/* Deployment history — derived from sessions */}
+      {/* Deployment History */}
       {(() => {
         const sessionFiles = mindTree["sessions"] ?? [];
         const worldIds = sessionFiles
@@ -565,51 +571,39 @@ export default function AgentProfilePage() {
           .map((f) => f.replace(".json", ""));
         if (worldIds.length === 0) return null;
         return (
-          <div>
-            <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-2 flex items-center gap-1.5">
-              Worlds
-            </h2>
-            <div className="flex flex-wrap gap-1.5">
-              {worldIds.map((wid) => {
+          <>
+            <Separator />
+            <div>
+              <SectionHeader>Deployment History</SectionHeader>
+              <ItemList items={worldIds.map((wid) => {
                 const parts = wid.split("-");
-                const worldName = parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : wid;
-                return (
-                  <a
-                    key={wid}
-                    href={`/world/${wid}/${agentName}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono bg-white/[0.04] text-muted-foreground/50 border border-white/[0.06] hover:bg-white/[0.08] hover:text-foreground/80 transition-all"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
-                    {worldName}
-                  </a>
-                );
-              })}
+                const wName = parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : wid;
+                return { name: wName, detail: wid, href: `/agents/${encPath(agentName)}?world=${wid}` };
+              })} />
             </div>
-          </div>
+          </>
         );
       })()}
 
-      {/* Purpose — inline editable */}
+      <Separator />
+
+      {/* Identity */}
       <div>
-        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3 flex items-center gap-1.5">
-          <IconSparkles size={12} />
-          Purpose
-        </h2>
-        <div className="glass-subtle p-4">
+        <SectionHeader>Identity</SectionHeader>
+
+        <div className="mb-4">
+          <SubLabel className="mb-1.5">Purpose</SubLabel>
           <InlineEdit
             value={profile.purpose || ""}
             placeholder="Define this agent's purpose..."
             onSave={(v) => saveIdentityField("purpose", v)}
             multiline
-            className="text-sm text-foreground/70 leading-relaxed"
+            className="text-sm text-foreground/75 leading-relaxed"
           />
         </div>
-      </div>
 
-      {/* Persona — inline editable */}
-      <div>
-        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Persona</h2>
-        <div className="glass-subtle p-4">
+        <div className="mb-4">
+          <SubLabel className="mb-1.5">Persona</SubLabel>
           <InlineEdit
             value={profile.persona || ""}
             placeholder="Describe the agent's persona..."
@@ -618,114 +612,91 @@ export default function AgentProfilePage() {
             className="text-sm text-foreground/60 leading-relaxed italic"
           />
         </div>
+
+        <div>
+          <SubLabel className="mb-1.5">Traits</SubLabel>
+          <InlineTagsEdit
+            tags={profile.traits ?? []}
+            onSave={async (tags) => {
+              const ok = await saveIdentityField("traits", tags.map((t) => `- ${t}`).join("\n"));
+              return ok;
+            }}
+            color="bg-white/[0.06] text-foreground/60 border-white/[0.08]"
+          />
+        </div>
       </div>
 
-      {/* Traits — inline tag editing */}
-      <div>
-        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Traits</h2>
-        <InlineTagsEdit
-          tags={profile.traits ?? []}
-          onSave={async (tags) => {
-            const ok = await saveIdentityField("traits", tags.map((t) => `- ${t}`).join("\n"));
-            return ok;
-          }}
-          color="bg-purple-500/10 text-purple-300/80 border-purple-500/20"
-        />
-      </div>
+      {/* Capabilities */}
+      {((profile.skills?.length ?? 0) > 0 || (profile.playbooks?.length ?? 0) > 0 || (profile.knowledge?.length ?? 0) > 0) && (
+        <>
+          <Separator />
+          <div>
+            <SectionHeader>Capabilities</SectionHeader>
 
-      {/* Skills */}
-      {(profile.skills?.length ?? 0) > 0 && (
-        <div>
-          <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3 flex items-center gap-1.5">
-            <IconBrain size={12} />
-            Skills
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {(profile.skills ?? []).map((skill) => (
-              <span
-                key={skill}
-                className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-blue-500/10 text-blue-300/80 border border-blue-500/20"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Playbooks */}
-      {(profile.playbooks?.length ?? 0) > 0 && (
-        <div>
-          <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3 flex items-center gap-1.5">
-            <IconBook size={12} />
-            Playbooks
-          </h2>
-          <div className="glass-subtle divide-y divide-border/20">
-            {(profile.playbooks ?? []).map((pb) => (
-              <div key={pb} className="px-4 py-2.5 flex items-center gap-2">
-                <IconFileText size={13} className="text-muted-foreground/30 shrink-0" />
-                <span className="text-xs font-mono text-foreground/60">{pb}</span>
+            {(profile.skills?.length ?? 0) > 0 && (
+              <div className="mb-4">
+                <SubLabel className="mb-2">Skills</SubLabel>
+                <div className="flex flex-wrap gap-1.5">
+                  {(profile.skills ?? []).map((skill) => (
+                    <span key={skill} className="px-2.5 py-1 text-[11px] font-mono text-foreground/60 bg-white/[0.04] border border-white/[0.06]">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            )}
 
-      {/* Knowledge */}
-      {(profile.knowledge?.length ?? 0) > 0 && (
-        <div>
-          <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Knowledge Files</h2>
-          <div className="glass-subtle divide-y divide-border/20">
-            {(profile.knowledge ?? []).map((k) => (
-              <div key={k} className="px-4 py-2.5 flex items-center gap-2">
-                <IconFileText size={13} className="text-muted-foreground/30 shrink-0" />
-                <span className="text-xs font-mono text-foreground/60">{k}</span>
+            {(profile.playbooks?.length ?? 0) > 0 && (
+              <div className="mb-4">
+                <SubLabel className="mb-2">Playbooks</SubLabel>
+                <ItemList items={(profile.playbooks ?? []).map((pb) => ({ name: pb }))} />
               </div>
-            ))}
+            )}
+
+            {(profile.knowledge?.length ?? 0) > 0 && (
+              <div>
+                <SubLabel className="mb-2">Knowledge</SubLabel>
+                <ItemList items={(profile.knowledge ?? []).map((k) => ({ name: k }))} />
+              </div>
+            )}
           </div>
-        </div>
+        </>
       )}
 
       {/* Journal */}
       {(profile.journal?.length ?? 0) > 0 && (
-        <div>
-          <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3 flex items-center gap-1.5">
-            <IconNotebook size={12} />
-            Journal
-          </h2>
-          <div className="space-y-2">
-            {(profile.journal ?? []).map((entry) => (
-              <div key={entry.date} className="glass-subtle p-4">
-                <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">{entry.date}</p>
-                <p className="text-xs text-foreground/60 leading-relaxed">{entry.summary}</p>
-              </div>
-            ))}
+        <>
+          <Separator />
+          <div>
+            <SectionHeader>Journal</SectionHeader>
+            <div className="space-y-3">
+              {(profile.journal ?? []).map((entry) => (
+                <div key={entry.date}>
+                  <SubLabel className="mb-1">{entry.date}</SubLabel>
+                  <p className="text-xs text-foreground/60 leading-relaxed">{entry.summary}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Bonds */}
       {(profile.bonds?.length ?? 0) > 0 && (
-        <div>
-          <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3 flex items-center gap-1.5">
-            <IconUsers size={12} />
-            Bonds
-          </h2>
-          <div className="glass-subtle divide-y divide-border/20">
-            {(profile.bonds ?? []).map((bond) => (
-              <div key={bond.agent} className="px-4 py-3 flex items-center justify-between">
-                <span className="text-xs font-mono text-foreground/70">{bond.agent}</span>
-                <span className="text-[10px] text-muted-foreground/40 italic">{bond.relationship}</span>
-              </div>
-            ))}
+        <>
+          <Separator />
+          <div>
+            <SectionHeader>Bonds</SectionHeader>
+            <ItemList items={(profile.bonds ?? []).map((b) => ({ name: b.agent, detail: b.relationship }))} />
           </div>
-        </div>
+        </>
       )}
 
-      {/* Commands */}
+      {/* Reference */}
+      <Separator />
       <div>
-        <h2 className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-3">Commands</h2>
-        <div className="glass-subtle p-3 font-mono text-[10px] text-muted-foreground/35 space-y-1">
+        <SectionHeader>Reference</SectionHeader>
+        <div className="font-mono text-[10px] text-muted-foreground/30 space-y-1">
           <p>spwn agent talk {agentName} &quot;message&quot;</p>
           <p>spwn agent dream {agentName}</p>
           <p>spwn agent sleep {agentName}</p>
@@ -739,7 +710,7 @@ export default function AgentProfilePage() {
 
       {/* Chat tab */}
       {activeTab === "chat" && (
-        <AgentChat agentName={agentName} />
+        <AgentChat agentName={agentName} worldId={worldId} />
       )}
 
       {/* Files tab */}
@@ -748,13 +719,122 @@ export default function AgentProfilePage() {
       )}
     </div>
   );
+
+  return (
+    <div className="flex h-[calc(100vh-1px)] overflow-hidden">
+      <div className="flex-1 min-w-0 overflow-y-auto">
+        {mainContent}
+      </div>
+      {/* ── Right: Quick info panel ── */}
+      <div className="w-72 border-l border-border/30 overflow-y-auto shrink-0 hidden lg:block">
+        <div className="p-5 space-y-6">
+          <SectionHeader>Diagnostics</SectionHeader>
+
+          {/* Identity */}
+          <div>
+            <SectionLabel>Identity</SectionLabel>
+            <div className="space-y-2">
+              <KeyValue label="Name" value={agentName} />
+              <KeyValue label="Tier" value={deployedAgent?.tier ?? profile.tier} />
+              {deployedAgent && (
+                <div className="flex items-center justify-between">
+                  <SubLabel>Status</SubLabel>
+                  <div className="flex items-center gap-1.5">
+                    <StatusDot status={deployedAgent.status} />
+                    <span className="text-xs font-mono font-medium text-foreground/80 capitalize">{deployedAgent.status}</span>
+                  </div>
+                </div>
+              )}
+              <KeyValue label="Engine" value={profile.engine} />
+              <KeyValue label="Provider" value={profile.provider} />
+              {profile.team && <KeyValue label="Team" value={profile.team} />}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Stats */}
+          <div>
+            <SectionLabel>Metrics</SectionLabel>
+            <MetricGrid columns={2} items={[
+              { label: "Files", value: totalFiles },
+              { label: "Layers", value: activeLayers },
+              { label: "Journal", value: profile.journal?.length ?? 0 },
+              { label: "Bonds", value: profile.bonds?.length ?? 0 },
+            ]} />
+          </div>
+
+          {/* World info — only when deployed */}
+          {worldData && (
+            <>
+              <Separator />
+              <div>
+                <SectionLabel>World</SectionLabel>
+                <div className="space-y-2">
+                  <KeyValue label="Name" value={worldName ?? worldId!} />
+                  <div className="flex items-center justify-between">
+                    <SubLabel>Status</SubLabel>
+                    <div className="flex items-center gap-1.5">
+                      <StatusDot status={worldData.status} />
+                      <span className="text-xs font-mono font-medium text-foreground/80 capitalize">{worldData.status}</span>
+                    </div>
+                  </div>
+                  <KeyValue label="Agents" value={worldData.agents.length} />
+                  {worldData.workspaces && worldData.workspaces.length > 0 && (
+                    <KeyValue label="Workspaces" value={worldData.workspaces.length} />
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          <Separator />
+
+          {/* Commands */}
+          <div>
+            <SectionLabel>Reference</SectionLabel>
+            <div className="font-mono text-[10px] text-muted-foreground/30 space-y-1">
+              <p>spwn agent talk {agentName} &quot;msg&quot;</p>
+              <p>spwn agent dream {agentName}</p>
+              <p>spwn agent sleep {agentName}</p>
+              <p>spwn profile {agentName}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ── Agent Chat ── */
 
-function AgentChat({ agentName }: { agentName: string }) {
+function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string }) {
   const [messages, setMessages] = useState<ChatBubble[]>([]);
   const [sending, setSending] = useState(false);
+
+  // Load conversation history when in world context
+  useEffect(() => {
+    if (!worldId) return;
+    apiGet<{ sessions: { messages: { role: string; content: string; timestamp: string; type: string; toolName?: string; cost?: number; durationMs?: number }[] }[] }>(
+      `/api/worlds/${worldId}/history?agent=${encPath(agentName)}`
+    ).then((data) => {
+      if (!data?.sessions?.length) return;
+      const historyMsgs: ChatBubble[] = [];
+      for (const session of data.sessions) {
+        for (const msg of session.messages) {
+          if (msg.type === "text" && msg.content) {
+            historyMsgs.push({
+              role: msg.role === "user" ? "user" : "assistant",
+              content: msg.content,
+              blocks: [{ type: "text", content: msg.content }],
+              timestamp: new Date(msg.timestamp),
+            });
+          }
+        }
+      }
+      if (historyMsgs.length > 0) setMessages(historyMsgs);
+    }).catch(() => {});
+  }, [worldId, agentName]);
 
   const handleSend = async (msg: string) => {
     setMessages((prev) => [
@@ -769,9 +849,18 @@ function AgentChat({ agentName }: { agentName: string }) {
       { role: "assistant", content: "", blocks: [], timestamp: new Date() },
     ]);
 
+    // When in world context, talk through the world endpoint (which routes to the deployed container).
+    // Otherwise, use the standalone agent talk endpoint (limbo / direct).
+    const chatUrl = worldId
+      ? goApiUrl(`/api/worlds/${worldId}/talk`)
+      : goApiUrl(`/api/agents/${encPath(agentName)}/talk`);
+    const chatBody = worldId
+      ? { message: msg, agent: agentName }
+      : { message: msg };
+
     await streamChat({
-      url: goApiUrl(`/api/agents/${agentName}/talk`),
-      body: { message: msg },
+      url: chatUrl,
+      body: chatBody,
       onBlocks: (newBlocks) => {
         setMessages((prev) => {
           const updated = [...prev];

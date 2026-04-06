@@ -1,17 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   IconPlus,
   IconUser,
-  IconArrowRight,
-  IconGhostFilled,
-  IconBoltFilled,
-  IconCircleFilled,
-  IconMessageFilled,
-  IconMoonFilled,
   IconX,
   IconCheck,
   IconUsers,
@@ -25,7 +18,7 @@ import { apiGet, apiAction, goApiUrl } from "@/lib/api-client";
 import { useRefetch } from "@/components/app-shell";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { getWorldName, type World, type Team } from "@/lib/types";
-import { TIER_BADGE } from "@/lib/status";
+import { DataTable, StatusDot, SectionLabel } from "@/components/ds";
 
 interface AgentListItem {
   name: string;
@@ -48,15 +41,6 @@ interface EnrichedAgent {
 }
 
 type StatusFilter = "all" | "deployed" | "limbo";
-
-const STATUS_ICON: Record<string, { icon: typeof IconBoltFilled; color: string }> = {
-  running:  { icon: IconBoltFilled,    color: "text-green-400" },
-  waiting:  { icon: IconMessageFilled, color: "text-amber-400" },
-  idle:     { icon: IconCircleFilled,  color: "text-amber-400/50" },
-  sleeping: { icon: IconMoonFilled,    color: "text-purple-400" },
-  stopped:  { icon: IconCircleFilled,  color: "text-zinc-500/40" },
-  limbo:    { icon: IconGhostFilled,   color: "text-muted-foreground/40" },
-};
 
 function countLayerFiles(layers: Record<string, string[] | null>): { nonEmpty: number; journal: number; sessions: number } {
   let nonEmpty = 0;
@@ -332,76 +316,75 @@ export default function AgentsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {grouped.map(({ team: t, agents: groupAgents }) => (
             <div key={t?.slug ?? "solo"}>
               {/* Team header */}
-              <div className="flex items-center gap-2 mb-2 group/team-header">
+              <div className="flex items-center gap-2 mb-3">
                 {t ? (
                   <>
                     {t.icon && <span className="text-base">{t.icon}</span>}
                     <button
                       onClick={() => openTeamDialog(t)}
-                      className="text-[10px] uppercase tracking-[0.15em] font-medium hover:underline underline-offset-2 transition-colors"
+                      className="hover:underline underline-offset-2 transition-colors"
                       style={t.color ? { color: t.color } : undefined}
                     >
-                      {t.name}
+                      <SectionLabel className="mb-0">{t.name}</SectionLabel>
                     </button>
                     <span className="text-[10px] text-muted-foreground/30 font-mono">{groupAgents.length}</span>
-                    {t.description && (
-                      <span className="text-[10px] text-muted-foreground/25 ml-1 hidden sm:inline">— {t.description}</span>
-                    )}
                   </>
                 ) : (
                   <>
-                    <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/30">No team</span>
+                    <SectionLabel className="mb-0 text-muted-foreground/30">No team</SectionLabel>
                     <span className="text-[10px] text-muted-foreground/20 font-mono">{groupAgents.length}</span>
                   </>
                 )}
               </div>
-              {/* Agent rows */}
-              <div className="space-y-0.5">
-                {groupAgents.map((a) => {
-                  const s = STATUS_ICON[a.status] ?? STATUS_ICON.limbo;
-                  const Icon = s.icon;
-                  const tierStyle = TIER_BADGE[a.tier] ?? TIER_BADGE.citizen;
-                  return (
-                    <Link
-                      key={a.name}
-                      href={`/agents/${a.name}`}
-                      className="group flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent hover:border-white/[0.08] hover:bg-white/[0.03] transition-all"
-                    >
-                      <Icon size={16} className={`${s.color} shrink-0`} />
-                      <div className="min-w-0 flex-1 flex items-center gap-3">
-                        <span className="font-mono text-sm text-foreground/85 group-hover:text-foreground transition-colors truncate">
-                          {a.name}
-                        </span>
-                        <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${tierStyle}`}>
-                          {a.tier}
-                        </span>
-                      </div>
-
-                      <div className="hidden sm:flex items-center gap-4 text-[11px] font-mono text-muted-foreground/40 shrink-0">
-                        <span title="Mind layers">{a.layersCount} layers</span>
-                        <span title="Sessions">{a.sessionsCount} sessions</span>
-                      </div>
-
-                      <div className="shrink-0 min-w-[110px] text-right text-xs text-muted-foreground/50">
-                        {a.worldID ? (
-                          <>
-                            <span className="text-muted-foreground/30">in </span>
-                            <span className="text-foreground/65">{a.worldName}</span>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground/30 uppercase tracking-wider text-[10px] font-mono">Limbo</span>
-                        )}
-                      </div>
-
-                      <IconArrowRight size={14} className="text-muted-foreground/20 group-hover:text-muted-foreground/60 transition-colors shrink-0" />
-                    </Link>
-                  );
-                })}
-              </div>
+              {/* Agent table */}
+              <DataTable<EnrichedAgent>
+                rows={groupAgents}
+                rowKey={(a) => a.name}
+                rowHref={(a) => a.worldID ? `/agents/${encodeURIComponent(a.name)}?world=${a.worldID}` : `/agents/${encodeURIComponent(a.name)}`}
+                columns={[
+                  {
+                    key: "name",
+                    label: "Name",
+                    width: "1fr",
+                    render: (a) => <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>,
+                  },
+                  {
+                    key: "tier",
+                    label: "Tier",
+                    width: "80px",
+                    render: (a) => <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.tier}</span>,
+                  },
+                  {
+                    key: "status",
+                    label: "Status",
+                    width: "100px",
+                    render: (a) => (
+                      <span className="flex items-center gap-1.5">
+                        <StatusDot status={a.status === "limbo" ? "stopped" : a.status} />
+                        <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">{a.status}</span>
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "world",
+                    label: "World",
+                    width: "120px",
+                    render: (a) => a.worldName
+                      ? <span className="text-[11px] font-mono text-foreground/60 truncate">{a.worldName}</span>
+                      : <span className="text-[11px] font-mono text-muted-foreground/25">—</span>,
+                  },
+                  {
+                    key: "layers",
+                    label: "Layers",
+                    width: "60px",
+                    render: (a) => <span className="text-[11px] font-mono text-muted-foreground/40">{a.layersCount}</span>,
+                  },
+                ]}
+              />
             </div>
           ))}
         </div>

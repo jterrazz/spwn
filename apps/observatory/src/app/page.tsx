@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/page-header";
 import { Page } from "@/components/page";
 import { ActionButton } from "@/components/action-button";
 import { GLASS_PILL_CLASS } from "@/components/glass-pill";
+import { Separator, MetricGrid, SectionHeader, SectionLabel, ItemList, StatusDot, ProgressBar } from "@/components/ds";
 import { useRefetch } from "@/components/app-shell";
 import { usePageTitle } from "@/hooks/use-page-title";
 
@@ -344,14 +345,15 @@ export default function UniverseMapPage() {
                   ref={panelRef}
                   className="w-full rounded-2xl overflow-hidden border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] pointer-events-auto animate-in fade-in slide-in-from-right-12 duration-500 ease-out"
                 >
+                  <div className="p-5 space-y-5">
                   {/* Header */}
-                  <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 min-w-0">
                       <WorldPlanet world={w} size="md" />
                       <div className="min-w-0">
-                        <h3 className="font-heading text-sm tracking-wide text-foreground/90 truncate">{name}</h3>
+                        <h3 className="text-sm font-mono font-bold text-foreground/95 truncate">{name}</h3>
                         <p className="text-[10px] font-mono text-muted-foreground/35 truncate">
-                          {w.config} · {w.status}
+                          {w.config} · <StatusDot status={w.status} className="inline-block align-middle" /> {w.status}
                         </p>
                       </div>
                     </div>
@@ -363,64 +365,51 @@ export default function UniverseMapPage() {
                     </button>
                   </div>
 
-                  {/* Stats row */}
-                  <div className="mx-5 border-t border-white/[0.06]" />
-                  <div className="px-5 py-3 flex gap-4">
-                    {[
-                      { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "—" },
-                      { label: "Agents", value: String(w.agents.length) },
-                      { label: "Workspaces", value: String(w.workspaces?.length ?? 0) },
-                    ].map(({ label, value }) => (
-                      <div key={label} className="flex-1 text-center">
-                        <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/30">{label}</p>
-                        <p className="text-sm font-mono font-medium text-foreground/70 mt-0.5">{value}</p>
-                      </div>
-                    ))}
-                  </div>
+                  {/* Metrics */}
+                  <MetricGrid columns={3} items={[
+                    { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "—" },
+                    { label: "Agents", value: w.agents.length },
+                    { label: "Workspaces", value: w.workspaces?.length ?? 0 },
+                  ]} />
 
-                  <div className="mx-5 border-t border-white/[0.06]" />
+                  <Separator />
+
+                  {/* Agents alive */}
+                  {w.agents.length > 0 && (
+                    <ProgressBar
+                      label="Alive"
+                      value={w.agents.length === 0 ? 0 : Math.round(w.agents.filter((a) => a.status === "running" || a.status === "idle" || a.status === "waiting").length / w.agents.length * 100)}
+                    />
+                  )}
 
                   {/* Agents */}
                   {w.agents.length > 0 && (
-                    <div className="px-5 pb-3 pt-3">
-                      <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/30 mb-2">Agents</p>
-                      <div className="space-y-1">
-                        {w.agents.map((a) => (
-                          <button
-                            key={a.name}
-                            onClick={(e) => { e.stopPropagation(); router.push(`/world/${w.id}/${a.name}`); }}
-                            className="group/agent w-full flex items-center gap-2 text-[11px] font-mono px-2.5 py-1.5 rounded-lg hover:bg-white/[0.04] transition-all text-left"
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.status === "running" ? "bg-green-500" : a.status === "idle" ? "bg-amber-400" : "bg-zinc-500/30"}`} />
-                            <span className="flex-1 text-foreground/70 group-hover/agent:text-foreground/90 truncate">{a.name}</span>
-                            <span className="text-[9px] text-muted-foreground/30 uppercase tracking-wider">{a.status}</span>
-                          </button>
-                        ))}
-                      </div>
+                    <div>
+                      <SectionLabel>Agents</SectionLabel>
+                      <ItemList items={w.agents.map((a) => ({
+                        name: a.name,
+                        detail: a.status,
+                        href: `/agents/${encodeURIComponent(a.name)}?world=${w.id}`,
+                      }))} />
                     </div>
                   )}
 
                   {/* Workspaces */}
                   {w.workspaces && w.workspaces.length > 0 && (
-                    <div className="px-5 pb-3">
-                      <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/30 mb-1.5">Workspaces</p>
-                      <div className="space-y-0.5">
-                        {w.workspaces.map((ws) => (
-                          <div key={ws.name} className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground/40">
-                            <span className="text-foreground/50">{ws.name}</span>
-                            <span className="truncate flex-1">{ws.path}</span>
-                            {ws.readonly && <span className="text-amber-400/50 text-[9px]">ro</span>}
-                          </div>
-                        ))}
-                      </div>
+                    <div>
+                      <SectionLabel>Workspaces</SectionLabel>
+                      <ItemList items={w.workspaces.map((ws) => ({
+                        name: ws.name,
+                        detail: ws.readonly ? `${ws.path} (ro)` : ws.path,
+                      }))} />
                     </div>
                   )}
 
                   {/* Actions */}
-                  <div className="px-5 pb-4 pt-1 flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => router.push(`/world/${w.id}`)}
-                      className="flex-1 flex items-center justify-center gap-2 h-9 rounded-full text-xs font-medium bg-white/[0.06] text-foreground/70 hover:text-foreground/95 hover:bg-white/[0.1] border border-white/[0.06] hover:border-white/[0.12] transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 h-9 rounded-full text-xs font-mono font-medium bg-white/[0.06] text-foreground/70 hover:text-foreground/95 hover:bg-white/[0.1] border border-white/[0.06] hover:border-white/[0.12] transition-all"
                     >
                       Enter World
                       <IconArrowRight size={13} />
@@ -428,12 +417,13 @@ export default function UniverseMapPage() {
                     {isRunning && (
                       <button
                         onClick={(e) => { e.stopPropagation(); apiDelete(`/api/worlds/${w.id}`).then(() => { fetchWorlds(); refetchSidebar(); setSelected(null); }); }}
-                        className="h-9 px-3.5 rounded-full text-[11px] text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/[0.06] border border-transparent hover:border-red-500/15 transition-all"
+                        className="h-9 px-3.5 rounded-full text-[11px] font-mono text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/[0.06] border border-transparent hover:border-red-500/15 transition-all"
                       >
                         Shutdown
                       </button>
                     )}
                   </div>
+                </div>
                 </div>
                 </div>
               );
