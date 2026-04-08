@@ -13,13 +13,18 @@ func init() { rt.Register(&Codex{}) }
 func (c *Codex) Name() string { return "codex" }
 
 // BuildCommand constructs the codex CLI command.
-// Codex manages sessions server-side — each invocation is independent but
-// Codex retains context through the workspace's git state and file contents.
+// Uses --json to emit JSONL (includes thread_id for session resumption).
+// When SessionID is set, resumes that thread for conversation continuity.
 func (c *Codex) BuildCommand(cfg rt.SpawnConfig) []string {
-	cmd := []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox"}
+	cmd := []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox", "--json"}
 
 	if cfg.Model != "" {
 		cmd = append(cmd, "--model", cfg.Model)
+	}
+
+	// Resume existing thread if we have a session ID
+	if cfg.SessionID != "" {
+		cmd = append(cmd, "resume", cfg.SessionID)
 	}
 
 	if cfg.Prompt != "" {

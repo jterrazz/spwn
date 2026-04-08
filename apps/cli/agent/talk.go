@@ -77,8 +77,9 @@ If no message is provided, opens an interactive session inside the container.`,
 			return fmt.Errorf("unknown runtime %q for world %s", runtimeName, worldID)
 		}
 
-		// For claude-code one-shot: use JSON output to capture session_id
-		useJSONCapture := runtimeName == "claude-code" && message != "" && talkOutputFormat != "stream-json"
+		// Configure output format for session ID capture
+		// Claude: --print --output-format json → single JSON with session_id
+		// Codex: --json is already in BuildCommand → JSONL with thread_id
 		if runtimeName == "claude-code" && message != "" {
 			if talkOutputFormat == "stream-json" {
 				runtimeCmd = append(runtimeCmd, "--output-format", "stream-json", "--verbose")
@@ -108,33 +109,66 @@ If no message is provided, opens an interactive session inside the container.`,
 				if err := execCmd.Run(); err != nil {
 					return formatExecError(err, nil)
 				}
-			} else if useJSONCapture {
-				// Capture JSON output to extract session_id, then print result
-				output, err := execCmd.CombinedOutput()
-				if err != nil {
-					return formatExecError(err, output)
-				}
-
-				var resp struct {
-					Result    string `json:"result"`
-					SessionID string `json:"session_id"`
-				}
-				if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
-					// Save session ID for next invocation
-					if resp.SessionID != "" && arc != nil {
-						_ = arc.SetSessionID(worldID, name, resp.SessionID)
-					}
-					fmt.Fprintln(os.Stdout, resp.Result)
-				} else {
-					// Fallback: print raw output
-					fmt.Fprint(os.Stdout, string(output))
-				}
 			} else {
 				output, err := execCmd.CombinedOutput()
 				if err != nil {
 					return formatExecError(err, output)
 				}
-				fmt.Fprint(os.Stdout, string(output))
+
+				// Parse response based on runtime to extract session ID and text
+				switch runtimeName {
+				case "claude-code":
+					var resp struct {
+						Result    string `json:"result"`
+						SessionID string `json:"session_id"`
+					}
+					if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
+						if resp.SessionID != "" && arc != nil {
+							_ = arc.SetSessionID(worldID, name, resp.SessionID)
+						}
+						fmt.Fprintln(os.Stdout, resp.Result)
+					} else {
+						fmt.Fprint(os.Stdout, string(output))
+					}
+
+				case "codex":
+					// Codex JSONL: parse line by line for thread_id and agent messages
+					var threadID string
+					var texts []string
+					for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+						if line == "" || line[0] != '{' {
+							continue
+						}
+						var event struct {
+							Type     string `json:"type"`
+							ThreadID string `json:"thread_id"`
+							Item     struct {
+								Type string `json:"type"`
+								Text string `json:"text"`
+							} `json:"item"`
+						}
+						if jsonErr := json.Unmarshal([]byte(line), &event); jsonErr != nil {
+							continue
+						}
+						if event.Type == "thread.started" && event.ThreadID != "" {
+							threadID = event.ThreadID
+						}
+						if event.Type == "item.completed" && event.Item.Text != "" {
+							texts = append(texts, event.Item.Text)
+						}
+					}
+					if threadID != "" && arc != nil {
+						_ = arc.SetSessionID(worldID, name, threadID)
+					}
+					if len(texts) > 0 {
+						fmt.Fprintln(os.Stdout, strings.Join(texts, "\n"))
+					} else {
+						fmt.Fprint(os.Stdout, string(output))
+					}
+
+				default:
+					fmt.Fprint(os.Stdout, string(output))
+				}
 			}
 		} else {
 			// Interactive mode
