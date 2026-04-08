@@ -82,6 +82,7 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 			UserCommands: spec.UserCommands,
 			Env:          spec.Env,
 			Files:        spec.Files,
+			HasSkills:    t.Skills() != nil,
 		}
 	}
 

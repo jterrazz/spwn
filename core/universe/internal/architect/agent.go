@@ -31,9 +31,17 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 	// Update status
 	a.state.UpdateStatus(worldID, models.StatusRunning)
 
+	// Select runtime from world state (falls back to architect default)
+	rt := a.runtime
+	if u.Runtime != "" {
+		if worldRT, rtErr := runtime.Get(u.Runtime); rtErr == nil {
+			rt = worldRT
+		}
+	}
+
 	// Session management
 	mindPath := u.MindPath
-	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
+	cmd := rt.BuildCommand(runtime.SpawnConfig{
 		MindPath:  mindPath,
 		AgentName: agentName,
 		WorldID:   worldID,
@@ -105,8 +113,16 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 
 	a.state.UpdateStatus(worldID, models.StatusRunning)
 
+	// Select runtime from world state
+	rt := a.runtime
+	if u.Runtime != "" {
+		if worldRT, rtErr := runtime.Get(u.Runtime); rtErr == nil {
+			rt = worldRT
+		}
+	}
+
 	mindPath := u.MindPath
-	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
+	cmd := rt.BuildCommand(runtime.SpawnConfig{
 		MindPath:  mindPath,
 		AgentName: agentName,
 		WorldID:   worldID,

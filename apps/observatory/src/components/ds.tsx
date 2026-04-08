@@ -157,7 +157,7 @@ interface ItemListProps {
 export function ItemList({ items, className }: ItemListProps) {
   return (
     <div className={cn("space-y-2", className)}>
-      {items.map((item) => {
+      {items.map((item, i) => {
         const content = (
           <>
             <span className="w-[6px] h-[6px] rounded-full bg-foreground/80 shrink-0" />
@@ -169,13 +169,13 @@ export function ItemList({ items, className }: ItemListProps) {
         );
         if (item.href) {
           return (
-            <a key={item.name} href={item.href} className="group flex items-center gap-2 hover:text-foreground transition-colors">
+            <a key={`${item.name}-${i}`} href={item.href} className="group flex items-center gap-2 hover:text-foreground transition-colors">
               {content}
             </a>
           );
         }
         return (
-          <div key={item.name} className="group flex items-center gap-2">
+          <div key={`${item.name}-${i}`} className="group flex items-center gap-2">
             {content}
           </div>
         );

@@ -30,6 +30,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
   "@spwn/python": <IconBrandPython size={18} />,
   "@spwn/build": <IconHammer size={18} />,
   "@spwn/claude-code": <IconBrain size={18} />,
+  "@spwn/codex": <IconBrain size={18} />,
   "@spwn/aider": <IconBrain size={18} />,
   "@spwn/git": <IconBrandGit size={18} />,
   "@spwn/docker-cli": <IconBrandDocker size={18} />,

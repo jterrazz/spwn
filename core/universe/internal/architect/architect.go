@@ -44,6 +44,16 @@ func New(b backend.Backend, s *state.Store) *Architect {
 	}
 }
 
+// SetRuntime switches the active runtime adapter.
+func (a *Architect) SetRuntime(name string) error {
+	rt, err := runtime.Get(name)
+	if err != nil {
+		return err
+	}
+	a.runtime = rt
+	return nil
+}
+
 // NewFromEnv creates an Architect using the default Docker backend and state store.
 func NewFromEnv() (*Architect, error) {
 	docker, err := backend.NewDocker()
