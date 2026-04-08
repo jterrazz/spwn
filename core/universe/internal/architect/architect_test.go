@@ -177,6 +177,10 @@ func (m *mockBackend) ImageRemove(_ context.Context, _ string) error {
 	return m.imageRemoveE
 }
 
+func (m *mockBackend) Inspect(_ context.Context, nameOrID string) (*backend.ContainerInfo, error) {
+	return &backend.ContainerInfo{ID: nameOrID, Running: true}, nil
+}
+
 // --- Tests ---
 
 func newTestArchitect(t *testing.T, b *mockBackend) (*Architect, *state.Store) {

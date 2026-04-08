@@ -14,8 +14,10 @@ import (
 
 	"spwn.sh/core/agent"
 	"spwn.sh/core/gate"
+	ib "spwn.sh/core/imagebuilder"
+	"spwn.sh/core/imagebuilder/base"
+	"spwn.sh/core/imagebuilder/catalog"
 	"spwn.sh/core/universe/internal/backend"
-	"spwn.sh/platform/images"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/physics"
@@ -193,7 +195,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Resolve image (env override for testing, then opts, then default)
+	// Resolve image (env override for testing, then opts, then default with imagebuilder)
 	image := foundation.WorldImage
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
@@ -202,11 +204,31 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		image = opts.Image
 	}
 
-	// Ensure image exists (auto-build for default image, fail for custom/test images)
+	// Ensure image exists
 	if opts.Image == "" {
 		opts.progress("image_building", image)
-		if err := a.backend.EnsureImage(ctx, image, foundation.WorldImageVersion, images.Dockerfile, opts.logWriter()); err != nil {
-			return nil, fmt.Errorf("ensure world image: %w", err)
+
+		// Build image using imagebuilder with manifest tools
+		reg := ib.NewRegistry()
+		catalog.RegisterDefaults(reg)
+		builder := ib.New(reg, a.backend)
+
+		// Use manifest tools if specified, otherwise default stack
+		tools := opts.Manifest.Tools
+		if len(tools) == 0 {
+			tools = []string{"@unix", "@git", "@node", "@claude-code", "@spwn"}
+		}
+
+		_, err := builder.Build(ctx, ib.BuildRequest{
+			BaseDockerfile: base.WorldDockerfile,
+			Tools:          tools,
+			Tag:            image,
+			Version:        foundation.WorldImageVersion,
+			SkipVerify:     true, // probeTools handles verification below
+			LogWriter:      opts.logWriter(),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("build world image: %w", err)
 		}
 		opts.progress("image_ready", image)
 	} else {
