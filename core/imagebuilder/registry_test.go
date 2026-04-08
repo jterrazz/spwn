@@ -26,13 +26,13 @@ func (s *stubTool) Skills() fs.FS        { return s.skills }
 
 func TestRegistry_Register(t *testing.T) {
 	r := NewRegistry()
-	err := r.Register(&stubTool{name: "@node", kind: KindSDK, version: "20"})
+	err := r.Register(&stubTool{name: "@spwn/node", kind: KindSDK, version: "20"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	// Duplicate should fail
-	err = r.Register(&stubTool{name: "@node", kind: KindSDK, version: "20"})
+	err = r.Register(&stubTool{name: "@spwn/node", kind: KindSDK, version: "20"})
 	if err == nil {
 		t.Fatal("expected error for duplicate registration")
 	}
@@ -40,10 +40,10 @@ func TestRegistry_Register(t *testing.T) {
 
 func TestRegistry_Get(t *testing.T) {
 	r := NewRegistry()
-	r.Register(&stubTool{name: "@node"})
+	r.Register(&stubTool{name: "@spwn/node"})
 
-	if r.Get("@node") == nil {
-		t.Fatal("expected to find @node")
+	if r.Get("@spwn/node") == nil {
+		t.Fatal("expected to find @spwn/node")
 	}
 	if r.Get("@missing") != nil {
 		t.Fatal("expected nil for missing tool")
@@ -52,29 +52,29 @@ func TestRegistry_Get(t *testing.T) {
 
 func TestResolve_ExpandsDependencies(t *testing.T) {
 	r := NewRegistry()
-	r.Register(&stubTool{name: "@node", version: "20"})
-	r.Register(&stubTool{name: "@qmd", deps: []string{"@node"}})
+	r.Register(&stubTool{name: "@spwn/node", version: "20"})
+	r.Register(&stubTool{name: "@spwn/qmd", deps: []string{"@spwn/node"}})
 
-	tools, err := r.Resolve([]string{"@qmd"})
+	tools, err := r.Resolve([]string{"@spwn/qmd"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(tools) != 2 {
 		t.Fatalf("expected 2 tools, got %d", len(tools))
 	}
-	// @node must come before @qmd
-	if tools[0].Name() != "@node" || tools[1].Name() != "@qmd" {
+	// @spwn/node must come before @spwn/qmd
+	if tools[0].Name() != "@spwn/node" || tools[1].Name() != "@spwn/qmd" {
 		t.Fatalf("wrong order: %s, %s", tools[0].Name(), tools[1].Name())
 	}
 }
 
 func TestResolve_Deduplicates(t *testing.T) {
 	r := NewRegistry()
-	r.Register(&stubTool{name: "@node"})
-	r.Register(&stubTool{name: "@qmd", deps: []string{"@node"}})
+	r.Register(&stubTool{name: "@spwn/node"})
+	r.Register(&stubTool{name: "@spwn/qmd", deps: []string{"@spwn/node"}})
 
-	// Request both @node and @qmd — @node should appear only once
-	tools, err := r.Resolve([]string{"@node", "@qmd"})
+	// Request both @spwn/node and @spwn/qmd — @spwn/node should appear only once
+	tools, err := r.Resolve([]string{"@spwn/node", "@spwn/qmd"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -85,12 +85,12 @@ func TestResolve_Deduplicates(t *testing.T) {
 
 func TestResolve_TopologicalOrder(t *testing.T) {
 	r := NewRegistry()
-	r.Register(&stubTool{name: "@unix"})
-	r.Register(&stubTool{name: "@node", deps: []string{"@unix"}})
-	r.Register(&stubTool{name: "@claude-code", deps: []string{"@node"}})
-	r.Register(&stubTool{name: "@qmd", deps: []string{"@node"}})
+	r.Register(&stubTool{name: "@spwn/unix"})
+	r.Register(&stubTool{name: "@spwn/node", deps: []string{"@spwn/unix"}})
+	r.Register(&stubTool{name: "@spwn/claude-code", deps: []string{"@spwn/node"}})
+	r.Register(&stubTool{name: "@spwn/qmd", deps: []string{"@spwn/node"}})
 
-	tools, err := r.Resolve([]string{"@qmd", "@claude-code"})
+	tools, err := r.Resolve([]string{"@spwn/qmd", "@spwn/claude-code"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -101,20 +101,20 @@ func TestResolve_TopologicalOrder(t *testing.T) {
 		idx[t.Name()] = i
 	}
 
-	if idx["@unix"] >= idx["@node"] {
-		t.Error("@unix should come before @node")
+	if idx["@spwn/unix"] >= idx["@spwn/node"] {
+		t.Error("@spwn/unix should come before @spwn/node")
 	}
-	if idx["@node"] >= idx["@claude-code"] {
-		t.Error("@node should come before @claude-code")
+	if idx["@spwn/node"] >= idx["@spwn/claude-code"] {
+		t.Error("@spwn/node should come before @spwn/claude-code")
 	}
-	if idx["@node"] >= idx["@qmd"] {
-		t.Error("@node should come before @qmd")
+	if idx["@spwn/node"] >= idx["@spwn/qmd"] {
+		t.Error("@spwn/node should come before @spwn/qmd")
 	}
 }
 
 func TestResolve_MissingTool(t *testing.T) {
 	r := NewRegistry()
-	_, err := r.Resolve([]string{"@nonexistent"})
+	_, err := r.Resolve([]string{"@spwn/nonexistent"})
 	if err == nil {
 		t.Fatal("expected error for missing tool")
 	}
@@ -122,9 +122,9 @@ func TestResolve_MissingTool(t *testing.T) {
 
 func TestResolve_MissingDependency(t *testing.T) {
 	r := NewRegistry()
-	r.Register(&stubTool{name: "@qmd", deps: []string{"@node"}})
+	r.Register(&stubTool{name: "@spwn/qmd", deps: []string{"@spwn/node"}})
 
-	_, err := r.Resolve([]string{"@qmd"})
+	_, err := r.Resolve([]string{"@spwn/qmd"})
 	if err == nil {
 		t.Fatal("expected error for missing dependency")
 	}
@@ -132,10 +132,10 @@ func TestResolve_MissingDependency(t *testing.T) {
 
 func TestResolve_CycleDetection(t *testing.T) {
 	r := NewRegistry()
-	r.Register(&stubTool{name: "@a", deps: []string{"@b"}})
-	r.Register(&stubTool{name: "@b", deps: []string{"@a"}})
+	r.Register(&stubTool{name: "@spwn/a", deps: []string{"@spwn/b"}})
+	r.Register(&stubTool{name: "@spwn/b", deps: []string{"@spwn/a"}})
 
-	_, err := r.Resolve([]string{"@a"})
+	_, err := r.Resolve([]string{"@spwn/a"})
 	if err == nil {
 		t.Fatal("expected error for dependency cycle")
 	}
@@ -143,10 +143,10 @@ func TestResolve_CycleDetection(t *testing.T) {
 
 func TestResolve_NoDeps(t *testing.T) {
 	r := NewRegistry()
-	r.Register(&stubTool{name: "@unix"})
-	r.Register(&stubTool{name: "@git"})
+	r.Register(&stubTool{name: "@spwn/unix"})
+	r.Register(&stubTool{name: "@spwn/git"})
 
-	tools, err := r.Resolve([]string{"@unix", "@git"})
+	tools, err := r.Resolve([]string{"@spwn/unix", "@spwn/git"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

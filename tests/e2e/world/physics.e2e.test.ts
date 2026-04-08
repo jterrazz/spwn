@@ -82,7 +82,7 @@ describe("world physics", () => {
   });
 
   test("world includes declared elements", () => {
-    // GIVEN — a spawned world (default config has @unix, @git elements)
+    // GIVEN — a spawned world (default config has @spwn/unix, @spwn/git elements)
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(

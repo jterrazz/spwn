@@ -26,7 +26,7 @@ type BuildRequest struct {
 	// BaseDockerfile is the raw base Dockerfile content.
 	BaseDockerfile []byte
 
-	// Tools is the list of tool names to include (e.g., ["@unix", "@node", "@qmd"]).
+	// Tools is the list of tool names to include (e.g., ["@spwn/unix", "@spwn/node", "@spwn/qmd"]).
 	Tools []string
 
 	// Tag is the Docker image tag to apply.
@@ -75,12 +75,13 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	for i, t := range resolved {
 		spec := t.Install()
 		toolInputs[i] = dockerfile.ToolInput{
-			Name:     t.Name(),
-			Kind:     string(t.Kind()),
-			Packages: spec.Packages,
-			Commands: spec.Commands,
-			Env:      spec.Env,
-			Files:    spec.Files,
+			Name:         t.Name(),
+			Kind:         string(t.Kind()),
+			Packages:     spec.Packages,
+			Commands:     spec.Commands,
+			UserCommands: spec.UserCommands,
+			Env:          spec.Env,
+			Files:        spec.Files,
 		}
 	}
 

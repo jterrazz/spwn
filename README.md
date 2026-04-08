@@ -293,12 +293,12 @@ physics:
     timeout: 30m
 
 tools:
-  - @unix          # bash, coreutils, grep, sed, awk
-  - @git           # version control
-  - @node          # Node.js 20 + npm
-  - @claude-code   # AI agent runtime
-  - @spwn          # spwn CLI
-  - @qmd           # on-device markdown search
+  - @spwn/unix          # bash, coreutils, grep, sed, awk
+  - @spwn/git           # version control
+  - @spwn/node          # Node.js 20 + npm
+  - @spwn/claude-code   # AI agent runtime
+  - @spwn/cli           # spwn CLI
+  - @spwn/qmd           # on-device markdown search
 
 gate:
   - source: mcp/slack
@@ -314,7 +314,7 @@ If `curl` is not in the tools list, it does not exist. Tools are composable, dep
 
 Spwn worlds are assembled from composable tools. Each tool is a self-contained plugin: it knows how to install itself, how to verify it works, and what skills to teach the agent. You pick only what you need — the imagebuilder resolves dependencies, deduplicates packages, and produces a single optimized Docker image.
 
-Tools are stackable. `@qmd` depends on `@node` — list `@qmd` and Node.js appears automatically. Adding a new tool to the ecosystem is one directory and one Go interface.
+Tools are stackable. `@spwn/qmd` depends on `@spwn/node` — list `@spwn/qmd` and Node.js appears automatically. Adding a new tool to the ecosystem is one directory and one Go interface.
 
 ### SDKs
 
@@ -322,10 +322,10 @@ Language runtimes and core system utilities.
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@unix` | bash, coreutils, grep, sed, awk, curl, jq | You need standard shell tools | Available |
-| `@node` | Node.js 20, npm, npx | Your project uses JavaScript/TypeScript | Available |
-| `@python` | Python 3, pip | Your project uses Python | Available |
-| `@build` | make, gcc, g++ | You need to compile C/C++ | Available |
+| `@spwn/unix` | bash, coreutils, grep, sed, awk, curl, jq | You need standard shell tools | Available |
+| `@spwn/node` | Node.js 20, npm, npx | Your project uses JavaScript/TypeScript | Available |
+| `@spwn/python` | Python 3, pip | Your project uses Python | Available |
+| `@spwn/build` | make, gcc, g++ | You need to compile C/C++ | Available |
 
 ### Runtimes
 
@@ -333,9 +333,9 @@ The thinking engine that drives the agent. Pick one per agent.
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@claude-code` | Claude Code CLI + pre-configured auth | You want Anthropic's agent runtime (default) | Available |
-| `@aider` | Aider CLI | You want an open-source code-focused runtime | Planned |
-| `@codex` | OpenAI Codex CLI | You want OpenAI's agent runtime | Planned |
+| `@spwn/claude-code` | Claude Code CLI + pre-configured auth | You want Anthropic's agent runtime (default) | Available |
+| `@spwn/aider` | Aider CLI | You want an open-source code-focused runtime | Planned |
+| `@spwn/codex` | OpenAI Codex CLI | You want OpenAI's agent runtime | Planned |
 
 ### Tools
 
@@ -343,9 +343,9 @@ Extra capabilities you add to a world. Each ships skills that teach the agent ho
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@git` | Git version control | You need source control (almost always) | Available |
-| `@docker-cli` | Docker CLI (DooD) | The agent needs to manage containers | Available |
-| `@qmd` | [QMD](https://github.com/tobi/qmd) on-device search | The agent needs to search docs, notes, or knowledge bases locally | Available |
+| `@spwn/git` | Git version control | You need source control (almost always) | Available |
+| `@spwn/docker-cli` | Docker CLI (DooD) | The agent needs to manage containers | Available |
+| `@spwn/qmd` | [QMD](https://github.com/tobi/qmd) on-device search | The agent needs to search docs, notes, or knowledge bases locally | Available |
 
 ### Platform
 
@@ -353,8 +353,8 @@ Spwn's own infrastructure. Usually included by default — listed here because y
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@spwn` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | Available |
-| `@architect` | Full orchestration daemon (includes @spwn, @claude-code, @docker-cli) | You're running the always-on Architect | Available |
+| `@spwn/cli` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | Available |
+| `@spwn/architect` | Full orchestration daemon (includes @spwn/cli, @spwn/claude-code, @spwn/docker-cli) | You're running the always-on Architect | Available |
 
 ### Adding your own tools
 
@@ -362,7 +362,7 @@ Every tool implements one Go interface:
 
 ```go
 type Tool interface {
-    Name() string           // "@mytool"
+    Name() string           // "@spwn/mytool"
     Kind() Kind             // runtime, tool, sdk, platform
     Version() string        // semver or "latest"
     Dependencies() []string // other tools this requires

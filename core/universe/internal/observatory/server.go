@@ -141,6 +141,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/auth/providers", cors(s.handleAuthProviders))
 	mux.HandleFunc("POST /api/auth/check", cors(s.handleAuthCheck))
 	mux.HandleFunc("POST /api/auth/configure", cors(s.handleAuthConfigure))
+	mux.HandleFunc("POST /api/auth/reset", cors(s.handleAuthReset))
 
 	// --- Knowledge endpoints (per-world, via docker exec) ---
 	mux.HandleFunc("GET /api/worlds/{id}/knowledge", cors(s.handleWorldKnowledgeList))
@@ -587,6 +588,20 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	manifest.ApplyDefaults(&m)
+
+	// Verify at least one AI provider is connected before spawning
+	creds := auth.ResolveAll()
+	hasProvider := false
+	for _, cred := range creds {
+		if cred.Type != auth.CredTypeNone {
+			hasProvider = true
+			break
+		}
+	}
+	if !hasProvider {
+		jsonError(w, "No AI provider configured. Go to Settings to connect an API key or subscription.", 400)
+		return
+	}
 
 	result, err := s.arch.Spawn(r.Context(), architect.SpawnOpts{
 		ConfigName: cfgName,
@@ -1867,6 +1882,14 @@ func (s *Server) handleAuthConfigure(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := auth.SaveToken(body.Token); err != nil {
+		jsonError(w, err.Error(), 500)
+		return
+	}
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
+	if err := auth.ClearToken(); err != nil && !os.IsNotExist(err) {
 		jsonError(w, err.Error(), 500)
 		return
 	}

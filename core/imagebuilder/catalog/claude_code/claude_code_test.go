@@ -6,15 +6,15 @@ import (
 )
 
 func TestClaudeCode_Name(t *testing.T) {
-	if Tool.Name() != "@claude-code" {
-		t.Errorf("expected @claude-code, got %s", Tool.Name())
+	if Tool.Name() != "@spwn/claude-code" {
+		t.Errorf("expected @spwn/claude-code, got %s", Tool.Name())
 	}
 }
 
 func TestClaudeCode_DependsOnNode(t *testing.T) {
 	deps := Tool.Dependencies()
-	if len(deps) != 1 || deps[0] != "@node" {
-		t.Errorf("expected [@node] dependency, got %v", deps)
+	if len(deps) != 1 || deps[0] != "@spwn/node" {
+		t.Errorf("expected [@spwn/node] dependency, got %v", deps)
 	}
 }
 

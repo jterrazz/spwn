@@ -10,25 +10,25 @@ import (
 //go:embed skills/*
 var skills embed.FS
 
-// Tool is the @claude-code tool — Claude Code AI agent runtime.
+// Tool is the @spwn/claude-code tool — Claude Code AI agent runtime.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@claude-code" }
+func (*tool) Name() string           { return "@spwn/claude-code" }
 func (*tool) Kind() ib.Kind          { return ib.KindRuntime }
 func (*tool) Version() string        { return "latest" }
-func (*tool) Dependencies() []string { return []string{"@node"} }
+func (*tool) Dependencies() []string { return []string{"@spwn/node"} }
 
 func (*tool) Install() ib.InstallSpec {
 	return ib.InstallSpec{
 		Commands: []string{
 			"npm install -g @anthropic-ai/claude-code",
-			// Pre-configure Claude Code (onboarding + workspace trust + permission skip)
-			"mkdir -p /home/spwn/.claude",
-			`echo '{"hasCompletedOnboarding":true,"projects":{"/workspace":{"hasTrustDialogAccepted":true},"/home/spwn":{"hasTrustDialogAccepted":true}}}' > /home/spwn/.claude.json`,
-			`echo '{"skipDangerousModePermissionPrompt":true}' > /home/spwn/.claude/settings.json`,
-			"chown -R spwn:spwn /home/spwn/.claude.json /home/spwn/.claude",
+		},
+		// User-level config: runs after USER switch.
+		// {{.Home}} and {{.User}} are templated by the generator.
+		UserCommands: []string{
+			`mkdir -p {{.Home}}/.claude && echo '{"hasCompletedOnboarding":true,"projects":{"/workspace":{"hasTrustDialogAccepted":true},"{{.Home}}":{"hasTrustDialogAccepted":true}}}' > {{.Home}}/.claude.json && echo '{"skipDangerousModePermissionPrompt":true}' > {{.Home}}/.claude/settings.json`,
 		},
 	}
 }

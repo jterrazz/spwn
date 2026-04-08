@@ -6,8 +6,8 @@ import (
 )
 
 func TestSpwn_Name(t *testing.T) {
-	if Tool.Name() != "@spwn" {
-		t.Errorf("expected @spwn, got %s", Tool.Name())
+	if Tool.Name() != "@spwn/cli" {
+		t.Errorf("expected @spwn/cli, got %s", Tool.Name())
 	}
 }
 

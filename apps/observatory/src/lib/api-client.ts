@@ -4,30 +4,54 @@
  */
 
 import type { World, AgentProfile } from "./types";
-import { getTauriApiBase, isTauri } from "./tauri";
+import { getTauriApiBase, initTauriApiPort, isTauri } from "./tauri";
 
 // Dynamic API base — Tauri app uses a random port, browser defaults to 3001
 let _goApiBase: string | null = null;
 
-function getGoApiBase(): string {
+/**
+ * Resolves the Go API base URL. In Tauri mode, waits for the port to be
+ * retrieved from the Rust backend before returning. This ensures every API
+ * call targets the correct port — even if the very first fetch fires before
+ * the Tauri webview has finished initializing.
+ */
+async function resolveGoApiBase(): Promise<string> {
   if (_goApiBase) return _goApiBase;
-  // Check Tauri first
+
+  // In Tauri, wait for the port from the Rust side
+  if (isTauri()) {
+    const port = await initTauriApiPort();
+    if (port) {
+      _goApiBase = `http://localhost:${port}`;
+      return _goApiBase;
+    }
+  }
+
+  // Check if the port was already cached synchronously
   const tauriBase = getTauriApiBase();
   if (tauriBase) {
     _goApiBase = tauriBase;
     return tauriBase;
   }
-  // Default: use the same hostname as the current page (works on LAN)
-  // so 192.168.1.137:3000 → 192.168.1.137:3001
+
+  // Browser fallback
   if (typeof window !== "undefined") {
     return process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:3001`;
   }
   return "http://localhost:3001";
 }
 
-// Allow Tauri to set the port after initialization
+// Allow external code to set the port explicitly
 export function setApiBase(base: string) {
   _goApiBase = base;
+}
+
+// Eagerly resolve the API base on module load so that even synchronous
+// callers (goApiUrl) get the right value as soon as possible. The promise
+// is fire-and-forget — by the time a user interaction triggers a fetch,
+// the port will be cached.
+if (typeof window !== "undefined") {
+  void resolveGoApiBase();
 }
 
 // ── Connection status tracking ──
@@ -57,7 +81,8 @@ export function onConnectionStatusChange(fn: (status: ConnectionStatus) => void)
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   try {
-    const res = await fetch(`${getGoApiBase()}${path}`, {
+    const base = await resolveGoApiBase();
+    const res = await fetch(`${base}${path}`, {
       ...init,
       signal: init?.signal ?? AbortSignal.timeout(10000),
     });
@@ -202,7 +227,8 @@ export async function apiAction(
   body?: unknown,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const res = await fetch(`${getGoApiBase()}${goPath}`, {
+    const base = await resolveGoApiBase();
+    const res = await fetch(`${base}${goPath}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: body ? JSON.stringify(body) : undefined,
@@ -223,7 +249,8 @@ export async function apiAction(
  */
 export async function isGoApiAvailable(): Promise<boolean> {
   try {
-    const res = await fetch(`${getGoApiBase()}/api/status`, {
+    const base = await resolveGoApiBase();
+    const res = await fetch(`${base}/api/status`, {
       signal: AbortSignal.timeout(2000),
     });
     return res.ok;
@@ -235,6 +262,14 @@ export async function isGoApiAvailable(): Promise<boolean> {
 /**
  * Build the full Go API URL for a path (useful for direct fetch calls).
  */
+/**
+ * Build the full Go API URL. Requires the port to have been resolved
+ * already (call resolveGoApiBase() first if unsure). Falls back to
+ * localhost:3001 if not yet initialized.
+ */
 export function goApiUrl(path: string): string {
-  return `${getGoApiBase()}${path}`;
+  const base = _goApiBase || getTauriApiBase() || (typeof window !== "undefined"
+    ? (process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:3001`)
+    : "http://localhost:3001");
+  return `${base}${path}`;
 }

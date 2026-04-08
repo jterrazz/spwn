@@ -257,7 +257,7 @@ export default function AgentsPage() {
     <Page>
       <PageHeader
         title="Agents"
-        description="Every agent's identity persists independently of any world — deploy, dream, retire."
+        description="Persistent identities that remember across sessions and worlds."
         actions={
           <>
             <ExpandingSearch value={query} onChange={setQuery} placeholder="Search agents…" />
@@ -307,7 +307,7 @@ export default function AgentsPage() {
             <IconUser size={24} className="text-muted-foreground/30" />
           </div>
           <p className="text-sm text-muted-foreground/50">
-            {query ? "No agents match your search" : "No agents yet — create one to get started"}
+            {query ? "No agents match your search" : "No agents yet. Create one to get started."}
           </p>
         </div>
       ) : (

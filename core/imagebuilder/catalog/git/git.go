@@ -6,12 +6,12 @@ import (
 	ib "spwn.sh/core/imagebuilder"
 )
 
-// Tool is the @git tool — Git version control.
+// Tool is the @spwn/git tool — Git version control.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@git" }
+func (*tool) Name() string           { return "@spwn/git" }
 func (*tool) Kind() ib.Kind          { return ib.KindTool }
 func (*tool) Version() string        { return "latest" }
 func (*tool) Dependencies() []string { return nil }

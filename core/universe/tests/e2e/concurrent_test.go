@@ -29,7 +29,7 @@ physics:
     cpu: 1
     memory: 256m
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `,
 		`
 physics:
@@ -37,7 +37,7 @@ physics:
     cpu: 1
     memory: 512m
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `,
 		`
 physics:
@@ -45,7 +45,7 @@ physics:
     cpu: 1
     memory: 384m
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `,
 	}
 

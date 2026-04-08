@@ -6,12 +6,12 @@ import (
 	ib "spwn.sh/core/imagebuilder"
 )
 
-// Tool is the @node tool — Node.js 20 SDK.
+// Tool is the @spwn/node tool — Node.js 20 SDK.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@node" }
+func (*tool) Name() string           { return "@spwn/node" }
 func (*tool) Kind() ib.Kind          { return ib.KindSDK }
 func (*tool) Version() string        { return "20" }
 func (*tool) Dependencies() []string { return nil }

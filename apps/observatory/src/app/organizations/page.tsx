@@ -426,7 +426,7 @@ export default function OrganizationsPage() {
     <Page>
       <PageHeader
         title="Organizations"
-        description="Role structures for organizing agents within worlds."
+        description="Define team structures and roles for multi-agent worlds."
         actions={
           <ActionButton compact onClick={() => setShowCreate(true)} label="New Organization" icon={<IconPlus size={18} stroke={2.4} />} />
         }

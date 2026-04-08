@@ -15,11 +15,11 @@ Read `/world/physics.md` for exact values.
 
 ## Elements
 Elements are tools available in your world:
-- `@unix` — bash, coreutils, standard CLI tools
-- `@git` — version control
-- `@node` — Node.js runtime
-- `@python` — Python runtime
-- `@docker` — Docker CLI (for the Architect)
+- `@spwn/unix` — bash, coreutils, standard CLI tools
+- `@spwn/git` — version control
+- `@spwn/node` — Node.js runtime
+- `@spwn/python` — Python runtime
+- `@spwn/docker-cli` — Docker CLI (for the Architect)
 Read `/world/faculties.md` for what's installed.
 
 ## Workspace

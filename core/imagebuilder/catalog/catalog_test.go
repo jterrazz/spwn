@@ -61,9 +61,9 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 	for _, tool := range All {
 		t.Run(tool.Name(), func(t *testing.T) {
 			spec := tool.Install()
-			hasContent := len(spec.Packages) > 0 || len(spec.Commands) > 0 || len(spec.Files) > 0
+			hasContent := len(spec.Packages) > 0 || len(spec.Commands) > 0 || len(spec.UserCommands) > 0 || len(spec.Files) > 0
 			if !hasContent {
-				t.Errorf("%s install spec must have packages, commands, or files", tool.Name())
+				t.Errorf("%s install spec must have packages, commands, user commands, or files", tool.Name())
 			}
 		})
 	}
@@ -135,6 +135,24 @@ func TestAllTools_SkillsHaveSkillMD(t *testing.T) {
 	}
 }
 
+func TestAllTools_UserCommandsUseTemplates(t *testing.T) {
+	for _, tool := range All {
+		spec := tool.Install()
+		if len(spec.UserCommands) == 0 {
+			continue
+		}
+		t.Run(tool.Name(), func(t *testing.T) {
+			for _, cmd := range spec.UserCommands {
+				// UserCommands should use {{.Home}} or {{.User}} templates,
+				// never hardcode /home/spwn or specific usernames
+				if strings.Contains(cmd, "/home/spwn") {
+					t.Errorf("%s UserCommand hardcodes /home/spwn — use {{.Home}} template instead", tool.Name())
+				}
+			}
+		})
+	}
+}
+
 func TestRegisterDefaults_AllRegistered(t *testing.T) {
 	reg := ib.NewRegistry()
 	RegisterDefaults(reg)
@@ -150,21 +168,21 @@ func TestResolve_FullWorldStack(t *testing.T) {
 	reg := ib.NewRegistry()
 	RegisterDefaults(reg)
 
-	tools, err := reg.Resolve([]string{"@unix", "@git", "@node", "@claude-code", "@spwn", "@qmd"})
+	tools, err := reg.Resolve([]string{"@spwn/unix", "@spwn/git", "@spwn/node", "@spwn/claude-code", "@spwn/cli", "@spwn/qmd"})
 	if err != nil {
 		t.Fatalf("resolve failed: %v", err)
 	}
 
-	// @node must come before @claude-code and @qmd
+	// @spwn/node must come before @spwn/claude-code and @spwn/qmd
 	idx := make(map[string]int)
 	for i, tool := range tools {
 		idx[tool.Name()] = i
 	}
 
-	if idx["@node"] >= idx["@claude-code"] {
-		t.Error("@node must come before @claude-code")
+	if idx["@spwn/node"] >= idx["@spwn/claude-code"] {
+		t.Error("@spwn/node must come before @spwn/claude-code")
 	}
-	if idx["@node"] >= idx["@qmd"] {
-		t.Error("@node must come before @qmd")
+	if idx["@spwn/node"] >= idx["@spwn/qmd"] {
+		t.Error("@spwn/node must come before @spwn/qmd")
 	}
 }

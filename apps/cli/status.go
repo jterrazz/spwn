@@ -22,7 +22,6 @@ func init() {
 
 // --- helpers -----------------------------------------------------------------
 
-// abbreviatePath replaces the user's home directory with ~.
 func abbreviatePath(p string) string {
 	home, err := os.UserHomeDir()
 	if err != nil || home == "" {
@@ -34,7 +33,6 @@ func abbreviatePath(p string) string {
 	return p
 }
 
-// padRight pads a string with spaces to at least width visible characters.
 func padRight(s string, width int) string {
 	visible := visibleLen(s)
 	if visible >= width {
@@ -43,26 +41,21 @@ func padRight(s string, width int) string {
 	return s + strings.Repeat(" ", width-visible)
 }
 
-// visibleLen returns the number of visible characters in a string,
-// ignoring ANSI escape sequences. It counts UTF-8 runes.
 func visibleLen(s string) int {
-	clean := stripAnsi(s)
-	return utf8.RuneCountInString(clean)
+	return utf8.RuneCountInString(stripAnsi(s))
 }
 
-// stripAnsi removes ANSI escape sequences from a string.
 func stripAnsi(s string) string {
 	var out strings.Builder
 	i := 0
 	for i < len(s) {
 		if s[i] == '\x1b' && i+1 < len(s) && s[i+1] == '[' {
-			// Skip until terminator letter
 			j := i + 2
 			for j < len(s) && !((s[j] >= 'A' && s[j] <= 'Z') || (s[j] >= 'a' && s[j] <= 'z')) {
 				j++
 			}
 			if j < len(s) {
-				j++ // skip terminator
+				j++
 			}
 			i = j
 		} else {
@@ -73,7 +66,6 @@ func stripAnsi(s string) string {
 	return out.String()
 }
 
-// repeatStr repeats a string n times (for single-char strings like "─").
 func repeatStr(s string, n int) string {
 	if n <= 0 {
 		return ""
@@ -81,11 +73,27 @@ func repeatStr(s string, n int) string {
 	return strings.Repeat(s, n)
 }
 
-// w is a shortcut for writing to stderr.
 var w = os.Stderr
 
 func pr(format string, args ...any) {
 	fmt.Fprintf(w, format, args...)
+}
+
+// ruleWidth is the total visible width of section rule lines.
+const ruleWidth = 56
+
+// rule renders a section header like: ── Label ──── right ──
+func rule(label, right string) string {
+	left := "\u2500\u2500 " + label + " "
+	rightPart := ""
+	if right != "" {
+		rightPart = " " + right + " \u2500\u2500"
+	}
+	fillLen := ruleWidth - visibleLen(left) - visibleLen(rightPart)
+	if fillLen < 1 {
+		fillLen = 1
+	}
+	return ui.Faint(left + repeatStr("\u2500", fillLen) + rightPart)
 }
 
 // --- status command ----------------------------------------------------------
@@ -94,9 +102,8 @@ var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show the full status of your spwn environment",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		const boxWidth = 64 // outer width of the header box
 
-		// ── Gather data ─────────────────────────────────────────────────
+		// ── Gather data ─────────────────────────────────────────────
 
 		org, _ := universe.LoadOrg()
 		orgName := ""
@@ -106,7 +113,7 @@ var statusCmd = &cobra.Command{
 
 		baseDir := foundation.BaseDir()
 
-		// Auth & skills
+		// Auth
 		authLabel := "not configured"
 		authToken := ""
 		if data, err := os.ReadFile(filepath.Join(baseDir, ".auth-token")); err == nil {
@@ -118,6 +125,7 @@ var statusCmd = &cobra.Command{
 			authLabel = "API key"
 		}
 
+		// Skills
 		skillCount := 0
 		if entries, err := os.ReadDir(foundation.SkillsDir()); err == nil {
 			for _, e := range entries {
@@ -127,15 +135,11 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// Physics from default manifest
+		// Default physics
 		m, err := universe.LoadManifest("default")
 		if err != nil {
-			// Use built-in defaults if no config
 			universe.ApplyDefaults(&m)
 		}
-		cpu := fmt.Sprintf("%d cpu", m.Physics.Constants.CPU)
-		mem := m.Physics.Constants.Memory
-		timeout := m.Physics.Constants.Timeout
 
 		// Worlds
 		var worlds []universe.World
@@ -147,253 +151,200 @@ var statusCmd = &cobra.Command{
 		// Agents
 		agentList, _ := agentDomain.ListAgents()
 
-		// Build map: agent name → world (to identify limbo agents)
+		// Agent → world mapping
 		worldMap := make(map[string]*universe.World)
 		for i := range worlds {
-			w := &worlds[i]
-			if w.Agent != "" {
-				worldMap[w.Agent] = w
+			ww := &worlds[i]
+			if ww.Agent != "" {
+				worldMap[ww.Agent] = ww
 			}
-			for _, a := range w.Agents {
-				worldMap[a.Name] = w
+			for _, a := range ww.Agents {
+				worldMap[a.Name] = ww
 			}
 		}
-
-		// ── Header box ──────────────────────────────────────────────────
-
-		pr("\n")
-
-		// Top border
-		pr("  %s%s%s\n", "\u256d", repeatStr("\u2500", boxWidth-2), "\u256e")
-
-		// Line 1: branding + version
-		brandLine := "\u2b21  s p w n"
-		versionStr := "v" + Version
-		innerWidth := boxWidth - 6 // visible chars between │ margins: │ __ content __ │
-		brandPad := innerWidth - visibleLen(brandLine) - len(versionStr)
-		if brandPad < 1 {
-			brandPad = 1
-		}
-		pr("  \u2502  %s%s%s  \u2502\n", brandLine, strings.Repeat(" ", brandPad), ui.Faint(versionStr))
-
-		// Line 2: org name + home
-		orgLine := ""
-		if orgName != "" {
-			orgLine = orgName + " \u00b7 "
-		}
-		orgLine += abbreviatePath(baseDir)
-		pr("  \u2502  %s  \u2502\n", padRight(orgLine, innerWidth))
-
-		// Line 3: auth + skills
-		authLine := ""
-		if authLabel == "subscription" || authLabel == "API key" {
-			authLine = "\u2713 " + authLabel
-		} else {
-			authLine = authLabel
-		}
-		authLine += fmt.Sprintf(" \u00b7 %d skills", skillCount)
-		pr("  \u2502  %s  \u2502\n", padRight(authLine, innerWidth))
-
-		// Bottom border
-		pr("  %s%s%s\n", "\u2570", repeatStr("\u2500", boxWidth-2), "\u256f")
-
-	// ── Architect section ────────────────────────────────────────────
-
-	pr("\n")
-	pr("  \u2726 %s \u00b7 %s\n", ui.Strong("Architect"), ui.Faint("offline"))
-		pr("  \u2502  %s   %s\n", ui.Faint("channels"), "\u2014")
-		pr("  \u2502  %s       %s\n", ui.Faint("sync"), "\u2014")
-
-		// ── Universe section ────────────────────────────────────────────
-
-		pr("\n")
-		pr("  \u25c9 %s \u00b7 %s \u00b7 %s \u00b7 %s\n",
-			ui.Strong("Universe"), ui.Faint(cpu), ui.Faint(mem), ui.Faint(timeout))
 
 		// Active worlds
-		activeWorlds := make([]universe.World, 0)
+		var activeWorlds []universe.World
 		for _, ww := range worlds {
 			if ww.Status == universe.StatusRunning || ww.Status == universe.StatusIdle || ww.Status == universe.StatusCreating {
 				activeWorlds = append(activeWorlds, ww)
 			}
 		}
 
-		if len(activeWorlds) > 0 {
-			for _, ww := range activeWorlds {
-				pr("  \u2502\n")
-				renderWorldBubble(ww, agentList)
-			}
-		}
-
-		// ── Limbo section ────────────────────────────────────────────
-
-		// Limbo agents: those not attached to any world
-		var limbo []agentDomain.Info
+		// Idle agents (not attached to any active world)
+		var idleAgents []agentDomain.Info
 		for _, a := range agentList {
 			if _, attached := worldMap[a.Name]; !attached {
-				limbo = append(limbo, a)
+				idleAgents = append(idleAgents, a)
 			}
 		}
 
-		pr("  \u2502\n")
-		pr("  \u2570\u2500\u2500\u25cc %s\n", ui.Strong("Limbo"))
+		// ── Render ──────────────────────────────────────────────────
 
-		if len(limbo) > 0 {
-			for _, a := range limbo {
-				pr("     \u2502\n")
-				pr("     \u2502  \u25cc %s\n", a.Name)
-			}
-			pr("     \u2502\n")
-			pr("     \u2570%s\n", repeatStr("\u2500", 20))
+		pr("\n")
+
+		// ── Header ──────────────────────────────────────────────────
+
+		pr("  %s %s\n", ui.Strong("spwn"), ui.Faint("v"+Version))
+
+		infoparts := []string{ui.Faint(abbreviatePath(baseDir))}
+		if orgName != "" {
+			infoparts = append([]string{ui.Faint(orgName)}, infoparts...)
+		}
+		if authLabel == "subscription" || authLabel == "API key" {
+			infoparts = append(infoparts, ui.Green("\u2713")+" "+ui.Faint(authLabel))
 		} else {
-			pr("     \u2502\n")
-			pr("     \u2570%s\n", repeatStr("\u2500", 20))
+			infoparts = append(infoparts, ui.Faint(authLabel))
 		}
+		infoparts = append(infoparts, ui.Faint(fmt.Sprintf("%d skills", skillCount)))
+		cpu := fmt.Sprintf("%d cpu", m.Physics.Constants.CPU)
+		infoparts = append(infoparts, ui.Faint(cpu))
+		infoparts = append(infoparts, ui.Faint(m.Physics.Constants.Memory))
+		pr("  %s\n", strings.Join(infoparts, ui.Faint(" \u00b7 ")))
+
+		// ── World sections ──────────────────────────────────────────
+
+		pr("\n")
+
+		if len(activeWorlds) > 0 {
+			for _, ww := range activeWorlds {
+				renderWorldSection(ww)
+			}
+		} else {
+			pr("  %s\n", rule("Worlds", "none"))
+			pr("     %s\n", ui.Faint("spwn up --agent <name> -w ."))
+			pr("\n")
+		}
+
+		// ── Idle agents ─────────────────────────────────────────────
+
+		if len(idleAgents) > 0 {
+			pr("  %s\n", rule("Idle", fmt.Sprintf("%d agent%s", len(idleAgents), plural(len(idleAgents)))))
+			for _, a := range idleAgents {
+				pr("     %s %s\n", ui.Faint("\u25cb"), a.Name)
+			}
+			pr("\n")
+		}
+
+		// ── Architect ───────────────────────────────────────────────
+
+		pr("  %s\n", rule("Architect", "offline"))
 
 		pr("\n")
 		return nil
 	},
 }
 
-// renderWorldBubble draws a world bubble with agents inside.
-func renderWorldBubble(ww universe.World, allAgents []agentDomain.Info) {
-	// Collect agents in this world
-	type agentEntry struct {
-		name   string
-		role   string
-		status string
+func plural(n int) string {
+	if n == 1 {
+		return ""
+	}
+	return "s"
+}
+
+// renderWorldSection draws a world as a rule-header section with agents listed below.
+func renderWorldSection(ww universe.World) {
+	// ── Section header rule ─────────────────────────────────────
+
+	// Left: world ID + optional config
+	label := ww.ID
+	if ww.Config != "" && ww.Config != "default" {
+		label += " \u00b7 " + ww.Config
 	}
 
-	var agents []agentEntry
+	// Right: status + uptime
+	statusText := string(ww.Status)
+	uptime := ""
+	if !ww.CreatedAt.IsZero() {
+		uptime = ui.FormatDuration(time.Since(ww.CreatedAt))
+	}
+	rightText := statusText
+	if uptime != "" {
+		rightText += " \u00b7 " + uptime
+	}
 
-	// Multi-agent worlds
+	pr("  %s\n", rule(label, rightText))
+
+	// ── Detail lines (indented) ─────────────────────────────────
+
+	indent := "     "
+
+	// Workspaces
+	wsPaths := collectWorkspacePaths(ww)
+	if len(wsPaths) > 0 {
+		pr("%s%s\n", indent, strings.Join(wsPaths, ", "))
+	}
+
+	// Tools + gates on one line
+	var metaParts []string
+	if len(ww.Manifest.Tools) > 0 {
+		metaParts = append(metaParts, strings.Join(ww.Manifest.Tools, " "))
+	}
+	if len(ww.Manifest.Gate) > 0 {
+		var gateNames []string
+		for _, g := range ww.Manifest.Gate {
+			gateNames = append(gateNames, g.As)
+		}
+		metaParts = append(metaParts, "gate: "+strings.Join(gateNames, ", "))
+	}
+	if len(metaParts) > 0 {
+		pr("%s%s\n", indent, ui.Faint(strings.Join(metaParts, " \u00b7 ")))
+	}
+
+	// Agents
+	agents := collectAgents(ww)
+	if len(agents) > 0 {
+		pr("\n")
+		for _, a := range agents {
+			dot := ui.Faint("\u25cb") // ○
+			if a.status == universe.StatusRunning {
+				dot = ui.Green("\u25cf") // ●
+			}
+			rolePart := padRight(a.role, 8)
+			statusPart := string(a.status)
+			pr("%s%s %s %s %s\n", indent, dot, padRight(a.name, 12), ui.Faint(rolePart), ui.Faint(statusPart))
+		}
+	}
+
+	pr("\n")
+}
+
+type agentInfo struct {
+	name   string
+	role   string
+	status universe.Status
+}
+
+func collectAgents(ww universe.World) []agentInfo {
+	var agents []agentInfo
 	if len(ww.Agents) > 0 {
 		for _, ar := range ww.Agents {
 			role := ar.Role
 			if role == "" {
 				role = "worker"
 			}
-			statusIcon := "\u25cc idle"
-			if ar.Status == universe.StatusRunning {
-				statusIcon = "\u25cf active"
-			}
-			agents = append(agents, agentEntry{
+			agents = append(agents, agentInfo{
 				name:   ar.Name,
 				role:   role,
-				status: statusIcon,
+				status: ar.Status,
 			})
 		}
 	} else if ww.Agent != "" {
-		// Legacy single-agent
-		role := "worker"
-		statusIcon := "\u25cc idle"
-		if ww.Status == universe.StatusRunning {
-			statusIcon = "\u25cf active"
-		}
-		agents = append(agents, agentEntry{
+		agents = append(agents, agentInfo{
 			name:   ww.Agent,
-			role:   role,
-			status: statusIcon,
+			role:   "worker",
+			status: ww.Status,
 		})
 	}
+	return agents
+}
 
-	// Calculate bubble width based on content
-	minWidth := 47
-	// Check agent lines: icon(2) + space + name(10) + gap(3) + role(10) + gap(3) + status(8) + trail(4)
-	for _, a := range agents {
-		lineLen := 4 + utf8.RuneCountInString(a.name) + 3 + utf8.RuneCountInString(a.role) + 3 + utf8.RuneCountInString(a.status) + 6
-		if lineLen > minWidth {
-			minWidth = lineLen
+func collectWorkspacePaths(ww universe.World) []string {
+	var paths []string
+	if len(ww.Workspaces) > 0 {
+		for _, ws := range ww.Workspaces {
+			paths = append(paths, abbreviatePath(ws.Path))
 		}
 	}
-
-	// Check header line width
-	headerContent := ww.ID + " " + ww.Config
-	headerMin := utf8.RuneCountInString(headerContent) + 12
-	if headerMin > minWidth {
-		minWidth = headerMin
-	}
-
-	// Workspace line (shows first workspace host path for brevity)
-	wsAbbrev := ""
-	if primary := ww.PrimaryWorkspacePath(); primary != "" {
-		wsAbbrev = abbreviatePath(primary)
-		wsLineLen := 14 + len(wsAbbrev) + 4
-		if wsLineLen > minWidth {
-			minWidth = wsLineLen
-		}
-	}
-
-	bubbleInner := minWidth
-
-	// Tools from manifest
-	tools := ""
-	if len(ww.Manifest.Tools) > 0 {
-		// Show @pack names (not expanded)
-		elems := make([]string, len(ww.Manifest.Tools))
-		copy(elems, ww.Manifest.Tools)
-		tools = strings.Join(elems, " ")
-	}
-
-	// Uptime
-	uptime := "\u2014"
-	if !ww.CreatedAt.IsZero() {
-		dur := time.Since(ww.CreatedAt)
-		uptime = ui.FormatDuration(dur)
-	}
-
-	// ── Draw bubble ─────────────────────────────────────────────────
-
-	// Top line: ╭─ w-default-28373 ──────────────── default ─╮
-	leftLabel := " " + ww.ID + " "
-	rightLabel := " " + ww.Config + " "
-	fillLen := bubbleInner - len(leftLabel) - len(rightLabel)
-	if fillLen < 1 {
-		fillLen = 1
-	}
-	pr("  \u2502  \u256d\u2500%s%s%s\u2500\u256e\n", leftLabel, repeatStr("\u2500", fillLen), rightLabel)
-
-	// Empty line
-	pr("  \u2502  \u2502%s\u2502\n", strings.Repeat(" ", bubbleInner))
-
-	// Agent lines
-	for _, a := range agents {
-		icon := "\u25cf" // ●
-		if a.role == "chief" {
-			icon = "\u2605" // ★
-		}
-		agentLine := fmt.Sprintf("   %s %s   %s   %s",
-			icon,
-			padRight(a.name, 10),
-			padRight(a.role, 10),
-			a.status,
-		)
-		pr("  \u2502  \u2502%s\u2502\n", padRight(agentLine, bubbleInner))
-	}
-
-	// Empty line
-	pr("  \u2502  \u2502%s\u2502\n", strings.Repeat(" ", bubbleInner))
-
-	// Workspace
-	if wsAbbrev != "" {
-		label := "workspace"
-		if len(ww.Workspaces) > 1 {
-			label = fmt.Sprintf("workspaces (%d)", len(ww.Workspaces))
-		}
-		wsLine := fmt.Sprintf("   %s  %s", label, wsAbbrev)
-		pr("  \u2502  \u2502%s\u2502\n", padRight(wsLine, bubbleInner))
-	}
-
-	// Tools
-	if tools != "" {
-		toolsLine := fmt.Sprintf("   tools      %s", tools)
-		pr("  \u2502  \u2502%s\u2502\n", padRight(toolsLine, bubbleInner))
-	}
-
-	// Uptime
-	uptimeLine := fmt.Sprintf("   uptime     %s", uptime)
-	pr("  \u2502  \u2502%s\u2502\n", padRight(uptimeLine, bubbleInner))
-
-	// Bottom border
-	pr("  \u2502  \u2570%s\u256f\n", repeatStr("\u2500", bubbleInner))
+	return paths
 }

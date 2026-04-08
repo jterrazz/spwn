@@ -9,9 +9,12 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
+	"strings"
 
-	"spwn.sh/core/foundation"
+	ib "spwn.sh/core/imagebuilder"
 	"spwn.sh/core/imagebuilder/base"
+	"spwn.sh/core/imagebuilder/catalog"
+	"spwn.sh/core/foundation"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/physics"
 )
@@ -37,16 +40,78 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		return fmt.Errorf("read cross-compiled binary: %w", err)
 	}
 
-	// Build the context map with all files needed by the Dockerfile
+	// Resolve architect tools via imagebuilder to generate install steps
+	reg := ib.NewRegistry()
+	catalog.RegisterDefaults(reg)
+
+	// The architect needs these tools installed in the image.
+	// @spwn/cli is handled separately (cross-compiled binary), so we only need
+	// the other tools that @spwn/architect depends on.
+	architectTools := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/docker-cli"}
+	resolved, err := reg.Resolve(architectTools)
+	if err != nil {
+		return fmt.Errorf("resolve architect tools: %w", err)
+	}
+
+	// Convert to generator inputs and generate the Dockerfile.
+	// SkipFooter: architect has its own COPY/entrypoint directives appended below.
+	// User/Home: architect image uses "architect" user, not "spwn".
+	toolInputs := ib.ToolsToInputs(resolved)
+	df := ib.GenerateDockerfile(base.ArchitectDockerfile, toolInputs, foundation.ArchitectImageVersion, ib.GenerateOpts{
+		SkipFooter: true,
+		User:       "architect",
+		Home:       "/home/architect",
+	})
+
+	// Append architect-specific Dockerfile directives (COPY binary, system files, entrypoint)
+	// Collect and template UserCommands for the architect user
+	var userCmdLines string
+	for _, t := range resolved {
+		for _, cmd := range t.Install().UserCommands {
+			cmd = strings.ReplaceAll(cmd, "{{.Home}}", "/home/architect")
+			cmd = strings.ReplaceAll(cmd, "{{.User}}", "architect")
+			userCmdLines += fmt.Sprintf("RUN %s\n", cmd)
+		}
+	}
+
+	architectFooter := `
+# Architect: cross-compiled spwn binary
+COPY spwn /usr/local/bin/spwn
+RUN chmod +x /usr/local/bin/spwn
+
+# Architect identity and skills
+COPY system/architect/ARCHITECT.md /me/ARCHITECT.md
+COPY system/AGENTS.md /me/AGENTS.md
+COPY system/skills/ /me/skills/
+COPY system/architect/skills/ /me/skills/
+RUN chown -R architect:architect /me /home/architect
+
+# Entrypoint aligns architect user groups with host docker.sock GID
+COPY entrypoint.sh /usr/local/bin/architect-entrypoint.sh
+RUN chmod +x /usr/local/bin/architect-entrypoint.sh
+
+# User-level tool configuration (runs as architect)
+USER architect
+` + userCmdLines + `
+# Switch back to root for entrypoint (needs usermod for docker socket GID)
+# Claude Code runs via: docker exec -u architect
+USER root
+WORKDIR /me
+ENTRYPOINT ["/usr/local/bin/architect-entrypoint.sh"]
+CMD ["sleep", "infinity"]
+`
+	df = append(df, []byte(architectFooter)...)
+
+	// Build the context map with architect-specific files
 	contextFiles := make(map[string][]byte)
 
-	// Add the spwn binary
+	// Cross-compiled spwn binary
 	contextFiles["spwn"] = binaryData
 
-	// Add the entrypoint script
+	// Entrypoint script for Docker socket GID alignment
 	contextFiles["entrypoint.sh"] = base.ArchitectEntrypoint
 
-	// Add all architect system files (ARCHITECT.md, AGENTS.md, skills, etc.)
+	// Architect system files (ARCHITECT.md, AGENTS.md, skills, stack)
 	for path, content := range physics.ArchitectSystemFiles() {
 		contextFiles[path] = []byte(content)
 	}
@@ -56,7 +121,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		ctx,
 		foundation.ArchitectImage,
 		foundation.ArchitectImageVersion,
-		base.ArchitectDockerfile,
+		df,
 		contextFiles,
 		logw,
 	)
@@ -99,12 +164,7 @@ func crossCompileSpwn(ctx context.Context, logw io.Writer) (string, error) {
 }
 
 // findSourceRoot locates the spwn workspace root directory.
-// It tries several strategies:
-// 1. Check build info for VCS directory
-// 2. Walk up from the running executable looking for go.work
-// 3. Walk up from the current working directory looking for go.work
 func findSourceRoot() (string, error) {
-	// Strategy 1: check build info VCS directory
 	if bi, ok := debug.ReadBuildInfo(); ok {
 		for _, s := range bi.Settings {
 			if s.Key == "vcs.directory" && s.Value != "" {
@@ -115,14 +175,12 @@ func findSourceRoot() (string, error) {
 		}
 	}
 
-	// Strategy 2: walk up from executable path
 	if exe, err := os.Executable(); err == nil {
 		if root := findRootUpward(filepath.Dir(exe)); root != "" {
 			return root, nil
 		}
 	}
 
-	// Strategy 3: walk up from cwd
 	if cwd, err := os.Getwd(); err == nil {
 		if root := findRootUpward(cwd); root != "" {
 			return root, nil
@@ -134,8 +192,6 @@ func findSourceRoot() (string, error) {
 		"Make sure you're running spwn from within the source tree, or that the binary was built with VCS info")
 }
 
-// findRootUpward walks up from dir looking for a directory containing go.work
-// and apps/cli/cmd/spwn/main.go (the spwn workspace root).
 func findRootUpward(dir string) string {
 	for {
 		if isSpwnRoot(dir) {
@@ -150,7 +206,6 @@ func findRootUpward(dir string) string {
 	return ""
 }
 
-// isSpwnRoot checks if dir is the spwn workspace root.
 func isSpwnRoot(dir string) bool {
 	goWork := filepath.Join(dir, "go.work")
 	mainGo := filepath.Join(dir, "apps", "cli", "cmd", "spwn", "main.go")

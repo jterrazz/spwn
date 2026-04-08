@@ -44,7 +44,7 @@ func TestConfig_DefaultsApplied(t *testing.T) {
 		WithConfigYAML(`
 physics:
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
@@ -84,14 +84,14 @@ physics:
 }
 
 func TestConfig_CustomToolsReflectedInFaculties(t *testing.T) {
-	// GIVEN a config with @unix and @git tools
+	// GIVEN a config with @spwn/unix and @spwn/git tools
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   tools:
-    - "@unix"
-    - "@git"
+    - "@spwn/unix"
+    - "@spwn/git"
 `).
 		NoAgent().
 		Execute()
