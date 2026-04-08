@@ -1,7 +1,6 @@
 package claude
 
 import (
-	"spwn.sh/core/agent"
 	rt "spwn.sh/core/universe/internal/runtime"
 )
 
@@ -26,13 +25,8 @@ func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
 	}
 
 	// Worker/Manager/Chief: session management
-	sessID := agent.DeterministicSessionID(cfg.AgentName, cfg.WorldID)
-	cmd = append(cmd, "--session-id", sessID)
-
-	existing, err := agent.LoadSession(cfg.MindPath, cfg.WorldID)
-	if err == nil && existing != nil {
-		cmd = append(cmd, "--resume")
-	}
+	// --continue auto-resumes the latest session or starts a new one
+	cmd = append(cmd, "--continue")
 
 	if cfg.Prompt != "" {
 		cmd = append(cmd, "-p", cfg.Prompt)
