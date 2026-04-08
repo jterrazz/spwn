@@ -24,8 +24,9 @@ func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
 		return cmd
 	}
 
-	// Worker/Manager/Chief: session management
-	// --continue auto-resumes the latest session or starts a new one
+	// Worker/Manager/Chief: use --continue to resume the latest session
+	// in the working directory. This is the only way to get session
+	// persistence with --print mode in Claude Code CLI.
 	cmd = append(cmd, "--continue")
 
 	if cfg.Prompt != "" {
