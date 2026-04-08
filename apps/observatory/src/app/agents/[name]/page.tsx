@@ -110,14 +110,14 @@ function AgentProfilePage() {
     }
   }, [fetchProfile, worldId]);
 
-  // Auto-detect world if not specified in URL
+  // Auto-detect world if not specified in URL — always update from latest world data
   useEffect(() => {
-    if (worldId || worldData) return;
+    if (worldId) return; // URL-pinned, don't override
     const w = availableWorlds.find((w) =>
       w.agent === agentName || w.agents.some((a) => a.name === agentName)
     );
     if (w) setWorldData(w);
-  }, [availableWorlds, agentName, worldId, worldData]);
+  }, [availableWorlds, agentName, worldId]);
 
   const showFeedback = (msg: string) => {
     setFeedback(msg);
