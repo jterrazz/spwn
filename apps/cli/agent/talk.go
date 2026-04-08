@@ -50,10 +50,13 @@ If no message is provided, opens an interactive session inside the container.`,
 			return err
 		}
 
-		s.Blank()
-		s.Info("Agent:", name)
-		s.Info("World:", worldID)
-		s.Blank()
+		// Suppress stepper output in stream-json mode (observatory reads raw JSON)
+		if talkOutputFormat != "stream-json" {
+			s.Blank()
+			s.Info("Agent:", name)
+			s.Info("World:", worldID)
+			s.Blank()
+		}
 
 		runtimeName := world.Runtime
 		if runtimeName == "" {
@@ -105,7 +108,7 @@ If no message is provided, opens an interactive session inside the container.`,
 
 			if talkOutputFormat == "stream-json" {
 				execCmd.Stdout = os.Stdout
-				execCmd.Stderr = os.Stderr
+				// Suppress stderr in streaming mode (codex emits noisy MCP errors)
 				if err := execCmd.Run(); err != nil {
 					return formatExecError(err, nil)
 				}

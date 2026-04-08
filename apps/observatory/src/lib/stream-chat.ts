@@ -76,10 +76,17 @@ async function consumeSSEStream(
         try {
           const event: StreamJsonEvent = JSON.parse(data);
 
-          // Extract cost/duration from result events
+          // Extract cost/duration from result events (Claude + Codex)
           if (event.type === "result") {
             meta.cost = event.total_cost_usd as number | undefined;
             meta.duration = event.duration_ms as number | undefined;
+          }
+          if (event.type === "turn.completed") {
+            const usage = event.usage as { input_tokens?: number; output_tokens?: number } | undefined;
+            if (usage) {
+              // Codex doesn't report cost directly — estimate from token count
+              meta.duration = undefined;
+            }
           }
 
           const newBlocks = parseStreamEvent(event);

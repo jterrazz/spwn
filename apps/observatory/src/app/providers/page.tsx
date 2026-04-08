@@ -9,7 +9,6 @@ import { Page } from "@/components/page";
 import {
   IconKey,
   IconPlugConnected,
-  IconRefresh,
   IconCheck,
   IconX,
   IconAlertTriangle,
@@ -17,6 +16,8 @@ import {
   IconEye,
   IconEyeOff,
   IconTerminal2,
+  IconLock,
+  IconUserCircle,
 } from "@tabler/icons-react";
 
 // ── Types ───────────────────────────────────────────────────────────────
@@ -37,11 +38,54 @@ interface ProviderInfo {
   usage: ProviderUsage | null;
 }
 
-const PROVIDER_META: Record<string, { name: string; icon: string; color: string; docsUrl: string; envKey: string }> = {
-  anthropic: { name: "Anthropic", icon: "◆", color: "text-orange-400", docsUrl: "https://console.anthropic.com/settings/keys", envKey: "ANTHROPIC_API_KEY" },
-  openai: { name: "OpenAI", icon: "◎", color: "text-green-400", docsUrl: "https://platform.openai.com/api-keys", envKey: "OPENAI_API_KEY" },
-  google: { name: "Google", icon: "◈", color: "text-blue-400", docsUrl: "https://aistudio.google.com/app/apikey", envKey: "GOOGLE_API_KEY" },
+const PROVIDER_META: Record<string, {
+  name: string;
+  icon: string;
+  color: string;
+  docsUrl: string;
+  envKey: string;
+  oauthNote: string;
+}> = {
+  anthropic: {
+    name: "Anthropic",
+    icon: "◆",
+    color: "text-orange-400",
+    docsUrl: "https://console.anthropic.com/settings/keys",
+    envKey: "ANTHROPIC_API_KEY",
+    oauthNote: "Sign in via Claude Code CLI: claude login",
+  },
+  openai: {
+    name: "OpenAI",
+    icon: "◎",
+    color: "text-green-400",
+    docsUrl: "https://platform.openai.com/api-keys",
+    envKey: "OPENAI_API_KEY",
+    oauthNote: "Sign in via Codex CLI: codex login",
+  },
+  google: {
+    name: "Google",
+    icon: "◈",
+    color: "text-blue-400",
+    docsUrl: "https://aistudio.google.com/app/apikey",
+    envKey: "GOOGLE_API_KEY",
+    oauthNote: "",
+  },
 };
+
+// ── Helpers ─────────────────────────────────────────────────────────────
+
+function credLabel(type: string | null): { label: string; icon: React.ReactNode; color: string } {
+  switch (type) {
+    case "api_key":
+      return { label: "API Key", icon: <IconKey size={10} />, color: "text-blue-400/60 border-blue-500/15 bg-blue-500/8" };
+    case "oauth":
+      return { label: "OAuth", icon: <IconUserCircle size={10} />, color: "text-purple-400/60 border-purple-500/15 bg-purple-500/8" };
+    case "keychain":
+      return { label: "Keychain", icon: <IconLock size={10} />, color: "text-amber-400/60 border-amber-500/15 bg-amber-500/8" };
+    default:
+      return { label: "", icon: null, color: "" };
+  }
+}
 
 // ── Sub-components ──────────────────────────────────────────────────────
 
@@ -56,111 +100,123 @@ function UsageBar({ label, used, limit, suffix }: { label: string; used: number;
           {suffix ? `${suffix}${used.toFixed(2)} / ${suffix}${limit.toFixed(2)}` : `${pct.toFixed(0)}%`}
         </span>
       </div>
-      <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+      <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
 }
 
-function ProviderCard({ provider, onCheckConnection, onConfigure, onReset, checking }: {
+function ProviderRow({ provider, onConfigure, onReset, checking, onCheck }: {
   provider: ProviderInfo;
-  onCheckConnection: () => void;
   onConfigure: () => void;
   onReset: () => void;
+  onCheck: () => void;
   checking: boolean;
 }) {
-  const meta = PROVIDER_META[provider.provider] ?? { name: provider.provider, icon: "●", color: "text-white/60", docsUrl: "", envKey: "" };
+  const meta = PROVIDER_META[provider.provider] ?? { name: provider.provider, icon: "●", color: "text-white/60", docsUrl: "", envKey: "", oauthNote: "" };
   const connected = provider.connected;
+  const cred = credLabel(provider.credentialType);
 
   return (
-    <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5 space-y-4 hover:border-white/[0.12] transition-colors">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-lg ${meta.color}`}>
-            {meta.icon}
+    <div className="py-5 space-y-3">
+      {/* Main row */}
+      <div className="flex items-center gap-4">
+        {/* Icon */}
+        <div className={`w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-base shrink-0 ${meta.color}`}>
+          {meta.icon}
+        </div>
+
+        {/* Name + status */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm font-mono font-medium text-foreground/80">{meta.name}</span>
+            {connected ? (
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+            ) : provider.error ? (
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+            ) : (
+              <span className="w-1.5 h-1.5 rounded-full bg-white/15" />
+            )}
+            {/* Credential type badge */}
+            {cred.label && (
+              <span className={`flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border ${cred.color}`}>
+                {cred.icon}
+                {cred.label}
+              </span>
+            )}
           </div>
-          <div>
-            <h3 className="text-sm font-mono font-medium text-foreground/80">{meta.name}</h3>
-            <div className="flex items-center gap-2 mt-0.5">
-              {connected ? (
-                <span className="flex items-center gap-1 text-[10px] font-mono text-green-400/60">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
-                  Connected
-                </span>
-              ) : provider.error ? (
-                <span className="flex items-center gap-1 text-[10px] font-mono text-red-400/60">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
-                  Error
-                </span>
-              ) : (
-                <span className="text-[10px] font-mono text-muted-foreground/25">Not configured</span>
-              )}
-              {provider.credentialType && (
-                <span className="text-[9px] font-mono text-muted-foreground/20 px-1.5 py-0.5 rounded bg-white/[0.03] border border-white/[0.05]">
-                  {provider.credentialType}
-                </span>
-              )}
-            </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            {connected ? (
+              <span className="text-[10px] font-mono text-muted-foreground/30">
+                {provider.source ?? "Connected"}
+              </span>
+            ) : (
+              <span className="text-[10px] font-mono text-muted-foreground/20">Not configured</span>
+            )}
           </div>
         </div>
+
+        {/* Plan badge */}
         {provider.plan && (
-          <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full border bg-white/[0.04] text-muted-foreground/40 border-white/[0.06]">
+          <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border bg-white/[0.03] text-muted-foreground/35 border-white/[0.06]">
             {provider.plan}
           </span>
         )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          {!connected && (
+            <button
+              onClick={onConfigure}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white/[0.05] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.08] transition-all"
+            >
+              <IconKey size={11} />
+              Add key
+            </button>
+          )}
+          {connected && (
+            <>
+              <button
+                onClick={onCheck}
+                disabled={checking}
+                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-all disabled:opacity-40"
+              >
+                {checking ? <span className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin inline-block" /> : "Verify"}
+              </button>
+              <button
+                onClick={onConfigure}
+                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-all"
+              >
+                Change
+              </button>
+              <button
+                onClick={onReset}
+                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/20 hover:text-red-400/60 hover:bg-red-500/[0.04] transition-all"
+              >
+                <IconX size={12} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Source */}
-      {provider.source && (
-        <div className="flex items-center gap-2">
-          <IconKey size={11} className="text-muted-foreground/20" />
-          <span className="text-[10px] font-mono text-muted-foreground/30">{provider.source}</span>
+      {/* Error */}
+      {provider.error && (
+        <div className="ml-13 rounded-lg bg-red-500/8 border border-red-500/12 px-3 py-2 flex items-start gap-2">
+          <IconAlertTriangle size={12} className="text-red-400/50 mt-0.5 shrink-0" />
+          <p className="text-[10px] text-red-400/50 font-mono leading-relaxed">{provider.error}</p>
         </div>
       )}
 
-      {/* Usage */}
+      {/* Usage bars */}
       {provider.usage && (
-        <div className="space-y-2">
+        <div className="ml-13 space-y-2 max-w-xs">
           {provider.usage.session && <UsageBar label={`Session (${provider.usage.session.label})`} used={provider.usage.session.used} limit={provider.usage.session.limit} />}
           {provider.usage.weekly && <UsageBar label={`Weekly (${provider.usage.weekly.label})`} used={provider.usage.weekly.used} limit={provider.usage.weekly.limit} />}
           {provider.usage.credits && <UsageBar label="Credits" used={provider.usage.credits.used} limit={provider.usage.credits.limit} suffix={provider.usage.credits.currency} />}
         </div>
       )}
-
-      {/* Error */}
-      {provider.error && (
-        <div className="rounded-lg bg-red-500/10 border border-red-500/15 px-3 py-2 flex items-start gap-2">
-          <IconAlertTriangle size={12} className="text-red-400/60 mt-0.5 shrink-0" />
-          <p className="text-[10px] text-red-400/70 font-mono leading-relaxed">{provider.error}</p>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 pt-1">
-        <button
-          onClick={onConfigure}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] bg-white/[0.04] text-foreground/50 hover:text-foreground/70 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
-        >
-          <IconKey size={11} />
-          Configure
-        </button>
-        <button
-          onClick={onCheckConnection}
-          disabled={checking}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] bg-white/[0.04] text-foreground/50 hover:text-foreground/70 hover:bg-white/[0.08] border border-white/[0.06] transition-all disabled:opacity-40"
-        >
-          {checking ? <span className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" /> : <IconRefresh size={11} />}
-          {checking ? "Checking..." : "Check"}
-        </button>
-        {connected && (
-          <button onClick={onReset} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-red-400/40 hover:text-red-400/70 hover:bg-red-500/[0.06] border border-transparent hover:border-red-500/15 transition-all ml-auto">
-            <IconX size={11} />
-            Reset
-          </button>
-        )}
-      </div>
     </div>
   );
 }
@@ -169,6 +225,7 @@ function ConfigureModal({ provider, onClose, onSave }: { provider: string; onClo
   const [token, setToken] = useState("");
   const [saving, setSaving] = useState(false);
   const [showToken, setShowToken] = useState(false);
+  const [mode, setMode] = useState<"key" | "oauth">("key");
   const meta = PROVIDER_META[provider];
 
   const handleSave = async () => {
@@ -182,52 +239,97 @@ function ConfigureModal({ provider, onClose, onSave }: { provider: string; onClo
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-sm font-heading tracking-wide text-foreground/80">Configure {meta?.name ?? provider}</h3>
+          <h3 className="text-sm font-heading tracking-wide text-foreground/80">Connect {meta?.name ?? provider}</h3>
           <button onClick={onClose} className="p-1 text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors">
             <IconX size={16} />
           </button>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">API Key</label>
-            <div className="relative">
-              <input
-                type={showToken ? "text" : "password"}
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
-                placeholder={`sk-... or paste your ${meta?.name ?? provider} API key`}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-4 py-3 pr-10 text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
-                autoFocus
-              />
-              <button type="button" onClick={() => setShowToken(!showToken)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors">
-                {showToken ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+        {/* Mode toggle */}
+        <div className="flex gap-1 mb-5 p-0.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+          <button
+            onClick={() => setMode("key")}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-[11px] font-mono transition-all ${
+              mode === "key" ? "bg-white/[0.08] text-foreground/70 border border-white/[0.10]" : "text-muted-foreground/30 border border-transparent"
+            }`}
+          >
+            <IconKey size={12} />
+            API Key
+          </button>
+          <button
+            onClick={() => setMode("oauth")}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-[11px] font-mono transition-all ${
+              mode === "oauth" ? "bg-white/[0.08] text-foreground/70 border border-white/[0.10]" : "text-muted-foreground/30 border border-transparent"
+            }`}
+          >
+            <IconUserCircle size={12} />
+            Subscription
+          </button>
+        </div>
+
+        {mode === "key" ? (
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">API Key</label>
+              <div className="relative">
+                <input
+                  type={showToken ? "text" : "password"}
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
+                  placeholder={`sk-... or paste your ${meta?.name ?? provider} API key`}
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-4 py-3 pr-10 text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                  autoFocus
+                />
+                <button type="button" onClick={() => setShowToken(!showToken)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors">
+                  {showToken ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                </button>
+              </div>
+              <div className="flex items-center gap-3 mt-2">
+                {meta?.envKey && <p className="text-[10px] font-mono text-muted-foreground/20">or set {meta.envKey}</p>}
+                {meta?.docsUrl && (
+                  <a href={meta.docsUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400/50 hover:text-blue-400/80 transition-colors flex items-center gap-0.5">
+                    Get key <IconExternalLink size={10} />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={!token.trim() || saving}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {saving ? <span className="flex items-center justify-center gap-2"><span className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />Saving...</span> : "Save"}
               </button>
             </div>
-            <div className="flex items-center gap-3 mt-2">
-              {meta?.envKey && <p className="text-[10px] font-mono text-muted-foreground/20">or set {meta.envKey}</p>}
-              {meta?.docsUrl && (
-                <a href={meta.docsUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400/50 hover:text-blue-400/80 transition-colors flex items-center gap-0.5">
-                  Get key <IconExternalLink size={10} />
-                </a>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 space-y-3">
+              <p className="text-xs text-muted-foreground/50 leading-relaxed">
+                Use your existing subscription (e.g. Claude Max, ChatGPT Plus) instead of an API key. Sign in via the CLI on your host machine — the credentials are shared automatically.
+              </p>
+              {meta?.oauthNote && (
+                <div className="flex items-center gap-2 text-[11px] font-mono text-foreground/50 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
+                  <IconTerminal2 size={13} className="text-muted-foreground/30 shrink-0" />
+                  <span>{meta.oauthNote}</span>
+                </div>
               )}
+              <p className="text-[10px] text-muted-foreground/25">
+                After signing in, spwn will detect the credentials from your system keychain automatically.
+              </p>
             </div>
-          </div>
 
-          <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors">
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!token.trim() || saving}
-              className="flex-1 px-4 py-2.5 rounded-xl text-sm bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              {saving ? <span className="flex items-center justify-center gap-2"><span className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />Saving...</span> : "Save"}
+            <button onClick={onClose} className="w-full px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors">
+              Done
             </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -271,10 +373,10 @@ export default function ProvidersPage() {
       const res = await fetch(goApiUrl("/api/auth/check"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: providerName }) });
       const data = await res.json();
       if (data.connected) {
-        showFeedback(`${providerName} connection verified`, "success");
+        showFeedback(`${providerName} verified`, "success");
         setProviders((prev) => prev.map((p) => p.provider === providerName ? { ...p, connected: true, error: null, usage: data.usage } : p));
       } else {
-        showFeedback(data.error || `${providerName} connection failed`, "error");
+        showFeedback(data.error || `${providerName} failed`, "error");
         setProviders((prev) => prev.map((p) => p.provider === providerName ? { ...p, connected: false, error: data.error } : p));
       }
     } catch { showFeedback(`Failed to check ${providerName}`, "error"); }
@@ -286,19 +388,17 @@ export default function ProvidersPage() {
       const res = await fetch(goApiUrl("/api/auth/configure"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: providerName, token }) });
       const data = await res.json();
       if (data.ok) { showFeedback(`${providerName} configured`, "success"); setConfiguring(null); fetchProviders(); }
-      else { showFeedback(data.error || "Failed to save credentials", "error"); }
-    } catch { showFeedback("Failed to save credentials", "error"); }
+      else { showFeedback(data.error || "Failed to save", "error"); }
+    } catch { showFeedback("Failed to save", "error"); }
   };
 
   const handleReset = async (providerName: string) => {
     try {
       const res = await fetch(goApiUrl("/api/auth/reset"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: providerName }) });
-      if (res.ok) { showFeedback(`${providerName} credentials cleared`, "success"); fetchProviders(); }
-      else { const data = await res.json().catch(() => ({ error: "Unknown error" })); showFeedback(data.error || "Failed to reset", "error"); }
-    } catch { showFeedback("Failed to reset credentials", "error"); }
+      if (res.ok) { showFeedback(`${providerName} cleared`, "success"); fetchProviders(); }
+      else { showFeedback("Failed to reset", "error"); }
+    } catch { showFeedback("Failed to reset", "error"); }
   };
-
-  const connectedCount = providers.filter((p) => p.connected).length;
 
   return (
     <Page>
@@ -327,17 +427,14 @@ export default function ProvidersPage() {
         </div>
       )}
 
-      {/* Provider cards */}
+      {/* Provider list */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-xl border border-white/[0.06] p-5 space-y-4">
-              <div className="flex items-center gap-3">
-                <Skeleton className="w-10 h-10 rounded-xl" />
-                <div><Skeleton className="h-4 w-24" /><Skeleton className="h-2.5 w-16 mt-1.5" /></div>
-              </div>
-              <Skeleton className="h-3 w-40" />
-              <div className="flex gap-2"><Skeleton className="h-7 w-24 rounded-lg" /><Skeleton className="h-7 w-20 rounded-lg" /></div>
+            <div key={i} className="flex items-center gap-4 py-5">
+              <Skeleton className="w-9 h-9 rounded-lg" />
+              <div className="flex-1"><Skeleton className="h-4 w-28" /><Skeleton className="h-2.5 w-20 mt-1.5" /></div>
+              <Skeleton className="h-7 w-20 rounded-lg" />
             </div>
           ))}
         </div>
@@ -356,21 +453,18 @@ export default function ProvidersPage() {
           </div>
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {providers.map((provider) => (
-              <ProviderCard
-                key={provider.provider}
-                provider={provider}
-                onCheckConnection={() => handleCheck(provider.provider)}
-                onConfigure={() => setConfiguring(provider.provider)}
-                onReset={() => handleReset(provider.provider)}
-                checking={checking === provider.provider}
-              />
-            ))}
-          </div>
-
-        </>
+        <div className="divide-y divide-white/[0.06]">
+          {providers.map((provider) => (
+            <ProviderRow
+              key={provider.provider}
+              provider={provider}
+              onConfigure={() => setConfiguring(provider.provider)}
+              onReset={() => handleReset(provider.provider)}
+              onCheck={() => handleCheck(provider.provider)}
+              checking={checking === provider.provider}
+            />
+          ))}
+        </div>
       )}
 
       {/* Configure Modal */}
