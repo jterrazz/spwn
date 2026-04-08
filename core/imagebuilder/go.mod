@@ -1,15 +1,10 @@
-module spwn.sh/core/universe
+module spwn.sh/core/imagebuilder
 
 go 1.25.0
 
 require (
 	github.com/docker/docker v27.5.1+incompatible
 	golang.org/x/term v0.28.0
-	gopkg.in/yaml.v3 v3.0.1
-	spwn.sh/core/agent v0.0.0
-	spwn.sh/core/foundation v0.0.0
-	spwn.sh/core/gate v0.0.0
-	spwn.sh/core/imagebuilder v0.0.0
 )
 
 require (
@@ -38,11 +33,4 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	gotest.tools/v3 v3.5.2 // indirect
-)
-
-replace (
-	spwn.sh/core/agent => ../agent
-	spwn.sh/core/foundation => ../foundation
-	spwn.sh/core/gate => ../gate
-	spwn.sh/core/imagebuilder => ../imagebuilder
 )

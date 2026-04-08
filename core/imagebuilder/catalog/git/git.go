@@ -1,0 +1,29 @@
+package git
+
+import (
+	"io/fs"
+
+	ib "spwn.sh/core/imagebuilder"
+)
+
+// Tool is the @git tool — Git version control.
+var Tool = &tool{}
+
+type tool struct{}
+
+func (*tool) Name() string           { return "@git" }
+func (*tool) Kind() ib.Kind          { return ib.KindTool }
+func (*tool) Version() string        { return "latest" }
+func (*tool) Dependencies() []string { return nil }
+
+func (*tool) Install() ib.InstallSpec {
+	return ib.InstallSpec{
+		Packages: []string{"git"},
+	}
+}
+
+func (*tool) Verify() []string {
+	return []string{"command -v git"}
+}
+
+func (*tool) Skills() fs.FS { return nil }

@@ -11,9 +11,9 @@ import (
 	"runtime/debug"
 
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/imagebuilder/base"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/physics"
-	"spwn.sh/platform/images"
 )
 
 // BuildArchitectImage cross-compiles the spwn binary for linux/amd64 and builds
@@ -44,7 +44,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 	contextFiles["spwn"] = binaryData
 
 	// Add the entrypoint script
-	contextFiles["entrypoint.sh"] = images.ArchitectEntrypoint
+	contextFiles["entrypoint.sh"] = base.ArchitectEntrypoint
 
 	// Add all architect system files (ARCHITECT.md, AGENTS.md, skills, etc.)
 	for path, content := range physics.ArchitectSystemFiles() {
@@ -56,7 +56,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		ctx,
 		foundation.ArchitectImage,
 		foundation.ArchitectImageVersion,
-		images.DockerfileArchitect,
+		base.ArchitectDockerfile,
 		contextFiles,
 		logw,
 	)
