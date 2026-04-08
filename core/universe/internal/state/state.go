@@ -138,6 +138,44 @@ func (s *Store) UpdateStatus(id string, status models.Status) error {
 	return fmt.Errorf("world %s not found", id)
 }
 
+// SetSessionID stores a runtime session ID for an agent in a world.
+func (s *Store) SetSessionID(worldID, agentName, sessionID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	universes, err := s.load()
+	if err != nil {
+		return err
+	}
+	for i := range universes {
+		if universes[i].ID == worldID {
+			if universes[i].SessionIDs == nil {
+				universes[i].SessionIDs = make(map[string]string)
+			}
+			universes[i].SessionIDs[agentName] = sessionID
+			return s.save(universes)
+		}
+	}
+	return fmt.Errorf("world %s not found", worldID)
+}
+
+// GetSessionID returns the runtime session ID for an agent in a world.
+func (s *Store) GetSessionID(worldID, agentName string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	universes, _ := s.load()
+	for _, u := range universes {
+		if u.ID == worldID {
+			if u.SessionIDs != nil {
+				return u.SessionIDs[agentName]
+			}
+			return ""
+		}
+	}
+	return ""
+}
+
 // AddAgent adds an agent record to a world.
 func (s *Store) AddAgent(worldID string, agent models.AgentRecord) error {
 	s.mu.Lock()

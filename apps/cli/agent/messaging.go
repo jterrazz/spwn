@@ -43,7 +43,7 @@ var sendCmd = &cobra.Command{
 		}
 		s := newStepper(cmd)
 
-		containerID, _, _, err := findAgentContainer(toAgent, "")
+		containerID, _, _, _, err := findAgentContainer(toAgent, "")
 		if err != nil {
 			return fmt.Errorf("agent %q is not in any active world", toAgent)
 		}
@@ -98,7 +98,7 @@ var inboxCmd = &cobra.Command{
 		s := newStepper(cmd)
 		j, _ := cmd.Flags().GetBool("json")
 
-		containerID, _, _, err := findAgentContainer(agentName, "")
+		containerID, _, _, _, err := findAgentContainer(agentName, "")
 		if err != nil {
 			return fmt.Errorf("agent %q is not in any active world", agentName)
 		}
@@ -145,7 +145,7 @@ var watchCmd = &cobra.Command{
 		agentName := args[0]
 		s := newStepper(cmd)
 
-		containerID, worldID, _, err := findAgentContainer(agentName, "")
+		containerID, worldID, _, _, err := findAgentContainer(agentName, "")
 		if err != nil {
 			return fmt.Errorf("agent %q is not in any active world", agentName)
 		}

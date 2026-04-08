@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -40,13 +41,11 @@ If no message is provided, opens an interactive session inside the container.`,
 		}
 		s := newStepper(cmd)
 
-		// Validate the agent exists
 		if err := agentDomain.ValidateMind(name); err != nil {
 			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent new %s", name, name)
 		}
 
-		// Find which world this agent is in
-		containerID, worldID, world, err := findAgentContainer(name, talkWorldID)
+		containerID, worldID, world, arc, err := findAgentContainer(name, talkWorldID)
 		if err != nil {
 			return err
 		}
@@ -56,33 +55,38 @@ If no message is provided, opens an interactive session inside the container.`,
 		s.Info("World:", worldID)
 		s.Blank()
 
-		// Get the runtime from the world state and build command via adapter
 		runtimeName := world.Runtime
 		if runtimeName == "" {
 			runtimeName = "claude-code"
 		}
+
+		// Look up existing session ID for this agent (enables conversation continuity)
+		sessionID := ""
+		if arc != nil {
+			sessionID = arc.GetSessionID(worldID, name)
+		}
+
 		runtimeCmd, rtErr := universe.BuildRuntimeCommand(runtimeName, universe.RuntimeSpawnConfig{
 			MindPath:  world.MindPath,
 			AgentName: name,
 			WorldID:   worldID,
 			Prompt:    message,
+			SessionID: sessionID,
 		})
 		if rtErr != nil {
 			return fmt.Errorf("unknown runtime %q for world %s", runtimeName, worldID)
 		}
 
-		// For claude-code: add output format flags.
-		// --print is needed for non-interactive one-shot mode.
-		// Session persistence works via --continue which saves even with --print.
+		// For claude-code one-shot: use JSON output to capture session_id
+		useJSONCapture := runtimeName == "claude-code" && message != "" && talkOutputFormat != "stream-json"
 		if runtimeName == "claude-code" && message != "" {
 			if talkOutputFormat == "stream-json" {
 				runtimeCmd = append(runtimeCmd, "--output-format", "stream-json", "--verbose")
 			} else {
-				runtimeCmd = append(runtimeCmd, "--print")
+				runtimeCmd = append(runtimeCmd, "--print", "--output-format", "json")
 			}
 		}
 
-		// Build docker exec args with auth env vars
 		buildDockerArgs := func(interactive bool) []string {
 			args := []string{"exec"}
 			if interactive {
@@ -95,7 +99,6 @@ If no message is provided, opens an interactive session inside the container.`,
 		}
 
 		if message != "" {
-			// One-shot mode
 			dockerArgs := append(buildDockerArgs(false), runtimeCmd...)
 			execCmd := exec.Command("docker", dockerArgs...)
 
@@ -105,6 +108,27 @@ If no message is provided, opens an interactive session inside the container.`,
 				if err := execCmd.Run(); err != nil {
 					return formatExecError(err, nil)
 				}
+			} else if useJSONCapture {
+				// Capture JSON output to extract session_id, then print result
+				output, err := execCmd.CombinedOutput()
+				if err != nil {
+					return formatExecError(err, output)
+				}
+
+				var resp struct {
+					Result    string `json:"result"`
+					SessionID string `json:"session_id"`
+				}
+				if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
+					// Save session ID for next invocation
+					if resp.SessionID != "" && arc != nil {
+						_ = arc.SetSessionID(worldID, name, resp.SessionID)
+					}
+					fmt.Fprintln(os.Stdout, resp.Result)
+				} else {
+					// Fallback: print raw output
+					fmt.Fprint(os.Stdout, string(output))
+				}
 			} else {
 				output, err := execCmd.CombinedOutput()
 				if err != nil {
@@ -113,7 +137,7 @@ If no message is provided, opens an interactive session inside the container.`,
 				fmt.Fprint(os.Stdout, string(output))
 			}
 		} else {
-			// Interactive mode — same command but with TTY
+			// Interactive mode
 			dockerArgs := append(buildDockerArgs(true), runtimeCmd...)
 			execCmd := exec.Command("docker", dockerArgs...)
 			execCmd.Stdin = os.Stdin
@@ -129,7 +153,6 @@ If no message is provided, opens an interactive session inside the container.`,
 	},
 }
 
-// isContainerRunning checks if a Docker container is actually alive.
 func isContainerRunning(containerID string) bool {
 	out, err := exec.Command("docker", "inspect", "--format", "{{.State.Running}}", containerID).Output()
 	if err != nil {
@@ -138,41 +161,37 @@ func isContainerRunning(containerID string) bool {
 	return strings.TrimSpace(string(out)) == "true"
 }
 
-// findAgentContainer looks up state.json to find a running world that contains
-// the given agent. Returns the container ID, world ID, and full world record.
-func findAgentContainer(agentName, worldID string) (string, string, *universe.World, error) {
+// findAgentContainer returns containerID, worldID, world record, and architect.
+func findAgentContainer(agentName, worldID string) (string, string, *universe.World, *universe.Architect, error) {
 	ctx := context.Background()
 
 	arc, err := universe.NewArchitectFromEnv()
 	if err != nil {
 		if strings.Contains(err.Error(), "cannot connect to Docker") {
-			return "", "", nil, fmt.Errorf("Docker is not running")
+			return "", "", nil, nil, fmt.Errorf("Docker is not running")
 		}
-		return "", "", nil, err
+		return "", "", nil, nil, err
 	}
 
 	worlds, err := arc.List(ctx)
 	if err != nil {
-		return "", "", nil, fmt.Errorf("cannot list worlds: %w", err)
+		return "", "", nil, nil, fmt.Errorf("cannot list worlds: %w", err)
 	}
 
 	cID, foundWorldID, routeErr := routeAgentToWorld(worlds, agentName, worldID, isContainerRunning)
 	if routeErr != nil {
-		return "", "", nil, routeErr
+		return "", "", nil, nil, routeErr
 	}
 
-	// Return the full world record for runtime/mind info
 	for i := range worlds {
 		if worlds[i].ID == foundWorldID {
-			return cID, foundWorldID, &worlds[i], nil
+			return cID, foundWorldID, &worlds[i], arc, nil
 		}
 	}
 
-	return cID, foundWorldID, nil, nil
+	return cID, foundWorldID, nil, arc, nil
 }
 
-// worldHasAgent returns true when the given agent name matches the world's
-// primary agent or any entry in its agents slice.
 func worldHasAgent(u universe.World, agentName string) bool {
 	if u.Agent == agentName {
 		return true
@@ -185,7 +204,6 @@ func worldHasAgent(u universe.World, agentName string) bool {
 	return false
 }
 
-// routeAgentToWorld contains the pure routing logic.
 func routeAgentToWorld(
 	worlds []universe.World,
 	agentName, worldID string,
@@ -222,12 +240,10 @@ func routeAgentToWorld(
 	return "", "", fmt.Errorf("agent %q is not in any active world\n\n  Spawn one with: spwn up --agent %s -w <workspace>", agentName, agentName)
 }
 
-// authEnvArgs returns Docker -e flags for all available auth credentials.
 func authEnvArgs() []string {
 	return auth.DockerEnvArgs()
 }
 
-// formatExecError parses docker exec output for common auth errors.
 func formatExecError(err error, output []byte) error {
 	out := string(output)
 
