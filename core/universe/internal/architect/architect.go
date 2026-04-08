@@ -44,6 +44,16 @@ func New(b backend.Backend, s *state.Store) *Architect {
 	}
 }
 
+// SetSessionID stores a runtime session ID for an agent in a world.
+func (a *Architect) SetSessionID(worldID, agentName, sessionID string) error {
+	return a.state.SetSessionID(worldID, agentName, sessionID)
+}
+
+// GetSessionID returns the runtime session ID for an agent in a world.
+func (a *Architect) GetSessionID(worldID, agentName string) string {
+	return a.state.GetSessionID(worldID, agentName)
+}
+
 // SetRuntime switches the active runtime adapter.
 func (a *Architect) SetRuntime(name string) error {
 	rt, err := runtime.Get(name)
