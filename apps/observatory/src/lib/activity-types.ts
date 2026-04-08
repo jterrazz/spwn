@@ -60,28 +60,39 @@ export interface ActivityMessage {
   duration?: number;
 }
 
-// ── Claude Code stream-json event types ──
+// ── Stream event types (Claude Code + Codex) ──
 
 export interface StreamJsonEvent {
-  type: "system" | "assistant" | "user" | "result" | "stream_event";
+  type: string;
   subtype?: string;
   [key: string]: unknown;
 }
 
 /**
- * Parse a Claude Code stream-json line into ActivityBlocks.
- * Returns blocks to append to the current message, or null to skip.
+ * Parse a stream-json line into ActivityBlocks.
+ * Handles both Claude Code events (assistant/result) and Codex JSONL (item.completed/turn.completed).
  */
 export function parseStreamEvent(event: StreamJsonEvent): ActivityBlock[] | null {
   switch (event.type) {
+    // Claude Code events
     case "assistant":
       return parseAssistantEvent(event);
-
     case "user":
       return parseUserEvent(event);
-
     case "result":
       return parseResultEvent(event);
+
+    // Codex JSONL events
+    case "item.completed": {
+      const item = event.item as { type?: string; text?: string } | undefined;
+      if (item?.text) {
+        return [{ type: "text", content: item.text }];
+      }
+      return null;
+    }
+    case "turn.completed":
+      // Mark as result-like for cost tracking (handled in stream-chat.ts)
+      return null;
 
     default:
       return null;
