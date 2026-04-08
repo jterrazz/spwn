@@ -63,7 +63,7 @@ function AgentProfilePage() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "chat" | "files">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "chat" | "files">("chat");
   const [showWizard, setShowWizard] = useState(false);
   const [showDeployDialog, setShowDeployDialog] = useState(false);
   const [availableTeams, setAvailableTeams] = useState<Team[]>([]);
@@ -464,10 +464,10 @@ function AgentProfilePage() {
           <div className="flex items-start justify-between mb-3">
             <div>
               <h3 className="text-sm font-heading text-emerald-300">
-                Welcome to {agentName}! Let&apos;s set up their identity.
+                Set up {agentName}&apos;s identity
               </h3>
               <p className="text-[11px] text-emerald-300/50 mt-1">
-                Fill in at least a purpose to get started.
+                Give this agent a purpose so it knows what to focus on.
               </p>
             </div>
             <button
@@ -541,16 +541,6 @@ function AgentProfilePage() {
       {/* Tab switcher */}
       <div className="flex gap-1 border-b border-white/[0.06] pb-px">
         <button
-          onClick={() => setActiveTab("profile")}
-          className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
-            activeTab === "profile"
-              ? "border-foreground/50 text-foreground/80"
-              : "border-transparent text-muted-foreground/40 hover:text-muted-foreground/60"
-          }`}
-        >
-          Profile
-        </button>
-        <button
           onClick={() => setActiveTab("chat")}
           className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px flex items-center gap-1.5 ${
             activeTab === "chat"
@@ -560,6 +550,16 @@ function AgentProfilePage() {
         >
           <IconMessageCircle size={13} />
           Chat
+        </button>
+        <button
+          onClick={() => setActiveTab("profile")}
+          className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+            activeTab === "profile"
+              ? "border-foreground/50 text-foreground/80"
+              : "border-transparent text-muted-foreground/40 hover:text-muted-foreground/60"
+          }`}
+        >
+          Profile
         </button>
         <button
           onClick={() => setActiveTab("files")}
@@ -712,20 +712,6 @@ function AgentProfilePage() {
         </>
       )}
 
-      {/* Reference */}
-      <Separator />
-      <div>
-        <SectionHeader>Reference</SectionHeader>
-        <div className="font-mono text-[10px] text-muted-foreground/30 space-y-1">
-          <p>spwn agent talk {agentName} &quot;message&quot;</p>
-          <p>spwn agent dream {agentName}</p>
-          <p>spwn agent sleep {agentName}</p>
-          <p>spwn profile {agentName}</p>
-          <p>spwn agent fork {agentName} &lt;new&gt;</p>
-          <p>spwn agent export {agentName}</p>
-        </div>
-      </div>
-
       </>)}
 
       {/* Chat tab */}
@@ -821,16 +807,6 @@ function AgentProfilePage() {
 
           <Separator />
 
-          {/* Commands */}
-          <div>
-            <SectionLabel>Reference</SectionLabel>
-            <div className="font-mono text-[10px] text-muted-foreground/30 space-y-1">
-              <p>spwn agent talk {agentName} &quot;msg&quot;</p>
-              <p>spwn agent dream {agentName}</p>
-              <p>spwn agent sleep {agentName}</p>
-              <p>spwn profile {agentName}</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

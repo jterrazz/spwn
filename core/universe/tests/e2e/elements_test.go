@@ -9,14 +9,14 @@ import (
 )
 
 func TestSpawn_ToolsVerified(t *testing.T) {
-	// GIVEN a config requesting @unix and @git tools
+	// GIVEN a config requesting @spwn/unix and @spwn/git tools
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   tools:
-    - "@unix"
-    - "@git"
+    - "@spwn/unix"
+    - "@spwn/git"
 `).
 		NoAgent().
 		Execute()
@@ -43,18 +43,18 @@ physics:
 }
 
 func TestSpawn_PackExpansion(t *testing.T) {
-	// GIVEN a config requesting the @unix pack
+	// GIVEN a config requesting the @spwn/unix pack
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
 
-	// THEN the faculties should include all @unix pack members
+	// THEN the faculties should include all @spwn/unix pack members
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.FileContains("/universe/faculties.md", "bash")
 		c.FileContains("/universe/faculties.md", "grep")

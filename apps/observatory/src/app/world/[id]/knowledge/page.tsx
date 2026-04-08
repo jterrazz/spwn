@@ -37,7 +37,7 @@ export default function KnowledgePage() {
     <Page>
       <PageHeader
         title="Knowledge"
-        description="World knowledge base — managed by the Architect."
+        description="Shared knowledge base for this world."
         actions={
           <>
             <ExpandingSearch

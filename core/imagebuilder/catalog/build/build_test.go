@@ -3,8 +3,8 @@ package build
 import "testing"
 
 func TestBuild_Name(t *testing.T) {
-	if Tool.Name() != "@build" {
-		t.Errorf("expected @build, got %s", Tool.Name())
+	if Tool.Name() != "@spwn/build" {
+		t.Errorf("expected @spwn/build, got %s", Tool.Name())
 	}
 }
 

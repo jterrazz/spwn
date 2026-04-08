@@ -6,16 +6,16 @@ import "io/fs"
 type Kind string
 
 const (
-	KindRuntime  Kind = "runtime"  // Agent thinking engine (@claude-code, @aider)
-	KindTool     Kind = "tool"     // Extra capability (@qmd, @jq)
-	KindSDK      Kind = "sdk"      // Language/runtime SDK (@node, @python)
-	KindPlatform Kind = "platform" // Spwn infrastructure (@spwn, @architect)
+	KindRuntime  Kind = "runtime"  // Agent thinking engine (@spwn/claude-code, @spwn/aider)
+	KindTool     Kind = "tool"     // Extra capability (@spwn/qmd, @jq)
+	KindSDK      Kind = "sdk"      // Language/runtime SDK (@spwn/node, @spwn/python)
+	KindPlatform Kind = "platform" // Spwn infrastructure (@spwn/cli, @spwn/architect)
 )
 
 // Tool is the contract that any installable capability must implement.
 // Built-in tools in catalog/ implement this; third-party tools can too.
 type Tool interface {
-	// Name returns the tool identifier (e.g., "@qmd", "@node").
+	// Name returns the tool identifier (e.g., "@spwn/qmd", "@spwn/node").
 	Name() string
 
 	// Kind returns the tool's category.
@@ -45,8 +45,13 @@ type InstallSpec struct {
 	// Packages are apt-get packages to install. Deduplicated across tools.
 	Packages []string
 
-	// Commands are RUN lines executed in order.
+	// Commands are RUN lines executed as root, before the USER switch.
 	Commands []string
+
+	// UserCommands are RUN lines executed after the USER switch.
+	// Use these for writing config files to $HOME or other user-specific setup.
+	// The generator templates {{.Home}} and {{.User}} with the actual values.
+	UserCommands []string
 
 	// Env are ENV key=value directives added to the Dockerfile.
 	Env map[string]string

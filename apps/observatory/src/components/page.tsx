@@ -11,7 +11,7 @@ interface PageProps {
  */
 export function Page({ children, className = "" }: PageProps) {
   return (
-    <div className={`px-6 md:px-8 pt-6 md:pt-8 pb-12 space-y-6 md:space-y-8 ${className}`}>
+    <div className={`px-6 md:px-8 pt-6 md:pt-8 pb-12 space-y-6 md:space-y-8 min-h-full flex flex-col ${className}`}>
       {children}
     </div>
   );

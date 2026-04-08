@@ -213,11 +213,21 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		catalog.RegisterDefaults(reg)
 		builder := ib.New(reg, a.backend)
 
-		// Use manifest tools if specified, otherwise default stack
-		tools := opts.Manifest.Tools
-		if len(tools) == 0 {
-			tools = []string{"@unix", "@git", "@node", "@claude-code", "@spwn"}
+		// Always include runtime essentials, then add user-specified tools on top.
+		// The registry deduplicates and resolves dependencies.
+		required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/cli"}
+		tools := append(required, opts.Manifest.Tools...)
+
+		// Deduplicate
+		seen := make(map[string]bool)
+		deduped := make([]string, 0, len(tools))
+		for _, t := range tools {
+			if !seen[t] {
+				seen[t] = true
+				deduped = append(deduped, t)
+			}
 		}
+		tools = deduped
 
 		_, err := builder.Build(ctx, ib.BuildRequest{
 			BaseDockerfile: base.WorldDockerfile,

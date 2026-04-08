@@ -3,21 +3,21 @@ package node
 import "testing"
 
 func TestNode_Name(t *testing.T) {
-	if Tool.Name() != "@node" {
-		t.Errorf("expected @node, got %s", Tool.Name())
+	if Tool.Name() != "@spwn/node" {
+		t.Errorf("expected @spwn/node, got %s", Tool.Name())
 	}
 }
 
 func TestNode_NoDependencies(t *testing.T) {
 	if len(Tool.Dependencies()) != 0 {
-		t.Error("@node should have no dependencies")
+		t.Error("@spwn/node should have no dependencies")
 	}
 }
 
 func TestNode_HasCommands(t *testing.T) {
 	spec := Tool.Install()
 	if len(spec.Commands) == 0 {
-		t.Error("@node should have install commands")
+		t.Error("@spwn/node should have install commands")
 	}
 }
 

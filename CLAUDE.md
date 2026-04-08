@@ -30,7 +30,7 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 - **Observatory**: Visual dashboard. Real-time view of everything.
 
 ### The Physics
-- **Physics**: Constants (CPU, memory, timeout), laws (network, max-processes), elements (@unix, @git, jq).
+- **Physics**: Constants (CPU, memory, timeout), laws (network, max-processes), elements (@spwn/unix, @spwn/git, jq).
 - **Elements**: Building blocks. @packs expand to collections. If not listed, doesn't exist.
 - **Faculties**: Verified elements + gate bridges, auto-generated as `/world/faculties.md`.
 

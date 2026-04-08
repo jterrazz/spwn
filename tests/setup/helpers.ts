@@ -62,7 +62,7 @@ export function createWorldConfig(
       timeout: "30m",
       "max-processes": 100,
     },
-    elements: ["@unix", "@git"],
+    elements: ["@spwn/unix", "@spwn/git"],
     ...overrides,
   };
   writeFileSync(

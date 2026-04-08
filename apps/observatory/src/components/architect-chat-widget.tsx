@@ -11,7 +11,6 @@ import {
 } from "@tabler/icons-react";
 import { useArchitectChat } from "@/contexts/architect-chat-context";
 import { Chat, type ChatBubble } from "@/components/chat";
-import { KnowledgeUpdateCard } from "@/components/knowledge-browser";
 
 function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive: boolean }) {
   return (
@@ -149,46 +148,35 @@ export function ArchitectChatWidget() {
               </p>
               {!isRunning && (
                 <p className="text-[9px] text-yellow-400/40 mt-2 font-mono">
-                  Architect is offline — it will auto-start when you send a message
+                  Architect is offline — start it from the Architect page
                 </p>
               )}
             </div>
           }
-          extras={(_, i) => {
-            const raw = messages[i];
-            if (!raw) return null;
-            return (
-              <>
-                {raw.stackAction && (
-                  <div className="max-w-[85%] mt-1 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                    <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-blue-500/[0.06]">
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 border-b border-blue-500/15">
-                        <span className="text-[9px]">📋</span>
-                        <span className="text-[9px] font-mono uppercase tracking-wider text-blue-400/70">
-                          {raw.stackAction.type === "push" ? "Task Pushed" : raw.stackAction.type === "pop" ? "Task Popped" : "Task Updated"}
-                        </span>
-                      </div>
-                      <div className="px-2.5 py-1.5">
-                        <p className="text-[11px] font-medium text-blue-200/90">{raw.stackAction.title}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {raw.knowledgeUpdate && (
-                  <KnowledgeUpdateCard
-                    path={raw.knowledgeUpdate.path}
-                    description={raw.knowledgeUpdate.description}
-                  />
-                )}
-              </>
-            );
-          }}
+          extras={() => null}
         />
       </div>
     );
   }
 
   // ── Collapsed bar ──
+
+  // When offline: show a compact button to navigate to architect page
+  if (!isRunning) {
+    return (
+      <div className="fixed bottom-4 right-4 z-[200] animate-in fade-in duration-200">
+        <button
+          onClick={() => router.push("/architect")}
+          className="flex items-center gap-2.5 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] px-4 py-2.5 hover:bg-white/[0.08] transition-colors"
+          title="Architect is offline — click to start"
+        >
+          <ArchitectGlyph isRunning={false} isActive={false} />
+          <span className="text-[12px] text-muted-foreground/35">Architect offline</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="fixed bottom-4 right-4 z-[200] animate-in fade-in duration-200">
@@ -196,7 +184,7 @@ export function ArchitectChatWidget() {
         <button
           onClick={() => setExpanded(true)}
           className="flex h-[30px] items-center justify-center rounded-full border border-transparent px-2 shrink-0"
-          title={isRunning ? "Architect alive" : "Architect offline"}
+          title="Architect alive"
         >
           <ArchitectGlyph isRunning={isRunning} isActive={sending} />
         </button>

@@ -40,14 +40,14 @@ func TestPhysics_ContainsLaws(t *testing.T) {
 }
 
 func TestFaculties_ContainsTools(t *testing.T) {
-	// GIVEN a config with @unix and @git tools
+	// GIVEN a config with @spwn/unix and @spwn/git tools
 	// WHEN a universe is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
   tools:
-    - "@unix"
-    - "@git"
+    - "@spwn/unix"
+    - "@spwn/git"
 `).
 		NoAgent().
 		Execute()

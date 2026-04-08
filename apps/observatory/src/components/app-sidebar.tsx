@@ -158,6 +158,12 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
+              <SidebarMenuButton isActive={pathname === "/tools"} onClick={() => router.push("/tools")}>
+                <IconBoltFilled size={16} />
+                <span>Tools</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
               <SidebarMenuButton isActive={pathname === "/organizations"} onClick={() => router.push("/organizations")}>
                 <IconBinaryTreeFilled size={16} />
                 <span>Organizations</span>
@@ -165,6 +171,20 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* ── Quick start hint ── */}
+        {!loading && worlds.length === 0 && (
+          <SidebarGroup>
+            <div className="mx-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-3 space-y-2">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30">Getting started</p>
+              <div className="space-y-1.5 text-[11px] text-muted-foreground/40 leading-relaxed">
+                <p><span className="text-foreground/50 font-mono">1.</span> Go to <button onClick={() => router.push("/providers")} className="text-foreground/60 hover:text-foreground/80 underline underline-offset-2 decoration-white/10">Settings</button> and connect a provider</p>
+                <p><span className="text-foreground/50 font-mono">2.</span> Create an <button onClick={() => router.push("/agents")} className="text-foreground/60 hover:text-foreground/80 underline underline-offset-2 decoration-white/10">Agent</button></p>
+                <p><span className="text-foreground/50 font-mono">3.</span> Spawn a <button onClick={() => router.push("/")} className="text-foreground/60 hover:text-foreground/80 underline underline-offset-2 decoration-white/10">World</button></p>
+              </div>
+            </div>
+          </SidebarGroup>
+        )}
 
         {/* ── Worlds ── */}
         <SidebarGroup>

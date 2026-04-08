@@ -11,6 +11,6 @@ RUN useradd -m -s /bin/bash architect
 # Universe data dir — mounted from host
 RUN mkdir -p /me /universe && chmod 777 /universe && chown -R architect:architect /me
 ENV SPWN_HOME=/universe
-WORKDIR /me
 
-ENTRYPOINT ["sleep", "infinity"]
+# NOTE: imagebuilder inserts tool installs here (Node.js, Claude Code, Docker CLI, etc.)
+# Then the architect-specific COPY and entrypoint directives are appended by BuildArchitectImage.

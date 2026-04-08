@@ -13,16 +13,16 @@ var skills embed.FS
 //go:embed files/*
 var files embed.FS
 
-// Tool is the @architect tool — the always-on orchestration daemon.
+// Tool is the @spwn/architect tool — the always-on orchestration daemon.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string    { return "@architect" }
+func (*tool) Name() string    { return "@spwn/architect" }
 func (*tool) Kind() ib.Kind   { return ib.KindPlatform }
 func (*tool) Version() string { return "1.1.0" }
 func (*tool) Dependencies() []string {
-	return []string{"@spwn", "@claude-code", "@docker-cli"}
+	return []string{"@spwn/cli", "@spwn/claude-code", "@spwn/docker-cli"}
 }
 
 func (*tool) Install() ib.InstallSpec {

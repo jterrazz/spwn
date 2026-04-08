@@ -14,22 +14,22 @@ func TestExpandTools(t *testing.T) {
 	}{
 		{
 			name: "unix_pack",
-			in:   []string{"@unix"},
-			want: ToolPacks["@unix"],
+			in:   []string{"@spwn/unix"},
+			want: ToolPacks["@spwn/unix"],
 		},
 		{
 			name: "git_pack",
-			in:   []string{"@git"},
+			in:   []string{"@spwn/git"},
 			want: []string{"git"},
 		},
 		{
 			name: "mixed_packs_and_individual",
-			in:   []string{"@git", "custom-tool", "bash"},
+			in:   []string{"@spwn/git", "custom-tool", "bash"},
 			want: []string{"git", "custom-tool", "bash"},
 		},
 		{
 			name: "deduplication",
-			in:   []string{"@git", "git"},
+			in:   []string{"@spwn/git", "git"},
 			want: []string{"git"},
 		},
 		{
@@ -44,9 +44,9 @@ func TestExpandTools(t *testing.T) {
 		},
 		{
 			name: "multiple_packs_overlap",
-			in:   []string{"@unix", "bash"},
-			// bash is in @unix, so it should not appear twice
-			want: ToolPacks["@unix"],
+			in:   []string{"@spwn/unix", "bash"},
+			// bash is in @spwn/unix, so it should not appear twice
+			want: ToolPacks["@spwn/unix"],
 		},
 	}
 

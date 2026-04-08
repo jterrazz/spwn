@@ -28,19 +28,19 @@ func TestProfile_ManifestOptional(t *testing.T) {
 }
 
 func TestProfile_RequiresValidation(t *testing.T) {
-	// GIVEN an agent with a profile.yaml requiring @node
+	// GIVEN an agent with a profile.yaml requiring @spwn/node
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("profile-agent")
 
 	agentDir := filepath.Join(tc.BaseDir, "agents", "profile-agent")
 	profileYAML := `requires:
-  - "@node"
+  - "@spwn/node"
 `
 	if err := os.WriteFile(filepath.Join(agentDir, "profile.yaml"), []byte(profileYAML), 0644); err != nil {
 		t.Fatalf("Failed to write profile.yaml: %v", err)
 	}
 
-	// WHEN spawning with the default config (which does not include @node)
+	// WHEN spawning with the default config (which does not include @spwn/node)
 	// THEN it should fail because the requirement is not satisfied
 	tc.Spawn().
 		WithAgent("profile-agent").
@@ -48,19 +48,19 @@ func TestProfile_RequiresValidation(t *testing.T) {
 }
 
 func TestProfile_RequiresSatisfied(t *testing.T) {
-	// GIVEN an agent with a profile.yaml requiring @unix
+	// GIVEN an agent with a profile.yaml requiring @spwn/unix
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("profile-agent")
 
 	agentDir := filepath.Join(tc.BaseDir, "agents", "profile-agent")
 	profileYAML := `requires:
-  - "@unix"
+  - "@spwn/unix"
 `
 	if err := os.WriteFile(filepath.Join(agentDir, "profile.yaml"), []byte(profileYAML), 0644); err != nil {
 		t.Fatalf("Failed to write profile.yaml: %v", err)
 	}
 
-	// WHEN spawning with the default config (which includes @unix)
+	// WHEN spawning with the default config (which includes @spwn/unix)
 	chain := tc.Spawn().
 		WithAgent("profile-agent").
 		Execute()

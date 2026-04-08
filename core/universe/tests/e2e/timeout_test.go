@@ -33,7 +33,7 @@ func TestTimeout_ShortTimeoutStopsContainer(t *testing.T) {
 	//     memory: 256m
 	//     timeout: 10s
 	//   tools:
-	//     - "@unix"
+	//     - "@spwn/unix"
 	// `).
 	//     WithAgent("test-agent").
 	//     Detached().
@@ -62,7 +62,7 @@ physics:
     memory: 256m
     timeout: 45m
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
@@ -84,7 +84,7 @@ physics:
     cpu: 1
     memory: 256m
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()

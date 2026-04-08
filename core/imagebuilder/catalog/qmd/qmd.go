@@ -10,15 +10,15 @@ import (
 //go:embed skills/*
 var skills embed.FS
 
-// Tool is the @qmd tool — on-device markdown search engine.
+// Tool is the @spwn/qmd tool — on-device markdown search engine.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@qmd" }
+func (*tool) Name() string           { return "@spwn/qmd" }
 func (*tool) Kind() ib.Kind          { return ib.KindTool }
 func (*tool) Version() string        { return "latest" }
-func (*tool) Dependencies() []string { return []string{"@node"} }
+func (*tool) Dependencies() []string { return []string{"@spwn/node"} }
 
 func (*tool) Install() ib.InstallSpec {
 	return ib.InstallSpec{

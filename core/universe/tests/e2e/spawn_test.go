@@ -95,7 +95,7 @@ physics:
     disk: 4g
     timeout: 60m
   tools:
-    - "@unix"
+    - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()

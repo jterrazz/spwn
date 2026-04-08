@@ -38,7 +38,7 @@ export default function MarketplacePage() {
       {/* Header */}
       <PageHeader
         title="Marketplace"
-        description="Installed packages and extensions for your spwn universe."
+        description="Browse and install packages to extend your worlds."
         actions={
           <a
             href="https://spwn.sh/marketplace"

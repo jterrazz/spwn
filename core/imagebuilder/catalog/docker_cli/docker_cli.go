@@ -6,12 +6,12 @@ import (
 	ib "spwn.sh/core/imagebuilder"
 )
 
-// Tool is the @docker-cli tool — Docker CLI for DooD access.
+// Tool is the @spwn/docker-cli tool — Docker CLI for DooD access.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@docker-cli" }
+func (*tool) Name() string           { return "@spwn/docker-cli" }
 func (*tool) Kind() ib.Kind          { return ib.KindTool }
 func (*tool) Version() string        { return "latest" }
 func (*tool) Dependencies() []string { return nil }

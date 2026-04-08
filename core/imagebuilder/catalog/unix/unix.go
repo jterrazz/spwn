@@ -6,12 +6,12 @@ import (
 	ib "spwn.sh/core/imagebuilder"
 )
 
-// Tool is the @unix tool — core Unix utilities.
+// Tool is the @spwn/unix tool — core Unix utilities.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string    { return "@unix" }
+func (*tool) Name() string    { return "@spwn/unix" }
 func (*tool) Kind() ib.Kind   { return ib.KindSDK }
 func (*tool) Version() string { return "24.04" }
 func (*tool) Dependencies() []string { return nil }

@@ -6,14 +6,14 @@ import (
 )
 
 func TestArchitect_Name(t *testing.T) {
-	if Tool.Name() != "@architect" {
-		t.Errorf("expected @architect, got %s", Tool.Name())
+	if Tool.Name() != "@spwn/architect" {
+		t.Errorf("expected @spwn/architect, got %s", Tool.Name())
 	}
 }
 
 func TestArchitect_Dependencies(t *testing.T) {
 	deps := Tool.Dependencies()
-	expected := map[string]bool{"@spwn": true, "@claude-code": true, "@docker-cli": true}
+	expected := map[string]bool{"@spwn/cli": true, "@spwn/claude-code": true, "@spwn/docker-cli": true}
 	if len(deps) != 3 {
 		t.Fatalf("expected 3 deps, got %d", len(deps))
 	}

@@ -15,12 +15,12 @@ describe("world security — physics enforcement", () => {
     ctx?.cleanup();
   });
 
-  test("missing element is truly missing — no @git means no git binary", () => {
-    // GIVEN — a config with only @unix (no @git)
+  test("missing element is truly missing — no @spwn/git means no git binary", () => {
+    // GIVEN — a config with only @spwn/unix (no @spwn/git)
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // Override the default config to remove @git
+    // Override the default config to remove @spwn/git
     const configContent = `physics:
   constants:
     cpu: 1
@@ -30,7 +30,7 @@ describe("world security — physics enforcement", () => {
   laws:
     max-processes: 256
   elements:
-    - "@unix"
+    - "@spwn/unix"
 `;
     writeFileSync(join(ctx.home, "worlds", "nogit.yaml"), configContent);
 
@@ -58,7 +58,7 @@ describe("world security — physics enforcement", () => {
     expect(faculties).not.toMatch(/\bgit\b/);
   });
 
-  test("element pack expansion — @unix, @git, @node all present", () => {
+  test("element pack expansion — @spwn/unix, @spwn/git, @spwn/node all present", () => {
     // GIVEN — a config with multiple element packs
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -72,9 +72,9 @@ describe("world security — physics enforcement", () => {
   laws:
     max-processes: 256
   elements:
-    - "@unix"
-    - "@git"
-    - "@node"
+    - "@spwn/unix"
+    - "@spwn/git"
+    - "@spwn/node"
 `;
     writeFileSync(join(ctx.home, "worlds", "fullstack.yaml"), configContent);
 
@@ -118,8 +118,8 @@ describe("world security — physics enforcement", () => {
   laws:
     max-processes: 256
   elements:
-    - "@unix"
-    - "@git"
+    - "@spwn/unix"
+    - "@spwn/git"
 `;
     writeFileSync(join(ctx.home, "worlds", "custom.yaml"), configContent);
 

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS, getWorkspaceSummary, getWorldName } from "@/lib/types";
 import type { World } from "@/lib/types";
-import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconMoonFilled, IconWorldFilled } from "@tabler/icons-react";
+import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconMoonFilled, IconWorldFilled, IconTerminal2 } from "@tabler/icons-react";
 import { Planet as PlanetGlobe } from "@/components/planet";
 import { NewWorldCard } from "@/components/new-world-card";
 import { WorldPlanet } from "@/components/world-planet";
@@ -255,7 +255,7 @@ export default function UniverseMapPage() {
     <Page className="flex flex-col h-full">
       <PageHeader
         title="Worlds"
-        description="Build AI agent systems that feel alive."
+        description="Isolated environments where your agents live and work."
         actions={
           <DashboardHeaderStats
             worldsCount={worlds.length}
@@ -432,9 +432,10 @@ export default function UniverseMapPage() {
             })()}
             </div>
           ) : (
-            <div className="relative overflow-hidden flex-1 min-h-[320px] flex items-center justify-center pb-24">
-              <NewWorldCard opacity={0.4} onClick={() => setShowSpawn(true)} />
-            </div>
+            <EmptyWorldsView
+              agents={agents}
+              onSpawn={() => setShowSpawn(true)}
+            />
           )}
 
         </>
@@ -592,6 +593,58 @@ function DashboardHeaderStats({
   );
 }
 
+function EmptyWorldsView({ agents, onSpawn }: { agents: AgentListItem[]; onSpawn: () => void }) {
+  const hasAgents = agents.length > 0;
+
+  return (
+    <div className="flex-1 min-h-[400px] flex items-center justify-center">
+      <div className="flex flex-col items-center text-center max-w-md">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/[0.06] flex items-center justify-center mb-6">
+          <IconPlanet size={36} className="text-muted-foreground/25" />
+        </div>
+
+        <h2 className="text-lg font-heading tracking-wide text-foreground/80 mb-2">
+          {hasAgents ? "No worlds running" : "Nothing running yet"}
+        </h2>
+        <p className="text-sm text-muted-foreground/40 leading-relaxed mb-8">
+          {hasAgents
+            ? `You have ${agents.length} agent${agents.length > 1 ? "s" : ""} ready. Spawn a world to put them to work.`
+            : "Spawn a world to give your agents a place to work. Each world is a Docker container with its own tools, files, and network."
+          }
+        </p>
+
+        <button
+          onClick={onSpawn}
+          className="group flex items-center gap-3 px-6 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] hover:bg-white/[0.10] hover:border-white/[0.16] transition-all duration-200"
+        >
+          <IconRocket size={18} className="text-blue-400/80 group-hover:text-blue-400" />
+          <span className="text-sm font-medium text-foreground/70 group-hover:text-foreground/90">Spawn a World</span>
+        </button>
+
+        <div className="mt-6 flex items-center gap-2 text-[11px] text-muted-foreground/25 font-mono">
+          <IconTerminal2 size={13} />
+          <span>spwn up --agent neo -w .</span>
+        </div>
+
+        {hasAgents && (
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {agents.slice(0, 5).map((a) => (
+              <span key={a.name} className="px-2.5 py-1 rounded-full text-[10px] font-mono bg-white/[0.04] border border-white/[0.06] text-muted-foreground/40">
+                {a.name}
+              </span>
+            ))}
+            {agents.length > 5 && (
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-mono text-muted-foreground/25">
+                +{agents.length - 5} more
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -672,8 +725,8 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/[0.08] flex items-center justify-center mx-auto mb-4">
           <IconSparkles size={28} className="text-blue-400/60" />
         </div>
-        <h2 className="text-xl font-heading text-foreground/90">Welcome to SPWN</h2>
-        <p className="text-xs text-muted-foreground/40 mt-1 font-mono">Let&apos;s set up your first agent and world</p>
+        <h2 className="text-xl font-heading text-foreground/90">Get started</h2>
+        <p className="text-xs text-muted-foreground/40 mt-1 font-mono">Create an agent, give it a purpose, and spawn a world.</p>
       </div>
 
       {/* Step indicators */}
@@ -703,7 +756,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
           <>
             <div>
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">
-                Name your first agent
+                Agent name
               </label>
               <input
                 value={agentName}

@@ -6,15 +6,15 @@ import (
 )
 
 func TestQmd_Name(t *testing.T) {
-	if Tool.Name() != "@qmd" {
-		t.Errorf("expected @qmd, got %s", Tool.Name())
+	if Tool.Name() != "@spwn/qmd" {
+		t.Errorf("expected @spwn/qmd, got %s", Tool.Name())
 	}
 }
 
 func TestQmd_DependsOnNode(t *testing.T) {
 	deps := Tool.Dependencies()
-	if len(deps) != 1 || deps[0] != "@node" {
-		t.Errorf("expected [@node] dependency, got %v", deps)
+	if len(deps) != 1 || deps[0] != "@spwn/node" {
+		t.Errorf("expected [@spwn/node] dependency, got %v", deps)
 	}
 }
 

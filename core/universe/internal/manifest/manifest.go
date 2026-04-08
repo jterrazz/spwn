@@ -14,11 +14,11 @@ import (
 
 // ToolPacks maps @pack names to their constituent binaries.
 var ToolPacks = map[string][]string{
-	"@unix":   {"bash", "sh", "ls", "cat", "cp", "mv", "rm", "mkdir", "rmdir", "chmod", "chown", "grep", "sed", "awk", "find", "xargs", "curl", "wget"},
-	"@git":    {"git"},
-	"@node":   {"node", "npm", "npx"},
-	"@python": {"python3", "pip3"},
-	"@build":  {"make", "gcc", "g++"},
+	"@spwn/unix":   {"bash", "sh", "ls", "cat", "cp", "mv", "rm", "mkdir", "rmdir", "chmod", "chown", "grep", "sed", "awk", "find", "xargs", "curl", "wget"},
+	"@spwn/git":    {"git"},
+	"@spwn/node":   {"node", "npm", "npx"},
+	"@spwn/python": {"python3", "pip3"},
+	"@spwn/build":  {"make", "gcc", "g++"},
 }
 
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
@@ -118,13 +118,13 @@ physics:
     disk: 2g         # Disk limit
     timeout: 30m     # Max session duration
 
-# Available tools (@unix = bash, grep, sed, awk, etc.)
+# Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
 tools:
-  - "@unix"          # Core Unix tools
-  - "@git"           # Git version control
-  # - "@node"        # Node.js + npm
-  # - "@python"      # Python 3
-  # - "@build"       # make, gcc, g++
+  - "@spwn/unix"          # Core Unix tools
+  - "@spwn/git"           # Git version control
+  # - "@spwn/node"        # Node.js + npm
+  # - "@spwn/python"      # Python 3
+  # - "@spwn/build"       # make, gcc, g++
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -152,8 +152,8 @@ physics:
     timeout: 30m
 
 tools:
-  - "@unix"
-  - "@git"
+  - "@spwn/unix"
+  - "@spwn/git"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
 }

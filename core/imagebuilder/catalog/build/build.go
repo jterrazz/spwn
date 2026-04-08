@@ -6,12 +6,12 @@ import (
 	ib "spwn.sh/core/imagebuilder"
 )
 
-// Tool is the @build tool — C/C++ build essentials.
+// Tool is the @spwn/build tool — C/C++ build essentials.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@build" }
+func (*tool) Name() string           { return "@spwn/build" }
 func (*tool) Kind() ib.Kind          { return ib.KindSDK }
 func (*tool) Version() string        { return "latest" }
 func (*tool) Dependencies() []string { return nil }

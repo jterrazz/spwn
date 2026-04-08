@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { apiGet, goApiUrl } from "@/lib/api-client";
 import { streamChat } from "@/lib/stream-chat";
 import type { ActivityBlock } from "@/lib/activity-types";
@@ -20,18 +20,6 @@ export interface ArchitectStatus {
   };
 }
 
-interface StackActionData {
-  type: "push" | "pop" | "update";
-  title: string;
-  priority?: string;
-  description?: string;
-}
-
-export interface KnowledgeUpdateData {
-  path: string;
-  description?: string;
-}
-
 export interface ChatMessage {
   role: "user" | "architect";
   content: string;
@@ -40,100 +28,6 @@ export interface ChatMessage {
   error?: boolean;
   cost?: number;
   duration?: number;
-  stackAction?: StackActionData;
-  knowledgeUpdate?: KnowledgeUpdateData;
-}
-
-export interface StackItem {
-  text: string;
-  done: boolean;
-  priority?: "high" | "medium" | "low";
-  description?: string;
-}
-
-export interface StackData {
-  focus: StackItem[];
-  queued: StackItem[];
-  done: StackItem[];
-  raw: string;
-}
-
-// ── Stack parsing ──
-
-function extractPriority(text: string): { cleanText: string; priority?: "high" | "medium" | "low"; description?: string } {
-  let cleanText = text;
-  let priority: "high" | "medium" | "low" | undefined;
-  let description: string | undefined;
-
-  const priorityMatch = cleanText.match(/\s*[\[(]*\*{0,2}(HIGH|MEDIUM|LOW)\*{0,2}[\])]*\s*/i);
-  if (priorityMatch) {
-    priority = priorityMatch[1].toLowerCase() as "high" | "medium" | "low";
-    cleanText = cleanText.replace(priorityMatch[0], " ").trim();
-  }
-
-  const descSep = cleanText.match(/\s+[-—]\s+(.+)$/);
-  if (descSep) {
-    description = descSep[1];
-    cleanText = cleanText.slice(0, cleanText.length - descSep[0].length).trim();
-  }
-
-  return { cleanText, priority, description };
-}
-
-export function parseStackMd(raw: string): StackData {
-  const lines = raw.split("\n");
-  const focus: StackItem[] = [];
-  const queued: StackItem[] = [];
-  const doneItems: StackItem[] = [];
-
-  let section = "queued";
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.toLowerCase().startsWith("## focus")) {
-      section = "focus";
-      continue;
-    }
-    if (trimmed.toLowerCase().startsWith("## queued")) {
-      section = "queued";
-      continue;
-    }
-    if (trimmed.toLowerCase().startsWith("## done")) {
-      section = "done";
-      continue;
-    }
-    if (trimmed.startsWith("#")) continue;
-
-    const checkMatch = trimmed.match(/^-\s*\[([ xX])\]\s*(.+)/);
-    if (checkMatch) {
-      const isDone = checkMatch[1] !== " ";
-      const { cleanText, priority, description } = extractPriority(checkMatch[2]);
-      const item: StackItem = { text: cleanText, done: isDone, priority, description };
-      if (isDone) {
-        doneItems.push(item);
-      } else if (section === "focus") {
-        focus.push(item);
-      } else {
-        queued.push(item);
-      }
-      continue;
-    }
-
-    const listMatch = trimmed.match(/^-\s+(.+)/);
-    if (listMatch) {
-      const { cleanText, priority, description } = extractPriority(listMatch[1]);
-      const item: StackItem = { text: cleanText, done: section === "done", priority, description };
-      if (section === "focus") {
-        focus.push(item);
-      } else if (section === "done") {
-        doneItems.push(item);
-      } else {
-        queued.push(item);
-      }
-    }
-  }
-
-  return { focus, queued, done: doneItems, raw };
 }
 
 // ── Context ──
@@ -146,7 +40,6 @@ interface ArchitectChatContextValue {
   sendMessage: () => Promise<void>;
   architectStatus: ArchitectStatus | null;
   isRunning: boolean;
-  stack: StackData | null;
   highlightTitle: string | null;
   refreshStatus: () => void;
   setArchitectStatus: React.Dispatch<React.SetStateAction<ArchitectStatus | null>>;
@@ -167,16 +60,6 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
   const [sending, setSending] = useState(false);
   const [architectStatus, setArchitectStatus] = useState<ArchitectStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [stack, setStack] = useState<StackData | null>(null);
-  const [highlightTitle, setHighlightTitle] = useState<string | null>(null);
-
-  const fetchStack = useCallback(() => {
-    apiGet<{ content: string }>("/api/architect/stack")
-      .then((data) => {
-        setStack(parseStackMd(data.content));
-      })
-      .catch(() => {});
-  }, []);
 
   const refreshStatus = useCallback(() => {
     apiGet<ArchitectStatus>("/api/architect/status")
@@ -244,13 +127,11 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
   // Status polling
   useEffect(() => {
     refreshStatus();
-    fetchStack();
     const interval = setInterval(refreshStatus, 10000);
     return () => clearInterval(interval);
-  }, [refreshStatus, fetchStack]);
+  }, [refreshStatus]);
 
   const doTalk = useCallback(async (msg: string) => {
-    // Use a ref-like approach: capture current length before adding placeholder
     let msgIndex: number;
     setMessages((prev) => {
       msgIndex = prev.length;
@@ -286,8 +167,6 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
           }
           return updated;
         });
-        // Refresh stack after response completes
-        fetchStack();
       },
       onError: (error) => {
         setMessages((prev) => {
@@ -305,7 +184,7 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
         });
       },
     });
-  }, [fetchStack]);
+  }, []);
 
   const sendMessage = useCallback(async () => {
     const msg = chatInput.trim();
@@ -317,58 +196,18 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
     setSending(true);
 
     try {
-      let running = architectStatus?.status === "running";
+      const running = architectStatus?.status === "running";
 
       if (!running) {
         setMessages((prev) => [...prev, {
           role: "architect",
-          content: "Starting Architect...",
-          blocks: [{ type: "text" as const, content: "Starting Architect..." }],
+          content: "Architect is offline. Start it first using the button above.",
+          blocks: [{ type: "text" as const, content: "Architect is offline. Start it first using the button above." }],
           timestamp: new Date(),
+          error: true,
         }]);
-
-        try {
-          await fetch(goApiUrl("/api/architect/start"), { method: "POST" });
-        } catch {
-          try {
-            await fetch(goApiUrl("/api/architect/start"), { method: "POST" });
-          } catch {
-            setMessages((prev) => [...prev, {
-              role: "architect",
-              content: "Failed to auto-start Architect. Please start it manually.",
-              blocks: [{ type: "error" as const, content: "Failed to auto-start Architect. Please start it manually." }],
-              timestamp: new Date(),
-              error: true,
-            }]);
-            setSending(false);
-            return;
-          }
-        }
-
-        for (let i = 0; i < 15; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          try {
-            const statusRes = await fetch(goApiUrl("/api/architect/status"));
-            const statusData = await statusRes.json();
-            if (statusData.status === "running") {
-              running = true;
-              setArchitectStatus((s) => s ? { ...s, status: "running" } : { status: "running", containerId: null, uptime: null });
-              break;
-            }
-          } catch {}
-        }
-
-        if (!running) {
-          setMessages((prev) => [...prev, {
-            role: "architect",
-            content: "Architect failed to start after 30s. Please try starting it manually.",
-            blocks: [{ type: "error" as const, content: "Architect failed to start after 30s." }],
-            timestamp: new Date(),
-            error: true,
-          }]);
-          setSending(false);
-          return;
-        }
+        setSending(false);
+        return;
       }
 
       await doTalk(msg);
@@ -398,8 +237,7 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
         sendMessage,
         architectStatus,
         isRunning,
-        stack,
-        highlightTitle,
+        highlightTitle: null,
         refreshStatus,
         setArchitectStatus,
         loading,
