@@ -1,7 +1,6 @@
 package codex
 
 import (
-	"spwn.sh/core/agent"
 	rt "spwn.sh/core/universe/internal/runtime"
 )
 
@@ -14,38 +13,19 @@ func init() { rt.Register(&Codex{}) }
 func (c *Codex) Name() string { return "codex" }
 
 // BuildCommand constructs the codex CLI command.
+// Codex manages sessions server-side — each invocation is independent but
+// Codex retains context through the workspace's git state and file contents.
 func (c *Codex) BuildCommand(cfg rt.SpawnConfig) []string {
-	// NPC mode: no Mind, one-shot
-	if cfg.MindPath == "" {
-		cmd := []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox"}
-		if cfg.Model != "" {
-			cmd = append(cmd, "--model", cfg.Model)
-		}
-		if cfg.Prompt != "" {
-			cmd = append(cmd, cfg.Prompt)
-		}
-		return cmd
-	}
-
-	// Worker/Manager/Chief: session management
-	sessID := agent.DeterministicSessionID(cfg.AgentName, cfg.WorldID)
-
 	cmd := []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox"}
+
 	if cfg.Model != "" {
 		cmd = append(cmd, "--model", cfg.Model)
-	}
-
-	// Check for existing session to resume
-	existing, err := agent.LoadSession(cfg.MindPath, cfg.WorldID)
-	if err == nil && existing != nil {
-		cmd = append(cmd, "resume", "--session-id", sessID)
 	}
 
 	if cfg.Prompt != "" {
 		cmd = append(cmd, cfg.Prompt)
 	}
 
-	_ = sessID // used for session tracking
 	return cmd
 }
 

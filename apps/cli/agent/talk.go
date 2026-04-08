@@ -30,7 +30,7 @@ var talkCmd = &cobra.Command{
 	Long: `Open a conversation with a named agent running inside a world.
 
 If a message is provided, runs a one-shot query and prints the response.
-If no message is provided, opens an interactive Claude session inside the container.`,
+If no message is provided, opens an interactive session inside the container.`,
 	Args: cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -45,10 +45,8 @@ If no message is provided, opens an interactive Claude session inside the contai
 			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent new %s", name, name)
 		}
 
-		// Find which world this agent is in. When --world is set, pin to that
-		// world so we don't accidentally route to a different container that
-		// happens to share the same agent name.
-		containerID, worldID, worldRuntime, err := findAgentContainer(name, talkWorldID)
+		// Find which world this agent is in
+		containerID, worldID, world, err := findAgentContainer(name, talkWorldID)
 		if err != nil {
 			return err
 		}
@@ -58,14 +56,28 @@ If no message is provided, opens an interactive Claude session inside the contai
 		s.Info("World:", worldID)
 		s.Blank()
 
-		// Build runtime command based on world's runtime
-		var runtimeArgs []string
-		switch worldRuntime {
-		case "codex":
-			runtimeArgs = []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox"}
-		default:
-			// claude-code (default)
-			runtimeArgs = []string{"claude", "--dangerously-skip-permissions", "--continue"}
+		// Get the runtime from the world state and build command via adapter
+		runtimeName := world.Runtime
+		if runtimeName == "" {
+			runtimeName = "claude-code"
+		}
+		runtimeCmd, rtErr := universe.BuildRuntimeCommand(runtimeName, universe.RuntimeSpawnConfig{
+			MindPath:  world.MindPath,
+			AgentName: name,
+			WorldID:   worldID,
+			Prompt:    message,
+		})
+		if rtErr != nil {
+			return fmt.Errorf("unknown runtime %q for world %s", runtimeName, worldID)
+		}
+
+		// For claude-code one-shot: add --print flag
+		if runtimeName == "claude-code" && message != "" {
+			if talkOutputFormat == "stream-json" {
+				runtimeCmd = append(runtimeCmd, "--output-format", "stream-json", "--verbose")
+			} else {
+				runtimeCmd = append(runtimeCmd, "--print")
+			}
 		}
 
 		// Build docker exec args with auth env vars
@@ -75,7 +87,6 @@ If no message is provided, opens an interactive Claude session inside the contai
 				args = append(args, "-it")
 			}
 			args = append(args, "-w", "/workspace")
-			// Pass all available auth credentials
 			args = append(args, authEnvArgs()...)
 			args = append(args, containerID)
 			return args
@@ -83,20 +94,7 @@ If no message is provided, opens an interactive Claude session inside the contai
 
 		if message != "" {
 			// One-shot mode
-			var cliArgs []string
-			switch worldRuntime {
-			case "codex":
-				cliArgs = append(runtimeArgs, message)
-			default:
-				cliArgs = append(runtimeArgs, "-p", message)
-				if talkOutputFormat == "stream-json" {
-					cliArgs = append(cliArgs, "--output-format", "stream-json", "--verbose")
-				} else {
-					cliArgs = append(cliArgs, "--print")
-				}
-			}
-
-			dockerArgs := append(buildDockerArgs(false), cliArgs...)
+			dockerArgs := append(buildDockerArgs(false), runtimeCmd...)
 			execCmd := exec.Command("docker", dockerArgs...)
 
 			if talkOutputFormat == "stream-json" {
@@ -113,8 +111,8 @@ If no message is provided, opens an interactive Claude session inside the contai
 				fmt.Fprint(os.Stdout, string(output))
 			}
 		} else {
-			// Interactive mode
-			dockerArgs := append(buildDockerArgs(true), runtimeArgs...)
+			// Interactive mode — same command but with TTY
+			dockerArgs := append(buildDockerArgs(true), runtimeCmd...)
 			execCmd := exec.Command("docker", dockerArgs...)
 			execCmd.Stdin = os.Stdin
 			execCmd.Stdout = os.Stdout
@@ -139,44 +137,36 @@ func isContainerRunning(containerID string) bool {
 }
 
 // findAgentContainer looks up state.json to find a running world that contains
-// the given agent. Verifies the container is actually alive.
-//
-// When worldID is non-empty, only that specific world is considered — this
-// disambiguates when the same agent name exists in multiple worlds (e.g.
-// talking to "qa" from the "The Test" world must not route to the "Matrix"
-// world's qa container). When worldID is empty, returns the first running
-// world that contains the agent.
-func findAgentContainer(agentName, worldID string) (containerID, wID, runtime string, err error) {
+// the given agent. Returns the container ID, world ID, and full world record.
+func findAgentContainer(agentName, worldID string) (string, string, *universe.World, error) {
 	ctx := context.Background()
 
-	arc, arcErr := universe.NewArchitectFromEnv()
-	if arcErr != nil {
-		if strings.Contains(arcErr.Error(), "cannot connect to Docker") {
-			return "", "", "", fmt.Errorf("Docker is not running")
+	arc, err := universe.NewArchitectFromEnv()
+	if err != nil {
+		if strings.Contains(err.Error(), "cannot connect to Docker") {
+			return "", "", nil, fmt.Errorf("Docker is not running")
 		}
-		return "", "", "", arcErr
+		return "", "", nil, err
 	}
 
-	worlds, listErr := arc.List(ctx)
-	if listErr != nil {
-		return "", "", "", fmt.Errorf("cannot list worlds: %w", listErr)
+	worlds, err := arc.List(ctx)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("cannot list worlds: %w", err)
 	}
 
 	cID, foundWorldID, routeErr := routeAgentToWorld(worlds, agentName, worldID, isContainerRunning)
 	if routeErr != nil {
-		return "", "", "", routeErr
+		return "", "", nil, routeErr
 	}
 
-	// Look up the runtime from the world state
-	rt := "claude-code"
-	for _, w := range worlds {
-		if w.ID == foundWorldID && w.Runtime != "" {
-			rt = w.Runtime
-			break
+	// Return the full world record for runtime/mind info
+	for i := range worlds {
+		if worlds[i].ID == foundWorldID {
+			return cID, foundWorldID, &worlds[i], nil
 		}
 	}
 
-	return cID, foundWorldID, rt, nil
+	return cID, foundWorldID, nil, nil
 }
 
 // worldHasAgent returns true when the given agent name matches the world's
@@ -193,16 +183,12 @@ func worldHasAgent(u universe.World, agentName string) bool {
 	return false
 }
 
-// routeAgentToWorld contains the pure routing logic used by findAgentContainer.
-// Split out from the Docker-calling outer function so it can be unit-tested.
-// isRunning is a predicate that tells whether a container is alive.
+// routeAgentToWorld contains the pure routing logic.
 func routeAgentToWorld(
 	worlds []universe.World,
 	agentName, worldID string,
 	isRunning func(containerID string) bool,
 ) (string, string, error) {
-	// Pinned lookup: only the specified world is considered. This exists to
-	// prevent cross-world bleed when multiple worlds share the same agent name.
 	if worldID != "" {
 		for _, u := range worlds {
 			if u.ID != worldID {
@@ -222,7 +208,6 @@ func routeAgentToWorld(
 		return "", "", fmt.Errorf("world %q not found", worldID)
 	}
 
-	// Unpinned lookup: first running world that contains the agent.
 	for _, u := range worlds {
 		if u.ContainerID == "" || !isRunning(u.ContainerID) {
 			continue
@@ -240,34 +225,24 @@ func authEnvArgs() []string {
 	return auth.DockerEnvArgs()
 }
 
-// formatExecError parses docker exec output for common auth errors
-// and returns an actionable error message.
+// formatExecError parses docker exec output for common auth errors.
 func formatExecError(err error, output []byte) error {
 	out := string(output)
 
-	// Check for common auth-related errors
 	switch {
 	case strings.Contains(out, "authentication_error"):
-		return fmt.Errorf("authentication failed — your API key or OAuth token was rejected\n\n  %s\n  %s",
-			"Run: spwn auth check    (validate credentials)",
-			"Run: spwn auth login    (refresh credentials)")
+		return fmt.Errorf("authentication failed\n\n  Run: spwn auth check\n  Run: spwn auth login")
 	case strings.Contains(out, "OAuth token has expired"):
-		return fmt.Errorf("OAuth token has expired\n\n  %s\n  %s",
-			"Run: spwn auth login    (refresh from Keychain)",
-			"Or re-authenticate in Claude Code CLI first")
+		return fmt.Errorf("OAuth token has expired — refresh credentials\n\n  Run: spwn auth login")
 	case strings.Contains(out, "Invalid API key") || strings.Contains(out, "invalid x-api-key"):
-		return fmt.Errorf("invalid API key\n\n  %s\n  %s",
-			"Run: spwn auth login    (set up fresh credentials)",
-			"Run: spwn auth token <key>  (set key directly)")
+		return fmt.Errorf("invalid API key\n\n  Run: spwn auth login")
 	case strings.Contains(out, "Could not resolve host") || strings.Contains(out, "connection refused"):
 		return fmt.Errorf("network error — cannot reach API\n\n  Output: %s", strings.TrimSpace(out))
 	case strings.Contains(out, "rate_limit") || strings.Contains(out, "overloaded"):
-		return fmt.Errorf("rate limited or API overloaded — try again in a moment\n\n  Output: %s", strings.TrimSpace(out))
+		return fmt.Errorf("rate limited — try again in a moment")
 	}
 
-	// Generic fallback: include the output so users can see what happened
 	if out != "" {
-		// Truncate very long output
 		if len(out) > 500 {
 			out = out[:500] + "..."
 		}

@@ -253,6 +253,19 @@ func ListClaws() []string {
 	return names
 }
 
+// RuntimeSpawnConfig holds the parameters for building a runtime command.
+type RuntimeSpawnConfig = runtime.SpawnConfig
+
+// BuildRuntimeCommand returns the CLI command for a given runtime and config.
+// This is the single source of truth for how to invoke any runtime inside a container.
+func BuildRuntimeCommand(runtimeName string, cfg RuntimeSpawnConfig) ([]string, error) {
+	rt, err := runtime.Get(runtimeName)
+	if err != nil {
+		return nil, err
+	}
+	return rt.BuildCommand(cfg), nil
+}
+
 // RuntimeAvailable returns true if the named runtime is production-ready.
 func RuntimeAvailable(name string) bool {
 	r, err := runtime.Get(name)
