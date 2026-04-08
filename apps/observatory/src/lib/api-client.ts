@@ -147,8 +147,8 @@ function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentPr
   return {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     role: (data as any).role || 'worker',
-    engine: 'claude-code',
-    provider: 'anthropic',
+    engine: '',
+    provider: '',
     purpose: '',
     persona: '',
     traits: [],

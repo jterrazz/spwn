@@ -248,7 +248,7 @@ function AgentProfilePage() {
     <div className="flex-1 min-w-0 p-4 md:p-8 space-y-6 md:space-y-8">
       <PageHeader
         title={agentName}
-        description={`${profile.engine} · ${profile.provider} · ${profile.role}`}
+        description={`${worldData?.runtime ?? profile.engine} · ${profile.role}`}
         actions={
           <>
             <ActionButton
@@ -762,8 +762,7 @@ function AgentProfilePage() {
                   </div>
                 </div>
               )}
-              <KeyValue label="Engine" value={profile.engine} />
-              <KeyValue label="Provider" value={profile.provider} />
+              <KeyValue label="Runtime" value={worldData?.runtime ?? profile.engine} />
               {profile.team && <KeyValue label="Team" value={profile.team} />}
             </div>
           </div>

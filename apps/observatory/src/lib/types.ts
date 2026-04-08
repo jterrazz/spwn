@@ -23,6 +23,7 @@ export interface World {
   config: string;
   agent: string;
   agents: Agent[];
+  runtime?: string;
   status: "running" | "idle" | "stopped" | "creating" | "error";
   created_at: string;
   workspaces?: Workspace[];
