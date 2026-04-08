@@ -71,7 +71,9 @@ If no message is provided, opens an interactive session inside the container.`,
 			return fmt.Errorf("unknown runtime %q for world %s", runtimeName, worldID)
 		}
 
-		// For claude-code one-shot: add --print flag
+		// For claude-code: add output format flags.
+		// --print is needed for non-interactive one-shot mode.
+		// Session persistence works via --continue which saves even with --print.
 		if runtimeName == "claude-code" && message != "" {
 			if talkOutputFormat == "stream-json" {
 				runtimeCmd = append(runtimeCmd, "--output-format", "stream-json", "--verbose")
