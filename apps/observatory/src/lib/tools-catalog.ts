@@ -106,6 +106,40 @@ claude --session-id <id> "task"      # Resume specific session
     ],
   },
   {
+    name: "@spwn/codex",
+    kind: "runtime",
+    description: "OpenAI Codex agent runtime",
+    provides: "codex CLI + pre-configured workspace trust",
+    useWhen: "You want to use OpenAI models (GPT-5, o3) as the agent runtime",
+    deps: ["@spwn/node"],
+    verify: ["codex"],
+    status: "available",
+    skills: [
+      {
+        name: "SKILL.md",
+        content: `# Codex
+
+Codex is OpenAI's agent runtime — a CLI that executes tasks using GPT models.
+
+## Usage
+\`\`\`bash
+codex "your task here"                      # Interactive mode
+codex exec "your task here"                 # Non-interactive mode
+codex exec "task" --full-auto               # Full auto with sandboxed writes
+codex exec "task" --model gpt-5.4           # Specify model
+\`\`\`
+
+## Configuration
+Codex config lives at \`~/.codex/config.toml\` inside the container.
+Auth tokens are forwarded from the host automatically.
+
+## Environment
+- Auth is handled via OAuth tokens (subscription-based, e.g. ChatGPT Plus)
+- Tokens are mounted from the host at \`~/.codex/auth.json\``,
+      },
+    ],
+  },
+  {
     name: "@spwn/aider",
     kind: "runtime",
     description: "Aider code assistant",

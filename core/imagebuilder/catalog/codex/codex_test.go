@@ -1,0 +1,44 @@
+package codex
+
+import (
+	"io/fs"
+	"testing"
+)
+
+func TestCodex_Name(t *testing.T) {
+	if Tool.Name() != "@spwn/codex" {
+		t.Errorf("expected @spwn/codex, got %s", Tool.Name())
+	}
+}
+
+func TestCodex_DependsOnNode(t *testing.T) {
+	deps := Tool.Dependencies()
+	if len(deps) != 1 || deps[0] != "@spwn/node" {
+		t.Errorf("expected [@spwn/node] dependency, got %v", deps)
+	}
+}
+
+func TestCodex_HasSkills(t *testing.T) {
+	s := Tool.Skills()
+	if s == nil {
+		t.Fatal("expected skills FS")
+	}
+	_, err := fs.ReadFile(s, "SKILL.md")
+	if err != nil {
+		t.Errorf("expected SKILL.md: %v", err)
+	}
+}
+
+func TestCodex_HasInstallCommand(t *testing.T) {
+	spec := Tool.Install()
+	if len(spec.Commands) == 0 {
+		t.Error("expected install commands")
+	}
+}
+
+func TestCodex_HasUserCommands(t *testing.T) {
+	spec := Tool.Install()
+	if len(spec.UserCommands) == 0 {
+		t.Error("expected user commands for config setup")
+	}
+}

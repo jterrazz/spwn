@@ -60,6 +60,7 @@ type World struct {
 	MindPath    string        `json:"mind_path,omitempty"`
 	GateDir     string        `json:"gate_dir,omitempty"`
 	Organization string       `json:"organization,omitempty"` // optional organization name
+	Runtime     string        `json:"runtime,omitempty"`       // agent runtime (e.g. "claude-code", "codex")
 	Status      Status        `json:"status"`
 	CreatedAt   time.Time     `json:"created_at"`
 	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support

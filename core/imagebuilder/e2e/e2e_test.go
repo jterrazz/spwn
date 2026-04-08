@@ -72,6 +72,18 @@ func TestQmd_E2E(t *testing.T) {
 	imagebuildertest.AssertSkillContains(t, s, "@spwn/qmd", "QMD")
 }
 
+func TestCodex_E2E(t *testing.T) {
+	s := imagebuildertest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/codex")
+
+	imagebuildertest.AssertBinaryExists(t, s, "codex")
+	imagebuildertest.AssertBinaryExists(t, s, "node") // transitive dep
+	imagebuildertest.AssertSkillInstalled(t, s, "@spwn/codex")
+
+	// Verify codex config was pre-configured
+	imagebuildertest.AssertFileExists(t, s, "/home/spwn/.codex/config.toml")
+	imagebuildertest.AssertFileContains(t, s, "/home/spwn/.codex/config.toml", "trust_level")
+}
+
 // ── Integration tests ──
 
 func TestFullWorldStack_E2E(t *testing.T) {

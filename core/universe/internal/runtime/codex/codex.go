@@ -1,8 +1,11 @@
 package codex
 
-import rt "spwn.sh/core/universe/internal/runtime"
+import (
+	"spwn.sh/core/agent"
+	rt "spwn.sh/core/universe/internal/runtime"
+)
 
-// Codex implements the Runtime interface for OpenAI Codex.
+// Codex implements the Runtime interface for OpenAI Codex CLI.
 type Codex struct{}
 
 func init() { rt.Register(&Codex{}) }
@@ -12,13 +15,37 @@ func (c *Codex) Name() string { return "codex" }
 
 // BuildCommand constructs the codex CLI command.
 func (c *Codex) BuildCommand(cfg rt.SpawnConfig) []string {
-	cmd := []string{"codex", "exec", cfg.Prompt, "--full-auto"}
+	// NPC mode: no Mind, one-shot
 	if cfg.MindPath == "" {
-		cmd = append(cmd, "--ephemeral")
+		cmd := []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox"}
+		if cfg.Model != "" {
+			cmd = append(cmd, "--model", cfg.Model)
+		}
+		if cfg.Prompt != "" {
+			cmd = append(cmd, cfg.Prompt)
+		}
+		return cmd
 	}
+
+	// Worker/Manager/Chief: session management
+	sessID := agent.DeterministicSessionID(cfg.AgentName, cfg.WorldID)
+
+	cmd := []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox"}
 	if cfg.Model != "" {
 		cmd = append(cmd, "--model", cfg.Model)
 	}
+
+	// Check for existing session to resume
+	existing, err := agent.LoadSession(cfg.MindPath, cfg.WorldID)
+	if err == nil && existing != nil {
+		cmd = append(cmd, "resume", "--session-id", sessID)
+	}
+
+	if cfg.Prompt != "" {
+		cmd = append(cmd, cfg.Prompt)
+	}
+
+	_ = sessID // used for session tracking
 	return cmd
 }
 
@@ -41,4 +68,4 @@ func (c *Codex) SystemPackages() []string { return []string{"git", "curl"} }
 
 // SupportsSession returns true if the runtime can resume sessions.
 func (c *Codex) SupportsSession() bool { return true }
-func (c *Codex) Available() bool       { return false }
+func (c *Codex) Available() bool       { return true }

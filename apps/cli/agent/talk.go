@@ -48,7 +48,7 @@ If no message is provided, opens an interactive Claude session inside the contai
 		// Find which world this agent is in. When --world is set, pin to that
 		// world so we don't accidentally route to a different container that
 		// happens to share the same agent name.
-		containerID, worldID, err := findAgentContainer(name, talkWorldID)
+		containerID, worldID, worldRuntime, err := findAgentContainer(name, talkWorldID)
 		if err != nil {
 			return err
 		}
@@ -58,11 +58,14 @@ If no message is provided, opens an interactive Claude session inside the contai
 		s.Info("World:", worldID)
 		s.Blank()
 
-		// Base claude command — continue latest session in this workspace
-		claudeArgs := []string{
-			"claude",
-			"--dangerously-skip-permissions",
-			"--continue",
+		// Build runtime command based on world's runtime
+		var runtimeArgs []string
+		switch worldRuntime {
+		case "codex":
+			runtimeArgs = []string{"codex", "exec", "--dangerously-bypass-approvals-and-sandbox"}
+		default:
+			// claude-code (default)
+			runtimeArgs = []string{"claude", "--dangerously-skip-permissions", "--continue"}
 		}
 
 		// Build docker exec args with auth env vars
@@ -80,19 +83,23 @@ If no message is provided, opens an interactive Claude session inside the contai
 
 		if message != "" {
 			// One-shot mode
-			claudeArgs = append(claudeArgs, "-p", message)
-
-			if talkOutputFormat == "stream-json" {
-				claudeArgs = append(claudeArgs, "--output-format", "stream-json", "--verbose")
-			} else {
-				claudeArgs = append(claudeArgs, "--print")
+			var cliArgs []string
+			switch worldRuntime {
+			case "codex":
+				cliArgs = append(runtimeArgs, message)
+			default:
+				cliArgs = append(runtimeArgs, "-p", message)
+				if talkOutputFormat == "stream-json" {
+					cliArgs = append(cliArgs, "--output-format", "stream-json", "--verbose")
+				} else {
+					cliArgs = append(cliArgs, "--print")
+				}
 			}
 
-			dockerArgs := append(buildDockerArgs(false), claudeArgs...)
+			dockerArgs := append(buildDockerArgs(false), cliArgs...)
 			execCmd := exec.Command("docker", dockerArgs...)
 
 			if talkOutputFormat == "stream-json" {
-				// Stream stdout directly for real-time output
 				execCmd.Stdout = os.Stdout
 				execCmd.Stderr = os.Stderr
 				if err := execCmd.Run(); err != nil {
@@ -106,8 +113,8 @@ If no message is provided, opens an interactive Claude session inside the contai
 				fmt.Fprint(os.Stdout, string(output))
 			}
 		} else {
-			// Interactive mode: attach stdin/stdout/stderr
-			dockerArgs := append(buildDockerArgs(true), claudeArgs...)
+			// Interactive mode
+			dockerArgs := append(buildDockerArgs(true), runtimeArgs...)
 			execCmd := exec.Command("docker", dockerArgs...)
 			execCmd.Stdin = os.Stdin
 			execCmd.Stdout = os.Stdout
@@ -139,23 +146,37 @@ func isContainerRunning(containerID string) bool {
 // talking to "qa" from the "The Test" world must not route to the "Matrix"
 // world's qa container). When worldID is empty, returns the first running
 // world that contains the agent.
-func findAgentContainer(agentName, worldID string) (string, string, error) {
+func findAgentContainer(agentName, worldID string) (containerID, wID, runtime string, err error) {
 	ctx := context.Background()
 
-	arc, err := universe.NewArchitectFromEnv()
-	if err != nil {
-		if strings.Contains(err.Error(), "cannot connect to Docker") {
-			return "", "", fmt.Errorf("Docker is not running")
+	arc, arcErr := universe.NewArchitectFromEnv()
+	if arcErr != nil {
+		if strings.Contains(arcErr.Error(), "cannot connect to Docker") {
+			return "", "", "", fmt.Errorf("Docker is not running")
 		}
-		return "", "", err
+		return "", "", "", arcErr
 	}
 
-	worlds, err := arc.List(ctx)
-	if err != nil {
-		return "", "", fmt.Errorf("cannot list worlds: %w", err)
+	worlds, listErr := arc.List(ctx)
+	if listErr != nil {
+		return "", "", "", fmt.Errorf("cannot list worlds: %w", listErr)
 	}
 
-	return routeAgentToWorld(worlds, agentName, worldID, isContainerRunning)
+	cID, foundWorldID, routeErr := routeAgentToWorld(worlds, agentName, worldID, isContainerRunning)
+	if routeErr != nil {
+		return "", "", "", routeErr
+	}
+
+	// Look up the runtime from the world state
+	rt := "claude-code"
+	for _, w := range worlds {
+		if w.ID == foundWorldID && w.Runtime != "" {
+			rt = w.Runtime
+			break
+		}
+	}
+
+	return cID, foundWorldID, rt, nil
 }
 
 // worldHasAgent returns true when the given agent name matches the world's

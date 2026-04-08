@@ -36,6 +36,7 @@ type SpawnOpts struct {
 	ConfigName    string
 	Name          string // Optional user-facing display name.
 	AgentName     string
+	Runtime       string                     // Agent runtime name (e.g., "claude-code", "codex"). Defaults to "claude-code".
 	Workspaces    []models.Workspace
 	Manifest      models.Manifest
 	Image         string                     // Override base image (used for testing). Defaults to foundation.WorldImage.
@@ -66,6 +67,14 @@ var defaultProbeList = []string{
 // Spawn creates a new world.
 func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, error) {
 	var warnings []string
+
+	// Set runtime adapter if specified
+	if opts.Runtime != "" {
+		if err := a.SetRuntime(opts.Runtime); err != nil {
+			warnings = append(warnings, fmt.Sprintf("runtime %q not found, using default", opts.Runtime))
+		}
+	}
+
 	// Generate ID
 	id := foundation.GenerateWorldID(opts.ConfigName)
 
@@ -215,7 +224,17 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 		// Always include runtime essentials, then add user-specified tools on top.
 		// The registry deduplicates and resolves dependencies.
-		required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/cli"}
+		runtimeTool := "@spwn/claude-code"
+		if opts.Runtime == "codex" {
+			runtimeTool = "@spwn/codex"
+		} else if opts.Runtime != "" && opts.Runtime != "claude-code" {
+			// For other runtimes, try @spwn/{runtime} if it exists
+			candidate := "@spwn/" + opts.Runtime
+			if reg.Get(candidate) != nil {
+				runtimeTool = candidate
+			}
+		}
+		required := []string{"@spwn/unix", "@spwn/node", runtimeTool, "@spwn/cli"}
 		tools := append(required, opts.Manifest.Tools...)
 
 		// Deduplicate
@@ -299,6 +318,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Note: ~/.claude/ is NOT mounted — the container has its own Claude config
 	// with pre-approved workspace trust. Credentials are passed via env vars.
+
+	// Mount Codex auth tokens if available (~/.codex/auth.json → container)
+	codexAuthPath := filepath.Join(os.Getenv("HOME"), ".codex", "auth.json")
+	if _, statErr := os.Stat(codexAuthPath); statErr == nil {
+		binds = append(binds, codexAuthPath+":/home/spwn/.codex/auth.json:ro")
+	}
 
 	// Create container
 	containerCfg := backend.ContainerConfig{
@@ -480,6 +505,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Build universe record
+	runtimeName := opts.Runtime
+	if runtimeName == "" {
+		runtimeName = "claude-code"
+	}
 	u := models.World{
 		ID:          id,
 		Name:        opts.Name,
@@ -490,6 +519,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Workspaces:  resolvedWorkspaces,
 		MindPath:    mindPath,
 		GateDir:     gateDir,
+		Runtime:     runtimeName,
 		Status:      models.StatusIdle,
 		CreatedAt:   time.Now(),
 		Manifest:    opts.Manifest,

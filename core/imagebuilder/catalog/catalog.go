@@ -6,6 +6,7 @@ import (
 	"spwn.sh/core/imagebuilder/catalog/architect"
 	"spwn.sh/core/imagebuilder/catalog/build"
 	"spwn.sh/core/imagebuilder/catalog/claude_code"
+	"spwn.sh/core/imagebuilder/catalog/codex"
 	"spwn.sh/core/imagebuilder/catalog/docker_cli"
 	"spwn.sh/core/imagebuilder/catalog/git"
 	"spwn.sh/core/imagebuilder/catalog/node"
@@ -25,6 +26,7 @@ var All = []ib.Tool{
 	build.Tool,
 	docker_cli.Tool,
 	claude_code.Tool,
+	codex.Tool,
 	spwn_cli.Tool,
 	architect.Tool,
 	qmd.Tool,

@@ -334,8 +334,8 @@ The thinking engine that drives the agent. Pick one per agent.
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
 | `@spwn/claude-code` | Claude Code CLI + pre-configured auth | You want Anthropic's agent runtime (default) | Available |
+| `@spwn/codex` | Codex CLI + pre-configured workspace trust | You want OpenAI models (GPT-5, o3) | Available |
 | `@spwn/aider` | Aider CLI | You want an open-source code-focused runtime | Planned |
-| `@spwn/codex` | OpenAI Codex CLI | You want OpenAI's agent runtime | Planned |
 
 ### Tools
 
