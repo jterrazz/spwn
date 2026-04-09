@@ -26,6 +26,14 @@ func SyncCredentials() error {
 	// Resolve all credentials from env, keychain, cached files
 	creds := ResolveAll()
 
+	// Skip disabled providers (user clicked "Reset" in settings)
+	for p, cred := range creds {
+		if IsProviderDisabled(p) {
+			cred.Type = CredTypeNone
+			cred.Token = ""
+		}
+	}
+
 	// Write .env file (atomic)
 	if err := writeEnvFile(dir, creds); err != nil {
 		return fmt.Errorf("write .env: %w", err)
