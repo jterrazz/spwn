@@ -27,7 +27,7 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 - **Leader**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
 - **Worker**: Persistent worker agent. Has a Profile — remembers, learns, evolves.
 - **Ephemeral**: Ephemeral agent. No Profile, no memory. Single task, fire & forget.
-- **Observatory**: Visual dashboard. Real-time view of everything.
+- **Desktop App**: Visual dashboard. Real-time view of everything.
 
 ### The Physics
 - **Physics**: Constants (CPU, memory, timeout), laws (network, max-processes), elements (@spwn/unix, @spwn/git, jq).
@@ -176,7 +176,7 @@ spwn/
 │
 ├── core/                            # Domain libraries (the product)
 │   ├── universe/                    #   go.mod — world management
-│   │   ├── universe.go              #   Public API (World, Manifest, Architect, Observatory)
+│   │   ├── universe.go              #   Public API (World, Manifest, Architect, Desktop App)
 │   │   └── internal/
 │   │       ├── architect/           #     Orchestration (spawn, destroy, list)
 │   │       │   ├── colony.go        #       Multi-agent: SpawnAgents, Chief/Manager/Worker
@@ -267,7 +267,7 @@ Host machine
 └── Docker daemon (/var/run/docker.sock)
     ├── Architect container (always-on, socket-mounted)
     ├── World containers (siblings, created by Architect)
-    └── Observatory container (sibling)
+    └── Desktop App container (sibling)
 ```
 
 **Two modes:**

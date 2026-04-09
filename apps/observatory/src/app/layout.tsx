@@ -29,16 +29,16 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s · Observatory',
-    default: 'Observatory · spwn',
+    template: '%s · spwn',
+    default: 'spwn',
   },
-  description: 'Visual dashboard for spwn — the control plane for AI agents',
+  description: 'Desktop app for spwn — manage AI agent worlds',
   icons: [{ rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }],
   openGraph: {
-    title: 'Observatory · spwn',
-    description: 'Visual dashboard for spwn — the control plane for AI agents',
+    title: 'spwn',
+    description: 'Desktop app for spwn — manage AI agent worlds',
     type: 'website',
-    siteName: 'spwn Observatory',
+    siteName: 'spwn',
   },
   metadataBase: new URL('https://spwn.sh'),
 };

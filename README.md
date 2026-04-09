@@ -19,7 +19,7 @@
 <br/>
 
 <p align="center">
-  <img src="doc/app-screenshot.webp" alt="Spwn Observatory — Worlds dashboard" width="720" />
+  <img src="doc/app-screenshot.webp" alt="spwn — Worlds dashboard" width="720" />
 </p>
 
 <br/>
@@ -97,7 +97,7 @@ Agents have a Profile: persona, traits, purpose, skills, knowledge, playbooks, j
 </td>
 <td align="center">
 <h3>🖥️ CLI + Desktop App</h3>
-Full CLI for power users. Observatory desktop app for visual monitoring with 3D world browser. Command or click.
+Full CLI for power users. Desktop app for visual monitoring. Command or click.
 </td>
 <td align="center">
 <h3>🔌 Pluggable Everything</h3>
@@ -506,7 +506,7 @@ spwn/
 - ✅ Agent evolution (dream, sleep, forking)
 - ✅ Multi-agent coordination and messaging
 - ✅ Snapshots and rollback
-- ✅ CLI and desktop app (Observatory)
+- ✅ CLI and desktop app
 - ✅ Pluggable runtime adapters (Claude Code, Pi, Aider)
 - ✅ Activity log and audit trail
 - ✅ Composable tool catalog with imagebuilder
