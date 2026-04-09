@@ -48,3 +48,4 @@ func (p *Pi) SystemPackages() []string { return []string{"git", "curl"} }
 // SupportsSession returns true if the runtime can resume sessions.
 func (p *Pi) SupportsSession() bool { return true }
 func (p *Pi) Available() bool       { return false }
+func (p *Pi) CredentialFiles() map[string]string { return nil }

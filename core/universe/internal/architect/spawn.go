@@ -2,11 +2,9 @@ package architect
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -23,6 +21,7 @@ import (
 	"spwn.sh/core/universe/internal/physics"
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/foundation/activity"
+	"spwn.sh/core/foundation/auth"
 )
 
 // SpawnResult is returned by Spawn with the universe and any non-fatal warnings.
@@ -271,27 +270,31 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		opts.progress("image_ready", image)
 	}
 
-	// Forward AI provider credentials to the container
-	var env []string
-	for _, key := range []string{
-		"ANTHROPIC_API_KEY",
-		"OPENAI_API_KEY",
-		"GOOGLE_API_KEY",
-		"CLAUDE_CODE_OAUTH_TOKEN",
-		"ANTHROPIC_AUTH_TOKEN",
-	} {
-		if val := os.Getenv(key); val != "" {
-			env = append(env, key+"="+val)
+	// Sync credentials to bind-mountable directory (live — containers see updates)
+	if err := auth.SyncCredentials(); err != nil {
+		warnings = append(warnings, fmt.Sprintf("credential sync: %v", err))
+	}
+	binds = append(binds, foundation.CredentialsDir()+":/credentials:ro")
+
+	// Determine credential source for progress reporting
+	creds := auth.ResolveAll()
+	credSource := "none"
+	for _, cred := range creds {
+		if cred.Type != auth.CredTypeNone {
+			credSource = string(cred.Type)
+			break
 		}
 	}
+	opts.progress("credentials_resolved", credSource)
 
-	// Architect mode env vars
+	// Non-credential env vars
+	var env []string
 	if opts.IsArchitect {
 		env = append(env, "SPWN_ARCHITECT_MODE=1")
 		env = append(env, "SPWN_HOME=/home/spwn/.spwn")
 	}
 
-	// Workspace discovery env vars: "name:container_path,name:container_path"
+	// Workspace discovery env vars
 	if len(resolvedWorkspaces) > 0 {
 		total := len(resolvedWorkspaces)
 		pairs := make([]string, 0, total)
@@ -300,29 +303,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 		env = append(env, "SPWN_WORKSPACES="+strings.Join(pairs, ","))
 		env = append(env, "SPWN_WORKSPACE_DEFAULT="+workspaceContainerPath(resolvedWorkspaces[0].Name, total))
-	}
-
-	// Auto-extract OAuth token from macOS Keychain for subscription auth
-	credSource := "none"
-	if hasEnv(env, "ANTHROPIC_API_KEY") {
-		credSource = "API key"
-	} else if hasEnv(env, "CLAUDE_CODE_OAUTH_TOKEN") {
-		credSource = "OAuth token"
-	} else {
-		if token := extractKeychainToken(); token != "" {
-			env = append(env, "CLAUDE_CODE_OAUTH_TOKEN="+token)
-			credSource = "subscription"
-		}
-	}
-	opts.progress("credentials_resolved", credSource)
-
-	// Note: ~/.claude/ is NOT mounted — the container has its own Claude config
-	// with pre-approved workspace trust. Credentials are passed via env vars.
-
-	// Mount Codex auth tokens if available (~/.codex/auth.json → container)
-	codexAuthPath := filepath.Join(os.Getenv("HOME"), ".codex", "auth.json")
-	if _, statErr := os.Stat(codexAuthPath); statErr == nil {
-		binds = append(binds, codexAuthPath+":/home/spwn/.codex/auth.json:ro")
 	}
 
 	// Create container
@@ -639,61 +619,6 @@ func mergeUnique(a, b []string) []string {
 		}
 	}
 	return result
-}
-
-func hasEnv(env []string, key string) bool {
-	prefix := key + "="
-	for _, e := range env {
-		if strings.HasPrefix(e, prefix) {
-			return true
-		}
-	}
-	return false
-}
-
-// readKeychainOAuthToken reads the Claude OAuth token directly from macOS Keychain.
-// Returns empty string if keychain is unavailable or token not found.
-func readKeychainOAuthToken() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	out, err := exec.CommandContext(ctx, "security", "find-generic-password", "-s", "Claude Code-credentials", "-w").Output()
-	if err != nil {
-		return ""
-	}
-
-	var creds struct {
-		ClaudeAiOauth struct {
-			AccessToken string `json:"accessToken"`
-		} `json:"claudeAiOauth"`
-	}
-	if err := json.Unmarshal(out, &creds); err != nil {
-		return ""
-	}
-	return creds.ClaudeAiOauth.AccessToken
-}
-
-// extractKeychainToken reads the Claude OAuth token, preferring a fresh keychain
-// read over the cached value so that expired tokens are automatically refreshed.
-func extractKeychainToken() string {
-	cachePath := filepath.Join(foundation.BaseDir(), ".auth-token")
-
-	// Try keychain first — always returns a fresh token
-	if token := readKeychainOAuthToken(); token != "" {
-		// Cache the fresh token for offline/fallback use
-		os.MkdirAll(foundation.BaseDir(), 0755)
-		os.WriteFile(cachePath, []byte(token), 0600)
-		return token
-	}
-
-	// Fall back to cached token (keychain unavailable, e.g. Linux or no GUI)
-	if data, err := os.ReadFile(cachePath); err == nil {
-		token := strings.TrimSpace(string(data))
-		if token != "" {
-			return token
-		}
-	}
-
-	return ""
 }
 
 func parseMemory(s string) (int64, error) {

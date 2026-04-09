@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"spwn.sh/core/foundation"
@@ -343,11 +344,12 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 		}
 	}
 
-	// Build env vars — always set SPWN_HOME, pass through auth credentials
+	// Sync credentials to bind-mountable directory
+	_ = auth.SyncCredentials()
+
 	envVars := []string{
 		"SPWN_HOME=/universe",
 	}
-	envVars = append(envVars, auth.DockerEnvVars()...)
 
 	// Create container — entrypoint is "sleep infinity" (set in Dockerfile),
 	// we docker exec claude into it when we want to talk.
@@ -370,6 +372,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 			foundation.BaseDir() + ":/universe",
 			architectStackPath + ":/me/stack.md",
 			"/var/run/docker.sock:/var/run/docker.sock",
+			foundation.CredentialsDir() + ":/credentials:ro",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
@@ -500,12 +503,12 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	// Pass SPWN_HOME so spwn CLI works inside the exec
 	args = append(args, "-e", "SPWN_HOME=/universe")
 
-	// Pass auth env vars into the exec (in case container env was not set at start)
-	args = append(args, auth.DockerEnvArgs()...)
+	// Sync credentials before exec
+	_ = auth.SyncCredentials()
 
 	args = append(args, foundation.ArchitectContainerName)
 
-	// Claude Code invocation
+	// Claude Code invocation — wrapped to source credentials from bind mount
 	claudeArgs := []string{"claude", "--dangerously-skip-permissions"}
 	if message != "" {
 		claudeArgs = append(claudeArgs, "-p", message, "--print",
@@ -521,6 +524,14 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 				"Every conversation should result in knowledge updates.")
 	}
 
-	args = append(args, claudeArgs...)
+	// Wrap command to source credentials from bind-mounted /credentials/.env
+	escaped := make([]string, len(claudeArgs))
+	for i, arg := range claudeArgs {
+		escaped[i] = "'" + strings.ReplaceAll(arg, "'", "'\\''") + "'"
+	}
+	setup := "source /credentials/.env 2>/dev/null"
+	setup += "; [ -f /credentials/openai/auth.json ] && mkdir -p $HOME/.codex && ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null"
+	shellCmd := setup + "; exec " + strings.Join(escaped, " ")
+	args = append(args, "bash", "-c", shellCmd)
 	return args, nil
 }

@@ -1,6 +1,9 @@
 package codex
 
 import (
+	"os"
+	"path/filepath"
+
 	rt "spwn.sh/core/universe/internal/runtime"
 )
 
@@ -50,6 +53,16 @@ func (c *Codex) BaseImage() string { return "node:20" }
 
 // SystemPackages returns apt packages needed beyond the base image.
 func (c *Codex) SystemPackages() []string { return []string{"git", "curl"} }
+
+// CredentialFiles returns runtime-specific credential files to mount.
+func (c *Codex) CredentialFiles() map[string]string {
+	home, _ := os.UserHomeDir()
+	codexAuth := filepath.Join(home, ".codex", "auth.json")
+	if _, err := os.Stat(codexAuth); err == nil {
+		return map[string]string{"openai/auth.json": codexAuth}
+	}
+	return nil
+}
 
 // SupportsSession returns true if the runtime can resume sessions.
 func (c *Codex) SupportsSession() bool { return true }

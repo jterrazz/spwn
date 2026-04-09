@@ -91,19 +91,36 @@ If no message is provided, opens an interactive session inside the container.`,
 			}
 		}
 
+		// Sync credentials before talking (updates bind-mounted /credentials/.env)
+		_ = auth.SyncCredentials()
+
 		buildDockerArgs := func(interactive bool) []string {
 			args := []string{"exec"}
 			if interactive {
 				args = append(args, "-it")
 			}
 			args = append(args, "-w", "/workspace")
-			args = append(args, authEnvArgs()...)
+			// No -e flags needed — credentials are in /credentials/.env (bind mount)
 			args = append(args, containerID)
 			return args
 		}
 
+		// Wrap runtime command to source credentials from bind-mounted directory
+		wrapWithCredentials := func(cmd []string) []string {
+			escaped := make([]string, len(cmd))
+			for i, arg := range cmd {
+				escaped[i] = "'" + strings.ReplaceAll(arg, "'", "'\\''") + "'"
+			}
+			// Source env vars + set up runtime-specific credential files (symlinks)
+			setup := "source /credentials/.env 2>/dev/null"
+			// Codex: symlink auth.json from credentials dir to ~/.codex/
+			setup += "; [ -f /credentials/openai/auth.json ] && mkdir -p $HOME/.codex && ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null"
+			shellCmd := setup + "; exec " + strings.Join(escaped, " ")
+			return []string{"bash", "-c", shellCmd}
+		}
+
 		if message != "" {
-			dockerArgs := append(buildDockerArgs(false), runtimeCmd...)
+			dockerArgs := append(buildDockerArgs(false), wrapWithCredentials(runtimeCmd)...)
 			execCmd := exec.Command("docker", dockerArgs...)
 
 			if talkOutputFormat == "stream-json" {
@@ -175,7 +192,7 @@ If no message is provided, opens an interactive session inside the container.`,
 			}
 		} else {
 			// Interactive mode
-			dockerArgs := append(buildDockerArgs(true), runtimeCmd...)
+			dockerArgs := append(buildDockerArgs(true), wrapWithCredentials(runtimeCmd)...)
 			execCmd := exec.Command("docker", dockerArgs...)
 			execCmd.Stdin = os.Stdin
 			execCmd.Stdout = os.Stdout
@@ -277,9 +294,6 @@ func routeAgentToWorld(
 	return "", "", fmt.Errorf("agent %q is not in any active world\n\n  Spawn one with: spwn up --agent %s -w <workspace>", agentName, agentName)
 }
 
-func authEnvArgs() []string {
-	return auth.DockerEnvArgs()
-}
 
 func formatExecError(err error, output []byte) error {
 	out := string(output)
