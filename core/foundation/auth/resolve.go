@@ -144,6 +144,27 @@ func resolveOpenAI() *Credential {
 			EnvVar:   "OPENAI_API_KEY",
 		}
 	}
+
+	// Check Codex OAuth auth.json (subscription-based, e.g. ChatGPT Plus)
+	home, _ := os.UserHomeDir()
+	codexAuth := home + "/.codex/auth.json"
+	if data, err := os.ReadFile(codexAuth); err == nil {
+		var tokens struct {
+			Tokens struct {
+				AccessToken string `json:"access_token"`
+			} `json:"tokens"`
+		}
+		if json.Unmarshal(data, &tokens) == nil && tokens.Tokens.AccessToken != "" {
+			return &Credential{
+				Provider: ProviderOpenAI,
+				Type:     CredTypeOAuth,
+				Token:    tokens.Tokens.AccessToken,
+				Source:   "file:~/.codex/auth.json",
+				EnvVar:   "OPENAI_API_KEY",
+			}
+		}
+	}
+
 	return &Credential{
 		Provider: ProviderOpenAI,
 		Type:     CredTypeNone,
