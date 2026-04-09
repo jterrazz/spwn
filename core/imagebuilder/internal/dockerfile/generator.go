@@ -128,16 +128,19 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 	}
 
 	// Copy skills into the image (if any tool has skills)
-	hasAnySkills := false
-	for _, t := range tools {
-		if t.HasSkills {
-			hasAnySkills = true
-			break
+	// Skip when SkipFooter is set — the caller manages their own COPY directives.
+	if !opt.SkipFooter {
+		hasAnySkills := false
+		for _, t := range tools {
+			if t.HasSkills {
+				hasAnySkills = true
+				break
+			}
 		}
-	}
-	if hasAnySkills {
-		sb.WriteString("# Skills (copied from build context)\n")
-		sb.WriteString("COPY skills/ /\n\n")
+		if hasAnySkills {
+			sb.WriteString("# Skills (copied from build context)\n")
+			sb.WriteString("COPY skills/ /\n\n")
+		}
 	}
 
 	// Collect UserCommands across all tools (run after USER switch)
