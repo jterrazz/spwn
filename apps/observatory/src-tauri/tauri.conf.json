@@ -1,11 +1,12 @@
 {
   "productName": "spwn Observatory",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "identifier": "sh.spwn.observatory",
   "build": {
     "devUrl": "http://localhost:1420",
+    "frontendDist": "../out",
     "beforeDevCommand": "npm run dev -- -p 1420",
-    "beforeBuildCommand": ""
+    "beforeBuildCommand": "npm run build:static"
   },
   "app": {
     "windows": [
