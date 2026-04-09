@@ -1,12 +1,12 @@
 [package]
-name = "spwn-observatory"
-version = "0.10.4"
-description = "spwn Observatory — visual dashboard for AI agents"
+name = "spwn-app"
+version = "0.13.0"
+description = "spwn — desktop app for AI agent worlds"
 authors = ["jterrazz"]
 edition = "2024"
 
 [lib]
-name = "spwn_observatory_lib"
+name = "spwn_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

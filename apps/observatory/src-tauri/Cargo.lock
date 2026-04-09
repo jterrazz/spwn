@@ -3542,8 +3542,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "spwn-observatory"
-version = "0.10.4"
+name = "spwn-app"
+version = "0.13.0"
 dependencies = [
  "cocoa",
  "objc",
