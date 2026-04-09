@@ -12,9 +12,6 @@ import {
   IconCheck,
   IconX,
   IconAlertTriangle,
-  IconExternalLink,
-  IconEye,
-  IconEyeOff,
   IconTerminal2,
   IconLock,
   IconUserCircle,
@@ -179,8 +176,7 @@ function ProviderRow({ provider, onConfigure, onReset, onReconnect, checking, on
                 onClick={onConfigure}
                 className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-all"
               >
-                <IconKey size={11} className="inline mr-1" />
-                Add key
+                How to connect
               </button>
             </>
           )}
@@ -230,18 +226,8 @@ function ProviderRow({ provider, onConfigure, onReset, onReconnect, checking, on
   );
 }
 
-function ConfigureModal({ provider, onClose, onSave }: { provider: string; onClose: () => void; onSave: (token: string) => void }) {
-  const [token, setToken] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [showToken, setShowToken] = useState(false);
-  const [mode, setMode] = useState<"key" | "oauth">("key");
+function ConfigureModal({ provider, onClose }: { provider: string; onClose: () => void }) {
   const meta = PROVIDER_META[provider];
-
-  const handleSave = async () => {
-    if (!token.trim()) return;
-    setSaving(true);
-    onSave(token.trim());
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -254,91 +240,26 @@ function ConfigureModal({ provider, onClose, onSave }: { provider: string; onClo
           </button>
         </div>
 
-        {/* Mode toggle */}
-        <div className="flex gap-1 mb-5 p-0.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-          <button
-            onClick={() => setMode("key")}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-[11px] font-mono transition-all ${
-              mode === "key" ? "bg-white/[0.08] text-foreground/70 border border-white/[0.10]" : "text-muted-foreground/30 border border-transparent"
-            }`}
-          >
-            <IconKey size={12} />
-            API Key
-          </button>
-          <button
-            onClick={() => setMode("oauth")}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-[11px] font-mono transition-all ${
-              mode === "oauth" ? "bg-white/[0.08] text-foreground/70 border border-white/[0.10]" : "text-muted-foreground/30 border border-transparent"
-            }`}
-          >
-            <IconUserCircle size={12} />
-            Subscription
+        <div className="space-y-4">
+          <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 space-y-3">
+            <p className="text-xs text-muted-foreground/50 leading-relaxed">
+              Sign in via the runtime CLI on your host machine. Spwn detects credentials from your system keychain and shares them with all containers automatically.
+            </p>
+            {meta?.oauthNote && (
+              <div className="flex items-center gap-2 text-[11px] font-mono text-foreground/50 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
+                <IconTerminal2 size={13} className="text-muted-foreground/30 shrink-0" />
+                <span>{meta.oauthNote}</span>
+              </div>
+            )}
+            <p className="text-[10px] text-muted-foreground/25">
+              After signing in, click Reconnect in the settings to pick up the new credentials.
+            </p>
+          </div>
+
+          <button onClick={onClose} className="w-full px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors">
+            Done
           </button>
         </div>
-
-        {mode === "key" ? (
-          <div className="space-y-4">
-            <div>
-              <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">API Key</label>
-              <div className="relative">
-                <input
-                  type={showToken ? "text" : "password"}
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
-                  placeholder={`sk-... or paste your ${meta?.name ?? provider} API key`}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-4 py-3 pr-10 text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
-                  autoFocus
-                />
-                <button type="button" onClick={() => setShowToken(!showToken)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors">
-                  {showToken ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-                </button>
-              </div>
-              <div className="flex items-center gap-3 mt-2">
-                {meta?.envKey && <p className="text-[10px] font-mono text-muted-foreground/20">or set {meta.envKey}</p>}
-                {meta?.docsUrl && (
-                  <a href={meta.docsUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-400/50 hover:text-blue-400/80 transition-colors flex items-center gap-0.5">
-                    Get key <IconExternalLink size={10} />
-                  </a>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors">
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={!token.trim() || saving}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {saving ? <span className="flex items-center justify-center gap-2"><span className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />Saving...</span> : "Save"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 space-y-3">
-              <p className="text-xs text-muted-foreground/50 leading-relaxed">
-                Use your existing subscription (e.g. Claude Max, ChatGPT Plus) instead of an API key. Sign in via the CLI on your host machine — the credentials are shared automatically.
-              </p>
-              {meta?.oauthNote && (
-                <div className="flex items-center gap-2 text-[11px] font-mono text-foreground/50 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
-                  <IconTerminal2 size={13} className="text-muted-foreground/30 shrink-0" />
-                  <span>{meta.oauthNote}</span>
-                </div>
-              )}
-              <p className="text-[10px] text-muted-foreground/25">
-                After signing in, spwn will detect the credentials from your system keychain automatically.
-              </p>
-            </div>
-
-            <button onClick={onClose} className="w-full px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors">
-              Done
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -390,15 +311,6 @@ export default function ProvidersPage() {
       }
     } catch { showFeedback(`Failed to check ${providerName}`, "error"); }
     finally { setChecking(null); }
-  };
-
-  const handleConfigure = async (providerName: string, token: string) => {
-    try {
-      const res = await fetch(goApiUrl("/api/auth/configure"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: providerName, token }) });
-      const data = await res.json();
-      if (data.ok) { showFeedback(`${providerName} configured`, "success"); setConfiguring(null); fetchProviders(); }
-      else { showFeedback(data.error || "Failed to save", "error"); }
-    } catch { showFeedback("Failed to save", "error"); }
   };
 
   const handleReset = async (providerName: string) => {
@@ -490,7 +402,6 @@ export default function ProvidersPage() {
         <ConfigureModal
           provider={configuring}
           onClose={() => setConfiguring(null)}
-          onSave={(token) => handleConfigure(configuring, token)}
         />
       )}
     </Page>

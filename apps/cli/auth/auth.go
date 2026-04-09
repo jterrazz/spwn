@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -37,10 +36,6 @@ var Cmd = &cobra.Command{
 		// Resolve all providers via auth package
 		creds := auth.ResolveAll()
 
-		anthropic := creds[auth.ProviderAnthropic]
-		openai := creds[auth.ProviderOpenAI]
-		google := creds[auth.ProviderGoogle]
-
 		if jsonOut {
 			type providerJSON struct {
 				Provider string `json:"provider"`
@@ -48,10 +43,9 @@ var Cmd = &cobra.Command{
 				Source   string `json:"source"`
 				Type     string `json:"type"`
 			}
-			out := []providerJSON{
-				{Provider: "anthropic", OK: anthropic.Type != auth.CredTypeNone, Source: anthropic.Source, Type: string(anthropic.Type)},
-				{Provider: "openai", OK: openai.Type != auth.CredTypeNone, Source: openai.Source, Type: string(openai.Type)},
-				{Provider: "google", OK: google.Type != auth.CredTypeNone, Source: google.Source, Type: string(google.Type)},
+			var out []providerJSON
+			for p, cred := range creds {
+				out = append(out, providerJSON{Provider: string(p), OK: cred.Type != auth.CredTypeNone, Source: cred.Source, Type: string(cred.Type)})
 			}
 			enc := json.NewEncoder(os.Stdout)
 			enc.SetIndent("", "  ")
@@ -62,9 +56,10 @@ var Cmd = &cobra.Command{
 
 		// Table
 		t := ui.NewTable(ui.ModeNormal, "PROVIDER", "STATUS", "SOURCE")
-		t.AddRow("Anthropic", statusText(anthropic.Type != auth.CredTypeNone), anthropic.Source)
-		t.AddRow("OpenAI", statusText(openai.Type != auth.CredTypeNone), openai.Source)
-		t.AddRow("Google", statusText(google.Type != auth.CredTypeNone), google.Source)
+		for _, p := range []auth.Provider{auth.ProviderAnthropic, auth.ProviderOpenAI} {
+			cred := creds[p]
+			t.AddRow(string(p), statusText(cred.Type != auth.CredTypeNone), cred.Source)
+		}
 		t.Render()
 
 		// Token cache info
@@ -81,8 +76,15 @@ var Cmd = &cobra.Command{
 		}
 
 		s.Blank()
-		if anthropic.Type == auth.CredTypeNone {
-			fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint(`Run "spwn auth login" to set up credentials`))
+		anyConfigured := false
+		for _, cred := range creds {
+			if cred.Type != auth.CredTypeNone {
+				anyConfigured = true
+				break
+			}
+		}
+		if !anyConfigured {
+			fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint(`Sign in: "claude login" (Anthropic) or "codex login" (OpenAI)`))
 			s.Blank()
 		}
 
@@ -121,7 +123,6 @@ func authHelp(cmd *cobra.Command, args []string) {
 			{Title: "Environment Variables", Commands: []ui.HelpEntry{
 				{Name: "ANTHROPIC_API_KEY", Desc: "Anthropic Claude API key"},
 				{Name: "OPENAI_API_KEY", Desc: "OpenAI API key"},
-				{Name: "GOOGLE_API_KEY", Desc: "Google Gemini API key"},
 			}},
 		},
 		"spwn auth              Show authentication status\n    spwn auth [command]",
@@ -133,63 +134,49 @@ func authHelp(cmd *cobra.Command, args []string) {
 
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Set up credentials — auto-detect from Keychain or paste manually",
+	Short: "Detect credentials from CLI logins and system keychain",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
 		s.Blank()
 
-		// 1. Try macOS Keychain via auth package
-		s.Start("Checking Keychain...")
+		found := false
+
+		// Anthropic: check keychain (Claude Code subscription)
+		s.Start("Checking Anthropic...")
 		cred := auth.Resolve(auth.ProviderAnthropic)
-		if cred.Type == auth.CredTypeKeychain {
-			// Cache it
-			_ = auth.SaveToken(cred.Token)
-			s.Done("Found subscription", "cached to "+abbreviate(foundation.BaseDir()+"/.auth-token"))
-			s.Blank()
-			s.Success("Authenticated.")
-			s.Blank()
-			return nil
-		}
-		s.Done("Keychain", ui.Faint("no Claude Code credentials found"))
-
-		// 2. Check if already configured via env
 		if cred.Type != auth.CredTypeNone {
-			s.Done("Environment", cred.Source+" is set")
-			s.Blank()
-			s.Success("Authenticated via environment.")
-			s.Blank()
-			return nil
+			if cred.Type == auth.CredTypeKeychain {
+				_ = auth.SaveToken(cred.Token)
+			}
+			_ = auth.EnableProvider(auth.ProviderAnthropic)
+			s.Done("Anthropic", cred.Source)
+			found = true
+		} else {
+			s.Done("Anthropic", ui.Faint("not found — run: claude login"))
 		}
 
-		// 3. Manual input
-		s.Blank()
-		fmt.Fprint(os.Stderr, "  Paste your API key or OAuth token:\n  > ")
-		reader := bufio.NewReader(os.Stdin)
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			return s.FailHint("Read failed", err, "Try setting ANTHROPIC_API_KEY instead")
-		}
-		input = strings.TrimSpace(input)
-		if input == "" {
-			return s.FailHint("Empty input", fmt.Errorf("no token provided"),
-				"Paste an API key (sk-ant-...) or OAuth token")
+		// OpenAI: check codex auth.json
+		s.Start("Checking OpenAI...")
+		openai := auth.Resolve(auth.ProviderOpenAI)
+		if openai.Type != auth.CredTypeNone {
+			_ = auth.EnableProvider(auth.ProviderOpenAI)
+			s.Done("OpenAI", openai.Source)
+			found = true
+		} else {
+			s.Done("OpenAI", ui.Faint("not found — run: codex login"))
 		}
 
-		// Detect type
-		kind := "token"
-		if strings.HasPrefix(input, "sk-ant-") {
-			kind = "API key"
-		}
-
-		// Save
-		if err := auth.SaveToken(input); err != nil {
-			return s.FailHint("Save failed", err, "Check permissions on "+abbreviate(foundation.BaseDir()))
-		}
+		// Sync credentials
+		_ = auth.SyncCredentials()
 
 		s.Blank()
-		s.Done("Saved "+kind, abbreviate(foundation.BaseDir()+"/.auth-token"))
-		s.Blank()
-		s.Success("Authenticated.")
+		if found {
+			s.Success("Credentials synced.")
+		} else {
+			fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint("Sign in with your runtime CLI first:"))
+			fmt.Fprintf(os.Stderr, "    %s\n", "claude login    (Anthropic subscription)")
+			fmt.Fprintf(os.Stderr, "    %s\n", "codex login     (OpenAI subscription)")
+		}
 		s.Blank()
 		return nil
 	},
