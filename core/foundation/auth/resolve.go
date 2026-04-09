@@ -26,7 +26,7 @@ func Resolve(p Provider) *Credential {
 // ResolveAll returns credentials for all known providers.
 func ResolveAll() map[Provider]*Credential {
 	result := make(map[Provider]*Credential)
-	for _, p := range []Provider{ProviderAnthropic, ProviderOpenAI, ProviderGoogle} {
+	for _, p := range []Provider{ProviderAnthropic, ProviderOpenAI} {
 		result[p] = Resolve(p)
 	}
 	return result
