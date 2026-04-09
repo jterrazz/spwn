@@ -1850,12 +1850,19 @@ func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 		Usage          *auth.UsageInfo `json:"usage,omitempty"`
 	}
 	var providers []providerInfo
-	for _, cred := range creds {
+	for p, cred := range creds {
+		// Respect disabled state (user clicked Reset)
+		connected := cred.Type != auth.CredTypeNone
+		if auth.IsProviderDisabled(p) {
+			connected = false
+			cred.Type = auth.CredTypeNone
+			cred.Source = ""
+		}
 		info := providerInfo{
 			Provider:       string(cred.Provider),
 			CredentialType: string(cred.Type),
 			Source:         cred.Source,
-			Connected:      cred.Type != auth.CredTypeNone,
+			Connected:      connected,
 		}
 		providers = append(providers, info)
 	}
@@ -1886,14 +1893,32 @@ func (s *Server) handleAuthConfigure(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), 500)
 		return
 	}
+	// Re-enable provider if it was previously disabled
+	if body.Provider != "" {
+		_ = auth.EnableProvider(auth.Provider(body.Provider))
+	}
+	// Re-sync credentials with new token
+	_ = auth.SyncCredentials()
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 
 func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
-	if err := auth.ClearToken(); err != nil && !os.IsNotExist(err) {
-		jsonError(w, err.Error(), 500)
-		return
+	var body struct {
+		Provider string `json:"provider"`
 	}
+	json.NewDecoder(r.Body).Decode(&body)
+
+	// Clear cached token
+	_ = auth.ClearToken()
+
+	// Disable the provider so keychain/env creds aren't re-resolved
+	if body.Provider != "" {
+		_ = auth.DisableProvider(auth.Provider(body.Provider))
+	}
+
+	// Re-sync credentials (removes disabled provider from .env)
+	_ = auth.SyncCredentials()
+
 	jsonOK(w, map[string]string{"status": "ok"})
 }
 
