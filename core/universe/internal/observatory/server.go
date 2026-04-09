@@ -142,6 +142,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("POST /api/auth/check", cors(s.handleAuthCheck))
 	mux.HandleFunc("POST /api/auth/configure", cors(s.handleAuthConfigure))
 	mux.HandleFunc("POST /api/auth/reset", cors(s.handleAuthReset))
+	mux.HandleFunc("POST /api/auth/reconnect", cors(s.handleAuthReconnect))
 
 	// --- Knowledge endpoints (per-world, via docker exec) ---
 	mux.HandleFunc("GET /api/worlds/{id}/knowledge", cors(s.handleWorldKnowledgeList))
@@ -1898,6 +1899,18 @@ func (s *Server) handleAuthConfigure(w http.ResponseWriter, r *http.Request) {
 		_ = auth.EnableProvider(auth.Provider(body.Provider))
 	}
 	// Re-sync credentials with new token
+	_ = auth.SyncCredentials()
+	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handleAuthReconnect(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Provider string `json:"provider"`
+	}
+	json.NewDecoder(r.Body).Decode(&body)
+	if body.Provider != "" {
+		_ = auth.EnableProvider(auth.Provider(body.Provider))
+	}
 	_ = auth.SyncCredentials()
 	jsonOK(w, map[string]string{"status": "ok"})
 }

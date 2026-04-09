@@ -107,10 +107,11 @@ function UsageBar({ label, used, limit, suffix }: { label: string; used: number;
   );
 }
 
-function ProviderRow({ provider, onConfigure, onReset, checking, onCheck }: {
+function ProviderRow({ provider, onConfigure, onReset, onReconnect, checking, onCheck }: {
   provider: ProviderInfo;
   onConfigure: () => void;
   onReset: () => void;
+  onReconnect: () => void;
   onCheck: () => void;
   checking: boolean;
 }) {
@@ -167,13 +168,21 @@ function ProviderRow({ provider, onConfigure, onReset, checking, onCheck }: {
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
           {!connected && (
-            <button
-              onClick={onConfigure}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white/[0.05] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.08] transition-all"
-            >
-              <IconKey size={11} />
-              Add key
-            </button>
+            <>
+              <button
+                onClick={onReconnect}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white/[0.05] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.08] transition-all"
+              >
+                Reconnect
+              </button>
+              <button
+                onClick={onConfigure}
+                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-all"
+              >
+                <IconKey size={11} className="inline mr-1" />
+                Add key
+              </button>
+            </>
           )}
           {connected && (
             <>
@@ -400,6 +409,14 @@ export default function ProvidersPage() {
     } catch { showFeedback("Failed to reset", "error"); }
   };
 
+  const handleReconnect = async (providerName: string) => {
+    try {
+      const res = await fetch(goApiUrl("/api/auth/reconnect"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider: providerName }) });
+      if (res.ok) { showFeedback(`${providerName} reconnected`, "success"); fetchProviders(); }
+      else { showFeedback("Failed to reconnect", "error"); }
+    } catch { showFeedback("Failed to reconnect", "error"); }
+  };
+
   return (
     <Page>
       <PageHeader
@@ -460,6 +477,7 @@ export default function ProvidersPage() {
               provider={provider}
               onConfigure={() => setConfiguring(provider.provider)}
               onReset={() => handleReset(provider.provider)}
+              onReconnect={() => handleReconnect(provider.provider)}
               onCheck={() => handleCheck(provider.provider)}
               checking={checking === provider.provider}
             />
