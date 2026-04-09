@@ -381,9 +381,10 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	mindPath := info.Path
 
 	// Load profile.yaml for role/engine/provider
+	// Engine/provider are intentionally empty — runtime is per-world, not per-agent
 	role := "worker"
-	engine := "claude-code"
-	provider := "anthropic"
+	engine := ""
+	provider := ""
 	profilePath := filepath.Join(mindPath, "profile.yaml")
 	if data, err := os.ReadFile(profilePath); err == nil {
 		var p profileYAML
