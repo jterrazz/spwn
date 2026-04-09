@@ -29,6 +29,10 @@ type Runtime interface {
 	BaseImage() string
 	// SystemPackages returns apt packages needed beyond the base image.
 	SystemPackages() []string
+	// CredentialFiles returns a map of paths to place in the credentials
+	// directory. Key = relative path inside credentials dir, value = host
+	// source path. Return nil if the runtime uses only env vars from .env.
+	CredentialFiles() map[string]string
 	// SupportsSession returns true if the runtime can resume sessions.
 	SupportsSession() bool
 	// Available returns true if the runtime is production-ready.

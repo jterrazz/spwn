@@ -39,3 +39,4 @@ func (g *Gemini) SystemPackages() []string { return []string{"git", "curl"} }
 // SupportsSession returns true if the runtime can resume sessions.
 func (g *Gemini) SupportsSession() bool { return false }
 func (g *Gemini) Available() bool       { return false }
+func (g *Gemini) CredentialFiles() map[string]string { return nil }

@@ -31,6 +31,11 @@ func AgentsDir() string {
 	return filepath.Join(BaseDir(), AgentsSubDir)
 }
 
+// CredentialsDir returns the path to ~/.spwn/credentials/.
+func CredentialsDir() string {
+	return filepath.Join(BaseDir(), CredentialsSubDir)
+}
+
 // StatePath returns the path to ~/.spwn/state.json.
 func StatePath() string {
 	return filepath.Join(BaseDir(), StateFileName)

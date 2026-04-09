@@ -65,3 +65,4 @@ func (c *Claude) SystemPackages() []string {
 // SupportsSession returns true if the runtime can resume sessions.
 func (c *Claude) SupportsSession() bool { return true }
 func (c *Claude) Available() bool       { return true }
+func (c *Claude) CredentialFiles() map[string]string { return nil }
