@@ -18,6 +18,7 @@ import (
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/foundation/auth"
+	"spwn.sh/core/foundation/system"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
@@ -85,6 +86,9 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/health", cors(s.handleHealth))
 	mux.HandleFunc("GET /api/status", cors(s.handleStatus))
 	mux.HandleFunc("GET /api/version", cors(s.handleVersion))
+	mux.HandleFunc("GET /api/system/docker", cors(s.handleSystemDocker))
+	mux.HandleFunc("GET /api/system/onboarding", cors(s.handleSystemOnboarding))
+	mux.HandleFunc("POST /api/system/onboarding/complete", cors(s.handleSystemOnboardingComplete))
 	mux.HandleFunc("GET /api/worlds", cors(s.handleListUniverses))
 	mux.HandleFunc("GET /api/universes", cors(s.handleListUniverses)) // legacy alias
 	mux.HandleFunc("GET /api/agents", cors(s.handleListAgents))
@@ -188,6 +192,54 @@ func (s *Server) Stop(ctx context.Context) error {
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, map[string]string{"status": "ok"})
+}
+
+// handleSystemDocker reports the host Docker daemon status. Used by the
+// observatory banner and the onboarding wizard.
+func (s *Server) handleSystemDocker(w http.ResponseWriter, r *http.Request) {
+	jsonOK(w, system.CheckDocker(r.Context()))
+}
+
+// handleSystemOnboarding reports whether the user has completed the
+// first-run onboarding wizard.
+func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) {
+	completed := false
+	if _, err := os.Stat(filepath.Join(foundation.BaseDir(), ".onboarding-complete")); err == nil {
+		completed = true
+	}
+	// Also surface a couple of useful first-run signals.
+	worlds, _ := s.state.List()
+	agents, _ := agentpkg.ListAgents()
+	docker := system.CheckDocker(r.Context())
+	hasAuth := false
+	for _, c := range auth.ResolveAll() {
+		if c != nil && c.Token != "" {
+			hasAuth = true
+			break
+		}
+	}
+	jsonOK(w, map[string]interface{}{
+		"completed":   completed,
+		"hasDocker":   docker.OK(),
+		"hasAuth":     hasAuth,
+		"hasWorlds":   len(worlds) > 0,
+		"hasAgents":   len(agents) > 0,
+		"docker":      docker,
+	})
+}
+
+// handleSystemOnboardingComplete marks the wizard as completed.
+func (s *Server) handleSystemOnboardingComplete(w http.ResponseWriter, r *http.Request) {
+	path := filepath.Join(foundation.BaseDir(), ".onboarding-complete")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.WriteFile(path, []byte(time.Now().Format(time.RFC3339)), 0o644); err != nil {
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	jsonOK(w, map[string]bool{"ok": true})
 }
 
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {

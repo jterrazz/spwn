@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -123,72 +125,118 @@ If no message is provided, opens an interactive session inside the container.`,
 			dockerArgs := append(buildDockerArgs(false), wrapWithCredentials(runtimeCmd)...)
 			execCmd := exec.Command("docker", dockerArgs...)
 
+			// persistSession is called once we discover the runtime's session
+			// identifier on stdout. It is intentionally idempotent — for streamed
+			// runs we'll be called per-line and will only update on first capture.
+			var captured string
+			persistSession := func(id string) {
+				if id == "" || id == captured || arc == nil {
+					return
+				}
+				captured = id
+				_ = arc.SetSessionID(worldID, name, id)
+			}
+
 			if talkOutputFormat == "stream-json" {
-				execCmd.Stdout = os.Stdout
+				// Streaming mode (used by the observatory): tee stdout so we
+				// can both forward each line to the caller AND scan it for the
+				// runtime's session/thread id. Without this scan, every
+				// observatory message starts a fresh conversation — the #1
+				// reported "agent forgets" bug.
+				stdoutPipe, pipeErr := execCmd.StdoutPipe()
+				if pipeErr != nil {
+					return fmt.Errorf("stdout pipe: %w", pipeErr)
+				}
 				// Suppress stderr in streaming mode (codex emits noisy MCP errors)
-				if err := execCmd.Run(); err != nil {
+				execCmd.Stderr = nil
+				if err := execCmd.Start(); err != nil {
 					return formatExecError(err, nil)
 				}
-			} else {
-				output, err := execCmd.CombinedOutput()
-				if err != nil {
-					return formatExecError(err, output)
+				scanner := bufio.NewScanner(stdoutPipe)
+				scanner.Buffer(make([]byte, 1024*1024), 4*1024*1024)
+				for scanner.Scan() {
+					line := scanner.Bytes()
+					// Forward verbatim so the observatory's SSE relay still
+					// sees the original event stream byte-for-byte.
+					_, _ = os.Stdout.Write(line)
+					_, _ = os.Stdout.Write([]byte{'\n'})
+					if id := extractSessionID(runtimeName, line); id != "" {
+						persistSession(id)
+					}
 				}
+				if err := execCmd.Wait(); err != nil {
+					return formatExecError(err, nil)
+				}
+				return nil
+			}
 
-				// Parse response based on runtime to extract session ID and text
-				switch runtimeName {
-				case "claude-code":
-					var resp struct {
-						Result    string `json:"result"`
-						SessionID string `json:"session_id"`
-					}
-					if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
-						if resp.SessionID != "" && arc != nil {
-							_ = arc.SetSessionID(worldID, name, resp.SessionID)
-						}
-						fmt.Fprintln(os.Stdout, resp.Result)
-					} else {
-						fmt.Fprint(os.Stdout, string(output))
-					}
+			// Non-streaming mode: capture stdout and stderr separately so
+			// stray stderr lines (warnings, MCP boot noise) cannot corrupt
+			// the JSON parse on stdout.
+			var stdoutBuf, stderrBuf bytes.Buffer
+			execCmd.Stdout = &stdoutBuf
+			execCmd.Stderr = &stderrBuf
+			err := execCmd.Run()
+			output := stdoutBuf.Bytes()
+			if err != nil {
+				combined := append([]byte{}, output...)
+				combined = append(combined, stderrBuf.Bytes()...)
+				return formatExecError(err, combined)
+			}
 
-				case "codex":
-					// Codex JSONL: parse line by line for thread_id and agent messages
-					var threadID string
-					var texts []string
-					for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
-						if line == "" || line[0] != '{' {
-							continue
-						}
-						var event struct {
-							Type     string `json:"type"`
-							ThreadID string `json:"thread_id"`
-							Item     struct {
-								Type string `json:"type"`
-								Text string `json:"text"`
-							} `json:"item"`
-						}
-						if jsonErr := json.Unmarshal([]byte(line), &event); jsonErr != nil {
-							continue
-						}
-						if event.Type == "thread.started" && event.ThreadID != "" {
-							threadID = event.ThreadID
-						}
-						if event.Type == "item.completed" && event.Item.Text != "" {
-							texts = append(texts, event.Item.Text)
-						}
+			// Parse response based on runtime to extract session ID and text
+			switch runtimeName {
+			case "claude-code":
+				var resp struct {
+					Result    string `json:"result"`
+					SessionID string `json:"session_id"`
+				}
+				if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
+					persistSession(resp.SessionID)
+					fmt.Fprintln(os.Stdout, resp.Result)
+				} else {
+					// Fallback: even if the wrapper JSON failed to parse,
+					// scan the raw output for an embedded session_id so we
+					// don't silently lose continuity.
+					if id := extractSessionID(runtimeName, output); id != "" {
+						persistSession(id)
 					}
-					if threadID != "" && arc != nil {
-						_ = arc.SetSessionID(worldID, name, threadID)
-					}
-					if len(texts) > 0 {
-						fmt.Fprintln(os.Stdout, strings.Join(texts, "\n"))
-					} else {
-						fmt.Fprint(os.Stdout, string(output))
-					}
-
-				default:
 					fmt.Fprint(os.Stdout, string(output))
 				}
+
+			case "codex":
+				// Codex JSONL: parse line by line for thread_id and agent messages
+				var texts []string
+				for _, line := range bytes.Split(bytes.TrimSpace(output), []byte("\n")) {
+					if len(line) == 0 || line[0] != '{' {
+						continue
+					}
+					var event struct {
+						Type     string `json:"type"`
+						ThreadID string `json:"thread_id"`
+						Item     struct {
+							Type string `json:"type"`
+							Text string `json:"text"`
+						} `json:"item"`
+					}
+					if jsonErr := json.Unmarshal(line, &event); jsonErr != nil {
+						continue
+					}
+					if event.Type == "thread.started" && event.ThreadID != "" {
+						persistSession(event.ThreadID)
+					}
+					if event.Type == "item.completed" && event.Item.Text != "" {
+						texts = append(texts, event.Item.Text)
+					}
+				}
+				if len(texts) > 0 {
+					fmt.Fprintln(os.Stdout, strings.Join(texts, "\n"))
+				} else {
+					fmt.Fprint(os.Stdout, string(output))
+				}
+
+			default:
+				fmt.Fprint(os.Stdout, string(output))
 			}
 		} else {
 			// Interactive mode
@@ -294,6 +342,38 @@ func routeAgentToWorld(
 	return "", "", fmt.Errorf("agent %q is not in any active world\n\n  Spawn one with: spwn up --agent %s -w <workspace>", agentName, agentName)
 }
 
+
+// extractSessionID looks at one line (or one document) of runtime output
+// and returns the runtime's session/thread identifier if present.
+//
+// Both Claude (--output-format stream-json) and Codex (--json) emit their
+// session id on the very first event of the conversation:
+//
+//   - Claude: {"type":"system","subtype":"init","session_id":"..."}
+//     (and the "session_id" field is repeated on subsequent events too)
+//   - Codex:  {"type":"thread.started","thread_id":"..."}
+//
+// We accept both shapes and return the first non-empty value found. The
+// function is tolerant — non-JSON lines, partial lines, and unknown event
+// types all return "".
+func extractSessionID(runtimeName string, line []byte) string {
+	trimmed := bytes.TrimSpace(line)
+	if len(trimmed) == 0 || trimmed[0] != '{' {
+		return ""
+	}
+	var event struct {
+		Type      string `json:"type"`
+		SessionID string `json:"session_id"`
+		ThreadID  string `json:"thread_id"`
+	}
+	if err := json.Unmarshal(trimmed, &event); err != nil {
+		return ""
+	}
+	if runtimeName == "codex" {
+		return event.ThreadID
+	}
+	return event.SessionID
+}
 
 func formatExecError(err error, output []byte) error {
 	out := string(output)

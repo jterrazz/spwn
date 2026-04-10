@@ -1,10 +1,12 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { DockerStatusBanner } from "@/components/docker-status-banner";
+import { GlossaryButton } from "@/components/glossary-button";
 import type { World } from "@/lib/types";
 import { apiGet } from "@/lib/api-client";
 import { checkForUpdatesOnStartup } from "@/lib/tauri-updater";
@@ -21,9 +23,22 @@ interface StatusData {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [worlds, setWorlds] = useState<World[]>([]);
   const [sidebarLoading, setSidebarLoading] = useState(true);
   const [statusData, setStatusData] = useState<StatusData | null>(null);
+
+  // First-run gate: redirect to /welcome if onboarding hasn't been
+  // completed yet. Runs once on mount; the wizard itself polls for state.
+  useEffect(() => {
+    if (pathname === "/welcome") return;
+    apiGet<{ completed: boolean }>("/api/system/onboarding")
+      .then((s) => {
+        if (!s.completed) router.replace("/welcome");
+      })
+      .catch(() => { /* API not reachable — render normally */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Track the last-visited world so the sidebar remembers the selection
   // across page navigations (e.g. going from /world/w-x to /agents).
@@ -73,10 +88,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           statusData={statusData}
         />
         <SidebarInset>
+          <DockerStatusBanner />
           <ErrorBoundary>
             {children}
           </ErrorBoundary>
         </SidebarInset>
+        <GlossaryButton />
       </SidebarProvider>
     </RefetchContext.Provider>
   );
