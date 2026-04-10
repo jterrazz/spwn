@@ -35,6 +35,7 @@ import {
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UpgradeBanner } from "@/components/upgrade-banner";
+import { DockerStatusPill } from "@/components/docker-status-pill";
 import { useVersion } from "@/hooks/use-version";
 import { getWorldName, type World, type Team } from "@/lib/types";
 import { WorldPlanet } from "@/components/world-planet";
@@ -365,6 +366,9 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
       {/* ── Footer ── */}
       <SidebarFooter>
         {version?.updateAvailable && <UpgradeBanner version={version} />}
+        <div className="px-1.5 pb-1">
+          <DockerStatusPill />
+        </div>
         <div className="flex items-center gap-1 px-1.5 pb-1">
           <a href="https://spwn.sh/docs" target="_blank" className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors" aria-label="Docs">
             <IconBookFilled size={15} />
