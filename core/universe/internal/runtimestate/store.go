@@ -6,13 +6,21 @@
 //   - the deployed-agent list (agents are added/removed after spawn)
 //   - per-agent runtime session ids (chat continuity)
 //
-// Each world gets one JSON file at ~/.spwn/runtime/<world-id>.json.
-// When a world container disappears the file becomes orphaned and is
-// reaped lazily by GC, which the state store calls on every list.
+// Each world gets a runtime.json file inside its world-state directory:
+//   ~/.spwn/world-states/<world-id>/runtime.json
+//
+// The same world-state directory also holds the world's manifest,
+// physics.md, faculties.md, roster.md and shared/ scratchpad — see
+// the spawn flow. Co-locating runtime.json with the rest of the
+// world's host-side state means everything per-world lives in one
+// place that can be inspected, archived or destroyed atomically.
 //
 // We never read this package without first proving the world exists in
 // Docker. The labels-on-container approach makes Docker the source of
-// truth for existence; this package only stores decoration.
+// truth for existence; this package only stores decoration. GC removes
+// runtime.json from any world-state directory whose container is no
+// longer present (the rest of the directory is left alone — destroying
+// a container should not destroy the user's whiteboard notes).
 package runtimestate
 
 import (
@@ -35,17 +43,20 @@ type File struct {
 // Store provides mutex-protected per-world JSON persistence. A single
 // process-wide mutex is fine here: writes are infrequent and the file
 // is small enough that contention is invisible.
+//
+// The Store is rooted at ~/.spwn/world-states/. For each world id, the
+// runtime data lives at <root>/<world-id>/runtime.json.
 type Store struct {
 	dir string
 	mu  sync.Mutex
 }
 
-// NewStore returns a Store rooted at ~/.spwn/runtime/, creating the
-// directory on first use.
+// NewStore returns a Store rooted at ~/.spwn/world-states/, creating
+// the directory on first use.
 func NewStore() (*Store, error) {
-	dir := filepath.Join(foundation.BaseDir(), "runtime")
+	dir := filepath.Join(foundation.BaseDir(), "world-states")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, fmt.Errorf("create runtime dir: %w", err)
+		return nil, fmt.Errorf("create world-states dir: %w", err)
 	}
 	return &Store{dir: dir}, nil
 }
@@ -54,7 +65,7 @@ func NewStore() (*Store, error) {
 // tests so they don't touch the real ~/.spwn.
 func NewStoreAt(dir string) (*Store, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, fmt.Errorf("create runtime dir: %w", err)
+		return nil, fmt.Errorf("create world-states dir: %w", err)
 	}
 	return &Store{dir: dir}, nil
 }
@@ -76,7 +87,9 @@ func (s *Store) Save(worldID string, f File) error {
 }
 
 // Delete removes a world's runtime state file. Missing files are not
-// an error.
+// an error. The rest of the world-state directory (manifest, physics,
+// shared scratchpad…) is intentionally left alone — destroying a
+// container should not destroy user-authored notes.
 func (s *Store) Delete(worldID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -167,9 +180,13 @@ func (s *Store) UpdateAgentStatus(worldID, agentID string, status models.Status)
 	return nil
 }
 
-// GC removes runtime state files for any world id that is not in the
-// supplied liveIDs set. Called by the state store on every List() so
-// the directory naturally stays in sync with Docker.
+// GC removes runtime.json from any world-state directory whose id is
+// not in the supplied liveIDs set. Called by the state store on every
+// List() so runtime data naturally stays in sync with Docker.
+//
+// Only runtime.json is removed — the world-state directory itself
+// (manifest, physics, shared scratchpad…) is left alone. Use a
+// dedicated `spwn world prune` flow for archival cleanup.
 func (s *Store) GC(liveIDs []string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -185,18 +202,15 @@ func (s *Store) GC(liveIDs []string) error {
 		return err
 	}
 	for _, e := range entries {
-		if e.IsDir() {
+		if !e.IsDir() {
 			continue
 		}
-		name := e.Name()
-		if filepath.Ext(name) != ".json" {
-			continue
-		}
-		id := name[:len(name)-len(".json")]
+		id := e.Name()
 		if _, ok := live[id]; ok {
 			continue
 		}
-		_ = os.Remove(filepath.Join(s.dir, name))
+		// Best-effort removal of the runtime.json only.
+		_ = os.Remove(filepath.Join(s.dir, id, "runtime.json"))
 	}
 	return nil
 }
@@ -204,7 +218,7 @@ func (s *Store) GC(liveIDs []string) error {
 // ── internals ──────────────────────────────────────────────────────────
 
 func (s *Store) path(worldID string) string {
-	return filepath.Join(s.dir, worldID+".json")
+	return filepath.Join(s.dir, worldID, "runtime.json")
 }
 
 func (s *Store) loadLocked(worldID string) (File, error) {
@@ -226,7 +240,8 @@ func (s *Store) loadLocked(worldID string) (File, error) {
 }
 
 func (s *Store) saveLocked(worldID string, f File) error {
-	if err := os.MkdirAll(s.dir, 0o755); err != nil {
+	worldDir := filepath.Join(s.dir, worldID)
+	if err := os.MkdirAll(worldDir, 0o755); err != nil {
 		return err
 	}
 	data, err := json.MarshalIndent(f, "", "  ")

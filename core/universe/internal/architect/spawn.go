@@ -119,52 +119,32 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		binds = append(binds, foundation.BaseDir()+":/home/spwn/.spwn")
 	}
 
-	// Mount knowledge read-only into agent worlds
-	knowledgeDir := foundation.KnowledgeDir()
-	if _, statErr := os.Stat(knowledgeDir); statErr == nil {
-		binds = append(binds, knowledgeDir+":/world/knowledge:ro")
-	}
+	// SINGLE shared agents mount: ~/.spwn/agents/ → /agents (rw).
+	// Every container sees every agent's persistent home. New agents
+	// added via DeployAgent appear instantly through this bind without
+	// any container restart, because the kernel sees the new directory
+	// the moment it's created on the host.
+	binds = append(binds, foundation.AgentsDir()+":/agents")
 
-	// Mount Mind(s) for agents
-	mindPath := ""
+	// Validate each named agent's mind directory and profile. We
+	// validate but no longer mount per-agent — all visibility goes
+	// through the single /agents bind above.
+	agentNamesToValidate := []string{}
 	if len(opts.Agents) > 0 {
-		// Multi-agent: mount each agent's mind at /mind/<name>
 		for _, spec := range opts.Agents {
-			if err := agent.ValidateMind(spec.Name); err != nil {
-				return nil, err
-			}
-			opts.progress("mind_validated", spec.Name)
-			agentDir := agent.AgentDir(spec.Name)
-			binds = append(binds, agentDir+":/mind/"+spec.Name)
-
-			// Validate profile manifest requirements
-			profile, err := manifest.LoadProfile(agentDir)
-			if err != nil {
-				return nil, fmt.Errorf("load profile manifest for %s: %w", spec.Name, err)
-			}
-			if profile != nil {
-				expandedTools := manifest.ExpandTools(opts.Manifest.Tools)
-				if err := manifest.ValidateRequires(profile, expandedTools); err != nil {
-					return nil, err
-				}
-			}
-			opts.progress("mind_mounted", spec.Name+" → /mind/"+spec.Name)
+			agentNamesToValidate = append(agentNamesToValidate, spec.Name)
 		}
-		// Use first agent's dir as primary mindPath for backward compat
-		mindPath = agent.AgentDir(opts.Agents[0].Name)
 	} else if opts.AgentName != "" {
-		// Single-agent (backward compatible)
-		if err := agent.ValidateMind(opts.AgentName); err != nil {
+		agentNamesToValidate = append(agentNamesToValidate, opts.AgentName)
+	}
+	for _, name := range agentNamesToValidate {
+		if err := agent.ValidateMind(name); err != nil {
 			return nil, err
 		}
-		opts.progress("mind_validated", opts.AgentName)
-		mindPath = agent.AgentDir(opts.AgentName)
-		binds = append(binds, mindPath+":/mind")
-
-		// Validate profile manifest requirements
-		profile, err := manifest.LoadProfile(mindPath)
+		opts.progress("mind_validated", name)
+		profile, err := manifest.LoadProfile(agent.AgentDir(name))
 		if err != nil {
-			return nil, fmt.Errorf("load profile manifest: %w", err)
+			return nil, fmt.Errorf("load profile manifest for %s: %w", name, err)
 		}
 		if profile != nil {
 			expandedTools := manifest.ExpandTools(opts.Manifest.Tools)
@@ -172,7 +152,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 				return nil, err
 			}
 		}
-		opts.progress("mind_mounted", opts.AgentName+" → /mind")
 	}
 
 	// Start gate TCP server and set up bridge scripts if bridges are configured
@@ -320,7 +299,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Agent:       opts.AgentName,
 		Backend:     foundation.DefaultBackend,
 		Workspaces:  resolvedWorkspaces,
-		MindPath:    mindPath,
 		GateDir:     gateDir,
 		Runtime:     runtimeName,
 		CreatedAt:   time.Now(),
@@ -340,6 +318,41 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	} else if opts.AgentName != "" {
 		worldRecord.AgentID = foundation.GenerateAgentID(opts.AgentName)
+	}
+
+	// Per-world state directory on the host. This is the canonical
+	// /world/ inside the container — physics, faculties, roster,
+	// AGENTS.md, system skills, and the shared whiteboard all live
+	// here. Surviving container destroy is a deliberate choice: the
+	// user's notes belong to the world, not the runtime.
+	worldStateDir := worldStateDirFor(id)
+	for _, sub := range []string{
+		filepath.Join("shared", "notes"),
+		filepath.Join("shared", "outputs"),
+		"skills",
+	} {
+		if err := os.MkdirAll(filepath.Join(worldStateDir, sub), 0o755); err != nil {
+			return nil, fmt.Errorf("create world-state dir %s: %w", sub, err)
+		}
+	}
+	binds = append(binds, worldStateDir+":/world")
+
+	// Per-agent per-world deployment dirs. Each agent gets a personal
+	// inbox/outbox/notes scoped to this world id, all rooted in the
+	// agent's persistent home so messages survive container destroy.
+	rosterAgents := worldRecord.Agents
+	if len(rosterAgents) == 0 && worldRecord.Agent != "" {
+		rosterAgents = []models.AgentRecord{{
+			Name:    worldRecord.Agent,
+			AgentID: worldRecord.AgentID,
+			Role:    "worker",
+			Status:  models.StatusIdle,
+		}}
+	}
+	for _, rec := range rosterAgents {
+		if err := initAgentDeployment(rec, id); err != nil {
+			warnings = append(warnings, fmt.Sprintf("init deployment for %s: %v", rec.Name, err))
+		}
 	}
 
 	// Create container
@@ -408,119 +421,34 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
 
-	// Generate physics.md
-	physicsContent := physics.GeneratePhysics(opts.Manifest)
-	if err := a.backend.CopyTo(ctx, containerID, "universe/physics.md", []byte(physicsContent)); err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
-		return nil, fmt.Errorf("copy physics.md: %w", err)
+	// Generate world-state files. They live on the HOST under
+	// ~/.spwn/world-states/<id>/ and are visible inside the container
+	// at /world/ via the bind mount. Writing to the host means the
+	// user can also `vim ~/.spwn/world-states/<id>/shared/notes/...`
+	// from their terminal.
+	type worldFile struct {
+		path    string
+		content []byte
 	}
-
-	// Generate faculties.md
-	facultiesContent := physics.GenerateFaculties(verifiedTools, opts.Manifest.Gate)
-	if err := a.backend.CopyTo(ctx, containerID, "universe/faculties.md", []byte(facultiesContent)); err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
-		return nil, fmt.Errorf("copy faculties.md: %w", err)
+	files := []worldFile{
+		{"physics.md", []byte(physics.GeneratePhysics(opts.Manifest))},
+		{"faculties.md", []byte(physics.GenerateFaculties(verifiedTools, opts.Manifest.Gate))},
+		{"AGENTS.md", []byte(physics.AgentsBook)},
+		{"roster.md", []byte(physics.GenerateRoster(id, rosterColony(rosterAgents)))},
 	}
-	opts.progress("faculties_generated", "physics.md, faculties.md")
-
-	// Generate AGENT.md (personalized agent context)
-	if len(opts.Agents) > 0 {
-		// Multi-agent: generate AGENT-{name}.md for each agent
-		for i, spec := range opts.Agents {
-			role := manifest.DefaultRole(spec.Role)
-
-			// Build list of other agents (everyone except this one)
-			var others []physics.AgentInfo
-			var chiefName string
-			for j, other := range opts.Agents {
-				if i == j {
-					continue
-				}
-				otherRole := manifest.DefaultRole(other.Role)
-				others = append(others, physics.AgentInfo{Name: other.Name, Role: otherRole})
-				if otherRole == "chief" {
-					chiefName = other.Name
-				}
-			}
-
-			agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
-				AgentName:   spec.Name,
-				Role:        role,
-				WorldID:     id,
-				Workspaces:  resolvedWorkspaces,
-				Tools:       verifiedTools,
-				CPU:         opts.Manifest.Physics.Constants.CPU,
-				Memory:      opts.Manifest.Physics.Constants.Memory,
-				Timeout:     opts.Manifest.Physics.Constants.Timeout,
-				OtherAgents: others,
-				Chief:       chiefName,
-			})
-			if err := a.backend.CopyTo(ctx, containerID, "world/AGENT-"+spec.Name+".md", []byte(agentCtx)); err != nil {
-				a.backend.Stop(ctx, containerID)
-				a.backend.Remove(ctx, containerID)
-				return nil, fmt.Errorf("copy AGENT-%s.md: %w", spec.Name, err)
-			}
-		}
-
-		// Also generate a combined /world/AGENT.md listing all agents
-		var colonySpecs []physics.ColonyAgentSpec
-		for _, spec := range opts.Agents {
-			colonySpecs = append(colonySpecs, physics.ColonyAgentSpec{
-				Name: spec.Name,
-				Role: manifest.DefaultRole(spec.Role),
-			})
-		}
-		combinedCtx := physics.GenerateColonyContext(id, colonySpecs)
-		if err := a.backend.CopyTo(ctx, containerID, "world/AGENT.md", []byte(combinedCtx)); err != nil {
+	for _, f := range files {
+		if err := os.WriteFile(filepath.Join(worldStateDir, f.path), f.content, 0o644); err != nil {
 			a.backend.Stop(ctx, containerID)
 			a.backend.Remove(ctx, containerID)
-			return nil, fmt.Errorf("copy colony AGENT.md: %w", err)
+			return nil, fmt.Errorf("write %s: %w", f.path, err)
 		}
-	} else if opts.AgentName != "" {
-		// Single agent: generate /world/AGENT.md
-		agentCtx := physics.GenerateAgentContext(physics.AgentContextOpts{
-			AgentName:  opts.AgentName,
-			Role:       "worker",
-			WorldID:    id,
-			Workspaces: resolvedWorkspaces,
-			Tools:      verifiedTools,
-			CPU:       opts.Manifest.Physics.Constants.CPU,
-			Memory:    opts.Manifest.Physics.Constants.Memory,
-			Timeout:   opts.Manifest.Physics.Constants.Timeout,
-		})
-		if err := a.backend.CopyTo(ctx, containerID, "world/AGENT.md", []byte(agentCtx)); err != nil {
-			a.backend.Stop(ctx, containerID)
-			a.backend.Remove(ctx, containerID)
-			return nil, fmt.Errorf("copy AGENT.md: %w", err)
-		}
-	}
-
-	// Write system files: AGENTS.md (operating manual) + skill guides
-	if err := a.backend.CopyTo(ctx, containerID, "world/AGENTS.md", []byte(physics.AgentsBook)); err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
-		return nil, fmt.Errorf("copy AGENTS.md: %w", err)
 	}
 	for skillName, skillContent := range physics.SystemSkills() {
-		if err := a.backend.CopyTo(ctx, containerID, "world/skills/"+skillName, []byte(skillContent)); err != nil {
-			a.backend.Stop(ctx, containerID)
-			a.backend.Remove(ctx, containerID)
-			return nil, fmt.Errorf("copy skill %s: %w", skillName, err)
+		if err := os.WriteFile(filepath.Join(worldStateDir, "skills", skillName), []byte(skillContent), 0o644); err != nil {
+			warnings = append(warnings, fmt.Sprintf("write skill %s: %v", skillName, err))
 		}
 	}
-	opts.progress("system_files_written", "AGENTS.md, 4 skill guides")
-
-	// Create inbox directories for agent communication
-	a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox"})
-	if len(opts.Agents) > 0 {
-		for _, spec := range opts.Agents {
-			a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox/" + spec.Name})
-		}
-	} else if opts.AgentName != "" {
-		a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox/" + opts.AgentName})
-	}
+	opts.progress("world_state_written", "physics, faculties, roster, AGENTS.md")
 
 	// Finalize the world record. The labels we already wrote to the
 	// container are the canonical store — this struct is just what we
@@ -662,42 +590,80 @@ func parseMemory(s string) (int64, error) {
 	return n * multiplier, nil
 }
 
-// buildWorkspaceBinds generates Docker bind specs for the resolved workspaces.
-// Layout (always rooted at /workspace so `ls /workspace` tells the agent what
-// it can work with):
-//   - 0 workspaces: no binds — container uses image-baked /workspace.
-//   - 1 workspace:  mounted directly at /workspace (legacy flat layout).
-//   - 2+:           each mounted at /workspace/<name>. Running `ls /workspace`
-//                   shows the workspace names; agents cd into one to drill in.
+// buildWorkspaceBinds generates Docker bind specs for the resolved
+// workspaces. Layout is uniform:
+//
+//   - 0 workspaces: no binds. /work does not exist; the agent's only
+//     writable space is its own home at /agents/<name>.
+//   - 1+ workspaces: each mounted at /work/<name>. There is no
+//     special-cased single-workspace path — `ls /work` always tells
+//     the agent what projects it can touch.
 func buildWorkspaceBinds(workspaces []models.Workspace) []string {
 	if len(workspaces) == 0 {
 		return nil
 	}
 	binds := make([]string, 0, len(workspaces))
-	if len(workspaces) == 1 {
-		ws := workspaces[0]
-		ro := ""
-		if ws.ReadOnly {
-			ro = ":ro"
-		}
-		return append(binds, fmt.Sprintf("%s:/workspace%s", ws.Path, ro))
-	}
 	for _, ws := range workspaces {
 		ro := ""
 		if ws.ReadOnly {
 			ro = ":ro"
 		}
-		binds = append(binds, fmt.Sprintf("%s:/workspace/%s%s", ws.Path, ws.Name, ro))
+		binds = append(binds, fmt.Sprintf("%s:/work/%s%s", ws.Path, ws.Name, ro))
 	}
 	return binds
 }
 
-// workspaceContainerPath returns the absolute path inside the container where
-// a workspace named `name` is mounted, given the total number of workspaces.
-// This is the single source of truth for the container-side path scheme.
+// workspaceContainerPath returns the absolute path inside the container
+// where a workspace named `name` is mounted. This is the single source
+// of truth for the container-side workspace path scheme.
 func workspaceContainerPath(name string, totalWorkspaces int) string {
-	if totalWorkspaces == 1 {
-		return "/workspace"
+	_ = totalWorkspaces // legacy parameter; layout is uniform now
+	return "/work/" + name
+}
+
+// worldStateDirFor returns the host-side directory where a given
+// world's per-instance state is stored. Used by both spawn (initial
+// write) and DeployAgent (roster regeneration).
+func worldStateDirFor(worldID string) string {
+	return filepath.Join(foundation.BaseDir(), "world-states", worldID)
+}
+
+// initAgentDeployment creates the per-agent per-world filesystem layout
+// inside the agent's persistent home dir on the host:
+//
+//	~/.spwn/agents/<name>/worlds/<world-id>/
+//	  inbox/    — messages received in this world
+//	  outbox/   — messages I sent (audit trail)
+//	  notes/    — my private notes for this world's project
+//	  role.md   — what role I play here
+//
+// The single /agents bind on the world container makes these dirs
+// visible at /agents/<name>/worlds/<world-id>/ instantly. Hot-deploy
+// uses the same helper.
+func initAgentDeployment(rec models.AgentRecord, worldID string) error {
+	deploymentDir := filepath.Join(agent.AgentDir(rec.Name), "worlds", worldID)
+	for _, sub := range []string{"inbox", "outbox", "notes"} {
+		if err := os.MkdirAll(filepath.Join(deploymentDir, sub), 0o755); err != nil {
+			return fmt.Errorf("mkdir %s: %w", sub, err)
+		}
 	}
-	return "/workspace/" + name
+	role := rec.Role
+	if role == "" {
+		role = "worker"
+	}
+	roleContent := fmt.Sprintf("# Role in %s\n\n%s\n", worldID, role)
+	if err := os.WriteFile(filepath.Join(deploymentDir, "role.md"), []byte(roleContent), 0o644); err != nil {
+		return fmt.Errorf("write role.md: %w", err)
+	}
+	return nil
+}
+
+// rosterColony adapts an agent record list into the physics package's
+// ColonyAgentSpec list (used by GenerateRoster).
+func rosterColony(recs []models.AgentRecord) []physics.ColonyAgentSpec {
+	out := make([]physics.ColonyAgentSpec, 0, len(recs))
+	for _, r := range recs {
+		out = append(out, physics.ColonyAgentSpec{Name: r.Name, Role: r.Role})
+	}
+	return out
 }

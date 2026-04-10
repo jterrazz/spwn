@@ -359,10 +359,12 @@ func TestDestroy_WritesJournal(t *testing.T) {
 	mb := newMockBackend()
 	arch, store := newTestArchitect(t, mb)
 
-	// Create a temp agent Mind directory with journal layer
-	// Note: journal.Append writes to mindPath/journal/ (not memory/journal)
-	mindDir := t.TempDir()
-	journalDir := mindDir + "/journal"
+	// Single-agent worlds find the journal dir via the agent name +
+	// the global agents root (foundation.AgentsDir() = $SPWN_HOME/agents).
+	agentsBase := t.TempDir()
+	t.Setenv("SPWN_HOME", agentsBase)
+
+	journalDir := agentsBase + "/agents/neo/journal"
 	if err := os.MkdirAll(journalDir, 0755); err != nil {
 		t.Fatalf("create journal dir: %v", err)
 	}
@@ -370,9 +372,9 @@ func TestDestroy_WritesJournal(t *testing.T) {
 	w := models.World{
 		ID:          "w-journal-11111",
 		Config:      "journal-test",
+		Agent:       "neo",
 		ContainerID: "mock-jrnl-1",
 		Status:      models.StatusRunning,
-		MindPath:    mindDir,
 		CreatedAt:   time.Now().Add(-5 * time.Minute),
 	}
 	seedWorld(mb, w)
@@ -383,7 +385,6 @@ func TestDestroy_WritesJournal(t *testing.T) {
 		t.Fatalf("Destroy() error: %v", err)
 	}
 
-	// Check that a journal entry was written
 	entries, err := os.ReadDir(journalDir)
 	if err != nil {
 		t.Fatalf("read journal dir: %v", err)

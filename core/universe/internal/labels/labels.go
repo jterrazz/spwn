@@ -44,7 +44,6 @@ const (
 	WorldAgentID      = Prefix + "world.agent_id"     // primary/legacy single-agent id
 	WorldRuntime      = Prefix + "world.runtime"
 	WorldOrganization = Prefix + "world.organization"
-	WorldMindPath     = Prefix + "world.mind_path"
 	WorldGateDir      = Prefix + "world.gate_dir"
 	WorldWorkspaces   = Prefix + "world.workspaces" // JSON-encoded []models.Workspace
 	WorldAgents       = Prefix + "world.agents"     // JSON-encoded []models.AgentRecord (creation-time only)
@@ -78,9 +77,6 @@ func WorldLabels(w models.World) map[string]string {
 	}
 	if w.Organization != "" {
 		out[WorldOrganization] = w.Organization
-	}
-	if w.MindPath != "" {
-		out[WorldMindPath] = w.MindPath
 	}
 	if w.GateDir != "" {
 		out[WorldGateDir] = w.GateDir
@@ -122,7 +118,6 @@ func ParseWorld(lbls map[string]string) (models.World, error) {
 		AgentID:      lbls[WorldAgentID],
 		Runtime:      lbls[WorldRuntime],
 		Organization: lbls[WorldOrganization],
-		MindPath:     lbls[WorldMindPath],
 		GateDir:      lbls[WorldGateDir],
 	}
 

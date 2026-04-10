@@ -40,9 +40,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 	}
 
 	// Session management
-	mindPath := u.MindPath
 	cmd := rt.BuildCommand(runtime.SpawnConfig{
-		MindPath:  mindPath,
 		AgentName: agentName,
 		WorldID:   worldID,
 	})
@@ -60,29 +58,25 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 
 	duration := time.Since(startTime)
 
-	// Save session (best-effort)
-	if mindPath != "" {
-		sessID := agent.DeterministicSessionID(agentName, worldID)
-		sess := &agent.Session{
-			ID:        sessID,
-			AgentName: agentName,
-			WorldID:   worldID,
-			Resumed:   true,
-		}
-		if saveErr := agent.SaveSession(mindPath, sess); saveErr != nil {
-			log.Printf("warning: failed to save session: %v", saveErr)
-		}
+	// Save session + journal (best-effort) — both live in the agent's
+	// persistent home dir, addressed by name.
+	agentPath := agent.AgentDir(agentName)
+	sessID := agent.DeterministicSessionID(agentName, worldID)
+	sess := &agent.Session{
+		ID:        sessID,
+		AgentName: agentName,
+		WorldID:   worldID,
+		Resumed:   true,
 	}
-
-	// Write journal entry (best-effort)
-	if mindPath != "" {
-		ec := exitCode
-		if err != nil {
-			ec = 1
-		}
-		if journalErr := agent.AppendJournal(mindPath, worldID, ec, duration); journalErr != nil {
-			log.Printf("warning: failed to write journal: %v", journalErr)
-		}
+	if saveErr := agent.SaveSession(agentPath, sess); saveErr != nil {
+		log.Printf("warning: failed to save session: %v", saveErr)
+	}
+	ec := exitCode
+	if err != nil {
+		ec = 1
+	}
+	if journalErr := agent.AppendJournal(agentPath, worldID, ec, duration); journalErr != nil {
+		log.Printf("warning: failed to write journal: %v", journalErr)
 	}
 
 	a.state.UpdateStatus(worldID, models.StatusIdle)
@@ -121,9 +115,7 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 		}
 	}
 
-	mindPath := u.MindPath
 	cmd := rt.BuildCommand(runtime.SpawnConfig{
-		MindPath:  mindPath,
 		AgentName: agentName,
 		WorldID:   worldID,
 	})
@@ -131,17 +123,16 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 	env := agentEnv()
 
 	// Save session for detached mode (best-effort, no journal since exit unknown)
-	if mindPath != "" {
-		sessID := agent.DeterministicSessionID(agentName, worldID)
-		sess := &agent.Session{
-			ID:        sessID,
-			AgentName: agentName,
-			WorldID:   worldID,
-			Resumed:   false,
-		}
-		if saveErr := agent.SaveSession(mindPath, sess); saveErr != nil {
-			log.Printf("warning: failed to save session: %v", saveErr)
-		}
+	agentPath := agent.AgentDir(agentName)
+	sessID := agent.DeterministicSessionID(agentName, worldID)
+	sess := &agent.Session{
+		ID:        sessID,
+		AgentName: agentName,
+		WorldID:   worldID,
+		Resumed:   false,
+	}
+	if saveErr := agent.SaveSession(agentPath, sess); saveErr != nil {
+		log.Printf("warning: failed to save session: %v", saveErr)
 	}
 
 	return a.backend.ExecDetached(ctx, u.ContainerID, backend.ExecConfig{

@@ -84,20 +84,24 @@ func NewStoreAt(path string) (*Store, error) {
 	return s, nil
 }
 
-// evictLegacyStateFile removes the old ~/.spwn/state.json if present.
-// Safe to call repeatedly: missing files are not an error.
+// evictLegacyStateFile removes the old ~/.spwn/state.json and the
+// short-lived ~/.spwn/runtime/ tree (used by an earlier version of
+// this refactor) if either is present. Safe to call repeatedly.
 func (s *Store) evictLegacyStateFile() {
 	legacy := foundation.StatePath()
-	if legacy == "" {
-		return
+	if legacy != "" {
+		if _, err := os.Stat(legacy); err == nil {
+			_ = os.Remove(legacy)
+			_ = os.Remove(legacy + ".bak")
+		}
 	}
-	if _, err := os.Stat(legacy); err == nil {
-		_ = os.Remove(legacy)
-		// Also nuke a stray .bak that older versions might have left.
-		_ = os.Remove(legacy + ".bak")
+	// The ~/.spwn/runtime/ flat directory is replaced by per-world
+	// subdirs under ~/.spwn/world-states/. Sweep it if it exists.
+	if oldRuntime := filepath.Join(foundation.BaseDir(), "runtime"); oldRuntime != "" {
+		_ = os.RemoveAll(oldRuntime)
 	}
-	// Make sure the runtime dir exists for first-time installs.
-	_ = os.MkdirAll(filepath.Join(foundation.BaseDir(), "runtime"), 0o755)
+	// Make sure the new world-states root exists for first-time installs.
+	_ = os.MkdirAll(filepath.Join(foundation.BaseDir(), "world-states"), 0o755)
 }
 
 // ── Read API ──────────────────────────────────────────────────────────

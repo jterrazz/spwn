@@ -17,7 +17,7 @@ func (p *Pi) BuildCommand(cfg rt.SpawnConfig) []string {
 		if cfg.Model != "" {
 			cmd = append(cmd, "--model", cfg.Model)
 		}
-		if cfg.MindPath == "" {
+		if cfg.AgentName == "" {
 			cmd = append(cmd, "--no-session")
 		}
 		return cmd

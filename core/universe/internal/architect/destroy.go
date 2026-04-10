@@ -44,20 +44,22 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 	a.backend.Stop(ctx, u.ContainerID)
 	a.backend.Remove(ctx, u.ContainerID)
 
-	// Write journal entries for all agents in the world (best-effort).
-	// Multi-agent worlds store agents in the Agents slice; single-agent
-	// worlds only have MindPath set.
+	// Write journal entries for every agent that was deployed in this
+	// world. Each agent's journal lives in their persistent home dir
+	// (~/.spwn/agents/<name>/memory/journal/), reachable via the agent
+	// name alone — no per-world MindPath needed.
 	duration := time.Since(u.CreatedAt)
-	if len(u.Agents) > 0 {
-		for _, rec := range u.Agents {
-			agentPath := filepath.Join(foundation.AgentsDir(), rec.Name)
-			if journalErr := agent.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
-				log.Printf("warning: failed to write journal for agent %s on destroy: %v", rec.Name, journalErr)
-			}
-		}
-	} else if u.MindPath != "" {
-		if journalErr := agent.AppendJournal(u.MindPath, worldID, -1, duration); journalErr != nil {
-			log.Printf("warning: failed to write journal on destroy: %v", journalErr)
+	agentNamesForJournal := []string{}
+	for _, rec := range u.Agents {
+		agentNamesForJournal = append(agentNamesForJournal, rec.Name)
+	}
+	if len(agentNamesForJournal) == 0 && u.Agent != "" {
+		agentNamesForJournal = append(agentNamesForJournal, u.Agent)
+	}
+	for _, name := range agentNamesForJournal {
+		agentPath := filepath.Join(foundation.AgentsDir(), name)
+		if journalErr := agent.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
+			log.Printf("warning: failed to write journal for agent %s on destroy: %v", name, journalErr)
 		}
 	}
 

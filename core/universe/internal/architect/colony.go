@@ -3,11 +3,14 @@ package architect
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/physics"
 )
 
 // AgentSpec describes an agent to spawn in a universe.
@@ -18,8 +21,16 @@ type AgentSpec struct {
 }
 
 // DeployAgent adds a single agent to a running world: validates the mind,
-// registers it in state, and starts the agent process in the background.
-// Safe to call on a world that's already running with other agents.
+// creates the agent's per-world deployment dirs on the host, registers
+// it in runtimestate, regenerates roster.md, and starts the agent
+// process in the background. Safe to call on a world that's already
+// running with other agents.
+//
+// Hot-deployed agents reach full parity with cold-spawned ones because
+// (a) the single /agents bind on the world container makes the new
+// agent's home visible immediately and (b) /world/roster.md and the
+// per-deployment inbox/outbox/notes/role.md are written to the host
+// where the bind mounts pick them up instantly.
 func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role string) error {
 	if err := agent.ValidateMind(agentName); err != nil {
 		return fmt.Errorf("agent %q: %w", agentName, err)
@@ -47,16 +58,61 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 		Role:    resolvedRole,
 		Status:  models.StatusRunning,
 	}
+
+	// 1. Create the per-agent per-world layout on the host. This
+	// brings hot-deployed agents up to first-class parity with
+	// spawn-time agents — inbox/outbox/notes/role.md all in place.
+	if err := initAgentDeployment(rec, worldID); err != nil {
+		return fmt.Errorf("init deployment: %w", err)
+	}
+
+	// 2. Register in runtimestate so the next List() includes the
+	// agent in u.Agents.
 	if err := a.state.AddAgent(worldID, rec); err != nil {
 		return fmt.Errorf("register agent: %w", err)
 	}
 
+	// 3. Regenerate /world/roster.md so existing agents in the
+	// container can see the new member on their next read. The file
+	// lives in ~/.spwn/world-states/<world-id>/, visible at /world/
+	// in the container via the bind mount.
+	if rosterErr := regenRoster(worldID, a); rosterErr != nil {
+		// Non-fatal: the agent is registered, the host filesystem is
+		// in place, the runtime can talk. Just log the warning.
+		fmt.Printf("warning: failed to regenerate roster: %v\n", rosterErr)
+	}
+
+	// 4. Start the runtime process in the background.
 	if err := a.SpawnAgentDetached(ctx, worldID, agentName); err != nil {
 		_ = a.state.RemoveAgent(worldID, agentID)
 		return fmt.Errorf("start agent: %w", err)
 	}
 
 	return nil
+}
+
+// regenRoster rebuilds /world/roster.md from the current set of agents
+// in the world. Called whenever the roster changes (DeployAgent today;
+// agent removal in future). The file is written to the host so the
+// bind mount propagates it into the container.
+func regenRoster(worldID string, a *Architect) error {
+	worlds, err := a.state.List()
+	if err != nil {
+		return err
+	}
+	var current *models.World
+	for i := range worlds {
+		if worlds[i].ID == worldID {
+			current = &worlds[i]
+			break
+		}
+	}
+	if current == nil {
+		return fmt.Errorf("world %s not found", worldID)
+	}
+	worldStateDir := worldStateDirFor(worldID)
+	roster := physics.GenerateRoster(worldID, rosterColony(current.Agents))
+	return os.WriteFile(filepath.Join(worldStateDir, "roster.md"), []byte(roster), 0o644)
 }
 
 // SpawnAgents spawns multiple agents in a world.
