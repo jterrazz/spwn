@@ -12,7 +12,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
-	"spwn.sh/core/foundation/system"
+	"spwn.sh/core/imagebuilder/probe"
 	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
@@ -145,7 +145,7 @@ and authentication. Reports issues with suggested fixes.`,
 // the same probe used by the observatory API so the CLI and the desktop
 // app always agree on whether Docker is healthy.
 func checkDocker() (string, bool) {
-	st := system.CheckDocker(context.Background())
+	st := probe.CheckDocker(context.Background())
 	if !st.OK() {
 		msg := st.Summary()
 		if st.Hint != "" {

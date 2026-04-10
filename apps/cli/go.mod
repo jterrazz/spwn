@@ -11,6 +11,7 @@ require (
 	spwn.sh/core/agent v0.0.0
 	spwn.sh/core/foundation v0.0.0
 	spwn.sh/core/gate v0.0.0
+	spwn.sh/core/imagebuilder v0.0.0
 	spwn.sh/core/messenger v0.0.0
 	spwn.sh/core/migration v0.0.0
 	spwn.sh/core/universe v0.0.0
@@ -49,7 +50,6 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	spwn.sh/core/imagebuilder v0.0.0 // indirect
 )
 
 replace (

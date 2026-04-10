@@ -18,7 +18,7 @@ import (
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/foundation/auth"
-	"spwn.sh/core/foundation/system"
+	"spwn.sh/core/imagebuilder/probe"
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
@@ -197,7 +197,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 // handleSystemDocker reports the host Docker daemon status. Used by the
 // observatory banner and the onboarding wizard.
 func (s *Server) handleSystemDocker(w http.ResponseWriter, r *http.Request) {
-	jsonOK(w, system.CheckDocker(r.Context()))
+	jsonOK(w, probe.CheckDocker(r.Context()))
 }
 
 // handleSystemOnboarding reports whether the user has completed the
@@ -210,7 +210,7 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 	// Also surface a couple of useful first-run signals.
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
-	docker := system.CheckDocker(r.Context())
+	docker := probe.CheckDocker(r.Context())
 	hasAuth := false
 	for _, c := range auth.ResolveAll() {
 		if c != nil && c.Token != "" {
