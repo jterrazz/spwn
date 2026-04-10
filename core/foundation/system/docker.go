@@ -47,7 +47,14 @@ type DockerStatus struct {
 func CheckDocker(ctx context.Context) DockerStatus {
 	st := DockerStatus{Platform: runtime.GOOS}
 
-	if _, err := exec.LookPath("docker"); err != nil {
+	// Locate the docker binary. We can't rely on exec.LookPath alone:
+	// when the spwn desktop app is launched from Finder/Dock the PATH
+	// it inherits is the bare system PATH (no /usr/local/bin, no
+	// /opt/homebrew/bin, no ~/.orbstack/bin), so user-only Docker
+	// installs would falsely report "not installed". findDockerBinary
+	// falls back to known install locations.
+	dockerBin := findDockerBinary()
+	if dockerBin == "" {
 		st.Error = "docker CLI not found on PATH"
 		st.Hint = installDockerHint(runtime.GOOS)
 		return st
@@ -56,7 +63,7 @@ func CheckDocker(ctx context.Context) DockerStatus {
 
 	// 1. Default attempt — honors whatever DOCKER_HOST / docker context
 	// the spawning environment provides.
-	if res := tryDockerInfo(ctx, "", 4*time.Second); res.ok {
+	if res := tryDockerInfo(ctx, dockerBin, "", 4*time.Second); res.ok {
 		st.Running = true
 		st.Version = res.version
 		return st
@@ -66,7 +73,7 @@ func CheckDocker(ctx context.Context) DockerStatus {
 	// answers wins. Each attempt has a tight timeout so the worst-case
 	// total stays under the API client's 10s window.
 	for _, sock := range candidateSockets() {
-		res := tryDockerInfo(ctx, sock, 1500*time.Millisecond)
+		res := tryDockerInfo(ctx, dockerBin, sock, 1500*time.Millisecond)
 		if !res.ok {
 			continue
 		}
@@ -79,7 +86,7 @@ func CheckDocker(ctx context.Context) DockerStatus {
 	// Nothing worked — surface the original failure (from the default
 	// attempt) so the user sees an honest error rather than the last
 	// fallback's "no such file" noise.
-	if res := tryDockerInfo(ctx, "", 1500*time.Millisecond); res.err != nil {
+	if res := tryDockerInfo(ctx, dockerBin, "", 1500*time.Millisecond); res.err != nil {
 		st.Error = daemonDownMessage(res.err)
 	} else {
 		st.Error = "docker daemon is not reachable"
@@ -95,12 +102,13 @@ type dockerProbeResult struct {
 }
 
 // tryDockerInfo runs `docker info` (optionally pinned to a specific
-// DOCKER_HOST) and returns the parsed result. When dockerHost is empty,
-// the inherited environment is used unchanged.
-func tryDockerInfo(ctx context.Context, dockerHost string, timeout time.Duration) dockerProbeResult {
+// DOCKER_HOST) and returns the parsed result. dockerBin is the absolute
+// path returned by findDockerBinary; when dockerHost is empty, the
+// inherited environment is used unchanged.
+func tryDockerInfo(ctx context.Context, dockerBin, dockerHost string, timeout time.Duration) dockerProbeResult {
 	cctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	cmd := exec.CommandContext(cctx, "docker", "info", "--format", "{{.ServerVersion}}")
+	cmd := exec.CommandContext(cctx, dockerBin, "info", "--format", "{{.ServerVersion}}")
 	if dockerHost != "" {
 		cmd.Env = append(os.Environ(), "DOCKER_HOST="+dockerHost)
 	}
@@ -109,6 +117,42 @@ func tryDockerInfo(ctx context.Context, dockerHost string, timeout time.Duration
 		return dockerProbeResult{err: err}
 	}
 	return dockerProbeResult{version: strings.TrimSpace(string(out)), ok: true}
+}
+
+// findDockerBinary returns an absolute path to a usable `docker` binary,
+// or "" if none can be found. It tries the inherited PATH first, then
+// falls back to well-known install locations used by user-only Docker
+// installs (OrbStack, Colima, brew, Docker Desktop). This is what makes
+// the desktop app work when launched from Finder/Dock instead of a
+// shell — Finder gives processes the bare system PATH which excludes
+// every common Docker install location.
+func findDockerBinary() string {
+	if path, err := exec.LookPath("docker"); err == nil {
+		return path
+	}
+
+	candidates := []string{}
+	if home, err := os.UserHomeDir(); err == nil && home != "" {
+		candidates = append(candidates,
+			home+"/.orbstack/bin/docker",
+			home+"/.docker/bin/docker",
+			home+"/.rd/bin/docker",
+		)
+	}
+	candidates = append(candidates,
+		"/Applications/OrbStack.app/Contents/MacOS/xbin/docker",
+		"/Applications/Docker.app/Contents/Resources/bin/docker",
+		"/Applications/Rancher Desktop.app/Contents/Resources/resources/darwin/bin/docker",
+		"/opt/homebrew/bin/docker", // Apple-Silicon Homebrew
+		"/usr/local/bin/docker",    // Intel Homebrew / Docker Desktop default
+		"/opt/local/bin/docker",    // MacPorts
+	)
+	for _, p := range candidates {
+		if info, err := os.Stat(p); err == nil && !info.IsDir() {
+			return p
+		}
+	}
+	return ""
 }
 
 // candidateSockets returns the list of well-known docker socket paths
