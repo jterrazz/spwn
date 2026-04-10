@@ -169,8 +169,20 @@ type ObservatoryServer = observatory.Server
 // NewObservatoryServer returns an Observatory API server bound to addr that
 // serves world and agent state from the provided Store. arch may be nil for
 // read-only mode (no world spawn/destroy).
+//
+// The architect-spawn function is wired in here so the observatory can
+// invoke universe.StartArchitectDaemonWithOpts without an import cycle
+// (the observatory package can't import core/universe directly).
 func NewObservatoryServer(s *Store, arch *Architect, addr string) *ObservatoryServer {
-	return observatory.New(s, arch, addr)
+	srv := observatory.New(s, arch, addr)
+	srv.SetSpawnArchitect(func(ctx context.Context, opts observatory.ArchitectSpawnOpts) (string, error) {
+		return StartArchitectDaemonWithOpts(ctx, StartArchitectDaemonOpts{
+			ImageOverride: opts.ImageOverride,
+			LogWriter:     opts.LogWriter,
+			OnProgress:    opts.OnProgress,
+		})
+	})
+	return srv
 }
 
 // --- Knowledge operations ---
@@ -299,10 +311,73 @@ type ArchitectDaemonInfo struct {
 	OrgName     string
 }
 
-// StartArchitectDaemon creates and starts the spwn-architect Docker container.
-// It returns the container ID. If the container is already running, it returns
-// an error indicating that.
+// StartArchitectDaemonOpts configures architect daemon spawn. All
+// fields are optional. The OnProgress callback is the canonical place
+// to surface real-time spawn diagnostics — both the CLI stepper and
+// the observatory's status endpoint feed off it.
+type StartArchitectDaemonOpts struct {
+	// ImageOverride lets the caller pin a specific architect image
+	// (used by tests and SPWN_ARCHITECT_IMAGE). When empty, the
+	// canonical image is built/refreshed by imagebuilder.
+	ImageOverride string
+	// LogWriter receives raw output from the image build (npm install,
+	// docker build steps, …). nil → io.Discard.
+	LogWriter io.Writer
+	// OnProgress is called at each step of the spawn pipeline with
+	// (event, detail) pairs. Events are stable strings that the
+	// observatory polls; detail is a free-form human-readable note.
+	OnProgress func(event, detail string)
+}
+
+func (o *StartArchitectDaemonOpts) progress(event, detail string) {
+	if o != nil && o.OnProgress != nil {
+		o.OnProgress(event, detail)
+	}
+}
+
+func (o *StartArchitectDaemonOpts) writer() io.Writer {
+	if o != nil && o.LogWriter != nil {
+		return o.LogWriter
+	}
+	return io.Discard
+}
+
+// StartArchitectDaemon creates and starts the spwn-architect Docker
+// container. It returns the container ID. If the container is already
+// running, it returns an error indicating that.
+//
+// This is the back-compat shim. New code should call
+// StartArchitectDaemonWithOpts so it can subscribe to progress events.
 func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters ...io.Writer) (string, error) {
+	var lw io.Writer
+	if len(logWriters) > 0 {
+		lw = logWriters[0]
+	}
+	return StartArchitectDaemonWithOpts(ctx, StartArchitectDaemonOpts{
+		ImageOverride: imageOverride,
+		LogWriter:     lw,
+	})
+}
+
+// StartArchitectDaemonWithOpts is the rich entry point. It emits an
+// OnProgress event at every step so callers can render real-time spawn
+// diagnostics instead of guessing from elapsed time.
+//
+// Event vocabulary (in order):
+//
+//	docker_check         — opening the Docker client
+//	already_running      — fast path, returned with error
+//	cleanup              — removing a stopped container
+//	image_resolve        — resolving image tag
+//	image_building       — building the architect image (long step)
+//	image_ready          — image present
+//	credentials_sync     — credentials being written
+//	host_files           — stack.md / knowledge dir bootstrapped
+//	container_creating   — Docker create call
+//	container_starting   — Docker start call
+//	ready                — daemon up and labelled
+func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemonOpts) (string, error) {
+	opts.progress("docker_check", "opening Docker client")
 	docker, err := backend.NewDocker()
 	if err != nil {
 		return "", fmt.Errorf("docker is not reachable: %w", err)
@@ -311,31 +386,30 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 	// Check if already running
 	info, err := docker.Inspect(ctx, foundation.ArchitectContainerName)
 	if err == nil && info.Running {
+		opts.progress("already_running", info.ID)
 		return info.ID, fmt.Errorf("architect is already running (container %s)", foundation.ArchitectContainerName)
 	}
 
 	// If container exists but stopped, remove it first
 	if err == nil && !info.Running {
+		opts.progress("cleanup", "removing stopped architect container")
 		_ = docker.Remove(ctx, foundation.ArchitectContainerName)
 	}
 
 	// Resolve image
 	image := foundation.ArchitectImage
-	if imageOverride != "" {
-		image = imageOverride
+	if opts.ImageOverride != "" {
+		image = opts.ImageOverride
 	}
+	opts.progress("image_resolve", image)
 
 	// Ensure architect image exists and is up to date (auto-build if needed)
-	if imageOverride == "" {
-		var logw io.Writer = io.Discard
-		if len(logWriters) > 0 && logWriters[0] != nil {
-			logw = logWriters[0]
-		}
-		if err := architect.BuildArchitectImage(ctx, docker, logw); err != nil {
+	if opts.ImageOverride == "" {
+		opts.progress("image_building", "building "+image+" — first run takes minutes")
+		if err := architect.BuildArchitectImage(ctx, docker, opts.writer()); err != nil {
 			return "", fmt.Errorf("ensure architect image: %w", err)
 		}
 	} else {
-		// Custom image override: just check it exists
 		exists, err := docker.ImageExists(ctx, image)
 		if err != nil {
 			return "", fmt.Errorf("checking image: %w", err)
@@ -344,8 +418,10 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 			return "", fmt.Errorf("image %s not found", image)
 		}
 	}
+	opts.progress("image_ready", image)
 
 	// Sync credentials to bind-mountable directory
+	opts.progress("credentials_sync", "syncing host credentials")
 	_ = auth.SyncCredentials()
 
 	envVars := []string{
@@ -370,6 +446,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 
 	// Ensure knowledge directory exists with defaults
 	_ = knowledge.Init(foundation.KnowledgeDir())
+	opts.progress("host_files", "stack + knowledge dirs ready")
 
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
@@ -381,11 +458,13 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
 
+	opts.progress("container_creating", foundation.ArchitectContainerName)
 	id, err := docker.CreateNamedContainer(ctx, foundation.ArchitectContainerName, containerCfg, hostCfg)
 	if err != nil {
 		return "", fmt.Errorf("creating architect container: %w", err)
 	}
 
+	opts.progress("container_starting", id[:12])
 	if err := docker.Start(ctx, id); err != nil {
 		_ = docker.Remove(ctx, id)
 		return "", fmt.Errorf("starting architect container: %w", err)
@@ -406,6 +485,7 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 		Phrase: activity.PhraseArchitectStarted(),
 	})
 
+	opts.progress("ready", id[:12])
 	return id, nil
 }
 

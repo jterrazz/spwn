@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	agentpkg "spwn.sh/core/agent"
@@ -35,6 +36,24 @@ type Server struct {
 	arch  *architect.Architect // nil = read-only mode
 	addr  string
 	srv   *http.Server
+
+	// spawnArchitectFn is injected by the cli wiring (universe pkg
+	// can't be imported here without a cycle). When nil, the
+	// /api/architect/start handler returns a 503.
+	spawnArchitectFn ArchitectSpawnFunc
+
+	// architectMu guards architectSpawnState. The state is mutated
+	// from the spawn goroutine and read by status/logs handlers.
+	architectMu         sync.Mutex
+	architectSpawnState *architectSpawn
+}
+
+// SetSpawnArchitect wires the implementation of the architect daemon
+// spawn function. Must be called before /api/architect/start is hit
+// for the first time. The cli/cmd wiring is responsible for passing
+// universe.StartArchitectDaemonWithOpts here.
+func (s *Server) SetSpawnArchitect(fn ArchitectSpawnFunc) {
+	s.spawnArchitectFn = fn
 }
 
 // New creates an Observatory server. arch may be nil for read-only mode.
@@ -129,6 +148,7 @@ func (s *Server) Start() error {
 	// --- Architect endpoints ---
 	mux.HandleFunc("GET /api/architect/status", cors(s.handleArchitectStatus))
 	mux.HandleFunc("GET /api/architect/history", cors(s.handleArchitectHistory))
+	mux.HandleFunc("GET /api/architect/logs", cors(s.handleArchitectLogs))
 	mux.HandleFunc("POST /api/architect/start", cors(s.handleArchitectStart))
 	mux.HandleFunc("POST /api/architect/stop", cors(s.handleArchitectStop))
 	mux.HandleFunc("POST /api/architect/talk", cors(s.handleArchitectTalk))
@@ -1022,7 +1042,7 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jsonOK(w, map[string]interface{}{
+	resp := map[string]interface{}{
 		"status":      status,
 		"containerId": containerID,
 		"uptime":      uptime,
@@ -1032,7 +1052,68 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 			"tasksPending":   tasksPending,
 			"tasksCompleted": tasksCompleted,
 		},
-	})
+	}
+
+	// Surface in-flight (or just-finished) spawn diagnostics. The
+	// frontend uses this to render real-time progress, log tail, and
+	// final error if the spawn failed. Absent when no spawn has been
+	// attempted in this server process.
+	s.architectMu.Lock()
+	if s.architectSpawnState != nil {
+		resp["progress"] = s.architectSpawnState.snapshot()
+	}
+	s.architectMu.Unlock()
+
+	jsonOK(w, resp)
+}
+
+// handleArchitectLogs streams the architect container's stdout/stderr
+// over SSE. Used by the desktop app's "View logs" panel so users can
+// see what claude-code or the daemon is doing without leaving spwn.
+func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
+	follow := r.URL.Query().Get("follow") == "true"
+	tail := r.URL.Query().Get("tail")
+	if tail == "" {
+		tail = "200"
+	}
+
+	args := []string{"logs"}
+	if follow {
+		args = append(args, "-f")
+	}
+	args = append(args, "--tail", tail, foundation.ArchitectContainerName)
+
+	cmd := exec.CommandContext(r.Context(), "docker", args...)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		jsonError(w, "stdout pipe: "+err.Error(), 500)
+		return
+	}
+	cmd.Stderr = cmd.Stdout // merge — docker logs is happy to do that
+	if err := cmd.Start(); err != nil {
+		jsonError(w, "start docker logs: "+err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	flusher, _ := w.(http.Flusher)
+
+	scanner := bufio.NewScanner(stdout)
+	scanner.Buffer(make([]byte, 1024*1024), 1024*1024)
+	for scanner.Scan() {
+		fmt.Fprintf(w, "data: %s\n\n", scanner.Text())
+		if flusher != nil {
+			flusher.Flush()
+		}
+	}
+	_ = cmd.Wait()
+	fmt.Fprint(w, "data: [DONE]\n\n")
+	if flusher != nil {
+		flusher.Flush()
+	}
 }
 
 // architectStackPath returns the path to the architect's stack file.
@@ -1098,24 +1179,26 @@ func (s *Server) handleArchitectStackUpdate(w http.ResponseWriter, r *http.Reque
 }
 
 func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
-	// Use a background context — image builds can take minutes (npm install etc.)
-	// and we don't want the HTTP request timeout to kill the build.
-	ctx := context.Background()
-
-	// Check if already running first (fast path)
-	checkCmd := exec.CommandContext(ctx, "docker", "inspect", "--format", "{{.State.Running}}", "spwn-architect")
+	// Fast path: already running.
+	checkCmd := exec.CommandContext(r.Context(), "docker", "inspect", "--format", "{{.State.Running}}", "spwn-architect")
 	if out, err := checkCmd.Output(); err == nil && strings.TrimSpace(string(out)) == "true" {
 		jsonOK(w, map[string]string{"status": "running", "message": "already running"})
 		return
 	}
 
-	// Start in background — return immediately so the UI doesn't timeout
-	go func() {
-		cmd := exec.CommandContext(ctx, "spwn", "architect", "start")
-		cmd.CombinedOutput() // fire and forget — errors logged by spwn CLI
-	}()
+	// Kick off the spawn in the background. The frontend already polls
+	// /api/architect/status every 3s — that endpoint now carries the
+	// real progress event, log tail and final result, so the user
+	// sees what's happening instead of guessing from elapsed time.
+	if err := s.startArchitectAsync(os.Getenv("SPWN_ARCHITECT_IMAGE")); err != nil {
+		jsonError(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
 
-	jsonOK(w, map[string]string{"status": "starting", "message": "architect is starting (image build may take a few minutes on first run)"})
+	jsonOK(w, map[string]string{
+		"status":  "starting",
+		"message": "spawning architect — poll /api/architect/status for progress",
+	})
 }
 
 func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
