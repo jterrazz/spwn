@@ -23,6 +23,10 @@ type ContainerConfig struct {
 	Binds       []string
 	Env         []string
 	ExtraHosts  []string // e.g. "host.docker.internal:host-gateway"
+	// Labels is the set of Docker labels written to the container at
+	// create time. spwn uses labels as the canonical store for world
+	// metadata so the daemon itself becomes the source of truth.
+	Labels map[string]string
 }
 
 // ExecConfig defines a command to run inside a container.
@@ -39,7 +43,9 @@ type ImageInfo struct {
 	Created time.Time
 }
 
-// ContainerInfo describes a running container's state.
+// ContainerInfo describes a container's state. Labels is populated by
+// list/inspect calls so callers can identify spwn-tagged containers
+// without a second round-trip.
 type ContainerInfo struct {
 	ID        string
 	Name      string
@@ -47,6 +53,8 @@ type ContainerInfo struct {
 	Status    string
 	Running   bool
 	StartedAt time.Time
+	CreatedAt time.Time
+	Labels    map[string]string
 }
 
 // Backend abstracts the container runtime.
@@ -77,4 +85,10 @@ type Backend interface {
 
 	// Inspect returns information about a container by name or ID.
 	Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, error)
+
+	// ListContainersByLabel returns every container (running or stopped)
+	// whose Docker labels match the given key=value selector. spwn uses
+	// this to enumerate worlds straight from the daemon, so the live
+	// container set is the source of truth — no JSON state file to drift.
+	ListContainersByLabel(ctx context.Context, key, value string) ([]ContainerInfo, error)
 }

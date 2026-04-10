@@ -18,6 +18,7 @@ import (
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/claw"
 	"spwn.sh/core/universe/internal/knowledge"
+	"spwn.sh/core/universe/internal/labels"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/observatory"
@@ -352,10 +353,13 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 	}
 
 	// Create container — entrypoint is "sleep infinity" (set in Dockerfile),
-	// we docker exec claude into it when we want to talk.
+	// we docker exec claude into it when we want to talk. The architect
+	// gets the spwn kind label too, so it shows up in tooling that
+	// queries `docker ps --filter label=sh.spwn.kind=architect`.
 	containerCfg := &containerTypes.Config{
-		Image: image,
-		Env:   envVars,
+		Image:  image,
+		Env:    envVars,
+		Labels: map[string]string{labels.KindKey: labels.KindArchitect},
 	}
 	// Ensure architect stack file exists on the host
 	architectStackPath := foundation.BaseDir() + "/architect/stack.md"

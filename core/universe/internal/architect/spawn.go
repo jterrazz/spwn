@@ -16,6 +16,7 @@ import (
 	"spwn.sh/core/imagebuilder/base"
 	"spwn.sh/core/imagebuilder/catalog"
 	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/labels"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/physics"
@@ -305,6 +306,42 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		env = append(env, "SPWN_WORKSPACE_DEFAULT="+workspaceContainerPath(resolvedWorkspaces[0].Name, total))
 	}
 
+	// Build the World record up-front so we can imprint it onto the
+	// container as labels at create time. The container becomes the
+	// canonical store — see core/universe/internal/labels.
+	runtimeName := opts.Runtime
+	if runtimeName == "" {
+		runtimeName = "claude-code"
+	}
+	worldRecord := models.World{
+		ID:          id,
+		Name:        opts.Name,
+		Config:      opts.ConfigName,
+		Agent:       opts.AgentName,
+		Backend:     foundation.DefaultBackend,
+		Workspaces:  resolvedWorkspaces,
+		MindPath:    mindPath,
+		GateDir:     gateDir,
+		Runtime:     runtimeName,
+		CreatedAt:   time.Now(),
+		Manifest:    opts.Manifest,
+	}
+	if len(opts.Agents) > 0 {
+		worldRecord.Agent = opts.Agents[0].Name
+		worldRecord.AgentID = foundation.GenerateAgentID(opts.Agents[0].Name)
+		for _, spec := range opts.Agents {
+			role := manifest.DefaultRole(spec.Role)
+			worldRecord.Agents = append(worldRecord.Agents, models.AgentRecord{
+				Name:    spec.Name,
+				AgentID: foundation.GenerateAgentID(spec.Name),
+				Role:    role,
+				Status:  models.StatusIdle,
+			})
+		}
+	} else if opts.AgentName != "" {
+		worldRecord.AgentID = foundation.GenerateAgentID(opts.AgentName)
+	}
+
 	// Create container
 	containerCfg := backend.ContainerConfig{
 		Image:       image,
@@ -315,6 +352,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		NetworkMode: "bridge",
 		Binds:       binds,
 		Env:         env,
+		Labels:      labels.WorldLabels(worldRecord),
 	}
 
 	// Gate bridges require host access to reach the host-side server.
@@ -484,50 +522,14 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.ExecOutput(ctx, containerID, []string{"mkdir", "-p", "/world/inbox/" + opts.AgentName})
 	}
 
-	// Build universe record
-	runtimeName := opts.Runtime
-	if runtimeName == "" {
-		runtimeName = "claude-code"
-	}
-	u := models.World{
-		ID:          id,
-		Name:        opts.Name,
-		Config:      opts.ConfigName,
-		Agent:       opts.AgentName,
-		Backend:     foundation.DefaultBackend,
-		ContainerID: containerID,
-		Workspaces:  resolvedWorkspaces,
-		MindPath:    mindPath,
-		GateDir:     gateDir,
-		Runtime:     runtimeName,
-		Status:      models.StatusIdle,
-		CreatedAt:   time.Now(),
-		Manifest:    opts.Manifest,
-	}
-
-	if len(opts.Agents) > 0 {
-		// Multi-agent: populate Agents slice and set primary Agent/AgentID for backward compat
-		u.Agent = opts.Agents[0].Name
-		u.AgentID = foundation.GenerateAgentID(opts.Agents[0].Name)
-		for _, spec := range opts.Agents {
-			role := manifest.DefaultRole(spec.Role)
-			u.Agents = append(u.Agents, models.AgentRecord{
-				Name:    spec.Name,
-				AgentID: foundation.GenerateAgentID(spec.Name),
-				Role:    role,
-				Status:  models.StatusIdle,
-			})
-		}
-	} else if opts.AgentName != "" {
-		u.AgentID = foundation.GenerateAgentID(opts.AgentName)
-	}
-
-	// Save state
-	if err := a.state.Save(u); err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
-		return nil, fmt.Errorf("save state: %w", err)
-	}
+	// Finalize the world record. The labels we already wrote to the
+	// container are the canonical store — this struct is just what we
+	// hand back to the caller. ContainerID and Status come from the
+	// runtime side, not from labels. Future state.List() calls will
+	// reconstruct identical Worlds straight from container labels.
+	u := worldRecord
+	u.ContainerID = containerID
+	u.Status = models.StatusIdle
 
 	// Emit activity events
 	agentNames := []string{}

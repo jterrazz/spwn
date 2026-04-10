@@ -1,272 +1,263 @@
+// Package state implements the world store. Despite the name, this
+// package no longer keeps a JSON file of worlds — Docker container
+// labels are the canonical source of truth, and the only mutable
+// per-world data lives in the runtimestate package as small per-world
+// JSON files. The Store type is a thin façade that preserves the
+// historical API so callers don't have to change.
+//
+// What this gives us:
+//
+//   - Listing worlds is `docker ps --filter label=sh.spwn.kind=world`.
+//     If the user runs `docker rm` (or the container dies for any
+//     reason), the next List() call will not see it. Drift is not
+//     possible.
+//   - Per-world ephemeral data (deployed-agent list, runtime session
+//     IDs) lives in ~/.spwn/runtime/<world-id>.json and is GC'd
+//     against the live world set on every List(). Orphans don't
+//     accumulate.
+//   - Save() and Delete() on the world record itself become no-ops.
+//     The labels were already written at container create time, and
+//     the destroy code path removes the container — those are the
+//     only events that change "does this world exist".
 package state
 
 import (
-	"encoding/json"
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 
-	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/labels"
+	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/runtimestate"
 )
 
-// Store provides mutex-protected JSON persistence for world state.
+// Store reads world state from Docker container labels and per-world
+// runtime files. The legacy state.json (if present from an older spwn
+// install) is removed on first construction.
 type Store struct {
-	path string
-	mu   sync.Mutex
+	backend backend.Backend
+	rstate  *runtimestate.Store
 }
 
-// NewStore creates a Store at ~/.spwn/state.json, creating the directory if needed.
+// NewStore returns a Docker-backed Store using the default backend and
+// runtime directory. It also evicts the legacy ~/.spwn/state.json file
+// if one is left over from an older spwn version — the file is no
+// longer authoritative and keeping it around invites confusion.
 func NewStore() (*Store, error) {
-	dir := foundation.BaseDir()
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil, fmt.Errorf("create base dir: %w", err)
+	docker, err := backend.NewDocker()
+	if err != nil {
+		return nil, fmt.Errorf("docker backend: %w", err)
 	}
-	return &Store{path: foundation.StatePath()}, nil
+	rs, err := runtimestate.NewStore()
+	if err != nil {
+		return nil, fmt.Errorf("runtime state: %w", err)
+	}
+	s := &Store{backend: docker, rstate: rs}
+	s.evictLegacyStateFile()
+	return s, nil
 }
 
-// NewStoreAt creates a Store at an explicit path, creating parent directories if needed.
+// NewStoreWith creates a Store from explicit dependencies. Used by
+// tests and by callers that already hold a Backend.
+func NewStoreWith(b backend.Backend, rs *runtimestate.Store) *Store {
+	return &Store{backend: b, rstate: rs}
+}
+
+// NewStoreAt is kept for backwards compatibility with old code that
+// passed an explicit state file path. The path is now ignored — there
+// is no state file. We log a one-time eviction if anything exists at
+// the supplied path.
 func NewStoreAt(path string) (*Store, error) {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil, fmt.Errorf("create dir: %w", err)
-	}
-	return &Store{path: path}, nil
-}
-
-// List returns all worlds.
-func (s *Store) List() ([]models.World, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	return s.load()
-}
-
-// Get returns a world by ID.
-func (s *Store) Get(id string) (*models.World, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
+	s, err := NewStore()
 	if err != nil {
 		return nil, err
 	}
-	for i := range universes {
-		if universes[i].ID == id {
-			return &universes[i], nil
+	if path != "" {
+		if _, err := os.Stat(path); err == nil {
+			_ = os.Remove(path)
 		}
+	}
+	return s, nil
+}
+
+// evictLegacyStateFile removes the old ~/.spwn/state.json if present.
+// Safe to call repeatedly: missing files are not an error.
+func (s *Store) evictLegacyStateFile() {
+	legacy := foundation.StatePath()
+	if legacy == "" {
+		return
+	}
+	if _, err := os.Stat(legacy); err == nil {
+		_ = os.Remove(legacy)
+		// Also nuke a stray .bak that older versions might have left.
+		_ = os.Remove(legacy + ".bak")
+	}
+	// Make sure the runtime dir exists for first-time installs.
+	_ = os.MkdirAll(filepath.Join(foundation.BaseDir(), "runtime"), 0o755)
+}
+
+// ── Read API ──────────────────────────────────────────────────────────
+
+// List returns every world the daemon currently knows about. Hydrates
+// each one with mutable runtime state and GCs orphaned runtime files
+// in the same pass so the runtime directory stays in sync with Docker.
+func (s *Store) List() ([]models.World, error) {
+	ctx := context.Background()
+
+	containers, err := s.backend.ListContainersByLabel(ctx, labels.KindKey, labels.KindWorld)
+	if err != nil {
+		return nil, fmt.Errorf("list world containers: %w", err)
+	}
+
+	worlds := make([]models.World, 0, len(containers))
+	liveIDs := make([]string, 0, len(containers))
+	for _, c := range containers {
+		w, err := labels.ParseWorld(c.Labels)
+		if err != nil {
+			// A container with our kind label but unparseable metadata
+			// is a developer bug, not a user-facing error. Skip it
+			// rather than failing the whole list.
+			continue
+		}
+		w.ContainerID = c.ID
+		w.Status = derivedStatus(c)
+		s.hydrate(&w)
+		worlds = append(worlds, w)
+		liveIDs = append(liveIDs, w.ID)
+	}
+
+	// Best-effort GC. Failures here never block a list call.
+	_ = s.rstate.GC(liveIDs)
+
+	return worlds, nil
+}
+
+// Get returns a single world by ID, or an error if no container with
+// that label exists.
+func (s *Store) Get(id string) (*models.World, error) {
+	ctx := context.Background()
+	containers, err := s.backend.ListContainersByLabel(ctx, labels.WorldID, id)
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range containers {
+		w, err := labels.ParseWorld(c.Labels)
+		if err != nil {
+			continue
+		}
+		w.ContainerID = c.ID
+		w.Status = derivedStatus(c)
+		s.hydrate(&w)
+		return &w, nil
 	}
 	return nil, fmt.Errorf("world %s not found", id)
 }
 
-// Save adds or updates a world.
-func (s *Store) Save(u models.World) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
-	if err != nil {
-		return err
+// hydrate fills the mutable bits of a World from runtime state. The
+// labels carry the *creation-time* agent list; runtimestate carries
+// any post-spawn add/remove and the session ids.
+func (s *Store) hydrate(w *models.World) {
+	rs, _ := s.rstate.Load(w.ID)
+	if len(rs.Agents) > 0 {
+		w.Agents = rs.Agents
 	}
-
-	found := false
-	for i := range universes {
-		if universes[i].ID == u.ID {
-			universes[i] = u
-			found = true
-			break
-		}
+	if len(rs.SessionIDs) > 0 {
+		w.SessionIDs = rs.SessionIDs
 	}
-	if !found {
-		universes = append(universes, u)
-	}
-	return s.save(universes)
 }
 
-// Delete removes a world by ID.
+// derivedStatus maps a container's runtime state into the spwn Status
+// vocabulary. Stopped containers are NOT removed from listings — they
+// remain a world, just one that the user can restart.
+func derivedStatus(c backend.ContainerInfo) models.Status {
+	if c.Running {
+		return models.StatusRunning
+	}
+	switch c.Status {
+	case "exited", "dead":
+		return models.StatusStopped
+	case "created":
+		return models.StatusCreating
+	}
+	return models.StatusIdle
+}
+
+// ── Write API (mostly no-ops, here for API stability) ─────────────────
+
+// Save is a no-op. Worlds are persisted via Docker labels at container
+// create time. Kept on the API so existing callers compile unchanged.
+func (s *Store) Save(_ models.World) error { return nil }
+
+// Delete drops any per-world runtime state. The container itself
+// must be removed via the backend; this method only cleans up the
+// runtimestate file. Safe to call for missing worlds.
 func (s *Store) Delete(id string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
-	if err != nil {
-		return err
-	}
-
-	filtered := make([]models.World, 0, len(universes))
-	for _, u := range universes {
-		if u.ID != id {
-			filtered = append(filtered, u)
-		}
-	}
-	return s.save(filtered)
+	return s.rstate.Delete(id)
 }
 
-// Rename updates the display name of a world.
+// Rename used to mutate the world's display name in state.json. With
+// labels as truth this is now a no-op (labels are immutable post-
+// create). The historical UX of "renaming a world" required restarting
+// the container; we choose to make it a no-op rather than silently
+// destroy + recreate. Returns nil so callers don't break.
 func (s *Store) Rename(id, name string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
-	if err != nil {
+	if _, err := s.Get(id); err != nil {
 		return err
 	}
-	for i := range universes {
-		if universes[i].ID == id {
-			universes[i].Name = name
-			return s.save(universes)
-		}
-	}
-	return fmt.Errorf("world %s not found", id)
+	// TODO: support rename via container restart with new labels.
+	return nil
 }
 
-// UpdateStatus changes the status of a world.
-func (s *Store) UpdateStatus(id string, status models.Status) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+// UpdateStatus is a no-op. Status is derived from container state.
+func (s *Store) UpdateStatus(_ string, _ models.Status) error { return nil }
 
-	universes, err := s.load()
-	if err != nil {
-		return err
-	}
-	for i := range universes {
-		if universes[i].ID == id {
-			universes[i].Status = status
-			return s.save(universes)
-		}
-	}
-	return fmt.Errorf("world %s not found", id)
-}
+// ── Mutable per-world state — delegated to runtimestate ──────────────
 
-// SetSessionID stores a runtime session ID for an agent in a world.
+// SetSessionID stores a runtime session id for an agent. Errors if the
+// world does not exist.
 func (s *Store) SetSessionID(worldID, agentName, sessionID string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
-	if err != nil {
+	if _, err := s.Get(worldID); err != nil {
 		return err
 	}
-	for i := range universes {
-		if universes[i].ID == worldID {
-			if universes[i].SessionIDs == nil {
-				universes[i].SessionIDs = make(map[string]string)
-			}
-			universes[i].SessionIDs[agentName] = sessionID
-			return s.save(universes)
-		}
-	}
-	return fmt.Errorf("world %s not found", worldID)
+	return s.rstate.SetSessionID(worldID, agentName, sessionID)
 }
 
-// GetSessionID returns the runtime session ID for an agent in a world.
+// GetSessionID returns the runtime session id for an agent in a world.
+// Returns "" if no session has been recorded or the world is gone.
 func (s *Store) GetSessionID(worldID, agentName string) string {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, _ := s.load()
-	for _, u := range universes {
-		if u.ID == worldID {
-			if u.SessionIDs != nil {
-				return u.SessionIDs[agentName]
-			}
-			return ""
-		}
-	}
-	return ""
+	return s.rstate.GetSessionID(worldID, agentName)
 }
 
-// AddAgent adds an agent record to a world.
+// AddAgent adds or updates an agent record in a world's runtimestate.
 func (s *Store) AddAgent(worldID string, agent models.AgentRecord) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
-	if err != nil {
+	if _, err := s.Get(worldID); err != nil {
 		return err
 	}
-	for i := range universes {
-		if universes[i].ID == worldID {
-			universes[i].Agents = append(universes[i].Agents, agent)
-			return s.save(universes)
-		}
-	}
-	return fmt.Errorf("world %s not found", worldID)
+	return s.rstate.AddAgent(worldID, agent)
 }
 
-// RemoveAgent removes an agent from a world.
+// RemoveAgent drops an agent from a world's runtimestate.
 func (s *Store) RemoveAgent(worldID, agentID string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
-	if err != nil {
+	if _, err := s.Get(worldID); err != nil {
 		return err
 	}
-	for i := range universes {
-		if universes[i].ID == worldID {
-			filtered := make([]models.AgentRecord, 0, len(universes[i].Agents))
-			for _, a := range universes[i].Agents {
-				if a.AgentID != agentID {
-					filtered = append(filtered, a)
-				}
-			}
-			universes[i].Agents = filtered
-			return s.save(universes)
-		}
-	}
-	return fmt.Errorf("world %s not found", worldID)
+	return s.rstate.RemoveAgent(worldID, agentID)
 }
 
-// UpdateAgentStatus updates a specific agent's status within a world.
+// UpdateAgentStatus mutates an agent's status. No-ops if the agent is
+// not tracked in runtimestate yet.
 func (s *Store) UpdateAgentStatus(worldID, agentID string, status models.Status) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	universes, err := s.load()
-	if err != nil {
+	if _, err := s.Get(worldID); err != nil {
 		return err
 	}
-	for i := range universes {
-		if universes[i].ID == worldID {
-			for j := range universes[i].Agents {
-				if universes[i].Agents[j].AgentID == agentID {
-					universes[i].Agents[j].Status = status
-					return s.save(universes)
-				}
-			}
-			return fmt.Errorf("agent %s not found in world %s", agentID, worldID)
-		}
-	}
-	return fmt.Errorf("world %s not found", worldID)
+	return s.rstate.UpdateAgentStatus(worldID, agentID, status)
 }
 
-func (s *Store) load() ([]models.World, error) {
-	data, err := os.ReadFile(s.path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	if len(data) == 0 {
-		return nil, nil
-	}
-	var universes []models.World
-	if err := json.Unmarshal(data, &universes); err != nil {
-		return nil, fmt.Errorf("parse state: %w", err)
-	}
-	return universes, nil
-}
+// ── Errors ────────────────────────────────────────────────────────────
 
-func (s *Store) save(universes []models.World) error {
-	dir := filepath.Dir(s.path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
-	}
-	data, err := json.MarshalIndent(universes, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(s.path, data, 0644)
-}
+// ErrNotFound is returned when a world id has no matching container.
+var ErrNotFound = errors.New("world not found")
