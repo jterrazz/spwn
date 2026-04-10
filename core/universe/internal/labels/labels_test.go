@@ -17,7 +17,6 @@ func TestWorldLabels_RoundTrip(t *testing.T) {
 		AgentID:      "a-neo-99999",
 		Runtime:      "claude-code",
 		Organization: "acme",
-		MindPath:     "/Users/x/.spwn/agents/neo",
 		GateDir:      "/tmp/spwn-gate-12345",
 		CreatedAt:    created,
 		Workspaces: []models.Workspace{
@@ -61,9 +60,6 @@ func TestWorldLabels_RoundTrip(t *testing.T) {
 	}
 	if parsed.Organization != original.Organization {
 		t.Errorf("Organization: got %q want %q", parsed.Organization, original.Organization)
-	}
-	if parsed.MindPath != original.MindPath {
-		t.Errorf("MindPath: got %q want %q", parsed.MindPath, original.MindPath)
 	}
 	if parsed.GateDir != original.GateDir {
 		t.Errorf("GateDir: got %q want %q", parsed.GateDir, original.GateDir)

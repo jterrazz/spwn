@@ -16,8 +16,8 @@ func (c *Claude) Name() string { return "claude-code" }
 func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
 	cmd := []string{"claude", "--dangerously-skip-permissions"}
 
-	// NPC mode: no Mind, just print
-	if cfg.MindPath == "" {
+	// NPC mode: no named agent, just print
+	if cfg.AgentName == "" {
 		if cfg.Prompt != "" {
 			cmd = append(cmd, "-p", cfg.Prompt, "--print")
 		}

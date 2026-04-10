@@ -57,7 +57,6 @@ type World struct {
 	// Legacy single-workspace field. Retained so old state files unmarshal cleanly.
 	// The state store migrates this into Workspaces on load and clears it.
 	Workspace   string        `json:"workspace,omitempty"`
-	MindPath    string        `json:"mind_path,omitempty"`
 	GateDir     string        `json:"gate_dir,omitempty"`
 	Organization string       `json:"organization,omitempty"` // optional organization name
 	Runtime     string            `json:"runtime,omitempty"`       // agent runtime (e.g. "claude-code", "codex")

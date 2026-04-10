@@ -63,25 +63,25 @@ var inspectCmd = &cobra.Command{
 
 		s.Info("Laws:", "Network: bridge")
 
-		if len(u.Workspaces) > 0 || u.MindPath != "" {
+		if len(u.Workspaces) > 0 || u.Agent != "" || len(u.Agents) > 0 {
 			s.Blank()
-			switch len(u.Workspaces) {
-			case 0:
-				// ephemeral — no workspace line
-			case 1:
-				s.Info("Workspace:", u.Workspaces[0].Path+" → /workspace")
-			default:
-				s.Info("Workspaces:", fmt.Sprintf("%d mounted at /workspaces/*", len(u.Workspaces)))
+			if len(u.Workspaces) > 0 {
+				s.Info("Workspaces:", fmt.Sprintf("%d mounted at /work/*", len(u.Workspaces)))
 				for _, ws := range u.Workspaces {
 					ro := ""
 					if ws.ReadOnly {
 						ro = " (ro)"
 					}
-					s.Info("  "+ws.Name+":", ws.Path+" → /workspaces/"+ws.Name+ro)
+					s.Info("  "+ws.Name+":", ws.Path+" → /work/"+ws.Name+ro)
 				}
 			}
-			if u.MindPath != "" {
-				s.Info("Mind:", u.MindPath+" → /mind")
+			// Agent homes are visible at /agents/<name>; per-world data
+			// (inbox, notes) at /agents/<name>/worlds/<world-id>/.
+			if u.Agent != "" {
+				s.Info("Agent home:", "~/.spwn/agents/"+u.Agent+" → /agents/"+u.Agent)
+			}
+			for _, rec := range u.Agents {
+				s.Info("  "+rec.Name+":", "~/.spwn/agents/"+rec.Name+" → /agents/"+rec.Name)
 			}
 		}
 

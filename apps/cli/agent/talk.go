@@ -71,8 +71,8 @@ If no message is provided, opens an interactive session inside the container.`,
 			sessionID = arc.GetSessionID(worldID, name)
 		}
 
+		_ = world // world record kept for future use; runtime config no longer needs MindPath
 		runtimeCmd, rtErr := universe.BuildRuntimeCommand(runtimeName, universe.RuntimeSpawnConfig{
-			MindPath:  world.MindPath,
 			AgentName: name,
 			WorldID:   worldID,
 			Prompt:    message,
@@ -97,12 +97,23 @@ If no message is provided, opens an interactive session inside the container.`,
 		_ = auth.SyncCredentials()
 
 		buildDockerArgs := func(interactive bool) []string {
+			agentHome := "/agents/" + name
 			args := []string{"exec"}
 			if interactive {
 				args = append(args, "-it")
 			}
-			args = append(args, "-w", "/workspace")
-			// No -e flags needed — credentials are in /credentials/.env (bind mount)
+			// Per-agent operational isolation: cwd + HOME + identity env
+			// vars. Tools that respect $HOME (claude, git, ssh, shell
+			// history, …) automatically land in this agent's persistent
+			// home dir on the host.
+			args = append(args,
+				"-w", agentHome,
+				"-e", "HOME="+agentHome,
+				"-e", "SPWN_AGENT_NAME="+name,
+				"-e", "SPWN_WORLD_ID="+worldID,
+			)
+			// Credentials still come from /credentials/.env via the
+			// bind mount; no -e flags needed for them.
 			args = append(args, containerID)
 			return args
 		}

@@ -73,8 +73,8 @@ var destroyCmd = &cobra.Command{
 
 		s.Done("Stopped agent", "")
 		s.Done("Removed container", "")
-		if u.MindPath != "" {
-			s.Done("Mind persisted", u.MindPath)
+		if u.Agent != "" {
+			s.Done("Mind persisted", "~/.spwn/agents/"+u.Agent)
 		}
 
 		s.Blank()
