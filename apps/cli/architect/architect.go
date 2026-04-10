@@ -94,7 +94,33 @@ func runStart(cmd *cobra.Command, args []string) error {
 	// Resolve image (allow override via env var for testing)
 	imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
 
-	id, err := universe.StartArchitectDaemon(ctx, imageOverride, cmd.ErrOrStderr())
+	// Friendly labels for the stable spawn events. Anything not in
+	// this map is shown verbatim — keeps unknown future events
+	// readable rather than crashing the stepper.
+	labels := map[string]string{
+		"docker_check":       "Connecting to Docker",
+		"cleanup":            "Cleaning up old container",
+		"image_resolve":      "Resolving image",
+		"image_building":     "Building architect image",
+		"image_ready":        "Image ready",
+		"credentials_sync":   "Syncing credentials",
+		"host_files":         "Preparing host files",
+		"container_creating": "Creating container",
+		"container_starting": "Starting container",
+		"ready":              "Architect is ready",
+	}
+
+	id, err := universe.StartArchitectDaemonWithOpts(ctx, universe.StartArchitectDaemonOpts{
+		ImageOverride: imageOverride,
+		LogWriter:     cmd.ErrOrStderr(),
+		OnProgress: func(event, detail string) {
+			label, ok := labels[event]
+			if !ok {
+				label = event
+			}
+			s.Info(label, detail)
+		},
+	})
 	if err != nil {
 		msg := err.Error()
 		switch {
