@@ -6,6 +6,78 @@ import (
 	"testing"
 )
 
+func TestExtractSessionID_ClaudeStreamJSON(t *testing.T) {
+	cases := []struct {
+		name string
+		line string
+		want string
+	}{
+		{
+			name: "system init carries session_id",
+			line: `{"type":"system","subtype":"init","session_id":"abc-123","cwd":"/workspace"}`,
+			want: "abc-123",
+		},
+		{
+			name: "assistant message carries session_id",
+			line: `{"type":"assistant","session_id":"abc-123","message":{"role":"assistant"}}`,
+			want: "abc-123",
+		},
+		{
+			name: "result event carries session_id",
+			line: `{"type":"result","session_id":"final-id","subtype":"success"}`,
+			want: "final-id",
+		},
+		{
+			name: "non-json line returns empty",
+			line: `not json at all`,
+			want: "",
+		},
+		{
+			name: "json without session_id returns empty",
+			line: `{"type":"tool_use","input":{}}`,
+			want: "",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := extractSessionID("claude-code", []byte(tc.line)); got != tc.want {
+				t.Errorf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestExtractSessionID_CodexJSONL(t *testing.T) {
+	cases := []struct {
+		name string
+		line string
+		want string
+	}{
+		{
+			name: "thread.started carries thread_id",
+			line: `{"type":"thread.started","thread_id":"t-9999"}`,
+			want: "t-9999",
+		},
+		{
+			name: "item.completed without thread_id returns empty",
+			line: `{"type":"item.completed","item":{"type":"text","text":"hi"}}`,
+			want: "",
+		},
+		{
+			name: "claude session_id is ignored for codex runtime",
+			line: `{"type":"system","session_id":"not-a-thread-id"}`,
+			want: "",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := extractSessionID("codex", []byte(tc.line)); got != tc.want {
+				t.Errorf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestFormatExecError_AuthenticationError(t *testing.T) {
 	err := fmt.Errorf("exit status 1")
 	output := []byte("Error: authentication_error - invalid credentials")

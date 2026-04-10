@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,6 +12,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
+	"spwn.sh/core/foundation/system"
 	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
@@ -139,17 +141,19 @@ and authentication. Reports issues with suggested fixes.`,
 	},
 }
 
-// checkDocker verifies Docker is running and returns version info.
+// checkDocker verifies Docker is running and returns version info. Shares
+// the same probe used by the observatory API so the CLI and the desktop
+// app always agree on whether Docker is healthy.
 func checkDocker() (string, bool) {
-	out, err := exec.Command("docker", "info", "--format", "{{.ServerVersion}}").Output()
-	if err != nil {
-		return "not running — start Docker Desktop or run 'docker info'", false
+	st := system.CheckDocker(context.Background())
+	if !st.OK() {
+		msg := st.Summary()
+		if st.Hint != "" {
+			msg += " — " + st.Hint
+		}
+		return msg, false
 	}
-	version := strings.TrimSpace(string(out))
-	if version == "" {
-		return "running", true
-	}
-	return fmt.Sprintf("running (v%s)", version), true
+	return st.Summary(), true
 }
 
 // checkImage verifies a Docker image exists and returns its size.
