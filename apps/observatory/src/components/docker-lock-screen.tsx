@@ -6,7 +6,6 @@ import {
   IconRefresh,
   IconExternalLink,
   IconLoader2,
-  IconAlertTriangle,
 } from "@tabler/icons-react";
 import { useDocker } from "@/contexts/docker-context";
 
@@ -43,51 +42,58 @@ export function DockerLockScreen() {
     }
   };
 
-  // Two distinct failure modes get two distinct screens.
+  // Three distinct states all get the same Docker-themed lock screen,
+  // because for users the actionable next step is the same in every
+  // case: make sure Docker is running. The "API offline" branding the
+  // previous version showed was technically accurate but useless — most
+  // users don't know what the spwn API is, only that Docker needs to
+  // be on for any of this to work. We surface API status as a quiet
+  // diagnostic line at the bottom instead.
+
   const apiDown = status === undefined;
-  const dockerDown = status && (!status.installed || !status.running);
+  const dockerDown = !!(status && (!status.installed || !status.running));
 
   if (!apiDown && !dockerDown) return null;
 
-  // ── API offline screen ──────────────────────────────────────────────
-  if (apiDown) {
-    return (
-      <LockShell
-        accent="amber"
-        icon={<IconAlertTriangle size={28} className="text-amber-300" />}
-        title="Can't reach the spwn API"
-        subtitle="The desktop app couldn't talk to the local Go server."
-        hint="Check that the spwn daemon is running. The app will reconnect automatically."
-        primaryAction={
-          <RetryButton onClick={handleRetry} loading={refreshing} />
-        }
-        secondsAgo={secondsAgo}
-      />
-    );
-  }
-
-  // ── Docker offline screen ──────────────────────────────────────────
   const installed = status?.installed ?? false;
+  // When the API is unreachable we don't actually know whether Docker is
+  // installed, so default to the "running but offline" copy — that's the
+  // most common cause and the install link would be wrong otherwise.
+  const showInstallCta = !apiDown && !installed;
   const installUrl =
     status?.platform === "linux"
       ? "https://docs.docker.com/engine/install/"
       : "https://www.docker.com/products/docker-desktop/";
 
+  // Title + subtitle pick the most accurate copy we can given what we
+  // know. All three branches use the same Docker pulse glyph.
+  let title: string;
+  let subtitle: string;
+  if (apiDown) {
+    title = "Connecting to spwn";
+    subtitle =
+      "The desktop app is waiting for the local spwn daemon. Make sure Docker is running — the daemon will come up with it.";
+  } else if (!installed) {
+    title = "Docker isn't installed";
+    subtitle =
+      "Every spwn world runs inside a Docker container. Install Docker to continue.";
+  } else {
+    title = "Waiting for Docker";
+    subtitle =
+      "spwn needs the Docker daemon to be running. Start Docker Desktop and we'll pick it up automatically.";
+  }
+
   return (
     <LockShell
-      accent="red"
       icon={<DockerPulse />}
-      title={installed ? "Waiting for Docker" : "Docker isn't installed"}
-      subtitle={
-        installed
-          ? "spwn needs the Docker daemon to be running. Start Docker Desktop and we'll pick it up automatically."
-          : "Every spwn world runs inside a Docker container. Install Docker to continue."
-      }
+      title={title}
+      subtitle={subtitle}
       hint={status?.hint}
       error={status?.error}
+      diagnostic={apiDown ? "spwn API isn't responding" : undefined}
       primaryAction={
         <div className="flex flex-wrap items-center justify-center gap-2">
-          {!installed && (
+          {showInstallCta && (
             <a
               href={installUrl}
               target="_blank"
@@ -110,35 +116,32 @@ export function DockerLockScreen() {
 // ── Sub-components ────────────────────────────────────────────────────
 
 function LockShell({
-  accent,
   icon,
   title,
   subtitle,
   hint,
   error,
+  diagnostic,
   primaryAction,
   secondsAgo,
 }: {
-  accent: "red" | "amber";
   icon: React.ReactNode;
   title: string;
   subtitle: string;
   hint?: string;
   error?: string;
+  /** Optional dim line shown above the polling footer for sub-failures
+   *  (e.g. "spwn API isn't responding") that aren't the primary cause. */
+  diagnostic?: string;
   primaryAction: React.ReactNode;
   secondsAgo: number;
 }) {
-  const ringColor =
-    accent === "red"
-      ? "from-red-500/20 via-transparent to-transparent"
-      : "from-amber-500/20 via-transparent to-transparent";
-
   return (
     <div className="relative flex h-full w-full items-center justify-center px-6 py-10">
-      {/* Ambient radial wash matching the accent */}
+      {/* Ambient radial wash matching the Docker accent */}
       <div
         aria-hidden
-        className={`pointer-events-none absolute inset-0 bg-gradient-radial ${ringColor}`}
+        className="pointer-events-none absolute inset-0 bg-gradient-radial from-red-500/20 via-transparent to-transparent"
       />
 
       <div className="relative z-10 w-full max-w-md">
@@ -166,7 +169,13 @@ function LockShell({
 
           <div className="mt-6">{primaryAction}</div>
 
-          <div className="mt-5 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground/40">
+          {diagnostic && (
+            <p className="mt-4 text-[10px] uppercase tracking-wider text-muted-foreground/40">
+              {diagnostic}
+            </p>
+          )}
+
+          <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground/40">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-foreground/40 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
