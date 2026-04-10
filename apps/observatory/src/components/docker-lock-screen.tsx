@@ -65,32 +65,23 @@ export function DockerLockScreen() {
       ? "https://docs.docker.com/engine/install/"
       : "https://www.docker.com/products/docker-desktop/";
 
-  // Title + subtitle pick the most accurate copy we can given what we
-  // know. All three branches use the same Docker pulse glyph.
-  let title: string;
-  let subtitle: string;
-  if (apiDown) {
-    title = "Connecting to spwn";
-    subtitle =
-      "The desktop app is waiting for the local spwn daemon. Make sure Docker is running — the daemon will come up with it.";
-  } else if (!installed) {
-    title = "Docker isn't installed";
-    subtitle =
-      "Every spwn world runs inside a Docker container. Install Docker to continue.";
-  } else {
-    title = "Waiting for Docker";
-    subtitle =
-      "spwn needs the Docker daemon to be running. Start Docker Desktop and we'll pick it up automatically.";
-  }
+  // Two messages, not three. "API offline" collapses into "Waiting for
+  // Docker" because the user-visible fix is identical: start Docker.
+  // The only branch that needs different copy is "not installed",
+  // because the action there is install rather than start.
+  const title = !installed && !apiDown ? "Docker isn't installed" : "Waiting for Docker";
+  const subtitle =
+    !installed && !apiDown
+      ? "Every spwn world runs inside a Docker container. Install Docker to continue."
+      : "Start Docker Desktop and spwn will pick it up automatically.";
 
   return (
     <LockShell
       icon={<DockerPulse />}
       title={title}
       subtitle={subtitle}
-      hint={status?.hint}
-      error={status?.error}
-      diagnostic={apiDown ? "spwn API isn't responding" : undefined}
+      hint={apiDown ? undefined : status?.hint}
+      error={apiDown ? undefined : status?.error}
       primaryAction={
         <div className="flex flex-wrap items-center justify-center gap-2">
           {showInstallCta && (
@@ -121,7 +112,6 @@ function LockShell({
   subtitle,
   hint,
   error,
-  diagnostic,
   primaryAction,
   secondsAgo,
 }: {
@@ -130,9 +120,6 @@ function LockShell({
   subtitle: string;
   hint?: string;
   error?: string;
-  /** Optional dim line shown above the polling footer for sub-failures
-   *  (e.g. "spwn API isn't responding") that aren't the primary cause. */
-  diagnostic?: string;
   primaryAction: React.ReactNode;
   secondsAgo: number;
 }) {
@@ -169,13 +156,7 @@ function LockShell({
 
           <div className="mt-6">{primaryAction}</div>
 
-          {diagnostic && (
-            <p className="mt-4 text-[10px] uppercase tracking-wider text-muted-foreground/40">
-              {diagnostic}
-            </p>
-          )}
-
-          <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground/40">
+          <div className="mt-5 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground/40">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-foreground/40 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
