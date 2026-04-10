@@ -1,360 +1,235 @@
 package state
 
 import (
-	"os"
-	"path/filepath"
+	"context"
+	"io"
 	"testing"
+	"time"
 
+	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/labels"
 	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/runtimestate"
 )
 
-func tempStore(t *testing.T) *Store {
-	t.Helper()
-	dir := t.TempDir()
-	s, err := NewStoreAt(filepath.Join(dir, "state.json"))
-	if err != nil {
-		t.Fatalf("NewStoreAt: %v", err)
-	}
-	return s
+// fakeBackend implements backend.Backend with stub methods for
+// everything the state Store does not need. Its container set is
+// mutable so tests can simulate "user ran docker rm" between calls.
+type fakeBackend struct {
+	containers []backend.ContainerInfo
 }
 
-func seedWorld(t *testing.T, s *Store, id string) {
-	t.Helper()
-	if err := s.Save(models.World{ID: id, Status: models.StatusIdle}); err != nil {
-		t.Fatalf("Save: %v", err)
-	}
-}
-
-func TestRename(t *testing.T) {
-	s := tempStore(t)
-	seedWorld(t, s, "u1")
-
-	if err := s.Rename("u1", "My Project"); err != nil {
-		t.Fatalf("Rename: %v", err)
-	}
-	u, _ := s.Get("u1")
-	if u.Name != "My Project" {
-		t.Errorf("expected name 'My Project', got %q", u.Name)
-	}
-
-	// Empty name clears the field.
-	if err := s.Rename("u1", ""); err != nil {
-		t.Fatalf("Rename clear: %v", err)
-	}
-	u, _ = s.Get("u1")
-	if u.Name != "" {
-		t.Errorf("expected name cleared, got %q", u.Name)
-	}
-
-	if err := s.Rename("nope", "x"); err == nil {
-		t.Fatal("expected error for nonexistent world")
-	}
-}
-
-// Legacy workspace migration is now handled by core/migration (migration 004).
-// The state store no longer does inline migration on load.
-
-// TestLoad_PreservesNewWorkspacesWhenBothPresent ensures that if a state file
-// somehow has both the legacy field and the new slice, the new slice wins.
-func TestLoad_PreservesNewWorkspacesWhenBothPresent(t *testing.T) {
-	dir := t.TempDir()
-	statePath := filepath.Join(dir, "state.json")
-
-	mixed := `[{"id":"u1","config":"default","backend":"docker","container_id":"c1","workspace":"/host/ignored","workspaces":[{"name":"a","path":"/host/new"}],"status":"idle","created_at":"0001-01-01T00:00:00Z"}]`
-	if err := os.WriteFile(statePath, []byte(mixed), 0644); err != nil {
-		t.Fatalf("write mixed state: %v", err)
-	}
-
-	s, _ := NewStoreAt(statePath)
-	u, _ := s.Get("u1")
-	if len(u.Workspaces) != 1 || u.Workspaces[0].Path != "/host/new" {
-		t.Errorf("new Workspaces slice should win: %+v", u.Workspaces)
-	}
-}
-
-func TestAddAgent(t *testing.T) {
-	s := tempStore(t)
-	seedWorld(t, s, "u1")
-
-	agent := models.AgentRecord{
-		Name:    "neo",
-		AgentID: "a-neo-12345",
-		Role:    "chief",
-		Status:  models.StatusIdle,
-	}
-	if err := s.AddAgent("u1", agent); err != nil {
-		t.Fatalf("AddAgent: %v", err)
-	}
-
-	u, err := s.Get("u1")
-	if err != nil {
-		t.Fatalf("Get: %v", err)
-	}
-	if len(u.Agents) != 1 {
-		t.Fatalf("expected 1 agent, got %d", len(u.Agents))
-	}
-	if u.Agents[0].Name != "neo" {
-		t.Errorf("expected agent name 'neo', got %q", u.Agents[0].Name)
-	}
-	if u.Agents[0].Role != "chief" {
-		t.Errorf("expected role 'chief', got %q", u.Agents[0].Role)
-	}
-}
-
-func TestAddAgent_MultipleAgents(t *testing.T) {
-	s := tempStore(t)
-	seedWorld(t, s, "u1")
-
-	a1 := models.AgentRecord{Name: "chief", AgentID: "a-chief-111", Role: "chief", Status: models.StatusIdle}
-	a2 := models.AgentRecord{Name: "wkr", AgentID: "a-wkr-222", Role: "worker", Status: models.StatusIdle}
-
-	if err := s.AddAgent("u1", a1); err != nil {
-		t.Fatalf("AddAgent chief: %v", err)
-	}
-	if err := s.AddAgent("u1", a2); err != nil {
-		t.Fatalf("AddAgent wkr: %v", err)
-	}
-
-	u, _ := s.Get("u1")
-	if len(u.Agents) != 2 {
-		t.Fatalf("expected 2 agents, got %d", len(u.Agents))
-	}
-}
-
-func TestAddAgent_WorldNotFound(t *testing.T) {
-	s := tempStore(t)
-	agent := models.AgentRecord{Name: "neo", AgentID: "a-neo-12345"}
-	if err := s.AddAgent("nonexistent", agent); err == nil {
-		t.Fatal("expected error for nonexistent world")
-	}
-}
-
-func TestRemoveAgent(t *testing.T) {
-	s := tempStore(t)
-	seedWorld(t, s, "u1")
-
-	a1 := models.AgentRecord{Name: "chief", AgentID: "a-chief-111", Role: "chief"}
-	a2 := models.AgentRecord{Name: "wkr", AgentID: "a-wkr-222", Role: "worker"}
-	s.AddAgent("u1", a1)
-	s.AddAgent("u1", a2)
-
-	if err := s.RemoveAgent("u1", "a-chief-111"); err != nil {
-		t.Fatalf("RemoveAgent: %v", err)
-	}
-
-	u, _ := s.Get("u1")
-	if len(u.Agents) != 1 {
-		t.Fatalf("expected 1 agent after removal, got %d", len(u.Agents))
-	}
-	if u.Agents[0].AgentID != "a-wkr-222" {
-		t.Errorf("expected remaining agent 'a-wkr-222', got %q", u.Agents[0].AgentID)
-	}
-}
-
-func TestRemoveAgent_WorldNotFound(t *testing.T) {
-	s := tempStore(t)
-	if err := s.RemoveAgent("nonexistent", "a-neo-12345"); err == nil {
-		t.Fatal("expected error for nonexistent world")
-	}
-}
-
-func TestUpdateAgentStatus(t *testing.T) {
-	s := tempStore(t)
-	seedWorld(t, s, "u1")
-
-	agent := models.AgentRecord{Name: "neo", AgentID: "a-neo-12345", Status: models.StatusIdle}
-	s.AddAgent("u1", agent)
-
-	if err := s.UpdateAgentStatus("u1", "a-neo-12345", models.StatusRunning); err != nil {
-		t.Fatalf("UpdateAgentStatus: %v", err)
-	}
-
-	u, _ := s.Get("u1")
-	if u.Agents[0].Status != models.StatusRunning {
-		t.Errorf("expected status 'running', got %q", u.Agents[0].Status)
-	}
-}
-
-func TestUpdateAgentStatus_AgentNotFound(t *testing.T) {
-	s := tempStore(t)
-	seedWorld(t, s, "u1")
-
-	if err := s.UpdateAgentStatus("u1", "nonexistent", models.StatusRunning); err == nil {
-		t.Fatal("expected error for nonexistent agent")
-	}
-}
-
-func TestUpdateAgentStatus_WorldNotFound(t *testing.T) {
-	s := tempStore(t)
-	if err := s.UpdateAgentStatus("nonexistent", "a-1", models.StatusRunning); err == nil {
-		t.Fatal("expected error for nonexistent world")
-	}
-}
-
-func TestConcurrentReadWrite(t *testing.T) {
-	s := tempStore(t)
-	seedWorld(t, s, "concurrent-world")
-
-	// Run concurrent reads and writes
-	done := make(chan error, 20)
-	for i := 0; i < 10; i++ {
-		go func(idx int) {
-			agent := models.AgentRecord{
-				Name:    "agent",
-				AgentID: "a-agent-" + string(rune('A'+idx)),
-				Status:  models.StatusIdle,
-			}
-			done <- s.AddAgent("concurrent-world", agent)
-		}(i)
-		go func() {
-			_, err := s.List()
-			done <- err
-		}()
-	}
-
-	for i := 0; i < 20; i++ {
-		if err := <-done; err != nil {
-			t.Errorf("concurrent op failed: %v", err)
+func (f *fakeBackend) ListContainersByLabel(_ context.Context, key, value string) ([]backend.ContainerInfo, error) {
+	out := []backend.ContainerInfo{}
+	for _, c := range f.containers {
+		if c.Labels[key] == value || (value == "" && c.Labels[key] != "") {
+			out = append(out, c)
 		}
 	}
+	return out, nil
 }
 
-func TestCorruptedJSON(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "state.json")
-
-	// Write corrupt JSON
-	os.WriteFile(path, []byte("{not valid json!!!"), 0644)
-
-	s, err := NewStoreAt(path)
-	if err != nil {
-		t.Fatalf("NewStoreAt: %v", err)
+// Stubs — none of these are called by Store, but we need them to
+// satisfy the Backend interface.
+func (f *fakeBackend) Create(context.Context, backend.ContainerConfig) (string, error) {
+	return "", nil
+}
+func (f *fakeBackend) Start(context.Context, string) error  { return nil }
+func (f *fakeBackend) Stop(context.Context, string) error   { return nil }
+func (f *fakeBackend) Remove(context.Context, string) error { return nil }
+func (f *fakeBackend) Exec(context.Context, string, backend.ExecConfig) (int, error) {
+	return 0, nil
+}
+func (f *fakeBackend) ExecOutput(context.Context, string, []string) (string, error) {
+	return "", nil
+}
+func (f *fakeBackend) CopyTo(context.Context, string, string, []byte) error  { return nil }
+func (f *fakeBackend) IsRunning(context.Context, string) (bool, error)       { return false, nil }
+func (f *fakeBackend) ImageExists(context.Context, string) (bool, error)     { return false, nil }
+func (f *fakeBackend) EnsureImage(context.Context, string, string, []byte, io.Writer) error {
+	return nil
+}
+func (f *fakeBackend) EnsureImageWithContext(context.Context, string, string, []byte, map[string][]byte, io.Writer) error {
+	return nil
+}
+func (f *fakeBackend) ImageVersion(context.Context, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeBackend) Logs(context.Context, string, backend.LogsConfig) (io.ReadCloser, error) {
+	return nil, nil
+}
+func (f *fakeBackend) ExecDetached(context.Context, string, backend.ExecConfig) error {
+	return nil
+}
+func (f *fakeBackend) Commit(context.Context, string, string) error           { return nil }
+func (f *fakeBackend) ImageList(context.Context, string) ([]backend.ImageInfo, error) {
+	return nil, nil
+}
+func (f *fakeBackend) ImageRemove(context.Context, string) error { return nil }
+func (f *fakeBackend) Inspect(context.Context, string) (*backend.ContainerInfo, error) {
+	return nil, nil
+}
+func newWorldContainer(id, name, configName string, running bool) backend.ContainerInfo {
+	w := models.World{
+		ID:        id,
+		Name:      name,
+		Config:    configName,
+		Runtime:   "claude-code",
+		CreatedAt: time.Date(2026, 4, 11, 12, 0, 0, 0, time.UTC),
+		Agents: []models.AgentRecord{
+			{Name: "neo", AgentID: "a-neo-1", Role: "worker", Status: models.StatusIdle},
+		},
 	}
-
-	_, err = s.List()
-	if err == nil {
-		t.Error("expected error for corrupted JSON, got nil")
+	return backend.ContainerInfo{
+		ID:      "container-" + id,
+		Name:    id,
+		Image:   "spwn/world:latest",
+		Status:  pickStatus(running),
+		Running: running,
+		Labels:  labels.WorldLabels(w),
 	}
 }
 
-func TestEmptyFile(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "state.json")
-
-	// Write empty file
-	os.WriteFile(path, []byte(""), 0644)
-
-	s, err := NewStoreAt(path)
-	if err != nil {
-		t.Fatalf("NewStoreAt: %v", err)
+func pickStatus(running bool) string {
+	if running {
+		return "running"
 	}
+	return "exited"
+}
+
+func newStore(t *testing.T, fb *fakeBackend) *Store {
+	t.Helper()
+	rs, err := runtimestate.NewStoreAt(t.TempDir())
+	if err != nil {
+		t.Fatalf("runtimestate: %v", err)
+	}
+	return NewStoreWith(fb, rs)
+}
+
+func TestList_ReadsFromContainerLabels(t *testing.T) {
+	fb := &fakeBackend{containers: []backend.ContainerInfo{
+		newWorldContainer("w-default-11111", "", "default", true),
+		newWorldContainer("w-acme-22222", "Acme", "acme", false),
+	}}
+	s := newStore(t, fb)
 
 	worlds, err := s.List()
 	if err != nil {
-		t.Fatalf("List on empty file: %v", err)
+		t.Fatalf("List: %v", err)
 	}
-	if worlds != nil {
-		t.Errorf("expected nil for empty file, got %v", worlds)
+	if len(worlds) != 2 {
+		t.Fatalf("expected 2 worlds, got %d", len(worlds))
+	}
+
+	byID := map[string]models.World{}
+	for _, w := range worlds {
+		byID[w.ID] = w
+	}
+	if byID["w-default-11111"].Status != models.StatusRunning {
+		t.Errorf("running world should map to StatusRunning")
+	}
+	if byID["w-acme-22222"].Status != models.StatusStopped {
+		t.Errorf("exited world should map to StatusStopped")
+	}
+	if byID["w-acme-22222"].Name != "Acme" {
+		t.Errorf("name should round-trip from labels")
 	}
 }
 
-func TestReadOnlyDirectory(t *testing.T) {
-	dir := t.TempDir()
-	roDir := filepath.Join(dir, "readonly")
-	os.MkdirAll(roDir, 0755)
+func TestList_GhostContainersDisappearWhenRemoved(t *testing.T) {
+	// This is the bug we are explicitly fixing: if Docker no longer
+	// has the container, the world must not be visible — full stop.
+	fb := &fakeBackend{containers: []backend.ContainerInfo{
+		newWorldContainer("w-doomed-99999", "", "default", true),
+	}}
+	s := newStore(t, fb)
 
-	path := filepath.Join(roDir, "state.json")
-	s, err := NewStoreAt(path)
+	if worlds, _ := s.List(); len(worlds) != 1 {
+		t.Fatalf("expected 1 world before removal, got %d", len(worlds))
+	}
+
+	// Simulate `docker rm`.
+	fb.containers = nil
+
+	worlds, err := s.List()
 	if err != nil {
-		t.Fatalf("NewStoreAt: %v", err)
+		t.Fatalf("List after removal: %v", err)
 	}
-
-	// Save a world first
-	seedWorld(t, s, "u1")
-
-	// Make directory read-only
-	os.Chmod(roDir, 0555)
-	defer os.Chmod(roDir, 0755) // restore for cleanup
-
-	// Writing should fail
-	err = s.Save(models.World{ID: "u2", Status: models.StatusIdle})
-	if err == nil {
-		// Some systems (e.g. root) may still allow writes — log but don't fail
-		t.Log("write to read-only dir succeeded (may be running as root)")
+	if len(worlds) != 0 {
+		t.Fatalf("expected 0 worlds after removal, got %d", len(worlds))
 	}
 }
 
-func TestGetNonexistentWorld(t *testing.T) {
-	s := tempStore(t)
-
-	_, err := s.Get("nonexistent")
-	if err == nil {
-		t.Error("expected error for nonexistent world, got nil")
+func TestGet_NotFound(t *testing.T) {
+	s := newStore(t, &fakeBackend{})
+	if _, err := s.Get("w-missing"); err == nil {
+		t.Fatal("expected error for missing world")
 	}
 }
 
-func TestDeleteNonexistentWorld(t *testing.T) {
-	s := tempStore(t)
+func TestSessionID_HydratedIntoListResults(t *testing.T) {
+	fb := &fakeBackend{containers: []backend.ContainerInfo{
+		newWorldContainer("w-1", "", "default", true),
+	}}
+	s := newStore(t, fb)
 
-	// Deleting a world that doesn't exist should not error (it just filters empty list)
-	err := s.Delete("nonexistent")
-	if err != nil {
-		t.Errorf("Delete nonexistent: %v", err)
-	}
-}
-
-func TestSaveAndUpdate(t *testing.T) {
-	s := tempStore(t)
-
-	// Save
-	w := models.World{ID: "u1", Status: models.StatusIdle}
-	if err := s.Save(w); err != nil {
-		t.Fatalf("Save: %v", err)
+	if err := s.SetSessionID("w-1", "neo", "sess-abc"); err != nil {
+		t.Fatalf("SetSessionID: %v", err)
 	}
 
-	// Update
-	w.Status = models.StatusRunning
-	if err := s.Save(w); err != nil {
-		t.Fatalf("Save update: %v", err)
-	}
-
-	got, err := s.Get("u1")
-	if err != nil {
-		t.Fatalf("Get: %v", err)
-	}
-	if got.Status != models.StatusRunning {
-		t.Errorf("expected status running, got %v", got.Status)
-	}
-
-	// Should still be exactly 1 world
 	worlds, _ := s.List()
 	if len(worlds) != 1 {
-		t.Errorf("expected 1 world after update, got %d", len(worlds))
+		t.Fatalf("expected 1 world, got %d", len(worlds))
+	}
+	if got := worlds[0].SessionIDs["neo"]; got != "sess-abc" {
+		t.Errorf("session id not hydrated into List() result: %q", got)
 	}
 }
 
-// TestStatePersistence verifies agents survive a reload from disk.
-func TestStatePersistence(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "state.json")
+func TestList_GCsOrphanedRuntimeFiles(t *testing.T) {
+	fb := &fakeBackend{containers: []backend.ContainerInfo{
+		newWorldContainer("w-live", "", "default", true),
+	}}
+	s := newStore(t, fb)
 
-	s1, _ := NewStoreAt(path)
-	seedWorld(t, s1, "u1")
-	s1.AddAgent("u1", models.AgentRecord{Name: "neo", AgentID: "a-neo-111", Role: "chief", Status: models.StatusIdle})
-
-	// Create a fresh store pointing at the same file
-	s2, _ := NewStoreAt(path)
-	u, err := s2.Get("u1")
-	if err != nil {
-		t.Fatalf("Get from fresh store: %v", err)
+	// Pretend a previous spawn left runtime state for a world that's
+	// since been removed.
+	if err := s.rstate.SetSessionID("w-orphan", "neo", "old"); err != nil {
+		t.Fatalf("seed orphan: %v", err)
 	}
-	if len(u.Agents) != 1 {
-		t.Fatalf("expected 1 agent after reload, got %d", len(u.Agents))
-	}
-	if u.Agents[0].Name != "neo" {
-		t.Errorf("expected agent name 'neo', got %q", u.Agents[0].Name)
+	if got := s.rstate.GetSessionID("w-orphan", "neo"); got != "old" {
+		t.Fatalf("orphan seed broken: %q", got)
 	}
 
-	// Clean up
-	os.Remove(path)
+	if _, err := s.List(); err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	// GC should have wiped the orphaned file.
+	if got := s.rstate.GetSessionID("w-orphan", "neo"); got != "" {
+		t.Errorf("orphaned runtime file not GC'd: %q", got)
+	}
+}
+
+func TestAddAgent_RequiresLiveWorld(t *testing.T) {
+	s := newStore(t, &fakeBackend{})
+	err := s.AddAgent("w-missing", models.AgentRecord{Name: "neo", AgentID: "a-1"})
+	if err == nil {
+		t.Fatal("AddAgent should reject missing worlds")
+	}
+}
+
+func TestSaveDeleteUpdateStatus_AreNoOps(t *testing.T) {
+	s := newStore(t, &fakeBackend{})
+	// All three should return nil for any input — they exist only for
+	// API stability.
+	if err := s.Save(models.World{}); err != nil {
+		t.Errorf("Save should be a no-op: %v", err)
+	}
+	if err := s.UpdateStatus("anything", models.StatusRunning); err != nil {
+		t.Errorf("UpdateStatus should be a no-op: %v", err)
+	}
+	if err := s.Delete("nope"); err != nil {
+		t.Errorf("Delete on missing world should be a no-op: %v", err)
+	}
 }

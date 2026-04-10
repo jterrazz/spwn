@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"spwn.sh/core/universe/internal/backend"
+	"spwn.sh/core/universe/internal/labels"
 	"spwn.sh/core/universe/internal/models"
+	"spwn.sh/core/universe/internal/runtimestate"
 	"spwn.sh/core/universe/internal/state"
 )
 
@@ -181,17 +183,58 @@ func (m *mockBackend) Inspect(_ context.Context, nameOrID string) (*backend.Cont
 	return &backend.ContainerInfo{ID: nameOrID, Running: true}, nil
 }
 
+func (m *mockBackend) ListContainersByLabel(_ context.Context, key, value string) ([]backend.ContainerInfo, error) {
+	out := []backend.ContainerInfo{}
+	for id, c := range m.containers {
+		if c.config.Labels[key] != value {
+			continue
+		}
+		status := "exited"
+		if c.running {
+			status = "running"
+		}
+		out = append(out, backend.ContainerInfo{
+			ID:      id,
+			Name:    c.config.Name,
+			Image:   c.config.Image,
+			Status:  status,
+			Running: c.running,
+			Labels:  c.config.Labels,
+		})
+	}
+	return out, nil
+}
+
 // --- Tests ---
 
 func newTestArchitect(t *testing.T, b *mockBackend) (*Architect, *state.Store) {
 	t.Helper()
-	dir := t.TempDir()
-	store, err := state.NewStoreAt(dir + "/state.json")
+	rs, err := runtimestate.NewStoreAt(t.TempDir())
 	if err != nil {
-		t.Fatalf("create test store: %v", err)
+		t.Fatalf("runtimestate: %v", err)
 	}
+	store := state.NewStoreWith(b, rs)
 	arch := New(b, store)
 	return arch, store
+}
+
+// seedWorld registers a world with the mock backend as if it had been
+// created via Spawn. With the labels-as-truth architecture, the only
+// way to make a world "exist" for the state Store is to put a labeled
+// container in the backend. The container ID matches w.ContainerID
+// when supplied so destroy/snapshot tests can assert against it.
+func seedWorld(mb *mockBackend, w models.World) {
+	id := w.ContainerID
+	if id == "" {
+		mb.nextID++
+		id = fmt.Sprintf("mock-%d", mb.nextID)
+	}
+	cfg := backend.ContainerConfig{
+		Name:   w.ID,
+		Image:  "spwn/world:latest",
+		Labels: labels.WorldLabels(w),
+	}
+	mb.containers[id] = &mockContainer{id: id, config: cfg, running: true}
 }
 
 func TestList_Empty(t *testing.T) {
@@ -218,9 +261,8 @@ func TestList_AfterSave(t *testing.T) {
 		ContainerID: "mock-1",
 		Status:      models.StatusIdle,
 	}
-	if err := store.Save(w); err != nil {
-		t.Fatalf("Save() error: %v", err)
-	}
+	seedWorld(mb, w)
+	_ = store // store kept in scope for later assertions if needed
 
 	worlds, err := arch.List(context.Background())
 	if err != nil {
@@ -236,7 +278,7 @@ func TestList_AfterSave(t *testing.T) {
 
 func TestInspect_Found(t *testing.T) {
 	mb := newMockBackend()
-	arch, store := newTestArchitect(t, mb)
+	arch, _ := newTestArchitect(t, mb)
 
 	w := models.World{
 		ID:          "w-test-99999",
@@ -244,7 +286,7 @@ func TestInspect_Found(t *testing.T) {
 		ContainerID: "mock-42",
 		Status:      models.StatusRunning,
 	}
-	store.Save(w)
+	seedWorld(mb, w)
 
 	got, err := arch.Inspect(context.Background(), "w-test-99999")
 	if err != nil {
@@ -278,7 +320,7 @@ func TestDestroy_RemovesWorld(t *testing.T) {
 		ContainerID: "mock-container-1",
 		Status:      models.StatusIdle,
 	}
-	store.Save(w)
+	seedWorld(mb, w)
 
 	destroyed, err := arch.Destroy(context.Background(), "w-destroy-11111")
 	if err != nil {
@@ -333,7 +375,8 @@ func TestDestroy_WritesJournal(t *testing.T) {
 		MindPath:    mindDir,
 		CreatedAt:   time.Now().Add(-5 * time.Minute),
 	}
-	store.Save(w)
+	seedWorld(mb, w)
+	_ = store
 
 	_, err := arch.Destroy(context.Background(), "w-journal-11111")
 	if err != nil {
@@ -376,7 +419,8 @@ func TestDestroy_MultiAgentWritesAllJournals(t *testing.T) {
 			{Name: "worker-b", AgentID: "a-worker-b-22222", Role: "worker", Status: models.StatusRunning},
 		},
 	}
-	store.Save(w)
+	seedWorld(mb, w)
+	_ = store
 
 	_, err := arch.Destroy(context.Background(), "w-multi-22222")
 	if err != nil {
@@ -400,15 +444,16 @@ func TestDestroyAll_RemovesAllWorlds(t *testing.T) {
 	mb := newMockBackend()
 	arch, store := newTestArchitect(t, mb)
 
-	// Save multiple worlds
+	// Seed multiple worlds via the mock backend
 	for _, id := range []string{"w-all-11111", "w-all-22222", "w-all-33333"} {
-		store.Save(models.World{
+		seedWorld(mb, models.World{
 			ID:          id,
 			Config:      "test",
 			ContainerID: "ctr-" + id,
 			Status:      models.StatusRunning,
 		})
 	}
+	_ = store
 
 	destroyed, err := arch.DestroyAll(context.Background())
 	if err != nil {
@@ -447,7 +492,8 @@ func TestSnapshot_Success(t *testing.T) {
 		ContainerID: "mock-snap-ctr",
 		Status:      models.StatusIdle,
 	}
-	store.Save(w)
+	seedWorld(mb, w)
+	_ = store
 
 	tag, err := arch.Snapshot(context.Background(), "w-snap-22222", "mysnap")
 	if err != nil {
@@ -476,7 +522,8 @@ func TestSnapshot_CommitError(t *testing.T) {
 	mb.commitErr = fmt.Errorf("disk full")
 	arch, store := newTestArchitect(t, mb)
 
-	store.Save(models.World{ID: "w-err-33333", ContainerID: "ctr-1", Status: models.StatusIdle})
+	seedWorld(mb, models.World{ID: "w-err-33333", ContainerID: "ctr-1", Status: models.StatusIdle})
+	_ = store
 
 	_, err := arch.Snapshot(context.Background(), "w-err-33333", "test")
 	if err == nil {

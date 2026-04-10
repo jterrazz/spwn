@@ -14,6 +14,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	containerTypes "github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	imageTypes "github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -55,6 +56,7 @@ func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error
 		Image:      cfg.Image,
 		Entrypoint: []string{"sleep", "infinity"},
 		Env:        cfg.Env,
+		Labels:     cfg.Labels,
 	}
 
 	resp, err := d.client.ContainerCreate(ctx, containerCfg, hostCfg, nil, nil, cfg.Name)
@@ -379,6 +381,7 @@ func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, 
 	if info.State != nil && info.State.StartedAt != "" {
 		startedAt, _ = time.Parse(time.RFC3339Nano, info.State.StartedAt)
 	}
+	createdAt, _ := time.Parse(time.RFC3339Nano, info.Created)
 
 	name := info.Name
 	if len(name) > 0 && name[0] == '/' {
@@ -392,6 +395,11 @@ func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, 
 		running = info.State.Running
 	}
 
+	var labels map[string]string
+	if info.Config != nil {
+		labels = info.Config.Labels
+	}
+
 	return &ContainerInfo{
 		ID:        info.ID,
 		Name:      name,
@@ -399,7 +407,51 @@ func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, 
 		Status:    status,
 		Running:   running,
 		StartedAt: startedAt,
+		CreatedAt: createdAt,
+		Labels:    labels,
 	}, nil
+}
+
+// ListContainersByLabel enumerates every container (running OR stopped)
+// whose Docker labels include key=value. Used by the state store to
+// list spwn worlds straight from the daemon — no JSON file involved,
+// no possibility of drift after `docker rm`.
+func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) ([]ContainerInfo, error) {
+	args := filters.NewArgs()
+	if value == "" {
+		args.Add("label", key)
+	} else {
+		args.Add("label", key+"="+value)
+	}
+
+	containers, err := d.client.ContainerList(ctx, containerTypes.ListOptions{
+		All:     true, // include stopped — a stopped world is still a world
+		Filters: args,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("list containers: %w", err)
+	}
+
+	out := make([]ContainerInfo, 0, len(containers))
+	for _, c := range containers {
+		name := ""
+		if len(c.Names) > 0 {
+			name = c.Names[0]
+			if len(name) > 0 && name[0] == '/' {
+				name = name[1:]
+			}
+		}
+		out = append(out, ContainerInfo{
+			ID:        c.ID,
+			Name:      name,
+			Image:     c.Image,
+			Status:    c.Status,
+			Running:   c.State == "running",
+			CreatedAt: time.Unix(c.Created, 0),
+			Labels:    c.Labels,
+		})
+	}
+	return out, nil
 }
 
 // CreateNamedContainer creates a container with explicit config and host config.
