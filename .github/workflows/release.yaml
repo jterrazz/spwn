@@ -88,6 +88,15 @@ jobs:
           # notary service via APPLE_ID + APPLE_PASSWORD (the latter
           # MUST be an app-specific password, not the real Apple ID
           # password).
+          #
+          # Gotcha that ate v0.14.2 + v0.14.3: the .p12 must be
+          # exported with `openssl pkcs12 -export -legacy`. Modern
+          # openssl 3.x defaults to PBKDF2 + AES which `security
+          # import` on macOS can't read, and the error message is
+          # the misleading "MAC verification failed (wrong
+          # password?)". The legacy flag falls back to PBE-SHA1-3DES
+          # which every macOS understands. If you ever rotate the
+          # cert: re-export with -legacy.
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
