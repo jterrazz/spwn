@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useProgressMessages } from "@/hooks/use-progress-messages";
 import { ProgressShimmer } from "@/components/progress-shimmer";
 import { getWorkspaceSummary, getWorldName, type World, type Agent } from "@/lib/types";
-import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
+import { apiGet, apiPost, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { streamChat } from "@/lib/stream-chat";
 import type { ActivityBlock } from "@/lib/activity-types";
 import { ActivityBlocksRenderer } from "@/components/activity-blocks";
@@ -20,6 +20,11 @@ import {
   IconRestore,
   IconSend,
   IconPencil,
+  IconUserPlus,
+  IconLoader2,
+  IconArrowRight,
+  IconSparkles,
+  IconWorld,
 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
@@ -432,18 +437,23 @@ export default function WorldDashboard() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <SectionHeader className="mb-0">Agents</SectionHeader>
-            <button
-              onClick={() => router.push("/agents")}
-              className="text-[10px] font-mono text-muted-foreground/35 hover:text-foreground/70 transition-colors"
-            >
-              + Deploy
-            </button>
+            {world.agents.length > 0 && (
+              <button
+                onClick={() => router.push("/agents")}
+                className="text-[10px] font-mono text-muted-foreground/35 hover:text-foreground/70 transition-colors"
+              >
+                + Deploy
+              </button>
+            )}
           </div>
+          {world.agents.length === 0 ? (
+            <EmptyAgentsView worldId={worldId} onDeployed={fetchWorld} />
+          ) : (
           <DataTable<Agent>
             rows={world.agents}
             rowKey={(a) => a.name}
             rowHref={(a) => `/agents/${encodeURIComponent(a.name)}?world=${worldId}`}
-            emptyText="No agents deployed — deploy from the Agents page."
+            emptyText="No agents deployed."
             columns={[
               {
                 key: "name",
@@ -477,6 +487,7 @@ export default function WorldDashboard() {
               },
             ]}
           />
+          )}
         </div>
       </div>
 
@@ -569,6 +580,231 @@ export default function WorldDashboard() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Empty-agents view ─────────────────────────────────────────────────
+//
+// Replaces the bare "No agents deployed" placeholder when a world has
+// zero members. Two paths to populate:
+//
+//   1. One of the user's already-installed agents → POST
+//      /api/worlds/{id}/agents and refetch.
+//   2. A fresh template from the gallery → POST /api/examples/<slug>
+//      /install, then deploy the first installed agent that is
+//      compatible (same flow but two requests instead of one).
+//
+// The component is self-contained — fetches its own data, has its own
+// loading/error state, and reports back through onDeployed so the
+// parent can refetch the world.
+
+interface InstalledAgentItem {
+  name: string;
+  layers?: Record<string, string[]>;
+}
+
+interface EmptyAgentsExample {
+  slug: string;
+  name: string;
+  tagline: string;
+  agents: string[];
+  worlds: string[];
+}
+
+function EmptyAgentsView({
+  worldId,
+  onDeployed,
+}: {
+  worldId: string;
+  onDeployed: () => void;
+}) {
+  const [installed, setInstalled] = useState<InstalledAgentItem[] | null>(null);
+  const [gallery, setGallery] = useState<EmptyAgentsExample[] | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showGallery, setShowGallery] = useState(false);
+
+  useEffect(() => {
+    apiGet<InstalledAgentItem[]>("/api/agents")
+      .then((data) => setInstalled(data ?? []))
+      .catch(() => setInstalled([]));
+    apiGet<{ examples: EmptyAgentsExample[] }>("/api/examples")
+      .then((data) => setGallery(data.examples ?? []))
+      .catch(() => setGallery([]));
+  }, []);
+
+  const deploy = async (name: string, role: string = "worker") => {
+    setBusy(name);
+    setError(null);
+    try {
+      const res = await fetch(goApiUrl(`/api/worlds/${worldId}/agents`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, role }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `deploy failed (${res.status})`);
+      }
+      onDeployed();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "deploy failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const installAndDeploy = async (ex: EmptyAgentsExample) => {
+    setBusy(ex.slug);
+    setError(null);
+    try {
+      // 1. Install the template (idempotent — keeps user edits).
+      await apiPost(`/api/examples/${ex.slug}/install`);
+      // 2. Deploy the example's primary agent into THIS world.
+      const primary = ex.agents[0];
+      if (!primary) throw new Error("template has no agents");
+      await deploy(primary);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "install failed");
+      setBusy(null);
+    }
+  };
+
+  const isLoading = installed === null || gallery === null;
+  const noInstalled = installed && installed.length === 0;
+
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.01] px-5 py-6">
+      <div className="mb-4 flex items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-br from-blue-500/10 to-purple-500/10">
+          <IconUserPlus size={16} className="text-blue-400/80" />
+        </div>
+        <div className="min-w-0">
+          <h3 className="text-sm font-medium text-foreground/95">
+            This world is empty
+          </h3>
+          <p className="mt-0.5 text-[11px] text-muted-foreground/60">
+            Pick one of your agents to deploy here, or install a fresh one
+            from the gallery. Deployment is hot — no container restart.
+          </p>
+        </div>
+      </div>
+
+      {error && (
+        <p className="mb-3 text-[11px] text-red-300/80">{error}</p>
+      )}
+
+      {/* ── Already-installed agents ─────────────────────────────── */}
+      {isLoading ? (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-16 rounded-lg" />
+          ))}
+        </div>
+      ) : noInstalled ? (
+        <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[11px] text-muted-foreground/60">
+          You don&apos;t have any agents installed yet. Pick one from the
+          gallery below to install and deploy in one click.
+        </div>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {installed!.map((a) => (
+            <button
+              key={a.name}
+              type="button"
+              onClick={() => deploy(a.name)}
+              disabled={busy !== null}
+              className="group flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left transition-colors hover:border-white/[0.16] hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <div className="min-w-0">
+                <div className="truncate text-[12px] font-mono text-foreground/90">
+                  {a.name}
+                </div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground/40">
+                  worker
+                </div>
+              </div>
+              {busy === a.name ? (
+                <IconLoader2
+                  size={13}
+                  className="shrink-0 animate-spin text-muted-foreground/60"
+                />
+              ) : (
+                <span className="inline-flex shrink-0 items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground/40 group-hover:text-foreground/80">
+                  Deploy
+                  <IconArrowRight size={11} />
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Gallery toggle / panel ──────────────────────────────── */}
+      <div className="mt-5">
+        <button
+          type="button"
+          onClick={() => setShowGallery((v) => !v)}
+          className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground/50 hover:text-foreground/80 transition-colors"
+        >
+          <IconSparkles size={11} />
+          {showGallery
+            ? "Hide template gallery"
+            : noInstalled
+              ? "Install one from a template"
+              : "Or install a new one from a template"}
+        </button>
+
+        {showGallery && (
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {gallery && gallery.length > 0 ? (
+              gallery.map((ex) => (
+                <button
+                  key={ex.slug}
+                  type="button"
+                  onClick={() => installAndDeploy(ex)}
+                  disabled={busy !== null}
+                  className="group flex items-start gap-2.5 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left transition-colors hover:border-white/[0.16] hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <IconWorld
+                    size={14}
+                    className="mt-0.5 shrink-0 text-blue-400/70"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[12px] font-medium text-foreground/95">
+                      {ex.name}
+                    </div>
+                    <div className="truncate text-[10px] text-muted-foreground/60">
+                      {ex.tagline}
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {ex.agents.slice(0, 3).map((a) => (
+                        <span
+                          key={a}
+                          className="rounded border border-white/[0.06] bg-white/[0.03] px-1 py-0.5 text-[9px] font-mono text-muted-foreground/60"
+                        >
+                          {a}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {busy === ex.slug && (
+                    <IconLoader2
+                      size={12}
+                      className="shrink-0 animate-spin text-muted-foreground/60"
+                    />
+                  )}
+                </button>
+              ))
+            ) : (
+              <p className="col-span-full text-[11px] text-muted-foreground/60">
+                No templates bundled in this build.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
