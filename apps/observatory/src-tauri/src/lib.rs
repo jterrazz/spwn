@@ -55,13 +55,28 @@ pub fn run() {
     // Pick a random available port for the Go API
     let api_port = portpicker::pick_unused_port().expect("No free port available");
 
+    // On macOS, GUI apps launched by Finder / launchd inherit a
+    // sanitized PATH ("/usr/bin:/bin:/usr/sbin:/sbin") that does NOT
+    // include /opt/homebrew/bin or /usr/local/bin where Docker Desktop
+    // and Homebrew install their binaries. Augment PATH before we
+    // spawn the spwn child so every `exec.Command("docker", ...)` call
+    // inside the Go process resolves correctly. The Go side also
+    // re-runs the same augmentation at process start (defense in
+    // depth — if a user launches spwn directly via Spotlight, the
+    // GUI-launched spwn binary still fixes its own PATH).
+    let augmented_path = augmented_path();
+
     // Find spwn binary — check PATH first, then common locations
-    let spwn_bin = which_spwn();
+    let spwn_bin = which_spwn(&augmented_path);
 
     // Run migrations before starting the API server.
     // This ensures the user's ~/.spwn data is up-to-date even if they
     // haven't used the CLI directly since updating the app.
-    match Command::new(&spwn_bin).args(["version"]).output() {
+    match Command::new(&spwn_bin)
+        .env("PATH", &augmented_path)
+        .args(["version"])
+        .output()
+    {
         Ok(output) if output.status.success() => {
             println!("[spwn] Migrations applied (via CLI pre-run hook)");
         }
@@ -76,6 +91,7 @@ pub fn run() {
 
     // Start the Go API server as a child process
     let child = Command::new(&spwn_bin)
+        .env("PATH", &augmented_path)
         .args(["dash", "start", "--port", &api_port.to_string()])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -160,9 +176,49 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-fn which_spwn() -> String {
-    // Check PATH
-    if let Ok(output) = Command::new("which").arg("spwn").output() {
+/// Return PATH with well-known Homebrew / Docker Desktop locations
+/// prepended, de-duplicated. Matches the Go-side
+/// `foundation.EnsureDockerFriendlyPATH` — keep in sync.
+fn augmented_path() -> String {
+    let current = std::env::var("PATH").unwrap_or_default();
+    let extras: &[&str] = if cfg!(target_os = "macos") {
+        &[
+            "/opt/homebrew/bin",
+            "/opt/homebrew/sbin",
+            "/usr/local/bin",
+            "/usr/local/sbin",
+            "/Applications/Docker.app/Contents/Resources/bin",
+        ]
+    } else if cfg!(target_os = "linux") {
+        &["/usr/local/bin", "/usr/local/sbin", "/snap/bin"]
+    } else {
+        &[]
+    };
+
+    let mut seen: std::collections::HashSet<&str> = std::collections::HashSet::new();
+    let mut out: Vec<String> = Vec::new();
+    for extra in extras {
+        if seen.insert(*extra) {
+            out.push((*extra).to_string());
+        }
+    }
+    for p in current.split(':') {
+        if !p.is_empty() && seen.insert(p) {
+            out.push(p.to_string());
+        }
+    }
+    out.join(":")
+}
+
+fn which_spwn(augmented_path: &str) -> String {
+    // Check PATH using the augmented PATH so /usr/local/bin/spwn and
+    // ~/.local/bin/spwn are actually reachable by `which` when the
+    // GUI-inherited PATH doesn't include them.
+    if let Ok(output) = Command::new("which")
+        .arg("spwn")
+        .env("PATH", augmented_path)
+        .output()
+    {
         if output.status.success() {
             let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
             if !path.is_empty() {
@@ -176,6 +232,7 @@ fn which_spwn() -> String {
     let candidates = [
         format!("{home}/.local/bin/spwn"),
         "/usr/local/bin/spwn".to_string(),
+        "/opt/homebrew/bin/spwn".to_string(),
         format!("{home}/go/bin/spwn"),
     ];
 
