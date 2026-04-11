@@ -2,9 +2,10 @@
 // templates — full worlds and agents with pre-written personas —
 // that first-time users can install with one click or one command.
 //
-// Every template lives under templates/<slug>/ and is embedded into
-// the binary at build time via go:embed. The package exposes three
-// operations:
+// Every template lives at /examples/<slug>/ at the repo root and is
+// embedded into the binary at build time via go:embed. The template
+// directories sit alongside this Go file so contributors can discover
+// and edit them directly from the repo root. The package exposes:
 //
 //   List(): the metadata for every template in the gallery
 //   Get(slug): one template's metadata + its bundled README
@@ -14,6 +15,12 @@
 // The templates themselves are intentionally small and read-only on
 // disk — install is a one-time copy operation, and once copied the
 // user can edit the files freely without affecting the source.
+//
+// The embed directive below lists every slug explicitly. When adding
+// a new template, add a new directory AND append it here AND to
+// shippedSlugs — the list is load-bearing and the shipped-templates
+// test will fail loudly if a directory exists without a matching
+// embed entry.
 package examples
 
 import (
@@ -31,8 +38,29 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed all:templates
+//go:embed all:macrohard all:matrix all:paperclip-factory all:research-lab all:startup
 var templatesFS embed.FS
+
+// shippedSlugs is the canonical list of bundled templates, in
+// display order. The TestShippedSlugsMatchEmbed test asserts this
+// matches both the embed directive above and the directories
+// actually present on disk.
+var shippedSlugs = []string{
+	"macrohard",
+	"matrix",
+	"paperclip-factory",
+	"research-lab",
+	"startup",
+}
+
+// ShippedSlugs returns the list of bundled templates as a fresh copy.
+// Exposed for binary-level bundling tests that need to verify every
+// expected slug is present without reading the embed FS directly.
+func ShippedSlugs() []string {
+	out := make([]string, len(shippedSlugs))
+	copy(out, shippedSlugs)
+	return out
+}
 
 // Example is the public-facing description of one template.
 type Example struct {
@@ -63,17 +91,15 @@ var ErrNotFound = errors.New("example not found")
 
 // List returns every template the binary knows about, sorted by slug
 // for stable output. README bodies are omitted; call Get for details.
+//
+// Iteration order is driven by shippedSlugs rather than embed.FS root
+// ReadDir so the list is deterministic even if new entries appear in
+// the embed before shippedSlugs is updated — keeping the "canonical
+// list" guarantee explicit.
 func List() ([]Example, error) {
-	entries, err := templatesFS.ReadDir("templates")
-	if err != nil {
-		return nil, fmt.Errorf("read templates: %w", err)
-	}
-	out := make([]Example, 0, len(entries))
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		ex, err := loadMetadata(e.Name())
+	out := make([]Example, 0, len(shippedSlugs))
+	for _, slug := range shippedSlugs {
+		ex, err := loadMetadata(slug)
 		if err != nil {
 			// Skip broken templates rather than failing the whole list.
 			// A malformed example should never break the gallery for
@@ -93,7 +119,7 @@ func Get(slug string) (Example, error) {
 	if err != nil {
 		return Example{}, err
 	}
-	readmeBytes, err := templatesFS.ReadFile(path("templates", slug, "README.md"))
+	readmeBytes, err := templatesFS.ReadFile(path(slug, "README.md"))
 	if err == nil {
 		ex.Readme = string(readmeBytes)
 	}
@@ -119,7 +145,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	if err := os.MkdirAll(worldsRoot, 0o755); err != nil {
 		return rep, fmt.Errorf("create worlds dir: %w", err)
 	}
-	worldsSrc := path("templates", slug, "worlds")
+	worldsSrc := path(slug, "worlds")
 	worldEntries, err := templatesFS.ReadDir(worldsSrc)
 	if err == nil {
 		for _, e := range worldEntries {
@@ -147,7 +173,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	if err := os.MkdirAll(agentsRoot, 0o755); err != nil {
 		return rep, fmt.Errorf("create agents dir: %w", err)
 	}
-	agentsSrc := path("templates", slug, "agents")
+	agentsSrc := path(slug, "agents")
 	agentEntries, err := templatesFS.ReadDir(agentsSrc)
 	if err == nil {
 		for _, e := range agentEntries {
@@ -180,7 +206,7 @@ func InstallInto(slug string) (InstallReport, error) {
 // ── internals ─────────────────────────────────────────────────────────
 
 func loadMetadata(slug string) (Example, error) {
-	data, err := templatesFS.ReadFile(path("templates", slug, "example.yaml"))
+	data, err := templatesFS.ReadFile(path(slug, "example.yaml"))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return Example{}, ErrNotFound

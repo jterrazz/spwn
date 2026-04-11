@@ -9,13 +9,13 @@ require (
 	golang.org/x/term v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 	spwn.sh/core/agent v0.0.0
-	spwn.sh/core/examples v0.0.0
 	spwn.sh/core/foundation v0.0.0
 	spwn.sh/core/gate v0.0.0
 	spwn.sh/core/imagebuilder v0.0.0
 	spwn.sh/core/messenger v0.0.0
 	spwn.sh/core/migration v0.0.0
 	spwn.sh/core/universe v0.0.0
+	spwn.sh/examples v0.0.0
 )
 
 require (
@@ -51,11 +51,11 @@ require (
 
 replace (
 	spwn.sh/core/agent => ../../core/agent
-	spwn.sh/core/examples => ../../core/examples
 	spwn.sh/core/foundation => ../../core/foundation
 	spwn.sh/core/gate => ../../core/gate
 	spwn.sh/core/imagebuilder => ../../core/imagebuilder
 	spwn.sh/core/messenger => ../../core/messenger
 	spwn.sh/core/migration => ../../core/migration
 	spwn.sh/core/universe => ../../core/universe
+	spwn.sh/examples => ../../examples
 )

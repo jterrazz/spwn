@@ -16,7 +16,6 @@ import (
 	"time"
 
 	agentpkg "spwn.sh/core/agent"
-	"spwn.sh/core/examples"
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/foundation/auth"
@@ -25,6 +24,7 @@ import (
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/state"
+	"spwn.sh/examples"
 
 	"gopkg.in/yaml.v3"
 )
