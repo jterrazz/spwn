@@ -1,6 +1,6 @@
 [package]
 name = "spwn-app"
-version = "0.14.2"
+version = "0.14.3"
 description = "spwn — desktop app for AI agent worlds"
 authors = ["jterrazz"]
 edition = "2024"
