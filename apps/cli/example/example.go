@@ -1,13 +1,14 @@
 // Package example wires the `spwn example …` cobra tree. It's a
-// tiny shell around the core/examples package — listing and
+// tiny shell around the spwn.sh/examples package — listing and
 // installing is all one-shot filesystem work, no state involved.
 package example
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/examples"
+	"spwn.sh/examples"
 
 	"github.com/spf13/cobra"
 )
@@ -29,6 +30,8 @@ Examples:
   spwn example install paperclip-factory`,
 }
 
+var listJSON bool
+
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Show every bundled example",
@@ -37,6 +40,24 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		// --json is the stable contract used by bundling tests and by
+		// the Tauri pre-release verification hook. On any zero-list
+		// result it still emits {"examples":[]} and exits non-zero so
+		// CI can fail loudly instead of silently shipping a hollow
+		// binary.
+		if listJSON {
+			enc := json.NewEncoder(cmd.OutOrStdout())
+			enc.SetIndent("", "  ")
+			if err := enc.Encode(map[string]interface{}{"examples": list}); err != nil {
+				return err
+			}
+			if len(list) == 0 {
+				return fmt.Errorf("no examples bundled in this build")
+			}
+			return nil
+		}
+
 		if len(list) == 0 {
 			fmt.Fprintln(cmd.OutOrStdout(), "no examples bundled in this build")
 			return nil
@@ -98,6 +119,7 @@ var installCmd = &cobra.Command{
 }
 
 func init() {
+	listCmd.Flags().BoolVar(&listJSON, "json", false, "emit the bundled example list as JSON and fail with exit code 1 if empty")
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(installCmd)
 }

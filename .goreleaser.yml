@@ -5,6 +5,10 @@ project_name: spwn
 before:
   hooks:
     - sh -c "cd apps/cli && go mod tidy"
+    # Bundling gate: if the embed is broken (missing template dirs,
+    # stale go:embed directive, shippedSlugs drift, etc.) we fail the
+    # release here rather than shipping a hollow binary like v28.x.
+    - sh -c "cd apps/cli && go test -run TestBundling_CompiledBinaryShipsExamples -v ."
 
 builds:
   - id: spwn
@@ -21,6 +25,13 @@ builds:
       - arm64
     ldflags:
       - -s -w -X spwn.sh/apps/cli.Version={{.Version}}
+    hooks:
+      # Post-build bundling gate: run the freshly-compiled binary
+      # targeting the host OS/arch only, and assert --json returns
+      # every canonical slug. Skips cross-compiled builds since we
+      # can't execute them here.
+      post:
+        - cmd: sh -c 'if [ "{{ .Os }}" = "$(go env GOOS)" ] && [ "{{ .Arch }}" = "$(go env GOARCH)" ]; then "{{ .Path }}" example list --json > /dev/null; fi'
 
 archives:
   - id: spwn

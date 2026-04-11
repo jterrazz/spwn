@@ -3,12 +3,12 @@ go 1.25.0
 use (
 	./apps/cli
 	./core/agent
-	./core/examples
 	./core/foundation
 	./core/gate
 	./core/imagebuilder
 	./core/messenger
 	./core/migration
 	./core/universe
+	./examples
 	./platform/images
 )

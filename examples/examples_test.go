@@ -1,10 +1,124 @@
 package examples
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 )
+
+// TestShippedSlugsMatchEmbed is the load-bearing invariant: it asserts
+// that the canonical shippedSlugs list, the go:embed directive, and the
+// on-disk template directories all agree. If any of the three drift
+// (someone adds a directory without updating the embed, or updates
+// shippedSlugs but forgets the embed, etc.), this test fails loudly.
+//
+// Runs against templatesFS so it exercises the exact bytes that ship
+// in the compiled binary — NOT the filesystem.
+func TestShippedSlugsMatchEmbed(t *testing.T) {
+	entries, err := fs.ReadDir(templatesFS, ".")
+	if err != nil {
+		t.Fatalf("read embed root: %v", err)
+	}
+
+	embedded := make([]string, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() {
+			embedded = append(embedded, e.Name())
+		}
+	}
+	sort.Strings(embedded)
+
+	canonical := append([]string(nil), shippedSlugs...)
+	sort.Strings(canonical)
+
+	if !stringsEqual(embedded, canonical) {
+		t.Fatalf("shippedSlugs %v != embedded dirs %v — update the go:embed directive AND shippedSlugs together when adding a template", canonical, embedded)
+	}
+}
+
+// TestShippedSlugsStructure asserts every shipped slug has the
+// minimum filesystem contract that Install and Get depend on:
+//   <slug>/example.yaml
+//   <slug>/README.md
+//   <slug>/agents/<at-least-one-dir>/
+//   <slug>/worlds/<at-least-one-yaml>
+//
+// Without these, the binary ships but misbehaves at runtime.
+func TestShippedSlugsStructure(t *testing.T) {
+	for _, slug := range shippedSlugs {
+		t.Run(slug, func(t *testing.T) {
+			mustExist := []string{
+				slug + "/example.yaml",
+				slug + "/README.md",
+			}
+			for _, p := range mustExist {
+				if _, err := fs.Stat(templatesFS, p); err != nil {
+					t.Errorf("missing %s: %v", p, err)
+				}
+			}
+
+			// At least one agent directory.
+			agentEntries, err := fs.ReadDir(templatesFS, slug+"/agents")
+			if err != nil {
+				t.Errorf("read %s/agents: %v", slug, err)
+				return
+			}
+			hasAgent := false
+			for _, e := range agentEntries {
+				if e.IsDir() {
+					hasAgent = true
+					break
+				}
+			}
+			if !hasAgent {
+				t.Errorf("%s: no agent directory under agents/", slug)
+			}
+
+			// At least one world yaml.
+			worldEntries, err := fs.ReadDir(templatesFS, slug+"/worlds")
+			if err != nil {
+				t.Errorf("read %s/worlds: %v", slug, err)
+				return
+			}
+			hasWorld := false
+			for _, e := range worldEntries {
+				if !e.IsDir() && filepath.Ext(e.Name()) == ".yaml" {
+					hasWorld = true
+					break
+				}
+			}
+			if !hasWorld {
+				t.Errorf("%s: no *.yaml under worlds/", slug)
+			}
+		})
+	}
+}
+
+// TestList_ReturnsExactCount locks in the list count so accidentally
+// dropping one shows up in CI before it reaches a binary.
+func TestList_ReturnsExactCount(t *testing.T) {
+	got, err := List()
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(got) != len(shippedSlugs) {
+		t.Fatalf("List() returned %d examples, want %d", len(got), len(shippedSlugs))
+	}
+}
+
+func stringsEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
 
 func TestList_AllShippedTemplatesParse(t *testing.T) {
 	got, err := List()
