@@ -1,0 +1,14 @@
+# Research — unproven ideas, isolated from production.
+
+physics:
+  constants:
+    cpu: 4
+    memory: 4g
+    disk: 8g
+    timeout: 2h
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/python"
+  - "@spwn/node"

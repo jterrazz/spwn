@@ -1,0 +1,14 @@
+# Matrix — sandbox world for first-time exploration.
+
+physics:
+  constants:
+    cpu: 2
+    memory: 2g
+    disk: 4g
+    timeout: 1h
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/python"

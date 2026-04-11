@@ -1,0 +1,18 @@
+slug: paperclip-factory
+name: Paperclip Factory
+tagline: Your single-agent automation workshop
+description: |
+  One tireless worker. A world built for loops, scripts, and scheduled work.
+  Clippy never sleeps — give it a directory full of things to process and it
+  will keep maximizing whatever you tell it to maximize.
+
+  What you get:
+    - One ephemeral world pre-configured with Unix, Git and Node tools
+    - One worker agent ("clippy") with a persona tuned for relentless automation
+    - Ready to chat the moment it's installed
+
+agents:
+  - clippy
+worlds:
+  - paperclip-factory
+command: spwn up -c paperclip-factory --agent clippy

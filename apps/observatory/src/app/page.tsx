@@ -7,12 +7,12 @@ import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS, getWorkspaceSummary, getWorldName } from "@/lib/types";
 import type { World } from "@/lib/types";
-import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconMoonFilled, IconWorldFilled, IconTerminal2 } from "@tabler/icons-react";
+import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconMoonFilled, IconWorldFilled, IconTerminal2, IconLoader2, IconDownload } from "@tabler/icons-react";
 import { Planet as PlanetGlobe } from "@/components/planet";
 import { NewWorldCard } from "@/components/new-world-card";
 import { WorldPlanet } from "@/components/world-planet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiGet, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
+import { apiGet, apiPost, apiAction, apiDelete, goApiUrl } from "@/lib/api-client";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { PageHeader } from "@/components/page-header";
 import { Page } from "@/components/page";
@@ -435,6 +435,10 @@ export default function UniverseMapPage() {
             <EmptyWorldsView
               agents={agents}
               onSpawn={() => setShowSpawn(true)}
+              onRefetch={() => {
+                fetchWorlds();
+                refetchSidebar();
+              }}
             />
           )}
 
@@ -593,54 +597,199 @@ function DashboardHeaderStats({
   );
 }
 
-function EmptyWorldsView({ agents, onSpawn }: { agents: AgentListItem[]; onSpawn: () => void }) {
+interface GalleryExample {
+  slug: string;
+  name: string;
+  tagline: string;
+  description: string;
+  agents: string[];
+  worlds: string[];
+  command?: string;
+}
+
+function EmptyWorldsView({ agents, onSpawn, onRefetch }: { agents: AgentListItem[]; onSpawn: () => void; onRefetch: () => void }) {
   const hasAgents = agents.length > 0;
+  const router = useRouter();
+  const [gallery, setGallery] = useState<GalleryExample[] | null>(null);
+  const [installing, setInstalling] = useState<string | null>(null);
+  const [installError, setInstallError] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiGet<{ examples: GalleryExample[] }>("/api/examples")
+      .then((data) => setGallery(data.examples ?? []))
+      .catch(() => setGallery([]));
+  }, []);
+
+  const handleInstallAndSpawn = async (ex: GalleryExample) => {
+    setInstalling(ex.slug);
+    setInstallError(null);
+    try {
+      // 1. Copy template files into ~/.spwn/ (idempotent — skips
+      //    existing agents/worlds so users don't lose local edits).
+      await apiPost(`/api/examples/${ex.slug}/install`);
+
+      // 2. Immediately spawn the first world with its canonical
+      //    agent set so the user lands in a live container on click.
+      const primaryWorld = ex.worlds[0];
+      const body: Record<string, unknown> = { config: primaryWorld };
+      if (ex.agents.length === 1) {
+        body.agent = ex.agents[0];
+      } else if (ex.agents.length > 1) {
+        body.agents = ex.agents.map((name) => ({ name, role: "worker" }));
+      }
+      const res = await fetch(goApiUrl("/api/worlds"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `spawn failed (${res.status})`);
+      }
+      const world = await res.json();
+      onRefetch();
+      if (world?.id) {
+        router.push(`/world/${world.id}`);
+      }
+    } catch (err) {
+      setInstallError(err instanceof Error ? err.message : "install failed");
+      setInstalling(null);
+    }
+  };
 
   return (
-    <div className="flex-1 min-h-[400px] flex items-center justify-center">
-      <div className="flex flex-col items-center text-center max-w-md">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/[0.06] flex items-center justify-center mb-6">
-          <IconPlanet size={36} className="text-muted-foreground/25" />
+    <div className="flex-1 min-h-[400px] flex items-start justify-center pt-12 pb-16 px-4">
+      <div className="w-full max-w-5xl">
+        <div className="text-center mb-10">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground/70">
+            <IconSparkles size={11} />
+            Start from a template
+          </div>
+          <h2 className="font-heading text-2xl tracking-wide text-foreground/90">
+            {hasAgents ? "Give your agents a world to work in" : "Pick a template and spawn in one click"}
+          </h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground/60">
+            {hasAgents
+              ? `You have ${agents.length} agent${agents.length > 1 ? "s" : ""} installed. Pick a template to put one to work, or build your own world from scratch.`
+              : "Each template ships a full world config + pre-written agents with personas. Clicking Install & spawn copies the files into ~/.spwn, creates a container and drops you straight into a conversation."}
+          </p>
         </div>
 
-        <h2 className="text-lg font-heading tracking-wide text-foreground/80 mb-2">
-          {hasAgents ? "No worlds running" : "Nothing running yet"}
-        </h2>
-        <p className="text-sm text-muted-foreground/40 leading-relaxed mb-8">
-          {hasAgents
-            ? `You have ${agents.length} agent${agents.length > 1 ? "s" : ""} ready. Spawn a world to put them to work.`
-            : "Spawn a world to give your agents a place to work. Each world is a Docker container with its own tools, files, and network."
-          }
-        </p>
-
-        <button
-          onClick={onSpawn}
-          className="group flex items-center gap-3 px-6 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] hover:bg-white/[0.10] hover:border-white/[0.16] transition-all duration-200"
-        >
-          <IconRocket size={18} className="text-blue-400/80 group-hover:text-blue-400" />
-          <span className="text-sm font-medium text-foreground/70 group-hover:text-foreground/90">Spawn a World</span>
-        </button>
-
-        <div className="mt-6 flex items-center gap-2 text-[11px] text-muted-foreground/25 font-mono">
-          <IconTerminal2 size={13} />
-          <span>spwn up --agent neo -w .</span>
-        </div>
-
-        {hasAgents && (
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
-            {agents.slice(0, 5).map((a) => (
-              <span key={a.name} className="px-2.5 py-1 rounded-full text-[10px] font-mono bg-white/[0.04] border border-white/[0.06] text-muted-foreground/40">
-                {a.name}
-              </span>
+        {gallery === null ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-52 rounded-2xl" />
             ))}
-            {agents.length > 5 && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-mono text-muted-foreground/25">
-                +{agents.length - 5} more
-              </span>
-            )}
+          </div>
+        ) : gallery.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground/60">
+            No examples bundled in this build.
+          </p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {gallery.map((ex) => (
+              <GalleryCard
+                key={ex.slug}
+                example={ex}
+                busy={installing === ex.slug}
+                disabled={installing !== null && installing !== ex.slug}
+                onInstall={() => handleInstallAndSpawn(ex)}
+              />
+            ))}
           </div>
         )}
+
+        {installError && (
+          <p className="mt-4 text-center text-xs text-red-300/80">{installError}</p>
+        )}
+
+        <div className="mt-10 flex flex-col items-center gap-2">
+          <button
+            onClick={onSpawn}
+            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground/50 hover:text-foreground/80 transition-colors"
+          >
+            <IconRocket size={12} />
+            Or build your own world from scratch
+          </button>
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground/30 font-mono">
+            <IconTerminal2 size={11} />
+            <span>spwn example list</span>
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function GalleryCard({
+  example,
+  busy,
+  disabled,
+  onInstall,
+}: {
+  example: GalleryExample;
+  busy: boolean;
+  disabled: boolean;
+  onInstall: () => void;
+}) {
+  const firstParagraph = example.description.split("\n\n")[0] ?? example.description;
+  return (
+    <div
+      className={`group relative flex h-full flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors ${
+        disabled ? "opacity-50" : "hover:border-white/[0.15] hover:bg-white/[0.04]"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-br from-blue-500/10 to-purple-500/10">
+          <IconWorld size={18} className="text-blue-400/80" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-heading text-sm tracking-wide text-foreground/95">{example.name}</h3>
+          <p className="text-[11px] text-muted-foreground/60">{example.tagline}</p>
+        </div>
+      </div>
+
+      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground/70 line-clamp-3">
+        {firstParagraph}
+      </p>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {example.agents.map((a) => (
+          <span
+            key={a}
+            className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-muted-foreground/70"
+          >
+            {a}
+          </span>
+        ))}
+        {example.worlds.length > 1 && (
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] text-muted-foreground/60">
+            {example.worlds.length} worlds
+          </span>
+        )}
+      </div>
+
+      <div className="flex-1" />
+
+      <button
+        type="button"
+        onClick={onInstall}
+        disabled={disabled || busy}
+        className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/[0.10] bg-white/[0.06] px-3 py-2 text-xs font-medium text-foreground/90 transition-colors hover:border-white/[0.18] hover:bg-white/[0.10] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {busy ? (
+          <>
+            <IconLoader2 size={13} className="animate-spin" />
+            Installing…
+          </>
+        ) : (
+          <>
+            <IconDownload size={13} />
+            Install &amp; spawn
+            <IconArrowRight size={12} className="ml-0.5 opacity-60" />
+          </>
+        )}
+      </button>
     </div>
   );
 }

@@ -1,0 +1,13 @@
+# Staging — devops + deployment glue.
+
+physics:
+  constants:
+    cpu: 2
+    memory: 2g
+    disk: 4g
+    timeout: 4h
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/node"
