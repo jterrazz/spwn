@@ -10,6 +10,7 @@ import (
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
 	"spwn.sh/apps/cli/dash"
+	"spwn.sh/apps/cli/example"
 	"spwn.sh/apps/cli/get"
 	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/knowledge"
@@ -85,6 +86,7 @@ func init() {
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
 	rootCmd.AddCommand(knowledge.Cmd)
+	rootCmd.AddCommand(example.Cmd)
 	rootCmd.AddCommand(dash.Cmd)
 	rootCmd.AddCommand(get.Cmd)
 	rootCmd.AddCommand(activity.Cmd)

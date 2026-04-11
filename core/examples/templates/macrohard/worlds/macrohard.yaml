@@ -1,0 +1,14 @@
+# Macrohard — three-agent software company.
+
+physics:
+  constants:
+    cpu: 4
+    memory: 4g
+    disk: 8g
+    timeout: 4h
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/python"

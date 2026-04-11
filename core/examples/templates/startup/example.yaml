@@ -1,0 +1,25 @@
+slug: startup
+name: Startup
+tagline: Three worlds, three stages, one team
+description: |
+  A complete little company with three parallel worlds — prod, staging
+  and research — each with its own agent. Designed to show what spwn
+  looks like when you run more than one world at a time.
+
+  What you get:
+    - prod     — ceo (chief), ships decisions
+    - staging  — devops, keeps the pipe flowing
+    - research — analyst, runs experiments without touching prod
+
+agents:
+  - ceo
+  - devops
+  - analyst
+worlds:
+  - prod
+  - staging
+  - research
+command: |
+  spwn up -c prod --agent ceo
+  spwn up -c staging --agent devops
+  spwn up -c research --agent analyst

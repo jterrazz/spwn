@@ -16,6 +16,7 @@ import (
 	"time"
 
 	agentpkg "spwn.sh/core/agent"
+	"spwn.sh/core/examples"
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/foundation/activity"
 	"spwn.sh/core/foundation/auth"
@@ -108,6 +109,9 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/system/docker", cors(s.handleSystemDocker))
 	mux.HandleFunc("GET /api/system/onboarding", cors(s.handleSystemOnboarding))
 	mux.HandleFunc("POST /api/system/onboarding/complete", cors(s.handleSystemOnboardingComplete))
+	mux.HandleFunc("GET /api/examples", cors(s.handleListExamples))
+	mux.HandleFunc("GET /api/examples/{slug}", cors(s.handleGetExample))
+	mux.HandleFunc("POST /api/examples/{slug}/install", cors(s.handleInstallExample))
 	mux.HandleFunc("GET /api/worlds", cors(s.handleListUniverses))
 	mux.HandleFunc("GET /api/universes", cors(s.handleListUniverses)) // legacy alias
 	mux.HandleFunc("GET /api/agents", cors(s.handleListAgents))
@@ -246,6 +250,50 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 		"hasAgents":   len(agents) > 0,
 		"docker":      docker,
 	})
+}
+
+// handleListExamples returns the full gallery of bundled example
+// templates. Used by the worlds-page empty state.
+func (s *Server) handleListExamples(w http.ResponseWriter, r *http.Request) {
+	list, err := examples.List()
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	jsonOK(w, map[string]interface{}{"examples": list})
+}
+
+// handleGetExample returns one example's metadata including its
+// bundled README body.
+func (s *Server) handleGetExample(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	ex, err := examples.Get(slug)
+	if err != nil {
+		if err == examples.ErrNotFound {
+			jsonError(w, "example not found", http.StatusNotFound)
+			return
+		}
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	jsonOK(w, ex)
+}
+
+// handleInstallExample copies the template's world configs and
+// agent dirs into ~/.spwn. Existing files are preserved (never
+// overwritten), so repeated installs are safe.
+func (s *Server) handleInstallExample(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	rep, err := examples.InstallInto(slug)
+	if err != nil {
+		if err == examples.ErrNotFound {
+			jsonError(w, "example not found", http.StatusNotFound)
+			return
+		}
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	jsonOK(w, rep)
 }
 
 // handleSystemOnboardingComplete marks the wizard as completed.
