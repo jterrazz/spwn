@@ -82,21 +82,18 @@ jobs:
           # Tauri auto-updater signing
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          # Apple code signing + notarization is intentionally NOT
-          # wired here. tauri-action eagerly imports any non-empty
-          # APPLE_CERTIFICATE env var into a temporary keychain and
-          # fails the whole build if the value is missing or
-          # malformed. Until a working Developer ID Application
-          # cert + private key pair is exported and added to the
-          # repo secrets, leaving these unset produces unsigned
-          # DMGs that ship cleanly. To re-enable signing, add the
-          # following env entries here once the secrets are set:
-          #   APPLE_CERTIFICATE
-          #   APPLE_CERTIFICATE_PASSWORD
-          #   APPLE_SIGNING_IDENTITY
-          #   APPLE_ID
-          #   APPLE_PASSWORD
-          #   APPLE_TEAM_ID
+          # Apple code signing + notarization (macOS only).
+          # tauri-action imports the .p12 cert into a temporary
+          # keychain, signs the .app + .dmg, then submits to Apple's
+          # notary service via APPLE_ID + APPLE_PASSWORD (the latter
+          # MUST be an app-specific password, not the real Apple ID
+          # password).
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           projectPath: apps/observatory
           tagName: ${{ github.ref_name }}
