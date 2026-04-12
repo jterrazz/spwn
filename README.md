@@ -133,6 +133,120 @@ Async inter-agent communication via filesystem inboxes. Agents send, receive, an
 
 <br/>
 
+## Ecosystem support
+
+Every layer of spwn is pluggable. Here's what works today and what's on the roadmap.
+
+### Agent runtimes
+
+The coding engine that runs inside each world.
+
+| Runtime | Status |
+|---|---|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (Anthropic) | **Supported** |
+| [Codex](https://openai.com/index/codex/) (OpenAI) | **Supported** |
+| [Aider](https://aider.chat) | Planned |
+| [Cline](https://cline.bot) | Planned |
+| [Continue](https://continue.dev) | Planned |
+| [OpenCode](https://opencode.ai) | Planned |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) (Google) | Planned |
+| [Amazon Q CLI](https://aws.amazon.com/q/developer/) | Planned |
+| [Goose](https://github.com/block/goose) (Block) | Planned |
+
+### Architect / Orchestrator adapters
+
+The brain that coordinates multi-agent collaboration.
+
+| Orchestrator | Status |
+|---|---|
+| Hermes (built-in) | Planned |
+| [CrewAI](https://crewai.com) | Planned |
+| [AutoGen](https://github.com/microsoft/autogen) (Microsoft) | Planned |
+| [LangGraph](https://github.com/langchain-ai/langgraph) (LangChain) | Planned |
+| [Swarm](https://github.com/openai/swarm) (OpenAI) | Planned |
+| [Mastra](https://mastra.ai) | Planned |
+
+### LLM providers
+
+Model backends for agent reasoning.
+
+| Provider | Status |
+|---|---|
+| [Anthropic](https://anthropic.com) (Claude) | **Supported** |
+| [OpenAI](https://openai.com) | **Supported** |
+| [Google](https://ai.google.dev) (Gemini) | Planned |
+| [Mistral](https://mistral.ai) | Planned |
+| [Groq](https://groq.com) | Planned |
+| [Together AI](https://together.ai) | Planned |
+| [Ollama](https://ollama.com) (local) | Planned |
+| [AWS Bedrock](https://aws.amazon.com/bedrock/) | Planned |
+
+### World providers
+
+Where worlds physically run — the isolation layer.
+
+| Provider | Status |
+|---|---|
+| [Docker](https://docker.com) | **Supported** |
+| Spwn Cloud (managed) | Planned |
+| [K3s](https://k3s.io) / Kubernetes | Planned |
+| [Firecracker](https://firecracker-microvm.github.io) (microVMs) | Planned |
+| [Fly.io](https://fly.io) | Planned |
+| [gVisor](https://gvisor.dev) | Planned |
+| [Podman](https://podman.io) | Planned |
+
+### Knowledge systems
+
+How agents store and retrieve long-term knowledge.
+
+| System | Status |
+|---|---|
+| Filesystem (built-in markdown) | **Supported** |
+| [RAG](https://en.wikipedia.org/wiki/Retrieval-augmented_generation) (vector search) | Planned |
+| [ChromaDB](https://www.trychroma.com) | Planned |
+| [Qdrant](https://qdrant.tech) | Planned |
+| [Pinecone](https://www.pinecone.io) | Planned |
+| [Weaviate](https://weaviate.io) | Planned |
+| [Turbopuffer](https://turbopuffer.com) | Planned |
+
+### Tool ecosystems
+
+How agents discover and use capabilities.
+
+| Ecosystem | Status |
+|---|---|
+| spwn tool packs (`@spwn/*`) | **Supported** |
+| Custom scripts | **Supported** |
+| [MCP servers](https://modelcontextprotocol.io) | Planned |
+| [LangChain tools](https://python.langchain.com/docs/integrations/tools/) | Planned |
+
+### Organization hierarchies
+
+How agents are structured and collaborate.
+
+| Hierarchy | Status |
+|---|---|
+| Three-tier (chief / manager / worker) | **Supported** |
+| Flat (all peers) | Planned |
+| Custom YAML | Planned |
+| DAO / consensus-based | Planned |
+
+### Observability
+
+Monitoring and debugging agent behavior.
+
+| Platform | Status |
+|---|---|
+| Observatory (built-in GUI) | **Supported** |
+| [Langfuse](https://langfuse.com) | Planned |
+| [LangSmith](https://smith.langchain.com) | Planned |
+| [Helicone](https://helicone.ai) | Planned |
+| [OpenTelemetry](https://opentelemetry.io) | Planned |
+
+> **Want something else?** [Open an issue](https://github.com/jterrazz/spwn/issues) or submit a PR — every adapter is a single Go interface.
+
+<br/>
+
 ## Use cases
 
 **Team with a leader** — a lead agent delegates tasks to worker agents via inboxes:
