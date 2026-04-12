@@ -332,7 +332,7 @@ skills:
   - @community/rust-review
 ```
 
-If a tool isn't listed, it doesn't exist. Not forbidden — physically absent. Browse the full [tool catalog](docs/tool-catalog.md) and [skill library](docs/skill-library.md).
+If a tool isn't listed, it doesn't exist. Not forbidden — physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
 
 <br/>
 
@@ -353,8 +353,8 @@ spwn agent ls                                  List your agents
 spwn agent show neo                            Inspect composition
 spwn agent rm neo                              Delete an agent
 spwn agent fork neo neo-v2                     Clone + evolve independently
-spwn agent publish neo                         Ship to registry (memory stripped)
-spwn agent pull @community/curie               Install a shared agent
+spwn agent publish neo                         Ship to registry (memory stripped)  [Epoch 10]
+spwn agent pull @community/curie               Install a shared agent              [Epoch 10]
 
 spwn agent add neo --tool @spwn/python         Add a tool block
 spwn agent add neo --skill paper-reading       Add a skill block
@@ -376,23 +376,23 @@ spwn world restore <snap-id>                   Rollback
 
 # ── Tools ────────────────────────────────────────────────────────
 spwn tool ls                                   Installed tool packs
-spwn tool search python                        Search the registry
-spwn tool install @spwn/python                 Install a tool pack
-spwn tool publish ./my-tool                    Ship to registry
+spwn tool search python                        Search the registry            [Epoch 10]
+spwn tool install @spwn/python                 Install a tool pack            [Epoch 10]
+spwn tool publish ./my-tool                    Ship to registry               [Epoch 10]
 
 # ── Skills ───────────────────────────────────────────────────────
 spwn skill ls                                  Your skill files
 spwn skill new paper-reading                   Author a new skill
 spwn skill edit paper-reading                  Open in $EDITOR
-spwn skill publish paper-reading               Ship to registry
-spwn skill install @community/rust-review      Install a shared skill
+spwn skill publish paper-reading               Ship to registry               [Epoch 10]
+spwn skill install @community/rust-review      Install a shared skill         [Epoch 10]
 
 # ── Profiles ─────────────────────────────────────────────────────
 spwn profile ls                                Your profiles
 spwn profile new researcher                    Author a profile
 spwn profile edit researcher                   Open in $EDITOR
-spwn profile publish researcher                Ship to registry
-spwn profile install @community/pragmatic-dev  Install a shared profile
+spwn profile publish researcher                Ship to registry               [Epoch 10]
+spwn profile install @community/pragmatic-dev  Install a shared profile       [Epoch 10]
 
 # ── Messages ─────────────────────────────────────────────────────
 spwn msg send neo --from morpheus "task"       Inter-agent messaging
