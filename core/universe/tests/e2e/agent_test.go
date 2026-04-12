@@ -15,7 +15,7 @@ func TestAgent_Init(t *testing.T) {
 	chain := setup.NewAgentBuilder(t).
 		Init("fresh-agent")
 
-	// THEN the Mind should have all standard layers and a default persona
+	// THEN the Mind should have all standard layers and a default profile
 	chain.ExpectMind(func(m *setup.MindAssertion) {
 		m.HasLayer("core")
 		m.HasLayer("skills")

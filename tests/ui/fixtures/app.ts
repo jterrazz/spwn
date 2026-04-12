@@ -1,29 +1,18 @@
 import { test as base, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-/**
- * Test config written by global-setup.
- */
-interface TestConfig {
-  apiPort: number;
-  spwnHome: string;
-  bin: string;
-}
-
-function loadConfig(): TestConfig {
-  const configPath = process.env.SPWN_TEST_CONFIG;
-  if (!configPath) {
-    throw new Error("SPWN_TEST_CONFIG env var not set — global-setup did not run?");
-  }
-  return JSON.parse(readFileSync(configPath, "utf-8"));
-}
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const API_PORT = 9877;
+const API_BASE = `http://localhost:${API_PORT}`;
+const BIN = resolve(__dirname, "../../../bin/spwn");
 
 /**
  * API helper — calls the Go API directly (faster than UI for setup).
  */
 class SpwnAPI {
-  constructor(private baseUrl: string, private config: TestConfig) {}
+  constructor(private baseUrl: string) {}
 
   async get<T = unknown>(path: string): Promise<T> {
     const res = await fetch(`${this.baseUrl}${path}`);
@@ -82,8 +71,7 @@ class SpwnAPI {
 
   /** Run a CLI command via the binary */
   cli(args: string): string {
-    return execSync(`${this.config.bin} ${args}`, {
-      env: { ...process.env, SPWN_HOME: this.config.spwnHome },
+    return execSync(`${BIN} ${args}`, {
       encoding: "utf-8",
       timeout: 30_000,
     });
@@ -158,8 +146,7 @@ export const test = base.extend<{
   app: SpwnPage;
 }>({
   api: async ({}, use) => {
-    const config = loadConfig();
-    const api = new SpwnAPI(`http://localhost:${config.apiPort}`, config);
+    const api = new SpwnAPI(API_BASE);
     await use(api);
     // Cleanup: destroy all worlds created during the test
     await api.destroyAll().catch(() => {});

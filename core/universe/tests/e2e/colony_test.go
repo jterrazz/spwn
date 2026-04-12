@@ -26,9 +26,9 @@ func TestColony_ChiefAndWorkerSpawn(t *testing.T) {
 	// tc.InitAgent("gov-agent")
 	// tc.InitAgent("worker-agent")
 	//
-	// Write profile.yaml for chief:
+	// Write agent.yaml for chief:
 	// govDir := filepath.Join(tc.BaseDir, "agents", "gov-agent")
-	// os.WriteFile(filepath.Join(govDir, "profile.yaml"), []byte("role: chief\n"), 0644)
+	// os.WriteFile(filepath.Join(govDir, "agent.yaml"), []byte("role: chief\n"), 0644)
 	//
 	// chain := tc.Spawn().
 	//     WithAgent("gov-agent").
@@ -43,7 +43,7 @@ func TestColony_ChiefAndWorkerSpawn(t *testing.T) {
 }
 
 func TestColony_SingleAgentDefaultsToWorker(t *testing.T) {
-	// GIVEN an agent without a profile.yaml (no role specified)
+	// GIVEN an agent without a agent.yaml (no role specified)
 	// WHEN spawned into a world
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
@@ -79,14 +79,14 @@ func TestColony_AgentMindLayersPresent(t *testing.T) {
 	})
 }
 
-func TestColony_RoleFromProfileYAML(t *testing.T) {
-	// BLOCKED: Role assignment from profile.yaml requires multi-agent colony support.
-	// The profile.yaml role field is parsed but not yet used in spawn because
+func TestColony_RoleFromAgentYAML(t *testing.T) {
+	// BLOCKED: Role assignment from agent.yaml requires multi-agent colony support.
+	// The agent.yaml role field is parsed but not yet used in spawn because
 	// the Architect only supports single-agent worlds. When colony spawn is
-	// added, verify that the role from profile.yaml is reflected in AgentRecord.
+	// added, verify that the role from agent.yaml is reflected in AgentRecord.
 	//
 	// Tracking: depends on TestColony_ChiefAndWorkerSpawn being unblocked.
-	t.Skip("Colony role assignment from profile.yaml not yet testable via E2E")
+	t.Skip("Colony role assignment from agent.yaml not yet testable via E2E")
 }
 
 func TestColony_MessagingBetweenAgents(t *testing.T) {

@@ -183,20 +183,20 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 }
 
 func TestAgentLifecycle_CustomIdentityFile(t *testing.T) {
-	// GIVEN an agent with a custom persona file in the identity layer
+	// GIVEN an agent with a custom file in the core/identity layer
 	tc := setup.NewTestContext(t)
-	tc.InitAgent("persona-agent")
+	tc.InitAgent("profile-agent")
 
-	identityDir := filepath.Join(agentDomain.AgentDir("persona-agent"), "core")
-	os.WriteFile(filepath.Join(identityDir, "custom.md"), []byte("# Custom Persona\nYou are a specialist."), 0644)
+	identityDir := filepath.Join(agentDomain.AgentDir("profile-agent"), "core")
+	os.WriteFile(filepath.Join(identityDir, "custom.md"), []byte("# Custom Profile\nYou are a specialist."), 0644)
 
 	// WHEN the agent is spawned in a universe
 	chain := tc.Spawn().
-		WithAgent("persona-agent").
+		WithAgent("profile-agent").
 		Detached().
 		Execute()
 
-	// THEN the mock should see the Mind with the custom persona
+	// THEN the mock should see the Mind with the custom profile
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.SawMind()

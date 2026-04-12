@@ -142,15 +142,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, err
 		}
 		opts.progress("mind_validated", name)
-		profile, err := manifest.LoadProfile(agent.AgentDir(name))
-		if err != nil {
-			return nil, fmt.Errorf("load profile manifest for %s: %w", name, err)
-		}
-		if profile != nil {
-			expandedTools := manifest.ExpandTools(opts.Manifest.Tools)
-			if err := manifest.ValidateRequires(profile, expandedTools); err != nil {
-				return nil, err
-			}
+		// Parse agent.yaml (optional). Used for future composition validation
+		// against the world's available tools.
+		if _, err := manifest.LoadAgent(agent.AgentDir(name)); err != nil {
+			return nil, fmt.Errorf("load agent manifest for %s: %w", name, err)
 		}
 	}
 

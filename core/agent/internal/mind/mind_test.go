@@ -206,34 +206,6 @@ func TestValidate_FileInsteadOfDir(t *testing.T) {
 	}
 }
 
-func TestValidate_LegacyPersonasDir(t *testing.T) {
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-
-	// Create agent dir with legacy personas/ instead of core/
-	agentDir := filepath.Join(tmp, "agents", "legacy")
-	os.MkdirAll(filepath.Join(agentDir, "personas"), 0755)
-
-	err := Validate("legacy")
-	if err != nil {
-		t.Errorf("expected legacy personas/ dir to pass validation, got: %v", err)
-	}
-}
-
-func TestValidate_LegacyIdentityDir(t *testing.T) {
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-
-	// Create agent dir with legacy identity/ instead of core/
-	agentDir := filepath.Join(tmp, "agents", "legacy-id")
-	os.MkdirAll(filepath.Join(agentDir, "identity"), 0755)
-
-	err := Validate("legacy-id")
-	if err != nil {
-		t.Errorf("expected legacy identity/ dir to pass validation, got: %v", err)
-	}
-}
-
 func TestLayerCount(t *testing.T) {
 	tests := []struct {
 		name string
@@ -244,7 +216,7 @@ func TestLayerCount(t *testing.T) {
 			name: "all_empty",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"personas": nil,
+					"core": nil,
 					"skills":   nil,
 				},
 			},
@@ -254,7 +226,7 @@ func TestLayerCount(t *testing.T) {
 			name: "some_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"personas": {"default.md"},
+					"core": {"default.md"},
 					"skills":   nil,
 					"journal":  {"entry.md"},
 				},
@@ -265,7 +237,7 @@ func TestLayerCount(t *testing.T) {
 			name: "all_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"personas":  {"a.md"},
+					"core":  {"a.md"},
 					"skills":    {"b.md"},
 					"knowledge": {"c.md"},
 				},

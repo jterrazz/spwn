@@ -133,7 +133,7 @@ func createTestAgent(t *testing.T, name string) string {
 	}
 
 	// Write core identity files
-	writeFile(t, filepath.Join(agentDir, "core", "persona.md"), "# Persona\n\nA helpful test agent.\n")
+	writeFile(t, filepath.Join(agentDir, "core", "profile.md"), "# Profile\n\nA helpful test agent.\n")
 	writeFile(t, filepath.Join(agentDir, "core", "purpose.md"), "# Purpose\n\nTo test the API.\n")
 	writeFile(t, filepath.Join(agentDir, "core", "traits.md"), "# Traits\n\n- curious\n- diligent\n")
 
@@ -143,8 +143,8 @@ func createTestAgent(t *testing.T, name string) string {
 	// Write a skill
 	writeFile(t, filepath.Join(agentDir, "skills", "coding.md"), "# Coding\n\nWrites Go code.\n")
 
-	// Write profile.yaml
-	writeFile(t, filepath.Join(agentDir, "profile.yaml"), "role: worker\nruntime:\n  engine: claude-code\n  provider: anthropic\n  model: claude-4\n")
+	// Write agent.yaml
+	writeFile(t, filepath.Join(agentDir, "agent.yaml"), "role: worker\nruntime:\n  engine: claude-code\n  provider: anthropic\n  model: claude-4\n")
 
 	return agentDir
 }
@@ -452,8 +452,8 @@ func TestGetAgentProfile(t *testing.T) {
 	if body["engine"] != "claude-code" {
 		t.Errorf("expected engine=claude-code, got %v", body["engine"])
 	}
-	if body["persona"] != "A helpful test agent." {
-		t.Errorf("expected persona content, got %v", body["persona"])
+	if body["profile"] != "A helpful test agent." {
+		t.Errorf("expected profile content, got %v", body["profile"])
 	}
 	if body["purpose"] != "To test the API." {
 		t.Errorf("expected purpose content, got %v", body["purpose"])
@@ -528,7 +528,7 @@ func TestGetAgentFile(t *testing.T) {
 	_, mux := newFullTestServer(t)
 	createTestAgent(t, "dave")
 
-	w := doJSON(t, mux, "GET", "/api/agents/dave/files/core/persona.md", nil)
+	w := doJSON(t, mux, "GET", "/api/agents/dave/files/core/profile.md", nil)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
 	}
@@ -538,8 +538,8 @@ func TestGetAgentFile(t *testing.T) {
 	if !ok || content == "" {
 		t.Errorf("expected file content, got %v", body["content"])
 	}
-	if body["path"] != "core/persona.md" {
-		t.Errorf("expected path=core/persona.md, got %v", body["path"])
+	if body["path"] != "core/profile.md" {
+		t.Errorf("expected path=core/profile.md, got %v", body["path"])
 	}
 }
 

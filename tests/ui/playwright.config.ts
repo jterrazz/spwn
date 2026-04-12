@@ -1,25 +1,25 @@
 import { defineConfig, devices } from "@playwright/test";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(__dirname, "../..");
+const BIN = resolve(REPO_ROOT, "bin/spwn");
 
 /**
- * Full-stack UI E2E test configuration.
+ * Full-stack UI E2E tests.
  *
- * Architecture:
- *   1. Global setup builds the Go binary and starts the API server
- *   2. Playwright webServer starts the Next.js dev server
- *   3. Tests run against the real UI + real API + real Docker
- *   4. Global teardown stops the API server and cleans up
+ * Both servers (Go API + Next.js) are managed by Playwright's
+ * webServer — they start before tests and stop after. No global
+ * setup/teardown needed for server lifecycle.
  *
- * Requirements:
- *   - Docker running (for world spawning tests)
- *   - Go 1.25+ (binary is built fresh in global setup)
- *   - spwn-test:latest image built (`make build-test-image`)
- *   - At least one API key configured (for agent talk tests)
+ * Uses the real ~/.spwn state — these are true integration tests.
  */
 export default defineConfig({
   testDir: "./specs",
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  fullyParallel: false, // worlds share Docker state — run sequentially
+  fullyParallel: false,
   retries: 0,
   workers: 1,
   reporter: [
@@ -35,21 +35,26 @@ export default defineConfig({
     actionTimeout: 15_000,
   },
 
-  // The Next.js dev server — started automatically by Playwright.
-  webServer: {
-    command: "npm run dev -- -p 1420",
-    cwd: "../apps/observatory",
-    port: 1420,
-    timeout: 30_000,
-    reuseExistingServer: !process.env.CI,
-    env: {
-      ...process.env,
-      NEXT_PUBLIC_API_URL: "http://localhost:9877",
+  webServer: [
+    {
+      command: `${BIN} dash start --port 9877`,
+      port: 9877,
+      timeout: 15_000,
+      reuseExistingServer: !process.env.CI,
     },
-  },
+    {
+      command: "npx next dev -p 1420",
+      cwd: resolve(REPO_ROOT, "apps/observatory"),
+      port: 1420,
+      timeout: 30_000,
+      reuseExistingServer: !process.env.CI,
+      env: {
+        ...process.env,
+        NEXT_PUBLIC_API_URL: "http://localhost:9877",
+      },
+    },
+  ],
 
-  // The Go API server is started in global setup (not here, because
-  // it needs a fresh binary build and SPWN_HOME isolation)
   globalSetup: "./setup/global-setup.ts",
   globalTeardown: "./setup/global-teardown.ts",
 

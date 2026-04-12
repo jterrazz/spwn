@@ -1,13 +1,14 @@
 import { test, expect } from "../fixtures/app";
 
 test.describe("API health", () => {
-  test("API is connected (not showing offline banner)", async ({ page }) => {
+  test("API is connected (not showing lock screen)", async ({ page }) => {
     await page.goto("/");
     await page.waitForTimeout(3000);
 
-    // Should NOT show the "Waiting for Docker" or "API OFFLINE" screen
     await expect(page.getByText("Waiting for Docker")).not.toBeVisible({ timeout: 5000 });
     await expect(page.getByText("API OFFLINE")).not.toBeVisible();
+    // The Worlds heading should be visible — confirms the app is past the lock screen
+    await expect(page.getByRole("heading", { name: "Worlds", level: 1 })).toBeVisible();
   });
 
   test("API version endpoint returns data", async ({ api }) => {
@@ -21,16 +22,15 @@ test.describe("API health", () => {
     expect(data.examples[0].slug).toBe("startup");
   });
 
-  test("API agents endpoint returns installed agents", async ({ api }) => {
+  test("API agents endpoint returns agents", async ({ api }) => {
     await api.installExample("matrix");
     const agents = await api.get<Array<{ name: string }>>("/api/agents");
     const names = agents.map((a) => a.name);
     expect(names).toContain("Neo");
   });
 
-  test("doctor check passes (Docker running)", async ({ api }) => {
-    const output = api.cli("doctor");
-    expect(output).toContain("Docker");
-    expect(output).toContain("✓");
+  test("Docker is detected as running", async ({ api }) => {
+    const docker = await api.get<{ running: boolean }>("/api/system/docker");
+    expect(docker.running).toBe(true);
   });
 });

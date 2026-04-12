@@ -70,15 +70,14 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show debug information")
 
 	// Top-level aliases — shortcuts for the 80% cases
-	rootCmd.AddCommand(world.UpCmd)       // spwn up
-	rootCmd.AddCommand(world.LsCmd)       // spwn ls
-	rootCmd.AddCommand(agent.TalkTopCmd)  // spwn talk
+	rootCmd.AddCommand(world.UpCmd)      // spwn up
+	rootCmd.AddCommand(world.LsCmd)      // spwn ls
+	rootCmd.AddCommand(agent.TalkTopCmd) // spwn talk
 
-	// Legacy top-level aliases (kept for muscle memory)
+	// Additional top-level shortcuts
 	rootCmd.AddCommand(world.DownCmd)
 	rootCmd.AddCommand(world.LogsTopCmd)
 	rootCmd.AddCommand(world.AttachTopCmd)
-	rootCmd.AddCommand(world.InspectTopCmd)
 
 	// Command groups — entities
 	rootCmd.AddCommand(world.Cmd)

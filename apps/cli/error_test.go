@@ -36,8 +36,8 @@ func TestCLI_ErrorNoUsageDump_WorldDestroyMissingArg(t *testing.T) {
 	}
 }
 
-func TestCLI_ErrorNoUsageDump_AgentInspectMissingArg(t *testing.T) {
-	_, stderr, err := executeCommand("agent", "inspect")
+func TestCLI_ErrorNoUsageDump_AgentShowMissingArg(t *testing.T) {
+	_, stderr, err := executeCommand("agent", "show")
 	if err == nil {
 		t.Fatal("expected error for missing argument")
 	}

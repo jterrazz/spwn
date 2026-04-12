@@ -12,7 +12,7 @@ Remove tools, skills, or profile from an agent
 Remove composable blocks from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent rm <name> --tool X' removes just that block.
+'spwn agent remove <name> --tool X' removes just that block.
 
 Examples:
   spwn agent remove neo --tool @spwn/python
@@ -27,7 +27,7 @@ spwn agent remove <agent-name> [flags]
 
 ```
   -h, --help                help for remove
-      --profile string      Remove profile (clears agent's profile)
+      --profile             Clear the agent's profile attachment
       --skill stringArray   Skill to remove (repeatable)
       --tool stringArray    Tool pack to remove (repeatable)
 ```

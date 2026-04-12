@@ -46,14 +46,6 @@ var AttachTopCmd = &cobra.Command{
 	RunE:  attachCmd.RunE,
 }
 
-// InspectTopCmd is the top-level alias for spwn inspect (kept for back-compat).
-var InspectTopCmd = &cobra.Command{
-	Use:   "inspect <world-id>",
-	Short: "Show world details, physics, and agent status",
-	Args:  cobra.ExactArgs(1),
-	RunE:  inspectCmd.RunE,
-}
-
 func init() {
 	// Copy flags from world Cmd to UpCmd — stay in sync with world.go
 	UpCmd.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named world config (default: default)")

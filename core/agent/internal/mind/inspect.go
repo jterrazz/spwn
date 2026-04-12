@@ -22,9 +22,9 @@ func Inspect(name string) (*AgentInfo, error) {
 		Layers: make(map[string][]string),
 	}
 
-	// Read team from profile.yaml (if exists).
-	profilePath := filepath.Join(dir, "profile.yaml")
-	if data, err := os.ReadFile(profilePath); err == nil {
+	// Read team from agent.yaml (if exists).
+	manifestPath := filepath.Join(dir, "agent.yaml")
+	if data, err := os.ReadFile(manifestPath); err == nil {
 		var p struct {
 			Team string `yaml:"team"`
 		}

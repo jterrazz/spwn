@@ -387,12 +387,12 @@ func spawnHint(err error, agentName string, agents []universe.AgentSpec) string 
 			name = agents[0].Name
 		}
 		return fmt.Sprintf("Run \"spwn agent new %s\" to create the agent first", name)
-	case strings.Contains(msg, "missing the personas") || strings.Contains(msg, "missing the profile"):
+	case strings.Contains(msg, "missing the core"):
 		name := agentName
 		if len(agents) > 0 {
 			name = agents[0].Name
 		}
-		return fmt.Sprintf("Run \"spwn agent new %s\" to set up the agent profile", name)
+		return fmt.Sprintf("Run \"spwn agent new %s\" to set up the agent layers", name)
 	case strings.Contains(msg, "image") && strings.Contains(msg, "not found"):
 		return "Run \"spwn doctor\" to check your Docker images"
 	case strings.Contains(msg, "workspace") && strings.Contains(msg, "not found"):

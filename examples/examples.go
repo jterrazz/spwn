@@ -185,24 +185,22 @@ func Install(slug, baseDir string) (InstallReport, error) {
 			dst := filepath.Join(agentsRoot, name)
 			if exists(dst) {
 				// Agent directory exists — but it might be broken
-				// (e.g. created by a previous version that used a
-				// different layout, or partially cleaned up). If
-				// core/profile.md (or legacy core/persona.md) is
-				// missing, copy the template's core/ layer on top
-				// without touching user data like journal/ or knowledge/.
+				// (e.g. created by a previous version or partially
+				// cleaned up). If core/profile.md is missing, copy
+				// the template's core/ layer on top without touching
+				// user data like journal/ or knowledge/.
 				coreProfile := filepath.Join(dst, "core", "profile.md")
-				corePersona := filepath.Join(dst, "core", "persona.md")
-				if !exists(coreProfile) && !exists(corePersona) {
+				if !exists(coreProfile) {
 					coreSrc := path(agentsSrc, name, "core")
 					coreDst := filepath.Join(dst, "core")
 					if cperr := copyDirFS(templatesFS, coreSrc, coreDst); cperr == nil {
 						rep.AgentsAdded = append(rep.AgentsAdded, name+" (repaired)")
 					}
-					// Also copy profile.yaml if missing
-					profileDst := filepath.Join(dst, "profile.yaml")
-					if !exists(profileDst) {
-						if data, rerr := templatesFS.ReadFile(path(agentsSrc, name, "profile.yaml")); rerr == nil {
-							_ = os.WriteFile(profileDst, data, 0o644)
+					// Also copy agent.yaml if missing
+					manifestDst := filepath.Join(dst, "agent.yaml")
+					if !exists(manifestDst) {
+						if data, rerr := templatesFS.ReadFile(path(agentsSrc, name, "agent.yaml")); rerr == nil {
+							_ = os.WriteFile(manifestDst, data, 0o644)
 						}
 					}
 				} else {

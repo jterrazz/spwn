@@ -81,14 +81,7 @@ func Validate(name string) error {
 
 	coreDir := filepath.Join(dir, "core")
 	if _, err := os.Stat(coreDir); err != nil {
-		// Backward compatibility: check for legacy identity/ or personas/ directory
-		identityDir := filepath.Join(dir, "identity")
-		if _, errI := os.Stat(identityDir); errI != nil {
-			personas := filepath.Join(dir, "personas")
-			if _, errP := os.Stat(personas); errP != nil {
-				return fmt.Errorf("agent %q is missing the core/ layer", name)
-			}
-		}
+		return fmt.Errorf("agent %q is missing the core/ layer", name)
 	}
 	return nil
 }

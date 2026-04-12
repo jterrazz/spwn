@@ -34,7 +34,6 @@ and a Mind (persistent agent identity).
 * [spwn down](./spwn_down.md)	 - Destroy a world
 * [spwn example](./spwn_example.md)	 - Install ready-made world + agent templates
 * [spwn init](./spwn_init.md)	 - First-time setup — create ~/.spwn/ and a named world config
-* [spwn inspect](./spwn_inspect.md)	 - Show world details, physics, and agent status
 * [spwn knowledge](./spwn_knowledge.md)	 - Universe knowledge base — the single source of truth
 * [spwn logs](./spwn_logs.md)	 - Stream agent output from a running world
 * [spwn ls](./spwn_ls.md)	 - List active worlds

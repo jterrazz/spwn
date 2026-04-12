@@ -195,7 +195,7 @@ spwn/
 │   │       ├── observatory/         #     HTTP API server (/api/worlds, /api/agents)
 │   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
 │   │       ├── physics/             #     Physics/faculties generation
-│   │       ├── manifest/            #     Config parsing (world.yaml, profile.yaml)
+│   │       ├── manifest/            #     Config parsing (world.yaml, agent.yaml)
 │   │       ├── state/               #     Universe + Claw state (JSON)
 │   │       ├── models/              #     Domain types (World, Manifest, Status, AgentRecord)
 │   │       └── ports/               #     8 port interfaces (Runtime, Backend, Provider, etc.)

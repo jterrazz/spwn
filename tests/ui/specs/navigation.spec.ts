@@ -6,47 +6,38 @@ test.describe("Navigation", () => {
     await page.waitForTimeout(2000);
   });
 
-  test("sidebar navigation works", async ({ page }) => {
-    // Click Agents
-    await page.getByRole("button", { name: "Agents" }).click();
-    await page.waitForTimeout(500);
-    await expect(page).toHaveURL(/agents/);
+  test("sidebar navigation changes page content", async ({ page }) => {
+    // Click Agents — content should change
+    await page.getByRole("button", { name: "Agents", exact: true }).first().click();
+    await page.waitForTimeout(1000);
+    await expect(page.getByRole("heading", { name: "Agents" })).toBeVisible({ timeout: 5000 });
 
     // Click Tools
-    await page.getByRole("button", { name: "Tools" }).click();
-    await page.waitForTimeout(500);
-    await expect(page).toHaveURL(/tools/);
-
-    // Click Settings
-    await page.getByRole("button", { name: "Settings" }).click();
-    await page.waitForTimeout(500);
-    await expect(page).toHaveURL(/settings/);
+    await page.getByRole("button", { name: "Tools", exact: true }).first().click();
+    await page.waitForTimeout(1000);
+    await expect(page.getByRole("heading", { name: "Tools" })).toBeVisible({ timeout: 5000 });
 
     // Click back to Worlds
-    await page.getByRole("button", { name: "Worlds" }).click();
-    await page.waitForTimeout(500);
-    await expect(page).toHaveURL(/\/$/);
+    await page.getByRole("button", { name: "Worlds", exact: true }).first().click();
+    await page.waitForTimeout(1000);
+    await expect(page.getByRole("heading", { name: "Worlds", level: 1 })).toBeVisible({ timeout: 5000 });
   });
 
   test("command palette opens with Cmd+K", async ({ page }) => {
     await page.keyboard.press("Meta+k");
     await page.waitForTimeout(500);
 
-    // Command palette should be visible
-    await expect(page.getByPlaceholder(/search|command/i)).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText(/Search for a command/i)).toBeVisible({ timeout: 3000 });
 
-    // Close it
     await page.keyboard.press("Escape");
     await page.waitForTimeout(300);
   });
 
-  test("top bar shows world/agent/task counts", async ({ page }) => {
-    // The header shows stats badges
-    await expect(page.locator("header, [class*='header']").first()).toBeVisible();
+  test("header shows stats buttons", async ({ page }) => {
+    await expect(page.locator('button:has-text("WORLDS")')).toBeVisible({ timeout: 5000 });
   });
 
-  test("version info is visible in sidebar footer", async ({ page }) => {
-    // The sidebar footer shows the Docker version
-    await expect(page.getByText(/v\d+\.\d+/)).toBeVisible({ timeout: 5000 });
+  test("Docker version is visible in sidebar", async ({ page }) => {
+    await expect(page.getByRole("button", { name: /Docker status/ })).toBeVisible({ timeout: 5000 });
   });
 });

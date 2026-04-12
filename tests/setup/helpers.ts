@@ -32,20 +32,20 @@ export function createAgent(spwnHome: string, name: string): void {
     mkdirSync(join(agentDir, layer), { recursive: true });
   }
   writeFileSync(
-    join(agentDir, "core", "persona.md"),
+    join(agentDir, "core", "profile.md"),
     `# ${name}\n\nYou are a test agent named ${name}.\n\n## Purpose\n\nTest automation.\n\n## Traits\n\n- Reliable\n- Systematic\n`,
   );
-  writeFileSync(join(agentDir, "profile.yaml"), `role: worker\n`);
+  writeFileSync(join(agentDir, "agent.yaml"), `role: worker\n`);
 }
 
 /**
- * Create a broken/legacy agent with missing core/ layer.
+ * Create a broken agent with missing core/ layer.
  * Used to test the install repair flow.
  */
 export function createBrokenAgent(spwnHome: string, name: string): void {
   const agentDir = join(spwnHome, "agents", name);
   mkdirSync(join(agentDir, "journal"), { recursive: true });
-  // No core/persona.md, no profile.yaml — just a journal dir
+  // No core/profile.md, no agent.yaml — just a journal dir
   writeFileSync(
     join(agentDir, "journal", "old-session.md"),
     "# Old session\nSome work was done.",

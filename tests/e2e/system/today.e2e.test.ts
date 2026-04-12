@@ -33,7 +33,7 @@ describe("example install + agent repair", () => {
     }
   });
 
-  test("install creates agents with core/persona.md", async () => {
+  test("install creates agents with core/profile.md", async () => {
     // WHEN — installing the matrix example
     const result = await spwn("install matrix")
       .exec("example install matrix")
@@ -41,30 +41,30 @@ describe("example install + agent repair", () => {
 
     // THEN — agent neo is created with the current Mind layout
     expect(result.exitCode).toBe(0);
-    expect(existsSync(join(home, "agents", "neo", "core", "persona.md"))).toBe(true);
-    expect(existsSync(join(home, "agents", "neo", "profile.yaml"))).toBe(true);
+    expect(existsSync(join(home, "agents", "neo", "core", "profile.md"))).toBe(true);
+    expect(existsSync(join(home, "agents", "neo", "agent.yaml"))).toBe(true);
     expect(existsSync(join(home, "worlds", "matrix.yaml"))).toBe(true);
 
-    // Persona has real content
-    const persona = readFileSync(join(home, "agents", "neo", "core", "persona.md"), "utf-8");
-    expect(persona).toContain("Neo");
+    // Profile has real content
+    const profile = readFileSync(join(home, "agents", "neo", "core", "profile.md"), "utf-8");
+    expect(profile).toContain("Neo");
   });
 
   test("install repairs broken agent (missing core/)", async () => {
-    // GIVEN — a broken agent "neo" with only a journal (no core/persona.md)
+    // GIVEN — a broken agent "neo" with only a journal (no core/profile.md)
     createBrokenAgent(home, "neo");
     expect(existsSync(join(home, "agents", "neo", "journal", "old-session.md"))).toBe(true);
-    expect(existsSync(join(home, "agents", "neo", "core", "persona.md"))).toBe(false);
+    expect(existsSync(join(home, "agents", "neo", "core", "profile.md"))).toBe(false);
 
     // WHEN — installing the matrix example (neo already exists but is broken)
     const result = await spwn("install repairs neo")
       .exec("example install matrix")
       .run();
 
-    // THEN — neo is repaired: core/persona.md created, journal preserved
+    // THEN — neo is repaired: core/profile.md created, journal preserved
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("repaired");
-    expect(existsSync(join(home, "agents", "neo", "core", "persona.md"))).toBe(true);
+    expect(existsSync(join(home, "agents", "neo", "core", "profile.md"))).toBe(true);
     // Old data preserved
     expect(existsSync(join(home, "agents", "neo", "journal", "old-session.md"))).toBe(true);
   });
@@ -94,7 +94,7 @@ describe("example install + agent repair", () => {
     // THEN — all 3 agents + 1 world created
     expect(result.exitCode).toBe(0);
     for (const agent of ["ceo", "devops", "analyst"]) {
-      expect(existsSync(join(home, "agents", agent, "core", "persona.md"))).toBe(true);
+      expect(existsSync(join(home, "agents", agent, "core", "profile.md"))).toBe(true);
     }
     expect(existsSync(join(home, "worlds", "startup.yaml"))).toBe(true);
   });
@@ -225,8 +225,8 @@ describe("agent mind structure", () => {
       expect(existsSync(join(agentDir, layer)), `missing ${layer}/`).toBe(true);
     }
 
-    // core/persona.md exists with content
-    const personaPath = join(agentDir, "core", "persona.md");
+    // core/profile.md exists with content
+    const personaPath = join(agentDir, "core", "profile.md");
     expect(existsSync(personaPath)).toBe(true);
     const persona = readFileSync(personaPath, "utf-8");
     expect(persona.length).toBeGreaterThan(10);

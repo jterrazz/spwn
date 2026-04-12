@@ -85,17 +85,17 @@ func TestTeamMembers(t *testing.T) {
 	// Create team
 	_ = CreateTeam(Team{Name: "Ops", Slug: "ops"})
 
-	// Create two agent dirs with profile.yaml referencing the team
+	// Create two agent dirs with agent.yaml referencing the team
 	agentsDir := filepath.Join(tmp, "agents")
 	for _, name := range []string{"neo", "trinity"} {
 		dir := filepath.Join(agentsDir, name)
 		os.MkdirAll(dir, 0755)
-		os.WriteFile(filepath.Join(dir, "profile.yaml"), []byte("team: ops\n"), 0644)
+		os.WriteFile(filepath.Join(dir, "agent.yaml"), []byte("team: ops\n"), 0644)
 	}
 	// One agent without team
 	soloDir := filepath.Join(agentsDir, "qa")
 	os.MkdirAll(soloDir, 0755)
-	os.WriteFile(filepath.Join(soloDir, "profile.yaml"), []byte("role: worker\n"), 0644)
+	os.WriteFile(filepath.Join(soloDir, "agent.yaml"), []byte("role: worker\n"), 0644)
 
 	members, err := TeamMembers("ops")
 	if err != nil {

@@ -52,17 +52,11 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		result.LayersCopied = append(result.LayersCopied, layer)
 	}
 
-	// Copy profile.yaml if it exists (with fallback to legacy life.yaml)
-	profileYaml := filepath.Join(sourceDir, "profile.yaml")
-	if _, err := os.Stat(profileYaml); err == nil {
-		data, _ := os.ReadFile(profileYaml)
-		os.WriteFile(filepath.Join(targetDir, "profile.yaml"), data, 0644)
-	} else {
-		lifeYaml := filepath.Join(sourceDir, "life.yaml")
-		if _, err := os.Stat(lifeYaml); err == nil {
-			data, _ := os.ReadFile(lifeYaml)
-			os.WriteFile(filepath.Join(targetDir, "profile.yaml"), data, 0644)
-		}
+	// Copy agent.yaml if it exists
+	sourceManifest := filepath.Join(sourceDir, "agent.yaml")
+	if _, err := os.Stat(sourceManifest); err == nil {
+		data, _ := os.ReadFile(sourceManifest)
+		os.WriteFile(filepath.Join(targetDir, "agent.yaml"), data, 0644)
 	}
 
 	// Emit activity event

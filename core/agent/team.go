@@ -126,7 +126,7 @@ func DeleteTeam(slug string) error {
 	return os.Remove(path)
 }
 
-// TeamMembers returns the names of all agents whose profile.yaml
+// TeamMembers returns the names of all agents whose agent.yaml
 // references the given team slug.
 func TeamMembers(teamSlug string) ([]string, error) {
 	agentsDir := foundation.AgentsDir()
@@ -142,8 +142,8 @@ func TeamMembers(teamSlug string) ([]string, error) {
 		if !e.IsDir() {
 			continue
 		}
-		profilePath := filepath.Join(agentsDir, e.Name(), "profile.yaml")
-		data, err := os.ReadFile(profilePath)
+		manifestPath := filepath.Join(agentsDir, e.Name(), "agent.yaml")
+		data, err := os.ReadFile(manifestPath)
 		if err != nil {
 			continue
 		}
@@ -157,36 +157,36 @@ func TeamMembers(teamSlug string) ([]string, error) {
 	return members, nil
 }
 
-// SetAgentTeam updates the agent's profile.yaml to reference the given
+// SetAgentTeam updates the agent's agent.yaml to reference the given
 // team slug. An empty slug clears the team assignment.
 func SetAgentTeam(agentName, teamSlug string) error {
 	agentDir := filepath.Join(foundation.AgentsDir(), agentName)
 	if _, err := os.Stat(agentDir); os.IsNotExist(err) {
 		return fmt.Errorf("agent %q not found", agentName)
 	}
-	profilePath := filepath.Join(agentDir, "profile.yaml")
+	manifestPath := filepath.Join(agentDir, "agent.yaml")
 
-	// Read existing profile (if any).
-	var profile map[string]any
-	data, err := os.ReadFile(profilePath)
+	// Read existing manifest (if any).
+	var m map[string]any
+	data, err := os.ReadFile(manifestPath)
 	if err == nil {
-		_ = yaml.Unmarshal(data, &profile)
+		_ = yaml.Unmarshal(data, &m)
 	}
-	if profile == nil {
-		profile = map[string]any{}
+	if m == nil {
+		m = map[string]any{}
 	}
 
 	if teamSlug == "" {
-		delete(profile, "team")
+		delete(m, "team")
 	} else {
-		profile["team"] = teamSlug
+		m["team"] = teamSlug
 	}
 
-	out, err := yaml.Marshal(profile)
+	out, err := yaml.Marshal(m)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(profilePath, out, 0644)
+	return os.WriteFile(manifestPath, out, 0644)
 }
 
 func writeTeam(path string, t Team) error {

@@ -3,30 +3,31 @@ package agent
 import (
 	"fmt"
 
+	agentDomain "spwn.sh/core/agent"
 	"github.com/spf13/cobra"
 )
 
-// ── agent add ──────────────────────────────────────────────────────────────
+// ── agent add / remove ─────────────────────────────────────────────────────
 //
-// Composition commands for attaching reusable blocks (tools, skills, profiles)
-// to an agent. Stubs for now — the full implementation requires wiring to the
-// agent/tool/skill/profile registries.
+// Composition commands for attaching reusable blocks (tools, skills, profile)
+// to an agent. These edit ~/.spwn/agents/<name>/agent.yaml directly.
 
 var (
-	addToolFlag    []string
-	addSkillFlag   []string
-	addProfileFlag string
+	composeTools    []string
+	composeSkills   []string
+	composeProfile  string
+	composeClearPro bool
 )
 
 func init() {
-	addCmd.Flags().StringArrayVar(&addToolFlag, "tool", nil, "Tool pack to add (repeatable, e.g. @spwn/python)")
-	addCmd.Flags().StringArrayVar(&addSkillFlag, "skill", nil, "Skill to add (repeatable)")
-	addCmd.Flags().StringVar(&addProfileFlag, "profile", "", "Profile template to apply")
+	addCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to add (repeatable, e.g. @spwn/python)")
+	addCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to add (repeatable)")
+	addCmd.Flags().StringVar(&composeProfile, "profile", "", "Profile template to apply")
 	Cmd.AddCommand(addCmd)
 
-	removeCmd.Flags().StringArrayVar(&addToolFlag, "tool", nil, "Tool pack to remove (repeatable)")
-	removeCmd.Flags().StringArrayVar(&addSkillFlag, "skill", nil, "Skill to remove (repeatable)")
-	removeCmd.Flags().StringVar(&addProfileFlag, "profile", "", "Remove profile (clears agent's profile)")
+	removeCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to remove (repeatable)")
+	removeCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to remove (repeatable)")
+	removeCmd.Flags().BoolVar(&composeClearPro, "profile", false, "Clear the agent's profile attachment")
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
@@ -46,36 +47,53 @@ Examples:
   spwn agent add neo --tool @spwn/unix --tool @spwn/git --profile dev`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(addToolFlag) == 0 && len(addSkillFlag) == 0 && addProfileFlag == "" {
+		if len(composeTools) == 0 && len(composeSkills) == 0 && composeProfile == "" {
 			return fmt.Errorf("nothing to add.\nPass at least one of --tool, --skill, or --profile")
 		}
-		// TODO: wire to agent.yaml composition. Currently a stub that reports intent.
-		fmt.Fprintf(cmd.OutOrStderr(), "agent compose %q:\n", name)
-		for _, t := range addToolFlag {
-			fmt.Fprintf(cmd.OutOrStderr(), "  + tool:    %s\n", t)
+
+		// Verify the agent exists before touching the manifest.
+		if err := agentDomain.ValidateMind(name); err != nil {
+			return err
 		}
-		for _, s := range addSkillFlag {
-			fmt.Fprintf(cmd.OutOrStderr(), "  + skill:   %s\n", s)
+
+		s := newStepper(cmd)
+		s.Blank()
+		s.Info("Agent:", name)
+
+		for _, t := range composeTools {
+			if err := agentDomain.AddTool(name, t); err != nil {
+				return fmt.Errorf("add tool %q: %w", t, err)
+			}
+			s.Done("+ tool", t)
 		}
-		if addProfileFlag != "" {
-			fmt.Fprintf(cmd.OutOrStderr(), "  + profile: %s\n", addProfileFlag)
+		for _, sk := range composeSkills {
+			if err := agentDomain.AddSkill(name, sk); err != nil {
+				return fmt.Errorf("add skill %q: %w", sk, err)
+			}
+			s.Done("+ skill", sk)
 		}
-		fmt.Fprintln(cmd.OutOrStderr())
-		fmt.Fprintln(cmd.OutOrStderr(), "Note: agent.yaml composition is not yet wired.")
-		fmt.Fprintln(cmd.OutOrStderr(), "      This command will edit the manifest in a future release.")
+		if composeProfile != "" {
+			if err := agentDomain.SetProfile(name, composeProfile); err != nil {
+				return fmt.Errorf("set profile %q: %w", composeProfile, err)
+			}
+			s.Done("+ profile", composeProfile)
+		}
+
+		s.Blank()
+		s.Success("Composition updated.")
+		s.Info("Manifest:", agentDomain.ManifestPath(name))
 		return nil
 	},
 }
 
 var removeCmd = &cobra.Command{
-	Use:     "remove <agent-name>",
-	Aliases: []string{"unadd"},
-	Short:   "Remove tools, skills, or profile from an agent",
-	Args:    cobra.ExactArgs(1),
+	Use:   "remove <agent-name>",
+	Short: "Remove tools, skills, or profile from an agent",
+	Args:  cobra.ExactArgs(1),
 	Long: `Remove composable blocks from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent rm <name> --tool X' removes just that block.
+'spwn agent remove <name> --tool X' removes just that block.
 
 Examples:
   spwn agent remove neo --tool @spwn/python
@@ -83,22 +101,40 @@ Examples:
   spwn agent remove neo --profile`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(addToolFlag) == 0 && len(addSkillFlag) == 0 && addProfileFlag == "" {
+		if len(composeTools) == 0 && len(composeSkills) == 0 && !composeClearPro {
 			return fmt.Errorf("nothing to remove.\nPass at least one of --tool, --skill, or --profile")
 		}
-		// TODO: wire to agent.yaml composition. Currently a stub that reports intent.
-		fmt.Fprintf(cmd.OutOrStderr(), "agent compose %q:\n", name)
-		for _, t := range addToolFlag {
-			fmt.Fprintf(cmd.OutOrStderr(), "  - tool:    %s\n", t)
+
+		if err := agentDomain.ValidateMind(name); err != nil {
+			return err
 		}
-		for _, s := range addSkillFlag {
-			fmt.Fprintf(cmd.OutOrStderr(), "  - skill:   %s\n", s)
+
+		s := newStepper(cmd)
+		s.Blank()
+		s.Info("Agent:", name)
+
+		for _, t := range composeTools {
+			if err := agentDomain.RemoveTool(name, t); err != nil {
+				return fmt.Errorf("remove tool %q: %w", t, err)
+			}
+			s.Done("- tool", t)
 		}
-		if addProfileFlag != "" {
-			fmt.Fprintf(cmd.OutOrStderr(), "  - profile: %s\n", addProfileFlag)
+		for _, sk := range composeSkills {
+			if err := agentDomain.RemoveSkill(name, sk); err != nil {
+				return fmt.Errorf("remove skill %q: %w", sk, err)
+			}
+			s.Done("- skill", sk)
 		}
-		fmt.Fprintln(cmd.OutOrStderr())
-		fmt.Fprintln(cmd.OutOrStderr(), "Note: agent.yaml composition is not yet wired.")
+		if composeClearPro {
+			if err := agentDomain.ClearProfile(name); err != nil {
+				return fmt.Errorf("clear profile: %w", err)
+			}
+			s.Done("- profile", "cleared")
+		}
+
+		s.Blank()
+		s.Success("Composition updated.")
+		s.Info("Manifest:", agentDomain.ManifestPath(name))
 		return nil
 	},
 }

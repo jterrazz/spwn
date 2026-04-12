@@ -61,8 +61,7 @@ type ContainerInfo = backend.ContainerInfo
 type Store = state.Store
 
 // Re-export manifest types.
-type LifeManifest = manifest.LifeManifest
-type ProfileManifest = manifest.ProfileManifest
+type AgentManifest = manifest.AgentManifest
 // OrgManifest is deprecated — org.yaml is no longer used.
 // Kept temporarily for migration compatibility.
 type OrgManifest = manifest.OrgManifest

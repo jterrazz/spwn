@@ -342,7 +342,7 @@ func (s *Server) handleListUniverses(w http.ResponseWriter, r *http.Request) {
 }
 
 // agentListItem is the enriched response for GET /api/agents, including the
-// role read from profile.yaml so the frontend can display it for undeployed agents.
+// role read from agent.yaml so the frontend can display it for undeployed agents.
 type agentListItem struct {
 	Name   string              `json:"name"`
 	Path   string              `json:"path"`
@@ -361,9 +361,9 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	result := make([]agentListItem, 0, len(agents))
 	for _, a := range agents {
 		role := "worker"
-		profilePath := filepath.Join(a.Path, "profile.yaml")
-		if data, readErr := os.ReadFile(profilePath); readErr == nil {
-			var p profileYAML
+		manifestPath := filepath.Join(a.Path, "agent.yaml")
+		if data, readErr := os.ReadFile(manifestPath); readErr == nil {
+			var p agentYAML
 			if yamlErr := yaml.Unmarshal(data, &p); yamlErr == nil && p.Role != "" {
 				role = p.Role
 			}
@@ -380,8 +380,8 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, result)
 }
 
-// profileYAML represents the profile.yaml manifest for an agent.
-type profileYAML struct {
+// agentYAML represents the agent.yaml manifest for an agent.
+type agentYAML struct {
 	Role    string `yaml:"role,omitempty" json:"role,omitempty"`
 	Team    string `yaml:"team,omitempty" json:"team,omitempty"`
 	Runtime struct {
@@ -400,7 +400,7 @@ type agentProfileResponse struct {
 	Engine   string              `json:"engine"`
 	Provider string              `json:"provider"`
 	Purpose  string              `json:"purpose"`
-	Persona  string              `json:"persona"`
+	Profile  string              `json:"profile"`
 	Traits   []string            `json:"traits"`
 	Skills   []string            `json:"skills"`
 	Journal  []journalEntry      `json:"journal"`
@@ -501,14 +501,14 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 
 	mindPath := info.Path
 
-	// Load profile.yaml for role/engine/provider
+	// Load agent.yaml for role/engine/provider
 	// Engine/provider are intentionally empty — runtime is per-world, not per-agent
 	role := "worker"
 	engine := ""
 	provider := ""
-	profilePath := filepath.Join(mindPath, "profile.yaml")
-	if data, err := os.ReadFile(profilePath); err == nil {
-		var p profileYAML
+	manifestPath := filepath.Join(mindPath, "agent.yaml")
+	if data, err := os.ReadFile(manifestPath); err == nil {
+		var p agentYAML
 		if err := yaml.Unmarshal(data, &p); err == nil {
 			if p.Role != "" {
 				role = p.Role
@@ -524,7 +524,7 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 
 	// Read core identity files
 	purpose := readFirstLineContent(filepath.Join(mindPath, "core", "purpose.md"))
-	persona := readFirstLineContent(filepath.Join(mindPath, "core", "persona.md"))
+	profileText := readFirstLineContent(filepath.Join(mindPath, "core", "profile.md"))
 	traits := parseTraits(filepath.Join(mindPath, "core", "traits.md"))
 	if traits == nil {
 		traits = []string{}
@@ -550,7 +550,7 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		Engine:   engine,
 		Provider: provider,
 		Purpose:  purpose,
-		Persona:  persona,
+		Profile:  profileText,
 		Traits:   traits,
 		Skills:   skills,
 		Journal:  journal,
@@ -1737,7 +1737,7 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Special case: "team" writes to profile.yaml, not identity/*.md.
+	// Special case: "team" writes to agent.yaml, not identity/*.md.
 	if body.Field == "team" {
 		if err := agentpkg.SetAgentTeam(name, body.Content); err != nil {
 			jsonError(w, err.Error(), 500)
@@ -1748,9 +1748,9 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate field name to prevent directory traversal
-	allowed := map[string]bool{"purpose": true, "persona": true, "traits": true}
+	allowed := map[string]bool{"purpose": true, "profile": true, "traits": true}
 	if !allowed[body.Field] {
-		jsonError(w, "invalid field: must be one of purpose, persona, traits, team", 400)
+		jsonError(w, "invalid field: must be one of purpose, profile, traits, team", 400)
 		return
 	}
 
