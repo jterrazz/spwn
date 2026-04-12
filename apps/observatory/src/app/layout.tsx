@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Aurora } from "@/components/aurora";
-import { Stars } from "@/components/stars";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastProvider } from "@/components/toast-provider";
@@ -63,7 +62,6 @@ export default function RootLayout({
             <TooltipProvider>
               <ToastProvider>
                 <Aurora />
-                <Stars />
                 <div className="relative z-10 flex-1 min-h-0 h-full">
                   <ArchitectChatProvider>
                     <AppShell>{children}</AppShell>
