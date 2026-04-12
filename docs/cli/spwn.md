@@ -40,10 +40,13 @@ and a Mind (persistent agent identity).
 * [spwn ls](./spwn_ls.md)	 - List active worlds
 * [spwn msg](./spwn_msg.md)	 - Agent messaging — send, inbox, watch
 * [spwn organization](./spwn_organization.md)	 - Manage organizations — list and inspect role structures
-* [spwn profile](./spwn_profile.md)	 - View and edit agent profiles
+* [spwn profile](./spwn_profile.md)	 - Author and manage reusable profile templates (personality)
+* [spwn skill](./spwn_skill.md)	 - Author and manage reusable skill files
 * [spwn snap](./spwn_snap.md)	 - World snapshots — save, ls, restore, rm
 * [spwn status](./spwn_status.md)	 - Show the full status of your spwn environment
+* [spwn talk](./spwn_talk.md)	 - Talk to a running agent (alias for `spwn agent talk`)
 * [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups
+* [spwn tool](./spwn_tool.md)	 - Manage reusable tool packs (e.g. @spwn/unix, @spwn/python)
 * [spwn up](./spwn_up.md)	 - Spawn a world — an isolated reality for agents
 * [spwn upgrade](./spwn_upgrade.md)	 - Upgrade spwn to the latest version
 * [spwn world](./spwn_world.md)	 - Spawn a world — an isolated reality for agents

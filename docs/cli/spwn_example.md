@@ -12,7 +12,7 @@ Install ready-made world + agent templates
 Ship-in-a-binary gallery of pre-written templates for first-time
 users and people who want a known-good starting point.
 
-Each example is a complete world + one-or-more agents with personas
+Each example is a complete world + one-or-more agents with profiles
 already filled in. Installing copies the files into ~/.spwn/ without
 touching anything that already exists, so it is safe to re-run.
 

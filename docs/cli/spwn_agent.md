@@ -11,9 +11,9 @@ Spawn an agent — a living identity that inhabits a world
 
 Spawn an agent into an existing world.
 
-An agent is backed by a Mind — a persistent directory of personas, skills,
-knowledge, playbooks, journal entries, and session state. The agent survives
-after the world is destroyed.
+An agent is backed by a Mind — a persistent directory holding its profile,
+skills, knowledge, playbooks, journal entries, and session state. The agent
+survives after the world is destroyed.
 
 ```
 spwn agent [flags]

@@ -52,7 +52,7 @@ func TestCLI_HelpContainsDescription(t *testing.T) {
 
 	assertContains(t, out, "spwn", "root help description")
 	assertContains(t, out, "Quick Start", "root help quick start section")
-	assertContains(t, out, "World:", "root help world section")
+	assertContains(t, out, "Worlds:", "root help worlds section")
 	assertContains(t, out, "world", "root help world command")
 	assertContains(t, out, "agent", "root help agent command")
 	assertContains(t, out, "System:", "root help system section")

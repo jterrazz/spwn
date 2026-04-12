@@ -16,8 +16,10 @@ import (
 	"spwn.sh/apps/cli/knowledge"
 	"spwn.sh/apps/cli/msg"
 	"spwn.sh/apps/cli/profile"
+	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
+	"spwn.sh/apps/cli/tool"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/core/foundation"
@@ -67,22 +69,33 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-essential output")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show debug information")
 
-	// Top-level aliases for world commands
-	rootCmd.AddCommand(world.UpCmd)
+	// Top-level aliases — shortcuts for the 80% cases
+	rootCmd.AddCommand(world.UpCmd)       // spwn up
+	rootCmd.AddCommand(world.LsCmd)       // spwn ls
+	rootCmd.AddCommand(agent.TalkTopCmd)  // spwn talk
+
+	// Legacy top-level aliases (kept for muscle memory)
 	rootCmd.AddCommand(world.DownCmd)
-	rootCmd.AddCommand(world.LsCmd)
 	rootCmd.AddCommand(world.LogsTopCmd)
 	rootCmd.AddCommand(world.AttachTopCmd)
 	rootCmd.AddCommand(world.InspectTopCmd)
 
-	// Command groups
+	// Command groups — entities
 	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
+
+	// Command groups — building blocks
+	rootCmd.AddCommand(tool.Cmd)
+	rootCmd.AddCommand(skill.Cmd)
 	rootCmd.AddCommand(profile.Cmd)
+
+	// Command groups — coordination
 	rootCmd.AddCommand(msg.Cmd)
 	rootCmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)
+
+	// Command groups — system
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
 	rootCmd.AddCommand(knowledge.Cmd)
@@ -136,16 +149,44 @@ func customHelp(cmd *cobra.Command, args []string) {
 	w := cmd.OutOrStdout()
 
 	fmt.Fprintln(w)
-	fmt.Fprintf(w, "  %s %s\n", ui.Strong("⬡ spwn"), ui.Faint("— the control plane for AI agents"))
+	fmt.Fprintf(w, "  %s %s\n", ui.Strong("⬡ spwn"), ui.Faint("— the building blocks of agent intelligence"))
 	fmt.Fprintln(w)
 
 	// Quick Start
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Quick Start:"))
-	printHelpCmd(w, "spwn architect start", "Start the world builder daemon")
 	printHelpCmd(w, "spwn agent new neo", "Create an agent")
+	printHelpCmd(w, "spwn agent add neo --tool @spwn/python", "Compose its mind")
 	printHelpCmd(w, "spwn up --agent neo -w .", "Spawn a world")
-	printHelpCmd(w, "spwn agent talk neo", "Talk to the agent")
+	printHelpCmd(w, "spwn talk neo", "Talk to the agent")
 	printHelpCmd(w, "spwn dash open", "Open the visual dashboard")
+	fmt.Fprintln(w)
+
+	// Worlds
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Worlds:"))
+	printHelpCmd(w, "up", "Spawn a world")
+	printHelpCmd(w, "down <id>", "Destroy a world")
+	printHelpCmd(w, "ls", "List active worlds")
+	printHelpCmd(w, "logs <id>", "Stream agent output")
+	printHelpCmd(w, "attach <id>", "Interactive shell")
+	printHelpCmd(w, "world show <id>", "World details and state")
+	printHelpCmd(w, "snap", "Snapshots "+ui.Faint("(save, ls, restore, rm)"))
+	fmt.Fprintln(w)
+
+	// Agents
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Agents:"))
+	printHelpCmd(w, "agent", "Lifecycle "+ui.Faint("(new, ls, show, rm, talk, fork)"))
+	printHelpCmd(w, "agent add <name> --tool/--skill/--profile", "Compose an agent")
+	printHelpCmd(w, "agent dream <name>", "Analyze experience, promote playbooks")
+	printHelpCmd(w, "agent sleep <name>", "Consolidate memory")
+	printHelpCmd(w, "talk <name>", "Talk to a running agent (alias for 'agent talk')")
+	printHelpCmd(w, "msg", "Inter-agent messaging "+ui.Faint("(send, inbox, watch)"))
+	fmt.Fprintln(w)
+
+	// Building blocks
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Building Blocks:"))
+	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, install, publish)"))
+	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show, publish)"))
+	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit, show, publish)"))
 	fmt.Fprintln(w)
 
 	// Orchestration
@@ -154,26 +195,6 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "knowledge", "Universe knowledge base "+ui.Faint("(ls, show, search)"))
 	printHelpCmd(w, "dash", "Visual dashboard "+ui.Faint("(start, open)"))
 	printHelpCmd(w, "activity", "View recent activity across worlds and agents")
-	fmt.Fprintln(w)
-
-	// World
-	fmt.Fprintf(w, "  %s\n", ui.Strong("World:"))
-	printHelpCmd(w, "up", "Spawn a world")
-	printHelpCmd(w, "down <id>", "Destroy a world")
-	printHelpCmd(w, "ls", "List active worlds")
-	printHelpCmd(w, "logs <id>", "Stream agent output")
-	printHelpCmd(w, "attach <id>", "Interactive shell")
-	printHelpCmd(w, "inspect <id>", "World details and physics")
-	printHelpCmd(w, "snap", "Snapshots "+ui.Faint("(save, ls, restore, rm)"))
-	fmt.Fprintln(w)
-
-	// Agent
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Agent:"))
-	printHelpCmd(w, "agent", "Lifecycle "+ui.Faint("(new, ls, rm, talk, inspect, fork, export)"))
-	printHelpCmd(w, "agent dream <name>", "Analyze experience, discover patterns, promote playbooks")
-	printHelpCmd(w, "agent sleep <name>", "Shutdown — save state, consolidate, archive")
-	printHelpCmd(w, "profile <name>", "Character sheet — the passport, not the person")
-	printHelpCmd(w, "msg", "Messaging "+ui.Faint("(send, inbox, watch)"))
 	fmt.Fprintln(w)
 
 	// System

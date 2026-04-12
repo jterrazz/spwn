@@ -85,9 +85,9 @@ var Cmd = &cobra.Command{
 	Short: "Spawn an agent — a living identity that inhabits a world",
 	Long: `Spawn an agent into an existing world.
 
-An agent is backed by a Mind — a persistent directory of personas, skills,
-knowledge, playbooks, journal entries, and session state. The agent survives
-after the world is destroyed.`,
+An agent is backed by a Mind — a persistent directory holding its profile,
+skills, knowledge, playbooks, journal entries, and session state. The agent
+survives after the world is destroyed.`,
 	Example: `  spwn agent -n neo -u w-abc123      Spawn named agent into world
   spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task
   spwn agent --import backup.tar.gz  Import a Mind archive first`,
