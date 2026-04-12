@@ -30,11 +30,11 @@ spwn agent [flags]
 ### Options
 
 ```
-  -h, --help            help for agent
-      --import string   Import Mind from tar.gz before spawning
-  -n, --name string     Agent name (default: default)
       --ephemeral string   Run as ephemeral agent — no Mind, no memory, just execute this task
-  -u, --world string    Target world ID
+  -h, --help               help for agent
+      --import string      Import Mind from tar.gz before spawning
+  -n, --name string        Agent name (default: default)
+  -u, --world string       Target world ID
 ```
 
 ### Options inherited from parent commands
@@ -47,21 +47,19 @@ spwn agent [flags]
 
 ### SEE ALSO
 
-* [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
-* [spwn agent rm](/docs/cli/spwn-agent-rm)	 - Remove an agent and its Mind directory
-* [spwn agent export](/docs/cli/spwn-agent-export)	 - Export an agent as tar.gz
-* [spwn agent fork](/docs/cli/spwn-agent-fork)	 - Clone a Mind from one agent to another
-* [spwn agent inbox](/docs/cli/spwn-agent-inbox)	 - Show messages in an agent's inbox
-* [spwn agent new](/docs/cli/spwn-agent-new)	 - Create a new agent with a 6-layer Mind
-* [spwn agent inspect](/docs/cli/spwn-agent-inspect)	 - Show agent details, Mind layers, world status, and history
-* [spwn agent journal](/docs/cli/spwn-agent-journal)	 - View an agent's journal history
-* [spwn agent ls](/docs/cli/spwn-agent-ls)	 - List all agents on this Host
-* [spwn agent mind](/docs/cli/spwn-agent-mind)	 - Show the agent's Mind directory tree with file sizes
-* [spwn agent dream](/docs/cli/spwn-agent-dream)	 - Analyze experience, discover patterns, promote playbooks
-* [spwn agent send](/docs/cli/spwn-agent-send)	 - Send a message to an agent's inbox
-* [spwn agent sessions](/docs/cli/spwn-agent-sessions)	 - View an agent's session history
-* [spwn agent sleep](/docs/cli/spwn-agent-sleep)	 - Consolidate experience — archive stale files, prune old sessions
-* [spwn agent stats](/docs/cli/spwn-agent-stats)	 - Show agent statistics and Mind layer summary
-* [spwn agent talk](/docs/cli/spwn-agent-talk)	 - Talk to a running agent — interactive or one-shot
-* [spwn agent watch](/docs/cli/spwn-agent-watch)	 - Watch for new messages to an agent
+* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn agent deploy](./spwn_agent_deploy.md)	 - Deploy an agent to a running world
+* [spwn agent dream](./spwn_agent_dream.md)	 - Analyze experience, discover patterns, promote playbooks
+* [spwn agent export](./spwn_agent_export.md)	 - Export an agent as tar.gz
+* [spwn agent fork](./spwn_agent_fork.md)	 - Clone a Mind from one agent to another
+* [spwn agent import](./spwn_agent_import.md)	 - Import an agent from a tar.gz archive
+* [spwn agent inbox](./spwn_agent_inbox.md)	 - Show messages in an agent's inbox
+* [spwn agent inspect](./spwn_agent_inspect.md)	 - Show agent details, Mind layers, world status, and history
+* [spwn agent ls](./spwn_agent_ls.md)	 - List all agents on this Host
+* [spwn agent new](./spwn_agent_new.md)	 - Create a new agent with a 6-layer Mind
+* [spwn agent rm](./spwn_agent_rm.md)	 - Remove an agent and its Mind directory
+* [spwn agent send](./spwn_agent_send.md)	 - Send a message to an agent's inbox
+* [spwn agent sleep](./spwn_agent_sleep.md)	 - Consolidate experience — archive stale files, prune old sessions
+* [spwn agent talk](./spwn_agent_talk.md)	 - Talk to a running agent — interactive or one-shot
+* [spwn agent watch](./spwn_agent_watch.md)	 - Watch for new messages to an agent
 

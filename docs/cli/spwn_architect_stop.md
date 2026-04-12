@@ -7,6 +7,10 @@ slug: "spwn-architect-stop"
 
 Stop the Architect daemon
 
+### Synopsis
+
+Stop the Architect daemon and remove the container.
+
 ```
 spwn architect stop [flags]
 ```
@@ -27,5 +31,5 @@ spwn architect stop [flags]
 
 ### SEE ALSO
 
-* [spwn architect](/docs/cli/spwn-architect)	 - The Architect — always-on orchestration daemon
+* [spwn architect](./spwn_architect.md)	 - Your always-on world builder
 

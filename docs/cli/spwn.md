@@ -10,7 +10,7 @@ spwn — create realities for things that can think
 ### Synopsis
 
 spwn creates isolated Docker environments for AI agents.
-Each world has physics (constants, laws, elements),
+Each world has physics (constants, laws, tools),
 and a Mind (persistent agent identity).
 
 ### Options
@@ -24,14 +24,27 @@ and a Mind (persistent agent identity).
 
 ### SEE ALSO
 
-* [spwn agent](/docs/cli/spwn-agent)	 - Spawn an agent — a living identity that inhabits a world
-* [spwn auth](/docs/cli/spwn-auth)	 - Manage credentials — login, logout, status
-* [spwn doctor](/docs/cli/spwn-doctor)	 - Check your spwn environment for issues
-* [spwn architect](/docs/cli/spwn-architect)	 - The Architect — always-on orchestration daemon
-* [spwn init](/docs/cli/spwn-init)	 - First-time setup — create ~/.spwn/ and a named world config
-* [spwn dash](/docs/cli/spwn-dash)	 - Visual dashboard for monitoring worlds and agents
-* [spwn get](/docs/cli/spwn-get)	 - Manage skills — reusable capabilities for agents
-* [spwn status](/docs/cli/spwn-status)	 - Show the full status of your spwn environment
-* [spwn upgrade](/docs/cli/spwn-upgrade)	 - Upgrade spwn to the latest version
-* [spwn world](/docs/cli/spwn-world)	 - Spawn a world — an isolated reality for agents
+* [spwn activity](./spwn_activity.md)	 - View recent activity across worlds and agents
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
+* [spwn architect](./spwn_architect.md)	 - Your always-on world builder
+* [spwn attach](./spwn_attach.md)	 - Open interactive session into a running world
+* [spwn auth](./spwn_auth.md)	 - Manage credentials — login, logout, status
+* [spwn dash](./spwn_dash.md)	 - Visual dashboard
+* [spwn doctor](./spwn_doctor.md)	 - Check your spwn environment for issues
+* [spwn down](./spwn_down.md)	 - Destroy a world
+* [spwn example](./spwn_example.md)	 - Install ready-made world + agent templates
+* [spwn init](./spwn_init.md)	 - First-time setup — create ~/.spwn/ and a named world config
+* [spwn inspect](./spwn_inspect.md)	 - Show world details, physics, and agent status
+* [spwn knowledge](./spwn_knowledge.md)	 - Universe knowledge base — the single source of truth
+* [spwn logs](./spwn_logs.md)	 - Stream agent output from a running world
+* [spwn ls](./spwn_ls.md)	 - List active worlds
+* [spwn msg](./spwn_msg.md)	 - Agent messaging — send, inbox, watch
+* [spwn organization](./spwn_organization.md)	 - Manage organizations — list and inspect role structures
+* [spwn profile](./spwn_profile.md)	 - View and edit agent profiles
+* [spwn snap](./spwn_snap.md)	 - World snapshots — save, ls, restore, rm
+* [spwn status](./spwn_status.md)	 - Show the full status of your spwn environment
+* [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups
+* [spwn up](./spwn_up.md)	 - Spawn a world — an isolated reality for agents
+* [spwn upgrade](./spwn_upgrade.md)	 - Upgrade spwn to the latest version
+* [spwn world](./spwn_world.md)	 - Spawn a world — an isolated reality for agents
 

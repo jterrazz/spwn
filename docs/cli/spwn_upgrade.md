@@ -11,17 +11,30 @@ Upgrade spwn to the latest version
 
 Downloads and installs the latest spwn release from GitHub.
 
-Detects your OS and architecture, downloads the matching binary,
-and replaces the current installation.
+Fetches the release binary for your OS/architecture, verifies its SHA256
+against the checksums published with the release, and atomically replaces
+the current binary. Running worlds are stopped gracefully before the swap.
 
 ```
 spwn upgrade [flags]
 ```
 
+### Examples
+
+```
+  spwn upgrade              # install the latest stable release
+  spwn upgrade --check      # just check, don't install
+  spwn upgrade --channel beta
+  spwn upgrade --force      # reinstall current version
+```
+
 ### Options
 
 ```
-  -h, --help   help for upgrade
+      --channel string   Release channel: stable or beta (default "stable")
+      --check            Check for updates but do not install
+      --force            Install even if already up to date
+  -h, --help             help for upgrade
 ```
 
 ### Options inherited from parent commands
@@ -34,5 +47,5 @@ spwn upgrade [flags]
 
 ### SEE ALSO
 
-* [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn — create realities for things that can think
 

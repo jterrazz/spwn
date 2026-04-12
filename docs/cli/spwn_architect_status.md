@@ -7,6 +7,10 @@ slug: "spwn-architect-status"
 
 Show Architect status — worlds, agents
 
+### Synopsis
+
+Query Docker to show whether the Architect container is running, its uptime, and active worlds.
+
 ```
 spwn architect status [flags]
 ```
@@ -27,5 +31,5 @@ spwn architect status [flags]
 
 ### SEE ALSO
 
-* [spwn architect](/docs/cli/spwn-architect)	 - The Architect — always-on orchestration daemon
+* [spwn architect](./spwn_architect.md)	 - Your always-on world builder
 

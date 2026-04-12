@@ -1,20 +1,20 @@
 ---
-title: "spwn agent list"
-slug: "spwn-agent-list"
+title: "spwn agent ls"
+slug: "spwn-agent-ls"
 ---
 
-## spwn agent list
+## spwn agent ls
 
 List all agents on this Host
 
 ```
-spwn agent list [flags]
+spwn agent ls [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help           help for list
+  -h, --help           help for ls
       --json           Output as JSON
       --world string   Filter agents by world ID
 ```
@@ -28,5 +28,5 @@ spwn agent list [flags]
 
 ### SEE ALSO
 
-* [spwn agent](/docs/cli/spwn-agent)	 - Spawn an agent — a living identity that inhabits a world
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
 
