@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Isolated Docker worlds where AI agents live, work, and evolve.
+  The open framework for orchestrating artificial life.
 </p>
 
 <p align="center">
@@ -22,20 +22,22 @@
 <br/>
 
 <p align="center">
-  <img src="doc/app-screenshot.webp" alt="spwn — Worlds dashboard" width="720" />
+  <img src="doc/app-screenshot.webp" alt="spwn — the Observatory" width="720" />
 </p>
 
 <p align="center">
-  <sub>The desktop app — visual monitoring for your worlds and agents. Also ships as a full CLI.</sub>
+  <sub>The Observatory — see every world, agent, and tool at a glance. Also ships as a full CLI.</sub>
 </p>
 
 <br/>
 
-## What is Spwn?
+## One command. A living colony.
 
-**If Claude Code is the intelligence, Spwn is the world to be intelligent in.**
+Spawn isolated worlds, deploy teams of AI agents, and let them collaborate autonomously. They remember, learn, and never sleep.
 
-Spwn is a CLI and desktop app that runs AI agents inside isolated Docker containers with persistent identity, multi-agent coordination, and physics-based security. You define the world. Your agents remember, adapt, and collaborate.
+Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own physics — filesystem, compute, memory, network. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork their profiles to run experiments.
+
+> *"The next breakthrough isn't smarter models. It's richer worlds."*
 
 |        | Step            | Example                                                            |
 | ------ | --------------- | ------------------------------------------------------------------ |
@@ -88,29 +90,43 @@ make install
 <tr>
 <td align="center" width="33%">
 <h3>🌍 Isolated Worlds</h3>
-Every agent runs in a Docker container with its own filesystem, compute, and network. Real constraints. Real physics.
+Every agent lives in a Docker container with its own filesystem, compute, and network. Real constraints. Real physics. Your host is never at risk.
 </td>
 <td align="center" width="33%">
-<h3>🧠 Persistent Identity</h3>
-Agents have a profile — persona, traits, purpose, skills, knowledge, playbooks. It survives across worlds.
+<h3>🧠 They Remember You</h3>
+Every agent has a profile — identity, skills, and memory. It survives across worlds and runtimes. An agent that worked on your codebase last week remembers it today.
 </td>
 <td align="center" width="33%">
 <h3>🏗️ Multi-Agent Hierarchy</h3>
-Leaders delegate to workers via inboxes. Workers report back. Flexible hierarchy, clear delegation.
+Leaders delegate to workers via inboxes. Workers report back. Async messaging, clear delegation. Teams collaborate by design.
 </td>
 </tr>
 <tr>
 <td align="center">
-<h3>🔒 Physics-Based Security</h3>
-No ACLs. If curl isn't installed, HTTP is impossible — not forbidden, physically absent. You can't prompt-inject a missing binary.
+<h3>🔒 Laws of Physics, Not ACLs</h3>
+No network interface means HTTP doesn't exist — not forbidden, physically impossible. No prompt can change the laws of physics. Security by absence.
 </td>
 <td align="center">
 <h3>🧬 Agent Evolution</h3>
-Dream to learn, sleep to consolidate, fork to branch. Natural selection for agent behavior.
+Dream to analyze, sleep to consolidate, fork to branch. Successful patterns become playbooks. Failed ones are discarded. Natural selection for behavior.
 </td>
 <td align="center">
-<h3>🔌 Pluggable Runtimes</h3>
-Claude Code, Codex, Aider, Pi — swap the thinking engine without touching your world config. 8 port interfaces, all swappable.
+<h3>🔌 Swap the Fabric of Reality</h3>
+Claude Code, Codex, Aider, Pi — swap the thinking engine without touching your world config. Every layer is pluggable. 8 port interfaces, all swappable.
+</td>
+</tr>
+<tr>
+<td align="center">
+<h3>🖥️ The Observatory</h3>
+See every world, agent, and tool at a glance. Know exactly what each agent can do, what it learned, and what sessions it ran. No more scattered configs.
+</td>
+<td align="center">
+<h3>📸 Snapshots & Rollback</h3>
+Capture a world at any point. Roll back to retry a different approach. Deterministic experimentation.
+</td>
+<td align="center">
+<h3>💬 Agent Messaging</h3>
+Async inter-agent communication via filesystem inboxes. Agents send, receive, and watch for messages. No orchestration glue code needed.
 </td>
 </tr>
 </table>
@@ -162,15 +178,17 @@ Each agent is a directory of markdown files — human-readable, git-friendly, no
 
 Agents evolve through three mechanisms:
 
-- **Dream** (`spwn agent dream Neo`) — analyze experience, promote successful patterns to playbooks
-- **Sleep** (`spwn agent sleep Neo`) — graceful shutdown, consolidate raw experience into durable knowledge
-- **Fork** (`spwn agent fork Neo Neo-v2`) — clone an agent, run variants, keep the one that performs best
+- **Dream** (`spwn agent dream Neo`) — analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
+- **Sleep** (`spwn agent sleep Neo`) — graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
+- **Fork** (`spwn agent fork Neo Neo-v2`) — clone an agent's profile. Run copies in different environments, keep the branch that performs best.
+
+> *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
 
 <br/>
 
 ## World configuration
 
-The world manifest defines what is physically possible inside a container:
+Design your universe once. Define who does what, what tools they have, what they're allowed to touch, and how they learn. Spwn handles the rest.
 
 ```yaml
 physics:
