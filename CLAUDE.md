@@ -35,9 +35,9 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 - **Faculties**: Verified elements + gate bridges, auto-generated as `/world/faculties.md`.
 
 ### The Profile
-- **Profile**: Persistent identity — persona, traits, purpose, bonds, skills, memory (knowledge, playbooks, journal), sessions.
-- **Identity**: Core character — persona, purpose, traits. Lives in `identity/` directory.
-- **Profile Manifest**: `profile.yaml` — declares role, engine, identity, requires, delegation.
+- **Profile**: Persistent identity (the Mind) — 5 layers: core, skills, knowledge, playbooks, journal.
+- **Core**: Character definition — persona.md with role, style, purpose, behavior. Lives in `core/` directory.
+- **Profile Manifest**: `profile.yaml` — declares team, role, engine, delegation rules.
 
 ### The Bridge
 - **Gate**: Bridge between universe and host. Host-side (Go) manages element bridging. Container-side (Rivet) normalizes runtimes.
@@ -147,16 +147,13 @@ spwn agent --ephemeral "task" --world w-acme-84721
 │   ├── default.yaml
 │   └── acme-org.yaml
 ├── agents/
-│   └── neo/
-│       ├── profile.yaml     # Role, engine, identity, requires, delegation
-│       ├── identity/        # persona.md, purpose.md, traits.md
-│       ├── skills/          # Agent skills
-│       ├── memory/
-│       │   ├── knowledge/   # Facts, codebase info
-│       │   ├── playbooks/   # Step-by-step workflows
-│       │   └── journal/     # Session logs
-│       ├── sessions/        # Active session state
-│       └── bonds.md         # Relationships with other agents
+│   └── Neo/
+│       ├── profile.yaml     # Team, role, engine, delegation rules
+│       ├── core/            # persona.md — role, style, purpose, behavior
+│       ├── skills/          # Procedures, checklists
+│       ├── knowledge/       # Facts, codebase info
+│       ├── playbooks/       # Step-by-step workflows promoted from experience
+│       └── journal/         # Session logs per world
 └── skills/
     ├── local/               # Custom skills
     └── marketplace/         # Downloaded from marketplace
