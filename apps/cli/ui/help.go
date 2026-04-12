@@ -54,7 +54,13 @@ func colorizeCmd(name string) string {
 // Entries wider than this still render — they just push past the padding.
 const HelpColWidth = 32
 
-// RenderGroupedHelp writes grouped command help to w. Flush-left, no padding.
+// Indent is the per-level indentation used in help output. Headers render
+// flush-left; their entries are indented by this much so the eye can skim
+// headers and drill into content.
+const Indent = "  "
+
+// RenderGroupedHelp writes grouped command help to w.
+// Headers sit flush-left, entries are indented one level.
 func RenderGroupedHelp(w io.Writer, header string, groups []HelpGroup, usage string, flags string) {
 	fmt.Fprintln(w)
 	fmt.Fprintf(w, "%s\n", header)
@@ -62,7 +68,7 @@ func RenderGroupedHelp(w io.Writer, header string, groups []HelpGroup, usage str
 
 	if usage != "" {
 		fmt.Fprintf(w, "%s\n", Strong("Usage:"))
-		fmt.Fprintf(w, "%s\n", Faint(usage))
+		fmt.Fprintf(w, "%s%s\n", Indent, Faint(usage))
 		fmt.Fprintln(w)
 	}
 
@@ -70,9 +76,9 @@ func RenderGroupedHelp(w io.Writer, header string, groups []HelpGroup, usage str
 		fmt.Fprintf(w, "%s\n", Strong(g.Title+":"))
 		for _, c := range g.Commands {
 			if c.Desc == "" {
-				fmt.Fprintf(w, "%s\n", colorizeCmd(c.Name))
+				fmt.Fprintf(w, "%s%s\n", Indent, colorizeCmd(c.Name))
 			} else {
-				fmt.Fprintf(w, "%s %s\n", PadVisible(colorizeCmd(c.Name), HelpColWidth), Faint(c.Desc))
+				fmt.Fprintf(w, "%s%s %s\n", Indent, PadVisible(colorizeCmd(c.Name), HelpColWidth), Faint(c.Desc))
 			}
 		}
 		fmt.Fprintln(w)
@@ -84,10 +90,10 @@ func RenderGroupedHelp(w io.Writer, header string, groups []HelpGroup, usage str
 	}
 }
 
-// MinimalHelp renders a flush-left, padding-free help view for any cobra
-// command. Use this as the fallback in custom HelpFunc implementations
-// instead of cobra's default (which pads 2 spaces on every line and inserts
-// blank lines around every section).
+// MinimalHelp renders a consistent help view for any cobra command:
+// headers flush-left, entries indented one level. Use this as the fallback
+// in custom HelpFunc implementations instead of cobra's default (which
+// inserts blank lines around every section).
 //
 // Sections rendered: description, usage, aliases, examples, subcommands,
 // local flags, global flags. Sections are omitted when empty.
@@ -95,7 +101,7 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 	w := cmd.OutOrStdout()
 	fmt.Fprintln(w)
 
-	// Description — prefer Long, fall back to Short.
+	// Description — prefer Long, fall back to Short. Flush-left.
 	if long := strings.TrimSpace(cmd.Long); long != "" {
 		fmt.Fprintln(w, long)
 		fmt.Fprintln(w)
@@ -108,10 +114,10 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 	if cmd.Runnable() || cmd.HasSubCommands() {
 		fmt.Fprintf(w, "%s\n", Strong("Usage:"))
 		if cmd.Runnable() {
-			fmt.Fprintln(w, Faint(cmd.UseLine()))
+			fmt.Fprintf(w, "%s%s\n", Indent, Faint(cmd.UseLine()))
 		}
 		if cmd.HasAvailableSubCommands() {
-			fmt.Fprintln(w, Faint(cmd.CommandPath()+" [command]"))
+			fmt.Fprintf(w, "%s%s\n", Indent, Faint(cmd.CommandPath()+" [command]"))
 		}
 		fmt.Fprintln(w)
 	}
@@ -119,16 +125,17 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 	// Aliases.
 	if len(cmd.Aliases) > 0 {
 		fmt.Fprintf(w, "%s\n", Strong("Aliases:"))
-		fmt.Fprintln(w, cmd.NameAndAliases())
+		fmt.Fprintf(w, "%s%s\n", Indent, cmd.NameAndAliases())
 		fmt.Fprintln(w)
 	}
 
 	// Examples.
 	if cmd.HasExample() {
 		fmt.Fprintf(w, "%s\n", Strong("Examples:"))
-		// Cobra examples are often indented 2 spaces; strip to flush-left.
+		// Cobra examples are often pre-indented 2 spaces; strip then re-indent
+		// consistently so our one-level rule holds.
 		for _, line := range strings.Split(strings.TrimRight(cmd.Example, "\n"), "\n") {
-			fmt.Fprintln(w, strings.TrimPrefix(line, "  "))
+			fmt.Fprintf(w, "%s%s\n", Indent, strings.TrimPrefix(line, "  "))
 		}
 		fmt.Fprintln(w)
 	}
@@ -140,35 +147,35 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 			if !c.IsAvailableCommand() && c.Name() != "help" {
 				continue
 			}
-			fmt.Fprintf(w, "%s %s\n", PadVisible(colorizeCmd(c.Name()), HelpColWidth), Faint(c.Short))
+			fmt.Fprintf(w, "%s%s %s\n", Indent, PadVisible(colorizeCmd(c.Name()), HelpColWidth), Faint(c.Short))
 		}
 		fmt.Fprintln(w)
 	}
 
-	// Local flags — FlagUsages comes pre-indented, strip leading spaces.
+	// Local flags — FlagUsages comes pre-indented; re-indent to our width.
 	if cmd.HasAvailableLocalFlags() {
 		fmt.Fprintf(w, "%s\n", Strong("Flags:"))
-		writeStrippedFlagUsages(w, cmd.LocalFlags().FlagUsages())
+		writeIndentedFlagUsages(w, cmd.LocalFlags().FlagUsages())
 		fmt.Fprintln(w)
 	}
 
 	// Global flags.
 	if cmd.HasAvailableInheritedFlags() {
 		fmt.Fprintf(w, "%s\n", Strong("Global flags:"))
-		writeStrippedFlagUsages(w, cmd.InheritedFlags().FlagUsages())
+		writeIndentedFlagUsages(w, cmd.InheritedFlags().FlagUsages())
 		fmt.Fprintln(w)
 	}
 }
 
-// writeStrippedFlagUsages writes FlagUsages output with its leading
-// whitespace removed. Pflag pads every flag line with 2 spaces; we drop
-// that so the output is flush-left like the rest of our help.
-func writeStrippedFlagUsages(w io.Writer, usages string) {
+// writeIndentedFlagUsages writes FlagUsages output with the pflag-supplied
+// 2-space leading whitespace replaced by our standard Indent (also 2
+// spaces, but kept routed through the constant for consistency).
+func writeIndentedFlagUsages(w io.Writer, usages string) {
 	usages = strings.TrimRight(usages, "\n")
 	if usages == "" {
 		return
 	}
 	for _, line := range strings.Split(usages, "\n") {
-		fmt.Fprintln(w, strings.TrimPrefix(line, "  "))
+		fmt.Fprintf(w, "%s%s\n", Indent, strings.TrimPrefix(line, "  "))
 	}
 }

@@ -120,14 +120,14 @@ func GetRootCmd() *cobra.Command {
 	return rootCmd
 }
 
-// printHelpCmd prints a command name and description in the help output.
-// Flush-left; if desc is empty the name is printed without padding.
+// printHelpCmd prints a command entry indented one level under its section
+// header. If desc is empty, the name is printed without trailing padding.
 func printHelpCmd(w io.Writer, name, desc string) {
 	if desc == "" {
-		fmt.Fprintf(w, "%s\n", ui.ColorizeHelpName(name))
+		fmt.Fprintf(w, "%s%s\n", ui.Indent, ui.ColorizeHelpName(name))
 		return
 	}
-	fmt.Fprintf(w, "%s %s\n", ui.PadVisible(ui.ColorizeHelpName(name), ui.HelpColWidth), ui.Faint(desc))
+	fmt.Fprintf(w, "%s%s %s\n", ui.Indent, ui.PadVisible(ui.ColorizeHelpName(name), ui.HelpColWidth), ui.Faint(desc))
 }
 
 // customHelp renders grouped, structured help for the root command.
