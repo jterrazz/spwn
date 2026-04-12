@@ -365,7 +365,7 @@ export function AppSidebar({ worlds, currentWorldId, loading, statusData }: AppS
 
       {/* ── Footer ── */}
       <SidebarFooter>
-        {version?.updateAvailable && <UpgradeBanner version={version} />}
+        {version?.updateAvailable && version.latest !== process.env.NEXT_PUBLIC_APP_VERSION && <UpgradeBanner version={version} />}
         <div className="px-1.5 pb-1">
           <DockerStatusPill />
         </div>
