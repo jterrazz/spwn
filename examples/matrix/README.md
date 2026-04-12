@@ -2,38 +2,77 @@
 
 > There is no spoon.
 
-The simplest possible spwn world: one agent, one sandbox, no project.
-Designed to be the first thing a new user spawns — talk to Neo, watch
-it run commands, understand the model.
+The simplest possible spwn world: one agent, one sandbox, no project. Designed to be the first thing a new user spawns — talk to Neo, watch it explore, understand the model.
+
+Perfect for first-time users: the fastest path from "I installed spwn" to "I see an agent running in a Docker container on my machine."
 
 ## What's inside
 
-- **World** `matrix` — 2 CPU, 2 GB, full Unix toolchain, no project mount.
-- **Agent** `neo` — a curious, low-ego agent that explains what it's
-  doing as it does it. Great for first-time users who want a tour.
+| Component | Details |
+|---|---|
+| **World** | `matrix` — 2 CPU, 2 GB RAM, 4 GB disk, 1h timeout |
+| **Tools** | Unix, Git, Node.js 20, Python 3 |
+| **Agent: neo** | A curious, low-ego explorer. Explains what it's doing as it does it. Asks clarifying questions rather than guessing. |
 
-## Try it
+## Prerequisites
 
-```sh
+- spwn installed (`curl -fsSL https://spwn.sh/install.sh | bash`)
+- Docker running
+- An Anthropic API key (set via `claude setup-token` or `ANTHROPIC_API_KEY`)
+
+## Install
+
+```bash
+spwn example install matrix
+```
+
+## Spawn
+
+```bash
+# Basic sandbox (no project, just exploration)
 spwn up -c matrix --agent neo
-spwn agent talk neo "show me what you can see. explore the world."
+
+# Or mount a project for Neo to explore
+spwn up -c matrix --agent neo -w ./my-project
 ```
 
-Neo will walk you through `/world/`, `/agents/`, its own memory, and
-what tools are available. It's essentially a self-documenting tour.
+## Explore
 
-## After the tour
+```bash
+# Ask Neo to give you a tour of the world
+spwn agent talk neo "Show me what you can see. Explore the world."
 
-Once you're comfortable, destroy the matrix and spawn something real:
+# Neo will walk you through:
+#   /world/        — the world manifest, physics, faculties
+#   /mind/         — its own persistent identity
+#   /workspace/    — mounted project (if any)
 
-```sh
+# Check what's happening
+spwn ls
+spwn logs <world-id>
+
+# Drop into the container yourself
+spwn attach <world-id>
+```
+
+## What to try next
+
+```bash
+# Give Neo a real task
+spwn agent talk neo "Read this codebase and explain the architecture"
+
+# Let Neo learn from the session
+spwn agent dream neo
+
+# Move on to a multi-agent example
 spwn down <world-id>
-spwn example install paperclip-factory
+spwn example install startup
 ```
 
-## Remove
+## Cleanup
 
-```sh
+```bash
+spwn down <world-id>
 rm ~/.spwn/worlds/matrix.yaml
 rm -rf ~/.spwn/agents/neo
 ```

@@ -2,50 +2,92 @@
 
 > Same brain, new soul.
 
-A science-themed world with Curie — a patient, note-taking agent who
-treats every task as an experiment. This example exists mostly to show
-off the `spwn agent fork` flow.
+A patient, methodical agent named Curie. She keeps a real lab notebook — hypotheses, methods, observations, conclusions — and writes playbooks as she figures things out.
+
+This example showcases **agent forking** — once Curie has learned enough, fork her into Darwin and watch him specialize differently. Same starting knowledge, divergent evolution.
 
 ## What's inside
 
-- **World** `research-lab` — 2 CPU, 2 GB, Python + Node, 4h timeout.
-- **Agent** `curie` — careful, keeps a structured lab notebook in her
-  memory, writes hypotheses and conclusions.
+| Component | Details |
+|---|---|
+| **World** | `research-lab` — 4 CPU, 4 GB RAM, 8 GB disk, 2h timeout |
+| **Tools** | Unix, Git, Node.js 20, Python 3 |
+| **Agent: curie** | Worker role. Careful, note-taking, hypothesis-driven. Documents everything in her journal. Writes playbooks from successful experiments. |
 
-## Try it
+## Prerequisites
 
-```sh
-spwn up -c research-lab --agent curie
-spwn agent talk curie "investigate why my test suite is flaky"
+- spwn installed (`curl -fsSL https://spwn.sh/install.sh | bash`)
+- Docker running
+- An Anthropic API key (set via `claude setup-token` or `ANTHROPIC_API_KEY`)
+
+## Install
+
+```bash
+spwn example install research-lab
 ```
 
-Curie frames the task as an experiment, records observations in her
-journal, and when she figures something out, promotes the insight into
-a playbook she can reuse next time.
+## Spawn
 
-## Forking — the headline feature
+```bash
+# Give Curie a codebase to study
+spwn up -c research-lab --agent curie -w ./my-project
+```
 
-After Curie has accumulated some knowledge (a handful of journal
-entries and playbooks), fork her:
+## Explore
 
-```sh
+```bash
+# Ask Curie to investigate something
+spwn agent talk curie "Analyze the performance of the database queries in this project"
+
+# Curie will:
+#   1. State a hypothesis
+#   2. Design an experiment
+#   3. Run it
+#   4. Record observations in her journal
+#   5. Write conclusions to her knowledge
+
+# Read her lab notebook
+spwn agent journal curie
+
+# Check her accumulated knowledge
+spwn agent mind curie
+```
+
+## The forking experiment
+
+Once Curie has built up knowledge from a few sessions:
+
+```bash
+# Consolidate what she's learned
+spwn agent dream curie
+
+# Fork her into a new agent
 spwn agent fork curie darwin
+
+# Now run both on different problems
+spwn up -c research-lab --agent curie -w ./project-a
+spwn up -c research-lab --agent darwin -w ./project-b
+
+# Over time, they'll specialize differently
+# — same starting knowledge, divergent playbooks
 ```
 
-You now have two agents:
+## What to try next
 
-- **Curie** keeps her current identity and continues her current work.
-- **Darwin** starts with a blank identity but **inherits Curie's
-  entire mind** — same knowledge, same playbooks, same journal.
+```bash
+# Compare the two agents after they've diverged
+spwn agent mind curie
+spwn agent mind darwin
 
-Edit `~/.spwn/agents/darwin/identity/` to give Darwin a different
-persona (evolutionary biologist, say), and he'll apply Curie's methods
-to a different domain.
+# Let them consolidate independently
+spwn agent dream curie
+spwn agent dream darwin
+```
 
-## Remove
+## Cleanup
 
-```sh
+```bash
+spwn down <world-id>
 rm ~/.spwn/worlds/research-lab.yaml
-rm -rf ~/.spwn/agents/curie
-# and darwin too if you forked
+rm -rf ~/.spwn/agents/curie ~/.spwn/agents/darwin
 ```
