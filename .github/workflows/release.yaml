@@ -96,84 +96,92 @@ jobs:
           BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
           WORKDIR=$(mktemp -d)
 
-          # Map: platform → asset filename
-          declare -A PLATFORMS=(
-            ["darwin-aarch64"]="spwn_aarch64.app.tar.gz"
-            ["darwin-x86_64"]="spwn_x64.app.tar.gz"
-            ["linux-x86_64"]="spwn_${VERSION}_amd64.AppImage.tar.gz"
-          )
+          # Write the private key to a temp file for signing
+          echo "${TAURI_SIGNING_PRIVATE_KEY}" > "${WORKDIR}/key.pem"
 
-          # For each platform, download the artifact, sign it, build the JSON entry
-          ENTRIES=""
-          for platform in "${!PLATFORMS[@]}"; do
-            asset="${PLATFORMS[$platform]}"
-            url="${BASE_URL}/${asset}"
+          sign_asset() {
+            local platform="$1" asset="$2"
+            local url="${BASE_URL}/${asset}"
 
             echo "Processing ${platform} → ${asset}"
 
             # Download
-            gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null || {
-              # Linux AppImage tar.gz might not exist — try plain AppImage
-              if [[ "$platform" == "linux-x86_64" ]]; then
-                asset="spwn_${VERSION}_amd64.AppImage"
-                url="${BASE_URL}/${asset}"
-                gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null || {
-                  echo "  Skipping ${platform}: asset not found"
-                  continue
-                }
-              else
-                echo "  Skipping ${platform}: asset not found"
-                continue
-              fi
-            }
+            if ! gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null; then
+              echo "  Skipping ${platform}: ${asset} not found in release"
+              return 1
+            fi
 
-            # Sign with Tauri updater key
-            echo "${TAURI_SIGNING_PRIVATE_KEY}" > "${WORKDIR}/key.pem"
-            SIG=$(cargo tauri signer sign \
+            # Sign
+            cargo tauri signer sign \
               --private-key "${WORKDIR}/key.pem" \
               --password "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD}" \
-              "${WORKDIR}/${asset}" 2>&1 | tail -1)
-            rm -f "${WORKDIR}/key.pem"
+              "${WORKDIR}/${asset}" 2>&1 || true
 
-            # Read signature from .sig file
+            # Read signature
+            local sig=""
             if [ -f "${WORKDIR}/${asset}.sig" ]; then
-              SIG=$(cat "${WORKDIR}/${asset}.sig")
+              sig=$(cat "${WORKDIR}/${asset}.sig")
             fi
 
-            if [ -z "$SIG" ]; then
+            if [ -z "$sig" ]; then
               echo "  Warning: no signature for ${platform}"
-              continue
+              return 1
             fi
 
-            # Build JSON entry
-            ENTRY="\"${platform}\": { \"signature\": \"${SIG}\", \"url\": \"${url}\" }"
-            if [ -n "$ENTRIES" ]; then
-              ENTRIES="${ENTRIES}, ${ENTRY}"
-            else
-              ENTRIES="${ENTRY}"
-            fi
             echo "  Signed ${platform} ✓"
-          done
+            # Output the JSON fragment
+            echo "ENTRY:\"${platform}\": { \"signature\": \"${sig}\", \"url\": \"${url}\" }"
+          }
+
+          # Sign each platform's updater asset
+          ENTRIES=""
+          add_entry() {
+            local entry="$1"
+            if [ -n "$ENTRIES" ]; then
+              ENTRIES="${ENTRIES}, ${entry}"
+            else
+              ENTRIES="${entry}"
+            fi
+          }
+
+          # macOS arm64
+          result=$(sign_asset "darwin-aarch64" "spwn_aarch64.app.tar.gz" 2>&1) && \
+            add_entry "$(echo "$result" | grep '^ENTRY:' | sed 's/^ENTRY://')" || true
+          echo "$result" | grep -v '^ENTRY:'
+
+          # macOS x86_64
+          result=$(sign_asset "darwin-x86_64" "spwn_x64.app.tar.gz" 2>&1) && \
+            add_entry "$(echo "$result" | grep '^ENTRY:' | sed 's/^ENTRY://')" || true
+          echo "$result" | grep -v '^ENTRY:'
+
+          # Linux x86_64 — Tauri uploads AppImage.tar.gz for updater
+          result=$(sign_asset "linux-x86_64" "spwn_${VERSION}_amd64.AppImage.tar.gz" 2>&1) && \
+            add_entry "$(echo "$result" | grep '^ENTRY:' | sed 's/^ENTRY://')" || true
+          echo "$result" | grep -v '^ENTRY:'
+
+          rm -f "${WORKDIR}/key.pem"
 
           if [ -z "$ENTRIES" ]; then
-            echo "Error: no platforms were signed"
-            exit 1
+            echo "Error: no platforms were signed — latest.json not generated"
+            # Don't fail the release — the desktop builds already shipped.
+            # The updater just won't work for this release.
+            exit 0
           fi
 
           # Compose latest.json
-          cat > "${WORKDIR}/latest.json" <<MANIFEST
+          cat > "${WORKDIR}/latest.json" <<EOF
           {
             "version": "${VERSION}",
             "notes": "spwn ${TAG}",
             "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "platforms": { ${ENTRIES} }
           }
-          MANIFEST
+          EOF
 
           # Pretty-print and validate
-          cat "${WORKDIR}/latest.json" | python3 -m json.tool
-          echo ""
+          python3 -m json.tool "${WORKDIR}/latest.json"
 
           # Upload to the release
           gh release upload "${TAG}" "${WORKDIR}/latest.json" --clobber
+          echo ""
           echo "latest.json uploaded to ${TAG} ✓"
