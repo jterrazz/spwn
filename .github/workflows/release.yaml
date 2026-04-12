@@ -24,6 +24,11 @@ jobs:
   #      the CLI in-place via the pre-build-script input. The
   #      goreleaser job above doesn't help here because tauri-action
   #      needs the binary on disk, not in a release asset.
+  #
+  #   3. The updater manifest (latest.json) — generated AFTER the
+  #      desktop builds upload their .tar.gz artifacts. We sign each
+  #      artifact with the Tauri updater key and compose the JSON
+  #      that the desktop app checks on startup.
 
   cli:
     name: CLI release
@@ -64,3 +69,111 @@ jobs:
       release-name: "spwn ${{ github.ref_name }}"
       release-body: "CLI + desktop app for managing AI agent worlds"
     secrets: inherit
+
+  updater:
+    name: Updater manifest
+    needs: desktop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (for cargo-tauri signer)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install tauri-cli
+        run: cargo install tauri-cli --version "^2" --locked
+
+      - name: Download release artifacts and generate latest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          REPO="${{ github.repository }}"
+          BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
+          WORKDIR=$(mktemp -d)
+
+          # Map: platform → asset filename
+          declare -A PLATFORMS=(
+            ["darwin-aarch64"]="spwn_aarch64.app.tar.gz"
+            ["darwin-x86_64"]="spwn_x64.app.tar.gz"
+            ["linux-x86_64"]="spwn_${VERSION}_amd64.AppImage.tar.gz"
+          )
+
+          # For each platform, download the artifact, sign it, build the JSON entry
+          ENTRIES=""
+          for platform in "${!PLATFORMS[@]}"; do
+            asset="${PLATFORMS[$platform]}"
+            url="${BASE_URL}/${asset}"
+
+            echo "Processing ${platform} → ${asset}"
+
+            # Download
+            gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null || {
+              # Linux AppImage tar.gz might not exist — try plain AppImage
+              if [[ "$platform" == "linux-x86_64" ]]; then
+                asset="spwn_${VERSION}_amd64.AppImage"
+                url="${BASE_URL}/${asset}"
+                gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null || {
+                  echo "  Skipping ${platform}: asset not found"
+                  continue
+                }
+              else
+                echo "  Skipping ${platform}: asset not found"
+                continue
+              fi
+            }
+
+            # Sign with Tauri updater key
+            echo "${TAURI_SIGNING_PRIVATE_KEY}" > "${WORKDIR}/key.pem"
+            SIG=$(cargo tauri signer sign \
+              --private-key "${WORKDIR}/key.pem" \
+              --password "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD}" \
+              "${WORKDIR}/${asset}" 2>&1 | tail -1)
+            rm -f "${WORKDIR}/key.pem"
+
+            # Read signature from .sig file
+            if [ -f "${WORKDIR}/${asset}.sig" ]; then
+              SIG=$(cat "${WORKDIR}/${asset}.sig")
+            fi
+
+            if [ -z "$SIG" ]; then
+              echo "  Warning: no signature for ${platform}"
+              continue
+            fi
+
+            # Build JSON entry
+            ENTRY="\"${platform}\": { \"signature\": \"${SIG}\", \"url\": \"${url}\" }"
+            if [ -n "$ENTRIES" ]; then
+              ENTRIES="${ENTRIES}, ${ENTRY}"
+            else
+              ENTRIES="${ENTRY}"
+            fi
+            echo "  Signed ${platform} ✓"
+          done
+
+          if [ -z "$ENTRIES" ]; then
+            echo "Error: no platforms were signed"
+            exit 1
+          fi
+
+          # Compose latest.json
+          cat > "${WORKDIR}/latest.json" <<MANIFEST
+          {
+            "version": "${VERSION}",
+            "notes": "spwn ${TAG}",
+            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": { ${ENTRIES} }
+          }
+          MANIFEST
+
+          # Pretty-print and validate
+          cat "${WORKDIR}/latest.json" | python3 -m json.tool
+          echo ""
+
+          # Upload to the release
+          gh release upload "${TAG}" "${WORKDIR}/latest.json" --clobber
+          echo "latest.json uploaded to ${TAG} ✓"
