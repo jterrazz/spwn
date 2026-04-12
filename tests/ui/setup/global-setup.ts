@@ -1,8 +1,10 @@
 import { execSync, spawn, type ChildProcess } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "../../..");
 const BIN = resolve(REPO_ROOT, "bin/spwn");
 const API_PORT = 9877;
@@ -35,15 +37,18 @@ export default async function globalSetup() {
     stdio: "inherit",
   });
 
-  // Start API server
+  // Start API server — detached so it survives the setup process
   console.log(`[global-setup] Starting API server on port ${API_PORT}...`);
   const api = spawn(BIN, ["dash", "start", "--port", String(API_PORT)], {
     env: { ...process.env, SPWN_HOME: home },
-    stdio: ["ignore", "pipe", "pipe"],
-    detached: false,
+    stdio: ["ignore", "ignore", "ignore"],
+    detached: true,
   });
+  api.unref(); // allow setup process to exit without killing the child
 
-  globalThis.__spwnApiProcess = api;
+  // Write PID so teardown can find it
+  const pidFile = join(home, ".api-pid");
+  writeFileSync(pidFile, String(api.pid));
 
   // Wait for API to be ready
   await new Promise<void>((resolve, reject) => {
@@ -65,12 +70,13 @@ export default async function globalSetup() {
 
   console.log("[global-setup] API server ready ✓\n");
 
-  // Write the port + home to a temp file so tests can read them
+  // Write config so tests + teardown can find everything
+  const configPath = join(home, ".test-config.json");
   writeFileSync(
-    join(home, ".test-config.json"),
-    JSON.stringify({ apiPort: API_PORT, spwnHome: home, bin: BIN }),
+    configPath,
+    JSON.stringify({ apiPort: API_PORT, spwnHome: home, bin: BIN, pidFile }),
   );
 
-  // Store the config path for the fixture
-  process.env.SPWN_TEST_CONFIG = join(home, ".test-config.json");
+  // Playwright passes env vars between setup → tests → teardown
+  process.env.SPWN_TEST_CONFIG = configPath;
 }

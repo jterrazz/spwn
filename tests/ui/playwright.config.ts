@@ -35,13 +35,15 @@ export default defineConfig({
     actionTimeout: 15_000,
   },
 
-  // The Next.js dev server — started automatically by Playwright
+  // The Next.js dev server — started automatically by Playwright.
   webServer: {
-    command: "cd ../apps/observatory && NEXT_PUBLIC_API_URL=http://localhost:9877 npm run dev -- -p 1420",
+    command: "npm run dev -- -p 1420",
+    cwd: "../apps/observatory",
     port: 1420,
     timeout: 30_000,
     reuseExistingServer: !process.env.CI,
     env: {
+      ...process.env,
       NEXT_PUBLIC_API_URL: "http://localhost:9877",
     },
   },
