@@ -637,11 +637,16 @@ func worldStateDirFor(worldID string) string {
 //	  notes/    — my private notes for this world's project
 //	  role.md   — what role I play here
 //
+// It also writes CLAUDE.md at the agent root so the Claude Code
+// runtime loads the agent's identity on startup. The cwd is set to
+// /agents/<name>/ so CLAUDE.md is the first thing it reads.
+//
 // The single /agents bind on the world container makes these dirs
 // visible at /agents/<name>/worlds/<world-id>/ instantly. Hot-deploy
 // uses the same helper.
 func initAgentDeployment(rec models.AgentRecord, worldID string) error {
-	deploymentDir := filepath.Join(agent.AgentDir(rec.Name), "worlds", worldID)
+	agentDir := agent.AgentDir(rec.Name)
+	deploymentDir := filepath.Join(agentDir, "worlds", worldID)
 	for _, sub := range []string{"inbox", "outbox", "notes"} {
 		if err := os.MkdirAll(filepath.Join(deploymentDir, sub), 0o755); err != nil {
 			return fmt.Errorf("mkdir %s: %w", sub, err)
@@ -655,7 +660,57 @@ func initAgentDeployment(rec models.AgentRecord, worldID string) error {
 	if err := os.WriteFile(filepath.Join(deploymentDir, "role.md"), []byte(roleContent), 0o644); err != nil {
 		return fmt.Errorf("write role.md: %w", err)
 	}
+
+	// Write CLAUDE.md — the entry point Claude Code reads on startup.
+	// It loads the agent's persona and tells the runtime where to find
+	// the world manual and system skills. Without this, the agent runs
+	// as a generic Claude instance with no identity.
+	claudeMD := generateAgentCLAUDEMD(rec.Name, role)
+	claudePath := filepath.Join(agentDir, "CLAUDE.md")
+	if err := os.WriteFile(claudePath, []byte(claudeMD), 0o644); err != nil {
+		return fmt.Errorf("write CLAUDE.md: %w", err)
+	}
+
 	return nil
+}
+
+// generateAgentCLAUDEMD creates the CLAUDE.md that Claude Code reads
+// on startup. It includes the persona inline (so it's always loaded)
+// and references the world files.
+func generateAgentCLAUDEMD(agentName, role string) string {
+	return fmt.Sprintf(`# %s
+
+You are **%s**, a spwn agent with role: %s.
+
+## Your identity
+
+Read your full persona and behavioral instructions from:
+
+@core/persona.md
+
+Follow the voice, style, and purpose defined there. You are NOT a generic assistant — you are %s.
+
+## Your world
+
+- Read %s for your operating manual (how memory, skills, and communication work).
+- Read %s for the physics and resource constraints of this world.
+- Read %s to see what tools are physically available.
+- Read %s for system skills (mind management, collaboration, evolution).
+
+## Key rules
+
+1. **Read your persona first** before doing anything else. Your identity shapes how you respond.
+2. Save important discoveries to your knowledge (write to %s).
+3. After significant work, check if a playbook should be created in %s.
+4. Communicate with other agents via your inbox/outbox in your current world deployment.
+5. Never modify files in /world/ (read-only system area).
+`, agentName, agentName, role, agentName,
+		"`/world/AGENTS.md`",
+		"`/world/physics.md`",
+		"`/world/faculties.md`",
+		"`/world/skills/`",
+		"`./knowledge/`",
+		"`./playbooks/`")
 }
 
 // rosterColony adapts an agent record list into the physics package's
