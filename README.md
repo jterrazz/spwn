@@ -150,26 +150,21 @@ spwn up --agent oracle --runtime aider -w .       # Open source
 Each agent is a directory of markdown files — human-readable, git-friendly, no database:
 
 ```
-~/.spwn/agents/neo/
-├── profile.yaml              # role, engine, delegation rules
-├── identity/
-│   ├── persona.md            # who I am — role, style, preferences
-│   ├── purpose.md            # why I exist — mission and goals
-│   └── traits.md             # what I believe — values and behavior
-├── memory/
-│   ├── knowledge/            # facts about the codebase
-│   ├── playbooks/            # step-by-step workflows I've learned
-│   └── journal/              # session logs — what happened to me
-├── skills/                   # what I can do
-├── sessions/                 # active session state
-└── bonds.md                  # relationships with other agents
+~/.spwn/agents/Neo/
+├── profile.yaml              # team, role, engine, delegation rules
+├── core/                     # who the agent is
+│   └── persona.md            # role, style, preferences, purpose, behavior
+├── skills/                   # what the agent can do — procedures, checklists
+├── knowledge/                # what the agent knows — facts about the codebase
+├── playbooks/                # how the agent works — step-by-step workflows
+└── journal/                  # what happened — session logs per world
 ```
 
 Agents evolve through three mechanisms:
 
-- **Dream** (`spwn agent dream neo`) — analyze experience, promote successful patterns to playbooks
-- **Sleep** (`spwn agent sleep neo`) — graceful shutdown, consolidate raw experience into durable knowledge
-- **Fork** (`spwn agent fork neo neo-v2`) — clone an agent, run variants, keep the one that performs best
+- **Dream** (`spwn agent dream Neo`) — analyze experience, promote successful patterns to playbooks
+- **Sleep** (`spwn agent sleep Neo`) — graceful shutdown, consolidate raw experience into durable knowledge
+- **Fork** (`spwn agent fork Neo Neo-v2`) — clone an agent, run variants, keep the one that performs best
 
 <br/>
 
