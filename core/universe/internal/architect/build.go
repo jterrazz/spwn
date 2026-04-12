@@ -42,7 +42,9 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 
 	// Resolve architect tools via imagebuilder to generate install steps
 	reg := ib.NewRegistry()
-	catalog.RegisterDefaults(reg)
+	if err := catalog.RegisterDefaults(reg); err != nil {
+		return fmt.Errorf("register catalog: %w", err)
+	}
 
 	// The architect needs these tools installed in the image.
 	// @spwn/cli is handled separately (cross-compiled binary), so we only need

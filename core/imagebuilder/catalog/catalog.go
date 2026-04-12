@@ -1,6 +1,8 @@
 package catalog
 
 import (
+	"fmt"
+
 	ib "spwn.sh/core/imagebuilder"
 
 	"spwn.sh/core/imagebuilder/catalog/architect"
@@ -33,10 +35,13 @@ var All = []ib.Tool{
 }
 
 // RegisterDefaults registers all built-in tools into the given registry.
-func RegisterDefaults(r *ib.Registry) {
+// Returns an error if any tool fails to register (typically a naming
+// collision — indicates a programmer error in the catalog).
+func RegisterDefaults(r *ib.Registry) error {
 	for _, t := range All {
 		if err := r.Register(t); err != nil {
-			panic("catalog: " + err.Error())
+			return fmt.Errorf("register built-in tool %q: %w", t.Name(), err)
 		}
 	}
+	return nil
 }

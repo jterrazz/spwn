@@ -13,7 +13,9 @@ import (
 func newRegistry(t *testing.T) *ib.Registry {
 	t.Helper()
 	reg := ib.NewRegistry()
-	catalog.RegisterDefaults(reg)
+	if err := catalog.RegisterDefaults(reg); err != nil {
+		t.Fatalf("register catalog: %v", err)
+	}
 	return reg
 }
 

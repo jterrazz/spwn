@@ -193,7 +193,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 		// Build image using imagebuilder with manifest tools
 		reg := ib.NewRegistry()
-		catalog.RegisterDefaults(reg)
+		if err := catalog.RegisterDefaults(reg); err != nil {
+			return nil, fmt.Errorf("register catalog: %w", err)
+		}
 		builder := ib.New(reg, a.backend)
 
 		// Always include runtime essentials, then add user-specified tools on top.
