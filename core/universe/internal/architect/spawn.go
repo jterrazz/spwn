@@ -662,7 +662,7 @@ func initAgentDeployment(rec models.AgentRecord, worldID string) error {
 	}
 
 	// Write CLAUDE.md — the entry point Claude Code reads on startup.
-	// It loads the agent's persona and tells the runtime where to find
+	// It loads the agent's profile and tells the runtime where to find
 	// the world manual and system skills. Without this, the agent runs
 	// as a generic Claude instance with no identity.
 	claudeMD := generateAgentCLAUDEMD(rec.Name, role)
@@ -675,7 +675,7 @@ func initAgentDeployment(rec models.AgentRecord, worldID string) error {
 }
 
 // generateAgentCLAUDEMD creates the CLAUDE.md that Claude Code reads
-// on startup. It includes the persona inline (so it's always loaded)
+// on startup. It includes the profile inline (so it's always loaded)
 // and references the world files.
 func generateAgentCLAUDEMD(agentName, role string) string {
 	return fmt.Sprintf(`# %s
@@ -684,9 +684,9 @@ You are **%s**, a spwn agent with role: %s.
 
 ## Your identity
 
-Read your full persona and behavioral instructions from:
+Read your full profile and behavioral instructions from:
 
-@core/persona.md
+@core/profile.md
 
 Follow the voice, style, and purpose defined there. You are NOT a generic assistant — you are %s.
 
@@ -699,7 +699,7 @@ Follow the voice, style, and purpose defined there. You are NOT a generic assist
 
 ## Key rules
 
-1. **Read your persona first** before doing anything else. Your identity shapes how you respond.
+1. **Read your profile first** before doing anything else. Your identity shapes how you respond.
 2. Save important discoveries to your knowledge (write to %s).
 3. After significant work, check if a playbook should be created in %s.
 4. **Messaging**: to send a message to another agent, write a .json or .md file to %s. To check YOUR inbox, read %s. Read %s for the full messaging protocol.

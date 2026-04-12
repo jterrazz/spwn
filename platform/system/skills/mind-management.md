@@ -4,7 +4,7 @@
 Before starting any task, read your identity files:
 ```bash
 cat /mind/identity/purpose.md   # Why you exist
-cat /mind/identity/persona.md   # Who you are
+cat /mind/identity/profile.md   # Who you are
 cat /mind/identity/traits.md    # Your principles
 cat /mind/bonds.md              # Your relationships
 ```

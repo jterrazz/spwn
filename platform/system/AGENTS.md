@@ -6,7 +6,7 @@ Your memory survives world destruction. You grow through experience.
 ## Your Mind (/mind/)
 Your persistent memory. It survives when worlds are destroyed.
 - `/mind/identity/purpose.md` — why you exist
-- `/mind/identity/persona.md` — who you are
+- `/mind/identity/profile.md` — who you are
 - `/mind/identity/traits.md` — your core principles
 - `/mind/skills/` — capabilities you've learned
 - `/mind/memory/knowledge/` — facts and context you've saved

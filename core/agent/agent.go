@@ -80,7 +80,7 @@ func InitMind(name string) (string, error) {
 }
 
 // ValidateMind checks that the named agent's Mind directory exists and contains
-// at least the personas layer.
+// at least the core layer.
 func ValidateMind(name string) error {
 	return mind.Validate(name)
 }

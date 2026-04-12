@@ -45,7 +45,7 @@ provided, a random name is picked from a curated dictionary.`,
 		}
 
 		s.Done("Created agent", name)
-		s.Done("Created persona", "persona.md")
+		s.Done("Created profile", "profile.md")
 
 		// Assign team if provided
 		if initTeam != "" {

@@ -124,7 +124,7 @@ func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("4. Report back to your chief\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/core/ — who you are (persona, purpose, traits)\n")
+	b.WriteString("- /mind/core/ — who you are (profile, purpose, traits)\n")
 	b.WriteString("- /mind/skills/ — what you can do\n")
 	b.WriteString("- /mind/knowledge/ — facts you've learned\n")
 	b.WriteString("- /mind/playbooks/ — procedures that work\n")
@@ -165,7 +165,7 @@ func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("Message peers: write to /world/inbox/{peer}/\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/core/ — who you are (persona, purpose, traits)\n")
+	b.WriteString("- /mind/core/ — who you are (profile, purpose, traits)\n")
 	b.WriteString("- /mind/skills/ — what you can do\n")
 	b.WriteString("- /mind/knowledge/ — facts you've learned\n")
 	b.WriteString("- /mind/playbooks/ — procedures that work\n")

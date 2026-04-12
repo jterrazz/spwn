@@ -9,7 +9,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	t.Run("creates_all_layers_and_persona", func(t *testing.T) {
+	t.Run("creates_all_layers_and_profile", func(t *testing.T) {
 		tmp := t.TempDir()
 		t.Setenv("SPWN_HOME", tmp)
 
@@ -31,10 +31,10 @@ func TestInit(t *testing.T) {
 			}
 		}
 
-		// Verify default persona exists
-		personaPath := filepath.Join(dir, "core", "persona.md")
-		if _, err := os.Stat(personaPath); err != nil {
-			t.Errorf("expected default persona to exist: %v", err)
+		// Verify default profile exists
+		profilePath := filepath.Join(dir, "core", "profile.md")
+		if _, err := os.Stat(profilePath); err != nil {
+			t.Errorf("expected default profile to exist: %v", err)
 		}
 	})
 

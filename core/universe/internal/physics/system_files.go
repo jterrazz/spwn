@@ -12,7 +12,7 @@ Your memory survives world destruction. You grow through experience.
 ## Your Mind (/mind/)
 Your persistent memory. It survives when worlds are destroyed.
 - ` + "`/mind/core/purpose.md`" + ` — why you exist
-- ` + "`/mind/core/persona.md`" + ` — who you are
+- ` + "`/mind/core/profile.md`" + ` — who you are
 - ` + "`/mind/core/traits.md`" + ` — your core principles
 - ` + "`/mind/skills/`" + ` — capabilities you've learned
 - ` + "`/mind/knowledge/`" + ` — facts and context you've saved
@@ -52,7 +52,7 @@ const SkillMindManagement = `# Mind Management
 Before starting any task, read your identity files:
 ` + "```bash" + `
 cat /mind/core/purpose.md   # Why you exist
-cat /mind/core/persona.md   # Who you are
+cat /mind/core/profile.md   # Who you are
 cat /mind/core/traits.md    # Your principles
 ` + "```" + `
 

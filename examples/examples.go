@@ -1,5 +1,5 @@
 // Package examples ships a curated gallery of ready-made spwn
-// templates — full worlds and agents with pre-written personas —
+// templates — full worlds and agents with pre-written profiles —
 // that first-time users can install with one click or one command.
 //
 // Every template lives at /examples/<slug>/ at the repo root and is
@@ -187,11 +187,12 @@ func Install(slug, baseDir string) (InstallReport, error) {
 				// Agent directory exists — but it might be broken
 				// (e.g. created by a previous version that used a
 				// different layout, or partially cleaned up). If
-				// core/persona.md is missing, copy the template's
-				// core/ layer on top without touching user data
-				// like journal/ or knowledge/.
+				// core/profile.md (or legacy core/persona.md) is
+				// missing, copy the template's core/ layer on top
+				// without touching user data like journal/ or knowledge/.
+				coreProfile := filepath.Join(dst, "core", "profile.md")
 				corePersona := filepath.Join(dst, "core", "persona.md")
-				if !exists(corePersona) {
+				if !exists(coreProfile) && !exists(corePersona) {
 					coreSrc := path(agentsSrc, name, "core")
 					coreDst := filepath.Join(dst, "core")
 					if cperr := copyDirFS(templatesFS, coreSrc, coreDst); cperr == nil {

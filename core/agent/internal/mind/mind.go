@@ -34,8 +34,8 @@ func Init(name string) (string, error) {
 		}
 	}
 
-	// Create default persona
-	persona := `# Default Persona
+	// Create default profile
+	profile := `# Default Profile
 
 You are a spwn agent — a persistent AI worker living inside an isolated world.
 
@@ -60,15 +60,15 @@ You are a spwn agent — a persistent AI worker living inside an isolated world.
 - Use your full Unix shell access (bash, git, curl, etc.)
 - Stay within the Laws — they describe what is physically possible
 `
-	personaPath := filepath.Join(dir, "core", "persona.md")
-	if err := os.WriteFile(personaPath, []byte(persona), 0644); err != nil {
-		return "", fmt.Errorf("create persona: %w", err)
+	profilePath := filepath.Join(dir, "core", "profile.md")
+	if err := os.WriteFile(profilePath, []byte(profile), 0644); err != nil {
+		return "", fmt.Errorf("create profile: %w", err)
 	}
 
 	return dir, nil
 }
 
-// Validate checks that a Mind directory exists and has the personas layer.
+// Validate checks that a Mind directory exists and has the core layer.
 func Validate(name string) error {
 	dir := AgentDir(name)
 	info, err := os.Stat(dir)

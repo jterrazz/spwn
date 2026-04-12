@@ -27,7 +27,7 @@ func (f *FilesystemMemory) Init(name string) (string, error) {
 	return mind.Init(name)
 }
 
-// Validate checks that a Mind directory exists and has the personas layer.
+// Validate checks that a Mind directory exists and has the core layer.
 func (f *FilesystemMemory) Validate(name string) error {
 	return mind.Validate(name)
 }

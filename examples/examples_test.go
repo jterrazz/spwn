@@ -59,7 +59,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 				}
 			}
 
-			// At least one agent directory, each with core/persona.md.
+			// At least one agent directory, each with core/profile.md.
 			agentEntries, err := fs.ReadDir(templatesFS, slug+"/agents")
 			if err != nil {
 				t.Errorf("read %s/agents: %v", slug, err)
@@ -69,10 +69,10 @@ func TestShippedSlugsStructure(t *testing.T) {
 			for _, e := range agentEntries {
 				if e.IsDir() {
 					hasAgent = true
-					// Every agent must have core/persona.md (the current Mind layout).
-					personaPath := slug + "/agents/" + e.Name() + "/core/persona.md"
-					if _, err := fs.Stat(templatesFS, personaPath); err != nil {
-						t.Errorf("%s: agent %q missing core/persona.md", slug, e.Name())
+					// Every agent must have core/profile.md (the current Mind layout).
+					profilePath := slug + "/agents/" + e.Name() + "/core/profile.md"
+					if _, err := fs.Stat(templatesFS, profilePath); err != nil {
+						t.Errorf("%s: agent %q missing core/profile.md", slug, e.Name())
 					}
 				}
 			}
@@ -208,8 +208,8 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	if !exists(filepath.Join(base, "worlds", "matrix.yaml")) {
 		t.Error("matrix.yaml was not written")
 	}
-	if !exists(filepath.Join(base, "agents", "neo", "core", "persona.md")) {
-		t.Error("agent core/persona.md was not copied")
+	if !exists(filepath.Join(base, "agents", "neo", "core", "profile.md")) {
+		t.Error("agent core/profile.md was not copied")
 	}
 
 	// Re-install should be a no-op: everything skipped.
