@@ -45,7 +45,7 @@
       "open": true
     },
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzOTc2Mjg3NTJFMjU1MjMKUldRalZlSlNoMktYRThHeG9RTGtweVQ2MHd0U3d6UGhRNjZzeW9SZmloS003bXlZbjZYMTk0clIK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERDOTEzNzY4NzQ1QzEzNEMKUldSTUUxeDBhRGVSM0lGYk5FdlpyWU5sSHB1QzlXTTB3eFhWKzZYY1dZMmVlTDBtK3R5b2pTM3QK",
       "endpoints": [
         "https://github.com/jterrazz/spwn/releases/latest/download/latest.json"
       ],
