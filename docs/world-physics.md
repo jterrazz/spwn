@@ -36,7 +36,6 @@ No ACLs. No permission prompts. If a binary isn't installed, it's **physically i
 | No structure for managing multiple agents. | Flexible hierarchy with messaging and delegation. |
 | Setup isn't reproducible or shareable. | Declarative YAML config. Git-friendly, shareable. |
 | Can't see what tools and skills are exposed. | `spwn inspect` shows everything. |
-| Zero governance. No cost limits. | `org.yaml` defines governance. |
 | Agent forgets everything between sessions. | Persistent identity survives across worlds. |
 | One bad agent action compromises your host. | Fully isolated Docker worlds. Snapshots and rollback. |
 

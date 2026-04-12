@@ -5,7 +5,6 @@
  * Data sources:
  *   ~/.spwn/state.json       — world list (array of World objects)
  *   ~/.spwn/agents/{name}/   — agent mind directories
- *   ~/.spwn/org.yaml          — universe manifest
  */
 
 import fs from "node:fs";

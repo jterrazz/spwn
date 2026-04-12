@@ -20,7 +20,6 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 ## Vocabulary
 
 ### The Hierarchy
-- **Organization**: Top-level manifest (org.yaml). Org-wide defaults, shared skills, governance, config sync.
 - **Architect**: The always-on orchestration daemon (ZeroClaw implementation). Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 - **Universe**: The reality — physics, constants, resource limits. One per org. Configured in `universe.yaml`. Defines what is physically possible.
 - **World**: A living workspace inside the universe. Has agents, elements, and a project. Many per universe. Configured in `~/.spwn/worlds/`.
@@ -139,13 +138,11 @@ spwn agent --ephemeral "task" --world w-acme-84721
 
 ```
 ~/.spwn/
-├── org.yaml                 # Organization manifest (source of truth)
 ├── claw/
 │   ├── state.json           # Active worlds, channels
 │   └── claw.yaml            # Claw runtime config
 ├── worlds/
-│   ├── default.yaml
-│   └── acme-org.yaml
+│   └── default.yaml         # World configs
 ├── agents/
 │   └── Neo/
 │       ├── profile.yaml     # Team, role, engine, delegation rules
@@ -159,7 +156,7 @@ spwn agent --ephemeral "task" --world w-acme-84721
     └── marketplace/         # Downloaded from marketplace
 ```
 
-**Manifest hierarchy (cascading overrides):** `org.yaml` → `universe.yaml` → `profile.yaml`. Each level inherits from parent and can override.
+**Config hierarchy:** `world.yaml` → `profile.yaml`. World defines physics, profile defines identity.
 
 ## Repository Structure
 
@@ -186,7 +183,7 @@ spwn/
 │   │       ├── observatory/         #     HTTP API server (/api/worlds, /api/agents)
 │   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
 │   │       ├── physics/             #     Physics/faculties generation
-│   │       ├── manifest/            #     Config parsing (universe.yaml, profile.yaml, org.yaml)
+│   │       ├── manifest/            #     Config parsing (world.yaml, profile.yaml)
 │   │       ├── state/               #     Universe + Claw state (JSON)
 │   │       ├── models/              #     Domain types (World, Manifest, Status, AgentRecord)
 │   │       └── ports/               #     8 port interfaces (Runtime, Backend, Provider, etc.)

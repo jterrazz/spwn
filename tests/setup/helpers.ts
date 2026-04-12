@@ -74,19 +74,6 @@ export function createWorldConfig(
 }
 
 /**
- * Create a minimal org.yaml manifest file in the SPWN_HOME directory.
- *
- * @param spwnHome - Path to the SPWN_HOME directory
- * @param name - Organization name (default: "test-org")
- */
-export function createOrgManifest(spwnHome: string, name = "test-org"): void {
-  writeFileSync(
-    join(spwnHome, "org.yaml"),
-    `name: ${name}\nversion: "1.0"\n`,
-  );
-}
-
-/**
  * Wait for a Docker container to be in a ready state.
  * Polls `docker inspect` until the container health/status is "running".
  *

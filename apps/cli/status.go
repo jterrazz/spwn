@@ -105,12 +105,6 @@ var statusCmd = &cobra.Command{
 
 		// ── Gather data ─────────────────────────────────────────────
 
-		org, _ := universe.LoadOrg()
-		orgName := ""
-		if org != nil && org.Name != "" {
-			orgName = org.Name
-		}
-
 		baseDir := foundation.BaseDir()
 
 		// Auth
@@ -188,9 +182,6 @@ var statusCmd = &cobra.Command{
 		pr("  %s %s\n", ui.Strong("spwn"), ui.Faint("v"+Version))
 
 		infoparts := []string{ui.Faint(abbreviatePath(baseDir))}
-		if orgName != "" {
-			infoparts = append([]string{ui.Faint(orgName)}, infoparts...)
-		}
 		if authLabel == "subscription" || authLabel == "API key" {
 			infoparts = append(infoparts, ui.Green("\u2713")+" "+ui.Faint(authLabel))
 		} else {

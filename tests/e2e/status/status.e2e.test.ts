@@ -75,15 +75,6 @@ describe("spwn status", () => {
       expect(out).toMatch(/subscription|not configured|API key/);
     });
 
-    test("shows org name when org.yaml exists", async () => {
-      await spwn("init").exec("init").run();
-      writeFileSync(join(home, "org.yaml"), "name: acme-corp\nversion: 1\n");
-      const result = await spwn("status").exec("status").run();
-
-      const out = stripAnsi(result.output);
-      expect(out).toContain("acme-corp");
-    });
-
     test("shows physics constants from default config", async () => {
       await spwn("init").exec("init").run();
       const result = await spwn("status").exec("status").run();

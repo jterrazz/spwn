@@ -49,17 +49,6 @@ spwn msg send neo --from morpheus "Implement Stripe webhooks"
 spwn msg send trinity --from morpheus "Write tests for webhooks"
 ```
 
-### Organization-wide governance
-
-```yaml
-# org.yaml
-governance:
-  max-worlds: 10
-  max-agents-per-world: 8
-  allowed-providers: [anthropic, openai]
-  cost-limit: $50/day
-```
-
 ### Solo developer
 
 ```bash

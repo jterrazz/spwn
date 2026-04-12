@@ -15,19 +15,6 @@ describe("config cascade", () => {
     ctx?.cleanup();
   });
 
-  test("init creates org.yaml", () => {
-    // GIVEN — a fresh SPWN_HOME
-    ctx = createTestContext();
-
-    // WHEN — running init
-    const result = ctx.spwn(["init"]);
-
-    // THEN — org.yaml exists and output confirms creation
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created universe\s+org\.yaml/);
-    expect(existsSync(join(ctx.home, "org.yaml"))).toBe(true);
-  });
-
   test("init creates default world config", () => {
     // GIVEN — a fresh SPWN_HOME
     ctx = createTestContext();
