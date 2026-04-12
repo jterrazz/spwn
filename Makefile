@@ -107,6 +107,13 @@ test-e2e-agent:
 test-e2e-imagebuilder:
 	cd core/imagebuilder && go test -v -tags=e2e -timeout=10m ./e2e/...
 
+# UI E2E tests (Docker + browser required)
+test-ui: build
+	cd tests && npm run test:ui
+
+test-ui-headed: build
+	cd tests && npm run test:ui:headed
+
 # Lint
 lint:
 	cd core/foundation && go vet ./...
