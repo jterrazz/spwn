@@ -1,0 +1,40 @@
+---
+title: "spwn agent publish"
+slug: "spwn-agent-publish"
+---
+
+## spwn agent publish
+
+Publish an agent to the registry (memory stripped)
+
+### Synopsis
+
+Publish an agent to the community registry for others to pull.
+
+Memory (journal, knowledge, sessions) is stripped before publishing —
+only the composition (tools, skills, profile) and core identity ship.
+
+Not yet implemented — tracks the registry port (coming in Epoch 10).
+
+```
+spwn agent publish <agent-name> [flags]
+```
+
+### Options
+
+```
+  -h, --help   help for publish
+```
+
+### Options inherited from parent commands
+
+```
+      --json      Output as JSON
+  -q, --quiet     Suppress non-essential output
+  -v, --verbose   Show debug information
+```
+
+### SEE ALSO
+
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
+

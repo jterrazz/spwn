@@ -48,18 +48,25 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "new <name>", Desc: "Create a new agent (interactive wizard)"},
 				{Name: "ls", Desc: "List all agents"},
+				{Name: "show <name>", Desc: "Show agent composition and history"},
 				{Name: "rm <name>", Desc: "Remove an agent"},
 				{Name: "talk <name> [msg]", Desc: "Talk to a running agent"},
-				{Name: "inspect <name>", Desc: "Show agent overview"},
+			}},
+			{Title: "Composition", Commands: []ui.HelpEntry{
+				{Name: "add <name> --tool <pack>", Desc: "Add a tool pack to an agent"},
+				{Name: "add <name> --skill <skill>", Desc: "Add a skill to an agent"},
+				{Name: "add <name> --profile <name>", Desc: "Apply a profile to an agent"},
 			}},
 			{Title: "Evolution", Commands: []ui.HelpEntry{
 				{Name: "dream <name>", Desc: "Analyze experience, discover patterns, promote playbooks"},
 				{Name: "sleep <name>", Desc: "Shutdown — save state, consolidate, archive"},
 			}},
 			{Title: "Portability", Commands: []ui.HelpEntry{
-				{Name: "fork <src> <dst>", Desc: "Clone an agent's profile"},
-				{Name: "export <name>", Desc: "Export profile as tar.gz"},
-				{Name: "import <path>", Desc: "Import profile from tar.gz"},
+				{Name: "fork <src> <dst>", Desc: "Clone an agent (memory included)"},
+				{Name: "publish <name>", Desc: "Publish an agent to the registry (memory stripped)"},
+				{Name: "pull <name>", Desc: "Install a shared agent from the registry"},
+				{Name: "export <name>", Desc: "Export as tar.gz"},
+				{Name: "import <path>", Desc: "Import from tar.gz"},
 			}},
 			{Title: "Spawn Flags", Commands: []ui.HelpEntry{
 				{Name: "--ephemeral <task>", Desc: "Run as ephemeral agent (fire-and-forget)"},
@@ -67,7 +74,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			}},
 		},
 		"spwn agent [command]",
-		"Profile is the passport. Agent is the person.\n\n    Use \"spwn agent <command> --help\" for more information.",
+		"Agents are composed from tools, skills, and a profile.\n\n    Use \"spwn agent <command> --help\" for more information.",
 	)
 }
 

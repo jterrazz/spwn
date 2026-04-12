@@ -21,22 +21,20 @@ spwn up [flags]
 ### Examples
 
 ```
-  spwn up -w .                    Spawn with current directory
-  spwn up -c acme -w ~/project   Named config + workspace
-  spwn up --leader morpheus       With a leader agent
+  spwn up --agent neo -w .                  Single agent in current dir
+  spwn up --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)
+  spwn up -c acme --agent neo -w ~/project   Named config + workspace
 ```
 
 ### Options
 
 ```
-  -a, --agent string            Agent name (default "default")
+  -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
   -c, --config string           Named world config (default: default)
       --gate stringArray        Bridge tool from Host: "source:as:cap1,cap2"
   -h, --help                    help for up
   -i, --interactive             Attach to agent interactively
-      --leader string           Leader agent for this world (gets the top role in the organization)
       --no-agent                Create the world without spawning an agent
-      --organization string     Organization to use for role assignment (default "default")
       --runtime string          Agent runtime (default "claude-code")
   -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
   -u, --world string            Explicit path to a YAML config file

@@ -107,9 +107,15 @@ var restoreCmd = &cobra.Command{
 			return fmt.Errorf("parse workspace: %w", wsErr)
 		}
 
+		// Restore uses the first --agent if provided, else "default".
+		restoreAgent := "default"
+		if len(spawnAgents) > 0 {
+			restoreAgent = spawnAgents[0]
+		}
+
 		opts := universe.SpawnOpts{
 			ConfigName: configName,
-			AgentName:  spawnAgent,
+			AgentName:  restoreAgent,
 			Workspaces: workspaces,
 			Manifest:   m,
 			Image:      imageTag,

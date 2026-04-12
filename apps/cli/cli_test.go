@@ -66,7 +66,7 @@ func TestCLI_WorldHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"list", "inspect", "logs", "attach", "destroy"} {
+	for _, sub := range []string{"list", "show", "logs", "attach", "destroy"} {
 		assertContains(t, out, sub, "world help")
 	}
 }
@@ -79,7 +79,7 @@ func TestCLI_AgentHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"new", "ls", "rm", "talk", "inspect", "dream", "sleep", "fork", "export", "import"} {
+	for _, sub := range []string{"new", "ls", "rm", "talk", "show", "dream", "sleep", "fork"} {
 		assertContains(t, out, sub, "agent help")
 	}
 }

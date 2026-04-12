@@ -14,33 +14,27 @@ import (
 )
 
 var (
-	spawnConfig     string
-	spawnName       string
-	spawnAgent      string
-	spawnWorkspaces []string
-	spawnWorld      string
-	spawnInteractive    bool
-	spawnNoAgent   bool
-	spawnGate      []string
-	spawnLeader    string
-	spawnOrganization string
-	spawnRuntime   string
-	spawnTeam      string
+	spawnConfig      string
+	spawnName        string
+	spawnAgents      []string
+	spawnWorkspaces  []string
+	spawnWorld       string
+	spawnInteractive bool
+	spawnNoAgent     bool
+	spawnGate        []string
+	spawnRuntime     string
 )
 
 func init() {
 	Cmd.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named world config (default: default)")
 	Cmd.Flags().StringVarP(&spawnName, "name", "n", "", "Display name for the world")
-	Cmd.Flags().StringVarP(&spawnAgent, "agent", "a", "default", "Agent name")
+	Cmd.Flags().StringArrayVarP(&spawnAgents, "agent", "a", nil, "Agent name (repeatable; first agent becomes chief in multi-agent worlds)")
 	Cmd.Flags().StringArrayVarP(&spawnWorkspaces, "workspace", "w", nil, `Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	Cmd.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Attach to agent interactively")
 	Cmd.Flags().BoolVar(&spawnNoAgent, "no-agent", false, "Create the world without spawning an agent")
 	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge tool from Host: "source:as:cap1,cap2"`)
-	Cmd.Flags().StringVar(&spawnLeader, "leader", "", "Leader agent for this world (gets the top role in the organization)")
-	Cmd.Flags().StringVar(&spawnOrganization, "organization", "default", "Organization to use for role assignment")
 	Cmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime (claude-code, pi, codex, opencode, gemini, aider)")
-	Cmd.Flags().StringVar(&spawnTeam, "team", "", "Deploy all agents in a team (team slug)")
 
 	defaultWorldHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(worldHelp)
@@ -63,7 +57,7 @@ func worldHelp(cmd *cobra.Command, args []string) {
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "list", Desc: "List active worlds"},
-				{Name: "inspect <id>", Desc: "Show world details and physics"},
+				{Name: "show <id>", Desc: "Show world details"},
 				{Name: "rename <id> <name>", Desc: "Rename a world (empty name clears)"},
 				{Name: "destroy <id>", Desc: "Destroy a world"},
 			}},
@@ -76,15 +70,13 @@ func worldHelp(cmd *cobra.Command, args []string) {
 				{Name: "snapshots", Desc: "List all snapshots"},
 				{Name: "restore <snap>", Desc: "Restore from snapshot"},
 			}},
-{Title: "Spawn Flags", Commands: []ui.HelpEntry{
-				{Name: "-a, --agent <name>", Desc: "Agent name (default: default)"},
+			{Title: "Spawn Flags", Commands: []ui.HelpEntry{
+				{Name: "-a, --agent <name>", Desc: "Agent name (repeatable; first is chief in multi-agent)"},
 				{Name: "-c, --config <name>", Desc: "Named world config"},
 				{Name: "-n, --name <name>", Desc: "Display name for the world"},
 				{Name: "-w, --workspace <[name=]path[:ro]>", Desc: "Host dir to mount (repeatable; omit for ephemeral)"},
 				{Name: "-i, --interactive", Desc: "Attach to agent interactively"},
 				{Name: "--no-agent", Desc: "Create world without agent"},
-				{Name: "--leader <name>", Desc: "Leader agent (top role in the organization)"},
-				{Name: "--organization <slug>", Desc: "Organization for role assignment (default: default)"},
 				{Name: "--runtime <name>", Desc: "Agent runtime (default: claude-code)"},
 				{Name: "--gate <spec>", Desc: "Bridge tool from host"},
 			}},
@@ -95,7 +87,7 @@ func worldHelp(cmd *cobra.Command, args []string) {
 }
 
 // Cmd is the world command — spawns a world when run directly,
-// and groups subcommands (list, inspect, logs, attach, destroy).
+// and groups subcommands (list, show, logs, attach, destroy).
 var Cmd = &cobra.Command{
 	Use:   "world",
 	Short: "Spawn a world — an isolated reality for agents",
@@ -103,18 +95,16 @@ var Cmd = &cobra.Command{
 
 Creates an isolated Docker environment and brings an agent to life inside it.
 Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
-	Example: `  spwn world -w .                         Spawn with current directory
-  spwn world -w web=./frontend -w api=./backend   Multi-workspace
-  spwn world -w docs=./docs:ro -w code=./src      Read-only reference
-  spwn world --name "Big Refactor"        Ephemeral (no host mount)
-  spwn world --leader morpheus            With a leader agent
-  spwn world --no-agent                   Empty world (no agent)`,
+	Example: `  spwn world --agent neo -w .                  Single agent in current directory
+  spwn world --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)
+  spwn world --name "Big Refactor" --agent neo  Ephemeral (no host mount)
+  spwn world --no-agent                        Empty world (no agent)`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// If no flags set at all, show help instead of spawning with defaults
 		if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("agent") &&
 			!cmd.Flags().Changed("workspace") && !cmd.Flags().Changed("world") &&
 			!cmd.Flags().Changed("interactive") && !cmd.Flags().Changed("no-agent") &&
-			!cmd.Flags().Changed("leader") && !cmd.Flags().Changed("gate") {
+			!cmd.Flags().Changed("gate") {
 			return cmd.Help()
 		}
 
@@ -161,40 +151,25 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 
 		s.Done("Loaded config", configName)
 
-		// Build spawn opts
+		// Build spawn opts based on --agent flags
 		agentName := ""
-		if !spawnNoAgent {
-			agentName = spawnAgent
-			// Auto-create the default agent on-demand (only when using the default name)
-			if agentName == "default" && !cmd.Flags().Changed("agent") {
-				agent.InitMind("default") // ignore error if already exists
-			}
-		}
-
-		// Build multi-agent list when --leader or --team is used
 		var agents []universe.AgentSpec
-		if spawnTeam != "" {
-			// Resolve team → members
-			members, teamErr := agent.TeamMembers(spawnTeam)
-			if teamErr != nil {
-				return s.FailHint("Team resolve failed", teamErr, "Run \"spwn team ls\" to see teams")
+
+		if spawnNoAgent {
+			// No agents at all
+		} else if len(spawnAgents) == 0 {
+			// Auto-create the default agent on-demand when no --agent is given
+			agentName = "default"
+			agent.InitMind("default") // ignore error if already exists
+		} else if len(spawnAgents) == 1 {
+			// Single agent mode
+			agentName = spawnAgents[0]
+		} else {
+			// Multi-agent mode: first is chief, rest are workers
+			agents = append(agents, universe.AgentSpec{Name: spawnAgents[0], Role: "chief"})
+			for _, name := range spawnAgents[1:] {
+				agents = append(agents, universe.AgentSpec{Name: name, Role: "worker"})
 			}
-			if len(members) == 0 {
-				return s.FailHint("Team empty", fmt.Errorf("team %q has no agents", spawnTeam),
-					"Assign agents with: spwn team assign <agent> "+spawnTeam)
-			}
-			for _, m := range members {
-				agents = append(agents, universe.AgentSpec{Name: m, Role: "worker"})
-			}
-			agentName = "" // multi-agent mode
-			s.Done("Team", fmt.Sprintf("%s → %d agent(s)", spawnTeam, len(members)))
-		} else if spawnLeader != "" {
-			agents = append(agents, universe.AgentSpec{Name: spawnLeader, Role: "chief"})
-			if agentName != "" {
-				agents = append(agents, universe.AgentSpec{Name: agentName, Role: "worker"})
-			}
-			// Clear single-agent name since we're using multi-agent
-			agentName = ""
 		}
 
 		s.Start("Connecting to Docker...")
@@ -310,7 +285,7 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 			s.Info("Status:", string(u.Status))
 			if agentName != "" {
 				s.Blank()
-				fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Talk: spwn agent talk %s", agentName)))
+				fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Talk: spwn talk %s", agentName)))
 				fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Logs: spwn logs %s", u.ID)))
 			}
 		}
@@ -412,12 +387,12 @@ func spawnHint(err error, agentName string, agents []universe.AgentSpec) string 
 			name = agents[0].Name
 		}
 		return fmt.Sprintf("Run \"spwn agent new %s\" to create the agent first", name)
-	case strings.Contains(msg, "missing the personas"):
+	case strings.Contains(msg, "missing the personas") || strings.Contains(msg, "missing the profile"):
 		name := agentName
 		if len(agents) > 0 {
 			name = agents[0].Name
 		}
-		return fmt.Sprintf("Run \"spwn agent new %s\" to set up the Mind layers", name)
+		return fmt.Sprintf("Run \"spwn agent new %s\" to set up the agent profile", name)
 	case strings.Contains(msg, "image") && strings.Contains(msg, "not found"):
 		return "Run \"spwn doctor\" to check your Docker images"
 	case strings.Contains(msg, "workspace") && strings.Contains(msg, "not found"):
