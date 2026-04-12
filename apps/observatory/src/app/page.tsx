@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Planet } from "@/components/planet";
 import { AVAILABLE_CONFIGS, getWorkspaceSummary, getWorldName } from "@/lib/types";
 import type { World } from "@/lib/types";
-import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconMoonFilled, IconWorldFilled, IconTerminal2, IconLoader2, IconDownload } from "@tabler/icons-react";
+import { IconPlus, IconRocket, IconX, IconPlanet, IconTrash, IconAlertTriangle, IconUser, IconBulb, IconWorld, IconCheck, IconArrowRight, IconSparkles, IconActivity, IconMoonFilled, IconWorldFilled, IconTerminal2, IconLoader2, IconDownload, IconUsers, IconFlask, IconRobot, IconBuildingFactory2, IconBriefcase } from "@tabler/icons-react";
 import { Planet as PlanetGlobe } from "@/components/planet";
 import { NewWorldCard } from "@/components/new-world-card";
 import { WorldPlanet } from "@/components/world-planet";
@@ -687,10 +687,11 @@ function EmptyWorldsView({ agents, onSpawn, onRefetch }: { agents: AgentListItem
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {gallery.map((ex) => (
+            {gallery.map((ex, i) => (
               <GalleryCard
                 key={ex.slug}
                 example={ex}
+                featured={i === 0}
                 busy={installing === ex.slug}
                 disabled={installing !== null && installing !== ex.slug}
                 onInstall={() => handleInstallAndSpawn(ex)}
@@ -721,27 +722,39 @@ function EmptyWorldsView({ agents, onSpawn, onRefetch }: { agents: AgentListItem
   );
 }
 
+const EXAMPLE_THEMES: Record<string, { icon: React.ReactNode; accent: string; gradient: string }> = {
+  startup:            { icon: <IconBriefcase size={18} />,        accent: "text-amber-400/80",   gradient: "from-amber-500/15 to-orange-500/10" },
+  matrix:             { icon: <IconRobot size={18} />,            accent: "text-green-400/80",   gradient: "from-green-500/15 to-emerald-500/10" },
+  "paperclip-factory": { icon: <IconBuildingFactory2 size={18} />, accent: "text-blue-400/80",   gradient: "from-blue-500/15 to-cyan-500/10" },
+  "research-lab":     { icon: <IconFlask size={18} />,            accent: "text-purple-400/80",  gradient: "from-purple-500/15 to-pink-500/10" },
+  macrohard:          { icon: <IconUsers size={18} />,            accent: "text-sky-400/80",     gradient: "from-sky-500/15 to-indigo-500/10" },
+};
+
 function GalleryCard({
   example,
+  featured,
   busy,
   disabled,
   onInstall,
 }: {
   example: GalleryExample;
+  featured?: boolean;
   busy: boolean;
   disabled: boolean;
   onInstall: () => void;
 }) {
+  const theme = EXAMPLE_THEMES[example.slug] ?? { icon: <IconWorld size={18} />, accent: "text-blue-400/80", gradient: "from-blue-500/10 to-purple-500/10" };
   const firstParagraph = example.description.split("\n\n")[0] ?? example.description;
+
   return (
     <div
-      className={`group relative flex h-full flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors ${
-        disabled ? "opacity-50" : "hover:border-white/[0.15] hover:bg-white/[0.04]"
-      }`}
+      className={`group relative flex h-full flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-all duration-200 ${
+        featured ? "sm:col-span-2 lg:col-span-2" : ""
+      } ${disabled ? "opacity-50" : "hover:border-white/[0.15] hover:bg-white/[0.04] hover:shadow-lg hover:shadow-white/[0.02]"}`}
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-br from-blue-500/10 to-purple-500/10">
-          <IconWorld size={18} className="text-blue-400/80" />
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-gradient-to-br ${theme.gradient}`}>
+          <span className={theme.accent}>{theme.icon}</span>
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="font-heading text-sm tracking-wide text-foreground/95">{example.name}</h3>
@@ -749,7 +762,7 @@ function GalleryCard({
         </div>
       </div>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground/70 line-clamp-3">
+      <p className={`mt-3 text-[11px] leading-relaxed text-muted-foreground/70 ${featured ? "line-clamp-4" : "line-clamp-3"}`}>
         {firstParagraph}
       </p>
 
@@ -757,17 +770,21 @@ function GalleryCard({
         {example.agents.map((a) => (
           <span
             key={a}
-            className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-muted-foreground/70"
+            className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-muted-foreground/70"
           >
+            <IconUser size={9} className="opacity-50" />
             {a}
           </span>
         ))}
-        {example.worlds.length > 1 && (
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] text-muted-foreground/60">
-            {example.worlds.length} worlds
-          </span>
-        )}
       </div>
+
+      {example.command && (
+        <div className="mt-3 rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-1.5">
+          <code className="text-[10px] font-mono text-muted-foreground/50 leading-relaxed">
+            $ {example.command.split("\n")[0]}
+          </code>
+        </div>
+      )}
 
       <div className="flex-1" />
 
@@ -775,16 +792,20 @@ function GalleryCard({
         type="button"
         onClick={onInstall}
         disabled={disabled || busy}
-        className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/[0.10] bg-white/[0.06] px-3 py-2 text-xs font-medium text-foreground/90 transition-colors hover:border-white/[0.18] hover:bg-white/[0.10] disabled:cursor-not-allowed disabled:opacity-60"
+        className={`mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
+          featured
+            ? "border-white/[0.15] bg-white/[0.08] text-foreground/95 hover:border-white/[0.25] hover:bg-white/[0.14]"
+            : "border-white/[0.10] bg-white/[0.06] text-foreground/90 hover:border-white/[0.18] hover:bg-white/[0.10]"
+        }`}
       >
         {busy ? (
           <>
             <IconLoader2 size={13} className="animate-spin" />
-            Installing…
+            Spawning…
           </>
         ) : (
           <>
-            <IconDownload size={13} />
+            <IconRocket size={13} />
             Install &amp; spawn
             <IconArrowRight size={12} className="ml-0.5 opacity-60" />
           </>
