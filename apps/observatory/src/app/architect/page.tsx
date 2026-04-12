@@ -403,9 +403,9 @@ export default function ArchitectPage() {
             { label: "Agents", value: kpis?.agents ?? 0 },
           ]} />
 
-          {/* Chat */}
+          {/* Chat — fills remaining page height, input sticks to the bottom */}
           <Chat
-            className="h-[480px]"
+            className="flex-1 min-h-[320px]"
             messages={bubbles}
             onSend={handleSendMessage}
             disabled={sending}

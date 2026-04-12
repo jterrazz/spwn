@@ -30,7 +30,7 @@ const TERMS: Term[] = [
   {
     word: "Agent",
     short: "A persistent worker.",
-    long: "An AI agent with a Profile (persona, traits, memory, skills) that lives inside a world and can run tasks, talk with you, and collaborate with other agents.",
+    long: "An AI agent composed from tools, skills, and a profile, with persistent memory and identity. Lives inside a world and can run tasks, talk with you, and collaborate with other agents.",
   },
   {
     word: "Architect",
@@ -59,8 +59,8 @@ const TERMS: Term[] = [
   },
   {
     word: "Profile",
-    short: "An agent's identity.",
-    long: "Persona, purpose, traits, bonds, memory and sessions. The profile is the passport, the agent is the person.",
+    short: "A reusable personality template.",
+    long: "Role, tone, purpose, behavior — authored in markdown and attached to agents. Profiles are first-class composable blocks alongside tools and skills.",
   },
 ];
 

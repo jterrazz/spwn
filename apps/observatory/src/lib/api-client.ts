@@ -150,7 +150,7 @@ function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentPr
     engine: '',
     provider: '',
     purpose: '',
-    persona: '',
+    profile: '',
     traits: [],
     skills: [],
     journal: [],

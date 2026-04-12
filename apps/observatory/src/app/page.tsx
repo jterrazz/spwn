@@ -671,7 +671,7 @@ function EmptyWorldsView({ agents, onSpawn, onRefetch }: { agents: AgentListItem
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground/60">
             {hasAgents
               ? `You have ${agents.length} agent${agents.length > 1 ? "s" : ""} installed. Pick a template to put one to work, or build your own world from scratch.`
-              : "Each template ships a full world config + pre-written agents with personas. Clicking Install & spawn copies the files into ~/.spwn, creates a container and drops you straight into a conversation."}
+              : "Each template ships a full world config + pre-written agents with profiles. Clicking Install & spawn copies the files into ~/.spwn, creates a container and drops you straight into a conversation."}
           </p>
         </div>
 

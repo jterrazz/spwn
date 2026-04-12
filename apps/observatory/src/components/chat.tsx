@@ -96,9 +96,10 @@ export function Chat({
   };
 
   return (
-    <div className={`flex flex-col min-h-0 ${className}`}>
-      {/* Messages area — transparent, only bubbles carry backgrounds */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-2 pr-1 space-y-3">
+    <div className={`flex flex-col min-h-0 flex-1 ${className}`}>
+      {/* Messages area — grows, scrolls. Bottom padding leaves room for the
+          floating input dock so the last bubble isn't hidden under it. */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 pr-1 space-y-3">
         {messages.length === 0 && emptyState && (
           <div className="flex h-full items-center justify-center">{emptyState}</div>
         )}
@@ -157,35 +158,38 @@ export function Chat({
         <div ref={endRef} />
       </div>
 
-      {/* Input — bare, with only a hairline separator to the scroll area */}
-      <div className="mt-3 pt-3 border-t border-white/[0.04] flex items-end gap-2">
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          placeholder={placeholder}
-          disabled={disabled}
-          className="flex-1 bg-transparent text-sm text-foreground/85 placeholder:text-muted-foreground/30 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!trimmed || disabled}
-          aria-label="Send"
-          className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all disabled:opacity-20 disabled:cursor-not-allowed ${
-            trimmed
-              ? "bg-foreground/85 text-background hover:bg-foreground"
-              : "text-muted-foreground/40"
-          }`}
-        >
-          <IconArrowUp size={15} stroke={2.4} />
-        </button>
+      {/* Input dock — anchored to the bottom of the flex column, styled
+          as a pill so it reads like a messaging-app composer. */}
+      <div className="shrink-0 pt-3">
+        <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-md px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] focus-within:border-white/[0.14] focus-within:bg-white/[0.06] transition-colors">
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="flex-1 min-w-0 bg-transparent px-1 text-sm text-foreground/85 placeholder:text-muted-foreground/30 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!trimmed || disabled}
+            aria-label="Send"
+            className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all disabled:opacity-20 disabled:cursor-not-allowed ${
+              trimmed
+                ? "bg-foreground/90 text-background hover:bg-foreground"
+                : "text-muted-foreground/40"
+            }`}
+          >
+            <IconArrowUp size={15} stroke={2.4} />
+          </button>
+        </div>
       </div>
     </div>
   );

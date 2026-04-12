@@ -508,15 +508,15 @@ function AgentProfilePage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-emerald-300/40 block mb-1.5">
-                  Persona
+                  Profile
                 </label>
                 <input
-                  placeholder="Describe their persona..."
+                  placeholder="Describe their profile..."
                   className="w-full bg-white/[0.03] border border-emerald-500/15 rounded-lg px-3 py-2 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-emerald-500/30 transition-colors"
                   onKeyDown={async (e) => {
                     if (e.key === "Enter") {
                       const val = (e.target as HTMLInputElement).value.trim();
-                      if (val) await saveIdentityField("persona", val);
+                      if (val) await saveIdentityField("profile", val);
                     }
                   }}
                 />
@@ -663,11 +663,11 @@ function AgentProfilePage() {
         </div>
 
         <div className="mb-4">
-          <SubLabel className="mb-1.5">Persona</SubLabel>
+          <SubLabel className="mb-1.5">Profile</SubLabel>
           <InlineEdit
-            value={profile.persona || ""}
-            placeholder="Describe the agent's persona..."
-            onSave={(v) => saveIdentityField("persona", v)}
+            value={profile.profile || ""}
+            placeholder="Describe the agent's profile..."
+            onSave={(v) => saveIdentityField("profile", v)}
             multiline
             className="text-sm text-foreground/60 leading-relaxed italic"
           />
@@ -930,7 +930,7 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
       assistantLabel={agentName}
       typingText={`${agentName} is thinking…`}
       autoFocus
-      className="h-[520px]"
+      className="h-[calc(100vh-220px)] min-h-[360px]"
       emptyState={
         <div className="flex flex-col items-center justify-center text-center">
           <IconTerminal size={28} className="text-muted-foreground/15 mb-3" />

@@ -235,10 +235,10 @@ spwn msg send <to> --from <me> "msg"  # Send message
 \`\`\`
 
 ## Agent Identity
-Your mind is at \`/mind/\` — read your purpose, traits, and persona before starting work.
+Your mind is at \`/mind/\` — read your purpose, traits, and profile before starting work.
 \`\`\`bash
 cat /mind/core/purpose.md
-cat /mind/core/persona.md
+cat /mind/core/profile.md
 cat /mind/core/traits.md
 \`\`\``,
       },
@@ -287,12 +287,12 @@ spwn agent ls                     # List all agents
 spwn agent new <name>             # Create agent
 spwn agent rm <name>              # Remove agent
 spwn agent talk <name> "msg"      # Talk to agent
-spwn profile <name>               # View profile
+spwn agent show <name>            # View agent details
 \`\`\`
 
 ## Agent Lifecycle
 1. Create: \`spwn agent new <name>\`
-2. Configure: write purpose, persona, traits
+2. Configure: write purpose, profile, traits
 3. Spawn: \`spwn up --agent <name> -w <workspace>\`
 4. Work: \`spwn agent talk <name> "task"\`
 5. Dream: \`spwn agent dream <name>\` (promote patterns)

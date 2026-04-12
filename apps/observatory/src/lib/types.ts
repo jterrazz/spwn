@@ -70,7 +70,7 @@ export interface AgentProfile {
   engine: string;
   provider: string;
   purpose: string;    // read from core/purpose.md
-  persona: string;    // read from core/persona.md
+  profile: string;    // read from core/profile.md
   traits: string[];   // read from core/traits.md
   skills: string[];
   journal: { date: string; summary: string }[];

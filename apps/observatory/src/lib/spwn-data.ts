@@ -206,9 +206,9 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     return null;
   }
 
-  // Read core identity files for purpose/persona
+  // Read core identity files for purpose/profile
   let purpose = "";
-  let persona = "";
+  let profileText = "";
   const coreFiles = info.layers["core"] ?? [];
   for (const file of coreFiles) {
     if (file.endsWith(".md")) {
@@ -220,9 +220,9 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
         // Extract purpose from content
         const purposeMatch = content.match(/## (?:Purpose|Your Identity)\n([\s\S]*?)(?:\n##|$)/);
         if (purposeMatch) purpose = purposeMatch[1].trim().slice(0, 200);
-        // Use first paragraph as persona
+        // Use first paragraph as profile text
         const lines = content.split("\n").filter((l) => l.trim() && !l.startsWith("#"));
-        if (lines.length > 0) persona = lines[0].trim();
+        if (lines.length > 0) profileText = lines[0].trim();
       } catch {
         // ignore read errors
       }
@@ -263,7 +263,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     engine: "claude-code",
     provider: "anthropic",
     purpose: purpose || "",
-    persona: persona || "",
+    profile: profileText || "",
     traits: [],
     skills,
     journal,
