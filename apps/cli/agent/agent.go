@@ -43,38 +43,38 @@ func agentHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ agent")+" "+ui.Faint("— create and manage agents"),
+		ui.Strong("⬡ agent")+" "+ui.Faint("— composed minds that live in worlds"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
-				{Name: "new <name>", Desc: "Create a new agent (interactive wizard)"},
-				{Name: "ls", Desc: "List all agents"},
-				{Name: "show <name>", Desc: "Show agent composition and history"},
-				{Name: "rm <name>", Desc: "Remove an agent"},
+				{Name: "new <name>", Desc: "Create a blank agent"},
+				{Name: "ls", Desc: "List agents"},
+				{Name: "show <name>", Desc: "Inspect composition and history"},
+				{Name: "rm <name>", Desc: "Delete an agent"},
 				{Name: "talk <name> [msg]", Desc: "Talk to a running agent"},
 			}},
-			{Title: "Composition", Commands: []ui.HelpEntry{
-				{Name: "add <name> --tool <pack>", Desc: "Add a tool pack to an agent"},
-				{Name: "add <name> --skill <skill>", Desc: "Add a skill to an agent"},
-				{Name: "add <name> --profile <name>", Desc: "Apply a profile to an agent"},
+			{Title: "Compose", Commands: []ui.HelpEntry{
+				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--tool / --skill / --profile)")},
+				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--tool / --skill / --profile)")},
 			}},
 			{Title: "Evolution", Commands: []ui.HelpEntry{
-				{Name: "dream <name>", Desc: "Analyze experience, discover patterns, promote playbooks"},
-				{Name: "sleep <name>", Desc: "Shutdown — save state, consolidate, archive"},
+				{Name: "dream <name>", Desc: "Analyze experience, promote playbooks"},
+				{Name: "sleep <name>", Desc: "Consolidate memory, prune stale strategies"},
+				{Name: "fork <src> <dst>", Desc: "Clone an agent with everything it knows"},
 			}},
 			{Title: "Portability", Commands: []ui.HelpEntry{
-				{Name: "fork <src> <dst>", Desc: "Clone an agent (memory included)"},
-				{Name: "publish <name>", Desc: "Publish an agent to the registry (memory stripped)"},
-				{Name: "pull <name>", Desc: "Install a shared agent from the registry"},
+				{Name: "publish <name>", Desc: "Ship to registry " + ui.Faint("[Epoch 10]")},
+				{Name: "pull <ref>", Desc: "Install a shared agent " + ui.Faint("[Epoch 10]")},
 				{Name: "export <name>", Desc: "Export as tar.gz"},
 				{Name: "import <path>", Desc: "Import from tar.gz"},
 			}},
-			{Title: "Spawn Flags", Commands: []ui.HelpEntry{
-				{Name: "--ephemeral <task>", Desc: "Run as ephemeral agent (fire-and-forget)"},
-				{Name: "-u, --world <id>", Desc: "Target world ID"},
+			{Title: "Examples", Commands: []ui.HelpEntry{
+				{Name: "spwn agent new neo", Desc: ""},
+				{Name: "spwn agent add neo --tool @spwn/python --profile researcher", Desc: ""},
+				{Name: "spwn up --agent neo -w .", Desc: ""},
 			}},
 		},
 		"spwn agent [command]",
-		"Agents are composed from tools, skills, and a profile.\n\n    Use \"spwn agent <command> --help\" for more information.",
+		"",
 	)
 }
 

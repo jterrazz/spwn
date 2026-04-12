@@ -53,36 +53,41 @@ func worldHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ world")+" "+ui.Faint("— spawn and manage isolated realities"),
+		ui.Strong("⬡ world")+" "+ui.Faint("— ephemeral runtime instances"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
-				{Name: "list", Desc: "List active worlds"},
-				{Name: "show <id>", Desc: "Show world details"},
-				{Name: "rename <id> <name>", Desc: "Rename a world (empty name clears)"},
-				{Name: "destroy <id>", Desc: "Destroy a world"},
+				{Name: "ls", Desc: "List active worlds"},
+				{Name: "show <id>", Desc: "Inspect a running world"},
+				{Name: "down <id>", Desc: "Destroy a world " + ui.Faint("(agent survives)")},
+				{Name: "rename <id> <name>", Desc: "Rename " + ui.Faint("(empty name clears)")},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
 				{Name: "logs <id>", Desc: "Stream agent output"},
 				{Name: "attach <id>", Desc: "Open interactive shell"},
 			}},
 			{Title: "Snapshots", Commands: []ui.HelpEntry{
-				{Name: "snapshot <id>", Desc: "Save world state"},
-				{Name: "snapshots", Desc: "List all snapshots"},
+				{Name: "snap <id>", Desc: "Save world state"},
+				{Name: "snaps", Desc: "List snapshots"},
 				{Name: "restore <snap>", Desc: "Restore from snapshot"},
 			}},
 			{Title: "Spawn Flags", Commands: []ui.HelpEntry{
-				{Name: "-a, --agent <name>", Desc: "Agent name (repeatable; first is chief in multi-agent)"},
+				{Name: "-a, --agent <name>", Desc: "Agent " + ui.Faint("(repeatable; first is chief)")},
+				{Name: "-w, --workspace <path>", Desc: "Host dir to mount " + ui.Faint("(repeatable)")},
 				{Name: "-c, --config <name>", Desc: "Named world config"},
-				{Name: "-n, --name <name>", Desc: "Display name for the world"},
-				{Name: "-w, --workspace <[name=]path[:ro]>", Desc: "Host dir to mount (repeatable; omit for ephemeral)"},
-				{Name: "-i, --interactive", Desc: "Attach to agent interactively"},
-				{Name: "--no-agent", Desc: "Create world without agent"},
-				{Name: "--runtime <name>", Desc: "Agent runtime (default: claude-code)"},
+				{Name: "-n, --name <name>", Desc: "Display name"},
+				{Name: "-i, --interactive", Desc: "Attach to agent after spawn"},
+				{Name: "--no-agent", Desc: "Spawn empty world"},
+				{Name: "--runtime <name>", Desc: "Agent runtime " + ui.Faint("(default: claude-code)")},
 				{Name: "--gate <spec>", Desc: "Bridge tool from host"},
+			}},
+			{Title: "Examples", Commands: []ui.HelpEntry{
+				{Name: "spwn up --agent neo -w .", Desc: "Spawn neo in current dir"},
+				{Name: "spwn up --agent morpheus --agent neo -w .", Desc: ""},
+				{Name: "spwn ls", Desc: "See what's running"},
 			}},
 		},
 		"spwn world [flags]\n    spwn world [command]",
-		"Use \"spwn world <command> --help\" for more information.",
+		"",
 	)
 }
 

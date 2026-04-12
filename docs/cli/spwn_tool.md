@@ -11,12 +11,11 @@ Manage reusable tool packs (e.g. @spwn/unix, @spwn/python)
 
 Tool packs are composable building blocks that agents plug into their worlds.
 
-Each tool pack bundles one or more binaries (bash, grep, python3, etc.) and any
-accompanying skills that ship with the tool. If a tool isn't in an agent's
-composition, it's physically absent from that agent's world.
+Attach one to an agent with:
+  spwn agent add <agent> --tool <pack>
 
-Tools are installed from the registry and stacked into agents via
-"spwn agent add <name> --tool <pack>".
+If a tool isn't in an agent's composition, it's physically absent from that
+agent's world — not forbidden, absent.
 
 ### Options
 

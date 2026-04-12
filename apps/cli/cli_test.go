@@ -52,7 +52,8 @@ func TestCLI_HelpContainsDescription(t *testing.T) {
 
 	assertContains(t, out, "spwn", "root help description")
 	assertContains(t, out, "Quick Start", "root help quick start section")
-	assertContains(t, out, "Worlds:", "root help worlds section")
+	assertContains(t, out, "Entities:", "root help entities section")
+	assertContains(t, out, "Building blocks:", "root help building blocks section")
 	assertContains(t, out, "world", "root help world command")
 	assertContains(t, out, "agent", "root help agent command")
 	assertContains(t, out, "System:", "root help system section")
@@ -66,7 +67,7 @@ func TestCLI_WorldHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"list", "show", "logs", "attach", "destroy"} {
+	for _, sub := range []string{"ls", "show", "logs", "attach", "down"} {
 		assertContains(t, out, sub, "world help")
 	}
 }
@@ -116,17 +117,6 @@ func TestCLI_ArchitectHelp(t *testing.T) {
 	for _, sub := range []string{"start", "stop", "status"} {
 		assertContains(t, out, sub, "architect help")
 	}
-}
-
-// --- Agent --ephemeral flag ---
-
-func TestCLI_AgentEphemeralFlag(t *testing.T) {
-	out, _, err := executeCommand("agent", "--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assertContains(t, out, "--ephemeral", "agent help ephemeral flag")
 }
 
 // --- Get help ---

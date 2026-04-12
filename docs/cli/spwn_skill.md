@@ -9,12 +9,10 @@ Author and manage reusable skill files
 
 ### Synopsis
 
-Skills are procedures, playbooks, or pieces of knowledge — authored in markdown,
-shared across agents. A skill has a trigger, required context, step-by-step
-instructions, and (often) rollback procedures.
+Skills are procedures, playbooks, or pieces of knowledge — authored in markdown.
 
-Skills live in ~/.spwn/skills/ and are attached to agents via
-"spwn agent add <name> --skill <skill-name>".
+Attach one to an agent with:
+  spwn agent add <agent> --skill <skill-name>
 
 ### Options
 

@@ -121,14 +121,24 @@ func GetRootCmd() *cobra.Command {
 	return rootCmd
 }
 
+// helpColWidth is the padding width reserved for command names in help output.
+// Wide enough to fit the longest common subcommand; entries longer than this
+// just flow past it — the description still reads left-to-right.
+const helpColWidth = 32
+
 // printHelpCmd prints a command name and description in the help output.
+// If desc is empty, the name is printed without padding.
 func printHelpCmd(w io.Writer, name, desc string) {
-	fmt.Fprintf(w, "    %s %s\n", ui.PadVisible(ui.ColorizeHelpName(name), 28), ui.Faint(desc))
+	if desc == "" {
+		fmt.Fprintf(w, "    %s\n", ui.ColorizeHelpName(name))
+		return
+	}
+	fmt.Fprintf(w, "    %s %s\n", ui.PadVisible(ui.ColorizeHelpName(name), helpColWidth), ui.Faint(desc))
 }
 
 // printHelpFlag prints a flag and description in the help output.
 func printHelpFlag(w io.Writer, flag, desc string) {
-	fmt.Fprintf(w, "    %s %s\n", ui.PadVisible(ui.Yellow(flag), 28), ui.Faint(desc))
+	fmt.Fprintf(w, "    %s %s\n", ui.PadVisible(ui.Yellow(flag), helpColWidth), ui.Faint(desc))
 }
 
 // defaultHelpFunc stores Cobra's original help function so subcommands
@@ -151,61 +161,60 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintf(w, "  %s %s\n", ui.Strong("⬡ spwn"), ui.Faint("— the building blocks of agent intelligence"))
 	fmt.Fprintln(w)
 
-	// Quick Start
+	// Quick Start — the 30-second path
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Quick Start:"))
 	printHelpCmd(w, "spwn agent new neo", "Create an agent")
-	printHelpCmd(w, "spwn agent add neo --tool @spwn/python", "Compose its mind")
+	printHelpCmd(w, "spwn agent add neo --tool @spwn/python", "")
 	printHelpCmd(w, "spwn up --agent neo -w .", "Spawn a world")
-	printHelpCmd(w, "spwn talk neo", "Talk to the agent")
-	printHelpCmd(w, "spwn dash open", "Open the visual dashboard")
+	printHelpCmd(w, "spwn talk neo", "Talk to it")
 	fmt.Fprintln(w)
 
-	// Worlds
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Worlds:"))
-	printHelpCmd(w, "up", "Spawn a world")
+	// Entities — the things you create
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Entities:"))
+	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, show, add, fork, dream, sleep)"))
+	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, show, down, attach, snap)"))
+	fmt.Fprintln(w)
+
+	// Building blocks — the things you compose agents from
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Building blocks:"))
+	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, install)"))
+	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show)"))
+	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit)"))
+	fmt.Fprintln(w)
+
+	// Shortcuts — the 80% top-level aliases
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Shortcuts:"))
+	printHelpCmd(w, "up", "Spawn a world "+ui.Faint("(alias: world up)"))
+	printHelpCmd(w, "ls", "List active worlds "+ui.Faint("(alias: world ls)"))
+	printHelpCmd(w, "talk <name>", "Talk to a running agent "+ui.Faint("(alias: agent talk)"))
 	printHelpCmd(w, "down <id>", "Destroy a world")
-	printHelpCmd(w, "ls", "List active worlds")
 	printHelpCmd(w, "logs <id>", "Stream agent output")
-	printHelpCmd(w, "attach <id>", "Interactive shell")
-	printHelpCmd(w, "world show <id>", "World details and state")
-	printHelpCmd(w, "snap", "Snapshots "+ui.Faint("(save, ls, restore, rm)"))
+	printHelpCmd(w, "attach <id>", "Open interactive shell")
 	fmt.Fprintln(w)
 
-	// Agents
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Agents:"))
-	printHelpCmd(w, "agent", "Lifecycle "+ui.Faint("(new, ls, show, rm, talk, fork)"))
-	printHelpCmd(w, "agent add <name> --tool/--skill/--profile", "Compose an agent")
-	printHelpCmd(w, "agent dream <name>", "Analyze experience, promote playbooks")
-	printHelpCmd(w, "agent sleep <name>", "Consolidate memory")
-	printHelpCmd(w, "talk <name>", "Talk to a running agent (alias for 'agent talk')")
+	// Coordination — multi-agent + orchestration
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Coordination:"))
 	printHelpCmd(w, "msg", "Inter-agent messaging "+ui.Faint("(send, inbox, watch)"))
-	fmt.Fprintln(w)
-
-	// Building blocks
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Building Blocks:"))
-	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, install, publish)"))
-	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show, publish)"))
-	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit, show, publish)"))
-	fmt.Fprintln(w)
-
-	// Orchestration
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Orchestration:"))
-	printHelpCmd(w, "architect", "Your always-on world builder "+ui.Faint("(start, stop, status, connect)"))
-	printHelpCmd(w, "knowledge", "Universe knowledge base "+ui.Faint("(ls, show, search)"))
+	printHelpCmd(w, "architect", "Always-on orchestration daemon")
 	printHelpCmd(w, "dash", "Visual dashboard "+ui.Faint("(start, open)"))
-	printHelpCmd(w, "activity", "View recent activity across worlds and agents")
+	printHelpCmd(w, "knowledge", "Universe knowledge base")
+	printHelpCmd(w, "activity", "Recent activity across worlds and agents")
 	fmt.Fprintln(w)
 
 	// System
 	fmt.Fprintf(w, "  %s\n", ui.Strong("System:"))
-	printHelpCmd(w, "init · status · auth · doctor · upgrade", "")
+	printHelpCmd(w, "init", "Create default configs")
+	printHelpCmd(w, "doctor", "Check your environment")
+	printHelpCmd(w, "status", "Show running state")
+	printHelpCmd(w, "auth", "Manage credentials")
+	printHelpCmd(w, "upgrade", "Update the CLI")
 	fmt.Fprintln(w)
 
-	// Flags
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Flags:"))
-	printHelpFlag(w, "--json · -q/--quiet · -v/--verbose · --version", "")
+	// Global flags
+	fmt.Fprintf(w, "  %s %s\n", ui.Strong("Flags:"),
+		ui.Faint("--json · -q/--quiet · -v/--verbose · --version"))
 	fmt.Fprintln(w)
 
-	fmt.Fprintf(w, "  %s\n", ui.Faint("Use \"spwn <command> --help\" for more information about a command."))
+	fmt.Fprintf(w, "  %s\n", ui.Faint("Run \"spwn <command> --help\" for details."))
 	fmt.Fprintln(w)
 }

@@ -9,6 +9,7 @@ package tool
 import (
 	"fmt"
 
+	"spwn.sh/apps/cli/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -18,13 +19,14 @@ var Cmd = &cobra.Command{
 	Short: "Manage reusable tool packs (e.g. @spwn/unix, @spwn/python)",
 	Long: `Tool packs are composable building blocks that agents plug into their worlds.
 
-Each tool pack bundles one or more binaries (bash, grep, python3, etc.) and any
-accompanying skills that ship with the tool. If a tool isn't in an agent's
-composition, it's physically absent from that agent's world.
+Attach one to an agent with:
+  spwn agent add <agent> --tool <pack>
 
-Tools are installed from the registry and stacked into agents via
-"spwn agent add <name> --tool <pack>".`,
+If a tool isn't in an agent's composition, it's physically absent from that
+agent's world — not forbidden, absent.`,
 }
+
+var defaultToolHelp func(*cobra.Command, []string)
 
 func init() {
 	Cmd.AddCommand(lsCmd)
@@ -33,6 +35,40 @@ func init() {
 	Cmd.AddCommand(installCmd)
 	Cmd.AddCommand(rmCmd)
 	Cmd.AddCommand(publishCmd)
+
+	defaultToolHelp = Cmd.HelpFunc()
+	Cmd.SetHelpFunc(toolHelp)
+}
+
+func toolHelp(cmd *cobra.Command, args []string) {
+	if cmd.Name() != "tool" {
+		if defaultToolHelp != nil {
+			defaultToolHelp(cmd, args)
+		}
+		return
+	}
+	w := cmd.OutOrStdout()
+	ui.RenderGroupedHelp(w,
+		ui.Strong("⬡ tool")+" "+ui.Faint("— reusable tool packs for agents"),
+		[]ui.HelpGroup{
+			{Title: "Manage", Commands: []ui.HelpEntry{
+				{Name: "ls", Desc: "List installed tool packs"},
+				{Name: "show <pack>", Desc: "Inspect a tool pack"},
+				{Name: "rm <pack>", Desc: "Uninstall a tool pack"},
+			}},
+			{Title: "Registry", Commands: []ui.HelpEntry{
+				{Name: "search <query>", Desc: "Search the registry " + ui.Faint("[Epoch 10]")},
+				{Name: "install <pack>", Desc: "Install a shared pack " + ui.Faint("[Epoch 10]")},
+				{Name: "publish <path>", Desc: "Publish a pack " + ui.Faint("[Epoch 10]")},
+			}},
+			{Title: "Examples", Commands: []ui.HelpEntry{
+				{Name: "spwn tool ls", Desc: "See every built-in pack"},
+				{Name: "spwn agent add neo --tool @spwn/python", Desc: ""},
+			}},
+		},
+		"spwn tool [command]",
+		"",
+	)
 }
 
 var lsCmd = &cobra.Command{

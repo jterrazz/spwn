@@ -10,12 +10,11 @@ Author and manage reusable profile templates (personality)
 ### Synopsis
 
 Profiles are reusable personality templates — role, tone, purpose, behavior.
-Each profile is a markdown file that agents inherit as their personality baseline.
 
-Profiles live in ~/.spwn/profiles/ and attach to agents via
-"spwn agent add <name> --profile <profile-name>".
+A profile defines WHO the agent is. Tools and skills define what it can do.
 
-A profile defines WHO the agent is (not WHAT it can do — that's tools and skills).
+Attach one to an agent with:
+  spwn agent add <agent> --profile <profile-name>
 
 ### Options
 

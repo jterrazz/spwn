@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/core/foundation"
 	"github.com/spf13/cobra"
 )
@@ -19,13 +20,13 @@ import (
 var Cmd = &cobra.Command{
 	Use:   "skill",
 	Short: "Author and manage reusable skill files",
-	Long: `Skills are procedures, playbooks, or pieces of knowledge — authored in markdown,
-shared across agents. A skill has a trigger, required context, step-by-step
-instructions, and (often) rollback procedures.
+	Long: `Skills are procedures, playbooks, or pieces of knowledge — authored in markdown.
 
-Skills live in ~/.spwn/skills/ and are attached to agents via
-"spwn agent add <name> --skill <skill-name>".`,
+Attach one to an agent with:
+  spwn agent add <agent> --skill <skill-name>`,
 }
+
+var defaultSkillHelp func(*cobra.Command, []string)
 
 func init() {
 	Cmd.AddCommand(lsCmd)
@@ -35,6 +36,41 @@ func init() {
 	Cmd.AddCommand(installCmd)
 	Cmd.AddCommand(publishCmd)
 	Cmd.AddCommand(rmCmd)
+
+	defaultSkillHelp = Cmd.HelpFunc()
+	Cmd.SetHelpFunc(skillHelp)
+}
+
+func skillHelp(cmd *cobra.Command, args []string) {
+	if cmd.Name() != "skill" {
+		if defaultSkillHelp != nil {
+			defaultSkillHelp(cmd, args)
+		}
+		return
+	}
+	w := cmd.OutOrStdout()
+	ui.RenderGroupedHelp(w,
+		ui.Strong("⬡ skill")+" "+ui.Faint("— reusable skill files for agents"),
+		[]ui.HelpGroup{
+			{Title: "Author", Commands: []ui.HelpEntry{
+				{Name: "ls", Desc: "List skill files"},
+				{Name: "new <name>", Desc: "Author a new skill"},
+				{Name: "edit <name>", Desc: "Open a skill in $EDITOR"},
+				{Name: "show <name>", Desc: "Display a skill"},
+				{Name: "rm <name>", Desc: "Delete a skill"},
+			}},
+			{Title: "Registry", Commands: []ui.HelpEntry{
+				{Name: "install <ref>", Desc: "Install a shared skill " + ui.Faint("[Epoch 10]")},
+				{Name: "publish <name>", Desc: "Publish a skill " + ui.Faint("[Epoch 10]")},
+			}},
+			{Title: "Examples", Commands: []ui.HelpEntry{
+				{Name: "spwn skill new paper-reading", Desc: ""},
+				{Name: "spwn agent add neo --skill paper-reading", Desc: ""},
+			}},
+		},
+		"spwn skill [command]",
+		"",
+	)
 }
 
 // skillsDir returns the root directory for user skill files.

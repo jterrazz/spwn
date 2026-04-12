@@ -94,7 +94,7 @@ func TestCLI_AgentHelpGrouped(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Lifecycle:", "Evolution:", "Portability:", "Spawn Flags:"} {
+	for _, section := range []string{"Lifecycle:", "Compose:", "Evolution:", "Portability:"} {
 		assertContains(t, out, section, "agent help sections")
 	}
 }
@@ -110,14 +110,15 @@ func TestCLI_WorldHelpShowsSpawnFlags(t *testing.T) {
 	}
 }
 
-func TestCLI_AgentHelpShowsSpawnFlags(t *testing.T) {
+func TestCLI_AgentHelpShowsComposeFlags(t *testing.T) {
 	out, _, err := executeCommand("agent", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, flag := range []string{"--world", "--ephemeral"} {
-		assertContains(t, out, flag, "agent spawn flags")
+	// The Compose section should mention the composition flags.
+	for _, flag := range []string{"--tool", "--skill", "--profile"} {
+		assertContains(t, out, flag, "agent compose flags")
 	}
 }
 
@@ -129,7 +130,7 @@ func TestCLI_RootHelpSections(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Quick Start:", "Worlds:", "Agents:", "Building Blocks:", "Orchestration:", "System:", "Flags:"} {
+	for _, section := range []string{"Quick Start:", "Entities:", "Building blocks:", "Shortcuts:", "Coordination:", "System:", "Flags:"} {
 		assertContains(t, out, section, "root help sections")
 	}
 }
@@ -140,7 +141,7 @@ func TestCLI_RootHelpFooter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "Use \"spwn <command> --help\"", "root help footer hint")
+	assertContains(t, out, "spwn <command> --help", "root help footer hint")
 }
 
 // --- Subcommand help fallback ---

@@ -48,6 +48,10 @@ func colorizeCmd(name string) string {
 	return strings.Join(colored, " ")
 }
 
+// HelpColWidth is the column width used to pad command names in grouped help.
+// Entries wider than this still render — they just push past the padding.
+const HelpColWidth = 32
+
 // RenderGroupedHelp writes grouped command help to w.
 func RenderGroupedHelp(w io.Writer, header string, groups []HelpGroup, usage string, flags string) {
 	fmt.Fprintln(w)
@@ -63,7 +67,11 @@ func RenderGroupedHelp(w io.Writer, header string, groups []HelpGroup, usage str
 	for _, g := range groups {
 		fmt.Fprintf(w, "  %s\n", Strong(g.Title+":"))
 		for _, c := range g.Commands {
-			fmt.Fprintf(w, "    %s %s\n", PadVisible(colorizeCmd(c.Name), 28), Faint(c.Desc))
+			if c.Desc == "" {
+				fmt.Fprintf(w, "    %s\n", colorizeCmd(c.Name))
+			} else {
+				fmt.Fprintf(w, "    %s %s\n", PadVisible(colorizeCmd(c.Name), HelpColWidth), Faint(c.Desc))
+			}
 		}
 		fmt.Fprintln(w)
 	}

@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/core/foundation"
 	"github.com/spf13/cobra"
 )
@@ -21,13 +22,14 @@ var Cmd = &cobra.Command{
 	Use:   "profile",
 	Short: "Author and manage reusable profile templates (personality)",
 	Long: `Profiles are reusable personality templates — role, tone, purpose, behavior.
-Each profile is a markdown file that agents inherit as their personality baseline.
 
-Profiles live in ~/.spwn/profiles/ and attach to agents via
-"spwn agent add <name> --profile <profile-name>".
+A profile defines WHO the agent is. Tools and skills define what it can do.
 
-A profile defines WHO the agent is (not WHAT it can do — that's tools and skills).`,
+Attach one to an agent with:
+  spwn agent add <agent> --profile <profile-name>`,
 }
+
+var defaultProfileHelp func(*cobra.Command, []string)
 
 func init() {
 	Cmd.AddCommand(lsCmd)
@@ -37,6 +39,41 @@ func init() {
 	Cmd.AddCommand(installCmd)
 	Cmd.AddCommand(publishCmd)
 	Cmd.AddCommand(rmCmd)
+
+	defaultProfileHelp = Cmd.HelpFunc()
+	Cmd.SetHelpFunc(profileHelp)
+}
+
+func profileHelp(cmd *cobra.Command, args []string) {
+	if cmd.Name() != "profile" {
+		if defaultProfileHelp != nil {
+			defaultProfileHelp(cmd, args)
+		}
+		return
+	}
+	w := cmd.OutOrStdout()
+	ui.RenderGroupedHelp(w,
+		ui.Strong("⬡ profile")+" "+ui.Faint("— reusable personality templates"),
+		[]ui.HelpGroup{
+			{Title: "Author", Commands: []ui.HelpEntry{
+				{Name: "ls", Desc: "List profile templates"},
+				{Name: "new <name>", Desc: "Author a new profile"},
+				{Name: "edit <name>", Desc: "Open a profile in $EDITOR"},
+				{Name: "show <name>", Desc: "Display a profile"},
+				{Name: "rm <name>", Desc: "Delete a profile"},
+			}},
+			{Title: "Registry", Commands: []ui.HelpEntry{
+				{Name: "install <ref>", Desc: "Install a shared profile " + ui.Faint("[Epoch 10]")},
+				{Name: "publish <name>", Desc: "Publish a profile " + ui.Faint("[Epoch 10]")},
+			}},
+			{Title: "Examples", Commands: []ui.HelpEntry{
+				{Name: "spwn profile new researcher", Desc: ""},
+				{Name: "spwn agent add neo --profile researcher", Desc: ""},
+			}},
+		},
+		"spwn profile [command]",
+		"",
+	)
 }
 
 // profilesDir returns the root directory for user profile templates.
