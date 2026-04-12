@@ -37,17 +37,18 @@ The building blocks of agent intelligence. Assemble tools, skills, and minds int
 
 The real power of AI isn't the model — it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
 
-**Think of it as Docker for intelligence.** Docker made OS environments composable — stack base images, layers, and configs into a running container. Spwn makes *agents* composable — stack tool packs, skill files, personality profiles, and world physics into a running mind. One command assembles the blocks and boots the world.
+**Think of it as Docker for intelligence.** Docker made OS environments composable — stack base images, layers, and configs into a running container. Spwn makes *agents* composable — stack tool packs, skill files, and profiles into a running mind. One command assembles the blocks and boots the world.
 
-Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own physics — filesystem, compute, memory, network. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork their profiles to run experiments. The full environment — not just the brain — is what turns a language model into something that actually gets work done.
+Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own filesystem, neighbors, and memory. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork themselves to run experiments. The full environment — not just the brain — is what turns a language model into something that actually gets work done.
 
 > *"The next breakthrough isn't smarter models. It's richer worlds."*
 
-|        | Step            | Example                                                            |
-| ------ | --------------- | ------------------------------------------------------------------ |
-| **01** | Create an agent | `spwn agent new neo`                                               |
-| **02** | Spawn a world   | `spwn up --agent neo -w ./my-project`                              |
-| **03** | Watch it live   | Agent discovers tools, works on your code, remembers everything.   |
+|        | Step             | Example                                                            |
+| ------ | ---------------- | ------------------------------------------------------------------ |
+| **01** | Create an agent  | `spwn agent new neo`                                               |
+| **02** | Compose its mind | `spwn agent add neo --tool @spwn/python --skill paper-reading`     |
+| **03** | Spawn a world    | `spwn up --agent neo -w ./my-project`                              |
+| **04** | Watch it live    | Agent discovers tools, works on your code, remembers everything.   |
 
 <br/>
 
@@ -59,12 +60,15 @@ curl -fsSL https://spwn.sh/install.sh | bash
 ```
 
 ```bash
-# Create an agent and spawn a world
+# Create an agent and compose its mind
 spwn agent new neo
+spwn agent add neo --tool @spwn/python --skill paper-reading
+
+# Spawn a world
 spwn up --agent neo -w ./my-project --detach
 
 # Talk to the agent
-spwn agent talk neo "What is this project?"
+spwn talk neo "What is this project?"
 
 # Check running worlds
 spwn ls
@@ -116,7 +120,7 @@ Dream to analyze, sleep to consolidate, fork to branch. Successful patterns beco
 </td>
 <td align="center">
 <h3>🧩 Composable Intelligence</h3>
-Tool packs, skill files, personality profiles, world physics — all stackable blocks. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher persona + 4GB memory = an autonomous scientist. Docker, but for minds.
+Tool packs, skill files, and profiles — all stackable blocks. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher profile = an autonomous scientist. Docker, but for minds.
 </td>
 </tr>
 <tr>
@@ -256,7 +260,7 @@ Monitoring and debugging agent behavior.
 **Team with a leader** — a lead agent delegates tasks to worker agents via inboxes:
 
 ```bash
-spwn up --leader morpheus --agent neo --agent trinity -w ./acme-api
+spwn up --agent morpheus --agent neo --agent trinity -w ./acme-api
 spwn msg send neo --from morpheus "Implement Stripe webhooks"
 spwn msg send trinity --from morpheus "Write tests for webhooks"
 ```
@@ -264,8 +268,10 @@ spwn msg send trinity --from morpheus "Write tests for webhooks"
 **Solo developer** — one agent, one project, persistent memory:
 
 ```bash
+spwn agent new neo
+spwn agent add neo --tool @spwn/node --skill refactoring
 spwn up --agent neo -w ./my-app
-spwn agent talk neo "Refactor the auth module to use sessions"
+spwn talk neo "Refactor the auth module to use sessions"
 # neo remembers the codebase next time
 ```
 
@@ -285,9 +291,8 @@ Each agent is a directory of markdown files — human-readable, git-friendly, no
 
 ```
 ~/.spwn/agents/Neo/
-├── profile.yaml              # team, role, engine, delegation rules
-├── core/                     # who the agent is
-│   └── persona.md            # role, style, preferences, purpose, behavior
+├── agent.yaml                # composition: tools, skills, profile, runtime
+├── profile.md                # personality — role, style, purpose, behavior
 ├── skills/                   # what the agent can do — procedures, checklists
 ├── knowledge/                # what the agent knows — facts about the codebase
 ├── playbooks/                # how the agent works — step-by-step workflows
@@ -296,56 +301,106 @@ Each agent is a directory of markdown files — human-readable, git-friendly, no
 
 Agents evolve through three mechanisms:
 
-- **Dream** (`spwn agent dream Neo`) — analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
-- **Sleep** (`spwn agent sleep Neo`) — graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
-- **Fork** (`spwn agent fork Neo Neo-v2`) — clone an agent's profile. Run copies in different environments, keep the branch that performs best.
+- **Dream** (`spwn agent dream neo`) — analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
+- **Sleep** (`spwn agent sleep neo`) — graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
+- **Fork** (`spwn agent fork neo neo-v2`) — clone an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
 
 > *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
 
 <br/>
 
-## World configuration
+## Agent composition
 
-Design your universe once. Define who does what, what tools they have, what they're allowed to touch, and how they learn. Spwn handles the rest.
+An agent is composed from three kinds of blocks: **tools**, **skills**, and a **profile**. Each block is a file. Stack them into an agent manifest:
 
 ```yaml
-physics:
-  constants:
-    cpu: 2
-    memory: 1GB
-    timeout: 30m
+# ~/.spwn/agents/neo/agent.yaml
+name: neo
+runtime: claude-code
+
+profile: researcher              # personality template
 
 tools:
-  - @spwn/unix          # bash, coreutils, grep, sed, awk
-  - @spwn/git           # version control
-  - @spwn/node          # Node.js 20 + npm
-  - @spwn/claude-code   # AI agent runtime
+  - @spwn/unix                   # bash, coreutils, grep, sed, awk
+  - @spwn/git                    # version control
+  - @spwn/python                 # python3, pip3
+  - @spwn/claude-code            # thinking engine
 
-gate:
-  - source: mcp/slack
-    as: slack-send
-    capabilities: [send]
+skills:
+  - paper-reading
+  - hypothesis-testing
+  - @community/rust-review
 ```
 
-If a tool isn't listed, it doesn't exist. Not forbidden — physically absent. See the full [tool catalog](docs/tool-catalog.md).
+If a tool isn't listed, it doesn't exist. Not forbidden — physically absent. Browse the full [tool catalog](docs/tool-catalog.md) and [skill library](docs/skill-library.md).
 
 <br/>
 
 ## CLI at a glance
 
+Grammar is consistent: `spwn <noun> <verb>`. Three shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn talk`.
+
 ```
-spwn up --agent neo -w .                    Spawn a world
-spwn down <id>                              Destroy a world (agent survives)
-spwn ls                                     List active worlds
-spwn attach <id>                            Interactive shell into a world
-spwn agent talk neo "do this"               Talk to an agent
-spwn agent dream neo                        Analyze experience, promote playbooks
-spwn agent sleep neo                        Shutdown, consolidate knowledge
-spwn agent fork neo neo-v2                  Clone an agent
-spwn msg send neo --from morpheus "task"    Inter-agent messaging
-spwn snap save <id>                         Snapshot a world
-spwn architect start                        Always-on orchestration daemon
-spwn doctor                                 Check your environment
+# ── Shortcuts ────────────────────────────────────────────────────
+spwn up --agent neo -w .                       Spawn a world
+spwn ls                                        List active worlds
+spwn talk neo "do this"                        Talk to an agent
+
+# ── Agents ───────────────────────────────────────────────────────
+spwn agent new neo                             Create a blank agent
+spwn agent new neo --from @community/sci       Fork from a shared agent
+spwn agent ls                                  List your agents
+spwn agent show neo                            Inspect composition
+spwn agent rm neo                              Delete an agent
+spwn agent fork neo neo-v2                     Clone + evolve independently
+spwn agent publish neo                         Ship to registry (memory stripped)
+spwn agent pull @community/curie               Install a shared agent
+
+spwn agent add neo --tool @spwn/python         Add a tool block
+spwn agent add neo --skill paper-reading       Add a skill block
+spwn agent add neo --profile researcher        Apply a profile
+spwn agent rm  neo --tool @spwn/python         Remove a block
+
+spwn agent dream neo                           Analyze experience
+spwn agent sleep neo                           Consolidate memory
+spwn agent talk  neo "refactor auth"           Full form of `spwn talk`
+
+# ── Worlds ───────────────────────────────────────────────────────
+spwn world up --agent neo -w .                 Full form of `spwn up`
+spwn world ls                                  Full form of `spwn ls`
+spwn world show <id>                           Inspect a running world
+spwn world down <id>                           Destroy (agent survives)
+spwn world attach <id>                         Interactive shell
+spwn world snap <id>                           Snapshot a world
+spwn world restore <snap-id>                   Rollback
+
+# ── Tools ────────────────────────────────────────────────────────
+spwn tool ls                                   Installed tool packs
+spwn tool search python                        Search the registry
+spwn tool install @spwn/python                 Install a tool pack
+spwn tool publish ./my-tool                    Ship to registry
+
+# ── Skills ───────────────────────────────────────────────────────
+spwn skill ls                                  Your skill files
+spwn skill new paper-reading                   Author a new skill
+spwn skill edit paper-reading                  Open in $EDITOR
+spwn skill publish paper-reading               Ship to registry
+spwn skill install @community/rust-review      Install a shared skill
+
+# ── Profiles ─────────────────────────────────────────────────────
+spwn profile ls                                Your profiles
+spwn profile new researcher                    Author a profile
+spwn profile edit researcher                   Open in $EDITOR
+spwn profile publish researcher                Ship to registry
+spwn profile install @community/pragmatic-dev  Install a shared profile
+
+# ── Messages ─────────────────────────────────────────────────────
+spwn msg send neo --from morpheus "task"       Inter-agent messaging
+spwn msg ls neo                                Neo's inbox
+
+# ── System ───────────────────────────────────────────────────────
+spwn architect start                           Always-on orchestration daemon
+spwn doctor                                    Check your environment
 ```
 
 Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
@@ -357,8 +412,8 @@ Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
 | Topic | Link |
 |---|---|
 | **Principles** — why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
-| **Agent identity** — profiles, memory, evolution | [`docs/identity.md`](docs/identity.md) |
-| **World physics** — config, tools, constraints | [`docs/world-physics.md`](docs/world-physics.md) |
+| **Agent composition** — tools, skills, profiles, memory | [`docs/composition.md`](docs/composition.md) |
+| **Worlds** — spawning, isolation, lifecycle | [`docs/worlds.md`](docs/worlds.md) |
 | **Tool catalog** — SDKs, runtimes, platform tools | [`docs/tool-catalog.md`](docs/tool-catalog.md) |
 | **Architecture** — ports & adapters, module map | [`docs/architecture.md`](docs/architecture.md) |
 | **Comparison** — vs LangChain, E2B, MCP, Docker | [`docs/comparison.md`](docs/comparison.md) |
