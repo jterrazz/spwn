@@ -1,14 +1,14 @@
-# Research — unproven ideas, isolated from production.
+# Startup — one world for the whole company.
 
 physics:
   constants:
     cpu: 4
     memory: 4g
     disk: 8g
-    timeout: 2h
+    timeout: 4h
 
 tools:
   - "@spwn/unix"
   - "@spwn/git"
-  - "@spwn/python"
   - "@spwn/node"
+  - "@spwn/python"

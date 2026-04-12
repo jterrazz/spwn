@@ -30,7 +30,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"spwn.sh/core/foundation"
@@ -45,12 +44,14 @@ var templatesFS embed.FS
 // display order. The TestShippedSlugsMatchEmbed test asserts this
 // matches both the embed directive above and the directories
 // actually present on disk.
+// shippedSlugs controls the gallery display order. Startup first
+// because it's the best showcase of multi-agent collaboration.
 var shippedSlugs = []string{
-	"macrohard",
+	"startup",
 	"matrix",
 	"paperclip-factory",
 	"research-lab",
-	"startup",
+	"macrohard",
 }
 
 // ShippedSlugs returns the list of bundled templates as a fresh copy.
@@ -108,7 +109,7 @@ func List() ([]Example, error) {
 		}
 		out = append(out, ex)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Slug < out[j].Slug })
+	// No sort — shippedSlugs order IS the gallery order.
 	return out, nil
 }
 

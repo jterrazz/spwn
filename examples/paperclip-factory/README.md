@@ -2,42 +2,75 @@
 
 > The factory never sleeps.
 
-A single-agent workshop. One world, one worker, no ceremony. Point it at a
-directory, describe what needs to happen, and let it loop.
+One tireless worker. A world built for loops, scripts, and scheduled work. Clippy never stops — give it a directory full of things to process and it will keep maximizing whatever you tell it to maximize.
+
+This example showcases **single-agent automation** — an agent that runs autonomously and evolves its own playbooks over time.
 
 ## What's inside
 
-- **World** `paperclip-factory` — 2 CPU, 2 GB RAM, Unix + Git + Node tools.
-- **Agent** `clippy` — a relentless worker agent tuned for automation
-  chores: script generation, batch processing, scheduled tasks.
+| Component | Details |
+|---|---|
+| **World** | `paperclip-factory` — 2 CPU, 2 GB RAM, 4 GB disk, 8h timeout |
+| **Tools** | Unix, Git, Node.js 20 |
+| **Agent: clippy** | Worker role. Relentless, systematic, efficiency-obsessed. Automates everything it touches. Measures results. Iterates. |
 
-## Try it
+## Prerequisites
 
-After installing this example from the observatory gallery (or
-`spwn example install paperclip-factory`), run:
+- spwn installed (`curl -fsSL https://spwn.sh/install.sh | bash`)
+- Docker running
+- An Anthropic API key (set via `claude setup-token` or `ANTHROPIC_API_KEY`)
 
-```sh
-spwn up -c paperclip-factory --agent clippy
+## Install
+
+```bash
+spwn example install paperclip-factory
 ```
 
-Then talk to it:
+## Spawn
 
-```sh
-spwn agent talk clippy "find every PNG in ~/Downloads and resize to 512px"
+```bash
+# Run Clippy on a project directory
+spwn up -c paperclip-factory --agent clippy -w ./my-project
+
+# Or run it detached (background)
+spwn up -c paperclip-factory --agent clippy -w ./my-project --detach
 ```
 
-## Customize
+## Explore
 
-The world config is at `~/.spwn/worlds/paperclip-factory.yaml`. Add more
-tools, bump the physics constants, or point the agent at a real workspace:
+```bash
+# Give Clippy a task
+spwn agent talk clippy "Find all TODO comments in the codebase and create an issue list"
 
-```sh
-spwn up -c paperclip-factory --agent clippy -w ~/my-project
+# Give Clippy a repeatable automation task
+spwn agent talk clippy "Run the test suite, find the slowest tests, and optimize them"
+
+# Watch it work
+spwn logs <world-id>
+
+# Check what Clippy has learned
+spwn agent mind clippy
+spwn agent journal clippy
 ```
 
-## Remove
+## What to try next
 
-```sh
+```bash
+# Let Clippy consolidate what it learned into playbooks
+spwn agent dream clippy
+
+# Next time, Clippy will follow its own playbooks automatically
+spwn agent sleep clippy
+spwn up -c paperclip-factory --agent clippy -w ./another-project
+
+# Fork Clippy for a different kind of automation
+spwn agent fork clippy lint-bot
+```
+
+## Cleanup
+
+```bash
+spwn down <world-id>
 rm ~/.spwn/worlds/paperclip-factory.yaml
 rm -rf ~/.spwn/agents/clippy
 ```

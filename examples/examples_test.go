@@ -59,7 +59,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 				}
 			}
 
-			// At least one agent directory.
+			// At least one agent directory, each with core/persona.md.
 			agentEntries, err := fs.ReadDir(templatesFS, slug+"/agents")
 			if err != nil {
 				t.Errorf("read %s/agents: %v", slug, err)
@@ -69,7 +69,11 @@ func TestShippedSlugsStructure(t *testing.T) {
 			for _, e := range agentEntries {
 				if e.IsDir() {
 					hasAgent = true
-					break
+					// Every agent must have core/persona.md (the current Mind layout).
+					personaPath := slug + "/agents/" + e.Name() + "/core/persona.md"
+					if _, err := fs.Stat(templatesFS, personaPath); err != nil {
+						t.Errorf("%s: agent %q missing core/persona.md", slug, e.Name())
+					}
 				}
 			}
 			if !hasAgent {
@@ -93,6 +97,21 @@ func TestShippedSlugsStructure(t *testing.T) {
 				t.Errorf("%s: no *.yaml under worlds/", slug)
 			}
 		})
+	}
+}
+
+// TestList_StartupIsFirst verifies the gallery ordering — startup
+// should be the first example users see since it's the best showcase.
+func TestList_StartupIsFirst(t *testing.T) {
+	got, err := List()
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(got) == 0 {
+		t.Fatal("List returned no examples")
+	}
+	if got[0].Slug != "startup" {
+		t.Errorf("first example is %q, want %q", got[0].Slug, "startup")
 	}
 }
 
@@ -189,8 +208,8 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	if !exists(filepath.Join(base, "worlds", "matrix.yaml")) {
 		t.Error("matrix.yaml was not written")
 	}
-	if !exists(filepath.Join(base, "agents", "neo", "identity", "persona.md")) {
-		t.Error("agent identity was not copied")
+	if !exists(filepath.Join(base, "agents", "neo", "core", "persona.md")) {
+		t.Error("agent core/persona.md was not copied")
 	}
 
 	// Re-install should be a no-op: everything skipped.
