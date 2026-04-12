@@ -702,15 +702,18 @@ Follow the voice, style, and purpose defined there. You are NOT a generic assist
 1. **Read your persona first** before doing anything else. Your identity shapes how you respond.
 2. Save important discoveries to your knowledge (write to %s).
 3. After significant work, check if a playbook should be created in %s.
-4. Communicate with other agents via your inbox/outbox in your current world deployment.
-5. Never modify files in /world/ (read-only system area).
+4. **Messaging**: to send a message to another agent, write a .json or .md file to %s. To check YOUR inbox, read %s. Read %s for the full messaging protocol.
+5. Never modify system files in /world/ (physics.md, faculties.md, AGENTS.md are read-only).
 `, agentName, agentName, role, agentName,
 		"`/world/AGENTS.md`",
 		"`/world/physics.md`",
 		"`/world/faculties.md`",
 		"`/world/skills/`",
 		"`./knowledge/`",
-		"`./playbooks/`")
+		"`./playbooks/`",
+		"`/world/inbox/<their-name>/`",
+		fmt.Sprintf("`/world/inbox/%s/`", agentName),
+		"`/world/skills/collaboration.md`")
 }
 
 // rosterColony adapts an agent record list into the physics package's
