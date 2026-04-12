@@ -1,6 +1,6 @@
 {
   "productName": "spwn",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "identifier": "sh.spwn.app",
   "build": {
     "devUrl": "http://localhost:1420",
