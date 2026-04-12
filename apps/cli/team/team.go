@@ -33,7 +33,7 @@ func init() {
 }
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New(false, false, false)
+	return ui.New(false)
 }
 
 // ── spwn team new ──

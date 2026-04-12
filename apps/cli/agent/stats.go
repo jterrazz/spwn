@@ -98,7 +98,7 @@ var statsCmd = &cobra.Command{
 		s.Blank()
 
 		// Mind layers table
-		t := ui.NewTable(ui.ModeNormal, "LAYER", "FILES", "SIZE")
+		t := ui.NewTable("LAYER", "FILES", "SIZE")
 		for _, layer := range foundation.MindLayers {
 			files := info.Layers[layer]
 			fileCount := len(files)

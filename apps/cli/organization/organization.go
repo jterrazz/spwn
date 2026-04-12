@@ -21,7 +21,7 @@ func init() {
 }
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New(false, false, false)
+	return ui.New(false)
 }
 
 // ── spwn organization ls ──
@@ -44,7 +44,7 @@ var lsCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "SLUG", "NAME", "ROLES", "DESCRIPTION")
+		t := ui.NewTable("SLUG", "NAME", "ROLES", "DESCRIPTION")
 		for _, h := range organizations {
 			roleNames := make([]string, 0, len(h.Roles))
 			for _, r := range h.Roles {
@@ -83,7 +83,7 @@ var inspectCmd = &cobra.Command{
 		}
 		fmt.Fprintln(w)
 
-		t := ui.NewTable(ui.ModeNormal, "ROLE", "LEVEL", "REPORTS TO", "CAN COMMAND", "PERMISSIONS")
+		t := ui.NewTable("ROLE", "LEVEL", "REPORTS TO", "CAN COMMAND", "PERMISSIONS")
 		for _, r := range h.Roles {
 			reportsTo := r.ReportsTo
 			if reportsTo == "" {

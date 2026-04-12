@@ -155,10 +155,8 @@ func runSearch(cmd *cobra.Command, args []string) error {
 
 // newStepper creates a Stepper using the persistent root flags.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	q, _ := cmd.Flags().GetBool("quiet")
-	v, _ := cmd.Flags().GetBool("verbose")
 	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(q, v, j)
+	return ui.New(j)
 }
 
 func formatSize(bytes int64) string {

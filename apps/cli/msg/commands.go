@@ -30,12 +30,10 @@ func init() {
 	Cmd.AddCommand(watchCmd)
 }
 
-// newStepper creates a Stepper using the persistent root flags.
+// newStepper creates a Stepper that respects the --json flag.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	q, _ := cmd.Flags().GetBool("quiet")
-	v, _ := cmd.Flags().GetBool("verbose")
 	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(q, v, j)
+	return ui.New(j)
 }
 
 // --- send ---
@@ -131,7 +129,7 @@ var inboxCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "FROM", "TYPE", "STATUS", "TIME", "CONTENT")
+		t := ui.NewTable("FROM", "TYPE", "STATUS", "TIME", "CONTENT")
 		for _, m := range msgs {
 			content := m.Content
 			if len(content) > 50 {

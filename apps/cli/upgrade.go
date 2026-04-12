@@ -38,7 +38,7 @@ the current binary. Running worlds are stopped gracefully before the swap.`,
   spwn upgrade --channel beta
   spwn upgrade --force      # reinstall current version`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New(quiet, verbose, jsonOutput)
+		s := ui.New(jsonOutput)
 		ctx := cmd.Context()
 		if ctx == nil {
 			ctx = context.Background()

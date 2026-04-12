@@ -62,7 +62,7 @@ var listCmd = &cobra.Command{
 			fmt.Fprintln(cmd.OutOrStdout(), "no examples bundled in this build")
 			return nil
 		}
-		s := ui.New(false, false, false)
+		s := ui.New(false)
 		s.Blank()
 		for _, ex := range list {
 			s.Info(ex.Slug, ex.Tagline)
@@ -80,7 +80,7 @@ var installCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		slug := args[0]
-		s := ui.New(false, false, false)
+		s := ui.New(false)
 
 		s.Blank()
 		s.Start(fmt.Sprintf("Installing example %q...", slug))

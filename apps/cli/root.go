@@ -29,11 +29,7 @@ import (
 // Version is set by goreleaser via ldflags.
 var Version = "dev"
 
-var (
-	jsonOutput bool
-	quiet      bool
-	verbose    bool
-)
+var jsonOutput bool
 
 var rootCmd = &cobra.Command{
 	Use:   "spwn",
@@ -65,8 +61,6 @@ func init() {
 	rootCmd.SetHelpFunc(customHelp)
 
 	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Output as JSON")
-	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-essential output")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show debug information")
 
 	// Top-level aliases — shortcuts for the 80% cases
 	rootCmd.AddCommand(world.UpCmd)      // spwn up
@@ -194,8 +188,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	// Global flags
-	fmt.Fprintf(w, "%s %s\n", ui.Strong("Flags:"),
-		ui.Faint("--json · -q/--quiet · -v/--verbose · --version"))
+	fmt.Fprintf(w, "%s %s\n", ui.Strong("Global:"), ui.Faint("--json"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Faint("Run \"spwn <command> --help\" for details."))

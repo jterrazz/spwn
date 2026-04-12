@@ -130,7 +130,7 @@ func TestCLI_RootHelpSections(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Quick Start:", "Entities:", "Building blocks:", "Shortcuts:", "Coordination:", "System:", "Flags:"} {
+	for _, section := range []string{"Quick Start:", "Entities:", "Building blocks:", "Shortcuts:", "Coordination:", "System:", "Global:"} {
 		assertContains(t, out, section, "root help sections")
 	}
 }

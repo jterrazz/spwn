@@ -56,7 +56,7 @@ var snapshotsCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "WORLD", "NAME", "SIZE", "CREATED")
+		t := ui.NewTable("WORLD", "NAME", "SIZE", "CREATED")
 		for _, snap := range snapshots {
 			// Parse tag: "spwn-snapshot:w-default-28373--pre-deploy"
 			parts := strings.SplitN(strings.TrimPrefix(snap.Tag, "spwn-snapshot:"), "--", 2)

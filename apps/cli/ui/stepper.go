@@ -15,39 +15,35 @@ var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "�
 
 const labelWidth = 24
 
-// Mode controls output behavior.
-type Mode int
-
-const (
-	ModeNormal  Mode = iota
-	ModeQuiet          // suppress all step output
-	ModeVerbose        // disable spinners, show inline logs
-	ModeJSON           // suppress human output entirely
-)
-
 // Stepper manages sequential step-by-step CLI output with spinners.
+//
+// Output modes are minimal: either human output (stderr spinners + rows)
+// or JSON mode, which suppresses human output entirely so callers can
+// print clean structured output to stdout.
 type Stepper struct {
-	mode   Mode
-	w      io.Writer
-	isTTY  bool
+	mode  stepperMode
+	w     io.Writer
+	isTTY bool
 
 	mu     sync.Mutex
 	stopCh chan struct{}
 	doneCh chan struct{}
 }
 
-// New creates a Stepper based on the CLI flags.
-func New(quiet, verbose, jsonOut bool) *Stepper {
-	mode := ModeNormal
-	switch {
-	case jsonOut:
-		mode = ModeJSON
-	case quiet:
-		mode = ModeQuiet
-	case verbose:
-		mode = ModeVerbose
-	}
+type stepperMode int
 
+const (
+	modeHuman stepperMode = iota
+	modeJSON
+)
+
+// New creates a Stepper. Pass jsonOut=true to suppress human output so
+// the caller can write structured output cleanly to stdout.
+func New(jsonOut bool) *Stepper {
+	mode := modeHuman
+	if jsonOut {
+		mode = modeJSON
+	}
 	return &Stepper{
 		mode:  mode,
 		w:     os.Stderr,
@@ -57,13 +53,13 @@ func New(quiet, verbose, jsonOut bool) *Stepper {
 
 // Start begins a new step with a spinner animation.
 func (s *Stepper) Start(msg string) {
-	if s.mode == ModeQuiet || s.mode == ModeJSON {
+	if s.mode == modeJSON {
 		return
 	}
 
 	s.stopSpinner()
 
-	if s.mode == ModeVerbose || !s.isTTY {
+	if !s.isTTY {
 		fmt.Fprintf(s.w, "  → %s\n", msg)
 		return
 	}
@@ -99,7 +95,7 @@ func (s *Stepper) Start(msg string) {
 
 // Done completes the current step with a checkmark.
 func (s *Stepper) Done(label, detail string) {
-	if s.mode == ModeQuiet || s.mode == ModeJSON {
+	if s.mode == modeJSON {
 		return
 	}
 
@@ -114,7 +110,7 @@ func (s *Stepper) Done(label, detail string) {
 
 // Fail completes the current step with a cross mark.
 func (s *Stepper) Fail(label string, err error) {
-	if s.mode == ModeQuiet || s.mode == ModeJSON {
+	if s.mode == modeJSON {
 		return
 	}
 
@@ -131,7 +127,7 @@ func (s *Stepper) Fail(label string, err error) {
 // displayedError so Execute() won't re-print it.
 func (s *Stepper) FailHint(label string, err error, hint string) error {
 	s.Fail(label, err)
-	if hint != "" && s.mode != ModeQuiet && s.mode != ModeJSON {
+	if hint != "" && s.mode != modeJSON {
 		fmt.Fprintf(s.w, "  %s %s\n", " ", faint(hint))
 	}
 	s.Blank()
@@ -144,27 +140,22 @@ type DisplayedError struct{ Err error }
 func (e *DisplayedError) Error() string { return e.Err.Error() }
 func (e *DisplayedError) Unwrap() error { return e.Err }
 
-// Log writes a line of output during an active step (verbose mode only).
-func (s *Stepper) Log(format string, args ...any) {
-	if s.mode != ModeVerbose {
-		return
-	}
-	fmt.Fprintf(s.w, "    "+format+"\n", args...)
-}
+// Log is a no-op in the current design. Kept for callers that used to
+// emit verbose-mode logs; if we reintroduce a real debug logger later,
+// this is the hook. Today it does nothing.
+func (s *Stepper) Log(format string, args ...any) {}
 
-// Writer returns an io.Writer for piping output (e.g., Docker build logs).
-// In verbose mode, returns a writer that indents each line.
-// In all other modes, returns io.Discard.
+// Writer returns an io.Writer for piping output (e.g. Docker build logs).
+// In the current design we discard piped output — builds run silently
+// through the Stepper. If we reintroduce verbose logging this is where
+// it would flow.
 func (s *Stepper) Writer() io.Writer {
-	if s.mode == ModeVerbose {
-		return &indentWriter{w: s.w, prefix: "    "}
-	}
 	return io.Discard
 }
 
 // Blank prints an empty line for spacing.
 func (s *Stepper) Blank() {
-	if s.mode == ModeQuiet || s.mode == ModeJSON {
+	if s.mode == modeJSON {
 		return
 	}
 	fmt.Fprintln(s.w)
@@ -172,7 +163,7 @@ func (s *Stepper) Blank() {
 
 // Success prints a final green success message.
 func (s *Stepper) Success(msg string) {
-	if s.mode == ModeQuiet || s.mode == ModeJSON {
+	if s.mode == modeJSON {
 		return
 	}
 	fmt.Fprintf(s.w, "  %s %s\n", check(), green.Sprint(msg))
@@ -180,7 +171,7 @@ func (s *Stepper) Success(msg string) {
 
 // Warn prints a warning line with a yellow "!" prefix.
 func (s *Stepper) Warn(label, detail string) {
-	if s.mode == ModeQuiet || s.mode == ModeJSON {
+	if s.mode == modeJSON {
 		return
 	}
 
@@ -195,7 +186,7 @@ func (s *Stepper) Warn(label, detail string) {
 
 // Info prints a label-value pair for summary output.
 func (s *Stepper) Info(label, value string) {
-	if s.mode == ModeQuiet || s.mode == ModeJSON {
+	if s.mode == modeJSON {
 		return
 	}
 	fmt.Fprintf(s.w, "  %-12s %s\n", strong(label), value)
@@ -216,7 +207,8 @@ func (s *Stepper) stopSpinner() {
 	}
 }
 
-// indentWriter prefixes each line with a string.
+// indentWriter prefixes each line with a string. Kept for potential
+// reuse; currently unreferenced.
 type indentWriter struct {
 	w      io.Writer
 	prefix string

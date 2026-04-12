@@ -16,10 +16,8 @@ and a Mind (persistent agent identity).
 ### Options
 
 ```
-  -h, --help      help for spwn
-      --json      Output as JSON
-  -q, --quiet     Suppress non-essential output
-  -v, --verbose   Show debug information
+  -h, --help   help for spwn
+      --json   Output as JSON
 ```
 
 ### SEE ALSO

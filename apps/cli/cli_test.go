@@ -174,18 +174,7 @@ func TestCLI_GlobalFlags(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, flag := range []string{"--json", "--quiet", "--verbose"} {
-		assertContains(t, out, flag, "global flags")
-	}
-}
-
-func TestCLI_GlobalFlagShortcuts(t *testing.T) {
-	out, _, err := executeCommand("--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Short flags -q and -v should appear in the help output.
-	assertContains(t, out, "-q", "global short flag quiet")
-	assertContains(t, out, "-v", "global short flag verbose")
+	// --json is the only global flag now. --quiet and --verbose were
+	// removed because their behavior didn't match user expectations.
+	assertContains(t, out, "--json", "global flags")
 }

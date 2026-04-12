@@ -68,7 +68,7 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "NAME", "WORLD", "STATUS")
+		t := ui.NewTable("NAME", "WORLD", "STATUS")
 		for _, a := range agents {
 			worldID := "\u2014"
 			status := "unattached"

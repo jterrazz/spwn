@@ -23,7 +23,7 @@ world config. If no name is provided, a random cosmos-themed word is picked.
 On first run, also creates default.yaml as the default config.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New(quiet, verbose, jsonOutput)
+		s := ui.New(jsonOutput)
 
 		name := ""
 		if len(args) > 0 {

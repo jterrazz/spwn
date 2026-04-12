@@ -38,7 +38,7 @@ var sessionsCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "WORLD", "SESSION ID", "RESUMED")
+		t := ui.NewTable("WORLD", "SESSION ID", "RESUMED")
 		for _, sess := range sessions {
 			resumed := "no"
 			if sess.Resumed {

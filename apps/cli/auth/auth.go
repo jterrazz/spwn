@@ -15,10 +15,8 @@ import (
 )
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	q, _ := cmd.Flags().GetBool("quiet")
-	v, _ := cmd.Flags().GetBool("verbose")
 	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(q, v, j)
+	return ui.New(j)
 }
 
 // --- Parent command: spwn auth (shows status) ---
@@ -55,7 +53,7 @@ var Cmd = &cobra.Command{
 		s.Blank()
 
 		// Table
-		t := ui.NewTable(ui.ModeNormal, "PROVIDER", "STATUS", "SOURCE")
+		t := ui.NewTable("PROVIDER", "STATUS", "SOURCE")
 		for _, p := range []auth.Provider{auth.ProviderAnthropic, auth.ProviderOpenAI} {
 			cred := creds[p]
 			t.AddRow(string(p), statusText(cred.Type != auth.CredTypeNone), cred.Source)
@@ -281,7 +279,7 @@ func runCheck(cmd *cobra.Command, _ []string) error {
 	s.Done("Validation complete", fmt.Sprintf("%d providers checked", len(results)))
 	s.Blank()
 
-	t := ui.NewTable(ui.ModeNormal, "PROVIDER", "STATUS", "TYPE", "SOURCE")
+	t := ui.NewTable("PROVIDER", "STATUS", "TYPE", "SOURCE")
 	for _, r := range results {
 		status := ui.Green("✓") + " connected"
 		if !r.Connected {

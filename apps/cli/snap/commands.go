@@ -34,10 +34,8 @@ func init() {
 
 // newStepper creates a Stepper using the persistent root flags.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	q, _ := cmd.Flags().GetBool("quiet")
-	v, _ := cmd.Flags().GetBool("verbose")
 	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(q, v, j)
+	return ui.New(j)
 }
 
 func dockerHint(err error) error {
@@ -94,7 +92,7 @@ var lsCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "WORLD", "NAME", "SIZE", "CREATED")
+		t := ui.NewTable("WORLD", "NAME", "SIZE", "CREATED")
 		for _, snap := range snapshots {
 			parts := strings.SplitN(strings.TrimPrefix(snap.Tag, "spwn-snapshot:"), "--", 2)
 			worldID := parts[0]

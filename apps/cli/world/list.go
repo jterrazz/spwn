@@ -66,7 +66,7 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "ID", "CONFIG", "AGENTS", "STATUS", "CREATED")
+		t := ui.NewTable("ID", "CONFIG", "AGENTS", "STATUS", "CREATED")
 		for _, u := range worlds {
 			agents := collectAgentNames(u)
 			config := u.Config

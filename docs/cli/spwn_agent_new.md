@@ -26,9 +26,7 @@ spwn agent new [name] [flags]
 ### Options inherited from parent commands
 
 ```
-      --json      Output as JSON
-  -q, --quiet     Suppress non-essential output
-  -v, --verbose   Show debug information
+      --json   Output as JSON
 ```
 
 ### SEE ALSO

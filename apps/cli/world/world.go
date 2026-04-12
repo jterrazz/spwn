@@ -296,10 +296,8 @@ Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).`,
 
 // newStepper creates a Stepper using the persistent root flags.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	q, _ := cmd.Flags().GetBool("quiet")
-	v, _ := cmd.Flags().GetBool("verbose")
 	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(q, v, j)
+	return ui.New(j)
 }
 
 // dockerHint wraps a NewArchitectFromEnv error with a user-friendly hint

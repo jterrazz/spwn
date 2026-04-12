@@ -38,7 +38,7 @@ var journalCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "DATE", "WORLD", "EXIT", "DURATION")
+		t := ui.NewTable("DATE", "WORLD", "EXIT", "DURATION")
 		for _, e := range entries {
 			t.AddRow(
 				e.CreatedAt.Format("2006-01-02"),

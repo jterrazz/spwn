@@ -18,13 +18,6 @@ spwn example list [flags]
       --json   emit the bundled example list as JSON and fail with exit code 1 if empty
 ```
 
-### Options inherited from parent commands
-
-```
-  -q, --quiet     Suppress non-essential output
-  -v, --verbose   Show debug information
-```
-
 ### SEE ALSO
 
 * [spwn example](./spwn_example.md)	 - Install ready-made world + agent templates

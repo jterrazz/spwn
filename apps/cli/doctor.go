@@ -28,7 +28,7 @@ var doctorCmd = &cobra.Command{
 Verifies Docker connectivity, images, configuration files, agents,
 and authentication. Reports issues with suggested fixes.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New(quiet, verbose, jsonOutput)
+		s := ui.New(jsonOutput)
 		s.Blank()
 
 		passed := 0

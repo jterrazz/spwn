@@ -14,15 +14,14 @@ type Table struct {
 	w       io.Writer
 	headers []string
 	rows    [][]string
-	mode    Mode
 }
 
 // NewTable creates a table with the given headers.
-func NewTable(mode Mode, headers ...string) *Table {
+// Callers are responsible for guarding Render() when --json is in effect.
+func NewTable(headers ...string) *Table {
 	return &Table{
 		w:       os.Stderr,
 		headers: headers,
-		mode:    mode,
 	}
 }
 
@@ -64,10 +63,6 @@ func padVisible(s string, w int) string {
 
 // Render prints the table with dimmed headers and 2-space indent.
 func (t *Table) Render() {
-	if t.mode == ModeQuiet || t.mode == ModeJSON {
-		return
-	}
-
 	// Calculate column widths from visible text (headers + all rows).
 	// For STATUS columns, account for the added icon prefix.
 	widths := make([]int, len(t.headers))

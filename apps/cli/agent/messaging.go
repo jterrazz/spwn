@@ -121,7 +121,7 @@ var inboxCmd = &cobra.Command{
 			return nil
 		}
 
-		t := ui.NewTable(ui.ModeNormal, "FROM", "TYPE", "STATUS", "TIME", "CONTENT")
+		t := ui.NewTable("FROM", "TYPE", "STATUS", "TIME", "CONTENT")
 		for _, m := range msgs {
 			content := m.Content
 			if len(content) > 50 {
