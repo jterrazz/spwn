@@ -96,28 +96,23 @@ jobs:
           BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
           WORKDIR=$(mktemp -d)
 
-          # Write the private key to a temp file for signing
-          echo "${TAURI_SIGNING_PRIVATE_KEY}" > "${WORKDIR}/key.pem"
-
-          sign_asset() {
+          sign_and_add() {
             local platform="$1" asset="$2"
             local url="${BASE_URL}/${asset}"
 
             echo "Processing ${platform} → ${asset}"
 
-            # Download
             if ! gh release download "${TAG}" --pattern "${asset}" --dir "${WORKDIR}" 2>/dev/null; then
-              echo "  Skipping ${platform}: ${asset} not found in release"
+              echo "  Skipping ${platform}: ${asset} not found"
               return 1
             fi
 
-            # Sign
+            # Sign using env var directly (avoids file encoding issues)
             cargo tauri signer sign \
-              --private-key "${WORKDIR}/key.pem" \
-              --password "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD}" \
+              --private-key "$TAURI_SIGNING_PRIVATE_KEY" \
+              --password "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" \
               "${WORKDIR}/${asset}" 2>&1 || true
 
-            # Read signature
             local sig=""
             if [ -f "${WORKDIR}/${asset}.sig" ]; then
               sig=$(cat "${WORKDIR}/${asset}.sig")
@@ -129,59 +124,50 @@ jobs:
             fi
 
             echo "  Signed ${platform} ✓"
-            # Output the JSON fragment
-            echo "ENTRY:\"${platform}\": { \"signature\": \"${sig}\", \"url\": \"${url}\" }"
+            # Append to entries file (avoids subshell variable scoping)
+            printf '"%s": { "signature": "%s", "url": "%s" }\n' \
+              "$platform" "$sig" "$url" >> "${WORKDIR}/entries.txt"
           }
 
-          # Sign each platform's updater asset
-          ENTRIES=""
-          add_entry() {
-            local entry="$1"
-            if [ -n "$ENTRIES" ]; then
-              ENTRIES="${ENTRIES}, ${entry}"
-            else
-              ENTRIES="${entry}"
-            fi
-          }
+          touch "${WORKDIR}/entries.txt"
 
-          # macOS arm64
-          result=$(sign_asset "darwin-aarch64" "spwn_aarch64.app.tar.gz" 2>&1) && \
-            add_entry "$(echo "$result" | grep '^ENTRY:' | sed 's/^ENTRY://')" || true
-          echo "$result" | grep -v '^ENTRY:'
+          # macOS arm64 + x86_64
+          sign_and_add "darwin-aarch64" "spwn_aarch64.app.tar.gz" || true
+          sign_and_add "darwin-x86_64" "spwn_x64.app.tar.gz" || true
 
-          # macOS x86_64
-          result=$(sign_asset "darwin-x86_64" "spwn_x64.app.tar.gz" 2>&1) && \
-            add_entry "$(echo "$result" | grep '^ENTRY:' | sed 's/^ENTRY://')" || true
-          echo "$result" | grep -v '^ENTRY:'
+          # Linux — Tauri uploads AppImage directly (no .tar.gz wrapper)
+          sign_and_add "linux-x86_64" "spwn_${VERSION}_amd64.AppImage" || true
 
-          # Linux x86_64 — Tauri uploads AppImage.tar.gz for updater
-          result=$(sign_asset "linux-x86_64" "spwn_${VERSION}_amd64.AppImage.tar.gz" 2>&1) && \
-            add_entry "$(echo "$result" | grep '^ENTRY:' | sed 's/^ENTRY://')" || true
-          echo "$result" | grep -v '^ENTRY:'
-
-          rm -f "${WORKDIR}/key.pem"
-
-          if [ -z "$ENTRIES" ]; then
-            echo "Error: no platforms were signed — latest.json not generated"
-            # Don't fail the release — the desktop builds already shipped.
-            # The updater just won't work for this release.
+          if [ ! -s "${WORKDIR}/entries.txt" ]; then
+            echo "Warning: no platforms were signed — latest.json not generated"
             exit 0
           fi
 
+          # Join entries with commas
+          ENTRIES=$(paste -sd ',' "${WORKDIR}/entries.txt" | sed 's/,/, /g')
+
           # Compose latest.json
-          cat > "${WORKDIR}/latest.json" <<EOF
-          {
-            "version": "${VERSION}",
-            "notes": "spwn ${TAG}",
-            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "platforms": { ${ENTRIES} }
+          PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          python3 -c "
+          import json, sys
+          entries_raw = '''${ENTRIES}'''
+          platforms = {}
+          for entry in entries_raw.split('\n'):
+            entry = entry.strip()
+            if not entry: continue
+            obj = json.loads('{' + entry + '}')
+            platforms.update(obj)
+          manifest = {
+            'version': '${VERSION}',
+            'notes': 'spwn ${TAG}',
+            'pub_date': '${PUB_DATE}',
+            'platforms': platforms
           }
-          EOF
+          json.dump(manifest, open('${WORKDIR}/latest.json', 'w'), indent=2)
+          json.dump(manifest, sys.stdout, indent=2)
+          print()
+          "
 
-          # Pretty-print and validate
-          python3 -m json.tool "${WORKDIR}/latest.json"
-
-          # Upload to the release
+          # Upload
           gh release upload "${TAG}" "${WORKDIR}/latest.json" --clobber
-          echo ""
           echo "latest.json uploaded to ${TAG} ✓"
