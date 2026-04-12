@@ -31,9 +31,9 @@
 
 <br/>
 
-## One command. A living colony.
+## Play god with AI agents.
 
-Spawn isolated worlds, deploy teams of AI agents, and let them collaborate autonomously. They remember, learn, and never sleep.
+The operating system for autonomous agent worlds. One command — they wake up, find their tools, and get to work.
 
 Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own physics — filesystem, compute, memory, network. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork their profiles to run experiments.
 
