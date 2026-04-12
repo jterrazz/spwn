@@ -5,7 +5,7 @@ slug: "spwn-auth-login"
 
 ## spwn auth login
 
-Set up credentials — auto-detect from Keychain or paste manually
+Detect credentials from CLI logins and system keychain
 
 ```
 spwn auth login [flags]
@@ -27,5 +27,5 @@ spwn auth login [flags]
 
 ### SEE ALSO
 
-* [spwn auth](/docs/cli/spwn-auth)	 - Manage credentials — login, logout, status
+* [spwn auth](./spwn_auth.md)	 - Manage credentials — login, logout, status
 

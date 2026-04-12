@@ -7,6 +7,21 @@ slug: "spwn-architect-start"
 
 Start the Architect daemon
 
+### Synopsis
+
+Start the Architect daemon in a Docker container.
+
+The Architect runs the spwn binary inside a long-lived container with the
+host's Docker socket mounted (DooD — Docker-outside-of-Docker), allowing it
+to create and manage world containers as siblings.
+
+The container mounts:
+  /var/run/docker.sock    Docker daemon access (sibling containers, not nested)
+  ~/.spwn/                Shared configuration and state
+
+The Architect's identity is defined in /world/ARCHITECT.md inside the container,
+which describes its capabilities and role as the always-on world builder.
+
 ```
 spwn architect start [flags]
 ```
@@ -27,5 +42,5 @@ spwn architect start [flags]
 
 ### SEE ALSO
 
-* [spwn architect](/docs/cli/spwn-architect)	 - The Architect — always-on orchestration daemon
+* [spwn architect](./spwn_architect.md)	 - Your always-on world builder
 

@@ -12,7 +12,7 @@ Talk to a running agent — interactive or one-shot
 Open a conversation with a named agent running inside a world.
 
 If a message is provided, runs a one-shot query and prints the response.
-If no message is provided, opens an interactive Claude session inside the container.
+If no message is provided, opens an interactive session inside the container.
 
 ```
 spwn agent talk <agent-name> [message] [flags]
@@ -21,7 +21,9 @@ spwn agent talk <agent-name> [message] [flags]
 ### Options
 
 ```
-  -h, --help   help for talk
+  -h, --help                   help for talk
+      --output-format string   Output format: text (default) or stream-json
+      --world string           World ID to target (disambiguates when the same agent exists in multiple worlds)
 ```
 
 ### Options inherited from parent commands
@@ -34,5 +36,5 @@ spwn agent talk <agent-name> [message] [flags]
 
 ### SEE ALSO
 
-* [spwn agent](/docs/cli/spwn-agent)	 - Spawn an agent — a living identity that inhabits a world
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
 

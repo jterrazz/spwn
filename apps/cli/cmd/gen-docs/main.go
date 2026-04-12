@@ -38,10 +38,11 @@ slug: "%s"
 	}
 
 	// Link handler for cross-references between commands.
+	// Uses relative paths with .md extension so links render correctly
+	// on GitHub's markdown file browser (absolute /docs/cli/spwn-agent
+	// style breaks because GitHub needs the real filename).
 	link := func(name string) string {
-		base := strings.TrimSuffix(name, ".md")
-		slug := strings.ReplaceAll(base, "_", "-")
-		return "/docs/cli/" + slug
+		return "./" + name
 	}
 
 	cmd := cli.GetRootCmd()

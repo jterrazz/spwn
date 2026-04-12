@@ -34,5 +34,5 @@ spwn doctor [flags]
 
 ### SEE ALSO
 
-* [spwn](/docs/cli/spwn)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn — create realities for things that can think
 

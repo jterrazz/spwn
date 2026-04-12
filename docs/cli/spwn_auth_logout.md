@@ -27,5 +27,5 @@ spwn auth logout [flags]
 
 ### SEE ALSO
 
-* [spwn auth](/docs/cli/spwn-auth)	 - Manage credentials — login, logout, status
+* [spwn auth](./spwn_auth.md)	 - Manage credentials — login, logout, status
 
