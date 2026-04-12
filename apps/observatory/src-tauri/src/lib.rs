@@ -211,6 +211,23 @@ fn augmented_path() -> String {
 }
 
 fn which_spwn(augmented_path: &str) -> String {
+    // In dev mode (`cargo tauri dev`), prefer the local build at
+    // ../../bin/spwn (relative to apps/observatory/src-tauri/) so
+    // `make build && npm run tauri dev` uses the freshly compiled
+    // binary instead of whatever's installed system-wide. This
+    // prevents the "I just built it but the app still uses the old
+    // binary" confusion.
+    let dev_candidates = ["../../bin/spwn", "../../../bin/spwn", "./bin/spwn"];
+    for rel in &dev_candidates {
+        let path = std::path::Path::new(rel);
+        if path.exists() {
+            if let Ok(abs) = path.canonicalize() {
+                println!("[spwn] Using local dev build: {}", abs.display());
+                return abs.to_string_lossy().to_string();
+            }
+        }
+    }
+
     // Check PATH using the augmented PATH so /usr/local/bin/spwn and
     // ~/.local/bin/spwn are actually reachable by `which` when the
     // GUI-inherited PATH doesn't include them.
