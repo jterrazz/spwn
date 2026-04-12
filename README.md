@@ -33,9 +33,11 @@
 
 ## Play god with AI agents.
 
-The operating system for autonomous agent worlds. One command — they wake up, find their tools, and get to work.
+The building blocks of agent intelligence. Assemble tools, skills, and minds into living worlds — one command away.
 
 The real power of AI isn't the model — it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
+
+**Think of it as Docker for intelligence.** Docker made OS environments composable — stack base images, layers, and configs into a running container. Spwn makes *agents* composable — stack tool packs, skill files, personality profiles, and world physics into a running mind. One command assembles the blocks and boots the world.
 
 Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own physics — filesystem, compute, memory, network. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork their profiles to run experiments. The full environment — not just the brain — is what turns a language model into something that actually gets work done.
 
@@ -113,8 +115,8 @@ No network interface means HTTP doesn't exist — not forbidden, physically impo
 Dream to analyze, sleep to consolidate, fork to branch. Successful patterns become playbooks. Failed ones are discarded. Natural selection for behavior.
 </td>
 <td align="center">
-<h3>🔌 Swap the Fabric of Reality</h3>
-Claude Code, Codex, Aider, Pi — swap the thinking engine without touching your world config. Every layer is pluggable. 8 port interfaces, all swappable.
+<h3>🧩 Composable Intelligence</h3>
+Tool packs, skill files, personality profiles, world physics — all stackable blocks. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher persona + 4GB memory = an autonomous scientist. Docker, but for minds.
 </td>
 </tr>
 <tr>
