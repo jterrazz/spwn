@@ -35,7 +35,9 @@
 
 The operating system for autonomous agent worlds. One command — they wake up, find their tools, and get to work.
 
-Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own physics — filesystem, compute, memory, network. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork their profiles to run experiments.
+The real power of AI isn't the model — it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
+
+Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own physics — filesystem, compute, memory, network. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork their profiles to run experiments. The full environment — not just the brain — is what turns a language model into something that actually gets work done.
 
 > *"The next breakthrough isn't smarter models. It's richer worlds."*
 
