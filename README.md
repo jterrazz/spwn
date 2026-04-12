@@ -25,11 +25,15 @@
   <img src="doc/app-screenshot.webp" alt="spwn — Worlds dashboard" width="720" />
 </p>
 
+<p align="center">
+  <sub>The desktop app — visual monitoring for your worlds and agents. Also ships as a full CLI.</sub>
+</p>
+
 <br/>
 
 ## What is Spwn?
 
-Models mastered thinking. Spwn builds the missing half: **a reality for them to live in**.
+**If Claude Code is the intelligence, Spwn is the world to be intelligent in.**
 
 Spwn is a CLI and desktop app that runs AI agents inside isolated Docker containers with persistent identity, multi-agent coordination, and physics-based security. You define the world. Your agents remember, adapt, and collaborate.
 
@@ -58,6 +62,13 @@ spwn agent talk neo "What is this project?"
 
 # Check running worlds
 spwn ls
+```
+
+Or start from a bundled example:
+
+```bash
+spwn example install matrix
+spwn up -c matrix --agent neo
 ```
 
 Or build from source:
@@ -106,17 +117,104 @@ Claude Code, Codex, Aider, Pi — swap the thinking engine without touching your
 
 <br/>
 
+## Use cases
+
+**Team with a leader** — a lead agent delegates tasks to worker agents via inboxes:
+
+```bash
+spwn up --leader morpheus --agent neo --agent trinity -w ./acme-api
+spwn msg send neo --from morpheus "Implement Stripe webhooks"
+spwn msg send trinity --from morpheus "Write tests for webhooks"
+```
+
+**Solo developer** — one agent, one project, persistent memory:
+
+```bash
+spwn up --agent neo -w ./my-app
+spwn agent talk neo "Refactor the auth module to use sessions"
+# neo remembers the codebase next time
+```
+
+**Multi-runtime** — different agents, different thinking engines:
+
+```bash
+spwn up --agent neo --runtime claude-code -w .   # Anthropic
+spwn up --agent smith --runtime codex -w .        # OpenAI
+spwn up --agent oracle --runtime aider -w .       # Open source
+```
+
+<br/>
+
+## How agents work
+
+Each agent is a directory of markdown files — human-readable, git-friendly, no database:
+
+```
+~/.spwn/agents/neo/
+├── profile.yaml              # role, engine, delegation rules
+├── identity/
+│   ├── persona.md            # who I am — role, style, preferences
+│   ├── purpose.md            # why I exist — mission and goals
+│   └── traits.md             # what I believe — values and behavior
+├── memory/
+│   ├── knowledge/            # facts about the codebase
+│   ├── playbooks/            # step-by-step workflows I've learned
+│   └── journal/              # session logs — what happened to me
+├── skills/                   # what I can do
+├── sessions/                 # active session state
+└── bonds.md                  # relationships with other agents
+```
+
+Agents evolve through three mechanisms:
+
+- **Dream** (`spwn agent dream neo`) — analyze experience, promote successful patterns to playbooks
+- **Sleep** (`spwn agent sleep neo`) — graceful shutdown, consolidate raw experience into durable knowledge
+- **Fork** (`spwn agent fork neo neo-v2`) — clone an agent, run variants, keep the one that performs best
+
+<br/>
+
+## World configuration
+
+The world manifest defines what is physically possible inside a container:
+
+```yaml
+physics:
+  constants:
+    cpu: 2
+    memory: 1GB
+    timeout: 30m
+
+tools:
+  - @spwn/unix          # bash, coreutils, grep, sed, awk
+  - @spwn/git           # version control
+  - @spwn/node          # Node.js 20 + npm
+  - @spwn/claude-code   # AI agent runtime
+
+gate:
+  - source: mcp/slack
+    as: slack-send
+    capabilities: [send]
+```
+
+If a tool isn't listed, it doesn't exist. Not forbidden — physically absent. See the full [tool catalog](docs/tool-catalog.md).
+
+<br/>
+
 ## CLI at a glance
 
 ```
 spwn up --agent neo -w .                    Spawn a world
+spwn down <id>                              Destroy a world (agent survives)
 spwn ls                                     List active worlds
+spwn attach <id>                            Interactive shell into a world
 spwn agent talk neo "do this"               Talk to an agent
 spwn agent dream neo                        Analyze experience, promote playbooks
 spwn agent sleep neo                        Shutdown, consolidate knowledge
 spwn agent fork neo neo-v2                  Clone an agent
+spwn msg send neo --from morpheus "task"    Inter-agent messaging
 spwn snap save <id>                         Snapshot a world
 spwn architect start                        Always-on orchestration daemon
+spwn doctor                                 Check your environment
 ```
 
 Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
