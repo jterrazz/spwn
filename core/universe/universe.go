@@ -63,6 +63,8 @@ type Store = state.Store
 // Re-export manifest types.
 type LifeManifest = manifest.LifeManifest
 type ProfileManifest = manifest.ProfileManifest
+// OrgManifest is deprecated — org.yaml is no longer used.
+// Kept temporarily for migration compatibility.
 type OrgManifest = manifest.OrgManifest
 
 // Re-export state types.
@@ -152,14 +154,9 @@ func ExpandTools(elems []string) []string {
 
 // --- Universe manifest operations ---
 
-// LoadOrg reads and parses the universe manifest from ~/.spwn/org.yaml.
-func LoadOrg() (*OrgManifest, error) { return manifest.LoadOrg() }
-
-// LoadOrgPath reads and parses a universe manifest from the given path.
-func LoadOrgPath(path string) (*OrgManifest, error) { return manifest.LoadOrgPath(path) }
-
-// CreateOrg writes a default universe manifest to ~/.spwn/org.yaml.
-func CreateOrg(name string) error { return manifest.CreateOrg(name) }
+// Deprecated: LoadOrg, LoadOrgPath, CreateOrg are no longer used.
+// org.yaml governance was never enforced; only org.Name was read.
+// Kept for migration 006 compatibility — do not use in new code.
 
 // --- Observatory ---
 
@@ -556,12 +553,6 @@ func GetArchitectDaemonStatus(ctx context.Context) (*ArchitectDaemonInfo, error)
 
 	if info.Running {
 		result.Uptime = time.Since(info.StartedAt)
-	}
-
-	// Load org info if available
-	org, err := manifest.LoadOrg()
-	if err == nil && org != nil {
-		result.OrgName = org.Name
 	}
 
 	return result, nil

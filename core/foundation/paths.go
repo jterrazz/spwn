@@ -41,9 +41,11 @@ func StatePath() string {
 	return filepath.Join(BaseDir(), StateFileName)
 }
 
-// OrgPath returns the path to the universe manifest (org.yaml).
+// OrgPath returns the path to the legacy org.yaml file.
+// Deprecated: org.yaml is no longer created or read. Kept only for
+// migration 006 compatibility.
 func OrgPath() string {
-	return filepath.Join(BaseDir(), OrgFileName)
+	return filepath.Join(BaseDir(), "org.yaml")
 }
 
 // ClawStatePath returns the path to the Claw state file.

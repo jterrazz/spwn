@@ -30,7 +30,6 @@ const (
 	WorldsSubDir      = "worlds"
 	AgentsSubDir      = "agents"
 	StateFileName     = "state.json"
-	OrgFileName       = "org.yaml"
 	ClawStateFileName = "claw.json"
 	SkillsSubDir      = "skills"
 	ClawSubDir        = "claw"

@@ -149,12 +149,6 @@ func runStart(cmd *cobra.Command, args []string) error {
 	s.Info("Container:", "spwn-architect")
 	s.Info("ID:", id[:12])
 
-	// Load org name if available
-	org, _ := universe.LoadOrg()
-	if org != nil {
-		s.Info("Universe:", org.Name)
-	}
-
 	s.Blank()
 	fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint("Status: spwn architect status"))
 	fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint("Stop:   spwn architect stop"))

@@ -13,7 +13,6 @@ import (
 	agentDomain "spwn.sh/core/agent"
 	"spwn.sh/core/foundation"
 	"spwn.sh/core/imagebuilder/probe"
-	"spwn.sh/core/universe"
 	"github.com/spf13/cobra"
 )
 
@@ -73,20 +72,7 @@ and authentication. Reports issues with suggested fixes.`,
 			s.Fail("Config", fmt.Errorf("%s not found", abbreviatePath(baseDir)))
 		}
 
-		// 5. Universe manifest
-		total++
-		if org, err := universe.LoadOrg(); err == nil && org != nil {
-			name := org.Name
-			if name == "" {
-				name = "unnamed"
-			}
-			s.Done("Universe", fmt.Sprintf("org.yaml (%s)", name))
-			passed++
-		} else {
-			s.Fail("Universe", fmt.Errorf("org.yaml not found"))
-		}
-
-		// 6. World configs
+		// 5. World configs
 		total++
 		if configs, ok := countWorldConfigs(); ok {
 			s.Done("World configs", configs)

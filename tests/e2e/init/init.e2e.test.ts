@@ -35,17 +35,6 @@ describe("spwn init", () => {
     expectLine(result.output, /✓ Ready\. Next steps:/);
   });
 
-  test("creates org.yaml", async () => {
-    // WHEN — running spwn init
-    const result = await spwn("init creates org")
-      .exec("init")
-      .run();
-
-    // THEN — org.yaml creation is confirmed in output
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created universe\s+org\.yaml/);
-  });
-
   test("creates a world config", async () => {
     // WHEN — running spwn init
     const result = await spwn("init creates config")
