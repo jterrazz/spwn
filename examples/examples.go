@@ -184,7 +184,29 @@ func Install(slug, baseDir string) (InstallReport, error) {
 			name := e.Name()
 			dst := filepath.Join(agentsRoot, name)
 			if exists(dst) {
-				rep.AgentsSkipped = append(rep.AgentsSkipped, name)
+				// Agent directory exists — but it might be broken
+				// (e.g. created by a previous version that used a
+				// different layout, or partially cleaned up). If
+				// core/persona.md is missing, copy the template's
+				// core/ layer on top without touching user data
+				// like journal/ or knowledge/.
+				corePersona := filepath.Join(dst, "core", "persona.md")
+				if !exists(corePersona) {
+					coreSrc := path(agentsSrc, name, "core")
+					coreDst := filepath.Join(dst, "core")
+					if cperr := copyDirFS(templatesFS, coreSrc, coreDst); cperr == nil {
+						rep.AgentsAdded = append(rep.AgentsAdded, name+" (repaired)")
+					}
+					// Also copy profile.yaml if missing
+					profileDst := filepath.Join(dst, "profile.yaml")
+					if !exists(profileDst) {
+						if data, rerr := templatesFS.ReadFile(path(agentsSrc, name, "profile.yaml")); rerr == nil {
+							_ = os.WriteFile(profileDst, data, 0o644)
+						}
+					}
+				} else {
+					rep.AgentsSkipped = append(rep.AgentsSkipped, name)
+				}
 				continue
 			}
 			if cperr := copyDirFS(templatesFS, path(agentsSrc, name), dst); cperr != nil {

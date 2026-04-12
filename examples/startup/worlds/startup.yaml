@@ -11,4 +11,3 @@ tools:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/node"
-  - "@spwn/python"
