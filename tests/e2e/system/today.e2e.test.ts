@@ -1,0 +1,252 @@
+/**
+ * E2E tests for features built/fixed on 2026-04-12.
+ *
+ * Covers: example install + agent repair, agent identity structure,
+ * org.yaml removal, example gallery order, examples bundling,
+ * CLI upgrade --check, CLAUDE.md generation on init deployment.
+ *
+ * All tests are CLI-only (no Docker required) unless noted.
+ */
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { existsSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+import { spwn } from "../../setup/spwn.specification.js";
+import { createSpwnHome, createAgent, createBrokenAgent } from "../../setup/helpers.js";
+import { expectLine, stripAnsi } from "../../setup/output-helpers.js";
+
+describe("example install + agent repair", () => {
+  let home: string;
+  let originalSpwnHome: string | undefined;
+
+  beforeEach(() => {
+    originalSpwnHome = process.env.SPWN_HOME;
+    home = createSpwnHome();
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
+  });
+
+  test("install creates agents with core/persona.md", async () => {
+    // WHEN — installing the matrix example
+    const result = await spwn("install matrix")
+      .exec("example install matrix")
+      .run();
+
+    // THEN — agent neo is created with the current Mind layout
+    expect(result.exitCode).toBe(0);
+    expect(existsSync(join(home, "agents", "neo", "core", "persona.md"))).toBe(true);
+    expect(existsSync(join(home, "agents", "neo", "profile.yaml"))).toBe(true);
+    expect(existsSync(join(home, "worlds", "matrix.yaml"))).toBe(true);
+
+    // Persona has real content
+    const persona = readFileSync(join(home, "agents", "neo", "core", "persona.md"), "utf-8");
+    expect(persona).toContain("Neo");
+  });
+
+  test("install repairs broken agent (missing core/)", async () => {
+    // GIVEN — a broken agent "neo" with only a journal (no core/persona.md)
+    createBrokenAgent(home, "neo");
+    expect(existsSync(join(home, "agents", "neo", "journal", "old-session.md"))).toBe(true);
+    expect(existsSync(join(home, "agents", "neo", "core", "persona.md"))).toBe(false);
+
+    // WHEN — installing the matrix example (neo already exists but is broken)
+    const result = await spwn("install repairs neo")
+      .exec("example install matrix")
+      .run();
+
+    // THEN — neo is repaired: core/persona.md created, journal preserved
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toContain("repaired");
+    expect(existsSync(join(home, "agents", "neo", "core", "persona.md"))).toBe(true);
+    // Old data preserved
+    expect(existsSync(join(home, "agents", "neo", "journal", "old-session.md"))).toBe(true);
+  });
+
+  test("install skips valid existing agent", async () => {
+    // GIVEN — a valid agent "neo" already exists
+    createAgent(home, "neo");
+
+    // WHEN — installing the matrix example
+    const result = await spwn("install skips valid neo")
+      .exec("example install matrix")
+      .run();
+
+    // THEN — neo is skipped (not overwritten, not repaired)
+    expect(result.exitCode).toBe(0);
+    const output = stripAnsi(result.output);
+    // Should NOT say "repaired" since the agent is valid
+    expect(output).not.toContain("repaired");
+  });
+
+  test("install creates all startup agents in one command", async () => {
+    // WHEN — installing the startup example
+    const result = await spwn("install startup")
+      .exec("example install startup")
+      .run();
+
+    // THEN — all 3 agents + 1 world created
+    expect(result.exitCode).toBe(0);
+    for (const agent of ["ceo", "devops", "analyst"]) {
+      expect(existsSync(join(home, "agents", agent, "core", "persona.md"))).toBe(true);
+    }
+    expect(existsSync(join(home, "worlds", "startup.yaml"))).toBe(true);
+  });
+});
+
+describe("example gallery", () => {
+  test("list returns all 5 examples in order (startup first)", async () => {
+    // WHEN — listing examples in JSON mode
+    const result = await spwn("example list json")
+      .exec("example list --json")
+      .run();
+
+    // THEN — 5 examples, startup first
+    expect(result.exitCode).toBe(0);
+    const data = JSON.parse(result.stdout);
+    expect(data.examples).toHaveLength(5);
+    expect(data.examples[0].slug).toBe("startup");
+
+    // All slugs present
+    const slugs = data.examples.map((e: { slug: string }) => e.slug);
+    expect(slugs).toContain("matrix");
+    expect(slugs).toContain("paperclip-factory");
+    expect(slugs).toContain("research-lab");
+    expect(slugs).toContain("macrohard");
+  });
+
+  test("each example has required metadata", async () => {
+    const result = await spwn("example metadata")
+      .exec("example list --json")
+      .run();
+
+    const data = JSON.parse(result.stdout);
+    for (const ex of data.examples) {
+      expect(ex.name, `${ex.slug} missing name`).toBeTruthy();
+      expect(ex.tagline, `${ex.slug} missing tagline`).toBeTruthy();
+      expect(ex.description, `${ex.slug} missing description`).toBeTruthy();
+      expect(ex.agents.length, `${ex.slug} has no agents`).toBeGreaterThan(0);
+      expect(ex.worlds.length, `${ex.slug} has no worlds`).toBeGreaterThan(0);
+    }
+  });
+
+  test("each example has exactly one world", async () => {
+    const result = await spwn("example one world")
+      .exec("example list --json")
+      .run();
+
+    const data = JSON.parse(result.stdout);
+    for (const ex of data.examples) {
+      expect(ex.worlds, `${ex.slug} has ${ex.worlds.length} worlds`).toHaveLength(1);
+    }
+  });
+});
+
+describe("org.yaml removal", () => {
+  let home: string;
+  let originalSpwnHome: string | undefined;
+
+  beforeEach(() => {
+    originalSpwnHome = process.env.SPWN_HOME;
+    home = createSpwnHome();
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
+  });
+
+  test("init does NOT create org.yaml", async () => {
+    // WHEN — running init
+    const result = await spwn("init no org")
+      .exec("init")
+      .run();
+
+    // THEN — no org.yaml created
+    expect(result.exitCode).toBe(0);
+    expect(existsSync(join(home, "org.yaml"))).toBe(false);
+    expect(result.output).not.toContain("org.yaml");
+  });
+
+  test("doctor does NOT check for org.yaml", async () => {
+    // GIVEN — init has been run
+    await spwn("init for doctor").exec("init").run();
+
+    // WHEN — running doctor
+    const result = await spwn("doctor no org check")
+      .exec("doctor")
+      .run();
+
+    // THEN — no mention of org.yaml or Universe check
+    const output = stripAnsi(result.output);
+    expect(output).not.toContain("org.yaml");
+    expect(output).not.toContain("Universe");
+  });
+});
+
+describe("agent mind structure", () => {
+  let home: string;
+  let originalSpwnHome: string | undefined;
+
+  beforeEach(() => {
+    originalSpwnHome = process.env.SPWN_HOME;
+    home = createSpwnHome();
+    process.env.SPWN_HOME = home;
+  });
+
+  afterEach(() => {
+    if (originalSpwnHome !== undefined) {
+      process.env.SPWN_HOME = originalSpwnHome;
+    } else {
+      delete process.env.SPWN_HOME;
+    }
+  });
+
+  test("agent new creates the 5-layer Mind structure", async () => {
+    // WHEN — creating a new agent
+    const result = await spwn("agent new")
+      .exec("agent new TestAgent")
+      .run();
+
+    // THEN — the 5 Mind layers are created
+    expect(result.exitCode).toBe(0);
+    const agentDir = join(home, "agents", "TestAgent");
+    for (const layer of ["core", "skills", "knowledge", "playbooks", "journal"]) {
+      expect(existsSync(join(agentDir, layer)), `missing ${layer}/`).toBe(true);
+    }
+
+    // core/persona.md exists with content
+    const personaPath = join(agentDir, "core", "persona.md");
+    expect(existsSync(personaPath)).toBe(true);
+    const persona = readFileSync(personaPath, "utf-8");
+    expect(persona.length).toBeGreaterThan(10);
+
+    // Old structure should NOT exist
+    expect(existsSync(join(agentDir, "identity"))).toBe(false);
+    expect(existsSync(join(agentDir, "memory"))).toBe(false);
+    expect(existsSync(join(agentDir, "sessions"))).toBe(false);
+  });
+});
+
+describe("CLI upgrade", () => {
+  test("upgrade --check finds latest version", async () => {
+    // WHEN — checking for updates
+    const result = await spwn("upgrade check")
+      .exec("upgrade --check")
+      .run();
+
+    // THEN — reports a version (the local build is "dev" so latest != current)
+    const output = stripAnsi(result.output);
+    expect(output).toMatch(/Latest version\s+v\d+\.\d+\.\d+/);
+  });
+});

@@ -25,20 +25,30 @@ export function createSpwnHome(): string {
  */
 export function createAgent(spwnHome: string, name: string): void {
   const agentDir = join(spwnHome, "agents", name);
-  const layers = [
-    "identity",
-    "skills",
-    "memory/knowledge",
-    "memory/playbooks",
-    "memory/journal",
-    "sessions",
-  ];
+  // Current Mind layout: core, skills, knowledge, playbooks, journal
+  // (matches foundation.MindLayers)
+  const layers = ["core", "skills", "knowledge", "playbooks", "journal"];
   for (const layer of layers) {
     mkdirSync(join(agentDir, layer), { recursive: true });
   }
   writeFileSync(
-    join(agentDir, "identity", "default.md"),
-    `# ${name}\nYou are a test agent.`,
+    join(agentDir, "core", "persona.md"),
+    `# ${name}\n\nYou are a test agent named ${name}.\n\n## Purpose\n\nTest automation.\n\n## Traits\n\n- Reliable\n- Systematic\n`,
+  );
+  writeFileSync(join(agentDir, "profile.yaml"), `role: worker\n`);
+}
+
+/**
+ * Create a broken/legacy agent with missing core/ layer.
+ * Used to test the install repair flow.
+ */
+export function createBrokenAgent(spwnHome: string, name: string): void {
+  const agentDir = join(spwnHome, "agents", name);
+  mkdirSync(join(agentDir, "journal"), { recursive: true });
+  // No core/persona.md, no profile.yaml — just a journal dir
+  writeFileSync(
+    join(agentDir, "journal", "old-session.md"),
+    "# Old session\nSome work was done.",
   );
 }
 

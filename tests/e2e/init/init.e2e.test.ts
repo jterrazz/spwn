@@ -28,11 +28,12 @@ describe("spwn init", () => {
       .exec("init")
       .run();
 
-    // THEN — exits successfully and outputs structured status lines
+    // THEN — exits successfully, creates config but NOT org.yaml
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created universe\s+org\.yaml/);
     expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
     expectLine(result.output, /✓ Ready\. Next steps:/);
+    // org.yaml was removed — verify it's NOT in the output
+    expect(result.output).not.toContain("org.yaml");
   });
 
   test("creates a world config", async () => {

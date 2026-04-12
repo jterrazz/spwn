@@ -12,6 +12,7 @@ export default defineWorkspace([
         "e2e/dashboard/**/*.e2e.test.ts",
         "e2e/status/**/*.e2e.test.ts",
         "e2e/activity/**/*.e2e.test.ts",
+        "e2e/system/**/*.e2e.test.ts",
       ],
     },
   },
