@@ -27,17 +27,12 @@ func init() {
 	Cmd.Flags().StringVar(&npcTaskCompat, "npc", "", "Run as ephemeral agent (deprecated: use --ephemeral)")
 	_ = Cmd.Flags().MarkHidden("npc")
 
-	defaultAgentHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(agentHelp)
 }
 
-var defaultAgentHelp func(*cobra.Command, []string)
-
 func agentHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "agent" {
-		if defaultAgentHelp != nil {
-			defaultAgentHelp(cmd, args)
-		}
+		ui.MinimalHelp(cmd, args)
 		return
 	}
 

@@ -62,7 +62,6 @@ func init() {
 	rootCmd.Version = Version
 	// Sync CLI version to the shared foundation package so observatory can use it
 	foundation.Version = Version
-	defaultHelpFunc = rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(customHelp)
 
 	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Output as JSON")
@@ -121,48 +120,32 @@ func GetRootCmd() *cobra.Command {
 	return rootCmd
 }
 
-// helpColWidth is the padding width reserved for command names in help output.
-// Wide enough to fit the longest common subcommand; entries longer than this
-// just flow past it — the description still reads left-to-right.
-const helpColWidth = 32
-
 // printHelpCmd prints a command name and description in the help output.
-// If desc is empty, the name is printed without padding.
+// Flush-left; if desc is empty the name is printed without padding.
 func printHelpCmd(w io.Writer, name, desc string) {
 	if desc == "" {
-		fmt.Fprintf(w, "    %s\n", ui.ColorizeHelpName(name))
+		fmt.Fprintf(w, "%s\n", ui.ColorizeHelpName(name))
 		return
 	}
-	fmt.Fprintf(w, "    %s %s\n", ui.PadVisible(ui.ColorizeHelpName(name), helpColWidth), ui.Faint(desc))
+	fmt.Fprintf(w, "%s %s\n", ui.PadVisible(ui.ColorizeHelpName(name), ui.HelpColWidth), ui.Faint(desc))
 }
-
-// printHelpFlag prints a flag and description in the help output.
-func printHelpFlag(w io.Writer, flag, desc string) {
-	fmt.Fprintf(w, "    %s %s\n", ui.PadVisible(ui.Yellow(flag), helpColWidth), ui.Faint(desc))
-}
-
-// defaultHelpFunc stores Cobra's original help function so subcommands
-// can fall back to it.
-var defaultHelpFunc func(*cobra.Command, []string)
 
 // customHelp renders grouped, structured help for the root command.
-// For subcommands, it falls back to Cobra's default help.
+// For subcommands, it falls back to MinimalHelp (flush-left, no padding).
 func customHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "spwn" {
-		if defaultHelpFunc != nil {
-			defaultHelpFunc(cmd, args)
-		}
+		ui.MinimalHelp(cmd, args)
 		return
 	}
 
 	w := cmd.OutOrStdout()
 
 	fmt.Fprintln(w)
-	fmt.Fprintf(w, "  %s %s\n", ui.Strong("⬡ spwn"), ui.Faint("— the building blocks of agent intelligence"))
+	fmt.Fprintf(w, "%s %s\n", ui.Strong("⬡ spwn"), ui.Faint("— the building blocks of agent intelligence"))
 	fmt.Fprintln(w)
 
 	// Quick Start — the 30-second path
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Quick Start:"))
+	fmt.Fprintf(w, "%s\n", ui.Strong("Quick Start:"))
 	printHelpCmd(w, "spwn agent new neo", "Create an agent")
 	printHelpCmd(w, "spwn agent add neo --tool @spwn/python", "")
 	printHelpCmd(w, "spwn up --agent neo -w .", "Spawn a world")
@@ -170,20 +153,20 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	// Entities — the things you create
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Entities:"))
+	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
 	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, show, add, fork, dream, sleep)"))
 	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, show, down, attach, snap)"))
 	fmt.Fprintln(w)
 
 	// Building blocks — the things you compose agents from
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Building blocks:"))
+	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
 	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, install)"))
 	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show)"))
 	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit)"))
 	fmt.Fprintln(w)
 
 	// Shortcuts — the 80% top-level aliases
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Shortcuts:"))
+	fmt.Fprintf(w, "%s\n", ui.Strong("Shortcuts:"))
 	printHelpCmd(w, "up", "Spawn a world "+ui.Faint("(alias: world up)"))
 	printHelpCmd(w, "ls", "List active worlds "+ui.Faint("(alias: world ls)"))
 	printHelpCmd(w, "talk <name>", "Talk to a running agent "+ui.Faint("(alias: agent talk)"))
@@ -193,7 +176,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	// Coordination — multi-agent + orchestration
-	fmt.Fprintf(w, "  %s\n", ui.Strong("Coordination:"))
+	fmt.Fprintf(w, "%s\n", ui.Strong("Coordination:"))
 	printHelpCmd(w, "msg", "Inter-agent messaging "+ui.Faint("(send, inbox, watch)"))
 	printHelpCmd(w, "architect", "Always-on orchestration daemon")
 	printHelpCmd(w, "dash", "Visual dashboard "+ui.Faint("(start, open)"))
@@ -202,7 +185,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	// System
-	fmt.Fprintf(w, "  %s\n", ui.Strong("System:"))
+	fmt.Fprintf(w, "%s\n", ui.Strong("System:"))
 	printHelpCmd(w, "init", "Create default configs")
 	printHelpCmd(w, "doctor", "Check your environment")
 	printHelpCmd(w, "status", "Show running state")
@@ -211,10 +194,10 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	// Global flags
-	fmt.Fprintf(w, "  %s %s\n", ui.Strong("Flags:"),
+	fmt.Fprintf(w, "%s %s\n", ui.Strong("Flags:"),
 		ui.Faint("--json · -q/--quiet · -v/--verbose · --version"))
 	fmt.Fprintln(w)
 
-	fmt.Fprintf(w, "  %s\n", ui.Faint("Run \"spwn <command> --help\" for details."))
+	fmt.Fprintf(w, "%s\n", ui.Faint("Run \"spwn <command> --help\" for details."))
 	fmt.Fprintln(w)
 }

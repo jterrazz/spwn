@@ -36,18 +36,13 @@ func init() {
 	Cmd.Flags().StringArrayVar(&spawnGate, "gate", nil, `Bridge tool from Host: "source:as:cap1,cap2"`)
 	Cmd.Flags().StringVar(&spawnRuntime, "runtime", "claude-code", "Agent runtime (claude-code, pi, codex, opencode, gemini, aider)")
 
-	defaultWorldHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(worldHelp)
 }
-
-var defaultWorldHelp func(*cobra.Command, []string)
 
 func worldHelp(cmd *cobra.Command, args []string) {
 	// Only override help for the parent "world" command itself
 	if cmd.Name() != "world" {
-		if defaultWorldHelp != nil {
-			defaultWorldHelp(cmd, args)
-		}
+		ui.MinimalHelp(cmd, args)
 		return
 	}
 

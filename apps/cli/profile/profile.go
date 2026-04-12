@@ -29,8 +29,6 @@ Attach one to an agent with:
   spwn agent add <agent> --profile <profile-name>`,
 }
 
-var defaultProfileHelp func(*cobra.Command, []string)
-
 func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(newCmd)
@@ -40,15 +38,12 @@ func init() {
 	Cmd.AddCommand(publishCmd)
 	Cmd.AddCommand(rmCmd)
 
-	defaultProfileHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(profileHelp)
 }
 
 func profileHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "profile" {
-		if defaultProfileHelp != nil {
-			defaultProfileHelp(cmd, args)
-		}
+		ui.MinimalHelp(cmd, args)
 		return
 	}
 	w := cmd.OutOrStdout()

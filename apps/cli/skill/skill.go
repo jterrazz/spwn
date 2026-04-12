@@ -26,8 +26,6 @@ Attach one to an agent with:
   spwn agent add <agent> --skill <skill-name>`,
 }
 
-var defaultSkillHelp func(*cobra.Command, []string)
-
 func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(newCmd)
@@ -37,15 +35,12 @@ func init() {
 	Cmd.AddCommand(publishCmd)
 	Cmd.AddCommand(rmCmd)
 
-	defaultSkillHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(skillHelp)
 }
 
 func skillHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "skill" {
-		if defaultSkillHelp != nil {
-			defaultSkillHelp(cmd, args)
-		}
+		ui.MinimalHelp(cmd, args)
 		return
 	}
 	w := cmd.OutOrStdout()

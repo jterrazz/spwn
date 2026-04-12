@@ -26,8 +26,6 @@ If a tool isn't in an agent's composition, it's physically absent from that
 agent's world — not forbidden, absent.`,
 }
 
-var defaultToolHelp func(*cobra.Command, []string)
-
 func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(showCmd)
@@ -36,15 +34,12 @@ func init() {
 	Cmd.AddCommand(rmCmd)
 	Cmd.AddCommand(publishCmd)
 
-	defaultToolHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(toolHelp)
 }
 
 func toolHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "tool" {
-		if defaultToolHelp != nil {
-			defaultToolHelp(cmd, args)
-		}
+		ui.MinimalHelp(cmd, args)
 		return
 	}
 	w := cmd.OutOrStdout()
