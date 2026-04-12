@@ -1,12 +1,5 @@
 # Startup — one world for the whole company.
 
-physics:
-  constants:
-    cpu: 4
-    memory: 4g
-    disk: 8g
-    timeout: 4h
-
 tools:
   - "@spwn/unix"
   - "@spwn/git"

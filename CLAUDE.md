@@ -1,8 +1,8 @@
 # Spwn — Project Conventions
 
-## Core Principle: The Control Plane for AI Agents
+## Core Principle: The Building Blocks of Agent Intelligence
 
-Spwn is the **control plane for AI agents** — bringing order to agent chaos. Isolated worlds, persistent identity, physics-based security, multi-agent collaboration. Every layer is an interface (port) with swappable adapters. If a tool dies tomorrow, swap one adapter. Core logic never changes.
+Spwn is the **operating system for autonomous agent worlds**. Compose tools, skills, and profiles into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work. Every layer is an interface (port) with swappable adapters. If a tool dies tomorrow, swap one adapter. Core logic never changes.
 
 ### The 8 Ports
 
@@ -11,122 +11,134 @@ Spwn is the **control plane for AI agents** — bringing order to agent chaos. I
 | **Runtime** | How agents think | Claude Code (ACP) |
 | **Provider** | Which LLM | Anthropic |
 | **Channel** | How Architect talks to outside | CLI |
-| **Backend** | Where universes run | Docker |
-| **Memory** | How profiles persist | Filesystem (markdown) |
+| **Backend** | Where worlds run | Docker |
+| **Memory** | How agents persist | Filesystem (markdown) |
 | **Store** | How state is tracked | JSON file |
 | **Tool** | What agents can do | Built-in + MCP |
 | **Skill** | Reusable capabilities | Local files |
 
 ## Vocabulary
 
-### The Hierarchy
-- **Architect**: The always-on orchestration daemon (ZeroClaw implementation). Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
-- **Universe**: The reality — physics, constants, resource limits. One per org. Configured in `universe.yaml`. Defines what is physically possible.
-- **World**: A living workspace inside the universe. Has agents, elements, and a project. Many per universe. Configured in `~/.spwn/worlds/`.
-- **Leader**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
-- **Worker**: Persistent worker agent. Has a Profile — remembers, learns, evolves.
-- **Ephemeral**: Ephemeral agent. No Profile, no memory. Single task, fire & forget.
-- **Desktop App**: Visual dashboard. Real-time view of everything.
+### Entities
+- **Agent**: A persistent mind. Composed from tools, skills, and a profile. Has identity, memory, and evolution history. The main thing you create and ship.
+- **World**: A runtime instance. Ephemeral. Where an agent actually runs — Docker container with filesystem, tools, and lifecycle. Dies when stopped.
+- **Architect**: The always-on orchestration daemon. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 
-### The Physics
-- **Physics**: Constants (CPU, memory, timeout), laws (network, max-processes), elements (@spwn/unix, @spwn/git, jq).
-- **Elements**: Building blocks. @packs expand to collections. If not listed, doesn't exist.
-- **Faculties**: Verified elements + gate bridges, auto-generated as `/world/faculties.md`.
+### Building blocks (composable, reusable)
+- **Tool**: A reusable tool pack (`@spwn/unix`, `@spwn/python`). Plugs into an agent as a capability. If not listed in an agent, it doesn't exist in its world.
+- **Skill**: A reusable procedure, playbook, or piece of knowledge. Authored in markdown, shared across agents.
+- **Profile**: A reusable personality template. Role, tone, purpose, behavior. Agents inherit a profile for their baseline personality.
 
-### The Profile
-- **Profile**: Persistent identity (the Mind) — 5 layers: core, skills, knowledge, playbooks, journal.
-- **Core**: Character definition — persona.md with role, style, purpose, behavior. Lives in `core/` directory.
-- **Profile Manifest**: `profile.yaml` — declares team, role, engine, delegation rules.
+### Agent internals
+- **Identity**: Immutable core — purpose, traits, bonds. Never changes, even across forks.
+- **Memory**: Journal, sessions, and knowledge. Persists across worlds, grows with experience.
+- **Composition**: An agent's active tools + skills + profile declared in `agent.yaml`.
 
-### The Bridge
-- **Gate**: Bridge between universe and host. Host-side (Go) manages element bridging. Container-side (Rivet) normalizes runtimes.
+### Hierarchy (inside a world — "coming soon" on landing page)
+- **Chief**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
+- **Worker**: Persistent worker agent. Has its own identity and memory.
+- **NPC**: Ephemeral agent. No persistent memory. Single task, fire & forget.
+
+### Bridge
+- **Gate**: Bridge between world and host. Host-side (Go) manages tool bridging. Container-side (Rivet) normalizes runtimes.
 - **Rivet**: Runtime normalization layer. One API across all agent runtimes. Event streaming, session persistence.
 
 ### Evolution
-- **Dream**: Analyze experience → discover patterns → promote successes to playbooks (auto-reflexion.md). `spwn agent dream <name>`
+- **Dream**: Analyze experience → discover patterns → promote successes to playbooks. `spwn agent dream <name>`
 - **Sleep**: Graceful shutdown — save state, consolidate, prune. `spwn agent sleep <name>`
-- **Forking**: Clone an agent from source to target. `spwn agent fork`
+- **Fork**: Clone an agent with everything it knows. `spwn agent fork <src> <dst>`
 
 ## CLI Commands
 
+**Grammar: `spwn <noun> <verb>`.** Three shortcuts for the 80% cases: `spwn up`, `spwn ls`, `spwn talk`.
+
 ```bash
-# World operations (top-level)
-spwn up --agent neo -w ./my-project --detach   # Spawn a world
-spwn up -c acme-org                            # Named config
-spwn up --leader morpheus -w ~/acme-org
-spwn ls                                        # List active worlds
-spwn inspect <id>                              # Show world details
-spwn down <id>                                 # Destroy a world
-spwn logs <id>                                 # Stream agent output
-spwn attach <id>                               # Interactive shell
+# ── Shortcuts ─────────────────────────────────────────────────────
+spwn up --agent neo -w ./my-project            # Spawn a world (alias for `spwn world up`)
+spwn ls                                        # List active worlds (alias for `spwn world ls`)
+spwn talk neo "what is this project?"          # Talk to an agent (alias for `spwn agent talk`)
 
-# Agent management — "Profile is the passport. Agent is the person."
-spwn agent new <name>                          # Create a new agent
-spwn agent ls                                  # List all agents
-spwn agent rm <name>                           # Remove an agent
-spwn agent talk <name> [message]               # Talk to a running agent
-spwn agent dream <name>                        # Analyze experience, discover patterns, promote playbooks
-spwn agent sleep <name>                        # Shutdown — save state, consolidate, archive
-spwn agent fork <src> <dst>                    # Clone an agent
-spwn agent export <name>                       # Export agent as tar.gz
-spwn agent import <file>                       # Import agent from tar.gz
+# ── Agents (the composed mind) ────────────────────────────────────
+spwn agent new neo                             # Create a blank agent
+spwn agent new neo --from @community/sci       # Fork from a shared agent
+spwn agent ls                                  # List agents
+spwn agent show neo                            # Inspect composition
+spwn agent rm neo                              # Delete agent (also: `rm neo --tool X` removes a block)
+spwn agent fork neo neo-v2                     # Clone + evolve independently
+spwn agent publish neo                         # Ship to registry (memory stripped)
+spwn agent pull @community/curie               # Install a shared agent
 
-# Profile (character sheet — the passport, not the person)
-spwn profile <name>                            # Show full character sheet
-spwn profile <name> purpose                    # Show/edit purpose
-spwn profile <name> traits                     # Show/edit traits
-spwn profile <name> persona                    # Show/edit persona
-spwn profile <name> bonds                      # Show/edit bonds
-spwn profile <name> skills                     # List skills
-spwn profile <name> playbooks                  # List playbooks
-spwn profile <name> knowledge                  # List knowledge
-spwn profile <name> journal                    # Session history
-spwn profile <name> sessions                   # Active sessions
-spwn profile <name> edit                       # Edit profile.yaml
-spwn profile <name> role                       # Show/set agent role
-spwn profile <name> engine                     # Show/set runtime engine
+# Compose capabilities onto an agent
+spwn agent add neo --tool @spwn/python         # Add a tool block
+spwn agent add neo --skill paper-reading       # Add a skill block
+spwn agent add neo --profile researcher        # Apply a profile
+spwn agent rm  neo --tool @spwn/python         # Remove a block
 
-# Messaging
-spwn msg send <agent> --from <sender> "msg"    # Send message to agent
-spwn msg inbox <agent>                         # Show inbox messages
-spwn msg watch <agent>                         # Watch for new messages
+# Evolution
+spwn agent dream neo                           # Analyze experience, promote playbooks
+spwn agent sleep neo                           # Consolidate memory, prune stale strategies
+spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`
 
-# Snapshots
-spwn snap save <id>                            # Save world state
-spwn snap ls                                   # List snapshots
-spwn snap restore <snap>                       # Restore from snapshot
-spwn snap rm <snap>                            # Remove a snapshot
+# ── Worlds (runtime instances) ────────────────────────────────────
+spwn world up --agent neo -w ./project         # Full form of `spwn up`
+spwn world ls                                  # Full form of `spwn ls`
+spwn world show <id>                           # Inspect a running world
+spwn world down <id>                           # Destroy world (agent survives)
+spwn world attach <id>                         # Interactive shell
+spwn world snap <id>                           # Snapshot
+spwn world restore <snap-id>                   # Rollback
 
-# Architect (your always-on world builder)
-spwn architect start                           # Start the Architect daemon
-spwn architect stop                            # Stop the Architect daemon
-spwn architect status                          # Show status, channels, active worlds
-spwn architect connect <channel>               # Connect to a messaging channel
+# ── Tools (composable blocks) ─────────────────────────────────────
+spwn tool ls                                   # Installed tool packs
+spwn tool show @spwn/python                    # Inspect a tool
+spwn tool search python                        # Search the registry
+spwn tool install @spwn/python                 # Install a tool pack
+spwn tool rm @spwn/python                      # Uninstall
+spwn tool publish ./my-tool                    # Ship to registry
 
-# Dashboard
-spwn dash start                                # Start the dashboard server
-spwn dash open                                 # Open in browser
+# ── Skills (composable blocks) ────────────────────────────────────
+spwn skill ls
+spwn skill new paper-reading                   # Author a new skill
+spwn skill edit paper-reading                  # Open in $EDITOR
+spwn skill show paper-reading
+spwn skill publish paper-reading
+spwn skill install @community/rust-review
+spwn skill rm paper-reading
 
-# Marketplace
-spwn get install <name>                        # Install a package
-spwn get ls                                    # List installed packages
-spwn get search <query>                        # Search the marketplace
-spwn get rm <name>                             # Remove a package
+# ── Profiles (composable blocks — personality templates) ──────────
+spwn profile ls
+spwn profile new researcher
+spwn profile edit researcher
+spwn profile show researcher
+spwn profile publish researcher
+spwn profile install @community/pragmatic-dev
+spwn profile rm researcher
 
-# Authentication
-spwn auth login                                # Login
-spwn auth logout                               # Logout
-spwn auth token                                # Show/manage tokens
+# ── Messaging ─────────────────────────────────────────────────────
+spwn msg send neo --from morpheus "task"       # Inter-agent messaging
+spwn msg ls neo                                # Neo's inbox
+spwn msg show <msg-id>
 
-# Ephemeral agent
-spwn agent --ephemeral "task" --world w-acme-84721
+# ── Architect (always-on orchestration daemon) ────────────────────
+spwn architect start
+spwn architect stop
+spwn architect status
+spwn architect connect <channel>
+
+# ── Dashboard ─────────────────────────────────────────────────────
+spwn dash start
+spwn dash open
+
+# ── System ────────────────────────────────────────────────────────
+spwn doctor                                    # Check environment
+spwn auth login / logout / token
 ```
 
 **Design rules:**
-- `spwn` IS the verb — no "create" or "spawn" subcommand
-- Top-level commands for world operations: up, down, ls, logs, attach, inspect
-- Config name via `-c` flag, agent name via `-n` flag (not positional — avoids conflict with subcommands)
-- Global flags: `--json`, `--quiet`/`-q`, `--verbose`/`-v`
+- Strict noun-first grammar: `spwn <noun> <verb>`. Three shortcuts exist: `up`, `ls`, `talk`. No other top-level verbs.
+- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --tool X` removes a block from it.
+- Agent/tool/skill/profile names via positional args; flags for composition (`--tool`, `--skill`, `--profile`).
+- Global flags: `--json`, `--quiet`/`-q`, `--verbose`/`-v`, `-w` (workspace path for world spawning).
 
 ## IDs
 
@@ -142,21 +154,21 @@ spwn agent --ephemeral "task" --world w-acme-84721
 │   ├── state.json           # Active worlds, channels
 │   └── claw.yaml            # Claw runtime config
 ├── worlds/
-│   └── default.yaml         # World configs
+│   └── default.yaml         # World configs (tools available at runtime)
 ├── agents/
-│   └── Neo/
-│       ├── profile.yaml     # Team, role, engine, delegation rules
-│       ├── core/            # persona.md — role, style, purpose, behavior
+│   └── neo/
+│       ├── agent.yaml       # Composition — tools, skills, profile, runtime
+│       ├── profile.md       # Personality — role, style, purpose, behavior
 │       ├── skills/          # Procedures, checklists
 │       ├── knowledge/       # Facts, codebase info
 │       ├── playbooks/       # Step-by-step workflows promoted from experience
 │       └── journal/         # Session logs per world
-└── skills/
-    ├── local/               # Custom skills
-    └── marketplace/         # Downloaded from marketplace
+├── tools/                   # Installed tool packs
+├── skills/                  # Authored and installed skill files
+└── profiles/                # Authored and installed profile templates
 ```
 
-**Config hierarchy:** `world.yaml` → `profile.yaml`. World defines physics, profile defines identity.
+**Config hierarchy:** `agent.yaml` declares composition (tools + skills + profile + runtime). `world.yaml` declares the runtime environment. An agent runs in a world.
 
 ## Repository Structure
 
@@ -337,7 +349,7 @@ Spwn follows a **spec-first** development process:
 The E2E test suite is the behavioral specification of spwn. Each test describes a user-visible behavior:
 
 ```go
-// GIVEN a universe with a chief and two workers
+// GIVEN a world with a chief and two workers
 // WHEN the chief delegates a task
 // THEN both workers receive work
 // AND the chief aggregates results

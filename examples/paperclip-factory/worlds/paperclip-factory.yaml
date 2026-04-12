@@ -1,13 +1,6 @@
-# Paperclip Factory — single-agent automation workshop
+# Paperclip Factory — single-agent automation workshop.
 #
 # Shipped by the spwn examples gallery. Edit freely; your changes stay.
-
-physics:
-  constants:
-    cpu: 2
-    memory: 2g
-    disk: 4g
-    timeout: 2h
 
 tools:
   - "@spwn/unix"

@@ -10,7 +10,7 @@ This example showcases **multi-agent hierarchy with messaging** — a leader age
 
 | Component | Details |
 |---|---|
-| **World** | `macrohard` — 4 CPU, 4 GB RAM, 8 GB disk, 4h timeout |
+| **World** | `macrohard` — Docker-isolated workspace |
 | **Tools** | Unix, Git, Node.js 20, Python 3 |
 | **Agent: ballmer** | Chief role. The product manager. Decomposes tasks, assigns work, reviews results. Energetic, decisive, results-obsessed. |
 | **Agent: gates** | Worker role. The architect. Careful, systematic, thinks before coding. Writes clean, documented code. |
@@ -32,10 +32,10 @@ spwn example install macrohard
 
 ```bash
 # Start the company — Ballmer leads, Gates and Nadella build
-spwn up -c macrohard --leader ballmer --agent gates --agent nadella
+spwn up -c macrohard --agent ballmer --agent gates --agent nadella
 
 # Mount a real project for them to work on
-spwn up -c macrohard --leader ballmer --agent gates --agent nadella -w ./my-project
+spwn up -c macrohard --agent ballmer --agent gates --agent nadella -w ./my-project
 ```
 
 ## Explore

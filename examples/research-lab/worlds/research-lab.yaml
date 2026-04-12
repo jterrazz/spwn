@@ -1,12 +1,5 @@
 # Research Lab — patient, hypothesis-driven agent with a lab notebook.
 
-physics:
-  constants:
-    cpu: 2
-    memory: 2g
-    disk: 4g
-    timeout: 4h
-
 tools:
   - "@spwn/unix"
   - "@spwn/git"

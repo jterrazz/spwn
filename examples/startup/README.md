@@ -34,10 +34,10 @@ This copies the world config and all three agent profiles into `~/.spwn/`. Nothi
 
 ```bash
 # Start the world with all three agents
-spwn up -c startup --leader ceo --agent devops --agent analyst
+spwn up -c startup --agent ceo --agent devops --agent analyst
 
 # Or mount your own project into the world
-spwn up -c startup --leader ceo --agent devops --agent analyst -w ./my-project
+spwn up -c startup --agent ceo --agent devops --agent analyst -w ./my-project
 ```
 
 ## Explore

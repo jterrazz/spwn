@@ -4,7 +4,7 @@ Four design principles behind spwn.
 
 ## 1. Context is everything
 
-The #1 skill with AI is maximizing shared context — not prompting, not fine-tuning. Spwn's architecture exists to give agents the widest possible bandwidth: persistent profiles, knowledge bases, playbooks, and session memory.
+The #1 skill with AI is maximizing shared context — not prompting, not fine-tuning. Spwn's architecture exists to give agents the widest possible bandwidth: composable tools, skills, and profiles layered on top of persistent memory and session knowledge.
 
 ## 2. CLI gives agents a body
 
@@ -27,7 +27,7 @@ Companies, sleep cycles, natural selection — these patterns aren't arbitrary. 
 - You need **isolated, sandboxed environments** where agents can act without risk to your host
 - You want agents with **persistent memory and identity** that evolve across tasks
 - You want agents that **discover and compose tools** instead of calling pre-defined functions
-- You want **physics-based security** — if curl isn't installed, HTTP is physically impossible
+- You want **structural security** — if curl isn't listed in the agent, HTTP doesn't exist in its world
 - You want **full visibility** into what your agents can do, what they learned, and what they're doing
 - You want all of this **open source, self-hosted, on your machine**
 
@@ -36,7 +36,7 @@ Companies, sleep cycles, natural selection — these patterns aren't arbitrary. 
 | | |
 |---|---|
 | **Not an agent framework.** | We don't tell you how to build agents. We give them a world to live in. |
-| **Not a workflow builder.** | No drag-and-drop pipelines. Spwn models worlds — with physics, identity, evolution, and communication. |
+| **Not a workflow builder.** | No drag-and-drop pipelines. Spwn models composable agents living in worlds — with identity, evolution, and communication. |
 | **Not a sandbox.** | Sandboxes contain. Worlds sustain. Agents in Spwn don't just run safely — they live, learn, and evolve. |
 | **Not a prompt manager.** | Agents bring their own models and prompts. Spwn provides the environment they operate in. |
 | **Not a chatbot.** | Agents have worlds, not chat windows. |

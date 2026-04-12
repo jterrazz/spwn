@@ -8,7 +8,7 @@ description: |
 
   What you get:
     - One ephemeral world pre-configured with Unix, Git and Node tools
-    - One worker agent ("clippy") with a persona tuned for relentless automation
+    - One worker agent ("clippy") with a profile tuned for relentless automation
     - Ready to chat the moment it's installed
 
 agents:

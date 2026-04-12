@@ -10,7 +10,7 @@ Multi-module Go monorepo with Ports and Adapters architecture. 8 port interfaces
 | Provider | Which LLM | Anthropic |
 | Backend | Where worlds run | Docker |
 | Channel | External communication | CLI |
-| Memory | How profiles persist | Filesystem (markdown) |
+| Memory | How agents persist | Filesystem (markdown) |
 | Store | How state is tracked | JSON file |
 | Tool | What agents can do | Built-in + MCP |
 | Skill | Reusable capabilities | Local files |
@@ -35,7 +35,7 @@ spwn/
 ├── core/                       Domain libraries
 │   ├── universe/                 World management, ports & adapters
 │   ├── imagebuilder/             Composable Docker images, tool catalog
-│   ├── agent/                    Agent lifecycle, profile, evolution
+│   ├── agent/                    Agent lifecycle, composition, evolution
 │   ├── gate/                     Host-container bridge
 │   ├── messenger/                Inter-agent messaging
 │   └── foundation/               Primitives (paths, IDs, constants)
@@ -59,7 +59,7 @@ spwn/
 - ✅ Pluggable runtime adapters (Claude Code, Pi, Aider)
 - ✅ Activity log and audit trail
 - ✅ Composable tool catalog with imagebuilder
-- ⚪ Marketplace — share and import world templates, tool packs
+- ⚪ Marketplace — share and import agents, tool packs, skills, profiles
 - ⚪ Cloud-hosted worlds
-- ⚪ Multi-universe federation
+- ⚪ Multi-org federation
 - ⚪ Mobile app
