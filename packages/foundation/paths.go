@@ -1,20 +1,14 @@
 package foundation
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
 
-// BaseDir returns the path to ~/.spwn/.
-// If SPWN_HOME is set, it overrides the default (used for test isolation).
-// Falls back to UNIVERSE_HOME (deprecated) for backward compatibility.
+// BaseDir returns the path to ~/.spwn/. If SPWN_HOME is set, it
+// overrides the default (used for test isolation).
 func BaseDir() string {
 	if dir := os.Getenv("SPWN_HOME"); dir != "" {
-		return dir
-	}
-	if dir := os.Getenv("UNIVERSE_HOME"); dir != "" {
-		fmt.Fprintln(os.Stderr, "warning: UNIVERSE_HOME is deprecated, use SPWN_HOME instead")
 		return dir
 	}
 	home, _ := os.UserHomeDir()

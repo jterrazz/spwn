@@ -53,7 +53,7 @@ class SpwnAPI {
     const body: Record<string, unknown> = { config };
     if (agent) body.agent = agent;
     if (agents) body.agents = agents;
-    return this.post<{ Universe: { id: string } }>("/api/worlds", body);
+    return this.post<{ World: { id: string } }>("/api/worlds", body);
   }
 
   /** Destroy a world */

@@ -12,7 +12,7 @@ import (
 
 	agentDomain "spwn.sh/packages/agent"
 	"spwn.sh/packages/foundation/auth"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -59,7 +59,7 @@ If no message is provided, opens an interactive session inside the container.`,
 			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent new %s", name, name)
 		}
 
-		containerID, worldID, world, arc, err := findAgentContainer(name, talkWorldID)
+		containerID, worldID, w, arc, err := findAgentContainer(name, talkWorldID)
 		if err != nil {
 			return err
 		}
@@ -78,8 +78,8 @@ If no message is provided, opens an interactive session inside the container.`,
 			sessionID = arc.GetSessionID(worldID, name)
 		}
 
-		_ = world // world record kept for future use; runtime config no longer needs MindPath
-		runtimeCmd, rtErr := universe.BuildRuntimeCommand("claude-code", universe.RuntimeSpawnConfig{
+		_ = w // world record kept for future use; runtime config no longer needs MindPath
+		runtimeCmd, rtErr := world.BuildRuntimeCommand("claude-code", world.RuntimeSpawnConfig{
 			AgentName: name,
 			WorldID:   worldID,
 			Prompt:    message,
@@ -244,10 +244,10 @@ func isContainerRunning(containerID string) bool {
 }
 
 // findAgentContainer returns containerID, worldID, world record, and architect.
-func findAgentContainer(agentName, worldID string) (string, string, *universe.World, *universe.Architect, error) {
+func findAgentContainer(agentName, worldID string) (string, string, *world.World, *world.Architect, error) {
 	ctx := context.Background()
 
-	arc, err := universe.NewArchitectFromEnv()
+	arc, err := world.NewArchitectFromEnv()
 	if err != nil {
 		if strings.Contains(err.Error(), "cannot connect to Docker") {
 			return "", "", nil, nil, fmt.Errorf("Docker is not running")
@@ -274,7 +274,7 @@ func findAgentContainer(agentName, worldID string) (string, string, *universe.Wo
 	return cID, foundWorldID, nil, arc, nil
 }
 
-func worldHasAgent(u universe.World, agentName string) bool {
+func worldHasAgent(u world.World, agentName string) bool {
 	if u.Agent == agentName {
 		return true
 	}
@@ -287,7 +287,7 @@ func worldHasAgent(u universe.World, agentName string) bool {
 }
 
 func routeAgentToWorld(
-	worlds []universe.World,
+	worlds []world.World,
 	agentName, worldID string,
 	isRunning func(containerID string) bool,
 ) (string, string, error) {

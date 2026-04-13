@@ -13,7 +13,7 @@ require (
 	spwn.sh/packages/imagebuilder v0.0.0
 	spwn.sh/packages/messenger v0.0.0
 	spwn.sh/packages/migration v0.0.0
-	spwn.sh/packages/universe v0.0.0
+	spwn.sh/packages/world v0.0.0
 	spwn.sh/examples v0.0.0
 )
 
@@ -54,6 +54,6 @@ replace (
 	spwn.sh/packages/imagebuilder => ../../packages/imagebuilder
 	spwn.sh/packages/messenger => ../../packages/messenger
 	spwn.sh/packages/migration => ../../packages/migration
-	spwn.sh/packages/universe => ../../packages/universe
+	spwn.sh/packages/world => ../../packages/world
 	spwn.sh/examples => ../../examples
 )

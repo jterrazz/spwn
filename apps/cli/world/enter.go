@@ -3,7 +3,7 @@ package world
 import (
 	"context"
 
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ var enterCmd = &cobra.Command{
 		worldID := args[0]
 		s := newStepper(cmd)
 
-		arc, err := universe.NewArchitectFromEnv()
+		arc, err := world.NewArchitectFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}

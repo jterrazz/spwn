@@ -61,7 +61,7 @@ describe("colony E2E", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    const roster = ctx.universe(id).readFile("/world/roster.md");
+    const roster = ctx.world(id).readFile("/world/roster.md");
     expect(roster).toContain("morpheus");
     expect(roster).toContain("neo");
     expect(roster.toLowerCase()).toContain("chief");
@@ -117,7 +117,7 @@ describe("colony E2E", () => {
       "check inbox persistence",
     ]);
 
-    ctx.universe(id).toHaveDirectory("/world/inbox/neo");
+    ctx.world(id).toHaveDirectory("/world/inbox/neo");
   });
 
   // ── Both agent dirs visible in container ──────────────────
@@ -145,14 +145,14 @@ describe("colony E2E", () => {
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(COLONY_FLAGS(ctx.home), 60_000);
     const id = parseWorldId(spawnResult.output)!;
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     const destroyResult = ctx.spwn(["down", id], 30_000);
 
     expect(destroyResult.exitCode).toBe(0);
     expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
-    ctx.universe(id).toNotExist();
+    ctx.world(id).toNotExist();
 
     const listResult = ctx.spwn(["ls"]);
     expectNoLine(

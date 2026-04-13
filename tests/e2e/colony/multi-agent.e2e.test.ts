@@ -62,14 +62,14 @@ describe("colony multi-agent", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     const destroyResult = ctx.spwn(["world", "destroy", id], 30_000);
 
     expect(destroyResult.exitCode).toBe(0);
     expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
-    ctx.universe(id).toNotExist();
+    ctx.world(id).toNotExist();
 
     const listResult = ctx.spwn(["world", "list"]);
     expectNoLine(

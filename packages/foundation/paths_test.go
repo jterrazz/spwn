@@ -8,7 +8,6 @@ import (
 
 func TestBaseDir_WithSpwnHome(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	got := BaseDir()
 	if got != "/tmp/test-spwn" {
@@ -16,29 +15,8 @@ func TestBaseDir_WithSpwnHome(t *testing.T) {
 	}
 }
 
-func TestBaseDir_WithUniverseHomeFallback(t *testing.T) {
-	t.Setenv("SPWN_HOME", "")
-	t.Setenv("UNIVERSE_HOME", "/tmp/test-universe")
-
-	got := BaseDir()
-	if got != "/tmp/test-universe" {
-		t.Errorf("BaseDir() = %q, want %q", got, "/tmp/test-universe")
-	}
-}
-
-func TestBaseDir_SpwnHomeTakesPrecedence(t *testing.T) {
-	t.Setenv("SPWN_HOME", "/tmp/spwn-wins")
-	t.Setenv("UNIVERSE_HOME", "/tmp/universe-loses")
-
-	got := BaseDir()
-	if got != "/tmp/spwn-wins" {
-		t.Errorf("BaseDir() = %q, want %q when both envs set", got, "/tmp/spwn-wins")
-	}
-}
-
 func TestBaseDir_DefaultPath(t *testing.T) {
 	t.Setenv("SPWN_HOME", "")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -54,7 +32,6 @@ func TestBaseDir_DefaultPath(t *testing.T) {
 
 func TestWorldsDir(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	want := "/tmp/test-spwn/worlds"
 	got := WorldsDir()
@@ -65,7 +42,6 @@ func TestWorldsDir(t *testing.T) {
 
 func TestAgentsDir(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	want := "/tmp/test-spwn/agents"
 	got := AgentsDir()
@@ -76,7 +52,6 @@ func TestAgentsDir(t *testing.T) {
 
 func TestStatePath(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	want := "/tmp/test-spwn/state.json"
 	got := StatePath()
@@ -87,7 +62,6 @@ func TestStatePath(t *testing.T) {
 
 func TestOrgPath(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	want := "/tmp/test-spwn/org.yaml"
 	got := OrgPath()
@@ -98,7 +72,6 @@ func TestOrgPath(t *testing.T) {
 
 func TestClawStatePath(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	want := "/tmp/test-spwn/claw/claw.json"
 	got := ClawStatePath()
@@ -109,7 +82,6 @@ func TestClawStatePath(t *testing.T) {
 
 func TestSkillsDir(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-	t.Setenv("UNIVERSE_HOME", "")
 
 	want := "/tmp/test-spwn/skills"
 	got := SkillsDir()

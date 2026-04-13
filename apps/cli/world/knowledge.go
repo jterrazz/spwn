@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -90,7 +90,7 @@ var knowledgeShowCmd = &cobra.Command{
 }
 
 func resolveWorldContainer(worldID string) (string, error) {
-	arc, err := universe.NewArchitectFromEnv()
+	arc, err := world.NewArchitectFromEnv()
 	if err != nil {
 		return "", dockerHint(err)
 	}

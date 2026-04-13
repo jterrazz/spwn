@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 )
 
 // These tests pin the routing rules for "talk to agent X in world Y". The
@@ -18,8 +18,8 @@ func running(_ string) bool  { return true }
 func stopped(_ string) bool  { return false }
 func onlyA(id string) bool   { return id == "cA" }
 
-func makeWorld(id, container, agent string) universe.World {
-	return universe.World{ID: id, ContainerID: container, Agent: agent}
+func makeWorld(id, container, agent string) world.World {
+	return world.World{ID: id, ContainerID: container, Agent: agent}
 }
 
 func TestRouteAgentToWorld_PinnedWinsWhenMultipleShareAgentName(t *testing.T) {
@@ -27,7 +27,7 @@ func TestRouteAgentToWorld_PinnedWinsWhenMultipleShareAgentName(t *testing.T) {
 	// Without a pin, `findAgentContainer` would return the first match
 	// ("matrix") regardless of which world the user meant. With a pin to
 	// "the-test", it must return "the-test".
-	worlds := []universe.World{
+	worlds := []world.World{
 		makeWorld("w-matrix", "cMatrix", "qa"),
 		makeWorld("w-terra", "cTerra", "qa"),
 		makeWorld("w-eris", "cEris", "qa"),
@@ -50,7 +50,7 @@ func TestRouteAgentToWorld_PinnedWinsWhenMultipleShareAgentName(t *testing.T) {
 func TestRouteAgentToWorld_UnpinnedReturnsFirstRunning(t *testing.T) {
 	// Legacy "unpinned" behavior is still supported for CLI use from outside
 	// the UI. Takes the first running world that has the agent.
-	worlds := []universe.World{
+	worlds := []world.World{
 		makeWorld("w-first", "cA", "qa"),
 		makeWorld("w-second", "cB", "qa"),
 	}
@@ -64,7 +64,7 @@ func TestRouteAgentToWorld_UnpinnedReturnsFirstRunning(t *testing.T) {
 }
 
 func TestRouteAgentToWorld_UnpinnedSkipsStoppedContainers(t *testing.T) {
-	worlds := []universe.World{
+	worlds := []world.World{
 		makeWorld("w-stopped", "cStopped", "qa"), // skipped — not running
 		makeWorld("w-running", "cA", "qa"),
 	}
@@ -78,7 +78,7 @@ func TestRouteAgentToWorld_UnpinnedSkipsStoppedContainers(t *testing.T) {
 }
 
 func TestRouteAgentToWorld_PinnedWorldNotFound(t *testing.T) {
-	worlds := []universe.World{makeWorld("w-a", "cA", "qa")}
+	worlds := []world.World{makeWorld("w-a", "cA", "qa")}
 	_, _, err := routeAgentToWorld(worlds, "qa", "w-missing", running)
 	if err == nil || !strings.Contains(err.Error(), "w-missing") {
 		t.Errorf("expected 'w-missing' not-found error, got: %v", err)
@@ -86,7 +86,7 @@ func TestRouteAgentToWorld_PinnedWorldNotFound(t *testing.T) {
 }
 
 func TestRouteAgentToWorld_PinnedWorldNotRunning(t *testing.T) {
-	worlds := []universe.World{makeWorld("w-a", "cA", "qa")}
+	worlds := []world.World{makeWorld("w-a", "cA", "qa")}
 	_, _, err := routeAgentToWorld(worlds, "qa", "w-a", stopped)
 	if err == nil || !strings.Contains(err.Error(), "is not running") {
 		t.Errorf("expected 'not running' error, got: %v", err)
@@ -96,7 +96,7 @@ func TestRouteAgentToWorld_PinnedWorldNotRunning(t *testing.T) {
 func TestRouteAgentToWorld_PinnedWorldLacksAgent(t *testing.T) {
 	// Pinning a world that doesn't have the requested agent must fail loudly
 	// rather than silently falling back to another world.
-	worlds := []universe.World{
+	worlds := []world.World{
 		makeWorld("w-a", "cA", "neo"),
 		makeWorld("w-b", "cB", "qa"),
 	}
@@ -109,12 +109,12 @@ func TestRouteAgentToWorld_PinnedWorldLacksAgent(t *testing.T) {
 func TestRouteAgentToWorld_FindsAgentInAgentsSlice(t *testing.T) {
 	// Multi-agent worlds list workers in the Agents slice, not just the
 	// primary Agent field. Routing must check both.
-	worlds := []universe.World{
+	worlds := []world.World{
 		{
 			ID:          "w-multi",
 			ContainerID: "cMulti",
 			Agent:       "chief",
-			Agents: []universe.AgentRecord{
+			Agents: []world.AgentRecord{
 				{Name: "chief", Role: "chief"},
 				{Name: "qa", Role: "worker"},
 			},
@@ -130,7 +130,7 @@ func TestRouteAgentToWorld_FindsAgentInAgentsSlice(t *testing.T) {
 }
 
 func TestRouteAgentToWorld_AgentNotAnywhere(t *testing.T) {
-	worlds := []universe.World{makeWorld("w-a", "cA", "neo")}
+	worlds := []world.World{makeWorld("w-a", "cA", "neo")}
 	_, _, err := routeAgentToWorld(worlds, "qa", "", running)
 	if err == nil || !strings.Contains(err.Error(), "not in any active world") {
 		t.Errorf("expected 'not in any active world' error, got: %v", err)

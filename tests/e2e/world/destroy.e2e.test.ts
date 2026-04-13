@@ -25,7 +25,7 @@ describe("down", () => {
     expect(id).toBeTruthy();
 
     // Verify container is running before destroy
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     // WHEN — destroying it
     const destroyResult = ctx.spwn(["down", id], 30_000);
@@ -39,7 +39,7 @@ describe("down", () => {
     expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
     // AND — container no longer exists
-    ctx.universe(id).toNotExist();
+    ctx.world(id).toNotExist();
   });
 
   test("destroy removes world from list and state", () => {

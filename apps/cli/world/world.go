@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -139,20 +139,20 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	var (
-		m   universe.Manifest
+		m   world.Manifest
 		err error
 	)
 	if spawnWorld != "" {
-		m, err = universe.LoadManifestPath(spawnWorld)
+		m, err = world.LoadManifestPath(spawnWorld)
 	} else {
-		m, err = universe.LoadManifest(configName)
+		m, err = world.LoadManifest(configName)
 	}
 	if err != nil {
 		return s.FailHint("Config failed", fmt.Errorf("cannot load %q: %w", configName, err),
 			"Run \"spwn init\" to create default configs")
 	}
 
-	if err := universe.ValidateManifest(m); err != nil {
+	if err := world.ValidateManifest(m); err != nil {
 		return s.FailHint("Config invalid", err, "Check ~/.spwn/worlds/"+configName+".yaml")
 	}
 
@@ -160,7 +160,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 
 	// Build spawn opts based on --agent flags. No --agent = empty world.
 	agentName := ""
-	var agents []universe.AgentSpec
+	var agents []world.AgentSpec
 
 	switch len(spawnAgents) {
 	case 0:
@@ -169,14 +169,14 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		agentName = spawnAgents[0]
 	default:
 		// Multi-agent mode: first is chief, rest are workers
-		agents = append(agents, universe.AgentSpec{Name: spawnAgents[0], Role: "chief"})
+		agents = append(agents, world.AgentSpec{Name: spawnAgents[0], Role: "chief"})
 		for _, name := range spawnAgents[1:] {
-			agents = append(agents, universe.AgentSpec{Name: name, Role: "worker"})
+			agents = append(agents, world.AgentSpec{Name: name, Role: "worker"})
 		}
 	}
 
 	s.Start("Connecting to Docker...")
-	arc, err := universe.NewArchitectFromEnv()
+	arc, err := world.NewArchitectFromEnv()
 	if err != nil {
 		return s.FailHint("Docker", err,
 			"Start Docker Desktop or OrbStack, then try again")
@@ -193,7 +193,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		s.Start("Validating agent...")
 	}
 
-	result, err := arc.Spawn(ctx, universe.SpawnOpts{
+	result, err := arc.Spawn(ctx, world.SpawnOpts{
 		ConfigName: configName,
 		Name:       spawnName,
 		AgentName:  agentName,
@@ -236,7 +236,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		return s.FailHint("Spawn failed", err, spawnHint(err, agentName, agents))
 	}
 
-	u := result.Universe
+	u := result.World
 
 	// Show non-fatal warnings
 	for _, w := range result.Warnings {
@@ -305,17 +305,17 @@ func dockerHint(err error) error {
 	return err
 }
 
-// parseWorkspaceFlags parses a list of "-w" values into universe.Workspace.
+// parseWorkspaceFlags parses a list of "-w" values into world.Workspace.
 // Accepted forms:
 //   "/host/path"             → {Name: "default" or "wN", Path: "/host/path"}
 //   "name=/host/path"        → {Name: "name", Path: "/host/path"}
 //   "name=/host/path:ro"     → read-only
 // Empty input returns a nil slice (ephemeral world — no mounts).
-func parseWorkspaceFlags(flags []string) ([]universe.Workspace, error) {
+func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 	if len(flags) == 0 {
 		return nil, nil
 	}
-	result := make([]universe.Workspace, 0, len(flags))
+	result := make([]world.Workspace, 0, len(flags))
 	for i, raw := range flags {
 		raw = strings.TrimSpace(raw)
 		if raw == "" {
@@ -347,13 +347,13 @@ func parseWorkspaceFlags(flags []string) ([]universe.Workspace, error) {
 				name = fmt.Sprintf("w%d", i)
 			}
 		}
-		result = append(result, universe.Workspace{Name: name, Path: path, ReadOnly: readOnly})
+		result = append(result, world.Workspace{Name: name, Path: path, ReadOnly: readOnly})
 	}
 	return result, nil
 }
 
 // spawnHint returns an actionable hint for common spawn errors.
-func spawnHint(err error, agentName string, agents []universe.AgentSpec) string {
+func spawnHint(err error, agentName string, agents []world.AgentSpec) string {
 	msg := err.Error()
 	switch {
 	case strings.Contains(msg, "not found") && strings.Contains(msg, "agent"):

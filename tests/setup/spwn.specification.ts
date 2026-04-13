@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { createSpwnHome, createAgent } from "./helpers.js";
-import { UniverseAssertion } from "./universe-assertion.js";
+import { WorldAssertion } from "./world-assertion.js";
 import { MindAssertion } from "./mind-assertion.js";
 import { StateAssertion } from "./state-assertion.js";
 
@@ -126,7 +126,7 @@ export interface TestContext {
     output: string;
   };
   /** Inspect a running world container */
-  universe: (worldId: string) => UniverseAssertion;
+  world: (worldId: string) => WorldAssertion;
   /** Inspect an agent Mind on disk */
   mind: (agentName: string) => MindAssertion;
   /** Inspect the state.json file */
@@ -152,8 +152,8 @@ export function createTestContext(): TestContext {
     home,
     spwn: (args: string[], timeout = 30_000) =>
       spwnWithEnv(args, envOverrides, timeout),
-    universe: (worldId: string) =>
-      new UniverseAssertion(worldId, home),
+    world: (worldId: string) =>
+      new WorldAssertion(worldId, home),
     mind: (agentName: string) => new MindAssertion(home, agentName),
     state: () => new StateAssertion(home),
     cleanup: () => {

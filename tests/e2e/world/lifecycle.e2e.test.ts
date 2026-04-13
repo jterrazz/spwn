@@ -66,7 +66,7 @@ describe("world lifecycle", () => {
     expectLine(inspectResult.output, /Agent home:/);
 
     // AND — the container is actually running
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
   });
 
   test("full lifecycle: spawn, inspect, destroy", () => {
@@ -107,7 +107,7 @@ describe("world lifecycle", () => {
     expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
     // AND — container is gone
-    ctx.universe(id).toNotExist();
+    ctx.world(id).toNotExist();
 
     // AND — list shows empty
     const listResult = ctx.spwn(["world", "list"]);

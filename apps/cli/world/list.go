@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ var listCmd = &cobra.Command{
 		ctx := context.Background()
 		s := newStepper(cmd)
 
-		arc, err := universe.NewArchitectFromEnv()
+		arc, err := world.NewArchitectFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -34,7 +34,7 @@ var listCmd = &cobra.Command{
 		}
 
 		// Auto-cleanup: remove stale worlds whose containers no longer exist
-		var liveWorlds []universe.World
+		var liveWorlds []world.World
 		for _, w := range worlds {
 			if w.ContainerID != "" && !containerExists(w.ContainerID) {
 				// Container is gone — clean up state silently
@@ -68,7 +68,7 @@ var listCmd = &cobra.Command{
 }
 
 // collectAgentNames returns a comma-separated list of agent names for a world.
-func collectAgentNames(u universe.World) string {
+func collectAgentNames(u world.World) string {
 	names := make([]string, 0)
 
 	// Primary agent

@@ -61,7 +61,7 @@ describe("config cascade", () => {
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     // AND — state tracks it with the right config
     ctx.state().hasWorld(id);

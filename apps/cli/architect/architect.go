@@ -10,7 +10,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/foundation"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -110,7 +110,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 		"ready":              "Architect is ready",
 	}
 
-	id, err := universe.StartArchitectDaemonWithOpts(ctx, universe.StartArchitectDaemonOpts{
+	id, err := world.StartArchitectDaemonWithOpts(ctx, world.StartArchitectDaemonOpts{
 		ImageOverride: imageOverride,
 		LogWriter:     cmd.ErrOrStderr(),
 		OnProgress: func(event, detail string) {
@@ -163,7 +163,7 @@ func runStop(cmd *cobra.Command, args []string) error {
 	s.Blank()
 	s.Start("Stopping Architect...")
 
-	err := universe.StopArchitectDaemon(ctx)
+	err := world.StopArchitectDaemon(ctx)
 	if err != nil {
 		msg := err.Error()
 		switch {
@@ -192,7 +192,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	s := newStepper(cmd)
 
-	info, err := universe.GetArchitectDaemonStatus(ctx)
+	info, err := world.GetArchitectDaemonStatus(ctx)
 	if err != nil {
 		msg := err.Error()
 		if strings.Contains(msg, "not reachable") {
@@ -220,7 +220,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	s.Info("Started:", info.StartedAt.Format(time.RFC3339))
 
 	if info.OrgName != "" {
-		s.Info("Universe:", info.OrgName)
+		s.Info("Org:", info.OrgName)
 	}
 
 	s.Blank()
@@ -233,11 +233,11 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
 	// Check if architect container is running. If not, auto-start it.
-	info, err := universe.GetArchitectDaemonStatus(ctx)
+	info, err := world.GetArchitectDaemonStatus(ctx)
 	if err != nil || !info.Running {
 		fmt.Fprintf(cmd.ErrOrStderr(), "\n  Architect not running. Starting...\n")
 		imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
-		_, startErr := universe.StartArchitectDaemon(ctx, imageOverride, cmd.ErrOrStderr())
+		_, startErr := world.StartArchitectDaemon(ctx, imageOverride, cmd.ErrOrStderr())
 		if startErr != nil {
 			if strings.Contains(startErr.Error(), "already running") {
 				// Race condition — it started between check and start, that's fine
@@ -264,7 +264,7 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get docker exec args from universe package
-	dockerArgs, err := universe.TalkToArchitectExecArgs(message)
+	dockerArgs, err := world.TalkToArchitectExecArgs(message)
 	if err != nil {
 		return s.FailHint("Talk", err, "")
 	}

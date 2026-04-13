@@ -23,7 +23,7 @@ describe("graceful shutdown", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     // WHEN — destroying it
     const destroyResult = ctx.spwn(["down", id], 30_000);
@@ -61,8 +61,8 @@ describe("graceful shutdown", () => {
     expectLine(downResult.output, /world\(s\) destroyed/);
 
     // AND — both worlds are gone
-    ctx.universe(id1).toNotExist();
-    ctx.universe(id2).toNotExist();
+    ctx.world(id1).toNotExist();
+    ctx.world(id2).toNotExist();
     ctx.state().noWorld(id1);
     ctx.state().noWorld(id2);
 

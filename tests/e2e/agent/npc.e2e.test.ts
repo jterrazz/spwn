@@ -40,7 +40,7 @@ describe("agent --ephemeral", () => {
     expect(id).toBeTruthy();
 
     // Verify container is running before dispatching ephemeral
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     // WHEN — dispatching an ephemeral task
     const npcResult = ctx.spwn(
@@ -53,7 +53,7 @@ describe("agent --ephemeral", () => {
     expect(npcResult.output.length).toBeGreaterThan(0);
 
     // AND — container is still running after ephemeral
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
   });
 
   test("ephemeral does not create Mind directory", () => {

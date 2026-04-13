@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-// CosmosWords are cosmos-themed names for universe configs.
+// CosmosWords are cosmos-themed names for world configs.
 var CosmosWords = []string{
 	"nebula", "quasar", "pulsar", "nova", "corona",
 	"aurora", "zenith", "vortex", "prism", "helix",

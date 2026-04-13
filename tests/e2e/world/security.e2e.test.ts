@@ -49,17 +49,17 @@ describe("world security — physics enforcement", () => {
     expect(id).toBeTruthy();
 
     // THEN — bash, git, and node should all be available
-    const bashPath = ctx.universe(id).exec("which bash");
+    const bashPath = ctx.world(id).exec("which bash");
     expect(bashPath).toContain("/bash");
 
-    const gitPath = ctx.universe(id).exec("which git");
+    const gitPath = ctx.world(id).exec("which git");
     expect(gitPath).toContain("/git");
 
-    const nodePath = ctx.universe(id).exec("which node");
+    const nodePath = ctx.world(id).exec("which node");
     expect(nodePath).toContain("/node");
 
     // AND — faculties.md should mention all of them
-    const faculties = ctx.universe(id).faculties();
+    const faculties = ctx.world(id).faculties();
     expect(faculties).toMatch(/bash/);
     expect(faculties).toMatch(/git/);
     expect(faculties).toMatch(/node/);
@@ -94,7 +94,7 @@ describe("world security — physics enforcement", () => {
     expect(id).toBeTruthy();
 
     // THEN — physics.md should document the constants
-    const physics = ctx.universe(id).physics();
+    const physics = ctx.world(id).physics();
     expect(physics).toMatch(/2/); // CPU count
     expect(physics).toMatch(/1[gG]/i); // Memory
     expect(physics).toMatch(/30m/); // Timeout
@@ -114,7 +114,7 @@ describe("world security — physics enforcement", () => {
     expect(result.exitCode).toBe(0);
     const id = parseWorldId(result.output)!;
 
-    const inspectData = ctx.universe(id).inspect();
+    const inspectData = ctx.world(id).inspect();
     expect(inspectData.HostConfig?.NetworkMode).toBe("bridge");
   });
 
@@ -130,7 +130,7 @@ describe("world security — physics enforcement", () => {
     const id = parseWorldId(result.output)!;
 
     // THEN — pids limit is set (not unlimited)
-    const inspectData = ctx.universe(id).inspect();
+    const inspectData = ctx.world(id).inspect();
     const pidsLimit = inspectData.HostConfig?.PidsLimit ?? 0;
     expect(pidsLimit).toBeGreaterThan(0);
   });

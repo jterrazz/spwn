@@ -12,7 +12,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/packages/agent"
 	"spwn.sh/packages/foundation"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -130,14 +130,14 @@ var statusCmd = &cobra.Command{
 		}
 
 		// Default physics
-		m, err := universe.LoadManifest("default")
+		m, err := world.LoadManifest("default")
 		if err != nil {
-			universe.ApplyDefaults(&m)
+			world.ApplyDefaults(&m)
 		}
 
 		// Worlds
-		var worlds []universe.World
-		arc, arcErr := universe.NewArchitectFromEnv()
+		var worlds []world.World
+		arc, arcErr := world.NewArchitectFromEnv()
 		if arcErr == nil {
 			worlds, _ = arc.List(context.Background())
 		}
@@ -146,7 +146,7 @@ var statusCmd = &cobra.Command{
 		agentList, _ := agentDomain.ListAgents()
 
 		// Agent → world mapping
-		worldMap := make(map[string]*universe.World)
+		worldMap := make(map[string]*world.World)
 		for i := range worlds {
 			ww := &worlds[i]
 			if ww.Agent != "" {
@@ -158,9 +158,9 @@ var statusCmd = &cobra.Command{
 		}
 
 		// Active worlds
-		var activeWorlds []universe.World
+		var activeWorlds []world.World
 		for _, ww := range worlds {
-			if ww.Status == universe.StatusRunning || ww.Status == universe.StatusIdle || ww.Status == universe.StatusCreating {
+			if ww.Status == world.StatusRunning || ww.Status == world.StatusIdle || ww.Status == world.StatusCreating {
 				activeWorlds = append(activeWorlds, ww)
 			}
 		}
@@ -234,7 +234,7 @@ func plural(n int) string {
 }
 
 // renderWorldSection draws a world as a rule-header section with agents listed below.
-func renderWorldSection(ww universe.World) {
+func renderWorldSection(ww world.World) {
 	// ── Section header rule ─────────────────────────────────────
 
 	// Left: world ID + optional config
@@ -277,7 +277,7 @@ func renderWorldSection(ww universe.World) {
 		pr("\n")
 		for _, a := range agents {
 			dot := ui.Faint("\u25cb") // ○
-			if a.status == universe.StatusRunning {
+			if a.status == world.StatusRunning {
 				dot = ui.Green("\u25cf") // ●
 			}
 			rolePart := padRight(a.role, 8)
@@ -292,10 +292,10 @@ func renderWorldSection(ww universe.World) {
 type agentInfo struct {
 	name   string
 	role   string
-	status universe.Status
+	status world.Status
 }
 
-func collectAgents(ww universe.World) []agentInfo {
+func collectAgents(ww world.World) []agentInfo {
 	var agents []agentInfo
 	if len(ww.Agents) > 0 {
 		for _, ar := range ww.Agents {
@@ -319,7 +319,7 @@ func collectAgents(ww universe.World) []agentInfo {
 	return agents
 }
 
-func collectWorkspacePaths(ww universe.World) []string {
+func collectWorkspacePaths(ww world.World) []string {
 	var paths []string
 	if len(ww.Workspaces) > 0 {
 		for _, ws := range ww.Workspaces {

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"spwn.sh/packages/foundation"
 	"github.com/spf13/cobra"
 )
@@ -41,7 +41,7 @@ On first run, also creates default.yaml as the default config.`,
 		s.Blank()
 
 		// Create default world config
-		if err := universe.CreateDefaultConfig(); err != nil {
+		if err := world.CreateDefaultConfig(); err != nil {
 			s.Log("default.yaml already exists, skipping")
 		} else {
 			s.Done("Created config", "default.yaml")
@@ -49,7 +49,7 @@ On first run, also creates default.yaml as the default config.`,
 
 		// Create named config
 		if name != "default" {
-			if err := universe.CreateConfig(name); err != nil {
+			if err := world.CreateConfig(name); err != nil {
 				s.Log("%s.yaml already exists, skipping", name)
 			} else {
 				s.Done("Created config", name+".yaml")

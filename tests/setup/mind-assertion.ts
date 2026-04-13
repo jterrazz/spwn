@@ -27,11 +27,11 @@ export class MindAssertion {
     return this;
   }
 
-  hasSession(universeId: string): this {
+  hasSession(worldId: string): this {
     const sessionsDir = join(this.agentDir, "sessions");
     if (!existsSync(sessionsDir)) throw new Error("No sessions directory");
     const files = readdirSync(sessionsDir);
-    const found = files.some((f) => f.includes(universeId));
+    const found = files.some((f) => f.includes(worldId));
     expect(found).toBe(true);
     return this;
   }

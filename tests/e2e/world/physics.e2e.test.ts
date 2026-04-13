@@ -43,7 +43,7 @@ describe("world physics", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     // THEN — physics.md inside container contains expected fields
-    const physics = ctx.universe(id).physics();
+    const physics = ctx.world(id).physics();
     expect(physics).toMatch(/CPU/);
     expect(physics).toMatch(/Memory/);
     expect(physics).toMatch(/Timeout/);
@@ -58,7 +58,7 @@ describe("world physics", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    const physics = ctx.universe(id).physics();
+    const physics = ctx.world(id).physics();
     expect(physics).toMatch(/network/i);
   });
 
@@ -74,7 +74,7 @@ describe("world physics", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     // THEN — faculties.md exists and lists tools
-    const faculties = ctx.universe(id).faculties();
+    const faculties = ctx.world(id).faculties();
     expect(faculties).toMatch(/bash/);
   });
 
@@ -112,7 +112,7 @@ describe("world physics", () => {
     const id = parseWorldId(result.output)!;
 
     // Verify network mode is set to bridge (the current default)
-    const inspectData = ctx.universe(id).inspect();
+    const inspectData = ctx.world(id).inspect();
     expect(inspectData.HostConfig?.NetworkMode).toBe("bridge");
   });
 });

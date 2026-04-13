@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ var destroyCmd = &cobra.Command{
 		ctx := context.Background()
 		s := newStepper(cmd)
 
-		arc, err := universe.NewArchitectFromEnv()
+		arc, err := world.NewArchitectFromEnv()
 		if err != nil {
 			return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 		}

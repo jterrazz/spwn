@@ -26,10 +26,10 @@ describe("system skills infrastructure", () => {
     expect(id).toBeTruthy();
 
     // THEN — AGENTS.md exists inside container at /world/AGENTS.md
-    ctx.universe(id).toHaveFile("/world/AGENTS.md");
+    ctx.world(id).toHaveFile("/world/AGENTS.md");
 
     // AND — contains expected Agent Operating Manual content
-    const content = ctx.universe(id).readFile("/world/AGENTS.md");
+    const content = ctx.world(id).readFile("/world/AGENTS.md");
     expect(content).toBeTruthy();
     expect(content.length).toBeGreaterThan(100);
   });
@@ -48,10 +48,10 @@ describe("system skills infrastructure", () => {
     expect(id).toBeTruthy();
 
     // THEN — /world/skills/ directory exists inside container
-    ctx.universe(id).toHaveDirectory("/world/skills");
+    ctx.world(id).toHaveDirectory("/world/skills");
 
     // AND — key system skill files exist
-    const skillsExist = ctx.universe(id).fileExists("/world/skills");
+    const skillsExist = ctx.world(id).fileExists("/world/skills");
     expect(skillsExist).toBe(true);
   });
 
@@ -69,9 +69,9 @@ describe("system skills infrastructure", () => {
     expect(id).toBeTruthy();
 
     // THEN — AGENTS.md exists and references the agent name in roster
-    ctx.universe(id).toHaveFile("/world/AGENTS.md");
-    ctx.universe(id).toHaveFile("/world/roster.md");
-    const roster = ctx.universe(id).readFile("/world/roster.md");
+    ctx.world(id).toHaveFile("/world/AGENTS.md");
+    ctx.world(id).toHaveFile("/world/roster.md");
+    const roster = ctx.world(id).readFile("/world/roster.md");
     expect(roster).toContain("neo");
   });
 
@@ -89,7 +89,7 @@ describe("system skills infrastructure", () => {
     expect(id).toBeTruthy();
 
     // THEN — the skills directory is accessible
-    const universe = ctx.universe(id);
+    const universe = ctx.world(id);
     universe.toHaveDirectory("/world/skills");
   });
 });

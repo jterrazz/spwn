@@ -35,7 +35,7 @@ describe("state management", () => {
       .worldCount(1);
 
     // AND — the container is actually running
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
   });
 
   test("destroy updates state file", () => {
@@ -58,7 +58,7 @@ describe("state management", () => {
     ctx.state().noWorld(id);
 
     // AND — container is gone
-    ctx.universe(id).toNotExist();
+    ctx.world(id).toNotExist();
   });
 
   test("state tracks active worlds across list calls", () => {
@@ -111,7 +111,7 @@ describe("state management", () => {
       .hasWorld(id2);
 
     // AND — both containers are running
-    ctx.universe(id1).toBeRunning();
-    ctx.universe(id2).toBeRunning();
+    ctx.world(id1).toBeRunning();
+    ctx.world(id2).toBeRunning();
   });
 });

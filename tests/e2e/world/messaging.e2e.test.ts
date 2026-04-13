@@ -110,7 +110,7 @@ describe("agent messaging", () => {
       "check persistence",
     ]);
 
-    ctx.universe(id).toHaveDirectory("/world/inbox/neo");
+    ctx.world(id).toHaveDirectory("/world/inbox/neo");
   });
 
   test("multiple messages to same agent all appear", () => {
@@ -241,7 +241,7 @@ describe("agent messaging", () => {
       "first message — creates the inbox dir",
     ]);
 
-    ctx.universe(id).toHaveDirectory("/world/inbox/neo");
+    ctx.world(id).toHaveDirectory("/world/inbox/neo");
   });
 
   test("physics.md includes communication section", () => {
@@ -253,7 +253,7 @@ describe("agent messaging", () => {
     );
     const id = parseWorldId(spawn.output)!;
 
-    const physics = ctx.universe(id).physics();
+    const physics = ctx.world(id).physics();
     expect(physics).toContain("Communication");
     expect(physics).toContain("/world/inbox");
   });

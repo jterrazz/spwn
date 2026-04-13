@@ -24,7 +24,7 @@ describe("world resource limits", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — inspecting the container
-    const inspectData = ctx.universe(id).inspect();
+    const inspectData = ctx.world(id).inspect();
 
     // THEN — memory limit is set (not 0 = unlimited)
     expect(inspectData.HostConfig?.Memory).toBeDefined();
@@ -43,7 +43,7 @@ describe("world resource limits", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — inspecting the container
-    const inspectData = ctx.universe(id).inspect();
+    const inspectData = ctx.world(id).inspect();
 
     // THEN — CPU limit is set (via NanoCpus or CpuQuota — not both 0)
     const nanoCpus = inspectData.HostConfig?.NanoCpus ?? 0;
@@ -63,7 +63,7 @@ describe("world resource limits", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — inspecting the container
-    const inspectData = ctx.universe(id).inspect();
+    const inspectData = ctx.world(id).inspect();
 
     // THEN — memory is set and reasonable (between 64MB and 16GB)
     const memory = inspectData.HostConfig?.Memory ?? 0;
@@ -88,7 +88,7 @@ describe("world resource limits", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — inspecting the container
-    const inspectData = ctx.universe(id).inspect();
+    const inspectData = ctx.world(id).inspect();
 
     // THEN — pids limit is set (not 0 or -1 which means unlimited)
     const pidsLimit = inspectData.HostConfig?.PidsLimit ?? 0;

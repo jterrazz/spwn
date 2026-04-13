@@ -23,7 +23,7 @@ describe("error recovery — Docker", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     // WHEN — destroying it the first time
     const firstDestroy = ctx.spwn(["down", id], 30_000);
@@ -120,6 +120,6 @@ describe("error recovery — Docker", () => {
     const secondId = parseWorldId(second.output)!;
     expect(secondId).toBeTruthy();
     expect(secondId).not.toBe(firstId);
-    ctx.universe(secondId).toBeRunning();
+    ctx.world(secondId).toBeRunning();
   });
 });

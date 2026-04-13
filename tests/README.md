@@ -12,7 +12,7 @@ Fast, isolated tests that run without Docker. Located next to their source files
 make test                  # all unit tests
 make test-foundation       # core/foundation only
 make test-agent            # core/agent only
-make test-universe         # core/universe only
+make test-world         # packages/world only
 make test-cli              # apps/cli only
 make test-gate             # core/gate only
 make test-messenger        # core/messenger only
@@ -21,16 +21,16 @@ make test-messenger        # core/messenger only
 Examples:
 - `core/foundation/paths_test.go` — path resolution logic
 - `core/agent/agent_test.go` — agent lifecycle
-- `core/universe/internal/manifest/manifest_test.go` — YAML parsing
+- `packages/world/internal/manifest/manifest_test.go` — YAML parsing
 - `apps/cli/ui/table_test.go` — table formatting
 
 ### 2. Go E2E Tests
 
-Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with `mock-claude` replacing the real Claude binary). Located in `core/universe/tests/e2e/`.
+Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with `mock-claude` replacing the real Claude binary). Located in `packages/world/tests/e2e/`.
 
 ```bash
 make test-e2e              # builds test image, then runs E2E suite
-make test-e2e-universe     # universe E2E only
+make test-e2e-world     # world E2E only
 ```
 
 These tests use the build tag `//go:build e2e` and are excluded from `make test`.
@@ -60,7 +60,7 @@ E2E tests do not call the real Claude Code CLI. Instead, they use a mock:
 **`platform/fixtures/mock-claude/mock-claude.sh`** is a bash script installed as `/usr/local/bin/claude` inside the test Docker image. It:
 
 1. Accepts and ignores real Claude CLI flags (`--session-id`, `--resume`, etc.)
-2. Inspects the container environment (checks for `/mind`, `/universe/physics.md`, `/workspace`, etc.)
+2. Inspects the container environment (checks for `/agents`, `/world/physics.md`, `/work`, etc.)
 3. Writes its observations as JSON to `/tmp/claude-mock.json`
 4. Optionally writes to `/workspace/mock-output.txt` to prove write access
 5. Supports `--exit-code` and `--sleep` flags for testing error/timeout scenarios
@@ -69,12 +69,12 @@ The Go E2E framework reads this JSON via `TestContext.ReadMockOutput()` and expo
 
 ## Test Infrastructure
 
-### Go E2E Setup (`core/universe/tests/e2e/setup/`)
+### Go E2E Setup (`packages/world/tests/e2e/setup/`)
 
 | File | Purpose |
 |------|---------|
 | `context.go` | `TestContext` — creates isolated temp SPWN_HOME, connects to Docker, registers cleanup |
-| `builders.go` | `SpawnBuilder` — fluent builder for spawning universes with config/agent/workspace |
+| `builders.go` | `SpawnBuilder` — fluent builder for spawning worlds with config/agent/workspace |
 | `assertions.go` | Assertion chains: `StateAssertion`, `ContainerAssertion`, `MindAssertion`, `MockAssertion`, `SessionAssertion`, `JournalAssertion`, `GateAssertion`, etc. |
 
 **Pattern:**
@@ -108,7 +108,7 @@ Key design points:
 | `helpers.ts` | `createSpwnHome()`, `createAgent()`, `createWorldConfig()`, `waitForContainer()`, `retry()` |
 | `spwn.specification.ts` | `createTestContext()` — creates isolated SPWN_HOME, provides `ctx.spwn()` runner with env overrides |
 | `output-helpers.ts` | `expectLine()`, `expectNoLine()`, `expectTableHeader()`, `expectTableRow()`, `stripAnsi()` |
-| `universe-assertion.ts` | `UniverseAssertion` — asserts on container state, files, mounts |
+| `world-assertion.ts` | `WorldAssertion` — asserts on container state, files, mounts |
 | `mind-assertion.ts` | `MindAssertion` — asserts on agent Mind directory structure |
 | `state-assertion.ts` | `StateAssertion` — asserts on `state.json` contents |
 | `mock-llm/` | Mock LLM server for testing agent talk flows |
@@ -132,7 +132,7 @@ describe("world spawn", () => {
     expectLine(result.output, /✓ Created container\s+w-\w+-\d{5}/);
 
     const id = parseWorldId(result.output)!;
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
   });
 });
 ```
@@ -154,7 +154,7 @@ Key design points:
 
 ### Go E2E Test
 
-1. Create `your_feature_test.go` in `core/universe/tests/e2e/`.
+1. Create `your_feature_test.go` in `packages/world/tests/e2e/`.
 2. Add `//go:build e2e` build tag at the top.
 3. Use `setup.NewSpawnBuilder(t)` to create test infrastructure.
 4. Follow GIVEN/WHEN/THEN comment structure.

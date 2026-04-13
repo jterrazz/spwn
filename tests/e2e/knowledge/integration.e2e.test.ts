@@ -31,7 +31,7 @@ describe("knowledge integration", () => {
       return;
     }
 
-    const universe = ctx.universe(worldId);
+    const universe = ctx.world(worldId);
 
     // The knowledge dir is per-world, lives inside the container, and is
     // created lazily by the agent. It does not exist immediately.

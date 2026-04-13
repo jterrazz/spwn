@@ -48,7 +48,7 @@ describe("agent inside world", () => {
     expectLine(spawnResult.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
 
     const id = parseWorldId(spawnResult.output)!;
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
   });
 
   test("inspect shows agent info", () => {

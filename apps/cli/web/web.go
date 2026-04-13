@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -74,12 +74,12 @@ func runWeb(cmd *cobra.Command, args []string) error {
 	fmt.Fprintln(w)
 
 	// Start the Go API server
-	store, err := universe.NewStore()
+	store, err := world.NewStore()
 	if err != nil {
 		return err
 	}
 
-	arch, archErr := universe.NewArchitectFromEnv()
+	arch, archErr := world.NewArchitectFromEnv()
 	mode := ui.Green("full")
 	if archErr != nil {
 		mode = ui.Yellow("read-only") + ui.Faint(" (Docker not available)")
@@ -112,7 +112,7 @@ func runWeb(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	srv := universe.NewAPIServer(store, arch, ":"+portFlag)
+	srv := world.NewAPIServer(store, arch, ":"+portFlag)
 	return srv.Start()
 }
 

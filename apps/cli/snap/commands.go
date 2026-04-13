@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 
 	"github.com/spf13/cobra"
 )
@@ -53,7 +53,7 @@ var saveCmd = &cobra.Command{
 		worldID := args[0]
 		s := newStepper(cmd)
 
-		arc, err := universe.NewArchitectFromEnv()
+		arc, err := world.NewArchitectFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -75,7 +75,7 @@ var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all snapshots",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		arc, err := universe.NewArchitectFromEnv()
+		arc, err := world.NewArchitectFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -118,7 +118,7 @@ var restoreCmd = &cobra.Command{
 		snapshotRef := args[0]
 		s := newStepper(cmd)
 
-		arc, err := universe.NewArchitectFromEnv()
+		arc, err := world.NewArchitectFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -129,18 +129,18 @@ var restoreCmd = &cobra.Command{
 		if configName == "" {
 			configName = "default"
 		}
-		m, err := universe.LoadManifest(configName)
+		m, err := world.LoadManifest(configName)
 		if err != nil {
 			return fmt.Errorf("cannot load config %q: %w", configName, err)
 		}
-		universe.ApplyDefaults(&m)
+		world.ApplyDefaults(&m)
 
 		workspaces, wsErr := parseSnapWorkspaces(snapWorkspace)
 		if wsErr != nil {
 			return fmt.Errorf("parse workspace: %w", wsErr)
 		}
 
-		opts := universe.SpawnOpts{
+		opts := world.SpawnOpts{
 			ConfigName: configName,
 			AgentName:  snapAgent,
 			Workspaces: workspaces,
@@ -154,7 +154,7 @@ var restoreCmd = &cobra.Command{
 			return s.FailHint("Restore failed", err, "Check available snapshots with \"spwn snap ls\"")
 		}
 
-		s.Done("Restored world", result.Universe.ID)
+		s.Done("Restored world", result.World.ID)
 		s.Info("From snapshot:", snapshotRef)
 		return nil
 	},
@@ -170,7 +170,7 @@ var rmCmd = &cobra.Command{
 		snapshotRef := args[0]
 		s := newStepper(cmd)
 
-		arc, err := universe.NewArchitectFromEnv()
+		arc, err := world.NewArchitectFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -188,13 +188,13 @@ var rmCmd = &cobra.Command{
 
 // --- helpers ---
 
-// parseSnapWorkspaces parses -w values into universe.Workspace. Mirrors the
+// parseSnapWorkspaces parses -w values into world.Workspace. Mirrors the
 // parser in apps/cli/world so snap restores accept the same syntax.
-func parseSnapWorkspaces(flags []string) ([]universe.Workspace, error) {
+func parseSnapWorkspaces(flags []string) ([]world.Workspace, error) {
 	if len(flags) == 0 {
 		return nil, nil
 	}
-	result := make([]universe.Workspace, 0, len(flags))
+	result := make([]world.Workspace, 0, len(flags))
 	for i, raw := range flags {
 		raw = strings.TrimSpace(raw)
 		if raw == "" {
@@ -221,7 +221,7 @@ func parseSnapWorkspaces(flags []string) ([]universe.Workspace, error) {
 				name = fmt.Sprintf("w%d", i)
 			}
 		}
-		result = append(result, universe.Workspace{Name: name, Path: path, ReadOnly: readOnly})
+		result = append(result, world.Workspace{Name: name, Path: path, ReadOnly: readOnly})
 	}
 	return result, nil
 }

@@ -29,7 +29,7 @@ describe("world workspace persistence", () => {
     const id = parseWorldId(result.output)!;
 
     // THEN — the file exists inside the container at /work/default/
-    ctx.universe(id).toHaveFile("/work/default/host-file.txt", "created on host");
+    ctx.world(id).toHaveFile("/work/default/host-file.txt", "created on host");
   });
 
   test("container changes persist to host", () => {
@@ -45,7 +45,7 @@ describe("world workspace persistence", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — creating a file inside the container
-    ctx.universe(id).exec("echo 'created in container' > /work/default/container-file.txt");
+    ctx.world(id).exec("echo 'created in container' > /work/default/container-file.txt");
 
     // THEN — the file exists on the host filesystem
     const hostPath = join(ctx.home, "container-file.txt");
@@ -67,8 +67,8 @@ describe("world workspace persistence", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — writing and reading back inside container
-    ctx.universe(id).exec("echo 'rw-test-content' > /work/default/rw-test.txt");
-    const readBack = ctx.universe(id).exec("cat /work/default/rw-test.txt");
+    ctx.world(id).exec("echo 'rw-test-content' > /work/default/rw-test.txt");
+    const readBack = ctx.world(id).exec("cat /work/default/rw-test.txt");
 
     // THEN — content matches
     expect(readBack).toBe("rw-test-content");

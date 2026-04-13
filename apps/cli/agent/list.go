@@ -6,7 +6,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/packages/agent"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -81,7 +81,7 @@ func buildAgentWorldMap() map[string]agentWorldInfo {
 	result := make(map[string]agentWorldInfo)
 
 	ctx := context.Background()
-	arc, err := universe.NewArchitectFromEnv()
+	arc, err := world.NewArchitectFromEnv()
 	if err != nil {
 		return result
 	}
@@ -92,7 +92,7 @@ func buildAgentWorldMap() map[string]agentWorldInfo {
 	}
 
 	for _, u := range worlds {
-		if u.Status == universe.StatusDestroyed {
+		if u.Status == world.StatusDestroyed {
 			continue
 		}
 

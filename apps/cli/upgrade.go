@@ -7,7 +7,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/foundation/update"
-	"spwn.sh/packages/universe"
+	"spwn.sh/packages/world"
 
 	"github.com/spf13/cobra"
 )
@@ -113,7 +113,7 @@ the current binary. Running worlds are stopped gracefully before the swap.`,
 // daemon before we swap the binary. Errors are logged but not fatal — the
 // upgrade should proceed even if Docker is offline.
 func stopSpwnWorkloads(ctx context.Context, s *ui.Stepper) error {
-	arc, err := universe.NewArchitectFromEnv()
+	arc, err := world.NewArchitectFromEnv()
 	if err != nil {
 		return nil // no Docker, nothing to stop
 	}
@@ -133,9 +133,9 @@ func stopSpwnWorkloads(ctx context.Context, s *ui.Stepper) error {
 		}
 		s.Done("Stopped", label)
 	}
-	if info, statusErr := universe.GetArchitectDaemonStatus(ctx); statusErr == nil && info.Running {
+	if info, statusErr := world.GetArchitectDaemonStatus(ctx); statusErr == nil && info.Running {
 		s.Start("Stopping architect...")
-		if stopErr := universe.StopArchitectDaemon(ctx); stopErr != nil {
+		if stopErr := world.StopArchitectDaemon(ctx); stopErr != nil {
 			s.Warn("Warning", fmt.Sprintf("failed to stop architect: %v", stopErr))
 		} else {
 			s.Done("Architect stopped", "")

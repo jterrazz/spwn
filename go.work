@@ -7,6 +7,6 @@ use (
 	./packages/imagebuilder
 	./packages/messenger
 	./packages/migration
-	./packages/universe
+	./packages/world
 	./examples
 )

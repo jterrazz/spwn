@@ -11,7 +11,7 @@ import (
 )
 
 // Sleep consolidates experience into durable knowledge.
-// It archives stale files and prunes sessions for destroyed universes.
+// It archives stale files and prunes sessions for destroyed worlds.
 func Sleep(mindPath string) (*SleepResult, error) {
 	result := &SleepResult{Timestamp: time.Now()}
 

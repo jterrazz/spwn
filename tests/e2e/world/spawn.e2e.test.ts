@@ -41,7 +41,7 @@ describe("world spawn", () => {
     expect(id).toMatch(/^(?:spwn-world|w)-\w+-\d{5}$/);
 
     // AND — the container is actually running
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     // AND — has /world directory with physics + faculties
     ctx
@@ -68,7 +68,7 @@ describe("world spawn", () => {
     expect(id).toMatch(/^spwn-world-myconfig-\d{5}$/);
 
     // AND — container is running
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
   });
 
   test("world ID format is w-{name}-{5digits}", () => {
@@ -156,7 +156,7 @@ describe("world spawn", () => {
     const id = parseWorldId(result.output)!;
 
     // Read physics.md from inside the container
-    const physics = ctx.universe(id).physics();
+    const physics = ctx.world(id).physics();
     expect(physics).toMatch(/CPU/);
     expect(physics).toMatch(/Memory/);
     expect(physics).toMatch(/Timeout/);
@@ -171,7 +171,7 @@ describe("world spawn", () => {
     );
     const id = parseWorldId(result.output)!;
 
-    const faculties = ctx.universe(id).faculties();
+    const faculties = ctx.world(id).faculties();
     expect(faculties).toMatch(/bash/);
   });
 
@@ -184,9 +184,9 @@ describe("world spawn", () => {
     );
     const id = parseWorldId(result.output)!;
 
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
     ctx.spwn(["world", "destroy", id], 30_000);
-    ctx.universe(id).toNotExist();
+    ctx.world(id).toNotExist();
   });
 
   test("workspace files visible inside container", () => {
@@ -203,7 +203,7 @@ describe("world spawn", () => {
     const id = parseWorldId(result.output)!;
 
     // Verify file exists inside container
-    ctx.universe(id).toHaveFile("/work/default/test-file.txt", "hello from workspace");
+    ctx.world(id).toHaveFile("/work/default/test-file.txt", "hello from workspace");
   });
 
   test("Mind layers are visible at /agents/<name>/ inside container", () => {
@@ -216,7 +216,7 @@ describe("world spawn", () => {
     const id = parseWorldId(result.output)!;
 
     for (const layer of ["core", "skills", "knowledge", "playbooks", "journal"]) {
-      ctx.universe(id).toHaveDirectory(`/agents/neo/${layer}`);
+      ctx.world(id).toHaveDirectory(`/agents/neo/${layer}`);
     }
   });
 
@@ -230,13 +230,13 @@ describe("world spawn", () => {
     const id = parseWorldId(result.output)!;
 
     // Verify .claude.json has trust accepted for /workspace
-    const claudeJson = ctx.universe(id).readFile("/home/spwn/.claude.json");
+    const claudeJson = ctx.world(id).readFile("/home/spwn/.claude.json");
     const config = JSON.parse(claudeJson);
     expect(config.hasCompletedOnboarding).toBe(true);
     expect(config.projects["/workspace"].hasTrustDialogAccepted).toBe(true);
 
     // Verify settings.json skips dangerous mode prompt
-    const settings = ctx.universe(id).readFile("/home/spwn/.claude/settings.json");
+    const settings = ctx.world(id).readFile("/home/spwn/.claude/settings.json");
     const settingsConfig = JSON.parse(settings);
     expect(settingsConfig.skipDangerousModePermissionPrompt).toBe(true);
   });
@@ -251,7 +251,7 @@ describe("world spawn", () => {
     const id = parseWorldId(result.output)!;
 
     // The settings.json should be our minimal config, not the host's (which has hooks, plugins, etc.)
-    const settings = ctx.universe(id).readFile("/home/spwn/.claude/settings.json");
+    const settings = ctx.world(id).readFile("/home/spwn/.claude/settings.json");
     const config = JSON.parse(settings);
     // Host config has hooks.PreToolUse — container config should NOT
     expect(config.hooks).toBeUndefined();
@@ -301,7 +301,7 @@ describe("world spawn", () => {
     expect(result.exitCode).toBe(0);
     const id = parseWorldId(result.output)!;
     expect(id).toBeTruthy();
-    ctx.universe(id).toBeRunning();
+    ctx.world(id).toBeRunning();
 
     // World exists in state
     ctx.state().hasWorld(id);
