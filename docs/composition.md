@@ -84,8 +84,8 @@ spwn up --agent neo -w ./project-b    # same agent, different world
 
 ```bash
 spwn up --agent morpheus --agent neo --agent trinity -w ./acme-api
-spwn msg send neo --from morpheus "Implement Stripe webhooks"
-spwn msg send trinity --from morpheus "Write tests for webhooks"
+spwn agent send neo "Implement Stripe webhooks" --from morpheus
+spwn agent send trinity "Write tests for webhooks" --from morpheus
 ```
 
 ### Solo developer
@@ -98,8 +98,14 @@ spwn talk neo "Refactor the auth module to use sessions"
 
 ### Multi-runtime
 
+Runtimes are declared per-agent in `agent.yaml`, not at spawn time:
+
+```yaml
+# ~/.spwn/agents/neo/agent.yaml
+runtime: claude-code
+```
+
 ```bash
-spwn up --agent neo --runtime claude-code -w .    # Anthropic (default)
-spwn up --agent smith --runtime codex -w .        # OpenAI
-spwn up --agent oracle --runtime aider -w .       # Open source
+spwn up --agent neo -w .       # uses the runtime declared in neo's agent.yaml
+spwn up --agent smith -w .     # smith can declare a different runtime
 ```

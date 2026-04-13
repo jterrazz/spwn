@@ -2,20 +2,15 @@
 
 ## Core Principle: The Building Blocks of Agent Intelligence
 
-Spwn is the **operating system for autonomous agent worlds**. Compose tools, skills, and profiles into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work. Every layer is an interface (port) with swappable adapters. If a tool dies tomorrow, swap one adapter. Core logic never changes.
+Spwn is the **operating system for autonomous agent worlds**. Compose tools, skills, and profiles into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work.
 
-### The 8 Ports
+The domain has three main abstractions, each owning one concern:
 
-| Port | What it abstracts | Default adapter |
-|------|-------------------|-----------------|
-| **Runtime** | How agents think | Claude Code (ACP) |
-| **Provider** | Which LLM | Anthropic |
-| **Channel** | How Architect talks to outside | CLI |
-| **Backend** | Where worlds run | Docker |
-| **Memory** | How agents persist | Filesystem (markdown) |
-| **Store** | How state is tracked | JSON file |
-| **Tool** | What agents can do | Built-in + MCP |
-| **Skill** | Reusable capabilities | Local files |
+| Abstraction | What it owns | Implementation |
+|---|---|---|
+| **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` — Claude Code today, others swap in as a ~50 LOC Go file |
+| **Backend** | Where worlds run | `packages/world/internal/backend` — Docker; container labels are the source of truth for world state |
+| **Mind** | How an agent persists across worlds | `packages/agent` — flat markdown layers (core/skills/knowledge/playbooks/journal) on the host filesystem |
 
 ## Vocabulary
 
@@ -38,10 +33,6 @@ Spwn is the **operating system for autonomous agent worlds**. Compose tools, ski
 - **Chief**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
 - **Worker**: Persistent worker agent. Has its own identity and memory.
 - **NPC**: Ephemeral agent. No persistent memory. Single task, fire & forget.
-
-### Bridge
-- **Gate**: Bridge between world and host. Host-side (Go) manages tool bridging. Container-side (Rivet) normalizes runtimes.
-- **Rivet**: Runtime normalization layer. One API across all agent runtimes. Event streaming, session persistence.
 
 ### Evolution
 - **Dream**: Analyze experience → discover patterns → promote successes to playbooks. `spwn agent dream <name>`
@@ -119,15 +110,16 @@ spwn profile install @community/pragmatic-dev
 spwn profile rm researcher
 
 # ── Messaging ─────────────────────────────────────────────────────
-spwn msg send neo --from morpheus "task"       # Inter-agent messaging
-spwn msg ls neo                                # Neo's inbox
-spwn msg show <msg-id>
+spwn agent send neo "task" --from morpheus     # Inter-agent messaging
+spwn agent inbox neo                           # Neo's inbox
+spwn agent watch neo                           # Tail neo's inbox live
 
 # ── Architect (always-on orchestration daemon) ────────────────────
 spwn architect start
 spwn architect stop
 spwn architect status
-spwn architect connect <channel>
+spwn architect talk "audit the world list"
+spwn architect logs
 
 # ── Web UI ────────────────────────────────────────────────────────
 spwn web                                       # Start + open in browser
@@ -145,7 +137,7 @@ spwn auth login / logout / token
 
 ## IDs
 
-- World: `w-{config-name}-{5digits}` (e.g. `w-default-84721`)
+- World: `spwn-world-{planet-name}-{5digits}` (e.g. `spwn-world-rhea-84721`)
 - Agent: `a-{agent-name}-{5digits}` (e.g. `a-leonardo-52103`)
 - Generated with `crypto/rand`
 
@@ -153,22 +145,26 @@ spwn auth login / logout / token
 
 ```
 ~/.spwn/
-├── claw/
-│   ├── state.json           # Active worlds, channels
-│   └── claw.yaml            # Claw runtime config
 ├── worlds/
-│   └── default.yaml         # World configs (tools available at runtime)
+│   └── default.yaml           # World configs (physics + tools)
+├── world-states/
+│   └── <world-id>/            # Per-world files (physics.md, roster.md, shared notes)
 ├── agents/
 │   └── neo/
-│       ├── agent.yaml       # Composition — tools, skills, profile, runtime
-│       ├── profile.md       # Personality — role, style, purpose, behavior
-│       ├── skills/          # Procedures, checklists
-│       ├── knowledge/       # Facts, codebase info
-│       ├── playbooks/       # Step-by-step workflows promoted from experience
-│       └── journal/         # Session logs per world
-├── tools/                   # Installed tool packs
-├── skills/                  # Authored and installed skill files
-└── profiles/                # Authored and installed profile templates
+│       ├── agent.yaml         # Composition — tools, skills, profile, runtime
+│       ├── CLAUDE.md          # Entry point Claude Code reads on startup
+│       ├── core/              # Identity layer (profile.md, purpose.md, traits.md)
+│       ├── skills/             # Procedures, checklists
+│       ├── knowledge/         # Facts, codebase info
+│       ├── playbooks/         # Workflows promoted from experience (via dream)
+│       ├── journal/           # Session history — one file per run
+│       └── worlds/<world-id>/ # Per-deployment inbox/outbox/notes/role.md
+├── credentials/               # Auth material surfaced to containers at /credentials
+├── skills/                    # Authored and installed skill files
+├── teams/                     # Team definitions
+├── organizations/             # Organization definitions
+├── activity.jsonl             # Append-only activity log
+└── state.json                 # Legacy (labels are now source of truth)
 ```
 
 **Config hierarchy:** `agent.yaml` declares composition (tools + skills + profile + runtime). `world.yaml` declares the runtime environment. An agent runs in a world.
@@ -176,13 +172,13 @@ spwn auth login / logout / token
 ## Repository Structure
 
 Polyglot monorepo: Go modules + Next.js/Tauri web UI, wired together
-with Go workspaces and pnpm/Turborepo.
+with Go workspaces, pnpm, and a top-level Makefile.
 
 ```
 spwn/
 ├── go.work                          # Go workspace
 ├── pnpm-workspace.yaml              # JS workspace (apps/*, tests)
-├── turbo.json                       # Turborepo task orchestration
+├── Makefile                         # Single entry point for Go + JS tasks
 │
 ├── apps/                            # End-user binaries
 │   ├── cli/                         #   go.mod — the `spwn` binary

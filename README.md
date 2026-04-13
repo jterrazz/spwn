@@ -276,13 +276,15 @@ spwn talk neo "Refactor the auth module to use sessions"
 Each agent is a directory of markdown files — human-readable, git-friendly, no database:
 
 ```
-~/.spwn/agents/Neo/
+~/.spwn/agents/neo/
 ├── agent.yaml                # composition: tools, skills, profile, runtime
-├── profile.md                # personality — role, style, purpose, behavior
-├── skills/                   # what the agent can do — procedures, checklists
-├── knowledge/                # what the agent knows — facts about the codebase
-├── playbooks/                # how the agent works — step-by-step workflows
-└── journal/                  # what happened — session logs per world
+├── CLAUDE.md                 # entry point the runtime reads on startup
+├── core/                     # identity — profile.md, purpose.md, traits.md
+├── skills/                   # procedures and checklists
+├── knowledge/                # facts about the codebase
+├── playbooks/                # workflows promoted from experience
+├── journal/                  # session history — one file per run
+└── worlds/<world-id>/        # per-deployment inbox/outbox/notes/role.md
 ```
 
 Agents evolve through three mechanisms:

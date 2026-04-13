@@ -17,14 +17,16 @@ Multi-module Go monorepo with Ports and Adapters architecture. 8 port interfaces
 
 ## Runtime adapters
 
-Spwn treats agent runtimes as swappable adapters. The container-side Gate speaks [ACP](https://github.com/agentclientprotocol/agent-client-protocol), so adding a new runtime is a container image change.
+Spwn treats agent runtimes as swappable adapters. Each runtime is a thin Go
+interface (`packages/world/internal/runtime.Runtime`) that knows how to build
+a CLI command for its own agent binary. Adding a new runtime is a ~50 LOC
+Go file plus an install recipe in the imagebuilder catalog.
 
 | Runtime | Base Image | Status |
 |---------|-----------|--------|
 | Claude Code | node:20 | Available |
-| Pi | node:20 | Available |
-| Aider | python:3.12-slim | Available |
 | Codex | node:20 | Planned |
+| Aider | python:3.12-slim | Planned |
 | OpenCode | debian:bookworm-slim | Planned |
 | Gemini | node:20 | Planned |
 
