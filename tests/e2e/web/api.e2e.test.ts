@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { createSpwnHome } from "../../setup/helpers.js";
 
 /**
- * E2E tests for Observatory API routes.
+ * E2E tests for spwn API routes.
  *
  * These tests validate the Go API server contracts. They run against
  * the Go API server at http://localhost:3001 when GO_API_URL is set,

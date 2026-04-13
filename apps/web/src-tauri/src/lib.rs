@@ -141,7 +141,7 @@ pub fn run() {
                 }
             }
 
-            println!("[spwn] Observatory ready");
+            println!("[spwn] Web UI ready");
             println!("[spwn] API: http://localhost:{api_port}");
             Ok(())
         })
@@ -212,7 +212,7 @@ fn augmented_path() -> String {
 
 fn which_spwn(augmented_path: &str) -> String {
     // In dev mode (`cargo tauri dev`), prefer the local build at
-    // ../../bin/spwn (relative to apps/observatory/src-tauri/) so
+    // ../../bin/spwn (relative to apps/web/src-tauri/) so
     // `make build && npm run tauri dev` uses the freshly compiled
     // binary instead of whatever's installed system-wide. This
     // prevents the "I just built it but the app still uses the old

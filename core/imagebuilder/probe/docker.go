@@ -1,7 +1,7 @@
 // Package probe contains environment probes that talk to the Docker
 // daemon directly via the official engine SDK. This is the canonical
 // place to ask "is Docker reachable, and if so where" — both the CLI
-// doctor command and the observatory API consume this package so the
+// doctor command and the HTTP API consume this package so the
 // answer is always identical.
 //
 // Why the SDK and not `docker info`?

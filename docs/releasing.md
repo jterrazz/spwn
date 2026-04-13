@@ -19,25 +19,25 @@ For architecture/security details see [`update-system.md`](./update-system.md).
 Generate the keypair:
 
 ```bash
-cd apps/observatory
-pnpm tauri signer generate -w ~/.tauri/spwn-observatory.key
+cd apps/web
+pnpm tauri signer generate -w ~/.tauri/spwn-web.key
 ```
 
 Output:
 ```
 Your keypair was generated successfully
-Private: ~/.tauri/spwn-observatory.key      (KEEP SECRET)
+Private: ~/.tauri/spwn-web.key      (KEEP SECRET)
 Public:  dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6...
 ```
 
 Paste the **private** key contents into `TAURI_SIGNING_PRIVATE_KEY`:
 
 ```bash
-gh secret set TAURI_SIGNING_PRIVATE_KEY < ~/.tauri/spwn-observatory.key
+gh secret set TAURI_SIGNING_PRIVATE_KEY < ~/.tauri/spwn-web.key
 gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD  # prompts
 ```
 
-Paste the **public** key into `apps/observatory/src-tauri/tauri.conf.json`:
+Paste the **public** key into `apps/web/src-tauri/tauri.conf.json`:
 
 ```json
 "plugins": {
@@ -75,9 +75,9 @@ Follow semver: `vMAJOR.MINOR.PATCH`.
 Keep these in sync with the tag you're about to push:
 
 ```bash
-# Observatory Tauri app
-vim apps/observatory/src-tauri/tauri.conf.json   # "version"
-vim apps/observatory/src-tauri/Cargo.toml        # [package] version
+# desktop Tauri app
+vim apps/web/src-tauri/tauri.conf.json   # "version"
+vim apps/web/src-tauri/Cargo.toml        # [package] version
 ```
 
 The CLI version is injected at build time via ldflags, so no source file
@@ -131,7 +131,7 @@ spwn --version                 # should print v1.2.3
 
 ### 5. Announce
 
-Nothing to do here — users running the CLI or Observatory will be notified
+Nothing to do here — users running the CLI or web UI will be notified
 automatically via the background check / Tauri updater.
 
 ---
@@ -148,7 +148,7 @@ goreleaser release --snapshot --clean
 ### Tauri build (no upload)
 
 ```bash
-cd apps/observatory
+cd apps/web
 pnpm tauri build
 # Bundles land in src-tauri/target/release/bundle/
 ```

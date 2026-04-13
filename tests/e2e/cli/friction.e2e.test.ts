@@ -100,7 +100,7 @@ describe("zero-friction UX", () => {
   test("no relative /api/ fetch calls in frontend (must use goApiUrl)", async () => {
     const result = await spwn("no-relative-api-fetch")
       .exec("grep", "-rn", 'fetch("/api/\\|fetch(`/api/',
-        "apps/observatory/src/", "--include=*.tsx", "--include=*.ts")
+        "apps/web/src/", "--include=*.tsx", "--include=*.ts")
       .run();
     // grep returns exit 1 when no matches (which is what we want)
     const out = stripAnsi(result.output).trim();

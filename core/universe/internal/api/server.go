@@ -1,4 +1,4 @@
-package observatory
+package api
 
 import (
 	"bufio"
@@ -30,7 +30,7 @@ import (
 
 const webVersionCheckInterval = 1 * time.Hour
 
-// Server serves the Observatory HTTP API.
+// Server serves the HTTP API.
 type Server struct {
 	state *state.Store
 	arch  *architect.Architect // nil = read-only mode
@@ -56,7 +56,7 @@ func (s *Server) SetSpawnArchitect(fn ArchitectSpawnFunc) {
 	s.spawnArchitectFn = fn
 }
 
-// New creates an Observatory server. arch may be nil for read-only mode.
+// New creates an API server. arch may be nil for read-only mode.
 func New(s *state.Store, arch *architect.Architect, addr string) *Server {
 	return &Server{state: s, arch: arch, addr: addr}
 }
@@ -182,7 +182,7 @@ func (s *Server) Start() error {
 		if r.URL.Path == "/" {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{
-				"name":    "spwn observatory API",
+				"name":    "spwn spwn API",
 				"version": foundation.Version,
 				"docs":    "/api/health",
 				"dashboard": "http://localhost:3000",
@@ -194,7 +194,7 @@ func (s *Server) Start() error {
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
 
 	s.srv = &http.Server{Addr: s.addr, Handler: mux}
-	fmt.Printf("Observatory API listening on %s\n", s.addr)
+	fmt.Printf("spwn API listening on %s\n", s.addr)
 	return s.srv.ListenAndServe()
 }
 
@@ -215,7 +215,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleSystemDocker reports the host Docker daemon status. Used by the
-// observatory banner and the onboarding wizard.
+// welcome banner and the onboarding wizard.
 func (s *Server) handleSystemDocker(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, probe.CheckDocker(r.Context()))
 }

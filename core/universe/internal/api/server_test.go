@@ -1,4 +1,4 @@
-package observatory
+package api
 
 import (
 	"bytes"
@@ -350,7 +350,7 @@ func TestServerGracefulShutdown(t *testing.T) {
 }
 
 // ============================================================
-// Integration tests for all Observatory API endpoints
+// Integration tests for all spwn API endpoints
 // ============================================================
 
 func TestStatus(t *testing.T) {

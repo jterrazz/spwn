@@ -1,7 +1,7 @@
 // Package activity provides a system-wide event log for spwn.
 //
 // Events are appended to ~/.spwn/activity.jsonl and surface on the
-// Observatory dashboard. Each event carries a natural-language phrase
+// web UI. Each event carries a natural-language phrase
 // authored at emission time by the code that knows the semantics.
 package activity
 

@@ -49,7 +49,7 @@ export async function checkForUpdatesOnStartup(): Promise<void> {
     if (!update?.available || !update.downloadAndInstall) return;
 
     const ok = await tauri.dialog.ask(
-      `spwn Observatory ${update.version ?? ""} is available.\n\n${update.notes ?? ""}\n\nInstall now? The app will restart.`,
+      `spwn web ${update.version ?? ""} is available.\n\n${update.notes ?? ""}\n\nInstall now? The app will restart.`,
       { title: "Update available", kind: "info" },
     );
     if (!ok) return;

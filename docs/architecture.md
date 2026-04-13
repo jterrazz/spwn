@@ -42,7 +42,7 @@ spwn/
 ├── examples/                   Bundled example gallery
 ├── apps/
 │   ├── cli/                      The spwn binary
-│   └── observatory/              Desktop app (Next.js + Tauri)
+│   └── web/                     Desktop app (Next.js + Tauri)
 └── platform/
     ├── gate-runtime/             Container-side Rust gate
     └── fixtures/                 Test fixtures

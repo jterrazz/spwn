@@ -22,11 +22,7 @@
 <br/>
 
 <p align="center">
-  <img src="doc/app-screenshot.webp" alt="spwn — the Observatory" width="720" />
-</p>
-
-<p align="center">
-  <sub>The Observatory — see every world, agent, and tool at a glance. Also ships as a full CLI.</sub>
+  <sub>spwn — see every world, agent, and tool at a glance. Also ships as a full CLI.</sub>
 </p>
 
 <br/>
@@ -125,7 +121,7 @@ Tool packs, skill files, and profiles — all stackable blocks. Mix <code>@spwn/
 </tr>
 <tr>
 <td align="center">
-<h3>🖥️ The Observatory</h3>
+<h3>🖥️ The Web UI</h3>
 See every world, agent, and tool at a glance. Know exactly what each agent can do, what it learned, and what sessions it ran. No more scattered configs.
 </td>
 <td align="center">
@@ -245,7 +241,7 @@ Monitoring and debugging agent behavior.
 
 | Platform | Status |
 |---|---|
-| Observatory (built-in GUI) | **Supported** |
+| Web UI (built-in GUI) | **Supported** |
 | [Langfuse](https://langfuse.com) | Planned |
 | [LangSmith](https://smith.langchain.com) | Planned |
 | [Helicone](https://helicone.ai) | Planned |

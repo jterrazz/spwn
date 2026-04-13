@@ -20,7 +20,7 @@ import (
 	"spwn.sh/core/universe/internal/labels"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
-	"spwn.sh/core/universe/internal/observatory"
+	"spwn.sh/core/universe/internal/api"
 	"spwn.sh/core/universe/internal/runtime"
 	"spwn.sh/core/universe/internal/state"
 	"spwn.sh/core/universe/internal/sync"
@@ -156,21 +156,21 @@ func ExpandTools(elems []string) []string {
 // org.yaml governance was never enforced; only org.Name was read.
 // Kept for migration 006 compatibility — do not use in new code.
 
-// --- Observatory ---
+// --- Web API ---
 
-// ObservatoryServer is the Observatory HTTP API server type.
-type ObservatoryServer = observatory.Server
+// APIServer is the HTTP API server type.
+type APIServer = api.Server
 
-// NewObservatoryServer returns an Observatory API server bound to addr that
+// NewAPIServer returns an spwn API server bound to addr that
 // serves world and agent state from the provided Store. arch may be nil for
 // read-only mode (no world spawn/destroy).
 //
-// The architect-spawn function is wired in here so the observatory can
+// The architect-spawn function is wired in here so the web UI can
 // invoke universe.StartArchitectDaemonWithOpts without an import cycle
-// (the observatory package can't import core/universe directly).
-func NewObservatoryServer(s *Store, arch *Architect, addr string) *ObservatoryServer {
-	srv := observatory.New(s, arch, addr)
-	srv.SetSpawnArchitect(func(ctx context.Context, opts observatory.ArchitectSpawnOpts) (string, error) {
+// (the web UI package can't import core/universe directly).
+func NewAPIServer(s *Store, arch *Architect, addr string) *APIServer {
+	srv := api.New(s, arch, addr)
+	srv.SetSpawnArchitect(func(ctx context.Context, opts api.ArchitectSpawnOpts) (string, error) {
 		return StartArchitectDaemonWithOpts(ctx, StartArchitectDaemonOpts{
 			ImageOverride: opts.ImageOverride,
 			LogWriter:     opts.LogWriter,
@@ -278,7 +278,7 @@ type ArchitectDaemonInfo struct {
 // StartArchitectDaemonOpts configures architect daemon spawn. All
 // fields are optional. The OnProgress callback is the canonical place
 // to surface real-time spawn diagnostics — both the CLI stepper and
-// the observatory's status endpoint feed off it.
+// the web UI's status endpoint feed off it.
 type StartArchitectDaemonOpts struct {
 	// ImageOverride lets the caller pin a specific architect image
 	// (used by tests and SPWN_ARCHITECT_IMAGE). When empty, the
@@ -289,7 +289,7 @@ type StartArchitectDaemonOpts struct {
 	LogWriter io.Writer
 	// OnProgress is called at each step of the spawn pipeline with
 	// (event, detail) pairs. Events are stable strings that the
-	// observatory polls; detail is a free-form human-readable note.
+	// the API polls; detail is a free-form human-readable note.
 	OnProgress func(event, detail string)
 }
 

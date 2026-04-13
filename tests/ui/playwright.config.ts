@@ -44,7 +44,7 @@ export default defineConfig({
     },
     {
       command: "npx next dev -p 1420",
-      cwd: resolve(REPO_ROOT, "apps/observatory"),
+      cwd: resolve(REPO_ROOT, "apps/web"),
       port: 1420,
       timeout: 30_000,
       reuseExistingServer: !process.env.CI,

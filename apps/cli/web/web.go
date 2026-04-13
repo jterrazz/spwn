@@ -1,4 +1,4 @@
-// Package web implements `spwn web` — the local web UI (Observatory).
+// Package web implements `spwn web` — the local web UI.
 //
 // One command, no subcommands: it starts the Next.js frontend, the Go
 // API server, and opens a browser tab. Ctrl+C tears everything down.
@@ -29,7 +29,7 @@ var (
 var Cmd = &cobra.Command{
 	Use:   "web",
 	Short: "Open the local web UI",
-	Long: `Starts the Observatory (Next.js frontend + Go API server) and opens it
+	Long: `Starts the Web UI (Next.js frontend + Go API server) and opens it
 in your default browser. Blocks until Ctrl+C.`,
 	RunE: runWeb,
 }
@@ -47,16 +47,16 @@ func runWeb(cmd *cobra.Command, args []string) error {
 	fmt.Fprintln(w)
 
 	// Start the Next.js frontend in the background
-	observatoryDir := findObservatoryDir()
+	webDir := findWebDir()
 	var webCmd *exec.Cmd
 	webURL := "http://localhost:3000"
 
-	if _, err := os.Stat(filepath.Join(observatoryDir, "package.json")); err == nil {
+	if _, err := os.Stat(filepath.Join(webDir, "package.json")); err == nil {
 		webCmd = exec.Command("npx", "next", "start", "-p", "3000", "-H", "0.0.0.0")
 	} else {
 		webCmd = exec.Command("npx", "next", "dev", "-p", "3000", "-H", "0.0.0.0")
 	}
-	webCmd.Dir = observatoryDir
+	webCmd.Dir = webDir
 	webCmd.Stdout = nil
 	webCmd.Stderr = nil
 
@@ -68,7 +68,7 @@ func runWeb(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		webCmd = nil
-		fmt.Fprintf(w, "  %s  Frontend  %s\n", ui.Yellow("⚠"), ui.Faint("not available (run: cd apps/observatory && npm install)"))
+		fmt.Fprintf(w, "  %s  Frontend  %s\n", ui.Yellow("⚠"), ui.Faint("not available (run: cd apps/web && npm install)"))
 	}
 
 	fmt.Fprintln(w)
@@ -112,7 +112,7 @@ func runWeb(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	srv := universe.NewObservatoryServer(store, arch, ":"+portFlag)
+	srv := universe.NewAPIServer(store, arch, ":"+portFlag)
 	return srv.Start()
 }
 
@@ -130,15 +130,15 @@ func openBrowser(url string) error {
 	return cmd.Start()
 }
 
-// findObservatoryDir locates the observatory Next.js app.
-func findObservatoryDir() string {
+// findWebDir locates the web UI Next.js app.
+func findWebDir() string {
 	candidates := []string{
-		"apps/observatory",
-		"../apps/observatory",
-		filepath.Join(os.Getenv("HOME"), "Developer/spwn/apps/observatory"),
+		"apps/web",
+		"../apps/web",
+		filepath.Join(os.Getenv("HOME"), "Developer/spwn/apps/web"),
 	}
 	if exe, err := os.Executable(); err == nil {
-		candidates = append(candidates, filepath.Join(filepath.Dir(exe), "..", "apps", "observatory"))
+		candidates = append(candidates, filepath.Join(filepath.Dir(exe), "..", "apps", "web"))
 	}
 	for _, c := range candidates {
 		if _, err := os.Stat(filepath.Join(c, "package.json")); err == nil {
@@ -146,7 +146,7 @@ func findObservatoryDir() string {
 			return abs
 		}
 	}
-	return "apps/observatory"
+	return "apps/web"
 }
 
 // getLanIP returns the first non-loopback IPv4 address, or "" if none found.

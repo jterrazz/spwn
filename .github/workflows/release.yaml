@@ -56,7 +56,7 @@ jobs:
     needs: cli
     uses: jterrazz/jterrazz-workflows/.github/workflows/release-tauri.yaml@main
     with:
-      project-path: apps/observatory
+      project-path: apps/web
       go-version: "1.25"
       pre-build-script: |
         # Build the CLI sidecar that the Tauri app will spawn at runtime.

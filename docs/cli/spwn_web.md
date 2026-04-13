@@ -9,7 +9,7 @@ Open the local web UI
 
 ### Synopsis
 
-Starts the Observatory (Next.js frontend + Go API server) and opens it
+Starts the web UI (Next.js frontend + Go API server) and opens it
 in your default browser. Blocks until Ctrl+C.
 
 ```

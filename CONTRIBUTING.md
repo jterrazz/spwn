@@ -33,7 +33,7 @@ core/                   Domain libraries (pure logic, no I/O at boundary)
 
 apps/                   Deployable consumers
   cli/                    The spwn binary (Cobra → domain APIs → output)
-  observatory/            Dashboard (planned)
+  web/                     Dashboard
 
 platform/               Build infrastructure
   images/                 Docker images (base, test)

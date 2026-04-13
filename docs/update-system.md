@@ -13,7 +13,7 @@ Two things are distributed:
 | Artifact              | Channel                 | Auto-update mechanism                     |
 | --------------------- | ----------------------- | ----------------------------------------- |
 | `spwn` CLI binary     | GitHub Releases (tar.gz) | `spwn upgrade` + background version check |
-| spwn Observatory.app  | GitHub Releases (bundles)| Tauri updater plugin → `latest.json`      |
+| spwn spwn.app  | GitHub Releases (bundles)| Tauri updater plugin → `latest.json`      |
 
 Both are built from the same git tag (`vX.Y.Z`). A single `git push --tags`
 triggers the entire pipeline.
@@ -99,7 +99,7 @@ spwn upgrade --force         # reinstall current version
 
 ## Tauri desktop auto-update
 
-The Observatory desktop app uses the official
+The desktop app uses the official
 [`tauri-plugin-updater`](https://v2.tauri.app/plugin/updater/) plugin,
 which:
 
@@ -117,12 +117,12 @@ which:
 Generate the keypair once:
 
 ```bash
-cd apps/observatory
-pnpm tauri signer generate -w ~/.tauri/spwn-observatory.key
+cd apps/web
+pnpm tauri signer generate -w ~/.tauri/spwn-web.key
 ```
 
 This produces two files:
-- **Private key** (`~/.tauri/spwn-observatory.key`) — stored in
+- **Private key** (`~/.tauri/spwn-web.key`) — stored in
   GitHub Secrets as `TAURI_SIGNING_PRIVATE_KEY`.
 - **Public key** (printed to stdout) — pasted into `tauri.conf.json`
   under `plugins.updater.pubkey`.
@@ -143,7 +143,7 @@ the key.
   "platforms": {
     "darwin-aarch64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJp...",
-      "url": "https://github.com/.../spwn-observatory_0.11.0_aarch64.app.tar.gz"
+      "url": "https://github.com/.../spwn-web_0.11.0_aarch64.app.tar.gz"
     },
     "darwin-x86_64":  { "signature": "...", "url": "..." },
     "linux-x86_64":   { "signature": "...", "url": "..." }
@@ -211,9 +211,9 @@ Verify the version, platform URLs, and that signatures are populated.
 
 ## Security notes
 
-- **Never commit `~/.tauri/spwn-observatory.key`.** It's the only thing
+- **Never commit `~/.tauri/spwn-web.key`.** It's the only thing
   between the public and arbitrary code execution inside every user's
-  Observatory instance. GitHub Secrets is the correct home.
+  web UI instance. GitHub Secrets is the correct home.
 - **Pub-key rotation.** If the private key is ever leaked, publish a new
   release with a rotated pubkey AND tell users to reinstall manually (the
   old app cannot verify signatures from the new key).
@@ -231,12 +231,12 @@ Verify the version, platform URLs, and that signatures are populated.
 apps/cli/upgrade.go                     # spwn upgrade command
 apps/cli/version_check.go               # background version check
 core/foundation/update/                 # reusable update logic + tests
-apps/observatory/src-tauri/tauri.conf.json        # updater endpoint + pubkey
-apps/observatory/src-tauri/Cargo.toml             # tauri-plugin-updater dep
-apps/observatory/src-tauri/src/lib.rs             # plugin registration
-apps/observatory/src-tauri/capabilities/default.json  # updater:default
-apps/observatory/src/lib/tauri-updater.ts         # frontend check + dialog
-apps/observatory/src/components/app-shell.tsx     # startup hook
+apps/web/src-tauri/tauri.conf.json        # updater endpoint + pubkey
+apps/web/src-tauri/Cargo.toml             # tauri-plugin-updater dep
+apps/web/src-tauri/src/lib.rs             # plugin registration
+apps/web/src-tauri/capabilities/default.json  # updater:default
+apps/web/src/lib/tauri-updater.ts         # frontend check + dialog
+apps/web/src/components/app-shell.tsx     # startup hook
 docs/update-system.md                   # this file
 docs/releasing.md                       # release runbook
 ```

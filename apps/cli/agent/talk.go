@@ -64,7 +64,7 @@ If no message is provided, opens an interactive session inside the container.`,
 			return err
 		}
 
-		// Suppress stepper output in stream-json mode (observatory reads raw JSON)
+		// Suppress stepper output in stream-json mode (web UI reads raw JSON)
 		if talkOutputFormat != "stream-json" {
 			s.Blank()
 			s.Info("Agent:", name)
@@ -155,10 +155,10 @@ If no message is provided, opens an interactive session inside the container.`,
 			}
 
 			if talkOutputFormat == "stream-json" {
-				// Streaming mode (used by the observatory): tee stdout so we
+				// Streaming mode (used by the web UI): tee stdout so we
 				// can both forward each line to the caller AND scan it for the
 				// runtime's session/thread id. Without this scan, every
-				// observatory message starts a fresh conversation — the #1
+				// web UI message starts a fresh conversation — the #1
 				// reported "agent forgets" bug.
 				stdoutPipe, pipeErr := execCmd.StdoutPipe()
 				if pipeErr != nil {
@@ -173,7 +173,7 @@ If no message is provided, opens an interactive session inside the container.`,
 				scanner.Buffer(make([]byte, 1024*1024), 4*1024*1024)
 				for scanner.Scan() {
 					line := scanner.Bytes()
-					// Forward verbatim so the observatory's SSE relay still
+					// Forward verbatim so the web UI's SSE relay still
 					// sees the original event stream byte-for-byte.
 					_, _ = os.Stdout.Write(line)
 					_, _ = os.Stdout.Write([]byte{'\n'})

@@ -195,7 +195,7 @@ spwn/
 │   │       ├── provider/            #     Anthropic + OpenAI adapters (Provider port)
 │   │       ├── channel/             #     CLI adapter (Channel port)
 │   │       ├── get/                  #     LocalRegistry adapter (Get/Marketplace port)
-│   │       ├── observatory/         #     HTTP API server (/api/worlds, /api/agents)
+│   │       ├── api/                 #     HTTP API server (internal) (/api/worlds, /api/agents)
 │   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
 │   │       ├── physics/             #     Physics/faculties generation
 │   │       ├── manifest/            #     Config parsing (world.yaml, agent.yaml)

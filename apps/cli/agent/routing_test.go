@@ -10,7 +10,7 @@ import (
 // These tests pin the routing rules for "talk to agent X in world Y". The
 // original bug: five worlds all had agent "qa"; the routing returned the
 // first matching world regardless of which world the user was talking from.
-// The observatory handler was then execing `spwn agent talk qa ...` without
+// The api handler was then execing `spwn agent talk qa ...` without
 // a world pin, so messages sent from "The Test" ended up in "Matrix" or
 // another world's container.
 

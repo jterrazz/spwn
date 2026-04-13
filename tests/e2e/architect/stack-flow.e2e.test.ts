@@ -17,7 +17,7 @@ import { createSpwnHome } from "../../setup/helpers.js";
  * - Stack file read/write operations
  * - Task counting (pending/completed KPIs)
  * - Stack response parsing (action markers)
- * - Observatory read-only Stack panel constraints
+ * - Web read-only Stack panel constraints
  */
 describe("architect Stack flow", () => {
   let home: string;
@@ -192,21 +192,21 @@ describe("architect Stack flow", () => {
   });
 
   // ──────────────────────────────────────────────
-  // Test 14: Stack panel in observatory is read-only
+  // Test 14: Stack panel in the web UI is read-only
   // ──────────────────────────────────────────────
-  test("Stack panel in observatory is read-only (no Add Stack input)", () => {
-    // We verify this by checking the Observatory page source.
+  test("Stack panel in the web UI is read-only (no Add Stack input)", () => {
+    // We verify this by checking the web UI page source.
     // The architect page.tsx uses parseStackMd() to display Stacks
     // but does NOT expose any "add" input/form for manual Stack creation.
 
-    // GIVEN — the Observatory architect page source
+    // GIVEN — the web UI architect page source
     const pagePath = join(
       home,
       "..",
       "..",
       "..",
       "apps",
-      "observatory",
+      "web",
       "src",
       "app",
       "architect",
@@ -220,7 +220,7 @@ describe("architect Stack flow", () => {
       "..",
       "..",
       "apps",
-      "observatory",
+      "web",
       "src",
       "app",
       "architect",

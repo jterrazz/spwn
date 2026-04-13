@@ -1,4 +1,4 @@
-package observatory
+package api
 
 import (
 	"bytes"
@@ -9,8 +9,8 @@ import (
 )
 
 // ArchitectSpawnOpts mirrors universe.StartArchitectDaemonOpts but
-// lives in the observatory package so we don't create an import cycle
-// (the universe public package imports observatory). The cli wires
+// lives in the api package so we don't create an import cycle
+// (the universe public package imports the api package). The cli wires
 // universe.StartArchitectDaemonWithOpts in via Server.SpawnArchitect.
 type ArchitectSpawnOpts struct {
 	ImageOverride string
@@ -19,12 +19,12 @@ type ArchitectSpawnOpts struct {
 }
 
 // ArchitectSpawnFunc is the signature the parent universe package
-// implements. The observatory holds it as a function value injected
+// implements. The the API holds it as a function value injected
 // at server construction time.
 type ArchitectSpawnFunc func(ctx context.Context, opts ArchitectSpawnOpts) (string, error)
 
 // architectSpawn is the in-memory record of an in-progress (or
-// just-completed) architect daemon spawn. The observatory exposes its
+// just-completed) architect daemon spawn. The the API exposes its
 // fields via /api/architect/status so the desktop app can render
 // real-time progress instead of guessing from elapsed time.
 //
@@ -119,7 +119,7 @@ func (s *Server) startArchitectAsync(imageOverride string) error {
 	return nil
 }
 
-var errSpawnNotWired = errSpawn("architect spawn function not wired into observatory")
+var errSpawnNotWired = errSpawn("architect spawn function not wired into the api server")
 
 type errSpawn string
 

@@ -1,4 +1,4 @@
-package observatory
+package api
 
 import (
 	"encoding/json"

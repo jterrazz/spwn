@@ -10,7 +10,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Observatory error:", error);
+    console.error("Web UI error:", error);
   }, [error]);
 
   return (

@@ -1,6 +1,6 @@
 {
   "identifier": "default",
-  "description": "Default permissions for the Observatory app",
+  "description": "Default permissions for the desktop app",
   "windows": ["main"],
   "permissions": [
     "core:default",
