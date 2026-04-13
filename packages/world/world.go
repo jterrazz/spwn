@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sort"
 	"strings"
 	"time"
 
@@ -16,14 +15,12 @@ import (
 	"spwn.sh/packages/foundation/auth"
 	"spwn.sh/packages/world/internal/architect"
 	"spwn.sh/packages/world/internal/backend"
-	"spwn.sh/packages/world/internal/claw"
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/api"
 	"spwn.sh/packages/world/internal/runtime"
 	"spwn.sh/packages/world/internal/state"
-	"spwn.sh/packages/world/internal/sync"
 
 	containerTypes "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -64,9 +61,6 @@ type AgentManifest = manifest.AgentManifest
 // OrgManifest is deprecated — org.yaml is no longer used.
 // Kept temporarily for migration compatibility.
 type OrgManifest = manifest.OrgManifest
-
-// Re-export state types.
-type ClawState = state.ClawState
 
 // --- Architect constructors ---
 
@@ -144,18 +138,6 @@ func ApplyDefaults(m *Manifest) {
 	manifest.ApplyDefaults(m)
 }
 
-// ExpandTools resolves @pack references into individual binary names and
-// deduplicates the resulting list.
-func ExpandTools(elems []string) []string {
-	return manifest.ExpandTools(elems)
-}
-
-// --- World manifest operations ---
-
-// Deprecated: LoadOrg, LoadOrgPath, CreateOrg are no longer used.
-// org.yaml governance was never enforced; only org.Name was read.
-// Kept for migration 006 compatibility — do not use in new code.
-
 // --- Web API ---
 
 // APIServer is the HTTP API server type.
@@ -180,56 +162,7 @@ func NewAPIServer(s *Store, arch *Architect, addr string) *APIServer {
 	return srv
 }
 
-// --- Git sync operations ---
-
-// SyncToGit commits and pushes pending ~/.spwn/ changes to the given git
-// repository and branch.
-func SyncToGit(repo, branch string) error { return sync.SyncToGit(repo, branch) }
-
-// PullFromGit fetches and applies the latest changes from the given git
-// repository and branch into ~/.spwn/.
-func PullFromGit(repo, branch string) error { return sync.PullFromGit(repo, branch) }
-
-// --- Claw state operations ---
-
-// LoadClawState reads the Claw daemon state from disk (~/.spwn/claw.json).
-func LoadClawState() (*ClawState, error) { return state.LoadClawState() }
-
-// SaveClawState persists the Claw daemon state to disk (~/.spwn/claw.json).
-func SaveClawState(s *ClawState) error { return state.SaveClawState(s) }
-
-// --- Runtime / Claw discovery ---
-
-// GenerateRuntimeDockerfile creates a Dockerfile for the given runtime.
-func GenerateRuntimeDockerfile(runtimeName string) (string, error) {
-	rt, err := runtime.Get(runtimeName)
-	if err != nil {
-		return "", err
-	}
-	return runtime.GenerateDockerfile(rt), nil
-}
-
-// ListRuntimes returns all registered runtime names.
-func ListRuntimes() []string {
-	all := runtime.All()
-	names := make([]string, 0, len(all))
-	for name := range all {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names
-}
-
-// ListClaws returns all registered claw names.
-func ListClaws() []string {
-	all := claw.All()
-	names := make([]string, 0, len(all))
-	for name := range all {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names
-}
+// --- Runtime ---
 
 // RuntimeSpawnConfig holds the parameters for building a runtime command.
 type RuntimeSpawnConfig = runtime.SpawnConfig
@@ -242,24 +175,6 @@ func BuildRuntimeCommand(runtimeName string, cfg RuntimeSpawnConfig) ([]string, 
 		return nil, err
 	}
 	return rt.BuildCommand(cfg), nil
-}
-
-// RuntimeAvailable returns true if the named runtime is production-ready.
-func RuntimeAvailable(name string) bool {
-	r, err := runtime.Get(name)
-	if err != nil {
-		return false
-	}
-	return r.Available()
-}
-
-// ClawAvailable returns true if the named claw adapter is production-ready.
-func ClawAvailable(name string) bool {
-	c, err := claw.Get(name)
-	if err != nil {
-		return false
-	}
-	return c.Available()
 }
 
 // --- Architect Daemon operations ---
@@ -432,13 +347,6 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 		return "", fmt.Errorf("starting architect container: %w", err)
 	}
 
-	// Save claw state
-	clawState := &state.ClawState{
-		Active:    true,
-		StartedAt: time.Now(),
-	}
-	_ = state.SaveClawState(clawState)
-
 	activity.Log(activity.Event{
 		Type:   activity.TypeArchitectStarted,
 		Actor:  "architect",
@@ -475,12 +383,6 @@ func StopArchitectDaemon(ctx context.Context) error {
 	if err := docker.Remove(ctx, foundation.ArchitectContainerName); err != nil {
 		return fmt.Errorf("removing architect container: %w", err)
 	}
-
-	// Update claw state
-	clawState := &state.ClawState{
-		Active: false,
-	}
-	_ = state.SaveClawState(clawState)
 
 	activity.Log(activity.Event{
 		Type:   activity.TypeArchitectStopped,

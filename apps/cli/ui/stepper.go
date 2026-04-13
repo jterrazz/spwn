@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -164,38 +163,3 @@ func (s *Stepper) stopSpinner() {
 	}
 }
 
-// indentWriter prefixes each line with a string. Kept for potential
-// reuse; currently unreferenced.
-type indentWriter struct {
-	w      io.Writer
-	prefix string
-	atBOL  bool
-}
-
-func (iw *indentWriter) Write(p []byte) (int, error) {
-	written := 0
-	for len(p) > 0 {
-		if iw.atBOL || written == 0 {
-			if _, err := fmt.Fprint(iw.w, iw.prefix); err != nil {
-				return written, err
-			}
-			iw.atBOL = false
-		}
-
-		idx := strings.IndexByte(string(p), '\n')
-		if idx < 0 {
-			n, err := iw.w.Write(p)
-			written += n
-			return written, err
-		}
-
-		n, err := iw.w.Write(p[:idx+1])
-		written += n
-		if err != nil {
-			return written, err
-		}
-		p = p[idx+1:]
-		iw.atBOL = true
-	}
-	return written, nil
-}

@@ -13,10 +13,6 @@ import (
 
 	// Register the claude-code runtime adapter
 	_ "spwn.sh/packages/world/internal/runtime/claude"
-
-	// Register all claw adapters
-	_ "spwn.sh/packages/world/internal/claw/hermes"
-	_ "spwn.sh/packages/world/internal/claw/zeroclaw"
 )
 
 // Architect orchestrates world lifecycle.

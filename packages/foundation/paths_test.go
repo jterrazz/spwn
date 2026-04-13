@@ -70,16 +70,6 @@ func TestOrgPath(t *testing.T) {
 	}
 }
 
-func TestClawStatePath(t *testing.T) {
-	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-
-	want := "/tmp/test-spwn/claw/claw.json"
-	got := ClawStatePath()
-	if got != want {
-		t.Errorf("ClawStatePath() = %q, want %q", got, want)
-	}
-}
-
 func TestSkillsDir(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
 

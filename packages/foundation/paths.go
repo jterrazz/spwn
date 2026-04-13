@@ -42,11 +42,6 @@ func OrgPath() string {
 	return filepath.Join(BaseDir(), "org.yaml")
 }
 
-// ClawStatePath returns the path to the Claw state file.
-func ClawStatePath() string {
-	return filepath.Join(BaseDir(), ClawSubDir, ClawStateFileName)
-}
-
 // SkillsDir returns the path to the skills directory.
 func SkillsDir() string {
 	return filepath.Join(BaseDir(), SkillsSubDir)
