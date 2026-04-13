@@ -5,6 +5,7 @@ use (
 	./packages/agent
 	./packages/foundation
 	./packages/imagebuilder
+	./packages/manifest
 	./packages/messenger
 	./packages/migration
 	./packages/world

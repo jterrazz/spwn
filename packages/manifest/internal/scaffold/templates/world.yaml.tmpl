@@ -1,0 +1,16 @@
+# The sandbox your agents live in.
+# Physics constants are hard resource limits enforced by the runtime.
+# Tools listed here get installed into every world container this
+# config spawns.
+
+physics:
+  constants:
+    cpu: 2
+    memory: 1g
+    disk: 4g
+    timeout: 30m
+
+tools:
+  - "@spwn/unix"         # bash, coreutils, grep, sed, awk, find
+  - "@spwn/git"          # version control
+  - "@spwn/claude-code"  # the thinking engine
