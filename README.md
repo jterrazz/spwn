@@ -157,20 +157,62 @@ spwn talk neo "Refactor the auth module to use sessions"
 # neo remembers the codebase next time
 ```
 
+<br/>
+
+## Projects are per-repository
+
+A spwn project lives **in the repo**, not in your home directory.
+`spwn init` turns any directory into a project — the same way `git init`
+turns any directory into a git repo, or `docker init` drops a Dockerfile
+and compose file. Commit your agents, your worlds, your tool composition
+alongside your code.
+
+```
+my-project/
+├── spwn.yaml               # manifest — the "package.json" of spwn
+├── spwn/                   # committed project assets
+│   ├── agents/             #   your agents — committed, travel with the repo
+│   ├── worlds/             #   custom world configs
+│   ├── tools/              #   `spwn tool get @community/foo` → spwn/tools/foo/
+│   └── skills/             #   `spwn skill get @community/review` → spwn/skills/review/
+└── .spwn/                  # gitignored local state (live world IDs, cache)
+```
+
+`spwn.yaml` is tiny — it declares which world and which agents this repo
+runs. Everyone who clones the repo gets the same agents, the same world
+physics, the same tool composition. Reproducibility by construction.
+
+```yaml
+# spwn.yaml
+version: 1
+name: acme-api
+workspace: .
+
+world: default
+agents:
+  - default
+```
+
+**`~/.spwn/` is for your user identity only** — credentials, daemon
+state, activity log. Agents and worlds don't live there. If you want to
+share an agent across projects, publish it to a registry (`spwn agent
+publish`) and `spwn agent get` it in the next project.
+
+<br/>
+
 ## How agents work
 
 Each agent is a directory of markdown files — human-readable, git-friendly, no database:
 
 ```
-~/.spwn/agents/neo/
+spwn/agents/neo/
 ├── agent.yaml                # composition: tools, skills, profile, runtime
 ├── CLAUDE.md                 # entry point the runtime reads on startup
 ├── core/                     # identity — profile.md, purpose.md, traits.md
 ├── skills/                   # procedures and checklists
 ├── knowledge/                # facts about the codebase
 ├── playbooks/                # workflows promoted from experience
-├── journal/                  # session history — one file per run
-└── worlds/<world-id>/        # per-deployment inbox/outbox/notes/role.md
+└── journal/                  # session history — one file per run
 ```
 
 Agents evolve through three mechanisms:
@@ -188,7 +230,7 @@ Agents evolve through three mechanisms:
 An agent is composed from three kinds of blocks: **tools**, **skills**, and a **profile**. Each block is a file. Stack them into an agent manifest:
 
 ```yaml
-# ~/.spwn/agents/neo/agent.yaml
+# spwn/agents/neo/agent.yaml
 name: neo
 runtime: claude-code
 
