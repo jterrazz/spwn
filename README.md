@@ -323,12 +323,6 @@ Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) â€
 
 - [Website](https://spwn.sh) &middot; [Docs](https://spwn.sh/docs) &middot; [Manifesto](https://spwn.sh/manifesto) &middot; [Issues](https://github.com/jterrazz/spwn/issues)
 
-<br/>
-
-## License
-
-MIT Â© 2025 Spwn
-
 ---
 
 <p align="center">
