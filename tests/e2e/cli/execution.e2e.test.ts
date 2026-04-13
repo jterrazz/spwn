@@ -132,7 +132,7 @@ describe("CLI execution — world aliases", () => {
     expectLine(inspectResult.output, /Status:\s+(running|idle)/);
   });
 
-  test("'spwn snap' alias creates snapshot", () => {
+  test("'spwn snap save' creates snapshot", () => {
     // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -142,12 +142,12 @@ describe("CLI execution — world aliases", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — using the 'snap' alias
-    const snapResult = ctx.spwn(["snap", id]);
+    // WHEN — saving via spwn snap save
+    const snapResult = ctx.spwn(["snap", "save", id]);
 
     // THEN — snapshot created
     expect(snapResult.exitCode).toBe(0);
-    expectLine(snapResult.output, /✓ Snapshot saved/);
+    expectLine(snapResult.output, /[Ss]aved snapshot|[Ss]nap(shot)? saved/);
   });
 });
 
@@ -213,39 +213,6 @@ describe("CLI execution — agent commands", () => {
     expect(tableLines.length).toBe(0);
   });
 
-  test("'spwn profile' shows character sheet", async () => {
-    // GIVEN — agent exists
-    createAgent(home, "testbot");
-
-    // WHEN — viewing profile
-    const result = await spwn("profile testbot")
-      .exec("profile testbot")
-      .run();
-
-    // THEN — shows character sheet elements
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out).toContain("testbot");
-    expect(out).toContain("Role");
-    expect(out).toContain("worker");
-    expect(out).toContain("Identity");
-  });
-
-  test("'spwn profile <agent> purpose' shows not-set when missing", async () => {
-    // GIVEN — agent with no purpose file
-    createAgent(home, "testbot");
-
-    // WHEN — checking purpose
-    const result = await spwn("profile purpose")
-      .exec("profile testbot purpose")
-      .run();
-
-    // THEN — shows not set message
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out).toContain("Not set yet");
-  });
-
   test("'spwn agent ls' shows table with correct headers", async () => {
     // GIVEN — agents exist
     await spwn("create agent1").exec("agent new alpha").run();
@@ -263,26 +230,25 @@ describe("CLI execution — agent commands", () => {
     expect(stripAnsi(result.output)).toContain("beta");
   });
 
-  test("'spwn agent inspect' shows detailed info", async () => {
+  test("'spwn agent show' shows detailed info", async () => {
     // GIVEN — agent exists
-    await spwn("create for inspect").exec("agent new inspectme").run();
+    await spwn("create for show").exec("agent new inspectme").run();
 
     // WHEN — inspecting
-    const result = await spwn("agent inspect")
-      .exec("agent inspect inspectme")
+    const result = await spwn("agent show")
+      .exec("agent show inspectme")
       .run();
 
     // THEN — shows structured details
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /Agent:\s+inspectme/);
     expectLine(result.output, /World:\s+unattached/);
-    expectLine(result.output, /identity\/\s+default\.md/);
   });
 });
 
-// ── Attach command ──────────────────────────────────────────
+// ── Enter command ──────────────────────────────────────────
 
-describe("CLI execution — attach command", () => {
+describe("CLI execution — enter command", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 
@@ -300,33 +266,26 @@ describe("CLI execution — attach command", () => {
     }
   });
 
-  test("'spwn world attach <nonexistent-id>' returns clean error", async () => {
-    // WHEN — attaching to a non-existent world
-    const result = await spwn("attach nonexistent")
-      .exec("world attach w-fake-99999")
+  test("'spwn world enter <nonexistent-id>' returns clean error", async () => {
+    const result = await spwn("enter nonexistent")
+      .exec("world enter w-fake-99999")
       .run();
 
-    // THEN — returns non-zero exit code
     expect(result.exitCode).not.toBe(0);
 
-    // AND — error output contains useful message (not a raw stack trace)
-    const output = stripAnsi(result.output);
     expectNoLine(result.output, /panic:/);
     expectNoLine(result.output, /goroutine /);
   });
 
-  test("'spwn world attach --help' shows usage", async () => {
-    // WHEN — requesting attach help
-    const result = await spwn("attach help")
-      .exec("world attach --help")
+  test("'spwn world enter --help' shows usage", async () => {
+    const result = await spwn("enter help")
+      .exec("world enter --help")
       .run();
 
-    // THEN — exit code 0
     expect(result.exitCode).toBe(0);
 
-    // AND — output contains usage information
     const output = stripAnsi(result.output);
-    expect(output).toContain("attach");
+    expect(output).toContain("enter");
     expect(output).toContain("world-id");
   });
 });
@@ -349,76 +308,6 @@ describe("CLI execution — global flags", () => {
     } else {
       delete process.env.SPWN_HOME;
     }
-  });
-
-  test("'--json' flag produces valid JSON for status", async () => {
-    // GIVEN — initialized home
-    await spwn("init").exec("init").run();
-
-    // WHEN — running status with --json
-    const result = await spwn("status json")
-      .exec("status --json")
-      .run();
-
-    // THEN — output is valid JSON
-    expect(result.exitCode).toBe(0);
-    const jsonOutput = result.stdout.trim();
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
-
-    // AND — JSON contains expected fields
-    const parsed = JSON.parse(jsonOutput);
-    expect(parsed).toBeDefined();
-    expect(typeof parsed).toBe("object");
-  });
-
-  test("'--json' flag produces valid JSON for agent ls", async () => {
-    // GIVEN — agents exist
-    await spwn("init").exec("init").run();
-    await spwn("create neo").exec("agent new neo").run();
-
-    // WHEN — listing agents with --json
-    const result = await spwn("agent ls json")
-      .exec("agent ls --json")
-      .run();
-
-    // THEN — output is valid JSON
-    expect(result.exitCode).toBe(0);
-    const jsonOutput = result.stdout.trim();
-    expect(() => JSON.parse(jsonOutput)).not.toThrow();
-
-    // AND — JSON is array or contains agents
-    const parsed = JSON.parse(jsonOutput);
-    expect(parsed).toBeDefined();
-  });
-
-  test("'--json' suppresses decorative output", async () => {
-    // GIVEN — initialized home
-    await spwn("init").exec("init").run();
-
-    // WHEN — running status with --json
-    const result = await spwn("status json decorative")
-      .exec("status --json")
-      .run();
-
-    // THEN — stdout should NOT contain box-drawing characters
-    const stdout = result.stdout;
-    expect(stdout).not.toContain("╭");
-    expect(stdout).not.toContain("╰");
-    expect(stdout).not.toContain("│");
-  });
-
-  test("'--quiet' flag suppresses output for agent new", async () => {
-    // WHEN — creating agent with --quiet
-    const result = await spwn("agent new quiet")
-      .exec("agent new quietbot --quiet")
-      .run();
-
-    // THEN — exit code 0 but minimal output
-    expect(result.exitCode).toBe(0);
-    // In quiet mode, output should be empty or minimal
-    const output = stripAnsi(result.output).trim();
-    // Quiet mode should have less output than normal (no status lines)
-    expect(output.split("\n").filter((l) => l.length > 0).length).toBeLessThanOrEqual(1);
   });
 
   test("'--version' shows version string", async () => {
@@ -457,16 +346,8 @@ describe("CLI execution — status command", () => {
 
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
-    expect(out).toContain("s p w n");
-  });
-
-  test("'spwn doctor' runs diagnostics", async () => {
-    const result = await spwn("doctor").exec("doctor").run();
-
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out).toContain("Docker");
-    expect(out).toContain("Version");
+    expect(out).toContain("spwn");
+    expect(out).toContain("Worlds");
   });
 
   test("'spwn auth' shows authentication status", async () => {

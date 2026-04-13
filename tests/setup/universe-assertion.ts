@@ -1,5 +1,4 @@
-import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { execSync, spawnSync } from "node:child_process";
 import { expect } from "vitest";
 
 /**
@@ -114,14 +113,17 @@ export class UniverseAssertion {
 
   constructor(
     private universeId: string,
-    private spwnHome: string,
+    _spwnHome: string,
   ) {
+    // Container labels are the source of truth — the world ID is also
+    // the container name (set at create time), so we resolve it via
+    // `docker inspect <name>` directly.
     try {
-      const stateRaw = readFileSync(`${spwnHome}/state.json`, "utf-8");
-      const state: Array<{ id: string; container_id: string }> =
-        JSON.parse(stateRaw);
-      const universe = state.find((u) => u.id === universeId);
-      this.containerId = universe?.container_id ?? null;
+      const id = execSync(
+        `docker inspect --format='{{.Id}}' ${universeId}`,
+        { encoding: "utf-8", timeout: 5000, stdio: ["pipe", "pipe", "ignore"] },
+      ).trim();
+      this.containerId = id || null;
     } catch {
       this.containerId = null;
     }
@@ -130,7 +132,7 @@ export class UniverseAssertion {
   private requireContainerId(): string {
     if (!this.containerId) {
       throw new Error(
-        `Universe ${this.universeId} not found in state — cannot inspect container`,
+        `Universe ${this.universeId} not found — no container with that name (looked up via docker inspect)`,
       );
     }
     return this.containerId;
@@ -217,12 +219,12 @@ export class UniverseAssertion {
 
   /** Get physics.md content */
   physics(): string {
-    return this.readFile("/universe/physics.md");
+    return this.readFile("/world/physics.md");
   }
 
   /** Get faculties.md content */
   faculties(): string {
-    return this.readFile("/universe/faculties.md");
+    return this.readFile("/world/faculties.md");
   }
 
   /** Read the mock agent probe output */
@@ -242,10 +244,19 @@ export class UniverseAssertion {
   /** Execute a command inside the container */
   exec(cmd: string): string {
     const cid = this.requireContainerId();
-    return execSync(`docker exec ${cid} sh -c '${cmd}'`, {
+    // Use the array form of spawnSync so node doesn't shell-interpret
+    // the command — single-quoted strings inside `cmd` would otherwise
+    // collide with the outer `sh -c '...'` quoting.
+    const result = spawnSync("docker", ["exec", cid, "sh", "-c", cmd], {
       encoding: "utf-8",
       timeout: 10000,
-    }).trim();
+    });
+    if (result.status !== 0) {
+      throw new Error(
+        `docker exec failed (exit ${result.status}): ${result.stderr || result.stdout}`,
+      );
+    }
+    return (result.stdout || "").trim();
   }
 
   /**

@@ -13,16 +13,12 @@ describe("CLI output", () => {
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("Quick Start:");
-    expect(out).toContain("Orchestration:");
+    expect(out).toContain("Coordination:");
     expect(out).toContain("System:");
     // Key commands present
-    for (const cmd of ["world", "agent", "init", "status", "doctor", "architect", "dash", "get", "upgrade", "up", "down", "ls", "profile", "msg", "snap"]) {
+    for (const cmd of ["world", "agent", "init", "architect", "web", "upgrade", "up", "down", "ls", "profile"]) {
       expect(out).toContain(cmd);
     }
-    // Flags
-    expect(out).toContain("--json");
-    expect(out).toContain("--quiet");
-    expect(out).toContain("--verbose");
   });
 
   test("world help lists subcommands", async () => {
@@ -31,7 +27,7 @@ describe("CLI output", () => {
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     // Custom grouped help uses section titles like "Lifecycle:", "Control:"
-    for (const sub of ["list", "inspect", "logs", "attach", "destroy", "snapshot", "restore"]) {
+    for (const sub of ["up", "ls", "inspect", "logs", "enter", "down"]) {
       expect(out).toContain(sub);
     }
   });
@@ -41,7 +37,7 @@ describe("CLI output", () => {
 
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
-    for (const sub of ["init", "list", "inspect", "export", "dream", "sleep", "fork", "talk"]) {
+    for (const sub of ["new", "ls", "show", "rm", "dream", "sleep", "fork", "talk", "send", "inbox"]) {
       expect(out).toContain(sub);
     }
   });
@@ -52,7 +48,7 @@ describe("CLI output", () => {
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("Commands:");
-    for (const sub of ["start", "stop", "status", "connect"]) {
+    for (const sub of ["start", "stop", "status", "talk", "logs"]) {
       expect(out).toContain(sub);
     }
   });
@@ -82,39 +78,6 @@ describe("CLI output", () => {
     expectLine(result.output, /unknown command "nonexistent" for "spwn"/);
   });
 
-  test("--json flag documented in help", async () => {
-    // WHEN — checking help output
-    const result = await spwn("json flag")
-      .exec("--help")
-      .run();
-
-    // THEN — --json is documented as a global flag
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /--json\s+Output as JSON/);
-  });
-
-  test("--quiet flag documented in help", async () => {
-    // WHEN — checking help output
-    const result = await spwn("quiet flag")
-      .exec("--help")
-      .run();
-
-    // THEN — --quiet is documented as a global flag
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /--quiet\s+Suppress/);
-  });
-
-  test("--verbose flag documented in help", async () => {
-    // WHEN — checking help output
-    const result = await spwn("verbose flag")
-      .exec("--help")
-      .run();
-
-    // THEN — --verbose is documented as a global flag
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /--verbose\s+Debug/);
-  });
-
   test("--version shows version", async () => {
     const result = await spwn("version")
       .exec("--version")
@@ -131,25 +94,6 @@ describe("CLI output", () => {
 
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("latest");
-  });
-
-  test("doctor runs diagnostic checks", async () => {
-    const result = await spwn("doctor")
-      .exec("doctor")
-      .run();
-
-    expect(result.exitCode).toBe(0);
-    expect(stripAnsi(result.output)).toContain("Docker");
-    expect(stripAnsi(result.output)).toContain("Version");
-  });
-
-  test("help lists doctor command", async () => {
-    const result = await spwn("help with doctor")
-      .exec("--help")
-      .run();
-
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /doctor\s+/);
   });
 
   test("help lists auth command", async () => {
@@ -170,7 +114,7 @@ describe("CLI output", () => {
     const out = stripAnsi(result.output);
     expect(out).toContain("PROVIDER");
     expect(out).toContain("STATUS");
-    expect(out).toContain("Anthropic");
+    expect(out.toLowerCase()).toContain("anthropic");
   });
 
   test("auth help lists subcommands", async () => {
@@ -187,15 +131,4 @@ describe("CLI output", () => {
 
 
 
-  test("doctor shows Universe label", async () => {
-    const result = await spwn("doctor universe")
-      .exec("doctor")
-      .run();
-
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out).toContain("Universe");
-    // Should NOT contain old "Organization" label
-    expect(out).not.toContain("Organization");
-  });
 });

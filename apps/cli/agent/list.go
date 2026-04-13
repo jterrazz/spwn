@@ -2,7 +2,6 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"spwn.sh/apps/cli/ui"
@@ -11,13 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	listJSON       bool
-	listFilterWorld string
-)
+var listFilterWorld string
 
 func init() {
-	listCmd.Flags().BoolVar(&listJSON, "json", false, "Output as JSON")
 	listCmd.Flags().StringVar(&listFilterWorld, "world", "", "Filter agents by world ID")
 	Cmd.AddCommand(listCmd)
 }
@@ -50,12 +45,6 @@ var listCmd = &cobra.Command{
 				}
 			}
 			agents = filtered
-		}
-
-		if listJSON {
-			data, _ := json.MarshalIndent(agents, "", "  ")
-			fmt.Println(string(data))
-			return nil
 		}
 
 		s := newStepper(cmd)

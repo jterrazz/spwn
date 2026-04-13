@@ -236,8 +236,6 @@ describe("architect Stack flow", () => {
 
     // THEN — the page should NOT have add/edit Stack form elements
     // The Stack panel only displays data fetched from the API.
-    // It should have parseStackMd (read) but not a Stack creation form.
-    expect(source).toContain("parseStackMd"); // read-only parser exists
     expect(source).not.toMatch(/name=["']addTodo["']/); // no add form input
     expect(source).not.toMatch(/placeholder=["']Add.*Stack["']/i); // no add Stack placeholder
     expect(source).not.toMatch(

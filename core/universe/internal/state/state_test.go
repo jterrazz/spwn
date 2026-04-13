@@ -55,9 +55,6 @@ func (f *fakeBackend) EnsureImageWithContext(context.Context, string, string, []
 func (f *fakeBackend) ImageVersion(context.Context, string, string) (string, error) {
 	return "", nil
 }
-func (f *fakeBackend) Logs(context.Context, string, backend.LogsConfig) (io.ReadCloser, error) {
-	return nil, nil
-}
 func (f *fakeBackend) ExecDetached(context.Context, string, backend.ExecConfig) error {
 	return nil
 }
@@ -74,7 +71,6 @@ func newWorldContainer(id, name, configName string, running bool) backend.Contai
 		ID:        id,
 		Name:      name,
 		Config:    configName,
-		Runtime:   "claude-code",
 		CreatedAt: time.Date(2026, 4, 11, 12, 0, 0, 0, time.UTC),
 		Agents: []models.AgentRecord{
 			{Name: "neo", AgentID: "a-neo-1", Role: "worker", Status: models.StatusIdle},

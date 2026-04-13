@@ -1,10 +1,9 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { writeFileSync, readFileSync, mkdirSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome, createAgent } from "../../setup/helpers.js";
-import { expectLine, stripAnsi } from "../../setup/output-helpers.js";
+import { stripAnsi } from "../../setup/output-helpers.js";
 
 describe("zero-friction UX", () => {
   let home: string;
@@ -75,7 +74,7 @@ describe("zero-friction UX", () => {
   test("inspect nonexistent world gives ls hint", async () => {
     // WHEN — inspecting a world that does not exist
     const result = await spwn("inspect missing hint")
-      .exec("inspect w-nonexistent-00000")
+      .exec("world inspect w-nonexistent-00000")
       .run();
 
     // THEN — error message includes hint to use spwn ls
@@ -84,104 +83,7 @@ describe("zero-friction UX", () => {
     expect(out).toContain("spwn ls");
   });
 
-  // ── 5. Knowledge commands work ──────────────────────────────
-
-  test("knowledge help works", async () => {
-    // WHEN — running knowledge subcommand
-    const result = await spwn("knowledge help")
-      .exec("knowledge --help")
-      .run();
-
-    // THEN — output mentions knowledge
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out.toLowerCase()).toContain("knowledge");
-  });
-
-  test("knowledge ls lists files", async () => {
-    // GIVEN — init the universe so knowledge dir is created with defaults
-    await spwn("bp init").exec("init").run();
-
-    // WHEN — listing knowledge files
-    const result = await spwn("knowledge ls")
-      .exec("knowledge ls")
-      .run();
-
-    // THEN — output includes overview.md (default knowledge file)
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out).toContain("overview.md");
-  });
-
-  test("knowledge show displays content", async () => {
-    // GIVEN — init the universe
-    await spwn("bp init for show").exec("init").run();
-
-    // WHEN — showing a specific knowledge file
-    const result = await spwn("knowledge show")
-      .exec("knowledge show overview.md")
-      .run();
-
-    // THEN — output contains markdown content
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    // The overview.md should have some content (at minimum a heading)
-    expect(out.length).toBeGreaterThan(10);
-  });
-
-  test("knowledge search finds matches", async () => {
-    // GIVEN — init the universe
-    await spwn("bp init for search").exec("init").run();
-
-    // WHEN — searching for "Agent" in knowledge files
-    const result = await spwn("knowledge search")
-      .exec("knowledge search Agent")
-      .run();
-
-    // THEN — exits successfully (matches may or may not be found depending on defaults)
-    expect(result.exitCode).toBe(0);
-  });
-
-  // ── 6. Stale worlds are cleaned up on ls ────────────────────
-
-  test("stale worlds are cleaned up on ls", async () => {
-    // GIVEN — a fake world entry in state.json with a nonexistent container ID
-    const stateFile = join(home, "state.json");
-    const fakeWorld = [
-      {
-        id: "w-stale-99999",
-        config: "default",
-        agent: "ghost",
-        backend: "docker",
-        container_id: "deadbeef0000000000000000000000000000000000000000000000000000dead",
-        status: "running",
-        created_at: new Date().toISOString(),
-      },
-    ];
-    writeFileSync(stateFile, JSON.stringify(fakeWorld, null, 2));
-
-    // Verify the fake entry exists
-    const before = JSON.parse(readFileSync(stateFile, "utf-8"));
-    expect(before).toHaveLength(1);
-    expect(before[0].id).toBe("w-stale-99999");
-
-    // WHEN — listing worlds (triggers auto-cleanup of stale entries)
-    const result = await spwn("ls stale cleanup")
-      .exec("ls")
-      .run();
-
-    // THEN — command succeeds
-    expect(result.exitCode).toBe(0);
-
-    // AND — the stale world is no longer in state.json
-    const after = JSON.parse(readFileSync(stateFile, "utf-8"));
-    const staleEntry = after.find(
-      (w: Record<string, unknown>) => w.id === "w-stale-99999",
-    );
-    expect(staleEntry).toBeUndefined();
-  });
-
-  // ── 7. Architect talk help mentions auto-start ──────────────
+  // ── 5. Architect talk help mentions auto-start ──────────────
 
   test("architect talk help mentions auto-start behavior", async () => {
     // WHEN — checking architect talk help

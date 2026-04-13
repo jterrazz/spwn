@@ -174,8 +174,7 @@ function FileTreeNode({
 
 interface KnowledgeBrowserProps {
   compact?: boolean;
-  worldId?: string;
-  architectMode?: boolean;
+  worldId: string;
   /** When provided, the parent owns the search state and this component
    *  hides its own search input (e.g. when a PageHeader action bar
    *  hosts an ExpandingSearch). */
@@ -183,7 +182,7 @@ interface KnowledgeBrowserProps {
   onSearchChange?: (value: string) => void;
 }
 
-export function KnowledgeBrowser({ compact = false, worldId, architectMode = false, searchQuery: externalSearch, onSearchChange }: KnowledgeBrowserProps) {
+export function KnowledgeBrowser({ compact = false, worldId, searchQuery: externalSearch, onSearchChange }: KnowledgeBrowserProps) {
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [internalSearch, setInternalSearch] = useState("");
@@ -194,12 +193,7 @@ export function KnowledgeBrowser({ compact = false, worldId, architectMode = fal
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
 
-  // Compute the correct API base path
-  const knowledgeApiBase = architectMode
-    ? "/api/architect/knowledge"
-    : worldId
-      ? `/api/worlds/${worldId}/knowledge`
-      : "/api/knowledge"; // fallback (shouldn't happen)
+  const knowledgeApiBase = `/api/worlds/${worldId}/knowledge`;
 
   useEffect(() => {
     const fetchFiles = async () => {

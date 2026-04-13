@@ -5,7 +5,7 @@ slug: "spwn-world-inspect"
 
 ## spwn world inspect
 
-Show world details, physics, and agent status
+Inspect a running world — physics, agents, status
 
 ```
 spwn world inspect <world-id> [flags]
@@ -17,15 +17,7 @@ spwn world inspect <world-id> [flags]
   -h, --help   help for inspect
 ```
 
-### Options inherited from parent commands
-
-```
-      --json      Output as JSON
-  -q, --quiet     Suppress non-essential output
-  -v, --verbose   Show debug information
-```
-
 ### SEE ALSO
 
-* [spwn world](./spwn_world.md)	 - Spawn a world — an isolated reality for agents
+* [spwn world](./spwn_world.md)	 - Manage worlds — ephemeral runtime instances for agents
 

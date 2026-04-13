@@ -2,7 +2,6 @@ package world
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -23,9 +22,6 @@ var listCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		s := newStepper(cmd)
-
-		j, _ := cmd.Flags().GetBool("json")
-		q, _ := cmd.Flags().GetBool("quiet")
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
@@ -48,16 +44,6 @@ var listCmd = &cobra.Command{
 			liveWorlds = append(liveWorlds, w)
 		}
 		worlds = liveWorlds
-
-		if j {
-			data, _ := json.MarshalIndent(map[string]interface{}{"active": worlds}, "", "  ")
-			fmt.Println(string(data))
-			return nil
-		}
-
-		if q {
-			return nil
-		}
 
 		if len(worlds) == 0 {
 			s.Blank()

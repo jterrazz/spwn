@@ -17,7 +17,6 @@ type Table struct {
 }
 
 // NewTable creates a table with the given headers.
-// Callers are responsible for guarding Render() when --json is in effect.
 func NewTable(headers ...string) *Table {
 	return &Table{
 		w:       os.Stderr,

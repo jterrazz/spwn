@@ -25,12 +25,6 @@ spwn team assign <agent-name> <team-slug> [flags]
   -h, --help    help for assign
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups

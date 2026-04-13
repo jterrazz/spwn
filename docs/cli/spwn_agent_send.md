@@ -18,15 +18,9 @@ spwn agent send <agent-name> [message] [flags]
 ### Options
 
 ```
-      --from string   Sender agent name (required)
+      --from string   Sender name (default: user) (default "user")
   -h, --help          help for send
       --type string   Message type: task, reply, question, announcement (default "task")
-```
-
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
 ```
 
 ### SEE ALSO

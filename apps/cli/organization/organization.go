@@ -21,7 +21,7 @@ func init() {
 }
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New(false)
+	return ui.New()
 }
 
 // ── spwn organization ls ──

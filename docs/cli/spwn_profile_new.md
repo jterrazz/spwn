@@ -17,12 +17,6 @@ spwn profile new <profile-name> [flags]
   -h, --help   help for new
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn profile](./spwn_profile.md)	 - Author and manage reusable profile templates (personality)

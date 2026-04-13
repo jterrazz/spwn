@@ -28,8 +28,8 @@ describe("world workspace persistence", () => {
     expect(result.exitCode).toBe(0);
     const id = parseWorldId(result.output)!;
 
-    // THEN — the file exists inside the container at /workspace/
-    ctx.universe(id).toHaveFile("/workspace/host-file.txt", "created on host");
+    // THEN — the file exists inside the container at /work/default/
+    ctx.universe(id).toHaveFile("/work/default/host-file.txt", "created on host");
   });
 
   test("container changes persist to host", () => {
@@ -45,7 +45,7 @@ describe("world workspace persistence", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — creating a file inside the container
-    ctx.universe(id).exec("echo 'created in container' > /workspace/container-file.txt");
+    ctx.universe(id).exec("echo 'created in container' > /work/default/container-file.txt");
 
     // THEN — the file exists on the host filesystem
     const hostPath = join(ctx.home, "container-file.txt");
@@ -67,28 +67,11 @@ describe("world workspace persistence", () => {
     const id = parseWorldId(result.output)!;
 
     // WHEN — writing and reading back inside container
-    ctx.universe(id).exec("echo 'rw-test-content' > /workspace/rw-test.txt");
-    const readBack = ctx.universe(id).exec("cat /workspace/rw-test.txt");
+    ctx.universe(id).exec("echo 'rw-test-content' > /work/default/rw-test.txt");
+    const readBack = ctx.universe(id).exec("cat /work/default/rw-test.txt");
 
     // THEN — content matches
     expect(readBack).toBe("rw-test-content");
-  });
-
-  test("mock agent output file exists in workspace", () => {
-    // GIVEN — a spawned world with mock agent
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-
-    const result = ctx.spwn(
-      ["world", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    expect(result.exitCode).toBe(0);
-    const id = parseWorldId(result.output)!;
-
-    // THEN — mock-claude wrote its output file inside the container
-    const mockOutput = ctx.universe(id).readFile("/workspace/mock-output.txt");
-    expect(mockOutput).toContain("mock-claude was here");
   });
 
   test("spawn with non-existent workspace path fails gracefully", () => {

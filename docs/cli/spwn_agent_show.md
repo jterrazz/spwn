@@ -15,7 +15,6 @@ spwn agent show <agent-name> [flags]
 
 ```
   -h, --help   help for show
-      --json   Output as JSON
 ```
 
 ### SEE ALSO

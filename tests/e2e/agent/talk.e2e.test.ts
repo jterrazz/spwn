@@ -198,22 +198,21 @@ describe("agent talk", () => {
     expectTableRow(listAfter.output, ["neo", "unattached"]);
   });
 
-  test("agent inspect shows world when attached", () => {
+  test("agent show prints details when attached to a world", () => {
     // GIVEN — a world with an agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
-    const spawnResult = ctx.spwn(
+    ctx.spwn(
       ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
-    const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — inspecting the agent
-    const inspectResult = ctx.spwn(["agent", "inspect", "neo"]);
+    // WHEN — showing the agent
+    const inspectResult = ctx.spwn(["agent", "show", "neo"]);
 
     // THEN — shows agent details with Mind layers
     expect(inspectResult.exitCode).toBe(0);
     expectLine(inspectResult.output, /Agent:\s+neo/);
-    expectLine(inspectResult.output, /identity\/\s+default\.md/);
+    expectLine(inspectResult.output, /core\/\s+profile\.md/);
   });
 });

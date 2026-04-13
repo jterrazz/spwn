@@ -34,7 +34,7 @@ func Append(mindPath, worldID string, exitCode int, duration time.Duration) erro
 		outcome = "failed"
 	}
 
-	filename := fmt.Sprintf("%s_%s.md", now.Format("2006-01-02_150405"), worldID)
+	filename := fmt.Sprintf("%s_%s.md", now.Format("2006-01-02_150405.000000000"), worldID)
 
 	content := fmt.Sprintf(`# Session Journal
 
@@ -112,7 +112,7 @@ func parseEntry(dir, filename string) (*Entry, error) {
 	// Parse filename for timestamp: 2006-01-02_150405_world-id.md
 	parts := strings.SplitN(strings.TrimSuffix(filename, ".md"), "_", 3)
 	if len(parts) == 3 {
-		t, err := time.Parse("2006-01-02_150405", parts[0]+"_"+parts[1])
+		t, err := time.Parse("2006-01-02_150405.000000000", parts[0]+"_"+parts[1])
 		if err == nil {
 			entry.CreatedAt = t
 		}

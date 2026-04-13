@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -15,8 +14,7 @@ import (
 )
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(j)
+	return ui.New()
 }
 
 // --- Parent command: spwn auth (shows status) ---
@@ -29,26 +27,9 @@ var Cmd = &cobra.Command{
 	Short: "Manage credentials — login, logout, status",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
-		jsonOut, _ := cmd.Flags().GetBool("json")
 
 		// Resolve all providers via auth package
 		creds := auth.ResolveAll()
-
-		if jsonOut {
-			type providerJSON struct {
-				Provider string `json:"provider"`
-				OK       bool   `json:"ok"`
-				Source   string `json:"source"`
-				Type     string `json:"type"`
-			}
-			var out []providerJSON
-			for p, cred := range creds {
-				out = append(out, providerJSON{Provider: string(p), OK: cred.Type != auth.CredTypeNone, Source: cred.Source, Type: string(cred.Type)})
-			}
-			enc := json.NewEncoder(os.Stdout)
-			enc.SetIndent("", "  ")
-			return enc.Encode(out)
-		}
 
 		s.Blank()
 
@@ -259,7 +240,6 @@ var checkCmd = &cobra.Command{
 
 func runCheck(cmd *cobra.Command, _ []string) error {
 	s := newStepper(cmd)
-	jsonOut, _ := cmd.Flags().GetBool("json")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -268,13 +248,6 @@ func runCheck(cmd *cobra.Command, _ []string) error {
 	s.Start("Validating credentials...")
 
 	results := auth.ValidateAll(ctx)
-
-	if jsonOut {
-		s.Done("Validation complete", "")
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "  ")
-		return enc.Encode(results)
-	}
 
 	s.Done("Validation complete", fmt.Sprintf("%d providers checked", len(results)))
 	s.Blank()

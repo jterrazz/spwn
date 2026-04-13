@@ -72,11 +72,6 @@ If no message is provided, opens an interactive session inside the container.`,
 			s.Blank()
 		}
 
-		runtimeName := world.Runtime
-		if runtimeName == "" {
-			runtimeName = "claude-code"
-		}
-
 		// Look up existing session ID for this agent (enables conversation continuity)
 		sessionID := ""
 		if arc != nil {
@@ -84,20 +79,19 @@ If no message is provided, opens an interactive session inside the container.`,
 		}
 
 		_ = world // world record kept for future use; runtime config no longer needs MindPath
-		runtimeCmd, rtErr := universe.BuildRuntimeCommand(runtimeName, universe.RuntimeSpawnConfig{
+		runtimeCmd, rtErr := universe.BuildRuntimeCommand("claude-code", universe.RuntimeSpawnConfig{
 			AgentName: name,
 			WorldID:   worldID,
 			Prompt:    message,
 			SessionID: sessionID,
 		})
 		if rtErr != nil {
-			return fmt.Errorf("unknown runtime %q for world %s", runtimeName, worldID)
+			return fmt.Errorf("cannot build claude-code runtime command for world %s", worldID)
 		}
 
-		// Configure output format for session ID capture
+		// Configure output format for session ID capture.
 		// Claude: --print --output-format json → single JSON with session_id
-		// Codex: --json is already in BuildCommand → JSONL with thread_id
-		if runtimeName == "claude-code" && message != "" {
+		if message != "" {
 			if talkOutputFormat == "stream-json" {
 				runtimeCmd = append(runtimeCmd, "--output-format", "stream-json", "--verbose")
 			} else {
@@ -183,7 +177,7 @@ If no message is provided, opens an interactive session inside the container.`,
 					// sees the original event stream byte-for-byte.
 					_, _ = os.Stdout.Write(line)
 					_, _ = os.Stdout.Write([]byte{'\n'})
-					if id := extractSessionID(runtimeName, line); id != "" {
+					if id := extractSessionID("claude-code", line); id != "" {
 						persistSession(id)
 					}
 				}
@@ -207,58 +201,21 @@ If no message is provided, opens an interactive session inside the container.`,
 				return formatExecError(err, combined)
 			}
 
-			// Parse response based on runtime to extract session ID and text
-			switch runtimeName {
-			case "claude-code":
-				var resp struct {
-					Result    string `json:"result"`
-					SessionID string `json:"session_id"`
+			// Parse the claude-code response to extract session ID and text.
+			var resp struct {
+				Result    string `json:"result"`
+				SessionID string `json:"session_id"`
+			}
+			if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
+				persistSession(resp.SessionID)
+				fmt.Fprintln(os.Stdout, resp.Result)
+			} else {
+				// Fallback: even if the wrapper JSON failed to parse,
+				// scan the raw output for an embedded session_id so we
+				// don't silently lose continuity.
+				if id := extractSessionID("claude-code", output); id != "" {
+					persistSession(id)
 				}
-				if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
-					persistSession(resp.SessionID)
-					fmt.Fprintln(os.Stdout, resp.Result)
-				} else {
-					// Fallback: even if the wrapper JSON failed to parse,
-					// scan the raw output for an embedded session_id so we
-					// don't silently lose continuity.
-					if id := extractSessionID(runtimeName, output); id != "" {
-						persistSession(id)
-					}
-					fmt.Fprint(os.Stdout, string(output))
-				}
-
-			case "codex":
-				// Codex JSONL: parse line by line for thread_id and agent messages
-				var texts []string
-				for _, line := range bytes.Split(bytes.TrimSpace(output), []byte("\n")) {
-					if len(line) == 0 || line[0] != '{' {
-						continue
-					}
-					var event struct {
-						Type     string `json:"type"`
-						ThreadID string `json:"thread_id"`
-						Item     struct {
-							Type string `json:"type"`
-							Text string `json:"text"`
-						} `json:"item"`
-					}
-					if jsonErr := json.Unmarshal(line, &event); jsonErr != nil {
-						continue
-					}
-					if event.Type == "thread.started" && event.ThreadID != "" {
-						persistSession(event.ThreadID)
-					}
-					if event.Type == "item.completed" && event.Item.Text != "" {
-						texts = append(texts, event.Item.Text)
-					}
-				}
-				if len(texts) > 0 {
-					fmt.Fprintln(os.Stdout, strings.Join(texts, "\n"))
-				} else {
-					fmt.Fprint(os.Stdout, string(output))
-				}
-
-			default:
 				fmt.Fprint(os.Stdout, string(output))
 			}
 		} else {

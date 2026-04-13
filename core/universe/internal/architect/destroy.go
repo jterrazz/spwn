@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -35,12 +34,6 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		return nil, err
 	}
 
-	// Stop gate server if running
-	if srv, ok := a.gates[worldID]; ok {
-		srv.Stop()
-		delete(a.gates, worldID)
-	}
-
 	a.backend.Stop(ctx, u.ContainerID)
 	a.backend.Remove(ctx, u.ContainerID)
 
@@ -61,11 +54,6 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		if journalErr := agent.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
 			log.Printf("warning: failed to write journal for agent %s on destroy: %v", name, journalErr)
 		}
-	}
-
-	// Clean up gate temp directory
-	if u.GateDir != "" {
-		os.RemoveAll(u.GateDir)
 	}
 
 	a.state.Delete(worldID)

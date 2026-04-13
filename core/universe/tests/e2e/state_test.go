@@ -4,41 +4,11 @@ package e2e
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"spwn.sh/core/universe"
 	"spwn.sh/core/universe/tests/e2e/setup"
 )
-
-func TestState_FileCreatedOnFirstSpawn(t *testing.T) {
-	// GIVEN a fresh test context
-	tc := setup.NewTestContext(t)
-	statePath := filepath.Join(tc.BaseDir, "state.json")
-
-	// THEN the state file should already exist (created by NewStoreAt)
-	if _, err := os.Stat(statePath); err != nil {
-		t.Fatalf("State file should exist after test context creation: %v", err)
-	}
-
-	// WHEN a universe is spawned
-	tc.Spawn().
-		NoAgent().
-		Execute().
-		ExpectState(func(s *setup.StateAssertion) {
-			s.WorldCount(1)
-		})
-
-	// THEN the state file should be non-empty
-	info, err := os.Stat(statePath)
-	if err != nil {
-		t.Fatalf("State file missing after spawn: %v", err)
-	}
-	if info.Size() == 0 {
-		t.Fatal("State file should be non-empty after spawn")
-	}
-}
 
 func TestState_UpdatedOnDestroy(t *testing.T) {
 	// GIVEN a universe exists in the state
@@ -91,7 +61,7 @@ func TestState_StatusIdleAfterSpawnWithoutAgent(t *testing.T) {
 		Execute().
 		ExpectState(func(s *setup.StateAssertion) {
 			s.WorldCount(1)
-			s.WorldStatus(universe.StatusIdle)
+			s.WorldStatus(universe.StatusRunning)
 		})
 }
 
@@ -137,8 +107,8 @@ func TestState_StatusIdleAfterAgentCompletes(t *testing.T) {
 	for _, u := range universes {
 		if u.ID == chain.Universe().ID {
 			found = true
-			if u.Status != universe.StatusIdle {
-				t.Fatalf("Expected status %q after agent completion, got %q", universe.StatusIdle, u.Status)
+			if u.Status != universe.StatusRunning {
+				t.Fatalf("Expected status %q after agent completion, got %q", universe.StatusRunning, u.Status)
 			}
 		}
 	}

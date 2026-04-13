@@ -11,8 +11,8 @@ Spawn a world — an isolated reality for agents
 
 Spawn a world — the Big Bang.
 
-Creates an isolated Docker environment and brings an agent to life inside it.
-Uses a named world config from ~/.spwn/worlds/ (default: default.yaml).
+Creates an isolated Docker environment. Pass --agent (repeatable) to bring
+agents to life inside it. Without any --agent flag, the world spawns empty.
 
 ```
 spwn up [flags]
@@ -21,9 +21,10 @@ spwn up [flags]
 ### Examples
 
 ```
-  spwn up --agent neo -w .                  Single agent in current dir
-  spwn up --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)
-  spwn up -c acme --agent neo -w ~/project   Named config + workspace
+  spwn world up --agent neo -w .                  Single agent in current dir
+  spwn world up --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)
+  spwn world up --name "Big Refactor" --agent neo  Ephemeral (no host mount)
+  spwn world up                                    Empty world (no agent)
 ```
 
 ### Options
@@ -31,19 +32,11 @@ spwn up [flags]
 ```
   -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
   -c, --config string           Named world config (default: default)
-      --gate stringArray        Bridge tool from Host: "source:as:cap1,cap2"
   -h, --help                    help for up
-  -i, --interactive             Attach to agent interactively
-      --no-agent                Create the world without spawning an agent
-      --runtime string          Agent runtime (default "claude-code")
+  -i, --interactive             Drop into the agent's session after spawn
+  -n, --name string             Display name for the world
   -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
   -u, --world string            Explicit path to a YAML config file
-```
-
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
 ```
 
 ### SEE ALSO

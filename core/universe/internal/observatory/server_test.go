@@ -91,7 +91,6 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/worlds/{id}", cors(srv.handleDestroyWorld))
 	mux.HandleFunc("POST /api/worlds/{id}/snapshot", cors(srv.handleSnapshot))
 	mux.HandleFunc("POST /api/worlds/{id}/talk", cors(srv.handleTalk))
-	mux.HandleFunc("GET /api/worlds/{id}/logs", cors(srv.handleWorldLogs))
 
 	// Architect endpoints
 	mux.HandleFunc("GET /api/architect/status", cors(srv.handleArchitectStatus))
@@ -742,15 +741,6 @@ func TestSnapshot_ReadOnlyMode(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
 	w := doJSON(t, mux, "POST", "/api/worlds/some-id/snapshot", nil)
-	if w.Code != 503 {
-		t.Fatalf("expected 503 (read-only mode), got %d", w.Code)
-	}
-}
-
-func TestWorldLogs_ReadOnlyMode(t *testing.T) {
-	_, mux := newFullTestServer(t)
-
-	w := doJSON(t, mux, "GET", "/api/worlds/some-id/logs", nil)
 	if w.Code != 503 {
 		t.Fatalf("expected 503 (read-only mode), got %d", w.Code)
 	}

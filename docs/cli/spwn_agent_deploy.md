@@ -33,12 +33,6 @@ spwn agent deploy <agent-name> <world-id> [flags]
       --role string   Agent role in the world organization (default "worker")
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world

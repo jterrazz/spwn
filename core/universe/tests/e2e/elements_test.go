@@ -14,17 +14,20 @@ func TestSpawn_ToolsVerified(t *testing.T) {
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  tools:
-    - "@spwn/unix"
-    - "@spwn/git"
+  constants:
+    cpu: 1
+    memory: 512m
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
 `).
 		NoAgent().
 		Execute()
 
 	// THEN the faculties file should list bash and git capabilities
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/universe/faculties.md", "bash")
-		c.FileContains("/universe/faculties.md", "git")
+		c.FileContains("/world/faculties.md", "bash")
+		c.FileContains("/world/faculties.md", "git")
 	})
 }
 
@@ -35,8 +38,11 @@ func TestSpawn_MissingToolFails(t *testing.T) {
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  tools:
-    - totally-fake-binary
+  constants:
+    cpu: 1
+    memory: 512m
+tools:
+  - totally-fake-binary
 `).
 		NoAgent().
 		ExecuteExpectError("does not provide it")
@@ -48,16 +54,19 @@ func TestSpawn_PackExpansion(t *testing.T) {
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  tools:
-    - "@spwn/unix"
+  constants:
+    cpu: 1
+    memory: 512m
+tools:
+  - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
 
 	// THEN the faculties should include all @spwn/unix pack members
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/universe/faculties.md", "bash")
-		c.FileContains("/universe/faculties.md", "grep")
-		c.FileContains("/universe/faculties.md", "curl")
+		c.FileContains("/world/faculties.md", "bash")
+		c.FileContains("/world/faculties.md", "grep")
+		c.FileContains("/world/faculties.md", "curl")
 	})
 }

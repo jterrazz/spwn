@@ -5,7 +5,6 @@ package e2e
 import (
 	"testing"
 
-	"spwn.sh/core/gate"
 	"spwn.sh/core/universe"
 	"spwn.sh/core/universe/tests/e2e/setup"
 )
@@ -27,7 +26,7 @@ func TestConfig_SpawnWithNamedConfig(t *testing.T) {
 	// THEN the state should show one idle world
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
-		s.WorldStatus(universe.StatusIdle)
+		s.WorldStatus(universe.StatusRunning)
 	})
 
 	// AND the container should be running with the custom config
@@ -43,8 +42,8 @@ func TestConfig_DefaultsApplied(t *testing.T) {
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  tools:
-    - "@spwn/unix"
+tools:
+  - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
@@ -52,10 +51,10 @@ physics:
 	// THEN default constants should be applied
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/universe/physics.md")
-		c.HasFile("/universe/faculties.md")
-		c.FileContains("/universe/physics.md", "core(s)")
-		c.FileContains("/universe/physics.md", "m")
+		c.HasFile("/world/physics.md")
+		c.HasFile("/world/faculties.md")
+		c.FileContains("/world/physics.md", "core(s)")
+		c.FileContains("/world/physics.md", "m")
 	})
 }
 
@@ -76,10 +75,10 @@ physics:
 
 	// THEN the physics file should reflect the custom values
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/universe/physics.md", "4 core(s)")
-		c.FileContains("/universe/physics.md", "2g")
-		c.FileContains("/universe/physics.md", "8g")
-		c.FileContains("/universe/physics.md", "120m")
+		c.FileContains("/world/physics.md", "4 core(s)")
+		c.FileContains("/world/physics.md", "2g")
+		c.FileContains("/world/physics.md", "8g")
+		c.FileContains("/world/physics.md", "120m")
 	})
 }
 
@@ -89,44 +88,18 @@ func TestConfig_CustomToolsReflectedInFaculties(t *testing.T) {
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
-  tools:
-    - "@spwn/unix"
-    - "@spwn/git"
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
 `).
 		NoAgent().
 		Execute()
 
 	// THEN the faculties file should list bash and git
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasFile("/universe/faculties.md")
-		c.FileContains("/universe/faculties.md", "bash")
-		c.FileContains("/universe/faculties.md", "git")
-	})
-}
-
-func TestConfig_GateBridgesInConfig(t *testing.T) {
-	// GIVEN a config with a gate bridge
-	bridge := gate.Bridge{
-		Source:       "mcp/config-tool",
-		As:           "config-bridge",
-		Capabilities: []string{"read", "write"},
-	}
-
-	// WHEN a universe is spawned with the bridge
-	chain := setup.NewSpawnBuilder(t).
-		NoAgent().
-		WithGate(bridge).
-		Execute()
-
-	// THEN the bridge should be installed and executable
-	chain.ExpectGate(func(g *setup.GateAssertion) {
-		g.HasBridge("config-bridge")
-		g.BridgeIsExecutable("config-bridge")
-	})
-
-	// AND the faculties should reference the bridge
-	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/universe/faculties.md", "config-bridge")
+		c.HasFile("/world/faculties.md")
+		c.FileContains("/world/faculties.md", "bash")
+		c.FileContains("/world/faculties.md", "git")
 	})
 }
 

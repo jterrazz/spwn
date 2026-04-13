@@ -9,16 +9,12 @@ func TestArchitectMode_BlockedCommands(t *testing.T) {
 	t.Setenv("SPWN_ARCHITECT_MODE", "1")
 
 	// Note: --help bypasses PersistentPreRunE, so we test with bare commands.
-	// "auth" (bare) runs its RunE, "doctor" runs its RunE, etc.
-	for _, cmd := range []string{"auth", "doctor"} {
-		_, _, err := executeCommand(cmd)
-		if err == nil {
-			t.Errorf("expected %q to be blocked in Architect mode", cmd)
-			continue
-		}
-		if !strings.Contains(err.Error(), "not available in Architect mode") {
-			t.Errorf("expected Architect mode error for %q, got: %s", cmd, err)
-		}
+	// "auth" (bare) runs its RunE.
+	_, _, err := executeCommand("auth")
+	if err == nil {
+		t.Error("expected \"auth\" to be blocked in Architect mode")
+	} else if !strings.Contains(err.Error(), "not available in Architect mode") {
+		t.Errorf("expected Architect mode error for \"auth\", got: %s", err)
 	}
 }
 

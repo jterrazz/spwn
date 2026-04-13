@@ -35,8 +35,6 @@ type mockBackend struct {
 	imageExistsV  bool
 	imageExistsE  error
 	ensureImgErr  error
-	logsReader    io.ReadCloser
-	logsErr       error
 	commitErr     error
 	imageList     []backend.ImageInfo
 	imageListErr  error
@@ -154,13 +152,6 @@ func (m *mockBackend) EnsureImageWithContext(_ context.Context, _ string, _ stri
 
 func (m *mockBackend) ImageVersion(_ context.Context, image string, label string) (string, error) {
 	return "", nil
-}
-
-func (m *mockBackend) Logs(_ context.Context, _ string, _ backend.LogsConfig) (io.ReadCloser, error) {
-	if m.logsErr != nil {
-		return nil, m.logsErr
-	}
-	return m.logsReader, nil
 }
 
 func (m *mockBackend) ExecDetached(_ context.Context, _ string, _ backend.ExecConfig) error {

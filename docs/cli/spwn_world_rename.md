@@ -17,13 +17,7 @@ spwn world rename <world-id> [name] [flags]
   -h, --help   help for rename
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
-* [spwn world](./spwn_world.md)	 - Spawn a world — an isolated reality for agents
+* [spwn world](./spwn_world.md)	 - Manage worlds — ephemeral runtime instances for agents
 

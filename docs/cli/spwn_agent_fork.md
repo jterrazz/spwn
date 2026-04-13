@@ -17,12 +17,6 @@ spwn agent fork <source> <target> [flags]
   -h, --help   help for fork
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world

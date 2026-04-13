@@ -328,10 +328,8 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// newStepper creates a Stepper using the persistent root flags.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(j)
+	return ui.New()
 }
 
 // formatDuration formats a duration into a human-readable string.
@@ -367,6 +365,7 @@ func architectHelp(cmd *cobra.Command, args []string) {
 				{Name: "stop", Desc: "Stop the Architect daemon"},
 				{Name: "status", Desc: "Show status and active worlds"},
 				{Name: "talk", Desc: "Talk to the Architect (Claude Code)"},
+				{Name: "logs", Desc: "Show the Architect's event log"},
 			}},
 		},
 		"spwn architect [command]",

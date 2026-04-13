@@ -2,15 +2,12 @@ package models
 
 import (
 	"time"
-
-	"spwn.sh/core/gate"
 )
 
 // Manifest is the parsed representation of a universe config YAML.
 type Manifest struct {
 	Physics PhysicsManifest `yaml:"physics"`
 	Tools   []string        `yaml:"-"`
-	Gate    []gate.Bridge   `yaml:"-"`
 }
 
 // PhysicsManifest defines the physical constraints of a universe.
@@ -56,11 +53,9 @@ type World struct {
 	Workspaces  []Workspace   `json:"workspaces,omitempty"`
 	// Legacy single-workspace field. Retained so old state files unmarshal cleanly.
 	// The state store migrates this into Workspaces on load and clears it.
-	Workspace   string        `json:"workspace,omitempty"`
-	GateDir     string        `json:"gate_dir,omitempty"`
-	Organization string       `json:"organization,omitempty"` // optional organization name
-	Runtime     string            `json:"runtime,omitempty"`       // agent runtime (e.g. "claude-code", "codex")
-	SessionIDs  map[string]string `json:"session_ids,omitempty"`   // agent name → runtime session ID
+	Workspace    string            `json:"workspace,omitempty"`
+	Organization string            `json:"organization,omitempty"` // optional organization name
+	SessionIDs   map[string]string `json:"session_ids,omitempty"`  // agent name → runtime session ID
 	Status      Status            `json:"status"`
 	CreatedAt   time.Time     `json:"created_at"`
 	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support

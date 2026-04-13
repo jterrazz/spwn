@@ -54,7 +54,7 @@ export function UpgradeBanner({ version }: UpgradeBannerProps) {
         </code>
         <p className="text-[10px] text-muted-foreground/40 mt-1.5">Then restart:</p>
         <code className="block text-[10px] font-mono text-amber-400/70 bg-black/20 rounded px-2 py-1">
-          $ spwn dash start
+          $ spwn web
         </code>
       </div>
     </div>

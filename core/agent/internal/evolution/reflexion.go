@@ -52,7 +52,7 @@ func Dream(mindPath string) (*ReflexionResult, error) {
 	}
 
 	// 3. Write reflexion summary to playbooks
-	playbooksDir := filepath.Join(mindPath, "memory", "playbooks")
+	playbooksDir := filepath.Join(mindPath, "playbooks")
 	os.MkdirAll(playbooksDir, 0755)
 
 	summary := formatReflexionSummary(result, entries)

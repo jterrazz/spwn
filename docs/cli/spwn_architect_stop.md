@@ -21,12 +21,6 @@ spwn architect stop [flags]
   -h, --help   help for stop
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn architect](./spwn_architect.md)	 - Your always-on world builder

@@ -17,12 +17,6 @@ spwn profile install <profile-ref> [flags]
   -h, --help   help for install
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn profile](./spwn_profile.md)	 - Author and manage reusable profile templates (personality)

@@ -9,7 +9,6 @@ import ib "spwn.sh/core/imagebuilder/backend"
 type Backend = ib.Backend
 type ContainerConfig = ib.ContainerConfig
 type ExecConfig = ib.ExecConfig
-type LogsConfig = ib.LogsConfig
 type ImageInfo = ib.ImageInfo
 type ContainerInfo = ib.ContainerInfo
 type Docker = ib.Docker

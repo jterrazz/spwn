@@ -17,12 +17,6 @@ spwn skill ls [flags]
   -h, --help   help for ls
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn skill](./spwn_skill.md)	 - Author and manage reusable skill files

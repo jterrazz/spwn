@@ -1,7 +1,7 @@
 .PHONY: build install uninstall \
-        build-test-image build-gate \
-        test test-universe test-agent test-gate test-foundation test-messenger test-imagebuilder \
-        test-e2e test-e2e-universe test-e2e-agent test-e2e-imagebuilder \
+        build-test-image \
+        test test-universe test-agent test-foundation test-messenger test-imagebuilder \
+        test-e2e test-e2e-universe test-e2e-imagebuilder \
         lint clean docs
 
 INSTALL_DIR ?= $(HOME)/.local/bin
@@ -60,15 +60,11 @@ uninstall:
 build-test-image:
 	docker build -t spwn-test:latest -f platform/images/Dockerfile.test ./platform/fixtures/mock-claude
 
-build-gate:
-	cd platform/gate-runtime && cargo build --release
-
 # Unit tests (per domain)
 test:
 	cd core/foundation && go test ./...
 	cd core/imagebuilder && go test ./...
 	cd core/agent && go test ./...
-	cd core/gate && go test ./...
 	cd core/messenger && go test ./...
 	cd core/universe && go test ./...
 	cd apps/cli && go test ./...
@@ -78,9 +74,6 @@ test-foundation:
 
 test-agent:
 	cd core/agent && go test -v ./...
-
-test-gate:
-	cd core/gate && go test -v ./...
 
 test-messenger:
 	cd core/messenger && go test -v ./...
@@ -100,9 +93,6 @@ test-e2e: build-test-image
 
 test-e2e-universe: build-test-image
 	cd core/universe && go test -v -tags=e2e -timeout=5m ./tests/e2e/...
-
-test-e2e-agent:
-	cd core/agent && go test -v -tags=e2e -timeout=3m ./tests/e2e/...
 
 test-e2e-imagebuilder:
 	cd core/imagebuilder && go test -v -tags=e2e -timeout=10m ./e2e/...

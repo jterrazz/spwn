@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"spwn.sh/core/gate"
 	"spwn.sh/core/universe/internal/models"
 )
 
@@ -50,30 +49,17 @@ func GeneratePhysics(m models.Manifest) string {
 }
 
 // GenerateFaculties returns the contents of /universe/faculties.md.
-func GenerateFaculties(verifiedTools []string, gateBridges []gate.Bridge) string {
+func GenerateFaculties(verifiedTools []string) string {
 	var sb strings.Builder
 
 	sb.WriteString("# Faculties\n\n")
 
-	// Tools
 	sb.WriteString("## Tools\n")
 	if len(verifiedTools) > 0 {
 		sb.WriteString(strings.Join(verifiedTools, ", "))
 		sb.WriteString("\n")
 	} else {
 		sb.WriteString("(none verified)\n")
-	}
-
-	// Gate Bridges
-	if len(gateBridges) > 0 {
-		sb.WriteString("\n## Gate Bridges\n")
-		for _, gb := range gateBridges {
-			caps := ""
-			if len(gb.Capabilities) > 0 {
-				caps = " [" + strings.Join(gb.Capabilities, ", ") + "]"
-			}
-			sb.WriteString(fmt.Sprintf("- `%s` — %s%s\n", gb.As, gb.Source, caps))
-		}
 	}
 
 	return sb.String()

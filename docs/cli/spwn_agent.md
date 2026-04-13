@@ -37,12 +37,6 @@ spwn agent [flags]
   -u, --world string       Target world ID
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn — create realities for things that can think
@@ -53,6 +47,7 @@ spwn agent [flags]
 * [spwn agent fork](./spwn_agent_fork.md)	 - Clone a Mind from one agent to another
 * [spwn agent import](./spwn_agent_import.md)	 - Import an agent from a tar.gz archive
 * [spwn agent inbox](./spwn_agent_inbox.md)	 - Show messages in an agent's inbox
+* [spwn agent logs](./spwn_agent_logs.md)	 - Show the event log for a specific agent
 * [spwn agent ls](./spwn_agent_ls.md)	 - List all agents on this Host
 * [spwn agent new](./spwn_agent_new.md)	 - Create a new agent with a 6-layer Mind
 * [spwn agent publish](./spwn_agent_publish.md)	 - Publish an agent to the registry (memory stripped)

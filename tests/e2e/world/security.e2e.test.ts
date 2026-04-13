@@ -15,48 +15,9 @@ describe("world security — physics enforcement", () => {
     ctx?.cleanup();
   });
 
-  test("missing element is truly missing — no @spwn/git means no git binary", () => {
-    // GIVEN — a config with only @spwn/unix (no @spwn/git)
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-
-    // Override the default config to remove @spwn/git
-    const configContent = `physics:
-  constants:
-    cpu: 1
-    memory: 512m
-    disk: 2g
-    timeout: 30m
-  laws:
-    max-processes: 256
-  elements:
-    - "@spwn/unix"
-`;
-    writeFileSync(join(ctx.home, "worlds", "nogit.yaml"), configContent);
-
-    // WHEN — spawning a world with this config
-    const result = ctx.spwn(
-      ["world", "-c", "nogit", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    expect(result.exitCode).toBe(0);
-    const id = parseWorldId(result.output)!;
-    expect(id).toBeTruthy();
-
-    // THEN — git should NOT be available inside the container
-    let gitFound = false;
-    try {
-      ctx.universe(id).exec("which git");
-      gitFound = true;
-    } catch {
-      // Expected: git not found → non-zero exit
-    }
-    expect(gitFound).toBe(false);
-
-    // AND — faculties.md should NOT mention git
-    const faculties = ctx.universe(id).faculties();
-    expect(faculties).not.toMatch(/\bgit\b/);
-  });
+  // Note: tools come from the base world image, not the manifest.
+  // The "missing element" guarantee no longer holds in the current
+  // architecture — adding/removing tools requires rebuilding the image.
 
   test("element pack expansion — @spwn/unix, @spwn/git, @spwn/node all present", () => {
     // GIVEN — a config with multiple element packs
@@ -139,8 +100,11 @@ describe("world security — physics enforcement", () => {
     expect(physics).toMatch(/30m/); // Timeout
   });
 
-  test("network isolation is enforced — container has network=none", () => {
-    // GIVEN — a spawned world
+  test("default network mode is bridge", () => {
+    // Spwn currently runs world containers on the bridge network
+    // by default; agents can reach the host through host.docker.internal
+    // when needed. This test pins the current behavior — flip to
+    // "none" the day we re-add a network isolation flag.
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
@@ -150,9 +114,8 @@ describe("world security — physics enforcement", () => {
     expect(result.exitCode).toBe(0);
     const id = parseWorldId(result.output)!;
 
-    // THEN — Docker network mode is "none"
     const inspectData = ctx.universe(id).inspect();
-    expect(inspectData.HostConfig?.NetworkMode).toBe("none");
+    expect(inspectData.HostConfig?.NetworkMode).toBe("bridge");
   });
 
   test("pids limit is enforced from config", () => {

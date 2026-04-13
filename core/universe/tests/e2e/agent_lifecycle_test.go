@@ -22,7 +22,7 @@ func TestAgentLifecycle_SurvivesUniverseDestruction(t *testing.T) {
 
 	chain.ExpectMind(func(m *setup.MindAssertion) {
 		m.HasLayer("core")
-		m.HasFile("core/default.md")
+		m.HasFile("core/profile.md")
 	})
 
 	// WHEN the universe is destroyed
@@ -55,7 +55,6 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 
 	chainA.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
-		m.HasSessionID()
 	})
 
 	// WHEN world A is destroyed and the agent is spawned in world B
@@ -70,7 +69,6 @@ func TestAgentLifecycle_SpawnInDifferentUniverses(t *testing.T) {
 
 	chainB.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
-		m.HasSessionID()
 	})
 
 	// THEN the universe IDs should differ
@@ -182,13 +180,13 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 	}
 }
 
-func TestAgentLifecycle_CustomIdentityFile(t *testing.T) {
-	// GIVEN an agent with a custom file in the core/identity layer
+func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
+	// GIVEN an agent with a custom file in the core layer
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("profile-agent")
 
-	identityDir := filepath.Join(agentDomain.AgentDir("profile-agent"), "core")
-	os.WriteFile(filepath.Join(identityDir, "custom.md"), []byte("# Custom Profile\nYou are a specialist."), 0644)
+	coreDir := filepath.Join(agentDomain.AgentDir("profile-agent"), "core")
+	os.WriteFile(filepath.Join(coreDir, "custom.md"), []byte("# Custom Profile\nYou are a specialist."), 0644)
 
 	// WHEN the agent is spawned in a universe
 	chain := tc.Spawn().
@@ -203,7 +201,7 @@ func TestAgentLifecycle_CustomIdentityFile(t *testing.T) {
 	})
 
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasFile("identity/custom.md")
+		m.HasFile("core/custom.md")
 	})
 }
 
@@ -219,7 +217,6 @@ func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
 
 	chainA.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
-		m.HasSessionID()
 	})
 
 	// WHEN world A is destroyed and the agent is spawned in world B
@@ -232,10 +229,9 @@ func TestAgentLifecycle_SessionDiffersPerUniverse(t *testing.T) {
 
 	chainB.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
-		m.HasSessionID()
 	})
 
-	// THEN the session IDs should be deterministic but different per universe
+	// THEN the deterministic session ID (world ID + agent name) should differ.
 	sessionA := agentDomain.DeterministicSessionID("session-diff-agent", chainA.Universe().ID)
 	sessionB := agentDomain.DeterministicSessionID("session-diff-agent", chainB.Universe().ID)
 

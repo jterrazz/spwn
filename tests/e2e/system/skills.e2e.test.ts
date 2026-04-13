@@ -68,12 +68,11 @@ describe("system skills infrastructure", () => {
     const id = parseWorldId(spawn.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — AGENT.md exists
-    ctx.universe(id).toHaveFile("/world/AGENT.md");
-
-    // AND — contains the agent name
-    const content = ctx.universe(id).readFile("/world/AGENT.md");
-    expect(content).toContain("neo");
+    // THEN — AGENTS.md exists and references the agent name in roster
+    ctx.universe(id).toHaveFile("/world/AGENTS.md");
+    ctx.universe(id).toHaveFile("/world/roster.md");
+    const roster = ctx.universe(id).readFile("/world/roster.md");
+    expect(roster).toContain("neo");
   });
 
   test("agent can read system skills directory", () => {
@@ -89,9 +88,8 @@ describe("system skills infrastructure", () => {
     const id = parseWorldId(spawn.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — the skills directory is accessible (can list it)
+    // THEN — the skills directory is accessible
     const universe = ctx.universe(id);
-    // Verify the /world directory has the expected structure
-    universe.toHaveFile("/world/AGENT.md");
+    universe.toHaveDirectory("/world/skills");
   });
 });

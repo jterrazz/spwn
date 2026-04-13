@@ -17,12 +17,6 @@ spwn auth token <token> [flags]
   -h, --help   help for token
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn auth](./spwn_auth.md)	 - Manage credentials — login, logout, status

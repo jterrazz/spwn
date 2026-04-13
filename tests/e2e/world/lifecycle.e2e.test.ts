@@ -62,8 +62,8 @@ describe("world lifecycle", () => {
     expectLine(inspectResult.output, /Status:\s+(running|idle)/);
     expectLine(inspectResult.output, /Agent:\s+a-neo-\d{5}/);
     expectLine(inspectResult.output, /Constants:/);
-    expectLine(inspectResult.output, /Workspace:/);
-    expectLine(inspectResult.output, /Mind:/);
+    expectLine(inspectResult.output, /Workspaces:/);
+    expectLine(inspectResult.output, /Agent home:/);
 
     // AND — the container is actually running
     ctx.universe(id).toBeRunning();
@@ -80,7 +80,7 @@ describe("world lifecycle", () => {
       60_000,
     );
     expect(spawnResult.exitCode).toBe(0);
-    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
     expectLine(spawnResult.output, /✓ Agent is alive\./);
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
@@ -89,8 +89,8 @@ describe("world lifecycle", () => {
     ctx
       .universe(id)
       .toBeRunning()
-      .toHaveFile("/universe/physics.md")
-      .toHaveFile("/universe/faculties.md");
+      .toHaveFile("/world/physics.md")
+      .toHaveFile("/world/faculties.md");
 
     // AND — state tracks it
     ctx.state().hasWorld(id).worldCount(1);

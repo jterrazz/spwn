@@ -17,12 +17,6 @@ spwn team rm <slug> [flags]
   -h, --help   help for rm
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups

@@ -56,7 +56,6 @@ type Backend interface {
 	ImageExists(ctx context.Context, image string) (bool, error)
 	EnsureImage(ctx context.Context, tag string, dockerfile []byte, logw io.Writer) error
 	EnsureImageWithContext(ctx context.Context, tag string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error
-	Logs(ctx context.Context, containerID string, cfg LogsConfig) (io.ReadCloser, error)
 }
 
 // ---------------------------------------------------------------------------
@@ -155,13 +154,6 @@ type ExecConfig struct {
 	Cmd []string
 	Env []string
 	TTY bool
-}
-
-// LogsConfig controls log streaming behavior.
-// Aligned with the existing backend.LogsConfig.
-type LogsConfig struct {
-	Follow bool
-	Tail   string
 }
 
 // ChannelMessage represents a message sent through a Channel.

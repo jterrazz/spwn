@@ -13,7 +13,7 @@ var architectModeAllowed = map[string]bool{
 	"agent":       true,
 	"status":      true,
 	"architect":   true,
-	"dash": true,
+	"web":  true,
 	"get":  true,
 	"help":        true,
 }
@@ -24,7 +24,7 @@ func isArchitectMode() bool {
 }
 
 // validateArchitectCommand checks if the current command is allowed in Architect mode.
-// Returns an error for admin-only commands (auth, upgrade, init, doctor).
+// Returns an error for admin-only commands (auth, upgrade, init).
 func validateArchitectCommand(cmd *cobra.Command) error {
 	// Walk up to find the top-level subcommand
 	top := cmd

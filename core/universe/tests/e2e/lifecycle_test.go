@@ -22,15 +22,15 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 	// THEN the state should show one idle world
 	u.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
-		s.WorldStatus(universe.StatusIdle)
+		s.WorldStatus(universe.StatusRunning)
 	})
 
 	// AND the container should be running with physics, faculties, and mind
 	u.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/universe/physics.md")
-		c.HasFile("/universe/faculties.md")
-		c.HasMount("/mind")
+		c.HasFile("/world/physics.md")
+		c.HasFile("/world/faculties.md")
+		c.HasMount("/agents")
 	})
 
 	// WHEN inspecting the universe

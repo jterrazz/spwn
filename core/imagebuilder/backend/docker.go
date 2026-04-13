@@ -308,16 +308,6 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 	return nil
 }
 
-func (d *Docker) Logs(ctx context.Context, containerID string, cfg LogsConfig) (io.ReadCloser, error) {
-	opts := containerTypes.LogsOptions{
-		ShowStdout: true,
-		ShowStderr: true,
-		Follow:     cfg.Follow,
-		Tail:       cfg.Tail,
-	}
-	return d.client.ContainerLogs(ctx, containerID, opts)
-}
-
 func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error {
 	execCfg := types.ExecConfig{
 		Cmd:          cfg.Cmd,

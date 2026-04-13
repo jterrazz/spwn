@@ -92,7 +92,7 @@ pub fn run() {
     // Start the Go API server as a child process
     let child = Command::new(&spwn_bin)
         .env("PATH", &augmented_path)
-        .args(["dash", "start", "--port", &api_port.to_string()])
+        .args(["web", "--port", &api_port.to_string(), "--no-open"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn();

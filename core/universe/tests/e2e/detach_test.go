@@ -121,6 +121,6 @@ func TestDetach_VsNoDetach(t *testing.T) {
 		Execute().
 		ExpectState(func(s *setup.StateAssertion) {
 			s.WorldCount(1)
-			s.WorldStatus(universe.StatusIdle)
+			s.WorldStatus(universe.StatusRunning)
 		})
 }

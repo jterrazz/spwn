@@ -45,11 +45,19 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "ls", Desc: "List agents"},
 				{Name: "show <name>", Desc: "Inspect composition and history"},
 				{Name: "rm <name>", Desc: "Delete an agent"},
-				{Name: "talk <name> [msg]", Desc: "Talk to a running agent"},
 			}},
 			{Title: "Compose", Commands: []ui.HelpEntry{
 				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--tool / --skill / --profile)")},
 				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--tool / --skill / --profile)")},
+			}},
+			{Title: "Conversation", Commands: []ui.HelpEntry{
+				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
+				{Name: "send <name> <msg>", Desc: "Send an async message to an agent's inbox"},
+				{Name: "inbox <name>", Desc: "Show an agent's inbox"},
+				{Name: "watch <name>", Desc: "Tail an agent's inbox in real time"},
+			}},
+			{Title: "Observe", Commands: []ui.HelpEntry{
+				{Name: "logs <name>", Desc: "Show the event log for this agent"},
 			}},
 			{Title: "Evolution", Commands: []ui.HelpEntry{
 				{Name: "dream <name>", Desc: "Analyze experience, promote playbooks"},
@@ -148,7 +156,7 @@ survives after the world is destroyed.`,
 			worlds, err := arc.List(ctx)
 			if err != nil {
 				s.Blank()
-				return s.FailHint("Cannot list worlds", err, "Run \"spwn doctor\" to diagnose")
+				return s.FailHint("Cannot list worlds", err, "")
 			}
 			if len(worlds) == 0 {
 				s.Blank()
@@ -178,8 +186,6 @@ survives after the world is destroyed.`,
 	},
 }
 
-// newStepper creates a Stepper using the persistent root flags.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(j)
+	return ui.New()
 }

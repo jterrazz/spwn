@@ -23,7 +23,7 @@ func init() {
 	saveCmd.Flags().StringVar(&snapName, "name", "", "Name for the snapshot")
 
 	restoreCmd.Flags().StringVarP(&snapConfig, "config", "c", "", "Named world config (default: default)")
-	restoreCmd.Flags().StringVarP(&snapAgent, "agent", "a", "default", "Agent name")
+	restoreCmd.Flags().StringVarP(&snapAgent, "agent", "a", "", "Agent name (omit for an empty world)")
 	restoreCmd.Flags().StringArrayVarP(&snapWorkspace, "workspace", "w", nil, `Host dir to mount. Repeatable: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 
 	Cmd.AddCommand(saveCmd)
@@ -32,10 +32,8 @@ func init() {
 	Cmd.AddCommand(rmCmd)
 }
 
-// newStepper creates a Stepper using the persistent root flags.
 func newStepper(cmd *cobra.Command) *ui.Stepper {
-	j, _ := cmd.Flags().GetBool("json")
-	return ui.New(j)
+	return ui.New()
 }
 
 func dockerHint(err error) error {

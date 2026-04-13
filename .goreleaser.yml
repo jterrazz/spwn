@@ -27,11 +27,12 @@ builds:
       - -s -w -X spwn.sh/apps/cli.Version={{.Version}}
     hooks:
       # Post-build bundling gate: run the freshly-compiled binary
-      # targeting the host OS/arch only, and assert --json returns
-      # every canonical slug. Skips cross-compiled builds since we
-      # can't execute them here.
+      # targeting the host OS/arch only. `example list` returns a
+      # non-zero exit code when the embed is empty, so an exit
+      # status check is enough to catch a hollow binary. Skips
+      # cross-compiled builds since we can't execute them here.
       post:
-        - cmd: sh -c 'if [ "{{ .Os }}" = "$(go env GOOS)" ] && [ "{{ .Arch }}" = "$(go env GOARCH)" ]; then "{{ .Path }}" example list --json > /dev/null; fi'
+        - cmd: sh -c 'if [ "{{ .Os }}" = "$(go env GOOS)" ] && [ "{{ .Arch }}" = "$(go env GOARCH)" ]; then "{{ .Path }}" example list > /dev/null; fi'
 
 archives:
   - id: spwn

@@ -120,7 +120,7 @@ describe("graceful shutdown", () => {
 
     // THEN — shows upgrade help text
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /[Uu]pgrade spwn/);
+    expectLine(result.output, /[Dd]ownloads.*spwn release/);
     expectLine(result.output, /[Rr]unning worlds are stopped/);
   });
 });

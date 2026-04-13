@@ -63,9 +63,6 @@ func (m *MockBackend) EnsureImageWithContext(ctx context.Context, tag, ver strin
 func (m *MockBackend) ImageVersion(ctx context.Context, image, label string) (string, error) {
 	return m.ImageVerFunc(ctx, image, label)
 }
-func (m *MockBackend) Logs(ctx context.Context, id string, cfg backend.LogsConfig) (io.ReadCloser, error) {
-	return nil, nil
-}
 func (m *MockBackend) ExecDetached(ctx context.Context, id string, cfg backend.ExecConfig) error {
 	return nil
 }

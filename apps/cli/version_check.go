@@ -20,8 +20,8 @@ var pendingUpgrade string
 // spwn release. It reads a cached result first and only hits the network
 // if the cache is older than 24 hours. The result is stored in pendingUpgrade.
 func startVersionCheck() {
-	// Skip for dev builds, JSON mode, or if SPWN_NO_UPDATE_CHECK is set
-	if Version == "dev" || jsonOutput {
+	// Skip for dev builds or if SPWN_NO_UPDATE_CHECK is set
+	if Version == "dev" {
 		return
 	}
 	if os.Getenv("SPWN_NO_UPDATE_CHECK") != "" {

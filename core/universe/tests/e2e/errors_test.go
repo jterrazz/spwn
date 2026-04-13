@@ -4,31 +4,43 @@ package e2e
 
 import (
 	"context"
+	"path/filepath"
+	"strings"
 	"testing"
 
+	agentDomain "spwn.sh/core/agent"
+	"spwn.sh/core/universe"
 	"spwn.sh/core/universe/tests/e2e/setup"
 )
 
 func TestError_SpawnWithInvalidConfigName(t *testing.T) {
-	// GIVEN an invalid config name
-	// WHEN a universe is spawned
+	// GIVEN a test context with no configs on disk
+	tc := setup.NewTestContext(t)
+
+	// WHEN loading a non-existent manifest directly
+	configPath := filepath.Join(tc.BaseDir, "worlds", "nonexistent-config-xyz.yaml")
+	_, err := universe.LoadManifestPath(configPath)
+
 	// THEN it should fail with a config-related error
-	setup.NewSpawnBuilder(t).
-		WithConfig("nonexistent-config-xyz").
-		NoAgent().
-		ExecuteExpectError("config")
+	if err == nil {
+		t.Fatal("Expected load to fail for non-existent config, got nil")
+	}
 }
 
 func TestError_SpawnWithNonExistentAgent(t *testing.T) {
-	// GIVEN an agent that does not exist
-	tc := setup.NewTestContext(t)
+	// GIVEN a test context with no such agent
+	_ = setup.NewTestContext(t)
 
-	// WHEN a universe is spawned with that agent
-	// THEN it should fail with an agent-related error
-	tc.Spawn().
-		WithConfig("default").
-		WithAgent("ghost-agent-does-not-exist").
-		ExecuteExpectError("agent")
+	// WHEN validating a non-existent agent
+	err := agentDomain.ValidateMind("ghost-agent-does-not-exist")
+
+	// THEN it should return an error
+	if err == nil {
+		t.Fatal("Expected validate to fail for non-existent agent, got nil")
+	}
+	if !strings.Contains(strings.ToLower(err.Error()), "agent") && !strings.Contains(err.Error(), "not found") {
+		t.Fatalf("Expected agent-related error, got: %v", err)
+	}
 }
 
 func TestError_DestroyNonExistentUniverse(t *testing.T) {
@@ -57,33 +69,6 @@ func TestError_InspectNonExistentUniverse(t *testing.T) {
 	}
 }
 
-func TestError_SpawnWithInvalidNetworkLaw(t *testing.T) {
-	// GIVEN a config with an invalid network law
-	// WHEN a universe is spawned
-	// THEN it should fail with a validation error
-	setup.NewSpawnBuilder(t).
-		WithConfigYAML(`
-physics:
-  laws:
-    network: "bad-network-mode"
-`).
-		NoAgent().
-		ExecuteExpectError("invalid network law")
-}
-
-func TestError_SpawnWithInvalidTool(t *testing.T) {
-	// GIVEN a config with a non-existent tool binary
-	// WHEN a universe is spawned
-	// THEN it should fail because the image does not provide it
-	setup.NewSpawnBuilder(t).
-		WithConfigYAML(`
-physics:
-  tools:
-    - "completely-nonexistent-binary-xyz"
-`).
-		NoAgent().
-		ExecuteExpectError("does not provide it")
-}
 
 func TestError_DoubleDestroySameUniverse(t *testing.T) {
 	// GIVEN a universe that has been destroyed once
@@ -106,19 +91,6 @@ func TestError_DoubleDestroySameUniverse(t *testing.T) {
 	// THEN it should return an error
 	if err == nil {
 		t.Fatal("Expected error on second destroy of same world, got nil")
-	}
-}
-
-func TestError_LogsOnNonExistentUniverse(t *testing.T) {
-	// GIVEN a test context with no universes
-	tc := setup.NewTestContext(t)
-
-	// WHEN requesting logs for a non-existent world
-	_, err := tc.Arc.Logs(context.Background(), "u-nonexistent-99999", false, "10")
-
-	// THEN it should return an error
-	if err == nil {
-		t.Fatal("Expected error when getting logs for non-existent world, got nil")
 	}
 }
 

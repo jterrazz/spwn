@@ -163,7 +163,7 @@ describe("agent messaging", () => {
 
     const result = ctx.spwn(["agent", "inbox", "neo"]);
     expect(result.exitCode).toBe(0);
-    expectTableHeader(result.output, ["FROM", "TO", "TYPE", "STATUS"]);
+    expectTableHeader(result.output, ["FROM", "TYPE", "STATUS"]);
   });
 
   test("send with --type flag sets message type", () => {
@@ -199,7 +199,7 @@ describe("agent messaging", () => {
     expect(stripAnsi(result.output)).not.toContain("TypeError");
   });
 
-  test("send without --from fails", () => {
+  test("send without --from defaults to user", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawn = ctx.spwn(
@@ -208,12 +208,13 @@ describe("agent messaging", () => {
     );
     const id = parseWorldId(spawn.output)!;
 
+    // --from is optional now; it defaults to "user".
     const result = ctx.spwn([
       "agent", "send", "neo",
       "missing from",
     ]);
-    expect(result.exitCode).not.toBe(0);
-    expect(stripAnsi(result.output)).not.toContain("TypeError");
+    expect(result.exitCode).toBe(0);
+    expect(stripAnsi(result.output)).toMatch(/Sent message\s+user → neo/);
   });
 
   test("inbox on non-existent agent fails", () => {
@@ -224,7 +225,7 @@ describe("agent messaging", () => {
     expect(stripAnsi(result.output)).not.toContain("TypeError");
   });
 
-  test("/world/inbox directory exists after spawn", () => {
+  test("/world/inbox/<agent> directory exists after first send", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawn = ctx.spwn(
@@ -233,7 +234,14 @@ describe("agent messaging", () => {
     );
     const id = parseWorldId(spawn.output)!;
 
-    ctx.universe(id).toHaveDirectory("/world/inbox");
+    // Inbox dirs are created lazily on first send.
+    ctx.spwn([
+      "agent", "send", "neo",
+      "--from", "morpheus",
+      "first message — creates the inbox dir",
+    ]);
+
+    ctx.universe(id).toHaveDirectory("/world/inbox/neo");
   });
 
   test("physics.md includes communication section", () => {

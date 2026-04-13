@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-// LogsConfig controls log streaming behavior.
-type LogsConfig struct {
-	Follow bool
-	Tail   string
-}
-
 // ContainerConfig defines how to create a container.
 type ContainerConfig struct {
 	Image       string
@@ -71,7 +65,6 @@ type Backend interface {
 	EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) error
 	EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error
 	ImageVersion(ctx context.Context, image string, label string) (string, error)
-	Logs(ctx context.Context, containerID string, cfg LogsConfig) (io.ReadCloser, error)
 	ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error
 
 	// Commit creates a snapshot image from a running container.

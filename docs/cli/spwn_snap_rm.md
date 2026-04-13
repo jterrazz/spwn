@@ -17,12 +17,6 @@ spwn snap rm <snapshot> [flags]
   -h, --help   help for rm
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn snap](./spwn_snap.md)	 - World snapshots — save, ls, restore, rm

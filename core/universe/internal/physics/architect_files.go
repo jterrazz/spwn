@@ -49,25 +49,11 @@ When updating progress:
 
 ALWAYS update stack.md after making changes. Keep it current.
 
-## Knowledge Management (YOUR MOST IMPORTANT JOB)
+## Knowledge
 
-You maintain the project knowledge at /universe/knowledge/.
-This is the single source of truth for all projects, architecture, and decisions.
-
-When the user discusses:
-- A new project → create /universe/knowledge/projects/<name>/overview.md
-- An architecture decision → create /universe/knowledge/decisions/NNN-title.md
-- Tech stack choices → update /universe/knowledge/projects/<name>/stack.md
-- Team structure → update /universe/knowledge/agents/team.md
-- Future plans → update /universe/knowledge/roadmap.md
-- New terminology → update /universe/knowledge/glossary.md
-
-Use [KNOWLEDGE_UPDATE] markers:
-[KNOWLEDGE_UPDATE] projects/api/architecture.md
-Updated with new auth flow decision.
-
-EVERY conversation should result in knowledge updates.
-The knowledge is your memory across conversations.
+Knowledge lives **inside each world** at ` + "`/world/knowledge/`" + ` — it belongs to
+the project that world hosts, not to you. When you're working on something,
+write notes into the relevant world's knowledge, not a global store.
 
 ## Your Skills
 Read /me/skills/ for detailed guides on:
@@ -80,10 +66,8 @@ Read /me/skills/ for detailed guides on:
 - Full access to the spwn CLI
 - Docker socket access (manage sibling containers)
 - Shared state with the host at $SPWN_HOME (/universe/)
-- Read-write access to /universe/knowledge/ (the knowledge base)
 
 Always update your stack after completing work.
-Always update the knowledge with project knowledge.
 `
 
 // ArchitectSkillFleetOps is the fleet-ops.md skill guide for the architect.
@@ -181,7 +165,7 @@ spwn agent ls                     # All agents
 Check an agent's journal for recent activity:
 ` + "```bash" + `
 spwn profile <name> journal       # View journal entries
-spwn profile <name> knowledge     # View knowledge files
+spwn world knowledge <id>         # View world knowledge
 ` + "```" + `
 
 ## Responding to Issues

@@ -8,7 +8,6 @@ SLEEP=0
 SESSION_ID=""
 RESUME="false"
 
-# Parse flags (accepts and ignores real Claude flags)
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --exit-code) EXIT_CODE="$2"; shift 2 ;;
@@ -19,17 +18,27 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Record observations as JSON
+# A mounted /agents dir containing at least one agent home means the mind is visible.
+MIND_EXISTS=false
+if [ -d /agents ] && [ -n "$(ls -A /agents 2>/dev/null)" ]; then
+  MIND_EXISTS=true
+fi
+
+# /work is the workspace root when any workspace is mounted.
+WORKSPACE_EXISTS=false
+if [ -d /work ] && [ -n "$(ls -A /work 2>/dev/null)" ]; then
+  WORKSPACE_EXISTS=true
+fi
+
 cat > "$OUTPUT" <<RECORD
 {
-  "mind_exists": $([ -d /mind ] && echo true || echo false),
-  "mind_personas": $([ -d /mind/personas ] && echo true || echo false),
-  "mind_identity": $([ -d /mind/identity ] && echo true || echo false),
-  "physics_exists": $([ -f /universe/physics.md ] && echo true || echo false),
-  "faculties_exists": $([ -f /universe/faculties.md ] && echo true || echo false),
-  "workspace_exists": $([ -d /workspace ] && echo true || echo false),
-  "physics_content": $(cat /universe/physics.md 2>/dev/null | head -20 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),
-  "faculties_content": $(cat /universe/faculties.md 2>/dev/null | head -20 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),
+  "mind_exists": $MIND_EXISTS,
+  "mind_personas": false,
+  "physics_exists": $([ -f /world/physics.md ] && echo true || echo false),
+  "faculties_exists": $([ -f /world/faculties.md ] && echo true || echo false),
+  "workspace_exists": $WORKSPACE_EXISTS,
+  "physics_content": $(cat /world/physics.md 2>/dev/null | head -20 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),
+  "faculties_content": $(cat /world/faculties.md 2>/dev/null | head -20 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),
   "session_id": "$SESSION_ID",
   "resume": $RESUME,
   "pid": $$,
@@ -37,9 +46,12 @@ cat > "$OUTPUT" <<RECORD
 }
 RECORD
 
-# Write to workspace to prove the agent can DO something (not just observe)
-if [ -d /workspace ]; then
-  echo "mock-claude was here" > /workspace/mock-output.txt
+# Write to the first workspace (if any) to prove the agent can DO something.
+if [ -d /work ]; then
+  FIRST_WS=$(ls /work 2>/dev/null | head -1)
+  if [ -n "$FIRST_WS" ] && [ -d "/work/$FIRST_WS" ]; then
+    echo "mock-claude was here" > "/work/$FIRST_WS/mock-output.txt" 2>/dev/null || true
+  fi
 fi
 
 [ "$SLEEP" -gt 0 ] && sleep "$SLEEP"

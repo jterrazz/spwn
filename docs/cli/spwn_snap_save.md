@@ -18,12 +18,6 @@ spwn snap save <world-id> [flags]
       --name string   Name for the snapshot
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn snap](./spwn_snap.md)	 - World snapshots — save, ls, restore, rm

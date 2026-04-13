@@ -8,6 +8,5 @@ import (
 // Organization and schema migrations are handled by runMigrations() which runs first.
 func ensureDefaults() error {
 	universe.CreateDefaultConfig()
-	universe.InitKnowledge()
 	return nil
 }

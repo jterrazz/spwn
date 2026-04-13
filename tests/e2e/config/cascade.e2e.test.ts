@@ -57,7 +57,7 @@ describe("config cascade", () => {
 
     // THEN — world ID reflects the config name
     expect(spawnResult.exitCode).toBe(0);
-    expectLine(spawnResult.output, /✓ Created container\s+w-custom-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+spwn-world-custom-\d{5}/);
 
     // AND — container is running
     const id = parseWorldId(spawnResult.output)!;

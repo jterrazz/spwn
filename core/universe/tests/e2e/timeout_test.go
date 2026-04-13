@@ -61,8 +61,8 @@ physics:
     cpu: 1
     memory: 256m
     timeout: 45m
-  tools:
-    - "@spwn/unix"
+tools:
+  - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
@@ -70,7 +70,7 @@ physics:
 	// THEN physics.md should contain the timeout value
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.FileContains("/universe/physics.md", "45m")
+		c.FileContains("/world/physics.md", "45m")
 	})
 }
 
@@ -83,8 +83,8 @@ physics:
   constants:
     cpu: 1
     memory: 256m
-  tools:
-    - "@spwn/unix"
+tools:
+  - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
@@ -92,6 +92,6 @@ physics:
 	// THEN physics.md should contain the default timeout (30m)
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.FileContains("/universe/physics.md", "30m")
+		c.FileContains("/world/physics.md", "30m")
 	})
 }

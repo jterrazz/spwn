@@ -26,12 +26,6 @@ spwn team new <name> [flags]
   -h, --help                 help for new
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups

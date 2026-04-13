@@ -4,7 +4,6 @@ use (
 	./apps/cli
 	./core/agent
 	./core/foundation
-	./core/gate
 	./core/imagebuilder
 	./core/messenger
 	./core/migration

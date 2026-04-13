@@ -6,19 +6,13 @@ import (
 	"time"
 
 	"spwn.sh/core/foundation/activity"
-	"spwn.sh/core/gate"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/universe/internal/runtime"
 	"spwn.sh/core/universe/internal/state"
 
-	// Register all runtime adapters
-	_ "spwn.sh/core/universe/internal/runtime/aider"
+	// Register the claude-code runtime adapter
 	_ "spwn.sh/core/universe/internal/runtime/claude"
-	_ "spwn.sh/core/universe/internal/runtime/codex"
-	_ "spwn.sh/core/universe/internal/runtime/gemini"
-	_ "spwn.sh/core/universe/internal/runtime/opencode"
-	_ "spwn.sh/core/universe/internal/runtime/pi"
 
 	// Register all claw adapters
 	_ "spwn.sh/core/universe/internal/claw/hermes"
@@ -29,17 +23,15 @@ import (
 type Architect struct {
 	backend backend.Backend
 	state   *state.Store
-	gates   map[string]*gate.Server // worldID → running gate server
-	runtime runtime.Runtime          // injected runtime adapter
+	runtime runtime.Runtime // injected runtime adapter — claude-code
 }
 
 // New creates an Architect with the given backend and state store.
 func New(b backend.Backend, s *state.Store) *Architect {
-	rt, _ := runtime.Get("claude-code") // default runtime
+	rt, _ := runtime.Get("claude-code")
 	return &Architect{
 		backend: b,
 		state:   s,
-		gates:   make(map[string]*gate.Server),
 		runtime: rt,
 	}
 }
@@ -52,16 +44,6 @@ func (a *Architect) SetSessionID(worldID, agentName, sessionID string) error {
 // GetSessionID returns the runtime session ID for an agent in a world.
 func (a *Architect) GetSessionID(worldID, agentName string) string {
 	return a.state.GetSessionID(worldID, agentName)
-}
-
-// SetRuntime switches the active runtime adapter.
-func (a *Architect) SetRuntime(name string) error {
-	rt, err := runtime.Get(name)
-	if err != nil {
-		return err
-	}
-	a.runtime = rt
-	return nil
 }
 
 // NewFromEnv creates an Architect using the default Docker backend and state store.
@@ -95,18 +77,6 @@ func (a *Architect) Rename(ctx context.Context, worldID, name string) error {
 		return err
 	}
 	return a.state.Rename(worldID, name)
-}
-
-// Logs streams container output.
-func (a *Architect) Logs(ctx context.Context, worldID string, follow bool, tail string) (interface{ Read([]byte) (int, error); Close() error }, error) {
-	u, err := a.state.Get(worldID)
-	if err != nil {
-		return nil, err
-	}
-	return a.backend.Logs(ctx, u.ContainerID, backend.LogsConfig{
-		Follow: follow,
-		Tail:   tail,
-	})
 }
 
 // Snapshot commits the current state of a world's container as a Docker image.

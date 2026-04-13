@@ -52,7 +52,7 @@ spwn ls
 spwn logs <world-id>
 
 # Drop into the container yourself
-spwn attach <world-id>
+spwn world enter <world-id>
 ```
 
 ## What to try next

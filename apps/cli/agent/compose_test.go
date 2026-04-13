@@ -18,9 +18,6 @@ import (
 func newComposeCmd() (*cobra.Command, *bytes.Buffer) {
 	out := new(bytes.Buffer)
 	cmd := &cobra.Command{Use: "test"}
-	cmd.PersistentFlags().Bool("quiet", true, "") // quiet suppresses stepper output in tests
-	cmd.PersistentFlags().Bool("verbose", false, "")
-	cmd.PersistentFlags().Bool("json", false, "")
 	cmd.SetOut(out)
 	cmd.SetErr(out)
 	return cmd, out

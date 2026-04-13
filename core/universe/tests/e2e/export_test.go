@@ -50,7 +50,7 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// THEN the imported agent should have identity/default.md
+	// THEN the imported agent should have core/profile.md
 	info, err := agentDomain.InspectAgent("import-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
@@ -59,12 +59,12 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 	files := info.Layers["core"]
 	found := false
 	for _, f := range files {
-		if f == "default.md" {
+		if f == "profile.md" {
 			found = true
 		}
 	}
 	if !found {
-		t.Fatalf("Expected core/default.md in imported Mind, got: %v", files)
+		t.Fatalf("Expected core/profile.md in imported Mind, got: %v", files)
 	}
 }
 

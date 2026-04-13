@@ -28,8 +28,8 @@ describe("agent CRUD", () => {
     }
   });
 
-  test("init creates agent with 6-layer Mind (identity, skills, memory/*, sessions)", async () => {
-    // WHEN — initializing a new agent
+  test("agent new creates agent with the 5-layer Mind", async () => {
+    // WHEN — creating a new agent
     const result = await spwn("agent new")
       .exec("agent new neo")
       .run();
@@ -38,8 +38,8 @@ describe("agent CRUD", () => {
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /→ Creating agent "neo"\.\.\./);
     expectLine(result.output, /✓ Created agent\s+neo/);
-    expectLine(result.output, /✓ Created persona\s+default\.md/);
-    expectLine(result.output, /✓ Spawn with: spwn (world --agent|up --agent) neo/);
+    expectLine(result.output, /✓ Created profile\s+profile\.md/);
+    expectLine(result.output, /✓ Spawn with: spwn up --agent neo/);
   });
 
   test("init duplicate fails", async () => {
@@ -73,25 +73,24 @@ describe("agent CRUD", () => {
     expectTableRow(result.output, ["trinity", "unattached"]);
   });
 
-  test("inspect shows agent details", async () => {
+  test("show prints agent details", async () => {
     // GIVEN — an agent exists
-    await spwn("create for inspect").exec("agent new neo").run();
+    await spwn("create for show").exec("agent new neo").run();
 
     // WHEN — inspecting the agent
-    const result = await spwn("inspect agent")
-      .exec("agent inspect neo")
+    const result = await spwn("show agent")
+      .exec("agent show neo")
       .run();
 
-    // THEN — details include agent name, path, world status, and Mind layers
+    // THEN — details include agent name, world status, and Mind layers
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /Agent:\s+neo/);
     expectLine(result.output, /World:\s+unattached/);
-    expectLine(result.output, /identity\/\s+default\.md/);
+    expectLine(result.output, /core\/\s+profile\.md/);
     expectLine(result.output, /skills\/\s+\(empty\)/);
-    expectLine(result.output, /memory\/knowledge\/\s+\(empty\)/);
-    expectLine(result.output, /memory\/playbooks\/\s+\(empty\)/);
-    expectLine(result.output, /memory\/journal\/\s+\(empty\)/);
-    expectLine(result.output, /sessions\/\s+\(empty\)/);
+    expectLine(result.output, /knowledge\/\s+\(empty\)/);
+    expectLine(result.output, /playbooks\/\s+\(empty\)/);
+    expectLine(result.output, /journal\/\s+\(empty\)/);
   });
 
   test("list on empty home returns no agents", async () => {
@@ -100,15 +99,14 @@ describe("agent CRUD", () => {
       .exec("agent ls")
       .run();
 
-    // THEN — exits successfully with table header (default agent may exist)
+    // THEN — exits successfully (no agents)
     expect(result.exitCode).toBe(0);
-    expectTableHeader(result.output, ["NAME", "WORLD", "STATUS"]);
   });
 
-  test("inspect non-existent agent fails", async () => {
-    // WHEN — inspecting an agent that does not exist
-    const result = await spwn("inspect missing")
-      .exec("agent inspect nonexistent")
+  test("show on non-existent agent fails", async () => {
+    // WHEN — showing an agent that does not exist
+    const result = await spwn("show missing")
+      .exec("agent show nonexistent")
       .run();
 
     // THEN — exits with error showing not found
@@ -134,9 +132,7 @@ describe("agent CRUD", () => {
     const list = await spwn("list after delete")
       .exec("agent ls")
       .run();
-    const listOutput = list.output;
-    // The table should not contain a row for "temp"
-    const tableLines = listOutput.split("\n").filter((l) => l.includes("temp"));
+    const tableLines = list.output.split("\n").filter((l) => l.includes("temp"));
     expect(tableLines.length).toBe(0);
   });
 
@@ -184,7 +180,7 @@ describe("agent CRUD", () => {
     // GIVEN — agent exists
     await spwn("create temp for disk check").exec("agent new temp").run();
     // Verify Mind directory exists
-    new MindAssertion(home, "temp").exists().hasLayer("identity");
+    new MindAssertion(home, "temp").exists().hasLayer("core");
 
     // WHEN — deleting the agent
     const result = await spwn("delete temp disk")
@@ -197,14 +193,14 @@ describe("agent CRUD", () => {
     expect(existsSync(agentDir)).toBe(false);
   });
 
-  test("cannot inspect agent after delete", async () => {
+  test("cannot show agent after delete", async () => {
     // GIVEN — agent is created then deleted
-    await spwn("create for inspect-delete").exec("agent new temp").run();
-    await spwn("delete for inspect-delete").exec("agent rm temp").run();
+    await spwn("create for show-delete").exec("agent new temp").run();
+    await spwn("delete for show-delete").exec("agent rm temp").run();
 
-    // WHEN — inspecting the deleted agent
-    const result = await spwn("inspect after delete")
-      .exec("agent inspect temp")
+    // WHEN — showing the deleted agent
+    const result = await spwn("show after delete")
+      .exec("agent show temp")
       .run();
 
     // THEN — exits with error showing not found

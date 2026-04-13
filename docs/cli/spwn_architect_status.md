@@ -21,12 +21,6 @@ spwn architect status [flags]
   -h, --help   help for status
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn architect](./spwn_architect.md)	 - Your always-on world builder

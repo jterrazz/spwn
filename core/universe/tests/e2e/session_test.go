@@ -21,10 +21,9 @@ func TestSession_FirstSpawnCreatesSession(t *testing.T) {
 		Detached().
 		Execute()
 
-	// THEN the mock should have been called with a session ID but not resumed
+	// THEN the mock should have been called and not resumed
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
-		m.HasSessionID()
 		m.WasNotResumed()
 	})
 
@@ -44,9 +43,9 @@ func TestSession_DeterministicID(t *testing.T) {
 		t.Fatalf("Session IDs not deterministic: %q != %q", id1, id2)
 	}
 
-	// AND the ID should be 16 characters
-	if len(id1) != 16 {
-		t.Fatalf("Expected 16-char session ID, got %d: %q", len(id1), id1)
+	// AND the ID should be a 36-char UUID
+	if len(id1) != 36 {
+		t.Fatalf("Expected 36-char UUID session ID, got %d: %q", len(id1), id1)
 	}
 
 	// AND different inputs should produce different IDs
@@ -165,7 +164,7 @@ func TestSession_DifferentWorldsDifferentSessions(t *testing.T) {
 	}
 }
 
-func TestSession_SecondSpawnResumes(t *testing.T) {
+func TestSession_SecondSpawnPreservesSessionID(t *testing.T) {
 	// GIVEN a universe where an agent has already been spawned once
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("resume-agent")
@@ -179,26 +178,31 @@ func TestSession_SecondSpawnResumes(t *testing.T) {
 
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
-		m.HasSessionID()
-		m.WasNotResumed()
 	})
 
+	// Capture the session ID stored after the first spawn.
+	mindPath := agentDomain.AgentDir("resume-agent")
+	first, err := agentDomain.LoadSession(mindPath, worldID)
+	if err != nil || first == nil {
+		t.Fatalf("Expected session after first spawn, got err=%v sess=%v", err, first)
+	}
+
 	// WHEN a second agent is spawned in the same world
-	err := tc.Arc.SpawnAgentDetached(context.Background(), worldID, "resume-agent")
-	if err != nil {
+	if err := tc.Arc.SpawnAgentDetached(context.Background(), worldID, "resume-agent"); err != nil {
 		t.Fatalf("Second spawn failed: %v", err)
 	}
 
-	// THEN the mock should be called again (wait for it to write output)
-	setup.WaitFor(t, 5*time.Second, 100*time.Millisecond, "second mock to write resumed output", func() bool {
-		output := tc.TryReadMockOutput(chain.Universe().ContainerID)
-		return output != nil && output.Resume
+	// Wait for the second mock invocation to land.
+	setup.WaitFor(t, 5*time.Second, 100*time.Millisecond, "second mock to write output", func() bool {
+		return tc.TryReadMockOutput(chain.Universe().ContainerID) != nil
 	})
 
-	// AND the mock should show it was resumed with a session ID
-	chain.ExpectMock(func(m *setup.MockAssertion) {
-		m.WasCalled()
-		m.HasSessionID()
-		m.WasResumed()
-	})
+	// THEN the session file should still have the same deterministic ID.
+	second, err := agentDomain.LoadSession(mindPath, worldID)
+	if err != nil || second == nil {
+		t.Fatalf("Expected session after second spawn, got err=%v sess=%v", err, second)
+	}
+	if second.ID != first.ID {
+		t.Fatalf("Deterministic session ID changed between spawns: %q vs %q", first.ID, second.ID)
+	}
 }

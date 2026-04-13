@@ -13,12 +13,6 @@ Manage teams — create, list, edit, and remove agent groups
   -h, --help   help for team
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn — create realities for things that can think

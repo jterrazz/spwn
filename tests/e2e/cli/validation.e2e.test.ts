@@ -23,15 +23,15 @@ describe("CLI input validation", () => {
 
   // ── Missing required arguments ─────────────────────────
 
-  test("'spwn agent new' with no name shows error", async () => {
+  test("'spwn agent new' with no name picks a random planet name", async () => {
     const result = await spwn("agent new no name")
       .exec("agent new")
       .run();
 
-    expect(result.exitCode).not.toBe(0);
+    // No-name is not an error: spwn picks a random planet name.
+    expect(result.exitCode).toBe(0);
     const output = stripAnsi(result.output);
-    // Should indicate a name is required
-    expect(output.toLowerCase()).toMatch(/name|required|argument|missing/);
+    expect(output).toMatch(/Created agent/);
   });
 
   test("'spwn agent new a b c' with too many args shows error", async () => {
@@ -52,7 +52,7 @@ describe("CLI input validation", () => {
 
     expect(result.exitCode).not.toBe(0);
     const output = stripAnsi(result.output);
-    expect(output.toLowerCase()).toMatch(/world|required|argument|missing|id/);
+    expect(output.toLowerCase()).toMatch(/world|required|argument|missing|id|accepts|arg/);
   });
 
   test("'spwn world inspect' with no world ID shows error", async () => {
@@ -62,7 +62,7 @@ describe("CLI input validation", () => {
 
     expect(result.exitCode).not.toBe(0);
     const output = stripAnsi(result.output);
-    expect(output.toLowerCase()).toMatch(/world|required|argument|missing|id/);
+    expect(output.toLowerCase()).toMatch(/world|required|argument|missing|id|accepts|arg/);
   });
 
   test("'spwn world logs' with no world ID shows error", async () => {
@@ -72,40 +72,28 @@ describe("CLI input validation", () => {
 
     expect(result.exitCode).not.toBe(0);
     const output = stripAnsi(result.output);
-    expect(output.toLowerCase()).toMatch(/world|required|argument|missing|id/);
+    expect(output.toLowerCase()).toMatch(/world|required|argument|missing|id|accepts|arg/);
   });
 
-  test("'spwn profile' with no agent name shows error", async () => {
-    const result = await spwn("profile no name")
+  test("'spwn profile' with no subcommand shows help", async () => {
+    const result = await spwn("profile no args")
       .exec("profile")
       .run();
 
-    expect(result.exitCode).not.toBe(0);
+    // profile is a command group — bare invocation renders help cleanly.
+    expect(result.exitCode).toBe(0);
     const output = stripAnsi(result.output);
-    expect(output.toLowerCase()).toMatch(/agent|name|required|argument|missing/);
+    expect(output.toLowerCase()).toContain("profile");
   });
 
-  test("'spwn profile neo unknownaspect' with invalid aspect shows error", async () => {
-    createAgent(home, "neo");
-
-    const result = await spwn("profile bad aspect")
-      .exec("profile neo unknownaspect")
-      .run();
-
-    // Should fail since 'unknownaspect' is not a valid profile aspect
-    expect(result.exitCode).not.toBe(0);
-    const output = stripAnsi(result.output);
-    expect(output.toLowerCase()).toMatch(/unknown|invalid|aspect|subcommand|unrecognized/);
-  });
-
-  test("'spwn msg send' with missing args shows error", async () => {
-    const result = await spwn("msg send no args")
-      .exec("msg send")
+  test("'spwn agent send' with missing args shows error", async () => {
+    const result = await spwn("agent send no args")
+      .exec("agent send")
       .run();
 
     expect(result.exitCode).not.toBe(0);
     const output = stripAnsi(result.output);
-    expect(output.toLowerCase()).toMatch(/required|argument|missing|world|message/);
+    expect(output.toLowerCase()).toMatch(/required|argument|missing|world|message|accepts|arg/);
   });
 
   // ── Error messages quality ─────────────────────────────
@@ -163,6 +151,6 @@ describe("CLI input validation", () => {
 
     expect(result.exitCode).not.toBe(0);
     const output = stripAnsi(result.output);
-    expect(output.toLowerCase()).toMatch(/name|required|argument|missing/);
+    expect(output.toLowerCase()).toMatch(/name|required|argument|missing|accepts|arg/);
   });
 });

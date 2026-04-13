@@ -69,7 +69,7 @@ describe("agent evolution", () => {
     expectLine(result.output, /→ Forking "neo" -> "neo-v2"\.\.\./);
     expectLine(result.output, /✓ Source\s+neo/);
     expectLine(result.output, /✓ Target\s+neo-v2/);
-    expectLine(result.output, /✓ Layers copied\s+identity, skills, memory\/knowledge, memory\/playbooks, memory\/journal, sessions/);
+    expectLine(result.output, /✓ Layers copied\s+core, skills, knowledge, playbooks, journal/);
   });
 
   test("fork duplicate target fails", async () => {
@@ -88,18 +88,18 @@ describe("agent evolution", () => {
 
   test("fork preserves source Mind layers", async () => {
     // WHEN — forking an agent
-    const forkResult = await spwn("fork for inspect")
+    const forkResult = await spwn("fork for show")
       .exec("agent fork neo neo-clone")
       .run();
     expect(forkResult.exitCode).toBe(0);
 
     // THEN — the forked agent has the same Mind structure
-    const inspectResult = await spwn("inspect forked")
-      .exec("agent inspect neo-clone")
+    const inspectResult = await spwn("show forked")
+      .exec("agent show neo-clone")
       .run();
     expect(inspectResult.exitCode).toBe(0);
     expectLine(inspectResult.output, /Agent:\s+neo-clone/);
-    expectLine(inspectResult.output, /identity\/\s+default\.md/);
+    expectLine(inspectResult.output, /core\/\s+profile\.md/);
   });
 
   test("dream on non-existent agent skips gracefully", async () => {
@@ -130,7 +130,7 @@ describe("agent evolution", () => {
 
   test("dream with journal entries creates auto-reflexion.md", async () => {
     // GIVEN — an agent with journal entries
-    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    const journalDir = join(home, "agents", "neo", "journal");
     writeFileSync(
       join(journalDir, "2024-01-01.md"),
       "# Journal 2024-01-01\n## Session w-test-00001\n- Outcome: success\n- Duration: 5m",
@@ -147,7 +147,7 @@ describe("agent evolution", () => {
 
     // THEN — auto-reflexion.md is created in playbooks/
     expect(result.exitCode).toBe(0);
-    new MindAssertion(home, "neo").hasFile("memory/playbooks/auto-reflexion.md");
+    new MindAssertion(home, "neo").hasFile("playbooks/auto-reflexion.md");
 
     // AND — output shows analysis stats
     expectLine(result.output, /Entries analyzed\s+2/);
@@ -155,7 +155,7 @@ describe("agent evolution", () => {
 
   test("dream output includes success rate", async () => {
     // GIVEN — an agent with journal entries (1 success, 1 failure)
-    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    const journalDir = join(home, "agents", "neo", "journal");
     writeFileSync(
       join(journalDir, "2024-02-01.md"),
       "# Journal 2024-02-01\n## Session w-test-00010\n- Outcome: success\n- Duration: 2m",
@@ -179,7 +179,7 @@ describe("agent evolution", () => {
 
   test("sleep archives stale playbooks", async () => {
     // GIVEN — an agent with old playbook files
-    const playbooksDir = join(home, "agents", "neo", "memory", "playbooks");
+    const playbooksDir = join(home, "agents", "neo", "playbooks");
     const stalePath = join(playbooksDir, "old-strategy.md");
     writeFileSync(stalePath, "# Old strategy\nThis is outdated.");
     const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
@@ -198,7 +198,7 @@ describe("agent evolution", () => {
 
   test("sleep preserves fresh files", async () => {
     // GIVEN — an agent with recent playbook files
-    const playbooksDir = join(home, "agents", "neo", "memory", "playbooks");
+    const playbooksDir = join(home, "agents", "neo", "playbooks");
     const freshPath = join(playbooksDir, "fresh-strategy.md");
     writeFileSync(freshPath, "# Fresh strategy\nThis is current.");
 
@@ -217,7 +217,7 @@ describe("agent evolution", () => {
 
   test("dream auto-reflexion.md content references journal entries", async () => {
     // GIVEN — an agent with multiple diverse journal entries
-    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    const journalDir = join(home, "agents", "neo", "journal");
     writeFileSync(
       join(journalDir, "2024-03-01.md"),
       "# Journal 2024-03-01\n## Session w-alpha-00001\n- Outcome: success\n- Duration: 10m\n- Task: deployed new API endpoint\n",
@@ -239,7 +239,7 @@ describe("agent evolution", () => {
     // THEN — auto-reflexion.md is created
     expect(result.exitCode).toBe(0);
     const reflexionPath = join(
-      home, "agents", "neo", "memory", "playbooks", "auto-reflexion.md",
+      home, "agents", "neo", "playbooks", "auto-reflexion.md",
     );
     expect(existsSync(reflexionPath)).toBe(true);
 
@@ -253,7 +253,7 @@ describe("agent evolution", () => {
 
   test("dream is idempotent — running twice overwrites cleanly", async () => {
     // GIVEN — an agent with journal entries
-    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    const journalDir = join(home, "agents", "neo", "journal");
     writeFileSync(
       join(journalDir, "2024-04-01.md"),
       "# Journal 2024-04-01\n## Session w-test-00010\n- Outcome: success\n- Duration: 5m\n",
@@ -269,7 +269,7 @@ describe("agent evolution", () => {
     expect(result.exitCode).toBe(0);
 
     // AND — only one auto-reflexion.md exists (not duplicated)
-    const playbooksDir = join(home, "agents", "neo", "memory", "playbooks");
+    const playbooksDir = join(home, "agents", "neo", "playbooks");
     const reflexionFiles = readdirSync(playbooksDir).filter(
       (f) => f.includes("auto-reflexion"),
     );
@@ -280,7 +280,7 @@ describe("agent evolution", () => {
 
   test("sleep archives stale but keeps fresh in same directory", async () => {
     // GIVEN — an agent with both stale and fresh playbooks
-    const playbooksDir = join(home, "agents", "neo", "memory", "playbooks");
+    const playbooksDir = join(home, "agents", "neo", "playbooks");
 
     const stalePath = join(playbooksDir, "ancient-patterns.md");
     writeFileSync(stalePath, "# Ancient patterns\nVery old strategies.");
@@ -304,7 +304,7 @@ describe("agent evolution", () => {
 
   test("sleep archives stale knowledge files", async () => {
     // GIVEN — an agent with old knowledge files
-    const knowledgeDir = join(home, "agents", "neo", "memory", "knowledge");
+    const knowledgeDir = join(home, "agents", "neo", "knowledge");
     const stalePath = join(knowledgeDir, "old-facts.md");
     writeFileSync(stalePath, "# Old facts\nOutdated information.");
     const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
@@ -346,7 +346,7 @@ describe("agent evolution", () => {
 
   test("dream then sleep preserves auto-reflexion.md (it is fresh)", async () => {
     // GIVEN — an agent with journal entries
-    const journalDir = join(home, "agents", "neo", "memory", "journal");
+    const journalDir = join(home, "agents", "neo", "journal");
     writeFileSync(
       join(journalDir, "2024-05-01.md"),
       "# Journal 2024-05-01\n## Session w-test-00020\n- Outcome: success\n- Duration: 7m\n",
@@ -359,7 +359,7 @@ describe("agent evolution", () => {
     expect(reflectResult.exitCode).toBe(0);
 
     const reflexionPath = join(
-      home, "agents", "neo", "memory", "playbooks", "auto-reflexion.md",
+      home, "agents", "neo", "playbooks", "auto-reflexion.md",
     );
     expect(existsSync(reflexionPath)).toBe(true);
 

@@ -17,15 +17,10 @@ The Architect is your always-on world builder. It manages worlds and orchestrate
   -h, --help   help for architect
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn architect logs](./spwn_architect_logs.md)	 - Show the Architect daemon's event log
 * [spwn architect start](./spwn_architect_start.md)	 - Start the Architect daemon
 * [spwn architect status](./spwn_architect_status.md)	 - Show Architect status — worlds, agents
 * [spwn architect stop](./spwn_architect_stop.md)	 - Stop the Architect daemon

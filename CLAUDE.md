@@ -82,11 +82,15 @@ spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`
 # ── Worlds (runtime instances) ────────────────────────────────────
 spwn world up --agent neo -w ./project         # Full form of `spwn up`
 spwn world ls                                  # Full form of `spwn ls`
-spwn world show <id>                           # Inspect a running world
+spwn world inspect <id>                        # Inspect a running world
 spwn world down <id>                           # Destroy world (agent survives)
-spwn world attach <id>                         # Interactive shell
-spwn world snap <id>                           # Snapshot
-spwn world restore <snap-id>                   # Rollback
+spwn world enter <id>                          # Interactive shell inside the world
+
+# ── Snapshots ─────────────────────────────────────────────────────
+spwn snap save <id>                            # Save world state
+spwn snap ls                                   # List snapshots
+spwn snap restore <snap-id>                    # Rollback
+spwn snap rm <snap-id>                         # Remove a snapshot
 
 # ── Tools (composable blocks) ─────────────────────────────────────
 spwn tool ls                                   # Installed tool packs
@@ -125,12 +129,11 @@ spwn architect stop
 spwn architect status
 spwn architect connect <channel>
 
-# ── Dashboard ─────────────────────────────────────────────────────
-spwn dash start
-spwn dash open
+# ── Web UI ────────────────────────────────────────────────────────
+spwn web                                       # Start + open in browser
+spwn web --no-open --port 3002                 # Headless / custom port
 
 # ── System ────────────────────────────────────────────────────────
-spwn doctor                                    # Check environment
 spwn auth login / logout / token
 ```
 
@@ -138,7 +141,7 @@ spwn auth login / logout / token
 - Strict noun-first grammar: `spwn <noun> <verb>`. Three shortcuts exist: `up`, `ls`, `talk`. No other top-level verbs.
 - `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --tool X` removes a block from it.
 - Agent/tool/skill/profile names via positional args; flags for composition (`--tool`, `--skill`, `--profile`).
-- Global flags: `--json`, `--quiet`/`-q`, `--verbose`/`-v`, `-w` (workspace path for world spawning).
+- Global flags: `-w` (workspace path for world spawning).
 
 ## IDs
 
@@ -232,7 +235,7 @@ spwn/
 │   │   ├── cmd/spwn/main.go         #     Entry point
 │   │   ├── root.go                  #     Root cobra command
 │   │   ├── defaults.go              #     Auto-create defaults on first run
-│   │   ├── world/                   #     World subcommands (up, down, ls, logs, attach, inspect)
+│   │   ├── world/                   #     World subcommands (up, down, ls, logs, enter, inspect)
 │   │   ├── agent/                   #     Agent subcommands (new, ls, rm, talk, fork, export, import)
 │   │   ├── profile/                 #     Profile subcommands (full character sheet)
 │   │   ├── msg/                     #     Messaging subcommands (send, inbox, watch)

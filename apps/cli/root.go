@@ -5,22 +5,20 @@ import (
 	"io"
 	"os"
 
-	"spwn.sh/apps/cli/activity"
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
-	"spwn.sh/apps/cli/dash"
 	"spwn.sh/apps/cli/example"
 	"spwn.sh/apps/cli/get"
+	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
-	"spwn.sh/apps/cli/knowledge"
-	"spwn.sh/apps/cli/msg"
 	"spwn.sh/apps/cli/profile"
 	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
 	"spwn.sh/apps/cli/tool"
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/core/foundation"
 	"github.com/spf13/cobra"
@@ -28,8 +26,6 @@ import (
 
 // Version is set by goreleaser via ldflags.
 var Version = "dev"
-
-var jsonOutput bool
 
 var rootCmd = &cobra.Command{
 	Use:   "spwn",
@@ -60,8 +56,6 @@ func init() {
 	foundation.Version = Version
 	rootCmd.SetHelpFunc(customHelp)
 
-	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Output as JSON")
-
 	// Top-level aliases — shortcuts for the 80% cases
 	rootCmd.AddCommand(world.UpCmd)      // spwn up
 	rootCmd.AddCommand(world.LsCmd)      // spwn ls
@@ -69,8 +63,6 @@ func init() {
 
 	// Additional top-level shortcuts
 	rootCmd.AddCommand(world.DownCmd)
-	rootCmd.AddCommand(world.LogsTopCmd)
-	rootCmd.AddCommand(world.AttachTopCmd)
 
 	// Command groups — entities
 	rootCmd.AddCommand(world.Cmd)
@@ -82,7 +74,6 @@ func init() {
 	rootCmd.AddCommand(profile.Cmd)
 
 	// Command groups — coordination
-	rootCmd.AddCommand(msg.Cmd)
 	rootCmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)
@@ -90,11 +81,10 @@ func init() {
 	// Command groups — system
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
-	rootCmd.AddCommand(knowledge.Cmd)
 	rootCmd.AddCommand(example.Cmd)
-	rootCmd.AddCommand(dash.Cmd)
+	rootCmd.AddCommand(web.Cmd)
 	rootCmd.AddCommand(get.Cmd)
-	rootCmd.AddCommand(activity.Cmd)
+	rootCmd.AddCommand(logs.Cmd)
 }
 
 // Execute runs the root command.
@@ -149,7 +139,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	// Entities — the things you create
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
 	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, show, add, fork, dream, sleep)"))
-	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, show, down, attach, snap)"))
+	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, show, down, enter, snap)"))
 	fmt.Fprintln(w)
 
 	// Building blocks — the things you compose agents from
@@ -165,30 +155,21 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "ls", "List active worlds "+ui.Faint("(alias: world ls)"))
 	printHelpCmd(w, "talk <name>", "Talk to a running agent "+ui.Faint("(alias: agent talk)"))
 	printHelpCmd(w, "down <id>", "Destroy a world")
-	printHelpCmd(w, "logs <id>", "Stream agent output")
-	printHelpCmd(w, "attach <id>", "Open interactive shell")
 	fmt.Fprintln(w)
 
 	// Coordination — multi-agent + orchestration
 	fmt.Fprintf(w, "%s\n", ui.Strong("Coordination:"))
-	printHelpCmd(w, "msg", "Inter-agent messaging "+ui.Faint("(send, inbox, watch)"))
 	printHelpCmd(w, "architect", "Always-on orchestration daemon")
-	printHelpCmd(w, "dash", "Visual dashboard "+ui.Faint("(start, open)"))
-	printHelpCmd(w, "knowledge", "Universe knowledge base")
-	printHelpCmd(w, "activity", "Recent activity across worlds and agents")
+	printHelpCmd(w, "web", "Open the local web UI")
+	printHelpCmd(w, "logs", "System event log "+ui.Faint("(--world, --agent, --type)"))
 	fmt.Fprintln(w)
 
 	// System
 	fmt.Fprintf(w, "%s\n", ui.Strong("System:"))
 	printHelpCmd(w, "init", "Create default configs")
-	printHelpCmd(w, "doctor", "Check your environment")
 	printHelpCmd(w, "status", "Show running state")
 	printHelpCmd(w, "auth", "Manage credentials")
 	printHelpCmd(w, "upgrade", "Update the CLI")
-	fmt.Fprintln(w)
-
-	// Global flags
-	fmt.Fprintf(w, "%s %s\n", ui.Strong("Global:"), ui.Faint("--json"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Faint("Run \"spwn <command> --help\" for details."))

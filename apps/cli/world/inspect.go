@@ -2,7 +2,6 @@ package world
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"spwn.sh/core/universe"
@@ -14,15 +13,13 @@ func init() {
 }
 
 var inspectCmd = &cobra.Command{
-	Use:   "show <world-id>",
-	Short: "Show world details and agent status",
+	Use:   "inspect <world-id>",
+	Short: "Inspect a running world — physics, agents, status",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		worldID := args[0]
 		s := newStepper(cmd)
-
-		j, _ := cmd.Flags().GetBool("json")
 
 		arc, err := universe.NewArchitectFromEnv()
 		if err != nil {
@@ -32,12 +29,6 @@ var inspectCmd = &cobra.Command{
 		u, err := arc.Inspect(ctx, worldID)
 		if err != nil {
 			return fmt.Errorf("world %s not found\n\n  List worlds with: spwn ls", worldID)
-		}
-
-		if j {
-			data, _ := json.MarshalIndent(u, "", "  ")
-			fmt.Println(string(data))
-			return nil
 		}
 
 		s.Blank()

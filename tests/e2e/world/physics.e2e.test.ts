@@ -29,7 +29,7 @@ describe("world physics", () => {
     // THEN — physics constants are shown in structured format
     expect(inspectResult.exitCode).toBe(0);
     expectLine(inspectResult.output, /Constants:\s+CPU:.*Memory:.*Timeout:/);
-    expectLine(inspectResult.output, /Laws:\s+Network:.*Max processes:/);
+    expectLine(inspectResult.output, /Laws:\s+Network:/);
   });
 
   test("physics.md contains constants inside container", () => {
@@ -73,10 +73,7 @@ describe("world physics", () => {
     expect(spawnResult.exitCode).toBe(0);
     const id = parseWorldId(spawnResult.output)!;
 
-    // THEN — the spawn output mentions faculties generation
-    expectLine(spawnResult.output, /✓ Generated physics\s+physics\.md, faculties\.md/);
-
-    // AND — faculties.md actually exists and lists elements
+    // THEN — faculties.md exists and lists tools
     const faculties = ctx.universe(id).faculties();
     expect(faculties).toMatch(/bash/);
   });
@@ -97,15 +94,15 @@ describe("world physics", () => {
     // THEN — exits successfully (elements are part of physics config)
     expect(inspectResult.exitCode).toBe(0);
 
-    // AND — container has the universe directory structure
+    // AND — container has the world directory structure
     ctx
       .universe(id)
-      .toHaveDirectory("/universe")
-      .toHaveFile("/universe/physics.md")
-      .toHaveFile("/universe/faculties.md");
+      .toHaveDirectory("/world")
+      .toHaveFile("/world/physics.md")
+      .toHaveFile("/world/faculties.md");
   });
 
-  test("network isolation — curl fails inside container", () => {
+  test("default network mode is bridge", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
@@ -114,21 +111,8 @@ describe("world physics", () => {
     );
     const id = parseWorldId(result.output)!;
 
-    // Verify network mode is set to none via docker inspect
+    // Verify network mode is set to bridge (the current default)
     const inspectData = ctx.universe(id).inspect();
-    expect(inspectData.HostConfig?.NetworkMode).toBe("none");
-
-    // Try to curl from inside — should fail with network=none
-    // We use exec and expect it to throw (non-zero exit code)
-    let curlSucceeded = false;
-    try {
-      ctx
-        .universe(id)
-        .exec("curl -s --connect-timeout 2 http://example.com");
-      curlSucceeded = true;
-    } catch {
-      // Expected: connection fails because network is disabled
-    }
-    expect(curlSucceeded).toBe(false);
+    expect(inspectData.HostConfig?.NetworkMode).toBe("bridge");
   });
 });

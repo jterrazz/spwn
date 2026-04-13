@@ -58,58 +58,6 @@ describe("CLI — auth command", () => {
     expect(hasProvider).toBe(true);
   });
 
-  // ── spwn auth --json ───────────────────────────────────────
-
-  test("'spwn auth --json' returns valid JSON array", async () => {
-    // WHEN — running auth with --json flag
-    const result = await spwn("auth json").exec("auth --json").run();
-
-    // THEN — exit code 0
-    expect(result.exitCode).toBe(0);
-
-    // AND — stdout is valid JSON
-    const jsonStr = result.stdout.trim();
-    let parsed: unknown;
-    expect(() => {
-      parsed = JSON.parse(jsonStr);
-    }).not.toThrow();
-
-    // AND — JSON is an array
-    expect(Array.isArray(parsed)).toBe(true);
-  });
-
-  test("'spwn auth --json' array items have provider/ok/source/type fields", async () => {
-    // WHEN — running auth with --json flag
-    const result = await spwn("auth json fields").exec("auth --json").run();
-
-    // THEN — parse and validate structure
-    expect(result.exitCode).toBe(0);
-    const parsed = JSON.parse(result.stdout.trim()) as Array<Record<string, unknown>>;
-    expect(parsed.length).toBeGreaterThan(0);
-
-    for (const item of parsed) {
-      expect(item).toHaveProperty("provider");
-      expect(typeof item.provider).toBe("string");
-      // Should have status-related fields (ok or connected)
-      const hasStatusField =
-        "ok" in item || "connected" in item || "status" in item;
-      expect(hasStatusField).toBe(true);
-      // Should have type/source info
-      const hasTypeInfo =
-        "type" in item || "credentialType" in item || "source" in item;
-      expect(hasTypeInfo).toBe(true);
-    }
-  });
-
-  test("'spwn auth --json' has no ANSI codes in stdout", async () => {
-    // WHEN — running auth with --json
-    const result = await spwn("auth json ansi").exec("auth --json").run();
-
-    // THEN — stdout has no ANSI escape codes
-    expect(result.exitCode).toBe(0);
-    expect(result.stdout).not.toMatch(/\x1B\[[0-9;]*[a-zA-Z]/);
-  });
-
   // ── spwn auth check ────────────────────────────────────────
 
   test("'spwn auth check' validates credentials and shows results", async () => {
@@ -130,75 +78,6 @@ describe("CLI — auth command", () => {
       out.includes("PROVIDER") ||
       out.includes("provider");
     expect(hasCheckOutput).toBe(true);
-  });
-
-  test("'spwn auth check --json' returns valid JSON", async () => {
-    // WHEN — running auth check with --json
-    const result = await spwn("auth check json")
-      .exec("auth check --json")
-      .run();
-
-    // THEN — exit code 0
-    expect(result.exitCode).toBe(0);
-
-    // AND — stdout is valid JSON
-    const jsonStr = result.stdout.trim();
-    let parsed: unknown;
-    expect(() => {
-      parsed = JSON.parse(jsonStr);
-    }).not.toThrow();
-
-    // AND — JSON is structured (array or object)
-    expect(parsed).toBeDefined();
-    expect(typeof parsed).toBe("object");
-  });
-
-  test("'spwn auth check --json' items have provider/connected/credentialType fields", async () => {
-    // WHEN — running auth check with --json
-    const result = await spwn("auth check json fields")
-      .exec("auth check --json")
-      .run();
-
-    // THEN — parse and check structure
-    expect(result.exitCode).toBe(0);
-    const parsed = JSON.parse(result.stdout.trim());
-
-    // Handle both array and object-with-array response shapes
-    const items: Array<Record<string, unknown>> = Array.isArray(parsed)
-      ? parsed
-      : Array.isArray(parsed?.providers)
-        ? parsed.providers
-        : [parsed];
-
-    expect(items.length).toBeGreaterThan(0);
-
-    for (const item of items) {
-      expect(item).toHaveProperty("provider");
-      expect(typeof item.provider).toBe("string");
-      // Should have connected status
-      const hasConnected =
-        "connected" in item || "ok" in item || "status" in item;
-      expect(hasConnected).toBe(true);
-      // Should have credential type info
-      const hasCredType =
-        "credentialType" in item || "type" in item || "source" in item;
-      expect(hasCredType).toBe(true);
-    }
-  });
-
-  test("'spwn auth check --json' has no decorative output in stdout", async () => {
-    // WHEN — running auth check with --json
-    const result = await spwn("auth check json clean")
-      .exec("auth check --json")
-      .run();
-
-    // THEN — no box-drawing or ANSI in stdout
-    expect(result.exitCode).toBe(0);
-    const stdout = result.stdout;
-    expect(stdout).not.toContain("╭");
-    expect(stdout).not.toContain("╰");
-    expect(stdout).not.toContain("│");
-    expect(stdout).not.toMatch(/\x1B\[[0-9;]*[a-zA-Z]/);
   });
 
   // ── spwn auth --help ───────────────────────────────────────

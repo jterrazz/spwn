@@ -161,17 +161,38 @@ func (s *Store) Get(id string) (*models.World, error) {
 	return nil, fmt.Errorf("world %s not found", id)
 }
 
-// hydrate fills the mutable bits of a World from runtime state. The
-// labels carry the *creation-time* agent list; runtimestate carries
-// any post-spawn add/remove and the session ids.
+// hydrate fills the mutable bits of a World from runtime state. Labels
+// carry the *creation-time* agent list; runtimestate carries post-spawn
+// add/remove plus per-agent mutable fields (status, session ids). The
+// two must be merged so hot-deployed agents appear alongside original
+// ones without discarding either.
 func (s *Store) hydrate(w *models.World) {
 	rs, _ := s.rstate.Load(w.ID)
-	if len(rs.Agents) > 0 {
-		w.Agents = rs.Agents
-	}
 	if len(rs.SessionIDs) > 0 {
 		w.SessionIDs = rs.SessionIDs
 	}
+	if len(rs.Agents) == 0 {
+		return
+	}
+	byID := make(map[string]models.AgentRecord, len(w.Agents))
+	order := make([]string, 0, len(w.Agents))
+	for _, a := range w.Agents {
+		if _, seen := byID[a.AgentID]; !seen {
+			order = append(order, a.AgentID)
+		}
+		byID[a.AgentID] = a
+	}
+	for _, a := range rs.Agents {
+		if _, seen := byID[a.AgentID]; !seen {
+			order = append(order, a.AgentID)
+		}
+		byID[a.AgentID] = a
+	}
+	merged := make([]models.AgentRecord, 0, len(order))
+	for _, id := range order {
+		merged = append(merged, byID[id])
+	}
+	w.Agents = merged
 }
 
 // derivedStatus maps a container's runtime state into the spwn Status

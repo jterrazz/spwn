@@ -5,7 +5,7 @@ slug: "spwn-world-logs"
 
 ## spwn world logs
 
-Show agent output from a world
+Show the event log for a specific world
 
 ```
 spwn world logs <world-id> [flags]
@@ -14,18 +14,11 @@ spwn world logs <world-id> [flags]
 ### Options
 
 ```
-  -f, --follow   Follow log output
-  -h, --help     help for logs
-  -n, --n int    Number of lines to show (default 100)
-```
-
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
+  -h, --help        help for logs
+  -n, --limit int   Number of events to show (default 50)
 ```
 
 ### SEE ALSO
 
-* [spwn world](./spwn_world.md)	 - Spawn a world — an isolated reality for agents
+* [spwn world](./spwn_world.md)	 - Manage worlds — ephemeral runtime instances for agents
 

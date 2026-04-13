@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/core/gate"
 	"spwn.sh/core/universe/internal/models"
 	"spwn.sh/core/foundation"
 	"gopkg.in/yaml.v3"
@@ -26,8 +25,7 @@ type rawManifest struct {
 	Physics struct {
 		Constants models.ConstantsManifest `yaml:"constants"`
 	} `yaml:"physics"`
-	Tools yaml.Node     `yaml:"tools"`
-	Gate  []gate.Bridge `yaml:"gate"`
+	Tools yaml.Node `yaml:"tools"`
 }
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
@@ -52,7 +50,6 @@ func LoadPath(path string) (models.Manifest, error) {
 		Physics: models.PhysicsManifest{
 			Constants: raw.Physics.Constants,
 		},
-		Gate: raw.Gate,
 	}
 
 	// Parse tools (plain list of strings, root-level)

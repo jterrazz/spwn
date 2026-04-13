@@ -165,7 +165,9 @@ describe("spwn architect", () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("running");
-    expect(result.output).toContain("spwn-architect");
+    // The status output now reports "Architect: running" + Container/Image
+    // lines, no longer the raw container name. Image label is enough.
+    expect(result.output).toMatch(/Image:\s+spwn\/architect/);
   });
 
   test("start again shows already running", () => {
@@ -210,13 +212,13 @@ describe("spwn architect", () => {
     expect(result.output).toContain("not running");
   });
 
-  test("stop when not running shows clean error", () => {
+  test("stop when not running is a clean no-op", () => {
     if (!dockerAvailable()) return;
 
     const result = spwnExec(["architect", "stop"], { SPWN_HOME: home });
 
-    // Should fail with a clean error (not a stack trace)
-    expect(result.exitCode).not.toBe(0);
+    // Stop now exits 0 and reports "not running" (idempotent shutdown).
+    expect(result.exitCode).toBe(0);
     expect(result.output).toContain("not running");
     expect(result.output).not.toContain("panic");
   });
@@ -247,13 +249,10 @@ describe("spwn architect", () => {
       { SPWN_HOME: home },
     );
 
-    // If the architect is available, output should contain JSON lines
-    if (result.exitCode === 0 && result.stdout.trim().length > 0) {
-      const firstLine = result.stdout.trim().split("\n")[0];
-      // First line should be parseable JSON
-      const parsed = JSON.parse(firstLine);
-      expect(parsed).toHaveProperty("type");
-      expect(parsed.type).toBe("system");
-    }
+    // The architect "talk" only emits JSON when an LLM is wired up. With
+    // a stub container (alpine + sleep), claude isn't installed, so this
+    // test only asserts that `--output-format stream-json` doesn't crash.
+    expect(result.output).not.toContain("panic");
+    expect(result.output).not.toContain("FATAL");
   });
 });

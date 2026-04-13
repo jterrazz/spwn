@@ -144,57 +144,37 @@ export default function WorldDashboard() {
   // Snapshots are not yet available from the API
   const snapshots: { id: string; worldId: string; name: string; created_at: string; size: string; agents: number }[] = [];
 
-  // Log streaming state
+  // Event log state (was "logs" — now the per-world semantic event feed)
   const [logs, setLogs] = useState<{ timestamp: string; level: string; source: string; message: string }[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
-  // Fetch logs when panel is opened
   useEffect(() => {
     if (activePanel !== "logs") return;
     setLogsLoading(true);
     const controller = new AbortController();
 
-    fetch(goApiUrl(`/api/worlds/${worldId}/logs`), { signal: controller.signal })
+    fetch(goApiUrl(`/api/activity?world=${worldId}&limit=200`), { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to fetch logs");
-        const reader = res.body?.getReader();
-        if (!reader) return;
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed || trimmed.startsWith(":")) continue;
-            if (trimmed.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(trimmed.slice(6));
-                setLogs((prev) => [...prev.slice(-500), {
-                  timestamp: data.timestamp || new Date().toISOString(),
-                  level: data.level || "info",
-                  source: data.source || "world",
-                  message: data.message || data.line || trimmed.slice(6),
-                }]);
-              } catch {
-                setLogs((prev) => [...prev.slice(-500), {
-                  timestamp: new Date().toISOString(),
-                  level: "info",
-                  source: "world",
-                  message: trimmed.slice(6),
-                }]);
-              }
-            }
-          }
-        }
+        if (!res.ok) throw new Error("Failed to fetch events");
+        const data = await res.json();
+        const events = (data.events ?? []) as Array<{
+          timestamp: string;
+          type: string;
+          phrase: string;
+          actor: string;
+        }>;
+        setLogs(
+          events.map((e) => ({
+            timestamp: e.timestamp,
+            level: "info",
+            source: e.actor || "world",
+            message: e.phrase || e.type,
+          })),
+        );
       })
       .catch(() => {
-        // Logs endpoint not available — that's OK
+        setLogs([]);
       })
       .finally(() => setLogsLoading(false));
 

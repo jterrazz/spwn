@@ -23,6 +23,6 @@ When updating progress:
   [STACK_UPDATE] Short task title
   Progress: what's been done so far.
 
-## Knowledge Management
-You maintain the project knowledge at /universe/knowledge/.
-EVERY conversation should result in knowledge updates.
+## Knowledge
+Knowledge is per-world at `/world/knowledge/` inside each world container.
+Write project notes into the relevant world, not a global store.

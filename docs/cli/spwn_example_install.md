@@ -17,12 +17,6 @@ spwn example install <slug> [flags]
   -h, --help   help for install
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn example](./spwn_example.md)	 - Install ready-made world + agent templates

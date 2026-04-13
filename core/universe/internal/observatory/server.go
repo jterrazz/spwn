@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -119,7 +118,6 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/agents/{name}/journal", cors(s.handleGetAgentJournal))
 	mux.HandleFunc("GET /api/agents/{name}/mind", cors(s.handleGetAgentMind))
 	mux.HandleFunc("GET /api/agents/{name}/files/{path...}", cors(s.handleGetAgentFile))
-	mux.HandleFunc("GET /api/worlds/{id}/logs", cors(s.handleWorldLogs))
 
 	// --- WRITE endpoints ---
 	mux.HandleFunc("POST /api/worlds", cors(s.handleCreateWorld))
@@ -178,8 +176,6 @@ func (s *Server) Start() error {
 	mux.HandleFunc("PUT /api/worlds/{id}/knowledge/{path...}", cors(s.handleWorldKnowledgeWrite))
 
 	// --- Architect knowledge endpoints (reads from architect container) ---
-	mux.HandleFunc("GET /api/architect/knowledge", cors(s.handleArchitectKnowledgeList))
-	mux.HandleFunc("GET /api/architect/knowledge/{path...}", cors(s.handleArchitectKnowledgeRead))
 
 	// --- Root redirect + CORS ---
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
@@ -576,63 +572,6 @@ func (s *Server) handleGetAgentJournal(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, entries)
 }
 
-func (s *Server) handleWorldLogs(w http.ResponseWriter, r *http.Request) {
-	if !s.requireArch(w) {
-		return
-	}
-
-	worldID := r.PathValue("id")
-	if worldID == "" {
-		jsonError(w, "world id is required", 400)
-		return
-	}
-
-	follow := r.URL.Query().Get("follow") == "true"
-	tail := r.URL.Query().Get("tail")
-	if tail == "" {
-		tail = "100"
-	}
-
-	reader, err := s.arch.Logs(r.Context(), worldID, follow, tail)
-	if err != nil {
-		jsonError(w, err.Error(), 500)
-		return
-	}
-	defer reader.Close()
-
-	if follow {
-		// SSE streaming
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "keep-alive")
-
-		flusher, ok := w.(http.Flusher)
-		if !ok {
-			jsonError(w, "streaming not supported", 500)
-			return
-		}
-
-		buf := make([]byte, 4096)
-		for {
-			n, err := reader.Read(buf)
-			if n > 0 {
-				lines := strings.Split(string(buf[:n]), "\n")
-				for _, line := range lines {
-					if line != "" {
-						fmt.Fprintf(w, "data: %s\n\n", line)
-					}
-				}
-				flusher.Flush()
-			}
-			if err != nil {
-				break
-			}
-		}
-	} else {
-		w.Header().Set("Content-Type", "text/plain")
-		io.Copy(w, reader)
-	}
-}
 
 // ============================================================
 // WRITE handlers
@@ -1267,12 +1206,6 @@ type StackAction struct {
 	Description string `json:"description,omitempty"`
 }
 
-// KnowledgeUpdate represents a parsed knowledge update marker from the architect's response.
-type KnowledgeUpdate struct {
-	Path        string `json:"path"`
-	Description string `json:"description,omitempty"`
-}
-
 // parseStackAction extracts a stack action marker from the architect's response.
 // It looks for [STACK_PUSH], [STACK_POP], or [STACK_UPDATE] at the start of lines.
 func parseStackAction(text string) *StackAction {
@@ -1320,33 +1253,6 @@ func parseStackAction(text string) *StackAction {
 		}
 
 		return action
-	}
-	return nil
-}
-
-// parseKnowledgeUpdate extracts a [KNOWLEDGE_UPDATE] marker from the architect's response.
-func parseKnowledgeUpdate(text string) *KnowledgeUpdate {
-	lines := strings.Split(text, "\n")
-	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if !strings.HasPrefix(trimmed, "[KNOWLEDGE_UPDATE]") {
-			continue
-		}
-
-		path := strings.TrimSpace(strings.TrimPrefix(trimmed, "[KNOWLEDGE_UPDATE]"))
-		update := &KnowledgeUpdate{
-			Path: path,
-		}
-
-		// Look at the next line for a description
-		if i+1 < len(lines) {
-			next := strings.TrimSpace(lines[i+1])
-			if next != "" && !strings.HasPrefix(next, "[") {
-				update.Description = next
-			}
-		}
-
-		return update
 	}
 	return nil
 }
@@ -1403,10 +1309,7 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 			"Format: [STACK_PUSH] Short task title\nPriority: blocking|queued\nBrief description. "+
 			"Also update /me/stack.md with the new task. "+
 			"When completing a task use [STACK_POP] Short task title. "+
-			"Read /me/skills/ for detailed guides. "+
-			"KNOWLEDGE: You maintain /universe/knowledge/ as the single source of truth. "+
-			"When updating knowledge files, include [KNOWLEDGE_UPDATE] path/to/file.md in your response. "+
-			"Every conversation should result in knowledge updates.",
+			"Read /me/skills/ for detailed guides.",
 	)
 
 	cmd := exec.CommandContext(r.Context(), "docker", dockerArgs...)
@@ -1449,7 +1352,6 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// knowledgeBasePath returns the path to the knowledge directory.
 // getWorldContainerID looks up the container ID for a world by its ID.
 func (s *Server) getWorldContainerID(worldID string) (string, error) {
 	universes, err := s.state.List()
@@ -1624,83 +1526,6 @@ func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Reques
 	}
 
 	jsonOK(w, map[string]string{"status": "ok", "path": relPath})
-}
-
-// handleArchitectKnowledgeList returns all files in the architect container's /universe/knowledge/ directory.
-func (s *Server) handleArchitectKnowledgeList(w http.ResponseWriter, r *http.Request) {
-	const containerName = "spwn-architect"
-
-	out, err := dockerExecOutput(r.Context(), containerName,
-		"find", "/universe/knowledge/", "-type", "f", "-not", "-name", ".*",
-		"-printf", "%P\\t%s\\t%T@\\n")
-	if err != nil {
-		// Directory might not exist yet — return empty list
-		jsonOK(w, map[string]interface{}{"files": []interface{}{}})
-		return
-	}
-
-	type fileEntry struct {
-		Path     string `json:"path"`
-		Size     int64  `json:"size"`
-		Modified string `json:"modified"`
-	}
-
-	var files []fileEntry
-	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
-		if line == "" {
-			continue
-		}
-		parts := strings.SplitN(line, "\t", 3)
-		if len(parts) < 3 {
-			continue
-		}
-		var size int64
-		fmt.Sscanf(parts[1], "%d", &size)
-		var epoch float64
-		fmt.Sscanf(parts[2], "%f", &epoch)
-		modified := time.Unix(int64(epoch), 0).Format(time.RFC3339)
-
-		files = append(files, fileEntry{
-			Path:     parts[0],
-			Size:     size,
-			Modified: modified,
-		})
-	}
-
-	if files == nil {
-		files = []fileEntry{}
-	}
-
-	jsonOK(w, map[string]interface{}{"files": files})
-}
-
-// handleArchitectKnowledgeRead returns the content of a specific knowledge file from the architect container.
-func (s *Server) handleArchitectKnowledgeRead(w http.ResponseWriter, r *http.Request) {
-	relPath := r.PathValue("path")
-	if relPath == "" {
-		jsonError(w, "file path is required", 400)
-		return
-	}
-
-	if strings.Contains(relPath, "..") {
-		jsonError(w, "invalid path", 400)
-		return
-	}
-
-	const containerName = "spwn-architect"
-	fullPath := "/universe/knowledge/" + relPath
-	out, err := dockerExecOutput(r.Context(), containerName, "cat", fullPath)
-	if err != nil {
-		jsonError(w, "file not found: "+relPath, 404)
-		return
-	}
-
-	jsonOK(w, map[string]string{"path": relPath, "content": out})
-}
-
-// knowledgeBasePath kept for any legacy use — points to host filesystem.
-func (s *Server) knowledgeBasePath() string {
-	return filepath.Join(foundation.BaseDir(), "knowledge")
 }
 
 // handleGetAgentMind returns the mind tree (layers → files) for an agent.

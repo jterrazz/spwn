@@ -31,25 +31,23 @@ describe("world spawn", () => {
     expectLine(result.output, /✓ Loaded config\s+default/);
     expectLine(result.output, /✓ Docker connected/);
     expectLine(result.output, /✓ Validated agent\s+neo/);
-    expectLine(result.output, /✓ Mounted mind\s+neo → \/mind/);
     expectLine(result.output, /✓ (Built image|Image ready)\s+spwn-test:latest/);
     expectLine(result.output, /✓ Credentials\s+/);
-    expectLine(result.output, /✓ Created container\s+w-\w+-\d{5}/);
-    expectLine(result.output, /✓ Probed elements\s+\d+ verified/);
-    expectLine(result.output, /✓ Generated physics\s+physics\.md, faculties\.md/);
+    expectLine(result.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
+    expectLine(result.output, /✓ Probed tools\s+\d+ verified/);
     expectLine(result.output, /✓ Agent is alive\./);
     const id = parseWorldId(result.output)!;
     expect(id).toBeTruthy();
-    expect(id).toMatch(/^w-\w+-\d{5}$/);
+    expect(id).toMatch(/^(?:spwn-world|w)-\w+-\d{5}$/);
 
     // AND — the container is actually running
     ctx.universe(id).toBeRunning();
 
-    // AND — has /universe directory with physics + faculties
+    // AND — has /world directory with physics + faculties
     ctx
       .universe(id)
-      .toHaveFile("/universe/physics.md")
-      .toHaveFile("/universe/faculties.md");
+      .toHaveFile("/world/physics.md")
+      .toHaveFile("/world/faculties.md");
   });
 
   test("spawns a world with named config via -c flag", () => {
@@ -65,9 +63,9 @@ describe("world spawn", () => {
 
     // THEN — exits successfully with correct ID prefix
     expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created container\s+w-myconfig-\d{5}/);
+    expectLine(result.output, /✓ Created container\s+spwn-world-myconfig-\d{5}/);
     const id = parseWorldId(result.output)!;
-    expect(id).toMatch(/^w-myconfig-\d{5}$/);
+    expect(id).toMatch(/^spwn-world-myconfig-\d{5}$/);
 
     // AND — container is running
     ctx.universe(id).toBeRunning();
@@ -87,7 +85,7 @@ describe("world spawn", () => {
     // THEN — the ID matches the expected format
     const id = parseWorldId(result.output);
     expect(id).toBeTruthy();
-    expect(id).toMatch(/^w-\w+-\d{5}$/);
+    expect(id).toMatch(/^(?:spwn-world|w)-\w+-\d{5}$/);
   });
 
   test("spawned world appears in list", () => {
@@ -205,10 +203,10 @@ describe("world spawn", () => {
     const id = parseWorldId(result.output)!;
 
     // Verify file exists inside container
-    ctx.universe(id).toHaveFile("/workspace/test-file.txt", "hello from workspace");
+    ctx.universe(id).toHaveFile("/work/default/test-file.txt", "hello from workspace");
   });
 
-  test("Mind has all 6 layers inside container", () => {
+  test("Mind layers are visible at /agents/<name>/ inside container", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
@@ -217,8 +215,8 @@ describe("world spawn", () => {
     );
     const id = parseWorldId(result.output)!;
 
-    for (const layer of ["identity", "skills", "memory/knowledge", "memory/playbooks", "memory/journal", "sessions"]) {
-      ctx.universe(id).toHaveDirectory(`/mind/${layer}`);
+    for (const layer of ["core", "skills", "knowledge", "playbooks", "journal"]) {
+      ctx.universe(id).toHaveDirectory(`/agents/neo/${layer}`);
     }
   });
 
@@ -226,7 +224,7 @@ describe("world spawn", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["world", "--no-agent", "-w", ctx.home],
+      ["world", "up", "-w", ctx.home],
       60_000,
     );
     const id = parseWorldId(result.output)!;
@@ -247,7 +245,7 @@ describe("world spawn", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["world", "--no-agent", "-w", ctx.home],
+      ["world", "up", "-w", ctx.home],
       60_000,
     );
     const id = parseWorldId(result.output)!;
@@ -274,7 +272,7 @@ describe("world spawn", () => {
     // The mock agent runs and exits, world goes idle
     expectLine(result.output, /Agent spawned\s+detached/);
     // Should show talk hint
-    expectLine(result.output, /Talk: spwn agent talk neo/);
+    expectLine(result.output, /Talk: spwn talk neo/);
   });
 
   test("world ID uses planet name instead of 'default'", () => {
@@ -288,15 +286,15 @@ describe("world spawn", () => {
 
     // ID should NOT contain "default"
     expect(id).not.toContain("default");
-    // ID should match w-{planet}-{digits} format
-    expect(id).toMatch(/^w-[a-z]+-\d{5}$/);
+    // ID should match spwn-world-{planet}-{digits} format
+    expect(id).toMatch(/^spwn-world-[a-z]+-\d{5}$/);
   });
 
-  test("--no-agent spawns world without agent", () => {
+  test("bare `world up` (no --agent) spawns an empty world", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
-      ["world", "--no-agent", "-w", ctx.home],
+      ["world", "up", "-w", ctx.home],
       60_000,
     );
 

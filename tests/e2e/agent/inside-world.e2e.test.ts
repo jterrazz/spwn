@@ -13,7 +13,7 @@ describe("agent inside world", () => {
     ctx?.cleanup();
   });
 
-  test("agent receives Mind inside world container", () => {
+  test("agent is mounted at /agents/<name> inside the world container", () => {
     // GIVEN — a spawned world with agent neo
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -22,18 +22,16 @@ describe("agent inside world", () => {
       60_000,
     );
 
-    // THEN — the output confirms mind was mounted with structured status
     expect(spawnResult.exitCode).toBe(0);
-    expectLine(spawnResult.output, /✓ Mounted mind\s+neo → \/mind/);
-    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
 
-    // AND — mind directory actually exists inside the container
+    // The agent's home dir is mounted via the single /agents bind.
     const id = parseWorldId(spawnResult.output)!;
     ctx
       .universe(id)
-      .toHaveDirectory("/mind")
-      .toHaveDirectory("/mind/identity")
-      .toHaveFile("/mind/identity/default.md");
+      .toHaveDirectory("/agents/neo")
+      .toHaveDirectory("/agents/neo/core")
+      .toHaveFile("/agents/neo/core/profile.md");
   });
 
   test("spawn confirms agent is alive", () => {
@@ -45,12 +43,10 @@ describe("agent inside world", () => {
       60_000,
     );
 
-    // THEN — agent is reported as alive with structured output
     expect(spawnResult.exitCode).toBe(0);
     expectLine(spawnResult.output, /✓ Agent is alive\./);
-    expectLine(spawnResult.output, /✓ Created container\s+w-\w+-\d{5}/);
+    expectLine(spawnResult.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
 
-    // AND — container is running
     const id = parseWorldId(spawnResult.output)!;
     ctx.universe(id).toBeRunning();
   });
@@ -72,30 +68,10 @@ describe("agent inside world", () => {
     expect(inspectResult.exitCode).toBe(0);
     expectLine(inspectResult.output, /World:\s+/);
     expectLine(inspectResult.output, /Agent:\s+a-neo-\d{5}/);
-    expectLine(inspectResult.output, /Backend:\s+docker/);
     expectLine(inspectResult.output, /Status:\s+(running|idle)/);
 
-    // AND — state tracks the agent
+    // AND — labels track the agent
     ctx.state().hasAgent(id, "neo");
-  });
-
-  test("mock agent sees all mounted directories", () => {
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const result = ctx.spwn(
-      ["world", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    const id = parseWorldId(result.output)!;
-
-    // Read mock agent probe — it MUST exist if the mock agent ran
-    ctx
-      .universe(id)
-      .agentProbe()
-      .sawMind()
-      .sawIdentity()
-      .sawPhysics()
-      .sawFaculties();
   });
 
   test("mind agent exists on host filesystem", () => {
@@ -110,11 +86,10 @@ describe("agent inside world", () => {
     ctx
       .mind("neo")
       .exists()
-      .hasLayer("identity")
+      .hasLayer("core")
       .hasLayer("skills")
-      .hasLayer("memory/knowledge")
-      .hasLayer("memory/journal")
-      .hasLayer("sessions")
-      .hasFile("identity/default.md");
+      .hasLayer("knowledge")
+      .hasLayer("journal")
+      .hasFile("core/profile.md");
   });
 });

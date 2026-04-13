@@ -23,15 +23,15 @@ func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
 		NoAgent().
 		Execute()
 
-	// THEN the state should show one idle world with physics and faculties
+	// THEN the state should show one live world with physics and faculties
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
-		s.WorldStatus(universe.StatusIdle)
+		s.WorldStatus(universe.StatusRunning)
 	})
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/universe/physics.md")
-		c.HasFile("/universe/faculties.md")
+		c.HasFile("/world/physics.md")
+		c.HasFile("/world/faculties.md")
 	})
 }
 
@@ -54,11 +54,11 @@ func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
 	// AND the Mind should be mounted with standard layers
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasMount("/mind")
+		c.HasMount("/agents")
 	})
 	chain.ExpectMind(func(m *setup.MindAssertion) {
 		m.HasLayer("core")
-		m.HasFile("core/default.md")
+		m.HasFile("core/profile.md")
 	})
 }
 

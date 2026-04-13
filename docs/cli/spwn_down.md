@@ -18,12 +18,6 @@ spwn down [world-id] [flags]
   -h, --help   help for down
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn — create realities for things that can think

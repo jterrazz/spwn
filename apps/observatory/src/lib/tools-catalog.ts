@@ -265,9 +265,9 @@ You are the Architect — the always-on daemon that builds and oversees worlds.
 2. Check system status: \`spwn status\`
 3. Address the highest priority task in Focus
 
-## Knowledge Management
-You maintain the project knowledge at /universe/knowledge/.
-EVERY conversation should result in knowledge updates.`,
+## Knowledge
+Knowledge is per-world at \`/world/knowledge/\` inside each world container.
+Write project notes into the relevant world, not a global store.`,
       },
       {
         name: "fleet-ops.md",

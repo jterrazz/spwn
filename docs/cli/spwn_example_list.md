@@ -15,7 +15,6 @@ spwn example list [flags]
 
 ```
   -h, --help   help for list
-      --json   emit the bundled example list as JSON and fail with exit code 1 if empty
 ```
 
 ### SEE ALSO

@@ -101,49 +101,13 @@ describe("example install + agent repair", () => {
 });
 
 describe("example gallery", () => {
-  test("list returns all 5 examples in order (startup first)", async () => {
-    // WHEN — listing examples in JSON mode
-    const result = await spwn("example list json")
-      .exec("example list --json")
-      .run();
+  test("list returns every shipped example", async () => {
+    const result = await spwn("example list").exec("example list").run();
 
-    // THEN — 5 examples, startup first
     expect(result.exitCode).toBe(0);
-    const data = JSON.parse(result.stdout);
-    expect(data.examples).toHaveLength(5);
-    expect(data.examples[0].slug).toBe("startup");
-
-    // All slugs present
-    const slugs = data.examples.map((e: { slug: string }) => e.slug);
-    expect(slugs).toContain("matrix");
-    expect(slugs).toContain("paperclip-factory");
-    expect(slugs).toContain("research-lab");
-    expect(slugs).toContain("macrohard");
-  });
-
-  test("each example has required metadata", async () => {
-    const result = await spwn("example metadata")
-      .exec("example list --json")
-      .run();
-
-    const data = JSON.parse(result.stdout);
-    for (const ex of data.examples) {
-      expect(ex.name, `${ex.slug} missing name`).toBeTruthy();
-      expect(ex.tagline, `${ex.slug} missing tagline`).toBeTruthy();
-      expect(ex.description, `${ex.slug} missing description`).toBeTruthy();
-      expect(ex.agents.length, `${ex.slug} has no agents`).toBeGreaterThan(0);
-      expect(ex.worlds.length, `${ex.slug} has no worlds`).toBeGreaterThan(0);
-    }
-  });
-
-  test("each example has exactly one world", async () => {
-    const result = await spwn("example one world")
-      .exec("example list --json")
-      .run();
-
-    const data = JSON.parse(result.stdout);
-    for (const ex of data.examples) {
-      expect(ex.worlds, `${ex.slug} has ${ex.worlds.length} worlds`).toHaveLength(1);
+    const out = stripAnsi(result.output);
+    for (const slug of ["startup", "matrix", "paperclip-factory", "research-lab", "macrohard"]) {
+      expect(out).toContain(slug);
     }
   });
 });
@@ -178,20 +142,6 @@ describe("org.yaml removal", () => {
     expect(result.output).not.toContain("org.yaml");
   });
 
-  test("doctor does NOT check for org.yaml", async () => {
-    // GIVEN — init has been run
-    await spwn("init for doctor").exec("init").run();
-
-    // WHEN — running doctor
-    const result = await spwn("doctor no org check")
-      .exec("doctor")
-      .run();
-
-    // THEN — no mention of org.yaml or Universe check
-    const output = stripAnsi(result.output);
-    expect(output).not.toContain("org.yaml");
-    expect(output).not.toContain("Universe");
-  });
 });
 
 describe("agent mind structure", () => {

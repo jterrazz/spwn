@@ -17,12 +17,6 @@ spwn auth login [flags]
   -h, --help   help for login
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn auth](./spwn_auth.md)	 - Manage credentials — login, logout, status

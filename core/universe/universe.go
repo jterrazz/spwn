@@ -17,7 +17,6 @@ import (
 	"spwn.sh/core/universe/internal/architect"
 	"spwn.sh/core/universe/internal/backend"
 	"spwn.sh/core/universe/internal/claw"
-	"spwn.sh/core/universe/internal/knowledge"
 	"spwn.sh/core/universe/internal/labels"
 	"spwn.sh/core/universe/internal/manifest"
 	"spwn.sh/core/universe/internal/models"
@@ -179,37 +178,6 @@ func NewObservatoryServer(s *Store, arch *Architect, addr string) *ObservatorySe
 		})
 	})
 	return srv
-}
-
-// --- Knowledge operations ---
-
-// KnowledgeFileInfo describes a file in the knowledge.
-type KnowledgeFileInfo = knowledge.FileInfo
-
-// InitKnowledge creates the knowledge directory and writes default files
-// if they don't already exist.
-func InitKnowledge() error {
-	return knowledge.Init(foundation.KnowledgeDir())
-}
-
-// ListKnowledgeFiles returns all files in the knowledge directory.
-func ListKnowledgeFiles() ([]KnowledgeFileInfo, error) {
-	return knowledge.ListFiles(foundation.KnowledgeDir())
-}
-
-// ReadKnowledgeFile reads a specific file from the knowledge.
-func ReadKnowledgeFile(relPath string) (string, error) {
-	return knowledge.ReadFile(foundation.KnowledgeDir(), relPath)
-}
-
-// WriteKnowledgeFile writes content to a file in the knowledge.
-func WriteKnowledgeFile(relPath, content string) error {
-	return knowledge.WriteFile(foundation.KnowledgeDir(), relPath, content)
-}
-
-// SearchKnowledge searches for a query string across all knowledge files.
-func SearchKnowledge(query string) (map[string][]string, error) {
-	return knowledge.Search(foundation.KnowledgeDir(), query)
 }
 
 // --- Git sync operations ---
@@ -440,9 +408,7 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 		_ = os.WriteFile(architectStackPath, []byte("# Architect Stack\n\n## Focus\n\n## Queued\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Done\n"), 0644)
 	}
 
-	// Ensure knowledge directory exists with defaults
-	_ = knowledge.Init(foundation.KnowledgeDir())
-	opts.progress("host_files", "stack + knowledge dirs ready")
+	opts.progress("host_files", "stack ready")
 
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
@@ -592,10 +558,7 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 				"Format: [STACK_PUSH] Short task title\\nPriority: blocking|queued\\nBrief description. "+
 				"Also update /me/stack.md with the new task. "+
 				"When completing a task use [STACK_POP] Short task title. "+
-				"Read /me/skills/ for detailed guides. "+
-				"KNOWLEDGE: You maintain /universe/knowledge/ as the single source of truth. "+
-				"When updating knowledge files, include [KNOWLEDGE_UPDATE] path/to/file.md in your response. "+
-				"Every conversation should result in knowledge updates.")
+				"Read /me/skills/ for detailed guides.")
 	}
 
 	// Wrap command to source credentials from bind-mounted /credentials/.env

@@ -16,24 +16,16 @@ describe("knowledge integration", () => {
     ctx?.cleanup();
   });
 
-  test("knowledge is mounted read-only in agent world", () => {
-    // GIVEN — an initialized context with knowledge files
+  test("world knowledge dir is created inside the container on demand", () => {
+    // GIVEN — a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // Create a knowledge directory with a file
-    const knowledgeDir = join(ctx.home, "knowledge");
-    mkdirSync(knowledgeDir, { recursive: true });
-    writeFileSync(join(knowledgeDir, "overview.md"), "# Test Knowledge\n\nRead-only test content.\n");
-
-    // WHEN — spawning a world
     const spawnResult = ctx.spwn(
       ["up", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
     const worldId = parseWorldId(spawnResult.output);
-
-    // Skip if world spawn didn't work (e.g. Docker not available)
     if (!worldId) {
       console.warn("Skipping: world spawn failed (Docker unavailable?)");
       return;
@@ -41,27 +33,20 @@ describe("knowledge integration", () => {
 
     const universe = ctx.universe(worldId);
 
-    // THEN — knowledge directory exists inside container
-    universe.toHaveDirectory("/world/knowledge");
+    // The knowledge dir is per-world, lives inside the container, and is
+    // created lazily by the agent. It does not exist immediately.
+    const lsResult = ctx.spwn(["world", "knowledge", "ls", worldId]);
+    expect(lsResult.exitCode).toBe(0);
+    expect(stripAnsi(lsResult.output).toLowerCase()).toContain("empty");
 
-    // THEN — overview.md is readable
-    universe.toHaveFile("/world/knowledge/overview.md", "Test Knowledge");
-
-    // THEN — writing to knowledge directory should fail (read-only)
-    try {
-      const writeResult = universe.exec(
-        "echo test > /world/knowledge/write-test.txt 2>&1 || echo READONLY",
-      );
-      // If mount is read-only, writing should fail
-      expect(
-        writeResult.includes("READONLY") ||
-        writeResult.includes("Read-only") ||
-        writeResult.includes("read-only") ||
-        writeResult.includes("Permission denied"),
-      ).toBe(true);
-    } catch {
-      // Command failure is also acceptable — means write was blocked
-    }
+    // Create a knowledge file via docker exec to simulate the agent writing
+    // and verify ls picks it up.
+    universe.exec(
+      "mkdir -p /world/knowledge && echo '# Test' > /world/knowledge/note.md",
+    );
+    const lsAfter = ctx.spwn(["world", "knowledge", "ls", worldId]);
+    expect(lsAfter.exitCode).toBe(0);
+    expect(stripAnsi(lsAfter.output)).toContain("note.md");
   });
 
   test("knowledge files are accessible via simulated API structure", () => {

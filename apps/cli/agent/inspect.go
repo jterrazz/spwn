@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,10 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var inspectJSON bool
-
 func init() {
-	inspectCmd.Flags().BoolVar(&inspectJSON, "json", false, "Output as JSON")
 	Cmd.AddCommand(inspectCmd)
 }
 
@@ -31,12 +27,6 @@ var inspectCmd = &cobra.Command{
 		info, err := agentDomain.InspectAgent(name)
 		if err != nil {
 			return fmt.Errorf("agent %q not found", name)
-		}
-
-		if inspectJSON {
-			data, _ := json.MarshalIndent(info, "", "  ")
-			fmt.Println(string(data))
-			return nil
 		}
 
 		s.Blank()

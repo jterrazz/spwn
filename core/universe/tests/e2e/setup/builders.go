@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"spwn.sh/core/agent"
-	"spwn.sh/core/gate"
 	"spwn.sh/core/universe"
 )
 
@@ -19,16 +18,14 @@ import (
 
 // SpawnBuilder configures and executes a universe spawn.
 type SpawnBuilder struct {
-	tc            *TestContext
-	configName    string
-	agentName     string
-	workspaces    []universe.Workspace
-	yamlConfig    string
-	noAgent       bool
-	detach        bool
-	runAgent      bool // run agent to completion (blocking, writes journal)
-	gates         []gate.Bridge
-	invokeHandler gate.InvokeHandler
+	tc         *TestContext
+	configName string
+	agentName  string
+	workspaces []universe.Workspace
+	yamlConfig string
+	noAgent    bool
+	detach     bool
+	runAgent   bool // run agent to completion (blocking, writes journal)
 }
 
 // Spawn creates a SpawnBuilder from a TestContext.
@@ -78,16 +75,6 @@ func (b *SpawnBuilder) WithReadOnlyWorkspace(name, path string) *SpawnBuilder {
 	return b
 }
 
-func (b *SpawnBuilder) WithGate(bridges ...gate.Bridge) *SpawnBuilder {
-	b.gates = append(b.gates, bridges...)
-	return b
-}
-
-func (b *SpawnBuilder) WithInvokeHandler(h gate.InvokeHandler) *SpawnBuilder {
-	b.invokeHandler = h
-	return b
-}
-
 func (b *SpawnBuilder) NoAgent() *SpawnBuilder {
 	b.noAgent = true
 	return b
@@ -110,16 +97,10 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 
 	m := b.buildManifest()
 
-	// Merge gate bridges from builder into manifest
-	if len(b.gates) > 0 {
-		m.Gate = append(m.Gate, b.gates...)
-	}
-
 	opts := universe.SpawnOpts{
-		ConfigName:    b.configName,
-		Manifest:      m,
-		Image:         b.tc.Image,
-		InvokeHandler: b.invokeHandler,
+		ConfigName: b.configName,
+		Manifest:   m,
+		Image:      b.tc.Image,
 	}
 
 	if !b.noAgent && b.agentName != "" {

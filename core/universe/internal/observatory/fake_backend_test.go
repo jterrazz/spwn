@@ -46,9 +46,6 @@ func (noContainersBackend) EnsureImageWithContext(context.Context, string, strin
 func (noContainersBackend) ImageVersion(context.Context, string, string) (string, error) {
 	return "", nil
 }
-func (noContainersBackend) Logs(context.Context, string, backend.LogsConfig) (io.ReadCloser, error) {
-	return nil, nil
-}
 func (noContainersBackend) ExecDetached(context.Context, string, backend.ExecConfig) error {
 	return nil
 }

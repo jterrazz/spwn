@@ -13,7 +13,6 @@ func All() []migration.Migration {
 	r.Register(OrgYAMLFieldRename)      // 006
 	r.Register(ConsolidateJournal)      // 007
 	r.Register(RemoveOrphanedUniverses)      // 008
-	r.Register(MergeBlueprintIntoKnowledge) // 009
 	r.Register(SimplifyArchitectDir)       // 010
 	r.Register(RestructureAgentDirs)              // 011
 	r.Register(RenameHierarchiesToOrganizations) // 012

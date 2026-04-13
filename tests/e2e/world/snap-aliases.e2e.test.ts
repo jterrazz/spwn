@@ -107,7 +107,7 @@ describe("snap command aliases", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
-      ["world", "--no-agent", "-w", ctx.home],
+      ["world", "up", "-w", ctx.home],
       60_000,
     );
     const id = parseWorldId(spawnResult.output)!;

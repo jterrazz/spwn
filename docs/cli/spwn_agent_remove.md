@@ -32,12 +32,6 @@ spwn agent remove <agent-name> [flags]
       --tool stringArray    Tool pack to remove (repeatable)
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world

@@ -21,10 +21,10 @@ func TestList_ReturnsSpawnedUniverses(t *testing.T) {
 	u2.List().
 		ExpectCount(2).
 		ExpectWorld(0, func(e *setup.ListEntryAssertion) {
-			e.StatusIs(universe.StatusIdle)
+			e.StatusIs(universe.StatusRunning)
 		}).
 		ExpectWorld(1, func(e *setup.ListEntryAssertion) {
-			e.StatusIs(universe.StatusIdle)
+			e.StatusIs(universe.StatusRunning)
 		})
 
 	_ = u1

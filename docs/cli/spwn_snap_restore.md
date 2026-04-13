@@ -24,12 +24,6 @@ spwn snap restore <snapshot> [flags]
   -w, --workspace stringArray   Host dir to mount. Repeatable: "path", "name=path", "name=path:ro". Omit for ephemeral.
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn snap](./spwn_snap.md)	 - World snapshots — save, ls, restore, rm

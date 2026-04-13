@@ -96,10 +96,16 @@ function spwnWithEnv(
 }
 
 /**
- * Parse a world ID (w-{name}-{5digits}) from command output.
+ * Parse a world ID from command output.
+ *
+ * New format: spwn-world-{name}-{5digits}
+ * Legacy:     w-{name}-{5digits} (kept for state files written before v1.1.0)
  */
+const WORLD_ID_RE = /(?:spwn-world|w)-[\w]+-\d{5}/;
+const WORLD_ID_RE_GLOBAL = /(?:spwn-world|w)-[\w]+-\d{5}/g;
+
 export function parseWorldId(output: string): string | null {
-  const match = output.match(/w-[\w]+-\d{5}/);
+  const match = output.match(WORLD_ID_RE);
   return match ? match[0] : null;
 }
 
@@ -107,7 +113,7 @@ export function parseWorldId(output: string): string | null {
  * Parse all world IDs from output (e.g., from list command).
  */
 export function parseAllWorldIds(output: string): string[] {
-  const matches = output.matchAll(/w-[\w]+-\d{5}/g);
+  const matches = output.matchAll(WORLD_ID_RE_GLOBAL);
   return [...matches].map((m) => m[0]);
 }
 

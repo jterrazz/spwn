@@ -16,12 +16,7 @@ var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "�
 const labelWidth = 24
 
 // Stepper manages sequential step-by-step CLI output with spinners.
-//
-// Output modes are minimal: either human output (stderr spinners + rows)
-// or JSON mode, which suppresses human output entirely so callers can
-// print clean structured output to stdout.
 type Stepper struct {
-	mode  stepperMode
 	w     io.Writer
 	isTTY bool
 
@@ -30,22 +25,9 @@ type Stepper struct {
 	doneCh chan struct{}
 }
 
-type stepperMode int
-
-const (
-	modeHuman stepperMode = iota
-	modeJSON
-)
-
-// New creates a Stepper. Pass jsonOut=true to suppress human output so
-// the caller can write structured output cleanly to stdout.
-func New(jsonOut bool) *Stepper {
-	mode := modeHuman
-	if jsonOut {
-		mode = modeJSON
-	}
+// New creates a Stepper that writes to stderr.
+func New() *Stepper {
 	return &Stepper{
-		mode:  mode,
 		w:     os.Stderr,
 		isTTY: term.IsTerminal(int(os.Stderr.Fd())),
 	}
@@ -53,10 +35,6 @@ func New(jsonOut bool) *Stepper {
 
 // Start begins a new step with a spinner animation.
 func (s *Stepper) Start(msg string) {
-	if s.mode == modeJSON {
-		return
-	}
-
 	s.stopSpinner()
 
 	if !s.isTTY {
@@ -95,10 +73,6 @@ func (s *Stepper) Start(msg string) {
 
 // Done completes the current step with a checkmark.
 func (s *Stepper) Done(label, detail string) {
-	if s.mode == modeJSON {
-		return
-	}
-
 	s.stopSpinner()
 
 	if detail != "" {
@@ -110,10 +84,6 @@ func (s *Stepper) Done(label, detail string) {
 
 // Fail completes the current step with a cross mark.
 func (s *Stepper) Fail(label string, err error) {
-	if s.mode == modeJSON {
-		return
-	}
-
 	s.stopSpinner()
 
 	if err != nil {
@@ -127,7 +97,7 @@ func (s *Stepper) Fail(label string, err error) {
 // displayedError so Execute() won't re-print it.
 func (s *Stepper) FailHint(label string, err error, hint string) error {
 	s.Fail(label, err)
-	if hint != "" && s.mode != modeJSON {
+	if hint != "" {
 		fmt.Fprintf(s.w, "  %s %s\n", " ", faint(hint))
 	}
 	s.Blank()
@@ -155,26 +125,16 @@ func (s *Stepper) Writer() io.Writer {
 
 // Blank prints an empty line for spacing.
 func (s *Stepper) Blank() {
-	if s.mode == modeJSON {
-		return
-	}
 	fmt.Fprintln(s.w)
 }
 
 // Success prints a final green success message.
 func (s *Stepper) Success(msg string) {
-	if s.mode == modeJSON {
-		return
-	}
 	fmt.Fprintf(s.w, "  %s %s\n", check(), green.Sprint(msg))
 }
 
 // Warn prints a warning line with a yellow "!" prefix.
 func (s *Stepper) Warn(label, detail string) {
-	if s.mode == modeJSON {
-		return
-	}
-
 	s.stopSpinner()
 
 	if detail != "" {
@@ -186,9 +146,6 @@ func (s *Stepper) Warn(label, detail string) {
 
 // Info prints a label-value pair for summary output.
 func (s *Stepper) Info(label, value string) {
-	if s.mode == modeJSON {
-		return
-	}
 	fmt.Fprintf(s.w, "  %-12s %s\n", strong(label), value)
 }
 

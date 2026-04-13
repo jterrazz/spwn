@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"spwn.sh/core/agent"
-	"spwn.sh/core/gate"
 	ib "spwn.sh/core/imagebuilder"
 	"spwn.sh/core/imagebuilder/base"
 	"spwn.sh/core/imagebuilder/catalog"
@@ -36,11 +35,9 @@ type SpawnOpts struct {
 	ConfigName    string
 	Name          string // Optional user-facing display name.
 	AgentName     string
-	Runtime       string                     // Agent runtime name (e.g., "claude-code", "codex"). Defaults to "claude-code".
 	Workspaces    []models.Workspace
 	Manifest      models.Manifest
 	Image         string                     // Override base image (used for testing). Defaults to foundation.WorldImage.
-	InvokeHandler gate.InvokeHandler         // Override gate handler (used for testing). Defaults to stub.
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
@@ -67,13 +64,6 @@ var defaultProbeList = []string{
 // Spawn creates a new world.
 func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, error) {
 	var warnings []string
-
-	// Set runtime adapter if specified
-	if opts.Runtime != "" {
-		if err := a.SetRuntime(opts.Runtime); err != nil {
-			warnings = append(warnings, fmt.Sprintf("runtime %q not found, using default", opts.Runtime))
-		}
-	}
 
 	// Generate ID
 	id := foundation.GenerateWorldID(opts.ConfigName)
@@ -149,35 +139,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Start gate TCP server and set up bridge scripts if bridges are configured
-	gateDir := ""
-	var gateSrv *gate.Server
-	if len(opts.Manifest.Gate) > 0 {
-		handler := opts.InvokeHandler
-		if handler == nil {
-			handler = gate.StubHandler()
-		}
-
-		gateSrv = gate.NewServer(handler)
-		if err := gateSrv.Start(); err != nil {
-			return nil, fmt.Errorf("start gate server: %w", err)
-		}
-
-		gateDir, err = os.MkdirTemp("", "spwn-gate-")
-		if err != nil {
-			gateSrv.Stop()
-			return nil, fmt.Errorf("create gate dir: %w", err)
-		}
-		binds = append(binds, gateDir+":/gate")
-
-		// Write wrapper scripts with the TCP port baked in
-		if err := gate.SetupBridges(gateDir, opts.Manifest.Gate, gateSrv.Port()); err != nil {
-			gateSrv.Stop()
-			os.RemoveAll(gateDir)
-			return nil, fmt.Errorf("setup gate bridges: %w", err)
-		}
-	}
-
 	// Resolve image (env override for testing, then opts, then default with imagebuilder)
 	image := foundation.WorldImage
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
@@ -200,17 +161,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 		// Always include runtime essentials, then add user-specified tools on top.
 		// The registry deduplicates and resolves dependencies.
-		runtimeTool := "@spwn/claude-code"
-		if opts.Runtime == "codex" {
-			runtimeTool = "@spwn/codex"
-		} else if opts.Runtime != "" && opts.Runtime != "claude-code" {
-			// For other runtimes, try @spwn/{runtime} if it exists
-			candidate := "@spwn/" + opts.Runtime
-			if reg.Get(candidate) != nil {
-				runtimeTool = candidate
-			}
-		}
-		required := []string{"@spwn/unix", "@spwn/node", runtimeTool, "@spwn/cli"}
+		required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/cli"}
 		tools := append(required, opts.Manifest.Tools...)
 
 		// Deduplicate
@@ -285,21 +236,15 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Build the World record up-front so we can imprint it onto the
 	// container as labels at create time. The container becomes the
 	// canonical store — see core/universe/internal/labels.
-	runtimeName := opts.Runtime
-	if runtimeName == "" {
-		runtimeName = "claude-code"
-	}
 	worldRecord := models.World{
-		ID:          id,
-		Name:        opts.Name,
-		Config:      opts.ConfigName,
-		Agent:       opts.AgentName,
-		Backend:     foundation.DefaultBackend,
-		Workspaces:  resolvedWorkspaces,
-		GateDir:     gateDir,
-		Runtime:     runtimeName,
-		CreatedAt:   time.Now(),
-		Manifest:    opts.Manifest,
+		ID:         id,
+		Name:       opts.Name,
+		Config:     opts.ConfigName,
+		Agent:      opts.AgentName,
+		Backend:    foundation.DefaultBackend,
+		Workspaces: resolvedWorkspaces,
+		CreatedAt:  time.Now(),
+		Manifest:   opts.Manifest,
 	}
 	if len(opts.Agents) > 0 {
 		worldRecord.Agent = opts.Agents[0].Name
@@ -315,6 +260,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	} else if opts.AgentName != "" {
 		worldRecord.AgentID = foundation.GenerateAgentID(opts.AgentName)
+		worldRecord.Agents = []models.AgentRecord{{
+			Name:    opts.AgentName,
+			AgentID: worldRecord.AgentID,
+			Role:    "worker",
+			Status:  models.StatusIdle,
+		}}
 	}
 
 	// Per-world state directory on the host. This is the canonical
@@ -365,49 +316,16 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Labels:      labels.WorldLabels(worldRecord),
 	}
 
-	// Gate bridges require host access to reach the host-side server.
-	if gateSrv != nil {
-		containerCfg.ExtraHosts = []string{"host.docker.internal:host-gateway"}
-	}
-
 	containerID, err := a.backend.Create(ctx, containerCfg)
 	if err != nil {
-		if gateSrv != nil {
-			gateSrv.Stop()
-		}
 		return nil, fmt.Errorf("create container: %w", err)
 	}
 
 	if err := a.backend.Start(ctx, containerID); err != nil {
 		a.backend.Remove(ctx, containerID)
-		if gateSrv != nil {
-			gateSrv.Stop()
-		}
 		return nil, fmt.Errorf("start container: %w", err)
 	}
 	opts.progress("container_created", id)
-
-	// Install gate bridges inside container
-	if gateSrv != nil {
-		// Symlink bridge wrappers to /usr/local/bin/ and extend PATH
-		for _, bridge := range opts.Manifest.Gate {
-			_, symErr := a.backend.ExecOutput(ctx, containerID, []string{
-				"ln", "-sf", "/gate/bin/" + bridge.As, "/usr/local/bin/" + bridge.As,
-			})
-			if symErr != nil {
-				warnings = append(warnings, fmt.Sprintf("failed to symlink bridge %s: %v", bridge.As, symErr))
-			}
-		}
-
-		// Add /gate/bin to PATH for all shells
-		pathScript := []byte("export PATH=/gate/bin:$PATH\n")
-		if err := a.backend.CopyTo(ctx, containerID, "etc/profile.d/gate.sh", pathScript); err != nil {
-			warnings = append(warnings, fmt.Sprintf("failed to write gate PATH extension: %v", err))
-		}
-
-		a.gates[id] = gateSrv
-		opts.progress("gates_bridged", fmt.Sprintf("%d bridge(s)", len(opts.Manifest.Gate)))
-	}
 
 	// Probe tools
 	verifiedTools, err := a.probeTools(ctx, containerID, opts.Manifest.Tools)
@@ -429,7 +347,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	files := []worldFile{
 		{"physics.md", []byte(physics.GeneratePhysics(opts.Manifest))},
-		{"faculties.md", []byte(physics.GenerateFaculties(verifiedTools, opts.Manifest.Gate))},
+		{"faculties.md", []byte(physics.GenerateFaculties(verifiedTools))},
 		{"AGENTS.md", []byte(physics.AgentsBook)},
 		{"roster.md", []byte(physics.GenerateRoster(id, rosterColony(rosterAgents)))},
 	}

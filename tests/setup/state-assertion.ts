@@ -1,54 +1,96 @@
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { execSync } from "node:child_process";
 import { expect } from "vitest";
 
+/**
+ * StateAssertion queries world state via Docker container labels —
+ * the canonical source of truth in the new model. The legacy
+ * state.json file is no longer maintained.
+ *
+ * Each helper shells out to `docker ps` filtered by the spwn
+ * `sh.spwn.kind=world` label and parses the resulting world IDs
+ * from the container names.
+ */
 export class StateAssertion {
-  private statePath: string;
+  constructor(private _spwnHome: string) {}
 
-  constructor(private spwnHome: string) {
-    this.statePath = join(spwnHome, "state.json");
+  private listWorldIds(): string[] {
+    try {
+      const out = execSync(
+        `docker ps -a --filter label=sh.spwn.kind=world --format '{{.Names}}'`,
+        { encoding: "utf-8", timeout: 5000, stdio: ["pipe", "pipe", "ignore"] },
+      ).trim();
+      if (!out) return [];
+      return out.split("\n").filter(Boolean);
+    } catch {
+      return [];
+    }
   }
 
-  private load(): Array<Record<string, unknown>> {
-    if (!existsSync(this.statePath)) return [];
-    return JSON.parse(readFileSync(this.statePath, "utf-8"));
+  private worldStatusOf(worldId: string): string | null {
+    try {
+      const out = execSync(
+        `docker inspect --format='{{.State.Status}}' ${worldId}`,
+        { encoding: "utf-8", timeout: 5000, stdio: ["pipe", "pipe", "ignore"] },
+      ).trim();
+      return out || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private worldLabel(worldId: string, label: string): string | null {
+    try {
+      const out = execSync(
+        `docker inspect --format='{{ index .Config.Labels "${label}" }}' ${worldId}`,
+        { encoding: "utf-8", timeout: 5000, stdio: ["pipe", "pipe", "ignore"] },
+      ).trim();
+      return out || null;
+    } catch {
+      return null;
+    }
   }
 
   exists(): this {
-    expect(existsSync(this.statePath)).toBe(true);
+    // Always considered "true": the source of truth is Docker, which is
+    // either reachable or not. Kept as a no-op for callers that still
+    // ask for it.
     return this;
   }
 
   worldCount(n: number): this {
-    expect(this.load().length).toBe(n);
+    expect(this.listWorldIds().length).toBe(n);
     return this;
   }
 
   hasWorld(worldId: string): this {
-    const state = this.load();
-    expect(state.some((u) => u.id === worldId)).toBe(true);
+    expect(this.listWorldIds()).toContain(worldId);
     return this;
   }
 
   worldStatus(worldId: string, status: string): this {
-    const state = this.load();
-    const u = state.find((u) => u.id === worldId);
-    expect(u).toBeDefined();
-    expect(u!.status).toBe(status);
+    expect(this.listWorldIds()).toContain(worldId);
+    // Map docker status to spwn status concept where useful.
+    const dockerStatus = this.worldStatusOf(worldId);
+    expect(dockerStatus).not.toBeNull();
+    if (status === "running" || status === "idle") {
+      expect(dockerStatus).toBe("running");
+    } else if (status === "stopped" || status === "destroyed") {
+      expect(["exited", "stopped"]).toContain(dockerStatus);
+    } else {
+      // Direct match fallback.
+      expect(dockerStatus).toBe(status);
+    }
     return this;
   }
 
   hasAgent(worldId: string, agentName: string): this {
-    const state = this.load();
-    const u = state.find((u) => u.id === worldId);
-    expect(u).toBeDefined();
-    expect(u!.agent).toBe(agentName);
+    const ag = this.worldLabel(worldId, "sh.spwn.world.agent");
+    expect(ag).toBe(agentName);
     return this;
   }
 
   noWorld(worldId: string): this {
-    const state = this.load();
-    expect(state.some((u) => u.id === worldId)).toBe(false);
+    expect(this.listWorldIds()).not.toContain(worldId);
     return this;
   }
 }

@@ -4,7 +4,6 @@
 package example
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"spwn.sh/apps/cli/ui"
@@ -30,8 +29,6 @@ Examples:
   spwn example install paperclip-factory`,
 }
 
-var listJSON bool
-
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Show every bundled example",
@@ -41,28 +38,14 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		// --json is the stable contract used by bundling tests and by
-		// the Tauri pre-release verification hook. On any zero-list
-		// result it still emits {"examples":[]} and exits non-zero so
-		// CI can fail loudly instead of silently shipping a hollow
-		// binary.
-		if listJSON {
-			enc := json.NewEncoder(cmd.OutOrStdout())
-			enc.SetIndent("", "  ")
-			if err := enc.Encode(map[string]interface{}{"examples": list}); err != nil {
-				return err
-			}
-			if len(list) == 0 {
-				return fmt.Errorf("no examples bundled in this build")
-			}
-			return nil
+		// Empty list is a build-time defect: the Tauri / goreleaser
+		// pre-release hook runs `spwn example list` and fails the
+		// build if we return non-zero, so CI catches a hollow binary.
+		if len(list) == 0 {
+			return fmt.Errorf("no examples bundled in this build")
 		}
 
-		if len(list) == 0 {
-			fmt.Fprintln(cmd.OutOrStdout(), "no examples bundled in this build")
-			return nil
-		}
-		s := ui.New(false)
+		s := ui.New()
 		s.Blank()
 		for _, ex := range list {
 			s.Info(ex.Slug, ex.Tagline)
@@ -80,7 +63,7 @@ var installCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		slug := args[0]
-		s := ui.New(false)
+		s := ui.New()
 
 		s.Blank()
 		s.Start(fmt.Sprintf("Installing example %q...", slug))
@@ -119,7 +102,6 @@ var installCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.Flags().BoolVar(&listJSON, "json", false, "emit the bundled example list as JSON and fail with exit code 1 if empty")
 	Cmd.AddCommand(listCmd)
 	Cmd.AddCommand(installCmd)
 }

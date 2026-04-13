@@ -63,13 +63,6 @@ func (a *AssertionChain) ExpectMock(fn func(m *MockAssertion)) *AssertionChain {
 	return a
 }
 
-// ExpectGate asserts against the gate bridges inside the container.
-func (a *AssertionChain) ExpectGate(fn func(g *GateAssertion)) *AssertionChain {
-	a.tc.T.Helper()
-	fn(&GateAssertion{tc: a.tc, containerID: a.universe.ContainerID})
-	return a
-}
-
 // ExpectSession asserts against the session persistence.
 func (a *AssertionChain) ExpectSession(fn func(s *SessionAssertion)) *AssertionChain {
 	a.tc.T.Helper()
@@ -306,14 +299,14 @@ func (m *MockAssertion) SawMind() {
 func (m *MockAssertion) SawPhysics() {
 	m.tc.T.Helper()
 	if !m.mock.PhysicsExists {
-		m.tc.T.Fatal("Mock claude did not see /universe/physics.md")
+		m.tc.T.Fatal("Mock claude did not see /world/physics.md")
 	}
 }
 
 func (m *MockAssertion) SawFaculties() {
 	m.tc.T.Helper()
 	if !m.mock.FacultiesExists {
-		m.tc.T.Fatal("Mock claude did not see /universe/faculties.md")
+		m.tc.T.Fatal("Mock claude did not see /world/faculties.md")
 	}
 }
 
@@ -392,8 +385,8 @@ func (s *SessionAssertion) SessionIDIsDeterministic(worldID string) {
 	if id1 != id2 {
 		s.tc.T.Fatalf("Session IDs not deterministic: %q != %q", id1, id2)
 	}
-	if len(id1) != 16 {
-		s.tc.T.Fatalf("Expected 16-char session ID, got %d: %q", len(id1), id1)
+	if len(id1) != 36 {
+		s.tc.T.Fatalf("Expected 36-char UUID session ID, got %d: %q", len(id1), id1)
 	}
 }
 
@@ -575,44 +568,3 @@ func (m *MindAssertion) HasJournalEntries(minCount int) {
 	}
 }
 
-// --- GateAssertion ---
-
-type GateAssertion struct {
-	tc          *TestContext
-	containerID string
-}
-
-func (g *GateAssertion) HasBridge(name string) {
-	g.tc.T.Helper()
-	if !g.tc.FileExistsInContainer(g.containerID, "/gate/bin/"+name) {
-		g.tc.T.Fatalf("Expected gate bridge %q at /gate/bin/%s, not found", name, name)
-	}
-}
-
-func (g *GateAssertion) BridgeIsExecutable(name string) {
-	g.tc.T.Helper()
-	_, err := g.tc.Backend.ExecOutput(context.Background(), g.containerID, []string{
-		"test", "-x", "/gate/bin/" + name,
-	})
-	if err != nil {
-		g.tc.T.Fatalf("Expected bridge %q to be executable, but it's not", name)
-	}
-}
-
-func (g *GateAssertion) NoGateDir() {
-	g.tc.T.Helper()
-	if g.tc.DirExistsInContainer(g.containerID, "/gate") {
-		g.tc.T.Fatal("Expected no /gate directory, but it exists")
-	}
-}
-
-func (g *GateAssertion) NoBridge(name string) {
-	g.tc.T.Helper()
-	if g.tc.FileExistsInContainer(g.containerID, "/gate/bin/"+name) {
-		g.tc.T.Fatalf("Expected NO gate bridge %q, but it exists", name)
-	}
-	// Also check /usr/local/bin
-	if g.tc.FileExistsInContainer(g.containerID, "/usr/local/bin/"+name) {
-		g.tc.T.Fatalf("Expected NO bridge symlink for %q in /usr/local/bin, but it exists", name)
-	}
-}

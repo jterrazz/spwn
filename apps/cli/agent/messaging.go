@@ -19,9 +19,8 @@ var (
 )
 
 func init() {
-	sendCmd.Flags().StringVar(&msgFrom, "from", "", "Sender agent name (required)")
+	sendCmd.Flags().StringVar(&msgFrom, "from", "user", "Sender name (default: user)")
 	sendCmd.Flags().StringVar(&msgType, "type", "task", "Message type: task, reply, question, announcement")
-	sendCmd.MarkFlagRequired("from")
 
 	Cmd.AddCommand(sendCmd)
 	Cmd.AddCommand(inboxCmd)
@@ -96,7 +95,6 @@ var inboxCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agentName := args[0]
 		s := newStepper(cmd)
-		j, _ := cmd.Flags().GetBool("json")
 
 		containerID, _, _, _, err := findAgentContainer(agentName, "")
 		if err != nil {
@@ -106,12 +104,6 @@ var inboxCmd = &cobra.Command{
 		msgs, err := readContainerInbox(containerID, agentName)
 		if err != nil {
 			return err
-		}
-
-		if j {
-			data, _ := json.MarshalIndent(msgs, "", "  ")
-			fmt.Println(string(data))
-			return nil
 		}
 
 		if len(msgs) == 0 {

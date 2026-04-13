@@ -30,12 +30,6 @@ spwn architect talk [message] [flags]
       --output-format string   Output format: text (default) or stream-json
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn architect](./spwn_architect.md)	 - Your always-on world builder

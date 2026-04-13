@@ -40,11 +40,9 @@ const (
 	WorldID           = Prefix + "world.id"
 	WorldName         = Prefix + "world.name"
 	WorldConfig       = Prefix + "world.config"
-	WorldAgent        = Prefix + "world.agent"        // primary/legacy single-agent name
-	WorldAgentID      = Prefix + "world.agent_id"     // primary/legacy single-agent id
-	WorldRuntime      = Prefix + "world.runtime"
+	WorldAgent        = Prefix + "world.agent"    // primary/legacy single-agent name
+	WorldAgentID      = Prefix + "world.agent_id" // primary/legacy single-agent id
 	WorldOrganization = Prefix + "world.organization"
-	WorldGateDir      = Prefix + "world.gate_dir"
 	WorldWorkspaces   = Prefix + "world.workspaces" // JSON-encoded []models.Workspace
 	WorldAgents       = Prefix + "world.agents"     // JSON-encoded []models.AgentRecord (creation-time only)
 	WorldCreatedAt    = Prefix + "world.created_at" // RFC3339
@@ -72,14 +70,8 @@ func WorldLabels(w models.World) map[string]string {
 	if w.AgentID != "" {
 		out[WorldAgentID] = w.AgentID
 	}
-	if w.Runtime != "" {
-		out[WorldRuntime] = w.Runtime
-	}
 	if w.Organization != "" {
 		out[WorldOrganization] = w.Organization
-	}
-	if w.GateDir != "" {
-		out[WorldGateDir] = w.GateDir
 	}
 	if len(w.Workspaces) > 0 {
 		if data, err := json.Marshal(w.Workspaces); err == nil {
@@ -116,9 +108,10 @@ func ParseWorld(lbls map[string]string) (models.World, error) {
 		Config:       lbls[WorldConfig],
 		Agent:        lbls[WorldAgent],
 		AgentID:      lbls[WorldAgentID],
-		Runtime:      lbls[WorldRuntime],
 		Organization: lbls[WorldOrganization],
-		GateDir:      lbls[WorldGateDir],
+		// Backend is always Docker for spwn-managed containers — labels
+		// don't store it because there's only one backend in production.
+		Backend: "docker",
 	}
 
 	if raw := lbls[WorldCreatedAt]; raw != "" {

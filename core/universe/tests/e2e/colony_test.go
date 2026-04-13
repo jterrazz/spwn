@@ -38,7 +38,7 @@ func TestColony_ChiefAndWorkerSpawn(t *testing.T) {
 	// tc.Arc.SpawnAgent(ctx, chain.Universe().ID, "worker-agent")
 	//
 	// chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-	//     c.HasMount("/mind")
+	//     c.HasMount("/agents")
 	// })
 }
 
@@ -58,7 +58,7 @@ func TestColony_SingleAgentDefaultsToWorker(t *testing.T) {
 	// AND the container should be running with Mind mounted
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasMount("/mind")
+		c.HasMount("/agents")
 	})
 }
 

@@ -19,12 +19,6 @@ spwn talk <agent-name> [message] [flags]
       --world string           World ID to target (disambiguates when the same agent exists in multiple worlds)
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn — create realities for things that can think

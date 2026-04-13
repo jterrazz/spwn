@@ -22,7 +22,7 @@ func TestAgent_Init(t *testing.T) {
 		m.HasLayer("knowledge")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
-		m.HasFile("core/default.md")
+		m.HasFile("core/profile.md")
 	})
 }
 
@@ -85,16 +85,16 @@ func TestAgent_Inspect(t *testing.T) {
 		}
 	}
 
-	// AND core should contain default.md
+	// AND core should contain profile.md
 	if files, ok := info.Layers["core"]; ok {
 		found := false
 		for _, f := range files {
-			if f == "default.md" {
+			if f == "profile.md" {
 				found = true
 			}
 		}
 		if !found {
-			t.Fatal("Expected default.md in identity layer")
+			t.Fatal("Expected profile.md in core layer")
 		}
 	}
 }

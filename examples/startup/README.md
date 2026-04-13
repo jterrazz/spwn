@@ -55,8 +55,8 @@ spwn msg inbox analyst
 # Watch the world
 spwn logs <world-id>
 
-# Interactive shell into the world
-spwn attach <world-id>
+# Interactive shell inside the world
+spwn world enter <world-id>
 ```
 
 ## How the agents collaborate

@@ -19,9 +19,6 @@ func TestCLI_UnknownCommandNoUsageDump(t *testing.T) {
 	if strings.Contains(stderr, "Available Commands:") {
 		t.Error("unknown command should NOT dump full usage")
 	}
-	if strings.Contains(stderr, "Flags:") && strings.Contains(stderr, "--json") {
-		t.Error("unknown command should NOT show all flags")
-	}
 }
 
 func TestCLI_ErrorNoUsageDump_WorldDestroyMissingArg(t *testing.T) {
@@ -83,7 +80,7 @@ func TestCLI_WorldHelpGrouped(t *testing.T) {
 	}
 
 	// Should show grouped sections
-	for _, section := range []string{"Lifecycle:", "Observe:", "Snapshots:"} {
+	for _, section := range []string{"Lifecycle:", "Observe:", "Knowledge:"} {
 		assertContains(t, out, section, "world help sections")
 	}
 }
@@ -94,7 +91,7 @@ func TestCLI_AgentHelpGrouped(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Lifecycle:", "Compose:", "Evolution:", "Portability:"} {
+	for _, section := range []string{"Lifecycle:", "Compose:", "Conversation:", "Evolution:", "Portability:"} {
 		assertContains(t, out, section, "agent help sections")
 	}
 }
@@ -105,7 +102,7 @@ func TestCLI_WorldHelpShowsSpawnFlags(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, flag := range []string{"--agent", "--workspace", "--interactive", "--no-agent", "--runtime"} {
+	for _, flag := range []string{"--agent", "--workspace", "--interactive"} {
 		assertContains(t, out, flag, "world spawn flags")
 	}
 }
@@ -130,7 +127,7 @@ func TestCLI_RootHelpSections(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Quick Start:", "Entities:", "Building blocks:", "Shortcuts:", "Coordination:", "System:", "Global:"} {
+	for _, section := range []string{"Quick Start:", "Entities:", "Building blocks:", "Shortcuts:", "Coordination:", "System:"} {
 		assertContains(t, out, section, "root help sections")
 	}
 }

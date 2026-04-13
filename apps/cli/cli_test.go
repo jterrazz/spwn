@@ -39,7 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"world", "agent", "profile", "msg", "snap", "architect", "dash", "init"} {
+	for _, sub := range []string{"world", "agent", "profile", "snap", "architect", "web", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -67,7 +67,7 @@ func TestCLI_WorldHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"ls", "show", "logs", "attach", "down"} {
+	for _, sub := range []string{"up", "ls", "inspect", "logs", "enter", "down"} {
 		assertContains(t, out, sub, "world help")
 	}
 }
@@ -132,17 +132,17 @@ func TestCLI_GetHelp(t *testing.T) {
 	}
 }
 
-// --- Dash help ---
+// --- Web help ---
 
-func TestCLI_DashHelp(t *testing.T) {
-	out, _, err := executeCommand("dash", "--help")
+func TestCLI_WebHelp(t *testing.T) {
+	out, _, err := executeCommand("web", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"start", "open"} {
-		assertContains(t, out, sub, "dash help")
-	}
+	assertContains(t, out, "web", "web help usage")
+	assertContains(t, out, "--port", "web help port flag")
+	assertContains(t, out, "--no-open", "web help no-open flag")
 }
 
 // --- Init help ---
@@ -166,15 +166,3 @@ func TestCLI_UnknownCommand(t *testing.T) {
 	}
 }
 
-// --- Global flags ---
-
-func TestCLI_GlobalFlags(t *testing.T) {
-	out, _, err := executeCommand("--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// --json is the only global flag now. --quiet and --verbose were
-	// removed because their behavior didn't match user expectations.
-	assertContains(t, out, "--json", "global flags")
-}

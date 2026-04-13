@@ -261,8 +261,8 @@ Monitoring and debugging agent behavior.
 
 ```bash
 spwn up --agent morpheus --agent neo --agent trinity -w ./acme-api
-spwn msg send neo --from morpheus "Implement Stripe webhooks"
-spwn msg send trinity --from morpheus "Write tests for webhooks"
+spwn agent send neo --from morpheus "Implement Stripe webhooks"
+spwn agent send trinity --from morpheus "Write tests for webhooks"
 ```
 
 **Solo developer** — one agent, one project, persistent memory:
@@ -274,16 +274,6 @@ spwn up --agent neo -w ./my-app
 spwn talk neo "Refactor the auth module to use sessions"
 # neo remembers the codebase next time
 ```
-
-**Multi-runtime** — different agents, different thinking engines:
-
-```bash
-spwn up --agent neo --runtime claude-code -w .   # Anthropic
-spwn up --agent smith --runtime codex -w .        # OpenAI
-spwn up --agent oracle --runtime aider -w .       # Open source
-```
-
-<br/>
 
 ## How agents work
 
@@ -368,11 +358,15 @@ spwn agent talk  neo "refactor auth"           Full form of `spwn talk`
 # ── Worlds ───────────────────────────────────────────────────────
 spwn world up --agent neo -w .                 Full form of `spwn up`
 spwn world ls                                  Full form of `spwn ls`
-spwn world show <id>                           Inspect a running world
+spwn world inspect <id>                        Inspect a running world
 spwn world down <id>                           Destroy (agent survives)
-spwn world attach <id>                         Interactive shell
-spwn world snap <id>                           Snapshot a world
-spwn world restore <snap-id>                   Rollback
+spwn world enter <id>                          Interactive shell inside the world
+
+# ── Snapshots ────────────────────────────────────────────────────
+spwn snap save <id>                            Save world state
+spwn snap ls                                   List snapshots
+spwn snap restore <snap-id>                    Rollback
+spwn snap rm <snap-id>                         Remove a snapshot
 
 # ── Tools ────────────────────────────────────────────────────────
 spwn tool ls                                   Installed tool packs
@@ -395,12 +389,12 @@ spwn profile publish researcher                Ship to registry               [E
 spwn profile install @community/pragmatic-dev  Install a shared profile       [Epoch 10]
 
 # ── Messages ─────────────────────────────────────────────────────
-spwn msg send neo --from morpheus "task"       Inter-agent messaging
-spwn msg ls neo                                Neo's inbox
+spwn agent send neo "Implement Stripe webhooks" Async message to an agent's inbox
+spwn agent inbox neo                           Show neo's inbox
+spwn agent talk neo                            Live sync session
 
 # ── System ───────────────────────────────────────────────────────
 spwn architect start                           Always-on orchestration daemon
-spwn doctor                                    Check your environment
 ```
 
 Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)

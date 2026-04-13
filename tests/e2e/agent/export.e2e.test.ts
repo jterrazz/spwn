@@ -45,7 +45,7 @@ describe("agent export", () => {
     expect(existsSync(join(home, "neo.tar.gz"))).toBe(true);
   });
 
-  test("export tar.gz contains identity/default.md", async () => {
+  test("export tar.gz contains core/profile.md", async () => {
     // WHEN — exporting the agent
     const result = await spwn("export contents")
       .exec("agent export neo")
@@ -57,7 +57,7 @@ describe("agent export", () => {
     expect(existsSync(tarPath)).toBe(true);
 
     const listing = execSync(`tar tzf ${tarPath}`, { encoding: "utf-8" });
-    expect(listing).toContain("identity/default.md");
+    expect(listing).toContain("core/profile.md");
   });
 
   test("export with exclude layers", async () => {
@@ -101,9 +101,9 @@ describe("agent export", () => {
     expect(existsSync(tarPath)).toBe(true);
 
     const listing = execSync(`tar tzf ${tarPath}`, { encoding: "utf-8" });
-    expect(listing).toContain("identity/");
-    expect(listing).toContain("skills/");
-    expect(listing).toContain("identity/default.md");
+    expect(listing).toMatch(/(^|\n)core(\/|$|\n)/);
+    expect(listing).toMatch(/(^|\n)skills(\/|$|\n)/);
+    expect(listing).toContain("core/profile.md");
   });
 
   test("import restores agent from export", async () => {

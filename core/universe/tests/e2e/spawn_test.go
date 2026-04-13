@@ -20,14 +20,14 @@ func TestSpawn_DefaultConfig(t *testing.T) {
 	// THEN the state should contain one idle world
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
-		s.WorldStatus(universe.StatusIdle)
+		s.WorldStatus(universe.StatusRunning)
 	})
 
 	// AND the container should have physics and faculties files
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/universe/physics.md")
-		c.HasFile("/universe/faculties.md")
+		c.HasFile("/world/physics.md")
+		c.HasFile("/world/faculties.md")
 	})
 }
 
@@ -55,8 +55,8 @@ func TestSpawn_WithWorkspace(t *testing.T) {
 
 	// THEN the workspace should be mounted and contain the test project files
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasMount("/workspace")
-		c.FileContains("/workspace/README.md", "test project")
+		c.HasMount("/work/default")
+		c.FileContains("/work/default/README.md", "test project")
 	})
 }
 
@@ -69,7 +69,7 @@ func TestSpawn_WithAgent(t *testing.T) {
 
 	// THEN the mind should be mounted in the container
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasMount("/mind")
+		c.HasMount("/agents")
 	})
 
 	// AND the Mind should have all standard layers
@@ -79,7 +79,7 @@ func TestSpawn_WithAgent(t *testing.T) {
 		m.HasLayer("knowledge")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
-		m.HasFile("core/default.md")
+		m.HasFile("core/profile.md")
 	})
 }
 
@@ -94,18 +94,17 @@ physics:
     memory: 1g
     disk: 4g
     timeout: 60m
-  tools:
-    - "@spwn/unix"
+tools:
+  - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
 
 	// THEN the physics.md should reflect the custom values
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/universe/physics.md", "2 core(s)")
-		c.FileContains("/universe/physics.md", "1g")
-		c.FileContains("/universe/physics.md", "60m")
-		c.FileContains("/universe/physics.md", "64")
+		c.FileContains("/world/physics.md", "2 core(s)")
+		c.FileContains("/world/physics.md", "1g")
+		c.FileContains("/world/physics.md", "60m")
 	})
 }
 

@@ -63,9 +63,9 @@ jobs:
         cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
         cd ../..
         # Bundling gate: the binary that's about to be embedded into
-        # the desktop bundle MUST ship the example templates. We run
-        # the same --json contract the observatory UI depends on.
-        ./bin/spwn example list --json > /dev/null
+        # the desktop bundle MUST ship the example templates.
+        # `example list` exits non-zero on a hollow binary.
+        ./bin/spwn example list > /dev/null
       release-name: "spwn ${{ github.ref_name }}"
       release-body: "CLI + desktop app for managing AI agent worlds"
     secrets: inherit

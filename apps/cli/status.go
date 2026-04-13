@@ -266,20 +266,9 @@ func renderWorldSection(ww universe.World) {
 		pr("%s%s\n", indent, strings.Join(wsPaths, ", "))
 	}
 
-	// Tools + gates on one line
-	var metaParts []string
+	// Tools
 	if len(ww.Manifest.Tools) > 0 {
-		metaParts = append(metaParts, strings.Join(ww.Manifest.Tools, " "))
-	}
-	if len(ww.Manifest.Gate) > 0 {
-		var gateNames []string
-		for _, g := range ww.Manifest.Gate {
-			gateNames = append(gateNames, g.As)
-		}
-		metaParts = append(metaParts, "gate: "+strings.Join(gateNames, ", "))
-	}
-	if len(metaParts) > 0 {
-		pr("%s%s\n", indent, ui.Faint(strings.Join(metaParts, " \u00b7 ")))
+		pr("%s%s\n", indent, ui.Faint(strings.Join(ww.Manifest.Tools, " ")))
 	}
 
 	// Agents

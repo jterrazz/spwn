@@ -26,12 +26,6 @@ spwn agent talk <agent-name> [message] [flags]
       --world string           World ID to target (disambiguates when the same agent exists in multiple worlds)
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world

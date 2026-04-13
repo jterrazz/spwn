@@ -4,9 +4,6 @@ package e2e
 
 import (
 	"context"
-	"encoding/json"
-	"os"
-	"path/filepath"
 	"sync"
 	"testing"
 
@@ -28,24 +25,24 @@ physics:
   constants:
     cpu: 1
     memory: 256m
-  tools:
-    - "@spwn/unix"
+tools:
+  - "@spwn/unix"
 `,
 		`
 physics:
   constants:
     cpu: 1
     memory: 512m
-  tools:
-    - "@spwn/unix"
+tools:
+  - "@spwn/unix"
 `,
 		`
 physics:
   constants:
     cpu: 1
     memory: 384m
-  tools:
-    - "@spwn/unix"
+tools:
+  - "@spwn/unix"
 `,
 	}
 
@@ -108,8 +105,8 @@ func TestConcurrent_ListShowsAll(t *testing.T) {
 	}
 
 	for _, u := range list {
-		if u.Status != universe.StatusIdle {
-			t.Fatalf("Expected status %q, got %q for universe %s", universe.StatusIdle, u.Status, u.ID)
+		if u.Status != universe.StatusRunning {
+			t.Fatalf("Expected status %q, got %q for universe %s", universe.StatusRunning, u.Status, u.ID)
 		}
 	}
 
@@ -199,20 +196,10 @@ func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
 		t.Fatalf("Expected %d chains, got %d", count, len(chains))
 	}
 
-	// AND state.json should have exactly 5 entries
+	// AND state (container labels) should have exactly 5 entries
 	universes := tc.LoadState()
 	if len(universes) != count {
 		t.Fatalf("Expected %d worlds in state, got %d", count, len(universes))
-	}
-
-	// AND state.json should be valid JSON (no corruption from concurrent writes)
-	statePath := filepath.Join(tc.BaseDir, "state.json")
-	data, err := os.ReadFile(statePath)
-	if err != nil {
-		t.Fatalf("Failed to read state.json: %v", err)
-	}
-	if !json.Valid(data) {
-		t.Fatalf("state.json is not valid JSON after concurrent spawns:\n%s", string(data))
 	}
 
 	// AND all IDs should be unique
@@ -241,19 +228,10 @@ func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
 	}
 	wg.Wait()
 
-	// THEN state.json should be empty
+	// THEN state should be empty
 	universes = tc.LoadState()
 	if len(universes) != 0 {
 		t.Fatalf("Expected 0 worlds after concurrent destroy, got %d", len(universes))
-	}
-
-	// AND state.json should still be valid JSON
-	data, err = os.ReadFile(statePath)
-	if err != nil {
-		t.Fatalf("Failed to read state.json after destroy: %v", err)
-	}
-	if !json.Valid(data) {
-		t.Fatalf("state.json is not valid JSON after concurrent destroys:\n%s", string(data))
 	}
 }
 

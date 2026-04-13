@@ -33,7 +33,6 @@ const (
 	ClawStateFileName = "claw.json"
 	SkillsSubDir      = "skills"
 	ClawSubDir        = "claw"
-	KnowledgeSubDir     = "knowledge"
 	CredentialsSubDir   = "credentials"
 	ActivityFileName  = "activity.jsonl"
 	TeamsSubDir       = "teams"

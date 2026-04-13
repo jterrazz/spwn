@@ -17,12 +17,6 @@ spwn agent rm <agent-name> [flags]
   -h, --help   help for rm
 ```
 
-### Options inherited from parent commands
-
-```
-      --json   Output as JSON
-```
-
 ### SEE ALSO
 
 * [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
