@@ -37,7 +37,7 @@ describe("colony multi-agent", () => {
 
     const id = parseWorldId(spawnResult.output)!;
     ctx
-      .universe(id)
+      .world(id)
       .toBeRunning()
       .toHaveFile("/world/physics.md")
       .toHaveFile("/world/faculties.md");

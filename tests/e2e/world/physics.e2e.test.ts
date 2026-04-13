@@ -96,7 +96,7 @@ describe("world physics", () => {
 
     // AND — container has the world directory structure
     ctx
-      .universe(id)
+      .world(id)
       .toHaveDirectory("/world")
       .toHaveFile("/world/physics.md")
       .toHaveFile("/world/faculties.md");

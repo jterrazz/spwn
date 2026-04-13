@@ -28,7 +28,7 @@ describe("agent inside world", () => {
     // The agent's home dir is mounted via the single /agents bind.
     const id = parseWorldId(spawnResult.output)!;
     ctx
-      .universe(id)
+      .world(id)
       .toHaveDirectory("/agents/neo")
       .toHaveDirectory("/agents/neo/core")
       .toHaveFile("/agents/neo/core/profile.md");

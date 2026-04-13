@@ -45,7 +45,7 @@ describe("world spawn", () => {
 
     // AND — has /world directory with physics + faculties
     ctx
-      .universe(id)
+      .world(id)
       .toHaveFile("/world/physics.md")
       .toHaveFile("/world/faculties.md");
   });

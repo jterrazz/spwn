@@ -87,7 +87,7 @@ describe("world lifecycle", () => {
 
     // THEN — container is running and has world files
     ctx
-      .universe(id)
+      .world(id)
       .toBeRunning()
       .toHaveFile("/world/physics.md")
       .toHaveFile("/world/faculties.md");

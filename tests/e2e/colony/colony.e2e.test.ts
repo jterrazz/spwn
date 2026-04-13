@@ -130,7 +130,7 @@ describe("colony E2E", () => {
     const id = parseWorldId(spawnResult.output)!;
 
     ctx
-      .universe(id)
+      .world(id)
       .toHaveDirectory("/agents/neo")
       .toHaveDirectory("/agents/morpheus")
       .toHaveFile("/agents/neo/core/profile.md")
