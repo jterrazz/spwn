@@ -175,92 +175,82 @@ spwn auth login / logout / token
 
 ## Repository Structure
 
-Multi-module Go monorepo + Turborepo-ready JS workspace:
+Polyglot monorepo: Go modules + Next.js/Tauri web UI, wired together
+with Go workspaces and pnpm/Turborepo.
 
 ```
 spwn/
 ├── go.work                          # Go workspace
-├── pnpm-workspace.yaml              # JS workspace (apps/, platform/)
+├── pnpm-workspace.yaml              # JS workspace (apps/*, tests)
 ├── turbo.json                       # Turborepo task orchestration
 │
-├── core/                            # Domain libraries (the product)
-│   ├── universe/                    #   go.mod — world management
-│   │   ├── universe.go              #   Public API (World, Manifest, Architect, Desktop App)
-│   │   └── internal/
-│   │       ├── architect/           #     Orchestration (spawn, destroy, list)
-│   │       │   ├── colony.go        #       Multi-agent: SpawnAgents, Chief/Manager/Worker
-│   │       │   └── npc.go           #       Ephemeral: SpawnNPC
-│   │       ├── backend/             #     Docker adapter (Backend port)
-│   │       ├── runtime/             #     Claude Code adapter (Runtime port)
-│   │       ├── provider/            #     Anthropic + OpenAI adapters (Provider port)
-│   │       ├── channel/             #     CLI adapter (Channel port)
-│   │       ├── get/                  #     LocalRegistry adapter (Get/Marketplace port)
-│   │       ├── api/                 #     HTTP API server (internal) (/api/worlds, /api/agents)
-│   │       ├── sync/                #     Git config sync (SyncToGit, PullFromGit)
-│   │       ├── physics/             #     Physics/faculties generation
-│   │       ├── manifest/            #     Config parsing (world.yaml, agent.yaml)
-│   │       ├── state/               #     Universe + Claw state (JSON)
-│   │       ├── models/              #     Domain types (World, Manifest, Status, AgentRecord)
-│   │       └── ports/               #     8 port interfaces (Runtime, Backend, Provider, etc.)
-│   │
-│   ├── agent/                       #   go.mod — agent management
-│   │   ├── agent.go                 #   Public API (Info, InitProfile, Reflect, Sleep, Fork)
-│   │   └── internal/
-│   │       ├── profile/             #     Profile CRUD (init, validate, list, inspect, export)
-│   │       ├── journal/             #     Episodic memory (append, list)
-│   │       ├── session/             #     Session persistence (load, save)
-│   │       ├── evolution/           #     Reflexion, Sleep, Forking
-│   │       └── memory/              #     Filesystem adapter (Memory port)
-│   │
-│   ├── gate/                        #   go.mod — bridge protocol
-│   │   ├── gate.go                  #   Public API (Server, Bridge, ExecHandler)
-│   │   └── internal/
-│   │       ├── bridge/              #     Wrapper scripts + capability enforcement
-│   │       └── server/              #     HTTP-over-TCP gate server
-│   │
-│   ├── messenger/                   #   go.mod — agent-to-agent communication
-│   │   ├── messenger.go             #   Public API (Send, Check, CheckUnread, MarkRead, ListAll)
-│   │   └── internal/
-│   │       ├── inbox/               #     Filesystem-based inbox read/write
-│   │       └── models/              #     Message type
-│   │
-│   └── foundation/                  #   go.mod — cross-cutting primitives
-│       ├── constants.go             #     Defaults, ProfileLayers, BaseImage
-│       ├── paths.go                 #     BaseDir(), WorldsDir(), AgentsDir(), OrgPath()
-│       ├── identity.go              #     GenerateWorldID(), GenerateAgentID()
-│       └── names.go                 #     RandomCosmosWord(), RandomAgentName()
-│
-├── apps/                            # Deployable consumers
-│   ├── cli/                         #   go.mod — the spwn binary
+├── apps/                            # End-user binaries
+│   ├── cli/                         #   go.mod — the `spwn` binary
 │   │   ├── cmd/spwn/main.go         #     Entry point
 │   │   ├── root.go                  #     Root cobra command
-│   │   ├── defaults.go              #     Auto-create defaults on first run
-│   │   ├── world/                   #     World subcommands (up, down, ls, logs, enter, inspect)
-│   │   ├── agent/                   #     Agent subcommands (new, ls, rm, talk, fork, export, import)
-│   │   ├── profile/                 #     Profile subcommands (full character sheet)
-│   │   ├── msg/                     #     Messaging subcommands (send, inbox, watch)
-│   │   ├── snap/                    #     Snapshot subcommands (save, ls, restore, rm)
-│   │   ├── architect/                #     Architect subcommands (start, stop, status, connect)
-│   │   ├── get/                     #     Marketplace subcommands (install, ls, search, rm)
-│   │   ├── auth/                    #     Auth subcommands (login, logout, token)
-│   │   ├── ui/                      #     Stepper, table, style, format
-│   │   └── tests/
-│   │       └── integration/         #   Cross-domain flows (world + agent)
+│   │   ├── world/                   #     spwn world (up, down, ls, inspect, logs, enter)
+│   │   ├── agent/                   #     spwn agent (new, ls, rm, talk, fork, export…)
+│   │   ├── snap/                    #     spwn snap (save, ls, restore, rm)
+│   │   ├── architect/               #     spwn architect (start, stop, status)
+│   │   ├── web/                     #     spwn web (launches the web UI)
+│   │   ├── auth/                    #     spwn auth (login, logout, token)
+│   │   ├── profile/                 #     spwn profile
+│   │   ├── skill/                   #     spwn skill
+│   │   ├── tool/                    #     spwn tool
+│   │   ├── team/                    #     spwn team
+│   │   ├── example/                 #     spwn example
+│   │   ├── organization/            #     spwn organization
+│   │   ├── get/                     #     spwn get (install from marketplace)
+│   │   ├── logs/                    #     spwn logs
+│   │   └── ui/                      #     Stepper, table, style
 │   │
-│   └── dash/                        #   Visual dashboard (CLI placeholder, Next.js planned)
-│       └── package.json
+│   └── web/                         #   Next.js + Tauri desktop/web app
+│       ├── src/                     #     Next.js app (React)
+│       └── src-tauri/               #     Tauri shell (Rust)
 │
-├── platform/                        # Build infrastructure
-│   ├── images/                      #   Docker images
-│   │   ├── Dockerfile               #     spwn/world production image
-│   │   ├── Dockerfile.test          #     Test image with mock Claude
-│   │   └── embed.go                 #     go:embed for runtime auto-build
-│   ├── gate-runtime/                #   Container-side gate (Rust)
-│   │   ├── Cargo.toml
-│   │   └── src/main.rs
-│   └── fixtures/                    #   Test fixtures
-│       ├── mock-claude/             #     Mock Claude binary for E2E
-│       └── testdata/                #     Shared test data
+├── packages/                        # Go domain modules (shared libraries)
+│   ├── world/                       #   go.mod — world lifecycle (the core)
+│   │   ├── world.go                 #   Public API (World, Manifest, Architect…)
+│   │   └── internal/
+│   │       ├── architect/           #     Orchestration (spawn, destroy, deploy)
+│   │       ├── backend/             #     Docker adapter
+│   │       ├── runtime/             #     Claude Code runtime
+│   │       ├── api/                 #     HTTP API server (consumed by apps/web)
+│   │       ├── physics/             #     physics.md / faculties.md generation
+│   │       ├── manifest/            #     Config parsing (world.yaml, agent.yaml)
+│   │       ├── labels/              #     Container labels as source of truth
+│   │       ├── state/               #     State hydrated from labels
+│   │       ├── runtimestate/        #     Mutable runtime state (sessions, agents)
+│   │       └── models/              #     Domain types
+│   │
+│   ├── agent/                       #   go.mod — agent/mind management
+│   │   ├── agent.go                 #   Public API (InitMind, Validate, Export, Fork…)
+│   │   └── internal/{mind,journal,session,evolution,memory}/
+│   │
+│   ├── messenger/                   #   go.mod — agent-to-agent messaging
+│   │
+│   ├── imagebuilder/                #   go.mod — composable tool-based image builder
+│   │
+│   ├── migration/                   #   go.mod — ~/.spwn schema migrations
+│   │
+│   └── foundation/                  #   go.mod — cross-cutting primitives
+│       ├── constants.go             #     Defaults, directory layout, mind layers
+│       ├── paths.go                 #     BaseDir(), WorldsDir(), AgentsDir()
+│       ├── identity.go              #     GenerateWorldID(), GenerateAgentID()
+│       ├── auth/                    #     Credential resolution
+│       ├── activity/                #     Activity log
+│       └── update/                  #     Self-update logic
+│
+├── examples/                        # Shipped example worlds
+├── fixtures/                        # Test fixtures
+│   ├── Dockerfile.test              #   Mock-claude test image
+│   ├── mock-claude/                 #   Bash script standing in for claude CLI
+│   └── testdata/                    #   Shared fixtures
+├── tests/                           # TypeScript vitest E2E suite
+│   ├── e2e/                         #   Behavioral specs against the compiled binary
+│   ├── setup/                       #   Test harness (world-assertion, state-assertion…)
+│   └── ui/                          #   Playwright specs for the web UI
+├── docs/                            # Prose docs (architecture, releasing, CLI man pages)
 │
 ├── Makefile
 ├── README.md
@@ -286,43 +276,41 @@ Host machine
 ## Dependency Graph
 
 ```
-apps/cli ──→ core/universe, core/agent, core/gate, core/messenger, core/foundation
-core/universe ──→ core/agent, core/gate, core/foundation
-core/agent ──→ core/foundation
-core/gate ──→ core/foundation
-core/messenger ──→ core/foundation
+apps/cli  ──→ packages/{world, agent, messenger, imagebuilder, migration, foundation}
+packages/world ──→ packages/{agent, imagebuilder, foundation}
+packages/agent ──→ packages/foundation
+packages/messenger ──→ packages/foundation
+packages/imagebuilder ──→ (no spwn deps)
+packages/migration ──→ packages/foundation
 ```
 
-5 Go modules + `platform/images`. Each `core/` module exposes a public API in its root `.go` file. Adapters (runtime, provider, channel, skill, etc.) live inside `core/universe/internal/` — private per module.
+Each `packages/` module exposes a public API in its root `.go` file.
+Implementation details live under `internal/`.
 
 ## Code Style
 
 - No cgo
 - Errors: `error: lowercase message.\nActionable hint.`
-- **Ports & Adapters everywhere** — every external dependency goes through an interface (port). Adapters are swappable.
-- Domain modules own all business logic — CLI is a thin wrapper (parse flags → call domain API → format output)
-- Backend is a port — Docker is just one adapter. No direct Docker calls outside the backend adapter.
-- Types avoid stutter: `universe.World` not `universe.Universe`, `agent.Info` not `agent.AgentInfo`, `gate.Bridge` not `gate.GateBridge`
-- Package name provides context — don't repeat it in type names
+- Domain modules own all business logic — CLI is a thin wrapper
+  (parse flags → call domain API → format output)
+- Types avoid stutter: `world.World` not `world.WorldInstance`,
+  `agent.Info` not `agent.AgentInfo`. Package name provides context.
 
 ## Build
 
 ```bash
 make build               # cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
-make build-image         # docker build spwn/world:latest from platform/images/
 make build-test-image    # docker build spwn-test:latest for E2E
-make build-gate          # cd platform/gate-runtime && cargo build --release
 
 make test                # Unit tests across all modules
-make test-foundation     # cd core/foundation && go test -v ./...
-make test-universe       # cd core/universe && go test -v ./...
-make test-agent          # cd core/agent && go test -v ./...
-make test-gate           # cd core/gate && go test -v ./...
+make test-foundation     # cd packages/foundation && go test -v ./...
+make test-world          # cd packages/world && go test -v ./...
+make test-agent          # cd packages/agent && go test -v ./...
 make test-cli            # cd apps/cli && go test -v ./...
 
-make test-e2e            # All integration/E2E tests
-make test-e2e-universe   # Universe integration (Docker required)
-make test-e2e-agent      # Agent integration (filesystem only)
+make test-e2e            # Go E2E against Docker
+make test-e2e-world      # Same, explicit alias
+make test-ui             # Playwright UI E2E (Docker + browser)
 
 make lint                # go vet across all modules
 make clean               # rm -rf bin/
@@ -335,7 +323,7 @@ Three-layer pyramid:
 | Layer | Location | Speed | Infra |
 |-------|----------|-------|-------|
 | **Unit** | `*_test.go` next to source files | ~1s | None |
-| **E2E (Go)** | `core/universe/tests/e2e/` | ~30s | Docker |
+| **E2E (Go)** | `packages/world/tests/e2e/` | ~30s | Docker |
 | **E2E (TS)** | `tests/e2e/` | ~2min | Built binary |
 
 Each domain tests only its own contract. Cross-domain flows (spawn universe + agent → verify journal) are the CLI's responsibility.
@@ -359,7 +347,7 @@ The E2E test suite is the behavioral specification of spwn. Each test describes 
 ```
 
 ### Test layers:
-- **Behavioral specs** (`core/universe/tests/e2e/`, `tests/e2e/`) — what the system does (the specification)
+- **Behavioral specs** (`packages/world/tests/e2e/`, `tests/e2e/`) — what the system does (the specification)
 - **CLI specs** (`apps/cli/cli_test.go`) — what the user sees (flag parsing, help, output)
 - **Unit tests** (`*_test.go` next to source) — how the code works (implementation details)
 

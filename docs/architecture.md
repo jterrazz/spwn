@@ -32,20 +32,18 @@ Spwn treats agent runtimes as swappable adapters. The container-side Gate speaks
 
 ```
 spwn/
-├── core/                       Domain libraries
-│   ├── universe/                 World management, ports & adapters
+├── packages/                   Domain libraries (Go modules)
+│   ├── world/                    World lifecycle (the core)
+│   ├── agent/                    Mind lifecycle, composition, evolution
 │   ├── imagebuilder/             Composable Docker images, tool catalog
-│   ├── agent/                    Agent lifecycle, composition, evolution
-│   ├── gate/                     Host-container bridge
 │   ├── messenger/                Inter-agent messaging
-│   └── foundation/               Primitives (paths, IDs, constants)
-├── examples/                   Bundled example gallery
+│   ├── migration/                ~/.spwn schema migrations
+│   └── foundation/               Primitives (paths, IDs, constants, auth)
 ├── apps/
 │   ├── cli/                      The spwn binary
-│   └── web/                     Desktop app (Next.js + Tauri)
-└── platform/
-    ├── gate-runtime/             Container-side Rust gate
-    └── fixtures/                 Test fixtures
+│   └── web/                      Next.js + Tauri web/desktop UI
+├── examples/                   Bundled example gallery
+└── fixtures/                   Test fixtures (mock-claude, testdata)
 ```
 
 ## Roadmap

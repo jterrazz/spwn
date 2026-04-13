@@ -5,7 +5,7 @@
 - **Go 1.25+** (monorepo uses `go.work`)
 - **Docker** (for E2E tests and world provisioning)
 - **Node.js 20+** (for TypeScript E2E tests)
-- **Rust** (only for `platform/gate-runtime`)
+- **Rust** (only for `apps/web/src-tauri`)
 
 ## Getting Started
 
@@ -24,30 +24,30 @@ cd tests && pnpm install && pnpm test
 ## Project Structure
 
 ```
-core/                   Domain libraries (pure logic, no I/O at boundary)
-  universe/               World management (architect, backend, runtime adapters)
-  agent/                  Agent lifecycle (mind, journal, session, evolution)
-  gate/                   Host↔container bridge (server, bridge scripts)
+packages/               Domain libraries (Go modules)
+  world/                  World lifecycle (architect, backend, runtime, api)
+  agent/                  Mind lifecycle (journal, session, evolution)
+  imagebuilder/           Composable Docker image builder + tool catalog
   messenger/              Inter-agent messaging (inbox, models)
-  foundation/             Cross-cutting primitives (paths, IDs, constants)
+  migration/              ~/.spwn schema migrations
+  foundation/             Cross-cutting primitives (paths, IDs, auth, activity)
 
 apps/                   Deployable consumers
   cli/                    The spwn binary (Cobra → domain APIs → output)
-  web/                     Dashboard
+  web/                    Next.js + Tauri web/desktop UI
 
-platform/               Build infrastructure
-  images/                 Docker images (base, test)
-  gate-runtime/           Container-side Rust gate
-  fixtures/               Mock claude, test data
+examples/               Bundled example worlds
+fixtures/               Test fixtures (mock-claude, testdata, Dockerfile.test)
 
 tests/                  TypeScript E2E test suite
   e2e/                    Behavioral specs (world, agent, messaging, etc.)
   setup/                  Test infrastructure (runners, assertions, mock LLM)
+  ui/                     Playwright specs for the web UI
 ```
 
 ## Adding a Runtime Adapter
 
-1. Create `core/universe/internal/runtime/{name}/{name}.go`
+1. Create `packages/world/internal/runtime/{name}/{name}.go`
 2. Implement the `runtime.Runtime` interface
 3. Call `runtime.Register(&YourRuntime{})` in `init()`
 4. The adapter auto-registers via blank import in `architect.go`
@@ -55,7 +55,7 @@ tests/                  TypeScript E2E test suite
 ```go
 package myruntime
 
-import rt "spwn.sh/core/universe/internal/runtime"
+import rt "spwn.sh/packages/world/internal/runtime"
 
 type MyRuntime struct{}
 func init() { rt.Register(&MyRuntime{}) }
@@ -108,7 +108,7 @@ make lint
 
 - **Spec-first**: write the test before the implementation
 - **Go unit tests**: `*_test.go` next to source. No Docker needed.
-- **Go E2E tests**: `core/universe/tests/e2e/`. Build tag `//go:build e2e`. Needs Docker.
+- **Go E2E tests**: `packages/world/tests/e2e/`. Build tag `//go:build e2e`. Needs Docker.
 - **TypeScript E2E**: `tests/e2e/`. Runs against real `spwn` binary. Needs Docker.
 - **Output assertions**: use `expectLine()`, `expectTableHeader()` — not weak `toContain()`
 - See [tests/README.md](./tests/README.md) for full testing documentation and patterns

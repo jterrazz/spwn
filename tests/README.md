@@ -10,17 +10,16 @@ Fast, isolated tests that run without Docker. Located next to their source files
 
 ```bash
 make test                  # all unit tests
-make test-foundation       # core/foundation only
-make test-agent            # core/agent only
+make test-foundation       # packages/foundation only
+make test-agent            # packages/agent only
 make test-world         # packages/world only
 make test-cli              # apps/cli only
-make test-gate             # core/gate only
-make test-messenger        # core/messenger only
+make test-messenger        # packages/messenger only
 ```
 
 Examples:
-- `core/foundation/paths_test.go` — path resolution logic
-- `core/agent/agent_test.go` — agent lifecycle
+- `packages/foundation/paths_test.go` — path resolution logic
+- `packages/agent/agent_test.go` — agent lifecycle
 - `packages/world/internal/manifest/manifest_test.go` — YAML parsing
 - `apps/cli/ui/table_test.go` — table formatting
 
@@ -50,14 +49,14 @@ cd tests && npx tsc --noEmit     # type-check only
 - **Docker**: Required for all E2E tests (both Go and TypeScript).
 - **Go 1.25+**: Required for Go tests.
 - **Node.js 20+**: Required for TypeScript E2E tests.
-- **Test image**: Run `make build-test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `platform/images/Dockerfile.test`.
+- **Test image**: Run `make build-test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `fixtures/Dockerfile.test`.
 - **Binary**: TypeScript E2E tests require `bin/spwn`. Run `make build` first.
 
 ## How mock-claude Works
 
 E2E tests do not call the real Claude Code CLI. Instead, they use a mock:
 
-**`platform/fixtures/mock-claude/mock-claude.sh`** is a bash script installed as `/usr/local/bin/claude` inside the test Docker image. It:
+**`fixtures/mock-claude/mock-claude.sh`** is a bash script installed as `/usr/local/bin/claude` inside the test Docker image. It:
 
 1. Accepts and ignores real Claude CLI flags (`--session-id`, `--resume`, etc.)
 2. Inspects the container environment (checks for `/agents`, `/world/physics.md`, `/work`, etc.)

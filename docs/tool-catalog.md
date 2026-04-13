@@ -60,4 +60,4 @@ type Tool interface {
 }
 ```
 
-Create a directory under `core/imagebuilder/catalog/mytool/`, implement the interface, add it to `catalog.go`. The test framework validates your tool automatically.
+Create a directory under `packages/imagebuilder/catalog/mytool/`, implement the interface, add it to `catalog.go`. The test framework validates your tool automatically.
