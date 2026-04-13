@@ -1,7 +1,9 @@
 .PHONY: build install uninstall \
         build-test-image \
         test test-world test-agent test-foundation test-messenger test-imagebuilder \
-        test-e2e test-e2e-universe test-e2e-imagebuilder \
+        test-e2e test-e2e-world test-e2e-imagebuilder \
+        test-ts test-ui test-ui-headed \
+        web-build web-dev web-lint \
         lint clean docs
 
 INSTALL_DIR ?= $(HOME)/.local/bin
@@ -97,15 +99,29 @@ test-e2e-world: build-test-image
 test-e2e-imagebuilder:
 	cd packages/imagebuilder && go test -v -tags=e2e -timeout=10m ./e2e/...
 
+# TS E2E (vitest, Docker required)
+test-ts: build build-test-image
+	pnpm -C tests test
+
 # UI E2E tests (Docker + browser required)
 test-ui: build
-	cd tests && npm run test:ui
+	pnpm -C tests test:ui
 
 test-ui-headed: build
-	cd tests && npm run test:ui:headed
+	pnpm -C tests test:ui:headed
+
+# Web UI (Next.js + Tauri)
+web-build:
+	pnpm -C apps/web build
+
+web-dev:
+	pnpm -C apps/web dev
+
+web-lint:
+	pnpm -C apps/web lint
 
 # Lint
-lint:
+lint: web-lint
 	cd packages/foundation && go vet ./...
 	cd packages/imagebuilder && go vet ./...
 	cd packages/agent && go vet ./...

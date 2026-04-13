@@ -62,3 +62,21 @@ jobs:
           cache-dependency-path: apps/cli/go.sum
       - name: Build binary
         run: cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint web
+        run: pnpm -C apps/web lint
+      - name: Build web
+        run: pnpm -C apps/web build
