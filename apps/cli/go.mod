@@ -8,12 +8,12 @@ require (
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
-	spwn.sh/core/agent v0.0.0
-	spwn.sh/core/foundation v0.0.0
-	spwn.sh/core/imagebuilder v0.0.0
-	spwn.sh/core/messenger v0.0.0
-	spwn.sh/core/migration v0.0.0
-	spwn.sh/core/universe v0.0.0
+	spwn.sh/packages/agent v0.0.0
+	spwn.sh/packages/foundation v0.0.0
+	spwn.sh/packages/imagebuilder v0.0.0
+	spwn.sh/packages/messenger v0.0.0
+	spwn.sh/packages/migration v0.0.0
+	spwn.sh/packages/universe v0.0.0
 	spwn.sh/examples v0.0.0
 )
 
@@ -49,11 +49,11 @@ require (
 )
 
 replace (
-	spwn.sh/core/agent => ../../core/agent
-	spwn.sh/core/foundation => ../../core/foundation
-	spwn.sh/core/imagebuilder => ../../core/imagebuilder
-	spwn.sh/core/messenger => ../../core/messenger
-	spwn.sh/core/migration => ../../core/migration
-	spwn.sh/core/universe => ../../core/universe
+	spwn.sh/packages/agent => ../../packages/agent
+	spwn.sh/packages/foundation => ../../packages/foundation
+	spwn.sh/packages/imagebuilder => ../../packages/imagebuilder
+	spwn.sh/packages/messenger => ../../packages/messenger
+	spwn.sh/packages/migration => ../../packages/migration
+	spwn.sh/packages/universe => ../../packages/universe
 	spwn.sh/examples => ../../examples
 )

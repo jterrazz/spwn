@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/foundation"
-	"spwn.sh/core/universe"
+	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/universe"
 	"github.com/spf13/cobra"
 )
 

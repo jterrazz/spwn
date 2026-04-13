@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/foundation"
-	"spwn.sh/core/foundation/auth"
+	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/foundation/auth"
 	"github.com/spf13/cobra"
 )
 

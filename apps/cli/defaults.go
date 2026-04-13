@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"spwn.sh/core/universe"
+	"spwn.sh/packages/universe"
 )
 
 // ensureDefaults creates the default world config if it doesn't already exist.

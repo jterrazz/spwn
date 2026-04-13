@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/foundation"
 )
 
 func TestVersionCheckCache_FreshCacheReturnsValue(t *testing.T) {

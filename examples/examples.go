@@ -32,7 +32,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/foundation"
 
 	"gopkg.in/yaml.v3"
 )

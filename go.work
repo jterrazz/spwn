@@ -2,11 +2,11 @@ go 1.25.0
 
 use (
 	./apps/cli
-	./core/agent
-	./core/foundation
-	./core/imagebuilder
-	./core/messenger
-	./core/migration
-	./core/universe
+	./packages/agent
+	./packages/foundation
+	./packages/imagebuilder
+	./packages/messenger
+	./packages/migration
+	./packages/universe
 	./examples
 )

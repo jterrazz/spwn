@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"spwn.sh/core/universe"
+	"spwn.sh/packages/universe"
 
 	"github.com/spf13/cobra"
 )

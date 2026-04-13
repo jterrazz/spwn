@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	agentDomain "spwn.sh/core/agent"
+	agentDomain "spwn.sh/packages/agent"
 	"github.com/spf13/cobra"
 )
 

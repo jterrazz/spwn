@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/core/agent"
+	agentDomain "spwn.sh/packages/agent"
 	"github.com/spf13/cobra"
 )
 

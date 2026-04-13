@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	agentDomain "spwn.sh/core/agent"
-	"spwn.sh/core/foundation"
+	agentDomain "spwn.sh/packages/agent"
+	"spwn.sh/packages/foundation"
 	"github.com/spf13/cobra"
 )
 

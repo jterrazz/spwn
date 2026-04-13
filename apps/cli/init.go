@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/universe"
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/universe"
+	"spwn.sh/packages/foundation"
 	"github.com/spf13/cobra"
 )
 

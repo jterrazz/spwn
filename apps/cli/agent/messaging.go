@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/messenger"
+	"spwn.sh/packages/messenger"
 	"github.com/spf13/cobra"
 )
 

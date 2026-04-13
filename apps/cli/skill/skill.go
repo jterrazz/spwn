@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/foundation"
 	"github.com/spf13/cobra"
 )
 

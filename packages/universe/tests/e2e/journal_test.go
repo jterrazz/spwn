@@ -1,0 +1,63 @@
+//go:build e2e
+
+package e2e
+
+import (
+	"testing"
+
+	agentDomain "spwn.sh/packages/agent"
+	"spwn.sh/packages/universe/tests/e2e/setup"
+)
+
+func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
+	// GIVEN a universe with an agent that runs to completion
+	tc := setup.NewTestContext(t)
+	tc.InitAgent("journal-agent")
+
+	chain := tc.Spawn().
+		WithAgent("journal-agent").
+		RunAgent().
+		Execute()
+
+	// THEN a journal entry should be created with the correct outcome and universe ID
+	chain.ExpectJournal(func(j *setup.JournalAssertion) {
+		j.HasEntries(1)
+		j.LatestOutcome("completed")
+		j.LatestWorldID(chain.Universe().ID)
+	})
+}
+
+func TestJournal_ListReturnsNewestFirst(t *testing.T) {
+	// GIVEN an agent that has run in two separate universes
+	tc := setup.NewTestContext(t)
+	tc.InitAgent("journal-order")
+
+	chain1 := tc.Spawn().
+		WithAgent("journal-order").
+		RunAgent().
+		Execute()
+
+	chain2 := tc.Spawn().
+		WithAgent("journal-order").
+		RunAgent().
+		Execute()
+
+	// WHEN listing journal entries
+	mindPath := agentDomain.AgentDir("journal-order")
+	entries, err := agentDomain.ListJournal(mindPath, 0)
+	if err != nil {
+		t.Fatalf("Failed to list journal: %v", err)
+	}
+
+	// THEN there should be at least 2 entries
+	if len(entries) < 2 {
+		t.Fatalf("Expected at least 2 journal entries, got %d", len(entries))
+	}
+
+	// AND the newest entry (index 0) should reference the second universe
+	if entries[0].WorldID != chain2.Universe().ID {
+		t.Fatalf("Expected newest entry to be %s, got %s", chain2.Universe().ID, entries[0].WorldID)
+	}
+
+	_ = chain1 // used above implicitly
+}

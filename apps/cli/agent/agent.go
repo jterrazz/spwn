@@ -6,8 +6,8 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 
-	agentDomain "spwn.sh/core/agent"
-	"spwn.sh/core/universe"
+	agentDomain "spwn.sh/packages/agent"
+	"spwn.sh/packages/universe"
 	"github.com/spf13/cobra"
 )
 

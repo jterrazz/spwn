@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"spwn.sh/core/universe"
+	"spwn.sh/packages/universe"
 	"github.com/spf13/cobra"
 )
 

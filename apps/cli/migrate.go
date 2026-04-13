@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
-	"spwn.sh/core/foundation"
-	"spwn.sh/core/migration"
-	"spwn.sh/core/migration/migrations"
+	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/migration"
+	"spwn.sh/packages/migration/migrations"
 )
 
 // runMigrations applies any pending schema migrations to ~/.spwn.

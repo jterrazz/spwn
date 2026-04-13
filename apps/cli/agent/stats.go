@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"time"
 
-	agentDomain "spwn.sh/core/agent"
+	agentDomain "spwn.sh/packages/agent"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/foundation"
 	"github.com/spf13/cobra"
 )
 

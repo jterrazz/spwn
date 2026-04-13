@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"spwn.sh/apps/cli"
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/foundation"
 )
 
 func main() {

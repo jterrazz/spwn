@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/universe"
+	"spwn.sh/packages/universe"
 	"github.com/spf13/cobra"
 )
 

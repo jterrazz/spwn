@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/core/universe"
+	"spwn.sh/packages/universe"
 )
 
 // These tests pin the routing rules for "talk to agent X in world Y". The

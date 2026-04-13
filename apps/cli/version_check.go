@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/foundation"
 )
 
 const versionCheckInterval = 24 * time.Hour

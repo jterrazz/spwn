@@ -20,7 +20,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
-	"spwn.sh/core/foundation"
+	"spwn.sh/packages/foundation"
 	"github.com/spf13/cobra"
 )
 
