@@ -139,17 +139,22 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Resolve image (env override for testing, then opts, then default with imagebuilder)
+	// Resolve image. SPWN_BASE_IMAGE and opts.Image both mean "use this
+	// exact image, don't rebuild" — they're how tests inject a mock
+	// runtime. Only when neither is set do we auto-build from the base
+	// Dockerfile + tool catalog.
 	image := foundation.WorldImage
+	explicitImage := false
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
+		explicitImage = true
 	}
 	if opts.Image != "" {
 		image = opts.Image
+		explicitImage = true
 	}
 
-	// Ensure image exists
-	if opts.Image == "" {
+	if !explicitImage {
 		opts.progress("image_building", image)
 
 		// Build image using imagebuilder with manifest tools
