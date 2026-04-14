@@ -18,7 +18,6 @@ import (
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/internal/api"
 	"spwn.sh/packages/world/internal/runtime"
 	"spwn.sh/packages/world/state"
 
@@ -144,30 +143,6 @@ func ApplyDefaults(m *Manifest) {
 // world's referenced agents without reaching into internal packages.
 func LoadAgentManifest(agentDir string) (*AgentManifest, error) {
 	return manifest.LoadAgent(agentDir)
-}
-
-// --- Web API ---
-
-// APIServer is the HTTP API server type.
-type APIServer = api.Server
-
-// NewAPIServer returns an spwn API server bound to addr that
-// serves world and agent state from the provided Store. arch may be nil for
-// read-only mode (no world spawn/destroy).
-//
-// The architect-spawn function is wired in here so the web UI can
-// invoke world.StartArchitectDaemonWithOpts without an import cycle
-// (this package can't import the api package directly).
-func NewAPIServer(s *Store, arch *Architect, addr string) *APIServer {
-	srv := api.New(s, arch, addr)
-	srv.SetSpawnArchitect(func(ctx context.Context, opts api.ArchitectSpawnOpts) (string, error) {
-		return StartArchitectDaemonWithOpts(ctx, StartArchitectDaemonOpts{
-			ImageOverride: opts.ImageOverride,
-			LogWriter:     opts.LogWriter,
-			OnProgress:    opts.OnProgress,
-		})
-	})
-	return srv
 }
 
 // --- Runtime ---

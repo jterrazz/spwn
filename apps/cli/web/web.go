@@ -15,7 +15,10 @@ import (
 	"syscall"
 	"time"
 
+	"context"
+
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/api"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
@@ -113,7 +116,14 @@ func runWeb(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	srv := world.NewAPIServer(store, arch, ":"+portFlag)
+	srv := api.New(store, arch, ":"+portFlag)
+	srv.SetSpawnArchitect(func(ctx context.Context, opts api.ArchitectSpawnOpts) (string, error) {
+		return world.StartArchitectDaemonWithOpts(ctx, world.StartArchitectDaemonOpts{
+			ImageOverride: opts.ImageOverride,
+			LogWriter:     opts.LogWriter,
+			OnProgress:    opts.OnProgress,
+		})
+	})
 	return srv.Start()
 }
 

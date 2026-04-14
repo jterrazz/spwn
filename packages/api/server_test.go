@@ -14,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/world/internal/runtimestate"
 	"spwn.sh/packages/world/state"
 )
 
@@ -23,11 +22,10 @@ func newTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	rs, err := runtimestate.NewStoreAt(t.TempDir())
+	store, err := state.NewStoreWithBackendAt(noContainersBackend{}, t.TempDir())
 	if err != nil {
 		t.Fatalf("runtimestate: %v", err)
 	}
-	store := state.NewStoreWith(noContainersBackend{}, rs)
 
 	srv := New(store, nil, "127.0.0.1:0")
 	mux := http.NewServeMux()
@@ -43,11 +41,10 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	rs, err := runtimestate.NewStoreAt(t.TempDir())
+	store, err := state.NewStoreWithBackendAt(noContainersBackend{}, t.TempDir())
 	if err != nil {
 		t.Fatalf("runtimestate: %v", err)
 	}
-	store := state.NewStoreWith(noContainersBackend{}, rs)
 
 	srv := New(store, nil, "127.0.0.1:0")
 	mux := http.NewServeMux()
@@ -293,11 +290,10 @@ func TestServerStop_NilServer(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	rs, err := runtimestate.NewStoreAt(t.TempDir())
+	store, err := state.NewStoreWithBackendAt(noContainersBackend{}, t.TempDir())
 	if err != nil {
 		t.Fatalf("runtimestate: %v", err)
 	}
-	store := state.NewStoreWith(noContainersBackend{}, rs)
 
 	srv := New(store, nil, "127.0.0.1:0")
 	// srv.srv is nil - Stop should be a no-op
@@ -311,11 +307,10 @@ func TestServerGracefulShutdown(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	rs, err := runtimestate.NewStoreAt(t.TempDir())
+	store, err := state.NewStoreWithBackendAt(noContainersBackend{}, t.TempDir())
 	if err != nil {
 		t.Fatalf("runtimestate: %v", err)
 	}
-	store := state.NewStoreWith(noContainersBackend{}, rs)
 
 	srv := New(store, nil, "127.0.0.1:0")
 
