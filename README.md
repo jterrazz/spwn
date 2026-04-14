@@ -326,17 +326,18 @@ Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
 
 ## Ecosystem
 
-Every layer is a swappable Go interface. What ships today, and what's on the roadmap:
+Every layer is a swappable Go interface. Same status legend as the CLI table:
+🟢 working · 🟡 in dev · 🔴 planned.
 
 | Layer | Shipping today | On the roadmap |
 |---|---|---|
-| **Agent runtime** | Claude Code, Codex | Aider, Cline, Continue, OpenCode, Gemini CLI, Amazon Q, Goose |
-| **LLM provider** | Anthropic, OpenAI | Google, Mistral, Groq, Together, Ollama, AWS Bedrock |
-| **World runtime** | Docker | Spwn Cloud, K3s, Firecracker, Fly.io, gVisor, Podman |
-| **Memory** | Markdown filesystem | RAG over Chroma, Qdrant, Pinecone, Weaviate, Turbopuffer |
-| **Tool ecosystem** | `@spwn/*` packs, custom scripts | MCP servers, LangChain tools |
-| **Orchestrator** | Built-in chief / worker hierarchy | Hermes, CrewAI, AutoGen, LangGraph, Swarm, Mastra |
-| **Observability** | Web UI | Langfuse, LangSmith, Helicone, OpenTelemetry |
+| **Agent runtime** | 🟢 Claude Code | 🔴 Codex, Aider, Cline, Continue, OpenCode, Gemini CLI, Amazon Q, Goose |
+| **LLM provider** | 🟢 Anthropic · 🟡 OpenAI | 🔴 Google, Mistral, Groq, Together, Ollama, AWS Bedrock |
+| **World runtime** | 🟢 Docker | 🔴 Spwn Cloud, K3s, Firecracker, Fly.io, gVisor, Podman |
+| **Memory** | 🟢 Markdown filesystem | 🔴 RAG over Chroma, Qdrant, Pinecone, Weaviate, Turbopuffer |
+| **Tool ecosystem** | 🟢 `@spwn/*` built-in packs · 🟡 local custom packs | 🔴 MCP servers, LangChain tools |
+| **Orchestrator** | 🟡 built-in chief / worker hierarchy | 🔴 Hermes, CrewAI, AutoGen, LangGraph, Swarm, Mastra |
+| **Observability** | 🟡 Web UI | 🔴 Langfuse, LangSmith, Helicone, OpenTelemetry |
 
 Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - every adapter is a single Go file.
 
