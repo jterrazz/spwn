@@ -1,15 +1,15 @@
 package cli
 
 import (
-	"spwn.sh/packages/imagebuilder/catalog"
+	"spwn.sh/catalog/tools"
 )
 
 // catalogToolNames returns the @scope/name identifier of every
 // built-in tool pack shipped with spwn. Used to power the "did you
 // mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
-	out := make([]string, 0, len(catalog.All))
-	for _, t := range catalog.All {
+	out := make([]string, 0, len(tools.All))
+	for _, t := range tools.All {
 		out = append(out, t.Name())
 	}
 	return out

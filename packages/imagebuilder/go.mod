@@ -5,7 +5,10 @@ go 1.25.0
 require (
 	github.com/docker/docker v27.5.1+incompatible
 	golang.org/x/term v0.28.0
+	spwn.sh/catalog/tools v0.0.0
 )
+
+replace spwn.sh/catalog/tools => ../../catalog/tools
 
 require (
 	github.com/Microsoft/go-winio v0.4.21 // indirect

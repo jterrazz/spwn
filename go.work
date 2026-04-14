@@ -10,4 +10,5 @@ use (
 	./packages/migration
 	./packages/world
 	./catalog/templates
+	./catalog/tools
 )

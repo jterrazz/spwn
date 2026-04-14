@@ -7,6 +7,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
 	spwn.sh/catalog/templates v0.0.0
+	spwn.sh/catalog/tools v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/foundation v0.0.0
 	spwn.sh/packages/imagebuilder v0.0.0
@@ -51,6 +52,7 @@ require (
 
 replace (
 	spwn.sh/catalog/templates => ../../catalog/templates
+	spwn.sh/catalog/tools => ../../catalog/tools
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/foundation => ../../packages/foundation
 	spwn.sh/packages/imagebuilder => ../../packages/imagebuilder

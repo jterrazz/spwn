@@ -1,21 +1,21 @@
-package catalog
+package tools
 
 import (
 	"fmt"
 
 	ib "spwn.sh/packages/imagebuilder"
 
-	"spwn.sh/packages/imagebuilder/catalog/architect"
-	"spwn.sh/packages/imagebuilder/catalog/build"
-	"spwn.sh/packages/imagebuilder/catalog/claude_code"
-	"spwn.sh/packages/imagebuilder/catalog/codex"
-	"spwn.sh/packages/imagebuilder/catalog/docker_cli"
-	"spwn.sh/packages/imagebuilder/catalog/git"
-	"spwn.sh/packages/imagebuilder/catalog/node"
-	"spwn.sh/packages/imagebuilder/catalog/python"
-	"spwn.sh/packages/imagebuilder/catalog/qmd"
-	"spwn.sh/packages/imagebuilder/catalog/spwn_cli"
-	"spwn.sh/packages/imagebuilder/catalog/unix"
+	"spwn.sh/catalog/tools/architect"
+	"spwn.sh/catalog/tools/build"
+	"spwn.sh/catalog/tools/claude_code"
+	"spwn.sh/catalog/tools/codex"
+	"spwn.sh/catalog/tools/docker_cli"
+	"spwn.sh/catalog/tools/git"
+	"spwn.sh/catalog/tools/node"
+	"spwn.sh/catalog/tools/python"
+	"spwn.sh/catalog/tools/qmd"
+	"spwn.sh/catalog/tools/spwn_cli"
+	"spwn.sh/catalog/tools/unix"
 )
 
 // All is the list of every built-in tool.

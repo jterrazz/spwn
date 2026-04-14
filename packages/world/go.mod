@@ -9,6 +9,7 @@ require (
 	spwn.sh/packages/foundation v0.0.0
 	spwn.sh/packages/imagebuilder v0.0.0
 	spwn.sh/catalog/templates v0.0.0
+	spwn.sh/catalog/tools v0.0.0
 )
 
 require (
@@ -48,4 +49,5 @@ replace (
 	spwn.sh/packages/foundation => ../foundation
 	spwn.sh/packages/imagebuilder => ../imagebuilder
 	spwn.sh/catalog/templates => ../../catalog/templates
+	spwn.sh/catalog/tools => ../../catalog/tools
 )

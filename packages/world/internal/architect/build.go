@@ -11,9 +11,9 @@ import (
 	"runtime/debug"
 	"strings"
 
+	tools "spwn.sh/catalog/tools"
 	ib "spwn.sh/packages/imagebuilder"
 	"spwn.sh/packages/imagebuilder/base"
-	"spwn.sh/packages/imagebuilder/catalog"
 	"spwn.sh/packages/foundation"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/physics"
@@ -42,7 +42,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 
 	// Resolve architect tools via imagebuilder to generate install steps
 	reg := ib.NewRegistry()
-	if err := catalog.RegisterDefaults(reg); err != nil {
+	if err := tools.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register catalog: %w", err)
 	}
 
