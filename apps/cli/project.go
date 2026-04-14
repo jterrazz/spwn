@@ -3,7 +3,7 @@ package cli
 import (
 	"os"
 
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
 )
 
@@ -23,5 +23,5 @@ func discoverProject() {
 	if err != nil || p == nil {
 		return
 	}
-	foundation.SetProjectRoot(p.Root)
+	base.SetProjectRoot(p.Root)
 }

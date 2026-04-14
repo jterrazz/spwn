@@ -6,7 +6,7 @@ require (
 	github.com/docker/docker v27.5.1+incompatible
 	gopkg.in/yaml.v3 v3.0.1
 	spwn.sh/packages/mind v0.0.0
-	spwn.sh/packages/foundation v0.0.0
+	spwn.sh/packages/base v0.0.0
 	spwn.sh/packages/imagebuilder v0.0.0
 	spwn.sh/catalog/runtimes v0.0.0
 	spwn.sh/catalog/templates v0.0.0
@@ -47,7 +47,7 @@ require (
 
 replace (
 	spwn.sh/packages/mind => ../mind
-	spwn.sh/packages/foundation => ../foundation
+	spwn.sh/packages/base => ../base
 	spwn.sh/packages/imagebuilder => ../imagebuilder
 	spwn.sh/catalog/runtimes => ../../catalog/runtimes
 	spwn.sh/catalog/templates => ../../catalog/templates

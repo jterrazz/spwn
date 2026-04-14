@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +70,7 @@ func skillHelp(cmd *cobra.Command, args []string) {
 
 // skillsDir returns the root directory for user skill files.
 func skillsDir() string {
-	return filepath.Join(foundation.BaseDir(), "skills")
+	return filepath.Join(base.BaseDir(), "skills")
 }
 
 var lsCmd = &cobra.Command{

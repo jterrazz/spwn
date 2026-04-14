@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
@@ -256,7 +256,7 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check the container exists and is responsive
-	checkCmd := exec.Command("docker", "inspect", "--format", "{{.State.Running}}", foundation.ArchitectContainerName)
+	checkCmd := exec.Command("docker", "inspect", "--format", "{{.State.Running}}", base.ArchitectContainerName)
 	checkOut, err := checkCmd.Output()
 	if err != nil || strings.TrimSpace(string(checkOut)) != "true" {
 		return s.FailHint("Container", fmt.Errorf("architect container is not running"),
@@ -312,7 +312,7 @@ func runTalk(cmd *cobra.Command, args []string) error {
 		// Interactive mode
 		s.Blank()
 		s.Info("Architect:", "entering interactive session")
-		s.Info("Container:", foundation.ArchitectContainerName)
+		s.Info("Container:", base.ArchitectContainerName)
 		s.Blank()
 
 		execCmd := exec.Command("docker", dockerArgs...)

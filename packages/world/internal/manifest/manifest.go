@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"spwn.sh/packages/world/internal/models"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,7 +30,7 @@ type rawManifest struct {
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
 func Load(name string) (models.Manifest, error) {
-	path := filepath.Join(foundation.WorldsDir(), name+".yaml")
+	path := filepath.Join(base.WorldsDir(), name+".yaml")
 	return LoadPath(path)
 }
 
@@ -74,7 +74,7 @@ func parseTools(node *yaml.Node) []string {
 
 // ListConfigs returns the names of all world configs in ~/.spwn/worlds/.
 func ListConfigs() ([]string, error) {
-	dir := foundation.WorldsDir()
+	dir := base.WorldsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -94,7 +94,7 @@ func ListConfigs() ([]string, error) {
 
 // CreateDefault creates a default.yaml in ~/.spwn/worlds/.
 func CreateDefault() error {
-	dir := foundation.WorldsDir()
+	dir := base.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ tools:
 
 // CreateConfig scaffolds a new named config.
 func CreateConfig(name string) error {
-	dir := foundation.WorldsDir()
+	dir := base.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -179,16 +179,16 @@ func ExpandTools(elems []string) []string {
 // ApplyDefaults fills zero-value fields with built-in defaults.
 func ApplyDefaults(m *models.Manifest) {
 	if m.Physics.Constants.CPU == 0 {
-		m.Physics.Constants.CPU = foundation.DefaultCPU
+		m.Physics.Constants.CPU = base.DefaultCPU
 	}
 	if m.Physics.Constants.Memory == "" {
-		m.Physics.Constants.Memory = foundation.DefaultMemory
+		m.Physics.Constants.Memory = base.DefaultMemory
 	}
 	if m.Physics.Constants.Disk == "" {
-		m.Physics.Constants.Disk = foundation.DefaultDisk
+		m.Physics.Constants.Disk = base.DefaultDisk
 	}
 	if m.Physics.Constants.Timeout == "" {
-		m.Physics.Constants.Timeout = foundation.DefaultTimeout
+		m.Physics.Constants.Timeout = base.DefaultTimeout
 	}
 }
 

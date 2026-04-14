@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
@@ -78,11 +78,11 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 	}
 
 	// THEN it should have the expected foundation defaults
-	if m.Physics.Constants.CPU != foundation.DefaultCPU {
-		t.Errorf("Expected CPU %d, got %d", foundation.DefaultCPU, m.Physics.Constants.CPU)
+	if m.Physics.Constants.CPU != base.DefaultCPU {
+		t.Errorf("Expected CPU %d, got %d", base.DefaultCPU, m.Physics.Constants.CPU)
 	}
-	if m.Physics.Constants.Memory != foundation.DefaultMemory {
-		t.Errorf("Expected memory %q, got %q", foundation.DefaultMemory, m.Physics.Constants.Memory)
+	if m.Physics.Constants.Memory != base.DefaultMemory {
+		t.Errorf("Expected memory %q, got %q", base.DefaultMemory, m.Physics.Constants.Memory)
 	}
 }
 

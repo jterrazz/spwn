@@ -1,4 +1,4 @@
-package foundation
+package base
 
 // Default physics constants.
 const (

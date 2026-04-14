@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/foundation/auth"
+	"spwn.sh/packages/base/auth"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )

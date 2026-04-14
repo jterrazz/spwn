@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
 	"spwn.sh/packages/world"
 )
@@ -87,7 +87,7 @@ func runInitLocal(cmd *cobra.Command) error {
 func runInitGlobal(cmd *cobra.Command) error {
 	s := ui.New()
 
-	baseDir := foundation.BaseDir()
+	baseDir := base.BaseDir()
 	if err := os.MkdirAll(baseDir, 0o755); err != nil {
 		return fmt.Errorf("cannot create %s: %w", baseDir, err)
 	}

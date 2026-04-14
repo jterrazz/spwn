@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/mind"
-	"spwn.sh/packages/foundation/auth"
+	"spwn.sh/packages/base/auth"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/runtime"

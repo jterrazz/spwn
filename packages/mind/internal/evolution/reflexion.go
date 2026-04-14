@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/mind/internal/journal"
-	"spwn.sh/packages/foundation/activity"
+	"spwn.sh/packages/base/activity"
 )
 
 // Dream analyzes recent journal entries and promotes successful patterns to playbooks.

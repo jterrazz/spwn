@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/foundation/activity"
+	"spwn.sh/packages/base/activity"
 )
 
 // Sleep consolidates experience into durable knowledge.

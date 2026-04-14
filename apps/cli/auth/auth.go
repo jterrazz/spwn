@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/foundation"
-	"spwn.sh/packages/foundation/auth"
+	"spwn.sh/packages/base"
+	"spwn.sh/packages/base/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +45,7 @@ var Cmd = &cobra.Command{
 		s.Blank()
 		cached := auth.ReadCachedToken()
 		if cached != "" {
-			tokenPath := foundation.BaseDir() + "/.auth-token"
+			tokenPath := base.BaseDir() + "/.auth-token"
 			if info, err := os.Stat(tokenPath); err == nil {
 				age := time.Since(info.ModTime())
 				s.Info("Cached token:", fmt.Sprintf("%s (%s ago)", abbreviate(tokenPath), formatAge(age)))
@@ -178,10 +178,10 @@ var logoutCmd = &cobra.Command{
 		}
 
 		if err := auth.ClearToken(); err != nil {
-			return s.FailHint("Clear failed", err, "Try removing manually: rm "+foundation.BaseDir()+"/.auth-token")
+			return s.FailHint("Clear failed", err, "Try removing manually: rm "+base.BaseDir()+"/.auth-token")
 		}
 
-		s.Done("Cleared cached token", abbreviate(foundation.BaseDir()+"/.auth-token"))
+		s.Done("Cleared cached token", abbreviate(base.BaseDir()+"/.auth-token"))
 
 		// Warn about lingering env vars
 		var active []string
@@ -216,7 +216,7 @@ var tokenCmd = &cobra.Command{
 		}
 
 		if err := auth.SaveToken(input); err != nil {
-			return s.FailHint("Save failed", err, "Check permissions on "+abbreviate(foundation.BaseDir()))
+			return s.FailHint("Save failed", err, "Check permissions on "+abbreviate(base.BaseDir()))
 		}
 
 		kind := "token"
@@ -224,7 +224,7 @@ var tokenCmd = &cobra.Command{
 			kind = "API key"
 		}
 
-		s.Done("Saved "+kind, abbreviate(foundation.BaseDir()+"/.auth-token"))
+		s.Done("Saved "+kind, abbreviate(base.BaseDir()+"/.auth-token"))
 		s.Blank()
 		return nil
 	},

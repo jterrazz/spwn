@@ -351,7 +351,7 @@ func TestDestroy_WritesJournal(t *testing.T) {
 	arch, store := newTestArchitect(t, mb)
 
 	// Single-agent worlds find the journal dir via the agent name +
-	// the global agents root (foundation.AgentsDir() = $SPWN_HOME/agents).
+	// the global agents root (base.AgentsDir() = $SPWN_HOME/agents).
 	agentsBase := t.TempDir()
 	t.Setenv("SPWN_HOME", agentsBase)
 

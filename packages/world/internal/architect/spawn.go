@@ -14,15 +14,15 @@ import (
 	runtimes "spwn.sh/catalog/runtimes"
 	tools "spwn.sh/catalog/tools"
 	ib "spwn.sh/packages/imagebuilder"
-	"spwn.sh/packages/imagebuilder/base"
+	ibbase "spwn.sh/packages/imagebuilder/base"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/physics"
-	"spwn.sh/packages/foundation"
-	"spwn.sh/packages/foundation/activity"
-	"spwn.sh/packages/foundation/auth"
+	"spwn.sh/packages/base"
+	"spwn.sh/packages/base/activity"
+	"spwn.sh/packages/base/auth"
 )
 
 // SpawnResult is returned by Spawn with the world and any non-fatal warnings.
@@ -38,7 +38,7 @@ type SpawnOpts struct {
 	AgentName     string
 	Workspaces    []models.Workspace
 	Manifest      models.Manifest
-	Image         string                     // Override base image (used for testing). Defaults to foundation.WorldImage.
+	Image         string                     // Override base image (used for testing). Defaults to base.WorldImage.
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
@@ -67,7 +67,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	var warnings []string
 
 	// Generate ID
-	id := foundation.GenerateWorldID(opts.ConfigName)
+	id := base.GenerateWorldID(opts.ConfigName)
 
 	// Parse memory
 	memBytes, err := parseMemory(opts.Manifest.Physics.Constants.Memory)
@@ -107,7 +107,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Architect mode: mount Docker socket + SPWN state directory
 	if opts.IsArchitect {
 		binds = append(binds, "/var/run/docker.sock:/var/run/docker.sock")
-		binds = append(binds, foundation.BaseDir()+":/home/spwn/.spwn")
+		binds = append(binds, base.BaseDir()+":/home/spwn/.spwn")
 	}
 
 	// SINGLE shared agents mount: ~/.spwn/agents/ → /agents (rw).
@@ -115,7 +115,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// added via DeployAgent appear instantly through this bind without
 	// any container restart, because the kernel sees the new directory
 	// the moment it's created on the host.
-	binds = append(binds, foundation.AgentsDir()+":/agents")
+	binds = append(binds, base.AgentsDir()+":/agents")
 
 	// Validate each named agent's mind directory and profile. We
 	// validate but no longer mount per-agent - all visibility goes
@@ -144,7 +144,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// exact image, don't rebuild" - they're how tests inject a mock
 	// runtime. Only when neither is set do we auto-build from the base
 	// Dockerfile + tool catalog.
-	image := foundation.WorldImage
+	image := base.WorldImage
 	explicitImage := false
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
@@ -185,10 +185,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		tools = deduped
 
 		_, err := builder.Build(ctx, ib.BuildRequest{
-			BaseDockerfile: base.WorldDockerfile,
+			BaseDockerfile: ibbase.WorldDockerfile,
 			Tools:          tools,
 			Tag:            image,
-			Version:        foundation.WorldImageVersion,
+			Version:        base.WorldImageVersion,
 			SkipVerify:     true, // probeTools handles verification below
 			LogWriter:      opts.logWriter(),
 		})
@@ -211,7 +211,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	if err := auth.SyncCredentials(); err != nil {
 		warnings = append(warnings, fmt.Sprintf("credential sync: %v", err))
 	}
-	binds = append(binds, foundation.CredentialsDir()+":/credentials:ro")
+	binds = append(binds, base.CredentialsDir()+":/credentials:ro")
 
 	// Determine credential source for progress reporting
 	creds := auth.ResolveAll()
@@ -250,25 +250,25 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Name:       opts.Name,
 		Config:     opts.ConfigName,
 		Agent:      opts.AgentName,
-		Backend:    foundation.DefaultBackend,
+		Backend:    base.DefaultBackend,
 		Workspaces: resolvedWorkspaces,
 		CreatedAt:  time.Now(),
 		Manifest:   opts.Manifest,
 	}
 	if len(opts.Agents) > 0 {
 		worldRecord.Agent = opts.Agents[0].Name
-		worldRecord.AgentID = foundation.GenerateAgentID(opts.Agents[0].Name)
+		worldRecord.AgentID = base.GenerateAgentID(opts.Agents[0].Name)
 		for _, spec := range opts.Agents {
 			role := manifest.DefaultRole(spec.Role)
 			worldRecord.Agents = append(worldRecord.Agents, models.AgentRecord{
 				Name:    spec.Name,
-				AgentID: foundation.GenerateAgentID(spec.Name),
+				AgentID: base.GenerateAgentID(spec.Name),
 				Role:    role,
 				Status:  models.StatusIdle,
 			})
 		}
 	} else if opts.AgentName != "" {
-		worldRecord.AgentID = foundation.GenerateAgentID(opts.AgentName)
+		worldRecord.AgentID = base.GenerateAgentID(opts.AgentName)
 		worldRecord.Agents = []models.AgentRecord{{
 			Name:    opts.AgentName,
 			AgentID: worldRecord.AgentID,
@@ -549,7 +549,7 @@ func workspaceContainerPath(name string, totalWorkspaces int) string {
 // world's per-instance state is stored. Used by both spawn (initial
 // write) and DeployAgent (roster regeneration).
 func worldStateDirFor(worldID string) string {
-	return filepath.Join(foundation.LocalStateDir(), "world-states", worldID)
+	return filepath.Join(base.LocalStateDir(), "world-states", worldID)
 }
 
 // initAgentDeployment creates the per-agent per-world filesystem layout

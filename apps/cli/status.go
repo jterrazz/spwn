@@ -11,7 +11,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
@@ -105,7 +105,7 @@ var statusCmd = &cobra.Command{
 
 		// ── Gather data ─────────────────────────────────────────────
 
-		baseDir := foundation.BaseDir()
+		baseDir := base.BaseDir()
 
 		// Auth
 		authLabel := "not configured"
@@ -121,7 +121,7 @@ var statusCmd = &cobra.Command{
 
 		// Skills
 		skillCount := 0
-		if entries, err := os.ReadDir(foundation.SkillsDir()); err == nil {
+		if entries, err := os.ReadDir(base.SkillsDir()); err == nil {
 			for _, e := range entries {
 				if e.IsDir() {
 					skillCount++

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	coreactivity "spwn.sh/packages/foundation/activity"
+	coreactivity "spwn.sh/packages/base/activity"
 
 	"github.com/spf13/cobra"
 )

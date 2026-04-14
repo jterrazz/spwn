@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/foundation/activity"
+	"spwn.sh/packages/base/activity"
 )
 
 // Entry represents a parsed journal entry.

@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
 )
 
@@ -33,7 +33,7 @@ provided, a random name is picked from a curated dictionary.`,
 		if len(args) > 0 {
 			name = args[0]
 		} else {
-			name = foundation.RandomAgentName()
+			name = base.RandomAgentName()
 		}
 
 		// Reject names that would shadow `spwn agent <subcommand>`.

@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 )
 
 // Role defines a position within an organization with its level and permissions.
@@ -35,7 +35,7 @@ type Organization struct {
 }
 
 func organizationPath(slug string) string {
-	return filepath.Join(foundation.OrganizationsDir(), slug+".yaml")
+	return filepath.Join(base.OrganizationsDir(), slug+".yaml")
 }
 
 // ValidateOrganization checks that an organization has a valid slug, name, and at
@@ -91,7 +91,7 @@ func CreateOrganization(h Organization) error {
 	if err := ValidateOrganization(h); err != nil {
 		return err
 	}
-	dir := foundation.OrganizationsDir()
+	dir := base.OrganizationsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("create organizations dir: %w", err)
 	}
@@ -121,7 +121,7 @@ func GetOrganization(slug string) (*Organization, error) {
 
 // ListOrganizations returns all organizations sorted alphabetically by slug.
 func ListOrganizations() ([]Organization, error) {
-	dir := foundation.OrganizationsDir()
+	dir := base.OrganizationsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {

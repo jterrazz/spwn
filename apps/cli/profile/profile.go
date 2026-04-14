@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"github.com/spf13/cobra"
 )
 
@@ -73,7 +73,7 @@ func profileHelp(cmd *cobra.Command, args []string) {
 
 // profilesDir returns the root directory for user profile templates.
 func profilesDir() string {
-	return filepath.Join(foundation.BaseDir(), "profiles")
+	return filepath.Join(base.BaseDir(), "profiles")
 }
 
 var lsCmd = &cobra.Command{

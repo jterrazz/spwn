@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"spwn.sh/packages/mind"
-	"spwn.sh/packages/foundation"
-	"spwn.sh/packages/foundation/activity"
+	"spwn.sh/packages/base"
+	"spwn.sh/packages/base/activity"
 	"spwn.sh/packages/world/internal/models"
 )
 
@@ -50,7 +50,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		agentNamesForJournal = append(agentNamesForJournal, u.Agent)
 	}
 	for _, name := range agentNamesForJournal {
-		agentPath := filepath.Join(foundation.AgentsDir(), name)
+		agentPath := filepath.Join(base.AgentsDir(), name)
 		if journalErr := mind.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
 			log.Printf("warning: failed to write journal for agent %s on destroy: %v", name, journalErr)
 		}

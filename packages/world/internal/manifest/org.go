@@ -3,7 +3,7 @@ package manifest
 import (
 	"os"
 
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 	"gopkg.in/yaml.v3"
 )
 
@@ -72,7 +72,7 @@ type SyncConfig struct {
 
 // LoadOrg reads the world manifest from ~/.spwn/org.yaml.
 func LoadOrg() (*OrgManifest, error) {
-	return LoadOrgPath(foundation.OrgPath())
+	return LoadOrgPath(base.OrgPath())
 }
 
 // LoadOrgPath reads a world manifest from an explicit path.
@@ -107,5 +107,5 @@ func CreateOrg(name string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(foundation.OrgPath(), data, 0644)
+	return os.WriteFile(base.OrgPath(), data, 0644)
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 )
 
 const versionCheckInterval = 24 * time.Hour
@@ -29,7 +29,7 @@ func startVersionCheck() {
 	}
 
 	go func() {
-		latest := foundation.CheckLatestVersion(versionCheckInterval)
+		latest := base.CheckLatestVersion(versionCheckInterval)
 		if latest == "" {
 			return
 		}

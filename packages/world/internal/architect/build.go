@@ -14,8 +14,8 @@ import (
 	runtimes "spwn.sh/catalog/runtimes"
 	tools "spwn.sh/catalog/tools"
 	ib "spwn.sh/packages/imagebuilder"
-	"spwn.sh/packages/imagebuilder/base"
-	"spwn.sh/packages/foundation"
+	ibbase "spwn.sh/packages/imagebuilder/base"
+	"spwn.sh/packages/base"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/physics"
 )
@@ -63,7 +63,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 	// SkipFooter: architect has its own COPY/entrypoint directives appended below.
 	// User/Home: architect image uses "architect" user, not "spwn".
 	toolInputs := ib.ToolsToInputs(resolved)
-	df := ib.GenerateDockerfile(base.ArchitectDockerfile, toolInputs, foundation.ArchitectImageVersion, ib.GenerateOpts{
+	df := ib.GenerateDockerfile(ibbase.ArchitectDockerfile, toolInputs, base.ArchitectImageVersion, ib.GenerateOpts{
 		SkipFooter: true,
 		User:       "architect",
 		Home:       "/home/architect",
@@ -115,7 +115,7 @@ CMD ["sleep", "infinity"]
 	contextFiles["spwn"] = binaryData
 
 	// Entrypoint script for Docker socket GID alignment
-	contextFiles["entrypoint.sh"] = base.ArchitectEntrypoint
+	contextFiles["entrypoint.sh"] = ibbase.ArchitectEntrypoint
 
 	// Architect system files (ARCHITECT.md, AGENTS.md, skills, stack)
 	for path, content := range physics.ArchitectSystemFiles() {
@@ -125,8 +125,8 @@ CMD ["sleep", "infinity"]
 	// Build the image
 	return docker.EnsureImageWithContext(
 		ctx,
-		foundation.ArchitectImage,
-		foundation.ArchitectImageVersion,
+		base.ArchitectImage,
+		base.ArchitectImageVersion,
 		df,
 		contextFiles,
 		logw,

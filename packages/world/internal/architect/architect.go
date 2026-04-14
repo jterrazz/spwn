@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"spwn.sh/packages/foundation/activity"
+	"spwn.sh/packages/base/activity"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/runtime"

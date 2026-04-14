@@ -6,15 +6,15 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/foundation"
-	"spwn.sh/packages/foundation/activity"
+	"spwn.sh/packages/base"
+	"spwn.sh/packages/base/activity"
 )
 
 // Fork clones a Mind from source agent to target agent.
 // If layers is nil, all layers are copied. Otherwise only the specified layers.
 func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
-	sourceDir := filepath.Join(foundation.AgentsDir(), sourceName)
-	targetDir := filepath.Join(foundation.AgentsDir(), targetName)
+	sourceDir := filepath.Join(base.AgentsDir(), sourceName)
+	targetDir := filepath.Join(base.AgentsDir(), targetName)
 
 	// Verify source exists
 	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
@@ -27,7 +27,7 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	}
 
 	// Determine which layers to copy
-	allLayers := foundation.MindLayers
+	allLayers := base.MindLayers
 	if len(layers) > 0 {
 		allLayers = layers
 	}

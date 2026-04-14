@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/foundation"
+	"spwn.sh/packages/base"
 
 	"gopkg.in/yaml.v3"
 )
@@ -133,7 +133,7 @@ func Get(slug string) (Template, error) {
 //
 // baseDir should be the project root. In legacy/global mode (no
 // project discoverable) callers can still pass ~/.spwn or the
-// foundation.UserDir() and the same layout will appear underneath.
+// base.UserDir() and the same layout will appear underneath.
 //
 // After Install, the caller can `spwn up` to bring the world online.
 func Install(slug, baseDir string) (InstallReport, error) {
@@ -222,11 +222,11 @@ func Install(slug, baseDir string) (InstallReport, error) {
 // the user-global ~/.spwn (legacy global mode). Callers that need
 // to target an explicit path should use Install directly.
 func InstallInto(slug string) (InstallReport, error) {
-	base := foundation.ProjectRoot()
-	if base == "" {
-		base = foundation.BaseDir()
+	root := base.ProjectRoot()
+	if root == "" {
+		root = base.BaseDir()
 	}
-	return Install(slug, base)
+	return Install(slug, root)
 }
 
 // ── internals ─────────────────────────────────────────────────────────
