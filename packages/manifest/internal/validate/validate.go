@@ -333,6 +333,7 @@ func ruleAgentStructure(in Input) []Issue {
 type agentYAML struct {
 	Name    string   `yaml:"name"`
 	Tools   []string `yaml:"tools"`
+	Plugins []string `yaml:"plugins"`
 	Runtime struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
@@ -507,7 +508,11 @@ func ruleToolVersionConflict(in Input) []Issue {
 			if err != nil {
 				continue
 			}
-			for _, t := range parsed.Tools {
+			// Plugins share the tool registry and count against the
+			// same version-conflict budget as tools.
+			allRefs := append([]string{}, parsed.Tools...)
+			allRefs = append(allRefs, parsed.Plugins...)
+			for _, t := range allRefs {
 				pack, version := splitToolVersion(t)
 				vmap, ok := versions[pack]
 				if !ok {
@@ -651,6 +656,10 @@ func ruleToolsExist(in Input) []Issue {
 		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#tools"
 		for _, t := range parsed.Tools {
 			out = append(out, check(t, loc)...)
+		}
+		ploc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#plugins"
+		for _, p := range parsed.Plugins {
+			out = append(out, check(p, ploc)...)
 		}
 	}
 	return out

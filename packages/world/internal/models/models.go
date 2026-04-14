@@ -6,7 +6,8 @@ import (
 
 // Manifest is the parsed representation of a world config YAML.
 type Manifest struct {
-	Tools []string `yaml:"-"`
+	Tools   []string `yaml:"-"`
+	Plugins []string `yaml:"-"`
 }
 
 // Workspace is a single host directory mounted into a world. A world may have

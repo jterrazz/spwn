@@ -14,6 +14,7 @@ import (
 
 var (
 	composeTools    []string
+	composePlugins  []string
 	composeSkills   []string
 	composeProfile  string
 	composeClearPro bool
@@ -21,11 +22,13 @@ var (
 
 func init() {
 	addCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to add (repeatable, e.g. @spwn/python)")
+	addCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin pack to add (repeatable, e.g. @spwn/mempalace)")
 	addCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to add (repeatable)")
 	addCmd.Flags().StringVar(&composeProfile, "profile", "", "Profile template to apply")
 	Cmd.AddCommand(addCmd)
 
 	removeCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to remove (repeatable)")
+	removeCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin pack to remove (repeatable)")
 	removeCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to remove (repeatable)")
 	removeCmd.Flags().BoolVar(&composeClearPro, "profile", false, "Clear the agent's profile attachment")
 	Cmd.AddCommand(removeCmd)
@@ -42,13 +45,14 @@ var addCmd = &cobra.Command{
 
 Examples:
   spwn agent add neo --tool @spwn/python
+  spwn agent add neo --plugin @spwn/mempalace
   spwn agent add neo --skill paper-reading --skill refactoring
   spwn agent add neo --profile researcher
   spwn agent add neo --tool @spwn/unix --tool @spwn/git --profile dev`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeTools) == 0 && len(composeSkills) == 0 && composeProfile == "" {
-			return fmt.Errorf("nothing to add.\nPass at least one of --tool, --skill, or --profile")
+		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 && composeProfile == "" {
+			return fmt.Errorf("nothing to add.\nPass at least one of --tool, --plugin, --skill, or --profile")
 		}
 
 		// Verify the agent exists before touching the manifest.
@@ -65,6 +69,12 @@ Examples:
 				return fmt.Errorf("add tool %q: %w", t, err)
 			}
 			s.Done("+ tool", t)
+		}
+		for _, p := range composePlugins {
+			if err := mind.AddPlugin(name, p); err != nil {
+				return fmt.Errorf("add plugin %q: %w", p, err)
+			}
+			s.Done("+ plugin", p)
 		}
 		for _, sk := range composeSkills {
 			if err := mind.AddSkill(name, sk); err != nil {
@@ -97,12 +107,13 @@ Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 
 Examples:
   spwn agent remove neo --tool @spwn/python
+  spwn agent remove neo --plugin @spwn/mempalace
   spwn agent remove neo --skill paper-reading
   spwn agent remove neo --profile`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeTools) == 0 && len(composeSkills) == 0 && !composeClearPro {
-			return fmt.Errorf("nothing to remove.\nPass at least one of --tool, --skill, or --profile")
+		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 && !composeClearPro {
+			return fmt.Errorf("nothing to remove.\nPass at least one of --tool, --plugin, --skill, or --profile")
 		}
 
 		if err := mind.ValidateMind(name); err != nil {
@@ -118,6 +129,12 @@ Examples:
 				return fmt.Errorf("remove tool %q: %w", t, err)
 			}
 			s.Done("- tool", t)
+		}
+		for _, p := range composePlugins {
+			if err := mind.RemovePlugin(name, p); err != nil {
+				return fmt.Errorf("remove plugin %q: %w", p, err)
+			}
+			s.Done("- plugin", p)
 		}
 		for _, sk := range composeSkills {
 			if err := mind.RemoveSkill(name, sk); err != nil {

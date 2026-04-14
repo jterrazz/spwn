@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/mind"
+	plugins "spwn.sh/catalog/plugins"
 	runtimes "spwn.sh/catalog/runtimes"
 	tools "spwn.sh/catalog/tools"
 	ib "spwn.sh/packages/image"
@@ -159,12 +160,17 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		if err := runtimes.RegisterDefaults(reg); err != nil {
 			return nil, fmt.Errorf("register runtimes: %w", err)
 		}
+		if err := plugins.RegisterDefaults(reg); err != nil {
+			return nil, fmt.Errorf("register plugins: %w", err)
+		}
 		builder := ib.New(reg, a.backend)
 
-		// Always include runtime essentials, then add user-specified tools on top.
-		// The registry deduplicates and resolves dependencies.
+		// Always include runtime essentials, then add user-specified tools
+		// and plugins on top. The registry deduplicates and resolves
+		// dependencies; plugins share the tool resolution pipeline.
 		required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/cli"}
 		tools := append(required, opts.Manifest.Tools...)
+		tools = append(tools, opts.Manifest.Plugins...)
 
 		// Deduplicate
 		seen := make(map[string]bool)
