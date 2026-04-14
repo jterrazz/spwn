@@ -1,0 +1,17 @@
+{
+    "valid": false,
+    "manifestPath": "<PROJECT>/spwn.yaml",
+    "summary": {
+        "errors": 1,
+        "warnings": 0,
+        "info": 0
+    },
+    "issues": [
+        {
+            "level": "error",
+            "path": "spwn/agents/neo/agent.yaml#tools",
+            "message": "tool \"@spwn/nonexistent\" does not exist",
+            "hint": "available built-ins: @spwn/unix, @spwn/git, @spwn/node, @spwn/python, @spwn/build, @spwn/docker-cli, @spwn/cli, @spwn/architect, @spwn/qmd, @spwn/claude-code, @spwn/codex, @spwn/mempalace"
+        }
+    ]
+}

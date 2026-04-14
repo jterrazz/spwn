@@ -1,0 +1,10 @@
+{
+    "mode": "project",
+    "agents": [
+        {
+            "name": "neo",
+            "status": "stopped",
+            "world": "neo"
+        }
+    ]
+}

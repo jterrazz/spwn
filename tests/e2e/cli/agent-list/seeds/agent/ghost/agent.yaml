@@ -1,0 +1,7 @@
+name: ghost
+
+runtime:
+    backend: '@spwn/claude-code'
+
+tools:
+    - '@spwn/unix'
