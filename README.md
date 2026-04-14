@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  The open framework for orchestrating artificial life.
+  The open framework for orchestrating AI agents.
 </p>
 
 <p align="center">
@@ -21,9 +21,15 @@
 
 <br/>
 
+<p align="center">
+  <img src="docs/assets/hero.gif" alt="spwn — spawning an agent" width="560" />
+</p>
+
+<br/>
+
 ## Play god with AI agents.
 
-**The building blocks of agent intelligence.** Assemble tools, skills, and minds into **living worlds** — one command away.
+**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** — one command away.
 
 The real power of AI isn't the model — it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
 
