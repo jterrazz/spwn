@@ -1,0 +1,37 @@
+
+⬡ spwn - the building blocks of agent intelligence
+
+Quick Start:
+  spwn init                        Scaffold a new project
+  spwn agent new neo               Create an agent (auto-creates a single-agent world)
+  spwn up                          Bring up every world in spwn.yaml
+  spwn agent neo                   Start the world that contains neo
+
+Entities:
+  agent                            Composed minds (new, ls, start, stop, inspect, add, fork, talk)
+  world                            Deployable groupings (start, stop, ls, inspect, enter, snap)
+
+Building blocks:
+  tool                             Reusable tool packs (ls, show, get)
+  plugin                           Runtime-targeted plugins (ls, show)
+  skill                            Reusable skill files (ls, new, edit, show)
+  profile                          Reusable personality templates (ls, new, edit)
+
+Shortcuts:
+  up [name]                        Start every world (or one) (alias: world start)
+  ls                               Agent-centric status (running, deployed, orphan)
+  down [name]                      Stop every world (or one) (alias: world stop)
+
+Coordination:
+  architect                        Always-on orchestration daemon
+  web                              Open the local web UI
+  logs                             System event log (--world, --agent, --type)
+
+System:
+  init                             Create default configs
+  status                           Show running state
+  auth                             Manage credentials
+  upgrade                          Update the CLI
+
+Run "spwn <command> --help" for details.
+

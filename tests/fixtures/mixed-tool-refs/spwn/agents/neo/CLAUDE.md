@@ -1,0 +1,3 @@
+# neo
+
+@core/profile.md

@@ -1,0 +1,12 @@
+  Committed:
+    spwn.yaml                      # project manifest
+    spwn/agents/neo/               # starter agent
+    spwn/worlds/default.yaml       # starter world
+
+  Gitignored:
+    .spwn/                         # local state
+
+  Next:
+    spwn up                        # spawn the world
+    spwn agent talk neo "hi"       # talk to your agent
+    spwn check                     # validate the project tree

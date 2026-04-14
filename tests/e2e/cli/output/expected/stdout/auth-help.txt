@@ -1,0 +1,17 @@
+
+⬡ auth - manage credentials
+
+Usage:
+  spwn auth              Show authentication status
+    spwn auth [command]
+
+Commands:
+  login                            Set up credentials (Keychain or manual)
+  logout                           Clear cached credentials
+  token <token>                    Set a token directly (CI / scripts)
+  check                            Validate credentials for all AI providers
+
+Environment Variables:
+  ANTHROPIC_API_KEY                Anthropic Claude API key
+  OPENAI_API_KEY                   OpenAI API key
+

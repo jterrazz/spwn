@@ -1,0 +1,44 @@
+
+⬡ agent - composed minds that live in worlds
+
+Usage:
+  spwn agent [command]
+
+Lifecycle:
+  create <name>                    Create a blank agent (auto-creates a single-agent world)
+  <name>                           Start the world that contains <name> (shortcut)
+  start <name>                     Start the world containing this agent
+  stop <name>                      Stop the world containing this agent
+  ls                               List agents
+  rm <name>                        Delete an agent
+
+Compose:
+  add <name>                       Attach blocks (--tool / --plugin / --skill / --profile)
+  remove <name>                    Detach blocks (--tool / --plugin / --skill / --profile)
+
+Conversation:
+  talk <name> [msg]                Open a session with a running agent (sync)
+  send <name> <msg>                Send an async message to an agent's inbox
+  inbox <name>                     Show an agent's inbox
+  watch <name>                     Tail an agent's inbox in real time
+
+Observe:
+  inspect <name>                   Inspect composition, memory, and history
+  logs <name>                      Show the event log for this agent
+
+Evolution:
+  dream <name>                     Analyze experience, promote playbooks
+  sleep <name>                     Consolidate memory, prune stale strategies
+  fork <src> <dst>                 Clone an agent with everything it knows
+
+Portability:
+  publish <name>                   Ship to registry [planned]
+  get <ref>                        Install a shared agent [planned]
+  export <name>                    Export as tar.gz
+  import <path>                    Import from tar.gz
+
+Examples:
+  spwn agent create neo
+  spwn agent add neo --tool @spwn/python --profile researcher
+  spwn agent neo
+

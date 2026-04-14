@@ -1,0 +1,14 @@
+
+⬡ get - install from the marketplace
+
+Usage:
+  spwn get [command]
+
+Commands:
+  install <name>                   Install a package
+  ls                               List installed packages
+  search <query>                   Search the marketplace
+  rm <name>                        Remove a package
+
+Use "spwn get <command> --help" for more information.
+
