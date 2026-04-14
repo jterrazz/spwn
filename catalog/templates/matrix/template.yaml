@@ -13,4 +13,4 @@ agents:
   - neo
 worlds:
   - matrix
-command: spwn up -c matrix --agent neo
+command: spwn up matrix

@@ -198,7 +198,7 @@ spwn init
 spwn agent add curie --tool @spwn/python --tool @spwn/qmd
 spwn agent add curie --skill paper-reading --profile researcher
 spwn up
-spwn talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
+spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
 
 > Stack `@spwn/python` + `@spwn/qmd` + a `researcher` profile and you have an autonomous lab partner. Swap `researcher` for `skeptic` tomorrow - same mind, new voice. **Docker, but for minds.**
@@ -224,7 +224,7 @@ git push
 ```bash
 spwn agent fork neo neo-migration       # clone composition + memory
 spwn up --agent neo-migration
-spwn talk neo-migration "migrate the whole repo from Jest to Vitest"
+spwn agent talk neo-migration "migrate the whole repo from Jest to Vitest"
 
 # worked? promote.  didn't? neo is untouched, no regrets.
 spwn agent rm neo-migration
@@ -238,7 +238,7 @@ spwn agent rm neo-migration
 git clone https://github.com/someone/sus-repo /tmp/sus && cd /tmp/sus
 spwn init
 spwn up                    # no network, hard limits on CPU/mem/disk/time
-spwn talk neo "run every test and benchmark, tell me what the code actually does"
+spwn agent talk neo "run every test and benchmark, tell me what the code actually does"
 ```
 
 > No network interface means the sandbox **can't phone home**. Kernel-enforced CPU, memory, disk, and time caps mean it **can't melt your machine**. A safe room for running code you don't yet trust. **Security by absence.**

@@ -15,4 +15,4 @@ agents:
   - clippy
 worlds:
   - paperclip-factory
-command: spwn up -c paperclip-factory --agent clippy
+command: spwn up paperclip-factory

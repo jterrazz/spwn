@@ -76,7 +76,7 @@ Implemented in `packages/base/update/`. High-level sequence:
 ### Background version check
 
 Every CLI invocation spawns a background goroutine that calls
-`foundation.CheckLatestVersion(24h)`. It writes to `~/.spwn/.version-check`
+`base.CheckLatestVersion(24h)`. It writes to `~/.spwn/.version-check`
 (timestamp + latest tag, 24h TTL). When a newer version exists, a single
 yellow hint is printed after the command output:
 

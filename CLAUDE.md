@@ -186,7 +186,6 @@ spwn/
 │   │   ├── skill/                   #     spwn skill
 │   │   ├── tool/                    #     spwn tool
 │   │   ├── team/                    #     spwn team
-│   │   ├── example/                 #     spwn example
 │   │   ├── organization/            #     spwn organization
 │   │   ├── get/                     #     spwn get (install from marketplace)
 │   │   ├── logs/                    #     spwn logs

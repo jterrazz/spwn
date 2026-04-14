@@ -178,7 +178,7 @@ pub fn run() {
 
 /// Return PATH with well-known Homebrew / Docker Desktop locations
 /// prepended, de-duplicated. Matches the Go-side
-/// `foundation.EnsureDockerFriendlyPATH` — keep in sync.
+/// `base.EnsureDockerFriendlyPATH` — keep in sync.
 fn augmented_path() -> String {
     let current = std::env::var("PATH").unwrap_or_default();
     let extras: &[&str] = if cfg!(target_os = "macos") {

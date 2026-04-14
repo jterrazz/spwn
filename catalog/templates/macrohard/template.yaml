@@ -17,4 +17,4 @@ agents:
   - nadella
 worlds:
   - macrohard
-command: spwn up -c macrohard --agents ballmer,gates,nadella
+command: spwn up macrohard

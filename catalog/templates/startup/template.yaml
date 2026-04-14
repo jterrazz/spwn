@@ -12,5 +12,4 @@ agents:
   - analyst
 worlds:
   - startup
-command: |
-  spwn up -c startup --agent ceo --agent devops --agent analyst
+command: spwn up startup

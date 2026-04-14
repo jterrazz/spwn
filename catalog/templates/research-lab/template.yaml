@@ -17,4 +17,4 @@ agents:
   - curie
 worlds:
   - research-lab
-command: spwn up -c research-lab --agent curie
+command: spwn up research-lab
