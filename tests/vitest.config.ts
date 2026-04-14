@@ -8,15 +8,14 @@ export default defineConfig({
         // Upper bound is harmless for them.
         testTimeout: 120_000,
         hookTimeout: 60_000,
-        // Serial file execution: spwn's command routing (msg, down,
-        // Destroy, inspect) still looks up containers daemon-wide by
-        // `sh.spwn.world.config` name, not by the per-test-run label —
-        // So two parallel tests both spawning a `neo` world would step
-        // On each other at CLI-dispatch time. Until spwn honours
-        // SPWN_TEST_LABEL on the routing side too, keep tests serial.
-        // The framework's per-test cleanup still makes the suite safe
-        // Across runs even though runs themselves are sequential.
-        fileParallelism: false,
+        // Parallel file execution is safe: spwn's state.Store.List /
+        // Get scope every world-lookup by the SPWN_TEST_LABEL env var
+        // The framework injects per test run (see packages/world/
+        // Internal/state/state.go), so two parallel tests both
+        // Spawning a "neo" world route to their own container.
+        // Combined with the framework's label-based cleanup on
+        // Symbol.asyncDispose, the whole suite is isolated per file.
+        fileParallelism: true,
         include: ['e2e/**/*.e2e.test.ts'],
     },
 });
