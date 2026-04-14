@@ -206,7 +206,7 @@ type ArchitectDaemonInfo struct {
 type StartArchitectDaemonOpts struct {
 	// ImageOverride lets the caller pin a specific architect image
 	// (used by tests and SPWN_ARCHITECT_IMAGE). When empty, the
-	// canonical image is built/refreshed by imagebuilder.
+	// canonical image is built/refreshed by the image package.
 	ImageOverride string
 	// LogWriter receives raw output from the image build (npm install,
 	// docker build steps, …). nil → io.Discard.

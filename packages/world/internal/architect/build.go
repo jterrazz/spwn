@@ -41,7 +41,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		return fmt.Errorf("read cross-compiled binary: %w", err)
 	}
 
-	// Resolve architect tools via imagebuilder to generate install steps
+	// Resolve architect tools via the image package to generate install steps
 	reg := ib.NewRegistry()
 	if err := tools.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register tools: %w", err)

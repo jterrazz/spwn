@@ -77,7 +77,7 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 		t.Fatalf("Load default failed: %v", err)
 	}
 
-	// THEN it should have the expected foundation defaults
+	// THEN it should have the expected base defaults
 	if m.Physics.Constants.CPU != base.DefaultCPU {
 		t.Errorf("Expected CPU %d, got %d", base.DefaultCPU, m.Physics.Constants.CPU)
 	}

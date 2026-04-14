@@ -11,8 +11,8 @@ var (
 	projectRoot   string
 )
 
-// SetProjectRoot tells foundation where this process's spwn project
-// lives. Path helpers that are project-aware (AgentsDir, WorldsDir,
+// SetProjectRoot tells the base package where this process's spwn
+// project lives. Path helpers that are project-aware (AgentsDir, WorldsDir,
 // SkillsDir, LocalStateDir) then resolve inside <projectRoot>.
 //
 // Pass "" to clear. Callers typically call this once from a cobra

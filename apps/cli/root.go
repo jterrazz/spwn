@@ -53,7 +53,7 @@ and a Mind (persistent agent identity).`,
 
 func init() {
 	rootCmd.Version = Version
-	// Sync CLI version to the shared foundation package so the web UI can use it
+	// Sync CLI version to the shared base package so the web UI can use it
 	base.Version = Version
 	rootCmd.SetHelpFunc(customHelp)
 

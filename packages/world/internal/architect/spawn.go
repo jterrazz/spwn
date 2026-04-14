@@ -158,7 +158,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	if !explicitImage {
 		opts.progress("image_building", image)
 
-		// Build image using imagebuilder with manifest tools
+		// Build image using the image package with manifest tools
 		reg := ib.NewRegistry()
 		if err := tools.RegisterDefaults(reg); err != nil {
 			return nil, fmt.Errorf("register tools: %w", err)

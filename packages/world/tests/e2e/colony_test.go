@@ -92,12 +92,12 @@ func TestColony_RoleFromAgentYAML(t *testing.T) {
 func TestColony_MessagingBetweenAgents(t *testing.T) {
 	// BLOCKED: Colony messaging requires multi-agent support in the Architect.
 	// The messaging infrastructure (inbox directories, JSON messages) is implemented
-	// in the gate and messenger packages, but cannot be E2E-tested until multi-agent
+	// in the gate and mailbox packages, but cannot be E2E-tested until multi-agent
 	// spawn is available.
 	//
 	// When implemented:
 	// 1. Spawn world with chief + worker
-	// 2. Chief sends a message to worker via messenger
+	// 2. Chief sends a message to worker via mailbox
 	// 3. Worker checks inbox and sees the message
 	// 4. Worker replies
 	// 5. Chief reads the reply

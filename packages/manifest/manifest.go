@@ -153,8 +153,8 @@ func ReservedAgentNames() []string {
 
 // ValidateOpts configures Validate. Zero value is valid and skips
 // catalog-backed rules (tool existence, runtime support). Callers
-// should populate this from the imagebuilder catalog for the richest
-// error messages, including "did you mean X?" hints.
+// should populate this from catalog/tools + catalog/runtimes for the
+// richest error messages, including "did you mean X?" hints.
 type ValidateOpts struct {
 	// BuiltinTools is the authoritative list of @scope/name tool
 	// identifiers the host knows how to build. When empty, tool

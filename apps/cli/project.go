@@ -8,8 +8,8 @@ import (
 )
 
 // discoverProject walks up from the current directory looking for a
-// spwn.yaml. When found, the project root is recorded on foundation
-// so every path helper that is project-aware (AgentsDir, WorldsDir,
+// spwn.yaml. When found, the project root is recorded on base so
+// every path helper that is project-aware (AgentsDir, WorldsDir,
 // SkillsDir, LocalStateDir) resolves inside the project.
 //
 // Called from root.PersistentPreRunE. Silently no-ops when no
