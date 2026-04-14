@@ -5,8 +5,6 @@ export interface Agent {
 }
 
 export interface WorldManifest {
-    cpu?: string;
-    memory?: string;
     elements?: string[];
 }
 

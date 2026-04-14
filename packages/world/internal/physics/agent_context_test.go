@@ -13,9 +13,7 @@ func TestGenerateChiefContext(t *testing.T) {
 		Role:      "chief",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Tools:  []string{"bash", "git", "node"},
-		CPU:       2,
-		Memory:    "4g",
+		Tools:     []string{"bash", "git", "node"},
 		OtherAgents: []AgentInfo{
 			{Name: "neo", Role: "worker"},
 			{Name: "trinity", Role: "worker"},
@@ -33,8 +31,6 @@ func TestGenerateChiefContext(t *testing.T) {
 		"w-acme-28373":     "missing world ID",
 		"/host/project":    "missing workspace path",
 		"bash, git, node":  "missing tools",
-		"2 cpu":            "missing CPU",
-		"4g":               "missing memory",
 	}
 
 	for want, msg := range checks {
@@ -55,9 +51,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Tools:  []string{"bash", "git"},
-		CPU:       2,
-		Memory:    "4g",
+		Tools:     []string{"bash", "git"},
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
 			{Name: "trinity", Role: "worker"},
@@ -90,10 +84,10 @@ func TestGenerateWorkerContext(t *testing.T) {
 
 func TestGenerateNPCContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
-		Role:     "npc",
-		WorldID:  "w-acme-28373",
-		NPCTask:  "lint src/",
-		Tools: []string{"bash"},
+		Role:    "npc",
+		WorldID: "w-acme-28373",
+		NPCTask: "lint src/",
+		Tools:   []string{"bash"},
 	})
 
 	checks := map[string]string{
@@ -159,9 +153,7 @@ func TestGenerateArchitectContext_ContainsAllSections(t *testing.T) {
 		AgentName: "architect",
 		Role:      "architect",
 		WorldID:   "w-test-99999",
-		Tools:  []string{"bash", "git"},
-		CPU:       4,
-		Memory:    "8g",
+		Tools:     []string{"bash", "git"},
 	})
 
 	sections := []string{

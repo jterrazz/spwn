@@ -232,7 +232,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 
 	// User edits the installed manifest.
 	manifestPath := filepath.Join(base, "spwn.yaml")
-	mine := []byte("version: 2\nname: paperclip-factory\nworlds:\n  paperclip-factory:\n    agents: [clippy]\n    workspaces: [.]\n    physics:\n      cpu: 99\n")
+	mine := []byte("version: 2\nname: paperclip-factory\nworlds:\n  paperclip-factory:\n    agents: [clippy]\n    workspaces: [.]\n    tools:\n      - \"@spwn/git\"\n")
 	if err := os.WriteFile(manifestPath, mine, 0o644); err != nil {
 		t.Fatal(err)
 	}

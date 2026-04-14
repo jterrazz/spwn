@@ -116,9 +116,8 @@ my-project/
 
 `spwn.yaml` is tiny. Worlds live **inline** as map entries under
 `worlds:` — no separate `spwn/worlds/*.yaml` files. Each world names
-the agents it deploys, the workspace it mounts, and optional
-physics/tool overrides. Everyone who clones the repo gets the same
-agents, the same world physics, the same tool composition.
+the agents it deploys and the workspace it mounts. Everyone who
+clones the repo gets the same agents and the same tool composition.
 **Reproducibility by construction.**
 
 ```yaml
@@ -130,9 +129,6 @@ worlds:
   default:
     agents: [neo]
     workspaces: [.]
-    physics:
-      cpu: 2
-      memory: 2g
 ```
 
 **`~/.spwn/` is for your user identity only** - credentials, daemon

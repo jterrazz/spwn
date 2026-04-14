@@ -8,7 +8,7 @@
 //     roster.
 //   - Worlds are inline entries in spwn.yaml under `worlds:`. Each one
 //     declares which agents it deploys, where the workspace mounts
-//     come from, and optional physics/tool overrides.
+//     come from, and optional tool overrides.
 //   - There is no top-level world: or agents: list anymore, and
 //     spwn/worlds/*.yaml files are gone — worlds live in spwn.yaml.
 package manifest
@@ -50,23 +50,9 @@ type World struct {
 	// form.
 	Workspaces []string `yaml:"workspaces"`
 
-	// Physics is the optional resource constraint override. When
-	// empty, host defaults apply.
-	Physics *Physics `yaml:"physics,omitempty"`
-
 	// Tools is the optional list of tool refs that augment the union
 	// computed from each agent's own tool list.
 	Tools []string `yaml:"tools,omitempty"`
-}
-
-// Physics mirrors the resource-limit knobs callers can set on a world.
-// Only fields Docker can actually enforce live here: CPU (--cpus) and
-// Memory (-m). Disk quotas and wall-clock timeouts are not yet
-// enforced — they require Docker storage-opt or external supervision
-// and are out of scope for now.
-type Physics struct {
-	CPU    int    `yaml:"cpu,omitempty"`
-	Memory string `yaml:"memory,omitempty"`
 }
 
 // LoadPath reads and parses spwn.yaml from an explicit file path.

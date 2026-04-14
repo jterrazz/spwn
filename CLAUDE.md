@@ -149,7 +149,7 @@ my-project/
 
 Worlds are declared **inline** under `spwn.yaml#worlds` — there is
 no `spwn/worlds/` directory any more. Each world entry names the
-agents it deploys, the workspace mounts, and optional physics/tool
+agents it deploys, the workspace mounts, and optional tool
 overrides.
 
 ```
@@ -159,7 +159,7 @@ overrides.
 └── state/                       # architect daemon state
 ```
 
-**Config hierarchy:** `agent.yaml` declares composition (tools + skills + profile + `runtime.backend`). `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces + optional physics + optional tools). The union of agent tools and world tools is what actually materializes inside the container.
+**Config hierarchy:** `agent.yaml` declares composition (tools + skills + profile + `runtime.backend`). `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces + optional tools). The union of agent tools and world tools is what actually materializes inside the container.
 
 ## Repository Structure
 

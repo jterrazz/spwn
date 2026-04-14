@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"
@@ -71,18 +70,9 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 		t.Fatalf("CreateDefault failed: %v", err)
 	}
 
-	// WHEN the manifest is loaded
-	m, err := world.LoadManifest("default")
-	if err != nil {
+	// WHEN the manifest is loaded, it should parse cleanly
+	if _, err := world.LoadManifest("default"); err != nil {
 		t.Fatalf("Load default failed: %v", err)
-	}
-
-	// THEN it should have the expected base defaults
-	if m.Physics.Constants.CPU != base.DefaultCPU {
-		t.Errorf("Expected CPU %d, got %d", base.DefaultCPU, m.Physics.Constants.CPU)
-	}
-	if m.Physics.Constants.Memory != base.DefaultMemory {
-		t.Errorf("Expected memory %q, got %q", base.DefaultMemory, m.Physics.Constants.Memory)
 	}
 }
 

@@ -34,9 +34,6 @@ type Manifest = intmanifest.Manifest
 // World is one inline world entry under spwn.yaml#worlds.
 type World = intmanifest.World
 
-// Physics mirrors the resource-limit knobs callers can set on a world.
-type Physics = intmanifest.Physics
-
 // Project is a loaded spwn project - manifest plus resolved references
 // to the agents it declares.
 type Project struct {

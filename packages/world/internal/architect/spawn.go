@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -68,12 +67,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Generate ID
 	id := base.GenerateWorldID(opts.ConfigName)
-
-	// Parse memory
-	memBytes, err := parseMemory(opts.Manifest.Physics.Constants.Memory)
-	if err != nil {
-		return nil, fmt.Errorf("invalid memory: %w", err)
-	}
 
 	// Resolve each workspace to absolute path and validate it exists.
 	// Layout inside the container:
@@ -312,12 +305,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Create container
+	// Create container. CPU/memory limits intentionally omitted — the
+	// Docker host defaults govern. Per-world hard limits may return as
+	// a dedicated knob later but are not declared in spwn.yaml.
 	containerCfg := backend.ContainerConfig{
 		Image:       image,
 		Name:        id,
-		CPU:         int64(opts.Manifest.Physics.Constants.CPU),
-		Memory:      memBytes,
 		PidsLimit:   256,
 		NetworkMode: "bridge",
 		Binds:       binds,
@@ -475,45 +468,6 @@ func mergeUnique(a, b []string) []string {
 	return result
 }
 
-func parseMemory(s string) (int64, error) {
-	s = strings.TrimSpace(strings.ToLower(s))
-	if s == "" {
-		return 0, fmt.Errorf("empty memory string.\nSpecify memory like '512m', '1g', or '4g'")
-	}
-
-	var multiplier int64
-	var numStr string
-
-	if strings.HasSuffix(s, "gb") {
-		multiplier = 1024 * 1024 * 1024
-		numStr = strings.TrimSuffix(s, "gb")
-	} else if strings.HasSuffix(s, "g") {
-		multiplier = 1024 * 1024 * 1024
-		numStr = strings.TrimSuffix(s, "g")
-	} else if strings.HasSuffix(s, "mb") {
-		multiplier = 1024 * 1024
-		numStr = strings.TrimSuffix(s, "mb")
-	} else if strings.HasSuffix(s, "m") {
-		multiplier = 1024 * 1024
-		numStr = strings.TrimSuffix(s, "m")
-	} else if strings.HasSuffix(s, "kb") {
-		multiplier = 1024
-		numStr = strings.TrimSuffix(s, "kb")
-	} else if strings.HasSuffix(s, "k") {
-		multiplier = 1024
-		numStr = strings.TrimSuffix(s, "k")
-	} else {
-		n, err := strconv.ParseInt(s, 10, 64)
-		return n, err
-	}
-
-	n, err := strconv.ParseInt(numStr, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("parse memory %q: %w", s, err)
-	}
-	return n * multiplier, nil
-}
-
 // buildWorkspaceBinds generates Docker bind specs for the resolved
 // workspaces. Layout is uniform:
 //
@@ -617,7 +571,7 @@ Follow the voice, style, and purpose defined there. You are NOT a generic assist
 ## Your world
 
 - Read %s for your operating manual (how memory, skills, and communication work).
-- Read %s for the physics and resource constraints of this world.
+- Read %s for the rules of this world (network, filesystem, communication).
 - Read %s to see what tools are physically available.
 - Read %s for system skills (mind management, collaboration, evolution).
 

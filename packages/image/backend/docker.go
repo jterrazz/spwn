@@ -43,8 +43,6 @@ func NewDocker() (*Docker, error) {
 func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error) {
 	hostCfg := &containerTypes.HostConfig{
 		Resources: containerTypes.Resources{
-			NanoCPUs:  cfg.CPU * 1e9,
-			Memory:    cfg.Memory,
 			PidsLimit: &cfg.PidsLimit,
 		},
 		NetworkMode: containerTypes.NetworkMode(cfg.NetworkMode),

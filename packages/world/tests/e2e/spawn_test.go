@@ -83,28 +83,6 @@ func TestSpawn_WithAgent(t *testing.T) {
 	})
 }
 
-func TestSpawn_CustomPhysics(t *testing.T) {
-	// GIVEN a custom physics configuration with specific constants and laws
-	// WHEN a world is spawned with that configuration
-	chain := setup.NewSpawnBuilder(t).
-		WithConfigYAML(`
-physics:
-  constants:
-    cpu: 2
-    memory: 1g
-tools:
-  - "@spwn/unix"
-`).
-		NoAgent().
-		Execute()
-
-	// THEN the physics.md should reflect the custom values
-	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/world/physics.md", "2 core(s)")
-		c.FileContains("/world/physics.md", "1g")
-	})
-}
-
 func TestSpawn_MockSeesEverything(t *testing.T) {
 	// GIVEN a world with an agent, workspace, and detached execution
 	// WHEN the mock agent runs

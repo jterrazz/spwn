@@ -2,8 +2,6 @@ package manifest
 
 import (
 	"testing"
-
-	"spwn.sh/packages/world/internal/models"
 )
 
 func TestExpandTools(t *testing.T) {
@@ -67,73 +65,3 @@ func TestExpandTools(t *testing.T) {
 	}
 }
 
-func TestApplyDefaults(t *testing.T) {
-	t.Run("fills_zero_values", func(t *testing.T) {
-		m := models.Manifest{}
-		ApplyDefaults(&m)
-
-		if m.Physics.Constants.CPU == 0 {
-			t.Error("CPU should not be zero after ApplyDefaults")
-		}
-		if m.Physics.Constants.Memory == "" {
-			t.Error("Memory should not be empty after ApplyDefaults")
-		}
-	})
-
-	t.Run("does_not_overwrite_set_values", func(t *testing.T) {
-		m := models.Manifest{
-			Physics: models.PhysicsManifest{
-				Constants: models.ConstantsManifest{
-					CPU:    4,
-					Memory: "2g",
-				},
-			},
-		}
-		ApplyDefaults(&m)
-
-		if m.Physics.Constants.CPU != 4 {
-			t.Errorf("CPU = %d, want 4", m.Physics.Constants.CPU)
-		}
-		if m.Physics.Constants.Memory != "2g" {
-			t.Errorf("Memory = %q, want %q", m.Physics.Constants.Memory, "2g")
-		}
-	})
-}
-
-func TestValidate(t *testing.T) {
-	tests := []struct {
-		name    string
-		m       models.Manifest
-		wantErr bool
-	}{
-		{
-			name: "valid_manifest",
-			m: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Constants: models.ConstantsManifest{CPU: 1},
-				},
-			},
-		},
-		{
-			name: "negative_cpu",
-			m: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Constants: models.ConstantsManifest{CPU: -1},
-				},
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := Validate(tt.m)
-			if tt.wantErr && err == nil {
-				t.Error("expected error, got nil")
-			}
-			if !tt.wantErr && err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
-		})
-	}
-}

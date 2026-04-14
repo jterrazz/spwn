@@ -49,11 +49,9 @@ func sortedWorldNames(p *manifest.Project) []string {
 // entry. If name is empty, the first entry (sorted) is used. Returns
 // an error when the requested world does not exist.
 //
-// The resulting world.Manifest has:
-//   - Physics copied from the inline world's Physics override, with
-//     host defaults applied for any unset field.
-//   - Tools unioned from (1) the inline world's explicit Tools list and
-//     (2) every referenced agent's agent.yaml Tools field.
+// The resulting world.Manifest has Tools unioned from (1) the inline
+// world's explicit Tools list and (2) every referenced agent's
+// agent.yaml Tools field.
 func resolveProjectWorld(p *manifest.Project, name string) (*projectWorld, error) {
 	if p == nil || p.Manifest == nil {
 		return nil, fmt.Errorf("no project loaded")
@@ -109,18 +107,7 @@ func resolveProjectWorld(p *manifest.Project, name string) (*projectWorld, error
 		}
 	}
 
-	// Physics — apply world overrides over host defaults.
-	m := world.Manifest{}
-	if w.Physics != nil {
-		m.Physics = world.PhysicsManifest{
-			Constants: world.ConstantsManifest{
-				CPU:    w.Physics.CPU,
-				Memory: w.Physics.Memory,
-			},
-		}
-	}
-	m.Tools = tools
-	world.ApplyDefaults(&m)
+	m := world.Manifest{Tools: tools}
 
 	return &projectWorld{
 		Project:    p,

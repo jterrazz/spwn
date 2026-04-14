@@ -1,24 +1,16 @@
 package physics
 
 import (
-	"fmt"
 	"strings"
 
 	"spwn.sh/packages/world/internal/models"
 )
 
 // GeneratePhysics returns the contents of /world/physics.md.
-func GeneratePhysics(m models.Manifest) string {
+func GeneratePhysics(_ models.Manifest) string {
 	var sb strings.Builder
 
 	sb.WriteString("# Physics of This World\n\n")
-
-	// Constants
-	sb.WriteString("## Constants\n")
-	sb.WriteString(fmt.Sprintf("CPU: %d core(s) | Memory: %s\n\n",
-		m.Physics.Constants.CPU,
-		m.Physics.Constants.Memory,
-	))
 
 	// Laws
 	sb.WriteString("## Laws\n")

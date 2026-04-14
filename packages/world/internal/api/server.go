@@ -331,11 +331,10 @@ func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
 // Returned by handleListWorlds when a spwn project is discoverable.
 // Falls back to the raw runtime world list otherwise.
 type declaredWorldItem struct {
-	Name       string         `json:"name"`
-	Agents     []string       `json:"agents"`
-	Workspaces []string       `json:"workspaces"`
-	Physics    map[string]any `json:"physics,omitempty"`
-	Tools      []string       `json:"tools,omitempty"`
+	Name       string   `json:"name"`
+	Agents     []string `json:"agents"`
+	Workspaces []string `json:"workspaces"`
+	Tools      []string `json:"tools,omitempty"`
 	// Status is "running" when any live world carries this config
 	// name, "stopped" otherwise. Declared-but-undeployed worlds are
 	// "stopped", not absent.
@@ -365,7 +364,6 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 				Name:       name,
 				Agents:     def.Agents,
 				Workspaces: def.Workspaces,
-				Physics:    def.Physics,
 				Tools:      def.Tools,
 				Status:     status,
 			})
@@ -471,10 +469,9 @@ type projectManifest struct {
 }
 
 type projectWorldDef struct {
-	Agents     []string       `yaml:"agents"`
-	Workspaces []string       `yaml:"workspaces"`
-	Physics    map[string]any `yaml:"physics,omitempty"`
-	Tools      []string       `yaml:"tools,omitempty"`
+	Agents     []string `yaml:"agents"`
+	Workspaces []string `yaml:"workspaces"`
+	Tools      []string `yaml:"tools,omitempty"`
 }
 
 // loadProjectManifest reads <projectRoot>/spwn.yaml when a project

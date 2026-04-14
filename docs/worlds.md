@@ -13,7 +13,7 @@ otherwise; it doesn't stop existing just because nothing is running.
 | ---------------------------------------- | ----------------------------------- |
 | Identity - profile, purpose, traits      | Entry in `spwn.yaml#worlds`         |
 | Memory - journal, knowledge, playbooks   | Mounted workspace                   |
-| Composition - tools, skills, profile     | Physics caps + tool overrides       |
+| Composition - tools, skills, profile     | Workspace mounts + tool overrides   |
 | Evolution history                        | Running container when deployed     |
 
 The agent is *who*. The world is *where this agent is deployed, and
@@ -22,8 +22,8 @@ under what rules*.
 ## Worlds-as-deployments
 
 A world entry is the deployment contract: *these agents, in this
-workspace, with this physics, possibly with these extra tools*. One
-agent can belong to at most one world (enforced by `spwn check`).
+workspace, possibly with these extra tools*. One agent can belong to
+at most one world (enforced by `spwn check`).
 
 ```yaml
 # spwn.yaml
@@ -34,9 +34,6 @@ worlds:
   default:
     agents: [neo]
     workspaces: [.]
-    physics:
-      cpu: 2
-      memory: 2g
     # Optional extra tools injected on top of each agent's own tools.
     tools:
       - "@spwn/docker-cli"
@@ -46,9 +43,6 @@ worlds:
     workspaces:
       - ./experiments
       - ./datasets:/workspace/datasets
-    physics:
-      cpu: 4
-      memory: 4g
 ```
 
 ### Workspaces
@@ -104,29 +98,11 @@ agent's `tools:` and the world's `tools:`. If two agents in the same
 multi-agent world disagree on a tool's *version*, `spwn check` fails
 the project — version conflicts are errors, not last-writer-wins.
 
-## Physics
+## Limits
 
-Worlds carry hard limits declared in their `spwn.yaml` entry:
-
-```yaml
-worlds:
-  default:
-    agents: [neo]
-    workspaces: [.]
-    physics:
-      cpu: 2          # CPU cores  (Docker --cpus)
-      memory: 2g      # RAM limit  (Docker -m)
-```
-
-These are the Docker-enforceable knobs: CPU (`--cpus`) and memory
-(`-m`). Network mode (bridge, outbound enabled) and the ephemeral,
-read-only-by-default filesystem are part of the same contract and are
-also enforced by the container runtime.
-
-Disk quotas and wall-clock timeouts are **not yet enforced** — they
-would require Docker `storage-opt` (devicemapper-only, not portable)
-or external supervision machinery, so they are out of scope for now.
-When `physics:` is omitted, host defaults apply.
+Worlds inherit Docker host defaults for CPU, memory, and disk.
+Per-world hard limits are a future knob — until then, agents share
+the daemon's resources.
 
 ## Spawning a world
 
