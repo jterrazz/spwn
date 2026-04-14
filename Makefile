@@ -2,7 +2,7 @@
         build-test-image \
         test test-world test-agent test-foundation test-messenger test-imagebuilder \
         test-e2e test-e2e-world test-e2e-imagebuilder \
-        test-ts test-ui test-ui-headed \
+        test-ts test-web test-web-headed \
         web-build web-dev web-lint \
         lint clean docs
 
@@ -103,12 +103,12 @@ test-e2e-imagebuilder:
 test-ts: build build-test-image
 	pnpm -C tests test
 
-# UI E2E tests (Docker + browser required)
-test-ui: build
-	pnpm -C tests test:ui
+# Web E2E tests (Docker + browser required)
+test-web: build
+	pnpm -C tests test:web
 
-test-ui-headed: build
-	pnpm -C tests test:ui:headed
+test-web-headed: build
+	pnpm -C tests test:web:headed
 
 # Web UI (Next.js + Tauri)
 web-build:

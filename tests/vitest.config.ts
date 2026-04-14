@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     test: {
-        exclude: ['**/node_modules/**', '**/dist/**', 'ui/**'],
+        exclude: ['**/node_modules/**', '**/dist/**', 'web/**'],
         // 2 minutes per test because the Docker-asserting tests spawn
         // Real containers; CLI-only tests finish in milliseconds so the
         // Upper bound is harmless for them.
