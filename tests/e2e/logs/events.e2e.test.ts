@@ -16,6 +16,7 @@ interface ActivityEvent {
   phrase: string;
   world_id?: string;
   agent_id?: string;
+  metadata?: Record<string, unknown>;
 }
 
 function runSpwn(args: string[], home: string): { exitCode: number; output: string } {
