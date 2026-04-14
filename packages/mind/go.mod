@@ -4,7 +4,9 @@ go 1.25.0
 
 require (
 	gopkg.in/yaml.v3 v3.0.1
+	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/base v0.0.0
+	spwn.sh/packages/paths v0.0.0
 )
 
 require (
@@ -13,4 +15,8 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
-replace spwn.sh/packages/base => ../base
+replace (
+	spwn.sh/packages/activity => ../activity
+	spwn.sh/packages/base => ../base
+	spwn.sh/packages/paths => ../paths
+)

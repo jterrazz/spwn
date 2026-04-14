@@ -11,7 +11,7 @@ import (
 	"spwn.sh/packages/mind/internal/journal"
 	"spwn.sh/packages/mind/internal/mind"
 	"spwn.sh/packages/mind/internal/session"
-	"spwn.sh/packages/base/activity"
+	"spwn.sh/packages/activity"
 )
 
 // Info describes an agent's Mind structure.

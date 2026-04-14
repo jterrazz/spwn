@@ -30,8 +30,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/paths"
 )
 
 // File holds the on-disk shape for a single world's runtime state.
@@ -54,7 +54,7 @@ type Store struct {
 // NewStore returns a Store rooted at ~/.spwn/world-states/, creating
 // the directory on first use.
 func NewStore() (*Store, error) {
-	dir := filepath.Join(base.LocalStateDir(), "world-states")
+	dir := filepath.Join(paths.LocalStateDir(), "world-states")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("create world-states dir: %w", err)
 	}

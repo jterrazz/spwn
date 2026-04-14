@@ -10,9 +10,9 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/catalog/templates"
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
 	"spwn.sh/packages/world"
+	"spwn.sh/packages/paths"
 )
 
 func init() {
@@ -172,7 +172,7 @@ func runInitTemplate(cmd *cobra.Command, ref string) error {
 func runInitGlobal(cmd *cobra.Command) error {
 	s := ui.New()
 
-	baseDir := base.BaseDir()
+	baseDir := paths.BaseDir()
 	if err := os.MkdirAll(baseDir, 0o755); err != nil {
 		return fmt.Errorf("cannot create %s: %w", baseDir, err)
 	}

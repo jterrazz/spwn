@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"spwn.sh/packages/base"
-	"spwn.sh/packages/base/activity"
-	"spwn.sh/packages/base/auth"
+	"spwn.sh/packages/activity"
+	"spwn.sh/packages/auth"
 	"spwn.sh/packages/world/internal/architect"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
@@ -24,6 +24,7 @@ import (
 
 	containerTypes "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"spwn.sh/packages/paths"
 )
 
 // Re-export model types so consumers don't need to reach into internal packages.
@@ -326,9 +327,9 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 		Labels: architectLabels,
 	}
 	// Ensure architect stack file exists on the host
-	architectStackPath := base.BaseDir() + "/architect/stack.md"
+	architectStackPath := paths.BaseDir() + "/architect/stack.md"
 	if _, err := os.Stat(architectStackPath); os.IsNotExist(err) {
-		_ = os.MkdirAll(base.BaseDir()+"/architect", 0755)
+		_ = os.MkdirAll(paths.BaseDir()+"/architect", 0755)
 		_ = os.WriteFile(architectStackPath, []byte("# Architect Stack\n\n## Focus\n\n## Queued\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Done\n"), 0644)
 	}
 
@@ -336,10 +337,10 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
-			base.BaseDir() + ":/home/spwn/.spwn",
+			paths.BaseDir() + ":/home/spwn/.spwn",
 			architectStackPath + ":/me/stack.md",
 			"/var/run/docker.sock:/var/run/docker.sock",
-			base.CredentialsDir() + ":/credentials:ro",
+			paths.CredentialsDir() + ":/credentials:ro",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}

@@ -22,8 +22,10 @@ import (
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/physics"
 	"spwn.sh/packages/base"
-	"spwn.sh/packages/base/activity"
-	"spwn.sh/packages/base/auth"
+	"spwn.sh/packages/activity"
+	"spwn.sh/packages/auth"
+	"spwn.sh/packages/paths"
+	"spwn.sh/packages/ids"
 )
 
 // SpawnResult is returned by Spawn with the world and any non-fatal warnings.
@@ -68,7 +70,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	var warnings []string
 
 	// Generate ID
-	id := base.GenerateWorldID(opts.ConfigName)
+	id := ids.GenerateWorldID(opts.ConfigName)
 
 	// Resolve each workspace to absolute path and validate it exists.
 	// Layout inside the container:
@@ -102,7 +104,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Architect mode: mount Docker socket + SPWN state directory
 	if opts.IsArchitect {
 		binds = append(binds, "/var/run/docker.sock:/var/run/docker.sock")
-		binds = append(binds, base.BaseDir()+":/home/spwn/.spwn")
+		binds = append(binds, paths.BaseDir()+":/home/spwn/.spwn")
 	}
 
 	// SINGLE shared agents mount: ~/.spwn/agents/ → /agents (rw).
@@ -110,7 +112,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// added via DeployAgent appear instantly through this bind without
 	// any container restart, because the kernel sees the new directory
 	// the moment it's created on the host.
-	binds = append(binds, base.AgentsDir()+":/agents")
+	binds = append(binds, paths.AgentsDir()+":/agents")
 
 	// Validate each named agent's mind directory and profile. We
 	// validate but no longer mount per-agent - all visibility goes
@@ -222,7 +224,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	if err := auth.SyncCredentials(); err != nil {
 		warnings = append(warnings, fmt.Sprintf("credential sync: %v", err))
 	}
-	binds = append(binds, base.CredentialsDir()+":/credentials:ro")
+	binds = append(binds, paths.CredentialsDir()+":/credentials:ro")
 
 	// Determine credential source for progress reporting
 	creds := auth.ResolveAll()
@@ -268,18 +270,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	if len(opts.Agents) > 0 {
 		worldRecord.Agent = opts.Agents[0].Name
-		worldRecord.AgentID = base.GenerateAgentID(opts.Agents[0].Name)
+		worldRecord.AgentID = ids.GenerateAgentID(opts.Agents[0].Name)
 		for _, spec := range opts.Agents {
 			role := manifest.DefaultRole(spec.Role)
 			worldRecord.Agents = append(worldRecord.Agents, models.AgentRecord{
 				Name:    spec.Name,
-				AgentID: base.GenerateAgentID(spec.Name),
+				AgentID: ids.GenerateAgentID(spec.Name),
 				Role:    role,
 				Status:  models.StatusIdle,
 			})
 		}
 	} else if opts.AgentName != "" {
-		worldRecord.AgentID = base.GenerateAgentID(opts.AgentName)
+		worldRecord.AgentID = ids.GenerateAgentID(opts.AgentName)
 		worldRecord.Agents = []models.AgentRecord{{
 			Name:    opts.AgentName,
 			AgentID: worldRecord.AgentID,
@@ -530,7 +532,7 @@ func workspaceContainerPath(name string, totalWorkspaces int) string {
 // world's per-instance state is stored. Used by both spawn (initial
 // write) and DeployAgent (roster regeneration).
 func worldStateDirFor(worldID string) string {
-	return filepath.Join(base.LocalStateDir(), "world-states", worldID)
+	return filepath.Join(paths.LocalStateDir(), "world-states", worldID)
 }
 
 // initAgentDeployment creates the per-agent per-world filesystem layout

@@ -1,4 +1,4 @@
-package base
+package ids
 
 import (
 	"strings"

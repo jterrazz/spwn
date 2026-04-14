@@ -17,9 +17,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/base"
 
 	"gopkg.in/yaml.v3"
+	"spwn.sh/packages/paths"
 )
 
 //go:embed all:macrohard all:matrix all:paperclip-factory all:research-lab all:startup
@@ -133,7 +133,7 @@ func Get(slug string) (Template, error) {
 //
 // baseDir should be the project root. In legacy/global mode (no
 // project discoverable) callers can still pass ~/.spwn or the
-// base.UserDir() and the same layout will appear underneath.
+// paths.UserDir() and the same layout will appear underneath.
 //
 // After Install, the caller can `spwn up` to bring the world online.
 func Install(slug, baseDir string) (InstallReport, error) {
@@ -222,9 +222,9 @@ func Install(slug, baseDir string) (InstallReport, error) {
 // the user-global ~/.spwn (legacy global mode). Callers that need
 // to target an explicit path should use Install directly.
 func InstallInto(slug string) (InstallReport, error) {
-	root := base.ProjectRoot()
+	root := paths.ProjectRoot()
 	if root == "" {
-		root = base.BaseDir()
+		root = paths.BaseDir()
 	}
 	return Install(slug, root)
 }

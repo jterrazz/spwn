@@ -22,7 +22,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
-	"spwn.sh/packages/base"
+	"spwn.sh/packages/version"
 )
 
 // Version is set by goreleaser via ldflags.
@@ -55,7 +55,7 @@ Mind (persistent agent identity).`,
 func init() {
 	rootCmd.Version = Version
 	// Sync CLI version to the shared base package so the web UI can use it
-	base.Version = Version
+	version.Version = Version
 	rootCmd.SetHelpFunc(customHelp)
 
 	// Top-level world shortcuts.

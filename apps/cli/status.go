@@ -11,9 +11,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
+	"spwn.sh/packages/paths"
 )
 
 func init() {
@@ -105,7 +105,7 @@ var statusCmd = &cobra.Command{
 
 		// ── Gather data ─────────────────────────────────────────────
 
-		baseDir := base.BaseDir()
+		baseDir := paths.BaseDir()
 
 		// Auth
 		authLabel := "not configured"
@@ -121,7 +121,7 @@ var statusCmd = &cobra.Command{
 
 		// Skills
 		skillCount := 0
-		if entries, err := os.ReadDir(base.SkillsDir()); err == nil {
+		if entries, err := os.ReadDir(paths.SkillsDir()); err == nil {
 			for _, e := range entries {
 				if e.IsDir() {
 					skillCount++

@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"spwn.sh/packages/base/auth"
+	"spwn.sh/packages/auth"
 	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 )

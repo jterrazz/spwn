@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"spwn.sh/apps/cli"
-	"spwn.sh/packages/base"
+	"spwn.sh/packages/env"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	// include /opt/homebrew/bin or /usr/local/bin by default. No-op
 	// when PATH already contains the target locations, so CLI usage
 	// from a terminal is unaffected.
-	base.EnsureDockerFriendlyPATH()
+	env.EnsureDockerFriendlyPATH()
 
 	if err := cli.Execute(); err != nil {
 		os.Exit(1)

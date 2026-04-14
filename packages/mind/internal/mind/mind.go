@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"spwn.sh/packages/base"
+	"spwn.sh/packages/paths"
 )
 
 // AgentInfo describes an agent's Mind structure.
@@ -18,7 +19,7 @@ type AgentInfo struct {
 
 // AgentDir returns the path to ~/.spwn/agents/{name}/.
 func AgentDir(name string) string {
-	return filepath.Join(base.AgentsDir(), name)
+	return filepath.Join(paths.AgentsDir(), name)
 }
 
 // Init scaffolds a new Mind with all 6 layers.
@@ -88,7 +89,7 @@ func Validate(name string) error {
 
 // List returns all agents in ~/.spwn/agents/.
 func List() ([]AgentInfo, error) {
-	dir := base.AgentsDir()
+	dir := paths.AgentsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {

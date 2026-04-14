@@ -28,11 +28,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/runtimestate"
+	"spwn.sh/packages/paths"
 )
 
 // Store reads world state from Docker container labels and per-world
@@ -88,7 +88,7 @@ func NewStoreAt(path string) (*Store, error) {
 // short-lived ~/.spwn/runtime/ tree (used by an earlier version of
 // this refactor) if either is present. Safe to call repeatedly.
 func (s *Store) evictLegacyStateFile() {
-	legacy := base.StatePath()
+	legacy := paths.StatePath()
 	if legacy != "" {
 		if _, err := os.Stat(legacy); err == nil {
 			_ = os.Remove(legacy)
@@ -97,11 +97,11 @@ func (s *Store) evictLegacyStateFile() {
 	}
 	// The ~/.spwn/runtime/ flat directory is replaced by per-world
 	// subdirs under ~/.spwn/world-states/. Sweep it if it exists.
-	if oldRuntime := filepath.Join(base.BaseDir(), "runtime"); oldRuntime != "" {
+	if oldRuntime := filepath.Join(paths.BaseDir(), "runtime"); oldRuntime != "" {
 		_ = os.RemoveAll(oldRuntime)
 	}
 	// Make sure the new world-states root exists for first-time installs.
-	_ = os.MkdirAll(filepath.Join(base.LocalStateDir(), "world-states"), 0o755)
+	_ = os.MkdirAll(filepath.Join(paths.LocalStateDir(), "world-states"), 0o755)
 }
 
 // ── Read API ──────────────────────────────────────────────────────────

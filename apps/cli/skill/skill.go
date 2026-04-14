@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/base"
 	"github.com/spf13/cobra"
+	"spwn.sh/packages/paths"
 )
 
 // Cmd is the root `spwn skill` command group.
@@ -72,7 +72,7 @@ func skillHelp(cmd *cobra.Command, args []string) {
 
 // skillsDir returns the root directory for user skill files.
 func skillsDir() string {
-	return filepath.Join(base.BaseDir(), "skills")
+	return filepath.Join(paths.BaseDir(), "skills")
 }
 
 var lsCmd = &cobra.Command{

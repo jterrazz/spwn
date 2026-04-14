@@ -6,13 +6,19 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
+	spwn.sh/packages/activity v0.0.0
+	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/base v0.0.0
 	spwn.sh/packages/catalog v0.0.0
+	spwn.sh/packages/env v0.0.0
+	spwn.sh/packages/ids v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mailbox v0.0.0
 	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
 	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/mind v0.0.0
+	spwn.sh/packages/paths v0.0.0
+	spwn.sh/packages/version v0.0.0
 	spwn.sh/packages/world v0.0.0
 )
 
@@ -51,12 +57,18 @@ require (
 )
 
 replace (
+	spwn.sh/packages/activity => ../../packages/activity
+	spwn.sh/packages/auth => ../../packages/auth
 	spwn.sh/packages/base => ../../packages/base
 	spwn.sh/packages/catalog => ../../packages/catalog
+	spwn.sh/packages/env => ../../packages/env
+	spwn.sh/packages/ids => ../../packages/ids
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/mailbox => ../../packages/mailbox
 	spwn.sh/packages/manifest => ../../packages/manifest
 	spwn.sh/packages/migration => ../../packages/migration
 	spwn.sh/packages/mind => ../../packages/mind
+	spwn.sh/packages/paths => ../../packages/paths
+	spwn.sh/packages/version => ../../packages/version
 	spwn.sh/packages/world => ../../packages/world
 )

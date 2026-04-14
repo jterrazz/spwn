@@ -16,8 +16,8 @@ import (
 
 	agentpkg "spwn.sh/packages/mind"
 	"spwn.sh/packages/base"
-	"spwn.sh/packages/base/activity"
-	"spwn.sh/packages/base/auth"
+	"spwn.sh/packages/activity"
+	"spwn.sh/packages/auth"
 	"spwn.sh/packages/image/probe"
 	"spwn.sh/packages/world/internal/architect"
 	"spwn.sh/packages/world/internal/manifest"
@@ -26,6 +26,8 @@ import (
 	templates "spwn.sh/packages/catalog/templates"
 
 	"gopkg.in/yaml.v3"
+	"spwn.sh/packages/paths"
+	"spwn.sh/packages/version"
 )
 
 const webVersionCheckInterval = 1 * time.Hour
@@ -182,7 +184,7 @@ func (s *Server) Start() error {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{
 				"name":    "spwn spwn API",
-				"version": base.Version,
+				"version": version.Version,
 				"docs":    "/api/health",
 				"dashboard": "http://localhost:3000",
 			})
@@ -223,7 +225,7 @@ func (s *Server) handleSystemDocker(w http.ResponseWriter, r *http.Request) {
 // first-run onboarding wizard.
 func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) {
 	completed := false
-	if _, err := os.Stat(filepath.Join(base.BaseDir(), ".onboarding-complete")); err == nil {
+	if _, err := os.Stat(filepath.Join(paths.BaseDir(), ".onboarding-complete")); err == nil {
 		completed = true
 	}
 	// Also surface a couple of useful first-run signals.
@@ -293,7 +295,7 @@ func (s *Server) handleInstallTemplate(w http.ResponseWriter, r *http.Request) {
 
 // handleSystemOnboardingComplete marks the wizard as completed.
 func (s *Server) handleSystemOnboardingComplete(w http.ResponseWriter, r *http.Request) {
-	path := filepath.Join(base.BaseDir(), ".onboarding-complete")
+	path := filepath.Join(paths.BaseDir(), ".onboarding-complete")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -309,7 +311,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
 
-	vi := base.GetVersionInfo(webVersionCheckInterval)
+	vi := version.GetVersionInfo(webVersionCheckInterval)
 
 	status := map[string]interface{}{
 		"worlds":          len(worlds),
@@ -323,7 +325,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
-	vi := base.GetVersionInfo(webVersionCheckInterval)
+	vi := version.GetVersionInfo(webVersionCheckInterval)
 	jsonOK(w, vi)
 }
 
@@ -478,7 +480,7 @@ type projectWorldDef struct {
 // root is active. Returns ok=false on any failure (no project, file
 // missing, parse error) so callers can fall back silently.
 func loadProjectManifest() (projectManifest, bool) {
-	root := base.ProjectRoot()
+	root := paths.ProjectRoot()
 	if root == "" {
 		return projectManifest{}, false
 	}

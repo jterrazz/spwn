@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/base"
 	"github.com/spf13/cobra"
+	"spwn.sh/packages/paths"
 )
 
 // Cmd is the root `spwn profile` command group.
@@ -75,7 +75,7 @@ func profileHelp(cmd *cobra.Command, args []string) {
 
 // profilesDir returns the root directory for user profile templates.
 func profilesDir() string {
-	return filepath.Join(base.BaseDir(), "profiles")
+	return filepath.Join(paths.BaseDir(), "profiles")
 }
 
 var lsCmd = &cobra.Command{

@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
 	"spwn.sh/packages/mind"
+	"spwn.sh/packages/ids"
 )
 
 var initTeam string
@@ -32,7 +32,7 @@ provided, a random name is picked from a curated dictionary.`,
 		if len(args) > 0 {
 			name = args[0]
 		} else {
-			name = base.RandomAgentName()
+			name = ids.RandomAgentName()
 		}
 
 		// Reject names that would shadow `spwn agent <subcommand>`.

@@ -20,18 +20,5 @@ const (
 	ImageVersionLabel     = "sh.spwn.image-version"
 )
 
-// Directory layout constants.
-const (
-	SpwnBaseDir         = ".spwn"
-	WorldsSubDir        = "worlds"
-	AgentsSubDir        = "agents"
-	StateFileName       = "state.json"
-	SkillsSubDir        = "skills"
-	CredentialsSubDir   = "credentials"
-	ActivityFileName    = "activity.jsonl"
-	TeamsSubDir         = "teams"
-	OrganizationsSubDir = "organizations"
-)
-
 // MindLayers defines the five-layer Mind structure.
 var MindLayers = []string{"core", "skills", "knowledge", "playbooks", "journal"}
