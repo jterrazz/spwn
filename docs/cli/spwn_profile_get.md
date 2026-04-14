@@ -1,20 +1,20 @@
 ---
-title: "spwn profile install"
-slug: "spwn-profile-install"
+title: "spwn profile get"
+slug: "spwn-profile-get"
 ---
 
-## spwn profile install
+## spwn profile get
 
 Install a profile template from the registry
 
 ```
-spwn profile install <profile-ref> [flags]
+spwn profile get <profile-ref> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for install
+  -h, --help   help for get
 ```
 
 ### SEE ALSO

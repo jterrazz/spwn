@@ -5,23 +5,29 @@ slug: "spwn-init"
 
 ## spwn init
 
-First-time setup - create ~/.spwn/ and a named world config
+Scaffold a spwn project in the current directory
 
 ### Synopsis
 
-First-time setup. Creates the ~/.spwn/ directory structure and a named
-world config. If no name is provided, a random cosmos-themed word is picked.
+Scaffold a spwn project in the current directory.
 
-On first run, also creates default.yaml as the default config.
+Creates spwn.yaml and a committed ./spwn/ tree containing a default
+world and a default agent. Adds .spwn/ to .gitignore for local state.
+
+Use --global to instead seed ~/.spwn/ with a world config (legacy
+user-home mode, kept for backward compatibility).
 
 ```
-spwn init [name] [flags]
+spwn init [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for init
+  -f, --force         Overwrite existing spwn.yaml
+      --global        Initialise ~/.spwn/ (legacy user-home mode)
+  -h, --help          help for init
+      --name string   Project name (default: current directory name)
 ```
 
 ### SEE ALSO

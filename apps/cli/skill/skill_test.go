@@ -164,7 +164,7 @@ func TestSkillEdit_NotFoundErrors(t *testing.T) {
 // ── stubs (install / publish) ────────────────────────────────────────────────
 
 func TestSkillInstall_Stub(t *testing.T) {
-	out, err := runWithOut(t, installCmd, "@community/rust-review")
+	out, err := runWithOut(t, getCmd, "@community/rust-review")
 	if err != nil {
 		t.Fatalf("install stub: %v", err)
 	}

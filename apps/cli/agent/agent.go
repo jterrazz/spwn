@@ -65,8 +65,8 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "fork <src> <dst>", Desc: "Clone an agent with everything it knows"},
 			}},
 			{Title: "Portability", Commands: []ui.HelpEntry{
-				{Name: "publish <name>", Desc: "Ship to registry " + ui.Faint("[Epoch 10]")},
-				{Name: "pull <ref>", Desc: "Install a shared agent " + ui.Faint("[Epoch 10]")},
+				{Name: "publish <name>", Desc: "Ship to registry " + ui.Faint("[planned]")},
+				{Name: "get <ref>", Desc: "Install a shared agent " + ui.Faint("[planned]")},
 				{Name: "export <name>", Desc: "Export as tar.gz"},
 				{Name: "import <path>", Desc: "Import from tar.gz"},
 			}},

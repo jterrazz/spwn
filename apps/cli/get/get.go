@@ -23,7 +23,7 @@ var installCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  Installing package %q...\n", args[0])
-		fmt.Println("  (Not yet implemented - coming in Epoch 10)")
+		fmt.Println("  (Not yet implemented - planned for a future release)")
 		return nil
 	},
 }
@@ -44,7 +44,7 @@ var searchCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  Searching for %q...\n", args[0])
-		fmt.Println("  (Not yet implemented - coming in Epoch 10)")
+		fmt.Println("  (Not yet implemented - planned for a future release)")
 		return nil
 	},
 }

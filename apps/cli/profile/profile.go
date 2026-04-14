@@ -34,7 +34,7 @@ func init() {
 	Cmd.AddCommand(newCmd)
 	Cmd.AddCommand(editCmd)
 	Cmd.AddCommand(showCmd)
-	Cmd.AddCommand(installCmd)
+	Cmd.AddCommand(getCmd)
 	Cmd.AddCommand(publishCmd)
 	Cmd.AddCommand(rmCmd)
 
@@ -58,8 +58,8 @@ func profileHelp(cmd *cobra.Command, args []string) {
 				{Name: "rm <name>", Desc: "Delete a profile"},
 			}},
 			{Title: "Registry", Commands: []ui.HelpEntry{
-				{Name: "install <ref>", Desc: "Install a shared profile " + ui.Faint("[Epoch 10]")},
-				{Name: "publish <name>", Desc: "Publish a profile " + ui.Faint("[Epoch 10]")},
+				{Name: "get <ref>", Desc: "Install a shared profile " + ui.Faint("[planned]")},
+				{Name: "publish <name>", Desc: "Publish a profile " + ui.Faint("[planned]")},
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn profile new researcher", Desc: ""},
@@ -190,13 +190,13 @@ var showCmd = &cobra.Command{
 	},
 }
 
-var installCmd = &cobra.Command{
-	Use:   "install <profile-ref>",
+var getCmd = &cobra.Command{
+	Use:   "get <profile-ref>",
 	Short: "Install a profile template from the registry",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(cmd.OutOrStderr(), "install %q: the profile registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Registry port is planned for Epoch 10 (Marketplace).")
+		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
 		return nil
 	},
 }
@@ -207,7 +207,7 @@ var publishCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(cmd.OutOrStderr(), "publish %q: the profile registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Registry port is planned for Epoch 10 (Marketplace).")
+		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
 		return nil
 	},
 }

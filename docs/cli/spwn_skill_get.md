@@ -1,20 +1,20 @@
 ---
-title: "spwn skill install"
-slug: "spwn-skill-install"
+title: "spwn skill get"
+slug: "spwn-skill-get"
 ---
 
-## spwn skill install
+## spwn skill get
 
 Install a skill from the registry
 
 ```
-spwn skill install <skill-ref> [flags]
+spwn skill get <skill-ref> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for install
+  -h, --help   help for get
 ```
 
 ### SEE ALSO

@@ -3,7 +3,7 @@
 // first-class composable blocks that agents stack into their compositions.
 //
 // Tools are stubs for now - the full implementation requires a tool
-// registry port. Coming in Epoch 10 (Marketplace).
+// registry. Planned for a future release.
 package tool
 
 import (
@@ -30,7 +30,7 @@ func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(showCmd)
 	Cmd.AddCommand(searchCmd)
-	Cmd.AddCommand(installCmd)
+	Cmd.AddCommand(getCmd)
 	Cmd.AddCommand(rmCmd)
 	Cmd.AddCommand(publishCmd)
 
@@ -52,9 +52,9 @@ func toolHelp(cmd *cobra.Command, args []string) {
 				{Name: "rm <pack>", Desc: "Uninstall a tool pack"},
 			}},
 			{Title: "Registry", Commands: []ui.HelpEntry{
-				{Name: "search <query>", Desc: "Search the registry " + ui.Faint("[Epoch 10]")},
-				{Name: "install <pack>", Desc: "Install a shared pack " + ui.Faint("[Epoch 10]")},
-				{Name: "publish <path>", Desc: "Publish a pack " + ui.Faint("[Epoch 10]")},
+				{Name: "search <query>", Desc: "Search the registry " + ui.Faint("[planned]")},
+				{Name: "get <pack>", Desc: "Install a shared pack " + ui.Faint("[planned]")},
+				{Name: "publish <path>", Desc: "Publish a pack " + ui.Faint("[planned]")},
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn tool ls", Desc: "See every built-in pack"},
@@ -82,7 +82,7 @@ var lsCmd = &cobra.Command{
 			fmt.Fprintf(cmd.OutOrStderr(), "  %-16s  %s\n", t.name, t.desc)
 		}
 		fmt.Fprintln(cmd.OutOrStderr())
-		fmt.Fprintln(cmd.OutOrStderr(), "Registry (remote) listings are not yet wired - coming in Epoch 10.")
+		fmt.Fprintln(cmd.OutOrStderr(), "Registry-backed listings are planned for a future release.")
 		return nil
 	},
 }
@@ -104,13 +104,13 @@ var searchCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(cmd.OutOrStderr(), "search %q: the tool registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Registry port is planned for Epoch 10 (Marketplace).")
+		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
 		return nil
 	},
 }
 
-var installCmd = &cobra.Command{
-	Use:   "install <tool-pack>",
+var getCmd = &cobra.Command{
+	Use:   "get <tool-pack>",
 	Short: "Install a tool pack from the registry",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -137,7 +137,7 @@ var publishCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(cmd.OutOrStderr(), "publish %q: the tool registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Registry port is planned for Epoch 10 (Marketplace).")
+		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
 		return nil
 	},
 }

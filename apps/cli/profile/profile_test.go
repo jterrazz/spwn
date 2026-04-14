@@ -155,7 +155,7 @@ func TestProfileEdit_NotFoundErrors(t *testing.T) {
 // ── stubs ────────────────────────────────────────────────────────────────────
 
 func TestProfileInstall_Stub(t *testing.T) {
-	out, err := runWithOut(t, installCmd, "@community/pragmatic-dev")
+	out, err := runWithOut(t, getCmd, "@community/pragmatic-dev")
 	if err != nil {
 		t.Fatalf("install stub: %v", err)
 	}

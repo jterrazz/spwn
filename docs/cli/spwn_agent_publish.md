@@ -14,7 +14,7 @@ Publish an agent to the community registry for others to pull.
 Memory (journal, knowledge, sessions) is stripped before publishing -
 only the composition (tools, skills, profile) and core identity ship.
 
-Not yet implemented - tracks the registry port (coming in Epoch 10).
+Not yet implemented - tracks the registry (planned).
 
 ```
 spwn agent publish <agent-name> [flags]

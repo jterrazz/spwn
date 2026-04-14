@@ -31,6 +31,7 @@ spwn up [flags]
 
 ```
   -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
+      --build                   Run spwn build first, then spawn from the artifact
   -c, --config string           Named world config (default: default)
   -h, --help                    help for up
   -i, --interactive             Drop into the agent's session after spawn

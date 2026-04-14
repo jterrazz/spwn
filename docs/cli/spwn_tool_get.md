@@ -1,20 +1,20 @@
 ---
-title: "spwn tool install"
-slug: "spwn-tool-install"
+title: "spwn tool get"
+slug: "spwn-tool-get"
 ---
 
-## spwn tool install
+## spwn tool get
 
 Install a tool pack from the registry
 
 ```
-spwn tool install <tool-pack> [flags]
+spwn tool get <tool-pack> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for install
+  -h, --help   help for get
 ```
 
 ### SEE ALSO

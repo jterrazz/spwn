@@ -31,7 +31,7 @@ func init() {
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
-	Cmd.AddCommand(pullCmd)
+	Cmd.AddCommand(getCmd)
 }
 
 var addCmd = &cobra.Command{
@@ -148,29 +148,30 @@ var publishCmd = &cobra.Command{
 Memory (journal, knowledge, sessions) is stripped before publishing -
 only the composition (tools, skills, profile) and core identity ship.
 
-Not yet implemented - tracks the registry port (coming in Epoch 10).`,
+Not yet implemented - tracks the registry (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		fmt.Fprintf(cmd.OutOrStderr(), "publish %q: not yet implemented.\n", name)
-		fmt.Fprintln(cmd.OutOrStderr(), "The registry port is planned for Epoch 10 (Marketplace).")
+		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
 		return nil
 	},
 }
 
-var pullCmd = &cobra.Command{
-	Use:   "pull <agent-ref>",
-	Short: "Pull a shared agent from the registry",
+var getCmd = &cobra.Command{
+	Use:   "get <agent-ref>",
+	Short: "Install a shared agent from the registry",
 	Args:  cobra.ExactArgs(1),
-	Long: `Install a shared agent from the community registry.
+	Long: `Install a shared agent from the community registry into
+./spwn/agents/<name>/.
 
-The pulled agent starts with a fresh memory but inherits the full
-composition from its published form.
+The installed agent starts with a fresh memory but inherits the
+full composition from its published form.
 
-Not yet implemented - tracks the registry port (coming in Epoch 10).`,
+Not yet implemented - tracks the registry port (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ref := args[0]
-		fmt.Fprintf(cmd.OutOrStderr(), "pull %q: not yet implemented.\n", ref)
-		fmt.Fprintln(cmd.OutOrStderr(), "The registry port is planned for Epoch 10 (Marketplace).")
+		fmt.Fprintf(cmd.OutOrStderr(), "get %q: not yet implemented.\n", ref)
+		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
 		return nil
 	},
 }

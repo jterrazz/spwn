@@ -236,26 +236,26 @@ func TestAgentRemove_AbsentToolIsNoOp(t *testing.T) {
 
 // ── publish / pull stubs ─────────────────────────────────────────────────────
 //
-// These are stubs until Epoch 10 - we just verify they don't blow up and
-// print something mentioning the Epoch 10 placeholder.
+// These are stubs until the registry ships - we just verify they don't
+// blow up and print a "not yet implemented" placeholder.
 
 func TestAgentPublish_Stub(t *testing.T) {
 	cmd, out := newComposeCmd()
 	if err := publishCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatalf("publish stub should not error: %v", err)
 	}
-	if !contains(out.String(), "Epoch 10") {
-		t.Errorf("publish output should reference Epoch 10 placeholder: %s", out.String())
+	if !contains(out.String(), "not yet implemented") {
+		t.Errorf("publish output should reference the placeholder: %s", out.String())
 	}
 }
 
-func TestAgentPull_Stub(t *testing.T) {
+func TestAgentGet_Stub(t *testing.T) {
 	cmd, out := newComposeCmd()
-	if err := pullCmd.RunE(cmd, []string{"@community/curie"}); err != nil {
-		t.Fatalf("pull stub should not error: %v", err)
+	if err := getCmd.RunE(cmd, []string{"@community/curie"}); err != nil {
+		t.Fatalf("get stub should not error: %v", err)
 	}
-	if !contains(out.String(), "Epoch 10") {
-		t.Errorf("pull output should reference Epoch 10 placeholder: %s", out.String())
+	if !contains(out.String(), "not yet implemented") {
+		t.Errorf("get output should reference the placeholder: %s", out.String())
 	}
 }
 

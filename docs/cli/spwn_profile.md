@@ -26,7 +26,7 @@ Attach one to an agent with:
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
 * [spwn profile edit](./spwn_profile_edit.md)	 - Open a profile template in $EDITOR
-* [spwn profile install](./spwn_profile_install.md)	 - Install a profile template from the registry
+* [spwn profile get](./spwn_profile_get.md)	 - Install a profile template from the registry
 * [spwn profile ls](./spwn_profile_ls.md)	 - List profile templates
 * [spwn profile new](./spwn_profile_new.md)	 - Author a new profile template
 * [spwn profile publish](./spwn_profile_publish.md)	 - Publish a profile template to the registry

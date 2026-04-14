@@ -55,7 +55,7 @@ func TestToolSearch_Stub(t *testing.T) {
 }
 
 func TestToolInstall_Stub(t *testing.T) {
-	out, err := runWithOut(t, installCmd, "@spwn/python")
+	out, err := runWithOut(t, getCmd, "@spwn/python")
 	if err != nil {
 		t.Fatalf("install stub: %v", err)
 	}
