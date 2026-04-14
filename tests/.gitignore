@@ -1,1 +1,4 @@
 .spwn/
+spwn/
+spwn.yaml
+*.tar.gz
