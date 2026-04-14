@@ -54,7 +54,7 @@ Four commands. One running world.
 
 Prefer a bundled demo? `spwn example install matrix`.
 
-> **Requirements:** Go 1.25+, Docker
+> **Requirements:** Docker
 
 <br/>
 
