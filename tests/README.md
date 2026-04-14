@@ -105,47 +105,93 @@ Key design points:
 
 ### TypeScript E2E Setup (`tests/setup/`)
 
-| File                    | Purpose                                                                                             |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| `helpers.ts`            | `createSpwnHome()`, `createAgent()`, `assertBinaryExists()`, `retry()`, `runConcurrently()`         |
-| `spwn.specification.ts` | `createTestContext()` - creates isolated SPWN_HOME, provides `ctx.spwn()` runner with env overrides |
-| `output-helpers.ts`     | `expectLine()`, `expectNoLine()`, `expectTableHeader()`, `expectTableRow()`, `stripAnsi()`          |
-| `world-assertion.ts`    | `WorldAssertion` - asserts on container state, files, mounts                                        |
-| `mind-assertion.ts`     | `MindAssertion` - asserts on agent Mind directory structure                                         |
-| `state-assertion.ts`    | `StateAssertion` - asserts on `state.json` contents                                                 |
-| `mock-llm/`             | Mock LLM server for testing agent talk flows                                                        |
-| `mock-api/`             | Mock API server (marketplace, auth)                                                                 |
+All TypeScript E2E tests run under `@jterrazz/test`. The spwn-side
+setup lives in a single file:
 
-**Pattern:**
+| File                   | Purpose                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `cli.specification.ts` | Exports `spec` (CLI mode) and `dockerSpec` (Docker mode), both bound to `bin/spwn` |
+
+Both runners share a `transform` that strips ANSI and collapses
+`/tmp/spec-*` paths to `<PROJECT>`, plus seed handlers for
+`spwn.yaml/`, `agent/`, `state/`, and `activity/` fragments under
+each test's `seeds/` directory.
+
+**CLI-mode pattern** — binary-level behavior, no Docker:
 
 ```typescript
-describe('world spawn', () => {
-    let ctx: TestContext;
+import { describe, expect, test } from 'vitest';
+import { spec } from '../../../setup/cli.specification.js';
 
-    afterEach(() => {
-        ctx?.cleanup();
-    });
-
-    test('creates a running Docker container', () => {
-        ctx = createTestContext();
-        ctx.spwn(['init']);
-        const result = ctx.spwn(['world', '--agent', 'neo', '-w', ctx.home], 60_000);
+describe('spwn check', () => {
+    test('valid project prints a clean success report', async () => {
+        const result = await spec('check valid').project('single-agent').exec('check').run();
 
         expect(result.exitCode).toBe(0);
-        expectLine(result.output, /✓ Created container\s+w-\w+-\d{5}/);
-
-        const id = parseWorldId(result.output)!;
-        ctx.world(id).toBeRunning();
+        await result.stdout.toMatch('valid-project.txt');
     });
 });
 ```
 
-Key design points:
+- Each spec gets a fresh temp dir. `.project('name')` copies
+  `tests/fixtures/<name>/` into it before the command runs.
+- `result.stdout.toMatch('name.txt')` compares against
+  `<test-dir>/expected/stdout/name.txt`. Generate with
+  `JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run ...`.
+- `result.json.toMatch('name.json')` parses stdout and deep-equals
+  against a JSON fixture — pair with `spwn check --json` etc.
+- `result.file('.spwn/state.json').exists` / `.content` reads the
+  host-side working dir.
 
-- Each test gets its own `createTestContext()` with an isolated temp dir.
-- `afterEach` calls `ctx.cleanup()` to destroy Docker containers and remove temp files.
-- Use `expectLine()` for structured assertions on CLI output - never weak `toContain()`.
-- `vitest.config.ts` sets `fileParallelism: false` because Docker tests must run sequentially.
+**Docker-mode pattern** — tests that need a live container:
+
+```typescript
+import { describe, expect, test } from 'vitest';
+import { dockerSpec } from '../../../setup/cli.specification.js';
+
+describe('world lifecycle', () => {
+    test('up provisions a running world', async () => {
+        await using result = await dockerSpec('up lifecycle')
+            .project('docker-pilot')
+            .exec('up')
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        result.stderr.toContain('Created container');
+
+        const neo = result.container('neo');
+        expect(neo.running).toBe(true);
+        expect(neo.file('/world/physics.md').exists).toBe(true);
+
+        const ls = await neo.exec('ls /world');
+        ls.stdout.toContain('physics.md');
+    });
+});
+```
+
+- **`await using`** is mandatory. The dispose hook force-removes
+  every container tagged with this test's run id — tests running
+  in parallel never collide and nothing leaks between runs.
+- `result.container('<world-key>')` resolves by the
+  `sh.spwn.world.config` label (the key declared under `worlds.`
+  in `spwn.yaml`), not by the sometimes-empty `sh.spwn.world.name`.
+- `result.container(name).file(path)` / `.exec(cmd)` /
+  `.inspect.value` / `.stdout` / `.stderr` use the same accessor
+  API as the host-side `result` — no new vocabulary.
+- Follow-up CLI commands that need a container id (e.g.
+  `spwn world inspect <id>`) get it via `neo.id`.
+- Always use the `docker-pilot` fixture (minimal agent without
+  `@spwn/python`). `single-agent` fails to spawn because the
+  base image lacks `pip3`.
+- Banners (`Created container`, `Agent is alive`, `Destroyed`,
+  `World destroyed`) go to **stderr**, not stdout — spwn follows
+  the Unix convention of data-on-stdout / status-on-stderr.
+
+**Vitest project layout** (`tests/vitest.config.ts`):
+
+- `cli` project — CLI-mode tests, runs fast, parallel.
+- `docker` project — Docker-mode tests, `fileParallelism: false`,
+  `testTimeout: 120_000`.
 
 ## Adding New Tests
 
@@ -166,11 +212,18 @@ Key design points:
 
 ### TypeScript E2E Test
 
-1. Create `your-feature.e2e.test.ts` in the appropriate `tests/e2e/{domain}/` directory.
-2. Use `describe`/`test` with clear behavioral names.
-3. Use `createTestContext()` and `afterEach(() => ctx?.cleanup())`.
-4. Use output helpers (`expectLine`, `expectTableHeader`) for CLI assertions.
-5. Run with `cd tests && npx vitest`.
+1. Create `tests/e2e/<area>/<feature>/<feature>.e2e.test.ts` (one
+   per-feature folder per test file, siblings: `expected/`, `seeds/`).
+2. Import `spec` (CLI mode) or `dockerSpec` (Docker mode) from
+   `tests/setup/cli.specification.js`.
+3. Use `describe`/`test` with clear behavioral names.
+4. Prefer structured assertions: `.toMatch('file.txt')`,
+   `.json.toMatch('file.json')`, `.container(name).file(path)`,
+   `.container(name).exec(cmd)`. Reach for `.toContain(substring)`
+   when the intent is "some substring appears somewhere".
+5. For Docker tests, always use `await using` to get automatic
+   container cleanup.
+6. Run with `pnpm -C tests exec vitest run --project {cli|docker} <glob>`.
 
 ## Test File Naming Conventions
 
@@ -187,8 +240,13 @@ Key design points:
 
 ## Vitest Configuration
 
-Tests use `tests/vitest.config.ts`:
+Tests use `tests/vitest.config.ts` with two projects:
 
-- `testTimeout: 120_000` - 2 minutes per test (Docker is slow)
-- `hookTimeout: 60_000` - 1 minute for setup/teardown hooks
-- `fileParallelism: false` - sequential execution (Docker resource constraints)
+- **`cli`** — CLI-mode tests. Parallel within the project, per-test
+  `testTimeout: 120_000`, `hookTimeout: 60_000`.
+- **`docker`** — Docker-mode tests. Also `testTimeout: 120_000` and
+  `hookTimeout: 60_000`, but `fileParallelism: false` because Docker
+  tests within a single file must run sequentially. Cross-file
+  isolation is still handled by the framework's label-based test-run
+  id, so the docker project is safe to parallelize if you ever drop
+  `fileParallelism: false`.
