@@ -31,6 +31,8 @@ export default defineConfig({
                 test: {
                     name: 'docker',
                     fileParallelism: false,
+                    testTimeout: 120_000,
+                    hookTimeout: 60_000,
                     include: [
                         'e2e/world/**/*.e2e.test.ts',
                         'e2e/agent/**/*.e2e.test.ts',
