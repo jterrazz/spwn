@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Colony (one world, two agents) — messaging + roster semantics under
@@ -34,7 +34,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('colony', () => {
     test('roster.md inside the container names both colony members', async () => {
-        await using result = await dockerSpec('colony roster')
+        await using result = await spec('colony roster')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
@@ -56,7 +56,7 @@ describe('colony', () => {
     });
 
     test('agent send writes a message file into the target agent inbox', async () => {
-        await using result = await dockerSpec('colony send')
+        await using result = await spec('colony send')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
@@ -85,7 +85,7 @@ describe('colony', () => {
     });
 
     test('agent inbox surfaces a message delivered inside the colony', async () => {
-        await using result = await dockerSpec('colony inbox')
+        await using result = await spec('colony inbox')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
@@ -104,7 +104,7 @@ describe('colony', () => {
     });
 
     test('multiple messages from chief to worker all persist', async () => {
-        await using result = await dockerSpec('colony inbox multi')
+        await using result = await spec('colony inbox multi')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
@@ -130,7 +130,7 @@ describe('colony', () => {
     });
 
     test('destroying the colony removes the container but both agent minds survive', async () => {
-        await using result = await dockerSpec('colony down survive')
+        await using result = await spec('colony down survive')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')

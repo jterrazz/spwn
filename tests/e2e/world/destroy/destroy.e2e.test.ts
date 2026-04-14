@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World destroy (spwn down) under the docker() spec mode.
@@ -18,7 +18,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('world destroy', () => {
     test('destroys a running project world', async () => {
-        await using result = await dockerSpec('down running world')
+        await using result = await spec('down running world')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
@@ -35,7 +35,7 @@ describe('world destroy', () => {
     });
 
     test('destroy removes world from list', async () => {
-        await using result = await dockerSpec('down removes from list')
+        await using result = await spec('down removes from list')
             .project('docker-pilot')
             .exec(['up', 'down', 'world list --json'])
             .run();
@@ -54,7 +54,7 @@ describe('world destroy', () => {
     });
 
     test('destroy non-existent world fails', async () => {
-        await using result = await dockerSpec('down missing world')
+        await using result = await spec('down missing world')
             .project('docker-pilot')
             .exec('down w-nonexistent-00000')
             .run();

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec, spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * CLI execution — agent management, flags, enter, status and the
@@ -128,11 +128,11 @@ describe('CLI execution - status command', () => {
 // Merged in from the legacy `execution-docker.e2e.test.ts`. These
 // Exercise `up`, `down`, `ls`, `world inspect`, `world logs`, and
 // `snap save` against a real container. The file lives in the cli
-// Vitest project, but dockerSpec runs real docker regardless — the
+// Vitest project, but spec runs real docker regardless — the
 // Cleanup label + `await using` still apply.
 describe('CLI execution - world aliases (docker)', () => {
     test("'spwn up' spawns a world that appears in world list --json", async () => {
-        await using result = await dockerSpec('up alias')
+        await using result = await spec('up alias')
             .project('docker-pilot')
             .exec(['up', 'world list --json'])
             .run();
@@ -153,7 +153,7 @@ describe('CLI execution - world aliases (docker)', () => {
     });
 
     test("'spwn down' destroys a spawned world", async () => {
-        await using result = await dockerSpec('down alias')
+        await using result = await spec('down alias')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
@@ -166,7 +166,7 @@ describe('CLI execution - world aliases (docker)', () => {
 
     test("'spwn world inspect' surfaces status for a running world", async () => {
         // Step 1: up, capture the spwn world id from the container label.
-        await using up = await dockerSpec('inspect up').project('docker-pilot').exec('up').run();
+        await using up = await spec('inspect up').project('docker-pilot').exec('up').run();
 
         expect(up.exitCode).toBe(0);
         const neo = up.container('neo');
@@ -175,7 +175,7 @@ describe('CLI execution - world aliases (docker)', () => {
         expect(worldId).toBeTruthy();
 
         // Step 2: world inspect <id>
-        await using inspect = await dockerSpec('inspect call')
+        await using inspect = await spec('inspect call')
             .project('docker-pilot')
             .exec(`world inspect ${worldId}`)
             .run();
@@ -187,7 +187,7 @@ describe('CLI execution - world aliases (docker)', () => {
     });
 
     test("'spwn world logs' returns cleanly for a running world", async () => {
-        await using up = await dockerSpec('logs up').project('docker-pilot').exec('up').run();
+        await using up = await spec('logs up').project('docker-pilot').exec('up').run();
         expect(up.exitCode).toBe(0);
         const worldId = (
             up.container('neo').inspect.value as {
@@ -196,7 +196,7 @@ describe('CLI execution - world aliases (docker)', () => {
         ).Config?.Labels?.['sh.spwn.world.id'];
         expect(worldId).toBeTruthy();
 
-        await using logs = await dockerSpec('logs call')
+        await using logs = await spec('logs call')
             .project('docker-pilot')
             .exec(`world logs ${worldId}`)
             .run();
@@ -207,7 +207,7 @@ describe('CLI execution - world aliases (docker)', () => {
     });
 
     test("'spwn snap save' creates a snapshot of a running world", async () => {
-        await using up = await dockerSpec('snap up').project('docker-pilot').exec('up').run();
+        await using up = await spec('snap up').project('docker-pilot').exec('up').run();
         expect(up.exitCode).toBe(0);
         const worldId = (
             up.container('neo').inspect.value as {
@@ -216,7 +216,7 @@ describe('CLI execution - world aliases (docker)', () => {
         ).Config?.Labels?.['sh.spwn.world.id'];
         expect(worldId).toBeTruthy();
 
-        await using snap = await dockerSpec('snap save')
+        await using snap = await spec('snap save')
             .project('docker-pilot')
             .exec(`world snap save ${worldId}`)
             .run();

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World lifecycle under the docker() spec mode.
@@ -17,10 +17,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('world lifecycle', () => {
     test('up provisions a running world with world/ files laid down', async () => {
-        await using result = await dockerSpec('up lifecycle')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('up lifecycle').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
         // Spwn writes progress banners to stderr (Unix convention) and
@@ -47,7 +44,7 @@ describe('world lifecycle', () => {
     });
 
     test('world list surfaces the running world in project mode', async () => {
-        await using result = await dockerSpec('list after up')
+        await using result = await spec('list after up')
             .project('docker-pilot')
             .exec(['up', 'world list --json'])
             .run();
@@ -71,7 +68,7 @@ describe('world lifecycle', () => {
     });
 
     test('down fully destroys the container (not just stopped)', async () => {
-        await using result = await dockerSpec('up then down')
+        await using result = await spec('up then down')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();

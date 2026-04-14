@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World spawn under the docker() spec mode.
@@ -41,10 +41,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('world spawn', () => {
     test('brings up a running container with world/ files laid down', async () => {
-        await using result = await dockerSpec('spawn up basic')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('spawn up basic').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
         // Banner lines land on stderr per Unix convention.
@@ -61,10 +58,7 @@ describe('world spawn', () => {
     });
 
     test('container carries a valid world id label', async () => {
-        await using result = await dockerSpec('spawn id label')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('spawn id label').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
 
@@ -82,7 +76,7 @@ describe('world spawn', () => {
     });
 
     test('spawned world appears in `world list --json`', async () => {
-        await using result = await dockerSpec('spawn in list')
+        await using result = await spec('spawn in list')
             .project('docker-pilot')
             .exec(['up', 'world list --json'])
             .run();
@@ -103,7 +97,7 @@ describe('world spawn', () => {
     });
 
     test('physics.md carries meaningful content (laws, network, /workspace)', async () => {
-        await using result = await dockerSpec('spawn physics content')
+        await using result = await spec('spawn physics content')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -117,7 +111,7 @@ describe('world spawn', () => {
     });
 
     test('faculties.md lists the expanded tool set', async () => {
-        await using result = await dockerSpec('spawn faculties content')
+        await using result = await spec('spawn faculties content')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -132,7 +126,7 @@ describe('world spawn', () => {
         // In project mode, `spwn up <name>` resolves <name> against the
         // Worlds: map in spwn.yaml. Asking for a key that isn't there is
         // The closest analogue to the legacy "non-existent config" case.
-        await using result = await dockerSpec('spawn unknown world')
+        await using result = await spec('spawn unknown world')
             .project('docker-pilot')
             .exec('up nonexistent-world')
             .run();
@@ -149,7 +143,7 @@ describe('world spawn', () => {
     });
 
     test('spawn with a non-existent agent fails cleanly', async () => {
-        await using result = await dockerSpec('spawn missing agent')
+        await using result = await spec('spawn missing agent')
             .project('docker-pilot')
             .exec('world up --agent ghost')
             .run();
@@ -166,7 +160,7 @@ describe('world spawn', () => {
     });
 
     test('`spwn down` fully removes the container', async () => {
-        await using result = await dockerSpec('spawn then down')
+        await using result = await spec('spawn then down')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
@@ -177,7 +171,7 @@ describe('world spawn', () => {
     });
 
     test('mind layers are visible at /agents/neo/ inside the container', async () => {
-        await using result = await dockerSpec('spawn mind layers')
+        await using result = await spec('spawn mind layers')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -198,7 +192,7 @@ describe('world spawn', () => {
     });
 
     test('container has Claude trust pre-approved for /workspace', async () => {
-        await using result = await dockerSpec('spawn claude trust')
+        await using result = await spec('spawn claude trust')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -223,7 +217,7 @@ describe('world spawn', () => {
     });
 
     test('container does NOT mount host ~/.claude directory', async () => {
-        await using result = await dockerSpec('spawn no host claude mount')
+        await using result = await spec('spawn no host claude mount')
             .project('docker-pilot')
             .exec('up')
             .run();

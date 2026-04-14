@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World physics under the docker() spec mode.
@@ -28,7 +28,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('world physics', () => {
     test('physics.md and faculties.md exist inside the container', async () => {
-        await using result = await dockerSpec('world files in container')
+        await using result = await spec('world files in container')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -50,7 +50,7 @@ describe('world physics', () => {
     });
 
     test('physics.md documents the network law and topology', async () => {
-        await using result = await dockerSpec('physics.md content')
+        await using result = await spec('physics.md content')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -65,7 +65,7 @@ describe('world physics', () => {
     });
 
     test('faculties.md lists available tools', async () => {
-        await using result = await dockerSpec('faculties.md content')
+        await using result = await spec('faculties.md content')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -77,7 +77,7 @@ describe('world physics', () => {
     });
 
     test('default network mode is bridge', async () => {
-        await using result = await dockerSpec('network mode bridge')
+        await using result = await spec('network mode bridge')
             .project('docker-pilot')
             .exec('up')
             .run();

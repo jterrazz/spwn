@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * `spwn agent talk <name> [msg]` under the docker() spec mode.
@@ -39,7 +39,7 @@ describe('agent talk', () => {
     test('talk to an unattached agent fails cleanly', async () => {
         // Empty project — no spwn.yaml worlds running. Create an orphan
         // Agent on disk and try to talk to it.
-        await using result = await dockerSpec('talk unattached')
+        await using result = await spec('talk unattached')
             .project('docker-pilot')
             .exec(['agent create orphan', 'agent talk orphan hello'])
             .run();
@@ -51,7 +51,7 @@ describe('agent talk', () => {
     });
 
     test('talk to a non-existent agent hints at agent create', async () => {
-        await using result = await dockerSpec('talk missing agent')
+        await using result = await spec('talk missing agent')
             .project('docker-pilot')
             .exec('agent talk does-not-exist hello')
             .run();
@@ -65,7 +65,7 @@ describe('agent talk', () => {
     });
 
     test("talk against a live world exec's the runtime inside the container", async () => {
-        await using result = await dockerSpec('talk happy path')
+        await using result = await spec('talk happy path')
             .project('docker-pilot')
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'agent talk neo "list files in /workspace"'])
@@ -95,7 +95,7 @@ describe('agent talk', () => {
     });
 
     test('talk can be invoked multiple times on the same world', async () => {
-        await using result = await dockerSpec('talk twice')
+        await using result = await spec('talk twice')
             .project('docker-pilot')
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(['up', 'agent talk neo hello', 'agent talk neo "hello again"'])
@@ -114,7 +114,7 @@ describe('agent talk', () => {
     });
 
     test('agent ls --json shows neo attached to the running world', async () => {
-        await using result = await dockerSpec('talk agent ls')
+        await using result = await spec('talk agent ls')
             .project('docker-pilot')
             .exec(['up', 'agent ls --json'])
             .run();
@@ -132,7 +132,7 @@ describe('agent talk', () => {
     });
 
     test('world list --json surfaces the running world with its agents', async () => {
-        await using result = await dockerSpec('talk world list')
+        await using result = await spec('talk world list')
             .project('docker-pilot')
             .exec(['up', 'world list --json'])
             .run();
@@ -150,7 +150,7 @@ describe('agent talk', () => {
     });
 
     test('after down, agent ls shows neo as unattached', async () => {
-        await using result = await dockerSpec('talk after down')
+        await using result = await spec('talk after down')
             .project('docker-pilot')
             .exec(['up', 'down', 'agent ls --json'])
             .run();
@@ -166,7 +166,7 @@ describe('agent talk', () => {
     });
 
     test('agent inspect prints layer details when attached to a world', async () => {
-        await using result = await dockerSpec('talk inspect')
+        await using result = await spec('talk inspect')
             .project('docker-pilot')
             .exec(['up', 'agent inspect neo'])
             .run();

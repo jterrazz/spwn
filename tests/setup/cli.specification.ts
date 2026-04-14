@@ -1,8 +1,6 @@
 import {
     type CliResult,
     command,
-    docker,
-    type DockerCliResult,
     type SeedHandlerContext,
     spec as specRunner,
 } from '@jterrazz/test';
@@ -80,7 +78,8 @@ function copyTree(srcPath: string, dstPath: string): void {
 /**
  * `command()` mode always produces a `CliResult`, but the framework's
  * generic `spec()` signature widens the result to a union. Narrow it
- * once at the runner level so tests get exitCode/stdout/stderr without
+ * once at the runner level so tests get the full CliResult shape
+ * (including `.container(...)` when the docker option is on) without
  * per-call casts. Followup: tighten upstream so this cast goes away.
  */
 type CliBuilder = {
@@ -139,51 +138,27 @@ const seedHandlers = {
     },
 };
 
+/**
+ * Single spwn specification runner. CLI-only tests use `.exec(...)` and
+ * reach for stdout/stderr/file accessors. Tests that need container
+ * assertions add `await using` and call `.container(name)` — the first
+ * access lazily queries Docker, CLI-only tests never touch it.
+ *
+ * Container lookup uses `sh.spwn.world.config` (the manifest-declared
+ * world key) because spwn only sets `sh.spwn.world.name` when the user
+ * assigns an explicit display name — empty for fixture-declared worlds.
+ * The per-run test id flows through `SPWN_TEST_LABEL` and lands on every
+ * container as `sh.spwn.test.run` (see packages/world/internal/labels).
+ */
 const rawRunner = await specRunner(command(SPWN_BIN), {
+    docker: {
+        envVar: 'SPWN_TEST_LABEL',
+        nameLabel: 'sh.spwn.world.config',
+        testRunLabel: 'sh.spwn.test.run',
+    },
     root: '../fixtures',
     seedHandlers,
     transform: normalise,
 });
 
 export const spec = rawRunner as unknown as (label: string) => CliBuilder;
-
-/**
- * Docker-aware runner. Same setup as `spec` plus container accessors on
- * the result — tests can reach into the live containers spwn spawned via
- * `result.container('<world-name>')`. Cleanup is automatic via
- * `await using` (containers tagged with this test's unique id are
- * force-removed when the scope exits, see the docker() mode docs).
- *
- * The label contract lives in packages/world/internal/labels: every
- * world container carries `sh.spwn.world.name=<name>` and, when the
- * `SPWN_TEST_LABEL` env var is set, `sh.spwn.test.run=<id>`. The runner
- * injects the id per-run and queries by those two labels.
- */
-type DockerSpecBuilder = {
-    project(name: string): DockerSpecBuilder;
-    seed(path: string): DockerSpecBuilder;
-    env(env: Record<string, null | string>): DockerSpecBuilder;
-    exec(args: string | string[]): DockerSpecBuilder;
-    spawn(args: string, options: { waitFor: string; timeout: number }): DockerSpecBuilder;
-    run(): Promise<DockerCliResult>;
-};
-
-const rawDockerRunner = await specRunner(
-    docker(SPWN_BIN, {
-        envVar: 'SPWN_TEST_LABEL',
-        // Spwn stores the manifest-declared world key ("worlds.<KEY>" in
-        // Spwn.yaml) on the `sh.spwn.world.config` label. The legacy
-        // `sh.spwn.world.name` is only set when the user assigns a
-        // Friendly display name — empty for fixture-declared worlds —
-        // So matching on config is what lines up with test intent.
-        nameLabel: 'sh.spwn.world.config',
-        testRunLabel: 'sh.spwn.test.run',
-    }),
-    {
-        root: '../fixtures',
-        seedHandlers,
-        transform: normalise,
-    },
-);
-
-export const dockerSpec = rawDockerRunner as unknown as (label: string) => DockerSpecBuilder;

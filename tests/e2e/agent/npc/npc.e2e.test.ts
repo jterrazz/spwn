@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Ephemeral (NPC) agents under the docker() spec mode.
@@ -29,7 +29,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('agent --ephemeral (NPC)', () => {
     test('ephemeral without --world fails with a helpful error', async () => {
-        await using result = await dockerSpec('ephemeral no world')
+        await using result = await spec('ephemeral no world')
             .project('docker-pilot')
             .exec('agent --ephemeral "do something"')
             .run();
@@ -44,9 +44,9 @@ describe('agent --ephemeral (NPC)', () => {
 
     test('ephemeral dispatches a task into a running world', async () => {
         // First run: bring up the world. Keep it alive for a follow-up
-        // Second dockerSpec call so we can read the runtime world id
+        // Second spec call so we can read the runtime world id
         // Off the container label map.
-        await using up = await dockerSpec('ephemeral up')
+        await using up = await spec('ephemeral up')
             .project('docker-pilot')
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('up')
@@ -64,7 +64,7 @@ describe('agent --ephemeral (NPC)', () => {
         expect(worldID).toBeTruthy();
 
         // Second run: dispatch the ephemeral against the live world.
-        await using dispatch = await dockerSpec('ephemeral dispatch')
+        await using dispatch = await spec('ephemeral dispatch')
             .project('docker-pilot')
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec(`agent --ephemeral "lint the code" --world ${worldID}`)
@@ -85,7 +85,7 @@ describe('agent --ephemeral (NPC)', () => {
 
     test('ephemeral does not register a persistent agent', async () => {
         // Bring up the world and learn its id.
-        await using up = await dockerSpec('ephemeral no mind up')
+        await using up = await spec('ephemeral no mind up')
             .project('docker-pilot')
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec('up')
@@ -101,7 +101,7 @@ describe('agent --ephemeral (NPC)', () => {
 
         // Dispatch an ephemeral and then list agents in the same run, so
         // `agent ls --json` sees whatever the dispatch left behind.
-        await using after = await dockerSpec('ephemeral then ls')
+        await using after = await spec('ephemeral then ls')
             .project('docker-pilot')
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
             .exec([`agent --ephemeral "check health" --world ${worldID}`, 'agent ls --json'])

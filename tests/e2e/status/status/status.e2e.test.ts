@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec, spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * `spwn status` — top-level dashboard.
@@ -52,7 +52,7 @@ describe('spwn status', () => {
     // Dashboards), so we match on stderr content.
     describe('with an active world (docker)', () => {
         test('shows the running project world and its agent', async () => {
-            await using result = await dockerSpec('status with world')
+            await using result = await spec('status with world')
                 .project('docker-pilot')
                 .exec(['up', 'status'])
                 .run();

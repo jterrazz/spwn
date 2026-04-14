@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World resource limits under the docker() spec mode.
@@ -15,7 +15,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('world resource limits', () => {
     test('default container has a bounded pids limit', async () => {
-        await using result = await dockerSpec('resource limits applied')
+        await using result = await spec('resource limits applied')
             .project('docker-pilot')
             .exec('up')
             .run();

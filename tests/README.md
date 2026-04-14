@@ -105,19 +105,26 @@ Key design points:
 
 ### TypeScript E2E Setup (`tests/setup/`)
 
-All TypeScript E2E tests run under `@jterrazz/test`. The spwn-side
-setup lives in a single file:
+All TypeScript E2E tests run under `@jterrazz/test` via one
+specification runner:
 
-| File                   | Purpose                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------- |
-| `cli.specification.ts` | Exports `spec` (CLI mode) and `dockerSpec` (Docker mode), both bound to `bin/spwn` |
+| File                   | Purpose                                               |
+| ---------------------- | ----------------------------------------------------- |
+| `cli.specification.ts` | Exports `spec`, the single runner bound to `bin/spwn` |
 
-Both runners share a `transform` that strips ANSI and collapses
+One runner, one mental model. Whether a test happens to touch
+Docker is a property of what it asserts on, not a choice you make
+at setup time. CLI-only tests use `.exec(...)` and reach for
+stdout/stderr/file accessors. Tests that need container assertions
+add `await using` and call `.container(name)` — the first access
+lazily queries Docker; CLI-only tests never touch it.
+
+The runner ships with a `transform` that strips ANSI and collapses
 `/tmp/spec-*` paths to `<PROJECT>`, plus seed handlers for
 `spwn.yaml/`, `agent/`, `state/`, and `activity/` fragments under
 each test's `seeds/` directory.
 
-**CLI-mode pattern** — binary-level behavior, no Docker:
+**CLI-only pattern** — no containers, no docker cost:
 
 ```typescript
 import { describe, expect, test } from 'vitest';
@@ -133,28 +140,25 @@ describe('spwn check', () => {
 });
 ```
 
-- Each spec gets a fresh temp dir. `.project('name')` copies
-  `tests/fixtures/<name>/` into it before the command runs.
+- `.project('name')` copies `tests/fixtures/<name>/` into a fresh
+  temp dir before the command runs.
 - `result.stdout.toMatch('name.txt')` compares against
-  `<test-dir>/expected/stdout/name.txt`. Generate with
+  `<test-dir>/expected/stdout/name.txt`. Regenerate with
   `JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run ...`.
 - `result.json.toMatch('name.json')` parses stdout and deep-equals
   against a JSON fixture — pair with `spwn check --json` etc.
 - `result.file('.spwn/state.json').exists` / `.content` reads the
   host-side working dir.
 
-**Docker-mode pattern** — tests that need a live container:
+**Container-asserting pattern** — same `spec`, plus `.container(...)`:
 
 ```typescript
 import { describe, expect, test } from 'vitest';
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 describe('world lifecycle', () => {
     test('up provisions a running world', async () => {
-        await using result = await dockerSpec('up lifecycle')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('up lifecycle').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
         result.stderr.toContain('Created container');
@@ -169,12 +173,13 @@ describe('world lifecycle', () => {
 });
 ```
 
-- **`await using`** is mandatory. The dispose hook force-removes
-  every container tagged with this test's run id — tests running
-  in parallel never collide and nothing leaks between runs.
+- **`await using`** whenever a test might spawn containers. The
+  dispose hook force-removes every container tagged with this
+  test's run id so parallel runs never collide. Harmless no-op
+  for tests that don't spawn anything.
 - `result.container('<world-key>')` resolves by the
-  `sh.spwn.world.config` label (the key declared under `worlds.`
-  in `spwn.yaml`), not by the sometimes-empty `sh.spwn.world.name`.
+  `sh.spwn.world.config` label — the key declared under `worlds.`
+  in `spwn.yaml`, not the sometimes-empty `sh.spwn.world.name`.
 - `result.container(name).file(path)` / `.exec(cmd)` /
   `.inspect.value` / `.stdout` / `.stderr` use the same accessor
   API as the host-side `result` — no new vocabulary.
@@ -186,12 +191,6 @@ describe('world lifecycle', () => {
 - Banners (`Created container`, `Agent is alive`, `Destroyed`,
   `World destroyed`) go to **stderr**, not stdout — spwn follows
   the Unix convention of data-on-stdout / status-on-stderr.
-
-**Vitest project layout** (`tests/vitest.config.ts`):
-
-- `cli` project — CLI-mode tests, runs fast, parallel.
-- `docker` project — Docker-mode tests, `fileParallelism: false`,
-  `testTimeout: 120_000`.
 
 ## Adding New Tests
 
@@ -214,8 +213,7 @@ describe('world lifecycle', () => {
 
 1. Create `tests/e2e/<area>/<feature>/<feature>.e2e.test.ts` (one
    per-feature folder per test file, siblings: `expected/`, `seeds/`).
-2. Import `spec` (CLI mode) or `dockerSpec` (Docker mode) from
-   `tests/setup/cli.specification.js`.
+2. Import `spec` from `tests/setup/cli.specification.js`.
 3. Use `describe`/`test` with clear behavioral names.
 4. Prefer structured assertions: `.toMatch('file.txt')`,
    `.json.toMatch('file.json')`, `.container(name).file(path)`,

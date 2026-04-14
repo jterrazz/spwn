@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World security / physics enforcement under the docker() spec mode.
@@ -27,7 +27,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('world security', () => {
     test('declared element packs expand into live binaries inside the container', async () => {
-        await using result = await dockerSpec('element pack expansion')
+        await using result = await spec('element pack expansion')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -57,10 +57,7 @@ describe('world security', () => {
         // Agents can reach the host through host.docker.internal. This
         // Test pins the behaviour — flip it the day spwn reintroduces a
         // Network isolation flag.
-        await using result = await dockerSpec('network bridge')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('network bridge').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
 
@@ -71,7 +68,7 @@ describe('world security', () => {
     });
 
     test('pids limit is bounded (not unlimited)', async () => {
-        await using result = await dockerSpec('pids limit bounded')
+        await using result = await spec('pids limit bounded')
             .project('docker-pilot')
             .exec('up')
             .run();
