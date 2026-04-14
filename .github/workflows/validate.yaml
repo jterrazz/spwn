@@ -71,7 +71,12 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # Node 22: oxlint.config.ts / oxfmt.config.ts rely on Node's
+          # Native .ts stripping, which requires >=22.18 (or ^20.19 with
+          # A quirk that doesn't actually work for config loading).
+          # Staying on Node 20 breaks codestyle check with
+          # ERR_UNKNOWN_FILE_EXTENSION.
+          node-version: '22'
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -79,3 +84,19 @@ jobs:
         run: pnpm -C apps/web lint
       - name: Build web
         run: pnpm -C apps/web build
+
+  tests-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint tests
+        run: pnpm -C tests lint
