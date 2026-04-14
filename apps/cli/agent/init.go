@@ -2,11 +2,14 @@ package agent
 
 import (
 	"fmt"
+	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 
 	agentDomain "spwn.sh/packages/agent"
 	"spwn.sh/packages/foundation"
-	"github.com/spf13/cobra"
+	"spwn.sh/packages/manifest"
 )
 
 var initTeam string
@@ -46,6 +49,19 @@ provided, a random name is picked from a curated dictionary.`,
 
 		s.Done("Created agent", name)
 		s.Done("Created profile", "profile.md")
+
+		// Auto-world: when a spwn project is active, also add a
+		// single-agent world entry to spwn.yaml so the agent is
+		// immediately deployable via `spwn up` or `spwn agent <name>`.
+		if cwd, werr := os.Getwd(); werr == nil {
+			if p, perr := manifest.Find(cwd); perr == nil && p != nil {
+				if addErr := manifest.AddAgentToManifest(p.ManifestPath, name); addErr != nil {
+					s.Warn("Warning", fmt.Sprintf("could not add world to spwn.yaml: %v", addErr))
+				} else {
+					s.Done("Added world to spwn.yaml", name)
+				}
+			}
+		}
 
 		// Assign team if provided
 		if initTeam != "" {

@@ -100,13 +100,16 @@ func worldHelp(cmd *cobra.Command, args []string) {
 }
 
 // Cmd is the parent for `spwn world …`. Bare `spwn world` shows help.
-// `spwn world --agent neo` (with at least one spawn flag) acts as a
-// shortcut for `spwn world up --agent neo`.
+// `spwn world <name>` is a compose-style shortcut that starts the
+// named world from spwn.yaml (equivalent to `spwn world start <name>`).
+// `spwn world --agent neo` (with at least one spawn flag) also still
+// acts as a shortcut for `spwn world up --agent neo`.
 var Cmd = &cobra.Command{
-	Use:   "world",
+	Use:   "world [name]",
 	Short: "Manage worlds - ephemeral runtime instances for agents",
+	Args:  cobra.ArbitraryArgs, // we inspect args manually so subcommands still resolve
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// If no spawn flags are set, just render the grouped help.
+		// If no spawn flags and no positional arg, just render help.
 		spawnFlagNames := []string{"config", "name", "agent", "workspace", "world", "interactive"}
 		anySet := false
 		for _, n := range spawnFlagNames {
@@ -115,27 +118,76 @@ var Cmd = &cobra.Command{
 				break
 			}
 		}
-		if !anySet {
+		if !anySet && len(args) == 0 {
 			return cmd.Help()
+		}
+		// `spwn world <name>` with no flags -> start the named world.
+		if !anySet && len(args) == 1 {
+			return composeUpRunE(cmd, args)
 		}
 		return spawnRunE(cmd, args)
 	},
 }
 
 // upCmd is `spwn world up` - the canonical spawn verb. The top-level
-// `spwn up` alias in aliases.go just reuses upCmd.RunE.
+// `spwn up` alias in aliases.go just reuses upCmd.RunE. When invoked
+// with no positional arg inside a spwn project, it brings up every
+// world declared in spwn.yaml compose-style.
 var upCmd = &cobra.Command{
-	Use:   "up",
+	Use:   "up [name]",
 	Short: "Spawn a world - an isolated reality for agents",
 	Long: `Spawn a world - the Big Bang.
 
-Creates an isolated Docker environment. Pass --agent (repeatable) to bring
-agents to life inside it. Without any --agent flag, the world spawns empty.`,
-	Example: `  spwn world up --agent neo -w .                  Single agent in current dir
-  spwn world up --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)
-  spwn world up --name "Big Refactor" --agent neo  Ephemeral (no host mount)
-  spwn world up                                    Empty world (no agent)`,
-	RunE: spawnRunE,
+Inside a spwn project:
+  spwn up             brings up every world declared in spwn.yaml
+  spwn up <name>      brings up a specific world from spwn.yaml
+
+Outside a project, the legacy global-mode flags still work and spawn
+a one-off world from ~/.spwn/worlds/<config>.yaml.`,
+	Args: cobra.MaximumNArgs(1),
+	Example: `  spwn up                                          Bring up every world in spwn.yaml
+  spwn up neo                                      Start the "neo" world
+  spwn world up --agent neo -w .                  Single agent in current dir
+  spwn world up --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)`,
+	RunE: composeUpRunE,
+}
+
+// composeUpRunE is the top-level entry point for `spwn up`.
+// With no args and a project active, it iterates every world in
+// spwn.yaml. With one positional arg, it forwards to spawnRunE.
+func composeUpRunE(cmd *cobra.Command, args []string) error {
+	if len(args) > 0 {
+		return spawnRunE(cmd, args)
+	}
+	// No positional arg: try compose-style iteration if a project is loaded.
+	p, err := loadProject()
+	if err != nil || p == nil || len(p.Manifest.Worlds) == 0 {
+		return spawnRunE(cmd, args)
+	}
+	names := sortedWorldNames(p)
+	if len(names) == 1 {
+		// Single-world project: behave identically to `spwn up <name>`.
+		return spawnRunE(cmd, []string{names[0]})
+	}
+	// Multi-world: iterate. Reset flag state between iterations so each
+	// world gets its own resolved agents/workspaces from the inline map.
+	for _, name := range names {
+		resetSpawnFlags(cmd)
+		if err := spawnRunE(cmd, []string{name}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// resetSpawnFlags zeroes out the flag-backed globals between successive
+// spawnRunE calls in compose-style iteration. Without this, the second
+// world would inherit the first world's agents/workspaces.
+func resetSpawnFlags(cmd *cobra.Command) {
+	spawnConfig = ""
+	spawnName = ""
+	spawnAgents = nil
+	spawnWorkspaces = nil
 }
 
 func spawnRunE(cmd *cobra.Command, args []string) error {
@@ -144,9 +196,21 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 
 	s.Blank()
 
-	// If we're inside a spwn project and the caller didn't override
-	// world or agents, adopt the defaults declared in spwn.yaml.
-	applyManifestDefaults(cmd)
+	// A positional name arg always refers to a world entry in spwn.yaml.
+	// `spwn up foo` = start world `foo`. This is the compose-style path.
+	positionalName := ""
+	if len(args) > 0 {
+		positionalName = args[0]
+	}
+
+	// If we're inside a spwn project, prefer the inline spwn.yaml world
+	// over the legacy ~/.spwn/worlds/<name>.yaml file. When a project is
+	// active we synthesize a world.Manifest straight from the inline
+	// map, so no stub file needs to exist on disk.
+	pw, projectErr := applyProjectDefaults(cmd, positionalName)
+	if projectErr != nil {
+		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
+	}
 
 	if spawnBuild {
 		if err := runPreSpawnBuild(cmd); err != nil {
@@ -165,9 +229,14 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		m   world.Manifest
 		err error
 	)
-	if spawnWorld != "" {
+	switch {
+	case pw != nil && spawnWorld == "":
+		// Project mode: manifest is fully synthesized from spwn.yaml.
+		m = pw.Manifest
+		configName = pw.Name
+	case spawnWorld != "":
 		m, err = world.LoadManifestPath(spawnWorld)
-	} else {
+	default:
 		m, err = world.LoadManifest(configName)
 	}
 	if err != nil {
@@ -404,42 +473,39 @@ func spawnHint(err error, agentName string, agents []world.AgentSpec) string {
 	}
 }
 
-// applyManifestDefaults pulls the world config name and agent list out
-// of the project's spwn.yaml when the caller didn't override them via
-// flags. Silently no-ops when no project is active, so the legacy
-// global-mode CLI still works unchanged.
-func applyManifestDefaults(cmd *cobra.Command) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return
-	}
-	p, err := manifest.Find(cwd)
+// applyProjectDefaults resolves the current spwn.yaml (if any) and
+// overlays its inline world entry on the flag state. It returns the
+// projectWorld used so callers can build from its synthesized manifest
+// directly. Silently no-ops (returning nil, nil) when no project is
+// active, so the legacy global-mode CLI still works unchanged.
+//
+// If requestedName is non-empty and the project has no such world,
+// this returns a hard error - we refuse to silently fall through to
+// the legacy config path because the user asked for a specific name.
+func applyProjectDefaults(cmd *cobra.Command, requestedName string) (*projectWorld, error) {
+	p, err := loadProject()
 	if err != nil || p == nil {
-		return
+		return nil, nil
+	}
+	pw, err := resolveProjectWorld(p, requestedName)
+	if err != nil {
+		// Named world explicitly requested but missing -> hard error.
+		if requestedName != "" {
+			return nil, err
+		}
+		return nil, nil
 	}
 
-	// New schema: pick the first (sorted) world entry as the default.
-	// Multi-world projects should be addressed explicitly by name.
-	var firstName string
-	var firstWorld manifest.World
-	for name, w := range p.Manifest.Worlds {
-		if firstName == "" || name < firstName {
-			firstName = name
-			firstWorld = w
-		}
-	}
-	if firstName == "" {
-		return
-	}
 	if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("world") && spawnConfig == "" {
-		spawnConfig = firstName
+		spawnConfig = pw.Name
 	}
 	if !cmd.Flags().Changed("agent") && len(spawnAgents) == 0 {
-		spawnAgents = append(spawnAgents, firstWorld.Agents...)
+		spawnAgents = append(spawnAgents, pw.Agents...)
 	}
-	if !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 && len(firstWorld.Workspaces) > 0 {
-		spawnWorkspaces = append(spawnWorkspaces, firstWorld.Workspaces...)
+	if !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 && len(pw.Workspaces) > 0 {
+		spawnWorkspaces = append(spawnWorkspaces, pw.Workspaces...)
 	}
+	return pw, nil
 }
 
 // runPreSpawnBuild runs a project build before spawning. When --build

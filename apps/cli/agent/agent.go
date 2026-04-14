@@ -41,7 +41,10 @@ func agentHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds that live in worlds"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
-				{Name: "new <name>", Desc: "Create a blank agent"},
+				{Name: "new <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
+				{Name: "<name>", Desc: "Start the world that contains <name> " + ui.Faint("(shortcut)")},
+				{Name: "start <name>", Desc: "Start the world containing this agent"},
+				{Name: "stop <name>", Desc: "Stop the world containing this agent"},
 				{Name: "ls", Desc: "List agents"},
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
@@ -81,20 +84,30 @@ func agentHelp(cmd *cobra.Command, args []string) {
 	)
 }
 
-// Cmd is the agent command - spawns an agent when run directly,
-// and groups subcommands (init, list, inspect, export).
+// Cmd is the agent command. In the new grammar:
+//   - `spwn agent` with no args and no flags -> help
+//   - `spwn agent <name>` -> start the world that contains <name>
+//   - `spwn agent --flags ...` -> legacy imperative spawn
+// Subcommands (new, ls, start, stop, inspect, ...) resolve first.
 var Cmd = &cobra.Command{
-	Use:   "agent",
+	Use:   "agent [name]",
 	Short: "Spawn an agent - a living identity that inhabits a world",
 	Long: `Spawn an agent into an existing world.
 
 An agent is backed by a Mind - a persistent directory holding its profile,
 skills, knowledge, playbooks, journal entries, and session state. The agent
 survives after the world is destroyed.`,
-	Example: `  spwn agent -n neo -u w-abc123      Spawn named agent into world
-  spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task
-  spwn agent --import backup.tar.gz  Import a Mind archive first`,
+	Args: cobra.ArbitraryArgs, // subcommands still resolve first
+	Example: `  spwn agent new neo                 Create a blank agent
+  spwn agent neo                     Start the world that contains neo
+  spwn agent -n neo -u w-abc123      Legacy: spawn named agent into world
+  spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Compose-style shortcut: `spwn agent <name>` -> agent start <name>.
+		if len(args) == 1 && !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
+			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {
+			return startCmd.RunE(cmd, args)
+		}
 		// If no flags set at all, show help
 		if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
 			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {

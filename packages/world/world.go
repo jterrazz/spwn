@@ -138,6 +138,15 @@ func ApplyDefaults(m *Manifest) {
 	manifest.ApplyDefaults(m)
 }
 
+// LoadAgentManifest reads an agent.yaml file from the given agent
+// directory. Returns (nil, nil) when agent.yaml is absent — callers
+// treat the manifest as optional. External callers (notably the CLI
+// project resolver) use this to compute the tool union across a
+// world's referenced agents without reaching into internal packages.
+func LoadAgentManifest(agentDir string) (*AgentManifest, error) {
+	return manifest.LoadAgent(agentDir)
+}
+
 // --- Web API ---
 
 // APIServer is the HTTP API server type.

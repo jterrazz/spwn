@@ -6,19 +6,23 @@ import (
 
 // UpCmd is the top-level alias for `spwn up` (= `spwn world up`).
 var UpCmd = &cobra.Command{
-	Use:     "up",
+	Use:     "up [name]",
 	Short:   "Spawn a world - an isolated reality for agents",
 	Long:    upCmd.Long,
 	Example: upCmd.Example,
-	RunE:    spawnRunE,
+	Args:    cobra.MaximumNArgs(1),
+	RunE:    composeUpRunE,
 }
 
-// DownCmd is the top-level alias for spwn down.
+// DownCmd is the top-level alias for spwn down. With no positional arg
+// and a spwn project active, it stops every running world whose config
+// name matches an entry in spwn.yaml (compose-style). With an explicit
+// name or ID, it forwards to destroyCmd.
 var DownCmd = &cobra.Command{
-	Use:   "down [world-id]",
+	Use:   "down [name-or-id]",
 	Short: "Destroy a world",
 	Args:  cobra.MaximumNArgs(1),
-	RunE:  destroyCmd.RunE,
+	RunE:  composeDownRunE,
 }
 
 // LsCmd is the top-level alias for spwn ls.
