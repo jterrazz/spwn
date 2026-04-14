@@ -10,7 +10,6 @@ import (
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
-	"spwn.sh/apps/cli/example"
 	"spwn.sh/apps/cli/get"
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
@@ -80,7 +79,6 @@ func init() {
 	// Command groups - system
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
-	rootCmd.AddCommand(example.Cmd)
 	rootCmd.AddCommand(web.Cmd)
 	rootCmd.AddCommand(get.Cmd)
 	rootCmd.AddCommand(logs.Cmd)

@@ -615,8 +615,8 @@ function EmptyWorldsView({ agents, onSpawn, onRefetch }: { agents: AgentListItem
   const [installError, setInstallError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiGet<{ examples: GalleryExample[] }>("/api/examples")
-      .then((data) => setGallery(data.examples ?? []))
+    apiGet<{ templates: GalleryExample[] }>("/api/templates")
+      .then((data) => setGallery(data.templates ?? []))
       .catch(() => setGallery([]));
   }, []);
 
@@ -626,7 +626,7 @@ function EmptyWorldsView({ agents, onSpawn, onRefetch }: { agents: AgentListItem
     try {
       // 1. Copy template files into ~/.spwn/ (idempotent - skips
       //    existing agents/worlds so users don't lose local edits).
-      await apiPost(`/api/examples/${ex.slug}/install`);
+      await apiPost(`/api/templates/${ex.slug}/install`);
 
       // 2. Immediately spawn the first world with its canonical
       //    agent set so the user lands in a live container on click.
