@@ -9,13 +9,13 @@ import (
 )
 
 func TestPhysics_ContainsLaws(t *testing.T) {
-	// GIVEN the default laws configuration
-	// WHEN a world is spawned
+	// Given - the default laws configuration
+	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
 		Execute()
 
-	// THEN the physics file should document the default network law
+	// Then - the physics file should document the default network law
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasFile("/world/physics.md")
 		c.FileContains("/world/physics.md", "Network: bridge")
@@ -23,8 +23,8 @@ func TestPhysics_ContainsLaws(t *testing.T) {
 }
 
 func TestFaculties_ContainsTools(t *testing.T) {
-	// GIVEN a config with @spwn/unix and @spwn/git tools
-	// WHEN a world is spawned
+	// Given - a config with @spwn/unix and @spwn/git tools
+	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 tools:
@@ -34,7 +34,7 @@ tools:
 		NoAgent().
 		Execute()
 
-	// THEN the faculties file should list the available tools
+	// Then - the faculties file should list the available tools
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasFile("/world/faculties.md")
 		c.FileContains("/world/faculties.md", "Tools")

@@ -54,11 +54,11 @@ describe('world destroy', () => {
     });
 
     test('per-id destroy prints the detailed step banners', async () => {
-        // GIVEN a running project world, WHEN `spwn down <world-id>`
-        // Is called with an explicit id (the per-id destroy path —
-        // Apps/cli/world/destroy.go's destroyCmd.RunE), THEN the
-        // Richer per-step banners must fire: "Stopped agent",
-        // "Removed container", "Mind persisted". These are NOT emitted
+        // Given - a running project world
+        // When - `spwn down <world-id>` is called with an explicit id
+        // (the per-id destroy path in apps/cli/world/destroy.go)
+        // Then - the richer per-step banners fire ("Stopped agent",
+        // "Removed container", "Mind persisted"). These are NOT emitted
         // By the project-mode bare `down`, so this test guards the
         // Per-id code path specifically.
         //

@@ -14,15 +14,15 @@ import { spec } from '../../../setup/cli.specification.js';
 
 describe('agent lifecycle (CLI-only)', () => {
     test('init -> agent ls -> dream -> rm round-trip', async () => {
-        // GIVEN - an empty dir scaffolded with the starter project
-        // WHEN - we run the full non-Docker journey in one chain
+        // Given - an empty dir scaffolded with the starter project
+        // When - we run the full non-Docker journey in one chain
         const result = await spec('lifecycle round trip')
             .project('empty')
             .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
             .exec(['init --name lifecycle', 'agent ls', 'agent dream neo', 'agent rm neo'])
             .run();
 
-        // THEN - final `agent rm neo` exits zero with the delete banner
+        // Then - final `agent rm neo` exits zero with the delete banner
         expect(result.exitCode).toBe(0);
         expect(result.stderr.text).toMatch(/Deleted agent\s+neo/);
 

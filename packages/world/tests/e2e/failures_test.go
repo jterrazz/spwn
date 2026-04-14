@@ -10,7 +10,7 @@ import (
 )
 
 func TestFailure_AgentExitsNonZero(t *testing.T) {
-	// GIVEN a world where the mock agent runs to completion
+	// Given - a world where the mock agent runs to completion
 	// (The mock exits with code 0 by default; RunAgent records the journal entry.)
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("fail-agent")
@@ -20,7 +20,7 @@ func TestFailure_AgentExitsNonZero(t *testing.T) {
 		RunAgent().
 		Execute()
 
-	// THEN the mock should have been called
+	// Then - the mock should have been called
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 	})
@@ -38,7 +38,7 @@ func TestFailure_AgentExitsNonZero(t *testing.T) {
 }
 
 func TestFailure_RecoveryAfterCrash(t *testing.T) {
-	// GIVEN a world where the first agent run completed
+	// Given - a world where the first agent run completed
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("recovery-agent")
 
@@ -53,13 +53,13 @@ func TestFailure_RecoveryAfterCrash(t *testing.T) {
 
 	worldID := chain.World().ID
 
-	// WHEN a second agent is spawned in the same world (blocking)
+	// When - a second agent is spawned in the same world (blocking)
 	err := tc.Arc.SpawnAgent(context.Background(), worldID, "recovery-agent")
 	if err != nil {
 		t.Logf("Second spawn returned (expected for mock): %v", err)
 	}
 
-	// THEN the container should still be running
+	// Then - the container should still be running
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
 	})

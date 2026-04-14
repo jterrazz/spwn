@@ -85,7 +85,7 @@ describe('spwn architect', () => {
         // The visible output here is from `architect status`. That means
         // Both "start" succeeded (exit 0) and status sees it running.
         result.stderr.toContain('running');
-        // When overriding the image we see alpine in the status line,
+        // When - overriding the image we see alpine in the status line,
         // Not the default spwn/architect:latest.
         result.stderr.toContain(ARCHITECT_IMAGE_OVERRIDE);
     });

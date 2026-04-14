@@ -12,18 +12,18 @@ import (
 )
 
 func TestAgent_ExportCreatesArchive(t *testing.T) {
-	// GIVEN an initialized agent
+	// Given - an initialized agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("export-agent")
 
-	// WHEN the agent's Mind is exported
+	// When - the agent's Mind is exported
 	outputDir := t.TempDir()
 	archivePath, err := agent.ExportMind("export-agent", outputDir, nil)
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
-	// THEN the archive should exist and be non-empty
+	// Then - the archive should exist and be non-empty
 	info, err := os.Stat(archivePath)
 	if err != nil {
 		t.Fatalf("Archive not found: %v", err)
@@ -34,7 +34,7 @@ func TestAgent_ExportCreatesArchive(t *testing.T) {
 }
 
 func TestAgent_ImportRestoresMind(t *testing.T) {
-	// GIVEN an exported agent archive
+	// Given - an exported agent archive
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("import-src")
 
@@ -44,13 +44,13 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 		t.Fatalf("Export failed: %v", err)
 	}
 
-	// WHEN importing the archive into a new agent
+	// When - importing the archive into a new agent
 	err = agent.ImportMind("import-dst", archivePath)
 	if err != nil {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// THEN the imported agent should have core/profile.md
+	// Then - the imported agent should have core/profile.md
 	info, err := agent.InspectAgent("import-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
@@ -69,14 +69,14 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 }
 
 func TestAgent_ExportWithExclude(t *testing.T) {
-	// GIVEN an agent with a journal entry
+	// Given - an agent with a journal entry
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("exclude-agent")
 
 	journalDir := filepath.Join(agent.AgentDir("exclude-agent"), "journal")
 	os.WriteFile(filepath.Join(journalDir, "test.md"), []byte("test"), 0644)
 
-	// WHEN exporting with the journal excluded
+	// When - exporting with the journal excluded
 	outputDir := t.TempDir()
 	archivePath, err := agent.ExportMind("exclude-agent", outputDir, []string{"journal"})
 	if err != nil {
@@ -89,7 +89,7 @@ func TestAgent_ExportWithExclude(t *testing.T) {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// THEN the imported agent's journal should be empty
+	// Then - the imported agent's journal should be empty
 	info, err := agent.InspectAgent("exclude-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)

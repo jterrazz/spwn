@@ -22,10 +22,10 @@ const isolated = (label: string) =>
 
 describe('CLI stress tests', () => {
     test('5 parallel agent create commands all exit cleanly', async () => {
-        // GIVEN - five distinct agent names
+        // Given - five distinct agent names
         const names = ['alpha', 'bravo', 'charlie', 'delta', 'echo'];
 
-        // WHEN - each runs in its own fresh home, initialized then create
+        // When - each runs in its own fresh home, initialized then create
         const results = await Promise.all(
             names.map((name) =>
                 isolated(`stress create ${name}`)
@@ -34,7 +34,7 @@ describe('CLI stress tests', () => {
             ),
         );
 
-        // THEN - every run exits zero with no panic
+        // Then - every run exits zero with no panic
         for (const result of results) {
             expect(result.exitCode).toBe(0);
             const combined = result.stdout.text + result.stderr.text;
@@ -44,20 +44,20 @@ describe('CLI stress tests', () => {
     });
 
     test('create + list round-trip surfaces the agent name in stderr banners', async () => {
-        // GIVEN - a fresh isolated home
-        // WHEN - init, create, then ls in one chained exec
+        // Given - a fresh isolated home
+        // When - init, create, then ls in one chained exec
         const result = await isolated('stress create + ls')
             .exec(['init', 'agent create rapid', 'agent ls'])
             .run();
 
-        // THEN - last command (ls) exits zero, and the chain mentions the agent
+        // Then - last command (ls) exits zero, and the chain mentions the agent
         expect(result.exitCode).toBe(0);
         const combined = result.stdout.text + result.stderr.text;
         expect(combined).toContain('rapid');
     });
 
     test('rapid sequential create/rm cycles do not corrupt state', async () => {
-        // GIVEN - a chain of 5 create/rm pairs followed by agent ls
+        // Given - a chain of 5 create/rm pairs followed by agent ls
         const steps: string[] = ['init'];
         for (let i = 0; i < 5; i++) {
             steps.push(`agent create rapid-${i}`);
@@ -65,10 +65,10 @@ describe('CLI stress tests', () => {
         }
         steps.push('agent ls');
 
-        // WHEN - the chain runs in a single isolated home
+        // When - the chain runs in a single isolated home
         const result = await isolated('stress sequential').exec(steps).run();
 
-        // THEN - every command in the chain exits zero, no crash.
+        // Then - every command in the chain exits zero, no crash.
         // We intentionally do NOT assert that the cycled agent names
         // Disappear from `agent ls`: spwn currently auto-adds a world
         // Per freshly-created agent, and `agent rm` only removes the

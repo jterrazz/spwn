@@ -14,13 +14,13 @@ import (
 // TestSpawn_Ephemeral verifies that a world with zero workspaces has no /work
 // mounts and no SPWN_WORKSPACES env var advertising mounts that don't exist.
 func TestSpawn_Ephemeral(t *testing.T) {
-	// GIVEN the default configuration
-	// WHEN a world is spawned without any -w flags
+	// Given - the default configuration
+	// When - a world is spawned without any -w flags
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		Execute()
 
-	// THEN the container is running with no workspace mounts
+	// Then - the container is running with no workspace mounts
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
 	})
@@ -29,14 +29,14 @@ func TestSpawn_Ephemeral(t *testing.T) {
 // TestSpawn_SingleNamedWorkspace verifies that one named workspace is mounted
 // at /work/<name>.
 func TestSpawn_SingleNamedWorkspace(t *testing.T) {
-	// GIVEN a project workspace
-	// WHEN a world is spawned with a single named workspace
+	// Given - a project workspace
+	// When - a world is spawned with a single named workspace
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		WithNamedWorkspace("proj", filepath.Join(setup.TestdataDir(), "project")).
 		Execute()
 
-	// THEN the project should be visible at /work/proj
+	// Then - the project should be visible at /work/proj
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasMount("/work/proj")
 		c.FileContains("/work/proj/README.md", "test project")
@@ -61,15 +61,15 @@ func TestSpawn_MultipleWorkspaces(t *testing.T) {
 		t.Fatalf("write api: %v", err)
 	}
 
-	// GIVEN two host directories
-	// WHEN a world is spawned with two named workspaces
+	// Given - two host directories
+	// When - a world is spawned with two named workspaces
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		WithNamedWorkspace("web", webPath).
 		WithNamedWorkspace("api", apiPath).
 		Execute()
 
-	// THEN both workspaces are mounted under /work/<name>.
+	// Then - both workspaces are mounted under /work/<name>.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasMount("/work/web")
 		c.HasMount("/work/api")
@@ -92,14 +92,14 @@ func TestSpawn_ReadOnlyWorkspace(t *testing.T) {
 		t.Fatalf("write: %v", err)
 	}
 
-	// GIVEN a host directory
-	// WHEN mounted read-only
+	// Given - a host directory
+	// When - mounted read-only
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		WithReadOnlyWorkspace("docs", dir).
 		Execute()
 
-	// THEN the file is readable but writes fail.
+	// Then - the file is readable but writes fail.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasMount("/work/docs")
 		c.FileContains("/work/docs/locked.txt", "read only")
@@ -123,17 +123,17 @@ func TestSpawn_WorkspaceEnvVars(t *testing.T) {
 		_ = os.MkdirAll(p, 0755)
 	}
 
-	// GIVEN two workspaces
+	// Given - two workspaces
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		WithNamedWorkspace("web", webPath).
 		WithNamedWorkspace("api", apiPath).
 		Execute()
 
-	// WHEN we read the env inside the container
+	// When - we read the env inside the container
 	envOut := chain.ExecInContainer([]string{"sh", "-c", "env | grep ^SPWN_WORKSPACE"})
 
-	// THEN both vars should be set and list each workspace
+	// Then - both vars should be set and list each workspace
 	if !strings.Contains(envOut, "SPWN_WORKSPACES=") {
 		t.Errorf("SPWN_WORKSPACES not set, got: %q", envOut)
 	}

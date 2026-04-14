@@ -9,13 +9,13 @@ import (
 )
 
 func TestAgentManifest_Optional(t *testing.T) {
-	// GIVEN an agent without an agent.yaml manifest
-	// WHEN a world is spawned with that agent
+	// Given - an agent without an agent.yaml manifest
+	// When - a world is spawned with that agent
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		Execute()
 
-	// THEN the spawn should succeed and the container should be running
+	// Then - the spawn should succeed and the container should be running
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 	})

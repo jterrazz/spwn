@@ -12,13 +12,13 @@ import (
 )
 
 func TestDetach_AgentRunsInBackground(t *testing.T) {
-	// GIVEN a world spawned with a detached agent
+	// Given - a world spawned with a detached agent
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("detach-agent").
 		Detached().
 		Execute()
 
-	// THEN the state should show one world
+	// Then - the state should show one world
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 	})
@@ -35,13 +35,13 @@ func TestDetach_AgentRunsInBackground(t *testing.T) {
 }
 
 func TestDetach_MockSeesEnvironment(t *testing.T) {
-	// GIVEN a world spawned with a detached agent
+	// Given - a world spawned with a detached agent
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("detach-env-agent").
 		Detached().
 		Execute()
 
-	// THEN the mock should see the full agent environment
+	// Then - the mock should see the full agent environment
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.SawMind()
@@ -51,7 +51,7 @@ func TestDetach_MockSeesEnvironment(t *testing.T) {
 }
 
 func TestDetach_StatusShowsRunning(t *testing.T) {
-	// GIVEN a world spawned with a detached agent
+	// Given - a world spawned with a detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("detach-status-agent")
 
@@ -60,7 +60,7 @@ func TestDetach_StatusShowsRunning(t *testing.T) {
 		Detached().
 		Execute()
 
-	// THEN the state should show the world as running
+	// Then - the state should show the world as running
 	worlds := tc.LoadState()
 	found := false
 	for _, u := range worlds {
@@ -77,7 +77,7 @@ func TestDetach_StatusShowsRunning(t *testing.T) {
 }
 
 func TestDetach_MultipleAgentsInSameWorld(t *testing.T) {
-	// GIVEN a world with an initial detached agent
+	// Given - a world with an initial detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("multi-agent")
 
@@ -90,13 +90,13 @@ func TestDetach_MultipleAgentsInSameWorld(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// WHEN a second agent is spawned detached in the same world
+	// When - a second agent is spawned detached in the same world
 	err := tc.Arc.SpawnAgentDetached(context.Background(), chain.World().ID, "multi-agent")
 	if err != nil {
 		t.Fatalf("Second detached agent spawn failed: %v", err)
 	}
 
-	// THEN the mock should have been called again (wait for output)
+	// Then - the mock should have been called again (wait for output)
 	setup.WaitFor(t, 5*time.Second, 100*time.Millisecond, "second mock to write output", func() bool {
 		output := tc.TryReadMockOutput(chain.World().ContainerID)
 		return output != nil
@@ -114,8 +114,8 @@ func TestDetach_MultipleAgentsInSameWorld(t *testing.T) {
 }
 
 func TestDetach_VsNoDetach(t *testing.T) {
-	// GIVEN a world spawned with an agent but WITHOUT Detached()
-	// THEN the world should be idle (agent not started in background)
+	// Given - a world spawned with an agent but WITHOUT Detached()
+	// Then - the world should be idle (agent not started in background)
 	setup.NewSpawnBuilder(t).
 		WithAgent("no-detach-agent").
 		Execute().

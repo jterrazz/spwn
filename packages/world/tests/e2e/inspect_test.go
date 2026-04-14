@@ -9,12 +9,12 @@ import (
 )
 
 func TestInspect_ShowsDetails(t *testing.T) {
-	// GIVEN a world spawned with the default config
+	// Given - a world spawned with the default config
 	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
 		Execute()
 
-	// WHEN inspecting the world
-	// THEN it should report the default config
+	// When - inspecting the world
+	// Then - it should report the default config
 	chain.Inspect().ExpectConfig("default")
 }

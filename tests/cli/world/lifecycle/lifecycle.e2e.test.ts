@@ -68,12 +68,12 @@ describe('world lifecycle', () => {
     });
 
     test('world inspect renders the expected field headers', async () => {
-        // GIVEN a running project world, WHEN `spwn world inspect <id>`
-        // Runs against it, THEN the rendered output must still include
-        // The core field headers (Status, Agent home). This locks down
-        // Apps/cli/world/inspect.go's top-level field surface, which
-        // Could silently regress when the Constants/Laws block was
-        // Removed alongside physics config.
+        // Given - a running project world
+        // When - `spwn world inspect <id>` runs against it
+        // Then - the rendered output includes the core field headers
+        // (Status, Agent home). This locks down apps/cli/world/inspect.go's
+        // Top-level field surface, which could silently regress now that
+        // The Constants/Laws block is gone along with physics config.
         //
         // World id is resolved inside the spec (single shared workdir)
         // Via shell substitution against .spwn/world-states/ — each

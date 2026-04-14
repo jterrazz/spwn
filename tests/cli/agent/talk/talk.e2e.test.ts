@@ -166,12 +166,13 @@ describe('agent talk', () => {
     });
 
     test('talk routes to the live world after a previous world was destroyed', async () => {
-        // GIVEN a full up/down cycle (spwn state now carries the record
-        // Of a torn-down world for neo), THEN a second up that brings up
-        // A fresh container, WHEN we call `agent talk neo`, THEN the
-        // Talk must reach the currently live container — not error out
-        // Against the stale one. All four steps run in a single spec so
-        // They share the same SPWN_HOME / state / test-run label.
+        // Given - a full up/down cycle followed by a fresh second up
+        // (spwn state carries a record of the torn-down world for neo
+        // Alongside the currently live container)
+        // When - we call `agent talk neo` against this mixed state
+        // Then - the talk reaches the currently live container, not
+        // The stale one. All four steps run in a single spec so they
+        // Share the same SPWN_HOME / state / test-run label.
         await using result = await spec('talk route after down')
             .project('docker-pilot')
             .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
