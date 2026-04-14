@@ -418,14 +418,27 @@ func applyManifestDefaults(cmd *cobra.Command) {
 		return
 	}
 
+	// New schema: pick the first (sorted) world entry as the default.
+	// Multi-world projects should be addressed explicitly by name.
+	var firstName string
+	var firstWorld manifest.World
+	for name, w := range p.Manifest.Worlds {
+		if firstName == "" || name < firstName {
+			firstName = name
+			firstWorld = w
+		}
+	}
+	if firstName == "" {
+		return
+	}
 	if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("world") && spawnConfig == "" {
-		spawnConfig = p.Manifest.World
+		spawnConfig = firstName
 	}
 	if !cmd.Flags().Changed("agent") && len(spawnAgents) == 0 {
-		spawnAgents = append(spawnAgents, p.Manifest.Agents...)
+		spawnAgents = append(spawnAgents, firstWorld.Agents...)
 	}
-	if !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 && p.Manifest.Workspace != "" {
-		spawnWorkspaces = append(spawnWorkspaces, p.Manifest.Workspace)
+	if !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 && len(firstWorld.Workspaces) > 0 {
+		spawnWorkspaces = append(spawnWorkspaces, firstWorld.Workspaces...)
 	}
 }
 

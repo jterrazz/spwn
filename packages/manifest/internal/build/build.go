@@ -1,26 +1,17 @@
 // Package build flattens a spwn project into a reproducible build
 // artifact under .spwn/build/.
 //
-// The artifact is a self-contained snapshot of "what the next spawn
-// would see". It lets `spwn up` skip straight to container creation
-// when nothing changed, and it lets teammates / CI ship an exact
-// pinned project by tar-ing the directory.
-//
 // Layout:
 //
 //	.spwn/build/
-//	├── build.json        - metadata (version, timestamps, hashes)
+//	├── build.json        - metadata (version, hashes, world+agents)
 //	├── manifest.json     - normalized spwn.yaml
-//	├── agents/
-//	│   └── <name>/       - flattened agent tree (every file the
-//	│                       runtime will read, including resolved
-//	│                       @-imports)
-//	└── worlds/
-//	    └── <name>.yaml   - world config (verbatim)
+//	└── agents/
+//	    └── <name>/       - flattened agent tree (every file the
+//	                        runtime will read)
 //
-// The Docker image digest, when a build includes one, goes into
-// build.json. Image bytes stay in the Docker daemon - the artifact
-// just pins the reference.
+// A build is always against a single world: only the agents that
+// world deploys, and the resolved tool union, are flattened.
 package build
 
 import (
@@ -31,48 +22,30 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
+
+	"gopkg.in/yaml.v3"
 
 	intmanifest "spwn.sh/packages/manifest/internal/manifest"
 )
 
 // Result is the outcome of a successful Build.
 type Result struct {
-	// Dir is the absolute path to the build artifact directory
-	// (typically <projectRoot>/.spwn/build/).
-	Dir string
-
-	// Agents lists the agents that were flattened into the artifact.
-	Agents []string
-
-	// World is the name of the world config written to the artifact.
-	World string
-
-	// FileCount is the total number of files copied.
+	Dir       string
+	World     string
+	Agents    []string
+	Tools     []string
 	FileCount int
-
-	// CreatedAt is when the build was written.
 	CreatedAt time.Time
 }
 
 // Opts configures Build.
 type Opts struct {
-	// Root is the absolute project root (the directory containing
-	// spwn.yaml).
-	Root string
-
-	// Manifest is the parsed manifest. Required.
-	Manifest *intmanifest.Manifest
-
-	// AgentPaths is the absolute path to each agent in the manifest
-	// (positional match with Manifest.Agents).
-	AgentPaths []string
-
-	// WorldPath is the absolute path to the world config file.
-	WorldPath string
-
-	// ImageDigest, when non-empty, pins the Docker image the build
-	// was produced against. Lands in build.json.
+	Root        string
+	Manifest    *intmanifest.Manifest
+	World       string            // which world to build (empty → only)
+	AgentPaths  map[string]string // agent name → absolute dir
 	ImageDigest string
 }
 
@@ -81,23 +54,26 @@ type Metadata struct {
 	Version     int       `json:"version"`
 	Project     string    `json:"project"`
 	CreatedAt   time.Time `json:"created_at"`
-	Agents      []string  `json:"agents"`
 	World       string    `json:"world"`
+	Agents      []string  `json:"agents"`
+	Tools       []string  `json:"tools"`
 	ImageDigest string    `json:"image_digest,omitempty"`
 	FileCount   int       `json:"file_count"`
 	ContentHash string    `json:"content_hash"`
 }
 
-// Build writes the artifact under .spwn/build/ and returns a Result.
-// The directory is wiped and recreated fresh on every call - the
-// artifact is atomic from the caller's perspective: either it reflects
-// the current project state or the call errors out.
+// Build writes the artifact under .spwn/build/ for the chosen world.
 func Build(opts Opts) (*Result, error) {
 	if opts.Manifest == nil {
 		return nil, fmt.Errorf("manifest is required")
 	}
 	if opts.Root == "" {
 		return nil, fmt.Errorf("root is required")
+	}
+
+	worldName, world, err := pickWorld(opts.Manifest, opts.World)
+	if err != nil {
+		return nil, err
 	}
 
 	buildDir := filepath.Join(opts.Root, ".spwn", "build")
@@ -122,12 +98,12 @@ func Build(opts Opts) (*Result, error) {
 	hasher.Write(mBytes)
 	fileCount++
 
-	// 2. Flattened agent trees
-	for i, name := range opts.Manifest.Agents {
-		if i >= len(opts.AgentPaths) {
+	// 2. Flattened agent trees (only this world's agents)
+	for _, name := range world.Agents {
+		src, ok := opts.AgentPaths[name]
+		if !ok {
 			continue
 		}
-		src := opts.AgentPaths[i]
 		dst := filepath.Join(buildDir, "agents", name)
 		n, err := copyTree(src, dst, hasher)
 		if err != nil {
@@ -136,28 +112,18 @@ func Build(opts Opts) (*Result, error) {
 		fileCount += n
 	}
 
-	// 3. World config
-	if opts.WorldPath != "" {
-		data, err := os.ReadFile(opts.WorldPath)
-		if err != nil {
-			return nil, fmt.Errorf("read world %s: %w", opts.WorldPath, err)
-		}
-		worldDst := filepath.Join(buildDir, "worlds", opts.Manifest.World+".yaml")
-		if err := writeFile(worldDst, data); err != nil {
-			return nil, err
-		}
-		hasher.Write(data)
-		fileCount++
-	}
+	// 3. Compute the resolved tool union for this world.
+	toolUnion := unionTools(opts.AgentPaths, world)
 
 	// 4. build.json metadata
 	now := time.Now().UTC()
 	meta := Metadata{
-		Version:     1,
+		Version:     2,
 		Project:     opts.Manifest.Name,
 		CreatedAt:   now,
-		Agents:      opts.Manifest.Agents,
-		World:       opts.Manifest.World,
+		World:       worldName,
+		Agents:      append([]string(nil), world.Agents...),
+		Tools:       toolUnion,
 		ImageDigest: opts.ImageDigest,
 		FileCount:   fileCount,
 		ContentHash: hex.EncodeToString(hasher.Sum(nil)),
@@ -172,17 +138,70 @@ func Build(opts Opts) (*Result, error) {
 
 	return &Result{
 		Dir:       buildDir,
-		Agents:    opts.Manifest.Agents,
-		World:     opts.Manifest.World,
+		World:     worldName,
+		Agents:    meta.Agents,
+		Tools:     toolUnion,
 		FileCount: fileCount,
 		CreatedAt: now,
 	}, nil
 }
 
-// copyTree walks src and replicates it under dst. Returns the number
-// of files copied. Skips anything matching a .spwn/ or node_modules/
-// pattern so artifacts don't balloon when the agent directory happens
-// to share a root with a larger repo.
+func pickWorld(m *intmanifest.Manifest, name string) (string, intmanifest.World, error) {
+	if name != "" {
+		w, ok := m.Worlds[name]
+		if !ok {
+			return "", intmanifest.World{}, fmt.Errorf("world %q not found in spwn.yaml", name)
+		}
+		return name, w, nil
+	}
+	if len(m.Worlds) == 0 {
+		return "", intmanifest.World{}, fmt.Errorf("no worlds declared in spwn.yaml")
+	}
+	if len(m.Worlds) > 1 {
+		return "", intmanifest.World{}, fmt.Errorf("multiple worlds declared; specify one explicitly")
+	}
+	for n, w := range m.Worlds {
+		return n, w, nil
+	}
+	return "", intmanifest.World{}, fmt.Errorf("unreachable")
+}
+
+// unionTools reads each agent's agent.yaml tools list and unions them
+// with the world's own tool augmentation, returning a sorted unique
+// slice. Best-effort: agent.yaml read errors are silently skipped.
+func unionTools(agentPaths map[string]string, world intmanifest.World) []string {
+	type agentToolsView struct {
+		Tools []string `yaml:"tools"`
+	}
+	seen := map[string]struct{}{}
+	for _, name := range world.Agents {
+		dir, ok := agentPaths[name]
+		if !ok {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, "agent.yaml"))
+		if err != nil {
+			continue
+		}
+		var v agentToolsView
+		if err := yaml.Unmarshal(data, &v); err != nil {
+			continue
+		}
+		for _, t := range v.Tools {
+			seen[t] = struct{}{}
+		}
+	}
+	for _, t := range world.Tools {
+		seen[t] = struct{}{}
+	}
+	out := make([]string, 0, len(seen))
+	for t := range seen {
+		out = append(out, t)
+	}
+	sort.Strings(out)
+	return out
+}
+
 func copyTree(src, dst string, hasher io.Writer) (int, error) {
 	count := 0
 	err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
@@ -226,8 +245,6 @@ func copyTree(src, dst string, hasher io.Writer) (int, error) {
 	return count, err
 }
 
-// shouldSkip filters out directories that are never part of a spwn
-// agent at runtime.
 func shouldSkip(rel string) bool {
 	switch rel {
 	case ".spwn", "node_modules", ".git", ".DS_Store":
@@ -246,9 +263,7 @@ func writeFile(path string, data []byte) error {
 	return nil
 }
 
-// LoadMetadata reads build.json from an existing artifact. Returns
-// (nil, nil) when the file doesn't exist - callers use this to
-// decide whether a build is needed.
+// LoadMetadata reads build.json from an existing artifact.
 func LoadMetadata(buildDir string) (*Metadata, error) {
 	path := filepath.Join(buildDir, "build.json")
 	data, err := os.ReadFile(path)

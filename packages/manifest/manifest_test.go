@@ -16,7 +16,6 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 
 	required := []string{
 		"spwn.yaml",
-		"spwn/worlds/default.yaml",
 		"spwn/agents/neo/agent.yaml",
 		"spwn/agents/neo/CLAUDE.md",
 		"spwn/agents/neo/core/profile.md",
@@ -34,6 +33,11 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		}
 	}
 
+	// New shape: no spwn/worlds/ directory at all.
+	if _, err := os.Stat(filepath.Join(dir, "spwn", "worlds")); err == nil {
+		t.Errorf("spwn/worlds/ should not exist in new schema")
+	}
+
 	gitignore, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
 	if err != nil {
 		t.Fatalf("read .gitignore: %v", err)
@@ -48,6 +52,9 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	}
 	if !strings.Contains(string(manifest), "name: acme-api") {
 		t.Errorf("expected name: acme-api in spwn.yaml, got:\n%s", manifest)
+	}
+	if !strings.Contains(string(manifest), "worlds:") {
+		t.Errorf("expected worlds: map in spwn.yaml, got:\n%s", manifest)
 	}
 }
 
@@ -81,8 +88,6 @@ func TestFind_walksUpFromSubdirectory(t *testing.T) {
 	if p == nil {
 		t.Fatal("expected to find a project, got nil")
 	}
-	// t.TempDir can return a path with a /private/ prefix on macOS,
-	// so compare via EvalSymlinks to normalize both sides.
 	gotRoot, _ := filepath.EvalSymlinks(p.Root)
 	wantRoot, _ := filepath.EvalSymlinks(root)
 	if gotRoot != wantRoot {
@@ -104,7 +109,7 @@ func TestFind_returnsNilWhenNoManifest(t *testing.T) {
 	}
 }
 
-func TestLoad_resolvesRefs(t *testing.T) {
+func TestLoad_resolvesAgents(t *testing.T) {
 	dir := t.TempDir()
 	if err := Init(dir, InitOpts{Name: "resolve-test"}); err != nil {
 		t.Fatalf("Init: %v", err)
@@ -120,11 +125,8 @@ func TestLoad_resolvesRefs(t *testing.T) {
 	if !p.Agents[0].Exists {
 		t.Errorf("neo agent should exist after Init")
 	}
-	if p.World.Name != "default" {
-		t.Errorf("World.Name = %q, want default", p.World.Name)
-	}
-	if !p.World.Exists {
-		t.Errorf("default world config should exist after Init")
+	if _, ok := p.Manifest.Worlds["neo"]; !ok {
+		t.Errorf("expected worlds['neo'] entry after Init")
 	}
 }
 
@@ -148,7 +150,6 @@ func TestValidate_missingAgentDirIsError(t *testing.T) {
 	if err := Init(dir, InitOpts{Name: "missing-agent-test"}); err != nil {
 		t.Fatalf("Init: %v", err)
 	}
-	// Remove the default agent dir to simulate a broken project.
 	if err := os.RemoveAll(filepath.Join(dir, "spwn", "agents", "neo")); err != nil {
 		t.Fatalf("rm agent dir: %v", err)
 	}
@@ -159,6 +160,66 @@ func TestValidate_missingAgentDirIsError(t *testing.T) {
 	issues := Validate(p)
 	if !HasErrors(issues) {
 		t.Fatalf("expected error issue for missing agent dir, got: %+v", issues)
+	}
+}
+
+func TestValidate_oneAgentOneWorld(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "shared"}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	// Append a second world that also references neo.
+	manifestPath := filepath.Join(dir, "spwn.yaml")
+	data, _ := os.ReadFile(manifestPath)
+	tail := "\n  matrix:\n    agents: [neo]\n    workspaces: [.]\n"
+	if err := os.WriteFile(manifestPath, append(data, []byte(tail)...), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	p, err := Load(manifestPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	issues := Validate(p)
+	found := false
+	for _, i := range issues {
+		if i.Level == LevelError && strings.Contains(i.Message, "already deployed") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected one-agent-one-world error, got: %+v", issues)
+	}
+}
+
+func TestValidate_workspaceMountRules(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "wsm"}); err != nil {
+		t.Fatal(err)
+	}
+	manifestPath := filepath.Join(dir, "spwn.yaml")
+	// Replace neo world with one that has two bare workspaces.
+	body := `version: 2
+name: wsm
+worlds:
+  neo:
+    agents: [neo]
+    workspaces:
+      - .
+      - ./data
+`
+	if err := os.WriteFile(manifestPath, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	p, _ := Load(manifestPath)
+	issues := Validate(p)
+	found := false
+	for _, i := range issues {
+		if i.Level == LevelError && strings.Contains(i.Message, "bare") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected workspace bare-entry error, got: %+v", issues)
 	}
 }
 
@@ -183,7 +244,6 @@ func TestBuild_flattensProjectIntoArtifact(t *testing.T) {
 	expected := []string{
 		"build.json",
 		"manifest.json",
-		"worlds/default.yaml",
 		"agents/neo/agent.yaml",
 		"agents/neo/CLAUDE.md",
 		"agents/neo/core/profile.md",
@@ -203,6 +263,9 @@ func TestBuild_flattensProjectIntoArtifact(t *testing.T) {
 	}
 	if meta.Project != "build-test" {
 		t.Errorf("meta.Project = %q, want build-test", meta.Project)
+	}
+	if meta.World != "neo" {
+		t.Errorf("meta.World = %q, want neo", meta.World)
 	}
 	if len(meta.Agents) != 1 || meta.Agents[0] != "neo" {
 		t.Errorf("meta.Agents = %v, want [neo]", meta.Agents)
@@ -236,5 +299,28 @@ func TestBuild_repeatedCallsProduceSameHash(t *testing.T) {
 	}
 	if r1.FileCount != r2.FileCount {
 		t.Errorf("file count changed: %d vs %d", r1.FileCount, r2.FileCount)
+	}
+}
+
+func TestAddAgentToManifest_appendsWorld(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "addtest"}); err != nil {
+		t.Fatal(err)
+	}
+	// Create a second agent dir.
+	if err := os.MkdirAll(filepath.Join(dir, "spwn", "agents", "trinity"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	manifestPath := filepath.Join(dir, "spwn.yaml")
+	if err := AddAgentToManifest(manifestPath, "trinity"); err != nil {
+		t.Fatalf("AddAgentToManifest: %v", err)
+	}
+	data, _ := os.ReadFile(manifestPath)
+	if !strings.Contains(string(data), "trinity") {
+		t.Errorf("expected trinity entry in manifest, got:\n%s", data)
+	}
+	// Idempotency: second call should not error or duplicate.
+	if err := AddAgentToManifest(manifestPath, "trinity"); err != nil {
+		t.Fatalf("idempotent AddAgentToManifest: %v", err)
 	}
 }

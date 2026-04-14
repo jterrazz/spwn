@@ -125,18 +125,18 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintf(w, "%s %s\n", ui.Strong("⬡ spwn"), ui.Faint("- the building blocks of agent intelligence"))
 	fmt.Fprintln(w)
 
-	// Quick Start - the 30-second path
+	// Quick Start - the 30-second path (new compose-style grammar)
 	fmt.Fprintf(w, "%s\n", ui.Strong("Quick Start:"))
-	printHelpCmd(w, "spwn agent new neo", "Create an agent")
-	printHelpCmd(w, "spwn agent add neo --tool @spwn/python", "")
-	printHelpCmd(w, "spwn up --agent neo -w .", "Spawn a world")
-	printHelpCmd(w, "spwn agent talk neo", "Talk to it")
+	printHelpCmd(w, "spwn init", "Scaffold a new project")
+	printHelpCmd(w, "spwn agent new neo", "Create an agent (auto-creates a single-agent world)")
+	printHelpCmd(w, "spwn up", "Bring up every world in spwn.yaml")
+	printHelpCmd(w, "spwn agent neo", "Start the world that contains neo")
 	fmt.Fprintln(w)
 
 	// Entities - the things you create
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
-	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, inspect, add, fork, dream, sleep, talk)"))
-	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, inspect, down, enter, snap)"))
+	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, start, stop, inspect, add, fork, talk)"))
+	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(start, stop, ls, inspect, enter, snap)"))
 	fmt.Fprintln(w)
 
 	// Building blocks - the things you compose agents from
@@ -146,11 +146,11 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit)"))
 	fmt.Fprintln(w)
 
-	// World shortcuts
+	// Shortcuts (compose-style: no-arg = all worlds in spwn.yaml)
 	fmt.Fprintf(w, "%s\n", ui.Strong("Shortcuts:"))
-	printHelpCmd(w, "up", "Spawn a world "+ui.Faint("(alias: world up)"))
-	printHelpCmd(w, "ls", "List active worlds "+ui.Faint("(alias: world ls)"))
-	printHelpCmd(w, "down <id>", "Destroy a world "+ui.Faint("(alias: world down)"))
+	printHelpCmd(w, "up [name]", "Start every world (or one) "+ui.Faint("(alias: world start)"))
+	printHelpCmd(w, "ls", "Agent-centric status "+ui.Faint("(running, deployed, orphan)"))
+	printHelpCmd(w, "down [name]", "Stop every world (or one) "+ui.Faint("(alias: world stop)"))
 	fmt.Fprintln(w)
 
 	// Coordination - multi-agent + orchestration

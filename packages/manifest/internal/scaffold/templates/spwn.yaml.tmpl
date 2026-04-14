@@ -1,12 +1,14 @@
 # spwn - project manifest
 # Docs: https://spwn.sh/docs/manifest
 #
-# This file declares what this project spawns. Commit it.
+# This file declares the deployable worlds in this project. Each world
+# entry deploys one or more agents into a single sandboxed container.
+# Commit this file.
 
-version: 1
+version: 2
 name: {{.Name}}
-workspace: .
 
-world: default
-agents:
-  - neo
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: [.]

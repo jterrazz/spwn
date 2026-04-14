@@ -1,11 +1,16 @@
 # Agent composition.
-# Tools listed here must also be present in the world - this is what
-# the agent is allowed to reach for inside the sandbox.
+#
+# This file is the source of truth for what tools and runtime the
+# agent needs. When the agent is deployed in a world alongside others,
+# the union of every member's tools is what gets installed into the
+# resulting container.
 
 name: neo
-runtime: claude-code
+
+runtime:
+  backend: "@spwn/claude-code"
 
 tools:
   - "@spwn/unix"
   - "@spwn/git"
-  - "@spwn/claude-code"
+  - "@spwn/python"

@@ -8,15 +8,16 @@
 //	├── spwn.yaml           - the manifest (committed)
 //	├── spwn/               - committed project assets
 //	│   ├── agents/<name>/
-//	│   ├── worlds/<name>.yaml
 //	│   ├── tools/<name>/
 //	│   └── skills/<name>.md
 //	└── .spwn/              - gitignored local state
 //	    └── state.json
 //
-// The manifest declares which world this project spawns and which
-// agents it contains. Everything referenced by name is resolved
-// relative to the project root - there is no cross-project lookup.
+// Worlds are no longer separate yaml files — they live as inline map
+// entries under spwn.yaml#worlds. Agents are the source of truth for
+// the project roster: every directory under spwn/agents/ that the
+// manifest's worlds reference is "deployable", everything else is
+// considered an orphan agent.
 package manifest
 
 import (
@@ -30,10 +31,14 @@ import (
 // Manifest is the parsed spwn.yaml content.
 type Manifest = intmanifest.Manifest
 
+// World is one inline world entry under spwn.yaml#worlds.
+type World = intmanifest.World
+
+// Physics mirrors the resource-limit knobs callers can set on a world.
+type Physics = intmanifest.Physics
+
 // Project is a loaded spwn project - manifest plus resolved references
-// to the agents and world it declares. Existence of each referenced
-// resource is recorded in the *Ref fields so callers can warn without
-// re-walking the tree.
+// to the agents it declares.
 type Project struct {
 	// Root is the absolute path to the project root (the directory
 	// that contains spwn.yaml).
@@ -45,25 +50,22 @@ type Project struct {
 	// Manifest is the parsed content.
 	Manifest *Manifest
 
-	// Agents is one entry per agent declared in the manifest, with
-	// its resolved filesystem path and whether the path exists.
+	// Agents is one entry per *deployable* agent (referenced by at
+	// least one world in the manifest). Orphan agents — directories
+	// under spwn/agents/ not listed in any world — are surfaced via
+	// OrphanAgents.
 	Agents []AgentRef
 
-	// World is the resolved reference to the world config.
-	World WorldRef
+	// OrphanAgents are agent directories on disk that no world in the
+	// manifest references. They are listed informationally; not
+	// runnable until added to a world.
+	OrphanAgents []AgentRef
 }
 
-// AgentRef points at one agent declared in the manifest.
+// AgentRef points at one agent directory under spwn/agents/.
 type AgentRef struct {
-	Name   string // as declared in spwn.yaml
+	Name   string // directory basename
 	Path   string // absolute path to ./spwn/agents/<name>/
-	Exists bool
-}
-
-// WorldRef points at the world config declared in the manifest.
-type WorldRef struct {
-	Name   string // as declared in spwn.yaml
-	Path   string // absolute path to ./spwn/worlds/<name>.yaml
 	Exists bool
 }
 
@@ -128,6 +130,13 @@ func Init(dir string, opts InitOpts) error {
 	})
 }
 
+// AddAgentToManifest atomically inserts a new world entry into
+// spwn.yaml that deploys the named agent on its own. Used by
+// `spwn agent new <name>` to keep the auto-world wired up.
+func AddAgentToManifest(manifestPath, agentName string) error {
+	return scaffold.AddAgentWorld(manifestPath, agentName)
+}
+
 // ValidateOpts configures Validate. Zero value is valid and skips
 // catalog-backed rules (tool existence, runtime support). Callers
 // should populate this from the imagebuilder catalog for the richest
@@ -139,8 +148,8 @@ type ValidateOpts struct {
 	BuiltinTools []string
 
 	// SupportedRuntimes is the list of runtime identifiers the host
-	// can actually spawn (e.g. "claude-code"). When empty, runtime
-	// validity is not checked.
+	// can actually spawn (e.g. "@spwn/claude-code"). When empty,
+	// runtime validity is not checked.
 	SupportedRuntimes []string
 }
 
@@ -156,16 +165,23 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 	if len(opts) > 0 {
 		o = opts[0]
 	}
-	return validate.Run(validate.Input{
+	in := validate.Input{
 		Root:              p.Root,
 		Manifest:          p.Manifest,
-		AgentPaths:        agentPaths(p.Agents),
-		WorldPath:         p.World.Path,
-		WorldExists:       p.World.Exists,
-		AgentExists:       agentExistence(p.Agents),
 		BuiltinTools:      o.BuiltinTools,
 		SupportedRuntimes: o.SupportedRuntimes,
-	})
+	}
+	for _, a := range p.Agents {
+		in.AgentRefs = append(in.AgentRefs, validate.AgentRef{
+			Name: a.Name, Path: a.Path, Exists: a.Exists,
+		})
+	}
+	for _, a := range p.OrphanAgents {
+		in.OrphanRefs = append(in.OrphanRefs, validate.AgentRef{
+			Name: a.Name, Path: a.Path, Exists: a.Exists,
+		})
+	}
+	return validate.Run(in)
 }
 
 // BuildResult is the outcome of a successful Build.
@@ -176,6 +192,11 @@ type BuildMetadata = build.Metadata
 
 // BuildOpts configures Build.
 type BuildOpts struct {
+	// World is the world name from spwn.yaml#worlds to build the
+	// artifact against. Empty means "the only world" — error if
+	// multiple worlds exist.
+	World string
+
 	// ImageDigest pins the Docker image produced for this build.
 	// Empty means "no image was built" - the artifact is still
 	// valid, it just records no image reference.
@@ -183,14 +204,11 @@ type BuildOpts struct {
 }
 
 // Build flattens the project into a reproducible artifact at
-// <projectRoot>/.spwn/build/. Every file the runtime will read is
-// copied in. The resulting directory is self-contained and safe to
-// tar and ship.
+// <projectRoot>/.spwn/build/. Every file the runtime will read for
+// the chosen world is copied in.
 //
 // Build does NOT validate. Callers should run Validate first and
-// abort on errors - Build will happily flatten a broken project,
-// which is useful when the user wants to inspect the artifact for
-// debugging but not when they want a spawnable result.
+// abort on errors.
 func Build(p *Project, opts ...BuildOpts) (*BuildResult, error) {
 	if p == nil {
 		return nil, nil
@@ -199,11 +217,15 @@ func Build(p *Project, opts ...BuildOpts) (*BuildResult, error) {
 	if len(opts) > 0 {
 		o = opts[0]
 	}
+	agentPaths := make(map[string]string, len(p.Agents))
+	for _, a := range p.Agents {
+		agentPaths[a.Name] = a.Path
+	}
 	return build.Build(build.Opts{
 		Root:        p.Root,
 		Manifest:    p.Manifest,
-		AgentPaths:  agentPaths(p.Agents),
-		WorldPath:   p.World.Path,
+		World:       o.World,
+		AgentPaths:  agentPaths,
 		ImageDigest: o.ImageDigest,
 	})
 }
@@ -232,28 +254,12 @@ func loadAt(manifestPath, root string) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
-	agents, world := resolveRefs(root, m)
+	agents, orphans := resolveRefs(root, m)
 	return &Project{
 		Root:         root,
 		ManifestPath: manifestPath,
 		Manifest:     m,
 		Agents:       agents,
-		World:        world,
+		OrphanAgents: orphans,
 	}, nil
-}
-
-func agentPaths(refs []AgentRef) []string {
-	out := make([]string, len(refs))
-	for i, r := range refs {
-		out[i] = r.Path
-	}
-	return out
-}
-
-func agentExistence(refs []AgentRef) []bool {
-	out := make([]bool, len(refs))
-	for i, r := range refs {
-		out[i] = r.Exists
-	}
-	return out
 }

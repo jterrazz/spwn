@@ -13,6 +13,10 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"gopkg.in/yaml.v3"
+
+	intmanifest "spwn.sh/packages/manifest/internal/manifest"
 )
 
 //go:embed templates/*.tmpl
@@ -49,7 +53,6 @@ func Init(dir string, opts Opts) error {
 
 	files := []fileSpec{
 		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
-		{"templates/world.yaml.tmpl", "spwn/worlds/default.yaml"},
 		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
 		{"templates/CLAUDE.md.tmpl", "spwn/agents/neo/CLAUDE.md"},
 		{"templates/profile.md.tmpl", "spwn/agents/neo/core/profile.md"},
@@ -77,8 +80,6 @@ func Init(dir string, opts Opts) error {
 		}
 	}
 
-	// Local state dir (.spwn/) is gitignored but needs to exist so
-	// tools that read state.json don't have to branch on missing.
 	stateDir := filepath.Join(absDir, ".spwn")
 	if err := os.MkdirAll(stateDir, 0o755); err != nil {
 		return fmt.Errorf("mkdir .spwn: %w", err)
@@ -94,6 +95,90 @@ func Init(dir string, opts Opts) error {
 	}
 
 	return nil
+}
+
+// AddAgentWorld inserts a `worlds.<agent>: { agents: [<agent>], workspaces: [.] }`
+// entry into spwn.yaml. Idempotent: a no-op if the entry already
+// exists. Used by `spwn agent new <name>` (unless --no-world).
+func AddAgentWorld(manifestPath, agentName string) error {
+	data, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", manifestPath, err)
+	}
+	var doc yaml.Node
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return fmt.Errorf("parse %s: %w", manifestPath, err)
+	}
+	if doc.Kind != yaml.DocumentNode || len(doc.Content) == 0 {
+		return fmt.Errorf("unexpected yaml structure in %s", manifestPath)
+	}
+	root := doc.Content[0]
+	if root.Kind != yaml.MappingNode {
+		return fmt.Errorf("spwn.yaml root must be a mapping")
+	}
+
+	worlds := findMapValue(root, "worlds")
+	if worlds == nil {
+		// Create a worlds: map.
+		worlds = &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
+		root.Content = append(root.Content,
+			&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "worlds"},
+			worlds,
+		)
+	}
+	if worlds.Kind != yaml.MappingNode {
+		return fmt.Errorf("spwn.yaml#worlds must be a mapping")
+	}
+	// Idempotency: already present?
+	if findMapValue(worlds, agentName) != nil {
+		return nil
+	}
+
+	entry := &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
+	entry.Content = append(entry.Content,
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "agents"},
+		flowSeq([]string{agentName}),
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "workspaces"},
+		flowSeq([]string{"."}),
+	)
+	worlds.Content = append(worlds.Content,
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: agentName},
+		entry,
+	)
+
+	out, err := yaml.Marshal(&doc)
+	if err != nil {
+		return fmt.Errorf("re-encode %s: %w", manifestPath, err)
+	}
+	return os.WriteFile(manifestPath, out, 0o644)
+}
+
+func flowSeq(values []string) *yaml.Node {
+	n := &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq", Style: yaml.FlowStyle}
+	for _, v := range values {
+		n.Content = append(n.Content, &yaml.Node{
+			Kind: yaml.ScalarNode, Tag: "!!str", Value: v,
+		})
+	}
+	return n
+}
+
+func findMapValue(m *yaml.Node, key string) *yaml.Node {
+	if m == nil || m.Kind != yaml.MappingNode {
+		return nil
+	}
+	for i := 0; i+1 < len(m.Content); i += 2 {
+		if m.Content[i].Value == key {
+			return m.Content[i+1]
+		}
+	}
+	return nil
+}
+
+// EncodeManifest is a small helper used by tests / CLI to render a
+// Manifest struct back to YAML bytes.
+func EncodeManifest(m *intmanifest.Manifest) ([]byte, error) {
+	return yaml.Marshal(m)
 }
 
 type fileSpec struct {
@@ -130,7 +215,6 @@ func writeTemplate(root, srcRel, dstRel string, data templateData) error {
 
 func defaultName(absDir string) string {
 	base := filepath.Base(absDir)
-	// slug-ify: keep alnum + dash, lowercase the rest
 	var b strings.Builder
 	for _, r := range strings.ToLower(base) {
 		switch {
@@ -147,8 +231,6 @@ func defaultName(absDir string) string {
 	return slug
 }
 
-// appendGitignore adds .spwn/ to the existing .gitignore, or creates
-// a fresh one if none exists. Idempotent: won't duplicate the line.
 func appendGitignore(root string) error {
 	path := filepath.Join(root, ".gitignore")
 	existing, err := os.ReadFile(path)

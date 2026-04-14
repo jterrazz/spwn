@@ -7,12 +7,17 @@
 package validate
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	intmanifest "spwn.sh/packages/manifest/internal/manifest"
+	"spwn.sh/packages/manifest/internal/resolve"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Level ranks the severity of an Issue.
@@ -47,72 +52,63 @@ func (l Level) String() string {
 
 // Issue is one finding from a rule.
 type Issue struct {
-	// Level is the severity.
-	Level Level
-
-	// Path is a file path or a manifest field name - whatever best
-	// identifies the location of the problem.
-	Path string
-
-	// Message is the human-readable description.
+	Level   Level
+	Path    string
 	Message string
-
-	// Hint is an optional suggested fix, usually a command the user
-	// can run. Empty if no obvious fix exists.
-	Hint string
+	Hint    string
 }
 
-// Input is the data every rule operates on. Built by the public
-// Validate function in packages/manifest and passed in verbatim.
+// AgentRef is the validator's view of an agent reference, mirroring
+// the public manifest.AgentRef but kept local so the validate package
+// doesn't import the public manifest package (which would cycle).
+type AgentRef struct {
+	Name   string
+	Path   string
+	Exists bool
+}
+
+// Input is the data every rule operates on.
 type Input struct {
-	Root        string
-	Manifest    *intmanifest.Manifest
-	AgentPaths  []string
-	AgentExists []bool
-	WorldPath   string
-	WorldExists bool
+	Root     string
+	Manifest *intmanifest.Manifest
+
+	// AgentRefs are the deployable agents (referenced by some world).
+	AgentRefs []AgentRef
+
+	// OrphanRefs are agent directories on disk not referenced by any
+	// world. Surfaced as info-level issues.
+	OrphanRefs []AgentRef
 
 	// BuiltinTools is the authoritative catalog of known tool packs.
-	// Callers (typically the CLI) populate this from the imagebuilder
-	// catalog so tool-existence rules don't have to hard-code names.
-	// Nil means "don't check tool existence against a catalog, fall
-	// back to @spwn/* prefix heuristics".
+	// Nil → fall back to @spwn/* prefix heuristic.
 	BuiltinTools []string
 
-	// SupportedRuntimes is the list of runtime identifiers the host
-	// can actually spawn (e.g. "claude-code"). Callers populate this
-	// from packages/world/internal/runtime at CLI wiring time. Nil
-	// means "don't check runtimes".
+	// SupportedRuntimes is the list of runtime backends the host can
+	// actually spawn (e.g. "@spwn/claude-code"). Nil → don't check.
 	SupportedRuntimes []string
 }
 
 // Run executes every rule against the input and returns all issues.
-// Rules never short-circuit - we want a complete picture from one run.
 func Run(in Input) []Issue {
 	var out []Issue
 	rules := []func(Input) []Issue{
-		// Schema (fast, in-memory)
 		ruleManifestVersion,
 		ruleManifestName,
-		ruleManifestWorld,
-		ruleManifestAgents,
-		ruleDuplicateAgents,
-		ruleWorkspaceExists,
-		ruleWorkspaceEscape,
-
-		// Structure (filesystem checks)
-		ruleWorldExists,
-		ruleAgentDirs,
-
-		// YAML content
-		ruleWorldYAMLParses,
+		ruleWorldsMap,
+		ruleWorldNames,
+		ruleReservedWorldNames,
+		ruleAgentDirsExist,
+		ruleAgentStructure,
 		ruleAgentYAMLParses,
-
-		// Cross-cutting
-		ruleWorldToolsExist,
-		ruleAgentToolsSubsetOfWorld,
+		ruleReservedAgentNames,
+		ruleOneAgentOneWorld,
+		ruleWorkspaceMounts,
+		ruleToolVersionConflict,
+		ruleRuntimeBackendConflict,
+		ruleToolsExist,
 		ruleRuntimeSupported,
 		ruleMarkdownImports,
+		ruleOrphanAgents,
 	}
 	for _, r := range rules {
 		out = append(out, r(in)...)
@@ -120,9 +116,30 @@ func Run(in Input) []Issue {
 	return out
 }
 
-var slugRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
+var (
+	slugRe      = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
+	projectName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
+)
 
-// --- Rules ---
+// reservedAgentSubcommands is the set of names that collide with
+// `spwn agent <subcommand>` and therefore cannot be used as agent
+// names.
+var reservedAgentSubcommands = map[string]struct{}{
+	"new": {}, "ls": {}, "rm": {}, "fork": {}, "inspect": {}, "logs": {},
+	"add": {}, "remove": {}, "talk": {}, "send": {}, "inbox": {},
+	"watch": {}, "dream": {}, "sleep": {}, "publish": {}, "get": {},
+	"export": {}, "import": {}, "start": {}, "stop": {}, "delete": {},
+	"deploy": {}, "compose": {}, "list": {}, "init": {},
+}
+
+// reservedWorldSubcommands is the equivalent for `spwn world ...`.
+var reservedWorldSubcommands = map[string]struct{}{
+	"start": {}, "stop": {}, "ls": {}, "rm": {}, "inspect": {},
+	"logs": {}, "enter": {}, "destroy": {}, "rename": {}, "knowledge": {},
+	"new": {}, "list": {},
+}
+
+// ----- Rules -----
 
 func ruleManifestVersion(in Input) []Issue {
 	if in.Manifest == nil {
@@ -132,8 +149,8 @@ func ruleManifestVersion(in Input) []Issue {
 		return []Issue{{
 			Level:   LevelError,
 			Path:    "spwn.yaml#version",
-			Message: "unsupported manifest version",
-			Hint:    "set version: 1",
+			Message: fmt.Sprintf("unsupported manifest version %d", in.Manifest.Version),
+			Hint:    fmt.Sprintf("set version: %d", intmanifest.CurrentVersion),
 		}}
 	}
 	return nil
@@ -145,16 +162,14 @@ func ruleManifestName(in Input) []Issue {
 	}
 	if in.Manifest.Name == "" {
 		return []Issue{{
-			Level:   LevelError,
-			Path:    "spwn.yaml#name",
+			Level: LevelError, Path: "spwn.yaml#name",
 			Message: "name is required",
 			Hint:    "set name: to a slug like my-project",
 		}}
 	}
-	if !slugRe.MatchString(in.Manifest.Name) {
+	if !projectName.MatchString(in.Manifest.Name) {
 		return []Issue{{
-			Level:   LevelError,
-			Path:    "spwn.yaml#name",
+			Level: LevelError, Path: "spwn.yaml#name",
 			Message: "name must match ^[a-z0-9][a-z0-9-]*$",
 			Hint:    "use lowercase letters, digits, and dashes only",
 		}}
@@ -162,77 +177,89 @@ func ruleManifestName(in Input) []Issue {
 	return nil
 }
 
-func ruleManifestWorld(in Input) []Issue {
+// ruleWorldsMap requires at least one world entry — unless the project
+// has zero agents on disk too (a brand-new init that hasn't created
+// anything yet).
+func ruleWorldsMap(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
-	if in.Manifest.World == "" {
-		return []Issue{{
-			Level:   LevelError,
-			Path:    "spwn.yaml#world",
-			Message: "world is required",
-			Hint:    "set world: to a name that matches ./spwn/worlds/<name>.yaml",
-		}}
-	}
-	return nil
-}
-
-func ruleManifestAgents(in Input) []Issue {
-	if in.Manifest == nil {
+	if len(in.Manifest.Worlds) > 0 {
 		return nil
 	}
-	if len(in.Manifest.Agents) == 0 {
-		return []Issue{{
-			Level:   LevelError,
-			Path:    "spwn.yaml#agents",
-			Message: "at least one agent must be declared",
-			Hint:    "add an entry under agents: - one per directory under ./spwn/agents/",
-		}}
-	}
-	return nil
-}
-
-func ruleWorldExists(in Input) []Issue {
-	if in.WorldPath == "" {
-		return nil
-	}
-	if in.WorldExists {
+	if len(in.AgentRefs) == 0 && len(in.OrphanRefs) == 0 {
 		return nil
 	}
 	return []Issue{{
-		Level:   LevelError,
-		Path:    relPath(in.Root, in.WorldPath),
-		Message: "world config not found",
-		Hint:    "create it with `spwn world new " + in.Manifest.World + "`",
+		Level: LevelError, Path: "spwn.yaml#worlds",
+		Message: "no worlds declared but agents exist on disk",
+		Hint:    "add a worlds: entry that references at least one agent",
 	}}
 }
 
-func ruleAgentDirs(in Input) []Issue {
+func ruleWorldNames(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
 	var out []Issue
-	for i, name := range in.Manifest.Agents {
-		if i >= len(in.AgentPaths) {
-			continue
-		}
-		path := in.AgentPaths[i]
-		exists := i < len(in.AgentExists) && in.AgentExists[i]
-		if !exists {
+	for _, name := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[name]
+		if !slugRe.MatchString(name) {
 			out = append(out, Issue{
-				Level:   LevelError,
-				Path:    relPath(in.Root, path),
-				Message: "agent directory not found",
-				Hint:    "create it with `spwn agent new " + name + "`",
+				Level: LevelError, Path: "spwn.yaml#worlds." + name,
+				Message: fmt.Sprintf("world name %q must match ^[a-z][a-z0-9-]*$", name),
 			})
-			continue
 		}
-		out = append(out, checkAgentStructure(in.Root, name, path)...)
+		if len(w.Agents) == 0 {
+			out = append(out, Issue{
+				Level: LevelError, Path: "spwn.yaml#worlds." + name + ".agents",
+				Message: "world must declare at least one agent",
+			})
+		}
+		if len(w.Workspaces) == 0 {
+			out = append(out, Issue{
+				Level: LevelError, Path: "spwn.yaml#worlds." + name + ".workspaces",
+				Message: "world must declare at least one workspace",
+				Hint:    "add `workspaces: [.]` to mount the project root",
+			})
+		}
 	}
 	return out
 }
 
-func checkAgentStructure(root, name, dir string) []Issue {
+func ruleReservedWorldNames(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	var out []Issue
+	for _, name := range sortedKeys(in.Manifest.Worlds) {
+		if _, ok := reservedWorldSubcommands[name]; ok {
+			out = append(out, Issue{
+				Level: LevelError, Path: "spwn.yaml#worlds." + name,
+				Message: fmt.Sprintf("world name %q collides with `spwn world %s` subcommand", name, name),
+				Hint:    "rename the world to something that doesn't shadow a subcommand",
+			})
+		}
+	}
+	return out
+}
+
+func ruleAgentDirsExist(in Input) []Issue {
+	var out []Issue
+	for _, a := range in.AgentRefs {
+		if a.Exists {
+			continue
+		}
+		out = append(out, Issue{
+			Level: LevelError, Path: relPath(in.Root, a.Path),
+			Message: "agent directory not found: " + a.Name,
+			Hint:    "create it with `spwn agent new " + a.Name + "`",
+		})
+	}
+	return out
+}
+
+func ruleAgentStructure(in Input) []Issue {
 	required := []struct {
 		rel   string
 		isDir bool
@@ -248,100 +275,450 @@ func checkAgentStructure(root, name, dir string) []Issue {
 		{"journal", true, LevelWarning},
 	}
 	var out []Issue
-	for _, r := range required {
-		full := filepath.Join(dir, r.rel)
-		info, err := os.Stat(full)
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		for _, r := range required {
+			full := filepath.Join(a.Path, r.rel)
+			info, err := os.Stat(full)
+			if err != nil {
+				out = append(out, Issue{
+					Level: r.level, Path: relPath(in.Root, full),
+					Message: "missing " + r.rel,
+					Hint:    "regenerate with `spwn agent new " + a.Name + " --force`",
+				})
+				continue
+			}
+			if r.isDir && !info.IsDir() {
+				out = append(out, Issue{
+					Level: r.level, Path: relPath(in.Root, full),
+					Message: r.rel + " is not a directory",
+				})
+			}
+			if !r.isDir && info.IsDir() {
+				out = append(out, Issue{
+					Level: r.level, Path: relPath(in.Root, full),
+					Message: r.rel + " should be a file, found directory",
+				})
+			}
+		}
+	}
+	return out
+}
+
+// agentYAML is the validator's local view of agent.yaml. Just enough
+// to drive rules.
+type agentYAML struct {
+	Name    string   `yaml:"name"`
+	Tools   []string `yaml:"tools"`
+	Runtime struct {
+		Backend string `yaml:"backend"`
+	} `yaml:"runtime"`
+}
+
+func loadAgentYAML(dir string) (*agentYAML, error) {
+	data, err := os.ReadFile(filepath.Join(dir, "agent.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	var a agentYAML
+	if err := yaml.Unmarshal(data, &a); err != nil {
+		return nil, err
+	}
+	return &a, nil
+}
+
+func ruleAgentYAMLParses(in Input) []Issue {
+	var out []Issue
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		yamlPath := filepath.Join(a.Path, "agent.yaml")
+		data, err := os.ReadFile(yamlPath)
 		if err != nil {
+			if os.IsNotExist(err) {
+				continue // already reported by ruleAgentStructure
+			}
 			out = append(out, Issue{
-				Level:   r.level,
-				Path:    relPath(root, full),
-				Message: "missing " + r.rel,
-				Hint:    "regenerate with `spwn agent new " + name + " --force`",
+				Level: LevelError, Path: relPath(in.Root, yamlPath),
+				Message: fmt.Sprintf("cannot read agent.yaml: %v", err),
 			})
 			continue
 		}
-		if r.isDir && !info.IsDir() {
+		var parsed agentYAML
+		if err := yaml.Unmarshal(data, &parsed); err != nil {
 			out = append(out, Issue{
-				Level:   r.level,
-				Path:    relPath(root, full),
-				Message: r.rel + " is not a directory",
+				Level: LevelError, Path: relPath(in.Root, yamlPath),
+				Message: "agent.yaml is not valid YAML: " + err.Error(),
 			})
+			continue
 		}
-		if !r.isDir && info.IsDir() {
+		if parsed.Name != "" && parsed.Name != a.Name {
 			out = append(out, Issue{
-				Level:   r.level,
-				Path:    relPath(root, full),
-				Message: r.rel + " should be a file, found directory",
+				Level: LevelWarning, Path: relPath(in.Root, yamlPath) + "#name",
+				Message: fmt.Sprintf("agent.yaml name %q does not match directory name %q", parsed.Name, a.Name),
 			})
 		}
 	}
 	return out
 }
 
-func ruleWorkspaceExists(in Input) []Issue {
-	if in.Manifest == nil || in.Manifest.Workspace == "" {
+func ruleReservedAgentNames(in Input) []Issue {
+	if in.Manifest == nil {
 		return nil
 	}
-	workspace := in.Manifest.Workspace
-	if !filepath.IsAbs(workspace) {
-		workspace = filepath.Join(in.Root, workspace)
+	var out []Issue
+	seen := map[string]bool{}
+	for _, name := range in.Manifest.AllAgentNames() {
+		if seen[name] {
+			continue
+		}
+		seen[name] = true
+		if _, ok := reservedAgentSubcommands[name]; ok {
+			out = append(out, Issue{
+				Level: LevelError, Path: "spwn.yaml#worlds",
+				Message: fmt.Sprintf("agent name %q collides with `spwn agent %s` subcommand", name, name),
+			})
+		}
 	}
-	info, err := os.Stat(workspace)
-	if err != nil {
+	return out
+}
+
+// ruleOneAgentOneWorld enforces that the same agent name does not
+// appear in more than one worlds[*].agents list.
+func ruleOneAgentOneWorld(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	first := map[string]string{} // agent → first world
+	var out []Issue
+	for _, wname := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[wname]
+		for _, a := range w.Agents {
+			if prev, ok := first[a]; ok {
+				out = append(out, Issue{
+					Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".agents",
+					Message: fmt.Sprintf("agent %q already deployed by world %q", a, prev),
+					Hint:    "an agent may only belong to a single world; remove the duplicate",
+				})
+				continue
+			}
+			first[a] = wname
+		}
+	}
+	return out
+}
+
+// ruleWorkspaceMounts enforces the /workspace mount rules:
+//
+//   - First entry may be bare (mounted at /workspace).
+//   - Subsequent bare entries are forbidden.
+//   - Subsequent explicit entries must use `host:/workspace/...`.
+func ruleWorkspaceMounts(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	var out []Issue
+	for _, wname := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[wname]
+		for i, entry := range w.Workspaces {
+			host, container, hasColon := splitWorkspace(entry)
+			if i == 0 {
+				if hasColon && !strings.HasPrefix(container, "/workspace") {
+					out = append(out, Issue{
+						Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
+						Message: fmt.Sprintf("workspace mount %q must target /workspace[...]", entry),
+					})
+				}
+				_ = host
+				continue
+			}
+			if !hasColon {
+				out = append(out, Issue{
+					Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
+					Message: fmt.Sprintf("workspace entry %q is bare; only the first entry may omit the container path", entry),
+					Hint:    "use `host:/workspace/<name>` form",
+				})
+				continue
+			}
+			if !strings.HasPrefix(container, "/workspace/") {
+				out = append(out, Issue{
+					Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
+					Message: fmt.Sprintf("workspace mount %q must land under /workspace/", entry),
+				})
+			}
+		}
+	}
+	return out
+}
+
+func splitWorkspace(entry string) (host, container string, hasColon bool) {
+	idx := strings.Index(entry, ":")
+	if idx < 0 {
+		return entry, "", false
+	}
+	return entry[:idx], entry[idx+1:], true
+}
+
+// ruleToolVersionConflict flags multi-agent worlds whose members
+// declare the same tool pack at different versions. Versions are
+// detected via the `@scope/name@version` suffix convention.
+func ruleToolVersionConflict(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	var out []Issue
+	for _, wname := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[wname]
+		if len(w.Agents) < 2 {
+			continue
+		}
+		// pack-name → seen versions
+		versions := map[string]map[string]string{} // pack → version → first-agent
+		for _, agentName := range w.Agents {
+			a := findAgent(in.AgentRefs, agentName)
+			if a == nil || !a.Exists {
+				continue
+			}
+			parsed, err := loadAgentYAML(a.Path)
+			if err != nil {
+				continue
+			}
+			for _, t := range parsed.Tools {
+				pack, version := splitToolVersion(t)
+				vmap, ok := versions[pack]
+				if !ok {
+					vmap = map[string]string{}
+					versions[pack] = vmap
+				}
+				if existing, ok := vmap[version]; !ok {
+					vmap[version] = agentName
+					_ = existing
+				}
+			}
+		}
+		for pack, vmap := range versions {
+			if len(vmap) <= 1 {
+				continue
+			}
+			out = append(out, Issue{
+				Level: LevelError, Path: "spwn.yaml#worlds." + wname,
+				Message: fmt.Sprintf("tool %q has conflicting versions across agents in world %q", pack, wname),
+				Hint:    "align the tool version across all agents that share a world",
+			})
+		}
+	}
+	return out
+}
+
+func splitToolVersion(tool string) (pack, version string) {
+	// scope/name@version → split at the last @ that isn't position 0
+	if !strings.HasPrefix(tool, "@") {
+		idx := strings.LastIndex(tool, "@")
+		if idx > 0 {
+			return tool[:idx], tool[idx+1:]
+		}
+		return tool, ""
+	}
+	// @scope/name[@version]
+	rest := tool[1:]
+	if idx := strings.LastIndex(rest, "@"); idx >= 0 {
+		return "@" + rest[:idx], rest[idx+1:]
+	}
+	return tool, ""
+}
+
+// ruleRuntimeBackendConflict flags multi-agent worlds whose members
+// disagree on a non-empty runtime backend. Empty (default) is
+// compatible with anything explicit.
+func ruleRuntimeBackendConflict(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	var out []Issue
+	for _, wname := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[wname]
+		if len(w.Agents) < 2 {
+			continue
+		}
+		var seen string
+		var seenAgent string
+		for _, agentName := range w.Agents {
+			a := findAgent(in.AgentRefs, agentName)
+			if a == nil || !a.Exists {
+				continue
+			}
+			parsed, err := loadAgentYAML(a.Path)
+			if err != nil || parsed.Runtime.Backend == "" {
+				continue
+			}
+			if seen == "" {
+				seen = parsed.Runtime.Backend
+				seenAgent = agentName
+				continue
+			}
+			if seen != parsed.Runtime.Backend {
+				out = append(out, Issue{
+					Level: LevelError, Path: "spwn.yaml#worlds." + wname,
+					Message: fmt.Sprintf("runtime backend conflict: agent %q uses %q, agent %q uses %q",
+						seenAgent, seen, agentName, parsed.Runtime.Backend),
+				})
+				break
+			}
+		}
+	}
+	return out
+}
+
+// ruleToolsExist checks every tool referenced by any agent or world
+// against the BuiltinTools catalog (or @spwn/* heuristic).
+func ruleToolsExist(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	builtin := make(map[string]struct{}, len(in.BuiltinTools))
+	for _, t := range in.BuiltinTools {
+		builtin[t] = struct{}{}
+	}
+	haveCatalog := in.BuiltinTools != nil
+	checked := map[string]bool{}
+	check := func(tool, location string) []Issue {
+		pack, _ := splitToolVersion(tool)
+		key := pack + "@@" + location
+		if checked[key] {
+			return nil
+		}
+		checked[key] = true
+		if resolveTool(in.Root, pack, builtin, haveCatalog) {
+			return nil
+		}
 		return []Issue{{
-			Level:   LevelError,
-			Path:    "spwn.yaml#workspace",
-			Message: "workspace path not found: " + in.Manifest.Workspace,
-			Hint:    "fix the workspace: field or create the directory",
+			Level: LevelError, Path: location,
+			Message: fmt.Sprintf("tool %q does not exist", tool),
+			Hint:    suggestTool(pack, in.BuiltinTools),
 		}}
 	}
-	if !info.IsDir() {
-		return []Issue{{
-			Level:   LevelError,
-			Path:    "spwn.yaml#workspace",
-			Message: "workspace must be a directory",
-		}}
+
+	var out []Issue
+	for _, wname := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[wname]
+		loc := "spwn.yaml#worlds." + wname + ".tools"
+		for _, t := range w.Tools {
+			out = append(out, check(t, loc)...)
+		}
+	}
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		parsed, err := loadAgentYAML(a.Path)
+		if err != nil {
+			continue
+		}
+		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#tools"
+		for _, t := range parsed.Tools {
+			out = append(out, check(t, loc)...)
+		}
+	}
+	return out
+}
+
+// ruleRuntimeSupported checks each agent's runtime backend against
+// the host's SupportedRuntimes list.
+func ruleRuntimeSupported(in Input) []Issue {
+	if len(in.SupportedRuntimes) == 0 {
+		return nil
+	}
+	supported := map[string]struct{}{}
+	for _, r := range in.SupportedRuntimes {
+		supported[r] = struct{}{}
+	}
+	var out []Issue
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		parsed, err := loadAgentYAML(a.Path)
+		if err != nil || parsed.Runtime.Backend == "" {
+			continue
+		}
+		if _, ok := supported[parsed.Runtime.Backend]; !ok {
+			out = append(out, Issue{
+				Level: LevelError,
+				Path:  relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#runtime.backend",
+				Message: fmt.Sprintf("runtime backend %q is not supported", parsed.Runtime.Backend),
+				Hint:    "supported: " + strings.Join(in.SupportedRuntimes, ", "),
+			})
+		}
+	}
+	return out
+}
+
+func ruleMarkdownImports(in Input) []Issue {
+	var out []Issue
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		claudePath := filepath.Join(a.Path, "CLAUDE.md")
+		result, err := resolve.Walk(a.Path, claudePath)
+		if err != nil {
+			continue
+		}
+		for _, ref := range result.Missing {
+			out = append(out, Issue{
+				Level: LevelError,
+				Path:  fmt.Sprintf("%s @%s", relPath(in.Root, ref.Source), ref.Target),
+				Message: "broken @-import: " + ref.Target,
+				Hint:    "create " + relPath(in.Root, ref.ResolvedPath) + " or remove the reference",
+			})
+		}
+		for _, cycle := range result.Cycles {
+			rel := make([]string, len(cycle))
+			for j, p := range cycle {
+				rel[j] = relPath(in.Root, p)
+			}
+			out = append(out, Issue{
+				Level: LevelWarning, Path: relPath(in.Root, claudePath),
+				Message: "import cycle: " + strings.Join(rel, " -> "),
+			})
+		}
+	}
+	return out
+}
+
+func ruleOrphanAgents(in Input) []Issue {
+	var out []Issue
+	for _, o := range in.OrphanRefs {
+		out = append(out, Issue{
+			Level: LevelInfo, Path: relPath(in.Root, o.Path),
+			Message: "agent " + o.Name + " is not referenced by any world",
+			Hint:    "add it to a worlds: entry, or `spwn agent rm " + o.Name + "`",
+		})
+	}
+	return out
+}
+
+// ----- helpers -----
+
+func findAgent(refs []AgentRef, name string) *AgentRef {
+	for i := range refs {
+		if refs[i].Name == name {
+			return &refs[i]
+		}
 	}
 	return nil
 }
 
-// ruleWorkspaceEscape blocks workspace paths that resolve outside the
-// project root. Without this, `workspace: ../../../etc` would silently
-// mount the user's entire disk into every spawned container.
-func ruleWorkspaceEscape(in Input) []Issue {
-	if in.Manifest == nil || in.Manifest.Workspace == "" {
-		return nil
+func sortedKeys(m map[string]intmanifest.World) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
 	}
-	workspace := in.Manifest.Workspace
-	if filepath.IsAbs(workspace) {
-		// Absolute paths are an explicit user choice; no escape to
-		// flag. Still warn so the user knows they've opted out of
-		// project containment.
-		return []Issue{{
-			Level:   LevelWarning,
-			Path:    "spwn.yaml#workspace",
-			Message: "workspace is an absolute path, outside the project root",
-			Hint:    "prefer a relative path so the project is portable",
-		}}
-	}
-	absRoot, err := filepath.Abs(in.Root)
-	if err != nil {
-		return nil
-	}
-	absWs, err := filepath.Abs(filepath.Join(in.Root, workspace))
-	if err != nil {
-		return nil
-	}
-	// Same dir or a child - OK.
-	if absWs == absRoot || strings.HasPrefix(absWs+string(filepath.Separator), absRoot+string(filepath.Separator)) {
-		return nil
-	}
-	return []Issue{{
-		Level:   LevelError,
-		Path:    "spwn.yaml#workspace",
-		Message: "workspace path escapes the project root",
-		Hint:    "use a path inside the project, or absolute if you really mean outside",
-	}}
+	sort.Strings(out)
+	return out
 }
 
 func relPath(root, path string) string {
@@ -350,4 +727,81 @@ func relPath(root, path string) string {
 		return path
 	}
 	return rel
+}
+
+func resolveTool(root, tool string, builtin map[string]struct{}, haveCatalog bool) bool {
+	if haveCatalog {
+		if _, ok := builtin[tool]; ok {
+			return true
+		}
+	} else if strings.HasPrefix(tool, "@spwn/") {
+		return true
+	}
+	localName := tool
+	if idx := strings.Index(tool, "/"); strings.HasPrefix(tool, "@") && idx > 0 {
+		localName = tool[idx+1:]
+	}
+	localPath := filepath.Join(root, "spwn", "tools", localName)
+	if info, err := os.Stat(localPath); err == nil && info.IsDir() {
+		return true
+	}
+	return false
+}
+
+func suggestTool(tool string, catalog []string) string {
+	if len(catalog) == 0 {
+		return "check the tool name, or add it as a local pack under ./spwn/tools/"
+	}
+	best := ""
+	bestScore := len(tool) + 1
+	for _, c := range catalog {
+		if d := editDistance(tool, c); d < bestScore && d <= 3 {
+			best = c
+			bestScore = d
+		}
+	}
+	if best != "" {
+		return "did you mean " + best + "?"
+	}
+	return "available built-ins: " + strings.Join(catalog, ", ")
+}
+
+func editDistance(a, b string) int {
+	if a == b {
+		return 0
+	}
+	la, lb := len(a), len(b)
+	if la == 0 {
+		return lb
+	}
+	if lb == 0 {
+		return la
+	}
+	prev := make([]int, lb+1)
+	curr := make([]int, lb+1)
+	for j := 0; j <= lb; j++ {
+		prev[j] = j
+	}
+	for i := 1; i <= la; i++ {
+		curr[0] = i
+		for j := 1; j <= lb; j++ {
+			cost := 1
+			if a[i-1] == b[j-1] {
+				cost = 0
+			}
+			del := prev[j] + 1
+			ins := curr[j-1] + 1
+			sub := prev[j-1] + cost
+			d := del
+			if ins < d {
+				d = ins
+			}
+			if sub < d {
+				d = sub
+			}
+			curr[j] = d
+		}
+		prev, curr = curr, prev
+	}
+	return prev[lb]
 }
