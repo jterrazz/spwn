@@ -244,71 +244,80 @@ spwn talk neo "run every test and benchmark, tell me what the code actually does
 
 Grammar is consistent: `spwn <noun> <verb>`. Three shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn talk`.
 
+Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
+
 ```
 # ── Shortcuts ────────────────────────────────────────────────────
-spwn up --agent neo -w .                       Spawn a world
-spwn ls                                        List active worlds
-spwn talk neo "do this"                        Talk to an agent
+🟢 spwn up --agent neo                          Spawn a world
+🟢 spwn ls                                      List active worlds
+🟢 spwn talk neo "do this"                      Talk to an agent
+
+# ── Project (per-repo manifest) ──────────────────────────────────
+🟢 spwn init                                    Scaffold a project in the current dir
+🟢 spwn check                                   Validate the project tree against 15 rules
+🟢 spwn build                                   Flatten to .spwn/build/ (pinned artifact)
+🟢 spwn up --build                              Build then spawn from the artifact
 
 # ── Agents ───────────────────────────────────────────────────────
-spwn agent new neo                             Create a blank agent
-spwn agent new neo --from @community/sci       Fork from a shared agent
-spwn agent ls                                  List your agents
-spwn agent show neo                            Inspect composition
-spwn agent rm neo                              Delete an agent
-spwn agent fork neo neo-v2                     Clone + evolve independently
-spwn agent publish neo                         Ship to registry (memory stripped)  [Epoch 10]
-spwn agent pull @community/curie               Install a shared agent              [Epoch 10]
+🟢 spwn agent new neo                           Create a blank agent
+🟢 spwn agent ls                                List your agents
+🟢 spwn agent show neo                          Inspect composition
+🟢 spwn agent rm neo                            Delete an agent
+🟢 spwn agent fork neo neo-v2                   Clone + evolve independently
+🔴 spwn agent get @community/sci                Install an agent from a registry
+🔴 spwn agent publish neo                       Ship to registry (memory stripped)
 
-spwn agent add neo --tool @spwn/python         Add a tool block
-spwn agent add neo --skill paper-reading       Add a skill block
-spwn agent add neo --profile researcher        Apply a profile
-spwn agent rm  neo --tool @spwn/python         Remove a block
+🟢 spwn agent add neo --tool @spwn/python       Add a tool block
+🟡 spwn agent add neo --skill paper-reading     Add a skill block (must exist locally)
+🟡 spwn agent add neo --profile researcher      Apply a profile (must exist locally)
+🟢 spwn agent rm  neo --tool @spwn/python       Remove a block
 
-spwn agent dream neo                           Analyze experience
-spwn agent sleep neo                           Consolidate memory
-spwn agent talk  neo "refactor auth"           Full form of `spwn talk`
+🟡 spwn agent dream neo                         Analyze experience, promote playbooks
+🟡 spwn agent sleep neo                         Consolidate memory, prune stale patterns
+🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`
 
 # ── Worlds ───────────────────────────────────────────────────────
-spwn world up --agent neo -w .                 Full form of `spwn up`
-spwn world ls                                  Full form of `spwn ls`
-spwn world inspect <id>                        Inspect a running world
-spwn world down <id>                           Destroy (agent survives)
-spwn world enter <id>                          Interactive shell inside the world
+🟢 spwn world up --agent neo                    Full form of `spwn up`
+🟢 spwn world ls                                Full form of `spwn ls`
+🟢 spwn world inspect <id>                      Inspect a running world
+🟢 spwn world down <id>                         Destroy (agent survives)
+🟢 spwn world enter <id>                        Interactive shell inside the world
 
 # ── Snapshots ────────────────────────────────────────────────────
-spwn snap save <id>                            Save world state
-spwn snap ls                                   List snapshots
-spwn snap restore <snap-id>                    Rollback
-spwn snap rm <snap-id>                         Remove a snapshot
+🟡 spwn snap save <id>                          Save world state
+🟡 spwn snap ls                                 List snapshots
+🟡 spwn snap restore <snap-id>                  Rollback
+🟡 spwn snap rm <snap-id>                       Remove a snapshot
 
 # ── Tools ────────────────────────────────────────────────────────
-spwn tool ls                                   Installed tool packs
-spwn tool search python                        Search the registry            [Epoch 10]
-spwn tool install @spwn/python                 Install a tool pack            [Epoch 10]
-spwn tool publish ./my-tool                    Ship to registry               [Epoch 10]
+🟢 spwn tool ls                                 Installed tool packs
+🔴 spwn tool get @community/rust-fuzzer         Install a community tool pack
+🔴 spwn tool search python                      Search the registry
+🔴 spwn tool publish ./my-tool                  Ship to registry
 
 # ── Skills ───────────────────────────────────────────────────────
-spwn skill ls                                  Your skill files
-spwn skill new paper-reading                   Author a new skill
-spwn skill edit paper-reading                  Open in $EDITOR
-spwn skill publish paper-reading               Ship to registry               [Epoch 10]
-spwn skill install @community/rust-review      Install a shared skill         [Epoch 10]
+🟢 spwn skill ls                                Your skill files
+🟢 spwn skill new paper-reading                 Author a new skill
+🟢 spwn skill edit paper-reading                Open in $EDITOR
+🔴 spwn skill get @community/rust-review        Install a shared skill
+🔴 spwn skill publish paper-reading             Ship to registry
 
 # ── Profiles ─────────────────────────────────────────────────────
-spwn profile ls                                Your profiles
-spwn profile new researcher                    Author a profile
-spwn profile edit researcher                   Open in $EDITOR
-spwn profile publish researcher                Ship to registry               [Epoch 10]
-spwn profile install @community/pragmatic-dev  Install a shared profile       [Epoch 10]
+🟢 spwn profile ls                              Your profiles
+🟢 spwn profile new researcher                  Author a profile
+🟢 spwn profile edit researcher                 Open in $EDITOR
+🔴 spwn profile get @community/pragmatic-dev    Install a shared profile
+🔴 spwn profile publish researcher              Ship to registry
 
-# ── Messages ─────────────────────────────────────────────────────
-spwn agent send neo "Implement Stripe webhooks" Async message to an agent's inbox
-spwn agent inbox neo                           Show neo's inbox
-spwn agent talk neo                            Live sync session
+# ── Messaging ────────────────────────────────────────────────────
+🟢 spwn agent send neo "do this" --from me      Async message to an agent's inbox
+🟢 spwn agent inbox neo                         Show neo's inbox
+🟡 spwn agent watch neo                         Tail neo's inbox live
 
 # ── System ───────────────────────────────────────────────────────
-spwn architect start                           Always-on orchestration daemon
+🟡 spwn architect start                         Always-on orchestration daemon
+🟢 spwn web                                     Open the local web UI
+🟢 spwn auth login                              Connect Anthropic / OpenAI
 ```
 
 Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
