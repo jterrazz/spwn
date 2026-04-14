@@ -52,7 +52,7 @@ Four commands. One running world.
 | **03** | Bring it online   | `spwn up`                                  |
 | **04** | Talk to it        | `spwn agent talk neo "what is this project?"` |
 
-Prefer a bundled demo? `spwn example install matrix`.
+Prefer a bundled demo? Install a template via the web UI (`spwn web`) or the `/api/templates` endpoint — CLI install is a followup.
 
 > **Requirements:** Docker
 
@@ -357,10 +357,6 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn team members acme                       List a team's agents
 🟢 spwn organization ls                         List organizations
 🟢 spwn organization inspect <name>             Show roles in an organization
-
-# ── Examples ─────────────────────────────────────────────────────
-🟢 spwn example list                            List bundled examples
-🟢 spwn example install matrix                  Copy a bundled example into the project
 
 # ── Architect daemon ─────────────────────────────────────────────
 🟡 spwn architect start                         Start the always-on daemon
