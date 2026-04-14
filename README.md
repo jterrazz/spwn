@@ -21,12 +21,6 @@
 
 <br/>
 
-<p align="center">
-  <sub>spwn — see every world, agent, and tool at a glance. Also ships as a full CLI.</sub>
-</p>
-
-<br/>
-
 ## Play god with AI agents.
 
 The building blocks of agent intelligence. Assemble tools, skills, and minds into living worlds — one command away.
