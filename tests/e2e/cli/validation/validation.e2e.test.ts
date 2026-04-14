@@ -26,20 +26,21 @@ describe('CLI input validation', () => {
         const result = await isolated('agent create no name').exec('agent create').run();
 
         /*
-         * No-name is not an error: spwn picks a random planet name.
-         * The "Created agent …" banner goes to stderr on success, which
-         * `@jterrazz/test`'s ExecAdapter (execSync) discards, so we can
-         * only assert on the exit code here. Weakened from the legacy
-         * version.
+         * No-name is not an error: spwn picks a random planet name. The
+         * chosen name is non-deterministic (random), so we assert on
+         * the stable banner wording rather than a snapshot.
          */
         expect(result.exitCode).toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('Creating agent');
+        expect(stderr).toContain('Created agent');
+        expect(stderr).toContain('Created profile');
     });
 
     test("'spwn agent create a b c' with too many args shows error", async () => {
         const result = await isolated('agent create extra args').exec('agent create a b c').run();
 
         expect(result.exitCode).not.toBe(0);
-        // ExecAdapter loses stderr on exit 0, but non-zero paths keep it
         const combined = (result.stdout.text + result.stderr.text).toLowerCase();
         expect(combined).toMatch(/unknown|too many|invalid|argument|accepts/);
     });

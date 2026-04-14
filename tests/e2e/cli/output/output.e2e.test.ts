@@ -7,8 +7,8 @@ import { spec } from '../../../setup/cli.specification.js';
  *
  * The help blocks are byte-stable — they live in Go strings and only
  * change when we intentionally reshuffle the CLI surface. Snapshot them.
- * The `auth` command touches the user's real keychain and the upgrade
- * --check hits the GitHub API, so those stay as loose substring checks.
+ * The `auth` provider-table output touches the user's real keychain, so
+ * it stays as a loose substring check against `result.stderr.text`.
  */
 
 describe('CLI output', () => {
@@ -81,10 +81,23 @@ describe('CLI output', () => {
         expect(combined).toContain('unknown command "nonexistent" for "spwn"');
     });
 
-    // Note: the `spwn auth` status table was covered by the legacy
-    // Suite but is dropped here — the command writes everything to
-    // Stderr (status, not data) and exits zero. The @jterrazz/test
-    // ExecAdapter uses execSync, which discards stderr on success, so
-    // There is nothing for the runner to assert against. The output
-    // Itself is also keychain-dependent and not byte-stable.
+    test('auth status table is rendered on stderr', async () => {
+        // The provider table contents are keychain-dependent (reads the
+        // Real anthropic keychain entry, the real ~/.codex/auth.json,
+        // Etc.) so we match on the stable header row rather than a
+        // Byte-for-byte snapshot.
+        const result = await spec('auth status output')
+            .project('empty')
+            .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
+            .exec('auth')
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('PROVIDER');
+        expect(stderr).toContain('STATUS');
+        expect(stderr).toContain('SOURCE');
+        expect(stderr).toContain('anthropic');
+        expect(stderr).toContain('openai');
+    });
 });

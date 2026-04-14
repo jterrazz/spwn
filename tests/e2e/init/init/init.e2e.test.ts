@@ -23,8 +23,10 @@ describe('spwn init', () => {
             .exec('init --name demo-project')
             .run();
 
-        // Then - exits zero and emits the canonical banner
+        // Then - exits zero, stderr carries the "Initialised" banner
+        // And stdout carries the committed/next summary block.
         expect(result.exitCode).toBe(0);
+        await result.stderr.toMatch('init-banner.txt');
         await result.stdout.toMatch('init-output.txt');
 
         // And the key files are on disk
@@ -71,9 +73,9 @@ describe('spwn init', () => {
         expect(result.file('spwn.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/neo/core/profile.md').exists).toBe(true);
-        // The banner "Installed template @spwn/matrix" is written to
-        // Stderr by the CLI and dropped by ExecAdapter on success; we
-        // Check the stdout summary block instead.
+        // The "Installed template @spwn/matrix" banner lands on stderr.
+        await result.stderr.toMatch('init-matrix-banner.txt');
+        // And the stdout summary describes what was added.
         const out = result.stdout.text;
         expect(out).toContain('spwn.yaml');
         expect(out).toContain('Worlds added:');
