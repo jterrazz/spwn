@@ -16,6 +16,7 @@ package labels
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -32,6 +33,33 @@ const (
 	KindWorld     = "world"
 	KindArchitect = "architect"
 )
+
+// TestRun tags containers created during a test run. Populated from
+// the SPWN_TEST_LABEL environment variable when set, giving test
+// frameworks a stable handle to find and clean up containers scoped
+// to a single test — even when multiple tests run in parallel against
+// the same Docker daemon.
+//
+// Unset in production: the label is only applied when SPWN_TEST_LABEL
+// is present, so normal spwn usage is unaffected.
+const TestRun = Prefix + "test.run"
+
+// TestRunEnv is the env var spwn reads to stamp the TestRun label on
+// every container it creates. Kept as a named constant so tests and
+// external tooling don't hard-code the string in multiple places.
+const TestRunEnv = "SPWN_TEST_LABEL"
+
+// ApplyTestRun stamps the TestRun label on the given map when the
+// SPWN_TEST_LABEL env var is set. No-op otherwise. Safe to call on a
+// nil map: callers should initialise before invoking.
+func ApplyTestRun(m map[string]string) {
+	if m == nil {
+		return
+	}
+	if v := os.Getenv(TestRunEnv); v != "" {
+		m[TestRun] = v
+	}
+}
 
 // World metadata keys. These map 1:1 onto the immutable fields of
 // models.World. Anything that can change after creation lives in
@@ -83,6 +111,7 @@ func WorldLabels(w models.World) map[string]string {
 			out[WorldAgents] = string(data)
 		}
 	}
+	ApplyTestRun(out)
 	return out
 }
 
