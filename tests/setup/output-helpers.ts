@@ -54,16 +54,3 @@ export function expectTableHeader(output: string, columns: string[]): void {
         );
     }
 }
-
-/**
- * Assert output contains a table row with specific values.
- */
-export function expectTableRow(output: string, values: string[]): void {
-    const outputLines = lines(output);
-    const found = outputLines.some((l) => values.every((v) => l.includes(v)));
-    if (!found) {
-        throw new Error(
-            `Expected table row containing [${values.join(', ')}]\nGot:\n${outputLines.join('\n')}`,
-        );
-    }
-}

@@ -1,0 +1,8 @@
+name: morpheus
+
+runtime:
+    backend: '@spwn/claude-code'
+
+tools:
+    - '@spwn/unix'
+    - '@spwn/git'
