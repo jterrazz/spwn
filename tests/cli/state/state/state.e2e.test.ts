@@ -27,7 +27,7 @@ import { spec } from '../../../setup/cli.specification.js';
  *     world in spwn.yaml is spawned together by `up`. The legacy test
  *     spawned two independent worlds sharing an agent through the old
  *     ad-hoc CLI; that path no longer exists. Multi-world tracking is
- *     exercised by the config / multi-world tests under `e2e/config/`.
+ *     exercised by the config / multi-world tests under `cli/config/`.
  *
  * Note on multi-exec chains: only the *last* command's stdout/stderr is
  * captured. To assert on banners from an earlier step (e.g. "Created

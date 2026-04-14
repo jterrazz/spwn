@@ -2,7 +2,7 @@
     "extends": "@jterrazz/typescript/presets/tsconfig/node",
     "include": [
         "setup/**/*.ts",
-        "e2e/**/*.ts",
+        "cli/**/*.ts",
         "ui/**/*.ts",
         "vitest.config.ts",
         "vitest.workspace.ts"

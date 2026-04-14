@@ -9,7 +9,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * Snapshots live under ./expected/stdout/<name>.txt. Each assertion
  * uses `result.stdout.toMatch('<name>.txt')` — the framework resolves
  * `<name>` against `<this-dir>/expected/stdout/<name>.txt`. Regenerate
- * with `JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run e2e/cli/check`.
+ * with `JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run cli/check`.
  *
  * Temp-dir paths and ANSI escapes are normalised to `<PROJECT>` by the
  * runner-level `transform` configured in setup/cli.specification.ts, so

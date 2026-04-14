@@ -7,7 +7,7 @@ import { spec } from '../../../setup/cli.specification.js';
  *
  * The legacy test wove the Docker world-spawn flow (up / world inspect
  * / down) into the same journey; those steps are covered by the
- * Docker-gated lifecycle tests under `tests/e2e/lifecycle/` and are
+ * Docker-gated lifecycle tests under `tests/cli/lifecycle/` and are
  * intentionally omitted here. This file exercises everything a user
  * can do without spinning up a container.
  */

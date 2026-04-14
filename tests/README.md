@@ -26,7 +26,7 @@ Examples:
 
 ### 2. Go E2E Tests
 
-Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with `mock-claude` replacing the real Claude binary). Located in `packages/world/tests/e2e/`.
+Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with `mock-claude` replacing the real Claude binary). Located in `packages/world/tests/cli/`.
 
 ```bash
 make test-e2e              # builds test image, then runs E2E suite
@@ -37,7 +37,7 @@ These tests use the build tag `//go:build e2e` and are excluded from `make test`
 
 ### 3. TypeScript E2E Tests
 
-Behavioral specs that exercise the compiled `spwn` CLI binary end-to-end. Located in `tests/e2e/`. They spawn processes, interact with Docker, and assert on CLI output.
+Behavioral specs that exercise the compiled `spwn` CLI binary end-to-end. Located in `tests/cli/`. They spawn processes, interact with Docker, and assert on CLI output.
 
 ```bash
 cd tests && npx vitest           # run all TS E2E tests
@@ -69,7 +69,7 @@ The Go E2E framework reads this JSON via `TestContext.ReadMockOutput()` and expo
 
 ## Test Infrastructure
 
-### Go E2E Setup (`packages/world/tests/e2e/setup/`)
+### Go E2E Setup (`packages/world/tests/cli/setup/`)
 
 | File            | Purpose                                                                                                                                                   |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -203,7 +203,7 @@ describe('world lifecycle', () => {
 
 ### Go E2E Test
 
-1. Create `your_feature_test.go` in `packages/world/tests/e2e/`.
+1. Create `your_feature_test.go` in `packages/world/tests/cli/`.
 2. Add `//go:build e2e` build tag at the top.
 3. Use `setup.NewSpawnBuilder(t)` to create test infrastructure.
 4. Follow GIVEN/WHEN/THEN comment structure.
@@ -211,7 +211,7 @@ describe('world lifecycle', () => {
 
 ### TypeScript E2E Test
 
-1. Create `tests/e2e/<area>/<feature>/<feature>.e2e.test.ts` (one
+1. Create `tests/cli/<area>/<feature>/<feature>.e2e.test.ts` (one
    per-feature folder per test file, siblings: `expected/`, `seeds/`).
 2. Import `spec` from `tests/setup/cli.specification.js`.
 3. Use `describe`/`test` with clear behavioral names.
@@ -228,8 +228,8 @@ describe('world lifecycle', () => {
 | Layer   | Pattern                                    | Example             |
 | ------- | ------------------------------------------ | ------------------- |
 | Go unit | `*_test.go` (next to source)               | `manifest_test.go`  |
-| Go E2E  | `*_test.go` (in `tests/e2e/`)              | `spawn_test.go`     |
-| TS E2E  | `*.e2e.test.ts` (in `tests/e2e/{domain}/`) | `spawn.e2e.test.ts` |
+| Go E2E  | `*_test.go` (in `tests/cli/`)              | `spawn_test.go`     |
+| TS E2E  | `*.e2e.test.ts` (in `tests/cli/{domain}/`) | `spawn.e2e.test.ts` |
 
 ## Test Function Naming
 
