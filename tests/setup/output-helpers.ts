@@ -9,7 +9,7 @@ export function stripAnsi(str: string): string {
 /**
  * Extract lines from output, stripping ANSI and empty lines.
  */
-export function lines(str: string): string[] {
+function lines(str: string): string[] {
     return stripAnsi(str)
         .split('\n')
         .map((l) => l.trim())

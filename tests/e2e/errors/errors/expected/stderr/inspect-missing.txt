@@ -1,0 +1,5 @@
+
+  Error: world w-nonexistent-00000 not found
+
+  List worlds with: spwn ls
+

@@ -1,0 +1,109 @@
+import { describe, expect, test } from 'vitest';
+
+import { spec } from '../../../setup/cli.specification.js';
+
+/**
+ * Error-handling E2E — one test per error shape, each paired with a
+ * locked-in stderr snapshot under `./expected/stderr/<name>.txt`.
+ *
+ * spwn writes the "→ Doing X..." / "✗ Failed ..." banners to stderr.
+ * `@jterrazz/test`'s ExecAdapter discards stderr on exit 0, so we can
+ * only snapshot on the non-zero path — which is exactly what we want
+ * here anyway.
+ *
+ * Regenerate snapshots with:
+ *   JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run e2e/errors/errors
+ */
+
+const isolated = (label: string) =>
+    spec(label).project('empty').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
+
+describe('error handling', () => {
+    test('destroy non-existent world', async () => {
+        const result = await isolated('destroy missing').exec('down w-nonexistent-00000').run();
+
+        expect(result.exitCode).not.toBe(0);
+        await result.stderr.toMatch('destroy-missing.txt');
+    });
+
+    test('inspect non-existent world', async () => {
+        const result = await isolated('inspect missing')
+            .exec('world inspect w-nonexistent-00000')
+            .run();
+
+        expect(result.exitCode).not.toBe(0);
+        await result.stderr.toMatch('inspect-missing.txt');
+    });
+
+    test('agent --ephemeral without --world flag', async () => {
+        const result = await isolated('npc no world').exec('agent --ephemeral lint-code').run();
+
+        expect(result.exitCode).not.toBe(0);
+    });
+
+    test('agent dream non-existent agent skips gracefully', async () => {
+        /*
+         * Success path — stderr is discarded by execSync so we can only
+         * assert on the exit code here (weakened from the legacy test,
+         * which matched on "Skipped  no journal entries" wording).
+         */
+        const result = await isolated('dream missing').exec('agent dream nonexistent').run();
+
+        expect(result.exitCode).toBe(0);
+    });
+
+    test('agent export non-existent agent', async () => {
+        const result = await isolated('export missing').exec('agent export nonexistent').run();
+
+        expect(result.exitCode).not.toBe(0);
+        await result.stderr.toMatch('export-missing.txt');
+    });
+
+    test('logs for non-existent world', async () => {
+        /*
+         * `spwn world logs` filters by world ID; a missing world yields
+         * no events. The important part is the absence of a crash.
+         */
+        const result = await isolated('logs missing').exec('world logs w-nonexistent-00000').run();
+
+        const combined = result.stdout.text + result.stderr.text;
+        expect(combined).not.toContain('panic:');
+        expect(combined).not.toContain('goroutine');
+    });
+
+    test('agent talk to non-existent agent', async () => {
+        const result = await isolated('talk missing').exec('agent talk nonexistent "hello"').run();
+
+        expect(result.exitCode).not.toBe(0);
+        await result.stderr.toMatch('talk-missing.txt');
+    });
+
+    test('delete non-existent agent shows error', async () => {
+        const result = await isolated('delete ghost').exec('agent rm ghost').run();
+
+        expect(result.exitCode).not.toBe(0);
+        await result.stderr.toMatch('delete-missing.txt');
+    });
+
+    test('no usage dump on errors', async () => {
+        const result = await isolated('error no usage').exec('down w-nonexistent-00000').run();
+
+        expect(result.exitCode).not.toBe(0);
+        const combined = result.stdout.text + result.stderr.text;
+        expect(combined).not.toContain('Available Commands:');
+        expect(combined).not.toContain('Global Flags:');
+        expect(combined).not.toContain('Use "spwn');
+    });
+
+    test('error messages follow the structured ✗ convention', async () => {
+        /*
+         * Redundant with "destroy non-existent world" but cheaper than
+         * maintaining a separate assertion on lowercase/format: we
+         * reuse the same snapshot to anchor the wording.
+         */
+        const result = await isolated('error format check').exec('down w-nonexistent-00000').run();
+
+        expect(result.exitCode).not.toBe(0);
+        await result.stderr.toMatch('destroy-missing.txt');
+    });
+});

@@ -1,0 +1,5 @@
+
+  Error: agent "nonexistent" not found
+
+  Create one with: spwn agent create nonexistent
+
