@@ -82,7 +82,7 @@ describe('world destroy', () => {
             .exec('down w-nonexistent-00000')
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         // Friendly error — no stack trace or panic
         expect(result.stderr.text).not.toContain('TypeError');
         expect(result.stderr.text).not.toContain('panic');

@@ -27,7 +27,7 @@ describe('error recovery - state resilience', () => {
         // Exec([...]) stops on the first non-zero exit. Run the
         // Create + ls as a separate chain to prove the home was not
         // Corrupted by the failure.
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('panic:');
 
         const recovery = await isolated('recover create after rm')
@@ -49,7 +49,7 @@ describe('error recovery - state resilience', () => {
         const bad = await isolated('export ghost after create')
             .exec(['init', 'agent create neoprime', 'agent export ghost'])
             .run();
-        expect(bad.exitCode).not.toBe(0);
+        expect(bad.exitCode).toBe(1);
         expect(bad.stderr.text).not.toContain('panic:');
         expect(bad.stderr.text).not.toContain('goroutine ');
 
@@ -68,7 +68,7 @@ describe('error recovery - state resilience', () => {
             const result = await isolated(`rm nonexistent #${i}`)
                 .exec(['init', 'agent rm nonexistent'])
                 .run();
-            expect(result.exitCode).not.toBe(0);
+            expect(result.exitCode).toBe(1);
             expect(result.stderr.text).not.toContain('panic:');
         }
 

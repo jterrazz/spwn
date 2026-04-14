@@ -17,7 +17,7 @@ describe('zero-friction UX', () => {
             .run();
 
         // Then - the error walks the user to the spawn command
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('talk-no-world.txt');
     });
 
@@ -29,7 +29,7 @@ describe('zero-friction UX', () => {
             .run();
 
         // Then - exits non-zero with a "create one" hint
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('talk-missing-agent-hint.txt');
     });
 
@@ -55,7 +55,7 @@ describe('zero-friction UX', () => {
             .run();
 
         // Then - error points at spwn ls so the user can find their worlds
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('inspect-missing-ls-hint.txt');
     });
 

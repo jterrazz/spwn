@@ -142,10 +142,9 @@ describe('spwn agent fork', () => {
             .exec(['agent fork neo neo-v2', 'agent fork neo neo-v2'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
-        const out = result.stderr.text;
-        expect(out).toContain('target agent "neo-v2" already exists');
-        expect(out).not.toContain('panic:');
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('fork-duplicate-target.txt');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test('forked agent is inspectable via show', async () => {

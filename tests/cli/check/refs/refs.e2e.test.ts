@@ -38,7 +38,7 @@ describe('spwn check: tool ref classification', () => {
             .run();
 
         // Then - exits non-zero and the error quotes the offending ref
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         // `check` writes its report (errors included) to stdout.
         result.stdout.toContain('remote registries are not yet supported');
         result.stdout.toContain('@jterrazz/foo');

@@ -31,7 +31,7 @@ describe('spwn check: plugins field resolution', () => {
             .run();
 
         // Then - check fails and names the offending plugin
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         // `check` renders its report on stdout.
         result.stdout.toContain('@spwn/totally-bogus-plugin');
         expect(result.stdout.text.toLowerCase()).toContain('does not exist');

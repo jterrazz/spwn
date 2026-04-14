@@ -75,9 +75,9 @@ describe('CLI output', () => {
     test('unknown command errors with a helpful cobra message', async () => {
         const result = await spec('unknown cmd').project('empty').exec('nonexistent').run();
 
-        // Then - cobra writes "unknown command" to stderr and exits non-zero
-        expect(result.exitCode).not.toBe(0);
-        result.stderr.toContain('unknown command "nonexistent" for "spwn"');
+        // Then - cobra writes "unknown command" to stderr and exits 1
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('unknown-command.txt');
     });
 
     test('auth status table is rendered on stderr', async () => {

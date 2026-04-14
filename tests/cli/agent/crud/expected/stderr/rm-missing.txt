@@ -1,0 +1,5 @@
+
+  → Deleting agent "ghost"...
+  ✗ Delete failed            agent "ghost" not found
+    Check that agent "ghost" exists with "spwn agent ls"
+

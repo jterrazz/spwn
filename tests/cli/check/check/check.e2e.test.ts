@@ -43,7 +43,7 @@ describe('spwn check', () => {
             .run();
 
         // Then - exits non-zero and lists the built-ins the user can pick from
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stdout.toMatch('invalid-tool-ref.txt');
     });
 
@@ -55,7 +55,7 @@ describe('spwn check', () => {
             .run();
 
         // Then - exits non-zero with the "remote registries not yet supported" rule
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stdout.toMatch('registry-not-supported.txt');
     });
 
@@ -72,7 +72,7 @@ describe('spwn check', () => {
         // Then - check fails with the rule violation, and the second
         // World is genuinely present in spwn.yaml on disk (proves the
         // Seed handler ran).
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.file('spwn.yaml').content).toContain('duplicate:');
         // `check` writes its rendered report to stdout (cmd.OutOrStdout).
         result.stdout.toContain('already deployed by world "duplicate"');
@@ -99,7 +99,7 @@ describe('spwn check', () => {
             .run();
 
         // Then - exits non-zero and the issue list is structurally stable
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.json.toMatch('invalid-tool.json');
     });
 
@@ -108,7 +108,7 @@ describe('spwn check', () => {
         const result = await spec('check no project').project('empty').exec('check').run();
 
         // Then - exits non-zero and nudges the user at spwn init
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         // `check` outside a project errors on stderr (project resolver).
         const stderr = result.stderr.text.toLowerCase();
         expect(stderr).toContain('spwn init');

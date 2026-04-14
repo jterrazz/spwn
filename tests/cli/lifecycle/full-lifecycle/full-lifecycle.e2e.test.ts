@@ -154,9 +154,9 @@ describe('full agent lifecycle', () => {
             .exec(['agent rm neo', 'agent inspect neo'])
             .run();
 
-        // Inspect on a missing agent should exit non-zero with a clean
+        // Inspect on a missing agent should exit 1 with a clean
         // Error — no panics, no Go stack traces.
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('panic');
         expect(result.stderr.text).not.toContain('goroutine');
         expect(result.stderr.text).not.toContain('FATAL');
@@ -169,7 +169,7 @@ describe('full agent lifecycle', () => {
             .exec('down w-fake-99999')
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('panic');
         expect(result.stderr.text).not.toContain('goroutine');
         expect(result.stderr.text).not.toContain('FATAL');

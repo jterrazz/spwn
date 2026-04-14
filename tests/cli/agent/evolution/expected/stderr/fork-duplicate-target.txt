@@ -1,0 +1,5 @@
+
+  → Forking "neo" -> "neo-v2"...
+  ✗ Fork failed              target agent "neo-v2" already exists
+    Check agents exist with "spwn agent ls"
+
