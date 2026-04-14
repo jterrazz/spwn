@@ -77,19 +77,9 @@ Memory is a folder of markdown files, not a database. Knowledge survives across 
 </tr>
 <tr>
 <td align="center">
-<h3>🌍 Real Physics</h3>
-Every world is a Docker container with hard, kernel-enforced limits on CPU, memory, disk, and time. Break the sandbox? You can't. <b>Real constraints, not suggestions.</b>
-</td>
-<td align="center">
 <h3>🔒 Laws of Physics, Not ACLs</h3>
-No network interface means HTTP doesn't exist — not forbidden, physically impossible. No prompt jailbreak can change the laws of physics. <b>Security by absence.</b>
+No network interface means HTTP doesn't exist — not forbidden, physically impossible. Hard, kernel-enforced limits on CPU, memory, disk, time. No prompt jailbreak can change the laws of physics. <b>Security by absence.</b>
 </td>
-<td align="center">
-<h3>🏗️ Multi-Agent Teams</h3>
-Leaders delegate via filesystem inboxes. Workers report back. Async, observable, no orchestration glue code. <b>Collaboration as a physical medium.</b>
-</td>
-</tr>
-<tr>
 <td align="center">
 <h3>🧾 Agents as Code</h3>
 If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit your agents alongside your app code. Review behavior changes in PRs. <b>Reproduce the same mind on any machine.</b>
@@ -97,10 +87,6 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 <td align="center">
 <h3>📦 Reproducible Builds</h3>
 <code>spwn check</code> validates the project tree. <code>spwn build</code> flattens it into a content-hashed artifact — pinned Docker image digest, flattened agent tree, normalized manifest. <b>Byte-identical agents across environments.</b>
-</td>
-<td align="center">
-<h3>🔌 Swappable Adapters</h3>
-Every layer is a Go interface. Claude Code today, Codex tomorrow. Docker today, Firecracker next year. Markdown memory today, vector store later. <b>No runtime lock-in.</b>
 </td>
 </tr>
 </table>
