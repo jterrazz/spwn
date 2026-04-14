@@ -7,8 +7,6 @@
         "ui/setup/global-setup.ts",
         "ui/setup/global-teardown.ts",
         "ui/fixtures/app.ts",
-        "setup/mock-api/server.ts",
-        "setup/mock-llm/server.ts",
         "oxlint.config.ts",
         "oxfmt.config.ts"
     ],

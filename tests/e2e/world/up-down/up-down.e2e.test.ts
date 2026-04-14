@@ -3,7 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { dockerSpec } from '../../../setup/cli.specification.js';
 
 /**
- * Pilot for the docker() spec mode. Proves the end-to-end flow:
+ * Smallest docker() spec mode coverage — the reference for the
+ * end-to-end flow:
  *
  *   1. dockerSpec injects SPWN_TEST_LABEL=<id> into the child env
  *   2. spwn stamps that id as a Docker label on every container it spawns
@@ -12,9 +13,6 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  *   4. `await using` force-removes every tracked container when the
  *      scope exits, so tests running in parallel never collide and
  *      nothing leaks between runs
- *
- * Once this is green, the rest of tests/e2e/world/*.e2e.test.ts can be
- * ported off the legacy createTestContext helpers.
  */
 describe('world up/down (docker pilot)', () => {
     test('spwn up brings a declared world into running state', async () => {

@@ -3,12 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { dockerSpec, spec } from '../../../setup/cli.specification.js';
 
 /**
- * CLI execution — non-Docker paths.
- *
- * The legacy file mixed Docker-backed world lifecycle tests with
- * agent-management / flag / enter / status tests. Only the non-Docker
- * suites are ported here; the Docker ones stay on the legacy helpers
- * (they rely on createTestContext / ctx.spwn).
+ * CLI execution — agent management, flags, enter, status and the
+ * `world aliases` docker block at the bottom.
  *
  * spwn's success path writes status banners to stderr (Unix
  * convention). Stable banners get stderr snapshots under
