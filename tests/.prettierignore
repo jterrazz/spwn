@@ -1,7 +1,0 @@
-fixtures/
-cli/**/expected/
-spwn/
-spwn.yaml
-.spwn/
-playwright-report/
-test-results/
