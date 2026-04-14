@@ -13,6 +13,7 @@ import (
 	"spwn.sh/apps/cli/get"
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
+	"spwn.sh/apps/cli/plugin"
 	"spwn.sh/apps/cli/profile"
 	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/snap"
@@ -75,6 +76,7 @@ func init() {
 
 	// Command groups - building blocks
 	rootCmd.AddCommand(tool.Cmd)
+	rootCmd.AddCommand(plugin.Cmd)
 	rootCmd.AddCommand(skill.Cmd)
 	rootCmd.AddCommand(profile.Cmd)
 
@@ -159,6 +161,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	// Building blocks - the things you compose agents from
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
 	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, get)"))
+	printHelpCmd(w, "plugin", "Runtime-targeted plugins "+ui.Faint("(ls, show)"))
 	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show)"))
 	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit)"))
 	fmt.Fprintln(w)

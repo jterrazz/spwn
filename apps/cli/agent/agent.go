@@ -49,8 +49,8 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
 			{Title: "Compose", Commands: []ui.HelpEntry{
-				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--tool / --skill / --profile)")},
-				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--tool / --skill / --profile)")},
+				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--tool / --plugin / --skill / --profile)")},
+				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--tool / --plugin / --skill / --profile)")},
 			}},
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},

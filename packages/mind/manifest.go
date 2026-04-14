@@ -19,6 +19,7 @@ type Manifest struct {
 	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
 	Profile string        `yaml:"profile,omitempty"` // personality template reference
 	Tools   []string      `yaml:"tools,omitempty"`   // tool packs
+	Plugins []string      `yaml:"plugins,omitempty"` // plugin packs (runtime-targeted tools)
 	Skills  []string      `yaml:"skills,omitempty"`  // skill files
 }
 
@@ -99,6 +100,38 @@ func RemoveTool(agentName, tool string) error {
 		}
 	}
 	m.Tools = out
+	return SaveManifest(agentName, m)
+}
+
+// AddPlugin appends a plugin pack to the agent's composition (idempotent).
+func AddPlugin(agentName, plugin string) error {
+	m, err := LoadManifest(agentName)
+	if err != nil {
+		return err
+	}
+	for _, p := range m.Plugins {
+		if p == plugin {
+			return nil // already present
+		}
+	}
+	m.Plugins = append(m.Plugins, plugin)
+	return SaveManifest(agentName, m)
+}
+
+// RemovePlugin removes a plugin pack from the agent's composition.
+// No-op if the plugin isn't attached.
+func RemovePlugin(agentName, plugin string) error {
+	m, err := LoadManifest(agentName)
+	if err != nil {
+		return err
+	}
+	out := make([]string, 0, len(m.Plugins))
+	for _, p := range m.Plugins {
+		if p != plugin {
+			out = append(out, p)
+		}
+	}
+	m.Plugins = out
 	return SaveManifest(agentName, m)
 }
 

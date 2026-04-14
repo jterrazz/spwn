@@ -11,6 +11,7 @@ import (
 	"runtime/debug"
 	"strings"
 
+	plugins "spwn.sh/catalog/plugins"
 	runtimes "spwn.sh/catalog/runtimes"
 	tools "spwn.sh/catalog/tools"
 	ib "spwn.sh/packages/image"
@@ -48,6 +49,9 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register runtimes: %w", err)
+	}
+	if err := plugins.RegisterDefaults(reg); err != nil {
+		return fmt.Errorf("register plugins: %w", err)
 	}
 
 	// The architect needs these tools installed in the image.

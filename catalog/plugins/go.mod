@@ -1,4 +1,4 @@
-module spwn.sh/catalog/runtimes
+module spwn.sh/catalog/plugins
 
 go 1.25.0
 

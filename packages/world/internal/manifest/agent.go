@@ -20,6 +20,7 @@ type AgentManifest struct {
 	Runtime RuntimeConfig `yaml:"runtime,omitempty"` // optional runtime override
 	Profile string        `yaml:"profile,omitempty"` // reference to a profile template (~/.spwn/profiles/{name}.md)
 	Tools   []string      `yaml:"tools,omitempty"`   // tool packs attached to the agent
+	Plugins []string      `yaml:"plugins,omitempty"` // plugin packs (runtime-targeted tools)
 	Skills  []string      `yaml:"skills,omitempty"`  // skill files attached to the agent
 }
 
