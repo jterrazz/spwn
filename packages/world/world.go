@@ -271,16 +271,16 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 	}
 
 	// Check if already running
-	info, err := docker.Inspect(ctx, base.ArchitectContainerName)
+	info, err := docker.Inspect(ctx, base.ArchitectContainerName())
 	if err == nil && info.Running {
 		opts.progress("already_running", info.ID)
-		return info.ID, fmt.Errorf("architect is already running (container %s)", base.ArchitectContainerName)
+		return info.ID, fmt.Errorf("architect is already running (container %s)", base.ArchitectContainerName())
 	}
 
 	// If container exists but stopped, remove it first
 	if err == nil && !info.Running {
 		opts.progress("cleanup", "removing stopped architect container")
-		_ = docker.Remove(ctx, base.ArchitectContainerName)
+		_ = docker.Remove(ctx, base.ArchitectContainerName())
 	}
 
 	// Resolve image
@@ -345,8 +345,8 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
 
-	opts.progress("container_creating", base.ArchitectContainerName)
-	id, err := docker.CreateNamedContainer(ctx, base.ArchitectContainerName, containerCfg, hostCfg)
+	opts.progress("container_creating", base.ArchitectContainerName())
+	id, err := docker.CreateNamedContainer(ctx, base.ArchitectContainerName(), containerCfg, hostCfg)
 	if err != nil {
 		return "", fmt.Errorf("creating architect container: %w", err)
 	}
@@ -376,7 +376,7 @@ func StopArchitectDaemon(ctx context.Context) error {
 		return fmt.Errorf("docker is not reachable: %w", err)
 	}
 
-	info, err := docker.Inspect(ctx, base.ArchitectContainerName)
+	info, err := docker.Inspect(ctx, base.ArchitectContainerName())
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			return fmt.Errorf("architect is not running")
@@ -385,12 +385,12 @@ func StopArchitectDaemon(ctx context.Context) error {
 	}
 
 	if info.Running {
-		if err := docker.Stop(ctx, base.ArchitectContainerName); err != nil {
+		if err := docker.Stop(ctx, base.ArchitectContainerName()); err != nil {
 			return fmt.Errorf("stopping architect container: %w", err)
 		}
 	}
 
-	if err := docker.Remove(ctx, base.ArchitectContainerName); err != nil {
+	if err := docker.Remove(ctx, base.ArchitectContainerName()); err != nil {
 		return fmt.Errorf("removing architect container: %w", err)
 	}
 
@@ -412,7 +412,7 @@ func GetArchitectDaemonStatus(ctx context.Context) (*ArchitectDaemonInfo, error)
 		return nil, fmt.Errorf("docker is not reachable: %w", err)
 	}
 
-	info, err := docker.Inspect(ctx, base.ArchitectContainerName)
+	info, err := docker.Inspect(ctx, base.ArchitectContainerName())
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			return &ArchitectDaemonInfo{Running: false, Status: "not running"}, nil
@@ -458,7 +458,7 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	// Sync credentials before exec
 	_ = auth.SyncCredentials()
 
-	args = append(args, base.ArchitectContainerName)
+	args = append(args, base.ArchitectContainerName())
 
 	// Claude Code invocation - wrapped to source credentials from bind mount
 	claudeArgs := []string{"claude", "--dangerously-skip-permissions"}
