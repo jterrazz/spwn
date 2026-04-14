@@ -43,16 +43,17 @@ The real power of AI isn't the model - it's the model plus everything around it.
 curl -fsSL https://spwn.sh/install.sh | bash
 ```
 
-Four commands. One running world.
+Three commands. One running agent.
 
-|        | Step              | Example                                    |
-| ------ | ----------------- | ------------------------------------------ |
-| **01** | Initialise        | `spwn init`                                |
-| **02** | Create an agent   | `spwn agent create neo`                    |
-| **03** | Bring it online   | `spwn up`                                  |
-| **04** | Talk to it        | `spwn agent talk neo "what is this project?"` |
+|        | Step          | Example                                            |
+| ------ | ------------- | -------------------------------------------------- |
+| **01** | Scaffold      | `spwn init`                                        |
+| **02** | Bring it up   | `spwn agent neo`                                   |
+| **03** | Talk to it    | `spwn agent talk neo "what is this project?"`      |
 
-Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug from `spwn web`'s template gallery or the `/api/templates` endpoint).
+`spwn init` drops a project with a default agent named **neo** and a 1:1 world ready to spawn. `spwn agent neo` is the shortcut that starts neo's world; the long form is `spwn agent start neo`.
+
+Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/templates/`).
 
 > **Requirements:** Docker
 
