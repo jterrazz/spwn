@@ -4,8 +4,8 @@ go 1.25.0
 
 require (
 	gopkg.in/yaml.v3 v3.0.1
-	spwn.sh/packages/base v0.0.0
 	spwn.sh/packages/image v0.0.0
+	spwn.sh/packages/paths v0.0.0
 )
 
 require (
@@ -42,6 +42,6 @@ require (
 )
 
 replace (
-	spwn.sh/packages/base => ../base
 	spwn.sh/packages/image => ../image
+	spwn.sh/packages/paths => ../paths
 )

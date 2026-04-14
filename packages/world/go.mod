@@ -5,10 +5,15 @@ go 1.25.0
 require (
 	github.com/docker/docker v27.5.1+incompatible
 	gopkg.in/yaml.v3 v3.0.1
+	spwn.sh/packages/activity v0.0.0
+	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/base v0.0.0
 	spwn.sh/packages/catalog v0.0.0
+	spwn.sh/packages/ids v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mind v0.0.0
+	spwn.sh/packages/paths v0.0.0
+	spwn.sh/packages/version v0.0.0
 )
 
 require (
@@ -36,8 +41,13 @@ require (
 )
 
 replace (
+	spwn.sh/packages/activity => ../activity
+	spwn.sh/packages/auth => ../auth
 	spwn.sh/packages/base => ../base
 	spwn.sh/packages/catalog => ../catalog
+	spwn.sh/packages/ids => ../ids
 	spwn.sh/packages/image => ../image
 	spwn.sh/packages/mind => ../mind
+	spwn.sh/packages/paths => ../paths
+	spwn.sh/packages/version => ../version
 )

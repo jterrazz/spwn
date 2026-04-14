@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 
 	"spwn.sh/packages/mind"
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/physics"
+	"spwn.sh/packages/ids"
 )
 
 // AgentSpec describes an agent to spawn in a world.
@@ -51,7 +51,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	}
 
 	resolvedRole := manifest.DefaultRole(role)
-	agentID := base.GenerateAgentID(agentName)
+	agentID := ids.GenerateAgentID(agentName)
 	rec := models.AgentRecord{
 		Name:    agentName,
 		AgentID: agentID,
@@ -152,7 +152,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 	// 3. Update existing agent records to "creating" status
 	// (agents are already registered by Spawn() - avoid duplicates)
 	for _, spec := range agents {
-		agentID := base.GenerateAgentID(spec.Name)
+		agentID := ids.GenerateAgentID(spec.Name)
 		if err := a.state.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
 			// Agent not yet registered (shouldn't happen in normal flow) - add it
 			role := manifest.DefaultRole(spec.Role)

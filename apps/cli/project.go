@@ -3,8 +3,8 @@ package cli
 import (
 	"os"
 
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/paths"
 )
 
 // discoverProject walks up from the current directory looking for a
@@ -23,5 +23,5 @@ func discoverProject() {
 	if err != nil || p == nil {
 		return
 	}
-	base.SetProjectRoot(p.Root)
+	paths.SetProjectRoot(p.Root)
 }

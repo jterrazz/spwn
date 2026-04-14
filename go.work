@@ -2,12 +2,18 @@ go 1.25.0
 
 use (
 	./apps/cli
+	./packages/activity
+	./packages/auth
 	./packages/base
 	./packages/catalog
+	./packages/env
+	./packages/ids
 	./packages/image
 	./packages/mailbox
 	./packages/manifest
 	./packages/migration
 	./packages/mind
+	./packages/paths
+	./packages/version
 	./packages/world
 )

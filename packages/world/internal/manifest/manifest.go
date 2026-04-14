@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"spwn.sh/packages/world/internal/models"
-	"spwn.sh/packages/base"
 	"gopkg.in/yaml.v3"
+	"spwn.sh/packages/paths"
 )
 
 // ToolPacks maps @pack names to their constituent binaries.
@@ -27,7 +27,7 @@ type rawManifest struct {
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
 func Load(name string) (models.Manifest, error) {
-	path := filepath.Join(base.WorldsDir(), name+".yaml")
+	path := filepath.Join(paths.WorldsDir(), name+".yaml")
 	return LoadPath(path)
 }
 
@@ -67,7 +67,7 @@ func parseTools(node *yaml.Node) []string {
 
 // ListConfigs returns the names of all world configs in ~/.spwn/worlds/.
 func ListConfigs() ([]string, error) {
-	dir := base.WorldsDir()
+	dir := paths.WorldsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -87,7 +87,7 @@ func ListConfigs() ([]string, error) {
 
 // CreateDefault creates a default.yaml in ~/.spwn/worlds/.
 func CreateDefault() error {
-	dir := base.WorldsDir()
+	dir := paths.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ tools:
 
 // CreateConfig scaffolds a new named config.
 func CreateConfig(name string) error {
-	dir := base.WorldsDir()
+	dir := paths.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}

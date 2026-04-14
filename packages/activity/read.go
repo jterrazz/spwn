@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/base"
+	"spwn.sh/packages/paths"
 )
 
 // ReadOpts filters the returned events.
@@ -26,7 +26,7 @@ type ReadOpts struct {
 
 // Read returns events matching the filter, newest first.
 func Read(opts ReadOpts) ([]Event, error) {
-	path := base.ActivityPath()
+	path := paths.ActivityPath()
 	f, err := os.Open(path)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {

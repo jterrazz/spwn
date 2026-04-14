@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"spwn.sh/packages/mind"
-	"spwn.sh/packages/base"
-	"spwn.sh/packages/base/activity"
+	"spwn.sh/packages/activity"
 	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/paths"
 )
 
 // formatUptime returns a human-readable duration like "47m" or "2h".
@@ -50,7 +50,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		agentNamesForJournal = append(agentNamesForJournal, u.Agent)
 	}
 	for _, name := range agentNamesForJournal {
-		agentPath := filepath.Join(base.AgentsDir(), name)
+		agentPath := filepath.Join(paths.AgentsDir(), name)
 		if journalErr := mind.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
 			log.Printf("warning: failed to write journal for agent %s on destroy: %v", name, journalErr)
 		}
