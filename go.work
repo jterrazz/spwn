@@ -10,7 +10,7 @@ use (
 	./packages/ids
 	./packages/image
 	./packages/mailbox
-	./packages/manifest
+	./packages/project
 	./packages/migration
 	./packages/mind
 	./packages/paths

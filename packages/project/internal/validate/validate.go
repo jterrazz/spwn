@@ -14,8 +14,8 @@ import (
 	"sort"
 	"strings"
 
-	intmanifest "spwn.sh/packages/manifest/internal/manifest"
-	"spwn.sh/packages/manifest/internal/resolve"
+	intmanifest "spwn.sh/packages/project/internal/manifest"
+	"spwn.sh/packages/project/internal/resolve"
 
 	"gopkg.in/yaml.v3"
 )

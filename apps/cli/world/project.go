@@ -5,7 +5,7 @@ import (
 	"os"
 	"sort"
 
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
@@ -13,7 +13,7 @@ import (
 // entry in spwn.yaml. It contains everything spawnRunE needs to skip
 // the legacy ~/.spwn/worlds/<name>.yaml file load entirely.
 type projectWorld struct {
-	Project    *manifest.Project
+	Project    *project.Project
 	Name       string
 	Agents     []string
 	Workspaces []string
@@ -23,17 +23,17 @@ type projectWorld struct {
 // loadProject walks up from the cwd looking for spwn.yaml. Returns
 // (nil, nil) when no project is active so callers can fall back to
 // the legacy global-mode flow.
-func loadProject() (*manifest.Project, error) {
+func loadProject() (*project.Project, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
-	return manifest.Find(cwd)
+	return project.Find(cwd)
 }
 
 // sortedWorldNames returns the project's world-map keys in stable
 // alphabetic order so callers iterate predictably.
-func sortedWorldNames(p *manifest.Project) []string {
+func sortedWorldNames(p *project.Project) []string {
 	if p == nil || p.Manifest == nil {
 		return nil
 	}
@@ -52,7 +52,7 @@ func sortedWorldNames(p *manifest.Project) []string {
 // The resulting world.Manifest has Tools unioned from (1) the inline
 // world's explicit Tools list and (2) every referenced agent's
 // agent.yaml Tools field.
-func resolveProjectWorld(p *manifest.Project, name string) (*projectWorld, error) {
+func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error) {
 	if p == nil || p.Manifest == nil {
 		return nil, fmt.Errorf("no project loaded")
 	}

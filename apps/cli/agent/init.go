@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/mind"
 	"spwn.sh/packages/ids"
 )
@@ -38,9 +38,9 @@ provided, a random name is picked from a curated dictionary.`,
 		// Reject names that would shadow `spwn agent <subcommand>`.
 		// Caught here, before InitMind writes anything to disk, so
 		// the user never sees a half-created agent directory.
-		if manifest.IsReservedAgentName(name) {
+		if project.IsReservedAgentName(name) {
 			return fmt.Errorf("agent name %q is reserved (collides with `spwn agent %s`). Reserved names: %s",
-				name, name, strings.Join(manifest.ReservedAgentNames(), ", "))
+				name, name, strings.Join(project.ReservedAgentNames(), ", "))
 		}
 
 		s.Blank()
@@ -61,8 +61,8 @@ provided, a random name is picked from a curated dictionary.`,
 		// single-agent world entry to spwn.yaml so the agent is
 		// immediately deployable via `spwn up` or `spwn agent <name>`.
 		if cwd, werr := os.Getwd(); werr == nil {
-			if p, perr := manifest.Find(cwd); perr == nil && p != nil {
-				if addErr := manifest.AddAgentToManifest(p.ManifestPath, name); addErr != nil {
+			if p, perr := project.Find(cwd); perr == nil && p != nil {
+				if addErr := project.AddAgentToManifest(p.ManifestPath, name); addErr != nil {
 					s.Warn("Warning", fmt.Sprintf("could not add world to spwn.yaml: %v", addErr))
 				} else {
 					s.Done("Added world to spwn.yaml", name)

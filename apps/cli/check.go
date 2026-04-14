@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 )
 
 func init() {
@@ -58,7 +58,7 @@ severity. Exits non-zero when errors are found (or warnings, with
 			return fmt.Errorf("resolve cwd: %w", err)
 		}
 
-		p, err := manifest.Find(cwd)
+		p, err := project.Find(cwd)
 		if err != nil {
 			return fmt.Errorf("load manifest: %w", err)
 		}
@@ -66,15 +66,15 @@ severity. Exits non-zero when errors are found (or warnings, with
 			return fmt.Errorf("no spwn.yaml found in %s or any parent directory.\nRun `spwn init` to create one", cwd)
 		}
 
-		issues := manifest.Validate(p, manifest.ValidateOpts{
+		issues := project.Validate(p, project.ValidateOpts{
 			BuiltinTools:      catalogToolNames(),
 			SupportedRuntimes: supportedRuntimes(),
 		})
 		out := cmd.OutOrStdout()
 
-		errors := filter(issues, manifest.LevelError)
-		warnings := filter(issues, manifest.LevelWarning)
-		infos := filter(issues, manifest.LevelInfo)
+		errors := filter(issues, project.LevelError)
+		warnings := filter(issues, project.LevelWarning)
+		infos := filter(issues, project.LevelInfo)
 
 		if checkJSON {
 			report := buildCheckReport(p.ManifestPath, errors, warnings, infos)
@@ -116,9 +116,9 @@ severity. Exits non-zero when errors are found (or warnings, with
 	},
 }
 
-func buildCheckReport(manifestPath string, errors, warnings, infos []manifest.Issue) checkReport {
+func buildCheckReport(manifestPath string, errors, warnings, infos []project.Issue) checkReport {
 	issues := make([]checkIssue, 0, len(errors)+len(warnings)+len(infos))
-	for _, group := range [][]manifest.Issue{errors, warnings, infos} {
+	for _, group := range [][]project.Issue{errors, warnings, infos} {
 		for _, i := range group {
 			issues = append(issues, checkIssue{
 				Level:   i.Level.String(),
@@ -140,8 +140,8 @@ func buildCheckReport(manifestPath string, errors, warnings, infos []manifest.Is
 	}
 }
 
-func filter(issues []manifest.Issue, level manifest.Level) []manifest.Issue {
-	var out []manifest.Issue
+func filter(issues []project.Issue, level project.Level) []project.Issue {
+	var out []project.Issue
 	for _, i := range issues {
 		if i.Level == level {
 			out = append(out, i)
@@ -150,7 +150,7 @@ func filter(issues []manifest.Issue, level manifest.Level) []manifest.Issue {
 	return out
 }
 
-func printGroup(out interface{ Write([]byte) (int, error) }, label string, issues []manifest.Issue, color func(string) string) {
+func printGroup(out interface{ Write([]byte) (int, error) }, label string, issues []project.Issue, color func(string) string) {
 	if len(issues) == 0 {
 		return
 	}

@@ -1,11 +1,11 @@
-package manifest
+package project
 
 import (
 	"os"
 	"path/filepath"
 	"sort"
 
-	intmanifest "spwn.sh/packages/manifest/internal/manifest"
+	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
 // resolveRefs walks the agents declared by every world in the manifest

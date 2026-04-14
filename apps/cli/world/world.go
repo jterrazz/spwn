@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
@@ -518,7 +518,7 @@ func runPreSpawnBuild(cmd *cobra.Command) error {
 	if err != nil {
 		return fmt.Errorf("resolve cwd: %w", err)
 	}
-	p, err := manifest.Find(cwd)
+	p, err := project.Find(cwd)
 	if err != nil {
 		return fmt.Errorf("load manifest: %w", err)
 	}
@@ -526,11 +526,11 @@ func runPreSpawnBuild(cmd *cobra.Command) error {
 		// No project - skip build, fall through to legacy spawn path.
 		return nil
 	}
-	issues := manifest.Validate(p)
-	if manifest.HasErrors(issues) {
+	issues := project.Validate(p)
+	if project.HasErrors(issues) {
 		return fmt.Errorf("project has validation errors - run `spwn check` to see them")
 	}
-	result, err := manifest.Build(p)
+	result, err := project.Build(p)
 	if err != nil {
 		return fmt.Errorf("build failed: %w", err)
 	}
@@ -541,7 +541,7 @@ func runPreSpawnBuild(cmd *cobra.Command) error {
 }
 
 func abbrevHash(dir string) string {
-	meta, err := manifest.LoadBuildMetadata(&manifest.Project{Root: dirOfBuildDir(dir)})
+	meta, err := project.LoadBuildMetadata(&project.Project{Root: dirOfBuildDir(dir)})
 	if err != nil || meta == nil {
 		return ""
 	}
