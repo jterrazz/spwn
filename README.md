@@ -33,41 +33,38 @@ The building blocks of agent intelligence. Assemble tools, skills, and minds int
 
 The real power of AI isn't the model — it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
 
-**Think of it as Docker for intelligence.** Docker made OS environments composable — stack base images, layers, and configs into a running container. Spwn makes *agents* composable — stack tool packs, skill files, and profiles into a running mind. One command assembles the blocks and boots the world.
+**Agents as code. Docker for intelligence.** If Terraform is infrastructure as code, spwn is *agents* as code: stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review PRs that change an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one reproducible artifact.
 
-Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own filesystem, neighbors, and memory. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork themselves to run experiments. The full environment — not just the brain — is what turns a language model into something that actually gets work done.
+Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own filesystem, neighbors, and memory. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork themselves to run experiments.
 
 > *"The next breakthrough isn't smarter models. It's richer worlds."*
-
-|        | Step             | Example                                                            |
-| ------ | ---------------- | ------------------------------------------------------------------ |
-| **01** | Create an agent  | `spwn agent new neo`                                               |
-| **02** | Compose its mind | `spwn agent add neo --tool @spwn/python --skill paper-reading`     |
-| **03** | Spawn a world    | `spwn up --agent neo -w ./my-project`                              |
-| **04** | Watch it live    | Agent discovers tools, works on your code, remembers everything.   |
 
 <br/>
 
 ## Quickstart
 
+Four commands to a running world:
+
+|        | Step             | Example                                                            |
+| ------ | ---------------- | ------------------------------------------------------------------ |
+| **01** | Initialise       | `spwn init`                                                        |
+| **02** | Compose the mind | `spwn agent add default --tool @spwn/python --skill paper-reading` |
+| **03** | Spawn the world  | `spwn up`                                                          |
+| **04** | Talk to it       | `spwn talk default "what is this project?"`                        |
+
 ```bash
 # Install (downloads latest release to ~/.local/bin)
 curl -fsSL https://spwn.sh/install.sh | bash
-```
 
-```bash
-# Create an agent and compose its mind
-spwn agent new neo
-spwn agent add neo --tool @spwn/python --skill paper-reading
+# Scaffold a spwn project in the current directory
+spwn init
 
-# Spawn a world
-spwn up --agent neo -w ./my-project --detach
+# Validate, build the artifact, and spawn
+spwn check
+spwn build
+spwn up
 
-# Talk to the agent
-spwn talk neo "What is this project?"
-
-# Check running worlds
-spwn ls
+# Or one shot: spwn up --build
 ```
 
 Or start from a bundled example:
