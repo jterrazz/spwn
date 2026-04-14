@@ -33,6 +33,35 @@ import { parse, stringify } from 'yaml';
  */
 const SPWN_BIN = resolve(import.meta.dirname, '../../bin/spwn');
 
+const PROJECT_PATH_PLACEHOLDER = '<PROJECT>';
+
+/**
+ * Strip ANSI colour escapes. The codestyle writer emits them unconditionally
+ * so stdout from `spwn check` contains SGR sequences in CI too.
+ */
+function stripAnsi(input: string): string {
+    // eslint-disable-next-line no-control-regex
+    return input.replace(/\u001b\[[0-9;]*m/g, '');
+}
+
+/**
+ * Normalise test-run specific noise before comparing to a stored fixture.
+ *
+ * Every `spec(...).project(...).exec(...)` call materialises the fixture
+ * in a fresh `os.tmpdir()/spec-*` directory — macOS resolves that to
+ * `/private/var/folders/...`, Linux to `/tmp/...`. Collapse any of those
+ * forms into a single `<PROJECT>` token so stored snapshots stay portable
+ * across machines.
+ */
+function normalise(actual: string): string {
+    let out = stripAnsi(actual);
+    out = out.replace(
+        /(?:\/private)?\/(?:var\/folders\/[^\s/]+\/[^\s/]+\/T|tmp)\/[A-Za-z0-9._-]+/g,
+        PROJECT_PATH_PLACEHOLDER,
+    );
+    return out;
+}
+
 function copyTree(srcPath: string, dstPath: string): void {
     const srcStat = statSync(srcPath);
     if (!srcStat.isDirectory()) {
@@ -61,6 +90,7 @@ type CliBuilder = {
 
 const rawRunner = await specRunner(command(SPWN_BIN), {
     root: '../fixtures',
+    transform: normalise,
     seedHandlers: {
         'spwn.yaml/': (ctx: SeedHandlerContext, fragmentPath: string) => {
             const fragment = parse(readFileSync(fragmentPath, 'utf8')) as Record<string, unknown>;
