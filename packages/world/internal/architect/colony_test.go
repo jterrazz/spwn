@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/internal/manifest"
+	"spwn.sh/packages/world/manifest"
 )
 
 func TestAgentSpec_DefaultRole(t *testing.T) {

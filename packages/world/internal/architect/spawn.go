@@ -18,7 +18,7 @@ import (
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
-	"spwn.sh/packages/world/internal/manifest"
+	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/worldfiles"
 	"spwn.sh/packages/base"

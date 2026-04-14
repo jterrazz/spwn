@@ -20,7 +20,7 @@ import (
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/image/probe"
 	"spwn.sh/packages/world/internal/architect"
-	"spwn.sh/packages/world/internal/manifest"
+	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/state"
 	templates "spwn.sh/packages/catalog/templates"
