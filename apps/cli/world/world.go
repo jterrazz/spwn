@@ -3,11 +3,14 @@ package world
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
-	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
+
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/world"
 )
 
 var (
@@ -132,6 +135,10 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 
 	s.Blank()
 	s.Start("Loading config...")
+
+	// If we're inside a spwn project and the caller didn't override
+	// world or agents, adopt the defaults declared in spwn.yaml.
+	applyManifestDefaults(cmd)
 
 	configName := "default"
 	if spawnConfig != "" {
@@ -378,5 +385,30 @@ func spawnHint(err error, agentName string, agents []world.AgentSpec) string {
 		return "Start Docker Desktop or OrbStack, then try again"
 	default:
 		return ""
+	}
+}
+
+// applyManifestDefaults pulls the world config name and agent list out
+// of the project's spwn.yaml when the caller didn't override them via
+// flags. Silently no-ops when no project is active, so the legacy
+// global-mode CLI still works unchanged.
+func applyManifestDefaults(cmd *cobra.Command) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	p, err := manifest.Find(cwd)
+	if err != nil || p == nil {
+		return
+	}
+
+	if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("world") && spawnConfig == "" {
+		spawnConfig = p.Manifest.World
+	}
+	if !cmd.Flags().Changed("agent") && len(spawnAgents) == 0 {
+		spawnAgents = append(spawnAgents, p.Manifest.Agents...)
+	}
+	if !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 && p.Manifest.Workspace != "" {
+		spawnWorkspaces = append(spawnWorkspaces, p.Manifest.Workspace)
 	}
 }

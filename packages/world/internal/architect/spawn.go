@@ -545,7 +545,7 @@ func workspaceContainerPath(name string, totalWorkspaces int) string {
 // world's per-instance state is stored. Used by both spawn (initial
 // write) and DeployAgent (roster regeneration).
 func worldStateDirFor(worldID string) string {
-	return filepath.Join(foundation.BaseDir(), "world-states", worldID)
+	return filepath.Join(foundation.LocalStateDir(), "world-states", worldID)
 }
 
 // initAgentDeployment creates the per-agent per-world filesystem layout

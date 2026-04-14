@@ -101,7 +101,7 @@ func (s *Store) evictLegacyStateFile() {
 		_ = os.RemoveAll(oldRuntime)
 	}
 	// Make sure the new world-states root exists for first-time installs.
-	_ = os.MkdirAll(filepath.Join(foundation.BaseDir(), "world-states"), 0o755)
+	_ = os.MkdirAll(filepath.Join(foundation.LocalStateDir(), "world-states"), 0o755)
 }
 
 // ── Read API ──────────────────────────────────────────────────────────

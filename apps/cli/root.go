@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
@@ -21,7 +23,6 @@ import (
 	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/packages/foundation"
-	"github.com/spf13/cobra"
 )
 
 // Version is set by goreleaser via ldflags.
@@ -43,6 +44,7 @@ and a Mind (persistent agent identity).`,
 		if err := runMigrations(); err != nil {
 			return err
 		}
+		discoverProject()
 		return ensureDefaults()
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {

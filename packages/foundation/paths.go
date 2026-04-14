@@ -3,11 +3,44 @@ package foundation
 import (
 	"os"
 	"path/filepath"
+	"sync"
 )
 
-// BaseDir returns the path to ~/.spwn/. If SPWN_HOME is set, it
-// overrides the default (used for test isolation).
-func BaseDir() string {
+var (
+	projectRootMu sync.RWMutex
+	projectRoot   string
+)
+
+// SetProjectRoot tells foundation where this process's spwn project
+// lives. Path helpers that are project-aware (AgentsDir, WorldsDir,
+// SkillsDir, LocalStateDir) then resolve inside <projectRoot>.
+//
+// Pass "" to clear. Callers typically call this once from a cobra
+// PersistentPreRun after discovering the project with manifest.Find.
+func SetProjectRoot(path string) {
+	projectRootMu.Lock()
+	defer projectRootMu.Unlock()
+	projectRoot = path
+}
+
+// ProjectRoot returns the currently active project root, or "" if no
+// project is active (legacy global mode).
+func ProjectRoot() string {
+	projectRootMu.RLock()
+	defer projectRootMu.RUnlock()
+	return projectRoot
+}
+
+// HasProject reports whether a project root is active.
+func HasProject() bool {
+	return ProjectRoot() != ""
+}
+
+// UserDir is the user-global home: ~/.spwn/. If SPWN_HOME is set, it
+// overrides the default (used for test isolation). Always user-level —
+// credentials, daemon state, and the activity log live here regardless
+// of whether a project is active.
+func UserDir() string {
 	if dir := os.Getenv("SPWN_HOME"); dir != "" {
 		return dir
 	}
@@ -15,49 +48,82 @@ func BaseDir() string {
 	return filepath.Join(home, SpwnBaseDir)
 }
 
-// WorldsDir returns the path to ~/.spwn/worlds/.
+// BaseDir is a historical alias for UserDir. New code should prefer
+// UserDir (user-level, always) or DataDir (project-aware).
+func BaseDir() string {
+	return UserDir()
+}
+
+// DataDir is the project-aware root for project assets — agents,
+// worlds, skills, custom tool packs. Returns <projectRoot>/spwn/ when
+// a project is active, or UserDir() otherwise (legacy global mode).
+func DataDir() string {
+	if root := ProjectRoot(); root != "" {
+		return filepath.Join(root, "spwn")
+	}
+	return UserDir()
+}
+
+// LocalStateDir is the project's gitignored state directory (.spwn/).
+// Used for transient runtime state like world-states and caches.
+// Returns <projectRoot>/.spwn/ when a project is active, or UserDir()
+// otherwise.
+func LocalStateDir() string {
+	if root := ProjectRoot(); root != "" {
+		return filepath.Join(root, ".spwn")
+	}
+	return UserDir()
+}
+
+// --- Project-aware data paths ---
+
+// WorldsDir returns the worlds config directory.
 func WorldsDir() string {
-	return filepath.Join(BaseDir(), WorldsSubDir)
+	return filepath.Join(DataDir(), WorldsSubDir)
 }
 
-// AgentsDir returns the path to ~/.spwn/agents/.
+// AgentsDir returns the agents directory.
 func AgentsDir() string {
-	return filepath.Join(BaseDir(), AgentsSubDir)
+	return filepath.Join(DataDir(), AgentsSubDir)
 }
 
-// CredentialsDir returns the path to ~/.spwn/credentials/.
+// SkillsDir returns the skills directory.
+func SkillsDir() string {
+	return filepath.Join(DataDir(), SkillsSubDir)
+}
+
+// --- User-level paths (never project-aware) ---
+
+// CredentialsDir always returns the user-level credentials directory.
+// Credentials are intentionally never project-scoped — projects must
+// never commit or reference auth material.
 func CredentialsDir() string {
-	return filepath.Join(BaseDir(), CredentialsSubDir)
+	return filepath.Join(UserDir(), CredentialsSubDir)
 }
 
-// StatePath returns the path to ~/.spwn/state.json.
+// StatePath returns the legacy state.json path (user-level).
 func StatePath() string {
-	return filepath.Join(BaseDir(), StateFileName)
+	return filepath.Join(UserDir(), StateFileName)
+}
+
+// ActivityPath returns the user-level activity log.
+func ActivityPath() string {
+	return filepath.Join(UserDir(), ActivityFileName)
+}
+
+// TeamsDir returns the user-level teams directory.
+func TeamsDir() string {
+	return filepath.Join(UserDir(), TeamsSubDir)
+}
+
+// OrganizationsDir returns the user-level organizations directory.
+func OrganizationsDir() string {
+	return filepath.Join(UserDir(), OrganizationsSubDir)
 }
 
 // OrgPath returns the path to the legacy org.yaml file.
 // Deprecated: org.yaml is no longer created or read. Kept only for
 // migration 006 compatibility.
 func OrgPath() string {
-	return filepath.Join(BaseDir(), "org.yaml")
-}
-
-// SkillsDir returns the path to the skills directory.
-func SkillsDir() string {
-	return filepath.Join(BaseDir(), SkillsSubDir)
-}
-
-// TeamsDir returns the path to ~/.spwn/teams/.
-func TeamsDir() string {
-	return filepath.Join(BaseDir(), TeamsSubDir)
-}
-
-// OrganizationsDir returns the path to ~/.spwn/organizations/.
-func OrganizationsDir() string {
-	return filepath.Join(BaseDir(), OrganizationsSubDir)
-}
-
-// ActivityPath returns the path to ~/.spwn/activity.jsonl.
-func ActivityPath() string {
-	return filepath.Join(BaseDir(), ActivityFileName)
+	return filepath.Join(UserDir(), "org.yaml")
 }
