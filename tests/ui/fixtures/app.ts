@@ -43,9 +43,9 @@ class SpwnAPI {
     return this.get("/api/worlds");
   }
 
-  /** Install a bundled example */
-  async installExample(slug: string) {
-    return this.post(`/api/examples/${slug}/install`);
+  /** Install a bundled template */
+  async installTemplate(slug: string) {
+    return this.post(`/api/templates/${slug}/install`);
   }
 
   /** Spawn a world */

@@ -104,7 +104,7 @@ Key design points:
 
 | File | Purpose |
 |------|---------|
-| `helpers.ts` | `createSpwnHome()`, `createAgent()`, `createWorldConfig()`, `waitForContainer()`, `retry()` |
+| `helpers.ts` | `createSpwnHome()`, `createAgent()`, `assertBinaryExists()`, `retry()`, `runConcurrently()` |
 | `spwn.specification.ts` | `createTestContext()` - creates isolated SPWN_HOME, provides `ctx.spwn()` runner with env overrides |
 | `output-helpers.ts` | `expectLine()`, `expectNoLine()`, `expectTableHeader()`, `expectTableRow()`, `stripAnsi()` |
 | `world-assertion.ts` | `WorldAssertion` - asserts on container state, files, mounts |
