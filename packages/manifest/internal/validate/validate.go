@@ -612,14 +612,24 @@ func ruleToolsExist(in Input) []Issue {
 			return nil
 		}
 		checked[key] = true
-		if resolveTool(in.Root, pack, builtin, haveCatalog) {
+		ref := ParseRef(pack)
+		switch ResolveTool(in.Root, ref, builtin, haveCatalog) {
+		case ResolveOK:
 			return nil
+		case ResolveRegistryUnsupported:
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", tool),
+				Hint: "use @spwn/<name> for built-in packs or drop a directory under ./spwn/tools/<name>/ for a local pack; " +
+					"remote registries (@<owner>/<name>) are planned but not implemented yet",
+			}}
+		default: // ResolveNotFound
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("tool %q does not exist", tool),
+				Hint:    suggestTool(pack, in.BuiltinTools),
+			}}
 		}
-		return []Issue{{
-			Level: LevelError, Path: location,
-			Message: fmt.Sprintf("tool %q does not exist", tool),
-			Hint:    suggestTool(pack, in.BuiltinTools),
-		}}
 	}
 
 	var out []Issue
@@ -748,25 +758,6 @@ func relPath(root, path string) string {
 		return path
 	}
 	return rel
-}
-
-func resolveTool(root, tool string, builtin map[string]struct{}, haveCatalog bool) bool {
-	if haveCatalog {
-		if _, ok := builtin[tool]; ok {
-			return true
-		}
-	} else if strings.HasPrefix(tool, "@spwn/") {
-		return true
-	}
-	localName := tool
-	if idx := strings.Index(tool, "/"); strings.HasPrefix(tool, "@") && idx > 0 {
-		localName = tool[idx+1:]
-	}
-	localPath := filepath.Join(root, "spwn", "tools", localName)
-	if info, err := os.Stat(localPath); err == nil && info.IsDir() {
-		return true
-	}
-	return false
 }
 
 func suggestTool(tool string, catalog []string) string {

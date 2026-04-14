@@ -48,6 +48,14 @@ Spwn's own infrastructure. Usually included by default.
 | `@spwn/cli` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | 🟢 |
 | `@spwn/architect` | Full orchestration daemon (includes @spwn/cli, @spwn/claude-code, @spwn/docker-cli) | You're running the always-on Architect | 🟡 architect mode is in dev |
 
+## Tool reference kinds
+
+Spwn classifies every tool reference in `agent.yaml#tools` (and world-level `tools:`) into one of three kinds:
+
+- **Local** — a bare name like `my-tool`. Resolved against `./spwn/tools/<name>/` on disk. Drop a directory there and it's picked up automatically.
+- **Built-in** — `@spwn/<name>`. Looked up in the catalog shipped with the CLI (see tables above). `spwn check` offers "did you mean X?" hints for typos.
+- **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `@spwn/<name>` or drop a local pack under `./spwn/tools/<name>/`.
+
 ## Adding your own tools
 
 Every tool implements one Go interface:
