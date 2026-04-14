@@ -1,4 +1,4 @@
-package examples
+package templates
 
 import (
 	"io/fs"
@@ -40,7 +40,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 
 // TestShippedSlugsStructure asserts every shipped slug has the
 // minimum filesystem contract that Install and Get depend on:
-//   <slug>/example.yaml
+//   <slug>/template.yaml
 //   <slug>/README.md
 //   <slug>/agents/<at-least-one-dir>/
 //   <slug>/worlds/<at-least-one-yaml>
@@ -50,7 +50,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 	for _, slug := range shippedSlugs {
 		t.Run(slug, func(t *testing.T) {
 			mustExist := []string{
-				slug + "/example.yaml",
+				slug + "/template.yaml",
 				slug + "/README.md",
 			}
 			for _, p := range mustExist {

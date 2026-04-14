@@ -8,7 +8,7 @@ require (
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/foundation v0.0.0
 	spwn.sh/packages/imagebuilder v0.0.0
-	spwn.sh/examples v0.0.0
+	spwn.sh/catalog/templates v0.0.0
 )
 
 require (
@@ -47,5 +47,5 @@ replace (
 	spwn.sh/packages/agent => ../agent
 	spwn.sh/packages/foundation => ../foundation
 	spwn.sh/packages/imagebuilder => ../imagebuilder
-	spwn.sh/examples => ../../examples
+	spwn.sh/catalog/templates => ../../catalog/templates
 )

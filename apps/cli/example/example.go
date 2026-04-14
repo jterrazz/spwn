@@ -1,13 +1,13 @@
 // Package example wires the `spwn example …` cobra tree. It's a
-// tiny shell around the spwn.sh/examples package - listing and
-// installing is all one-shot filesystem work, no state involved.
+// tiny shell around the templates package - listing and installing
+// is all one-shot filesystem work, no state involved.
 package example
 
 import (
 	"fmt"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/examples"
+	templates "spwn.sh/catalog/templates"
 
 	"github.com/spf13/cobra"
 )
@@ -33,7 +33,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Show every bundled example",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		list, err := examples.List()
+		list, err := templates.List()
 		if err != nil {
 			return err
 		}
@@ -68,9 +68,9 @@ var installCmd = &cobra.Command{
 		s.Blank()
 		s.Start(fmt.Sprintf("Installing example %q...", slug))
 
-		rep, err := examples.InstallInto(slug)
+		rep, err := templates.InstallInto(slug)
 		if err != nil {
-			if err == examples.ErrNotFound {
+			if err == templates.ErrNotFound {
 				return s.FailHint("Install failed", err,
 					"Run 'spwn example list' to see valid slugs")
 			}

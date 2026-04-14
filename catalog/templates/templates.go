@@ -1,27 +1,12 @@
-// Package examples ships a curated gallery of ready-made spwn
+// Package templates ships a curated gallery of ready-made spwn
 // templates - full worlds and agents with pre-written profiles -
 // that first-time users can install with one click or one command.
 //
-// Every template lives at /examples/<slug>/ at the repo root and is
-// embedded into the binary at build time via go:embed. The template
-// directories sit alongside this Go file so contributors can discover
-// and edit them directly from the repo root. The package exposes:
-//
-//   List(): the metadata for every template in the gallery
-//   Get(slug): one template's metadata + its bundled README
-//   Install(slug, baseDir): copy the template's world configs and
-//       agent directories into the user's ~/.spwn tree
-//
-// The templates themselves are intentionally small and read-only on
-// disk - install is a one-time copy operation, and once copied the
-// user can edit the files freely without affecting the source.
-//
-// The embed directive below lists every slug explicitly. When adding
-// a new template, add a new directory AND append it here AND to
-// shippedSlugs - the list is load-bearing and the shipped-templates
-// test will fail loudly if a directory exists without a matching
-// embed entry.
-package examples
+// Every template lives at /catalog/templates/<slug>/ at the repo root
+// and is embedded into the binary at build time via go:embed. The
+// template directories sit alongside this Go file so contributors can
+// discover and edit them directly from the repo root.
+package templates
 
 import (
 	"embed"
@@ -63,8 +48,8 @@ func ShippedSlugs() []string {
 	return out
 }
 
-// Example is the public-facing description of one template.
-type Example struct {
+// Template is the public-facing description of one template.
+type Template struct {
 	Slug        string   `json:"slug" yaml:"slug"`
 	Name        string   `json:"name" yaml:"name"`
 	Tagline     string   `json:"tagline" yaml:"tagline"`
@@ -88,7 +73,7 @@ type InstallReport struct {
 
 // ErrNotFound is returned by Get and Install when a slug does not
 // match any bundled template.
-var ErrNotFound = errors.New("example not found")
+var ErrNotFound = errors.New("template not found")
 
 // List returns every template the binary knows about, sorted by slug
 // for stable output. README bodies are omitted; call Get for details.
@@ -97,8 +82,8 @@ var ErrNotFound = errors.New("example not found")
 // ReadDir so the list is deterministic even if new entries appear in
 // the embed before shippedSlugs is updated - keeping the "canonical
 // list" guarantee explicit.
-func List() ([]Example, error) {
-	out := make([]Example, 0, len(shippedSlugs))
+func List() ([]Template, error) {
+	out := make([]Template, 0, len(shippedSlugs))
 	for _, slug := range shippedSlugs {
 		ex, err := loadMetadata(slug)
 		if err != nil {
@@ -115,10 +100,10 @@ func List() ([]Example, error) {
 
 // Get returns one template's metadata + its README. Returns
 // ErrNotFound if the slug is unknown.
-func Get(slug string) (Example, error) {
+func Get(slug string) (Template, error) {
 	ex, err := loadMetadata(slug)
 	if err != nil {
-		return Example{}, err
+		return Template{}, err
 	}
 	readmeBytes, err := templatesFS.ReadFile(path(slug, "README.md"))
 	if err == nil {
@@ -227,17 +212,17 @@ func InstallInto(slug string) (InstallReport, error) {
 
 // ── internals ─────────────────────────────────────────────────────────
 
-func loadMetadata(slug string) (Example, error) {
-	data, err := templatesFS.ReadFile(path(slug, "example.yaml"))
+func loadMetadata(slug string) (Template, error) {
+	data, err := templatesFS.ReadFile(path(slug, "template.yaml"))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return Example{}, ErrNotFound
+			return Template{}, ErrNotFound
 		}
-		return Example{}, err
+		return Template{}, err
 	}
-	var ex Example
+	var ex Template
 	if err := yaml.Unmarshal(data, &ex); err != nil {
-		return Example{}, fmt.Errorf("parse %s/example.yaml: %w", slug, err)
+		return Template{}, fmt.Errorf("parse %s/template.yaml: %w", slug, err)
 	}
 	if ex.Slug == "" {
 		ex.Slug = slug

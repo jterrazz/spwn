@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/examples"
+	templates "spwn.sh/catalog/templates"
 )
 
 // TestBundling_CompiledBinaryShipsExamples builds the real spwn binary
@@ -52,7 +52,7 @@ func TestBundling_CompiledBinaryShipsExamples(t *testing.T) {
 	text := string(out)
 
 	// Every canonical shipped slug MUST appear in the human output.
-	want := examples.ShippedSlugs()
+	want := templates.ShippedSlugs()
 	for _, slug := range want {
 		if !strings.Contains(text, slug) {
 			t.Errorf("compiled binary is missing example %q - rebuild is producing a hollow binary", slug)

@@ -23,7 +23,7 @@ import (
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/state"
-	"spwn.sh/examples"
+	templates "spwn.sh/catalog/templates"
 
 	"gopkg.in/yaml.v3"
 )
@@ -250,7 +250,7 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 // handleListExamples returns the full gallery of bundled example
 // templates. Used by the worlds-page empty state.
 func (s *Server) handleListExamples(w http.ResponseWriter, r *http.Request) {
-	list, err := examples.List()
+	list, err := templates.List()
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -262,9 +262,9 @@ func (s *Server) handleListExamples(w http.ResponseWriter, r *http.Request) {
 // bundled README body.
 func (s *Server) handleGetExample(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
-	ex, err := examples.Get(slug)
+	ex, err := templates.Get(slug)
 	if err != nil {
-		if err == examples.ErrNotFound {
+		if err == templates.ErrNotFound {
 			jsonError(w, "example not found", http.StatusNotFound)
 			return
 		}
@@ -279,9 +279,9 @@ func (s *Server) handleGetExample(w http.ResponseWriter, r *http.Request) {
 // overwritten), so repeated installs are safe.
 func (s *Server) handleInstallExample(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
-	rep, err := examples.InstallInto(slug)
+	rep, err := templates.InstallInto(slug)
 	if err != nil {
-		if err == examples.ErrNotFound {
+		if err == templates.ErrNotFound {
 			jsonError(w, "example not found", http.StatusNotFound)
 			return
 		}

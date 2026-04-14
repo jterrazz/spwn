@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
-	spwn.sh/examples v0.0.0
+	spwn.sh/catalog/templates v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/foundation v0.0.0
 	spwn.sh/packages/imagebuilder v0.0.0
@@ -50,7 +50,7 @@ require (
 )
 
 replace (
-	spwn.sh/examples => ../../examples
+	spwn.sh/catalog/templates => ../../catalog/templates
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/foundation => ../../packages/foundation
 	spwn.sh/packages/imagebuilder => ../../packages/imagebuilder

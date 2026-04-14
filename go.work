@@ -9,5 +9,5 @@ use (
 	./packages/messenger
 	./packages/migration
 	./packages/world
-	./examples
+	./catalog/templates
 )
