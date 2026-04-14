@@ -13,7 +13,7 @@ import (
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
-	"spwn.sh/packages/world/internal/architect"
+	"spwn.sh/packages/world/architect"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/manifest"
