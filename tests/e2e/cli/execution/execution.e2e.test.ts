@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { dockerSpec, spec } from '../../../setup/cli.specification.js';
 
 /**
  * CLI execution — non-Docker paths.
@@ -124,5 +124,109 @@ describe('CLI execution - status command', () => {
         // Provider table is keychain-dependent (see auth.e2e.test.ts),
         // So we only assert on the stable header row here.
         expect(result.stderr.text).toContain('PROVIDER');
+    });
+});
+
+// ── Docker-backed world lifecycle (aliases) ─────────────────
+//
+// Merged in from the legacy `execution-docker.e2e.test.ts`. These
+// Exercise `up`, `down`, `ls`, `world inspect`, `world logs`, and
+// `snap save` against a real container. The file lives in the cli
+// Vitest project, but dockerSpec runs real docker regardless — the
+// Cleanup label + `await using` still apply.
+describe('CLI execution - world aliases (docker)', () => {
+    test("'spwn up' spawns a world that appears in world list --json", async () => {
+        await using result = await dockerSpec('up alias')
+            .project('docker-pilot')
+            .exec(['up', 'world list --json'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+
+        const list = result.json.value as {
+            mode: string;
+            worlds: Array<{ agents: string[]; name: string; status: string }>;
+        };
+        expect(list.mode).toBe('project');
+        expect(list.worlds).toHaveLength(1);
+        expect(list.worlds[0].name).toBe('neo');
+        expect(list.worlds[0].status).toBe('running');
+
+        // And the container really exists.
+        expect(result.container('neo').running).toBe(true);
+    });
+
+    test("'spwn down' destroys a spawned world", async () => {
+        await using result = await dockerSpec('down alias')
+            .project('docker-pilot')
+            .exec(['up', 'down'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        result.stderr.toContain('Destroyed');
+        result.stderr.toContain('project world(s) destroyed');
+        expect(result.container('neo').exists).toBe(false);
+    });
+
+    test("'spwn world inspect' surfaces status for a running world", async () => {
+        // Step 1: up, capture the spwn world id from the container label.
+        await using up = await dockerSpec('inspect up').project('docker-pilot').exec('up').run();
+
+        expect(up.exitCode).toBe(0);
+        const neo = up.container('neo');
+        const worldId = (neo.inspect.value as { Config?: { Labels?: Record<string, string> } })
+            .Config?.Labels?.['sh.spwn.world.id'];
+        expect(worldId).toBeTruthy();
+
+        // Step 2: world inspect <id>
+        await using inspect = await dockerSpec('inspect call')
+            .project('docker-pilot')
+            .exec(`world inspect ${worldId}`)
+            .run();
+
+        expect(inspect.exitCode).toBe(0);
+        const combined = `${inspect.stdout.text}\n${inspect.stderr.text}`;
+        expect(combined).toContain(worldId!);
+        expect(combined).toMatch(/Status/);
+    });
+
+    test("'spwn world logs' returns cleanly for a running world", async () => {
+        await using up = await dockerSpec('logs up').project('docker-pilot').exec('up').run();
+        expect(up.exitCode).toBe(0);
+        const worldId = (
+            up.container('neo').inspect.value as {
+                Config?: { Labels?: Record<string, string> };
+            }
+        ).Config?.Labels?.['sh.spwn.world.id'];
+        expect(worldId).toBeTruthy();
+
+        await using logs = await dockerSpec('logs call')
+            .project('docker-pilot')
+            .exec(`world logs ${worldId}`)
+            .run();
+
+        // Agent may not have emitted anything yet — we just require the
+        // Command to exit cleanly.
+        expect(logs.exitCode).toBe(0);
+    });
+
+    test("'spwn snap save' creates a snapshot of a running world", async () => {
+        await using up = await dockerSpec('snap up').project('docker-pilot').exec('up').run();
+        expect(up.exitCode).toBe(0);
+        const worldId = (
+            up.container('neo').inspect.value as {
+                Config?: { Labels?: Record<string, string> };
+            }
+        ).Config?.Labels?.['sh.spwn.world.id'];
+        expect(worldId).toBeTruthy();
+
+        await using snap = await dockerSpec('snap save')
+            .project('docker-pilot')
+            .exec(`world snap save ${worldId}`)
+            .run();
+
+        expect(snap.exitCode).toBe(0);
+        const combined = `${snap.stdout.text}\n${snap.stderr.text}`;
+        expect(combined).toMatch(/[Ss]aved|[Ss]nap(shot)? saved|created/);
     });
 });

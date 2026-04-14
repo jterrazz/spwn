@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { dockerSpec, spec } from '../../../setup/cli.specification.js';
 
 /**
  * `spwn status` — top-level dashboard.
@@ -43,6 +43,31 @@ describe('spwn status', () => {
             const result = await isolated('status no init').exec('status').run();
             expect(result.exitCode).toBe(0);
             await result.stderr.toMatch('status-empty-home.txt');
+        });
+    });
+
+    // Merged from the legacy `status-docker.e2e.test.ts`. With a live
+    // Project world, `spwn status` should surface the neo world and its
+    // Agent. Renderer output goes to stderr (Unix convention for
+    // Dashboards), so we match on stderr content.
+    describe('with an active world (docker)', () => {
+        test('shows the running project world and its agent', async () => {
+            await using result = await dockerSpec('status with world')
+                .project('docker-pilot')
+                .exec(['up', 'status'])
+                .run();
+
+            expect(result.exitCode).toBe(0);
+
+            // The container should be live under the run label.
+            expect(result.container('neo').running).toBe(true);
+
+            // Multi-exec only exposes the last command's streams, so
+            // Both the status banner and the world entry should be in
+            // The final `status` output. Renderer writes to stderr.
+            const combined = `${result.stdout.text}\n${result.stderr.text}`;
+            expect(combined).toContain('spwn');
+            expect(combined).toContain('neo');
         });
     });
 });
