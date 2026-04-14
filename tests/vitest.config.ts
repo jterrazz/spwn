@@ -19,6 +19,7 @@ export default defineConfig({
                         'e2e/marketplace/**/*.e2e.test.ts',
                         'e2e/status/**/*.e2e.test.ts',
                         'e2e/system/**/*.e2e.test.ts',
+                        'e2e/logs/**/*.e2e.test.ts',
                     ],
                 },
             },
