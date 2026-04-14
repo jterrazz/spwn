@@ -10,16 +10,16 @@ Fast, isolated tests that run without Docker. Located next to their source files
 
 ```bash
 make test                  # all unit tests
-make test-foundation       # packages/foundation only
-make test-agent            # packages/agent only
-make test-world         # packages/world only
+make test-foundation       # packages/base only
+make test-agent            # packages/mind only
+make test-world            # packages/world only
 make test-cli              # apps/cli only
-make test-messenger        # packages/messenger only
+make test-messenger        # packages/mailbox only
 ```
 
 Examples:
-- `packages/foundation/paths_test.go` - path resolution logic
-- `packages/agent/agent_test.go` - agent lifecycle
+- `packages/base/paths_test.go` - path resolution logic
+- `packages/mind/mind_test.go` - agent lifecycle
 - `packages/world/internal/manifest/manifest_test.go` - YAML parsing
 - `apps/cli/ui/table_test.go` - table formatting
 

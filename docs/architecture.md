@@ -29,7 +29,7 @@ Each package exposes a small public API in its root `.go` file. Implementation d
 |-------------|----------------|----------------------------------------------------------|
 | Runtime     | `packages/world/internal/runtime` | How an agent runs (builds the CLI command to exec inside a container) |
 | Backend     | `packages/world/internal/backend` | Where worlds run (container lifecycle, image management) |
-| Mind        | `packages/agent`                  | How an agent persists and evolves across runs            |
+| Mind        | `packages/mind`                   | How an agent persists and evolves across runs            |
 | Manifest    | `packages/manifest`               | Project definition on disk + artifact pipeline           |
 
 Each one is a Go interface or type whose implementations can be swapped. Today there is one of each. Adding a new runtime adapter is ~50 lines of Go plus an install recipe in the imagebuilder catalog.

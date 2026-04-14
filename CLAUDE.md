@@ -10,7 +10,7 @@ The domain has three main abstractions, each owning one concern:
 |---|---|---|
 | **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` - Claude Code today, others swap in as a ~50 LOC Go file |
 | **Backend** | Where worlds run | `packages/world/internal/backend` - Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (core/skills/knowledge/playbooks/journal) on the host filesystem |
+| **Mind** | How an agent persists across worlds | `packages/mind` - flat markdown layers (core/skills/knowledge/playbooks/journal) on the host filesystem |
 
 ## Vocabulary
 
@@ -264,12 +264,13 @@ Host machine
 ## Dependency Graph
 
 ```
-apps/cli  ──→ packages/{world, agent, messenger, imagebuilder, migration, foundation}
-packages/world ──→ packages/{agent, imagebuilder, foundation}
-packages/agent ──→ packages/foundation
-packages/messenger ──→ packages/foundation
-packages/imagebuilder ──→ (no spwn deps)
-packages/migration ──→ packages/foundation
+apps/cli  ──→ packages/{world, mind, mailbox, image, migration, base, manifest}
+packages/world ──→ packages/{mind, image, base}
+packages/mind ──→ packages/base
+packages/mailbox ──→ packages/base
+packages/image ──→ (no spwn deps)
+packages/migration ──→ packages/base
+packages/manifest ──→ (no spwn deps)
 ```
 
 Each `packages/` module exposes a public API in its root `.go` file.
@@ -291,9 +292,9 @@ make build               # cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
 make build-test-image    # docker build spwn-test:latest for E2E
 
 make test                # Unit tests across all modules
-make test-foundation     # cd packages/foundation && go test -v ./...
+make test-foundation     # cd packages/base && go test -v ./...
 make test-world          # cd packages/world && go test -v ./...
-make test-agent          # cd packages/agent && go test -v ./...
+make test-agent          # cd packages/mind && go test -v ./...
 make test-cli            # cd apps/cli && go test -v ./...
 
 make test-e2e            # Go E2E against Docker
