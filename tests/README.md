@@ -18,6 +18,7 @@ make test-messenger        # packages/mailbox only
 ```
 
 Examples:
+
 - `packages/base/paths_test.go` - path resolution logic
 - `packages/mind/mind_test.go` - agent lifecycle
 - `packages/world/internal/manifest/manifest_test.go` - YAML parsing
@@ -70,13 +71,14 @@ The Go E2E framework reads this JSON via `TestContext.ReadMockOutput()` and expo
 
 ### Go E2E Setup (`packages/world/tests/e2e/setup/`)
 
-| File | Purpose |
-|------|---------|
-| `context.go` | `TestContext` - creates isolated temp SPWN_HOME, connects to Docker, registers cleanup |
-| `builders.go` | `SpawnBuilder` - fluent builder for spawning worlds with config/agent/workspace |
+| File            | Purpose                                                                                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `context.go`    | `TestContext` - creates isolated temp SPWN_HOME, connects to Docker, registers cleanup                                                                    |
+| `builders.go`   | `SpawnBuilder` - fluent builder for spawning worlds with config/agent/workspace                                                                           |
 | `assertions.go` | Assertion chains: `StateAssertion`, `ContainerAssertion`, `MindAssertion`, `MockAssertion`, `SessionAssertion`, `JournalAssertion`, `GateAssertion`, etc. |
 
 **Pattern:**
+
 ```go
 func TestSomething(t *testing.T) {
     chain := setup.NewSpawnBuilder(t).
@@ -96,47 +98,50 @@ func TestSomething(t *testing.T) {
 ```
 
 Key design points:
+
 - `NewTestContext(t)` creates an isolated SPWN_HOME in `t.TempDir()` and registers `t.Cleanup()` to destroy all spawned worlds.
 - `SpawnBuilder.Execute()` returns an `AssertionChain` for fluent assertions.
 - `WaitFor(t, timeout, interval, desc, conditionFn)` polls a condition instead of using `time.Sleep`.
 
 ### TypeScript E2E Setup (`tests/setup/`)
 
-| File | Purpose |
-|------|---------|
-| `helpers.ts` | `createSpwnHome()`, `createAgent()`, `assertBinaryExists()`, `retry()`, `runConcurrently()` |
+| File                    | Purpose                                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------- |
+| `helpers.ts`            | `createSpwnHome()`, `createAgent()`, `assertBinaryExists()`, `retry()`, `runConcurrently()`         |
 | `spwn.specification.ts` | `createTestContext()` - creates isolated SPWN_HOME, provides `ctx.spwn()` runner with env overrides |
-| `output-helpers.ts` | `expectLine()`, `expectNoLine()`, `expectTableHeader()`, `expectTableRow()`, `stripAnsi()` |
-| `world-assertion.ts` | `WorldAssertion` - asserts on container state, files, mounts |
-| `mind-assertion.ts` | `MindAssertion` - asserts on agent Mind directory structure |
-| `state-assertion.ts` | `StateAssertion` - asserts on `state.json` contents |
-| `mock-llm/` | Mock LLM server for testing agent talk flows |
-| `mock-api/` | Mock API server (marketplace, auth) |
+| `output-helpers.ts`     | `expectLine()`, `expectNoLine()`, `expectTableHeader()`, `expectTableRow()`, `stripAnsi()`          |
+| `world-assertion.ts`    | `WorldAssertion` - asserts on container state, files, mounts                                        |
+| `mind-assertion.ts`     | `MindAssertion` - asserts on agent Mind directory structure                                         |
+| `state-assertion.ts`    | `StateAssertion` - asserts on `state.json` contents                                                 |
+| `mock-llm/`             | Mock LLM server for testing agent talk flows                                                        |
+| `mock-api/`             | Mock API server (marketplace, auth)                                                                 |
 
 **Pattern:**
+
 ```typescript
-describe("world spawn", () => {
-  let ctx: TestContext;
+describe('world spawn', () => {
+    let ctx: TestContext;
 
-  afterEach(() => {
-    ctx?.cleanup();
-  });
+    afterEach(() => {
+        ctx?.cleanup();
+    });
 
-  test("creates a running Docker container", () => {
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const result = ctx.spwn(["world", "--agent", "neo", "-w", ctx.home], 60_000);
+    test('creates a running Docker container', () => {
+        ctx = createTestContext();
+        ctx.spwn(['init']);
+        const result = ctx.spwn(['world', '--agent', 'neo', '-w', ctx.home], 60_000);
 
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created container\s+w-\w+-\d{5}/);
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Created container\s+w-\w+-\d{5}/);
 
-    const id = parseWorldId(result.output)!;
-    ctx.world(id).toBeRunning();
-  });
+        const id = parseWorldId(result.output)!;
+        ctx.world(id).toBeRunning();
+    });
 });
 ```
 
 Key design points:
+
 - Each test gets its own `createTestContext()` with an isolated temp dir.
 - `afterEach` calls `ctx.cleanup()` to destroy Docker containers and remove temp files.
 - Use `expectLine()` for structured assertions on CLI output - never weak `toContain()`.
@@ -169,11 +174,11 @@ Key design points:
 
 ## Test File Naming Conventions
 
-| Layer | Pattern | Example |
-|-------|---------|---------|
-| Go unit | `*_test.go` (next to source) | `manifest_test.go` |
-| Go E2E | `*_test.go` (in `tests/e2e/`) | `spawn_test.go` |
-| TS E2E | `*.e2e.test.ts` (in `tests/e2e/{domain}/`) | `spawn.e2e.test.ts` |
+| Layer   | Pattern                                    | Example             |
+| ------- | ------------------------------------------ | ------------------- |
+| Go unit | `*_test.go` (next to source)               | `manifest_test.go`  |
+| Go E2E  | `*_test.go` (in `tests/e2e/`)              | `spawn_test.go`     |
+| TS E2E  | `*.e2e.test.ts` (in `tests/e2e/{domain}/`) | `spawn.e2e.test.ts` |
 
 ## Test Function Naming
 
@@ -183,6 +188,7 @@ Key design points:
 ## Vitest Configuration
 
 Tests use `tests/vitest.config.ts`:
+
 - `testTimeout: 120_000` - 2 minutes per test (Docker is slow)
 - `hookTimeout: 60_000` - 1 minute for setup/teardown hooks
 - `fileParallelism: false` - sequential execution (Docker resource constraints)

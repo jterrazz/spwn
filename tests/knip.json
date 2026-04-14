@@ -1,0 +1,17 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "entry": [
+        "vitest.config.ts",
+        "vitest.workspace.ts",
+        "ui/playwright.config.ts",
+        "ui/setup/global-setup.ts",
+        "ui/setup/global-teardown.ts",
+        "ui/fixtures/app.ts",
+        "setup/mock-api/server.ts",
+        "setup/mock-llm/server.ts",
+        "oxlint.config.ts",
+        "oxfmt.config.ts"
+    ],
+    "ignore": ["spwn/**", ".spwn/**"],
+    "ignoreDependencies": []
+}

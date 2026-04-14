@@ -1,99 +1,90 @@
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { spwn } from "../../setup/spwn.specification.js";
-import { createSpwnHome } from "../../setup/helpers.js";
-import { expectLine, lines } from "../../setup/output-helpers.js";
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-describe("spwn init", () => {
-  let home: string;
-  let originalSpwnHome: string | undefined;
+import { createSpwnHome } from '../../setup/helpers.js';
+import { expectLine, lines } from '../../setup/output-helpers.js';
+import { spwn } from '../../setup/spwn.specification.js';
 
-  beforeEach(() => {
-    // GIVEN - a fresh temporary SPWN_HOME directory
-    originalSpwnHome = process.env.SPWN_HOME;
-    home = createSpwnHome();
-    process.env.SPWN_HOME = home;
-  });
+describe('spwn init', () => {
+    let home: string;
+    let originalSpwnHome: string | undefined;
 
-  afterEach(() => {
-    if (originalSpwnHome !== undefined) {
-      process.env.SPWN_HOME = originalSpwnHome;
-    } else {
-      delete process.env.SPWN_HOME;
-    }
-  });
+    beforeEach(() => {
+        // GIVEN - a fresh temporary SPWN_HOME directory
+        originalSpwnHome = process.env.SPWN_HOME;
+        home = createSpwnHome();
+        process.env.SPWN_HOME = home;
+    });
 
-  test("creates ~/.spwn/ directory structure", async () => {
-    // WHEN - running spwn init
-    const result = await spwn("init creates directory structure")
-      .exec("init")
-      .run();
+    afterEach(() => {
+        if (originalSpwnHome !== undefined) {
+            process.env.SPWN_HOME = originalSpwnHome;
+        } else {
+            delete process.env.SPWN_HOME;
+        }
+    });
 
-    // THEN - exits successfully, creates config but NOT org.yaml
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
-    expectLine(result.output, /✓ Ready\. Next steps:/);
-    // org.yaml was removed - verify it's NOT in the output
-    expect(result.output).not.toContain("org.yaml");
-  });
+    test('creates ~/.spwn/ directory structure', async () => {
+        // WHEN - running spwn init
+        const result = await spwn('init creates directory structure').exec('init').run();
 
-  test("creates a world config", async () => {
-    // WHEN - running spwn init
-    const result = await spwn("init creates config")
-      .exec("init")
-      .run();
+        // THEN - exits successfully, creates config but NOT org.yaml
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
+        expectLine(result.output, /✓ Ready\. Next steps:/);
+        // Org.yaml was removed - verify it's NOT in the output
+        expect(result.output).not.toContain('org.yaml');
+    });
 
-    // THEN - a .yaml config is created (with a random cosmos-themed name)
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
-  });
+    test('creates a world config', async () => {
+        // WHEN - running spwn init
+        const result = await spwn('init creates config').exec('init').run();
 
-  test("is idempotent", async () => {
-    // GIVEN - init has already been run once
-    await spwn("first init").exec("init").run();
+        // THEN - a .yaml config is created (with a random cosmos-themed name)
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
+    });
 
-    // WHEN - running init again
-    const result = await spwn("second init").exec("init").run();
+    test('is idempotent', async () => {
+        // GIVEN - init has already been run once
+        await spwn('first init').exec('init').run();
 
-    // THEN - succeeds (creates another config with a different name)
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
-    expectLine(result.output, /✓ Ready\./);
-  });
+        // WHEN - running init again
+        const result = await spwn('second init').exec('init').run();
 
-  test("uses random name when none provided", async () => {
-    // WHEN - running init without a name argument
-    const result = await spwn("init random name")
-      .exec("init")
-      .run();
+        // THEN - succeeds (creates another config with a different name)
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
+        expectLine(result.output, /✓ Ready\./);
+    });
 
-    // THEN - a random name is generated and setup completes
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Ready\. Next steps:/);
-  });
+    test('uses random name when none provided', async () => {
+        // WHEN - running init without a name argument
+        const result = await spwn('init random name').exec('init').run();
 
-  test("accepts custom name", async () => {
-    // WHEN - running init with a custom name
-    const result = await spwn("init with name")
-      .exec("init acme")
-      .run();
+        // THEN - a random name is generated and setup completes
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Ready\. Next steps:/);
+    });
 
-    // THEN - the custom name is used in the config
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created config\s+acme\.yaml/);
-    expectLine(result.output, /✓ Ready\. Next steps:/);
-  });
+    test('accepts custom name', async () => {
+        // WHEN - running init with a custom name
+        const result = await spwn('init with name').exec('init acme').run();
 
-  test("init with special characters in name handles gracefully", async () => {
-    // WHEN - running init with a name containing special chars
-    const result = await spwn("init special chars")
-      .exec("init my/bad:name")
-      .run();
+        // THEN - the custom name is used in the config
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Created config\s+acme\.yaml/);
+        expectLine(result.output, /✓ Ready\. Next steps:/);
+    });
 
-    // THEN - either succeeds with sanitized name or fails with clean error
-    const out = lines(result.output);
-    expect(out.length).toBeGreaterThan(0);
-    // Should not contain stack traces
-    expect(result.output).not.toContain("TypeError");
-    expect(result.output).not.toContain("FATAL");
-  });
+    test('init with special characters in name handles gracefully', async () => {
+        // WHEN - running init with a name containing special chars
+        const result = await spwn('init special chars').exec('init my/bad:name').run();
+
+        // THEN - either succeeds with sanitized name or fails with clean error
+        const out = lines(result.output);
+        expect(out.length).toBeGreaterThan(0);
+        // Should not contain stack traces
+        expect(result.output).not.toContain('TypeError');
+        expect(result.output).not.toContain('FATAL');
+    });
 });

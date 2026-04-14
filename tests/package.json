@@ -1,24 +1,29 @@
 {
-  "name": "@spwn/tests",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "vitest --run",
-    "test:watch": "vitest",
-    "test:cli": "vitest --run --project cli",
-    "test:docker": "vitest --run --project docker",
-    "test:ui": "npx playwright test --config ui/playwright.config.ts",
-    "test:ui:headed": "npx playwright test --config ui/playwright.config.ts --headed",
-    "test:ui:debug": "npx playwright test --config ui/playwright.config.ts --debug"
-  },
-  "devDependencies": {
-    "@hono/node-server": "^1.0.0",
-    "@jterrazz/test": "latest",
-    "@playwright/test": "^1.59.1",
-    "@types/node": "^25.5.0",
-    "hono": "^4.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "^4.0.0"
-  }
+    "name": "@spwn/tests",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "lint": "codestyle check",
+        "lint:fix": "codestyle fix",
+        "test": "vitest --run",
+        "test:watch": "vitest",
+        "test:cli": "vitest --run --project cli",
+        "test:docker": "vitest --run --project docker",
+        "test:ui": "npx playwright test --config ui/playwright.config.ts",
+        "test:ui:headed": "npx playwright test --config ui/playwright.config.ts --headed",
+        "test:ui:debug": "npx playwright test --config ui/playwright.config.ts --debug"
+    },
+    "devDependencies": {
+        "@hono/node-server": "^1.0.0",
+        "@jterrazz/codestyle": "^3.0.9",
+        "@jterrazz/test": "latest",
+        "@jterrazz/typescript": "^5.3.0",
+        "@playwright/test": "^1.59.1",
+        "@types/node": "^25.5.0",
+        "hono": "^4.0.0",
+        "oxfmt": "^0.45.0",
+        "oxlint": "^1.60.0",
+        "vitest": "^4.0.0"
+    }
 }

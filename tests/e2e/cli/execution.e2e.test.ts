@@ -1,361 +1,326 @@
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+
+import { createSpwnHome } from '../../setup/helpers.js';
 import {
-  spwn,
-  createTestContext,
-  parseWorldId,
-  type TestContext,
-} from "../../setup/spwn.specification.js";
-import { createSpwnHome, createAgent } from "../../setup/helpers.js";
+    expectLine,
+    expectNoLine,
+    expectTableHeader,
+    stripAnsi,
+} from '../../setup/output-helpers.js';
 import {
-  expectLine,
-  expectNoLine,
-  expectTableHeader,
-  stripAnsi,
-} from "../../setup/output-helpers.js";
+    createTestContext,
+    parseWorldId,
+    spwn,
+    type TestContext,
+} from '../../setup/spwn.specification.js';
 
 // ── Tests that require Docker (world lifecycle) ─────────────
 
-describe("CLI execution - world aliases", () => {
-  let ctx: TestContext;
+describe('CLI execution - world aliases', () => {
+    let ctx: TestContext;
 
-  afterEach(() => {
-    ctx?.cleanup();
-  });
+    afterEach(() => {
+        ctx?.cleanup();
+    });
 
-  test("'spwn up' alias spawns a world", () => {
-    // GIVEN - initialized context
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
+    test("'spwn up' alias spawns a world", () => {
+        // GIVEN - initialized context
+        ctx = createTestContext();
+        ctx.spwn(['init']);
 
-    // WHEN - using the 'up' alias
-    const result = ctx.spwn(
-      ["up", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
+        // WHEN - using the 'up' alias
+        const result = ctx.spwn(['up', '--agent', 'neo', '-w', ctx.home], 60_000);
 
-    // THEN - world is created
-    expect(result.exitCode).toBe(0);
-    const id = parseWorldId(result.output)!;
-    expect(id).toBeTruthy();
+        // THEN - world is created
+        expect(result.exitCode).toBe(0);
+        const id = parseWorldId(result.output)!;
+        expect(id).toBeTruthy();
 
-    // AND - appears in ls
-    const listResult = ctx.spwn(["ls"]);
-    expect(listResult.exitCode).toBe(0);
-    expect(stripAnsi(listResult.output)).toContain(id);
-  });
+        // AND - appears in ls
+        const listResult = ctx.spwn(['ls']);
+        expect(listResult.exitCode).toBe(0);
+        expect(stripAnsi(listResult.output)).toContain(id);
+    });
 
-  test("'spwn down' alias destroys a world", () => {
-    // GIVEN - a spawned world
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const spawnResult = ctx.spwn(
-      ["up", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    const id = parseWorldId(spawnResult.output)!;
-    expect(id).toBeTruthy();
+    test("'spwn down' alias destroys a world", () => {
+        // GIVEN - a spawned world
+        ctx = createTestContext();
+        ctx.spwn(['init']);
+        const spawnResult = ctx.spwn(['up', '--agent', 'neo', '-w', ctx.home], 60_000);
+        const id = parseWorldId(spawnResult.output)!;
+        expect(id).toBeTruthy();
 
-    // WHEN - using the 'down' alias
-    const destroyResult = ctx.spwn(["down", id], 30_000);
+        // WHEN - using the 'down' alias
+        const destroyResult = ctx.spwn(['down', id], 30_000);
 
-    // THEN - world is destroyed
-    expect(destroyResult.exitCode).toBe(0);
-    expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
+        // THEN - world is destroyed
+        expect(destroyResult.exitCode).toBe(0);
+        expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
-    // AND - world gone from ls
-    const listResult = ctx.spwn(["ls"]);
-    expect(listResult.exitCode).toBe(0);
-    expectNoLine(
-      listResult.output,
-      new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
-    );
-  });
+        // AND - world gone from ls
+        const listResult = ctx.spwn(['ls']);
+        expect(listResult.exitCode).toBe(0);
+        expectNoLine(
+            listResult.output,
+            new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)),
+        );
+    });
 
-  test("'spwn ls' alias lists worlds", () => {
-    // GIVEN - a spawned world
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const spawnResult = ctx.spwn(
-      ["world", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    const id = parseWorldId(spawnResult.output)!;
+    test("'spwn ls' alias lists worlds", () => {
+        // GIVEN - a spawned world
+        ctx = createTestContext();
+        ctx.spwn(['init']);
+        const spawnResult = ctx.spwn(['world', '--agent', 'neo', '-w', ctx.home], 60_000);
+        const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN - using the 'ls' alias
-    const listResult = ctx.spwn(["ls"]);
+        // WHEN - using the 'ls' alias
+        const listResult = ctx.spwn(['ls']);
 
-    // THEN - world appears in output
-    expect(listResult.exitCode).toBe(0);
-    expect(stripAnsi(listResult.output)).toContain(id);
-    expectTableHeader(listResult.output, ["ID", "CONFIG", "AGENTS", "STATUS"]);
-  });
+        // THEN - world appears in output
+        expect(listResult.exitCode).toBe(0);
+        expect(stripAnsi(listResult.output)).toContain(id);
+        expectTableHeader(listResult.output, ['ID', 'CONFIG', 'AGENTS', 'STATUS']);
+    });
 
-  test("'spwn logs' alias works for world", () => {
-    // GIVEN - a spawned world
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const spawnResult = ctx.spwn(
-      ["world", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    const id = parseWorldId(spawnResult.output)!;
+    test("'spwn logs' alias works for world", () => {
+        // GIVEN - a spawned world
+        ctx = createTestContext();
+        ctx.spwn(['init']);
+        const spawnResult = ctx.spwn(['world', '--agent', 'neo', '-w', ctx.home], 60_000);
+        const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN - using the 'logs' command (world logs)
-    const logsResult = ctx.spwn(["world", "logs", id]);
+        // WHEN - using the 'logs' command (world logs)
+        const logsResult = ctx.spwn(['world', 'logs', id]);
 
-    // THEN - doesn't error (agent may not have output yet)
-    expect(logsResult.exitCode).toBe(0);
-    // AND - output is a string (may be empty if agent hasn't logged yet)
-    expect(typeof logsResult.output).toBe("string");
-  });
+        // THEN - doesn't error (agent may not have output yet)
+        expect(logsResult.exitCode).toBe(0);
+        // AND - output is a string (may be empty if agent hasn't logged yet)
+        expect(typeof logsResult.output).toBe('string');
+    });
 
-  test("'spwn inspect' works for world via world inspect", () => {
-    // GIVEN - a spawned world
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const spawnResult = ctx.spwn(
-      ["world", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    const id = parseWorldId(spawnResult.output)!;
+    test("'spwn inspect' works for world via world inspect", () => {
+        // GIVEN - a spawned world
+        ctx = createTestContext();
+        ctx.spwn(['init']);
+        const spawnResult = ctx.spwn(['world', '--agent', 'neo', '-w', ctx.home], 60_000);
+        const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN - inspecting the world
-    const inspectResult = ctx.spwn(["world", "inspect", id]);
+        // WHEN - inspecting the world
+        const inspectResult = ctx.spwn(['world', 'inspect', id]);
 
-    // THEN - output contains world details
-    expect(inspectResult.exitCode).toBe(0);
-    const out = stripAnsi(inspectResult.output);
-    expect(out).toContain(id);
-    expect(out).toContain("default"); // config name
-    expect(out).toContain("neo"); // agent
-    expectLine(inspectResult.output, /Config:\s+default/);
-    expectLine(inspectResult.output, /Status:\s+(running|idle)/);
-  });
+        // THEN - output contains world details
+        expect(inspectResult.exitCode).toBe(0);
+        const out = stripAnsi(inspectResult.output);
+        expect(out).toContain(id);
+        expect(out).toContain('default'); // Config name
+        expect(out).toContain('neo'); // Agent
+        expectLine(inspectResult.output, /Config:\s+default/);
+        expectLine(inspectResult.output, /Status:\s+(running|idle)/);
+    });
 
-  test("'spwn snap save' creates snapshot", () => {
-    // GIVEN - a spawned world
-    ctx = createTestContext();
-    ctx.spwn(["init"]);
-    const spawnResult = ctx.spwn(
-      ["world", "--agent", "neo", "-w", ctx.home],
-      60_000,
-    );
-    const id = parseWorldId(spawnResult.output)!;
+    test("'spwn snap save' creates snapshot", () => {
+        // GIVEN - a spawned world
+        ctx = createTestContext();
+        ctx.spwn(['init']);
+        const spawnResult = ctx.spwn(['world', '--agent', 'neo', '-w', ctx.home], 60_000);
+        const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN - saving via spwn snap save
-    const snapResult = ctx.spwn(["snap", "save", id]);
+        // WHEN - saving via spwn snap save
+        const snapResult = ctx.spwn(['snap', 'save', id]);
 
-    // THEN - snapshot created
-    expect(snapResult.exitCode).toBe(0);
-    expectLine(snapResult.output, /[Ss]aved snapshot|[Ss]nap(shot)? saved/);
-  });
+        // THEN - snapshot created
+        expect(snapResult.exitCode).toBe(0);
+        expectLine(snapResult.output, /[Ss]aved snapshot|[Ss]nap(shot)? saved/);
+    });
 });
 
 // ── Tests that don't need Docker (agent management) ─────────
 
-describe("CLI execution - agent commands", () => {
-  let home: string;
-  let originalSpwnHome: string | undefined;
+describe('CLI execution - agent commands', () => {
+    let home: string;
+    let originalSpwnHome: string | undefined;
 
-  beforeEach(() => {
-    originalSpwnHome = process.env.SPWN_HOME;
-    home = createSpwnHome();
-    process.env.SPWN_HOME = home;
-  });
+    beforeEach(() => {
+        originalSpwnHome = process.env.SPWN_HOME;
+        home = createSpwnHome();
+        process.env.SPWN_HOME = home;
+    });
 
-  afterEach(() => {
-    if (originalSpwnHome !== undefined) {
-      process.env.SPWN_HOME = originalSpwnHome;
-    } else {
-      delete process.env.SPWN_HOME;
-    }
-  });
+    afterEach(() => {
+        if (originalSpwnHome !== undefined) {
+            process.env.SPWN_HOME = originalSpwnHome;
+        } else {
+            delete process.env.SPWN_HOME;
+        }
+    });
 
-  test("'spwn agent new' creates an agent", async () => {
-    // WHEN - creating a new agent
-    const result = await spwn("agent new testbot")
-      .exec("agent new testbot")
-      .run();
+    test("'spwn agent new' creates an agent", async () => {
+        // WHEN - creating a new agent
+        const result = await spwn('agent new testbot').exec('agent new testbot').run();
 
-    // THEN - exit code 0
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Created agent\s+testbot/);
+        // THEN - exit code 0
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Created agent\s+testbot/);
 
-    // AND - agent appears in ls
-    const listResult = await spwn("agent ls after new")
-      .exec("agent ls")
-      .run();
-    expect(listResult.exitCode).toBe(0);
-    expect(stripAnsi(listResult.output)).toContain("testbot");
-  });
+        // AND - agent appears in ls
+        const listResult = await spwn('agent ls after new').exec('agent ls').run();
+        expect(listResult.exitCode).toBe(0);
+        expect(stripAnsi(listResult.output)).toContain('testbot');
+    });
 
-  test("'spwn agent rm' removes an agent", async () => {
-    // GIVEN - agent exists
-    await spwn("create agent").exec("agent new testbot").run();
+    test("'spwn agent rm' removes an agent", async () => {
+        // GIVEN - agent exists
+        await spwn('create agent').exec('agent new testbot').run();
 
-    // WHEN - removing it
-    const result = await spwn("agent rm testbot")
-      .exec("agent rm testbot")
-      .run();
+        // WHEN - removing it
+        const result = await spwn('agent rm testbot').exec('agent rm testbot').run();
 
-    // THEN - exit code 0
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /✓ Deleted agent\s+testbot/);
+        // THEN - exit code 0
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /✓ Deleted agent\s+testbot/);
 
-    // AND - agent gone from ls
-    const listResult = await spwn("agent ls after rm")
-      .exec("agent ls")
-      .run();
-    expect(listResult.exitCode).toBe(0);
-    const output = stripAnsi(listResult.output);
-    // testbot should not appear as a row in the table
-    const tableLines = output.split("\n").filter((l) => l.includes("testbot"));
-    expect(tableLines.length).toBe(0);
-  });
+        // AND - agent gone from ls
+        const listResult = await spwn('agent ls after rm').exec('agent ls').run();
+        expect(listResult.exitCode).toBe(0);
+        const output = stripAnsi(listResult.output);
+        // Testbot should not appear as a row in the table
+        const tableLines = output.split('\n').filter((l) => l.includes('testbot'));
+        expect(tableLines.length).toBe(0);
+    });
 
-  test("'spwn agent ls' shows table with correct headers", async () => {
-    // GIVEN - agents exist
-    await spwn("create agent1").exec("agent new alpha").run();
-    await spwn("create agent2").exec("agent new beta").run();
+    test("'spwn agent ls' shows table with correct headers", async () => {
+        // GIVEN - agents exist
+        await spwn('create agent1').exec('agent new alpha').run();
+        await spwn('create agent2').exec('agent new beta').run();
 
-    // WHEN - listing agents
-    const result = await spwn("agent ls")
-      .exec("agent ls")
-      .run();
+        // WHEN - listing agents
+        const result = await spwn('agent ls').exec('agent ls').run();
 
-    // THEN - table has correct headers and both agents
-    expect(result.exitCode).toBe(0);
-    expectTableHeader(result.output, ["NAME", "WORLD", "STATUS"]);
-    expect(stripAnsi(result.output)).toContain("alpha");
-    expect(stripAnsi(result.output)).toContain("beta");
-  });
+        // THEN - table has correct headers and both agents
+        expect(result.exitCode).toBe(0);
+        expectTableHeader(result.output, ['NAME', 'WORLD', 'STATUS']);
+        expect(stripAnsi(result.output)).toContain('alpha');
+        expect(stripAnsi(result.output)).toContain('beta');
+    });
 
-  test("'spwn agent show' shows detailed info", async () => {
-    // GIVEN - agent exists
-    await spwn("create for show").exec("agent new inspectme").run();
+    test("'spwn agent show' shows detailed info", async () => {
+        // GIVEN - agent exists
+        await spwn('create for show').exec('agent new inspectme').run();
 
-    // WHEN - inspecting
-    const result = await spwn("agent show")
-      .exec("agent show inspectme")
-      .run();
+        // WHEN - inspecting
+        const result = await spwn('agent show').exec('agent show inspectme').run();
 
-    // THEN - shows structured details
-    expect(result.exitCode).toBe(0);
-    expectLine(result.output, /Agent:\s+inspectme/);
-    expectLine(result.output, /World:\s+unattached/);
-  });
+        // THEN - shows structured details
+        expect(result.exitCode).toBe(0);
+        expectLine(result.output, /Agent:\s+inspectme/);
+        expectLine(result.output, /World:\s+unattached/);
+    });
 });
 
 // ── Enter command ──────────────────────────────────────────
 
-describe("CLI execution - enter command", () => {
-  let home: string;
-  let originalSpwnHome: string | undefined;
+describe('CLI execution - enter command', () => {
+    let home: string;
+    let originalSpwnHome: string | undefined;
 
-  beforeEach(() => {
-    originalSpwnHome = process.env.SPWN_HOME;
-    home = createSpwnHome();
-    process.env.SPWN_HOME = home;
-  });
+    beforeEach(() => {
+        originalSpwnHome = process.env.SPWN_HOME;
+        home = createSpwnHome();
+        process.env.SPWN_HOME = home;
+    });
 
-  afterEach(() => {
-    if (originalSpwnHome !== undefined) {
-      process.env.SPWN_HOME = originalSpwnHome;
-    } else {
-      delete process.env.SPWN_HOME;
-    }
-  });
+    afterEach(() => {
+        if (originalSpwnHome !== undefined) {
+            process.env.SPWN_HOME = originalSpwnHome;
+        } else {
+            delete process.env.SPWN_HOME;
+        }
+    });
 
-  test("'spwn world enter <nonexistent-id>' returns clean error", async () => {
-    const result = await spwn("enter nonexistent")
-      .exec("world enter w-fake-99999")
-      .run();
+    test("'spwn world enter <nonexistent-id>' returns clean error", async () => {
+        const result = await spwn('enter nonexistent').exec('world enter w-fake-99999').run();
 
-    expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).not.toBe(0);
 
-    expectNoLine(result.output, /panic:/);
-    expectNoLine(result.output, /goroutine /);
-  });
+        expectNoLine(result.output, /panic:/);
+        expectNoLine(result.output, /goroutine /);
+    });
 
-  test("'spwn world enter --help' shows usage", async () => {
-    const result = await spwn("enter help")
-      .exec("world enter --help")
-      .run();
+    test("'spwn world enter --help' shows usage", async () => {
+        const result = await spwn('enter help').exec('world enter --help').run();
 
-    expect(result.exitCode).toBe(0);
+        expect(result.exitCode).toBe(0);
 
-    const output = stripAnsi(result.output);
-    expect(output).toContain("enter");
-    expect(output).toContain("world-id");
-  });
+        const output = stripAnsi(result.output);
+        expect(output).toContain('enter');
+        expect(output).toContain('world-id');
+    });
 });
 
 // ── Global flags ─────────────────────────────────────────────
 
-describe("CLI execution - global flags", () => {
-  let home: string;
-  let originalSpwnHome: string | undefined;
+describe('CLI execution - global flags', () => {
+    let home: string;
+    let originalSpwnHome: string | undefined;
 
-  beforeEach(() => {
-    originalSpwnHome = process.env.SPWN_HOME;
-    home = createSpwnHome();
-    process.env.SPWN_HOME = home;
-  });
+    beforeEach(() => {
+        originalSpwnHome = process.env.SPWN_HOME;
+        home = createSpwnHome();
+        process.env.SPWN_HOME = home;
+    });
 
-  afterEach(() => {
-    if (originalSpwnHome !== undefined) {
-      process.env.SPWN_HOME = originalSpwnHome;
-    } else {
-      delete process.env.SPWN_HOME;
-    }
-  });
+    afterEach(() => {
+        if (originalSpwnHome !== undefined) {
+            process.env.SPWN_HOME = originalSpwnHome;
+        } else {
+            delete process.env.SPWN_HOME;
+        }
+    });
 
-  test("'--version' shows version string", async () => {
-    const result = await spwn("version")
-      .exec("--version")
-      .run();
+    test("'--version' shows version string", async () => {
+        const result = await spwn('version').exec('--version').run();
 
-    expect(result.exitCode).toBe(0);
-    expect(result.output).toMatch(/spwn version/);
-  });
+        expect(result.exitCode).toBe(0);
+        expect(result.output).toMatch(/spwn version/);
+    });
 });
 
 // ── Status command ──────────────────────────────────────────
 
-describe("CLI execution - status command", () => {
-  let home: string;
-  let originalSpwnHome: string | undefined;
+describe('CLI execution - status command', () => {
+    let home: string;
+    let originalSpwnHome: string | undefined;
 
-  beforeEach(() => {
-    originalSpwnHome = process.env.SPWN_HOME;
-    home = createSpwnHome();
-    process.env.SPWN_HOME = home;
-  });
+    beforeEach(() => {
+        originalSpwnHome = process.env.SPWN_HOME;
+        home = createSpwnHome();
+        process.env.SPWN_HOME = home;
+    });
 
-  afterEach(() => {
-    if (originalSpwnHome !== undefined) {
-      process.env.SPWN_HOME = originalSpwnHome;
-    } else {
-      delete process.env.SPWN_HOME;
-    }
-  });
+    afterEach(() => {
+        if (originalSpwnHome !== undefined) {
+            process.env.SPWN_HOME = originalSpwnHome;
+        } else {
+            delete process.env.SPWN_HOME;
+        }
+    });
 
-  test("'spwn status' runs without error", async () => {
-    await spwn("init").exec("init").run();
-    const result = await spwn("status").exec("status").run();
+    test("'spwn status' runs without error", async () => {
+        await spwn('init').exec('init').run();
+        const result = await spwn('status').exec('status').run();
 
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out).toContain("spwn");
-    expect(out).toContain("Worlds");
-  });
+        expect(result.exitCode).toBe(0);
+        const out = stripAnsi(result.output);
+        expect(out).toContain('spwn');
+        expect(out).toContain('Worlds');
+    });
 
-  test("'spwn auth' shows authentication status", async () => {
-    const result = await spwn("auth").exec("auth").run();
+    test("'spwn auth' shows authentication status", async () => {
+        const result = await spwn('auth').exec('auth').run();
 
-    expect(result.exitCode).toBe(0);
-    const out = stripAnsi(result.output);
-    expect(out).toContain("PROVIDER");
-    expect(out).toContain("STATUS");
-  });
+        expect(result.exitCode).toBe(0);
+        const out = stripAnsi(result.output);
+        expect(out).toContain('PROVIDER');
+        expect(out).toContain('STATUS');
+    });
 });

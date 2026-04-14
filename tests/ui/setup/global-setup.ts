@@ -1,9 +1,9 @@
-import { execSync } from "node:child_process";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { execSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(__dirname, "../../..");
+const REPO_ROOT = resolve(__dirname, '../../..');
 
 /**
  * Build the binary so the Tauri sidecar exists. Templates are
@@ -11,7 +11,7 @@ const REPO_ROOT = resolve(__dirname, "../../..");
  * they need them. Servers are managed by playwright.config.ts.
  */
 export default async function globalSetup() {
-  console.log("\n[global-setup] Building spwn binary...");
-  execSync("make build", { cwd: REPO_ROOT, stdio: "inherit" });
-  console.log("[global-setup] Ready ✓\n");
+    console.log('\n[global-setup] Building spwn binary...');
+    execSync('make build', { cwd: REPO_ROOT, stdio: 'inherit' });
+    console.log('[global-setup] Ready ✓\n');
 }

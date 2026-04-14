@@ -1,13 +1,10 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "outDir": "dist",
-    "rootDir": "."
-  },
-  "include": ["setup/**/*.ts", "e2e/**/*.ts"]
+    "extends": "@jterrazz/typescript/presets/tsconfig/node",
+    "include": [
+        "setup/**/*.ts",
+        "e2e/**/*.ts",
+        "ui/**/*.ts",
+        "vitest.config.ts",
+        "vitest.workspace.ts"
+    ]
 }
