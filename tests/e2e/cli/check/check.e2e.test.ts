@@ -1,21 +1,20 @@
-import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
 import { spec } from '../../../setup/cli.specification.js';
-import { stdoutMatcher } from '../../../setup/fixtures.js';
 
 /**
  * Stage 2a of the @jterrazz/test migration: per-feature folder layout
  * with real stdout fixtures.
  *
- * Snapshots live under ./expected/stdout/<name>.txt. Regenerate them
+ * Snapshots live under ./expected/stdout/<name>.txt. Each assertion
+ * uses `result.stdout.toMatch('<name>')` — the framework resolves
+ * `<name>` against `<this-dir>/expected/stdout/<name>.txt`. Regenerate
  * with `JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run e2e/cli/check`.
  *
- * Temp-dir paths are normalised to `<PROJECT>` inside the matcher so
- * fixtures stay stable across runs and machines (see setup/fixtures.ts).
+ * Temp-dir paths and ANSI escapes are normalised to `<PROJECT>` by the
+ * runner-level `transform` configured in setup/cli.specification.ts, so
+ * fixtures stay stable across runs and machines.
  */
-
-const TEST_FILE = fileURLToPath(import.meta.url);
 
 describe('spwn check', () => {
     test('valid project prints a clean success report', async () => {
@@ -24,7 +23,7 @@ describe('spwn check', () => {
 
         // Then - exits zero with the canonical "Project is valid" banner
         expect(result.exitCode).toBe(0);
-        await stdoutMatcher(TEST_FILE, result.stdout).toMatchFixture('valid-project');
+        await result.stdout.toMatch('valid-project');
     });
 
     test('--help prints the check command usage', async () => {
@@ -33,7 +32,7 @@ describe('spwn check', () => {
 
         // Then - cobra emits the usage block for the check subcommand
         expect(result.exitCode).toBe(0);
-        await stdoutMatcher(TEST_FILE, result.stdout).toMatchFixture('help');
+        await result.stdout.toMatch('help');
     });
 
     test('flags an agent that references a non-existent built-in tool', async () => {
@@ -45,7 +44,7 @@ describe('spwn check', () => {
 
         // Then - exits non-zero and lists the built-ins the user can pick from
         expect(result.exitCode).not.toBe(0);
-        await stdoutMatcher(TEST_FILE, result.stdout).toMatchFixture('invalid-tool-ref');
+        await result.stdout.toMatch('invalid-tool-ref');
     });
 
     test('flags a remote-registry tool reference as unsupported', async () => {
@@ -57,7 +56,7 @@ describe('spwn check', () => {
 
         // Then - exits non-zero with the "remote registries not yet supported" rule
         expect(result.exitCode).not.toBe(0);
-        await stdoutMatcher(TEST_FILE, result.stdout).toMatchFixture('registry-not-supported');
+        await result.stdout.toMatch('registry-not-supported');
     });
 
     test('seed overlay flags the one-agent-one-world rule', async () => {
