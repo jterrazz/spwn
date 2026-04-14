@@ -13,7 +13,7 @@ import { spec } from '../../../setup/cli.specification.js';
  *   - `/world/roster.md`   — regenerated per spawn, names the agents
  *   - `/world/skills/`     — shared system skill bundle
  *
- * Lives under the cli vitest project (`e2e/system/**`) but spec
+ * Lives under the cli vitest project (`cli/system/**`) but spec
  * Still spawns real containers; cleanup runs via the test-run label.
  */
 describe('system skills infrastructure (docker)', () => {

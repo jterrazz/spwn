@@ -97,7 +97,7 @@ describe('CLI execution - status command', () => {
     test("'spwn status' runs cleanly after init", async () => {
         /*
          * Richer status-output coverage lives in
-         * tests/e2e/status/status/*. Here we just confirm both
+         * tests/cli/status/status/*. Here we just confirm both
          * commands emit their stable banners.
          */
         const initResult = await isolated('init for status').exec('init').run();

@@ -16,6 +16,6 @@ export default defineConfig({
         // Combined with the framework's label-based cleanup on
         // Symbol.asyncDispose, the whole suite is isolated per file.
         fileParallelism: true,
-        include: ['e2e/**/*.e2e.test.ts'],
+        include: ['cli/**/*.e2e.test.ts'],
     },
 });

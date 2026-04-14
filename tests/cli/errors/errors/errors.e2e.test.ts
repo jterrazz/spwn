@@ -11,7 +11,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * failure paths.
  *
  * Regenerate snapshots with:
- *   JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run e2e/errors/errors
+ *   JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run cli/errors/errors
  */
 
 const isolated = (label: string) =>

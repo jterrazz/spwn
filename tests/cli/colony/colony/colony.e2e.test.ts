@@ -29,8 +29,8 @@ import { spec } from '../../../setup/cli.specification.js';
  *     distinction the legacy test asserted on is not meaningful in this
  *     fixture shape — agents get their roles from spwn.yaml role fields
  *     which colony.yaml doesn't set.
- *   - `spwn ls` output-format assertions: covered in e2e/cli/execution
- *     and e2e/colony/multi-agent `world list --json`.
+ *   - `spwn ls` output-format assertions: covered in cli/execution
+ *     and cli/colony/multi-agent `world list --json`.
  */
 describe('colony', () => {
     test('roster.md inside the container names both colony members', async () => {

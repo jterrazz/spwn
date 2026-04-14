@@ -13,7 +13,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * status-docker test.
  *
  * Regenerate snapshots with:
- *   JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run e2e/status/status
+ *   JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run cli/status/status
  */
 
 const isolated = (label: string) =>

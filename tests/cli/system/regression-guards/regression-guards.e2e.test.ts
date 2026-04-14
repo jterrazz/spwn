@@ -5,8 +5,8 @@ import { describe, expect, test } from 'vitest';
 /**
  * Repo-wide regression guards. These don't exercise the spwn binary —
  * they shell out to grep against the source tree to catch reintroduced
- * patterns that we've intentionally removed. They live under e2e/cli
- * because the vitest `cli` project globs `e2e/cli/**`.
+ * patterns that we've intentionally removed. They live under cli/cli
+ * because the vitest `cli` project globs `cli/**`.
  */
 
 const repoRoot = resolve(import.meta.dirname, '../../../..');

@@ -1,5 +1,5 @@
 fixtures/
-e2e/**/expected/
+cli/**/expected/
 spwn/
 spwn.yaml
 .spwn/

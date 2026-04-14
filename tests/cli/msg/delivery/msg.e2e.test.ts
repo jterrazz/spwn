@@ -5,13 +5,13 @@ import { spec } from '../../../setup/cli.specification.js';
 /**
  * `spwn agent send` / `spwn agent inbox` under the docker() spec mode.
  *
- * Port of the legacy CLI-only `tests/e2e/messaging/msg.e2e.test.ts`. The
+ * Port of the legacy CLI-only `tests/cli/messaging/msg.e2e.test.ts`. The
  * legacy tests ran against an in-process test context that no longer
  * matches how messaging works in project mode — messaging writes JSON
  * files into `/world/inbox/<agent>/` inside the running world container.
  *
  * Extensive coverage of the same surface already lives under
- * `tests/e2e/world/messaging/` (physics docs, type flag, JSON body
+ * `tests/cli/world/messaging/` (physics docs, type flag, JSON body
  * parsing, multi-message). This file focuses on the CLI-facing
  * behaviours the legacy msg test cared about:
  *   - send prints a confirmation line
