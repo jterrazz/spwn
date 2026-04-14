@@ -1,0 +1,14 @@
+version: 2
+name: research-lab
+
+worlds:
+  research-lab:
+    agents:
+      - curie
+    workspaces:
+      - .
+    tools:
+      - "@spwn/unix"
+      - "@spwn/git"
+      - "@spwn/python"
+      - "@spwn/node"

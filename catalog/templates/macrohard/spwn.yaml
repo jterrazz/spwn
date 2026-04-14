@@ -1,0 +1,15 @@
+version: 2
+name: macrohard
+
+worlds:
+  macrohard:
+    agents:
+      - ballmer
+      - gates
+      - nadella
+    workspaces:
+      - .
+    tools:
+      - "@spwn/unix"
+      - "@spwn/git"
+      - "@spwn/node"

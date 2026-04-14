@@ -1,1 +1,11 @@
+name: curie
 role: worker
+
+runtime:
+  backend: "@spwn/claude-code"
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/python"
+  - "@spwn/node"

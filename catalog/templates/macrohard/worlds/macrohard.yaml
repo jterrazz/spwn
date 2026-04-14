@@ -1,6 +1,0 @@
-# Macrohard - three-agent software company.
-
-tools:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"

@@ -137,6 +137,20 @@ func AddAgentToManifest(manifestPath, agentName string) error {
 	return scaffold.AddAgentWorld(manifestPath, agentName)
 }
 
+// IsReservedAgentName reports whether the given name collides with
+// a `spwn agent <subcommand>` reserved verb. CLI callers should
+// reject such names at creation time — before a directory is ever
+// written — so the user never lands in a half-broken state.
+func IsReservedAgentName(name string) bool {
+	return validate.IsReservedAgentName(name)
+}
+
+// ReservedAgentNames returns the sorted list of reserved agent
+// names for display in error messages.
+func ReservedAgentNames() []string {
+	return validate.ReservedAgentNames()
+}
+
 // ValidateOpts configures Validate. Zero value is valid and skips
 // catalog-backed rules (tool existence, runtime support). Callers
 // should populate this from the imagebuilder catalog for the richest

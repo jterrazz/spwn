@@ -1,6 +1,0 @@
-# Startup - one world for the whole company.
-
-tools:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"

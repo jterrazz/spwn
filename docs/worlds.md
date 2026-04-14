@@ -1,61 +1,140 @@
 # Worlds
 
-A world is a runtime instance - the ephemeral Docker container where an agent actually runs. An agent can live in many worlds over time; the agent persists, the world doesn't.
+A **world** is a deployable grouping of agents plus the runtime
+constraints they live under. Worlds are declared *inline* in
+`spwn.yaml` as map entries under `worlds:` — there is no
+`spwn/worlds/` directory and no per-world yaml file. A world is
+"alive" when at least one container is up for it, and "stopped"
+otherwise; it doesn't stop existing just because nothing is running.
 
 ## Agent vs world
 
-| Agent (persistent)                       | World (ephemeral)              |
-| ---------------------------------------- | ------------------------------ |
-| Identity - profile, purpose, traits      | Running container              |
-| Memory - journal, knowledge, playbooks   | Mounted workspace              |
-| Composition - tools, skills, profile     | Live tool bridges              |
-| Evolution history                        | Process state + logs           |
+| Agent (persistent)                       | World (declaration + live instance) |
+| ---------------------------------------- | ----------------------------------- |
+| Identity - profile, purpose, traits      | Entry in `spwn.yaml#worlds`         |
+| Memory - journal, knowledge, playbooks   | Mounted workspace                   |
+| Composition - tools, skills, profile     | Physics caps + tool overrides       |
+| Evolution history                        | Running container when deployed     |
 
-The agent is *who*. The world is *where, right now*.
+The agent is *who*. The world is *where this agent is deployed, and
+under what rules*.
+
+## Worlds-as-deployments
+
+A world entry is the deployment contract: *these agents, in this
+workspace, with this physics, possibly with these extra tools*. One
+agent can belong to at most one world (enforced by `spwn check`).
+
+```yaml
+# spwn.yaml
+version: 2
+name: acme-api
+
+worlds:
+  default:
+    agents: [neo]
+    workspaces: [.]
+    physics:
+      cpu: 2
+      memory: 2g
+    # Optional extra tools injected on top of each agent's own tools.
+    tools:
+      - "@spwn/docker-cli"
+
+  lab:
+    agents: [curie]
+    workspaces:
+      - ./experiments
+      - ./datasets:/workspace/datasets
+    physics:
+      cpu: 4
+      memory: 4g
+```
+
+### Workspaces
+
+Every world mounts at least one workspace under `/workspace` inside
+the container. The *first* entry may be a bare host path (mounted at
+`/workspace`). Any additional entries must use the explicit
+`host:/workspace/<name>` form so the target directory is unambiguous.
+
+### Agents in worlds
+
+`agents:` names directories under `spwn/agents/`. `spwn check`
+rejects a world that references a missing directory, and it also
+rejects an agent listed in more than one world (one-agent-one-world).
+
+### Bringing worlds up and down
+
+```bash
+spwn up                     # start every world in spwn.yaml (compose-style)
+spwn up default             # start one world by name
+spwn agent neo              # start the world that contains neo
+spwn down                   # stop every world
+spwn world stop lab         # stop one world
+```
+
+Creating an agent with `spwn agent new <name>` automatically inserts
+a single-agent world into `spwn.yaml` so you never end up with an
+agent that has nowhere to run. You can later merge it into a
+multi-agent world by editing the file by hand — there is no implicit
+migration tooling.
 
 ## Tools are structural, not permitted
 
-No ACLs. No permission prompts. If a tool isn't listed in the agent's composition, it's **physically impossible** inside its world - not forbidden, absent. You can't prompt-inject a missing binary.
+No ACLs. No permission prompts. If a tool isn't listed — on the
+agent, on the world, or injected by the image builder — it's
+**physically impossible** inside the container, not forbidden. You
+can't prompt-inject a missing binary.
 
 ```yaml
 # spwn/agents/neo/agent.yaml
 name: neo
-runtime: claude-code
+runtime:
+  backend: "@spwn/claude-code"
 
 tools:
   - "@spwn/unix"         # bash, grep, sed, awk…
   - "@spwn/git"          # version control
   - "@spwn/node"         # Node.js
-  - "@spwn/claude-code"  # thinking engine
 ```
 
-If `curl` isn't listed, HTTP doesn't exist in neo's world. Tools are composable, dependency-aware, and verified at world creation. The image is built on-demand from the exact selection - no bloated base image.
-
-Tools are **world-scoped**: when a world is destroyed, its tool bridges go with it. Installing a tool via `spwn agent add` updates the agent's composition; the next `spwn up` rebuilds the world with the new tool available.
+The effective tool set for a live container is the union of the
+agent's `tools:` and the world's `tools:`. If two agents in the same
+multi-agent world disagree on a tool's *version*, `spwn check` fails
+the project — version conflicts are errors, not last-writer-wins.
 
 ## Physics
 
-Worlds also carry hard limits declared in `spwn/worlds/<name>.yaml`:
+Worlds carry hard limits declared in their `spwn.yaml` entry:
 
 ```yaml
-physics:
-  constants:
-    cpu: 2          # CPU cores
-    memory: 1g      # RAM
-    disk: 4g        # rootfs cap
-    timeout: 30m    # wall clock per session
+worlds:
+  default:
+    agents: [neo]
+    workspaces: [.]
+    physics:
+      cpu: 2          # CPU cores
+      memory: 2g      # RAM
+      disk: 4g        # rootfs cap
+      timeout: 30m    # wall clock per session
 ```
 
-These are kernel-enforced. An agent can't burn your battery or fill your disk by accident.
+These are kernel-enforced. An agent can't burn your battery or fill
+your disk by accident. When `physics:` is omitted, host defaults
+apply.
 
 ## Spawning a world
 
 From inside a spwn project:
 
 ```bash
-spwn up                     # use the world + agents declared in spwn.yaml
-spwn up --agent neo         # override which agent spawns
+spwn up                     # every world in spwn.yaml
+spwn up default             # just "default"
 spwn up --build             # rebuild the artifact first, then spawn
 ```
 
-`spwn up` assembles the agent's composition (tools + skills + profile) into a Docker image, boots a container, mounts the workspace at `/work/`, and hands the runtime control. The agent wakes up, reads `CLAUDE.md`, finds its tools, and gets to work.
+`spwn up` assembles each agent's composition (tools + skills +
+profile) into a Docker image, boots a container, mounts the
+workspaces under `/workspace`, and hands the runtime control. The
+agent wakes up, reads `CLAUDE.md`, finds its tools, and gets to work.

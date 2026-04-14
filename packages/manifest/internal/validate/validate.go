@@ -132,6 +132,27 @@ var reservedAgentSubcommands = map[string]struct{}{
 	"deploy": {}, "compose": {}, "list": {}, "init": {},
 }
 
+// IsReservedAgentName reports whether the given name would collide
+// with a `spwn agent <subcommand>` subcommand. Used by the CLI to
+// reject such names at creation time, before the agent directory is
+// ever written.
+func IsReservedAgentName(name string) bool {
+	_, ok := reservedAgentSubcommands[name]
+	return ok
+}
+
+// ReservedAgentNames returns the sorted list of agent names that
+// collide with subcommands of `spwn agent`. The slice is a fresh
+// copy the caller can mutate.
+func ReservedAgentNames() []string {
+	out := make([]string, 0, len(reservedAgentSubcommands))
+	for k := range reservedAgentSubcommands {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
+}
+
 // reservedWorldSubcommands is the equivalent for `spwn world ...`.
 var reservedWorldSubcommands = map[string]struct{}{
 	"start": {}, "stop": {}, "ls": {}, "rm": {}, "inspect": {},

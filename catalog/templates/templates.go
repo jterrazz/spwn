@@ -64,10 +64,18 @@ type Template struct {
 
 // InstallReport describes everything Install wrote to disk.
 type InstallReport struct {
-	Slug         string   `json:"slug"`
-	AgentsAdded  []string `json:"agentsAdded"`
+	Slug          string   `json:"slug"`
+	AgentsAdded   []string `json:"agentsAdded"`
 	AgentsSkipped []string `json:"agentsSkipped"`
-	WorldsAdded  []string `json:"worldsAdded"`
+	// ManifestAdded is true if this install wrote a fresh spwn.yaml,
+	// false if one already existed at baseDir/spwn.yaml (and was left
+	// untouched per the no-overwrite rule).
+	ManifestAdded bool `json:"manifestAdded"`
+	// WorldsAdded/WorldsSkipped are retained for API compatibility
+	// with the old per-world-file install surface. With the v2
+	// schema, at most one entry lands here: the template's world
+	// name, populated from template.yaml#worlds.
+	WorldsAdded   []string `json:"worldsAdded"`
 	WorldsSkipped []string `json:"worldsSkipped"`
 }
 
@@ -112,13 +120,22 @@ func Get(slug string) (Template, error) {
 	return ex, nil
 }
 
-// Install copies a template's world configs and agent directories
-// into baseDir (typically ~/.spwn). Existing files are NEVER
-// overwritten - the slug and filename you already have on disk win.
-// The report tells the caller what was added vs skipped.
+// Install materializes a template into baseDir as a project tree:
 //
-// After Install, the caller can `spwn up -c <world>` to actually
-// spawn a container.
+//	baseDir/
+//	├── spwn.yaml              (copied from <slug>/spwn.yaml)
+//	└── spwn/
+//	    └── agents/<name>/     (copied from <slug>/agents/<name>/)
+//
+// Existing files are NEVER overwritten - whatever the user already
+// has on disk wins. The report tells the caller what was added vs
+// skipped.
+//
+// baseDir should be the project root. In legacy/global mode (no
+// project discoverable) callers can still pass ~/.spwn or the
+// foundation.UserDir() and the same layout will appear underneath.
+//
+// After Install, the caller can `spwn up` to bring the world online.
 func Install(slug, baseDir string) (InstallReport, error) {
 	ex, err := loadMetadata(slug)
 	if err != nil {
@@ -126,36 +143,32 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	}
 	rep := InstallReport{Slug: slug}
 
-	// --- worlds ---
-	worldsRoot := filepath.Join(baseDir, "worlds")
-	if err := os.MkdirAll(worldsRoot, 0o755); err != nil {
-		return rep, fmt.Errorf("create worlds dir: %w", err)
+	if err := os.MkdirAll(baseDir, 0o755); err != nil {
+		return rep, fmt.Errorf("create project dir: %w", err)
 	}
-	worldsSrc := path(slug, "worlds")
-	worldEntries, err := templatesFS.ReadDir(worldsSrc)
-	if err == nil {
-		for _, e := range worldEntries {
-			if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
-				continue
-			}
-			dst := filepath.Join(worldsRoot, e.Name())
-			if exists(dst) {
-				rep.WorldsSkipped = append(rep.WorldsSkipped, e.Name())
-				continue
-			}
-			data, rerr := templatesFS.ReadFile(path(worldsSrc, e.Name()))
-			if rerr != nil {
-				return rep, fmt.Errorf("read %s: %w", e.Name(), rerr)
-			}
-			if werr := os.WriteFile(dst, data, 0o644); werr != nil {
-				return rep, fmt.Errorf("write %s: %w", dst, werr)
-			}
-			rep.WorldsAdded = append(rep.WorldsAdded, e.Name())
+
+	// --- spwn.yaml ---
+	manifestDst := filepath.Join(baseDir, "spwn.yaml")
+	if exists(manifestDst) {
+		// Record the world name(s) declared by the template as skipped
+		// so existing callers (web UI, activity log) still see a
+		// "worlds skipped" signal.
+		rep.WorldsSkipped = append(rep.WorldsSkipped, ex.Worlds...)
+	} else {
+		manifestSrc := path(slug, "spwn.yaml")
+		data, rerr := templatesFS.ReadFile(manifestSrc)
+		if rerr != nil {
+			return rep, fmt.Errorf("read %s: %w", manifestSrc, rerr)
 		}
+		if werr := os.WriteFile(manifestDst, data, 0o644); werr != nil {
+			return rep, fmt.Errorf("write %s: %w", manifestDst, werr)
+		}
+		rep.ManifestAdded = true
+		rep.WorldsAdded = append(rep.WorldsAdded, ex.Worlds...)
 	}
 
 	// --- agents ---
-	agentsRoot := filepath.Join(baseDir, "agents")
+	agentsRoot := filepath.Join(baseDir, "spwn", "agents")
 	if err := os.MkdirAll(agentsRoot, 0o755); err != nil {
 		return rep, fmt.Errorf("create agents dir: %w", err)
 	}
@@ -204,10 +217,16 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	return rep, nil
 }
 
-// InstallInto is a convenience wrapper that targets the default
-// ~/.spwn home directory.
+// InstallInto is a convenience wrapper that installs a template
+// into the active project root when one is discoverable, else into
+// the user-global ~/.spwn (legacy global mode). Callers that need
+// to target an explicit path should use Install directly.
 func InstallInto(slug string) (InstallReport, error) {
-	return Install(slug, foundation.BaseDir())
+	base := foundation.ProjectRoot()
+	if base == "" {
+		base = foundation.BaseDir()
+	}
+	return Install(slug, base)
 }
 
 // ── internals ─────────────────────────────────────────────────────────

@@ -1,1 +1,10 @@
+name: gates
 role: worker
+
+runtime:
+  backend: "@spwn/claude-code"
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/node"

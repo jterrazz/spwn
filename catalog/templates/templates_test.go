@@ -42,8 +42,8 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 // minimum filesystem contract that Install and Get depend on:
 //   <slug>/template.yaml
 //   <slug>/README.md
-//   <slug>/agents/<at-least-one-dir>/
-//   <slug>/worlds/<at-least-one-yaml>
+//   <slug>/spwn.yaml
+//   <slug>/agents/<at-least-one-dir>/core/profile.md
 //
 // Without these, the binary ships but misbehaves at runtime.
 func TestShippedSlugsStructure(t *testing.T) {
@@ -52,6 +52,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 			mustExist := []string{
 				slug + "/template.yaml",
 				slug + "/README.md",
+				slug + "/spwn.yaml",
 			}
 			for _, p := range mustExist {
 				if _, err := fs.Stat(templatesFS, p); err != nil {
@@ -74,27 +75,15 @@ func TestShippedSlugsStructure(t *testing.T) {
 					if _, err := fs.Stat(templatesFS, profilePath); err != nil {
 						t.Errorf("%s: agent %q missing core/profile.md", slug, e.Name())
 					}
+					// And an agent.yaml so Install can wire up runtime/tools.
+					agentYAML := slug + "/agents/" + e.Name() + "/agent.yaml"
+					if _, err := fs.Stat(templatesFS, agentYAML); err != nil {
+						t.Errorf("%s: agent %q missing agent.yaml", slug, e.Name())
+					}
 				}
 			}
 			if !hasAgent {
 				t.Errorf("%s: no agent directory under agents/", slug)
-			}
-
-			// At least one world yaml.
-			worldEntries, err := fs.ReadDir(templatesFS, slug+"/worlds")
-			if err != nil {
-				t.Errorf("read %s/worlds: %v", slug, err)
-				return
-			}
-			hasWorld := false
-			for _, e := range worldEntries {
-				if !e.IsDir() && filepath.Ext(e.Name()) == ".yaml" {
-					hasWorld = true
-					break
-				}
-			}
-			if !hasWorld {
-				t.Errorf("%s: no *.yaml under worlds/", slug)
 			}
 		})
 	}
@@ -197,6 +186,9 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
+	if !rep.ManifestAdded {
+		t.Error("expected ManifestAdded to be true on fresh install")
+	}
 	if len(rep.WorldsAdded) == 0 {
 		t.Error("expected at least one world to be added")
 	}
@@ -204,18 +196,24 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 		t.Error("expected at least one agent to be added")
 	}
 
-	// Files should exist.
-	if !exists(filepath.Join(base, "worlds", "matrix.yaml")) {
-		t.Error("matrix.yaml was not written")
+	// Files should exist in the new project tree layout.
+	if !exists(filepath.Join(base, "spwn.yaml")) {
+		t.Error("spwn.yaml was not written")
 	}
-	if !exists(filepath.Join(base, "agents", "neo", "core", "profile.md")) {
-		t.Error("agent core/profile.md was not copied")
+	if !exists(filepath.Join(base, "spwn", "agents", "neo", "core", "profile.md")) {
+		t.Error("agent core/profile.md was not copied into spwn/agents/")
+	}
+	if !exists(filepath.Join(base, "spwn", "agents", "neo", "agent.yaml")) {
+		t.Error("agent.yaml was not copied into spwn/agents/")
 	}
 
 	// Re-install should be a no-op: everything skipped.
 	rep2, err := Install("matrix", base)
 	if err != nil {
 		t.Fatalf("second Install: %v", err)
+	}
+	if rep2.ManifestAdded {
+		t.Error("second install should not re-add the manifest")
 	}
 	if len(rep2.WorldsAdded) != 0 || len(rep2.AgentsAdded) != 0 {
 		t.Errorf("second install should be no-op, got %+v", rep2)
@@ -232,10 +230,10 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 		t.Fatalf("Install: %v", err)
 	}
 
-	// User edits the installed world yaml.
-	worldYAML := filepath.Join(base, "worlds", "paperclip-factory.yaml")
-	mine := []byte("# user edits\nphysics:\n  constants:\n    cpu: 99\n")
-	if err := os.WriteFile(worldYAML, mine, 0o644); err != nil {
+	// User edits the installed manifest.
+	manifestPath := filepath.Join(base, "spwn.yaml")
+	mine := []byte("version: 2\nname: paperclip-factory\nworlds:\n  paperclip-factory:\n    agents: [clippy]\n    workspaces: [.]\n    physics:\n      cpu: 99\n")
+	if err := os.WriteFile(manifestPath, mine, 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -244,7 +242,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 	if err != nil {
 		t.Fatalf("re-Install: %v", err)
 	}
-	got, err := os.ReadFile(worldYAML)
+	got, err := os.ReadFile(manifestPath)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,1 +1,11 @@
+name: devops
 role: worker
+
+runtime:
+  backend: "@spwn/claude-code"
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/docker-cli"

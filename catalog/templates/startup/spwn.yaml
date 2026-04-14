@@ -1,0 +1,15 @@
+version: 2
+name: startup
+
+worlds:
+  startup:
+    agents:
+      - ceo
+      - devops
+      - analyst
+    workspaces:
+      - .
+    tools:
+      - "@spwn/unix"
+      - "@spwn/git"
+      - "@spwn/node"

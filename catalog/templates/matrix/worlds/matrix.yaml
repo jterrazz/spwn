@@ -1,6 +1,0 @@
-# Matrix - sandbox world for first-time exploration.
-
-tools:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"

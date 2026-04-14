@@ -36,6 +36,14 @@ provided, a random name is picked from a curated dictionary.`,
 			name = foundation.RandomAgentName()
 		}
 
+		// Reject names that would shadow `spwn agent <subcommand>`.
+		// Caught here, before InitMind writes anything to disk, so
+		// the user never sees a half-created agent directory.
+		if manifest.IsReservedAgentName(name) {
+			return fmt.Errorf("agent name %q is reserved (collides with `spwn agent %s`). Reserved names: %s",
+				name, name, strings.Join(manifest.ReservedAgentNames(), ", "))
+		}
+
 		s.Blank()
 		s.Start(fmt.Sprintf("Creating agent %q...", name))
 		_, err := agentDomain.InitMind(name)

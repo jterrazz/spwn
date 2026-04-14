@@ -41,19 +41,24 @@ The domain has three main abstractions, each owning one concern:
 
 ## CLI Commands
 
-**Grammar: `spwn <noun> <verb>`.** Three shortcuts for the 80% cases: `spwn up`, `spwn ls`, `spwn talk`. Full status matrix lives in the README; this is the reference map.
+**Grammar: `spwn <noun> <verb>`** plus compose-style shortcuts
+(`spwn up`, `spwn ls`, `spwn down`) and name-only shortcuts
+(`spwn agent neo`, `spwn world default`). With no args, the
+shortcuts act on every world declared in `spwn.yaml`.
 
 ```bash
 # ── Project workflow ─────────────────────────────────────────────
 spwn init                                      # Scaffold spwn.yaml + ./spwn/ + .spwn/
-spwn check                                     # Validate the tree (15 rules)
+spwn check                                     # Validate the tree
 spwn build                                     # Flatten to .spwn/build/ (pinned artifact)
 spwn up --build                                # Build then spawn from the artifact
 
-# ── Shortcuts ────────────────────────────────────────────────────
-spwn up                                        # Spawn the world declared in spwn.yaml
-spwn ls                                        # List active worlds
-spwn talk neo "what is this project?"          # Talk to an agent
+# ── Compose-style shortcuts ──────────────────────────────────────
+spwn up                                        # Bring up every world in spwn.yaml
+spwn up default                                # Bring up one world by name
+spwn agent neo                                 # Start the world that contains neo
+spwn ls                                        # Agent-centric status (running/stopped/orphan)
+spwn down                                      # Stop every world
 
 # ── Agents ───────────────────────────────────────────────────────
 spwn agent new neo                             # Create a blank agent in ./spwn/agents/
@@ -79,11 +84,13 @@ spwn agent dream neo                           # Analyze experience, promote pla
 spwn agent sleep neo                           # Consolidate memory, prune stale patterns
 
 # ── Worlds ───────────────────────────────────────────────────────
-spwn world up                                  # Full form of `spwn up`
-spwn world ls                                  # Full form of `spwn ls`
+# Worlds are inline map entries in spwn.yaml#worlds; there is no
+# spwn/worlds/ directory any more.
+spwn world start [name]                        # Start a world (no arg: every world in spwn.yaml)
+spwn world stop  [name]                        # Stop a world
+spwn world ls                                  # List running worlds
 spwn world inspect <id>                        # Inspect a running world
-spwn world down <id>                           # Destroy (agent survives)
-spwn world enter <id>                          # Interactive shell inside the world
+spwn world enter   <id>                        # Interactive shell inside the world
 spwn world snap save|ls|restore|rm             # World snapshots
 
 # ── Tools / skills / profiles ────────────────────────────────────
@@ -120,19 +127,17 @@ A spwn project is **in the repo**, not in your home directory. `~/.spwn/` holds 
 
 ```
 my-project/
-├── spwn.yaml                    # manifest - version, name, world, agents
+├── spwn.yaml                    # manifest - version, name, inline worlds map
 ├── spwn/                        # committed project assets
 │   ├── agents/
 │   │   └── neo/
-│   │       ├── agent.yaml       # composition: tools + skills + profile + runtime
+│   │       ├── agent.yaml       # composition: tools + skills + profile + runtime.backend
 │   │       ├── CLAUDE.md        # entry point the runtime reads on startup
 │   │       ├── core/profile.md  # identity
 │   │       ├── skills/          # authored procedures
 │   │       ├── knowledge/       # facts, codebase notes
 │   │       ├── playbooks/       # promoted patterns (via dream)
 │   │       └── journal/         # per-run history
-│   ├── worlds/
-│   │   └── default.yaml         # physics (cpu/memory/disk/timeout) + tools
 │   ├── skills/                  # project-scoped skill files
 │   ├── profiles/                # project-scoped personality templates
 │   └── tools/                   # project-scoped tool packs (optional)
@@ -142,6 +147,11 @@ my-project/
     └── cache/
 ```
 
+Worlds are declared **inline** under `spwn.yaml#worlds` — there is
+no `spwn/worlds/` directory any more. Each world entry names the
+agents it deploys, the workspace mounts, and optional physics/tool
+overrides.
+
 ```
 ~/.spwn/                         # USER-LEVEL only, not per-project
 ├── credentials/                 # auth material surfaced to containers at /credentials
@@ -149,7 +159,7 @@ my-project/
 └── state/                       # architect daemon state
 ```
 
-**Config hierarchy:** `agent.yaml` declares composition (tools + skills + profile + runtime). `worlds/<name>.yaml` declares the runtime environment (physics + tools). `spwn.yaml` at project root wires which world runs which agents.
+**Config hierarchy:** `agent.yaml` declares composition (tools + skills + profile + `runtime.backend`). `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces + optional physics + optional tools). The union of agent tools and world tools is what actually materializes inside the container.
 
 ## Repository Structure
 

@@ -48,9 +48,9 @@ Four commands. One running world.
 |        | Step              | Example                                    |
 | ------ | ----------------- | ------------------------------------------ |
 | **01** | Initialise        | `spwn init`                                |
-| **02** | Compose the mind  | `spwn agent add neo --tool @spwn/python`   |
-| **03** | Spawn the world   | `spwn up`                                  |
-| **04** | Talk to it        | `spwn talk neo "what is this project?"`    |
+| **02** | Create an agent   | `spwn agent new neo`                       |
+| **03** | Bring it online   | `spwn up`                                  |
+| **04** | Talk to it        | `spwn agent talk neo "what is this project?"` |
 
 Prefer a bundled demo? `spwn example install matrix`.
 
@@ -108,25 +108,30 @@ my-project/
 ├── spwn.yaml               # manifest - the "package.json" of spwn
 ├── spwn/                   # committed project assets
 │   ├── agents/             #   your agents - committed, travel with the repo
-│   ├── worlds/             #   custom world configs
 │   ├── tools/              #   `spwn tool get @community/foo` → spwn/tools/foo/
 │   └── skills/             #   `spwn skill get @community/review` → spwn/skills/review/
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
 
-`spwn.yaml` is tiny - it declares which world and which agents this repo
-runs. Everyone who clones the repo gets the same agents, the same world
-physics, the same tool composition. **Reproducibility by construction.**
+`spwn.yaml` is tiny. Worlds live **inline** as map entries under
+`worlds:` — no separate `spwn/worlds/*.yaml` files. Each world names
+the agents it deploys, the workspace it mounts, and optional
+physics/tool overrides. Everyone who clones the repo gets the same
+agents, the same world physics, the same tool composition.
+**Reproducibility by construction.**
 
 ```yaml
 # spwn.yaml
-version: 1
+version: 2
 name: acme-api
-workspace: .
 
-world: default
-agents:
-  - neo
+worlds:
+  default:
+    agents: [neo]
+    workspaces: [.]
+    physics:
+      cpu: 2
+      memory: 2g
 ```
 
 **`~/.spwn/` is for your user identity only** - credentials, daemon
@@ -242,15 +247,23 @@ spwn talk neo "run every test and benchmark, tell me what the code actually does
 
 ## CLI at a glance
 
-Grammar is consistent: `spwn <noun> <verb>`. Three world shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn down`.
+Grammar is consistent: `spwn <noun> <verb>`. Compose-style
+shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn down`.
+With no arguments they act on every world declared in `spwn.yaml`.
+Name-only shortcuts start a single entity by name: `spwn agent neo`
+starts the world that contains `neo`; `spwn world default` starts the
+world named `default`.
 
 Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 ```
-# ── Shortcuts ────────────────────────────────────────────────────
-🟢 spwn up --agent neo                          Spawn a world (alias: world up)
-🟢 spwn ls                                      List active worlds (alias: world ls)
-🟢 spwn down <id>                               Destroy a world (alias: world down)
+# ── Shortcuts (compose-style) ────────────────────────────────────
+🟢 spwn up                                      Bring up every world in spwn.yaml
+🟢 spwn up default                              Bring up one world by name
+🟢 spwn agent neo                               Start the world that contains neo
+🟢 spwn ls                                      Agent-centric status (running / stopped / orphan)
+🟢 spwn down                                    Stop every world in spwn.yaml
+🟢 spwn down default                            Stop one world by name
 
 # ── Project (per-repo manifest) ──────────────────────────────────
 🟢 spwn init                                    Scaffold a project in the current dir
@@ -292,10 +305,10 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🔴 spwn agent publish neo                       Ship to registry (memory stripped)
 
 # ── Worlds ───────────────────────────────────────────────────────
-# Lifecycle
-🟢 spwn world up --agent neo                    Full form of `spwn up`
-🟢 spwn world ls                                Full form of `spwn ls`
-🟢 spwn world down <id>                         Destroy (agent survives)
+# Lifecycle — worlds are inline entries in spwn.yaml (not files)
+🟢 spwn world start [name]                      Start a world (no-arg: every world in spwn.yaml)
+🟢 spwn world stop  [name]                      Stop a world
+🟢 spwn world ls                                List running worlds
 🟢 spwn world rename <id> <name>                Rename a world
 
 # Observe

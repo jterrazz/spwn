@@ -57,9 +57,15 @@ func init() {
 	foundation.Version = Version
 	rootCmd.SetHelpFunc(customHelp)
 
-	// Top-level world shortcuts
+	// Top-level world shortcuts.
+	//
+	// `spwn ls` is intentionally the agent-centric smart view when a
+	// project is active — the legacy world-centric list is kept as
+	// `spwn world ls`. The smart command's RunE already falls back
+	// to the global view when no spwn.yaml is discovered, so we can
+	// just point the top-level alias at it.
 	rootCmd.AddCommand(world.UpCmd)
-	rootCmd.AddCommand(world.LsCmd)
+	rootCmd.AddCommand(smartLsCmd())
 	rootCmd.AddCommand(world.DownCmd)
 
 	// Command groups - entities
@@ -99,6 +105,17 @@ func Execute() error {
 // GetRootCmd returns the root command for documentation generation.
 func GetRootCmd() *cobra.Command {
 	return rootCmd
+}
+
+// smartLsCmd wraps agent.LsCmd as a top-level `spwn ls` shortcut.
+// We wrap rather than re-register the same *cobra.Command instance
+// because cobra only allows a command to have a single parent.
+func smartLsCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "ls",
+		Short: "Agent-centric status (running / stopped / orphan)",
+		RunE:  agent.LsCmd.RunE,
+	}
 }
 
 // printHelpCmd prints a command entry indented one level under its section

@@ -1,8 +1,0 @@
-# Paperclip Factory - single-agent automation workshop.
-#
-# Shipped by the spwn examples gallery. Edit freely; your changes stay.
-
-tools:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"

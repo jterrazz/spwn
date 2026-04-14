@@ -1,0 +1,13 @@
+version: 2
+name: matrix
+
+worlds:
+  matrix:
+    agents:
+      - neo
+    workspaces:
+      - .
+    tools:
+      - "@spwn/unix"
+      - "@spwn/git"
+      - "@spwn/node"

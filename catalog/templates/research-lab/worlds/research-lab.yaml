@@ -1,7 +1,0 @@
-# Research Lab - patient, hypothesis-driven agent with a lab notebook.
-
-tools:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/python"
-  - "@spwn/node"

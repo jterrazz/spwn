@@ -327,7 +327,53 @@ func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, vi)
 }
 
+// declaredWorldItem is the project-aware view of one world entry.
+// Returned by handleListWorlds when a spwn project is discoverable.
+// Falls back to the raw runtime world list otherwise.
+type declaredWorldItem struct {
+	Name       string         `json:"name"`
+	Agents     []string       `json:"agents"`
+	Workspaces []string       `json:"workspaces"`
+	Physics    map[string]any `json:"physics,omitempty"`
+	Tools      []string       `json:"tools,omitempty"`
+	// Status is "running" when any live world carries this config
+	// name, "stopped" otherwise. Declared-but-undeployed worlds are
+	// "stopped", not absent.
+	Status string `json:"status"`
+}
+
 func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
+	// Project-aware mode: when a spwn.yaml is present, return the
+	// declared worlds enriched with live status. Falls back to the
+	// runtime world list if we can't read the manifest.
+	if pm, ok := loadProjectManifest(); ok {
+		running := map[string]bool{}
+		if liveWorlds, err := s.state.List(); err == nil {
+			for _, lw := range liveWorlds {
+				if lw.Config != "" {
+					running[lw.Config] = true
+				}
+			}
+		}
+		out := make([]declaredWorldItem, 0, len(pm.Worlds))
+		for name, def := range pm.Worlds {
+			status := "stopped"
+			if running[name] {
+				status = "running"
+			}
+			out = append(out, declaredWorldItem{
+				Name:       name,
+				Agents:     def.Agents,
+				Workspaces: def.Workspaces,
+				Physics:    def.Physics,
+				Tools:      def.Tools,
+				Status:     status,
+			})
+		}
+		jsonOK(w, out)
+		return
+	}
+
 	worlds, err := s.state.List()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
@@ -344,6 +390,15 @@ type agentListItem struct {
 	Team   string              `json:"team,omitempty"`
 	Role   string              `json:"role"`
 	Layers map[string][]string `json:"layers"`
+	// World is the name of the world in spwn.yaml that deploys this
+	// agent, or empty when the agent isn't referenced by any world
+	// (orphan) or no project is active.
+	World string `json:"world,omitempty"`
+	// Status is the agent's live state:
+	//   "running"  — its world is currently up
+	//   "stopped"  — referenced by a world in spwn.yaml that's down
+	//   "orphan"   — on-disk agent dir not referenced by any world
+	Status string `json:"status"`
 }
 
 func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
@@ -351,6 +406,25 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
+	}
+
+	// Project context: map each agent to its declared world, if any.
+	agentWorld := map[string]string{} // agent → world name in spwn.yaml
+	runningWorlds := map[string]bool{}
+	if pm, ok := loadProjectManifest(); ok {
+		for wname, world := range pm.Worlds {
+			for _, a := range world.Agents {
+				agentWorld[a] = wname
+			}
+		}
+	}
+	// Index running worlds by config name.
+	if liveWorlds, lerr := s.state.List(); lerr == nil {
+		for _, lw := range liveWorlds {
+			if lw.Config != "" {
+				runningWorlds[lw.Config] = true
+			}
+		}
 	}
 
 	result := make([]agentListItem, 0, len(agents))
@@ -363,16 +437,63 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 				role = p.Role
 			}
 		}
+		wname := agentWorld[a.Name]
+		status := "orphan"
+		if wname != "" {
+			if runningWorlds[wname] {
+				status = "running"
+			} else {
+				status = "stopped"
+			}
+		}
 		result = append(result, agentListItem{
 			Name:   a.Name,
 			Path:   a.Path,
 			Team:   a.Team,
 			Role:   role,
 			Layers: a.Layers,
+			World:  wname,
+			Status: status,
 		})
 	}
 
 	jsonOK(w, result)
+}
+
+// projectManifest is the minimal view of spwn.yaml the web API needs
+// to annotate agents with their world and compute world status. It's
+// intentionally a local struct so this package doesn't import the
+// full packages/manifest parser (would introduce a module dep).
+type projectManifest struct {
+	Version int                        `yaml:"version"`
+	Name    string                     `yaml:"name"`
+	Worlds  map[string]projectWorldDef `yaml:"worlds"`
+}
+
+type projectWorldDef struct {
+	Agents     []string       `yaml:"agents"`
+	Workspaces []string       `yaml:"workspaces"`
+	Physics    map[string]any `yaml:"physics,omitempty"`
+	Tools      []string       `yaml:"tools,omitempty"`
+}
+
+// loadProjectManifest reads <projectRoot>/spwn.yaml when a project
+// root is active. Returns ok=false on any failure (no project, file
+// missing, parse error) so callers can fall back silently.
+func loadProjectManifest() (projectManifest, bool) {
+	root := foundation.ProjectRoot()
+	if root == "" {
+		return projectManifest{}, false
+	}
+	data, err := os.ReadFile(filepath.Join(root, "spwn.yaml"))
+	if err != nil {
+		return projectManifest{}, false
+	}
+	var pm projectManifest
+	if err := yaml.Unmarshal(data, &pm); err != nil {
+		return projectManifest{}, false
+	}
+	return pm, true
 }
 
 // agentYAML represents the agent.yaml manifest for an agent.
