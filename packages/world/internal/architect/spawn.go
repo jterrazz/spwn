@@ -2,6 +2,7 @@ package architect
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -149,43 +150,54 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		explicitImage = true
 	}
 
-	if !explicitImage {
-		opts.progress("image_building", image)
+	// Registry + resolved plugin list are computed unconditionally.
+	// Even when the image is prebuilt (tests injecting SPWN_BASE_IMAGE),
+	// plugin config still needs to be merged into the container's
+	// runtime settings file after the container boots.
+	reg := ib.NewRegistry()
+	if err := tools.RegisterDefaults(reg); err != nil {
+		return nil, fmt.Errorf("register tools: %w", err)
+	}
+	if err := runtimes.RegisterDefaults(reg); err != nil {
+		return nil, fmt.Errorf("register runtimes: %w", err)
+	}
+	if err := plugins.RegisterDefaults(reg); err != nil {
+		return nil, fmt.Errorf("register plugins: %w", err)
+	}
 
-		// Build image using the image package with manifest tools
-		reg := ib.NewRegistry()
-		if err := tools.RegisterDefaults(reg); err != nil {
-			return nil, fmt.Errorf("register tools: %w", err)
-		}
-		if err := runtimes.RegisterDefaults(reg); err != nil {
-			return nil, fmt.Errorf("register runtimes: %w", err)
-		}
-		if err := plugins.RegisterDefaults(reg); err != nil {
-			return nil, fmt.Errorf("register plugins: %w", err)
-		}
-		builder := ib.New(reg, a.backend)
+	// Always include runtime essentials, then add user-specified tools
+	// and plugins on top. The registry deduplicates and resolves
+	// dependencies; plugins share the tool resolution pipeline.
+	required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/cli"}
+	toolList := append(required, opts.Manifest.Tools...)
+	toolList = append(toolList, opts.Manifest.Plugins...)
 
-		// Always include runtime essentials, then add user-specified tools
-		// and plugins on top. The registry deduplicates and resolves
-		// dependencies; plugins share the tool resolution pipeline.
-		required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/cli"}
-		tools := append(required, opts.Manifest.Tools...)
-		tools = append(tools, opts.Manifest.Plugins...)
-
-		// Deduplicate
+	// Deduplicate
+	{
 		seen := make(map[string]bool)
-		deduped := make([]string, 0, len(tools))
-		for _, t := range tools {
+		deduped := make([]string, 0, len(toolList))
+		for _, t := range toolList {
 			if !seen[t] {
 				seen[t] = true
 				deduped = append(deduped, t)
 			}
 		}
-		tools = deduped
+		toolList = deduped
+	}
+
+	resolvedTools, resolveErr := reg.Resolve(toolList)
+	if resolveErr != nil {
+		return nil, fmt.Errorf("resolve tools: %w", resolveErr)
+	}
+
+	if !explicitImage {
+		opts.progress("image_building", image)
+
+		builder := ib.New(reg, a.backend)
 
 		_, err := builder.Build(ctx, ib.BuildRequest{
 			BaseDockerfile: ibbase.WorldDockerfile,
-			Tools:          tools,
+			Tools:          toolList,
 			Tag:            image,
 			Version:        base.WorldImageVersion,
 			SkipVerify:     true, // probeTools handles verification below
@@ -334,6 +346,15 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("start container: %w", err)
 	}
 	opts.progress("container_created", id)
+
+	// Merge plugin runtime-config into the container's runtime settings
+	// file. Currently only the claude-code backend has a known target
+	// path; additional runtimes can grow their own branch as needed.
+	if err := injectPluginRuntimeConfig(ctx, a.backend, containerID, resolvedTools); err != nil {
+		a.backend.Stop(ctx, containerID)
+		a.backend.Remove(ctx, containerID)
+		return nil, fmt.Errorf("inject plugin runtime config: %w", err)
+	}
 
 	// Probe tools
 	verifiedTools, err := a.probeTools(ctx, containerID, opts.Manifest.Tools)
@@ -598,6 +619,57 @@ Follow the voice, style, and purpose defined there. You are NOT a generic assist
 		"`/world/inbox/<their-name>/`",
 		fmt.Sprintf("`/world/inbox/%s/`", agentName),
 		"`/world/skills/collaboration.md`")
+}
+
+// injectPluginRuntimeConfig computes the merged plugin config for the
+// world's runtime backend and writes it into the container's runtime
+// settings file.
+//
+// Current scope: only @spwn/claude-code has a known settings path
+// (/home/spwn/.claude/settings.json). The container's baseline
+// settings file — written by the claude_code tool's UserCommands at
+// image build time — is read back, shallow-merged with every plugin's
+// Config(runtime) output (last write wins), and rewritten in place.
+//
+// When no plugin targets the runtime, this is a no-op: the baseline
+// settings.json stays untouched.
+//
+// Additional runtimes can grow their own branch here as plugins for
+// them materialize.
+func injectPluginRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []ib.Tool) error {
+	// The plugin-facing runtime identifier is the same as the image
+	// builder's runtime tool name. Spawn always installs
+	// @spwn/claude-code, so hard-code it here until a second runtime
+	// lands (codex is built but has no plugin target yet).
+	const runtimeName = "@spwn/claude-code"
+	const settingsPath = "/home/spwn/.claude/settings.json"
+
+	configs := ib.CollectPluginConfigs(resolved, runtimeName)
+	if len(configs) == 0 {
+		return nil
+	}
+
+	// Read the container's baseline settings.json. Missing file is
+	// fine — an empty base layer merges cleanly.
+	baseStdout, _ := be.ExecOutput(ctx, containerID, []string{"sh", "-c", "cat " + settingsPath + " 2>/dev/null || true"})
+	base := []byte(strings.TrimSpace(baseStdout))
+
+	merged, err := ib.MergeRuntimeConfig(base, configs...)
+	if err != nil {
+		return fmt.Errorf("merge config: %w", err)
+	}
+
+	// Encode the merged JSON as base64 and pipe it through the shell
+	// so we don't have to worry about escaping JSON inside sh -c.
+	encoded := base64.StdEncoding.EncodeToString(merged)
+	script := fmt.Sprintf(
+		"mkdir -p %s && printf '%%s' '%s' | base64 -d > %s",
+		filepath.Dir(settingsPath), encoded, settingsPath,
+	)
+	if _, err := be.ExecOutput(ctx, containerID, []string{"sh", "-c", script}); err != nil {
+		return fmt.Errorf("write merged settings: %w", err)
+	}
+	return nil
 }
 
 // rosterColony adapts an agent record list into the physics package's
