@@ -25,8 +25,15 @@ Thumbs.db
 
 # Local agent state
 .claude/
+.spwn/
 
 # Archives (agent exports etc.)
 *.tar.gz
 *.tar
 *.bak
+
+# Test artifacts scaffolded by e2e runs
+tests/spwn/
+tests/spwn.yaml
+tests/playwright-report/
+tests/test-results/
