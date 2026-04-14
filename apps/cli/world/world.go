@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -20,6 +21,7 @@ var (
 	spawnWorkspaces  []string
 	spawnWorld       string
 	spawnInteractive bool
+	spawnBuild       bool
 )
 
 func init() {
@@ -44,6 +46,7 @@ func registerSpawnFlags(c *cobra.Command) {
 	c.Flags().StringArrayVarP(&spawnWorkspaces, "workspace", "w", nil, `Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 	c.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	c.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Drop into the agent's session after spawn")
+	c.Flags().BoolVar(&spawnBuild, "build", false, "Run spwn build first, then spawn from the artifact")
 }
 
 func worldHelp(cmd *cobra.Command, args []string) {
@@ -134,11 +137,18 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
 	s.Blank()
-	s.Start("Loading config...")
 
 	// If we're inside a spwn project and the caller didn't override
 	// world or agents, adopt the defaults declared in spwn.yaml.
 	applyManifestDefaults(cmd)
+
+	if spawnBuild {
+		if err := runPreSpawnBuild(cmd); err != nil {
+			return err
+		}
+	}
+
+	s.Start("Loading config...")
 
 	configName := "default"
 	if spawnConfig != "" {
@@ -411,4 +421,50 @@ func applyManifestDefaults(cmd *cobra.Command) {
 	if !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 && p.Manifest.Workspace != "" {
 		spawnWorkspaces = append(spawnWorkspaces, p.Manifest.Workspace)
 	}
+}
+
+// runPreSpawnBuild runs a project build before spawning. When --build
+// is set, `spwn up` becomes a thin wrapper over `spwn build` followed
+// by a container create — matching the docker build + docker run
+// split. Errors abort the spawn before any container is created.
+func runPreSpawnBuild(cmd *cobra.Command) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("resolve cwd: %w", err)
+	}
+	p, err := manifest.Find(cwd)
+	if err != nil {
+		return fmt.Errorf("load manifest: %w", err)
+	}
+	if p == nil {
+		return fmt.Errorf("--build requires a spwn.yaml in the current directory or a parent.\nRun `spwn init` first")
+	}
+	issues := manifest.Validate(p)
+	if manifest.HasErrors(issues) {
+		return fmt.Errorf("project has validation errors — run `spwn check` to see them")
+	}
+	result, err := manifest.Build(p)
+	if err != nil {
+		return fmt.Errorf("build failed: %w", err)
+	}
+	out := cmd.OutOrStdout()
+	fmt.Fprintf(out, "  %s  Build ready — %d file(s), hash %s\n",
+		ui.Green("✓"), result.FileCount, ui.Faint(abbrevHash(result.Dir)))
+	return nil
+}
+
+func abbrevHash(dir string) string {
+	meta, err := manifest.LoadBuildMetadata(&manifest.Project{Root: dirOfBuildDir(dir)})
+	if err != nil || meta == nil {
+		return ""
+	}
+	if len(meta.ContentHash) > 12 {
+		return meta.ContentHash[:12]
+	}
+	return meta.ContentHash
+}
+
+func dirOfBuildDir(buildDir string) string {
+	// buildDir is <root>/.spwn/build; return <root>.
+	return filepath.Dir(filepath.Dir(buildDir))
 }

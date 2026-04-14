@@ -20,6 +20,7 @@
 package manifest
 
 import (
+	"spwn.sh/packages/manifest/internal/build"
 	"spwn.sh/packages/manifest/internal/discovery"
 	intmanifest "spwn.sh/packages/manifest/internal/manifest"
 	"spwn.sh/packages/manifest/internal/scaffold"
@@ -165,6 +166,55 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 		BuiltinTools:      o.BuiltinTools,
 		SupportedRuntimes: o.SupportedRuntimes,
 	})
+}
+
+// BuildResult is the outcome of a successful Build.
+type BuildResult = build.Result
+
+// BuildMetadata is the shape of .spwn/build/build.json.
+type BuildMetadata = build.Metadata
+
+// BuildOpts configures Build.
+type BuildOpts struct {
+	// ImageDigest pins the Docker image produced for this build.
+	// Empty means "no image was built" — the artifact is still
+	// valid, it just records no image reference.
+	ImageDigest string
+}
+
+// Build flattens the project into a reproducible artifact at
+// <projectRoot>/.spwn/build/. Every file the runtime will read is
+// copied in. The resulting directory is self-contained and safe to
+// tar and ship.
+//
+// Build does NOT validate. Callers should run Validate first and
+// abort on errors — Build will happily flatten a broken project,
+// which is useful when the user wants to inspect the artifact for
+// debugging but not when they want a spawnable result.
+func Build(p *Project, opts ...BuildOpts) (*BuildResult, error) {
+	if p == nil {
+		return nil, nil
+	}
+	var o BuildOpts
+	if len(opts) > 0 {
+		o = opts[0]
+	}
+	return build.Build(build.Opts{
+		Root:        p.Root,
+		Manifest:    p.Manifest,
+		AgentPaths:  agentPaths(p.Agents),
+		WorldPath:   p.World.Path,
+		ImageDigest: o.ImageDigest,
+	})
+}
+
+// LoadBuildMetadata reads an existing build.json from a project's
+// .spwn/build/ directory. Returns (nil, nil) when no build is present.
+func LoadBuildMetadata(p *Project) (*BuildMetadata, error) {
+	if p == nil {
+		return nil, nil
+	}
+	return build.LoadMetadata(p.Root + "/.spwn/build")
 }
 
 // HasErrors returns true if any issue is LevelError.
