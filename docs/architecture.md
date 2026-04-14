@@ -1,65 +1,78 @@
 # Architecture
 
-Multi-module Go monorepo with Ports and Adapters architecture. 8 port interfaces, each with swappable adapters.
-
-## Ports
-
-| Port | What it abstracts | Default adapter |
-|------|-------------------|-----------------|
-| Runtime | How agents think | Claude Code (ACP) |
-| Provider | Which LLM | Anthropic |
-| Backend | Where worlds run | Docker |
-| Channel | External communication | CLI |
-| Memory | How agents persist | Filesystem (markdown) |
-| Store | How state is tracked | JSON file |
-| Tool | What agents can do | Built-in + MCP |
-| Skill | Reusable capabilities | Local files |
-
-## Runtime adapters
-
-Spwn treats agent runtimes as swappable adapters. Each runtime is a thin Go
-interface (`packages/world/internal/runtime.Runtime`) that knows how to build
-a CLI command for its own agent binary. Adding a new runtime is a ~50 LOC
-Go file plus an install recipe in the imagebuilder catalog.
-
-| Runtime | Base Image | Status |
-|---------|-----------|--------|
-| Claude Code | node:20 | Available |
-| Codex | node:20 | Planned |
-| Aider | python:3.12-slim | Planned |
-| OpenCode | debian:bookworm-slim | Planned |
-| Gemini | node:20 | Planned |
+Multi-module Go monorepo. Two apps, a handful of domain packages, one web UI.
 
 ## Module map
 
 ```
 spwn/
-├── packages/                   Domain libraries (Go modules)
-│   ├── world/                    World lifecycle (the core)
-│   ├── agent/                    Mind lifecycle, composition, evolution
-│   ├── imagebuilder/             Composable Docker images, tool catalog
-│   ├── messenger/                Inter-agent messaging
-│   ├── migration/                ~/.spwn schema migrations
-│   └── foundation/               Primitives (paths, IDs, constants, auth)
+├── packages/                       Domain libraries (Go modules)
+│   ├── world/                        World lifecycle (the core)
+│   ├── agent/                        Mind lifecycle, composition, evolution
+│   ├── manifest/                     Project manifest: parse, validate, build
+│   ├── imagebuilder/                 Composable Docker images, tool catalog
+│   ├── messenger/                    Filesystem inbox / outbox
+│   ├── migration/                    Schema migrations across releases
+│   └── foundation/                   Primitives (paths, IDs, auth, activity)
 ├── apps/
-│   ├── cli/                      The spwn binary
-│   └── web/                      Next.js + Tauri web/desktop UI
-├── examples/                   Bundled example gallery
-└── fixtures/                   Test fixtures (mock-claude, testdata)
+│   ├── cli/                          The spwn binary
+│   └── web/                          Next.js + Tauri web/desktop UI
+├── examples/                       Bundled example gallery
+└── fixtures/                       Test fixtures (mock-claude, testdata)
 ```
+
+Each package exposes a small public API in its root `.go` file. Implementation details live under `internal/`. The CLI is deliberately thin: parse flags, call a domain API, format output.
+
+## Core abstractions
+
+| Abstraction | Where          | Purpose                                                  |
+|-------------|----------------|----------------------------------------------------------|
+| Runtime     | `packages/world/internal/runtime` | How an agent runs (builds the CLI command to exec inside a container) |
+| Backend     | `packages/world/internal/backend` | Where worlds run (container lifecycle, image management) |
+| Mind        | `packages/agent`                  | How an agent persists and evolves across runs            |
+| Manifest    | `packages/manifest`               | Project definition on disk + artifact pipeline           |
+
+Each one is a Go interface or type whose implementations can be swapped. Today there is one of each. Adding a new runtime adapter is ~50 lines of Go plus an install recipe in the imagebuilder catalog.
+
+## Runtime adapters
+
+| Runtime     | Status     |
+|-------------|------------|
+| Claude Code | 🟢 working |
+| Codex       | 🔴 planned |
+| Aider       | 🔴 planned |
+| Gemini CLI  | 🔴 planned |
+| OpenCode    | 🔴 planned |
+
+Only Claude Code can actually be spawned today. The other names appear in the tool catalog (imagebuilder can install their binaries into a container) but no runtime adapter wires them into `spwn up` yet.
+
+## State and data flow
+
+**Source of truth for live worlds**: container labels. `sh.spwn.*` labels are set at container creation time and read back by `packages/world/internal/state`. There is no `state.json` that tracks worlds anymore - the labels are the state.
+
+**Source of truth for project config**: `spwn.yaml` + `./spwn/`. `packages/manifest` parses these, validates them via a rule engine (15 rules, see `internal/validate/`), and optionally flattens them into a reproducible artifact at `./.spwn/build/`.
+
+**Source of truth for user identity**: `~/.spwn/`. Credentials, daemon state, activity log. Never project-scoped.
+
+## Key invariants
+
+- **Per-repository**. Agents, worlds, tools, and skills live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
+- **Declared tools only**. An agent can only reach for tools its `agent.yaml` declares. Tools not in the world's image are physically absent.
+- **Labels are truth**. Any world info the CLI displays comes from reading Docker labels, not an on-disk state file.
+- **Build is deterministic**. `spwn build` writes the same content hash to `.spwn/build/build.json` when the source tree is unchanged - covered by `TestBuild_repeatedCallsProduceSameHash`.
 
 ## Roadmap
 
-- ✅ World creation and isolation
-- ✅ Persistent agent identity and memory
-- ✅ Agent evolution (dream, sleep, forking)
-- ✅ Multi-agent coordination and messaging
-- ✅ Snapshots and rollback
-- ✅ CLI and desktop app
-- ✅ Pluggable runtime adapters (Claude Code, Pi, Aider)
-- ✅ Activity log and audit trail
-- ✅ Composable tool catalog with imagebuilder
-- ⚪ Marketplace - share and import agents, tool packs, skills, profiles
-- ⚪ Cloud-hosted worlds
-- ⚪ Multi-org federation
-- ⚪ Mobile app
+- 🟢 Per-repository projects (`spwn init` / `check` / `build`)
+- 🟢 World creation and isolation
+- 🟢 Persistent agent identity and memory
+- 🟢 Composable tool catalog (imagebuilder)
+- 🟢 Reproducible build artifacts
+- 🟡 Agent evolution (dream, sleep, fork)
+- 🟡 Multi-agent coordination via filesystem inboxes
+- 🟡 Snapshots and rollback
+- 🟡 Desktop app (Tauri) + web UI
+- 🔴 Registry for sharing agents, tool packs, skills, profiles
+- 🔴 Additional runtime adapters (Codex, Aider, OpenCode, Gemini CLI)
+- 🔴 Additional backends (Firecracker, gVisor, K3s, Fly.io)
+- 🔴 Cloud-hosted worlds

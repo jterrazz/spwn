@@ -348,13 +348,12 @@ Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - 
 | Topic | Link |
 |---|---|
 | **Principles** - why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
-| **Agent composition** - tools, skills, profiles, memory | [`docs/composition.md`](docs/composition.md) |
-| **Worlds** - spawning, isolation, lifecycle | [`docs/worlds.md`](docs/worlds.md) |
-| **Tool catalog** - SDKs, runtimes, platform tools | [`docs/tool-catalog.md`](docs/tool-catalog.md) |
-| **Architecture** - ports & adapters, module map | [`docs/architecture.md`](docs/architecture.md) |
-| **Comparison** - vs LangChain, E2B, MCP, Docker | [`docs/comparison.md`](docs/comparison.md) |
+| **Architecture** - module map, core abstractions, invariants | [`docs/architecture.md`](docs/architecture.md) |
+| **Worlds** - spawning, isolation, tools-as-structure | [`docs/worlds.md`](docs/worlds.md) |
+| **Tool catalog** - how tool packs work, how to add one | [`docs/tool-catalog.md`](docs/tool-catalog.md) |
 | **CLI reference** - every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
 | **Releasing** - release runbook | [`docs/releasing.md`](docs/releasing.md) |
+| **Update system** - CLI + Tauri auto-update, channels | [`docs/update-system.md`](docs/update-system.md) |
 | **Contributing** - setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 <br/>

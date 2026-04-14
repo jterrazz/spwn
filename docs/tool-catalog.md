@@ -4,16 +4,18 @@ Spwn worlds are assembled from composable tools. Each tool is a self-contained p
 
 Tools are stackable. `@spwn/qmd` depends on `@spwn/node` - list `@spwn/qmd` and Node.js appears automatically.
 
+Status legend: 🟢 working · 🟡 installed but rough · 🔴 planned.
+
 ## SDKs
 
 Language runtimes and core system utilities.
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@spwn/unix` | bash, coreutils, grep, sed, awk, curl, jq | You need standard shell tools | Available |
-| `@spwn/node` | Node.js 20, npm, npx | Your project uses JavaScript/TypeScript | Available |
-| `@spwn/python` | Python 3, pip | Your project uses Python | Available |
-| `@spwn/build` | make, gcc, g++ | You need to compile C/C++ | Available |
+| `@spwn/unix` | bash, coreutils, grep, sed, awk, curl, jq | You need standard shell tools | 🟢 |
+| `@spwn/node` | Node.js 20, npm, npx | Your project uses JavaScript/TypeScript | 🟢 |
+| `@spwn/python` | Python 3, pip | Your project uses Python | 🟢 |
+| `@spwn/build` | make, gcc, g++ | You need to compile C/C++ | 🟢 |
 
 ## Runtimes
 
@@ -21,9 +23,11 @@ The thinking engine that drives the agent. Pick one per agent.
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@spwn/claude-code` | Claude Code CLI + pre-configured auth | You want Anthropic's agent runtime (default) | Available |
-| `@spwn/codex` | Codex CLI + pre-configured workspace trust | You want OpenAI models (GPT-5, o3) | Available |
-| `@spwn/aider` | Aider CLI | You want an open-source code-focused runtime | Planned |
+| `@spwn/claude-code` | Claude Code CLI + pre-configured auth | You want Anthropic's agent runtime (default) | 🟢 |
+| `@spwn/codex` | Codex CLI installed in the image | You want OpenAI-style models | 🟡 binary available, no runtime adapter wired |
+| `@spwn/aider` | Aider CLI | You want an open-source code-focused runtime | 🔴 planned |
+
+Only `@spwn/claude-code` is wired as a runtime adapter in `packages/world/internal/runtime`. `@spwn/codex` installs the binary and `claude-code` can still shell out to it, but `agent.yaml`'s `runtime:` field only accepts `claude-code` today.
 
 ## Tools
 
@@ -31,9 +35,9 @@ Extra capabilities you add to a world. Each ships skills that teach the agent ho
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@spwn/git` | Git version control | You need source control (almost always) | Available |
-| `@spwn/docker-cli` | Docker CLI (DooD) | The agent needs to manage containers | Available |
-| `@spwn/qmd` | [QMD](https://github.com/tobi/qmd) on-device search | The agent needs to search docs, notes, or knowledge bases locally | Available |
+| `@spwn/git` | Git version control | You need source control (almost always) | 🟢 |
+| `@spwn/docker-cli` | Docker CLI (DooD) | The agent needs to manage containers | 🟢 |
+| `@spwn/qmd` | [QMD](https://github.com/tobi/qmd) on-device search | The agent needs to search docs, notes, or knowledge bases locally | 🟢 |
 
 ## Platform
 
@@ -41,8 +45,8 @@ Spwn's own infrastructure. Usually included by default.
 
 | Tool | What it provides | Use when | Status |
 |------|-----------------|----------|--------|
-| `@spwn/cli` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | Available |
-| `@spwn/architect` | Full orchestration daemon (includes @spwn/cli, @spwn/claude-code, @spwn/docker-cli) | You're running the always-on Architect | Available |
+| `@spwn/cli` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | 🟢 |
+| `@spwn/architect` | Full orchestration daemon (includes @spwn/cli, @spwn/claude-code, @spwn/docker-cli) | You're running the always-on Architect | 🟡 architect mode is in dev |
 
 ## Adding your own tools
 
