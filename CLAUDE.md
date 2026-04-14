@@ -63,10 +63,18 @@ spwn agent fork neo neo-v2                     # Clone memory + composition
 spwn agent rm neo                              # Delete an agent
 spwn agent rm neo --tool @spwn/python          # Remove a block from an agent
 
+# Compose blocks
 spwn agent add neo --tool @spwn/python         # Add a tool block
 spwn agent add neo --skill paper-reading       # Add a skill block
 spwn agent add neo --profile researcher        # Apply a profile
 
+# Talk + messaging
+spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`
+spwn agent send  neo "do this" --from morpheus # Async message to an agent's inbox
+spwn agent inbox neo                           # Show neo's inbox
+spwn agent watch neo                           # Tail neo's inbox live
+
+# Evolution
 spwn agent dream neo                           # Analyze experience, promote playbooks
 spwn agent sleep neo                           # Consolidate memory, prune stale patterns
 
@@ -76,11 +84,7 @@ spwn world ls                                  # Full form of `spwn ls`
 spwn world inspect <id>                        # Inspect a running world
 spwn world down <id>                           # Destroy (agent survives)
 spwn world enter <id>                          # Interactive shell inside the world
-
-# ── Messaging (filesystem inbox) ─────────────────────────────────
-spwn agent send neo "do this" --from morpheus  # Async message to an agent's inbox
-spwn agent inbox neo                           # Show neo's inbox
-spwn agent watch neo                           # Tail neo's inbox live
+spwn world snap save|ls|restore|rm             # World snapshots
 
 # ── Tools / skills / profiles ────────────────────────────────────
 spwn tool    ls                                # Installed built-in packs

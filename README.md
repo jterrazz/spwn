@@ -267,14 +267,21 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🔴 spwn agent get @community/sci                Install an agent from a registry
 🔴 spwn agent publish neo                       Ship to registry (memory stripped)
 
+# Compose blocks
 🟢 spwn agent add neo --tool @spwn/python       Add a tool block
 🟡 spwn agent add neo --skill paper-reading     Add a skill block (must exist locally)
 🟡 spwn agent add neo --profile researcher      Apply a profile (must exist locally)
 🟢 spwn agent rm  neo --tool @spwn/python       Remove a block
 
+# Talk + messaging
+🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`
+🟢 spwn agent send  neo "do this" --from me     Async message to an agent's inbox
+🟢 spwn agent inbox neo                         Show neo's inbox
+🟡 spwn agent watch neo                         Tail neo's inbox live
+
+# Evolution
 🟡 spwn agent dream neo                         Analyze experience, promote playbooks
 🟡 spwn agent sleep neo                         Consolidate memory, prune stale patterns
-🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`
 
 # ── Worlds ───────────────────────────────────────────────────────
 🟢 spwn world up --agent neo                    Full form of `spwn up`
@@ -306,11 +313,6 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn profile edit researcher                 Open in $EDITOR
 🔴 spwn profile get @community/pragmatic-dev    Install a shared profile
 🔴 spwn profile publish researcher              Ship to registry
-
-# ── Messaging ────────────────────────────────────────────────────
-🟢 spwn agent send neo "do this" --from me      Async message to an agent's inbox
-🟢 spwn agent inbox neo                         Show neo's inbox
-🟡 spwn agent watch neo                         Tail neo's inbox live
 
 # ── System ───────────────────────────────────────────────────────
 🟡 spwn architect start                         Always-on orchestration daemon
