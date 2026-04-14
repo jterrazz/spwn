@@ -37,9 +37,8 @@ describe('CLI stress tests', () => {
         // Then - every run exits zero with no panic
         for (const result of results) {
             expect(result.exitCode).toBe(0);
-            const combined = result.stdout.text + result.stderr.text;
-            expect(combined).not.toContain('panic:');
-            expect(combined).not.toContain('goroutine ');
+            expect(result.stderr.text).not.toContain('panic:');
+            expect(result.stderr.text).not.toContain('goroutine ');
         }
     });
 
@@ -52,8 +51,8 @@ describe('CLI stress tests', () => {
 
         // Then - last command (ls) exits zero, and the chain mentions the agent
         expect(result.exitCode).toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('rapid');
+        // `agent ls` renders its table on stderr (ui.Table default writer).
+        result.stderr.toContain('rapid');
     });
 
     test('rapid sequential create/rm cycles do not corrupt state', async () => {
@@ -76,9 +75,8 @@ describe('CLI stress tests', () => {
         // User runs `world rm`. The legacy test predated that
         // Behaviour. Assert on the absence-of-crash signal instead.
         expect(result.exitCode).toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('panic:');
-        expect(combined).not.toContain('goroutine ');
+        expect(result.stderr.text).not.toContain('panic:');
+        expect(result.stderr.text).not.toContain('goroutine ');
         // Only the LAST command's output is captured by the chained
         // `exec([...])` adapter (each sub-command runs in its own
         // SpawnSync), so the deletion banners from the interior

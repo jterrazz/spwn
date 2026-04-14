@@ -25,9 +25,9 @@ describe('spwn check: tool ref classification', () => {
         // Then - check passes and neither the registry nor the
         // "does not exist" errors are raised.
         expect(result.exitCode, `output:\n${result.stdout.text}`).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
-        expect(out).not.toContain('remote registries are not yet supported');
-        expect(out).not.toContain('does not exist');
+        // `check` writes its report to stdout.
+        expect(result.stdout.text).not.toContain('remote registries are not yet supported');
+        expect(result.stdout.text).not.toContain('does not exist');
     });
 
     test('rejects @<owner>/<name> registry refs with explicit wording', async () => {
@@ -39,8 +39,8 @@ describe('spwn check: tool ref classification', () => {
 
         // Then - exits non-zero and the error quotes the offending ref
         expect(result.exitCode).not.toBe(0);
-        const out = result.stdout.text + result.stderr.text;
-        expect(out).toContain('remote registries are not yet supported');
-        expect(out).toContain('@jterrazz/foo');
+        // `check` writes its report (errors included) to stdout.
+        result.stdout.toContain('remote registries are not yet supported');
+        result.stdout.toContain('@jterrazz/foo');
     });
 });

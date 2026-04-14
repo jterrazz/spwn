@@ -1,0 +1,4 @@
+
+  ✗ Project                  world "nonexistent-world" is not defined in spwn.yaml
+    Check spwn.yaml or pick an existing world name
+

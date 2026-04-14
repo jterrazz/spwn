@@ -79,11 +79,10 @@ describe('graceful shutdown', () => {
 
         // The second `down` may exit non-zero (no worlds to stop), but
         // It must not crash or produce a stack trace.
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).not.toContain('FATAL');
-        expect(combined).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('FATAL');
+        expect(result.stderr.text).not.toContain('TypeError');
 
         // Container is still gone after the double-down
         expect(result.container('neo').exists).toBe(false);
@@ -96,13 +95,12 @@ describe('graceful shutdown', () => {
             .run();
 
         // Nothing to destroy — should not panic regardless of exit code
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).not.toContain('FATAL');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('FATAL');
         // And the explicit zero-count banner fires so users see that
         // Spwn recognised there was nothing to stop (vs. a silent exit).
-        expect(combined).toContain('No project worlds were running');
+        result.stderr.toContain('No project worlds were running');
     });
 
     test('down appends a journal entry to the destroyed agent', async () => {
@@ -131,8 +129,8 @@ describe('graceful shutdown', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/[Dd]ownloads.*spwn release/);
-        expect(combined).toMatch(/[Rr]unning worlds are stopped/);
+        // Cobra --help renders on stdout.
+        expect(result.stdout.text).toMatch(/[Dd]ownloads.*spwn release/);
+        expect(result.stdout.text).toMatch(/[Rr]unning worlds are stopped/);
     });
 });

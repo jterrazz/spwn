@@ -61,8 +61,7 @@ describe('agent lifecycle (CLI-only)', () => {
         expect(result.file('spwn/agents/trinity').exists).toBe(true);
 
         // And `agent ls` lists both names (rendered to stderr)
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('neo');
-        expect(combined).toContain('trinity');
+        result.stderr.toContain('neo');
+        result.stderr.toContain('trinity');
     });
 });

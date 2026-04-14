@@ -28,7 +28,7 @@ describe('spwn agent CRUD', () => {
         expect(result.file('spwn-home/agents/neo/journal').exists).toBe(true);
         // Smoke-check the status banner so regressions in the CLI UX
         // Are caught without pinning the full text.
-        expect(result.stderr.text + result.stdout.text).toContain('Created agent');
+        result.stderr.toContain('Created agent');
     });
 
     test('creating the same agent twice fails cleanly', async () => {
@@ -37,9 +37,8 @@ describe('spwn agent CRUD', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('agent "neo" already exists');
-        expect(combined).not.toContain('panic:');
+        result.stderr.toContain('agent "neo" already exists');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test('ls --json lists created agents structurally', async () => {
@@ -64,22 +63,21 @@ describe('spwn agent CRUD', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
-        expect(out).toMatch(/Agent:\s+neo/);
-        expect(out).toMatch(/core\/\s+profile\.md/);
-        expect(out).toMatch(/skills\/\s+\(empty\)/);
-        expect(out).toMatch(/knowledge\/\s+\(empty\)/);
-        expect(out).toMatch(/playbooks\/\s+\(empty\)/);
-        expect(out).toMatch(/journal\/\s+\(empty\)/);
+        // `agent show` renders the Mind tree on stderr in spwn's UX.
+        expect(result.stderr.text).toMatch(/Agent:\s+neo/);
+        expect(result.stderr.text).toMatch(/core\/\s+profile\.md/);
+        expect(result.stderr.text).toMatch(/skills\/\s+\(empty\)/);
+        expect(result.stderr.text).toMatch(/knowledge\/\s+\(empty\)/);
+        expect(result.stderr.text).toMatch(/playbooks\/\s+\(empty\)/);
+        expect(result.stderr.text).toMatch(/journal\/\s+\(empty\)/);
     });
 
     test('show on a missing agent errors cleanly', async () => {
         const result = await isolated('show missing').exec('agent show ghost').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('agent "ghost" not found');
-        expect(combined).not.toContain('panic:');
+        result.stderr.toContain('agent "ghost" not found');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test('rm deletes the agent from disk', async () => {
@@ -87,16 +85,15 @@ describe('spwn agent CRUD', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn-home/agents/temp').exists).toBe(false);
-        expect(result.stderr.text + result.stdout.text).toContain('Deleted agent');
+        result.stderr.toContain('Deleted agent');
     });
 
     test('rm on a missing agent errors cleanly', async () => {
         const result = await isolated('rm missing').exec('agent rm ghost').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('agent "ghost" not found');
-        expect(combined).not.toContain('panic:');
+        result.stderr.toContain('agent "ghost" not found');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test('rm then show reports the agent as not found', async () => {
@@ -105,8 +102,7 @@ describe('spwn agent CRUD', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('agent "temp" not found');
+        result.stderr.toContain('agent "temp" not found');
     });
 
     test('talk without a world fails with a helpful error', async () => {
@@ -115,7 +111,6 @@ describe('spwn agent CRUD', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('agent "neo" is not in any active world');
+        result.stderr.toContain('agent "neo" is not in any active world');
     });
 });

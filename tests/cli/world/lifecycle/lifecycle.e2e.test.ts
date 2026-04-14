@@ -83,9 +83,9 @@ describe('world lifecycle', () => {
             .exec(['up', 'world inspect $(ls .spwn/world-states 2>/dev/null | head -1)'])
             .run();
         expect(inspect.exitCode).toBe(0);
-        const combined = `${inspect.stdout.text}\n${inspect.stderr.text}`;
-        expect(combined).toMatch(/Status/);
-        expect(combined).toMatch(/Agent home/);
+        // `world inspect` uses a Stepper that renders to stderr.
+        expect(inspect.stderr.text).toMatch(/Status/);
+        expect(inspect.stderr.text).toMatch(/Agent home/);
     });
 
     test('down fully destroys the container (not just stopped)', async () => {

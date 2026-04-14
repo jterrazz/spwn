@@ -65,9 +65,8 @@ describe('spwn status', () => {
             // Multi-exec only exposes the last command's streams, so
             // Both the status banner and the world entry should be in
             // The final `status` output. Renderer writes to stderr.
-            const combined = `${result.stdout.text}\n${result.stderr.text}`;
-            expect(combined).toContain('spwn');
-            expect(combined).toContain('neo');
+            result.stderr.toContain('spwn');
+            result.stderr.toContain('neo');
         });
     });
 });

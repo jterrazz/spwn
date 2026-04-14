@@ -166,13 +166,11 @@ describe('world spawn', () => {
 
             expect(result.exitCode).not.toBe(0);
 
-            const combined = `${result.stdout.text}\n${result.stderr.text}`;
-            expect(combined).not.toContain('panic');
-            expect(combined).not.toContain('goroutine');
+            expect(result.stderr.text).not.toContain('panic');
+            expect(result.stderr.text).not.toContain('goroutine');
             // Error message names the missing world and points users back
             // At spwn.yaml — this is the hint contract we lock down.
-            expect(combined).toContain('nonexistent-world');
-            expect(combined).toContain('spwn.yaml');
+            await result.stderr.toMatch('spawn-unknown-world.txt');
             expect(result.container('neo').exists).toBe(false);
             expect(result.container('nonexistent-world').exists).toBe(false);
         });
@@ -185,13 +183,11 @@ describe('world spawn', () => {
 
             expect(result.exitCode).not.toBe(0);
 
-            const combined = `${result.stdout.text}\n${result.stderr.text}`;
-            expect(combined).not.toContain('panic');
-            expect(combined).not.toContain('goroutine');
-            expect(combined).toContain('ghost');
+            expect(result.stderr.text).not.toContain('panic');
+            expect(result.stderr.text).not.toContain('goroutine');
             // Hint at `spwn agent new <name>` so users can fix it.
             // (Exact wording from apps/cli/world/world.go:456.)
-            expect(combined).toContain('spwn agent new ghost');
+            await result.stderr.toMatch('spawn-missing-agent.txt');
             expect(result.container('ghost').exists).toBe(false);
         });
 

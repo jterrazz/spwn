@@ -69,11 +69,11 @@ describe('world snap', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('save');
-        expect(combined).toContain('ls');
-        expect(combined).toContain('restore');
-        expect(combined).toContain('rm');
+        // Cobra --help renders on stdout.
+        result.stdout.toContain('save');
+        result.stdout.toContain('ls');
+        result.stdout.toContain('restore');
+        result.stdout.toContain('rm');
     });
 
     test('`spwn world snap save` + `snap ls` + `snap rm` round-trip', async () => {
@@ -102,9 +102,9 @@ describe('world snap', () => {
             .run();
 
         expect(save.exitCode).toBe(0);
-        const saveCombined = `${save.stdout.text}\n${save.stderr.text}`;
-        expect(saveCombined).toMatch(/Saved snapshot|Snapshot/i);
-        expect(saveCombined).toContain('round-trip');
+        // Save banner + snapshot name land on stderr.
+        expect(save.stderr.text).toMatch(/Saved snapshot|Snapshot/i);
+        save.stderr.toContain('round-trip');
 
         // List snapshots — our tag must appear.
         await using list = await spec('snap cycle ls')
@@ -113,8 +113,8 @@ describe('world snap', () => {
             .run();
 
         expect(list.exitCode).toBe(0);
-        const listCombined = `${list.stdout.text}\n${list.stderr.text}`;
-        expect(listCombined).toContain('round-trip');
+        // `snap ls` renders a table on stderr (ui.Table default writer).
+        list.stderr.toContain('round-trip');
 
         // Remove the snapshot.
         await using rm = await spec('snap cycle rm')
@@ -131,7 +131,8 @@ describe('world snap', () => {
             .run();
 
         expect(after.exitCode).toBe(0);
-        const afterCombined = `${after.stdout.text}\n${after.stderr.text}`;
-        expect(afterCombined).not.toContain('round-trip');
+        // After rm the snapshot must be absent from both streams.
+        expect(after.stderr.text).not.toContain('round-trip');
+        expect(after.stdout.text).not.toContain('round-trip');
     });
 });

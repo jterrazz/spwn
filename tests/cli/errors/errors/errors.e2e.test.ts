@@ -61,9 +61,8 @@ describe('error handling', () => {
          */
         const result = await isolated('logs missing').exec('world logs w-nonexistent-00000').run();
 
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('panic:');
-        expect(combined).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('panic:');
+        expect(result.stderr.text).not.toContain('goroutine');
     });
 
     test('agent talk to non-existent agent', async () => {
@@ -84,10 +83,13 @@ describe('error handling', () => {
         const result = await isolated('error no usage').exec('down w-nonexistent-00000').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('Available Commands:');
-        expect(combined).not.toContain('Global Flags:');
-        expect(combined).not.toContain('Use "spwn');
+        // Hygiene: errors must not leak help text into either stream.
+        expect(result.stderr.text).not.toContain('Available Commands:');
+        expect(result.stderr.text).not.toContain('Global Flags:');
+        expect(result.stderr.text).not.toContain('Use "spwn');
+        expect(result.stdout.text).not.toContain('Available Commands:');
+        expect(result.stdout.text).not.toContain('Global Flags:');
+        expect(result.stdout.text).not.toContain('Use "spwn');
     });
 
     test('error messages follow the structured ✗ convention', async () => {

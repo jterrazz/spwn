@@ -24,7 +24,7 @@ describe('spwn agent dream', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toContain('Dreaming for agent "neo"');
         expect(out).toContain('no journal entries');
     });
@@ -38,7 +38,7 @@ describe('spwn agent dream', () => {
         // Dream treats a missing journal the same as a missing agent —
         // It is a no-op, not an error. This mirrors the Go semantics.
         expect(result.exitCode).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toContain('Dreaming for agent "ghost"');
         expect(out).toContain('no journal entries');
     });
@@ -57,7 +57,7 @@ describe('spwn agent dream', () => {
         // The reflexion file must carry real content, not just an
         // Empty stub — dream should have written something useful.
         expect(reflexion.content.length).toBeGreaterThan(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toMatch(/Entries analyzed\s+2/);
         expect(out).toMatch(/Success rate\s+\d+%/);
         expect(out).toMatch(/Completed\s+\d+/);
@@ -75,7 +75,7 @@ describe('spwn agent dream', () => {
         expect(result.file('spwn/agents/neo/playbooks/auto-reflexion.md').exists).toBe(true);
         // Second dream still exits cleanly and the banner is present —
         // The deep content check is covered by the Go unit tests.
-        expect(result.stdout.text + result.stderr.text).toContain('Entries analyzed');
+        expect(result.stderr.text).toContain('Entries analyzed');
     });
 });
 
@@ -87,7 +87,7 @@ describe('spwn agent sleep', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toContain('Sleep cycle for agent "neo"');
         expect(out).toMatch(/Archived playbooks\s+0/);
         expect(out).toMatch(/Archived knowledge\s+0/);
@@ -101,7 +101,7 @@ describe('spwn agent sleep', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toContain('Sleep cycle for agent "ghost"');
         expect(out).toMatch(/Archived playbooks\s+0/);
         expect(out).toMatch(/Archived knowledge\s+0/);
@@ -130,7 +130,7 @@ describe('spwn agent fork', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toContain('Forking "neo" -> "neo-v2"');
         expect(out).toMatch(/Layers copied\s+core, skills, knowledge, playbooks, journal/);
         expect(result.file('spwn/agents/neo-v2/core/profile.md').exists).toBe(true);
@@ -143,7 +143,7 @@ describe('spwn agent fork', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toContain('target agent "neo-v2" already exists');
         expect(out).not.toContain('panic:');
     });
@@ -155,7 +155,7 @@ describe('spwn agent fork', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const out = result.stdout.text + result.stderr.text;
+        const out = result.stderr.text;
         expect(out).toMatch(/Agent:\s+neo-clone/);
         expect(out).toMatch(/core\/\s+profile\.md/);
     });

@@ -97,9 +97,9 @@ describe('full agent lifecycle', () => {
             .run();
 
         expect(inspect.exitCode).toBe(0);
-        const inspectOut = `${inspect.stdout.text}\n${inspect.stderr.text}`;
-        expect(inspectOut).toContain(worldId!);
-        expect(inspectOut).toMatch(/Status/);
+        // `world inspect` renders via stepper on stderr.
+        inspect.stderr.toContain(worldId!);
+        expect(inspect.stderr.text).toMatch(/Status/);
 
         // Step 5: world logs <id> — must not crash
         await using logs = await spec('journey logs')
@@ -136,9 +136,8 @@ describe('full agent lifecycle', () => {
         // Propagates the last failing step if any. Assert the journey
         // Produced the expected on-disk side-effects regardless of the
         // Exact last-step streams captured.
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('FATAL');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('FATAL');
 
         // Fork wrote a second on-disk mind.
         expect(result.file('spwn/agents/neo-v2').exists).toBe(true);
@@ -158,11 +157,10 @@ describe('full agent lifecycle', () => {
         // Inspect on a missing agent should exit non-zero with a clean
         // Error — no panics, no Go stack traces.
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).not.toContain('FATAL');
-        expect(combined).toContain('neo');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('FATAL');
+        result.stderr.toContain('neo');
     });
 
     test('error recovery: down on an invalid world id fails gracefully', async () => {
@@ -172,10 +170,9 @@ describe('full agent lifecycle', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).not.toContain('FATAL');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('FATAL');
     });
 
     test('error recovery: double destroy is idempotent', async () => {
@@ -184,10 +181,9 @@ describe('full agent lifecycle', () => {
             .exec(['up', 'down', 'down'])
             .run();
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).not.toContain('FATAL');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('FATAL');
         expect(result.container('neo').exists).toBe(false);
     });
 });

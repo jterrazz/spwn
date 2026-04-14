@@ -24,7 +24,7 @@ describe('spwn agent export', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.file('neo.tar.gz').exists).toBe(true);
-        expect(result.stderr.text + result.stdout.text).toContain('Exported');
+        result.stderr.toContain('Exported');
     });
 
     test('exported archive contains all Mind layers', async () => {
@@ -50,16 +50,15 @@ describe('spwn agent export', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.file('neo.tar.gz').exists).toBe(true);
-        expect(result.stderr.text + result.stdout.text).toContain('Exported');
+        result.stderr.toContain('Exported');
     });
 
     test('export on a missing agent errors cleanly', async () => {
         const result = await isolated('export missing').exec('agent export ghost').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('agent "ghost" not found');
-        expect(combined).not.toContain('panic:');
+        result.stderr.toContain('agent "ghost" not found');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test('import restores an agent from its own export', async () => {
@@ -77,6 +76,6 @@ describe('spwn agent export', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn-home/agents/neo/core/profile.md').exists).toBe(true);
-        expect(result.stderr.text + result.stdout.text).toContain('Imported agent');
+        result.stderr.toContain('Imported agent');
     });
 });

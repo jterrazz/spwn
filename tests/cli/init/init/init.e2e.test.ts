@@ -45,9 +45,7 @@ describe('spwn init', () => {
 
         // Then - exits non-zero and points at --force
         expect(result.exitCode).not.toBe(0);
-        const out = result.stdout.text + result.stderr.text;
-        expect(out).toContain('spwn.yaml already exists');
-        expect(out).toContain('--force');
+        await result.stderr.toMatch('init-already-exists.txt');
     });
 
     test('--force overwrites an existing spwn.yaml', async () => {

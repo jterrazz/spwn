@@ -64,8 +64,7 @@ describe('colony', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/Sent message\s+morpheus → neo/);
+        expect(result.stderr.text).toMatch(/Sent message\s+morpheus → neo/);
 
         // The message file lands in /world/inbox/neo/ inside the container.
         const neo = result.container('neo');
@@ -97,10 +96,10 @@ describe('colony', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('morpheus');
-        expect(combined).toContain('implement auth module');
-        expect(combined).toContain('FROM');
+        // Inbox renders a table on stderr (ui.Table default writer).
+        result.stderr.toContain('morpheus');
+        result.stderr.toContain('implement auth module');
+        result.stderr.toContain('FROM');
     });
 
     test('multiple messages from chief to worker all persist', async () => {
@@ -118,10 +117,10 @@ describe('colony', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('task 1: setup database');
-        expect(combined).toContain('task 2: implement API');
-        expect(combined).toContain('task 3: write tests');
+        // Inbox table rows land on stderr.
+        result.stderr.toContain('task 1: setup database');
+        result.stderr.toContain('task 2: implement API');
+        result.stderr.toContain('task 3: write tests');
 
         // And three JSON files live in the container inbox.
         const wc = await result.container('neo').exec('sh -c "ls /world/inbox/neo/*.json | wc -l"');

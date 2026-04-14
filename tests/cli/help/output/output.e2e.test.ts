@@ -77,8 +77,7 @@ describe('CLI output', () => {
 
         // Then - cobra writes "unknown command" to stderr and exits non-zero
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('unknown command "nonexistent" for "spwn"');
+        result.stderr.toContain('unknown command "nonexistent" for "spwn"');
     });
 
     test('auth status table is rendered on stderr', async () => {

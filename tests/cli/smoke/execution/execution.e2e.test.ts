@@ -34,9 +34,8 @@ describe('CLI execution - agent commands', () => {
         const result = await isolated('agent rm missing').exec('agent rm ghost').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('panic:');
-        expect(combined).not.toContain('goroutine ');
+        expect(result.stderr.text).not.toContain('panic:');
+        expect(result.stderr.text).not.toContain('goroutine ');
     });
 
     test("'spwn agent ls' on an empty home prints the empty state", async () => {
@@ -49,9 +48,8 @@ describe('CLI execution - agent commands', () => {
         const result = await isolated('agent show missing').exec('agent show ghost').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('panic:');
-        expect(combined).not.toContain('goroutine ');
+        expect(result.stderr.text).not.toContain('panic:');
+        expect(result.stderr.text).not.toContain('goroutine ');
     });
 });
 
@@ -62,9 +60,8 @@ describe('CLI execution - enter command', () => {
         const result = await isolated('enter nonexistent').exec('world enter w-fake-99999').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('panic:');
-        expect(combined).not.toContain('goroutine ');
+        expect(result.stderr.text).not.toContain('panic:');
+        expect(result.stderr.text).not.toContain('goroutine ');
     });
 
     test("'spwn world enter --help' shows usage", async () => {
@@ -181,9 +178,9 @@ describe('CLI execution - world aliases (docker)', () => {
             .run();
 
         expect(inspect.exitCode).toBe(0);
-        const combined = `${inspect.stdout.text}\n${inspect.stderr.text}`;
-        expect(combined).toContain(worldId!);
-        expect(combined).toMatch(/Status/);
+        // `world inspect` renders via stepper (stderr).
+        inspect.stderr.toContain(worldId!);
+        expect(inspect.stderr.text).toMatch(/Status/);
     });
 
     test("'spwn world logs' returns cleanly for a running world", async () => {
@@ -222,7 +219,7 @@ describe('CLI execution - world aliases (docker)', () => {
             .run();
 
         expect(snap.exitCode).toBe(0);
-        const combined = `${snap.stdout.text}\n${snap.stderr.text}`;
-        expect(combined).toMatch(/[Ss]aved|[Ss]nap(shot)? saved|created/);
+        // Snapshot save banner lands on stderr.
+        expect(snap.stderr.text).toMatch(/[Ss]aved|[Ss]nap(shot)? saved|created/);
     });
 });

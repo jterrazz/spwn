@@ -35,11 +35,10 @@ describe('agent --ephemeral (NPC)', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).toMatch(/--world|world specified|active worlds/i);
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        expect(result.stderr.text).toMatch(/--world|world specified|active worlds/i);
     });
 
     test('ephemeral dispatches a task into a running world', async () => {
@@ -71,8 +70,12 @@ describe('agent --ephemeral (NPC)', () => {
             .run();
 
         expect(dispatch.exitCode).toBe(0);
-        const combined = `${dispatch.stdout.text}\n${dispatch.stderr.text}`;
-        expect(combined).toMatch(/Ephemeral dispatched|lint the code/);
+        // Dispatch banner is a stepper line on stderr; `lint the code`
+        // Shows up as the runtime's echoed command on stdout or stderr
+        // Depending on the mock — stay tolerant by checking both.
+        expect(dispatch.stdout.text + dispatch.stderr.text).toMatch(
+            /Ephemeral dispatched|lint the code/,
+        );
 
         // And the container still exists and is running after dispatch —
         // Ephemerals must not kill their host world.

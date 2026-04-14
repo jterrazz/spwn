@@ -19,8 +19,8 @@ describe('spwn check: plugins field resolution', () => {
 
         // Then - check passes and does not complain about the plugin
         expect(result.exitCode).toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('does not exist');
+        // `check` renders its report on stdout.
+        expect(result.stdout.text).not.toContain('does not exist');
     });
 
     test('rejects nonexistent plugin refs with the same wording as tools', async () => {
@@ -32,8 +32,8 @@ describe('spwn check: plugins field resolution', () => {
 
         // Then - check fails and names the offending plugin
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('@spwn/totally-bogus-plugin');
-        expect(combined.toLowerCase()).toContain('does not exist');
+        // `check` renders its report on stdout.
+        result.stdout.toContain('@spwn/totally-bogus-plugin');
+        expect(result.stdout.text.toLowerCase()).toContain('does not exist');
     });
 });
