@@ -121,6 +121,22 @@ var (
 	projectName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
 )
 
+// IsValidAgentName reports whether the given name is a valid agent
+// name — i.e. a slug matching the same regex the manifest enforces
+// for world names (`^[a-z][a-z0-9-]*$`). Empty names are invalid.
+// Callers use this to reject invalid names at creation time, before
+// anything is written to disk.
+func IsValidAgentName(name string) bool {
+	return name != "" && slugRe.MatchString(name)
+}
+
+// IsValidProjectName reports whether the given name matches the
+// manifest's project-name regex (`^[a-z0-9][a-z0-9-]*$`). Empty
+// names are invalid.
+func IsValidProjectName(name string) bool {
+	return name != "" && projectName.MatchString(name)
+}
+
 // reservedAgentSubcommands is the set of names that collide with
 // `spwn agent <subcommand>` and therefore cannot be used as agent
 // names.
