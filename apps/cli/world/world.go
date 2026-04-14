@@ -307,7 +307,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		s.Info("Status:", string(u.Status))
 		if agentName != "" {
 			s.Blank()
-			fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Talk: spwn talk %s", agentName)))
+			fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Talk: spwn agent talk %s", agentName)))
 			fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Logs: spwn world logs %s", u.ID)))
 		}
 	}

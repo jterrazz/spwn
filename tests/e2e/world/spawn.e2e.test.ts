@@ -272,7 +272,7 @@ describe("world spawn", () => {
     // The mock agent runs and exits, world goes idle
     expectLine(result.output, /Agent spawned\s+detached/);
     // Should show talk hint
-    expectLine(result.output, /Talk: spwn talk neo/);
+    expectLine(result.output, /Talk: spwn agent talk neo/);
   });
 
   test("world ID uses planet name instead of 'default'", () => {

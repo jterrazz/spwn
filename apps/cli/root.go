@@ -58,12 +58,9 @@ func init() {
 	foundation.Version = Version
 	rootCmd.SetHelpFunc(customHelp)
 
-	// Top-level aliases - shortcuts for the 80% cases
-	rootCmd.AddCommand(world.UpCmd)      // spwn up
-	rootCmd.AddCommand(world.LsCmd)      // spwn ls
-	rootCmd.AddCommand(agent.TalkTopCmd) // spwn talk
-
-	// Additional top-level shortcuts
+	// Top-level world shortcuts
+	rootCmd.AddCommand(world.UpCmd)
+	rootCmd.AddCommand(world.LsCmd)
 	rootCmd.AddCommand(world.DownCmd)
 
 	// Command groups - entities
@@ -135,28 +132,27 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "spwn agent new neo", "Create an agent")
 	printHelpCmd(w, "spwn agent add neo --tool @spwn/python", "")
 	printHelpCmd(w, "spwn up --agent neo -w .", "Spawn a world")
-	printHelpCmd(w, "spwn talk neo", "Talk to it")
+	printHelpCmd(w, "spwn agent talk neo", "Talk to it")
 	fmt.Fprintln(w)
 
 	// Entities - the things you create
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
-	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, show, add, fork, dream, sleep)"))
-	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, show, down, enter, snap)"))
+	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, inspect, add, fork, dream, sleep, talk)"))
+	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, inspect, down, enter, snap)"))
 	fmt.Fprintln(w)
 
 	// Building blocks - the things you compose agents from
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
-	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, install)"))
+	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, get)"))
 	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show)"))
 	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit)"))
 	fmt.Fprintln(w)
 
-	// Shortcuts - the 80% top-level aliases
+	// World shortcuts
 	fmt.Fprintf(w, "%s\n", ui.Strong("Shortcuts:"))
 	printHelpCmd(w, "up", "Spawn a world "+ui.Faint("(alias: world up)"))
 	printHelpCmd(w, "ls", "List active worlds "+ui.Faint("(alias: world ls)"))
-	printHelpCmd(w, "talk <name>", "Talk to a running agent "+ui.Faint("(alias: agent talk)"))
-	printHelpCmd(w, "down <id>", "Destroy a world")
+	printHelpCmd(w, "down <id>", "Destroy a world "+ui.Faint("(alias: world down)"))
 	fmt.Fprintln(w)
 
 	// Coordination - multi-agent + orchestration

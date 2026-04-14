@@ -242,15 +242,15 @@ spwn talk neo "run every test and benchmark, tell me what the code actually does
 
 ## CLI at a glance
 
-Grammar is consistent: `spwn <noun> <verb>`. Three shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn talk`.
+Grammar is consistent: `spwn <noun> <verb>`. Three world shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn down`.
 
 Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 ```
 # ── Shortcuts ────────────────────────────────────────────────────
-🟢 spwn up --agent neo                          Spawn a world
-🟢 spwn ls                                      List active worlds
-🟢 spwn talk neo "do this"                      Talk to an agent
+🟢 spwn up --agent neo                          Spawn a world (alias: world up)
+🟢 spwn ls                                      List active worlds (alias: world ls)
+🟢 spwn down <id>                               Destroy a world (alias: world down)
 
 # ── Project (per-repo manifest) ──────────────────────────────────
 🟢 spwn init                                    Scaffold a project in the current dir

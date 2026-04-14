@@ -25,18 +25,6 @@ func init() {
 	talkCmd.Flags().StringVar(&talkOutputFormat, "output-format", "", "Output format: text (default) or stream-json")
 	talkCmd.Flags().StringVar(&talkWorldID, "world", "", "World ID to target (disambiguates when the same agent exists in multiple worlds)")
 	Cmd.AddCommand(talkCmd)
-
-	// TalkTopCmd flags mirror talkCmd for the root-level alias
-	TalkTopCmd.Flags().StringVar(&talkOutputFormat, "output-format", "", "Output format: text (default) or stream-json")
-	TalkTopCmd.Flags().StringVar(&talkWorldID, "world", "", "World ID to target (disambiguates when the same agent exists in multiple worlds)")
-}
-
-// TalkTopCmd is the top-level `spwn talk` alias for `spwn agent talk`.
-var TalkTopCmd = &cobra.Command{
-	Use:   "talk <agent-name> [message]",
-	Short: "Talk to a running agent (alias for `spwn agent talk`)",
-	Args:  cobra.RangeArgs(1, 2),
-	RunE:  func(cmd *cobra.Command, args []string) error { return talkCmd.RunE(cmd, args) },
 }
 
 var talkCmd = &cobra.Command{
