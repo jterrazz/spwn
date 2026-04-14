@@ -22,7 +22,7 @@
 <br/>
 
 <p align="center">
-  <img src="docs/assets/hero.gif" alt="spwn — spawning an agent" width="620" />
+  <img src="docs/assets/hero.gif" alt="spwn — spawning an agent" width="560" />
 </p>
 
 <br/>
