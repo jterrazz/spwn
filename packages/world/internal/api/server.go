@@ -1187,7 +1187,7 @@ func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
 	if follow {
 		args = append(args, "-f")
 	}
-	args = append(args, "--tail", tail, base.ArchitectContainerName)
+	args = append(args, "--tail", tail, base.ArchitectContainerName())
 
 	cmd := exec.CommandContext(r.Context(), "docker", args...)
 	stdout, err := cmd.StdoutPipe()
