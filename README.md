@@ -52,7 +52,7 @@ Four commands. One running world.
 | **03** | Bring it online   | `spwn up`                                  |
 | **04** | Talk to it        | `spwn agent talk neo "what is this project?"` |
 
-Prefer a bundled demo? Install a template via the web UI (`spwn web`) or the `/api/templates` endpoint — CLI install is a followup.
+Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug from `spwn web`'s template gallery or the `/api/templates` endpoint).
 
 > **Requirements:** Docker
 
@@ -266,7 +266,8 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn down default                            Stop one world by name
 
 # ── Project (per-repo manifest) ──────────────────────────────────
-🟢 spwn init                                    Scaffold a project in the current dir
+🟢 spwn init                                    Scaffold a blank project in the current dir
+🟢 spwn init @spwn/matrix                       Install a bundled template (matrix, startup, ...)
 🟢 spwn check                                   Validate the project tree against 15 rules
 🟢 spwn build                                   Flatten to .spwn/build/ (pinned artifact)
 

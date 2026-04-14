@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/catalog/templates"
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
 	"spwn.sh/packages/world"
@@ -26,19 +28,30 @@ var (
 	initName   string
 )
 
+const templateRefPrefix = "@spwn/"
+
 var initCmd = &cobra.Command{
-	Use:   "init",
+	Use:   "init [template-ref]",
 	Short: "Scaffold a spwn project in the current directory",
 	Long: `Scaffold a spwn project in the current directory.
 
-Creates spwn.yaml and a committed ./spwn/ tree containing a default
-world and a default agent. Adds .spwn/ to .gitignore for local state.
+Without arguments, creates a blank spwn.yaml plus a default ./spwn/
+tree (one world, one agent) and adds .spwn/ to .gitignore.
+
+A positional template ref of the form @spwn/<slug> installs one of
+the bundled templates into the current directory instead. Example:
+
+    spwn init @spwn/matrix
 
 Use --global to instead seed ~/.spwn/ with a world config (legacy
 user-home mode, kept for backward compatibility).`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if initGlobal {
 			return runInitGlobal(cmd)
+		}
+		if len(args) == 1 {
+			return runInitTemplate(cmd, args[0])
 		}
 		return runInitLocal(cmd)
 	},
@@ -79,6 +92,78 @@ func runInitLocal(cmd *cobra.Command) error {
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn up                        # spawn the world")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn agent talk neo \"hi\"       # talk to your agent")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn check                     # validate the project tree")
+	s.Blank()
+
+	return nil
+}
+
+// parseTemplateRef validates a `@spwn/<slug>` argument and returns the
+// bare slug. Anything else is a hard error with a one-line hint.
+func parseTemplateRef(ref string) (string, error) {
+	if !strings.HasPrefix(ref, templateRefPrefix) {
+		return "", fmt.Errorf("template ref must start with %q (e.g. @spwn/matrix), got %q", templateRefPrefix, ref)
+	}
+	slug := strings.TrimPrefix(ref, templateRefPrefix)
+	if slug == "" || strings.ContainsAny(slug, "/ \t") {
+		return "", fmt.Errorf("invalid template slug in %q (expected @spwn/<slug>)", ref)
+	}
+	return slug, nil
+}
+
+func runInitTemplate(cmd *cobra.Command, ref string) error {
+	if initName != "" {
+		return fmt.Errorf("--name cannot be used with a template ref; it only applies to the blank scaffold")
+	}
+
+	slug, err := parseTemplateRef(ref)
+	if err != nil {
+		return err
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("resolve cwd: %w", err)
+	}
+
+	// Honor --force: if the user passed it and a manifest already
+	// exists, clear it so templates.Install can write fresh content
+	// (templates.Install itself never overwrites).
+	if initForce {
+		if err := os.Remove(filepath.Join(cwd, "spwn.yaml")); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove existing spwn.yaml: %w", err)
+		}
+	}
+
+	rep, err := templates.Install(slug, cwd)
+	if err != nil {
+		return fmt.Errorf("install template %s: %w", ref, err)
+	}
+
+	s := ui.New()
+	s.Blank()
+	s.Success(fmt.Sprintf("Installed template %s", ref))
+	s.Blank()
+	out := cmd.OutOrStdout()
+	if rep.ManifestAdded {
+		fmt.Fprintln(out, "  spwn.yaml          # created")
+	} else {
+		fmt.Fprintln(out, "  spwn.yaml          # kept existing (use --force to replace)")
+	}
+	if len(rep.WorldsAdded) > 0 {
+		fmt.Fprintln(out, "  Worlds added:      "+strings.Join(rep.WorldsAdded, ", "))
+	}
+	if len(rep.WorldsSkipped) > 0 {
+		fmt.Fprintln(out, "  Worlds skipped:    "+strings.Join(rep.WorldsSkipped, ", "))
+	}
+	if len(rep.AgentsAdded) > 0 {
+		fmt.Fprintln(out, "  Agents added:      "+strings.Join(rep.AgentsAdded, ", "))
+	}
+	if len(rep.AgentsSkipped) > 0 {
+		fmt.Fprintln(out, "  Agents skipped:    "+strings.Join(rep.AgentsSkipped, ", "))
+	}
+	fmt.Fprintln(out, "")
+	fmt.Fprintln(out, "  Next:")
+	fmt.Fprintln(out, "    spwn up                        # spawn the world")
 	s.Blank()
 
 	return nil
