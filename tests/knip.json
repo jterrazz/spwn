@@ -3,10 +3,10 @@
     "entry": [
         "vitest.config.ts",
         "vitest.workspace.ts",
-        "ui/playwright.config.ts",
-        "ui/setup/global-setup.ts",
-        "ui/setup/global-teardown.ts",
-        "ui/fixtures/app.ts",
+        "web/playwright.config.ts",
+        "web/setup/global-setup.ts",
+        "web/setup/global-teardown.ts",
+        "web/fixtures/app.ts",
         "oxlint.config.ts",
         "oxfmt.config.ts"
     ],

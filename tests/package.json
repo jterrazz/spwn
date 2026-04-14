@@ -8,11 +8,9 @@
         "lint:fix": "codestyle fix",
         "test": "vitest --run",
         "test:watch": "vitest",
-        "test:cli": "vitest --run --project cli",
-        "test:docker": "vitest --run --project docker",
-        "test:ui": "npx playwright test --config ui/playwright.config.ts",
-        "test:ui:headed": "npx playwright test --config ui/playwright.config.ts --headed",
-        "test:ui:debug": "npx playwright test --config ui/playwright.config.ts --debug"
+        "test:web": "npx playwright test --config web/playwright.config.ts",
+        "test:web:headed": "npx playwright test --config web/playwright.config.ts --headed",
+        "test:web:debug": "npx playwright test --config web/playwright.config.ts --debug"
     },
     "dependencies": {
         "yaml": "^2.8.3"

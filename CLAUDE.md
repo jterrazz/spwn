@@ -299,7 +299,7 @@ make test-cli            # cd apps/cli && go test -v ./...
 
 make test-e2e            # Go E2E against Docker
 make test-e2e-world      # Same, explicit alias
-make test-ui             # Playwright UI E2E (Docker + browser)
+make test-web            # Playwright web E2E (Docker + browser)
 
 make lint                # go vet across all modules
 make clean               # rm -rf bin/

@@ -3,7 +3,7 @@
     "include": [
         "setup/**/*.ts",
         "cli/**/*.ts",
-        "ui/**/*.ts",
+        "web/**/*.ts",
         "vitest.config.ts",
         "vitest.workspace.ts"
     ]
