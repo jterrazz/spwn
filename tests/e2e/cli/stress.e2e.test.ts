@@ -32,7 +32,7 @@ describe('CLI stress tests', () => {
         const createTasks = agentNames.map(
             (name) => () =>
                 spwn(`create ${name}`)
-                    .exec(`agent new ${name}`)
+                    .exec(`agent create ${name}`)
                     .run()
                     .then((result) => {
                         expect(result.exitCode).toBe(0);
@@ -76,7 +76,7 @@ describe('CLI stress tests', () => {
         // WHEN - running many sequential create/delete cycles
         for (let i = 0; i < 5; i++) {
             const name = `rapid-${i}`;
-            const createResult = await spwn(`create ${name}`).exec(`agent new ${name}`).run();
+            const createResult = await spwn(`create ${name}`).exec(`agent create ${name}`).run();
             expect(createResult.exitCode).toBe(0);
 
             const rmResult = await spwn(`rm ${name}`).exec(`agent rm ${name}`).run();

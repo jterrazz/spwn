@@ -135,14 +135,14 @@ describe('agent talk', () => {
         expectLine(result.output, /agent "ghost" not found/);
     });
 
-    test('talk to nonexistent agent shows helpful error with agent new hint', () => {
+    test('talk to nonexistent agent shows helpful error with agent create hint', () => {
         // WHEN - talking to an agent that was never created
         ctx = createTestContext();
         const result = ctx.spwn(['agent', 'talk', 'does-not-exist', 'hello']);
 
-        // THEN - error is helpful (suggests spwn agent new) and no raw exit status
+        // THEN - error is helpful (suggests spwn agent create) and no raw exit status
         expect(result.exitCode).not.toBe(0);
-        expectLine(result.output, /spwn agent new/);
+        expectLine(result.output, /spwn agent create/);
         // Should NOT show raw Go error output
         expect(result.output).not.toContain('exit status 1');
     });

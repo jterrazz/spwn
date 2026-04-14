@@ -62,9 +62,9 @@ describe('agent mind structure', () => {
         }
     });
 
-    test('agent new creates the 5-layer Mind structure', async () => {
+    test('agent create creates the 5-layer Mind structure', async () => {
         // WHEN - creating a new agent
-        const result = await spwn('agent new').exec('agent new TestAgent').run();
+        const result = await spwn('agent create').exec('agent create TestAgent').run();
 
         // THEN - the 5 Mind layers are created
         expect(result.exitCode).toBe(0);

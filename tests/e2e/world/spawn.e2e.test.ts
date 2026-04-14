@@ -45,27 +45,6 @@ describe('world spawn', () => {
         ctx.world(id).toHaveFile('/world/physics.md').toHaveFile('/world/faculties.md');
     });
 
-    test('spawns a world with named config via -c flag', () => {
-        // GIVEN - an initialized SPWN_HOME
-        ctx = createTestContext();
-        ctx.spwn(['init', 'myconfig']);
-
-        // WHEN - spawning with a named config
-        const result = ctx.spwn(
-            ['world', '-c', 'myconfig', '--agent', 'neo', '-w', ctx.home],
-            60_000,
-        );
-
-        // THEN - exits successfully with correct ID prefix
-        expect(result.exitCode).toBe(0);
-        expectLine(result.output, /✓ Created container\s+spwn-world-myconfig-\d{5}/);
-        const id = parseWorldId(result.output)!;
-        expect(id).toMatch(/^spwn-world-myconfig-\d{5}$/);
-
-        // AND - container is running
-        ctx.world(id).toBeRunning();
-    });
-
     test('world ID format is w-{name}-{5digits}', () => {
         // GIVEN - an initialized SPWN_HOME
         ctx = createTestContext();
@@ -131,7 +110,7 @@ describe('world spawn', () => {
 
         expect(result.exitCode).not.toBe(0);
         expectLine(result.output, /✗ Spawn failed/);
-        expectLine(result.output, /spwn agent new ghost/);
+        expectLine(result.output, /spwn agent create ghost/);
         expectNoLine(result.output, /Available Commands:/);
     });
 

@@ -31,7 +31,7 @@ describe('error recovery - state resilience', () => {
         expect(errorResult.exitCode).not.toBe(0);
 
         // AND - creating a new agent right after
-        const createResult = await spwn('create after error').exec('agent new testbot').run();
+        const createResult = await spwn('create after error').exec('agent create testbot').run();
 
         // THEN - the new agent is created successfully
         expect(createResult.exitCode).toBe(0);
@@ -45,7 +45,7 @@ describe('error recovery - state resilience', () => {
     test('export non-existent agent does not corrupt state', async () => {
         // GIVEN - an initialized home with an agent
         await spwn('init').exec('init').run();
-        await spwn('create neo').exec('agent new neo').run();
+        await spwn('create neo').exec('agent create neo').run();
 
         // WHEN - exporting a non-existent agent
         const exportResult = await spwn('export ghost').exec('agent export ghost').run();
@@ -68,7 +68,7 @@ describe('error recovery - state resilience', () => {
         }
 
         // THEN - a normal operation still succeeds
-        const createResult = await spwn('create after errors').exec('agent new survivor').run();
+        const createResult = await spwn('create after errors').exec('agent create survivor').run();
         expect(createResult.exitCode).toBe(0);
 
         const listResult = await spwn('list after errors').exec('agent ls').run();
@@ -86,7 +86,9 @@ describe('error recovery - state resilience', () => {
         // Either way, subsequent commands should work
 
         // THEN - agent commands still work
-        const createResult = await spwn('create after double init').exec('agent new testbot').run();
+        const createResult = await spwn('create after double init')
+            .exec('agent create testbot')
+            .run();
         expect(createResult.exitCode).toBe(0);
     });
 });

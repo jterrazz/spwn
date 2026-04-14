@@ -50,7 +50,7 @@ describe('zero-friction UX', () => {
         // THEN - error suggests creating the agent
         expect(result.exitCode).not.toBe(0);
         const out = stripAnsi(result.output);
-        expect(out).toContain('spwn agent new');
+        expect(out).toContain('spwn agent create');
     });
 
     // ── 3. Architect stop when not running is graceful ──────────

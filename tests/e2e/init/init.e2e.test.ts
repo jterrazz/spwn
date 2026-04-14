@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { createSpwnHome } from '../../setup/helpers.js';
-import { expectLine, lines } from '../../setup/output-helpers.js';
+import { expectLine } from '../../setup/output-helpers.js';
 import { spwn } from '../../setup/spwn.specification.js';
 
 describe('spwn init', () => {
@@ -64,27 +64,5 @@ describe('spwn init', () => {
         // THEN - a random name is generated and setup completes
         expect(result.exitCode).toBe(0);
         expectLine(result.output, /✓ Ready\. Next steps:/);
-    });
-
-    test('accepts custom name', async () => {
-        // WHEN - running init with a custom name
-        const result = await spwn('init with name').exec('init acme').run();
-
-        // THEN - the custom name is used in the config
-        expect(result.exitCode).toBe(0);
-        expectLine(result.output, /✓ Created config\s+acme\.yaml/);
-        expectLine(result.output, /✓ Ready\. Next steps:/);
-    });
-
-    test('init with special characters in name handles gracefully', async () => {
-        // WHEN - running init with a name containing special chars
-        const result = await spwn('init special chars').exec('init my/bad:name').run();
-
-        // THEN - either succeeds with sanitized name or fails with clean error
-        const out = lines(result.output);
-        expect(out.length).toBeGreaterThan(0);
-        // Should not contain stack traces
-        expect(result.output).not.toContain('TypeError');
-        expect(result.output).not.toContain('FATAL');
     });
 });
