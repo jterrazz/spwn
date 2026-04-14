@@ -5,8 +5,19 @@ import (
 	"strings"
 	"testing"
 
+	runtimes "spwn.sh/catalog/runtimes"
 	ib "spwn.sh/packages/imagebuilder"
 )
+
+// fullRegistry registers tools + runtimes. Some tools like
+// @spwn/architect depend on runtime packs (e.g. @spwn/claude-code),
+// so dependency-resolution tests need both sides available.
+func fullRegistry() *ib.Registry {
+	reg := ib.NewRegistry()
+	_ = RegisterDefaults(reg)
+	_ = runtimes.RegisterDefaults(reg)
+	return reg
+}
 
 func TestAllTools_ValidName(t *testing.T) {
 	for _, tool := range All {
@@ -80,8 +91,7 @@ func TestAllTools_NoDuplicateNames(t *testing.T) {
 }
 
 func TestAllTools_DependenciesExist(t *testing.T) {
-	reg := ib.NewRegistry()
-	RegisterDefaults(reg)
+	reg := fullRegistry()
 
 	for _, tool := range All {
 		t.Run(tool.Name(), func(t *testing.T) {
@@ -95,8 +105,7 @@ func TestAllTools_DependenciesExist(t *testing.T) {
 }
 
 func TestAllTools_NoDependencyCycles(t *testing.T) {
-	reg := ib.NewRegistry()
-	RegisterDefaults(reg)
+	reg := fullRegistry()
 
 	for _, tool := range All {
 		t.Run(tool.Name(), func(t *testing.T) {

@@ -7,7 +7,6 @@ package runtimes
 import (
 	"fmt"
 
-	"spwn.sh/catalog/runtimes/architect"
 	"spwn.sh/catalog/runtimes/claude_code"
 	"spwn.sh/catalog/runtimes/codex"
 	ib "spwn.sh/packages/imagebuilder"
@@ -18,7 +17,6 @@ import (
 var All = []ib.Tool{
 	claude_code.Tool,
 	codex.Tool,
-	architect.Tool,
 }
 
 // RegisterDefaults registers all built-in runtimes into the given registry.

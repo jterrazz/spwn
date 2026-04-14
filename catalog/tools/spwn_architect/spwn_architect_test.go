@@ -1,4 +1,4 @@
-package architect
+package spwn_architect
 
 import (
 	"io/fs"

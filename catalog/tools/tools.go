@@ -11,6 +11,7 @@ import (
 	"spwn.sh/catalog/tools/node"
 	"spwn.sh/catalog/tools/python"
 	"spwn.sh/catalog/tools/qmd"
+	"spwn.sh/catalog/tools/spwn_architect"
 	"spwn.sh/catalog/tools/spwn_cli"
 	"spwn.sh/catalog/tools/unix"
 )
@@ -25,6 +26,7 @@ var All = []ib.Tool{
 	build.Tool,
 	docker_cli.Tool,
 	spwn_cli.Tool,
+	spwn_architect.Tool,
 	qmd.Tool,
 }
 
