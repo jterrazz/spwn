@@ -169,6 +169,20 @@ func ReservedAgentNames() []string {
 	return validate.ReservedAgentNames()
 }
 
+// IsValidAgentName reports whether the given string is a syntactically
+// valid agent name (same slug regex the manifest enforces for world
+// names). CLI callers should reject invalid names at creation time
+// before writing anything to disk.
+func IsValidAgentName(name string) bool {
+	return validate.IsValidAgentName(name)
+}
+
+// IsValidProjectName reports whether the given string matches the
+// manifest's project-name regex.
+func IsValidProjectName(name string) bool {
+	return validate.IsValidProjectName(name)
+}
+
 // ValidateOpts configures Validate. Zero value is valid and skips
 // catalog-backed rules (tool existence, runtime support). Callers
 // should populate this from catalog/tools + catalog/runtimes for the
