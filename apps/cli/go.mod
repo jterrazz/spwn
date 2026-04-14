@@ -3,18 +3,16 @@ module spwn.sh/apps/cli
 go 1.25.0
 
 require (
-	github.com/docker/docker v27.5.1+incompatible
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
-	gopkg.in/yaml.v3 v3.0.1
+	spwn.sh/examples v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/foundation v0.0.0
-	spwn.sh/packages/imagebuilder v0.0.0
+	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
 	spwn.sh/packages/messenger v0.0.0
 	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/world v0.0.0
-	spwn.sh/examples v0.0.0
 )
 
 require (
@@ -22,6 +20,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
+	github.com/docker/docker v27.5.1+incompatible // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -46,14 +45,17 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+	spwn.sh/packages/imagebuilder v0.0.0 // indirect
 )
 
 replace (
+	spwn.sh/examples => ../../examples
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/foundation => ../../packages/foundation
 	spwn.sh/packages/imagebuilder => ../../packages/imagebuilder
+	spwn.sh/packages/manifest => ../../packages/manifest
 	spwn.sh/packages/messenger => ../../packages/messenger
 	spwn.sh/packages/migration => ../../packages/migration
 	spwn.sh/packages/world => ../../packages/world
-	spwn.sh/examples => ../../examples
 )
