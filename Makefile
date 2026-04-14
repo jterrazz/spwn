@@ -1,138 +1,109 @@
-.PHONY: build install uninstall \
-        build-test-image \
-        test test-world test-agent test-foundation test-messenger test-imagebuilder \
-        test-e2e test-e2e-world test-e2e-imagebuilder \
+.PHONY: help build install uninstall clean \
+        lint go-vet \
+        test go-test test-pkg \
+        test-e2e test-e2e-imagebuilder \
         test-ts test-web test-web-headed \
-        web-build web-dev web-lint \
-        lint clean docs
+        build-test-image \
+        web-build web-dev \
+        docs
 
-INSTALL_DIR ?= $(HOME)/.local/bin
-PATH_EXPORT := export PATH="$$HOME/.local/bin:$$PATH"
+# Go modules are the single source of truth: every entry in go.work
+# Gets linted and tested. Adding a new module to go.work is the only
+# Thing needed to bring it under CI coverage — no Makefile edits.
+GO_MODS := $(shell go work edit -json 2>/dev/null | jq -r '.Use[].DiskPath')
 
-# Build
+help:
+	@echo "Common targets:"
+	@echo "  make build               Build bin/spwn"
+	@echo "  make install             Build and install to ~/.local/bin"
+	@echo "  make lint                go vet all modules + pnpm -r lint"
+	@echo "  make test                Go unit tests across the workspace"
+	@echo "  make test-pkg PKG=mind   Verbose go test for one package"
+	@echo "  make test-e2e            Go E2E (Docker required)"
+	@echo "  make test-ts             TypeScript E2E (Docker + Node 22)"
+	@echo "  make test-web            Playwright web E2E (Docker + browser)"
+	@echo "  make web-dev             Run the Next.js dev server"
+	@echo "  make docs                Regenerate apps/cli docs"
+	@echo "  make clean               rm -rf bin/"
+
+# ── Build ─────────────────────────────────────────────────────────
+
 build:
 	cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
 
-# Install - builds from source and installs to ~/.local/bin (same as install.sh)
 install: build
-	@mkdir -p $(INSTALL_DIR)
-	@cp bin/spwn $(INSTALL_DIR)/spwn
-	@chmod +x $(INSTALL_DIR)/spwn
-	@codesign -s - $(INSTALL_DIR)/spwn 2>/dev/null || true
-	@# Ensure ~/.local/bin is in PATH
-	@case ":$$PATH:" in \
-		*":$(INSTALL_DIR):"*) ;; \
-		*) \
-			ADDED=false; \
-			for rc in "$$HOME/.zshrc" "$$HOME/.bashrc" "$$HOME/.bash_profile" "$$HOME/.profile"; do \
-				if [ -f "$$rc" ]; then \
-					if ! grep -q '.local/bin' "$$rc" 2>/dev/null; then \
-						echo "" >> "$$rc"; \
-						echo "# Added by spwn (make install)" >> "$$rc"; \
-						echo '$(PATH_EXPORT)' >> "$$rc"; \
-						echo "  Added ~/.local/bin to PATH in $$(basename $$rc)"; \
-					fi; \
-					ADDED=true; \
-					break; \
-				fi; \
-			done; \
-			if [ "$$ADDED" = false ]; then \
-				echo "" >> "$$HOME/.profile"; \
-				echo "# Added by spwn (make install)" >> "$$HOME/.profile"; \
-				echo '$(PATH_EXPORT)' >> "$$HOME/.profile"; \
-				echo "  Added ~/.local/bin to PATH in .profile"; \
-			fi; \
-			export PATH="$(INSTALL_DIR):$$PATH"; \
-		;; \
-	esac
-	@echo ""
-	@echo "  ✓ spwn installed to $(INSTALL_DIR)/spwn"
-	@echo ""
-	@echo "  Get started:"
-	@echo "    spwn init"
-	@echo "    spwn agent new neo"
-	@echo "    spwn up --agent neo -w ."
-	@echo ""
+	@scripts/install.sh
 
-# Uninstall
 uninstall:
-	@rm -f $(INSTALL_DIR)/spwn
-	@echo "  ✓ spwn removed from $(INSTALL_DIR)"
+	@rm -f $${INSTALL_DIR:-$$HOME/.local/bin}/spwn
+	@echo "  ✓ spwn removed"
+
+clean:
+	rm -rf bin/
 
 build-test-image:
 	docker build -t spwn-test:latest -f tests/fixtures/Dockerfile.test ./tests/fixtures/mock-claude
 
-# Unit tests (per domain)
-test:
-	cd packages/base && go test ./...
-	cd packages/image && go test ./...
-	cd packages/mind && go test ./...
-	cd packages/mailbox && go test ./...
-	cd packages/world && go test ./...
-	cd apps/cli && go test ./...
+# ── Lint ──────────────────────────────────────────────────────────
 
-test-foundation:
-	cd packages/base && go test -v ./...
+lint: go-vet
+	pnpm -r lint
 
-test-agent:
-	cd packages/mind && go test -v ./...
+go-vet:
+	@for mod in $(GO_MODS); do \
+		echo "==> go vet $$mod"; \
+		(cd $$mod && go vet ./...) || exit 1; \
+	done
 
-test-messenger:
-	cd packages/mailbox && go test -v ./...
+# ── Test ──────────────────────────────────────────────────────────
 
-test-world:
-	cd packages/world && go test -v ./...
+test: go-test
 
-test-cli:
-	cd apps/cli && go test -v ./...
+go-test:
+	@for mod in $(GO_MODS); do \
+		echo "==> go test $$mod"; \
+		(cd $$mod && go test ./...) || exit 1; \
+	done
 
-test-imagebuilder:
-	cd packages/image && go test -v ./...
+# Run verbose tests for a single package: `make test-pkg PKG=mind` or
+# `make test-pkg PKG=apps/cli`. Path is resolved relative to repo root.
+test-pkg:
+	@if [ -z "$(PKG)" ]; then \
+		echo "usage: make test-pkg PKG=<module-path-or-name>" >&2; \
+		exit 1; \
+	fi
+	@if [ -d "packages/$(PKG)" ]; then cd packages/$(PKG) && go test -v ./...; \
+	elif [ -d "$(PKG)" ]; then cd $(PKG) && go test -v ./...; \
+	else echo "no such package: $(PKG)" >&2; exit 1; fi
 
-# E2E tests (Docker required)
+# ── E2E ───────────────────────────────────────────────────────────
+
 test-e2e: build-test-image
-	cd packages/world && go test -v -tags=e2e -timeout=5m ./tests/e2e/...
-
-test-e2e-world: build-test-image
 	cd packages/world && go test -v -tags=e2e -timeout=5m ./tests/e2e/...
 
 test-e2e-imagebuilder:
 	cd packages/image && go test -v -tags=e2e -timeout=10m ./e2e/...
 
-# TS E2E (vitest, Docker required)
+# TypeScript E2E against the compiled spwn CLI (vitest + real Docker).
 test-ts: build build-test-image
 	pnpm -C tests test
 
-# Web E2E tests (Docker + browser required)
+# Playwright against the Next.js web UI.
 test-web: build
 	pnpm -C tests test:web
 
 test-web-headed: build
 	pnpm -C tests test:web:headed
 
-# Web UI (Next.js + Tauri)
+# ── Web (apps/web) ────────────────────────────────────────────────
+
 web-build:
 	pnpm -C apps/web build
 
 web-dev:
 	pnpm -C apps/web dev
 
-web-lint:
-	pnpm -C apps/web lint
+# ── Docs ──────────────────────────────────────────────────────────
 
-# Lint
-lint: web-lint
-	cd packages/base && go vet ./...
-	cd packages/image && go vet ./...
-	cd packages/mind && go vet ./...
-	cd packages/mailbox && go vet ./...
-	cd packages/world && go vet ./...
-	cd apps/cli && go vet ./...
-
-# Docs
 docs:
 	cd apps/cli && go run ./cmd/gen-docs ../../docs/cli
-
-# Clean
-clean:
-	rm -rf bin/
