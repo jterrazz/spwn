@@ -84,6 +84,7 @@ function copyTree(srcPath: string, dstPath: string): void {
 type CliBuilder = {
     project(name: string): CliBuilder;
     seed(path: string): CliBuilder;
+    env(env: Record<string, null | string>): CliBuilder;
     exec(args: string | string[]): CliBuilder;
     run(): Promise<CliResult>;
 };

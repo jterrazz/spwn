@@ -1,0 +1,5 @@
+
+  → Exporting agent nonexistent...
+  ✗ Export failed            agent "nonexistent" not found
+    Check that agent "nonexistent" exists with "spwn agent ls"
+
