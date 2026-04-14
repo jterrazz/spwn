@@ -51,7 +51,7 @@ Three commands. One running agent.
 | **02** | Bring it up   | `spwn agent neo`                                   |
 | **03** | Talk to it    | `spwn agent talk neo "what is this project?"`      |
 
-`spwn init` drops a project with a default agent named **neo** and a 1:1 world ready to spawn. `spwn agent neo` is the shortcut that starts neo's world; the long form is `spwn agent start neo`.
+**neo** is the starter agent `spwn init` creates.
 
 Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/templates/`).
 
