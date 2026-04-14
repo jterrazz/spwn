@@ -6,20 +6,7 @@ import (
 
 // Manifest is the parsed representation of a world config YAML.
 type Manifest struct {
-	Physics PhysicsManifest `yaml:"physics"`
-	Tools   []string        `yaml:"-"`
-}
-
-// PhysicsManifest defines the physical constraints of a world.
-type PhysicsManifest struct {
-	Constants ConstantsManifest `yaml:"constants"`
-}
-
-// ConstantsManifest defines fixed resource limits.
-// Only Docker-enforceable fields live here: CPU (--cpus) and Memory (-m).
-type ConstantsManifest struct {
-	CPU    int    `yaml:"cpu"`
-	Memory string `yaml:"memory"`
+	Tools []string `yaml:"-"`
 }
 
 // Workspace is a single host directory mounted into a world. A world may have

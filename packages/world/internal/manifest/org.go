@@ -23,7 +23,6 @@ type OrgDefaults struct {
 	Backend string          `yaml:"backend"`
 	Memory  string          `yaml:"memory"`
 	Store   string          `yaml:"store"`
-	Physics PhysicsDefaults `yaml:"physics"`
 }
 
 // RuntimeDefaults holds default runtime configuration.
@@ -32,19 +31,6 @@ type RuntimeDefaults struct {
 	Provider string `yaml:"provider"`
 	Model    string `yaml:"model"`
 	Auth     string `yaml:"auth"`
-}
-
-// PhysicsDefaults holds default physics for new worlds.
-type PhysicsDefaults struct {
-	Constants ConstantsManifest `yaml:"constants"`
-	Tools     []string          `yaml:"tools"`
-}
-
-// ConstantsManifest mirrors the world constants for org defaults.
-// Only Docker-enforceable fields live here: CPU (--cpus) and Memory (-m).
-type ConstantsManifest struct {
-	CPU    int    `yaml:"cpu"`
-	Memory string `yaml:"memory"`
 }
 
 // OrgGovernance holds governance limits and policies.

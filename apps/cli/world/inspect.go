@@ -14,7 +14,7 @@ func init() {
 
 var inspectCmd = &cobra.Command{
 	Use:   "inspect <world-id>",
-	Short: "Inspect a running world - physics, agents, status",
+	Short: "Inspect a running world - agents, workspaces, status",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -45,11 +45,6 @@ var inspectCmd = &cobra.Command{
 		}
 
 		s.Blank()
-		s.Info("Constants:", fmt.Sprintf("CPU: %d core(s) | Memory: %s",
-			u.Manifest.Physics.Constants.CPU,
-			u.Manifest.Physics.Constants.Memory,
-		))
-
 		s.Info("Laws:", "Network: bridge")
 
 		if len(u.Workspaces) > 0 || u.Agent != "" || len(u.Agents) > 0 {

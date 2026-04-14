@@ -14,19 +14,10 @@ func TestGeneratePhysics(t *testing.T) {
 		wantParts []string
 	}{
 		{
-			name: "contains_all_sections",
-			manifest: models.Manifest{
-				Physics: models.PhysicsManifest{
-					Constants: models.ConstantsManifest{
-						CPU: 2, Memory: "1g",
-					},
-				},
-			},
+			name:     "contains_all_sections",
+			manifest: models.Manifest{},
 			wantParts: []string{
 				"# Physics of This World",
-				"## Constants",
-				"2 core(s)",
-				"1g",
 				"## Laws",
 				"bridge (outbound access enabled)",
 				"## Tools",

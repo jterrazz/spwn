@@ -18,9 +18,7 @@ type AgentContextOpts struct {
 	OrganizationName string
 	WorldID       string
 	Workspaces    []models.Workspace
-	Tools      []string
-	CPU           int
-	Memory        string
+	Tools         []string
 	OtherAgents   []AgentInfo // other agents in the world
 	Chief         string      // chief name (empty if this IS the chief or no chief)
 	NPCTask       string      // task for NPC (empty for chief/manager/worker)
@@ -332,8 +330,5 @@ func writeWorldInfo(b *strings.Builder, opts AgentContextOpts) {
 	writeWorkspaces(b, opts.Workspaces)
 	if len(opts.Tools) > 0 {
 		b.WriteString(fmt.Sprintf("- Tools: %s\n", strings.Join(opts.Tools, ", ")))
-	}
-	if opts.CPU > 0 || opts.Memory != "" {
-		b.WriteString(fmt.Sprintf("- Physics: %d cpu, %s\n", opts.CPU, opts.Memory))
 	}
 }

@@ -30,8 +30,6 @@ import (
 type World = models.World
 type Workspace = models.Workspace
 type Manifest = models.Manifest
-type PhysicsManifest = models.PhysicsManifest
-type ConstantsManifest = models.ConstantsManifest
 type Status = models.Status
 
 // Re-export status constants.

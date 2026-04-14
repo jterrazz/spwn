@@ -119,13 +119,11 @@ const SkillWorldAwareness = `# World Awareness
 Read ` + "`/world/AGENT.md`" + ` for your world's configuration:
 - Your role in the organization
 - Available tools (tools installed)
-- Physics (resource limits: CPU, memory)
 - Your workspace path
 
 ## Physics
-Your world has resource limits:
-- CPU cores and memory (enforced by Docker)
-Read ` + "`/world/physics.md`" + ` for exact values.
+Read ` + "`/world/physics.md`" + ` for the rules of this world
+(network mode, filesystem semantics, communication topology).
 
 ## Tools
 Tools are capabilities available in your world:

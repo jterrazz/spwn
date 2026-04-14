@@ -14,9 +14,7 @@ func TestAgentsBookContent(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-test-12345",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
-		Tools:  []string{"bash", "git"},
-		CPU:       2,
-		Memory:    "4g",
+		Tools:     []string{"bash", "git"},
 	})
 
 	// Must contain key sections that make up the "Agent Operating Manual"
@@ -92,9 +90,7 @@ func TestArchitectSkillsExist(t *testing.T) {
 		AgentName: "architect",
 		Role:      "architect",
 		WorldID:   "spwn-world-architect-00001",
-		Tools:  []string{"bash", "git", "docker"},
-		CPU:       4,
-		Memory:    "8g",
+		Tools:     []string{"bash", "git", "docker"},
 	})
 
 	// 1. World Management skill

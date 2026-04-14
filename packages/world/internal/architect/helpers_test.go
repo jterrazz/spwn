@@ -4,48 +4,6 @@ import (
 	"testing"
 )
 
-func TestParseMemory(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		want    int64
-		wantErr bool
-	}{
-		{name: "megabytes_m", input: "512m", want: 512 * 1024 * 1024},
-		{name: "megabytes_mb", input: "512mb", want: 512 * 1024 * 1024},
-		{name: "gigabytes_g", input: "1g", want: 1024 * 1024 * 1024},
-		{name: "gigabytes_gb", input: "2GB", want: 2 * 1024 * 1024 * 1024},
-		{name: "kilobytes_k", input: "1024k", want: 1024 * 1024},
-		{name: "kilobytes_kb", input: "1024kb", want: 1024 * 1024},
-		{name: "plain_bytes", input: "4096", want: 4096},
-		{name: "whitespace_trimmed", input: "  512m  ", want: 512 * 1024 * 1024},
-		{name: "case_insensitive", input: "1G", want: 1024 * 1024 * 1024},
-		{name: "empty_string", input: "", wantErr: true},
-		{name: "invalid_string", input: "abc", wantErr: true},
-		{name: "invalid_unit_suffix", input: "512x", wantErr: true},
-		{name: "negative_value", input: "-1g", want: -1 * 1024 * 1024 * 1024},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseMemory(tt.input)
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("parseMemory(%q) expected error, got %d", tt.input, got)
-				}
-				return
-			}
-			if err != nil {
-				t.Errorf("parseMemory(%q) unexpected error: %v", tt.input, err)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("parseMemory(%q) = %d, want %d", tt.input, got, tt.want)
-			}
-		})
-	}
-}
-
 func TestMergeUnique(t *testing.T) {
 	tests := []struct {
 		name string

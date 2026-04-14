@@ -129,12 +129,6 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// Default physics
-		m, err := world.LoadManifest("default")
-		if err != nil {
-			world.ApplyDefaults(&m)
-		}
-
 		// Worlds
 		var worlds []world.World
 		arc, arcErr := world.NewArchitectFromEnv()
@@ -188,9 +182,6 @@ var statusCmd = &cobra.Command{
 			infoparts = append(infoparts, ui.Faint(authLabel))
 		}
 		infoparts = append(infoparts, ui.Faint(fmt.Sprintf("%d skills", skillCount)))
-		cpu := fmt.Sprintf("%d cpu", m.Physics.Constants.CPU)
-		infoparts = append(infoparts, ui.Faint(cpu))
-		infoparts = append(infoparts, ui.Faint(m.Physics.Constants.Memory))
 		pr("  %s\n", strings.Join(infoparts, ui.Faint(" \u00b7 ")))
 
 		// ── World sections ──────────────────────────────────────────

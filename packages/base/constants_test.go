@@ -25,12 +25,6 @@ func TestMindLayers_Contents(t *testing.T) {
 }
 
 func TestDefaultConstants_Sanity(t *testing.T) {
-	if DefaultCPU <= 0 {
-		t.Errorf("DefaultCPU = %d, want > 0", DefaultCPU)
-	}
-	if DefaultMemory == "" {
-		t.Error("DefaultMemory is empty")
-	}
 	if DefaultBackend == "" {
 		t.Error("DefaultBackend is empty")
 	}

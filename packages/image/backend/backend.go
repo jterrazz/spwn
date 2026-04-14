@@ -6,12 +6,13 @@ import (
 	"time"
 )
 
-// ContainerConfig defines how to create a container.
+// ContainerConfig defines how to create a container. CPU and memory
+// limits are intentionally absent: worlds inherit the Docker host
+// defaults. A per-world hard-limit knob may return in the future, but
+// it does not live in spwn.yaml today.
 type ContainerConfig struct {
 	Image       string
 	Name        string
-	CPU         int64
-	Memory      int64
 	PidsLimit   int64
 	NetworkMode string
 	Binds       []string

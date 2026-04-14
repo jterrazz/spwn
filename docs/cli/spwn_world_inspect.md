@@ -5,7 +5,7 @@ slug: "spwn-world-inspect"
 
 ## spwn world inspect
 
-Inspect a running world - physics, agents, status
+Inspect a running world - agents, workspaces, status
 
 ```
 spwn world inspect <world-id> [flags]

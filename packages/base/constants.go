@@ -1,12 +1,10 @@
 package base
 
-// Default physics constants.
+// Default runtime constants.
 const (
-	DefaultCPU      = 1
-	DefaultMemory   = "512m"
 	DefaultMaxProcs = 128
 	DefaultBackend  = "docker"
-	WorldImage = "spwn/world:latest"
+	WorldImage      = "spwn/world:latest"
 )
 
 // Architect daemon constants.

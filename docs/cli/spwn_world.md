@@ -29,7 +29,7 @@ spwn world [name] [flags]
 * [spwn world create](./spwn_world_create.md)	 - Declare a new world in spwn.yaml
 * [spwn world destroy](./spwn_world_destroy.md)	 - Destroy a world
 * [spwn world enter](./spwn_world_enter.md)	 - Open an interactive shell inside a running world
-* [spwn world inspect](./spwn_world_inspect.md)	 - Inspect a running world - physics, agents, status
+* [spwn world inspect](./spwn_world_inspect.md)	 - Inspect a running world - agents, workspaces, status
 * [spwn world knowledge](./spwn_world_knowledge.md)	 - Read a world's shared knowledge
 * [spwn world list](./spwn_world_list.md)	 - List declared worlds and their running status
 * [spwn world logs](./spwn_world_logs.md)	 - Show the event log for a specific world

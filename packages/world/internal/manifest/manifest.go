@@ -22,9 +22,6 @@ var ToolPacks = map[string][]string{
 
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
-	Physics struct {
-		Constants models.ConstantsManifest `yaml:"constants"`
-	} `yaml:"physics"`
 	Tools yaml.Node `yaml:"tools"`
 }
 
@@ -46,11 +43,7 @@ func LoadPath(path string) (models.Manifest, error) {
 		return models.Manifest{}, fmt.Errorf("parse config %s: %w", path, err)
 	}
 
-	m := models.Manifest{
-		Physics: models.PhysicsManifest{
-			Constants: raw.Physics.Constants,
-		},
-	}
+	m := models.Manifest{}
 
 	// Parse tools (plain list of strings, root-level)
 	if raw.Tools.Kind == yaml.SequenceNode {
@@ -104,14 +97,8 @@ func CreateDefault() error {
 		return fmt.Errorf("default.yaml already exists.\nEdit it at %s or remove it first", path)
 	}
 
-	content := `# Default world config - defines the physics of your world.
+	content := `# Default world config.
 # Docs: https://spwn.sh/docs/cli/spwn-world
-
-physics:
-  # Resource limits (the constants of this reality)
-  constants:
-    cpu: 1           # CPU cores
-    memory: 512m     # RAM limit (512m, 1g, 4g, etc.)
 
 # Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
 tools:
@@ -137,12 +124,6 @@ func CreateConfig(name string) error {
 	}
 
 	content := fmt.Sprintf(`# World config: %s
-# Customize the physics of this world.
-
-physics:
-  constants:
-    cpu: 1
-    memory: 512m
 
 tools:
   - "@spwn/unix"
@@ -173,19 +154,9 @@ func ExpandTools(elems []string) []string {
 }
 
 // ApplyDefaults fills zero-value fields with built-in defaults.
-func ApplyDefaults(m *models.Manifest) {
-	if m.Physics.Constants.CPU == 0 {
-		m.Physics.Constants.CPU = base.DefaultCPU
-	}
-	if m.Physics.Constants.Memory == "" {
-		m.Physics.Constants.Memory = base.DefaultMemory
-	}
-}
+func ApplyDefaults(_ *models.Manifest) {}
 
 // Validate checks that a manifest is well-formed.
-func Validate(m models.Manifest) error {
-	if m.Physics.Constants.CPU < 0 {
-		return fmt.Errorf("cpu must be >= 0.\nSet a positive CPU value in your world config")
-	}
+func Validate(_ models.Manifest) error {
 	return nil
 }

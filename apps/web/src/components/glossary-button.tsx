@@ -21,7 +21,7 @@ const TERMS: Term[] = [
     {
         word: 'Universe',
         short: 'The shared reality.',
-        long: 'The set of physics, constants and resource limits applied to every world inside an organization. Configured in universe.yaml.',
+        long: 'The shared defaults applied to every world inside an organization. Configured in universe.yaml.',
     },
     {
         word: 'World',

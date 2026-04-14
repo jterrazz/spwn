@@ -41,40 +41,17 @@ func TestConfig_DefaultsApplied(t *testing.T) {
 	// WHEN a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics:
 tools:
   - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
 
-	// THEN default constants should be applied
+	// THEN the world should come up with physics/faculties files present
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
 		c.HasFile("/world/physics.md")
 		c.HasFile("/world/faculties.md")
-		c.FileContains("/world/physics.md", "core(s)")
-		c.FileContains("/world/physics.md", "m")
-	})
-}
-
-func TestConfig_CustomCPUReflectedInPhysics(t *testing.T) {
-	// GIVEN a config with custom CPU and memory
-	// WHEN a world is spawned
-	chain := setup.NewSpawnBuilder(t).
-		WithConfigYAML(`
-physics:
-  constants:
-    cpu: 4
-    memory: 2g
-`).
-		NoAgent().
-		Execute()
-
-	// THEN the physics file should reflect the custom values
-	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/world/physics.md", "4 core(s)")
-		c.FileContains("/world/physics.md", "2g")
 	})
 }
 
@@ -83,7 +60,6 @@ func TestConfig_CustomToolsReflectedInFaculties(t *testing.T) {
 	// WHEN a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics:
 tools:
   - "@spwn/unix"
   - "@spwn/git"
@@ -108,17 +84,8 @@ func TestConfig_LoadAndVerifyManifest(t *testing.T) {
 	}
 
 	// WHEN loading the manifest
-	m, err := world.LoadManifest("default")
-	if err != nil {
+	if _, err := world.LoadManifest("default"); err != nil {
 		t.Fatalf("LoadManifest failed: %v", err)
-	}
-
-	// THEN the defaults should have reasonable values
-	if m.Physics.Constants.CPU == 0 {
-		t.Fatal("Expected non-zero CPU in default config")
-	}
-	if m.Physics.Constants.Memory == "" {
-		t.Fatal("Expected non-empty memory in default config")
 	}
 	_ = tc
 }
