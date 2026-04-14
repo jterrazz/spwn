@@ -39,6 +39,10 @@ The real power of AI isn't the model — it's the model plus everything around i
 
 ## Quickstart
 
+```bash
+curl -fsSL https://spwn.sh/install.sh | bash
+```
+
 Four commands. One running world.
 
 |        | Step              | Example                                    |
@@ -48,23 +52,7 @@ Four commands. One running world.
 | **03** | Spawn the world   | `spwn up`                                  |
 | **04** | Talk to it        | `spwn talk neo "what is this project?"`    |
 
-```bash
-# Install
-curl -fsSL https://spwn.sh/install.sh | bash
-
-# Scaffold a project in the current directory
-spwn init
-
-# Run it
-spwn up
-spwn talk neo "hi"
-```
-
-Or start from a bundled example:
-
-```bash
-spwn example install matrix
-```
+Prefer a bundled demo? `spwn example install matrix`.
 
 > **Requirements:** Go 1.25+, Docker
 
