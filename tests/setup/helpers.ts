@@ -36,31 +36,3 @@ export function createAgent(spwnHome: string, name: string): void {
     );
     writeFileSync(join(agentDir, 'agent.yaml'), `role: worker\n`);
 }
-
-/**
- * Run async tasks with bounded concurrency.
- * Executes up to `maxConcurrency` tasks at a time, waiting for a slot
- * to open before launching the next one.
- *
- * @param tasks - Array of async task factories
- * @param maxConcurrency - Maximum number of concurrent tasks
- */
-export async function runConcurrently(
-    tasks: (() => Promise<void>)[],
-    maxConcurrency: number,
-): Promise<void> {
-    const executing = new Set<Promise<void>>();
-
-    for (const task of tasks) {
-        const p = task().then(() => {
-            executing.delete(p);
-        });
-        executing.add(p);
-
-        if (executing.size >= maxConcurrency) {
-            await Promise.race(executing);
-        }
-    }
-
-    await Promise.all(executing);
-}

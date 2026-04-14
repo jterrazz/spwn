@@ -4,7 +4,17 @@ import {
     createTestContext,
     parseWorldId,
     type TestContext,
-} from '../../setup/spwn.specification.js';
+} from '../../../setup/spwn.specification.js';
+
+/**
+ * Docker-backed system skills / AGENTS.md injection tests.
+ *
+ * These spawn a real world container via `spwn world --agent …` and
+ * inspect the container filesystem, so they need a running Docker
+ * daemon. They remain on the legacy `createTestContext` helpers
+ * because the `@jterrazz/test` spec runner has no container-
+ * inspection surface today.
+ */
 
 describe('system skills infrastructure', () => {
     let ctx: TestContext;
