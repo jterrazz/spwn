@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	Cmd.AddCommand(forkCmd)
+	ui.MarkExperimental(forkCmd)
 }
 
 var forkCmd = &cobra.Command{

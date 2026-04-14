@@ -18,6 +18,10 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(inspectCmd)
+
+	ui.MarkExperimental(Cmd)
+	ui.MarkExperimental(lsCmd)
+	ui.MarkExperimental(inspectCmd)
 }
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {

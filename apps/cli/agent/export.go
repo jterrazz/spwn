@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
 )
@@ -17,6 +18,7 @@ func init() {
 	exportCmd.Flags().StringVar(&exportOutput, "output", ".", "Output directory")
 	exportCmd.Flags().StringSliceVar(&exportExclude, "exclude", nil, "Exclude layers (e.g., journal, sessions)")
 	Cmd.AddCommand(exportCmd)
+	ui.MarkExperimental(exportCmd)
 }
 
 var exportCmd = &cobra.Command{

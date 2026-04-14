@@ -37,6 +37,7 @@ in your default browser. Blocks until Ctrl+C.`,
 func init() {
 	Cmd.Flags().StringVarP(&portFlag, "port", "p", "3001", "API server port")
 	Cmd.Flags().BoolVar(&noOpen, "no-open", false, "Don't open the browser")
+	ui.MarkExperimental(Cmd)
 }
 
 func runWeb(cmd *cobra.Command, args []string) error {

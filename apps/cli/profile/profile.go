@@ -39,6 +39,8 @@ func init() {
 	Cmd.AddCommand(rmCmd)
 
 	Cmd.SetHelpFunc(profileHelp)
+
+	ui.MarkExperimental(editCmd)
 }
 
 func profileHelp(cmd *cobra.Command, args []string) {

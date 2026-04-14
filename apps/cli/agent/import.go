@@ -6,12 +6,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"spwn.sh/apps/cli/ui"
 	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	Cmd.AddCommand(importCmd)
+	ui.MarkExperimental(importCmd)
 }
 
 var importCmd = &cobra.Command{

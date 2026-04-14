@@ -30,6 +30,16 @@ func init() {
 	Cmd.AddCommand(rmCmd)
 	Cmd.AddCommand(assignCmd)
 	Cmd.AddCommand(membersCmd)
+
+	// The team subsystem is in active design - the manifest, storage layout,
+	// and CLI surface are all subject to change. Mark every entry point.
+	ui.MarkExperimental(Cmd)
+	ui.MarkExperimental(newCmd)
+	ui.MarkExperimental(lsCmd)
+	ui.MarkExperimental(editCmd)
+	ui.MarkExperimental(rmCmd)
+	ui.MarkExperimental(assignCmd)
+	ui.MarkExperimental(membersCmd)
 }
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {

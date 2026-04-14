@@ -25,6 +25,10 @@ func init() {
 	Cmd.AddCommand(sendCmd)
 	Cmd.AddCommand(inboxCmd)
 	Cmd.AddCommand(watchCmd)
+
+	ui.MarkExperimental(sendCmd)
+	ui.MarkExperimental(inboxCmd)
+	ui.MarkExperimental(watchCmd)
 }
 
 // --- send ---

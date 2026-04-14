@@ -276,7 +276,7 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn agent new neo                           Create a blank agent
 🟢 spwn agent ls                                List your agents
 🟢 spwn agent rm neo                            Delete an agent
-🟢 spwn agent fork neo neo-v2                   Clone + evolve independently
+🟡 spwn agent fork neo neo-v2                   Clone + evolve independently
 
 # Observe
 🟢 spwn agent inspect neo                       Inspect composition, memory, history
@@ -290,8 +290,8 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 # Talk + messaging
 🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`
-🟢 spwn agent send  neo "do this" --from me     Async message to an agent's inbox
-🟢 spwn agent inbox neo                         Show neo's inbox
+🟡 spwn agent send  neo "do this" --from me     Async message to an agent's inbox
+🟡 spwn agent inbox neo                         Show neo's inbox
 🟡 spwn agent watch neo                         Tail neo's inbox live
 
 # Evolution
@@ -299,8 +299,8 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟡 spwn agent sleep neo                         Consolidate memory, prune stale patterns
 
 # Portability
-🟢 spwn agent export neo                        Archive to neo.tar.gz
-🟢 spwn agent import ./neo.tar.gz               Install from archive
+🟡 spwn agent export neo                        Archive to neo.tar.gz
+🟡 spwn agent import ./neo.tar.gz               Install from archive
 🔴 spwn agent get @community/sci                Install a shared agent from a registry
 🔴 spwn agent publish neo                       Ship to registry (memory stripped)
 
@@ -336,7 +336,7 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 🟢 spwn skill   ls                              Your skill files
 🟢 spwn skill   new  paper-reading              Author a new skill
-🟢 spwn skill   edit paper-reading              Open in $EDITOR
+🟡 spwn skill   edit paper-reading              Open in $EDITOR
 🟢 spwn skill   show paper-reading              Display a skill
 🟢 spwn skill   rm   paper-reading              Delete a skill
 🔴 spwn skill   get  @community/rust-review     Install a shared skill
@@ -344,19 +344,19 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 🟢 spwn profile ls                              Your personality templates
 🟢 spwn profile new  researcher                 Author a new profile
-🟢 spwn profile edit researcher                 Open in $EDITOR
+🟡 spwn profile edit researcher                 Open in $EDITOR
 🟢 spwn profile show researcher                 Display a profile
 🟢 spwn profile rm   researcher                 Delete a profile
 🔴 spwn profile get  @community/pragmatic-dev   Install a shared profile
 🔴 spwn profile publish researcher              Ship to registry
 
 # ── Teams & orgs ─────────────────────────────────────────────────
-🟢 spwn team new     acme                       Create a team
-🟢 spwn team ls                                 List teams
-🟢 spwn team assign  neo acme                   Attach an agent to a team
-🟢 spwn team members acme                       List a team's agents
-🟢 spwn organization ls                         List organizations
-🟢 spwn organization inspect <name>             Show roles in an organization
+🟡 spwn team new     acme                       Create a team
+🟡 spwn team ls                                 List teams
+🟡 spwn team assign  neo acme                   Attach an agent to a team
+🟡 spwn team members acme                       List a team's agents
+🟡 spwn organization ls                         List organizations
+🟡 spwn organization inspect <name>             Show roles in an organization
 
 # ── Architect daemon ─────────────────────────────────────────────
 🟡 spwn architect start                         Start the always-on daemon
@@ -366,7 +366,7 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟡 spwn architect logs                          Show the Architect's event log
 
 # ── System ───────────────────────────────────────────────────────
-🟢 spwn web                                     Open the local web UI
+🟡 spwn web                                     Open the local web UI
 🟢 spwn status                                  Global status (worlds, auth, version)
 🟢 spwn auth login                              Connect Anthropic / OpenAI
 🟢 spwn auth logout                             Clear cached credentials

@@ -36,6 +36,8 @@ func init() {
 	Cmd.AddCommand(rmCmd)
 
 	Cmd.SetHelpFunc(skillHelp)
+
+	ui.MarkExperimental(editCmd)
 }
 
 func skillHelp(cmd *cobra.Command, args []string) {
