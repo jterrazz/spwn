@@ -1,0 +1,13 @@
+
+Walks up from the current directory looking for spwn.yaml, then runs
+every validation rule against the project. Reports issues grouped by
+severity. Exits non-zero when errors are found (or warnings, with
+--strict).
+
+Usage:
+  spwn check [flags]
+
+Flags:
+  -h, --help     help for check
+      --strict   Exit non-zero on warnings, not just errors
+

@@ -12,6 +12,6 @@
         "oxlint.config.ts",
         "oxfmt.config.ts"
     ],
-    "ignore": ["spwn/**", ".spwn/**"],
+    "ignore": ["spwn/**", ".spwn/**", "setup/fixtures.ts"],
     "ignoreDependencies": []
 }
