@@ -36,11 +36,14 @@ apps/                   Deployable consumers
   cli/                    The spwn binary (Cobra → domain APIs → output)
   web/                    Next.js + Tauri web/desktop UI
 
-examples/               Bundled example worlds
-fixtures/               Test fixtures (mock-claude, testdata, Dockerfile.test)
+catalog/                Shipped catalog (templates, tools, runtimes)
+  templates/              Bundled scenario projects
+  tools/                  Composable tool packs
+  runtimes/               Agent runtimes (claude-code, codex)
 
 tests/                  TypeScript E2E test suite
   e2e/                    Behavioral specs (world, agent, messaging, etc.)
+  fixtures/               Test fixtures (mock-claude, testdata, Dockerfile.test)
   setup/                  Test infrastructure (runners, assertions, mock LLM)
   ui/                     Playwright specs for the web UI
 ```

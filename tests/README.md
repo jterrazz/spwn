@@ -49,14 +49,14 @@ cd tests && npx tsc --noEmit     # type-check only
 - **Docker**: Required for all E2E tests (both Go and TypeScript).
 - **Go 1.25+**: Required for Go tests.
 - **Node.js 20+**: Required for TypeScript E2E tests.
-- **Test image**: Run `make build-test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `fixtures/Dockerfile.test`.
+- **Test image**: Run `make build-test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `tests/fixtures/Dockerfile.test`.
 - **Binary**: TypeScript E2E tests require `bin/spwn`. Run `make build` first.
 
 ## How mock-claude Works
 
 E2E tests do not call the real Claude Code CLI. Instead, they use a mock:
 
-**`fixtures/mock-claude/mock-claude.sh`** is a bash script installed as `/usr/local/bin/claude` inside the test Docker image. It:
+**`tests/fixtures/mock-claude/mock-claude.sh`** is a bash script installed as `/usr/local/bin/claude` inside the test Docker image. It:
 
 1. Accepts and ignores real Claude CLI flags (`--session-id`, `--resume`, etc.)
 2. Inspects the container environment (checks for `/agents`, `/world/physics.md`, `/work`, etc.)

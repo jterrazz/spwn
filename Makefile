@@ -60,7 +60,7 @@ uninstall:
 	@echo "  ✓ spwn removed from $(INSTALL_DIR)"
 
 build-test-image:
-	docker build -t spwn-test:latest -f fixtures/Dockerfile.test ./fixtures/mock-claude
+	docker build -t spwn-test:latest -f tests/fixtures/Dockerfile.test ./tests/fixtures/mock-claude
 
 # Unit tests (per domain)
 test:
