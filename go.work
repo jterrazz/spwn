@@ -4,6 +4,7 @@ use (
 	./apps/cli
 	./packages/activity
 	./packages/agent
+	./packages/api
 	./packages/auth
 	./packages/base
 	./packages/catalog

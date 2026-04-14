@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"spwn.sh/packages/world/internal/backend"
+	"spwn.sh/packages/image/backend"
 )
 
 // noContainersBackend implements backend.Backend with stubs that report

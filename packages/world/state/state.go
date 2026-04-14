@@ -67,6 +67,19 @@ func NewStoreWith(b backend.Backend, rs *runtimestate.Store) *Store {
 	return &Store{backend: b, rstate: rs}
 }
 
+// NewStoreWithBackendAt creates a Store wired to an explicit backend and
+// a runtimestate rooted at the given filesystem path. Intended for
+// external callers (notably packages/api test fixtures) that need full
+// control over the state layout without reaching into the unexported
+// runtimestate package.
+func NewStoreWithBackendAt(b backend.Backend, runtimeStatePath string) (*Store, error) {
+	rs, err := runtimestate.NewStoreAt(runtimeStatePath)
+	if err != nil {
+		return nil, fmt.Errorf("runtime state: %w", err)
+	}
+	return &Store{backend: b, rstate: rs}, nil
+}
+
 // NewStoreAt is kept for backwards compatibility with old code that
 // passed an explicit state file path. The path is now ignored - there
 // is no state file. We log a one-time eviction if anything exists at
