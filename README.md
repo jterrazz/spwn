@@ -29,11 +29,11 @@
 
 ## Play god with AI agents.
 
-**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** - one command away.
+**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** — one command away.
 
-The real power of AI isn't the model - it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
+The real power of AI isn't the model. It's the model *plus everything around it*. Einstein in a chatbox can answer questions. Einstein in a lab — with instruments, notebooks, colleagues, and years of memory — can change the world. **The environment is the multiplier.**
 
-**Agents as code. Docker for intelligence.** If Terraform is infrastructure as code, spwn is **agents as code** - stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review PRs that change an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**.
+That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code**: stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review the PR that changes an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**. **Docker for intelligence.**
 
 <br/>
 
