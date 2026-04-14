@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/base"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/base"
+	"spwn.sh/packages/mind"
 )
 
 func init() {
@@ -25,7 +25,7 @@ var inspectCmd = &cobra.Command{
 		name := args[0]
 		s := newStepper(cmd)
 
-		info, err := agentDomain.InspectAgent(name)
+		info, err := mind.InspectAgent(name)
 		if err != nil {
 			return fmt.Errorf("agent %q not found", name)
 		}
@@ -87,7 +87,7 @@ var inspectCmd = &cobra.Command{
 		}
 
 		// Show recent journal entries
-		entries, err := agentDomain.ListJournal(info.Path, 5)
+		entries, err := mind.ListJournal(info.Path, 5)
 		if err == nil && len(entries) > 0 {
 			s.Blank()
 			s.Info("Journal:", fmt.Sprintf("last %d entries", len(entries)))

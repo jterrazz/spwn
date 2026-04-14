@@ -6,9 +6,9 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 
-	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
+	"spwn.sh/packages/mind"
+	"spwn.sh/packages/world"
 )
 
 var (
@@ -88,6 +88,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 //   - `spwn agent` with no args and no flags -> help
 //   - `spwn agent <name>` -> start the world that contains <name>
 //   - `spwn agent --flags ...` -> legacy imperative spawn
+//
 // Subcommands (new, ls, start, stop, inspect, ...) resolve first.
 var Cmd = &cobra.Command{
 	Use:   "agent [name]",
@@ -151,7 +152,7 @@ survives after the world is destroyed.`,
 		if spawnImport != "" {
 			s.Blank()
 			s.Start("Importing agent...")
-			if err := agentDomain.ImportMind(agentName, spawnImport); err != nil {
+			if err := mind.ImportMind(agentName, spawnImport); err != nil {
 				return s.FailHint("Import failed", err, "Check that the archive exists and is a valid tar.gz")
 			}
 			s.Done("Imported agent", agentName)

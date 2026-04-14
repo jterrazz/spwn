@@ -3,8 +3,8 @@ package agent
 import (
 	"fmt"
 
-	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
+	"spwn.sh/packages/mind"
 )
 
 func init() {
@@ -23,7 +23,7 @@ var dreamCmd = &cobra.Command{
 		s.Blank()
 		s.Start(fmt.Sprintf("Dreaming for agent %q...", name))
 
-		result, err := agentDomain.Dream(name)
+		result, err := mind.Dream(name)
 		if err != nil {
 			return s.FailHint("Dream failed", err,
 				fmt.Sprintf("Check that agent %q exists with \"spwn agent inspect %s\"", name, name))

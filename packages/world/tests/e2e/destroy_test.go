@@ -5,7 +5,7 @@ package e2e
 import (
 	"testing"
 
-	agentDomain "spwn.sh/packages/mind"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
 
@@ -43,7 +43,7 @@ func TestDestroy_AgentSurvives(t *testing.T) {
 		})
 
 	// THEN the agent Mind should still exist on the host
-	info, err := agentDomain.InspectAgent("survivor-agent")
+	info, err := mind.InspectAgent("survivor-agent")
 	if err != nil {
 		t.Fatalf("Agent should survive after destroy: %v", err)
 	}

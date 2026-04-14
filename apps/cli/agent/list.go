@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/manifest"
-	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/mind"
+	"spwn.sh/packages/world"
 )
 
 var listFilterWorld string
@@ -45,7 +45,7 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		agents, err := agentDomain.ListAgents()
+		agents, err := mind.ListAgents()
 		if err != nil {
 			return fmt.Errorf("cannot list agents: %w", err)
 		}
@@ -55,7 +55,7 @@ var listCmd = &cobra.Command{
 
 		// Filter by world if requested
 		if listFilterWorld != "" {
-			filtered := make([]agentDomain.Info, 0)
+			filtered := make([]mind.Info, 0)
 			for _, a := range agents {
 				if info, ok := agentMap[a.Name]; ok && info.WorldID == listFilterWorld {
 					filtered = append(filtered, a)

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	agentDomain "spwn.sh/packages/mind"
 	"spwn.sh/packages/base"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
@@ -16,7 +16,7 @@ import (
 func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
 	// GIVEN default config and default agent are created (simulating ensureDefaults)
 	world.CreateDefaultConfig()
-	agentDomain.InitMind("default")
+	mind.InitMind("default")
 
 	// WHEN a world is spawned with no agent
 	chain := setup.NewSpawnBuilder(t).
@@ -38,7 +38,7 @@ func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
 func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
 	// GIVEN default config and default agent
 	world.CreateDefaultConfig()
-	agentDomain.InitMind("default")
+	mind.InitMind("default")
 
 	// WHEN a world is spawned with the default agent
 	chain := setup.NewSpawnBuilder(t).
@@ -92,13 +92,13 @@ func TestDefaults_DefaultAgentIsValid(t *testing.T) {
 	t.Setenv("SPWN_HOME", tmpDir)
 	os.MkdirAll(filepath.Join(tmpDir, "agents"), 0755)
 
-	_, err := agentDomain.InitMind("default")
+	_, err := mind.InitMind("default")
 	if err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 
 	// WHEN validating the agent
-	err = agentDomain.ValidateMind("default")
+	err = mind.ValidateMind("default")
 
 	// THEN it should pass validation
 	if err != nil {
@@ -115,19 +115,19 @@ func TestDefaults_IdempotentRerun(t *testing.T) {
 	if err := world.CreateDefaultConfig(); err != nil {
 		t.Fatalf("First CreateDefault failed: %v", err)
 	}
-	if _, err := agentDomain.InitMind("default"); err != nil {
+	if _, err := mind.InitMind("default"); err != nil {
 		t.Fatalf("First Init failed: %v", err)
 	}
 
 	// WHEN creating them again (idempotent re-run)
 	world.CreateDefaultConfig()
-	agentDomain.InitMind("default")
+	mind.InitMind("default")
 
 	// THEN the config and agent should still be valid
 	if _, err := world.LoadManifest("default"); err != nil {
 		t.Fatalf("Load after idempotent create failed: %v", err)
 	}
-	if err := agentDomain.ValidateMind("default"); err != nil {
+	if err := mind.ValidateMind("default"); err != nil {
 		t.Fatalf("Validate after idempotent init failed: %v", err)
 	}
 }

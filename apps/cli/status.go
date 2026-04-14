@@ -9,11 +9,11 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/base"
-	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/base"
+	"spwn.sh/packages/mind"
+	"spwn.sh/packages/world"
 )
 
 func init() {
@@ -143,7 +143,7 @@ var statusCmd = &cobra.Command{
 		}
 
 		// Agents
-		agentList, _ := agentDomain.ListAgents()
+		agentList, _ := mind.ListAgents()
 
 		// Agent → world mapping
 		worldMap := make(map[string]*world.World)
@@ -166,7 +166,7 @@ var statusCmd = &cobra.Command{
 		}
 
 		// Idle agents (not attached to any active world)
-		var idleAgents []agentDomain.Info
+		var idleAgents []mind.Info
 		for _, a := range agentList {
 			if _, attached := worldMap[a.Name]; !attached {
 				idleAgents = append(idleAgents, a)

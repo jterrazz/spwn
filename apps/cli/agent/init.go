@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	agentDomain "spwn.sh/packages/mind"
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/mind"
 )
 
 var initTeam string
@@ -45,7 +45,7 @@ provided, a random name is picked from a curated dictionary.`,
 
 		s.Blank()
 		s.Start(fmt.Sprintf("Creating agent %q...", name))
-		_, err := agentDomain.InitMind(name)
+		_, err := mind.InitMind(name)
 		if err != nil {
 			hint := "Check that ~/.spwn/agents/ is writable"
 			if strings.Contains(err.Error(), "already exists") {
@@ -72,7 +72,7 @@ provided, a random name is picked from a curated dictionary.`,
 
 		// Assign team if provided
 		if initTeam != "" {
-			if err := agentDomain.SetAgentTeam(name, initTeam); err != nil {
+			if err := mind.SetAgentTeam(name, initTeam); err != nil {
 				s.Warn("Warning", fmt.Sprintf("could not set team: %v", err))
 			} else {
 				s.Done("Team", initTeam)

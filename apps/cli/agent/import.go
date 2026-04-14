@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/mind"
 )
 
 func init() {
@@ -51,7 +51,7 @@ The archive must contain at least an identity/ layer.`,
 		}
 
 		// Check if agent already exists
-		agentDir := agentDomain.AgentDir(name)
+		agentDir := mind.AgentDir(name)
 		if _, err := os.Stat(agentDir); err == nil {
 			s.Blank()
 			return s.FailHint("Agent already exists", fmt.Errorf("agent %q already exists", name),
@@ -61,7 +61,7 @@ The archive must contain at least an identity/ layer.`,
 		s.Blank()
 		s.Start(fmt.Sprintf("Importing agent %s...", name))
 
-		if err := agentDomain.ImportMind(name, archivePath); err != nil {
+		if err := mind.ImportMind(name, archivePath); err != nil {
 			// Clean up partial import
 			os.RemoveAll(agentDir)
 			return s.FailHint("Import failed", err,

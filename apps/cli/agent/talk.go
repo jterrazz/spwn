@@ -10,10 +10,10 @@ import (
 	"os/exec"
 	"strings"
 
-	agentDomain "spwn.sh/packages/mind"
-	"spwn.sh/packages/base/auth"
-	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
+	"spwn.sh/packages/base/auth"
+	"spwn.sh/packages/mind"
+	"spwn.sh/packages/world"
 )
 
 var (
@@ -43,7 +43,7 @@ If no message is provided, opens an interactive session inside the container.`,
 		}
 		s := newStepper(cmd)
 
-		if err := agentDomain.ValidateMind(name); err != nil {
+		if err := mind.ValidateMind(name); err != nil {
 			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent create %s", name, name)
 		}
 
@@ -309,7 +309,6 @@ func routeAgentToWorld(
 
 	return "", "", fmt.Errorf("agent %q is not in any active world\n\n  Spawn one with: spwn up --agent %s -w <workspace>", agentName, agentName)
 }
-
 
 // extractSessionID looks at one line (or one document) of runtime output
 // and returns the runtime's session/thread identifier if present.

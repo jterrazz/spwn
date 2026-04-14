@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
+	"spwn.sh/packages/mind"
 )
 
 // ── test helpers ────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ func TestAgentAdd_SingleTool(t *testing.T) {
 		t.Fatalf("add: %v", err)
 	}
 
-	m, err := agentDomain.LoadManifest("neo")
+	m, err := mind.LoadManifest("neo")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestAgentAdd_MultipleToolsSkillsAndProfile(t *testing.T) {
 		t.Fatalf("add: %v", err)
 	}
 
-	m, _ := agentDomain.LoadManifest("neo")
+	m, _ := mind.LoadManifest("neo")
 	if len(m.Tools) != 3 {
 		t.Errorf("expected 3 tools, got %d: %v", len(m.Tools), m.Tools)
 	}
@@ -138,7 +138,7 @@ func TestAgentAdd_Idempotent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, _ := agentDomain.LoadManifest("neo")
+	m, _ := mind.LoadManifest("neo")
 	if len(m.Tools) != 1 {
 		t.Errorf("expected 1 tool (idempotent), got %d: %v", len(m.Tools), m.Tools)
 	}
@@ -164,8 +164,8 @@ func TestAgentRemove_Tool(t *testing.T) {
 	scaffoldAgent(t, "neo")
 
 	// Seed with two tools.
-	agentDomain.AddTool("neo", "@spwn/unix")
-	agentDomain.AddTool("neo", "@spwn/python")
+	mind.AddTool("neo", "@spwn/unix")
+	mind.AddTool("neo", "@spwn/python")
 
 	// Remove one.
 	resetComposeFlags()
@@ -175,7 +175,7 @@ func TestAgentRemove_Tool(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, _ := agentDomain.LoadManifest("neo")
+	m, _ := mind.LoadManifest("neo")
 	if len(m.Tools) != 1 || m.Tools[0] != "@spwn/python" {
 		t.Errorf("Tools = %v, want [@spwn/python]", m.Tools)
 	}
@@ -183,8 +183,8 @@ func TestAgentRemove_Tool(t *testing.T) {
 
 func TestAgentRemove_Skill(t *testing.T) {
 	scaffoldAgent(t, "neo")
-	agentDomain.AddSkill("neo", "refactoring")
-	agentDomain.AddSkill("neo", "paper-reading")
+	mind.AddSkill("neo", "refactoring")
+	mind.AddSkill("neo", "paper-reading")
 
 	resetComposeFlags()
 	composeSkills = []string{"paper-reading"}
@@ -193,7 +193,7 @@ func TestAgentRemove_Skill(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, _ := agentDomain.LoadManifest("neo")
+	m, _ := mind.LoadManifest("neo")
 	if len(m.Skills) != 1 || m.Skills[0] != "refactoring" {
 		t.Errorf("Skills = %v, want [refactoring]", m.Skills)
 	}
@@ -201,7 +201,7 @@ func TestAgentRemove_Skill(t *testing.T) {
 
 func TestAgentRemove_Profile(t *testing.T) {
 	scaffoldAgent(t, "neo")
-	agentDomain.SetProfile("neo", "researcher")
+	mind.SetProfile("neo", "researcher")
 
 	resetComposeFlags()
 	composeClearPro = true
@@ -210,7 +210,7 @@ func TestAgentRemove_Profile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, _ := agentDomain.LoadManifest("neo")
+	m, _ := mind.LoadManifest("neo")
 	if m.Profile != "" {
 		t.Errorf("Profile = %q, want empty after clear", m.Profile)
 	}
@@ -218,7 +218,7 @@ func TestAgentRemove_Profile(t *testing.T) {
 
 func TestAgentRemove_AbsentToolIsNoOp(t *testing.T) {
 	scaffoldAgent(t, "neo")
-	agentDomain.AddTool("neo", "@spwn/python")
+	mind.AddTool("neo", "@spwn/python")
 
 	resetComposeFlags()
 	composeTools = []string{"@spwn/never-added"}
@@ -228,7 +228,7 @@ func TestAgentRemove_AbsentToolIsNoOp(t *testing.T) {
 		t.Errorf("remove absent tool should be no-op, got: %v", err)
 	}
 
-	m, _ := agentDomain.LoadManifest("neo")
+	m, _ := mind.LoadManifest("neo")
 	if len(m.Tools) != 1 {
 		t.Errorf("Tools = %v, want unchanged", m.Tools)
 	}

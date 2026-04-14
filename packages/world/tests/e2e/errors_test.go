@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	agentDomain "spwn.sh/packages/mind"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
@@ -32,7 +32,7 @@ func TestError_SpawnWithNonExistentAgent(t *testing.T) {
 	_ = setup.NewTestContext(t)
 
 	// WHEN validating a non-existent agent
-	err := agentDomain.ValidateMind("ghost-agent-does-not-exist")
+	err := mind.ValidateMind("ghost-agent-does-not-exist")
 
 	// THEN it should return an error
 	if err == nil {
@@ -68,7 +68,6 @@ func TestError_InspectNonExistentWorld(t *testing.T) {
 		t.Fatal("Expected error when inspecting non-existent world, got nil")
 	}
 }
-
 
 func TestError_DoubleDestroySameWorld(t *testing.T) {
 	// GIVEN a world that has been destroyed once

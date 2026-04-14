@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/mind"
 )
 
 func init() {
@@ -26,7 +26,7 @@ var forkCmd = &cobra.Command{
 		s.Blank()
 		s.Start(fmt.Sprintf("Forking %q -> %q...", source, target))
 
-		result, err := agentDomain.Fork(source, target, nil)
+		result, err := mind.Fork(source, target, nil)
 		if err != nil {
 			return s.FailHint("Fork failed", err, "Check agents exist with \"spwn agent ls\"")
 		}

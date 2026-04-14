@@ -5,7 +5,7 @@ package e2e
 import (
 	"testing"
 
-	agentDomain "spwn.sh/packages/mind"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
 
@@ -43,7 +43,7 @@ func TestAgent_List(t *testing.T) {
 	ctx.InitAgent("agent-b")
 
 	// WHEN listing agents
-	agents, err := agentDomain.ListAgents()
+	agents, err := mind.ListAgents()
 	if err != nil {
 		t.Fatalf("Failed to list agents: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestAgent_Inspect(t *testing.T) {
 	ctx.InitAgent("inspect-agent")
 
 	// WHEN inspecting the agent
-	info, err := agentDomain.InspectAgent("inspect-agent")
+	info, err := mind.InspectAgent("inspect-agent")
 	if err != nil {
 		t.Fatalf("Failed to inspect agent: %v", err)
 	}

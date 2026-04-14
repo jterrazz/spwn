@@ -5,7 +5,7 @@ package e2e
 import (
 	"testing"
 
-	agentDomain "spwn.sh/packages/mind"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
@@ -52,7 +52,7 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 		})
 
 	// AND the agent should persist on the host
-	info, err := agentDomain.InspectAgent("e2e-agent")
+	info, err := mind.InspectAgent("e2e-agent")
 	if err != nil {
 		t.Fatalf("Agent should survive after destroy: %v", err)
 	}

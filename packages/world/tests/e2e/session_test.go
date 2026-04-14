@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world/tests/e2e/setup"
-	agentDomain "spwn.sh/packages/mind"
 )
 
 func TestSession_FirstSpawnCreatesSession(t *testing.T) {
@@ -35,8 +35,8 @@ func TestSession_FirstSpawnCreatesSession(t *testing.T) {
 
 func TestSession_DeterministicID(t *testing.T) {
 	// GIVEN two calls to DeterministicSessionID with the same inputs
-	id1 := agentDomain.DeterministicSessionID("test-agent", "u-default-12345")
-	id2 := agentDomain.DeterministicSessionID("test-agent", "u-default-12345")
+	id1 := mind.DeterministicSessionID("test-agent", "u-default-12345")
+	id2 := mind.DeterministicSessionID("test-agent", "u-default-12345")
 
 	// THEN the IDs should be identical
 	if id1 != id2 {
@@ -49,7 +49,7 @@ func TestSession_DeterministicID(t *testing.T) {
 	}
 
 	// AND different inputs should produce different IDs
-	id3 := agentDomain.DeterministicSessionID("other-agent", "u-default-12345")
+	id3 := mind.DeterministicSessionID("other-agent", "u-default-12345")
 	if id1 == id3 {
 		t.Fatalf("Different agents should produce different session IDs")
 	}
@@ -72,8 +72,8 @@ func TestSession_FileContainsCorrectWorldID(t *testing.T) {
 	})
 
 	// THEN the session file should contain the correct world ID
-	mindPath := agentDomain.AgentDir("sess-wid-agent")
-	sess, err := agentDomain.LoadSession(mindPath, worldID)
+	mindPath := mind.AgentDir("sess-wid-agent")
+	sess, err := mind.LoadSession(mindPath, worldID)
 	if err != nil {
 		t.Fatalf("Failed to load session: %v", err)
 	}
@@ -110,8 +110,8 @@ func TestSession_PersistsAfterDestroy(t *testing.T) {
 	chain.Destroy()
 
 	// THEN the session file should still exist (persist after destruction)
-	mindPath := agentDomain.AgentDir("persist-agent")
-	sess, err := agentDomain.LoadSession(mindPath, worldID)
+	mindPath := mind.AgentDir("persist-agent")
+	sess, err := mind.LoadSession(mindPath, worldID)
 	if err != nil {
 		t.Fatalf("Failed to load session after destroy: %v", err)
 	}
@@ -147,13 +147,13 @@ func TestSession_DifferentWorldsDifferentSessions(t *testing.T) {
 	worldID2 := chain2.World().ID
 
 	// THEN each world should have its own session file
-	mindPath := agentDomain.AgentDir("multi-sess-agent")
+	mindPath := mind.AgentDir("multi-sess-agent")
 
-	sess1, err := agentDomain.LoadSession(mindPath, worldID1)
+	sess1, err := mind.LoadSession(mindPath, worldID1)
 	if err != nil || sess1 == nil {
 		t.Fatalf("Expected session for world %s", worldID1)
 	}
-	sess2, err := agentDomain.LoadSession(mindPath, worldID2)
+	sess2, err := mind.LoadSession(mindPath, worldID2)
 	if err != nil || sess2 == nil {
 		t.Fatalf("Expected session for world %s", worldID2)
 	}
@@ -181,8 +181,8 @@ func TestSession_SecondSpawnPreservesSessionID(t *testing.T) {
 	})
 
 	// Capture the session ID stored after the first spawn.
-	mindPath := agentDomain.AgentDir("resume-agent")
-	first, err := agentDomain.LoadSession(mindPath, worldID)
+	mindPath := mind.AgentDir("resume-agent")
+	first, err := mind.LoadSession(mindPath, worldID)
 	if err != nil || first == nil {
 		t.Fatalf("Expected session after first spawn, got err=%v sess=%v", err, first)
 	}
@@ -198,7 +198,7 @@ func TestSession_SecondSpawnPreservesSessionID(t *testing.T) {
 	})
 
 	// THEN the session file should still have the same deterministic ID.
-	second, err := agentDomain.LoadSession(mindPath, worldID)
+	second, err := mind.LoadSession(mindPath, worldID)
 	if err != nil || second == nil {
 		t.Fatalf("Expected session after second spawn, got err=%v sess=%v", err, second)
 	}

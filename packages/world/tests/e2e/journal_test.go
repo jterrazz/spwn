@@ -5,7 +5,7 @@ package e2e
 import (
 	"testing"
 
-	agentDomain "spwn.sh/packages/mind"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
 
@@ -43,8 +43,8 @@ func TestJournal_ListReturnsNewestFirst(t *testing.T) {
 		Execute()
 
 	// WHEN listing journal entries
-	mindPath := agentDomain.AgentDir("journal-order")
-	entries, err := agentDomain.ListJournal(mindPath, 0)
+	mindPath := mind.AgentDir("journal-order")
+	entries, err := mind.ListJournal(mindPath, 0)
 	if err != nil {
 		t.Fatalf("Failed to list journal: %v", err)
 	}
