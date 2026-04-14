@@ -38,7 +38,10 @@ severity. Exits non-zero when errors are found (or warnings, with
 			return fmt.Errorf("no spwn.yaml found in %s or any parent directory.\nRun `spwn init` to create one", cwd)
 		}
 
-		issues := manifest.Validate(p)
+		issues := manifest.Validate(p, manifest.ValidateOpts{
+			BuiltinTools:      catalogToolNames(),
+			SupportedRuntimes: supportedRuntimes(),
+		})
 		out := cmd.OutOrStdout()
 
 		if len(issues) == 0 {

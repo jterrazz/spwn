@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	intmanifest "spwn.sh/packages/manifest/internal/manifest"
 )
@@ -70,6 +71,19 @@ type Input struct {
 	AgentExists []bool
 	WorldPath   string
 	WorldExists bool
+
+	// BuiltinTools is the authoritative catalog of known tool packs.
+	// Callers (typically the CLI) populate this from the imagebuilder
+	// catalog so tool-existence rules don't have to hard-code names.
+	// Nil means "don't check tool existence against a catalog, fall
+	// back to @spwn/* prefix heuristics".
+	BuiltinTools []string
+
+	// SupportedRuntimes is the list of runtime identifiers the host
+	// can actually spawn (e.g. "claude-code"). Callers populate this
+	// from packages/world/internal/runtime at CLI wiring time. Nil
+	// means "don't check runtimes".
+	SupportedRuntimes []string
 }
 
 // Run executes every rule against the input and returns all issues.
@@ -77,13 +91,27 @@ type Input struct {
 func Run(in Input) []Issue {
 	var out []Issue
 	rules := []func(Input) []Issue{
+		// Schema (fast, in-memory)
 		ruleManifestVersion,
 		ruleManifestName,
 		ruleManifestWorld,
 		ruleManifestAgents,
+		ruleDuplicateAgents,
+		ruleWorkspaceExists,
+		ruleWorkspaceEscape,
+
+		// Structure (filesystem checks)
 		ruleWorldExists,
 		ruleAgentDirs,
-		ruleWorkspaceExists,
+
+		// YAML content
+		ruleWorldYAMLParses,
+		ruleAgentYAMLParses,
+
+		// Cross-cutting
+		ruleWorldToolsExist,
+		ruleAgentToolsSubsetOfWorld,
+		ruleRuntimeSupported,
 	}
 	for _, r := range rules {
 		out = append(out, r(in)...)
@@ -274,6 +302,45 @@ func ruleWorkspaceExists(in Input) []Issue {
 		}}
 	}
 	return nil
+}
+
+// ruleWorkspaceEscape blocks workspace paths that resolve outside the
+// project root. Without this, `workspace: ../../../etc` would silently
+// mount the user's entire disk into every spawned container.
+func ruleWorkspaceEscape(in Input) []Issue {
+	if in.Manifest == nil || in.Manifest.Workspace == "" {
+		return nil
+	}
+	workspace := in.Manifest.Workspace
+	if filepath.IsAbs(workspace) {
+		// Absolute paths are an explicit user choice; no escape to
+		// flag. Still warn so the user knows they've opted out of
+		// project containment.
+		return []Issue{{
+			Level:   LevelWarning,
+			Path:    "spwn.yaml#workspace",
+			Message: "workspace is an absolute path, outside the project root",
+			Hint:    "prefer a relative path so the project is portable",
+		}}
+	}
+	absRoot, err := filepath.Abs(in.Root)
+	if err != nil {
+		return nil
+	}
+	absWs, err := filepath.Abs(filepath.Join(in.Root, workspace))
+	if err != nil {
+		return nil
+	}
+	// Same dir or a child — OK.
+	if absWs == absRoot || strings.HasPrefix(absWs+string(filepath.Separator), absRoot+string(filepath.Separator)) {
+		return nil
+	}
+	return []Issue{{
+		Level:   LevelError,
+		Path:    "spwn.yaml#workspace",
+		Message: "workspace path escapes the project root",
+		Hint:    "use a path inside the project, or absolute if you really mean outside",
+	}}
 }
 
 func relPath(root, path string) string {

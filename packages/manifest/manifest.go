@@ -127,21 +127,43 @@ func Init(dir string, opts InitOpts) error {
 	})
 }
 
+// ValidateOpts configures Validate. Zero value is valid and skips
+// catalog-backed rules (tool existence, runtime support). Callers
+// should populate this from the imagebuilder catalog for the richest
+// error messages, including "did you mean X?" hints.
+type ValidateOpts struct {
+	// BuiltinTools is the authoritative list of @scope/name tool
+	// identifiers the host knows how to build. When empty, tool
+	// existence falls back to a simple @spwn/* prefix heuristic.
+	BuiltinTools []string
+
+	// SupportedRuntimes is the list of runtime identifiers the host
+	// can actually spawn (e.g. "claude-code"). When empty, runtime
+	// validity is not checked.
+	SupportedRuntimes []string
+}
+
 // Validate runs every validation rule against the project and returns
 // the collected issues. It never returns an error — all problems
 // surface as Issues with a Level. Callers decide what to do with
 // warnings vs errors.
-func Validate(p *Project) []Issue {
+func Validate(p *Project, opts ...ValidateOpts) []Issue {
 	if p == nil {
 		return nil
 	}
+	var o ValidateOpts
+	if len(opts) > 0 {
+		o = opts[0]
+	}
 	return validate.Run(validate.Input{
-		Root:         p.Root,
-		Manifest:     p.Manifest,
-		AgentPaths:   agentPaths(p.Agents),
-		WorldPath:    p.World.Path,
-		WorldExists:  p.World.Exists,
-		AgentExists:  agentExistence(p.Agents),
+		Root:              p.Root,
+		Manifest:          p.Manifest,
+		AgentPaths:        agentPaths(p.Agents),
+		WorldPath:         p.World.Path,
+		WorldExists:       p.World.Exists,
+		AgentExists:       agentExistence(p.Agents),
+		BuiltinTools:      o.BuiltinTools,
+		SupportedRuntimes: o.SupportedRuntimes,
 	})
 }
 

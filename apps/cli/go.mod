@@ -9,6 +9,7 @@ require (
 	spwn.sh/examples v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/foundation v0.0.0
+	spwn.sh/packages/imagebuilder v0.0.0
 	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
 	spwn.sh/packages/messenger v0.0.0
 	spwn.sh/packages/migration v0.0.0
@@ -46,7 +47,6 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	spwn.sh/packages/imagebuilder v0.0.0 // indirect
 )
 
 replace (
