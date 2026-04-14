@@ -5,7 +5,7 @@ slug: "spwn-ls"
 
 ## spwn ls
 
-List active worlds
+Agent-centric status (running / stopped / orphan)
 
 ```
 spwn ls [flags]

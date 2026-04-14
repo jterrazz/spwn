@@ -5,7 +5,13 @@ slug: "spwn-team-new"
 
 ## spwn team new
 
-Create a new team
+[experimental] Create a new team
+
+### Synopsis
+
+[experimental] Create a new team
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn team new <name> [flags]
@@ -28,5 +34,5 @@ spwn team new <name> [flags]
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 

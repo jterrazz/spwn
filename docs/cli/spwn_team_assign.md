@@ -5,7 +5,13 @@ slug: "spwn-team-assign"
 
 ## spwn team assign
 
-Assign an agent to a team (or --clear to remove)
+[experimental] Assign an agent to a team (or --clear to remove)
+
+### Synopsis
+
+[experimental] Assign an agent to a team (or --clear to remove)
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn team assign <agent-name> <team-slug> [flags]
@@ -27,5 +33,5 @@ spwn team assign <agent-name> <team-slug> [flags]
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 

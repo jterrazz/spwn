@@ -5,12 +5,14 @@ slug: "spwn-web"
 
 ## spwn web
 
-Open the local web UI
+[experimental] Open the local web UI
 
 ### Synopsis
 
 Starts the Web UI (Next.js frontend + Go API server) and opens it
 in your default browser. Blocks until Ctrl+C.
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn web [flags]

@@ -5,7 +5,13 @@ slug: "spwn-agent-fork"
 
 ## spwn agent fork
 
-Clone a Mind from one agent to another
+[experimental] Clone a Mind from one agent to another
+
+### Synopsis
+
+[experimental] Clone a Mind from one agent to another
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn agent fork <source> <target> [flags]

@@ -5,7 +5,13 @@ slug: "spwn-team-members"
 
 ## spwn team members
 
-List agents in a team
+[experimental] List agents in a team
+
+### Synopsis
+
+[experimental] List agents in a team
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn team members <slug> [flags]
@@ -25,5 +31,5 @@ spwn team members <slug> [flags]
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 

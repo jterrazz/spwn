@@ -5,7 +5,13 @@ slug: "spwn-team-ls"
 
 ## spwn team ls
 
-List all teams
+[experimental] List all teams
+
+### Synopsis
+
+[experimental] List all teams
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn team ls [flags]
@@ -19,5 +25,5 @@ spwn team ls [flags]
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 

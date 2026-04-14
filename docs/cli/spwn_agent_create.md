@@ -1,9 +1,9 @@
 ---
-title: "spwn agent new"
-slug: "spwn-agent-new"
+title: "spwn agent create"
+slug: "spwn-agent-create"
 ---
 
-## spwn agent new
+## spwn agent create
 
 Create a new agent with a 6-layer Mind
 
@@ -13,13 +13,13 @@ Create a new agent with the 6-layer Mind structure. If no name is
 provided, a random name is picked from a curated dictionary.
 
 ```
-spwn agent new [name] [flags]
+spwn agent create [name] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          help for new
+  -h, --help          help for create
       --team string   Assign agent to a team (slug)
 ```
 

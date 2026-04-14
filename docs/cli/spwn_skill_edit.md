@@ -5,7 +5,13 @@ slug: "spwn-skill-edit"
 
 ## spwn skill edit
 
-Open a skill file in $EDITOR
+[experimental] Open a skill file in $EDITOR
+
+### Synopsis
+
+[experimental] Open a skill file in $EDITOR
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn skill edit <skill-name> [flags]

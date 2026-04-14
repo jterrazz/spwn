@@ -5,7 +5,13 @@ slug: "spwn-organization-ls"
 
 ## spwn organization ls
 
-List all organizations
+[experimental] List all organizations
+
+### Synopsis
+
+[experimental] List all organizations
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn organization ls [flags]
@@ -19,5 +25,5 @@ spwn organization ls [flags]
 
 ### SEE ALSO
 
-* [spwn organization](./spwn_organization.md)	 - Manage organizations - list and inspect role structures
+* [spwn organization](./spwn_organization.md)	 - [experimental] Manage organizations - list and inspect role structures
 

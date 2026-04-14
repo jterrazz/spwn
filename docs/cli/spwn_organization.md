@@ -5,7 +5,13 @@ slug: "spwn-organization"
 
 ## spwn organization
 
-Manage organizations - list and inspect role structures
+[experimental] Manage organizations - list and inspect role structures
+
+### Synopsis
+
+[experimental] Manage organizations - list and inspect role structures
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ### Options
 
@@ -16,6 +22,6 @@ Manage organizations - list and inspect role structures
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
-* [spwn organization inspect](./spwn_organization_inspect.md)	 - Show roles in an organization
-* [spwn organization ls](./spwn_organization_ls.md)	 - List all organizations
+* [spwn organization inspect](./spwn_organization_inspect.md)	 - [experimental] Show roles in an organization
+* [spwn organization ls](./spwn_organization_ls.md)	 - [experimental] List all organizations
 

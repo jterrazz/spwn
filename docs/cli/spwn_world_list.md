@@ -5,7 +5,7 @@ slug: "spwn-world-list"
 
 ## spwn world list
 
-List all active worlds
+List declared worlds and their running status
 
 ```
 spwn world list [flags]

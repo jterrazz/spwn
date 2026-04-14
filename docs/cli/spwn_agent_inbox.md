@@ -5,7 +5,13 @@ slug: "spwn-agent-inbox"
 
 ## spwn agent inbox
 
-Show messages in an agent's inbox
+[experimental] Show messages in an agent's inbox
+
+### Synopsis
+
+[experimental] Show messages in an agent's inbox
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn agent inbox <agent-name> [flags]

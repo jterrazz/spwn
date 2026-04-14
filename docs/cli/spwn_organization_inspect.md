@@ -5,7 +5,13 @@ slug: "spwn-organization-inspect"
 
 ## spwn organization inspect
 
-Show roles in an organization
+[experimental] Show roles in an organization
+
+### Synopsis
+
+[experimental] Show roles in an organization
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn organization inspect <slug> [flags]
@@ -19,5 +25,5 @@ spwn organization inspect <slug> [flags]
 
 ### SEE ALSO
 
-* [spwn organization](./spwn_organization.md)	 - Manage organizations - list and inspect role structures
+* [spwn organization](./spwn_organization.md)	 - [experimental] Manage organizations - list and inspect role structures
 

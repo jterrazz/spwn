@@ -5,11 +5,13 @@ slug: "spwn-agent-send"
 
 ## spwn agent send
 
-Send a message to an agent's inbox
+[experimental] Send a message to an agent's inbox
 
 ### Synopsis
 
 Send an async message to a running agent. The agent must be in an active world.
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn agent send <agent-name> [message] [flags]

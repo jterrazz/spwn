@@ -5,7 +5,13 @@ slug: "spwn-agent-watch"
 
 ## spwn agent watch
 
-Watch for new messages to an agent
+[experimental] Watch for new messages to an agent
+
+### Synopsis
+
+[experimental] Watch for new messages to an agent
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn agent watch <agent-name> [flags]

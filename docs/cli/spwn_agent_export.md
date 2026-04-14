@@ -5,7 +5,13 @@ slug: "spwn-agent-export"
 
 ## spwn agent export
 
-Export an agent as tar.gz
+[experimental] Export an agent as tar.gz
+
+### Synopsis
+
+[experimental] Export an agent as tar.gz
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn agent export <agent-name> [flags]

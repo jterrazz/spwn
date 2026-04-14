@@ -5,7 +5,7 @@ slug: "spwn-agent-import"
 
 ## spwn agent import
 
-Import an agent from a tar.gz archive
+[experimental] Import an agent from a tar.gz archive
 
 ### Synopsis
 
@@ -13,6 +13,8 @@ Import an agent's Mind from a previously exported tar.gz archive.
 
 The agent name is derived from the archive filename (e.g., neo.tar.gz → neo).
 The archive must contain at least an identity/ layer.
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn agent import <path-to-tar.gz> [flags]

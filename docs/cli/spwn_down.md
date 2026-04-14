@@ -8,7 +8,7 @@ slug: "spwn-down"
 Destroy a world
 
 ```
-spwn down [world-id] [flags]
+spwn down [name-or-id] [flags]
 ```
 
 ### Options

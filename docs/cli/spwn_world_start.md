@@ -1,0 +1,29 @@
+---
+title: "spwn world start"
+slug: "spwn-world-start"
+---
+
+## spwn world start
+
+Start a world (alias for `spwn up`)
+
+```
+spwn world start [name] [flags]
+```
+
+### Options
+
+```
+  -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
+  -c, --config string           Named world config (default: default)
+  -h, --help                    help for start
+  -i, --interactive             Drop into the agent's session after spawn
+  -n, --name string             Display name for the world
+  -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
+  -u, --world string            Explicit path to a YAML config file
+```
+
+### SEE ALSO
+
+* [spwn world](./spwn_world.md)	 - Manage worlds - ephemeral runtime instances for agents
+

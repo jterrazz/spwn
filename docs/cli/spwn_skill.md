@@ -23,7 +23,7 @@ Attach one to an agent with:
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
-* [spwn skill edit](./spwn_skill_edit.md)	 - Open a skill file in $EDITOR
+* [spwn skill edit](./spwn_skill_edit.md)	 - [experimental] Open a skill file in $EDITOR
 * [spwn skill get](./spwn_skill_get.md)	 - Install a skill from the registry
 * [spwn skill ls](./spwn_skill_ls.md)	 - List skill files
 * [spwn skill new](./spwn_skill_new.md)	 - Author a new skill file

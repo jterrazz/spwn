@@ -5,7 +5,13 @@ slug: "spwn-team-edit"
 
 ## spwn team edit
 
-Edit a team's metadata
+[experimental] Edit a team's metadata
+
+### Synopsis
+
+[experimental] Edit a team's metadata
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn team edit <slug> [flags]
@@ -28,5 +34,5 @@ spwn team edit <slug> [flags]
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 

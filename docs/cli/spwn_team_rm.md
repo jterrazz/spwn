@@ -5,7 +5,13 @@ slug: "spwn-team-rm"
 
 ## spwn team rm
 
-Delete a team (agents become solo)
+[experimental] Delete a team (agents become solo)
+
+### Synopsis
+
+[experimental] Delete a team (agents become solo)
+
+⚠ Experimental: this command is in development and may change or break without notice.
 
 ```
 spwn team rm <slug> [flags]
@@ -19,5 +25,5 @@ spwn team rm <slug> [flags]
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 
