@@ -36,8 +36,8 @@ describe('spwn agent CRUD', () => {
             .exec(['agent create neo', 'agent create neo'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
-        result.stderr.toContain('agent "neo" already exists');
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('create-duplicate.txt');
         expect(result.stderr.text).not.toContain('panic:');
     });
 
@@ -75,8 +75,8 @@ describe('spwn agent CRUD', () => {
     test('show on a missing agent errors cleanly', async () => {
         const result = await isolated('show missing').exec('agent show ghost').run();
 
-        expect(result.exitCode).not.toBe(0);
-        result.stderr.toContain('agent "ghost" not found');
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('show-missing.txt');
         expect(result.stderr.text).not.toContain('panic:');
     });
 
@@ -91,8 +91,8 @@ describe('spwn agent CRUD', () => {
     test('rm on a missing agent errors cleanly', async () => {
         const result = await isolated('rm missing').exec('agent rm ghost').run();
 
-        expect(result.exitCode).not.toBe(0);
-        result.stderr.toContain('agent "ghost" not found');
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('rm-missing.txt');
         expect(result.stderr.text).not.toContain('panic:');
     });
 
@@ -101,8 +101,8 @@ describe('spwn agent CRUD', () => {
             .exec(['agent create temp', 'agent rm temp', 'agent show temp'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
-        result.stderr.toContain('agent "temp" not found');
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('rm-then-show-not-found.txt');
     });
 
     test('talk without a world fails with a helpful error', async () => {
@@ -110,7 +110,7 @@ describe('spwn agent CRUD', () => {
             .exec(['agent create neo', 'agent talk neo hello'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
-        result.stderr.toContain('agent "neo" is not in any active world');
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('talk-no-active-world.txt');
     });
 });

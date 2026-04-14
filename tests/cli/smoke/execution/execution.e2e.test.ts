@@ -33,7 +33,7 @@ describe('CLI execution - agent commands', () => {
          */
         const result = await isolated('agent rm missing').exec('agent rm ghost').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('panic:');
         expect(result.stderr.text).not.toContain('goroutine ');
     });
@@ -47,7 +47,7 @@ describe('CLI execution - agent commands', () => {
     test("'spwn agent show' on nonexistent agent errors cleanly", async () => {
         const result = await isolated('agent show missing').exec('agent show ghost').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('panic:');
         expect(result.stderr.text).not.toContain('goroutine ');
     });
@@ -59,7 +59,7 @@ describe('CLI execution - enter command', () => {
     test("'spwn world enter <nonexistent-id>' returns clean error", async () => {
         const result = await isolated('enter nonexistent').exec('world enter w-fake-99999').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('panic:');
         expect(result.stderr.text).not.toContain('goroutine ');
     });

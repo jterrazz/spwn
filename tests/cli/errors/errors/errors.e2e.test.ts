@@ -21,7 +21,7 @@ describe('error handling', () => {
     test('destroy non-existent world', async () => {
         const result = await isolated('destroy missing').exec('down w-nonexistent-00000').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('destroy-missing.txt');
     });
 
@@ -30,14 +30,14 @@ describe('error handling', () => {
             .exec('world inspect w-nonexistent-00000')
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('inspect-missing.txt');
     });
 
     test('agent --ephemeral without --world flag', async () => {
         const result = await isolated('npc no world').exec('agent --ephemeral lint-code').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
     });
 
     test('agent dream non-existent agent skips gracefully', async () => {
@@ -50,7 +50,7 @@ describe('error handling', () => {
     test('agent export non-existent agent', async () => {
         const result = await isolated('export missing').exec('agent export nonexistent').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('export-missing.txt');
     });
 
@@ -68,21 +68,21 @@ describe('error handling', () => {
     test('agent talk to non-existent agent', async () => {
         const result = await isolated('talk missing').exec('agent talk nonexistent "hello"').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('talk-missing.txt');
     });
 
     test('delete non-existent agent shows error', async () => {
         const result = await isolated('delete ghost').exec('agent rm ghost').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('delete-missing.txt');
     });
 
     test('no usage dump on errors', async () => {
         const result = await isolated('error no usage').exec('down w-nonexistent-00000').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         // Hygiene: errors must not leak help text into either stream.
         expect(result.stderr.text).not.toContain('Available Commands:');
         expect(result.stderr.text).not.toContain('Global Flags:');
@@ -100,7 +100,7 @@ describe('error handling', () => {
          */
         const result = await isolated('error format check').exec('down w-nonexistent-00000').run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('destroy-missing.txt');
     });
 });

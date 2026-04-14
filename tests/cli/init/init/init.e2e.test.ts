@@ -44,7 +44,7 @@ describe('spwn init', () => {
         const result = await spec('init conflict').project('single-agent').exec('init').run();
 
         // Then - exits non-zero and points at --force
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('init-already-exists.txt');
     });
 

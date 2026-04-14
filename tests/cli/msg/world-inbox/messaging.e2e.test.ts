@@ -129,8 +129,8 @@ describe('agent messaging', () => {
             .exec(['up', 'agent send nonexistent --from morpheus "hello"'])
             .run();
 
-        // The up step succeeds; the send step fails — combined exit code non-zero.
-        expect(result.exitCode).not.toBe(0);
+        // The up step succeeds; the send step fails — combined exit code 1.
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('TypeError');
         expect(result.stderr.text).not.toContain('panic');
         expect(result.stderr.text).not.toContain('goroutine');
@@ -143,7 +143,7 @@ describe('agent messaging', () => {
             .exec(['up', 'agent inbox nonexistent'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('TypeError');
         expect(result.stderr.text).not.toContain('panic');
         expect(result.stderr.text).not.toContain('goroutine');

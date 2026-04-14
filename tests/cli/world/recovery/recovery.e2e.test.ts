@@ -37,7 +37,7 @@ describe('error recovery', () => {
             .exec('down neo')
             .run();
 
-        expect(secondDown.exitCode).not.toBe(0);
+        expect(secondDown.exitCode).toBe(1);
         expect(secondDown.stderr.text).toMatch(/not (found|running)|no (running )?worlds?/i);
         // No stack trace, no usage dump.
         expect(secondDown.stderr.text).not.toContain('TypeError');
@@ -53,7 +53,7 @@ describe('error recovery', () => {
             .exec('world inspect w-ghost-99999')
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).toMatch(/not found/i);
         expect(result.stdout.text).not.toContain('Available Commands:');
         expect(result.stderr.text).not.toContain('panic');
@@ -68,7 +68,7 @@ describe('error recovery', () => {
             .exec('up nonexistent-world')
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
 
         // And no container was left behind.
         expect(result.container('neo').exists).toBe(false);
@@ -86,7 +86,7 @@ describe('error recovery', () => {
             .project('docker-pilot')
             .exec('down w-ghost-00000')
             .run();
-        expect(errorResult.exitCode).not.toBe(0);
+        expect(errorResult.exitCode).toBe(1);
 
         // Then: a normal command in a fresh project dir still works.
         await using listResult = await spec('list after error')

@@ -56,8 +56,8 @@ describe('spwn agent export', () => {
     test('export on a missing agent errors cleanly', async () => {
         const result = await isolated('export missing').exec('agent export ghost').run();
 
-        expect(result.exitCode).not.toBe(0);
-        result.stderr.toContain('agent "ghost" not found');
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('export-missing-agent.txt');
         expect(result.stderr.text).not.toContain('panic:');
     });
 

@@ -1,0 +1,5 @@
+
+  Error: agent "neo" is not in any active world
+
+  Spawn one with: spwn up --agent neo -w <workspace>
+

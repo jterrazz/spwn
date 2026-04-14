@@ -87,7 +87,7 @@ describe('agent messaging (msg)', () => {
             .exec(['up', 'agent send nonexistent --from morpheus "hello"'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
 
         expect(result.stderr.text).not.toContain('TypeError');
         expect(result.stderr.text).not.toContain('ReferenceError');
@@ -102,7 +102,7 @@ describe('agent messaging (msg)', () => {
             .exec(['up', 'agent inbox nonexistent'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
 
         expect(result.stderr.text).not.toContain('TypeError');
         expect(result.stderr.text).not.toContain('ReferenceError');

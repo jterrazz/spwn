@@ -44,7 +44,7 @@ describe('agent talk', () => {
             .exec(['agent create orphan', 'agent talk orphan hello'])
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr.text).toMatch(/not in any active world|no active world/i);
         expect(result.stderr.text).not.toContain('panic');
     });
@@ -55,7 +55,7 @@ describe('agent talk', () => {
             .exec('agent talk does-not-exist hello')
             .run();
 
-        expect(result.exitCode).not.toBe(0);
+        expect(result.exitCode).toBe(1);
         // Should NOT leak the raw Go wrapper noise.
         expect(result.stderr.text).not.toContain('exit status 1');
         expect(result.stderr.text).not.toContain('panic');

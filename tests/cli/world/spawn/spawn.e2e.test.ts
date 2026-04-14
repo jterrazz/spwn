@@ -164,7 +164,7 @@ describe('world spawn', () => {
                 .exec('up nonexistent-world')
                 .run();
 
-            expect(result.exitCode).not.toBe(0);
+            expect(result.exitCode).toBe(1);
 
             expect(result.stderr.text).not.toContain('panic');
             expect(result.stderr.text).not.toContain('goroutine');
@@ -181,7 +181,7 @@ describe('world spawn', () => {
                 .exec('world up --agent ghost')
                 .run();
 
-            expect(result.exitCode).not.toBe(0);
+            expect(result.exitCode).toBe(1);
 
             expect(result.stderr.text).not.toContain('panic');
             expect(result.stderr.text).not.toContain('goroutine');
