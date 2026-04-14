@@ -1,6 +1,8 @@
 import {
     type CliResult,
     command,
+    docker,
+    type DockerCliResult,
     type SeedHandlerContext,
     spec as specRunner,
 } from '@jterrazz/test';
@@ -90,58 +92,98 @@ type CliBuilder = {
     run(): Promise<CliResult>;
 };
 
+const seedHandlers = {
+    'spwn.yaml/': (ctx: SeedHandlerContext, fragmentPath: string) => {
+        const fragment = parse(readFileSync(fragmentPath, 'utf8')) as Record<string, unknown>;
+        const targetPath = join(ctx.cwd, 'spwn.yaml');
+        const target = parse(readFileSync(targetPath, 'utf8')) as Record<string, unknown>;
+        const merged: Record<string, unknown> = { ...target, ...fragment };
+        if (
+            target.worlds &&
+            fragment.worlds &&
+            typeof target.worlds === 'object' &&
+            typeof fragment.worlds === 'object'
+        ) {
+            merged.worlds = {
+                ...(target.worlds as Record<string, unknown>),
+                ...(fragment.worlds as Record<string, unknown>),
+            };
+        }
+        writeFileSync(targetPath, stringify(merged));
+    },
+    'agent/': (ctx: SeedHandlerContext, fragmentPath: string) => {
+        const seedsRoot = fragmentPath.split('/seeds/agent/')[1];
+        if (!seedsRoot) {
+            throw new Error(`unexpected seed path shape: ${fragmentPath}`);
+        }
+        const dst = join(ctx.cwd, 'spwn', 'agents', seedsRoot);
+        copyTree(fragmentPath, dst);
+    },
+    'state/': (ctx: SeedHandlerContext, fragmentPath: string) => {
+        const fragment = JSON.parse(readFileSync(fragmentPath, 'utf8')) as Record<string, unknown>;
+        const targetPath = join(ctx.cwd, '.spwn', 'state.json');
+        mkdirSync(dirname(targetPath), { recursive: true });
+        let target: Record<string, unknown> = {};
+        try {
+            target = JSON.parse(readFileSync(targetPath, 'utf8')) as Record<string, unknown>;
+        } catch {
+            // First write — leave target empty
+        }
+        writeFileSync(targetPath, JSON.stringify({ ...target, ...fragment }, null, 2));
+    },
+    'activity/': (ctx: SeedHandlerContext, fragmentPath: string) => {
+        const lines = readFileSync(fragmentPath, 'utf8');
+        const targetPath = join(ctx.cwd, '.spwn', 'activity.jsonl');
+        mkdirSync(dirname(targetPath), { recursive: true });
+        writeFileSync(targetPath, lines, { flag: 'a' });
+    },
+};
+
 const rawRunner = await specRunner(command(SPWN_BIN), {
     root: '../fixtures',
+    seedHandlers,
     transform: normalise,
-    seedHandlers: {
-        'spwn.yaml/': (ctx: SeedHandlerContext, fragmentPath: string) => {
-            const fragment = parse(readFileSync(fragmentPath, 'utf8')) as Record<string, unknown>;
-            const targetPath = join(ctx.cwd, 'spwn.yaml');
-            const target = parse(readFileSync(targetPath, 'utf8')) as Record<string, unknown>;
-            const merged: Record<string, unknown> = { ...target, ...fragment };
-            if (
-                target.worlds &&
-                fragment.worlds &&
-                typeof target.worlds === 'object' &&
-                typeof fragment.worlds === 'object'
-            ) {
-                merged.worlds = {
-                    ...(target.worlds as Record<string, unknown>),
-                    ...(fragment.worlds as Record<string, unknown>),
-                };
-            }
-            writeFileSync(targetPath, stringify(merged));
-        },
-        'agent/': (ctx: SeedHandlerContext, fragmentPath: string) => {
-            const seedsRoot = fragmentPath.split('/seeds/agent/')[1];
-            if (!seedsRoot) {
-                throw new Error(`unexpected seed path shape: ${fragmentPath}`);
-            }
-            const dst = join(ctx.cwd, 'spwn', 'agents', seedsRoot);
-            copyTree(fragmentPath, dst);
-        },
-        'state/': (ctx: SeedHandlerContext, fragmentPath: string) => {
-            const fragment = JSON.parse(readFileSync(fragmentPath, 'utf8')) as Record<
-                string,
-                unknown
-            >;
-            const targetPath = join(ctx.cwd, '.spwn', 'state.json');
-            mkdirSync(dirname(targetPath), { recursive: true });
-            let target: Record<string, unknown> = {};
-            try {
-                target = JSON.parse(readFileSync(targetPath, 'utf8')) as Record<string, unknown>;
-            } catch {
-                // First write — leave target empty
-            }
-            writeFileSync(targetPath, JSON.stringify({ ...target, ...fragment }, null, 2));
-        },
-        'activity/': (ctx: SeedHandlerContext, fragmentPath: string) => {
-            const lines = readFileSync(fragmentPath, 'utf8');
-            const targetPath = join(ctx.cwd, '.spwn', 'activity.jsonl');
-            mkdirSync(dirname(targetPath), { recursive: true });
-            writeFileSync(targetPath, lines, { flag: 'a' });
-        },
-    },
 });
 
 export const spec = rawRunner as unknown as (label: string) => CliBuilder;
+
+/**
+ * Docker-aware runner. Same setup as `spec` plus container accessors on
+ * the result — tests can reach into the live containers spwn spawned via
+ * `result.container('<world-name>')`. Cleanup is automatic via
+ * `await using` (containers tagged with this test's unique id are
+ * force-removed when the scope exits, see the docker() mode docs).
+ *
+ * The label contract lives in packages/world/internal/labels: every
+ * world container carries `sh.spwn.world.name=<name>` and, when the
+ * `SPWN_TEST_LABEL` env var is set, `sh.spwn.test.run=<id>`. The runner
+ * injects the id per-run and queries by those two labels.
+ */
+type DockerSpecBuilder = {
+    project(name: string): DockerSpecBuilder;
+    seed(path: string): DockerSpecBuilder;
+    env(env: Record<string, null | string>): DockerSpecBuilder;
+    exec(args: string | string[]): DockerSpecBuilder;
+    spawn(args: string, options: { waitFor: string; timeout: number }): DockerSpecBuilder;
+    run(): Promise<DockerCliResult>;
+};
+
+const rawDockerRunner = await specRunner(
+    docker(SPWN_BIN, {
+        envVar: 'SPWN_TEST_LABEL',
+        // Spwn stores the manifest-declared world key ("worlds.<KEY>" in
+        // Spwn.yaml) on the `sh.spwn.world.config` label. The legacy
+        // `sh.spwn.world.name` is only set when the user assigns a
+        // Friendly display name — empty for fixture-declared worlds —
+        // So matching on config is what lines up with test intent.
+        nameLabel: 'sh.spwn.world.config',
+        testRunLabel: 'sh.spwn.test.run',
+    }),
+    {
+        root: '../fixtures',
+        seedHandlers,
+        transform: normalise,
+    },
+);
+
+export const dockerSpec = rawDockerRunner as unknown as (label: string) => DockerSpecBuilder;
