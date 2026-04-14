@@ -35,8 +35,6 @@ The real power of AI isn't the model — it's the model plus everything around i
 
 **Agents as code. Docker for intelligence.** If Terraform is infrastructure as code, spwn is **agents as code** — stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review PRs that change an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**.
 
-> *"The next breakthrough isn't smarter models. It's richer worlds."*
-
 <br/>
 
 ## Quickstart
@@ -118,6 +116,8 @@ Async inter-agent communication via filesystem inboxes. Agents send, receive, an
 </td>
 </tr>
 </table>
+
+> *"The next breakthrough isn't smarter models. It's richer worlds."*
 
 <br/>
 
