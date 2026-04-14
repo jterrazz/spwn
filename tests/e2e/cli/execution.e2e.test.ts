@@ -154,9 +154,9 @@ describe('CLI execution - agent commands', () => {
         }
     });
 
-    test("'spwn agent new' creates an agent", async () => {
+    test("'spwn agent create' creates an agent", async () => {
         // WHEN - creating a new agent
-        const result = await spwn('agent new testbot').exec('agent new testbot').run();
+        const result = await spwn('agent create testbot').exec('agent create testbot').run();
 
         // THEN - exit code 0
         expect(result.exitCode).toBe(0);
@@ -170,7 +170,7 @@ describe('CLI execution - agent commands', () => {
 
     test("'spwn agent rm' removes an agent", async () => {
         // GIVEN - agent exists
-        await spwn('create agent').exec('agent new testbot').run();
+        await spwn('create agent').exec('agent create testbot').run();
 
         // WHEN - removing it
         const result = await spwn('agent rm testbot').exec('agent rm testbot').run();
@@ -190,8 +190,8 @@ describe('CLI execution - agent commands', () => {
 
     test("'spwn agent ls' shows table with correct headers", async () => {
         // GIVEN - agents exist
-        await spwn('create agent1').exec('agent new alpha').run();
-        await spwn('create agent2').exec('agent new beta').run();
+        await spwn('create agent1').exec('agent create alpha').run();
+        await spwn('create agent2').exec('agent create beta').run();
 
         // WHEN - listing agents
         const result = await spwn('agent ls').exec('agent ls').run();
@@ -205,7 +205,7 @@ describe('CLI execution - agent commands', () => {
 
     test("'spwn agent show' shows detailed info", async () => {
         // GIVEN - agent exists
-        await spwn('create for show').exec('agent new inspectme').run();
+        await spwn('create for show').exec('agent create inspectme').run();
 
         // WHEN - inspecting
         const result = await spwn('agent show').exec('agent show inspectme').run();

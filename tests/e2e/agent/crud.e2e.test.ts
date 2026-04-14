@@ -25,9 +25,9 @@ describe('agent CRUD', () => {
         }
     });
 
-    test('agent new creates agent with the 5-layer Mind', async () => {
+    test('agent create creates agent with the 5-layer Mind', async () => {
         // WHEN - creating a new agent
-        const result = await spwn('agent new').exec('agent new neo').run();
+        const result = await spwn('agent create').exec('agent create neo').run();
 
         // THEN - agent is created with structured status output
         expect(result.exitCode).toBe(0);
@@ -39,10 +39,10 @@ describe('agent CRUD', () => {
 
     test('init duplicate fails', async () => {
         // GIVEN - an agent already exists
-        await spwn('first new').exec('agent new neo').run();
+        await spwn('first new').exec('agent create neo').run();
 
         // WHEN - creating the same agent again
-        const result = await spwn('duplicate init').exec('agent new neo').run();
+        const result = await spwn('duplicate init').exec('agent create neo').run();
 
         // THEN - exits with error showing duplicate message
         expect(result.exitCode).not.toBe(0);
@@ -51,8 +51,8 @@ describe('agent CRUD', () => {
 
     test('list shows created agents', async () => {
         // GIVEN - two agents have been created
-        await spwn('create neo').exec('agent new neo').run();
-        await spwn('create trinity').exec('agent new trinity').run();
+        await spwn('create neo').exec('agent create neo').run();
+        await spwn('create trinity').exec('agent create trinity').run();
 
         // WHEN - listing agents
         const result = await spwn('list agents').exec('agent ls').run();
@@ -66,7 +66,7 @@ describe('agent CRUD', () => {
 
     test('show prints agent details', async () => {
         // GIVEN - an agent exists
-        await spwn('create for show').exec('agent new neo').run();
+        await spwn('create for show').exec('agent create neo').run();
 
         // WHEN - inspecting the agent
         const result = await spwn('show agent').exec('agent show neo').run();
@@ -101,7 +101,7 @@ describe('agent CRUD', () => {
 
     test('delete removes agent', async () => {
         // GIVEN - an agent exists
-        await spwn('create temp').exec('agent new temp').run();
+        await spwn('create temp').exec('agent create temp').run();
 
         // WHEN - deleting the agent
         const result = await spwn('delete agent').exec('agent rm temp').run();
@@ -128,7 +128,7 @@ describe('agent CRUD', () => {
 
     test('talk requires running world', async () => {
         // GIVEN - an agent exists but is not in any world
-        await spwn('create neo for talk').exec('agent new neo').run();
+        await spwn('create neo for talk').exec('agent create neo').run();
 
         // WHEN - trying to talk to the agent
         const result = await spwn('talk without world').exec('agent talk neo hello').run();
@@ -140,7 +140,7 @@ describe('agent CRUD', () => {
 
     test('list shows world column headers', async () => {
         // GIVEN - an agent has been created
-        await spwn('create for list').exec('agent new atlas').run();
+        await spwn('create for list').exec('agent create atlas').run();
 
         // WHEN - listing agents
         const result = await spwn('list with world').exec('agent ls').run();
@@ -153,7 +153,7 @@ describe('agent CRUD', () => {
 
     test('delete actually removes Mind directory from disk', async () => {
         // GIVEN - agent exists
-        await spwn('create temp for disk check').exec('agent new temp').run();
+        await spwn('create temp for disk check').exec('agent create temp').run();
         // Verify Mind directory exists
         new MindAssertion(home, 'temp').exists().hasLayer('core');
 
@@ -168,7 +168,7 @@ describe('agent CRUD', () => {
 
     test('cannot show agent after delete', async () => {
         // GIVEN - agent is created then deleted
-        await spwn('create for show-delete').exec('agent new temp').run();
+        await spwn('create for show-delete').exec('agent create temp').run();
         await spwn('delete for show-delete').exec('agent rm temp').run();
 
         // WHEN - showing the deleted agent

@@ -24,8 +24,8 @@ describe('CLI input validation', () => {
 
     // ── Missing required arguments ─────────────────────────
 
-    test("'spwn agent new' with no name picks a random planet name", async () => {
-        const result = await spwn('agent new no name').exec('agent new').run();
+    test("'spwn agent create' with no name picks a random planet name", async () => {
+        const result = await spwn('agent create no name').exec('agent create').run();
 
         // No-name is not an error: spwn picks a random planet name.
         expect(result.exitCode).toBe(0);
@@ -33,8 +33,8 @@ describe('CLI input validation', () => {
         expect(output).toMatch(/Created agent/);
     });
 
-    test("'spwn agent new a b c' with too many args shows error", async () => {
-        const result = await spwn('agent new extra args').exec('agent new a b c').run();
+    test("'spwn agent create a b c' with too many args shows error", async () => {
+        const result = await spwn('agent create extra args').exec('agent create a b c').run();
 
         expect(result.exitCode).not.toBe(0);
         const output = stripAnsi(result.output);
