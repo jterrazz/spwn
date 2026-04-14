@@ -82,55 +82,6 @@ export interface TestContext {
     cleanup: () => void;
 }
 
-/**
- * Simple specification runner for the spwn CLI binary.
- *
- * The spwn binary writes user-facing output to stderr (unix convention:
- * stdout for data, stderr for status). The @jterrazz/test ExecAdapter
- * discards stderr on success, so we use a custom runner that captures
- * both streams. The `output` field merges stdout + stderr for assertions.
- */
-export function spwn(_label: string) {
-    let args = '';
-
-    return {
-        exec(cmdArgs: string | string[]) {
-            args = Array.isArray(cmdArgs) ? cmdArgs.join(' ') : cmdArgs;
-            return this;
-        },
-
-        async run(): Promise<{
-            exitCode: number;
-            stdout: string;
-            stderr: string;
-            output: string;
-        }> {
-            const env = {
-                ...process.env,
-                INIT_CWD: undefined,
-            };
-
-            const result = spawnSync(SPWN_BIN, args.split(/\s+/).filter(Boolean), {
-                encoding: 'utf8',
-                env: env as NodeJS.ProcessEnv,
-                stdio: ['pipe', 'pipe', 'pipe'],
-                timeout: 30_000,
-            });
-
-            const stdout = result.stdout ?? '';
-            const stderr = result.stderr ?? '';
-            const exitCode = result.status ?? 1;
-
-            return {
-                exitCode,
-                stdout,
-                stderr,
-                output: stdout + stderr,
-            };
-        },
-    };
-}
-
 export function parseWorldId(output: string): null | string {
     const match = output.match(WORLD_ID_RE);
     return match ? match[0] : null;

@@ -86,6 +86,7 @@ type CliBuilder = {
     seed(path: string): CliBuilder;
     env(env: Record<string, null | string>): CliBuilder;
     exec(args: string | string[]): CliBuilder;
+    spawn(args: string, options: { waitFor: string; timeout: number }): CliBuilder;
     run(): Promise<CliResult>;
 };
 
