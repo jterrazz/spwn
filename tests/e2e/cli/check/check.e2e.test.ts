@@ -7,7 +7,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * with real stdout fixtures.
  *
  * Snapshots live under ./expected/stdout/<name>.txt. Each assertion
- * uses `result.stdout.toMatch('<name>')` — the framework resolves
+ * uses `result.stdout.toMatch('<name>.txt')` — the framework resolves
  * `<name>` against `<this-dir>/expected/stdout/<name>.txt`. Regenerate
  * with `JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run e2e/cli/check`.
  *
@@ -23,7 +23,7 @@ describe('spwn check', () => {
 
         // Then - exits zero with the canonical "Project is valid" banner
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('valid-project');
+        await result.stdout.toMatch('valid-project.txt');
     });
 
     test('--help prints the check command usage', async () => {
@@ -32,7 +32,7 @@ describe('spwn check', () => {
 
         // Then - cobra emits the usage block for the check subcommand
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('help');
+        await result.stdout.toMatch('help.txt');
     });
 
     test('flags an agent that references a non-existent built-in tool', async () => {
@@ -44,7 +44,7 @@ describe('spwn check', () => {
 
         // Then - exits non-zero and lists the built-ins the user can pick from
         expect(result.exitCode).not.toBe(0);
-        await result.stdout.toMatch('invalid-tool-ref');
+        await result.stdout.toMatch('invalid-tool-ref.txt');
     });
 
     test('flags a remote-registry tool reference as unsupported', async () => {
@@ -56,7 +56,7 @@ describe('spwn check', () => {
 
         // Then - exits non-zero with the "remote registries not yet supported" rule
         expect(result.exitCode).not.toBe(0);
-        await result.stdout.toMatch('registry-not-supported');
+        await result.stdout.toMatch('registry-not-supported.txt');
     });
 
     test('seed overlay flags the one-agent-one-world rule', async () => {

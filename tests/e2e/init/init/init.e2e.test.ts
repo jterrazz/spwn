@@ -25,7 +25,7 @@ describe('spwn init', () => {
 
         // Then - exits zero and emits the canonical banner
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('init-output');
+        await result.stdout.toMatch('init-output.txt');
 
         // And the key files are on disk
         expect(result.file('spwn.yaml').exists).toBe(true);
