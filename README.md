@@ -176,6 +176,15 @@ skills:
 
 **If a tool isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
 
+Some tool packs are **plugins**: they target a runtime and inject
+config (MCP servers, hooks, settings) at spawn time. They live under
+a separate `plugins:` field that co-exists with `tools:`:
+
+```yaml
+plugins:
+  - "@spwn/mempalace"   # memory palace for Claude Code
+```
+
 **Agents evolve through three mechanisms:**
 
 - **Dream** (`spwn agent dream neo`) - analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.

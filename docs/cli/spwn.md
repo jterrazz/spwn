@@ -31,6 +31,7 @@ Mind (persistent agent identity).
 * [spwn logs](./spwn_logs.md)	 - Show the system event log across worlds and agents
 * [spwn ls](./spwn_ls.md)	 - Agent-centric status (running / stopped / orphan)
 * [spwn organization](./spwn_organization.md)	 - [experimental] Manage organizations - list and inspect role structures
+* [spwn plugin](./spwn_plugin.md)	 - Manage runtime-targeted plugin packs (e.g. @spwn/mempalace)
 * [spwn profile](./spwn_profile.md)	 - Author and manage reusable profile templates (personality)
 * [spwn skill](./spwn_skill.md)	 - Author and manage reusable skill files
 * [spwn status](./spwn_status.md)	 - Show the full status of your spwn environment

@@ -48,6 +48,32 @@ Spwn's own infrastructure. Usually included by default.
 | `@spwn/cli` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | 🟢 |
 | `@spwn/architect` | Full orchestration daemon (includes @spwn/cli, @spwn/claude-code, @spwn/docker-cli) | You're running the always-on Architect | 🟡 architect mode is in dev |
 
+## Plugins
+
+Plugins are tool packs that *also* target a runtime: they reach into the
+runtime's config file (e.g. `~/.claude/settings.json`) at spawn time and
+merge in their own JSON snippet. That's how MCP servers, shell hooks, or
+any other runtime-specific wiring show up inside the container without
+the user having to touch config files.
+
+Mechanically, a plugin is a tool whose Go implementation also satisfies
+the optional `image.Plugin` interface (`Runtimes()` + `Config(runtime)`).
+They live in `catalog/plugins/` and are referenced from `agent.yaml`
+under a dedicated `plugins:` field:
+
+```yaml
+plugins:
+  - "@spwn/mempalace"
+```
+
+`plugins:` coexists with `tools:` — both lists are unioned at spawn time
+and resolved through the same builder registry, so plugins can depend on
+regular tools (and vice-versa).
+
+| Plugin | Targets | What it provides | Status |
+|--------|---------|------------------|--------|
+| `@spwn/mempalace` | `@spwn/claude-code` | [MemPalace](https://github.com/MemPalace/mempalace) memory palace exposed as an MCP server | 🟡 experimental |
+
 ## Tool reference kinds
 
 Spwn classifies every tool reference in `agent.yaml#tools` (and world-level `tools:`) into one of three kinds:
