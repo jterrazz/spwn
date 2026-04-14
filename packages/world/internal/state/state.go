@@ -30,7 +30,7 @@ import (
 
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/runtimestate"
 	"spwn.sh/packages/paths"
 )

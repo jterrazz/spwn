@@ -3,7 +3,7 @@ package runtimestate
 import (
 	"testing"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 )
 
 func newTestStore(t *testing.T) *Store {

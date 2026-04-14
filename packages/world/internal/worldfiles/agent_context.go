@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 )
 
 // AgentContextOpts configures the generation of an AGENT.md context file.

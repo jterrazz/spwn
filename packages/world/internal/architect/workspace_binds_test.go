@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 )
 
 // These tests pin the exact Docker bind specs produced for each

@@ -8,7 +8,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world/internal/manifest"
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/worldfiles"
 	"spwn.sh/packages/ids"
 )

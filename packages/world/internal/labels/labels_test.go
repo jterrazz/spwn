@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 )
 
 func TestApplyTestRun(t *testing.T) {

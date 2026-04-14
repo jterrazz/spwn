@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 	"gopkg.in/yaml.v3"
 	"spwn.sh/packages/paths"
 )

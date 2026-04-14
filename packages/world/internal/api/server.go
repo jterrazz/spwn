@@ -21,7 +21,7 @@ import (
 	"spwn.sh/packages/image/probe"
 	"spwn.sh/packages/world/internal/architect"
 	"spwn.sh/packages/world/internal/manifest"
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/state"
 	templates "spwn.sh/packages/catalog/templates"
 

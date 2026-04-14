@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 )
 
 func TestGeneratePhysics(t *testing.T) {
