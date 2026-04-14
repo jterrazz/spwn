@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 interface ShortcutHandlers {
-  onSearch?: () => void;
-  onSpawnWorld?: () => void;
-  onEscape?: () => void;
+    onSearch?: () => void;
+    onSpawnWorld?: () => void;
+    onEscape?: () => void;
 }
 
 /**
@@ -15,35 +15,35 @@ interface ShortcutHandlers {
  * - Escape → onEscape (close dialogs)
  */
 export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const meta = e.metaKey || e.ctrlKey;
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const meta = e.metaKey || e.ctrlKey;
 
-      // Don't trigger if user is typing in an input
-      const tag = (e.target as HTMLElement)?.tagName;
-      const isInput = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+            // Don't trigger if user is typing in an input
+            const tag = (e.target as HTMLElement)?.tagName;
+            const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 
-      if (meta && e.key === "k") {
-        e.preventDefault();
-        handlers.onSearch?.();
-        return;
-      }
+            if (meta && e.key === 'k') {
+                e.preventDefault();
+                handlers.onSearch?.();
+                return;
+            }
 
-      if (meta && e.key === "n") {
-        if (!isInput) {
-          e.preventDefault();
-          handlers.onSpawnWorld?.();
-        }
-        return;
-      }
+            if (meta && e.key === 'n') {
+                if (!isInput) {
+                    e.preventDefault();
+                    handlers.onSpawnWorld?.();
+                }
+                return;
+            }
 
-      if (e.key === "Escape") {
-        handlers.onEscape?.();
-        return;
-      }
-    };
+            if (e.key === 'Escape') {
+                handlers.onEscape?.();
+                return;
+            }
+        };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handlers]);
+        globalThis.addEventListener('keydown', handleKeyDown);
+        return () => globalThis.removeEventListener('keydown', handleKeyDown);
+    }, [handlers]);
 }

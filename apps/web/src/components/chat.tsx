@@ -1,52 +1,51 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { IconArrowUp } from "@tabler/icons-react";
+import { IconArrowUp } from '@tabler/icons-react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 
-import { ActivityMessageView } from "@/components/activity-blocks";
-import type { ActivityBlock } from "@/lib/activity-types";
+import { ActivityMessageView } from '@/components/activity-blocks';
+import type { ActivityBlock } from '@/lib/activity-types';
 
 /**
  * ChatBubble is the minimal shape any caller must provide. The chat does
  * not manage state - the parent owns the message list and passes it in.
  */
 export interface ChatBubble {
-  role: "user" | "assistant";
-  blocks: ActivityBlock[];
-  content: string;
-  timestamp: Date;
-  error?: boolean;
-  cost?: number;
-  duration?: number;
+    role: 'assistant' | 'user';
+    blocks: ActivityBlock[];
+    content: string;
+    timestamp: Date;
+    error?: boolean;
+    cost?: number;
+    duration?: number;
 }
 
 interface ChatProps {
-  messages: ChatBubble[];
-  onSend: (text: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  /** Shown when there are no messages. */
-  emptyState?: ReactNode;
-  /** Typing indicator text, e.g. "morpheus is thinking...". Omit to hide. */
-  typingText?: string;
-  /** Rendered immediately after each bubble - used for stack/knowledge cards. */
-  extras?: (msg: ChatBubble, index: number) => ReactNode;
-  /** Optional label shown under the assistant's bubbles ("morpheus", "architect"). */
-  assistantLabel?: string;
-  /** Optional label shown under the user's bubbles. Default "you". */
-  userLabel?: string;
-  /** Focus the input on mount. */
-  autoFocus?: boolean;
-  /** Extra className on the outer flex column. Use for height constraints. */
-  className?: string;
-  /**
-   * Controlled-input props. When both are passed, the parent owns the
-   * input state (lets the architect widget share its draft between
-   * collapsed and expanded modes). When omitted, Chat owns state itself.
-   */
-  input?: string;
-  onInputChange?: (value: string) => void;
+    messages: ChatBubble[];
+    onSend: (text: string) => void;
+    placeholder?: string;
+    disabled?: boolean;
+    /** Shown when there are no messages. */
+    emptyState?: ReactNode;
+    /** Typing indicator text, e.g. "morpheus is thinking...". Omit to hide. */
+    typingText?: string;
+    /** Rendered immediately after each bubble - used for stack/knowledge cards. */
+    extras?: (msg: ChatBubble, index: number) => ReactNode;
+    /** Optional label shown under the assistant's bubbles ("morpheus", "architect"). */
+    assistantLabel?: string;
+    /** Optional label shown under the user's bubbles. Default "you". */
+    userLabel?: string;
+    /** Focus the input on mount. */
+    autoFocus?: boolean;
+    /** Extra className on the outer flex column. Use for height constraints. */
+    className?: string;
+    /**
+     * Controlled-input props. When both are passed, the parent owns the
+     * input state (lets the architect widget share its draft between
+     * collapsed and expanded modes). When omitted, Chat owns state itself.
+     */
+    input?: string;
+    onInputChange?: (value: string) => void;
 }
 
 /**
@@ -56,143 +55,161 @@ interface ChatProps {
  * so the chat blends into whatever page hosts it.
  */
 export function Chat({
-  messages,
-  onSend,
-  placeholder = "Message...",
-  disabled,
-  emptyState,
-  typingText,
-  extras,
-  assistantLabel = "assistant",
-  userLabel = "you",
-  autoFocus,
-  className = "",
-  input: controlledInput,
-  onInputChange,
+    messages,
+    onSend,
+    placeholder = 'Message...',
+    disabled,
+    emptyState,
+    typingText,
+    extras,
+    assistantLabel = 'assistant',
+    userLabel = 'you',
+    autoFocus,
+    className = '',
+    input: controlledInput,
+    onInputChange,
 }: ChatProps) {
-  const [uncontrolledInput, setUncontrolledInput] = useState("");
-  const isControlled = controlledInput !== undefined && onInputChange !== undefined;
-  const input = isControlled ? controlledInput : uncontrolledInput;
-  const setInput = isControlled ? onInputChange : setUncontrolledInput;
+    const [uncontrolledInput, setUncontrolledInput] = useState('');
+    const isControlled = controlledInput !== undefined && onInputChange !== undefined;
+    const input = isControlled ? controlledInput : uncontrolledInput;
+    const setInput = isControlled ? onInputChange : setUncontrolledInput;
 
-  const endRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+    const endRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [messages.length, disabled]);
+    useEffect(() => {
+        endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, [messages.length, disabled]);
 
-  useEffect(() => {
-    if (autoFocus) inputRef.current?.focus();
-  }, [autoFocus]);
+    useEffect(() => {
+        if (autoFocus) {
+            inputRef.current?.focus();
+        }
+    }, [autoFocus]);
 
-  const trimmed = input.trim();
+    const trimmed = input.trim();
 
-  const handleSend = () => {
-    if (!trimmed || disabled) return;
-    onSend(trimmed);
-    setInput("");
-    requestAnimationFrame(() => inputRef.current?.focus());
-  };
+    const handleSend = () => {
+        if (!trimmed || disabled) {
+            return;
+        }
+        onSend(trimmed);
+        setInput('');
+        requestAnimationFrame(() => inputRef.current?.focus());
+    };
 
-  return (
-    <div className={`flex flex-col min-h-0 flex-1 ${className}`}>
-      {/* Messages area - grows, scrolls. Bottom padding leaves room for the
+    return (
+        <div className={`flex flex-col min-h-0 flex-1 ${className}`}>
+            {/* Messages area - grows, scrolls. Bottom padding leaves room for the
           floating input dock so the last bubble isn't hidden under it. */}
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 pr-1 space-y-3">
-        {messages.length === 0 && emptyState && (
-          <div className="flex h-full items-center justify-center">{emptyState}</div>
-        )}
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 transition-colors ${
-                msg.role === "user"
-                  ? "bg-white/[0.08] text-foreground/85"
-                  : msg.error
-                    ? "bg-red-500/10 border border-red-500/15 text-red-400/80"
-                    : "bg-white/[0.03] border border-white/[0.06] text-foreground/75"
-              }`}
-            >
-              {msg.role === "assistant" && msg.blocks.length > 0 ? (
-                <ActivityMessageView
-                  message={{
-                    role: "agent",
-                    blocks: msg.blocks,
-                    timestamp: msg.timestamp,
-                    cost: msg.cost,
-                    duration: msg.duration,
-                  }}
-                />
-              ) : (
-                <p className="text-xs whitespace-pre-wrap break-words leading-relaxed">
-                  {msg.content || (msg.role === "assistant" ? "…" : "")}
-                </p>
-              )}
-              <p className="text-[9px] text-muted-foreground/25 mt-1">
-                {msg.role === "assistant" ? assistantLabel : userLabel}
-                {" · "}
-                {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-              </p>
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 pr-1 space-y-3">
+                {messages.length === 0 && emptyState && (
+                    <div className="flex h-full items-center justify-center">{emptyState}</div>
+                )}
+                {messages.map((msg, i) => (
+                    <div
+                        className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                        key={i}
+                    >
+                        <div
+                            className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 transition-colors ${
+                                msg.role === 'user'
+                                    ? 'bg-white/[0.08] text-foreground/85'
+                                    : msg.error
+                                      ? 'bg-red-500/10 border border-red-500/15 text-red-400/80'
+                                      : 'bg-white/[0.03] border border-white/[0.06] text-foreground/75'
+                            }`}
+                        >
+                            {msg.role === 'assistant' && msg.blocks.length > 0 ? (
+                                <ActivityMessageView
+                                    message={{
+                                        role: 'agent',
+                                        blocks: msg.blocks,
+                                        timestamp: msg.timestamp,
+                                        cost: msg.cost,
+                                        duration: msg.duration,
+                                    }}
+                                />
+                            ) : (
+                                <p className="text-xs whitespace-pre-wrap break-words leading-relaxed">
+                                    {msg.content || (msg.role === 'assistant' ? '…' : '')}
+                                </p>
+                            )}
+                            <p className="text-[9px] text-muted-foreground/25 mt-1">
+                                {msg.role === 'assistant' ? assistantLabel : userLabel}
+                                {' · '}
+                                {msg.timestamp.toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
+                            </p>
+                        </div>
+                        {extras?.(msg, i)}
+                    </div>
+                ))}
+                {disabled && typingText && (
+                    <div className="flex items-start">
+                        <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] px-3.5 py-2.5">
+                            <div className="flex items-center gap-2">
+                                <div className="flex gap-1">
+                                    <span
+                                        className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce"
+                                        style={{ animationDelay: '0ms' }}
+                                    />
+                                    <span
+                                        className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce"
+                                        style={{ animationDelay: '150ms' }}
+                                    />
+                                    <span
+                                        className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce"
+                                        style={{ animationDelay: '300ms' }}
+                                    />
+                                </div>
+                                <span className="text-xs text-muted-foreground/40">
+                                    {typingText}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                <div ref={endRef} />
             </div>
-            {extras?.(msg, i)}
-          </div>
-        ))}
-        {disabled && typingText && (
-          <div className="flex items-start">
-            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] px-3.5 py-2.5">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-                <span className="text-xs text-muted-foreground/40">{typingText}</span>
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={endRef} />
-      </div>
 
-      {/* Input dock - anchored to the bottom of the flex column, styled
+            {/* Input dock - anchored to the bottom of the flex column, styled
           as a pill so it reads like a messaging-app composer. */}
-      <div className="shrink-0 pt-3">
-        <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-md px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] focus-within:border-white/[0.14] focus-within:bg-white/[0.06] transition-colors">
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder={placeholder}
-            disabled={disabled}
-            className="flex-1 min-w-0 bg-transparent px-1 text-sm text-foreground/85 placeholder:text-muted-foreground/30 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={!trimmed || disabled}
-            aria-label="Send"
-            className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all disabled:opacity-20 disabled:cursor-not-allowed ${
-              trimmed
-                ? "bg-foreground/90 text-background hover:bg-foreground"
-                : "text-muted-foreground/40"
-            }`}
-          >
-            <IconArrowUp size={15} stroke={2.4} />
-          </button>
+            <div className="shrink-0 pt-3">
+                <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-md px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] focus-within:border-white/[0.14] focus-within:bg-white/[0.06] transition-colors">
+                    <input
+                        className="flex-1 min-w-0 bg-transparent px-1 text-sm text-foreground/85 placeholder:text-muted-foreground/30 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={disabled}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSend();
+                            }
+                        }}
+                        placeholder={placeholder}
+                        ref={inputRef}
+                        value={input}
+                    />
+                    <button
+                        aria-label="Send"
+                        className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all disabled:opacity-20 disabled:cursor-not-allowed ${
+                            trimmed
+                                ? 'bg-foreground/90 text-background hover:bg-foreground'
+                                : 'text-muted-foreground/40'
+                        }`}
+                        disabled={!trimmed || disabled}
+                        onClick={handleSend}
+                        type="button"
+                    >
+                        <IconArrowUp size={15} stroke={2.4} />
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 /**
@@ -201,23 +218,23 @@ export function Chat({
  * use the same styling.
  */
 export function ChatSuggestions({
-  suggestions,
-  onPick,
+    suggestions,
+    onPick,
 }: {
-  suggestions: string[];
-  onPick: (text: string) => void;
+    suggestions: string[];
+    onPick: (text: string) => void;
 }) {
-  return (
-    <div className="flex gap-2 flex-wrap justify-center max-w-sm">
-      {suggestions.map((s) => (
-        <button
-          key={s}
-          onClick={() => onPick(s)}
-          className="px-3 py-1.5 rounded-full text-[11px] text-muted-foreground/40 bg-white/[0.03] border border-white/[0.06] hover:text-foreground/70 hover:bg-white/[0.06] transition-colors"
-        >
-          {s}
-        </button>
-      ))}
-    </div>
-  );
+    return (
+        <div className="flex gap-2 flex-wrap justify-center max-w-sm">
+            {suggestions.map((s) => (
+                <button
+                    className="px-3 py-1.5 rounded-full text-[11px] text-muted-foreground/40 bg-white/[0.03] border border-white/[0.06] hover:text-foreground/70 hover:bg-white/[0.06] transition-colors"
+                    key={s}
+                    onClick={() => onPick(s)}
+                >
+                    {s}
+                </button>
+            ))}
+        </div>
+    );
 }

@@ -1,55 +1,51 @@
 {
-  "productName": "spwn",
-  "version": "0.15.5",
-  "identifier": "sh.spwn.app",
-  "build": {
-    "devUrl": "http://localhost:1420",
-    "frontendDist": "../out",
-    "beforeDevCommand": "npm run dev -- -p 1420",
-    "beforeBuildCommand": "npm run build:static"
-  },
-  "app": {
-    "windows": [
-      {
-        "label": "main",
-        "width": 1280,
-        "height": 800,
-        "minWidth": 900,
-        "minHeight": 600,
-        "resizable": true,
-        "fullscreen": false,
-        "decorations": true,
-        "transparent": false,
-        "hiddenTitle": true,
-        "titleBarStyle": "Overlay",
-        "trafficLightPosition": { "x": 20, "y": 16 }
-      }
-    ],
-    "security": {
-      "csp": null
+    "productName": "spwn",
+    "version": "0.15.5",
+    "identifier": "sh.spwn.app",
+    "build": {
+        "devUrl": "http://localhost:1420",
+        "frontendDist": "../out",
+        "beforeDevCommand": "npm run dev -- -p 1420",
+        "beforeBuildCommand": "npm run build:static"
     },
-    "withGlobalTauri": true
-  },
-  "bundle": {
-    "active": true,
-    "targets": "all",
-    "icon": [
-      "icons/icon.png"
-    ],
-    "macOS": {
-      "minimumSystemVersion": "10.15"
-    }
-  },
-  "plugins": {
-    "shell": {
-      "open": true
+    "app": {
+        "windows": [
+            {
+                "label": "main",
+                "width": 1280,
+                "height": 800,
+                "minWidth": 900,
+                "minHeight": 600,
+                "resizable": true,
+                "fullscreen": false,
+                "decorations": true,
+                "transparent": false,
+                "hiddenTitle": true,
+                "titleBarStyle": "Overlay",
+                "trafficLightPosition": { "x": 20, "y": 16 }
+            }
+        ],
+        "security": {
+            "csp": null
+        },
+        "withGlobalTauri": true
     },
-    "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERDOTEzNzY4NzQ1QzEzNEMKUldSTUUxeDBhRGVSM0lGYk5FdlpyWU5sSHB1QzlXTTB3eFhWKzZYY1dZMmVlTDBtK3R5b2pTM3QK",
-      "endpoints": [
-        "https://github.com/jterrazz/spwn/releases/latest/download/latest.json"
-      ],
-      "dialog": false
+    "bundle": {
+        "active": true,
+        "targets": "all",
+        "icon": ["icons/icon.png"],
+        "macOS": {
+            "minimumSystemVersion": "10.15"
+        }
+    },
+    "plugins": {
+        "shell": {
+            "open": true
+        },
+        "updater": {
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERDOTEzNzY4NzQ1QzEzNEMKUldSTUUxeDBhRGVSM0lGYk5FdlpyWU5sSHB1QzlXTTB3eFhWKzZYY1dZMmVlTDBtK3R5b2pTM3QK",
+            "endpoints": ["https://github.com/jterrazz/spwn/releases/latest/download/latest.json"],
+            "dialog": false
+        }
     }
-  }
 }

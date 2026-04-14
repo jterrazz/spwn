@@ -1,0 +1,43 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "next": {
+        "entry": [
+            "next.config.{js,ts,cjs,mjs}",
+            "src/app/**/{page,layout,loading,error,not-found,route,default,template,global-error}.{ts,tsx}",
+            "src/app/**/{opengraph,twitter}-image.{ts,tsx}",
+            "src/middleware.ts"
+        ]
+    },
+    "entry": [
+        "oxlint.config.ts",
+        "oxfmt.config.ts",
+        "postcss.config.{js,ts,mjs}",
+        "tailwind.config.{js,ts,mjs}"
+    ],
+    "project": ["src/**/*.{ts,tsx}"],
+    "paths": {
+        "@/*": ["src/*"]
+    },
+    "ignore": [
+        "src/lib/__tests__/**",
+        "next-env.d.ts",
+        "src/components/ui/**",
+        "src/components/breadcrumbs.tsx",
+        "src/components/live-status.tsx",
+        "src/components/recent-activity.tsx",
+        "src/lib/spwn-data.ts",
+        "src/lib/status.ts",
+        "src/lib/types.ts",
+        "src/lib/api-client.ts",
+        "src/components/knowledge-browser.tsx",
+        "src/components/activity-blocks.tsx"
+    ],
+    "ignoreExportsUsedInFile": true,
+    "ignoreDependencies": [
+        "tailwindcss",
+        "@tailwindcss/postcss",
+        "tw-animate-css",
+        "framer-motion",
+        "postcss"
+    ]
+}
