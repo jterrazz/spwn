@@ -67,6 +67,27 @@ describe('world lifecycle', () => {
         expect(result.container('neo').running).toBe(true);
     });
 
+    test('world inspect renders the expected field headers', async () => {
+        // GIVEN a running project world, WHEN `spwn world inspect <id>`
+        // Runs against it, THEN the rendered output must still include
+        // The core field headers (Status, Agent home). This locks down
+        // Apps/cli/world/inspect.go's top-level field surface, which
+        // Could silently regress when the Constants/Laws block was
+        // Removed alongside physics config.
+        //
+        // World id is resolved inside the spec (single shared workdir)
+        // Via shell substitution against .spwn/world-states/ — each
+        // Subdir there is named after the world id.
+        await using inspect = await spec('inspect fields')
+            .project('docker-pilot')
+            .exec(['up', 'world inspect $(ls .spwn/world-states 2>/dev/null | head -1)'])
+            .run();
+        expect(inspect.exitCode).toBe(0);
+        const combined = `${inspect.stdout.text}\n${inspect.stderr.text}`;
+        expect(combined).toMatch(/Status/);
+        expect(combined).toMatch(/Agent home/);
+    });
+
     test('down fully destroys the container (not just stopped)', async () => {
         await using result = await spec('up then down')
             .project('docker-pilot')

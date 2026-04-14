@@ -53,6 +53,30 @@ describe('world destroy', () => {
         expect(result.container('neo').exists).toBe(false);
     });
 
+    test('per-id destroy prints the detailed step banners', async () => {
+        // GIVEN a running project world, WHEN `spwn down <world-id>`
+        // Is called with an explicit id (the per-id destroy path —
+        // Apps/cli/world/destroy.go's destroyCmd.RunE), THEN the
+        // Richer per-step banners must fire: "Stopped agent",
+        // "Removed container", "Mind persisted". These are NOT emitted
+        // By the project-mode bare `down`, so this test guards the
+        // Per-id code path specifically.
+        //
+        // The id is resolved via shell substitution against
+        // .spwn/world-states/ (each subdir there is named after the
+        // World id) so the whole flow fits in one spec.
+        await using result = await spec('destroy steps per-id')
+            .project('docker-pilot')
+            .exec(['up', 'down $(ls .spwn/world-states 2>/dev/null | head -1)'])
+            .run();
+        expect(result.exitCode).toBe(0);
+
+        const combined = `${result.stdout.text}\n${result.stderr.text}`;
+        expect(combined).toContain('Stopped agent');
+        expect(combined).toContain('Removed container');
+        expect(combined).toContain('Mind persisted');
+    });
+
     test('destroy non-existent world fails', async () => {
         await using result = await spec('down missing world')
             .project('docker-pilot')

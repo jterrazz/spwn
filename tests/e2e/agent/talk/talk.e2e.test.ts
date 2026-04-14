@@ -165,6 +165,34 @@ describe('agent talk', () => {
         expect(neo?.status).not.toMatch(/running/);
     });
 
+    test('talk routes to the live world after a previous world was destroyed', async () => {
+        // GIVEN a full up/down cycle (spwn state now carries the record
+        // Of a torn-down world for neo), THEN a second up that brings up
+        // A fresh container, WHEN we call `agent talk neo`, THEN the
+        // Talk must reach the currently live container — not error out
+        // Against the stale one. All four steps run in a single spec so
+        // They share the same SPWN_HOME / state / test-run label.
+        await using result = await spec('talk route after down')
+            .project('docker-pilot')
+            .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
+            .exec(['up', 'down', 'up', 'agent talk neo hello'])
+            .run();
+        expect(result.exitCode).toBe(0);
+
+        const neo = result.container('neo');
+        expect(neo.running).toBe(true);
+
+        // Mock-claude writes /tmp/claude-mock.json on every invocation.
+        // Its presence on the live container after `agent talk` confirms
+        // Talk routed here (not to the torn-down first world).
+        const cat = await neo.exec('cat /tmp/claude-mock.json');
+        expect(cat.exitCode).toBe(0);
+        const receipt = JSON.parse(cat.stdout.text) as {
+            mind_exists: boolean;
+        };
+        expect(receipt.mind_exists).toBe(true);
+    });
+
     test('agent inspect prints layer details when attached to a world', async () => {
         await using result = await spec('talk inspect')
             .project('docker-pilot')

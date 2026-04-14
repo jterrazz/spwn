@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { describe, expect, test } from 'vitest';
 
 import { spec } from '../../../setup/cli.specification.js';
@@ -26,6 +27,57 @@ describe('spwn web', () => {
         const out = result.stdout.text;
         expect(out).toContain('--port');
         expect(out).toContain('--no-open');
+    });
+
+    test('web child exits cleanly on SIGTERM, leaves no orphans', async () => {
+        // GIVEN a uniquely-marked SPWN_HOME so we can grep for any
+        // Surviving processes carrying this test's env after dispose.
+        // WHEN the spec scope exits, the framework SIGTERMs the spawned
+        // Child. THEN no processes referencing the marker should remain —
+        // Proves `spwn web` honours SIGTERM and tears down its children.
+        const homeMarker = `spwn-test-web-sigterm-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+        {
+            await using result = await spec('web sigterm')
+                .project('empty')
+                .env({ SPWN_HOME: `$WORKDIR/${homeMarker}` })
+                .spawn('web --no-open --port 0', {
+                    timeout: 15_000,
+                    waitFor: 'spwn API listening on',
+                })
+                .run();
+
+            expect(result.exitCode).toBe(0);
+            // Prove we actually reached the listening banner (i.e. the
+            // Server really started) — otherwise the orphan check below
+            // Is trivially satisfied because nothing ever ran.
+            const combined = result.stdout.text + result.stderr.text;
+            expect(combined).toContain('spwn API listening on');
+        }
+
+        // Give the OS a brief moment to reap; retry a few times before
+        // Failing the assertion outright.
+        let orphans = 'not checked';
+        for (let i = 0; i < 5; i++) {
+            try {
+                orphans = execSync(`pgrep -fl "${homeMarker}" || true`, {
+                    encoding: 'utf8',
+                }).trim();
+            } catch {
+                orphans = '';
+            }
+            // Filter out our own ripgrep/shell match (pgrep -f matches
+            // Against our own command line too on some systems).
+            orphans = orphans
+                .split('\n')
+                .filter((line) => line && !line.includes('pgrep'))
+                .join('\n');
+            if (orphans === '') {
+                break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+        expect(orphans).toBe('');
     });
 
     test('starts the API server and reaches the listening banner', async () => {
