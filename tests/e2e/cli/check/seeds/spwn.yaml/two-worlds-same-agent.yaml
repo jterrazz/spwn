@@ -1,0 +1,4 @@
+worlds:
+  duplicate:
+    agents: [neo]
+    workspaces: [.]
