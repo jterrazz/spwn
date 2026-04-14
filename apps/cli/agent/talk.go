@@ -12,7 +12,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/packages/auth"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world"
 )
 
@@ -43,7 +43,7 @@ If no message is provided, opens an interactive session inside the container.`,
 		}
 		s := newStepper(cmd)
 
-		if err := mind.ValidateMind(name); err != nil {
+		if err := agent.ValidateMind(name); err != nil {
 			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent create %s", name, name)
 		}
 

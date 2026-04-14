@@ -1,4 +1,4 @@
-package mind
+package agent
 
 // DefaultOrganization is the built-in three-role organization used when no custom
 // organization is specified. It contains a chief (level 0) who commands

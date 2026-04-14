@@ -7,7 +7,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 
 	"github.com/spf13/cobra"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world"
 )
 
@@ -152,7 +152,7 @@ survives after the world is destroyed.`,
 		if spawnImport != "" {
 			s.Blank()
 			s.Start("Importing agent...")
-			if err := mind.ImportMind(agentName, spawnImport); err != nil {
+			if err := agent.ImportMind(agentName, spawnImport); err != nil {
 				return s.FailHint("Import failed", err, "Check that the archive exists and is a valid tar.gz")
 			}
 			s.Done("Imported agent", agentName)

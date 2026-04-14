@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
@@ -32,7 +32,7 @@ func TestError_SpawnWithNonExistentAgent(t *testing.T) {
 	_ = setup.NewTestContext(t)
 
 	// WHEN validating a non-existent agent
-	err := mind.ValidateMind("ghost-agent-does-not-exist")
+	err := agent.ValidateMind("ghost-agent-does-not-exist")
 
 	// THEN it should return an error
 	if err == nil {

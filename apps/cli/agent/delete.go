@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 )
 
 func init() {
@@ -23,7 +23,7 @@ var deleteCmd = &cobra.Command{
 		s.Blank()
 		s.Start(fmt.Sprintf("Deleting agent %q...", name))
 
-		if err := mind.DeleteAgent(name); err != nil {
+		if err := agent.DeleteAgent(name); err != nil {
 			return s.FailHint("Delete failed", err,
 				fmt.Sprintf("Check that agent %q exists with \"spwn agent ls\"", name))
 		}

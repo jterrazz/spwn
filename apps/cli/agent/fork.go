@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 )
 
 func init() {
@@ -26,7 +26,7 @@ var forkCmd = &cobra.Command{
 		s.Blank()
 		s.Start(fmt.Sprintf("Forking %q -> %q...", source, target))
 
-		result, err := mind.Fork(source, target, nil)
+		result, err := agent.Fork(source, target, nil)
 		if err != nil {
 			return s.FailHint("Fork failed", err, "Check agents exist with \"spwn agent ls\"")
 		}

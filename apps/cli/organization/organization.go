@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 )
 
 // Cmd is the top-level `spwn organization` command.
@@ -34,7 +34,7 @@ var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all organizations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		organizations, err := mind.ListOrganizations()
+		organizations, err := agent.ListOrganizations()
 		if err != nil {
 			return fmt.Errorf("cannot list organizations: %w", err)
 		}
@@ -74,7 +74,7 @@ var inspectCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		slug := args[0]
-		h, err := mind.GetOrganization(slug)
+		h, err := agent.GetOrganization(slug)
 		if err != nil {
 			return fmt.Errorf("cannot load organization: %w", err)
 		}

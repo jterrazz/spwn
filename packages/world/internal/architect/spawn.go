@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	plugins "spwn.sh/packages/catalog/plugins"
 	runtimes "spwn.sh/packages/catalog/runtimes"
 	tools "spwn.sh/packages/catalog/tools"
@@ -126,13 +126,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		agentNamesToValidate = append(agentNamesToValidate, opts.AgentName)
 	}
 	for _, name := range agentNamesToValidate {
-		if err := mind.ValidateMind(name); err != nil {
+		if err := agent.ValidateMind(name); err != nil {
 			return nil, err
 		}
 		opts.progress("mind_validated", name)
 		// Parse agent.yaml (optional). Used for future composition validation
 		// against the world's available tools.
-		if _, err := manifest.LoadAgent(mind.AgentDir(name)); err != nil {
+		if _, err := manifest.LoadAgent(agent.AgentDir(name)); err != nil {
 			return nil, fmt.Errorf("load agent manifest for %s: %w", name, err)
 		}
 	}
@@ -552,7 +552,7 @@ func worldStateDirFor(worldID string) string {
 // visible at /agents/<name>/worlds/<world-id>/ instantly. Hot-deploy
 // uses the same helper.
 func initAgentDeployment(rec models.AgentRecord, worldID string) error {
-	agentDir := mind.AgentDir(rec.Name)
+	agentDir := agent.AgentDir(rec.Name)
 	deploymentDir := filepath.Join(agentDir, "worlds", worldID)
 	for _, sub := range []string{"inbox", "outbox", "notes"} {
 		if err := os.MkdirAll(filepath.Join(deploymentDir, sub), 0o755); err != nil {

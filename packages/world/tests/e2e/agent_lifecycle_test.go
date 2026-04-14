@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
 
@@ -32,7 +32,7 @@ func TestAgentLifecycle_SurvivesWorldDestruction(t *testing.T) {
 		})
 
 	// THEN the agent Mind should still exist on the host
-	info, err := mind.InspectAgent("lifecycle-agent")
+	info, err := agent.InspectAgent("lifecycle-agent")
 	if err != nil {
 		t.Fatalf("Agent should survive world destruction: %v", err)
 	}
@@ -77,7 +77,7 @@ func TestAgentLifecycle_SpawnInDifferentWorlds(t *testing.T) {
 	}
 
 	// AND the agent Mind should persist across both
-	info, err := mind.InspectAgent("roaming-agent")
+	info, err := agent.InspectAgent("roaming-agent")
 	if err != nil {
 		t.Fatalf("Agent inspect failed: %v", err)
 	}
@@ -114,8 +114,8 @@ func TestAgentLifecycle_JournalAcrossWorlds(t *testing.T) {
 	})
 
 	// AND the entries should reference different worlds
-	mindPath := mind.AgentDir("journal-multi-agent")
-	entries, err := mind.ListJournal(mindPath, 0)
+	mindPath := agent.AgentDir("journal-multi-agent")
+	entries, err := agent.ListJournal(mindPath, 0)
 	if err != nil {
 		t.Fatalf("Failed to list journal: %v", err)
 	}
@@ -137,28 +137,28 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("export-src-agent")
 
-	knowledgePath := filepath.Join(mind.AgentDir("export-src-agent"), "knowledge")
+	knowledgePath := filepath.Join(agent.AgentDir("export-src-agent"), "knowledge")
 	os.MkdirAll(knowledgePath, 0755)
 	os.WriteFile(filepath.Join(knowledgePath, "custom.md"), []byte("# Custom Knowledge\nThis is unique."), 0644)
 
 	// WHEN the agent is exported and imported into a new agent
 	outputDir := t.TempDir()
-	archivePath, err := mind.ExportMind("export-src-agent", outputDir, nil)
+	archivePath, err := agent.ExportMind("export-src-agent", outputDir, nil)
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
-	err = mind.ImportMind("export-dst-agent", archivePath)
+	err = agent.ImportMind("export-dst-agent", archivePath)
 	if err != nil {
 		t.Fatalf("Import failed: %v", err)
 	}
 
 	// THEN the imported agent should have the same layer structure
-	srcInfo, err := mind.InspectAgent("export-src-agent")
+	srcInfo, err := agent.InspectAgent("export-src-agent")
 	if err != nil {
 		t.Fatalf("Inspect source failed: %v", err)
 	}
-	dstInfo, err := mind.InspectAgent("export-dst-agent")
+	dstInfo, err := agent.InspectAgent("export-dst-agent")
 	if err != nil {
 		t.Fatalf("Inspect destination failed: %v", err)
 	}
@@ -170,7 +170,7 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 	}
 
 	// AND the custom knowledge file should be preserved
-	customPath := filepath.Join(mind.AgentDir("export-dst-agent"), "knowledge", "custom.md")
+	customPath := filepath.Join(agent.AgentDir("export-dst-agent"), "knowledge", "custom.md")
 	content, err := os.ReadFile(customPath)
 	if err != nil {
 		t.Fatalf("Custom knowledge file not found in imported agent: %v", err)
@@ -185,7 +185,7 @@ func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("profile-agent")
 
-	coreDir := filepath.Join(mind.AgentDir("profile-agent"), "core")
+	coreDir := filepath.Join(agent.AgentDir("profile-agent"), "core")
 	os.WriteFile(filepath.Join(coreDir, "custom.md"), []byte("# Custom Profile\nYou are a specialist."), 0644)
 
 	// WHEN the agent is spawned in a world
@@ -232,8 +232,8 @@ func TestAgentLifecycle_SessionDiffersPerWorld(t *testing.T) {
 	})
 
 	// THEN the deterministic session ID (world ID + agent name) should differ.
-	sessionA := mind.DeterministicSessionID("session-diff-agent", chainA.World().ID)
-	sessionB := mind.DeterministicSessionID("session-diff-agent", chainB.World().ID)
+	sessionA := agent.DeterministicSessionID("session-diff-agent", chainA.World().ID)
+	sessionB := agent.DeterministicSessionID("session-diff-agent", chainB.World().ID)
 
 	if sessionA == sessionB {
 		t.Fatalf("Expected different session IDs for different worlds, both are %q", sessionA)

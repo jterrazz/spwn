@@ -1,4 +1,4 @@
-package mind
+package agent
 
 import (
 	"fmt"

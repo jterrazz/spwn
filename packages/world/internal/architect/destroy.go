@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/paths"
@@ -51,7 +51,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 	}
 	for _, name := range agentNamesForJournal {
 		agentPath := filepath.Join(paths.AgentsDir(), name)
-		if journalErr := mind.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
+		if journalErr := agent.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
 			log.Printf("warning: failed to write journal for agent %s on destroy: %v", name, journalErr)
 		}
 	}

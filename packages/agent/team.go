@@ -4,7 +4,7 @@
 // Each agent's profile can reference a team by slug. Teams carry display
 // metadata (name, color, description) for the UI.
 
-package mind
+package agent
 
 import (
 	"fmt"

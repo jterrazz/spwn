@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 )
 
 // ── agent add / remove ─────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ Examples:
 		}
 
 		// Verify the agent exists before touching the manifest.
-		if err := mind.ValidateMind(name); err != nil {
+		if err := agent.ValidateMind(name); err != nil {
 			return err
 		}
 
@@ -65,25 +65,25 @@ Examples:
 		s.Info("Agent:", name)
 
 		for _, t := range composeTools {
-			if err := mind.AddTool(name, t); err != nil {
+			if err := agent.AddTool(name, t); err != nil {
 				return fmt.Errorf("add tool %q: %w", t, err)
 			}
 			s.Done("+ tool", t)
 		}
 		for _, p := range composePlugins {
-			if err := mind.AddPlugin(name, p); err != nil {
+			if err := agent.AddPlugin(name, p); err != nil {
 				return fmt.Errorf("add plugin %q: %w", p, err)
 			}
 			s.Done("+ plugin", p)
 		}
 		for _, sk := range composeSkills {
-			if err := mind.AddSkill(name, sk); err != nil {
+			if err := agent.AddSkill(name, sk); err != nil {
 				return fmt.Errorf("add skill %q: %w", sk, err)
 			}
 			s.Done("+ skill", sk)
 		}
 		if composeProfile != "" {
-			if err := mind.SetProfile(name, composeProfile); err != nil {
+			if err := agent.SetProfile(name, composeProfile); err != nil {
 				return fmt.Errorf("set profile %q: %w", composeProfile, err)
 			}
 			s.Done("+ profile", composeProfile)
@@ -91,7 +91,7 @@ Examples:
 
 		s.Blank()
 		s.Success("Composition updated.")
-		s.Info("Manifest:", mind.ManifestPath(name))
+		s.Info("Manifest:", agent.ManifestPath(name))
 		return nil
 	},
 }
@@ -116,7 +116,7 @@ Examples:
 			return fmt.Errorf("nothing to remove.\nPass at least one of --tool, --plugin, --skill, or --profile")
 		}
 
-		if err := mind.ValidateMind(name); err != nil {
+		if err := agent.ValidateMind(name); err != nil {
 			return err
 		}
 
@@ -125,25 +125,25 @@ Examples:
 		s.Info("Agent:", name)
 
 		for _, t := range composeTools {
-			if err := mind.RemoveTool(name, t); err != nil {
+			if err := agent.RemoveTool(name, t); err != nil {
 				return fmt.Errorf("remove tool %q: %w", t, err)
 			}
 			s.Done("- tool", t)
 		}
 		for _, p := range composePlugins {
-			if err := mind.RemovePlugin(name, p); err != nil {
+			if err := agent.RemovePlugin(name, p); err != nil {
 				return fmt.Errorf("remove plugin %q: %w", p, err)
 			}
 			s.Done("- plugin", p)
 		}
 		for _, sk := range composeSkills {
-			if err := mind.RemoveSkill(name, sk); err != nil {
+			if err := agent.RemoveSkill(name, sk); err != nil {
 				return fmt.Errorf("remove skill %q: %w", sk, err)
 			}
 			s.Done("- skill", sk)
 		}
 		if composeClearPro {
-			if err := mind.ClearProfile(name); err != nil {
+			if err := agent.ClearProfile(name); err != nil {
 				return fmt.Errorf("clear profile: %w", err)
 			}
 			s.Done("- profile", "cleared")
@@ -151,7 +151,7 @@ Examples:
 
 		s.Blank()
 		s.Success("Composition updated.")
-		s.Info("Manifest:", mind.ManifestPath(name))
+		s.Info("Manifest:", agent.ManifestPath(name))
 		return nil
 	},
 }

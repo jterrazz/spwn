@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"spwn.sh/packages/mind/internal/mind"
+	"spwn.sh/packages/agent/internal/mind"
 )
 
 // AgentInfo describes an agent's Mind structure.

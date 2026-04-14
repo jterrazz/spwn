@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
 
@@ -18,7 +18,7 @@ func TestAgent_ExportCreatesArchive(t *testing.T) {
 
 	// WHEN the agent's Mind is exported
 	outputDir := t.TempDir()
-	archivePath, err := mind.ExportMind("export-agent", outputDir, nil)
+	archivePath, err := agent.ExportMind("export-agent", outputDir, nil)
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
@@ -39,19 +39,19 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 	tc.InitAgent("import-src")
 
 	outputDir := t.TempDir()
-	archivePath, err := mind.ExportMind("import-src", outputDir, nil)
+	archivePath, err := agent.ExportMind("import-src", outputDir, nil)
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
 	// WHEN importing the archive into a new agent
-	err = mind.ImportMind("import-dst", archivePath)
+	err = agent.ImportMind("import-dst", archivePath)
 	if err != nil {
 		t.Fatalf("Import failed: %v", err)
 	}
 
 	// THEN the imported agent should have core/profile.md
-	info, err := mind.InspectAgent("import-dst")
+	info, err := agent.InspectAgent("import-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
 	}
@@ -73,24 +73,24 @@ func TestAgent_ExportWithExclude(t *testing.T) {
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("exclude-agent")
 
-	journalDir := filepath.Join(mind.AgentDir("exclude-agent"), "journal")
+	journalDir := filepath.Join(agent.AgentDir("exclude-agent"), "journal")
 	os.WriteFile(filepath.Join(journalDir, "test.md"), []byte("test"), 0644)
 
 	// WHEN exporting with the journal excluded
 	outputDir := t.TempDir()
-	archivePath, err := mind.ExportMind("exclude-agent", outputDir, []string{"journal"})
+	archivePath, err := agent.ExportMind("exclude-agent", outputDir, []string{"journal"})
 	if err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
 
 	// AND importing into a new agent
-	err = mind.ImportMind("exclude-dst", archivePath)
+	err = agent.ImportMind("exclude-dst", archivePath)
 	if err != nil {
 		t.Fatalf("Import failed: %v", err)
 	}
 
 	// THEN the imported agent's journal should be empty
-	info, err := mind.InspectAgent("exclude-dst")
+	info, err := agent.InspectAgent("exclude-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
 	}
