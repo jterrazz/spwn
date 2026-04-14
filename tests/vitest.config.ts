@@ -11,7 +11,7 @@ export default defineConfig({
         // Serial file execution: spwn's command routing (msg, down,
         // Destroy, inspect) still looks up containers daemon-wide by
         // `sh.spwn.world.config` name, not by the per-test-run label —
-        // so two parallel tests both spawning a `neo` world would step
+        // So two parallel tests both spawning a `neo` world would step
         // On each other at CLI-dispatch time. Until spwn honours
         // SPWN_TEST_LABEL on the routing side too, keep tests serial.
         // The framework's per-test cleanup still makes the suite safe
