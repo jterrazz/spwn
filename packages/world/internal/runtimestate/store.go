@@ -30,7 +30,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/paths"
 )
 

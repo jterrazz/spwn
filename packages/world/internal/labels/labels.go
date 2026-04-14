@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 )
 
 // All spwn labels share this prefix so they're easy to spot in

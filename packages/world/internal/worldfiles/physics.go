@@ -3,7 +3,7 @@ package worldfiles
 import (
 	"strings"
 
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 )
 
 // GeneratePhysics returns the contents of /world/physics.md.

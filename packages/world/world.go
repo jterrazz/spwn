@@ -17,7 +17,7 @@ import (
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/internal/manifest"
-	"spwn.sh/packages/world/internal/models"
+	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/api"
 	"spwn.sh/packages/world/internal/runtime"
 	"spwn.sh/packages/world/internal/state"
