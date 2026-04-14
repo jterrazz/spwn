@@ -259,13 +259,15 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn up --build                              Build then spawn from the artifact
 
 # ── Agents ───────────────────────────────────────────────────────
+# Lifecycle
 🟢 spwn agent new neo                           Create a blank agent
 🟢 spwn agent ls                                List your agents
-🟢 spwn agent inspect neo                       Inspect composition, memory, history
 🟢 spwn agent rm neo                            Delete an agent
 🟢 spwn agent fork neo neo-v2                   Clone + evolve independently
-🔴 spwn agent get @community/sci                Install an agent from a registry
-🔴 spwn agent publish neo                       Ship to registry (memory stripped)
+
+# Observe
+🟢 spwn agent inspect neo                       Inspect composition, memory, history
+🟢 spwn agent logs neo                          Event log for this agent
 
 # Compose blocks
 🟢 spwn agent add neo --tool @spwn/python       Add a tool block
@@ -283,41 +285,85 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟡 spwn agent dream neo                         Analyze experience, promote playbooks
 🟡 spwn agent sleep neo                         Consolidate memory, prune stale patterns
 
+# Portability
+🟢 spwn agent export neo                        Archive to neo.tar.gz
+🟢 spwn agent import ./neo.tar.gz               Install from archive
+🔴 spwn agent get @community/sci                Install a shared agent from a registry
+🔴 spwn agent publish neo                       Ship to registry (memory stripped)
+
 # ── Worlds ───────────────────────────────────────────────────────
+# Lifecycle
 🟢 spwn world up --agent neo                    Full form of `spwn up`
 🟢 spwn world ls                                Full form of `spwn ls`
-🟢 spwn world inspect <id>                      Inspect a running world
 🟢 spwn world down <id>                         Destroy (agent survives)
+🟢 spwn world rename <id> <name>                Rename a world
+
+# Observe
+🟢 spwn world inspect <id>                      Inspect composition + runtime state
+🟢 spwn world logs <id>                         Event log for a world
 🟢 spwn world enter <id>                        Interactive shell inside the world
+
+# Snapshots
 🟡 spwn world snap save <id>                    Save world state
 🟡 spwn world snap ls                           List snapshots
 🟡 spwn world snap restore <snap-id>            Rollback to a snapshot
 🟡 spwn world snap rm <snap-id>                 Remove a snapshot
 
-# ── Tools ────────────────────────────────────────────────────────
-🟢 spwn tool ls                                 Installed tool packs
-🔴 spwn tool get @community/rust-fuzzer         Install a community tool pack
-🔴 spwn tool search python                      Search the registry
-🔴 spwn tool publish ./my-tool                  Ship to registry
+# Shared knowledge
+🟢 spwn world knowledge ls <id>                 List a world's shared knowledge files
+🟢 spwn world knowledge show <id> <path>        Read a knowledge file
 
-# ── Skills ───────────────────────────────────────────────────────
-🟢 spwn skill ls                                Your skill files
-🟢 spwn skill new paper-reading                 Author a new skill
-🟢 spwn skill edit paper-reading                Open in $EDITOR
-🔴 spwn skill get @community/rust-review        Install a shared skill
-🔴 spwn skill publish paper-reading             Ship to registry
+# ── Tools / Skills / Profiles ────────────────────────────────────
+🟢 spwn tool    ls                              Installed tool packs
+🟢 spwn tool    show <pack>                     Inspect a tool pack
+🟢 spwn tool    rm   <pack>                     Uninstall a local tool pack
+🔴 spwn tool    get     @community/rust-fuzzer  Install a community tool pack
+🔴 spwn tool    search  python                  Search the registry
+🔴 spwn tool    publish ./my-tool               Ship to registry
 
-# ── Profiles ─────────────────────────────────────────────────────
-🟢 spwn profile ls                              Your profiles
-🟢 spwn profile new researcher                  Author a profile
+🟢 spwn skill   ls                              Your skill files
+🟢 spwn skill   new  paper-reading              Author a new skill
+🟢 spwn skill   edit paper-reading              Open in $EDITOR
+🟢 spwn skill   show paper-reading              Display a skill
+🟢 spwn skill   rm   paper-reading              Delete a skill
+🔴 spwn skill   get  @community/rust-review     Install a shared skill
+🔴 spwn skill   publish paper-reading           Ship to registry
+
+🟢 spwn profile ls                              Your personality templates
+🟢 spwn profile new  researcher                 Author a new profile
 🟢 spwn profile edit researcher                 Open in $EDITOR
-🔴 spwn profile get @community/pragmatic-dev    Install a shared profile
+🟢 spwn profile show researcher                 Display a profile
+🟢 spwn profile rm   researcher                 Delete a profile
+🔴 spwn profile get  @community/pragmatic-dev   Install a shared profile
 🔴 spwn profile publish researcher              Ship to registry
 
+# ── Teams & orgs ─────────────────────────────────────────────────
+🟢 spwn team new     acme                       Create a team
+🟢 spwn team ls                                 List teams
+🟢 spwn team assign  neo acme                   Attach an agent to a team
+🟢 spwn team members acme                       List a team's agents
+🟢 spwn organization ls                         List organizations
+🟢 spwn organization inspect <name>             Show roles in an organization
+
+# ── Examples ─────────────────────────────────────────────────────
+🟢 spwn example list                            List bundled examples
+🟢 spwn example install matrix                  Copy a bundled example into the project
+
+# ── Architect daemon ─────────────────────────────────────────────
+🟡 spwn architect start                         Start the always-on daemon
+🟡 spwn architect stop                          Stop it
+🟡 spwn architect status                        Show status and active worlds
+🟡 spwn architect talk "..."                    Talk to the Architect
+🟡 spwn architect logs                          Show the Architect's event log
+
 # ── System ───────────────────────────────────────────────────────
-🟡 spwn architect start                         Always-on orchestration daemon
 🟢 spwn web                                     Open the local web UI
+🟢 spwn status                                  Global status (worlds, auth, version)
 🟢 spwn auth login                              Connect Anthropic / OpenAI
+🟢 spwn auth logout                             Clear cached credentials
+🟢 spwn auth token <value>                      Set a token directly (CI)
+🟢 spwn auth check                              Validate credentials across providers
+🟢 spwn upgrade                                 Self-update the CLI
 ```
 
 Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
