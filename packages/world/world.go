@@ -20,7 +20,7 @@ import (
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/api"
 	"spwn.sh/packages/world/internal/runtime"
-	"spwn.sh/packages/world/internal/state"
+	"spwn.sh/packages/world/state"
 
 	containerTypes "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"

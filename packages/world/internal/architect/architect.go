@@ -9,7 +9,7 @@ import (
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/runtime"
-	"spwn.sh/packages/world/internal/state"
+	"spwn.sh/packages/world/state"
 
 	// Register the claude-code runtime adapter
 	_ "spwn.sh/packages/world/internal/runtime/claude"

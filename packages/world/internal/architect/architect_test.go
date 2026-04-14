@@ -13,7 +13,7 @@ import (
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/internal/runtimestate"
-	"spwn.sh/packages/world/internal/state"
+	"spwn.sh/packages/world/state"
 )
 
 // mockBackend implements backend.Backend for unit testing without Docker.

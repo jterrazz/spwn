@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/world/internal/runtimestate"
-	"spwn.sh/packages/world/internal/state"
+	"spwn.sh/packages/world/state"
 )
 
 func newTestServer(t *testing.T) (*Server, *http.ServeMux) {
