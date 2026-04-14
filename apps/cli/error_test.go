@@ -157,14 +157,14 @@ func TestCLI_WorldListHelp(t *testing.T) {
 	}
 }
 
-func TestCLI_AgentInitHelp(t *testing.T) {
-	out, _, err := executeCommand("agent", "init", "--help")
+func TestCLI_AgentCreateHelp(t *testing.T) {
+	out, _, err := executeCommand("agent", "create", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "init", "agent init help")
-	assertContains(t, out, "6-layer Mind", "agent init description")
+	assertContains(t, out, "create", "agent create help")
+	assertContains(t, out, "6-layer Mind", "agent create description")
 }
 
 // --- Bare command shows help ---

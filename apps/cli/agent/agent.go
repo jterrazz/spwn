@@ -41,7 +41,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds that live in worlds"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
-				{Name: "new <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
+				{Name: "create <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
 				{Name: "<name>", Desc: "Start the world that contains <name> " + ui.Faint("(shortcut)")},
 				{Name: "start <name>", Desc: "Start the world containing this agent"},
 				{Name: "stop <name>", Desc: "Stop the world containing this agent"},
@@ -74,9 +74,9 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "import <path>", Desc: "Import from tar.gz"},
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
-				{Name: "spwn agent new neo", Desc: ""},
+				{Name: "spwn agent create neo", Desc: ""},
 				{Name: "spwn agent add neo --tool @spwn/python --profile researcher", Desc: ""},
-				{Name: "spwn up --agent neo -w .", Desc: ""},
+				{Name: "spwn agent neo", Desc: ""},
 			}},
 		},
 		"spwn agent [command]",
@@ -98,7 +98,7 @@ An agent is backed by a Mind - a persistent directory holding its profile,
 skills, knowledge, playbooks, journal entries, and session state. The agent
 survives after the world is destroyed.`,
 	Args: cobra.ArbitraryArgs, // subcommands still resolve first
-	Example: `  spwn agent new neo                 Create a blank agent
+	Example: `  spwn agent create neo              Create a blank agent
   spwn agent neo                     Start the world that contains neo
   spwn agent -n neo -u w-abc123      Legacy: spawn named agent into world
   spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task`,

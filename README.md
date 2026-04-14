@@ -48,7 +48,7 @@ Four commands. One running world.
 |        | Step              | Example                                    |
 | ------ | ----------------- | ------------------------------------------ |
 | **01** | Initialise        | `spwn init`                                |
-| **02** | Create an agent   | `spwn agent new neo`                       |
+| **02** | Create an agent   | `spwn agent create neo`                    |
 | **03** | Bring it online   | `spwn up`                                  |
 | **04** | Talk to it        | `spwn agent talk neo "what is this project?"` |
 
@@ -272,9 +272,12 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 # ── Agents ───────────────────────────────────────────────────────
 # Lifecycle
-🟢 spwn agent new neo                           Create a blank agent
+🟢 spwn agent create neo                        Create a blank agent (auto-creates a single-agent world)
 🟢 spwn agent ls                                List your agents
 🟢 spwn agent rm neo                            Delete an agent
+🟢 spwn agent start neo                         Start the world that contains neo
+🟢 spwn agent stop  neo                         Stop the world that contains neo
+🟢 spwn agent neo                               Shortcut for `spwn agent start neo`
 🟡 spwn agent fork neo neo-v2                   Clone + evolve independently
 
 # Observe
@@ -305,10 +308,13 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 # ── Worlds ───────────────────────────────────────────────────────
 # Lifecycle — worlds are inline entries in spwn.yaml (not files)
+🟢 spwn world create matrix --agent neo         Declare a new world in spwn.yaml
+🟢 spwn world rm matrix                         Remove a world declaration from spwn.yaml
+🟢 spwn world ls                                List declared worlds (with status column)
 🟢 spwn world start [name]                      Start a world (no-arg: every world in spwn.yaml)
 🟢 spwn world stop  [name]                      Stop a world
-🟢 spwn world ls                                List running worlds
-🟢 spwn world rename <id> <name>                Rename a world
+🟢 spwn world matrix                            Shortcut for `spwn world start matrix`
+🟢 spwn world rename <id> <name>                Rename a running world
 
 # Observe
 🟢 spwn world inspect <id>                      Inspect composition + runtime state

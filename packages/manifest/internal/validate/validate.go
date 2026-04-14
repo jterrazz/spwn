@@ -125,8 +125,8 @@ var (
 // `spwn agent <subcommand>` and therefore cannot be used as agent
 // names.
 var reservedAgentSubcommands = map[string]struct{}{
-	"new": {}, "ls": {}, "rm": {}, "fork": {}, "inspect": {}, "logs": {},
-	"add": {}, "remove": {}, "talk": {}, "send": {}, "inbox": {},
+	"create": {}, "new": {}, "ls": {}, "rm": {}, "fork": {}, "inspect": {},
+	"logs": {}, "add": {}, "remove": {}, "talk": {}, "send": {}, "inbox": {},
 	"watch": {}, "dream": {}, "sleep": {}, "publish": {}, "get": {},
 	"export": {}, "import": {}, "start": {}, "stop": {}, "delete": {},
 	"deploy": {}, "compose": {}, "list": {}, "init": {},
@@ -155,9 +155,9 @@ func ReservedAgentNames() []string {
 
 // reservedWorldSubcommands is the equivalent for `spwn world ...`.
 var reservedWorldSubcommands = map[string]struct{}{
-	"start": {}, "stop": {}, "ls": {}, "rm": {}, "inspect": {},
+	"create": {}, "start": {}, "stop": {}, "ls": {}, "rm": {}, "inspect": {},
 	"logs": {}, "enter": {}, "destroy": {}, "rename": {}, "knowledge": {},
-	"new": {}, "list": {},
+	"new": {}, "list": {}, "remove": {}, "up": {}, "down": {}, "snap": {},
 }
 
 // ----- Rules -----

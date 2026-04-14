@@ -153,6 +153,113 @@ func AddAgentWorld(manifestPath, agentName string) error {
 	return os.WriteFile(manifestPath, out, 0o644)
 }
 
+// AddWorldOpts configures AddWorld. All fields are optional except
+// the world name passed as a separate argument.
+type AddWorldOpts struct {
+	// Agents is the list of agent names this world deploys. Empty is
+	// allowed at scaffold time but `spwn check` will flag it.
+	Agents []string
+	// Workspaces is the list of workspace mount specs. Empty defaults
+	// to ["."] so the project root is mounted at /workspace.
+	Workspaces []string
+}
+
+// AddWorld inserts a new entry under spwn.yaml#worlds with the given
+// name and options. Idempotent: a no-op if an entry with that name
+// already exists. Used by `spwn world create <name>`.
+func AddWorld(manifestPath, name string, opts AddWorldOpts) error {
+	data, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", manifestPath, err)
+	}
+	var doc yaml.Node
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return fmt.Errorf("parse %s: %w", manifestPath, err)
+	}
+	if doc.Kind != yaml.DocumentNode || len(doc.Content) == 0 {
+		return fmt.Errorf("unexpected yaml structure in %s", manifestPath)
+	}
+	root := doc.Content[0]
+	if root.Kind != yaml.MappingNode {
+		return fmt.Errorf("spwn.yaml root must be a mapping")
+	}
+
+	worlds := findMapValue(root, "worlds")
+	if worlds == nil {
+		worlds = &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
+		root.Content = append(root.Content,
+			&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "worlds"},
+			worlds,
+		)
+	}
+	if worlds.Kind != yaml.MappingNode {
+		return fmt.Errorf("spwn.yaml#worlds must be a mapping")
+	}
+	if findMapValue(worlds, name) != nil {
+		return nil
+	}
+
+	workspaces := opts.Workspaces
+	if len(workspaces) == 0 {
+		workspaces = []string{"."}
+	}
+
+	entry := &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
+	entry.Content = append(entry.Content,
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "agents"},
+		flowSeq(opts.Agents),
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "workspaces"},
+		flowSeq(workspaces),
+	)
+	worlds.Content = append(worlds.Content,
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: name},
+		entry,
+	)
+
+	out, err := yaml.Marshal(&doc)
+	if err != nil {
+		return fmt.Errorf("re-encode %s: %w", manifestPath, err)
+	}
+	return os.WriteFile(manifestPath, out, 0o644)
+}
+
+// RemoveWorld drops the named entry from spwn.yaml#worlds. Returns
+// an error wrapping ErrWorldNotFound if no such entry exists. Used
+// by `spwn world rm <name>`.
+func RemoveWorld(manifestPath, name string) error {
+	data, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", manifestPath, err)
+	}
+	var doc yaml.Node
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		return fmt.Errorf("parse %s: %w", manifestPath, err)
+	}
+	if doc.Kind != yaml.DocumentNode || len(doc.Content) == 0 {
+		return fmt.Errorf("unexpected yaml structure in %s", manifestPath)
+	}
+	root := doc.Content[0]
+	worlds := findMapValue(root, "worlds")
+	if worlds == nil || worlds.Kind != yaml.MappingNode {
+		return ErrWorldNotFound
+	}
+	for i := 0; i+1 < len(worlds.Content); i += 2 {
+		if worlds.Content[i].Value == name {
+			worlds.Content = append(worlds.Content[:i], worlds.Content[i+2:]...)
+			out, err := yaml.Marshal(&doc)
+			if err != nil {
+				return fmt.Errorf("re-encode %s: %w", manifestPath, err)
+			}
+			return os.WriteFile(manifestPath, out, 0o644)
+		}
+	}
+	return ErrWorldNotFound
+}
+
+// ErrWorldNotFound is returned by RemoveWorld when the named world
+// does not exist in spwn.yaml.
+var ErrWorldNotFound = fmt.Errorf("world not found in spwn.yaml")
+
 func flowSeq(values []string) *yaml.Node {
 	n := &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq", Style: yaml.FlowStyle}
 	for _, v := range values {

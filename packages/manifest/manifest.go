@@ -132,10 +132,31 @@ func Init(dir string, opts InitOpts) error {
 
 // AddAgentToManifest atomically inserts a new world entry into
 // spwn.yaml that deploys the named agent on its own. Used by
-// `spwn agent new <name>` to keep the auto-world wired up.
+// `spwn agent create <name>` to keep the auto-world wired up.
 func AddAgentToManifest(manifestPath, agentName string) error {
 	return scaffold.AddAgentWorld(manifestPath, agentName)
 }
+
+// AddWorldOpts configures AddWorld.
+type AddWorldOpts = scaffold.AddWorldOpts
+
+// AddWorld declares a new world entry in spwn.yaml. Idempotent: a
+// no-op if an entry with that name already exists. Used by
+// `spwn world create <name>`.
+func AddWorld(manifestPath, name string, opts AddWorldOpts) error {
+	return scaffold.AddWorld(manifestPath, name, opts)
+}
+
+// RemoveWorld drops the named entry from spwn.yaml#worlds. Returns
+// ErrWorldNotFound if no such entry exists. Used by
+// `spwn world rm <name>`.
+func RemoveWorld(manifestPath, name string) error {
+	return scaffold.RemoveWorld(manifestPath, name)
+}
+
+// ErrWorldNotFound is returned by RemoveWorld when the named world
+// is not declared in spwn.yaml.
+var ErrWorldNotFound = scaffold.ErrWorldNotFound
 
 // IsReservedAgentName reports whether the given name collides with
 // a `spwn agent <subcommand>` reserved verb. CLI callers should

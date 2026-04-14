@@ -20,9 +20,8 @@ func init() {
 }
 
 var initCmd = &cobra.Command{
-	Use:     "new [name]",
-	Aliases: []string{"init"},
-	Short:   "Create a new agent with a 6-layer Mind",
+	Use:   "create [name]",
+	Short: "Create a new agent with a 6-layer Mind",
 	Long: `Create a new agent with the 6-layer Mind structure. If no name is
 provided, a random name is picked from a curated dictionary.`,
 	Args: cobra.MaximumNArgs(1),
