@@ -1,0 +1,13 @@
+{
+    "mode": "global",
+    "agents": [
+        {
+            "name": "neo",
+            "status": "unattached"
+        },
+        {
+            "name": "trinity",
+            "status": "unattached"
+        }
+    ]
+}
