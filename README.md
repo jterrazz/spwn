@@ -63,44 +63,44 @@ Prefer a bundled demo? `spwn example install matrix`.
 <table>
 <tr>
 <td align="center" width="33%">
-<h3>🌍 Isolated Worlds</h3>
-Every agent lives in a Docker container with its own filesystem, compute, and network. <b>Real constraints. Real physics.</b> Your host is never at risk.
+<h3>🧩 Composable Intelligence</h3>
+Stack tool packs, skill files, and a profile into a running mind. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher profile and you have an autonomous scientist. <b>Docker, but for minds.</b>
 </td>
 <td align="center" width="33%">
-<h3>🧠 They Remember You</h3>
-Every agent has a profile — identity, skills, and memory. <b>It survives across worlds and runtimes.</b> An agent that worked on your codebase last week remembers it today.
+<h3>🧠 Persistent Minds</h3>
+Memory is a folder of markdown files, not a database. Knowledge survives across runs, playbooks accumulate, a mind that worked on your codebase last week <b>remembers it today</b>.
 </td>
 <td align="center" width="33%">
-<h3>🏗️ Multi-Agent Hierarchy</h3>
-Leaders delegate to workers via inboxes. Workers report back. <b>Teams collaborate by design.</b>
+<h3>🧬 Agents That Evolve</h3>
+<i>Dream</i> to analyze experience, <i>sleep</i> to consolidate memory, <i>fork</i> to branch. Successful patterns become playbooks. Failed ones are discarded. <b>Natural selection for behavior.</b>
 </td>
 </tr>
 <tr>
+<td align="center">
+<h3>🌍 Real Physics</h3>
+Every world is a Docker container with hard, kernel-enforced limits on CPU, memory, disk, and time. Break the sandbox? You can't. <b>Real constraints, not suggestions.</b>
+</td>
 <td align="center">
 <h3>🔒 Laws of Physics, Not ACLs</h3>
-No network interface means HTTP doesn't exist — not forbidden, physically impossible. No prompt can change the laws of physics. <b>Security by absence.</b>
+No network interface means HTTP doesn't exist — not forbidden, physically impossible. No prompt jailbreak can change the laws of physics. <b>Security by absence.</b>
 </td>
 <td align="center">
-<h3>🧬 Agent Evolution</h3>
-Dream to analyze, sleep to consolidate, fork to branch. Successful patterns become playbooks. Failed ones are discarded. <b>Natural selection for behavior.</b>
-</td>
-<td align="center">
-<h3>🧩 Composable Intelligence</h3>
-Tool packs, skill files, and profiles — all stackable blocks. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher profile = an autonomous scientist. <b>Docker, but for minds.</b>
+<h3>🏗️ Multi-Agent Teams</h3>
+Leaders delegate via filesystem inboxes. Workers report back. Async, observable, no orchestration glue code. <b>Collaboration as a physical medium.</b>
 </td>
 </tr>
 <tr>
 <td align="center">
-<h3>🖥️ The Web UI</h3>
-See every world, agent, and tool at a glance. Know exactly what each agent can do, what it learned, and what sessions it ran. <b>No more scattered configs.</b>
+<h3>🧾 Agents as Code</h3>
+If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit your agents alongside your app code. Review behavior changes in PRs. <b>Reproduce the same mind on any machine.</b>
 </td>
 <td align="center">
-<h3>📸 Snapshots & Rollback</h3>
-Capture a world at any point. Roll back to retry a different approach. <b>Deterministic experimentation.</b>
+<h3>📦 Reproducible Builds</h3>
+<code>spwn check</code> validates the project tree. <code>spwn build</code> flattens it into a content-hashed artifact — pinned Docker image digest, flattened agent tree, normalized manifest. <b>Byte-identical agents across environments.</b>
 </td>
 <td align="center">
-<h3>💬 Agent Messaging</h3>
-Async inter-agent communication via filesystem inboxes. Agents send, receive, and watch for messages. <b>No orchestration glue code needed.</b>
+<h3>🔌 Swappable Adapters</h3>
+Every layer is a Go interface. Claude Code today, Codex tomorrow. Docker today, Firecracker next year. Markdown memory today, vector store later. <b>No runtime lock-in.</b>
 </td>
 </tr>
 </table>
