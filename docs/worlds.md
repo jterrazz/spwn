@@ -131,10 +131,11 @@ From inside a spwn project:
 ```bash
 spwn up                     # every world in spwn.yaml
 spwn up default             # just "default"
-spwn up --build             # rebuild the artifact first, then spawn
 ```
 
-`spwn up` assembles each agent's composition (tools + skills +
-profile) into a Docker image, boots a container, mounts the
+`spwn up` first flattens the project into `.spwn/build/` (validate +
+content-hash + pin), then assembles each agent's composition (tools +
+skills + profile) into a Docker image, boots a container, mounts the
 workspaces under `/workspace`, and hands the runtime control. The
 agent wakes up, reads `CLAUDE.md`, finds its tools, and gets to work.
+The build step is a no-op when the cache hash matches.

@@ -51,7 +51,7 @@ shortcuts act on every world declared in `spwn.yaml`.
 spwn init                                      # Scaffold spwn.yaml + ./spwn/ + .spwn/
 spwn check                                     # Validate the tree
 spwn build                                     # Flatten to .spwn/build/ (pinned artifact)
-spwn up --build                                # Build then spawn from the artifact
+spwn up                                        # Auto-builds before spawning when a project exists
 
 # ── Compose-style shortcuts ──────────────────────────────────────
 spwn up                                        # Bring up every world in spwn.yaml

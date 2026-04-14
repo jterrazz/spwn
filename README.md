@@ -269,7 +269,6 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn init                                    Scaffold a project in the current dir
 🟢 spwn check                                   Validate the project tree against 15 rules
 🟢 spwn build                                   Flatten to .spwn/build/ (pinned artifact)
-🟢 spwn up --build                              Build then spawn from the artifact
 
 # ── Agents ───────────────────────────────────────────────────────
 # Lifecycle
