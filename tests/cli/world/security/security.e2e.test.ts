@@ -1,43 +1,38 @@
-import { describe, expect, test } from 'vitest';
+import type { CliResult } from '@jterrazz/test';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { spec } from '../../../setup/cli.specification.js';
 
 /**
- * World security / physics enforcement under the docker() spec mode.
+ * World security / physics enforcement.
  *
- * Dropped (legacy assertions that no longer apply to current spwn):
- *   - "physics constants are documented in physics.md":
- *     The physics.md template no longer materialises CPU / Memory /
- *     Timeout values. Physics constants were removed from the manifest
- *     as part of a previous refactor; see resources.e2e.test.ts for
- *     the PidsLimit assertion that survived.
- *   - "element pack expansion with @spwn/node":
- *     The current seed handler surface can't override spwn/worlds/
- *     default.yaml. The docker-pilot fixture ships @spwn/unix and
- *     @spwn/git only. Testing @spwn/node would require a new fixture
- *     clone — out of scope for this migration. The unix + git
- *     expansion is exercised below.
+ * Every test is a read-only inspection of a fresh-up world, so we
+ * Share a single container across the file.
  *
- * Preserved and augmented:
- *   - bash and git are reachable inside the container (element packs
- *     actually wire binaries in)
- *   - faculties.md lists the expanded tools
- *   - Default network mode is bridge
- *   - PidsLimit is bounded (see also resources.e2e.test.ts)
+ * Dropped legacy coverage:
+ *   - "physics constants documented in physics.md": the physics.md
+ *     template no longer materialises CPU / Memory / Timeout values.
+ *   - "element pack expansion with @spwn/node": the fixture ships
+ *     @spwn/unix + @spwn/git only. Testing @spwn/node would require
+ *     a new fixture clone — out of scope.
  */
 describe('world security', () => {
-    test('declared element packs expand into live binaries inside the container', async () => {
-        await using result = await spec('element pack expansion')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+    let world: CliResult;
 
-        expect(result.exitCode).toBe(0);
-        const neo = result.container('neo');
+    beforeAll(async () => {
+        world = await spec('world security shared').project('docker-pilot').exec('up').run();
+        expect(world.exitCode).toBe(0);
+    });
+
+    afterAll(async () => {
+        await world[Symbol.asyncDispose]();
+    });
+
+    test('declared element packs expand into live binaries inside the container', async () => {
+        const neo = world.container('neo');
         expect(neo.running).toBe(true);
 
-        // The docker-pilot fixture's worlds/default.yaml declares
-        // @spwn/unix + @spwn/git, so bash and git must resolve on $PATH.
+        // Docker-pilot's worlds/default.yaml declares @spwn/unix + @spwn/git.
         const bash = await neo.exec('which bash');
         expect(bash.exitCode).toBe(0);
         expect(bash.stdout.text).toContain('bash');
@@ -46,41 +41,28 @@ describe('world security', () => {
         expect(git.exitCode).toBe(0);
         expect(git.stdout.text).toContain('git');
 
-        // And faculties.md reflects the verified tool set.
         const faculties = neo.file('/world/faculties.md').content;
         expect(faculties).toMatch(/bash/);
         expect(faculties).toMatch(/git/);
     });
 
-    test('default network mode is bridge', async () => {
+    test('default network mode is bridge', () => {
         // Spwn currently runs world containers on the bridge network so
-        // Agents can reach the host through host.docker.internal. This
-        // Test pins the behaviour — flip it the day spwn reintroduces a
-        // Network isolation flag.
-        await using result = await spec('network bridge').project('docker-pilot').exec('up').run();
-
-        expect(result.exitCode).toBe(0);
-
-        const inspectData = result.container('neo').inspect.value as {
+        // Agents can reach the host via host.docker.internal. Flip this
+        // The day spwn reintroduces a network isolation flag.
+        const inspectData = world.container('neo').inspect.value as {
             HostConfig?: { NetworkMode?: string };
         };
         expect(inspectData.HostConfig?.NetworkMode).toBe('bridge');
     });
 
-    test('pids limit is bounded (not unlimited)', async () => {
-        await using result = await spec('pids limit bounded')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
-
-        expect(result.exitCode).toBe(0);
-
-        const inspectData = result.container('neo').inspect.value as {
+    test('pids limit is bounded (not unlimited)', () => {
+        const inspectData = world.container('neo').inspect.value as {
             HostConfig?: { PidsLimit?: number };
         };
         const pidsLimit = inspectData.HostConfig?.PidsLimit ?? 0;
-        // 0 and -1 both mean unlimited; a positive number means the
-        // Backend wired the limit through from physics config.
+        // 0 / -1 mean unlimited; a positive number means physics config
+        // Wired the limit through.
         expect(pidsLimit).toBeGreaterThan(0);
     });
 });
