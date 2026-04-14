@@ -26,7 +26,7 @@ test.describe("Example gallery", () => {
   });
 
   test("shows CLI command preview", async ({ page }) => {
-    await expect(page.getByText(/\$ spwn up -c startup/)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/\$ spwn up startup/)).toBeVisible({ timeout: 10_000 });
   });
 
   test("install & spawn creates a world", async ({ page, api }) => {
