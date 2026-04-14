@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"spwn.sh/catalog/plugins"
-	"spwn.sh/catalog/runtimes"
-	"spwn.sh/catalog/tools"
+	"spwn.sh/packages/catalog/plugins"
+	"spwn.sh/packages/catalog/runtimes"
+	"spwn.sh/packages/catalog/tools"
 )
 
 // catalogToolNames returns the @scope/name identifier of every

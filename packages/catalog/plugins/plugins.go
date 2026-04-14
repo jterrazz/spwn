@@ -14,7 +14,7 @@ package plugins
 import (
 	"fmt"
 
-	"spwn.sh/catalog/plugins/mempalace"
+	"spwn.sh/packages/catalog/plugins/mempalace"
 	ib "spwn.sh/packages/image"
 )
 

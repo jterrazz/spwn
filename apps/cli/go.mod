@@ -6,11 +6,8 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
-	spwn.sh/catalog/plugins v0.0.0
-	spwn.sh/catalog/runtimes v0.0.0
-	spwn.sh/catalog/templates v0.0.0
-	spwn.sh/catalog/tools v0.0.0
 	spwn.sh/packages/base v0.0.0
+	spwn.sh/packages/catalog v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mailbox v0.0.0
 	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
@@ -23,7 +20,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/docker v27.5.1+incompatible // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
@@ -39,7 +35,6 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -56,11 +51,8 @@ require (
 )
 
 replace (
-	spwn.sh/catalog/plugins => ../../catalog/plugins
-	spwn.sh/catalog/runtimes => ../../catalog/runtimes
-	spwn.sh/catalog/templates => ../../catalog/templates
-	spwn.sh/catalog/tools => ../../catalog/tools
 	spwn.sh/packages/base => ../../packages/base
+	spwn.sh/packages/catalog => ../../packages/catalog
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/mailbox => ../../packages/mailbox
 	spwn.sh/packages/manifest => ../../packages/manifest

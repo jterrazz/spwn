@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/catalog/templates"
+	"spwn.sh/packages/catalog/templates"
 )
 
 func TestParseTemplateRef(t *testing.T) {

@@ -2,11 +2,8 @@ go 1.25.0
 
 use (
 	./apps/cli
-	./catalog/plugins
-	./catalog/runtimes
-	./catalog/templates
-	./catalog/tools
 	./packages/base
+	./packages/catalog
 	./packages/image
 	./packages/mailbox
 	./packages/manifest
