@@ -112,6 +112,7 @@ func Run(in Input) []Issue {
 		ruleWorldToolsExist,
 		ruleAgentToolsSubsetOfWorld,
 		ruleRuntimeSupported,
+		ruleMarkdownImports,
 	}
 	for _, r := range rules {
 		out = append(out, r(in)...)
