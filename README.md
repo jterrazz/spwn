@@ -186,25 +186,57 @@ skills:
 
 ## Use cases
 
-**Solo developer** - one agent, one project, persistent memory:
+### Compose a scientist from blocks
 
 ```bash
 spwn init
-spwn agent add neo --tool @spwn/node
+spwn agent add curie --tool @spwn/python --tool @spwn/qmd
+spwn agent add curie --skill paper-reading --profile researcher
 spwn up
-spwn talk neo "Refactor the auth module to use sessions"
-# neo remembers the codebase next time
+spwn talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
 
-**Team with a leader** - a lead agent delegates tasks to worker agents via inboxes:
+> Stack `@spwn/python` + `@spwn/qmd` + a `researcher` profile and you have an autonomous lab partner. Swap `researcher` for `skeptic` tomorrow - same mind, new voice. **Docker, but for minds.**
+
+### Ship an agent with your repo
 
 ```bash
-spwn agent new morpheus
-spwn agent new trinity
-spwn up --agent morpheus --agent neo --agent trinity
-spwn agent send neo    "Implement Stripe webhooks" --from morpheus
-spwn agent send trinity "Write tests for webhooks"  --from morpheus
+cd acme-api
+spwn init
+spwn agent add neo --tool @spwn/node --tool @spwn/git
+
+git add spwn.yaml spwn/
+git commit -m "add neo, our repo maintainer"
+git push
+
+# every teammate who clones the repo gets the same mind, byte-for-byte
 ```
+
+> Agents as code, shared like code. PR-review a behavior change. Bisect an agent's memory like bisecting a bug. **The Dockerfile metaphor, all the way.**
+
+### Fork a mind, throw it away if it breaks
+
+```bash
+spwn agent fork neo neo-migration       # clone composition + memory
+spwn up --agent neo-migration
+spwn talk neo-migration "migrate the whole repo from Jest to Vitest"
+
+# worked? promote.  didn't? neo is untouched, no regrets.
+spwn agent rm neo-migration
+```
+
+> The only AI assistant that lets you `git checkout -b` your agent. Run a destructive refactor in a branch; keep or discard based on the diff. **Natural selection for behavior.**
+
+### Unleash untrusted code in a sealed room
+
+```bash
+git clone https://github.com/someone/sus-repo /tmp/sus && cd /tmp/sus
+spwn init
+spwn up                    # no network, hard limits on CPU/mem/disk/time
+spwn talk neo "run every test and benchmark, tell me what the code actually does"
+```
+
+> No network interface means the sandbox **can't phone home**. Kernel-enforced CPU, memory, disk, and time caps mean it **can't melt your machine**. A safe room for running code you don't yet trust. **Security by absence.**
 
 <br/>
 
