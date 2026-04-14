@@ -16,6 +16,7 @@ Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 
 Examples:
   spwn agent remove neo --tool @spwn/python
+  spwn agent remove neo --plugin @spwn/mempalace
   spwn agent remove neo --skill paper-reading
   spwn agent remove neo --profile
 
@@ -26,10 +27,11 @@ spwn agent remove <agent-name> [flags]
 ### Options
 
 ```
-  -h, --help                help for remove
-      --profile             Clear the agent's profile attachment
-      --skill stringArray   Skill to remove (repeatable)
-      --tool stringArray    Tool pack to remove (repeatable)
+  -h, --help                 help for remove
+      --plugin stringArray   Plugin pack to remove (repeatable)
+      --profile              Clear the agent's profile attachment
+      --skill stringArray    Skill to remove (repeatable)
+      --tool stringArray     Tool pack to remove (repeatable)
 ```
 
 ### SEE ALSO

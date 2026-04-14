@@ -21,6 +21,7 @@ The domain has three main abstractions, each owning one concern:
 
 ### Building blocks (composable, reusable)
 - **Tool**: A reusable tool pack (`@spwn/unix`, `@spwn/python`). Plugs into an agent as a capability. If not listed in an agent, it doesn't exist in its world.
+- **Plugin**: A runtime-targeted tool pack (`@spwn/mempalace`). Same pipeline as Tool, plus it injects JSON into the runtime's settings file (e.g. `~/.claude/settings.json`) at spawn time — the standard vehicle for MCP servers, shell hooks, and other runtime-specific wiring. Declared under `agent.yaml#plugins:`, coexists with `tools:`.
 - **Skill**: A reusable procedure, playbook, or piece of knowledge. Authored in markdown, shared across agents.
 - **Profile**: A reusable personality template. Role, tone, purpose, behavior. Agents inherit a profile for their baseline personality.
 

@@ -14,12 +14,15 @@ package plugins
 import (
 	"fmt"
 
+	"spwn.sh/catalog/plugins/mempalace"
 	ib "spwn.sh/packages/image"
 )
 
 // All is the list of every built-in plugin. Adding a new plugin?
 // Import it here and append.
-var All = []ib.Tool{}
+var All = []ib.Tool{
+	mempalace.Tool,
+}
 
 // RegisterDefaults registers all built-in plugins into the given
 // registry. Returns an error on naming collisions (programmer error).
