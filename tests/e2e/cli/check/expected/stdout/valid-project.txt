@@ -1,0 +1,4 @@
+
+  ✓  Project is valid
+     <PROJECT>/spwn.yaml
+

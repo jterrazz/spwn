@@ -1,4 +1,5 @@
 fixtures/
+e2e/**/expected/
 spwn/
 spwn.yaml
 .spwn/

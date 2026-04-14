@@ -1,0 +1,10 @@
+
+  <PROJECT>/spwn.yaml
+
+  errors
+    •  remote registries are not yet supported (ref: "@jterrazz/foo")
+       spwn/agents/neo/agent.yaml#tools
+       → use @spwn/<name> for built-in packs or drop a directory under ./spwn/tools/<name>/ for a local pack; remote registries (@<owner>/<name>) are planned but not implemented yet
+
+  1 error(s), 0 warning(s), 0 info
+

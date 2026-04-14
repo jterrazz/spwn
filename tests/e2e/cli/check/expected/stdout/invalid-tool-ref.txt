@@ -1,0 +1,10 @@
+
+  <PROJECT>/spwn.yaml
+
+  errors
+    •  tool "@spwn/nonexistent" does not exist
+       spwn/agents/neo/agent.yaml#tools
+       → available built-ins: @spwn/unix, @spwn/git, @spwn/node, @spwn/python, @spwn/build, @spwn/docker-cli, @spwn/cli, @spwn/architect, @spwn/qmd, @spwn/claude-code, @spwn/codex, @spwn/mempalace
+
+  1 error(s), 0 warning(s), 0 info
+
