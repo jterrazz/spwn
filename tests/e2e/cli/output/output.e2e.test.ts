@@ -18,49 +18,49 @@ describe('CLI output', () => {
 
         // Then - exits zero with the grouped help banner
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('root-help');
+        await result.stdout.toMatch('root-help.txt');
     });
 
     test('world --help lists the lifecycle subcommands', async () => {
         const result = await spec('world help').project('empty').exec('world --help').run();
 
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('world-help');
+        await result.stdout.toMatch('world-help.txt');
     });
 
     test('agent --help lists the agent subcommands', async () => {
         const result = await spec('agent help').project('empty').exec('agent --help').run();
 
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('agent-help');
+        await result.stdout.toMatch('agent-help.txt');
     });
 
     test('architect --help lists the architect subcommands', async () => {
         const result = await spec('architect help').project('empty').exec('architect --help').run();
 
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('architect-help');
+        await result.stdout.toMatch('architect-help.txt');
     });
 
     test('get --help lists the marketplace subcommands', async () => {
         const result = await spec('get help').project('empty').exec('get --help').run();
 
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('get-help');
+        await result.stdout.toMatch('get-help.txt');
     });
 
     test('upgrade --help describes the install flow', async () => {
         const result = await spec('upgrade help').project('empty').exec('upgrade --help').run();
 
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('upgrade-help');
+        await result.stdout.toMatch('upgrade-help.txt');
     });
 
     test('auth --help lists the auth subcommands', async () => {
         const result = await spec('auth help').project('empty').exec('auth --help').run();
 
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('auth-help');
+        await result.stdout.toMatch('auth-help.txt');
     });
 
     test('--version prints the spwn version line', async () => {
