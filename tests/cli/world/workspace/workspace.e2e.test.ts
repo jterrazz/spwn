@@ -99,10 +99,9 @@ describe('world workspace', () => {
 
         expect(result.exitCode).not.toBe(0);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
 
         expect(result.container('neo').exists).toBe(false);
     });

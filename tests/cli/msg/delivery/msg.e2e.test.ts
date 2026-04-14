@@ -32,10 +32,9 @@ describe('agent messaging (msg)', () => {
 
         expect(result.exitCode).toBe(0);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/[Ss]ent message/);
-        expect(combined).toContain('morpheus');
-        expect(combined).toContain('neo');
+        expect(result.stderr.text).toMatch(/[Ss]ent message/);
+        result.stderr.toContain('morpheus');
+        result.stderr.toContain('neo');
 
         // The message file really lives in the container inbox.
         const neo = result.container('neo');
@@ -56,8 +55,7 @@ describe('agent messaging (msg)', () => {
 
         expect(result.exitCode).toBe(0);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/[Ss]ent message/);
+        expect(result.stderr.text).toMatch(/[Ss]ent message/);
 
         const cat = await result.container('neo').exec('sh -c "cat /world/inbox/neo/*.json"');
         expect(cat.exitCode).toBe(0);
@@ -73,13 +71,14 @@ describe('agent messaging (msg)', () => {
 
         expect(result.exitCode).toBe(0);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('morpheus');
-        expect(combined).toContain('inbox test');
+        // Inbox renders a table on stderr (spwn's ui.Table writer);
+        // Rows carry the sender and body of each delivered message.
+        result.stderr.toContain('morpheus');
+        result.stderr.toContain('inbox test');
         // Table columns the legacy test matched against.
-        expect(combined).toContain('FROM');
-        expect(combined).toContain('TYPE');
-        expect(combined).toContain('STATUS');
+        result.stderr.toContain('FROM');
+        result.stderr.toContain('TYPE');
+        result.stderr.toContain('STATUS');
     });
 
     test('send to a non-existent agent fails cleanly', async () => {
@@ -90,12 +89,11 @@ describe('agent messaging (msg)', () => {
 
         expect(result.exitCode).not.toBe(0);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('ReferenceError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).toContain('nonexistent');
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('ReferenceError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        result.stderr.toContain('nonexistent');
     });
 
     test('inbox on a non-existent agent fails cleanly', async () => {
@@ -106,11 +104,10 @@ describe('agent messaging (msg)', () => {
 
         expect(result.exitCode).not.toBe(0);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('ReferenceError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).toContain('nonexistent');
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('ReferenceError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        result.stderr.toContain('nonexistent');
     });
 });

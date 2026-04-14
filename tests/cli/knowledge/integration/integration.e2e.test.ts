@@ -55,7 +55,7 @@ describe('world knowledge integration', () => {
             .run();
 
         expect(ls.exitCode).toBe(0);
-        const combined = `${ls.stdout.text}\n${ls.stderr.text}`;
-        expect(combined).toContain('note.md');
+        // `world knowledge ls` prints entries on stdout.
+        ls.stdout.toContain('note.md');
     });
 });

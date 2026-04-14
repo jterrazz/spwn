@@ -34,8 +34,7 @@ describe('agent messaging', () => {
         expect(result.exitCode).toBe(0);
         // With a multi-command chain, only the last command's streams are
         // Captured, so we assert on the final "Sent message" confirmation.
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/Sent message\s+morpheus → neo/);
+        expect(result.stderr.text).toMatch(/Sent message\s+morpheus → neo/);
 
         // And the JSON message file is present inside the container.
         const neo = result.container('neo');
@@ -63,13 +62,13 @@ describe('agent messaging', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('morpheus');
-        expect(combined).toContain('implement webhooks');
+        // Inbox renders a table on stderr (spwn's ui.Table writer).
+        result.stderr.toContain('morpheus');
+        result.stderr.toContain('implement webhooks');
         // Table columns the legacy test asserted on.
-        expect(combined).toContain('FROM');
-        expect(combined).toContain('TYPE');
-        expect(combined).toContain('STATUS');
+        result.stderr.toContain('FROM');
+        result.stderr.toContain('TYPE');
+        result.stderr.toContain('STATUS');
     });
 
     test('inbox is empty before any send', async () => {
@@ -79,8 +78,7 @@ describe('agent messaging', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('No messages');
+        result.stderr.toContain('No messages');
     });
 
     test('multiple messages to the same agent all appear in the inbox', async () => {
@@ -96,10 +94,10 @@ describe('agent messaging', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('first message');
-        expect(combined).toContain('second message');
-        expect(combined).toContain('third message');
+        // Table rows land on stderr (spwn's ui.Table writer).
+        result.stderr.toContain('first message');
+        result.stderr.toContain('second message');
+        result.stderr.toContain('third message');
 
         // And three message files live in the container inbox.
         const ls = await result.container('neo').exec('sh -c "ls /world/inbox/neo/*.json | wc -l"');
@@ -114,9 +112,8 @@ describe('agent messaging', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
         // Default --from is "user" (omitted on the send line above).
-        expect(combined).toMatch(/Sent message\s+user → neo/);
+        expect(result.stderr.text).toMatch(/Sent message\s+user → neo/);
 
         // And the persisted JSON has both pieces of metadata.
         const cat = await result.container('neo').exec('sh -c "cat /world/inbox/neo/*.json"');
@@ -134,11 +131,10 @@ describe('agent messaging', () => {
 
         // The up step succeeds; the send step fails — combined exit code non-zero.
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).toContain('nonexistent');
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        result.stderr.toContain('nonexistent');
     });
 
     test('inbox on a non-existent agent fails cleanly', async () => {
@@ -148,11 +144,10 @@ describe('agent messaging', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).toContain('nonexistent');
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        result.stderr.toContain('nonexistent');
     });
 
     test('physics.md documents the /world/inbox communication channel', async () => {

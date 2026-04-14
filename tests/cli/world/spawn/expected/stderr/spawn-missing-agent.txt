@@ -1,0 +1,9 @@
+
+  → Loading config...
+  ✓ Loaded config            neo
+  → Connecting to Docker...
+  ✓ Docker connected
+  → Validating agent...
+  ✗ Spawn failed             agent "ghost" not found
+    Run "spwn agent new ghost" to create the agent first
+

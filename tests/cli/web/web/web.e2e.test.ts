@@ -52,8 +52,7 @@ describe('spwn web', () => {
             // Prove we actually reached the listening banner (i.e. the
             // Server really started) — otherwise the orphan check below
             // Is trivially satisfied because nothing ever ran.
-            const combined = result.stdout.text + result.stderr.text;
-            expect(combined).toContain('spwn API listening on');
+            result.stdout.toContain('spwn API listening on');
         }
 
         // Give the OS a brief moment to reap; retry a few times before
@@ -93,10 +92,9 @@ describe('spwn web', () => {
         // Fires; 124 means the timeout expired before the banner
         // Appeared.
         expect(result.exitCode).toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('spwn API listening on');
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('ReferenceError');
-        expect(combined).not.toContain('panic:');
+        result.stdout.toContain('spwn API listening on');
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('ReferenceError');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 });

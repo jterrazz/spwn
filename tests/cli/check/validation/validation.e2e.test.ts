@@ -41,7 +41,7 @@ describe('CLI input validation', () => {
         const result = await isolated('agent create extra args').exec('agent create a b c').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
+        const combined = result.stderr.text.toLowerCase();
         expect(combined).toMatch(/unknown|too many|invalid|argument|accepts/);
     });
 
@@ -49,7 +49,7 @@ describe('CLI input validation', () => {
         const result = await isolated('down no id').exec('down').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
+        const combined = result.stderr.text.toLowerCase();
         expect(combined).toMatch(/world|required|argument|missing|id|accepts|arg/);
     });
 
@@ -57,7 +57,7 @@ describe('CLI input validation', () => {
         const result = await isolated('inspect no id').exec('world inspect').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
+        const combined = result.stderr.text.toLowerCase();
         expect(combined).toMatch(/world|required|argument|missing|id|accepts|arg/);
     });
 
@@ -65,7 +65,7 @@ describe('CLI input validation', () => {
         const result = await isolated('logs no id').exec('world logs').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
+        const combined = result.stderr.text.toLowerCase();
         expect(combined).toMatch(/world|required|argument|missing|id|accepts|arg/);
     });
 
@@ -81,7 +81,7 @@ describe('CLI input validation', () => {
         const result = await isolated('agent send no args').exec('agent send').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
+        const combined = result.stderr.text.toLowerCase();
         expect(combined).toMatch(/required|argument|missing|world|message|accepts|arg/);
     });
 
@@ -98,9 +98,11 @@ describe('CLI input validation', () => {
             const result = await isolated(`validation: ${cmd}`).exec(cmd).run();
 
             if (result.exitCode !== 0) {
-                const combined = result.stdout.text + result.stderr.text;
-                expect(combined).not.toContain('Available Commands:');
-                expect(combined).not.toContain('Global Flags:');
+                // Help-text leak would land on stderr alongside the error.
+                expect(result.stderr.text).not.toContain('Available Commands:');
+                expect(result.stderr.text).not.toContain('Global Flags:');
+                expect(result.stdout.text).not.toContain('Available Commands:');
+                expect(result.stdout.text).not.toContain('Global Flags:');
             }
         }
     });
@@ -110,17 +112,16 @@ describe('CLI input validation', () => {
         const result = await isolated('actionable hint').exec('down w-nonexistent-00000').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toMatch(/not found/);
+        expect(result.stderr.text).toMatch(/not found/);
         // Should use the structured ✗ prefix.
-        expect(combined).toMatch(/✗/);
+        expect(result.stderr.text).toMatch(/✗/);
     });
 
     test('unknown top-level command shows error without full usage dump', async () => {
         const result = await isolated('unknown command').exec('foobar').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
+        const combined = result.stderr.text.toLowerCase();
         expect(combined).toMatch(/unknown|invalid|command/);
     });
 
@@ -128,7 +129,7 @@ describe('CLI input validation', () => {
         const result = await isolated('agent rm no name').exec('agent rm').run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
+        const combined = result.stderr.text.toLowerCase();
         expect(combined).toMatch(/name|required|argument|missing|accepts|arg/);
     });
 });

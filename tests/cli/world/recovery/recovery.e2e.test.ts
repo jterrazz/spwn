@@ -38,14 +38,13 @@ describe('error recovery', () => {
             .run();
 
         expect(secondDown.exitCode).not.toBe(0);
-        const combined = `${secondDown.stdout.text}\n${secondDown.stderr.text}`;
-        expect(combined).toMatch(/not (found|running)|no (running )?worlds?/i);
+        expect(secondDown.stderr.text).toMatch(/not (found|running)|no (running )?worlds?/i);
         // No stack trace, no usage dump.
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        expect(combined).not.toContain('Available Commands:');
-        expect(combined).not.toContain('Global Flags:');
+        expect(secondDown.stderr.text).not.toContain('TypeError');
+        expect(secondDown.stderr.text).not.toContain('panic');
+        expect(secondDown.stderr.text).not.toContain('goroutine');
+        expect(secondDown.stdout.text).not.toContain('Available Commands:');
+        expect(secondDown.stdout.text).not.toContain('Global Flags:');
     });
 
     test('world inspect on a non-existent id fails cleanly', async () => {
@@ -55,11 +54,10 @@ describe('error recovery', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/not found/i);
-        expect(combined).not.toContain('Available Commands:');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
+        expect(result.stderr.text).toMatch(/not found/i);
+        expect(result.stdout.text).not.toContain('Available Commands:');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
     });
 
     test('spawn with an invalid project name leaks no container', async () => {
@@ -76,9 +74,8 @@ describe('error recovery', () => {
         expect(result.container('neo').exists).toBe(false);
         expect(result.container('nonexistent-world').exists).toBe(false);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
     });
 
     test('an error does not corrupt state — the next command still works', async () => {

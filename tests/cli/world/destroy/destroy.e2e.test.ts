@@ -71,10 +71,9 @@ describe('world destroy', () => {
             .run();
         expect(result.exitCode).toBe(0);
 
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('Stopped agent');
-        expect(combined).toContain('Removed container');
-        expect(combined).toContain('Mind persisted');
+        result.stderr.toContain('Stopped agent');
+        result.stderr.toContain('Removed container');
+        result.stderr.toContain('Mind persisted');
     });
 
     test('destroy non-existent world fails', async () => {
@@ -84,13 +83,11 @@ describe('world destroy', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
         // Friendly error — no stack trace or panic
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('panic');
-        expect(combined).not.toContain('goroutine');
-        // Error line mentions the missing world by name
-        expect(combined).toContain('w-nonexistent-00000');
-        expect(combined).toContain('not found');
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        // Error line mentions the missing world by name and says "not found"
+        await result.stderr.toMatch('destroy-missing-world.txt');
     });
 });

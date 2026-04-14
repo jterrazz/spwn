@@ -45,9 +45,8 @@ describe('agent talk', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/not in any active world|no active world/i);
-        expect(combined).not.toContain('panic');
+        expect(result.stderr.text).toMatch(/not in any active world|no active world/i);
+        expect(result.stderr.text).not.toContain('panic');
     });
 
     test('talk to a non-existent agent hints at agent create', async () => {
@@ -57,11 +56,11 @@ describe('agent talk', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toContain('spwn agent create');
         // Should NOT leak the raw Go wrapper noise.
-        expect(combined).not.toContain('exit status 1');
-        expect(combined).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('exit status 1');
+        expect(result.stderr.text).not.toContain('panic');
+        // Friendly error points users at `spwn agent create`.
+        await result.stderr.toMatch('talk-missing-agent.txt');
     });
 
     test("talk against a live world exec's the runtime inside the container", async () => {
@@ -201,8 +200,7 @@ describe('agent talk', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        const combined = `${result.stdout.text}\n${result.stderr.text}`;
-        expect(combined).toMatch(/Agent:\s+neo/);
-        expect(combined).toMatch(/core\/\s+profile\.md/);
+        expect(result.stderr.text).toMatch(/Agent:\s+neo/);
+        expect(result.stderr.text).toMatch(/core\/\s+profile\.md/);
     });
 });

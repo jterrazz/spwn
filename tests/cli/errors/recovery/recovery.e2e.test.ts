@@ -28,15 +28,14 @@ describe('error recovery - state resilience', () => {
         // Create + ls as a separate chain to prove the home was not
         // Corrupted by the failure.
         expect(result.exitCode).not.toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toContain('panic:');
+        expect(result.stderr.text).not.toContain('panic:');
 
         const recovery = await isolated('recover create after rm')
             .exec(['init', 'agent create testbot', 'agent ls'])
             .run();
         expect(recovery.exitCode).toBe(0);
-        const recoveryOut = recovery.stdout.text + recovery.stderr.text;
-        expect(recoveryOut).toContain('testbot');
+        // `agent ls` renders its table on stderr (ui.Table default writer).
+        recovery.stderr.toContain('testbot');
     });
 
     test('export non-existent agent does not corrupt state', async () => {
@@ -51,16 +50,14 @@ describe('error recovery - state resilience', () => {
             .exec(['init', 'agent create neoprime', 'agent export ghost'])
             .run();
         expect(bad.exitCode).not.toBe(0);
-        const badCombined = bad.stdout.text + bad.stderr.text;
-        expect(badCombined).not.toContain('panic:');
-        expect(badCombined).not.toContain('goroutine ');
+        expect(bad.stderr.text).not.toContain('panic:');
+        expect(bad.stderr.text).not.toContain('goroutine ');
 
         const healthy = await isolated('ls after export failure')
             .exec(['init', 'agent create neoprime', 'agent ls'])
             .run();
         expect(healthy.exitCode).toBe(0);
-        const healthyCombined = healthy.stdout.text + healthy.stderr.text;
-        expect(healthyCombined).toContain('neoprime');
+        healthy.stderr.toContain('neoprime');
     });
 
     test('multiple errors in sequence do not compound', async () => {
@@ -72,8 +69,7 @@ describe('error recovery - state resilience', () => {
                 .exec(['init', 'agent rm nonexistent'])
                 .run();
             expect(result.exitCode).not.toBe(0);
-            const combined = result.stdout.text + result.stderr.text;
-            expect(combined).not.toContain('panic:');
+            expect(result.stderr.text).not.toContain('panic:');
         }
 
         // Then - a normal init + create + ls still works.
@@ -81,8 +77,7 @@ describe('error recovery - state resilience', () => {
             .exec(['init', 'agent create survivor', 'agent ls'])
             .run();
         expect(healthy.exitCode).toBe(0);
-        const combined = healthy.stdout.text + healthy.stderr.text;
-        expect(combined).toContain('survivor');
+        healthy.stderr.toContain('survivor');
     });
 
     test('init is idempotent - running init twice does not break state', async () => {
@@ -96,8 +91,7 @@ describe('error recovery - state resilience', () => {
 
         if (result.exitCode === 0) {
             // Idempotent path — everything went through.
-            const combined = result.stdout.text + result.stderr.text;
-            expect(combined).toContain('testbot');
+            result.stderr.toContain('testbot');
         } else {
             // Non-idempotent init — prove followups still work in a
             // Clean home on retry.
@@ -105,8 +99,7 @@ describe('error recovery - state resilience', () => {
                 .exec(['init', 'agent create testbot', 'agent ls'])
                 .run();
             expect(retry.exitCode).toBe(0);
-            const combined = retry.stdout.text + retry.stderr.text;
-            expect(combined).toContain('testbot');
+            retry.stderr.toContain('testbot');
         }
     });
 });

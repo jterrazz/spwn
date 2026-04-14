@@ -18,9 +18,7 @@ describe('zero-friction UX', () => {
 
         // Then - the error walks the user to the spawn command
         expect(result.exitCode).not.toBe(0);
-        const out = result.stdout.text + result.stderr.text;
-        expect(out).toContain('not in any active world');
-        expect(out).toContain('spwn up --agent neo');
+        await result.stderr.toMatch('talk-no-world.txt');
     });
 
     test('agent talk to a nonexistent agent suggests spwn agent create', async () => {
@@ -32,9 +30,7 @@ describe('zero-friction UX', () => {
 
         // Then - exits non-zero with a "create one" hint
         expect(result.exitCode).not.toBe(0);
-        const out = result.stdout.text + result.stderr.text;
-        expect(out).toContain('agent "nonexistent" not found');
-        expect(out).toContain('spwn agent create nonexistent');
+        await result.stderr.toMatch('talk-missing-agent-hint.txt');
     });
 
     test('architect stop when the daemon is not running exits cleanly', async () => {
@@ -60,9 +56,7 @@ describe('zero-friction UX', () => {
 
         // Then - error points at spwn ls so the user can find their worlds
         expect(result.exitCode).not.toBe(0);
-        const out = result.stdout.text + result.stderr.text;
-        expect(out).toContain('w-nonexistent-00000');
-        expect(out).toContain('spwn ls');
+        await result.stderr.toMatch('inspect-missing-ls-hint.txt');
     });
 
     test('architect talk --help lists usage and flags', async () => {

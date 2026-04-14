@@ -19,19 +19,21 @@ describe('marketplace - spwn get', () => {
         const result = await isolated('get help').exec('get --help').run();
 
         expect(result.exitCode).toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('install');
-        expect(combined).toContain('ls');
-        expect(combined).toContain('search');
-        expect(combined).toContain('rm');
+        // Cobra --help renders on stdout.
+        result.stdout.toContain('install');
+        result.stdout.toContain('ls');
+        result.stdout.toContain('search');
+        result.stdout.toContain('rm');
     });
 
     test("'spwn get ls' shows empty list when no packages installed", async () => {
         const result = await isolated('get ls').exec('get ls').run();
 
         expect(result.exitCode).toBe(0);
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).toContain('No packages installed');
+        // Stub placeholder — the "No packages installed" line lands on stderr
+        // (ui.Info). Fall back to both streams to stay resilient as the
+        // Command moves from placeholder to real implementation.
+        expect(result.stdout.text + result.stderr.text).toContain('No packages installed');
     });
 
     test("'spwn get install nonexistent' handles gracefully", async () => {
@@ -41,40 +43,38 @@ describe('marketplace - spwn get', () => {
 
         // Placeholder surface — command may succeed with a stub or
         // Fail cleanly. The requirement is "no crash / no stack trace".
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined.length).toBeGreaterThan(0);
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('ReferenceError');
-        expect(combined).not.toContain('panic:');
+        expect(result.stdout.text.length + result.stderr.text.length).toBeGreaterThan(0);
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('ReferenceError');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test("'spwn get rm nonexistent' handles gracefully", async () => {
         const result = await isolated('get rm nonexistent').exec('get rm nonexistent').run();
 
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined.length).toBeGreaterThan(0);
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('ReferenceError');
-        expect(combined).not.toContain('panic:');
+        expect(result.stdout.text.length + result.stderr.text.length).toBeGreaterThan(0);
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('ReferenceError');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test("'spwn get search' handles search query", async () => {
         const result = await isolated('get search test').exec('get search test').run();
 
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined.length).toBeGreaterThan(0);
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('ReferenceError');
-        expect(combined).not.toContain('panic:');
+        expect(result.stdout.text.length + result.stderr.text.length).toBeGreaterThan(0);
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('ReferenceError');
+        expect(result.stderr.text).not.toContain('panic:');
     });
 
     test("'spwn get' without subcommand shows help-ish output", async () => {
         const result = await isolated('get bare').exec('get').run();
 
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined.length).toBeGreaterThan(0);
-        expect(combined).not.toContain('TypeError');
-        expect(combined).not.toContain('panic:');
-        expect(combined).toMatch(/install|search|ls|rm|help/i);
+        // Bare command group prints help-ish output; exact stream depends on
+        // Whether cobra (stdout) or our stub renderer (stderr) handled it.
+        expect(result.stdout.text.length + result.stderr.text.length).toBeGreaterThan(0);
+        expect(result.stderr.text).not.toContain('TypeError');
+        expect(result.stderr.text).not.toContain('panic:');
+        expect(result.stdout.text + result.stderr.text).toMatch(/install|search|ls|rm|help/i);
     });
 });

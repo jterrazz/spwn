@@ -74,13 +74,9 @@ describe('spwn check', () => {
         // Seed handler ran).
         expect(result.exitCode).not.toBe(0);
         expect(result.file('spwn.yaml').content).toContain('duplicate:');
-        const combined = result.stdout.text + result.stderr.text;
-        // The rule fires with "agent X already deployed by world Y" — the
-        // Exact wording lives in the validator. We assert on intent, not
-        // Wording, by also checking the manifest path the violation
-        // Points at.
-        expect(combined).toContain('already deployed by world "duplicate"');
-        expect(combined).toContain('spwn.yaml#worlds.neo.agents');
+        // `check` writes its rendered report to stdout (cmd.OutOrStdout).
+        result.stdout.toContain('already deployed by world "duplicate"');
+        result.stdout.toContain('spwn.yaml#worlds.neo.agents');
     });
 
     test('emits a JSON report for a valid project', async () => {
@@ -113,8 +109,9 @@ describe('spwn check', () => {
 
         // Then - exits non-zero and nudges the user at spwn init
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
-        expect(combined).toContain('spwn init');
-        expect(combined).toContain('spwn.yaml');
+        // `check` outside a project errors on stderr (project resolver).
+        const stderr = result.stderr.text.toLowerCase();
+        expect(stderr).toContain('spwn init');
+        expect(stderr).toContain('spwn.yaml');
     });
 });
