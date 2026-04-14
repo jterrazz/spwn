@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	runtimes "spwn.sh/catalog/runtimes"
+	runtimes "spwn.sh/packages/catalog/runtimes"
 	ib "spwn.sh/packages/image"
 )
 

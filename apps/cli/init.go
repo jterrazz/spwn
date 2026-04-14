@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/catalog/templates"
+	"spwn.sh/packages/catalog/templates"
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/manifest"
 	"spwn.sh/packages/world"

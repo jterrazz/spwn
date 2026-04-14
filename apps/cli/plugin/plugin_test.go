@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	plugins "spwn.sh/catalog/plugins"
-	runtimes "spwn.sh/catalog/runtimes"
-	tools "spwn.sh/catalog/tools"
+	plugins "spwn.sh/packages/catalog/plugins"
+	runtimes "spwn.sh/packages/catalog/runtimes"
+	tools "spwn.sh/packages/catalog/tools"
 	ib "spwn.sh/packages/image"
 )
 

@@ -23,7 +23,7 @@ import (
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"
 	"spwn.sh/packages/world/internal/state"
-	templates "spwn.sh/catalog/templates"
+	templates "spwn.sh/packages/catalog/templates"
 
 	"gopkg.in/yaml.v3"
 )

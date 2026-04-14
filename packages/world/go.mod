@@ -5,11 +5,8 @@ go 1.25.0
 require (
 	github.com/docker/docker v27.5.1+incompatible
 	gopkg.in/yaml.v3 v3.0.1
-	spwn.sh/catalog/plugins v0.0.0
-	spwn.sh/catalog/runtimes v0.0.0
-	spwn.sh/catalog/templates v0.0.0
-	spwn.sh/catalog/tools v0.0.0
 	spwn.sh/packages/base v0.0.0
+	spwn.sh/packages/catalog v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mind v0.0.0
 )
@@ -34,17 +31,13 @@ require (
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
-	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.40.0 // indirect
 )
 
 replace (
-	spwn.sh/catalog/plugins => ../../catalog/plugins
-	spwn.sh/catalog/runtimes => ../../catalog/runtimes
-	spwn.sh/catalog/templates => ../../catalog/templates
-	spwn.sh/catalog/tools => ../../catalog/tools
 	spwn.sh/packages/base => ../base
+	spwn.sh/packages/catalog => ../catalog
 	spwn.sh/packages/image => ../image
 	spwn.sh/packages/mind => ../mind
 )
