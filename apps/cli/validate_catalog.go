@@ -26,9 +26,12 @@ func catalogToolNames() []string {
 }
 
 // supportedRuntimes returns the identifiers of every runtime adapter
-// the CLI knows about. Currently a single hard-coded entry; when we
-// ship additional runtimes this should be replaced with a registry
-// lookup.
+// the CLI knows about, taken from catalog/runtimes. Used to validate
+// each agent's runtime.backend at `spwn check` time.
 func supportedRuntimes() []string {
-	return []string{"claude-code"}
+	out := make([]string, 0, len(runtimes.All))
+	for _, r := range runtimes.All {
+		out = append(out, r.Name())
+	}
+	return out
 }
