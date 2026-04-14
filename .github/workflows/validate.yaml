@@ -6,6 +6,11 @@ on:
   push:
     branches: [main]
 
+# Every job sets up Go + pnpm/node (for the `pnpm -r lint` step inside
+# `make lint`) then calls a Makefile target. The source of truth for
+# What gets linted/tested/built is go.work + pnpm-workspace.yaml. If
+# This workflow ever drifts from local `make ...`, it's a bug.
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -15,19 +20,15 @@ jobs:
         with:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
-      - name: Vet all modules
-        run: |
-          cd packages/base && go vet ./...
-          cd ../image && go vet ./...
-          cd ../mind && go vet ./...
-          cd ../mailbox && go vet ./...
-          cd ../manifest && go vet ./...
-          cd ../migration && go vet ./...
-          cd ../world && go vet ./...
-          cd ../../catalog/templates && go vet ./...
-          cd ../tools && go vet ./...
-          cd ../runtimes && go vet ./...
-          cd ../../apps/cli && go vet ./...
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: make lint
 
   test:
     runs-on: ubuntu-latest
@@ -37,19 +38,7 @@ jobs:
         with:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
-      - name: Unit tests
-        run: |
-          cd packages/base && go test ./...
-          cd ../image && go test ./...
-          cd ../mind && go test ./...
-          cd ../mailbox && go test ./...
-          cd ../manifest && go test ./...
-          cd ../migration && go test ./...
-          cd ../world && go test ./...
-          cd ../../catalog/templates && go test ./...
-          cd ../tools && go test ./...
-          cd ../runtimes && go test ./...
-          cd ../../apps/cli && go test ./...
+      - run: make test
 
   build:
     runs-on: ubuntu-latest
@@ -59,8 +48,7 @@ jobs:
         with:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
-      - name: Build binary
-        run: cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
+      - run: make build
 
   web:
     runs-on: ubuntu-latest
@@ -71,32 +59,7 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4
         with:
-          # Node 22: oxlint.config.ts / oxfmt.config.ts rely on Node's
-          # Native .ts stripping, which requires >=22.18 (or ^20.19 with
-          # A quirk that doesn't actually work for config loading).
-          # Staying on Node 20 breaks codestyle check with
-          # ERR_UNKNOWN_FILE_EXTENSION.
           node-version: '22'
           cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint web
-        run: pnpm -C apps/web lint
-      - name: Build web
-        run: pnpm -C apps/web build
-
-  tests-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint tests
-        run: pnpm -C tests lint
+      - run: pnpm install --frozen-lockfile
+      - run: make web-build
