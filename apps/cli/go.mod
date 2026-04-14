@@ -13,7 +13,7 @@ require (
 	spwn.sh/packages/base v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
-	spwn.sh/packages/messenger v0.0.0
+	spwn.sh/packages/mailbox v0.0.0
 	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/world v0.0.0
 )
@@ -59,7 +59,7 @@ replace (
 	spwn.sh/packages/base => ../../packages/base
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/manifest => ../../packages/manifest
-	spwn.sh/packages/messenger => ../../packages/messenger
+	spwn.sh/packages/mailbox => ../../packages/mailbox
 	spwn.sh/packages/migration => ../../packages/migration
 	spwn.sh/packages/world => ../../packages/world
 )

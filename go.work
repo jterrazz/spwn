@@ -6,7 +6,7 @@ use (
 	./packages/base
 	./packages/image
 	./packages/manifest
-	./packages/messenger
+	./packages/mailbox
 	./packages/migration
 	./packages/world
 	./catalog/templates

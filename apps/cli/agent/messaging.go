@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/messenger"
+	"spwn.sh/packages/mailbox"
 	"github.com/spf13/cobra"
 )
 
@@ -171,7 +171,7 @@ var watchCmd = &cobra.Command{
 						continue
 					}
 
-					var msg messenger.Message
+					var msg mailbox.Message
 					if err := json.Unmarshal(msgOut, &msg); err != nil {
 						continue
 					}
@@ -201,7 +201,7 @@ var watchCmd = &cobra.Command{
 
 // --- helpers ---
 
-func readContainerInbox(containerID, agentName string) ([]messenger.Message, error) {
+func readContainerInbox(containerID, agentName string) ([]mailbox.Message, error) {
 	listCmd := fmt.Sprintf("find /world/inbox/%s -name '*.json' 2>/dev/null || true", agentName)
 	out, err := exec.Command("docker", "exec", containerID, "sh", "-c", listCmd).Output()
 	if err != nil {
@@ -209,7 +209,7 @@ func readContainerInbox(containerID, agentName string) ([]messenger.Message, err
 	}
 
 	files := strings.Split(strings.TrimSpace(string(out)), "\n")
-	var msgs []messenger.Message
+	var msgs []mailbox.Message
 	for _, f := range files {
 		f = strings.TrimSpace(f)
 		if f == "" {
@@ -219,7 +219,7 @@ func readContainerInbox(containerID, agentName string) ([]messenger.Message, err
 		if err != nil {
 			continue
 		}
-		var msg messenger.Message
+		var msg mailbox.Message
 		if err := json.Unmarshal(msgOut, &msg); err != nil {
 			continue
 		}

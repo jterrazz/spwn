@@ -1,10 +1,10 @@
-// Package messenger provides agent-to-agent communication via a
+// Package mailbox provides agent-to-agent communication via a
 // filesystem-based inbox system.
-package messenger
+package mailbox
 
 import (
-	"spwn.sh/packages/messenger/internal/inbox"
-	"spwn.sh/packages/messenger/internal/models"
+	"spwn.sh/packages/mailbox/internal/inbox"
+	"spwn.sh/packages/mailbox/internal/models"
 )
 
 // Message is a single inbox message exchanged between agents.

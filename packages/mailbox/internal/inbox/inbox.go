@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/messenger/internal/models"
+	"spwn.sh/packages/mailbox/internal/models"
 )
 
 // Send creates a message file in the recipient's inbox.
