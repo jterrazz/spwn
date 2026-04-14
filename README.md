@@ -23,13 +23,11 @@
 
 ## Play god with AI agents.
 
-The building blocks of agent intelligence. Assemble tools, skills, and minds into living worlds — one command away.
+**The building blocks of agent intelligence.** Assemble tools, skills, and minds into **living worlds** — one command away.
 
 The real power of AI isn't the model — it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
 
-**Agents as code. Docker for intelligence.** If Terraform is infrastructure as code, spwn is *agents* as code: stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review PRs that change an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one reproducible artifact.
-
-Other frameworks give agents tools. **Spwn gives them a world.** Each world is a contained reality with its own filesystem, neighbors, and memory. Agents carry their identity across sessions, consolidate experience into lasting knowledge, and fork themselves to run experiments.
+**Agents as code. Docker for intelligence.** If Terraform is infrastructure as code, spwn is **agents as code** — stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review PRs that change an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**.
 
 > *"The next breakthrough isn't smarter models. It's richer worlds."*
 
@@ -85,43 +83,43 @@ make install
 <tr>
 <td align="center" width="33%">
 <h3>🌍 Isolated Worlds</h3>
-Every agent lives in a Docker container with its own filesystem, compute, and network. Real constraints. Real physics. Your host is never at risk.
+Every agent lives in a Docker container with its own filesystem, compute, and network. <b>Real constraints. Real physics.</b> Your host is never at risk.
 </td>
 <td align="center" width="33%">
 <h3>🧠 They Remember You</h3>
-Every agent has a profile — identity, skills, and memory. It survives across worlds and runtimes. An agent that worked on your codebase last week remembers it today.
+Every agent has a profile — identity, skills, and memory. <b>It survives across worlds and runtimes.</b> An agent that worked on your codebase last week remembers it today.
 </td>
 <td align="center" width="33%">
 <h3>🏗️ Multi-Agent Hierarchy</h3>
-Leaders delegate to workers via inboxes. Workers report back. Async messaging, clear delegation. Teams collaborate by design.
+Leaders delegate to workers via inboxes. Workers report back. <b>Teams collaborate by design.</b>
 </td>
 </tr>
 <tr>
 <td align="center">
 <h3>🔒 Laws of Physics, Not ACLs</h3>
-No network interface means HTTP doesn't exist — not forbidden, physically impossible. No prompt can change the laws of physics. Security by absence.
+No network interface means HTTP doesn't exist — not forbidden, physically impossible. No prompt can change the laws of physics. <b>Security by absence.</b>
 </td>
 <td align="center">
 <h3>🧬 Agent Evolution</h3>
-Dream to analyze, sleep to consolidate, fork to branch. Successful patterns become playbooks. Failed ones are discarded. Natural selection for behavior.
+Dream to analyze, sleep to consolidate, fork to branch. Successful patterns become playbooks. Failed ones are discarded. <b>Natural selection for behavior.</b>
 </td>
 <td align="center">
 <h3>🧩 Composable Intelligence</h3>
-Tool packs, skill files, and profiles — all stackable blocks. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher profile = an autonomous scientist. Docker, but for minds.
+Tool packs, skill files, and profiles — all stackable blocks. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher profile = an autonomous scientist. <b>Docker, but for minds.</b>
 </td>
 </tr>
 <tr>
 <td align="center">
 <h3>🖥️ The Web UI</h3>
-See every world, agent, and tool at a glance. Know exactly what each agent can do, what it learned, and what sessions it ran. No more scattered configs.
+See every world, agent, and tool at a glance. Know exactly what each agent can do, what it learned, and what sessions it ran. <b>No more scattered configs.</b>
 </td>
 <td align="center">
 <h3>📸 Snapshots & Rollback</h3>
-Capture a world at any point. Roll back to retry a different approach. Deterministic experimentation.
+Capture a world at any point. Roll back to retry a different approach. <b>Deterministic experimentation.</b>
 </td>
 <td align="center">
 <h3>💬 Agent Messaging</h3>
-Async inter-agent communication via filesystem inboxes. Agents send, receive, and watch for messages. No orchestration glue code needed.
+Async inter-agent communication via filesystem inboxes. Agents send, receive, and watch for messages. <b>No orchestration glue code needed.</b>
 </td>
 </tr>
 </table>
@@ -152,7 +150,7 @@ spwn talk neo "Refactor the auth module to use sessions"
 
 ## Projects are per-repository
 
-A spwn project lives **in the repo**, not in your home directory.
+**A spwn project lives in the repo, not in your home directory.**
 `spwn init` turns any directory into a project — the same way `git init`
 turns any directory into a git repo, or `docker init` drops a Dockerfile
 and compose file. Commit your agents, your worlds, your tool composition
@@ -171,7 +169,7 @@ my-project/
 
 `spwn.yaml` is tiny — it declares which world and which agents this repo
 runs. Everyone who clones the repo gets the same agents, the same world
-physics, the same tool composition. Reproducibility by construction.
+physics, the same tool composition. **Reproducibility by construction.**
 
 ```yaml
 # spwn.yaml
@@ -193,7 +191,7 @@ publish`) and `spwn agent get` it in the next project.
 
 ## How agents work
 
-Each agent is a directory of markdown files — human-readable, git-friendly, no database:
+Each agent is a directory of markdown files — **human-readable, git-friendly, no database**:
 
 ```
 spwn/agents/neo/
@@ -218,7 +216,7 @@ Agents evolve through three mechanisms:
 
 ## Agent composition
 
-An agent is composed from three kinds of blocks: **tools**, **skills**, and a **profile**. Each block is a file. Stack them into an agent manifest:
+**Three kinds of blocks: tools, skills, and a profile.** Each block is a file. Stack them into an agent manifest:
 
 ```yaml
 # spwn/agents/neo/agent.yaml
@@ -239,7 +237,7 @@ skills:
   - @community/rust-review
 ```
 
-If a tool isn't listed, it doesn't exist. Not forbidden — physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
+**If a tool isn't listed, it doesn't exist.** Not forbidden — physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
 
 <br/>
 
