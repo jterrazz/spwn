@@ -106,6 +106,24 @@ func (s *Store) evictLegacyStateFile() {
 
 // ── Read API ──────────────────────────────────────────────────────────
 
+// testRunFilter returns the SPWN_TEST_LABEL value when set, empty
+// otherwise. Used to scope enumeration to a single test run so parallel
+// tests with identically-named worlds don't collide at routing time.
+// In production the env var is unset and this is a no-op pass-through.
+func testRunFilter() string {
+	return os.Getenv(labels.TestRunEnv)
+}
+
+// belongsToTestRun reports whether a container's labels match the
+// current SPWN_TEST_LABEL scope. Always true when the env var is unset.
+func belongsToTestRun(containerLabels map[string]string) bool {
+	scope := testRunFilter()
+	if scope == "" {
+		return true
+	}
+	return containerLabels[labels.TestRun] == scope
+}
+
 // List returns every world the daemon currently knows about. Hydrates
 // each one with mutable runtime state and GCs orphaned runtime files
 // in the same pass so the runtime directory stays in sync with Docker.
@@ -120,6 +138,9 @@ func (s *Store) List() ([]models.World, error) {
 	worlds := make([]models.World, 0, len(containers))
 	liveIDs := make([]string, 0, len(containers))
 	for _, c := range containers {
+		if !belongsToTestRun(c.Labels) {
+			continue
+		}
 		w, err := labels.ParseWorld(c.Labels)
 		if err != nil {
 			// A container with our kind label but unparseable metadata
@@ -149,6 +170,9 @@ func (s *Store) Get(id string) (*models.World, error) {
 		return nil, err
 	}
 	for _, c := range containers {
+		if !belongsToTestRun(c.Labels) {
+			continue
+		}
 		w, err := labels.ParseWorld(c.Labels)
 		if err != nil {
 			continue
