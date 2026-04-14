@@ -1,6 +1,6 @@
-package imagebuilder
+package image
 
-import "spwn.sh/packages/imagebuilder/internal/dockerfile"
+import "spwn.sh/packages/image/internal/dockerfile"
 
 // GenerateOpts configures Dockerfile generation.
 type GenerateOpts = dockerfile.GenerateOpts

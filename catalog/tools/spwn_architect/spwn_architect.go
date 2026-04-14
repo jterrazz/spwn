@@ -4,7 +4,7 @@ import (
 	"embed"
 	"io/fs"
 
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 )
 
 //go:embed skills/*

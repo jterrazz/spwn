@@ -1,4 +1,4 @@
-package imagebuilder
+package image
 
 import "io/fs"
 

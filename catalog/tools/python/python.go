@@ -3,7 +3,7 @@ package python
 import (
 	"io/fs"
 
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 )
 
 // Tool is the @spwn/python tool - Python 3 SDK.

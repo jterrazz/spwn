@@ -4,7 +4,7 @@ use (
 	./apps/cli
 	./packages/mind
 	./packages/base
-	./packages/imagebuilder
+	./packages/image
 	./packages/manifest
 	./packages/messenger
 	./packages/migration

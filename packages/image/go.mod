@@ -1,4 +1,4 @@
-module spwn.sh/packages/imagebuilder
+module spwn.sh/packages/image
 
 go 1.25.0
 

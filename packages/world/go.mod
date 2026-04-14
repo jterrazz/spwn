@@ -7,7 +7,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	spwn.sh/packages/mind v0.0.0
 	spwn.sh/packages/base v0.0.0
-	spwn.sh/packages/imagebuilder v0.0.0
+	spwn.sh/packages/image v0.0.0
 	spwn.sh/catalog/runtimes v0.0.0
 	spwn.sh/catalog/templates v0.0.0
 	spwn.sh/catalog/tools v0.0.0
@@ -48,7 +48,7 @@ require (
 replace (
 	spwn.sh/packages/mind => ../mind
 	spwn.sh/packages/base => ../base
-	spwn.sh/packages/imagebuilder => ../imagebuilder
+	spwn.sh/packages/image => ../image
 	spwn.sh/catalog/runtimes => ../../catalog/runtimes
 	spwn.sh/catalog/templates => ../../catalog/templates
 	spwn.sh/catalog/tools => ../../catalog/tools

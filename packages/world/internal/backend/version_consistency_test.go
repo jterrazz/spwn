@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/imagebuilder/base"
+	"spwn.sh/packages/image/base"
 )
 
 // TestDockerfileVersionMatchesConstant verifies the base Dockerfiles are

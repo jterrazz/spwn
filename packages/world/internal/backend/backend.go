@@ -1,9 +1,9 @@
-// Package backend re-exports types from spwn.sh/packages/imagebuilder/backend.
+// Package backend re-exports types from spwn.sh/packages/image/backend.
 // This package exists so that world internal code can continue importing
 // "spwn.sh/packages/world/internal/backend" without changes.
 package backend
 
-import ib "spwn.sh/packages/imagebuilder/backend"
+import ib "spwn.sh/packages/image/backend"
 
 // Type aliases - all forwarded from imagebuilder/backend.
 type Backend = ib.Backend

@@ -1,4 +1,4 @@
-package imagebuildertest
+package imagetest
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	ib "spwn.sh/packages/imagebuilder"
-	"spwn.sh/packages/imagebuilder/backend"
-	"spwn.sh/packages/imagebuilder/base"
+	ib "spwn.sh/packages/image"
+	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/image/base"
 )
 
 // Sandbox is a running container built from specific tools, used for E2E testing.

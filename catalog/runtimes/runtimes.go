@@ -9,7 +9,7 @@ import (
 
 	"spwn.sh/catalog/runtimes/claude_code"
 	"spwn.sh/catalog/runtimes/codex"
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 )
 
 // All is the list of every built-in runtime.

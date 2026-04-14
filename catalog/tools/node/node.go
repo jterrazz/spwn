@@ -3,7 +3,7 @@ package node
 import (
 	"io/fs"
 
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 )
 
 // Tool is the @spwn/node tool - Node.js 20 SDK.

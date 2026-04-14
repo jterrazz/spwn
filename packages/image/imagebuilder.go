@@ -1,4 +1,4 @@
-package imagebuilder
+package image
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"io"
 	"strings"
 
-	"spwn.sh/packages/imagebuilder/backend"
-	"spwn.sh/packages/imagebuilder/internal/dockerfile"
+	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/image/internal/dockerfile"
 )
 
 // Builder composes Docker images from tool definitions.

@@ -3,7 +3,7 @@ package docker_cli
 import (
 	"io/fs"
 
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 )
 
 // Tool is the @spwn/docker-cli tool - Docker CLI for DooD access.

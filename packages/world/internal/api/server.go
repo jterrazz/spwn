@@ -18,7 +18,7 @@ import (
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/base/activity"
 	"spwn.sh/packages/base/auth"
-	"spwn.sh/packages/imagebuilder/probe"
+	"spwn.sh/packages/image/probe"
 	"spwn.sh/packages/world/internal/architect"
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"

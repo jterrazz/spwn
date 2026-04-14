@@ -3,7 +3,7 @@ package tools
 import (
 	"fmt"
 
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 
 	"spwn.sh/catalog/tools/build"
 	"spwn.sh/catalog/tools/docker_cli"

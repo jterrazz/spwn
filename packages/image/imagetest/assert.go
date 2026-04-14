@@ -1,11 +1,11 @@
-package imagebuildertest
+package imagetest
 
 import (
 	"io/fs"
 	"strings"
 	"testing"
 
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 )
 
 // AssertValidTool checks all interface invariants on a tool.

@@ -11,7 +11,7 @@ require (
 	spwn.sh/catalog/tools v0.0.0
 	spwn.sh/packages/mind v0.0.0
 	spwn.sh/packages/base v0.0.0
-	spwn.sh/packages/imagebuilder v0.0.0
+	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
 	spwn.sh/packages/messenger v0.0.0
 	spwn.sh/packages/migration v0.0.0
@@ -57,7 +57,7 @@ replace (
 	spwn.sh/catalog/tools => ../../catalog/tools
 	spwn.sh/packages/mind => ../../packages/mind
 	spwn.sh/packages/base => ../../packages/base
-	spwn.sh/packages/imagebuilder => ../../packages/imagebuilder
+	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/manifest => ../../packages/manifest
 	spwn.sh/packages/messenger => ../../packages/messenger
 	spwn.sh/packages/migration => ../../packages/migration

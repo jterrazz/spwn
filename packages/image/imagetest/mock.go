@@ -1,11 +1,11 @@
-package imagebuildertest
+package imagetest
 
 import (
 	"context"
 	"io"
 	"time"
 
-	"spwn.sh/packages/imagebuilder/backend"
+	"spwn.sh/packages/image/backend"
 )
 
 // MockBackend is a test double for the Docker backend.

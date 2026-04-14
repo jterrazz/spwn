@@ -3,7 +3,7 @@ package build
 import (
 	"io/fs"
 
-	ib "spwn.sh/packages/imagebuilder"
+	ib "spwn.sh/packages/image"
 )
 
 // Tool is the @spwn/build tool - C/C++ build essentials.
