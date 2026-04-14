@@ -5,7 +5,7 @@ package e2e
 import (
 	"testing"
 
-	agentDomain "spwn.sh/packages/agent"
+	agentDomain "spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"
 )

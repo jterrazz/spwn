@@ -10,7 +10,7 @@ import (
 	"unicode/utf8"
 
 	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/packages/agent"
+	agentDomain "spwn.sh/packages/mind"
 	"spwn.sh/packages/foundation"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"

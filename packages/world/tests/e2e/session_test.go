@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/world/tests/e2e/setup"
-	agentDomain "spwn.sh/packages/agent"
+	agentDomain "spwn.sh/packages/mind"
 )
 
 func TestSession_FirstSpawnCreatesSession(t *testing.T) {

@@ -1,16 +1,16 @@
-// Package agent provides the public API for the agent domain.
+// Package mind provides the public API for the agent domain.
 // It wraps mind, journal, and session operations.
-package agent
+package mind
 
 import (
 	"fmt"
 	"os"
 	"time"
 
-	"spwn.sh/packages/agent/internal/evolution"
-	"spwn.sh/packages/agent/internal/journal"
-	"spwn.sh/packages/agent/internal/mind"
-	"spwn.sh/packages/agent/internal/session"
+	"spwn.sh/packages/mind/internal/evolution"
+	"spwn.sh/packages/mind/internal/journal"
+	"spwn.sh/packages/mind/internal/mind"
+	"spwn.sh/packages/mind/internal/session"
 	"spwn.sh/packages/foundation/activity"
 )
 

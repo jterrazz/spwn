@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/agent/internal/journal"
+	"spwn.sh/packages/mind/internal/journal"
 	"spwn.sh/packages/foundation/activity"
 )
 

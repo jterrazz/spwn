@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
-	agentDomain "spwn.sh/packages/agent"
+	agentDomain "spwn.sh/packages/mind"
 	"spwn.sh/packages/manifest"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"

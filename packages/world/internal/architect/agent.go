@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"spwn.sh/packages/agent"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/foundation/auth"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/models"
@@ -52,22 +52,22 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 
 	// Save session + journal (best-effort) - both live in the agent's
 	// persistent home dir, addressed by name.
-	agentPath := agent.AgentDir(agentName)
-	sessID := agent.DeterministicSessionID(agentName, worldID)
-	sess := &agent.Session{
+	agentPath := mind.AgentDir(agentName)
+	sessID := mind.DeterministicSessionID(agentName, worldID)
+	sess := &mind.Session{
 		ID:        sessID,
 		AgentName: agentName,
 		WorldID:   worldID,
 		Resumed:   true,
 	}
-	if saveErr := agent.SaveSession(agentPath, sess); saveErr != nil {
+	if saveErr := mind.SaveSession(agentPath, sess); saveErr != nil {
 		log.Printf("warning: failed to save session: %v", saveErr)
 	}
 	ec := exitCode
 	if err != nil {
 		ec = 1
 	}
-	if journalErr := agent.AppendJournal(agentPath, worldID, ec, duration); journalErr != nil {
+	if journalErr := mind.AppendJournal(agentPath, worldID, ec, duration); journalErr != nil {
 		log.Printf("warning: failed to write journal: %v", journalErr)
 	}
 
@@ -107,15 +107,15 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 	env := agentEnv()
 
 	// Save session for detached mode (best-effort, no journal since exit unknown)
-	agentPath := agent.AgentDir(agentName)
-	sessID := agent.DeterministicSessionID(agentName, worldID)
-	sess := &agent.Session{
+	agentPath := mind.AgentDir(agentName)
+	sessID := mind.DeterministicSessionID(agentName, worldID)
+	sess := &mind.Session{
 		ID:        sessID,
 		AgentName: agentName,
 		WorldID:   worldID,
 		Resumed:   false,
 	}
-	if saveErr := agent.SaveSession(agentPath, sess); saveErr != nil {
+	if saveErr := mind.SaveSession(agentPath, sess); saveErr != nil {
 		log.Printf("warning: failed to save session: %v", saveErr)
 	}
 

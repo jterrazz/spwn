@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	agentDomain "spwn.sh/packages/agent"
+	agentDomain "spwn.sh/packages/mind"
 	"spwn.sh/packages/foundation"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/tests/e2e/setup"

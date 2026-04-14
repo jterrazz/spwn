@@ -1,4 +1,4 @@
-module spwn.sh/packages/agent
+module spwn.sh/packages/mind
 
 go 1.25.0
 

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/agent"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/foundation"
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"
@@ -32,7 +32,7 @@ type AgentSpec struct {
 // per-deployment inbox/outbox/notes/role.md are written to the host
 // where the bind mounts pick them up instantly.
 func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role string) error {
-	if err := agent.ValidateMind(agentName); err != nil {
+	if err := mind.ValidateMind(agentName); err != nil {
 		return fmt.Errorf("agent %q: %w", agentName, err)
 	}
 
@@ -124,7 +124,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 
 	// 1. Validate all agents exist and have valid Minds
 	for _, spec := range agents {
-		if err := agent.ValidateMind(spec.Name); err != nil {
+		if err := mind.ValidateMind(spec.Name); err != nil {
 			return fmt.Errorf("agent %q: %w", spec.Name, err)
 		}
 	}

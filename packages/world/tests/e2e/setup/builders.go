@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/agent"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 )
 
@@ -285,7 +285,7 @@ func (b *AgentBuilder) Init(name string) *AgentAssertionChain {
 // InitExpectError expects agent new to fail.
 func (b *AgentBuilder) InitExpectError(name, substring string) {
 	b.tc.T.Helper()
-	_, err := agent.InitMind(name)
+	_, err := mind.InitMind(name)
 	if err == nil {
 		b.tc.T.Fatalf("Expected agent new to fail with %q, but it succeeded", substring)
 	}

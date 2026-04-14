@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"strings"
 
-	agentDomain "spwn.sh/packages/agent"
+	agentDomain "spwn.sh/packages/mind"
 	"spwn.sh/packages/foundation/auth"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"

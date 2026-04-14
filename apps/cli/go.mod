@@ -9,7 +9,7 @@ require (
 	spwn.sh/catalog/runtimes v0.0.0
 	spwn.sh/catalog/templates v0.0.0
 	spwn.sh/catalog/tools v0.0.0
-	spwn.sh/packages/agent v0.0.0
+	spwn.sh/packages/mind v0.0.0
 	spwn.sh/packages/foundation v0.0.0
 	spwn.sh/packages/imagebuilder v0.0.0
 	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
@@ -55,7 +55,7 @@ replace (
 	spwn.sh/catalog/runtimes => ../../catalog/runtimes
 	spwn.sh/catalog/templates => ../../catalog/templates
 	spwn.sh/catalog/tools => ../../catalog/tools
-	spwn.sh/packages/agent => ../../packages/agent
+	spwn.sh/packages/mind => ../../packages/mind
 	spwn.sh/packages/foundation => ../../packages/foundation
 	spwn.sh/packages/imagebuilder => ../../packages/imagebuilder
 	spwn.sh/packages/manifest => ../../packages/manifest

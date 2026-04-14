@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	agentpkg "spwn.sh/packages/agent"
+	agentpkg "spwn.sh/packages/mind"
 	"spwn.sh/packages/foundation"
 	"spwn.sh/packages/foundation/activity"
 	"spwn.sh/packages/foundation/auth"

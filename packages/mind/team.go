@@ -1,10 +1,10 @@
-// Package agent provides team management for grouping agents.
+// Package mind provides team management for grouping agents.
 //
 // A team is a first-class entity stored as a YAML file under ~/.spwn/teams/.
 // Each agent's profile can reference a team by slug. Teams carry display
 // metadata (name, color, description) for the UI.
 
-package agent
+package mind
 
 import (
 	"fmt"

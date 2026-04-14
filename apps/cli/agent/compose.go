@@ -3,7 +3,7 @@ package agent
 import (
 	"fmt"
 
-	agentDomain "spwn.sh/packages/agent"
+	agentDomain "spwn.sh/packages/mind"
 	"github.com/spf13/cobra"
 )
 

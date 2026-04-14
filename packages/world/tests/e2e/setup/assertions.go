@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/agent"
+	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 )
 
@@ -224,7 +224,7 @@ type MindAssertion struct {
 
 func (m *MindAssertion) HasLayer(layer string) {
 	m.tc.T.Helper()
-	info, err := agent.InspectAgent(m.agentName)
+	info, err := mind.InspectAgent(m.agentName)
 	if err != nil {
 		m.tc.T.Fatalf("Failed to inspect agent: %v", err)
 	}
@@ -235,7 +235,7 @@ func (m *MindAssertion) HasLayer(layer string) {
 
 func (m *MindAssertion) HasFile(relPath string) {
 	m.tc.T.Helper()
-	info, err := agent.InspectAgent(m.agentName)
+	info, err := mind.InspectAgent(m.agentName)
 	if err != nil {
 		m.tc.T.Fatalf("Failed to inspect agent: %v", err)
 	}
@@ -368,8 +368,8 @@ type SessionAssertion struct {
 
 func (s *SessionAssertion) HasSessionFile(worldID string) {
 	s.tc.T.Helper()
-	mindPath := agent.AgentDir(s.agentName)
-	sess, err := agent.LoadSession(mindPath, worldID)
+	mindPath := mind.AgentDir(s.agentName)
+	sess, err := mind.LoadSession(mindPath, worldID)
 	if err != nil {
 		s.tc.T.Fatalf("Failed to load session: %v", err)
 	}
@@ -380,8 +380,8 @@ func (s *SessionAssertion) HasSessionFile(worldID string) {
 
 func (s *SessionAssertion) SessionIDIsDeterministic(worldID string) {
 	s.tc.T.Helper()
-	id1 := agent.DeterministicSessionID(s.agentName, worldID)
-	id2 := agent.DeterministicSessionID(s.agentName, worldID)
+	id1 := mind.DeterministicSessionID(s.agentName, worldID)
+	id2 := mind.DeterministicSessionID(s.agentName, worldID)
 	if id1 != id2 {
 		s.tc.T.Fatalf("Session IDs not deterministic: %q != %q", id1, id2)
 	}
@@ -399,8 +399,8 @@ type JournalAssertion struct {
 
 func (j *JournalAssertion) HasEntries(minCount int) {
 	j.tc.T.Helper()
-	mindPath := agent.AgentDir(j.agentName)
-	entries, err := agent.ListJournal(mindPath, 0)
+	mindPath := mind.AgentDir(j.agentName)
+	entries, err := mind.ListJournal(mindPath, 0)
 	if err != nil {
 		j.tc.T.Fatalf("Failed to list journal: %v", err)
 	}
@@ -411,8 +411,8 @@ func (j *JournalAssertion) HasEntries(minCount int) {
 
 func (j *JournalAssertion) LatestOutcome(expected string) {
 	j.tc.T.Helper()
-	mindPath := agent.AgentDir(j.agentName)
-	entries, err := agent.ListJournal(mindPath, 1)
+	mindPath := mind.AgentDir(j.agentName)
+	entries, err := mind.ListJournal(mindPath, 1)
 	if err != nil || len(entries) == 0 {
 		j.tc.T.Fatalf("No journal entries found")
 	}
@@ -423,8 +423,8 @@ func (j *JournalAssertion) LatestOutcome(expected string) {
 
 func (j *JournalAssertion) LatestWorldID(expected string) {
 	j.tc.T.Helper()
-	mindPath := agent.AgentDir(j.agentName)
-	entries, err := agent.ListJournal(mindPath, 1)
+	mindPath := mind.AgentDir(j.agentName)
+	entries, err := mind.ListJournal(mindPath, 1)
 	if err != nil || len(entries) == 0 {
 		j.tc.T.Fatalf("No journal entries found")
 	}
@@ -530,7 +530,7 @@ func (a *AgentAssertionChain) ExpectMind(fn func(m *MindAssertion)) *AgentAssert
 
 func (a *AgentAssertionChain) Export(outputDir string, exclude []string) *ExportAssertion {
 	a.tc.T.Helper()
-	archivePath, err := agent.ExportMind(a.agentName, outputDir, exclude)
+	archivePath, err := mind.ExportMind(a.agentName, outputDir, exclude)
 	if err != nil {
 		a.tc.T.Fatalf("Export failed: %v", err)
 	}
@@ -539,7 +539,7 @@ func (a *AgentAssertionChain) Export(outputDir string, exclude []string) *Export
 
 func (a *AgentAssertionChain) ImportFrom(archivePath string) *AgentAssertionChain {
 	a.tc.T.Helper()
-	if err := agent.ImportMind(a.agentName, archivePath); err != nil {
+	if err := mind.ImportMind(a.agentName, archivePath); err != nil {
 		a.tc.T.Fatalf("Import failed: %v", err)
 	}
 	return a
@@ -548,7 +548,7 @@ func (a *AgentAssertionChain) ImportFrom(archivePath string) *AgentAssertionChai
 // HasSessionFile checks that a session file exists for this agent+world combo.
 func (m *MindAssertion) HasSessionFile(worldID string) {
 	m.tc.T.Helper()
-	mindPath := agent.AgentDir(m.agentName)
+	mindPath := mind.AgentDir(m.agentName)
 	sessionPath := filepath.Join(mindPath, "journal", worldID+".json")
 	if _, err := os.Stat(sessionPath); err != nil {
 		m.tc.T.Fatalf("Expected session file at %s, not found", sessionPath)
@@ -558,8 +558,8 @@ func (m *MindAssertion) HasSessionFile(worldID string) {
 // HasJournalEntries checks that the journal directory has entries.
 func (m *MindAssertion) HasJournalEntries(minCount int) {
 	m.tc.T.Helper()
-	mindPath := agent.AgentDir(m.agentName)
-	entries, err := agent.ListJournal(mindPath, 0)
+	mindPath := mind.AgentDir(m.agentName)
+	entries, err := mind.ListJournal(mindPath, 0)
 	if err != nil {
 		m.tc.T.Fatalf("Failed to list journal: %v", err)
 	}

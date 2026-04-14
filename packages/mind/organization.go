@@ -1,10 +1,10 @@
-// Package agent provides organization management for defining role structures.
+// Package mind provides organization management for defining role structures.
 //
 // An organization is a first-class entity stored as a YAML file under ~/.spwn/organizations/.
 // Each organization defines a set of roles with levels, command relationships,
 // and permissions that govern how agents interact within a world.
 
-package agent
+package mind
 
 import (
 	"fmt"

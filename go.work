@@ -2,7 +2,7 @@ go 1.25.0
 
 use (
 	./apps/cli
-	./packages/agent
+	./packages/mind
 	./packages/foundation
 	./packages/imagebuilder
 	./packages/manifest
