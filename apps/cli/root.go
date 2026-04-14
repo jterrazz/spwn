@@ -67,6 +67,7 @@ func init() {
 	rootCmd.AddCommand(world.DownCmd)
 
 	// Command groups - entities
+	world.Cmd.AddCommand(snap.Cmd) // snap lives under `spwn world snap`
 	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 
@@ -76,7 +77,6 @@ func init() {
 	rootCmd.AddCommand(profile.Cmd)
 
 	// Command groups - coordination
-	rootCmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)
 

@@ -282,12 +282,10 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn world inspect <id>                      Inspect a running world
 🟢 spwn world down <id>                         Destroy (agent survives)
 🟢 spwn world enter <id>                        Interactive shell inside the world
-
-# ── Snapshots ────────────────────────────────────────────────────
-🟡 spwn snap save <id>                          Save world state
-🟡 spwn snap ls                                 List snapshots
-🟡 spwn snap restore <snap-id>                  Rollback
-🟡 spwn snap rm <snap-id>                       Remove a snapshot
+🟡 spwn world snap save <id>                    Save world state
+🟡 spwn world snap ls                           List snapshots
+🟡 spwn world snap restore <snap-id>            Rollback to a snapshot
+🟡 spwn world snap rm <snap-id>                 Remove a snapshot
 
 # ── Tools ────────────────────────────────────────────────────────
 🟢 spwn tool ls                                 Installed tool packs

@@ -22,7 +22,7 @@ func snapHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ snap")+" "+ui.Faint("- world snapshots"),
+		ui.Strong("⬡ world snap")+" "+ui.Faint("- world snapshots"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
 				{Name: "save <world-id>", Desc: "Save world state"},
@@ -31,12 +31,13 @@ func snapHelp(cmd *cobra.Command, args []string) {
 				{Name: "rm <snap-id>", Desc: "Remove a snapshot"},
 			}},
 		},
-		"spwn snap [command]",
-		"Use \"spwn snap <command> --help\" for more information.",
+		"spwn world snap [command]",
+		"Use \"spwn world snap <command> --help\" for more information.",
 	)
 }
 
-// Cmd is the snap command group.
+// Cmd is the snap command group, attached to `spwn world` at CLI
+// registration time in apps/cli/root.go.
 var Cmd = &cobra.Command{
 	Use:   "snap",
 	Short: "World snapshots - save, ls, restore, rm",

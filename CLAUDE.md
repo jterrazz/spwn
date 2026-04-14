@@ -164,7 +164,7 @@ spwn/
 │   │   ├── root.go                  #     Root cobra command
 │   │   ├── world/                   #     spwn world (up, down, ls, inspect, logs, enter)
 │   │   ├── agent/                   #     spwn agent (new, ls, rm, talk, fork, export…)
-│   │   ├── snap/                    #     spwn snap (save, ls, restore, rm)
+│   │   ├── snap/                    #     spwn world snap (save, ls, restore, rm)
 │   │   ├── architect/               #     spwn architect (start, stop, status)
 │   │   ├── web/                     #     spwn web (launches the web UI)
 │   │   ├── auth/                    #     spwn auth (login, logout, token)
