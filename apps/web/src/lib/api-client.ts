@@ -142,10 +142,11 @@ function normalizeWorlds(data: RawWorld[]): World[] {
             agents: (
                 w.agents ??
                 (_agent ? [{ name: _agent, role: 'worker', status: w.status || 'idle' }] : [])
-            ).map(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (a: any) => ({ ...a, role: a.role || 'worker' }),
-            ),
+            ).map((a) => ({
+                name: a.name,
+                role: a.role || 'worker',
+                status: a.status,
+            })),
             workspaces: wsList,
         };
     });

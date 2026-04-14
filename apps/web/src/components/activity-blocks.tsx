@@ -106,18 +106,20 @@ function ToolUseBlockView({
         >
             {/* Input */}
             <div className="space-y-1">
-                {Object.entries(block.input || {}).map(([key, value]) => (
-                    <div className="flex gap-2" key={key}>
-                        <span className="text-muted-foreground/30 shrink-0">{key}:</span>
-                        <span className="text-foreground/50 break-all">
-                            {typeof value === 'string'
-                                ? value.length > 200
-                                    ? `${value.slice(0, 200)}...`
-                                    : value
-                                : JSON.stringify(value)}
-                        </span>
-                    </div>
-                ))}
+                {Object.entries(block.input || {}).map(([key, value]) => {
+                    let displayValue: string;
+                    if (typeof value === 'string') {
+                        displayValue = value.length > 200 ? `${value.slice(0, 200)}...` : value;
+                    } else {
+                        displayValue = JSON.stringify(value);
+                    }
+                    return (
+                        <div className="flex gap-2" key={key}>
+                            <span className="text-muted-foreground/30 shrink-0">{key}:</span>
+                            <span className="text-foreground/50 break-all">{displayValue}</span>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Result */}
@@ -180,6 +182,15 @@ function StatusBlockView({ block }: { block: { status: string; tool?: string } }
 
 // ── Main activity renderer ──
 
+// Activity blocks stream append-only — a (type, running-index) pair is a stable
+// Identity for every block except tool_use, which carries its own id.
+function blockKey(block: ActivityBlock, i: number): string {
+    if (block.type === 'tool_use') {
+        return `tool-${block.id}`;
+    }
+    return `${block.type}-${i}`;
+}
+
 export function ActivityBlocksRenderer({ blocks }: { blocks: ActivityBlock[] }) {
     // Pair tool_use blocks with their results
     const resultMap = new Map<string, { content: string; isError: boolean }>();
@@ -197,27 +208,28 @@ export function ActivityBlocksRenderer({ blocks }: { blocks: ActivityBlock[] }) 
                     return null;
                 }
 
+                const key = blockKey(block, i);
                 switch (block.type) {
                     case 'thinking': {
-                        return <ThinkingBlockView block={block} key={i} />;
+                        return <ThinkingBlockView block={block} key={key} />;
                     }
                     case 'tool_use': {
                         return (
                             <ToolUseBlockView
                                 block={block}
-                                key={i}
+                                key={key}
                                 result={resultMap.get(block.id)}
                             />
                         );
                     }
                     case 'text': {
-                        return <TextBlockView block={block} key={i} />;
+                        return <TextBlockView block={block} key={key} />;
                     }
                     case 'error': {
-                        return <ErrorBlockView block={block} key={i} />;
+                        return <ErrorBlockView block={block} key={key} />;
                     }
                     case 'status': {
-                        return <StatusBlockView block={block} key={i} />;
+                        return <StatusBlockView block={block} key={key} />;
                     }
                     default: {
                         return null;

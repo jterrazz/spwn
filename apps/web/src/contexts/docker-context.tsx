@@ -1,6 +1,14 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 import { apiGet } from '@/lib/api-client';
 
@@ -82,11 +90,12 @@ export function DockerProvider({ children }: { children: React.ReactNode }) {
 
     const ready = Boolean(status && status.installed && status.running);
 
-    return (
-        <DockerContext.Provider value={{ status, lastChecked, refresh, ready }}>
-            {children}
-        </DockerContext.Provider>
+    const contextValue = useMemo(
+        () => ({ status, lastChecked, refresh, ready }),
+        [status, lastChecked, refresh, ready],
     );
+
+    return <DockerContext.Provider value={contextValue}>{children}</DockerContext.Provider>;
 }
 
 export function useDocker(): DockerContextValue {

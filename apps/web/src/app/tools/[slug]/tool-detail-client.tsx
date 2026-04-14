@@ -125,12 +125,14 @@ function SkillContent({ content }: { content: string }) {
 
 function renderInlineCode(text: string): React.ReactNode {
     const parts = text.split(/(`[^`]+`)/g);
-    return parts.map((part, i) => {
+    let codeSeq = 0;
+    return parts.map((part) => {
         if (part.startsWith('`') && part.endsWith('`')) {
+            codeSeq += 1;
             return (
                 <code
                     className="text-[11px] font-mono bg-white/[0.05] border border-white/[0.08] rounded px-1 py-0.5 text-foreground/60"
-                    key={i}
+                    key={`code-${codeSeq}-${part}`}
                 >
                     {part.slice(1, -1)}
                 </code>
@@ -252,13 +254,15 @@ export default function ToolDetailPage() {
                 />
                 <MetaCard
                     label="Version"
-                    value={
-                        tool.name === '@spwn/node'
-                            ? '20'
-                            : tool.name === '@spwn/python'
-                              ? '3'
-                              : 'latest'
-                    }
+                    value={(() => {
+                        if (tool.name === '@spwn/node') {
+                            return '20';
+                        }
+                        if (tool.name === '@spwn/python') {
+                            return '3';
+                        }
+                        return 'latest';
+                    })()}
                 />
                 <MetaCard
                     icon={

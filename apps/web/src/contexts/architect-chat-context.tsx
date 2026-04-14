@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import type { ActivityBlock } from '@/lib/activity-types';
 import { apiGet, goApiUrl } from '@/lib/api-client';
@@ -281,22 +281,34 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
 
     const isRunning = architectStatus?.status === 'running';
 
+    const contextValue = useMemo(
+        () => ({
+            messages,
+            chatInput,
+            setChatInput,
+            sending,
+            sendMessage,
+            architectStatus,
+            isRunning,
+            highlightTitle: null,
+            refreshStatus,
+            setArchitectStatus,
+            loading,
+        }),
+        [
+            messages,
+            chatInput,
+            sending,
+            sendMessage,
+            architectStatus,
+            isRunning,
+            refreshStatus,
+            loading,
+        ],
+    );
+
     return (
-        <ArchitectChatContext.Provider
-            value={{
-                messages,
-                chatInput,
-                setChatInput,
-                sending,
-                sendMessage,
-                architectStatus,
-                isRunning,
-                highlightTitle: null,
-                refreshStatus,
-                setArchitectStatus,
-                loading,
-            }}
-        >
+        <ArchitectChatContext.Provider value={contextValue}>
             {children}
         </ArchitectChatContext.Provider>
     );

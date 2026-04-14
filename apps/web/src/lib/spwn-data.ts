@@ -250,12 +250,12 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
             const dateMatch = file.match(/^(\d{4}-\d{2}-\d{2})/);
             const date = dateMatch ? dateMatch[1] : file.replace(/\.md$/, '');
             // Use first non-header line as summary
-            const summaryLines = content
+            const summaryLine = content
                 .split('\n')
-                .filter((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---'));
+                .find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---'));
             journal.push({
                 date,
-                summary: summaryLines[0]?.trim() || '(empty entry)',
+                summary: summaryLine?.trim() || '(empty entry)',
             });
         } catch {
             // Skip unreadable files

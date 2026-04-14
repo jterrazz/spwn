@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 /**
  * Sets the document title dynamically.
@@ -8,8 +8,14 @@ import { useEffect } from 'react';
  * Example: usePageTitle('neo', 'Rhea') → 'neo · Rhea · spwn'
  */
 export function usePageTitle(...parts: (null | string | undefined)[]) {
-    useEffect(() => {
+    // Materialise the title once per render so the effect dep list is a single string.
+    const title = useMemo(() => {
         const filtered = parts.filter(Boolean) as string[];
-        document.title = filtered.length === 0 ? 'spwn' : [...filtered, 'spwn'].join(' · ');
+        return filtered.length === 0 ? 'spwn' : [...filtered, 'spwn'].join(' · ');
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- rest params change identity every call; we intentionally key on the joined string
     }, [parts.join(',')]);
+
+    useEffect(() => {
+        document.title = title;
+    }, [title]);
 }

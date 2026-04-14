@@ -335,13 +335,14 @@ export default function UniverseMapPage() {
                 title="Worlds"
             />
 
-            {loading ? (
+            {loading && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map((i) => (
                         <Skeleton className="h-32 rounded-lg" key={i} />
                     ))}
                 </div>
-            ) : worlds.length === 0 && agents.length === 0 && !agentsLoading ? (
+            )}
+            {!loading && worlds.length === 0 && agents.length === 0 && !agentsLoading && (
                 <QuickStartWizard
                     onComplete={() => {
                         fetchWorlds();
@@ -349,7 +350,8 @@ export default function UniverseMapPage() {
                         refetchSidebar();
                     }}
                 />
-            ) : (
+            )}
+            {!loading && !(worlds.length === 0 && agents.length === 0 && !agentsLoading) && (
                 <>
                     {/* Worlds */}
                     {worlds.length > 0 ? (
@@ -877,17 +879,19 @@ function EmptyWorldsView({
                     </p>
                 </div>
 
-                {gallery === null ? (
+                {gallery === null && (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {[0, 1, 2, 3, 4].map((i) => (
                             <Skeleton className="h-52 rounded-2xl" key={i} />
                         ))}
                     </div>
-                ) : gallery.length === 0 ? (
+                )}
+                {gallery !== null && gallery.length === 0 && (
                     <p className="text-center text-sm text-muted-foreground/60">
                         No examples bundled in this build.
                     </p>
-                ) : (
+                )}
+                {gallery !== null && gallery.length > 0 && (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {gallery.map((ex, i) => (
                             <GalleryCard
@@ -1145,25 +1149,30 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
 
             {/* Step indicators */}
             <div className="flex items-center justify-center gap-2 mb-8">
-                {steps.map((s, i) => (
-                    <div className="flex items-center gap-2" key={s.num}>
-                        <div
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-mono transition-all ${
-                                step > s.num
-                                    ? 'bg-green-500/15 text-green-400/80 border border-green-500/20'
-                                    : step === s.num
-                                      ? 'bg-white/[0.08] text-foreground/70 border border-white/[0.12]'
-                                      : 'bg-white/[0.02] text-muted-foreground/25 border border-white/[0.04]'
-                            }`}
-                        >
-                            {step > s.num ? <IconCheck size={10} /> : s.icon}
-                            {s.label}
+                {steps.map((s, i) => {
+                    let stepClass: string;
+                    if (step > s.num) {
+                        stepClass = 'bg-green-500/15 text-green-400/80 border border-green-500/20';
+                    } else if (step === s.num) {
+                        stepClass = 'bg-white/[0.08] text-foreground/70 border border-white/[0.12]';
+                    } else {
+                        stepClass =
+                            'bg-white/[0.02] text-muted-foreground/25 border border-white/[0.04]';
+                    }
+                    return (
+                        <div className="flex items-center gap-2" key={s.num}>
+                            <div
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-mono transition-all ${stepClass}`}
+                            >
+                                {step > s.num ? <IconCheck size={10} /> : s.icon}
+                                {s.label}
+                            </div>
+                            {i < steps.length - 1 && (
+                                <IconArrowRight className="text-muted-foreground/15" size={10} />
+                            )}
                         </div>
-                        {i < steps.length - 1 && (
-                            <IconArrowRight className="text-muted-foreground/15" size={10} />
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Step content */}
@@ -1329,9 +1338,18 @@ interface SpawnAgentListItem {
 }
 
 interface WorkspaceDraft {
+    id: string;
     name: string;
     path: string;
     readonly: boolean;
+}
+
+let workspaceDraftCounter = 0;
+function newWorkspaceDraft(
+    init: Omit<WorkspaceDraft, 'id'> = { name: 'default', path: '', readonly: false },
+): WorkspaceDraft {
+    workspaceDraftCounter += 1;
+    return { id: `ws-${workspaceDraftCounter}`, ...init };
 }
 
 function SpawnWorldDialog({
@@ -1344,9 +1362,7 @@ function SpawnWorldDialog({
     const router = useRouter();
     const [worldName, setWorldName] = useState('');
     const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
-    const [workspaces, setWorkspaces] = useState<WorkspaceDraft[]>([
-        { name: 'default', path: '', readonly: false },
-    ]);
+    const [workspaces, setWorkspaces] = useState<WorkspaceDraft[]>(() => [newWorkspaceDraft()]);
     const [config, setConfig] = useState('default');
     const [role, setRole] = useState('worker');
     const [spawning, setSpawning] = useState(false);
@@ -1603,11 +1619,11 @@ function SpawnWorldDialog({
                                 onClick={() =>
                                     setWorkspaces((prev) => [
                                         ...prev,
-                                        {
+                                        newWorkspaceDraft({
                                             name: prev.length === 0 ? 'default' : `w${prev.length}`,
                                             path: '',
                                             readonly: false,
-                                        },
+                                        }),
                                     ])
                                 }
                                 type="button"
@@ -1618,9 +1634,7 @@ function SpawnWorldDialog({
                         {workspaces.length === 0 ? (
                             <button
                                 className="w-full text-left px-3 py-2.5 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.08] text-[11px] text-muted-foreground/40 hover:text-foreground/60 hover:border-white/[0.15] transition-colors"
-                                onClick={() =>
-                                    setWorkspaces([{ name: 'default', path: '', readonly: false }])
-                                }
+                                onClick={() => setWorkspaces([newWorkspaceDraft()])}
                                 type="button"
                             >
                                 Ephemeral world - click to add a host mount
@@ -1628,7 +1642,7 @@ function SpawnWorldDialog({
                         ) : (
                             <div className="space-y-2">
                                 {workspaces.map((ws, idx) => (
-                                    <div className="flex gap-1.5 items-center" key={idx}>
+                                    <div className="flex gap-1.5 items-center" key={ws.id}>
                                         <input
                                             className="w-24 shrink-0 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2.5 py-2 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
                                             onChange={(e) =>
@@ -1764,8 +1778,8 @@ function SpawnWorldDialog({
                                     ) : (
                                         workspaces
                                             .filter((w) => w.path.trim())
-                                            .map((w, i) => (
-                                                <p key={i}>
+                                            .map((w) => (
+                                                <p key={w.id}>
                                                     → {w.name}:{' '}
                                                     <span className="font-mono">
                                                         {w.path.trim()}

@@ -42,6 +42,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                     </p>
                     <button
                         className="px-4 py-2 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
+                        // eslint-disable-next-line react/no-set-state -- class-based ErrorBoundary has no hook alternative for resetting its own state
                         onClick={() => this.setState({ hasError: false, error: null })}
                     >
                         Try again

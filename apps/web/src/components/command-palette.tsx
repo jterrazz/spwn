@@ -30,6 +30,11 @@ interface AgentListItem {
     layers: Record<string, string[]>;
 }
 
+function extractName(id: string): string {
+    const parts = id.split('-');
+    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
+}
+
 export function CommandPalette() {
     const [open, setOpen] = useState(false);
     const [worlds, setWorlds] = useState<World[]>([]);
@@ -69,11 +74,6 @@ export function CommandPalette() {
         },
         [router],
     );
-
-    function extractName(id: string): string {
-        const parts = id.split('-');
-        return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
-    }
 
     return (
         <CommandDialog onOpenChange={setOpen} open={open}>

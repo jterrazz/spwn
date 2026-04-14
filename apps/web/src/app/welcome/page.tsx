@@ -163,15 +163,35 @@ export default function WelcomePage() {
                         const done = status ? completed(step.id, status) : false;
                         const isActive = active === step.id;
                         const Icon = step.icon;
+                        let liClass: string;
+                        if (isActive) {
+                            liClass = 'border-white/15 bg-white/[0.04]';
+                        } else if (done) {
+                            liClass = 'border-emerald-500/20 bg-emerald-500/[0.03]';
+                        } else {
+                            liClass = 'border-white/[0.06] bg-white/[0.015]';
+                        }
+                        let circleClass: string;
+                        if (done) {
+                            circleClass =
+                                'border-emerald-400/40 bg-emerald-500/15 text-emerald-300';
+                        } else if (isActive) {
+                            circleClass = 'border-white/20 bg-white/[0.06] text-foreground/80';
+                        } else {
+                            circleClass =
+                                'border-white/10 bg-white/[0.02] text-muted-foreground/50';
+                        }
+                        let statusLabel: string;
+                        if (done) {
+                            statusLabel = 'Done';
+                        } else if (isActive) {
+                            statusLabel = 'Active';
+                        } else {
+                            statusLabel = 'Pending';
+                        }
                         return (
                             <li
-                                className={`overflow-hidden rounded-xl border transition-colors ${
-                                    isActive
-                                        ? 'border-white/15 bg-white/[0.04]'
-                                        : done
-                                          ? 'border-emerald-500/20 bg-emerald-500/[0.03]'
-                                          : 'border-white/[0.06] bg-white/[0.015]'
-                                }`}
+                                className={`overflow-hidden rounded-xl border transition-colors ${liClass}`}
                                 key={step.id}
                             >
                                 <button
@@ -180,13 +200,7 @@ export default function WelcomePage() {
                                     type="button"
                                 >
                                     <div
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
-                                            done
-                                                ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-300'
-                                                : isActive
-                                                  ? 'border-white/20 bg-white/[0.06] text-foreground/80'
-                                                  : 'border-white/10 bg-white/[0.02] text-muted-foreground/50'
-                                        }`}
+                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${circleClass}`}
                                     >
                                         {done ? <IconCheck size={14} /> : <Icon size={14} />}
                                     </div>
@@ -210,7 +224,7 @@ export default function WelcomePage() {
                                         </p>
                                     </div>
                                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground/40">
-                                        {done ? 'Done' : isActive ? 'Active' : 'Pending'}
+                                        {statusLabel}
                                     </span>
                                 </button>
 
@@ -319,11 +333,15 @@ function DockerStep({
                 <div className="flex items-center gap-2">
                     <IconBrandDocker size={14} />
                     <span className="font-medium">
-                        {ok
-                            ? `Docker ${docker?.version ? `v${docker.version}` : ''} running`
-                            : !docker?.installed
-                              ? 'Docker is not installed on this machine'
-                              : 'Docker is installed but the daemon is not running'}
+                        {(() => {
+                            if (ok) {
+                                return `Docker ${docker?.version ? `v${docker.version}` : ''} running`;
+                            }
+                            if (!docker?.installed) {
+                                return 'Docker is not installed on this machine';
+                            }
+                            return 'Docker is installed but the daemon is not running';
+                        })()}
                     </span>
                 </div>
                 {!ok && docker?.hint && (

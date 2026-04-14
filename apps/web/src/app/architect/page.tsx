@@ -36,6 +36,19 @@ function deriveState(isRunning: boolean, actionLoading: null | string): Architec
     return isRunning ? 'running' : 'offline';
 }
 
+function describeState(s: ArchitectState): string {
+    if (s === 'running') {
+        return 'Running. Talk to it in natural language.';
+    }
+    if (s === 'starting') {
+        return 'Starting...';
+    }
+    if (s === 'stopping') {
+        return 'Stopping...';
+    }
+    return 'Offline';
+}
+
 // ── Offline State ───────────────────────────────────────────────────────
 
 function OfflineView({ onStart, disabled }: { onStart: () => void; disabled: boolean }) {
@@ -324,47 +337,47 @@ export default function ArchitectPage() {
 
     const kpis = architectStatus?.kpis;
 
+    const renderHeaderActions = () => {
+        if (state === 'running') {
+            return (
+                <>
+                    <ActionButton
+                        compact
+                        disabled={actionLoading !== null}
+                        icon={<IconRefresh size={16} stroke={2.2} />}
+                        label="Restart"
+                        onClick={handleStart}
+                    />
+                    <ActionButton
+                        compact
+                        danger
+                        disabled={actionLoading !== null}
+                        icon={<IconPlayerStop size={16} stroke={2.2} />}
+                        label="Stop"
+                        onClick={handleStop}
+                    />
+                </>
+            );
+        }
+        if (state === 'offline') {
+            return (
+                <ActionButton
+                    compact
+                    disabled={actionLoading !== null}
+                    icon={<IconPlayerPlay size={16} stroke={2.2} />}
+                    label="Start"
+                    onClick={handleStart}
+                />
+            );
+        }
+        return null;
+    };
+
     return (
         <Page>
             <PageHeader
-                actions={
-                    state === 'running' ? (
-                        <>
-                            <ActionButton
-                                compact
-                                disabled={actionLoading !== null}
-                                icon={<IconRefresh size={16} stroke={2.2} />}
-                                label="Restart"
-                                onClick={handleStart}
-                            />
-                            <ActionButton
-                                compact
-                                danger
-                                disabled={actionLoading !== null}
-                                icon={<IconPlayerStop size={16} stroke={2.2} />}
-                                label="Stop"
-                                onClick={handleStop}
-                            />
-                        </>
-                    ) : state === 'offline' ? (
-                        <ActionButton
-                            compact
-                            disabled={actionLoading !== null}
-                            icon={<IconPlayerPlay size={16} stroke={2.2} />}
-                            label="Start"
-                            onClick={handleStart}
-                        />
-                    ) : null
-                }
-                description={
-                    state === 'running'
-                        ? 'Running. Talk to it in natural language.'
-                        : state === 'starting'
-                          ? 'Starting...'
-                          : state === 'stopping'
-                            ? 'Stopping...'
-                            : 'Offline'
-                }
+                actions={renderHeaderActions()}
+                description={describeState(state)}
                 title="Architect"
             />
 

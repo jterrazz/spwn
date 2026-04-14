@@ -136,11 +136,12 @@ function AgentProfilePage() {
         if (availableWorlds.length === 0) {
             return;
         }
-        const w = availableWorlds.find(
-            (w) => w.agent === agentName || w.agents.some((a) => a.name === agentName),
+        const match = availableWorlds.find(
+            (candidate) =>
+                candidate.agent === agentName || candidate.agents.some((a) => a.name === agentName),
         );
-        if (w) {
-            setWorldData(w);
+        if (match) {
+            setWorldData(match);
         }
     }, [availableWorlds, agentName]);
 
@@ -398,15 +399,17 @@ function AgentProfilePage() {
                                         const alreadyDeployed = w.agents.some(
                                             (a) => a.name === agentName,
                                         );
+                                        let stateClass: string;
+                                        if (alreadyDeployed) {
+                                            stateClass = 'opacity-40 cursor-not-allowed';
+                                        } else if (isSelected) {
+                                            stateClass = 'bg-white/[0.06]';
+                                        } else {
+                                            stateClass = 'hover:bg-white/[0.03]';
+                                        }
                                         return (
                                             <button
-                                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
-                                                    alreadyDeployed
-                                                        ? 'opacity-40 cursor-not-allowed'
-                                                        : isSelected
-                                                          ? 'bg-white/[0.06]'
-                                                          : 'hover:bg-white/[0.03]'
-                                                }`}
+                                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${stateClass}`}
                                                 disabled={alreadyDeployed}
                                                 key={w.id}
                                                 onClick={() =>
@@ -1183,10 +1186,8 @@ function MindFileViewer({
 
     const sortedLayers = Object.keys(mindTree).sort((a, b) => {
         const order = ['core', 'skills', 'knowledge', 'playbooks', 'journal'];
-        return (
-            (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) -
-            (order.indexOf(b) === -1 ? 99 : order.indexOf(b))
-        );
+        const rank = (key: string) => (order.includes(key) ? order.indexOf(key) : 99);
+        return rank(a) - rank(b);
     });
 
     if (sortedLayers.length === 0) {

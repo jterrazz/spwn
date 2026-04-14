@@ -252,19 +252,14 @@ export default function AgentsPage() {
                 color: teamColor.trim(),
                 description: teamDesc.trim(),
             };
-            if (editingTeam) {
-                await fetch(goApiUrl(`/api/teams/${editingTeam.slug}`), {
-                    method: 'PUT',
+            await fetch(
+                editingTeam ? goApiUrl(`/api/teams/${editingTeam.slug}`) : goApiUrl('/api/teams'),
+                {
+                    method: editingTeam ? 'PUT' : 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),
-                });
-            } else {
-                await fetch(goApiUrl('/api/teams'), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body),
-                });
-            }
+                },
+            );
             setShowTeamDialog(false);
             await fetchAll();
         } catch {
@@ -334,13 +329,14 @@ export default function AgentsPage() {
             </div>
 
             {/* List */}
-            {loading ? (
+            {loading && (
                 <div className="space-y-2">
                     {[1, 2, 3].map((i) => (
                         <Skeleton className="h-14 w-full rounded-xl" key={i} />
                     ))}
                 </div>
-            ) : filtered.length === 0 ? (
+            )}
+            {!loading && filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
                         <IconUser className="text-muted-foreground/30" size={24} />
@@ -351,7 +347,8 @@ export default function AgentsPage() {
                             : 'No agents yet. Create one to get started.'}
                     </p>
                 </div>
-            ) : (
+            )}
+            {!loading && filtered.length > 0 && (
                 <div className="space-y-8">
                     {grouped.map(({ team: t, agents: groupAgents }) => (
                         <div key={t?.slug ?? 'solo'}>
@@ -629,7 +626,12 @@ export default function AgentsPage() {
                                     disabled={savingTeam || !teamName.trim()}
                                     onClick={handleSaveTeam}
                                 >
-                                    {savingTeam ? 'Saving…' : editingTeam ? 'Save' : 'Create'}
+                                    {(() => {
+                                        if (savingTeam) {
+                                            return 'Saving…';
+                                        }
+                                        return editingTeam ? 'Save' : 'Create';
+                                    })()}
                                 </button>
                             </div>
                         </div>

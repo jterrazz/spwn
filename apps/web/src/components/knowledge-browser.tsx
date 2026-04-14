@@ -9,6 +9,7 @@ import {
     IconFolderOpen,
     IconSearch,
 } from '@tabler/icons-react';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 import { goApiUrl } from '@/lib/api-client';
@@ -25,6 +26,25 @@ interface TreeNode {
     isDir: boolean;
     children: TreeNode[];
     file?: KnowledgeFile;
+}
+
+// Sort: dirs first, then alphabetically (recurses into children).
+function sortTreeNodes(nodes: TreeNode[]): TreeNode[] {
+    nodes.sort((a, b) => {
+        if (a.isDir && !b.isDir) {
+            return -1;
+        }
+        if (!a.isDir && b.isDir) {
+            return 1;
+        }
+        return a.name.localeCompare(b.name);
+    });
+    for (const n of nodes) {
+        if (n.isDir) {
+            sortTreeNodes(n.children);
+        }
+    }
+    return nodes;
 }
 
 function buildTree(files: KnowledgeFile[]): TreeNode[] {
@@ -45,43 +65,22 @@ function buildTree(files: KnowledgeFile[]): TreeNode[] {
                 } else {
                     current.push({ name: part, path: file.path, isDir: false, children: [], file });
                 }
+            } else if (existingIdx !== -1) {
+                current = current[existingIdx].children;
             } else {
-                if (existingIdx !== -1) {
-                    current = current[existingIdx].children;
-                } else {
-                    const dir: TreeNode = {
-                        name: part,
-                        path: parts.slice(0, i + 1).join('/'),
-                        isDir: true,
-                        children: [],
-                    };
-                    current.push(dir);
-                    current = dir.children;
-                }
+                const dir: TreeNode = {
+                    name: part,
+                    path: parts.slice(0, i + 1).join('/'),
+                    isDir: true,
+                    children: [],
+                };
+                current.push(dir);
+                current = dir.children;
             }
         }
     }
 
-    // Sort: dirs first, then alphabetically
-    const sortNodes = (nodes: TreeNode[]): TreeNode[] => {
-        nodes.sort((a, b) => {
-            if (a.isDir && !b.isDir) {
-                return -1;
-            }
-            if (!a.isDir && b.isDir) {
-                return 1;
-            }
-            return a.name.localeCompare(b.name);
-        });
-        for (const n of nodes) {
-            if (n.isDir) {
-                sortNodes(n.children);
-            }
-        }
-        return nodes;
-    };
-
-    return sortNodes(root);
+    return sortTreeNodes(root);
 }
 
 function formatSize(bytes: number): string {
@@ -322,7 +321,7 @@ export function KnowledgeBrowser({
                 <div
                     className={`overflow-y-auto border-r border-white/[0.05] ${selectedPath ? 'w-1/3 min-w-[200px]' : 'w-full'}`}
                 >
-                    {loading ? (
+                    {loading && (
                         <div className="p-4 space-y-2">
                             {[1, 2, 3, 4].map((i) => (
                                 <div className="flex items-center gap-2 px-3 py-1.5" key={i}>
@@ -334,7 +333,8 @@ export function KnowledgeBrowser({
                                 </div>
                             ))}
                         </div>
-                    ) : tree.length === 0 ? (
+                    )}
+                    {!loading && tree.length === 0 && (
                         <div className="flex flex-col items-center justify-center h-full text-center px-4">
                             <IconBook2 className="text-muted-foreground/15 mb-3" size={28} />
                             <p className="text-xs text-muted-foreground/35">
@@ -343,14 +343,15 @@ export function KnowledgeBrowser({
                             <p className="text-[10px] text-muted-foreground/20 mt-1 max-w-[200px]">
                                 Talk to the Architect to start building your knowledge base
                             </p>
-                            <a
+                            <Link
                                 className="mt-3 text-[10px] font-mono text-blue-400/50 hover:text-blue-400/80 transition-colors"
                                 href="/architect"
                             >
                                 Go to Architect →
-                            </a>
+                            </Link>
                         </div>
-                    ) : (
+                    )}
+                    {!loading && tree.length > 0 && (
                         <div className="py-1">
                             {tree.map((node) => (
                                 <FileTreeNode

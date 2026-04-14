@@ -56,7 +56,7 @@ async function consumeSSEStream(
     const decoder = new TextDecoder();
     let buffer = '';
     const meta: { cost?: number; duration?: number } = {};
-    let allBlocks: ActivityBlock[] = [];
+    const allBlocks: ActivityBlock[] = [];
 
     while (true) {
         const { done, value } = await reader.read();
@@ -103,7 +103,7 @@ async function consumeSSEStream(
                     if (newBlocks) {
                         const deduplicated = deduplicateBlocks(allBlocks, newBlocks);
                         if (deduplicated.length > 0) {
-                            allBlocks = [...allBlocks, ...deduplicated];
+                            allBlocks.push(...deduplicated);
                             onBlocks(deduplicated);
                         }
                     }
@@ -123,7 +123,7 @@ async function consumeSSEStream(
                     if (newBlocks) {
                         const deduplicated = deduplicateBlocks(allBlocks, newBlocks);
                         if (deduplicated.length > 0) {
-                            allBlocks = [...allBlocks, ...deduplicated];
+                            allBlocks.push(...deduplicated);
                             onBlocks(deduplicated);
                         }
                     }

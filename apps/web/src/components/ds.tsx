@@ -106,7 +106,14 @@ interface MetricGridProps {
 }
 
 export function MetricGrid({ items, columns = 2, className }: MetricGridProps) {
-    const colClass = columns === 2 ? 'grid-cols-2' : columns === 3 ? 'grid-cols-3' : 'grid-cols-4';
+    let colClass: string;
+    if (columns === 2) {
+        colClass = 'grid-cols-2';
+    } else if (columns === 3) {
+        colClass = 'grid-cols-3';
+    } else {
+        colClass = 'grid-cols-4';
+    }
     return (
         <div className={cn(`grid ${colClass} gap-x-6 gap-y-3`, className)}>
             {items.map(({ label, value }) => (
@@ -164,7 +171,7 @@ interface ItemListProps {
 export function ItemList({ items, className }: ItemListProps) {
     return (
         <div className={cn('space-y-2', className)}>
-            {items.map((item, i) => {
+            {items.map((item) => {
                 const content = (
                     <>
                         <span className="w-[6px] h-[6px] rounded-full bg-foreground/80 shrink-0" />
@@ -183,14 +190,14 @@ export function ItemList({ items, className }: ItemListProps) {
                         <a
                             className="group flex items-center gap-2 hover:text-foreground transition-colors"
                             href={item.href}
-                            key={`${item.name}-${i}`}
+                            key={item.name}
                         >
                             {content}
                         </a>
                     );
                 }
                 return (
-                    <div className="group flex items-center gap-2" key={`${item.name}-${i}`}>
+                    <div className="group flex items-center gap-2" key={item.name}>
                         {content}
                     </div>
                 );

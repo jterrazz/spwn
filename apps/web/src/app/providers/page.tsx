@@ -118,7 +118,12 @@ function UsageBar({
     suffix?: string;
 }) {
     const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
-    const barColor = pct > 90 ? 'bg-red-400' : pct > 70 ? 'bg-amber-400' : 'bg-green-400/70';
+    let barColor = 'bg-green-400/70';
+    if (pct > 90) {
+        barColor = 'bg-red-400';
+    } else if (pct > 70) {
+        barColor = 'bg-amber-400';
+    }
     return (
         <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -182,11 +187,11 @@ function ProviderRow({
                         <span className="text-sm font-mono font-medium text-foreground/80">
                             {meta.name}
                         </span>
-                        {connected ? (
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
-                        ) : provider.error ? (
+                        {connected && <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />}
+                        {!connected && provider.error && (
                             <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
-                        ) : (
+                        )}
+                        {!connected && !provider.error && (
                             <span className="w-1.5 h-1.5 rounded-full bg-white/15" />
                         )}
                         {/* Credential type badge */}
@@ -367,7 +372,7 @@ export default function ProvidersPage() {
     usePageTitle('Settings');
     const [providers, setProviders] = useState<ProviderInfo[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<null | string>(null);
+    const [errorMessage, setErrorMessage] = useState<null | string>(null);
     const [checking, setChecking] = useState<null | string>(null);
     const [configuring, setConfiguring] = useState<null | string>(null);
     const [feedback, setFeedback] = useState<null | { message: string; type: 'error' | 'success' }>(
@@ -387,9 +392,9 @@ export default function ProvidersPage() {
             }
             const data = await res.json();
             setProviders(data.providers ?? []);
-            setError(null);
+            setErrorMessage(null);
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Failed to load providers');
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to load providers');
         } finally {
             setLoading(false);
         }
@@ -493,15 +498,15 @@ export default function ProvidersPage() {
             )}
 
             {/* Error */}
-            {error && !loading && (
+            {errorMessage && !loading && (
                 <div className="rounded-lg bg-red-500/10 border border-red-500/15 px-4 py-3 flex items-start gap-2">
                     <IconAlertTriangle className="text-red-400/60 mt-0.5 shrink-0" size={14} />
-                    <p className="text-xs text-red-400/70 font-mono">{error}</p>
+                    <p className="text-xs text-red-400/70 font-mono">{errorMessage}</p>
                 </div>
             )}
 
             {/* Provider list */}
-            {loading ? (
+            {loading && (
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
                         <div className="flex items-center gap-4 py-5" key={i}>
@@ -514,7 +519,8 @@ export default function ProvidersPage() {
                         </div>
                     ))}
                 </div>
-            ) : providers.length === 0 && !error ? (
+            )}
+            {!loading && providers.length === 0 && !errorMessage && (
                 <div className="flex-1 flex items-center justify-center -mt-12">
                     <div className="flex flex-col items-center text-center max-w-md">
                         <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-6">
@@ -533,7 +539,8 @@ export default function ProvidersPage() {
                         </div>
                     </div>
                 </div>
-            ) : (
+            )}
+            {!loading && providers.length > 0 && (
                 <div className="divide-y divide-white/[0.06]">
                     {providers.map((provider) => (
                         <ProviderRow

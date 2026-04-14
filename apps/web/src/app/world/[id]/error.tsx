@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 export default function WorldError({
@@ -30,12 +31,12 @@ export default function WorldError({
                     >
                         Retry
                     </button>
-                    <a
+                    <Link
                         className="px-5 py-2.5 rounded-xl text-sm text-muted-foreground/40 hover:text-foreground/60 transition-colors"
                         href="/"
                     >
                         Back to worlds
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>

@@ -570,10 +570,10 @@ export default function WorldDashboard() {
                                         </p>
                                     </div>
                                 )}
-                                {logs.map((log, i) => (
+                                {logs.map((log) => (
                                     <div
                                         className="flex gap-2 py-1.5 border-b border-border/10 last:border-0"
-                                        key={i}
+                                        key={`${log.timestamp}-${log.source}-${log.message}`}
                                     >
                                         <span className="text-muted-foreground/25 shrink-0 w-14">
                                             {new Date(log.timestamp).toLocaleTimeString([], {
@@ -689,7 +689,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
     const [installed, setInstalled] = useState<InstalledAgentItem[] | null>(null);
     const [gallery, setGallery] = useState<EmptyAgentsExample[] | null>(null);
     const [busy, setBusy] = useState<null | string>(null);
-    const [error, setError] = useState<null | string>(null);
+    const [errorMessage, setErrorMessage] = useState<null | string>(null);
     const [showGallery, setShowGallery] = useState(false);
 
     useEffect(() => {
@@ -703,7 +703,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
 
     const deploy = async (name: string, role: string = 'worker') => {
         setBusy(name);
-        setError(null);
+        setErrorMessage(null);
         try {
             const res = await fetch(goApiUrl(`/api/worlds/${worldId}/agents`), {
                 method: 'POST',
@@ -716,7 +716,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
             }
             onDeployed();
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'deploy failed');
+            setErrorMessage(error instanceof Error ? error.message : 'deploy failed');
         } finally {
             setBusy(null);
         }
@@ -724,7 +724,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
 
     const installAndDeploy = async (ex: EmptyAgentsExample) => {
         setBusy(ex.slug);
-        setError(null);
+        setErrorMessage(null);
         try {
             // 1. Install the template (idempotent - keeps user edits).
             await apiPost(`/api/templates/${ex.slug}/install`);
@@ -735,7 +735,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
             }
             await deploy(primary);
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'install failed');
+            setErrorMessage(error instanceof Error ? error.message : 'install failed');
             setBusy(null);
         }
     };
@@ -758,21 +758,23 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                 </div>
             </div>
 
-            {error && <p className="mb-3 text-[11px] text-red-300/80">{error}</p>}
+            {errorMessage && <p className="mb-3 text-[11px] text-red-300/80">{errorMessage}</p>}
 
             {/* ── Already-installed agents ─────────────────────────────── */}
-            {isLoading ? (
+            {isLoading && (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {[0, 1, 2].map((i) => (
                         <Skeleton className="h-16 rounded-lg" key={i} />
                     ))}
                 </div>
-            ) : noInstalled ? (
+            )}
+            {!isLoading && noInstalled && (
                 <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[11px] text-muted-foreground/60">
                     You don&apos;t have any agents installed yet. Pick one from the gallery below to
                     install and deploy in one click.
                 </div>
-            ) : (
+            )}
+            {!isLoading && !noInstalled && (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {installed!.map((a) => (
                         <button
@@ -814,11 +816,15 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                     type="button"
                 >
                     <IconSparkles size={11} />
-                    {showGallery
-                        ? 'Hide template gallery'
-                        : noInstalled
-                          ? 'Install one from a template'
-                          : 'Or install a new one from a template'}
+                    {(() => {
+                        if (showGallery) {
+                            return 'Hide template gallery';
+                        }
+                        if (noInstalled) {
+                            return 'Install one from a template';
+                        }
+                        return 'Or install a new one from a template';
+                    })()}
                 </button>
 
                 {showGallery && (

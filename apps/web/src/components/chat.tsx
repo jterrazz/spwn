@@ -106,47 +106,54 @@ export function Chat({
                 {messages.length === 0 && emptyState && (
                     <div className="flex h-full items-center justify-center">{emptyState}</div>
                 )}
-                {messages.map((msg, i) => (
-                    <div
-                        className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                        key={i}
-                    >
+                {messages.map((msg, i) => {
+                    // Messages are append-only; (timestamp, role, index) is a stable identity.
+                    const msgKey = `${msg.timestamp.getTime()}-${msg.role}-${i}`;
+                    let bubbleClass: string;
+                    if (msg.role === 'user') {
+                        bubbleClass = 'bg-white/[0.08] text-foreground/85';
+                    } else if (msg.error) {
+                        bubbleClass = 'bg-red-500/10 border border-red-500/15 text-red-400/80';
+                    } else {
+                        bubbleClass =
+                            'bg-white/[0.03] border border-white/[0.06] text-foreground/75';
+                    }
+                    return (
                         <div
-                            className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 transition-colors ${
-                                msg.role === 'user'
-                                    ? 'bg-white/[0.08] text-foreground/85'
-                                    : msg.error
-                                      ? 'bg-red-500/10 border border-red-500/15 text-red-400/80'
-                                      : 'bg-white/[0.03] border border-white/[0.06] text-foreground/75'
-                            }`}
+                            className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                            key={msgKey}
                         >
-                            {msg.role === 'assistant' && msg.blocks.length > 0 ? (
-                                <ActivityMessageView
-                                    message={{
-                                        role: 'agent',
-                                        blocks: msg.blocks,
-                                        timestamp: msg.timestamp,
-                                        cost: msg.cost,
-                                        duration: msg.duration,
-                                    }}
-                                />
-                            ) : (
-                                <p className="text-xs whitespace-pre-wrap break-words leading-relaxed">
-                                    {msg.content || (msg.role === 'assistant' ? '…' : '')}
+                            <div
+                                className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 transition-colors ${bubbleClass}`}
+                            >
+                                {msg.role === 'assistant' && msg.blocks.length > 0 ? (
+                                    <ActivityMessageView
+                                        message={{
+                                            role: 'agent',
+                                            blocks: msg.blocks,
+                                            timestamp: msg.timestamp,
+                                            cost: msg.cost,
+                                            duration: msg.duration,
+                                        }}
+                                    />
+                                ) : (
+                                    <p className="text-xs whitespace-pre-wrap break-words leading-relaxed">
+                                        {msg.content || (msg.role === 'assistant' ? '…' : '')}
+                                    </p>
+                                )}
+                                <p className="text-[9px] text-muted-foreground/25 mt-1">
+                                    {msg.role === 'assistant' ? assistantLabel : userLabel}
+                                    {' · '}
+                                    {msg.timestamp.toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })}
                                 </p>
-                            )}
-                            <p className="text-[9px] text-muted-foreground/25 mt-1">
-                                {msg.role === 'assistant' ? assistantLabel : userLabel}
-                                {' · '}
-                                {msg.timestamp.toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })}
-                            </p>
+                            </div>
+                            {extras?.(msg, i)}
                         </div>
-                        {extras?.(msg, i)}
-                    </div>
-                ))}
+                    );
+                })}
                 {disabled && typingText && (
                     <div className="flex items-start">
                         <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] px-3.5 py-2.5">

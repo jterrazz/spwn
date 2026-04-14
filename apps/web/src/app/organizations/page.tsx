@@ -248,6 +248,7 @@ function OrganizationFlow({ organization }: { organization: Organization }) {
 // ── Create Organization Dialog ───────────────────────────────────────
 
 interface RoleDraft {
+    id: string;
     name: string;
     level: number;
     reports_to: string;
@@ -255,8 +256,17 @@ interface RoleDraft {
     permissions: string;
 }
 
+let roleDraftCounter = 0;
 function emptyRoleDraft(): RoleDraft {
-    return { name: '', level: 0, reports_to: '', can_command: '', permissions: '' };
+    roleDraftCounter += 1;
+    return {
+        id: `draft-${roleDraftCounter}`,
+        name: '',
+        level: 0,
+        reports_to: '',
+        can_command: '',
+        permissions: '',
+    };
 }
 
 function CreateOrganizationDialog({
@@ -270,7 +280,7 @@ function CreateOrganizationDialog({
     const [description, setDescription] = useState('');
     const [roles, setRoles] = useState<RoleDraft[]>([emptyRoleDraft()]);
     const [creating, setCreating] = useState(false);
-    const [error, setError] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const updateRole = (idx: number, patch: Partial<RoleDraft>) => {
         setRoles((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
@@ -282,15 +292,15 @@ function CreateOrganizationDialog({
 
     const handleCreate = async () => {
         if (!name.trim()) {
-            setError('Name is required');
+            setErrorMessage('Name is required');
             return;
         }
         if (roles.every((r) => !r.name.trim())) {
-            setError('At least one role with a name is required');
+            setErrorMessage('At least one role with a name is required');
             return;
         }
         setCreating(true);
-        setError('');
+        setErrorMessage('');
         const slug = name
             .trim()
             .toLowerCase()
@@ -325,7 +335,9 @@ function CreateOrganizationDialog({
             onComplete();
             onClose();
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Failed to create organization');
+            setErrorMessage(
+                error instanceof Error ? error.message : 'Failed to create organization',
+            );
             setCreating(false);
         }
     };
@@ -385,7 +397,7 @@ function CreateOrganizationDialog({
                             {roles.map((role, idx) => (
                                 <div
                                     className="border border-white/[0.06] rounded-lg p-3 bg-white/[0.01] space-y-2"
-                                    key={idx}
+                                    key={role.id}
                                 >
                                     <div className="flex items-center gap-2">
                                         <span className="text-[9px] font-mono text-muted-foreground/30">
@@ -482,7 +494,7 @@ function CreateOrganizationDialog({
                         </button>
                     </div>
 
-                    {error && <p className="text-xs text-red-400/80">{error}</p>}
+                    {errorMessage && <p className="text-xs text-red-400/80">{errorMessage}</p>}
 
                     <div className="flex gap-3 justify-end pt-2">
                         <button
@@ -524,17 +536,19 @@ function DeleteOrganizationDialog({
     onComplete: () => void;
 }) {
     const [deleting, setDeleting] = useState(false);
-    const [error, setError] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleDelete = async () => {
         setDeleting(true);
-        setError('');
+        setErrorMessage('');
         try {
             await apiDelete(`/api/organizations/${organization.slug}`);
             onComplete();
             onClose();
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Failed to delete organization');
+            setErrorMessage(
+                error instanceof Error ? error.message : 'Failed to delete organization',
+            );
             setDeleting(false);
         }
     };
@@ -550,7 +564,7 @@ function DeleteOrganizationDialog({
                     Are you sure you want to delete{' '}
                     <span className="font-mono text-foreground/70">{organization.name}</span>?
                 </p>
-                {error && <p className="text-xs text-red-400/80 mb-3">{error}</p>}
+                {errorMessage && <p className="text-xs text-red-400/80 mb-3">{errorMessage}</p>}
                 <div className="flex gap-3 justify-end">
                     <button
                         className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
@@ -622,11 +636,12 @@ export default function OrganizationsPage() {
                 title="Organizations"
             />
 
-            {loading ? (
+            {loading && (
                 <div className="space-y-6">
                     <Skeleton className="h-[300px] w-full rounded-xl" />
                 </div>
-            ) : organizations.length === 0 ? (
+            )}
+            {!loading && organizations.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                     <p className="text-sm text-muted-foreground/50">
                         No organizations defined yet.
@@ -638,7 +653,8 @@ export default function OrganizationsPage() {
                         Create your first organization
                     </button>
                 </div>
-            ) : (
+            )}
+            {!loading && organizations.length > 0 && (
                 <div className="space-y-10">
                     {organizations.map((h, idx) => (
                         <div key={h.slug}>

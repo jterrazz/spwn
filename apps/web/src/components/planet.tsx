@@ -178,7 +178,7 @@ export function Planet({
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    const size = compact ? 140 : isMobile ? 140 : 200;
+    const size: number = compact || isMobile ? 140 : 200;
 
     const wrapperRef = useRef<HTMLDivElement>(null);
     const glowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -232,7 +232,15 @@ export function Planet({
                 return;
             }
 
-            phiRef.current += sel ? 0.005 : compact ? 0.006 : 0.002;
+            let phiStep: number;
+            if (sel) {
+                phiStep = 0.005;
+            } else if (compact) {
+                phiStep = 0.006;
+            } else {
+                phiStep = 0.002;
+            }
+            phiRef.current += phiStep;
 
             // Selected: gentle theta wobble + breathing diffuse
             const theta = sel
@@ -273,9 +281,36 @@ export function Planet({
             cancelAnimationFrame(raf);
             globe.destroy();
         };
-    }, [world.id, world.status]);
+    }, [
+        world.id,
+        world.status,
+        world.agents,
+        compact,
+        size,
+        index,
+        config.base,
+        config.glow,
+        config.marker,
+    ]);
 
     const GAP = isSelected ? 40 : 12;
+
+    let globeScale: number;
+    if (isSelected) {
+        if (isMobile) {
+            globeScale = 1.3;
+        } else if (compact) {
+            globeScale = 1.5;
+        } else {
+            globeScale = 1.8;
+        }
+    } else if (isMobile) {
+        globeScale = 0.7;
+    } else if (compact) {
+        globeScale = 1.15;
+    } else {
+        globeScale = 0.85;
+    }
 
     return (
         <div
@@ -292,7 +327,7 @@ export function Planet({
                 style={{
                     width: size,
                     height: size,
-                    transform: `scale(${isSelected ? (isMobile ? 1.3 : compact ? 1.5 : 1.8) : isMobile ? 0.7 : compact ? 1.15 : 0.85})`,
+                    transform: `scale(${globeScale})`,
                     filter: isSelected
                         ? `brightness(1.2) drop-shadow(0 0 28px hsl(${config.hue}, ${config.sat}%, 62%))`
                         : `brightness(1) drop-shadow(0 0 12px hsla(${config.hue}, ${config.sat}%, 60%, 0.45))`,
