@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Full agent-lifecycle end-to-end journey under the docker() spec mode.
@@ -30,13 +30,13 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  *     below already exercise `agent rm` + operations on deleted agents.
  *
  * Multi-exec chains only expose the last command's streams, so the
- * journey is split into several dockerSpec calls that keep the world
+ * journey is split into several spec calls that keep the world
  * alive under the test-run label across calls.
  */
 describe('full agent lifecycle', () => {
     test('journey: up → ls → inspect → logs → down', async () => {
         // Step 1: up (also checks banners on stderr)
-        await using up = await dockerSpec('journey up').project('docker-pilot').exec('up').run();
+        await using up = await spec('journey up').project('docker-pilot').exec('up').run();
 
         expect(up.exitCode).toBe(0);
         up.stderr.toContain('Created container');
@@ -56,7 +56,7 @@ describe('full agent lifecycle', () => {
         expect(worldId).toBeTruthy();
 
         // Step 2: agent ls — neo shows up as running
-        await using agentLs = await dockerSpec('journey agent ls')
+        await using agentLs = await spec('journey agent ls')
             .project('docker-pilot')
             .exec('agent ls --json')
             .run();
@@ -72,7 +72,7 @@ describe('full agent lifecycle', () => {
         expect(neoAgent?.status).toMatch(/running/);
 
         // Step 3: world list --json — one running world
-        await using worldLs = await dockerSpec('journey world list')
+        await using worldLs = await spec('journey world list')
             .project('docker-pilot')
             .exec('world list --json')
             .run();
@@ -91,7 +91,7 @@ describe('full agent lifecycle', () => {
         });
 
         // Step 4: world inspect <id> — stable field headers
-        await using inspect = await dockerSpec('journey inspect')
+        await using inspect = await spec('journey inspect')
             .project('docker-pilot')
             .exec(`world inspect ${worldId}`)
             .run();
@@ -102,7 +102,7 @@ describe('full agent lifecycle', () => {
         expect(inspectOut).toMatch(/Status/);
 
         // Step 5: world logs <id> — must not crash
-        await using logs = await dockerSpec('journey logs')
+        await using logs = await spec('journey logs')
             .project('docker-pilot')
             .exec(`world logs ${worldId}`)
             .run();
@@ -110,7 +110,7 @@ describe('full agent lifecycle', () => {
         expect(logs.exitCode).toBe(0);
 
         // Step 6: down — destroy banners + container removed
-        await using down = await dockerSpec('journey down')
+        await using down = await spec('journey down')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
@@ -122,7 +122,7 @@ describe('full agent lifecycle', () => {
     });
 
     test('evolution: dream, sleep, fork, export', async () => {
-        await using result = await dockerSpec('journey evolve')
+        await using result = await spec('journey evolve')
             .project('docker-pilot')
             .exec([
                 'agent dream neo',
@@ -150,7 +150,7 @@ describe('full agent lifecycle', () => {
     });
 
     test('error recovery: operations on a deleted agent fail without crashing', async () => {
-        await using result = await dockerSpec('journey deleted agent')
+        await using result = await spec('journey deleted agent')
             .project('docker-pilot')
             .exec(['agent rm neo', 'agent inspect neo'])
             .run();
@@ -166,7 +166,7 @@ describe('full agent lifecycle', () => {
     });
 
     test('error recovery: down on an invalid world id fails gracefully', async () => {
-        await using result = await dockerSpec('journey bad id')
+        await using result = await spec('journey bad id')
             .project('docker-pilot')
             .exec('down w-fake-99999')
             .run();
@@ -179,7 +179,7 @@ describe('full agent lifecycle', () => {
     });
 
     test('error recovery: double destroy is idempotent', async () => {
-        await using result = await dockerSpec('journey double destroy')
+        await using result = await spec('journey double destroy')
             .project('docker-pilot')
             .exec(['up', 'down', 'down'])
             .run();

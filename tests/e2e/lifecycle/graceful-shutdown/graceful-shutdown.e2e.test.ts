@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Graceful shutdown under the docker() spec mode.
@@ -38,7 +38,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('graceful shutdown', () => {
     test('down on a running project world removes the container cleanly', async () => {
-        await using result = await dockerSpec('graceful down')
+        await using result = await spec('graceful down')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
@@ -52,14 +52,14 @@ describe('graceful shutdown', () => {
     });
 
     test('world list --json reports no running worlds after down', async () => {
-        await using downed = await dockerSpec('graceful down then list up')
+        await using downed = await spec('graceful down then list up')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
 
         expect(downed.exitCode).toBe(0);
 
-        await using list = await dockerSpec('graceful down then list')
+        await using list = await spec('graceful down then list')
             .project('docker-pilot')
             .exec('world list --json')
             .run();
@@ -74,7 +74,7 @@ describe('graceful shutdown', () => {
     });
 
     test('double down is idempotent (no panic, no stack trace)', async () => {
-        await using result = await dockerSpec('graceful double down')
+        await using result = await spec('graceful double down')
             .project('docker-pilot')
             .exec(['up', 'down', 'down'])
             .run();
@@ -92,7 +92,7 @@ describe('graceful shutdown', () => {
     });
 
     test('down with no running worlds succeeds gracefully', async () => {
-        await using result = await dockerSpec('graceful down empty')
+        await using result = await spec('graceful down empty')
             .project('docker-pilot')
             .exec('down')
             .run();
@@ -105,7 +105,7 @@ describe('graceful shutdown', () => {
     });
 
     test('upgrade --help documents graceful world shutdown', async () => {
-        await using result = await dockerSpec('graceful upgrade help')
+        await using result = await spec('graceful upgrade help')
             .project('docker-pilot')
             .exec('upgrade --help')
             .run();

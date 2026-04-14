@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * System skills / AGENTS.md injection — docker-backed.
@@ -13,15 +13,12 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  *   - `/world/roster.md`   — regenerated per spawn, names the agents
  *   - `/world/skills/`     — shared system skill bundle
  *
- * Lives under the cli vitest project (`e2e/system/**`) but dockerSpec
+ * Lives under the cli vitest project (`e2e/system/**`) but spec
  * Still spawns real containers; cleanup runs via the test-run label.
  */
 describe('system skills infrastructure (docker)', () => {
     test('AGENTS.md, roster.md, and /world/skills are laid down on up', async () => {
-        await using result = await dockerSpec('skills layout')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('skills layout').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
         result.stderr.toContain('Created container');
@@ -47,10 +44,7 @@ describe('system skills infrastructure (docker)', () => {
     });
 
     test('agent can read /world/skills from inside the container', async () => {
-        await using result = await dockerSpec('skills readable')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('skills readable').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
         const neo = result.container('neo');

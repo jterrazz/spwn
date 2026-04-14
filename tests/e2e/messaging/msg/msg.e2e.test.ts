@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * `spwn agent send` / `spwn agent inbox` under the docker() spec mode.
@@ -25,7 +25,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('agent messaging (msg)', () => {
     test('send prints a confirmation and writes a JSON message file', async () => {
-        await using result = await dockerSpec('msg send basic')
+        await using result = await spec('msg send basic')
             .project('docker-pilot')
             .exec(['up', 'agent send neo --from morpheus "hello world"'])
             .run();
@@ -49,7 +49,7 @@ describe('agent messaging (msg)', () => {
     });
 
     test('send without --from defaults to "user"', async () => {
-        await using result = await dockerSpec('msg send default from')
+        await using result = await spec('msg send default from')
             .project('docker-pilot')
             .exec(['up', 'agent send neo "hi from default"'])
             .run();
@@ -66,7 +66,7 @@ describe('agent messaging (msg)', () => {
     });
 
     test('inbox shows the sender and body of a delivered message', async () => {
-        await using result = await dockerSpec('msg inbox shows message')
+        await using result = await spec('msg inbox shows message')
             .project('docker-pilot')
             .exec(['up', 'agent send neo --from morpheus "inbox test"', 'agent inbox neo'])
             .run();
@@ -83,7 +83,7 @@ describe('agent messaging (msg)', () => {
     });
 
     test('send to a non-existent agent fails cleanly', async () => {
-        await using result = await dockerSpec('msg send missing')
+        await using result = await spec('msg send missing')
             .project('docker-pilot')
             .exec(['up', 'agent send nonexistent --from morpheus "hello"'])
             .run();
@@ -99,7 +99,7 @@ describe('agent messaging (msg)', () => {
     });
 
     test('inbox on a non-existent agent fails cleanly', async () => {
-        await using result = await dockerSpec('msg inbox missing')
+        await using result = await spec('msg inbox missing')
             .project('docker-pilot')
             .exec(['up', 'agent inbox nonexistent'])
             .run();

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Agent messaging under the docker() spec mode.
@@ -26,7 +26,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('agent messaging', () => {
     test('send writes a message into the agent inbox inside the container', async () => {
-        await using result = await dockerSpec('agent send basic')
+        await using result = await spec('agent send basic')
             .project('docker-pilot')
             .exec(['up', 'agent send neo --from morpheus "implement webhooks"'])
             .run();
@@ -57,7 +57,7 @@ describe('agent messaging', () => {
     });
 
     test('inbox shows a delivered message with sender and content', async () => {
-        await using result = await dockerSpec('agent inbox delivered')
+        await using result = await spec('agent inbox delivered')
             .project('docker-pilot')
             .exec(['up', 'agent send neo --from morpheus "implement webhooks"', 'agent inbox neo'])
             .run();
@@ -73,7 +73,7 @@ describe('agent messaging', () => {
     });
 
     test('inbox is empty before any send', async () => {
-        await using result = await dockerSpec('agent inbox empty')
+        await using result = await spec('agent inbox empty')
             .project('docker-pilot')
             .exec(['up', 'agent inbox neo'])
             .run();
@@ -84,7 +84,7 @@ describe('agent messaging', () => {
     });
 
     test('multiple messages to the same agent all appear in the inbox', async () => {
-        await using result = await dockerSpec('agent inbox multi')
+        await using result = await spec('agent inbox multi')
             .project('docker-pilot')
             .exec([
                 'up',
@@ -108,7 +108,7 @@ describe('agent messaging', () => {
     });
 
     test('--type flag sets the message type and --from defaults to user', async () => {
-        await using result = await dockerSpec('agent send flags')
+        await using result = await spec('agent send flags')
             .project('docker-pilot')
             .exec(['up', 'agent send neo --type question "what is the matrix?"'])
             .run();
@@ -127,7 +127,7 @@ describe('agent messaging', () => {
     });
 
     test('send to a non-existent agent fails cleanly', async () => {
-        await using result = await dockerSpec('agent send missing')
+        await using result = await spec('agent send missing')
             .project('docker-pilot')
             .exec(['up', 'agent send nonexistent --from morpheus "hello"'])
             .run();
@@ -142,7 +142,7 @@ describe('agent messaging', () => {
     });
 
     test('inbox on a non-existent agent fails cleanly', async () => {
-        await using result = await dockerSpec('agent inbox missing')
+        await using result = await spec('agent inbox missing')
             .project('docker-pilot')
             .exec(['up', 'agent inbox nonexistent'])
             .run();
@@ -156,7 +156,7 @@ describe('agent messaging', () => {
     });
 
     test('physics.md documents the /world/inbox communication channel', async () => {
-        await using result = await dockerSpec('physics documents inbox')
+        await using result = await spec('physics documents inbox')
             .project('docker-pilot')
             .exec('up')
             .run();

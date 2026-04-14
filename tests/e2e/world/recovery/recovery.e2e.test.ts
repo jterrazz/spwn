@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Error recovery under the docker() spec mode.
@@ -15,13 +15,13 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  * Two operations require the live container id (not the world key):
  * spwn world inspect and spwn down <id>. We capture the id from the
  * first run via `container('neo').id` and feed it into a fresh
- * dockerSpec call. The first run's `await using` still owns cleanup
+ * spec call. The first run's `await using` still owns cleanup
  * of any container it spawned.
  */
 describe('error recovery', () => {
     test('double destroy — second destroy fails with a clean not-found error', async () => {
         // Up, capture the container id, then destroy via project-mode down.
-        await using up = await dockerSpec('double destroy up')
+        await using up = await spec('double destroy up')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
@@ -32,7 +32,7 @@ describe('error recovery', () => {
 
         // A second `spwn down` on a clean project must exit non-zero with
         // A clean message (the neo world has no running container).
-        await using secondDown = await dockerSpec('double destroy second')
+        await using secondDown = await spec('double destroy second')
             .project('docker-pilot')
             .exec('down neo')
             .run();
@@ -49,7 +49,7 @@ describe('error recovery', () => {
     });
 
     test('world inspect on a non-existent id fails cleanly', async () => {
-        await using result = await dockerSpec('inspect missing')
+        await using result = await spec('inspect missing')
             .project('docker-pilot')
             .exec('world inspect w-ghost-99999')
             .run();
@@ -65,7 +65,7 @@ describe('error recovery', () => {
     test('spawn with an invalid project name leaks no container', async () => {
         // Project-mode up: request a world key that doesn't exist in the
         // Docker-pilot manifest.
-        await using result = await dockerSpec('spawn bad project world')
+        await using result = await spec('spawn bad project world')
             .project('docker-pilot')
             .exec('up nonexistent-world')
             .run();
@@ -85,14 +85,14 @@ describe('error recovery', () => {
         // First: trigger an error (destroy a non-existent world). The
         // Array chain short-circuits on failure, so we split across two
         // DockerSpec calls using the same project fixture.
-        await using errorResult = await dockerSpec('error first')
+        await using errorResult = await spec('error first')
             .project('docker-pilot')
             .exec('down w-ghost-00000')
             .run();
         expect(errorResult.exitCode).not.toBe(0);
 
         // Then: a normal command in a fresh project dir still works.
-        await using listResult = await dockerSpec('list after error')
+        await using listResult = await spec('list after error')
             .project('docker-pilot')
             .exec('world list --json')
             .run();
@@ -107,7 +107,7 @@ describe('error recovery', () => {
 
     test('spawn and destroy cycle — world can be recreated after destroy', async () => {
         // Up → down → up again, all in one run.
-        await using result = await dockerSpec('spawn destroy recreate')
+        await using result = await spec('spawn destroy recreate')
             .project('docker-pilot')
             .exec(['up', 'down', 'up'])
             .run();

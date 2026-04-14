@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { afterEach, describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World snapshot CLI under the docker() spec mode.
@@ -18,7 +18,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  *   1. `spwn world snap save` takes a full world *id* (not a world key
  *      like "neo"). In project mode the id is generated at spawn time;
  *      we read it off the container's label map via inspect and pass
- *      it into a follow-up dockerSpec call. The first run's container
+ *      it into a follow-up spec call. The first run's container
  *      stays alive until its `await using` scope exits, so the second
  *      run finds it via docker labels.
  *
@@ -63,7 +63,7 @@ describe('world snap', () => {
     });
 
     test('`spwn world snap --help` lists the save/ls/restore/rm subcommands', async () => {
-        await using result = await dockerSpec('world snap help')
+        await using result = await spec('world snap help')
             .project('docker-pilot')
             .exec('world snap --help')
             .run();
@@ -81,7 +81,7 @@ describe('world snap', () => {
         // Container labels. The first run's container stays alive while
         // This scope is open, so follow-up spwn commands in a second
         // DockerSpec call can reach it via docker labels.
-        await using up = await dockerSpec('snap cycle up').project('docker-pilot').exec('up').run();
+        await using up = await spec('snap cycle up').project('docker-pilot').exec('up').run();
 
         expect(up.exitCode).toBe(0);
 
@@ -96,7 +96,7 @@ describe('world snap', () => {
         expect(typeof worldId).toBe('string');
 
         // Save a snapshot by id.
-        await using save = await dockerSpec('snap cycle save')
+        await using save = await spec('snap cycle save')
             .project('docker-pilot')
             .exec(`world snap save ${worldId} --name round-trip`)
             .run();
@@ -107,7 +107,7 @@ describe('world snap', () => {
         expect(saveCombined).toContain('round-trip');
 
         // List snapshots — our tag must appear.
-        await using list = await dockerSpec('snap cycle ls')
+        await using list = await spec('snap cycle ls')
             .project('docker-pilot')
             .exec('world snap ls')
             .run();
@@ -117,7 +117,7 @@ describe('world snap', () => {
         expect(listCombined).toContain('round-trip');
 
         // Remove the snapshot.
-        await using rm = await dockerSpec('snap cycle rm')
+        await using rm = await spec('snap cycle rm')
             .project('docker-pilot')
             .exec(`world snap rm ${worldId}--round-trip`)
             .run();
@@ -125,7 +125,7 @@ describe('world snap', () => {
         expect(rm.exitCode).toBe(0);
 
         // Confirm it's gone.
-        await using after = await dockerSpec('snap cycle ls after rm')
+        await using after = await spec('snap cycle ls after rm')
             .project('docker-pilot')
             .exec('world snap ls')
             .run();

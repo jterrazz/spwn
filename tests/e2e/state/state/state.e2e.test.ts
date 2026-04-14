@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * State tracking under the docker() spec mode.
@@ -31,16 +31,13 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  *
  * Note on multi-exec chains: only the *last* command's stdout/stderr is
  * captured. To assert on banners from an earlier step (e.g. "Created
- * container"), split the chain into separate dockerSpec calls and keep
+ * container"), split the chain into separate spec calls and keep
  * the earlier result in scope with `await using` so its container is
  * still live under the test-run label for follow-up queries.
  */
 describe('state tracking', () => {
     test('after up, banners fire and world list --json reports the world', async () => {
-        await using up = await dockerSpec('state up banner')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using up = await spec('state up banner').project('docker-pilot').exec('up').run();
 
         expect(up.exitCode).toBe(0);
         up.stderr.toContain('Created container');
@@ -52,7 +49,7 @@ describe('state tracking', () => {
 
         // Now query list from a second spec — our container is still
         // In scope under the test-run label so it's visible there too.
-        await using list = await dockerSpec('state up list')
+        await using list = await spec('state up list')
             .project('docker-pilot')
             .exec('world list --json')
             .run();
@@ -76,7 +73,7 @@ describe('state tracking', () => {
         // Destroy banners; world list --json is queried separately
         // Below, but the destroy banner assertions need to be on the
         // Run whose last step is `down`.
-        await using destroy = await dockerSpec('state down banner')
+        await using destroy = await spec('state down banner')
             .project('docker-pilot')
             .exec(['up', 'down'])
             .run();
@@ -89,7 +86,7 @@ describe('state tracking', () => {
         expect(destroy.container('neo').exists).toBe(false);
 
         // And list --json reports no running worlds
-        await using list = await dockerSpec('state down list')
+        await using list = await spec('state down list')
             .project('docker-pilot')
             .exec('world list --json')
             .run();
@@ -105,7 +102,7 @@ describe('state tracking', () => {
 
     test('world list is stable across repeated calls', async () => {
         // First run: spawn the world and grab list #1.
-        await using first = await dockerSpec('state list stable first')
+        await using first = await spec('state list stable first')
             .project('docker-pilot')
             .exec(['up', 'world list --json'])
             .run();
@@ -122,7 +119,7 @@ describe('state tracking', () => {
         // Second run inside the same `await using` scope: the first
         // Container is still live under the test-run label, so a new
         // `world list --json` in a fresh spec reads the same snapshot.
-        await using second = await dockerSpec('state list stable second')
+        await using second = await spec('state list stable second')
             .project('docker-pilot')
             .exec('world list --json')
             .run();

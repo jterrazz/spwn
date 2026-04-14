@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World workspace persistence under the docker() spec mode.
@@ -18,7 +18,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('world workspace', () => {
     test('workspace is bind-mounted read-write into the container', async () => {
-        await using result = await dockerSpec('workspace bind mount')
+        await using result = await spec('workspace bind mount')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -45,7 +45,7 @@ describe('world workspace', () => {
     });
 
     test('host project files are visible inside the container', async () => {
-        await using result = await dockerSpec('host to container visibility')
+        await using result = await spec('host to container visibility')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -62,7 +62,7 @@ describe('world workspace', () => {
     });
 
     test('files written in the container persist to the host workspace', async () => {
-        await using result = await dockerSpec('container to host persistence')
+        await using result = await spec('container to host persistence')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -85,7 +85,7 @@ describe('world workspace', () => {
     });
 
     test('workspace mount is read-write (write then read back inside container)', async () => {
-        await using result = await dockerSpec('workspace rw roundtrip')
+        await using result = await spec('workspace rw roundtrip')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -105,7 +105,7 @@ describe('world workspace', () => {
     });
 
     test('up with a non-existent workspace path fails gracefully', async () => {
-        await using result = await dockerSpec('bad workspace path')
+        await using result = await spec('bad workspace path')
             .project('docker-pilot')
             .seed('spwn.yaml/bad-workspace.yaml')
             .exec('up')

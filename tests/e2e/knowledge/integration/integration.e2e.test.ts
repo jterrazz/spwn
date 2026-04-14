@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * World-scoped knowledge integration under the docker() spec mode.
@@ -25,10 +25,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
 describe('world knowledge integration', () => {
     test('world knowledge ls reflects files written into the container', async () => {
         // Step 1: spawn, then assert the knowledge listing is empty.
-        await using empty = await dockerSpec('knowledge empty')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using empty = await spec('knowledge empty').project('docker-pilot').exec('up').run();
 
         expect(empty.exitCode).toBe(0);
         const neo = empty.container('neo');
@@ -52,7 +49,7 @@ describe('world knowledge integration', () => {
         // New file. Run as a fresh spec against the same fixture; the
         // Test-run label keeps the first container alive for the second
         // Spec call so `world knowledge ls` finds it.
-        await using ls = await dockerSpec('knowledge ls')
+        await using ls = await spec('knowledge ls')
             .project('docker-pilot')
             .exec(`world knowledge ls ${worldId}`)
             .run();

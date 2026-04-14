@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { beforeAll, describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * `spwn architect <start|stop|status|talk>` under the docker() spec mode.
@@ -63,7 +63,7 @@ describe('spwn architect', () => {
     });
 
     test('status reports not running when no architect container exists', async () => {
-        await using result = await dockerSpec('architect status idle')
+        await using result = await spec('architect status idle')
             .project('docker-pilot')
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec('architect status')
@@ -74,7 +74,7 @@ describe('spwn architect', () => {
     });
 
     test('start provisions a running architect container', async () => {
-        await using result = await dockerSpec('architect start')
+        await using result = await spec('architect start')
             .project('docker-pilot')
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec(['architect start', 'architect status'])
@@ -91,7 +91,7 @@ describe('spwn architect', () => {
     });
 
     test('start is idempotent — second start reports already running', async () => {
-        await using result = await dockerSpec('architect start twice')
+        await using result = await spec('architect start twice')
             .project('docker-pilot')
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec(['architect start', 'architect start'])
@@ -102,7 +102,7 @@ describe('spwn architect', () => {
     });
 
     test('stop tears the architect container down', async () => {
-        await using result = await dockerSpec('architect stop')
+        await using result = await spec('architect stop')
             .project('docker-pilot')
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec(['architect start', 'architect stop', 'architect status'])
@@ -114,7 +114,7 @@ describe('spwn architect', () => {
     });
 
     test('stop when nothing is running is a clean no-op', async () => {
-        await using result = await dockerSpec('architect stop idle')
+        await using result = await spec('architect stop idle')
             .project('docker-pilot')
             .env({ SPWN_ARCHITECT_IMAGE: ARCHITECT_IMAGE_OVERRIDE })
             .exec('architect stop')

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Agent "inside a running world" under the docker() spec mode.
@@ -28,10 +28,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('agent inside world', () => {
     test('agent home is mounted at /agents/<name> inside the world container', async () => {
-        await using result = await dockerSpec('agent mount')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('agent mount').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
         // Banners go to stderr.
@@ -53,7 +50,7 @@ describe('agent inside world', () => {
     });
 
     test('spawn confirms the agent is alive and the container is running', async () => {
-        await using result = await dockerSpec('agent alive banner')
+        await using result = await spec('agent alive banner')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -69,7 +66,7 @@ describe('agent inside world', () => {
     });
 
     test('agent ls --json surfaces neo attached to the running world', async () => {
-        await using result = await dockerSpec('agent ls running')
+        await using result = await spec('agent ls running')
             .project('docker-pilot')
             .exec(['up', 'agent ls --json'])
             .run();
@@ -89,10 +86,7 @@ describe('agent inside world', () => {
     });
 
     test('the on-disk Mind for neo has all expected layers', async () => {
-        await using result = await dockerSpec('mind on disk')
-            .project('docker-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('mind on disk').project('docker-pilot').exec('up').run();
 
         expect(result.exitCode).toBe(0);
 

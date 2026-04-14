@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { dockerSpec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../setup/cli.specification.js';
 
 /**
  * Multi-agent colony (one world, multiple agents) under the docker()
@@ -28,7 +28,7 @@ import { dockerSpec } from '../../../setup/cli.specification.js';
  */
 describe('colony multi-agent', () => {
     test('up spawns one world containing two agents', async () => {
-        await using result = await dockerSpec('colony up')
+        await using result = await spec('colony up')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
@@ -58,7 +58,7 @@ describe('colony multi-agent', () => {
     });
 
     test('agent ls --json and world list --json both show the full colony', async () => {
-        await using result = await dockerSpec('colony ls')
+        await using result = await spec('colony ls')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
@@ -83,7 +83,7 @@ describe('colony multi-agent', () => {
     });
 
     test('destroying the colony cleans up both agents at once', async () => {
-        await using result = await dockerSpec('colony down')
+        await using result = await spec('colony down')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
