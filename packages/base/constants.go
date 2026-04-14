@@ -4,8 +4,6 @@ package base
 const (
 	DefaultCPU      = 1
 	DefaultMemory   = "512m"
-	DefaultDisk     = "2g"
-	DefaultTimeout  = "30m"
 	DefaultMaxProcs = 128
 	DefaultBackend  = "docker"
 	WorldImage = "spwn/world:latest"

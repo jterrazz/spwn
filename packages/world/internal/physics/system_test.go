@@ -17,7 +17,6 @@ func TestAgentsBookContent(t *testing.T) {
 		Tools:  []string{"bash", "git"},
 		CPU:       2,
 		Memory:    "4g",
-		Timeout:   "30m",
 	})
 
 	// Must contain key sections that make up the "Agent Operating Manual"
@@ -96,7 +95,6 @@ func TestArchitectSkillsExist(t *testing.T) {
 		Tools:  []string{"bash", "git", "docker"},
 		CPU:       4,
 		Memory:    "8g",
-		Timeout:   "60m",
 	})
 
 	// 1. World Management skill

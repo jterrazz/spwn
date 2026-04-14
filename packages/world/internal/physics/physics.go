@@ -15,11 +15,9 @@ func GeneratePhysics(m models.Manifest) string {
 
 	// Constants
 	sb.WriteString("## Constants\n")
-	sb.WriteString(fmt.Sprintf("CPU: %d core(s) | Memory: %s | Disk: %s | Timeout: %s\n\n",
+	sb.WriteString(fmt.Sprintf("CPU: %d core(s) | Memory: %s\n\n",
 		m.Physics.Constants.CPU,
 		m.Physics.Constants.Memory,
-		m.Physics.Constants.Disk,
-		m.Physics.Constants.Timeout,
 	))
 
 	// Laws

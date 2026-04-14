@@ -16,7 +16,6 @@ func TestGenerateChiefContext(t *testing.T) {
 		Tools:  []string{"bash", "git", "node"},
 		CPU:       2,
 		Memory:    "4g",
-		Timeout:   "30m",
 		OtherAgents: []AgentInfo{
 			{Name: "neo", Role: "worker"},
 			{Name: "trinity", Role: "worker"},
@@ -36,7 +35,6 @@ func TestGenerateChiefContext(t *testing.T) {
 		"bash, git, node":  "missing tools",
 		"2 cpu":            "missing CPU",
 		"4g":               "missing memory",
-		"30m":              "missing timeout",
 	}
 
 	for want, msg := range checks {
@@ -60,7 +58,6 @@ func TestGenerateWorkerContext(t *testing.T) {
 		Tools:  []string{"bash", "git"},
 		CPU:       2,
 		Memory:    "4g",
-		Timeout:   "30m",
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
 			{Name: "trinity", Role: "worker"},
@@ -165,7 +162,6 @@ func TestGenerateArchitectContext_ContainsAllSections(t *testing.T) {
 		Tools:  []string{"bash", "git"},
 		CPU:       4,
 		Memory:    "8g",
-		Timeout:   "60m",
 	})
 
 	sections := []string{

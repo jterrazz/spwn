@@ -60,11 +60,13 @@ type World struct {
 }
 
 // Physics mirrors the resource-limit knobs callers can set on a world.
+// Only fields Docker can actually enforce live here: CPU (--cpus) and
+// Memory (-m). Disk quotas and wall-clock timeouts are not yet
+// enforced — they require Docker storage-opt or external supervision
+// and are out of scope for now.
 type Physics struct {
-	CPU     int    `yaml:"cpu,omitempty"`
-	Memory  string `yaml:"memory,omitempty"`
-	Disk    string `yaml:"disk,omitempty"`
-	Timeout string `yaml:"timeout,omitempty"`
+	CPU    int    `yaml:"cpu,omitempty"`
+	Memory string `yaml:"memory,omitempty"`
 }
 
 // LoadPath reads and parses spwn.yaml from an explicit file path.

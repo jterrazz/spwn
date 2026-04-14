@@ -112,8 +112,6 @@ physics:
   constants:
     cpu: 1           # CPU cores
     memory: 512m     # RAM limit (512m, 1g, 4g, etc.)
-    disk: 2g         # Disk limit
-    timeout: 30m     # Max session duration
 
 # Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
 tools:
@@ -145,8 +143,6 @@ physics:
   constants:
     cpu: 1
     memory: 512m
-    disk: 2g
-    timeout: 30m
 
 tools:
   - "@spwn/unix"
@@ -183,12 +179,6 @@ func ApplyDefaults(m *models.Manifest) {
 	}
 	if m.Physics.Constants.Memory == "" {
 		m.Physics.Constants.Memory = base.DefaultMemory
-	}
-	if m.Physics.Constants.Disk == "" {
-		m.Physics.Constants.Disk = base.DefaultDisk
-	}
-	if m.Physics.Constants.Timeout == "" {
-		m.Physics.Constants.Timeout = base.DefaultTimeout
 	}
 }
 

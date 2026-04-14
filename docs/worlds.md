@@ -114,15 +114,19 @@ worlds:
     agents: [neo]
     workspaces: [.]
     physics:
-      cpu: 2          # CPU cores
-      memory: 2g      # RAM
-      disk: 4g        # rootfs cap
-      timeout: 30m    # wall clock per session
+      cpu: 2          # CPU cores  (Docker --cpus)
+      memory: 2g      # RAM limit  (Docker -m)
 ```
 
-These are kernel-enforced. An agent can't burn your battery or fill
-your disk by accident. When `physics:` is omitted, host defaults
-apply.
+These are the Docker-enforceable knobs: CPU (`--cpus`) and memory
+(`-m`). Network mode (bridge, outbound enabled) and the ephemeral,
+read-only-by-default filesystem are part of the same contract and are
+also enforced by the container runtime.
+
+Disk quotas and wall-clock timeouts are **not yet enforced** — they
+would require Docker `storage-opt` (devicemapper-only, not portable)
+or external supervision machinery, so they are out of scope for now.
+When `physics:` is omitted, host defaults apply.
 
 ## Spawning a world
 

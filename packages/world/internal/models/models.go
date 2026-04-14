@@ -16,11 +16,10 @@ type PhysicsManifest struct {
 }
 
 // ConstantsManifest defines fixed resource limits.
+// Only Docker-enforceable fields live here: CPU (--cpus) and Memory (-m).
 type ConstantsManifest struct {
-	CPU     int    `yaml:"cpu"`
-	Memory  string `yaml:"memory"`
-	Disk    string `yaml:"disk"`
-	Timeout string `yaml:"timeout"`
+	CPU    int    `yaml:"cpu"`
+	Memory string `yaml:"memory"`
 }
 
 // Workspace is a single host directory mounted into a world. A world may have

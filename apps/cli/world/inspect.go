@@ -45,11 +45,9 @@ var inspectCmd = &cobra.Command{
 		}
 
 		s.Blank()
-		s.Info("Constants:", fmt.Sprintf("CPU: %d core(s) | Memory: %s | Disk: %s | Timeout: %s",
+		s.Info("Constants:", fmt.Sprintf("CPU: %d core(s) | Memory: %s",
 			u.Manifest.Physics.Constants.CPU,
 			u.Manifest.Physics.Constants.Memory,
-			u.Manifest.Physics.Constants.Disk,
-			u.Manifest.Physics.Constants.Timeout,
 		))
 
 		s.Info("Laws:", "Network: bridge")

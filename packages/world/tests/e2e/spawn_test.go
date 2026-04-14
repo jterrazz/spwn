@@ -92,8 +92,6 @@ physics:
   constants:
     cpu: 2
     memory: 1g
-    disk: 4g
-    timeout: 60m
 tools:
   - "@spwn/unix"
 `).
@@ -104,7 +102,6 @@ tools:
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.FileContains("/world/physics.md", "2 core(s)")
 		c.FileContains("/world/physics.md", "1g")
-		c.FileContains("/world/physics.md", "60m")
 	})
 }
 

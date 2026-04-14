@@ -59,7 +59,7 @@ tools:
 }
 
 func TestConfig_CustomCPUReflectedInPhysics(t *testing.T) {
-	// GIVEN a config with custom CPU, memory, disk, and timeout
+	// GIVEN a config with custom CPU and memory
 	// WHEN a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
@@ -67,8 +67,6 @@ physics:
   constants:
     cpu: 4
     memory: 2g
-    disk: 8g
-    timeout: 120m
 `).
 		NoAgent().
 		Execute()
@@ -77,8 +75,6 @@ physics:
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.FileContains("/world/physics.md", "4 core(s)")
 		c.FileContains("/world/physics.md", "2g")
-		c.FileContains("/world/physics.md", "8g")
-		c.FileContains("/world/physics.md", "120m")
 	})
 }
 

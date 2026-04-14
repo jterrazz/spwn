@@ -18,7 +18,7 @@ func TestGeneratePhysics(t *testing.T) {
 			manifest: models.Manifest{
 				Physics: models.PhysicsManifest{
 					Constants: models.ConstantsManifest{
-						CPU: 2, Memory: "1g", Disk: "5g", Timeout: "1h",
+						CPU: 2, Memory: "1g",
 					},
 				},
 			},
@@ -27,8 +27,6 @@ func TestGeneratePhysics(t *testing.T) {
 				"## Constants",
 				"2 core(s)",
 				"1g",
-				"5g",
-				"1h",
 				"## Laws",
 				"bridge (outbound access enabled)",
 				"## Tools",

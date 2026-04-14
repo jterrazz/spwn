@@ -114,10 +114,8 @@ func resolveProjectWorld(p *manifest.Project, name string) (*projectWorld, error
 	if w.Physics != nil {
 		m.Physics = world.PhysicsManifest{
 			Constants: world.ConstantsManifest{
-				CPU:     w.Physics.CPU,
-				Memory:  w.Physics.Memory,
-				Disk:    w.Physics.Disk,
-				Timeout: w.Physics.Timeout,
+				CPU:    w.Physics.CPU,
+				Memory: w.Physics.Memory,
 			},
 		}
 	}

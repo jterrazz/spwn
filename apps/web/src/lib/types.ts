@@ -7,7 +7,6 @@ export interface Agent {
 export interface WorldManifest {
     cpu?: string;
     memory?: string;
-    timeout?: string;
     elements?: string[];
 }
 

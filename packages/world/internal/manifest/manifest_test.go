@@ -78,22 +78,14 @@ func TestApplyDefaults(t *testing.T) {
 		if m.Physics.Constants.Memory == "" {
 			t.Error("Memory should not be empty after ApplyDefaults")
 		}
-		if m.Physics.Constants.Disk == "" {
-			t.Error("Disk should not be empty after ApplyDefaults")
-		}
-		if m.Physics.Constants.Timeout == "" {
-			t.Error("Timeout should not be empty after ApplyDefaults")
-		}
 	})
 
 	t.Run("does_not_overwrite_set_values", func(t *testing.T) {
 		m := models.Manifest{
 			Physics: models.PhysicsManifest{
 				Constants: models.ConstantsManifest{
-					CPU:     4,
-					Memory:  "2g",
-					Disk:    "10g",
-					Timeout: "1h",
+					CPU:    4,
+					Memory: "2g",
 				},
 			},
 		}
@@ -104,12 +96,6 @@ func TestApplyDefaults(t *testing.T) {
 		}
 		if m.Physics.Constants.Memory != "2g" {
 			t.Errorf("Memory = %q, want %q", m.Physics.Constants.Memory, "2g")
-		}
-		if m.Physics.Constants.Disk != "10g" {
-			t.Errorf("Disk = %q, want %q", m.Physics.Constants.Disk, "10g")
-		}
-		if m.Physics.Constants.Timeout != "1h" {
-			t.Errorf("Timeout = %q, want %q", m.Physics.Constants.Timeout, "1h")
 		}
 	})
 }

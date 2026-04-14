@@ -31,12 +31,6 @@ func TestDefaultConstants_Sanity(t *testing.T) {
 	if DefaultMemory == "" {
 		t.Error("DefaultMemory is empty")
 	}
-	if DefaultDisk == "" {
-		t.Error("DefaultDisk is empty")
-	}
-	if DefaultTimeout == "" {
-		t.Error("DefaultTimeout is empty")
-	}
 	if DefaultBackend == "" {
 		t.Error("DefaultBackend is empty")
 	}
