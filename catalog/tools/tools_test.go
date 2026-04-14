@@ -164,24 +164,21 @@ func TestRegisterDefaults_AllRegistered(t *testing.T) {
 	}
 }
 
-func TestResolve_FullWorldStack(t *testing.T) {
+func TestResolve_FullToolStack(t *testing.T) {
 	reg := ib.NewRegistry()
 	RegisterDefaults(reg)
 
-	tools, err := reg.Resolve([]string{"@spwn/unix", "@spwn/git", "@spwn/node", "@spwn/claude-code", "@spwn/cli", "@spwn/qmd"})
+	tools, err := reg.Resolve([]string{"@spwn/unix", "@spwn/git", "@spwn/node", "@spwn/cli", "@spwn/qmd"})
 	if err != nil {
 		t.Fatalf("resolve failed: %v", err)
 	}
 
-	// @spwn/node must come before @spwn/claude-code and @spwn/qmd
+	// @spwn/node must come before @spwn/qmd (qmd depends on node)
 	idx := make(map[string]int)
 	for i, tool := range tools {
 		idx[tool.Name()] = i
 	}
 
-	if idx["@spwn/node"] >= idx["@spwn/claude-code"] {
-		t.Error("@spwn/node must come before @spwn/claude-code")
-	}
 	if idx["@spwn/node"] >= idx["@spwn/qmd"] {
 		t.Error("@spwn/node must come before @spwn/qmd")
 	}

@@ -8,6 +8,7 @@ require (
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/foundation v0.0.0
 	spwn.sh/packages/imagebuilder v0.0.0
+	spwn.sh/catalog/runtimes v0.0.0
 	spwn.sh/catalog/templates v0.0.0
 	spwn.sh/catalog/tools v0.0.0
 )
@@ -48,6 +49,7 @@ replace (
 	spwn.sh/packages/agent => ../agent
 	spwn.sh/packages/foundation => ../foundation
 	spwn.sh/packages/imagebuilder => ../imagebuilder
+	spwn.sh/catalog/runtimes => ../../catalog/runtimes
 	spwn.sh/catalog/templates => ../../catalog/templates
 	spwn.sh/catalog/tools => ../../catalog/tools
 )

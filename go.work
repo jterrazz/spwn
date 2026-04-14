@@ -11,4 +11,5 @@ use (
 	./packages/world
 	./catalog/templates
 	./catalog/tools
+	./catalog/runtimes
 )

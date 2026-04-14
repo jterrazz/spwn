@@ -1,15 +1,19 @@
 package cli
 
 import (
+	"spwn.sh/catalog/runtimes"
 	"spwn.sh/catalog/tools"
 )
 
 // catalogToolNames returns the @scope/name identifier of every
-// built-in tool pack shipped with spwn. Used to power the "did you
-// mean X?" hints in `spwn check`.
+// built-in tool + runtime shipped with spwn. Used to power the
+// "did you mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
-	out := make([]string, 0, len(tools.All))
+	out := make([]string, 0, len(tools.All)+len(runtimes.All))
 	for _, t := range tools.All {
+		out = append(out, t.Name())
+	}
+	for _, t := range runtimes.All {
 		out = append(out, t.Name())
 	}
 	return out

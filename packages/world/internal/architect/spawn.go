@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
+	runtimes "spwn.sh/catalog/runtimes"
 	tools "spwn.sh/catalog/tools"
 	ib "spwn.sh/packages/imagebuilder"
 	"spwn.sh/packages/imagebuilder/base"
@@ -160,7 +161,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		// Build image using imagebuilder with manifest tools
 		reg := ib.NewRegistry()
 		if err := tools.RegisterDefaults(reg); err != nil {
-			return nil, fmt.Errorf("register catalog: %w", err)
+			return nil, fmt.Errorf("register tools: %w", err)
+		}
+		if err := runtimes.RegisterDefaults(reg); err != nil {
+			return nil, fmt.Errorf("register runtimes: %w", err)
 		}
 		builder := ib.New(reg, a.backend)
 
