@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 )
 
 var (
@@ -37,7 +37,7 @@ var exportCmd = &cobra.Command{
 		s.Blank()
 		s.Start(fmt.Sprintf("Exporting agent %s...", name))
 
-		archivePath, err := mind.ExportMind(name, exportOutput, exportExclude)
+		archivePath, err := agent.ExportMind(name, exportOutput, exportExclude)
 		if err != nil {
 			return s.FailHint("Export failed", err,
 				fmt.Sprintf("Check that agent %q exists with \"spwn agent ls\"", name))

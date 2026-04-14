@@ -7,6 +7,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
 	spwn.sh/packages/activity v0.0.0
+	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/base v0.0.0
 	spwn.sh/packages/catalog v0.0.0
@@ -15,7 +16,6 @@ require (
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mailbox v0.0.0
 	spwn.sh/packages/migration v0.0.0
-	spwn.sh/packages/mind v0.0.0
 	spwn.sh/packages/paths v0.0.0
 	spwn.sh/packages/project v0.0.0
 	spwn.sh/packages/version v0.0.0
@@ -58,6 +58,7 @@ require (
 
 replace (
 	spwn.sh/packages/activity => ../../packages/activity
+	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/auth => ../../packages/auth
 	spwn.sh/packages/base => ../../packages/base
 	spwn.sh/packages/catalog => ../../packages/catalog
@@ -66,7 +67,6 @@ replace (
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/mailbox => ../../packages/mailbox
 	spwn.sh/packages/migration => ../../packages/migration
-	spwn.sh/packages/mind => ../../packages/mind
 	spwn.sh/packages/paths => ../../packages/paths
 	spwn.sh/packages/project => ../../packages/project
 	spwn.sh/packages/version => ../../packages/version

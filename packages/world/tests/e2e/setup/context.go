@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world"
 )
 
@@ -94,7 +94,7 @@ func (tc *TestContext) LoadState() []world.World {
 // InitAgent creates an agent Mind in the temp directory.
 func (tc *TestContext) InitAgent(name string) {
 	tc.T.Helper()
-	_, err := mind.InitMind(name)
+	_, err := agent.InitMind(name)
 	if err != nil {
 		tc.T.Fatalf("Failed to init agent %q: %v", name, err)
 	}

@@ -4,7 +4,7 @@
 // Each organization defines a set of roles with levels, command relationships,
 // and permissions that govern how agents interact within a world.
 
-package mind
+package agent
 
 import (
 	"fmt"

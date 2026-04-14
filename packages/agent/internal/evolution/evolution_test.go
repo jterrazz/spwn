@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/mind/internal/journal"
+	"spwn.sh/packages/agent/internal/journal"
 )
 
 // --- Reflect tests ---

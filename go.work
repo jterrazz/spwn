@@ -3,6 +3,7 @@ go 1.25.0
 use (
 	./apps/cli
 	./packages/activity
+	./packages/agent
 	./packages/auth
 	./packages/base
 	./packages/catalog
@@ -10,10 +11,9 @@ use (
 	./packages/ids
 	./packages/image
 	./packages/mailbox
-	./packages/project
 	./packages/migration
-	./packages/mind
 	./packages/paths
+	./packages/project
 	./packages/version
 	./packages/world
 )

@@ -11,7 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/paths"
 )
@@ -137,7 +137,7 @@ var statusCmd = &cobra.Command{
 		}
 
 		// Agents
-		agentList, _ := mind.ListAgents()
+		agentList, _ := agent.ListAgents()
 
 		// Agent → world mapping
 		worldMap := make(map[string]*world.World)
@@ -160,7 +160,7 @@ var statusCmd = &cobra.Command{
 		}
 
 		// Idle agents (not attached to any active world)
-		var idleAgents []mind.Info
+		var idleAgents []agent.Info
 		for _, a := range agentList {
 			if _, attached := worldMap[a.Name]; !attached {
 				idleAgents = append(idleAgents, a)

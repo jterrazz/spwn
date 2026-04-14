@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/mind"
+	"spwn.sh/packages/agent"
 )
 
 // Cmd is the top-level `spwn team` command.
@@ -57,15 +57,15 @@ var newCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
 		name := args[0]
-		slug := mind.Slugify(name)
+		slug := agent.Slugify(name)
 
-		t := mind.Team{
+		t := agent.Team{
 			Slug:        slug,
 			Name:        name,
 			Color:       newColor,
 			Description: newDesc,
 		}
-		if err := mind.CreateTeam(t); err != nil {
+		if err := agent.CreateTeam(t); err != nil {
 			return s.FailHint("Team creation failed", err, "Choose a different name")
 		}
 
@@ -83,7 +83,7 @@ var lsCmd = &cobra.Command{
 	Aliases: []string{"list"},
 	Short:   "List all teams",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		teams, err := mind.ListTeams()
+		teams, err := agent.ListTeams()
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ var lsCmd = &cobra.Command{
 			return nil
 		}
 		for _, t := range teams {
-			members, _ := mind.TeamMembers(t.Slug)
+			members, _ := agent.TeamMembers(t.Slug)
 			line := fmt.Sprintf("  ●  %-20s %d agent(s)", t.Name, len(members))
 			if len(members) > 0 {
 				line += "   " + strings.Join(members, ", ")
@@ -115,7 +115,7 @@ var editCmd = &cobra.Command{
 		s := newStepper(cmd)
 		slug := args[0]
 
-		t, err := mind.GetTeam(slug)
+		t, err := agent.GetTeam(slug)
 		if err != nil {
 			return s.FailHint("Team not found", err, "Run \"spwn team ls\" to see all teams")
 		}
@@ -141,7 +141,7 @@ var editCmd = &cobra.Command{
 			return nil
 		}
 
-		if err := mind.UpdateTeam(*t); err != nil {
+		if err := agent.UpdateTeam(*t); err != nil {
 			return err
 		}
 		s.Blank()
@@ -167,7 +167,7 @@ var rmCmd = &cobra.Command{
 		s := newStepper(cmd)
 		slug := args[0]
 
-		if err := mind.DeleteTeam(slug); err != nil {
+		if err := agent.DeleteTeam(slug); err != nil {
 			return s.FailHint("Delete failed", err, "Run \"spwn team ls\" to see teams")
 		}
 
@@ -197,7 +197,7 @@ var assignCmd = &cobra.Command{
 			teamSlug = args[1]
 		}
 
-		if err := mind.SetAgentTeam(agentName, teamSlug); err != nil {
+		if err := agent.SetAgentTeam(agentName, teamSlug); err != nil {
 			return s.FailHint("Assign failed", err, "Check agent exists")
 		}
 
@@ -225,7 +225,7 @@ var membersCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		slug := args[0]
-		members, err := mind.TeamMembers(slug)
+		members, err := agent.TeamMembers(slug)
 		if err != nil {
 			return err
 		}
