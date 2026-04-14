@@ -6,10 +6,9 @@ import { spec } from '../../../setup/cli.specification.js';
  * Error-handling E2E — one test per error shape, each paired with a
  * locked-in stderr snapshot under `./expected/stderr/<name>.txt`.
  *
- * spwn writes the "→ Doing X..." / "✗ Failed ..." banners to stderr.
- * `@jterrazz/test`'s ExecAdapter discards stderr on exit 0, so we can
- * only snapshot on the non-zero path — which is exactly what we want
- * here anyway.
+ * spwn writes the "→ Doing X..." / "✗ Failed ..." banners to stderr,
+ * which the @jterrazz/test runner captures on both the success and
+ * failure paths.
  *
  * Regenerate snapshots with:
  *   JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run e2e/errors/errors
@@ -42,14 +41,10 @@ describe('error handling', () => {
     });
 
     test('agent dream non-existent agent skips gracefully', async () => {
-        /*
-         * Success path — stderr is discarded by execSync so we can only
-         * assert on the exit code here (weakened from the legacy test,
-         * which matched on "Skipped  no journal entries" wording).
-         */
         const result = await isolated('dream missing').exec('agent dream nonexistent').run();
 
         expect(result.exitCode).toBe(0);
+        await result.stderr.toMatch('dream-missing.txt');
     });
 
     test('agent export non-existent agent', async () => {

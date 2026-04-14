@@ -10,11 +10,10 @@ import { spec } from '../../../setup/cli.specification.js';
  * suites are ported here; the Docker ones stay on the legacy helpers
  * (they rely on createTestContext / ctx.spwn).
  *
- * spwn's success path writes status banners to stderr, which the
- * `@jterrazz/test` ExecAdapter (execSync) discards on exit 0. As a
- * result, most success-path banners cannot be asserted on and the
- * tests collapse to exit-code smoke checks. Error-path stderr still
- * comes through because the adapter captures stderr on non-zero.
+ * spwn's success path writes status banners to stderr (Unix
+ * convention). Stable banners get stderr snapshots under
+ * `./expected/stderr/`; machine-dependent output (paths, ids) is
+ * matched with substrings against `result.stderr.text`.
  */
 
 const isolated = (label: string) =>
@@ -23,10 +22,10 @@ const isolated = (label: string) =>
 // ── Agent management (no Docker) ─────────────────────────────
 
 describe('CLI execution - agent commands', () => {
-    test("'spwn agent create' succeeds", async () => {
-        // Success banner goes to stderr — we only assert on exit code.
+    test("'spwn agent create testbot' prints the creation banner", async () => {
         const result = await isolated('agent create testbot').exec('agent create testbot').run();
         expect(result.exitCode).toBe(0);
+        await result.stderr.toMatch('agent-create-testbot.txt');
     });
 
     test("'spwn agent rm' on missing agent errors cleanly", async () => {
@@ -44,9 +43,10 @@ describe('CLI execution - agent commands', () => {
         expect(combined).not.toContain('goroutine ');
     });
 
-    test("'spwn agent ls' runs on an empty home", async () => {
+    test("'spwn agent ls' on an empty home prints the empty state", async () => {
         const result = await isolated('agent ls empty').exec('agent ls').run();
         expect(result.exitCode).toBe(0);
+        await result.stderr.toMatch('agent-ls-empty.txt');
     });
 
     test("'spwn agent show' on nonexistent agent errors cleanly", async () => {
@@ -98,21 +98,31 @@ describe('CLI execution - global flags', () => {
 // ── Status command ──────────────────────────────────────────
 
 describe('CLI execution - status command', () => {
-    test("'spwn status' runs without error after init", async () => {
+    test("'spwn status' runs cleanly after init", async () => {
         /*
-         * Both `init` and `status` render to stderr on success, so all
-         * we can check is that they exit zero. The richer status-output
-         * coverage lives in tests/e2e/status/status/*.
+         * Richer status-output coverage lives in
+         * tests/e2e/status/status/*. Here we just confirm both
+         * commands emit their stable banners.
          */
         const initResult = await isolated('init for status').exec('init').run();
         expect(initResult.exitCode).toBe(0);
+        // `init` banner includes the basename of the temp workdir,
+        // Which is not snapshot-stable (the transform only masks the
+        // Path prefix, not the basename). Assert on the marker.
+        expect(initResult.stderr.text).toContain('Initialised spwn project');
 
         const statusResult = await isolated('status after init').exec('status').run();
         expect(statusResult.exitCode).toBe(0);
+        const stderr = statusResult.stderr.text;
+        expect(stderr).toContain('Worlds');
+        expect(stderr).toContain('Architect');
     });
 
-    test("'spwn auth' runs without error", async () => {
+    test("'spwn auth' from an empty project still renders the provider table", async () => {
         const result = await isolated('auth from execution').exec('auth').run();
         expect(result.exitCode).toBe(0);
+        // Provider table is keychain-dependent (see auth.e2e.test.ts),
+        // So we only assert on the stable header row here.
+        expect(result.stderr.text).toContain('PROVIDER');
     });
 });

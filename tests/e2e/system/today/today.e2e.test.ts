@@ -42,14 +42,17 @@ describe('agent mind structure', () => {
 });
 
 describe('CLI upgrade', () => {
-    test('upgrade --check exits cleanly', async () => {
+    test('upgrade --check queries the release feed and prints a version', async () => {
         // Given - the upgrade command hits the GitHub API to learn
-        // About the latest release. The output banner is written to
-        // Stderr and discarded on success by the ExecAdapter, so we
-        // Can only assert on the exit code here — the point of the
-        // Test is that `upgrade --check` itself does not crash.
+        // About the latest release. The latest version tag changes
+        // Over time and the network may be flaky on CI, so we do a
+        // Substring match on the stable portions of the banner
+        // Rather than a full snapshot.
         const result = await spec('upgrade check').project('empty').exec('upgrade --check').run();
 
         expect(result.exitCode).toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('Current version');
+        expect(stderr).toContain('Checking for updates');
     });
 });

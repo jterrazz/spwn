@@ -10,34 +10,41 @@ import { spec } from '../../../setup/cli.specification.js';
  * are made; the only subcommands we exercise are status / check /
  * help / logout, which are safe on a fresh home.
  *
- * Note: `@jterrazz/test`'s ExecAdapter uses `execSync`, which discards
- * stderr on exit 0. spwn renders provider tables to stderr, so those
- * status tests collapse to exit-code smoke checks. The --help variants
- * go through cobra which writes to stdout, so they keep their content
- * assertions.
+ * `spwn auth` renders its provider table to stderr (Unix convention
+ * for status output). The table content is keychain/OS-dependent, so
+ * we assert on intent-level substrings against `result.stderr.text`
+ * rather than snapshotting. The `auth logout` messages are stable
+ * and get full stderr snapshots.
  */
 
 const isolated = (label: string) =>
     spec(label).project('empty').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
 
 describe('CLI - auth command', () => {
-    /*
-     * `spwn auth` and `spwn auth check` render the provider table to
-     * stderr (confirmed via `spwn auth 2>/dev/null`). On exit 0,
-     * ExecAdapter discards stderr, so the two tests below are weakened
-     * to smoke checks. Kept because the "runs without crashing"
-     * coverage is still worth something.
-     */
-    test("'spwn auth' runs without crashing", async () => {
+    test("'spwn auth' prints the provider status table", async () => {
         const result = await isolated('auth status').exec('auth').run();
 
+        // The provider table is keychain-dependent (the anthropic row
+        // Reads Claude Code's real keychain entry on the dev box) so
+        // We assert on the stable header row rather than a snapshot.
         expect(result.exitCode).toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('PROVIDER');
+        expect(stderr).toContain('STATUS');
+        expect(stderr).toContain('anthropic');
+        expect(stderr).toContain('openai');
     });
 
-    test("'spwn auth check' runs without crashing", async () => {
+    test("'spwn auth check' validates credentials against each provider", async () => {
         const result = await isolated('auth check').exec('auth check').run();
 
+        // Validation output is keychain/network-dependent. Intent: the
+        // Validate banner fires and the provider table is rendered.
         expect(result.exitCode).toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('Validating credentials');
+        expect(stderr).toContain('PROVIDER');
+        expect(stderr).toContain('anthropic');
     });
 
     test("'spwn auth --help' shows subcommands", async () => {
@@ -79,27 +86,20 @@ describe('CLI - auth command', () => {
      */
     test.skip("'spwn auth login' handles non-interactive gracefully", () => {});
 
-    test("'spwn auth logout' removes cached token", async () => {
-        /*
-         * Non-zero from "nothing to remove" is acceptable; we just
-         * assert it does not crash with a stack trace.
-         */
+    test("'spwn auth logout' on a fresh home emits the no-op banner", async () => {
         const result = await isolated('auth logout').exec('auth logout').run();
 
-        expect(result.exitCode).toBeDefined();
-        expect(typeof result.exitCode).toBe('number');
-        const combined = result.stdout.text + result.stderr.text;
-        expect(combined).not.toMatch(/at\s+\S+\s+\(/);
-        expect(combined).not.toContain('panic:');
-        expect(combined).not.toContain('goroutine ');
+        expect(result.exitCode).toBe(0);
+        await result.stderr.toMatch('logout-noop.txt');
     });
 
     test("'spwn auth logout' is idempotent", async () => {
         await isolated('auth logout 1').exec('auth logout').run();
         const result2 = await isolated('auth logout 2').exec('auth logout').run();
 
-        expect(result2.exitCode).toBeDefined();
-        const combined = result2.stdout.text + result2.stderr.text;
-        expect(combined).not.toMatch(/at\s+\S+\s+\(/);
+        // The second logout sees the same state as the first and emits
+        // The same no-op banner.
+        expect(result2.exitCode).toBe(0);
+        await result2.stderr.toMatch('logout-noop.txt');
     });
 });

@@ -1,0 +1,5 @@
+
+  → Dreaming for agent "nonexistent"...
+  Skipped      no journal entries
+  Hint         Journal entries are created when worlds are destroyed. Use "spwn down <world>" first.
+

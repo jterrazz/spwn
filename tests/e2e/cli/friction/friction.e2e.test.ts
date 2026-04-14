@@ -6,11 +6,6 @@ import { spec } from '../../../setup/cli.specification.js';
  * Zero-friction UX — the error paths and nudges the CLI emits when the
  * user hits a rough edge. These are loose assertions on substrings of
  * the error messages; full snapshots are reserved for happy paths.
- *
- * Error messages are written to stderr; the @jterrazz/test ExecAdapter
- * only captures stderr when the command exits non-zero, so tests that
- * need to read a successful command's stderr fall back to asserting on
- * exitCode only.
  */
 
 describe('zero-friction UX', () => {
@@ -49,11 +44,11 @@ describe('zero-friction UX', () => {
             .exec('architect stop')
             .run();
 
-        // Then - exits zero. The "not running" banner is on stderr and
-        // The ExecAdapter discards stderr on success, so we only
-        // Assert the exit code here — the point of the test is that
-        // Stopping an already-stopped daemon is not an error.
+        // Then - exits zero and the "not running" banner is rendered
+        // To stderr. The point of the test is that stopping an
+        // Already-stopped daemon is not an error.
         expect(result.exitCode).toBe(0);
+        await result.stderr.toMatch('architect-stop-not-running.txt');
     });
 
     test('inspect nonexistent world gives ls hint', async () => {
