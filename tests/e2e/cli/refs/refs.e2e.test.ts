@@ -1,0 +1,46 @@
+import { describe, expect, test } from 'vitest';
+
+import { spec } from '../../../setup/cli.specification.js';
+
+/**
+ * Tool reference classification by `spwn check`:
+ *
+ *   @spwn/<name>      → built-in tool pack (must exist)
+ *   @<owner>/<name>   → remote registry (not yet supported)
+ *   <name>            → local pack under spwn/tools/<name>
+ *
+ * The canonical success path is already covered by the check suite via
+ * the single-agent fixture. These tests pin the classifier edges: a
+ * mixed @spwn + local project should pass, a registry ref should fail
+ * with explicit wording quoting the offending ref.
+ */
+
+describe('spwn check: tool ref classification', () => {
+    test('accepts mixed @spwn and local refs without error', async () => {
+        // Given - the mixed-tool-refs fixture declares @spwn/unix plus
+        // A local tool `my-local-tool` that actually exists on disk
+        // Under spwn/tools/.
+        const result = await spec('mixed refs').project('mixed-tool-refs').exec('check').run();
+
+        // Then - check passes and neither the registry nor the
+        // "does not exist" errors are raised.
+        expect(result.exitCode, `output:\n${result.stdout.text}`).toBe(0);
+        const out = result.stdout.text + result.stderr.text;
+        expect(out).not.toContain('remote registries are not yet supported');
+        expect(out).not.toContain('does not exist');
+    });
+
+    test('rejects @<owner>/<name> registry refs with explicit wording', async () => {
+        // Given - check-registry-tool has tools: ["@jterrazz/foo"]
+        const result = await spec('registry ref')
+            .project('check-registry-tool')
+            .exec('check')
+            .run();
+
+        // Then - exits non-zero and the error quotes the offending ref
+        expect(result.exitCode).not.toBe(0);
+        const out = result.stdout.text + result.stderr.text;
+        expect(out).toContain('remote registries are not yet supported');
+        expect(out).toContain('@jterrazz/foo');
+    });
+});

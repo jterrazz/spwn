@@ -1,0 +1,8 @@
+name: neo
+
+runtime:
+  backend: "@spwn/claude-code"
+
+tools:
+  - "@spwn/unix"
+  - "my-local-tool"

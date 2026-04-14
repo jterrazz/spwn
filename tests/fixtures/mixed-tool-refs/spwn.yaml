@@ -1,0 +1,7 @@
+version: 2
+name: mixed-tool-refs
+
+worlds:
+  default:
+    agents: [neo]
+    workspaces: [.]

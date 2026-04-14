@@ -1,0 +1,15 @@
+
+⬡ architect - your always-on world builder
+
+Usage:
+  spwn architect [command]
+
+Commands:
+  start                            Start the Architect daemon
+  stop                             Stop the Architect daemon
+  status                           Show status and active worlds
+  talk                             Talk to the Architect (Claude Code)
+  logs                             Show the Architect's event log
+
+Use "spwn architect <command> --help" for more information.
+
