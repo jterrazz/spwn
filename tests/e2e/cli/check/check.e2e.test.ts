@@ -83,6 +83,30 @@ describe('spwn check', () => {
         expect(combined).toContain('spwn.yaml#worlds.neo.agents');
     });
 
+    test('emits a JSON report for a valid project', async () => {
+        // Given - the frozen single-agent fixture
+        const result = await spec('check json valid')
+            .project('single-agent')
+            .exec('check --json')
+            .run();
+
+        // Then - exits zero and emits the canonical JSON envelope
+        expect(result.exitCode).toBe(0);
+        await result.json.toMatch('valid.json');
+    });
+
+    test('emits a JSON report listing rule violations', async () => {
+        // Given - check-invalid-tool references a nonexistent built-in
+        const result = await spec('check json invalid tool')
+            .project('check-invalid-tool')
+            .exec('check --json')
+            .run();
+
+        // Then - exits non-zero and the issue list is structurally stable
+        expect(result.exitCode).not.toBe(0);
+        await result.json.toMatch('invalid-tool.json');
+    });
+
     test('errors when run outside a spwn project', async () => {
         // Given - the empty fixture has no spwn.yaml anywhere up the tree
         const result = await spec('check no project').project('empty').exec('check').run();
