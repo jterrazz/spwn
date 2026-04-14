@@ -5,18 +5,18 @@
 // A spwn project is a directory tree that contains:
 //
 //	my-project/
-//	├── spwn.yaml           — the manifest (committed)
-//	├── spwn/               — committed project assets
+//	├── spwn.yaml           - the manifest (committed)
+//	├── spwn/               - committed project assets
 //	│   ├── agents/<name>/
 //	│   ├── worlds/<name>.yaml
 //	│   ├── tools/<name>/
 //	│   └── skills/<name>.md
-//	└── .spwn/              — gitignored local state
+//	└── .spwn/              - gitignored local state
 //	    └── state.json
 //
 // The manifest declares which world this project spawns and which
 // agents it contains. Everything referenced by name is resolved
-// relative to the project root — there is no cross-project lookup.
+// relative to the project root - there is no cross-project lookup.
 package manifest
 
 import (
@@ -30,7 +30,7 @@ import (
 // Manifest is the parsed spwn.yaml content.
 type Manifest = intmanifest.Manifest
 
-// Project is a loaded spwn project — manifest plus resolved references
+// Project is a loaded spwn project - manifest plus resolved references
 // to the agents and world it declares. Existence of each referenced
 // resource is recorded in the *Ref fields so callers can warn without
 // re-walking the tree.
@@ -67,7 +67,7 @@ type WorldRef struct {
 	Exists bool
 }
 
-// InitOpts configures Init. Zero-value is fine — all fields have sane
+// InitOpts configures Init. Zero-value is fine - all fields have sane
 // defaults.
 type InitOpts struct {
 	// Name overrides the default (filepath.Base of dir). Leave empty
@@ -145,7 +145,7 @@ type ValidateOpts struct {
 }
 
 // Validate runs every validation rule against the project and returns
-// the collected issues. It never returns an error — all problems
+// the collected issues. It never returns an error - all problems
 // surface as Issues with a Level. Callers decide what to do with
 // warnings vs errors.
 func Validate(p *Project, opts ...ValidateOpts) []Issue {
@@ -177,7 +177,7 @@ type BuildMetadata = build.Metadata
 // BuildOpts configures Build.
 type BuildOpts struct {
 	// ImageDigest pins the Docker image produced for this build.
-	// Empty means "no image was built" — the artifact is still
+	// Empty means "no image was built" - the artifact is still
 	// valid, it just records no image reference.
 	ImageDigest string
 }
@@ -188,7 +188,7 @@ type BuildOpts struct {
 // tar and ship.
 //
 // Build does NOT validate. Callers should run Validate first and
-// abort on errors — Build will happily flatten a broken project,
+// abort on errors - Build will happily flatten a broken project,
 // which is useful when the user wants to inspect the artifact for
 // debugging but not when they want a spawnable result.
 func Build(p *Project, opts ...BuildOpts) (*BuildResult, error) {

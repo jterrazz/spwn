@@ -31,7 +31,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 	// Update status
 	a.state.UpdateStatus(worldID, models.StatusRunning)
 
-	// Session management — claude-code is the only runtime
+	// Session management - claude-code is the only runtime
 	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
 		AgentName: agentName,
 		WorldID:   worldID,
@@ -50,7 +50,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 
 	duration := time.Since(startTime)
 
-	// Save session + journal (best-effort) — both live in the agent's
+	// Save session + journal (best-effort) - both live in the agent's
 	// persistent home dir, addressed by name.
 	agentPath := agent.AgentDir(agentName)
 	sessID := agent.DeterministicSessionID(agentName, worldID)

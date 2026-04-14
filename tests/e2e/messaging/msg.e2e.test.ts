@@ -6,7 +6,7 @@ import {
 } from "../../setup/spwn.specification.js";
 import { expectLine, stripAnsi } from "../../setup/output-helpers.js";
 
-describe("messaging — spwn agent send/inbox", () => {
+describe("messaging - spwn agent send/inbox", () => {
   let ctx: TestContext;
 
   afterEach(() => {
@@ -23,7 +23,7 @@ describe("messaging — spwn agent send/inbox", () => {
     const id = parseWorldId(spawn.output)!;
     expect(id).toBeTruthy();
 
-    // WHEN — sending a message
+    // WHEN - sending a message
     const result = ctx.spwn([
       "agent",
       "send",
@@ -33,7 +33,7 @@ describe("messaging — spwn agent send/inbox", () => {
       "hello world",
     ]);
 
-    // THEN — message sent
+    // THEN - message sent
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /[Ss]ent message/);
   });
@@ -43,10 +43,10 @@ describe("messaging — spwn agent send/inbox", () => {
     ctx.spwn(["init"]);
     ctx.spwn(["world", "up", "--agent", "neo", "-w", ctx.home], 60_000);
 
-    // WHEN — sending without --from
+    // WHEN - sending without --from
     const result = ctx.spwn(["agent", "send", "neo", "hi from default"]);
 
-    // THEN — succeeds
+    // THEN - succeeds
     expect(result.exitCode).toBe(0);
   });
 
@@ -64,10 +64,10 @@ describe("messaging — spwn agent send/inbox", () => {
       "inbox test",
     ]);
 
-    // WHEN — checking inbox
+    // WHEN - checking inbox
     const result = ctx.spwn(["agent", "inbox", "neo"]);
 
-    // THEN — shows the message
+    // THEN - shows the message
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("morpheus");

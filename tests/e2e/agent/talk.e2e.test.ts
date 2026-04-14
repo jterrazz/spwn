@@ -18,7 +18,7 @@ describe("agent talk", () => {
   });
 
   test("talk sees /workspace files", () => {
-    // GIVEN — a world with an agent and workspace
+    // GIVEN - a world with an agent and workspace
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -27,13 +27,13 @@ describe("agent talk", () => {
     );
     expect(spawnResult.exitCode).toBe(0);
 
-    // WHEN — talking to the agent about the workspace
+    // WHEN - talking to the agent about the workspace
     const talkResult = ctx.spwn(
       ["agent", "talk", "neo", "List files in /workspace. Just the filenames, one per line."],
       60_000,
     );
 
-    // THEN — the agent responds with world context
+    // THEN - the agent responds with world context
     expect(talkResult.exitCode).toBe(0);
     expectLine(talkResult.output, /neo/);
     expectLine(talkResult.output, /World/);
@@ -42,7 +42,7 @@ describe("agent talk", () => {
   });
 
   test("talk can be called multiple times on same world", () => {
-    // GIVEN — a world with an agent
+    // GIVEN - a world with an agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -51,7 +51,7 @@ describe("agent talk", () => {
     );
     expect(spawnResult.exitCode).toBe(0);
 
-    // WHEN — talking twice
+    // WHEN - talking twice
     const talk1 = ctx.spwn(
       ["agent", "talk", "neo", "hello"],
       60_000,
@@ -61,7 +61,7 @@ describe("agent talk", () => {
       60_000,
     );
 
-    // THEN — both succeed (agent is still available)
+    // THEN - both succeed (agent is still available)
     expect(talk1.exitCode).toBe(0);
     expect(talk2.exitCode).toBe(0);
     expectLine(talk1.output, /neo/);
@@ -69,21 +69,21 @@ describe("agent talk", () => {
   });
 
   test("talk to unattached agent fails", () => {
-    // GIVEN — an agent exists but is NOT in any world
+    // GIVEN - an agent exists but is NOT in any world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     ctx.spwn(["agent", "init", "orphan"]);
 
-    // WHEN — trying to talk
+    // WHEN - trying to talk
     const result = ctx.spwn(["agent", "talk", "orphan", "hello"]);
 
-    // THEN — error about no active world
+    // THEN - error about no active world
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /agent "orphan" is not in any active world/);
   });
 
   test("agent ls shows world association after spawn", () => {
-    // GIVEN — a world with an agent
+    // GIVEN - a world with an agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -92,17 +92,17 @@ describe("agent talk", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — listing agents
+    // WHEN - listing agents
     const listResult = ctx.spwn(["agent", "ls"]);
 
-    // THEN — agent shows its world and status in table
+    // THEN - agent shows its world and status in table
     expect(listResult.exitCode).toBe(0);
     expectTableHeader(listResult.output, ["NAME", "WORLD", "STATUS"]);
     expectTableRow(listResult.output, ["neo", id]);
   });
 
   test("ls shows agent names", () => {
-    // GIVEN — a world with an agent
+    // GIVEN - a world with an agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -110,17 +110,17 @@ describe("agent talk", () => {
       60_000,
     );
 
-    // WHEN — listing worlds
+    // WHEN - listing worlds
     const listResult = ctx.spwn(["ls"]);
 
-    // THEN — shows agent name in AGENTS column
+    // THEN - shows agent name in AGENTS column
     expect(listResult.exitCode).toBe(0);
     expectTableHeader(listResult.output, ["ID", "CONFIG", "AGENTS", "STATUS", "CREATED"]);
     expectTableRow(listResult.output, ["neo"]);
   });
 
   test("talk skips dead containers and finds the live one", () => {
-    // GIVEN — a world spawned, destroyed, then respawned
+    // GIVEN - a world spawned, destroyed, then respawned
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
@@ -141,33 +141,33 @@ describe("agent talk", () => {
     );
     const id2 = parseWorldId(spawn2.output)!;
 
-    // WHEN — talking to the agent
+    // WHEN - talking to the agent
     const talkResult = ctx.spwn(
       ["agent", "talk", "neo", "hello"],
       60_000,
     );
 
-    // THEN — connects to the live world (id2), not the dead one (id1)
+    // THEN - connects to the live world (id2), not the dead one (id1)
     expect(talkResult.exitCode).toBe(0);
     expectLine(talkResult.output, new RegExp(id2.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   });
 
   test("talk to non-existent agent fails", () => {
-    // WHEN — talking to agent that was never created
+    // WHEN - talking to agent that was never created
     ctx = createTestContext();
     const result = ctx.spwn(["agent", "talk", "ghost", "hello"]);
 
-    // THEN — error about agent not found
+    // THEN - error about agent not found
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /agent "ghost" not found/);
   });
 
   test("talk to nonexistent agent shows helpful error with agent new hint", () => {
-    // WHEN — talking to an agent that was never created
+    // WHEN - talking to an agent that was never created
     ctx = createTestContext();
     const result = ctx.spwn(["agent", "talk", "does-not-exist", "hello"]);
 
-    // THEN — error is helpful (suggests spwn agent new) and no raw exit status
+    // THEN - error is helpful (suggests spwn agent new) and no raw exit status
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /spwn agent new/);
     // Should NOT show raw Go error output
@@ -175,7 +175,7 @@ describe("agent talk", () => {
   });
 
   test("agent ls shows unattached after destroy", () => {
-    // GIVEN — an agent was in a world, then world destroyed
+    // GIVEN - an agent was in a world, then world destroyed
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -191,15 +191,15 @@ describe("agent talk", () => {
     // Destroy
     ctx.spwn(["down", id]);
 
-    // WHEN — listing agents after destroy
+    // WHEN - listing agents after destroy
     const listAfter = ctx.spwn(["agent", "ls"]);
 
-    // THEN — agent still exists but is unattached
+    // THEN - agent still exists but is unattached
     expectTableRow(listAfter.output, ["neo", "unattached"]);
   });
 
   test("agent show prints details when attached to a world", () => {
-    // GIVEN — a world with an agent
+    // GIVEN - a world with an agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
     ctx.spwn(
@@ -207,10 +207,10 @@ describe("agent talk", () => {
       60_000,
     );
 
-    // WHEN — showing the agent
+    // WHEN - showing the agent
     const inspectResult = ctx.spwn(["agent", "show", "neo"]);
 
-    // THEN — shows agent details with Mind layers
+    // THEN - shows agent details with Mind layers
     expect(inspectResult.exitCode).toBe(0);
     expectLine(inspectResult.output, /Agent:\s+neo/);
     expectLine(inspectResult.output, /core\/\s+profile\.md/);

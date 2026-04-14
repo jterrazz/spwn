@@ -104,7 +104,7 @@ func CreateDefault() error {
 		return fmt.Errorf("default.yaml already exists.\nEdit it at %s or remove it first", path)
 	}
 
-	content := `# Default world config — defines the physics of your world.
+	content := `# Default world config - defines the physics of your world.
 # Docs: https://spwn.sh/docs/cli/spwn-world
 
 physics:

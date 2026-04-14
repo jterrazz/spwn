@@ -9,7 +9,7 @@ const API_BASE = `http://localhost:${API_PORT}`;
 const BIN = resolve(__dirname, "../../../bin/spwn");
 
 /**
- * API helper — calls the Go API directly (faster than UI for setup).
+ * API helper - calls the Go API directly (faster than UI for setup).
  */
 class SpwnAPI {
   constructor(private baseUrl: string) {}

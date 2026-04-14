@@ -4,12 +4,12 @@ import { expectLine, lines, stripAnsi } from "../../setup/output-helpers.js";
 
 describe("CLI output", () => {
   test("root help lists all subcommands", async () => {
-    // WHEN — running spwn --help
+    // WHEN - running spwn --help
     const result = await spwn("root help")
       .exec("--help")
       .run();
 
-    // THEN — custom grouped help with all sections
+    // THEN - custom grouped help with all sections
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("Quick Start:");
@@ -54,12 +54,12 @@ describe("CLI output", () => {
   });
 
   test("get help lists subcommands", async () => {
-    // WHEN — running spwn get --help
+    // WHEN - running spwn get --help
     const result = await spwn("get help")
       .exec("get --help")
       .run();
 
-    // THEN — get subcommands are listed
+    // THEN - get subcommands are listed
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     for (const sub of ["install", "ls", "search", "rm"]) {
@@ -68,12 +68,12 @@ describe("CLI output", () => {
   });
 
   test("unknown command returns error", async () => {
-    // WHEN — running a non-existent subcommand
+    // WHEN - running a non-existent subcommand
     const result = await spwn("unknown cmd")
       .exec("nonexistent")
       .run();
 
-    // THEN — exits with non-zero code and helpful error
+    // THEN - exits with non-zero code and helpful error
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /unknown command "nonexistent" for "spwn"/);
   });

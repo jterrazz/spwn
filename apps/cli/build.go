@@ -20,7 +20,7 @@ var buildSkipValidate bool
 var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Flatten the project into a reproducible build artifact",
-	Long: `Flatten the project into .spwn/build/ — every agent file, the world
+	Long: `Flatten the project into .spwn/build/ - every agent file, the world
 config, and a normalized manifest, all copied into one self-contained
 tree that spwn up can consume directly.
 
@@ -49,7 +49,7 @@ the build; warnings are printed but not blocking.`,
 			})
 			if manifest.HasErrors(issues) {
 				fmt.Fprintln(out)
-				fmt.Fprintf(out, "  %s Build blocked — project has validation errors.\n", ui.Red("✗"))
+				fmt.Fprintf(out, "  %s Build blocked - project has validation errors.\n", ui.Red("✗"))
 				fmt.Fprintln(out, "  Run `spwn check` to see them, or pass --skip-validate.")
 				fmt.Fprintln(out)
 				os.Exit(1)

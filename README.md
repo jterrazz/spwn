@@ -22,18 +22,18 @@
 <br/>
 
 <p align="center">
-  <img src="docs/assets/hero-v2.gif" alt="spwn — spawning an agent" width="560" />
+  <img src="docs/assets/hero-v2.gif" alt="spwn - spawning an agent" width="560" />
 </p>
 
 <br/>
 
 ## Play god with AI agents.
 
-**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** — one command away.
+**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** - one command away.
 
-The real power of AI isn't the model — it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
+The real power of AI isn't the model - it's the model plus everything around it. Einstein in a chatbox can answer questions. Einstein in a lab with instruments, notebooks, colleagues, and years of memory can change the world. **The environment is the multiplier.**
 
-**Agents as code. Docker for intelligence.** If Terraform is infrastructure as code, spwn is **agents as code** — stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review PRs that change an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**.
+**Agents as code. Docker for intelligence.** If Terraform is infrastructure as code, spwn is **agents as code** - stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review PRs that change an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**.
 
 <br/>
 
@@ -78,7 +78,7 @@ Memory is a folder of markdown files, not a database. Knowledge survives across 
 <tr>
 <td align="center">
 <h3>🔒 Laws of Physics, Not ACLs</h3>
-No network interface means HTTP doesn't exist — not forbidden, physically impossible. Hard, kernel-enforced limits on CPU, memory, disk, time. No prompt jailbreak can change the laws of physics. <b>Security by absence.</b>
+No network interface means HTTP doesn't exist - not forbidden, physically impossible. Hard, kernel-enforced limits on CPU, memory, disk, time. No prompt jailbreak can change the laws of physics. <b>Security by absence.</b>
 </td>
 <td align="center">
 <h3>🧾 Agents as Code</h3>
@@ -86,7 +86,7 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 </td>
 <td align="center">
 <h3>📦 Reproducible Builds</h3>
-<code>spwn check</code> validates the project tree. <code>spwn build</code> flattens it into a content-hashed artifact — pinned Docker image digest, flattened agent tree, normalized manifest. <b>Byte-identical agents across environments.</b>
+<code>spwn check</code> validates the project tree. <code>spwn build</code> flattens it into a content-hashed artifact - pinned Docker image digest, flattened agent tree, normalized manifest. <b>Byte-identical agents across environments.</b>
 </td>
 </tr>
 </table>
@@ -98,23 +98,23 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 ## Projects are per-repository
 
 **A spwn project lives in the repo, not in your home directory.**
-`spwn init` turns any directory into a project — the same way `git init`
+`spwn init` turns any directory into a project - the same way `git init`
 turns any directory into a git repo, or `docker init` drops a Dockerfile
 and compose file. Commit your agents, your worlds, your tool composition
 alongside your code.
 
 ```
 my-project/
-├── spwn.yaml               # manifest — the "package.json" of spwn
+├── spwn.yaml               # manifest - the "package.json" of spwn
 ├── spwn/                   # committed project assets
-│   ├── agents/             #   your agents — committed, travel with the repo
+│   ├── agents/             #   your agents - committed, travel with the repo
 │   ├── worlds/             #   custom world configs
 │   ├── tools/              #   `spwn tool get @community/foo` → spwn/tools/foo/
 │   └── skills/             #   `spwn skill get @community/review` → spwn/skills/review/
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
 
-`spwn.yaml` is tiny — it declares which world and which agents this repo
+`spwn.yaml` is tiny - it declares which world and which agents this repo
 runs. Everyone who clones the repo gets the same agents, the same world
 physics, the same tool composition. **Reproducibility by construction.**
 
@@ -129,7 +129,7 @@ agents:
   - neo
 ```
 
-**`~/.spwn/` is for your user identity only** — credentials, daemon
+**`~/.spwn/` is for your user identity only** - credentials, daemon
 state, activity log. Agents and worlds don't live there. If you want to
 share an agent across projects, publish it to a registry (`spwn agent
 publish`) and `spwn agent get` it in the next project.
@@ -138,17 +138,17 @@ publish`) and `spwn agent get` it in the next project.
 
 ## Inside an agent
 
-Each agent is a directory of markdown files — **human-readable, git-friendly, no database**:
+Each agent is a directory of markdown files - **human-readable, git-friendly, no database**:
 
 ```
 spwn/agents/neo/
 ├── agent.yaml                # composition: tools, skills, profile, runtime
 ├── CLAUDE.md                 # entry point the runtime reads on startup
-├── core/                     # identity — profile.md, purpose.md, traits.md
+├── core/                     # identity - profile.md, purpose.md, traits.md
 ├── skills/                   # procedures and checklists
 ├── knowledge/                # facts about the codebase
 ├── playbooks/                # workflows promoted from experience
-└── journal/                  # session history — one file per run
+└── journal/                  # session history - one file per run
 ```
 
 **Three kinds of blocks: tools, skills, and a profile.** Each block is a file. Stack them into `agent.yaml`:
@@ -172,13 +172,13 @@ skills:
   - @community/rust-review
 ```
 
-**If a tool isn't listed, it doesn't exist.** Not forbidden — physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
+**If a tool isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
 
 **Agents evolve through three mechanisms:**
 
-- **Dream** (`spwn agent dream neo`) — analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
-- **Sleep** (`spwn agent sleep neo`) — graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
-- **Fork** (`spwn agent fork neo neo-v2`) — clone an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
+- **Dream** (`spwn agent dream neo`) - analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
+- **Sleep** (`spwn agent sleep neo`) - graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
+- **Fork** (`spwn agent fork neo neo-v2`) - clone an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
 
 > *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
 
@@ -186,7 +186,7 @@ skills:
 
 ## Use cases
 
-**Solo developer** — one agent, one project, persistent memory:
+**Solo developer** - one agent, one project, persistent memory:
 
 ```bash
 spwn init
@@ -196,7 +196,7 @@ spwn talk neo "Refactor the auth module to use sessions"
 # neo remembers the codebase next time
 ```
 
-**Team with a leader** — a lead agent delegates tasks to worker agents via inboxes:
+**Team with a leader** - a lead agent delegates tasks to worker agents via inboxes:
 
 ```bash
 spwn agent new morpheus
@@ -297,7 +297,7 @@ Every layer is a swappable Go interface. What ships today, and what's on the roa
 | **Orchestrator** | Built-in chief / worker hierarchy | Hermes, CrewAI, AutoGen, LangGraph, Swarm, Mastra |
 | **Observability** | Web UI | Langfuse, LangSmith, Helicone, OpenTelemetry |
 
-Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) — every adapter is a single Go file.
+Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - every adapter is a single Go file.
 
 <br/>
 
@@ -305,15 +305,15 @@ Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) �
 
 | Topic | Link |
 |---|---|
-| **Principles** — why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
-| **Agent composition** — tools, skills, profiles, memory | [`docs/composition.md`](docs/composition.md) |
-| **Worlds** — spawning, isolation, lifecycle | [`docs/worlds.md`](docs/worlds.md) |
-| **Tool catalog** — SDKs, runtimes, platform tools | [`docs/tool-catalog.md`](docs/tool-catalog.md) |
-| **Architecture** — ports & adapters, module map | [`docs/architecture.md`](docs/architecture.md) |
-| **Comparison** — vs LangChain, E2B, MCP, Docker | [`docs/comparison.md`](docs/comparison.md) |
-| **CLI reference** — every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
-| **Releasing** — release runbook | [`docs/releasing.md`](docs/releasing.md) |
-| **Contributing** — setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| **Principles** - why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
+| **Agent composition** - tools, skills, profiles, memory | [`docs/composition.md`](docs/composition.md) |
+| **Worlds** - spawning, isolation, lifecycle | [`docs/worlds.md`](docs/worlds.md) |
+| **Tool catalog** - SDKs, runtimes, platform tools | [`docs/tool-catalog.md`](docs/tool-catalog.md) |
+| **Architecture** - ports & adapters, module map | [`docs/architecture.md`](docs/architecture.md) |
+| **Comparison** - vs LangChain, E2B, MCP, Docker | [`docs/comparison.md`](docs/comparison.md) |
+| **CLI reference** - every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
+| **Releasing** - release runbook | [`docs/releasing.md`](docs/releasing.md) |
+| **Contributing** - setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 <br/>
 

@@ -6,7 +6,7 @@ import (
 	ib "spwn.sh/packages/imagebuilder"
 )
 
-// Tool is the @spwn/docker-cli tool — Docker CLI for DooD access.
+// Tool is the @spwn/docker-cli tool - Docker CLI for DooD access.
 var Tool = &tool{}
 
 type tool struct{}

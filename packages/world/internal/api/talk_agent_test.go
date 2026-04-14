@@ -33,7 +33,7 @@ func TestTalkRequest_DecodesAgentField(t *testing.T) {
 }
 
 func TestTalkRequest_AgentFieldOptional(t *testing.T) {
-	// Legacy callers may not send the agent field — handler falls back
+	// Legacy callers may not send the agent field - handler falls back
 	// to u.Agent or u.Agents[0].
 	raw := `{"message":"hello"}`
 	var body struct {
@@ -63,7 +63,7 @@ func TestTalkRequest_AgentWithSpaces(t *testing.T) {
 
 func TestTalk_ReadOnlyMode(t *testing.T) {
 	// POST /api/worlds/{id}/talk with arch=nil (read-only) should NOT
-	// panic — it doesn't need arch, it just calls `spwn agent talk` via exec.
+	// panic - it doesn't need arch, it just calls `spwn agent talk` via exec.
 	// But if no worlds exist in state, it should 404 gracefully.
 	_, mux := newFullTestServer(t)
 	w := doJSON(t, mux, "POST", "/api/worlds/w-nonexistent/talk", map[string]string{
@@ -88,7 +88,7 @@ func TestTalk_URLEncodedWorldID(t *testing.T) {
 		"message": "test",
 		"agent":   "neo",
 	})
-	// 404 because world doesn't exist in test state — not 500/panic.
+	// 404 because world doesn't exist in test state - not 500/panic.
 	if w.Code != 404 {
 		t.Errorf("expected 404, got %d", w.Code)
 	}

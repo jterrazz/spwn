@@ -14,7 +14,7 @@ describe("down", () => {
   });
 
   test("destroys a running world", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -27,10 +27,10 @@ describe("down", () => {
     // Verify container is running before destroy
     ctx.world(id).toBeRunning();
 
-    // WHEN — destroying it
+    // WHEN - destroying it
     const destroyResult = ctx.spwn(["down", id], 30_000);
 
-    // THEN — exits successfully with structured status lines
+    // THEN - exits successfully with structured status lines
     expect(destroyResult.exitCode).toBe(0);
     expectLine(destroyResult.output, /→ Destroying world\.\.\./);
     expectLine(destroyResult.output, /✓ Stopped agent/);
@@ -38,12 +38,12 @@ describe("down", () => {
     expectLine(destroyResult.output, /✓ Mind persisted/);
     expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
-    // AND — container no longer exists
+    // AND - container no longer exists
     ctx.world(id).toNotExist();
   });
 
   test("destroy removes world from list and state", () => {
-    // GIVEN — a spawned and destroyed world
+    // GIVEN - a spawned and destroyed world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -57,29 +57,29 @@ describe("down", () => {
 
     ctx.spwn(["down", id], 30_000);
 
-    // WHEN — listing worlds
+    // WHEN - listing worlds
     const listResult = ctx.spwn(["ls"]);
 
-    // THEN — the destroyed world is gone from list
+    // THEN - the destroyed world is gone from list
     expect(listResult.exitCode).toBe(0);
     expectNoLine(listResult.output, new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
-    // AND — gone from state.json
+    // AND - gone from state.json
     ctx.state().noWorld(id);
   });
 
   test("destroy non-existent world fails", () => {
-    // GIVEN — an initialized SPWN_HOME
+    // GIVEN - an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — destroying a world that does not exist
+    // WHEN - destroying a world that does not exist
     const result = ctx.spwn(
       ["down", "w-nonexistent-00000"],
       30_000,
     );
 
-    // THEN — exits with non-zero code and structured error
+    // THEN - exits with non-zero code and structured error
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /✗ Destroy failed\s+world w-nonexistent-00000 not found/);
   });

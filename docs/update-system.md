@@ -52,7 +52,7 @@ Implemented in `packages/foundation/update/`. High-level sequence:
 │ 2. Download asset into tmpdir (3 retries)        │
 │ 3. Download checksums.txt                        │
 │ 4. SHA256 the archive, match against digest in   │
-│    checksums.txt — refuse install on mismatch    │
+│    checksums.txt - refuse install on mismatch    │
 │ 5. Extract binary from the tar.gz (Go stdlib)    │
 │ 6. os.Rename new binary → target path (atomic)   │
 └──────────────────────────────────────────────────┘
@@ -81,7 +81,7 @@ Every CLI invocation spawns a background goroutine that calls
 yellow hint is printed after the command output:
 
 ```
-  ↑ spwn v1.2.3 available (you have v1.1.0) — run `spwn upgrade`
+  ↑ spwn v1.2.3 available (you have v1.1.0) - run `spwn upgrade`
 ```
 
 Disable with `SPWN_NO_UPDATE_CHECK=1`.
@@ -122,9 +122,9 @@ pnpm tauri signer generate -w ~/.tauri/spwn-web.key
 ```
 
 This produces two files:
-- **Private key** (`~/.tauri/spwn-web.key`) — stored in
+- **Private key** (`~/.tauri/spwn-web.key`) - stored in
   GitHub Secrets as `TAURI_SIGNING_PRIVATE_KEY`.
-- **Public key** (printed to stdout) — pasted into `tauri.conf.json`
+- **Public key** (printed to stdout) - pasted into `tauri.conf.json`
   under `plugins.updater.pubkey`.
 
 Also set `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` if you passphrase-protected
@@ -177,11 +177,11 @@ as a GitHub prerelease, so the stable "latest" endpoint still returns only
 
 ```
 packages/foundation/update/
-  version_test.go         — semver parse + comparison
-  release_test.go         — GitHub API client, channel resolution, asset lookup
-  download_test.go        — download retries, checksums parse, SHA256 verify
-  install_test.go         — tar.gz extract (incl. nested paths), atomic replace
-  update_test.go          — end-to-end: fake release server + checksum
+  version_test.go         - semver parse + comparison
+  release_test.go         - GitHub API client, channel resolution, asset lookup
+  download_test.go        - download retries, checksums parse, SHA256 verify
+  install_test.go         - tar.gz extract (incl. nested paths), atomic replace
+  update_test.go          - end-to-end: fake release server + checksum
                             enforcement + mismatch rejection + dev-build handling
 ```
 
@@ -217,7 +217,7 @@ Verify the version, platform URLs, and that signatures are populated.
 - **Pub-key rotation.** If the private key is ever leaked, publish a new
   release with a rotated pubkey AND tell users to reinstall manually (the
   old app cannot verify signatures from the new key).
-- **CLI checksums are not Ed25519-signed** — they protect against
+- **CLI checksums are not Ed25519-signed** - they protect against
   transport errors and accidental tampering. If you need stronger
   guarantees, add cosign/minisign signatures and verify in `update.Apply`.
 

@@ -1,17 +1,17 @@
 # Agent Composition
 
-An agent is a directory of markdown files — human-readable, version-controllable, no database.
+An agent is a directory of markdown files - human-readable, version-controllable, no database.
 
 ## Structure
 
 ```
 ~/.spwn/agents/neo/
 ├── agent.yaml                # composition: tools, skills, profile, runtime
-├── profile.md                # personality — role, style, purpose, behavior
+├── profile.md                # personality - role, style, purpose, behavior
 ├── skills/                   # procedures, checklists, playbooks (authored or installed)
 ├── knowledge/                # facts about the codebase, team, domain
 ├── playbooks/                # step-by-step workflows promoted from experience
-└── journal/                  # session logs — one file per world session
+└── journal/                  # session logs - one file per world session
 ```
 
 The `agent.yaml` declares the composition. Everything else is markdown you can read, edit, and git-diff.
@@ -24,7 +24,7 @@ An agent is composed from three kinds of reusable blocks:
 |---|---|---|
 | **Tool** | A capability pack (`@spwn/unix`, `@spwn/python`). Shell binaries the agent can invoke. | `~/.spwn/tools/` |
 | **Skill** | A procedure, playbook, or piece of knowledge authored in markdown. | `~/.spwn/skills/` and per-agent `skills/` |
-| **Profile** | A personality template — role, tone, purpose, behavior. | `~/.spwn/profiles/` |
+| **Profile** | A personality template - role, tone, purpose, behavior. | `~/.spwn/profiles/` |
 
 You stack them into an agent:
 
@@ -54,7 +54,7 @@ Memory is what the agent *has done*, not what it *can do*. It lives on the agent
 |---------|-------|----------------|
 | Semantic memory | **Knowledge** | Facts about the codebase, the team, the domain |
 | Procedural memory | **Playbooks** | Step-by-step workflows promoted from experience |
-| Episodic memory | **Journal** | Session logs — one per world per session |
+| Episodic memory | **Journal** | Session logs - one per world per session |
 
 Memory survives across worlds. An agent that worked on your codebase last week remembers it today.
 
@@ -62,9 +62,9 @@ Memory survives across worlds. An agent that worked on your codebase last week r
 
 Agents evolve through three mechanisms:
 
-- **Dream** (`spwn agent dream neo`) — Analyzes experience from the journal, discovers patterns, promotes successful strategies to playbooks. Failed ones are discarded. Natural selection for behavior.
-- **Sleep** (`spwn agent sleep neo`) — Graceful shutdown — saves state, archives stale files, prunes old sessions. Raw experience consolidates into durable knowledge.
-- **Fork** (`spwn agent fork neo neo-v2`) — Clones an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
+- **Dream** (`spwn agent dream neo`) - Analyzes experience from the journal, discovers patterns, promotes successful strategies to playbooks. Failed ones are discarded. Natural selection for behavior.
+- **Sleep** (`spwn agent sleep neo`) - Graceful shutdown - saves state, archives stale files, prunes old sessions. Raw experience consolidates into durable knowledge.
+- **Fork** (`spwn agent fork neo neo-v2`) - Clones an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
 
 > *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
 

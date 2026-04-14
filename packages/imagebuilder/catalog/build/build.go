@@ -6,7 +6,7 @@ import (
 	ib "spwn.sh/packages/imagebuilder"
 )
 
-// Tool is the @spwn/build tool — C/C++ build essentials.
+// Tool is the @spwn/build tool - C/C++ build essentials.
 var Tool = &tool{}
 
 type tool struct{}

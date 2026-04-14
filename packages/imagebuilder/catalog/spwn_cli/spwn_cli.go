@@ -10,7 +10,7 @@ import (
 //go:embed skills/*
 var skills embed.FS
 
-// Tool is the @spwn/cli tool — spwn CLI for managing worlds and agents.
+// Tool is the @spwn/cli tool - spwn CLI for managing worlds and agents.
 var Tool = &tool{}
 
 type tool struct{}

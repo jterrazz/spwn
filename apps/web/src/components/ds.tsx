@@ -1,9 +1,9 @@
 /**
- * Design system primitives — the diagnostics panel aesthetic.
+ * Design system primitives - the diagnostics panel aesthetic.
  *
  * Dark background, mono font, uppercase labels with wide tracking,
  * bold metric values, accent bars on section headers, thin separators.
- * No cards, no glass, no rounded wrappers — raw on dark.
+ * No cards, no glass, no rounded wrappers - raw on dark.
  */
 
 import type { ReactNode } from "react";
@@ -32,7 +32,7 @@ export function SectionHeader({ children, className }: SectionHeaderProps) {
 }
 
 // ── Section Label ───────────────────────────────────────────────────
-// Bold uppercase white — used for content sections within a panel.
+// Bold uppercase white - used for content sections within a panel.
 // No accent bar (that's reserved for SectionHeader / main titles).
 //
 //   SERVICES
@@ -54,7 +54,7 @@ export function SectionLabel({ children, className }: SectionLabelProps) {
 }
 
 // ── Sub Label ───────────────────────────────────────────────────────
-// Smaller label without accent bar — used for nested fields.
+// Smaller label without accent bar - used for nested fields.
 //
 //   PURPOSE
 
@@ -138,7 +138,7 @@ export function KeyValue({ label, value, dot, className }: KeyValueProps) {
 }
 
 // ── Item List ────────────────────────────────────────────────────────
-// Dot-prefixed mono list — services / deployment history style.
+// Dot-prefixed mono list - services / deployment history style.
 //
 //   ● Auth Service              Running · 99.99%
 //   ● Database                  Degraded · 92.11%

@@ -19,7 +19,7 @@ import (
 type Architect struct {
 	backend backend.Backend
 	state   *state.Store
-	runtime runtime.Runtime // injected runtime adapter — claude-code
+	runtime runtime.Runtime // injected runtime adapter - claude-code
 }
 
 // New creates an Architect with the given backend and state store.

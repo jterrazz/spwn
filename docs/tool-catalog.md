@@ -1,8 +1,8 @@
 # Tool Catalog
 
-Spwn worlds are assembled from composable tools. Each tool is a self-contained plugin: it knows how to install itself, how to verify it works, and what skills to teach the agent. You pick only what you need — the imagebuilder resolves dependencies, deduplicates packages, and produces a single optimized Docker image.
+Spwn worlds are assembled from composable tools. Each tool is a self-contained plugin: it knows how to install itself, how to verify it works, and what skills to teach the agent. You pick only what you need - the imagebuilder resolves dependencies, deduplicates packages, and produces a single optimized Docker image.
 
-Tools are stackable. `@spwn/qmd` depends on `@spwn/node` — list `@spwn/qmd` and Node.js appears automatically.
+Tools are stackable. `@spwn/qmd` depends on `@spwn/node` - list `@spwn/qmd` and Node.js appears automatically.
 
 ## SDKs
 

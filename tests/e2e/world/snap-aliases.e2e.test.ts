@@ -56,10 +56,10 @@ describe("snap command aliases", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // WHEN — using the 'snap save' alias
+    // WHEN - using the 'snap save' alias
     const result = ctx.spwn(["snap", "save", id, "--name", "alias-test"]);
 
-    // THEN — snapshot created
+    // THEN - snapshot created
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /[Ss]napshot|[Ss]aved/);
   });
@@ -74,10 +74,10 @@ describe("snap command aliases", () => {
     const id = parseWorldId(spawnResult.output)!;
     ctx.spwn(["snap", "save", id, "--name", "ls-test"]);
 
-    // WHEN — listing snapshots via alias
+    // WHEN - listing snapshots via alias
     const result = ctx.spwn(["snap", "ls"]);
 
-    // THEN — shows the snapshot
+    // THEN - shows the snapshot
     expect(result.exitCode).toBe(0);
     expect(stripAnsi(result.output)).toContain("ls-test");
   });
@@ -92,13 +92,13 @@ describe("snap command aliases", () => {
     const id = parseWorldId(spawnResult.output)!;
     ctx.spwn(["snap", "save", id, "--name", "rm-test"]);
 
-    // WHEN — removing via alias
+    // WHEN - removing via alias
     const result = ctx.spwn(["snap", "rm", id + "--rm-test"]);
 
-    // THEN — succeeds
+    // THEN - succeeds
     expect(result.exitCode).toBe(0);
 
-    // AND — no longer in list
+    // AND - no longer in list
     const list = ctx.spwn(["snap", "ls"]);
     expect(stripAnsi(list.output)).not.toContain("rm-test");
   });
@@ -116,13 +116,13 @@ describe("snap command aliases", () => {
     // Destroy original
     ctx.spwn(["world", "destroy", id]);
 
-    // WHEN — restoring via alias
+    // WHEN - restoring via alias
     const result = ctx.spwn(
       ["snap", "restore", id + "--restore-alias"],
       60_000,
     );
 
-    // THEN — new world created
+    // THEN - new world created
     expect(result.exitCode).toBe(0);
     const newId = parseWorldId(result.output);
     expect(newId).toBeTruthy();

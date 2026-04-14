@@ -55,10 +55,10 @@ func GenerateAgentContext(opts AgentContextOpts) string {
 }
 
 func generateChiefContext(b *strings.Builder, opts AgentContextOpts) {
-	b.WriteString(fmt.Sprintf("# You are %s — Chief of %s\n\n", opts.AgentName, opts.WorldID))
+	b.WriteString(fmt.Sprintf("# You are %s - Chief of %s\n\n", opts.AgentName, opts.WorldID))
 
 	b.WriteString("## Your Role\n")
-	b.WriteString("You are the Chief — the supreme leader of this world. You set direction,\n")
+	b.WriteString("You are the Chief - the supreme leader of this world. You set direction,\n")
 	b.WriteString("make final decisions, delegate work to managers and workers, and review their output.\n\n")
 
 	// Team list
@@ -87,16 +87,16 @@ func generateChiefContext(b *strings.Builder, opts AgentContextOpts) {
 }
 
 func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
-	b.WriteString(fmt.Sprintf("# You are %s — Manager in %s\n\n", opts.AgentName, opts.WorldID))
+	b.WriteString(fmt.Sprintf("# You are %s - Manager in %s\n\n", opts.AgentName, opts.WorldID))
 
 	b.WriteString("## Your Role\n")
-	b.WriteString("You are a Manager — you coordinate workers, delegate tasks, review output,\n")
+	b.WriteString("You are a Manager - you coordinate workers, delegate tasks, review output,\n")
 	b.WriteString("and execute work yourself when needed.\n\n")
 
 	// Chief
 	if opts.Chief != "" {
 		b.WriteString("## Your Chief\n")
-		b.WriteString(fmt.Sprintf("%s — check /world/inbox/%s/ for tasks.\n\n", opts.Chief, opts.AgentName))
+		b.WriteString(fmt.Sprintf("%s - check /world/inbox/%s/ for tasks.\n\n", opts.Chief, opts.AgentName))
 	}
 
 	// Other agents
@@ -124,26 +124,26 @@ func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("4. Report back to your chief\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/core/ — who you are (profile, purpose, traits)\n")
-	b.WriteString("- /mind/skills/ — what you can do\n")
-	b.WriteString("- /mind/knowledge/ — facts you've learned\n")
-	b.WriteString("- /mind/playbooks/ — procedures that work\n")
-	b.WriteString("- /mind/journal/ — session history\n\n")
+	b.WriteString("- /mind/core/ - who you are (profile, purpose, traits)\n")
+	b.WriteString("- /mind/skills/ - what you can do\n")
+	b.WriteString("- /mind/knowledge/ - facts you've learned\n")
+	b.WriteString("- /mind/playbooks/ - procedures that work\n")
+	b.WriteString("- /mind/journal/ - session history\n\n")
 
 	writeWorldInfo(b, opts)
 }
 
 func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
-	b.WriteString(fmt.Sprintf("# You are %s — Worker in %s\n\n", opts.AgentName, opts.WorldID))
+	b.WriteString(fmt.Sprintf("# You are %s - Worker in %s\n\n", opts.AgentName, opts.WorldID))
 
 	b.WriteString("## Your Role\n")
-	b.WriteString("You are a Worker — a persistent executor. You have a Mind that persists\n")
+	b.WriteString("You are a Worker - a persistent executor. You have a Mind that persists\n")
 	b.WriteString("across sessions. Execute tasks, learn from experience, collaborate.\n\n")
 
 	// Chief
 	if opts.Chief != "" {
 		b.WriteString("## Your Chief\n")
-		b.WriteString(fmt.Sprintf("%s — check /world/inbox/%s/ for tasks.\n\n", opts.Chief, opts.AgentName))
+		b.WriteString(fmt.Sprintf("%s - check /world/inbox/%s/ for tasks.\n\n", opts.Chief, opts.AgentName))
 	}
 
 	// Other agents
@@ -165,11 +165,11 @@ func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("Message peers: write to /world/inbox/{peer}/\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/core/ — who you are (profile, purpose, traits)\n")
-	b.WriteString("- /mind/skills/ — what you can do\n")
-	b.WriteString("- /mind/knowledge/ — facts you've learned\n")
-	b.WriteString("- /mind/playbooks/ — procedures that work\n")
-	b.WriteString("- /mind/journal/ — session history\n\n")
+	b.WriteString("- /mind/core/ - who you are (profile, purpose, traits)\n")
+	b.WriteString("- /mind/skills/ - what you can do\n")
+	b.WriteString("- /mind/knowledge/ - facts you've learned\n")
+	b.WriteString("- /mind/playbooks/ - procedures that work\n")
+	b.WriteString("- /mind/journal/ - session history\n\n")
 
 	writeWorldInfo(b, opts)
 }
@@ -193,7 +193,7 @@ func generateNPCContext(b *strings.Builder, opts AgentContextOpts) {
 }
 
 func generateArchitectContext(b *strings.Builder, opts AgentContextOpts) {
-	b.WriteString("# You are the Architect — the orchestration daemon\n\n")
+	b.WriteString("# You are the Architect - the orchestration daemon\n\n")
 
 	b.WriteString("## Your Role\n")
 	b.WriteString("You are the Architect of this world. You manage the lifecycle of all worlds and agents.\n")
@@ -203,27 +203,27 @@ func generateArchitectContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Available Commands\n")
 	b.WriteString("You have the `spwn` CLI installed. Key commands:\n\n")
 	b.WriteString("### World Management\n")
-	b.WriteString("- `spwn ls` — list all active worlds\n")
-	b.WriteString("- `spwn up --agent <name> -w <path>` — spawn a new world\n")
-	b.WriteString("- `spwn up --agent <name> -w <path> --detach` — spawn in background\n")
-	b.WriteString("- `spwn down <id>` — destroy a world\n")
-	b.WriteString("- `spwn inspect <id>` — show world details\n")
-	b.WriteString("- `spwn logs <id>` — stream agent output\n\n")
+	b.WriteString("- `spwn ls` - list all active worlds\n")
+	b.WriteString("- `spwn up --agent <name> -w <path>` - spawn a new world\n")
+	b.WriteString("- `spwn up --agent <name> -w <path> --detach` - spawn in background\n")
+	b.WriteString("- `spwn down <id>` - destroy a world\n")
+	b.WriteString("- `spwn inspect <id>` - show world details\n")
+	b.WriteString("- `spwn logs <id>` - stream agent output\n\n")
 
 	b.WriteString("### Agent Management\n")
-	b.WriteString("- `spwn agent new <name>` — create a new agent\n")
-	b.WriteString("- `spwn agent ls` — list all agents\n")
-	b.WriteString("- `spwn agent talk <name> <message>` — send a message to an agent\n")
-	b.WriteString("- `spwn agent inspect <name>` — show agent details\n")
-	b.WriteString("- `spwn agent rm <name>` — remove an agent\n\n")
+	b.WriteString("- `spwn agent new <name>` - create a new agent\n")
+	b.WriteString("- `spwn agent ls` - list all agents\n")
+	b.WriteString("- `spwn agent talk <name> <message>` - send a message to an agent\n")
+	b.WriteString("- `spwn agent inspect <name>` - show agent details\n")
+	b.WriteString("- `spwn agent rm <name>` - remove an agent\n\n")
 
 	b.WriteString("### Messaging\n")
-	b.WriteString("- `spwn agent send <agent-name> --from <sender> <message>` — inter-agent message (auto-resolves world)\n")
-	b.WriteString("- `spwn agent inbox <agent-name>` — check inbox (auto-resolves world)\n")
-	b.WriteString("- `spwn agent watch <agent-name>` — watch for new messages (auto-resolves world)\n\n")
+	b.WriteString("- `spwn agent send <agent-name> --from <sender> <message>` - inter-agent message (auto-resolves world)\n")
+	b.WriteString("- `spwn agent inbox <agent-name>` - check inbox (auto-resolves world)\n")
+	b.WriteString("- `spwn agent watch <agent-name>` - watch for new messages (auto-resolves world)\n\n")
 
 	b.WriteString("### Status\n")
-	b.WriteString("- `spwn status` — environment overview\n\n")
+	b.WriteString("- `spwn status` - environment overview\n\n")
 
 	writeWorldInfo(b, opts)
 }
@@ -243,26 +243,26 @@ type ColonyAgentSpec struct {
 func GenerateColonyContext(worldID string, agents []ColonyAgentSpec) string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("# Colony — %s\n\n", worldID))
+	b.WriteString(fmt.Sprintf("# Colony - %s\n\n", worldID))
 	b.WriteString("This world has multiple agents. Each agent has a personalized context file.\n\n")
 
 	b.WriteString("## Agents\n")
 	for _, a := range agents {
-		b.WriteString(fmt.Sprintf("- **%s** (%s) — see /world/AGENT-%s.md\n", a.Name, a.Role, a.Name))
+		b.WriteString(fmt.Sprintf("- **%s** (%s) - see /world/AGENT-%s.md\n", a.Name, a.Role, a.Name))
 	}
 	b.WriteString("\n")
 
 	b.WriteString("## Communication\n")
 	b.WriteString("Agents communicate via inbox directories:\n")
 	for _, a := range agents {
-		b.WriteString(fmt.Sprintf("- /world/inbox/%s/ — messages for %s\n", a.Name, a.Name))
+		b.WriteString(fmt.Sprintf("- /world/inbox/%s/ - messages for %s\n", a.Name, a.Name))
 	}
 	b.WriteString("\nWrite JSON files with fields: from, to, type, content.\n")
 
 	return b.String()
 }
 
-// GenerateRoster produces /world/roster.md — the world's authoritative
+// GenerateRoster produces /world/roster.md - the world's authoritative
 // list of who is currently in this world. The runtime can read this to
 // answer "who am I in here with?" and to address messages.
 //
@@ -273,7 +273,7 @@ func GenerateColonyContext(worldID string, agents []ColonyAgentSpec) string {
 func GenerateRoster(worldID string, agents []ColonyAgentSpec) string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("# Roster — %s\n\n", worldID))
+	b.WriteString(fmt.Sprintf("# Roster - %s\n\n", worldID))
 	if len(agents) == 0 {
 		b.WriteString("This world has no agents currently deployed.\n")
 		return b.String()
@@ -313,7 +313,7 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec) string {
 func writeWorkspaces(b *strings.Builder, workspaces []models.Workspace) {
 	switch len(workspaces) {
 	case 0:
-		b.WriteString("- Workspace: /workspace (ephemeral — no host mount)\n")
+		b.WriteString("- Workspace: /workspace (ephemeral - no host mount)\n")
 	case 1:
 		b.WriteString(fmt.Sprintf("- Workspace: /workspace (host: %s)\n", workspaces[0].Path))
 	default:

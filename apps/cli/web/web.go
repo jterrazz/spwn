@@ -1,4 +1,4 @@
-// Package web implements `spwn web` — the local web UI.
+// Package web implements `spwn web` - the local web UI.
 //
 // One command, no subcommands: it starts the Next.js frontend, the Go
 // API server, and opens a browser tab. Ctrl+C tears everything down.

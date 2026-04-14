@@ -103,5 +103,5 @@ func TestColony_MessagingBetweenAgents(t *testing.T) {
 	// 5. Chief reads the reply
 	//
 	// Tracking: depends on Architect.SpawnColony() or multi-agent SpawnOpts.
-	t.Skip("Colony messaging requires multi-agent spawn — not yet available")
+	t.Skip("Colony messaging requires multi-agent spawn - not yet available")
 }

@@ -6,7 +6,7 @@ import (
 	ib "spwn.sh/packages/imagebuilder"
 )
 
-// Tool is the @spwn/unix tool — core Unix utilities.
+// Tool is the @spwn/unix tool - core Unix utilities.
 var Tool = &tool{}
 
 type tool struct{}

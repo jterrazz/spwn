@@ -4,7 +4,7 @@
 // Container labels are spwn's source of truth for world existence and
 // immutable creation-time metadata. The mutable bits (deployed agent
 // list, runtime session ids) live in per-world JSON files under
-// ~/.spwn/runtime/<world-id>.json — see the runtimestate package.
+// ~/.spwn/runtime/<world-id>.json - see the runtimestate package.
 //
 // The split is deliberate: labels are immutable once a container is
 // created, so anything that needs to change after spawn must live
@@ -109,7 +109,7 @@ func ParseWorld(lbls map[string]string) (models.World, error) {
 		Agent:        lbls[WorldAgent],
 		AgentID:      lbls[WorldAgentID],
 		Organization: lbls[WorldOrganization],
-		// Backend is always Docker for spwn-managed containers — labels
+		// Backend is always Docker for spwn-managed containers - labels
 		// don't store it because there's only one backend in production.
 		Backend: "docker",
 	}

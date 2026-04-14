@@ -118,7 +118,7 @@ func moveSubdir(agentDir, src, dst string) error {
 		return os.Rename(srcPath, dstPath)
 	}
 
-	// Both exist — merge
+	// Both exist - merge
 	if err := mergeDir(srcPath, dstPath); err != nil {
 		return err
 	}

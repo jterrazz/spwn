@@ -1,4 +1,4 @@
-# Research Lab — patient, hypothesis-driven agent with a lab notebook.
+# Research Lab - patient, hypothesis-driven agent with a lab notebook.
 
 tools:
   - "@spwn/unix"

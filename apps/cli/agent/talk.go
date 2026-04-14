@@ -41,7 +41,7 @@ var TalkTopCmd = &cobra.Command{
 
 var talkCmd = &cobra.Command{
 	Use:   "talk <agent-name> [message]",
-	Short: "Talk to a running agent — interactive or one-shot",
+	Short: "Talk to a running agent - interactive or one-shot",
 	Long: `Open a conversation with a named agent running inside a world.
 
 If a message is provided, runs a one-shot query and prints the response.
@@ -143,7 +143,7 @@ If no message is provided, opens an interactive session inside the container.`,
 			execCmd := exec.Command("docker", dockerArgs...)
 
 			// persistSession is called once we discover the runtime's session
-			// identifier on stdout. It is intentionally idempotent — for streamed
+			// identifier on stdout. It is intentionally idempotent - for streamed
 			// runs we'll be called per-line and will only update on first capture.
 			var captured string
 			persistSession := func(id string) {
@@ -158,7 +158,7 @@ If no message is provided, opens an interactive session inside the container.`,
 				// Streaming mode (used by the web UI): tee stdout so we
 				// can both forward each line to the caller AND scan it for the
 				// runtime's session/thread id. Without this scan, every
-				// web UI message starts a fresh conversation — the #1
+				// web UI message starts a fresh conversation - the #1
 				// reported "agent forgets" bug.
 				stdoutPipe, pipeErr := execCmd.StdoutPipe()
 				if pipeErr != nil {
@@ -334,7 +334,7 @@ func routeAgentToWorld(
 //   - Codex:  {"type":"thread.started","thread_id":"..."}
 //
 // We accept both shapes and return the first non-empty value found. The
-// function is tolerant — non-JSON lines, partial lines, and unknown event
+// function is tolerant - non-JSON lines, partial lines, and unknown event
 // types all return "".
 func extractSessionID(runtimeName string, line []byte) string {
 	trimmed := bytes.TrimSpace(line)
@@ -362,13 +362,13 @@ func formatExecError(err error, output []byte) error {
 	case strings.Contains(out, "authentication_error"):
 		return fmt.Errorf("authentication failed\n\n  Run: spwn auth check\n  Run: spwn auth login")
 	case strings.Contains(out, "OAuth token has expired"):
-		return fmt.Errorf("OAuth token has expired — refresh credentials\n\n  Run: spwn auth login")
+		return fmt.Errorf("OAuth token has expired - refresh credentials\n\n  Run: spwn auth login")
 	case strings.Contains(out, "Invalid API key") || strings.Contains(out, "invalid x-api-key"):
 		return fmt.Errorf("invalid API key\n\n  Run: spwn auth login")
 	case strings.Contains(out, "Could not resolve host") || strings.Contains(out, "connection refused"):
-		return fmt.Errorf("network error — cannot reach API\n\n  Output: %s", strings.TrimSpace(out))
+		return fmt.Errorf("network error - cannot reach API\n\n  Output: %s", strings.TrimSpace(out))
 	case strings.Contains(out, "rate_limit") || strings.Contains(out, "overloaded"):
-		return fmt.Errorf("rate limited — try again in a moment")
+		return fmt.Errorf("rate limited - try again in a moment")
 	}
 
 	if out != "" {

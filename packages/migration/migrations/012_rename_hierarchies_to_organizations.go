@@ -20,7 +20,7 @@ var RenameHierarchiesToOrganizations = migration.Migration{
 		if _, err := os.Stat(src); os.IsNotExist(err) {
 			return nil
 		}
-		// Destination already exists — skip
+		// Destination already exists - skip
 		if _, err := os.Stat(dst); err == nil {
 			return nil
 		}

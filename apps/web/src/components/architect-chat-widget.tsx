@@ -77,7 +77,7 @@ export function ArchitectChatWidget() {
     };
   }, [expanded]);
 
-  // Hide on architect page — the full page takes over
+  // Hide on architect page - the full page takes over
   if (pathname === "/architect" || pathname.startsWith("/architect/")) {
     return null;
   }
@@ -93,7 +93,7 @@ export function ArchitectChatWidget() {
     duration: m.duration,
   }));
 
-  // Chat is controlled via chatInput/setChatInput — at send time the
+  // Chat is controlled via chatInput/setChatInput - at send time the
   // context's chatInput is already the latest value, so sendMessage()
   // reads it directly. The `text` arg is the same as chatInput here.
   const handleSend = () => {
@@ -127,7 +127,7 @@ export function ArchitectChatWidget() {
           </div>
         </div>
 
-        {/* Messages + input via shared Chat — indexed by the original
+        {/* Messages + input via shared Chat - indexed by the original
             messages array so the extras closure can read stackAction etc. */}
         <Chat
           className="flex-1 px-3 pb-3"
@@ -144,11 +144,11 @@ export function ArchitectChatWidget() {
               <IconMessageCircle size={24} className="text-muted-foreground/15 mb-2" />
               <p className="text-xs text-muted-foreground/30">Talk to the Architect</p>
               <p className="text-[10px] text-muted-foreground/20 mt-1 max-w-[260px]">
-                Ask anything — create agents, manage worlds, or check status.
+                Ask anything - create agents, manage worlds, or check status.
               </p>
               {!isRunning && (
                 <p className="text-[9px] text-yellow-400/40 mt-2 font-mono">
-                  Architect is offline — start it from the Architect page
+                  Architect is offline - start it from the Architect page
                 </p>
               )}
             </div>
@@ -168,7 +168,7 @@ export function ArchitectChatWidget() {
         <button
           onClick={() => router.push("/architect")}
           className="flex items-center gap-2.5 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] px-4 py-2.5 hover:bg-white/[0.08] transition-colors"
-          title="Architect is offline — click to start"
+          title="Architect is offline - click to start"
         >
           <ArchitectGlyph isRunning={false} isActive={false} />
           <span className="text-[12px] text-muted-foreground/35">Architect offline</span>

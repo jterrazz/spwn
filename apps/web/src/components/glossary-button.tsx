@@ -40,7 +40,7 @@ const TERMS: Term[] = [
   {
     word: "Runtime",
     short: "How an agent thinks.",
-    long: "The CLI or SDK that drives an agent — Claude Code, Codex, Aider, etc. Runtimes are swappable adapters; the rest of spwn does not care which one you use.",
+    long: "The CLI or SDK that drives an agent - Claude Code, Codex, Aider, etc. Runtimes are swappable adapters; the rest of spwn does not care which one you use.",
   },
   {
     word: "Provider",
@@ -50,7 +50,7 @@ const TERMS: Term[] = [
   {
     word: "Tool",
     short: "A composable capability.",
-    long: "A piece of an image — a binary, configuration, or skill — that can be installed into a world. Tools live under @spwn/* in the catalog.",
+    long: "A piece of an image - a binary, configuration, or skill - that can be installed into a world. Tools live under @spwn/* in the catalog.",
   },
   {
     word: "Skill",
@@ -60,7 +60,7 @@ const TERMS: Term[] = [
   {
     word: "Profile",
     short: "A reusable personality template.",
-    long: "Role, tone, purpose, behavior — authored in markdown and attached to agents. Profiles are first-class composable blocks alongside tools and skills.",
+    long: "Role, tone, purpose, behavior - authored in markdown and attached to agents. Profiles are first-class composable blocks alongside tools and skills.",
   },
 ];
 

@@ -41,20 +41,20 @@ describe("architect Stack flow", () => {
   // Test 10: Stack file is initialized with default template
   // ──────────────────────────────────────────────
   test("architect Stack file is initialized with default template", () => {
-    // GIVEN — an architect directory
+    // GIVEN - an architect directory
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
-    // WHEN — writing the default template (as the system would)
+    // WHEN - writing the default template (as the system would)
     const defaultContent =
       "# Architect Stack\n\n## Focus\n\n## Queued\n\n## Done\n";
     const stackPath = join(architectDir, "stack.md");
     writeFileSync(stackPath, defaultContent);
 
-    // THEN — file exists
+    // THEN - file exists
     expect(existsSync(stackPath)).toBe(true);
 
-    // AND — it has all required sections
+    // AND - it has all required sections
     const content = readFileSync(stackPath, "utf-8");
     expect(content).toContain("# Architect Stack");
     expect(content).toContain("## Focus");
@@ -66,7 +66,7 @@ describe("architect Stack flow", () => {
   // Test 11: Stack can be read (simulated API read)
   // ──────────────────────────────────────────────
   test("architect Stack can be read from file system", () => {
-    // GIVEN — a Stack file with content
+    // GIVEN - a Stack file with content
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
@@ -88,10 +88,10 @@ describe("architect Stack flow", () => {
     const stackPath = join(architectDir, "stack.md");
     writeFileSync(stackPath, stackContent);
 
-    // WHEN — reading the file (as the API handler would)
+    // WHEN - reading the file (as the API handler would)
     const content = readFileSync(stackPath, "utf-8");
 
-    // THEN — content matches what was written
+    // THEN - content matches what was written
     expect(content).toBe(stackContent);
     expect(content).toContain("Deploy API v2");
     expect(content).toContain("Write documentation");
@@ -102,7 +102,7 @@ describe("architect Stack flow", () => {
   // Test 12: Status includes Stack KPIs
   // ──────────────────────────────────────────────
   test("architect status includes Stack KPIs with correct counts", () => {
-    // GIVEN — a Stack file with known task counts
+    // GIVEN - a Stack file with known task counts
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
@@ -123,7 +123,7 @@ describe("architect Stack flow", () => {
 
     writeFileSync(join(architectDir, "stack.md"), stackContent);
 
-    // WHEN — parsing the file for KPIs (same logic as Go server)
+    // WHEN - parsing the file for KPIs (same logic as Go server)
     const content = readFileSync(
       join(architectDir, "stack.md"),
       "utf-8",
@@ -131,7 +131,7 @@ describe("architect Stack flow", () => {
     const pendingMatches = content.match(/- \[ \]/g) ?? [];
     const doneMatches = content.match(/- \[x\]/gi) ?? [];
 
-    // THEN — counts are correct
+    // THEN - counts are correct
     expect(pendingMatches.length).toBe(3); // 2 in progress + 1 backlog
     expect(doneMatches.length).toBe(1); // 1 completed
   });
@@ -143,17 +143,17 @@ describe("architect Stack flow", () => {
     // We can't test the actual architect container, but we can verify
     // the response parsing logic that the API uses.
 
-    // GIVEN — a simulated architect response with Stack action
+    // GIVEN - a simulated architect response with Stack action
     const response =
       "Sure, I'll add that to the list.\n[STACK_PUSH] Deploy API\nPriority: high\nSetting up the deployment pipeline.";
 
-    // WHEN — parsing the response (same regex as Go server)
+    // WHEN - parsing the response (same regex as Go server)
     const todoAddMatch = response.match(
       /\[STACK_PUSH\]\s*(.*?)(?:\n|$)/,
     );
     const priorityMatch = response.match(/Priority:\s*(.*?)(?:\n|$)/);
 
-    // THEN — action fields are extracted
+    // THEN - action fields are extracted
     expect(todoAddMatch).not.toBeNull();
     expect(todoAddMatch![1].trim()).toBe("Deploy API");
     expect(priorityMatch).not.toBeNull();
@@ -176,16 +176,16 @@ describe("architect Stack flow", () => {
   });
 
   test("architect talk response without Stack action has no stackAction field", () => {
-    // GIVEN — a regular response with no Stack markers
+    // GIVEN - a regular response with no Stack markers
     const response =
       "The system is running well. All agents are healthy and no issues detected.";
 
-    // WHEN — parsing the response
+    // WHEN - parsing the response
     const todoAddMatch = response.match(/\[STACK_PUSH\]/);
     const todoDoneMatch = response.match(/\[STACK_POP\]/);
     const todoUpdateMatch = response.match(/\[STACK_UPDATE\]/);
 
-    // THEN — no action markers found
+    // THEN - no action markers found
     expect(todoAddMatch).toBeNull();
     expect(todoDoneMatch).toBeNull();
     expect(todoUpdateMatch).toBeNull();
@@ -199,7 +199,7 @@ describe("architect Stack flow", () => {
     // The architect page.tsx uses parseStackMd() to display Stacks
     // but does NOT expose any "add" input/form for manual Stack creation.
 
-    // GIVEN — the web UI architect page source
+    // GIVEN - the web UI architect page source
     const pagePath = join(
       home,
       "..",
@@ -234,7 +234,7 @@ describe("architect Stack flow", () => {
 
     const source = readFileSync(projectPagePath, "utf-8");
 
-    // THEN — the page should NOT have add/edit Stack form elements
+    // THEN - the page should NOT have add/edit Stack form elements
     // The Stack panel only displays data fetched from the API.
     expect(source).not.toMatch(/name=["']addTodo["']/); // no add form input
     expect(source).not.toMatch(/placeholder=["']Add.*Stack["']/i); // no add Stack placeholder
@@ -367,7 +367,7 @@ describe("architect Stack flow", () => {
   // ──────────────────────────────────────────────
   // Multiple Stack actions: only first is recognized
   // ──────────────────────────────────────────────
-  test("multiple Stack actions in response — only first is recognized", () => {
+  test("multiple Stack actions in response - only first is recognized", () => {
     const response = [
       "I'll handle both tasks.",
       "[STACK_PUSH] First task",
@@ -385,7 +385,7 @@ describe("architect Stack flow", () => {
     expect(firstMatch).not.toBeNull();
     expect(firstMatch![1].trim()).toBe("First task");
 
-    // Count total matches — there should be 2 in the text
+    // Count total matches - there should be 2 in the text
     const allMatches = response.match(/\[STACK_PUSH\]/g) ?? [];
     expect(allMatches.length).toBe(2);
   });

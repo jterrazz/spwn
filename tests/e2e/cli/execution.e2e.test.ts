@@ -15,7 +15,7 @@ import {
 
 // ── Tests that require Docker (world lifecycle) ─────────────
 
-describe("CLI execution — world aliases", () => {
+describe("CLI execution - world aliases", () => {
   let ctx: TestContext;
 
   afterEach(() => {
@@ -23,29 +23,29 @@ describe("CLI execution — world aliases", () => {
   });
 
   test("'spwn up' alias spawns a world", () => {
-    // GIVEN — initialized context
+    // GIVEN - initialized context
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — using the 'up' alias
+    // WHEN - using the 'up' alias
     const result = ctx.spwn(
       ["up", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — world is created
+    // THEN - world is created
     expect(result.exitCode).toBe(0);
     const id = parseWorldId(result.output)!;
     expect(id).toBeTruthy();
 
-    // AND — appears in ls
+    // AND - appears in ls
     const listResult = ctx.spwn(["ls"]);
     expect(listResult.exitCode).toBe(0);
     expect(stripAnsi(listResult.output)).toContain(id);
   });
 
   test("'spwn down' alias destroys a world", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -55,14 +55,14 @@ describe("CLI execution — world aliases", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // WHEN — using the 'down' alias
+    // WHEN - using the 'down' alias
     const destroyResult = ctx.spwn(["down", id], 30_000);
 
-    // THEN — world is destroyed
+    // THEN - world is destroyed
     expect(destroyResult.exitCode).toBe(0);
     expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
-    // AND — world gone from ls
+    // AND - world gone from ls
     const listResult = ctx.spwn(["ls"]);
     expect(listResult.exitCode).toBe(0);
     expectNoLine(
@@ -72,7 +72,7 @@ describe("CLI execution — world aliases", () => {
   });
 
   test("'spwn ls' alias lists worlds", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -81,17 +81,17 @@ describe("CLI execution — world aliases", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — using the 'ls' alias
+    // WHEN - using the 'ls' alias
     const listResult = ctx.spwn(["ls"]);
 
-    // THEN — world appears in output
+    // THEN - world appears in output
     expect(listResult.exitCode).toBe(0);
     expect(stripAnsi(listResult.output)).toContain(id);
     expectTableHeader(listResult.output, ["ID", "CONFIG", "AGENTS", "STATUS"]);
   });
 
   test("'spwn logs' alias works for world", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -100,17 +100,17 @@ describe("CLI execution — world aliases", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — using the 'logs' command (world logs)
+    // WHEN - using the 'logs' command (world logs)
     const logsResult = ctx.spwn(["world", "logs", id]);
 
-    // THEN — doesn't error (agent may not have output yet)
+    // THEN - doesn't error (agent may not have output yet)
     expect(logsResult.exitCode).toBe(0);
-    // AND — output is a string (may be empty if agent hasn't logged yet)
+    // AND - output is a string (may be empty if agent hasn't logged yet)
     expect(typeof logsResult.output).toBe("string");
   });
 
   test("'spwn inspect' works for world via world inspect", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -119,10 +119,10 @@ describe("CLI execution — world aliases", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — inspecting the world
+    // WHEN - inspecting the world
     const inspectResult = ctx.spwn(["world", "inspect", id]);
 
-    // THEN — output contains world details
+    // THEN - output contains world details
     expect(inspectResult.exitCode).toBe(0);
     const out = stripAnsi(inspectResult.output);
     expect(out).toContain(id);
@@ -133,7 +133,7 @@ describe("CLI execution — world aliases", () => {
   });
 
   test("'spwn snap save' creates snapshot", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -142,10 +142,10 @@ describe("CLI execution — world aliases", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — saving via spwn snap save
+    // WHEN - saving via spwn snap save
     const snapResult = ctx.spwn(["snap", "save", id]);
 
-    // THEN — snapshot created
+    // THEN - snapshot created
     expect(snapResult.exitCode).toBe(0);
     expectLine(snapResult.output, /[Ss]aved snapshot|[Ss]nap(shot)? saved/);
   });
@@ -153,7 +153,7 @@ describe("CLI execution — world aliases", () => {
 
 // ── Tests that don't need Docker (agent management) ─────────
 
-describe("CLI execution — agent commands", () => {
+describe("CLI execution - agent commands", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 
@@ -172,16 +172,16 @@ describe("CLI execution — agent commands", () => {
   });
 
   test("'spwn agent new' creates an agent", async () => {
-    // WHEN — creating a new agent
+    // WHEN - creating a new agent
     const result = await spwn("agent new testbot")
       .exec("agent new testbot")
       .run();
 
-    // THEN — exit code 0
+    // THEN - exit code 0
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Created agent\s+testbot/);
 
-    // AND — agent appears in ls
+    // AND - agent appears in ls
     const listResult = await spwn("agent ls after new")
       .exec("agent ls")
       .run();
@@ -190,19 +190,19 @@ describe("CLI execution — agent commands", () => {
   });
 
   test("'spwn agent rm' removes an agent", async () => {
-    // GIVEN — agent exists
+    // GIVEN - agent exists
     await spwn("create agent").exec("agent new testbot").run();
 
-    // WHEN — removing it
+    // WHEN - removing it
     const result = await spwn("agent rm testbot")
       .exec("agent rm testbot")
       .run();
 
-    // THEN — exit code 0
+    // THEN - exit code 0
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Deleted agent\s+testbot/);
 
-    // AND — agent gone from ls
+    // AND - agent gone from ls
     const listResult = await spwn("agent ls after rm")
       .exec("agent ls")
       .run();
@@ -214,16 +214,16 @@ describe("CLI execution — agent commands", () => {
   });
 
   test("'spwn agent ls' shows table with correct headers", async () => {
-    // GIVEN — agents exist
+    // GIVEN - agents exist
     await spwn("create agent1").exec("agent new alpha").run();
     await spwn("create agent2").exec("agent new beta").run();
 
-    // WHEN — listing agents
+    // WHEN - listing agents
     const result = await spwn("agent ls")
       .exec("agent ls")
       .run();
 
-    // THEN — table has correct headers and both agents
+    // THEN - table has correct headers and both agents
     expect(result.exitCode).toBe(0);
     expectTableHeader(result.output, ["NAME", "WORLD", "STATUS"]);
     expect(stripAnsi(result.output)).toContain("alpha");
@@ -231,15 +231,15 @@ describe("CLI execution — agent commands", () => {
   });
 
   test("'spwn agent show' shows detailed info", async () => {
-    // GIVEN — agent exists
+    // GIVEN - agent exists
     await spwn("create for show").exec("agent new inspectme").run();
 
-    // WHEN — inspecting
+    // WHEN - inspecting
     const result = await spwn("agent show")
       .exec("agent show inspectme")
       .run();
 
-    // THEN — shows structured details
+    // THEN - shows structured details
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /Agent:\s+inspectme/);
     expectLine(result.output, /World:\s+unattached/);
@@ -248,7 +248,7 @@ describe("CLI execution — agent commands", () => {
 
 // ── Enter command ──────────────────────────────────────────
 
-describe("CLI execution — enter command", () => {
+describe("CLI execution - enter command", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 
@@ -292,7 +292,7 @@ describe("CLI execution — enter command", () => {
 
 // ── Global flags ─────────────────────────────────────────────
 
-describe("CLI execution — global flags", () => {
+describe("CLI execution - global flags", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 
@@ -322,7 +322,7 @@ describe("CLI execution — global flags", () => {
 
 // ── Status command ──────────────────────────────────────────
 
-describe("CLI execution — status command", () => {
+describe("CLI execution - status command", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 

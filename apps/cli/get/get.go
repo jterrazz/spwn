@@ -13,7 +13,7 @@ var defaultGetHelp func(*cobra.Command, []string)
 var Cmd = &cobra.Command{
 	Use:    "get",
 	Short:  "Install from the marketplace",
-	Long:   `Install packages from the marketplace — skills, worlds, packs, and adapters.`,
+	Long:   `Install packages from the marketplace - skills, worlds, packs, and adapters.`,
 	Hidden: true,
 }
 
@@ -23,7 +23,7 @@ var installCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  Installing package %q...\n", args[0])
-		fmt.Println("  (Not yet implemented — coming in Epoch 10)")
+		fmt.Println("  (Not yet implemented - coming in Epoch 10)")
 		return nil
 	},
 }
@@ -44,7 +44,7 @@ var searchCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  Searching for %q...\n", args[0])
-		fmt.Println("  (Not yet implemented — coming in Epoch 10)")
+		fmt.Println("  (Not yet implemented - coming in Epoch 10)")
 		return nil
 	},
 }
@@ -79,7 +79,7 @@ func getHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ get")+" "+ui.Faint("— install from the marketplace"),
+		ui.Strong("⬡ get")+" "+ui.Faint("- install from the marketplace"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
 				{Name: "install <name>", Desc: "Install a package"},

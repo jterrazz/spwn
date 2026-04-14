@@ -1,5 +1,5 @@
 /**
- * Static tool catalog — mirrors core/imagebuilder/catalog.
+ * Static tool catalog - mirrors core/imagebuilder/catalog.
  * Skill content is inlined from the embedded markdown files.
  */
 
@@ -84,7 +84,7 @@ export const TOOLS: ToolDef[] = [
         name: "SKILL.md",
         content: `# Claude Code
 
-Claude Code is your AI agent runtime — the thinking engine that processes tasks.
+Claude Code is your AI agent runtime - the thinking engine that processes tasks.
 
 ## Configuration
 Claude Code is pre-configured with:
@@ -100,8 +100,8 @@ claude --session-id <id> "task"      # Resume specific session
 \`\`\`
 
 ## Environment
-- \`ANTHROPIC_API_KEY\` — API key for Claude (if using API auth)
-- \`CLAUDE_CODE_OAUTH_TOKEN\` — OAuth token (if using subscription auth)`,
+- \`ANTHROPIC_API_KEY\` - API key for Claude (if using API auth)
+- \`CLAUDE_CODE_OAUTH_TOKEN\` - OAuth token (if using subscription auth)`,
       },
     ],
   },
@@ -119,7 +119,7 @@ claude --session-id <id> "task"      # Resume specific session
         name: "SKILL.md",
         content: `# Codex
 
-Codex is OpenAI's agent runtime — a CLI that executes tasks using GPT models.
+Codex is OpenAI's agent runtime - a CLI that executes tasks using GPT models.
 
 ## Usage
 \`\`\`bash
@@ -177,7 +177,7 @@ Auth tokens are forwarded from the host automatically.
     name: "@spwn/qmd",
     kind: "tool",
     description: "On-device markdown search",
-    provides: "qmd — BM25 + semantic search",
+    provides: "qmd - BM25 + semantic search",
     useWhen: "The agent needs to search docs or knowledge bases locally",
     deps: ["@spwn/node"],
     verify: ["qmd"],
@@ -185,7 +185,7 @@ Auth tokens are forwarded from the host automatically.
     skills: [
       {
         name: "SKILL.md",
-        content: `# QMD — Query Markdown Documents
+        content: `# QMD - Query Markdown Documents
 
 QMD is an on-device search engine for markdown notes, meeting transcripts, documentation, and knowledge bases.
 
@@ -204,7 +204,7 @@ qmd search --semantic "concept"      # Semantic search with embeddings
 
 ## When to Use
 Use QMD when you need to search through large knowledge bases, documentation, or notes.
-It runs entirely locally — no external API calls needed for search.`,
+It runs entirely locally - no external API calls needed for search.`,
       },
     ],
   },
@@ -213,7 +213,7 @@ It runs entirely locally — no external API calls needed for search.`,
     name: "@spwn/cli",
     kind: "platform",
     description: "spwn CLI",
-    provides: "spwn — agent management, messaging, identity",
+    provides: "spwn - agent management, messaging, identity",
     useWhen: "The agent needs to manage its own identity or sub-worlds",
     deps: [],
     verify: ["spwn"],
@@ -235,7 +235,7 @@ spwn msg send <to> --from <me> "msg"  # Send message
 \`\`\`
 
 ## Agent Identity
-Your mind is at \`/mind/\` — read your purpose, traits, and profile before starting work.
+Your mind is at \`/mind/\` - read your purpose, traits, and profile before starting work.
 \`\`\`bash
 cat /mind/core/purpose.md
 cat /mind/core/profile.md
@@ -258,10 +258,10 @@ cat /mind/core/traits.md
         name: "SKILL.md",
         content: `# Architect
 
-You are the Architect — the always-on daemon that builds and oversees worlds.
+You are the Architect - the always-on daemon that builds and oversees worlds.
 
 ## First Things First
-1. Read your stack at /me/stack.md — prioritize focus tasks
+1. Read your stack at /me/stack.md - prioritize focus tasks
 2. Check system status: \`spwn status\`
 3. Address the highest priority task in Focus
 

@@ -1,4 +1,4 @@
-# Spwn — Project Conventions
+# Spwn - Project Conventions
 
 ## Core Principle: The Building Blocks of Agent Intelligence
 
@@ -8,15 +8,15 @@ The domain has three main abstractions, each owning one concern:
 
 | Abstraction | What it owns | Implementation |
 |---|---|---|
-| **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` — Claude Code today, others swap in as a ~50 LOC Go file |
-| **Backend** | Where worlds run | `packages/world/internal/backend` — Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/agent` — flat markdown layers (core/skills/knowledge/playbooks/journal) on the host filesystem |
+| **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` - Claude Code today, others swap in as a ~50 LOC Go file |
+| **Backend** | Where worlds run | `packages/world/internal/backend` - Docker; container labels are the source of truth for world state |
+| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (core/skills/knowledge/playbooks/journal) on the host filesystem |
 
 ## Vocabulary
 
 ### Entities
 - **Agent**: A persistent mind. Composed from tools, skills, and a profile. Has identity, memory, and evolution history. The main thing you create and ship.
-- **World**: A runtime instance. Ephemeral. Where an agent actually runs — Docker container with filesystem, tools, and lifecycle. Dies when stopped.
+- **World**: A runtime instance. Ephemeral. Where an agent actually runs - Docker container with filesystem, tools, and lifecycle. Dies when stopped.
 - **Architect**: The always-on orchestration daemon. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 
 ### Building blocks (composable, reusable)
@@ -25,18 +25,18 @@ The domain has three main abstractions, each owning one concern:
 - **Profile**: A reusable personality template. Role, tone, purpose, behavior. Agents inherit a profile for their baseline personality.
 
 ### Agent internals
-- **Identity**: Immutable core — purpose, traits, bonds. Never changes, even across forks.
+- **Identity**: Immutable core - purpose, traits, bonds. Never changes, even across forks.
 - **Memory**: Journal, sessions, and knowledge. Persists across worlds, grows with experience.
 - **Composition**: An agent's active tools + skills + profile declared in `agent.yaml`.
 
-### Hierarchy (inside a world — "coming soon" on landing page)
+### Hierarchy (inside a world - "coming soon" on landing page)
 - **Chief**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
 - **Worker**: Persistent worker agent. Has its own identity and memory.
 - **NPC**: Ephemeral agent. No persistent memory. Single task, fire & forget.
 
 ### Evolution
 - **Dream**: Analyze experience → discover patterns → promote successes to playbooks. `spwn agent dream <name>`
-- **Sleep**: Graceful shutdown — save state, consolidate, prune. `spwn agent sleep <name>`
+- **Sleep**: Graceful shutdown - save state, consolidate, prune. `spwn agent sleep <name>`
 - **Fork**: Clone an agent with everything it knows. `spwn agent fork <src> <dst>`
 
 ## CLI Commands
@@ -100,7 +100,7 @@ spwn skill publish paper-reading
 spwn skill install @community/rust-review
 spwn skill rm paper-reading
 
-# ── Profiles (composable blocks — personality templates) ──────────
+# ── Profiles (composable blocks - personality templates) ──────────
 spwn profile ls
 spwn profile new researcher
 spwn profile edit researcher
@@ -151,13 +151,13 @@ spwn auth login / logout / token
 │   └── <world-id>/            # Per-world files (physics.md, roster.md, shared notes)
 ├── agents/
 │   └── neo/
-│       ├── agent.yaml         # Composition — tools, skills, profile, runtime
+│       ├── agent.yaml         # Composition - tools, skills, profile, runtime
 │       ├── CLAUDE.md          # Entry point Claude Code reads on startup
 │       ├── core/              # Identity layer (profile.md, purpose.md, traits.md)
 │       ├── skills/             # Procedures, checklists
 │       ├── knowledge/         # Facts, codebase info
 │       ├── playbooks/         # Workflows promoted from experience (via dream)
-│       ├── journal/           # Session history — one file per run
+│       ├── journal/           # Session history - one file per run
 │       └── worlds/<world-id>/ # Per-deployment inbox/outbox/notes/role.md
 ├── credentials/               # Auth material surfaced to containers at /credentials
 ├── skills/                    # Authored and installed skill files
@@ -181,7 +181,7 @@ spwn/
 ├── Makefile                         # Single entry point for Go + JS tasks
 │
 ├── apps/                            # End-user binaries
-│   ├── cli/                         #   go.mod — the `spwn` binary
+│   ├── cli/                         #   go.mod - the `spwn` binary
 │   │   ├── cmd/spwn/main.go         #     Entry point
 │   │   ├── root.go                  #     Root cobra command
 │   │   ├── world/                   #     spwn world (up, down, ls, inspect, logs, enter)
@@ -205,7 +205,7 @@ spwn/
 │       └── src-tauri/               #     Tauri shell (Rust)
 │
 ├── packages/                        # Go domain modules (shared libraries)
-│   ├── world/                       #   go.mod — world lifecycle (the core)
+│   ├── world/                       #   go.mod - world lifecycle (the core)
 │   │   ├── world.go                 #   Public API (World, Manifest, Architect…)
 │   │   └── internal/
 │   │       ├── architect/           #     Orchestration (spawn, destroy, deploy)
@@ -219,17 +219,17 @@ spwn/
 │   │       ├── runtimestate/        #     Mutable runtime state (sessions, agents)
 │   │       └── models/              #     Domain types
 │   │
-│   ├── agent/                       #   go.mod — agent/mind management
+│   ├── agent/                       #   go.mod - agent/mind management
 │   │   ├── agent.go                 #   Public API (InitMind, Validate, Export, Fork…)
 │   │   └── internal/{mind,journal,session,evolution,memory}/
 │   │
-│   ├── messenger/                   #   go.mod — agent-to-agent messaging
+│   ├── messenger/                   #   go.mod - agent-to-agent messaging
 │   │
-│   ├── imagebuilder/                #   go.mod — composable tool-based image builder
+│   ├── imagebuilder/                #   go.mod - composable tool-based image builder
 │   │
-│   ├── migration/                   #   go.mod — ~/.spwn schema migrations
+│   ├── migration/                   #   go.mod - ~/.spwn schema migrations
 │   │
-│   └── foundation/                  #   go.mod — cross-cutting primitives
+│   └── foundation/                  #   go.mod - cross-cutting primitives
 │       ├── constants.go             #     Defaults, directory layout, mind layers
 │       ├── paths.go                 #     BaseDir(), WorldsDir(), AgentsDir()
 │       ├── identity.go              #     GenerateWorldID(), GenerateAgentID()
@@ -255,7 +255,7 @@ spwn/
 
 ## Container Architecture: Docker-outside-of-Docker (DooD)
 
-spwn uses **DooD (Docker-outside-of-Docker)**, not DinD (Docker-in-Docker). The host's Docker daemon is shared via socket mount (`/var/run/docker.sock`). All containers are **siblings** on the same daemon — no nesting, no privilege escalation, no performance overhead.
+spwn uses **DooD (Docker-outside-of-Docker)**, not DinD (Docker-in-Docker). The host's Docker daemon is shared via socket mount (`/var/run/docker.sock`). All containers are **siblings** on the same daemon - no nesting, no privilege escalation, no performance overhead.
 
 ```
 Host machine
@@ -266,8 +266,8 @@ Host machine
 ```
 
 **Two modes:**
-- **Local CLI (direct)** — `spwn up` calls Docker directly from the host. No Architect container needed.
-- **Hosted Architect (containerized)** — `spwn architect start` launches the Architect in a long-lived container with the Docker socket mounted. It creates/manages world containers as siblings. Channels connect here.
+- **Local CLI (direct)** - `spwn up` calls Docker directly from the host. No Architect container needed.
+- **Hosted Architect (containerized)** - `spwn architect start` launches the Architect in a long-lived container with the Docker socket mounted. It creates/manages world containers as siblings. Channels connect here.
 
 ## Dependency Graph
 
@@ -287,7 +287,7 @@ Implementation details live under `internal/`.
 
 - No cgo
 - Errors: `error: lowercase message.\nActionable hint.`
-- Domain modules own all business logic — CLI is a thin wrapper
+- Domain modules own all business logic - CLI is a thin wrapper
   (parse flags → call domain API → format output)
 - Types avoid stutter: `world.World` not `world.WorldInstance`,
   `agent.Info` not `agent.AgentInfo`. Package name provides context.
@@ -328,10 +328,10 @@ Each domain tests only its own contract. Cross-domain flows (spawn universe + ag
 
 Spwn follows a **spec-first** development process:
 
-1. **Specify** — Define behavior in the knowledge (what the system SHOULD do)
-2. **Encode** — Write tests that encode those specs (they fail initially)
-3. **Implement** — Write code that makes the tests pass
-4. **Verify** — The test suite IS the living specification
+1. **Specify** - Define behavior in the knowledge (what the system SHOULD do)
+2. **Encode** - Write tests that encode those specs (they fail initially)
+3. **Implement** - Write code that makes the tests pass
+4. **Verify** - The test suite IS the living specification
 
 The E2E test suite is the behavioral specification of spwn. Each test describes a user-visible behavior:
 
@@ -343,8 +343,8 @@ The E2E test suite is the behavioral specification of spwn. Each test describes 
 ```
 
 ### Test layers:
-- **Behavioral specs** (`packages/world/tests/e2e/`, `tests/e2e/`) — what the system does (the specification)
-- **CLI specs** (`apps/cli/cli_test.go`) — what the user sees (flag parsing, help, output)
-- **Unit tests** (`*_test.go` next to source) — how the code works (implementation details)
+- **Behavioral specs** (`packages/world/tests/e2e/`, `tests/e2e/`) - what the system does (the specification)
+- **CLI specs** (`apps/cli/cli_test.go`) - what the user sees (flag parsing, help, output)
+- **Unit tests** (`*_test.go` next to source) - how the code works (implementation details)
 
-The behavioral specs are the source of truth. If a spec fails, the implementation is wrong — not the spec.
+The behavioral specs are the source of truth. If a spec fails, the implementation is wrong - not the spec.

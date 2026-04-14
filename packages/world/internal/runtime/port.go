@@ -4,7 +4,7 @@ package runtime
 //
 // Note: MindPath used to live here in the legacy file-mounted layout.
 // In the labels-as-truth + per-agent HOME architecture the runtime
-// adapter does not need a host path — talk.go sets HOME and -w on the
+// adapter does not need a host path - talk.go sets HOME and -w on the
 // docker exec. Adapters that need to distinguish "named agent" from
 // "anonymous NPC" should check AgentName != "".
 type SpawnConfig struct {

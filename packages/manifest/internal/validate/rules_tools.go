@@ -15,7 +15,7 @@ import (
 //   - a directory under ./spwn/tools/<name>/ (local tool pack).
 //
 // When BuiltinTools is nil the caller didn't inject a catalog, so we
-// fall back to a simple "@spwn/*" prefix check — enough to catch
+// fall back to a simple "@spwn/*" prefix check - enough to catch
 // obvious typos without false positives.
 func ruleWorldToolsExist(in Input) []Issue {
 	if !in.WorldExists {

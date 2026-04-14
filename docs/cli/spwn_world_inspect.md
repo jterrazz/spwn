@@ -5,7 +5,7 @@ slug: "spwn-world-inspect"
 
 ## spwn world inspect
 
-Inspect a running world — physics, agents, status
+Inspect a running world - physics, agents, status
 
 ```
 spwn world inspect <world-id> [flags]
@@ -19,5 +19,5 @@ spwn world inspect <world-id> [flags]
 
 ### SEE ALSO
 
-* [spwn world](./spwn_world.md)	 - Manage worlds — ephemeral runtime instances for agents
+* [spwn world](./spwn_world.md)	 - Manage worlds - ephemeral runtime instances for agents
 

@@ -29,7 +29,7 @@ func (f *fakeBackend) ListContainersByLabel(_ context.Context, key, value string
 	return out, nil
 }
 
-// Stubs — none of these are called by Store, but we need them to
+// Stubs - none of these are called by Store, but we need them to
 // satisfy the Backend interface.
 func (f *fakeBackend) Create(context.Context, backend.ContainerConfig) (string, error) {
 	return "", nil
@@ -134,7 +134,7 @@ func TestList_ReadsFromContainerLabels(t *testing.T) {
 
 func TestList_GhostContainersDisappearWhenRemoved(t *testing.T) {
 	// This is the bug we are explicitly fixing: if Docker no longer
-	// has the container, the world must not be visible — full stop.
+	// has the container, the world must not be visible - full stop.
 	fb := &fakeBackend{containers: []backend.ContainerInfo{
 		newWorldContainer("w-doomed-99999", "", "default", true),
 	}}
@@ -217,7 +217,7 @@ func TestAddAgent_RequiresLiveWorld(t *testing.T) {
 
 func TestSaveDeleteUpdateStatus_AreNoOps(t *testing.T) {
 	s := newStore(t, &fakeBackend{})
-	// All three should return nil for any input — they exist only for
+	// All three should return nil for any input - they exist only for
 	// API stability.
 	if err := s.Save(models.World{}); err != nil {
 		t.Errorf("Save should be a no-op: %v", err)

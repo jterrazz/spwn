@@ -15,12 +15,12 @@ describe("colony multi-agent", () => {
   });
 
   test("spawn multi-agent world (first --agent is chief)", () => {
-    // GIVEN — two agents
+    // GIVEN - two agents
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
 
-    // WHEN — spawning with two --agent flags
+    // WHEN - spawning with two --agent flags
     const spawnResult = ctx.spwn(
       [
         "world",

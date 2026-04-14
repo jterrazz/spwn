@@ -5,7 +5,7 @@ slug: "spwn-architect-status"
 
 ## spwn architect status
 
-Show Architect status — worlds, agents
+Show Architect status - worlds, agents
 
 ### Synopsis
 

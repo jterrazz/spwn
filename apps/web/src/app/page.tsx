@@ -235,7 +235,7 @@ export default function UniverseMapPage() {
       refetchSidebar();
       setShowDestroyAll(false);
     } catch {
-      // ignore errors — worlds may already be gone
+      // ignore errors - worlds may already be gone
     } finally {
       setDestroyingAll(false);
       setShowDestroyAll(false);
@@ -283,7 +283,7 @@ export default function UniverseMapPage() {
               onClick={(e) => { if (e.target === e.currentTarget && selected !== null) setSelected(null); }}
             >
             <div className="h-full flex items-center pb-24">
-              {/* Planets — full width scrollable */}
+              {/* Planets - full width scrollable */}
               <div
                 ref={scrollRef}
                 className="flex gap-10 items-center will-change-transform select-none"
@@ -323,7 +323,7 @@ export default function UniverseMapPage() {
                     </div>
                   );
                 })}
-                {/* New world — same card, same animations */}
+                {/* New world - same card, same animations */}
                 <NewWorldCard
                   tint="creating"
                   opacity={selected !== null ? 0.2 : 0.5}
@@ -334,7 +334,7 @@ export default function UniverseMapPage() {
 
             </div>
 
-            {/* Floating world info panel — lives OUTSIDE the negative-margin
+            {/* Floating world info panel - lives OUTSIDE the negative-margin
                 carousel so it doesn't cause horizontal overflow. Positioned
                 absolutely within the flex-1 parent that wraps the carousel. */}
             {selected !== null && worlds[selected] && (() => {
@@ -369,7 +369,7 @@ export default function UniverseMapPage() {
 
                   {/* Metrics */}
                   <MetricGrid columns={3} items={[
-                    { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "—" },
+                    { label: "Uptime", value: w.created_at ? (() => { const m = Math.floor((Date.now() - new Date(w.created_at).getTime()) / 60000); if (m < 60) return `${m}m`; const h = Math.floor(m / 60); if (h < 24) return `${h}h`; return `${Math.floor(h / 24)}d`; })() : "-" },
                     { label: "Agents", value: w.agents.length },
                     { label: "Workspaces", value: w.workspaces?.length ?? 0 },
                   ]} />
@@ -624,7 +624,7 @@ function EmptyWorldsView({ agents, onSpawn, onRefetch }: { agents: AgentListItem
     setInstalling(ex.slug);
     setInstallError(null);
     try {
-      // 1. Copy template files into ~/.spwn/ (idempotent — skips
+      // 1. Copy template files into ~/.spwn/ (idempotent - skips
       //    existing agents/worlds so users don't lose local edits).
       await apiPost(`/api/examples/${ex.slug}/install`);
 
@@ -864,7 +864,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agent: agentName.trim(), workspaces: [{ name: "default", path: effectiveWorkspace }], config: "default", role: "worker" }),
-        signal: AbortSignal.timeout(600000), // 10 min — first run may build Docker images
+        signal: AbortSignal.timeout(600000), // 10 min - first run may build Docker images
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -971,7 +971,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 autoFocus
               />
               <p className="text-[10px] text-muted-foreground/25 mt-2">
-                Optional — you can always change this later
+                Optional - you can always change this later
               </p>
             </div>
             <button
@@ -999,7 +999,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 autoFocus
               />
               <p className="text-[10px] text-muted-foreground/25 mt-2">
-                The directory where {agentName} will work — leave empty for default
+                The directory where {agentName} will work - leave empty for default
               </p>
             </div>
 
@@ -1146,7 +1146,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
           config,
           role,
         }),
-        signal: AbortSignal.timeout(600000), // 10 min — first run may build Docker images
+        signal: AbortSignal.timeout(600000), // 10 min - first run may build Docker images
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -1212,12 +1212,12 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
             />
           </div>
 
-          {/* Agents — checkable list, optional (0 = empty world) */}
+          {/* Agents - checkable list, optional (0 = empty world) */}
           <div>
             <div className="flex items-baseline justify-between mb-1.5">
               <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40">
                 Agents <span className="text-muted-foreground/25 normal-case tracking-normal">
-                  ({selectedAgents.size === 0 ? "none — empty world" : `${selectedAgents.size} selected`})
+                  ({selectedAgents.size === 0 ? "none - empty world" : `${selectedAgents.size} selected`})
                 </span>
               </label>
               {selectedAgents.size > 0 && (
@@ -1233,7 +1233,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
             <div className="rounded-lg bg-white/[0.02] border border-white/[0.08] max-h-44 overflow-y-auto">
               {availableAgents.length === 0 ? (
                 <p className="text-[11px] text-muted-foreground/40 px-3 py-2.5">
-                  No agents yet — create one below or skip to spawn an empty world.
+                  No agents yet - create one below or skip to spawn an empty world.
                 </p>
               ) : (
                 <ul className="divide-y divide-white/[0.04]">
@@ -1298,7 +1298,7 @@ function SpawnWorldDialog({ onClose, onComplete }: { onClose: () => void; onComp
                 onClick={() => setWorkspaces([{ name: "default", path: "", readonly: false }])}
                 className="w-full text-left px-3 py-2.5 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.08] text-[11px] text-muted-foreground/40 hover:text-foreground/60 hover:border-white/[0.15] transition-colors"
               >
-                Ephemeral world — click to add a host mount
+                Ephemeral world - click to add a host mount
               </button>
             ) : (
               <div className="space-y-2">

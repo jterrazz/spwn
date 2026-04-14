@@ -45,7 +45,7 @@ export function DockerLockScreen() {
   // Three distinct states all get the same Docker-themed lock screen,
   // because for users the actionable next step is the same in every
   // case: make sure Docker is running. The "API offline" branding the
-  // previous version showed was technically accurate but useless — most
+  // previous version showed was technically accurate but useless - most
   // users don't know what the spwn API is, only that Docker needs to
   // be on for any of this to work. We surface API status as a quiet
   // diagnostic line at the bottom instead.
@@ -57,7 +57,7 @@ export function DockerLockScreen() {
 
   const installed = status?.installed ?? false;
   // When the API is unreachable we don't actually know whether Docker is
-  // installed, so default to the "running but offline" copy — that's the
+  // installed, so default to the "running but offline" copy - that's the
   // most common cause and the install link would be wrong otherwise.
   const showInstallCta = !apiDown && !installed;
   const installUrl =

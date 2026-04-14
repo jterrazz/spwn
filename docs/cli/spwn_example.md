@@ -29,7 +29,7 @@ Examples:
 
 ### SEE ALSO
 
-* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn - create realities for things that can think
 * [spwn example install](./spwn_example_install.md)	 - Copy an example's worlds + agents into ~/.spwn/
 * [spwn example list](./spwn_example_list.md)	 - Show every bundled example
 

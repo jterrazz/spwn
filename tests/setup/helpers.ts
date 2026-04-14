@@ -45,7 +45,7 @@ export function createAgent(spwnHome: string, name: string): void {
 export function createBrokenAgent(spwnHome: string, name: string): void {
   const agentDir = join(spwnHome, "agents", name);
   mkdirSync(join(agentDir, "journal"), { recursive: true });
-  // No core/profile.md, no agent.yaml — just a journal dir
+  // No core/profile.md, no agent.yaml - just a journal dir
   writeFileSync(
     join(agentDir, "journal", "old-session.md"),
     "# Old session\nSome work was done.",
@@ -126,7 +126,7 @@ export function waitForContainer(
       continue;
     }
 
-    // Dead / exited states — no point waiting
+    // Dead / exited states - no point waiting
     if (status === "exited" || status === "dead") {
       return false;
     }
@@ -161,7 +161,7 @@ export function verifyContainerRemoved(
       },
     );
 
-    // Exit code != 0 means container doesn't exist — success
+    // Exit code != 0 means container doesn't exist - success
     if (result.status !== 0) {
       return true;
     }

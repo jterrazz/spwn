@@ -15,7 +15,7 @@ import (
 // shippedSlugs but forgets the embed, etc.), this test fails loudly.
 //
 // Runs against templatesFS so it exercises the exact bytes that ship
-// in the compiled binary — NOT the filesystem.
+// in the compiled binary - NOT the filesystem.
 func TestShippedSlugsMatchEmbed(t *testing.T) {
 	entries, err := fs.ReadDir(templatesFS, ".")
 	if err != nil {
@@ -34,7 +34,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 	sort.Strings(canonical)
 
 	if !stringsEqual(embedded, canonical) {
-		t.Fatalf("shippedSlugs %v != embedded dirs %v — update the go:embed directive AND shippedSlugs together when adding a template", canonical, embedded)
+		t.Fatalf("shippedSlugs %v != embedded dirs %v - update the go:embed directive AND shippedSlugs together when adding a template", canonical, embedded)
 	}
 }
 
@@ -100,7 +100,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 	}
 }
 
-// TestList_StartupIsFirst verifies the gallery ordering — startup
+// TestList_StartupIsFirst verifies the gallery ordering - startup
 // should be the first example users see since it's the best showcase.
 func TestList_StartupIsFirst(t *testing.T) {
 	got, err := List()

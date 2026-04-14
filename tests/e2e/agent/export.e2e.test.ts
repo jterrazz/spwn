@@ -31,28 +31,28 @@ describe("agent export", () => {
   });
 
   test("export creates tar.gz", async () => {
-    // WHEN — exporting the agent
+    // WHEN - exporting the agent
     const result = await spwn("export agent")
       .exec("agent export neo")
       .run();
 
-    // THEN — a tar.gz archive is created with structured output
+    // THEN - a tar.gz archive is created with structured output
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /→ Exporting agent neo\.\.\./);
     expectLine(result.output, /✓ Exported\s+neo\.tar\.gz/);
 
-    // AND — the tar.gz file actually exists on disk
+    // AND - the tar.gz file actually exists on disk
     expect(existsSync(join(home, "neo.tar.gz"))).toBe(true);
   });
 
   test("export tar.gz contains core/profile.md", async () => {
-    // WHEN — exporting the agent
+    // WHEN - exporting the agent
     const result = await spwn("export contents")
       .exec("agent export neo")
       .run();
     expect(result.exitCode).toBe(0);
 
-    // THEN — the tar.gz contains expected files
+    // THEN - the tar.gz contains expected files
     const tarPath = join(home, "neo.tar.gz");
     expect(existsSync(tarPath)).toBe(true);
 
@@ -61,42 +61,42 @@ describe("agent export", () => {
   });
 
   test("export with exclude layers", async () => {
-    // WHEN — exporting with excluded layers
+    // WHEN - exporting with excluded layers
     const result = await spwn("export with exclude")
       .exec("agent export neo --exclude journal,sessions")
       .run();
 
-    // THEN — export completes successfully with same output format
+    // THEN - export completes successfully with same output format
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /→ Exporting agent neo\.\.\./);
     expectLine(result.output, /✓ Exported\s+neo\.tar\.gz/);
 
-    // AND — the tar.gz file exists
+    // AND - the tar.gz file exists
     expect(existsSync(join(home, "neo.tar.gz"))).toBe(true);
   });
 
   test("export non-existent agent fails", async () => {
-    // WHEN — exporting an agent that does not exist
+    // WHEN - exporting an agent that does not exist
     const result = await spwn("export missing")
       .exec("agent export nonexistent")
       .run();
 
-    // THEN — exits with error showing not found
+    // THEN - exits with error showing not found
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /✗ Export failed\s+agent "nonexistent" not found/);
   });
 
   test("export includes all Mind layers by default", async () => {
-    // WHEN — exporting without exclusions
+    // WHEN - exporting without exclusions
     const result = await spwn("export full")
       .exec("agent export neo")
       .run();
 
-    // THEN — export is successful
+    // THEN - export is successful
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Exported\s+neo\.tar\.gz/);
 
-    // AND — the archive contains all expected layers
+    // AND - the archive contains all expected layers
     const tarPath = join(home, "neo.tar.gz");
     expect(existsSync(tarPath)).toBe(true);
 
@@ -107,7 +107,7 @@ describe("agent export", () => {
   });
 
   test("import restores agent from export", async () => {
-    // GIVEN — an exported agent
+    // GIVEN - an exported agent
     const exportResult = await spwn("export for import")
       .exec("agent export neo")
       .run();
@@ -115,12 +115,12 @@ describe("agent export", () => {
     const tarPath = join(home, "neo.tar.gz");
     expect(existsSync(tarPath)).toBe(true);
 
-    // WHEN — importing into a new agent name
+    // WHEN - importing into a new agent name
     const importResult = await spwn("import agent")
       .exec(`agent import ${tarPath} --name neo-restored`)
       .run();
 
-    // THEN — import succeeds and agent exists
+    // THEN - import succeeds and agent exists
     if (importResult.exitCode === 0) {
       // Verify the restored agent directory exists
       expect(existsSync(join(home, "agents", "neo-restored"))).toBe(true);

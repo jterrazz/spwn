@@ -13,7 +13,7 @@ var skills embed.FS
 //go:embed files/*
 var files embed.FS
 
-// Tool is the @spwn/architect tool — the always-on orchestration daemon.
+// Tool is the @spwn/architect tool - the always-on orchestration daemon.
 var Tool = &tool{}
 
 type tool struct{}

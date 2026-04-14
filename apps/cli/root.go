@@ -30,7 +30,7 @@ var Version = "dev"
 
 var rootCmd = &cobra.Command{
 	Use:   "spwn",
-	Short: "spwn — create realities for things that can think",
+	Short: "spwn - create realities for things that can think",
 	Long: `spwn creates isolated Docker environments for AI agents.
 Each world has physics (constants, laws, tools),
 and a Mind (persistent agent identity).`,
@@ -58,7 +58,7 @@ func init() {
 	foundation.Version = Version
 	rootCmd.SetHelpFunc(customHelp)
 
-	// Top-level aliases — shortcuts for the 80% cases
+	// Top-level aliases - shortcuts for the 80% cases
 	rootCmd.AddCommand(world.UpCmd)      // spwn up
 	rootCmd.AddCommand(world.LsCmd)      // spwn ls
 	rootCmd.AddCommand(agent.TalkTopCmd) // spwn talk
@@ -66,21 +66,21 @@ func init() {
 	// Additional top-level shortcuts
 	rootCmd.AddCommand(world.DownCmd)
 
-	// Command groups — entities
+	// Command groups - entities
 	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 
-	// Command groups — building blocks
+	// Command groups - building blocks
 	rootCmd.AddCommand(tool.Cmd)
 	rootCmd.AddCommand(skill.Cmd)
 	rootCmd.AddCommand(profile.Cmd)
 
-	// Command groups — coordination
+	// Command groups - coordination
 	rootCmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)
 
-	// Command groups — system
+	// Command groups - system
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
 	rootCmd.AddCommand(example.Cmd)
@@ -127,10 +127,10 @@ func customHelp(cmd *cobra.Command, args []string) {
 	w := cmd.OutOrStdout()
 
 	fmt.Fprintln(w)
-	fmt.Fprintf(w, "%s %s\n", ui.Strong("⬡ spwn"), ui.Faint("— the building blocks of agent intelligence"))
+	fmt.Fprintf(w, "%s %s\n", ui.Strong("⬡ spwn"), ui.Faint("- the building blocks of agent intelligence"))
 	fmt.Fprintln(w)
 
-	// Quick Start — the 30-second path
+	// Quick Start - the 30-second path
 	fmt.Fprintf(w, "%s\n", ui.Strong("Quick Start:"))
 	printHelpCmd(w, "spwn agent new neo", "Create an agent")
 	printHelpCmd(w, "spwn agent add neo --tool @spwn/python", "")
@@ -138,20 +138,20 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "spwn talk neo", "Talk to it")
 	fmt.Fprintln(w)
 
-	// Entities — the things you create
+	// Entities - the things you create
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
 	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, show, add, fork, dream, sleep)"))
 	printHelpCmd(w, "world", "Runtime instances "+ui.Faint("(up, ls, show, down, enter, snap)"))
 	fmt.Fprintln(w)
 
-	// Building blocks — the things you compose agents from
+	// Building blocks - the things you compose agents from
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
 	printHelpCmd(w, "tool", "Reusable tool packs "+ui.Faint("(ls, show, install)"))
 	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show)"))
 	printHelpCmd(w, "profile", "Reusable personality templates "+ui.Faint("(ls, new, edit)"))
 	fmt.Fprintln(w)
 
-	// Shortcuts — the 80% top-level aliases
+	// Shortcuts - the 80% top-level aliases
 	fmt.Fprintf(w, "%s\n", ui.Strong("Shortcuts:"))
 	printHelpCmd(w, "up", "Spawn a world "+ui.Faint("(alias: world up)"))
 	printHelpCmd(w, "ls", "List active worlds "+ui.Faint("(alias: world ls)"))
@@ -159,7 +159,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "down <id>", "Destroy a world")
 	fmt.Fprintln(w)
 
-	// Coordination — multi-agent + orchestration
+	// Coordination - multi-agent + orchestration
 	fmt.Fprintf(w, "%s\n", ui.Strong("Coordination:"))
 	printHelpCmd(w, "architect", "Always-on orchestration daemon")
 	printHelpCmd(w, "web", "Open the local web UI")

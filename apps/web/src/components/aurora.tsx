@@ -17,7 +17,7 @@ export function Aurora({ className }: { className?: string }) {
           "opacity-[0.06] blur-[18px] will-change-transform",
           "dark:invert-0 invert filter",
 
-          // Aurora gradient — slightly varied angles to break parallelism
+          // Aurora gradient - slightly varied angles to break parallelism
           "[--aurora:repeating-linear-gradient(100deg,rgba(255,255,255,0.15)_10%,rgba(180,180,180,0.1)_15%,rgba(220,220,220,0.12)_20%,rgba(150,150,150,0.08)_25%,rgba(200,200,200,0.1)_30%)]",
           "[--aurora-b:repeating-linear-gradient(115deg,rgba(255,255,255,0.1)_8%,rgba(200,200,200,0.06)_14%,rgba(240,240,240,0.08)_22%,rgba(160,160,160,0.05)_28%,rgba(210,210,210,0.07)_34%)]",
 
@@ -33,7 +33,7 @@ export function Aurora({ className }: { className?: string }) {
           // Dark mode
           "dark:[background-image:var(--dark-gradient),var(--aurora)]",
 
-          // After pseudo — second layer at different angle for depth
+          // After pseudo - second layer at different angle for depth
           "after:absolute after:inset-0 after:content-['']",
           "after:[background-image:var(--white-gradient),var(--aurora-b)]",
           "after:[background-size:250%,_180%]",
@@ -41,7 +41,7 @@ export function Aurora({ className }: { className?: string }) {
           "after:mix-blend-difference",
           "after:dark:[background-image:var(--dark-gradient),var(--aurora-b)]",
 
-          // Mask — simple top fade
+          // Mask - simple top fade
           "[mask-image:radial-gradient(ellipse_at_50%_0%,black_10%,transparent_70%)]",
 
           // Animation

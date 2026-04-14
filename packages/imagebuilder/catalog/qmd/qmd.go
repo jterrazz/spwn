@@ -10,7 +10,7 @@ import (
 //go:embed skills/*
 var skills embed.FS
 
-// Tool is the @spwn/qmd tool — on-device markdown search engine.
+// Tool is the @spwn/qmd tool - on-device markdown search engine.
 var Tool = &tool{}
 
 type tool struct{}

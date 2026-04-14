@@ -29,9 +29,9 @@ func GeneratePhysics(m models.Manifest) string {
 
 	// Tools
 	sb.WriteString("## Tools\n")
-	sb.WriteString("/workspace — project files, mounted from Host (read-write)\n")
-	sb.WriteString("/mind — agent identity and memory (read-write)\n")
-	sb.WriteString("/tmp — ephemeral scratch space\n\n")
+	sb.WriteString("/workspace - project files, mounted from Host (read-write)\n")
+	sb.WriteString("/mind - agent identity and memory (read-write)\n")
+	sb.WriteString("/tmp - ephemeral scratch space\n\n")
 
 	// Communication
 	sb.WriteString("## Communication\n")
@@ -41,9 +41,9 @@ func GeneratePhysics(m models.Manifest) string {
 
 	// Topology
 	sb.WriteString("## Topology\n")
-	sb.WriteString("/workspace — project files, mounted from Host (read-write)\n")
-	sb.WriteString("/mind — agent identity and memory (read-write)\n")
-	sb.WriteString("/tmp — ephemeral scratch space\n")
+	sb.WriteString("/workspace - project files, mounted from Host (read-write)\n")
+	sb.WriteString("/mind - agent identity and memory (read-write)\n")
+	sb.WriteString("/tmp - ephemeral scratch space\n")
 
 	return sb.String()
 }

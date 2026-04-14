@@ -22,12 +22,12 @@ describe("CLI stress tests", () => {
   });
 
   test("create and destroy 5 agents rapidly with concurrency", async () => {
-    // GIVEN — an initialized home
+    // GIVEN - an initialized home
     await spwn("init").exec("init").run();
 
     const agentNames = ["alpha", "bravo", "charlie", "delta", "echo"];
 
-    // WHEN — creating 5 agents concurrently (max 3 at a time)
+    // WHEN - creating 5 agents concurrently (max 3 at a time)
     const createTasks = agentNames.map(
       (name) => () =>
         spwn(`create ${name}`)
@@ -39,7 +39,7 @@ describe("CLI stress tests", () => {
     );
     await runConcurrently(createTasks, 3);
 
-    // THEN — all agents exist in list
+    // THEN - all agents exist in list
     const listResult = await spwn("list all")
       .exec("agent ls")
       .run();
@@ -49,7 +49,7 @@ describe("CLI stress tests", () => {
       expect(output).toContain(name);
     }
 
-    // WHEN — deleting all 5 agents concurrently (max 3 at a time)
+    // WHEN - deleting all 5 agents concurrently (max 3 at a time)
     const deleteTasks = agentNames.map(
       (name) => () =>
         spwn(`rm ${name}`)
@@ -61,7 +61,7 @@ describe("CLI stress tests", () => {
     );
     await runConcurrently(deleteTasks, 3);
 
-    // THEN — no agents remain (except possibly 'default' created by init)
+    // THEN - no agents remain (except possibly 'default' created by init)
     const finalList = await spwn("final list")
       .exec("agent ls")
       .run();
@@ -73,10 +73,10 @@ describe("CLI stress tests", () => {
   });
 
   test("rapid sequential commands do not corrupt state", async () => {
-    // GIVEN — an initialized home
+    // GIVEN - an initialized home
     await spwn("init").exec("init").run();
 
-    // WHEN — running many sequential create/delete cycles
+    // WHEN - running many sequential create/delete cycles
     for (let i = 0; i < 5; i++) {
       const name = `rapid-${i}`;
       const createResult = await spwn(`create ${name}`)
@@ -90,7 +90,7 @@ describe("CLI stress tests", () => {
       expect(rmResult.exitCode).toBe(0);
     }
 
-    // THEN — agent list is clean (no remnants from rapid cycles)
+    // THEN - agent list is clean (no remnants from rapid cycles)
     const listResult = await spwn("final list")
       .exec("agent ls")
       .run();

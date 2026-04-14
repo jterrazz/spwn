@@ -8,7 +8,7 @@ import (
 
 // These tests pin the JSON shape of POST /api/worlds. They exist because a
 // stale binary once had only `Workspace string` (legacy) on its body struct,
-// so JSON requests carrying `workspaces: [...]` were silently dropped — the
+// so JSON requests carrying `workspaces: [...]` were silently dropped - the
 // world spawned ephemeral and Docker auto-created an anonymous /workspace
 // volume. Any regression of the field name or JSON tag will fail here.
 
@@ -55,7 +55,7 @@ func TestCreateWorldRequest_MigratesLegacyWorkspaceField(t *testing.T) {
 }
 
 func TestCreateWorldRequest_NewSliceWinsOverLegacy(t *testing.T) {
-	// If a request sends both, the new slice takes precedence — the legacy
+	// If a request sends both, the new slice takes precedence - the legacy
 	// field is only a fallback when the slice is empty.
 	raw := `{"workspace":"/legacy","workspaces":[{"name":"a","path":"/new"}]}`
 

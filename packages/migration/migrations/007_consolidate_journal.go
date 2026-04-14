@@ -35,7 +35,7 @@ func migration007() Migration {
 
 				legacyInfo, legacyErr := os.Stat(legacyJournal)
 				if legacyErr != nil || !legacyInfo.IsDir() {
-					continue // no legacy journal — nothing to do
+					continue // no legacy journal - nothing to do
 				}
 
 				_, memoryErr := os.Stat(memoryJournal)

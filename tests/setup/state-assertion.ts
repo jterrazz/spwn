@@ -2,7 +2,7 @@ import { execSync } from "node:child_process";
 import { expect } from "vitest";
 
 /**
- * StateAssertion queries world state via Docker container labels —
+ * StateAssertion queries world state via Docker container labels -
  * the canonical source of truth in the new model. The legacy
  * state.json file is no longer maintained.
  *

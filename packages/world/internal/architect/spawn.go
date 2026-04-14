@@ -117,7 +117,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	binds = append(binds, foundation.AgentsDir()+":/agents")
 
 	// Validate each named agent's mind directory and profile. We
-	// validate but no longer mount per-agent — all visibility goes
+	// validate but no longer mount per-agent - all visibility goes
 	// through the single /agents bind above.
 	agentNamesToValidate := []string{}
 	if len(opts.Agents) > 0 {
@@ -140,7 +140,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Resolve image. SPWN_BASE_IMAGE and opts.Image both mean "use this
-	// exact image, don't rebuild" — they're how tests inject a mock
+	// exact image, don't rebuild" - they're how tests inject a mock
 	// runtime. Only when neither is set do we auto-build from the base
 	// Dockerfile + tool catalog.
 	image := foundation.WorldImage
@@ -203,7 +203,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		opts.progress("image_ready", image)
 	}
 
-	// Sync credentials to bind-mountable directory (live — containers see updates)
+	// Sync credentials to bind-mountable directory (live - containers see updates)
 	if err := auth.SyncCredentials(); err != nil {
 		warnings = append(warnings, fmt.Sprintf("credential sync: %v", err))
 	}
@@ -240,7 +240,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// Build the World record up-front so we can imprint it onto the
 	// container as labels at create time. The container becomes the
-	// canonical store — see packages/world/internal/labels.
+	// canonical store - see packages/world/internal/labels.
 	worldRecord := models.World{
 		ID:         id,
 		Name:       opts.Name,
@@ -274,7 +274,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Per-world state directory on the host. This is the canonical
-	// /world/ inside the container — physics, faculties, roster,
+	// /world/ inside the container - physics, faculties, roster,
 	// AGENTS.md, system skills, and the shared whiteboard all live
 	// here. Surviving container destroy is a deliberate choice: the
 	// user's notes belong to the world, not the runtime.
@@ -371,7 +371,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	opts.progress("world_state_written", "physics, faculties, roster, AGENTS.md")
 
 	// Finalize the world record. The labels we already wrote to the
-	// container are the canonical store — this struct is just what we
+	// container are the canonical store - this struct is just what we
 	// hand back to the caller. ContainerID and Status come from the
 	// runtime side, not from labels. Future state.List() calls will
 	// reconstruct identical Worlds straight from container labels.
@@ -516,7 +516,7 @@ func parseMemory(s string) (int64, error) {
 //   - 0 workspaces: no binds. /work does not exist; the agent's only
 //     writable space is its own home at /agents/<name>.
 //   - 1+ workspaces: each mounted at /work/<name>. There is no
-//     special-cased single-workspace path — `ls /work` always tells
+//     special-cased single-workspace path - `ls /work` always tells
 //     the agent what projects it can touch.
 func buildWorkspaceBinds(workspaces []models.Workspace) []string {
 	if len(workspaces) == 0 {
@@ -552,10 +552,10 @@ func worldStateDirFor(worldID string) string {
 // inside the agent's persistent home dir on the host:
 //
 //	~/.spwn/agents/<name>/worlds/<world-id>/
-//	  inbox/    — messages received in this world
-//	  outbox/   — messages I sent (audit trail)
-//	  notes/    — my private notes for this world's project
-//	  role.md   — what role I play here
+//	  inbox/    - messages received in this world
+//	  outbox/   - messages I sent (audit trail)
+//	  notes/    - my private notes for this world's project
+//	  role.md   - what role I play here
 //
 // It also writes CLAUDE.md at the agent root so the Claude Code
 // runtime loads the agent's identity on startup. The cwd is set to
@@ -581,7 +581,7 @@ func initAgentDeployment(rec models.AgentRecord, worldID string) error {
 		return fmt.Errorf("write role.md: %w", err)
 	}
 
-	// Write CLAUDE.md — the entry point Claude Code reads on startup.
+	// Write CLAUDE.md - the entry point Claude Code reads on startup.
 	// It loads the agent's profile and tells the runtime where to find
 	// the world manual and system skills. Without this, the agent runs
 	// as a generic Claude instance with no identity.
@@ -608,7 +608,7 @@ Read your full profile and behavioral instructions from:
 
 @core/profile.md
 
-Follow the voice, style, and purpose defined there. You are NOT a generic assistant — you are %s.
+Follow the voice, style, and purpose defined there. You are NOT a generic assistant - you are %s.
 
 ## Your world
 

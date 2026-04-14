@@ -44,9 +44,9 @@ const POLL_INTERVAL_MS = 3000;
  * 3 seconds and exposes the latest probe result through React context.
  *
  * Status semantics:
- *   null       — first load, we don't know yet (render skeleton, not lock)
- *   undefined  — the API itself is unreachable (different failure mode)
- *   object     — actual probe result; check `installed && running`
+ *   null       - first load, we don't know yet (render skeleton, not lock)
+ *   undefined  - the API itself is unreachable (different failure mode)
+ *   object     - actual probe result; check `installed && running`
  */
 export function DockerProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<DockerStatus | null | undefined>(null);
@@ -61,7 +61,7 @@ export function DockerProvider({ children }: { children: React.ReactNode }) {
       setLastChecked(Date.now());
     } catch {
       if (!mounted.current) return;
-      // The API itself didn't answer — distinct from "Docker is down".
+      // The API itself didn't answer - distinct from "Docker is down".
       setStatus(undefined);
       setLastChecked(Date.now());
     }
@@ -69,7 +69,7 @@ export function DockerProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     mounted.current = true;
-    // refresh() is async — setState only fires inside the resolved promise,
+    // refresh() is async - setState only fires inside the resolved promise,
     // never synchronously, so this does not cause a cascading render.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();

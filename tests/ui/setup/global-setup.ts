@@ -8,7 +8,7 @@ const BIN = resolve(REPO_ROOT, "bin/spwn");
 
 /**
  * Build the binary and install examples so the gallery works.
- * Servers are managed by playwright.config.ts webServer — not here.
+ * Servers are managed by playwright.config.ts webServer - not here.
  */
 export default async function globalSetup() {
   console.log("\n[global-setup] Building spwn binary...");
@@ -19,7 +19,7 @@ export default async function globalSetup() {
     try {
       execSync(`${BIN} example install ${slug}`, { stdio: "inherit", timeout: 15_000 });
     } catch {
-      // idempotent — already installed is fine
+      // idempotent - already installed is fine
     }
   }
 

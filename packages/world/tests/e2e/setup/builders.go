@@ -187,7 +187,7 @@ func (b *SpawnBuilder) buildManifest() world.Manifest {
 		return b.parseInlineYAML()
 	}
 
-	// Ensure config exists on disk (idempotent — no-ops if already present)
+	// Ensure config exists on disk (idempotent - no-ops if already present)
 	configPath := filepath.Join(b.tc.BaseDir, "worlds", b.configName+".yaml")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		if b.configName == "default" {

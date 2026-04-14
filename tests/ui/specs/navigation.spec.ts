@@ -7,7 +7,7 @@ test.describe("Navigation", () => {
   });
 
   test("sidebar navigation changes page content", async ({ page }) => {
-    // Click Agents — content should change
+    // Click Agents - content should change
     await page.getByRole("button", { name: "Agents", exact: true }).first().click();
     await page.waitForTimeout(1000);
     await expect(page.getByRole("heading", { name: "Agents" })).toBeVisible({ timeout: 5000 });

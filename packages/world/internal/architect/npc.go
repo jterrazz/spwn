@@ -11,7 +11,7 @@ import (
 	"spwn.sh/packages/world/internal/runtime"
 )
 
-// SpawnNPC runs an NPC — an ephemeral agent with a single task, no Mind, no persistence.
+// SpawnNPC runs an NPC - an ephemeral agent with a single task, no Mind, no persistence.
 // NPCs have no persistent identity, no journal, and no session state.
 func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) error {
 	u, err := a.state.Get(worldID)
@@ -43,7 +43,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		fmt.Fprintf(os.Stderr, "warning: failed to write NPC AGENT.md: %v\n", err)
 	}
 
-	// Build a minimal claude command — no Mind, no session
+	// Build a minimal claude command - no Mind, no session
 	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
 		Prompt: task,
 	})

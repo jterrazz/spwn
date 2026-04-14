@@ -22,7 +22,7 @@ func snapHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ snap")+" "+ui.Faint("— world snapshots"),
+		ui.Strong("⬡ snap")+" "+ui.Faint("- world snapshots"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
 				{Name: "save <world-id>", Desc: "Save world state"},
@@ -39,7 +39,7 @@ func snapHelp(cmd *cobra.Command, args []string) {
 // Cmd is the snap command group.
 var Cmd = &cobra.Command{
 	Use:   "snap",
-	Short: "World snapshots — save, ls, restore, rm",
+	Short: "World snapshots - save, ls, restore, rm",
 	Long:  `Save, list, restore, and remove world snapshots.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()

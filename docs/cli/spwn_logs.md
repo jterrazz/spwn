@@ -9,7 +9,7 @@ Show the system event log across worlds and agents
 
 ### Synopsis
 
-Show the spwn event log — spawned worlds, created agents, dream cycles,
+Show the spwn event log - spawned worlds, created agents, dream cycles,
 snapshots, messages, and every other discrete thing that happened.
 
 Scope it with --world or --agent, or use the per-entity shortcuts:
@@ -33,5 +33,5 @@ spwn logs [flags]
 
 ### SEE ALSO
 
-* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn - create realities for things that can think
 

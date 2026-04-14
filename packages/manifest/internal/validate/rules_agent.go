@@ -9,7 +9,7 @@ import (
 )
 
 // agentYAML mirrors the subset of agent.yaml we validate. We keep it
-// deliberately minimal and local — packages/agent owns the richer
+// deliberately minimal and local - packages/agent owns the richer
 // schema used at runtime; this struct only cares about whether the
 // file is well-formed and whether the fields that load-bearing for
 // validation rules are present.

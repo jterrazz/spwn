@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        For anything that doesn't fit a feature request or bug report — design ideas, architecture questions, wild experiments, "what if" scenarios, or things you noticed that feel off but you can't quite pin down.
+        For anything that doesn't fit a feature request or bug report - design ideas, architecture questions, wild experiments, "what if" scenarios, or things you noticed that feel off but you can't quite pin down.
 
   - type: textarea
     id: description

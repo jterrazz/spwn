@@ -376,7 +376,7 @@ export default function AgentsPage() {
                     width: "120px",
                     render: (a) => a.worldName
                       ? <span className="text-[11px] font-mono text-foreground/60 truncate">{a.worldName}</span>
-                      : <span className="text-[11px] font-mono text-muted-foreground/25">—</span>,
+                      : <span className="text-[11px] font-mono text-muted-foreground/25">-</span>,
                   },
                 ]}
               />

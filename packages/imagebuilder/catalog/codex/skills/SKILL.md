@@ -1,6 +1,6 @@
 # Codex
 
-Codex is OpenAI's agent runtime — a CLI that executes tasks using GPT models.
+Codex is OpenAI's agent runtime - a CLI that executes tasks using GPT models.
 
 ## Usage
 ```bash
@@ -16,9 +16,9 @@ Codex config lives at `~/.codex/config.toml` inside the container.
 Auth tokens are forwarded from the host automatically.
 
 ## Sandbox Modes
-- `read-only` — can read files, cannot write
-- `workspace-write` — can write to workspace directory
-- `danger-full-access` — no restrictions (used inside spwn worlds)
+- `read-only` - can read files, cannot write
+- `workspace-write` - can write to workspace directory
+- `danger-full-access` - no restrictions (used inside spwn worlds)
 
 ## Environment
 - Auth is handled via OAuth tokens (subscription-based, e.g. ChatGPT Plus)

@@ -6,7 +6,7 @@ import (
 	ib "spwn.sh/packages/imagebuilder"
 )
 
-// Tool is the @spwn/python tool — Python 3 SDK.
+// Tool is the @spwn/python tool - Python 3 SDK.
 var Tool = &tool{}
 
 type tool struct{}

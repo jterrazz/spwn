@@ -144,7 +144,7 @@ export default function WorldDashboard() {
   // Snapshots are not yet available from the API
   const snapshots: { id: string; worldId: string; name: string; created_at: string; size: string; agents: number }[] = [];
 
-  // Event log state (was "logs" — now the per-world semantic event feed)
+  // Event log state (was "logs" - now the per-world semantic event feed)
   const [logs, setLogs] = useState<{ timestamp: string; level: string; source: string; message: string }[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
@@ -575,7 +575,7 @@ export default function WorldDashboard() {
 //      /install, then deploy the first installed agent that is
 //      compatible (same flow but two requests instead of one).
 //
-// The component is self-contained — fetches its own data, has its own
+// The component is self-contained - fetches its own data, has its own
 // loading/error state, and reports back through onDeployed so the
 // parent can refetch the world.
 
@@ -639,7 +639,7 @@ function EmptyAgentsView({
     setBusy(ex.slug);
     setError(null);
     try {
-      // 1. Install the template (idempotent — keeps user edits).
+      // 1. Install the template (idempotent - keeps user edits).
       await apiPost(`/api/examples/${ex.slug}/install`);
       // 2. Deploy the example's primary agent into THIS world.
       const primary = ex.agents[0];
@@ -666,7 +666,7 @@ function EmptyAgentsView({
           </h3>
           <p className="mt-0.5 text-[11px] text-muted-foreground/60">
             Pick one of your agents to deploy here, or install a fresh one
-            from the gallery. Deployment is hot — no container restart.
+            from the gallery. Deployment is hot - no container restart.
           </p>
         </div>
       </div>

@@ -6,7 +6,7 @@ import (
 	ib "spwn.sh/packages/imagebuilder"
 )
 
-// Tool is the @spwn/git tool — Git version control.
+// Tool is the @spwn/git tool - Git version control.
 var Tool = &tool{}
 
 type tool struct{}

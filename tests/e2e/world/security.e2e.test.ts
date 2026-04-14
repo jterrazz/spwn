@@ -8,7 +8,7 @@ import {
 } from "../../setup/spwn.specification.js";
 import { expectLine } from "../../setup/output-helpers.js";
 
-describe("world security — physics enforcement", () => {
+describe("world security - physics enforcement", () => {
   let ctx: TestContext;
 
   afterEach(() => {
@@ -17,10 +17,10 @@ describe("world security — physics enforcement", () => {
 
   // Note: tools come from the base world image, not the manifest.
   // The "missing element" guarantee no longer holds in the current
-  // architecture — adding/removing tools requires rebuilding the image.
+  // architecture - adding/removing tools requires rebuilding the image.
 
-  test("element pack expansion — @spwn/unix, @spwn/git, @spwn/node all present", () => {
-    // GIVEN — a config with multiple element packs
+  test("element pack expansion - @spwn/unix, @spwn/git, @spwn/node all present", () => {
+    // GIVEN - a config with multiple element packs
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
@@ -39,7 +39,7 @@ describe("world security — physics enforcement", () => {
 `;
     writeFileSync(join(ctx.home, "worlds", "fullstack.yaml"), configContent);
 
-    // WHEN — spawning a world with all element packs
+    // WHEN - spawning a world with all element packs
     const result = ctx.spwn(
       ["world", "-c", "fullstack", "--agent", "neo", "-w", ctx.home],
       60_000,
@@ -48,7 +48,7 @@ describe("world security — physics enforcement", () => {
     const id = parseWorldId(result.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — bash, git, and node should all be available
+    // THEN - bash, git, and node should all be available
     const bashPath = ctx.world(id).exec("which bash");
     expect(bashPath).toContain("/bash");
 
@@ -58,7 +58,7 @@ describe("world security — physics enforcement", () => {
     const nodePath = ctx.world(id).exec("which node");
     expect(nodePath).toContain("/node");
 
-    // AND — faculties.md should mention all of them
+    // AND - faculties.md should mention all of them
     const faculties = ctx.world(id).faculties();
     expect(faculties).toMatch(/bash/);
     expect(faculties).toMatch(/git/);
@@ -66,7 +66,7 @@ describe("world security — physics enforcement", () => {
   });
 
   test("physics constants are documented in physics.md", () => {
-    // GIVEN — a config with specific constants
+    // GIVEN - a config with specific constants
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
@@ -84,7 +84,7 @@ describe("world security — physics enforcement", () => {
 `;
     writeFileSync(join(ctx.home, "worlds", "custom.yaml"), configContent);
 
-    // WHEN — spawning a world with these physics
+    // WHEN - spawning a world with these physics
     const result = ctx.spwn(
       ["world", "-c", "custom", "--agent", "neo", "-w", ctx.home],
       60_000,
@@ -93,7 +93,7 @@ describe("world security — physics enforcement", () => {
     const id = parseWorldId(result.output)!;
     expect(id).toBeTruthy();
 
-    // THEN — physics.md should document the constants
+    // THEN - physics.md should document the constants
     const physics = ctx.world(id).physics();
     expect(physics).toMatch(/2/); // CPU count
     expect(physics).toMatch(/1[gG]/i); // Memory
@@ -103,7 +103,7 @@ describe("world security — physics enforcement", () => {
   test("default network mode is bridge", () => {
     // Spwn currently runs world containers on the bridge network
     // by default; agents can reach the host through host.docker.internal
-    // when needed. This test pins the current behavior — flip to
+    // when needed. This test pins the current behavior - flip to
     // "none" the day we re-add a network isolation flag.
     ctx = createTestContext();
     ctx.spwn(["init"]);
@@ -119,7 +119,7 @@ describe("world security — physics enforcement", () => {
   });
 
   test("pids limit is enforced from config", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const result = ctx.spwn(
@@ -129,7 +129,7 @@ describe("world security — physics enforcement", () => {
     expect(result.exitCode).toBe(0);
     const id = parseWorldId(result.output)!;
 
-    // THEN — pids limit is set (not unlimited)
+    // THEN - pids limit is set (not unlimited)
     const inspectData = ctx.world(id).inspect();
     const pidsLimit = inspectData.HostConfig?.PidsLimit ?? 0;
     expect(pidsLimit).toBeGreaterThan(0);

@@ -24,7 +24,7 @@ var defaultAuthHelp func(*cobra.Command, []string)
 // Cmd is the auth command group.
 var Cmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Manage credentials — login, logout, status",
+	Short: "Manage credentials - login, logout, status",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
 
@@ -91,7 +91,7 @@ func authHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ auth")+" "+ui.Faint("— manage credentials"),
+		ui.Strong("⬡ auth")+" "+ui.Faint("- manage credentials"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
 				{Name: "login", Desc: "Set up credentials (Keychain or manual)"},
@@ -131,7 +131,7 @@ var loginCmd = &cobra.Command{
 			s.Done("Anthropic", cred.Source)
 			found = true
 		} else {
-			s.Done("Anthropic", ui.Faint("not found — run: claude login"))
+			s.Done("Anthropic", ui.Faint("not found - run: claude login"))
 		}
 
 		// OpenAI: check codex auth.json
@@ -142,7 +142,7 @@ var loginCmd = &cobra.Command{
 			s.Done("OpenAI", openai.Source)
 			found = true
 		} else {
-			s.Done("OpenAI", ui.Faint("not found — run: codex login"))
+			s.Done("OpenAI", ui.Faint("not found - run: codex login"))
 		}
 
 		// Sync credentials
@@ -204,7 +204,7 @@ var logoutCmd = &cobra.Command{
 
 var tokenCmd = &cobra.Command{
 	Use:   "token <token>",
-	Short: "Set a token directly — for CI and scripts",
+	Short: "Set a token directly - for CI and scripts",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)

@@ -11,13 +11,13 @@ permissions:
 jobs:
   # spwn ships two distinct artifacts on every release:
   #
-  #   1. The CLI binary — built and uploaded by goreleaser into the
+  #   1. The CLI binary - built and uploaded by goreleaser into the
   #      same GitHub Release this job creates. Stays inline because
   #      goreleaser is materially better than the central
   #      release-go.yaml's raw `go build` flow for our cross-compile
   #      matrix + checksums + archive needs.
   #
-  #   2. The Tauri desktop app — built, code-signed and notarized
+  #   2. The Tauri desktop app - built, code-signed and notarized
   #      by the centralized jterrazz/jterrazz-workflows reusable
   #      workflow. The desktop bundle ships the spwn CLI as a Tauri
   #      sidecar, so the desktop job runs Go itself and re-builds
@@ -25,7 +25,7 @@ jobs:
   #      goreleaser job above doesn't help here because tauri-action
   #      needs the binary on disk, not in a release asset.
   #
-  #   3. The updater manifest (latest.json) — generated AFTER the
+  #   3. The updater manifest (latest.json) - generated AFTER the
   #      desktop builds upload their .tar.gz artifacts. We sign each
   #      artifact with the Tauri updater key and compose the JSON
   #      that the desktop app checks on startup.
@@ -135,11 +135,11 @@ jobs:
           sign_and_add "darwin-aarch64" "spwn_aarch64.app.tar.gz" || true
           sign_and_add "darwin-x86_64" "spwn_x64.app.tar.gz" || true
 
-          # Linux — Tauri uploads AppImage directly (no .tar.gz wrapper)
+          # Linux - Tauri uploads AppImage directly (no .tar.gz wrapper)
           sign_and_add "linux-x86_64" "spwn_${VERSION}_amd64.AppImage" || true
 
           if [ ! -s "${WORKDIR}/entries.txt" ]; then
-            echo "Warning: no platforms were signed — latest.json not generated"
+            echo "Warning: no platforms were signed - latest.json not generated"
             exit 0
           fi
 

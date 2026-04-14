@@ -154,7 +154,7 @@ export function CommandPalette() {
               <IconBook2 size={14} className="text-muted-foreground/50" />
               <span>Go to Knowledge</span>
             </CommandItem>
-            {/* Marketplace — hidden until ready */}
+            {/* Marketplace - hidden until ready */}
           </CommandGroup>
 
           {/* Actions */}

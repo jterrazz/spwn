@@ -40,7 +40,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 	// Write journal entries for every agent that was deployed in this
 	// world. Each agent's journal lives in their persistent home dir
 	// (~/.spwn/agents/<name>/memory/journal/), reachable via the agent
-	// name alone — no per-world MindPath needed.
+	// name alone - no per-world MindPath needed.
 	duration := time.Since(u.CreatedAt)
 	agentNamesForJournal := []string{}
 	for _, rec := range u.Agents {

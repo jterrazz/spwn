@@ -110,7 +110,7 @@ the current binary. Running worlds are stopped gracefully before the swap.`,
 }
 
 // stopSpwnWorkloads gracefully stops any running worlds and the architect
-// daemon before we swap the binary. Errors are logged but not fatal — the
+// daemon before we swap the binary. Errors are logged but not fatal - the
 // upgrade should proceed even if Docker is offline.
 func stopSpwnWorkloads(ctx context.Context, s *ui.Stepper) error {
 	arc, err := world.NewArchitectFromEnv()

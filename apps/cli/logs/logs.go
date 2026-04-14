@@ -1,4 +1,4 @@
-// Package logs implements `spwn logs` — the system-wide semantic event log.
+// Package logs implements `spwn logs` - the system-wide semantic event log.
 // It tails ~/.spwn/activity.jsonl and is the top of a small family of
 // per-scope event viewers (spwn world logs, spwn agent logs, spwn architect logs).
 package logs
@@ -19,7 +19,7 @@ import (
 var Cmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Show the system event log across worlds and agents",
-	Long: `Show the spwn event log — spawned worlds, created agents, dream cycles,
+	Long: `Show the spwn event log - spawned worlds, created agents, dream cycles,
 snapshots, messages, and every other discrete thing that happened.
 
 Scope it with --world or --agent, or use the per-entity shortcuts:

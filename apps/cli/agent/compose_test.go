@@ -130,7 +130,7 @@ func TestAgentAdd_Idempotent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Second add with the same tool — should not duplicate.
+	// Second add with the same tool - should not duplicate.
 	resetComposeFlags()
 	composeTools = []string{"@spwn/python"}
 	cmd, _ = newComposeCmd()
@@ -236,7 +236,7 @@ func TestAgentRemove_AbsentToolIsNoOp(t *testing.T) {
 
 // ── publish / pull stubs ─────────────────────────────────────────────────────
 //
-// These are stubs until Epoch 10 — we just verify they don't blow up and
+// These are stubs until Epoch 10 - we just verify they don't blow up and
 // print something mentioning the Epoch 10 placeholder.
 
 func TestAgentPublish_Stub(t *testing.T) {

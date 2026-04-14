@@ -22,11 +22,11 @@ describe("knowledge", () => {
   });
 
   test("knowledge directory is initialized with default files", () => {
-    // GIVEN — a SPWN_HOME with a knowledge directory
+    // GIVEN - a SPWN_HOME with a knowledge directory
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
 
-    // WHEN — writing default knowledge files (simulating init)
+    // WHEN - writing default knowledge files (simulating init)
     const defaultFiles: Record<string, string> = {
       "overview.md": "# Universe Knowledge\n\nThis is the knowledge base for your spwn universe.\n",
       "glossary.md": "# Glossary\n\nKey terms and concepts.\n",
@@ -37,30 +37,30 @@ describe("knowledge", () => {
       writeFileSync(join(knowledgeDir, name), content);
     }
 
-    // THEN — all default files exist
+    // THEN - all default files exist
     expect(existsSync(join(knowledgeDir, "overview.md"))).toBe(true);
     expect(existsSync(join(knowledgeDir, "glossary.md"))).toBe(true);
     expect(existsSync(join(knowledgeDir, "roadmap.md"))).toBe(true);
   });
 
   test("knowledge files have expected content", () => {
-    // GIVEN — initialized knowledge directory
+    // GIVEN - initialized knowledge directory
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
 
     const overviewContent = "# Universe Knowledge\n\nThis is the knowledge base for your spwn universe.\nThe Architect maintains this as the single source of truth.\n";
     writeFileSync(join(knowledgeDir, "overview.md"), overviewContent);
 
-    // WHEN — reading files
+    // WHEN - reading files
     const content = readFileSync(join(knowledgeDir, "overview.md"), "utf-8");
 
-    // THEN — content matches
+    // THEN - content matches
     expect(content).toContain("Universe Knowledge");
     expect(content).toContain("single source of truth");
   });
 
   test("knowledge ls lists files correctly", () => {
-    // GIVEN — knowledge with multiple files
+    // GIVEN - knowledge with multiple files
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
     mkdirSync(join(knowledgeDir, "projects"), { recursive: true });
@@ -69,7 +69,7 @@ describe("knowledge", () => {
     writeFileSync(join(knowledgeDir, "glossary.md"), "# Glossary");
     writeFileSync(join(knowledgeDir, "projects", "api.md"), "# API Project");
 
-    // WHEN — listing files
+    // WHEN - listing files
     const { readdirSync, statSync } = require("node:fs");
     const { join: pathJoin } = require("node:path");
 
@@ -90,37 +90,37 @@ describe("knowledge", () => {
 
     const files = walkFiles(knowledgeDir, knowledgeDir);
 
-    // THEN — all files are listed
+    // THEN - all files are listed
     expect(files).toContain("overview.md");
     expect(files).toContain("glossary.md");
     expect(files).toContain("projects/api.md");
   });
 
   test("knowledge show displays file content", () => {
-    // GIVEN — a knowledge file
+    // GIVEN - a knowledge file
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
 
     const expectedContent = "# Universe Knowledge\n\nThis is the overview.\n";
     writeFileSync(join(knowledgeDir, "overview.md"), expectedContent);
 
-    // WHEN — reading the file
+    // WHEN - reading the file
     const content = readFileSync(join(knowledgeDir, "overview.md"), "utf-8");
 
-    // THEN — content is returned correctly
+    // THEN - content is returned correctly
     expect(content).toBe(expectedContent);
     expect(content).toContain("Universe Knowledge");
   });
 
   test("knowledge API returns file list structure", () => {
-    // GIVEN — knowledge with files
+    // GIVEN - knowledge with files
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
 
     writeFileSync(join(knowledgeDir, "overview.md"), "# Overview");
     writeFileSync(join(knowledgeDir, "glossary.md"), "# Glossary");
 
-    // WHEN — simulating API response construction
+    // WHEN - simulating API response construction
     const { readdirSync, statSync } = require("node:fs");
     const files = readdirSync(knowledgeDir).map((name: string) => {
       const stat = statSync(join(knowledgeDir, name));
@@ -131,7 +131,7 @@ describe("knowledge", () => {
       };
     });
 
-    // THEN — response has expected shape
+    // THEN - response has expected shape
     expect(Array.isArray(files)).toBe(true);
     expect(files.length).toBe(2);
     for (const file of files) {
@@ -144,25 +144,25 @@ describe("knowledge", () => {
   });
 
   test("knowledge API returns file content", () => {
-    // GIVEN — a knowledge file
+    // GIVEN - a knowledge file
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
 
     const markdownContent = "# Overview\n\n## Architecture\n\nThis is the main overview.\n";
     writeFileSync(join(knowledgeDir, "overview.md"), markdownContent);
 
-    // WHEN — simulating API content response
+    // WHEN - simulating API content response
     const content = readFileSync(join(knowledgeDir, "overview.md"), "utf-8");
     const response = { path: "overview.md", content };
 
-    // THEN — response contains markdown content
+    // THEN - response contains markdown content
     expect(response.path).toBe("overview.md");
     expect(response.content).toContain("# Overview");
     expect(response.content).toContain("Architecture");
   });
 
   test("knowledge prevents directory traversal", () => {
-    // GIVEN — a knowledge directory
+    // GIVEN - a knowledge directory
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
     writeFileSync(join(knowledgeDir, "overview.md"), "# Overview");
@@ -170,11 +170,11 @@ describe("knowledge", () => {
     // Write a file outside knowledge
     writeFileSync(join(home, "secret.txt"), "secret data");
 
-    // WHEN — attempting directory traversal
+    // WHEN - attempting directory traversal
     const requestedPath = "../secret.txt";
     const hasTraversal = requestedPath.includes("..");
 
-    // THEN — traversal is detected and blocked
+    // THEN - traversal is detected and blocked
     expect(hasTraversal).toBe(true);
 
     // The resolved path would escape the knowledge directory
@@ -185,7 +185,7 @@ describe("knowledge", () => {
   });
 
   test("knowledge subdirectories work correctly", () => {
-    // GIVEN — knowledge with nested directories
+    // GIVEN - knowledge with nested directories
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(join(knowledgeDir, "decisions"), { recursive: true });
     mkdirSync(join(knowledgeDir, "projects"), { recursive: true });
@@ -195,26 +195,26 @@ describe("knowledge", () => {
     writeFileSync(join(knowledgeDir, "projects", "api.md"), "# API Project");
     writeFileSync(join(knowledgeDir, "agents", "team.md"), "# Team");
 
-    // WHEN — reading nested files
+    // WHEN - reading nested files
     const authContent = readFileSync(join(knowledgeDir, "decisions", "auth-flow.md"), "utf-8");
     const apiContent = readFileSync(join(knowledgeDir, "projects", "api.md"), "utf-8");
     const teamContent = readFileSync(join(knowledgeDir, "agents", "team.md"), "utf-8");
 
-    // THEN — all nested files are readable
+    // THEN - all nested files are readable
     expect(authContent).toContain("Auth Flow Decision");
     expect(apiContent).toContain("API Project");
     expect(teamContent).toContain("Team");
   });
 
   test("knowledge init does not overwrite existing files", () => {
-    // GIVEN — a knowledge with a custom overview
+    // GIVEN - a knowledge with a custom overview
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
 
     const customContent = "# My Custom Overview\n\nThis was manually edited.\n";
     writeFileSync(join(knowledgeDir, "overview.md"), customContent);
 
-    // WHEN — simulating re-init (only write if not exists)
+    // WHEN - simulating re-init (only write if not exists)
     const overviewPath = join(knowledgeDir, "overview.md");
     if (!existsSync(overviewPath)) {
       writeFileSync(overviewPath, "# Default Overview");
@@ -226,14 +226,14 @@ describe("knowledge", () => {
       writeFileSync(glossaryPath, "# Glossary");
     }
 
-    // THEN — custom content preserved, new defaults created
+    // THEN - custom content preserved, new defaults created
     const content = readFileSync(overviewPath, "utf-8");
     expect(content).toBe(customContent);
     expect(existsSync(glossaryPath)).toBe(true);
   });
 
   test("knowledge search finds matches across files", () => {
-    // GIVEN — knowledge with searchable content
+    // GIVEN - knowledge with searchable content
     const knowledgeDir = join(home, "knowledge");
     mkdirSync(knowledgeDir, { recursive: true });
 
@@ -241,7 +241,7 @@ describe("knowledge", () => {
     writeFileSync(join(knowledgeDir, "glossary.md"), "# Glossary\n\n| Term | Definition |\n| JWT | JSON Web Token |\n");
     writeFileSync(join(knowledgeDir, "roadmap.md"), "# Roadmap\n\n## Current Focus\n- Improve performance\n");
 
-    // WHEN — searching for "JWT"
+    // WHEN - searching for "JWT"
     const { readdirSync } = require("node:fs");
     const query = "JWT";
     const results: Record<string, string[]> = {};
@@ -257,7 +257,7 @@ describe("knowledge", () => {
       }
     }
 
-    // THEN — matches found in relevant files
+    // THEN - matches found in relevant files
     expect(Object.keys(results)).toContain("overview.md");
     expect(Object.keys(results)).toContain("glossary.md");
     expect(Object.keys(results)).not.toContain("roadmap.md");

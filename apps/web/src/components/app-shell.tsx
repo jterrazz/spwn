@@ -53,7 +53,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       .then((s) => {
         if (!s.completed) router.replace("/welcome");
       })
-      .catch(() => { /* API not reachable — render normally */ });
+      .catch(() => { /* API not reachable - render normally */ });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -70,7 +70,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   const currentWorldId = urlWorldId ?? lastWorldId;
 
   const fetchWorlds = useCallback(() => {
-    // Don't hammer the API while Docker is down — every world endpoint
+    // Don't hammer the API while Docker is down - every world endpoint
     // depends on it and will just return an empty list anyway.
     if (locked) return;
     Promise.all([
@@ -95,7 +95,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   return (
     <RefetchContext.Provider value={fetchWorlds}>
       <SidebarProvider>
-        {/* Drag region for window movement — stays interactive even
+        {/* Drag region for window movement - stays interactive even
             while the rest of the app is locked. */}
         <div
           data-tauri-drag-region="true"

@@ -58,7 +58,7 @@ type Store = state.Store
 
 // Re-export manifest types.
 type AgentManifest = manifest.AgentManifest
-// OrgManifest is deprecated — org.yaml is no longer used.
+// OrgManifest is deprecated - org.yaml is no longer used.
 // Kept temporarily for migration compatibility.
 type OrgManifest = manifest.OrgManifest
 
@@ -192,7 +192,7 @@ type ArchitectDaemonInfo struct {
 
 // StartArchitectDaemonOpts configures architect daemon spawn. All
 // fields are optional. The OnProgress callback is the canonical place
-// to surface real-time spawn diagnostics — both the CLI stepper and
+// to surface real-time spawn diagnostics - both the CLI stepper and
 // the web UI's status endpoint feed off it.
 type StartArchitectDaemonOpts struct {
 	// ImageOverride lets the caller pin a specific architect image
@@ -244,17 +244,17 @@ func StartArchitectDaemon(ctx context.Context, imageOverride string, logWriters 
 //
 // Event vocabulary (in order):
 //
-//	docker_check         — opening the Docker client
-//	already_running      — fast path, returned with error
-//	cleanup              — removing a stopped container
-//	image_resolve        — resolving image tag
-//	image_building       — building the architect image (long step)
-//	image_ready          — image present
-//	credentials_sync     — credentials being written
-//	host_files           — stack.md / knowledge dir bootstrapped
-//	container_creating   — Docker create call
-//	container_starting   — Docker start call
-//	ready                — daemon up and labelled
+//	docker_check         - opening the Docker client
+//	already_running      - fast path, returned with error
+//	cleanup              - removing a stopped container
+//	image_resolve        - resolving image tag
+//	image_building       - building the architect image (long step)
+//	image_ready          - image present
+//	credentials_sync     - credentials being written
+//	host_files           - stack.md / knowledge dir bootstrapped
+//	container_creating   - Docker create call
+//	container_starting   - Docker start call
+//	ready                - daemon up and labelled
 func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemonOpts) (string, error) {
 	opts.progress("docker_check", "opening Docker client")
 	docker, err := backend.NewDocker()
@@ -284,7 +284,7 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 
 	// Ensure architect image exists and is up to date (auto-build if needed)
 	if opts.ImageOverride == "" {
-		opts.progress("image_building", "building "+image+" — first run takes minutes")
+		opts.progress("image_building", "building "+image+" - first run takes minutes")
 		if err := architect.BuildArchitectImage(ctx, docker, opts.writer()); err != nil {
 			return "", fmt.Errorf("ensure architect image: %w", err)
 		}
@@ -307,7 +307,7 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 		"SPWN_HOME=/home/spwn/.spwn",
 	}
 
-	// Create container — entrypoint is "sleep infinity" (set in Dockerfile),
+	// Create container - entrypoint is "sleep infinity" (set in Dockerfile),
 	// we docker exec claude into it when we want to talk. The architect
 	// gets the spwn kind label too, so it shows up in tooling that
 	// queries `docker ps --filter label=sh.spwn.kind=architect`.
@@ -450,7 +450,7 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 
 	args = append(args, foundation.ArchitectContainerName)
 
-	// Claude Code invocation — wrapped to source credentials from bind mount
+	// Claude Code invocation - wrapped to source credentials from bind mount
 	claudeArgs := []string{"claude", "--dangerously-skip-permissions"}
 	if message != "" {
 		claudeArgs = append(claudeArgs, "-p", message, "--print",

@@ -19,5 +19,5 @@ spwn auth check [flags]
 
 ### SEE ALSO
 
-* [spwn auth](./spwn_auth.md)	 - Manage credentials — login, logout, status
+* [spwn auth](./spwn_auth.md)	 - Manage credentials - login, logout, status
 

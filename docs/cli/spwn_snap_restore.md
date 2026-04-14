@@ -26,5 +26,5 @@ spwn snap restore <snapshot> [flags]
 
 ### SEE ALSO
 
-* [spwn snap](./spwn_snap.md)	 - World snapshots — save, ls, restore, rm
+* [spwn snap](./spwn_snap.md)	 - World snapshots - save, ls, restore, rm
 

@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Manifest is the public agent.yaml type — composition + runtime config.
+// Manifest is the public agent.yaml type - composition + runtime config.
 //
 // Lives at ~/.spwn/agents/{name}/agent.yaml. Optional: if absent, the agent
 // directory is used as-is with built-in defaults.

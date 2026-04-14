@@ -12,7 +12,7 @@ Start the Architect daemon
 Start the Architect daemon in a Docker container.
 
 The Architect runs the spwn binary inside a long-lived container with the
-host's Docker socket mounted (DooD — Docker-outside-of-Docker), allowing it
+host's Docker socket mounted (DooD - Docker-outside-of-Docker), allowing it
 to create and manage world containers as siblings.
 
 The container mounts:

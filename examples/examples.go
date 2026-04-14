@@ -1,5 +1,5 @@
 // Package examples ships a curated gallery of ready-made spwn
-// templates — full worlds and agents with pre-written profiles —
+// templates - full worlds and agents with pre-written profiles -
 // that first-time users can install with one click or one command.
 //
 // Every template lives at /examples/<slug>/ at the repo root and is
@@ -13,12 +13,12 @@
 //       agent directories into the user's ~/.spwn tree
 //
 // The templates themselves are intentionally small and read-only on
-// disk — install is a one-time copy operation, and once copied the
+// disk - install is a one-time copy operation, and once copied the
 // user can edit the files freely without affecting the source.
 //
 // The embed directive below lists every slug explicitly. When adding
 // a new template, add a new directory AND append it here AND to
-// shippedSlugs — the list is load-bearing and the shipped-templates
+// shippedSlugs - the list is load-bearing and the shipped-templates
 // test will fail loudly if a directory exists without a matching
 // embed entry.
 package examples
@@ -95,7 +95,7 @@ var ErrNotFound = errors.New("example not found")
 //
 // Iteration order is driven by shippedSlugs rather than embed.FS root
 // ReadDir so the list is deterministic even if new entries appear in
-// the embed before shippedSlugs is updated — keeping the "canonical
+// the embed before shippedSlugs is updated - keeping the "canonical
 // list" guarantee explicit.
 func List() ([]Example, error) {
 	out := make([]Example, 0, len(shippedSlugs))
@@ -109,7 +109,7 @@ func List() ([]Example, error) {
 		}
 		out = append(out, ex)
 	}
-	// No sort — shippedSlugs order IS the gallery order.
+	// No sort - shippedSlugs order IS the gallery order.
 	return out, nil
 }
 
@@ -129,7 +129,7 @@ func Get(slug string) (Example, error) {
 
 // Install copies a template's world configs and agent directories
 // into baseDir (typically ~/.spwn). Existing files are NEVER
-// overwritten — the slug and filename you already have on disk win.
+// overwritten - the slug and filename you already have on disk win.
 // The report tells the caller what was added vs skipped.
 //
 // After Install, the caller can `spwn up -c <world>` to actually
@@ -184,7 +184,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 			name := e.Name()
 			dst := filepath.Join(agentsRoot, name)
 			if exists(dst) {
-				// Agent directory exists — but it might be broken
+				// Agent directory exists - but it might be broken
 				// (e.g. created by a previous version or partially
 				// cleaned up). If core/profile.md is missing, copy
 				// the template's core/ layer on top without touching
@@ -245,7 +245,7 @@ func loadMetadata(slug string) (Example, error) {
 	return ex, nil
 }
 
-// path joins with forward slashes — required because embed.FS always
+// path joins with forward slashes - required because embed.FS always
 // uses forward slashes regardless of the host OS.
 func path(parts ...string) string {
 	return strings.Join(parts, "/")

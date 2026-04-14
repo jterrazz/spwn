@@ -30,7 +30,7 @@ func TestRandomCosmosWord_Randomness(t *testing.T) {
 	}
 	// With 20 words and 100 calls, we should see at least 2 distinct words
 	if len(seen) < 2 {
-		t.Errorf("RandomCosmosWord() returned same word in 100 calls — randomness likely broken")
+		t.Errorf("RandomCosmosWord() returned same word in 100 calls - randomness likely broken")
 	}
 }
 
@@ -61,6 +61,6 @@ func TestRandomAgentName_Randomness(t *testing.T) {
 		seen[RandomAgentName()] = true
 	}
 	if len(seen) < 2 {
-		t.Errorf("RandomAgentName() returned same name in 100 calls — randomness likely broken")
+		t.Errorf("RandomAgentName() returned same name in 100 calls - randomness likely broken")
 	}
 }

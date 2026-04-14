@@ -121,7 +121,7 @@ func TestMinimalStack_E2E(t *testing.T) {
 }
 
 func TestDependencyAutoResolve_E2E(t *testing.T) {
-	// Request @spwn/qmd without explicit @spwn/node — should auto-resolve
+	// Request @spwn/qmd without explicit @spwn/node - should auto-resolve
 	s := imagebuildertest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/qmd")
 
 	imagebuildertest.AssertBinaryExists(t, s, "qmd")

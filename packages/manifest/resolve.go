@@ -9,7 +9,7 @@ import (
 
 // resolveRefs walks the declared agents and world in the manifest and
 // turns each name into a filesystem path + existence flag. It does
-// NOT parse the referenced files — that's the loader's job. Its only
+// NOT parse the referenced files - that's the loader's job. Its only
 // purpose is to give callers enough info to produce good error
 // messages and to let the validator check structure.
 func resolveRefs(root string, m *intmanifest.Manifest) ([]AgentRef, WorldRef) {

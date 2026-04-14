@@ -31,18 +31,18 @@ describe("colony E2E", () => {
   // ── Multi-agent spawn ──────────────────────────────────────
 
   test("chief and worker both appear in running world", () => {
-    // GIVEN — two agents: morpheus (chief, first) and neo (worker)
+    // GIVEN - two agents: morpheus (chief, first) and neo (worker)
     ctx = createTestContext();
     createAgent(ctx.home, "morpheus");
     ctx.spwn(["init"]);
 
-    // WHEN — spawning with multiple --agent flags
+    // WHEN - spawning with multiple --agent flags
     const spawnResult = ctx.spwn(COLONY_FLAGS(ctx.home), 60_000);
 
     expect(spawnResult.exitCode).toBe(0);
     expectLine(spawnResult.output, /✓ Colony spawned\s+2 agent\(s\)/);
 
-    // AND — world appears in ls
+    // AND - world appears in ls
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
     const listResult = ctx.spwn(["ls"]);

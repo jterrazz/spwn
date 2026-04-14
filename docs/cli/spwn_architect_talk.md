@@ -5,7 +5,7 @@ slug: "spwn-architect-talk"
 
 ## spwn architect talk
 
-Talk to the Architect — ask it to manage worlds and agents
+Talk to the Architect - ask it to manage worlds and agents
 
 ### Synopsis
 

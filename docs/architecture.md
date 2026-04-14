@@ -59,7 +59,7 @@ spwn/
 - ✅ Pluggable runtime adapters (Claude Code, Pi, Aider)
 - ✅ Activity log and audit trail
 - ✅ Composable tool catalog with imagebuilder
-- ⚪ Marketplace — share and import agents, tool packs, skills, profiles
+- ⚪ Marketplace - share and import agents, tool packs, skills, profiles
 - ⚪ Cloud-hosted worlds
 - ⚪ Multi-org federation
 - ⚪ Mobile app

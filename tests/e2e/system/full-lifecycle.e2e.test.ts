@@ -85,7 +85,7 @@ describe("complete agent lifecycle", () => {
     expect(dreamResult.exitCode).toBe(0);
     expectLine(dreamResult.output, /→ Dreaming for agent "neo"\.\.\./);
 
-    // ── STEP 8: Cleanup — remove agent ──────────────────────────
+    // ── STEP 8: Cleanup - remove agent ──────────────────────────
     const rmResult = ctx.spwn(["agent", "rm", "neo"]);
     expect(rmResult.exitCode).toBe(0);
     expectLine(rmResult.output, /✓ Deleted agent\s+neo/);
@@ -95,18 +95,18 @@ describe("complete agent lifecycle", () => {
   });
 
   test("agent shows correct mind layout on disk", () => {
-    // GIVEN — fresh context with the default neo agent
+    // GIVEN - fresh context with the default neo agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — adding identity content
+    // WHEN - adding identity content
     const corePath = join(ctx.home, "agents", "neo", "core", "default.md");
     writeFileSync(
       corePath,
       "# Neo\nYou are a code architect specializing in distributed systems.\n",
     );
 
-    // THEN — mind layers exist on disk
+    // THEN - mind layers exist on disk
     new MindAssertion(ctx.home, "neo")
       .exists()
       .hasLayer("core")
@@ -114,15 +114,15 @@ describe("complete agent lifecycle", () => {
   });
 
   test("multiple agents can coexist in the same universe", () => {
-    // GIVEN — initialized universe with the default neo agent
+    // GIVEN - initialized universe with the default neo agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — creating a second agent
+    // WHEN - creating a second agent
     const newResult = ctx.spwn(["agent", "new", "trinity"]);
     expect(newResult.exitCode).toBe(0);
 
-    // THEN — both agents appear in agent ls
+    // THEN - both agents appear in agent ls
     const agentLs = ctx.spwn(["agent", "ls"]);
     expect(agentLs.exitCode).toBe(0);
     const output = stripAnsi(agentLs.output);

@@ -86,7 +86,7 @@ func TestEnsureDockerFriendlyPATH_PreservesUserPrecedence(t *testing.T) {
 	}
 
 	// Put one of the docker-friendly paths at the END of the existing
-	// PATH — we expect it to STAY there, not get duplicated at the front.
+	// PATH - we expect it to STAY there, not get duplicated at the front.
 	extras := dockerFriendlyPaths()
 	if len(extras) == 0 {
 		t.Skip("no docker-friendly paths on this OS")

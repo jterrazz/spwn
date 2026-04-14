@@ -21,5 +21,5 @@ spwn talk <agent-name> [message] [flags]
 
 ### SEE ALSO
 
-* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn - create realities for things that can think
 

@@ -128,7 +128,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 	}
 
 	// Copy skills into the image (if any tool has skills)
-	// Skip when SkipFooter is set — the caller manages their own COPY directives.
+	// Skip when SkipFooter is set - the caller manages their own COPY directives.
 	if !opt.SkipFooter {
 		hasAnySkills := false
 		for _, t := range tools {

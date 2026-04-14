@@ -29,7 +29,7 @@ type CheckOpts struct {
 
 // CheckForUpdate fetches the latest release on the requested channel and
 // decides whether an update is available for the given platform. Does not
-// download anything — the caller should inspect plan.UpdateAvail and then
+// download anything - the caller should inspect plan.UpdateAvail and then
 // call Apply() if it wants to proceed.
 func CheckForUpdate(ctx context.Context, client ReleaseClient, currentVersion string, opts CheckOpts) (*Plan, error) {
 	cur, err := ParseVersion(currentVersion)
@@ -121,7 +121,7 @@ func Apply(ctx context.Context, plan *Plan, opts ApplyOpts) error {
 		}
 		digest, ok := checksums[plan.Asset.Name]
 		if !ok {
-			return fmt.Errorf("no checksum entry for %s in checksums.txt — refusing to install", plan.Asset.Name)
+			return fmt.Errorf("no checksum entry for %s in checksums.txt - refusing to install", plan.Asset.Name)
 		}
 		if err := VerifyChecksum(archivePath, digest); err != nil {
 			return err

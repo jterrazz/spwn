@@ -1,18 +1,18 @@
 /**
  * API client for the Go API server.
- * The Go API is the sole backend — no fallback to Next.js API routes.
+ * The Go API is the sole backend - no fallback to Next.js API routes.
  */
 
 import type { World, AgentProfile } from "./types";
 import { getTauriApiBase, initTauriApiPort, isTauri } from "./tauri";
 
-// Dynamic API base — Tauri app uses a random port, browser defaults to 3001
+// Dynamic API base - Tauri app uses a random port, browser defaults to 3001
 let _goApiBase: string | null = null;
 
 /**
  * Resolves the Go API base URL. In Tauri mode, waits for the port to be
  * retrieved from the Rust backend before returning. This ensures every API
- * call targets the correct port — even if the very first fetch fires before
+ * call targets the correct port - even if the very first fetch fires before
  * the Tauri webview has finished initializing.
  */
 async function resolveGoApiBase(): Promise<string> {
@@ -48,7 +48,7 @@ export function setApiBase(base: string) {
 
 // Eagerly resolve the API base on module load so that even synchronous
 // callers (goApiUrl) get the right value as soon as possible. The promise
-// is fire-and-forget — by the time a user interaction triggers a fetch,
+// is fire-and-forget - by the time a user interaction triggers a fetch,
 // the port will be cached.
 if (typeof window !== "undefined") {
   void resolveGoApiBase();
@@ -160,7 +160,7 @@ function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentPr
 
 /**
  * Encode a value for use as a URL path segment. Handles spaces, special
- * chars, and non-ASCII — so agent names like "QA Eng" don't break API calls.
+ * chars, and non-ASCII - so agent names like "QA Eng" don't break API calls.
  */
 export function encPath(segment: string): string {
   return encodeURIComponent(segment);
@@ -220,7 +220,7 @@ export async function apiDelete(goPath: string): Promise<void> {
 }
 
 /**
- * POST that returns { ok, error } shape — used for action buttons.
+ * POST that returns { ok, error } shape - used for action buttons.
  */
 export async function apiAction(
   goPath: string,

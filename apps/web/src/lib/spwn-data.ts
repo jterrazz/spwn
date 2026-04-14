@@ -1,10 +1,10 @@
 /**
  * Server-side functions to read spwn data from the filesystem.
- * These run in Node.js (RSC or API routes) — NOT in the browser.
+ * These run in Node.js (RSC or API routes) - NOT in the browser.
  *
  * Data sources:
- *   ~/.spwn/state.json       — world list (array of World objects)
- *   ~/.spwn/agents/{name}/   — agent mind directories
+ *   ~/.spwn/state.json       - world list (array of World objects)
+ *   ~/.spwn/agents/{name}/   - agent mind directories
  */
 
 import fs from "node:fs";
@@ -173,7 +173,7 @@ export async function getAgents(): Promise<AgentMindInfo[]> {
 }
 
 /**
- * Get limbo agents — agents that exist in ~/.spwn/agents/ but are not
+ * Get limbo agents - agents that exist in ~/.spwn/agents/ but are not
  * currently assigned to any active world.
  */
 export async function getLimboAgents(worlds: World[]): Promise<LimboAgent[]> {

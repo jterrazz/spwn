@@ -1,6 +1,6 @@
 import type { World } from "@/lib/types";
 
-// Deterministic hue from world id — same world reads as the same color
+// Deterministic hue from world id - same world reads as the same color
 // wherever it's rendered (sidebar hero, switcher pill, world page title).
 function hashHue(id: string): number {
   let h = 0;
@@ -22,7 +22,7 @@ interface WorldPlanetProps {
  * desaturate toward grey).
  *
  * Shared across sidebar, page headers, and any other surface where a world
- * gets displayed — keeping rendering identical by construction.
+ * gets displayed - keeping rendering identical by construction.
  */
 export function WorldPlanet({ world, size = "md", className = "" }: WorldPlanetProps) {
   const hue = hashHue(world.id);

@@ -286,7 +286,7 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 	}
 	defer resp.Body.Close()
 
-	// Stream build output — Docker returns JSON lines with a "stream" field.
+	// Stream build output - Docker returns JSON lines with a "stream" field.
 	type buildMsg struct {
 		Stream string `json:"stream"`
 		Error  string `json:"error"`
@@ -404,7 +404,7 @@ func (d *Docker) Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, 
 
 // ListContainersByLabel enumerates every container (running OR stopped)
 // whose Docker labels include key=value. Used by the state store to
-// list spwn worlds straight from the daemon — no JSON file involved,
+// list spwn worlds straight from the daemon - no JSON file involved,
 // no possibility of drift after `docker rm`.
 func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) ([]ContainerInfo, error) {
 	args := filters.NewArgs()
@@ -415,7 +415,7 @@ func (d *Docker) ListContainersByLabel(ctx context.Context, key, value string) (
 	}
 
 	containers, err := d.client.ContainerList(ctx, containerTypes.ListOptions{
-		All:     true, // include stopped — a stopped world is still a world
+		All:     true, // include stopped - a stopped world is still a world
 		Filters: args,
 	})
 	if err != nil {

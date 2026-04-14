@@ -13,7 +13,7 @@ PATH_EXPORT := export PATH="$$HOME/.local/bin:$$PATH"
 build:
 	cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
 
-# Install — builds from source and installs to ~/.local/bin (same as install.sh)
+# Install - builds from source and installs to ~/.local/bin (same as install.sh)
 install: build
 	@mkdir -p $(INSTALL_DIR)
 	@cp bin/spwn $(INSTALL_DIR)/spwn

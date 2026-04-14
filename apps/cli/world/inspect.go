@@ -14,7 +14,7 @@ func init() {
 
 var inspectCmd = &cobra.Command{
 	Use:   "inspect <world-id>",
-	Short: "Inspect a running world — physics, agents, status",
+	Short: "Inspect a running world - physics, agents, status",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()

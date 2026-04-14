@@ -68,7 +68,7 @@ func (c *GitHubClient) baseURL() string {
 	return defaultAPIBase
 }
 
-// LatestStable fetches GitHub's idea of "latest release" (stable only —
+// LatestStable fetches GitHub's idea of "latest release" (stable only -
 // GitHub filters prereleases automatically on this endpoint).
 func (c *GitHubClient) LatestStable(ctx context.Context) (*Release, error) {
 	url := fmt.Sprintf("%s/repos/%s/%s/releases/latest", c.baseURL(), c.Owner, c.Repo)

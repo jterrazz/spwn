@@ -1,21 +1,21 @@
 # Worlds
 
-A world is a runtime instance — the ephemeral Docker container where an agent actually runs. An agent can live in many worlds over time; the agent persists, the world doesn't.
+A world is a runtime instance - the ephemeral Docker container where an agent actually runs. An agent can live in many worlds over time; the agent persists, the world doesn't.
 
 ## What lives on the agent vs the world
 
 | Agent (persistent) | World (ephemeral) |
 | --- | --- |
-| Identity — purpose, traits, profile | Running container and processes |
-| Memory — journal, knowledge, sessions | Mounted workspace directory |
-| Composition — tools, skills, profile | Active tool bridges |
+| Identity - purpose, traits, profile | Running container and processes |
+| Memory - journal, knowledge, sessions | Mounted workspace directory |
+| Composition - tools, skills, profile | Active tool bridges |
 | Evolution history | Live state + logs |
 
 The agent is "who". The world is "where, right now".
 
 ## Tools are structural
 
-No ACLs. No permission prompts. If a tool isn't listed in the agent's composition, it's **physically impossible** inside its world — not "forbidden," absent. You can't prompt-inject a missing binary.
+No ACLs. No permission prompts. If a tool isn't listed in the agent's composition, it's **physically impossible** inside its world - not "forbidden," absent. You can't prompt-inject a missing binary.
 
 ```yaml
 # ~/.spwn/agents/neo/agent.yaml
@@ -35,7 +35,7 @@ skills:
   - refactoring
 ```
 
-If `curl` is not listed, HTTP doesn't exist in Neo's world. Tools are composable, dependency-aware, and verified at world creation. Each tool ships its own skills (Vercel SKILL.md convention). The image is built on-demand from your exact tool selection — no bloated base images.
+If `curl` is not listed, HTTP doesn't exist in Neo's world. Tools are composable, dependency-aware, and verified at world creation. Each tool ships its own skills (Vercel SKILL.md convention). The image is built on-demand from your exact tool selection - no bloated base images.
 
 ## Spawning a world
 
@@ -58,4 +58,4 @@ This assembles Neo's composition (tools + skills + profile) into a Docker image,
 
 ## What was here before
 
-An earlier version of spwn described a `physics:` block with CPU/memory/timeout constants. That configuration still works at the world runtime layer, but it's no longer part of the user-facing mental model. Think in terms of **agents** and **worlds** — the runtime constraints fade into infrastructure.
+An earlier version of spwn described a `physics:` block with CPU/memory/timeout constants. That configuration still works at the world runtime layer, but it's no longer part of the user-facing mental model. Think in terms of **agents** and **worlds** - the runtime constraints fade into infrastructure.

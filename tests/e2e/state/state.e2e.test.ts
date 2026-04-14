@@ -14,7 +14,7 @@ describe("state management", () => {
   });
 
   test("world state persists in state.json", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -23,10 +23,10 @@ describe("state management", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // THEN — spawn output confirms structured status
+    // THEN - spawn output confirms structured status
     expectLine(spawnResult.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
 
-    // AND — state.json exists and contains the world
+    // AND - state.json exists and contains the world
     ctx
       .state()
       .exists()
@@ -34,12 +34,12 @@ describe("state management", () => {
       .hasAgent(id, "neo")
       .worldCount(1);
 
-    // AND — the container is actually running
+    // AND - the container is actually running
     ctx.world(id).toBeRunning();
   });
 
   test("destroy updates state file", () => {
-    // GIVEN — a spawned and destroyed world
+    // GIVEN - a spawned and destroyed world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -54,15 +54,15 @@ describe("state management", () => {
     const destroyResult = ctx.spwn(["world", "destroy", id], 30_000);
     expectLine(destroyResult.output, /✓ World destroyed\. Agent survives\./);
 
-    // THEN — state.json no longer contains the world
+    // THEN - state.json no longer contains the world
     ctx.state().noWorld(id);
 
-    // AND — container is gone
+    // AND - container is gone
     ctx.world(id).toNotExist();
   });
 
   test("state tracks active worlds across list calls", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -71,16 +71,16 @@ describe("state management", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — listing worlds multiple times
+    // WHEN - listing worlds multiple times
     const list1 = ctx.spwn(["world", "list"]);
     const list2 = ctx.spwn(["world", "list"]);
 
-    // THEN — both calls show the same world in the table
+    // THEN - both calls show the same world in the table
     const idPattern = new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     expectLine(list1.output, idPattern);
     expectLine(list2.output, idPattern);
 
-    // AND — state is consistent
+    // AND - state is consistent
     ctx.state().hasWorld(id).worldCount(1);
   });
 
@@ -103,14 +103,14 @@ describe("state management", () => {
     const id2 = parseWorldId(r2.output)!;
     expectLine(r2.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
 
-    // THEN — both are tracked
+    // THEN - both are tracked
     ctx
       .state()
       .worldCount(2)
       .hasWorld(id1)
       .hasWorld(id2);
 
-    // AND — both containers are running
+    // AND - both containers are running
     ctx.world(id1).toBeRunning();
     ctx.world(id2).toBeRunning();
   });

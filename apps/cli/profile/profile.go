@@ -1,4 +1,4 @@
-// Package profile implements the `spwn profile` command group — management
+// Package profile implements the `spwn profile` command group - management
 // of reusable personality profile templates. Profiles are first-class
 // composable blocks alongside tools and skills: stackable, shareable,
 // and attached to agents via "spwn agent add <name> --profile <name>".
@@ -21,7 +21,7 @@ import (
 var Cmd = &cobra.Command{
 	Use:   "profile",
 	Short: "Author and manage reusable profile templates (personality)",
-	Long: `Profiles are reusable personality templates — role, tone, purpose, behavior.
+	Long: `Profiles are reusable personality templates - role, tone, purpose, behavior.
 
 A profile defines WHO the agent is. Tools and skills define what it can do.
 
@@ -48,7 +48,7 @@ func profileHelp(cmd *cobra.Command, args []string) {
 	}
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ profile")+" "+ui.Faint("— reusable personality templates"),
+		ui.Strong("⬡ profile")+" "+ui.Faint("- reusable personality templates"),
 		[]ui.HelpGroup{
 			{Title: "Author", Commands: []ui.HelpEntry{
 				{Name: "ls", Desc: "List profile templates"},

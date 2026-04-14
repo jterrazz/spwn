@@ -182,7 +182,7 @@ func TestInit_VeryLongName(t *testing.T) {
 	// 500-char name
 	dir, err := Init(longName)
 	if err != nil {
-		// Some filesystems may reject very long paths — that's acceptable
+		// Some filesystems may reject very long paths - that's acceptable
 		t.Logf("Init with 500-char name failed (acceptable): %v", err)
 		return
 	}

@@ -9,7 +9,7 @@ import type { ActivityBlock } from "@/lib/activity-types";
 
 /**
  * ChatBubble is the minimal shape any caller must provide. The chat does
- * not manage state — the parent owns the message list and passes it in.
+ * not manage state - the parent owns the message list and passes it in.
  */
 export interface ChatBubble {
   role: "user" | "assistant";
@@ -30,7 +30,7 @@ interface ChatProps {
   emptyState?: ReactNode;
   /** Typing indicator text, e.g. "morpheus is thinking...". Omit to hide. */
   typingText?: string;
-  /** Rendered immediately after each bubble — used for stack/knowledge cards. */
+  /** Rendered immediately after each bubble - used for stack/knowledge cards. */
   extras?: (msg: ChatBubble, index: number) => ReactNode;
   /** Optional label shown under the assistant's bubbles ("morpheus", "architect"). */
   assistantLabel?: string;
@@ -51,7 +51,7 @@ interface ChatProps {
 
 /**
  * Chat is the shared, presentational surface used by both the agent chat
- * tab and the Architect chat widget. It's container-less by design —
+ * tab and the Architect chat widget. It's container-less by design -
  * only the message bubbles and the focused input border carry backgrounds,
  * so the chat blends into whatever page hosts it.
  */
@@ -97,7 +97,7 @@ export function Chat({
 
   return (
     <div className={`flex flex-col min-h-0 flex-1 ${className}`}>
-      {/* Messages area — grows, scrolls. Bottom padding leaves room for the
+      {/* Messages area - grows, scrolls. Bottom padding leaves room for the
           floating input dock so the last bubble isn't hidden under it. */}
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 pr-1 space-y-3">
         {messages.length === 0 && emptyState && (
@@ -158,7 +158,7 @@ export function Chat({
         <div ref={endRef} />
       </div>
 
-      {/* Input dock — anchored to the bottom of the flex column, styled
+      {/* Input dock - anchored to the bottom of the flex column, styled
           as a pill so it reads like a messaging-app composer. */}
       <div className="shrink-0 pt-3">
         <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-md px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] focus-within:border-white/[0.14] focus-within:bg-white/[0.06] transition-colors">
@@ -197,7 +197,7 @@ export function Chat({
 
 /**
  * Suggestion pills shown inside the empty state. Each click fills the
- * input — onPick is usually just setInput. Kept here so both chats can
+ * input - onPick is usually just setInput. Kept here so both chats can
  * use the same styling.
  */
 export function ChatSuggestions({

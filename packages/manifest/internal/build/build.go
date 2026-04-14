@@ -9,17 +9,17 @@
 // Layout:
 //
 //	.spwn/build/
-//	├── build.json        — metadata (version, timestamps, hashes)
-//	├── manifest.json     — normalized spwn.yaml
+//	├── build.json        - metadata (version, timestamps, hashes)
+//	├── manifest.json     - normalized spwn.yaml
 //	├── agents/
-//	│   └── <name>/       — flattened agent tree (every file the
+//	│   └── <name>/       - flattened agent tree (every file the
 //	│                       runtime will read, including resolved
 //	│                       @-imports)
 //	└── worlds/
-//	    └── <name>.yaml   — world config (verbatim)
+//	    └── <name>.yaml   - world config (verbatim)
 //
 // The Docker image digest, when a build includes one, goes into
-// build.json. Image bytes stay in the Docker daemon — the artifact
+// build.json. Image bytes stay in the Docker daemon - the artifact
 // just pins the reference.
 package build
 
@@ -89,7 +89,7 @@ type Metadata struct {
 }
 
 // Build writes the artifact under .spwn/build/ and returns a Result.
-// The directory is wiped and recreated fresh on every call — the
+// The directory is wiped and recreated fresh on every call - the
 // artifact is atomic from the caller's perspective: either it reflects
 // the current project state or the call errors out.
 func Build(opts Opts) (*Result, error) {
@@ -247,7 +247,7 @@ func writeFile(path string, data []byte) error {
 }
 
 // LoadMetadata reads build.json from an existing artifact. Returns
-// (nil, nil) when the file doesn't exist — callers use this to
+// (nil, nil) when the file doesn't exist - callers use this to
 // decide whether a build is needed.
 func LoadMetadata(buildDir string) (*Metadata, error) {
 	path := filepath.Join(buildDir, "build.json")

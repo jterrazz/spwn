@@ -13,7 +13,7 @@ func init() {
 
 var sleepCmd = &cobra.Command{
 	Use:   "sleep <agent-name>",
-	Short: "Consolidate experience — archive stale files, prune old sessions",
+	Short: "Consolidate experience - archive stale files, prune old sessions",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]

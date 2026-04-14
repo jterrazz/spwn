@@ -22,7 +22,7 @@ func TestTimeout_ShortTimeoutStopsContainer(t *testing.T) {
 	//
 	// Tracking: requires Architect to pass --stop-timeout to Docker or use
 	// context.WithTimeout when spawning agents.
-	t.Skip("Container timeout enforcement not yet implemented — timeout is informational only")
+	t.Skip("Container timeout enforcement not yet implemented - timeout is informational only")
 
 	// Placeholder for future implementation:
 	// chain := setup.NewSpawnBuilder(t).

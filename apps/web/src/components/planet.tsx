@@ -16,7 +16,7 @@ interface PlanetProps {
 
 // Status → planet "life signal": saturation (how vivid the hue renders) + brightness level.
 // We keep a semantic bottom-dot color independent so status is still readable at a glance.
-// Saturation is deliberately muted — each world still has a recognizable
+// Saturation is deliberately muted - each world still has a recognizable
 // hue, but the palette leans toward grey so the planets read as part of
 // one cohesive set rather than a rainbow of competing colors. Error
 // worlds stay vivid so they stand out.
@@ -28,7 +28,7 @@ const STATUS_SAT: Record<string, number> = {
   stopped: 15,
 };
 
-// Deterministic hue from world id — matches the sidebar's hashHue() so the same world reads as the same planet everywhere.
+// Deterministic hue from world id - matches the sidebar's hashHue() so the same world reads as the same planet everywhere.
 function hashHue(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
@@ -57,11 +57,11 @@ function getPlanetConfig(worldId: string, status: string) {
     sat,
     // Key: glowColor must be DARKER than baseColor, otherwise cobe renders an inside-out halo
     // (bright rim, dark center). We want a bright solid sphere with the halo coming from the outer
-    // CSS drop-shadow instead — matching the flat sidebar icon's look.
+    // CSS drop-shadow instead - matching the flat sidebar icon's look.
     base: hslToRgb01(hue, sat, 30),
     glow: hslToRgb01(hue, sat, 12),
     marker: hslToRgb01(hue, sat, 92),
-    // CSS color for the outer drop-shadow halo — matches the sidebar hero glow.
+    // CSS color for the outer drop-shadow halo - matches the sidebar hero glow.
     haloCss: `hsl(${hue}, ${sat}%, 62%)`,
   };
 }
@@ -112,7 +112,7 @@ function seeded(seed: number) {
   return () => { s = (s * 16807 + 0) % 2147483647; return s / 2147483647; };
 }
 
-// Generate procedural "continent" markers — clusters of dots that form landmass shapes
+// Generate procedural "continent" markers - clusters of dots that form landmass shapes
 function generateContinents(worldId: string, count: number): { location: [number, number]; size: number }[] {
   const rng = seeded(hashCode(worldId));
   const markers: { location: [number, number]; size: number }[] = [];
@@ -124,7 +124,7 @@ function generateContinents(worldId: string, count: number): { location: [number
     centers.push([rng() * 140 - 70, rng() * 360 - 180]);
   }
 
-  // Scatter dots around each center — wider spread, more overlap between continents
+  // Scatter dots around each center - wider spread, more overlap between continents
   const dotsPerContinent = Math.floor(count / numContinents);
   for (const [cLat, cLng] of centers) {
     const spread = 25 + rng() * 35; // wider continents

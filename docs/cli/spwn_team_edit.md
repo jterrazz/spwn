@@ -21,12 +21,12 @@ spwn team edit <slug> [flags]
 ### Options
 
 ```
-      --color string         Accent color — hex or name
+      --color string         Accent color - hex or name
       --description string   Short description
   -h, --help                 help for edit
 ```
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
 

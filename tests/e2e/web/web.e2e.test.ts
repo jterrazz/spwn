@@ -7,7 +7,7 @@ import { stripAnsi } from "../../setup/output-helpers.js";
 
 const SPWN_BIN = resolve(import.meta.dirname, "../../../bin/spwn");
 
-describe("web — spwn web", () => {
+describe("web - spwn web", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 
@@ -81,7 +81,7 @@ describe("web — spwn web", () => {
           });
           expect([200, 301, 302, 307, 308]).toContain(res.status);
         } catch {
-          // Server may not be fully ready, but it did bind — that's OK
+          // Server may not be fully ready, but it did bind - that's OK
         }
       }
 
@@ -137,7 +137,7 @@ describe("web — spwn web", () => {
         }
       }
     }
-    // pgrep exit code 1 means no matches found — that's what we want
+    // pgrep exit code 1 means no matches found - that's what we want
     expect(psResult.status).not.toBe(0);
   });
 

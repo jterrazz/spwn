@@ -1,5 +1,5 @@
 /**
- * Tauri integration — detect if running inside the native app
+ * Tauri integration - detect if running inside the native app
  * and get the dynamic API port.
  */
 
@@ -12,7 +12,7 @@ export function isTauri(): boolean {
 
 /**
  * Initialize the Tauri API port. Must be called (and awaited) once before
- * any API calls. Safe to call multiple times — subsequent calls return the
+ * any API calls. Safe to call multiple times - subsequent calls return the
  * cached result.
  */
 export async function initTauriApiPort(): Promise<number | null> {

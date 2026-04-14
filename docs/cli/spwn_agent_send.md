@@ -25,5 +25,5 @@ spwn agent send <agent-name> [message] [flags]
 
 ### SEE ALSO
 
-* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent - a living identity that inhabits a world
 

@@ -18,10 +18,10 @@ make test-messenger        # packages/messenger only
 ```
 
 Examples:
-- `packages/foundation/paths_test.go` — path resolution logic
-- `packages/agent/agent_test.go` — agent lifecycle
-- `packages/world/internal/manifest/manifest_test.go` — YAML parsing
-- `apps/cli/ui/table_test.go` — table formatting
+- `packages/foundation/paths_test.go` - path resolution logic
+- `packages/agent/agent_test.go` - agent lifecycle
+- `packages/world/internal/manifest/manifest_test.go` - YAML parsing
+- `apps/cli/ui/table_test.go` - table formatting
 
 ### 2. Go E2E Tests
 
@@ -72,8 +72,8 @@ The Go E2E framework reads this JSON via `TestContext.ReadMockOutput()` and expo
 
 | File | Purpose |
 |------|---------|
-| `context.go` | `TestContext` — creates isolated temp SPWN_HOME, connects to Docker, registers cleanup |
-| `builders.go` | `SpawnBuilder` — fluent builder for spawning worlds with config/agent/workspace |
+| `context.go` | `TestContext` - creates isolated temp SPWN_HOME, connects to Docker, registers cleanup |
+| `builders.go` | `SpawnBuilder` - fluent builder for spawning worlds with config/agent/workspace |
 | `assertions.go` | Assertion chains: `StateAssertion`, `ContainerAssertion`, `MindAssertion`, `MockAssertion`, `SessionAssertion`, `JournalAssertion`, `GateAssertion`, etc. |
 
 **Pattern:**
@@ -105,11 +105,11 @@ Key design points:
 | File | Purpose |
 |------|---------|
 | `helpers.ts` | `createSpwnHome()`, `createAgent()`, `createWorldConfig()`, `waitForContainer()`, `retry()` |
-| `spwn.specification.ts` | `createTestContext()` — creates isolated SPWN_HOME, provides `ctx.spwn()` runner with env overrides |
+| `spwn.specification.ts` | `createTestContext()` - creates isolated SPWN_HOME, provides `ctx.spwn()` runner with env overrides |
 | `output-helpers.ts` | `expectLine()`, `expectNoLine()`, `expectTableHeader()`, `expectTableRow()`, `stripAnsi()` |
-| `world-assertion.ts` | `WorldAssertion` — asserts on container state, files, mounts |
-| `mind-assertion.ts` | `MindAssertion` — asserts on agent Mind directory structure |
-| `state-assertion.ts` | `StateAssertion` — asserts on `state.json` contents |
+| `world-assertion.ts` | `WorldAssertion` - asserts on container state, files, mounts |
+| `mind-assertion.ts` | `MindAssertion` - asserts on agent Mind directory structure |
+| `state-assertion.ts` | `StateAssertion` - asserts on `state.json` contents |
 | `mock-llm/` | Mock LLM server for testing agent talk flows |
 | `mock-api/` | Mock API server (marketplace, auth) |
 
@@ -139,7 +139,7 @@ describe("world spawn", () => {
 Key design points:
 - Each test gets its own `createTestContext()` with an isolated temp dir.
 - `afterEach` calls `ctx.cleanup()` to destroy Docker containers and remove temp files.
-- Use `expectLine()` for structured assertions on CLI output — never weak `toContain()`.
+- Use `expectLine()` for structured assertions on CLI output - never weak `toContain()`.
 - `vitest.config.ts` sets `fileParallelism: false` because Docker tests must run sequentially.
 
 ## Adding New Tests
@@ -183,6 +183,6 @@ Key design points:
 ## Vitest Configuration
 
 Tests use `tests/vitest.config.ts`:
-- `testTimeout: 120_000` — 2 minutes per test (Docker is slow)
-- `hookTimeout: 60_000` — 1 minute for setup/teardown hooks
-- `fileParallelism: false` — sequential execution (Docker resource constraints)
+- `testTimeout: 120_000` - 2 minutes per test (Docker is slow)
+- `hookTimeout: 60_000` - 1 minute for setup/teardown hooks
+- `fileParallelism: false` - sequential execution (Docker resource constraints)

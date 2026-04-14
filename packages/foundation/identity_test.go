@@ -78,7 +78,7 @@ func TestGenerateWorldID_Uniqueness(t *testing.T) {
 	}
 	// With 5 random digits (100k combinations), 50 calls should almost never collide
 	if len(seen) < 2 {
-		t.Error("generated 50 IDs but all were identical — randomness is broken")
+		t.Error("generated 50 IDs but all were identical - randomness is broken")
 	}
 }
 
@@ -174,7 +174,7 @@ func TestGenerateAgentID_SpecialChars(t *testing.T) {
 
 func TestGenerateAgentID_SuffixIs5Digits(t *testing.T) {
 	id := GenerateAgentID("neo")
-	// Format: a-neo-XXXXX — but name could contain hyphens, so split carefully
+	// Format: a-neo-XXXXX - but name could contain hyphens, so split carefully
 	prefix := "a-neo-"
 	if !strings.HasPrefix(id, prefix) {
 		t.Fatalf("id %q does not start with %q", id, prefix)

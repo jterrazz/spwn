@@ -169,5 +169,5 @@ func TestEmptyAgentSlice(t *testing.T) {
 	if len(agents) != 0 {
 		t.Error("empty slice should have length 0")
 	}
-	// SpawnAgents returns nil for empty agents — a no-op.
+	// SpawnAgents returns nil for empty agents - a no-op.
 }

@@ -69,7 +69,7 @@ func (r *MyRuntime) BaseImage() string { return "node:20" }
 
 1. Create `apps/cli/{domain}/{command}.go`
 2. Register with `Cmd.AddCommand(yourCmd)` in `init()`
-3. Command calls domain APIs — no business logic in CLI layer
+3. Command calls domain APIs - no business logic in CLI layer
 4. Use `ui.New()` stepper for output (✓/✗/→)
 5. Add to custom help in `apps/cli/root.go`
 
@@ -78,14 +78,14 @@ func (r *MyRuntime) BaseImage() string { return "node:20" }
 ### Running Tests
 
 ```bash
-# Unit tests — fast, no Docker required
+# Unit tests - fast, no Docker required
 make test
 
-# Go E2E tests — requires Docker + test image
+# Go E2E tests - requires Docker + test image
 make build-test-image   # build spwn-test:latest (once)
 make test-e2e           # run Go E2E suite
 
-# TypeScript E2E tests — requires built binary + Docker + test image
+# TypeScript E2E tests - requires built binary + Docker + test image
 make build              # build bin/spwn
 cd tests && npx vitest run
 
@@ -110,7 +110,7 @@ make lint
 - **Go unit tests**: `*_test.go` next to source. No Docker needed.
 - **Go E2E tests**: `packages/world/tests/e2e/`. Build tag `//go:build e2e`. Needs Docker.
 - **TypeScript E2E**: `tests/e2e/`. Runs against real `spwn` binary. Needs Docker.
-- **Output assertions**: use `expectLine()`, `expectTableHeader()` — not weak `toContain()`
+- **Output assertions**: use `expectLine()`, `expectTableHeader()` - not weak `toContain()`
 - See [tests/README.md](./tests/README.md) for full testing documentation and patterns
 
 ## Commit Messages
@@ -125,6 +125,6 @@ docs: update CLI reference
 
 ## Resources
 
-- [Knowledge Wiki](https://github.com/jterrazz/spwn-wiki) — ADRs, domain models, epoch plans
-- [CLI Reference](https://spwn.sh/docs) — auto-generated from source
-- [CLAUDE.md](./CLAUDE.md) — full project conventions
+- [Knowledge Wiki](https://github.com/jterrazz/spwn-wiki) - ADRs, domain models, epoch plans
+- [CLI Reference](https://spwn.sh/docs) - auto-generated from source
+- [CLAUDE.md](./CLAUDE.md) - full project conventions

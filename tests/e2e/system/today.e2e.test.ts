@@ -34,12 +34,12 @@ describe("example install + agent repair", () => {
   });
 
   test("install creates agents with core/profile.md", async () => {
-    // WHEN — installing the matrix example
+    // WHEN - installing the matrix example
     const result = await spwn("install matrix")
       .exec("example install matrix")
       .run();
 
-    // THEN — agent neo is created with the current Mind layout
+    // THEN - agent neo is created with the current Mind layout
     expect(result.exitCode).toBe(0);
     expect(existsSync(join(home, "agents", "neo", "core", "profile.md"))).toBe(true);
     expect(existsSync(join(home, "agents", "neo", "agent.yaml"))).toBe(true);
@@ -51,17 +51,17 @@ describe("example install + agent repair", () => {
   });
 
   test("install repairs broken agent (missing core/)", async () => {
-    // GIVEN — a broken agent "neo" with only a journal (no core/profile.md)
+    // GIVEN - a broken agent "neo" with only a journal (no core/profile.md)
     createBrokenAgent(home, "neo");
     expect(existsSync(join(home, "agents", "neo", "journal", "old-session.md"))).toBe(true);
     expect(existsSync(join(home, "agents", "neo", "core", "profile.md"))).toBe(false);
 
-    // WHEN — installing the matrix example (neo already exists but is broken)
+    // WHEN - installing the matrix example (neo already exists but is broken)
     const result = await spwn("install repairs neo")
       .exec("example install matrix")
       .run();
 
-    // THEN — neo is repaired: core/profile.md created, journal preserved
+    // THEN - neo is repaired: core/profile.md created, journal preserved
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain("repaired");
     expect(existsSync(join(home, "agents", "neo", "core", "profile.md"))).toBe(true);
@@ -70,15 +70,15 @@ describe("example install + agent repair", () => {
   });
 
   test("install skips valid existing agent", async () => {
-    // GIVEN — a valid agent "neo" already exists
+    // GIVEN - a valid agent "neo" already exists
     createAgent(home, "neo");
 
-    // WHEN — installing the matrix example
+    // WHEN - installing the matrix example
     const result = await spwn("install skips valid neo")
       .exec("example install matrix")
       .run();
 
-    // THEN — neo is skipped (not overwritten, not repaired)
+    // THEN - neo is skipped (not overwritten, not repaired)
     expect(result.exitCode).toBe(0);
     const output = stripAnsi(result.output);
     // Should NOT say "repaired" since the agent is valid
@@ -86,12 +86,12 @@ describe("example install + agent repair", () => {
   });
 
   test("install creates all startup agents in one command", async () => {
-    // WHEN — installing the startup example
+    // WHEN - installing the startup example
     const result = await spwn("install startup")
       .exec("example install startup")
       .run();
 
-    // THEN — all 3 agents + 1 world created
+    // THEN - all 3 agents + 1 world created
     expect(result.exitCode).toBe(0);
     for (const agent of ["ceo", "devops", "analyst"]) {
       expect(existsSync(join(home, "agents", agent, "core", "profile.md"))).toBe(true);
@@ -131,12 +131,12 @@ describe("org.yaml removal", () => {
   });
 
   test("init does NOT create org.yaml", async () => {
-    // WHEN — running init
+    // WHEN - running init
     const result = await spwn("init no org")
       .exec("init")
       .run();
 
-    // THEN — no org.yaml created
+    // THEN - no org.yaml created
     expect(result.exitCode).toBe(0);
     expect(existsSync(join(home, "org.yaml"))).toBe(false);
     expect(result.output).not.toContain("org.yaml");
@@ -163,12 +163,12 @@ describe("agent mind structure", () => {
   });
 
   test("agent new creates the 5-layer Mind structure", async () => {
-    // WHEN — creating a new agent
+    // WHEN - creating a new agent
     const result = await spwn("agent new")
       .exec("agent new TestAgent")
       .run();
 
-    // THEN — the 5 Mind layers are created
+    // THEN - the 5 Mind layers are created
     expect(result.exitCode).toBe(0);
     const agentDir = join(home, "agents", "TestAgent");
     for (const layer of ["core", "skills", "knowledge", "playbooks", "journal"]) {
@@ -190,12 +190,12 @@ describe("agent mind structure", () => {
 
 describe("CLI upgrade", () => {
   test("upgrade --check finds latest version", async () => {
-    // WHEN — checking for updates
+    // WHEN - checking for updates
     const result = await spwn("upgrade check")
       .exec("upgrade --check")
       .run();
 
-    // THEN — reports a version (the local build is "dev" so latest != current)
+    // THEN - reports a version (the local build is "dev" so latest != current)
     const output = stripAnsi(result.output);
     expect(output).toMatch(/Latest version\s+v\d+\.\d+\.\d+/);
   });

@@ -7,7 +7,7 @@ test.describe("API health", () => {
 
     await expect(page.getByText("Waiting for Docker")).not.toBeVisible({ timeout: 5000 });
     await expect(page.getByText("API OFFLINE")).not.toBeVisible();
-    // The Worlds heading should be visible — confirms the app is past the lock screen
+    // The Worlds heading should be visible - confirms the app is past the lock screen
     await expect(page.getByRole("heading", { name: "Worlds", level: 1 })).toBeVisible();
   });
 

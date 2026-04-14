@@ -29,7 +29,7 @@ func GenerateDockerfile(rt Runtime) string {
 	}
 	b.WriteString("\n")
 
-	// Non-root user (security — many runtimes refuse root)
+	// Non-root user (security - many runtimes refuse root)
 	b.WriteString("# Non-root user\n")
 	b.WriteString("RUN useradd -m -s /bin/bash spwn 2>/dev/null || true \\\n")
 	b.WriteString("    && echo 'spwn ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers 2>/dev/null || true\n\n")

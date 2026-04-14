@@ -497,7 +497,7 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	mindPath := info.Path
 
 	// Load agent.yaml for role/engine/provider
-	// Engine/provider are intentionally empty — runtime is per-world, not per-agent
+	// Engine/provider are intentionally empty - runtime is per-world, not per-agent
 	role := "worker"
 	engine := ""
 	provider := ""
@@ -583,7 +583,7 @@ type agentSpec struct {
 }
 
 // createWorldRequest is the JSON body accepted by POST /api/worlds.
-// Exported at package scope so its JSON shape can be unit-tested — a stale
+// Exported at package scope so its JSON shape can be unit-tested - a stale
 // binary once silently dropped the `workspaces` field when the struct had
 // only the legacy `workspace` string, spawning empty worlds.
 type createWorldRequest struct {
@@ -1009,7 +1009,7 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Build KPIs — always included regardless of Docker status
+	// Build KPIs - always included regardless of Docker status
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
 
@@ -1075,7 +1075,7 @@ func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "stdout pipe: "+err.Error(), 500)
 		return
 	}
-	cmd.Stderr = cmd.Stdout // merge — docker logs is happy to do that
+	cmd.Stderr = cmd.Stdout // merge - docker logs is happy to do that
 	if err := cmd.Start(); err != nil {
 		jsonError(w, "start docker logs: "+err.Error(), 500)
 		return
@@ -1173,7 +1173,7 @@ func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Kick off the spawn in the background. The frontend already polls
-	// /api/architect/status every 3s — that endpoint now carries the
+	// /api/architect/status every 3s - that endpoint now carries the
 	// real progress event, log tail and final result, so the user
 	// sees what's happening instead of guessing from elapsed time.
 	if err := s.startArchitectAsync(os.Getenv("SPWN_ARCHITECT_IMAGE")); err != nil {
@@ -1183,7 +1183,7 @@ func (s *Server) handleArchitectStart(w http.ResponseWriter, r *http.Request) {
 
 	jsonOK(w, map[string]string{
 		"status":  "starting",
-		"message": "spawning architect — poll /api/architect/status for progress",
+		"message": "spawning architect - poll /api/architect/status for progress",
 	})
 }
 
@@ -1276,7 +1276,7 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 	isRunning := checkErr == nil && strings.TrimSpace(string(checkOut)) == "running"
 
 	if !isRunning {
-		// Use background context — image builds can take minutes
+		// Use background context - image builds can take minutes
 		bgCtx := context.Background()
 		startCmd := exec.CommandContext(bgCtx, "docker", "start", containerName)
 		if startErr := startCmd.Run(); startErr != nil {
@@ -1395,7 +1395,7 @@ func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request
 		"find", "/world/knowledge/", "-type", "f", "-not", "-name", ".*",
 		"-printf", "%P\\t%s\\t%T@\\n")
 	if err != nil {
-		// Directory might not exist yet — return empty list
+		// Directory might not exist yet - return empty list
 		jsonOK(w, map[string]interface{}{"files": []interface{}{}})
 		return
 	}
@@ -1943,7 +1943,7 @@ func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
 }
 
 // ============================================================
-// History handlers — read Claude Code JSONL conversation logs
+// History handlers - read Claude Code JSONL conversation logs
 // ============================================================
 
 type historyMessage struct {

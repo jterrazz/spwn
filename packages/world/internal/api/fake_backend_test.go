@@ -9,7 +9,7 @@ import (
 
 // noContainersBackend implements backend.Backend with stubs that report
 // "no containers exist". The api test suite uses this to keep
-// state.Store reads deterministic — the real local Docker daemon may
+// state.Store reads deterministic - the real local Docker daemon may
 // have spwn-labeled containers from interactive use, which would leak
 // into list/status tests.
 type noContainersBackend struct{}

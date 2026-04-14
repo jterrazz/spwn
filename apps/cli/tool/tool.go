@@ -1,8 +1,8 @@
-// Package tool implements the `spwn tool` command group — management of
+// Package tool implements the `spwn tool` command group - management of
 // reusable tool packs (e.g. @spwn/unix, @spwn/python). Tool packs are
 // first-class composable blocks that agents stack into their compositions.
 //
-// Tools are stubs for now — the full implementation requires a tool
+// Tools are stubs for now - the full implementation requires a tool
 // registry port. Coming in Epoch 10 (Marketplace).
 package tool
 
@@ -23,7 +23,7 @@ Attach one to an agent with:
   spwn agent add <agent> --tool <pack>
 
 If a tool isn't in an agent's composition, it's physically absent from that
-agent's world — not forbidden, absent.`,
+agent's world - not forbidden, absent.`,
 }
 
 func init() {
@@ -44,7 +44,7 @@ func toolHelp(cmd *cobra.Command, args []string) {
 	}
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ tool")+" "+ui.Faint("— reusable tool packs for agents"),
+		ui.Strong("⬡ tool")+" "+ui.Faint("- reusable tool packs for agents"),
 		[]ui.HelpGroup{
 			{Title: "Manage", Commands: []ui.HelpEntry{
 				{Name: "ls", Desc: "List installed tool packs"},
@@ -82,7 +82,7 @@ var lsCmd = &cobra.Command{
 			fmt.Fprintf(cmd.OutOrStderr(), "  %-16s  %s\n", t.name, t.desc)
 		}
 		fmt.Fprintln(cmd.OutOrStderr())
-		fmt.Fprintln(cmd.OutOrStderr(), "Registry (remote) listings are not yet wired — coming in Epoch 10.")
+		fmt.Fprintln(cmd.OutOrStderr(), "Registry (remote) listings are not yet wired - coming in Epoch 10.")
 		return nil
 	},
 }
@@ -115,7 +115,7 @@ var installCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(cmd.OutOrStderr(), "install %q: the tool registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Built-in packs (@spwn/*) are always available — no install needed.")
+		fmt.Fprintln(cmd.OutOrStderr(), "Built-in packs (@spwn/*) are always available - no install needed.")
 		return nil
 	},
 }

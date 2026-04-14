@@ -12,7 +12,7 @@ import (
 // Cmd is the top-level `spwn organization` command.
 var Cmd = &cobra.Command{
 	Use:   "organization",
-	Short: "Manage organizations — list and inspect role structures",
+	Short: "Manage organizations - list and inspect role structures",
 }
 
 func init() {

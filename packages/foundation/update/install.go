@@ -12,7 +12,7 @@ import (
 )
 
 // PlatformToken returns the GoReleaser asset name token for the current
-// runtime — e.g. "darwin_arm64", "linux_amd64", "windows_amd64".
+// runtime - e.g. "darwin_arm64", "linux_amd64", "windows_amd64".
 func PlatformToken() string {
 	return fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
 }
@@ -68,7 +68,7 @@ func ExtractBinary(archivePath, binaryName, destPath string) error {
 // AtomicReplace overwrites `target` with the contents of `newFile` as
 // atomically as the OS allows:
 //
-//   - POSIX: os.Rename into place — the kernel guarantees readers see either
+//   - POSIX: os.Rename into place - the kernel guarantees readers see either
 //     the old or the new binary, never a partial write.
 //   - Windows: os.Rename fails when the target is running, so we fall back
 //     to renaming the old binary aside (`target.old`) and then renaming the

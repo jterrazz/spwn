@@ -5,7 +5,7 @@ slug: "spwn-agent-show"
 
 ## spwn agent show
 
-Show agent details — composition, memory, world status, history
+Show agent details - composition, memory, world status, history
 
 ```
 spwn agent show <agent-name> [flags]
@@ -19,5 +19,5 @@ spwn agent show <agent-name> [flags]
 
 ### SEE ALSO
 
-* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent - a living identity that inhabits a world
 

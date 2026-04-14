@@ -51,7 +51,7 @@ func colorizeCmd(name string) string {
 }
 
 // HelpColWidth is the column width used to pad command names in grouped help.
-// Entries wider than this still render — they just push past the padding.
+// Entries wider than this still render - they just push past the padding.
 const HelpColWidth = 32
 
 // Indent is the per-level indentation used in help output. Headers render
@@ -101,7 +101,7 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 	w := cmd.OutOrStdout()
 	fmt.Fprintln(w)
 
-	// Description — prefer Long, fall back to Short. Flush-left.
+	// Description - prefer Long, fall back to Short. Flush-left.
 	if long := strings.TrimSpace(cmd.Long); long != "" {
 		fmt.Fprintln(w, long)
 		fmt.Fprintln(w)
@@ -152,7 +152,7 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(w)
 	}
 
-	// Local flags — FlagUsages comes pre-indented; re-indent to our width.
+	// Local flags - FlagUsages comes pre-indented; re-indent to our width.
 	if cmd.HasAvailableLocalFlags() {
 		fmt.Fprintf(w, "%s\n", Strong("Flags:"))
 		writeIndentedFlagUsages(w, cmd.LocalFlags().FlagUsages())

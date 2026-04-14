@@ -73,7 +73,7 @@ func TestResolve_Deduplicates(t *testing.T) {
 	r.Register(&stubTool{name: "@spwn/node"})
 	r.Register(&stubTool{name: "@spwn/qmd", deps: []string{"@spwn/node"}})
 
-	// Request both @spwn/node and @spwn/qmd — @spwn/node should appear only once
+	// Request both @spwn/node and @spwn/qmd - @spwn/node should appear only once
 	tools, err := r.Resolve([]string{"@spwn/node", "@spwn/qmd"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

@@ -15,7 +15,7 @@ Attach one to an agent with:
   spwn agent add <agent> --tool <pack>
 
 If a tool isn't in an agent's composition, it's physically absent from that
-agent's world — not forbidden, absent.
+agent's world - not forbidden, absent.
 
 ### Options
 
@@ -25,7 +25,7 @@ agent's world — not forbidden, absent.
 
 ### SEE ALSO
 
-* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn - create realities for things that can think
 * [spwn tool install](./spwn_tool_install.md)	 - Install a tool pack from the registry
 * [spwn tool ls](./spwn_tool_ls.md)	 - List installed tool packs
 * [spwn tool publish](./spwn_tool_publish.md)	 - Publish a tool pack to the registry

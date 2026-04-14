@@ -8,7 +8,7 @@ import (
 )
 
 // worldYAML mirrors the subset of world.yaml we validate. Like
-// agentYAML above, this is a deliberate minimal view — packages/world
+// agentYAML above, this is a deliberate minimal view - packages/world
 // owns the full schema at runtime.
 type worldYAML struct {
 	Physics struct {

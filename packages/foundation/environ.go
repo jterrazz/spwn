@@ -44,7 +44,7 @@ func dockerFriendlyPaths() []string {
 // that does NOT include /opt/homebrew/bin or /usr/local/bin where
 // Docker Desktop installs its CLI. The Tauri desktop bundle spawns the
 // spwn binary as a subprocess, so the spwn binary inherits that
-// minimal PATH — meaning every `exec.Command("docker", ...)` call site
+// minimal PATH - meaning every `exec.Command("docker", ...)` call site
 // fails to resolve the binary. Calling this function at process start
 // fixes every call site at once without touching them individually.
 //

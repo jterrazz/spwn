@@ -102,7 +102,7 @@ export function RecentActivity() {
   if (events.length === 0) {
     return (
       <p className="text-xs text-muted-foreground/30 px-4 py-6 text-center">
-        No activity yet — spawn a world to get started
+        No activity yet - spawn a world to get started
       </p>
     );
   }

@@ -1,5 +1,5 @@
 // Package state implements the world store. Despite the name, this
-// package no longer keeps a JSON file of worlds — Docker container
+// package no longer keeps a JSON file of worlds - Docker container
 // labels are the canonical source of truth, and the only mutable
 // per-world data lives in the runtimestate package as small per-world
 // JSON files. The Store type is a thin façade that preserves the
@@ -17,7 +17,7 @@
 //     accumulate.
 //   - Save() and Delete() on the world record itself become no-ops.
 //     The labels were already written at container create time, and
-//     the destroy code path removes the container — those are the
+//     the destroy code path removes the container - those are the
 //     only events that change "does this world exist".
 package state
 
@@ -45,7 +45,7 @@ type Store struct {
 
 // NewStore returns a Docker-backed Store using the default backend and
 // runtime directory. It also evicts the legacy ~/.spwn/state.json file
-// if one is left over from an older spwn version — the file is no
+// if one is left over from an older spwn version - the file is no
 // longer authoritative and keeping it around invites confusion.
 func NewStore() (*Store, error) {
 	docker, err := backend.NewDocker()
@@ -68,7 +68,7 @@ func NewStoreWith(b backend.Backend, rs *runtimestate.Store) *Store {
 }
 
 // NewStoreAt is kept for backwards compatibility with old code that
-// passed an explicit state file path. The path is now ignored — there
+// passed an explicit state file path. The path is now ignored - there
 // is no state file. We log a one-time eviction if anything exists at
 // the supplied path.
 func NewStoreAt(path string) (*Store, error) {
@@ -196,7 +196,7 @@ func (s *Store) hydrate(w *models.World) {
 }
 
 // derivedStatus maps a container's runtime state into the spwn Status
-// vocabulary. Stopped containers are NOT removed from listings — they
+// vocabulary. Stopped containers are NOT removed from listings - they
 // remain a world, just one that the user can restart.
 func derivedStatus(c backend.ContainerInfo) models.Status {
 	if c.Running {
@@ -240,7 +240,7 @@ func (s *Store) Rename(id, name string) error {
 // UpdateStatus is a no-op. Status is derived from container state.
 func (s *Store) UpdateStatus(_ string, _ models.Status) error { return nil }
 
-// ── Mutable per-world state — delegated to runtimestate ──────────────
+// ── Mutable per-world state - delegated to runtimestate ──────────────
 
 // SetSessionID stores a runtime session id for an agent. Errors if the
 // world does not exist.

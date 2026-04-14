@@ -37,7 +37,7 @@ func HasProject() bool {
 }
 
 // UserDir is the user-global home: ~/.spwn/. If SPWN_HOME is set, it
-// overrides the default (used for test isolation). Always user-level —
+// overrides the default (used for test isolation). Always user-level -
 // credentials, daemon state, and the activity log live here regardless
 // of whether a project is active.
 func UserDir() string {
@@ -54,7 +54,7 @@ func BaseDir() string {
 	return UserDir()
 }
 
-// DataDir is the project-aware root for project assets — agents,
+// DataDir is the project-aware root for project assets - agents,
 // worlds, skills, custom tool packs. Returns <projectRoot>/spwn/ when
 // a project is active, or UserDir() otherwise (legacy global mode).
 func DataDir() string {
@@ -95,7 +95,7 @@ func SkillsDir() string {
 // --- User-level paths (never project-aware) ---
 
 // CredentialsDir always returns the user-level credentials directory.
-// Credentials are intentionally never project-scoped — projects must
+// Credentials are intentionally never project-scoped - projects must
 // never commit or reference auth material.
 func CredentialsDir() string {
 	return filepath.Join(UserDir(), CredentialsSubDir)

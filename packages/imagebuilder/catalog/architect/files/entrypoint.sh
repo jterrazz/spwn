@@ -15,7 +15,7 @@ if [ -S "$SOCK" ]; then
     usermod -aG "$GROUP_NAME" architect
     echo "[architect] docker socket (gid=$SOCK_GID) available to architect via group=$GROUP_NAME"
 else
-    echo "[architect] warning: /var/run/docker.sock not mounted — architect cannot spawn worlds"
+    echo "[architect] warning: /var/run/docker.sock not mounted - architect cannot spawn worlds"
 fi
 
 exec "$@"

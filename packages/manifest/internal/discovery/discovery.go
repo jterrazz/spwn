@@ -1,5 +1,5 @@
 // Package discovery walks filesystem paths to locate the nearest
-// spwn.yaml. The walk stops at the filesystem root — same behavior as
+// spwn.yaml. The walk stops at the filesystem root - same behavior as
 // `git rev-parse --show-toplevel`.
 package discovery
 
@@ -16,7 +16,7 @@ const ManifestFileName = "spwn.yaml"
 // Find walks up from startPath searching for ManifestFileName. Returns
 // the absolute manifest path and the project root (the directory that
 // contains the manifest). The third return value reports whether
-// anything was found — the caller can decide whether that's an error.
+// anything was found - the caller can decide whether that's an error.
 func Find(startPath string) (manifestPath, root string, found bool, err error) {
 	abs, err := filepath.Abs(startPath)
 	if err != nil {

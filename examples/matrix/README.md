@@ -2,7 +2,7 @@
 
 > There is no spoon.
 
-The simplest possible spwn world: one agent, one sandbox, no project. Designed to be the first thing a new user spawns — talk to Neo, watch it explore, understand the model.
+The simplest possible spwn world: one agent, one sandbox, no project. Designed to be the first thing a new user spawns - talk to Neo, watch it explore, understand the model.
 
 Perfect for first-time users: the fastest path from "I installed spwn" to "I see an agent running in a Docker container on my machine."
 
@@ -10,7 +10,7 @@ Perfect for first-time users: the fastest path from "I installed spwn" to "I see
 
 | Component | Details |
 |---|---|
-| **World** | `matrix` — 2 CPU, 2 GB RAM, 4 GB disk, 1h timeout |
+| **World** | `matrix` - 2 CPU, 2 GB RAM, 4 GB disk, 1h timeout |
 | **Tools** | Unix, Git, Node.js 20, Python 3 |
 | **Agent: neo** | A curious, low-ego explorer. Explains what it's doing as it does it. Asks clarifying questions rather than guessing. |
 
@@ -43,9 +43,9 @@ spwn up -c matrix --agent neo -w ./my-project
 spwn agent talk neo "Show me what you can see. Explore the world."
 
 # Neo will walk you through:
-#   /world/        — the world manifest, physics, faculties
-#   /mind/         — its own persistent identity
-#   /workspace/    — mounted project (if any)
+#   /world/        - the world manifest, physics, faculties
+#   /mind/         - its own persistent identity
+#   /workspace/    - mounted project (if any)
 
 # Check what's happening
 spwn ls

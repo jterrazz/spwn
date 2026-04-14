@@ -14,7 +14,7 @@ describe("graceful shutdown", () => {
   });
 
   test("destroy writes journal entry for the agent", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -25,17 +25,17 @@ describe("graceful shutdown", () => {
     expect(id).toBeTruthy();
     ctx.world(id).toBeRunning();
 
-    // WHEN — destroying it
+    // WHEN - destroying it
     const destroyResult = ctx.spwn(["down", id], 30_000);
     expect(destroyResult.exitCode).toBe(0);
 
-    // THEN — journal entry exists with world ID
+    // THEN - journal entry exists with world ID
     ctx.mind("neo").hasJournalEntries(1);
     ctx.mind("neo").journalContains(id);
   });
 
   test("down --all destroys all running worlds", () => {
-    // GIVEN — two spawned worlds (same agent for simplicity)
+    // GIVEN - two spawned worlds (same agent for simplicity)
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
@@ -53,25 +53,25 @@ describe("graceful shutdown", () => {
     const id2 = parseWorldId(spawn2.output)!;
     expect(id2).toBeTruthy();
 
-    // WHEN — destroying all worlds
+    // WHEN - destroying all worlds
     const downResult = ctx.spwn(["down", "--all"], 30_000);
 
-    // THEN — exits successfully
+    // THEN - exits successfully
     expect(downResult.exitCode).toBe(0);
     expectLine(downResult.output, /world\(s\) destroyed/);
 
-    // AND — both worlds are gone
+    // AND - both worlds are gone
     ctx.world(id1).toNotExist();
     ctx.world(id2).toNotExist();
     ctx.state().noWorld(id1);
     ctx.state().noWorld(id2);
 
-    // AND — journal entries exist for the agent
+    // AND - journal entries exist for the agent
     ctx.mind("neo").hasJournalEntries(2);
   });
 
-  test("destroy updates agent status — world removed from list", () => {
-    // GIVEN — a spawned world
+  test("destroy updates agent status - world removed from list", () => {
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -84,10 +84,10 @@ describe("graceful shutdown", () => {
     // Verify it exists in state
     ctx.state().hasWorld(id);
 
-    // WHEN — destroying
+    // WHEN - destroying
     ctx.spwn(["down", id], 30_000);
 
-    // THEN — world is gone from state and list
+    // THEN - world is gone from state and list
     ctx.state().noWorld(id);
     const listResult = ctx.spwn(["ls"]);
     expect(listResult.exitCode).toBe(0);
@@ -98,27 +98,27 @@ describe("graceful shutdown", () => {
   });
 
   test("down --all with no running worlds succeeds gracefully", () => {
-    // GIVEN — an initialized SPWN_HOME with no worlds
+    // GIVEN - an initialized SPWN_HOME with no worlds
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — running down --all
+    // WHEN - running down --all
     const result = ctx.spwn(["down", "--all"], 30_000);
 
-    // THEN — exits successfully with 0 worlds destroyed
+    // THEN - exits successfully with 0 worlds destroyed
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /0 world\(s\) destroyed/);
   });
 
   test("upgrade command exists and shows help", () => {
-    // GIVEN — an initialized context
+    // GIVEN - an initialized context
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — running upgrade --help
+    // WHEN - running upgrade --help
     const result = ctx.spwn(["upgrade", "--help"]);
 
-    // THEN — shows upgrade help text
+    // THEN - shows upgrade help text
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /[Dd]ownloads.*spwn release/);
     expectLine(result.output, /[Rr]unning worlds are stopped/);

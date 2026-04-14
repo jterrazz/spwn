@@ -10,10 +10,10 @@ const BIN = resolve(REPO_ROOT, "bin/spwn");
  * Full-stack UI E2E tests.
  *
  * Both servers (Go API + Next.js) are managed by Playwright's
- * webServer — they start before tests and stop after. No global
+ * webServer - they start before tests and stop after. No global
  * setup/teardown needed for server lifecycle.
  *
- * Uses the real ~/.spwn state — these are true integration tests.
+ * Uses the real ~/.spwn state - these are true integration tests.
  */
 export default defineConfig({
   testDir: "./specs",

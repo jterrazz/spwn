@@ -1,4 +1,4 @@
-// Package skill implements the `spwn skill` command group — authoring and
+// Package skill implements the `spwn skill` command group - authoring and
 // managing reusable skill files. Skills are procedures, playbooks, or
 // pieces of knowledge authored in markdown that agents can invoke.
 //
@@ -20,7 +20,7 @@ import (
 var Cmd = &cobra.Command{
 	Use:   "skill",
 	Short: "Author and manage reusable skill files",
-	Long: `Skills are procedures, playbooks, or pieces of knowledge — authored in markdown.
+	Long: `Skills are procedures, playbooks, or pieces of knowledge - authored in markdown.
 
 Attach one to an agent with:
   spwn agent add <agent> --skill <skill-name>`,
@@ -45,7 +45,7 @@ func skillHelp(cmd *cobra.Command, args []string) {
 	}
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ skill")+" "+ui.Faint("— reusable skill files for agents"),
+		ui.Strong("⬡ skill")+" "+ui.Faint("- reusable skill files for agents"),
 		[]ui.HelpGroup{
 			{Title: "Author", Commands: []ui.HelpEntry{
 				{Name: "ls", Desc: "List skill files"},

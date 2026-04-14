@@ -14,7 +14,7 @@ describe("agent inside world", () => {
   });
 
   test("agent is mounted at /agents/<name> inside the world container", () => {
-    // GIVEN — a spawned world with agent neo
+    // GIVEN - a spawned world with agent neo
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -35,7 +35,7 @@ describe("agent inside world", () => {
   });
 
   test("spawn confirms agent is alive", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -52,7 +52,7 @@ describe("agent inside world", () => {
   });
 
   test("inspect shows agent info", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -61,16 +61,16 @@ describe("agent inside world", () => {
     );
     const id = parseWorldId(spawnResult.output)!;
 
-    // WHEN — inspecting
+    // WHEN - inspecting
     const inspectResult = ctx.spwn(["world", "inspect", id]);
 
-    // THEN — agent is shown with structured details
+    // THEN - agent is shown with structured details
     expect(inspectResult.exitCode).toBe(0);
     expectLine(inspectResult.output, /World:\s+/);
     expectLine(inspectResult.output, /Agent:\s+a-neo-\d{5}/);
     expectLine(inspectResult.output, /Status:\s+(running|idle)/);
 
-    // AND — labels track the agent
+    // AND - labels track the agent
     ctx.state().hasAgent(id, "neo");
   });
 

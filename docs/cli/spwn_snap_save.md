@@ -20,5 +20,5 @@ spwn snap save <world-id> [flags]
 
 ### SEE ALSO
 
-* [spwn snap](./spwn_snap.md)	 - World snapshots — save, ls, restore, rm
+* [spwn snap](./spwn_snap.md)	 - World snapshots - save, ls, restore, rm
 

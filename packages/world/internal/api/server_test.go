@@ -83,7 +83,7 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	mux.HandleFunc("PUT /api/organizations/{slug}", cors(srv.handleUpdateOrganization))
 	mux.HandleFunc("DELETE /api/organizations/{slug}", cors(srv.handleDeleteOrganization))
 
-	// Docker-dependent endpoints (read-only mode — arch is nil)
+	// Docker-dependent endpoints (read-only mode - arch is nil)
 	mux.HandleFunc("POST /api/worlds", cors(srv.handleCreateWorld))
 	mux.HandleFunc("POST /api/worlds/{id}/agents", cors(srv.handleDeployAgent))
 	mux.HandleFunc("DELETE /api/worlds/{id}", cors(srv.handleDestroyWorld))
@@ -300,7 +300,7 @@ func TestServerStop_NilServer(t *testing.T) {
 	store := state.NewStoreWith(noContainersBackend{}, rs)
 
 	srv := New(store, nil, "127.0.0.1:0")
-	// srv.srv is nil — Stop should be a no-op
+	// srv.srv is nil - Stop should be a no-op
 	err = srv.Stop(context.Background())
 	if err != nil {
 		t.Errorf("Stop on nil server should return nil, got: %v", err)
@@ -326,7 +326,7 @@ func TestServerGracefulShutdown(t *testing.T) {
 	httpSrv := &http.Server{Addr: "127.0.0.1:0", Handler: mux}
 	srv.srv = httpSrv
 
-	// Start in background — use a listener to get the actual port
+	// Start in background - use a listener to get the actual port
 	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatalf("listen: %v", err)
@@ -558,7 +558,7 @@ func TestGetAgentFile_DirectoryTraversal(t *testing.T) {
 	// so we test that the server code itself rejects ".." if it reaches the handler.
 	// Use a raw request that bypasses router normalization by encoding dots.
 	w := doJSON(t, mux, "GET", "/api/agents/dave3/files/core/..%2F..%2F..%2Fetc%2Fpasswd", nil)
-	// Should be rejected — either 400 (bad path) or 404 (not found)
+	// Should be rejected - either 400 (bad path) or 404 (not found)
 	if w.Code != 400 && w.Code != 404 {
 		t.Fatalf("expected 400 or 404 for traversal attempt, got %d", w.Code)
 	}
@@ -610,7 +610,7 @@ func TestDream(t *testing.T) {
 	createTestAgent(t, "dreamer")
 
 	w := doJSON(t, mux, "POST", "/api/agents/dreamer/dream", nil)
-	// Dream may succeed or fail depending on journal contents — either 200 or 500 is acceptable
+	// Dream may succeed or fail depending on journal contents - either 200 or 500 is acceptable
 	if w.Code != 200 && w.Code != 500 {
 		t.Fatalf("expected 200 or 500, got %d (body: %s)", w.Code, w.Body.String())
 	}
@@ -621,7 +621,7 @@ func TestSleep(t *testing.T) {
 	createTestAgent(t, "sleeper")
 
 	w := doJSON(t, mux, "POST", "/api/agents/sleeper/sleep", nil)
-	// Sleep may succeed or fail depending on contents — either 200 or 500 is acceptable
+	// Sleep may succeed or fail depending on contents - either 200 or 500 is acceptable
 	if w.Code != 200 && w.Code != 500 {
 		t.Fatalf("expected 200 or 500, got %d (body: %s)", w.Code, w.Body.String())
 	}
@@ -704,7 +704,7 @@ func TestArchitectStatus_ReadOnlyMode(t *testing.T) {
 	// The handler shells out to `docker inspect spwn-architect`.
 	// On machines where the real spwn-architect container is running,
 	// docker returns "running" instead of "stopped".
-	// Accept either value — the important thing is the endpoint works.
+	// Accept either value - the important thing is the endpoint works.
 	status, _ := body["status"].(string)
 	if status != "stopped" && status != "running" {
 		t.Errorf("expected status=stopped or running, got %v", body["status"])
@@ -814,7 +814,7 @@ func TestStatusCountsAgents(t *testing.T) {
 func TestGetArchitectStack_DefaultTemplate(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
-	// No todo file exists — should return default template
+	// No todo file exists - should return default template
 	w := doJSON(t, mux, "GET", "/api/architect/stack", nil)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
@@ -1305,7 +1305,7 @@ func TestAuthCheck(t *testing.T) {
 
 	// Response should be a JSON object with status info
 	body := decodeBody(t, w)
-	// The Validate function returns a ProviderStatus — just check it's valid JSON
+	// The Validate function returns a ProviderStatus - just check it's valid JSON
 	if len(body) == 0 {
 		t.Error("expected non-empty auth check response")
 	}
@@ -1318,7 +1318,7 @@ func TestAuthConfigure(t *testing.T) {
 		"provider": "anthropic",
 		"token":    "sk-test-fake-token-12345",
 	})
-	// Should succeed (200) — SaveToken writes to SPWN_HOME which is a temp dir
+	// Should succeed (200) - SaveToken writes to SPWN_HOME which is a temp dir
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
 	}
@@ -1358,7 +1358,7 @@ func TestArchitectHistory(t *testing.T) {
 	if !ok {
 		t.Fatal("response missing 'sessions' key")
 	}
-	// sessions should be an array (empty — no Docker container in test)
+	// sessions should be an array (empty - no Docker container in test)
 	arr, ok := sessions.([]interface{})
 	if !ok {
 		t.Fatalf("sessions should be an array, got %T", sessions)
@@ -1380,9 +1380,9 @@ func TestWorldHistory(t *testing.T) {
 func TestWorldHistory_MissingID(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
-	// Empty world ID — Go's mux may redirect /api/worlds//history to
+	// Empty world ID - Go's mux may redirect /api/worlds//history to
 	// /api/worlds/history (307) since it cleans double slashes.
-	// Accept 307 (redirect), 400 (validation), or 404 (not found) —
+	// Accept 307 (redirect), 400 (validation), or 404 (not found) -
 	// all indicate the request is not served as a valid world history.
 	w := doJSON(t, mux, "GET", "/api/worlds//history", nil)
 	validCodes := map[int]bool{301: true, 307: true, 400: true, 404: true}

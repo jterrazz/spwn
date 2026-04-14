@@ -10,7 +10,7 @@ import (
 //go:embed skills/*
 var skills embed.FS
 
-// Tool is the @spwn/claude-code tool — Claude Code AI agent runtime.
+// Tool is the @spwn/claude-code tool - Claude Code AI agent runtime.
 var Tool = &tool{}
 
 type tool struct{}

@@ -29,7 +29,7 @@ var startCmd = &cobra.Command{
 	Long: `Start the Architect daemon in a Docker container.
 
 The Architect runs the spwn binary inside a long-lived container with the
-host's Docker socket mounted (DooD — Docker-outside-of-Docker), allowing it
+host's Docker socket mounted (DooD - Docker-outside-of-Docker), allowing it
 to create and manage world containers as siblings.
 
 The container mounts:
@@ -50,14 +50,14 @@ var stopCmd = &cobra.Command{
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show Architect status — worlds, agents",
+	Short: "Show Architect status - worlds, agents",
 	Long:  `Query Docker to show whether the Architect container is running, its uptime, and active worlds.`,
 	RunE:  runStatus,
 }
 
 var talkCmd = &cobra.Command{
 	Use:   "talk [message]",
-	Short: "Talk to the Architect — ask it to manage worlds and agents",
+	Short: "Talk to the Architect - ask it to manage worlds and agents",
 	Long: `Send a message to the Architect (Claude Code running inside Docker).
 
 If a message is provided, runs a one-shot query and prints the response.
@@ -95,7 +95,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 	imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
 
 	// Friendly labels for the stable spawn events. Anything not in
-	// this map is shown verbatim — keeps unknown future events
+	// this map is shown verbatim - keeps unknown future events
 	// readable rather than crashing the stepper.
 	labels := map[string]string{
 		"docker_check":       "Connecting to Docker",
@@ -240,7 +240,7 @@ func runTalk(cmd *cobra.Command, args []string) error {
 		_, startErr := world.StartArchitectDaemon(ctx, imageOverride, cmd.ErrOrStderr())
 		if startErr != nil {
 			if strings.Contains(startErr.Error(), "already running") {
-				// Race condition — it started between check and start, that's fine
+				// Race condition - it started between check and start, that's fine
 			} else {
 				return s.FailHint("Architect", fmt.Errorf("failed to auto-start architect: %w", startErr),
 					"Start manually with: spwn architect start")
@@ -358,7 +358,7 @@ func architectHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ architect")+" "+ui.Faint("— your always-on world builder"),
+		ui.Strong("⬡ architect")+" "+ui.Faint("- your always-on world builder"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
 				{Name: "start", Desc: "Start the Architect daemon"},

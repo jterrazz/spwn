@@ -27,5 +27,5 @@ spwn team assign <agent-name> <team-slug> [flags]
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
 

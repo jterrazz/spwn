@@ -23,7 +23,7 @@ func init() {
 	Cmd.Flags().StringVarP(&spawnName, "name", "n", "", "Agent name (default: default)")
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Target world ID")
 	Cmd.Flags().StringVar(&spawnImport, "import", "", "Import Mind from tar.gz before spawning")
-	Cmd.Flags().StringVar(&ephemeralTask, "ephemeral", "", "Run as ephemeral agent — no Mind, no memory, just execute this task")
+	Cmd.Flags().StringVar(&ephemeralTask, "ephemeral", "", "Run as ephemeral agent - no Mind, no memory, just execute this task")
 	Cmd.Flags().StringVar(&npcTaskCompat, "npc", "", "Run as ephemeral agent (deprecated: use --ephemeral)")
 	_ = Cmd.Flags().MarkHidden("npc")
 
@@ -38,7 +38,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ agent")+" "+ui.Faint("— composed minds that live in worlds"),
+		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds that live in worlds"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "new <name>", Desc: "Create a blank agent"},
@@ -81,14 +81,14 @@ func agentHelp(cmd *cobra.Command, args []string) {
 	)
 }
 
-// Cmd is the agent command — spawns an agent when run directly,
+// Cmd is the agent command - spawns an agent when run directly,
 // and groups subcommands (init, list, inspect, export).
 var Cmd = &cobra.Command{
 	Use:   "agent",
-	Short: "Spawn an agent — a living identity that inhabits a world",
+	Short: "Spawn an agent - a living identity that inhabits a world",
 	Long: `Spawn an agent into an existing world.
 
-An agent is backed by a Mind — a persistent directory holding its profile,
+An agent is backed by a Mind - a persistent directory holding its profile,
 skills, knowledge, playbooks, journal entries, and session state. The agent
 survives after the world is destroyed.`,
 	Example: `  spwn agent -n neo -u w-abc123      Spawn named agent into world
@@ -110,7 +110,7 @@ survives after the world is destroyed.`,
 			task = npcTaskCompat
 		}
 
-		// Ephemeral mode — no Mind, no identity, just execute
+		// Ephemeral mode - no Mind, no identity, just execute
 		if task != "" {
 			worldID := spawnWorld
 			if worldID == "" {

@@ -65,7 +65,7 @@ func TestRouteAgentToWorld_UnpinnedReturnsFirstRunning(t *testing.T) {
 
 func TestRouteAgentToWorld_UnpinnedSkipsStoppedContainers(t *testing.T) {
 	worlds := []world.World{
-		makeWorld("w-stopped", "cStopped", "qa"), // skipped — not running
+		makeWorld("w-stopped", "cStopped", "qa"), // skipped - not running
 		makeWorld("w-running", "cA", "qa"),
 	}
 	cid, wid, err := routeAgentToWorld(worlds, "qa", "", onlyA)

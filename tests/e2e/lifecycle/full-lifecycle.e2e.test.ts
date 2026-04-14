@@ -53,13 +53,13 @@ describe("full agent lifecycle", () => {
     expect(worldId).toBeTruthy();
     expectLine(spawnResult.output, /✓ Created container\s+(?:spwn-world|w)-\w+-\d{5}/);
 
-    // ── STEP 4: spwn ls — verify world appears ─────────────────
+    // ── STEP 4: spwn ls - verify world appears ─────────────────
     const lsWorldsResult = ctx.spwn(["ls"]);
     expect(lsWorldsResult.exitCode).toBe(0);
     expect(stripAnsi(lsWorldsResult.output)).toContain(worldId!);
     expectTableHeader(lsWorldsResult.output, ["ID", "CONFIG", "AGENTS", "STATUS"]);
 
-    // ── STEP 5: spwn world inspect <id> — verify details ───────
+    // ── STEP 5: spwn world inspect <id> - verify details ───────
     const inspectWorldResult = ctx.spwn(["world", "inspect", worldId!]);
     expect(inspectWorldResult.exitCode).toBe(0);
     expectLine(
@@ -69,12 +69,12 @@ describe("full agent lifecycle", () => {
     expectLine(inspectWorldResult.output, /Status:\s+(running|idle)/);
     expectLine(inspectWorldResult.output, /Config:\s+default/);
 
-    // ── STEP 6: spwn world logs <id> — verify it doesn't crash ─
+    // ── STEP 6: spwn world logs <id> - verify it doesn't crash ─
     const logsResult = ctx.spwn(["world", "logs", worldId!]);
     expect(logsResult.exitCode).toBe(0);
     expect(typeof logsResult.output).toBe("string");
 
-    // ── STEP 7: spwn down <id> — destroy world ─────────────────
+    // ── STEP 7: spwn down <id> - destroy world ─────────────────
     const downResult = ctx.spwn(["down", worldId!], 30_000);
     expect(downResult.exitCode).toBe(0);
     expectLine(downResult.output, /✓ World destroyed\. Agent survives\./);
@@ -138,12 +138,12 @@ describe("full agent lifecycle", () => {
   });
 
   test("error recovery: operations on deleted agent fail gracefully", () => {
-    // GIVEN — an agent that was created then deleted
+    // GIVEN - an agent that was created then deleted
     ctx = createTestContext();
     ctx.spwn(["init"]);
     ctx.spwn(["agent", "rm", "neo"]);
 
-    // WHEN/THEN — operations on deleted agent produce clean errors
+    // WHEN/THEN - operations on deleted agent produce clean errors
     const showResult = ctx.spwn(["agent", "show", "neo"]);
     expect(showResult.exitCode).not.toBe(0);
     expectLine(showResult.output, /agent "neo" not found/);

@@ -2,15 +2,15 @@
 
 > The factory never sleeps.
 
-One tireless worker. A world built for loops, scripts, and scheduled work. Clippy never stops — give it a directory full of things to process and it will keep maximizing whatever you tell it to maximize.
+One tireless worker. A world built for loops, scripts, and scheduled work. Clippy never stops - give it a directory full of things to process and it will keep maximizing whatever you tell it to maximize.
 
-This example showcases **single-agent automation** — an agent that runs autonomously and evolves its own playbooks over time.
+This example showcases **single-agent automation** - an agent that runs autonomously and evolves its own playbooks over time.
 
 ## What's inside
 
 | Component | Details |
 |---|---|
-| **World** | `paperclip-factory` — 2 CPU, 2 GB RAM, 4 GB disk, 8h timeout |
+| **World** | `paperclip-factory` - 2 CPU, 2 GB RAM, 4 GB disk, 8h timeout |
 | **Tools** | Unix, Git, Node.js 20 |
 | **Agent: clippy** | Worker role. Relentless, systematic, efficiency-obsessed. Automates everything it touches. Measures results. Iterates. |
 

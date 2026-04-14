@@ -1,5 +1,5 @@
 // Package example wires the `spwn example …` cobra tree. It's a
-// tiny shell around the spwn.sh/examples package — listing and
+// tiny shell around the spwn.sh/examples package - listing and
 // installing is all one-shot filesystem work, no state involved.
 package example
 

@@ -9,7 +9,7 @@ Author and manage reusable profile templates (personality)
 
 ### Synopsis
 
-Profiles are reusable personality templates — role, tone, purpose, behavior.
+Profiles are reusable personality templates - role, tone, purpose, behavior.
 
 A profile defines WHO the agent is. Tools and skills define what it can do.
 
@@ -24,7 +24,7 @@ Attach one to an agent with:
 
 ### SEE ALSO
 
-* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn - create realities for things that can think
 * [spwn profile edit](./spwn_profile_edit.md)	 - Open a profile template in $EDITOR
 * [spwn profile install](./spwn_profile_install.md)	 - Install a profile template from the registry
 * [spwn profile ls](./spwn_profile_ls.md)	 - List profile templates

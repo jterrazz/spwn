@@ -3,7 +3,7 @@ import { spwn } from "../../setup/spwn.specification.js";
 import { createSpwnHome } from "../../setup/helpers.js";
 import { stripAnsi, expectLine } from "../../setup/output-helpers.js";
 
-describe("marketplace — spwn get", () => {
+describe("marketplace - spwn get", () => {
   let home: string;
   let originalSpwnHome: string | undefined;
 
@@ -45,7 +45,7 @@ describe("marketplace — spwn get", () => {
       .exec("get install nonexistent")
       .run();
 
-    // Command should not crash — may succeed with "not yet implemented" or fail cleanly
+    // Command should not crash - may succeed with "not yet implemented" or fail cleanly
     const out = stripAnsi(result.output);
     expect(out.length).toBeGreaterThan(0);
     // Should not contain stack traces
@@ -80,7 +80,7 @@ describe("marketplace — spwn get", () => {
   test("'spwn get' without subcommand shows help", async () => {
     const result = await spwn("get bare").exec("get").run();
 
-    // THEN — shows help or usage info (no crash)
+    // THEN - shows help or usage info (no crash)
     const out = stripAnsi(result.output);
     expect(out.length).toBeGreaterThan(0);
     expect(out).not.toContain("TypeError");

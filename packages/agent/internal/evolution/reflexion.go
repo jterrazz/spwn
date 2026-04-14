@@ -12,7 +12,7 @@ import (
 )
 
 // Dream analyzes recent journal entries and promotes successful patterns to playbooks.
-// This is the primary function — formerly called Reflect.
+// This is the primary function - formerly called Reflect.
 func Dream(mindPath string) (*ReflexionResult, error) {
 	// 1. Read journal entries
 	entries, err := journal.List(mindPath, 20)

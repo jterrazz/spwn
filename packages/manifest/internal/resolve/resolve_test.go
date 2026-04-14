@@ -64,7 +64,7 @@ func TestWalk_detectsCycle(t *testing.T) {
 func TestWalk_ignoresEmailAddresses(t *testing.T) {
 	root := t.TempDir()
 	claude := filepath.Join(root, "CLAUDE.md")
-	mustWrite(t, claude, "ping me at user@example.com — not an import\n")
+	mustWrite(t, claude, "ping me at user@example.com - not an import\n")
 
 	r, err := Walk(root, claude)
 	if err != nil {

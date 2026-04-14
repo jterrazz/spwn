@@ -16,69 +16,69 @@ describe("config cascade", () => {
   });
 
   test("init creates default world config", () => {
-    // GIVEN — a fresh SPWN_HOME
+    // GIVEN - a fresh SPWN_HOME
     ctx = createTestContext();
 
-    // WHEN — running init
+    // WHEN - running init
     const result = ctx.spwn(["init"]);
 
-    // THEN — a default.yaml exists in worlds/ and output confirms
+    // THEN - a default.yaml exists in worlds/ and output confirms
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Created config\s+\w+\.yaml/);
     expect(existsSync(join(ctx.home, "worlds", "default.yaml"))).toBe(true);
   });
 
   test("multiple world configs coexist", () => {
-    // GIVEN — an initialized SPWN_HOME
+    // GIVEN - an initialized SPWN_HOME
     ctx = createTestContext();
     const r1 = ctx.spwn(["init", "alpha"]);
     const r2 = ctx.spwn(["init", "beta"]);
 
-    // THEN — init outputs confirm named configs
+    // THEN - init outputs confirm named configs
     expectLine(r1.output, /✓ Created config\s+alpha\.yaml/);
     expectLine(r2.output, /✓ Created config\s+beta\.yaml/);
 
-    // AND — both configs exist alongside default
+    // AND - both configs exist alongside default
     expect(existsSync(join(ctx.home, "worlds", "alpha.yaml"))).toBe(true);
     expect(existsSync(join(ctx.home, "worlds", "beta.yaml"))).toBe(true);
     expect(existsSync(join(ctx.home, "worlds", "default.yaml"))).toBe(true);
   });
 
   test("named config is used when spawning with -c flag", () => {
-    // GIVEN — a named config
+    // GIVEN - a named config
     ctx = createTestContext();
     ctx.spwn(["init", "custom"]);
 
-    // WHEN — spawning with that config
+    // WHEN - spawning with that config
     const spawnResult = ctx.spwn(
       ["world", "-c", "custom", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — world ID reflects the config name
+    // THEN - world ID reflects the config name
     expect(spawnResult.exitCode).toBe(0);
     expectLine(spawnResult.output, /✓ Created container\s+spwn-world-custom-\d{5}/);
 
-    // AND — container is running
+    // AND - container is running
     const id = parseWorldId(spawnResult.output)!;
     ctx.world(id).toBeRunning();
 
-    // AND — state tracks it with the right config
+    // AND - state tracks it with the right config
     ctx.state().hasWorld(id);
   });
 
   test("spawning with non-existent config fails with actionable error", () => {
-    // GIVEN — an initialized SPWN_HOME (but no 'ghost' config)
+    // GIVEN - an initialized SPWN_HOME (but no 'ghost' config)
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — spawning with a config that doesn't exist
+    // WHEN - spawning with a config that doesn't exist
     const result = ctx.spwn(
       ["world", "-c", "ghost", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — exits with non-zero code and actionable error
+    // THEN - exits with non-zero code and actionable error
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /✗ Config failed/);
     expectLine(result.output, /spwn init/);

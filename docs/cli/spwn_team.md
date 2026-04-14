@@ -5,7 +5,7 @@ slug: "spwn-team"
 
 ## spwn team
 
-Manage teams — create, list, edit, and remove agent groups
+Manage teams - create, list, edit, and remove agent groups
 
 ### Options
 
@@ -15,7 +15,7 @@ Manage teams — create, list, edit, and remove agent groups
 
 ### SEE ALSO
 
-* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn - create realities for things that can think
 * [spwn team assign](./spwn_team_assign.md)	 - Assign an agent to a team (or --clear to remove)
 * [spwn team edit](./spwn_team_edit.md)	 - Edit a team's metadata
 * [spwn team ls](./spwn_team_ls.md)	 - List all teams

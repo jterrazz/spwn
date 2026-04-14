@@ -7,7 +7,7 @@ import (
 // UpCmd is the top-level alias for `spwn up` (= `spwn world up`).
 var UpCmd = &cobra.Command{
 	Use:     "up",
-	Short:   "Spawn a world — an isolated reality for agents",
+	Short:   "Spawn a world - an isolated reality for agents",
 	Long:    upCmd.Long,
 	Example: upCmd.Example,
 	RunE:    spawnRunE,

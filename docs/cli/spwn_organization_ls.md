@@ -19,5 +19,5 @@ spwn organization ls [flags]
 
 ### SEE ALSO
 
-* [spwn organization](./spwn_organization.md)	 - Manage organizations — list and inspect role structures
+* [spwn organization](./spwn_organization.md)	 - Manage organizations - list and inspect role structures
 

@@ -21,7 +21,7 @@ var knowledgeCmd = &cobra.Command{
 	Use:   "knowledge",
 	Short: "Read a world's shared knowledge",
 	Long: `Each world carries its own knowledge base at /world/knowledge/ inside the
-container — shared notes, decisions, and context for the agents working there.
+container - shared notes, decisions, and context for the agents working there.
 Knowledge is per-world; destroy the world and its knowledge goes with it.`,
 }
 

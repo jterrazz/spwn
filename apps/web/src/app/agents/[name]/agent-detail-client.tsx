@@ -110,7 +110,7 @@ function AgentProfilePage() {
     }
   }, [fetchProfile, worldId]);
 
-  // Auto-detect world from available worlds — works even when single-world fetch fails
+  // Auto-detect world from available worlds - works even when single-world fetch fails
   useEffect(() => {
     if (availableWorlds.length === 0) return;
     const w = availableWorlds.find((w) =>
@@ -177,7 +177,7 @@ function AgentProfilePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: agentName, role: deployRole }),
-        signal: AbortSignal.timeout(600000), // 10 min — first run may build Docker images
+        signal: AbortSignal.timeout(600000), // 10 min - first run may build Docker images
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -264,12 +264,12 @@ function AgentProfilePage() {
               compact
               onClick={async () => {
                 if ((profile?.journal?.length ?? 0) === 0) {
-                  showFeedback("Nothing to dream about yet — spawn the agent in a world first");
+                  showFeedback("Nothing to dream about yet - spawn the agent in a world first");
                   return;
                 }
                 const ok = await callAction("dream");
                 if (ok) {
-                  showFeedback("Dream cycle complete — check playbooks for promoted patterns");
+                  showFeedback("Dream cycle complete - check playbooks for promoted patterns");
                   fetchProfile();
                 }
               }}
@@ -318,7 +318,7 @@ function AgentProfilePage() {
         }
       />
 
-      {/* Deploy dialog — select a running world to deploy this agent into */}
+      {/* Deploy dialog - select a running world to deploy this agent into */}
       {showDeployDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !deploying && setShowDeployDialog(false)} />
@@ -593,7 +593,7 @@ function AgentProfilePage() {
         </div>
       )}
 
-      {/* Profile tab — diagnostics panel style */}
+      {/* Profile tab - diagnostics panel style */}
       {activeTab === "profile" && (<>
 
       <MetricGrid columns={2} items={[
@@ -616,7 +616,7 @@ function AgentProfilePage() {
           }}
           className="bg-transparent text-sm font-mono text-foreground/80 focus:outline-none cursor-pointer text-right"
         >
-          <option value="">—</option>
+          <option value="">-</option>
           {availableTeams.map((t) => (
             <option key={t.slug} value={t.slug}>{t.name}</option>
           ))}
@@ -789,7 +789,7 @@ function AgentProfilePage() {
             ]} />
           </div>
 
-          {/* World info — only when deployed */}
+          {/* World info - only when deployed */}
           {worldData && (
             <>
               <Separator />

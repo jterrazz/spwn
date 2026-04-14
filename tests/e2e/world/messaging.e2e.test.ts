@@ -238,7 +238,7 @@ describe("agent messaging", () => {
     ctx.spwn([
       "agent", "send", "neo",
       "--from", "morpheus",
-      "first message — creates the inbox dir",
+      "first message - creates the inbox dir",
     ]);
 
     ctx.world(id).toHaveDirectory("/world/inbox/neo");

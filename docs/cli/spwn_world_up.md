@@ -5,11 +5,11 @@ slug: "spwn-world-up"
 
 ## spwn world up
 
-Spawn a world — an isolated reality for agents
+Spawn a world - an isolated reality for agents
 
 ### Synopsis
 
-Spawn a world — the Big Bang.
+Spawn a world - the Big Bang.
 
 Creates an isolated Docker environment. Pass --agent (repeatable) to bring
 agents to life inside it. Without any --agent flag, the world spawns empty.
@@ -41,5 +41,5 @@ spwn world up [flags]
 
 ### SEE ALSO
 
-* [spwn world](./spwn_world.md)	 - Manage worlds — ephemeral runtime instances for agents
+* [spwn world](./spwn_world.md)	 - Manage worlds - ephemeral runtime instances for agents
 

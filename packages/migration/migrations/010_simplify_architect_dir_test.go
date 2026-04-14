@@ -95,7 +95,7 @@ func TestSimplifyArchitectDir_Idempotent(t *testing.T) {
 
 	SimplifyArchitectDir.Apply(context.Background(), dir)
 
-	// Second run — files already gone, should be a no-op
+	// Second run - files already gone, should be a no-op
 	if err := SimplifyArchitectDir.Apply(context.Background(), dir); err != nil {
 		t.Fatal(err)
 	}

@@ -13,7 +13,7 @@ import (
 // SkillsDir, LocalStateDir) resolves inside the project.
 //
 // Called from root.PersistentPreRunE. Silently no-ops when no
-// spwn.yaml is present — legacy user-home mode still works.
+// spwn.yaml is present - legacy user-home mode still works.
 func discoverProject() {
 	cwd, err := os.Getwd()
 	if err != nil {

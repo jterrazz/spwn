@@ -166,7 +166,7 @@ function parseResultEvent(event: StreamJsonEvent): ActivityBlock[] | null {
   // If there's a result text and we haven't already rendered it via assistant events
   const resultText = event.result as string | undefined;
   if (resultText && event.subtype === "success") {
-    // The result text is the final response — we may have already streamed it
+    // The result text is the final response - we may have already streamed it
     // Only add if no assistant text blocks were received (fallback)
   }
 
@@ -206,7 +206,7 @@ export function deduplicateBlocks(
         added.push(block);
       } else if (block.content !== (lastExistingText as TextBlock).content) {
         // Replace the last text block with the updated one
-        // Return a special marker — the caller should update, not append
+        // Return a special marker - the caller should update, not append
       }
     } else if (block.type === "thinking") {
       const lastExistingThinking = [...existingBlocks]

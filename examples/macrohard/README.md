@@ -4,13 +4,13 @@
 
 A tiny software company with a chief and two developers. Ballmer assigns work, Gates and Nadella build it. The three agents live in the same world and communicate through their per-world inboxes.
 
-This example showcases **multi-agent hierarchy with messaging** — a leader agent decomposes work and delegates to worker agents, who report back through the inbox system.
+This example showcases **multi-agent hierarchy with messaging** - a leader agent decomposes work and delegates to worker agents, who report back through the inbox system.
 
 ## What's inside
 
 | Component | Details |
 |---|---|
-| **World** | `macrohard` — Docker-isolated workspace |
+| **World** | `macrohard` - Docker-isolated workspace |
 | **Tools** | Unix, Git, Node.js 20, Python 3 |
 | **Agent: ballmer** | Chief role. The product manager. Decomposes tasks, assigns work, reviews results. Energetic, decisive, results-obsessed. |
 | **Agent: gates** | Worker role. The architect. Careful, systematic, thinks before coding. Writes clean, documented code. |
@@ -31,7 +31,7 @@ spwn example install macrohard
 ## Spawn
 
 ```bash
-# Start the company — Ballmer leads, Gates and Nadella build
+# Start the company - Ballmer leads, Gates and Nadella build
 spwn up -c macrohard --agent ballmer --agent gates --agent nadella
 
 # Mount a real project for them to work on
@@ -41,7 +41,7 @@ spwn up -c macrohard --agent ballmer --agent gates --agent nadella -w ./my-proje
 ## Explore
 
 ```bash
-# Give Ballmer a task — he'll delegate to the workers
+# Give Ballmer a task - he'll delegate to the workers
 spwn agent talk ballmer "We need a REST API for user management. Plan it and assign the work."
 
 # Ballmer will:
@@ -57,7 +57,7 @@ spwn msg inbox nadella
 spwn logs <world-id>
 
 # Send a direct message to a worker
-spwn msg send gates --from ballmer "Priority change — auth endpoints first"
+spwn msg send gates --from ballmer "Priority change - auth endpoints first"
 ```
 
 ## How the hierarchy works
@@ -65,9 +65,9 @@ spwn msg send gates --from ballmer "Priority change — auth endpoints first"
 1. **Ballmer** (chief) reads the task, breaks it down, and messages workers via `/world/inbox/{name}/`.
 2. **Gates** and **Nadella** (workers) check their inboxes, do the work, and write results to their journals.
 3. **Ballmer** periodically reads `/agents/gates/` and `/agents/nadella/` to see progress.
-4. The cycle repeats — decompose, delegate, review, decide.
+4. The cycle repeats - decompose, delegate, review, decide.
 
-The two developers have different personalities on purpose: Gates writes careful, well-documented code; Nadella ships fast and iterates. The same task, assigned to both, produces different results — and Ballmer decides which approach wins.
+The two developers have different personalities on purpose: Gates writes careful, well-documented code; Nadella ships fast and iterates. The same task, assigned to both, produces different results - and Ballmer decides which approach wins.
 
 ## What to try next
 

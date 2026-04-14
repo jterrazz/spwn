@@ -4,13 +4,13 @@
 
 A complete AI startup in a box. The CEO decides what ships, the DevOps engineer keeps the pipeline flowing, and the Analyst runs experiments. All three live in a single world and communicate through their inboxes.
 
-This is the best example for understanding **multi-agent collaboration** — how agents with different roles coordinate without you orchestrating them manually.
+This is the best example for understanding **multi-agent collaboration** - how agents with different roles coordinate without you orchestrating them manually.
 
 ## What's inside
 
 | Component | Details |
 |---|---|
-| **World** | `startup` — 4 CPU, 4 GB RAM, 8 GB disk, 4h timeout |
+| **World** | `startup` - 4 CPU, 4 GB RAM, 8 GB disk, 4h timeout |
 | **Tools** | Unix, Git, Node.js 20, Python 3 |
 | **Agent: ceo** | Chief role. Reads what the other agents have learned, decides what ships. Decisive, informed, accountable. |
 | **Agent: devops** | Worker role. Keeps the pipeline flowing. Deploys, monitors, fixes. Pragmatic, reliable, calm under pressure. |
@@ -66,18 +66,18 @@ spwn world enter <world-id>
 3. **DevOps** and **Analyst** check their inboxes, do the work, and write results to their own knowledge and journal.
 4. Next cycle, the CEO reads the updated state and decides again.
 
-No orchestration code. The collaboration emerges from the architecture — persistent memory + inboxes + clear roles.
+No orchestration code. The collaboration emerges from the architecture - persistent memory + inboxes + clear roles.
 
 ## Next steps
 
 ```bash
-# Dream — let the CEO analyze past decisions
+# Dream - let the CEO analyze past decisions
 spwn agent dream ceo
 
-# Fork — clone the analyst to try a different approach
+# Fork - clone the analyst to try a different approach
 spwn agent fork analyst analyst-v2
 
-# Snapshot — save the world state before a risky experiment
+# Snapshot - save the world state before a risky experiment
 spwn snap save <world-id>
 ```
 

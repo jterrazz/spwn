@@ -19,5 +19,5 @@ spwn world enter <world-id> [flags]
 
 ### SEE ALSO
 
-* [spwn world](./spwn_world.md)	 - Manage worlds — ephemeral runtime instances for agents
+* [spwn world](./spwn_world.md)	 - Manage worlds - ephemeral runtime instances for agents
 

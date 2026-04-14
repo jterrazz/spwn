@@ -259,7 +259,7 @@ export function KnowledgeBrowser({ compact = false, worldId, searchQuery: extern
         </span>
       </div>
 
-      {/* Search — hidden when a parent controls searchQuery externally
+      {/* Search - hidden when a parent controls searchQuery externally
           (e.g. an ExpandingSearch in the page header). */}
       {!searchControlled && (
         <div className="px-3 py-2 border-b border-white/[0.04]">

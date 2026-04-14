@@ -72,16 +72,16 @@ func resolveAnthropic() *Credential {
 	}
 	keychainCred := readKeychainAnthropic()
 
-	// If keychain has a token, prefer it — auto-update the file if stale
+	// If keychain has a token, prefer it - auto-update the file if stale
 	if keychainCred != nil {
 		if cachedToken != keychainCred.Token {
-			// Keychain is fresher than cached file — update file
+			// Keychain is fresher than cached file - update file
 			_ = SaveToken(keychainCred.Token)
 		}
 		return keychainCred
 	}
 
-	// No keychain — fall back to cached file
+	// No keychain - fall back to cached file
 	if cachedToken != "" {
 		credType := CredTypeOAuth
 		envVar := "CLAUDE_CODE_OAUTH_TOKEN"

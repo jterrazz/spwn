@@ -27,7 +27,7 @@ const (
 	// the user probably wants.
 	LevelWarning
 
-	// LevelInfo is advisory — best-practice suggestions.
+	// LevelInfo is advisory - best-practice suggestions.
 	LevelInfo
 )
 
@@ -50,7 +50,7 @@ type Issue struct {
 	// Level is the severity.
 	Level Level
 
-	// Path is a file path or a manifest field name — whatever best
+	// Path is a file path or a manifest field name - whatever best
 	// identifies the location of the problem.
 	Path string
 
@@ -87,7 +87,7 @@ type Input struct {
 }
 
 // Run executes every rule against the input and returns all issues.
-// Rules never short-circuit — we want a complete picture from one run.
+// Rules never short-circuit - we want a complete picture from one run.
 func Run(in Input) []Issue {
 	var out []Issue
 	rules := []func(Input) []Issue{
@@ -186,7 +186,7 @@ func ruleManifestAgents(in Input) []Issue {
 			Level:   LevelError,
 			Path:    "spwn.yaml#agents",
 			Message: "at least one agent must be declared",
-			Hint:    "add an entry under agents: — one per directory under ./spwn/agents/",
+			Hint:    "add an entry under agents: - one per directory under ./spwn/agents/",
 		}}
 	}
 	return nil
@@ -332,7 +332,7 @@ func ruleWorkspaceEscape(in Input) []Issue {
 	if err != nil {
 		return nil
 	}
-	// Same dir or a child — OK.
+	// Same dir or a child - OK.
 	if absWs == absRoot || strings.HasPrefix(absWs+string(filepath.Separator), absRoot+string(filepath.Separator)) {
 		return nil
 	}

@@ -53,7 +53,7 @@ test.describe("World lifecycle (requires Docker)", () => {
     await page.goto(`/world/${worldId}`);
     await page.waitForTimeout(4000);
 
-    // Should show the world — agent name or status visible
+    // Should show the world - agent name or status visible
     await expect(page.getByText(/Neo|matrix|running|idle/i).first()).toBeVisible({ timeout: 10_000 });
   });
 });

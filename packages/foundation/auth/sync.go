@@ -16,7 +16,7 @@ import (
 // directory (~/.spwn/credentials/). This directory is bind-mounted into every
 // container at /credentials/, so updates are visible immediately.
 //
-// Safe to call repeatedly — uses atomic writes.
+// Safe to call repeatedly - uses atomic writes.
 func SyncCredentials() error {
 	dir := foundation.CredentialsDir()
 	if err := os.MkdirAll(dir, 0700); err != nil {

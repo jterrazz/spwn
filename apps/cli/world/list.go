@@ -37,7 +37,7 @@ var listCmd = &cobra.Command{
 		var liveWorlds []world.World
 		for _, w := range worlds {
 			if w.ContainerID != "" && !containerExists(w.ContainerID) {
-				// Container is gone — clean up state silently
+				// Container is gone - clean up state silently
 				arc.Destroy(ctx, w.ID)
 				continue
 			}

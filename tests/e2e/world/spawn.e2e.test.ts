@@ -16,17 +16,17 @@ describe("world spawn", () => {
   });
 
   test("creates a running Docker container", () => {
-    // GIVEN — an initialized SPWN_HOME with agent
+    // GIVEN - an initialized SPWN_HOME with agent
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — spawning a world
+    // WHEN - spawning a world
     const result = ctx.spwn(
       ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — exits successfully with structured status lines
+    // THEN - exits successfully with structured status lines
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Loaded config\s+default/);
     expectLine(result.output, /✓ Docker connected/);
@@ -40,10 +40,10 @@ describe("world spawn", () => {
     expect(id).toBeTruthy();
     expect(id).toMatch(/^(?:spwn-world|w)-\w+-\d{5}$/);
 
-    // AND — the container is actually running
+    // AND - the container is actually running
     ctx.world(id).toBeRunning();
 
-    // AND — has /world directory with physics + faculties
+    // AND - has /world directory with physics + faculties
     ctx
       .world(id)
       .toHaveFile("/world/physics.md")
@@ -51,45 +51,45 @@ describe("world spawn", () => {
   });
 
   test("spawns a world with named config via -c flag", () => {
-    // GIVEN — an initialized SPWN_HOME
+    // GIVEN - an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init", "myconfig"]);
 
-    // WHEN — spawning with a named config
+    // WHEN - spawning with a named config
     const result = ctx.spwn(
       ["world", "-c", "myconfig", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — exits successfully with correct ID prefix
+    // THEN - exits successfully with correct ID prefix
     expect(result.exitCode).toBe(0);
     expectLine(result.output, /✓ Created container\s+spwn-world-myconfig-\d{5}/);
     const id = parseWorldId(result.output)!;
     expect(id).toMatch(/^spwn-world-myconfig-\d{5}$/);
 
-    // AND — container is running
+    // AND - container is running
     ctx.world(id).toBeRunning();
   });
 
   test("world ID format is w-{name}-{5digits}", () => {
-    // GIVEN — an initialized SPWN_HOME
+    // GIVEN - an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — spawning a world
+    // WHEN - spawning a world
     const result = ctx.spwn(
       ["world", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — the ID matches the expected format
+    // THEN - the ID matches the expected format
     const id = parseWorldId(result.output);
     expect(id).toBeTruthy();
     expect(id).toMatch(/^(?:spwn-world|w)-\w+-\d{5}$/);
   });
 
   test("spawned world appears in list", () => {
-    // GIVEN — a spawned world
+    // GIVEN - a spawned world
     ctx = createTestContext();
     ctx.spwn(["init"]);
     const spawnResult = ctx.spwn(
@@ -99,39 +99,39 @@ describe("world spawn", () => {
     const id = parseWorldId(spawnResult.output)!;
     expect(id).toBeTruthy();
 
-    // WHEN — listing worlds
+    // WHEN - listing worlds
     const listResult = ctx.spwn(["world", "list"]);
 
-    // THEN — the spawned world appears in the table
+    // THEN - the spawned world appears in the table
     expect(listResult.exitCode).toBe(0);
     expectLine(listResult.output, new RegExp(id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
-    // AND — state.json tracks it
+    // AND - state.json tracks it
     ctx.state().hasWorld(id).hasAgent(id, "neo");
   });
 
-  test("fails with non-existent config — clean error, no usage dump", () => {
-    // GIVEN — an initialized SPWN_HOME
+  test("fails with non-existent config - clean error, no usage dump", () => {
+    // GIVEN - an initialized SPWN_HOME
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // WHEN — spawning with a non-existent config
+    // WHEN - spawning with a non-existent config
     const result = ctx.spwn(
       ["world", "-c", "nonexistent", "--agent", "neo", "-w", ctx.home],
       60_000,
     );
 
-    // THEN — exits with error and shows actionable hint
+    // THEN - exits with error and shows actionable hint
     expect(result.exitCode).not.toBe(0);
     expectLine(result.output, /✗ Config failed/);
     expectLine(result.output, /spwn init/);
 
-    // AND — does NOT dump full usage
+    // AND - does NOT dump full usage
     expectNoLine(result.output, /Available Commands:/);
     expectNoLine(result.output, /Global Flags:/);
   });
 
-  test("fails with non-existent agent — shows init hint", () => {
+  test("fails with non-existent agent - shows init hint", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
@@ -253,7 +253,7 @@ describe("world spawn", () => {
     // The settings.json should be our minimal config, not the host's (which has hooks, plugins, etc.)
     const settings = ctx.world(id).readFile("/home/spwn/.claude/settings.json");
     const config = JSON.parse(settings);
-    // Host config has hooks.PreToolUse — container config should NOT
+    // Host config has hooks.PreToolUse - container config should NOT
     expect(config.hooks).toBeUndefined();
     expect(config.enabledPlugins).toBeUndefined();
   });
@@ -262,7 +262,7 @@ describe("world spawn", () => {
     ctx = createTestContext();
     ctx.spwn(["init"]);
 
-    // Spawn WITHOUT --detach or --interactive — should still be detached
+    // Spawn WITHOUT --detach or --interactive - should still be detached
     const result = ctx.spwn(
       ["world", "--agent", "neo", "-w", ctx.home],
       60_000,

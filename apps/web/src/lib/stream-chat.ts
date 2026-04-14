@@ -9,7 +9,7 @@ import { parseStreamEvent, deduplicateBlocks } from "./activity-types";
 export interface StreamChatOptions {
   /** Primary URL (Go API) */
   url: string;
-  /** @deprecated No longer used — Go API is the sole backend */
+  /** @deprecated No longer used - Go API is the sole backend */
   fallbackUrl?: string;
   /** POST body */
   body: Record<string, unknown>;
@@ -84,7 +84,7 @@ async function consumeSSEStream(
           if (event.type === "turn.completed") {
             const usage = event.usage as { input_tokens?: number; output_tokens?: number } | undefined;
             if (usage) {
-              // Codex doesn't report cost directly — estimate from token count
+              // Codex doesn't report cost directly - estimate from token count
               meta.duration = undefined;
             }
           }
@@ -98,7 +98,7 @@ async function consumeSSEStream(
             }
           }
         } catch {
-          // Not valid JSON — treat as plain text
+          // Not valid JSON - treat as plain text
           if (onText) onText(data);
           else onBlocks([{ type: "text", content: data }]);
         }

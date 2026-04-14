@@ -5,7 +5,7 @@ package backend
 
 import ib "spwn.sh/packages/imagebuilder/backend"
 
-// Type aliases — all forwarded from imagebuilder/backend.
+// Type aliases - all forwarded from imagebuilder/backend.
 type Backend = ib.Backend
 type ContainerConfig = ib.ContainerConfig
 type ExecConfig = ib.ExecConfig

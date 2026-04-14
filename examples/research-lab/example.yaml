@@ -3,14 +3,14 @@ name: Research Lab
 tagline: A lab notebook and a scientist you can fork
 description: |
   A patient, methodical agent named Curie. Curie keeps a real lab
-  notebook — hypotheses, methods, observations, conclusions — and
+  notebook - hypotheses, methods, observations, conclusions - and
   writes playbooks as she figures things out. Designed to showcase
   the "same brain, new soul" pattern: once Curie has learned enough,
   fork her into Darwin and watch him specialize differently.
 
   What you get:
     - One world with Python and Node
-    - One agent "curie" — careful, note-taking, hypothesis-driven
+    - One agent "curie" - careful, note-taking, hypothesis-driven
     - A one-command fork example once you're ready
 
 agents:

@@ -182,7 +182,7 @@ export function ActivityBlocksRenderer({ blocks }: { blocks: ActivityBlock[] }) 
   return (
     <div className="space-y-2">
       {blocks.map((block, i) => {
-        // Skip tool_result blocks — they're rendered inline with tool_use
+        // Skip tool_result blocks - they're rendered inline with tool_use
         if (block.type === "tool_result") return null;
 
         switch (block.type) {

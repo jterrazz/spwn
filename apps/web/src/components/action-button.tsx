@@ -24,7 +24,7 @@ interface ActionButtonProps {
 }
 
 /**
- * ActionButton renders a consistent header action — either as a compact
+ * ActionButton renders a consistent header action - either as a compact
  * round icon-only button, or as a pill with icon + text. Both share the
  * exact same base styling so swapping between them is cosmetic only.
  */

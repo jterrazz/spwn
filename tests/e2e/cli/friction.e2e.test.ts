@@ -26,15 +26,15 @@ describe("zero-friction UX", () => {
   // ── 1. Agent talk without world gives spawn hint ────────────
 
   test("agent talk without world gives spawn hint", async () => {
-    // GIVEN — an agent exists but no world is spawned
+    // GIVEN - an agent exists but no world is spawned
     createAgent(home, "solo");
 
-    // WHEN — trying to talk to the agent
+    // WHEN - trying to talk to the agent
     const result = await spwn("talk no world")
       .exec('agent talk solo "hello"')
       .run();
 
-    // THEN — error mentions how to spawn a world
+    // THEN - error mentions how to spawn a world
     expect(result.exitCode).not.toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("spwn up --agent");
@@ -43,12 +43,12 @@ describe("zero-friction UX", () => {
   // ── 2. Agent talk with nonexistent agent gives create hint ──
 
   test("agent talk with nonexistent agent gives create hint", async () => {
-    // WHEN — talking to an agent that was never created
+    // WHEN - talking to an agent that was never created
     const result = await spwn("talk missing agent")
       .exec('agent talk nonexistent "hello"')
       .run();
 
-    // THEN — error suggests creating the agent
+    // THEN - error suggests creating the agent
     expect(result.exitCode).not.toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("spwn agent new");
@@ -57,13 +57,13 @@ describe("zero-friction UX", () => {
   // ── 3. Architect stop when not running is graceful ──────────
 
   test("architect stop when not running is graceful", async () => {
-    // GIVEN — architect is not running (fresh SPWN_HOME, no containers)
-    // WHEN — running architect stop
+    // GIVEN - architect is not running (fresh SPWN_HOME, no containers)
+    // WHEN - running architect stop
     const result = await spwn("architect stop graceful")
       .exec("architect stop")
       .run();
 
-    // THEN — exits cleanly (not an error)
+    // THEN - exits cleanly (not an error)
     expect(result.exitCode).toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("not running");
@@ -72,12 +72,12 @@ describe("zero-friction UX", () => {
   // ── 4. Inspect nonexistent world gives ls hint ──────────────
 
   test("inspect nonexistent world gives ls hint", async () => {
-    // WHEN — inspecting a world that does not exist
+    // WHEN - inspecting a world that does not exist
     const result = await spwn("inspect missing hint")
       .exec("world inspect w-nonexistent-00000")
       .run();
 
-    // THEN — error message includes hint to use spwn ls
+    // THEN - error message includes hint to use spwn ls
     expect(result.exitCode).not.toBe(0);
     const out = stripAnsi(result.output);
     expect(out).toContain("spwn ls");
@@ -86,12 +86,12 @@ describe("zero-friction UX", () => {
   // ── 5. Architect talk help mentions auto-start ──────────────
 
   test("architect talk help mentions auto-start behavior", async () => {
-    // WHEN — checking architect talk help
+    // WHEN - checking architect talk help
     const result = await spwn("architect talk help")
       .exec("architect talk --help")
       .run();
 
-    // THEN — the talk command exists
+    // THEN - the talk command exists
     expect(result.exitCode).toBe(0);
   });
 
@@ -140,7 +140,7 @@ describe("zero-friction UX", () => {
       .split("\n")
       .filter((line) => line.trim().length > 0);
 
-    // Should be zero — all God references should be renamed to Architect
+    // Should be zero - all God references should be renamed to Architect
     expect(
       matches.length,
       `Found ${matches.length} remaining 'God' references:\n${matches.join("\n")}`,

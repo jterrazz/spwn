@@ -93,7 +93,7 @@ export default function WelcomePage() {
         return "chat";
       });
     } catch {
-      // API not reachable yet — render the page anyway with empty state.
+      // API not reachable yet - render the page anyway with empty state.
     }
   }, []);
 

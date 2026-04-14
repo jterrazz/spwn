@@ -22,11 +22,11 @@ describe("architect Stack", () => {
   });
 
   test("architect Stack directory can be created", () => {
-    // GIVEN — a SPWN_HOME
+    // GIVEN - a SPWN_HOME
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
-    // WHEN — writing a stack.md file
+    // WHEN - writing a stack.md file
     const stackPath = join(architectDir, "stack.md");
     const content = [
       "# Architect Stack",
@@ -44,7 +44,7 @@ describe("architect Stack", () => {
     ].join("\n");
     writeFileSync(stackPath, content);
 
-    // THEN — file exists and is readable
+    // THEN - file exists and is readable
     expect(existsSync(stackPath)).toBe(true);
     const read = readFileSync(stackPath, "utf-8");
     expect(read).toContain("## Focus");
@@ -53,17 +53,17 @@ describe("architect Stack", () => {
   });
 
   test("architect Stack default template has expected sections", () => {
-    // GIVEN — a fresh architect directory
+    // GIVEN - a fresh architect directory
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
 
-    // WHEN — writing the default template
+    // WHEN - writing the default template
     const defaultContent =
       "# Architect Stack\n\n## Focus\n\n## Queued\n\n## Done\n";
     const stackPath = join(architectDir, "stack.md");
     writeFileSync(stackPath, defaultContent);
 
-    // THEN — template has all required sections
+    // THEN - template has all required sections
     const content = readFileSync(stackPath, "utf-8");
     expect(content).toContain("# Architect Stack");
     expect(content).toContain("## Focus");
@@ -72,7 +72,7 @@ describe("architect Stack", () => {
   });
 
   test("architect Stack supports checkbox parsing", () => {
-    // GIVEN — a Stack file with checkboxes
+    // GIVEN - a Stack file with checkboxes
     const architectDir = join(home, "architect");
     mkdirSync(architectDir, { recursive: true });
     const stackPath = join(architectDir, "stack.md");
@@ -91,12 +91,12 @@ describe("architect Stack", () => {
       ].join("\n"),
     );
 
-    // WHEN — reading and parsing
+    // WHEN - reading and parsing
     const content = readFileSync(stackPath, "utf-8");
     const pendingMatches = content.match(/- \[ \]/g) ?? [];
     const doneMatches = content.match(/- \[x\]/g) ?? [];
 
-    // THEN — counts are correct
+    // THEN - counts are correct
     expect(pendingMatches.length).toBe(3);
     expect(doneMatches.length).toBe(2);
   });

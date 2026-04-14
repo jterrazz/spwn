@@ -31,11 +31,11 @@ export const metadata: Metadata = {
     template: '%s · spwn',
     default: 'spwn',
   },
-  description: 'Desktop app for spwn — manage AI agent worlds',
+  description: 'Desktop app for spwn - manage AI agent worlds',
   icons: [{ rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }],
   openGraph: {
     title: 'spwn',
-    description: 'Desktop app for spwn — manage AI agent worlds',
+    description: 'Desktop app for spwn - manage AI agent worlds',
     type: 'website',
     siteName: 'spwn',
   },

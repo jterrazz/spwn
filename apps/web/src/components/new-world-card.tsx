@@ -18,7 +18,7 @@ const PLACEHOLDER_WORLD: World = {
 
 interface NewWorldCardProps {
   onClick: () => void;
-  /** Visual dim level — carousel uses 0.5/0.2 based on selection state,
+  /** Visual dim level - carousel uses 0.5/0.2 based on selection state,
    *  empty state uses 0.4. */
   opacity?: number;
   /** Scale override for the "dim and shrink when another planet is
@@ -27,13 +27,13 @@ interface NewWorldCardProps {
   /** Extra style overrides (transitions, margin, etc). */
   style?: CSSProperties;
   /** "creating" places the card inline with real worlds in the carousel,
-   *  "stopped" is used for the standalone empty state — the difference
+   *  "stopped" is used for the standalone empty state - the difference
    *  only affects how PlanetGlobe tints the orb. */
   tint?: "creating" | "stopped";
 }
 
 /**
- * Shared "create a new world" card — used both inline at the end of the
+ * Shared "create a new world" card - used both inline at the end of the
  * carousel AND in the empty state. Wraps the placeholder PlanetGlobe in
  * the exact same container, animations, and typography as every other
  * world card, so the create affordance feels native to the list.

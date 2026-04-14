@@ -109,7 +109,7 @@ describe("activity event emissions", () => {
   });
 
   test("agent dream emits agent.dreamed event when it runs", async () => {
-    // GIVEN — an agent with at least one journal entry
+    // GIVEN - an agent with at least one journal entry
     runSpwn(["agent", "new", "neo"], home);
     // Seed a fake journal entry so dream doesn't skip
     const journalDir = join(home, "agents", "neo", "journal");
@@ -167,12 +167,12 @@ describe("activity event emissions", () => {
   });
 
   test("events are appended in chronological order", () => {
-    // GIVEN — sequential operations
+    // GIVEN - sequential operations
     runSpwn(["agent", "new", "a"], home);
     runSpwn(["agent", "new", "b"], home);
     runSpwn(["agent", "new", "c"], home);
 
-    // THEN — events in file are in chronological order (oldest first)
+    // THEN - events in file are in chronological order (oldest first)
     const events = readActivityLog(home);
     const creations = eventsOfType(events, "agent.created");
     expect(creations.length).toBe(3);
@@ -185,36 +185,36 @@ describe("activity event emissions", () => {
   });
 
   test("event IDs are unique", () => {
-    // GIVEN — multiple events
+    // GIVEN - multiple events
     for (let i = 0; i < 5; i++) {
       runSpwn(["agent", "new", `agent-${i}`], home);
     }
 
-    // THEN — all event IDs are unique
+    // THEN - all event IDs are unique
     const events = readActivityLog(home);
     const ids = new Set(events.map((e) => e.id));
     expect(ids.size).toBe(events.length);
   });
 
   test("activity.jsonl file is created on first event", () => {
-    // GIVEN — no file exists
+    // GIVEN - no file exists
     const path = join(home, "activity.jsonl");
     expect(existsSync(path)).toBe(false);
 
-    // WHEN — an event is emitted
+    // WHEN - an event is emitted
     runSpwn(["agent", "new", "neo"], home);
 
-    // THEN — file is created
+    // THEN - file is created
     expect(existsSync(path)).toBe(true);
   });
 
   test("each line is valid JSON", () => {
-    // GIVEN — several events
+    // GIVEN - several events
     runSpwn(["agent", "new", "neo"], home);
     runSpwn(["agent", "new", "morpheus"], home);
     runSpwn(["agent", "fork", "neo", "trinity"], home);
 
-    // THEN — file contains only valid JSON lines
+    // THEN - file contains only valid JSON lines
     const path = join(home, "activity.jsonl");
     const content = readFileSync(path, "utf-8");
     const lines = content.split("\n").filter((l) => l.trim());

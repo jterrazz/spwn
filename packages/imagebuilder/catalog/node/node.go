@@ -6,7 +6,7 @@ import (
 	ib "spwn.sh/packages/imagebuilder"
 )
 
-// Tool is the @spwn/node tool — Node.js 20 SDK.
+// Tool is the @spwn/node tool - Node.js 20 SDK.
 var Tool = &tool{}
 
 type tool struct{}

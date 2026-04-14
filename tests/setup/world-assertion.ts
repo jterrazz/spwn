@@ -115,7 +115,7 @@ export class WorldAssertion {
     private worldId: string,
     _spwnHome: string,
   ) {
-    // Container labels are the source of truth — the world ID is also
+    // Container labels are the source of truth - the world ID is also
     // the container name (set at create time), so we resolve it via
     // `docker inspect <name>` directly.
     try {
@@ -132,7 +132,7 @@ export class WorldAssertion {
   private requireContainerId(): string {
     if (!this.containerId) {
       throw new Error(
-        `World ${this.worldId} not found — no container with that name (looked up via docker inspect)`,
+        `World ${this.worldId} not found - no container with that name (looked up via docker inspect)`,
       );
     }
     return this.containerId;
@@ -152,7 +152,7 @@ export class WorldAssertion {
   /** Assert container is gone (works even if world was removed from state) */
   toNotExist(): this {
     if (!this.containerId) {
-      // World already removed from state — container is gone
+      // World already removed from state - container is gone
       return this;
     }
     try {
@@ -237,7 +237,7 @@ export class WorldAssertion {
       );
       return new AgentProbeAssertion(JSON.parse(raw));
     } catch {
-      throw new Error("Mock agent probe not found — agent may not have run");
+      throw new Error("Mock agent probe not found - agent may not have run");
     }
   }
 
@@ -245,7 +245,7 @@ export class WorldAssertion {
   exec(cmd: string): string {
     const cid = this.requireContainerId();
     // Use the array form of spawnSync so node doesn't shell-interpret
-    // the command — single-quoted strings inside `cmd` would otherwise
+    // the command - single-quoted strings inside `cmd` would otherwise
     // collide with the outer `sh -c '...'` quoting.
     const result = spawnSync("docker", ["exec", cid, "sh", "-c", cmd], {
       encoding: "utf-8",

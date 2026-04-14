@@ -12,7 +12,7 @@ import (
 // Cmd is the top-level `spwn team` command.
 var Cmd = &cobra.Command{
 	Use:   "team",
-	Short: "Manage teams — create, list, edit, and remove agent groups",
+	Short: "Manage teams - create, list, edit, and remove agent groups",
 }
 
 var (
@@ -21,7 +21,7 @@ var (
 )
 
 func init() {
-	newCmd.Flags().StringVar(&newColor, "color", "", "Accent color — hex (#8B5CF6) or name (purple, blue, red, amber, emerald)")
+	newCmd.Flags().StringVar(&newColor, "color", "", "Accent color - hex (#8B5CF6) or name (purple, blue, red, amber, emerald)")
 	newCmd.Flags().StringVar(&newDesc, "description", "", "Short description")
 
 	Cmd.AddCommand(newCmd)
@@ -142,7 +142,7 @@ var editCmd = &cobra.Command{
 }
 
 func init() {
-	editCmd.Flags().StringVar(&newColor, "color", "", "Accent color — hex or name")
+	editCmd.Flags().StringVar(&newColor, "color", "", "Accent color - hex or name")
 	editCmd.Flags().StringVar(&newDesc, "description", "", "Short description")
 }
 

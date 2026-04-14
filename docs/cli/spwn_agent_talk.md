@@ -5,7 +5,7 @@ slug: "spwn-agent-talk"
 
 ## spwn agent talk
 
-Talk to a running agent — interactive or one-shot
+Talk to a running agent - interactive or one-shot
 
 ### Synopsis
 
@@ -28,5 +28,5 @@ spwn agent talk <agent-name> [message] [flags]
 
 ### SEE ALSO
 
-* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent - a living identity that inhabits a world
 

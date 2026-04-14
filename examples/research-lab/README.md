@@ -2,15 +2,15 @@
 
 > Same brain, new soul.
 
-A patient, methodical agent named Curie. She keeps a real lab notebook — hypotheses, methods, observations, conclusions — and writes playbooks as she figures things out.
+A patient, methodical agent named Curie. She keeps a real lab notebook - hypotheses, methods, observations, conclusions - and writes playbooks as she figures things out.
 
-This example showcases **agent forking** — once Curie has learned enough, fork her into Darwin and watch him specialize differently. Same starting knowledge, divergent evolution.
+This example showcases **agent forking** - once Curie has learned enough, fork her into Darwin and watch him specialize differently. Same starting knowledge, divergent evolution.
 
 ## What's inside
 
 | Component | Details |
 |---|---|
-| **World** | `research-lab` — 4 CPU, 4 GB RAM, 8 GB disk, 2h timeout |
+| **World** | `research-lab` - 4 CPU, 4 GB RAM, 8 GB disk, 2h timeout |
 | **Tools** | Unix, Git, Node.js 20, Python 3 |
 | **Agent: curie** | Worker role. Careful, note-taking, hypothesis-driven. Documents everything in her journal. Writes playbooks from successful experiments. |
 
@@ -69,7 +69,7 @@ spwn up -c research-lab --agent curie -w ./project-a
 spwn up -c research-lab --agent darwin -w ./project-b
 
 # Over time, they'll specialize differently
-# — same starting knowledge, divergent playbooks
+# - same starting knowledge, divergent playbooks
 ```
 
 ## What to try next

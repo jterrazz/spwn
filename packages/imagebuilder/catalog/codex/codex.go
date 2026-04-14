@@ -10,7 +10,7 @@ import (
 //go:embed skills/*
 var skills embed.FS
 
-// Tool is the @spwn/codex tool — OpenAI Codex agent runtime.
+// Tool is the @spwn/codex tool - OpenAI Codex agent runtime.
 var Tool = &tool{}
 
 type tool struct{}

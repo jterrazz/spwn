@@ -93,7 +93,7 @@ func TestRenameDefaultRoles_Idempotent(t *testing.T) {
 func TestRenameDefaultRoles_NoStateFile(t *testing.T) {
 	dir := t.TempDir()
 
-	// No state.json — should not error
+	// No state.json - should not error
 	if err := RenameDefaultRoles.Apply(context.Background(), dir); err != nil {
 		t.Fatalf("expected no error for missing state.json, got: %v", err)
 	}

@@ -58,7 +58,7 @@ func worldHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ world")+" "+ui.Faint("— ephemeral runtime instances"),
+		ui.Strong("⬡ world")+" "+ui.Faint("- ephemeral runtime instances"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "up", Desc: "Spawn a world " + ui.Faint("(see Spawn Flags below)")},
@@ -98,7 +98,7 @@ func worldHelp(cmd *cobra.Command, args []string) {
 // shortcut for `spwn world up --agent neo`.
 var Cmd = &cobra.Command{
 	Use:   "world",
-	Short: "Manage worlds — ephemeral runtime instances for agents",
+	Short: "Manage worlds - ephemeral runtime instances for agents",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// If no spawn flags are set, just render the grouped help.
 		spawnFlagNames := []string{"config", "name", "agent", "workspace", "world", "interactive"}
@@ -116,12 +116,12 @@ var Cmd = &cobra.Command{
 	},
 }
 
-// upCmd is `spwn world up` — the canonical spawn verb. The top-level
+// upCmd is `spwn world up` - the canonical spawn verb. The top-level
 // `spwn up` alias in aliases.go just reuses upCmd.RunE.
 var upCmd = &cobra.Command{
 	Use:   "up",
-	Short: "Spawn a world — an isolated reality for agents",
-	Long: `Spawn a world — the Big Bang.
+	Short: "Spawn a world - an isolated reality for agents",
+	Long: `Spawn a world - the Big Bang.
 
 Creates an isolated Docker environment. Pass --agent (repeatable) to bring
 agents to life inside it. Without any --agent flag, the world spawns empty.`,
@@ -228,7 +228,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 				s.Start("Resolving image...")
 			case "image_building":
 				s.Done("Image not cached", detail)
-				s.Start("Building image (first run — may take a few minutes)...")
+				s.Start("Building image (first run - may take a few minutes)...")
 			case "image_built":
 				s.Done("Built image", detail)
 				s.Start("Resolving credentials...")
@@ -327,7 +327,7 @@ func dockerHint(err error) error {
 //   "/host/path"             → {Name: "default" or "wN", Path: "/host/path"}
 //   "name=/host/path"        → {Name: "name", Path: "/host/path"}
 //   "name=/host/path:ro"     → read-only
-// Empty input returns a nil slice (ephemeral world — no mounts).
+// Empty input returns a nil slice (ephemeral world - no mounts).
 func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 	if len(flags) == 0 {
 		return nil, nil
@@ -340,7 +340,7 @@ func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 		}
 
 		// Strip optional :ro suffix. Be careful not to confuse with a colon inside the path
-		// — we only accept :ro at the very end.
+		// - we only accept :ro at the very end.
 		readOnly := false
 		if strings.HasSuffix(raw, ":ro") {
 			readOnly = true
@@ -425,7 +425,7 @@ func applyManifestDefaults(cmd *cobra.Command) {
 
 // runPreSpawnBuild runs a project build before spawning. When --build
 // is set, `spwn up` becomes a thin wrapper over `spwn build` followed
-// by a container create — matching the docker build + docker run
+// by a container create - matching the docker build + docker run
 // split. Errors abort the spawn before any container is created.
 func runPreSpawnBuild(cmd *cobra.Command) error {
 	cwd, err := os.Getwd()
@@ -441,14 +441,14 @@ func runPreSpawnBuild(cmd *cobra.Command) error {
 	}
 	issues := manifest.Validate(p)
 	if manifest.HasErrors(issues) {
-		return fmt.Errorf("project has validation errors — run `spwn check` to see them")
+		return fmt.Errorf("project has validation errors - run `spwn check` to see them")
 	}
 	result, err := manifest.Build(p)
 	if err != nil {
 		return fmt.Errorf("build failed: %w", err)
 	}
 	out := cmd.OutOrStdout()
-	fmt.Fprintf(out, "  %s  Build ready — %d file(s), hash %s\n",
+	fmt.Fprintf(out, "  %s  Build ready - %d file(s), hash %s\n",
 		ui.Green("✓"), result.FileCount, ui.Faint(abbrevHash(result.Dir)))
 	return nil
 }

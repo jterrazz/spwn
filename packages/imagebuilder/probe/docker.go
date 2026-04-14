@@ -1,6 +1,6 @@
 // Package probe contains environment probes that talk to the Docker
 // daemon directly via the official engine SDK. This is the canonical
-// place to ask "is Docker reachable, and if so where" — both the CLI
+// place to ask "is Docker reachable, and if so where" - both the CLI
 // doctor command and the HTTP API consume this package so the
 // answer is always identical.
 //
@@ -37,7 +37,7 @@ import (
 type DockerStatus struct {
 	// Installed is true once we have proven the daemon is reachable.
 	// We deliberately do not separate "binary present" from "daemon up"
-	// — spwn talks to the daemon directly, so binary presence is
+	// - spwn talks to the daemon directly, so binary presence is
 	// irrelevant. Field kept for JSON backwards compatibility with
 	// older clients of the API.
 	Installed bool `json:"installed"`
@@ -86,13 +86,13 @@ func (s DockerStatus) Summary() string {
 }
 
 // CheckDocker probes the local Docker daemon and returns a DockerStatus.
-// Always returns a value — never nil — so callers can render the result
+// Always returns a value - never nil - so callers can render the result
 // directly without nil checks. The returned status is the result of the
 // FIRST host that answered; subsequent hosts are not contacted.
 func CheckDocker(ctx context.Context) DockerStatus {
 	st := DockerStatus{Platform: runtime.GOOS}
 
-	// 1. Default attempt — honors DOCKER_HOST, ~/.docker/contexts, etc.
+	// 1. Default attempt - honors DOCKER_HOST, ~/.docker/contexts, etc.
 	if res := tryHost(ctx, "", 4*time.Second); res.ok {
 		return res.apply(st)
 	}
@@ -118,7 +118,7 @@ func CheckDocker(ctx context.Context) DockerStatus {
 		}
 	}
 
-	// Nothing answered. Surface a single, honest error message —
+	// Nothing answered. Surface a single, honest error message -
 	// re-using the daemon error from the default attempt is more useful
 	// than the last fallback's generic "no such file" noise.
 	if defRes := tryHost(ctx, "", 1500*time.Millisecond); defRes.err != nil {
@@ -179,7 +179,7 @@ func tryHost(ctx context.Context, host string, timeout time.Duration) probeResul
 		return probeResult{err: err, host: cli.DaemonHost()}
 	}
 
-	// ServerVersion is non-fatal — Ping is the source of truth, but
+	// ServerVersion is non-fatal - Ping is the source of truth, but
 	// version is nice to have. Use the ping context so we don't double
 	// the timeout budget.
 	var version string
@@ -196,7 +196,7 @@ func tryHost(ctx context.Context, host string, timeout time.Duration) probeResul
 }
 
 // candidateHosts returns the well-known per-user socket paths for every
-// common Docker runtime, plus the system default. Order matters — we
+// common Docker runtime, plus the system default. Order matters - we
 // put per-user sockets first so we never accidentally connect to a
 // system-wide daemon the user wasn't using.
 func candidateHosts() []string {

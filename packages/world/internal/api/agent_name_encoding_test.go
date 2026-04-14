@@ -13,7 +13,7 @@ import (
 func TestAgentNameWithSpaces_GetProfile(t *testing.T) {
 	_, mux := newFullTestServer(t)
 
-	// Create an agent whose name has a space — simulate by hitting the list
+	// Create an agent whose name has a space - simulate by hitting the list
 	// endpoint. The profile endpoint should 404 gracefully (agent doesn't
 	// exist) rather than panicking on the space.
 

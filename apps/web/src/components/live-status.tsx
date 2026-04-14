@@ -8,13 +8,13 @@ const STATUS_CONFIG: Record<ConnectionStatus, { dot: string; label: string; labe
     dot: "bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.6)]",
     label: "Connected",
     labelColor: "text-green-500/60",
-    title: "Connected — Go API responding",
+    title: "Connected - Go API responding",
   },
   disconnected: {
     dot: "bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.5)]",
     label: "Disconnected",
     labelColor: "text-red-400/60",
-    title: "Disconnected — API unreachable",
+    title: "Disconnected - API unreachable",
   },
 };
 

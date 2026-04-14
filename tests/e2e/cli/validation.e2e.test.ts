@@ -80,7 +80,7 @@ describe("CLI input validation", () => {
       .exec("profile")
       .run();
 
-    // profile is a command group — bare invocation renders help cleanly.
+    // profile is a command group - bare invocation renders help cleanly.
     expect(result.exitCode).toBe(0);
     const output = stripAnsi(result.output);
     expect(output.toLowerCase()).toContain("profile");
@@ -121,7 +121,7 @@ describe("CLI input validation", () => {
   });
 
   test("error messages contain actionable hints", async () => {
-    // Destroy a non-existent world — should show clean error
+    // Destroy a non-existent world - should show clean error
     const result = await spwn("actionable hint")
       .exec("down w-nonexistent-00000")
       .run();

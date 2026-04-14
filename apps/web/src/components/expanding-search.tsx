@@ -29,7 +29,7 @@ interface ExpandingSearchProps {
  * A search control that renders as a round icon button by default and
  * expands horizontally into a full input field. The animation is purely
  * geometric: the outer pill animates its width, and `overflow-hidden`
- * reveals the input as the clip widens. The input never moves — it's
+ * reveals the input as the clip widens. The input never moves - it's
  * always in its final position, hidden only by the clipping edge.
  */
 export function ExpandingSearch({
@@ -89,14 +89,14 @@ export function ExpandingSearch({
       {/* Icon: absolutely positioned in a 40×40 square that exactly
           matches the pill's padding-box (interior after the 1px
           border). This makes the icon position totally independent of
-          outer width — it always sits at the geometric center (21, 21)
+          outer width - it always sits at the geometric center (21, 21)
           of the 42px pill whether collapsed, expanded, or mid-animation. */}
       <span className="absolute top-0 left-0 w-10 h-10 flex items-center justify-center pointer-events-none">
         <IconSearch size={16} stroke={2.4} className="translate-y-[0.5px]" />
       </span>
       {/* Input: filling the padding box from x=40 to the right edge.
           When outer width is 42px (interior 40px), left:40 right:0
-          collapses to 0 width — fully behind the clipping edge. */}
+          collapses to 0 width - fully behind the clipping edge. */}
       <input
         ref={inputRef}
         value={value}

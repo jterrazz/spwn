@@ -48,7 +48,7 @@ Paste the **public** key into `apps/web/src-tauri/tauri.conf.json`:
 }
 ```
 
-Commit that change **once**. Never rotate the pubkey casually — see
+Commit that change **once**. Never rotate the pubkey casually - see
 [Key rotation](#key-rotation) below.
 
 ### 2. GoReleaser is already configured
@@ -131,7 +131,7 @@ spwn --version                 # should print v1.2.3
 
 ### 5. Announce
 
-Nothing to do here — users running the CLI or web UI will be notified
+Nothing to do here - users running the CLI or web UI will be notified
 automatically via the background check / Tauri updater.
 
 ---
@@ -210,7 +210,7 @@ If the Tauri private key leaks:
 1. Generate a new keypair.
 2. Update `TAURI_SIGNING_PRIVATE_KEY` in GitHub Secrets.
 3. Update `pubkey` in `tauri.conf.json`.
-4. Cut a new release — users running the old app **cannot** auto-update
+4. Cut a new release - users running the old app **cannot** auto-update
    to it (signatures won't verify with the old pubkey).
 5. Publish a manual-install notice on the website. Users must download
    the new bundle directly and replace their app.

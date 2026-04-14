@@ -1,5 +1,5 @@
 name: Feature / Behavioral Change
-description: Propose a new feature or a change in behavior. Describe what should happen — not how to implement it.
+description: Propose a new feature or a change in behavior. Describe what should happen - not how to implement it.
 labels: ["enhancement"]
 body:
   - type: markdown
@@ -32,6 +32,6 @@ body:
     id: context
     attributes:
       label: Additional context
-      description: Anything else — edge cases, related features, screenshots, links.
+      description: Anything else - edge cases, related features, screenshots, links.
     validations:
       required: false

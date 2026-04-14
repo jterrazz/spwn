@@ -61,7 +61,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 
 	// 1. Create the per-agent per-world layout on the host. This
 	// brings hot-deployed agents up to first-class parity with
-	// spawn-time agents — inbox/outbox/notes/role.md all in place.
+	// spawn-time agents - inbox/outbox/notes/role.md all in place.
 	if err := initAgentDeployment(rec, worldID); err != nil {
 		return fmt.Errorf("init deployment: %w", err)
 	}
@@ -150,11 +150,11 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 	}
 
 	// 3. Update existing agent records to "creating" status
-	// (agents are already registered by Spawn() — avoid duplicates)
+	// (agents are already registered by Spawn() - avoid duplicates)
 	for _, spec := range agents {
 		agentID := foundation.GenerateAgentID(spec.Name)
 		if err := a.state.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
-			// Agent not yet registered (shouldn't happen in normal flow) — add it
+			// Agent not yet registered (shouldn't happen in normal flow) - add it
 			role := manifest.DefaultRole(spec.Role)
 			rec := models.AgentRecord{
 				Name:    spec.Name,
@@ -168,7 +168,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		}
 	}
 
-	// 4. Spawn chief first (detached — chiefs run in background like others)
+	// 4. Spawn chief first (detached - chiefs run in background like others)
 	for _, ch := range chiefs {
 		if err := a.SpawnAgentDetached(ctx, worldID, ch.Name); err != nil {
 			return fmt.Errorf("spawn chief %q: %w", ch.Name, err)

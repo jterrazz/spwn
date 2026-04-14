@@ -1,4 +1,4 @@
-# QMD — Query Markdown Documents
+# QMD - Query Markdown Documents
 
 QMD is an on-device search engine for markdown notes, meeting transcripts, documentation, and knowledge bases.
 
@@ -17,4 +17,4 @@ qmd search --semantic "concept"      # Semantic search with embeddings
 
 ## When to Use
 Use QMD when you need to search through large knowledge bases, documentation, or notes.
-It runs entirely locally — no external API calls needed for search.
+It runs entirely locally - no external API calls needed for search.

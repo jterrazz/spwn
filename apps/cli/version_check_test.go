@@ -46,7 +46,7 @@ func TestVersionCheckCache_MissingCacheFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	t.Setenv("SPWN_HOME", tmpDir)
 
-	// No cache file — will try network, may return "" in offline env
+	// No cache file - will try network, may return "" in offline env
 	result := foundation.CheckLatestVersion(versionCheckInterval)
 	_ = result // just ensure no panic
 }

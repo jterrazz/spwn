@@ -49,7 +49,7 @@ func TestResolveAnthropic_CachedFile(t *testing.T) {
 	tokenFile := filepath.Join(tmpDir, ".auth-token")
 	os.WriteFile(tokenFile, []byte("sk-ant-cached-key"), 0600)
 	cred := Resolve(ProviderAnthropic)
-	// On machines with a keychain, keychain may take priority — accept either
+	// On machines with a keychain, keychain may take priority - accept either
 	if cred.Type == CredTypeKeychain {
 		t.Skip("keychain available, takes priority over cached file")
 	}

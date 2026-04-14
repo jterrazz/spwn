@@ -101,7 +101,7 @@ const PROGRESS_LABELS: Record<string, string> = {
 function describeProgress(p: SpawnProgress | null): string {
   if (!p) return "Sending start signal…";
   const label = PROGRESS_LABELS[p.event] ?? p.event.replace(/_/g, " ");
-  if (p.detail) return `${label} — ${p.detail}`;
+  if (p.detail) return `${label} - ${p.detail}`;
   return label;
 }
 
@@ -403,7 +403,7 @@ export default function ArchitectPage() {
             { label: "Agents", value: kpis?.agents ?? 0 },
           ]} />
 
-          {/* Chat — fills remaining page height, input sticks to the bottom */}
+          {/* Chat - fills remaining page height, input sticks to the bottom */}
           <Chat
             className="flex-1 min-h-[320px]"
             messages={bubbles}

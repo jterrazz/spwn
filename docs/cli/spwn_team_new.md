@@ -21,12 +21,12 @@ spwn team new <name> [flags]
 ### Options
 
 ```
-      --color string         Accent color — hex (#8B5CF6) or name (purple, blue, red, amber, emerald)
+      --color string         Accent color - hex (#8B5CF6) or name (purple, blue, red, amber, emerald)
       --description string   Short description
   -h, --help                 help for new
 ```
 
 ### SEE ALSO
 
-* [spwn team](./spwn_team.md)	 - Manage teams — create, list, edit, and remove agent groups
+* [spwn team](./spwn_team.md)	 - Manage teams - create, list, edit, and remove agent groups
 

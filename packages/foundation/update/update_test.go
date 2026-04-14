@@ -119,7 +119,7 @@ func TestApply_RefusesWhenChecksumMissing(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/asset", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write(archiveBytes) })
 	mux.HandleFunc("/checksums", func(w http.ResponseWriter, _ *http.Request) {
-		// Name doesn't match — should trigger rejection.
+		// Name doesn't match - should trigger rejection.
 		_, _ = w.Write([]byte("abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789  unrelated.tar.gz\n"))
 	})
 	server := httptest.NewServer(mux)

@@ -146,7 +146,7 @@ func TestAllTools_UserCommandsUseTemplates(t *testing.T) {
 				// UserCommands should use {{.Home}} or {{.User}} templates,
 				// never hardcode /home/spwn or specific usernames
 				if strings.Contains(cmd, "/home/spwn") {
-					t.Errorf("%s UserCommand hardcodes /home/spwn — use {{.Home}} template instead", tool.Name())
+					t.Errorf("%s UserCommand hardcodes /home/spwn - use {{.Home}} template instead", tool.Name())
 				}
 			}
 		})

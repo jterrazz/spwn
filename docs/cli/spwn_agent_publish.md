@@ -11,10 +11,10 @@ Publish an agent to the registry (memory stripped)
 
 Publish an agent to the community registry for others to pull.
 
-Memory (journal, knowledge, sessions) is stripped before publishing —
+Memory (journal, knowledge, sessions) is stripped before publishing -
 only the composition (tools, skills, profile) and core identity ship.
 
-Not yet implemented — tracks the registry port (coming in Epoch 10).
+Not yet implemented - tracks the registry port (coming in Epoch 10).
 
 ```
 spwn agent publish <agent-name> [flags]
@@ -28,5 +28,5 @@ spwn agent publish <agent-name> [flags]
 
 ### SEE ALSO
 
-* [spwn agent](./spwn_agent.md)	 - Spawn an agent — a living identity that inhabits a world
+* [spwn agent](./spwn_agent.md)	 - Spawn an agent - a living identity that inhabits a world
 

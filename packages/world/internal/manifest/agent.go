@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// AgentManifest declares an agent's composition — the stacked blocks
+// AgentManifest declares an agent's composition - the stacked blocks
 // (tools, skills, profile) plus runtime configuration.
 //
 // Stored in ~/.spwn/agents/{name}/agent.yaml. Optional: if agent.yaml
@@ -45,7 +45,7 @@ func AgentManifestPath(agentDir string) string {
 }
 
 // LoadAgent reads agent.yaml from an agent directory.
-// Returns (nil, nil) if agent.yaml doesn't exist — the manifest is optional.
+// Returns (nil, nil) if agent.yaml doesn't exist - the manifest is optional.
 func LoadAgent(agentDir string) (*AgentManifest, error) {
 	path := AgentManifestPath(agentDir)
 	data, err := os.ReadFile(path)

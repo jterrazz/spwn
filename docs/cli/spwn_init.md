@@ -5,7 +5,7 @@ slug: "spwn-init"
 
 ## spwn init
 
-First-time setup — create ~/.spwn/ and a named world config
+First-time setup - create ~/.spwn/ and a named world config
 
 ### Synopsis
 
@@ -26,5 +26,5 @@ spwn init [name] [flags]
 
 ### SEE ALSO
 
-* [spwn](./spwn.md)	 - spwn — create realities for things that can think
+* [spwn](./spwn.md)	 - spwn - create realities for things that can think
 

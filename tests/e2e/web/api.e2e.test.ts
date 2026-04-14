@@ -535,7 +535,7 @@ describe("Go API routes", () => {
       if (requireServer()) return;
 
       const res = await fetch(`${BASE_URL}/api/worlds/w-test-00001/history`);
-      // 200 if world exists, 404 if not — both are valid
+      // 200 if world exists, 404 if not - both are valid
       expect([200, 404]).toContain(res.status);
 
       if (res.ok) {

@@ -82,6 +82,6 @@ type Backend interface {
 	// ListContainersByLabel returns every container (running or stopped)
 	// whose Docker labels match the given key=value selector. spwn uses
 	// this to enumerate worlds straight from the daemon, so the live
-	// container set is the source of truth — no JSON state file to drift.
+	// container set is the source of truth - no JSON state file to drift.
 	ListContainersByLabel(ctx context.Context, key, value string) ([]ContainerInfo, error)
 }

@@ -10,7 +10,7 @@
 //   ~/.spwn/world-states/<world-id>/runtime.json
 //
 // The same world-state directory also holds the world's manifest,
-// physics.md, faculties.md, roster.md and shared/ scratchpad — see
+// physics.md, faculties.md, roster.md and shared/ scratchpad - see
 // the spawn flow. Co-locating runtime.json with the rest of the
 // world's host-side state means everything per-world lives in one
 // place that can be inspected, archived or destroyed atomically.
@@ -19,7 +19,7 @@
 // Docker. The labels-on-container approach makes Docker the source of
 // truth for existence; this package only stores decoration. GC removes
 // runtime.json from any world-state directory whose container is no
-// longer present (the rest of the directory is left alone — destroying
+// longer present (the rest of the directory is left alone - destroying
 // a container should not destroy the user's whiteboard notes).
 package runtimestate
 
@@ -71,7 +71,7 @@ func NewStoreAt(dir string) (*Store, error) {
 }
 
 // Load returns the runtime state for a world. Missing files yield an
-// empty File without an error — a freshly-spawned world legitimately
+// empty File without an error - a freshly-spawned world legitimately
 // has no runtime data yet.
 func (s *Store) Load(worldID string) (File, error) {
 	s.mu.Lock()
@@ -88,7 +88,7 @@ func (s *Store) Save(worldID string, f File) error {
 
 // Delete removes a world's runtime state file. Missing files are not
 // an error. The rest of the world-state directory (manifest, physics,
-// shared scratchpad…) is intentionally left alone — destroying a
+// shared scratchpad…) is intentionally left alone - destroying a
 // container should not destroy user-authored notes.
 func (s *Store) Delete(worldID string) error {
 	s.mu.Lock()
@@ -176,7 +176,7 @@ func (s *Store) UpdateAgentStatus(worldID, agentID string, status models.Status)
 			return s.saveLocked(worldID, f)
 		}
 	}
-	// No-op if the agent isn't tracked yet — the status update is best-effort.
+	// No-op if the agent isn't tracked yet - the status update is best-effort.
 	return nil
 }
 
@@ -184,7 +184,7 @@ func (s *Store) UpdateAgentStatus(worldID, agentID string, status models.Status)
 // not in the supplied liveIDs set. Called by the state store on every
 // List() so runtime data naturally stays in sync with Docker.
 //
-// Only runtime.json is removed — the world-state directory itself
+// Only runtime.json is removed - the world-state directory itself
 // (manifest, physics, shared scratchpad…) is left alone. Use a
 // dedicated `spwn world prune` flow for archival cleanup.
 func (s *Store) GC(liveIDs []string) error {

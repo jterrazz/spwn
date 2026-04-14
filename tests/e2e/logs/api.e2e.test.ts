@@ -195,7 +195,7 @@ describe("GET /api/activity", () => {
   test("returns empty array when no events exist", async () => {
     if (!hasServer) return;
 
-    // Fresh home — no activity should exist
+    // Fresh home - no activity should exist
     const res = await fetch(`${BASE_URL}/api/activity?agent=nonexistent-xyz-123`);
     expect(res.ok).toBe(true);
     const data = await res.json();

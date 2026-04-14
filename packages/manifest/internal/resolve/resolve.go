@@ -2,7 +2,7 @@
 // set a single agent brings into a world at runtime.
 //
 // Claude Code treats `@path/to/file.md` inside a markdown file as an
-// include directive — the runtime effectively inlines the referenced
+// include directive - the runtime effectively inlines the referenced
 // file's contents. We follow the same convention. Given a starting
 // file (typically CLAUDE.md), Walk returns every file the runtime
 // would read and any broken references it hit along the way.
@@ -21,7 +21,7 @@ import (
 // is not (the `@` follows an alphanumeric).
 var importRe = regexp.MustCompile(`(^|[^\w/])@([\w.\-/]+\.md)\b`)
 
-// Result is the outcome of a single Walk — every file visited, every
+// Result is the outcome of a single Walk - every file visited, every
 // broken reference found, and the order in which files were first
 // discovered (useful for build artifacts and error reporting).
 type Result struct {
@@ -62,7 +62,7 @@ type Reference struct {
 // reachable through the import graph. Errors opening the starting
 // file are returned; broken @-imports inside valid files surface as
 // entries in Result.Missing. Cycles are detected and reported in
-// Result.Cycles — they do NOT block the walk.
+// Result.Cycles - they do NOT block the walk.
 //
 // The root parameter is used to resolve references that begin with
 // the agent root (e.g. `@core/profile.md`). References without a

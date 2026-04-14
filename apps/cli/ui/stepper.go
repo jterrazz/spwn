@@ -115,7 +115,7 @@ func (e *DisplayedError) Unwrap() error { return e.Err }
 func (s *Stepper) Log(format string, args ...any) {}
 
 // Writer returns an io.Writer for piping output (e.g. Docker build logs).
-// In the current design we discard piped output — builds run silently
+// In the current design we discard piped output - builds run silently
 // through the Stepper. If we reintroduce verbose logging this is where
 // it would flow.
 func (s *Stepper) Writer() io.Writer {

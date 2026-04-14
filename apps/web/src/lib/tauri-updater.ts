@@ -6,7 +6,7 @@
  * If a newer signed release exists, we show a native confirmation dialog
  * and, on user approval, download + install + relaunch the app.
  *
- * Safe to call in the browser — it is a no-op outside the Tauri runtime.
+ * Safe to call in the browser - it is a no-op outside the Tauri runtime.
  */
 
 import { isTauri } from "./tauri";
