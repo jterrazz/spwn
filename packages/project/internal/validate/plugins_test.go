@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	intmanifest "spwn.sh/packages/manifest/internal/manifest"
+	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
 // scaffoldAgent writes a minimal agent directory with the given

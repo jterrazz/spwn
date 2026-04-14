@@ -3,7 +3,7 @@ package cli
 import (
 	"os"
 
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/paths"
 )
 
@@ -19,7 +19,7 @@ func discoverProject() {
 	if err != nil {
 		return
 	}
-	p, err := manifest.Find(cwd)
+	p, err := project.Find(cwd)
 	if err != nil || p == nil {
 		return
 	}

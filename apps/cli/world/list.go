@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
@@ -49,7 +49,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		proj, err := manifest.Find(cwd)
+		proj, err := project.Find(cwd)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func emitWorldListJSON(cmd *cobra.Command, report worldListReport) error {
 
 // renderDeclared lists worlds declared in spwn.yaml with a status
 // column derived from the live Docker query.
-func renderDeclared(ctx context.Context, s *ui.Stepper, proj *manifest.Project, cmd *cobra.Command) error {
+func renderDeclared(ctx context.Context, s *ui.Stepper, proj *project.Project, cmd *cobra.Command) error {
 	declared := proj.Manifest.Worlds
 	if len(declared) == 0 {
 		if listAsJSON {
@@ -131,7 +131,7 @@ func renderDeclared(ctx context.Context, s *ui.Stepper, proj *manifest.Project, 
 // It emits a plain status token ("running"/"stopped") without the
 // human-formatted duration so snapshots stay machine-stable.
 func buildDeclaredJSONRows(
-	declared map[string]manifest.World,
+	declared map[string]project.World,
 	running map[string]world.World,
 ) []worldListRow {
 	names := make([]string, 0, len(declared))
@@ -166,7 +166,7 @@ func buildDeclaredJSONRows(
 // running-duration formatting in tests). Rows are returned sorted by
 // world name.
 func buildDeclaredRows(
-	declared map[string]manifest.World,
+	declared map[string]project.World,
 	running map[string]world.World,
 	now time.Time,
 ) [][3]string {

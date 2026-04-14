@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 )
 
 var (
@@ -41,7 +41,7 @@ spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
 		if err != nil {
 			return fmt.Errorf("resolve cwd: %w", err)
 		}
-		p, err := manifest.Find(cwd)
+		p, err := project.Find(cwd)
 		if err != nil {
 			return s.FailHint("Manifest", err, "Check spwn.yaml")
 		}
@@ -50,7 +50,7 @@ spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
 				"Run \"spwn init\" first")
 		}
 
-		if err := manifest.AddWorld(p.ManifestPath, name, manifest.AddWorldOpts{
+		if err := project.AddWorld(p.ManifestPath, name, project.AddWorldOpts{
 			Agents:     createAgents,
 			Workspaces: createWorkspaces,
 		}); err != nil {
@@ -93,7 +93,7 @@ preserved. Other worlds may still reference them.`,
 		if err != nil {
 			return fmt.Errorf("resolve cwd: %w", err)
 		}
-		p, err := manifest.Find(cwd)
+		p, err := project.Find(cwd)
 		if err != nil {
 			return s.FailHint("Manifest", err, "Check spwn.yaml")
 		}
@@ -102,8 +102,8 @@ preserved. Other worlds may still reference them.`,
 				"Run \"spwn init\" first")
 		}
 
-		if err := manifest.RemoveWorld(p.ManifestPath, name); err != nil {
-			if errors.Is(err, manifest.ErrWorldNotFound) {
+		if err := project.RemoveWorld(p.ManifestPath, name); err != nil {
+			if errors.Is(err, project.ErrWorldNotFound) {
 				return s.FailHint("Not found",
 					fmt.Errorf("no world named %q in spwn.yaml", name),
 					"Run \"spwn world ls\" to see declared worlds")

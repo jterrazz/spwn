@@ -10,7 +10,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/catalog/templates"
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/paths"
 )
@@ -65,7 +65,7 @@ func runInitLocal(cmd *cobra.Command) error {
 		return fmt.Errorf("resolve cwd: %w", err)
 	}
 
-	if err := manifest.Init(cwd, manifest.InitOpts{
+	if err := project.Init(cwd, project.InitOpts{
 		Name:  initName,
 		Force: initForce,
 	}); err != nil {

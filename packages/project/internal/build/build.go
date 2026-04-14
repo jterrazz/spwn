@@ -27,7 +27,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	intmanifest "spwn.sh/packages/manifest/internal/manifest"
+	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
 // Result is the outcome of a successful Build.

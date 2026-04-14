@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/mind"
 	"spwn.sh/packages/world"
 )
@@ -69,7 +69,7 @@ var listCmd = &cobra.Command{
 		// view driven by spwn.yaml + live runtime state. Falls back
 		// to the legacy global view when no project is present.
 		if cwd, werr := os.Getwd(); werr == nil {
-			if p, perr := manifest.Find(cwd); perr == nil && p != nil {
+			if p, perr := project.Find(cwd); perr == nil && p != nil {
 				return renderSmartAgentList(cmd, p)
 			}
 		}
@@ -144,7 +144,7 @@ var listCmd = &cobra.Command{
 //	"● running (<dur>)"      — the agent's world is currently up
 //	"○ deployed, stopped"    — declared in spwn.yaml but not running
 //	"─ orphan"               — on-disk agent not referenced by any world
-func renderSmartAgentList(cmd *cobra.Command, p *manifest.Project) error {
+func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 	// Build declared-agent → world map from the manifest.
 	declared := map[string]string{}
 	if p.Manifest != nil {

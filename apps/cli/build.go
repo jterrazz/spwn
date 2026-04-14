@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 )
 
 func init() {
@@ -32,7 +32,7 @@ the build; warnings are printed but not blocking.`,
 			return fmt.Errorf("resolve cwd: %w", err)
 		}
 
-		p, err := manifest.Find(cwd)
+		p, err := project.Find(cwd)
 		if err != nil {
 			return fmt.Errorf("load manifest: %w", err)
 		}
@@ -43,11 +43,11 @@ the build; warnings are printed but not blocking.`,
 		out := cmd.OutOrStdout()
 
 		if !buildSkipValidate {
-			issues := manifest.Validate(p, manifest.ValidateOpts{
+			issues := project.Validate(p, project.ValidateOpts{
 				BuiltinTools:      catalogToolNames(),
 				SupportedRuntimes: supportedRuntimes(),
 			})
-			if manifest.HasErrors(issues) {
+			if project.HasErrors(issues) {
 				fmt.Fprintln(out)
 				fmt.Fprintf(out, "  %s Build blocked - project has validation errors.\n", ui.Red("✗"))
 				fmt.Fprintln(out, "  Run `spwn check` to see them, or pass --skip-validate.")
@@ -56,7 +56,7 @@ the build; warnings are printed but not blocking.`,
 			}
 		}
 
-		result, err := manifest.Build(p)
+		result, err := project.Build(p)
 		if err != nil {
 			return fmt.Errorf("build: %w", err)
 		}

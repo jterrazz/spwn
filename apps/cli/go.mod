@@ -14,10 +14,10 @@ require (
 	spwn.sh/packages/ids v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mailbox v0.0.0
-	spwn.sh/packages/manifest v0.0.0-00010101000000-000000000000
 	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/mind v0.0.0
 	spwn.sh/packages/paths v0.0.0
+	spwn.sh/packages/project v0.0.0
 	spwn.sh/packages/version v0.0.0
 	spwn.sh/packages/world v0.0.0
 )
@@ -65,10 +65,10 @@ replace (
 	spwn.sh/packages/ids => ../../packages/ids
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/mailbox => ../../packages/mailbox
-	spwn.sh/packages/manifest => ../../packages/manifest
 	spwn.sh/packages/migration => ../../packages/migration
 	spwn.sh/packages/mind => ../../packages/mind
 	spwn.sh/packages/paths => ../../packages/paths
+	spwn.sh/packages/project => ../../packages/project
 	spwn.sh/packages/version => ../../packages/version
 	spwn.sh/packages/world => ../../packages/world
 )

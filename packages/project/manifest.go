@@ -18,14 +18,14 @@
 // the project roster: every directory under spwn/agents/ that the
 // manifest's worlds reference is "deployable", everything else is
 // considered an orphan agent.
-package manifest
+package project
 
 import (
-	"spwn.sh/packages/manifest/internal/build"
-	"spwn.sh/packages/manifest/internal/discovery"
-	intmanifest "spwn.sh/packages/manifest/internal/manifest"
-	"spwn.sh/packages/manifest/internal/scaffold"
-	"spwn.sh/packages/manifest/internal/validate"
+	"spwn.sh/packages/project/internal/build"
+	"spwn.sh/packages/project/internal/discovery"
+	intmanifest "spwn.sh/packages/project/internal/manifest"
+	"spwn.sh/packages/project/internal/scaffold"
+	"spwn.sh/packages/project/internal/validate"
 )
 
 // Manifest is the parsed spwn.yaml content.

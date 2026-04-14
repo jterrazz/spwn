@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
@@ -86,7 +86,7 @@ func findWorldForAgent(agentName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	p, err := manifest.Find(cwd)
+	p, err := project.Find(cwd)
 	if err != nil {
 		return "", fmt.Errorf("load spwn.yaml: %w", err)
 	}

@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/manifest"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
 func TestBuildDeclaredRows_StopAndRunning(t *testing.T) {
 	now := time.Date(2026, 4, 14, 12, 0, 0, 0, time.UTC)
-	declared := map[string]manifest.World{
+	declared := map[string]project.World{
 		"alpha": {Agents: []string{"a1", "a2"}},
 		"beta":  {Agents: []string{"b1"}},
 		"gamma": {},
