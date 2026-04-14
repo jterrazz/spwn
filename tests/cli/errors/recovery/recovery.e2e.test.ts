@@ -17,13 +17,13 @@ const isolated = (label: string) =>
 
 describe('error recovery - state resilience', () => {
     test('agent commands work after failed agent operations', async () => {
-        // GIVEN - init, then try to delete a non-existent agent, then
+        // Given - init, then try to delete a non-existent agent, then
         // Create a real one, then list.
         const result = await isolated('recover after failed rm')
             .exec(['init', 'agent rm ghost', 'agent create testbot', 'agent ls'])
             .run();
 
-        // THEN - the chain short-circuits on `agent rm ghost` because
+        // Then - the chain short-circuits on `agent rm ghost` because
         // Exec([...]) stops on the first non-zero exit. Run the
         // Create + ls as a separate chain to prove the home was not
         // Corrupted by the failure.
@@ -40,7 +40,7 @@ describe('error recovery - state resilience', () => {
     });
 
     test('export non-existent agent does not corrupt state', async () => {
-        // GIVEN - init + create neo, then try a bad export, then list.
+        // Given - init + create neo, then try a bad export, then list.
         // `exec([...])` stops at the first non-zero exit, so we split
         // The scenario into a "setup + bad export" chain and a
         // Followup "list" chain in the same isolated workdir is not
@@ -64,7 +64,7 @@ describe('error recovery - state resilience', () => {
     });
 
     test('multiple errors in sequence do not compound', async () => {
-        // GIVEN - three back-to-back `agent rm nonexistent` calls, each
+        // Given - three back-to-back `agent rm nonexistent` calls, each
         // In its own isolated home (a single chain would
         // Short-circuit on the first failure).
         for (let i = 0; i < 3; i++) {
@@ -76,7 +76,7 @@ describe('error recovery - state resilience', () => {
             expect(combined).not.toContain('panic:');
         }
 
-        // THEN - a normal init + create + ls still works.
+        // Then - a normal init + create + ls still works.
         const healthy = await isolated('survivor after errors')
             .exec(['init', 'agent create survivor', 'agent ls'])
             .run();
@@ -86,7 +86,7 @@ describe('error recovery - state resilience', () => {
     });
 
     test('init is idempotent - running init twice does not break state', async () => {
-        // WHEN - running init twice, then creating an agent in the same home.
+        // When - running init twice, then creating an agent in the same home.
         // The second init may succeed (idempotent) or fail (already
         // Exists); exec([...]) stops at the first non-zero, so we
         // Assert on two variants and pick the one that matches.

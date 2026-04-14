@@ -12,7 +12,7 @@ import (
 )
 
 func TestConcurrent_SpawnThreeWorlds(t *testing.T) {
-	// GIVEN three different world configurations
+	// Given - three different world configurations
 	tc := setup.NewTestContext(t)
 
 	var mu sync.Mutex
@@ -46,7 +46,7 @@ tools:
 `,
 	}
 
-	// WHEN spawning all three concurrently
+	// When - spawning all three concurrently
 	wg.Add(len(configs))
 	for _, cfg := range configs {
 		cfg := cfg // capture loop variable
@@ -63,7 +63,7 @@ tools:
 	}
 	wg.Wait()
 
-	// THEN all three should be created successfully
+	// Then - all three should be created successfully
 	if len(chains) != 3 {
 		t.Fatalf("Expected 3 chains, got %d", len(chains))
 	}
@@ -86,20 +86,20 @@ tools:
 }
 
 func TestConcurrent_ListShowsAll(t *testing.T) {
-	// GIVEN three sequentially spawned worlds
+	// Given - three sequentially spawned worlds
 	tc := setup.NewTestContext(t)
 
 	chain1 := tc.Spawn().NoAgent().Execute()
 	chain2 := tc.Spawn().NoAgent().Execute()
 	chain3 := tc.Spawn().NoAgent().Execute()
 
-	// WHEN listing all worlds
+	// When - listing all worlds
 	list, err := tc.Arc.List(context.Background())
 	if err != nil {
 		t.Fatalf("List failed: %v", err)
 	}
 
-	// THEN all three should be present and idle
+	// Then - all three should be present and idle
 	if len(list) != 3 {
 		t.Fatalf("Expected 3 worlds in list, got %d", len(list))
 	}
@@ -116,7 +116,7 @@ func TestConcurrent_ListShowsAll(t *testing.T) {
 }
 
 func TestConcurrent_DestroyAllCleansState(t *testing.T) {
-	// GIVEN three spawned worlds
+	// Given - three spawned worlds
 	tc := setup.NewTestContext(t)
 
 	chains := make([]*setup.AssertionChain, 3)
@@ -129,7 +129,7 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 		t.Fatalf("Expected 3 worlds before destroy, got %d", len(worlds))
 	}
 
-	// WHEN all three are destroyed
+	// When - all three are destroyed
 	for _, chain := range chains {
 		_, err := tc.Arc.Destroy(context.Background(), chain.World().ID)
 		if err != nil {
@@ -137,7 +137,7 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 		}
 	}
 
-	// THEN the state should be empty
+	// Then - the state should be empty
 	worlds = tc.LoadState()
 	if len(worlds) != 0 {
 		t.Fatalf("Expected 0 worlds after destroy all, got %d", len(worlds))
@@ -145,7 +145,7 @@ func TestConcurrent_DestroyAllCleansState(t *testing.T) {
 }
 
 func TestConcurrent_UniqueIDs(t *testing.T) {
-	// GIVEN five sequentially spawned worlds
+	// Given - five sequentially spawned worlds
 	tc := setup.NewTestContext(t)
 
 	const count = 5
@@ -154,7 +154,7 @@ func TestConcurrent_UniqueIDs(t *testing.T) {
 		chains[i] = tc.Spawn().NoAgent().Execute()
 	}
 
-	// THEN all IDs should be unique
+	// Then - all IDs should be unique
 	ids := make(map[string]bool)
 	for _, chain := range chains {
 		id := chain.World().ID
@@ -170,7 +170,7 @@ func TestConcurrent_UniqueIDs(t *testing.T) {
 }
 
 func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
-	// GIVEN a fresh test context
+	// Given - a fresh test context
 	tc := setup.NewTestContext(t)
 
 	const count = 5
@@ -178,7 +178,7 @@ func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
 	var chains []*setup.AssertionChain
 	var wg sync.WaitGroup
 
-	// WHEN spawning 5 worlds concurrently
+	// When - spawning 5 worlds concurrently
 	wg.Add(count)
 	for i := 0; i < count; i++ {
 		go func() {
@@ -191,7 +191,7 @@ func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
 	}
 	wg.Wait()
 
-	// THEN all 5 should be created
+	// Then - all 5 should be created
 	if len(chains) != count {
 		t.Fatalf("Expected %d chains, got %d", count, len(chains))
 	}
@@ -212,7 +212,7 @@ func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
 		ids[id] = true
 	}
 
-	// WHEN destroying all 5 concurrently
+	// When - destroying all 5 concurrently
 	wg.Add(count)
 	for _, chain := range chains {
 		chain := chain // capture
@@ -228,7 +228,7 @@ func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
 	}
 	wg.Wait()
 
-	// THEN state should be empty
+	// Then - state should be empty
 	worlds = tc.LoadState()
 	if len(worlds) != 0 {
 		t.Fatalf("Expected 0 worlds after concurrent destroy, got %d", len(worlds))
@@ -236,13 +236,13 @@ func TestConcurrent_FiveWorldsStateSafety(t *testing.T) {
 }
 
 func TestConcurrent_ListDuringSpawn(t *testing.T) {
-	// GIVEN a fresh test context
+	// Given - a fresh test context
 	tc := setup.NewTestContext(t)
 
 	const count = 3
 	var wg sync.WaitGroup
 
-	// WHEN spawning worlds and listing concurrently
+	// When - spawning worlds and listing concurrently
 	wg.Add(count + 1)
 
 	for i := 0; i < count; i++ {

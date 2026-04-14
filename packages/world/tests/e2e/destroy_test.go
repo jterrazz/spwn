@@ -10,14 +10,14 @@ import (
 )
 
 func TestDestroy_RemovesContainer(t *testing.T) {
-	// GIVEN a world with no agent
-	// WHEN the world is destroyed
+	// Given - a world with no agent
+	// When - the world is destroyed
 	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
 		Execute()
 
 	chain.Destroy().
-		// THEN the state should have no worlds
+		// Then - the state should have no worlds
 		ExpectState(func(s *setup.StateAssertion) {
 			s.WorldCount(0)
 		}).
@@ -28,7 +28,7 @@ func TestDestroy_RemovesContainer(t *testing.T) {
 }
 
 func TestDestroy_AgentSurvives(t *testing.T) {
-	// GIVEN a world with an agent
+	// Given - a world with an agent
 	ctx := setup.NewTestContext(t)
 	ctx.InitAgent("survivor-agent")
 
@@ -36,13 +36,13 @@ func TestDestroy_AgentSurvives(t *testing.T) {
 		WithAgent("survivor-agent").
 		Execute()
 
-	// WHEN the world is destroyed
+	// When - the world is destroyed
 	u.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
 			s.WorldCount(0)
 		})
 
-	// THEN the agent Mind should still exist on the host
+	// Then - the agent Mind should still exist on the host
 	info, err := agent.InspectAgent("survivor-agent")
 	if err != nil {
 		t.Fatalf("Agent should survive after destroy: %v", err)

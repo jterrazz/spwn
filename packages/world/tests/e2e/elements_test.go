@@ -9,8 +9,8 @@ import (
 )
 
 func TestSpawn_ToolsVerified(t *testing.T) {
-	// GIVEN a config requesting @spwn/unix and @spwn/git tools
-	// WHEN a world is spawned
+	// Given - a config requesting @spwn/unix and @spwn/git tools
+	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
@@ -24,7 +24,7 @@ tools:
 		NoAgent().
 		Execute()
 
-	// THEN the faculties file should list bash and git capabilities
+	// Then - the faculties file should list bash and git capabilities
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.FileContains("/world/faculties.md", "bash")
 		c.FileContains("/world/faculties.md", "git")
@@ -32,9 +32,9 @@ tools:
 }
 
 func TestSpawn_MissingToolFails(t *testing.T) {
-	// GIVEN a config requesting a non-existent tool
-	// WHEN a world is spawned
-	// THEN it should fail with an error about the missing tool
+	// Given - a config requesting a non-existent tool
+	// When - a world is spawned
+	// Then - it should fail with an error about the missing tool
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
@@ -49,8 +49,8 @@ tools:
 }
 
 func TestSpawn_PackExpansion(t *testing.T) {
-	// GIVEN a config requesting the @spwn/unix pack
-	// WHEN a world is spawned
+	// Given - a config requesting the @spwn/unix pack
+	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 physics:
@@ -63,7 +63,7 @@ tools:
 		NoAgent().
 		Execute()
 
-	// THEN the faculties should include all @spwn/unix pack members
+	// Then - the faculties should include all @spwn/unix pack members
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.FileContains("/world/faculties.md", "bash")
 		c.FileContains("/world/faculties.md", "grep")

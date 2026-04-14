@@ -43,13 +43,13 @@ func TestColony_ChiefAndWorkerSpawn(t *testing.T) {
 }
 
 func TestColony_SingleAgentDefaultsToWorker(t *testing.T) {
-	// GIVEN an agent without a agent.yaml (no role specified)
-	// WHEN spawned into a world
+	// Given - an agent without a agent.yaml (no role specified)
+	// When - spawned into a world
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		Execute()
 
-	// THEN the state should track it (role defaults to worker internally)
+	// Then - the state should track it (role defaults to worker internally)
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 		s.HasAgent("test-agent")
@@ -63,13 +63,13 @@ func TestColony_SingleAgentDefaultsToWorker(t *testing.T) {
 }
 
 func TestColony_AgentMindLayersPresent(t *testing.T) {
-	// GIVEN an agent with standard Mind structure
-	// WHEN spawned
+	// Given - an agent with standard Mind structure
+	// When - spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("test-agent").
 		Execute()
 
-	// THEN the Mind should have all standard layers
+	// Then - the Mind should have all standard layers
 	chain.ExpectMind(func(m *setup.MindAssertion) {
 		m.HasLayer("core")
 		m.HasLayer("skills")
@@ -95,7 +95,7 @@ func TestColony_MessagingBetweenAgents(t *testing.T) {
 	// in the gate and mailbox packages, but cannot be E2E-tested until multi-agent
 	// spawn is available.
 	//
-	// When implemented:
+	// When - implemented:
 	// 1. Spawn world with chief + worker
 	// 2. Chief sends a message to worker via mailbox
 	// 3. Worker checks inbox and sees the message

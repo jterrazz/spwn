@@ -12,7 +12,7 @@ import (
 )
 
 func TestAgentLifecycle_SurvivesWorldDestruction(t *testing.T) {
-	// GIVEN a world with an agent
+	// Given - a world with an agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("lifecycle-agent")
 
@@ -25,13 +25,13 @@ func TestAgentLifecycle_SurvivesWorldDestruction(t *testing.T) {
 		m.HasFile("core/profile.md")
 	})
 
-	// WHEN the world is destroyed
+	// When - the world is destroyed
 	chain.Destroy().
 		ExpectState(func(s *setup.StateAssertion) {
 			s.WorldCount(0)
 		})
 
-	// THEN the agent Mind should still exist on the host
+	// Then - the agent Mind should still exist on the host
 	info, err := agent.InspectAgent("lifecycle-agent")
 	if err != nil {
 		t.Fatalf("Agent should survive world destruction: %v", err)
@@ -42,7 +42,7 @@ func TestAgentLifecycle_SurvivesWorldDestruction(t *testing.T) {
 }
 
 func TestAgentLifecycle_SpawnInDifferentWorlds(t *testing.T) {
-	// GIVEN an agent spawned in world A
+	// Given - an agent spawned in world A
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("roaming-agent")
 
@@ -57,7 +57,7 @@ func TestAgentLifecycle_SpawnInDifferentWorlds(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// WHEN world A is destroyed and the agent is spawned in world B
+	// When - world A is destroyed and the agent is spawned in world B
 	chainA.Destroy()
 
 	chainB := tc.Spawn().
@@ -71,7 +71,7 @@ func TestAgentLifecycle_SpawnInDifferentWorlds(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// THEN the world IDs should differ
+	// Then - the world IDs should differ
 	if worldAID == worldBID {
 		t.Fatalf("Expected different world IDs, both are %s", worldAID)
 	}
@@ -87,7 +87,7 @@ func TestAgentLifecycle_SpawnInDifferentWorlds(t *testing.T) {
 }
 
 func TestAgentLifecycle_JournalAcrossWorlds(t *testing.T) {
-	// GIVEN an agent that runs to completion in a first world
+	// Given - an agent that runs to completion in a first world
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("journal-multi-agent")
 
@@ -101,13 +101,13 @@ func TestAgentLifecycle_JournalAcrossWorlds(t *testing.T) {
 		j.LatestWorldID(chain1.World().ID)
 	})
 
-	// WHEN the agent runs to completion in a second world
+	// When - the agent runs to completion in a second world
 	chain2 := tc.Spawn().
 		WithAgent("journal-multi-agent").
 		RunAgent().
 		Execute()
 
-	// THEN the journal should have entries from both worlds
+	// Then - the journal should have entries from both worlds
 	chain2.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(2)
 		j.LatestWorldID(chain2.World().ID)
@@ -133,7 +133,7 @@ func TestAgentLifecycle_JournalAcrossWorlds(t *testing.T) {
 }
 
 func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
-	// GIVEN an agent with a custom knowledge file
+	// Given - an agent with a custom knowledge file
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("export-src-agent")
 
@@ -141,7 +141,7 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 	os.MkdirAll(knowledgePath, 0755)
 	os.WriteFile(filepath.Join(knowledgePath, "custom.md"), []byte("# Custom Knowledge\nThis is unique."), 0644)
 
-	// WHEN the agent is exported and imported into a new agent
+	// When - the agent is exported and imported into a new agent
 	outputDir := t.TempDir()
 	archivePath, err := agent.ExportMind("export-src-agent", outputDir, nil)
 	if err != nil {
@@ -153,7 +153,7 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// THEN the imported agent should have the same layer structure
+	// Then - the imported agent should have the same layer structure
 	srcInfo, err := agent.InspectAgent("export-src-agent")
 	if err != nil {
 		t.Fatalf("Inspect source failed: %v", err)
@@ -181,20 +181,20 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 }
 
 func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
-	// GIVEN an agent with a custom file in the core layer
+	// Given - an agent with a custom file in the core layer
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("profile-agent")
 
 	coreDir := filepath.Join(agent.AgentDir("profile-agent"), "core")
 	os.WriteFile(filepath.Join(coreDir, "custom.md"), []byte("# Custom Profile\nYou are a specialist."), 0644)
 
-	// WHEN the agent is spawned in a world
+	// When - the agent is spawned in a world
 	chain := tc.Spawn().
 		WithAgent("profile-agent").
 		Detached().
 		Execute()
 
-	// THEN the mock should see the Mind with the custom profile
+	// Then - the mock should see the Mind with the custom profile
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.SawMind()
@@ -206,7 +206,7 @@ func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
 }
 
 func TestAgentLifecycle_SessionDiffersPerWorld(t *testing.T) {
-	// GIVEN an agent spawned in world A
+	// Given - an agent spawned in world A
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("session-diff-agent")
 
@@ -219,7 +219,7 @@ func TestAgentLifecycle_SessionDiffersPerWorld(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// WHEN world A is destroyed and the agent is spawned in world B
+	// When - world A is destroyed and the agent is spawned in world B
 	chainA.Destroy()
 
 	chainB := tc.Spawn().
@@ -231,7 +231,7 @@ func TestAgentLifecycle_SessionDiffersPerWorld(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// THEN the deterministic session ID (world ID + agent name) should differ.
+	// Then - the deterministic session ID (world ID + agent name) should differ.
 	sessionA := agent.DeterministicSessionID("session-diff-agent", chainA.World().ID)
 	sessionB := agent.DeterministicSessionID("session-diff-agent", chainB.World().ID)
 

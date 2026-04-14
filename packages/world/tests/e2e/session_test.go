@@ -12,7 +12,7 @@ import (
 )
 
 func TestSession_FirstSpawnCreatesSession(t *testing.T) {
-	// GIVEN a world with a detached agent
+	// Given - a world with a detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("sess-agent")
 
@@ -21,7 +21,7 @@ func TestSession_FirstSpawnCreatesSession(t *testing.T) {
 		Detached().
 		Execute()
 
-	// THEN the mock should have been called and not resumed
+	// Then - the mock should have been called and not resumed
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.WasNotResumed()
@@ -34,11 +34,11 @@ func TestSession_FirstSpawnCreatesSession(t *testing.T) {
 }
 
 func TestSession_DeterministicID(t *testing.T) {
-	// GIVEN two calls to DeterministicSessionID with the same inputs
+	// Given - two calls to DeterministicSessionID with the same inputs
 	id1 := agent.DeterministicSessionID("test-agent", "u-default-12345")
 	id2 := agent.DeterministicSessionID("test-agent", "u-default-12345")
 
-	// THEN the IDs should be identical
+	// Then - the IDs should be identical
 	if id1 != id2 {
 		t.Fatalf("Session IDs not deterministic: %q != %q", id1, id2)
 	}
@@ -56,7 +56,7 @@ func TestSession_DeterministicID(t *testing.T) {
 }
 
 func TestSession_FileContainsCorrectWorldID(t *testing.T) {
-	// GIVEN a world with a detached agent
+	// Given - a world with a detached agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("sess-wid-agent")
 
@@ -71,7 +71,7 @@ func TestSession_FileContainsCorrectWorldID(t *testing.T) {
 		m.WasCalled()
 	})
 
-	// THEN the session file should contain the correct world ID
+	// Then - the session file should contain the correct world ID
 	mindPath := agent.AgentDir("sess-wid-agent")
 	sess, err := agent.LoadSession(mindPath, worldID)
 	if err != nil {
@@ -86,7 +86,7 @@ func TestSession_FileContainsCorrectWorldID(t *testing.T) {
 }
 
 func TestSession_PersistsAfterDestroy(t *testing.T) {
-	// GIVEN a world where an agent has been spawned and a session created
+	// Given - a world where an agent has been spawned and a session created
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("persist-agent")
 
@@ -106,10 +106,10 @@ func TestSession_PersistsAfterDestroy(t *testing.T) {
 		m.HasSessionFile(worldID)
 	})
 
-	// WHEN the world is destroyed
+	// When - the world is destroyed
 	chain.Destroy()
 
-	// THEN the session file should still exist (persist after destruction)
+	// Then - the session file should still exist (persist after destruction)
 	mindPath := agent.AgentDir("persist-agent")
 	sess, err := agent.LoadSession(mindPath, worldID)
 	if err != nil {
@@ -121,7 +121,7 @@ func TestSession_PersistsAfterDestroy(t *testing.T) {
 }
 
 func TestSession_DifferentWorldsDifferentSessions(t *testing.T) {
-	// GIVEN two separate worlds with the same agent
+	// Given - two separate worlds with the same agent
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("multi-sess-agent")
 
@@ -146,7 +146,7 @@ func TestSession_DifferentWorldsDifferentSessions(t *testing.T) {
 	worldID1 := chain1.World().ID
 	worldID2 := chain2.World().ID
 
-	// THEN each world should have its own session file
+	// Then - each world should have its own session file
 	mindPath := agent.AgentDir("multi-sess-agent")
 
 	sess1, err := agent.LoadSession(mindPath, worldID1)
@@ -165,7 +165,7 @@ func TestSession_DifferentWorldsDifferentSessions(t *testing.T) {
 }
 
 func TestSession_SecondSpawnPreservesSessionID(t *testing.T) {
-	// GIVEN a world where an agent has already been spawned once
+	// Given - a world where an agent has already been spawned once
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("resume-agent")
 
@@ -187,7 +187,7 @@ func TestSession_SecondSpawnPreservesSessionID(t *testing.T) {
 		t.Fatalf("Expected session after first spawn, got err=%v sess=%v", err, first)
 	}
 
-	// WHEN a second agent is spawned in the same world
+	// When - a second agent is spawned in the same world
 	if err := tc.Arc.SpawnAgentDetached(context.Background(), worldID, "resume-agent"); err != nil {
 		t.Fatalf("Second spawn failed: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestSession_SecondSpawnPreservesSessionID(t *testing.T) {
 		return tc.TryReadMockOutput(chain.World().ContainerID) != nil
 	})
 
-	// THEN the session file should still have the same deterministic ID.
+	// Then - the session file should still have the same deterministic ID.
 	second, err := agent.LoadSession(mindPath, worldID)
 	if err != nil || second == nil {
 		t.Fatalf("Expected session after second spawn, got err=%v sess=%v", err, second)

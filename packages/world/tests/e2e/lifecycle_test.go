@@ -11,7 +11,7 @@ import (
 )
 
 func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
-	// GIVEN a world spawned with an agent
+	// Given - a world spawned with an agent
 	ctx := setup.NewTestContext(t)
 	ctx.InitAgent("e2e-agent")
 
@@ -19,7 +19,7 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 		WithAgent("e2e-agent").
 		Execute()
 
-	// THEN the state should show one idle world
+	// Then - the state should show one idle world
 	u.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 		s.WorldStatus(world.StatusRunning)
@@ -33,16 +33,16 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 		c.HasMount("/agents")
 	})
 
-	// WHEN inspecting the world
-	// THEN it should report the default config
+	// When - inspecting the world
+	// Then - it should report the default config
 	u.Inspect().ExpectConfig("default")
 
 	// AND listing should show one world
 	u.List().ExpectCount(1)
 
-	// WHEN the world is destroyed
+	// When - the world is destroyed
 	u.Destroy().
-		// THEN the state should be empty
+		// Then - the state should be empty
 		ExpectState(func(s *setup.StateAssertion) {
 			s.WorldCount(0)
 		}).

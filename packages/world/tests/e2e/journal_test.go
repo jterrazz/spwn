@@ -10,7 +10,7 @@ import (
 )
 
 func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
-	// GIVEN a world with an agent that runs to completion
+	// Given - a world with an agent that runs to completion
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("journal-agent")
 
@@ -19,7 +19,7 @@ func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
 		RunAgent().
 		Execute()
 
-	// THEN a journal entry should be created with the correct outcome and world ID
+	// Then - a journal entry should be created with the correct outcome and world ID
 	chain.ExpectJournal(func(j *setup.JournalAssertion) {
 		j.HasEntries(1)
 		j.LatestOutcome("completed")
@@ -28,7 +28,7 @@ func TestJournal_EntryCreatedOnCompletion(t *testing.T) {
 }
 
 func TestJournal_ListReturnsNewestFirst(t *testing.T) {
-	// GIVEN an agent that has run in two separate worlds
+	// Given - an agent that has run in two separate worlds
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("journal-order")
 
@@ -42,14 +42,14 @@ func TestJournal_ListReturnsNewestFirst(t *testing.T) {
 		RunAgent().
 		Execute()
 
-	// WHEN listing journal entries
+	// When - listing journal entries
 	mindPath := agent.AgentDir("journal-order")
 	entries, err := agent.ListJournal(mindPath, 0)
 	if err != nil {
 		t.Fatalf("Failed to list journal: %v", err)
 	}
 
-	// THEN there should be at least 2 entries
+	// Then - there should be at least 2 entries
 	if len(entries) < 2 {
 		t.Fatalf("Expected at least 2 journal entries, got %d", len(entries))
 	}

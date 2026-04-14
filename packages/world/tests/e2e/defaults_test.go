@@ -13,16 +13,16 @@ import (
 )
 
 func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
-	// GIVEN default config and default agent are created (simulating ensureDefaults)
+	// Given - default config and default agent are created (simulating ensureDefaults)
 	world.CreateDefaultConfig()
 	agent.InitMind("default")
 
-	// WHEN a world is spawned with no agent
+	// When - a world is spawned with no agent
 	chain := setup.NewSpawnBuilder(t).
 		NoAgent().
 		Execute()
 
-	// THEN the state should show one live world with physics and faculties
+	// Then - the state should show one live world with physics and faculties
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 		s.WorldStatus(world.StatusRunning)
@@ -35,16 +35,16 @@ func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
 }
 
 func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
-	// GIVEN default config and default agent
+	// Given - default config and default agent
 	world.CreateDefaultConfig()
 	agent.InitMind("default")
 
-	// WHEN a world is spawned with the default agent
+	// When - a world is spawned with the default agent
 	chain := setup.NewSpawnBuilder(t).
 		WithAgent("default").
 		Execute()
 
-	// THEN the state should track the agent
+	// Then - the state should track the agent
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 		s.HasAgent("default")
@@ -62,7 +62,7 @@ func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
 }
 
 func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
-	// GIVEN a fresh SPWN_HOME with the default config created
+	// Given - a fresh SPWN_HOME with the default config created
 	tmpDir := t.TempDir()
 	t.Setenv("SPWN_HOME", tmpDir)
 
@@ -70,14 +70,14 @@ func TestDefaults_DefaultConfigIsLoadable(t *testing.T) {
 		t.Fatalf("CreateDefault failed: %v", err)
 	}
 
-	// WHEN the manifest is loaded, it should parse cleanly
+	// When - the manifest is loaded, it should parse cleanly
 	if _, err := world.LoadManifest("default"); err != nil {
 		t.Fatalf("Load default failed: %v", err)
 	}
 }
 
 func TestDefaults_DefaultAgentIsValid(t *testing.T) {
-	// GIVEN a fresh SPWN_HOME with the default agent initialized
+	// Given - a fresh SPWN_HOME with the default agent initialized
 	tmpDir := t.TempDir()
 	t.Setenv("SPWN_HOME", tmpDir)
 	os.MkdirAll(filepath.Join(tmpDir, "agents"), 0755)
@@ -87,17 +87,17 @@ func TestDefaults_DefaultAgentIsValid(t *testing.T) {
 		t.Fatalf("Init failed: %v", err)
 	}
 
-	// WHEN validating the agent
+	// When - validating the agent
 	err = agent.ValidateMind("default")
 
-	// THEN it should pass validation
+	// Then - it should pass validation
 	if err != nil {
 		t.Fatalf("Validate after Init failed: %v", err)
 	}
 }
 
 func TestDefaults_IdempotentRerun(t *testing.T) {
-	// GIVEN default config and agent are created once
+	// Given - default config and agent are created once
 	tmpDir := t.TempDir()
 	t.Setenv("SPWN_HOME", tmpDir)
 	os.MkdirAll(filepath.Join(tmpDir, "agents"), 0755)
@@ -109,11 +109,11 @@ func TestDefaults_IdempotentRerun(t *testing.T) {
 		t.Fatalf("First Init failed: %v", err)
 	}
 
-	// WHEN creating them again (idempotent re-run)
+	// When - creating them again (idempotent re-run)
 	world.CreateDefaultConfig()
 	agent.InitMind("default")
 
-	// THEN the config and agent should still be valid
+	// Then - the config and agent should still be valid
 	if _, err := world.LoadManifest("default"); err != nil {
 		t.Fatalf("Load after idempotent create failed: %v", err)
 	}

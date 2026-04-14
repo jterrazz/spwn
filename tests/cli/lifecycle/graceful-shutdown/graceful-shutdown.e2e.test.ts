@@ -106,9 +106,9 @@ describe('graceful shutdown', () => {
     });
 
     test('down appends a journal entry to the destroyed agent', async () => {
-        // GIVEN a running project world with neo,
-        // WHEN we up then down,
-        // THEN the architect's destroy path must append a journal entry
+        // Given - a running project world with neo,
+        // When - we up then down,
+        // Then - the architect's destroy path must append a journal entry
         // Under spwn/agents/neo/journal/ (see
         // Packages/world/internal/architect/destroy.go:54 calling
         // Mind.AppendJournal). This test guards that contract.

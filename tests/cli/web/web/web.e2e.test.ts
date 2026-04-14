@@ -30,11 +30,12 @@ describe('spwn web', () => {
     });
 
     test('web child exits cleanly on SIGTERM, leaves no orphans', async () => {
-        // GIVEN a uniquely-marked SPWN_HOME so we can grep for any
+        // Given - a uniquely-marked SPWN_HOME so we can grep for any
         // Surviving processes carrying this test's env after dispose.
-        // WHEN the spec scope exits, the framework SIGTERMs the spawned
-        // Child. THEN no processes referencing the marker should remain —
-        // Proves `spwn web` honours SIGTERM and tears down its children.
+        // When - the spec scope exits, the framework SIGTERMs the spawned
+        // Child.
+        // Then - no processes referencing the marker should remain,
+        // Proving `spwn web` honours SIGTERM and tears down its children.
         const homeMarker = `spwn-test-web-sigterm-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
         {
