@@ -137,6 +137,10 @@ describe('world spawn', () => {
         // No stack trace / panic / goroutine dump.
         expect(combined).not.toContain('panic');
         expect(combined).not.toContain('goroutine');
+        // Error message names the missing world and points users back
+        // At spwn.yaml — this is the hint contract we lock down.
+        expect(combined).toContain('nonexistent-world');
+        expect(combined).toContain('spwn.yaml');
         // No container with our label stuck around.
         expect(result.container('neo').exists).toBe(false);
         expect(result.container('nonexistent-world').exists).toBe(false);
@@ -155,6 +159,9 @@ describe('world spawn', () => {
         expect(combined).not.toContain('goroutine');
         // Error mentions the missing agent by name.
         expect(combined).toContain('ghost');
+        // And hints at `spwn agent new <name>` so users can fix it.
+        // (The exact wording comes from apps/cli/world/world.go:456.)
+        expect(combined).toContain('spwn agent new ghost');
         // No container leaked.
         expect(result.container('ghost').exists).toBe(false);
     });

@@ -16,15 +16,13 @@ import { spec } from '../../../setup/cli.specification.js';
  * maps to what the legacy `--all` flag did). The explicit `--all` flag
  * no longer exists in the project-mode CLI surface.
  *
- * Dropped:
- *   - Journal-entry-on-destroy assertions. The legacy test asserted that
- *     `spwn down` appended an entry to the agent's journal. Reviewing
- *     packages/mind and apps/cli, no code path currently writes a
- *     journal entry on world teardown — the legacy test was likely
- *     exercising an intention that was never (or is no longer)
- *     implemented. Rather than fake a passing test, this file asserts
- *     on the shutdown contract that actually exists: container removal,
- *     banner wording, and idempotent double-down.
+ * Restored (was wrongly dropped):
+ *   - Journal-entry-on-destroy assertions. The destroy path in
+ *     `packages/world/internal/architect/destroy.go` does call
+ *     `mind.AppendJournal` for every deployed agent. The earlier
+ *     docstring claiming no code path writes journal entries on
+ *     teardown was incorrect; the "journal on destroy" test below
+ *     now locks that contract down.
  *
  * Preserved from legacy:
  *   - `down` exits cleanly and removes the container from docker
@@ -102,6 +100,28 @@ describe('graceful shutdown', () => {
         expect(combined).not.toContain('panic');
         expect(combined).not.toContain('goroutine');
         expect(combined).not.toContain('FATAL');
+        // And the explicit zero-count banner fires so users see that
+        // Spwn recognised there was nothing to stop (vs. a silent exit).
+        expect(combined).toContain('No project worlds were running');
+    });
+
+    test('down appends a journal entry to the destroyed agent', async () => {
+        // GIVEN a running project world with neo,
+        // WHEN we up then down,
+        // THEN the architect's destroy path must append a journal entry
+        // Under spwn/agents/neo/journal/ (see
+        // Packages/world/internal/architect/destroy.go:54 calling
+        // Mind.AppendJournal). This test guards that contract.
+        await using result = await spec('journal on destroy')
+            .project('docker-pilot')
+            .exec(['up', 'down'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+
+        const journalDir = result.directory('spwn/agents/neo/journal');
+        const entries = await journalDir.files();
+        expect(entries.length).toBeGreaterThanOrEqual(1);
     });
 
     test('upgrade --help documents graceful world shutdown', async () => {

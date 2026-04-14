@@ -52,7 +52,11 @@ describe('spwn agent dream', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.file('spwn/agents/neo/playbooks/auto-reflexion.md').exists).toBe(true);
+        const reflexion = result.file('spwn/agents/neo/playbooks/auto-reflexion.md');
+        expect(reflexion.exists).toBe(true);
+        // The reflexion file must carry real content, not just an
+        // Empty stub — dream should have written something useful.
+        expect(reflexion.content.length).toBeGreaterThan(0);
         const out = result.stdout.text + result.stderr.text;
         expect(out).toMatch(/Entries analyzed\s+2/);
         expect(out).toMatch(/Success rate\s+\d+%/);
