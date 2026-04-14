@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -13,11 +14,39 @@ import (
 	"spwn.sh/packages/world"
 )
 
-var listFilterWorld string
+var (
+	listFilterWorld string
+	listAsJSON      bool
+)
 
 func init() {
 	listCmd.Flags().StringVar(&listFilterWorld, "world", "", "Filter agents by world ID")
+	listCmd.Flags().BoolVar(&listAsJSON, "json", false, "Emit results as structured JSON on stdout")
 	Cmd.AddCommand(listCmd)
+}
+
+// agentListReport is the CLI-owned JSON schema for `spwn agent ls`.
+type agentListReport struct {
+	Mode   string          `json:"mode"`
+	Agents []agentListRow  `json:"agents"`
+}
+
+type agentListRow struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+	World  string `json:"world,omitempty"`
+}
+
+func emitAgentListJSON(cmd *cobra.Command, report agentListReport) error {
+	if report.Agents == nil {
+		report.Agents = []agentListRow{}
+	}
+	enc := json.NewEncoder(cmd.OutOrStdout())
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(report); err != nil {
+		return fmt.Errorf("encode json: %w", err)
+	}
+	return nil
 }
 
 // agentWorldInfo holds cross-referenced world data for an agent.
@@ -67,11 +96,28 @@ var listCmd = &cobra.Command{
 		s := newStepper(cmd)
 
 		if len(agents) == 0 {
+			if listAsJSON {
+				return emitAgentListJSON(cmd, agentListReport{Mode: "global"})
+			}
 			s.Blank()
 			s.Success("No agents yet.")
 			s.Log("Create one with: spwn agent new <name>")
 			s.Blank()
 			return nil
+		}
+
+		if listAsJSON {
+			rows := make([]agentListRow, 0, len(agents))
+			for _, a := range agents {
+				status := "unattached"
+				worldID := ""
+				if info, ok := agentMap[a.Name]; ok {
+					worldID = info.WorldID
+					status = info.Status
+				}
+				rows = append(rows, agentListRow{Name: a.Name, Status: status, World: worldID})
+			}
+			return emitAgentListJSON(cmd, agentListReport{Mode: "global", Agents: rows})
 		}
 
 		t := ui.NewTable("NAME", "WORLD", "STATUS")
@@ -146,6 +192,9 @@ func renderSmartAgentList(cmd *cobra.Command, p *manifest.Project) error {
 	s := newStepper(cmd)
 
 	if len(allAgents) == 0 {
+		if listAsJSON {
+			return emitAgentListJSON(cmd, agentListReport{Mode: "project"})
+		}
 		s.Blank()
 		s.Success("No agents yet.")
 		s.Log("Create one with: spwn agent new <name>")
@@ -153,13 +202,34 @@ func renderSmartAgentList(cmd *cobra.Command, p *manifest.Project) error {
 		return nil
 	}
 
-	t := ui.NewTable("AGENT", "STATUS", "WORLD")
-	// Stable order: deployed first (alpha by name), then orphans.
+	// Stable order: alpha by name. Matches the table order.
 	names := make([]string, 0, len(allAgents))
 	for name := range allAgents {
 		names = append(names, name)
 	}
 	sortStrings(names)
+
+	if listAsJSON {
+		rows := make([]agentListRow, 0, len(names))
+		for _, name := range names {
+			wname, isDeployed := declared[name]
+			var status, worldCol string
+			switch {
+			case isDeployed && running[wname] > 0:
+				status = "running"
+				worldCol = wname
+			case isDeployed:
+				status = "stopped"
+				worldCol = wname
+			default:
+				status = "orphan"
+			}
+			rows = append(rows, agentListRow{Name: name, Status: status, World: worldCol})
+		}
+		return emitAgentListJSON(cmd, agentListReport{Mode: "project", Agents: rows})
+	}
+
+	t := ui.NewTable("AGENT", "STATUS", "WORLD")
 	for _, name := range names {
 		wname, isDeployed := declared[name]
 		var status, worldCol string

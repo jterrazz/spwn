@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -12,10 +13,37 @@ import (
 
 func init() {
 	checkCmd.Flags().BoolVar(&checkStrict, "strict", false, "Exit non-zero on warnings, not just errors")
+	checkCmd.Flags().BoolVar(&checkJSON, "json", false, "Emit results as structured JSON on stdout")
 	rootCmd.AddCommand(checkCmd)
 }
 
-var checkStrict bool
+var (
+	checkStrict bool
+	checkJSON   bool
+)
+
+// checkReport is the CLI-owned JSON schema for `spwn check`. It's
+// intentionally decoupled from the internal validate.Issue type so the
+// JSON contract can evolve independently of the rule engine internals.
+type checkReport struct {
+	Valid        bool          `json:"valid"`
+	ManifestPath string        `json:"manifestPath"`
+	Summary      checkSummary  `json:"summary"`
+	Issues       []checkIssue  `json:"issues"`
+}
+
+type checkSummary struct {
+	Errors   int `json:"errors"`
+	Warnings int `json:"warnings"`
+	Info     int `json:"info"`
+}
+
+type checkIssue struct {
+	Level   string `json:"level"`
+	Path    string `json:"path"`
+	Message string `json:"message"`
+	Hint    string `json:"hint,omitempty"`
+}
 
 var checkCmd = &cobra.Command{
 	Use:   "check",
@@ -44,6 +72,23 @@ severity. Exits non-zero when errors are found (or warnings, with
 		})
 		out := cmd.OutOrStdout()
 
+		errors := filter(issues, manifest.LevelError)
+		warnings := filter(issues, manifest.LevelWarning)
+		infos := filter(issues, manifest.LevelInfo)
+
+		if checkJSON {
+			report := buildCheckReport(p.ManifestPath, errors, warnings, infos)
+			enc := json.NewEncoder(out)
+			enc.SetIndent("", "  ")
+			if err := enc.Encode(report); err != nil {
+				return fmt.Errorf("encode json: %w", err)
+			}
+			if len(errors) > 0 || (checkStrict && len(warnings) > 0) {
+				os.Exit(1)
+			}
+			return nil
+		}
+
 		if len(issues) == 0 {
 			fmt.Fprintln(out)
 			fmt.Fprintf(out, "  %s  %s\n", ui.Green("✓"), ui.Strong("Project is valid"))
@@ -51,10 +96,6 @@ severity. Exits non-zero when errors are found (or warnings, with
 			fmt.Fprintln(out)
 			return nil
 		}
-
-		errors := filter(issues, manifest.LevelError)
-		warnings := filter(issues, manifest.LevelWarning)
-		infos := filter(issues, manifest.LevelInfo)
 
 		fmt.Fprintln(out)
 		fmt.Fprintf(out, "  %s\n", ui.Faint(p.ManifestPath))
@@ -73,6 +114,30 @@ severity. Exits non-zero when errors are found (or warnings, with
 		}
 		return nil
 	},
+}
+
+func buildCheckReport(manifestPath string, errors, warnings, infos []manifest.Issue) checkReport {
+	issues := make([]checkIssue, 0, len(errors)+len(warnings)+len(infos))
+	for _, group := range [][]manifest.Issue{errors, warnings, infos} {
+		for _, i := range group {
+			issues = append(issues, checkIssue{
+				Level:   i.Level.String(),
+				Path:    i.Path,
+				Message: i.Message,
+				Hint:    i.Hint,
+			})
+		}
+	}
+	return checkReport{
+		Valid:        len(errors) == 0,
+		ManifestPath: manifestPath,
+		Summary: checkSummary{
+			Errors:   len(errors),
+			Warnings: len(warnings),
+			Info:     len(infos),
+		},
+		Issues: issues,
+	}
 }
 
 func filter(issues []manifest.Issue, level manifest.Level) []manifest.Issue {
