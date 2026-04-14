@@ -58,7 +58,7 @@ spwn talk neo "what is this project?"          # Talk to an agent
 # ── Agents ───────────────────────────────────────────────────────
 spwn agent new neo                             # Create a blank agent in ./spwn/agents/
 spwn agent ls                                  # List project agents
-spwn agent show neo                            # Inspect composition
+spwn agent inspect neo                         # Inspect composition, memory, history
 spwn agent fork neo neo-v2                     # Clone memory + composition
 spwn agent rm neo                              # Delete an agent
 spwn agent rm neo --tool @spwn/python          # Remove a block from an agent

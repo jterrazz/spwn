@@ -261,7 +261,7 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 # ── Agents ───────────────────────────────────────────────────────
 🟢 spwn agent new neo                           Create a blank agent
 🟢 spwn agent ls                                List your agents
-🟢 spwn agent show neo                          Inspect composition
+🟢 spwn agent inspect neo                       Inspect composition, memory, history
 🟢 spwn agent rm neo                            Delete an agent
 🟢 spwn agent fork neo neo-v2                   Clone + evolve independently
 🔴 spwn agent get @community/sci                Install an agent from a registry

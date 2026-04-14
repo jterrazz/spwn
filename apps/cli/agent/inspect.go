@@ -17,9 +17,10 @@ func init() {
 }
 
 var inspectCmd = &cobra.Command{
-	Use:   "show <agent-name>",
-	Short: "Show agent details - composition, memory, world status, history",
-	Args:  cobra.ExactArgs(1),
+	Use:     "inspect <agent-name>",
+	Aliases: []string{"show"},
+	Short:   "Inspect an agent - composition, memory, world status, history",
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		s := newStepper(cmd)

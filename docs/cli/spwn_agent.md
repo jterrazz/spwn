@@ -48,6 +48,7 @@ spwn agent [flags]
 * [spwn agent get](./spwn_agent_get.md)	 - Install a shared agent from the registry
 * [spwn agent import](./spwn_agent_import.md)	 - Import an agent from a tar.gz archive
 * [spwn agent inbox](./spwn_agent_inbox.md)	 - Show messages in an agent's inbox
+* [spwn agent inspect](./spwn_agent_inspect.md)	 - Inspect an agent - composition, memory, world status, history
 * [spwn agent logs](./spwn_agent_logs.md)	 - Show the event log for a specific agent
 * [spwn agent ls](./spwn_agent_ls.md)	 - List all agents on this Host
 * [spwn agent new](./spwn_agent_new.md)	 - Create a new agent with a 6-layer Mind
@@ -55,7 +56,6 @@ spwn agent [flags]
 * [spwn agent remove](./spwn_agent_remove.md)	 - Remove tools, skills, or profile from an agent
 * [spwn agent rm](./spwn_agent_rm.md)	 - Remove an agent and its Mind directory
 * [spwn agent send](./spwn_agent_send.md)	 - Send a message to an agent's inbox
-* [spwn agent show](./spwn_agent_show.md)	 - Show agent details - composition, memory, world status, history
 * [spwn agent sleep](./spwn_agent_sleep.md)	 - Consolidate experience - archive stale files, prune old sessions
 * [spwn agent talk](./spwn_agent_talk.md)	 - Talk to a running agent - interactive or one-shot
 * [spwn agent watch](./spwn_agent_watch.md)	 - Watch for new messages to an agent

@@ -43,7 +43,6 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "new <name>", Desc: "Create a blank agent"},
 				{Name: "ls", Desc: "List agents"},
-				{Name: "show <name>", Desc: "Inspect composition and history"},
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
 			{Title: "Compose", Commands: []ui.HelpEntry{
@@ -57,6 +56,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "watch <name>", Desc: "Tail an agent's inbox in real time"},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
+				{Name: "inspect <name>", Desc: "Inspect composition, memory, and history"},
 				{Name: "logs <name>", Desc: "Show the event log for this agent"},
 			}},
 			{Title: "Evolution", Commands: []ui.HelpEntry{

@@ -63,11 +63,11 @@ func worldHelp(cmd *cobra.Command, args []string) {
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "up", Desc: "Spawn a world " + ui.Faint("(see Spawn Flags below)")},
 				{Name: "ls", Desc: "List active worlds"},
-				{Name: "inspect <id>", Desc: "Inspect a running world"},
 				{Name: "down <id>", Desc: "Destroy a world " + ui.Faint("(agent survives)")},
 				{Name: "rename <id> <name>", Desc: "Rename " + ui.Faint("(empty name clears)")},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
+				{Name: "inspect <id>", Desc: "Inspect a running world's composition and state"},
 				{Name: "logs <id>", Desc: "Show event log for a world"},
 				{Name: "enter <id>", Desc: "Open an interactive shell inside a world"},
 			}},
