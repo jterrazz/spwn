@@ -7,6 +7,38 @@ import (
 	"spwn.sh/packages/world/internal/models"
 )
 
+func TestApplyTestRun(t *testing.T) {
+	t.Run("noop when env var unset", func(t *testing.T) {
+		t.Setenv(TestRunEnv, "")
+		m := map[string]string{"keep": "me"}
+		ApplyTestRun(m)
+		if _, ok := m[TestRun]; ok {
+			t.Fatalf("expected no TestRun label when env var unset")
+		}
+		if m["keep"] != "me" {
+			t.Fatalf("unrelated keys must survive: %v", m)
+		}
+	})
+
+	t.Run("stamps label when env var set", func(t *testing.T) {
+		t.Setenv(TestRunEnv, "abc123")
+		m := map[string]string{}
+		ApplyTestRun(m)
+		if m[TestRun] != "abc123" {
+			t.Fatalf("expected TestRun=abc123, got %q", m[TestRun])
+		}
+	})
+
+	t.Run("WorldLabels picks up the env var", func(t *testing.T) {
+		t.Setenv(TestRunEnv, "run-xyz")
+		w := models.World{ID: "w-1", Config: "default", CreatedAt: time.Now()}
+		lbls := WorldLabels(w)
+		if lbls[TestRun] != "run-xyz" {
+			t.Fatalf("WorldLabels must propagate SPWN_TEST_LABEL: %v", lbls)
+		}
+	})
+}
+
 func TestWorldLabels_RoundTrip(t *testing.T) {
 	created := time.Date(2026, 4, 11, 12, 0, 0, 0, time.UTC)
 	original := models.World{

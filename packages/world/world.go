@@ -318,10 +318,12 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 	// we docker exec claude into it when we want to talk. The architect
 	// gets the spwn kind label too, so it shows up in tooling that
 	// queries `docker ps --filter label=sh.spwn.kind=architect`.
+	architectLabels := map[string]string{labels.KindKey: labels.KindArchitect}
+	labels.ApplyTestRun(architectLabels)
 	containerCfg := &containerTypes.Config{
 		Image:  image,
 		Env:    envVars,
-		Labels: map[string]string{labels.KindKey: labels.KindArchitect},
+		Labels: architectLabels,
 	}
 	// Ensure architect stack file exists on the host
 	architectStackPath := base.BaseDir() + "/architect/stack.md"
