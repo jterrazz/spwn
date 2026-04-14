@@ -35,42 +35,31 @@ The real power of AI isn't the model — it's the model plus everything around i
 
 ## Quickstart
 
-Four commands to a running world:
+Four commands. One running world.
 
-|        | Step             | Example                                                            |
-| ------ | ---------------- | ------------------------------------------------------------------ |
-| **01** | Initialise       | `spwn init`                                                        |
-| **02** | Compose the mind | `spwn agent add default --tool @spwn/python --skill paper-reading` |
-| **03** | Spawn the world  | `spwn up`                                                          |
-| **04** | Talk to it       | `spwn talk default "what is this project?"`                        |
+|        | Step              | Example                                    |
+| ------ | ----------------- | ------------------------------------------ |
+| **01** | Initialise        | `spwn init`                                |
+| **02** | Compose the mind  | `spwn agent add neo --tool @spwn/python`   |
+| **03** | Spawn the world   | `spwn up`                                  |
+| **04** | Talk to it        | `spwn talk neo "what is this project?"`    |
 
 ```bash
-# Install (downloads latest release to ~/.local/bin)
+# Install
 curl -fsSL https://spwn.sh/install.sh | bash
 
-# Scaffold a spwn project in the current directory
+# Scaffold a project in the current directory
 spwn init
 
-# Validate, build the artifact, and spawn
-spwn check
-spwn build
+# Run it
 spwn up
-
-# Or one shot: spwn up --build
+spwn talk neo "hi"
 ```
 
 Or start from a bundled example:
 
 ```bash
 spwn example install matrix
-spwn up -c matrix --agent neo
-```
-
-Or build from source:
-
-```bash
-git clone https://github.com/jterrazz/spwn.git && cd spwn
-make install
 ```
 
 > **Requirements:** Go 1.25+, Docker
@@ -126,28 +115,6 @@ Async inter-agent communication via filesystem inboxes. Agents send, receive, an
 
 <br/>
 
-## Use cases
-
-**Team with a leader** — a lead agent delegates tasks to worker agents via inboxes:
-
-```bash
-spwn up --agent morpheus --agent neo --agent trinity -w ./acme-api
-spwn agent send neo --from morpheus "Implement Stripe webhooks"
-spwn agent send trinity --from morpheus "Write tests for webhooks"
-```
-
-**Solo developer** — one agent, one project, persistent memory:
-
-```bash
-spwn agent new neo
-spwn agent add neo --tool @spwn/node --skill refactoring
-spwn up --agent neo -w ./my-app
-spwn talk neo "Refactor the auth module to use sessions"
-# neo remembers the codebase next time
-```
-
-<br/>
-
 ## Projects are per-repository
 
 **A spwn project lives in the repo, not in your home directory.**
@@ -179,7 +146,7 @@ workspace: .
 
 world: default
 agents:
-  - default
+  - neo
 ```
 
 **`~/.spwn/` is for your user identity only** — credentials, daemon
@@ -189,7 +156,7 @@ publish`) and `spwn agent get` it in the next project.
 
 <br/>
 
-## How agents work
+## Inside an agent
 
 Each agent is a directory of markdown files — **human-readable, git-friendly, no database**:
 
@@ -204,19 +171,7 @@ spwn/agents/neo/
 └── journal/                  # session history — one file per run
 ```
 
-Agents evolve through three mechanisms:
-
-- **Dream** (`spwn agent dream neo`) — analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
-- **Sleep** (`spwn agent sleep neo`) — graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
-- **Fork** (`spwn agent fork neo neo-v2`) — clone an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
-
-> *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
-
-<br/>
-
-## Agent composition
-
-**Three kinds of blocks: tools, skills, and a profile.** Each block is a file. Stack them into an agent manifest:
+**Three kinds of blocks: tools, skills, and a profile.** Each block is a file. Stack them into `agent.yaml`:
 
 ```yaml
 # spwn/agents/neo/agent.yaml
@@ -238,6 +193,38 @@ skills:
 ```
 
 **If a tool isn't listed, it doesn't exist.** Not forbidden — physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
+
+**Agents evolve through three mechanisms:**
+
+- **Dream** (`spwn agent dream neo`) — analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
+- **Sleep** (`spwn agent sleep neo`) — graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
+- **Fork** (`spwn agent fork neo neo-v2`) — clone an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
+
+> *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
+
+<br/>
+
+## Use cases
+
+**Solo developer** — one agent, one project, persistent memory:
+
+```bash
+spwn init
+spwn agent add neo --tool @spwn/node
+spwn up
+spwn talk neo "Refactor the auth module to use sessions"
+# neo remembers the codebase next time
+```
+
+**Team with a leader** — a lead agent delegates tasks to worker agents via inboxes:
+
+```bash
+spwn agent new morpheus
+spwn agent new trinity
+spwn up --agent morpheus --agent neo --agent trinity
+spwn agent send neo    "Implement Stripe webhooks" --from morpheus
+spwn agent send trinity "Write tests for webhooks"  --from morpheus
+```
 
 <br/>
 

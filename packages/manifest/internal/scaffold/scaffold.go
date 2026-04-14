@@ -50,9 +50,9 @@ func Init(dir string, opts Opts) error {
 	files := []fileSpec{
 		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
 		{"templates/world.yaml.tmpl", "spwn/worlds/default.yaml"},
-		{"templates/agent.yaml.tmpl", "spwn/agents/default/agent.yaml"},
-		{"templates/CLAUDE.md.tmpl", "spwn/agents/default/CLAUDE.md"},
-		{"templates/profile.md.tmpl", "spwn/agents/default/core/profile.md"},
+		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
+		{"templates/CLAUDE.md.tmpl", "spwn/agents/neo/CLAUDE.md"},
+		{"templates/profile.md.tmpl", "spwn/agents/neo/core/profile.md"},
 	}
 	for _, f := range files {
 		if err := writeTemplate(absDir, f.src, f.dst, data); err != nil {
@@ -62,10 +62,10 @@ func Init(dir string, opts Opts) error {
 
 	// Empty layer dirs: preserve them with .gitkeep so git tracks them.
 	layerDirs := []string{
-		"spwn/agents/default/skills",
-		"spwn/agents/default/knowledge",
-		"spwn/agents/default/playbooks",
-		"spwn/agents/default/journal",
+		"spwn/agents/neo/skills",
+		"spwn/agents/neo/knowledge",
+		"spwn/agents/neo/playbooks",
+		"spwn/agents/neo/journal",
 	}
 	for _, rel := range layerDirs {
 		dst := filepath.Join(absDir, rel, ".gitkeep")

@@ -17,13 +17,13 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	required := []string{
 		"spwn.yaml",
 		"spwn/worlds/default.yaml",
-		"spwn/agents/default/agent.yaml",
-		"spwn/agents/default/CLAUDE.md",
-		"spwn/agents/default/core/profile.md",
-		"spwn/agents/default/skills/.gitkeep",
-		"spwn/agents/default/knowledge/.gitkeep",
-		"spwn/agents/default/playbooks/.gitkeep",
-		"spwn/agents/default/journal/.gitkeep",
+		"spwn/agents/neo/agent.yaml",
+		"spwn/agents/neo/CLAUDE.md",
+		"spwn/agents/neo/core/profile.md",
+		"spwn/agents/neo/skills/.gitkeep",
+		"spwn/agents/neo/knowledge/.gitkeep",
+		"spwn/agents/neo/playbooks/.gitkeep",
+		"spwn/agents/neo/journal/.gitkeep",
 		".spwn/state.json",
 		".gitignore",
 	}
@@ -114,11 +114,11 @@ func TestLoad_resolvesRefs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if len(p.Agents) != 1 || p.Agents[0].Name != "default" {
-		t.Fatalf("Agents = %+v, want [default]", p.Agents)
+	if len(p.Agents) != 1 || p.Agents[0].Name != "neo" {
+		t.Fatalf("Agents = %+v, want [neo]", p.Agents)
 	}
 	if !p.Agents[0].Exists {
-		t.Errorf("default agent should exist after Init")
+		t.Errorf("neo agent should exist after Init")
 	}
 	if p.World.Name != "default" {
 		t.Errorf("World.Name = %q, want default", p.World.Name)
@@ -149,7 +149,7 @@ func TestValidate_missingAgentDirIsError(t *testing.T) {
 		t.Fatalf("Init: %v", err)
 	}
 	// Remove the default agent dir to simulate a broken project.
-	if err := os.RemoveAll(filepath.Join(dir, "spwn", "agents", "default")); err != nil {
+	if err := os.RemoveAll(filepath.Join(dir, "spwn", "agents", "neo")); err != nil {
 		t.Fatalf("rm agent dir: %v", err)
 	}
 	p, err := Load(filepath.Join(dir, "spwn.yaml"))
@@ -184,9 +184,9 @@ func TestBuild_flattensProjectIntoArtifact(t *testing.T) {
 		"build.json",
 		"manifest.json",
 		"worlds/default.yaml",
-		"agents/default/agent.yaml",
-		"agents/default/CLAUDE.md",
-		"agents/default/core/profile.md",
+		"agents/neo/agent.yaml",
+		"agents/neo/CLAUDE.md",
+		"agents/neo/core/profile.md",
 	}
 	for _, rel := range expected {
 		if _, err := os.Stat(filepath.Join(buildDir, rel)); err != nil {
@@ -204,8 +204,8 @@ func TestBuild_flattensProjectIntoArtifact(t *testing.T) {
 	if meta.Project != "build-test" {
 		t.Errorf("meta.Project = %q, want build-test", meta.Project)
 	}
-	if len(meta.Agents) != 1 || meta.Agents[0] != "default" {
-		t.Errorf("meta.Agents = %v, want [default]", meta.Agents)
+	if len(meta.Agents) != 1 || meta.Agents[0] != "neo" {
+		t.Errorf("meta.Agents = %v, want [neo]", meta.Agents)
 	}
 	if meta.ContentHash == "" {
 		t.Error("meta.ContentHash should be set")
