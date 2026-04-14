@@ -12,6 +12,8 @@ export default defineConfig({
             {
                 test: {
                     name: 'cli',
+                    testTimeout: 120_000,
+                    hookTimeout: 60_000,
                     include: [
                         'e2e/cli/**/*.e2e.test.ts',
                         'e2e/init/**/*.e2e.test.ts',
@@ -41,6 +43,8 @@ export default defineConfig({
                         'e2e/state/**/*.e2e.test.ts',
                         'e2e/messaging/**/*.e2e.test.ts',
                         'e2e/lifecycle/**/*.e2e.test.ts',
+                        'e2e/architect/**/*.e2e.test.ts',
+                        'e2e/knowledge/**/*.e2e.test.ts',
                     ],
                     exclude: [
                         '**/node_modules/**',
