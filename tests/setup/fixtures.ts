@@ -2,18 +2,20 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 /**
- * Spwn-side shim for per-feature fixture snapshotting.
+ * Spwn-side fixture snapshotting helpers.
  *
- * This is the temporary bridge for stage 2a of the test framework
- * migration. Once `@jterrazz/test` ships `result.stdout.toMatchFixture()`
- * upstream (stage 2b), this file goes away and the tests switch over.
+ * @jterrazz/test now ships StreamAccessor / JsonAccessor with a built-in
+ * .toMatchFixture(), but spwn needs ANSI stripping + temp-path
+ * normalisation BEFORE the comparison runs (the codestyle writer emits
+ * SGR sequences and every spec materialises in a fresh temp dir whose
+ * absolute path leaks into output). These helpers wrap the raw text
+ * with the spwn-specific transforms, then delegate to the upstream
+ * file-snapshot semantics — same `JTERRAZZ_TEST_UPDATE=1` contract.
  *
  * Convention:
  *   tests/e2e/cli/<feature>/<feature>.e2e.test.ts
  *   tests/e2e/cli/<feature>/expected/stdout/<name>.txt
  *   tests/e2e/cli/<feature>/expected/json/<name>.json
- *
- * Set `JTERRAZZ_TEST_UPDATE=1` to (re)write fixtures instead of diffing.
  */
 
 const UPDATE = process.env.JTERRAZZ_TEST_UPDATE === '1';
@@ -73,11 +75,25 @@ export interface StdoutMatcher {
     toMatchFixture(name: string): Promise<void>;
 }
 
-export function stdoutMatcher(testFilePath: string, actual: string): StdoutMatcher {
+/** Read text from either a raw string or a `@jterrazz/test` accessor. */
+function asText(actual: string | { text: string } | { toString(): string }): string {
+    if (typeof actual === 'string') {
+        return actual;
+    }
+    if ('text' in actual && typeof actual.text === 'string') {
+        return actual.text;
+    }
+    return actual.toString();
+}
+
+export function stdoutMatcher(
+    testFilePath: string,
+    actual: string | { text: string },
+): StdoutMatcher {
     return {
         async toMatchFixture(name: string) {
             const path = resolveFixture(testFilePath, 'stdout', name, 'txt');
-            const normalised = normalise(actual);
+            const normalised = normalise(asText(actual));
             if (UPDATE || !existsSync(path)) {
                 writeFixture(path, normalised);
                 return;
@@ -99,11 +115,11 @@ export interface JsonMatcher {
     toMatchFixture(name: string): Promise<void>;
 }
 
-export function jsonMatcher(testFilePath: string, actual: string): JsonMatcher {
+export function jsonMatcher(testFilePath: string, actual: string | { text: string }): JsonMatcher {
     return {
         async toMatchFixture(name: string) {
             const path = resolveFixture(testFilePath, 'json', name, 'json');
-            const parsed = JSON.parse(actual);
+            const parsed = JSON.parse(asText(actual));
             const formatted = `${JSON.stringify(parsed, null, 4)}\n`;
             if (UPDATE || !existsSync(path)) {
                 writeFixture(path, formatted);

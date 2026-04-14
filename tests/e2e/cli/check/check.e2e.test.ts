@@ -60,13 +60,37 @@ describe('spwn check', () => {
         await stdoutMatcher(TEST_FILE, result.stdout).toMatchFixture('registry-not-supported');
     });
 
+    test('seed overlay flags the one-agent-one-world rule', async () => {
+        // Given - single-agent base + a seed fragment that adds a second
+        // World claiming the same neo agent. The framework's seed handler
+        // Merges the YAML fragment into spwn.yaml inside the temp project.
+        const result = await spec('one-agent-one-world')
+            .project('single-agent')
+            .seed('spwn.yaml/two-worlds-same-agent.yaml')
+            .exec('check')
+            .run();
+
+        // Then - check fails with the rule violation, and the second
+        // World is genuinely present in spwn.yaml on disk (proves the
+        // Seed handler ran).
+        expect(result.exitCode).not.toBe(0);
+        expect(result.file('spwn.yaml').content).toContain('duplicate:');
+        const combined = result.stdout.text + result.stderr.text;
+        // The rule fires with "agent X already deployed by world Y" — the
+        // Exact wording lives in the validator. We assert on intent, not
+        // Wording, by also checking the manifest path the violation
+        // Points at.
+        expect(combined).toContain('already deployed by world "duplicate"');
+        expect(combined).toContain('spwn.yaml#worlds.neo.agents');
+    });
+
     test('errors when run outside a spwn project', async () => {
         // Given - the empty fixture has no spwn.yaml anywhere up the tree
         const result = await spec('check no project').project('empty').exec('check').run();
 
         // Then - exits non-zero and nudges the user at spwn init
         expect(result.exitCode).not.toBe(0);
-        const combined = (result.stdout + result.stderr).toLowerCase();
+        const combined = (result.stdout.text + result.stderr.text).toLowerCase();
         expect(combined).toContain('spwn init');
         expect(combined).toContain('spwn.yaml');
     });

@@ -14,10 +14,13 @@
         "test:ui:headed": "npx playwright test --config ui/playwright.config.ts --headed",
         "test:ui:debug": "npx playwright test --config ui/playwright.config.ts --debug"
     },
+    "dependencies": {
+        "yaml": "^2.8.3"
+    },
     "devDependencies": {
         "@hono/node-server": "^1.0.0",
         "@jterrazz/codestyle": "^3.0.9",
-        "@jterrazz/test": "latest",
+        "@jterrazz/test": "link:../../../jterrazz/package-test",
         "@jterrazz/typescript": "^5.3.0",
         "@playwright/test": "^1.59.1",
         "@types/node": "^25.5.0",
