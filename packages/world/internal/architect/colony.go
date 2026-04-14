@@ -9,7 +9,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/world/internal/manifest"
 	"spwn.sh/packages/world/internal/models"
-	"spwn.sh/packages/world/internal/physics"
+	"spwn.sh/packages/world/internal/worldfiles"
 	"spwn.sh/packages/ids"
 )
 
@@ -111,7 +111,7 @@ func regenRoster(worldID string, a *Architect) error {
 		return fmt.Errorf("world %s not found", worldID)
 	}
 	worldStateDir := worldStateDirFor(worldID)
-	roster := physics.GenerateRoster(worldID, rosterColony(current.Agents))
+	roster := worldfiles.GenerateRoster(worldID, rosterColony(current.Agents))
 	return os.WriteFile(filepath.Join(worldStateDir, "roster.md"), []byte(roster), 0o644)
 }
 

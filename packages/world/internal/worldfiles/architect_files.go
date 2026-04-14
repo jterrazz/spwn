@@ -1,4 +1,4 @@
-package physics
+package worldfiles
 
 // Architect-specific system files written into the architect container at build time.
 // These are the files from platform/system/architect/ that the Dockerfile.architect
