@@ -55,6 +55,23 @@ describe('CLI stress tests', () => {
         result.stderr.toContain('rapid');
     });
 
+    test('spwn up refuses to run when another up is holding the lock', async () => {
+        // Given - a stale per-world lockfile already present in .spwn/ (simulates a concurrent `spwn up` that has not yet released).
+        // When - we run `spwn up neo`.
+        // Then - exit non-zero with an "Up in progress" message and no container is created.
+        await using result = await spec('up lock held')
+            .project('docker-pilot')
+            .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
+            .seed('lock/.up.neo.lock')
+            .exec('up neo')
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toContain('Up in progress');
+        // And - no neo container was created under this test run label.
+        expect(result.container('neo').exists).toBe(false);
+    });
+
     test('rapid sequential create/rm cycles do not corrupt state', async () => {
         // Given - a chain of 5 create/rm pairs followed by agent ls
         const steps: string[] = ['init'];

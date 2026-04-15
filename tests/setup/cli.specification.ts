@@ -136,6 +136,18 @@ const seedHandlers = {
         mkdirSync(dirname(targetPath), { recursive: true });
         writeFileSync(targetPath, lines, { flag: 'a' });
     },
+    'lock/': (ctx: SeedHandlerContext, fragmentPath: string) => {
+        // Route `.seed('lock/.up.neo.lock')` into `.spwn/.up.neo.lock` so tests can exercise the per-world up-lock without needing real concurrency. Strip everything up to the last `lock/` segment to mirror how the `agent/` handler works.
+        const segments = fragmentPath.split('/seeds/lock/');
+        const rel = segments[1];
+        if (!rel) {
+            throw new Error(`unexpected seed path shape: ${fragmentPath}`);
+        }
+        const targetPath = join(ctx.cwd, '.spwn', rel);
+        mkdirSync(dirname(targetPath), { recursive: true });
+        const data = readFileSync(fragmentPath);
+        writeFileSync(targetPath, data);
+    },
 };
 
 /**
