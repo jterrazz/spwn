@@ -21,7 +21,7 @@ func TestArchitectMode_BlockedCommands(t *testing.T) {
 func TestArchitectMode_AllowedCommands(t *testing.T) {
 	t.Setenv("SPWN_ARCHITECT_MODE", "1")
 
-	for _, cmd := range []string{"world", "agent", "architect", "tool"} {
+	for _, cmd := range []string{"world", "agent", "architect", "package"} {
 		_, _, err := executeCommand(cmd, "--help")
 		if err != nil {
 			t.Errorf("expected %q to be allowed in Architect mode, got: %s", cmd, err)

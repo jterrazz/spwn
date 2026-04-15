@@ -8,19 +8,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// AgentManifest declares an agent's composition - the stacked blocks
-// (tools, skills, profile) plus runtime configuration.
+// AgentManifest declares an agent's composition — the flat package
+// dependency list plus runtime configuration.
 //
 // Stored in ~/.spwn/agents/{name}/agent.yaml. Optional: if agent.yaml
-// doesn't exist, the agent directory is used as-is with built-in defaults.
+// doesn't exist, the agent directory is used as-is with built-in
+// defaults.
 type AgentManifest struct {
-	Name    string        `yaml:"name,omitempty"`
-	Role    string        `yaml:"role,omitempty"`    // "chief", "manager", or "worker" (default: "worker")
-	Team    string        `yaml:"team,omitempty"`    // team slug (references ~/.spwn/teams/{slug}.yaml)
-	Runtime RuntimeConfig `yaml:"runtime,omitempty"` // optional runtime override
-	Tools   []string      `yaml:"tools,omitempty"`   // tool packs attached to the agent
-	Plugins []string      `yaml:"plugins,omitempty"` // plugin packs (runtime-targeted tools)
-	Skills  []string      `yaml:"skills,omitempty"`  // skill files attached to the agent
+	Name     string        `yaml:"name,omitempty"`
+	Role     string        `yaml:"role,omitempty"`    // "chief", "manager", or "worker" (default: "worker")
+	Team     string        `yaml:"team,omitempty"`    // team slug (references ~/.spwn/teams/{slug}.yaml)
+	Runtime  RuntimeConfig `yaml:"runtime,omitempty"` // optional runtime override
+	Packages []string      `yaml:"packages,omitempty"` // package refs attached to the agent
 }
 
 // RuntimeConfig allows per-agent runtime override.

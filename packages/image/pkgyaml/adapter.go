@@ -1,4 +1,4 @@
-package toolyaml
+package pkgyaml
 
 import (
 	"io/fs"
@@ -57,16 +57,9 @@ func (t *toolImpl) Verify() []string { return t.schema.Verify }
 // or nil when the directory is absent.
 func (t *toolImpl) Skills() fs.FS { return t.skillsFS }
 
-// Runtimes satisfies the image.Plugin interface. Returns nil when the
-// manifest has no `plugin:` block, which collapses the type assertion
-// `_, ok := t.(ib.Plugin)` to "not a plugin" in the caller's eye.
-//
-// Note: because every *toolImpl has this method, every toolImpl
-// technically satisfies image.Plugin at the type system level. Call
-// sites that want to distinguish "plugin" from "plain tool" should
-// check `len(Runtimes()) > 0` rather than relying on a type assertion.
-// image.PluginRuntimes already does this check internally so most
-// call sites are fine.
+// Runtimes returns the runtime backends this package targets for
+// plugin-config injection. Returns nil when the manifest has no
+// `plugin:` block, which the spawn-time merger reads as "not a plugin."
 func (t *toolImpl) Runtimes() []string {
 	if t.schema.Plugin == nil {
 		return nil
@@ -74,9 +67,9 @@ func (t *toolImpl) Runtimes() []string {
 	return t.schema.Plugin.Runtimes
 }
 
-// Config satisfies image.Plugin. Returns the JSON bytes for the
-// requested runtime's config snippet, or nil when this tool is not a
-// plugin or has no config for that runtime.
+// Config returns the JSON bytes for the requested runtime's config
+// snippet, or nil when this package has no plugin block or no config
+// for that runtime.
 func (t *toolImpl) Config(runtime string) []byte {
 	if t.schema.Plugin == nil {
 		return nil

@@ -8,14 +8,12 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+
 	"spwn.sh/packages/agent"
 )
 
 // ── test helpers ────────────────────────────────────────────────────────────
 
-// newComposeCmd returns a cobra.Command set up with the persistent flags
-// that newStepper() expects. It captures stdout/stderr into buffers so tests
-// can assert on command output.
 func newComposeCmd() (*cobra.Command, *bytes.Buffer) {
 	out := new(bytes.Buffer)
 	cmd := &cobra.Command{Use: "test"}
@@ -24,8 +22,6 @@ func newComposeCmd() (*cobra.Command, *bytes.Buffer) {
 	return cmd, out
 }
 
-// scaffoldAgent creates a minimal agent directory that passes ValidateMind.
-// Returns the temp SPWN_HOME so tests can inspect files under it.
 func scaffoldAgent(t *testing.T, name string) string {
 	t.Helper()
 	tmp := t.TempDir()
@@ -38,12 +34,11 @@ func scaffoldAgent(t *testing.T, name string) string {
 	return tmp
 }
 
-// resetComposeFlags clears the package-level compose flag state between runs.
-// Cobra stores flag values in package-level vars, so tests that run
-// sequentially leak state without this reset.
+// resetComposeFlags clears the package-level compose flag state between
+// runs. Cobra stores flag values in package-level vars, so tests that
+// run sequentially leak state without this reset.
 func resetComposeFlags() {
-	composeTools = nil
-	composeSkills = nil
+	composePackages = nil
 }
 
 // ── agent add ──────────────────────────────────────────────────────────────
@@ -66,7 +61,7 @@ func TestAgentAdd_AgentNotFound(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 	resetComposeFlags()
-	composeTools = []string{"@spwn/python"}
+	composePackages = []string{"@spwn/python"}
 
 	cmd, _ := newComposeCmd()
 	err := addCmd.RunE(cmd, []string{"ghost"})
@@ -75,10 +70,10 @@ func TestAgentAdd_AgentNotFound(t *testing.T) {
 	}
 }
 
-func TestAgentAdd_SingleTool(t *testing.T) {
+func TestAgentAdd_SinglePackage(t *testing.T) {
 	scaffoldAgent(t, "neo")
 	resetComposeFlags()
-	composeTools = []string{"@spwn/python"}
+	composePackages = []string{"@spwn/python"}
 
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
@@ -89,16 +84,15 @@ func TestAgentAdd_SingleTool(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	if len(m.Tools) != 1 || m.Tools[0] != "@spwn/python" {
-		t.Errorf("Tools = %v, want [@spwn/python]", m.Tools)
+	if len(m.Packages) != 1 || m.Packages[0] != "@spwn/python" {
+		t.Errorf("Packages = %v, want [@spwn/python]", m.Packages)
 	}
 }
 
-func TestAgentAdd_MultipleToolsAndSkills(t *testing.T) {
+func TestAgentAdd_MultiplePackages(t *testing.T) {
 	scaffoldAgent(t, "neo")
 	resetComposeFlags()
-	composeTools = []string{"@spwn/unix", "@spwn/python", "@spwn/git"}
-	composeSkills = []string{"refactoring", "paper-reading"}
+	composePackages = []string{"@spwn/unix", "@spwn/python", "@spwn/git"}
 
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
@@ -106,36 +100,31 @@ func TestAgentAdd_MultipleToolsAndSkills(t *testing.T) {
 	}
 
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Tools) != 3 {
-		t.Errorf("expected 3 tools, got %d: %v", len(m.Tools), m.Tools)
-	}
-	if len(m.Skills) != 2 {
-		t.Errorf("expected 2 skills, got %d: %v", len(m.Skills), m.Skills)
+	if len(m.Packages) != 3 {
+		t.Errorf("expected 3 packages, got %d: %v", len(m.Packages), m.Packages)
 	}
 }
 
 func TestAgentAdd_Idempotent(t *testing.T) {
 	scaffoldAgent(t, "neo")
 
-	// First add.
 	resetComposeFlags()
-	composeTools = []string{"@spwn/python"}
+	composePackages = []string{"@spwn/python"}
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
 	}
 
-	// Second add with the same tool - should not duplicate.
 	resetComposeFlags()
-	composeTools = []string{"@spwn/python"}
+	composePackages = []string{"@spwn/python"}
 	cmd, _ = newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
 	}
 
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Tools) != 1 {
-		t.Errorf("expected 1 tool (idempotent), got %d: %v", len(m.Tools), m.Tools)
+	if len(m.Packages) != 1 {
+		t.Errorf("expected 1 package (idempotent), got %d: %v", len(m.Packages), m.Packages)
 	}
 }
 
@@ -155,77 +144,51 @@ func TestAgentRemove_NoFlagsReturnsError(t *testing.T) {
 	}
 }
 
-func TestAgentRemove_Tool(t *testing.T) {
+func TestAgentRemove_Package(t *testing.T) {
 	scaffoldAgent(t, "neo")
 
-	// Seed with two tools.
-	agent.AddTool("neo", "@spwn/unix")
-	agent.AddTool("neo", "@spwn/python")
+	agent.AddPackage("neo", "@spwn/unix")
+	agent.AddPackage("neo", "@spwn/python")
 
-	// Remove one.
 	resetComposeFlags()
-	composeTools = []string{"@spwn/unix"}
+	composePackages = []string{"@spwn/unix"}
 	cmd, _ := newComposeCmd()
 	if err := removeCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
 	}
 
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Tools) != 1 || m.Tools[0] != "@spwn/python" {
-		t.Errorf("Tools = %v, want [@spwn/python]", m.Tools)
+	if len(m.Packages) != 1 || m.Packages[0] != "@spwn/python" {
+		t.Errorf("Packages = %v, want [@spwn/python]", m.Packages)
 	}
 }
 
-func TestAgentRemove_Skill(t *testing.T) {
+func TestAgentRemove_AbsentPackageErrors(t *testing.T) {
 	scaffoldAgent(t, "neo")
-	agent.AddSkill("neo", "refactoring")
-	agent.AddSkill("neo", "paper-reading")
+	agent.AddPackage("neo", "@spwn/python")
 
 	resetComposeFlags()
-	composeSkills = []string{"paper-reading"}
+	composePackages = []string{"@spwn/never-added"}
 	cmd, _ := newComposeCmd()
-	if err := removeCmd.RunE(cmd, []string{"neo"}); err != nil {
-		t.Fatal(err)
-	}
-
-	m, _ := agent.LoadManifest("neo")
-	if len(m.Skills) != 1 || m.Skills[0] != "refactoring" {
-		t.Errorf("Skills = %v, want [refactoring]", m.Skills)
-	}
-}
-
-func TestAgentRemove_AbsentToolErrors(t *testing.T) {
-	scaffoldAgent(t, "neo")
-	agent.AddTool("neo", "@spwn/python")
-
-	resetComposeFlags()
-	composeTools = []string{"@spwn/never-added"}
-	cmd, _ := newComposeCmd()
-	// Removing an absent block must error so scripts can distinguish
+	// Removing an absent package must error so scripts can distinguish
 	// "I removed it" from "it was never there" — the previous
 	// silent-success behaviour was QA finding #13.
 	if err := removeCmd.RunE(cmd, []string{"neo"}); err == nil {
-		t.Fatal("remove absent tool should return an error, got nil")
+		t.Fatal("remove absent package should return an error, got nil")
 	}
 
 	// Manifest must stay untouched when the preflight rejects.
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Tools) != 1 || m.Tools[0] != "@spwn/python" {
-		t.Errorf("Tools = %v, want [@spwn/python] (unchanged)", m.Tools)
+	if len(m.Packages) != 1 || m.Packages[0] != "@spwn/python" {
+		t.Errorf("Packages = %v, want [@spwn/python] (unchanged)", m.Packages)
 	}
 }
 
 // ── publish / pull stubs ─────────────────────────────────────────────────────
-//
-// These are stubs until the registry ships - we just verify they don't
-// blow up and print a "not yet implemented" placeholder.
 
 func TestAgentPublish_Stub(t *testing.T) {
 	cmd, _ := newComposeCmd()
 	err := publishCmd.RunE(cmd, []string{"neo"})
-	// publish is a planned/unimplemented feature — expect an error
-	// that carries exit code 2 so CI scripts can distinguish
-	// "feature unavailable" from a runtime failure.
 	if err == nil {
 		t.Fatal("publish stub should return a not-implemented error")
 	}

@@ -8,9 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/catalog/packages"
 	"spwn.sh/packages/agent"
-	"spwn.sh/catalog/plugins"
-	"spwn.sh/catalog/tools"
 )
 
 // ── agent add / remove ─────────────────────────────────────────────────────
@@ -18,21 +17,15 @@ import (
 // Composition commands for attaching reusable blocks (tools, skills) to an
 // agent. These edit ~/.spwn/agents/<name>/agent.yaml directly.
 
-var (
-	composeTools   []string
-	composePlugins []string
-	composeSkills  []string
-)
+var composePackages []string
 
 func init() {
-	addCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to add (repeatable, e.g. @spwn/python)")
-	addCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin pack to add (repeatable, e.g. @spwn/mempalace)")
-	addCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to add (repeatable)")
+	addCmd.Flags().StringArrayVar(&composePackages, "package", nil, "Package ref to add (repeatable, e.g. @spwn/python)")
+	addCmd.Flags().StringArrayVar(&composePackages, "pkg", nil, "Short alias for --package")
 	Cmd.AddCommand(addCmd)
 
-	removeCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to remove (repeatable)")
-	removeCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin pack to remove (repeatable)")
-	removeCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to remove (repeatable)")
+	removeCmd.Flags().StringArrayVar(&composePackages, "package", nil, "Package ref to remove (repeatable)")
+	removeCmd.Flags().StringArrayVar(&composePackages, "pkg", nil, "Short alias for --package")
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
@@ -41,39 +34,31 @@ func init() {
 
 var addCmd = &cobra.Command{
 	Use:   "add <agent-name>",
-	Short: "Add tools or skills to an agent",
+	Short: "Add packages to an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Compose an agent by attaching reusable blocks.
+	Long: `Compose an agent by attaching packages.
 
 Examples:
-  spwn agent add neo --tool @spwn/python
-  spwn agent add neo --plugin @spwn/mempalace
-  spwn agent add neo --skill paper-reading --skill refactoring
-  spwn agent add neo --tool @spwn/unix --tool @spwn/git`,
+  spwn agent add neo --package @spwn/python
+  spwn agent add neo --pkg @spwn/mempalace
+  spwn agent add neo --package @spwn/unix --package @spwn/git`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 {
-			return fmt.Errorf("nothing to add.\nPass at least one of --tool, --plugin, or --skill")
+		if len(composePackages) == 0 {
+			return fmt.Errorf("nothing to add.\nPass at least one --package (or --pkg)")
 		}
 
-		// Verify the agent exists before touching the manifest.
 		if err := agent.ValidateMind(name); err != nil {
 			return err
 		}
 
-		// Pre-flight every --tool / --plugin ref against the catalog
-		// so we never write an unknown pack to agent.yaml — otherwise
-		// `agent add` silently breaks `spwn check` with a cryptic
-		// "tool does not exist" (Finding #12). Symmetric with the
-		// preflight on `agent remove`.
-		for _, t := range composeTools {
-			if !knownComposeRef(t) {
-				return unknownComposeRefError("tool", t)
-			}
-		}
-		for _, p := range composePlugins {
-			if !knownComposeRef(p) {
-				return unknownComposeRefError("plugin", p)
+		// Pre-flight every catalog ref against the catalog so we never
+		// write an unknown package to agent.yaml. Bare-name local refs
+		// are skipped here — they resolve against the project tree at
+		// build time, not the catalog.
+		for _, p := range composePackages {
+			if strings.HasPrefix(p, "@") && !knownComposeRef(p) {
+				return unknownComposeRefError("package", p)
 			}
 		}
 
@@ -81,23 +66,11 @@ Examples:
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, t := range composeTools {
-			if err := agent.AddTool(name, t); err != nil {
-				return fmt.Errorf("add tool %q: %w", t, err)
+		for _, p := range composePackages {
+			if err := agent.AddPackage(name, p); err != nil {
+				return fmt.Errorf("add package %q: %w", p, err)
 			}
-			s.Done("+ tool", t)
-		}
-		for _, p := range composePlugins {
-			if err := agent.AddPlugin(name, p); err != nil {
-				return fmt.Errorf("add plugin %q: %w", p, err)
-			}
-			s.Done("+ plugin", p)
-		}
-		for _, sk := range composeSkills {
-			if err := agent.AddSkill(name, sk); err != nil {
-				return fmt.Errorf("add skill %q: %w", sk, err)
-			}
-			s.Done("+ skill", sk)
+			s.Done("+ package", p)
 		}
 
 		s.Blank()
@@ -109,31 +82,29 @@ Examples:
 
 var removeCmd = &cobra.Command{
 	Use:   "remove <agent-name>",
-	Short: "Remove tools or skills from an agent",
+	Short: "Remove packages from an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Remove composable blocks from an agent's composition.
+	Long: `Remove packages from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent remove <name> --tool X' removes just that block.
+'spwn agent remove <name> --package X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --tool @spwn/python
-  spwn agent remove neo --plugin @spwn/mempalace
-  spwn agent remove neo --skill paper-reading`,
+  spwn agent remove neo --package @spwn/python
+  spwn agent remove neo --pkg @spwn/mempalace`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 {
-			return fmt.Errorf("nothing to remove.\nPass at least one of --tool, --plugin, or --skill")
+		if len(composePackages) == 0 {
+			return fmt.Errorf("nothing to remove.\nPass at least one --package (or --pkg)")
 		}
 
 		if err := agent.ValidateMind(name); err != nil {
 			return err
 		}
 
-		// Load the manifest once so we can pre-flight every requested
-		// removal: if the user passes a tool / plugin / skill that
-		// isn't actually attached, we refuse instead of printing a
-		// misleading green checkmark on a no-op.
+		// Preflight: every ref must currently be attached, otherwise
+		// the removal silently no-ops and the user doesn't notice the
+		// typo.
 		preflight, err := agent.LoadManifest(name)
 		if err != nil {
 			return fmt.Errorf("load manifest: %w", err)
@@ -146,19 +117,9 @@ Examples:
 			}
 			return false
 		}
-		for _, t := range composeTools {
-			if !hasString(preflight.Tools, t) {
-				return fmt.Errorf("tool %q is not attached to agent %q — nothing to remove", t, name)
-			}
-		}
-		for _, p := range composePlugins {
-			if !hasString(preflight.Plugins, p) {
-				return fmt.Errorf("plugin %q is not attached to agent %q — nothing to remove", p, name)
-			}
-		}
-		for _, sk := range composeSkills {
-			if !hasString(preflight.Skills, sk) {
-				return fmt.Errorf("skill %q is not attached to agent %q — nothing to remove", sk, name)
+		for _, p := range composePackages {
+			if !hasString(preflight.Packages, p) {
+				return fmt.Errorf("package %q is not attached to agent %q — nothing to remove", p, name)
 			}
 		}
 
@@ -166,23 +127,11 @@ Examples:
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, t := range composeTools {
-			if err := agent.RemoveTool(name, t); err != nil {
-				return fmt.Errorf("remove tool %q: %w", t, err)
+		for _, p := range composePackages {
+			if err := agent.RemovePackage(name, p); err != nil {
+				return fmt.Errorf("remove package %q: %w", p, err)
 			}
-			s.Done("- tool", t)
-		}
-		for _, p := range composePlugins {
-			if err := agent.RemovePlugin(name, p); err != nil {
-				return fmt.Errorf("remove plugin %q: %w", p, err)
-			}
-			s.Done("- plugin", p)
-		}
-		for _, sk := range composeSkills {
-			if err := agent.RemoveSkill(name, sk); err != nil {
-				return fmt.Errorf("remove skill %q: %w", sk, err)
-			}
-			s.Done("- skill", sk)
+			s.Done("- package", p)
 		}
 		s.Blank()
 		s.Success("Composition updated.")
@@ -257,18 +206,13 @@ func (e *notImplementedError) Error() string {
 func (e *notImplementedError) ExitCode() int { return 2 }
 
 // knownComposeRef reports whether the given @scope/name[@version]
-// reference matches a built-in tool or plugin in the catalog. Used
-// by `agent add` to preflight --tool and --plugin refs before they
+// reference matches a built-in package in the catalog. Used by
+// `agent add` to preflight --tool and --plugin refs before they
 // hit agent.yaml.
 func knownComposeRef(ref string) bool {
 	pack := stripVersion(ref)
-	for _, t := range tools.All {
+	for _, t := range pkg.All {
 		if t.Name() == pack {
-			return true
-		}
-	}
-	for _, p := range plugins.All {
-		if p.Name() == pack {
 			return true
 		}
 	}
@@ -298,12 +242,9 @@ func stripVersion(ref string) string {
 // not know about. The "known:" list mirrors what `spwn check` shows
 // so the two commands never disagree.
 func unknownComposeRefError(kind, ref string) error {
-	known := make([]string, 0, len(tools.All)+len(plugins.All))
-	for _, t := range tools.All {
+	known := make([]string, 0, len(pkg.All))
+	for _, t := range pkg.All {
 		known = append(known, t.Name())
-	}
-	for _, p := range plugins.All {
-		known = append(known, p.Name())
 	}
 	sort.Strings(known)
 	return fmt.Errorf("%s %q does not exist.\nknown: %s",

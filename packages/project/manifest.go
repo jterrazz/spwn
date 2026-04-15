@@ -194,14 +194,10 @@ func IsValidProjectName(name string) bool {
 // should populate this from catalog/tools + catalog/runtimes for the
 // richest error messages, including "did you mean X?" hints.
 type ValidateOpts struct {
-	// BuiltinTools is the authoritative list of @scope/name tool
-	// identifiers the host knows how to build. When empty, tool
+	// BuiltinTools is the authoritative list of @scope/name package
+	// identifiers the host knows how to build. When empty, package
 	// existence falls back to a simple @spwn/* prefix heuristic.
 	BuiltinTools []string
-
-	// BuiltinSkills is the authoritative list of @scope/name skill
-	// identifiers shipped with spwn. Empty today — reserved.
-	BuiltinSkills []string
 
 	// SupportedRuntimes is the list of runtime identifiers the host
 	// can actually spawn (e.g. "@spwn/claude-code"). When empty,
@@ -225,7 +221,6 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 		Root:              p.Root,
 		Manifest:          p.Manifest,
 		BuiltinTools:      o.BuiltinTools,
-		BuiltinSkills:     o.BuiltinSkills,
 		SupportedRuntimes: o.SupportedRuntimes,
 	}
 	for _, a := range p.Agents {

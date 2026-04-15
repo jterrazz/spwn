@@ -8,7 +8,7 @@
 // sync, default config materialisation, prelaunch shell) declare a
 // `runtime-provider:` in their manifest and register the Go impl
 // via packages/world/internal/runtime/providers.
-package tools
+package pkg
 
 import (
 	"fmt"

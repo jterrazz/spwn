@@ -3,30 +3,25 @@
 // (claude-code, codex, ...) — as distinct from tools, which are the
 // things an agent reaches for while thinking.
 //
-// Every runtime lives as a YAML manifest under
-// catalog/runtimes/<name>/spwn-tool.yaml and is picked up automatically
-// by loadYAMLRuntimes. Runtimes that need host-side spawn-time
-// behavior (credential sync, default config files, prelaunch shell)
-// declare `runtime-provider: <name>` in their manifest; the spawn
-// pipeline looks up the Go impl by that name via
-// packages/world/internal/runtime.Get.
+// Runtimes stay in Go (unlike tools, which live as package.yaml) because
+// they carry non-trivial spawn-time behavior — credential sync, default
+// config materialisation, prelaunch shell, authentication flows — that
+// declarative YAML can't express cleanly.
 package runtimes
 
 import (
 	"fmt"
 
+	"spwn.sh/catalog/runtimes/claude_code"
+	"spwn.sh/catalog/runtimes/codex"
 	ib "spwn.sh/packages/image"
 )
 
-// All is populated at package init from every YAML-backed runtime.
-var All []ib.Tool
-
-func init() {
-	yaml, err := loadYAMLRuntimes()
-	if err != nil {
-		panic(fmt.Errorf("catalog: load yaml runtimes: %w", err))
-	}
-	All = yaml
+// All is the list of every built-in runtime. Adding a new runtime?
+// Import it and append.
+var All = []ib.Tool{
+	claude_code.Tool,
+	codex.Tool,
 }
 
 // RegisterDefaults registers all built-in runtimes into the given registry.

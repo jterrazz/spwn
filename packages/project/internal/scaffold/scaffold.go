@@ -95,9 +95,7 @@ func Init(dir string, opts Opts) error {
 	// any brand-new project.
 	initialLock := lockfile.Empty()
 	for _, ref := range []string{"@spwn/unix", "@spwn/git", "@spwn/python"} {
-		initialLock.Add(lockfile.KindTool, ref, lockfile.Entry{
-			Source: lockfile.SourceBuiltin,
-		})
+		initialLock.Add(ref, lockfile.Entry{Source: lockfile.SourceBuiltin})
 	}
 	if err := lockfile.Save(absDir, initialLock); err != nil {
 		return fmt.Errorf("seed lockfile: %w", err)

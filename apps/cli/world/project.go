@@ -81,7 +81,7 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		toolSet[t] = struct{}{}
 		tools = append(tools, t)
 	}
-	for _, t := range w.Tools {
+	for _, t := range w.Packages {
 		add(t)
 	}
 	// p.Agents is the deployable set. We only want the subset referenced
@@ -102,12 +102,12 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		if err != nil || am == nil {
 			continue
 		}
-		for _, t := range am.Tools {
+		for _, t := range am.Packages {
 			add(t)
 		}
 	}
 
-	m := world.Manifest{Tools: tools}
+	m := world.Manifest{Packages: tools}
 
 	return &projectWorld{
 		Project:    p,

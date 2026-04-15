@@ -13,7 +13,7 @@ import (
 
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
-	Tools yaml.Node `yaml:"tools"`
+	Packages yaml.Node `yaml:"packages"`
 }
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
@@ -36,17 +36,17 @@ func LoadPath(path string) (models.Manifest, error) {
 
 	m := models.Manifest{}
 
-	// Parse tools (plain list of strings, root-level)
-	if raw.Tools.Kind == yaml.SequenceNode {
-		m.Tools = parseTools(&raw.Tools)
+	// Parse packages (plain list of strings, root-level)
+	if raw.Packages.Kind == yaml.SequenceNode {
+		m.Packages = parsePackages(&raw.Packages)
 	}
 
 	ApplyDefaults(&m)
 	return m, nil
 }
 
-// parseTools extracts tool names from a YAML sequence node.
-func parseTools(node *yaml.Node) []string {
+// parsePackages extracts package refs from a YAML sequence node.
+func parsePackages(node *yaml.Node) []string {
 	var elems []string
 	for _, item := range node.Content {
 		if item.Kind == yaml.ScalarNode {

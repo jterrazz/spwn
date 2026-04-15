@@ -12,7 +12,7 @@ import (
 	ib "spwn.sh/packages/image"
 )
 
-// localToolYAML is the schema for spwn/tools/<name>/spwn-tool.yaml —
+// localToolYAML is the schema for spwn/tools/<name>/package.yaml —
 // the manifest for a project-local tool pack. Kept intentionally
 // small so authoring a local tool is "fill in three keys". Unknown
 // fields are ignored for forwards compatibility.
@@ -29,7 +29,7 @@ type localToolYAML struct {
 }
 
 // localTool is the image.Tool adapter for a project-local pack. It's
-// backed by the parsed spwn-tool.yaml plus an optional skills/ dir
+// backed by the parsed package.yaml plus an optional skills/ dir
 // exposed through Skills(). Name() returns the "local:<basename>"
 // form so the synthetic entry doesn't collide with any future
 // @spwn/<name> promotion.
@@ -42,15 +42,23 @@ type localTool struct {
 	skillsFS fs.FS
 }
 
-func (t *localTool) Name() string         { return t.name }
-func (t *localTool) Kind() ib.Kind        { return ib.KindTool }
-func (t *localTool) Version() string      { return t.version }
+func (t *localTool) Name() string          { return t.name }
+func (t *localTool) Kind() ib.Kind         { return ib.KindTool }
+func (t *localTool) Version() string       { return t.version }
 func (t *localTool) Dependencies() []string { return t.deps }
 func (t *localTool) Install() ib.InstallSpec { return t.spec }
-func (t *localTool) Verify() []string     { return t.verify }
-func (t *localTool) Skills() fs.FS        { return t.skillsFS }
+func (t *localTool) Verify() []string      { return t.verify }
+func (t *localTool) Skills() fs.FS         { return t.skillsFS }
 
-// loadLocalTool parses spwn/tools/<name>/spwn-tool.yaml and produces
+// Runtimes and Config satisfy the image.Tool interface for the
+// plugin-config pathway. Local packages don't currently declare a
+// plugin: section in spwn-tool.yaml (no schema for it yet in the
+// local loader) so they always return nil, which the spawn-time
+// merger correctly ignores.
+func (t *localTool) Runtimes() []string         { return nil }
+func (t *localTool) Config(runtime string) []byte { return nil }
+
+// loadLocalTool parses spwn/tools/<name>/package.yaml and produces
 // an image.Tool. Missing manifest is a crisp authoring error — we
 // don't silently accept empty directories, since an empty local tool
 // would render to nothing and the user would spend an afternoon
@@ -65,11 +73,11 @@ func loadLocalTool(projectRoot, name string) (ib.Tool, error) {
 		return nil, fmt.Errorf("local tool %q: %s is not a directory", name, toolDir)
 	}
 
-	manifestPath := filepath.Join(toolDir, "spwn-tool.yaml")
+	manifestPath := filepath.Join(toolDir, "package.yaml")
 	data, err := os.ReadFile(manifestPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("local tool %q: missing spwn-tool.yaml at %s\n"+
+			return nil, fmt.Errorf("local tool %q: missing package.yaml at %s\n"+
 				"  Create one with at least `name:` and `commands:` or `packages:`.",
 				name, manifestPath)
 		}
@@ -78,7 +86,7 @@ func loadLocalTool(projectRoot, name string) (ib.Tool, error) {
 
 	var y localToolYAML
 	if err := yaml.Unmarshal(data, &y); err != nil {
-		return nil, fmt.Errorf("local tool %q: parse spwn-tool.yaml: %w", name, err)
+		return nil, fmt.Errorf("local tool %q: parse package.yaml: %w", name, err)
 	}
 
 	// Optional skills/ subdir. An empty or missing dir → nil so the

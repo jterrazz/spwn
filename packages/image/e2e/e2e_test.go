@@ -5,9 +5,8 @@ package e2e
 import (
 	"testing"
 
-	plugins "spwn.sh/catalog/plugins"
 	runtimes "spwn.sh/catalog/runtimes"
-	tools "spwn.sh/catalog/tools"
+	pkg "spwn.sh/catalog/packages"
 	ib "spwn.sh/packages/image"
 	"spwn.sh/packages/image/imagetest"
 )
@@ -15,14 +14,11 @@ import (
 func newRegistry(t *testing.T) *ib.Registry {
 	t.Helper()
 	reg := ib.NewRegistry()
-	if err := tools.RegisterDefaults(reg); err != nil {
+	if err := pkg.RegisterDefaults(reg); err != nil {
 		t.Fatalf("register tools: %v", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
 		t.Fatalf("register runtimes: %v", err)
-	}
-	if err := plugins.RegisterDefaults(reg); err != nil {
-		t.Fatalf("register plugins: %v", err)
 	}
 	return reg
 }

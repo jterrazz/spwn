@@ -29,7 +29,7 @@ worlds:
 	writeFile(t, filepath.Join(agentDir, "AGENTS.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "agent.yaml"), `runtime:
   backend: "@spwn/claude-code"
-tools:
+packages:
   - "@spwn/python"
   - "local-tool"
   - "local-missing"
@@ -38,7 +38,7 @@ tools:
 `)
 
 	// Local pack that exists on disk.
-	mustMkdir(t, filepath.Join(root, "spwn", "tools", "local-tool"))
+	mustMkdir(t, filepath.Join(root, "spwn", "packages", "local-tool"))
 
 	p, err := Load(filepath.Join(root, "spwn.yaml"))
 	if err != nil {
@@ -94,7 +94,7 @@ tools:
 	if !strings.Contains(jterrazzMsg, "remote registries are not yet supported") {
 		t.Errorf("@jterrazz/python: want registry-unsupported message, got %q", jterrazzMsg)
 	}
-	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/tools/") {
+	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/packages/") {
 		t.Errorf("@jterrazz/python: hint should mention both workarounds, got %q", jterrazzHint)
 	}
 	if !strings.Contains(communityMsg, "remote registries are not yet supported") {

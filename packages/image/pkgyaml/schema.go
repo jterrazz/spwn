@@ -1,15 +1,21 @@
-// Package toolyaml is the shared parser for spwn-tool.yaml — the
-// declarative manifest format that describes a tool pack's image-build
-// recipe. Both the catalog (catalog/tools/<name>/spwn-tool.yaml) and
-// project-local tools (spwn/tools/<name>/spwn-tool.yaml in a user
-// project) use the same schema, so a tool can graduate from "authored
-// in a project" to "shipped in the catalog" by moving its directory.
+// Package pkgyaml is the shared parser for package.yaml — the
+// declarative manifest format that describes a spwn package's
+// image-build recipe. Both the catalog (catalog/packages/<name>/
+// package.yaml) and project-local packages (spwn/packages/<name>/
+// package.yaml in a user project) use the same schema, so a package
+// can graduate from "authored in a project" to "shipped in the
+// catalog" by moving its directory.
+//
+// A package is whatever its fields say it is: install steps + verify
+// make it a tool; a plugin: section makes it inject runtime config; a
+// SKILL.md sibling or content-only body makes it a skill. There is
+// no explicit type field — composability determines identity.
 //
 // The parser produces image.Tool instances (via the adapter in
 // adapter.go), so everything downstream — registry resolution,
 // dockerfile generation, skill collection — is oblivious to whether a
-// given tool came from Go or YAML.
-package toolyaml
+// given package came from Go or YAML.
+package pkgyaml
 
 import (
 	"encoding/json"
@@ -18,9 +24,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Schema is the on-disk shape of spwn-tool.yaml. Every field is
-// optional so a minimal tool ("install one package, verify it's there")
-// stays short.
+// Schema is the on-disk shape of package.yaml. Every field is
+// optional so a minimal package ("install one thing, verify it's
+// there") stays short.
 type Schema struct {
 	// Name is the tool identifier (e.g. "@spwn/git"). Optional: when
 	// empty, the loader derives it from the directory name (plain

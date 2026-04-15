@@ -2,6 +2,6 @@ name: neo
 role: worker
 runtime:
   backend: "@spwn/claude-code"
-tools:
+packages:
   - "@spwn/unix"
   - "@spwn/git"

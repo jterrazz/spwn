@@ -9,8 +9,8 @@ import (
 )
 
 // scaffoldAgent writes a minimal agent directory with the given
-// agent.yaml body. Validator rules that load the file will see the
-// plugins: list.
+// agent.yaml body. Rules that load the file will see the packages:
+// list.
 func scaffoldAgent(t *testing.T, root, name, yamlBody string) AgentRef {
 	t.Helper()
 	dir := filepath.Join(root, "spwn", "agents", name)
@@ -34,15 +34,16 @@ func scaffoldAgent(t *testing.T, root, name, yamlBody string) AgentRef {
 	return AgentRef{Name: name, Path: dir, Exists: true}
 }
 
-func TestRuleToolsExist_PluginsResolveLikeTools(t *testing.T) {
+// TestRulePackagesExist_ResolvesMixedRefs exercises the unified
+// rulePackagesExist rule: catalog refs + local refs in one list.
+func TestRulePackagesExist_ResolvesMixedRefs(t *testing.T) {
 	root := t.TempDir()
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-plugins:
-  - "@spwn/known-plugin"
-  - "@spwn/bogus-plugin"
-tools:
+packages:
   - "@spwn/known-tool"
+  - "@spwn/known-plugin"
+  - "@spwn/bogus-package"
 `)
 
 	in := Input{
@@ -58,9 +59,9 @@ tools:
 		BuiltinTools: []string{"@spwn/known-tool", "@spwn/known-plugin"},
 	}
 
-	issues := ruleToolsExist(in)
+	issues := rulePackagesExist(in)
 
-	// Expect exactly one error: the bogus plugin.
+	// Expect exactly one error: the bogus package.
 	var errs []Issue
 	for _, is := range issues {
 		if is.Level == LevelError {
@@ -68,13 +69,13 @@ tools:
 		}
 	}
 	if len(errs) != 1 {
-		t.Fatalf("want 1 error (bogus plugin), got %d: %+v", len(errs), errs)
+		t.Fatalf("want 1 error (bogus package), got %d: %+v", len(errs), errs)
 	}
-	if got := errs[0].Message; got == "" || !contains(got, "@spwn/bogus-plugin") {
-		t.Errorf("error message %q should mention @spwn/bogus-plugin", got)
+	if got := errs[0].Message; got == "" || !contains(got, "@spwn/bogus-package") {
+		t.Errorf("error message %q should mention @spwn/bogus-package", got)
 	}
-	if got := errs[0].Path; got == "" || !contains(got, "#plugins") {
-		t.Errorf("error path %q should mention #plugins", got)
+	if got := errs[0].Path; got == "" || !contains(got, "#packages") {
+		t.Errorf("error path %q should mention #packages", got)
 	}
 }
 

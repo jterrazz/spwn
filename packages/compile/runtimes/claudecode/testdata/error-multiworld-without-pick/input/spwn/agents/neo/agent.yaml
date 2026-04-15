@@ -1,2 +1,2 @@
 name: neo
-tools: ["@spwn/unix"]
+packages: ["@spwn/unix"]

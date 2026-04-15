@@ -13,11 +13,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/apps/cli/tool"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/agent"
 	"spwn.sh/packages/paths"
-	"spwn.sh/packages/project/lockfile"
 )
 
 // Cmd is the root `spwn skill` command group.
@@ -35,8 +32,6 @@ func init() {
 	Cmd.AddCommand(newCmd)
 	Cmd.AddCommand(editCmd)
 	Cmd.AddCommand(showCmd)
-	Cmd.AddCommand(installCmd)
-	Cmd.AddCommand(uninstallCmd)
 	Cmd.AddCommand(rmCmd)
 
 	Cmd.SetHelpFunc(skillHelp)
@@ -60,13 +55,9 @@ func skillHelp(cmd *cobra.Command, args []string) {
 				{Name: "show <name>", Desc: "Display a skill"},
 				{Name: "rm <name>", Desc: "Delete a skill"},
 			}},
-			{Title: "Catalog", Commands: []ui.HelpEntry{
-				{Name: "install <ref>", Desc: "Attach a catalog skill to every agent + lockfile"},
-				{Name: "uninstall <ref>", Desc: "Detach a catalog skill"},
-			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn skill new paper-reading", Desc: ""},
-				{Name: "spwn agent add neo --skill paper-reading", Desc: ""},
+				{Name: "spwn package install @spwn/mempalace", Desc: "Install a catalog skill package"},
 			}},
 		},
 		"spwn skill [command]",
@@ -183,25 +174,6 @@ var showCmd = &cobra.Command{
 		}
 		fmt.Fprintln(cmd.OutOrStderr(), string(data))
 		return nil
-	},
-}
-
-var installCmd = &cobra.Command{
-	Use:   "install <ref>",
-	Short: "Attach a catalog skill to every agent in the project",
-	Args:  cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return tool.RunInstall(cmd, args[0], lockfile.KindSkill, agent.AddSkill)
-	},
-}
-
-var uninstallCmd = &cobra.Command{
-	Use:     "uninstall <ref>",
-	Aliases: []string{"detach"},
-	Short:   "Detach a catalog skill from every agent in the project",
-	Args:    cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return tool.RunUninstall(cmd, args[0], lockfile.KindSkill, agent.RemoveSkill)
 	},
 }
 

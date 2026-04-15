@@ -77,11 +77,10 @@ func TestMergeRuntimeConfig_EmptyResult(t *testing.T) {
 	}
 }
 
-// fakeConfigPlugin is a minimal in-memory Plugin used to drive
-// CollectPluginConfigs tests — the architect's injection pipeline
-// consumes the same helper.
+// fakeConfigPlugin is a minimal in-memory Tool with a plugin block
+// used to drive CollectPluginConfigs tests — the architect's
+// injection pipeline consumes the same helper.
 type fakeConfigPlugin struct {
-	PluginBase
 	name     string
 	runtimes []string
 	cfg      map[string]string
