@@ -60,6 +60,30 @@ func padVisible(s string, w int) string {
 	return s + strings.Repeat(" ", w-vis)
 }
 
+// statusDisplay turns a bare status word into a colored,
+// icon-prefixed display string for a STATUS column cell. Covers
+// both the world-lifecycle vocabulary (running/idle/unattached)
+// and the auth-lifecycle vocabulary (connected/disconnected/
+// not configured/error). Cells whose first rune is an ANSI escape
+// are assumed to be pre-formatted by the caller and pass through
+// untouched - that's the opt-out for custom status strings (e.g.
+// inline error messages from `auth check`).
+func statusDisplay(cell string) string {
+	if strings.HasPrefix(cell, "\x1b[") {
+		return cell
+	}
+	switch cell {
+	case "running", "connected":
+		return green.Sprint("● " + cell)
+	case "idle":
+		return yellow.Sprint("◌ " + cell)
+	case "not configured", "disconnected", "unattached":
+		return faint("○ " + cell)
+	default:
+		return faint("○ " + cell)
+	}
+}
+
 // Render prints the table with dimmed headers and 2-space indent.
 func (t *Table) Render() {
 	// Calculate column widths from visible text (headers + all rows).
@@ -73,9 +97,12 @@ func (t *Table) Render() {
 			if i >= len(widths) {
 				continue
 			}
-			w := len(cell)
-			// Account for status icon prefix that will be added during rendering.
-			if t.headers[i] == "STATUS" {
+			w := visibleWidth(cell)
+			// Account for the status icon prefix the renderer adds
+			// for unformatted cells. Pre-formatted cells (those
+			// starting with an ANSI escape) are passed through so
+			// their visible width is already accurate.
+			if t.headers[i] == "STATUS" && !strings.HasPrefix(cell, "\x1b[") {
 				w += 2 // "● " / "◌ " / "○ " prefix
 			}
 			if w > widths[i] {
@@ -100,19 +127,9 @@ func (t *Table) Render() {
 			if i >= len(widths) {
 				break
 			}
-			// Colorize status values
 			display := cell
 			if t.headers[i] == "STATUS" {
-				switch cell {
-				case "running":
-					display = green.Sprint("● " + cell)
-				case "idle":
-					display = yellow.Sprint("◌ " + cell)
-				case "unattached":
-					display = faint("○ " + cell)
-				default:
-					display = faint("○ " + cell)
-				}
+				display = statusDisplay(cell)
 			}
 			// Pad based on visible width to handle ANSI codes and status icons.
 			fmt.Fprint(t.w, padVisible(display, widths[i]+gap))
