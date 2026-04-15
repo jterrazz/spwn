@@ -96,9 +96,9 @@ describe('world spawn', () => {
             const neo = world.container('neo');
 
             // The runtime provider writes .claude.json into each agent's
-            // real HOME (/agents/<name>) at spawn time so the per-agent
+            // Real HOME (/agents/<name>) at spawn time so the per-agent
             // Claude Code run drops straight into a ready state without
-            // onboarding prompts.
+            // Onboarding prompts.
             const claudeJson = neo.file('/agents/neo/.claude.json').content;
             const config = JSON.parse(claudeJson) as {
                 hasCompletedOnboarding?: boolean;
@@ -120,8 +120,8 @@ describe('world spawn', () => {
             const neo = world.container('neo');
 
             // The agent's .claude/settings.json should be the minimal
-            // config spwn ships, not the host's (which has hooks,
-            // plugins, etc.).
+            // Config spwn ships, not the host's (which has hooks,
+            // Plugins, etc.).
             const settings = neo.file('/agents/neo/.claude/settings.json').content;
             const settingsConfig = JSON.parse(settings) as {
                 enabledPlugins?: unknown;
@@ -132,8 +132,8 @@ describe('world spawn', () => {
 
             // And inspect confirms neither /home/spwn/.claude nor
             // /agents/neo/.claude is a host bind mount - the files
-            // live inside the shared /agents bind, which is correct,
-            // but no claude-specific mount should exist.
+            // Live inside the shared /agents bind, which is correct,
+            // But no claude-specific mount should exist.
             const inspectData = neo.inspect.value as {
                 Mounts?: Array<{ Destination: string }>;
             };
