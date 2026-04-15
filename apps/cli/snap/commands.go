@@ -61,7 +61,7 @@ var saveCmd = &cobra.Command{
 		s.Start("Saving snapshot...")
 		tag, err := arc.Snapshot(context.Background(), worldID, snapName)
 		if err != nil {
-			return s.FailHint("Snapshot failed", err, "Check that the world is running with \"spwn ls\"")
+			return s.FailHint("Snapshot failed", err, "Check that the world is running with \"spwn world list\"")
 		}
 
 		s.Done("Saved snapshot", tag)
@@ -151,7 +151,7 @@ var restoreCmd = &cobra.Command{
 		s.Start("Restoring from snapshot...")
 		result, err := arc.Spawn(context.Background(), opts)
 		if err != nil {
-			return s.FailHint("Restore failed", err, "Check available snapshots with \"spwn snap ls\"")
+			return s.FailHint("Restore failed", err, "Check available snapshots with \"spwn world snap ls\"")
 		}
 
 		s.Done("Restored world", result.World.ID)
@@ -178,7 +178,7 @@ var rmCmd = &cobra.Command{
 		imageTag := "spwn-snapshot:" + snapshotRef
 		s.Start("Deleting snapshot...")
 		if err := arc.DeleteSnapshot(context.Background(), imageTag); err != nil {
-			return s.FailHint("Delete failed", err, "Check available snapshots with \"spwn snap ls\"")
+			return s.FailHint("Delete failed", err, "Check available snapshots with \"spwn world snap ls\"")
 		}
 
 		s.Done("Deleted snapshot", snapshotRef)

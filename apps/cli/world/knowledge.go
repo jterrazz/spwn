@@ -96,7 +96,7 @@ func resolveWorldContainer(worldID string) (string, error) {
 	}
 	u, err := arc.Inspect(context.Background(), worldID)
 	if err != nil {
-		return "", fmt.Errorf("world %s not found\n\n  List worlds with: spwn ls", worldID)
+		return "", fmt.Errorf("world %s not found\n\n  List worlds with: spwn world list", worldID)
 	}
 	if u.ContainerID == "" {
 		return "", fmt.Errorf("world %s has no running container", worldID)

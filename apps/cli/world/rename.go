@@ -38,7 +38,7 @@ var renameCmd = &cobra.Command{
 
 		if err := arc.Rename(ctx, worldID, name); err != nil {
 			return s.FailHint("Rename failed", err,
-				fmt.Sprintf("Check that world %q exists with \"spwn ls\"", worldID))
+				fmt.Sprintf("Check that world %q exists with \"spwn world list\"", worldID))
 		}
 
 		if name == "" {
