@@ -2,11 +2,13 @@ package agent
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/project"
 )
 
 func init() {
@@ -34,6 +36,20 @@ var forkCmd = &cobra.Command{
 		s.Done("Source", result.Source)
 		s.Done("Target", result.Target)
 		s.Done("Layers copied", strings.Join(result.LayersCopied, ", "))
+
+		// Auto-world for the forked agent, symmetric with
+		// `agent create`. Without this, `spwn check` flags the
+		// forked agent as an orphan — surprising and silent.
+		if cwd, werr := os.Getwd(); werr == nil {
+			if p, perr := project.Find(cwd); perr == nil && p != nil {
+				if err := project.AddAgentToManifest(p.ManifestPath, target); err != nil {
+					s.Warn("Warning", fmt.Sprintf("could not add world to spwn.yaml: %v", err))
+				} else {
+					s.Done("Added world to spwn.yaml", target)
+				}
+			}
+		}
+
 		s.Blank()
 
 		return nil

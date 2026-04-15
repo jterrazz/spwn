@@ -147,6 +147,20 @@ describe('spwn agent fork', () => {
         expect(result.stderr.text).not.toContain('panic:');
     });
 
+    test('fork is symmetric with create in spwn.yaml', async () => {
+        // Given - an initialised project (which already scaffolds a neo agent)
+        // When - we fork neo to morpheus and re-run check
+        // Then - check is clean because the fork also added a world
+        const result = await spec('fork adds world')
+            .project('empty')
+            .exec(['init', 'agent fork neo morpheus', 'check'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn/agents/morpheus/agent.yaml').exists).toBe(true);
+        expect(result.file('spwn.yaml').content).toContain('morpheus');
+    });
+
     test('forked agent is inspectable via show', async () => {
         const result = await spec('fork then show')
             .project('single-agent')
