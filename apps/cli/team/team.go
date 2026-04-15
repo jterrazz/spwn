@@ -56,8 +56,14 @@ var newCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
-		name := args[0]
+		name := strings.TrimSpace(args[0])
+		if name == "" {
+			return fmt.Errorf("team name is required")
+		}
 		slug := agent.Slugify(name)
+		if slug == "" {
+			return fmt.Errorf("team name %q has no valid characters — use letters, digits, and dashes", args[0])
+		}
 
 		t := agent.Team{
 			Slug:        slug,

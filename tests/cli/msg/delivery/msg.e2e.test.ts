@@ -96,6 +96,21 @@ describe('agent messaging (msg)', () => {
         result.stderr.toContain('nonexistent');
     });
 
+    test('send with an empty message rejects up-front', async () => {
+        // Given - no container needed: validation runs before the
+        // FindAgentContainer lookup, so we skip the docker-pilot setup.
+        // When - agent send with an empty string body
+        // Then - exit 1 with "message cannot be empty", no crash
+        const result = await spec('msg send empty')
+            .project('empty')
+            .exec('agent send neo ""')
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toMatch(/message cannot be empty/i);
+        expect(result.stderr.text).not.toContain('panic:');
+    });
+
     test('inbox on a non-existent agent fails cleanly', async () => {
         await using result = await spec('msg inbox missing')
             .project('docker-pilot')

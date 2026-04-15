@@ -34,15 +34,15 @@ func init() {
 // --- send ---
 
 var sendCmd = &cobra.Command{
-	Use:   "send <agent-name> [message]",
+	Use:   "send <agent-name> <message>",
 	Short: "Send a message to an agent's inbox",
 	Long:  `Send an async message to a running agent. The agent must be in an active world.`,
-	Args:  cobra.RangeArgs(1, 2),
+	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		toAgent := args[0]
-		content := ""
-		if len(args) > 1 {
-			content = args[1]
+		content := strings.TrimSpace(args[1])
+		if content == "" {
+			return fmt.Errorf("message cannot be empty")
 		}
 		s := newStepper(cmd)
 
