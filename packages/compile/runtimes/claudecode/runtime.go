@@ -61,8 +61,13 @@ func (r *Runtime) Render(input compile.Input) (*compile.Tree, error) {
 		if role == "" {
 			role = "worker"
 		}
+		// role.md is per-deployment -- it describes what the agent
+		// does in THIS world -- so it lives under worlds/<id>/. The
+		// CLAUDE.md entrypoint lives at the agent root because
+		// Claude Code loads the cwd's CLAUDE.md on startup and the
+		// agent runs with cwd = /agents/<name>/.
 		t.AddString(
-			fmt.Sprintf("agents/%s/role.md", a.Name),
+			fmt.Sprintf("agents/%s/worlds/%s/role.md", a.Name, input.WorldID),
 			fmt.Sprintf("# Role in %s\n\n%s\n", input.WorldID, role),
 		)
 		t.AddString(
