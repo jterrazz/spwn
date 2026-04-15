@@ -107,10 +107,10 @@ describe('smoke: project upgrade cycle', () => {
         expect(exec(cid1, 'command -v python3')).not.toBe('');
         expect(exec(cid1, 'command -v git')).not.toBe('');
         // The Phase 2 marker tool (@spwn/qmd) is added in Phase 2
-        // and verified in Phase 3. Asserting its absence here would
-        // be brittle against evolving base images, so we rely on
-        // the image-version-label diff + the Phase 3 presence
-        // check to prove the rebuild.
+        // And verified in Phase 3. Asserting its absence here would
+        // Be brittle against evolving base images, so we rely on
+        // The image-version-label diff + the Phase 3 presence
+        // Check to prove the rebuild.
 
         // Baseline: one agent home at /agents/neo, no trinity yet.
         expect(exec(cid1, 'test -d /agents/neo && echo ok')).toBe('ok');
@@ -122,8 +122,8 @@ describe('smoke: project upgrade cycle', () => {
 
         // 2a. Add a tool the default scaffold doesn't ship. The
         //     @spwn/qmd pack runs `npm install -g @tobilu/qmd`,
-        //     which adds a new RUN layer to the Dockerfile - the
-        //     content hash changes and the cache misses.
+        //     Which adds a new RUN layer to the Dockerfile - the
+        //     Content hash changes and the cache misses.
         writeFileSync(
             join(workdir, 'spwn/agents/neo/agent.yaml'),
             [
@@ -217,10 +217,10 @@ describe('smoke: project upgrade cycle', () => {
         const cid2 = container();
 
         // New tool: @spwn/qmd installed a `qmd` binary via npm
-        // during the content-hash-triggered rebuild. If this
-        // command fails, either the rebuild didn't happen or the
-        // generator dropped the tool - both are regressions in
-        // the cache / generator pipeline.
+        // During the content-hash-triggered rebuild. If this
+        // Command fails, either the rebuild didn't happen or the
+        // Generator dropped the tool - both are regressions in
+        // The cache / generator pipeline.
         expect(exec(cid2, 'command -v qmd')).not.toBe('');
 
         // New skill: present inside neo's home at the expected
