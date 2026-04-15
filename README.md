@@ -33,7 +33,7 @@
 
 The real power of AI isn't the model. It's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions. Oppenheimer in a lab - with instruments, notebooks, colleagues, and years of memory - can change the world. **The environment is the multiplier.**
 
-That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code**: stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review the PR that changes an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**. **Docker for intelligence.**
+That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code**: stack tool packs, skill files, and an identity into a running mind, then commit the whole declaration to git. Review the PR that changes an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**. **Docker for intelligence.**
 
 <br/>
 
@@ -43,15 +43,15 @@ That's what spwn gives you, declaratively. If Terraform is infrastructure as cod
 curl -fsSL https://spwn.sh/install.sh | bash
 ```
 
-Three commands. One running agent.
+Three commands. One working agent.
 
-|        | Step          | Example                                            |
-| ------ | ------------- | -------------------------------------------------- |
-| **01** | Scaffold      | `spwn init`                                        |
-| **02** | Bring it up   | `spwn agent neo`                                   |
-| **03** | Talk to it    | `spwn agent talk neo "what is this project?"`      |
+|        | Step                 | Example            |
+| ------ | -------------------- | ------------------ |
+| **01** | Log in               | `spwn auth`        |
+| **02** | Scaffold a project   | `spwn init`        |
+| **03** | Talk to your agent   | `spwn agent neo`   |
 
-**neo** is the starter agent `spwn init` creates.
+`spwn auth` checks you're logged in to Claude Code (or any supported runtime). `spwn init` drops `spwn.yaml` + a starter `neo` agent into the current directory. `spwn agent neo` opens an interactive session with neo inside a sandboxed Docker world — the container lifecycle is handled for you.
 
 Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/examples/`).
 
@@ -65,7 +65,7 @@ Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent w
 <tr>
 <td align="center" width="33%">
 <h3>🧩 Composable Intelligence</h3>
-Stack tool packs, skill files, and a profile into a running mind. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher profile and you have an autonomous scientist. <b>Docker, but for minds.</b>
+Stack tool packs, skill files, and an identity into a running mind. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher identity and you have an autonomous scientist. <b>Docker, but for minds.</b>
 </td>
 <td align="center" width="33%">
 <h3>🧠 Persistent Minds</h3>
@@ -101,8 +101,8 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 Three ideas to hold in your head before you dive in:
 
 - **[Agent orchestration as code](#agent-orchestration-as-code)** - agents, worlds, and tool composition are declarative files committed alongside your code. Like Terraform or `docker-compose.yaml`, but for the agents that work on your repo. Clone it, get the same agents byte-for-byte.
-- **[An agent is a directory of markdown](#inside-an-agent)** - composed from blocks (tools, skills, profile) in `agent.yaml`. Human-readable, git-friendly, no database. Evolves through dream / sleep / fork.
-- **[spwn is a compiler](#spwn-is-a-compiler-for-agents)** - `spwn build` compiles your provider-neutral source and bakes it into a reproducible Docker image. Like `tsc`, but targeting agent runtimes instead of JS engines.
+- **[Agents built from blocks](#agents-built-from-blocks)** - tools, skills, and identity composed in `agent.yaml`. Human-readable, git-friendly, no database. Evolves through dream / sleep / fork.
+- **[Compile to any runtime](#compile-to-any-runtime)** - you write provider-neutral source; `spwn build` adapts it to whatever runtime you target and bakes the result into a reproducible Docker image. Like `tsc`, but for agent runtimes.
 
 <br/>
 
@@ -139,9 +139,9 @@ worlds:
 
 <br/>
 
-### Inside an agent
+### Agents built from blocks
 
-Each agent is a directory of markdown files - **human-readable, git-friendly, no database**:
+Each agent is a directory of composable blocks - **human-readable, git-friendly, no database**:
 
 ```
 spwn/agents/neo/
@@ -194,9 +194,9 @@ plugins:
 
 <br/>
 
-### spwn is a compiler for agents
+### Compile to any runtime
 
-Think of spwn the way you think of `tsc` or `babel`. You write in one clean source language; a compiler emits whatever flavor your target runtime actually wants. You never touch the output by hand.
+Think of spwn the way you think of `tsc` or `babel`. You write in one clean, provider-neutral source; a compiler adapts it to whatever runtime you target and emits exactly what that runtime expects. You never touch the output by hand.
 
 ```
  spwn/           spwn build          Docker image
@@ -271,13 +271,6 @@ spwn agent talk neo "run every test and benchmark, tell me what the code actuall
 <br/>
 
 ## CLI at a glance
-
-Grammar is consistent: `spwn <noun> <verb>`. Compose-style
-shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn down`.
-With no arguments they act on every world declared in `spwn.yaml`.
-Name-only shortcuts start a single entity by name: `spwn agent neo`
-starts the world that contains `neo`; `spwn world matrix` starts the
-world named `matrix`.
 
 Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
