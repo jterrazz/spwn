@@ -73,18 +73,12 @@ var inspectCmd = &cobra.Command{
 			}
 		}
 
-		// Show session files (now stored in journal/)
-		sessDir := filepath.Join(info.Path, "journal")
-		if entries, err := os.ReadDir(sessDir); err == nil && len(entries) > 0 {
-			s.Blank()
-			s.Info("Sessions:", fmt.Sprintf("%d file(s)", len(entries)))
-			for _, e := range entries {
-				fi, _ := e.Info()
-				if fi != nil {
-					s.Info("", fmt.Sprintf("  %s (%s)", e.Name(), formatSize(fi.Size())))
-				}
-			}
-		}
+		// The legacy "Sessions:" block used to list the same files as
+		// the journal layer (sessions were stored there). That made
+		// `agent inspect` render the same tree twice and confused
+		// users about whether two sources existed (Finding #18). The
+		// journal layer above is the single source of truth; suppress
+		// the duplicate block entirely.
 
 		// Show recent journal entries
 		entries, err := agent.ListJournal(info.Path, 5)

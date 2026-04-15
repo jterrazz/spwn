@@ -104,9 +104,14 @@ func formatReflexionSummary(r *ReflexionResult, entries []journal.Entry) string 
 	b.WriteString(fmt.Sprintf("- Destroyed: %d\n", r.DestroyedTasks))
 	b.WriteString(fmt.Sprintf("- Success rate: %.0f%%\n\n", r.SuccessRate*100))
 
-	// List recent sessions
+	// List recent sessions. Skip entries whose WorldID is empty —
+	// without this guard, stray journal files leak in as phantom
+	// "- : completed (0s)" rows (Finding #19).
 	b.WriteString("## Recent Sessions\n\n")
 	for _, e := range entries {
+		if e.WorldID == "" {
+			continue
+		}
 		outcome := "completed"
 		if e.ExitCode < 0 {
 			outcome = "destroyed"
