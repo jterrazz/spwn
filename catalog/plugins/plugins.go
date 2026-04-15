@@ -9,19 +9,27 @@
 // config injection — they coexist with plain tools in the agent
 // manifest via the dedicated plugins: field. Under the hood both lists
 // are resolved through the same image.Registry.
+//
+// Every plugin lives as a YAML manifest under
+// catalog/plugins/<name>/spwn-tool.yaml with a `plugin:` section that
+// declares its target runtimes and the config snippets to inject.
 package plugins
 
 import (
 	"fmt"
 
-	"spwn.sh/catalog/plugins/mempalace"
 	ib "spwn.sh/packages/image"
 )
 
-// All is the list of every built-in plugin. Adding a new plugin?
-// Import it here and append.
-var All = []ib.Tool{
-	mempalace.Tool,
+// All is populated at package init from every YAML-backed plugin.
+var All []ib.Tool
+
+func init() {
+	yaml, err := loadYAMLPlugins()
+	if err != nil {
+		panic(fmt.Errorf("catalog: load yaml plugins: %w", err))
+	}
+	All = yaml
 }
 
 // RegisterDefaults registers all built-in plugins into the given
