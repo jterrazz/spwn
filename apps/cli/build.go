@@ -103,9 +103,9 @@ Examples:
 		}
 
 		// Resolve runtime: --runtime override > agent declaration >
-		// claude-code fallback. The agent-declared path lands in a
-		// follow-up commit; for now, only handle the override +
-		// fallback.
+		// claude-code fallback. source.ResolveRuntime handles all
+		// three precedence levels and canonicalises catalog refs
+		// (@spwn/claude-code -> claude-code).
 		runtimeName, err := source.ResolveRuntime(src, buildRuntime)
 		if err != nil {
 			return err

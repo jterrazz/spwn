@@ -29,7 +29,7 @@ func (r *Runtime) Name() string { return "claude-code" }
 //   - agents/<name>/CLAUDE.md + agents/<name>/role.md for every agent
 //
 // This is the in-memory equivalent of what architect.Spawn used to
-// write file-by-file. Commit 3 will wire Spawn through this.
+// write file-by-file.
 func (r *Runtime) Render(input compile.Input) (*compile.Tree, error) {
 	t := compile.New()
 
