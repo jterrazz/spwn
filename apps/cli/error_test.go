@@ -164,7 +164,10 @@ func TestCLI_AgentCreateHelp(t *testing.T) {
 	}
 
 	assertContains(t, out, "create", "agent create help")
-	assertContains(t, out, "6-layer Mind", "agent create description")
+	// QA finding #31: the help long description used to lie about
+	// a "6-layer Mind" when the scaffolded tree has 5 layers. Pin
+	// the corrected wording here.
+	assertContains(t, out, "5-layer Mind", "agent create description")
 }
 
 // --- Bare command shows help ---

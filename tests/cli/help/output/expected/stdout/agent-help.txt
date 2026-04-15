@@ -23,6 +23,7 @@ Conversation:
   watch <name>                     Tail an agent's inbox in real time
 
 Observe:
+  show <name>                      Show agent details (alias of inspect)
   inspect <name>                   Inspect composition, memory, and history
   logs <name>                      Show the event log for this agent
 

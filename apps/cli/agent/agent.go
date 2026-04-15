@@ -59,6 +59,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "watch <name>", Desc: "Tail an agent's inbox in real time"},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
+				{Name: "show <name>", Desc: "Show agent details " + ui.Faint("(alias of inspect)")},
 				{Name: "inspect <name>", Desc: "Inspect composition, memory, and history"},
 				{Name: "logs <name>", Desc: "Show the event log for this agent"},
 			}},
