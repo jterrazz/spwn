@@ -120,7 +120,10 @@ var listCmd = &cobra.Command{
 			return emitAgentListJSON(cmd, agentListReport{Mode: "global", Agents: rows})
 		}
 
-		t := ui.NewTable("NAME", "WORLD", "STATUS")
+		// Unified schema: AGENT | STATUS | WORLD. Matches the
+		// project-mode renderer so the header row stays stable no
+		// matter where the user runs `spwn agent ls`. See finding #24.
+		t := ui.NewTable("AGENT", "STATUS", "WORLD")
 		for _, a := range agents {
 			worldID := "\u2014"
 			status := "unattached"
@@ -130,7 +133,7 @@ var listCmd = &cobra.Command{
 				status = info.Status
 			}
 
-			t.AddRow(a.Name, worldID, status)
+			t.AddRow(a.Name, status, worldID)
 		}
 		t.Render()
 
