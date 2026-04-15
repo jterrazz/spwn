@@ -2,8 +2,10 @@ package agent
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 )
 
@@ -120,6 +122,38 @@ Examples:
 			return err
 		}
 
+		// Load the manifest once so we can pre-flight every requested
+		// removal: if the user passes a tool / plugin / skill that
+		// isn't actually attached, we refuse instead of printing a
+		// misleading green checkmark on a no-op.
+		preflight, err := agent.LoadManifest(name)
+		if err != nil {
+			return fmt.Errorf("load manifest: %w", err)
+		}
+		hasString := func(list []string, target string) bool {
+			for _, v := range list {
+				if v == target {
+					return true
+				}
+			}
+			return false
+		}
+		for _, t := range composeTools {
+			if !hasString(preflight.Tools, t) {
+				return fmt.Errorf("tool %q is not attached to agent %q — nothing to remove", t, name)
+			}
+		}
+		for _, p := range composePlugins {
+			if !hasString(preflight.Plugins, p) {
+				return fmt.Errorf("plugin %q is not attached to agent %q — nothing to remove", p, name)
+			}
+		}
+		for _, sk := range composeSkills {
+			if !hasString(preflight.Skills, sk) {
+				return fmt.Errorf("skill %q is not attached to agent %q — nothing to remove", sk, name)
+			}
+		}
+
 		s := newStepper(cmd)
 		s.Blank()
 		s.Info("Agent:", name)
@@ -168,9 +202,8 @@ only the composition (tools, skills, profile) and core identity ship.
 Not yet implemented - tracks the registry (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		fmt.Fprintf(cmd.OutOrStderr(), "publish %q: not yet implemented.\n", name)
-		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
-		return nil
+		return notImplemented(fmt.Sprintf("agent publish %q", name),
+			"The registry is planned for a future release.")
 	},
 }
 
@@ -187,8 +220,38 @@ full composition from its published form.
 Not yet implemented - tracks the registry port (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ref := args[0]
-		fmt.Fprintf(cmd.OutOrStderr(), "get %q: not yet implemented.\n", ref)
-		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
-		return nil
+		return notImplemented(fmt.Sprintf("agent get %q", ref),
+			"The registry is planned for a future release.")
 	},
 }
+
+// notImplemented writes a structured "not yet implemented" message to
+// stderr and returns a DisplayedError that carries exit code 2 —
+// the dedicated "feature unavailable" code used across the CLI so
+// scripts can distinguish a missing feature from a runtime failure.
+func notImplemented(what, detail string) error {
+	fmt.Fprintf(os.Stderr, "\n  %s %s: not yet implemented\n", ui.Red("✗"), what)
+	if detail != "" {
+		fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint(detail))
+	}
+	fmt.Fprintln(os.Stderr)
+	return &notImplementedError{what: what}
+}
+
+// notImplementedError carries the exit-2 ("feature unavailable")
+// signal back to the process entry point while keeping the
+// already-rendered banner untouched (it embeds DisplayedError so
+// root.Execute skips its generic "Error:" line).
+type notImplementedError struct {
+	what string
+}
+
+func (e *notImplementedError) Error() string {
+	return fmt.Sprintf("%s: not yet implemented", e.what)
+}
+
+// ExitCode returns 2 so cmd/spwn/main.go forwards the signal to
+// os.Exit. The CLI reserves exit code 2 for "planned but not yet
+// implemented" features; exit 1 stays for runtime failures.
+func (e *notImplementedError) ExitCode() int { return 2 }
+
