@@ -8,10 +8,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/packages/catalog/templates"
+	"spwn.sh/packages/catalog/examples"
 )
 
-func TestParseTemplateRef(t *testing.T) {
+func TestParseExampleRef(t *testing.T) {
 	cases := []struct {
 		in      string
 		want    string
@@ -27,18 +27,18 @@ func TestParseTemplateRef(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.in, func(t *testing.T) {
-			got, err := parseTemplateRef(c.in)
+			got, err := parseExampleRef(c.in)
 			if c.wantErr {
 				if err == nil {
-					t.Errorf("parseTemplateRef(%q) = %q, want error", c.in, got)
+					t.Errorf("parseExampleRef(%q) = %q, want error", c.in, got)
 				}
 				return
 			}
 			if err != nil {
-				t.Errorf("parseTemplateRef(%q) returned error: %v", c.in, err)
+				t.Errorf("parseExampleRef(%q) returned error: %v", c.in, err)
 			}
 			if got != c.want {
-				t.Errorf("parseTemplateRef(%q) = %q, want %q", c.in, got, c.want)
+				t.Errorf("parseExampleRef(%q) = %q, want %q", c.in, got, c.want)
 			}
 		})
 	}
@@ -60,13 +60,13 @@ func withTempCwd(t *testing.T) string {
 	return tmp
 }
 
-// TestRunInitTemplate_InstallsFromCatalog verifies the init template
-// path materialises a template into a temp project dir. Invokes the
+// TestRunInitExample_InstallsFromCatalog verifies the init example
+// path materialises an example into a temp project dir. Invokes the
 // RunE directly to avoid cobra's shared-state issues with --help
 // flags leaking across tests in the package.
-func TestRunInitTemplate_InstallsFromCatalog(t *testing.T) {
-	if _, err := templates.Get("matrix"); err != nil {
-		t.Skipf("matrix template not bundled: %v", err)
+func TestRunInitExample_InstallsFromCatalog(t *testing.T) {
+	if _, err := examples.Get("matrix"); err != nil {
+		t.Skipf("matrix example not bundled: %v", err)
 	}
 
 	tmp := withTempCwd(t)
@@ -79,8 +79,8 @@ func TestRunInitTemplate_InstallsFromCatalog(t *testing.T) {
 	cmd.SetOut(new(bytes.Buffer))
 	cmd.SetErr(new(bytes.Buffer))
 
-	if err := runInitTemplate(cmd, "@spwn/matrix"); err != nil {
-		t.Fatalf("runInitTemplate: %v", err)
+	if err := runInitExample(cmd, "@spwn/matrix"); err != nil {
+		t.Fatalf("runInitExample: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(tmp, "spwn.yaml")); err != nil {
 		t.Fatalf("spwn.yaml missing after init: %v", err)
@@ -95,7 +95,7 @@ func TestRunInitTemplate_InstallsFromCatalog(t *testing.T) {
 	}
 }
 
-func TestRunInitTemplate_RejectsBadRef(t *testing.T) {
+func TestRunInitExample_RejectsBadRef(t *testing.T) {
 	withTempCwd(t)
 
 	initName = ""
@@ -106,12 +106,12 @@ func TestRunInitTemplate_RejectsBadRef(t *testing.T) {
 	cmd.SetOut(new(bytes.Buffer))
 	cmd.SetErr(new(bytes.Buffer))
 
-	if err := runInitTemplate(cmd, "matrix"); err == nil {
+	if err := runInitExample(cmd, "matrix"); err == nil {
 		t.Fatalf("expected error for bad ref, got nil")
 	}
 }
 
-func TestRunInitTemplate_RejectsNameFlag(t *testing.T) {
+func TestRunInitExample_RejectsNameFlag(t *testing.T) {
 	withTempCwd(t)
 
 	initName = "custom"
@@ -123,7 +123,7 @@ func TestRunInitTemplate_RejectsNameFlag(t *testing.T) {
 	cmd.SetOut(new(bytes.Buffer))
 	cmd.SetErr(new(bytes.Buffer))
 
-	if err := runInitTemplate(cmd, "@spwn/matrix"); err == nil {
-		t.Fatalf("expected error when --name is combined with a template ref")
+	if err := runInitExample(cmd, "@spwn/matrix"); err == nil {
+		t.Fatalf("expected error when --name is combined with an example ref")
 	}
 }

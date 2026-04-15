@@ -664,7 +664,7 @@ export default function WorldDashboard() {
 //
 //   1. One of the user's already-installed agents → POST
 //      /api/worlds/{id}/agents and refetch.
-//   2. A fresh template from the gallery → POST /api/templates/<slug>
+//   2. A fresh template from the gallery → POST /api/examples/<slug>
 //      /install, then deploy the first installed agent that is
 //      Compatible (same flow but two requests instead of one).
 //
@@ -696,8 +696,8 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
         apiGet<InstalledAgentItem[]>('/api/agents')
             .then((data) => setInstalled(data ?? []))
             .catch(() => setInstalled([]));
-        apiGet<{ templates: EmptyAgentsExample[] }>('/api/templates')
-            .then((data) => setGallery(data.templates ?? []))
+        apiGet<{ examples: EmptyAgentsExample[] }>('/api/examples')
+            .then((data) => setGallery(data.examples ?? []))
             .catch(() => setGallery([]));
     }, []);
 
@@ -727,7 +727,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
         setErrorMessage(null);
         try {
             // 1. Install the template (idempotent - keeps user edits).
-            await apiPost(`/api/templates/${ex.slug}/install`);
+            await apiPost(`/api/examples/${ex.slug}/install`);
             // 2. Deploy the example's primary agent into THIS world.
             const primary = ex.agents[0];
             if (!primary) {
@@ -870,7 +870,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                             ))
                         ) : (
                             <p className="col-span-full text-[11px] text-muted-foreground/60">
-                                No templates bundled in this build.
+                                No examples bundled in this build.
                             </p>
                         )}
                     </div>

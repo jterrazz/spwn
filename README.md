@@ -53,7 +53,7 @@ Three commands. One running agent.
 
 **neo** is the starter agent `spwn init` creates.
 
-Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/templates/`).
+Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/examples/`).
 
 > **Requirements:** Docker
 
@@ -292,7 +292,7 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 # ── Project (per-repo manifest) ──────────────────────────────────
 🟢 spwn init                                    Scaffold a blank project in the current dir
-🟢 spwn init @spwn/matrix                       Install a bundled template (matrix, startup, ...)
+🟢 spwn init @spwn/matrix                       Install a bundled example (matrix, startup, ...)
 🟢 spwn check                                   Validate the project tree against 15 rules
 🟢 spwn compile                                 Render the project tree to ./dist (preview / debug)
 🟢 spwn build                                   Compile + bake into a project-specific Docker image
@@ -372,14 +372,6 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn skill   rm   paper-reading              Delete a skill
 🔴 spwn skill   get  @community/rust-review     Install a shared skill
 🔴 spwn skill   publish paper-reading           Ship to registry
-
-🟢 spwn profile ls                              Your personality templates
-🟢 spwn profile new  researcher                 Author a new profile
-🟡 spwn profile edit researcher                 Open in $EDITOR
-🟢 spwn profile show researcher                 Display a profile
-🟢 spwn profile rm   researcher                 Delete a profile
-🔴 spwn profile get  @community/pragmatic-dev   Install a shared profile
-🔴 spwn profile publish researcher              Ship to registry
 
 # ── Teams & orgs ─────────────────────────────────────────────────
 🟡 spwn team new     acme                       Create a team

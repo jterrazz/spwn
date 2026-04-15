@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/catalog/templates"
+	"spwn.sh/packages/catalog/examples"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/paths"
@@ -28,18 +28,18 @@ var (
 	initName   string
 )
 
-const templateRefPrefix = "@spwn/"
+const exampleRefPrefix = "@spwn/"
 
 var initCmd = &cobra.Command{
-	Use:   "init [template-ref]",
+	Use:   "init [example-ref]",
 	Short: "Scaffold a spwn project in the current directory",
 	Long: `Scaffold a spwn project in the current directory.
 
 Without arguments, creates a blank spwn.yaml plus a default ./spwn/
 tree (one world, one agent) and adds .spwn/ to .gitignore.
 
-A positional template ref of the form @spwn/<slug> installs one of
-the bundled templates into the current directory instead. Example:
+A positional example ref of the form @spwn/<slug> installs one of
+the bundled examples into the current directory instead. Example:
 
     spwn init @spwn/matrix
 
@@ -51,7 +51,7 @@ user-home mode, kept for backward compatibility).`,
 			return runInitGlobal(cmd)
 		}
 		if len(args) == 1 {
-			return runInitTemplate(cmd, args[0])
+			return runInitExample(cmd, args[0])
 		}
 		return runInitLocal(cmd)
 	},
@@ -103,25 +103,25 @@ func runInitLocal(cmd *cobra.Command) error {
 	return nil
 }
 
-// parseTemplateRef validates a `@spwn/<slug>` argument and returns the
+// parseExampleRef validates a `@spwn/<slug>` argument and returns the
 // bare slug. Anything else is a hard error with a one-line hint.
-func parseTemplateRef(ref string) (string, error) {
-	if !strings.HasPrefix(ref, templateRefPrefix) {
-		return "", fmt.Errorf("template ref must start with %q (e.g. @spwn/matrix), got %q", templateRefPrefix, ref)
+func parseExampleRef(ref string) (string, error) {
+	if !strings.HasPrefix(ref, exampleRefPrefix) {
+		return "", fmt.Errorf("example ref must start with %q (e.g. @spwn/matrix), got %q", exampleRefPrefix, ref)
 	}
-	slug := strings.TrimPrefix(ref, templateRefPrefix)
+	slug := strings.TrimPrefix(ref, exampleRefPrefix)
 	if slug == "" || strings.ContainsAny(slug, "/ \t") {
-		return "", fmt.Errorf("invalid template slug in %q (expected @spwn/<slug>)", ref)
+		return "", fmt.Errorf("invalid example slug in %q (expected @spwn/<slug>)", ref)
 	}
 	return slug, nil
 }
 
-func runInitTemplate(cmd *cobra.Command, ref string) error {
+func runInitExample(cmd *cobra.Command, ref string) error {
 	if initName != "" {
-		return fmt.Errorf("--name cannot be used with a template ref; it only applies to the blank scaffold")
+		return fmt.Errorf("--name cannot be used with an example ref; it only applies to the blank scaffold")
 	}
 
-	slug, err := parseTemplateRef(ref)
+	slug, err := parseExampleRef(ref)
 	if err != nil {
 		return err
 	}
@@ -132,22 +132,22 @@ func runInitTemplate(cmd *cobra.Command, ref string) error {
 	}
 
 	// Honor --force: if the user passed it and a manifest already
-	// exists, clear it so templates.Install can write fresh content
-	// (templates.Install itself never overwrites).
+	// exists, clear it so examples.Install can write fresh content
+	// (examples.Install itself never overwrites).
 	if initForce {
 		if err := os.Remove(filepath.Join(cwd, "spwn.yaml")); err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("remove existing spwn.yaml: %w", err)
 		}
 	}
 
-	rep, err := templates.Install(slug, cwd)
+	rep, err := examples.Install(slug, cwd)
 	if err != nil {
-		return fmt.Errorf("install template %s: %w", ref, err)
+		return fmt.Errorf("install example %s: %w", ref, err)
 	}
 
 	s := ui.New()
 	s.Blank()
-	s.Success(fmt.Sprintf("Installed template %s", ref))
+	s.Success(fmt.Sprintf("Installed example %s", ref))
 	s.Blank()
 	out := cmd.OutOrStdout()
 	if rep.ManifestAdded {

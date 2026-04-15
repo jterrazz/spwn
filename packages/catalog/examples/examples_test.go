@@ -1,4 +1,4 @@
-package templates
+package examples
 
 import (
 	"io/fs"
@@ -10,14 +10,14 @@ import (
 
 // TestShippedSlugsMatchEmbed is the load-bearing invariant: it asserts
 // that the canonical shippedSlugs list, the go:embed directive, and the
-// on-disk template directories all agree. If any of the three drift
+// on-disk example directories all agree. If any of the three drift
 // (someone adds a directory without updating the embed, or updates
 // shippedSlugs but forgets the embed, etc.), this test fails loudly.
 //
-// Runs against templatesFS so it exercises the exact bytes that ship
+// Runs against examplesFS so it exercises the exact bytes that ship
 // in the compiled binary - NOT the filesystem.
 func TestShippedSlugsMatchEmbed(t *testing.T) {
-	entries, err := fs.ReadDir(templatesFS, ".")
+	entries, err := fs.ReadDir(examplesFS, ".")
 	if err != nil {
 		t.Fatalf("read embed root: %v", err)
 	}
@@ -34,13 +34,13 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 	sort.Strings(canonical)
 
 	if !stringsEqual(embedded, canonical) {
-		t.Fatalf("shippedSlugs %v != embedded dirs %v - update the go:embed directive AND shippedSlugs together when adding a template", canonical, embedded)
+		t.Fatalf("shippedSlugs %v != embedded dirs %v - update the go:embed directive AND shippedSlugs together when adding an example", canonical, embedded)
 	}
 }
 
 // TestShippedSlugsStructure asserts every shipped slug has the
 // minimum filesystem contract that Install and Get depend on:
-//   <slug>/template.yaml
+//   <slug>/example.yaml
 //   <slug>/README.md
 //   <slug>/spwn.yaml
 //   <slug>/agents/<at-least-one-dir>/identity/profile.md
@@ -50,18 +50,18 @@ func TestShippedSlugsStructure(t *testing.T) {
 	for _, slug := range shippedSlugs {
 		t.Run(slug, func(t *testing.T) {
 			mustExist := []string{
-				slug + "/template.yaml",
+				slug + "/example.yaml",
 				slug + "/README.md",
 				slug + "/spwn.yaml",
 			}
 			for _, p := range mustExist {
-				if _, err := fs.Stat(templatesFS, p); err != nil {
+				if _, err := fs.Stat(examplesFS, p); err != nil {
 					t.Errorf("missing %s: %v", p, err)
 				}
 			}
 
 			// At least one agent directory, each with identity/profile.md.
-			agentEntries, err := fs.ReadDir(templatesFS, slug+"/agents")
+			agentEntries, err := fs.ReadDir(examplesFS, slug+"/agents")
 			if err != nil {
 				t.Errorf("read %s/agents: %v", slug, err)
 				return
@@ -72,12 +72,12 @@ func TestShippedSlugsStructure(t *testing.T) {
 					hasAgent = true
 					// Every agent must have identity/profile.md (the current Mind layout).
 					profilePath := slug + "/agents/" + e.Name() + "/identity/profile.md"
-					if _, err := fs.Stat(templatesFS, profilePath); err != nil {
+					if _, err := fs.Stat(examplesFS, profilePath); err != nil {
 						t.Errorf("%s: agent %q missing identity/profile.md", slug, e.Name())
 					}
 					// And an agent.yaml so Install can wire up runtime/tools.
 					agentYAML := slug + "/agents/" + e.Name() + "/agent.yaml"
-					if _, err := fs.Stat(templatesFS, agentYAML); err != nil {
+					if _, err := fs.Stat(examplesFS, agentYAML); err != nil {
 						t.Errorf("%s: agent %q missing agent.yaml", slug, e.Name())
 					}
 				}
@@ -128,7 +128,7 @@ func stringsEqual(a, b []string) bool {
 	return true
 }
 
-func TestList_AllShippedTemplatesParse(t *testing.T) {
+func TestList_AllShippedExamplesParse(t *testing.T) {
 	got, err := List()
 	if err != nil {
 		t.Fatalf("List: %v", err)
@@ -158,7 +158,7 @@ func TestList_AllShippedTemplatesParse(t *testing.T) {
 	}
 	for slug, found := range wantSlugs {
 		if !found {
-			t.Errorf("template %q missing from List()", slug)
+			t.Errorf("example %q missing from List()", slug)
 		}
 	}
 }

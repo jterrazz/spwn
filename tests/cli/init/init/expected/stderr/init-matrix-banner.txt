@@ -1,4 +1,4 @@
 
-  ✓ Installed template @spwn/matrix
+  ✓ Installed example @spwn/matrix
 
 

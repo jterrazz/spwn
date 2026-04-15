@@ -53,9 +53,9 @@ class SpwnAPI {
         return this.get('/api/worlds');
     }
 
-    /** Install a bundled template */
+    /** Install a bundled example */
     async installTemplate(slug: string) {
-        return this.post(`/api/templates/${slug}/install`);
+        return this.post(`/api/examples/${slug}/install`);
     }
 
     /** Spawn a world */
@@ -140,7 +140,7 @@ class SpwnPage {
         // Wait until either planets appear or the empty gallery shows
         await this.page
             .waitForSelector(
-                '[role="button"]:has-text("Enter World"), :has-text("Pick a template")',
+                '[role="button"]:has-text("Enter World"), :has-text("Pick an example")',
                 { timeout: 15_000 },
             )
             .catch(() => {});
