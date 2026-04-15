@@ -5,7 +5,14 @@ slug: "spwn-agent-stop"
 
 ## spwn agent stop
 
-Stop the world that contains this agent
+Stop an agent daemon [planned]
+
+### Synopsis
+
+Kill a running autonomous agent process.
+
+This command is reserved for a future release. Today, spwn agents
+don't run between invocations - there is nothing to stop.
 
 ```
 spwn agent stop <name> [flags]

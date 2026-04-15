@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"spwn.sh/apps/cli/ui"
+	worldcmd "spwn.sh/apps/cli/world"
 
 	"github.com/spf13/cobra"
 	"spwn.sh/packages/agent"
@@ -87,10 +88,12 @@ func agentHelp(cmd *cobra.Command, args []string) {
 
 // Cmd is the agent command. In the new grammar:
 //   - `spwn agent` with no args and no flags -> help
-//   - `spwn agent <name>` -> start the world that contains <name>
+//   - `spwn agent <name>` -> open an interactive session with <name>
+//     (boots the world transparently if needed, then attaches a TTY
+//     to the runtime inside the container)
 //   - `spwn agent --flags ...` -> legacy imperative spawn
 //
-// Subcommands (new, ls, start, stop, inspect, ...) resolve first.
+// Subcommands (new, ls, inspect, ...) resolve first.
 var Cmd = &cobra.Command{
 	Use:   "agent [name]",
 	Short: "Spawn an agent - a living identity that inhabits a world",
@@ -101,14 +104,15 @@ skills, knowledge, playbooks, journal entries, and session state. The agent
 survives after the world is destroyed.`,
 	Args: cobra.ArbitraryArgs, // subcommands still resolve first
 	Example: `  spwn agent create neo              Create a blank agent
-  spwn agent neo                     Start the world that contains neo
+  spwn agent neo                     Open an interactive session with neo
   spwn agent -n neo -u w-abc123      Legacy: spawn named agent into world
   spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Compose-style shortcut: `spwn agent <name>` -> agent start <name>.
+		// Compose-style shortcut: `spwn agent <name>` -> open an
+		// interactive session (boot world if needed, then attach).
 		if len(args) == 1 && !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
 			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {
-			return startCmd.RunE(cmd, args)
+			return runInteractiveSession(cmd, args[0])
 		}
 		// If no flags set at all, show help
 		if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
@@ -203,4 +207,30 @@ survives after the world is destroyed.`,
 
 func newStepper(cmd *cobra.Command) *ui.Stepper {
 	return ui.New()
+}
+
+// runInteractiveSession is the `spwn agent <name>` shortcut: open an
+// interactive claude session with <name> as if running claude locally
+// in your terminal. Boots the world containing <name> transparently
+// if it isn't already running (idempotent - no-op when up), then
+// attaches a TTY via the existing talk path. The container is left
+// running on exit so the next invocation is instant and journal /
+// knowledge state keeps accumulating across sessions.
+func runInteractiveSession(cmd *cobra.Command, agentName string) error {
+	if err := agent.ValidateMind(agentName); err != nil {
+		return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent create %s", agentName, agentName)
+	}
+	worldName, err := findWorldForAgent(agentName)
+	if err != nil {
+		return err
+	}
+	// Bring the world up. composeUpRunE is idempotent: if a container
+	// for this world config is already running it prints a notice and
+	// returns nil, so we can call it unconditionally without paying
+	// the Docker bootstrap cost twice.
+	if err := worldcmd.UpCmd.RunE(cmd, []string{worldName}); err != nil {
+		return err
+	}
+	// Attach an interactive session inside the running container.
+	return talkCmd.RunE(cmd, []string{agentName})
 }

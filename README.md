@@ -302,9 +302,9 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn agent create neo                        Create a blank agent (auto-creates a single-agent world)
 🟢 spwn agent ls                                List your agents
 🟢 spwn agent rm neo                            Delete an agent
-🟢 spwn agent start neo                         Start the world that contains neo
-🟢 spwn agent stop  neo                         Stop the world that contains neo
-🟢 spwn agent neo                               Shortcut for `spwn agent start neo`
+🟢 spwn agent neo                               Open an interactive session with neo (boots the world if needed)
+🔴 spwn agent start neo                         Run neo as an autonomous daemon [planned]
+🔴 spwn agent stop  neo                         Kill neo's daemon loop [planned]
 🟡 spwn agent fork neo neo-v2                   Clone + evolve independently
 
 # Observe
