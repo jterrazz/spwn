@@ -1,0 +1,7 @@
+# neo agent configuration
+name: neo
+role: worker
+runtime:
+  backend: "@spwn/claude-code" # resolves to claude-code compile adapter
+tools:
+  - "@spwn/unix"

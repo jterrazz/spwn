@@ -1,0 +1,6 @@
+version: 2
+name: empty-skill
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

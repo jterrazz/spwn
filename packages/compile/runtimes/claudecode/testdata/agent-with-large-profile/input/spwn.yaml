@@ -1,0 +1,6 @@
+version: 2
+name: large-profile
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

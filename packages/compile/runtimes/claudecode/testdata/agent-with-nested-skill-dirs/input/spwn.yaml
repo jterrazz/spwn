@@ -1,0 +1,6 @@
+version: 2
+name: nested
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

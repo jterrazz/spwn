@@ -1,0 +1,10 @@
+# This file configures the neo agent.
+name: neo            # basename under spwn/agents/
+role: worker         # default role
+
+# tools section (catalog refs)
+tools:
+  - "@spwn/unix"     # POSIX basics
+
+# plugins currently unused
+plugins: []

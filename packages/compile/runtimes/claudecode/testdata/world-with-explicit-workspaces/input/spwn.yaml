@@ -1,0 +1,8 @@
+version: 2
+name: ws-explicit
+worlds:
+  home:
+    agents: [neo]
+    workspaces:
+      - ./src
+      - ./tests
