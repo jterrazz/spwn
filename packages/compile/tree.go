@@ -11,11 +11,14 @@
 package compile
 
 import (
+	"archive/tar"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 // Tree is a pure in-memory file layout produced by a Runtime. Paths
@@ -93,6 +96,40 @@ func (t *Tree) WriteTo(dir string) error {
 		if err := os.WriteFile(full, t.files[p], 0o644); err != nil {
 			return fmt.Errorf("write %s: %w", full, err)
 		}
+	}
+	return nil
+}
+
+// Tar writes the tree as an uncompressed tar stream. Output is
+// deterministic: for the same input the same tar bytes are produced.
+// Mode, modtime, and uid/gid are fixed; entries are written in the
+// sorted path order exposed by Paths(). Paths are written unchanged
+// (relative, no leading slash).
+//
+// Useful for feeding a compiled tree directly into a Docker build
+// context without materialising to disk first.
+func (t *Tree) Tar(w io.Writer) error {
+	tw := tar.NewWriter(w)
+	for _, path := range t.Paths() {
+		content := t.files[path]
+		hdr := &tar.Header{
+			Name:    path,
+			Mode:    0o644,
+			Size:    int64(len(content)),
+			ModTime: time.Unix(0, 0).UTC(),
+			Uid:     0,
+			Gid:     0,
+			Format:  tar.FormatUSTAR,
+		}
+		if err := tw.WriteHeader(hdr); err != nil {
+			return fmt.Errorf("tar header %s: %w", path, err)
+		}
+		if _, err := tw.Write(content); err != nil {
+			return fmt.Errorf("tar write %s: %w", path, err)
+		}
+	}
+	if err := tw.Close(); err != nil {
+		return fmt.Errorf("tar close: %w", err)
 	}
 	return nil
 }
