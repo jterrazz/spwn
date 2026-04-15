@@ -152,6 +152,7 @@ Examples:
 		if !buildTreeOnly {
 			issues := project.Validate(p, project.ValidateOpts{
 				BuiltinTools:      catalogToolNames(),
+				BuiltinSkills:     catalogSkillNames(),
 				SupportedRuntimes: supportedRuntimes(),
 			})
 			if project.HasErrors(issues) {

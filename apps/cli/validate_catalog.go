@@ -35,3 +35,12 @@ func supportedRuntimes() []string {
 	}
 	return out
 }
+
+// catalogSkillNames returns the @scope/name identifier of every
+// built-in skill pack. Reserved — the built-in skill catalog is
+// empty today, so the validator only exercises the local-ref path
+// for skills. Keeping the seam wired so a future skill catalog drops
+// in without rule-engine changes.
+func catalogSkillNames() []string {
+	return []string{}
+}
