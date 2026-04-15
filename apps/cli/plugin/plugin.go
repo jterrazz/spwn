@@ -1,14 +1,14 @@
 // Package plugin implements the `spwn plugin` command group — managing
-// reusable packages (the unified installable concept (formerly "package")).
+// the spwn plugin system — the unified installable concept (formerly "package").
 //
 // Packages are declared in each agent's agent.yaml#plugins list and
 // pinned in the project's spwn.lock.yaml. The shape is deliberately
 // npm-ish:
 //
-//   - @spwn/<name> is a catalog package compiled into the spwn binary.
+//   - @spwn/<name> is a catalog plugin compiled into the spwn binary.
 //     `spwn plugin install @spwn/unix` adds it to every agent's
 //     agent.yaml and records the pin in the lockfile.
-//   - <bare-name> is a local package authored under
+//   - <bare-name> is a local plugin authored under
 //     spwn/plugins/<name>/ (directory form) or spwn/plugins/<name>.md
 //     (bare-markdown skill form). The install verb rejects bare names
 //     with a hint — they are not "installed", they are authored.
@@ -29,7 +29,7 @@ import (
 	"spwn.sh/packages/project/refs"
 )
 
-// Cmd is the root `spwn package` command group.
+// Cmd is the root `spwn plugin` command group.
 var Cmd = &cobra.Command{
 	Use:     "plugin",
 	Aliases: []string{"pkgs", "plugins"},
@@ -77,7 +77,7 @@ func pluginHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn plugin install @spwn/python", Desc: ""},
-				{Name: "spwn plugin install @spwn/mempalace", Desc: "Short alias"},
+				{Name: "spwn plugin uninstall @spwn/python", Desc: "Remove it again"},
 				{Name: "spwn plugin ls", Desc: "What's pinned in the lockfile"},
 			}},
 		},
@@ -145,7 +145,7 @@ var showCmd = &cobra.Command{
 
 // installCmd adds a ref to every agent's agent.yaml#plugins and
 // pins it in the project lockfile. Bare names are rejected with a
-// pointer to the local-package authoring flow.
+// pointer to the local-plugin authoring flow.
 var installCmd = &cobra.Command{
 	Use:   "install <ref>",
 	Short: "Install a plugin into the project",
@@ -180,16 +180,16 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	switch ref.Kind {
 	case refs.KindLocal:
 		return fmt.Errorf("%q is a bare name — local plugins are authored in place, not installed. "+
-			"Create ./spwn/plugins/%s/package.yaml for a full package or ./spwn/plugins/%s.md for a bare skill",
+			"Create ./spwn/plugins/%s/plugin.yaml for a full plugin or ./spwn/plugins/%s.md for a bare skill",
 			pack, pack, pack)
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
-			"Use @spwn/<name> for built-in plugins, or author a local package under ./spwn/plugins/",
+			"Use @spwn/<name> for built-in plugins, or author a local plugin under ./spwn/plugins/",
 			raw, ref.Owner, ref.Name)
 	}
 
 	if !catalogHas(pack) {
-		return fmt.Errorf("unknown builtin %q — run `spwn plugin ls` to see available packages", pack)
+		return fmt.Errorf("unknown builtin %q — run `spwn plugin ls` to see available plugins", pack)
 	}
 
 	agents := p.Agents

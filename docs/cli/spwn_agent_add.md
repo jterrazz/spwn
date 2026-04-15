@@ -5,15 +5,15 @@ slug: "spwn-agent-add"
 
 ## spwn agent add
 
-Add packages to an agent
+Add plugins to an agent
 
 ### Synopsis
 
-Compose an agent by attaching packages.
+Compose an agent by attaching plugins.
 
 Examples:
   spwn agent add neo --plugin @spwn/python
-  spwn agent add neo --pkg @spwn/mempalace
+  spwn agent add neo --plugins @spwn/unix --plugins @spwn/git
   spwn agent add neo --plugin @spwn/unix --plugin @spwn/git
 
 ```

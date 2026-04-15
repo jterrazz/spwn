@@ -73,7 +73,7 @@ func SaveManifest(agentName string, m *Manifest) error {
 	return nil
 }
 
-// AddPlugin appends a package ref to the agent's composition
+// AddPlugin appends a plugin ref to the agent's composition
 // (idempotent). Replaces the old AddTool/AddPlugin/AddSkill trio.
 func AddPlugin(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
@@ -89,7 +89,7 @@ func AddPlugin(agentName, ref string) error {
 	return SaveManifest(agentName, m)
 }
 
-// RemovePlugin removes a package ref from the agent's composition.
+// RemovePlugin removes a plugin ref from the agent's composition.
 // No-op when the ref isn't present.
 func RemovePlugin(agentName, ref string) error {
 	m, err := LoadManifest(agentName)

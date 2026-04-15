@@ -36,28 +36,28 @@ type Tool interface {
 	Verify() []string
 
 	// Skills returns embedded skill files (Vercel SKILL.md convention).
-	// Return nil if the package ships no skills.
+	// Return nil if the plugin ships no skills.
 	Skills() fs.FS
 
-	// Runtimes returns the runtime backends this package injects
+	// Runtimes returns the runtime backends this plugin injects
 	// config into (e.g. "@spwn/claude-code"). Return nil for the
-	// common case of "not a plugin" — packages that aren't targeting
-	// a runtime. Non-nil means the spawn-time merge pass should call
-	// Config(runtime) for each matching runtime and shallow-merge the
-	// result into the runtime's settings file.
+	// common case of "no runtime-config block" — plugins that don't
+	// target a runtime. Non-nil means the spawn-time merge pass
+	// should call Config(runtime) for each matching runtime and
+	// shallow-merge the result into the runtime's settings file.
 	Runtimes() []string
 
 	// Config returns the JSON snippet to merge into the named
 	// runtime's config file inside the container, or nil if this
-	// package has no config for that runtime. Called only when the
+	// plugin has no config for that runtime. Called only when the
 	// runtime is in Runtimes().
 	Config(runtime string) []byte
 }
 
-// PluginConfig returns the config JSON a package would inject for the
+// PluginConfig returns the config JSON a plugin would inject for the
 // given runtime, enforcing the Runtimes() allowlist so individual
-// packages don't have to repeat the check. Returns nil when the
-// package doesn't target the runtime or has no config for it.
+// plugins don't have to repeat the check. Returns nil when the
+// plugin doesn't target the runtime or has no config for it.
 func PluginConfig(t Tool, runtime string) []byte {
 	runtimes := t.Runtimes()
 	if len(runtimes) == 0 {

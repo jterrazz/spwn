@@ -601,13 +601,13 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 	return out
 }
 
-// rulePluginsExist checks every package referenced by any agent or
+// rulePluginsExist checks every plugin referenced by any agent or
 // world against the BuiltinTools catalog (for @spwn/* refs) and
 // against the filesystem (for bare local refs).
 //
 // Local refs resolve to either:
 //   - spwn/plugins/<name>/ (a directory-form package, with or without
-//     a package.yaml inside), OR
+//     a plugin.yaml inside), OR
 //   - spwn/plugins/<name>.md (a bare-markdown skill).
 func rulePluginsExist(in Input) []Issue {
 	if in.Manifest == nil {
@@ -638,13 +638,13 @@ func rulePluginsExist(in Input) []Issue {
 				return []Issue{{
 					Level: LevelError, Path: location,
 					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
-					Hint: "use @spwn/<name> for built-in packages or drop a directory under ./spwn/plugins/<name>/ for a local package; " +
+					Hint: "use @spwn/<name> for built-in plugins or drop a directory under ./spwn/plugins/<name>/ for a local plugin; " +
 						"remote registries (@<owner>/<name>) are planned but not implemented yet",
 				}}
 			default: // ResolveNotFound
 				return []Issue{{
 					Level: LevelError, Path: location,
-					Message: fmt.Sprintf("package %q does not exist", raw),
+					Message: fmt.Sprintf("plugin %q does not exist", raw),
 					Hint:    suggestPackage(pack, in.BuiltinTools),
 				}}
 			}
@@ -652,7 +652,7 @@ func rulePluginsExist(in Input) []Issue {
 
 		// Local ref: delegate to refs.ResolveSkill which already
 		// handles both the directory form (full package) and the
-		// file form (bare markdown skill) against spwn/packages/.
+		// file form (bare markdown skill) against spwn/plugins/.
 		if ref.Name == "" {
 			return []Issue{{
 				Level: LevelError, Path: location,
@@ -664,8 +664,8 @@ func rulePluginsExist(in Input) []Issue {
 		}
 		return []Issue{{
 			Level: LevelError, Path: location,
-			Message: fmt.Sprintf("package %q does not exist", raw),
-			Hint: "create ./spwn/plugins/" + ref.Name + "/package.yaml for a full package, " +
+			Message: fmt.Sprintf("plugin %q does not exist", raw),
+			Hint: "create ./spwn/plugins/" + ref.Name + "/plugin.yaml for a full plugin, " +
 				"or ./spwn/plugins/" + ref.Name + ".md for a bare skill",
 		}}
 	}
@@ -695,9 +695,9 @@ func rulePluginsExist(in Input) []Issue {
 }
 
 // ruleLockfileConsistent compares every @spwn/* or @<owner>/*
-// package ref declared in any agent.yaml or spwn.yaml world against
+// plugin ref declared in any agent.yaml or spwn.yaml world against
 // spwn.lock.yaml. Missing entries become errors so `spwn build` fails
-// loudly and points the user at `spwn package install`.
+// loudly and points the user at `spwn plugin install`.
 //
 // Local (bare) refs are never lockfile-tracked.
 //
@@ -713,7 +713,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		return []Issue{{
 			Level: LevelError, Path: lockfile.FileName,
 			Message: fmt.Sprintf("cannot read lockfile: %v", err),
-			Hint:    "regenerate with `spwn package install` for each declared pack, or delete " + lockfile.FileName + " to start fresh",
+			Hint:    "regenerate with `spwn plugin install` for each declared pack, or delete " + lockfile.FileName + " to start fresh",
 		}}
 	}
 	if lock == nil {
@@ -767,7 +767,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		out = append(out, Issue{
 			Level: LevelError, Path: rec.location,
 			Message: fmt.Sprintf("%q is not recorded in %s", pack, lockfile.FileName),
-			Hint:    "run `spwn package install " + pack + "` to sync the lockfile",
+			Hint:    "run `spwn plugin install " + pack + "` to sync the lockfile",
 		})
 	}
 	return out
@@ -879,7 +879,7 @@ func relPath(root, path string) string {
 
 func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
-		return "check the package name, or add it as a local package under ./spwn/plugins/"
+		return "check the plugin name, or add it as a local plugin under ./spwn/plugins/"
 	}
 	best := ""
 	bestScore := len(tool) + 1

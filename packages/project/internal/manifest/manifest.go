@@ -50,7 +50,7 @@ type World struct {
 	// form.
 	Workspaces []string `yaml:"workspaces"`
 
-	// Packages is the optional list of package refs that augment the
+	// Plugins is the optional list of plugin refs that augment the
 	// union computed from each agent's own package list. Useful for
 	// "every agent in this world gets @spwn/qmd" shared-baseline
 	// patterns.

@@ -101,7 +101,7 @@ func (p *fakeConfigPlugin) Config(runtime string) []byte {
 	return nil
 }
 
-func TestCollectPluginConfigs_FiltersByRuntime(t *testing.T) {
+func TestCollectRuntimeConfigs_FiltersByRuntime(t *testing.T) {
 	resolved := []Tool{
 		&fakeConfigPlugin{
 			name:     "@spwn/a",

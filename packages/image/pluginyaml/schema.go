@@ -1,19 +1,21 @@
-// Package pkgyaml is the shared parser for package.yaml — the
-// declarative manifest format that describes a spwn package's
-// image-build recipe. Both the catalog (catalog/plugins/<name>/ // plugin.yaml) and project-local packages (spwn/plugins/<name>/
-// package.yaml in a user project) use the same schema, so a package
-// can graduate from "authored in a project" to "shipped in the
-// catalog" by moving its directory.
+// Package pluginyaml is the shared parser for plugin.yaml — the
+// declarative manifest format that describes a spwn plugin's
+// image-build recipe. Both the catalog (catalog/plugins/<name>/plugin.yaml)
+// and project-local plugins (spwn/plugins/<name>/plugin.yaml in a user
+// project) use the same schema, so a plugin can graduate from
+// "authored in a project" to "shipped in the catalog" by moving its
+// directory.
 //
-// A package is whatever its fields say it is: install steps + verify
-// make it a tool; a plugin: section makes it inject runtime config; a
-// SKILL.md sibling or content-only body makes it a skill. There is
-// no explicit type field — composability determines identity.
+// A plugin is whatever its fields say it is: install steps + verify
+// make it a tool; a runtime-config: section makes it inject runtime
+// configuration; a SKILL.md sibling or content-only body makes it a
+// skill. There is no explicit type field — composability determines
+// identity.
 //
 // The parser produces image.Tool instances (via the adapter in
 // adapter.go), so everything downstream — registry resolution,
 // dockerfile generation, skill collection — is oblivious to whether a
-// given package came from Go or YAML.
+// given plugin came from Go or YAML.
 package pluginyaml
 
 import (
@@ -23,42 +25,41 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Schema is the on-disk shape of package.yaml. Every field is
-// optional so a minimal package ("install one thing, verify it's
+// Schema is the on-disk shape of plugin.yaml. Every field is
+// optional so a minimal plugin ("install one thing, verify it's
 // there") stays short.
 type Schema struct {
-	// Name is the package identifier (e.g. "@spwn/git"). Optional:
+	// Name is the plugin identifier (e.g. "@spwn/git"). Optional:
 	// when empty, the loader derives it from the caller-supplied
 	// DefaultName (catalog loader auto-prefixes with "@spwn/"; local
 	// loader uses the directory basename).
 	Name string `yaml:"name"`
 
-	// Kind classifies the package: "runtime", "sdk", "tool", or
+	// Kind classifies the plugin: "runtime", "sdk", "tool", or
 	// "platform". Defaults to "tool". Today this is metadata only
 	// (the image builder doesn't branch on it); composability of the
-	// other fields decides what the package actually does.
+	// other fields decides what the plugin actually does.
 	Kind string `yaml:"kind"`
 
 	// Version is a semver string or "latest". Required for catalog
-	// packages; defaults to "0.0.0-local" for project-local packages.
+	// plugins; defaults to "0.0.0-local" for project-local plugins.
 	Version string `yaml:"version"`
 
 	// Description is a human-readable one-liner. Optional.
 	Description string `yaml:"description"`
 
-	// Dependencies is a flat list of other package refs this one
+	// Dependencies is a flat list of other plugin refs this one
 	// needs. The registry resolves them transitively and topologically
 	// sorts the final install order.
 	Dependencies []string `yaml:"dependencies"`
 
-	// Install is the build-time recipe for baking this package into
-	// the image. All sub-fields are optional — a package that only
-	// ships
-	// skills can leave Install empty entirely.
+	// Install is the build-time recipe for baking this plugin into
+	// the image. All sub-fields are optional — a plugin that only
+	// ships skills can leave Install empty entirely.
 	Install InstallSection `yaml:"install"`
 
 	// Files is a map of image-target-path → source path relative to
-	// this tool's directory. Contents are read at parse time and
+	// this plugin's directory. Contents are read at parse time and
 	// baked into the image via the Dockerfile's COPY layer.
 	Files map[string]string `yaml:"files"`
 
@@ -66,9 +67,10 @@ type Schema struct {
 	// exit 0. Typically "command -v <binary>" or "<binary> --version".
 	Verify []string `yaml:"verify"`
 
-	// Plugin, when present, promotes this tool to a Plugin — a tool
-	// that targets one or more runtimes and injects configuration
-	// into their settings files at spawn time.
+	// RuntimeConfig, when present, makes this plugin inject settings
+	// into one or more target runtimes at spawn time. The merger
+	// reads the runtimes list and the per-runtime config snippets
+	// and shallow-merges them into the runtime's settings file.
 	RuntimeConfig *RuntimeConfigSection `yaml:"runtime-config,omitempty"`
 
 	// RuntimeProvider names a host-side Go implementation that
@@ -106,15 +108,15 @@ type InstallSection struct {
 	Env map[string]string `yaml:"env"`
 }
 
-// RuntimeConfigSection is the optional `plugin:` block. A tool that declares
-// this becomes a Plugin: the Runtimes list scopes which runtime
-// backends the plugin targets, and Configs is a map from runtime name
-// to the YAML-native snippet that gets merged into the runtime's
-// settings file at spawn time.
+// RuntimeConfigSection is the optional `runtime-config:` block on a
+// plugin. When present, the Runtimes list scopes which runtime
+// backends the plugin targets, and Configs is a map from runtime
+// name to the YAML-native snippet that gets merged into the
+// runtime's settings file at spawn time.
 //
 // Example (mempalace targeting Claude Code):
 //
-//	plugin:
+//	runtime-config:
 //	  runtimes:
 //	    - "@spwn/claude-code"
 //	  configs:

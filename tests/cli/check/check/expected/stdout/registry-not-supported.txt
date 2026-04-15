@@ -1,10 +1,8 @@
-
   <PROJECT>/spwn.yaml
 
   errors
     •  remote registries are not yet supported (ref: "@jterrazz/foo")
-       spwn/agents/neo/agent.yaml#packages
-       → use @spwn/<name> for built-in packages or drop a directory under ./spwn/packages/<name>/ for a local package; remote registries (@<owner>/<name>) are planned but not implemented yet
+       spwn/agents/neo/agent.yaml#plugins
+       → use @spwn/<name> for built-in plugins or drop a directory under ./spwn/plugins/<name>/ for a local plugin; remote registries (@<owner>/<name>) are planned but not implemented yet
 
   1 error(s), 0 warning(s), 0 info
-

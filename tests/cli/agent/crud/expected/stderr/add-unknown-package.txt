@@ -1,4 +1,4 @@
 
-  Error: package "@spwn/nonexistent" does not exist.
+  Error: plugin "@spwn/nonexistent" does not exist.
 known: @spwn/architect, @spwn/build, @spwn/cli, @spwn/docker-cli, @spwn/git, @spwn/mempalace, @spwn/node, @spwn/python, @spwn/qmd, @spwn/unix
 

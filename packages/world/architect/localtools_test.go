@@ -8,9 +8,9 @@ import (
 	ib "spwn.sh/packages/image"
 )
 
-func writePackage(t *testing.T, root, name, yaml string) {
+func writePlugin(t *testing.T, root, name, yaml string) {
 	t.Helper()
-	dir := filepath.Join(root, "spwn", "packages", name)
+	dir := filepath.Join(root, "spwn", "plugins", name)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -21,7 +21,7 @@ func writePackage(t *testing.T, root, name, yaml string) {
 
 func TestLoadLocalPackage_happyPath(t *testing.T) {
 	root := t.TempDir()
-	writePackage(t, root, "my-tool", `name: my-tool
+	writePlugin(t, root, "my-tool", `name: my-tool
 version: "1.2.3"
 install:
   packages:
@@ -38,7 +38,7 @@ dependencies:
   - "@spwn/unix"
 `)
 
-	tool, err := loadLocalPackage(root, "my-tool")
+	tool, err := loadLocalPlugin(root, "my-tool")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -71,24 +71,24 @@ dependencies:
 
 func TestLoadLocalPackage_missingManifest(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "packages", "empty-pkg"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "plugins", "empty-pkg"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	_, err := loadLocalPackage(root, "empty-pkg")
+	_, err := loadLocalPlugin(root, "empty-pkg")
 	if err == nil {
-		t.Fatal("want error for missing package.yaml")
+		t.Fatal("want error for missing plugin.yaml")
 	}
 }
 
 func TestLoadLocalPackage_skillsDirExposed(t *testing.T) {
 	root := t.TempDir()
-	writePackage(t, root, "toolish", `name: toolish
+	writePlugin(t, root, "toolish", `name: toolish
 install:
   packages: [curl]
 verify:
   - command -v curl
 `)
-	skillsDir := filepath.Join(root, "spwn", "packages", "toolish", "skills")
+	skillsDir := filepath.Join(root, "spwn", "plugins", "toolish", "skills")
 	if err := os.MkdirAll(skillsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := loadLocalPackage(root, "toolish")
+	tool, err := loadLocalPlugin(root, "toolish")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -110,7 +110,7 @@ func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "@spwn/git"}
-	got, err := hydrateLocalPackages(reg, root, list)
+	got, err := hydrateLocalPlugins(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -121,7 +121,7 @@ func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 
 func TestHydrateLocalPackages_rewritesBareNames(t *testing.T) {
 	root := t.TempDir()
-	writePackage(t, root, "mine", `name: mine
+	writePlugin(t, root, "mine", `name: mine
 install:
   packages: [curl]
 verify:
@@ -130,7 +130,7 @@ verify:
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "mine", "@spwn/git"}
-	got, err := hydrateLocalPackages(reg, root, list)
+	got, err := hydrateLocalPlugins(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -145,13 +145,13 @@ verify:
 // Register once per unique name.
 func TestHydrateLocalPackages_mixedListOrderPreserved(t *testing.T) {
 	root := t.TempDir()
-	writePackage(t, root, "tool-a", `name: tool-a
+	writePlugin(t, root, "tool-a", `name: tool-a
 install:
   packages: [curl]
 verify:
   - command -v curl
 `)
-	writePackage(t, root, "tool-b", `name: tool-b
+	writePlugin(t, root, "tool-b", `name: tool-b
 install:
   packages: [jq]
 verify:
@@ -160,7 +160,7 @@ verify:
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "tool-a", "@spwn/git", "tool-b", "tool-a"}
-	got, err := hydrateLocalPackages(reg, root, list)
+	got, err := hydrateLocalPlugins(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -179,15 +179,15 @@ func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 	root := t.TempDir()
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalPackages(reg, root, []string{"nonexistent"})
+	_, err := hydrateLocalPlugins(reg, root, []string{"nonexistent"})
 	if err == nil {
-		t.Fatal("want error for missing local package dir")
+		t.Fatal("want error for missing local plugin dir")
 	}
 }
 
 func TestHydrateLocalPackages_idempotentOnDuplicate(t *testing.T) {
 	root := t.TempDir()
-	writePackage(t, root, "mine", `name: mine
+	writePlugin(t, root, "mine", `name: mine
 install:
   packages: [curl]
 verify:
@@ -195,7 +195,7 @@ verify:
 `)
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalPackages(reg, root, []string{"mine", "mine"})
+	_, err := hydrateLocalPlugins(reg, root, []string{"mine", "mine"})
 	if err != nil {
 		t.Fatalf("duplicate should not error: %v", err)
 	}

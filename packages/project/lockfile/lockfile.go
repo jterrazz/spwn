@@ -1,11 +1,11 @@
 // Package lockfile owns spwn.lock.yaml: the committed, deterministic
-// pin of every @spwn/* and @<org>/* package reference the project
+// pin of every @spwn/* and @<org>/* plugin reference the project
 // depends on.
 //
 // The lockfile mirrors each agent.yaml's flat `packages:` list and
 // collapses them into a single project-wide record. Local (bare-name)
 // refs never land in the lockfile — they are authored in-place under
-// spwn/packages/ and have no version to pin.
+// spwn/plugins/ and have no version to pin.
 //
 // Shape:
 //
