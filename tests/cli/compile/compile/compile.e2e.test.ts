@@ -105,4 +105,38 @@ describe('spwn compile', () => {
         expect(stderr).toContain('codex');
         expect(stderr).toContain('claude-code');
     });
+
+    test('--force re-compile replaces stale files from a filtered run', async () => {
+        // Given — a clean compile, then a filtered compile with
+        // --force. Before the cleanup guard shipped, the second run
+        // Would overwrite only the agent slice and leave stale
+        // World/* files lying around. Lock the replace semantics.
+        const result = await spec('compile force replaces stale')
+            .project('docker-pilot')
+            .exec(['compile', 'compile --agent neo --force'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        // Filtered compile writes only the agent slice — no
+        // World/* files should remain from the first run.
+        expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
+        expect(result.file('dist/world/physics.md').exists).toBe(false);
+        expect(result.file('dist/world/AGENTS.md').exists).toBe(false);
+    });
+
+    test('empty AGENT.md is rejected with a loud error', async () => {
+        // Given — an otherwise-valid project whose agent prompt
+        // Is blank. Previously compile shipped an empty CLAUDE.md
+        // Silently; now it errors with a named agent list.
+        const result = await spec('compile empty agent md')
+            .project('docker-pilot')
+            .seed('agent/neo')
+            .exec('compile')
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        const stderr = result.stderr.text.toLowerCase();
+        expect(stderr).toContain('agent prompt');
+        expect(stderr).toContain('neo');
+    });
 });
