@@ -1,7 +1,7 @@
 # packages/image
 
 **The spwn image layer.** Owns every code path that turns a
-declaration into a Docker image — both the shared base world image
+declaration into a Docker image - both the shared base world image
 (tools, skills, runtime) and the derived project images produced by
 `spwn build`.
 
@@ -11,7 +11,7 @@ There are two distinct "build an image" flows, and they live side by
 side in this package because they share the tool registry, the
 Docker backend, and the Dockerfile generator.
 
-### 1. `imagebuilder.Build(req)` — the shared base world image
+### 1. `imagebuilder.Build(req)` - the shared base world image
 
 Called by `packages/world/architect` at spawn time. Resolves a tool
 catalog into a Dockerfile, runs `docker build`, then probes the
@@ -32,7 +32,7 @@ result, err := builder.Build(ctx, image.BuildRequest{
 })
 ```
 
-### 2. `image.BuildFromBase(ctx, cli, req)` — project-specific images
+### 2. `image.BuildFromBase(ctx, cli, req)` - project-specific images
 
 Called by the `spwn build` CLI command. Takes an existing base image
 plus a compiled `Tree` and produces a derived image with the tree
@@ -46,7 +46,7 @@ LABEL sh.spwn.kind=project-build
 LABEL sh.spwn.runtime=<runtime>
 ```
 
-The whole build context — Dockerfile plus tree entries — is
+The whole build context - Dockerfile plus tree entries - is
 assembled in memory and streamed into the Docker API's `ImageBuild`
 endpoint. Nothing is materialised to disk.
 
@@ -87,20 +87,20 @@ mounts, cred sync).
 
 ## Responsibilities
 
-- **Base image selection** — pick the right starter image (the
+- **Base image selection** - pick the right starter image (the
   default world image, a custom one from `spwn.yaml`, or an
   injected `SPWN_BASE_IMAGE` for tests).
-- **Tool resolution** — turn user-declared tool refs
+- **Tool resolution** - turn user-declared tool refs
   (`@spwn/unix`, `@spwn/python`, `@community/foo`) into concrete
   install steps via the tool catalog.
-- **Layer authoring** — generate a Dockerfile that installs each
+- **Layer authoring** - generate a Dockerfile that installs each
   resolved tool's `UserCommands`, adds verify hooks, and copies in
   any compile-time artifacts.
-- **Derived images** — `BuildFromBase` bakes a compiled tree onto
+- **Derived images** - `BuildFromBase` bakes a compiled tree onto
   an existing base image, producing a pushable project artifact.
-- **Build + verify** — run `docker build`, then probe the resulting
+- **Build + verify** - run `docker build`, then probe the resulting
   base image to confirm every declared tool actually works.
-- **Plugin config** — collect plugin `Config(runtime)` contributions
+- **Plugin config** - collect plugin `Config(runtime)` contributions
   so `architect.Spawn` can merge them into the container's runtime
   settings file after boot.
 

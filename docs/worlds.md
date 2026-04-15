@@ -2,7 +2,7 @@
 
 A **world** is a deployable grouping of agents plus the runtime
 constraints they live under. Worlds are declared *inline* in
-`spwn.yaml` as map entries under `worlds:` — there is no
+`spwn.yaml` as map entries under `worlds:` - there is no
 `spwn/worlds/` directory and no per-world yaml file. A world is
 "alive" when at least one container is up for it, and "stopped"
 otherwise; it doesn't stop existing just because nothing is running.
@@ -71,13 +71,13 @@ spwn world stop lab         # stop one world
 Creating an agent with `spwn agent new <name>` automatically inserts
 a single-agent world into `spwn.yaml` so you never end up with an
 agent that has nowhere to run. You can later merge it into a
-multi-agent world by editing the file by hand — there is no implicit
+multi-agent world by editing the file by hand - there is no implicit
 migration tooling.
 
 ## Tools are structural, not permitted
 
-No ACLs. No permission prompts. If a tool isn't listed — on the
-agent, on the world, or injected by the image builder — it's
+No ACLs. No permission prompts. If a tool isn't listed - on the
+agent, on the world, or injected by the image builder - it's
 **physically impossible** inside the container, not forbidden. You
 can't prompt-inject a missing binary.
 
@@ -96,12 +96,12 @@ tools:
 The effective tool set for a live container is the union of the
 agent's `tools:` and the world's `tools:`. If two agents in the same
 multi-agent world disagree on a tool's *version*, `spwn check` fails
-the project — version conflicts are errors, not last-writer-wins.
+the project - version conflicts are errors, not last-writer-wins.
 
 ## Limits
 
 Worlds inherit Docker host defaults for CPU, memory, and disk.
-Per-world hard limits are a future knob — until then, agents share
+Per-world hard limits are a future knob - until then, agents share
 the daemon's resources.
 
 ## Spawning a world

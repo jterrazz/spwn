@@ -116,7 +116,7 @@ One runner, one mental model. Whether a test happens to touch
 Docker is a property of what it asserts on, not a choice you make
 at setup time. CLI-only tests use `.exec(...)` and reach for
 stdout/stderr/file accessors. Tests that need container assertions
-add `await using` and call `.container(name)` — the first access
+add `await using` and call `.container(name)` - the first access
 lazily queries Docker; CLI-only tests never touch it.
 
 The runner ships with a `transform` that strips ANSI and collapses
@@ -124,7 +124,7 @@ The runner ships with a `transform` that strips ANSI and collapses
 `spwn.yaml/`, `agent/`, `state/`, and `activity/` fragments under
 each test's `seeds/` directory.
 
-**CLI-only pattern** — no containers, no docker cost:
+**CLI-only pattern** - no containers, no docker cost:
 
 ```typescript
 import { describe, expect, test } from 'vitest';
@@ -146,11 +146,11 @@ describe('spwn check', () => {
   `<test-dir>/expected/stdout/name.txt`. Regenerate with
   `JTERRAZZ_TEST_UPDATE=1 pnpm -C tests exec vitest run ...`.
 - `result.json.toMatch('name.json')` parses stdout and deep-equals
-  against a JSON fixture — pair with `spwn check --json` etc.
+  against a JSON fixture - pair with `spwn check --json` etc.
 - `result.file('.spwn/state.json').exists` / `.content` reads the
   host-side working dir.
 
-**Container-asserting pattern** — same `spec`, plus `.container(...)`:
+**Container-asserting pattern** - same `spec`, plus `.container(...)`:
 
 ```typescript
 import { describe, expect, test } from 'vitest';
@@ -178,18 +178,18 @@ describe('world lifecycle', () => {
   test's run id so parallel runs never collide. Harmless no-op
   for tests that don't spawn anything.
 - `result.container('<world-key>')` resolves by the
-  `sh.spwn.world.config` label — the key declared under `worlds.`
+  `sh.spwn.world.config` label - the key declared under `worlds.`
   in `spwn.yaml`, not the sometimes-empty `sh.spwn.world.name`.
 - `result.container(name).file(path)` / `.exec(cmd)` /
   `.inspect.value` / `.stdout` / `.stderr` use the same accessor
-  API as the host-side `result` — no new vocabulary.
+  API as the host-side `result` - no new vocabulary.
 - Follow-up CLI commands that need a container id (e.g.
   `spwn world inspect <id>`) get it via `neo.id`.
 - Always use the `docker-pilot` fixture (minimal agent without
   `@spwn/python`). `single-agent` fails to spawn because the
   base image lacks `pip3`.
 - Banners (`Created container`, `Agent is alive`, `Destroyed`,
-  `World destroyed`) go to **stderr**, not stdout — spwn follows
+  `World destroyed`) go to **stderr**, not stdout - spwn follows
   the Unix convention of data-on-stdout / status-on-stderr.
 
 ## Adding New Tests
@@ -240,9 +240,9 @@ describe('world lifecycle', () => {
 
 Tests use `tests/vitest.config.ts` with two projects:
 
-- **`cli`** — CLI-mode tests. Parallel within the project, per-test
+- **`cli`** - CLI-mode tests. Parallel within the project, per-test
   `testTimeout: 120_000`, `hookTimeout: 60_000`.
-- **`docker`** — Docker-mode tests. Also `testTimeout: 120_000` and
+- **`docker`** - Docker-mode tests. Also `testTimeout: 120_000` and
   `hookTimeout: 60_000`, but `fileParallelism: false` because Docker
   tests within a single file must run sequentially. Cross-file
   isolation is still handled by the framework's label-based test-run

@@ -58,7 +58,7 @@ Only Claude Code can actually be spawned today. The other names appear in the to
 
 - **Per-repository**. Agents, worlds, tools, and skills live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
 - **Declared tools only**. An agent can only reach for tools its `agent.yaml` declares (via either `tools:` or `plugins:`). Tools not in the world's image are physically absent.
-- **Plugins are a composition layer above tools**. A plugin is a tool that additionally targets a runtime — it installs its binary via the same image-build pipeline *and* injects a JSON snippet into the runtime's settings file (`~/.claude/settings.json` for Claude Code) at spawn time. MCP servers, shell hooks, and other runtime-specific wiring ship as plugins so the user never touches runtime config by hand.
+- **Plugins are a composition layer above tools**. A plugin is a tool that additionally targets a runtime - it installs its binary via the same image-build pipeline *and* injects a JSON snippet into the runtime's settings file (`~/.claude/settings.json` for Claude Code) at spawn time. MCP servers, shell hooks, and other runtime-specific wiring ship as plugins so the user never touches runtime config by hand.
 - **Labels are truth**. Any world info the CLI displays comes from reading Docker labels, not an on-disk state file.
 - **Compile is deterministic**. Running `spwn compile` on an unchanged project tree produces byte-identical output - covered by the renderer golden tests in `packages/compile/runtimes/`.
 

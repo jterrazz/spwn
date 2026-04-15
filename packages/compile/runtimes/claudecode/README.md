@@ -38,26 +38,26 @@ uses the neutral name, the emitted tree uses Claude's convention.
 
 Paths in the `Tree` are grouped under two top-level namespaces:
 
-- **`world/…`** — shared per-world files. `architect.Spawn` binds
+- **`world/…`** - shared per-world files. `architect.Spawn` binds
   these into the container at `/world/` through a host directory
   under `~/.spwn/world-states/<id>/`.
-- **`agents/<name>/…`** — per-agent home content. Bound into the
+- **`agents/<name>/…`** - per-agent home content. Bound into the
   container at `/agents/` through `~/.spwn/agents/`.
 
-Anything else is a bug — the `materialiseWorldTree` helper in
+Anything else is a bug - the `materialiseWorldTree` helper in
 `architect.Spawn` will return an error if the tree contains an
 unexpected prefix.
 
 ## What this runtime does NOT touch
 
-- **Runtime state** — inbox/outbox/notes directories are empty
+- **Runtime state** - inbox/outbox/notes directories are empty
   mkdir'd by `architect.Spawn`, not the renderer. They're state,
   not generated content.
-- **Plugin settings** — `/home/spwn/.claude/settings.json` is merged
+- **Plugin settings** - `/home/spwn/.claude/settings.json` is merged
   at spawn time by `injectPluginRuntimeConfig`, because it reads
   the baseline from inside a running container and can't be done
   at compile time.
-- **Docker config** — base image, binds, env vars, labels. Those
+- **Docker config** - base image, binds, env vars, labels. Those
   live in `packages/image` and `packages/world/architect`.
 
 ## Where to hook
@@ -65,15 +65,15 @@ unexpected prefix.
 Want to change what Claude Code sees on boot? Edit the generator
 you care about:
 
-- `physics.go` — `GeneratePhysics(manifest)` — `/world/physics.md`
-- `physics.go` — `GenerateFaculties(tools)` — `/world/faculties.md`
-- `system_files.go` — `AgentsBook`, `SkillMindManagement`, etc. —
+- `physics.go` - `GeneratePhysics(manifest)` - `/world/physics.md`
+- `physics.go` - `GenerateFaculties(tools)` - `/world/faculties.md`
+- `system_files.go` - `AgentsBook`, `SkillMindManagement`, etc. -
   static operating manual and system skills.
-- `agent_context.go` — per-agent context generators, used by
+- `agent_context.go` - per-agent context generators, used by
   colony renders and NPC flows.
-- `agent_entrypoint.go` — `GenerateAgentCLAUDEMD(name, role)` —
+- `agent_entrypoint.go` - `GenerateAgentCLAUDEMD(name, role)` -
   the per-agent `CLAUDE.md` boot file.
-- `runtime.go` — `Render(input)` — the top-level glue that stitches
+- `runtime.go` - `Render(input)` - the top-level glue that stitches
   all of the above into one `Tree`.
 
 ## Testing
