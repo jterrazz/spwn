@@ -29,7 +29,8 @@ dependency graph and vice-versa.
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
-* [spwn plugin get](./spwn_plugin_get.md)	 - [experimental] Install a plugin pack from the registry [planned]
+* [spwn plugin install](./spwn_plugin_install.md)	 - Attach a plugin to every agent in the project
 * [spwn plugin ls](./spwn_plugin_ls.md)	 - List installed plugin packs
 * [spwn plugin show](./spwn_plugin_show.md)	 - Inspect a plugin pack
+* [spwn plugin uninstall](./spwn_plugin_uninstall.md)	 - Detach a plugin from every agent in the project
 

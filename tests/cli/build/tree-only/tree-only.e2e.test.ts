@@ -114,28 +114,18 @@ describe('spwn build --tree-only', () => {
     });
 
     test('--force re-compile replaces stale files from a filtered run', async () => {
-        // Given - a clean compile, then a filtered compile with
-        // --force. Before the cleanup guard shipped, the second
-        // run would overwrite only the agent slice and leave
-        // stale world/* files lying around. Lock the replace
-        // semantics.
         const result = await spec('tree-only force replaces stale')
             .project('docker-pilot')
             .exec(['build --tree-only', 'build --tree-only --agent neo --force'])
             .run();
 
         expect(result.exitCode).toBe(0);
-        // Filtered compile writes only the agent slice - no
-        // world/* files should remain from the first run.
         expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
         expect(result.file('dist/world/physics.md').exists).toBe(false);
         expect(result.file('dist/world/AGENTS.md').exists).toBe(false);
     });
 
     test('empty AGENTS.md is rejected with a loud error', async () => {
-        // Given - an otherwise-valid project whose agent prompt
-        // is blank. Previously compile shipped an empty CLAUDE.md
-        // silently; now it errors with a named agent list.
         const result = await spec('tree-only empty agent md')
             .project('docker-pilot')
             .seed('agent/neo')
@@ -149,8 +139,6 @@ describe('spwn build --tree-only', () => {
     });
 
     test('--dry-run without --tree-only errors', async () => {
-        // New guardrail: --dry-run is a tree-only concept because
-        // there's nothing to dry-run on the image-build path.
         const result = await spec('tree-only dry-run requires tree-only')
             .project('docker-pilot')
             .exec('build --dry-run')

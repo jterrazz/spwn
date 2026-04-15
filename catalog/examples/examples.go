@@ -168,6 +168,15 @@ func Install(slug, baseDir string) (InstallReport, error) {
 		rep.WorldsAdded = append(rep.WorldsAdded, ex.Worlds...)
 	}
 
+	// --- spwn.lock.yaml (committed dep pin) ---
+	lockDst := filepath.Join(baseDir, "spwn.lock.yaml")
+	if !exists(lockDst) {
+		lockSrc := path(slug, "spwn.lock.yaml")
+		if data, rerr := examplesFS.ReadFile(lockSrc); rerr == nil {
+			_ = os.WriteFile(lockDst, data, 0o644)
+		}
+	}
+
 	// --- agents ---
 	agentsRoot := filepath.Join(baseDir, "spwn", "agents")
 	if err := os.MkdirAll(agentsRoot, 0o755); err != nil {

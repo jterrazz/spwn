@@ -53,6 +53,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 				slug + "/example.yaml",
 				slug + "/README.md",
 				slug + "/spwn.yaml",
+				slug + "/spwn.lock.yaml",
 			}
 			for _, p := range mustExist {
 				if _, err := fs.Stat(examplesFS, p); err != nil {

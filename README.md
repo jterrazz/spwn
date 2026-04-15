@@ -115,11 +115,11 @@ Three ideas to hold in your head before you dive in:
 ```
 my-project/
 ├── spwn.yaml               # manifest - declares worlds, like docker-compose.yaml
+├── spwn.lock.yaml          # committed dep pins (like package-lock.json)
 ├── spwn/                   # committed project assets
 │   ├── agents/             #   your agents - travel with the repo
-│   ├── tools/              #   `spwn tool get @community/foo` → spwn/tools/foo/
-│   ├── plugins/            #   runtime-targeted tool packs (MCP, hooks, settings)
-│   └── skills/             #   `spwn skill get @community/review` → spwn/skills/review/
+│   ├── tools/              #   local tool packs you author (bare-name refs)
+│   └── skills/             #   local skill files (bare-name refs)
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
 
