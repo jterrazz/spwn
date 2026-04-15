@@ -51,8 +51,9 @@ shortcuts act on every world declared in `spwn.yaml`.
 # ── Project workflow ─────────────────────────────────────────────
 spwn init                                      # Scaffold spwn.yaml + ./spwn/ + .spwn/
 spwn check                                     # Validate the tree
-spwn build                                     # Flatten to .spwn/build/ (pinned artifact)
-spwn up                                        # Auto-builds before spawning when a project exists
+spwn compile                                   # Render the project tree to ./dist (preview/debug)
+spwn build                                     # Compile + bake into a project-specific Docker image
+spwn up                                        # Spawn a world from the current project
 
 # ── Compose-style shortcuts ──────────────────────────────────────
 spwn up                                        # Bring up every world in spwn.yaml
@@ -144,7 +145,6 @@ my-project/
 │   └── tools/                   # project-scoped tool packs (optional)
 └── .spwn/                       # gitignored local state
     ├── state.json               # live world IDs bound to this project
-    ├── build/                   # `spwn build` output (see packages/manifest)
     └── cache/
 ```
 

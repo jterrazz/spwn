@@ -21,7 +21,6 @@
 package project
 
 import (
-	"spwn.sh/packages/project/internal/build"
 	"spwn.sh/packages/project/internal/discovery"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/scaffold"
@@ -235,61 +234,6 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 		})
 	}
 	return validate.Run(in)
-}
-
-// BuildResult is the outcome of a successful Build.
-type BuildResult = build.Result
-
-// BuildMetadata is the shape of .spwn/build/build.json.
-type BuildMetadata = build.Metadata
-
-// BuildOpts configures Build.
-type BuildOpts struct {
-	// World is the world name from spwn.yaml#worlds to build the
-	// artifact against. Empty means "the only world" — error if
-	// multiple worlds exist.
-	World string
-
-	// ImageDigest pins the Docker image produced for this build.
-	// Empty means "no image was built" - the artifact is still
-	// valid, it just records no image reference.
-	ImageDigest string
-}
-
-// Build flattens the project into a reproducible artifact at
-// <projectRoot>/.spwn/build/. Every file the runtime will read for
-// the chosen world is copied in.
-//
-// Build does NOT validate. Callers should run Validate first and
-// abort on errors.
-func Build(p *Project, opts ...BuildOpts) (*BuildResult, error) {
-	if p == nil {
-		return nil, nil
-	}
-	var o BuildOpts
-	if len(opts) > 0 {
-		o = opts[0]
-	}
-	agentPaths := make(map[string]string, len(p.Agents))
-	for _, a := range p.Agents {
-		agentPaths[a.Name] = a.Path
-	}
-	return build.Build(build.Opts{
-		Root:        p.Root,
-		Manifest:    p.Manifest,
-		World:       o.World,
-		AgentPaths:  agentPaths,
-		ImageDigest: o.ImageDigest,
-	})
-}
-
-// LoadBuildMetadata reads an existing build.json from a project's
-// .spwn/build/ directory. Returns (nil, nil) when no build is present.
-func LoadBuildMetadata(p *Project) (*BuildMetadata, error) {
-	if p == nil {
-		return nil, nil
-	}
-	return build.LoadMetadata(p.Root + "/.spwn/build")
 }
 
 // HasErrors returns true if any issue is LevelError.

@@ -50,7 +50,7 @@ Only Claude Code can actually be spawned today. The other names appear in the to
 
 **Source of truth for live worlds**: container labels. `sh.spwn.*` labels are set at container creation time and read back by `packages/world/internal/state`. There is no `state.json` that tracks worlds anymore - the labels are the state.
 
-**Source of truth for project config**: `spwn.yaml` + `./spwn/`. `packages/manifest` parses these, validates them via a rule engine (15 rules, see `internal/validate/`), and optionally flattens them into a reproducible artifact at `./.spwn/build/`.
+**Source of truth for project config**: `spwn.yaml` + `./spwn/`. `packages/project` parses these and validates them via a rule engine (15 rules, see `internal/validate/`). `packages/compile` renders the validated tree into a runtime-specific `Tree`, and `spwn build` bakes that `Tree` onto a base image to produce a project-specific Docker image.
 
 **Source of truth for user identity**: `~/.spwn/`. Credentials, daemon state, activity log. Never project-scoped.
 
@@ -60,7 +60,7 @@ Only Claude Code can actually be spawned today. The other names appear in the to
 - **Declared tools only**. An agent can only reach for tools its `agent.yaml` declares (via either `tools:` or `plugins:`). Tools not in the world's image are physically absent.
 - **Plugins are a composition layer above tools**. A plugin is a tool that additionally targets a runtime — it installs its binary via the same image-build pipeline *and* injects a JSON snippet into the runtime's settings file (`~/.claude/settings.json` for Claude Code) at spawn time. MCP servers, shell hooks, and other runtime-specific wiring ship as plugins so the user never touches runtime config by hand.
 - **Labels are truth**. Any world info the CLI displays comes from reading Docker labels, not an on-disk state file.
-- **Build is deterministic**. `spwn build` writes the same content hash to `.spwn/build/build.json` when the source tree is unchanged - covered by `TestBuild_repeatedCallsProduceSameHash`.
+- **Compile is deterministic**. Running `spwn compile` on an unchanged project tree produces byte-identical output - covered by the renderer golden tests in `packages/compile/runtimes/`.
 
 ## Roadmap
 
