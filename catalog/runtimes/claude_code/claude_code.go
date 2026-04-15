@@ -15,15 +15,36 @@ var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@spwn/claude-code" }
-func (*tool) Kind() ib.Kind          { return ib.KindRuntime }
-func (*tool) Version() string        { return "latest" }
-func (*tool) Dependencies() []string { return []string{"@spwn/node"} }
+func (*tool) Name() string    { return "@spwn/claude-code" }
+func (*tool) Kind() ib.Kind   { return ib.KindRuntime }
+func (*tool) Version() string { return "latest" }
+
+// Dependencies: only @spwn/unix for curl + jq. We used to also
+// require @spwn/node because the old install path was
+// `npm install -g @anthropic-ai/claude-code`; the native installer
+// below ships a self-contained binary so node is no longer part
+// of the required world footprint.
+func (*tool) Dependencies() []string { return []string{"@spwn/unix"} }
 
 func (*tool) Install() ib.InstallSpec {
 	return ib.InstallSpec{
 		Commands: []string{
-			"npm install -g @anthropic-ai/claude-code",
+			// Native install: downloads a self-contained binary,
+			// no Node.js / npm in the image. The installer drops
+			// the binary at $HOME/.local/share/claude/versions/<ver>
+			// and places a symlink at $HOME/.local/bin/claude
+			// pointing at the current version. $HOME during a
+			// Dockerfile RUN step is /root, so those paths resolve
+			// under /root/.local.
+			//
+			// We `cp -L` via the symlink so the destination is the
+			// 200+ MB binary itself (not a dangling symlink), then
+			// wipe /root/.local so the layer doesn't ship the
+			// private staging tree.
+			"curl -fsSL https://claude.ai/install.sh | bash",
+			"cp -L /root/.local/bin/claude /usr/local/bin/claude",
+			"chmod +x /usr/local/bin/claude",
+			"rm -rf /root/.local /root/.claude",
 		},
 		// Note: first-run UI dismissal (hasCompletedOnboarding,
 		// trust dialogs, skipDangerousModePermissionPrompt) used to

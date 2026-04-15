@@ -11,10 +11,12 @@ func TestClaudeCode_Name(t *testing.T) {
 	}
 }
 
-func TestClaudeCode_DependsOnNode(t *testing.T) {
+func TestClaudeCode_DependsOnUnix(t *testing.T) {
+	// Native install uses curl + jq (from @spwn/unix) to pull the
+	// bootstrap script. No Node.js runtime needed.
 	deps := Tool.Dependencies()
-	if len(deps) != 1 || deps[0] != "@spwn/node" {
-		t.Errorf("expected [@spwn/node] dependency, got %v", deps)
+	if len(deps) != 1 || deps[0] != "@spwn/unix" {
+		t.Errorf("expected [@spwn/unix] dependency, got %v", deps)
 	}
 }
 

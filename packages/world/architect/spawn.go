@@ -196,9 +196,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// @spwn/cli is deliberately excluded here - it installs the
 	// spwn binary itself and is only meaningful inside the
 	// architect container, not inside the workers' world container.
-	// Adding it to every world spawn wasted a download and broke
-	// the probe whenever the install script was unreachable.
-	required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code"}
+	//
+	// @spwn/node used to live here because the claude-code runtime
+	// was installed via `npm install -g @anthropic-ai/claude-code`.
+	// The native binary installer removed that dependency, so node
+	// is no longer part of the baseline footprint. Users who want
+	// node for their own tools still add @spwn/node to agent.yaml.
+	required := []string{"@spwn/unix", "@spwn/claude-code"}
 	toolList := append(required, opts.Manifest.Tools...)
 	toolList = append(toolList, opts.Manifest.Plugins...)
 
