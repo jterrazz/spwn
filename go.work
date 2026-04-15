@@ -8,6 +8,7 @@ use (
 	./packages/auth
 	./packages/base
 	./packages/catalog
+	./packages/compile
 	./packages/env
 	./packages/ids
 	./packages/image
