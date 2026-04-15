@@ -20,6 +20,7 @@ import (
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
+	"spwn.sh/packages/world/internal/runtime"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/base"
@@ -370,6 +371,20 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("inject plugin runtime config: %w", err)
 	}
 
+	// Write the runtime provider's default config files into each
+	// deployed agent's HOME. These pre-dismiss first-run UI - Claude
+	// Code's onboarding banner, trust dialogs, dangerous-mode prompt
+	// - so `spwn agent <name>` drops straight into a clean session.
+	// Written host-side through the /agents bind mount (no container
+	// exec), and only when the file doesn't already exist so we
+	// don't clobber user customizations.
+	agentHomes := agentHomesForSpawn(opts)
+	if len(agentHomes) > 0 {
+		if err := writeRuntimeDefaultConfig(agentHomes); err != nil {
+			warnings = append(warnings, fmt.Sprintf("runtime default config: %v", err))
+		}
+	}
+
 	// Probe tools by running each resolved tool's Verify() commands
 	// inside the container. This is the canonical "is my image
 	// actually healthy" check - the probe pulls its expectations
@@ -618,6 +633,70 @@ func injectPluginRuntimeConfig(ctx context.Context, be backend.Backend, containe
 	)
 	if _, err := be.ExecOutput(ctx, containerID, []string{"sh", "-c", script}); err != nil {
 		return fmt.Errorf("write merged settings: %w", err)
+	}
+	return nil
+}
+
+// agentHomesForSpawn returns the (agentName -> containerHomePath)
+// map for every agent attached to this spawn. Single-agent worlds
+// return one entry; multi-agent worlds return one per agent. The
+// home paths are the in-container view (/agents/<name>) - they also
+// map 1:1 to ~/.spwn/agents/<name>/ on the host via the shared
+// agents bind mount.
+func agentHomesForSpawn(opts SpawnOpts) map[string]string {
+	homes := map[string]string{}
+	if opts.AgentName != "" {
+		homes[opts.AgentName] = "/agents/" + opts.AgentName
+	}
+	for _, a := range opts.Agents {
+		if a.Name == "" {
+			continue
+		}
+		homes[a.Name] = "/agents/" + a.Name
+	}
+	return homes
+}
+
+// writeRuntimeDefaultConfig writes the runtime provider's default
+// config files into each agent home. Files are written host-side
+// through the shared /agents bind mount (= ~/.spwn/agents/<name>/)
+// so no container exec is needed, and the state persists across
+// world restarts the same way the rest of the agent home does.
+//
+// Existing files are preserved - once the user or Claude Code has
+// touched .claude.json we don't want to stomp it on every spawn.
+// That means the first-run defaults land exactly once per agent
+// and any subsequent runtime-level customization survives.
+//
+// The runtime lookup is hardcoded to claude-code because every
+// world spawn today installs @spwn/claude-code as a required tool
+// (see the `required` list above). When the runtime becomes a
+// per-world choice this should resolve off the world manifest.
+func writeRuntimeDefaultConfig(agentHomes map[string]string) error {
+	rt, err := runtime.Get("claude-code")
+	if err != nil {
+		return fmt.Errorf("unknown runtime: %w", err)
+	}
+
+	hostAgents := paths.AgentsDir()
+	for agentName, agentHome := range agentHomes {
+		files := rt.DefaultConfigFiles(agentHome)
+		if len(files) == 0 {
+			continue
+		}
+		hostAgentDir := filepath.Join(hostAgents, agentName)
+		for relPath, content := range files {
+			dst := filepath.Join(hostAgentDir, relPath)
+			if _, statErr := os.Stat(dst); statErr == nil {
+				continue // preserve user customization
+			}
+			if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+				return fmt.Errorf("mkdir %s: %w", filepath.Dir(dst), err)
+			}
+			if err := os.WriteFile(dst, content, 0o644); err != nil {
+				return fmt.Errorf("write %s: %w", dst, err)
+			}
+		}
 	}
 	return nil
 }

@@ -78,8 +78,11 @@ func TestClaudeCodeMetadata(t *testing.T) {
 	if len(r.InstallCommands()) == 0 {
 		t.Error("no install commands")
 	}
-	if len(r.RequiredEnvVars()) == 0 && len(r.OptionalEnvVars()) == 0 {
-		t.Error("no env vars defined (need at least optional auth)")
+	if r.PrelaunchShell() == "" {
+		t.Error("empty prelaunch shell (needed to source /credentials/.env)")
+	}
+	if len(r.DefaultConfigFiles("/agents/neo")) == 0 {
+		t.Error("no default config files (needed to dismiss first-run UI)")
 	}
 
 	hasGit := false

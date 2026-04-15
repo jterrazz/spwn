@@ -67,11 +67,11 @@ describe('spwn web', () => {
                 orphans = '';
             }
             // Filter out our own ripgrep/shell match and bare shell
-            // wrappers whose argv happens to contain the marker via
-            // their env var (pgrep -f matches the full command line
-            // plus env on some systems, so the parent `sh -c ...`
-            // that launched the spec child gets caught even after
-            // its child exited).
+            // Wrappers whose argv happens to contain the marker via
+            // Their env var (pgrep -f matches the full command line
+            // Plus env on some systems, so the parent `sh -c ...`
+            // That launched the spec child gets caught even after
+            // Its child exited).
             orphans = orphans
                 .split('\n')
                 .filter((line) => line && !line.includes('pgrep'))
