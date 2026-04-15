@@ -9,9 +9,9 @@
     "issues": [
         {
             "level": "error",
-            "path": "spwn/agents/neo/agent.yaml#tools",
-            "message": "tool \"@spwn/nonexistent\" does not exist",
-            "hint": "available built-ins: @spwn/build, @spwn/docker-cli, @spwn/git, @spwn/node, @spwn/python, @spwn/qmd, @spwn/architect, @spwn/cli, @spwn/unix, @spwn/claude-code, @spwn/codex, @spwn/mempalace",
+            "path": "spwn/agents/neo/agent.yaml#packages",
+            "message": "package \"@spwn/nonexistent\" does not exist",
+            "hint": "available built-ins: @spwn/build, @spwn/docker-cli, @spwn/git, @spwn/mempalace, @spwn/node, @spwn/python, @spwn/qmd, @spwn/architect, @spwn/cli, @spwn/unix, @spwn/claude-code, @spwn/codex",
             "source": "manifest"
         }
     ]

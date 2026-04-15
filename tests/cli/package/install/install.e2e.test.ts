@@ -3,24 +3,24 @@ import { describe, expect, test } from 'vitest';
 import { spec } from '../../../setup/cli.specification.js';
 
 /**
- * Coverage for `spwn tool install` / `spwn tool uninstall` — the
- * npm-style dependency-management verbs. These mutate the target
+ * Coverage for `spwn package install` / `spwn package uninstall` —
+ * the npm-style dependency-management verbs. These mutate the target
  * agent.yaml plus the project-root spwn.lock.yaml and never touch
- * Docker, so the tests run fast against the lightweight empty +
- * docker-pilot fixtures.
+ * Docker, so the tests run fast against the lightweight docker-pilot
+ * fixture.
  *
  * What's locked in here:
  *   - installing an @spwn/* ref pins it in spwn.lock.yaml
  *   - installing a bare name is rejected with an authoring hint
  *   - installing @<owner>/* is rejected as unsupported
- *   - uninstall removes the ref from both agent.yaml and the lockfile
+ *   - uninstall removes the ref from agent.yaml and the lockfile
  *   - double-install is idempotent (no duplicate agent.yaml entry)
  */
-describe('spwn tool install', () => {
+describe('spwn package install', () => {
     test('pins an @spwn/* ref into spwn.lock.yaml', async () => {
-        const result = await spec('tool install builtin')
+        const result = await spec('package install builtin')
             .project('docker-pilot')
-            .exec('tool install @spwn/python')
+            .exec('package install @spwn/python')
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -34,20 +34,20 @@ describe('spwn tool install', () => {
     });
 
     test('rejects a bare name with an authoring hint', async () => {
-        const result = await spec('tool install bare rejected')
+        const result = await spec('package install bare rejected')
             .project('docker-pilot')
-            .exec('tool install my-local-tool')
+            .exec('package install my-local-tool')
             .run();
 
         expect(result.exitCode).not.toBe(0);
         expect(result.stderr.text).toContain('bare name');
-        expect(result.stderr.text).toContain('spwn/tools/');
+        expect(result.stderr.text).toContain('spwn/packages/');
     });
 
     test('rejects @<owner>/* as unsupported', async () => {
-        const result = await spec('tool install registry rejected')
+        const result = await spec('package install registry rejected')
             .project('docker-pilot')
-            .exec('tool install @acme/foo')
+            .exec('package install @acme/foo')
             .run();
 
         expect(result.exitCode).not.toBe(0);
@@ -55,9 +55,9 @@ describe('spwn tool install', () => {
     });
 
     test('rejects an unknown @spwn/* ref', async () => {
-        const result = await spec('tool install unknown builtin')
+        const result = await spec('package install unknown builtin')
             .project('docker-pilot')
-            .exec('tool install @spwn/nonesuch')
+            .exec('package install @spwn/nonesuch')
             .run();
 
         expect(result.exitCode).not.toBe(0);
@@ -65,9 +65,9 @@ describe('spwn tool install', () => {
     });
 
     test('is idempotent on re-install', async () => {
-        const result = await spec('tool install idempotent')
+        const result = await spec('package install idempotent')
             .project('docker-pilot')
-            .exec(['tool install @spwn/python', 'tool install @spwn/python'])
+            .exec(['package install @spwn/python', 'package install @spwn/python'])
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -75,13 +75,23 @@ describe('spwn tool install', () => {
         const count = (agentYaml.content.match(/@spwn\/python/g) ?? []).length;
         expect(count).toBe(1);
     });
+
+    test('pkg alias works identically to the full verb', async () => {
+        const result = await spec('pkg alias')
+            .project('docker-pilot')
+            .exec('pkg install @spwn/python')
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn.lock.yaml').content).toContain('@spwn/python');
+    });
 });
 
-describe('spwn tool uninstall', () => {
+describe('spwn package uninstall', () => {
     test('removes the ref from agent.yaml and the lockfile', async () => {
-        const result = await spec('tool uninstall')
+        const result = await spec('package uninstall')
             .project('docker-pilot')
-            .exec(['tool install @spwn/python', 'tool uninstall @spwn/python'])
+            .exec(['package install @spwn/python', 'package uninstall @spwn/python'])
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -89,25 +99,27 @@ describe('spwn tool uninstall', () => {
         expect(agentYaml.content).not.toContain('@spwn/python');
 
         const lock = result.file('spwn.lock.yaml');
-        // Either the file is gone or it no longer has the ref.
         if (lock.exists) {
             expect(lock.content).not.toContain('@spwn/python');
         }
     });
 });
 
-describe('spwn tool ls', () => {
+describe('spwn package ls', () => {
     test('shows an empty state on a project with no installs', async () => {
-        const result = await spec('tool ls empty').project('docker-pilot').exec('tool ls').run();
+        const result = await spec('package ls empty')
+            .project('docker-pilot')
+            .exec('package ls')
+            .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toContain('No tool packs installed');
+        expect(result.stdout.text).toContain('No packages installed');
     });
 
-    test('lists installed packs after install', async () => {
-        const result = await spec('tool ls after install')
+    test('lists installed packages after install', async () => {
+        const result = await spec('package ls after install')
             .project('docker-pilot')
-            .exec(['tool install @spwn/python', 'tool ls'])
+            .exec(['package install @spwn/python', 'package ls'])
             .run();
 
         expect(result.exitCode).toBe(0);

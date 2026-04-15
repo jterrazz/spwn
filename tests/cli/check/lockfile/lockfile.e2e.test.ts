@@ -24,7 +24,7 @@ describe('spwn check — lockfile drift', () => {
     test('passes after installing every declared ref', async () => {
         const result = await spec('check matches lockfile')
             .project('docker-pilot')
-            .exec(['tool install @spwn/unix', 'tool install @spwn/git', 'check'])
+            .exec(['package install @spwn/unix', 'package install @spwn/git', 'check'])
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -34,7 +34,7 @@ describe('spwn check — lockfile drift', () => {
     test('flags drift when lockfile is incomplete', async () => {
         const result = await spec('check detects drift')
             .project('docker-pilot')
-            .exec(['tool install @spwn/unix', 'check'])
+            .exec(['package install @spwn/unix', 'check'])
             .run();
 
         expect(result.exitCode).not.toBe(0);

@@ -42,8 +42,8 @@ describe('CLI output', () => {
         await result.stdout.toMatch('architect-help.txt');
     });
 
-    test('tool --help lists the install subcommands', async () => {
-        const result = await spec('tool help').project('empty').exec('tool --help').run();
+    test('package --help lists the install subcommands', async () => {
+        const result = await spec('package help').project('empty').exec('package --help').run();
 
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('install');

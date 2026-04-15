@@ -118,8 +118,7 @@ my-project/
 ├── spwn.lock.yaml          # committed dep pins (like package-lock.json)
 ├── spwn/                   # committed project assets
 │   ├── agents/             #   your agents - travel with the repo
-│   ├── tools/              #   local tool packs you author (bare-name refs)
-│   └── skills/             #   local skill files (bare-name refs)
+│   └── packages/           #   local packages (tool dirs, skill .md files) you author
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
 
@@ -146,45 +145,39 @@ Each agent is a directory of composable blocks - **human-readable, git-friendly,
 
 ```
 spwn/agents/neo/
-├── agent.yaml                # composition: tools, plugins, skills, runtime
+├── agent.yaml                # composition: packages + runtime
 ├── AGENTS.md                 # entry point (provider-neutral; compiled per runtime)
 ├── identity/                 # who the agent is - profile.md, purpose.md, traits.md
-├── plugins/                  # runtime-targeted tool packs (MCP, hooks, settings)
-├── skills/                   # procedures and checklists
 ├── knowledge/                # facts about the codebase
 ├── playbooks/                # workflows promoted from experience
 └── journal/                  # session history - one file per run
 ```
 
-**Two kinds of blocks: tools and skills.** Each block is a file. Stack them into `agent.yaml`:
+**Everything is a package.** Tools, plugins, skills — all unified under one concept. A package can install apt-get deps, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
 
 ```yaml
 # spwn/agents/neo/agent.yaml
 name: neo
-runtime: claude-code
+runtime:
+  backend: "@spwn/claude-code"
 
-tools:
-  - @spwn/unix                   # bash, coreutils, grep, sed, awk
-  - @spwn/git                    # version control
-  - @spwn/python                 # python3, pip3
-  - @spwn/claude-code            # thinking engine
-
-skills:
-  - paper-reading
-  - hypothesis-testing
-  - @community/rust-review
+packages:
+  - "@spwn/unix"                 # bash, coreutils, grep, sed, awk
+  - "@spwn/git"                  # version control
+  - "@spwn/python"               # python3, pip3
+  - "@spwn/mempalace"            # memory palace (plugin: injects Claude Code config)
+  - paper-reading                # local skill: spwn/packages/paper-reading.md
+  - hypothesis-testing           # local skill
 ```
 
-**If a tool isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [tool catalog](docs/tool-catalog.md).
+**If a package isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [package catalog](docs/tool-catalog.md).
 
-Some tool packs are **plugins**: they target a runtime and inject
-config (MCP servers, hooks, settings) at spawn time. They live under
-a separate `plugins:` field that co-exists with `tools:`:
+Dependency resolution works like npm:
+- `@spwn/<name>` is a catalog package compiled into the spwn binary.
+- `<bare-name>` is a local package under `spwn/packages/<name>/` (directory form) or `spwn/packages/<name>.md` (bare-markdown skill).
+- `@<owner>/<name>` is reserved for a future community registry.
 
-```yaml
-plugins:
-  - "@spwn/mempalace"   # memory palace for Claude Code
-```
+Add a catalog package to every agent with `spwn package install @spwn/<name>`; the ref gets pinned in `spwn.lock.yaml`.
 
 **Agents evolve through three mechanisms:**
 
@@ -352,21 +345,18 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn world knowledge ls <id>                 List a world's shared knowledge files
 🟢 spwn world knowledge show <id> <path>        Read a knowledge file
 
-# ── Tools / Skills / Profiles ────────────────────────────────────
-🟢 spwn tool    ls                              Installed tool packs
-🟢 spwn tool    show <pack>                     Inspect a tool pack
-🟢 spwn tool    rm   <pack>                     Uninstall a local tool pack
-🔴 spwn tool    get     @community/rust-fuzzer  Install a community tool pack
-🔴 spwn tool    search  python                  Search the registry
-🔴 spwn tool    publish ./my-tool               Ship to registry
+# ── Packages & Skills ────────────────────────────────────────────
+🟢 spwn package install @spwn/python            Pin a catalog package in the lockfile
+🟢 spwn package uninstall @spwn/python          Remove a catalog package
+🟢 spwn package ls                              Installed packages
+🟢 spwn package show <ref>                      Inspect a package
+🟢 spwn pkg install @spwn/mempalace             Short alias for `spwn package`
+🔴 spwn package search python                   Search the community registry
 
-🟢 spwn skill   ls                              Your skill files
-🟢 spwn skill   new  paper-reading              Author a new skill
-🟡 spwn skill   edit paper-reading              Open in $EDITOR
-🟢 spwn skill   show paper-reading              Display a skill
-🟢 spwn skill   rm   paper-reading              Delete a skill
-🔴 spwn skill   get  @community/rust-review     Install a shared skill
-🔴 spwn skill   publish paper-reading           Ship to registry
+🟢 spwn skill new paper-reading                 Author a new bare-markdown skill
+🟡 spwn skill edit paper-reading                Open in $EDITOR
+🟢 spwn skill show paper-reading                Display a skill
+🟢 spwn skill rm   paper-reading                Delete a skill
 
 # ── Teams & orgs ─────────────────────────────────────────────────
 🟡 spwn team new     acme                       Create a team

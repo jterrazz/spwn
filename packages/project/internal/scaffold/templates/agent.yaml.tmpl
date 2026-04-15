@@ -1,19 +1,20 @@
 # Agent composition — the source of truth for what this agent needs.
 #
 # Dependency resolution works like npm:
-#   @spwn/<name>       built-in catalog pack (compiled into spwn)
+#   @spwn/<name>       built-in catalog package (compiled into spwn)
 #   @<owner>/<name>    future: remote community registry
-#   <bare-name>        local pack authored under spwn/tools/<name>/
+#   <bare-name>        local package authored under spwn/packages/<name>/
+#                      (or spwn/packages/<name>.md for a bare skill)
 #
-# Installed catalog refs are pinned in spwn.lock.yaml at the project
-# root. Add new ones with `spwn tool install @spwn/<name>`.
+# Catalog refs are pinned in spwn.lock.yaml at the project root. Add
+# new ones with `spwn package install @spwn/<name>` (or `spwn pkg`).
 
 name: neo
 
 runtime:
   backend: "@spwn/claude-code"
 
-tools:
+packages:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/python"

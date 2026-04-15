@@ -20,9 +20,8 @@ The domain has three main abstractions, each owning one concern:
 - **Architect**: The always-on orchestration daemon. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 
 ### Building blocks (composable, reusable)
-- **Tool**: A reusable tool pack (`@spwn/unix`, `@spwn/python`). Plugs into an agent as a capability. If not listed in an agent, it doesn't exist in its world.
-- **Plugin**: A runtime-targeted tool pack (`@spwn/mempalace`). Same pipeline as Tool, plus it injects JSON into the runtime's settings file (e.g. `~/.claude/settings.json`) at spawn time - the standard vehicle for MCP servers, shell hooks, and other runtime-specific wiring. Declared under `agent.yaml#plugins:`, coexists with `tools:`.
-- **Skill**: A reusable procedure, playbook, or piece of knowledge. Authored in markdown, shared across agents.
+- **Package**: The unified building block. A package.yaml manifest (catalog or project-local) plus optional `skills/` and `files/` siblings. Composability determines what it is: `install:` + `verify:` → tool, `plugin:` section → runtime-config injector, bare `.md` content → skill. All three co-exist under the single `agent.yaml#packages:` list.
+- **Skill (bare form)**: A `spwn/packages/<name>.md` file with no wrapping directory. Simplest authoring path for "write a paragraph of instructions."
 
 ### Agent internals
 - **Identity**: Who the agent is - profile, purpose, traits. Lives in `spwn/agents/<name>/identity/`. Persists across world restarts.
@@ -93,14 +92,16 @@ spwn world inspect <id>                        # Inspect a running world
 spwn world enter   <id>                        # Interactive shell inside the world
 spwn world snap save|ls|restore|rm             # World snapshots
 
-# ── Tools / skills ───────────────────────────────────────────────
-spwn tool    ls                                # Installed built-in packs
-spwn skill   ls|new|edit                       # Authored skills in ./spwn/skills/
+# ── Packages & skills ────────────────────────────────────────────
+spwn package install @spwn/python              # Pin a catalog package + update every agent
+spwn package uninstall @spwn/python            # Remove a catalog package
+spwn package ls                                # Installed packages (from lockfile)
+spwn pkg     install @spwn/mempalace           # `pkg` is a short alias for `package`
+spwn skill   new|edit|show|rm <name>           # Bare-markdown skill authoring (./spwn/packages/<name>.md)
 
 # ── Registry (planned) ───────────────────────────────────────────
 spwn agent   get @community/sci                # Install a shared agent     [planned]
-spwn tool    get @community/rust-fuzzer        # Install a shared tool pack [planned]
-spwn skill   get @community/rust-review        # Install a shared skill     [planned]
+spwn package install @acme/fuzzer              # Install an external package [planned]
 spwn *       publish <name>                    # Push to registry           [planned]
 
 # ── System ───────────────────────────────────────────────────────
@@ -183,7 +184,7 @@ spwn/
 │   │   ├── tool/                    #     spwn tool
 │   │   ├── team/                    #     spwn team
 │   │   ├── organization/            #     spwn organization
-│   │   ├── tool/                    #     spwn tool install/uninstall/ls
+│   │   ├── tool/                    #     spwn package install/uninstall/ls (Go package is historically "tool")
 │   │   ├── logs/                    #     spwn logs
 │   │   └── ui/                      #     Stepper, table, style
 │   │
