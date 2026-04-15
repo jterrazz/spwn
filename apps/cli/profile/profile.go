@@ -160,7 +160,7 @@ var editCmd = &cobra.Command{
 		name := args[0]
 		path := filepath.Join(paths.ProfilesDir(), name+".md")
 		if _, err := os.Stat(path); err != nil {
-			return fmt.Errorf("profile %q not found at %s", name, path)
+			return fmt.Errorf("profile %q not found at %s", name, paths.PrettyHome(path))
 		}
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
@@ -180,7 +180,7 @@ var showCmd = &cobra.Command{
 		path := filepath.Join(paths.ProfilesDir(), name+".md")
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("profile %q not found at %s", name, path)
+			return fmt.Errorf("profile %q not found at %s", name, paths.PrettyHome(path))
 		}
 		fmt.Fprintln(cmd.OutOrStderr(), string(data))
 		return nil
@@ -218,7 +218,7 @@ var rmCmd = &cobra.Command{
 		name := args[0]
 		path := filepath.Join(paths.ProfilesDir(), name+".md")
 		if _, err := os.Stat(path); err != nil {
-			return fmt.Errorf("profile %q not found at %s", name, path)
+			return fmt.Errorf("profile %q not found at %s", name, paths.PrettyHome(path))
 		}
 		if err := os.Remove(path); err != nil {
 			return fmt.Errorf("remove %s: %w", path, err)
