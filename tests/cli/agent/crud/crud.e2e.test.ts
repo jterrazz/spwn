@@ -204,6 +204,19 @@ describe('spwn agent CRUD', () => {
         expect(result.file('spwn.yaml').content).not.toContain('trinity');
     });
 
+    test('agent add rejects unknown tool refs', async () => {
+        // Given - an initialised project (init scaffolds neo)
+        // When - we try to add a tool that is not in the catalog
+        // Then - exit 1 and agent.yaml is not corrupted
+        const result = await spec('add bogus tool')
+            .project('empty')
+            .exec(['init', 'agent add neo --tool @spwn/nonexistent'])
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        await result.stderr.toMatch('add-unknown-tool.txt');
+    });
+
     test('talk without a world fails with a helpful error', async () => {
         const result = await isolated('talk no world')
             .exec(['agent create neo', 'agent talk neo hello'])
