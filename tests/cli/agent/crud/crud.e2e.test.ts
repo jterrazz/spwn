@@ -175,6 +175,35 @@ describe('spwn agent CRUD', () => {
         expect(result.stderr.text).not.toMatch(/Composition updated/);
     });
 
+    test('agent create inside a project scaffolds a check-valid agent', async () => {
+        // Given - an initialised empty project
+        // When - we create an agent and re-run check
+        // Then - check passes and the full mind tree is on disk
+        const result = await spec('create inside project')
+            .project('empty')
+            .exec(['init', 'agent new trinity', 'check'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn/agents/trinity/agent.yaml').exists).toBe(true);
+        expect(result.file('spwn/agents/trinity/CLAUDE.md').exists).toBe(true);
+        expect(result.file('spwn/agents/trinity/core').exists).toBe(true);
+    });
+
+    test('agent rm cleans the manifest so check stays green', async () => {
+        // Given - a project with one agent auto-registered in its world
+        // When - we rm the agent and re-run check
+        // Then - check passes (the world reference is gone)
+        const result = await spec('rm cleans manifest')
+            .project('empty')
+            .exec(['init', 'agent new trinity', 'agent rm trinity', 'check'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        // And spwn.yaml no longer mentions trinity
+        expect(result.file('spwn.yaml').content).not.toContain('trinity');
+    });
+
     test('talk without a world fails with a helpful error', async () => {
         const result = await isolated('talk no world')
             .exec(['agent create neo', 'agent talk neo hello'])
