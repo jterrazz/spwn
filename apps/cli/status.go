@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -12,9 +13,17 @@ import (
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/world"
 	"spwn.sh/packages/paths"
+	"spwn.sh/packages/world"
 )
+
+// containerExistsStatus mirrors the helper in apps/cli/world/list.go.
+// Duplicated here to avoid pulling the world subpackage into the root
+// cli package just for a one-liner (and the subpackage already imports
+// cli, which would create a cycle).
+func containerExistsStatus(containerID string) bool {
+	return exec.Command("docker", "inspect", "--format", "{{.Id}}", containerID).Run() == nil
+}
 
 func init() {
 	rootCmd.AddCommand(statusCmd)
@@ -129,11 +138,34 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		// Worlds
+		// Worlds. Mirror the filtering used by `spwn ls` so the two
+		// commands agree on what's running:
+		//   1. dead containers are pruned (fixes stale drift), and
+		//   2. duplicates by config name are collapsed to the newest.
+		// Together with the `spwn up` idempotency guard this keeps
+		// `status` and `ls` in lockstep. See finding #10.
 		var worlds []world.World
 		arc, arcErr := world.NewArchitectFromEnv()
 		if arcErr == nil {
-			worlds, _ = arc.List(context.Background())
+			raw, _ := arc.List(context.Background())
+			byConfig := map[string]world.World{}
+			ungrouped := make([]world.World, 0, len(raw))
+			for _, w := range raw {
+				if w.ContainerID != "" && !containerExistsStatus(w.ContainerID) {
+					continue
+				}
+				if w.Config == "" {
+					ungrouped = append(ungrouped, w)
+					continue
+				}
+				if prev, ok := byConfig[w.Config]; !ok || w.CreatedAt.After(prev.CreatedAt) {
+					byConfig[w.Config] = w
+				}
+			}
+			for _, w := range byConfig {
+				worlds = append(worlds, w)
+			}
+			worlds = append(worlds, ungrouped...)
 		}
 
 		// Agents
