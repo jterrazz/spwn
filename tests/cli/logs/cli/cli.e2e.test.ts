@@ -88,6 +88,29 @@ describe('spwn logs CLI', () => {
         expect(result.stdout.text).toMatch(/\d{2}:\d{2}:\d{2}/);
     });
 
+    test('--type with an unknown event type errors', async () => {
+        // Given - a bogus --type value
+        // When - running logs
+        // Then - exit 1 with a list of known types, not silent no-op
+        const result = await isolated('logs bad type').exec('logs --type garbage').run();
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toMatch(/unknown event type/i);
+        expect(result.stderr.text).toMatch(/agent\.created/);
+    });
+
+    test('--world with a name not in spwn.yaml errors', async () => {
+        // Given - a project with one declared world (neo)
+        // When - filtering by a world that doesn't exist
+        // Then - exit 1, with the set of known worlds listed
+        const result = await spec('logs bad world')
+            .project('single-agent')
+            .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
+            .exec('logs --world doesnotexist')
+            .run();
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toMatch(/unknown world/i);
+    });
+
     test('--help shows command description', async () => {
         const result = await isolated('logs help').exec('logs --help').run();
         expect(result.exitCode).toBe(0);

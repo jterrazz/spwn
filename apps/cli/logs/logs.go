@@ -6,14 +6,59 @@ package logs
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"spwn.sh/apps/cli/ui"
 	coreactivity "spwn.sh/packages/activity"
+	"spwn.sh/packages/project"
 
 	"github.com/spf13/cobra"
 )
+
+// knownEventTypes is the curated set of event types that `--type`
+// will accept. Values must match the constants defined in
+// packages/activity/event.go. Kept local so the logs CLI can
+// validate input early with a helpful "did you mean X?" error
+// instead of silently returning "No events yet."
+var knownEventTypes = []coreactivity.Type{
+	coreactivity.TypeWorldSpawned,
+	coreactivity.TypeWorldDestroyed,
+	coreactivity.TypeWorldSnapshot,
+	coreactivity.TypeWorldStateChange,
+	coreactivity.TypeAgentCreated,
+	coreactivity.TypeAgentDeleted,
+	coreactivity.TypeAgentJoined,
+	coreactivity.TypeAgentLeft,
+	coreactivity.TypeAgentDreamed,
+	coreactivity.TypeAgentSlept,
+	coreactivity.TypeAgentForked,
+	coreactivity.TypeAgentTalked,
+	coreactivity.TypeArchitectStarted,
+	coreactivity.TypeArchitectStopped,
+	coreactivity.TypeArchitectTalked,
+	coreactivity.TypeSessionEnded,
+}
+
+func isKnownEventType(t string) bool {
+	for _, k := range knownEventTypes {
+		if string(k) == t {
+			return true
+		}
+	}
+	return false
+}
+
+func sortedEventTypes() []string {
+	out := make([]string, 0, len(knownEventTypes))
+	for _, t := range knownEventTypes {
+		out = append(out, string(t))
+	}
+	sort.Strings(out)
+	return out
+}
 
 // Cmd is the root `spwn logs` command.
 var Cmd = &cobra.Command{
@@ -60,6 +105,11 @@ type RunOpts struct {
 	WorldID string
 	AgentID string
 	Actor   string
+	// SkipWorldValidation is set by scoped subcommands (e.g.
+	// `spwn world logs <id>`) that pass a live world ID rather than
+	// a name declared in spwn.yaml, so the validation against the
+	// project manifest would reject a perfectly valid argument.
+	SkipWorldValidation bool
 }
 
 // Run reads the event log with the given filters and renders it to cmd's
@@ -67,6 +117,20 @@ type RunOpts struct {
 func Run(cmd *cobra.Command, opts RunOpts) error {
 	if opts.Limit == 0 {
 		opts.Limit = 20
+	}
+
+	// Early input validation: unknown --type / --world values used
+	// to silently return "No events yet." which made it impossible
+	// to distinguish "empty log" from "typo". Reject them up-front
+	// with a concrete list of what's allowed.
+	if opts.Type != "" && !isKnownEventType(opts.Type) {
+		return fmt.Errorf("unknown event type %q\n\n  Known types:\n    %s",
+			opts.Type, strings.Join(sortedEventTypes(), "\n    "))
+	}
+	if opts.WorldID != "" && !opts.SkipWorldValidation {
+		if err := validateWorldFilter(opts.WorldID); err != nil {
+			return err
+		}
 	}
 	events, err := coreactivity.Read(coreactivity.ReadOpts{
 		Limit:   opts.Limit,
@@ -89,6 +153,31 @@ func Run(cmd *cobra.Command, opts RunOpts) error {
 		printEvent(events[i])
 	}
 	return nil
+}
+
+// validateWorldFilter rejects --world values that don't match any
+// world declared in the current project's spwn.yaml. If no project
+// is active we accept the value as-is (there's nothing to validate
+// against in legacy global mode).
+func validateWorldFilter(name string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil
+	}
+	proj, err := project.Find(cwd)
+	if err != nil || proj == nil || proj.Manifest == nil || len(proj.Manifest.Worlds) == 0 {
+		return nil
+	}
+	if _, ok := proj.Manifest.Worlds[name]; ok {
+		return nil
+	}
+	names := make([]string, 0, len(proj.Manifest.Worlds))
+	for k := range proj.Manifest.Worlds {
+		names = append(names, k)
+	}
+	sort.Strings(names)
+	return fmt.Errorf("unknown world %q — not declared in spwn.yaml\n\n  Known worlds: %s",
+		name, strings.Join(names, ", "))
 }
 
 func printEvent(e coreactivity.Event) {
