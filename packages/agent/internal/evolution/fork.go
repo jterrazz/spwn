@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/activity"
@@ -53,11 +54,23 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		result.LayersCopied = append(result.LayersCopied, layer)
 	}
 
-	// Copy agent.yaml if it exists
+	// Copy agent.yaml if it exists, rewriting the name: field to
+	// match the target so `spwn check` doesn't warn about a name /
+	// directory mismatch on the freshly forked agent.
 	sourceManifest := filepath.Join(sourceDir, "agent.yaml")
 	if _, err := os.Stat(sourceManifest); err == nil {
 		data, _ := os.ReadFile(sourceManifest)
+		data = rewriteAgentName(data, targetName)
 		os.WriteFile(filepath.Join(targetDir, "agent.yaml"), data, 0644)
+	}
+
+	// Copy CLAUDE.md if it exists. Without this, `spwn check` reports
+	// the forked agent as missing CLAUDE.md since ruleAgentStructure
+	// requires it at the agent root (Finding #11).
+	sourceClaude := filepath.Join(sourceDir, "CLAUDE.md")
+	if _, err := os.Stat(sourceClaude); err == nil {
+		data, _ := os.ReadFile(sourceClaude)
+		os.WriteFile(filepath.Join(targetDir, "CLAUDE.md"), data, 0644)
 	}
 
 	// Emit activity event
@@ -75,6 +88,21 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	})
 
 	return result, nil
+}
+
+// agentNameLine matches a top-level `name: <value>` entry in agent.yaml
+// so we can rewrite it to the forked target name without spinning up
+// a full YAML round-trip.
+var agentNameLine = regexp.MustCompile(`(?m)^name:\s*.*$`)
+
+func rewriteAgentName(data []byte, name string) []byte {
+	replacement := []byte("name: " + name)
+	if agentNameLine.Match(data) {
+		return agentNameLine.ReplaceAll(data, replacement)
+	}
+	// No existing name: line — prepend one so the forked manifest is
+	// still self-describing.
+	return append(append(replacement, '\n'), data...)
 }
 
 // ForkResult holds the outcome of a fork operation.
