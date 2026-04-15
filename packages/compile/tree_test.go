@@ -1,7 +1,9 @@
 package compile
 
 import (
+	"archive/tar"
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -98,6 +100,66 @@ func TestTreeWriteToMaterialises(t *testing.T) {
 	check("top.md", "top")
 	check("sub/inner.md", "inner")
 	check("sub/deep/more.md", "deep")
+}
+
+func TestTreeTarRoundTrip(t *testing.T) {
+	tr := New()
+	tr.AddString("top.md", "top")
+	tr.AddString("sub/inner.md", "inner")
+	tr.AddString("sub/deep/more.md", "deep")
+
+	var buf bytes.Buffer
+	if err := tr.Tar(&buf); err != nil {
+		t.Fatalf("Tar: %v", err)
+	}
+
+	reloaded := New()
+	tr2 := tar.NewReader(bytes.NewReader(buf.Bytes()))
+	for {
+		hdr, err := tr2.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatalf("tar read: %v", err)
+		}
+		data, err := io.ReadAll(tr2)
+		if err != nil {
+			t.Fatalf("tar payload: %v", err)
+		}
+		reloaded.Add(hdr.Name, data)
+	}
+
+	if !reflect.DeepEqual(tr.Paths(), reloaded.Paths()) {
+		t.Fatalf("paths differ: %v vs %v", tr.Paths(), reloaded.Paths())
+	}
+	for _, p := range tr.Paths() {
+		a, _ := tr.Get(p)
+		b, _ := reloaded.Get(p)
+		if !bytes.Equal(a, b) {
+			t.Fatalf("%s content differs", p)
+		}
+	}
+}
+
+func TestTreeTarDeterministic(t *testing.T) {
+	mk := func() *Tree {
+		tr := New()
+		tr.AddString("a.md", "alpha")
+		tr.AddString("nested/b.md", "beta")
+		tr.AddString("z/y/x.md", "gamma")
+		return tr
+	}
+	var buf1, buf2 bytes.Buffer
+	if err := mk().Tar(&buf1); err != nil {
+		t.Fatalf("Tar 1: %v", err)
+	}
+	if err := mk().Tar(&buf2); err != nil {
+		t.Fatalf("Tar 2: %v", err)
+	}
+	if !bytes.Equal(buf1.Bytes(), buf2.Bytes()) {
+		t.Fatal("tar output is not deterministic across identical inputs")
+	}
 }
 
 func TestTreeWriteToRoundTrip(t *testing.T) {
