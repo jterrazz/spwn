@@ -199,6 +199,10 @@ type ValidateOpts struct {
 	// existence falls back to a simple @spwn/* prefix heuristic.
 	BuiltinTools []string
 
+	// BuiltinSkills is the authoritative list of @scope/name skill
+	// identifiers shipped with spwn. Empty today — reserved.
+	BuiltinSkills []string
+
 	// SupportedRuntimes is the list of runtime identifiers the host
 	// can actually spawn (e.g. "@spwn/claude-code"). When empty,
 	// runtime validity is not checked.
@@ -221,6 +225,7 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 		Root:              p.Root,
 		Manifest:          p.Manifest,
 		BuiltinTools:      o.BuiltinTools,
+		BuiltinSkills:     o.BuiltinSkills,
 		SupportedRuntimes: o.SupportedRuntimes,
 	}
 	for _, a := range p.Agents {

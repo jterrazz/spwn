@@ -16,6 +16,8 @@ import (
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/resolve"
+	"spwn.sh/packages/project/lockfile"
+	"spwn.sh/packages/project/refs"
 
 	"gopkg.in/yaml.v3"
 )
@@ -83,6 +85,11 @@ type Input struct {
 	// Nil → fall back to @spwn/* prefix heuristic.
 	BuiltinTools []string
 
+	// BuiltinSkills is the authoritative catalog of known skill packs.
+	// Today always empty — the built-in skill catalog is reserved for
+	// a future release. Local-ref validation for skills runs regardless.
+	BuiltinSkills []string
+
 	// SupportedRuntimes is the list of runtime backends the host can
 	// actually spawn (e.g. "@spwn/claude-code"). Nil → don't check.
 	SupportedRuntimes []string
@@ -106,6 +113,8 @@ func Run(in Input) []Issue {
 		ruleToolVersionConflict,
 		ruleRuntimeBackendConflict,
 		ruleToolsExist,
+		ruleSkillsExist,
+		ruleLockfileConsistent,
 		ruleRuntimeSupported,
 		ruleMarkdownImports,
 		ruleOrphanAgents,
@@ -350,6 +359,7 @@ type agentYAML struct {
 	Name    string   `yaml:"name"`
 	Tools   []string `yaml:"tools"`
 	Plugins []string `yaml:"plugins"`
+	Skills  []string `yaml:"skills"`
 	Runtime struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
@@ -529,7 +539,7 @@ func ruleToolVersionConflict(in Input) []Issue {
 			allRefs := append([]string{}, parsed.Tools...)
 			allRefs = append(allRefs, parsed.Plugins...)
 			for _, t := range allRefs {
-				pack, version := splitToolVersion(t)
+				pack, version := refs.SplitVersion(t)
 				vmap, ok := versions[pack]
 				if !ok {
 					vmap = map[string]string{}
@@ -553,23 +563,6 @@ func ruleToolVersionConflict(in Input) []Issue {
 		}
 	}
 	return out
-}
-
-func splitToolVersion(tool string) (pack, version string) {
-	// scope/name@version → split at the last @ that isn't position 0
-	if !strings.HasPrefix(tool, "@") {
-		idx := strings.LastIndex(tool, "@")
-		if idx > 0 {
-			return tool[:idx], tool[idx+1:]
-		}
-		return tool, ""
-	}
-	// @scope/name[@version]
-	rest := tool[1:]
-	if idx := strings.LastIndex(rest, "@"); idx >= 0 {
-		return "@" + rest[:idx], rest[idx+1:]
-	}
-	return tool, ""
 }
 
 // ruleRuntimeBackendConflict flags multi-agent worlds whose members
@@ -627,17 +620,17 @@ func ruleToolsExist(in Input) []Issue {
 	haveCatalog := in.BuiltinTools != nil
 	checked := map[string]bool{}
 	check := func(tool, location string) []Issue {
-		pack, _ := splitToolVersion(tool)
+		pack, _ := refs.SplitVersion(tool)
 		key := pack + "@@" + location
 		if checked[key] {
 			return nil
 		}
 		checked[key] = true
-		ref := ParseRef(pack)
-		switch ResolveTool(in.Root, ref, builtin, haveCatalog) {
-		case ResolveOK:
+		ref := refs.Parse(pack)
+		switch refs.ResolveTool(in.Root, ref, builtin, haveCatalog) {
+		case refs.ResolveOK:
 			return nil
-		case ResolveRegistryUnsupported:
+		case refs.ResolveRegistryUnsupported:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", tool),
@@ -679,6 +672,168 @@ func ruleToolsExist(in Input) []Issue {
 		}
 	}
 	return out
+}
+
+// ruleSkillsExist mirrors ruleToolsExist for the agent.yaml `skills:`
+// list. Bare names must exist at spwn/skills/<name>.md (file form) or
+// spwn/skills/<name>/ (directory form). `@spwn/*` refs are checked
+// against BuiltinSkills — empty today, so any builtin ref passes via
+// the heuristic path. `@<owner>/*` refs are rejected as unsupported.
+func ruleSkillsExist(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	builtin := make(map[string]struct{}, len(in.BuiltinSkills))
+	for _, s := range in.BuiltinSkills {
+		builtin[s] = struct{}{}
+	}
+	haveCatalog := in.BuiltinSkills != nil
+	checked := map[string]bool{}
+	check := func(skill, location string) []Issue {
+		pack, _ := refs.SplitVersion(skill)
+		key := pack + "@@" + location
+		if checked[key] {
+			return nil
+		}
+		checked[key] = true
+		ref := refs.Parse(pack)
+		switch refs.ResolveSkill(in.Root, ref, builtin, haveCatalog) {
+		case refs.ResolveOK:
+			return nil
+		case refs.ResolveRegistryUnsupported:
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", skill),
+				Hint: "use @spwn/<name> for built-in packs or drop a file/dir under ./spwn/skills/<name>{.md,/} for a local pack; " +
+					"remote registries (@<owner>/<name>) are planned but not implemented yet",
+			}}
+		default: // ResolveNotFound
+			if ref.Kind == refs.KindLocal {
+				return []Issue{{
+					Level: LevelError, Path: location,
+					Message: fmt.Sprintf("skill %q does not exist", skill),
+					Hint:    "create ./spwn/skills/" + ref.Name + ".md, or reference @spwn/" + ref.Name + " once the built-in catalog ships",
+				}}
+			}
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("skill %q does not exist", skill),
+				Hint:    "check the skill name; built-in skill catalog is empty today",
+			}}
+		}
+	}
+
+	var out []Issue
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		parsed, err := loadAgentYAML(a.Path)
+		if err != nil {
+			continue
+		}
+		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#skills"
+		for _, s := range parsed.Skills {
+			out = append(out, check(s, loc)...)
+		}
+	}
+	return out
+}
+
+// ruleLockfileConsistent compares every @spwn/* or @<owner>/* ref
+// declared in any agent.yaml or spwn.yaml world against the
+// project's spwn.lock.yaml. Missing entries become errors so
+// `spwn build` fails loudly and points the user at `spwn tool install`.
+//
+// Local (bare) refs are never lockfile-tracked.
+//
+// If no lockfile exists yet, the rule is silent — the project has
+// never been installed against. CLI install verbs seed the lockfile
+// on first use. This keeps brand-new `spwn init` projects from
+// immediately complaining.
+func ruleLockfileConsistent(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	lock, err := lockfile.Load(in.Root)
+	if err != nil {
+		return []Issue{{
+			Level: LevelError, Path: lockfile.FileName,
+			Message: fmt.Sprintf("cannot read lockfile: %v", err),
+			Hint:    "regenerate with `spwn tool install` for each declared pack, or delete " + lockfile.FileName + " to start fresh",
+		}}
+	}
+	if lock == nil {
+		return nil // no lockfile yet, nothing to compare against
+	}
+
+	type refRec struct {
+		raw      string
+		location string
+		kind     lockfile.Kind
+	}
+	var all []refRec
+
+	collect := func(list []string, location string, kind lockfile.Kind) {
+		for _, r := range list {
+			all = append(all, refRec{raw: r, location: location, kind: kind})
+		}
+	}
+
+	for _, wname := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[wname]
+		collect(w.Tools, "spwn.yaml#worlds."+wname+".tools", lockfile.KindTool)
+	}
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		parsed, err := loadAgentYAML(a.Path)
+		if err != nil {
+			continue
+		}
+		rel := relPath(in.Root, filepath.Join(a.Path, "agent.yaml"))
+		collect(parsed.Tools, rel+"#tools", lockfile.KindTool)
+		collect(parsed.Plugins, rel+"#plugins", lockfile.KindPlugin)
+		collect(parsed.Skills, rel+"#skills", lockfile.KindSkill)
+	}
+
+	seen := map[string]bool{}
+	var out []Issue
+	for _, rec := range all {
+		pack, _ := refs.SplitVersion(rec.raw)
+		ref := refs.Parse(pack)
+		// Local refs are never lockfile entries.
+		if ref.Kind == refs.KindLocal {
+			continue
+		}
+		key := fmt.Sprintf("%d|%s", rec.kind, pack)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		if lock.Has(rec.kind, pack) {
+			continue
+		}
+		out = append(out, Issue{
+			Level: LevelError, Path: rec.location,
+			Message: fmt.Sprintf("%q is not recorded in %s", pack, lockfile.FileName),
+			Hint:    "run `spwn " + kindVerb(rec.kind) + " install " + pack + "` to sync the lockfile",
+		})
+	}
+	return out
+}
+
+func kindVerb(k lockfile.Kind) string {
+	switch k {
+	case lockfile.KindTool:
+		return "tool"
+	case lockfile.KindPlugin:
+		return "plugin"
+	case lockfile.KindSkill:
+		return "skill"
+	}
+	return "tool"
 }
 
 // ruleRuntimeSupported checks each agent's runtime backend against
