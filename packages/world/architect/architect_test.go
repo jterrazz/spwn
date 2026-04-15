@@ -42,11 +42,33 @@ type mockBackend struct {
 	execDetachErr error
 
 	// Call tracking
-	createdConfigs []backend.ContainerConfig
-	startedIDs     []string
-	stoppedIDs     []string
-	removedIDs     []string
-	execCalls      []execCall
+	createdConfigs   []backend.ContainerConfig
+	startedIDs       []string
+	stoppedIDs       []string
+	removedIDs       []string
+	execCalls        []execCall
+	copyToCalls      []copyToCall
+	copyDirToCalls   []copyDirToCall
+	copyDirFromCalls []copyDirFromCall
+	copyDirFromErrs  map[string]error // key: containerPath -> error
+}
+
+type copyToCall struct {
+	containerID string
+	destPath    string
+	content     []byte
+}
+
+type copyDirToCall struct {
+	containerID string
+	destDir     string
+	hostSrcDir  string
+}
+
+type copyDirFromCall struct {
+	containerID string
+	srcDir      string
+	hostDestDir string
 }
 
 type mockContainer struct {
@@ -127,8 +149,24 @@ func (m *mockBackend) ExecOutput(_ context.Context, _ string, _ []string) (strin
 	return m.execOutput, nil
 }
 
-func (m *mockBackend) CopyTo(_ context.Context, _ string, _ string, _ []byte) error {
+func (m *mockBackend) CopyTo(_ context.Context, containerID string, destPath string, content []byte) error {
+	m.copyToCalls = append(m.copyToCalls, copyToCall{containerID, destPath, append([]byte{}, content...)})
 	return m.copyToErr
+}
+
+func (m *mockBackend) CopyDirTo(_ context.Context, containerID string, destDir string, hostSrcDir string) error {
+	m.copyDirToCalls = append(m.copyDirToCalls, copyDirToCall{containerID, destDir, hostSrcDir})
+	return nil
+}
+
+func (m *mockBackend) CopyDirFrom(_ context.Context, containerID string, srcDir string, hostDestDir string) error {
+	m.copyDirFromCalls = append(m.copyDirFromCalls, copyDirFromCall{containerID, srcDir, hostDestDir})
+	if m.copyDirFromErrs != nil {
+		if err, ok := m.copyDirFromErrs[srcDir]; ok {
+			return err
+		}
+	}
+	return nil
 }
 
 func (m *mockBackend) IsRunning(_ context.Context, _ string) (bool, error) {

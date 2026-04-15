@@ -11,7 +11,6 @@ import (
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claudecode"
 	"spwn.sh/packages/ids"
-	"spwn.sh/packages/paths"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 )
@@ -23,17 +22,17 @@ type AgentSpec struct {
 	Ephemeral bool   // true for NPC-style throwaway agents
 }
 
-// DeployAgent adds a single agent to a running world: validates the mind,
-// creates the agent's per-world deployment dirs on the host, registers
-// it in runtimestate, regenerates roster.md, and starts the agent
-// process in the background. Safe to call on a world that's already
-// running with other agents.
+// DeployAgent adds a single agent to a running world: validates the
+// mind, creates the agent's per-world deployment dirs on the host,
+// syncs the agent home into the container, regenerates roster.md,
+// and starts the agent process in the background. Safe to call on a
+// world that's already running with other agents.
 //
-// Hot-deployed agents reach full parity with cold-spawned ones because
-// (a) the single /agents bind on the world container makes the new
-// agent's home visible immediately and (b) /world/roster.md and the
-// per-deployment inbox/outbox/notes/role.md are written to the host
-// where the bind mounts pick them up instantly.
+// Hot-deploy uses the same docker-cp mechanism as cold spawn: the
+// host-side spwn/agents/<name>/ tree is copied into the container at
+// /agents/<name>/ once, and per-agent compile output (CLAUDE.md,
+// role.md) is docker-cp'd on top. Subsequent writes inside the
+// container are only flushed back on graceful world destroy.
 func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role string) error {
 	if err := agent.ValidateMind(agentName); err != nil {
 		return fmt.Errorf("agent %q: %w", agentName, err)
@@ -68,9 +67,20 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	if err := initAgentDeploymentDirs(rec, worldID); err != nil {
 		return fmt.Errorf("init deployment: %w", err)
 	}
+
+	// Sync the agent's home tree into the container at /agents/<name>/
+	// — the same copy-in step spawn uses. Without this the runtime
+	// process started in step 4 would find no identity/profile.md,
+	// no agent.yaml, nothing.
+	agentHome := "/agents/" + agentName
+	if err := syncAgentsInto(ctx, a.backend, u.ContainerID, map[string]string{agentName: agentHome}); err != nil {
+		return fmt.Errorf("sync agent into container: %w", err)
+	}
+
 	// Render just this agent's content (CLAUDE.md + per-world
-	// role.md) through the compiler. We only write the agents/*
-	// half; the world/* files already exist from spawn time.
+	// role.md) through the compiler and docker-cp it on top of the
+	// copied-in home. We only handle agents/* entries — the world/*
+	// files already exist from spawn time.
 	hotTree, err := compile.Compile("claude-code", compile.Input{
 		Manifest:      models.Manifest{},
 		VerifiedTools: nil,
@@ -80,19 +90,23 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	if err != nil {
 		return fmt.Errorf("compile agent deployment: %w", err)
 	}
+	var hotCpErr error
 	hotTree.Walk(func(path string, content []byte) {
-		// Only write agents/* entries -- the world/* files were
-		// written at spawn time and would be identical anyway.
+		if hotCpErr != nil {
+			return
+		}
 		const prefix = "agents/"
 		if !strings.HasPrefix(path, prefix) {
 			return
 		}
-		full := filepath.Join(paths.AgentsDir(), filepath.FromSlash(strings.TrimPrefix(path, prefix)))
-		if mkErr := os.MkdirAll(filepath.Dir(full), 0o755); mkErr != nil {
-			return
+		containerPath := "/" + path
+		if err := a.backend.CopyTo(ctx, u.ContainerID, containerPath, content); err != nil {
+			hotCpErr = fmt.Errorf("cp %s into container: %w", containerPath, err)
 		}
-		_ = os.WriteFile(full, content, 0o644)
 	})
+	if hotCpErr != nil {
+		return hotCpErr
+	}
 
 	// 2. Register in runtimestate so the next List() includes the
 	// agent in u.Agents.

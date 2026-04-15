@@ -176,6 +176,173 @@ func (d *Docker) CopyTo(ctx context.Context, containerID string, destPath string
 	return d.client.CopyToContainer(ctx, containerID, "/", &buf, types.CopyToContainerOptions{})
 }
 
+// CopyDirTo tar-streams the contents of hostSrcDir into destDir
+// inside the container. Walks the host tree, records each file and
+// directory under destDir in the tarball, and hands the whole thing
+// to CopyToContainer in a single round-trip.
+//
+// The destination is the absolute container path where the contents
+// should land — e.g. hostSrcDir=/host/spwn/agents/neo, destDir=/agents/neo
+// drops every file from the host tree under /agents/neo/ inside the
+// container.
+func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir string, hostSrcDir string) error {
+	destDir = strings.TrimSuffix(destDir, "/")
+	if destDir == "" {
+		return fmt.Errorf("CopyDirTo: destDir must be absolute")
+	}
+	info, err := os.Stat(hostSrcDir)
+	if err != nil {
+		return fmt.Errorf("stat %s: %w", hostSrcDir, err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("%s is not a directory", hostSrcDir)
+	}
+
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	// Write a top-level directory entry for destDir so the extract
+	// side has an explicit mkdir.
+	rootHdr := &tar.Header{
+		Name:     strings.TrimPrefix(destDir, "/") + "/",
+		Mode:     0o755,
+		Typeflag: tar.TypeDir,
+	}
+	if err := tw.WriteHeader(rootHdr); err != nil {
+		tw.Close()
+		return fmt.Errorf("tar header for %s: %w", destDir, err)
+	}
+
+	walkErr := filepath.Walk(hostSrcDir, func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(hostSrcDir, path)
+		if err != nil {
+			return err
+		}
+		if rel == "." {
+			return nil
+		}
+		// Build the tar entry name relative to the tarball root (/)
+		// so it lands under destDir inside the container.
+		entryName := strings.TrimPrefix(destDir, "/") + "/" + filepath.ToSlash(rel)
+
+		if fi.IsDir() {
+			hdr := &tar.Header{
+				Name:     entryName + "/",
+				Mode:     int64(fi.Mode().Perm()),
+				Typeflag: tar.TypeDir,
+			}
+			return tw.WriteHeader(hdr)
+		}
+		if fi.Mode()&os.ModeSymlink != 0 {
+			link, err := os.Readlink(path)
+			if err != nil {
+				return err
+			}
+			hdr := &tar.Header{
+				Name:     entryName,
+				Mode:     int64(fi.Mode().Perm()),
+				Typeflag: tar.TypeSymlink,
+				Linkname: link,
+			}
+			return tw.WriteHeader(hdr)
+		}
+		if !fi.Mode().IsRegular() {
+			return nil // skip devices, sockets, fifos
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		hdr := &tar.Header{
+			Name: entryName,
+			Mode: int64(fi.Mode().Perm()),
+			Size: int64(len(content)),
+		}
+		if err := tw.WriteHeader(hdr); err != nil {
+			return err
+		}
+		_, err = tw.Write(content)
+		return err
+	})
+	if closeErr := tw.Close(); closeErr != nil && walkErr == nil {
+		walkErr = closeErr
+	}
+	if walkErr != nil {
+		return fmt.Errorf("pack %s: %w", hostSrcDir, walkErr)
+	}
+
+	return d.client.CopyToContainer(ctx, containerID, "/", &buf, types.CopyToContainerOptions{})
+}
+
+// CopyDirFrom streams a directory out of the container into a host
+// directory. Uses the Docker CopyFromContainer API which returns a
+// tar stream; we walk the stream and write each entry to hostDestDir.
+//
+// The srcDir parameter is the absolute container path whose contents
+// should be copied out. hostDestDir is created if missing. Existing
+// files at the destination are overwritten so spwn down can refresh
+// the host copy from the container's latest state.
+func (d *Docker) CopyDirFrom(ctx context.Context, containerID string, srcDir string, hostDestDir string) error {
+	rc, _, err := d.client.CopyFromContainer(ctx, containerID, srcDir)
+	if err != nil {
+		return fmt.Errorf("docker cp from %s: %w", srcDir, err)
+	}
+	defer rc.Close()
+
+	if err := os.MkdirAll(hostDestDir, 0o755); err != nil {
+		return fmt.Errorf("mkdir %s: %w", hostDestDir, err)
+	}
+
+	tr := tar.NewReader(rc)
+	// Docker's tar stream includes the source directory itself as
+	// the top-level entry (e.g. "journal/"). We strip that first
+	// component so the contents land directly under hostDestDir.
+	srcBase := filepath.Base(srcDir)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("read tar: %w", err)
+		}
+		name := strings.TrimPrefix(hdr.Name, srcBase)
+		name = strings.TrimPrefix(name, "/")
+		if name == "" {
+			continue
+		}
+		target := filepath.Join(hostDestDir, filepath.FromSlash(name))
+
+		switch hdr.Typeflag {
+		case tar.TypeDir:
+			if err := os.MkdirAll(target, os.FileMode(hdr.Mode)&0o777); err != nil {
+				return fmt.Errorf("mkdir %s: %w", target, err)
+			}
+		case tar.TypeReg, tar.TypeRegA:
+			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+				return fmt.Errorf("mkdir parent of %s: %w", target, err)
+			}
+			f, err := os.OpenFile(target, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(hdr.Mode)&0o777)
+			if err != nil {
+				return fmt.Errorf("open %s: %w", target, err)
+			}
+			if _, err := io.Copy(f, tr); err != nil {
+				f.Close()
+				return fmt.Errorf("write %s: %w", target, err)
+			}
+			f.Close()
+		case tar.TypeSymlink:
+			_ = os.Remove(target)
+			if err := os.Symlink(hdr.Linkname, target); err != nil {
+				return fmt.Errorf("symlink %s: %w", target, err)
+			}
+		}
+	}
+	return nil
+}
+
 func (d *Docker) IsRunning(ctx context.Context, containerID string) (bool, error) {
 	info, err := d.client.ContainerInspect(ctx, containerID)
 	if err != nil {

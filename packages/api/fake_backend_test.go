@@ -33,6 +33,12 @@ func (noContainersBackend) ExecOutput(context.Context, string, []string) (string
 func (noContainersBackend) CopyTo(context.Context, string, string, []byte) error {
 	return nil
 }
+func (noContainersBackend) CopyDirTo(context.Context, string, string, string) error {
+	return nil
+}
+func (noContainersBackend) CopyDirFrom(context.Context, string, string, string) error {
+	return nil
+}
 func (noContainersBackend) IsRunning(context.Context, string) (bool, error) { return false, nil }
 func (noContainersBackend) ImageExists(context.Context, string) (bool, error) {
 	return false, nil

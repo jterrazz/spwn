@@ -60,9 +60,9 @@ E2E tests do not call the real Claude Code CLI. Instead, they use a mock:
 **`tests/fixtures/mock-claude/mock-claude.sh`** is a bash script installed as `/usr/local/bin/claude` inside the test Docker image. It:
 
 1. Accepts and ignores real Claude CLI flags (`--session-id`, `--resume`, etc.)
-2. Inspects the container environment (checks for `/agents`, `/world/physics.md`, `/work`, etc.)
+2. Inspects the container environment (checks for `/agents`, `/world/physics.md`, `/workspaces`, etc.)
 3. Writes its observations as JSON to `/tmp/claude-mock.json`
-4. Optionally writes to `/workspace/mock-output.txt` to prove write access
+4. Optionally writes to `/workspaces/workspace0/mock-output.txt` to prove write access
 5. Supports `--exit-code` and `--sleep` flags for testing error/timeout scenarios
 
 The Go E2E framework reads this JSON via `TestContext.ReadMockOutput()` and exposes it through `MockAssertion` (e.g., `ExpectMock(func(m) { m.SawMind(); m.SawPhysics() })`).

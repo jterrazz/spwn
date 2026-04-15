@@ -128,16 +128,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		binds = append(binds, paths.BaseDir()+":/home/spwn/.spwn")
 	}
 
-	// SINGLE shared agents mount: ~/.spwn/agents/ → /agents (rw).
-	// Every container sees every agent's persistent home. New agents
-	// added via DeployAgent appear instantly through this bind without
-	// any container restart, because the kernel sees the new directory
-	// the moment it's created on the host.
-	binds = append(binds, paths.AgentsDir()+":/agents")
+	// No /agents bind mount under the new architecture. Each
+	// agent's home directory is copied INTO the container at
+	// /agents/<name>/ by syncAgentsInto() right after container
+	// start. On graceful shutdown (Destroy), syncAgentsOutOf()
+	// copies the allowlisted memory directories back. Dotfiles,
+	// npm cache, .claude/*, etc. stay inside the container and die
+	// with it — the host project tree is never written to by a
+	// container process.
 
 	// Validate each named agent's mind directory and profile. We
-	// validate but no longer mount per-agent - all visibility goes
-	// through the single /agents bind above.
+	// still need to check that every agent's tree exists on the
+	// host because we're about to copy it into the container.
 	agentNamesToValidate := []string{}
 	if len(opts.Agents) > 0 {
 		for _, spec := range opts.Agents {
@@ -419,6 +421,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("container_created", id)
 
+	// Copy every deployed agent's home directory from the host into
+	// the container at /agents/<name>/. This is the replacement for
+	// the former bind mount — it's a one-way snapshot, writes inside
+	// the container never flow back to the host except on graceful
+	// shutdown (see Destroy → syncAgentsOutOf).
+	agentHomes := agentHomesForSpawn(opts)
+	if err := syncAgentsInto(ctx, a.backend, containerID, agentHomes); err != nil {
+		a.backend.Stop(ctx, containerID)
+		a.backend.Remove(ctx, containerID)
+		return nil, fmt.Errorf("sync agent homes into container: %w", err)
+	}
+
 	// Merge plugin runtime-config into the container's runtime settings
 	// file. Currently only the claude-code backend has a known target
 	// path; additional runtimes can grow their own branch as needed.
@@ -428,16 +442,14 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("inject plugin runtime config: %w", err)
 	}
 
-	// Write the runtime provider's default config files into each
-	// deployed agent's HOME. These pre-dismiss first-run UI - Claude
-	// Code's onboarding banner, trust dialogs, dangerous-mode prompt
-	// - so `spwn agent <name>` drops straight into a clean session.
-	// Written host-side through the /agents bind mount (no container
-	// exec), and only when the file doesn't already exist so we
-	// don't clobber user customizations.
-	agentHomes := agentHomesForSpawn(opts)
+	// Write the runtime provider's default config files directly
+	// into the running container at each agent's HOME. These
+	// pre-dismiss first-run UI — Claude Code's onboarding banner,
+	// trust dialogs, dangerous-mode prompt — so `spwn agent <name>`
+	// drops straight into a clean session. docker cp'd per file,
+	// overwrites any placeholder that came in via the host copy.
 	if len(agentHomes) > 0 {
-		if err := writeRuntimeDefaultConfig(agentHomes); err != nil {
+		if err := writeRuntimeDefaultConfig(ctx, a.backend, containerID, agentHomes); err != nil {
 			warnings = append(warnings, fmt.Sprintf("runtime default config: %v", err))
 		}
 	}
@@ -459,9 +471,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// claude-code Runtime produces a Tree with two kinds of entries:
 	// world/* (shared per-world files -- physics, roster, skills)
 	// and agents/<name>/* (per-agent entrypoint + per-deployment
-	// role.md). We split by prefix and materialise each half under
-	// its canonical host directory. Both directories are already
-	// visible inside the container via pre-existing bind mounts.
+	// role.md). materialiseWorldTree splits by prefix: world/* goes
+	// to the host state dir (visible in the container via the /world
+	// bind mount), agents/* is docker-cp'd directly into the running
+	// container on top of the home tree seeded by syncAgentsInto.
 	compileInput := compile.Input{
 		Manifest:      opts.Manifest,
 		VerifiedTools: verifiedTools,
@@ -474,7 +487,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("compile world: %w", err)
 	}
-	if err := materialiseWorldTree(tree, worldStateDir, paths.AgentsDir()); err != nil {
+	if err := materialiseWorldTree(ctx, a.backend, containerID, tree, worldStateDir); err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("materialise world tree: %w", err)
@@ -592,11 +605,11 @@ func (a *Architect) probeTools(ctx context.Context, containerID string, tools []
 // buildWorkspaceBinds generates Docker bind specs for the resolved
 // workspaces. Layout is uniform:
 //
-//   - 0 workspaces: no binds. /work does not exist; the agent's only
-//     writable space is its own home at /agents/<name>.
-//   - 1+ workspaces: each mounted at /work/<name>. There is no
-//     special-cased single-workspace path - `ls /work` always tells
-//     the agent what projects it can touch.
+//   - 0 workspaces: no binds. /workspaces does not exist; the agent's
+//     only writable space is its own home at /agents/<name>.
+//   - 1+ workspaces: each mounted at /workspaces/<name>. There is no
+//     special-cased single-workspace path — `ls /workspaces` always
+//     tells the agent what projects it can touch.
 func buildWorkspaceBinds(workspaces []models.Workspace) []string {
 	if len(workspaces) == 0 {
 		return nil
@@ -607,7 +620,7 @@ func buildWorkspaceBinds(workspaces []models.Workspace) []string {
 		if ws.ReadOnly {
 			ro = ":ro"
 		}
-		binds = append(binds, fmt.Sprintf("%s:/work/%s%s", ws.Path, ws.Name, ro))
+		binds = append(binds, fmt.Sprintf("%s:/workspaces/%s%s", ws.Path, ws.Name, ro))
 	}
 	return binds
 }
@@ -617,7 +630,7 @@ func buildWorkspaceBinds(workspaces []models.Workspace) []string {
 // of truth for the container-side workspace path scheme.
 func workspaceContainerPath(name string, totalWorkspaces int) string {
 	_ = totalWorkspaces // legacy parameter; layout is uniform now
-	return "/work/" + name
+	return "/workspaces/" + name
 }
 
 // worldStateDirFor returns the host-side directory where a given
@@ -649,32 +662,42 @@ func initAgentDeploymentDirs(rec models.AgentRecord, worldID string) error {
 	return nil
 }
 
-// materialiseWorldTree splits a compile.Tree into its two destination
-// directories: every entry under world/* goes to worldStateDir (bound
-// as /world in the container), every entry under agents/* goes to
-// agentsRoot (bound as /agents). Any other prefix is an error.
-func materialiseWorldTree(tree *compile.Tree, worldStateDir, agentsRoot string) error {
+// materialiseWorldTree splits a compile.Tree into its two
+// destination surfaces: every entry under world/* goes to
+// worldStateDir on the host (bound as /world in the container),
+// every entry under agents/* is docker-cp'd directly into the
+// running container at /agents/<name>/ (no host side — under the
+// new architecture the agent tree is not bind-mounted).
+//
+// Any other prefix is an error.
+func materialiseWorldTree(ctx context.Context, be backend.Backend, containerID string, tree *compile.Tree, worldStateDir string) error {
 	var worldErr error
 	tree.Walk(func(path string, content []byte) {
 		if worldErr != nil {
 			return
 		}
-		var full string
 		switch {
 		case strings.HasPrefix(path, "world/"):
-			full = filepath.Join(worldStateDir, filepath.FromSlash(strings.TrimPrefix(path, "world/")))
+			full := filepath.Join(worldStateDir, filepath.FromSlash(strings.TrimPrefix(path, "world/")))
+			if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+				worldErr = fmt.Errorf("mkdir %s: %w", filepath.Dir(full), err)
+				return
+			}
+			if err := os.WriteFile(full, content, 0o644); err != nil {
+				worldErr = fmt.Errorf("write %s: %w", full, err)
+				return
+			}
 		case strings.HasPrefix(path, "agents/"):
-			full = filepath.Join(agentsRoot, filepath.FromSlash(strings.TrimPrefix(path, "agents/")))
+			// Example path: "agents/neo/CLAUDE.md" →
+			// container path "/agents/neo/CLAUDE.md". Deliver via
+			// docker cp straight into the already-running container.
+			containerPath := "/" + path
+			if err := be.CopyTo(ctx, containerID, containerPath, content); err != nil {
+				worldErr = fmt.Errorf("cp %s into container: %w", containerPath, err)
+				return
+			}
 		default:
 			worldErr = fmt.Errorf("unexpected tree path %q: claudecode runtime must namespace files under world/ or agents/", path)
-			return
-		}
-		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-			worldErr = fmt.Errorf("mkdir %s: %w", filepath.Dir(full), err)
-			return
-		}
-		if err := os.WriteFile(full, content, 0o644); err != nil {
-			worldErr = fmt.Errorf("write %s: %w", full, err)
 			return
 		}
 	})
@@ -735,9 +758,10 @@ func injectPluginRuntimeConfig(ctx context.Context, be backend.Backend, containe
 // agentHomesForSpawn returns the (agentName -> containerHomePath)
 // map for every agent attached to this spawn. Single-agent worlds
 // return one entry; multi-agent worlds return one per agent. The
-// home paths are the in-container view (/agents/<name>) - they also
-// map 1:1 to ~/.spwn/agents/<name>/ on the host via the shared
-// agents bind mount.
+// home paths are the in-container view (/agents/<name>). Each has
+// a mirror under <project>/spwn/agents/<name>/ on the host, but the
+// two are NOT a live bind mount — spawn copies host→container and
+// graceful shutdown copies an allowlisted subset back.
 func agentHomesForSpawn(opts SpawnOpts) map[string]string {
 	homes := map[string]string{}
 	if opts.AgentName != "" {
@@ -753,47 +777,94 @@ func agentHomesForSpawn(opts SpawnOpts) map[string]string {
 }
 
 // writeRuntimeDefaultConfig writes the runtime provider's default
-// config files into each agent home. Files are written host-side
-// through the shared /agents bind mount (= ~/.spwn/agents/<name>/)
-// so no container exec is needed, and the state persists across
-// world restarts the same way the rest of the agent home does.
+// config files into each agent's HOME *inside the running container*
+// via docker cp. Under the new architecture the /agents tree is
+// copied into the container at start (not bind-mounted), so dotfiles
+// must also be delivered via docker cp — there's no shared host path
+// to write to.
 //
-// Existing files are preserved - once the user or Claude Code has
-// touched .claude.json we don't want to stomp it on every spawn.
-// That means the first-run defaults land exactly once per agent
-// and any subsequent runtime-level customization survives.
+// Unlike the old host-side write, there's no "preserve existing"
+// guard: each spawn re-seeds the default config, which is always
+// safe because the container is ephemeral. Any user customizations
+// to .claude.json that land in durable memory layers
+// (journal/knowledge/playbooks/skills) will be synced back on
+// graceful shutdown and re-seeded fresh next spawn.
 //
 // The runtime lookup is hardcoded to claude-code because every
-// world spawn today installs @spwn/claude-code as a required tool
-// (see the `required` list above). When the runtime becomes a
-// per-world choice this should resolve off the world manifest.
-func writeRuntimeDefaultConfig(agentHomes map[string]string) error {
+// world spawn today installs @spwn/claude-code as a required tool.
+// When the runtime becomes a per-world choice this should resolve
+// off the world manifest.
+func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
 	rt, err := runtime.Get("claude-code")
 	if err != nil {
 		return fmt.Errorf("unknown runtime: %w", err)
 	}
 
-	hostAgents := paths.AgentsDir()
-	for agentName, agentHome := range agentHomes {
+	for _, agentHome := range agentHomes {
 		files := rt.DefaultConfigFiles(agentHome)
 		if len(files) == 0 {
 			continue
 		}
-		hostAgentDir := filepath.Join(hostAgents, agentName)
 		for relPath, content := range files {
-			dst := filepath.Join(hostAgentDir, relPath)
-			if _, statErr := os.Stat(dst); statErr == nil {
-				continue // preserve user customization
-			}
-			if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-				return fmt.Errorf("mkdir %s: %w", filepath.Dir(dst), err)
-			}
-			if err := os.WriteFile(dst, content, 0o644); err != nil {
-				return fmt.Errorf("write %s: %w", dst, err)
+			absPath := agentHome + "/" + relPath
+			if err := be.CopyTo(ctx, containerID, absPath, content); err != nil {
+				return fmt.Errorf("cp %s to container: %w", absPath, err)
 			}
 		}
 	}
 	return nil
+}
+
+// syncAgentsInto copies every agent's host-side home tree into the
+// running container at /agents/<name>/. Called right after container
+// start, before any agent command runs.
+//
+// Directories that don't exist on the host (e.g. a freshly scaffolded
+// agent whose memory dirs are still empty) are silently skipped.
+func syncAgentsInto(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
+	hostRoot := paths.AgentsDir()
+	for agentName, containerHome := range agentHomes {
+		hostDir := filepath.Join(hostRoot, agentName)
+		if info, err := os.Stat(hostDir); err != nil || !info.IsDir() {
+			// Nothing to copy — a no-op agent (uncommon in practice).
+			continue
+		}
+		if err := be.CopyDirTo(ctx, containerID, containerHome, hostDir); err != nil {
+			return fmt.Errorf("copy %s → %s: %w", hostDir, containerHome, err)
+		}
+	}
+	return nil
+}
+
+// syncAgentsOutOf is the sync-back step run at graceful shutdown
+// (Destroy). For each agent in the world, it copies the allowlisted
+// memory directories (journal, knowledge, playbooks, skills) out of
+// the container and into the host-side agent tree. Anything else
+// inside /agents/<name>/ — identity files that didn't change, dotfiles,
+// runtime caches — stays in the container and is discarded.
+//
+// Failures per-agent per-dir are logged as warnings but don't abort
+// the destroy: a best-effort snapshot is better than nothing, and
+// the container is about to be removed anyway.
+func syncAgentsOutOf(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) []string {
+	// Allowlist: only these subdirs of /agents/<name>/ sync back.
+	// Everything else (dotfiles, .claude/, .npm/, .cache/, rebuilt
+	// CLAUDE.md, etc.) stays inside the container.
+	syncDirs := []string{"journal", "knowledge", "playbooks", "skills"}
+	hostRoot := paths.AgentsDir()
+
+	var warnings []string
+	for agentName, containerHome := range agentHomes {
+		hostDir := filepath.Join(hostRoot, agentName)
+		for _, sub := range syncDirs {
+			src := containerHome + "/" + sub
+			dst := filepath.Join(hostDir, sub)
+			if err := be.CopyDirFrom(ctx, containerID, src, dst); err != nil {
+				warnings = append(warnings, fmt.Sprintf("sync %s/%s: %v", agentName, sub, err))
+			}
+		}
+	}
+	return warnings
 }
 
 // rosterColony adapts an agent record list into the claudecode

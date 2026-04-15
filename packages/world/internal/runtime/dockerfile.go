@@ -36,15 +36,15 @@ func GenerateDockerfile(rt Runtime) string {
 
 	// Mount points
 	b.WriteString("# Mount points\n")
-	b.WriteString("RUN mkdir -p /work /agents /world \\\n")
-	b.WriteString("    && chown -R spwn:spwn /work /agents /world 2>/dev/null || true\n\n")
+	b.WriteString("RUN mkdir -p /workspaces /agents /world \\\n")
+	b.WriteString("    && chown -R spwn:spwn /workspaces /agents /world 2>/dev/null || true\n\n")
 
 	// Switch to non-root
 	b.WriteString("USER spwn\n")
 	b.WriteString("WORKDIR /home/spwn\n\n")
 
 	// Volumes
-	b.WriteString("VOLUME [\"/work\", \"/agents\", \"/world\"]\n")
+	b.WriteString("VOLUME [\"/workspaces\", \"/agents\", \"/world\"]\n")
 	b.WriteString("ENTRYPOINT [\"sleep\", \"infinity\"]\n")
 
 	return b.String()

@@ -21,8 +21,8 @@ import { spec } from '../../../setup/cli.specification.js';
  *   - destroy (down) tears down the world cleanly
  *
  * Augmented over the legacy test:
- *   - Asserts both agents' homes are bind-mounted inside the container
- *     at /agents/morpheus and /agents/neo
+ *   - Asserts both agents' homes are docker-cp'd into the container
+ *     at /agents/morpheus and /agents/neo at spawn time
  *   - Reads `agent ls --json` and `world list --json` to confirm both
  *     agents are attached to the same running world
  */
@@ -43,7 +43,7 @@ describe('colony multi-agent', () => {
         expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
         expect(result.file('spwn/agents/morpheus/identity/profile.md').exists).toBe(true);
 
-        // And bind-mounted into the world container at /agents/<name>.
+        // And docker-cp'd into the world container at /agents/<name>.
         const neo = result.container('neo');
         expect(neo.running).toBe(true);
         expect(neo.file('/agents/neo').exists).toBe(true);

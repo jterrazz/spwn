@@ -5,7 +5,7 @@ Claude Code is your AI agent runtime - the thinking engine that processes tasks.
 ## Configuration
 Claude Code is pre-configured with:
 - Onboarding completed
-- Workspace trust granted for /workspace and /home/spwn
+- Workspace trust granted for /workspaces and the agent home
 - Dangerous mode permissions skipped
 
 ## Usage

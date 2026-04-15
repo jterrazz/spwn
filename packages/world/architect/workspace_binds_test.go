@@ -11,14 +11,14 @@ import (
 
 // These tests pin the exact Docker bind specs produced for each
 // workspace configuration. The contract is uniform under the new
-// architecture: every workspace gets mounted at /work/<name>, no
-// matter how many there are. Running `ls /work` always tells the
+// architecture: every workspace gets mounted at /workspaces/<name>, no
+// matter how many there are. Running `ls /workspaces` always tells the
 // agent which projects are available.
 //
 // Contract:
-//   0 workspaces: no binds (the agent has no /work directory; its
+//   0 workspaces: no binds (the agent has no /workspaces directory; its
 //                 only writable space is /agents/<name>).
-//   1+:           one bind per workspace at /work/<name>.
+//   1+:           one bind per workspace at /workspaces/<name>.
 
 func TestBuildWorkspaceBinds_Ephemeral(t *testing.T) {
 	got := buildWorkspaceBinds(nil)
@@ -31,7 +31,7 @@ func TestBuildWorkspaceBinds_SingleWorkspace(t *testing.T) {
 	got := buildWorkspaceBinds([]models.Workspace{
 		{Name: "proj", Path: "/host/project"},
 	})
-	want := []string{"/host/project:/work/proj"}
+	want := []string{"/host/project:/workspaces/proj"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("single workspace binds:\n got  %v\n want %v", got, want)
 	}
@@ -41,7 +41,7 @@ func TestBuildWorkspaceBinds_SingleWorkspace_ReadOnly(t *testing.T) {
 	got := buildWorkspaceBinds([]models.Workspace{
 		{Name: "docs", Path: "/host/docs", ReadOnly: true},
 	})
-	want := []string{"/host/docs:/work/docs:ro"}
+	want := []string{"/host/docs:/workspaces/docs:ro"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("read-only single workspace binds:\n got  %v\n want %v", got, want)
 	}
@@ -54,8 +54,8 @@ func TestBuildWorkspaceBinds_MultiWorkspace_NamedSubdirs(t *testing.T) {
 	})
 	sort.Strings(got)
 	want := []string{
-		"/host/api:/work/api",
-		"/host/web:/work/web",
+		"/host/api:/workspaces/api",
+		"/host/web:/workspaces/web",
 	}
 	sort.Strings(want)
 	if !reflect.DeepEqual(got, want) {
@@ -71,9 +71,9 @@ func TestBuildWorkspaceBinds_MultiWorkspace_MixedReadOnly(t *testing.T) {
 	})
 	sort.Strings(got)
 	want := []string{
-		"/host/code:/work/code",
-		"/host/data:/work/data",
-		"/host/docs:/work/docs:ro",
+		"/host/code:/workspaces/code",
+		"/host/data:/workspaces/data",
+		"/host/docs:/workspaces/docs:ro",
 	}
 	sort.Strings(want)
 	if !reflect.DeepEqual(got, want) {
@@ -91,8 +91,8 @@ func TestBuildWorkspaceBinds_ThreeWorkspaces_AllUnderWork(t *testing.T) {
 		t.Errorf("expected exactly 3 binds, got %d: %v", len(got), got)
 	}
 	for _, b := range got {
-		if !strings.Contains(b, ":/work/") {
-			t.Errorf("every bind should target /work/<name>, got: %q", b)
+		if !strings.Contains(b, ":/workspaces/") {
+			t.Errorf("every bind should target /workspaces/<name>, got: %q", b)
 		}
 	}
 }
@@ -103,10 +103,10 @@ func TestWorkspaceContainerPath(t *testing.T) {
 		total int
 		want  string
 	}{
-		{"proj", 1, "/work/proj"},
-		{"web", 2, "/work/web"},
-		{"api", 2, "/work/api"},
-		{"docs", 5, "/work/docs"},
+		{"proj", 1, "/workspaces/proj"},
+		{"web", 2, "/workspaces/web"},
+		{"api", 2, "/workspaces/api"},
+		{"docs", 5, "/workspaces/docs"},
 	}
 	for _, tt := range tests {
 		if got := workspaceContainerPath(tt.name, tt.total); got != tt.want {

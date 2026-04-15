@@ -2,10 +2,10 @@
 
 ## Laws
 - Network: bridge (outbound access enabled)
-- Filesystem is ephemeral except /workspace and /mind
+- Filesystem is ephemeral except /workspaces and /mind
 
 ## Tools
-/workspace - project files, mounted from Host (read-write)
+/workspaces - project files, mounted from Host (read-write)
 /mind - agent identity and memory (read-write)
 /tmp - ephemeral scratch space
 
@@ -15,6 +15,6 @@ To send a message: write a JSON file to /world/inbox/{recipient}/.
 To check messages: read files from /world/inbox/{your-name}/.
 
 ## Topology
-/workspace - project files, mounted from Host (read-write)
+/workspaces - project files, mounted from Host (read-write)
 /mind - agent identity and memory (read-write)
 /tmp - ephemeral scratch space

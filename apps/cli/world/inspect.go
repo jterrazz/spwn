@@ -50,13 +50,13 @@ var inspectCmd = &cobra.Command{
 		if len(u.Workspaces) > 0 || u.Agent != "" || len(u.Agents) > 0 {
 			s.Blank()
 			if len(u.Workspaces) > 0 {
-				s.Info("Workspaces:", fmt.Sprintf("%d mounted at /work/*", len(u.Workspaces)))
+				s.Info("Workspaces:", fmt.Sprintf("%d mounted under /workspaces/", len(u.Workspaces)))
 				for _, ws := range u.Workspaces {
 					ro := ""
 					if ws.ReadOnly {
 						ro = " (ro)"
 					}
-					s.Info("  "+ws.Name+":", ws.Path+" → /work/"+ws.Name+ro)
+					s.Info("  "+ws.Name+":", ws.Path+" → /workspaces/"+ws.Name+ro)
 				}
 			}
 			// Agent homes are visible at /agents/<name>; per-world data

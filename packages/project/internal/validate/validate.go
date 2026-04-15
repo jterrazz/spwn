@@ -455,11 +455,16 @@ func ruleOneAgentOneWorld(in Input) []Issue {
 	return out
 }
 
-// ruleWorkspaceMounts enforces the /workspace mount rules:
+// ruleWorkspaceMounts enforces the workspace mount form. Accepted
+// entries:
 //
-//   - First entry may be bare (mounted at /workspace).
-//   - Subsequent bare entries are forbidden.
-//   - Subsequent explicit entries must use `host:/workspace/...`.
+//   - "path"           (bare host path — auto-named workspace<N>)
+//   - "name=path"      (named mount; container-side becomes /workspaces/<name>)
+//   - "name=path:ro"   (same, read-only)
+//
+// Container paths never appear in the manifest. Users don't write
+// `/workspaces/...` — that's an implementation detail of where the
+// mount lands inside the container.
 func ruleWorkspaceMounts(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -467,43 +472,40 @@ func ruleWorkspaceMounts(in Input) []Issue {
 	var out []Issue
 	for _, wname := range sortedKeys(in.Manifest.Worlds) {
 		w := in.Manifest.Worlds[wname]
-		for i, entry := range w.Workspaces {
-			host, container, hasColon := splitWorkspace(entry)
-			if i == 0 {
-				if hasColon && !strings.HasPrefix(container, "/workspace") {
+		for _, entry := range w.Workspaces {
+			raw := strings.TrimSuffix(entry, ":ro")
+			// If there's an `=`, the left side must be a valid name.
+			if eq := strings.Index(raw, "="); eq > 0 {
+				name := strings.TrimSpace(raw[:eq])
+				path := strings.TrimSpace(raw[eq+1:])
+				if name == "" || path == "" {
 					out = append(out, Issue{
 						Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
-						Message: fmt.Sprintf("workspace mount %q must target /workspace[...]", entry),
+						Message: fmt.Sprintf("workspace entry %q has empty name or path", entry),
+					})
+					continue
+				}
+				if !slugRe.MatchString(name) {
+					out = append(out, Issue{
+						Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
+						Message: fmt.Sprintf("workspace name %q must match ^[a-z][a-z0-9-]*$", name),
 					})
 				}
-				_ = host
 				continue
 			}
-			if !hasColon {
+			// Bare entry: any host path. Container-path-on-RHS form is no
+			// longer accepted — colons in the entry mean the user likely
+			// tried to hand-craft the container side.
+			if strings.Contains(raw, ":") {
 				out = append(out, Issue{
 					Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
-					Message: fmt.Sprintf("workspace entry %q is bare; only the first entry may omit the container path", entry),
-					Hint:    "use `host:/workspace/<name>` form",
-				})
-				continue
-			}
-			if !strings.HasPrefix(container, "/workspace/") {
-				out = append(out, Issue{
-					Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
-					Message: fmt.Sprintf("workspace mount %q must land under /workspace/", entry),
+					Message: fmt.Sprintf("workspace entry %q uses a container-path form; use name=path instead", entry),
+					Hint:    "drop the container path; spwn mounts named workspaces at /workspaces/<name> automatically",
 				})
 			}
 		}
 	}
 	return out
-}
-
-func splitWorkspace(entry string) (host, container string, hasColon bool) {
-	idx := strings.Index(entry, ":")
-	if idx < 0 {
-		return entry, "", false
-	}
-	return entry[:idx], entry[idx+1:], true
 }
 
 // rulePackageVersionConflict flags multi-agent worlds whose members

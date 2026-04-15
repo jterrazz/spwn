@@ -25,5 +25,5 @@ spwn skill edit <skill-name> [flags]
 
 ### SEE ALSO
 
-* [spwn skill](./spwn_skill.md)	 - Author and manage reusable skill files
+* [spwn skill](./spwn_skill.md)	 - Author bare-markdown skill packages
 

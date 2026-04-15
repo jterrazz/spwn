@@ -7,7 +7,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * World workspace persistence under the docker() spec mode.
  *
  * Read-only / independent-write tests share one container. Each
- * Writing test targets a distinct filename in /work/default so they
+ * Writing test targets a distinct filename in /workspaces/workspace0 so they
  * don't conflict. The bad-workspace-path error case spins up its own
  * spec since it tests a failing `up`.
  *
@@ -35,7 +35,7 @@ describe('world workspace', () => {
             expect(neo.running).toBe(true);
 
             // Docker-pilot declares workspaces: [.] so the project root is
-            // Mounted at /work/default read-write.
+            // Mounted at /workspaces/workspace0 read-write.
             const inspectData = neo.inspect.value as {
                 HostConfig?: { Binds?: string[] };
                 Mounts?: Array<{
@@ -47,7 +47,7 @@ describe('world workspace', () => {
             };
 
             const mounts = inspectData.Mounts ?? [];
-            const workspaceMount = mounts.find((m) => m.Destination === '/work/default');
+            const workspaceMount = mounts.find((m) => m.Destination === '/workspaces/workspace0');
             expect(workspaceMount).toBeDefined();
             expect(workspaceMount?.RW).toBe(true);
             expect(workspaceMount?.Source).toBeTruthy();
@@ -56,8 +56,8 @@ describe('world workspace', () => {
         test('host project files are visible inside the container', () => {
             const neo = world.container('neo');
             // The spwn.yaml file lives at the root of the docker-pilot fixture.
-            expect(neo.file('/work/default/spwn.yaml').exists).toBe(true);
-            const content = neo.file('/work/default/spwn.yaml').content;
+            expect(neo.file('/workspaces/workspace0/spwn.yaml').exists).toBe(true);
+            const content = neo.file('/workspaces/workspace0/spwn.yaml').content;
             expect(content).toContain('docker-pilot');
         });
 
@@ -66,7 +66,7 @@ describe('world workspace', () => {
 
             // Unique filename so other shared tests never race this one.
             const write = await neo.exec(
-                'sh -c "echo \'created in container\' > /work/default/persist-test.txt"',
+                'sh -c "echo \'created in container\' > /workspaces/workspace0/persist-test.txt"',
             );
             expect(write.exitCode).toBe(0);
 
@@ -80,11 +80,11 @@ describe('world workspace', () => {
 
             // Distinct filename from the persist test above.
             const write = await neo.exec(
-                'sh -c "echo \'rw-test-content\' > /work/default/rw-test.txt"',
+                'sh -c "echo \'rw-test-content\' > /workspaces/workspace0/rw-test.txt"',
             );
             expect(write.exitCode).toBe(0);
 
-            const read = await neo.exec('cat /work/default/rw-test.txt');
+            const read = await neo.exec('cat /workspaces/workspace0/rw-test.txt');
             expect(read.exitCode).toBe(0);
             expect(read.stdout.text.trim()).toBe('rw-test-content');
         });

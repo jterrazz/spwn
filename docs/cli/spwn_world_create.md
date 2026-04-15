@@ -25,7 +25,7 @@ spwn world create <name> [flags]
 
 ```
   spwn world create matrix --agent neo --agent trinity
-  spwn world create alignment --agent clippy --workspace ./data:/workspace/data
+  spwn world create alignment --agent clippy --workspace data=./data
 ```
 
 ### Options
@@ -33,7 +33,7 @@ spwn world create <name> [flags]
 ```
   -a, --agent stringArray       Agent name (repeatable). Must already exist under spwn/agents/
   -h, --help                    help for create
-  -w, --workspace stringArray   Workspace mount. Forms: "path", "host:/workspace/name"
+  -w, --workspace stringArray   Workspace mount. Forms: "path", "name=path", "name=path:ro"
 ```
 
 ### SEE ALSO

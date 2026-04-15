@@ -45,7 +45,7 @@ spwn agent talk neo "Show me what you can see. Explore the world."
 # Neo will walk you through:
 #   /world/        - the world manifest, physics, faculties
 #   /mind/         - its own persistent identity
-#   /workspace/    - mounted project (if any)
+#   /workspaces/   - mounted project workspaces (if any)
 
 # Check what's happening
 spwn ls

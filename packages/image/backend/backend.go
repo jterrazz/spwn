@@ -61,6 +61,25 @@ type Backend interface {
 	Exec(ctx context.Context, containerID string, cfg ExecConfig) (int, error)
 	ExecOutput(ctx context.Context, containerID string, cmd []string) (string, error)
 	CopyTo(ctx context.Context, containerID string, destPath string, content []byte) error
+
+	// CopyDirTo copies the contents of a host directory into a
+	// directory inside the container. The destination directory is
+	// created if it doesn't exist. Files that already exist at the
+	// destination are overwritten. This is the mechanism used to
+	// seed per-agent home directories from `spwn/agents/<name>/` on
+	// the host into `/agents/<name>/` inside the container at spawn
+	// time — the committed agent tree flows in via a one-time copy,
+	// not via a bind mount.
+	CopyDirTo(ctx context.Context, containerID string, destDir string, hostSrcDir string) error
+
+	// CopyDirFrom copies the contents of a directory inside the
+	// container back to a host directory. Used by `spwn down` to
+	// snapshot an agent's durable memory layers (journal, knowledge,
+	// playbooks, skills) out of the container before it's destroyed.
+	// hostDestDir is created if it doesn't exist; existing files at
+	// the destination are overwritten.
+	CopyDirFrom(ctx context.Context, containerID string, srcDir string, hostDestDir string) error
+
 	IsRunning(ctx context.Context, containerID string) (bool, error)
 	ImageExists(ctx context.Context, image string) (bool, error)
 	// EnsureImage and EnsureImageWithContext return (rebuilt, err).
