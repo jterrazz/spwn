@@ -2,8 +2,8 @@
 
 **The spwn compiler.** Translates a provider-neutral spwn project
 (`spwn.yaml` + `spwn/agents/*` + skills + hooks) into a
-runtime-specific file layout that a concrete agent runtime — Claude
-Code today, Codex tomorrow — can boot from.
+runtime-specific file layout that a concrete agent runtime - Claude
+Code today, Codex tomorrow - can boot from.
 
 ## The pitch in one line
 
@@ -26,12 +26,12 @@ hooks/*    ───►  │ package) │                │ package) │
                      pure                    side-effectful
 ```
 
-Phase 1 — **compile** (this package) — is a pure function. Given an
+Phase 1 - **compile** (this package) - is a pure function. Given an
 `Input` it returns a `*Tree`, a sorted, in-memory `path → bytes`
 map. No disk writes, no Docker calls. The same input produces the
 same output.
 
-Phase 2 — **link** (`packages/image`) — consumes the `Tree` and
+Phase 2 - **link** (`packages/image`) - consumes the `Tree` and
 turns it into a Docker image. This is where the side effects live:
 `docker build`, tool verification, runtime state.
 
@@ -103,18 +103,18 @@ _ = tree.WriteTo("/tmp/out")                // materialise
 
 Why a flat map:
 
-- **Deterministic** — `Paths()` is sorted, so golden fixtures
+- **Deterministic** - `Paths()` is sorted, so golden fixtures
   diff cleanly.
-- **Composable** — `WriteTo` puts the tree anywhere. `Walk` lets
+- **Composable** - `WriteTo` puts the tree anywhere. `Walk` lets
   callers route different prefixes to different destinations, which
   is what `architect.Spawn` does today (it splits `world/*` and
   `agents/*` into two bind-mounted host directories).
-- **Testable** — comparing two trees is a map comparison. No temp
+- **Testable** - comparing two trees is a map comparison. No temp
   dirs, no file system assertions.
 
 When a renderer eventually needs streaming (multi-gigabyte tool
 bundles, for example), the `Tree` interface can grow without
-breaking callers — `Add` becomes `AddReader`, `Walk` becomes a
+breaking callers - `Add` becomes `AddReader`, `Walk` becomes a
 channel. That's a forward refactor; today the flat map is enough.
 
 ## The `Runtime` interface
@@ -133,7 +133,7 @@ no Docker, no time-dependent output. Three reasons this matters:
 2. **Tests are one-liners.** Call `Render`, compare paths, compare
    contents. Golden fixtures (coming in Phase 4) diff two maps.
 3. **Reasoning.** When a bug appears in the rendered output, you
-   know it's the input or the renderer — never a race, never a
+   know it's the input or the renderer - never a race, never a
    dangling file from a previous run.
 
 ### Adding a new runtime

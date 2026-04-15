@@ -29,9 +29,9 @@
 
 ## Play god with AI agents.
 
-**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** — one command away.
+**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** - one command away.
 
-The real power of AI isn't the model. It's the model *plus everything around it*. Einstein in a chatbox can answer questions. Einstein in a lab — with instruments, notebooks, colleagues, and years of memory — can change the world. **The environment is the multiplier.**
+The real power of AI isn't the model. It's the model *plus everything around it*. Einstein in a chatbox can answer questions. Einstein in a lab - with instruments, notebooks, colleagues, and years of memory - can change the world. **The environment is the multiplier.**
 
 That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code**: stack tool packs, skill files, and profiles into a running mind, then commit the whole declaration to git. Review the PR that changes an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**. **Docker for intelligence.**
 
@@ -87,7 +87,7 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 </td>
 <td align="center">
 <h3>📦 Reproducible Builds</h3>
-<code>spwn check</code> validates the project tree. <code>spwn build</code> compiles it and bakes the result into a project-specific Docker image — pushable to any registry, reproducible anywhere. <b>Byte-identical agents across environments.</b>
+<code>spwn check</code> validates the project tree. <code>spwn build</code> compiles it and bakes the result into a project-specific Docker image - pushable to any registry, reproducible anywhere. <b>Byte-identical agents across environments.</b>
 </td>
 </tr>
 </table>
@@ -96,86 +96,33 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 
 <br/>
 
-## How it works: the spwn compiler
+## How spwn works
 
-Spwn is a **two-phase compiler**. You author a project in a
-provider-neutral source format, and a runtime-specific renderer
-translates it into the file layout your target agent runtime expects.
-Think `tsc`: you write `.ts`, you get `.js` — but your source never
-mentions V8 or Bun.
+Three ideas to hold in your head before you dive in:
 
-```
-Source (what you commit)               Target (what the container sees)
-──────────────────────                 ────────────────────────────────
-spwn.yaml                ─┐            CLAUDE.md            (Claude Code)
-spwn/agents/neo/AGENT.md ─┤  compile   .claude/agents/neo/…
-spwn/agents/neo/core/    ─┼──────────> world/physics.md
-spwn/skills/*.md         ─┤            world/faculties.md
-spwn/hooks/*             ─┘            world/skills/*.md
-```
-
-The source format is **100% provider-agnostic**. Nothing under
-`spwn/` mentions Claude Code, Codex, or any other specific agent
-runtime by name or by convention. The per-agent entrypoint is
-`AGENT.md`, not `CLAUDE.md`, and the manifest's `runtime:` field
-picks which compiler backend to use.
-
-Two packages drive the pipeline:
-
-- **[`packages/compile`](packages/compile/)** is the compiler.
-  It takes a project and produces a `Tree` — an in-memory
-  `path → bytes` map that represents the full on-disk layout the
-  target runtime needs. Each concrete backend
-  (`packages/compile/runtimes/claudecode`, future `codex`, …)
-  implements the `Runtime` interface: a pure function from `Input`
-  to `Tree`, no I/O, deterministic.
-- **[`packages/image`](packages/image/)** is the linker. It takes
-  the compiled `Tree` plus the resolved tool list and bakes them
-  into a Docker image the world container can boot from.
-
-`spwn check` is a dry run of the first phase: it catches broken
-@-imports, missing skills, and invalid tool refs without touching
-Docker. `spwn build` runs both phases and emits the final image.
-
-Why this split matters:
-
-- **Portability** — the committed project runs on any backend with a
-  compile Runtime. Adding `packages/compile/runtimes/codex` lets the
-  same agents run under a Codex-style runtime with zero source edits.
-- **Testability** — renderers are pure functions, so they test with
-  a map comparison, not a live container.
-- **No vendor lock-in** — your repo stays clean even if you switch
-  target runtimes, because the Claude-specific convention
-  (`CLAUDE.md`) is emitted at compile time, not authored by hand.
-
-See [`packages/compile/README.md`](packages/compile/README.md) for
-the full type walkthrough and how to add a new runtime.
+- **[Agent orchestration as code](#agent-orchestration-as-code)** - agents, worlds, and tool composition are declarative files committed alongside your code. Like Terraform or `docker-compose.yaml`, but for the agents that work on your repo. Clone it, get the same agents byte-for-byte.
+- **[An agent is a directory of markdown](#inside-an-agent)** - composed from blocks (tools, skills, profile) in `agent.yaml`. Human-readable, git-friendly, no database. Evolves through dream / sleep / fork.
+- **[spwn is a compiler](#spwn-is-a-compiler-for-agents)** - `spwn build` compiles your provider-neutral source and bakes it into a reproducible Docker image. Like `tsc`, but targeting agent runtimes instead of JS engines.
 
 <br/>
 
-## Projects are per-repository
+### Agent orchestration as code
 
-**A spwn project lives in the repo, not in your home directory.**
-`spwn init` turns any directory into a project - the same way `git init`
-turns any directory into a git repo, or `docker init` drops a Dockerfile
-and compose file. Commit your agents, your worlds, your tool composition
-alongside your code.
+**Your agents, your worlds, and your tool composition are declarative files committed alongside your code** - reviewed in PRs, versioned in git, diffed like any other config. Think Terraform for infrastructure, `docker-compose.yaml` for services, `package.json` for dependencies. Spwn plays the same role for the agents that work on your repo.
+
+`spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do:
 
 ```
 my-project/
-├── spwn.yaml               # manifest - the "package.json" of spwn
+├── spwn.yaml               # manifest - declares worlds, like docker-compose.yaml
 ├── spwn/                   # committed project assets
-│   ├── agents/             #   your agents - committed, travel with the repo
+│   ├── agents/             #   your agents - travel with the repo
 │   ├── tools/              #   `spwn tool get @community/foo` → spwn/tools/foo/
 │   └── skills/             #   `spwn skill get @community/review` → spwn/skills/review/
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
 
-`spwn.yaml` is tiny. Worlds live **inline** as map entries under
-`worlds:` — no separate `spwn/worlds/*.yaml` files. Each world names
-the agents it deploys and the workspace it mounts. Everyone who
-clones the repo gets the same agents and the same tool composition.
-**Reproducibility by construction.**
+`spwn.yaml` is the declarative entry point. Worlds live **inline** under `worlds:` - each one names the agents it deploys and the workspace it mounts. No imperative setup scripts, no "works on my machine": whoever clones the repo gets the same agents with the same tools, byte-for-byte.
 
 ```yaml
 # spwn.yaml
@@ -183,19 +130,16 @@ version: 2
 name: acme-api
 
 worlds:
-  default:
+  matrix:
     agents: [neo]
     workspaces: [.]
 ```
 
-**`~/.spwn/` is for your user identity only** - credentials, daemon
-state, activity log. Agents and worlds don't live there. If you want to
-share an agent across projects, publish it to a registry (`spwn agent
-publish`) and `spwn agent get` it in the next project.
+**`~/.spwn/` holds only your user identity** - credentials, daemon state, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, publish it (`spwn agent publish`) and pull it in the next repo with `spwn agent get`.
 
 <br/>
 
-## Inside an agent
+### Inside an agent
 
 Each agent is a directory of markdown files - **human-readable, git-friendly, no database**:
 
@@ -249,6 +193,26 @@ plugins:
 - **Fork** (`spwn agent fork neo neo-v2`) - clone an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
 
 > *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
+
+<br/>
+
+### spwn is a compiler for agents
+
+Think of spwn the way you think of `tsc` or `babel`. You write in one clean source language; a compiler emits whatever flavor your target runtime actually wants. You never touch the output by hand.
+
+```
+ spwn/           spwn build          Docker image
+ (source)   ──────────────────▶     (artifact you run)
+             compile  +  bake
+```
+
+- **Source** is provider-neutral. `AGENT.md`, `core/`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
+- **Compile** renders that source into the exact file layout your chosen runtime expects. Claude Code wants `CLAUDE.md` in a particular place? The claude-code backend emits it. Codex wants something else? Its backend emits that. Same source, different targets - like compiling TypeScript to ES5 vs ES2022.
+- **Bake** links the compiled tree with the tools your agent declared and produces a normal Docker image. Push it, pull it, run it anywhere - byte-identical on every machine.
+
+`spwn check` is the type-checker: it runs the compile step in dry-run to catch broken imports, missing skills, and invalid tool refs before you ever touch Docker.
+
+Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lock-in. See [`packages/compile/README.md`](packages/compile/README.md) for internals and how to add a new backend.
 
 <br/>
 
@@ -314,19 +278,19 @@ Grammar is consistent: `spwn <noun> <verb>`. Compose-style
 shortcuts exist for the 80% cases: `spwn up`, `spwn ls`, `spwn down`.
 With no arguments they act on every world declared in `spwn.yaml`.
 Name-only shortcuts start a single entity by name: `spwn agent neo`
-starts the world that contains `neo`; `spwn world default` starts the
-world named `default`.
+starts the world that contains `neo`; `spwn world matrix` starts the
+world named `matrix`.
 
 Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 
 ```
 # ── Shortcuts (compose-style) ────────────────────────────────────
 🟢 spwn up                                      Bring up every world in spwn.yaml
-🟢 spwn up default                              Bring up one world by name
+🟢 spwn up matrix                               Bring up one world by name
 🟢 spwn agent neo                               Start the world that contains neo
 🟢 spwn ls                                      Agent-centric status (running / stopped / orphan)
 🟢 spwn down                                    Stop every world in spwn.yaml
-🟢 spwn down default                            Stop one world by name
+🟢 spwn down matrix                             Stop one world by name
 
 # ── Project (per-repo manifest) ──────────────────────────────────
 🟢 spwn init                                    Scaffold a blank project in the current dir
@@ -372,7 +336,7 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🔴 spwn agent publish neo                       Ship to registry (memory stripped)
 
 # ── Worlds ───────────────────────────────────────────────────────
-# Lifecycle — worlds are inline entries in spwn.yaml (not files)
+# Lifecycle - worlds are inline entries in spwn.yaml (not files)
 🟢 spwn world create matrix --agent neo         Declare a new world in spwn.yaml
 🟢 spwn world rm matrix                         Remove a world declaration from spwn.yaml
 🟢 spwn world ls                                List declared worlds (with status column)
