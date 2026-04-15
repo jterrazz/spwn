@@ -6,15 +6,15 @@ Usage:
 
 Lifecycle:
   create <name>                    Create a blank agent (auto-creates a single-agent world)
-  <name>                           Start the world that contains <name> (shortcut)
-  start <name>                     Start the world containing this agent
-  stop <name>                      Stop the world containing this agent
+  <name>                           Open an interactive session with <name> (shortcut)
+  start <name>                     Run <name> as an autonomous daemon [planned]
+  stop <name>                      Kill <name>'s daemon loop [planned]
   ls                               List agents
   rm <name>                        Delete an agent
 
 Compose:
-  add <name>                       Attach blocks (--tool / --plugin / --skill / --profile)
-  remove <name>                    Detach blocks (--tool / --plugin / --skill / --profile)
+  add <name>                       Attach blocks (--tool / --plugin / --skill)
+  remove <name>                    Detach blocks (--tool / --plugin / --skill)
 
 Conversation:
   talk <name> [msg]                Open a session with a running agent (sync)
@@ -40,6 +40,6 @@ Portability:
 
 Examples:
   spwn agent create neo
-  spwn agent add neo --tool @spwn/python --profile researcher
+  spwn agent add neo --tool @spwn/python --skill paper-reading
   spwn agent neo
 

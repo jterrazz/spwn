@@ -24,7 +24,7 @@ test.describe('Worlds page', () => {
     });
 
     test('shows planets when worlds exist', async ({ page, api }) => {
-        await api.installTemplate('matrix');
+        await api.installExample('matrix');
         await api.spawnWorld('matrix', 'Neo');
         await page.goto('/');
         await page.waitForTimeout(4000);
@@ -35,7 +35,7 @@ test.describe('Worlds page', () => {
     });
 
     test('selecting a planet shows agent details', async ({ page, api }) => {
-        await api.installTemplate('matrix');
+        await api.installExample('matrix');
         await api.spawnWorld('matrix', 'Neo');
         await page.goto('/');
         await page.waitForTimeout(4000);

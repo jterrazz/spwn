@@ -16,14 +16,14 @@ test.describe('API health', () => {
         expect(version.current).toBeTruthy();
     });
 
-    test('API templates endpoint returns 5 templates', async ({ api }) => {
-        const data = await api.get<{ templates: Array<{ slug: string }> }>('/api/templates');
-        expect(data.templates).toHaveLength(5);
-        expect(data.templates[0].slug).toBe('startup');
+    test('API examples endpoint returns 5 examples', async ({ api }) => {
+        const data = await api.get<{ examples: Array<{ slug: string }> }>('/api/examples');
+        expect(data.examples).toHaveLength(5);
+        expect(data.examples[0].slug).toBe('startup');
     });
 
     test('API agents endpoint returns agents', async ({ api }) => {
-        await api.installTemplate('matrix');
+        await api.installExample('matrix');
         const agents = await api.get<Array<{ name: string }>>('/api/agents');
         const names = agents.map((a) => a.name);
         expect(names).toContain('Neo');

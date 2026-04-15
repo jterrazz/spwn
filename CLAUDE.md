@@ -2,7 +2,7 @@
 
 ## Core Principle: The Building Blocks of Agent Intelligence
 
-Spwn is the **operating system for autonomous agent worlds**. Compose tools, skills, and profiles into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work.
+Spwn is the **operating system for autonomous agent worlds**. Compose tools, skills, and identity into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work.
 
 The domain has three main abstractions, each owning one concern:
 
@@ -15,7 +15,7 @@ The domain has three main abstractions, each owning one concern:
 ## Vocabulary
 
 ### Entities
-- **Agent**: A persistent mind. Composed from tools, skills, and a profile. Has identity, memory, and evolution history. The main thing you create and ship.
+- **Agent**: A persistent mind. Composed from tools, skills, and an identity. Has memory and evolution history. The main thing you create and ship.
 - **World**: A runtime instance. Ephemeral. Where an agent actually runs - Docker container with filesystem, tools, and lifecycle. Dies when stopped.
 - **Architect**: The always-on orchestration daemon. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 
@@ -23,12 +23,11 @@ The domain has three main abstractions, each owning one concern:
 - **Tool**: A reusable tool pack (`@spwn/unix`, `@spwn/python`). Plugs into an agent as a capability. If not listed in an agent, it doesn't exist in its world.
 - **Plugin**: A runtime-targeted tool pack (`@spwn/mempalace`). Same pipeline as Tool, plus it injects JSON into the runtime's settings file (e.g. `~/.claude/settings.json`) at spawn time - the standard vehicle for MCP servers, shell hooks, and other runtime-specific wiring. Declared under `agent.yaml#plugins:`, coexists with `tools:`.
 - **Skill**: A reusable procedure, playbook, or piece of knowledge. Authored in markdown, shared across agents.
-- **Profile**: A reusable personality template. Role, tone, purpose, behavior. Agents inherit a profile for their baseline personality.
 
 ### Agent internals
-- **Identity**: Immutable core - purpose, traits, bonds. Never changes, even across forks.
+- **Identity**: Who the agent is - profile, purpose, traits. Lives in `spwn/agents/<name>/identity/`. Persists across world restarts.
 - **Memory**: Journal, sessions, and knowledge. Persists across worlds, grows with experience.
-- **Composition**: An agent's active tools + skills + profile declared in `agent.yaml`.
+- **Composition**: An agent's active tools + skills, declared in `agent.yaml`.
 
 ### Hierarchy (inside a world - "coming soon" on landing page)
 - **Chief**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
@@ -94,10 +93,9 @@ spwn world inspect <id>                        # Inspect a running world
 spwn world enter   <id>                        # Interactive shell inside the world
 spwn world snap save|ls|restore|rm             # World snapshots
 
-# ── Tools / skills / profiles ────────────────────────────────────
+# ── Tools / skills ───────────────────────────────────────────────
 spwn tool    ls                                # Installed built-in packs
 spwn skill   ls|new|edit                       # Authored skills in ./spwn/skills/
-spwn profile ls|new|edit                       # Authored profiles in ./spwn/profiles/
 
 # ── Registry (planned) ───────────────────────────────────────────
 spwn agent   get @community/sci                # Install a shared agent     [planned]
@@ -158,7 +156,7 @@ overrides.
 └── state/                       # architect daemon state
 ```
 
-**Config hierarchy:** `agent.yaml` declares composition (tools + skills + profile + `runtime.backend`). `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces + optional tools). The union of agent tools and world tools is what actually materializes inside the container.
+**Config hierarchy:** `agent.yaml` declares composition (tools + skills + `runtime.backend`). `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces + optional tools). The union of agent tools and world tools is what actually materializes inside the container.
 
 ## Repository Structure
 
@@ -181,7 +179,6 @@ spwn/
 │   │   ├── architect/               #     spwn architect (start, stop, status)
 │   │   ├── web/                     #     spwn web (launches the web UI)
 │   │   ├── auth/                    #     spwn auth (login, logout, token)
-│   │   ├── profile/                 #     spwn profile
 │   │   ├── skill/                   #     spwn skill
 │   │   ├── tool/                    #     spwn tool
 │   │   ├── team/                    #     spwn team
