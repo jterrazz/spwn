@@ -1,0 +1,6 @@
+version: 2
+name: binary-skills
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

@@ -1,0 +1,9 @@
+version: 2
+name: multiworld
+worlds:
+  alpha:
+    agents: [neo]
+    workspaces: [.]
+  beta:
+    agents: [neo]
+    workspaces: [.]

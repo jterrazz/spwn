@@ -1,0 +1,6 @@
+version: 2
+name: commented
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

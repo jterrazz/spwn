@@ -1,0 +1,1 @@
+manifest declares multiple worlds ([alpha beta]); pick one with --world

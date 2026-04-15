@@ -1,0 +1,6 @@
+version: 2
+name: shebang-hook
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

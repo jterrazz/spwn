@@ -1,0 +1,6 @@
+version: 2
+name: spaces
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]
