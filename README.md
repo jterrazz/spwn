@@ -101,7 +101,7 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 Three ideas to hold in your head before you dive in:
 
 - **[Agent orchestration as code](#agent-orchestration-as-code)** - agents, worlds, and tool composition are declarative files committed alongside your code. Like Terraform or `docker-compose.yaml`, but for the agents that work on your repo. Clone it, get the same agents byte-for-byte.
-- **[Agents built from blocks](#agents-built-from-blocks)** - tools, skills, and identity composed in `agent.yaml`. Human-readable, git-friendly, no database. Evolves through dream / sleep / fork.
+- **[Agents built from blocks](#agents-built-from-blocks)** - tools, skills, and identity composed in `agent.yaml`. Human-readable, git-friendly, no database.
 - **[Compile to any runtime](#compile-to-any-runtime)** - you write provider-neutral source; `spwn build` adapts it to whatever runtime you target and bakes the result into a reproducible Docker image. Like `tsc`, but for agent runtimes.
 
 <br/>
