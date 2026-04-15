@@ -59,3 +59,31 @@ describe('system skills infrastructure (docker)', () => {
         expect(ls.exitCode).toBe(0);
     });
 });
+
+describe('spwn skill / profile new (project-local)', () => {
+    test('skill new inside a project writes into the project tree', async () => {
+        // Given - an initialised empty project
+        // When - we author a new skill
+        // Then - it lands under spwn/skills/, not ~/.spwn/skills/
+        const result = await spec('project-scoped skill new')
+            .project('empty')
+            .exec(['init', 'skill new my-skill'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn/skills/my-skill.md').exists).toBe(true);
+    });
+
+    test('profile new inside a project writes into the project tree', async () => {
+        // Given - an initialised empty project
+        // When - we author a new profile
+        // Then - it lands under spwn/profiles/, not ~/.spwn/profiles/
+        const result = await spec('project-scoped profile new')
+            .project('empty')
+            .exec(['init', 'profile new researcher'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn/profiles/researcher.md').exists).toBe(true);
+    });
+});

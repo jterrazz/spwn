@@ -7,6 +7,7 @@ const (
 	AgentsSubDir        = "agents"
 	StateFileName       = "state.json"
 	SkillsSubDir        = "skills"
+	ProfilesSubDir      = "profiles"
 	CredentialsSubDir   = "credentials"
 	ActivityFileName    = "activity.jsonl"
 	TeamsSubDir         = "teams"
