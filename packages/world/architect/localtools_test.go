@@ -8,9 +8,9 @@ import (
 	ib "spwn.sh/packages/image"
 )
 
-func writeTool(t *testing.T, root, name, yaml string) {
+func writePackage(t *testing.T, root, name, yaml string) {
 	t.Helper()
-	dir := filepath.Join(root, "spwn", "tools", name)
+	dir := filepath.Join(root, "spwn", "packages", name)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -19,25 +19,26 @@ func writeTool(t *testing.T, root, name, yaml string) {
 	}
 }
 
-func TestLoadLocalTool_happyPath(t *testing.T) {
+func TestLoadLocalPackage_happyPath(t *testing.T) {
 	root := t.TempDir()
-	writeTool(t, root, "my-tool", `name: my-tool
+	writePackage(t, root, "my-tool", `name: my-tool
 version: "1.2.3"
-packages:
-  - build-essential
-commands:
-  - echo hi
-user-commands:
-  - echo user
-env:
-  FOO: bar
+install:
+  packages:
+    - build-essential
+  commands:
+    - echo hi
+  user-commands:
+    - echo user
+  env:
+    FOO: bar
 verify:
   - command -v my-tool
 dependencies:
   - "@spwn/unix"
 `)
 
-	tool, err := loadLocalTool(root, "my-tool")
+	tool, err := loadLocalPackage(root, "my-tool")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -68,23 +69,26 @@ dependencies:
 	}
 }
 
-func TestLoadLocalTool_missingManifest(t *testing.T) {
+func TestLoadLocalPackage_missingManifest(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "tools", "empty-tool"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "packages", "empty-pkg"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	_, err := loadLocalTool(root, "empty-tool")
+	_, err := loadLocalPackage(root, "empty-pkg")
 	if err == nil {
 		t.Fatal("want error for missing package.yaml")
 	}
 }
 
-func TestLoadLocalTool_skillsDirExposed(t *testing.T) {
+func TestLoadLocalPackage_skillsDirExposed(t *testing.T) {
 	root := t.TempDir()
-	writeTool(t, root, "toolish", `name: toolish
-packages: [curl]
+	writePackage(t, root, "toolish", `name: toolish
+install:
+  packages: [curl]
+verify:
+  - command -v curl
 `)
-	skillsDir := filepath.Join(root, "spwn", "tools", "toolish", "skills")
+	skillsDir := filepath.Join(root, "spwn", "packages", "toolish", "skills")
 	if err := os.MkdirAll(skillsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -92,21 +96,21 @@ packages: [curl]
 		t.Fatal(err)
 	}
 
-	tool, err := loadLocalTool(root, "toolish")
+	tool, err := loadLocalPackage(root, "toolish")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
 	if tool.Skills() == nil {
-		t.Error("want non-nil Skills fs for tool with skills/ dir")
+		t.Error("want non-nil Skills fs for package with skills/ dir")
 	}
 }
 
-func TestHydrateLocalTools_passThroughAtRefs(t *testing.T) {
+func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 	root := t.TempDir()
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "@spwn/git"}
-	got, err := hydrateLocalTools(reg, root, list)
+	got, err := hydrateLocalPackages(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -115,15 +119,18 @@ func TestHydrateLocalTools_passThroughAtRefs(t *testing.T) {
 	}
 }
 
-func TestHydrateLocalTools_rewritesBareNames(t *testing.T) {
+func TestHydrateLocalPackages_rewritesBareNames(t *testing.T) {
 	root := t.TempDir()
-	writeTool(t, root, "mine", `name: mine
-packages: [curl]
+	writePackage(t, root, "mine", `name: mine
+install:
+  packages: [curl]
+verify:
+  - command -v curl
 `)
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "mine", "@spwn/git"}
-	got, err := hydrateLocalTools(reg, root, list)
+	got, err := hydrateLocalPackages(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -132,22 +139,63 @@ packages: [curl]
 	}
 }
 
-func TestHydrateLocalTools_missingToolErrors(t *testing.T) {
+// TestHydrateLocalPackages_mixedListOrderPreserved locks in that the
+// rewritten list preserves the original ordering and deduplicates
+// bare names after the first registration. The registry only sees
+// Register once per unique name.
+func TestHydrateLocalPackages_mixedListOrderPreserved(t *testing.T) {
 	root := t.TempDir()
+	writePackage(t, root, "tool-a", `name: tool-a
+install:
+  packages: [curl]
+verify:
+  - command -v curl
+`)
+	writePackage(t, root, "tool-b", `name: tool-b
+install:
+  packages: [jq]
+verify:
+  - command -v jq
+`)
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalTools(reg, root, []string{"nonexistent"})
-	if err == nil {
-		t.Fatal("want error for missing local tool dir")
+	list := []string{"@spwn/unix", "tool-a", "@spwn/git", "tool-b", "tool-a"}
+	got, err := hydrateLocalPackages(reg, root, list)
+	if err != nil {
+		t.Fatalf("hydrate: %v", err)
+	}
+	want := []string{"@spwn/unix", "local:tool-a", "@spwn/git", "local:tool-b", "local:tool-a"}
+	if len(got) != len(want) {
+		t.Fatalf("length: got %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("at %d: got %q, want %q", i, got[i], want[i])
+		}
 	}
 }
 
-func TestHydrateLocalTools_idempotentOnDuplicate(t *testing.T) {
+func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 	root := t.TempDir()
-	writeTool(t, root, "mine", `name: mine`)
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalTools(reg, root, []string{"mine", "mine"})
+	_, err := hydrateLocalPackages(reg, root, []string{"nonexistent"})
+	if err == nil {
+		t.Fatal("want error for missing local package dir")
+	}
+}
+
+func TestHydrateLocalPackages_idempotentOnDuplicate(t *testing.T) {
+	root := t.TempDir()
+	writePackage(t, root, "mine", `name: mine
+install:
+  packages: [curl]
+verify:
+  - command -v curl
+`)
+	reg := ib.NewRegistry()
+
+	_, err := hydrateLocalPackages(reg, root, []string{"mine", "mine"})
 	if err != nil {
 		t.Fatalf("duplicate should not error: %v", err)
 	}

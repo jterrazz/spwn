@@ -23,7 +23,7 @@ Perfect for first-time users: the fastest path from "I installed spwn" to "I see
 ## Install
 
 ```bash
-spwn example install matrix
+spwn init @spwn/matrix
 ```
 
 ## Spawn
@@ -66,7 +66,7 @@ spwn agent dream neo
 
 # Move on to a multi-agent example
 spwn down <world-id>
-spwn example install startup
+spwn init @spwn/startup
 ```
 
 ## Cleanup

@@ -28,30 +28,33 @@ import (
 // optional so a minimal package ("install one thing, verify it's
 // there") stays short.
 type Schema struct {
-	// Name is the tool identifier (e.g. "@spwn/git"). Optional: when
-	// empty, the loader derives it from the directory name (plain
-	// local tools) or from the parent directory (catalog tools
-	// auto-prefix with "@spwn/").
+	// Name is the package identifier (e.g. "@spwn/git"). Optional:
+	// when empty, the loader derives it from the caller-supplied
+	// DefaultName (catalog loader auto-prefixes with "@spwn/"; local
+	// loader uses the directory basename).
 	Name string `yaml:"name"`
 
-	// Kind classifies the tool: "runtime", "sdk", "tool", or
-	// "platform". Defaults to "tool".
+	// Kind classifies the package: "runtime", "sdk", "tool", or
+	// "platform". Defaults to "tool". Today this is metadata only
+	// (the image builder doesn't branch on it); composability of the
+	// other fields decides what the package actually does.
 	Kind string `yaml:"kind"`
 
 	// Version is a semver string or "latest". Required for catalog
-	// tools; defaults to "0.0.0-local" for project-local tools.
+	// packages; defaults to "0.0.0-local" for project-local packages.
 	Version string `yaml:"version"`
 
 	// Description is a human-readable one-liner. Optional.
 	Description string `yaml:"description"`
 
-	// Dependencies is a flat list of other tool refs this one needs.
-	// The registry resolves them transitively and topologically
+	// Dependencies is a flat list of other package refs this one
+	// needs. The registry resolves them transitively and topologically
 	// sorts the final install order.
 	Dependencies []string `yaml:"dependencies"`
 
-	// Install is the build-time recipe for baking this tool into the
-	// image. All sub-fields are optional — a tool that only ships
+	// Install is the build-time recipe for baking this package into
+	// the image. All sub-fields are optional — a package that only
+	// ships
 	// skills can leave Install empty entirely.
 	Install InstallSection `yaml:"install"`
 

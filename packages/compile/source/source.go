@@ -5,7 +5,7 @@
 // filesystem.
 //
 // A ProjectSource is intentionally generous: it carries every file a
-// renderer might want (AGENT.md, agent.yaml, profile, layer dirs,
+// renderer might want (AGENTS.md, agent.yaml, profile, layer dirs,
 // skills, hooks, profiles) so the claude-code renderer — and the
 // future codex renderer — can pick whatever subset they need.
 package source
@@ -36,7 +36,10 @@ type ProjectSource struct {
 	// is deterministic (sorted by Name).
 	Agents []AgentSource
 
-	// Skills is every *.md file under spwn/skills/ (recursive).
+	// Skills are every bare-markdown skill at the top of
+	// spwn/packages/*.md. Nested .md files inside a directory-form
+	// package belong to that package's own package.yaml and are not
+	// enumerated here.
 	Skills []SkillSource
 
 	// Hooks is every file directly under spwn/hooks/.
@@ -56,7 +59,7 @@ type AgentSource struct {
 	// Name is the directory basename under spwn/agents/.
 	Name string
 
-	// AgentMD is the raw bytes of spwn/agents/<name>/AGENT.md — the
+	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md — the
 	// provider-neutral prompt. May be nil if the file is missing.
 	AgentMD []byte
 
@@ -97,10 +100,11 @@ type LayerFiles struct {
 	Journal   map[string][]byte
 }
 
-// SkillSource is one file under spwn/skills/.
+// SkillSource is one bare-markdown skill file directly under
+// spwn/packages/*.md.
 type SkillSource struct {
 	// Name is the skill identifier — the path relative to
-	// spwn/skills/ with the .md extension stripped.
+	// spwn/packages/ with the .md extension stripped.
 	Name string
 
 	// Content is the raw bytes of the skill file.
@@ -250,7 +254,7 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 func loadAgent(name, dir string) (AgentSource, error) {
 	src := AgentSource{Name: name}
 
-	// AGENT.md
+	// AGENTS.md
 	agentMDPath := filepath.Join(dir, "AGENTS.md")
 	if b, err := os.ReadFile(agentMDPath); err == nil {
 		src.AgentMD = b
@@ -338,44 +342,38 @@ func readTree(dir string) (map[string][]byte, error) {
 	return out, nil
 }
 
+// loadSkills reads bare-markdown skill packages from
+// <root>/spwn/packages/*.md. Files are loaded flat at the top level
+// only — nested .md files inside a package directory belong to that
+// directory's own package.yaml and are not project-level skills.
 func loadSkills(root string) ([]SkillSource, error) {
-	dir := filepath.Join(root, "spwn", "skills")
-	if _, err := os.Stat(dir); err != nil {
+	dir := filepath.Join(root, "spwn", "packages")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("stat %s: %w", dir, err)
+		return nil, fmt.Errorf("read %s: %w", dir, err)
 	}
 	var out []SkillSource
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
 		}
-		if d.IsDir() {
-			return nil
-		}
-		name := d.Name()
+		name := e.Name()
 		if strings.HasPrefix(name, ".") {
-			return nil
+			continue
 		}
 		if !strings.HasSuffix(name, ".md") {
-			return nil
+			continue
 		}
-		rel, err := filepath.Rel(dir, path)
-		if err != nil {
-			return err
-		}
-		rel = filepath.ToSlash(rel)
-		id := strings.TrimSuffix(rel, ".md")
+		path := filepath.Join(dir, name)
 		b, err := os.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("read %s: %w", path, err)
+			return nil, fmt.Errorf("read %s: %w", path, err)
 		}
+		id := strings.TrimSuffix(name, ".md")
 		out = append(out, SkillSource{Name: id, Content: b})
-		return nil
-	})
-	if err != nil {
-		return nil, err
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, nil

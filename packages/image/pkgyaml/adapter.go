@@ -6,10 +6,11 @@ import (
 	ib "spwn.sh/packages/image"
 )
 
-// toolImpl backs a parsed Schema as an image.Tool. When the manifest
-// includes a `plugin:` block, toolImpl also satisfies image.Plugin so
-// type assertions like `if p, ok := t.(ib.Plugin); ok { ... }` work
-// without special-casing YAML-backed tools.
+// toolImpl backs a parsed Schema as an image.Tool. Runtimes() and
+// Config() are part of the unified Tool interface — a package with a
+// `plugin:` block returns a non-empty Runtimes list and the spawn-time
+// merger picks up its Config(runtime) snippet. Packages without a
+// plugin block return nil from both.
 type toolImpl struct {
 	schema    Schema
 	kind      ib.Kind

@@ -89,6 +89,7 @@ func runInitLocal(cmd *cobra.Command) error {
 	s.Blank()
 	fmt.Fprintln(cmd.OutOrStdout(), "  Committed:")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.yaml                      # project manifest (worlds live inline)")
+	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.lock.yaml                 # committed package pins (like package-lock.json)")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/agents/neo/               # starter agent")
 	fmt.Fprintln(cmd.OutOrStdout(), "")
 	fmt.Fprintln(cmd.OutOrStdout(), "  Gitignored:")
@@ -142,6 +143,13 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 	rep, err := examples.Install(slug, cwd)
 	if err != nil {
 		return fmt.Errorf("install example %s: %w", ref, err)
+	}
+
+	// Example installs ship a `.spwn/` runtime state dir at first
+	// spawn; make sure `.gitignore` excludes it so users don't
+	// accidentally commit local world state.
+	if err := project.AppendGitignore(cwd); err != nil {
+		return fmt.Errorf("update .gitignore: %w", err)
 	}
 
 	s := ui.New()

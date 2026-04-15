@@ -44,7 +44,7 @@ type ParseOptions struct {
 	DefaultVersion string
 }
 
-// Parse reads spwn-tool.yaml via the Resolver and returns an
+// Parse reads package.yaml via the Resolver and returns an
 // image.Tool instance backed by the parsed schema. File references
 // declared in the `files:` map are read eagerly — the returned Tool
 // is self-contained and can outlive the Resolver.
@@ -100,7 +100,7 @@ func Parse(res Resolver, opts ParseOptions) (ib.Tool, error) {
 }
 
 // DirResolver is a Resolver backed by a host filesystem directory.
-// Used by the project-local tool loader for spwn/tools/<name>/.
+// Used by the project-local package loader for spwn/packages/<name>/.
 type DirResolver struct {
 	Root string
 }
@@ -126,14 +126,14 @@ func (d DirResolver) SkillsFS() fs.FS {
 }
 
 // EmbedResolver is a Resolver backed by an embed.FS. Used by the
-// catalog loader so tool manifests ship inside the spwn binary.
+// catalog loader so package manifests ship inside the spwn binary.
 //
 // Example:
 //
-//	//go:embed all:catalog/tools
+//	//go:embed all:catalog/packages
 //	var catalogFS embed.FS
 //
-//	res := EmbedResolver{FS: catalogFS, Root: "catalog/tools/git"}
+//	res := EmbedResolver{FS: catalogFS, Root: "catalog/packages/git"}
 //
 // Paths inside EmbedResolver always use forward slashes because
 // embed.FS normalises to POSIX regardless of host OS.

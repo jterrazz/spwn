@@ -215,8 +215,8 @@ Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lo
 
 ```bash
 spwn init
-spwn agent add curie --tool @spwn/python --tool @spwn/qmd
-spwn agent add curie --skill paper-reading --skill hypothesis-testing
+spwn agent add curie --package @spwn/python --package @spwn/qmd
+spwn agent add curie --package paper-reading --package hypothesis-testing
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
@@ -228,7 +228,7 @@ spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag a
 ```bash
 cd acme-api
 spwn init
-spwn agent add neo --tool @spwn/node --tool @spwn/git
+spwn agent add neo --package @spwn/node --package @spwn/git
 
 git add spwn.yaml spwn/
 git commit -m "add neo, our repo maintainer"
@@ -299,10 +299,10 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn agent inspect neo                       Inspect composition, memory, history
 🟢 spwn agent logs neo                          Event log for this agent
 
-# Compose blocks
-🟢 spwn agent add neo --tool @spwn/python       Add a tool block
-🟡 spwn agent add neo --skill paper-reading     Add a skill block (must exist locally)
-🟢 spwn agent rm  neo --tool @spwn/python       Remove a block
+# Compose packages
+🟢 spwn agent add neo --package @spwn/python    Add a catalog package to the agent
+🟡 spwn agent add neo --package paper-reading   Add a local package (must exist in spwn/packages/)
+🟢 spwn agent rm  neo --package @spwn/python    Remove a package from the agent
 
 # Talk + messaging
 🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`

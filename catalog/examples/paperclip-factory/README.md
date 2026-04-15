@@ -23,7 +23,7 @@ This example showcases **single-agent automation** - an agent that runs autonomo
 ## Install
 
 ```bash
-spwn example install paperclip-factory
+spwn init @spwn/paperclip-factory
 ```
 
 ## Spawn

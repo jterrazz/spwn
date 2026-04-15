@@ -1,16 +1,16 @@
 // Package refs parses and resolves tool/skill/plugin references in
 // agent.yaml and spwn.yaml.
 //
-// Spwn projects reference packs in three ways:
+// Spwn projects reference packages in three ways:
 //
-//  1. Local — a bare name, resolved against ./spwn/tools/<name>/ (for
-//     tools) or ./spwn/skills/<name>.md / ./spwn/skills/<name>/ (for
-//     skills).
-//  2. @spwn/<name> — a built-in pack compiled into the spwn binary,
-//     looked up against the catalog provided by the caller.
-//  3. @<owner>/<name> — a remote registry pack. Reserved for a future
-//     community registry; resolved today as "unsupported" so users
-//     aren't told their ref is a typo.
+//  1. Local — a bare name, resolved against ./spwn/packages/<name>/
+//     (directory form, with its own package.yaml) or
+//     ./spwn/packages/<name>.md (bare-markdown skill form).
+//  2. @spwn/<name> — a built-in package compiled into the spwn
+//     binary, looked up against the catalog provided by the caller.
+//  3. @<owner>/<name> — a remote registry package. Reserved for a
+//     future community registry; resolved today as "unsupported" so
+//     users aren't told their ref is a typo.
 //
 // ParseRef classifies a ref string. ResolveTool and ResolveSkill
 // answer whether the target exists. Versioned refs like
@@ -31,8 +31,9 @@ import (
 type Kind int
 
 const (
-	// KindLocal is a bare name authored in ./spwn/tools/<name>/ or
-	// ./spwn/skills/<name>.
+	// KindLocal is a bare name authored in ./spwn/packages/<name>/
+	// (directory form) or ./spwn/packages/<name>.md (bare-markdown
+	// skill form).
 	KindLocal Kind = iota
 	// KindSpwnBuiltin is a @spwn/<name> pack compiled into the binary.
 	KindSpwnBuiltin
@@ -122,9 +123,10 @@ const (
 	ResolveRegistryUnsupported
 )
 
-// ResolveTool answers whether a Ref resolves to a real tool pack.
+// ResolveTool answers whether a Ref resolves to a real package
+// (directory form — for skill-only markdown refs use ResolveSkill).
 //
-//   - KindLocal: checks that <root>/spwn/tools/<name>/ is a directory.
+//   - KindLocal: checks that <root>/spwn/packages/<name>/ is a directory.
 //   - KindSpwnBuiltin: checks that @spwn/<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
@@ -134,7 +136,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		localPath := filepath.Join(root, "spwn", "tools", ref.Name)
+		localPath := filepath.Join(root, "spwn", "packages", ref.Name)
 		if info, err := os.Stat(localPath); err == nil && info.IsDir() {
 			return ResolveOK
 		}
@@ -161,14 +163,16 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 	}
 }
 
-// ResolveSkill answers whether a Ref resolves to a real skill pack.
+// ResolveSkill answers whether a Ref resolves to a real skill
+// package — either the bare-markdown form or a full directory
+// package (same layout as a tool).
 //
-//   - KindLocal: checks that <root>/spwn/skills/<name>.md exists as a
-//     file, or that <root>/spwn/skills/<name>/ exists as a directory
-//     (directory-form skill packs with their own resources).
+//   - KindLocal: checks that <root>/spwn/packages/<name>.md exists
+//     as a file (bare-markdown skill), or that
+//     <root>/spwn/packages/<name>/ exists as a directory (full
+//     package that may or may not ship skills via its own package.yaml).
 //   - KindSpwnBuiltin: checks that @spwn/<name> is in `builtin` when
-//     `haveCatalog` is true, else accepts any well-formed ref. The
-//     built-in skill catalog is reserved — empty today.
+//     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
 func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog bool) ResolveResult {
 	switch ref.Kind {
@@ -176,11 +180,11 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		fileForm := filepath.Join(root, "spwn", "skills", ref.Name+".md")
+		fileForm := filepath.Join(root, "spwn", "packages", ref.Name+".md")
 		if info, err := os.Stat(fileForm); err == nil && !info.IsDir() {
 			return ResolveOK
 		}
-		dirForm := filepath.Join(root, "spwn", "skills", ref.Name)
+		dirForm := filepath.Join(root, "spwn", "packages", ref.Name)
 		if info, err := os.Stat(dirForm); err == nil && info.IsDir() {
 			return ResolveOK
 		}

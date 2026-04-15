@@ -648,20 +648,16 @@ func rulePackagesExist(in Input) []Issue {
 			}
 		}
 
-		// Local ref: try directory form (full package) then file form
-		// (bare markdown skill).
+		// Local ref: delegate to refs.ResolveSkill which already
+		// handles both the directory form (full package) and the
+		// file form (bare markdown skill) against spwn/packages/.
 		if ref.Name == "" {
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("package %q is malformed", raw),
 			}}
 		}
-		dirForm := filepath.Join(in.Root, "spwn", "packages", ref.Name)
-		if info, err := os.Stat(dirForm); err == nil && info.IsDir() {
-			return nil
-		}
-		fileForm := filepath.Join(in.Root, "spwn", "packages", ref.Name+".md")
-		if info, err := os.Stat(fileForm); err == nil && !info.IsDir() {
+		if refs.ResolveSkill(in.Root, ref, nil, false) == refs.ResolveOK {
 			return nil
 		}
 		return []Issue{{
@@ -881,7 +877,7 @@ func relPath(root, path string) string {
 
 func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
-		return "check the tool name, or add it as a local pack under ./spwn/tools/"
+		return "check the package name, or add it as a local package under ./spwn/packages/"
 	}
 	best := ""
 	bestScore := len(tool) + 1

@@ -111,7 +111,7 @@ worlds:
 	if err := os.WriteFile(filepath.Join(agentDir, "agent.yaml"), []byte(`name: neo
 runtime:
   backend: "@spwn/codex"
-tools: ["@spwn/unix"]
+packages: ["@spwn/unix"]
 `), 0o644); err != nil {
 		t.Fatalf("write agent yaml: %v", err)
 	}

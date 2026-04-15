@@ -49,9 +49,9 @@ func sortedWorldNames(p *project.Project) []string {
 // entry. If name is empty, the first entry (sorted) is used. Returns
 // an error when the requested world does not exist.
 //
-// The resulting world.Manifest has Tools unioned from (1) the inline
-// world's explicit Tools list and (2) every referenced agent's
-// agent.yaml Tools field.
+// The resulting world.Manifest has Packages unioned from (1) the
+// inline world's explicit Packages list and (2) every referenced
+// agent's agent.yaml Packages field.
 func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error) {
 	if p == nil || p.Manifest == nil {
 		return nil, fmt.Errorf("no project loaded")
@@ -68,18 +68,18 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		return nil, fmt.Errorf("world %q is not defined in spwn.yaml", name)
 	}
 
-	// Union: explicit world.Tools + every agent.yaml.Tools.
-	toolSet := map[string]struct{}{}
-	var tools []string
+	// Union: explicit world.Packages + every agent.yaml.Packages.
+	pkgSet := map[string]struct{}{}
+	var pkgs []string
 	add := func(t string) {
 		if t == "" {
 			return
 		}
-		if _, seen := toolSet[t]; seen {
+		if _, seen := pkgSet[t]; seen {
 			return
 		}
-		toolSet[t] = struct{}{}
-		tools = append(tools, t)
+		pkgSet[t] = struct{}{}
+		pkgs = append(pkgs, t)
 	}
 	for _, t := range w.Packages {
 		add(t)
@@ -107,7 +107,7 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		}
 	}
 
-	m := world.Manifest{Packages: tools}
+	m := world.Manifest{Packages: pkgs}
 
 	return &projectWorld{
 		Project:    p,

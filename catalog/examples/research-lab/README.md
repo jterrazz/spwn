@@ -23,7 +23,7 @@ This example showcases **agent forking** - once Curie has learned enough, fork h
 ## Install
 
 ```bash
-spwn example install research-lab
+spwn init @spwn/research-lab
 ```
 
 ## Spawn

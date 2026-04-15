@@ -10,7 +10,7 @@ import (
 //
 // Claude Code reads a CLAUDE.md at the working directory on startup.
 // This runtime translates the provider-neutral spwn source format
-// into that convention: each agent's source AGENT.md becomes an
+// into that convention: each agent's source AGENTS.md becomes an
 // emitted CLAUDE.md inside the container's agent home.
 type Runtime struct{}
 
@@ -53,7 +53,7 @@ func (r *Runtime) Render(input compile.Input) (*compile.Tree, error) {
 		t.AddString("world/skills/"+name, body)
 	}
 
-	// Per-agent files. Source AGENT.md -> target CLAUDE.md lives
+	// Per-agent files. Source AGENTS.md -> target CLAUDE.md lives
 	// here: the claudecode renderer is the single place that
 	// encodes "Claude Code reads CLAUDE.md".
 	for _, a := range input.Agents {

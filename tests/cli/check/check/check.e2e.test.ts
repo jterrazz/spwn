@@ -35,6 +35,16 @@ describe('spwn check', () => {
         await result.stdout.toMatch('help.txt');
     });
 
+    test('freshly initialised project passes check cleanly', async () => {
+        const result = await spec('init then check clean')
+            .project('empty')
+            .exec(['init --name init-check-test', 'check'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toContain('Project is valid');
+    });
+
     test('flags an agent that references a non-existent built-in tool', async () => {
         // Given - check-invalid-tool has tools: ["@spwn/nonexistent"]
         const result = await spec('check invalid tool')
