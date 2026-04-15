@@ -8,6 +8,7 @@
         "lint:fix": "codestyle fix",
         "test": "vitest --run",
         "test:watch": "vitest",
+        "test:smoke": "vitest --run --config vitest.smoke.config.ts",
         "test:web": "npx playwright test --config web/playwright.config.ts",
         "test:web:headed": "npx playwright test --config web/playwright.config.ts --headed",
         "test:web:debug": "npx playwright test --config web/playwright.config.ts --debug"
