@@ -5,17 +5,16 @@ slug: "spwn-agent-add"
 
 ## spwn agent add
 
-Add tools or skills to an agent
+Add packages to an agent
 
 ### Synopsis
 
-Compose an agent by attaching reusable blocks.
+Compose an agent by attaching packages.
 
 Examples:
-  spwn agent add neo --tool @spwn/python
-  spwn agent add neo --plugin @spwn/mempalace
-  spwn agent add neo --skill paper-reading --skill refactoring
-  spwn agent add neo --tool @spwn/unix --tool @spwn/git
+  spwn agent add neo --package @spwn/python
+  spwn agent add neo --pkg @spwn/mempalace
+  spwn agent add neo --package @spwn/unix --package @spwn/git
 
 ```
 spwn agent add <agent-name> [flags]
@@ -24,10 +23,9 @@ spwn agent add <agent-name> [flags]
 ### Options
 
 ```
-  -h, --help                 help for add
-      --plugin stringArray   Plugin pack to add (repeatable, e.g. @spwn/mempalace)
-      --skill stringArray    Skill to add (repeatable)
-      --tool stringArray     Tool pack to add (repeatable, e.g. @spwn/python)
+  -h, --help                  help for add
+      --package stringArray   Package ref to add (repeatable, e.g. @spwn/python)
+      --pkg stringArray       Short alias for --package
 ```
 
 ### SEE ALSO

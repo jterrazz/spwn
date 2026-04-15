@@ -162,12 +162,12 @@ describe('spwn agent CRUD', () => {
         expect(result.stderr.text).toMatch(/invalid/i);
     });
 
-    test('agent remove --tool rejects tools that were never attached', async () => {
-        // Given - neo with no tools
-        // When - remove --tool for a tool that isn't in its composition
+    test('agent remove --package rejects packages that were never attached', async () => {
+        // Given - neo with no packages
+        // When - remove --package for a ref that isn't in its composition
         // Then - exit 1 with a "nothing to remove" message, no green check
-        const result = await isolated('remove absent tool')
-            .exec(['agent create neo', 'agent remove neo --tool @spwn/never-added'])
+        const result = await isolated('remove absent package')
+            .exec(['agent create neo', 'agent remove neo --package @spwn/never-added'])
             .run();
 
         expect(result.exitCode).toBe(1);
@@ -204,17 +204,17 @@ describe('spwn agent CRUD', () => {
         expect(result.file('spwn.yaml').content).not.toContain('trinity');
     });
 
-    test('agent add rejects unknown tool refs', async () => {
+    test('agent add rejects unknown package refs', async () => {
         // Given - an initialised project (init scaffolds neo)
-        // When - we try to add a tool that is not in the catalog
+        // When - we try to add a package that is not in the catalog
         // Then - exit 1 and agent.yaml is not corrupted
-        const result = await spec('add bogus tool')
+        const result = await spec('add bogus package')
             .project('empty')
-            .exec(['init', 'agent add neo --tool @spwn/nonexistent'])
+            .exec(['init', 'agent add neo --package @spwn/nonexistent'])
             .run();
 
         expect(result.exitCode).toBe(1);
-        await result.stderr.toMatch('add-unknown-tool.txt');
+        await result.stderr.toMatch('add-unknown-package.txt');
     });
 
     test('agent inspect does not duplicate journal as Sessions', async () => {

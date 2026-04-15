@@ -31,11 +31,10 @@ Mind (persistent agent identity).
 * [spwn logs](./spwn_logs.md)	 - Show the system event log across worlds and agents
 * [spwn ls](./spwn_ls.md)	 - Agent-centric status (running / stopped / orphan)
 * [spwn organization](./spwn_organization.md)	 - [experimental] Manage organizations - list and inspect role structures
-* [spwn plugin](./spwn_plugin.md)	 - Manage runtime-targeted plugin packs (e.g. @spwn/mempalace)
+* [spwn package](./spwn_package.md)	 - Manage reusable packages (e.g. @spwn/unix, @spwn/mempalace)
 * [spwn skill](./spwn_skill.md)	 - Author and manage reusable skill files
 * [spwn status](./spwn_status.md)	 - Show the full status of your spwn environment
 * [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
-* [spwn tool](./spwn_tool.md)	 - Manage reusable tool packs (e.g. @spwn/unix, @spwn/python)
 * [spwn up](./spwn_up.md)	 - Spawn a world - an isolated reality for agents
 * [spwn upgrade](./spwn_upgrade.md)	 - Upgrade spwn to the latest version
 * [spwn web](./spwn_web.md)	 - [experimental] Open the local web UI

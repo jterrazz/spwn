@@ -5,19 +5,18 @@ slug: "spwn-agent-remove"
 
 ## spwn agent remove
 
-Remove tools or skills from an agent
+Remove packages from an agent
 
 ### Synopsis
 
-Remove composable blocks from an agent's composition.
+Remove packages from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent remove <name> --tool X' removes just that block.
+'spwn agent remove <name> --package X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --tool @spwn/python
-  spwn agent remove neo --plugin @spwn/mempalace
-  spwn agent remove neo --skill paper-reading
+  spwn agent remove neo --package @spwn/python
+  spwn agent remove neo --pkg @spwn/mempalace
 
 ```
 spwn agent remove <agent-name> [flags]
@@ -26,10 +25,9 @@ spwn agent remove <agent-name> [flags]
 ### Options
 
 ```
-  -h, --help                 help for remove
-      --plugin stringArray   Plugin pack to remove (repeatable)
-      --skill stringArray    Skill to remove (repeatable)
-      --tool stringArray     Tool pack to remove (repeatable)
+  -h, --help                  help for remove
+      --package stringArray   Package ref to remove (repeatable)
+      --pkg stringArray       Short alias for --package
 ```
 
 ### SEE ALSO

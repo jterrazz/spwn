@@ -1,5 +1,5 @@
 version: 1
-tools:
+packages:
   "@spwn/git":
     version: ""
     source: builtin
@@ -12,5 +12,3 @@ tools:
   "@spwn/unix":
     version: ""
     source: builtin
-plugins: {}
-skills: {}

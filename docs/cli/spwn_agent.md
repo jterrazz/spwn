@@ -41,7 +41,7 @@ spwn agent [name] [flags]
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
-* [spwn agent add](./spwn_agent_add.md)	 - Add tools or skills to an agent
+* [spwn agent add](./spwn_agent_add.md)	 - Add packages to an agent
 * [spwn agent create](./spwn_agent_create.md)	 - Create a new agent with a 5-layer Mind
 * [spwn agent deploy](./spwn_agent_deploy.md)	 - Deploy an agent to a running world
 * [spwn agent dream](./spwn_agent_dream.md)	 - Analyze experience, discover patterns, promote playbooks
@@ -54,7 +54,7 @@ spwn agent [name] [flags]
 * [spwn agent logs](./spwn_agent_logs.md)	 - Show the event log for a specific agent
 * [spwn agent ls](./spwn_agent_ls.md)	 - List all agents on this Host
 * [spwn agent publish](./spwn_agent_publish.md)	 - Publish an agent to the registry (memory stripped)
-* [spwn agent remove](./spwn_agent_remove.md)	 - Remove tools or skills from an agent
+* [spwn agent remove](./spwn_agent_remove.md)	 - Remove packages from an agent
 * [spwn agent rm](./spwn_agent_rm.md)	 - Remove an agent and its Mind directory
 * [spwn agent send](./spwn_agent_send.md)	 - [experimental] Send a message to an agent's inbox
 * [spwn agent sleep](./spwn_agent_sleep.md)	 - Consolidate experience - archive stale files, prune old sessions

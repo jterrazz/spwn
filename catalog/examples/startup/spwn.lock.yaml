@@ -1,5 +1,5 @@
 version: 1
-tools:
+packages:
   "@spwn/docker-cli":
     version: ""
     source: builtin
@@ -15,5 +15,3 @@ tools:
   "@spwn/unix":
     version: ""
     source: builtin
-plugins: {}
-skills: {}
