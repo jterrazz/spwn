@@ -221,6 +221,16 @@ func copyTree(src, dst string, hasher io.Writer) (int, error) {
 			}
 			return nil
 		}
+		// Skip symlinks entirely. The only symlinks we expect to see
+		// under a host agent tree are runtime artefacts (e.g. the
+		// `.codex/auth.json -> /credentials/openai/auth.json` link
+		// that older spwn versions wrote into $HOME when $HOME was
+		// bound to the host agents dir). Their targets don't exist
+		// on the host, so following them via os.ReadFile would fail
+		// every build after the first `spwn up`. See finding #26.
+		if info.Mode()&os.ModeSymlink != 0 {
+			return nil
+		}
 		target := filepath.Join(dst, rel)
 		if info.IsDir() {
 			return os.MkdirAll(target, 0o755)
@@ -247,7 +257,7 @@ func copyTree(src, dst string, hasher io.Writer) (int, error) {
 
 func shouldSkip(rel string) bool {
 	switch rel {
-	case ".spwn", "node_modules", ".git", ".DS_Store":
+	case ".spwn", "node_modules", ".git", ".DS_Store", ".codex":
 		return true
 	}
 	return false
