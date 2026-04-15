@@ -1,0 +1,63 @@
+package tools
+
+import (
+	"embed"
+	"fmt"
+	"io/fs"
+	"path"
+	"sort"
+	"strings"
+
+	ib "spwn.sh/packages/image"
+	"spwn.sh/packages/image/toolyaml"
+)
+
+// yamlToolsFS embeds every YAML-defined tool pack. Each tool lives at
+// catalog/tools/<name>/spwn-tool.yaml with optional sibling skills/,
+// files/, and config/ directories. The embed is rooted at the tools
+// package so the Dir walk sees <name>/spwn-tool.yaml entries.
+//
+// Adding a new YAML tool? Drop the directory in and re-build — the
+// loader picks it up automatically. No registration list to maintain.
+//
+//go:embed all:*
+var yamlToolsFS embed.FS
+
+// loadYAMLTools walks the embedded tool tree and parses every
+// spwn-tool.yaml it finds into an image.Tool instance. Directories
+// without a manifest are ignored so transitional Go-based tools can
+// coexist.
+func loadYAMLTools() ([]ib.Tool, error) {
+	entries, err := fs.ReadDir(yamlToolsFS, ".")
+	if err != nil {
+		return nil, fmt.Errorf("read embedded catalog: %w", err)
+	}
+	var out []ib.Tool
+	var names []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		manifestPath := path.Join(name, toolyaml.Manifest)
+		if _, err := fs.Stat(yamlToolsFS, manifestPath); err != nil {
+			continue // directory without a manifest — legacy Go tool
+		}
+		names = append(names, name)
+	}
+	sort.Strings(names) // deterministic order
+	for _, name := range names {
+		tool, err := toolyaml.Parse(
+			toolyaml.EmbedResolver{FS: yamlToolsFS, Root: name},
+			toolyaml.ParseOptions{
+				DefaultName:    "@spwn/" + strings.ReplaceAll(name, "_", "-"),
+				DefaultVersion: "latest",
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("load %s: %w", name, err)
+		}
+		out = append(out, tool)
+	}
+	return out, nil
+}

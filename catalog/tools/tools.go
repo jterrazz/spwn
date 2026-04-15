@@ -1,38 +1,39 @@
+// Package tools aggregates every built-in tool pack into a single
+// registrable list. Every tool lives as a YAML manifest under
+// catalog/tools/<name>/spwn-tool.yaml and is picked up automatically
+// by loadYAMLTools. The Go-based tool layer is gone — adding a new
+// tool is a directory + a yaml + a git add, no Go edit required.
+//
+// Tools that need host-side Go behavior at spawn time (credential
+// sync, default config materialisation, prelaunch shell) declare a
+// `runtime-provider:` in their manifest and register the Go impl
+// via packages/world/internal/runtime/providers.
 package tools
 
 import (
 	"fmt"
 
 	ib "spwn.sh/packages/image"
-
-	"spwn.sh/catalog/tools/build"
-	"spwn.sh/catalog/tools/docker_cli"
-	"spwn.sh/catalog/tools/git"
-	"spwn.sh/catalog/tools/node"
-	"spwn.sh/catalog/tools/python"
-	"spwn.sh/catalog/tools/qmd"
-	"spwn.sh/catalog/tools/spwn_architect"
-	"spwn.sh/catalog/tools/spwn_cli"
-	"spwn.sh/catalog/tools/unix"
 )
 
-// All is the list of every built-in tool.
-// Adding a new tool? Import it and add it here.
-var All = []ib.Tool{
-	unix.Tool,
-	git.Tool,
-	node.Tool,
-	python.Tool,
-	build.Tool,
-	docker_cli.Tool,
-	spwn_cli.Tool,
-	spwn_architect.Tool,
-	qmd.Tool,
+// All is populated at package init from every YAML-backed tool in
+// the embedded catalog tree. Init panics if any manifest fails to
+// parse — a malformed catalog is a programmer error and should fail
+// loudly at CLI startup.
+var All []ib.Tool
+
+func init() {
+	yaml, err := loadYAMLTools()
+	if err != nil {
+		panic(fmt.Errorf("catalog: load yaml tools: %w", err))
+	}
+	All = yaml
 }
 
-// RegisterDefaults registers all built-in tools into the given registry.
-// Returns an error if any tool fails to register (typically a naming
-// collision - indicates a programmer error in the catalog).
+// RegisterDefaults registers every built-in tool into the given
+// registry. Returns an error if any tool fails to register
+// (typically a naming collision — indicates a programmer error in
+// the catalog).
 func RegisterDefaults(r *ib.Registry) error {
 	for _, t := range All {
 		if err := r.Register(t); err != nil {

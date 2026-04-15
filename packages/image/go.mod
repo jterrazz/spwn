@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/docker/docker v27.5.1+incompatible
 	golang.org/x/term v0.40.0
+	gopkg.in/yaml.v3 v3.0.1
 	spwn.sh/catalog v0.0.0
 )
 
