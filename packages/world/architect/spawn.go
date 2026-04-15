@@ -222,7 +222,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Project root defaults to paths.ProjectRoot() — set by the CLI
 	// PersistentPreRunE when a spwn.yaml is discovered.
 	if projectRoot := paths.ProjectRoot(); projectRoot != "" {
-		hydrated, hErr := hydrateLocalPackages(reg, projectRoot, toolList)
+		hydrated, hErr := hydrateLocalPlugins(reg, projectRoot, toolList)
 		if hErr != nil {
 			return nil, fmt.Errorf("load local tools: %w", hErr)
 		}

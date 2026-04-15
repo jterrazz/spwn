@@ -14,7 +14,7 @@ import (
 )
 
 // Manifest is the canonical basename. Both catalog and local
-// packages live at <packageDir>/package.yaml.
+// plugins live at <pluginDir>/plugin.yaml.
 const Manifest = "plugin.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
@@ -44,7 +44,7 @@ type ParseOptions struct {
 	DefaultVersion string
 }
 
-// Parse reads package.yaml via the Resolver and returns an
+// Parse reads plugin.yaml via the Resolver and returns an
 // image.Tool instance backed by the parsed schema. File references
 // declared in the `files:` map are read eagerly — the returned Tool
 // is self-contained and can outlive the Resolver.
@@ -100,7 +100,7 @@ func Parse(res Resolver, opts ParseOptions) (ib.Tool, error) {
 }
 
 // DirResolver is a Resolver backed by a host filesystem directory.
-// Used by the project-local package loader for spwn/plugins/<name>/.
+// Used by the project-local plugin loader for spwn/plugins/<name>/.
 type DirResolver struct {
 	Root string
 }
@@ -126,14 +126,14 @@ func (d DirResolver) SkillsFS() fs.FS {
 }
 
 // EmbedResolver is a Resolver backed by an embed.FS. Used by the
-// catalog loader so package manifests ship inside the spwn binary.
+// catalog loader so plugin manifests ship inside the spwn binary.
 //
 // Example:
 //
-//	//go:embed all:catalog/packages
+//	//go:embed all:catalog/plugins
 //	var catalogFS embed.FS
 //
-//	res := EmbedResolver{FS: catalogFS, Root: "catalog/packages/git"}
+//	res := EmbedResolver{FS: catalogFS, Root: "catalog/plugins/git"}
 //
 // Paths inside EmbedResolver always use forward slashes because
 // embed.FS normalises to POSIX regardless of host OS.

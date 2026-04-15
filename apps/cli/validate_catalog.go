@@ -8,7 +8,7 @@ import (
 
 func init() {
 	// Wire the built-in catalog into the install verbs so
-	// `spwn package install @spwn/bogus` can fail with a crisp error
+	// `spwn plugin install @spwn/bogus` can fail with a crisp error
 	// instead of silently pinning garbage. Lives here (not in
 	// plugin.init()) so the plugin package stays free of a catalog import.
 	plugin.SetCatalogLookup(func(ref string) bool {

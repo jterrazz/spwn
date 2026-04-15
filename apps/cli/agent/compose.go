@@ -34,13 +34,13 @@ func init() {
 
 var addCmd = &cobra.Command{
 	Use:   "add <agent-name>",
-	Short: "Add packages to an agent",
+	Short: "Add plugins to an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Compose an agent by attaching packages.
+	Long: `Compose an agent by attaching plugins.
 
 Examples:
   spwn agent add neo --plugin @spwn/python
-  spwn agent add neo --pkg @spwn/mempalace
+  spwn agent add neo --plugins @spwn/unix --plugins @spwn/git
   spwn agent add neo --plugin @spwn/unix --plugin @spwn/git`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -53,7 +53,7 @@ Examples:
 		}
 
 		// Pre-flight every catalog ref against the catalog so we never
-		// write an unknown package to agent.yaml. Bare-name local refs
+		// write an unknown plugin to agent.yaml. Bare-name local refs
 		// are skipped here — they resolve against the project tree at
 		// build time, not the catalog.
 		for _, p := range composePlugins {
@@ -68,9 +68,9 @@ Examples:
 
 		for _, p := range composePlugins {
 			if err := agent.AddPlugin(name, p); err != nil {
-				return fmt.Errorf("add package %q: %w", p, err)
+				return fmt.Errorf("add plugin %q: %w", p, err)
 			}
-			s.Done("+ package", p)
+			s.Done("+ plugin", p)
 		}
 
 		s.Blank()
@@ -82,16 +82,16 @@ Examples:
 
 var removeCmd = &cobra.Command{
 	Use:   "remove <agent-name>",
-	Short: "Remove packages from an agent",
+	Short: "Remove plugins from an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Remove packages from an agent's composition.
+	Long: `Remove plugins from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 'spwn agent remove <name> --plugin X' removes just that entry.
 
 Examples:
   spwn agent remove neo --plugin @spwn/python
-  spwn agent remove neo --pkg @spwn/mempalace`,
+  spwn agent remove neo --plugins @spwn/mempalace`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		if len(composePlugins) == 0 {
@@ -119,7 +119,7 @@ Examples:
 		}
 		for _, p := range composePlugins {
 			if !hasString(preflight.Plugins, p) {
-				return fmt.Errorf("package %q is not attached to agent %q — nothing to remove", p, name)
+				return fmt.Errorf("plugin %q is not attached to agent %q — nothing to remove", p, name)
 			}
 		}
 
@@ -129,9 +129,9 @@ Examples:
 
 		for _, p := range composePlugins {
 			if err := agent.RemovePlugin(name, p); err != nil {
-				return fmt.Errorf("remove package %q: %w", p, err)
+				return fmt.Errorf("remove plugin %q: %w", p, err)
 			}
-			s.Done("- package", p)
+			s.Done("- plugin", p)
 		}
 		s.Blank()
 		s.Success("Composition updated.")
@@ -206,8 +206,8 @@ func (e *notImplementedError) Error() string {
 func (e *notImplementedError) ExitCode() int { return 2 }
 
 // knownComposeRef reports whether the given @scope/name[@version]
-// reference matches a built-in package in the catalog. Used by
-// `agent add` to preflight --tool and --plugin refs before they
+// reference matches a built-in plugin in the catalog. Used by
+// `agent add` to preflight --plugin refs before they
 // hit agent.yaml.
 func knownComposeRef(ref string) bool {
 	pack := stripVersion(ref)
@@ -238,7 +238,7 @@ func stripVersion(ref string) string {
 }
 
 // unknownComposeRefError formats the refusal message shown when the
-// user passes --tool or --plugin with a reference the catalog does
+// user passes --plugin with a reference the catalog does
 // not know about. The "known:" list mirrors what `spwn check` shows
 // so the two commands never disagree.
 func unknownComposeRefError(kind, ref string) error {

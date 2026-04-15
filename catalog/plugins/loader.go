@@ -15,7 +15,7 @@ import (
 // yamlToolsFS embeds every YAML-defined package. Each package lives
 // at catalog/plugins/<name>/plugin.yaml with optional sibling
 // skills/, files/, and config/ directories. The embed is rooted at
-// the catalog/packages/ directory so the walk sees
+// the catalog/plugins/ directory so the walk sees
 // <name>/plugin.yaml entries directly.
 //
 // Adding a new YAML package? Drop the directory in and re-build —

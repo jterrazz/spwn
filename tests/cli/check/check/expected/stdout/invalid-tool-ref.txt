@@ -1,10 +1,8 @@
-
   <PROJECT>/spwn.yaml
 
   errors
-    •  package "@spwn/nonexistent" does not exist
-       spwn/agents/neo/agent.yaml#packages
+    •  plugin "@spwn/nonexistent" does not exist
+       spwn/agents/neo/agent.yaml#plugins
        → available built-ins: @spwn/build, @spwn/docker-cli, @spwn/git, @spwn/mempalace, @spwn/node, @spwn/python, @spwn/qmd, @spwn/architect, @spwn/cli, @spwn/unix, @spwn/claude-code, @spwn/codex
 
   1 error(s), 0 warning(s), 0 info
-

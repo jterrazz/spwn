@@ -1,14 +1,14 @@
-// Package refs parses and resolves tool/skill/plugin references in
-// agent.yaml and spwn.yaml.
+// Package refs parses and resolves plugin references in agent.yaml
+// and spwn.yaml.
 //
-// Spwn projects reference packages in three ways:
+// Spwn projects reference plugins in three ways:
 //
 //  1. Local — a bare name, resolved against ./spwn/plugins/<name>/
-//     (directory form, with its own package.yaml) or
+//     (directory form, with its own plugin.yaml) or
 //     ./spwn/plugins/<name>.md (bare-markdown skill form).
-//  2. @spwn/<name> — a built-in package compiled into the spwn
+//  2. @spwn/<name> — a built-in plugin compiled into the spwn
 //     binary, looked up against the catalog provided by the caller.
-//  3. @<owner>/<name> — a remote registry package. Reserved for a
+//  3. @<owner>/<name> — a remote registry plugin. Reserved for a
 //     future community registry; resolved today as "unsupported" so
 //     users aren't told their ref is a typo.
 //
@@ -35,7 +35,7 @@ const (
 	// (directory form) or ./spwn/plugins/<name>.md (bare-markdown
 	// skill form).
 	KindLocal Kind = iota
-	// KindSpwnBuiltin is a @spwn/<name> pack compiled into the binary.
+	// KindSpwnBuiltin is a @spwn/<name> plugin compiled into the binary.
 	KindSpwnBuiltin
 	// KindRegistry is @<owner>/<name> with owner != "spwn" — reserved
 	// for a future community registry, not yet supported.
@@ -136,7 +136,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		localPath := filepath.Join(root, "spwn", "packages", ref.Name)
+		localPath := filepath.Join(root, "spwn", "plugins", ref.Name)
 		if info, err := os.Stat(localPath); err == nil && info.IsDir() {
 			return ResolveOK
 		}
@@ -170,7 +170,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 //   - KindLocal: checks that <root>/spwn/plugins/<name>.md exists
 //     as a file (bare-markdown skill), or that
 //     <root>/spwn/plugins/<name>/ exists as a directory (full
-//     package that may or may not ship skills via its own package.yaml).
+//     package that may or may not ship skills via its own plugin.yaml).
 //   - KindSpwnBuiltin: checks that @spwn/<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
@@ -180,11 +180,11 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		fileForm := filepath.Join(root, "spwn", "packages", ref.Name+".md")
+		fileForm := filepath.Join(root, "spwn", "plugins", ref.Name+".md")
 		if info, err := os.Stat(fileForm); err == nil && !info.IsDir() {
 			return ResolveOK
 		}
-		dirForm := filepath.Join(root, "spwn", "packages", ref.Name)
+		dirForm := filepath.Join(root, "spwn", "plugins", ref.Name)
 		if info, err := os.Stat(dirForm); err == nil && info.IsDir() {
 			return ResolveOK
 		}

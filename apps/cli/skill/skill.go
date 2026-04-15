@@ -5,8 +5,8 @@
 //
 // Bare-markdown skills live at spwn/plugins/<name>.md. For richer
 // packages with install steps or plugin-config injection, author a
-// directory-form package at spwn/plugins/<name>/package.yaml and
-// install/reference it via `spwn package`. Attach a skill to an
+// directory-form plugin at spwn/plugins/<name>/plugin.yaml and
+// install/reference it via `spwn plugin`. Attach a skill to an
 // agent via `spwn agent add <agent> --plugin <name>`.
 package skill
 
@@ -61,7 +61,7 @@ func skillHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn skill new paper-reading", Desc: ""},
-				{Name: "spwn package install @spwn/mempalace", Desc: "Install a catalog skill package"},
+				{Name: "spwn plugin install @spwn/mempalace", Desc: "Install a catalog skill plugin"},
 			}},
 		},
 		"spwn skill [command]",

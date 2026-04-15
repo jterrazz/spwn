@@ -14,7 +14,7 @@ var architectModeAllowed = map[string]bool{
 	"status":    true,
 	"architect": true,
 	"web":       true,
-	"package":   true,
+	"plugin":    true,
 	"skill":     true,
 	"help":      true,
 }

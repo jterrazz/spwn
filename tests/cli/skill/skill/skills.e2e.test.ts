@@ -64,13 +64,13 @@ describe('spwn skill new (project-local)', () => {
     test('skill new inside a project writes into the project tree', async () => {
         // Given - an initialised empty project
         // When - we author a new skill
-        // Then - it lands under spwn/packages/ (not ~/.spwn/packages/)
+        // Then - it lands under spwn/plugins/ (not ~/.spwn/plugins/)
         const result = await spec('project-scoped skill new')
             .project('empty')
             .exec(['init', 'skill new my-skill'])
             .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.file('spwn/packages/my-skill.md').exists).toBe(true);
+        expect(result.file('spwn/plugins/my-skill.md').exists).toBe(true);
     });
 });
