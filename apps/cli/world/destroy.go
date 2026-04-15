@@ -130,7 +130,7 @@ var destroyCmd = &cobra.Command{
 		u, err := arc.Destroy(ctx, worldID)
 		if err != nil {
 			return s.FailHint("Destroy failed", err,
-				fmt.Sprintf("Check that world %q exists with \"spwn ls\"", worldID))
+				fmt.Sprintf("Check that world %q exists with \"spwn world list\"", worldID))
 		}
 
 		s.Done("Stopped agent", "")

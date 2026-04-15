@@ -59,6 +59,23 @@ describe('zero-friction UX', () => {
         await result.stderr.toMatch('inspect-missing-ls-hint.txt');
     });
 
+    test('inspect missing world points at `spwn world list`, not the stale `spwn ls`', async () => {
+        // Given - empty project, no worlds
+        // When - inspecting a nonexistent world
+        // Then - hint text references the correct list command
+        const result = await spec('inspect missing correct hint')
+            .project('empty')
+            .exec('world inspect w-nonexistent-00000')
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        // Regression guard for QA finding #16: hint must point at
+        // `spwn world list` (the real world-listing command). The
+        // Old hint said `spwn ls`, which lists agents, not worlds.
+        expect(result.stderr.text).toContain('spwn world list');
+        expect(result.stderr.text).not.toMatch(/List worlds with: spwn ls$/m);
+    });
+
     test('architect talk --help lists usage and flags', async () => {
         // Given - --help is a pure cobra render, no side effects
         const result = await spec('architect talk help')
