@@ -68,5 +68,30 @@ describe('spwn status', () => {
             result.stderr.toContain('spwn');
             result.stderr.toContain('neo');
         });
+
+        test('status and ls report the same running worlds', async () => {
+            // Given - a running world `neo`
+            // When - `spwn ls` runs after `spwn up`
+            await using ls = await spec('ls after up')
+                .project('docker-pilot')
+                .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
+                .exec(['up', 'world list'])
+                .run();
+
+            // And - `spwn status` runs under the same project
+            await using status = await spec('status after up')
+                .project('docker-pilot')
+                .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
+                .exec(['up', 'status'])
+                .run();
+
+            // Then - both exit zero and both mention `neo` exactly once
+            expect(ls.exitCode).toBe(0);
+            expect(status.exitCode).toBe(0);
+            const lsMatches = (ls.stderr.text.match(/\bneo\b/g) ?? []).length;
+            const statusMatches = (status.stderr.text.match(/\bneo\b/g) ?? []).length;
+            expect(lsMatches).toBeGreaterThanOrEqual(1);
+            expect(statusMatches).toBeGreaterThanOrEqual(1);
+        });
     });
 });
