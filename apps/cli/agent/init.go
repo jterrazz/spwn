@@ -12,18 +12,28 @@ import (
 	"spwn.sh/packages/ids"
 )
 
-var initTeam string
+var (
+	initTeam  string
+	initForce bool
+)
 
 func init() {
 	initCmd.Flags().StringVar(&initTeam, "team", "", "Assign agent to a team (slug)")
+	initCmd.Flags().BoolVarP(&initForce, "force", "f", false, "Re-scaffold any missing Mind files without complaining if the agent already exists")
 	Cmd.AddCommand(initCmd)
 }
 
 var initCmd = &cobra.Command{
-	Use:   "create [name]",
-	Short: "Create a new agent with a 6-layer Mind",
-	Long: `Create a new agent with the 6-layer Mind structure. If no name is
-provided, a random name is picked from a curated dictionary.`,
+	Use:     "create [name]",
+	Aliases: []string{"new"},
+	Short:   "Create a new agent with a 5-layer Mind",
+	Long: `Create a new agent with the 5-layer Mind structure
+(core/skills/knowledge/playbooks/journal). If no name is provided,
+a random name is picked from a curated dictionary.
+
+With --force, an existing agent's Mind is re-scaffolded: any missing
+files are recreated and the command exits zero even if the agent
+already exists.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := newStepper(cmd)
@@ -33,6 +43,17 @@ provided, a random name is picked from a curated dictionary.`,
 			name = args[0]
 		} else {
 			name = ids.RandomAgentName()
+		}
+
+		// Reject empty / invalid names before touching disk. The
+		// same slug regex the manifest enforces for world names is
+		// applied here so we never leave a half-created agent
+		// directory that `spwn check` cannot reconcile.
+		if name == "" {
+			return fmt.Errorf("agent name is required")
+		}
+		if !project.IsValidAgentName(name) {
+			return fmt.Errorf("agent name %q is invalid — must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter)", name)
 		}
 
 		// Reject names that would shadow `spwn agent <subcommand>`.
@@ -47,9 +68,23 @@ provided, a random name is picked from a curated dictionary.`,
 		s.Start(fmt.Sprintf("Creating agent %q...", name))
 		_, err := agent.InitMind(name)
 		if err != nil {
+			if initForce && strings.Contains(err.Error(), "already exists") {
+				// --force: re-scaffold any missing files over the
+				// existing Mind and proceed as if the create had
+				// succeeded.
+				if ferr := agent.RepairMind(name); ferr != nil {
+					return s.FailHint("Force re-scaffold failed", ferr,
+						"Check that the agent directory is writable")
+				}
+				s.Done("Re-scaffolded agent", name)
+				s.Blank()
+				s.Success(fmt.Sprintf("Spawn with: spwn up --agent %s", name))
+				s.Blank()
+				return nil
+			}
 			hint := "Check that ~/.spwn/agents/ is writable"
 			if strings.Contains(err.Error(), "already exists") {
-				hint = fmt.Sprintf("Run \"spwn agent rm %s\" first, or choose a different name", name)
+				hint = fmt.Sprintf("Run \"spwn agent rm %s\" first, or pass --force to re-scaffold", name)
 			}
 			return s.FailHint("Agent creation failed", err, hint)
 		}

@@ -105,6 +105,76 @@ describe('spwn agent CRUD', () => {
         await result.stderr.toMatch('rm-then-show-not-found.txt');
     });
 
+    test('agent new is an alias for agent create', async () => {
+        // Given - isolated home
+        // When - create via both the canonical verb and the alias
+        // Then - both produce the same on-disk Mind layout
+        const created = await isolated('create via create').exec('agent create neo').run();
+        const aliased = await isolated('create via new').exec('agent new neo').run();
+
+        expect(created.exitCode).toBe(0);
+        expect(aliased.exitCode).toBe(0);
+
+        for (const path of [
+            'spwn-home/agents/neo/core/profile.md',
+            'spwn-home/agents/neo/skills',
+            'spwn-home/agents/neo/knowledge',
+            'spwn-home/agents/neo/playbooks',
+            'spwn-home/agents/neo/journal',
+        ]) {
+            expect(created.file(path).exists).toBe(true);
+            expect(aliased.file(path).exists).toBe(true);
+        }
+    });
+
+    test('agent create --force succeeds even when the agent already exists', async () => {
+        // Given - an agent already scaffolded
+        // When - re-running create with --force
+        // Then - no "already exists" error; Mind layers still on disk
+        const result = await isolated('create force')
+            .exec(['agent create neo', 'agent create neo --force'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn-home/agents/neo/core/profile.md').exists).toBe(true);
+    });
+
+    test('agent create without --force still rejects duplicates', async () => {
+        // Given - the agent already scaffolded
+        // When - re-running without --force
+        // Then - exit 1 with the "already exists" error path
+        const result = await isolated('create dup no force')
+            .exec(['agent create neo', 'agent create neo'])
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toMatch(/already exists/i);
+    });
+
+    test('agent create rejects invalid names', async () => {
+        // Given - a name with a space (would corrupt spwn.yaml downstream)
+        // When - running agent create
+        // Then - the command exits 1 and writes nothing to disk
+        const result = await isolated('create bad name').exec('agent create "bad name"').run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.file('spwn-home/agents/bad name').exists).toBe(false);
+        expect(result.stderr.text).toMatch(/invalid/i);
+    });
+
+    test('agent remove --tool rejects tools that were never attached', async () => {
+        // Given - neo with no tools
+        // When - remove --tool for a tool that isn't in its composition
+        // Then - exit 1 with a "nothing to remove" message, no green check
+        const result = await isolated('remove absent tool')
+            .exec(['agent create neo', 'agent remove neo --tool @spwn/never-added'])
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toMatch(/not attached|nothing to remove/i);
+        expect(result.stderr.text).not.toMatch(/Composition updated/);
+    });
+
     test('talk without a world fails with a helpful error', async () => {
         const result = await isolated('talk no world')
             .exec(['agent create neo', 'agent talk neo hello'])

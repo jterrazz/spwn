@@ -69,6 +69,39 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 	return dir, nil
 }
 
+// Repair re-creates any missing layer directories and the default
+// profile for an already-existing Mind. Unlike Init, Repair never
+// errors when the agent directory already exists — it is idempotent
+// and only writes what is missing, making it safe for --force
+// re-scaffold paths.
+func Repair(name string) error {
+	dir := AgentDir(name)
+	if _, err := os.Stat(dir); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("agent %q not found", name)
+		}
+		return err
+	}
+
+	for _, layer := range base.MindLayers {
+		if err := os.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
+			return fmt.Errorf("create %s: %w", layer, err)
+		}
+	}
+
+	profilePath := filepath.Join(dir, "core", "profile.md")
+	if _, err := os.Stat(profilePath); err != nil && os.IsNotExist(err) {
+		profile := `# Default Profile
+
+You are a spwn agent - a persistent AI worker living inside an isolated world.
+`
+		if err := os.WriteFile(profilePath, []byte(profile), 0644); err != nil {
+			return fmt.Errorf("create profile: %w", err)
+		}
+	}
+	return nil
+}
+
 // Validate checks that a Mind directory exists and has the core layer.
 func Validate(name string) error {
 	dir := AgentDir(name)

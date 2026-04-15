@@ -85,6 +85,14 @@ func ValidateMind(name string) error {
 	return mind.Validate(name)
 }
 
+// RepairMind re-creates missing Mind layer directories and the
+// default profile for an already-existing agent. It is idempotent
+// and safe to call on a valid Mind. Used by `agent create --force`
+// to re-scaffold over a partially-deleted agent directory.
+func RepairMind(name string) error {
+	return mind.Repair(name)
+}
+
 // ListAgents returns metadata for every agent found in ~/.spwn/agents/.
 func ListAgents() ([]Info, error) {
 	return mind.List()

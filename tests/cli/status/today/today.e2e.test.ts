@@ -18,26 +18,26 @@ describe('agent mind structure', () => {
         // Clobbering the frozen fixture state.
         const result = await spec('agent create mind')
             .project('single-agent')
-            .exec('agent create Trinity')
+            .exec('agent create trinity')
             .run();
 
         // Then - exits zero and creates the 5 Mind layers on disk.
         expect(result.exitCode).toBe(0);
         for (const layer of ['core', 'skills', 'knowledge', 'playbooks', 'journal']) {
-            expect(result.file(`spwn/agents/Trinity/${layer}`).exists, `missing ${layer}/`).toBe(
+            expect(result.file(`spwn/agents/trinity/${layer}`).exists, `missing ${layer}/`).toBe(
                 true,
             );
         }
 
         // The starter persona is seeded into core/profile.md
-        const persona = result.file('spwn/agents/Trinity/core/profile.md');
+        const persona = result.file('spwn/agents/trinity/core/profile.md');
         expect(persona.exists).toBe(true);
         expect(persona.content.length).toBeGreaterThan(10);
 
         // The legacy (pre-Mind) layout must not be recreated.
-        expect(result.file('spwn/agents/Trinity/identity').exists).toBe(false);
-        expect(result.file('spwn/agents/Trinity/memory').exists).toBe(false);
-        expect(result.file('spwn/agents/Trinity/sessions').exists).toBe(false);
+        expect(result.file('spwn/agents/trinity/identity').exists).toBe(false);
+        expect(result.file('spwn/agents/trinity/memory').exists).toBe(false);
+        expect(result.file('spwn/agents/trinity/sessions').exists).toBe(false);
     });
 });
 
