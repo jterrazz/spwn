@@ -1,12 +1,13 @@
-// Package templates ships a curated gallery of ready-made spwn
-// templates - full worlds and agents with pre-written profiles -
-// that first-time users can install with one click or one command.
+// Package examples ships a curated gallery of ready-made spwn
+// example projects - full worlds and agents with pre-written
+// identities - that first-time users can install with one click or
+// one command.
 //
-// Every template lives at /catalog/templates/<slug>/ at the repo root
+// Every example lives at /catalog/examples/<slug>/ at the repo root
 // and is embedded into the binary at build time via go:embed. The
-// template directories sit alongside this Go file so contributors can
+// example directories sit alongside this Go file so contributors can
 // discover and edit them directly from the repo root.
-package templates
+package examples
 
 import (
 	"embed"
@@ -23,9 +24,9 @@ import (
 )
 
 //go:embed all:macrohard all:matrix all:paperclip-factory all:research-lab all:startup
-var templatesFS embed.FS
+var examplesFS embed.FS
 
-// shippedSlugs is the canonical list of bundled templates, in
+// shippedSlugs is the canonical list of bundled examples, in
 // display order. The TestShippedSlugsMatchEmbed test asserts this
 // matches both the embed directive above and the directories
 // actually present on disk.
@@ -39,7 +40,7 @@ var shippedSlugs = []string{
 	"macrohard",
 }
 
-// ShippedSlugs returns the list of bundled templates as a fresh copy.
+// ShippedSlugs returns the list of bundled examples as a fresh copy.
 // Exposed for binary-level bundling tests that need to verify every
 // expected slug is present without reading the embed FS directly.
 func ShippedSlugs() []string {
@@ -48,8 +49,8 @@ func ShippedSlugs() []string {
 	return out
 }
 
-// Template is the public-facing description of one template.
-type Template struct {
+// Example is the public-facing description of one example.
+type Example struct {
 	Slug        string   `json:"slug" yaml:"slug"`
 	Name        string   `json:"name" yaml:"name"`
 	Tagline     string   `json:"tagline" yaml:"tagline"`
@@ -73,29 +74,29 @@ type InstallReport struct {
 	ManifestAdded bool `json:"manifestAdded"`
 	// WorldsAdded/WorldsSkipped are retained for API compatibility
 	// with the old per-world-file install surface. With the v2
-	// schema, at most one entry lands here: the template's world
-	// name, populated from template.yaml#worlds.
+	// schema, at most one entry lands here: the example's world
+	// name, populated from example.yaml#worlds.
 	WorldsAdded   []string `json:"worldsAdded"`
 	WorldsSkipped []string `json:"worldsSkipped"`
 }
 
 // ErrNotFound is returned by Get and Install when a slug does not
-// match any bundled template.
-var ErrNotFound = errors.New("template not found")
+// match any bundled example.
+var ErrNotFound = errors.New("example not found")
 
-// List returns every template the binary knows about, sorted by slug
+// List returns every example the binary knows about, sorted by slug
 // for stable output. README bodies are omitted; call Get for details.
 //
 // Iteration order is driven by shippedSlugs rather than embed.FS root
 // ReadDir so the list is deterministic even if new entries appear in
 // the embed before shippedSlugs is updated - keeping the "canonical
 // list" guarantee explicit.
-func List() ([]Template, error) {
-	out := make([]Template, 0, len(shippedSlugs))
+func List() ([]Example, error) {
+	out := make([]Example, 0, len(shippedSlugs))
 	for _, slug := range shippedSlugs {
 		ex, err := loadMetadata(slug)
 		if err != nil {
-			// Skip broken templates rather than failing the whole list.
+			// Skip broken examples rather than failing the whole list.
 			// A malformed example should never break the gallery for
 			// users who only care about the other four.
 			continue
@@ -106,21 +107,21 @@ func List() ([]Template, error) {
 	return out, nil
 }
 
-// Get returns one template's metadata + its README. Returns
+// Get returns one example's metadata + its README. Returns
 // ErrNotFound if the slug is unknown.
-func Get(slug string) (Template, error) {
+func Get(slug string) (Example, error) {
 	ex, err := loadMetadata(slug)
 	if err != nil {
-		return Template{}, err
+		return Example{}, err
 	}
-	readmeBytes, err := templatesFS.ReadFile(path(slug, "README.md"))
+	readmeBytes, err := examplesFS.ReadFile(path(slug, "README.md"))
 	if err == nil {
 		ex.Readme = string(readmeBytes)
 	}
 	return ex, nil
 }
 
-// Install materializes a template into baseDir as a project tree:
+// Install materializes an example into baseDir as a project tree:
 //
 //	baseDir/
 //	├── spwn.yaml              (copied from <slug>/spwn.yaml)
@@ -150,13 +151,13 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	// --- spwn.yaml ---
 	manifestDst := filepath.Join(baseDir, "spwn.yaml")
 	if exists(manifestDst) {
-		// Record the world name(s) declared by the template as skipped
+		// Record the world name(s) declared by the example as skipped
 		// so existing callers (web UI, activity log) still see a
 		// "worlds skipped" signal.
 		rep.WorldsSkipped = append(rep.WorldsSkipped, ex.Worlds...)
 	} else {
 		manifestSrc := path(slug, "spwn.yaml")
-		data, rerr := templatesFS.ReadFile(manifestSrc)
+		data, rerr := examplesFS.ReadFile(manifestSrc)
 		if rerr != nil {
 			return rep, fmt.Errorf("read %s: %w", manifestSrc, rerr)
 		}
@@ -173,7 +174,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 		return rep, fmt.Errorf("create agents dir: %w", err)
 	}
 	agentsSrc := path(slug, "agents")
-	agentEntries, err := templatesFS.ReadDir(agentsSrc)
+	agentEntries, err := examplesFS.ReadDir(agentsSrc)
 	if err == nil {
 		for _, e := range agentEntries {
 			if !e.IsDir() {
@@ -185,19 +186,19 @@ func Install(slug, baseDir string) (InstallReport, error) {
 				// Agent directory exists - but it might be broken
 				// (e.g. created by a previous version or partially
 				// cleaned up). If identity/profile.md is missing, copy
-				// the template's identity/ layer on top without touching
+				// the example's identity/ layer on top without touching
 				// user data like journal/ or knowledge/.
 				identityProfile := filepath.Join(dst, "identity", "profile.md")
 				if !exists(identityProfile) {
 					identitySrc := path(agentsSrc, name, "identity")
 					identityDst := filepath.Join(dst, "identity")
-					if cperr := copyDirFS(templatesFS, identitySrc, identityDst); cperr == nil {
+					if cperr := copyDirFS(examplesFS, identitySrc, identityDst); cperr == nil {
 						rep.AgentsAdded = append(rep.AgentsAdded, name+" (repaired)")
 					}
 					// Also copy agent.yaml if missing
 					manifestDst := filepath.Join(dst, "agent.yaml")
 					if !exists(manifestDst) {
-						if data, rerr := templatesFS.ReadFile(path(agentsSrc, name, "agent.yaml")); rerr == nil {
+						if data, rerr := examplesFS.ReadFile(path(agentsSrc, name, "agent.yaml")); rerr == nil {
 							_ = os.WriteFile(manifestDst, data, 0o644)
 						}
 					}
@@ -206,7 +207,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 				}
 				continue
 			}
-			if cperr := copyDirFS(templatesFS, path(agentsSrc, name), dst); cperr != nil {
+			if cperr := copyDirFS(examplesFS, path(agentsSrc, name), dst); cperr != nil {
 				return rep, fmt.Errorf("copy agent %s: %w", name, cperr)
 			}
 			rep.AgentsAdded = append(rep.AgentsAdded, name)
@@ -217,7 +218,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	return rep, nil
 }
 
-// InstallInto is a convenience wrapper that installs a template
+// InstallInto is a convenience wrapper that installs an example
 // into the active project root when one is discoverable, else into
 // the user-global ~/.spwn (legacy global mode). Callers that need
 // to target an explicit path should use Install directly.
@@ -231,17 +232,17 @@ func InstallInto(slug string) (InstallReport, error) {
 
 // ── internals ─────────────────────────────────────────────────────────
 
-func loadMetadata(slug string) (Template, error) {
-	data, err := templatesFS.ReadFile(path(slug, "template.yaml"))
+func loadMetadata(slug string) (Example, error) {
+	data, err := examplesFS.ReadFile(path(slug, "example.yaml"))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return Template{}, ErrNotFound
+			return Example{}, ErrNotFound
 		}
-		return Template{}, err
+		return Example{}, err
 	}
-	var ex Template
+	var ex Example
 	if err := yaml.Unmarshal(data, &ex); err != nil {
-		return Template{}, fmt.Errorf("parse %s/template.yaml: %w", slug, err)
+		return Example{}, fmt.Errorf("parse %s/example.yaml: %w", slug, err)
 	}
 	if ex.Slug == "" {
 		ex.Slug = slug

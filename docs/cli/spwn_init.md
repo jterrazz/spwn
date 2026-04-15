@@ -14,8 +14,8 @@ Scaffold a spwn project in the current directory.
 Without arguments, creates a blank spwn.yaml plus a default ./spwn/
 tree (one world, one agent) and adds .spwn/ to .gitignore.
 
-A positional template ref of the form @spwn/<slug> installs one of
-the bundled templates into the current directory instead. Example:
+A positional example ref of the form @spwn/<slug> installs one of
+the bundled examples into the current directory instead. Example:
 
     spwn init @spwn/matrix
 
@@ -23,7 +23,7 @@ Use --global to instead seed ~/.spwn/ with a world config (legacy
 user-home mode, kept for backward compatibility).
 
 ```
-spwn init [template-ref] [flags]
+spwn init [example-ref] [flags]
 ```
 
 ### Options

@@ -23,7 +23,7 @@ import (
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/state"
-	templates "spwn.sh/packages/catalog/templates"
+	examples "spwn.sh/packages/catalog/examples"
 
 	"gopkg.in/yaml.v3"
 	"spwn.sh/packages/paths"
@@ -110,9 +110,9 @@ func (s *Server) Start() error {
 	mux.HandleFunc("GET /api/system/docker", cors(s.handleSystemDocker))
 	mux.HandleFunc("GET /api/system/onboarding", cors(s.handleSystemOnboarding))
 	mux.HandleFunc("POST /api/system/onboarding/complete", cors(s.handleSystemOnboardingComplete))
-	mux.HandleFunc("GET /api/templates", cors(s.handleListTemplates))
-	mux.HandleFunc("GET /api/templates/{slug}", cors(s.handleGetTemplate))
-	mux.HandleFunc("POST /api/templates/{slug}/install", cors(s.handleInstallTemplate))
+	mux.HandleFunc("GET /api/examples", cors(s.handleListExamples))
+	mux.HandleFunc("GET /api/examples/{slug}", cors(s.handleGetExample))
+	mux.HandleFunc("POST /api/examples/{slug}/install", cors(s.handleInstallExample))
 	mux.HandleFunc("GET /api/worlds", cors(s.handleListWorlds))
 	mux.HandleFunc("GET /api/agents", cors(s.handleListAgents))
 	mux.HandleFunc("GET /api/agents/{name}", cors(s.handleGetAgent))
@@ -249,25 +249,25 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-// handleListTemplates returns the full gallery of bundled templates.
+// handleListExamples returns the full gallery of bundled examples.
 // Used by the worlds-page empty state.
-func (s *Server) handleListTemplates(w http.ResponseWriter, r *http.Request) {
-	list, err := templates.List()
+func (s *Server) handleListExamples(w http.ResponseWriter, r *http.Request) {
+	list, err := examples.List()
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	jsonOK(w, map[string]interface{}{"templates": list})
+	jsonOK(w, map[string]interface{}{"examples": list})
 }
 
-// handleGetTemplate returns one template's metadata including its
+// handleGetExample returns one example's metadata including its
 // bundled README body.
-func (s *Server) handleGetTemplate(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetExample(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
-	ex, err := templates.Get(slug)
+	ex, err := examples.Get(slug)
 	if err != nil {
-		if err == templates.ErrNotFound {
-			jsonError(w, "template not found", http.StatusNotFound)
+		if err == examples.ErrNotFound {
+			jsonError(w, "example not found", http.StatusNotFound)
 			return
 		}
 		jsonError(w, err.Error(), http.StatusInternalServerError)
@@ -276,15 +276,15 @@ func (s *Server) handleGetTemplate(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, ex)
 }
 
-// handleInstallTemplate copies the template's world configs and
+// handleInstallExample copies the example's world configs and
 // agent dirs into ~/.spwn. Existing files are preserved (never
 // overwritten), so repeated installs are safe.
-func (s *Server) handleInstallTemplate(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleInstallExample(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
-	rep, err := templates.InstallInto(slug)
+	rep, err := examples.InstallInto(slug)
 	if err != nil {
-		if err == templates.ErrNotFound {
-			jsonError(w, "template not found", http.StatusNotFound)
+		if err == examples.ErrNotFound {
+			jsonError(w, "example not found", http.StatusNotFound)
 			return
 		}
 		jsonError(w, err.Error(), http.StatusInternalServerError)
