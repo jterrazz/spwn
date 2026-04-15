@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -208,11 +209,11 @@ func (d *Docker) ImageVersion(ctx context.Context, image string, label string) (
 	return inspect.Config.Labels[label], nil
 }
 
-func (d *Docker) EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) error {
+func (d *Docker) EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) (bool, error) {
 	return d.EnsureImageWithContext(ctx, tag, expectedVersion, dockerfile, nil, logw)
 }
 
-func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error {
+func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) (bool, error) {
 	if logw == nil {
 		logw = io.Discard
 	}
@@ -220,11 +221,11 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 	// Check current version
 	currentVersion, err := d.ImageVersion(ctx, tag, "sh.spwn.image-version")
 	if err != nil {
-		return fmt.Errorf("check image version: %w", err)
+		return false, fmt.Errorf("check image version: %w", err)
 	}
 
 	if !NeedsRebuild(currentVersion, expectedVersion) {
-		return nil
+		return false, nil
 	}
 
 	// Log what we're doing
@@ -241,15 +242,25 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 	tw := tar.NewWriter(buf)
 	hdr := &tar.Header{Name: "Dockerfile", Size: int64(len(dockerfile)), Mode: 0644}
 	if err := tw.WriteHeader(hdr); err != nil {
-		return fmt.Errorf("tar header: %w", err)
+		return false, fmt.Errorf("tar header: %w", err)
 	}
 	if _, err := tw.Write(dockerfile); err != nil {
-		return fmt.Errorf("tar write: %w", err)
+		return false, fmt.Errorf("tar write: %w", err)
 	}
 
-	// Add extra context files (create parent directories first)
-	dirs := make(map[string]bool)
+	// Add extra context files (create parent directories first).
+	// Sort names for deterministic tar ordering - with map iteration
+	// order randomized, two builds of the same input would otherwise
+	// produce different tar bytes and the docker build layer cache
+	// would fragment.
+	names := make([]string, 0, len(extraFiles))
 	for name := range extraFiles {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	dirs := make(map[string]bool)
+	for _, name := range names {
 		parts := strings.Split(filepath.Dir(name), string(filepath.Separator))
 		for i := range parts {
 			d := strings.Join(parts[:i+1], "/")
@@ -260,18 +271,19 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 			}
 		}
 	}
-	for name, content := range extraFiles {
+	for _, name := range names {
+		content := extraFiles[name]
 		fileHdr := &tar.Header{Name: name, Size: int64(len(content)), Mode: 0755}
 		if err := tw.WriteHeader(fileHdr); err != nil {
-			return fmt.Errorf("tar header %s: %w", name, err)
+			return false, fmt.Errorf("tar header %s: %w", name, err)
 		}
 		if _, err := tw.Write(content); err != nil {
-			return fmt.Errorf("tar write %s: %w", name, err)
+			return false, fmt.Errorf("tar write %s: %w", name, err)
 		}
 	}
 
 	if err := tw.Close(); err != nil {
-		return fmt.Errorf("tar close: %w", err)
+		return false, fmt.Errorf("tar close: %w", err)
 	}
 
 	resp, err := d.client.ImageBuild(ctx, buf, types.ImageBuildOptions{
@@ -280,7 +292,7 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		Remove:     true,
 	})
 	if err != nil {
-		return fmt.Errorf("build image: %w", err)
+		return false, fmt.Errorf("build image: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -296,14 +308,14 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 			break
 		}
 		if msg.Error != "" {
-			return fmt.Errorf("image build: %s", msg.Error)
+			return false, fmt.Errorf("image build: %s", msg.Error)
 		}
 		if msg.Stream != "" {
 			fmt.Fprint(logw, msg.Stream)
 		}
 	}
 
-	return nil
+	return true, nil
 }
 
 func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error {

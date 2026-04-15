@@ -33,9 +33,12 @@ func ArchitectContainerName() string {
 	return architectContainerNameBase
 }
 
-// Image versioning constants.
+// Image versioning constants. The world image version is no longer
+// here - it is derived from a content hash of (base Dockerfile +
+// resolved tool specs + generator output) at build time, so any
+// input change automatically invalidates the cache. See
+// packages/image/imagebuilder.go hashBuildContext.
 const (
-	WorldImageVersion     = "1.1.0"
 	ArchitectImageVersion = "1.1.0"
 	ImageVersionLabel     = "sh.spwn.image-version"
 )

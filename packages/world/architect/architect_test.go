@@ -142,12 +142,12 @@ func (m *mockBackend) ImageExists(_ context.Context, image string) (bool, error)
 	return m.imageExistsV, nil
 }
 
-func (m *mockBackend) EnsureImage(_ context.Context, _ string, _ string, _ []byte, _ io.Writer) error {
-	return m.ensureImgErr
+func (m *mockBackend) EnsureImage(_ context.Context, _ string, _ string, _ []byte, _ io.Writer) (bool, error) {
+	return true, m.ensureImgErr
 }
 
-func (m *mockBackend) EnsureImageWithContext(_ context.Context, _ string, _ string, _ []byte, _ map[string][]byte, _ io.Writer) error {
-	return m.ensureImgErr
+func (m *mockBackend) EnsureImageWithContext(_ context.Context, _ string, _ string, _ []byte, _ map[string][]byte, _ io.Writer) (bool, error) {
+	return true, m.ensureImgErr
 }
 
 func (m *mockBackend) ImageVersion(_ context.Context, image string, label string) (string, error) {

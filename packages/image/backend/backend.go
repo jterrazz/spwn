@@ -63,8 +63,12 @@ type Backend interface {
 	CopyTo(ctx context.Context, containerID string, destPath string, content []byte) error
 	IsRunning(ctx context.Context, containerID string) (bool, error)
 	ImageExists(ctx context.Context, image string) (bool, error)
-	EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) error
-	EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error
+	// EnsureImage and EnsureImageWithContext return (rebuilt, err).
+	// rebuilt=true means the build actually ran; false means the
+	// tagged image already matched expectedVersion and was reused.
+	// Callers use this to emit accurate progress messages.
+	EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) (bool, error)
+	EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) (bool, error)
 	ImageVersion(ctx context.Context, image string, label string) (string, error)
 	ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error
 

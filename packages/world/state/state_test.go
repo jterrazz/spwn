@@ -46,11 +46,11 @@ func (f *fakeBackend) ExecOutput(context.Context, string, []string) (string, err
 func (f *fakeBackend) CopyTo(context.Context, string, string, []byte) error  { return nil }
 func (f *fakeBackend) IsRunning(context.Context, string) (bool, error)       { return false, nil }
 func (f *fakeBackend) ImageExists(context.Context, string) (bool, error)     { return false, nil }
-func (f *fakeBackend) EnsureImage(context.Context, string, string, []byte, io.Writer) error {
-	return nil
+func (f *fakeBackend) EnsureImage(context.Context, string, string, []byte, io.Writer) (bool, error) {
+	return true, nil
 }
-func (f *fakeBackend) EnsureImageWithContext(context.Context, string, string, []byte, map[string][]byte, io.Writer) error {
-	return nil
+func (f *fakeBackend) EnsureImageWithContext(context.Context, string, string, []byte, map[string][]byte, io.Writer) (bool, error) {
+	return true, nil
 }
 func (f *fakeBackend) ImageVersion(context.Context, string, string) (string, error) {
 	return "", nil

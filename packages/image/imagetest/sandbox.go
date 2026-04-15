@@ -41,7 +41,6 @@ func SpinUp(t *testing.T, reg *ib.Registry, tools ...string) *Sandbox {
 		BaseDockerfile: base.WorldDockerfile,
 		Tools:          tools,
 		Tag:            tag,
-		Version:        "test",
 		SkipVerify:     true,
 		LogWriter:      testWriter{t},
 	})

@@ -12,12 +12,13 @@ import (
 )
 
 var (
-	spawnConfig      string
-	spawnName        string
-	spawnAgents      []string
-	spawnWorkspaces  []string
-	spawnWorld       string
-	spawnInteractive bool
+	spawnConfig       string
+	spawnName         string
+	spawnAgents       []string
+	spawnWorkspaces   []string
+	spawnWorld        string
+	spawnInteractive  bool
+	spawnForceRebuild bool
 )
 
 func init() {
@@ -42,6 +43,7 @@ func registerSpawnFlags(c *cobra.Command) {
 	c.Flags().StringArrayVarP(&spawnWorkspaces, "workspace", "w", nil, `Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 	c.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
 	c.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Drop into the agent's session after spawn")
+	c.Flags().BoolVar(&spawnForceRebuild, "force-rebuild", false, "Ignore the image cache and rebuild the world image from scratch")
 }
 
 func worldHelp(cmd *cobra.Command, args []string) {
@@ -305,13 +307,14 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	result, err := arc.Spawn(ctx, world.SpawnOpts{
-		ConfigName: configName,
-		Name:       spawnName,
-		AgentName:  agentName,
-		Workspaces: workspaces,
-		Manifest:   m,
-		Agents:     agents,
-		LogWriter:  s.Writer(),
+		ConfigName:   configName,
+		Name:         spawnName,
+		AgentName:    agentName,
+		Workspaces:   workspaces,
+		Manifest:     m,
+		Agents:       agents,
+		ForceRebuild: spawnForceRebuild,
+		LogWriter:    s.Writer(),
 		OnProgress: func(event, detail string) {
 			switch event {
 			case "mind_validated":
@@ -320,11 +323,13 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 			case "mind_mounted":
 				s.Done("Mounted mind", detail)
 				s.Start("Resolving image...")
-			case "image_building":
-				s.Done("Image not cached", detail)
-				s.Start("Building image (first run - may take a few minutes)...")
+			case "image_resolving":
+				s.Start("Resolving image (checking cache)...")
 			case "image_built":
 				s.Done("Built image", detail)
+				s.Start("Resolving credentials...")
+			case "image_cached":
+				s.Done("Image cached", detail)
 				s.Start("Resolving credentials...")
 			case "image_ready":
 				s.Done("Image ready", detail)

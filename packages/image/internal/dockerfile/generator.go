@@ -104,8 +104,16 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 
 		sb.WriteString(fmt.Sprintf("# %s (%s)\n", t.Name, t.Kind))
 
-		for k, v := range t.Env {
-			sb.WriteString(fmt.Sprintf("ENV %s=%s\n", k, v))
+		// Sort env keys for deterministic output (Go map iteration
+		// order is randomized; content-addressed image hashing
+		// requires stable bytes).
+		envKeys := make([]string, 0, len(t.Env))
+		for k := range t.Env {
+			envKeys = append(envKeys, k)
+		}
+		sort.Strings(envKeys)
+		for _, k := range envKeys {
+			sb.WriteString(fmt.Sprintf("ENV %s=%s\n", k, t.Env[k]))
 		}
 
 		if len(t.Files) > 0 {

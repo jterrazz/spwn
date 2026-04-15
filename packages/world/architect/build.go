@@ -127,7 +127,7 @@ CMD ["sleep", "infinity"]
 	}
 
 	// Build the image
-	return docker.EnsureImageWithContext(
+	_, err = docker.EnsureImageWithContext(
 		ctx,
 		base.ArchitectImage,
 		base.ArchitectImageVersion,
@@ -135,6 +135,7 @@ CMD ["sleep", "infinity"]
 		contextFiles,
 		logw,
 	)
+	return err
 }
 
 // crossCompileSpwn builds the spwn CLI binary for linux/amd64.

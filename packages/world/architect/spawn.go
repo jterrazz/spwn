@@ -47,6 +47,7 @@ type SpawnOpts struct {
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
 	IsArchitect   bool                       // When true, mounts Docker socket + SPWN_HOME for Architect mode.
+	ForceRebuild  bool                       // When true, bypass the content-addressed image cache.
 }
 
 func (opts *SpawnOpts) progress(event, detail string) {
@@ -194,22 +195,26 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	if !explicitImage {
-		opts.progress("image_building", image)
+		opts.progress("image_resolving", image)
 
 		builder := ib.New(reg, a.backend)
 
-		_, err := builder.Build(ctx, ib.BuildRequest{
+		buildResult, err := builder.Build(ctx, ib.BuildRequest{
 			BaseDockerfile: ibbase.WorldDockerfile,
 			Tools:          toolList,
 			Tag:            image,
-			Version:        base.WorldImageVersion,
+			ForceRebuild:   opts.ForceRebuild,
 			SkipVerify:     true, // probeTools handles verification below
 			LogWriter:      opts.logWriter(),
 		})
 		if err != nil {
 			return nil, fmt.Errorf("build world image: %w", err)
 		}
-		opts.progress("image_ready", image)
+		if buildResult.Cached {
+			opts.progress("image_cached", image)
+		} else {
+			opts.progress("image_built", image)
+		}
 	} else {
 		exists, err := a.backend.ImageExists(ctx, image)
 		if err != nil {
