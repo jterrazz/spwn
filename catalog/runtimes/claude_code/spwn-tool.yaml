@@ -1,0 +1,37 @@
+name: "@spwn/claude-code"
+kind: runtime
+version: latest
+description: "Claude Code AI agent runtime"
+
+# Host-side spawn behavior (credential sync, default config files,
+# prelaunch shell) lives in packages/world/internal/runtime/claude/
+# and is looked up by this name at spawn time. The field is
+# documentation today — the runtime adapter registry key is hard-
+# coded in spawn.go's runtime.Get("claude-code") call.
+runtime-provider: claude-code
+
+# curl pulls the bootstrap script, jq parses the release manifest,
+# ca-certificates is required for the HTTPS fetch, git is the tool
+# claude code reaches for most on the worker's behalf. Most of
+# these overlap with @spwn/unix but we keep the dep explicit so
+# compose changes there don't silently drop our baseline.
+dependencies:
+  - "@spwn/unix"
+
+install:
+  commands:
+    # Native install: downloads a self-contained binary, no Node.js
+    # in the image. The installer drops the binary at
+    # $HOME/.local/share/claude/versions/<ver> and places a symlink
+    # at $HOME/.local/bin/claude pointing at the current version.
+    # $HOME during a Dockerfile RUN step is /root.
+    - curl -fsSL https://claude.ai/install.sh | bash
+    # cp -L follows the symlink so the destination is the 200+ MB
+    # binary itself, not a dangling symlink.
+    - cp -L /root/.local/bin/claude /usr/local/bin/claude
+    - chmod +x /usr/local/bin/claude
+    # Wipe the staging tree so the layer doesn't ship it.
+    - rm -rf /root/.local /root/.claude
+
+verify:
+  - command -v claude
