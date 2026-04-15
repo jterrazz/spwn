@@ -43,7 +43,7 @@ func TestSkillLs_EmptyDirectory(t *testing.T) {
 
 func TestSkillLs_ListsAuthoredSkills(t *testing.T) {
 	home := setupTempHome(t)
-	dir := filepath.Join(home, "packages")
+	dir := filepath.Join(home, "plugins")
 	os.MkdirAll(dir, 0o755)
 	os.WriteFile(filepath.Join(dir, "paper-reading.md"), []byte("# Paper Reading"), 0o644)
 	os.WriteFile(filepath.Join(dir, "refactoring.md"), []byte("# Refactoring"), 0o644)
@@ -75,7 +75,7 @@ func TestSkillNew_CreatesTemplateFile(t *testing.T) {
 		t.Fatalf("new: %v", err)
 	}
 
-	path := filepath.Join(home, "packages", "paper-reading.md")
+	path := filepath.Join(home, "plugins", "paper-reading.md")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read: %v", err)
@@ -108,7 +108,7 @@ func TestSkillNew_DuplicateErrors(t *testing.T) {
 
 func TestSkillShow_DisplaysContent(t *testing.T) {
 	home := setupTempHome(t)
-	dir := filepath.Join(home, "packages")
+	dir := filepath.Join(home, "plugins")
 	os.MkdirAll(dir, 0o755)
 	os.WriteFile(filepath.Join(dir, "paper-reading.md"), []byte("# Paper Reading\n\nHow to read papers."), 0o644)
 
@@ -132,7 +132,7 @@ func TestSkillShow_NotFoundErrors(t *testing.T) {
 
 func TestSkillRm_RemovesFile(t *testing.T) {
 	home := setupTempHome(t)
-	dir := filepath.Join(home, "packages")
+	dir := filepath.Join(home, "plugins")
 	os.MkdirAll(dir, 0o755)
 	path := filepath.Join(dir, "refactoring.md")
 	os.WriteFile(path, []byte("# Refactoring"), 0o644)

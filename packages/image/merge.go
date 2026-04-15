@@ -50,13 +50,13 @@ func MergeRuntimeConfig(base []byte, additions ...[]byte) ([]byte, error) {
 	return out, nil
 }
 
-// CollectPluginConfigs walks a list of resolved tools, filters to
+// CollectRuntimeConfigs walks a list of resolved tools, filters to
 // Plugins whose Runtimes() includes the given runtime, and returns
 // the non-nil Config() outputs in resolution order (last wins).
 //
 // This helper exists so the architect doesn't need to replicate the
 // Plugin runtime-gating logic.
-func CollectPluginConfigs(resolved []Tool, runtime string) [][]byte {
+func CollectRuntimeConfigs(resolved []Tool, runtime string) [][]byte {
 	var out [][]byte
 	for _, t := range resolved {
 		cfg := PluginConfig(t, runtime)

@@ -68,7 +68,7 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		return nil, fmt.Errorf("world %q is not defined in spwn.yaml", name)
 	}
 
-	// Union: explicit world.Packages + every agent.yaml.Packages.
+	// Union: explicit world.Plugins + every agent.yaml.Plugins.
 	pkgSet := map[string]struct{}{}
 	var pkgs []string
 	add := func(t string) {
@@ -81,7 +81,7 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		pkgSet[t] = struct{}{}
 		pkgs = append(pkgs, t)
 	}
-	for _, t := range w.Packages {
+	for _, t := range w.Plugins {
 		add(t)
 	}
 	// p.Agents is the deployable set. We only want the subset referenced
@@ -102,12 +102,12 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		if err != nil || am == nil {
 			continue
 		}
-		for _, t := range am.Packages {
+		for _, t := range am.Plugins {
 			add(t)
 		}
 	}
 
-	m := world.Manifest{Packages: pkgs}
+	m := world.Manifest{Plugins: pkgs}
 
 	return &projectWorld{
 		Project:    p,

@@ -78,7 +78,7 @@ func TestMergeRuntimeConfig_EmptyResult(t *testing.T) {
 }
 
 // fakeConfigPlugin is a minimal in-memory Tool with a plugin block
-// used to drive CollectPluginConfigs tests — the architect's
+// used to drive CollectRuntimeConfigs tests — the architect's
 // injection pipeline consumes the same helper.
 type fakeConfigPlugin struct {
 	name     string
@@ -120,7 +120,7 @@ func TestCollectPluginConfigs_FiltersByRuntime(t *testing.T) {
 		},
 	}
 
-	cfgs := CollectPluginConfigs(resolved, "@spwn/claude-code")
+	cfgs := CollectRuntimeConfigs(resolved, "@spwn/claude-code")
 	if len(cfgs) != 2 {
 		t.Fatalf("want 2 configs, got %d", len(cfgs))
 	}

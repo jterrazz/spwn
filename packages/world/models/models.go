@@ -9,7 +9,7 @@ import (
 // Tools/Plugins/Skills trichotomy; the parser distinguishes what's
 // what by the referenced package's manifest shape.
 type Manifest struct {
-	Packages []string `yaml:"-"`
+	Plugins []string `yaml:"-"`
 }
 
 // Workspace is a single host directory mounted into a world. A world may have

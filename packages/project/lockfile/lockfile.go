@@ -67,14 +67,14 @@ type Entry struct {
 // Lockfile is the parsed content of spwn.lock.yaml.
 type Lockfile struct {
 	Version  int              `yaml:"version"`
-	Packages map[string]Entry `yaml:"packages"`
+	Plugins map[string]Entry `yaml:"plugins"`
 }
 
 // Empty returns a fresh lockfile at the current schema version.
 func Empty() *Lockfile {
 	return &Lockfile{
 		Version:  CurrentVersion,
-		Packages: map[string]Entry{},
+		Plugins: map[string]Entry{},
 	}
 }
 
@@ -106,8 +106,8 @@ func Load(projectRoot string) (*Lockfile, error) {
 	if err := yaml.Unmarshal(data, &l); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", FileName, err)
 	}
-	if l.Packages == nil {
-		l.Packages = map[string]Entry{}
+	if l.Plugins == nil {
+		l.Plugins = map[string]Entry{}
 	}
 	if l.Version == 0 {
 		l.Version = CurrentVersion
@@ -156,7 +156,7 @@ func Save(projectRoot string, l *Lockfile) error {
 		Kind: yaml.ScalarNode, Tag: "!!int",
 		Value: fmt.Sprintf("%d", l.Version),
 	})
-	addScalar(body, "packages", mapToNode(l.Packages))
+	addScalar(body, "plugins", mapToNode(l.Plugins))
 
 	data, err := yaml.Marshal(root)
 	if err != nil {
@@ -199,28 +199,28 @@ func mapToNode(m map[string]Entry) *yaml.Node {
 // Add upserts an entry. Passing an empty version is valid — callers
 // that don't track versions yet record "" as the pin.
 func (l *Lockfile) Add(ref string, entry Entry) {
-	if l.Packages == nil {
-		l.Packages = map[string]Entry{}
+	if l.Plugins == nil {
+		l.Plugins = map[string]Entry{}
 	}
-	l.Packages[ref] = entry
+	l.Plugins[ref] = entry
 }
 
 // Remove deletes an entry. No-op when the ref is absent.
 func (l *Lockfile) Remove(ref string) {
-	delete(l.Packages, ref)
+	delete(l.Plugins, ref)
 }
 
 // Has reports whether the ref is pinned in the lockfile.
 func (l *Lockfile) Has(ref string) bool {
-	_, ok := l.Packages[ref]
+	_, ok := l.Plugins[ref]
 	return ok
 }
 
 // Refs returns the sorted list of pinned refs. Useful for
 // deterministic iteration in error messages and tests.
 func (l *Lockfile) Refs() []string {
-	out := make([]string, 0, len(l.Packages))
-	for k := range l.Packages {
+	out := make([]string, 0, len(l.Plugins))
+	for k := range l.Plugins {
 		out = append(out, k)
 	}
 	sort.Strings(out)

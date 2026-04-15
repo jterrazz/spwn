@@ -19,8 +19,8 @@ func TestGenerate_EmptyTools(t *testing.T) {
 func TestGenerate_MergesAptPackages(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "@spwn/unix", Kind: "sdk", Packages: []string{"bash", "grep", "curl"}},
-		{Name: "@spwn/git", Kind: "tool", Packages: []string{"git", "curl"}}, // curl is duplicate
+		{Name: "@spwn/unix", Kind: "sdk", AptPackages: []string{"bash", "grep", "curl"}},
+		{Name: "@spwn/git", Kind: "tool", AptPackages: []string{"git", "curl"}}, // curl is duplicate
 	}
 
 	result := string(Generate(base, tools, ""))

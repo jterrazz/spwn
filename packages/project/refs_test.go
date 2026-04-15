@@ -29,7 +29,7 @@ worlds:
 	writeFile(t, filepath.Join(agentDir, "AGENTS.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "agent.yaml"), `runtime:
   backend: "@spwn/claude-code"
-packages:
+plugins:
   - "@spwn/python"
   - "local-tool"
   - "local-missing"
@@ -94,7 +94,7 @@ packages:
 	if !strings.Contains(jterrazzMsg, "remote registries are not yet supported") {
 		t.Errorf("@jterrazz/python: want registry-unsupported message, got %q", jterrazzMsg)
 	}
-	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/packages/") {
+	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/plugins/") {
 		t.Errorf("@jterrazz/python: hint should mention both workarounds, got %q", jterrazzHint)
 	}
 	if !strings.Contains(communityMsg, "remote registries are not yet supported") {

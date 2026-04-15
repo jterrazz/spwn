@@ -13,7 +13,7 @@ func TestGenerateChiefContext(t *testing.T) {
 		Role:      "chief",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Packages:  []string{"bash", "git", "node"},
+		Plugins:   []string{"bash", "git", "node"},
 		OtherAgents: []AgentInfo{
 			{Name: "neo", Role: "worker"},
 			{Name: "trinity", Role: "worker"},
@@ -51,7 +51,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Packages:  []string{"bash", "git"},
+		Plugins:   []string{"bash", "git"},
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
 			{Name: "trinity", Role: "worker"},
@@ -87,7 +87,7 @@ func TestGenerateNPCContext(t *testing.T) {
 		Role:    "npc",
 		WorldID: "w-acme-28373",
 		NPCTask: "lint src/",
-		Packages:[]string{"bash"},
+		Plugins:[]string{"bash"},
 	})
 
 	checks := map[string]string{
@@ -153,7 +153,7 @@ func TestGenerateArchitectContext_ContainsAllSections(t *testing.T) {
 		AgentName: "architect",
 		Role:      "architect",
 		WorldID:   "w-test-99999",
-		Packages:  []string{"bash", "git"},
+		Plugins:   []string{"bash", "git"},
 	})
 
 	sections := []string{

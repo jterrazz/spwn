@@ -13,7 +13,7 @@ import (
 
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
-	Packages yaml.Node `yaml:"packages"`
+	Plugins yaml.Node `yaml:"plugins"`
 }
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
@@ -37,8 +37,8 @@ func LoadPath(path string) (models.Manifest, error) {
 	m := models.Manifest{}
 
 	// Parse packages (plain list of strings, root-level)
-	if raw.Packages.Kind == yaml.SequenceNode {
-		m.Packages = parsePackages(&raw.Packages)
+	if raw.Plugins.Kind == yaml.SequenceNode {
+		m.Plugins = parsePackages(&raw.Plugins)
 	}
 
 	ApplyDefaults(&m)

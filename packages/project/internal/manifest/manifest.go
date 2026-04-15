@@ -54,7 +54,7 @@ type World struct {
 	// union computed from each agent's own package list. Useful for
 	// "every agent in this world gets @spwn/qmd" shared-baseline
 	// patterns.
-	Packages []string `yaml:"packages,omitempty"`
+	Plugins []string `yaml:"plugins,omitempty"`
 }
 
 // LoadPath reads and parses spwn.yaml from an explicit file path.
