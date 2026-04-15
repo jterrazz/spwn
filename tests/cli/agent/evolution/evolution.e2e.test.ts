@@ -161,6 +161,24 @@ describe('spwn agent fork', () => {
         expect(result.file('spwn.yaml').content).toContain('morpheus');
     });
 
+    test('dream reflexion has no empty-id session row', async () => {
+        // Given - a fresh agent whose journal may contain stub files
+        // When - we run dream
+        // Then - auto-reflexion never lists "- : <status>" rows
+        const result = await spec('dream no phantom')
+            .project('empty')
+            .exec(['init', 'agent dream neo'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        const reflexion = result.file('spwn/agents/neo/playbooks/auto-reflexion.md');
+        // Dream may skip when there are no entries; if the file does
+        // Get written, every row must carry a real session id.
+        if (reflexion.exists) {
+            expect(reflexion.content).not.toMatch(/^- :/m);
+        }
+    });
+
     test('forked agent is inspectable via show', async () => {
         const result = await spec('fork then show')
             .project('single-agent')

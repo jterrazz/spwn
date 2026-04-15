@@ -217,6 +217,19 @@ describe('spwn agent CRUD', () => {
         await result.stderr.toMatch('add-unknown-tool.txt');
     });
 
+    test('agent inspect does not duplicate journal as Sessions', async () => {
+        // Given - an initialised project (init scaffolds neo)
+        // When - running agent inspect
+        // Then - the legacy Sessions: block is suppressed
+        const result = await spec('inspect no dup')
+            .project('empty')
+            .exec(['init', 'agent inspect neo'])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr.text).not.toMatch(/Sessions:/);
+    });
+
     test('talk without a world fails with a helpful error', async () => {
         const result = await isolated('talk no world')
             .exec(['agent create neo', 'agent talk neo hello'])
