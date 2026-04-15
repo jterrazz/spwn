@@ -79,6 +79,30 @@ func init() {
 	Cmd.AddCommand(logoutCmd)
 	Cmd.AddCommand(tokenCmd)
 	Cmd.AddCommand(checkCmd)
+	Cmd.AddCommand(statusCmd)
+	Cmd.AddCommand(providersCmd)
+}
+
+// statusCmd is a named alias for the bare `spwn auth` command — both
+// render the provider table. Exposed as an explicit subcommand so it
+// shows up in `auth --help`.
+var statusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Show authentication status for every AI provider",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return Cmd.RunE(cmd, args)
+	},
+}
+
+// providersCmd is another alias of the bare `spwn auth` command.
+// Kept as a distinct entry because it's the name users reach for
+// when they want to "see what providers are configured".
+var providersCmd = &cobra.Command{
+	Use:   "providers",
+	Short: "List configured AI providers (alias of \"auth status\")",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return Cmd.RunE(cmd, args)
+	},
 }
 
 func authHelp(cmd *cobra.Command, args []string) {
@@ -94,6 +118,8 @@ func authHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ auth")+" "+ui.Faint("- manage credentials"),
 		[]ui.HelpGroup{
 			{Title: "Commands", Commands: []ui.HelpEntry{
+				{Name: "status", Desc: "Show authentication status " + ui.Faint("(default when no subcommand)")},
+				{Name: "providers", Desc: "List configured AI providers"},
 				{Name: "login", Desc: "Set up credentials (Keychain or manual)"},
 				{Name: "logout", Desc: "Clear cached credentials"},
 				{Name: "token <token>", Desc: "Set a token directly (CI / scripts)"},
@@ -104,7 +130,7 @@ func authHelp(cmd *cobra.Command, args []string) {
 				{Name: "OPENAI_API_KEY", Desc: "OpenAI API key"},
 			}},
 		},
-		"spwn auth              Show authentication status\n    spwn auth [command]",
+		"spwn auth [command]",
 		"",
 	)
 }
