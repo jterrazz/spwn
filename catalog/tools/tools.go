@@ -5,15 +5,15 @@ import (
 
 	ib "spwn.sh/packages/image"
 
-	"spwn.sh/packages/catalog/tools/build"
-	"spwn.sh/packages/catalog/tools/docker_cli"
-	"spwn.sh/packages/catalog/tools/git"
-	"spwn.sh/packages/catalog/tools/node"
-	"spwn.sh/packages/catalog/tools/python"
-	"spwn.sh/packages/catalog/tools/qmd"
-	"spwn.sh/packages/catalog/tools/spwn_architect"
-	"spwn.sh/packages/catalog/tools/spwn_cli"
-	"spwn.sh/packages/catalog/tools/unix"
+	"spwn.sh/catalog/tools/build"
+	"spwn.sh/catalog/tools/docker_cli"
+	"spwn.sh/catalog/tools/git"
+	"spwn.sh/catalog/tools/node"
+	"spwn.sh/catalog/tools/python"
+	"spwn.sh/catalog/tools/qmd"
+	"spwn.sh/catalog/tools/spwn_architect"
+	"spwn.sh/catalog/tools/spwn_cli"
+	"spwn.sh/catalog/tools/unix"
 )
 
 // All is the list of every built-in tool.

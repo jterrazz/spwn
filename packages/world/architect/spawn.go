@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
-	plugins "spwn.sh/packages/catalog/plugins"
-	runtimes "spwn.sh/packages/catalog/runtimes"
-	tools "spwn.sh/packages/catalog/tools"
+	plugins "spwn.sh/catalog/plugins"
+	runtimes "spwn.sh/catalog/runtimes"
+	tools "spwn.sh/catalog/tools"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claudecode"
 	ib "spwn.sh/packages/image"

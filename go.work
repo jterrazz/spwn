@@ -2,12 +2,12 @@ go 1.25.0
 
 use (
 	./apps/cli
+	./catalog
 	./packages/activity
 	./packages/agent
 	./packages/api
 	./packages/auth
 	./packages/base
-	./packages/catalog
 	./packages/compile
 	./packages/env
 	./packages/ids

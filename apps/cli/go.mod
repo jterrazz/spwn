@@ -3,14 +3,16 @@ module spwn.sh/apps/cli
 go 1.25.0
 
 require (
+	github.com/docker/docker v27.5.1+incompatible
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/term v0.40.0
+	gopkg.in/yaml.v3 v3.0.1
+	spwn.sh/catalog v0.0.0
 	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/base v0.0.0
-	spwn.sh/packages/catalog v0.0.0
 	spwn.sh/packages/compile v0.0.0
 	spwn.sh/packages/env v0.0.0
 	spwn.sh/packages/ids v0.0.0
@@ -28,7 +30,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/docker v27.5.1+incompatible // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -54,15 +55,14 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace (
+	spwn.sh/catalog => ../../catalog
 	spwn.sh/packages/activity => ../../packages/activity
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/auth => ../../packages/auth
 	spwn.sh/packages/base => ../../packages/base
-	spwn.sh/packages/catalog => ../../packages/catalog
 	spwn.sh/packages/compile => ../../packages/compile
 	spwn.sh/packages/env => ../../packages/env
 	spwn.sh/packages/ids => ../../packages/ids

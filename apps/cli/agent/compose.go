@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/catalog/plugins"
-	"spwn.sh/packages/catalog/tools"
+	"spwn.sh/catalog/plugins"
+	"spwn.sh/catalog/tools"
 )
 
 // ── agent add / remove ─────────────────────────────────────────────────────

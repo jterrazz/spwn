@@ -23,7 +23,7 @@ import (
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/state"
-	examples "spwn.sh/packages/catalog/examples"
+	examples "spwn.sh/catalog/examples"
 
 	"gopkg.in/yaml.v3"
 	"spwn.sh/packages/paths"

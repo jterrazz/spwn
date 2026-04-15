@@ -11,9 +11,9 @@ import (
 	"runtime/debug"
 	"strings"
 
-	plugins "spwn.sh/packages/catalog/plugins"
-	runtimes "spwn.sh/packages/catalog/runtimes"
-	tools "spwn.sh/packages/catalog/tools"
+	plugins "spwn.sh/catalog/plugins"
+	runtimes "spwn.sh/catalog/runtimes"
+	tools "spwn.sh/catalog/tools"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/base"

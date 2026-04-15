@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/packages/catalog/examples"
+	"spwn.sh/catalog/examples"
 )
 
 func TestParseExampleRef(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/catalog/examples"
+	"spwn.sh/catalog/examples"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/paths"
