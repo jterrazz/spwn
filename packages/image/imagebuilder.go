@@ -2,8 +2,11 @@ package image
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"spwn.sh/packages/image/backend"
@@ -32,8 +35,11 @@ type BuildRequest struct {
 	// Tag is the Docker image tag to apply.
 	Tag string
 
-	// Version is the image version label.
-	Version string
+	// ForceRebuild bypasses the content hash cache check and rebuilds
+	// from scratch. The default is content-addressed caching: if the
+	// generated Dockerfile + extra-files bytes match what the
+	// currently tagged image was built from, the build is a no-op.
+	ForceRebuild bool
 
 	// SkipVerify disables post-build verification.
 	SkipVerify bool
@@ -86,9 +92,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		}
 	}
 
-	// Generate Dockerfile
-	df := dockerfile.Generate(req.BaseDockerfile, toolInputs, req.Version)
-
 	// Collect extra files for build context (tool files + skills)
 	extraFiles := make(map[string][]byte)
 
@@ -110,8 +113,25 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		extraFiles[contextPath] = content
 	}
 
+	// Content-addressed versioning: hash the Dockerfile we'd
+	// generate + the extra-files tarball contents. Any change to the
+	// base Dockerfile, a tool's install spec, the generator logic,
+	// or the selected tool set flows through to a different hash and
+	// automatically triggers a rebuild. No manual version bumps.
+	//
+	// Two-pass generation: first pass without the version label so
+	// the LABEL value itself doesn't affect the hash, then regenerate
+	// with the hash embedded as the label.
+	dfNoLabel := dockerfile.Generate(req.BaseDockerfile, toolInputs, "")
+	version := hashBuildContext(dfNoLabel, extraFiles)
+	df := dockerfile.Generate(req.BaseDockerfile, toolInputs, version)
+
+	if req.ForceRebuild {
+		_ = b.backend.ImageRemove(ctx, req.Tag)
+	}
+
 	// Build image
-	err = b.backend.EnsureImageWithContext(ctx, req.Tag, req.Version, df, extraFiles, logw)
+	rebuilt, err := b.backend.EnsureImageWithContext(ctx, req.Tag, version, df, extraFiles, logw)
 	if err != nil {
 		return nil, &BuildError{Tag: req.Tag, Cause: err}
 	}
@@ -127,6 +147,7 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	result := &BuildResult{
 		Tag:        req.Tag,
 		Tools:      resolvedNames,
+		Cached:     !rebuilt,
 		SkillPaths: make(map[string]string),
 	}
 
@@ -138,6 +159,31 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	}
 
 	return result, nil
+}
+
+// hashBuildContext produces a 12-char hex digest of the Dockerfile +
+// sorted extra-files contents. Used as the content-addressed image
+// version label so every input change invalidates the cache without
+// any manual bumping. Order-independent: sorts file names and hashes
+// each path:content pair so map iteration order can't affect the
+// result.
+func hashBuildContext(dockerfile []byte, extraFiles map[string][]byte) string {
+	h := sha256.New()
+	h.Write([]byte("dockerfile:"))
+	h.Write(dockerfile)
+	h.Write([]byte{0})
+
+	names := make([]string, 0, len(extraFiles))
+	for name := range extraFiles {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		h.Write([]byte("file:" + name + ":"))
+		h.Write(extraFiles[name])
+		h.Write([]byte{0})
+	}
+	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
 // verify creates a temporary container from the built image and runs each tool's

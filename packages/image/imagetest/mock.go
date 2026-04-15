@@ -16,7 +16,7 @@ type MockBackend struct {
 	RemoveFunc    func(ctx context.Context, id string) error
 	ExecFunc      func(ctx context.Context, id string, cfg backend.ExecConfig) (int, error)
 	ExecOutFunc   func(ctx context.Context, id string, cmd []string) (string, error)
-	EnsureFunc    func(ctx context.Context, tag, ver string, df []byte, extra map[string][]byte, w io.Writer) error
+	EnsureFunc    func(ctx context.Context, tag, ver string, df []byte, extra map[string][]byte, w io.Writer) (bool, error)
 	ImageExFunc   func(ctx context.Context, image string) (bool, error)
 	ImageVerFunc  func(ctx context.Context, image, label string) (string, error)
 }
@@ -29,7 +29,9 @@ func NewMockBackend() *MockBackend {
 		RemoveFunc:  func(ctx context.Context, id string) error { return nil },
 		ExecFunc:    func(ctx context.Context, id string, cfg backend.ExecConfig) (int, error) { return 0, nil },
 		ExecOutFunc: func(ctx context.Context, id string, cmd []string) (string, error) { return "", nil },
-		EnsureFunc:  func(ctx context.Context, tag, ver string, df []byte, extra map[string][]byte, w io.Writer) error { return nil },
+		EnsureFunc: func(ctx context.Context, tag, ver string, df []byte, extra map[string][]byte, w io.Writer) (bool, error) {
+			return true, nil
+		},
 		ImageExFunc: func(ctx context.Context, image string) (bool, error) { return false, nil },
 		ImageVerFunc: func(ctx context.Context, image, label string) (string, error) { return "", nil },
 	}
@@ -54,10 +56,10 @@ func (m *MockBackend) IsRunning(ctx context.Context, id string) (bool, error) { 
 func (m *MockBackend) ImageExists(ctx context.Context, image string) (bool, error) {
 	return m.ImageExFunc(ctx, image)
 }
-func (m *MockBackend) EnsureImage(ctx context.Context, tag, ver string, df []byte, w io.Writer) error {
+func (m *MockBackend) EnsureImage(ctx context.Context, tag, ver string, df []byte, w io.Writer) (bool, error) {
 	return m.EnsureFunc(ctx, tag, ver, df, nil, w)
 }
-func (m *MockBackend) EnsureImageWithContext(ctx context.Context, tag, ver string, df []byte, extra map[string][]byte, w io.Writer) error {
+func (m *MockBackend) EnsureImageWithContext(ctx context.Context, tag, ver string, df []byte, extra map[string][]byte, w io.Writer) (bool, error) {
 	return m.EnsureFunc(ctx, tag, ver, df, extra, w)
 }
 func (m *MockBackend) ImageVersion(ctx context.Context, image, label string) (string, error) {

@@ -37,11 +37,11 @@ func (noContainersBackend) IsRunning(context.Context, string) (bool, error) { re
 func (noContainersBackend) ImageExists(context.Context, string) (bool, error) {
 	return false, nil
 }
-func (noContainersBackend) EnsureImage(context.Context, string, string, []byte, io.Writer) error {
-	return nil
+func (noContainersBackend) EnsureImage(context.Context, string, string, []byte, io.Writer) (bool, error) {
+	return true, nil
 }
-func (noContainersBackend) EnsureImageWithContext(context.Context, string, string, []byte, map[string][]byte, io.Writer) error {
-	return nil
+func (noContainersBackend) EnsureImageWithContext(context.Context, string, string, []byte, map[string][]byte, io.Writer) (bool, error) {
+	return true, nil
 }
 func (noContainersBackend) ImageVersion(context.Context, string, string) (string, error) {
 	return "", nil
