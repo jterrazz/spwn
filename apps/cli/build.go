@@ -116,11 +116,18 @@ Examples:
 			return err
 		}
 
+		// Same guard as `spwn compile`: refuse to build an image
+		// around a silently-empty agent prompt.
+		if err := requireAgentPrompts(src, input); err != nil {
+			return err
+		}
+
 		tree, err := compile.Compile(runtimeName, input)
 		if err != nil {
 			if strings.Contains(err.Error(), "unknown runtime") {
 				return fmt.Errorf(
-					"%v\n\nKnown runtimes: claude-code", err)
+					"%v\n\nKnown runtimes: %s", err,
+					strings.Join(compile.RegisteredRuntimes(), ", "))
 			}
 			return fmt.Errorf("compile: %w", err)
 		}

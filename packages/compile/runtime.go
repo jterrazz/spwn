@@ -2,6 +2,7 @@ package compile
 
 import (
 	"fmt"
+	"sort"
 
 	"spwn.sh/packages/world/models"
 )
@@ -69,4 +70,18 @@ func lookupRuntime(name string) (Runtime, error) {
 		return nil, fmt.Errorf("unknown runtime: %s", name)
 	}
 	return r, nil
+}
+
+// RegisteredRuntimes returns the sorted set of names currently
+// registered via Register. Used by the CLI to surface an accurate
+// "known runtimes" hint on typos, and by `spwn check` to warn when an
+// agent declares a runtime that the catalog knows about but no
+// compile adapter implements.
+func RegisteredRuntimes() []string {
+	out := make([]string, 0, len(runtimes))
+	for name := range runtimes {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out
 }

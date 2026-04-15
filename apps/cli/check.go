@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -84,6 +85,14 @@ severity. Exits non-zero when errors are found (or warnings, with
 		if checkDeep {
 			compileIssues = runCompileDeepCheck(p.Root)
 		}
+		// Cross-check: an agent may declare a runtime the catalog
+		// recognises (e.g. `@spwn/codex`) even when no compile
+		// adapter is registered for it. Without this warning,
+		// `spwn check` happily reports "valid" and the user only
+		// discovers the gap when `spwn compile` fails with
+		// "unknown runtime". Surface it as a warning at every
+		// severity (not just --deep) so the inconsistency is loud.
+		compileIssues = append(compileIssues, crossCheckRuntimeAdapters(p.Root)...)
 
 		errors := filter(issues, project.LevelError)
 		warnings := filter(issues, project.LevelWarning)
@@ -120,10 +129,14 @@ severity. Exits non-zero when errors are found (or warnings, with
 		printCompileIssues(out, compileIssues)
 
 		fmt.Fprintf(out, "  %d error(s), %d warning(s), %d info\n",
-			len(errors)+countCompileErrors(compileIssues), len(warnings), len(infos))
+			len(errors)+countCompileErrors(compileIssues),
+			len(warnings)+countCompileWarnings(compileIssues),
+			len(infos))
 		fmt.Fprintln(out)
 
-		if len(errors) > 0 || hasCompileErrors(compileIssues) || (checkStrict && len(warnings) > 0) {
+		compileWarns := countCompileWarnings(compileIssues)
+		if len(errors) > 0 || hasCompileErrors(compileIssues) ||
+			(checkStrict && (len(warnings)+compileWarns) > 0) {
 			os.Exit(1)
 		}
 		return nil
@@ -193,14 +206,14 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 	if err != nil {
 		// Multi-world projects (or manifests with no world at all)
 		// surface as a warning rather than an error — deep-check is
-		// best-effort, not a world selector. When a user really
-		// wants to validate every world, they can run
-		// `spwn compile --world <name>` against each one.
+		// best-effort, not a world selector. `check` has no --world
+		// flag of its own, so the hint points users at the compile
+		// command.
 		return []compileIssue{{
 			Level:   "warning",
 			Path:    "spwn.yaml#worlds",
 			Message: fmt.Sprintf("compile pass skipped: %v", err),
-			Hint:    "run `spwn compile --world <name>` to validate a specific world",
+			Hint:    "run `spwn compile --world <name>` against each world to validate it",
 		}}
 	}
 	var issues []compileIssue
@@ -262,6 +275,46 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 	return issues
 }
 
+// crossCheckRuntimeAdapters inspects each agent.yaml's declared
+// runtime.backend and warns when the value is catalog-recognised but
+// has no compile adapter registered. This closes the gap where
+// `spwn check` says "valid" and `spwn compile` then fails with
+// `unknown runtime`.
+func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
+	src, err := source.Load(projectRoot)
+	if err != nil || src == nil {
+		return nil
+	}
+	registered := map[string]struct{}{}
+	for _, name := range compile.RegisteredRuntimes() {
+		registered[name] = struct{}{}
+	}
+	var out []compileIssue
+	for _, a := range src.Agents {
+		raw := a.Config.Runtime.Backend
+		if raw == "" {
+			continue
+		}
+		// Map catalog refs like "@spwn/codex" -> "codex" before
+		// looking them up. ResolveRuntime uses the same mapping.
+		canonical := raw
+		if strings.HasPrefix(raw, "@spwn/") {
+			canonical = strings.TrimPrefix(raw, "@spwn/")
+		}
+		if _, ok := registered[canonical]; ok {
+			continue
+		}
+		known := strings.Join(compile.RegisteredRuntimes(), ", ")
+		out = append(out, compileIssue{
+			Level:   "warning",
+			Path:    "spwn/agents/" + a.Name + "/agent.yaml#runtime.backend",
+			Message: fmt.Sprintf("runtime %q has no compile adapter registered", raw),
+			Hint:    "available compile runtimes: " + known,
+		})
+	}
+	return out
+}
+
 func hasCompileErrors(ci []compileIssue) bool {
 	for _, c := range ci {
 		if c.Level == "error" {
@@ -295,7 +348,14 @@ func printCompileIssues(out interface{ Write([]byte) (int, error) }, ci []compil
 	if len(ci) == 0 {
 		return
 	}
-	fmt.Fprintf(out, "  %s\n", ui.Red("compile"))
+	// Header color reflects the max severity present: red when any
+	// issue is an error, yellow for warning-only batches. Previously
+	// always red — misleading for deep-check "skipped" warnings.
+	headerColor := ui.Yellow
+	if hasCompileErrors(ci) {
+		headerColor = ui.Red
+	}
+	fmt.Fprintf(out, "  %s\n", headerColor("compile"))
 	for _, c := range ci {
 		color := ui.Red
 		if c.Level == "warning" {

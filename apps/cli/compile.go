@@ -94,13 +94,24 @@ debugging renderer output, and packaging for non-Docker runtimes.
 			return err
 		}
 
+		// Fail loudly when an agent in the selected world has an
+		// empty / missing AGENT.md. The renderer itself doesn't
+		// inspect AGENT.md bytes yet, so without this guard the
+		// user gets a successful compile for a silently-broken
+		// agent. `spwn check --deep` reports the same finding.
+		if err := requireAgentPrompts(src, input); err != nil {
+			return err
+		}
+
 		tree, err := compile.Compile(runtimeName, input)
 		if err != nil {
 			// Surface the known runtime list so typos ("codex" ->
-			// "claude-code") are self-correcting.
+			// "claude-code") are self-correcting. Query the real
+			// registry rather than hardcoding the list.
 			if strings.Contains(err.Error(), "unknown runtime") {
 				return fmt.Errorf(
-					"%v\n\nKnown runtimes: claude-code", err)
+					"%v\n\nKnown runtimes: %s", err,
+					strings.Join(compile.RegisteredRuntimes(), ", "))
 			}
 			return fmt.Errorf("compile: %w", err)
 		}
@@ -137,6 +148,15 @@ debugging renderer output, and packaging for non-Docker runtimes.
 				return fmt.Errorf(
 					"output directory %s is not empty; re-run with --force to overwrite",
 					absOut)
+			}
+		} else if absOut != "" {
+			// --force = replace the tree. Remove the existing
+			// directory first so stale files from a prior compile
+			// (or a prior `--agent` filter) don't mix with the new
+			// output. Safety guard: refuse to wipe paths that look
+			// like filesystem roots or the cwd itself.
+			if err := safeRemoveOutDir(absOut); err != nil {
+				return fmt.Errorf("clean --out: %w", err)
 			}
 		}
 
@@ -202,6 +222,66 @@ func listTreeAgents(t *compile.Tree) []string {
 		out = append(out, n)
 	}
 	return out
+}
+
+// requireAgentPrompts validates that every agent selected for this
+// compile run has a non-empty AGENT.md on disk. Empty prompts would
+// otherwise produce a silently-templated CLAUDE.md with no system
+// instructions — worse than a loud error.
+func requireAgentPrompts(src *source.ProjectSource, input compile.Input) error {
+	if src == nil {
+		return nil
+	}
+	byName := make(map[string]int, len(src.Agents))
+	for i, a := range src.Agents {
+		byName[a.Name] = i
+	}
+	var missing []string
+	for _, a := range input.Agents {
+		idx, ok := byName[a.Name]
+		if !ok {
+			continue
+		}
+		if len(strings.TrimSpace(string(src.Agents[idx].AgentMD))) == 0 {
+			missing = append(missing, a.Name)
+		}
+	}
+	if len(missing) == 0 {
+		return nil
+	}
+	return fmt.Errorf(
+		"agent prompt is missing or empty for: %s\nCreate spwn/agents/<name>/AGENT.md with the agent's system prompt",
+		strings.Join(missing, ", "))
+}
+
+// safeRemoveOutDir removes dir if and only if it looks like a real,
+// project-relative output directory. It refuses to touch filesystem
+// roots, the user's home, and missing paths (which are a no-op). The
+// guard is cheap insurance against a bogus --out value wiping more
+// than the compile tree.
+func safeRemoveOutDir(dir string) error {
+	if dir == "" {
+		return fmt.Errorf("empty output directory")
+	}
+	clean := filepath.Clean(dir)
+	if clean == "/" || clean == "." || clean == ".." {
+		return fmt.Errorf("refusing to remove %q", clean)
+	}
+	// Refuse to touch $HOME exactly.
+	if home, err := os.UserHomeDir(); err == nil && clean == filepath.Clean(home) {
+		return fmt.Errorf("refusing to remove home directory %q", clean)
+	}
+	info, err := os.Stat(clean)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("--out %s is not a directory", clean)
+	}
+	return os.RemoveAll(clean)
 }
 
 func dirNonEmpty(dir string) (bool, error) {
