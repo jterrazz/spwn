@@ -1,0 +1,7 @@
+name: neo
+role: worker
+runtime:
+  backend: "@spwn/claude-code"
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
