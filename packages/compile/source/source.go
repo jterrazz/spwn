@@ -195,9 +195,18 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 	// job is just to surface every agent directory the user has.
 	seen := map[string]string{}
 	for _, a := range p.Agents {
+		if !a.Exists {
+			// Manifest references a name with no directory on
+			// disk. Skip it here — the caller (manifest validate
+			// or ToCompileInput) is the one that reports it.
+			continue
+		}
 		seen[a.Name] = a.Path
 	}
 	for _, a := range p.OrphanAgents {
+		if !a.Exists {
+			continue
+		}
 		if _, ok := seen[a.Name]; !ok {
 			seen[a.Name] = a.Path
 		}

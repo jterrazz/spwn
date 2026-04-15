@@ -1,0 +1,6 @@
+version: 2
+name: empty-journal
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

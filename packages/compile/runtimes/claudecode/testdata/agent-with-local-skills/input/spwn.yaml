@@ -1,0 +1,6 @@
+version: 2
+name: skilled
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

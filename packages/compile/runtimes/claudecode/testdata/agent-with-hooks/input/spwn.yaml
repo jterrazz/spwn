@@ -1,0 +1,6 @@
+version: 2
+name: hooked
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

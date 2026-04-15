@@ -1,0 +1,6 @@
+version: 2
+name: pluggy
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]
