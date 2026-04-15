@@ -88,6 +88,22 @@ describe('world lifecycle', () => {
         expect(inspect.stderr.text).toMatch(/Agent home/);
     });
 
+    test('world enter validates the world before printing the banner', async () => {
+        // Given - an initialised project with no running worlds
+        // When - world enter is called with a bogus id
+        // Then - the ✓ Entering success banner must never be printed
+        const result = await spec('enter missing')
+            .project('empty')
+            .exec(['init', 'world enter nonexistent'])
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        // The success banner must not have been printed before the error.
+        expect(result.stderr.text).not.toContain('Entering');
+        // The error surface should say what we were trying to enter.
+        expect(result.stderr.text).toMatch(/nonexistent/);
+    });
+
     test('down fully destroys the container (not just stopped)', async () => {
         await using result = await spec('up then down')
             .project('docker-pilot')
