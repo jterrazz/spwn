@@ -280,13 +280,17 @@ func runCheck(cmd *cobra.Command, _ []string) error {
 
 	t := ui.NewTable("PROVIDER", "STATUS", "TYPE", "SOURCE")
 	for _, r := range results {
-		status := ui.Green("✓") + " connected"
-		if !r.Connected {
-			if r.Error != "" {
-				status = ui.Red("✗") + " " + r.Error
-			} else {
-				status = ui.Faint("○") + " not configured"
-			}
+		// Bare words hand off to ui.Table's auto-indicator; error
+		// messages are pre-formatted with a red ✗ + explanation so
+		// the table passes them through verbatim.
+		var status string
+		switch {
+		case r.Connected:
+			status = "connected"
+		case r.Error != "":
+			status = ui.Red("✗") + " " + r.Error
+		default:
+			status = "not configured"
 		}
 		t.AddRow(string(r.Provider), status, string(r.CredType), r.Source)
 	}
@@ -315,11 +319,15 @@ func runCheck(cmd *cobra.Command, _ []string) error {
 
 // --- Helpers ---
 
+// statusText returns the bare status word the table renderer
+// expects. The ui.Table's STATUS column auto-applies a colored
+// indicator based on this value - do not embed icons or ANSI
+// codes here or the table will double up (you'll see "○ ✓ …").
 func statusText(ok bool) string {
 	if ok {
-		return ui.Green("\u2713") + " configured"
+		return "connected"
 	}
-	return ui.Faint("\u25CB") + " not set"
+	return "not configured"
 }
 
 func abbreviate(path string) string {
