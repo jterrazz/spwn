@@ -11,6 +11,7 @@ require (
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/base v0.0.0
 	spwn.sh/packages/catalog v0.0.0
+	spwn.sh/packages/compile v0.0.0
 	spwn.sh/packages/env v0.0.0
 	spwn.sh/packages/ids v0.0.0
 	spwn.sh/packages/image v0.0.0
@@ -62,6 +63,7 @@ replace (
 	spwn.sh/packages/auth => ../../packages/auth
 	spwn.sh/packages/base => ../../packages/base
 	spwn.sh/packages/catalog => ../../packages/catalog
+	spwn.sh/packages/compile => ../../packages/compile
 	spwn.sh/packages/env => ../../packages/env
 	spwn.sh/packages/ids => ../../packages/ids
 	spwn.sh/packages/image => ../../packages/image
