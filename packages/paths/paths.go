@@ -3,8 +3,27 @@ package paths
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
+
+// PrettyHome collapses the user's home directory prefix to `~` so
+// user-facing paths do not leak absolute host locations. Returns the
+// input unchanged when the home dir cannot be resolved or when the
+// path is not under $HOME. See finding #30.
+func PrettyHome(p string) string {
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return p
+	}
+	if p == home {
+		return "~"
+	}
+	if strings.HasPrefix(p, home+string(filepath.Separator)) {
+		return "~" + p[len(home):]
+	}
+	return p
+}
 
 var (
 	projectRootMu sync.RWMutex
