@@ -471,25 +471,63 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 // and silently proceeding would hand users a world without the
 // capabilities they asked for.
 //
+// All checks run inside a SINGLE `sh -c` invocation - one container
+// exec for the whole probe instead of one per tool. The old
+// per-tool loop needed N sequential docker execs which added 2-4s
+// of round-trip per tool to every spawn and blew the e2e hook
+// timeout on CI runners with a modest tool set.
+//
 // This replaces an older implementation that maintained a parallel
 // hardcoded @pack → binary map in packages/world/manifest and fell
 // back to a static list of binaries. That map drifted as new tools
 // were added and left unknown @pack refs erroring as "base image
-// missing @spwn/foo". The catalog is now the single source of truth.
+// missing @spwn/foo". The catalog is now the single source of
+// truth: each tool's Verify() method decides what must be present.
 func (a *Architect) probeTools(ctx context.Context, containerID string, tools []ib.Tool) ([]string, error) {
-	verified := make([]string, 0, len(tools))
+	if len(tools) == 0 {
+		return nil, nil
+	}
+
+	// Build a single shell script. Each block runs one tool's
+	// checks; on any failure the block emits "FAIL <tool> :: <cmd>"
+	// and the script exits 1. On success the block emits
+	// "OK <tool>". The final exit 0 is only reached when every
+	// tool passed.
+	var b strings.Builder
+	b.WriteString("set -e\n")
 	for _, t := range tools {
 		for _, check := range t.Verify() {
-			cmd := []string{"sh", "-c", check}
-			if _, err := a.backend.ExecOutput(ctx, containerID, cmd); err != nil {
-				return nil, fmt.Errorf(
-					"world requires tool %q but the container failed its verification (%q: %w).\n"+
-						"Hint: rebuild with --force-rebuild, or remove the tool from the agent's tools list",
-					t.Name(), check, err,
-				)
+			fmt.Fprintf(&b,
+				"if ! %s >/dev/null 2>&1; then echo 'FAIL %s :: %s'; exit 1; fi\n",
+				check, t.Name(), check,
+			)
+		}
+		fmt.Fprintf(&b, "echo 'OK %s'\n", t.Name())
+	}
+
+	output, err := a.backend.ExecOutput(ctx, containerID, []string{"sh", "-c", b.String()})
+	if err != nil {
+		// The script printed the offending "FAIL <tool> :: <cmd>"
+		// line before exiting non-zero; surface it verbatim.
+		failLine := strings.TrimSpace(output)
+		for _, line := range strings.Split(failLine, "\n") {
+			if strings.HasPrefix(line, "FAIL ") {
+				failLine = line
+				break
 			}
 		}
-		verified = append(verified, t.Name())
+		return nil, fmt.Errorf(
+			"world tool verification failed (%s).\n"+
+				"Hint: rebuild with --force-rebuild, or remove the tool from the agent's tools list",
+			failLine,
+		)
+	}
+
+	verified := make([]string, 0, len(tools))
+	for _, line := range strings.Split(output, "\n") {
+		if name := strings.TrimPrefix(line, "OK "); name != line {
+			verified = append(verified, strings.TrimSpace(name))
+		}
 	}
 	return verified, nil
 }

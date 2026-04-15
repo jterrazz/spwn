@@ -11,7 +11,11 @@ export default defineConfig({
         // Real containers; CLI-only tests finish in milliseconds so the
         // Upper bound is harmless for them.
         testTimeout: 120_000,
-        hookTimeout: 60_000,
+        // BeforeAll hooks spawn real Docker worlds (create
+        // Container, probe tools, write config). Cold GitHub
+        // Actions runners need more than 60s; 180s gives comfortable
+        // Headroom without hiding real regressions.
+        hookTimeout: 180_000,
         // Parallel file execution is safe: spwn's state.Store.List /
         // Get scope every world-lookup by the SPWN_TEST_LABEL env var
         // The framework injects per test run (see packages/world/
