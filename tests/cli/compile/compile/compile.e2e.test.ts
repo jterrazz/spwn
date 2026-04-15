@@ -124,7 +124,7 @@ describe('spwn compile', () => {
         expect(result.file('dist/world/AGENTS.md').exists).toBe(false);
     });
 
-    test('empty AGENT.md is rejected with a loud error', async () => {
+    test('empty AGENTS.md is rejected with a loud error', async () => {
         // Given — an otherwise-valid project whose agent prompt
         // Is blank. Previously compile shipped an empty CLAUDE.md
         // Silently; now it errors with a named agent list.

@@ -7,7 +7,7 @@ import (
 	"spwn.sh/packages/world/models"
 )
 
-// AgentContextOpts configures the generation of an AGENT.md context file.
+// AgentContextOpts configures the generation of an AGENTS.md context file.
 type AgentContextOpts struct {
 	AgentName     string
 	Role          string // "chief", "manager", "worker", "npc", or "architect"
@@ -30,7 +30,7 @@ type AgentInfo struct {
 	Role string
 }
 
-// GenerateAgentContext returns the contents of an AGENT.md file personalized
+// GenerateAgentContext returns the contents of an AGENTS.md file personalized
 // for the agent's tier and world configuration.
 func GenerateAgentContext(opts AgentContextOpts) string {
 	var b strings.Builder
@@ -229,34 +229,6 @@ func generateArchitectContext(b *strings.Builder, opts AgentContextOpts) {
 type ColonyAgentSpec struct {
 	Name string
 	Role string
-}
-
-// GenerateColonyContext generates a combined /world/AGENT.md for multi-agent worlds
-// listing all agents, their tiers, and how to find per-agent context files.
-//
-// Deprecated: kept for compatibility with older callers. New code should
-// use GenerateRoster, which produces /world/roster.md under the
-// labels-as-truth + per-agent HOME architecture.
-func GenerateColonyContext(worldID string, agents []ColonyAgentSpec) string {
-	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("# Colony - %s\n\n", worldID))
-	b.WriteString("This world has multiple agents. Each agent has a personalized context file.\n\n")
-
-	b.WriteString("## Agents\n")
-	for _, a := range agents {
-		b.WriteString(fmt.Sprintf("- **%s** (%s) - see /world/AGENT-%s.md\n", a.Name, a.Role, a.Name))
-	}
-	b.WriteString("\n")
-
-	b.WriteString("## Communication\n")
-	b.WriteString("Agents communicate via inbox directories:\n")
-	for _, a := range agents {
-		b.WriteString(fmt.Sprintf("- /world/inbox/%s/ - messages for %s\n", a.Name, a.Name))
-	}
-	b.WriteString("\nWrite JSON files with fields: from, to, type, content.\n")
-
-	return b.String()
 }
 
 // GenerateRoster produces /world/roster.md - the world's authoritative

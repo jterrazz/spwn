@@ -54,7 +54,7 @@ func Init(dir string, opts Opts) error {
 	files := []fileSpec{
 		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
 		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
-		{"templates/AGENT.md.tmpl", "spwn/agents/neo/AGENT.md"},
+		{"templates/AGENTS.md.tmpl", "spwn/agents/neo/AGENTS.md"},
 		{"templates/profile.md.tmpl", "spwn/agents/neo/identity/profile.md"},
 	}
 	for _, f := range files {

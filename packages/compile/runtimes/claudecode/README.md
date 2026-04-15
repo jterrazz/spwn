@@ -21,7 +21,7 @@ mention `CLAUDE.md` directly.
 
 | Source (provider-neutral)                | Target (Claude Code)                        |
 | ---------------------------------------- | ------------------------------------------- |
-| `spwn/agents/<name>/AGENT.md`            | `/agents/<name>/CLAUDE.md`                  |
+| `spwn/agents/<name>/AGENTS.md`            | `/agents/<name>/CLAUDE.md`                  |
 | `spwn/agents/<name>/identity/profile.md` | `/agents/<name>/identity/profile.md` (as-is)|
 | `spwn/agents/<name>/skills/*`            | `/agents/<name>/skills/*` (as-is)           |
 | `compile.Input.VerifiedTools`            | `/world/faculties.md` (generated)           |
@@ -31,7 +31,7 @@ mention `CLAUDE.md` directly.
 | *(static content)*                       | `/world/skills/*.md` (system skills)        |
 | *(per-agent, per-world)*                 | `/agents/<name>/worlds/<id>/role.md`        |
 
-The key rename is **AGENT.md → CLAUDE.md**: the committed source
+The key rename is **AGENTS.md → CLAUDE.md**: the committed source
 uses the neutral name, the emitted tree uses Claude's convention.
 
 ## What this runtime emits

@@ -131,7 +131,7 @@ my-project/
 │   ├── agents/
 │   │   └── neo/
 │   │       ├── agent.yaml       # composition: tools + skills + runtime.backend
-│   │       ├── AGENT.md         # entry point (provider-neutral, compiled per runtime)
+│   │       ├── AGENTS.md         # entry point (provider-neutral, compiled per runtime)
 │   │       ├── identity/        # who the agent is - profile.md, purpose.md, traits.md
 │   │       ├── skills/          # authored procedures
 │   │       ├── knowledge/       # facts, codebase notes

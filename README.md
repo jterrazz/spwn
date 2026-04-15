@@ -118,6 +118,7 @@ my-project/
 ├── spwn/                   # committed project assets
 │   ├── agents/             #   your agents - travel with the repo
 │   ├── tools/              #   `spwn tool get @community/foo` → spwn/tools/foo/
+│   ├── plugins/            #   runtime-targeted tool packs (MCP, hooks, settings)
 │   └── skills/             #   `spwn skill get @community/review` → spwn/skills/review/
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
@@ -145,9 +146,10 @@ Each agent is a directory of composable blocks - **human-readable, git-friendly,
 
 ```
 spwn/agents/neo/
-├── agent.yaml                # composition: tools, skills, runtime
-├── AGENT.md                  # entry point (provider-neutral; compiled per runtime)
+├── agent.yaml                # composition: tools, plugins, skills, runtime
+├── AGENTS.md                 # entry point (provider-neutral; compiled per runtime)
 ├── identity/                 # who the agent is - profile.md, purpose.md, traits.md
+├── plugins/                  # runtime-targeted tool packs (MCP, hooks, settings)
 ├── skills/                   # procedures and checklists
 ├── knowledge/                # facts about the codebase
 ├── playbooks/                # workflows promoted from experience
@@ -204,7 +206,7 @@ Think of spwn the way you think of `tsc` or `babel`. You write in one clean, pro
              compile  +  bake
 ```
 
-- **Source** is provider-neutral. `AGENT.md`, `identity/`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
+- **Source** is provider-neutral. `AGENTS.md`, `identity/`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
 - **Compile** renders that source into the exact file layout your chosen runtime expects. Claude Code wants `CLAUDE.md` in a particular place? The claude-code backend emits it. Codex wants something else? Its backend emits that. Same source, different targets - like compiling TypeScript to ES5 vs ES2022.
 - **Bake** links the compiled tree with the tools your agent declared and produces a normal Docker image. Push it, pull it, run it anywhere - byte-identical on every machine.
 

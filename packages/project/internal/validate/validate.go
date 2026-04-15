@@ -303,7 +303,7 @@ func ruleAgentStructure(in Input) []Issue {
 		level Level
 	}{
 		{"agent.yaml", false, LevelError},
-		{"AGENT.md", false, LevelError},
+		{"AGENTS.md", false, LevelError},
 		{filepath.Join("identity", "profile.md"), false, LevelError},
 		{"identity", true, LevelWarning},
 		{"skills", true, LevelWarning},
@@ -718,7 +718,7 @@ func ruleMarkdownImports(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		entryPath := filepath.Join(a.Path, "AGENT.md")
+		entryPath := filepath.Join(a.Path, "AGENTS.md")
 		result, err := resolve.Walk(a.Path, entryPath)
 		if err != nil {
 			continue

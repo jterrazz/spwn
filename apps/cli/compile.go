@@ -95,8 +95,8 @@ debugging renderer output, and packaging for non-Docker runtimes.
 		}
 
 		// Fail loudly when an agent in the selected world has an
-		// empty / missing AGENT.md. The renderer itself doesn't
-		// inspect AGENT.md bytes yet, so without this guard the
+		// empty / missing AGENTS.md. The renderer itself doesn't
+		// inspect AGENTS.md bytes yet, so without this guard the
 		// user gets a successful compile for a silently-broken
 		// agent. `spwn check --deep` reports the same finding.
 		if err := requireAgentPrompts(src, input); err != nil {
@@ -225,7 +225,7 @@ func listTreeAgents(t *compile.Tree) []string {
 }
 
 // requireAgentPrompts validates that every agent selected for this
-// compile run has a non-empty AGENT.md on disk. Empty prompts would
+// compile run has a non-empty AGENTS.md on disk. Empty prompts would
 // otherwise produce a silently-templated CLAUDE.md with no system
 // instructions — worse than a loud error.
 func requireAgentPrompts(src *source.ProjectSource, input compile.Input) error {
@@ -250,7 +250,7 @@ func requireAgentPrompts(src *source.ProjectSource, input compile.Input) error {
 		return nil
 	}
 	return fmt.Errorf(
-		"agent prompt is missing or empty for: %s\nCreate spwn/agents/<name>/AGENT.md with the agent's system prompt",
+		"agent prompt is missing or empty for: %s\nCreate spwn/agents/<name>/AGENTS.md with the agent's system prompt",
 		strings.Join(missing, ", "))
 }
 

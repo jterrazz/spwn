@@ -11,7 +11,7 @@ import (
 )
 
 // Test_requireAgentPrompts pins the QA-surfaced behaviour: compile
-// refuses to render an empty / missing AGENT.md rather than
+// refuses to render an empty / missing AGENTS.md rather than
 // templating an empty CLAUDE.md. Before the fix, `spwn compile`
 // succeeded silently while `spwn check --deep` flagged it — a loud
 // inconsistency between the two commands.
@@ -23,14 +23,14 @@ func Test_requireAgentPrompts(t *testing.T) {
 		wantErr string
 	}{
 		{
-			name: "non-empty AGENT.md passes",
+			name: "non-empty AGENTS.md passes",
 			src: &source.ProjectSource{Agents: []source.AgentSource{
 				{Name: "neo", AgentMD: []byte("# neo\n\nhi there")},
 			}},
 			input: compile.Input{Agents: []compile.AgentInput{{Name: "neo"}}},
 		},
 		{
-			name: "empty AGENT.md errors",
+			name: "empty AGENTS.md errors",
 			src: &source.ProjectSource{Agents: []source.AgentSource{
 				{Name: "neo", AgentMD: []byte("")},
 			}},
@@ -38,7 +38,7 @@ func Test_requireAgentPrompts(t *testing.T) {
 			wantErr: "agent prompt is missing or empty for: neo",
 		},
 		{
-			name: "whitespace-only AGENT.md errors",
+			name: "whitespace-only AGENTS.md errors",
 			src: &source.ProjectSource{Agents: []source.AgentSource{
 				{Name: "neo", AgentMD: []byte("   \n\t\n")},
 			}},
@@ -105,7 +105,7 @@ worlds:
 	if err := os.MkdirAll(filepath.Join(agentDir, "core"), 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte("# neo"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(agentDir, "AGENTS.md"), []byte("# neo"), 0o644); err != nil {
 		t.Fatalf("write agent md: %v", err)
 	}
 	if err := os.WriteFile(filepath.Join(agentDir, "agent.yaml"), []byte(`name: neo

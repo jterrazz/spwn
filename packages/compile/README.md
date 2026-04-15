@@ -19,7 +19,7 @@ you should never write a `CLAUDE.md` by hand for spwn.
                   ───────────                  ──────────────
                  ┌──────────┐                 ┌──────────┐
 spwn.yaml  ───►  │          │  ──► Tree ──►  │  Docker  │
-AGENT.md   ───►  │ compile  │    (files)     │  image   │
+AGENTS.md   ───►  │ compile  │    (files)     │  image   │
 skills/*   ───►  │ (this    │                │ (image   │
 hooks/*    ───►  │ package) │                │ package) │
                  └──────────┘                 └──────────┘
@@ -55,7 +55,7 @@ my-repo/
     ├── agents/
     │   └── neo/
     │       ├── agent.yaml              # composition: tools, skills, runtime
-    │       ├── AGENT.md                # the agent's prompt (provider-neutral)
+    │       ├── AGENTS.md                # the agent's prompt (provider-neutral)
     │       ├── identity/               # who the agent is (profile, purpose, traits)
     │       ├── skills/                 # procedures and checklists
     │       ├── knowledge/              # learned facts
@@ -66,7 +66,7 @@ my-repo/
 ```
 
 None of these files know what runtime will execute them. The
-per-agent prompt is `AGENT.md`, not `CLAUDE.md`, and nothing under
+per-agent prompt is `AGENTS.md`, not `CLAUDE.md`, and nothing under
 `spwn/` references specific runtime conventions by name. That
 discipline is what makes one project portable across every backend
 the compiler grows to support.
@@ -246,7 +246,7 @@ milliseconds instead of waiting for a docker spawn in an e2e test.
 The current fixture set exercises: minimal agents, colonies (2 and
 3 agents with roles), every per-agent layer, local and subdir skills,
 hooks, plugins, tool lists, custom project names, unicode in
-prompts, long agent names, empty layer dirs, AGENT.md `@`-imports,
+prompts, long agent names, empty layer dirs, AGENTS.md `@`-imports,
 and the three main error paths (missing agents, malformed
 `agent.yaml`, manifests with no worlds declared).
 
@@ -260,7 +260,7 @@ and the three main error paths (missing agents, malformed
 - **No vendor lock-in.** If a runtime disappears or changes its
   file conventions tomorrow, you delete one sub-package. Your repo
   doesn't move.
-- **Reviewability.** A diff in `spwn/agents/neo/AGENT.md` means
+- **Reviewability.** A diff in `spwn/agents/neo/AGENTS.md` means
   "the agent's behavior changed." A diff in `CLAUDE.md` inside a
   generated artifact would conflate agent behavior and compiler
   output.

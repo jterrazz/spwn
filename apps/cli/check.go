@@ -218,10 +218,10 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 	}
 	var issues []compileIssue
 
-	// Every agent in the selected world must have an AGENT.md on
+	// Every agent in the selected world must have an AGENTS.md on
 	// disk — the manifest rule engine checks that spwn/agents/<name>/
 	// exists, but not that the entrypoint prompt is there. Missing
-	// AGENT.md would silently render an empty CLAUDE.md, which is
+	// AGENTS.md would silently render an empty CLAUDE.md, which is
 	// worse than a loud error, so the deep check promotes it.
 	byName := make(map[string]int, len(src.Agents))
 	for i, a := range src.Agents {
@@ -235,9 +235,9 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 		if len(src.Agents[idx].AgentMD) == 0 {
 			issues = append(issues, compileIssue{
 				Level:   "error",
-				Path:    "spwn/agents/" + a.Name + "/AGENT.md",
+				Path:    "spwn/agents/" + a.Name + "/AGENTS.md",
 				Message: "agent prompt is missing or empty",
-				Hint:    "create spwn/agents/" + a.Name + "/AGENT.md with the agent's system prompt",
+				Hint:    "create spwn/agents/" + a.Name + "/AGENTS.md with the agent's system prompt",
 			})
 		}
 	}
@@ -268,7 +268,7 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 				Level:   "warning",
 				Path:    "agents/" + a.Name,
 				Message: "agent produced no files in the compiled Tree",
-				Hint:    "check spwn/agents/" + a.Name + "/ for missing AGENT.md or agent.yaml",
+				Hint:    "check spwn/agents/" + a.Name + "/ for missing AGENTS.md or agent.yaml",
 			})
 		}
 	}
