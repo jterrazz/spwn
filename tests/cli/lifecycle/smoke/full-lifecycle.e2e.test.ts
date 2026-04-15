@@ -39,12 +39,12 @@ describe('agent lifecycle (CLI-only)', () => {
 
         // Project-mode scaffold writes the 5-layer Mind under spwn/agents/neo
         expect(result.file('spwn/agents/neo').exists).toBe(true);
-        expect(result.file('spwn/agents/neo/core').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/identity').exists).toBe(true);
         expect(result.file('spwn/agents/neo/skills').exists).toBe(true);
         expect(result.file('spwn/agents/neo/knowledge').exists).toBe(true);
         expect(result.file('spwn/agents/neo/playbooks').exists).toBe(true);
         expect(result.file('spwn/agents/neo/journal').exists).toBe(true);
-        expect(result.file('spwn/agents/neo/core/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
     });
 

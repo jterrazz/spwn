@@ -21,7 +21,9 @@ spwn check [flags]
 ### Options
 
 ```
+      --deep     Also run a compile dry-run and report renderer errors
   -h, --help     help for check
+      --json     Emit results as structured JSON on stdout
       --strict   Exit non-zero on warnings, not just errors
 ```
 

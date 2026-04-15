@@ -54,9 +54,9 @@ my-repo/
 └── spwn/
     ├── agents/
     │   └── neo/
-    │       ├── agent.yaml              # composition: tools, skills, profile
+    │       ├── agent.yaml              # composition: tools, skills, runtime
     │       ├── AGENT.md                # the agent's prompt (provider-neutral)
-    │       ├── core/profile.md         # identity
+    │       ├── identity/               # who the agent is (profile, purpose, traits)
     │       ├── skills/                 # procedures and checklists
     │       ├── knowledge/              # learned facts
     │       ├── playbooks/              # promoted workflows

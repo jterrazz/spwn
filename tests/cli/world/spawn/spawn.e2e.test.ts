@@ -81,13 +81,13 @@ describe('world spawn', () => {
 
         test('mind layers are visible at /agents/neo/ inside the container', async () => {
             const neo = world.container('neo');
-            for (const layer of ['core', 'skills', 'knowledge', 'playbooks', 'journal']) {
+            for (const layer of ['identity', 'skills', 'knowledge', 'playbooks', 'journal']) {
                 expect(neo.file(`/agents/neo/${layer}`).exists).toBe(true);
             }
 
             const ls = await neo.exec('ls /agents/neo');
             expect(ls.exitCode).toBe(0);
-            for (const layer of ['core', 'skills', 'knowledge', 'playbooks', 'journal']) {
+            for (const layer of ['identity', 'skills', 'knowledge', 'playbooks', 'journal']) {
                 ls.stdout.toContain(layer);
             }
         });

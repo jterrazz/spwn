@@ -15,28 +15,24 @@ import (
 
 // ── agent add / remove ─────────────────────────────────────────────────────
 //
-// Composition commands for attaching reusable blocks (tools, skills, profile)
-// to an agent. These edit ~/.spwn/agents/<name>/agent.yaml directly.
+// Composition commands for attaching reusable blocks (tools, skills) to an
+// agent. These edit ~/.spwn/agents/<name>/agent.yaml directly.
 
 var (
-	composeTools    []string
-	composePlugins  []string
-	composeSkills   []string
-	composeProfile  string
-	composeClearPro bool
+	composeTools   []string
+	composePlugins []string
+	composeSkills  []string
 )
 
 func init() {
 	addCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to add (repeatable, e.g. @spwn/python)")
 	addCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin pack to add (repeatable, e.g. @spwn/mempalace)")
 	addCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to add (repeatable)")
-	addCmd.Flags().StringVar(&composeProfile, "profile", "", "Profile template to apply")
 	Cmd.AddCommand(addCmd)
 
 	removeCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool pack to remove (repeatable)")
 	removeCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin pack to remove (repeatable)")
 	removeCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill to remove (repeatable)")
-	removeCmd.Flags().BoolVar(&composeClearPro, "profile", false, "Clear the agent's profile attachment")
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
@@ -45,7 +41,7 @@ func init() {
 
 var addCmd = &cobra.Command{
 	Use:   "add <agent-name>",
-	Short: "Add tools, skills, or a profile to an agent",
+	Short: "Add tools or skills to an agent",
 	Args:  cobra.ExactArgs(1),
 	Long: `Compose an agent by attaching reusable blocks.
 
@@ -53,12 +49,11 @@ Examples:
   spwn agent add neo --tool @spwn/python
   spwn agent add neo --plugin @spwn/mempalace
   spwn agent add neo --skill paper-reading --skill refactoring
-  spwn agent add neo --profile researcher
-  spwn agent add neo --tool @spwn/unix --tool @spwn/git --profile dev`,
+  spwn agent add neo --tool @spwn/unix --tool @spwn/git`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 && composeProfile == "" {
-			return fmt.Errorf("nothing to add.\nPass at least one of --tool, --plugin, --skill, or --profile")
+		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 {
+			return fmt.Errorf("nothing to add.\nPass at least one of --tool, --plugin, or --skill")
 		}
 
 		// Verify the agent exists before touching the manifest.
@@ -104,12 +99,6 @@ Examples:
 			}
 			s.Done("+ skill", sk)
 		}
-		if composeProfile != "" {
-			if err := agent.SetProfile(name, composeProfile); err != nil {
-				return fmt.Errorf("set profile %q: %w", composeProfile, err)
-			}
-			s.Done("+ profile", composeProfile)
-		}
 
 		s.Blank()
 		s.Success("Composition updated.")
@@ -120,7 +109,7 @@ Examples:
 
 var removeCmd = &cobra.Command{
 	Use:   "remove <agent-name>",
-	Short: "Remove tools, skills, or profile from an agent",
+	Short: "Remove tools or skills from an agent",
 	Args:  cobra.ExactArgs(1),
 	Long: `Remove composable blocks from an agent's composition.
 
@@ -130,12 +119,11 @@ Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 Examples:
   spwn agent remove neo --tool @spwn/python
   spwn agent remove neo --plugin @spwn/mempalace
-  spwn agent remove neo --skill paper-reading
-  spwn agent remove neo --profile`,
+  spwn agent remove neo --skill paper-reading`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 && !composeClearPro {
-			return fmt.Errorf("nothing to remove.\nPass at least one of --tool, --plugin, --skill, or --profile")
+		if len(composeTools) == 0 && len(composePlugins) == 0 && len(composeSkills) == 0 {
+			return fmt.Errorf("nothing to remove.\nPass at least one of --tool, --plugin, or --skill")
 		}
 
 		if err := agent.ValidateMind(name); err != nil {
@@ -196,13 +184,6 @@ Examples:
 			}
 			s.Done("- skill", sk)
 		}
-		if composeClearPro {
-			if err := agent.ClearProfile(name); err != nil {
-				return fmt.Errorf("clear profile: %w", err)
-			}
-			s.Done("- profile", "cleared")
-		}
-
 		s.Blank()
 		s.Success("Composition updated.")
 		s.Info("Manifest:", agent.ManifestPath(name))
@@ -217,7 +198,7 @@ var publishCmd = &cobra.Command{
 	Long: `Publish an agent to the community registry for others to pull.
 
 Memory (journal, knowledge, sessions) is stripped before publishing -
-only the composition (tools, skills, profile) and core identity ship.
+only the composition (tools, skills) and identity ship.
 
 Not yet implemented - tracks the registry (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {

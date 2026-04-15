@@ -30,7 +30,8 @@ spwn agent import <path-to-tar.gz> [flags]
 ### Options
 
 ```
-  -h, --help   help for import
+      --as string   Rename the agent on import (instead of using the archive filename)
+  -h, --help        help for import
 ```
 
 ### SEE ALSO

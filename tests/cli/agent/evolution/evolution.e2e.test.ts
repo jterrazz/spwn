@@ -132,8 +132,8 @@ describe('spwn agent fork', () => {
         expect(result.exitCode).toBe(0);
         const out = result.stderr.text;
         expect(out).toContain('Forking "neo" -> "neo-v2"');
-        expect(out).toMatch(/Layers copied\s+core, skills, knowledge, playbooks, journal/);
-        expect(result.file('spwn/agents/neo-v2/core/profile.md').exists).toBe(true);
+        expect(out).toMatch(/Layers copied\s+identity, skills, knowledge, playbooks, journal/);
+        expect(result.file('spwn/agents/neo-v2/identity/profile.md').exists).toBe(true);
     });
 
     test('forking onto an existing target fails cleanly', async () => {
@@ -188,6 +188,6 @@ describe('spwn agent fork', () => {
         expect(result.exitCode).toBe(0);
         const out = result.stderr.text;
         expect(out).toMatch(/Agent:\s+neo-clone/);
-        expect(out).toMatch(/core\/\s+profile\.md/);
+        expect(out).toMatch(/identity\/\s+profile\.md/);
     });
 });

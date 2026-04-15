@@ -15,6 +15,7 @@ spwn agent ls [flags]
 
 ```
   -h, --help           help for ls
+      --json           Emit results as structured JSON on stdout
       --world string   Filter agents by world ID
 ```
 

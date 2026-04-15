@@ -66,7 +66,7 @@ type Reference struct {
 // Result.Cycles - they do NOT block the walk.
 //
 // The root parameter is used to resolve references that begin with
-// the agent root (e.g. `@core/profile.md`). References without a
+// the agent root (e.g. `@identity/profile.md`). References without a
 // leading `/` are treated as relative to the containing file's
 // directory first, then as relative to root.
 func Walk(root, startFile string) (*Result, error) {

@@ -12,7 +12,7 @@ func TestRestructureAgentDirs_FullMigration(t *testing.T) {
 
 	// Create an agent with old directory structure
 	agentDir := filepath.Join(dir, "agents", "neo")
-	os.MkdirAll(filepath.Join(agentDir, "identity"), 0755)
+	os.MkdirAll(filepath.Join(agentDir, "core"), 0755)
 	os.MkdirAll(filepath.Join(agentDir, "skills"), 0755)
 	os.MkdirAll(filepath.Join(agentDir, "memory", "knowledge"), 0755)
 	os.MkdirAll(filepath.Join(agentDir, "memory", "playbooks"), 0755)
@@ -20,8 +20,8 @@ func TestRestructureAgentDirs_FullMigration(t *testing.T) {
 	os.MkdirAll(filepath.Join(agentDir, "sessions"), 0755)
 
 	// Write files in old locations
-	os.WriteFile(filepath.Join(agentDir, "identity", "persona.md"), []byte("# Persona"), 0644)
-	os.WriteFile(filepath.Join(agentDir, "identity", "purpose.md"), []byte("# Purpose"), 0644)
+	os.WriteFile(filepath.Join(agentDir, "core", "persona.md"), []byte("# Persona"), 0644)
+	os.WriteFile(filepath.Join(agentDir, "core", "purpose.md"), []byte("# Purpose"), 0644)
 	os.WriteFile(filepath.Join(agentDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 	os.WriteFile(filepath.Join(agentDir, "memory", "knowledge", "facts.md"), []byte("# Facts"), 0644)
 	os.WriteFile(filepath.Join(agentDir, "memory", "playbooks", "deploy.md"), []byte("# Deploy"), 0644)
@@ -36,13 +36,13 @@ func TestRestructureAgentDirs_FullMigration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Verify identity/ was renamed to core/
-	if _, err := os.Stat(filepath.Join(agentDir, "identity")); !os.IsNotExist(err) {
-		t.Error("identity/ should have been renamed")
+	// Verify core/ was renamed to identity/
+	if _, err := os.Stat(filepath.Join(agentDir, "core")); !os.IsNotExist(err) {
+		t.Error("core/ should have been renamed")
 	}
-	data, err := os.ReadFile(filepath.Join(agentDir, "core", "persona.md"))
+	data, err := os.ReadFile(filepath.Join(agentDir, "identity", "persona.md"))
 	if err != nil {
-		t.Fatalf("core/persona.md missing: %v", err)
+		t.Fatalf("identity/persona.md missing: %v", err)
 	}
 	if string(data) != "# Persona" {
 		t.Errorf("unexpected content: %s", data)
@@ -128,22 +128,22 @@ func TestRestructureAgentDirs_NoAgentsDir(t *testing.T) {
 func TestRestructureAgentDirs_AlreadyMigrated(t *testing.T) {
 	dir := t.TempDir()
 	agentDir := filepath.Join(dir, "agents", "neo")
-	os.MkdirAll(filepath.Join(agentDir, "core"), 0755)
+	os.MkdirAll(filepath.Join(agentDir, "identity"), 0755)
 	os.MkdirAll(filepath.Join(agentDir, "skills"), 0755)
 	os.MkdirAll(filepath.Join(agentDir, "knowledge"), 0755)
 	os.MkdirAll(filepath.Join(agentDir, "playbooks"), 0755)
 	os.MkdirAll(filepath.Join(agentDir, "journal"), 0755)
-	os.WriteFile(filepath.Join(agentDir, "core", "persona.md"), []byte("# Persona"), 0644)
+	os.WriteFile(filepath.Join(agentDir, "identity", "persona.md"), []byte("# Persona"), 0644)
 
 	// Running migration on already-migrated agent should be idempotent
 	if err := RestructureAgentDirs.Apply(context.Background(), dir); err != nil {
 		t.Fatal(err)
 	}
 
-	// core/ should still exist with its file
-	data, err := os.ReadFile(filepath.Join(agentDir, "core", "persona.md"))
+	// identity/ should still exist with its file
+	data, err := os.ReadFile(filepath.Join(agentDir, "identity", "persona.md"))
 	if err != nil {
-		t.Fatalf("core/persona.md missing: %v", err)
+		t.Fatalf("identity/persona.md missing: %v", err)
 	}
 	if string(data) != "# Persona" {
 		t.Errorf("unexpected content: %s", data)

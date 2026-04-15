@@ -141,7 +141,7 @@ describe('full agent lifecycle', () => {
 
         // Fork wrote a second on-disk mind.
         expect(result.file('spwn/agents/neo-v2').exists).toBe(true);
-        expect(result.file('spwn/agents/neo-v2/core/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo-v2/identity/profile.md').exists).toBe(true);
 
         // Export dropped a tar.gz somewhere in the project — the legacy
         // Test checked for neo.tar.gz at the project root.

@@ -5,12 +5,17 @@ slug: "spwn-agent-create"
 
 ## spwn agent create
 
-Create a new agent with a 6-layer Mind
+Create a new agent with a 5-layer Mind
 
 ### Synopsis
 
-Create a new agent with the 6-layer Mind structure. If no name is
-provided, a random name is picked from a curated dictionary.
+Create a new agent with the 5-layer Mind structure
+(core/skills/knowledge/playbooks/journal). If no name is provided,
+a random name is picked from a curated dictionary.
+
+With --force, an existing agent's Mind is re-scaffolded: any missing
+files are recreated and the command exits zero even if the agent
+already exists.
 
 ```
 spwn agent create [name] [flags]
@@ -19,6 +24,7 @@ spwn agent create [name] [flags]
 ### Options
 
 ```
+  -f, --force         Re-scaffold any missing Mind files without complaining if the agent already exists
   -h, --help          help for create
       --team string   Assign agent to a team (slug)
 ```

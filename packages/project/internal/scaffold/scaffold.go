@@ -55,7 +55,7 @@ func Init(dir string, opts Opts) error {
 		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
 		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
 		{"templates/AGENT.md.tmpl", "spwn/agents/neo/AGENT.md"},
-		{"templates/profile.md.tmpl", "spwn/agents/neo/core/profile.md"},
+		{"templates/profile.md.tmpl", "spwn/agents/neo/identity/profile.md"},
 	}
 	for _, f := range files {
 		if err := writeTemplate(absDir, f.src, f.dst, data); err != nil {

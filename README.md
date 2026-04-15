@@ -145,23 +145,21 @@ Each agent is a directory of markdown files - **human-readable, git-friendly, no
 
 ```
 spwn/agents/neo/
-├── agent.yaml                # composition: tools, skills, profile, runtime
+├── agent.yaml                # composition: tools, skills, runtime
 ├── AGENT.md                  # entry point (provider-neutral; compiled per runtime)
-├── core/                     # identity - profile.md, purpose.md, traits.md
+├── identity/                 # who the agent is - profile.md, purpose.md, traits.md
 ├── skills/                   # procedures and checklists
 ├── knowledge/                # facts about the codebase
 ├── playbooks/                # workflows promoted from experience
 └── journal/                  # session history - one file per run
 ```
 
-**Three kinds of blocks: tools, skills, and a profile.** Each block is a file. Stack them into `agent.yaml`:
+**Two kinds of blocks: tools and skills.** Each block is a file. Stack them into `agent.yaml`:
 
 ```yaml
 # spwn/agents/neo/agent.yaml
 name: neo
 runtime: claude-code
-
-profile: researcher              # personality template
 
 tools:
   - @spwn/unix                   # bash, coreutils, grep, sed, awk
@@ -223,12 +221,12 @@ Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lo
 ```bash
 spwn init
 spwn agent add curie --tool @spwn/python --tool @spwn/qmd
-spwn agent add curie --skill paper-reading --profile researcher
+spwn agent add curie --skill paper-reading --skill hypothesis-testing
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
 
-> Stack `@spwn/python` + `@spwn/qmd` + a `researcher` profile and you have an autonomous lab partner. Swap `researcher` for `skeptic` tomorrow - same mind, new voice. **Docker, but for minds.**
+> Stack `@spwn/python` + `@spwn/qmd` + the right skills and you have an autonomous lab partner. Edit `identity/profile.md` tomorrow - same mind, new voice. **Docker, but for minds.**
 
 ### Ship an agent with your repo
 
@@ -316,7 +314,6 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 # Compose blocks
 🟢 spwn agent add neo --tool @spwn/python       Add a tool block
 🟡 spwn agent add neo --skill paper-reading     Add a skill block (must exist locally)
-🟡 spwn agent add neo --profile researcher      Apply a profile (must exist locally)
 🟢 spwn agent rm  neo --tool @spwn/python       Remove a block
 
 # Talk + messaging

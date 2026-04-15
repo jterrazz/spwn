@@ -73,7 +73,6 @@ spwn agent rm neo --tool @spwn/python          # Remove a block from an agent
 # Compose blocks
 spwn agent add neo --tool @spwn/python         # Add a tool block
 spwn agent add neo --skill paper-reading       # Add a skill block
-spwn agent add neo --profile researcher        # Apply a profile
 
 # Talk + messaging
 spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`
@@ -133,15 +132,14 @@ my-project/
 ├── spwn/                        # committed project assets
 │   ├── agents/
 │   │   └── neo/
-│   │       ├── agent.yaml       # composition: tools + skills + profile + runtime.backend
-│   │       ├── CLAUDE.md        # entry point the runtime reads on startup
-│   │       ├── core/profile.md  # identity
+│   │       ├── agent.yaml       # composition: tools + skills + runtime.backend
+│   │       ├── AGENT.md         # entry point (provider-neutral, compiled per runtime)
+│   │       ├── identity/        # who the agent is - profile.md, purpose.md, traits.md
 │   │       ├── skills/          # authored procedures
 │   │       ├── knowledge/       # facts, codebase notes
 │   │       ├── playbooks/       # promoted patterns (via dream)
 │   │       └── journal/         # per-run history
 │   ├── skills/                  # project-scoped skill files
-│   ├── profiles/                # project-scoped personality templates
 │   └── tools/                   # project-scoped tool packs (optional)
 └── .spwn/                       # gitignored local state
     ├── state.json               # live world IDs bound to this project

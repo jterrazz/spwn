@@ -76,23 +76,6 @@ describe('zero-friction UX', () => {
         expect(result.stderr.text).not.toMatch(/List worlds with: spwn ls$/m);
     });
 
-    test('profile errors collapse $HOME to ~', async () => {
-        // Given - an empty project pointed at an isolated SPWN_HOME.
-        // When - we ask `spwn profile show` for a profile that does not exist.
-        // Then - the error exits non-zero and the message does not leak an absolute
-        //   /Users/... or /home/... host path (it should use ~ or the spwn-home dir).
-        const result = await spec('profile show missing')
-            .project('empty')
-            .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
-            .exec('profile show ghost')
-            .run();
-
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr.text).not.toMatch(/\/Users\/[^\s]+\.spwn/);
-        expect(result.stderr.text).not.toMatch(/\/home\/[^\s]+\.spwn/);
-        expect(result.stderr.text).toMatch(/ghost/);
-    });
-
     test('architect talk --help lists usage and flags', async () => {
         // Given - --help is a pure cobra render, no side effects
         const result = await spec('architect talk help')

@@ -41,4 +41,4 @@ const (
 )
 
 // MindLayers defines the five-layer Mind structure.
-var MindLayers = []string{"core", "skills", "knowledge", "playbooks", "journal"}
+var MindLayers = []string{"identity", "skills", "knowledge", "playbooks", "journal"}

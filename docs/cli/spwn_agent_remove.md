@@ -5,7 +5,7 @@ slug: "spwn-agent-remove"
 
 ## spwn agent remove
 
-Remove tools, skills, or profile from an agent
+Remove tools or skills from an agent
 
 ### Synopsis
 
@@ -18,7 +18,6 @@ Examples:
   spwn agent remove neo --tool @spwn/python
   spwn agent remove neo --plugin @spwn/mempalace
   spwn agent remove neo --skill paper-reading
-  spwn agent remove neo --profile
 
 ```
 spwn agent remove <agent-name> [flags]
@@ -29,7 +28,6 @@ spwn agent remove <agent-name> [flags]
 ```
   -h, --help                 help for remove
       --plugin stringArray   Plugin pack to remove (repeatable)
-      --profile              Clear the agent's profile attachment
       --skill stringArray    Skill to remove (repeatable)
       --tool stringArray     Tool pack to remove (repeatable)
 ```

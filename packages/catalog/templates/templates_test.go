@@ -43,7 +43,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 //   <slug>/template.yaml
 //   <slug>/README.md
 //   <slug>/spwn.yaml
-//   <slug>/agents/<at-least-one-dir>/core/profile.md
+//   <slug>/agents/<at-least-one-dir>/identity/profile.md
 //
 // Without these, the binary ships but misbehaves at runtime.
 func TestShippedSlugsStructure(t *testing.T) {
@@ -60,7 +60,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 				}
 			}
 
-			// At least one agent directory, each with core/profile.md.
+			// At least one agent directory, each with identity/profile.md.
 			agentEntries, err := fs.ReadDir(templatesFS, slug+"/agents")
 			if err != nil {
 				t.Errorf("read %s/agents: %v", slug, err)
@@ -70,10 +70,10 @@ func TestShippedSlugsStructure(t *testing.T) {
 			for _, e := range agentEntries {
 				if e.IsDir() {
 					hasAgent = true
-					// Every agent must have core/profile.md (the current Mind layout).
-					profilePath := slug + "/agents/" + e.Name() + "/core/profile.md"
+					// Every agent must have identity/profile.md (the current Mind layout).
+					profilePath := slug + "/agents/" + e.Name() + "/identity/profile.md"
 					if _, err := fs.Stat(templatesFS, profilePath); err != nil {
-						t.Errorf("%s: agent %q missing core/profile.md", slug, e.Name())
+						t.Errorf("%s: agent %q missing identity/profile.md", slug, e.Name())
 					}
 					// And an agent.yaml so Install can wire up runtime/tools.
 					agentYAML := slug + "/agents/" + e.Name() + "/agent.yaml"
@@ -200,8 +200,8 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	if !exists(filepath.Join(base, "spwn.yaml")) {
 		t.Error("spwn.yaml was not written")
 	}
-	if !exists(filepath.Join(base, "spwn", "agents", "neo", "core", "profile.md")) {
-		t.Error("agent core/profile.md was not copied into spwn/agents/")
+	if !exists(filepath.Join(base, "spwn", "agents", "neo", "identity", "profile.md")) {
+		t.Error("agent identity/profile.md was not copied into spwn/agents/")
 	}
 	if !exists(filepath.Join(base, "spwn", "agents", "neo", "agent.yaml")) {
 		t.Error("agent.yaml was not copied into spwn/agents/")

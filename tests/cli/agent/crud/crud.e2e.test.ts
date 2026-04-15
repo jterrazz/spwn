@@ -21,7 +21,7 @@ describe('spwn agent CRUD', () => {
 
         expect(result.exitCode).toBe(0);
         // Structural: the on-disk Mind exists with a profile.
-        expect(result.file('spwn-home/agents/neo/core/profile.md').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/identity/profile.md').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/skills').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/knowledge').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/playbooks').exists).toBe(true);
@@ -65,7 +65,7 @@ describe('spwn agent CRUD', () => {
         expect(result.exitCode).toBe(0);
         // `agent show` renders the Mind tree on stderr in spwn's UX.
         expect(result.stderr.text).toMatch(/Agent:\s+neo/);
-        expect(result.stderr.text).toMatch(/core\/\s+profile\.md/);
+        expect(result.stderr.text).toMatch(/identity\/\s+profile\.md/);
         expect(result.stderr.text).toMatch(/skills\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/knowledge\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/playbooks\/\s+\(empty\)/);
@@ -116,7 +116,7 @@ describe('spwn agent CRUD', () => {
         expect(aliased.exitCode).toBe(0);
 
         for (const path of [
-            'spwn-home/agents/neo/core/profile.md',
+            'spwn-home/agents/neo/identity/profile.md',
             'spwn-home/agents/neo/skills',
             'spwn-home/agents/neo/knowledge',
             'spwn-home/agents/neo/playbooks',
@@ -136,7 +136,7 @@ describe('spwn agent CRUD', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.file('spwn-home/agents/neo/core/profile.md').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/identity/profile.md').exists).toBe(true);
     });
 
     test('agent create without --force still rejects duplicates', async () => {
@@ -187,7 +187,7 @@ describe('spwn agent CRUD', () => {
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn/agents/trinity/agent.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/trinity/AGENT.md').exists).toBe(true);
-        expect(result.file('spwn/agents/trinity/core').exists).toBe(true);
+        expect(result.file('spwn/agents/trinity/identity').exists).toBe(true);
     });
 
     test('agent rm cleans the manifest so check stays green', async () => {

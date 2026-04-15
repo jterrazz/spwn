@@ -33,7 +33,7 @@ func TestAgentsBookContent(t *testing.T) {
 
 	// Must contain core and skills references
 	mindPaths := []string{
-		"/mind/core/",
+		"/mind/identity/",
 		"/mind/skills/",
 		"/mind/knowledge/",
 		"/mind/playbooks/",

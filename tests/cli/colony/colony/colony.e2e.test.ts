@@ -146,7 +146,7 @@ describe('colony', () => {
         // Both on-disk minds survive teardown so a follow-up up can
         // Resurrect them. This matches the legacy "agent survives"
         // Contract the colony destroy test was asserting on.
-        expect(result.file('spwn/agents/neo/core/profile.md').exists).toBe(true);
-        expect(result.file('spwn/agents/morpheus/core/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/morpheus/identity/profile.md').exists).toBe(true);
     });
 });

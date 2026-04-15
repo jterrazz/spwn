@@ -31,7 +31,7 @@ func scaffoldAgent(t *testing.T, name string) string {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	dir := filepath.Join(tmp, "agents", name, "core")
+	dir := filepath.Join(tmp, "agents", name, "identity")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
@@ -44,8 +44,6 @@ func scaffoldAgent(t *testing.T, name string) string {
 func resetComposeFlags() {
 	composeTools = nil
 	composeSkills = nil
-	composeProfile = ""
-	composeClearPro = false
 }
 
 // ── agent add ──────────────────────────────────────────────────────────────
@@ -96,12 +94,11 @@ func TestAgentAdd_SingleTool(t *testing.T) {
 	}
 }
 
-func TestAgentAdd_MultipleToolsSkillsAndProfile(t *testing.T) {
+func TestAgentAdd_MultipleToolsAndSkills(t *testing.T) {
 	scaffoldAgent(t, "neo")
 	resetComposeFlags()
 	composeTools = []string{"@spwn/unix", "@spwn/python", "@spwn/git"}
 	composeSkills = []string{"refactoring", "paper-reading"}
-	composeProfile = "researcher"
 
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
@@ -114,9 +111,6 @@ func TestAgentAdd_MultipleToolsSkillsAndProfile(t *testing.T) {
 	}
 	if len(m.Skills) != 2 {
 		t.Errorf("expected 2 skills, got %d: %v", len(m.Skills), m.Skills)
-	}
-	if m.Profile != "researcher" {
-		t.Errorf("Profile = %q, want \"researcher\"", m.Profile)
 	}
 }
 
@@ -197,23 +191,6 @@ func TestAgentRemove_Skill(t *testing.T) {
 	m, _ := agent.LoadManifest("neo")
 	if len(m.Skills) != 1 || m.Skills[0] != "refactoring" {
 		t.Errorf("Skills = %v, want [refactoring]", m.Skills)
-	}
-}
-
-func TestAgentRemove_Profile(t *testing.T) {
-	scaffoldAgent(t, "neo")
-	agent.SetProfile("neo", "researcher")
-
-	resetComposeFlags()
-	composeClearPro = true
-	cmd, _ := newComposeCmd()
-	if err := removeCmd.RunE(cmd, []string{"neo"}); err != nil {
-		t.Fatal(err)
-	}
-
-	m, _ := agent.LoadManifest("neo")
-	if m.Profile != "" {
-		t.Errorf("Profile = %q, want empty after clear", m.Profile)
 	}
 }
 
