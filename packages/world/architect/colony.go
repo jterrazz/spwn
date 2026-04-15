@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/world/manifest"
-	"spwn.sh/packages/world/models"
+	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claudecode"
 	"spwn.sh/packages/ids"
+	"spwn.sh/packages/paths"
+	"spwn.sh/packages/world/manifest"
+	"spwn.sh/packages/world/models"
 )
 
 // AgentSpec describes an agent to spawn in a world.
@@ -62,9 +65,34 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	// 1. Create the per-agent per-world layout on the host. This
 	// brings hot-deployed agents up to first-class parity with
 	// spawn-time agents - inbox/outbox/notes/role.md all in place.
-	if err := initAgentDeployment(rec, worldID); err != nil {
+	if err := initAgentDeploymentDirs(rec, worldID); err != nil {
 		return fmt.Errorf("init deployment: %w", err)
 	}
+	// Render just this agent's content (CLAUDE.md + per-world
+	// role.md) through the compiler. We only write the agents/*
+	// half; the world/* files already exist from spawn time.
+	hotTree, err := compile.Compile("claude-code", compile.Input{
+		Manifest:      models.Manifest{},
+		VerifiedTools: nil,
+		WorldID:       worldID,
+		Agents:        []compile.AgentInput{{Name: rec.Name, Role: resolvedRole}},
+	})
+	if err != nil {
+		return fmt.Errorf("compile agent deployment: %w", err)
+	}
+	hotTree.Walk(func(path string, content []byte) {
+		// Only write agents/* entries -- the world/* files were
+		// written at spawn time and would be identical anyway.
+		const prefix = "agents/"
+		if !strings.HasPrefix(path, prefix) {
+			return
+		}
+		full := filepath.Join(paths.AgentsDir(), filepath.FromSlash(strings.TrimPrefix(path, prefix)))
+		if mkErr := os.MkdirAll(filepath.Dir(full), 0o755); mkErr != nil {
+			return
+		}
+		_ = os.WriteFile(full, content, 0o644)
+	})
 
 	// 2. Register in runtimestate so the next List() includes the
 	// agent in u.Agents.

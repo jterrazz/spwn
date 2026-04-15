@@ -14,13 +14,14 @@ import (
 	plugins "spwn.sh/packages/catalog/plugins"
 	runtimes "spwn.sh/packages/catalog/runtimes"
 	tools "spwn.sh/packages/catalog/tools"
+	"spwn.sh/packages/compile"
+	"spwn.sh/packages/compile/runtimes/claudecode"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/compile/runtimes/claudecode"
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
@@ -310,6 +311,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Per-agent per-world deployment dirs. Each agent gets a personal
 	// inbox/outbox/notes scoped to this world id, all rooted in the
 	// agent's persistent home so messages survive container destroy.
+	// The rendered files (role.md, CLAUDE.md) come from the compile
+	// Tree below; here we only create the empty inbox/outbox/notes
+	// directories because they're runtime state, not generated
+	// content.
 	rosterAgents := worldRecord.Agents
 	if len(rosterAgents) == 0 && worldRecord.Agent != "" {
 		rosterAgents = []models.AgentRecord{{
@@ -320,7 +325,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}}
 	}
 	for _, rec := range rosterAgents {
-		if err := initAgentDeployment(rec, id); err != nil {
+		if err := initAgentDeploymentDirs(rec, id); err != nil {
 			warnings = append(warnings, fmt.Sprintf("init deployment for %s: %v", rec.Name, err))
 		}
 	}
@@ -367,32 +372,29 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
 
-	// Generate world-state files. They live on the HOST under
-	// ~/.spwn/world-states/<id>/ and are visible inside the container
-	// at /world/ via the bind mount. Writing to the host means the
-	// user can also `vim ~/.spwn/world-states/<id>/shared/notes/...`
-	// from their terminal.
-	type worldFile struct {
-		path    string
-		content []byte
+	// Render every file this world needs through the compiler. The
+	// claude-code Runtime produces a Tree with two kinds of entries:
+	// world/* (shared per-world files -- physics, roster, skills)
+	// and agents/<name>/* (per-agent entrypoint + per-deployment
+	// role.md). We split by prefix and materialise each half under
+	// its canonical host directory. Both directories are already
+	// visible inside the container via pre-existing bind mounts.
+	compileInput := compile.Input{
+		Manifest:      opts.Manifest,
+		VerifiedTools: verifiedTools,
+		WorldID:       id,
+		Agents:        rosterCompileAgents(rosterAgents),
 	}
-	files := []worldFile{
-		{"physics.md", []byte(claudecode.GeneratePhysics(opts.Manifest))},
-		{"faculties.md", []byte(claudecode.GenerateFaculties(verifiedTools))},
-		{"AGENTS.md", []byte(claudecode.AgentsBook)},
-		{"roster.md", []byte(claudecode.GenerateRoster(id, rosterColony(rosterAgents)))},
+	tree, err := compile.Compile("claude-code", compileInput)
+	if err != nil {
+		a.backend.Stop(ctx, containerID)
+		a.backend.Remove(ctx, containerID)
+		return nil, fmt.Errorf("compile world: %w", err)
 	}
-	for _, f := range files {
-		if err := os.WriteFile(filepath.Join(worldStateDir, f.path), f.content, 0o644); err != nil {
-			a.backend.Stop(ctx, containerID)
-			a.backend.Remove(ctx, containerID)
-			return nil, fmt.Errorf("write %s: %w", f.path, err)
-		}
-	}
-	for skillName, skillContent := range claudecode.SystemSkills() {
-		if err := os.WriteFile(filepath.Join(worldStateDir, "skills", skillName), []byte(skillContent), 0o644); err != nil {
-			warnings = append(warnings, fmt.Sprintf("write skill %s: %v", skillName, err))
-		}
+	if err := materialiseWorldTree(tree, worldStateDir, paths.AgentsDir()); err != nil {
+		a.backend.Stop(ctx, containerID)
+		a.backend.Remove(ctx, containerID)
+		return nil, fmt.Errorf("materialise world tree: %w", err)
 	}
 	opts.progress("world_state_written", "physics, faculties, roster, AGENTS.md")
 
@@ -535,23 +537,18 @@ func worldStateDirFor(worldID string) string {
 	return filepath.Join(paths.LocalStateDir(), "world-states", worldID)
 }
 
-// initAgentDeployment creates the per-agent per-world filesystem layout
-// inside the agent's persistent home dir on the host:
+// initAgentDeploymentDirs creates the empty per-agent per-world
+// filesystem skeleton inside the agent's persistent home:
 //
 //	~/.spwn/agents/<name>/worlds/<world-id>/
 //	  inbox/    - messages received in this world
 //	  outbox/   - messages I sent (audit trail)
 //	  notes/    - my private notes for this world's project
-//	  role.md   - what role I play here
 //
-// It also writes CLAUDE.md at the agent root so the Claude Code
-// runtime loads the agent's identity on startup. The cwd is set to
-// /agents/<name>/ so CLAUDE.md is the first thing it reads.
-//
-// The single /agents bind on the world container makes these dirs
-// visible at /agents/<name>/worlds/<world-id>/ instantly. Hot-deploy
-// uses the same helper.
-func initAgentDeployment(rec models.AgentRecord, worldID string) error {
+// The content-bearing files (role.md, CLAUDE.md) are produced by the
+// compiler and materialised alongside these dirs via
+// materialiseWorldTree. Hot-deploy uses the same helper.
+func initAgentDeploymentDirs(rec models.AgentRecord, worldID string) error {
 	agentDir := agent.AgentDir(rec.Name)
 	deploymentDir := filepath.Join(agentDir, "worlds", worldID)
 	for _, sub := range []string{"inbox", "outbox", "notes"} {
@@ -559,68 +556,39 @@ func initAgentDeployment(rec models.AgentRecord, worldID string) error {
 			return fmt.Errorf("mkdir %s: %w", sub, err)
 		}
 	}
-	role := rec.Role
-	if role == "" {
-		role = "worker"
-	}
-	roleContent := fmt.Sprintf("# Role in %s\n\n%s\n", worldID, role)
-	if err := os.WriteFile(filepath.Join(deploymentDir, "role.md"), []byte(roleContent), 0o644); err != nil {
-		return fmt.Errorf("write role.md: %w", err)
-	}
-
-	// Write CLAUDE.md - the entry point Claude Code reads on startup.
-	// It loads the agent's profile and tells the runtime where to find
-	// the world manual and system skills. Without this, the agent runs
-	// as a generic Claude instance with no identity.
-	claudeMD := generateAgentCLAUDEMD(rec.Name, role)
-	claudePath := filepath.Join(agentDir, "CLAUDE.md")
-	if err := os.WriteFile(claudePath, []byte(claudeMD), 0o644); err != nil {
-		return fmt.Errorf("write CLAUDE.md: %w", err)
-	}
-
 	return nil
 }
 
-// generateAgentCLAUDEMD creates the CLAUDE.md that Claude Code reads
-// on startup. It includes the profile inline (so it's always loaded)
-// and references the world files.
-func generateAgentCLAUDEMD(agentName, role string) string {
-	return fmt.Sprintf(`# %s
-
-You are **%s**, a spwn agent with role: %s.
-
-## Your identity
-
-Read your full profile and behavioral instructions from:
-
-@core/profile.md
-
-Follow the voice, style, and purpose defined there. You are NOT a generic assistant - you are %s.
-
-## Your world
-
-- Read %s for your operating manual (how memory, skills, and communication work).
-- Read %s for the rules of this world (network, filesystem, communication).
-- Read %s to see what tools are physically available.
-- Read %s for system skills (mind management, collaboration, evolution).
-
-## Key rules
-
-1. **Read your profile first** before doing anything else. Your identity shapes how you respond.
-2. Save important discoveries to your knowledge (write to %s).
-3. After significant work, check if a playbook should be created in %s.
-4. **Messaging**: to send a message to another agent, write a .json or .md file to %s. To check YOUR inbox, read %s. Read %s for the full messaging protocol.
-5. Never modify system files in /world/ (physics.md, faculties.md, AGENTS.md are read-only).
-`, agentName, agentName, role, agentName,
-		"`/world/AGENTS.md`",
-		"`/world/physics.md`",
-		"`/world/faculties.md`",
-		"`/world/skills/`",
-		"`./knowledge/`",
-		"`./playbooks/`",
-		"`/world/inbox/<their-name>/`",
-		fmt.Sprintf("`/world/inbox/%s/`", agentName),
-		"`/world/skills/collaboration.md`")
+// materialiseWorldTree splits a compile.Tree into its two destination
+// directories: every entry under world/* goes to worldStateDir (bound
+// as /world in the container), every entry under agents/* goes to
+// agentsRoot (bound as /agents). Any other prefix is an error.
+func materialiseWorldTree(tree *compile.Tree, worldStateDir, agentsRoot string) error {
+	var worldErr error
+	tree.Walk(func(path string, content []byte) {
+		if worldErr != nil {
+			return
+		}
+		var full string
+		switch {
+		case strings.HasPrefix(path, "world/"):
+			full = filepath.Join(worldStateDir, filepath.FromSlash(strings.TrimPrefix(path, "world/")))
+		case strings.HasPrefix(path, "agents/"):
+			full = filepath.Join(agentsRoot, filepath.FromSlash(strings.TrimPrefix(path, "agents/")))
+		default:
+			worldErr = fmt.Errorf("unexpected tree path %q: claudecode runtime must namespace files under world/ or agents/", path)
+			return
+		}
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			worldErr = fmt.Errorf("mkdir %s: %w", filepath.Dir(full), err)
+			return
+		}
+		if err := os.WriteFile(full, content, 0o644); err != nil {
+			worldErr = fmt.Errorf("write %s: %w", full, err)
+			return
+		}
+	})
+	return worldErr
 }
 
 // injectPluginRuntimeConfig computes the merged plugin config for the
@@ -674,12 +642,24 @@ func injectPluginRuntimeConfig(ctx context.Context, be backend.Backend, containe
 	return nil
 }
 
-// rosterColony adapts an agent record list into the physics package's
-// ColonyAgentSpec list (used by GenerateRoster).
+// rosterColony adapts an agent record list into the claudecode
+// ColonyAgentSpec list (used by colony.go's GenerateRoster call for
+// roster regeneration on hot-deploy). New code should build a
+// compile.Input instead.
 func rosterColony(recs []models.AgentRecord) []claudecode.ColonyAgentSpec {
 	out := make([]claudecode.ColonyAgentSpec, 0, len(recs))
 	for _, r := range recs {
 		out = append(out, claudecode.ColonyAgentSpec{Name: r.Name, Role: r.Role})
+	}
+	return out
+}
+
+// rosterCompileAgents projects the world record's agent list onto
+// the compile.Input shape.
+func rosterCompileAgents(recs []models.AgentRecord) []compile.AgentInput {
+	out := make([]compile.AgentInput, 0, len(recs))
+	for _, r := range recs {
+		out = append(out, compile.AgentInput{Name: r.Name, Role: r.Role})
 	}
 	return out
 }
