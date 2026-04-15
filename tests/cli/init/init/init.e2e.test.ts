@@ -62,6 +62,36 @@ describe('spwn init', () => {
         expect(result.file('spwn.yaml').content).toContain('name: forced-project');
     });
 
+    test('init rejects --name values that fail the manifest regex', async () => {
+        // Given - an empty dir, a --name with spaces
+        // When - running init
+        // Then - exit 1, no spwn.yaml written
+        const result = await spec('init bad name')
+            .project('empty')
+            .exec('init --name "Has Spaces"')
+            .run();
+        expect(result.exitCode).toBe(1);
+        expect(result.file('spwn.yaml').exists).toBe(false);
+        expect(result.stderr.text).toMatch(/invalid --name/i);
+    });
+
+    test('init banner only references files that actually exist', async () => {
+        // Given - an empty dir scaffolded via init
+        // When - scanning the stdout banner for `spwn/...` paths
+        // Then - every printed path resolves to something on disk
+        const result = await spec('init banner truth')
+            .project('empty')
+            .exec('init --name demo-project')
+            .run();
+        expect(result.exitCode).toBe(0);
+
+        // The old banner promised spwn/worlds/default.yaml which was
+        // Never created. Regression guard: no removed-path sneaking
+        // Back into the template.
+        expect(result.stdout.text).not.toContain('spwn/worlds/default.yaml');
+        expect(result.file('spwn/worlds/default.yaml').exists).toBe(false);
+    });
+
     test('init @spwn/matrix installs the bundled template', async () => {
         // Given - an empty dir
         const result = await spec('init matrix').project('empty').exec('init @spwn/matrix').run();
