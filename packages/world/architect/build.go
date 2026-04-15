@@ -18,7 +18,7 @@ import (
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/world/internal/backend"
-	"spwn.sh/packages/world/internal/worldfiles"
+	"spwn.sh/packages/compile/runtimes/claudecode"
 )
 
 // BuildArchitectImage cross-compiles the spwn binary for linux/amd64 and builds
@@ -122,7 +122,7 @@ CMD ["sleep", "infinity"]
 	contextFiles["entrypoint.sh"] = ibbase.ArchitectEntrypoint
 
 	// Architect system files (ARCHITECT.md, AGENTS.md, skills, stack)
-	for path, content := range worldfiles.ArchitectSystemFiles() {
+	for path, content := range claudecode.ArchitectSystemFiles() {
 		contextFiles[path] = []byte(content)
 	}
 

@@ -20,7 +20,7 @@ import (
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/internal/worldfiles"
+	"spwn.sh/packages/compile/runtimes/claudecode"
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
@@ -377,10 +377,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		content []byte
 	}
 	files := []worldFile{
-		{"physics.md", []byte(worldfiles.GeneratePhysics(opts.Manifest))},
-		{"faculties.md", []byte(worldfiles.GenerateFaculties(verifiedTools))},
-		{"AGENTS.md", []byte(worldfiles.AgentsBook)},
-		{"roster.md", []byte(worldfiles.GenerateRoster(id, rosterColony(rosterAgents)))},
+		{"physics.md", []byte(claudecode.GeneratePhysics(opts.Manifest))},
+		{"faculties.md", []byte(claudecode.GenerateFaculties(verifiedTools))},
+		{"AGENTS.md", []byte(claudecode.AgentsBook)},
+		{"roster.md", []byte(claudecode.GenerateRoster(id, rosterColony(rosterAgents)))},
 	}
 	for _, f := range files {
 		if err := os.WriteFile(filepath.Join(worldStateDir, f.path), f.content, 0o644); err != nil {
@@ -389,7 +389,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, fmt.Errorf("write %s: %w", f.path, err)
 		}
 	}
-	for skillName, skillContent := range worldfiles.SystemSkills() {
+	for skillName, skillContent := range claudecode.SystemSkills() {
 		if err := os.WriteFile(filepath.Join(worldStateDir, "skills", skillName), []byte(skillContent), 0o644); err != nil {
 			warnings = append(warnings, fmt.Sprintf("write skill %s: %v", skillName, err))
 		}
@@ -676,10 +676,10 @@ func injectPluginRuntimeConfig(ctx context.Context, be backend.Backend, containe
 
 // rosterColony adapts an agent record list into the physics package's
 // ColonyAgentSpec list (used by GenerateRoster).
-func rosterColony(recs []models.AgentRecord) []worldfiles.ColonyAgentSpec {
-	out := make([]worldfiles.ColonyAgentSpec, 0, len(recs))
+func rosterColony(recs []models.AgentRecord) []claudecode.ColonyAgentSpec {
+	out := make([]claudecode.ColonyAgentSpec, 0, len(recs))
 	for _, r := range recs {
-		out = append(out, worldfiles.ColonyAgentSpec{Name: r.Name, Role: r.Role})
+		out = append(out, claudecode.ColonyAgentSpec{Name: r.Name, Role: r.Role})
 	}
 	return out
 }

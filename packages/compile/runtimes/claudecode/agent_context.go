@@ -1,4 +1,4 @@
-package worldfiles
+package claudecode
 
 import (
 	"fmt"
