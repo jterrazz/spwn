@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/paths"
 	"spwn.sh/packages/world"
 )
 
@@ -87,8 +88,20 @@ If no message is provided, opens an interactive session inside the container.`,
 			}
 		}
 
-		// Sync credentials before talking (updates bind-mounted /credentials/.env)
+		// Sync credentials before talking. Two layers:
+		//   1. packages/auth writes env vars + the codex auth.json into
+		//      ~/.spwn/credentials/ (bind-mounted at /credentials/).
+		//   2. The runtime provider syncs its own host-side files
+		//      (e.g. Claude's ~/.claude/.credentials.json or the
+		//      macOS Keychain) into the same directory.
 		_ = auth.SyncCredentials()
+		rt, rtErr2 := world.GetRuntime("claude-code")
+		if rtErr2 != nil {
+			return fmt.Errorf("lookup runtime: %w", rtErr2)
+		}
+		if err := rt.SyncHostCredentials(paths.CredentialsDir()); err != nil {
+			return fmt.Errorf("sync credentials: %w", err)
+		}
 
 		buildDockerArgs := func(interactive bool) []string {
 			agentHome := "/agents/" + name
@@ -112,16 +125,16 @@ If no message is provided, opens an interactive session inside the container.`,
 			return args
 		}
 
-		// Wrap runtime command to source credentials from bind-mounted directory
+		// Wrap the runtime command with the provider's prelaunch
+		// shell snippet. The snippet sources env vars from the bind
+		// mount and symlinks/copies runtime-specific credential files
+		// into the agent's HOME before exec'ing the real command.
 		wrapWithCredentials := func(cmd []string) []string {
 			escaped := make([]string, len(cmd))
 			for i, arg := range cmd {
 				escaped[i] = "'" + strings.ReplaceAll(arg, "'", "'\\''") + "'"
 			}
-			// Source env vars + set up runtime-specific credential files (symlinks)
-			setup := "source /credentials/.env 2>/dev/null"
-			// Codex: symlink auth.json from credentials dir to ~/.codex/
-			setup += "; [ -f /credentials/openai/auth.json ] && mkdir -p $HOME/.codex && ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null"
+			setup := rt.PrelaunchShell()
 			shellCmd := setup + "; exec " + strings.Join(escaped, " ")
 			return []string{"bash", "-c", shellCmd}
 		}

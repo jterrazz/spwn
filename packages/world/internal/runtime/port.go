@@ -26,20 +26,37 @@ type Runtime interface {
 	BuildCommand(cfg SpawnConfig) []string
 	// InstallCommands returns shell commands to install the runtime in a Dockerfile.
 	InstallCommands() []string
-	// RequiredEnvVars returns env var names needed for auth.
-	RequiredEnvVars() []string
-	// OptionalEnvVars returns useful but not required env vars.
-	OptionalEnvVars() []string
 	// BaseImage returns the Docker base image needed.
 	BaseImage() string
 	// SystemPackages returns apt packages needed beyond the base image.
 	SystemPackages() []string
-	// CredentialFiles returns a map of paths to place in the credentials
-	// directory. Key = relative path inside credentials dir, value = host
-	// source path. Return nil if the runtime uses only env vars from .env.
-	CredentialFiles() map[string]string
 	// SupportsSession returns true if the runtime can resume sessions.
 	SupportsSession() bool
 	// Available returns true if the runtime is production-ready.
 	Available() bool
+
+	// DefaultConfigFiles returns files that the runtime provider
+	// wants written into the agent's HOME (/agents/<name>/) at
+	// spawn time. Used to pre-dismiss first-run UI prompts -
+	// onboarding banners, trust dialogs, terminal preferences - so
+	// the user drops straight into a working session on
+	// `spwn agent <name>`. Path keys are relative to HOME. Return
+	// nil when the runtime has no such setup.
+	DefaultConfigFiles(agentHome string) map[string][]byte
+
+	// SyncHostCredentials copies host-side auth state into credsDir
+	// (the directory bind-mounted at /credentials/ inside every
+	// container). Called before every exec - the first call
+	// bootstraps, subsequent calls refresh. Runtimes should fail
+	// silently when no auth source is available (env vars may still
+	// work as a fallback). Return an error only on true I/O or
+	// command-execution failures.
+	SyncHostCredentials(credsDir string) error
+
+	// PrelaunchShell returns a shell snippet that runs immediately
+	// before the runtime command inside the container. Typical
+	// uses: source /credentials/.env, symlink credential files into
+	// their expected paths on the agent home, set runtime-specific
+	// env vars. An empty string means no wrapping is needed.
+	PrelaunchShell() string
 }

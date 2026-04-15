@@ -92,18 +92,24 @@ describe('world spawn', () => {
             }
         });
 
-        test('container has Claude trust pre-approved for /workspace', () => {
+        test('agent home has Claude trust pre-approved for its workspaces', () => {
             const neo = world.container('neo');
 
-            const claudeJson = neo.file('/home/spwn/.claude.json').content;
+            // The runtime provider writes .claude.json into each agent's
+            // real HOME (/agents/<name>) at spawn time so the per-agent
+            // Claude Code run drops straight into a ready state without
+            // onboarding prompts.
+            const claudeJson = neo.file('/agents/neo/.claude.json').content;
             const config = JSON.parse(claudeJson) as {
                 hasCompletedOnboarding?: boolean;
                 projects?: Record<string, { hasTrustDialogAccepted?: boolean }>;
             };
             expect(config.hasCompletedOnboarding).toBe(true);
             expect(config.projects?.['/workspace']?.hasTrustDialogAccepted).toBe(true);
+            expect(config.projects?.['/work']?.hasTrustDialogAccepted).toBe(true);
+            expect(config.projects?.['/agents/neo']?.hasTrustDialogAccepted).toBe(true);
 
-            const settings = neo.file('/home/spwn/.claude/settings.json').content;
+            const settings = neo.file('/agents/neo/.claude/settings.json').content;
             const settingsConfig = JSON.parse(settings) as {
                 skipDangerousModePermissionPrompt?: boolean;
             };
@@ -113,9 +119,10 @@ describe('world spawn', () => {
         test('container does NOT mount host ~/.claude directory', () => {
             const neo = world.container('neo');
 
-            // The container settings.json should be the minimal config spwn
-            // Ships, not the host's (which has hooks, plugins, etc.).
-            const settings = neo.file('/home/spwn/.claude/settings.json').content;
+            // The agent's .claude/settings.json should be the minimal
+            // config spwn ships, not the host's (which has hooks,
+            // plugins, etc.).
+            const settings = neo.file('/agents/neo/.claude/settings.json').content;
             const settingsConfig = JSON.parse(settings) as {
                 enabledPlugins?: unknown;
                 hooks?: unknown;
@@ -123,12 +130,19 @@ describe('world spawn', () => {
             expect(settingsConfig.hooks).toBeUndefined();
             expect(settingsConfig.enabledPlugins).toBeUndefined();
 
-            // And inspect confirms /home/spwn/.claude is not a host bind mount.
+            // And inspect confirms neither /home/spwn/.claude nor
+            // /agents/neo/.claude is a host bind mount - the files
+            // live inside the shared /agents bind, which is correct,
+            // but no claude-specific mount should exist.
             const inspectData = neo.inspect.value as {
                 Mounts?: Array<{ Destination: string }>;
             };
             const mounts = inspectData.Mounts ?? [];
-            const claudeMount = mounts.find((m) => m.Destination === '/home/spwn/.claude');
+            const claudeMount = mounts.find(
+                (m) =>
+                    m.Destination === '/home/spwn/.claude' ||
+                    m.Destination === '/agents/neo/.claude',
+            );
             expect(claudeMount).toBeUndefined();
         });
     });

@@ -25,11 +25,16 @@ func (*tool) Install() ib.InstallSpec {
 		Commands: []string{
 			"npm install -g @anthropic-ai/claude-code",
 		},
-		// User-level config: runs after USER switch.
-		// {{.Home}} and {{.User}} are templated by the generator.
-		UserCommands: []string{
-			`mkdir -p {{.Home}}/.claude && echo '{"hasCompletedOnboarding":true,"projects":{"/workspace":{"hasTrustDialogAccepted":true},"{{.Home}}":{"hasTrustDialogAccepted":true}}}' > {{.Home}}/.claude.json && echo '{"skipDangerousModePermissionPrompt":true}' > {{.Home}}/.claude/settings.json`,
-		},
+		// Note: first-run UI dismissal (hasCompletedOnboarding,
+		// trust dialogs, skipDangerousModePermissionPrompt) used to
+		// live here as UserCommands but the generated files landed
+		// at /home/spwn/.claude.json - the wrong HOME once every
+		// agent mounts its own /agents/<name>/ at spawn time. That
+		// logic moved to
+		// packages/world/internal/runtime/claude.DefaultConfigFiles,
+		// which writes the files directly into the per-agent home
+		// via the /agents bind mount at spawn time so they land
+		// under the HOME the runtime actually reads.
 	}
 }
 

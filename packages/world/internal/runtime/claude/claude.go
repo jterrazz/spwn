@@ -1,6 +1,14 @@
 package claude
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+
 	rt "spwn.sh/packages/world/internal/runtime"
 )
 
@@ -44,16 +52,6 @@ func (c *Claude) InstallCommands() []string {
 	return []string{"npm install -g @anthropic-ai/claude-code@latest"}
 }
 
-// RequiredEnvVars returns env var names needed for auth.
-func (c *Claude) RequiredEnvVars() []string {
-	return []string{"ANTHROPIC_API_KEY"}
-}
-
-// OptionalEnvVars returns useful but not required env vars.
-func (c *Claude) OptionalEnvVars() []string {
-	return []string{"CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"}
-}
-
 // BaseImage returns the Docker base image needed.
 func (c *Claude) BaseImage() string { return "node:20" }
 
@@ -65,4 +63,169 @@ func (c *Claude) SystemPackages() []string {
 // SupportsSession returns true if the runtime can resume sessions.
 func (c *Claude) SupportsSession() bool { return true }
 func (c *Claude) Available() bool       { return true }
-func (c *Claude) CredentialFiles() map[string]string { return nil }
+
+// ── Container-side setup ─────────────────────────────────────────
+
+// DefaultConfigFiles pre-dismisses Claude Code's first-run UI.
+// Without these, every invocation of `claude` inside a fresh agent
+// home walks the user through onboarding, trust dialogs, and
+// permission prompts - painful when the goal is "open an
+// interactive session" and the user never sees a clean terminal.
+//
+// The files are written at spawn time into /agents/<name>/, which
+// is the actual HOME the runtime runs under (not /home/spwn).
+// Previous attempts baked these into the base image at build time
+// and lost to the HOME override.
+func (c *Claude) DefaultConfigFiles(agentHome string) map[string][]byte {
+	// Trust the agent's own home + common workspace mount paths so
+	// Claude Code doesn't prompt on first access. We can't
+	// enumerate the resolved workspaces here without plumbing them
+	// through; trusting /work + /workspace covers the uniform
+	// layout spawn sets up for every world.
+	claudeJSON := map[string]any{
+		"hasCompletedOnboarding": true,
+		"projects": map[string]any{
+			agentHome: map[string]any{
+				"hasTrustDialogAccepted": true,
+			},
+			"/work": map[string]any{
+				"hasTrustDialogAccepted": true,
+			},
+			"/workspace": map[string]any{
+				"hasTrustDialogAccepted": true,
+			},
+		},
+	}
+	claudeJSONBytes, _ := json.Marshal(claudeJSON)
+
+	settingsJSON := map[string]any{
+		"skipDangerousModePermissionPrompt": true,
+	}
+	settingsBytes, _ := json.Marshal(settingsJSON)
+
+	return map[string][]byte{
+		".claude.json":          claudeJSONBytes,
+		".claude/settings.json": settingsBytes,
+	}
+}
+
+// ── Host-side credential sync ────────────────────────────────────
+
+// SyncHostCredentials copies the host's Claude Code OAuth token into
+// credsDir so the containerised runtime can read it via the
+// /credentials bind mount. Resolution order mirrors the opencode
+// claude-auth plugin, which is the best-documented solution in the
+// wild (https://github.com/griffinmartin/opencode-claude-auth):
+//
+//  1. ~/.claude/.credentials.json on the host (works on all
+//     platforms; the only file Claude Code itself reads on Linux
+//     and the file-based fallback on macOS when the Keychain is
+//     inaccessible).
+//  2. macOS Keychain service "Claude Code-credentials" via
+//     `security find-generic-password -s ... -w` - the primary
+//     store on macOS for OAuth subscription users.
+//
+// CLAUDE_CODE_OAUTH_TOKEN, ANTHROPIC_API_KEY, and ANTHROPIC_AUTH_TOKEN
+// are already flowed through the env-var path by packages/auth, so
+// this method only handles the file-based sources that path cannot
+// reach.
+//
+// A missing credential source is not an error: the env-var path may
+// still supply working auth. Return an error only for real I/O or
+// command failures.
+func (c *Claude) SyncHostCredentials(credsDir string) error {
+	dstDir := filepath.Join(credsDir, "anthropic")
+	dst := filepath.Join(dstDir, ".credentials.json")
+
+	// Source 1: host credentials file.
+	if b, ok := readHostCredentialsFile(); ok {
+		return writeCredsFile(dstDir, dst, b)
+	}
+
+	// Source 2: macOS Keychain (silent no-op on other platforms).
+	if runtime.GOOS == "darwin" {
+		if b, ok := extractFromMacOSKeychain(); ok {
+			return writeCredsFile(dstDir, dst, b)
+		}
+	}
+
+	// No file/Keychain source available. Clear any stale file
+	// from a previous sync so we never mislead the container into
+	// thinking it has working creds.
+	_ = os.Remove(dst)
+	return nil
+}
+
+// PrelaunchShell returns the shell snippet that wraps every runtime
+// exec. It sources env vars from /credentials/.env (set by
+// packages/auth.SyncCredentials), then copies the credential file
+// Claude Code expects into the agent's HOME.
+//
+// Runs as the agent user with /credentials bind-mounted read-only.
+// Every line guards with test-before-act so missing sources never
+// break the launch - the container may still have working auth via
+// env vars sourced from /credentials/.env alone.
+func (c *Claude) PrelaunchShell() string {
+	return strings.Join([]string{
+		"source /credentials/.env 2>/dev/null",
+		// Claude subscription OAuth: point ~/.claude/.credentials.json
+		// at the host-synced file. Use a copy rather than a symlink
+		// so Claude Code's in-place token refresh doesn't mutate the
+		// bind-mounted source.
+		`if [ -f /credentials/anthropic/.credentials.json ]; then ` +
+			`mkdir -p "$HOME/.claude" && ` +
+			`cp /credentials/anthropic/.credentials.json "$HOME/.claude/.credentials.json" && ` +
+			`chmod 600 "$HOME/.claude/.credentials.json"; fi`,
+	}, "; ")
+}
+
+// ── internal helpers ─────────────────────────────────────────────
+
+// readHostCredentialsFile returns the content of
+// ~/.claude/.credentials.json when it exists and is non-empty.
+func readHostCredentialsFile() ([]byte, bool) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil, false
+	}
+	path := filepath.Join(home, ".claude", ".credentials.json")
+	b, err := os.ReadFile(path)
+	if err != nil || len(b) == 0 {
+		return nil, false
+	}
+	return b, true
+}
+
+// extractFromMacOSKeychain pulls the Claude Code-credentials entry
+// out of the macOS Keychain via the `security` CLI. Returns ok=false
+// on any failure (missing entry, locked Keychain, non-macOS).
+func extractFromMacOSKeychain() ([]byte, bool) {
+	cmd := exec.Command("security", "find-generic-password",
+		"-s", "Claude Code-credentials", "-w")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, false
+	}
+	out = []byte(strings.TrimSpace(string(out)))
+	if len(out) == 0 {
+		return nil, false
+	}
+	return out, true
+}
+
+// writeCredsFile atomically writes b to dst with mode 0600 (Claude
+// Code requires tight perms on .credentials.json). Creates dir if
+// missing.
+func writeCredsFile(dir, dst string, b []byte) error {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return fmt.Errorf("mkdir %s: %w", dir, err)
+	}
+	tmp := dst + ".tmp"
+	if err := os.WriteFile(tmp, b, 0o600); err != nil {
+		return fmt.Errorf("write %s: %w", tmp, err)
+	}
+	if err := os.Rename(tmp, dst); err != nil {
+		return fmt.Errorf("rename %s: %w", dst, err)
+	}
+	return nil
+}
