@@ -40,16 +40,16 @@ describe('colony multi-agent', () => {
         result.stderr.toContain('Agent is alive');
 
         // Both agents' on-disk minds are present in the project tree.
-        expect(result.file('spwn/agents/neo/core/profile.md').exists).toBe(true);
-        expect(result.file('spwn/agents/morpheus/core/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/morpheus/identity/profile.md').exists).toBe(true);
 
         // And bind-mounted into the world container at /agents/<name>.
         const neo = result.container('neo');
         expect(neo.running).toBe(true);
         expect(neo.file('/agents/neo').exists).toBe(true);
         expect(neo.file('/agents/morpheus').exists).toBe(true);
-        expect(neo.file('/agents/neo/core/profile.md').exists).toBe(true);
-        expect(neo.file('/agents/morpheus/core/profile.md').exists).toBe(true);
+        expect(neo.file('/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(neo.file('/agents/morpheus/identity/profile.md').exists).toBe(true);
 
         const ls = await neo.exec('ls /agents');
         expect(ls.exitCode).toBe(0);

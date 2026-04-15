@@ -72,9 +72,9 @@ export interface AgentProfile {
     team?: string;
     engine: string;
     provider: string;
-    purpose: string; // Read from core/purpose.md
-    profile: string; // Read from core/profile.md
-    traits: string[]; // Read from core/traits.md
+    purpose: string; // Read from identity/purpose.md
+    profile: string; // Read from identity/profile.md
+    traits: string[]; // Read from identity/traits.md
     skills: string[];
     journal: { date: string; summary: string }[];
 }

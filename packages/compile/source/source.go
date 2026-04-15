@@ -64,10 +64,6 @@ type AgentSource struct {
 	// if the file is missing.
 	Config AgentConfig
 
-	// Profile is the raw bytes of spwn/agents/<name>/core/profile.md.
-	// May be nil if the file is missing.
-	Profile []byte
-
 	// Layers contains the four layer directories: skills/, knowledge/,
 	// playbooks/, journal/. Keys are file paths relative to the layer
 	// root (e.g. "foo.md", "category/bar.md").
@@ -82,7 +78,6 @@ type AgentConfig struct {
 	Role    string        `yaml:"role,omitempty"`
 	Team    string        `yaml:"team,omitempty"`
 	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
-	Profile string        `yaml:"profile,omitempty"`
 	Tools   []string      `yaml:"tools,omitempty"`
 	Plugins []string      `yaml:"plugins,omitempty"`
 	Skills  []string      `yaml:"skills,omitempty"`
@@ -275,14 +270,6 @@ func loadAgent(name, dir string) (AgentSource, error) {
 		src.Config = cfg
 	} else if !os.IsNotExist(err) {
 		return src, fmt.Errorf("read %s: %w", configPath, err)
-	}
-
-	// core/profile.md
-	profilePath := filepath.Join(dir, "core", "profile.md")
-	if b, err := os.ReadFile(profilePath); err == nil {
-		src.Profile = b
-	} else if !os.IsNotExist(err) {
-		return src, fmt.Errorf("read %s: %w", profilePath, err)
 	}
 
 	// Layer dirs

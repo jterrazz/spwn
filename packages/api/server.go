@@ -637,10 +637,10 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Read core identity files
-	purpose := readFirstLineContent(filepath.Join(mindPath, "core", "purpose.md"))
-	profileText := readFirstLineContent(filepath.Join(mindPath, "core", "profile.md"))
-	traits := parseTraits(filepath.Join(mindPath, "core", "traits.md"))
+	// Read identity files
+	purpose := readFirstLineContent(filepath.Join(mindPath, "identity", "purpose.md"))
+	profileText := readFirstLineContent(filepath.Join(mindPath, "identity", "profile.md"))
+	traits := parseTraits(filepath.Join(mindPath, "identity", "traits.md"))
 	if traits == nil {
 		traits = []string{}
 	}
@@ -1704,13 +1704,13 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coreDir := filepath.Join(info.Path, "core")
-	if err := os.MkdirAll(coreDir, 0755); err != nil {
-		jsonError(w, "failed to create core dir: "+err.Error(), 500)
+	identityDir := filepath.Join(info.Path, "identity")
+	if err := os.MkdirAll(identityDir, 0755); err != nil {
+		jsonError(w, "failed to create identity dir: "+err.Error(), 500)
 		return
 	}
 
-	filePath := filepath.Join(coreDir, body.Field+".md")
+	filePath := filepath.Join(identityDir, body.Field+".md")
 
 	// Write content with a heading
 	heading := strings.ToUpper(body.Field[:1]) + body.Field[1:]

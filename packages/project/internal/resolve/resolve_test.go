@@ -9,9 +9,9 @@ import (
 func TestWalk_simpleImport(t *testing.T) {
 	root := t.TempDir()
 	claude := filepath.Join(root, "CLAUDE.md")
-	profile := filepath.Join(root, "core", "profile.md")
+	profile := filepath.Join(root, "identity", "profile.md")
 	mustWrite(t, profile, "# profile\n")
-	mustWrite(t, claude, "# header\n\nread @core/profile.md for the profile\n")
+	mustWrite(t, claude, "# header\n\nread @identity/profile.md for the profile\n")
 
 	r, err := Walk(root, claude)
 	if err != nil {

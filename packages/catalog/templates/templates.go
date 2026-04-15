@@ -184,14 +184,14 @@ func Install(slug, baseDir string) (InstallReport, error) {
 			if exists(dst) {
 				// Agent directory exists - but it might be broken
 				// (e.g. created by a previous version or partially
-				// cleaned up). If core/profile.md is missing, copy
-				// the template's core/ layer on top without touching
+				// cleaned up). If identity/profile.md is missing, copy
+				// the template's identity/ layer on top without touching
 				// user data like journal/ or knowledge/.
-				coreProfile := filepath.Join(dst, "core", "profile.md")
-				if !exists(coreProfile) {
-					coreSrc := path(agentsSrc, name, "core")
-					coreDst := filepath.Join(dst, "core")
-					if cperr := copyDirFS(templatesFS, coreSrc, coreDst); cperr == nil {
+				identityProfile := filepath.Join(dst, "identity", "profile.md")
+				if !exists(identityProfile) {
+					identitySrc := path(agentsSrc, name, "identity")
+					identityDst := filepath.Join(dst, "identity")
+					if cperr := copyDirFS(templatesFS, identitySrc, identityDst); cperr == nil {
 						rep.AgentsAdded = append(rep.AgentsAdded, name+" (repaired)")
 					}
 					// Also copy agent.yaml if missing

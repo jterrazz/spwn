@@ -34,7 +34,7 @@ func TestLoadManifest_MissingFileReturnsEmpty(t *testing.T) {
 	if m == nil {
 		t.Fatal("LoadManifest returned nil on missing file; expected empty Manifest")
 	}
-	if m.Name != "" || len(m.Tools) != 0 || len(m.Skills) != 0 || m.Profile != "" {
+	if m.Name != "" || len(m.Tools) != 0 || len(m.Skills) != 0 {
 		t.Errorf("expected empty manifest, got %+v", m)
 	}
 }
@@ -43,11 +43,10 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 	initAgent(t, "neo")
 
 	m := &Manifest{
-		Name:    "neo",
-		Role:    "chief",
-		Profile: "the-one",
-		Tools:   []string{"@spwn/unix", "@spwn/python"},
-		Skills:  []string{"kung-fu"},
+		Name:   "neo",
+		Role:   "chief",
+		Tools:  []string{"@spwn/unix", "@spwn/python"},
+		Skills: []string{"kung-fu"},
 	}
 	if err := SaveManifest("neo", m); err != nil {
 		t.Fatalf("SaveManifest: %v", err)
@@ -69,9 +68,6 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 	}
 	if got.Name != "neo" {
 		t.Errorf("Name = %q, want \"neo\"", got.Name)
-	}
-	if got.Profile != "the-one" {
-		t.Errorf("Profile = %q, want \"the-one\"", got.Profile)
 	}
 	if len(got.Tools) != 2 {
 		t.Errorf("Tools count = %d, want 2", len(got.Tools))
@@ -104,10 +100,9 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 	initAgent(t, "curie")
 
 	original := &Manifest{
-		Name:    "curie",
-		Role:    "worker",
-		Team:    "research",
-		Profile: "researcher",
+		Name: "curie",
+		Role: "worker",
+		Team: "research",
 		Runtime: RuntimeConfig{
 			Backend:  "claude-code",
 			Provider: "anthropic",
@@ -126,9 +121,6 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 	}
 	if loaded.Name != original.Name || loaded.Role != original.Role || loaded.Team != original.Team {
 		t.Errorf("identity fields drifted: got %+v", loaded)
-	}
-	if loaded.Profile != original.Profile {
-		t.Errorf("Profile drifted: %q → %q", original.Profile, loaded.Profile)
 	}
 	if loaded.Runtime.Backend != "claude-code" {
 		t.Errorf("Runtime.Backend = %q", loaded.Runtime.Backend)
@@ -223,50 +215,6 @@ func TestRemoveSkill_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 	}
 }
 
-// ── SetProfile / ClearProfile ────────────────────────────────────────────────
-
-func TestSetProfile_OverwritesPrevious(t *testing.T) {
-	initAgent(t, "neo")
-
-	if err := SetProfile("neo", "researcher"); err != nil {
-		t.Fatal(err)
-	}
-	m, _ := LoadManifest("neo")
-	if m.Profile != "researcher" {
-		t.Errorf("Profile = %q, want \"researcher\"", m.Profile)
-	}
-
-	// Setting again overwrites.
-	if err := SetProfile("neo", "the-one"); err != nil {
-		t.Fatal(err)
-	}
-	m, _ = LoadManifest("neo")
-	if m.Profile != "the-one" {
-		t.Errorf("Profile = %q, want \"the-one\"", m.Profile)
-	}
-}
-
-func TestClearProfile_RemovesAttachment(t *testing.T) {
-	initAgent(t, "neo")
-
-	SetProfile("neo", "researcher")
-	if err := ClearProfile("neo"); err != nil {
-		t.Fatal(err)
-	}
-	m, _ := LoadManifest("neo")
-	if m.Profile != "" {
-		t.Errorf("Profile = %q, want empty after clear", m.Profile)
-	}
-}
-
-func TestClearProfile_EmptyManifestIsNoOp(t *testing.T) {
-	initAgent(t, "neo")
-
-	if err := ClearProfile("neo"); err != nil {
-		t.Errorf("clear on empty: %v", err)
-	}
-}
-
 // ── Composition across multiple calls ────────────────────────────────────────
 
 func TestComposition_FullRoundtrip(t *testing.T) {
@@ -277,7 +225,6 @@ func TestComposition_FullRoundtrip(t *testing.T) {
 	AddTool("neo", "@spwn/python")
 	AddSkill("neo", "refactoring")
 	AddSkill("neo", "paper-reading")
-	SetProfile("neo", "researcher")
 
 	// Remove one tool and one skill.
 	RemoveTool("neo", "@spwn/unix")
@@ -293,9 +240,6 @@ func TestComposition_FullRoundtrip(t *testing.T) {
 	}
 	if len(m.Skills) != 1 || m.Skills[0] != "refactoring" {
 		t.Errorf("Skills = %v, want [refactoring]", m.Skills)
-	}
-	if m.Profile != "researcher" {
-		t.Errorf("Profile = %q, want \"researcher\"", m.Profile)
 	}
 }
 

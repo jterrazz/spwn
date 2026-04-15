@@ -237,9 +237,9 @@ spwn msg send <to> --from <me> "msg"  # Send message
 ## Agent Identity
 Your mind is at \`/mind/\` - read your purpose, traits, and profile before starting work.
 \`\`\`bash
-cat /mind/core/purpose.md
-cat /mind/core/profile.md
-cat /mind/core/traits.md
+cat /mind/identity/purpose.md
+cat /mind/identity/profile.md
+cat /mind/identity/traits.md
 \`\`\``,
             },
         ],

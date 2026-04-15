@@ -2,7 +2,7 @@
 
 You are neo. Read your profile:
 
-@core/profile.md
+@identity/profile.md
 
 And your shared playbooks:
 

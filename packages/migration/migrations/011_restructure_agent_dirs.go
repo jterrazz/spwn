@@ -13,11 +13,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// RestructureAgentDirs renames identity/ to core/, flattens memory/ subdirs
+// RestructureAgentDirs renames core/ to identity/, flattens memory/ subdirs
 // to root level, and merges sessions/ into journal/.
 var RestructureAgentDirs = migration.Migration{
 	Number:      11,
-	Description: "restructure agent dirs: identity->core, flatten memory, merge sessions into journal",
+	Description: "restructure agent dirs: core->identity, flatten memory, merge sessions into journal",
 	Apply: func(_ context.Context, baseDir string) error {
 		agentsDir := filepath.Join(baseDir, "agents")
 		if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
@@ -43,11 +43,11 @@ var RestructureAgentDirs = migration.Migration{
 }
 
 func restructureAgent(agentDir string) error {
-	// 1. Rename identity/ -> core/ (if identity/ exists and core/ does not)
-	identityDir := filepath.Join(agentDir, "identity")
+	// 1. Rename core/ -> identity/ (if core/ exists and identity/ does not)
 	coreDir := filepath.Join(agentDir, "core")
-	if dirExists(identityDir) && !dirExists(coreDir) {
-		if err := os.Rename(identityDir, coreDir); err != nil {
+	identityDir := filepath.Join(agentDir, "identity")
+	if dirExists(coreDir) && !dirExists(identityDir) {
+		if err := os.Rename(coreDir, identityDir); err != nil {
 			return err
 		}
 	}

@@ -1,3 +1,3 @@
 # neo
 
-@core/profile.md
+@identity/profile.md

@@ -201,6 +201,6 @@ describe('agent talk', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.stderr.text).toMatch(/Agent:\s+neo/);
-        expect(result.stderr.text).toMatch(/core\/\s+profile\.md/);
+        expect(result.stderr.text).toMatch(/identity\/\s+profile\.md/);
     });
 });

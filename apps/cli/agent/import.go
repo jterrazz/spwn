@@ -77,16 +77,13 @@ The archive must contain at least an identity/ layer.`,
 				"Check that the archive is a valid tar.gz created by \"spwn agent export\"")
 		}
 
-		// Validate extracted structure has core/ layer (or legacy identity/)
-		coreDir := filepath.Join(agentDir, "core")
+		// Validate extracted structure has identity/ layer
 		identityDir := filepath.Join(agentDir, "identity")
-		if _, err := os.Stat(coreDir); err != nil {
-			if _, errI := os.Stat(identityDir); errI != nil {
-				os.RemoveAll(agentDir)
-				s.Blank()
-				return s.FailHint("Invalid archive content", fmt.Errorf("missing core/ layer"),
-					"Archive must contain at least a core/ directory")
-			}
+		if _, err := os.Stat(identityDir); err != nil {
+			os.RemoveAll(agentDir)
+			s.Blank()
+			return s.FailHint("Invalid archive content", fmt.Errorf("missing identity/ layer"),
+				"Archive must contain at least an identity/ directory")
 		}
 
 		// When --as was used, rewrite agent.yaml so the embedded

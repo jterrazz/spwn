@@ -69,14 +69,6 @@ describe('CLI input validation', () => {
         expect(combined).toMatch(/world|required|argument|missing|id|accepts|arg/);
     });
 
-    test("'spwn profile' with no subcommand shows help", async () => {
-        const result = await isolated('profile no args').exec('profile').run();
-
-        // Profile is a command group - bare invocation renders help cleanly.
-        expect(result.exitCode).toBe(0);
-        expect(result.stdout.text.toLowerCase()).toContain('profile');
-    });
-
     test("'spwn agent send' with missing args shows error", async () => {
         const result = await isolated('agent send no args').exec('agent send').run();
 

@@ -63,7 +63,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 		"neo":            "missing name",
 		"morpheus":       "missing chief",
 		"trinity":        "missing peer",
-		"/mind/core/":      "missing mind core",
+		"/mind/identity/":  "missing mind identity",
 		"/mind/skills/":    "missing mind skills",
 		"/mind/knowledge/": "missing mind knowledge",
 		"/mind/playbooks/": "missing mind playbooks",

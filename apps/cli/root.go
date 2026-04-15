@@ -15,7 +15,6 @@ import (
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/plugin"
-	"spwn.sh/apps/cli/profile"
 	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
@@ -79,7 +78,6 @@ func init() {
 	rootCmd.AddCommand(tool.Cmd)
 	rootCmd.AddCommand(plugin.Cmd)
 	rootCmd.AddCommand(skill.Cmd)
-	rootCmd.AddCommand(profile.Cmd)
 
 	// Command groups - coordination
 	rootCmd.AddCommand(team.Cmd)

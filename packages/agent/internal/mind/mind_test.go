@@ -32,7 +32,7 @@ func TestInit(t *testing.T) {
 		}
 
 		// Verify default profile exists
-		profilePath := filepath.Join(dir, "core", "profile.md")
+		profilePath := filepath.Join(dir, "identity", "profile.md")
 		if _, err := os.Stat(profilePath); err != nil {
 			t.Errorf("expected default profile to exist: %v", err)
 		}
@@ -216,7 +216,7 @@ func TestLayerCount(t *testing.T) {
 			name: "all_empty",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"core": nil,
+					"identity": nil,
 					"skills":   nil,
 				},
 			},
@@ -226,7 +226,7 @@ func TestLayerCount(t *testing.T) {
 			name: "some_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"core": {"default.md"},
+					"identity": {"default.md"},
 					"skills":   nil,
 					"journal":  {"entry.md"},
 				},
@@ -237,7 +237,7 @@ func TestLayerCount(t *testing.T) {
 			name: "all_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"core":  {"a.md"},
+					"identity":  {"a.md"},
 					"skills":    {"b.md"},
 					"knowledge": {"c.md"},
 				},

@@ -111,13 +111,6 @@ func SkillsDir() string {
 	return filepath.Join(DataDir(), SkillsSubDir)
 }
 
-// ProfilesDir returns the profile templates directory. Project-aware:
-// resolves to <projectRoot>/spwn/profiles/ inside a project, or
-// ~/.spwn/profiles/ otherwise.
-func ProfilesDir() string {
-	return filepath.Join(DataDir(), ProfilesSubDir)
-}
-
 // --- User-level paths (never project-aware) ---
 
 // CredentialsDir always returns the user-level credentials directory.

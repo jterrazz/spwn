@@ -114,7 +114,7 @@ func createTestAgent(t *testing.T, name string) string {
 	agentDir := filepath.Join(home, "agents", name)
 
 	dirs := []string{
-		filepath.Join(agentDir, "core"),
+		filepath.Join(agentDir, "identity"),
 		filepath.Join(agentDir, "skills"),
 		filepath.Join(agentDir, "journal"),
 		filepath.Join(agentDir, "playbooks"),
@@ -126,10 +126,10 @@ func createTestAgent(t *testing.T, name string) string {
 		}
 	}
 
-	// Write core identity files
-	writeFile(t, filepath.Join(agentDir, "core", "profile.md"), "# Profile\n\nA helpful test agent.\n")
-	writeFile(t, filepath.Join(agentDir, "core", "purpose.md"), "# Purpose\n\nTo test the API.\n")
-	writeFile(t, filepath.Join(agentDir, "core", "traits.md"), "# Traits\n\n- curious\n- diligent\n")
+	// Write identity files
+	writeFile(t, filepath.Join(agentDir, "identity", "profile.md"), "# Profile\n\nA helpful test agent.\n")
+	writeFile(t, filepath.Join(agentDir, "identity", "purpose.md"), "# Purpose\n\nTo test the API.\n")
+	writeFile(t, filepath.Join(agentDir, "identity", "traits.md"), "# Traits\n\n- curious\n- diligent\n")
 
 	// Write journal entries
 	writeFile(t, filepath.Join(agentDir, "journal", "2025-01-01.md"), "# 2025-01-01\n\nFirst journal entry.\n")
@@ -510,9 +510,9 @@ func TestGetAgentMind(t *testing.T) {
 
 	// Response should be a JSON object (layers map)
 	body := decodeBody(t, w)
-	// Should have at least the core layer
-	if body["core"] == nil {
-		t.Errorf("expected core layer in mind response, got keys: %v", body)
+	// Should have at least the identity layer
+	if body["identity"] == nil {
+		t.Errorf("expected identity layer in mind response, got keys: %v", body)
 	}
 }
 
@@ -520,7 +520,7 @@ func TestGetAgentFile(t *testing.T) {
 	_, mux := newFullTestServer(t)
 	createTestAgent(t, "dave")
 
-	w := doJSON(t, mux, "GET", "/api/agents/dave/files/core/profile.md", nil)
+	w := doJSON(t, mux, "GET", "/api/agents/dave/files/identity/profile.md", nil)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
 	}
@@ -530,8 +530,8 @@ func TestGetAgentFile(t *testing.T) {
 	if !ok || content == "" {
 		t.Errorf("expected file content, got %v", body["content"])
 	}
-	if body["path"] != "core/profile.md" {
-		t.Errorf("expected path=core/profile.md, got %v", body["path"])
+	if body["path"] != "identity/profile.md" {
+		t.Errorf("expected path=identity/profile.md, got %v", body["path"])
 	}
 }
 
@@ -552,7 +552,7 @@ func TestGetAgentFile_DirectoryTraversal(t *testing.T) {
 	// Go's HTTP router normalizes ".." in paths with a 301/307 redirect,
 	// so we test that the server code itself rejects ".." if it reaches the handler.
 	// Use a raw request that bypasses router normalization by encoding dots.
-	w := doJSON(t, mux, "GET", "/api/agents/dave3/files/core/..%2F..%2F..%2Fetc%2Fpasswd", nil)
+	w := doJSON(t, mux, "GET", "/api/agents/dave3/files/identity/..%2F..%2F..%2Fetc%2Fpasswd", nil)
 	// Should be rejected - either 400 (bad path) or 404 (not found)
 	if w.Code != 400 && w.Code != 404 {
 		t.Fatalf("expected 400 or 404 for traversal attempt, got %d", w.Code)
@@ -578,7 +578,7 @@ func TestUpdateIdentity(t *testing.T) {
 
 	// Verify the file was actually written
 	home := os.Getenv("SPWN_HOME")
-	data, err := os.ReadFile(filepath.Join(home, "agents", "eve", "core", "purpose.md"))
+	data, err := os.ReadFile(filepath.Join(home, "agents", "eve", "identity", "purpose.md"))
 	if err != nil {
 		t.Fatalf("read updated file: %v", err)
 	}
@@ -628,7 +628,7 @@ func TestFork(t *testing.T) {
 
 	w := doJSON(t, mux, "POST", "/api/agents/original/fork", map[string]interface{}{
 		"target": "clone",
-		"layers": []string{"core"},
+		"layers": []string{"identity"},
 	})
 	if w.Code != 201 {
 		t.Fatalf("expected 201, got %d (body: %s)", w.Code, w.Body.String())

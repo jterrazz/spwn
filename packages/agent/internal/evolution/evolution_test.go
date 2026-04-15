@@ -152,10 +152,10 @@ func TestFork_AllLayers(t *testing.T) {
 
 	// Create source agent with some layers
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"core", "skills", "knowledge", "playbooks", "journal"} {
+	for _, layer := range []string{"identity", "skills", "knowledge", "playbooks", "journal"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "core", "profile.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "identity", "profile.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 
 	result, err := Fork("source-agent", "target-agent", nil)
@@ -170,7 +170,7 @@ func TestFork_AllLayers(t *testing.T) {
 	}
 
 	// Verify files exist in target
-	targetProfile := filepath.Join(home, "agents", "target-agent", "core", "profile.md")
+	targetProfile := filepath.Join(home, "agents", "target-agent", "identity", "profile.md")
 	if _, err := os.Stat(targetProfile); err != nil {
 		t.Errorf("target profile not found: %v", err)
 	}
@@ -186,21 +186,21 @@ func TestFork_SpecificLayers(t *testing.T) {
 
 	// Create source agent
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"core", "skills", "knowledge"} {
+	for _, layer := range []string{"identity", "skills", "knowledge"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "core", "profile.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "identity", "profile.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "knowledge", "facts.md"), []byte("# Facts"), 0644)
 
-	// Fork only core layer
-	result, err := Fork("source-agent", "target-agent", []string{"core"})
+	// Fork only identity layer
+	result, err := Fork("source-agent", "target-agent", []string{"identity"})
 	if err != nil {
 		t.Fatalf("Fork() error: %v", err)
 	}
 
-	// Verify core was copied
-	targetProfile := filepath.Join(home, "agents", "target-agent", "core", "profile.md")
+	// Verify identity was copied
+	targetProfile := filepath.Join(home, "agents", "target-agent", "identity", "profile.md")
 	if _, err := os.Stat(targetProfile); err != nil {
 		t.Errorf("target profile not found: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestFork_SpecificLayers(t *testing.T) {
 	// Verify skills was NOT copied (no file inside)
 	targetSkill := filepath.Join(home, "agents", "target-agent", "skills", "coding.md")
 	if _, err := os.Stat(targetSkill); !os.IsNotExist(err) {
-		t.Error("skills should not have been copied when only core specified")
+		t.Error("skills should not have been copied when only identity specified")
 	}
 
 	if len(result.LayersCopied) == 0 {

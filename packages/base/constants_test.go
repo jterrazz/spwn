@@ -9,7 +9,7 @@ func TestMindLayers_Count(t *testing.T) {
 }
 
 func TestMindLayers_Contents(t *testing.T) {
-	expected := []string{"core", "skills", "knowledge", "playbooks", "journal"}
+	expected := []string{"identity", "skills", "knowledge", "playbooks", "journal"}
 	for _, want := range expected {
 		found := false
 		for _, layer := range MindLayers {

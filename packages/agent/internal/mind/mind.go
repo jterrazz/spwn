@@ -44,9 +44,9 @@ You are **__NAME__**, an agent running inside a spwn world.
 
 ## Your identity
 
-Before doing anything else, read your profile:
+Before doing anything else, read your identity:
 
-@core/profile.md
+@identity/profile.md
 
 ## Your world
 
@@ -57,7 +57,7 @@ Before doing anything else, read your profile:
 
 ## Conventions
 
-1. Read your profile first. It shapes how you respond.
+1. Read your identity first. It shapes how you respond.
 2. Save important discoveries to ` + "`./knowledge/`" + ` so you remember them next time.
 3. After significant work, consider promoting a pattern to ` + "`./playbooks/`" + `.
 4. Before committing changes, run the project's existing tests if they exist.
@@ -100,7 +100,7 @@ func Init(name string) (string, error) {
 You are a spwn agent - a persistent AI worker living inside an isolated world.
 
 ## Your Identity
-- You have a Mind that persists across sessions at /mind (core, skills, knowledge, playbooks, journal)
+- You have a Mind that persists across sessions at /mind (identity, skills, knowledge, playbooks, journal)
 - Your identity defines your purpose and values - you are reading it now
 - You evolve through experience: dream to analyze tasks, learn from outcomes, update your knowledge
 
@@ -120,7 +120,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 - Use your full Unix shell access (bash, git, curl, etc.)
 - Stay within the Laws - they describe what is physically possible
 `
-	profilePath := filepath.Join(dir, "core", "profile.md")
+	profilePath := filepath.Join(dir, "identity", "profile.md")
 	if err := os.WriteFile(profilePath, []byte(profile), 0644); err != nil {
 		return "", fmt.Errorf("create profile: %w", err)
 	}
@@ -158,7 +158,7 @@ func Repair(name string) error {
 		}
 	}
 
-	profilePath := filepath.Join(dir, "core", "profile.md")
+	profilePath := filepath.Join(dir, "identity", "profile.md")
 	if _, err := os.Stat(profilePath); err != nil && os.IsNotExist(err) {
 		profile := `# Default Profile
 
@@ -197,9 +197,9 @@ func Validate(name string) error {
 		return fmt.Errorf("agent %q is not a directory", name)
 	}
 
-	coreDir := filepath.Join(dir, "core")
-	if _, err := os.Stat(coreDir); err != nil {
-		return fmt.Errorf("agent %q is missing the core/ layer", name)
+	identityDir := filepath.Join(dir, "identity")
+	if _, err := os.Stat(identityDir); err != nil {
+		return fmt.Errorf("agent %q is missing the identity/ layer", name)
 	}
 	return nil
 }

@@ -23,19 +23,19 @@ describe('agent mind structure', () => {
 
         // Then - exits zero and creates the 5 Mind layers on disk.
         expect(result.exitCode).toBe(0);
-        for (const layer of ['core', 'skills', 'knowledge', 'playbooks', 'journal']) {
+        for (const layer of ['identity', 'skills', 'knowledge', 'playbooks', 'journal']) {
             expect(result.file(`spwn/agents/trinity/${layer}`).exists, `missing ${layer}/`).toBe(
                 true,
             );
         }
 
-        // The starter persona is seeded into core/profile.md
-        const persona = result.file('spwn/agents/trinity/core/profile.md');
+        // The starter persona is seeded into identity/profile.md
+        const persona = result.file('spwn/agents/trinity/identity/profile.md');
         expect(persona.exists).toBe(true);
         expect(persona.content.length).toBeGreaterThan(10);
 
-        // The legacy (pre-Mind) layout must not be recreated.
-        expect(result.file('spwn/agents/trinity/identity').exists).toBe(false);
+        // Legacy layout names must not be recreated.
+        expect(result.file('spwn/agents/trinity/core').exists).toBe(false);
         expect(result.file('spwn/agents/trinity/memory').exists).toBe(false);
         expect(result.file('spwn/agents/trinity/sessions').exists).toBe(false);
     });

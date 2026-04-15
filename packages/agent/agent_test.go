@@ -35,7 +35,7 @@ func TestInitMind_HasStandardLayers(t *testing.T) {
 		t.Fatalf("InspectAgent failed: %v", err)
 	}
 
-	expectedLayers := []string{"core", "skills", "knowledge", "playbooks", "journal"}
+	expectedLayers := []string{"identity", "skills", "knowledge", "playbooks", "journal"}
 	for _, layer := range expectedLayers {
 		if _, ok := info.Layers[layer]; !ok {
 			t.Errorf("Expected layer %q not found in Mind", layer)
@@ -195,7 +195,7 @@ func TestLayerCount_MixedLayers(t *testing.T) {
 	info := &Info{
 		Name: "mixed",
 		Layers: map[string][]string{
-			"core":      {"profile.md"},
+			"identity":  {"profile.md"},
 			"skills":    {},
 			"knowledge": {"fact.md"},
 			"journal":   nil,

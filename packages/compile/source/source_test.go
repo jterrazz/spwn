@@ -35,9 +35,6 @@ func TestLoadMinimalProject(t *testing.T) {
 	if len(neo.Config.Tools) != 2 {
 		t.Errorf("agent.yaml tools: got %d, want 2", len(neo.Config.Tools))
 	}
-	if len(neo.Profile) == 0 {
-		t.Error("core/profile.md missing")
-	}
 	if got, want := len(neo.Layers.Skills), 1; got != want {
 		t.Errorf("layer skills: got %d, want %d", got, want)
 	}

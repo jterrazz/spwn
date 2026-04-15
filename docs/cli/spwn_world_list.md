@@ -15,6 +15,7 @@ spwn world list [flags]
 
 ```
   -h, --help   help for list
+      --json   Emit results as structured JSON on stdout
 ```
 
 ### SEE ALSO

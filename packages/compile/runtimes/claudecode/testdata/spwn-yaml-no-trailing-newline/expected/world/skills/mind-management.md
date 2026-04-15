@@ -3,9 +3,9 @@
 ## Reading Your Identity
 Before starting any task, read your identity files:
 ```bash
-cat /mind/core/purpose.md   # Why you exist
-cat /mind/core/profile.md   # Who you are
-cat /mind/core/traits.md    # Your principles
+cat /mind/identity/purpose.md   # Why you exist
+cat /mind/identity/profile.md   # Who you are
+cat /mind/identity/traits.md    # Your principles
 ```
 
 ## Saving Knowledge
@@ -31,5 +31,5 @@ You can read them at `/mind/journal/`.
 You can evolve your own identity:
 ```bash
 # Update your purpose as you learn
-echo "# Purpose\nI exist to maintain the production API" > /mind/core/purpose.md
+echo "# Purpose\nI exist to maintain the production API" > /mind/identity/purpose.md
 ```

@@ -18,7 +18,6 @@ type AgentManifest struct {
 	Role    string        `yaml:"role,omitempty"`    // "chief", "manager", or "worker" (default: "worker")
 	Team    string        `yaml:"team,omitempty"`    // team slug (references ~/.spwn/teams/{slug}.yaml)
 	Runtime RuntimeConfig `yaml:"runtime,omitempty"` // optional runtime override
-	Profile string        `yaml:"profile,omitempty"` // reference to a profile template (~/.spwn/profiles/{name}.md)
 	Tools   []string      `yaml:"tools,omitempty"`   // tool packs attached to the agent
 	Plugins []string      `yaml:"plugins,omitempty"` // plugin packs (runtime-targeted tools)
 	Skills  []string      `yaml:"skills,omitempty"`  // skill files attached to the agent

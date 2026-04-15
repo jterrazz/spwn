@@ -96,7 +96,7 @@ var Cmd = &cobra.Command{
 	Short: "Spawn an agent - a living identity that inhabits a world",
 	Long: `Spawn an agent into an existing world.
 
-An agent is backed by a Mind - a persistent directory holding its profile,
+An agent is backed by a Mind - a persistent directory holding its identity,
 skills, knowledge, playbooks, journal entries, and session state. The agent
 survives after the world is destroyed.`,
 	Args: cobra.ArbitraryArgs, // subcommands still resolve first

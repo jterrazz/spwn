@@ -17,7 +17,6 @@ type Manifest struct {
 	Role    string        `yaml:"role,omitempty"`
 	Team    string        `yaml:"team,omitempty"`
 	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
-	Profile string        `yaml:"profile,omitempty"` // personality template reference
 	Tools   []string      `yaml:"tools,omitempty"`   // tool packs
 	Plugins []string      `yaml:"plugins,omitempty"` // plugin packs (runtime-targeted tools)
 	Skills  []string      `yaml:"skills,omitempty"`  // skill files
@@ -166,22 +165,3 @@ func RemoveSkill(agentName, skill string) error {
 	return SaveManifest(agentName, m)
 }
 
-// SetProfile attaches a profile template to the agent.
-func SetProfile(agentName, profile string) error {
-	m, err := LoadManifest(agentName)
-	if err != nil {
-		return err
-	}
-	m.Profile = profile
-	return SaveManifest(agentName, m)
-}
-
-// ClearProfile removes the profile attachment.
-func ClearProfile(agentName string) error {
-	m, err := LoadManifest(agentName)
-	if err != nil {
-		return err
-	}
-	m.Profile = ""
-	return SaveManifest(agentName, m)
-}
