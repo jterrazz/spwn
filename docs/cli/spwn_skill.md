@@ -5,14 +5,14 @@ slug: "spwn-skill"
 
 ## spwn skill
 
-Author and manage reusable skill files
+Author bare-markdown skill packages
 
 ### Synopsis
 
-Skills are procedures, playbooks, or pieces of knowledge - authored in markdown.
-
-Attach one to an agent with:
-  spwn agent add <agent> --skill <skill-name>
+Skills are procedures, playbooks, or pieces of knowledge authored as
+bare markdown files at spwn/packages/<name>.md. Attach a skill to an
+agent with:
+  spwn agent add <agent> --package <skill-name>
 
 ### Options
 

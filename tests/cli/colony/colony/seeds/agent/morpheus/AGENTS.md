@@ -10,4 +10,4 @@ You are **morpheus**, an agent running inside a spwn world.
 
 - `/world/physics.md` - the rules of this world
 - `/world/faculties.md` - installed tools
-- `/work/` - mounted workspaces
+- `/workspaces/` - mounted workspaces

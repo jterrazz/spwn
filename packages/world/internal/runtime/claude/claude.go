@@ -102,21 +102,18 @@ func (c *Claude) Available() bool       { return true }
 // Previous attempts baked these into the base image at build time
 // and lost to the HOME override.
 func (c *Claude) DefaultConfigFiles(agentHome string) map[string][]byte {
-	// Trust the agent's own home + common workspace mount paths so
+	// Trust the agent's own home + the workspaces mount root so
 	// Claude Code doesn't prompt on first access. We can't
-	// enumerate the resolved workspaces here without plumbing them
-	// through; trusting /work + /workspace covers the uniform
-	// layout spawn sets up for every world.
+	// enumerate the resolved workspace names here without plumbing
+	// them through; trusting /workspaces (the root every bind mount
+	// lands under) covers any child path the agent will cd into.
 	claudeJSON := map[string]any{
 		"hasCompletedOnboarding": true,
 		"projects": map[string]any{
 			agentHome: map[string]any{
 				"hasTrustDialogAccepted": true,
 			},
-			"/work": map[string]any{
-				"hasTrustDialogAccepted": true,
-			},
-			"/workspace": map[string]any{
+			"/workspaces": map[string]any{
 				"hasTrustDialogAccepted": true,
 			},
 		},

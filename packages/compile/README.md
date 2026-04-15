@@ -19,9 +19,9 @@ you should never write a `CLAUDE.md` by hand for spwn.
                   ───────────                  ──────────────
                  ┌──────────┐                 ┌──────────┐
 spwn.yaml  ───►  │          │  ──► Tree ──►  │  Docker  │
-AGENTS.md   ───►  │ compile  │    (files)     │  image   │
-skills/*   ───►  │ (this    │                │ (image   │
-hooks/*    ───►  │ package) │                │ package) │
+AGENTS.md   ───►  │ compile  │    (files)     │  image/  │
+skills/*   ───►  │ (this    │                │ container│
+hooks/*    ───►  │ package) │                │          │
                  └──────────┘                 └──────────┘
                      pure                    side-effectful
 ```
@@ -31,9 +31,27 @@ Phase 1 - **compile** (this package) - is a pure function. Given an
 map. No disk writes, no Docker calls. The same input produces the
 same output.
 
-Phase 2 - **link** (`packages/image`) - consumes the `Tree` and
-turns it into a Docker image. This is where the side effects live:
-`docker build`, tool verification, runtime state.
+Phase 2 - **link** - consumes the `Tree` and gets it onto a running
+system. There are two delivery shapes, both in `packages/image` /
+`packages/world/architect`:
+
+1. **Spawn-time injection** (`spwn up`). The container boots from a
+   pre-built base image, then `architect.Spawn` docker-cp's the
+   freshly-compiled `Tree` straight into the running container:
+   `world/*` via a small host state bind, `agents/*` via
+   `backend.CopyTo` one file at a time. Nothing about the project is
+   in the image — each spawn recompiles and re-injects, so every
+   change in `spwn.yaml` or `spwn/**` is picked up without a rebuild.
+
+2. **Build-time baking** (`spwn build`). The same `Tree` is handed to
+   `image.BuildFromBase`, which streams it into a `docker build` as
+   `COPY <tree>/ /world/`. The result is a self-contained derived
+   image that can be pushed, shipped, and run without the source
+   tree present. Good for CI artifacts and distribution; doesn't
+   benefit from live recompile.
+
+Both shapes share Phase 1 verbatim. The compile phase never knows or
+cares which delivery will consume its output.
 
 Analogy:
 
@@ -106,10 +124,25 @@ Why a flat map:
   diff cleanly.
 - **Composable** - `WriteTo` puts the tree anywhere. `Walk` lets
   callers route different prefixes to different destinations, which
-  is what `architect.Spawn` does today (it splits `world/*` and
-  `agents/*` into two bind-mounted host directories).
+  is exactly what `architect.Spawn` does:
+
+  ```
+  compile.Tree
+    ├── world/physics.md     ──► host state dir  ──► /world/ bind mount
+    ├── world/roster.md      ──► host state dir  ──► /world/ bind mount
+    ├── agents/neo/CLAUDE.md ──► backend.CopyTo   ──► /agents/neo/CLAUDE.md
+    └── agents/neo/role.md   ──► backend.CopyTo   ──► /agents/neo/role.md
+  ```
+
+  The `world/*` half goes to disk (one small bind still surfaces it
+  into the container). The `agents/*` half is tar-streamed into the
+  *already-running* container via `backend.CopyTo`. The project tree
+  on the host never sees the agents/* output — it's compiled fresh on
+  every spawn.
 - **Testable** - comparing two trees is a map comparison. No temp
-  dirs, no file system assertions.
+  dirs, no file system assertions. `materialiseWorldTree` itself is
+  unit-tested against a mock backend that records every `CopyTo` call,
+  so the split contract is locked down without Docker in the loop.
 
 When a renderer eventually needs streaming (multi-gigabyte tool
 bundles, for example), the `Tree` interface can grow without

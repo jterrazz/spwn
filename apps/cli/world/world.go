@@ -440,11 +440,15 @@ func dockerHint(err error) error {
 
 // parseWorkspaceFlags parses a list of "-w" values into world.Workspace.
 // Accepted forms:
-//   "/host/path"                    → {Name: "default" or "wN", Path: "/host/path"}
-//   "name=/host/path"               → {Name: "name", Path: "/host/path"}
-//   "name=/host/path:ro"            → read-only
-//   "/host/path:/workspace/name"    → manifest form; name extracted from container path
-// Empty input returns a nil slice (ephemeral world - no mounts).
+//
+//	"path"           → auto-named workspace<N>
+//	"name=path"      → explicit name
+//	"name=path:ro"   → same, read-only
+//
+// Users never write container paths. The container-side layout is
+// decided by the spawn pipeline (currently /workspaces/<name>/).
+//
+// Empty input returns a nil slice (ephemeral world — no mounts).
 func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 	if len(flags) == 0 {
 		return nil, nil
@@ -456,37 +460,25 @@ func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 			continue
 		}
 
-		// Strip optional :ro suffix. Be careful not to confuse with a colon inside the path
-		// - we only accept :ro at the very end.
+		// Strip optional :ro suffix. Only accept :ro at the very end —
+		// anything else in the entry is path content.
 		readOnly := false
 		if strings.HasSuffix(raw, ":ro") {
 			readOnly = true
 			raw = strings.TrimSuffix(raw, ":ro")
 		}
 
-		// Accepted forms (in priority order):
-		//   name=path                    (CLI-friendly)
-		//   host:/workspace/name         (manifest form, validated in project/internal/validate)
-		//   bare path                    (legacy)
 		name := ""
 		path := raw
 		if eq := strings.Index(raw, "="); eq > 0 {
 			name = strings.TrimSpace(raw[:eq])
 			path = strings.TrimSpace(raw[eq+1:])
-		} else if colon := strings.Index(raw, ":"); colon > 0 && strings.HasPrefix(raw[colon+1:], "/workspace/") {
-			path = strings.TrimSpace(raw[:colon])
-			container := strings.TrimSpace(raw[colon+1:])
-			name = strings.TrimPrefix(container, "/workspace/")
 		}
 		if path == "" {
 			return nil, fmt.Errorf("workspace #%d has empty path", i+1)
 		}
 		if name == "" {
-			if i == 0 && len(flags) == 1 {
-				name = "default"
-			} else {
-				name = fmt.Sprintf("w%d", i)
-			}
+			name = fmt.Sprintf("workspace%d", i)
 		}
 		result = append(result, world.Workspace{Name: name, Path: path, ReadOnly: readOnly})
 	}

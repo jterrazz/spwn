@@ -31,7 +31,7 @@ spawn the world with "spwn world start <name>" or "spwn world <name>".
 The agents listed via --agent must already exist on disk under
 spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
 	Example: `  spwn world create matrix --agent neo --agent trinity
-  spwn world create alignment --agent clippy --workspace ./data:/workspace/data`,
+  spwn world create alignment --agent clippy --workspace data=./data`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := ui.New()
@@ -120,7 +120,7 @@ preserved. Other worlds may still reference them.`,
 
 func init() {
 	createCmd.Flags().StringArrayVarP(&createAgents, "agent", "a", nil, "Agent name (repeatable). Must already exist under spwn/agents/")
-	createCmd.Flags().StringArrayVarP(&createWorkspaces, "workspace", "w", nil, `Workspace mount. Forms: "path", "host:/workspace/name"`)
+	createCmd.Flags().StringArrayVarP(&createWorkspaces, "workspace", "w", nil, `Workspace mount. Forms: "path", "name=path", "name=path:ro"`)
 	Cmd.AddCommand(createCmd)
 	Cmd.AddCommand(rmCmd)
 }

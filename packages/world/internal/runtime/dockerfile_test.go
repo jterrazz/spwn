@@ -35,7 +35,7 @@ func TestGenerateDockerfileClaudeCode(t *testing.T) {
 		t.Error("missing user creation")
 	}
 
-	for _, dir := range []string{"/work", "/agents", "/world"} {
+	for _, dir := range []string{"/workspaces", "/agents", "/world"} {
 		if !strings.Contains(df, dir) {
 			t.Errorf("missing mount point %s", dir)
 		}

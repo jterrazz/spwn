@@ -67,11 +67,11 @@ describe('world spawn', () => {
             expect(labels['sh.spwn.kind']).toBe('world');
         });
 
-        test('physics.md carries meaningful content (laws, network, /workspace)', () => {
+        test('physics.md carries meaningful content (laws, network, /workspaces)', () => {
             const physics = world.container('neo').file('/world/physics.md').content;
             expect(physics).toMatch(/Laws/);
             expect(physics).toMatch(/network/i);
-            expect(physics).toMatch(/\/workspace/);
+            expect(physics).toMatch(/\/workspaces/);
         });
 
         test('faculties.md lists the expanded tool set', () => {
@@ -106,7 +106,7 @@ describe('world spawn', () => {
             };
             expect(config.hasCompletedOnboarding).toBe(true);
             expect(config.projects?.['/workspace']?.hasTrustDialogAccepted).toBe(true);
-            expect(config.projects?.['/work']?.hasTrustDialogAccepted).toBe(true);
+            expect(config.projects?.['/workspaces']?.hasTrustDialogAccepted).toBe(true);
             expect(config.projects?.['/agents/neo']?.hasTrustDialogAccepted).toBe(true);
 
             const settings = neo.file('/agents/neo/.claude/settings.json').content;
@@ -116,7 +116,7 @@ describe('world spawn', () => {
             expect(settingsConfig.skipDangerousModePermissionPrompt).toBe(true);
         });
 
-        test('container does NOT mount host ~/.claude directory', () => {
+        test('container does NOT bind-mount host .claude or /agents tree', () => {
             const neo = world.container('neo');
 
             // The agent's .claude/settings.json should be the minimal
@@ -130,20 +130,21 @@ describe('world spawn', () => {
             expect(settingsConfig.hooks).toBeUndefined();
             expect(settingsConfig.enabledPlugins).toBeUndefined();
 
-            // And inspect confirms neither /home/spwn/.claude nor
-            // /agents/neo/.claude is a host bind mount - the files
-            // Live inside the shared /agents bind, which is correct,
-            // But no claude-specific mount should exist.
+            // Inspect confirms nothing under /agents is a host bind
+            // Mount — agent homes are docker-cp'd in at spawn time,
+            // And memory layers are docker-cp'd back out on graceful
+            // Down. No bind equals no host leak.
             const inspectData = neo.inspect.value as {
                 Mounts?: Array<{ Destination: string }>;
             };
             const mounts = inspectData.Mounts ?? [];
-            const claudeMount = mounts.find(
+            const agentMount = mounts.find(
                 (m) =>
-                    m.Destination === '/home/spwn/.claude' ||
-                    m.Destination === '/agents/neo/.claude',
+                    m.Destination === '/agents' ||
+                    m.Destination.startsWith('/agents/') ||
+                    m.Destination === '/home/spwn/.claude',
             );
-            expect(claudeMount).toBeUndefined();
+            expect(agentMount).toBeUndefined();
         });
     });
 

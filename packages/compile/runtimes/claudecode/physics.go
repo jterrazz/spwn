@@ -15,11 +15,11 @@ func GeneratePhysics(_ models.Manifest) string {
 	// Laws
 	sb.WriteString("## Laws\n")
 	sb.WriteString("- Network: bridge (outbound access enabled)\n")
-	sb.WriteString("- Filesystem is ephemeral except /workspace and /mind\n\n")
+	sb.WriteString("- Filesystem is ephemeral except /workspaces and /mind\n\n")
 
 	// Tools
 	sb.WriteString("## Tools\n")
-	sb.WriteString("/workspace - project files, mounted from Host (read-write)\n")
+	sb.WriteString("/workspaces - project files, mounted from Host (read-write)\n")
 	sb.WriteString("/mind - agent identity and memory (read-write)\n")
 	sb.WriteString("/tmp - ephemeral scratch space\n\n")
 
@@ -31,7 +31,7 @@ func GeneratePhysics(_ models.Manifest) string {
 
 	// Topology
 	sb.WriteString("## Topology\n")
-	sb.WriteString("/workspace - project files, mounted from Host (read-write)\n")
+	sb.WriteString("/workspaces - project files, mounted from Host (read-write)\n")
 	sb.WriteString("/mind - agent identity and memory (read-write)\n")
 	sb.WriteString("/tmp - ephemeral scratch space\n")
 

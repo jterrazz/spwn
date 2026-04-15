@@ -20,8 +20,11 @@ Your current environment. Read-only system files.
 - `/world/skills/` - system skills (guides for common tasks)
 - `/world/knowledge/` - shared knowledge for this world (read-write, collaborate with other agents here)
 
-## Your Workspace (/workspace/)
-The project you're working on. Read-write. Persists on the host.
+## Your Workspaces (/workspaces/)
+The projects you're working on. Read-write. Each entry is a named
+subdirectory under /workspaces/ mounted from a host path. Persists
+on the host. A world with zero declared workspaces has /workspaces
+empty.
 
 ## System Skills
 Read `/world/skills/` for detailed guides:

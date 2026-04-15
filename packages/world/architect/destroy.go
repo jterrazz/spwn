@@ -28,28 +28,49 @@ func formatUptime(d time.Duration) string {
 }
 
 // Destroy stops and removes a world.
+//
+// Before the container is stopped, every deployed agent's durable
+// memory layers (journal, knowledge, playbooks, skills) are
+// snapshotted out via docker cp into the host-side spwn/agents/<name>/
+// tree. Runtime state that isn't in the allowlist — dotfiles, npm
+// caches, compiled CLAUDE.md — stays in the container and is
+// discarded with it. Non-graceful shutdowns (crash, docker kill)
+// skip this step and lose any unsaved memory writes.
 func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World, error) {
 	u, err := a.state.Get(worldID)
 	if err != nil {
 		return nil, err
 	}
 
+	// Collect the agent home mapping so we can sync out before the
+	// container is stopped. Both multi-agent (Agents list) and
+	// legacy single-agent (Agent scalar) shapes feed the same map.
+	agentHomes := map[string]string{}
+	for _, rec := range u.Agents {
+		if rec.Name != "" {
+			agentHomes[rec.Name] = "/agents/" + rec.Name
+		}
+	}
+	if len(agentHomes) == 0 && u.Agent != "" {
+		agentHomes[u.Agent] = "/agents/" + u.Agent
+	}
+
+	// Sync memory layers out of the container before stopping it.
+	// Best-effort: warnings surface via log but never block destroy.
+	if len(agentHomes) > 0 {
+		for _, w := range syncAgentsOutOf(ctx, a.backend, u.ContainerID, agentHomes) {
+			log.Printf("warning: %s", w)
+		}
+	}
+
 	a.backend.Stop(ctx, u.ContainerID)
 	a.backend.Remove(ctx, u.ContainerID)
 
-	// Write journal entries for every agent that was deployed in this
-	// world. Each agent's journal lives in their persistent home dir
-	// (~/.spwn/agents/<name>/memory/journal/), reachable via the agent
-	// name alone - no per-world MindPath needed.
+	// Write a journal entry for every agent that was deployed in
+	// this world. Happens after the sync-out so the new entry joins
+	// the already-freshened on-disk journal, not a stale copy.
 	duration := time.Since(u.CreatedAt)
-	agentNamesForJournal := []string{}
-	for _, rec := range u.Agents {
-		agentNamesForJournal = append(agentNamesForJournal, rec.Name)
-	}
-	if len(agentNamesForJournal) == 0 && u.Agent != "" {
-		agentNamesForJournal = append(agentNamesForJournal, u.Agent)
-	}
-	for _, name := range agentNamesForJournal {
+	for name := range agentHomes {
 		agentPath := filepath.Join(paths.AgentsDir(), name)
 		if journalErr := agent.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
 			log.Printf("warning: failed to write journal for agent %s on destroy: %v", name, journalErr)
@@ -60,14 +81,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 
 	// Emit activity events
 	uptime := formatUptime(duration)
-	agentNames := []string{}
-	for _, rec := range u.Agents {
-		agentNames = append(agentNames, rec.Name)
-	}
-	if len(agentNames) == 0 && u.Agent != "" {
-		agentNames = append(agentNames, u.Agent)
-	}
-	for _, name := range agentNames {
+	for name := range agentHomes {
 		activity.Log(activity.Event{
 			Type:       activity.TypeAgentLeft,
 			Actor:      "architect",

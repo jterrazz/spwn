@@ -212,7 +212,11 @@ func TestValidate_workspaceMountRules(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifestPath := filepath.Join(dir, "spwn.yaml")
-	// Replace neo world with one that has two bare workspaces.
+
+	// Two bare entries are fine under the unified form — each gets
+	// auto-named workspace0, workspace1 at spawn time. A container-
+	// path-on-RHS entry (legacy manifest form) is rejected because
+	// users should never write container paths.
 	body := `version: 2
 name: wsm
 worlds:
@@ -220,7 +224,7 @@ worlds:
     agents: [neo]
     workspaces:
       - .
-      - ./data
+      - ./data:/workspace/data
 `
 	if err := os.WriteFile(manifestPath, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
@@ -229,12 +233,41 @@ worlds:
 	issues := Validate(p)
 	found := false
 	for _, i := range issues {
-		if i.Level == LevelError && strings.Contains(i.Message, "bare") {
+		if i.Level == LevelError && strings.Contains(i.Message, "container-path form") {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("expected workspace bare-entry error, got: %+v", issues)
+		t.Errorf("expected container-path-form error, got: %+v", issues)
+	}
+}
+
+// TestValidate_workspaceBareEntriesOK locks in that multiple bare
+// path entries are valid under the unified form.
+func TestValidate_workspaceBareEntriesOK(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "bare"}); err != nil {
+		t.Fatal(err)
+	}
+	manifestPath := filepath.Join(dir, "spwn.yaml")
+	body := `version: 2
+name: bare
+worlds:
+  neo:
+    agents: [neo]
+    workspaces:
+      - .
+      - ./data
+      - web=./src
+`
+	if err := os.WriteFile(manifestPath, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	p, _ := Load(manifestPath)
+	for _, i := range Validate(p) {
+		if i.Level == LevelError && strings.Contains(i.Message, "workspace") {
+			t.Errorf("unexpected workspace error: %+v", i)
+		}
 	}
 }
 

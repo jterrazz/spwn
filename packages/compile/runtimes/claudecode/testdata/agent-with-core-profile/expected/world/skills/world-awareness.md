@@ -19,6 +19,8 @@ Tools are capabilities available in your world:
 - `@spwn/docker-cli` - Docker CLI (for the Architect)
 Read `/world/faculties.md` for what's installed.
 
-## Workspace
-`/workspace/` is the project directory. It's mounted from the host.
-Changes you make here persist even after the world is destroyed.
+## Workspaces
+`/workspaces/` holds the host project directories mounted
+into the world. Each named entry is a subdirectory — `/workspaces/repo`,
+`/workspaces/library`, etc. Changes you make here persist on the
+host even after the world is destroyed.

@@ -276,23 +276,24 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec) string {
 	return b.String()
 }
 
-// writeWorkspaces renders the Workspace: line(s) of the agent context.
-// When no workspaces are mounted the world is "ephemeral" and uses the
-// container's internal /workspace.
+// writeWorkspaces renders the Workspace: line(s) of the agent
+// context. When no workspaces are mounted the world is "ephemeral"
+// and /workspaces is empty.
 func writeWorkspaces(b *strings.Builder, workspaces []models.Workspace) {
 	switch len(workspaces) {
 	case 0:
-		b.WriteString("- Workspace: /workspace (ephemeral - no host mount)\n")
+		b.WriteString("- Workspaces: none mounted (ephemeral world)\n")
 	case 1:
-		b.WriteString(fmt.Sprintf("- Workspace: /workspace (host: %s)\n", workspaces[0].Path))
+		ws := workspaces[0]
+		b.WriteString(fmt.Sprintf("- Workspace: /workspaces/%s (host: %s)\n", ws.Name, ws.Path))
 	default:
-		b.WriteString("- Workspaces (rooted at /workspace):\n")
+		b.WriteString("- Workspaces (each under /workspaces/):\n")
 		for _, ws := range workspaces {
 			ro := ""
 			if ws.ReadOnly {
 				ro = " (read-only)"
 			}
-			b.WriteString(fmt.Sprintf("    - /workspace/%s → host %s%s\n", ws.Name, ws.Path, ro))
+			b.WriteString(fmt.Sprintf("    - /workspaces/%s → host %s%s\n", ws.Name, ws.Path, ro))
 		}
 	}
 }

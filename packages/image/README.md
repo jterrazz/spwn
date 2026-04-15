@@ -113,22 +113,82 @@ mounts, cred sync).
   This package stops at "image exists."
 - **It does not own project parsing.** `packages/project` walks
   `spwn.yaml`; this package doesn't look at source files at all.
+- **It does not manage container ↔ host syncing.** The `Backend`
+  interface exposes `CopyTo` / `CopyDirTo` / `CopyDirFrom` as plumbing,
+  but the *policy* (when to push, what to pull, what to allow-list) is
+  owned by `packages/world/architect`.
+
+## The `Backend` interface: why it has `CopyDirTo` / `CopyDirFrom`
+
+`Backend` is the thin abstraction over "a running container runtime."
+It has four families of methods:
+
+- **Lifecycle**: `Create`, `Start`, `Stop`, `Remove`, `Inspect`,
+  `IsRunning`, `ListContainersByLabel`.
+- **Execution**: `Exec`, `ExecOutput`, `ExecDetached`.
+- **Image plumbing**: `EnsureImage`, `ImageExists`, `ImageVersion`,
+  `Commit`, `ImageList`, `ImageRemove`.
+- **File transport**: `CopyTo` (one file), `CopyDirTo` (whole host
+  directory → container, as a tar stream), `CopyDirFrom` (whole
+  container directory → host, as a tar stream).
+
+The directory transport methods exist because spwn deliberately
+avoided binding `spwn/agents/<name>/` into every container. A bind
+mount leaks container writes onto the host at the instant they
+happen — runtime dotfiles, `.npm` caches, half-written journal
+entries, per-run `CLAUDE.md` recompiles — which breaks image caching,
+pollutes `git status`, and erases the isolation the container was
+supposed to give. Instead:
+
+- **`CopyDirTo` at spawn**: `filepath.Walk` over the host tree →
+  stream a single tarball → `client.CopyToContainer(...)`. One
+  round-trip, one logical operation, no live link.
+- **`CopyDirFrom` on graceful down**: `client.CopyFromContainer(...)`
+  returns a tar stream; spwn walks it, strips the top-level directory
+  entry Docker adds, and writes each file to the host. Only the
+  allowlisted memory dirs are snapshotted; everything else dies
+  with the container.
+
+Non-graceful termination (crash, `docker kill`) skips the sync-out
+and loses any unsaved memory writes. That's an explicit trade-off:
+durability is the agent's responsibility, and the allowlist is small
+enough that most writes the agent actually cares about happen there.
 
 ## Relationship to `architect.Spawn`
 
 `architect.Spawn` is the orchestrator for `spwn up`. For one spawn:
 
-1. Validate the project and resolve the target runtime.
-2. Call `compile.Compile(runtime, input)` → `Tree`.
-3. Call `imagebuilder.Build(…)` to ensure the shared base image.
-4. Create and start the container, bind-mounting the materialised
-   `Tree` into the container's `/world` path.
-5. Inject plugin runtime config, probe tools, emit activity events.
+1. Validate the project, resolve workspaces, resolve the target runtime.
+2. Call `imagebuilder.Build(…)` to ensure the shared base image at the
+   expected version.
+3. Create and start the container. The *only* host bind mounts on this
+   container are the caller-declared `workspaces:` entries, mounted under
+   `/workspaces/<name>/`. **No `/agents` bind, no `/world` bind from the
+   project source** — the architecture moved away from both.
+4. `syncAgentsInto`: for each attached agent, `CopyDirTo` the host-side
+   `spwn/agents/<name>/` tree into the container at `/agents/<name>/`.
+   This is a one-way snapshot at boot.
+5. Write the runtime's default config files (`.claude.json`, trust
+   dialogs, etc.) directly into each agent's container HOME via `CopyTo`.
+6. Probe tools, then call `compile.Compile(runtime, input)` → `Tree`.
+7. `materialiseWorldTree` splits the tree by prefix: `world/*` entries
+   write to the host's world-state directory (mounted as `/world/` via
+   a small dedicated bind), `agents/*` entries are `CopyTo`'d directly
+   into the running container on top of the home tree seeded in step 4.
+8. Inject plugin runtime config, emit activity events.
 
-Steps 2 and 3 are separate from step 3 in `spwn build`, which uses
-`BuildFromBase` to bake the `Tree` directly into a derived image
-instead of bind-mounting it at runtime. Same compile phase, two
-different delivery shapes.
+On graceful `spwn down`, `syncAgentsOutOf` uses `CopyDirFrom` to pull
+the four allowlisted memory directories (`journal`, `knowledge`,
+`playbooks`, `skills`) back out of the container into each agent's
+host-side tree. Everything else — dotfiles, npm cache, compiled
+`CLAUDE.md`, `.claude/` runtime state — is discarded with the
+container.
+
+The same `compile.Tree` also powers `spwn build`, which uses
+`BuildFromBase` to bake the tree into a derived image instead of
+docker-cp'ing it at spawn time. Same compile phase, two different
+delivery shapes: *live container injection* (spawn) vs *baked image
+layer* (build).
 
 ## Testing
 

@@ -14,7 +14,7 @@ every tool you try, you narrate quietly for the user watching.
 ## Style
 
 - When asked to explore, walk the filesystem in order: `/world/`,
-  `/agents/`, `~/`, `/work/`. Show what each one contains.
+  `/agents/`, `~/`, `/workspaces/`. Show what each one contains.
 - When you run a command, say what you're about to run and why, then
   run it, then report what you learned.
 - When stuck, ask for a direction. Don't loop.

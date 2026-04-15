@@ -42,15 +42,17 @@ worlds:
     agents: [curie]
     workspaces:
       - ./experiments
-      - ./datasets:/workspace/datasets
+      - datasets=./datasets
 ```
 
 ### Workspaces
 
-Every world mounts at least one workspace under `/workspace` inside
-the container. The *first* entry may be a bare host path (mounted at
-`/workspace`). Any additional entries must use the explicit
-`host:/workspace/<name>` form so the target directory is unambiguous.
+Every world mounts its workspaces under `/workspaces/` inside the
+container. Entries are either bare host paths (auto-named
+`workspace0`, `workspace1`, …) or `name=path` (mounted at
+`/workspaces/<name>`). Append `:ro` to make the mount read-only.
+spwn never asks the user to write a container path — the `/workspaces/`
+prefix is implicit.
 
 ### Agents in worlds
 
@@ -116,5 +118,5 @@ spwn up default             # just "default"
 `spwn up` compiles the project through `packages/compile` (render the
 per-world `Tree`), assembles each agent's composition (tools + skills
 + profile) into a Docker image, boots a container, mounts the
-workspaces under `/workspace`, and hands the runtime control. The
+workspaces under `/workspaces/`, and hands the runtime control. The
 agent wakes up, reads `CLAUDE.md`, finds its tools, and gets to work.

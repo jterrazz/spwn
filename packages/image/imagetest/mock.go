@@ -52,6 +52,12 @@ func (m *MockBackend) ExecOutput(ctx context.Context, id string, cmd []string) (
 func (m *MockBackend) CopyTo(ctx context.Context, id string, path string, content []byte) error {
 	return nil
 }
+func (m *MockBackend) CopyDirTo(ctx context.Context, id string, destDir string, hostSrcDir string) error {
+	return nil
+}
+func (m *MockBackend) CopyDirFrom(ctx context.Context, id string, srcDir string, hostDestDir string) error {
+	return nil
+}
 func (m *MockBackend) IsRunning(ctx context.Context, id string) (bool, error) { return true, nil }
 func (m *MockBackend) ImageExists(ctx context.Context, image string) (bool, error) {
 	return m.ImageExFunc(ctx, image)

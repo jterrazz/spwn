@@ -99,6 +99,12 @@ func (s *Sandbox) ReadFile(path string) string {
 	return output
 }
 
+// Backend exposes the underlying Backend for tests that need to
+// exercise transport methods (CopyDirTo, CopyDirFrom, CopyTo) against
+// the running container directly. Most test helpers should prefer the
+// higher-level Sandbox methods above.
+func (s *Sandbox) Backend() backend.Backend { return s.backend }
+
 // Teardown stops and removes the container and image.
 func (s *Sandbox) Teardown() {
 	ctx := context.Background()

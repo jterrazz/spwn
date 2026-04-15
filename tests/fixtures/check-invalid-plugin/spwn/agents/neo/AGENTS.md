@@ -13,7 +13,7 @@ Before doing anything else, read your profile:
 - `/world/physics.md`    - the rules of this world (network, filesystem, communication topology)
 - `/world/faculties.md`  - every tool installed and verified
 - `/world/AGENTS.md`     - the operating manual every spwn agent reads
-- `/work/`               - mounted workspaces, this is where you make changes
+- `/workspaces/`               - mounted workspaces, this is where you make changes
 
 ## Conventions
 

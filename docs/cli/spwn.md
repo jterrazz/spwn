@@ -32,7 +32,7 @@ Mind (persistent agent identity).
 * [spwn ls](./spwn_ls.md)	 - Agent-centric status (running / stopped / orphan)
 * [spwn organization](./spwn_organization.md)	 - [experimental] Manage organizations - list and inspect role structures
 * [spwn package](./spwn_package.md)	 - Manage reusable packages (e.g. @spwn/unix, @spwn/mempalace)
-* [spwn skill](./spwn_skill.md)	 - Author and manage reusable skill files
+* [spwn skill](./spwn_skill.md)	 - Author bare-markdown skill packages
 * [spwn status](./spwn_status.md)	 - Show the full status of your spwn environment
 * [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 * [spwn up](./spwn_up.md)	 - Spawn a world - an isolated reality for agents

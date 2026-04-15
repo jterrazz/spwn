@@ -15,11 +15,11 @@ func TestParseWorkspaceFlags(t *testing.T) {
 		wantErr  bool
 	}{
 		{name: "empty → ephemeral", in: nil, wantLen: 0},
-		{name: "single bare path", in: []string{"/host/a"}, wantName: "default", wantPath: "/host/a", wantLen: 1},
+		{name: "single bare path", in: []string{"/host/a"}, wantName: "workspace0", wantPath: "/host/a", wantLen: 1},
 		{name: "single named", in: []string{"web=/host/a"}, wantName: "web", wantPath: "/host/a", wantLen: 1},
 		{name: "read-only", in: []string{"docs=/host/d:ro"}, wantName: "docs", wantPath: "/host/d", wantRO: true, wantLen: 1},
 		{name: "multi named", in: []string{"web=/a", "api=/b"}, wantName: "web", wantPath: "/a", wantLen: 2},
-		{name: "bare in multi gets w-index", in: []string{"/a", "/b"}, wantName: "w0", wantPath: "/a", wantLen: 2},
+		{name: "bare in multi gets workspace<N>", in: []string{"/a", "/b"}, wantName: "workspace0", wantPath: "/a", wantLen: 2},
 		{name: "empty path errors", in: []string{"name="}, wantErr: true},
 	}
 
