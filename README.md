@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  The open framework for orchestrating AI agents.
+  Compose AI agents as code. In your repo.
 </p>
 
 <p align="center">
