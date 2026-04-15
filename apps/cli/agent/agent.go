@@ -43,15 +43,15 @@ func agentHelp(cmd *cobra.Command, args []string) {
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "create <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
-				{Name: "<name>", Desc: "Start the world that contains <name> " + ui.Faint("(shortcut)")},
-				{Name: "start <name>", Desc: "Start the world containing this agent"},
-				{Name: "stop <name>", Desc: "Stop the world containing this agent"},
+				{Name: "<name>", Desc: "Open an interactive session with <name> " + ui.Faint("(shortcut)")},
+				{Name: "start <name>", Desc: "Run <name> as an autonomous daemon " + ui.Faint("[planned]")},
+				{Name: "stop <name>", Desc: "Kill <name>'s daemon loop " + ui.Faint("[planned]")},
 				{Name: "ls", Desc: "List agents"},
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
 			{Title: "Compose", Commands: []ui.HelpEntry{
-				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--tool / --plugin / --skill / --profile)")},
-				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--tool / --plugin / --skill / --profile)")},
+				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--tool / --plugin / --skill)")},
+				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--tool / --plugin / --skill)")},
 			}},
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
@@ -77,7 +77,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn agent create neo", Desc: ""},
-				{Name: "spwn agent add neo --tool @spwn/python --profile researcher", Desc: ""},
+				{Name: "spwn agent add neo --tool @spwn/python --skill paper-reading", Desc: ""},
 				{Name: "spwn agent neo", Desc: ""},
 			}},
 		},

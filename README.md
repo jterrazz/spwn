@@ -204,7 +204,7 @@ Think of spwn the way you think of `tsc` or `babel`. You write in one clean, pro
              compile  +  bake
 ```
 
-- **Source** is provider-neutral. `AGENT.md`, `core/`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
+- **Source** is provider-neutral. `AGENT.md`, `identity/`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
 - **Compile** renders that source into the exact file layout your chosen runtime expects. Claude Code wants `CLAUDE.md` in a particular place? The claude-code backend emits it. Codex wants something else? Its backend emits that. Same source, different targets - like compiling TypeScript to ES5 vs ES2022.
 - **Bake** links the compiled tree with the tools your agent declared and produces a normal Docker image. Push it, pull it, run it anywhere - byte-identical on every machine.
 

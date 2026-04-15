@@ -3,7 +3,7 @@ import { expect, test } from '../fixtures/app.js';
 test.describe('World lifecycle (requires Docker)', () => {
     test.beforeEach(async ({ api }) => {
         await api.destroyAll();
-        await api.installTemplate('matrix');
+        await api.installExample('matrix');
     });
 
     test('spawn → appears in UI → destroy → disappears', async ({ page, api }) => {
@@ -28,7 +28,7 @@ test.describe('World lifecycle (requires Docker)', () => {
     });
 
     test('multi-agent world shows all agents in sidebar', async ({ page, api }) => {
-        await api.installTemplate('startup');
+        await api.installExample('startup');
         await api.spawnWorld('startup', undefined, [
             { name: 'ceo', role: 'chief' },
             { name: 'devops', role: 'worker' },

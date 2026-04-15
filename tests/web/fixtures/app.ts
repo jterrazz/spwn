@@ -54,7 +54,7 @@ class SpwnAPI {
     }
 
     /** Install a bundled example */
-    async installTemplate(slug: string) {
+    async installExample(slug: string) {
         return this.post(`/api/examples/${slug}/install`);
     }
 

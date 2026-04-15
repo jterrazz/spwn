@@ -6,6 +6,5 @@
     .spwn/                         # local state
 
   Next:
-    spwn up                        # spawn the world
-    spwn agent talk neo "hi"       # talk to your agent
-    spwn check                     # validate the project tree
+    spwn auth                      # verify your credentials
+    spwn agent neo                 # open an interactive session with neo

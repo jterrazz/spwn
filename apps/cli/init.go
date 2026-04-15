@@ -95,9 +95,8 @@ func runInitLocal(cmd *cobra.Command) error {
 	fmt.Fprintln(cmd.OutOrStdout(), "    .spwn/                         # local state")
 	fmt.Fprintln(cmd.OutOrStdout(), "")
 	fmt.Fprintln(cmd.OutOrStdout(), "  Next:")
-	fmt.Fprintln(cmd.OutOrStdout(), "    spwn up                        # spawn the world")
-	fmt.Fprintln(cmd.OutOrStdout(), "    spwn agent talk neo \"hi\"       # talk to your agent")
-	fmt.Fprintln(cmd.OutOrStdout(), "    spwn check                     # validate the project tree")
+	fmt.Fprintln(cmd.OutOrStdout(), "    spwn auth                      # verify your credentials")
+	fmt.Fprintln(cmd.OutOrStdout(), "    spwn agent neo                 # open an interactive session with neo")
 	s.Blank()
 
 	return nil

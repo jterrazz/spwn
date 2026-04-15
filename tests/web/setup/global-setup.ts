@@ -6,8 +6,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../..');
 
 /**
- * Build the binary so the Tauri sidecar exists. Templates are
- * installed lazily through /api/templates by individual tests when
+ * Build the binary so the Tauri sidecar exists. Examples are
+ * installed lazily through /api/examples by individual tests when
  * they need them. Servers are managed by playwright.config.ts.
  */
 export default async function globalSetup() {

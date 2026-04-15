@@ -2,8 +2,8 @@ import { expect, test } from '../fixtures/app.js';
 
 test.describe('Agents page', () => {
     test.beforeEach(async ({ api }) => {
-        await api.installTemplate('matrix');
-        await api.installTemplate('startup');
+        await api.installExample('matrix');
+        await api.installExample('startup');
     });
 
     test('shows agents list', async ({ page }) => {
