@@ -11,7 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	plugins "spwn.sh/packages/catalog/plugins"
+	plugins "spwn.sh/catalog/plugins"
 	"spwn.sh/apps/cli/ui"
 	ib "spwn.sh/packages/image"
 )

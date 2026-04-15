@@ -1,4 +1,4 @@
-module spwn.sh/packages/catalog
+module spwn.sh/catalog
 
 go 1.25.0
 
@@ -42,6 +42,6 @@ require (
 )
 
 replace (
-	spwn.sh/packages/image => ../image
-	spwn.sh/packages/paths => ../paths
+	spwn.sh/packages/image => ../packages/image
+	spwn.sh/packages/paths => ../packages/paths
 )

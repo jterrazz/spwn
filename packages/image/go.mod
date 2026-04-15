@@ -5,10 +5,10 @@ go 1.25.0
 require (
 	github.com/docker/docker v27.5.1+incompatible
 	golang.org/x/term v0.40.0
-	spwn.sh/packages/catalog v0.0.0
+	spwn.sh/catalog v0.0.0
 )
 
-replace spwn.sh/packages/catalog => ../catalog
+replace spwn.sh/catalog => ../../catalog
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect

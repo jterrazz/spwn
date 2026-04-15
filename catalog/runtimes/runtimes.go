@@ -7,8 +7,8 @@ package runtimes
 import (
 	"fmt"
 
-	"spwn.sh/packages/catalog/runtimes/claude_code"
-	"spwn.sh/packages/catalog/runtimes/codex"
+	"spwn.sh/catalog/runtimes/claude_code"
+	"spwn.sh/catalog/runtimes/codex"
 	ib "spwn.sh/packages/image"
 )
 

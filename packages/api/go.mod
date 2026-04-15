@@ -8,7 +8,7 @@ require (
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/base v0.0.0
-	spwn.sh/packages/catalog v0.0.0
+	spwn.sh/catalog v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/paths v0.0.0
 	spwn.sh/packages/version v0.0.0
@@ -48,7 +48,7 @@ replace (
 	spwn.sh/packages/agent => ../agent
 	spwn.sh/packages/auth => ../auth
 	spwn.sh/packages/base => ../base
-	spwn.sh/packages/catalog => ../catalog
+	spwn.sh/catalog => ../../catalog
 	spwn.sh/packages/ids => ../ids
 	spwn.sh/packages/image => ../image
 	spwn.sh/packages/paths => ../paths
