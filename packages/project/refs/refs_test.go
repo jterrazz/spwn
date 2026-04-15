@@ -66,16 +66,16 @@ func TestSplitVersion(t *testing.T) {
 
 func TestResolveTool_Local(t *testing.T) {
 	root := t.TempDir()
-	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
+	mustMkdir(t, filepath.Join(root, "spwn", "packages", "present"))
 
 	got := refs.ResolveTool(root, refs.Parse("present"), nil, false)
 	if got != refs.ResolveOK {
-		t.Errorf("present local tool: want OK, got %v", got)
+		t.Errorf("present local package: want OK, got %v", got)
 	}
 
 	got = refs.ResolveTool(root, refs.Parse("missing"), nil, false)
 	if got != refs.ResolveNotFound {
-		t.Errorf("missing local tool: want NotFound, got %v", got)
+		t.Errorf("missing local package: want NotFound, got %v", got)
 	}
 }
 
@@ -112,8 +112,8 @@ func TestResolveSkill_Local(t *testing.T) {
 	root := t.TempDir()
 
 	// File-form skill.
-	mustMkdir(t, filepath.Join(root, "spwn", "skills"))
-	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
+	mustMkdir(t, filepath.Join(root, "spwn", "packages"))
+	if err := os.WriteFile(filepath.Join(root, "spwn", "packages", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -123,7 +123,7 @@ func TestResolveSkill_Local(t *testing.T) {
 	}
 
 	// Directory-form skill.
-	mustMkdir(t, filepath.Join(root, "spwn", "skills", "debug"))
+	mustMkdir(t, filepath.Join(root, "spwn", "packages", "debug"))
 
 	got = refs.ResolveSkill(root, refs.Parse("debug"), nil, false)
 	if got != refs.ResolveOK {

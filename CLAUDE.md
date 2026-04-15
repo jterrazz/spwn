@@ -10,7 +10,7 @@ The domain has three main abstractions, each owning one concern:
 |---|---|---|
 | **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` - Claude Code today, others swap in as a ~50 LOC Go file |
 | **Backend** | Where worlds run | `packages/world/internal/backend` - Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/mind` - flat markdown layers (core/skills/knowledge/playbooks/journal) on the host filesystem |
+| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (identity/skills/knowledge/playbooks/journal) on the host filesystem |
 
 ## Vocabulary
 
@@ -66,11 +66,11 @@ spwn agent ls                                  # List project agents
 spwn agent inspect neo                         # Inspect composition, memory, history
 spwn agent fork neo neo-v2                     # Clone memory + composition
 spwn agent rm neo                              # Delete an agent
-spwn agent rm neo --tool @spwn/python          # Remove a block from an agent
+spwn agent rm neo --package @spwn/python       # Remove a package from an agent
 
-# Compose blocks
-spwn agent add neo --tool @spwn/python         # Add a tool block
-spwn agent add neo --skill paper-reading       # Add a skill block
+# Compose packages
+spwn agent add neo --package @spwn/python      # Add a catalog package
+spwn agent add neo --package paper-reading     # Add a local package (spwn/packages/paper-reading.md or dir)
 
 # Talk + messaging
 spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`
@@ -112,7 +112,7 @@ spwn auth login|logout|token                   # Provider credentials
 
 **Design rules:**
 - Strict noun-first grammar: `spwn <noun> <verb>`. Three shortcuts exist: `up`, `ls`, `talk`. No other top-level verbs.
-- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --tool X` removes a block from it.
+- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --package X` removes a package from it.
 - Inside a project, commands resolve against `./spwn/` first. Outside a project, they operate on user-level paths (legacy).
 
 ## IDs
@@ -180,11 +180,10 @@ spwn/
 │   │   ├── architect/               #     spwn architect (start, stop, status)
 │   │   ├── web/                     #     spwn web (launches the web UI)
 │   │   ├── auth/                    #     spwn auth (login, logout, token)
-│   │   ├── skill/                   #     spwn skill
-│   │   ├── tool/                    #     spwn tool
+│   │   ├── skill/                   #     spwn skill (bare-markdown authoring)
+│   │   ├── tool/                    #     spwn package install/uninstall/ls (Go package historically named "tool")
 │   │   ├── team/                    #     spwn team
 │   │   ├── organization/            #     spwn organization
-│   │   ├── tool/                    #     spwn package install/uninstall/ls (Go package is historically "tool")
 │   │   ├── logs/                    #     spwn logs
 │   │   └── ui/                      #     Stepper, table, style
 │   │
@@ -260,13 +259,13 @@ Host machine
 ## Dependency Graph
 
 ```
-apps/cli  ──→ packages/{world, mind, mailbox, image, migration, base, manifest}
-packages/world ──→ packages/{mind, image, base}
-packages/mind ──→ packages/base
+apps/cli  ──→ packages/{world, agent, mailbox, image, migration, base, project}
+packages/world ──→ packages/{agent, image, base}
+packages/agent ──→ packages/base
 packages/mailbox ──→ packages/base
 packages/image ──→ (no spwn deps)
 packages/migration ──→ packages/base
-packages/manifest ──→ (no spwn deps)
+packages/project ──→ (no spwn deps)
 ```
 
 Each `packages/` module exposes a public API in its root `.go` file.
@@ -290,7 +289,7 @@ make build-test-image    # docker build spwn-test:latest for E2E
 make test                # Unit tests across all modules
 make test-foundation     # cd packages/base && go test -v ./...
 make test-world          # cd packages/world && go test -v ./...
-make test-agent          # cd packages/mind && go test -v ./...
+make test-agent          # cd packages/agent && go test -v ./...
 make test-cli            # cd apps/cli && go test -v ./...
 
 make test-e2e            # Go E2E against Docker

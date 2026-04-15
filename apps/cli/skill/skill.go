@@ -1,9 +1,13 @@
-// Package skill implements the `spwn skill` command group - authoring and
-// managing reusable skill files. Skills are procedures, playbooks, or
-// pieces of knowledge authored in markdown that agents can invoke.
+// Package skill implements the `spwn skill` command group —
+// authoring bare-markdown skill packages. Skills are procedures,
+// playbooks, or pieces of knowledge authored in markdown that agents
+// can invoke.
 //
-// Skills are first-class composable blocks alongside tools and profiles.
-// Attach one to an agent via "spwn agent add <name> --skill <skill>".
+// Bare-markdown skills live at spwn/packages/<name>.md. For richer
+// packages with install steps or plugin-config injection, author a
+// directory-form package at spwn/packages/<name>/package.yaml and
+// install/reference it via `spwn package`. Attach a skill to an
+// agent via `spwn agent add <agent> --package <name>`.
 package skill
 
 import (
@@ -20,11 +24,11 @@ import (
 // Cmd is the root `spwn skill` command group.
 var Cmd = &cobra.Command{
 	Use:   "skill",
-	Short: "Author and manage reusable skill files",
-	Long: `Skills are procedures, playbooks, or pieces of knowledge - authored in markdown.
-
-Attach one to an agent with:
-  spwn agent add <agent> --skill <skill-name>`,
+	Short: "Author bare-markdown skill packages",
+	Long: `Skills are procedures, playbooks, or pieces of knowledge authored as
+bare markdown files at spwn/packages/<name>.md. Attach a skill to an
+agent with:
+  spwn agent add <agent> --package <skill-name>`,
 }
 
 func init() {

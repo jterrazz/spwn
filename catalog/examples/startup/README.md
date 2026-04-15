@@ -25,7 +25,7 @@ This is the best example for understanding **multi-agent collaboration** - how a
 ## Install
 
 ```bash
-spwn example install startup
+spwn init @spwn/startup
 ```
 
 This copies the world config and all three agent profiles into `~/.spwn/`. Nothing is overwritten if you already have agents with the same names.

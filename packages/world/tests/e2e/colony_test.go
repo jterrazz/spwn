@@ -15,7 +15,7 @@ func TestColony_ChiefAndWorkerSpawn(t *testing.T) {
 	// similar), this test should:
 	// 1. Spawn a world with a chief + worker agent spec
 	// 2. Verify both agents' Mind directories are mounted
-	// 3. Verify AGENT.md for each role is correct
+	// 3. Verify AGENTS.md for each role is correct
 	// 4. Verify messaging between chief and worker works
 	//
 	// Tracking: requires Architect.SpawnColony() or multi-agent SpawnOpts.

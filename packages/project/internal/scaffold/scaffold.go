@@ -417,6 +417,14 @@ func defaultName(absDir string) string {
 	return slug
 }
 
+// AppendGitignore appends the `.spwn/` entry to <root>/.gitignore
+// when it's not already present. Idempotent and file-creating. Used
+// by Init (for blank scaffolds) and by the example installer (so
+// `spwn init @spwn/<slug>` in a fresh dir also gets the entry).
+func AppendGitignore(root string) error {
+	return appendGitignore(root)
+}
+
 func appendGitignore(root string) error {
 	path := filepath.Join(root, ".gitignore")
 	existing, err := os.ReadFile(path)

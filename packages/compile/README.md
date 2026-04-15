@@ -54,14 +54,13 @@ my-repo/
 └── spwn/
     ├── agents/
     │   └── neo/
-    │       ├── agent.yaml              # composition: tools, skills, runtime
+    │       ├── agent.yaml              # composition: packages + runtime
     │       ├── AGENTS.md                # the agent's prompt (provider-neutral)
     │       ├── identity/               # who the agent is (profile, purpose, traits)
-    │       ├── skills/                 # procedures and checklists
     │       ├── knowledge/              # learned facts
     │       ├── playbooks/              # promoted workflows
     │       └── journal/                # session history
-    ├── skills/                         # shared skills across agents
+    ├── packages/                       # project-local packages (dirs or bare .md)
     └── hooks/                          # lifecycle hooks (build-time, spawn-time)
 ```
 
@@ -245,7 +244,7 @@ milliseconds instead of waiting for a docker spawn in an e2e test.
 
 The current fixture set exercises: minimal agents, colonies (2 and
 3 agents with roles), every per-agent layer, local and subdir skills,
-hooks, plugins, tool lists, custom project names, unicode in
+hooks, plugin-block packages, package lists, custom project names, unicode in
 prompts, long agent names, empty layer dirs, AGENTS.md `@`-imports,
 and the three main error paths (missing agents, malformed
 `agent.yaml`, manifests with no worlds declared).

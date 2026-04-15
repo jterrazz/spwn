@@ -12,21 +12,23 @@ import (
 	"spwn.sh/packages/image/pkgyaml"
 )
 
-// yamlToolsFS embeds every YAML-defined tool pack. Each tool lives at
-// catalog/tools/<name>/package.yaml with optional sibling skills/,
-// files/, and config/ directories. The embed is rooted at the tools
-// package so the Dir walk sees <name>/package.yaml entries.
+// yamlToolsFS embeds every YAML-defined package. Each package lives
+// at catalog/packages/<name>/package.yaml with optional sibling
+// skills/, files/, and config/ directories. The embed is rooted at
+// the catalog/packages/ directory so the walk sees
+// <name>/package.yaml entries directly.
 //
-// Adding a new YAML tool? Drop the directory in and re-build — the
-// loader picks it up automatically. No registration list to maintain.
+// Adding a new YAML package? Drop the directory in and re-build —
+// the loader picks it up automatically. No registration list to
+// maintain.
 //
 //go:embed all:*
 var yamlToolsFS embed.FS
 
-// loadYAMLTools walks the embedded tool tree and parses every
+// loadYAMLTools walks the embedded package tree and parses every
 // package.yaml it finds into an image.Tool instance. Directories
-// without a manifest are ignored so transitional Go-based tools can
-// coexist.
+// without a manifest are silently skipped so non-package assets (e.g.
+// README.md) don't break the load.
 func loadYAMLTools() ([]ib.Tool, error) {
 	entries, err := fs.ReadDir(yamlToolsFS, ".")
 	if err != nil {

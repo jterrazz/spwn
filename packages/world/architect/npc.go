@@ -36,7 +36,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		WorldID:    worldID,
 		NPCTask:    task,
 		Workspaces: u.Workspaces,
-		Tools:      u.Manifest.Packages,
+		Packages:   u.Manifest.Packages,
 	})
 	if err := a.backend.CopyTo(ctx, u.ContainerID, "world/AGENT.md", []byte(agentCtx)); err != nil {
 		// Non-fatal: log warning but continue

@@ -10,15 +10,14 @@ import (
 	"spwn.sh/packages/paths"
 )
 
-// defaultAgentYAML is the baseline agent.yaml written by Init/Repair
-// so `spwn check` passes immediately after `agent create`. Matches the
-// shape of packages/project/internal/scaffold/templates/agent.yaml.tmpl
-// but parameterised by name.
-const defaultAgentYAMLTmpl = `# Agent composition.
-#
-# This file is the source of truth for what tools and runtime the
-# agent needs. When the agent is deployed in a world alongside others,
-# the union of every member's tools is what gets installed into the
+// defaultAgentYAMLTmpl is the baseline agent.yaml written by
+// Init/Repair so `spwn check` passes immediately after
+// `agent create`. Matches the shape of
+// packages/project/internal/scaffold/templates/agent.yaml.tmpl but
+// parameterised by name.
+const defaultAgentYAMLTmpl = `# Agent composition — the source of truth for the agent's packages
+# and runtime. When the agent is deployed in a world alongside others,
+# the union of every member's packages is what gets baked into the
 # resulting container.
 
 name: __NAME__
@@ -26,13 +25,13 @@ name: __NAME__
 runtime:
   backend: "@spwn/claude-code"
 
-tools:
+packages:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/python"
 `
 
-// defaultAgentMDTmpl is the baseline source AGENT.md written by
+// defaultAgentMDTmpl is the baseline source AGENTS.md written by
 // Init/Repair. Mirrors packages/project/internal/scaffold/templates/
 // AGENTS.md.tmpl. This is the provider-neutral agent prompt file; a
 // runtime-specific renderer (e.g. packages/compile/runtimes/
@@ -125,14 +124,14 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 		return "", fmt.Errorf("create profile: %w", err)
 	}
 
-	// Write the baseline agent.yaml and AGENT.md so `spwn check`
+	// Write the baseline agent.yaml and AGENTS.md so `spwn check`
 	// passes immediately after `agent create`. Both files are
 	// required by the project validator (ruleAgentStructure).
 	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
 		return "", fmt.Errorf("create agent.yaml: %w", err)
 	}
 	if err := os.WriteFile(filepath.Join(dir, "AGENTS.md"), renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
-		return "", fmt.Errorf("create AGENT.md: %w", err)
+		return "", fmt.Errorf("create AGENTS.md: %w", err)
 	}
 
 	return dir, nil
@@ -169,7 +168,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 		}
 	}
 
-	// Re-scaffold agent.yaml / AGENT.md when missing so --force can
+	// Re-scaffold agent.yaml / AGENTS.md when missing so --force can
 	// rescue a partially-deleted agent tree.
 	agentYAMLPath := filepath.Join(dir, "agent.yaml")
 	if _, err := os.Stat(agentYAMLPath); err != nil && os.IsNotExist(err) {
@@ -180,7 +179,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 	entryPath := filepath.Join(dir, "AGENTS.md")
 	if _, err := os.Stat(entryPath); err != nil && os.IsNotExist(err) {
 		if err := os.WriteFile(entryPath, renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
-			return fmt.Errorf("create AGENT.md: %w", err)
+			return fmt.Errorf("create AGENTS.md: %w", err)
 		}
 	}
 	return nil

@@ -25,7 +25,7 @@ This example showcases **multi-agent hierarchy with messaging** - a leader agent
 ## Install
 
 ```bash
-spwn example install macrohard
+spwn init @spwn/macrohard
 ```
 
 ## Spawn

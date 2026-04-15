@@ -1,13 +1,13 @@
-// Package tools aggregates every built-in tool pack into a single
-// registrable list. Every tool lives as a YAML manifest under
-// catalog/tools/<name>/spwn-tool.yaml and is picked up automatically
-// by loadYAMLTools. The Go-based tool layer is gone — adding a new
-// tool is a directory + a yaml + a git add, no Go edit required.
+// Package pkg aggregates every built-in package into a single
+// registrable list. Every package lives as a YAML manifest under
+// catalog/packages/<name>/package.yaml and is picked up automatically
+// by loadYAMLTools. The Go-based catalog layer is gone — adding a
+// new package is a directory + a yaml + a git add, no Go edit
+// required.
 //
-// Tools that need host-side Go behavior at spawn time (credential
-// sync, default config materialisation, prelaunch shell) declare a
-// `runtime-provider:` in their manifest and register the Go impl
-// via packages/world/internal/runtime/providers.
+// Runtimes that need host-side Go behavior at spawn time (credential
+// sync, default config materialisation, prelaunch shell) are kept
+// Go-only and registered via packages/world/internal/runtime/.
 package pkg
 
 import (

@@ -16,6 +16,7 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 
 	required := []string{
 		"spwn.yaml",
+		"spwn.lock.yaml",
 		"spwn/agents/neo/agent.yaml",
 		"spwn/agents/neo/AGENTS.md",
 		"spwn/agents/neo/identity/profile.md",
@@ -55,6 +56,20 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	}
 	if !strings.Contains(string(manifest), "worlds:") {
 		t.Errorf("expected worlds: map in spwn.yaml, got:\n%s", manifest)
+	}
+
+	// Lockfile should be seeded with the three default @spwn/* refs
+	// so `spwn check` passes on a brand-new project (no drift between
+	// the scaffolded agent.yaml and the initial lockfile).
+	lock, err := os.ReadFile(filepath.Join(dir, "spwn.lock.yaml"))
+	if err != nil {
+		t.Fatalf("read spwn.lock.yaml: %v", err)
+	}
+	lockStr := string(lock)
+	for _, ref := range []string{"@spwn/unix", "@spwn/git", "@spwn/python"} {
+		if !strings.Contains(lockStr, ref) {
+			t.Errorf("lockfile missing %s:\n%s", ref, lockStr)
+		}
 	}
 }
 

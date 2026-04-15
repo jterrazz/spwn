@@ -13,7 +13,7 @@ func TestGenerateChiefContext(t *testing.T) {
 		Role:      "chief",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Tools:     []string{"bash", "git", "node"},
+		Packages:  []string{"bash", "git", "node"},
 		OtherAgents: []AgentInfo{
 			{Name: "neo", Role: "worker"},
 			{Name: "trinity", Role: "worker"},
@@ -51,7 +51,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-acme-28373",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
-		Tools:     []string{"bash", "git"},
+		Packages:  []string{"bash", "git"},
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
 			{Name: "trinity", Role: "worker"},
@@ -87,7 +87,7 @@ func TestGenerateNPCContext(t *testing.T) {
 		Role:    "npc",
 		WorldID: "w-acme-28373",
 		NPCTask: "lint src/",
-		Tools:   []string{"bash"},
+		Packages:[]string{"bash"},
 	})
 
 	checks := map[string]string{
@@ -119,7 +119,7 @@ func TestGenerateArchitectContext_ContainsNewCLICommands(t *testing.T) {
 		WorldID:   "w-test-99999",
 	})
 
-	// New CLI commands that MUST appear in architect-tier AGENT.md
+	// New CLI commands that MUST appear in architect-tier AGENTS.md
 	mustContain := []string{
 		"spwn ls",
 		"spwn down",
@@ -129,7 +129,7 @@ func TestGenerateArchitectContext_ContainsNewCLICommands(t *testing.T) {
 	}
 	for _, cmd := range mustContain {
 		if !strings.Contains(ctx, cmd) {
-			t.Errorf("Architect-tier AGENT.md missing new command %q", cmd)
+			t.Errorf("Architect-tier AGENTS.md missing new command %q", cmd)
 		}
 	}
 
@@ -143,7 +143,7 @@ func TestGenerateArchitectContext_ContainsNewCLICommands(t *testing.T) {
 	}
 	for _, cmd := range mustNotContain {
 		if strings.Contains(ctx, cmd) {
-			t.Errorf("Architect-tier AGENT.md still contains old command %q", cmd)
+			t.Errorf("Architect-tier AGENTS.md still contains old command %q", cmd)
 		}
 	}
 }
@@ -153,7 +153,7 @@ func TestGenerateArchitectContext_ContainsAllSections(t *testing.T) {
 		AgentName: "architect",
 		Role:      "architect",
 		WorldID:   "w-test-99999",
-		Tools:     []string{"bash", "git"},
+		Packages:  []string{"bash", "git"},
 	})
 
 	sections := []string{
@@ -174,7 +174,7 @@ func TestGenerateArchitectContext_ContainsAllSections(t *testing.T) {
 	}
 	for _, s := range sections {
 		if !strings.Contains(ctx, s) {
-			t.Errorf("Architect-tier AGENT.md missing section/command %q", s)
+			t.Errorf("Architect-tier AGENTS.md missing section/command %q", s)
 		}
 	}
 }
