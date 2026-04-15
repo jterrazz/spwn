@@ -34,7 +34,7 @@ describe('spwn init', () => {
         expect(result.file('spwn.yaml').content).toContain('name: demo-project');
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/neo/core/profile.md').exists).toBe(true);
-        expect(result.file('spwn/agents/neo/CLAUDE.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/AGENT.md').exists).toBe(true);
         expect(result.file('.gitignore').exists).toBe(true);
         expect(result.file('.gitignore').content).toContain('.spwn');
     });

@@ -4,8 +4,9 @@
 // Claude Code treats `@path/to/file.md` inside a markdown file as an
 // include directive - the runtime effectively inlines the referenced
 // file's contents. We follow the same convention. Given a starting
-// file (typically CLAUDE.md), Walk returns every file the runtime
-// would read and any broken references it hit along the way.
+// file (typically AGENT.md, the provider-neutral agent entrypoint),
+// Walk returns every file the runtime would read and any broken
+// references it hit along the way.
 package resolve
 
 import (

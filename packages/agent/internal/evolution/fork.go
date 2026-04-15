@@ -64,13 +64,13 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		os.WriteFile(filepath.Join(targetDir, "agent.yaml"), data, 0644)
 	}
 
-	// Copy CLAUDE.md if it exists. Without this, `spwn check` reports
-	// the forked agent as missing CLAUDE.md since ruleAgentStructure
-	// requires it at the agent root (Finding #11).
-	sourceClaude := filepath.Join(sourceDir, "CLAUDE.md")
-	if _, err := os.Stat(sourceClaude); err == nil {
-		data, _ := os.ReadFile(sourceClaude)
-		os.WriteFile(filepath.Join(targetDir, "CLAUDE.md"), data, 0644)
+	// Copy AGENT.md if it exists. Without this, `spwn check` reports
+	// the forked agent as missing AGENT.md since ruleAgentStructure
+	// requires it at the agent root.
+	sourceEntry := filepath.Join(sourceDir, "AGENT.md")
+	if _, err := os.Stat(sourceEntry); err == nil {
+		data, _ := os.ReadFile(sourceEntry)
+		os.WriteFile(filepath.Join(targetDir, "AGENT.md"), data, 0644)
 	}
 
 	// Emit activity event
