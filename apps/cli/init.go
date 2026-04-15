@@ -65,6 +65,13 @@ func runInitLocal(cmd *cobra.Command) error {
 		return fmt.Errorf("resolve cwd: %w", err)
 	}
 
+	// Reject invalid --name up-front so we never leave an unvalidated
+	// spwn.yaml on disk that `spwn check` immediately rejects. Uses
+	// the same regex the manifest enforces.
+	if initName != "" && !project.IsValidProjectName(initName) {
+		return fmt.Errorf("invalid --name %q — must match ^[a-z0-9][a-z0-9-]*$ (lowercase letters, digits, and dashes)", initName)
+	}
+
 	if err := project.Init(cwd, project.InitOpts{
 		Name:  initName,
 		Force: initForce,
@@ -81,9 +88,8 @@ func runInitLocal(cmd *cobra.Command) error {
 	s.Success("Initialised spwn project " + name)
 	s.Blank()
 	fmt.Fprintln(cmd.OutOrStdout(), "  Committed:")
-	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.yaml                      # project manifest")
+	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.yaml                      # project manifest (worlds live inline)")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/agents/neo/               # starter agent")
-	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/worlds/default.yaml       # starter world")
 	fmt.Fprintln(cmd.OutOrStdout(), "")
 	fmt.Fprintln(cmd.OutOrStdout(), "  Gitignored:")
 	fmt.Fprintln(cmd.OutOrStdout(), "    .spwn/                         # local state")
