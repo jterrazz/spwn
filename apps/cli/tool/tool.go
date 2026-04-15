@@ -8,10 +8,27 @@ package tool
 
 import (
 	"fmt"
+	"os"
 
 	"spwn.sh/apps/cli/ui"
 	"github.com/spf13/cobra"
 )
+
+// notImplementedError mirrors the one in apps/cli/agent/compose.go:
+// renders a "not yet implemented" banner and carries exit code 2.
+type notImplementedError struct{ what string }
+
+func (e *notImplementedError) Error() string { return fmt.Sprintf("%s: not yet implemented", e.what) }
+func (e *notImplementedError) ExitCode() int { return 2 }
+
+func notImplemented(what, detail string) error {
+	fmt.Fprintf(os.Stderr, "\n  %s %s: not yet implemented\n", ui.Red("\u2717"), what)
+	if detail != "" {
+		fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint(detail))
+	}
+	fmt.Fprintln(os.Stderr)
+	return &notImplementedError{what: what}
+}
 
 // Cmd is the root `spwn tool` command group.
 var Cmd = &cobra.Command{
@@ -92,9 +109,8 @@ var showCmd = &cobra.Command{
 	Short: "Inspect a tool pack",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Fprintf(cmd.OutOrStderr(), "tool %q: inspection not yet wired.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Built-in packs are listed with 'spwn tool ls'.")
-		return nil
+		return notImplemented(fmt.Sprintf("tool show %q", args[0]),
+			"Built-in packs are listed with 'spwn tool ls'.")
 	},
 }
 
@@ -114,9 +130,8 @@ var getCmd = &cobra.Command{
 	Short: "Install a tool pack from the registry",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Fprintf(cmd.OutOrStderr(), "install %q: the tool registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Built-in packs (@spwn/*) are always available - no install needed.")
-		return nil
+		return notImplemented(fmt.Sprintf("tool get %q", args[0]),
+			"Built-in packs (@spwn/*) are always available — no install needed.")
 	},
 }
 

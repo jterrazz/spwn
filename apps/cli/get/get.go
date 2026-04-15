@@ -2,10 +2,29 @@ package get
 
 import (
 	"fmt"
+	"os"
 
 	"spwn.sh/apps/cli/ui"
 	"github.com/spf13/cobra"
 )
+
+// notImplementedError mirrors the one in apps/cli/agent/compose.go:
+// it renders a structured "not yet implemented" banner to stderr
+// and carries exit code 2 so scripts can distinguish a missing
+// feature from a runtime failure.
+type notImplementedError struct{ what string }
+
+func (e *notImplementedError) Error() string { return fmt.Sprintf("%s: not yet implemented", e.what) }
+func (e *notImplementedError) ExitCode() int { return 2 }
+
+func notImplemented(what, detail string) error {
+	fmt.Fprintf(os.Stderr, "\n  %s %s: not yet implemented\n", ui.Red("\u2717"), what)
+	if detail != "" {
+		fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint(detail))
+	}
+	fmt.Fprintln(os.Stderr)
+	return &notImplementedError{what: what}
+}
 
 var defaultGetHelp func(*cobra.Command, []string)
 
@@ -22,9 +41,8 @@ var installCmd = &cobra.Command{
 	Short: "Install a package",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("  Installing package %q...\n", args[0])
-		fmt.Println("  (Not yet implemented - planned for a future release)")
-		return nil
+		return notImplemented(fmt.Sprintf("get install %q", args[0]),
+			"The marketplace is planned for a future release.")
 	},
 }
 
@@ -43,9 +61,8 @@ var searchCmd = &cobra.Command{
 	Short: "Search the marketplace",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("  Searching for %q...\n", args[0])
-		fmt.Println("  (Not yet implemented - planned for a future release)")
-		return nil
+		return notImplemented(fmt.Sprintf("get search %q", args[0]),
+			"The marketplace is planned for a future release.")
 	},
 }
 

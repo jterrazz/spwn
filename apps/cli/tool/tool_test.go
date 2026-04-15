@@ -2,6 +2,7 @@ package tool
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
 
@@ -35,12 +36,15 @@ func TestToolLs_ListsBuiltInPacks(t *testing.T) {
 // ── stubs (show / search / install / rm / publish) ──────────────────────────
 
 func TestToolShow_Stub(t *testing.T) {
-	out, err := runWithOut(t, showCmd, "@spwn/python")
-	if err != nil {
-		t.Fatalf("show stub: %v", err)
+	_, err := runWithOut(t, showCmd, "@spwn/python")
+	// show is deliberately unimplemented — it must signal
+	// feature-unavailable (exit 2) rather than succeed silently.
+	if err == nil {
+		t.Fatal("show stub should return a not-implemented error")
 	}
-	if !strings.Contains(out.String(), "not yet wired") {
-		t.Errorf("stub should mention 'not yet wired': %s", out.String())
+	var coder interface{ ExitCode() int }
+	if !errorAs(err, &coder) || coder.ExitCode() != 2 {
+		t.Errorf("expected ExitCode()==2, got err=%v", err)
 	}
 }
 
@@ -55,13 +59,22 @@ func TestToolSearch_Stub(t *testing.T) {
 }
 
 func TestToolInstall_Stub(t *testing.T) {
-	out, err := runWithOut(t, getCmd, "@spwn/python")
-	if err != nil {
-		t.Fatalf("install stub: %v", err)
+	_, err := runWithOut(t, getCmd, "@spwn/python")
+	// get is deliberately unimplemented — expect feature-unavailable.
+	if err == nil {
+		t.Fatal("get stub should return a not-implemented error")
 	}
-	if !strings.Contains(out.String(), "Built-in packs") {
-		t.Errorf("install stub should mention built-in packs: %s", out.String())
+	var coder interface{ ExitCode() int }
+	if !errorAs(err, &coder) || coder.ExitCode() != 2 {
+		t.Errorf("expected ExitCode()==2, got err=%v", err)
 	}
+}
+
+// errorAs is a minimal errors.As bridge to avoid pulling the stdlib
+// import for a single call site. It walks Unwrap chains and assigns
+// the first match to target.
+func errorAs(err error, target interface{}) bool {
+	return errors.As(err, target)
 }
 
 func TestToolRm_Stub(t *testing.T) {

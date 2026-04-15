@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -96,12 +97,24 @@ func init() {
 func Execute() error {
 	err := rootCmd.Execute()
 	if err != nil {
-		// Don't re-print errors already shown by a Stepper
-		if _, ok := err.(*ui.DisplayedError); !ok {
+		// Don't re-print errors already shown by a Stepper — or
+		// by a custom error type that rendered its own banner (e.g.
+		// notImplementedError, which implements ExitCoder).
+		var displayed *ui.DisplayedError
+		var coded ExitCoder
+		if !errors.As(err, &displayed) && !errors.As(err, &coded) {
 			fmt.Fprintf(os.Stderr, "\n  %s %s\n\n", ui.Red("Error:"), err)
 		}
 	}
 	return err
+}
+
+// ExitCoder is implemented by errors that want to set a non-default
+// process exit code. The spwn binary entry point inspects the returned
+// error and, if it satisfies this interface, forwards ExitCode() to
+// os.Exit. Unknown errors default to exit 1.
+type ExitCoder interface {
+	ExitCode() int
 }
 
 // GetRootCmd returns the root command for documentation generation.
