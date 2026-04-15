@@ -3,10 +3,14 @@ package agent
 import (
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/catalog/plugins"
+	"spwn.sh/packages/catalog/tools"
 )
 
 // ── agent add / remove ─────────────────────────────────────────────────────
@@ -60,6 +64,22 @@ Examples:
 		// Verify the agent exists before touching the manifest.
 		if err := agent.ValidateMind(name); err != nil {
 			return err
+		}
+
+		// Pre-flight every --tool / --plugin ref against the catalog
+		// so we never write an unknown pack to agent.yaml — otherwise
+		// `agent add` silently breaks `spwn check` with a cryptic
+		// "tool does not exist" (Finding #12). Symmetric with the
+		// preflight on `agent remove`.
+		for _, t := range composeTools {
+			if !knownComposeRef(t) {
+				return unknownComposeRefError("tool", t)
+			}
+		}
+		for _, p := range composePlugins {
+			if !knownComposeRef(p) {
+				return unknownComposeRefError("plugin", p)
+			}
 		}
 
 		s := newStepper(cmd)
@@ -254,4 +274,58 @@ func (e *notImplementedError) Error() string {
 // os.Exit. The CLI reserves exit code 2 for "planned but not yet
 // implemented" features; exit 1 stays for runtime failures.
 func (e *notImplementedError) ExitCode() int { return 2 }
+
+// knownComposeRef reports whether the given @scope/name[@version]
+// reference matches a built-in tool or plugin in the catalog. Used
+// by `agent add` to preflight --tool and --plugin refs before they
+// hit agent.yaml.
+func knownComposeRef(ref string) bool {
+	pack := stripVersion(ref)
+	for _, t := range tools.All {
+		if t.Name() == pack {
+			return true
+		}
+	}
+	for _, p := range plugins.All {
+		if p.Name() == pack {
+			return true
+		}
+	}
+	return false
+}
+
+// stripVersion drops the "@version" suffix from an @scope/name@version
+// reference. Mirrors packages/project/internal/validate/validate.go's
+// splitToolVersion but kept local so the CLI doesn't depend on the
+// validator's internals.
+func stripVersion(ref string) string {
+	if !strings.HasPrefix(ref, "@") {
+		if idx := strings.LastIndex(ref, "@"); idx > 0 {
+			return ref[:idx]
+		}
+		return ref
+	}
+	rest := ref[1:]
+	if idx := strings.LastIndex(rest, "@"); idx >= 0 {
+		return "@" + rest[:idx]
+	}
+	return ref
+}
+
+// unknownComposeRefError formats the refusal message shown when the
+// user passes --tool or --plugin with a reference the catalog does
+// not know about. The "known:" list mirrors what `spwn check` shows
+// so the two commands never disagree.
+func unknownComposeRefError(kind, ref string) error {
+	known := make([]string, 0, len(tools.All)+len(plugins.All))
+	for _, t := range tools.All {
+		known = append(known, t.Name())
+	}
+	for _, p := range plugins.All {
+		known = append(known, p.Name())
+	}
+	sort.Strings(known)
+	return fmt.Errorf("%s %q does not exist.\nknown: %s",
+		kind, ref, strings.Join(known, ", "))
+}
 
