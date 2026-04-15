@@ -48,7 +48,11 @@ func TestGenerateDockerfileClaudeCode(t *testing.T) {
 
 func TestDockerfileBaseImage(t *testing.T) {
 	r, _ := runtime.Get("claude-code")
-	if r.BaseImage() != "node:20" {
-		t.Errorf("expected node:20, got %q", r.BaseImage())
+	// Claude Code now ships as a native binary via
+	// https://claude.ai/install.sh - no Node.js dependency. The
+	// baseline is the same Ubuntu release spwn's world image
+	// actually uses.
+	if r.BaseImage() != "ubuntu:24.04" {
+		t.Errorf("expected ubuntu:24.04, got %q", r.BaseImage())
 	}
 }

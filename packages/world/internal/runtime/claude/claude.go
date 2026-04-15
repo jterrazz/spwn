@@ -48,16 +48,41 @@ func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
 }
 
 // InstallCommands returns shell commands to install Claude Code.
+//
+// Native install: downloads the self-contained claude binary
+// (no Node.js runtime dependency). The bootstrap script places
+// the real binary at
+//
+//	$HOME/.local/share/claude/versions/<version>
+//
+// and a symlink at $HOME/.local/bin/claude pointing at it.
+// Dockerfile RUN steps execute as root during build, so those
+// resolve under /root/.local. We `cp -L` through the symlink
+// into /usr/local/bin so the destination is the 200+ MB binary
+// itself (not a dangling symlink), then wipe /root/.local so
+// the layer doesn't ship the private staging tree.
 func (c *Claude) InstallCommands() []string {
-	return []string{"npm install -g @anthropic-ai/claude-code@latest"}
+	return []string{
+		"curl -fsSL https://claude.ai/install.sh | bash",
+		"cp -L /root/.local/bin/claude /usr/local/bin/claude",
+		"chmod +x /usr/local/bin/claude",
+		"rm -rf /root/.local /root/.claude",
+	}
 }
 
-// BaseImage returns the Docker base image needed.
-func (c *Claude) BaseImage() string { return "node:20" }
+// BaseImage used to be node:20 because the old install path was
+// `npm install -g @anthropic-ai/claude-code`. The native binary
+// installer has no Node.js dependency, so the plain Ubuntu base
+// that the real spwn world image uses is enough.
+func (c *Claude) BaseImage() string { return "ubuntu:24.04" }
 
-// SystemPackages returns apt packages needed beyond the base image.
+// SystemPackages returns apt packages needed beyond the base
+// image. curl pulls the bootstrap script, jq lets it parse the
+// release manifest, ca-certificates is required for the HTTPS
+// fetch, and git is the tool Claude Code reaches for most on
+// the worker's behalf.
 func (c *Claude) SystemPackages() []string {
-	return []string{"git", "jq", "curl", "wget"}
+	return []string{"ca-certificates", "curl", "git", "jq"}
 }
 
 // SupportsSession returns true if the runtime can resume sessions.
