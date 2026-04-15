@@ -119,16 +119,16 @@ func TestCLI_ArchitectHelp(t *testing.T) {
 	}
 }
 
-// --- Get help ---
+// --- Tool install help ---
 
-func TestCLI_GetHelp(t *testing.T) {
-	out, _, err := executeCommand("get", "--help")
+func TestCLI_ToolHelp(t *testing.T) {
+	out, _, err := executeCommand("tool", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"install", "ls", "search", "rm"} {
-		assertContains(t, out, sub, "get help")
+	for _, sub := range []string{"install", "uninstall", "ls", "show"} {
+		assertContains(t, out, sub, "tool help")
 	}
 }
 

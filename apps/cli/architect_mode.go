@@ -9,13 +9,15 @@ import (
 
 // architectModeAllowed lists the top-level commands available inside an Architect container.
 var architectModeAllowed = map[string]bool{
-	"world":       true,
-	"agent":       true,
-	"status":      true,
-	"architect":   true,
-	"web":  true,
-	"get":  true,
-	"help":        true,
+	"world":     true,
+	"agent":     true,
+	"status":    true,
+	"architect": true,
+	"web":       true,
+	"tool":      true,
+	"plugin":    true,
+	"skill":     true,
+	"help":      true,
 }
 
 // isArchitectMode returns true when running inside an Architect container.

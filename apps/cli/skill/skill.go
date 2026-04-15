@@ -11,9 +11,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/apps/cli/ui"
 	"github.com/spf13/cobra"
+
+	"spwn.sh/apps/cli/tool"
+	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/paths"
+	"spwn.sh/packages/project/lockfile"
 )
 
 // Cmd is the root `spwn skill` command group.
@@ -31,8 +35,8 @@ func init() {
 	Cmd.AddCommand(newCmd)
 	Cmd.AddCommand(editCmd)
 	Cmd.AddCommand(showCmd)
-	Cmd.AddCommand(getCmd)
-	Cmd.AddCommand(publishCmd)
+	Cmd.AddCommand(installCmd)
+	Cmd.AddCommand(uninstallCmd)
 	Cmd.AddCommand(rmCmd)
 
 	Cmd.SetHelpFunc(skillHelp)
@@ -56,9 +60,9 @@ func skillHelp(cmd *cobra.Command, args []string) {
 				{Name: "show <name>", Desc: "Display a skill"},
 				{Name: "rm <name>", Desc: "Delete a skill"},
 			}},
-			{Title: "Registry", Commands: []ui.HelpEntry{
-				{Name: "get <ref>", Desc: "Install a shared skill " + ui.Faint("[planned]")},
-				{Name: "publish <name>", Desc: "Publish a skill " + ui.Faint("[planned]")},
+			{Title: "Catalog", Commands: []ui.HelpEntry{
+				{Name: "install <ref>", Desc: "Attach a catalog skill to every agent + lockfile"},
+				{Name: "uninstall <ref>", Desc: "Detach a catalog skill"},
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn skill new paper-reading", Desc: ""},
@@ -182,25 +186,22 @@ var showCmd = &cobra.Command{
 	},
 }
 
-var getCmd = &cobra.Command{
-	Use:   "get <skill-ref>",
-	Short: "Install a skill from the registry",
+var installCmd = &cobra.Command{
+	Use:   "install <ref>",
+	Short: "Attach a catalog skill to every agent in the project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Fprintf(cmd.OutOrStderr(), "install %q: the skill registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
-		return nil
+		return tool.RunInstall(cmd, args[0], lockfile.KindSkill, agent.AddSkill)
 	},
 }
 
-var publishCmd = &cobra.Command{
-	Use:   "publish <skill-name>",
-	Short: "Publish a skill to the registry",
-	Args:  cobra.ExactArgs(1),
+var uninstallCmd = &cobra.Command{
+	Use:     "uninstall <ref>",
+	Aliases: []string{"detach"},
+	Short:   "Detach a catalog skill from every agent in the project",
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Fprintf(cmd.OutOrStderr(), "publish %q: the skill registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "The registry is planned for a future release.")
-		return nil
+		return tool.RunUninstall(cmd, args[0], lockfile.KindSkill, agent.RemoveSkill)
 	},
 }
 
