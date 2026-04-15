@@ -2,10 +2,11 @@
 ⬡ auth - manage credentials
 
 Usage:
-  spwn auth              Show authentication status
-    spwn auth [command]
+  spwn auth [command]
 
 Commands:
+  status                           Show authentication status (default when no subcommand)
+  providers                        List configured AI providers
   login                            Set up credentials (Keychain or manual)
   logout                           Clear cached credentials
   token <token>                    Set a token directly (CI / scripts)
