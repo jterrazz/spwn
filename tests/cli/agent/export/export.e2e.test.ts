@@ -61,6 +61,24 @@ describe('spwn agent export', () => {
         expect(result.stderr.text).not.toContain('panic:');
     });
 
+    test('import --as renames the agent on import', async () => {
+        // Given - a fresh export of neo, then neo is removed
+        // When - we import the archive with --as neo-copy
+        // Then - the on-disk dir is neo-copy and exit is zero
+        const result = await isolated('import rename')
+            .exec([
+                'agent create neo',
+                'agent export neo',
+                'agent rm neo',
+                'agent import neo.tar.gz --as neo-copy',
+            ])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn-home/agents/neo-copy/core/profile.md').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/core/profile.md').exists).toBe(false);
+    });
+
     test('import restores an agent from its own export', async () => {
         // Round-trip: create -> export -> rm -> import. Archive name
         // Drives the restored agent name, so we reuse "neo" here

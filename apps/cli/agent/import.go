@@ -7,11 +7,16 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 )
 
+var importAs string
+
 func init() {
+	importCmd.Flags().StringVar(&importAs, "as", "", "Rename the agent on import (instead of using the archive filename)")
 	Cmd.AddCommand(importCmd)
 	ui.MarkExperimental(importCmd)
 }
@@ -37,7 +42,8 @@ The archive must contain at least an identity/ layer.`,
 				"Provide the path to a .tar.gz file created by \"spwn agent export\"")
 		}
 
-		// Derive agent name from filename: neo.tar.gz → neo
+		// Derive agent name from filename: neo.tar.gz → neo (unless
+		// --as was given, which takes precedence).
 		base := filepath.Base(archivePath)
 		name := strings.TrimSuffix(base, ".tar.gz")
 		if name == base {
@@ -48,6 +54,9 @@ The archive must contain at least an identity/ layer.`,
 			s.Blank()
 			return s.FailHint("Invalid archive", fmt.Errorf("cannot derive agent name from %q", base),
 				"Archive should be named <agent-name>.tar.gz")
+		}
+		if importAs != "" {
+			name = importAs
 		}
 
 		// Check if agent already exists
@@ -77,6 +86,23 @@ The archive must contain at least an identity/ layer.`,
 				s.Blank()
 				return s.FailHint("Invalid archive content", fmt.Errorf("missing core/ layer"),
 					"Archive must contain at least a core/ directory")
+			}
+		}
+
+		// When --as was used, rewrite agent.yaml so the embedded
+		// `name:` field matches the new directory name. We keep this
+		// best-effort - a missing or unparseable agent.yaml does not
+		// fail the import.
+		if importAs != "" {
+			yamlPath := filepath.Join(agentDir, "agent.yaml")
+			if data, err := os.ReadFile(yamlPath); err == nil {
+				var m map[string]any
+				if err := yaml.Unmarshal(data, &m); err == nil {
+					m["name"] = name
+					if out, err := yaml.Marshal(m); err == nil {
+						_ = os.WriteFile(yamlPath, out, 0o644)
+					}
+				}
 			}
 		}
 
