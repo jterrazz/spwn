@@ -3,17 +3,22 @@ import { describe, expect, test } from 'vitest';
 import { spec } from '../../../setup/cli.specification.js';
 
 /**
- * E2E coverage for `spwn compile` — the disk materialisation path
- * introduced in Phase 2 of the compiler refactor. Each test pins one
- * flag or error path: project resolution, --dry-run, --out, --agent,
- * --json, --runtime fallback, and the "no spwn.yaml" diagnostic.
+ * E2E coverage for `spwn build --tree-only` - the disk
+ * materialisation path formerly known as `spwn compile`. Each test
+ * pins one flag or error path: project resolution, --dry-run,
+ * --output, --agent, --json, --runtime fallback, and the "no
+ * spwn.yaml" diagnostic.
  *
- * These exercise the CLI wiring only — the renderer itself is covered
- * by Go golden-fixture tests in packages/compile/runtimes/claudecode/.
+ * These exercise the CLI wiring only - the renderer itself is
+ * covered by Go golden-fixture tests in
+ * packages/compile/runtimes/claudecode/.
  */
-describe('spwn compile', () => {
+describe('spwn build --tree-only', () => {
     test('errors when run outside a spwn project', async () => {
-        const result = await spec('compile no project').project('empty').exec('compile').run();
+        const result = await spec('tree-only no project')
+            .project('empty')
+            .exec('build --tree-only')
+            .run();
 
         expect(result.exitCode).toBe(1);
         const stderr = result.stderr.text.toLowerCase();
@@ -22,9 +27,9 @@ describe('spwn compile', () => {
     });
 
     test('writes a Tree to ./dist on a minimal project', async () => {
-        const result = await spec('compile default out')
+        const result = await spec('tree-only default out')
             .project('docker-pilot')
-            .exec('compile')
+            .exec('build --tree-only')
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -35,9 +40,9 @@ describe('spwn compile', () => {
     });
 
     test('--dry-run prints paths without touching disk', async () => {
-        const result = await spec('compile dry run')
+        const result = await spec('tree-only dry run')
             .project('docker-pilot')
-            .exec('compile --dry-run')
+            .exec('build --tree-only --dry-run')
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -46,10 +51,10 @@ describe('spwn compile', () => {
         expect(result.file('dist').exists).toBe(false);
     });
 
-    test('--out writes to a custom location', async () => {
-        const result = await spec('compile out custom')
+    test('--output writes to a custom location', async () => {
+        const result = await spec('tree-only out custom')
             .project('docker-pilot')
-            .exec('compile --out build/preview')
+            .exec('build --tree-only --output build/preview')
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -59,32 +64,34 @@ describe('spwn compile', () => {
     });
 
     test('--json emits a machine-readable report', async () => {
-        const result = await spec('compile json')
+        const result = await spec('tree-only json')
             .project('docker-pilot')
-            .exec('compile --json')
+            .exec('build --tree-only --json')
             .run();
 
         expect(result.exitCode).toBe(0);
         const report = result.json.value as {
-            fileCount: number;
+            treeFiles: number;
+            treeOnly: boolean;
             outDir: string;
             paths: string[];
             runtime: string;
         };
         expect(report.runtime).toBe('claude-code');
-        expect(report.fileCount).toBeGreaterThan(0);
+        expect(report.treeOnly).toBe(true);
+        expect(report.treeFiles).toBeGreaterThan(0);
         expect(Array.isArray(report.paths)).toBe(true);
         expect(report.paths).toContain('agents/neo/CLAUDE.md');
         expect(report.paths).toContain('world/physics.md');
-        expect(report.fileCount).toBe(report.paths.length);
+        expect(report.treeFiles).toBe(report.paths.length);
     });
 
     test('--agent filters the Tree to one agent in a colony', async () => {
-        const result = await spec('compile agent filter')
+        const result = await spec('tree-only agent filter')
             .project('docker-pilot')
             .seed('agent/morpheus')
             .seed('spwn.yaml/colony.yaml')
-            .exec('compile --agent neo --dry-run')
+            .exec('build --tree-only --agent neo --dry-run')
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -95,9 +102,9 @@ describe('spwn compile', () => {
     });
 
     test('--runtime <bogus> errors with a hint about known runtimes', async () => {
-        const result = await spec('compile bad runtime')
+        const result = await spec('tree-only bad runtime')
             .project('docker-pilot')
-            .exec('compile --runtime codex')
+            .exec('build --tree-only --runtime codex')
             .run();
 
         expect(result.exitCode).toBe(1);
@@ -107,36 +114,49 @@ describe('spwn compile', () => {
     });
 
     test('--force re-compile replaces stale files from a filtered run', async () => {
-        // Given — a clean compile, then a filtered compile with
-        // --force. Before the cleanup guard shipped, the second run
-        // Would overwrite only the agent slice and leave stale
-        // World/* files lying around. Lock the replace semantics.
-        const result = await spec('compile force replaces stale')
+        // Given - a clean compile, then a filtered compile with
+        // --force. Before the cleanup guard shipped, the second
+        // run would overwrite only the agent slice and leave
+        // stale world/* files lying around. Lock the replace
+        // semantics.
+        const result = await spec('tree-only force replaces stale')
             .project('docker-pilot')
-            .exec(['compile', 'compile --agent neo --force'])
+            .exec(['build --tree-only', 'build --tree-only --agent neo --force'])
             .run();
 
         expect(result.exitCode).toBe(0);
-        // Filtered compile writes only the agent slice — no
-        // World/* files should remain from the first run.
+        // Filtered compile writes only the agent slice - no
+        // world/* files should remain from the first run.
         expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
         expect(result.file('dist/world/physics.md').exists).toBe(false);
         expect(result.file('dist/world/AGENTS.md').exists).toBe(false);
     });
 
     test('empty AGENTS.md is rejected with a loud error', async () => {
-        // Given — an otherwise-valid project whose agent prompt
-        // Is blank. Previously compile shipped an empty CLAUDE.md
-        // Silently; now it errors with a named agent list.
-        const result = await spec('compile empty agent md')
+        // Given - an otherwise-valid project whose agent prompt
+        // is blank. Previously compile shipped an empty CLAUDE.md
+        // silently; now it errors with a named agent list.
+        const result = await spec('tree-only empty agent md')
             .project('docker-pilot')
             .seed('agent/neo')
-            .exec('compile')
+            .exec('build --tree-only')
             .run();
 
         expect(result.exitCode).toBe(1);
         const stderr = result.stderr.text.toLowerCase();
         expect(stderr).toContain('agent prompt');
         expect(stderr).toContain('neo');
+    });
+
+    test('--dry-run without --tree-only errors', async () => {
+        // New guardrail: --dry-run is a tree-only concept because
+        // there's nothing to dry-run on the image-build path.
+        const result = await spec('tree-only dry-run requires tree-only')
+            .project('docker-pilot')
+            .exec('build --dry-run')
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toContain('--tree-only');
     });
 });

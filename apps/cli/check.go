@@ -89,7 +89,7 @@ severity. Exits non-zero when errors are found (or warnings, with
 		// recognises (e.g. `@spwn/codex`) even when no compile
 		// adapter is registered for it. Without this warning,
 		// `spwn check` happily reports "valid" and the user only
-		// discovers the gap when `spwn compile` fails with
+		// discovers the gap when `spwn build` fails with
 		// "unknown runtime". Surface it as a warning at every
 		// severity (not just --deep) so the inconsistency is loud.
 		compileIssues = append(compileIssues, crossCheckRuntimeAdapters(p.Root)...)
@@ -213,7 +213,7 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 			Level:   "warning",
 			Path:    "spwn.yaml#worlds",
 			Message: fmt.Sprintf("compile pass skipped: %v", err),
-			Hint:    "run `spwn compile --world <name>` against each world to validate it",
+			Hint:    "run `spwn build --tree-only --world <name>` against each world to validate it",
 		}}
 	}
 	var issues []compileIssue
@@ -278,7 +278,7 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 // crossCheckRuntimeAdapters inspects each agent.yaml's declared
 // runtime.backend and warns when the value is catalog-recognised but
 // has no compile adapter registered. This closes the gap where
-// `spwn check` says "valid" and `spwn compile` then fails with
+// `spwn check` says "valid" and `spwn build` then fails with
 // `unknown runtime`.
 func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 	src, err := source.Load(projectRoot)

@@ -26,7 +26,6 @@ Mind (persistent agent identity).
 * [spwn auth](./spwn_auth.md)	 - Manage credentials - login, logout, status
 * [spwn build](./spwn_build.md)	 - Compile the project and bake it into a Docker image
 * [spwn check](./spwn_check.md)	 - Validate the project tree against spwn.yaml
-* [spwn compile](./spwn_compile.md)	 - Compile the project into a runtime-specific file tree
 * [spwn down](./spwn_down.md)	 - Destroy a world
 * [spwn init](./spwn_init.md)	 - Scaffold a spwn project in the current directory
 * [spwn logs](./spwn_logs.md)	 - Show the system event log across worlds and agents
