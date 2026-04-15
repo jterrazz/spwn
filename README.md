@@ -87,7 +87,7 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 </td>
 <td align="center">
 <h3>📦 Reproducible Builds</h3>
-<code>spwn check</code> validates the project tree. <code>spwn build</code> flattens it into a content-hashed artifact - pinned Docker image digest, flattened agent tree, normalized manifest. <b>Byte-identical agents across environments.</b>
+<code>spwn check</code> validates the project tree. <code>spwn build</code> compiles it and bakes the result into a project-specific Docker image — pushable to any registry, reproducible anywhere. <b>Byte-identical agents across environments.</b>
 </td>
 </tr>
 </table>
@@ -332,7 +332,8 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn init                                    Scaffold a blank project in the current dir
 🟢 spwn init @spwn/matrix                       Install a bundled template (matrix, startup, ...)
 🟢 spwn check                                   Validate the project tree against 15 rules
-🟢 spwn build                                   Flatten to .spwn/build/ (pinned artifact)
+🟢 spwn compile                                 Render the project tree to ./dist (preview / debug)
+🟢 spwn build                                   Compile + bake into a project-specific Docker image
 
 # ── Agents ───────────────────────────────────────────────────────
 # Lifecycle

@@ -3,14 +3,11 @@ package world
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
 
@@ -238,14 +235,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	pw, projectErr := applyProjectDefaults(cmd, positionalName)
 	if projectErr != nil {
 		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
-	}
-
-	// Auto-build: when a spwn project exists, validate + flatten it into
-	// .spwn/build/ before spawning so the runtime always reads a fresh
-	// content-hashed artifact. No-op when there's no project (legacy
-	// global mode) and silent when the build cache is warm.
-	if err := runPreSpawnBuild(cmd); err != nil {
-		return err
 	}
 
 	s.Start("Loading config...")
@@ -538,50 +527,3 @@ func applyProjectDefaults(cmd *cobra.Command, requestedName string) (*projectWor
 	return pw, nil
 }
 
-// runPreSpawnBuild runs a project build before spawning so `spwn up`
-// always reads a fresh content-hashed artifact - the same shape `spwn
-// build` produces, just rolled into the spawn flow. No-op when no
-// spwn.yaml is reachable (legacy global mode). Errors abort the spawn
-// before any container is created.
-func runPreSpawnBuild(cmd *cobra.Command) error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("resolve cwd: %w", err)
-	}
-	p, err := project.Find(cwd)
-	if err != nil {
-		return fmt.Errorf("load manifest: %w", err)
-	}
-	if p == nil {
-		// No project - skip build, fall through to legacy spawn path.
-		return nil
-	}
-	issues := project.Validate(p)
-	if project.HasErrors(issues) {
-		return fmt.Errorf("project has validation errors - run `spwn check` to see them")
-	}
-	result, err := project.Build(p)
-	if err != nil {
-		return fmt.Errorf("build failed: %w", err)
-	}
-	out := cmd.OutOrStdout()
-	fmt.Fprintf(out, "  %s  Build ready - %d file(s), hash %s\n",
-		ui.Green("✓"), result.FileCount, ui.Faint(abbrevHash(result.Dir)))
-	return nil
-}
-
-func abbrevHash(dir string) string {
-	meta, err := project.LoadBuildMetadata(&project.Project{Root: dirOfBuildDir(dir)})
-	if err != nil || meta == nil {
-		return ""
-	}
-	if len(meta.ContentHash) > 12 {
-		return meta.ContentHash[:12]
-	}
-	return meta.ContentHash
-}
-
-func dirOfBuildDir(buildDir string) string {
-	// buildDir is <root>/.spwn/build; return <root>.
-	return filepath.Dir(filepath.Dir(buildDir))
-}
