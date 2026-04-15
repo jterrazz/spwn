@@ -22,7 +22,7 @@ func init() {
 	buildCmd.Flags().StringVar(&buildRuntime, "runtime", "", "Target runtime. Defaults to the runtime declared in agent.yaml (fallback: claude-code)")
 	buildCmd.Flags().StringVar(&buildWorld, "world", "", "World from spwn.yaml to build (required for multi-world projects)")
 	buildCmd.Flags().StringVar(&buildTag, "tag", "", "Image tag (default: spwn-<project>:latest)")
-	buildCmd.Flags().StringVar(&buildBase, "base", "spwn-world:latest", "Base image to derive from")
+	buildCmd.Flags().StringVar(&buildBase, "base", "", "Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest)")
 	buildCmd.Flags().BoolVar(&buildNoCache, "no-cache", false, "Disable Docker build cache")
 	buildCmd.Flags().BoolVar(&buildJSON, "json", false, "Emit a machine-readable build report on stdout")
 	rootCmd.AddCommand(buildCmd)
@@ -86,6 +86,17 @@ Examples:
 				cwd)
 		}
 
+		// Validate before touching Docker — same rules as `spwn
+		// check`. This keeps bad manifests from turning into
+		// confusing docker build errors downstream.
+		issues := project.Validate(p, project.ValidateOpts{
+			BuiltinTools:      catalogToolNames(),
+			SupportedRuntimes: supportedRuntimes(),
+		})
+		if project.HasErrors(issues) {
+			return fmt.Errorf("project has validation errors — run `spwn check` to see them")
+		}
+
 		src, err := source.Load(p.Root)
 		if err != nil {
 			return fmt.Errorf("load project source: %w", err)
@@ -121,6 +132,19 @@ Examples:
 			tag = fmt.Sprintf("spwn-%s:latest", p.Manifest.Name)
 		}
 
+		// Resolve the base image: --base > $SPWN_BASE_IMAGE >
+		// spwn-world:latest. This mirrors how spawn discovers the
+		// base image, so e2e tests pinning SPWN_BASE_IMAGE don't
+		// need an extra flag.
+		baseImage := buildBase
+		if baseImage == "" {
+			if env := os.Getenv("SPWN_BASE_IMAGE"); env != "" {
+				baseImage = env
+			} else {
+				baseImage = "spwn-world:latest"
+			}
+		}
+
 		// Labels: identify the project + mark the image kind so
 		// test cleanup can scope to built images without touching
 		// world or architect containers.
@@ -150,7 +174,7 @@ Examples:
 
 		ctx := context.Background()
 		result, err := image.BuildFromBase(ctx, dockerCli, image.BuildFromBaseRequest{
-			BaseImage:       buildBase,
+			BaseImage:       baseImage,
 			Tree:            tree,
 			TreeDestination: "/world",
 			Tag:             tag,
@@ -169,7 +193,7 @@ Examples:
 				Runtime:   runtimeName,
 				Tag:       result.Tag,
 				ImageID:   result.ImageID,
-				BaseImage: buildBase,
+				BaseImage: baseImage,
 				TreeFiles: treeFiles,
 				World:     input.WorldID,
 			}
