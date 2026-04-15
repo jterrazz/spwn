@@ -303,7 +303,7 @@ func ruleAgentStructure(in Input) []Issue {
 		level Level
 	}{
 		{"agent.yaml", false, LevelError},
-		{"CLAUDE.md", false, LevelError},
+		{"AGENT.md", false, LevelError},
 		{filepath.Join("core", "profile.md"), false, LevelError},
 		{"core", true, LevelWarning},
 		{"skills", true, LevelWarning},
@@ -718,8 +718,8 @@ func ruleMarkdownImports(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		claudePath := filepath.Join(a.Path, "CLAUDE.md")
-		result, err := resolve.Walk(a.Path, claudePath)
+		entryPath := filepath.Join(a.Path, "AGENT.md")
+		result, err := resolve.Walk(a.Path, entryPath)
 		if err != nil {
 			continue
 		}
@@ -737,7 +737,7 @@ func ruleMarkdownImports(in Input) []Issue {
 				rel[j] = relPath(in.Root, p)
 			}
 			out = append(out, Issue{
-				Level: LevelWarning, Path: relPath(in.Root, claudePath),
+				Level: LevelWarning, Path: relPath(in.Root, entryPath),
 				Message: "import cycle: " + strings.Join(rel, " -> "),
 			})
 		}

@@ -17,7 +17,7 @@ func scaffoldAgent(t *testing.T, root, name, yamlBody string) AgentRef {
 	if err := os.MkdirAll(filepath.Join(dir, "core"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	for _, p := range []string{"CLAUDE.md", "agent.yaml"} {
+	for _, p := range []string{"AGENT.md", "agent.yaml"} {
 		if p == "agent.yaml" {
 			if err := os.WriteFile(filepath.Join(dir, p), []byte(yamlBody), 0o644); err != nil {
 				t.Fatal(err)

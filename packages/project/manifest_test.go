@@ -17,7 +17,7 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	required := []string{
 		"spwn.yaml",
 		"spwn/agents/neo/agent.yaml",
-		"spwn/agents/neo/CLAUDE.md",
+		"spwn/agents/neo/AGENT.md",
 		"spwn/agents/neo/core/profile.md",
 		"spwn/agents/neo/skills/.gitkeep",
 		"spwn/agents/neo/knowledge/.gitkeep",
@@ -245,7 +245,7 @@ func TestBuild_flattensProjectIntoArtifact(t *testing.T) {
 		"build.json",
 		"manifest.json",
 		"agents/neo/agent.yaml",
-		"agents/neo/CLAUDE.md",
+		"agents/neo/AGENT.md",
 		"agents/neo/core/profile.md",
 	}
 	for _, rel := range expected {

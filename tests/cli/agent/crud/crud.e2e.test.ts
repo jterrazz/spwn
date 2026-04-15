@@ -186,7 +186,7 @@ describe('spwn agent CRUD', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn/agents/trinity/agent.yaml').exists).toBe(true);
-        expect(result.file('spwn/agents/trinity/CLAUDE.md').exists).toBe(true);
+        expect(result.file('spwn/agents/trinity/AGENT.md').exists).toBe(true);
         expect(result.file('spwn/agents/trinity/core').exists).toBe(true);
     });
 

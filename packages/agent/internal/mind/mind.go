@@ -32,9 +32,13 @@ tools:
   - "@spwn/python"
 `
 
-// defaultClaudeMDTmpl is the baseline CLAUDE.md written by Init/Repair.
-// Mirrors packages/project/internal/scaffold/templates/CLAUDE.md.tmpl.
-const defaultClaudeMDTmpl = `# __NAME__
+// defaultAgentMDTmpl is the baseline source AGENT.md written by
+// Init/Repair. Mirrors packages/project/internal/scaffold/templates/
+// AGENT.md.tmpl. This is the provider-neutral agent prompt file; a
+// runtime-specific renderer (e.g. packages/compile/runtimes/
+// claudecode) is what eventually turns it into CLAUDE.md inside the
+// container.
+const defaultAgentMDTmpl = `# __NAME__
 
 You are **__NAME__**, an agent running inside a spwn world.
 
@@ -121,14 +125,14 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 		return "", fmt.Errorf("create profile: %w", err)
 	}
 
-	// Write the baseline agent.yaml and CLAUDE.md so `spwn check`
+	// Write the baseline agent.yaml and AGENT.md so `spwn check`
 	// passes immediately after `agent create`. Both files are
 	// required by the project validator (ruleAgentStructure).
 	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
 		return "", fmt.Errorf("create agent.yaml: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "CLAUDE.md"), renderTmpl(defaultClaudeMDTmpl, name), 0644); err != nil {
-		return "", fmt.Errorf("create CLAUDE.md: %w", err)
+	if err := os.WriteFile(filepath.Join(dir, "AGENT.md"), renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
+		return "", fmt.Errorf("create AGENT.md: %w", err)
 	}
 
 	return dir, nil
@@ -165,7 +169,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 		}
 	}
 
-	// Re-scaffold agent.yaml / CLAUDE.md when missing so --force can
+	// Re-scaffold agent.yaml / AGENT.md when missing so --force can
 	// rescue a partially-deleted agent tree.
 	agentYAMLPath := filepath.Join(dir, "agent.yaml")
 	if _, err := os.Stat(agentYAMLPath); err != nil && os.IsNotExist(err) {
@@ -173,10 +177,10 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 			return fmt.Errorf("create agent.yaml: %w", err)
 		}
 	}
-	claudePath := filepath.Join(dir, "CLAUDE.md")
-	if _, err := os.Stat(claudePath); err != nil && os.IsNotExist(err) {
-		if err := os.WriteFile(claudePath, renderTmpl(defaultClaudeMDTmpl, name), 0644); err != nil {
-			return fmt.Errorf("create CLAUDE.md: %w", err)
+	entryPath := filepath.Join(dir, "AGENT.md")
+	if _, err := os.Stat(entryPath); err != nil && os.IsNotExist(err) {
+		if err := os.WriteFile(entryPath, renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
+			return fmt.Errorf("create AGENT.md: %w", err)
 		}
 	}
 	return nil
