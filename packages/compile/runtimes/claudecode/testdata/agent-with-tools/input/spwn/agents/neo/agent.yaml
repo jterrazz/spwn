@@ -1,7 +1,7 @@
 name: neo
 runtime:
   backend: "@spwn/claude-code"
-tools:
+packages:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/node"

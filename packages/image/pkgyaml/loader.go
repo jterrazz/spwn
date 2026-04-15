@@ -1,4 +1,4 @@
-package toolyaml
+package pkgyaml
 
 import (
 	"fmt"
@@ -13,9 +13,9 @@ import (
 	ib "spwn.sh/packages/image"
 )
 
-// Manifest is the canonical basename. Both catalog and local tools
-// live at <toolDir>/spwn-tool.yaml.
-const Manifest = "spwn-tool.yaml"
+// Manifest is the canonical basename. Both catalog and local
+// packages live at <packageDir>/package.yaml.
+const Manifest = "package.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
 // supporting directories (files/, skills/, config/). It abstracts

@@ -11,9 +11,8 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
-	plugins "spwn.sh/catalog/plugins"
 	runtimes "spwn.sh/catalog/runtimes"
-	tools "spwn.sh/catalog/tools"
+	pkg "spwn.sh/catalog/packages"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claudecode"
 	ib "spwn.sh/packages/image"
@@ -179,14 +178,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// plugin config still needs to be merged into the container's
 	// runtime settings file after the container boots.
 	reg := ib.NewRegistry()
-	if err := tools.RegisterDefaults(reg); err != nil {
+	if err := pkg.RegisterDefaults(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
 		return nil, fmt.Errorf("register runtimes: %w", err)
-	}
-	if err := plugins.RegisterDefaults(reg); err != nil {
-		return nil, fmt.Errorf("register plugins: %w", err)
 	}
 
 	// Always include runtime essentials, then add user-specified tools
@@ -203,8 +199,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// is no longer part of the baseline footprint. Users who want
 	// node for their own tools still add @spwn/node to agent.yaml.
 	required := []string{"@spwn/unix", "@spwn/claude-code"}
-	toolList := append(required, opts.Manifest.Tools...)
-	toolList = append(toolList, opts.Manifest.Plugins...)
+	toolList := append(required, opts.Manifest.Packages...)
 
 	// Deduplicate
 	{

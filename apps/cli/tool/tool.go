@@ -1,15 +1,17 @@
-// Package tool implements the `spwn tool` command group — managing
-// reusable tool packs (e.g. @spwn/unix, @spwn/python).
+// Package tool implements the `spwn package` command group — managing
+// reusable packages (tools, plugins, skills unified under one concept).
 //
-// Tools are declared in each agent's agent.yaml#tools list and pinned
-// in the project's spwn.lock.yaml. The shape is deliberately npm-ish:
+// Packages are declared in each agent's agent.yaml#packages list and
+// pinned in the project's spwn.lock.yaml. The shape is deliberately
+// npm-ish:
 //
-//   - @spwn/<name> is a catalog pack compiled into the spwn binary.
-//     `spwn tool install @spwn/unix` adds it to every agent's agent.yaml
-//     and records the pin in the lockfile.
-//   - <bare-name> is a local pack authored under spwn/tools/<name>/.
-//     The install verb rejects bare names with a hint — they are not
-//     "installed", they are authored.
+//   - @spwn/<name> is a catalog package compiled into the spwn binary.
+//     `spwn package install @spwn/unix` adds it to every agent's
+//     agent.yaml and records the pin in the lockfile.
+//   - <bare-name> is a local package authored under
+//     spwn/packages/<name>/ (directory form) or spwn/packages/<name>.md
+//     (bare-markdown skill form). The install verb rejects bare names
+//     with a hint — they are not "installed", they are authored.
 //   - @<owner>/<name> (owner != spwn) is a future community-registry
 //     ref, currently rejected as unsupported.
 package tool
@@ -27,22 +29,24 @@ import (
 	"spwn.sh/packages/project/refs"
 )
 
-// Cmd is the root `spwn tool` command group.
+// Cmd is the root `spwn package` command group.
 var Cmd = &cobra.Command{
-	Use:   "tool",
-	Short: "Manage reusable tool packs (e.g. @spwn/unix, @spwn/python)",
-	Long: `Tool packs are composable building blocks that agents plug into their worlds.
+	Use:     "package",
+	Aliases: []string{"pkg"},
+	Short:   "Manage reusable packages (e.g. @spwn/unix, @spwn/mempalace)",
+	Long: `Packages are the unified building blocks that agents plug into their worlds:
+tools, plugins, and skills all share one schema.
 
-Install a catalog pack into the project's agents + lockfile with:
-  spwn tool install @spwn/python
+Install a catalog package into the project's agents + lockfile with:
+  spwn package install @spwn/python
 
 Remove it with:
-  spwn tool uninstall @spwn/python
+  spwn package uninstall @spwn/python
 
 List what's installed with:
-  spwn tool ls
+  spwn package ls
 
-Local tool packs authored under spwn/tools/<name>/ are referenced by
+Local packages authored under spwn/packages/<name>/ are referenced by
 bare name in agent.yaml and do NOT go through the install verb — they
 are authored in place.`,
 }
@@ -53,31 +57,31 @@ func init() {
 	Cmd.AddCommand(installCmd)
 	Cmd.AddCommand(uninstallCmd)
 
-	Cmd.SetHelpFunc(toolHelp)
+	Cmd.SetHelpFunc(packageHelp)
 }
 
-func toolHelp(cmd *cobra.Command, args []string) {
-	if cmd.Name() != "tool" {
+func packageHelp(cmd *cobra.Command, args []string) {
+	if cmd.Name() != "package" {
 		ui.MinimalHelp(cmd, args)
 		return
 	}
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ tool")+" "+ui.Faint("- reusable tool packs for agents"),
+		ui.Strong("⬡ package")+" "+ui.Faint("- reusable packages for agents"),
 		[]ui.HelpGroup{
 			{Title: "Manage", Commands: []ui.HelpEntry{
-				{Name: "install <ref>", Desc: "Add a pack to every agent + lockfile"},
-				{Name: "uninstall <ref>", Desc: "Remove a pack from every agent + lockfile"},
-				{Name: "ls", Desc: "List installed tool packs"},
-				{Name: "show <pack>", Desc: "Inspect a tool pack"},
+				{Name: "install <ref>", Desc: "Add a package to every agent + lockfile"},
+				{Name: "uninstall <ref>", Desc: "Remove a package from every agent + lockfile"},
+				{Name: "ls", Desc: "List installed packages"},
+				{Name: "show <pack>", Desc: "Inspect a package"},
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
-				{Name: "spwn tool install @spwn/python", Desc: ""},
-				{Name: "spwn tool uninstall @spwn/git", Desc: ""},
-				{Name: "spwn tool ls", Desc: "What's pinned in the lockfile"},
+				{Name: "spwn package install @spwn/python", Desc: ""},
+				{Name: "spwn pkg install @spwn/mempalace", Desc: "Short alias"},
+				{Name: "spwn package ls", Desc: "What's pinned in the lockfile"},
 			}},
 		},
-		"spwn tool [command]",
+		"spwn package [command]",
 		"",
 	)
 }
@@ -86,7 +90,7 @@ func toolHelp(cmd *cobra.Command, args []string) {
 var lsCmd = &cobra.Command{
 	Use:     "ls",
 	Aliases: []string{"list"},
-	Short:   "List installed tool packs",
+	Short:   "List installed packages",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		p, err := findProject()
 		if err != nil {
@@ -97,15 +101,15 @@ var lsCmd = &cobra.Command{
 			return err
 		}
 		out := cmd.OutOrStdout()
-		refs := lock.RefsIn(lockfile.KindTool)
+		refs := lock.Refs()
 		if len(refs) == 0 {
-			fmt.Fprintln(out, "No tool packs installed.")
-			fmt.Fprintln(out, "Install one with 'spwn tool install @spwn/<name>'.")
+			fmt.Fprintln(out, "No packages installed.")
+			fmt.Fprintln(out, "Install one with 'spwn package install @spwn/<name>'.")
 			return nil
 		}
-		fmt.Fprintln(out, "Installed tool packs:")
+		fmt.Fprintln(out, "Installed packages:")
 		for _, r := range refs {
-			e := lock.Tools[r]
+			e := lock.Packages[r]
 			version := e.Version
 			if version == "" {
 				version = "-"
@@ -117,8 +121,8 @@ var lsCmd = &cobra.Command{
 }
 
 var showCmd = &cobra.Command{
-	Use:   "show <tool-pack>",
-	Short: "Inspect a tool pack",
+	Use:   "show <package>",
+	Short: "Inspect a package",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		p, err := findProject()
@@ -130,7 +134,7 @@ var showCmd = &cobra.Command{
 			return err
 		}
 		ref := args[0]
-		e, ok := lock.Tools[ref]
+		e, ok := lock.Packages[ref]
 		if !ok {
 			return fmt.Errorf("%q is not recorded in %s", ref, lockfile.FileName)
 		}
@@ -139,35 +143,33 @@ var showCmd = &cobra.Command{
 	},
 }
 
-// installCmd adds a ref to every agent's agent.yaml#tools and pins it
-// in the project lockfile. Bare names are rejected with a pointer to
-// the local-pack authoring flow.
+// installCmd adds a ref to every agent's agent.yaml#packages and
+// pins it in the project lockfile. Bare names are rejected with a
+// pointer to the local-package authoring flow.
 var installCmd = &cobra.Command{
 	Use:   "install <ref>",
-	Short: "Install a tool pack into the project",
+	Short: "Install a package into the project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return RunInstall(cmd, args[0], lockfile.KindTool, installTool)
+		return RunInstall(cmd, args[0])
 	},
 }
 
 var uninstallCmd = &cobra.Command{
 	Use:     "uninstall <ref>",
 	Aliases: []string{"rm", "remove"},
-	Short:   "Uninstall a tool pack from the project",
+	Short:   "Uninstall a package from the project",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return RunUninstall(cmd, args[0], lockfile.KindTool, uninstallTool)
+		return RunUninstall(cmd, args[0])
 	},
 }
 
-func installTool(agentName, ref string) error  { return agent.AddTool(agentName, ref) }
-func uninstallTool(agentName, ref string) error { return agent.RemoveTool(agentName, ref) }
-
-// RunInstall is shared between tool + plugin + skill install verbs.
-// Parses the ref, rejects bare/registry refs with verb-specific hints,
-// mutates every agent.yaml in the project, and updates the lockfile.
-func RunInstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate func(agentName, ref string) error) error {
+// RunInstall parses the ref, rejects bare/registry refs with crisp
+// hints, mutates every agent.yaml in the project, and updates the
+// lockfile. Exported so sibling CLI commands (if any land in the
+// future) can reuse the logic.
+func RunInstall(cmd *cobra.Command, raw string) error {
 	p, err := findProject()
 	if err != nil {
 		return err
@@ -177,20 +179,17 @@ func RunInstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate func(
 	ref := refs.Parse(pack)
 	switch ref.Kind {
 	case refs.KindLocal:
-		return fmt.Errorf("%q is a bare name — local %s are authored in place, not installed. "+
-			"Create the directory under ./spwn/%s/%s/ and reference it from agent.yaml",
-			pack, kindPlural(kind), kindDir(kind), pack)
+		return fmt.Errorf("%q is a bare name — local packages are authored in place, not installed. "+
+			"Create ./spwn/packages/%s/package.yaml for a full package or ./spwn/packages/%s.md for a bare skill",
+			pack, pack, pack)
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
-			"Use @spwn/<name> for built-in packs, or author a local pack under ./spwn/%s/",
-			raw, ref.Owner, ref.Name, kindDir(kind))
+			"Use @spwn/<name> for built-in packages, or author a local package under ./spwn/packages/",
+			raw, ref.Owner, ref.Name)
 	}
 
-	// @spwn/<name> — verify it's in the catalog before touching anything.
-	if kind != lockfile.KindSkill {
-		if !catalogHas(pack, kind) {
-			return fmt.Errorf("unknown builtin %q — run `spwn tool ls` to see available packs", pack)
-		}
+	if !catalogHas(pack) {
+		return fmt.Errorf("unknown builtin %q — run `spwn package ls` to see available packages", pack)
 	}
 
 	agents := p.Agents
@@ -202,7 +201,7 @@ func RunInstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate func(
 		if !a.Exists {
 			continue
 		}
-		if err := mutate(a.Name, pack); err != nil {
+		if err := agent.AddPackage(a.Name, pack); err != nil {
 			return fmt.Errorf("update %s: %w", a.Name, err)
 		}
 		mutated++
@@ -212,7 +211,7 @@ func RunInstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate func(
 	if err != nil {
 		return err
 	}
-	lock.Add(kind, pack, lockfile.Entry{
+	lock.Add(pack, lockfile.Entry{
 		Version: version,
 		Source:  lockfile.SourceBuiltin,
 	})
@@ -227,7 +226,9 @@ func RunInstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate func(
 	return nil
 }
 
-func RunUninstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate func(agentName, ref string) error) error {
+// RunUninstall mirrors RunInstall: removes the ref from every
+// agent.yaml and from the lockfile.
+func RunUninstall(cmd *cobra.Command, raw string) error {
 	p, err := findProject()
 	if err != nil {
 		return err
@@ -239,7 +240,7 @@ func RunUninstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate fun
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
 	if ref.Kind == refs.KindLocal {
-		return fmt.Errorf("%q is a bare name — delete ./spwn/%s/%s/ by hand if you want to remove it", pack, kindDir(kind), pack)
+		return fmt.Errorf("%q is a bare name — delete ./spwn/packages/%s/ (or %s.md) by hand to remove it", pack, pack, pack)
 	}
 
 	mutated := 0
@@ -247,7 +248,7 @@ func RunUninstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate fun
 		if !a.Exists {
 			continue
 		}
-		if err := mutate(a.Name, pack); err != nil {
+		if err := agent.RemovePackage(a.Name, pack); err != nil {
 			return fmt.Errorf("update %s: %w", a.Name, err)
 		}
 		mutated++
@@ -257,7 +258,7 @@ func RunUninstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate fun
 	if err != nil {
 		return err
 	}
-	lock.Remove(kind, pack)
+	lock.Remove(pack)
 	if err := lockfile.Save(p.Root, lock); err != nil {
 		return err
 	}
@@ -269,14 +270,12 @@ func RunUninstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate fun
 }
 
 // FindProject walks up from cwd looking for spwn.yaml and loads it.
-// Exported so sibling CLI packages (skill, plugin) can reuse the
-// "find-or-fail" boilerplate without duplicating the error shape.
+// Exported for sibling CLI packages that need the same "find-or-fail"
+// boilerplate.
 func FindProject() (*project.Project, error) {
 	return findProject()
 }
 
-// findProject walks up from cwd looking for spwn.yaml and loads it.
-// Used by every install/uninstall verb.
 func findProject() (*project.Project, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -293,44 +292,21 @@ func findProject() (*project.Project, error) {
 }
 
 // catalogHas checks whether `pack` is a known @spwn/* ref. The
-// catalog list is supplied by the parent CLI — tool.go doesn't import
-// spwn.sh/catalog to avoid a cycle. The lookup function is set at
-// package init by apps/cli/cmd/spwn.
-var catalogLookup func(pack string, kind lockfile.Kind) bool
+// catalog list is supplied by the parent CLI — this package doesn't
+// import spwn.sh/catalog to avoid a cycle.
+var catalogLookup func(pack string) bool
 
 // SetCatalogLookup wires the built-in catalog into the install verbs.
 // Called from the CLI entrypoint to avoid a direct catalog import.
-func SetCatalogLookup(f func(pack string, kind lockfile.Kind) bool) {
+func SetCatalogLookup(f func(pack string) bool) {
 	catalogLookup = f
 }
 
-func catalogHas(pack string, kind lockfile.Kind) bool {
+func catalogHas(pack string) bool {
 	if catalogLookup == nil {
-		return true // permissive when no catalog wired — fallback
+		return true // permissive when no catalog wired — fallback for tests
 	}
-	return catalogLookup(pack, kind)
-}
-
-func kindPlural(k lockfile.Kind) string {
-	switch k {
-	case lockfile.KindTool:
-		return "tools"
-	case lockfile.KindPlugin:
-		return "plugins"
-	case lockfile.KindSkill:
-		return "skills"
-	}
-	return ""
-}
-
-func kindDir(k lockfile.Kind) string {
-	switch k {
-	case lockfile.KindTool, lockfile.KindPlugin:
-		return "tools"
-	case lockfile.KindSkill:
-		return "skills"
-	}
-	return "tools"
+	return catalogLookup(pack)
 }
 
 func plural(n int) string {

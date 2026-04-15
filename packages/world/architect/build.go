@@ -11,9 +11,8 @@ import (
 	"runtime/debug"
 	"strings"
 
-	plugins "spwn.sh/catalog/plugins"
 	runtimes "spwn.sh/catalog/runtimes"
-	tools "spwn.sh/catalog/tools"
+	pkg "spwn.sh/catalog/packages"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/base"
@@ -44,16 +43,12 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 
 	// Resolve architect tools via the image package to generate install steps
 	reg := ib.NewRegistry()
-	if err := tools.RegisterDefaults(reg); err != nil {
+	if err := pkg.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register runtimes: %w", err)
 	}
-	if err := plugins.RegisterDefaults(reg); err != nil {
-		return fmt.Errorf("register plugins: %w", err)
-	}
-
 	// The architect needs these tools installed in the image.
 	// @spwn/cli is handled separately (cross-compiled binary), so we only need
 	// the other tools that @spwn/architect depends on.

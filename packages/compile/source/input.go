@@ -66,12 +66,11 @@ func ToCompileInput(src *ProjectSource, worldName string) (compile.Input, error)
 		byName[a.Name] = a
 	}
 
-	// Collect the union of tools + plugins from every agent in this
-	// world. This mirrors what spawn does before probing the
-	// container: the render doesn't need a verified list, it just
-	// needs to know what the manifest *claims* is available.
-	tools := map[string]struct{}{}
-	plugins := map[string]struct{}{}
+	// Collect the union of packages from every agent in this world.
+	// This mirrors what spawn does before probing the container: the
+	// render doesn't need a verified list, it just needs to know what
+	// the manifest *claims* is available.
+	packages := map[string]struct{}{}
 	agents := make([]compile.AgentInput, 0, len(world.Agents))
 	for _, name := range world.Agents {
 		a, ok := byName[name]
@@ -79,40 +78,30 @@ func ToCompileInput(src *ProjectSource, worldName string) (compile.Input, error)
 			return compile.Input{}, fmt.Errorf(
 				"world %q references missing agent %q", selected, name)
 		}
-		for _, t := range a.Config.Tools {
-			tools[t] = struct{}{}
-		}
-		for _, p := range a.Config.Plugins {
-			plugins[p] = struct{}{}
+		for _, p := range a.Config.Packages {
+			packages[p] = struct{}{}
 		}
 		agents = append(agents, compile.AgentInput{
 			Name: a.Name,
 			Role: a.Config.Role,
 		})
 	}
-	// Add world-level tool overrides too.
-	for _, t := range world.Tools {
-		tools[t] = struct{}{}
+	// Add world-level package overrides too.
+	for _, p := range world.Packages {
+		packages[p] = struct{}{}
 	}
 
-	toolList := make([]string, 0, len(tools))
-	for t := range tools {
-		toolList = append(toolList, t)
+	packageList := make([]string, 0, len(packages))
+	for p := range packages {
+		packageList = append(packageList, p)
 	}
-	sort.Strings(toolList)
-
-	pluginList := make([]string, 0, len(plugins))
-	for p := range plugins {
-		pluginList = append(pluginList, p)
-	}
-	sort.Strings(pluginList)
+	sort.Strings(packageList)
 
 	return compile.Input{
 		Manifest: models.Manifest{
-			Tools:   toolList,
-			Plugins: pluginList,
+			Packages: packageList,
 		},
-		VerifiedTools: toolList,
+		VerifiedTools: packageList,
 		WorldID:       selected,
 		Agents:        agents,
 	}, nil

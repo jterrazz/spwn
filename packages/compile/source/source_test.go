@@ -32,8 +32,8 @@ func TestLoadMinimalProject(t *testing.T) {
 	if neo.Config.Role != "worker" {
 		t.Errorf("agent.yaml role: got %q", neo.Config.Role)
 	}
-	if len(neo.Config.Tools) != 2 {
-		t.Errorf("agent.yaml tools: got %d, want 2", len(neo.Config.Tools))
+	if len(neo.Config.Packages) != 2 {
+		t.Errorf("agent.yaml packages: got %d, want 2", len(neo.Config.Packages))
 	}
 	if got, want := len(neo.Layers.Skills), 1; got != want {
 		t.Errorf("layer skills: got %d, want %d", got, want)

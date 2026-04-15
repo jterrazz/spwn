@@ -81,14 +81,10 @@ type Input struct {
 	// world. Surfaced as info-level issues.
 	OrphanRefs []AgentRef
 
-	// BuiltinTools is the authoritative catalog of known tool packs.
-	// Nil → fall back to @spwn/* prefix heuristic.
+	// BuiltinTools is the authoritative catalog of known built-in
+	// packages (tools, plugins, runtimes). Nil → fall back to
+	// @spwn/* prefix heuristic.
 	BuiltinTools []string
-
-	// BuiltinSkills is the authoritative catalog of known skill packs.
-	// Today always empty — the built-in skill catalog is reserved for
-	// a future release. Local-ref validation for skills runs regardless.
-	BuiltinSkills []string
 
 	// SupportedRuntimes is the list of runtime backends the host can
 	// actually spawn (e.g. "@spwn/claude-code"). Nil → don't check.
@@ -110,10 +106,9 @@ func Run(in Input) []Issue {
 		ruleReservedAgentNames,
 		ruleOneAgentOneWorld,
 		ruleWorkspaceMounts,
-		ruleToolVersionConflict,
+		rulePackageVersionConflict,
 		ruleRuntimeBackendConflict,
-		ruleToolsExist,
-		ruleSkillsExist,
+		rulePackagesExist,
 		ruleLockfileConsistent,
 		ruleRuntimeSupported,
 		ruleMarkdownImports,
@@ -355,12 +350,13 @@ func ruleAgentStructure(in Input) []Issue {
 
 // agentYAML is the validator's local view of agent.yaml. Just enough
 // to drive rules.
+//
+// Packages replaces the old Tools/Plugins/Skills trichotomy under the
+// unified package model — see packages/agent/manifest.go.
 type agentYAML struct {
-	Name    string   `yaml:"name"`
-	Tools   []string `yaml:"tools"`
-	Plugins []string `yaml:"plugins"`
-	Skills  []string `yaml:"skills"`
-	Runtime struct {
+	Name     string   `yaml:"name"`
+	Packages []string `yaml:"packages"`
+	Runtime  struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
 }
@@ -510,10 +506,10 @@ func splitWorkspace(entry string) (host, container string, hasColon bool) {
 	return entry[:idx], entry[idx+1:], true
 }
 
-// ruleToolVersionConflict flags multi-agent worlds whose members
-// declare the same tool pack at different versions. Versions are
+// rulePackageVersionConflict flags multi-agent worlds whose members
+// declare the same package at different versions. Versions are
 // detected via the `@scope/name@version` suffix convention.
-func ruleToolVersionConflict(in Input) []Issue {
+func rulePackageVersionConflict(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
@@ -534,11 +530,7 @@ func ruleToolVersionConflict(in Input) []Issue {
 			if err != nil {
 				continue
 			}
-			// Plugins share the tool registry and count against the
-			// same version-conflict budget as tools.
-			allRefs := append([]string{}, parsed.Tools...)
-			allRefs = append(allRefs, parsed.Plugins...)
-			for _, t := range allRefs {
+			for _, t := range parsed.Packages {
 				pack, version := refs.SplitVersion(t)
 				vmap, ok := versions[pack]
 				if !ok {
@@ -557,8 +549,8 @@ func ruleToolVersionConflict(in Input) []Issue {
 			}
 			out = append(out, Issue{
 				Level: LevelError, Path: "spwn.yaml#worlds." + wname,
-				Message: fmt.Sprintf("tool %q has conflicting versions across agents in world %q", pack, wname),
-				Hint:    "align the tool version across all agents that share a world",
+				Message: fmt.Sprintf("package %q has conflicting versions across agents in world %q", pack, wname),
+				Hint:    "align the package version across all agents that share a world",
 			})
 		}
 	}
@@ -607,9 +599,15 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 	return out
 }
 
-// ruleToolsExist checks every tool referenced by any agent or world
-// against the BuiltinTools catalog (or @spwn/* heuristic).
-func ruleToolsExist(in Input) []Issue {
+// rulePackagesExist checks every package referenced by any agent or
+// world against the BuiltinTools catalog (for @spwn/* refs) and
+// against the filesystem (for bare local refs).
+//
+// Local refs resolve to either:
+//   - spwn/packages/<name>/ (a directory-form package, with or without
+//     a package.yaml inside), OR
+//   - spwn/packages/<name>.md (a bare-markdown skill).
+func rulePackagesExist(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
@@ -619,38 +617,66 @@ func ruleToolsExist(in Input) []Issue {
 	}
 	haveCatalog := in.BuiltinTools != nil
 	checked := map[string]bool{}
-	check := func(tool, location string) []Issue {
-		pack, _ := refs.SplitVersion(tool)
+	check := func(raw, location string) []Issue {
+		pack, _ := refs.SplitVersion(raw)
 		key := pack + "@@" + location
 		if checked[key] {
 			return nil
 		}
 		checked[key] = true
 		ref := refs.Parse(pack)
-		switch refs.ResolveTool(in.Root, ref, builtin, haveCatalog) {
-		case refs.ResolveOK:
-			return nil
-		case refs.ResolveRegistryUnsupported:
+
+		// For @spwn/* and @<owner>/* refs, resolve against the
+		// catalog.
+		if ref.Kind != refs.KindLocal {
+			switch refs.ResolveTool(in.Root, ref, builtin, haveCatalog) {
+			case refs.ResolveOK:
+				return nil
+			case refs.ResolveRegistryUnsupported:
+				return []Issue{{
+					Level: LevelError, Path: location,
+					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
+					Hint: "use @spwn/<name> for built-in packages or drop a directory under ./spwn/packages/<name>/ for a local package; " +
+						"remote registries (@<owner>/<name>) are planned but not implemented yet",
+				}}
+			default: // ResolveNotFound
+				return []Issue{{
+					Level: LevelError, Path: location,
+					Message: fmt.Sprintf("package %q does not exist", raw),
+					Hint:    suggestPackage(pack, in.BuiltinTools),
+				}}
+			}
+		}
+
+		// Local ref: try directory form (full package) then file form
+		// (bare markdown skill).
+		if ref.Name == "" {
 			return []Issue{{
 				Level: LevelError, Path: location,
-				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", tool),
-				Hint: "use @spwn/<name> for built-in packs or drop a directory under ./spwn/tools/<name>/ for a local pack; " +
-					"remote registries (@<owner>/<name>) are planned but not implemented yet",
-			}}
-		default: // ResolveNotFound
-			return []Issue{{
-				Level: LevelError, Path: location,
-				Message: fmt.Sprintf("tool %q does not exist", tool),
-				Hint:    suggestTool(pack, in.BuiltinTools),
+				Message: fmt.Sprintf("package %q is malformed", raw),
 			}}
 		}
+		dirForm := filepath.Join(in.Root, "spwn", "packages", ref.Name)
+		if info, err := os.Stat(dirForm); err == nil && info.IsDir() {
+			return nil
+		}
+		fileForm := filepath.Join(in.Root, "spwn", "packages", ref.Name+".md")
+		if info, err := os.Stat(fileForm); err == nil && !info.IsDir() {
+			return nil
+		}
+		return []Issue{{
+			Level: LevelError, Path: location,
+			Message: fmt.Sprintf("package %q does not exist", raw),
+			Hint: "create ./spwn/packages/" + ref.Name + "/package.yaml for a full package, " +
+				"or ./spwn/packages/" + ref.Name + ".md for a bare skill",
+		}}
 	}
 
 	var out []Issue
 	for _, wname := range sortedKeys(in.Manifest.Worlds) {
 		w := in.Manifest.Worlds[wname]
-		loc := "spwn.yaml#worlds." + wname + ".tools"
-		for _, t := range w.Tools {
+		loc := "spwn.yaml#worlds." + wname + ".packages"
+		for _, t := range w.Packages {
 			out = append(out, check(t, loc)...)
 		}
 	}
@@ -662,95 +688,24 @@ func ruleToolsExist(in Input) []Issue {
 		if err != nil {
 			continue
 		}
-		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#tools"
-		for _, t := range parsed.Tools {
+		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#packages"
+		for _, t := range parsed.Packages {
 			out = append(out, check(t, loc)...)
 		}
-		ploc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#plugins"
-		for _, p := range parsed.Plugins {
-			out = append(out, check(p, ploc)...)
-		}
 	}
 	return out
 }
 
-// ruleSkillsExist mirrors ruleToolsExist for the agent.yaml `skills:`
-// list. Bare names must exist at spwn/skills/<name>.md (file form) or
-// spwn/skills/<name>/ (directory form). `@spwn/*` refs are checked
-// against BuiltinSkills — empty today, so any builtin ref passes via
-// the heuristic path. `@<owner>/*` refs are rejected as unsupported.
-func ruleSkillsExist(in Input) []Issue {
-	if in.Manifest == nil {
-		return nil
-	}
-	builtin := make(map[string]struct{}, len(in.BuiltinSkills))
-	for _, s := range in.BuiltinSkills {
-		builtin[s] = struct{}{}
-	}
-	haveCatalog := in.BuiltinSkills != nil
-	checked := map[string]bool{}
-	check := func(skill, location string) []Issue {
-		pack, _ := refs.SplitVersion(skill)
-		key := pack + "@@" + location
-		if checked[key] {
-			return nil
-		}
-		checked[key] = true
-		ref := refs.Parse(pack)
-		switch refs.ResolveSkill(in.Root, ref, builtin, haveCatalog) {
-		case refs.ResolveOK:
-			return nil
-		case refs.ResolveRegistryUnsupported:
-			return []Issue{{
-				Level: LevelError, Path: location,
-				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", skill),
-				Hint: "use @spwn/<name> for built-in packs or drop a file/dir under ./spwn/skills/<name>{.md,/} for a local pack; " +
-					"remote registries (@<owner>/<name>) are planned but not implemented yet",
-			}}
-		default: // ResolveNotFound
-			if ref.Kind == refs.KindLocal {
-				return []Issue{{
-					Level: LevelError, Path: location,
-					Message: fmt.Sprintf("skill %q does not exist", skill),
-					Hint:    "create ./spwn/skills/" + ref.Name + ".md, or reference @spwn/" + ref.Name + " once the built-in catalog ships",
-				}}
-			}
-			return []Issue{{
-				Level: LevelError, Path: location,
-				Message: fmt.Sprintf("skill %q does not exist", skill),
-				Hint:    "check the skill name; built-in skill catalog is empty today",
-			}}
-		}
-	}
-
-	var out []Issue
-	for _, a := range in.AgentRefs {
-		if !a.Exists {
-			continue
-		}
-		parsed, err := loadAgentYAML(a.Path)
-		if err != nil {
-			continue
-		}
-		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#skills"
-		for _, s := range parsed.Skills {
-			out = append(out, check(s, loc)...)
-		}
-	}
-	return out
-}
-
-// ruleLockfileConsistent compares every @spwn/* or @<owner>/* ref
-// declared in any agent.yaml or spwn.yaml world against the
-// project's spwn.lock.yaml. Missing entries become errors so
-// `spwn build` fails loudly and points the user at `spwn tool install`.
+// ruleLockfileConsistent compares every @spwn/* or @<owner>/*
+// package ref declared in any agent.yaml or spwn.yaml world against
+// spwn.lock.yaml. Missing entries become errors so `spwn build` fails
+// loudly and points the user at `spwn package install`.
 //
 // Local (bare) refs are never lockfile-tracked.
 //
 // If no lockfile exists yet, the rule is silent — the project has
-// never been installed against. CLI install verbs seed the lockfile
-// on first use. This keeps brand-new `spwn init` projects from
-// immediately complaining.
+// never been installed against. `spwn init` seeds an initial lockfile
+// so freshly-scaffolded projects pass.
 func ruleLockfileConsistent(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -760,7 +715,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		return []Issue{{
 			Level: LevelError, Path: lockfile.FileName,
 			Message: fmt.Sprintf("cannot read lockfile: %v", err),
-			Hint:    "regenerate with `spwn tool install` for each declared pack, or delete " + lockfile.FileName + " to start fresh",
+			Hint:    "regenerate with `spwn package install` for each declared pack, or delete " + lockfile.FileName + " to start fresh",
 		}}
 	}
 	if lock == nil {
@@ -770,19 +725,18 @@ func ruleLockfileConsistent(in Input) []Issue {
 	type refRec struct {
 		raw      string
 		location string
-		kind     lockfile.Kind
 	}
 	var all []refRec
 
-	collect := func(list []string, location string, kind lockfile.Kind) {
+	collect := func(list []string, location string) {
 		for _, r := range list {
-			all = append(all, refRec{raw: r, location: location, kind: kind})
+			all = append(all, refRec{raw: r, location: location})
 		}
 	}
 
 	for _, wname := range sortedKeys(in.Manifest.Worlds) {
 		w := in.Manifest.Worlds[wname]
-		collect(w.Tools, "spwn.yaml#worlds."+wname+".tools", lockfile.KindTool)
+		collect(w.Packages, "spwn.yaml#worlds."+wname+".packages")
 	}
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
@@ -793,9 +747,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 			continue
 		}
 		rel := relPath(in.Root, filepath.Join(a.Path, "agent.yaml"))
-		collect(parsed.Tools, rel+"#tools", lockfile.KindTool)
-		collect(parsed.Plugins, rel+"#plugins", lockfile.KindPlugin)
-		collect(parsed.Skills, rel+"#skills", lockfile.KindSkill)
+		collect(parsed.Packages, rel+"#packages")
 	}
 
 	seen := map[string]bool{}
@@ -807,33 +759,20 @@ func ruleLockfileConsistent(in Input) []Issue {
 		if ref.Kind == refs.KindLocal {
 			continue
 		}
-		key := fmt.Sprintf("%d|%s", rec.kind, pack)
-		if seen[key] {
+		if seen[pack] {
 			continue
 		}
-		seen[key] = true
-		if lock.Has(rec.kind, pack) {
+		seen[pack] = true
+		if lock.Has(pack) {
 			continue
 		}
 		out = append(out, Issue{
 			Level: LevelError, Path: rec.location,
 			Message: fmt.Sprintf("%q is not recorded in %s", pack, lockfile.FileName),
-			Hint:    "run `spwn " + kindVerb(rec.kind) + " install " + pack + "` to sync the lockfile",
+			Hint:    "run `spwn package install " + pack + "` to sync the lockfile",
 		})
 	}
 	return out
-}
-
-func kindVerb(k lockfile.Kind) string {
-	switch k {
-	case lockfile.KindTool:
-		return "tool"
-	case lockfile.KindPlugin:
-		return "plugin"
-	case lockfile.KindSkill:
-		return "skill"
-	}
-	return "tool"
 }
 
 // ruleRuntimeSupported checks each agent's runtime backend against
@@ -940,7 +879,7 @@ func relPath(root, path string) string {
 	return rel
 }
 
-func suggestTool(tool string, catalog []string) string {
+func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
 		return "check the tool name, or add it as a local pack under ./spwn/tools/"
 	}

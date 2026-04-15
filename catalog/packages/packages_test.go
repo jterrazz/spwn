@@ -1,4 +1,4 @@
-package tools
+package pkg
 
 import (
 	"io/fs"

@@ -50,9 +50,11 @@ type World struct {
 	// form.
 	Workspaces []string `yaml:"workspaces"`
 
-	// Tools is the optional list of tool refs that augment the union
-	// computed from each agent's own tool list.
-	Tools []string `yaml:"tools,omitempty"`
+	// Packages is the optional list of package refs that augment the
+	// union computed from each agent's own package list. Useful for
+	// "every agent in this world gets @spwn/qmd" shared-baseline
+	// patterns.
+	Packages []string `yaml:"packages,omitempty"`
 }
 
 // LoadPath reads and parses spwn.yaml from an explicit file path.

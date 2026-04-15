@@ -8,18 +8,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Manifest is the public agent.yaml type - composition + runtime config.
+// Manifest is the public agent.yaml type — composition + runtime
+// config.
 //
-// Lives at ~/.spwn/agents/{name}/agent.yaml. Optional: if absent, the agent
-// directory is used as-is with built-in defaults.
+// The composition is a single flat dependency list. Under the old
+// tool/plugin/skill trichotomy, each entry would land in a different
+// key; under the unified package model they all share one `packages:`
+// list. The parser distinguishes what's what by the manifest the ref
+// resolves to (an `install:` block makes it a tool, a `plugin:` block
+// makes it a plugin, a content-only body makes it a skill).
 type Manifest struct {
-	Name    string        `yaml:"name,omitempty"`
-	Role    string        `yaml:"role,omitempty"`
-	Team    string        `yaml:"team,omitempty"`
-	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
-	Tools   []string      `yaml:"tools,omitempty"`   // tool packs
-	Plugins []string      `yaml:"plugins,omitempty"` // plugin packs (runtime-targeted tools)
-	Skills  []string      `yaml:"skills,omitempty"`  // skill files
+	Name     string        `yaml:"name,omitempty"`
+	Role     string        `yaml:"role,omitempty"`
+	Team     string        `yaml:"team,omitempty"`
+	Runtime  RuntimeConfig `yaml:"runtime,omitempty"`
+	Packages []string      `yaml:"packages,omitempty"`
 }
 
 // RuntimeConfig allows per-agent runtime override.
@@ -70,98 +73,35 @@ func SaveManifest(agentName string, m *Manifest) error {
 	return nil
 }
 
-// AddTool appends a tool pack to the agent's composition (idempotent).
-func AddTool(agentName, tool string) error {
+// AddPackage appends a package ref to the agent's composition
+// (idempotent). Replaces the old AddTool/AddPlugin/AddSkill trio.
+func AddPackage(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err
 	}
-	for _, t := range m.Tools {
-		if t == tool {
+	for _, p := range m.Packages {
+		if p == ref {
 			return nil // already present
 		}
 	}
-	m.Tools = append(m.Tools, tool)
+	m.Packages = append(m.Packages, ref)
 	return SaveManifest(agentName, m)
 }
 
-// RemoveTool removes a tool pack from the agent's composition.
-// No-op if the tool isn't attached.
-func RemoveTool(agentName, tool string) error {
+// RemovePackage removes a package ref from the agent's composition.
+// No-op when the ref isn't present.
+func RemovePackage(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err
 	}
-	out := make([]string, 0, len(m.Tools))
-	for _, t := range m.Tools {
-		if t != tool {
-			out = append(out, t)
-		}
-	}
-	m.Tools = out
-	return SaveManifest(agentName, m)
-}
-
-// AddPlugin appends a plugin pack to the agent's composition (idempotent).
-func AddPlugin(agentName, plugin string) error {
-	m, err := LoadManifest(agentName)
-	if err != nil {
-		return err
-	}
-	for _, p := range m.Plugins {
-		if p == plugin {
-			return nil // already present
-		}
-	}
-	m.Plugins = append(m.Plugins, plugin)
-	return SaveManifest(agentName, m)
-}
-
-// RemovePlugin removes a plugin pack from the agent's composition.
-// No-op if the plugin isn't attached.
-func RemovePlugin(agentName, plugin string) error {
-	m, err := LoadManifest(agentName)
-	if err != nil {
-		return err
-	}
-	out := make([]string, 0, len(m.Plugins))
-	for _, p := range m.Plugins {
-		if p != plugin {
+	out := make([]string, 0, len(m.Packages))
+	for _, p := range m.Packages {
+		if p != ref {
 			out = append(out, p)
 		}
 	}
-	m.Plugins = out
+	m.Packages = out
 	return SaveManifest(agentName, m)
 }
-
-// AddSkill appends a skill to the agent's composition (idempotent).
-func AddSkill(agentName, skill string) error {
-	m, err := LoadManifest(agentName)
-	if err != nil {
-		return err
-	}
-	for _, s := range m.Skills {
-		if s == skill {
-			return nil
-		}
-	}
-	m.Skills = append(m.Skills, skill)
-	return SaveManifest(agentName, m)
-}
-
-// RemoveSkill removes a skill from the agent's composition.
-func RemoveSkill(agentName, skill string) error {
-	m, err := LoadManifest(agentName)
-	if err != nil {
-		return err
-	}
-	out := make([]string, 0, len(m.Skills))
-	for _, s := range m.Skills {
-		if s != skill {
-			out = append(out, s)
-		}
-	}
-	m.Skills = out
-	return SaveManifest(agentName, m)
-}
-

@@ -1,31 +1,29 @@
 // Package lockfile owns spwn.lock.yaml: the committed, deterministic
-// pin of every @spwn/* and @<org>/* reference the project depends on.
+// pin of every @spwn/* and @<org>/* package reference the project
+// depends on.
 //
-// The lockfile mirrors the dependency lists in each agent.yaml but
+// The lockfile mirrors each agent.yaml's flat `packages:` list and
 // collapses them into a single project-wide record. Local (bare-name)
 // refs never land in the lockfile — they are authored in-place under
-// spwn/tools/ and spwn/skills/ and have no version to pin.
+// spwn/packages/ and have no version to pin.
 //
 // Shape:
 //
 //	version: 1
-//	tools:
+//	packages:
 //	  "@spwn/unix":
 //	    version: "24.04"
 //	    source: builtin
 //	  "@spwn/git":
 //	    version: "2.43"
 //	    source: builtin
-//	plugins:
 //	  "@spwn/mempalace":
 //	    version: "0.1.0"
 //	    source: builtin
-//	skills: {}
 //
-// `source: builtin` means the pack is compiled into the spwn binary
-// and needs no on-disk cache. `source: registry` is reserved for the
-// future community registry — resolved to <root>/.spwn/packs/@<org>/<name>/.
-// Nothing emits registry entries today.
+// `source: builtin` means the package is compiled into the spwn
+// binary. `source: registry` is reserved for the future community
+// registry — resolved to <root>/.spwn/packs/@<org>/<name>/.
 //
 // Load/Save round-trip is deterministic: keys are sorted lexically so
 // git diffs stay clean.
@@ -51,11 +49,12 @@ const FileName = "spwn.lock.yaml"
 type Source string
 
 const (
-	// SourceBuiltin means the pack is compiled into the spwn binary.
-	// No on-disk cache, no download.
+	// SourceBuiltin means the package is compiled into the spwn
+	// binary. No on-disk cache, no download.
 	SourceBuiltin Source = "builtin"
-	// SourceRegistry means the pack lives under .spwn/packs/@<org>/<name>/.
-	// Reserved for the future community registry.
+	// SourceRegistry means the package lives under
+	// .spwn/packs/@<org>/<name>/. Reserved for the future community
+	// registry.
 	SourceRegistry Source = "registry"
 )
 
@@ -67,19 +66,15 @@ type Entry struct {
 
 // Lockfile is the parsed content of spwn.lock.yaml.
 type Lockfile struct {
-	Version int              `yaml:"version"`
-	Tools   map[string]Entry `yaml:"tools"`
-	Plugins map[string]Entry `yaml:"plugins"`
-	Skills  map[string]Entry `yaml:"skills"`
+	Version  int              `yaml:"version"`
+	Packages map[string]Entry `yaml:"packages"`
 }
 
 // Empty returns a fresh lockfile at the current schema version.
 func Empty() *Lockfile {
 	return &Lockfile{
-		Version: CurrentVersion,
-		Tools:   map[string]Entry{},
-		Plugins: map[string]Entry{},
-		Skills:  map[string]Entry{},
+		Version:  CurrentVersion,
+		Packages: map[string]Entry{},
 	}
 }
 
@@ -111,14 +106,8 @@ func Load(projectRoot string) (*Lockfile, error) {
 	if err := yaml.Unmarshal(data, &l); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", FileName, err)
 	}
-	if l.Tools == nil {
-		l.Tools = map[string]Entry{}
-	}
-	if l.Plugins == nil {
-		l.Plugins = map[string]Entry{}
-	}
-	if l.Skills == nil {
-		l.Skills = map[string]Entry{}
+	if l.Packages == nil {
+		l.Packages = map[string]Entry{}
 	}
 	if l.Version == 0 {
 		l.Version = CurrentVersion
@@ -152,9 +141,6 @@ func Save(projectRoot string, l *Lockfile) error {
 	if l.Version == 0 {
 		l.Version = CurrentVersion
 	}
-	// Build a plain map-of-maps with sorted keys to force deterministic
-	// marshalling; yaml.v3 preserves insertion order for MapSlice but
-	// not for `map[string]`, so go through a hand-built node tree.
 	root := &yaml.Node{Kind: yaml.DocumentNode}
 	body := &yaml.Node{Kind: yaml.MappingNode}
 	root.Content = []*yaml.Node{body}
@@ -170,9 +156,7 @@ func Save(projectRoot string, l *Lockfile) error {
 		Kind: yaml.ScalarNode, Tag: "!!int",
 		Value: fmt.Sprintf("%d", l.Version),
 	})
-	addScalar(body, "tools", mapToNode(l.Tools))
-	addScalar(body, "plugins", mapToNode(l.Plugins))
-	addScalar(body, "skills", mapToNode(l.Skills))
+	addScalar(body, "packages", mapToNode(l.Packages))
 
 	data, err := yaml.Marshal(root)
 	if err != nil {
@@ -212,65 +196,31 @@ func mapToNode(m map[string]Entry) *yaml.Node {
 	return node
 }
 
-// Kind selects which dependency map an operation targets.
-type Kind int
-
-const (
-	KindTool Kind = iota
-	KindPlugin
-	KindSkill
-)
-
-func (l *Lockfile) section(k Kind) map[string]Entry {
-	switch k {
-	case KindTool:
-		return l.Tools
-	case KindPlugin:
-		return l.Plugins
-	case KindSkill:
-		return l.Skills
-	}
-	return nil
-}
-
 // Add upserts an entry. Passing an empty version is valid — callers
 // that don't track versions yet record "" as the pin.
-func (l *Lockfile) Add(k Kind, ref string, entry Entry) {
-	m := l.section(k)
-	if m == nil {
-		return
+func (l *Lockfile) Add(ref string, entry Entry) {
+	if l.Packages == nil {
+		l.Packages = map[string]Entry{}
 	}
-	m[ref] = entry
+	l.Packages[ref] = entry
 }
 
 // Remove deletes an entry. No-op when the ref is absent.
-func (l *Lockfile) Remove(k Kind, ref string) {
-	m := l.section(k)
-	if m == nil {
-		return
-	}
-	delete(m, ref)
+func (l *Lockfile) Remove(ref string) {
+	delete(l.Packages, ref)
 }
 
-// Has reports whether the ref is pinned in the given section.
-func (l *Lockfile) Has(k Kind, ref string) bool {
-	m := l.section(k)
-	if m == nil {
-		return false
-	}
-	_, ok := m[ref]
+// Has reports whether the ref is pinned in the lockfile.
+func (l *Lockfile) Has(ref string) bool {
+	_, ok := l.Packages[ref]
 	return ok
 }
 
-// RefsIn returns the sorted list of refs in the given section. Useful
-// for deterministic iteration in error messages and tests.
-func (l *Lockfile) RefsIn(k Kind) []string {
-	m := l.section(k)
-	if m == nil {
-		return nil
-	}
-	out := make([]string, 0, len(m))
-	for k := range m {
+// Refs returns the sorted list of pinned refs. Useful for
+// deterministic iteration in error messages and tests.
+func (l *Lockfile) Refs() []string {
+	out := make([]string, 0, len(l.Packages))
+	for k := range l.Packages {
 		out = append(out, k)
 	}
 	sort.Strings(out)

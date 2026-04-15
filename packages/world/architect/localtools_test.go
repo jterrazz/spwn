@@ -14,7 +14,7 @@ func writeTool(t *testing.T, root, name, yaml string) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "spwn-tool.yaml"), []byte(yaml), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "package.yaml"), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -75,7 +75,7 @@ func TestLoadLocalTool_missingManifest(t *testing.T) {
 	}
 	_, err := loadLocalTool(root, "empty-tool")
 	if err == nil {
-		t.Fatal("want error for missing spwn-tool.yaml")
+		t.Fatal("want error for missing package.yaml")
 	}
 }
 

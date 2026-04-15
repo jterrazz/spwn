@@ -8,9 +8,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// initAgent scaffolds a minimal agent directory so the Manifest helpers have
-// somewhere to read/write. It does NOT use the full mind.Init flow to keep
-// tests focused on the manifest layer.
+// initAgent scaffolds a minimal agent directory so the Manifest
+// helpers have somewhere to read/write.
 func initAgent(t *testing.T, name string) string {
 	t.Helper()
 	tmp := t.TempDir()
@@ -34,7 +33,7 @@ func TestLoadManifest_MissingFileReturnsEmpty(t *testing.T) {
 	if m == nil {
 		t.Fatal("LoadManifest returned nil on missing file; expected empty Manifest")
 	}
-	if m.Name != "" || len(m.Tools) != 0 || len(m.Skills) != 0 {
+	if m.Name != "" || len(m.Packages) != 0 {
 		t.Errorf("expected empty manifest, got %+v", m)
 	}
 }
@@ -43,10 +42,9 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 	initAgent(t, "neo")
 
 	m := &Manifest{
-		Name:   "neo",
-		Role:   "chief",
-		Tools:  []string{"@spwn/unix", "@spwn/python"},
-		Skills: []string{"kung-fu"},
+		Name:     "neo",
+		Role:     "chief",
+		Packages: []string{"@spwn/unix", "@spwn/python", "kung-fu"},
 	}
 	if err := SaveManifest("neo", m); err != nil {
 		t.Fatalf("SaveManifest: %v", err)
@@ -61,7 +59,6 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 		t.Error("manifest file is empty")
 	}
 
-	// Parse back and verify round-trip.
 	var got Manifest
 	if err := yaml.Unmarshal(data, &got); err != nil {
 		t.Fatalf("unmarshal: %v", err)
@@ -69,8 +66,8 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 	if got.Name != "neo" {
 		t.Errorf("Name = %q, want \"neo\"", got.Name)
 	}
-	if len(got.Tools) != 2 {
-		t.Errorf("Tools count = %d, want 2", len(got.Tools))
+	if len(got.Packages) != 3 {
+		t.Errorf("Packages count = %d, want 3", len(got.Packages))
 	}
 }
 
@@ -86,7 +83,6 @@ func TestSaveManifest_AgentNotFound(t *testing.T) {
 
 func TestLoadManifest_InvalidYAML(t *testing.T) {
 	initAgent(t, "neo")
-	// Write garbage to the manifest file.
 	if err := os.WriteFile(ManifestPath("neo"), []byte("{{ not yaml"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -108,8 +104,7 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 			Provider: "anthropic",
 			Model:    "claude-sonnet-4-6",
 		},
-		Tools:  []string{"@spwn/python", "@spwn/unix"},
-		Skills: []string{"paper-reading", "hypothesis-testing"},
+		Packages: []string{"@spwn/python", "@spwn/unix", "paper-reading"},
 	}
 	if err := SaveManifest("curie", original); err != nil {
 		t.Fatal(err)
@@ -125,121 +120,72 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 	if loaded.Runtime.Backend != "claude-code" {
 		t.Errorf("Runtime.Backend = %q", loaded.Runtime.Backend)
 	}
-	if len(loaded.Tools) != 2 || loaded.Tools[0] != "@spwn/python" {
-		t.Errorf("Tools drifted: %v", loaded.Tools)
-	}
-	if len(loaded.Skills) != 2 || loaded.Skills[0] != "paper-reading" {
-		t.Errorf("Skills drifted: %v", loaded.Skills)
+	if len(loaded.Packages) != 3 || loaded.Packages[0] != "@spwn/python" {
+		t.Errorf("Packages drifted: %v", loaded.Packages)
 	}
 }
 
-// ── AddTool / RemoveTool ────────────────────────────────────────────────────
+// ── AddPackage / RemovePackage ──────────────────────────────────────────────
 
-func TestAddTool_AppendsAndIsIdempotent(t *testing.T) {
+func TestAddPackage_AppendsAndIsIdempotent(t *testing.T) {
 	initAgent(t, "neo")
 
-	if err := AddTool("neo", "@spwn/python"); err != nil {
+	if err := AddPackage("neo", "@spwn/python"); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddTool("neo", "@spwn/unix"); err != nil {
+	if err := AddPackage("neo", "@spwn/unix"); err != nil {
 		t.Fatal(err)
 	}
-	// Adding the same tool twice should be a no-op.
-	if err := AddTool("neo", "@spwn/python"); err != nil {
+	if err := AddPackage("neo", "@spwn/python"); err != nil {
 		t.Fatal(err)
 	}
 
 	m, _ := LoadManifest("neo")
-	if len(m.Tools) != 2 {
-		t.Errorf("expected 2 tools after double-add, got %d: %v", len(m.Tools), m.Tools)
+	if len(m.Packages) != 2 {
+		t.Errorf("expected 2 packages after double-add, got %d: %v", len(m.Packages), m.Packages)
 	}
 }
 
-func TestRemoveTool_RemovesPresentToolAndIsNoOpForAbsent(t *testing.T) {
+func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 	initAgent(t, "neo")
 
-	AddTool("neo", "@spwn/python")
-	AddTool("neo", "@spwn/git")
+	AddPackage("neo", "@spwn/python")
+	AddPackage("neo", "@spwn/git")
 
-	// Remove a present tool.
-	if err := RemoveTool("neo", "@spwn/git"); err != nil {
+	if err := RemovePackage("neo", "@spwn/git"); err != nil {
 		t.Fatal(err)
 	}
 	m, _ := LoadManifest("neo")
-	if len(m.Tools) != 1 || m.Tools[0] != "@spwn/python" {
-		t.Errorf("after remove: %v", m.Tools)
+	if len(m.Packages) != 1 || m.Packages[0] != "@spwn/python" {
+		t.Errorf("after remove: %v", m.Packages)
 	}
 
-	// Removing an absent tool should be a no-op, not an error.
-	if err := RemoveTool("neo", "@spwn/never-added"); err != nil {
+	if err := RemovePackage("neo", "@spwn/never-added"); err != nil {
 		t.Errorf("remove absent: %v", err)
 	}
 	m, _ = LoadManifest("neo")
-	if len(m.Tools) != 1 {
-		t.Errorf("after no-op remove: %v", m.Tools)
+	if len(m.Packages) != 1 {
+		t.Errorf("after no-op remove: %v", m.Packages)
 	}
 }
-
-// ── AddSkill / RemoveSkill ───────────────────────────────────────────────────
-
-func TestAddSkill_AppendsAndIsIdempotent(t *testing.T) {
-	initAgent(t, "neo")
-
-	AddSkill("neo", "refactoring")
-	AddSkill("neo", "paper-reading")
-	AddSkill("neo", "refactoring") // duplicate
-
-	m, _ := LoadManifest("neo")
-	if len(m.Skills) != 2 {
-		t.Errorf("expected 2 skills, got %d: %v", len(m.Skills), m.Skills)
-	}
-}
-
-func TestRemoveSkill_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
-	initAgent(t, "neo")
-
-	AddSkill("neo", "refactoring")
-	AddSkill("neo", "paper-reading")
-
-	if err := RemoveSkill("neo", "paper-reading"); err != nil {
-		t.Fatal(err)
-	}
-	m, _ := LoadManifest("neo")
-	if len(m.Skills) != 1 || m.Skills[0] != "refactoring" {
-		t.Errorf("after remove: %v", m.Skills)
-	}
-
-	// No-op on absent.
-	if err := RemoveSkill("neo", "no-such-skill"); err != nil {
-		t.Errorf("remove absent: %v", err)
-	}
-}
-
-// ── Composition across multiple calls ────────────────────────────────────────
 
 func TestComposition_FullRoundtrip(t *testing.T) {
 	initAgent(t, "neo")
 
-	// Build up a composition incrementally (simulating CLI add commands).
-	AddTool("neo", "@spwn/unix")
-	AddTool("neo", "@spwn/python")
-	AddSkill("neo", "refactoring")
-	AddSkill("neo", "paper-reading")
+	AddPackage("neo", "@spwn/unix")
+	AddPackage("neo", "@spwn/python")
+	AddPackage("neo", "refactoring")
+	AddPackage("neo", "paper-reading")
 
-	// Remove one tool and one skill.
-	RemoveTool("neo", "@spwn/unix")
-	RemoveSkill("neo", "paper-reading")
+	RemovePackage("neo", "@spwn/unix")
+	RemovePackage("neo", "paper-reading")
 
-	// Load final state and verify.
 	m, err := LoadManifest("neo")
 	if err != nil {
 		t.Fatalf("LoadManifest: %v", err)
 	}
-	if len(m.Tools) != 1 || m.Tools[0] != "@spwn/python" {
-		t.Errorf("Tools = %v, want [@spwn/python]", m.Tools)
-	}
-	if len(m.Skills) != 1 || m.Skills[0] != "refactoring" {
-		t.Errorf("Skills = %v, want [refactoring]", m.Skills)
+	if len(m.Packages) != 2 {
+		t.Errorf("Packages count = %d, want 2", len(m.Packages))
 	}
 }
 

@@ -17,20 +17,22 @@ func writeLockfile(t *testing.T, root string, l *lockfile.Lockfile) {
 	}
 }
 
-func TestRuleSkillsExist_local(t *testing.T) {
+// TestRulePackagesExist_localSkillFileForm verifies the local
+// file-form skill path: spwn/packages/<name>.md counts as a valid
+// bare-name local package.
+func TestRulePackagesExist_localSkillFileForm(t *testing.T) {
 	root := t.TempDir()
-	// Present skill (file form).
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "skills"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "packages"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "spwn", "packages", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-skills:
+packages:
   - focus
-  - missing-skill
+  - missing-package
 `)
 
 	in := Input{
@@ -43,14 +45,14 @@ skills:
 		AgentRefs: []AgentRef{ref},
 	}
 
-	issues := ruleSkillsExist(in)
+	issues := rulePackagesExist(in)
 	var missingFound bool
 	var presentFound bool
 	for _, iss := range issues {
 		if strings.Contains(iss.Message, `"focus"`) {
 			presentFound = true
 		}
-		if strings.Contains(iss.Message, `"missing-skill"`) {
+		if strings.Contains(iss.Message, `"missing-package"`) {
 			missingFound = true
 		}
 	}
@@ -58,24 +60,24 @@ skills:
 		t.Error("focus is on disk, should not error")
 	}
 	if !missingFound {
-		t.Error("missing-skill should error")
+		t.Error("missing-package should error")
 	}
 }
 
-func TestRuleSkillsExist_registryUnsupported(t *testing.T) {
+func TestRulePackagesExist_registryUnsupported(t *testing.T) {
 	root := t.TempDir()
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-skills:
+packages:
   - "@jterrazz/focus"
 `)
 	in := Input{
-		Root:     root,
-		Manifest: &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
+		Root:      root,
+		Manifest:  &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
 		AgentRefs: []AgentRef{ref},
 	}
 
-	issues := ruleSkillsExist(in)
+	issues := rulePackagesExist(in)
 	if len(issues) == 0 || !strings.Contains(issues[0].Message, "remote registries are not yet supported") {
 		t.Errorf("want registry-unsupported, got %+v", issues)
 	}
@@ -84,12 +86,12 @@ skills:
 func TestRuleLockfileConsistent_missingLockfileIsSilent(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-tools:
+packages:
   - "@spwn/unix"
 `)
 	in := Input{
-		Root:     root,
-		Manifest: &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
+		Root:      root,
+		Manifest:  &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
 		AgentRefs: []AgentRef{ref},
 	}
 	if got := ruleLockfileConsistent(in); len(got) != 0 {
@@ -100,20 +102,19 @@ tools:
 func TestRuleLockfileConsistent_driftFlagged(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-tools:
+packages:
   - "@spwn/unix"
   - "@spwn/git"
-plugins:
   - "@spwn/mempalace"
 `)
 	// Lockfile only has @spwn/unix — git and mempalace are drift.
 	l := lockfile.Empty()
-	l.Add(lockfile.KindTool, "@spwn/unix", lockfile.Entry{Version: "1", Source: lockfile.SourceBuiltin})
+	l.Add("@spwn/unix", lockfile.Entry{Version: "1", Source: lockfile.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
-		Root:     root,
-		Manifest: &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
+		Root:      root,
+		Manifest:  &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
 		AgentRefs: []AgentRef{ref},
 	}
 	issues := ruleLockfileConsistent(in)
@@ -142,19 +143,19 @@ plugins:
 
 func TestRuleLockfileConsistent_ignoresLocalRefs(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "tools", "my-tool"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "packages", "my-tool"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-tools:
+packages:
   - my-tool
 `)
 	// Empty lockfile — bare names should not produce errors.
 	writeLockfile(t, root, lockfile.Empty())
 
 	in := Input{
-		Root:     root,
-		Manifest: &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
+		Root:      root,
+		Manifest:  &intmanifest.Manifest{Version: intmanifest.CurrentVersion, Name: "t", Worlds: map[string]intmanifest.World{"d": {Agents: []string{"neo"}, Workspaces: []string{"."}}}},
 		AgentRefs: []AgentRef{ref},
 	}
 	if got := ruleLockfileConsistent(in); len(got) != 0 {

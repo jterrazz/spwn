@@ -5,9 +5,11 @@ import (
 )
 
 // Manifest is the parsed representation of a world config YAML.
+// Packages is the flat dependency list that replaced the old
+// Tools/Plugins/Skills trichotomy; the parser distinguishes what's
+// what by the referenced package's manifest shape.
 type Manifest struct {
-	Tools   []string `yaml:"-"`
-	Plugins []string `yaml:"-"`
+	Packages []string `yaml:"-"`
 }
 
 // Workspace is a single host directory mounted into a world. A world may have

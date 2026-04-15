@@ -16,13 +16,15 @@ type stubTool struct {
 	skills  fs.FS
 }
 
-func (s *stubTool) Name() string         { return s.name }
-func (s *stubTool) Kind() Kind           { return s.kind }
-func (s *stubTool) Version() string      { return s.version }
+func (s *stubTool) Name() string          { return s.name }
+func (s *stubTool) Kind() Kind            { return s.kind }
+func (s *stubTool) Version() string       { return s.version }
 func (s *stubTool) Dependencies() []string { return s.deps }
-func (s *stubTool) Install() InstallSpec { return s.install }
-func (s *stubTool) Verify() []string     { return s.verify }
-func (s *stubTool) Skills() fs.FS        { return s.skills }
+func (s *stubTool) Install() InstallSpec  { return s.install }
+func (s *stubTool) Verify() []string      { return s.verify }
+func (s *stubTool) Skills() fs.FS         { return s.skills }
+func (s *stubTool) Runtimes() []string    { return nil }
+func (s *stubTool) Config(string) []byte  { return nil }
 
 func TestRegistry_Register(t *testing.T) {
 	r := NewRegistry()

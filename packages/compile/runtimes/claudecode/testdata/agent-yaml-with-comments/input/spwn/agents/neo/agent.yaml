@@ -2,9 +2,6 @@
 name: neo            # basename under spwn/agents/
 role: worker         # default role
 
-# tools section (catalog refs)
-tools:
+# Catalog packages and local refs live in a single flat list.
+packages:
   - "@spwn/unix"     # POSIX basics
-
-# plugins currently unused
-plugins: []

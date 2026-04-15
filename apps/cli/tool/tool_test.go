@@ -23,9 +23,6 @@ func runWithOut(t *testing.T, c *cobra.Command, args ...string) (*bytes.Buffer, 
 	return out, c.RunE(cmd, args)
 }
 
-// scaffoldProject builds a minimal spwn project with one agent. Tests
-// cd into the root before running install verbs so project.Find
-// discovers it.
 func scaffoldProject(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -55,7 +52,7 @@ worlds:
 
 // withProject points paths.ProjectRoot at a scaffolded project and
 // chdirs into it for the duration of a test. Needed because
-// agent.AddTool / agent.RemoveTool resolve AgentDir via paths, and
+// agent.AddPackage / RemovePackage resolve AgentDir via paths, and
 // RunInstall walks up from cwd.
 func withProject(t *testing.T) string {
 	t.Helper()
@@ -74,13 +71,13 @@ func withProject(t *testing.T) string {
 
 // ── ls ───────────────────────────────────────────────────────────────────────
 
-func TestToolLs_empty(t *testing.T) {
+func TestPackageLs_empty(t *testing.T) {
 	withProject(t)
 	out, err := runWithOut(t, lsCmd)
 	if err != nil {
 		t.Fatalf("ls: %v", err)
 	}
-	if !strings.Contains(out.String(), "No tool packs installed") {
+	if !strings.Contains(out.String(), "No packages installed") {
 		t.Errorf("want empty message, got: %s", out.String())
 	}
 }
@@ -111,7 +108,7 @@ func TestInstall_rejectsRegistryRef(t *testing.T) {
 
 func TestInstall_rejectsUnknownBuiltin(t *testing.T) {
 	withProject(t)
-	SetCatalogLookup(func(pack string, kind lockfile.Kind) bool { return false })
+	SetCatalogLookup(func(pack string) bool { return false })
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
 	_, err := runWithOut(t, installCmd, "@spwn/nonesuch")
@@ -124,41 +121,39 @@ func TestInstall_rejectsUnknownBuiltin(t *testing.T) {
 
 func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 	root := withProject(t)
-	SetCatalogLookup(func(pack string, kind lockfile.Kind) bool { return true })
+	SetCatalogLookup(func(pack string) bool { return true })
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
 	if _, err := runWithOut(t, installCmd, "@spwn/git"); err != nil {
 		t.Fatalf("install: %v", err)
 	}
 
-	// Lockfile records the entry.
 	lock, err := lockfile.Load(root)
 	if err != nil {
 		t.Fatalf("load lockfile: %v", err)
 	}
-	if !lock.Has(lockfile.KindTool, "@spwn/git") {
+	if !lock.Has("@spwn/git") {
 		t.Errorf("lockfile missing @spwn/git, got %+v", lock)
 	}
 
-	// Agent manifest carries the tool.
 	m, err := agent.LoadManifest("neo")
 	if err != nil {
 		t.Fatalf("load manifest: %v", err)
 	}
 	var found bool
-	for _, tool := range m.Tools {
-		if tool == "@spwn/git" {
+	for _, p := range m.Packages {
+		if p == "@spwn/git" {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("neo.agent.yaml missing @spwn/git, tools=%v", m.Tools)
+		t.Errorf("neo.agent.yaml missing @spwn/git, packages=%v", m.Packages)
 	}
 }
 
 func TestInstall_idempotent(t *testing.T) {
 	root := withProject(t)
-	SetCatalogLookup(func(pack string, kind lockfile.Kind) bool { return true })
+	SetCatalogLookup(func(pack string) bool { return true })
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
 	for i := 0; i < 3; i++ {
@@ -168,8 +163,8 @@ func TestInstall_idempotent(t *testing.T) {
 	}
 	m, _ := agent.LoadManifest("neo")
 	count := 0
-	for _, tool := range m.Tools {
-		if tool == "@spwn/unix" {
+	for _, p := range m.Packages {
+		if p == "@spwn/unix" {
 			count++
 		}
 	}
@@ -177,7 +172,7 @@ func TestInstall_idempotent(t *testing.T) {
 		t.Errorf("want 1 instance of @spwn/unix, got %d", count)
 	}
 	lock, _ := lockfile.Load(root)
-	if !lock.Has(lockfile.KindTool, "@spwn/unix") {
+	if !lock.Has("@spwn/unix") {
 		t.Errorf("lockfile missing @spwn/unix")
 	}
 }
@@ -186,7 +181,7 @@ func TestInstall_idempotent(t *testing.T) {
 
 func TestUninstall_removesEntry(t *testing.T) {
 	root := withProject(t)
-	SetCatalogLookup(func(pack string, kind lockfile.Kind) bool { return true })
+	SetCatalogLookup(func(pack string) bool { return true })
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
 	if _, err := runWithOut(t, installCmd, "@spwn/git"); err != nil {
@@ -197,12 +192,12 @@ func TestUninstall_removesEntry(t *testing.T) {
 	}
 
 	lock, _ := lockfile.Load(root)
-	if lock.Has(lockfile.KindTool, "@spwn/git") {
+	if lock.Has("@spwn/git") {
 		t.Errorf("lockfile still has @spwn/git after uninstall")
 	}
 	m, _ := agent.LoadManifest("neo")
-	for _, tool := range m.Tools {
-		if tool == "@spwn/git" {
+	for _, p := range m.Packages {
+		if p == "@spwn/git" {
 			t.Errorf("neo.agent.yaml still has @spwn/git after uninstall")
 		}
 	}
