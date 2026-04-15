@@ -180,7 +180,7 @@ run without spinning up a live world.
 | `spwn check`        | Parses + validates the project (manifest rule engine).                          |
 | `spwn check --deep` | Additionally runs a full compile dry-run and reports renderer errors.           |
 | `spwn compile`      | Materialises the compiled `Tree` to disk (default `./dist`). No Docker.         |
-| `spwn build`        | Runs compile + link, produces a Docker image. (Still wired the old way; phase-5 folds it through `compile.Compile`.) |
+| `spwn build`        | Compiles the project and bakes the resulting `Tree` into a project-specific Docker image via `image.BuildFromBase`. |
 | `spwn up`           | Runs compile + link + container boot.                                           |
 
 ## CLI
