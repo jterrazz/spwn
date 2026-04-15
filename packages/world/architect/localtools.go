@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/pkgyaml"
+	"spwn.sh/packages/image/pluginyaml"
 )
 
 // localPackageDir is where the project-local package loader looks
 // for bare-name refs at image-build time. Mirrors what the validator
-// (rulePackagesExist) expects, so `spwn check` and `spwn build`
+// (rulePluginsExist) expects, so `spwn check` and `spwn build`
 // resolve refs through the same on-disk layout.
 const localPackageDir = "packages"
 
@@ -38,7 +38,7 @@ func (t *wrappedLocalTool) Skills() fs.FS               { return t.inner.Skills(
 func (t *wrappedLocalTool) Runtimes() []string          { return t.inner.Runtimes() }
 func (t *wrappedLocalTool) Config(runtime string) []byte { return t.inner.Config(runtime) }
 
-// loadLocalPackage parses spwn/packages/<name>/package.yaml via the
+// loadLocalPackage parses spwn/plugins/<name>/package.yaml via the
 // shared pkgyaml parser and wraps the result so Name() returns
 // "local:<name>". Missing manifest is a crisp authoring error — an
 // empty local package would render to nothing and the user would
@@ -53,9 +53,9 @@ func loadLocalPackage(projectRoot, name string) (ib.Tool, error) {
 		return nil, fmt.Errorf("local package %q: %s is not a directory", name, pkgDir)
 	}
 
-	tool, err := pkgyaml.Parse(
-		pkgyaml.DirResolver{Root: pkgDir},
-		pkgyaml.ParseOptions{
+	tool, err := pluginyaml.Parse(
+		pluginyaml.DirResolver{Root: pkgDir},
+		pluginyaml.ParseOptions{
 			DefaultName:    name,
 			DefaultVersion: "0.0.0-local",
 		},

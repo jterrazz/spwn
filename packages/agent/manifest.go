@@ -22,7 +22,7 @@ type Manifest struct {
 	Role     string        `yaml:"role,omitempty"`
 	Team     string        `yaml:"team,omitempty"`
 	Runtime  RuntimeConfig `yaml:"runtime,omitempty"`
-	Packages []string      `yaml:"packages,omitempty"`
+	Plugins []string      `yaml:"plugins,omitempty"`
 }
 
 // RuntimeConfig allows per-agent runtime override.
@@ -73,35 +73,35 @@ func SaveManifest(agentName string, m *Manifest) error {
 	return nil
 }
 
-// AddPackage appends a package ref to the agent's composition
+// AddPlugin appends a package ref to the agent's composition
 // (idempotent). Replaces the old AddTool/AddPlugin/AddSkill trio.
-func AddPackage(agentName, ref string) error {
+func AddPlugin(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err
 	}
-	for _, p := range m.Packages {
+	for _, p := range m.Plugins {
 		if p == ref {
 			return nil // already present
 		}
 	}
-	m.Packages = append(m.Packages, ref)
+	m.Plugins = append(m.Plugins, ref)
 	return SaveManifest(agentName, m)
 }
 
-// RemovePackage removes a package ref from the agent's composition.
+// RemovePlugin removes a package ref from the agent's composition.
 // No-op when the ref isn't present.
-func RemovePackage(agentName, ref string) error {
+func RemovePlugin(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err
 	}
-	out := make([]string, 0, len(m.Packages))
-	for _, p := range m.Packages {
+	out := make([]string, 0, len(m.Plugins))
+	for _, p := range m.Plugins {
 		if p != ref {
 			out = append(out, p)
 		}
 	}
-	m.Packages = out
+	m.Plugins = out
 	return SaveManifest(agentName, m)
 }

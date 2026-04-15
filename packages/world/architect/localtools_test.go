@@ -14,7 +14,7 @@ func writePackage(t *testing.T, root, name, yaml string) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "package.yaml"), []byte(yaml), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "plugin.yaml"), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -52,8 +52,8 @@ dependencies:
 		t.Errorf("kind: want Tool, got %v", got)
 	}
 	spec := tool.Install()
-	if len(spec.Packages) != 1 || spec.Packages[0] != "build-essential" {
-		t.Errorf("packages: %v", spec.Packages)
+	if len(spec.AptPackages) != 1 || spec.AptPackages[0] != "build-essential" {
+		t.Errorf("packages: %v", spec.AptPackages)
 	}
 	if len(spec.Commands) != 1 || spec.Commands[0] != "echo hi" {
 		t.Errorf("commands: %v", spec.Commands)

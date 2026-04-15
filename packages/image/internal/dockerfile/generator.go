@@ -10,7 +10,7 @@ import (
 type ToolInput struct {
 	Name         string
 	Kind         string
-	Packages     []string
+	AptPackages []string
 	Commands     []string
 	UserCommands []string // Commands that run after USER switch (templates: {{.Home}}, {{.User}})
 	Env          map[string]string
@@ -76,7 +76,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 	var allPackages []string
 	seen := make(map[string]bool)
 	for _, t := range tools {
-		for _, pkg := range t.Packages {
+		for _, pkg := range t.AptPackages {
 			if !seen[pkg] {
 				seen[pkg] = true
 				allPackages = append(allPackages, pkg)

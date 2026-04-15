@@ -3,5 +3,5 @@ name: neo
 role: worker
 runtime:
   backend: "@spwn/claude-code" # resolves to claude-code compile adapter
-packages:
+plugins:
   - "@spwn/unix"

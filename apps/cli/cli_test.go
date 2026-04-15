@@ -119,16 +119,16 @@ func TestCLI_ArchitectHelp(t *testing.T) {
 	}
 }
 
-// --- Package install help ---
+// --- Plugin install help ---
 
-func TestCLI_PackageHelp(t *testing.T) {
-	out, _, err := executeCommand("package", "--help")
+func TestCLI_PluginHelp(t *testing.T) {
+	out, _, err := executeCommand("plugin", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, sub := range []string{"install", "uninstall", "ls", "show"} {
-		assertContains(t, out, sub, "package help")
+		assertContains(t, out, sub, "plugin help")
 	}
 }
 

@@ -3,9 +3,9 @@
 //
 // Spwn projects reference packages in three ways:
 //
-//  1. Local — a bare name, resolved against ./spwn/packages/<name>/
+//  1. Local — a bare name, resolved against ./spwn/plugins/<name>/
 //     (directory form, with its own package.yaml) or
-//     ./spwn/packages/<name>.md (bare-markdown skill form).
+//     ./spwn/plugins/<name>.md (bare-markdown skill form).
 //  2. @spwn/<name> — a built-in package compiled into the spwn
 //     binary, looked up against the catalog provided by the caller.
 //  3. @<owner>/<name> — a remote registry package. Reserved for a
@@ -31,8 +31,8 @@ import (
 type Kind int
 
 const (
-	// KindLocal is a bare name authored in ./spwn/packages/<name>/
-	// (directory form) or ./spwn/packages/<name>.md (bare-markdown
+	// KindLocal is a bare name authored in ./spwn/plugins/<name>/
+	// (directory form) or ./spwn/plugins/<name>.md (bare-markdown
 	// skill form).
 	KindLocal Kind = iota
 	// KindSpwnBuiltin is a @spwn/<name> pack compiled into the binary.
@@ -126,7 +126,7 @@ const (
 // ResolveTool answers whether a Ref resolves to a real package
 // (directory form — for skill-only markdown refs use ResolveSkill).
 //
-//   - KindLocal: checks that <root>/spwn/packages/<name>/ is a directory.
+//   - KindLocal: checks that <root>/spwn/plugins/<name>/ is a directory.
 //   - KindSpwnBuiltin: checks that @spwn/<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
@@ -167,9 +167,9 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 // package — either the bare-markdown form or a full directory
 // package (same layout as a tool).
 //
-//   - KindLocal: checks that <root>/spwn/packages/<name>.md exists
+//   - KindLocal: checks that <root>/spwn/plugins/<name>.md exists
 //     as a file (bare-markdown skill), or that
-//     <root>/spwn/packages/<name>/ exists as a directory (full
+//     <root>/spwn/plugins/<name>/ exists as a directory (full
 //     package that may or may not ship skills via its own package.yaml).
 //   - KindSpwnBuiltin: checks that @spwn/<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.

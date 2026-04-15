@@ -12,10 +12,10 @@ Remove packages from an agent
 Remove packages from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent remove <name> --package X' removes just that entry.
+'spwn agent remove <name> --plugin X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --package @spwn/python
+  spwn agent remove neo --plugin @spwn/python
   spwn agent remove neo --pkg @spwn/mempalace
 
 ```
@@ -26,8 +26,8 @@ spwn agent remove <agent-name> [flags]
 
 ```
   -h, --help                  help for remove
-      --package stringArray   Package ref to remove (repeatable)
-      --pkg stringArray       Short alias for --package
+      --plugin stringArray    Plugin ref to remove (repeatable)
+      --plugins stringArray   Plural alias for --plugin
 ```
 
 ### SEE ALSO

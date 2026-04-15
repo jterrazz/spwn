@@ -56,10 +56,10 @@ Only Claude Code can actually be spawned today. The other names appear in the to
 
 ## Key invariants
 
-- **Per-repository**. Agents and packages live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
-- **Declared packages only**. An agent can only reach for packages its `agent.yaml` declares under the unified `packages:` list. Anything not listed is physically absent from the world's image.
-- **Everything is a package**. Tools, plugins, and skills are one concept — the only thing that differs is which fields the manifest populates. A `package.yaml` with an `install:` block is a tool; one with a `plugin:` block also injects runtime config (MCP servers, hooks, settings) into the target runtime's config file at spawn time; a bare `.md` file is a skill.
-- **Dependencies resolve like npm**. `@spwn/<name>` is a catalog package compiled into the binary; `<bare-name>` is a local package under `spwn/packages/<name>/` (directory form) or `spwn/packages/<name>.md` (bare-markdown skill); `@<owner>/<name>` is reserved for a future community registry. Catalog pins live in `spwn.lock.yaml` at the project root, managed by `spwn package install` / `spwn package uninstall`. `spwn check` flags drift between agent.yaml and the lockfile.
+- **Per-repository**. Agents and plugins live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
+- **Declared packages only**. An agent can only reach for packages its `agent.yaml` declares under the unified `plugins:` list. Anything not listed is physically absent from the world's image.
+- **Everything is a plugin**. Tools, runtime-config injectors, and skills are one concept — the only thing that differs is which fields the manifest populates. A `plugin.yaml` with an `install:` block is a tool; one with a `runtime-config:` block also injects runtime config (MCP servers, hooks, settings) into the target runtime's config file at spawn time; a bare `.md` file is a skill.
+- **Dependencies resolve like npm**. `@spwn/<name>` is a catalog plugin compiled into the binary; `<bare-name>` is a local plugin under `spwn/plugins/<name>/` (directory form) or `spwn/plugins/<name>.md` (bare-markdown skill); `@<owner>/<name>` is reserved for a future community registry. Catalog pins live in `spwn.lock.yaml` at the project root, managed by `spwn plugin install` / `spwn plugin uninstall`. `spwn check` flags drift between agent.yaml and the lockfile.
 - **Labels are truth**. Any world info the CLI displays comes from reading Docker labels, not an on-disk state file.
 - **Compile is deterministic**. Running `spwn build --tree-only` on an unchanged project tree produces byte-identical output - covered by the renderer golden tests in `packages/compile/runtimes/`.
 

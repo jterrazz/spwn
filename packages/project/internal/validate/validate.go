@@ -106,9 +106,9 @@ func Run(in Input) []Issue {
 		ruleReservedAgentNames,
 		ruleOneAgentOneWorld,
 		ruleWorkspaceMounts,
-		rulePackageVersionConflict,
+		rulePluginVersionConflict,
 		ruleRuntimeBackendConflict,
-		rulePackagesExist,
+		rulePluginsExist,
 		ruleLockfileConsistent,
 		ruleRuntimeSupported,
 		ruleMarkdownImports,
@@ -355,7 +355,7 @@ func ruleAgentStructure(in Input) []Issue {
 // unified package model — see packages/agent/manifest.go.
 type agentYAML struct {
 	Name     string   `yaml:"name"`
-	Packages []string `yaml:"packages"`
+	Plugins []string `yaml:"plugins"`
 	Runtime  struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
@@ -508,10 +508,10 @@ func ruleWorkspaceMounts(in Input) []Issue {
 	return out
 }
 
-// rulePackageVersionConflict flags multi-agent worlds whose members
+// rulePluginVersionConflict flags multi-agent worlds whose members
 // declare the same package at different versions. Versions are
 // detected via the `@scope/name@version` suffix convention.
-func rulePackageVersionConflict(in Input) []Issue {
+func rulePluginVersionConflict(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
@@ -532,7 +532,7 @@ func rulePackageVersionConflict(in Input) []Issue {
 			if err != nil {
 				continue
 			}
-			for _, t := range parsed.Packages {
+			for _, t := range parsed.Plugins {
 				pack, version := refs.SplitVersion(t)
 				vmap, ok := versions[pack]
 				if !ok {
@@ -601,15 +601,15 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 	return out
 }
 
-// rulePackagesExist checks every package referenced by any agent or
+// rulePluginsExist checks every package referenced by any agent or
 // world against the BuiltinTools catalog (for @spwn/* refs) and
 // against the filesystem (for bare local refs).
 //
 // Local refs resolve to either:
-//   - spwn/packages/<name>/ (a directory-form package, with or without
+//   - spwn/plugins/<name>/ (a directory-form package, with or without
 //     a package.yaml inside), OR
-//   - spwn/packages/<name>.md (a bare-markdown skill).
-func rulePackagesExist(in Input) []Issue {
+//   - spwn/plugins/<name>.md (a bare-markdown skill).
+func rulePluginsExist(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
@@ -638,7 +638,7 @@ func rulePackagesExist(in Input) []Issue {
 				return []Issue{{
 					Level: LevelError, Path: location,
 					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
-					Hint: "use @spwn/<name> for built-in packages or drop a directory under ./spwn/packages/<name>/ for a local package; " +
+					Hint: "use @spwn/<name> for built-in packages or drop a directory under ./spwn/plugins/<name>/ for a local package; " +
 						"remote registries (@<owner>/<name>) are planned but not implemented yet",
 				}}
 			default: // ResolveNotFound
@@ -665,8 +665,8 @@ func rulePackagesExist(in Input) []Issue {
 		return []Issue{{
 			Level: LevelError, Path: location,
 			Message: fmt.Sprintf("package %q does not exist", raw),
-			Hint: "create ./spwn/packages/" + ref.Name + "/package.yaml for a full package, " +
-				"or ./spwn/packages/" + ref.Name + ".md for a bare skill",
+			Hint: "create ./spwn/plugins/" + ref.Name + "/package.yaml for a full package, " +
+				"or ./spwn/plugins/" + ref.Name + ".md for a bare skill",
 		}}
 	}
 
@@ -674,7 +674,7 @@ func rulePackagesExist(in Input) []Issue {
 	for _, wname := range sortedKeys(in.Manifest.Worlds) {
 		w := in.Manifest.Worlds[wname]
 		loc := "spwn.yaml#worlds." + wname + ".packages"
-		for _, t := range w.Packages {
+		for _, t := range w.Plugins {
 			out = append(out, check(t, loc)...)
 		}
 	}
@@ -686,8 +686,8 @@ func rulePackagesExist(in Input) []Issue {
 		if err != nil {
 			continue
 		}
-		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#packages"
-		for _, t := range parsed.Packages {
+		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#plugins"
+		for _, t := range parsed.Plugins {
 			out = append(out, check(t, loc)...)
 		}
 	}
@@ -734,7 +734,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 
 	for _, wname := range sortedKeys(in.Manifest.Worlds) {
 		w := in.Manifest.Worlds[wname]
-		collect(w.Packages, "spwn.yaml#worlds."+wname+".packages")
+		collect(w.Plugins, "spwn.yaml#worlds."+wname+".packages")
 	}
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
@@ -745,7 +745,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 			continue
 		}
 		rel := relPath(in.Root, filepath.Join(a.Path, "agent.yaml"))
-		collect(parsed.Packages, rel+"#packages")
+		collect(parsed.Plugins, rel+"#plugins")
 	}
 
 	seen := map[string]bool{}
@@ -879,7 +879,7 @@ func relPath(root, path string) string {
 
 func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
-		return "check the package name, or add it as a local package under ./spwn/packages/"
+		return "check the package name, or add it as a local package under ./spwn/plugins/"
 	}
 	best := ""
 	bestScore := len(tool) + 1

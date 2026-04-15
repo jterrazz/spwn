@@ -1,5 +1,5 @@
 name: a-very-long-agent-name-that-tests-slug-boundaries-abc
 runtime:
   backend: "@spwn/claude-code"
-packages:
+plugins:
   - "@spwn/unix"

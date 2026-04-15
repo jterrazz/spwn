@@ -51,7 +51,7 @@ func TestSaveLoad_roundtrip(t *testing.T) {
 			t.Errorf("lost %s after round-trip", ref)
 		}
 	}
-	e := got.Packages["@spwn/unix"]
+	e := got.Plugins["@spwn/unix"]
 	if e.Version != "24.04" || e.Source != lockfile.SourceBuiltin {
 		t.Errorf("entry mangled: %+v", e)
 	}

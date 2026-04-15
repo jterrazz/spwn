@@ -2,7 +2,7 @@
 # Docs: https://spwn.sh/docs/cli/spwn-world
 
 # Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
-packages:
+plugins:
   - "@spwn/unix"          # Core Unix tools
   - "@spwn/git"           # Git version control
   # - "@spwn/node"        # Node.js + npm

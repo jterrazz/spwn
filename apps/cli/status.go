@@ -290,8 +290,8 @@ func renderWorldSection(ww world.World) {
 	}
 
 	// Packages
-	if len(ww.Manifest.Packages) > 0 {
-		pr("%s%s\n", indent, ui.Faint(strings.Join(ww.Manifest.Packages, " ")))
+	if len(ww.Manifest.Plugins) > 0 {
+		pr("%s%s\n", indent, ui.Faint(strings.Join(ww.Manifest.Plugins, " ")))
 	}
 
 	// Agents

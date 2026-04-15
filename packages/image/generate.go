@@ -23,7 +23,7 @@ func ToolsToInputs(tools []Tool) []ToolInput {
 		inputs[i] = ToolInput{
 			Name:         t.Name(),
 			Kind:         string(t.Kind()),
-			Packages:     spec.Packages,
+			AptPackages:  spec.AptPackages,
 			Commands:     spec.Commands,
 			UserCommands: spec.UserCommands,
 			Env:          spec.Env,

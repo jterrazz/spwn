@@ -15,11 +15,11 @@ func TestRulePackageVersionConflict_flagsMismatchAcrossAgents(t *testing.T) {
 	root := t.TempDir()
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
-packages:
+plugins:
   - "@spwn/unix@24.04"
 `)
 	morpheus := scaffoldAgent(t, root, "morpheus", `name: morpheus
-packages:
+plugins:
   - "@spwn/unix@22.04"
 `)
 
@@ -35,7 +35,7 @@ packages:
 		AgentRefs: []AgentRef{neo, morpheus},
 	}
 
-	issues := rulePackageVersionConflict(in)
+	issues := rulePluginVersionConflict(in)
 	if len(issues) != 1 {
 		t.Fatalf("want 1 conflict issue, got %d: %+v", len(issues), issues)
 	}
@@ -53,11 +53,11 @@ func TestRulePackageVersionConflict_identicalVersionsOK(t *testing.T) {
 	root := t.TempDir()
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
-packages:
+plugins:
   - "@spwn/unix@24.04"
 `)
 	morpheus := scaffoldAgent(t, root, "morpheus", `name: morpheus
-packages:
+plugins:
   - "@spwn/unix@24.04"
 `)
 
@@ -73,7 +73,7 @@ packages:
 		AgentRefs: []AgentRef{neo, morpheus},
 	}
 
-	if got := rulePackageVersionConflict(in); len(got) != 0 {
+	if got := rulePluginVersionConflict(in); len(got) != 0 {
 		t.Errorf("matching versions should not flag, got %+v", got)
 	}
 }
@@ -84,7 +84,7 @@ func TestRulePackageVersionConflict_singleAgentSkipped(t *testing.T) {
 	root := t.TempDir()
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
-packages:
+plugins:
   - "@spwn/unix@24.04"
 `)
 
@@ -100,7 +100,7 @@ packages:
 		AgentRefs: []AgentRef{neo},
 	}
 
-	if got := rulePackageVersionConflict(in); len(got) != 0 {
+	if got := rulePluginVersionConflict(in); len(got) != 0 {
 		t.Errorf("single-agent world should not fire, got %+v", got)
 	}
 }

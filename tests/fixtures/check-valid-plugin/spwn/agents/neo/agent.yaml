@@ -3,5 +3,5 @@ name: neo
 runtime:
   backend: "@spwn/claude-code"
 
-packages:
+plugins:
   - "@spwn/mempalace"

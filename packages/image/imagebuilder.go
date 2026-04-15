@@ -83,7 +83,7 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 		toolInputs[i] = dockerfile.ToolInput{
 			Name:         t.Name(),
 			Kind:         string(t.Kind()),
-			Packages:     spec.Packages,
+			AptPackages:  spec.AptPackages,
 			Commands:     spec.Commands,
 			UserCommands: spec.UserCommands,
 			Env:          spec.Env,

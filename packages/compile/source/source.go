@@ -81,7 +81,7 @@ type AgentConfig struct {
 	Role     string        `yaml:"role,omitempty"`
 	Team     string        `yaml:"team,omitempty"`
 	Runtime  RuntimeConfig `yaml:"runtime,omitempty"`
-	Packages []string      `yaml:"packages,omitempty"`
+	Plugins []string      `yaml:"plugins,omitempty"`
 }
 
 // RuntimeConfig is the per-agent runtime override section of agent.yaml.

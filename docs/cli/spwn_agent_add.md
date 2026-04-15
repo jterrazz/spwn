@@ -12,9 +12,9 @@ Add packages to an agent
 Compose an agent by attaching packages.
 
 Examples:
-  spwn agent add neo --package @spwn/python
+  spwn agent add neo --plugin @spwn/python
   spwn agent add neo --pkg @spwn/mempalace
-  spwn agent add neo --package @spwn/unix --package @spwn/git
+  spwn agent add neo --plugin @spwn/unix --plugin @spwn/git
 
 ```
 spwn agent add <agent-name> [flags]
@@ -24,8 +24,8 @@ spwn agent add <agent-name> [flags]
 
 ```
   -h, --help                  help for add
-      --package stringArray   Package ref to add (repeatable, e.g. @spwn/python)
-      --pkg stringArray       Short alias for --package
+      --plugin stringArray    Plugin ref to add (repeatable, e.g. @spwn/python)
+      --plugins stringArray   Plural alias for --plugin
 ```
 
 ### SEE ALSO

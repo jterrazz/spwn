@@ -83,8 +83,8 @@ func PluginRuntimes(t Tool) []string { return t.Runtimes() }
 
 // InstallSpec describes how to install a tool into a Docker image.
 type InstallSpec struct {
-	// Packages are apt-get packages to install. Deduplicated across tools.
-	Packages []string
+	// AptPackages are apt-get packages to install. Deduplicated across tools.
+	AptPackages []string
 
 	// Commands are RUN lines executed as root, before the USER switch.
 	Commands []string

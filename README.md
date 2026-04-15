@@ -153,7 +153,7 @@ spwn/agents/neo/
 └── journal/                  # session history - one file per run
 ```
 
-**Everything is a package.** Tools, plugins, skills — all unified under one concept. A package can install apt-get deps, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
+**Everything is a plugin.** Tools, plugins, skills — all unified under one concept. A package can install apt-get deps, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
 
 ```yaml
 # spwn/agents/neo/agent.yaml
@@ -166,18 +166,18 @@ packages:
   - "@spwn/git"                  # version control
   - "@spwn/python"               # python3, pip3
   - "@spwn/mempalace"            # memory palace (plugin: injects Claude Code config)
-  - paper-reading                # local skill: spwn/packages/paper-reading.md
+  - paper-reading                # local skill: spwn/plugins/paper-reading.md
   - hypothesis-testing           # local skill
 ```
 
-**If a package isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [package catalog](docs/tool-catalog.md).
+**If a package isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [package catalog](docs/plugin-catalog.md).
 
 Dependency resolution works like npm:
 - `@spwn/<name>` is a catalog package compiled into the spwn binary.
-- `<bare-name>` is a local package under `spwn/packages/<name>/` (directory form) or `spwn/packages/<name>.md` (bare-markdown skill).
+- `<bare-name>` is a local plugin under `spwn/plugins/<name>/` (directory form) or `spwn/plugins/<name>.md` (bare-markdown skill).
 - `@<owner>/<name>` is reserved for a future community registry.
 
-Add a catalog package to every agent with `spwn package install @spwn/<name>`; the ref gets pinned in `spwn.lock.yaml`.
+Add a catalog package to every agent with `spwn plugin install @spwn/<name>`; the ref gets pinned in `spwn.lock.yaml`.
 
 **Agents evolve through three mechanisms:**
 
@@ -413,7 +413,7 @@ Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - 
 | **Principles** - why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
 | **Architecture** - module map, core abstractions, invariants | [`docs/architecture.md`](docs/architecture.md) |
 | **Worlds** - spawning, isolation, tools-as-structure | [`docs/worlds.md`](docs/worlds.md) |
-| **Tool catalog** - how tool packs work, how to add one | [`docs/tool-catalog.md`](docs/tool-catalog.md) |
+| **Tool catalog** - how tool packs work, how to add one | [`docs/plugin-catalog.md`](docs/plugin-catalog.md) |
 | **CLI reference** - every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
 | **Releasing** - release runbook | [`docs/releasing.md`](docs/releasing.md) |
 | **Update system** - CLI + Tauri auto-update, channels | [`docs/update-system.md`](docs/update-system.md) |
