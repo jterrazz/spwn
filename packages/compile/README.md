@@ -170,34 +170,34 @@ touches the disk, the network, or global state.
 
 Phase 1 hand-constructs `Input` inside `architect.Spawn` from the
 data it already has. Phase 2+ will add a loader that reads
-`Input` from a project directory so `spwn compile ./my-project` can
-run without spinning up a live world.
+`Input` from a project directory so `spwn build --tree-only ./my-project`
+can run without spinning up a live world.
 
 ## Relationship to the CLI
 
-| Command             | What it does                                                                    |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `spwn check`        | Parses + validates the project (manifest rule engine).                          |
-| `spwn check --deep` | Additionally runs a full compile dry-run and reports renderer errors.           |
-| `spwn compile`      | Materialises the compiled `Tree` to disk (default `./dist`). No Docker.         |
-| `spwn build`        | Compiles the project and bakes the resulting `Tree` into a project-specific Docker image via `image.BuildFromBase`. |
-| `spwn up`           | Runs compile + link + container boot.                                           |
+| Command                   | What it does                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `spwn check`              | Parses + validates the project (manifest rule engine).                          |
+| `spwn check --deep`       | Additionally runs a full compile dry-run and reports renderer errors.           |
+| `spwn build --tree-only`  | Materialises the compiled `Tree` to disk (default `./dist`). No Docker.         |
+| `spwn build`              | Compiles the project and bakes the resulting `Tree` into a project-specific Docker image via `image.BuildFromBase`. |
+| `spwn up`                 | Runs compile + link + container boot.                                           |
 
 ## CLI
 
-`spwn compile` lets you render the project and see what the claude-code
-runtime would produce without going through Docker. Useful for
-previewing, debugging a renderer change, or packaging for non-Docker
+`spwn build --tree-only` lets you render the project and see what the
+claude-code runtime would produce without going through Docker. Useful
+for previewing, debugging a renderer change, or packaging for non-Docker
 targets down the road.
 
 ```
-spwn compile                      # -> ./dist
-spwn compile --out ./preview      # custom output dir
-spwn compile --dry-run            # list paths, touch nothing
-spwn compile --agent neo          # filter the Tree to one agent
-spwn compile --json               # machine-readable build report
-spwn compile --runtime claude-code
-spwn compile --force              # overwrite a non-empty output dir
+spwn build --tree-only                      # -> ./dist
+spwn build --tree-only --output ./preview   # custom output dir
+spwn build --tree-only --dry-run            # list paths, touch nothing
+spwn build --tree-only --agent neo          # filter the Tree to one agent
+spwn build --tree-only --json               # machine-readable build report
+spwn build --tree-only --runtime claude-code
+spwn build --tree-only --force              # overwrite a non-empty output dir
 ```
 
 `spwn check --deep` runs a compile dry-run as part of validation.

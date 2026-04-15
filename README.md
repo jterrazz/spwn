@@ -289,7 +289,7 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn init                                    Scaffold a blank project in the current dir
 🟢 spwn init @spwn/matrix                       Install a bundled example (matrix, startup, ...)
 🟢 spwn check                                   Validate the project tree against 15 rules
-🟢 spwn compile                                 Render the project tree to ./dist (preview / debug)
+🟢 spwn build --tree-only                       Render the project tree to ./dist (preview / debug)
 🟢 spwn build                                   Compile + bake into a project-specific Docker image
 
 # ── Agents ───────────────────────────────────────────────────────
