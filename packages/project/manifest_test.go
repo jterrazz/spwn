@@ -17,7 +17,7 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	required := []string{
 		"spwn.yaml",
 		"spwn/agents/neo/agent.yaml",
-		"spwn/agents/neo/AGENT.md",
+		"spwn/agents/neo/AGENTS.md",
 		"spwn/agents/neo/identity/profile.md",
 		"spwn/agents/neo/skills/.gitkeep",
 		"spwn/agents/neo/knowledge/.gitkeep",

@@ -184,7 +184,7 @@ describe('smoke: project upgrade cycle', () => {
             ].join('\n'),
         );
         writeFileSync(
-            join(trinityDir, 'AGENT.md'),
+            join(trinityDir, 'AGENTS.md'),
             "# trinity\n\nYou are trinity, neo's partner.\n",
         );
         writeFileSync(

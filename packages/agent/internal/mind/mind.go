@@ -34,7 +34,7 @@ tools:
 
 // defaultAgentMDTmpl is the baseline source AGENT.md written by
 // Init/Repair. Mirrors packages/project/internal/scaffold/templates/
-// AGENT.md.tmpl. This is the provider-neutral agent prompt file; a
+// AGENTS.md.tmpl. This is the provider-neutral agent prompt file; a
 // runtime-specific renderer (e.g. packages/compile/runtimes/
 // claudecode) is what eventually turns it into CLAUDE.md inside the
 // container.
@@ -131,7 +131,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
 		return "", fmt.Errorf("create agent.yaml: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "AGENT.md"), renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "AGENTS.md"), renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
 		return "", fmt.Errorf("create AGENT.md: %w", err)
 	}
 
@@ -177,7 +177,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 			return fmt.Errorf("create agent.yaml: %w", err)
 		}
 	}
-	entryPath := filepath.Join(dir, "AGENT.md")
+	entryPath := filepath.Join(dir, "AGENTS.md")
 	if _, err := os.Stat(entryPath); err != nil && os.IsNotExist(err) {
 		if err := os.WriteFile(entryPath, renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
 			return fmt.Errorf("create AGENT.md: %w", err)

@@ -8,7 +8,7 @@ import (
 )
 
 func TestAgentsBookContent(t *testing.T) {
-	// Verify that AGENT.md content for a worker has key sections
+	// Verify that AGENTS.md content for a worker has key sections
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "test-agent",
 		Role:      "worker",
@@ -27,7 +27,7 @@ func TestAgentsBookContent(t *testing.T) {
 
 	for _, section := range keySections {
 		if !strings.Contains(ctx, section) {
-			t.Errorf("AGENT.md (worker) missing key section %q", section)
+			t.Errorf("AGENTS.md (worker) missing key section %q", section)
 		}
 	}
 
@@ -42,7 +42,7 @@ func TestAgentsBookContent(t *testing.T) {
 
 	for _, path := range mindPaths {
 		if !strings.Contains(ctx, path) {
-			t.Errorf("AGENT.md (worker) missing mind path %q", path)
+			t.Errorf("AGENTS.md (worker) missing mind path %q", path)
 		}
 	}
 }
@@ -62,7 +62,7 @@ func TestSystemSkillsExist(t *testing.T) {
 		},
 	})
 
-	// System skills are embedded in the AGENT.md for workers
+	// System skills are embedded in the AGENTS.md for workers
 	// 1. Mind management skill
 	if !strings.Contains(ctx, "/mind/") {
 		t.Error("worker context missing mind management skill references")

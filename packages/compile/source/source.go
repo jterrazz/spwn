@@ -253,7 +253,7 @@ func loadAgent(name, dir string) (AgentSource, error) {
 	src := AgentSource{Name: name}
 
 	// AGENT.md
-	agentMDPath := filepath.Join(dir, "AGENT.md")
+	agentMDPath := filepath.Join(dir, "AGENTS.md")
 	if b, err := os.ReadFile(agentMDPath); err == nil {
 		src.AgentMD = b
 	} else if !os.IsNotExist(err) {

@@ -104,7 +104,7 @@ describe('spwn check', () => {
     });
 
     test('--deep passes on a valid project', async () => {
-        // Given - the single-agent fixture has a real AGENT.md so the
+        // Given - the single-agent fixture has a real AGENTS.md so the
         // Compile pass finds nothing to complain about.
         const result = await spec('check deep valid')
             .project('single-agent')
@@ -117,8 +117,8 @@ describe('spwn check', () => {
         await result.stdout.toMatch('valid-project.txt');
     });
 
-    test('--deep catches an empty AGENT.md that shallow check misses', async () => {
-        // Given - a seed wipes AGENT.md to zero bytes. The manifest
+    test('--deep catches an empty AGENTS.md that shallow check misses', async () => {
+        // Given - a seed wipes AGENTS.md to zero bytes. The manifest
         // Rule engine only checks that the file EXISTS, not that it
         // Has content, so a shallow check sees a valid project.
         const shallow = await spec('check deep shallow-pass')
@@ -139,7 +139,7 @@ describe('spwn check', () => {
         expect(deep.exitCode).toBe(1);
         const text = deep.stdout.text;
         expect(text).toContain('agent prompt is missing or empty');
-        expect(text).toContain('spwn/agents/neo/AGENT.md');
+        expect(text).toContain('spwn/agents/neo/AGENTS.md');
     });
 
     test('--deep --json tags compile issues with source=compile', async () => {
