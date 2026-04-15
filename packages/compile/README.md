@@ -175,28 +175,80 @@ run without spinning up a live world.
 
 ## Relationship to the CLI
 
-| Command      | What it does                                        |
-| ------------ | --------------------------------------------------- |
-| `spwn check` | Parses + validates the project. (Phase 3 will run a full dry-run compile through this package.) |
-| `spwn build` | Runs compile + link, produces a Docker image. (Phase 2 will route it through `compile.Compile`.) |
-| `spwn up`    | Runs compile + link + container boot.               |
+| Command             | What it does                                                                    |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `spwn check`        | Parses + validates the project (manifest rule engine).                          |
+| `spwn check --deep` | Additionally runs a full compile dry-run and reports renderer errors.           |
+| `spwn compile`      | Materialises the compiled `Tree` to disk (default `./dist`). No Docker.         |
+| `spwn build`        | Runs compile + link, produces a Docker image. (Still wired the old way; phase-5 folds it through `compile.Compile`.) |
+| `spwn up`           | Runs compile + link + container boot.                                           |
 
-Today `spwn up` is the only path that exercises the compiler in
-production (via `architect.Spawn` → `compile.Compile`). The CLI
-commands that expose the compiler as a first-class verb land in
-Phase 2.
+## CLI
+
+`spwn compile` lets you render the project and see what the claude-code
+runtime would produce without going through Docker. Useful for
+previewing, debugging a renderer change, or packaging for non-Docker
+targets down the road.
+
+```
+spwn compile                      # -> ./dist
+spwn compile --out ./preview      # custom output dir
+spwn compile --dry-run            # list paths, touch nothing
+spwn compile --agent neo          # filter the Tree to one agent
+spwn compile --json               # machine-readable build report
+spwn compile --runtime claude-code
+spwn compile --force              # overwrite a non-empty output dir
+```
+
+`spwn check --deep` runs a compile dry-run as part of validation.
+Compile errors are merged into the existing issue list and tagged
+with `source: "compile"` in the JSON output so they can be
+distinguished from manifest-level issues.
+
+```
+spwn check                        # fast: manifest only
+spwn check --deep                 # + compile dry-run (still fast: no Docker)
+spwn check --deep --json          # JSON report with source=manifest|compile
+```
+
+Behind both: `source.Load(projectRoot)` walks the project into a rich
+`ProjectSource`, `source.ToCompileInput` projects it onto the runtime
+`Input`, and `compile.Compile("claude-code", input)` returns the
+`Tree` that `tree.WriteTo` then materialises.
+
+Today `spwn up` is the only path that bakes the compiled tree into a
+running Docker world. The commands above expose the pure first half
+of that pipeline as a first-class verb.
 
 ## Testing strategy
 
-Phase 1 ships unit tests for the `Tree` type (CRUD, sorting,
-`WriteTo` round-trip) and the existing `claudecode` generator tests
-that moved over from the old `worldfiles` package.
+Unit tests cover the `Tree` type (CRUD, sorting, `WriteTo`
+round-trip) and the individual `claudecode` generators that produce
+physics, faculties, AGENTS.md, roster, and the per-agent entrypoint.
 
-Phase 4 will add **golden-fixture tests**: a small spwn project
-checked into `testdata/`, a recorded expected `Tree` (map of
-path → content hash), and a diff on every CI run. When a renderer
-changes output by even one byte, the test fails with a readable
-diff. That's the payoff of making `Render` pure.
+**Golden fixtures** live under
+`packages/compile/runtimes/claudecode/testdata/`. Each sub-directory
+is one scenario: an `input/` project tree and an `expected/` rendered
+tree, or an `expected-error.txt` for error-path fixtures. The test
+driver (`golden_test.go`) feeds every `input/` through
+`source.Load → compile.Compile` and diffs the resulting tree against
+`expected/`.
+
+```bash
+go test ./packages/compile/runtimes/claudecode/...
+UPDATE_GOLDEN=1 go test -run TestGoldenFixtures ./packages/compile/runtimes/claudecode/...
+```
+
+The whole suite runs in tens of milliseconds. Regressions on any
+byte of the renderer's output fail a test in single-digit
+milliseconds instead of waiting for a docker spawn in an e2e test.
+
+The current fixture set exercises: minimal agents, colonies (2 and
+3 agents with roles), every per-agent layer, local and subdir skills,
+hooks, plugins, tool lists, custom project names, unicode in
+prompts, long agent names, empty layer dirs, AGENT.md `@`-imports,
+and the three main error paths (missing agents, malformed
+`agent.yaml`, manifests with no worlds declared).
 
 ## Why provider neutrality matters
 

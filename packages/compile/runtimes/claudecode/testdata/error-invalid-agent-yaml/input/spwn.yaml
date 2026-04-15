@@ -1,0 +1,6 @@
+version: 2
+name: broken-yaml
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]

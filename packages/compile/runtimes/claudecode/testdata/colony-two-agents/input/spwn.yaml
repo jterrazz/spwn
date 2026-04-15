@@ -1,0 +1,6 @@
+version: 2
+name: duo
+worlds:
+  home:
+    agents: [morpheus, neo]
+    workspaces: [.]

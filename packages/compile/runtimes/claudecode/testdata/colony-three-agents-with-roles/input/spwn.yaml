@@ -1,0 +1,6 @@
+version: 2
+name: trio
+worlds:
+  home:
+    agents: [architect, morpheus, neo]
+    workspaces: [.]

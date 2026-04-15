@@ -1,0 +1,6 @@
+version: 2
+name: importy
+worlds:
+  home:
+    agents: [neo]
+    workspaces: [.]
