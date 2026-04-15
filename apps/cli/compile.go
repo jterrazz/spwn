@@ -17,7 +17,7 @@ import (
 )
 
 func init() {
-	compileCmd.Flags().StringVar(&compileRuntime, "runtime", "claude-code", "Target runtime (claude-code)")
+	compileCmd.Flags().StringVar(&compileRuntime, "runtime", "", "Target runtime (defaults to the runtime declared in agent.yaml, fallback: claude-code)")
 	compileCmd.Flags().StringVar(&compileOut, "out", "dist", "Output directory for the compiled tree")
 	compileCmd.Flags().StringVar(&compileAgent, "agent", "", "Compile only the named agent (filter the Tree)")
 	compileCmd.Flags().StringVar(&compileWorld, "world", "", "World from spwn.yaml to compile (default: sole world)")
@@ -84,12 +84,17 @@ debugging renderer output, and packaging for non-Docker runtimes.
 			return fmt.Errorf("load project source: %w", err)
 		}
 
+		runtimeName, err := source.ResolveRuntime(src, compileRuntime)
+		if err != nil {
+			return err
+		}
+
 		input, err := source.ToCompileInput(src, compileWorld)
 		if err != nil {
 			return err
 		}
 
-		tree, err := compile.Compile(compileRuntime, input)
+		tree, err := compile.Compile(runtimeName, input)
 		if err != nil {
 			// Surface the known runtime list so typos ("codex" ->
 			// "claude-code") are self-correcting.
@@ -142,7 +147,7 @@ debugging renderer output, and packaging for non-Docker runtimes.
 		paths := tree.Paths()
 		if compileJSON {
 			report := compileReport{
-				Runtime:   compileRuntime,
+				Runtime:   runtimeName,
 				OutDir:    absOut,
 				FileCount: len(paths),
 				Paths:     paths,
@@ -156,7 +161,7 @@ debugging renderer output, and packaging for non-Docker runtimes.
 		fmt.Fprintf(out, "  %s  %s\n", ui.Green("✓"), ui.Strong("Compile complete"))
 		fmt.Fprintf(out, "     %s\n", ui.Faint(absOut))
 		fmt.Fprintln(out)
-		fmt.Fprintf(out, "  %d file(s) written, runtime=%s\n", len(paths), compileRuntime)
+		fmt.Fprintf(out, "  %d file(s) written, runtime=%s\n", len(paths), runtimeName)
 		fmt.Fprintln(out)
 		return nil
 	},
