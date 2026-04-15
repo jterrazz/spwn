@@ -96,6 +96,63 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 
 <br/>
 
+## How it works: the spwn compiler
+
+Spwn is a **two-phase compiler**. You author a project in a
+provider-neutral source format, and a runtime-specific renderer
+translates it into the file layout your target agent runtime expects.
+Think `tsc`: you write `.ts`, you get `.js` — but your source never
+mentions V8 or Bun.
+
+```
+Source (what you commit)               Target (what the container sees)
+──────────────────────                 ────────────────────────────────
+spwn.yaml                ─┐            CLAUDE.md            (Claude Code)
+spwn/agents/neo/AGENT.md ─┤  compile   .claude/agents/neo/…
+spwn/agents/neo/core/    ─┼──────────> world/physics.md
+spwn/skills/*.md         ─┤            world/faculties.md
+spwn/hooks/*             ─┘            world/skills/*.md
+```
+
+The source format is **100% provider-agnostic**. Nothing under
+`spwn/` mentions Claude Code, Codex, or any other specific agent
+runtime by name or by convention. The per-agent entrypoint is
+`AGENT.md`, not `CLAUDE.md`, and the manifest's `runtime:` field
+picks which compiler backend to use.
+
+Two packages drive the pipeline:
+
+- **[`packages/compile`](packages/compile/)** is the compiler.
+  It takes a project and produces a `Tree` — an in-memory
+  `path → bytes` map that represents the full on-disk layout the
+  target runtime needs. Each concrete backend
+  (`packages/compile/runtimes/claudecode`, future `codex`, …)
+  implements the `Runtime` interface: a pure function from `Input`
+  to `Tree`, no I/O, deterministic.
+- **[`packages/image`](packages/image/)** is the linker. It takes
+  the compiled `Tree` plus the resolved tool list and bakes them
+  into a Docker image the world container can boot from.
+
+`spwn check` is a dry run of the first phase: it catches broken
+@-imports, missing skills, and invalid tool refs without touching
+Docker. `spwn build` runs both phases and emits the final image.
+
+Why this split matters:
+
+- **Portability** — the committed project runs on any backend with a
+  compile Runtime. Adding `packages/compile/runtimes/codex` lets the
+  same agents run under a Codex-style runtime with zero source edits.
+- **Testability** — renderers are pure functions, so they test with
+  a map comparison, not a live container.
+- **No vendor lock-in** — your repo stays clean even if you switch
+  target runtimes, because the Claude-specific convention
+  (`CLAUDE.md`) is emitted at compile time, not authored by hand.
+
+See [`packages/compile/README.md`](packages/compile/README.md) for
+the full type walkthrough and how to add a new runtime.
+
+<br/>
+
 ## Projects are per-repository
 
 **A spwn project lives in the repo, not in your home directory.**
@@ -145,7 +202,7 @@ Each agent is a directory of markdown files - **human-readable, git-friendly, no
 ```
 spwn/agents/neo/
 ├── agent.yaml                # composition: tools, skills, profile, runtime
-├── CLAUDE.md                 # entry point the runtime reads on startup
+├── AGENT.md                  # entry point (provider-neutral; compiled per runtime)
 ├── core/                     # identity - profile.md, purpose.md, traits.md
 ├── skills/                   # procedures and checklists
 ├── knowledge/                # facts about the codebase
