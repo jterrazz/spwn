@@ -36,16 +36,16 @@ describe('marketplace - spwn get', () => {
         expect(result.stdout.text + result.stderr.text).toContain('No packages installed');
     });
 
-    test("'spwn get install nonexistent' handles gracefully", async () => {
+    test("'spwn get install nonexistent' exits non-zero with a not-implemented banner", async () => {
+        // Given - isolated home, bogus package name
+        // When - running the unimplemented get install stub
+        // Then - exit 2 (feature-unavailable), no crash, banner on stderr
         const result = await isolated('get install nonexistent')
             .exec('get install nonexistent')
             .run();
 
-        // Placeholder surface — command may succeed with a stub or
-        // Fail cleanly. The requirement is "no crash / no stack trace".
-        expect(result.stdout.text.length + result.stderr.text.length).toBeGreaterThan(0);
-        expect(result.stderr.text).not.toContain('TypeError');
-        expect(result.stderr.text).not.toContain('ReferenceError');
+        expect(result.exitCode).toBe(2);
+        expect(result.stderr.text).toMatch(/not yet implemented/i);
         expect(result.stderr.text).not.toContain('panic:');
     });
 
@@ -65,6 +65,16 @@ describe('marketplace - spwn get', () => {
         expect(result.stderr.text).not.toContain('TypeError');
         expect(result.stderr.text).not.toContain('ReferenceError');
         expect(result.stderr.text).not.toContain('panic:');
+    });
+
+    test("'spwn tool show' exits non-zero with a not-implemented banner", async () => {
+        // Given - tool show is planned but not yet wired
+        // When - invoking it on any pack name
+        // Then - exit 2, not-implemented banner on stderr
+        const result = await isolated('tool show unimplemented').exec('tool show @spwn/unix').run();
+
+        expect(result.exitCode).toBe(2);
+        expect(result.stderr.text).toMatch(/not yet implemented/i);
     });
 
     test("'spwn get' without subcommand shows help-ish output", async () => {
