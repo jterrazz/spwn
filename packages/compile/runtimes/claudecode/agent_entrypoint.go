@@ -1,0 +1,52 @@
+package claudecode
+
+import "fmt"
+
+// GenerateAgentCLAUDEMD returns the per-agent CLAUDE.md file that
+// Claude Code loads on startup. It inlines a reference to the
+// agent's profile and the world's shared manuals so the runtime
+// always boots with the agent's identity in context.
+//
+// This is Claude Code specific on purpose: the filename, the use of
+// @-imports for profile loading, and the paths under /world/ are all
+// conventions that belong to Claude Code, not to spwn's source
+// format. A future Codex renderer will produce its own entrypoint
+// file under its own name.
+func GenerateAgentCLAUDEMD(agentName, role string) string {
+	return fmt.Sprintf(`# %s
+
+You are **%s**, a spwn agent with role: %s.
+
+## Your identity
+
+Read your full profile and behavioral instructions from:
+
+@core/profile.md
+
+Follow the voice, style, and purpose defined there. You are NOT a generic assistant - you are %s.
+
+## Your world
+
+- Read %s for your operating manual (how memory, skills, and communication work).
+- Read %s for the rules of this world (network, filesystem, communication).
+- Read %s to see what tools are physically available.
+- Read %s for system skills (mind management, collaboration, evolution).
+
+## Key rules
+
+1. **Read your profile first** before doing anything else. Your identity shapes how you respond.
+2. Save important discoveries to your knowledge (write to %s).
+3. After significant work, check if a playbook should be created in %s.
+4. **Messaging**: to send a message to another agent, write a .json or .md file to %s. To check YOUR inbox, read %s. Read %s for the full messaging protocol.
+5. Never modify system files in /world/ (physics.md, faculties.md, AGENTS.md are read-only).
+`, agentName, agentName, role, agentName,
+		"`/world/AGENTS.md`",
+		"`/world/physics.md`",
+		"`/world/faculties.md`",
+		"`/world/skills/`",
+		"`./knowledge/`",
+		"`./playbooks/`",
+		"`/world/inbox/<their-name>/`",
+		fmt.Sprintf("`/world/inbox/%s/`", agentName),
+		"`/world/skills/collaboration.md`")
+}
