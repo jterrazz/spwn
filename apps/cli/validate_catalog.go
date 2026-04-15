@@ -1,10 +1,41 @@
 package cli
 
 import (
+	"spwn.sh/apps/cli/tool"
 	"spwn.sh/catalog/plugins"
 	"spwn.sh/catalog/runtimes"
 	"spwn.sh/catalog/tools"
+	"spwn.sh/packages/project/lockfile"
 )
+
+func init() {
+	// Wire the built-in catalog into the install verbs so `spwn tool
+	// install @spwn/bogus` can fail with a crisp error instead of
+	// silently pinning garbage. Lives here (not in tool.init()) so the
+	// tool package stays free of a catalog import.
+	tool.SetCatalogLookup(func(pack string, kind lockfile.Kind) bool {
+		switch kind {
+		case lockfile.KindTool:
+			for _, t := range tools.All {
+				if t.Name() == pack {
+					return true
+				}
+			}
+		case lockfile.KindPlugin:
+			for _, p := range plugins.All {
+				if p.Name() == pack {
+					return true
+				}
+			}
+		case lockfile.KindSkill:
+			// Built-in skill catalog is empty today — accept any
+			// @spwn/* skill name. Once the catalog ships, switch this
+			// to a real lookup.
+			return true
+		}
+		return false
+	})
+}
 
 // catalogToolNames returns the @scope/name identifier of every
 // built-in tool + runtime + plugin shipped with spwn. Used to power the

@@ -161,24 +161,7 @@ func TestSkillEdit_NotFoundErrors(t *testing.T) {
 	}
 }
 
-// ── stubs (install / publish) ────────────────────────────────────────────────
-
-func TestSkillInstall_Stub(t *testing.T) {
-	out, err := runWithOut(t, getCmd, "@community/rust-review")
-	if err != nil {
-		t.Fatalf("install stub: %v", err)
-	}
-	if !strings.Contains(out.String(), "registry") {
-		t.Errorf("stub should mention registry: %s", out.String())
-	}
-}
-
-func TestSkillPublish_Stub(t *testing.T) {
-	out, err := runWithOut(t, publishCmd, "refactoring")
-	if err != nil {
-		t.Fatalf("publish stub: %v", err)
-	}
-	if !strings.Contains(out.String(), "registry") {
-		t.Errorf("stub should mention registry: %s", out.String())
-	}
-}
+// install/uninstall verb behavior is covered end-to-end in
+// tests/cli/skill/install/*.e2e.test.ts; the shared ref-classification
+// + lockfile-mutation logic lives in apps/cli/tool and is unit-tested
+// there. Keeping this file focused on author/ls/edit/rm semantics.

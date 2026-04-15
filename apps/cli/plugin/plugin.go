@@ -11,9 +11,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	plugins "spwn.sh/catalog/plugins"
+	"spwn.sh/apps/cli/tool"
 	"spwn.sh/apps/cli/ui"
+	plugins "spwn.sh/catalog/plugins"
+	"spwn.sh/packages/agent"
 	ib "spwn.sh/packages/image"
+	"spwn.sh/packages/project/lockfile"
 )
 
 // Cmd is the root `spwn plugin` command group.
@@ -35,7 +38,8 @@ dependency graph and vice-versa.`,
 func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(showCmd)
-	Cmd.AddCommand(getCmd)
+	Cmd.AddCommand(installCmd)
+	Cmd.AddCommand(uninstallCmd)
 
 	Cmd.SetHelpFunc(pluginHelp)
 }
@@ -50,15 +54,14 @@ func pluginHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ plugin")+" "+ui.Faint("- runtime-targeted packs for agents"),
 		[]ui.HelpGroup{
 			{Title: "Manage", Commands: []ui.HelpEntry{
+				{Name: "install <ref>", Desc: "Attach a plugin to every agent + lockfile"},
+				{Name: "uninstall <ref>", Desc: "Detach a plugin from every agent"},
 				{Name: "ls", Desc: "List built-in plugin packs"},
 				{Name: "show <pack>", Desc: "Inspect a plugin pack"},
 			}},
-			{Title: "Registry", Commands: []ui.HelpEntry{
-				{Name: "get <pack>", Desc: "Install a shared plugin " + ui.Faint("[planned]")},
-			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
+				{Name: "spwn plugin install @spwn/mempalace", Desc: ""},
 				{Name: "spwn plugin ls", Desc: "See every built-in plugin"},
-				{Name: "spwn agent add neo --plugin @spwn/mempalace", Desc: ""},
 			}},
 		},
 		"spwn plugin [command]",
@@ -131,19 +134,23 @@ var showCmd = &cobra.Command{
 	},
 }
 
-var getCmd = &cobra.Command{
-	Use:   "get <plugin>",
-	Short: "Install a plugin pack from the registry [planned]",
+var installCmd = &cobra.Command{
+	Use:   "install <ref>",
+	Short: "Attach a plugin to every agent in the project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Fprintf(cmd.OutOrStderr(), "install %q: the plugin registry is not yet available.\n", args[0])
-		fmt.Fprintln(cmd.OutOrStderr(), "Built-in plugin packs (@spwn/*) are always available - no install needed.")
-		return nil
+		return tool.RunInstall(cmd, args[0], lockfile.KindPlugin, agent.AddPlugin)
 	},
 }
 
-func init() {
-	ui.MarkExperimental(getCmd)
+var uninstallCmd = &cobra.Command{
+	Use:     "uninstall <ref>",
+	Aliases: []string{"rm", "remove"},
+	Short:   "Detach a plugin from every agent in the project",
+	Args:    cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return tool.RunUninstall(cmd, args[0], lockfile.KindPlugin, agent.RemovePlugin)
+	},
 }
 
 func joinOrDash(s []string) string {
