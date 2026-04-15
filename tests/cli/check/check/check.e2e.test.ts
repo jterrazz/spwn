@@ -103,6 +103,64 @@ describe('spwn check', () => {
         await result.json.toMatch('invalid-tool.json');
     });
 
+    test('--deep passes on a valid project', async () => {
+        // Given - the single-agent fixture has a real AGENT.md so the
+        // compile pass finds nothing to complain about.
+        const result = await spec('check deep valid')
+            .project('single-agent')
+            .exec('check --deep')
+            .run();
+
+        // Then - exits zero with the clean success banner. Deep adds
+        // no issues on a healthy project.
+        expect(result.exitCode).toBe(0);
+        await result.stdout.toMatch('valid-project.txt');
+    });
+
+    test('--deep catches an empty AGENT.md that shallow check misses', async () => {
+        // Given - a seed wipes AGENT.md to zero bytes. The manifest
+        // rule engine only checks that the file EXISTS, not that it
+        // has content, so a shallow check sees a valid project.
+        const shallow = await spec('check deep shallow-pass')
+            .project('single-agent')
+            .seed('agent/neo')
+            .exec('check')
+            .run();
+        expect(shallow.exitCode).toBe(0);
+
+        // When - the same project is re-run with --deep
+        const deep = await spec('check deep catches empty')
+            .project('single-agent')
+            .seed('agent/neo')
+            .exec('check --deep')
+            .run();
+
+        // Then - deep exits non-zero and surfaces the empty prompt
+        expect(deep.exitCode).toBe(1);
+        const text = deep.stdout.text;
+        expect(text).toContain('agent prompt is missing or empty');
+        expect(text).toContain('spwn/agents/neo/AGENT.md');
+    });
+
+    test('--deep --json tags compile issues with source=compile', async () => {
+        const result = await spec('check deep json')
+            .project('single-agent')
+            .seed('agent/neo')
+            .exec('check --deep --json')
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        const report = result.json.value as {
+            issues: Array<{ level: string; message: string; source?: string }>;
+            summary: { errors: number };
+            valid: boolean;
+        };
+        expect(report.valid).toBe(false);
+        const compileIssues = report.issues.filter((i) => i.source === 'compile');
+        expect(compileIssues.length).toBeGreaterThan(0);
+        expect(compileIssues[0].message).toContain('agent prompt');
+    });
+
     test('errors when run outside a spwn project', async () => {
         // Given - the empty fixture has no spwn.yaml anywhere up the tree
         const result = await spec('check no project').project('empty').exec('check').run();

@@ -8,18 +8,22 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/compile"
+	"spwn.sh/packages/compile/source"
 	"spwn.sh/packages/project"
 )
 
 func init() {
 	checkCmd.Flags().BoolVar(&checkStrict, "strict", false, "Exit non-zero on warnings, not just errors")
 	checkCmd.Flags().BoolVar(&checkJSON, "json", false, "Emit results as structured JSON on stdout")
+	checkCmd.Flags().BoolVar(&checkDeep, "deep", false, "Also run a compile dry-run and report renderer errors")
 	rootCmd.AddCommand(checkCmd)
 }
 
 var (
 	checkStrict bool
 	checkJSON   bool
+	checkDeep   bool
 )
 
 // checkReport is the CLI-owned JSON schema for `spwn check`. It's
@@ -43,6 +47,10 @@ type checkIssue struct {
 	Path    string `json:"path"`
 	Message string `json:"message"`
 	Hint    string `json:"hint,omitempty"`
+	// Source identifies which pass produced the issue. "manifest"
+	// (default, from the project.Validate rule engine) or "compile"
+	// (only emitted under --deep).
+	Source string `json:"source,omitempty"`
 }
 
 var checkCmd = &cobra.Command{
@@ -72,24 +80,29 @@ severity. Exits non-zero when errors are found (or warnings, with
 		})
 		out := cmd.OutOrStdout()
 
+		var compileIssues []compileIssue
+		if checkDeep {
+			compileIssues = runCompileDeepCheck(p.Root)
+		}
+
 		errors := filter(issues, project.LevelError)
 		warnings := filter(issues, project.LevelWarning)
 		infos := filter(issues, project.LevelInfo)
 
 		if checkJSON {
-			report := buildCheckReport(p.ManifestPath, errors, warnings, infos)
+			report := buildCheckReport(p.ManifestPath, errors, warnings, infos, compileIssues)
 			enc := json.NewEncoder(out)
 			enc.SetIndent("", "  ")
 			if err := enc.Encode(report); err != nil {
 				return fmt.Errorf("encode json: %w", err)
 			}
-			if len(errors) > 0 || (checkStrict && len(warnings) > 0) {
+			if len(errors) > 0 || hasCompileErrors(compileIssues) || (checkStrict && len(warnings) > 0) {
 				os.Exit(1)
 			}
 			return nil
 		}
 
-		if len(issues) == 0 {
+		if len(issues) == 0 && len(compileIssues) == 0 {
 			fmt.Fprintln(out)
 			fmt.Fprintf(out, "  %s  %s\n", ui.Green("✓"), ui.Strong("Project is valid"))
 			fmt.Fprintf(out, "     %s\n", ui.Faint(p.ManifestPath))
@@ -104,20 +117,21 @@ severity. Exits non-zero when errors are found (or warnings, with
 		printGroup(out, "errors", errors, ui.Red)
 		printGroup(out, "warnings", warnings, ui.Yellow)
 		printGroup(out, "info", infos, ui.Faint)
+		printCompileIssues(out, compileIssues)
 
 		fmt.Fprintf(out, "  %d error(s), %d warning(s), %d info\n",
-			len(errors), len(warnings), len(infos))
+			len(errors)+countCompileErrors(compileIssues), len(warnings), len(infos))
 		fmt.Fprintln(out)
 
-		if len(errors) > 0 || (checkStrict && len(warnings) > 0) {
+		if len(errors) > 0 || hasCompileErrors(compileIssues) || (checkStrict && len(warnings) > 0) {
 			os.Exit(1)
 		}
 		return nil
 	},
 }
 
-func buildCheckReport(manifestPath string, errors, warnings, infos []project.Issue) checkReport {
-	issues := make([]checkIssue, 0, len(errors)+len(warnings)+len(infos))
+func buildCheckReport(manifestPath string, errors, warnings, infos []project.Issue, compileIssues []compileIssue) checkReport {
+	issues := make([]checkIssue, 0, len(errors)+len(warnings)+len(infos)+len(compileIssues))
 	for _, group := range [][]project.Issue{errors, warnings, infos} {
 		for _, i := range group {
 			issues = append(issues, checkIssue{
@@ -125,19 +139,175 @@ func buildCheckReport(manifestPath string, errors, warnings, infos []project.Iss
 				Path:    i.Path,
 				Message: i.Message,
 				Hint:    i.Hint,
+				Source:  "manifest",
 			})
 		}
 	}
+	for _, ci := range compileIssues {
+		issues = append(issues, checkIssue{
+			Level:   ci.Level,
+			Path:    ci.Path,
+			Message: ci.Message,
+			Hint:    ci.Hint,
+			Source:  "compile",
+		})
+	}
+	compileErrs := countCompileErrors(compileIssues)
 	return checkReport{
-		Valid:        len(errors) == 0,
+		Valid:        len(errors) == 0 && compileErrs == 0,
 		ManifestPath: manifestPath,
 		Summary: checkSummary{
-			Errors:   len(errors),
-			Warnings: len(warnings),
+			Errors:   len(errors) + compileErrs,
+			Warnings: len(warnings) + countCompileWarnings(compileIssues),
 			Info:     len(infos),
 		},
 		Issues: issues,
 	}
+}
+
+// compileIssue is one finding produced by the --deep compile pass.
+// Kept parallel to project.Issue so the two can be merged in the
+// report without forcing a dependency from packages/compile onto the
+// project rule engine.
+type compileIssue struct {
+	Level   string // "error" | "warning"
+	Path    string
+	Message string
+	Hint    string
+}
+
+// runCompileDeepCheck loads the project from disk and runs a compile
+// dry-run. Errors become "error" issues; suspicious render output
+// (agent with no files in the Tree) becomes "warning" issues.
+func runCompileDeepCheck(projectRoot string) []compileIssue {
+	src, err := source.Load(projectRoot)
+	if err != nil {
+		return []compileIssue{{
+			Level:   "error",
+			Path:    projectRoot,
+			Message: fmt.Sprintf("load project source: %v", err),
+			Hint:    "every file under spwn/ must be readable",
+		}}
+	}
+	input, err := source.ToCompileInput(src, "")
+	if err != nil {
+		// Multi-world projects (or manifests with no world at all)
+		// surface as a warning rather than an error — deep-check is
+		// best-effort, not a world selector. When a user really
+		// wants to validate every world, they can run
+		// `spwn compile --world <name>` against each one.
+		return []compileIssue{{
+			Level:   "warning",
+			Path:    "spwn.yaml#worlds",
+			Message: fmt.Sprintf("compile pass skipped: %v", err),
+			Hint:    "run `spwn compile --world <name>` to validate a specific world",
+		}}
+	}
+	var issues []compileIssue
+
+	// Every agent in the selected world must have an AGENT.md on
+	// disk — the manifest rule engine checks that spwn/agents/<name>/
+	// exists, but not that the entrypoint prompt is there. Missing
+	// AGENT.md would silently render an empty CLAUDE.md, which is
+	// worse than a loud error, so the deep check promotes it.
+	byName := make(map[string]int, len(src.Agents))
+	for i, a := range src.Agents {
+		byName[a.Name] = i
+	}
+	for _, a := range input.Agents {
+		idx, ok := byName[a.Name]
+		if !ok {
+			continue
+		}
+		if len(src.Agents[idx].AgentMD) == 0 {
+			issues = append(issues, compileIssue{
+				Level:   "error",
+				Path:    "spwn/agents/" + a.Name + "/AGENT.md",
+				Message: "agent prompt is missing or empty",
+				Hint:    "create spwn/agents/" + a.Name + "/AGENT.md with the agent's system prompt",
+			})
+		}
+	}
+
+	tree, err := compile.Compile("claude-code", input)
+	if err != nil {
+		return append(issues, compileIssue{
+			Level:   "error",
+			Path:    "compile:claude-code",
+			Message: err.Error(),
+			Hint:    "runtime renderer rejected the project",
+		})
+	}
+	// Warn about any roster agent that produced no files in the
+	// Tree — usually means the agent directory is missing the
+	// entrypoint or the renderer silently dropped it.
+	for _, a := range input.Agents {
+		prefix := "agents/" + a.Name + "/"
+		found := false
+		for _, p := range tree.Paths() {
+			if len(p) >= len(prefix) && p[:len(prefix)] == prefix {
+				found = true
+				break
+			}
+		}
+		if !found {
+			issues = append(issues, compileIssue{
+				Level:   "warning",
+				Path:    "agents/" + a.Name,
+				Message: "agent produced no files in the compiled Tree",
+				Hint:    "check spwn/agents/" + a.Name + "/ for missing AGENT.md or agent.yaml",
+			})
+		}
+	}
+	return issues
+}
+
+func hasCompileErrors(ci []compileIssue) bool {
+	for _, c := range ci {
+		if c.Level == "error" {
+			return true
+		}
+	}
+	return false
+}
+
+func countCompileErrors(ci []compileIssue) int {
+	n := 0
+	for _, c := range ci {
+		if c.Level == "error" {
+			n++
+		}
+	}
+	return n
+}
+
+func countCompileWarnings(ci []compileIssue) int {
+	n := 0
+	for _, c := range ci {
+		if c.Level == "warning" {
+			n++
+		}
+	}
+	return n
+}
+
+func printCompileIssues(out interface{ Write([]byte) (int, error) }, ci []compileIssue) {
+	if len(ci) == 0 {
+		return
+	}
+	fmt.Fprintf(out, "  %s\n", ui.Red("compile"))
+	for _, c := range ci {
+		color := ui.Red
+		if c.Level == "warning" {
+			color = ui.Yellow
+		}
+		fmt.Fprintf(out, "    %s  %s\n", color("•"), c.Message)
+		fmt.Fprintf(out, "       %s\n", ui.Faint(c.Path))
+		if c.Hint != "" {
+			fmt.Fprintf(out, "       %s %s\n", ui.Faint("→"), ui.Faint(c.Hint))
+		}
+	}
+	fmt.Fprintln(out)
 }
 
 func filter(issues []project.Issue, level project.Level) []project.Issue {

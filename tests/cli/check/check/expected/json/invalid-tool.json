@@ -11,7 +11,8 @@
             "level": "error",
             "path": "spwn/agents/neo/agent.yaml#tools",
             "message": "tool \"@spwn/nonexistent\" does not exist",
-            "hint": "available built-ins: @spwn/unix, @spwn/git, @spwn/node, @spwn/python, @spwn/build, @spwn/docker-cli, @spwn/cli, @spwn/architect, @spwn/qmd, @spwn/claude-code, @spwn/codex, @spwn/mempalace"
+            "hint": "available built-ins: @spwn/unix, @spwn/git, @spwn/node, @spwn/python, @spwn/build, @spwn/docker-cli, @spwn/cli, @spwn/architect, @spwn/qmd, @spwn/claude-code, @spwn/codex, @spwn/mempalace",
+            "source": "manifest"
         }
     ]
 }
