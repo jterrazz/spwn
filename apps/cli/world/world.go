@@ -201,6 +201,36 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		positionalName = args[0]
 	}
 
+	// Idempotency guard: if a world with the same config name is
+	// already running, treat `spwn up` as a no-op. This matches docker
+	// compose semantics and prevents the duplicate-container bug where
+	// two invocations of `spwn up` would spawn two containers for the
+	// same world. See finding #7.
+	if positionalName != "" {
+		if existing := findRunningWorldByConfig(ctx, positionalName); existing != nil {
+			s.Blank()
+			s.Success(fmt.Sprintf("world %q is already running (%s)", positionalName, existing.ID))
+			s.Blank()
+			s.Info("Enter:", fmt.Sprintf("spwn world enter %s", existing.ID))
+			s.Blank()
+			return nil
+		}
+	}
+
+	// Per-world spawn lock: prevents two concurrent `spwn up` calls
+	// from racing past the idempotency check above and both creating
+	// containers. The lock lives under the project's local state dir
+	// and is released in a defer. See finding #8.
+	if positionalName != "" {
+		unlock, lockErr := acquireUpLock(positionalName)
+		if lockErr != nil {
+			return s.FailHint("Up in progress",
+				fmt.Errorf("another `spwn up` is spawning world %q", positionalName),
+				"Wait for the other run to finish, or remove "+lockErr.Error()+" if it is stale")
+		}
+		defer unlock()
+	}
+
 	// If we're inside a spwn project, prefer the inline spwn.yaml world
 	// over the legacy ~/.spwn/worlds/<name>.yaml file. When a project is
 	// active we synthesize a world.Manifest straight from the inline
