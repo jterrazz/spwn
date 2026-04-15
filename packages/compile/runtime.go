@@ -26,10 +26,10 @@ type Runtime interface {
 // so the signature can grow without breaking every runtime whenever
 // a new field appears (profiles, hooks, per-agent overrides, ...).
 //
-// Phase 1 shape: just the data architect.Spawn already has on hand
-// when it decides to render. Future phases will grow AgentSource /
-// SkillSource / HookSource types loaded directly from disk so that
-// Input can be built from a project path without a live Spawn call.
+// Today Input carries the minimal roster + manifest shape that
+// every registered runtime needs. When a runtime wants richer data
+// (AgentSource bodies, Skills, Hooks) we grow this struct rather
+// than passing a second argument to Render.
 type Input struct {
 	// Manifest is the parsed spwn.yaml (or whatever synthetic
 	// manifest a single-agent spawn flow constructs).
