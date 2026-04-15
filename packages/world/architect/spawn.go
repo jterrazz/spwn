@@ -64,6 +64,29 @@ func (opts *SpawnOpts) logWriter() io.Writer {
 	return io.Discard
 }
 
+// firstWriteNotifier forwards writes to an inner writer and calls
+// `once` exactly once on the first non-empty write. Used to
+// lift "the build is actually running now" out of the Docker
+// stream: the first byte arriving from `docker build` is the
+// signal that the cache was missed and a real build started. No
+// bytes ever arrive on a pure cache hit, so `once` never fires
+// and the UI stays on "Resolving image...".
+type firstWriteNotifier struct {
+	inner io.Writer
+	once  func()
+	fired bool
+}
+
+func (w *firstWriteNotifier) Write(p []byte) (int, error) {
+	if !w.fired && len(p) > 0 {
+		w.fired = true
+		if w.once != nil {
+			w.once()
+		}
+	}
+	return w.inner.Write(p)
+}
+
 // Spawn creates a new world.
 func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, error) {
 	var warnings []string
@@ -197,10 +220,32 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("resolve tools: %w", resolveErr)
 	}
 
+	// Surface the resolved tool list so the CLI stepper can show
+	// the user what's about to install before the (potentially
+	// minutes-long) image build begins.
+	resolvedNames := make([]string, 0, len(resolvedTools))
+	for _, t := range resolvedTools {
+		resolvedNames = append(resolvedNames, t.Name())
+	}
+	opts.progress("tools_resolved", strings.Join(resolvedNames, ", "))
+
 	if !explicitImage {
 		opts.progress("image_resolving", image)
 
 		builder := ib.New(reg, a.backend)
+
+		// Wrap the log writer so the first docker build line
+		// flips the spinner label from "Resolving image..." to
+		// "Building image". Emits image_building exactly once,
+		// the first time we see actual build output - which
+		// means cache-hit spawns never raise the build label.
+		// Simpler than pre-checking the cache in Go.
+		buildLogWriter := &firstWriteNotifier{
+			inner: opts.logWriter(),
+			once: func() {
+				opts.progress("image_building", image)
+			},
+		}
 
 		buildResult, err := builder.Build(ctx, ib.BuildRequest{
 			BaseDockerfile: ibbase.WorldDockerfile,
@@ -208,7 +253,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			Tag:            image,
 			ForceRebuild:   opts.ForceRebuild,
 			SkipVerify:     true, // probeTools handles verification below
-			LogWriter:      opts.logWriter(),
+			LogWriter:      buildLogWriter,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("build world image: %w", err)

@@ -20,6 +20,7 @@ type Stepper struct {
 	isTTY bool
 
 	mu     sync.Mutex
+	label  string // current spinner label; live-updatable via UpdateLabel
 	stopCh chan struct{}
 	doneCh chan struct{}
 }
@@ -42,6 +43,7 @@ func (s *Stepper) Start(msg string) {
 	}
 
 	s.mu.Lock()
+	s.label = msg
 	s.stopCh = make(chan struct{})
 	s.doneCh = make(chan struct{})
 	stopCh := s.stopCh
@@ -55,8 +57,15 @@ func (s *Stepper) Start(msg string) {
 		defer ticker.Stop()
 
 		for {
+			s.mu.Lock()
+			label := s.label
+			s.mu.Unlock()
+
 			frame := spinnerFrames[i%len(spinnerFrames)]
-			fmt.Fprintf(s.w, "\r  %s %s", green.Sprint(frame), msg)
+			// Clear the entire line before redraw so a shorter
+			// label doesn't leave trailing characters from the
+			// previous (longer) render.
+			fmt.Fprintf(s.w, "\r\033[2K  %s %s", green.Sprint(frame), label)
 			i++
 
 			select {
@@ -68,6 +77,18 @@ func (s *Stepper) Start(msg string) {
 			}
 		}
 	}()
+}
+
+// UpdateLabel replaces the spinner label in place. Safe to call
+// from any goroutine (the spinner re-reads the label each frame).
+// No-op on non-TTY output where labels are one-shot prints.
+func (s *Stepper) UpdateLabel(msg string) {
+	if !s.isTTY {
+		return
+	}
+	s.mu.Lock()
+	s.label = msg
+	s.mu.Unlock()
 }
 
 // Done completes the current step with a checkmark.
@@ -114,12 +135,24 @@ func (e *DisplayedError) Unwrap() error { return e.Err }
 // this is the hook. Today it does nothing.
 func (s *Stepper) Log(format string, args ...any) {}
 
-// Writer returns an io.Writer for piping output (e.g. Docker build logs).
-// In the current design we discard piped output - builds run silently
-// through the Stepper. If we reintroduce verbose logging this is where
-// it would flow.
+// Writer returns a discarding writer for callers that don't need
+// build progress - the spinner is the whole UX.
 func (s *Stepper) Writer() io.Writer {
 	return io.Discard
+}
+
+// BuildProgressWriter returns an io.Writer that parses Docker
+// build output and updates the active spinner label in place with
+// "<base> [N/M] <action>" as each step completes. Pass this as
+// the LogWriter for a `spwn up` that's about to build an image
+// and the long silent gap turns into live progress. Works only
+// on TTY writers; on non-TTY the writer silently discards input
+// (the stepper's one-shot prints cover non-interactive mode).
+func (s *Stepper) BuildProgressWriter(base string) io.Writer {
+	if !s.isTTY {
+		return io.Discard
+	}
+	return &buildProgressWriter{stepper: s, base: base}
 }
 
 // Blank prints an empty line for spacing.

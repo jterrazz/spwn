@@ -306,6 +306,12 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		s.Start("Validating agent...")
 	}
 
+	// BuildProgressWriter parses the Docker build stream for
+	// `Step N/M :` lines and updates the spinner label in place.
+	// Callers see "Building image [5/12] Installing packages"
+	// instead of a mystery spinner during the long image build.
+	buildProgress := s.BuildProgressWriter("Building image")
+
 	result, err := arc.Spawn(ctx, world.SpawnOpts{
 		ConfigName:   configName,
 		Name:         spawnName,
@@ -314,17 +320,28 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		Manifest:     m,
 		Agents:       agents,
 		ForceRebuild: spawnForceRebuild,
-		LogWriter:    s.Writer(),
+		LogWriter:    buildProgress,
 		OnProgress: func(event, detail string) {
 			switch event {
 			case "mind_validated":
 				s.Done("Validated agent", detail)
-				s.Start("Mounting mind...")
-			case "mind_mounted":
-				s.Done("Mounted mind", detail)
+			case "tools_resolved":
+				// Surface the resolved tool list right after the
+				// agent validation so users can see exactly what's
+				// about to flow into the world image before the
+				// spinner starts.
+				if detail != "" {
+					s.Info("Tools", detail)
+				}
 				s.Start("Resolving image...")
 			case "image_resolving":
-				s.Start("Resolving image (checking cache)...")
+				s.UpdateLabel("Resolving image (checking cache)...")
+			case "image_building":
+				// Flip the spinner label to "Building image" so
+				// BuildProgressWriter's in-place step updates land
+				// on the right base. Each docker `Step N/M :`
+				// line rewrites this label with the current action.
+				s.UpdateLabel("Building image")
 			case "image_built":
 				s.Done("Built image", detail)
 				s.Start("Resolving credentials...")
@@ -423,9 +440,10 @@ func dockerHint(err error) error {
 
 // parseWorkspaceFlags parses a list of "-w" values into world.Workspace.
 // Accepted forms:
-//   "/host/path"             → {Name: "default" or "wN", Path: "/host/path"}
-//   "name=/host/path"        → {Name: "name", Path: "/host/path"}
-//   "name=/host/path:ro"     → read-only
+//   "/host/path"                    → {Name: "default" or "wN", Path: "/host/path"}
+//   "name=/host/path"               → {Name: "name", Path: "/host/path"}
+//   "name=/host/path:ro"            → read-only
+//   "/host/path:/workspace/name"    → manifest form; name extracted from container path
 // Empty input returns a nil slice (ephemeral world - no mounts).
 func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 	if len(flags) == 0 {
@@ -446,12 +464,19 @@ func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 			raw = strings.TrimSuffix(raw, ":ro")
 		}
 
-		// name=path or bare path
+		// Accepted forms (in priority order):
+		//   name=path                    (CLI-friendly)
+		//   host:/workspace/name         (manifest form, validated in project/internal/validate)
+		//   bare path                    (legacy)
 		name := ""
 		path := raw
 		if eq := strings.Index(raw, "="); eq > 0 {
 			name = strings.TrimSpace(raw[:eq])
 			path = strings.TrimSpace(raw[eq+1:])
+		} else if colon := strings.Index(raw, ":"); colon > 0 && strings.HasPrefix(raw[colon+1:], "/workspace/") {
+			path = strings.TrimSpace(raw[:colon])
+			container := strings.TrimSpace(raw[colon+1:])
+			name = strings.TrimPrefix(container, "/workspace/")
 		}
 		if path == "" {
 			return nil, fmt.Errorf("workspace #%d has empty path", i+1)
