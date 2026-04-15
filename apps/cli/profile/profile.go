@@ -73,17 +73,12 @@ func profileHelp(cmd *cobra.Command, args []string) {
 	)
 }
 
-// profilesDir returns the root directory for user profile templates.
-func profilesDir() string {
-	return filepath.Join(paths.BaseDir(), "profiles")
-}
-
 var lsCmd = &cobra.Command{
 	Use:     "ls",
 	Aliases: []string{"list"},
 	Short:   "List profile templates",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dir := profilesDir()
+		dir := paths.ProfilesDir()
 		entries, err := os.ReadDir(dir)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -116,7 +111,7 @@ var newCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		dir := profilesDir()
+		dir := paths.ProfilesDir()
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("create %s: %w", dir, err)
 		}
@@ -163,7 +158,7 @@ var editCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		path := filepath.Join(profilesDir(), name+".md")
+		path := filepath.Join(paths.ProfilesDir(), name+".md")
 		if _, err := os.Stat(path); err != nil {
 			return fmt.Errorf("profile %q not found at %s", name, path)
 		}
@@ -182,7 +177,7 @@ var showCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		path := filepath.Join(profilesDir(), name+".md")
+		path := filepath.Join(paths.ProfilesDir(), name+".md")
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("profile %q not found at %s", name, path)
@@ -221,7 +216,7 @@ var rmCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		path := filepath.Join(profilesDir(), name+".md")
+		path := filepath.Join(paths.ProfilesDir(), name+".md")
 		if _, err := os.Stat(path); err != nil {
 			return fmt.Errorf("profile %q not found at %s", name, path)
 		}
