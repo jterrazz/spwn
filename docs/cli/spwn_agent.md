@@ -23,7 +23,7 @@ spwn agent [name] [flags]
 
 ```
   spwn agent create neo              Create a blank agent
-  spwn agent neo                     Start the world that contains neo
+  spwn agent neo                     Open an interactive session with neo
   spwn agent -n neo -u w-abc123      Legacy: spawn named agent into world
   spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task
 ```
@@ -58,8 +58,8 @@ spwn agent [name] [flags]
 * [spwn agent rm](./spwn_agent_rm.md)	 - Remove an agent and its Mind directory
 * [spwn agent send](./spwn_agent_send.md)	 - [experimental] Send a message to an agent's inbox
 * [spwn agent sleep](./spwn_agent_sleep.md)	 - Consolidate experience - archive stale files, prune old sessions
-* [spwn agent start](./spwn_agent_start.md)	 - Start the world that contains this agent
-* [spwn agent stop](./spwn_agent_stop.md)	 - Stop the world that contains this agent
+* [spwn agent start](./spwn_agent_start.md)	 - Start an agent as a background daemon [planned]
+* [spwn agent stop](./spwn_agent_stop.md)	 - Stop an agent daemon [planned]
 * [spwn agent talk](./spwn_agent_talk.md)	 - Talk to a running agent - interactive or one-shot
 * [spwn agent watch](./spwn_agent_watch.md)	 - [experimental] Watch for new messages to an agent
 

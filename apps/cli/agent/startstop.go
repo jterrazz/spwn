@@ -1,81 +1,65 @@
 package agent
 
 import (
-	"context"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	"spwn.sh/packages/project"
-	"spwn.sh/packages/world"
 )
 
-// startCmd is `spwn agent start <name>` — start the world that
-// contains the named agent. In the new grammar, agents don't run on
-// their own: every running agent lives in a world declared by
-// spwn.yaml. This command finds the first world whose inline agent
-// list contains <name> and brings it up.
+// startCmd and stopCmd are reserved for a future world where agents
+// run as autonomous daemons - they have their own loop, react to
+// events without a human trigger, and have a meaningful "started" vs
+// "stopped" state. Today that's not how spwn works: an agent is a
+// tool you pick up, not a service you boot. Every invocation is
+// user-initiated (`spwn agent <name>`), and between invocations the
+// container is just an idle sandbox.
+//
+// Rather than pretending otherwise, these commands are registered but
+// return a friendly "not yet" error so the command space is reserved
+// and users who reach for them get a clear explanation.
+
 var startCmd = &cobra.Command{
 	Use:   "start <name>",
-	Short: "Start the world that contains this agent",
-	Args:  cobra.ExactArgs(1),
+	Short: "Start an agent as a background daemon [planned]",
+	Long: `Run an agent as a long-lived autonomous process.
+
+This command is reserved for a future release. Today, spwn agents
+are invoked interactively ("spwn agent <name>") - they don't run on
+their own between invocations.`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		agentName := args[0]
-		worldName, err := findWorldForAgent(agentName)
-		if err != nil {
-			return err
-		}
-		// Delegate to `spwn up <worldName>` via the shared root.
-		root := cmd.Root()
-		root.SetArgs([]string{"up", worldName})
-		return root.Execute()
+		return notYetImplemented("start", args[0])
 	},
 }
 
-// stopCmd is `spwn agent stop <name>` — stop the world that contains
-// the named agent. The agent itself is never deleted; only its
-// runtime container is torn down.
 var stopCmd = &cobra.Command{
 	Use:   "stop <name>",
-	Short: "Stop the world that contains this agent",
-	Args:  cobra.ExactArgs(1),
+	Short: "Stop an agent daemon [planned]",
+	Long: `Kill a running autonomous agent process.
+
+This command is reserved for a future release. Today, spwn agents
+don't run between invocations - there is nothing to stop.`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		agentName := args[0]
-		// First try to match a live running world by AgentRecord name.
-		ctx := context.Background()
-		arc, err := world.NewArchitectFromEnv()
-		if err == nil {
-			worlds, lerr := arc.List(ctx)
-			if lerr == nil {
-				for _, u := range worlds {
-					if u.Agent == agentName {
-						_, derr := arc.Destroy(ctx, u.ID)
-						return derr
-					}
-					for _, a := range u.Agents {
-						if a.Name == agentName {
-							_, derr := arc.Destroy(ctx, u.ID)
-							return derr
-						}
-					}
-				}
-			}
-		}
-		// Fall back to spwn.yaml resolution → `spwn down <worldName>`.
-		worldName, err := findWorldForAgent(agentName)
-		if err != nil {
-			return err
-		}
-		root := cmd.Root()
-		root.SetArgs([]string{"down", worldName})
-		return root.Execute()
+		return notYetImplemented("stop", args[0])
 	},
 }
 
 func init() {
 	Cmd.AddCommand(startCmd)
 	Cmd.AddCommand(stopCmd)
+}
+
+func notYetImplemented(verb, name string) error {
+	return fmt.Errorf(
+		"agent %s is not yet implemented.\n"+
+			"Today's agents are interactive: run \"spwn agent %s\" to open a session.\n"+
+			"spwn agent start/stop will land when agents become autonomous daemons",
+		verb, name,
+	)
 }
 
 // findWorldForAgent locates the first spwn.yaml world entry that
