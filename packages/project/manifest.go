@@ -134,6 +134,13 @@ func AddAgentToManifest(manifestPath, agentName string) error {
 	return scaffold.AddAgentWorld(manifestPath, agentName)
 }
 
+// RemoveAgentFromManifest strips every reference to the named agent
+// from spwn.yaml#worlds and drops any worlds left empty. Used by
+// `spwn agent rm` to keep the manifest consistent with disk state.
+func RemoveAgentFromManifest(manifestPath, agentName string) error {
+	return scaffold.RemoveAgentFromManifest(manifestPath, agentName)
+}
+
 // AddWorldOpts configures AddWorld.
 type AddWorldOpts = scaffold.AddWorldOpts
 

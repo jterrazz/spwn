@@ -4,10 +4,65 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"spwn.sh/packages/base"
 	"spwn.sh/packages/paths"
 )
+
+// defaultAgentYAML is the baseline agent.yaml written by Init/Repair
+// so `spwn check` passes immediately after `agent create`. Matches the
+// shape of packages/project/internal/scaffold/templates/agent.yaml.tmpl
+// but parameterised by name.
+const defaultAgentYAMLTmpl = `# Agent composition.
+#
+# This file is the source of truth for what tools and runtime the
+# agent needs. When the agent is deployed in a world alongside others,
+# the union of every member's tools is what gets installed into the
+# resulting container.
+
+name: __NAME__
+
+runtime:
+  backend: "@spwn/claude-code"
+
+tools:
+  - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/python"
+`
+
+// defaultClaudeMDTmpl is the baseline CLAUDE.md written by Init/Repair.
+// Mirrors packages/project/internal/scaffold/templates/CLAUDE.md.tmpl.
+const defaultClaudeMDTmpl = `# __NAME__
+
+You are **__NAME__**, an agent running inside a spwn world.
+
+## Your identity
+
+Before doing anything else, read your profile:
+
+@core/profile.md
+
+## Your world
+
+- ` + "`/world/physics.md`" + `    - the rules of this world (network, filesystem, communication topology)
+- ` + "`/world/faculties.md`" + `  - every tool installed and verified
+- ` + "`/world/AGENTS.md`" + `     - the operating manual every spwn agent reads
+- ` + "`/work/`" + `               - mounted workspaces, this is where you make changes
+
+## Conventions
+
+1. Read your profile first. It shapes how you respond.
+2. Save important discoveries to ` + "`./knowledge/`" + ` so you remember them next time.
+3. After significant work, consider promoting a pattern to ` + "`./playbooks/`" + `.
+4. Before committing changes, run the project's existing tests if they exist.
+5. Never modify ` + "`/world/`" + ` files - they are read-only system context.
+`
+
+func renderTmpl(tmpl, name string) []byte {
+	return []byte(strings.ReplaceAll(tmpl, "__NAME__", name))
+}
 
 // AgentInfo describes an agent's Mind structure.
 type AgentInfo struct {
@@ -66,6 +121,16 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 		return "", fmt.Errorf("create profile: %w", err)
 	}
 
+	// Write the baseline agent.yaml and CLAUDE.md so `spwn check`
+	// passes immediately after `agent create`. Both files are
+	// required by the project validator (ruleAgentStructure).
+	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
+		return "", fmt.Errorf("create agent.yaml: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "CLAUDE.md"), renderTmpl(defaultClaudeMDTmpl, name), 0644); err != nil {
+		return "", fmt.Errorf("create CLAUDE.md: %w", err)
+	}
+
 	return dir, nil
 }
 
@@ -97,6 +162,21 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 `
 		if err := os.WriteFile(profilePath, []byte(profile), 0644); err != nil {
 			return fmt.Errorf("create profile: %w", err)
+		}
+	}
+
+	// Re-scaffold agent.yaml / CLAUDE.md when missing so --force can
+	// rescue a partially-deleted agent tree.
+	agentYAMLPath := filepath.Join(dir, "agent.yaml")
+	if _, err := os.Stat(agentYAMLPath); err != nil && os.IsNotExist(err) {
+		if err := os.WriteFile(agentYAMLPath, renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
+			return fmt.Errorf("create agent.yaml: %w", err)
+		}
+	}
+	claudePath := filepath.Join(dir, "CLAUDE.md")
+	if _, err := os.Stat(claudePath); err != nil && os.IsNotExist(err) {
+		if err := os.WriteFile(claudePath, renderTmpl(defaultClaudeMDTmpl, name), 0644); err != nil {
+			return fmt.Errorf("create CLAUDE.md: %w", err)
 		}
 	}
 	return nil
