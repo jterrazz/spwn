@@ -40,6 +40,52 @@ jobs:
           cache-dependency-path: apps/cli/go.sum
       - run: make test
 
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: apps/cli/go.sum
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: make build
+      - run: make build-test-image
+      - run: pnpm -C tests test
+
+  # Real-build smoke tests: spwn init (default + every catalog example)
+  # -> spwn up -> tool probe. Exercises the actual image build path
+  # that every other e2e test bypasses via SPWN_BASE_IMAGE. Runs only
+  # on push to main because each test builds a Docker image from
+  # scratch and the full suite takes ~10 minutes on a cold machine.
+  smoke:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: apps/cli/go.sum
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: make build
+      - run: pnpm -C tests test:smoke
+
   build:
     runs-on: ubuntu-latest
     steps:

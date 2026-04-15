@@ -2,6 +2,10 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     test: {
+        // The smoke suite (tests/smoke/**) runs real Docker builds
+        // And lives under its own vitest.smoke.config.ts. Default
+        // Include is `cli/**` only, so the top-level `smoke/` tree
+        // Is naturally excluded without a glob guard.
         exclude: ['**/node_modules/**', '**/dist/**', 'web/**'],
         // 2 minutes per test because the Docker-asserting tests spawn
         // Real containers; CLI-only tests finish in milliseconds so the

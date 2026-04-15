@@ -11,15 +11,6 @@ import (
 	"spwn.sh/packages/paths"
 )
 
-// ToolPacks maps @pack names to their constituent binaries.
-var ToolPacks = map[string][]string{
-	"@spwn/unix":   {"bash", "sh", "ls", "cat", "cp", "mv", "rm", "mkdir", "rmdir", "chmod", "chown", "grep", "sed", "awk", "find", "xargs", "curl", "wget"},
-	"@spwn/git":    {"git"},
-	"@spwn/node":   {"node", "npm", "npx"},
-	"@spwn/python": {"python3", "pip3"},
-	"@spwn/build":  {"make", "gcc", "g++"},
-}
-
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
 	Tools yaml.Node `yaml:"tools"`
@@ -130,27 +121,6 @@ tools:
   - "@spwn/git"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
-}
-
-// ExpandTools expands @packs into individual binaries and deduplicates.
-func ExpandTools(elems []string) []string {
-	seen := make(map[string]bool)
-	var result []string
-
-	for _, e := range elems {
-		if binaries, ok := ToolPacks[e]; ok {
-			for _, b := range binaries {
-				if !seen[b] {
-					seen[b] = true
-					result = append(result, b)
-				}
-			}
-		} else if !seen[e] {
-			seen[e] = true
-			result = append(result, e)
-		}
-	}
-	return result
 }
 
 // ApplyDefaults fills zero-value fields with built-in defaults.

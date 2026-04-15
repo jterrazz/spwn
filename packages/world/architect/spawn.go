@@ -63,10 +63,6 @@ func (opts *SpawnOpts) logWriter() io.Writer {
 	return io.Discard
 }
 
-var defaultProbeList = []string{
-	"bash", "sh", "git", "node", "npm", "python3", "curl", "wget", "jq", "claude", "go", "rustc", "gcc", "make",
-}
-
 // Spawn creates a new world.
 func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, error) {
 	var warnings []string
@@ -172,7 +168,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Always include runtime essentials, then add user-specified tools
 	// and plugins on top. The registry deduplicates and resolves
 	// dependencies; plugins share the tool resolution pipeline.
-	required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/cli"}
+	//
+	// @spwn/cli is deliberately excluded here - it installs the
+	// spwn binary itself and is only meaningful inside the
+	// architect container, not inside the workers' world container.
+	// Adding it to every world spawn wasted a download and broke
+	// the probe whenever the install script was unreachable.
+	required := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code"}
 	toolList := append(required, opts.Manifest.Tools...)
 	toolList = append(toolList, opts.Manifest.Plugins...)
 
@@ -368,8 +370,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("inject plugin runtime config: %w", err)
 	}
 
-	// Probe tools
-	verifiedTools, err := a.probeTools(ctx, containerID, opts.Manifest.Tools)
+	// Probe tools by running each resolved tool's Verify() commands
+	// inside the container. This is the canonical "is my image
+	// actually healthy" check - the probe pulls its expectations
+	// straight from the catalog, so the same install specs that
+	// built the image decide what must be present at runtime.
+	verifiedTools, err := a.probeTools(ctx, containerID, resolvedTools)
 	if err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
@@ -443,65 +449,34 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	return &SpawnResult{World: &u, Warnings: warnings}, nil
 }
 
-// probeTools verifies which tools are available in the container.
-func (a *Architect) probeTools(ctx context.Context, containerID string, declaredTools []string) ([]string, error) {
-	// Expand @packs and merge with default probe list
-	expanded := manifest.ExpandTools(declaredTools)
-	probeList := mergeUnique(expanded, defaultProbeList)
-
-	// Build probe command
-	var checks []string
-	for _, b := range probeList {
-		checks = append(checks, fmt.Sprintf(`command -v "%s" >/dev/null 2>&1 && echo "%s"`, b, b))
-	}
-	cmd := []string{"sh", "-c", strings.Join(checks, "; ") + "; true"}
-
-	output, err := a.backend.ExecOutput(ctx, containerID, cmd)
-	if err != nil {
-		return nil, fmt.Errorf("probe tools: %w", err)
-	}
-
-	verified := make(map[string]bool)
-	for _, line := range strings.Split(output, "\n") {
-		line = strings.TrimSpace(line)
-		if line != "" {
-			verified[line] = true
+// probeTools runs each resolved tool's Verify() commands inside the
+// container and returns the names of the tools that passed. A
+// failing Verify aborts the spawn: the only safe interpretation of
+// "the tool I declared didn't verify" is that the image is broken,
+// and silently proceeding would hand users a world without the
+// capabilities they asked for.
+//
+// This replaces an older implementation that maintained a parallel
+// hardcoded @pack → binary map in packages/world/manifest and fell
+// back to a static list of binaries. That map drifted as new tools
+// were added and left unknown @pack refs erroring as "base image
+// missing @spwn/foo". The catalog is now the single source of truth.
+func (a *Architect) probeTools(ctx context.Context, containerID string, tools []ib.Tool) ([]string, error) {
+	verified := make([]string, 0, len(tools))
+	for _, t := range tools {
+		for _, check := range t.Verify() {
+			cmd := []string{"sh", "-c", check}
+			if _, err := a.backend.ExecOutput(ctx, containerID, cmd); err != nil {
+				return nil, fmt.Errorf(
+					"world requires tool %q but the container failed its verification (%q: %w).\n"+
+						"Hint: rebuild with --force-rebuild, or remove the tool from the agent's tools list",
+					t.Name(), check, err,
+				)
+			}
 		}
+		verified = append(verified, t.Name())
 	}
-
-	// Verify all declared tools exist
-	for _, e := range expanded {
-		if !verified[e] {
-			return nil, fmt.Errorf("world requires tool '%s' but the base image does not provide it.\nHint: Add %s to the container image, or remove it from the config's tools", e, e)
-		}
-	}
-
-	// Return all verified tools
-	var result []string
-	for _, e := range probeList {
-		if verified[e] {
-			result = append(result, e)
-		}
-	}
-	return result, nil
-}
-
-func mergeUnique(a, b []string) []string {
-	seen := make(map[string]bool)
-	var result []string
-	for _, s := range a {
-		if !seen[s] {
-			seen[s] = true
-			result = append(result, s)
-		}
-	}
-	for _, s := range b {
-		if !seen[s] {
-			seen[s] = true
-			result = append(result, s)
-		}
-	}
-	return result
+	return verified, nil
 }
 
 // buildWorkspaceBinds generates Docker bind specs for the resolved
