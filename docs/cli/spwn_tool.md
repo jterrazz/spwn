@@ -11,11 +11,18 @@ Manage reusable tool packs (e.g. @spwn/unix, @spwn/python)
 
 Tool packs are composable building blocks that agents plug into their worlds.
 
-Attach one to an agent with:
-  spwn agent add <agent> --tool <pack>
+Install a catalog pack into the project's agents + lockfile with:
+  spwn tool install @spwn/python
 
-If a tool isn't in an agent's composition, it's physically absent from that
-agent's world - not forbidden, absent.
+Remove it with:
+  spwn tool uninstall @spwn/python
+
+List what's installed with:
+  spwn tool ls
+
+Local tool packs authored under spwn/tools/<name>/ are referenced by
+bare name in agent.yaml and do NOT go through the install verb — they
+are authored in place.
 
 ### Options
 
@@ -26,10 +33,8 @@ agent's world - not forbidden, absent.
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
-* [spwn tool get](./spwn_tool_get.md)	 - Install a tool pack from the registry
+* [spwn tool install](./spwn_tool_install.md)	 - Install a tool pack into the project
 * [spwn tool ls](./spwn_tool_ls.md)	 - List installed tool packs
-* [spwn tool publish](./spwn_tool_publish.md)	 - Publish a tool pack to the registry
-* [spwn tool rm](./spwn_tool_rm.md)	 - Remove an installed tool pack
-* [spwn tool search](./spwn_tool_search.md)	 - Search the tool registry
 * [spwn tool show](./spwn_tool_show.md)	 - Inspect a tool pack
+* [spwn tool uninstall](./spwn_tool_uninstall.md)	 - Uninstall a tool pack from the project
 

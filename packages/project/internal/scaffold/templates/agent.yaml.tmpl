@@ -1,9 +1,12 @@
-# Agent composition.
+# Agent composition — the source of truth for what this agent needs.
 #
-# This file is the source of truth for what tools and runtime the
-# agent needs. When the agent is deployed in a world alongside others,
-# the union of every member's tools is what gets installed into the
-# resulting container.
+# Dependency resolution works like npm:
+#   @spwn/<name>       built-in catalog pack (compiled into spwn)
+#   @<owner>/<name>    future: remote community registry
+#   <bare-name>        local pack authored under spwn/tools/<name>/
+#
+# Installed catalog refs are pinned in spwn.lock.yaml at the project
+# root. Add new ones with `spwn tool install @spwn/<name>`.
 
 name: neo
 

@@ -27,14 +27,6 @@ import (
 	"spwn.sh/packages/project/refs"
 )
 
-type exitCodeErr struct {
-	msg  string
-	code int
-}
-
-func (e *exitCodeErr) Error() string { return e.msg }
-func (e *exitCodeErr) ExitCode() int  { return e.code }
-
 // Cmd is the root `spwn tool` command group.
 var Cmd = &cobra.Command{
 	Use:   "tool",
@@ -185,19 +177,13 @@ func RunInstall(cmd *cobra.Command, raw string, kind lockfile.Kind, mutate func(
 	ref := refs.Parse(pack)
 	switch ref.Kind {
 	case refs.KindLocal:
-		return &exitCodeErr{
-			code: 2,
-			msg: fmt.Sprintf("%q is a bare name — local %s are authored in place, not installed.\n"+
-				"  Create the directory under ./spwn/%s/%s/ and reference it from agent.yaml.",
-				pack, kindPlural(kind), kindDir(kind), pack),
-		}
+		return fmt.Errorf("%q is a bare name — local %s are authored in place, not installed. "+
+			"Create the directory under ./spwn/%s/%s/ and reference it from agent.yaml",
+			pack, kindPlural(kind), kindDir(kind), pack)
 	case refs.KindRegistry:
-		return &exitCodeErr{
-			code: 2,
-			msg: fmt.Sprintf("%q targets @%s/%s — remote registries are not yet supported.\n"+
-				"  Use @spwn/<name> for built-in packs, or author a local pack under ./spwn/%s/.",
-				raw, ref.Owner, ref.Name, kindDir(kind)),
-		}
+		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
+			"Use @spwn/<name> for built-in packs, or author a local pack under ./spwn/%s/",
+			raw, ref.Owner, ref.Name, kindDir(kind))
 	}
 
 	// @spwn/<name> — verify it's in the catalog before touching anything.

@@ -1,0 +1,16 @@
+version: 1
+tools:
+  "@spwn/git":
+    version: ""
+    source: builtin
+  "@spwn/node":
+    version: ""
+    source: builtin
+  "@spwn/python":
+    version: ""
+    source: builtin
+  "@spwn/unix":
+    version: ""
+    source: builtin
+plugins: {}
+skills: {}

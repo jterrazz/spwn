@@ -17,6 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
+	"spwn.sh/packages/project/lockfile"
 )
 
 //go:embed templates/*.tmpl
@@ -86,6 +87,20 @@ func Init(dir string, opts Opts) error {
 	}
 	if err := os.WriteFile(filepath.Join(stateDir, "state.json"), []byte("{}\n"), 0o644); err != nil {
 		return fmt.Errorf("write .spwn/state.json: %w", err)
+	}
+
+	// Seed spwn.lock.yaml with the initial @spwn/* refs baked into
+	// the template agent.yaml so `spwn check` is clean on the very
+	// first run. Without this the lockfile rule would flag drift on
+	// any brand-new project.
+	initialLock := lockfile.Empty()
+	for _, ref := range []string{"@spwn/unix", "@spwn/git", "@spwn/python"} {
+		initialLock.Add(lockfile.KindTool, ref, lockfile.Entry{
+			Source: lockfile.SourceBuiltin,
+		})
+	}
+	if err := lockfile.Save(absDir, initialLock); err != nil {
+		return fmt.Errorf("seed lockfile: %w", err)
 	}
 
 	if !opts.NoGitignore {

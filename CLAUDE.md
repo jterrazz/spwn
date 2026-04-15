@@ -183,7 +183,7 @@ spwn/
 │   │   ├── tool/                    #     spwn tool
 │   │   ├── team/                    #     spwn team
 │   │   ├── organization/            #     spwn organization
-│   │   ├── get/                     #     spwn get (install from marketplace)
+│   │   ├── tool/                    #     spwn tool install/uninstall/ls
 │   │   ├── logs/                    #     spwn logs
 │   │   └── ui/                      #     Stepper, table, style
 │   │

@@ -42,11 +42,13 @@ describe('CLI output', () => {
         await result.stdout.toMatch('architect-help.txt');
     });
 
-    test('get --help lists the marketplace subcommands', async () => {
-        const result = await spec('get help').project('empty').exec('get --help').run();
+    test('tool --help lists the install subcommands', async () => {
+        const result = await spec('tool help').project('empty').exec('tool --help').run();
 
         expect(result.exitCode).toBe(0);
-        await result.stdout.toMatch('get-help.txt');
+        expect(result.stdout.text).toContain('install');
+        expect(result.stdout.text).toContain('uninstall');
+        expect(result.stdout.text).toContain('ls');
     });
 
     test('upgrade --help describes the install flow', async () => {
