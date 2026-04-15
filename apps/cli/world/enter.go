@@ -25,6 +25,15 @@ var enterCmd = &cobra.Command{
 			return dockerHint(err)
 		}
 
+		// Validate the world exists before emitting the "Entering"
+		// banner. Without this guard, `world enter nonexistent` prints
+		// a success line and then errors, which reads incoherently
+		// (Finding #15).
+		if _, err := arc.Inspect(ctx, worldID); err != nil {
+			return s.FailHint("Enter failed", err,
+				"Check running worlds with \"spwn world ls\"")
+		}
+
 		s.Blank()
 		s.Done("Entering", worldID)
 		s.Blank()
