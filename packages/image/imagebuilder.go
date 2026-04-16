@@ -48,6 +48,19 @@ type BuildRequest struct {
 	LogWriter io.Writer
 }
 
+// Validate returns a non-nil error when BuildRequest is missing
+// required fields. Called at the top of Build before any
+// side-effectful work (Dockerfile gen, docker build, probe).
+func (req *BuildRequest) Validate() error {
+	if len(req.BaseDockerfile) == 0 {
+		return fmt.Errorf("BuildRequest.BaseDockerfile is required")
+	}
+	if req.Tag == "" {
+		return fmt.Errorf("BuildRequest.Tag is required")
+	}
+	return nil
+}
+
 // BuildResult describes the outcome of a successful build.
 type BuildResult struct {
 	Tag        string
@@ -58,6 +71,9 @@ type BuildResult struct {
 
 // Build resolves tools, generates a Dockerfile, builds the image, and verifies it.
 func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, error) {
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
 	logw := req.LogWriter
 	if logw == nil {
 		logw = io.Discard

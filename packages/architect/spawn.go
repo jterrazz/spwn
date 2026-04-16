@@ -45,6 +45,19 @@ type SpawnOpts struct {
 	ForceRebuild  bool                       // When true, bypass the content-addressed image cache.
 }
 
+// Validate returns a non-nil error when SpawnOpts is missing
+// required fields or has an internally inconsistent combination.
+// Called at the top of Spawn before any side-effectful work.
+func (opts *SpawnOpts) Validate() error {
+	if opts.ConfigName == "" {
+		return fmt.Errorf("SpawnOpts.ConfigName is required")
+	}
+	if opts.AgentName == "" && len(opts.Agents) == 0 {
+		return fmt.Errorf("SpawnOpts needs at least one agent (AgentName or Agents)")
+	}
+	return nil
+}
+
 func (opts *SpawnOpts) progress(event, detail string) {
 	if opts.OnProgress != nil {
 		opts.OnProgress(event, detail)
@@ -83,6 +96,9 @@ func (w *firstWriteNotifier) Write(p []byte) (int, error) {
 
 // Spawn creates a new world.
 func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, error) {
+	if err := opts.Validate(); err != nil {
+		return nil, err
+	}
 	var warnings []string
 
 	// Generate ID
