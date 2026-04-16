@@ -10,7 +10,6 @@ func All() []upgrade.Migration {
 	r.Register(EnsureDefaultHierarchy) // 003
 	r.Register(WorkspaceToWorkspaces) // 004
 	r.Register(RenameDefaultRoles)      // 005
-	r.Register(OrgYAMLFieldRename)      // 006
 	r.Register(ConsolidateJournal)      // 007
 	r.Register(RemoveOrphanedUniverses)      // 008
 	r.Register(SimplifyArchitectDir)       // 010
