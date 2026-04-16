@@ -1,123 +1,135 @@
 # Architecture
 
-Multi-module Go monorepo. Two apps, domain packages organized in five layers, one web UI.
+Multi-language monorepo (Go + TypeScript + Rust). Go packages organized in enforced layers; TS and Rust have their own boundaries.
 
 ## Layer architecture
 
-Imports flow **downward only**. A package in layer N may import from layers 1..N-1 but never from N+1 or above. This is enforced by [depguard](https://github.com/OpenPeeDeeP/depguard2) in `.golangci.yml` — a PR that adds an upward import fails lint with the violated rule name.
+Imports flow **downward only**. Enforced at three levels:
+
+1. **depguard** (`.golangci.yml`) — lint-time deny rules per layer
+2. **Go `internal/`** — compile-time privacy for implementation details
+3. **This document** — review-time ground truth
 
 ```
-L6  CLI         apps/cli/                        (imports anything)
-    ─────────────────────────────────────────────────────────────
-L5  Runtime     packages/world/                  (container orchestration)
-    ─────────────────────────────────────────────────────────────
-L4  Build       packages/compile/                (pure render: Input → Tree)
-                packages/image/                  (Docker image builder)
-    ─────────────────────────────────────────────────────────────
-L3  Project     packages/project/                (manifest + validation)
-    ─────────────────────────────────────────────────────────────
-L2  Domain      packages/pack/                   (pack schema, refs, lockfile)
-                packages/agent/                  (agent mind + composition)
-    ─────────────────────────────────────────────────────────────
-L1  Foundation  packages/paths/                  (directory constants)
-                packages/base/                   (shared types)
-                packages/ids/                    (ID generation)
+L7 Surface   apps/cli/  apps/web/  apps/api/        (imports anything)
+   ────────────────────────────────────────────────────────────────
+L6 Runtime   packages/world/                        (orchestration hub)
+   ────────────────────────────────────────────────────────────────
+L5 Build     packages/compile/  packages/image/     (project → image)
+   ────────────────────────────────────────────────────────────────
+L4 Project   packages/project/                      (manifest + validation)
+   ────────────────────────────────────────────────────────────────
+L3 Domain    packages/deps/  packages/agent/        (packs + agents)
+   ────────────────────────────────────────────────────────────────
+L2 Platform  packages/activity/  packages/auth/
+             packages/upgrade/   packages/mailbox/  (platform utilities)
+   ────────────────────────────────────────────────────────────────
+L1 Foundation packages/paths/                       (constants + IDs)
 ```
 
-### What each layer owns
+### What each package owns
 
-| Layer | Package | Owns | Does NOT own |
-|-------|---------|------|-------------|
-| L1 | `paths`, `base`, `ids` | Constants, shared types, ID generation | Nothing else — zero spwn imports |
-| L2 | `pack` | `spwn.yaml` schema parsing, ref resolution (`@spwn/`, `github.com/`, bare-name), `spwn.lock` read/write, filesystem loaders | Validation rules, build pipeline |
-| L2 | `agent` | `agent.yaml` parsing, mind layers (identity, skills, knowledge, playbooks, journal), evolution | Project manifest, Docker |
-| L3 | `project` | Project manifest (`spwn.yaml` with `worlds:`), validation rule engine (15 rules), dep merging | Pack schema, image building |
-| L4 | `compile` | Pure render: `Input → Tree`, runtime backends (claude-code, codex) | Source loading, container lifecycle |
-| L4 | `image` | Docker image builder, tool registry, Dockerfile generation, tool probing | Pack schema, container orchestration |
-| L5 | `world` | Container lifecycle (spawn, destroy, colony), agent sync (docker-cp in/out), runtime state | Pack parsing, compile rendering |
-| L6 | `apps/cli` | Thin CLI layer: parse flags, call domain APIs, format output | Domain logic |
+| Pkg | Layer | Owns |
+|-----|-------|------|
+| `paths` | L1 | Directory constants, ID generation, PATH setup, runtime image constants |
+| `activity` | L2 | Append-only event log (JSONL) |
+| `auth` | L2 | Provider resolution, credential storage (keychain/env/file/OAuth) |
+| `upgrade` | L2 | Version checking + schema migrations runner |
+| `mailbox` | L2 | Agent-to-agent filesystem inbox |
+| `deps` | L3 | `spwn.yaml` pack schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
+| `agent` | L3 | Agent mind (identity/skills/knowledge/playbooks/journal), evolution, session |
+| `project` | L4 | Project manifest, 15 validation rules, scaffolding |
+| `image` | L5 | Docker image build, tool registry, transitive dep resolution, pack→Tool adapter |
+| `compile` | L5 | Pure render: `Input → Tree`, runtime backends (claudecode) |
+| `world` | L6 | Container lifecycle (spawn, destroy, colony), docker-cp sync |
+| `apps/cli` | L7 | `spwn` binary — commands, UI |
+| `apps/web` | L7 | Next.js + Tauri desktop app |
+| `packages/api` | L7 | HTTP server (backs web UI) |
 
-### Enforcement mechanisms
-
-1. **depguard** (lint-time) — `.golangci.yml` contains deny rules per layer. Run `golangci-lint run -E depguard` to verify. A package in L3 importing from L5 produces:
-   ```
-   L3 (project) must not import L5 (runtime)
-   ```
-
-2. **Go `internal/`** (compile-time) — implementation details live under `internal/` and the Go compiler itself rejects wrong imports. Examples: `project/internal/validate/`, `project/internal/manifest/`, `world/internal/runtime/`.
-
-3. **This document** (review-time) — the layer diagram is the ground truth. When in doubt, check here.
-
-## Module map
+### Module map
 
 ```
 spwn/
 ├── apps/
-│   ├── cli/                          The spwn binary (L6)
-│   │   ├── pack/                       install/uninstall logic
-│   │   ├── skill/                      skill authoring (new/edit/show/rm)
-│   │   ├── agent/                      agent commands
-│   │   ├── world/                      world commands
-│   │   └── install.go                  root-level spwn install/uninstall
-│   └── web/                          Next.js + Tauri web/desktop UI
+│   ├── cli/                    Go — the spwn CLI binary
+│   └── web/                    TS + Rust — Next.js + Tauri desktop
 ├── packages/
-│   ├── pack/                         L2 — pack domain
-│   │   ├── schema.go                   spwn.yaml pack format parser
-│   │   ├── refs.go                     ref parsing + resolution
-│   │   ├── lockfile.go                 spwn.lock text format
-│   │   ├── adapter.go                  image.Tool adapter
-│   │   └── loader.go                   filesystem + embed resolvers
-│   ├── agent/                        L2 — agent mind
-│   │   ├── manifest.go                 agent.yaml parsing
-│   │   └── internal/                   mind layers, evolution, journal
-│   ├── project/                      L3 — project manifest
-│   │   ├── manifest.go                 spwn.yaml project parsing
-│   │   └── internal/
-│   │       ├── validate/               rule engine (15 rules)
-│   │       ├── manifest/               manifest loader
-│   │       └── resolve/                dep merging (project + agent → flat list)
-│   ├── compile/                      L4 — pure render
-│   │   ├── runtime.go                  Input → Tree interface
-│   │   ├── tree.go                     in-memory file tree
-│   │   ├── source/                     source loader (project → Input)
-│   │   └── runtimes/
-│   │       └── claudecode/             claude-code renderer
-│   ├── image/                        L4 — Docker image builder
-│   │   ├── imagebuilder.go             Build() + BuildFromBase()
-│   │   ├── registry.go                 tool registry + transitive resolution
-│   │   └── backend/                    Docker API abstraction
-│   ├── world/                        L5 — container orchestration
-│   │   ├── architect/                  spawn, destroy, colony, sync
-│   │   └── internal/
-│   │       ├── runtime/                runtime adapters (claude-code)
-│   │       ├── backend/                backend adapter
-│   │       └── state/                  container label state
-│   ├── paths/                        L1 — directory constants
-│   ├── base/                         L1 — shared types
-│   └── ids/                          L1 — ID generation
+│   ├── paths/                  L1  dir constants, IDs, env setup
+│   ├── activity/               L2  event log
+│   ├── auth/                   L2  credentials
+│   ├── upgrade/                L2  version + migrations
+│   ├── mailbox/                L2  agent messaging
+│   ├── deps/                   L3  pack schema, refs, lockfile
+│   ├── agent/                  L3  agent mind + evolution
+│   ├── project/                L4  project manifest + validation
+│   ├── compile/                L5  render Input → Tree
+│   ├── image/                  L5  Docker image build
+│   ├── world/                  L6  container orchestration
+│   └── api/                    L7  HTTP server
 ├── catalog/
-│   ├── packs/                        built-in packs (@spwn/unix, etc.)
-│   ├── runtimes/                     runtime tool definitions
-│   └── examples/                     bundled example projects
-└── tests/                            e2e test suite
+│   ├── packs/                  built-in packs (embedded)
+│   ├── runtimes/               runtime pack definitions
+│   └── examples/               bundled example projects
+└── tests/                      e2e suite (vitest + real Docker)
 ```
+
+## Enforcement mechanisms
+
+### 1. depguard (`.golangci.yml`)
+
+Each layer has deny rules preventing upward imports:
+
+- **Platform (L1-L2)**: may not import any domain or higher
+- **Domain (L3)**: may not import project, compile, image, world
+- **Project (L4)**: may not import compile, image, world
+- **Build (L5)**: may not import world
+
+Violation produces: `L3 (domain) must not import L5 (build)`. Failed lint blocks PRs.
+
+### 2. Go `internal/`
+
+Implementation details live under `internal/` — the Go compiler itself rejects wrong imports. Examples:
+- `packages/project/internal/validate/` — rule engine, only reachable from `project`
+- `packages/project/internal/manifest/` — parsing details
+- `packages/project/internal/resolve/` — dep merging
+- `packages/world/internal/runtime/` — runtime adapters
+- `packages/world/internal/backend/` — Docker API wrapper
+
+### 3. This document
+
+The layer diagram above is the ground truth. When in doubt, check here.
 
 ## Core abstractions
 
 | Abstraction | Where | Purpose |
 |-------------|-------|---------|
-| Runtime | `packages/world/internal/runtime` | How an agent runs (builds the CLI command to exec inside a container) |
-| Backend | `packages/image/backend` | Where worlds run (container lifecycle, image management) |
-| Mind | `packages/agent` | How an agent persists and evolves across runs |
-| Pack | `packages/pack` | The distribution unit: schema, refs, lockfile |
+| Pack | `packages/deps` | Distribution unit (schema, refs, lockfile) |
+| Tool | `packages/image` | Interface any installable capability implements |
+| Runtime | `packages/compile/runtimes` | Translates agent composition → runtime files |
+| Backend | `packages/image/backend` | Container runtime (Docker today) |
+| Mind | `packages/agent` | How an agent persists and evolves |
 
-## State and data flow
+## Data flow: `spwn up`
 
-**Source of truth for live worlds**: container labels. `sh.spwn.*` labels are set at container creation time and read back by `packages/world/internal/state`. No `state.json`.
+```
+spwn.yaml       →  project.Load    →  project.Manifest
+  + agents/**                         + []AgentRef
 
-**Source of truth for project config**: `spwn.yaml` + `./spwn/`. `packages/project` parses and validates. `packages/compile` renders to a runtime-specific `Tree`. `packages/image` bakes into Docker images.
+project.Manifest →  project/resolve  →  []string (merged deps)
 
-**Source of truth for user identity**: `~/.spwn/`. Credentials, daemon state, activity log. Never project-scoped.
+deps             →  deps.Parse       →  *deps.Parsed (schema + files)
+
+*deps.Parsed     →  image.ToolFromParsed → image.Tool
+
+[]image.Tool     →  image.Build     →  Docker image
+
+Docker image     →  compile.Render  →  compile.Tree (in-memory files)
+
+compile.Tree     →  world.Spawn     →  running container + synced agents
+                   (architect)
+```
+
+Every arrow crosses a layer boundary. Every layer has one job.
 
 ## Key invariants
 
@@ -137,7 +149,7 @@ spwn/
 - 🟢 Persistent agent identity and memory
 - 🟢 Composable pack catalog
 - 🟢 Reproducible build artifacts
-- 🟢 5-layer architecture with lint enforcement
+- 🟢 Layered package architecture with depguard enforcement
 - 🟡 Agent evolution (dream, sleep, fork)
 - 🟡 Multi-agent coordination via filesystem inboxes
 - 🟡 Snapshots and rollback
@@ -145,4 +157,3 @@ spwn/
 - 🔴 GitHub-based pack distribution (`github.com/owner/repo`)
 - 🔴 Additional runtime adapters (Codex, Aider, OpenCode, Gemini CLI)
 - 🔴 Additional backends (Firecracker, gVisor, K3s, Fly.io)
-- 🔴 Cloud-hosted worlds
