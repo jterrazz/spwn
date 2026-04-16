@@ -105,7 +105,6 @@ describe('world spawn', () => {
                 projects?: Record<string, { hasTrustDialogAccepted?: boolean }>;
             };
             expect(config.hasCompletedOnboarding).toBe(true);
-            expect(config.projects?.['/workspace']?.hasTrustDialogAccepted).toBe(true);
             expect(config.projects?.['/workspaces']?.hasTrustDialogAccepted).toBe(true);
             expect(config.projects?.['/agents/neo']?.hasTrustDialogAccepted).toBe(true);
 

@@ -60,7 +60,7 @@ func TestSummariseInstruction(t *testing.T) {
 		},
 		{
 			name: "VOLUME finalising",
-			in:   `VOLUME ["/work", "/agents"]`,
+			in:   `VOLUME ["/workspaces", "/world"]`,
 			want: "Finalising",
 		},
 		{

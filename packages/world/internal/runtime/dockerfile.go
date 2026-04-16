@@ -44,7 +44,7 @@ func GenerateDockerfile(rt Runtime) string {
 	b.WriteString("WORKDIR /home/spwn\n\n")
 
 	// Volumes
-	b.WriteString("VOLUME [\"/workspaces\", \"/agents\", \"/world\"]\n")
+	b.WriteString("VOLUME [\"/workspaces\", \"/world\"]\n")
 	b.WriteString("ENTRYPOINT [\"sleep\", \"infinity\"]\n")
 
 	return b.String()

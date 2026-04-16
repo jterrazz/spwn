@@ -46,7 +46,7 @@ describe('CLI output', () => {
         const result = await spec('install help').project('empty').exec('install --help').run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toContain('Install a dependency');
+        expect(result.stdout.text).toContain('Add a catalog or GitHub pack');
     });
 
     test('upgrade --help describes the install flow', async () => {

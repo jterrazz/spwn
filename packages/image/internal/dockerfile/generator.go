@@ -174,7 +174,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 			sb.WriteString(fmt.Sprintf("RUN %s\n", cmd))
 		}
 
-		sb.WriteString("VOLUME [\"/workspaces\", \"/agents\", \"/world\"]\n")
+		sb.WriteString("VOLUME [\"/workspaces\", \"/world\"]\n")
 		sb.WriteString("ENTRYPOINT [\"sleep\", \"infinity\"]\n")
 	}
 
