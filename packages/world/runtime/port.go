@@ -19,17 +19,18 @@ type SpawnConfig struct {
 }
 
 // Runtime defines the adapter interface for any agent backend.
+//
+// The runtime's image-build recipe (base image, apt packages, install
+// commands) is NOT part of this interface — it lives in the catalog
+// entry for the runtime (e.g. @spwn/claude-code's spwn.yaml) and is
+// consumed by the generic image builder. This interface covers only
+// the spawn-time behavior the world layer drives: command building,
+// credential sync, and prelaunch shell setup.
 type Runtime interface {
 	// Name returns the runtime identifier.
 	Name() string
 	// BuildCommand returns the CLI command + args to execute inside the container.
 	BuildCommand(cfg SpawnConfig) []string
-	// InstallCommands returns shell commands to install the runtime in a Dockerfile.
-	InstallCommands() []string
-	// BaseImage returns the Docker base image needed.
-	BaseImage() string
-	// SystemPackages returns apt packages needed beyond the base image.
-	SystemPackages() []string
 	// SupportsSession returns true if the runtime can resume sessions.
 	SupportsSession() bool
 	// Available returns true if the runtime is production-ready.

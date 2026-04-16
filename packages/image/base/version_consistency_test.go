@@ -1,10 +1,8 @@
-package backend
+package base
 
 import (
 	"strings"
 	"testing"
-
-	"spwn.sh/packages/image/base"
 )
 
 // TestDockerfileVersionMatchesConstant verifies the base Dockerfiles are
@@ -15,8 +13,8 @@ func TestDockerfileVersionMatchesConstant(t *testing.T) {
 		name       string
 		dockerfile []byte
 	}{
-		{"world.Dockerfile", base.WorldDockerfile},
-		{"architect.Dockerfile", base.ArchitectDockerfile},
+		{"world.Dockerfile", WorldDockerfile},
+		{"architect.Dockerfile", ArchitectDockerfile},
 	}
 
 	for _, tc := range cases {

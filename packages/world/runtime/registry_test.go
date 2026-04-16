@@ -72,27 +72,10 @@ func TestClaudeCodeMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if r.BaseImage() == "" {
-		t.Error("empty base image")
-	}
-	if len(r.InstallCommands()) == 0 {
-		t.Error("no install commands")
-	}
 	if r.PrelaunchShell() == "" {
 		t.Error("empty prelaunch shell (needed to source /credentials/.env)")
 	}
 	if len(r.DefaultConfigFiles("/agents/neo")) == 0 {
 		t.Error("no default config files (needed to dismiss first-run UI)")
-	}
-
-	hasGit := false
-	for _, p := range r.SystemPackages() {
-		if p == "git" {
-			hasGit = true
-			break
-		}
-	}
-	if !hasGit {
-		t.Error("system packages missing git")
 	}
 }

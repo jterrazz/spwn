@@ -17,7 +17,7 @@ import (
 	"spwn.sh/packages/runtimes/claude_code/compile"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
-	"spwn.sh/packages/world/backend"
+	"spwn.sh/packages/image/backend"
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/models"

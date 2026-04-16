@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/activity"
-	"spwn.sh/packages/world/backend"
+	"spwn.sh/packages/image/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/state"

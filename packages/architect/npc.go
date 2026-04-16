@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"spwn.sh/packages/world/backend"
+	"spwn.sh/packages/image/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/runtimes/claude_code/compile"
 	"spwn.sh/packages/world/runtime"

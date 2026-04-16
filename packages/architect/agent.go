@@ -8,7 +8,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/auth"
-	"spwn.sh/packages/world/backend"
+	"spwn.sh/packages/image/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtime"
 )
