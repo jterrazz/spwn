@@ -29,7 +29,7 @@ worlds:
 	writeFile(t, filepath.Join(agentDir, "AGENTS.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "agent.yaml"), `runtime:
   backend: "@spwn/claude-code"
-plugins:
+deps:
   - "@spwn/python"
   - "local-tool"
   - "local-missing"

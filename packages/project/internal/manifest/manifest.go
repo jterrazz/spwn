@@ -36,6 +36,11 @@ type Manifest struct {
 	// entry declares which agents it spawns and what workspaces are
 	// mounted into the resulting container.
 	Worlds map[string]World `yaml:"worlds"`
+
+	// Deps is the project-wide dependency pool. Every agent in
+	// every world inherits these. Agent-level agent.yaml can add
+	// more but cannot remove project-level deps.
+	Deps []string `yaml:"deps,omitempty"`
 }
 
 // World is one inline world entry in spwn.yaml.
@@ -50,11 +55,6 @@ type World struct {
 	// form.
 	Workspaces []string `yaml:"workspaces"`
 
-	// Plugins is the optional list of pack refs that augment the
-	// union computed from each agent's own package list. Useful for
-	// "every agent in this world gets @spwn/qmd" shared-baseline
-	// patterns.
-	Plugins []string `yaml:"plugins,omitempty"`
 }
 
 // LoadPath reads and parses spwn.yaml from an explicit file path.

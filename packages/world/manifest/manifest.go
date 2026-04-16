@@ -13,7 +13,7 @@ import (
 
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
-	Plugins yaml.Node `yaml:"plugins"`
+	Deps yaml.Node `yaml:"deps"`
 }
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
@@ -37,16 +37,16 @@ func LoadPath(path string) (models.Manifest, error) {
 	m := models.Manifest{}
 
 	// Parse packages (plain list of strings, root-level)
-	if raw.Plugins.Kind == yaml.SequenceNode {
-		m.Plugins = parsePackages(&raw.Plugins)
+	if raw.Deps.Kind == yaml.SequenceNode {
+		m.Deps = parseDeps(&raw.Deps)
 	}
 
 	ApplyDefaults(&m)
 	return m, nil
 }
 
-// parsePacks extracts pack refs from a YAML sequence node.
-func parsePackages(node *yaml.Node) []string {
+// parseDeps extracts dep refs from a YAML sequence node.
+func parseDeps(node *yaml.Node) []string {
 	var elems []string
 	for _, item := range node.Content {
 		if item.Kind == yaml.ScalarNode {
@@ -92,7 +92,7 @@ func CreateDefault() error {
 # Docs: https://spwn.sh/docs/cli/spwn-world
 
 # Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
-tools:
+deps:
   - "@spwn/unix"          # Core Unix tools
   - "@spwn/git"           # Git version control
   # - "@spwn/node"        # Node.js + npm
@@ -116,7 +116,7 @@ func CreateConfig(name string) error {
 
 	content := fmt.Sprintf(`# World config: %s
 
-tools:
+deps:
   - "@spwn/unix"
   - "@spwn/git"
 `, name)

@@ -109,7 +109,7 @@ var lsCmd = &cobra.Command{
 		}
 		fmt.Fprintln(out, "Installed packs:")
 		for _, r := range refs {
-			e := lock.Plugins[r]
+			e := lock.Deps[r]
 			version := e.Version
 			if version == "" {
 				version = "-"
@@ -134,7 +134,7 @@ var showCmd = &cobra.Command{
 			return err
 		}
 		ref := args[0]
-		e, ok := lock.Plugins[ref]
+		e, ok := lock.Deps[ref]
 		if !ok {
 			return fmt.Errorf("%q is not recorded in %s", ref, lockfile.FileName)
 		}

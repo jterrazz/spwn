@@ -1,14 +1,15 @@
 version: 2
 name: research-lab
 
+deps:
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/python"
+  - "@spwn/unix"
+
 worlds:
   research-lab:
     agents:
       - curie
     workspaces:
       - .
-    tools:
-      - "@spwn/unix"
-      - "@spwn/git"
-      - "@spwn/python"
-      - "@spwn/node"

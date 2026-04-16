@@ -3,6 +3,6 @@ name: neo
 runtime:
   backend: "@spwn/claude-code"
 
-plugins:
+deps:
   - "@spwn/unix"
   - "my-local-tool"

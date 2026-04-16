@@ -355,7 +355,7 @@ func ruleAgentStructure(in Input) []Issue {
 // unified package model — see packages/agent/manifest.go.
 type agentYAML struct {
 	Name     string   `yaml:"name"`
-	Plugins []string `yaml:"plugins"`
+	Deps []string `yaml:"deps"`
 	Runtime  struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
@@ -532,7 +532,7 @@ func rulePackVersionConflict(in Input) []Issue {
 			if err != nil {
 				continue
 			}
-			for _, t := range parsed.Plugins {
+			for _, t := range parsed.Deps {
 				pack, version := refs.SplitVersion(t)
 				vmap, ok := versions[pack]
 				if !ok {
@@ -671,12 +671,9 @@ func rulePacksExist(in Input) []Issue {
 	}
 
 	var out []Issue
-	for _, wname := range sortedKeys(in.Manifest.Worlds) {
-		w := in.Manifest.Worlds[wname]
-		loc := "spwn.yaml#worlds." + wname + ".packages"
-		for _, t := range w.Plugins {
-			out = append(out, check(t, loc)...)
-		}
+	// Project-level deps (top-level deps: in spwn.yaml).
+	for _, t := range in.Manifest.Deps {
+		out = append(out, check(t, "spwn.yaml#deps")...)
 	}
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
@@ -687,7 +684,7 @@ func rulePacksExist(in Input) []Issue {
 			continue
 		}
 		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#plugins"
-		for _, t := range parsed.Plugins {
+		for _, t := range parsed.Deps {
 			out = append(out, check(t, loc)...)
 		}
 	}
@@ -732,10 +729,8 @@ func ruleLockfileConsistent(in Input) []Issue {
 		}
 	}
 
-	for _, wname := range sortedKeys(in.Manifest.Worlds) {
-		w := in.Manifest.Worlds[wname]
-		collect(w.Plugins, "spwn.yaml#worlds."+wname+".packages")
-	}
+	// Project-level deps.
+	collect(in.Manifest.Deps, "spwn.yaml#deps")
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
 			continue
@@ -745,7 +740,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 			continue
 		}
 		rel := relPath(in.Root, filepath.Join(a.Path, "agent.yaml"))
-		collect(parsed.Plugins, rel+"#plugins")
+		collect(parsed.Deps, rel+"#deps")
 	}
 
 	seen := map[string]bool{}

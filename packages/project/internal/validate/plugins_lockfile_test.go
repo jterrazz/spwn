@@ -30,7 +30,7 @@ func TestRulePackagesExist_localSkillFileForm(t *testing.T) {
 	}
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-plugins:
+deps:
   - focus
   - missing-package
 `)
@@ -68,7 +68,7 @@ func TestRulePackagesExist_registryUnsupported(t *testing.T) {
 	root := t.TempDir()
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-plugins:
+deps:
   - "@jterrazz/focus"
 `)
 	in := Input{
@@ -86,7 +86,7 @@ plugins:
 func TestRuleLockfileConsistent_missingLockfileIsSilent(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-plugins:
+deps:
   - "@spwn/unix"
 `)
 	in := Input{
@@ -102,7 +102,7 @@ plugins:
 func TestRuleLockfileConsistent_driftFlagged(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-plugins:
+deps:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/mempalace"
@@ -147,7 +147,7 @@ func TestRuleLockfileConsistent_ignoresLocalRefs(t *testing.T) {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-plugins:
+deps:
   - my-tool
 `)
 	// Empty lockfile — bare names should not produce errors.

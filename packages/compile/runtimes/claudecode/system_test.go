@@ -14,7 +14,7 @@ func TestAgentsBookContent(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-test-12345",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
-		Plugins:   []string{"bash", "git"},
+		Deps:   []string{"bash", "git"},
 	})
 
 	// Must contain key sections that make up the "Agent Operating Manual"
@@ -55,7 +55,7 @@ func TestSystemSkillsExist(t *testing.T) {
 		Role:      "worker",
 		WorldID:   "w-test-99999",
 		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
-		Plugins:[]string{"bash"},
+		Deps:[]string{"bash"},
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
 			{Name: "trinity", Role: "worker"},
@@ -90,7 +90,7 @@ func TestArchitectSkillsExist(t *testing.T) {
 		AgentName: "architect",
 		Role:      "architect",
 		WorldID:   "spwn-world-architect-00001",
-		Plugins:   []string{"bash", "git", "docker"},
+		Deps:   []string{"bash", "git", "docker"},
 	})
 
 	// 1. World Management skill

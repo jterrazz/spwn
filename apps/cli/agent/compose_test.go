@@ -84,8 +84,8 @@ func TestAgentAdd_SinglePackage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	if len(m.Plugins) != 1 || m.Plugins[0] != "@spwn/python" {
-		t.Errorf("Packages = %v, want [@spwn/python]", m.Plugins)
+	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
+		t.Errorf("Packages = %v, want [@spwn/python]", m.Deps)
 	}
 }
 
@@ -100,8 +100,8 @@ func TestAgentAdd_MultiplePackages(t *testing.T) {
 	}
 
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Plugins) != 3 {
-		t.Errorf("expected 3 packages, got %d: %v", len(m.Plugins), m.Plugins)
+	if len(m.Deps) != 3 {
+		t.Errorf("expected 3 packages, got %d: %v", len(m.Deps), m.Deps)
 	}
 }
 
@@ -123,8 +123,8 @@ func TestAgentAdd_Idempotent(t *testing.T) {
 	}
 
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Plugins) != 1 {
-		t.Errorf("expected 1 package (idempotent), got %d: %v", len(m.Plugins), m.Plugins)
+	if len(m.Deps) != 1 {
+		t.Errorf("expected 1 package (idempotent), got %d: %v", len(m.Deps), m.Deps)
 	}
 }
 
@@ -158,8 +158,8 @@ func TestAgentRemove_Package(t *testing.T) {
 	}
 
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Plugins) != 1 || m.Plugins[0] != "@spwn/python" {
-		t.Errorf("Packages = %v, want [@spwn/python]", m.Plugins)
+	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
+		t.Errorf("Packages = %v, want [@spwn/python]", m.Deps)
 	}
 }
 
@@ -179,8 +179,8 @@ func TestAgentRemove_AbsentPackageErrors(t *testing.T) {
 
 	// Manifest must stay untouched when the preflight rejects.
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Plugins) != 1 || m.Plugins[0] != "@spwn/python" {
-		t.Errorf("Packages = %v, want [@spwn/python] (unchanged)", m.Plugins)
+	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
+		t.Errorf("Packages = %v, want [@spwn/python] (unchanged)", m.Deps)
 	}
 }
 

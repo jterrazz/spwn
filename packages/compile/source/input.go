@@ -78,7 +78,7 @@ func ToCompileInput(src *ProjectSource, worldName string) (compile.Input, error)
 			return compile.Input{}, fmt.Errorf(
 				"world %q references missing agent %q", selected, name)
 		}
-		for _, p := range a.Config.Plugins {
+		for _, p := range a.Config.Deps {
 			packages[p] = struct{}{}
 		}
 		agents = append(agents, compile.AgentInput{
@@ -86,8 +86,8 @@ func ToCompileInput(src *ProjectSource, worldName string) (compile.Input, error)
 			Role: a.Config.Role,
 		})
 	}
-	// Add world-level package overrides too.
-	for _, p := range world.Plugins {
+	// Add project-level deps (top-level deps: in spwn.yaml).
+	for _, p := range src.Manifest.Deps {
 		packages[p] = struct{}{}
 	}
 
@@ -99,7 +99,7 @@ func ToCompileInput(src *ProjectSource, worldName string) (compile.Input, error)
 
 	return compile.Input{
 		Manifest: models.Manifest{
-			Plugins: packageList,
+			Deps: packageList,
 		},
 		VerifiedTools: packageList,
 		WorldID:       selected,

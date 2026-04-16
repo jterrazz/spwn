@@ -336,7 +336,7 @@ type declaredWorldItem struct {
 	Name       string   `json:"name"`
 	Agents     []string `json:"agents"`
 	Workspaces []string `json:"workspaces"`
-	Plugins []string `json:"packages,omitempty"`
+	Deps []string `json:"deps,omitempty"`
 	// Status is "running" when any live world carries this config
 	// name, "stopped" otherwise. Declared-but-undeployed worlds are
 	// "stopped", not absent.
@@ -366,7 +366,7 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 				Name:       name,
 				Agents:     def.Agents,
 				Workspaces: def.Workspaces,
-				Plugins:    def.Plugins,
+				Deps:    def.Deps,
 				Status:     status,
 			})
 		}
@@ -473,7 +473,7 @@ type projectManifest struct {
 type projectWorldDef struct {
 	Agents     []string `yaml:"agents"`
 	Workspaces []string `yaml:"workspaces"`
-	Plugins []string `yaml:"plugins,omitempty"`
+	Deps []string `yaml:"deps,omitempty"`
 }
 
 // loadProjectManifest reads <projectRoot>/spwn.yaml when a project

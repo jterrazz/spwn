@@ -1,6 +1,11 @@
 version: 2
 name: startup
 
+deps:
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/unix"
+
 worlds:
   startup:
     agents:
@@ -9,7 +14,3 @@ worlds:
       - analyst
     workspaces:
       - .
-    tools:
-      - "@spwn/unix"
-      - "@spwn/git"
-      - "@spwn/node"

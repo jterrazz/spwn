@@ -1,13 +1,14 @@
 version: 2
 name: paperclip-factory
 
+deps:
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/unix"
+
 worlds:
   paperclip-factory:
     agents:
       - clippy
     workspaces:
       - .
-    tools:
-      - "@spwn/unix"
-      - "@spwn/git"
-      - "@spwn/node"

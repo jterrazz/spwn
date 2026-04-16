@@ -40,7 +40,7 @@ func TestRulePackagesExist_ResolvesMixedRefs(t *testing.T) {
 	root := t.TempDir()
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
-plugins:
+deps:
   - "@spwn/known-tool"
   - "@spwn/known-plugin"
   - "@spwn/bogus-package"
