@@ -100,7 +100,7 @@ mounts, cred sync).
   an existing base image, producing a pushable project artifact.
 - **Build + verify** - run `docker build`, then probe the resulting
   base image to confirm every declared tool actually works.
-- **Plugin config** - collect plugin `Config(runtime)` contributions
+- **Runtime config** - collect pack `Config(runtime)` contributions
   so `architect.Spawn` can merge them into the container's runtime
   settings file after boot.
 
@@ -175,7 +175,7 @@ enough that most writes the agent actually cares about happen there.
    write to the host's world-state directory (mounted as `/world/` via
    a small dedicated bind), `agents/*` entries are `CopyTo`'d directly
    into the running container on top of the home tree seeded in step 4.
-8. Inject plugin runtime config, emit activity events.
+8. Inject runtime config, emit activity events.
 
 On graceful `spwn down`, `syncAgentsOutOf` uses `CopyDirFrom` to pull
 the four allowlisted memory directories (`journal`, `knowledge`,

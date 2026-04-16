@@ -175,9 +175,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		explicitImage = true
 	}
 
-	// Registry + resolved plugin list are computed unconditionally.
+	// Registry + resolved pack list are computed unconditionally.
 	// Even when the image is prebuilt (tests injecting SPWN_BASE_IMAGE),
-	// plugin config still needs to be merged into the container's
+	// runtime config still needs to be merged into the container's
 	// runtime settings file after the container boots.
 	reg := ib.NewRegistry()
 	if err := packs.RegisterDefaults(reg); err != nil {
@@ -188,8 +188,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Always include runtime essentials, then add user-specified tools
-	// and plugins on top. The registry deduplicates and resolves
-	// dependencies; plugins share the tool resolution pipeline.
+	// and packs on top. The registry deduplicates and resolves
+	// dependencies; packs share the tool resolution pipeline.
 	//
 	// @spwn/cli is deliberately excluded here - it installs the
 	// spwn binary itself and is only meaningful inside the
@@ -433,13 +433,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("sync agent homes into container: %w", err)
 	}
 
-	// Merge plugin runtime-config into the container's runtime settings
+	// Merge pack runtime-config into the container's runtime settings
 	// file. Currently only the claude-code backend has a known target
 	// path; additional runtimes can grow their own branch as needed.
-	if err := injectPluginRuntimeConfig(ctx, a.backend, containerID, resolvedTools); err != nil {
+	if err := injectRuntimeConfig(ctx, a.backend, containerID, resolvedTools); err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
-		return nil, fmt.Errorf("inject plugin runtime config: %w", err)
+		return nil, fmt.Errorf("inject runtime config: %w", err)
 	}
 
 	// Write the runtime provider's default config files directly
@@ -704,7 +704,7 @@ func materialiseWorldTree(ctx context.Context, be backend.Backend, containerID s
 	return worldErr
 }
 
-// injectPluginRuntimeConfig computes the merged plugin config for the
+// injectRuntimeConfig computes the merged runtime config for the
 // world's runtime backend and writes it into the container's runtime
 // settings file.
 //
@@ -714,16 +714,16 @@ func materialiseWorldTree(ctx context.Context, be backend.Backend, containerID s
 // image build time — is read back, shallow-merged with every pack's
 // Config(runtime) output (last write wins), and rewritten in place.
 //
-// When no plugin targets the runtime, this is a no-op: the baseline
+// When no pack targets the runtime, this is a no-op: the baseline
 // settings.json stays untouched.
 //
-// Additional runtimes can grow their own branch here as plugins for
+// Additional runtimes can grow their own branch here as packs for
 // them materialize.
-func injectPluginRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []ib.Tool) error {
+func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []ib.Tool) error {
 	// The pack-facing runtime identifier is the same as the image
 	// builder's runtime tool name. Spawn always installs
 	// @spwn/claude-code, so hard-code it here until a second runtime
-	// lands (codex is built but has no plugin target yet).
+	// lands (codex is built but has no pack target yet).
 	const runtimeName = "@spwn/claude-code"
 	const settingsPath = "/home/spwn/.claude/settings.json"
 

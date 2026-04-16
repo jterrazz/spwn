@@ -53,7 +53,7 @@ Examples:
 		}
 
 		// Pre-flight every catalog ref against the catalog so we never
-		// write an unknown plugin to agent.yaml. Bare-name local refs
+		// write an unknown pack to agent.yaml. Bare-name local refs
 		// are skipped here — they resolve against the project tree at
 		// build time, not the catalog.
 		for _, p := range composePacks {
@@ -87,7 +87,7 @@ var removeCmd = &cobra.Command{
 	Long: `Remove packs from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent remove <name> --plugin X' removes just that entry.
+'spwn agent remove <name> --pack X' removes just that entry.
 
 Examples:
   spwn agent remove neo --pack @spwn/python
@@ -238,7 +238,7 @@ func stripVersion(ref string) string {
 }
 
 // unknownComposeRefError formats the refusal message shown when the
-// user passes --plugin with a reference the catalog does
+// user passes --pack with a reference the catalog does
 // not know about. The "known:" list mirrors what `spwn check` shows
 // so the two commands never disagree.
 func unknownComposeRefError(kind, ref string) error {

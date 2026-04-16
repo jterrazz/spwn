@@ -18,7 +18,7 @@ import (
 const localPackDir = "packs"
 
 // wrappedLocalTool forwards every image.Tool method to an underlying
-// pluginyaml-parsed plugin but forces Name() to the "local:<basename>"
+// packyaml-parsed pack but forces Name() to the "local:<basename>"
 // form. Catalog refs and local refs share a single registry keyed by
 // name, so the prefix keeps them in separate namespaces — any future
 // promotion of a local name to an @spwn/ pack doesn't collide with

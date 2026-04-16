@@ -4,7 +4,7 @@
 // Spwn projects reference plugins in three ways:
 //
 //  1. Local — a bare name, resolved against ./spwn/packs/<name>/
-//     (directory form, with its own plugin.yaml) or
+//     (directory form, with its own pack.yaml) or
 //     ./spwn/skills/<name>.md (bare-markdown skill form).
 //  2. @spwn/<name> — a built-in pack compiled into the spwn
 //     binary, looked up against the catalog provided by the caller.

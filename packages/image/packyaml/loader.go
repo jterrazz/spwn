@@ -14,7 +14,7 @@ import (
 )
 
 // Manifest is the canonical basename. Both catalog and local
-// plugins live at <pluginDir>/plugin.yaml.
+// packs live at <packDir>/pack.yaml.
 const Manifest = "pack.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
@@ -44,7 +44,7 @@ type ParseOptions struct {
 	DefaultVersion string
 }
 
-// Parse reads plugin.yaml via the Resolver and returns an
+// Parse reads pack.yaml via the Resolver and returns an
 // image.Tool instance backed by the parsed schema. File references
 // declared in the `files:` map are read eagerly — the returned Tool
 // is self-contained and can outlive the Resolver.
@@ -130,10 +130,10 @@ func (d DirResolver) SkillsFS() fs.FS {
 //
 // Example:
 //
-//	//go:embed all:catalog/plugins
+//	//go:embed all:catalog/packs
 //	var catalogFS embed.FS
 //
-//	res := EmbedResolver{FS: catalogFS, Root: "catalog/plugins/git"}
+//	res := EmbedResolver{FS: catalogFS, Root: "catalog/packs/git"}
 //
 // Paths inside EmbedResolver always use forward slashes because
 // embed.FS normalises to POSIX regardless of host OS.

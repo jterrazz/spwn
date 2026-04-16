@@ -42,7 +42,7 @@ func TestRulePackagesExist_ResolvesMixedRefs(t *testing.T) {
 	ref := scaffoldAgent(t, root, "neo", `name: neo
 deps:
   - "@spwn/known-tool"
-  - "@spwn/known-plugin"
+  - "@spwn/known-pack"
   - "@spwn/bogus-package"
 `)
 
@@ -56,7 +56,7 @@ deps:
 			},
 		},
 		AgentRefs:    []AgentRef{ref},
-		BuiltinTools: []string{"@spwn/known-tool", "@spwn/known-plugin"},
+		BuiltinTools: []string{"@spwn/known-tool", "@spwn/known-pack"},
 	}
 
 	issues := rulePacksExist(in)
@@ -74,8 +74,8 @@ deps:
 	if got := errs[0].Message; got == "" || !contains(got, "@spwn/bogus-package") {
 		t.Errorf("error message %q should mention @spwn/bogus-package", got)
 	}
-	if got := errs[0].Path; got == "" || !contains(got, "#plugins") {
-		t.Errorf("error path %q should mention #plugins", got)
+	if got := errs[0].Path; got == "" || !contains(got, "#deps") {
+		t.Errorf("error path %q should mention #deps", got)
 	}
 }
 

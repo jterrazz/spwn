@@ -12,10 +12,10 @@ import (
 // config.
 //
 // The composition is a single flat dependency list. Under the old
-// tool/plugin/skill trichotomy, each entry would land in a different
+// tool/runtime-config/skill trichotomy, each entry would land in a different
 // key; under the unified package model they all share one `packages:`
 // list. The parser distinguishes what's what by the manifest the ref
-// resolves to (an `install:` block makes it a tool, a `plugin:` block
+// resolves to (an `install:` block makes it a tool, a `runtime-config:` block
 // makes it a pack, a content-only body makes it a skill).
 type Manifest struct {
 	Name     string        `yaml:"name,omitempty"`

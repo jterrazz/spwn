@@ -82,7 +82,7 @@ type Input struct {
 	OrphanRefs []AgentRef
 
 	// BuiltinTools is the authoritative catalog of known built-in
-	// packages (tools, plugins, runtimes). Nil → fall back to
+	// packs (tools, skills, runtimes). Nil → fall back to
 	// @spwn/* prefix heuristic.
 	BuiltinTools []string
 
@@ -644,7 +644,7 @@ func rulePacksExist(in Input) []Issue {
 			default: // ResolveNotFound
 				return []Issue{{
 					Level: LevelError, Path: location,
-					Message: fmt.Sprintf("plugin %q does not exist", raw),
+					Message: fmt.Sprintf("pack %q does not exist", raw),
 					Hint:    suggestPackage(pack, in.BuiltinTools),
 				}}
 			}
@@ -664,8 +664,8 @@ func rulePacksExist(in Input) []Issue {
 		}
 		return []Issue{{
 			Level: LevelError, Path: location,
-			Message: fmt.Sprintf("plugin %q does not exist", raw),
-			Hint: "create ./spwn/packs/" + ref.Name + "/plugin.yaml for a full plugin, " +
+			Message: fmt.Sprintf("pack %q does not exist", raw),
+			Hint: "create ./spwn/packs/" + ref.Name + "/pack.yaml for a full pack, " +
 				"or ./spwn/packs/" + ref.Name + ".md for a bare skill",
 		}}
 	}
@@ -683,7 +683,7 @@ func rulePacksExist(in Input) []Issue {
 		if err != nil {
 			continue
 		}
-		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#plugins"
+		loc := relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#deps"
 		for _, t := range parsed.Deps {
 			out = append(out, check(t, loc)...)
 		}
@@ -694,7 +694,7 @@ func rulePacksExist(in Input) []Issue {
 // ruleLockfileConsistent compares every @spwn/* or @<owner>/*
 // pack ref declared in any agent.yaml or spwn.yaml world against
 // spwn.lock. Missing entries become errors so `spwn build` fails
-// loudly and points the user at `spwn plugin install`.
+// loudly and points the user at `spwn install`.
 //
 // Local (bare) refs are never lockfile-tracked.
 //
@@ -710,7 +710,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		return []Issue{{
 			Level: LevelError, Path: lockfile.FileName,
 			Message: fmt.Sprintf("cannot read lockfile: %v", err),
-			Hint:    "regenerate with `spwn plugin install` for each declared pack, or delete " + lockfile.FileName + " to start fresh",
+			Hint:    "regenerate with `spwn install` for each declared pack, or delete " + lockfile.FileName + " to start fresh",
 		}}
 	}
 	if lock == nil {
@@ -762,7 +762,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		out = append(out, Issue{
 			Level: LevelError, Path: rec.location,
 			Message: fmt.Sprintf("%q is not recorded in %s", pack, lockfile.FileName),
-			Hint:    "run `spwn plugin install " + pack + "` to sync the lockfile",
+			Hint:    "run `spwn install " + pack + "` to sync the lockfile",
 		})
 	}
 	return out

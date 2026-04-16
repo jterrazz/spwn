@@ -13,10 +13,10 @@ import (
 )
 
 // yamlToolsFS embeds every YAML-defined package. Each package lives
-// at catalog/plugins/<name>/plugin.yaml with optional sibling
+// at catalog/packs/<name>/pack.yaml with optional sibling
 // skills/, files/, and config/ directories. The embed is rooted at
-// the catalog/plugins/ directory so the walk sees
-// <name>/plugin.yaml entries directly.
+// the catalog/packs/ directory so the walk sees
+// <name>/pack.yaml entries directly.
 //
 // Adding a new YAML package? Drop the directory in and re-build —
 // the loader picks it up automatically. No registration list to
@@ -26,7 +26,7 @@ import (
 var yamlToolsFS embed.FS
 
 // loadYAMLTools walks the embedded package tree and parses every
-// plugin.yaml it finds into an image.Tool instance. Directories
+// pack.yaml it finds into an image.Tool instance. Directories
 // without a manifest are silently skipped so non-package assets (e.g.
 // README.md) don't break the load.
 func loadYAMLTools() ([]ib.Tool, error) {

@@ -280,7 +280,7 @@ milliseconds instead of waiting for a docker spawn in an e2e test.
 
 The current fixture set exercises: minimal agents, colonies (2 and
 3 agents with roles), every per-agent layer, local and subdir skills,
-hooks, plugin-block packages, package lists, custom project names, unicode in
+hooks, runtime-config packs, pack lists, custom project names, unicode in
 prompts, long agent names, empty layer dirs, AGENTS.md `@`-imports,
 and the three main error paths (missing agents, malformed
 `agent.yaml`, manifests with no worlds declared).
