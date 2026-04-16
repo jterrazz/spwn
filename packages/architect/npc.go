@@ -7,7 +7,7 @@ import (
 
 	"spwn.sh/packages/image/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/runtimes/claude_code/compile"
+	"spwn.sh/packages/compile/runtimes/claude_code"
 	"spwn.sh/packages/world/runtime"
 )
 

@@ -107,7 +107,7 @@ already exists.`,
 
 		// Assign team if provided
 		if initTeam != "" {
-			if err := agent.SetAgentTeam(name, initTeam); err != nil {
+			if err := project.SetAgentTeam(name, initTeam); err != nil {
 				s.Warn("Warning", fmt.Sprintf("could not set team: %v", err))
 			} else {
 				s.Done("Team", initTeam)
