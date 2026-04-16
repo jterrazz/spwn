@@ -86,7 +86,7 @@ func init() {
 
 func runStart(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	s := newStepper(cmd)
+	s := ui.New()
 
 	s.Blank()
 	s.Start("Starting Architect (building image if needed)...")
@@ -158,7 +158,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 
 func runStop(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	s := newStepper(cmd)
+	s := ui.New()
 
 	s.Blank()
 	s.Start("Stopping Architect...")
@@ -190,7 +190,7 @@ func runStop(cmd *cobra.Command, args []string) error {
 
 func runStatus(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	s := newStepper(cmd)
+	s := ui.New()
 
 	info, err := arch.GetDaemonStatus(ctx)
 	if err != nil {
@@ -230,7 +230,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 
 func runTalk(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	s := newStepper(cmd)
+	s := ui.New()
 
 	// Check if architect container is running. If not, auto-start it.
 	info, err := arch.GetDaemonStatus(ctx)
@@ -326,10 +326,6 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New()
 }
 
 // formatDuration formats a duration into a human-readable string.

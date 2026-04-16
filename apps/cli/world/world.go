@@ -190,7 +190,7 @@ func resetSpawnFlags(cmd *cobra.Command) {
 
 func spawnRunE(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
-	s := newStepper(cmd)
+	s := ui.New()
 
 	s.Blank()
 
@@ -424,10 +424,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New()
 }
 
 // dockerHint wraps a NewArchitectFromEnv error with a user-friendly hint

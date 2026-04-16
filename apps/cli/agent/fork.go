@@ -23,7 +23,7 @@ var forkCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		source := args[0]
 		target := args[1]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		s.Blank()
 		s.Start(fmt.Sprintf("Forking %q -> %q...", source, target))

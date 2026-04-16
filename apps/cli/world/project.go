@@ -2,9 +2,9 @@ package world
 
 import (
 	"fmt"
-	"os"
 	"sort"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 )
@@ -20,15 +20,11 @@ type projectWorld struct {
 	Manifest   world.Manifest
 }
 
-// loadProject walks up from the cwd looking for spwn.yaml. Returns
-// (nil, nil) when no project is active so callers can fall back to
-// the legacy global-mode flow.
+// loadProject is kept as a thin alias over cliproject.Find so the
+// existing call sites under apps/cli/world/ stay concise while the
+// canonical walker lives in cliproject.
 func loadProject() (*project.Project, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	return project.Find(cwd)
+	return cliproject.Find()
 }
 
 // sortedWorldNames returns the project's world-map keys in stable

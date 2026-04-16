@@ -2,11 +2,10 @@ package agent
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/packages/project"
+	"spwn.sh/apps/cli/cliproject"
 )
 
 // startCmd and stopCmd are reserved for a future world where agents
@@ -66,16 +65,9 @@ func notYetImplemented(verb, name string) error {
 // references the named agent. Returns a descriptive error when no
 // project is active or the agent is absent from every world.
 func findWorldForAgent(agentName string) (string, error) {
-	cwd, err := os.Getwd()
+	p, err := cliproject.Require()
 	if err != nil {
 		return "", err
-	}
-	p, err := project.Find(cwd)
-	if err != nil {
-		return "", fmt.Errorf("load spwn.yaml: %w", err)
-	}
-	if p == nil {
-		return "", fmt.Errorf("no spwn.yaml in this directory tree.\nRun \"spwn init\" first")
 	}
 	for name, w := range p.Manifest.Worlds {
 		for _, a := range w.Agents {

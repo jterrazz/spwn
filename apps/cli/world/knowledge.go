@@ -38,14 +38,14 @@ var knowledgeLsCmd = &cobra.Command{
 		out, err := dockerExec(containerID,
 			"find", "/world/knowledge/", "-type", "f", "-not", "-name", ".*", "-printf", "%P\n")
 		if err != nil || strings.TrimSpace(out) == "" {
-			s := newStepper(cmd)
+			s := ui.New()
 			s.Blank()
 			s.Info("Knowledge:", "empty")
 			s.Blank()
 			return nil
 		}
 
-		s := newStepper(cmd)
+		s := ui.New()
 		s.Blank()
 		fmt.Fprintf(cmd.OutOrStdout(), "  %s\n", ui.Strong("Knowledge files:"))
 		s.Blank()
@@ -81,7 +81,7 @@ var knowledgeShowCmd = &cobra.Command{
 			return fmt.Errorf("file not found: %s", relPath)
 		}
 
-		s := newStepper(cmd)
+		s := ui.New()
 		s.Blank()
 		fmt.Fprint(cmd.OutOrStdout(), out)
 		s.Blank()

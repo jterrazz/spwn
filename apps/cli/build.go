@@ -11,6 +11,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/compile"
 	_ "spwn.sh/packages/compile/runtimes/claude_code" // register the claude-code runtime
@@ -129,19 +130,9 @@ Examples:
 			}
 		}
 
-		cwd, err := os.Getwd()
+		p, err := cliproject.Require()
 		if err != nil {
-			return fmt.Errorf("resolve cwd: %w", err)
-		}
-
-		p, err := project.Find(cwd)
-		if err != nil {
-			return fmt.Errorf("load manifest: %w", err)
-		}
-		if p == nil {
-			return fmt.Errorf(
-				"no spwn.yaml found in %s or any parent directory.\nRun `spwn init` to create one",
-				cwd)
+			return err
 		}
 
 		// Validate before touching Docker - same rules as `spwn

@@ -121,7 +121,7 @@ survives after the world is destroyed.`,
 		}
 
 		ctx := context.Background()
-		s := newStepper(cmd)
+		s := ui.New()
 
 		// Support deprecated --npc alias
 		task := ephemeralTask
@@ -203,10 +203,6 @@ survives after the world is destroyed.`,
 
 		return nil
 	},
-}
-
-func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New()
 }
 
 // runInteractiveSession is the `spwn agent <name>` shortcut: open an

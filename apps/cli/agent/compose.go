@@ -62,7 +62,7 @@ Examples:
 			}
 		}
 
-		s := newStepper(cmd)
+		s := ui.New()
 		s.Blank()
 		s.Info("Agent:", name)
 
@@ -123,7 +123,7 @@ Examples:
 			}
 		}
 
-		s := newStepper(cmd)
+		s := ui.New()
 		s.Blank()
 		s.Info("Agent:", name)
 

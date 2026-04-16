@@ -33,10 +33,6 @@ func init() {
 	Cmd.AddCommand(rmCmd)
 }
 
-func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New()
-}
-
 func dockerHint(err error) error {
 	if strings.Contains(err.Error(), "cannot connect to Docker") {
 		return fmt.Errorf("Docker is not running")
@@ -52,7 +48,7 @@ var saveCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		worldID := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		arc, err := architect.NewFromEnv()
 		if err != nil {
@@ -117,7 +113,7 @@ var restoreCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		snapshotRef := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		arc, err := architect.NewFromEnv()
 		if err != nil {
@@ -169,7 +165,7 @@ var rmCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		snapshotRef := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		arc, err := architect.NewFromEnv()
 		if err != nil {

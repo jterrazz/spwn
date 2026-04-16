@@ -13,10 +13,6 @@ import (
 	"spwn.sh/packages/platform"
 )
 
-func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New()
-}
-
 // --- Parent command: spwn auth (shows status) ---
 
 var defaultAuthHelp func(*cobra.Command, []string)
@@ -26,7 +22,7 @@ var Cmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Manage credentials - login, logout, status",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 
 		// Resolve all providers via auth package
 		creds := auth.ResolveAll()
@@ -141,7 +137,7 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Detect credentials from CLI logins and system keychain",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 		s.Blank()
 
 		found := false
@@ -193,7 +189,7 @@ var logoutCmd = &cobra.Command{
 	Use:   "logout",
 	Short: "Clear cached credentials",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 		s.Blank()
 
 		cached := auth.ReadCachedToken()
@@ -233,7 +229,7 @@ var tokenCmd = &cobra.Command{
 	Short: "Set a token directly - for CI and scripts",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 		s.Blank()
 
 		input := strings.TrimSpace(args[0])
@@ -265,7 +261,7 @@ var checkCmd = &cobra.Command{
 }
 
 func runCheck(cmd *cobra.Command, _ []string) error {
-	s := newStepper(cmd)
+	s := ui.New()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

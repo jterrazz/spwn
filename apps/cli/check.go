@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/source"
@@ -62,17 +63,9 @@ every validation rule against the project. Reports issues grouped by
 severity. Exits non-zero when errors are found (or warnings, with
 --strict).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cwd, err := os.Getwd()
+		p, err := cliproject.Require()
 		if err != nil {
-			return fmt.Errorf("resolve cwd: %w", err)
-		}
-
-		p, err := project.Find(cwd)
-		if err != nil {
-			return fmt.Errorf("load manifest: %w", err)
-		}
-		if p == nil {
-			return fmt.Errorf("no spwn.yaml found in %s or any parent directory.\nRun `spwn init` to create one", cwd)
+			return err
 		}
 
 		issues := project.Validate(p, project.ValidateOpts{

@@ -42,10 +42,6 @@ func init() {
 	ui.MarkExperimental(membersCmd)
 }
 
-func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New()
-}
-
 // ── spwn team new ──
 
 var newCmd = &cobra.Command{
@@ -55,7 +51,7 @@ var newCmd = &cobra.Command{
   spwn team new infra --color purple`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 		name := strings.TrimSpace(args[0])
 		if name == "" {
 			return fmt.Errorf("team name is required")
@@ -118,7 +114,7 @@ var editCmd = &cobra.Command{
   spwn team edit infra --description "Infrastructure & ops"`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 		slug := args[0]
 
 		t, err := project.GetTeam(slug)
@@ -170,7 +166,7 @@ var rmCmd = &cobra.Command{
 	Short:   "Delete a team (agents become solo)",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 		slug := args[0]
 
 		if err := project.DeleteTeam(slug); err != nil {
@@ -194,7 +190,7 @@ var assignCmd = &cobra.Command{
   spwn team assign qa --clear`,
 	Args: cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 		agentName := args[0]
 		teamSlug := ""
 

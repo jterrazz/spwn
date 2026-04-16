@@ -8,6 +8,7 @@ import (
 	"spwn.sh/packages/architect"
 
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 )
 
 func init() {
@@ -20,7 +21,7 @@ var renameCmd = &cobra.Command{
 	Args:  cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		s := newStepper(cmd)
+		s := ui.New()
 
 		worldID := args[0]
 		name := ""

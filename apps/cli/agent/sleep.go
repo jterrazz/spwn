@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 )
 
@@ -17,7 +18,7 @@ var sleepCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		s.Blank()
 		s.Start(fmt.Sprintf("Sleep cycle for agent %q...", name))

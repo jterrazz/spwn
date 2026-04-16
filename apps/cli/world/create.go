@@ -3,10 +3,10 @@ package world
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/project"
 )
@@ -37,17 +37,9 @@ spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
 		s := ui.New()
 		name := args[0]
 
-		cwd, err := os.Getwd()
+		p, err := cliproject.Require()
 		if err != nil {
-			return fmt.Errorf("resolve cwd: %w", err)
-		}
-		p, err := project.Find(cwd)
-		if err != nil {
-			return s.FailHint("Manifest", err, "Check spwn.yaml")
-		}
-		if p == nil {
-			return s.FailHint("No project", fmt.Errorf("spwn.yaml not found"),
-				"Run \"spwn init\" first")
+			return s.FailHint("No project", err, "Run \"spwn init\" first")
 		}
 
 		if err := project.AddWorld(p.ManifestPath, name, project.AddWorldOpts{
@@ -89,17 +81,9 @@ preserved. Other worlds may still reference them.`,
 		s := ui.New()
 		name := args[0]
 
-		cwd, err := os.Getwd()
+		p, err := cliproject.Require()
 		if err != nil {
-			return fmt.Errorf("resolve cwd: %w", err)
-		}
-		p, err := project.Find(cwd)
-		if err != nil {
-			return s.FailHint("Manifest", err, "Check spwn.yaml")
-		}
-		if p == nil {
-			return s.FailHint("No project", fmt.Errorf("spwn.yaml not found"),
-				"Run \"spwn init\" first")
+			return s.FailHint("No project", err, "Run \"spwn init\" first")
 		}
 
 		if err := project.RemoveWorld(p.ManifestPath, name); err != nil {
