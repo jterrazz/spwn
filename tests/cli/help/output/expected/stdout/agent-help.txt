@@ -40,6 +40,6 @@ Portability:
 
 Examples:
   spwn agent create neo
-  spwn agent add neo --tool @spwn/python --skill paper-reading
+  spwn agent add neo --pack @spwn/python --skill paper-reading
   spwn agent neo
 
