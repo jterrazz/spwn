@@ -19,32 +19,36 @@ L5 Build     packages/compile/  packages/image/     (project → image)
    ────────────────────────────────────────────────────────────────
 L4 Project   packages/project/                      (manifest + validation)
    ────────────────────────────────────────────────────────────────
-L3 Domain    packages/deps/  packages/agent/        (dependencies + agents)
+L3 Domain    packages/dependency/  packages/agent/   (dependencies + agents)
    ────────────────────────────────────────────────────────────────
 L2 Platform  packages/activity/  packages/auth/
-             packages/upgrade/   packages/mailbox/  (platform utilities)
+             packages/migration/ packages/update/
+             packages/mailbox/                      (platform utilities)
    ────────────────────────────────────────────────────────────────
-L1 Foundation packages/paths/                       (constants + IDs)
+L1 Foundation packages/platform/                    (constants + IDs)
 ```
 
 ### What each package owns
 
 | Pkg | Layer | Owns |
 |-----|-------|------|
-| `paths` | L1 | Directory constants, ID generation, PATH setup, runtime image constants |
+| `platform` | L1 | Directory constants, ID generation, PATH setup, runtime image constants |
 | `activity` | L2 | Append-only event log (JSONL) |
 | `auth` | L2 | Provider resolution, credential storage (keychain/env/file/OAuth) |
-| `upgrade` | L2 | Version checking + schema migrations runner |
+| `migration` | L2 | Schema migrations runner + registry + backups |
+| `update` | L2 | CLI self-update + version-check |
 | `mailbox` | L2 | Agent-to-agent filesystem inbox |
-| `deps` | L3 | `spwn.yaml` dependency schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
+| `dependency` | L3 | `spwn.yaml` schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
 | `agent` | L3 | Agent mind (identity/skills/knowledge/playbooks/journal), evolution, session |
-| `project` | L4 | Project manifest, 15 validation rules, scaffolding |
+| `project` | L4 | Project manifest, validation rules, scaffolding, teams + organizations |
 | `image` | L5 | Docker image build, tool registry, transitive dep resolution, dependency→Tool adapter |
-| `compile` | L5 | Pure render: `Input → Tree`, runtime backends (claudecode) |
-| `world` | L6 | Container lifecycle (spawn, destroy, colony), docker-cp sync |
+| `compile` | L5 | Pure render: `Input → Tree`, runtime renderers (claude_code) |
+| `runtimes` | L5 | Spawn-time runtime adapters (claude_code/adapter) |
+| `world` | L6 | Container lifecycle primitives, state, labels, deploy helpers |
+| `architect` | L6 | World orchestration (spawn/destroy/daemon) — composes world + image + compile |
 | `apps/cli` | L7 | `spwn` binary — commands, UI |
 | `apps/web` | L7 | Next.js + Tauri desktop app |
-| `packages/api` | L7 | HTTP server (backs web UI) |
+| `apps/api` | L7 | HTTP server (backs web UI) |
 
 ### Module map
 
@@ -52,24 +56,24 @@ L1 Foundation packages/paths/                       (constants + IDs)
 spwn/
 ├── apps/
 │   ├── cli/                    Go — the spwn CLI binary
+│   ├── api/                    Go — HTTP server backing the web UI
 │   └── web/                    TS + Rust — Next.js + Tauri desktop
 ├── packages/
-│   ├── paths/                  L1  dir constants, IDs, env setup
+│   ├── platform/               L1  dir constants, IDs, env setup
 │   ├── activity/               L2  event log
 │   ├── auth/                   L2  credentials
-│   ├── upgrade/                L2  version + migrations
+│   ├── migration/              L2  schema migrations runner
+│   ├── update/                 L2  CLI self-update + version-check
 │   ├── mailbox/                L2  agent messaging
-│   ├── deps/                   L3  dependency schema, refs, lockfile
+│   ├── dependency/             L3  dependency schema, refs, lockfile
 │   ├── agent/                  L3  agent mind + evolution
-│   ├── project/                L4  project manifest + validation
-│   ├── compile/                L5  render Input → Tree
-│   ├── image/                  L5  Docker image build
-│   ├── world/                  L6  container orchestration
-│   └── api/                    L7  HTTP server
-├── catalog/
-│   ├── dependencies/                  built-in dependencies (embedded)
-│   ├── runtimes/               runtime dependency definitions
-│   └── examples/               bundled example projects
+│   ├── project/                L4  project manifest + validation + teams/orgs
+│   ├── compile/                L5  render Input → Tree, runtime renderers
+│   ├── image/                  L5  Docker image build, backend adapter
+│   ├── runtimes/               L5  spawn-time runtime adapters
+│   ├── world/                  L6  container state, labels, deploy helpers
+│   └── architect/              L6  world orchestration (spawn/destroy/daemon)
+├── catalog/                    flat tree of @spwn/* catalog entries
 └── tests/                      e2e suite (vitest + real Docker)
 ```
 
@@ -92,8 +96,8 @@ Implementation details live under `internal/` — the Go compiler itself rejects
 - `packages/project/internal/validate/` — rule engine, only reachable from `project`
 - `packages/project/internal/manifest/` — parsing details
 - `packages/project/internal/resolve/` — dep merging
-- `packages/world/internal/runtime/` — runtime adapters
-- `packages/world/internal/backend/` — Docker API wrapper
+- `packages/world/runtime/` — runtime adapter port interface
+- `packages/image/backend/` — Docker API wrapper
 
 ### 3. This document
 
@@ -103,7 +107,7 @@ The layer diagram above is the ground truth. When in doubt, check here.
 
 | Abstraction | Where | Purpose |
 |-------------|-------|---------|
-| Dependency | `packages/deps` | Distribution unit (schema, refs, lockfile) |
+| Dependency | `packages/dependency` | Distribution unit (schema, refs, lockfile) |
 | Tool | `packages/image` | Interface any installable capability implements |
 | Runtime | `packages/compile/runtimes` | Translates agent composition → runtime files |
 | Backend | `packages/image/backend` | Container runtime (Docker today) |
@@ -117,9 +121,9 @@ spwn.yaml       →  project.Load    →  project.Manifest
 
 project.Manifest →  project/resolve  →  []string (merged deps)
 
-deps             →  deps.Parse       →  *deps.Parsed (schema + files)
+deps             →  dependency.Parse   →  *dependency.Parsed (schema + files)
 
-*deps.Parsed     →  image.ToolFromParsed → image.Tool
+*dependency.Parsed → image.ToolFromParsed → image.Tool
 
 []image.Tool     →  image.Build     →  Docker image
 

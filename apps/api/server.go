@@ -461,38 +461,44 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 }
 
 // projectManifest is the minimal view of spwn.yaml the web API needs
-// to annotate agents with their world and compute world status. It's
-// intentionally a local struct so this package doesn't import the
-// full packages/manifest parser (would introduce a module dep).
+// to annotate agents with their world and compute world status.
+// Hydrated from packages/project so parsing stays in one place.
 type projectManifest struct {
-	Version int                        `yaml:"version"`
-	Name    string                     `yaml:"name"`
-	Worlds  map[string]projectWorldDef `yaml:"worlds"`
+	Version int
+	Name    string
+	Worlds  map[string]projectWorldDef
 }
 
 type projectWorldDef struct {
-	Agents     []string `yaml:"agents"`
-	Workspaces []string `yaml:"workspaces"`
-	Deps []string `yaml:"dependencies,omitempty"`
+	Agents     []string
+	Workspaces []string
+	Deps       []string
 }
 
-// loadProjectManifest reads <projectRoot>/spwn.yaml when a project
-// root is active. Returns ok=false on any failure (no project, file
-// missing, parse error) so callers can fall back silently.
+// loadProjectManifest returns a view of the current project's
+// spwn.yaml if a project is active. Returns ok=false when no project
+// is discoverable or the manifest fails to load so callers can fall
+// back silently.
 func loadProjectManifest() (projectManifest, bool) {
-	root := platform.ProjectRoot()
-	if root == "" {
+	if platform.ProjectRoot() == "" {
 		return projectManifest{}, false
 	}
-	data, err := os.ReadFile(filepath.Join(root, "spwn.yaml"))
-	if err != nil {
+	p, err := projectpkg.Find(platform.ProjectRoot())
+	if err != nil || p == nil || p.Manifest == nil {
 		return projectManifest{}, false
 	}
-	var pm projectManifest
-	if err := yaml.Unmarshal(data, &pm); err != nil {
-		return projectManifest{}, false
+	out := projectManifest{
+		Version: p.Manifest.Version,
+		Name:    p.Manifest.Name,
+		Worlds:  make(map[string]projectWorldDef, len(p.Manifest.Worlds)),
 	}
-	return pm, true
+	for name, w := range p.Manifest.Worlds {
+		out.Worlds[name] = projectWorldDef{
+			Agents:     append([]string(nil), w.Agents...),
+			Workspaces: append([]string(nil), w.Workspaces...),
+		}
+	}
+	return out, true
 }
 
 // agentYAML represents the agent.yaml manifest for an agent.
