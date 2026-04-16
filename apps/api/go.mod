@@ -1,4 +1,4 @@
-module spwn.sh/packages/api
+module spwn.sh/apps/api
 
 go 1.25.0
 
@@ -41,11 +41,11 @@ require (
 )
 
 replace (
-	spwn.sh/packages/activity => ../activity
-	spwn.sh/packages/agent => ../agent
-	spwn.sh/packages/auth => ../auth
+	spwn.sh/packages/activity => ../../packages/activity
+	spwn.sh/packages/agent => ../../packages/agent
+	spwn.sh/packages/auth => ../../packages/auth
 	spwn.sh/catalog => ../../catalog
-	spwn.sh/packages/image => ../image
-	spwn.sh/packages/platform => ../platform
-	spwn.sh/packages/world => ../world
+	spwn.sh/packages/image => ../../packages/image
+	spwn.sh/packages/platform => ../../packages/platform
+	spwn.sh/packages/world => ../../packages/world
 )
