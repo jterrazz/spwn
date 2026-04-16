@@ -13,8 +13,8 @@ Lifecycle:
   rm <name>                        Delete an agent
 
 Compose:
-  add <name>                       Attach blocks (--tool / --plugin / --skill)
-  remove <name>                    Detach blocks (--tool / --plugin / --skill)
+  add <name>                       Attach blocks (--pack / --skill)
+  remove <name>                    Detach blocks (--pack / --skill)
 
 Conversation:
   talk <name> [msg]                Open a session with a running agent (sync)
