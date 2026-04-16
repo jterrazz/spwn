@@ -66,7 +66,7 @@ Spwn classifies every plugin reference in `agent.yaml#plugins` (and world-level 
 - **Built-in** — `@spwn/<name>`. Looked up in the catalog shipped with the CLI (see tables above). `spwn check` offers "did you mean X?" hints for typos.
 - **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `@spwn/<name>` or drop a local plugin under `./spwn/plugins/<name>/`.
 
-Catalog refs are pinned in `spwn.lock.yaml` at the project root. Install one with `spwn plugin install @spwn/<name>`. `spwn check` flags any drift between agent.yaml and the lockfile.
+Catalog refs are pinned in `spwn.lock` at the project root. Install one with `spwn plugin install @spwn/<name>`. `spwn check` flags any drift between agent.yaml and the lockfile.
 
 ## Adding your own plugins
 

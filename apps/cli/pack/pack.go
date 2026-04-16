@@ -2,7 +2,7 @@
 // the spwn pack system — the unified installable concept (formerly "package").
 //
 // Packages are declared in each agent's agent.yaml#plugins list and
-// pinned in the project's spwn.lock.yaml. The shape is deliberately
+// pinned in the project's spwn.lock. The shape is deliberately
 // npm-ish:
 //
 //   - @spwn/<name> is a catalog pack compiled into the spwn binary.

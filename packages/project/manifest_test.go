@@ -16,7 +16,7 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 
 	required := []string{
 		"spwn.yaml",
-		"spwn.lock.yaml",
+		"spwn.lock",
 		"spwn/agents/neo/agent.yaml",
 		"spwn/agents/neo/AGENTS.md",
 		"spwn/agents/neo/identity/profile.md",
@@ -61,9 +61,9 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	// Lockfile should be seeded with the three default @spwn/* refs
 	// so `spwn check` passes on a brand-new project (no drift between
 	// the scaffolded agent.yaml and the initial lockfile).
-	lock, err := os.ReadFile(filepath.Join(dir, "spwn.lock.yaml"))
+	lock, err := os.ReadFile(filepath.Join(dir, "spwn.lock"))
 	if err != nil {
-		t.Fatalf("read spwn.lock.yaml: %v", err)
+		t.Fatalf("read spwn.lock: %v", err)
 	}
 	lockStr := string(lock)
 	for _, ref := range []string{"@spwn/unix", "@spwn/git", "@spwn/python"} {

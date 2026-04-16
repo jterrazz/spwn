@@ -89,7 +89,7 @@ func Init(dir string, opts Opts) error {
 		return fmt.Errorf("write .spwn/state.json: %w", err)
 	}
 
-	// Seed spwn.lock.yaml with the initial @spwn/* refs baked into
+	// Seed spwn.lock with the initial @spwn/* refs baked into
 	// the template agent.yaml so `spwn check` is clean on the very
 	// first run. Without this the lockfile rule would flag drift on
 	// any brand-new project.

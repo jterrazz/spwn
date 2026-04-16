@@ -115,7 +115,7 @@ Three ideas to hold in your head before you dive in:
 ```
 my-project/
 ├── spwn.yaml               # manifest - declares worlds, like docker-compose.yaml
-├── spwn.lock.yaml          # committed dep pins (like package-lock.json)
+├── spwn.lock          # committed dep pins (like package-lock.json)
 ├── spwn/                   # committed project assets
 │   ├── agents/             #   your agents - travel with the repo
 │   └── plugins/            #   local plugins (dirs, bare .md skills) you author
@@ -177,7 +177,7 @@ Dependency resolution works like npm:
 - `<bare-name>` is a local plugin under `spwn/plugins/<name>/` (directory form) or `spwn/plugins/<name>.md` (bare-markdown skill).
 - `@<owner>/<name>` is reserved for a future community registry.
 
-Add a catalog plugin to every agent with `spwn plugin install @spwn/<name>`; the ref gets pinned in `spwn.lock.yaml`.
+Add a catalog plugin to every agent with `spwn plugin install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
 
 **Agents evolve through three mechanisms:**
 
