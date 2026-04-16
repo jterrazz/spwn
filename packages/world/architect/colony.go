@@ -11,7 +11,6 @@ import (
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claudecode"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 )
 
@@ -52,7 +51,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 		}
 	}
 
-	resolvedRole := manifest.DefaultRole(role)
+	resolvedRole := agent.DefaultRole(role)
 	agentID := platform.GenerateAgentID(agentName)
 	rec := models.AgentRecord{
 		Name:    agentName,
@@ -174,7 +173,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 	// 2. Separate chiefs, managers, and workers
 	var chiefs, managers, workers []AgentSpec
 	for _, spec := range agents {
-		role := manifest.DefaultRole(spec.Role)
+		role := agent.DefaultRole(spec.Role)
 		switch role {
 		case "chief":
 			chiefs = append(chiefs, spec)
@@ -197,7 +196,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 		agentID := platform.GenerateAgentID(spec.Name)
 		if err := a.state.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
 			// Agent not yet registered (shouldn't happen in normal flow) - add it
-			role := manifest.DefaultRole(spec.Role)
+			role := agent.DefaultRole(spec.Role)
 			rec := models.AgentRecord{
 				Name:    spec.Name,
 				AgentID: agentID,

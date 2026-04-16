@@ -105,3 +105,31 @@ func RemovePack(agentName, ref string) error {
 	m.Deps = out
 	return SaveManifest(agentName, m)
 }
+
+// LoadManifestPath reads agent.yaml from an explicit directory.
+// Returns (nil, nil) when agent.yaml doesn't exist.
+// Used by callers that have a resolved agent dir (e.g. the spawn
+// pipeline) rather than a name.
+func LoadManifestPath(agentDir string) (*Manifest, error) {
+	path := filepath.Join(agentDir, "agent.yaml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read %s: %w", path, err)
+	}
+	var m Manifest
+	if err := yaml.Unmarshal(data, &m); err != nil {
+		return nil, fmt.Errorf("parse %s: %w", path, err)
+	}
+	return &m, nil
+}
+
+// DefaultRole returns the effective role, defaulting to "worker" if empty.
+func DefaultRole(role string) string {
+	if role == "" {
+		return "worker"
+	}
+	return role
+}
