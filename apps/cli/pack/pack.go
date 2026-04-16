@@ -25,8 +25,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/project"
-	"spwn.sh/packages/project/lockfile"
-	"spwn.sh/packages/project/refs"
+	packlib "spwn.sh/packages/pack"
 )
 
 // Cmd is the root `spwn pack` command group.
@@ -96,7 +95,7 @@ var lsCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		lock, err := lockfile.LoadOrEmpty(p.Root)
+		lock, err := packlib.LoadLockfileOrEmpty(p.Root)
 		if err != nil {
 			return err
 		}
@@ -129,14 +128,14 @@ var showCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		lock, err := lockfile.LoadOrEmpty(p.Root)
+		lock, err := packlib.LoadLockfileOrEmpty(p.Root)
 		if err != nil {
 			return err
 		}
 		ref := args[0]
 		e, ok := lock.Deps[ref]
 		if !ok {
-			return fmt.Errorf("%q is not recorded in %s", ref, lockfile.FileName)
+			return fmt.Errorf("%q is not recorded in %s", ref, packlib.LockFileName)
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "%s\n  version: %s\n  source:  %s\n", ref, e.Version, e.Source)
 		return nil
@@ -175,14 +174,14 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 		return err
 	}
 
-	pack, version := refs.SplitVersion(raw)
-	ref := refs.Parse(pack)
+	pack, version := packlib.SplitVersion(raw)
+	ref := packlib.ParseRef(pack)
 	switch ref.Kind {
-	case refs.KindLocal:
+	case packlib.KindLocal:
 		return fmt.Errorf("%q is a bare name — local packs are authored in place, not installed. "+
 			"Create ./spwn/tools/%s/spwn.yaml for a full pack or ./spwn/tools/%s.md for a bare skill",
 			pack, pack, pack)
-	case refs.KindRegistry:
+	case packlib.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
 			"Use @spwn/<name> for built-in packs, or author a local pack under ./spwn/tools/",
 			raw, ref.Owner, ref.Name)
@@ -207,22 +206,22 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 		mutated++
 	}
 
-	lock, err := lockfile.LoadOrEmpty(p.Root)
+	lock, err := packlib.LoadLockfileOrEmpty(p.Root)
 	if err != nil {
 		return err
 	}
-	lock.Add(pack, lockfile.Entry{
+	lock.Add(pack, packlib.LockEntry{
 		Version: version,
-		Source:  lockfile.SourceBuiltin,
+		Source:  packlib.SourceBuiltin,
 	})
-	if err := lockfile.Save(p.Root, lock); err != nil {
+	if err := packlib.SaveLockfile(p.Root, lock); err != nil {
 		return err
 	}
 
 	out := cmd.OutOrStdout()
 	fmt.Fprintf(out, "  %s  %s\n", ui.Green("\u2713"), ui.Strong("installed "+pack))
 	fmt.Fprintf(out, "     %d agent%s updated, %s pinned\n",
-		mutated, plural(mutated), lockfile.FileName)
+		mutated, plural(mutated), packlib.LockFileName)
 	return nil
 }
 
@@ -234,12 +233,12 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 		return err
 	}
 
-	pack, _ := refs.SplitVersion(raw)
-	ref := refs.Parse(pack)
-	if ref.Kind == refs.KindRegistry {
+	pack, _ := packlib.SplitVersion(raw)
+	ref := packlib.ParseRef(pack)
+	if ref.Kind == packlib.KindRegistry {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
-	if ref.Kind == refs.KindLocal {
+	if ref.Kind == packlib.KindLocal {
 		return fmt.Errorf("%q is a bare name — delete ./spwn/tools/%s/ (or %s.md) by hand to remove it", pack, pack, pack)
 	}
 
@@ -254,12 +253,12 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 		mutated++
 	}
 
-	lock, err := lockfile.LoadOrEmpty(p.Root)
+	lock, err := packlib.LoadLockfileOrEmpty(p.Root)
 	if err != nil {
 		return err
 	}
 	lock.Remove(pack)
-	if err := lockfile.Save(p.Root, lock); err != nil {
+	if err := packlib.SaveLockfile(p.Root, lock); err != nil {
 		return err
 	}
 

@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
-	"spwn.sh/packages/project/lockfile"
+	"spwn.sh/packages/pack"
 )
 
 //go:embed templates/*.tmpl
@@ -93,11 +93,11 @@ func Init(dir string, opts Opts) error {
 	// the template agent.yaml so `spwn check` is clean on the very
 	// first run. Without this the lockfile rule would flag drift on
 	// any brand-new project.
-	initialLock := lockfile.Empty()
+	initialLock := pack.EmptyLockfile()
 	for _, ref := range []string{"@spwn/unix", "@spwn/git", "@spwn/python"} {
-		initialLock.Add(ref, lockfile.Entry{Source: lockfile.SourceBuiltin})
+		initialLock.Add(ref, pack.LockEntry{Source: pack.SourceBuiltin})
 	}
-	if err := lockfile.Save(absDir, initialLock); err != nil {
+	if err := pack.SaveLockfile(absDir, initialLock); err != nil {
 		return fmt.Errorf("seed lockfile: %w", err)
 	}
 

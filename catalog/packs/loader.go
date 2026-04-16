@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/packyaml"
+	"spwn.sh/packages/pack"
 )
 
 // yamlToolsFS embeds every YAML-defined package. Each package lives
@@ -41,7 +41,7 @@ func loadYAMLTools() ([]ib.Tool, error) {
 			continue
 		}
 		name := e.Name()
-		manifestPath := path.Join(name, packyaml.Manifest)
+		manifestPath := path.Join(name, pack.Manifest)
 		if _, err := fs.Stat(yamlToolsFS, manifestPath); err != nil {
 			continue // directory without a manifest — legacy Go tool
 		}
@@ -49,9 +49,9 @@ func loadYAMLTools() ([]ib.Tool, error) {
 	}
 	sort.Strings(names) // deterministic order
 	for _, name := range names {
-		tool, err := packyaml.Parse(
-			packyaml.EmbedResolver{FS: yamlToolsFS, Root: name},
-			packyaml.ParseOptions{
+		tool, err := pack.Parse(
+			pack.EmbedResolver{FS: yamlToolsFS, Root: name},
+			pack.ParseOptions{
 				DefaultName:    "@spwn/" + strings.ReplaceAll(name, "_", "-"),
 				DefaultVersion: "latest",
 			},

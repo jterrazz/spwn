@@ -1,4 +1,4 @@
-// Package lockfile owns spwn.lock: the committed, deterministic
+// Package pack owns spwn.lock: the committed, deterministic
 // pin of every @spwn/* and github.com/* dependency the project uses.
 //
 // Format is Go-style, line-oriented text — one entry per line:
@@ -13,7 +13,7 @@
 //
 // Load/Save round-trip is deterministic: entries are sorted lexically
 // so git diffs stay clean.
-package lockfile
+package pack
 
 import (
 	"bufio"
@@ -24,8 +24,8 @@ import (
 	"strings"
 )
 
-// FileName is the canonical lockfile basename at the project root.
-const FileName = "spwn.lock"
+// LockFileName is the canonical lockfile basename at the project root.
+const LockFileName = "spwn.lock"
 
 // Source identifies how an entry is resolved at build time.
 type Source string
@@ -37,47 +37,47 @@ const (
 	SourceGitHub Source = "github"
 )
 
-// Entry pins one dependency to a source and version.
-type Entry struct {
+// LockEntry pins one dependency to a source and version.
+type LockEntry struct {
 	Version string
 	Source  Source
 }
 
 // Lockfile is the parsed content of spwn.lock.
 type Lockfile struct {
-	Deps map[string]Entry
+	Deps map[string]LockEntry
 }
 
-// Empty returns a fresh lockfile.
-func Empty() *Lockfile {
+// Empty returns a fresh pack.
+func EmptyLockfile() *Lockfile {
 	return &Lockfile{
-		Deps: map[string]Entry{},
+		Deps: map[string]LockEntry{},
 	}
 }
 
 // Path returns the canonical lockfile location for a project root.
-func Path(projectRoot string) string {
-	return filepath.Join(projectRoot, FileName)
+func LockfilePath(projectRoot string) string {
+	return filepath.Join(projectRoot, LockFileName)
 }
 
 // Exists reports whether a lockfile is present at the given project root.
-func Exists(projectRoot string) bool {
-	_, err := os.Stat(Path(projectRoot))
+func LockfileExists(projectRoot string) bool {
+	_, err := os.Stat(LockfilePath(projectRoot))
 	return err == nil
 }
 
-// Load reads and parses the lockfile. Returns (nil, nil) when the file
+// Load reads and parses the pack. Returns (nil, nil) when the file
 // does not exist so callers can distinguish "never installed" from
 // "corrupted".
-func Load(projectRoot string) (*Lockfile, error) {
-	data, err := os.ReadFile(Path(projectRoot))
+func LoadLockfile(projectRoot string) (*Lockfile, error) {
+	data, err := os.ReadFile(LockfilePath(projectRoot))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("read %s: %w", FileName, err)
+		return nil, fmt.Errorf("read %s: %w", LockFileName, err)
 	}
-	l := &Lockfile{Deps: map[string]Entry{}}
+	l := &Lockfile{Deps: map[string]LockEntry{}}
 	scanner := bufio.NewScanner(strings.NewReader(string(data)))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -99,7 +99,7 @@ func Load(projectRoot string) (*Lockfile, error) {
 		if len(parts) >= 3 {
 			source = Source(parts[2])
 		}
-		l.Deps[ref] = Entry{Version: version, Source: source}
+		l.Deps[ref] = LockEntry{Version: version, Source: source}
 	}
 	return l, nil
 }
@@ -107,7 +107,7 @@ func Load(projectRoot string) (*Lockfile, error) {
 // loadLegacyYAML handles the old YAML lockfile format for migration.
 func loadLegacyYAML(data []byte) (*Lockfile, error) {
 	// Minimal YAML parse — just extract the deps map.
-	l := &Lockfile{Deps: map[string]Entry{}}
+	l := &Lockfile{Deps: map[string]LockEntry{}}
 	scanner := bufio.NewScanner(strings.NewReader(string(data)))
 	inDeps := false
 	var currentRef string
@@ -127,7 +127,7 @@ func loadLegacyYAML(data []byte) (*Lockfile, error) {
 		}
 		if indent == 2 && strings.HasSuffix(trimmed, ":") {
 			currentRef = strings.Trim(strings.TrimSuffix(trimmed, ":"), "\"")
-			l.Deps[currentRef] = Entry{}
+			l.Deps[currentRef] = LockEntry{}
 			continue
 		}
 		if indent == 4 && currentRef != "" {
@@ -152,20 +152,20 @@ func loadLegacyYAML(data []byte) (*Lockfile, error) {
 
 // LoadOrEmpty is a convenience for callers that don't care whether the
 // file existed.
-func LoadOrEmpty(projectRoot string) (*Lockfile, error) {
-	l, err := Load(projectRoot)
+func LoadLockfileOrEmpty(projectRoot string) (*Lockfile, error) {
+	l, err := LoadLockfile(projectRoot)
 	if err != nil {
 		return nil, err
 	}
 	if l == nil {
-		return Empty(), nil
+		return EmptyLockfile(), nil
 	}
 	return l, nil
 }
 
 // Save writes the lockfile deterministically: entries sorted lexically,
 // one line per dep.
-func Save(projectRoot string, l *Lockfile) error {
+func SaveLockfile(projectRoot string, l *Lockfile) error {
 	if l == nil {
 		return fmt.Errorf("nil lockfile")
 	}
@@ -184,16 +184,16 @@ func Save(projectRoot string, l *Lockfile) error {
 		}
 		fmt.Fprintf(&b, "%s %s %s\n", k, version, e.Source)
 	}
-	if err := os.WriteFile(Path(projectRoot), []byte(b.String()), 0o644); err != nil {
-		return fmt.Errorf("write %s: %w", FileName, err)
+	if err := os.WriteFile(LockfilePath(projectRoot), []byte(b.String()), 0o644); err != nil {
+		return fmt.Errorf("write %s: %w", LockFileName, err)
 	}
 	return nil
 }
 
 // Add upserts an entry.
-func (l *Lockfile) Add(ref string, entry Entry) {
+func (l *Lockfile) Add(ref string, entry LockEntry) {
 	if l.Deps == nil {
-		l.Deps = map[string]Entry{}
+		l.Deps = map[string]LockEntry{}
 	}
 	l.Deps[ref] = entry
 }
@@ -209,7 +209,7 @@ func (l *Lockfile) Has(ref string) bool {
 	return ok
 }
 
-// Refs returns the sorted list of pinned refs.
+// Refs returns the sorted list of pinned pack.
 func (l *Lockfile) Refs() []string {
 	out := make([]string, 0, len(l.Deps))
 	for k := range l.Deps {

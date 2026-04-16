@@ -1,4 +1,4 @@
-// Package packyaml is the shared parser for spwn.yaml — the
+// Package pack is the shared parser for spwn.yaml — the
 // declarative manifest format that describes a spwn pack's
 // image-build recipe. Both the catalog (catalog/packs/<name>/spwn.yaml)
 // and project-local tools (spwn/tools/<name>/spwn.yaml in a user
@@ -16,7 +16,7 @@
 // adapter.go), so everything downstream — registry resolution,
 // dockerfile generation, skill collection — is oblivious to whether a
 // given pack came from Go or YAML.
-package packyaml
+package pack
 
 import (
 	"encoding/json"

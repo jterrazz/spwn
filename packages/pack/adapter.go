@@ -1,4 +1,4 @@
-package packyaml
+package pack
 
 import (
 	"io/fs"

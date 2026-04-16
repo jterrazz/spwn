@@ -1,4 +1,4 @@
-// Package refs parses and resolves pack references in agent.yaml
+// Package pack parses and resolves pack references in agent.yaml
 // and spwn.yaml.
 //
 // Spwn projects reference packs in three ways:
@@ -19,7 +19,7 @@
 //
 // This package has no dependencies on the validator or compiler so
 // it can be imported from CLI commands and the build pipeline alike.
-package refs
+package pack
 
 import (
 	"os"
@@ -52,7 +52,7 @@ type Ref struct {
 
 // Parse classifies a ref string. Trims whitespace. Does NOT strip a
 // `@version` suffix — call SplitVersion first if the caller accepts
-// versioned refs.
+// versioned pack.
 //
 // Rules:
 //   - No leading "@": KindLocal, Owner="", Name=trimmed.
@@ -60,7 +60,7 @@ type Ref struct {
 //   - "@<owner>/<name>" (owner != spwn): KindRegistry.
 //   - Malformed "@" or "@<owner>" without a slash: KindRegistry with
 //     empty Name — callers should reject it as malformed.
-func Parse(s string) Ref {
+func ParseRef(s string) Ref {
 	raw := s
 	s = strings.TrimSpace(s)
 

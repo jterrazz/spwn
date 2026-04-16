@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/packyaml"
+	"spwn.sh/packages/pack"
 )
 
 // localToolDir is where the project-local pack loader looks
@@ -53,9 +53,9 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 		return nil, fmt.Errorf("local pack %q: %s is not a directory", name, pkgDir)
 	}
 
-	tool, err := packyaml.Parse(
-		packyaml.DirResolver{Root: pkgDir},
-		packyaml.ParseOptions{
+	tool, err := pack.Parse(
+		pack.DirResolver{Root: pkgDir},
+		pack.ParseOptions{
 			DefaultName:    name,
 			DefaultVersion: "0.0.0-local",
 		},

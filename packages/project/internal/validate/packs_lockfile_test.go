@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
-	"spwn.sh/packages/project/lockfile"
+	"spwn.sh/packages/pack"
 )
 
-func writeLockfile(t *testing.T, root string, l *lockfile.Lockfile) {
+func writeLockfile(t *testing.T, root string, l *pack.Lockfile) {
 	t.Helper()
-	if err := lockfile.Save(root, l); err != nil {
+	if err := pack.SaveLockfile(root, l); err != nil {
 		t.Fatalf("write lockfile: %v", err)
 	}
 }
@@ -108,8 +108,8 @@ deps:
   - "@spwn/mempalace"
 `)
 	// Lockfile only has @spwn/unix — git and mempalace are drift.
-	l := lockfile.Empty()
-	l.Add("@spwn/unix", lockfile.Entry{Version: "1", Source: lockfile.SourceBuiltin})
+	l := pack.EmptyLockfile()
+	l.Add("@spwn/unix", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -151,7 +151,7 @@ deps:
   - my-tool
 `)
 	// Empty lockfile — bare names should not produce errors.
-	writeLockfile(t, root, lockfile.Empty())
+	writeLockfile(t, root, pack.EmptyLockfile())
 
 	in := Input{
 		Root:      root,
