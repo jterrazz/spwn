@@ -16,6 +16,7 @@ use (
 	./packages/migration
 	./packages/paths
 	./packages/project
+	./packages/pack
 	./packages/version
 	./packages/world
 )

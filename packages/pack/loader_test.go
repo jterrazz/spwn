@@ -1,4 +1,4 @@
-package packyaml_test
+package pack_test
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/packyaml"
+	"spwn.sh/packages/pack"
 )
 
 func writeManifest(t *testing.T, dir, body string) {
@@ -30,7 +30,7 @@ verify:
   - command -v git
 `)
 
-	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
+	tool, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestParse_defaults(t *testing.T) {
   packages: [curl]
 `)
 
-	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{
+	tool, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{
 		DefaultName:    "local-tool",
 		DefaultVersion: "0.0.0-local",
 	})
@@ -86,7 +86,7 @@ verify:
   - command -v claude
 `)
 
-	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
+	tool, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -118,7 +118,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
+	tool, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -152,7 +152,7 @@ verify:
   - command -v mempalace
 `)
 
-	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
+	tool, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -205,7 +205,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
+	tool, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -219,7 +219,7 @@ func TestParse_unknownKindErrors(t *testing.T) {
 	writeManifest(t, dir, `name: bogus
 kind: weird-kind
 `)
-	if _, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{}); err == nil {
+	if _, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{}); err == nil {
 		t.Fatal("want error for unknown kind")
 	}
 }
@@ -229,7 +229,7 @@ func TestParse_missingNameErrors(t *testing.T) {
 	writeManifest(t, dir, `install:
   packages: [git]
 `)
-	if _, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{}); err == nil {
+	if _, err := pack.Parse(pack.DirResolver{Root: dir}, pack.ParseOptions{}); err == nil {
 		t.Fatal("want error for missing name + no default")
 	}
 }

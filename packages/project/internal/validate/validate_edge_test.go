@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
-	"spwn.sh/packages/project/lockfile"
+	"spwn.sh/packages/pack"
 )
 
 // helper: build a minimal Input with one world and given agent refs.
@@ -167,9 +167,9 @@ deps:
 func TestEdge_LockfileConsistent_ProjectDepsPresent(t *testing.T) {
 	root := t.TempDir()
 	// No agents needed, just project-level deps.
-	l := lockfile.Empty()
-	l.Add("@spwn/unix", lockfile.Entry{Version: "1", Source: lockfile.SourceBuiltin})
-	l.Add("@spwn/git", lockfile.Entry{Version: "1", Source: lockfile.SourceBuiltin})
+	l := pack.EmptyLockfile()
+	l.Add("@spwn/unix", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
+	l.Add("@spwn/git", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -190,8 +190,8 @@ func TestEdge_LockfileConsistent_ProjectDepsPresent(t *testing.T) {
 // 9. ruleLockfileConsistent with project-level deps missing from lockfile
 func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 	root := t.TempDir()
-	l := lockfile.Empty()
-	l.Add("@spwn/unix", lockfile.Entry{Version: "1", Source: lockfile.SourceBuiltin})
+	l := pack.EmptyLockfile()
+	l.Add("@spwn/unix", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -288,7 +288,7 @@ deps:
   - "@spwn/missing-thing"
 `)
 	// Create a lockfile so the rule fires.
-	writeLockfile(t, root, lockfile.Empty())
+	writeLockfile(t, root, pack.EmptyLockfile())
 
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	in.BuiltinTools = []string{"@spwn/something-else"}
