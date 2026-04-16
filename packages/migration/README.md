@@ -1,20 +1,20 @@
-# packages/upgrade
+# packages/migration
 
-On-disk state migrations + CLI version updates.
+On-disk state migrations for ~/.spwn.
 
 ## Role
 
-Two responsibilities behind one package: (1) migrations that advance the `~/.spwn/` directory layout forward as the CLI evolves — numbered scripts applied in strict order, tracked in a registry, with backup-before-apply and applied-state persisted so rerunning is idempotent; (2) the `spwn upgrade` self-update path, which downloads and installs a newer CLI binary. Both live together because "upgrade" from the user's perspective is one action: advance the local install to the latest version of both the binary and the state it depends on.
+Advances the `~/.spwn/` directory layout as the CLI evolves. Each schema change is a numbered step with an `Apply(baseDir) error` function; the registry enforces strict ordering (no duplicates, no out-of-order numbers) and the runner persists applied state to `~/.spwn/state.json` so rerunning is idempotent. A full backup of `~/.spwn/` (minus `backups/`) is taken before any migration runs. Split from the former `packages/upgrade` package so state migration and CLI self-update (`packages/update`) are independently composable.
 
 ## Key types
 
-- `Migration` — one numbered step: `Number`, `Description`, `Apply(baseDir) error`. Registered via `migrations.init()`.
-- `Registry` — ordered, collision-checked list of migrations. `Register` panics on out-of-order or duplicate numbers.
-- `Runner` — applies pending migrations against a base dir, persists the applied state to `~/.spwn/state.json`, skips already-applied ones.
-- `BackupBaseDir(baseDir)` — tar the whole `~/.spwn/` (minus `backups/`) into `backups/` before migration runs.
-- `update/` sub-package — `spwn upgrade` logic: version check against GitHub releases, binary download, atomic replace.
+- `Migration` — one numbered step: `Number`, `Description`, `Apply(baseDir) error`.
+- `Registry` / `NewRegistry` — ordered, collision-checked list. `Register` panics on duplicate or out-of-order numbers.
+- `Runner` / `NewRunner(baseDir, migrations)` — applies every pending migration against a base dir, persists state, skips already-applied.
+- `BackupBaseDir(baseDir)` — tar the whole `~/.spwn/` (excluding `backups/`) into `backups/` before migration runs.
+- `migrations/` sub-package — the built-in migration catalogue: drop in a new `NNN_<name>.go` and register it in `migrations.All()`.
 
 ## Related
 
-- **Imported by** — `apps/api`, `apps/cli`
-- **Imports** — `packages/platform`, internal sub-packages (`migrations/`, `update/`)
+- **Imported by** — `apps/cli` (via `spwn migrate` + boot-time runMigrations)
+- **Imports** — `packages/platform`
