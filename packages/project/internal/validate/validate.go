@@ -106,9 +106,9 @@ func Run(in Input) []Issue {
 		ruleReservedAgentNames,
 		ruleOneAgentOneWorld,
 		ruleWorkspaceMounts,
-		rulePluginVersionConflict,
+		rulePackVersionConflict,
 		ruleRuntimeBackendConflict,
-		rulePluginsExist,
+		rulePacksExist,
 		ruleLockfileConsistent,
 		ruleRuntimeSupported,
 		ruleMarkdownImports,
@@ -508,10 +508,10 @@ func ruleWorkspaceMounts(in Input) []Issue {
 	return out
 }
 
-// rulePluginVersionConflict flags multi-agent worlds whose members
+// rulePackVersionConflict flags multi-agent worlds whose members
 // declare the same package at different versions. Versions are
 // detected via the `@scope/name@version` suffix convention.
-func rulePluginVersionConflict(in Input) []Issue {
+func rulePackVersionConflict(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
@@ -601,15 +601,15 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 	return out
 }
 
-// rulePluginsExist checks every plugin referenced by any agent or
+// rulePacksExist checks every pack referenced by any agent or
 // world against the BuiltinTools catalog (for @spwn/* refs) and
 // against the filesystem (for bare local refs).
 //
 // Local refs resolve to either:
-//   - spwn/plugins/<name>/ (a directory-form package, with or without
-//     a plugin.yaml inside), OR
-//   - spwn/plugins/<name>.md (a bare-markdown skill).
-func rulePluginsExist(in Input) []Issue {
+//   - spwn/packs/<name>/ (a directory-form package, with or without
+//     a pack.yaml inside), OR
+//   - spwn/packs/<name>.md (a bare-markdown skill).
+func rulePacksExist(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
@@ -638,7 +638,7 @@ func rulePluginsExist(in Input) []Issue {
 				return []Issue{{
 					Level: LevelError, Path: location,
 					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
-					Hint: "use @spwn/<name> for built-in plugins or drop a directory under ./spwn/plugins/<name>/ for a local plugin; " +
+					Hint: "use @spwn/<name> for built-in packs or drop a directory under ./spwn/packs/<name>/ for a local pack; " +
 						"remote registries (@<owner>/<name>) are planned but not implemented yet",
 				}}
 			default: // ResolveNotFound
@@ -652,7 +652,7 @@ func rulePluginsExist(in Input) []Issue {
 
 		// Local ref: delegate to refs.ResolveSkill which already
 		// handles both the directory form (full package) and the
-		// file form (bare markdown skill) against spwn/plugins/.
+		// file form (bare markdown skill) against spwn/packs/.
 		if ref.Name == "" {
 			return []Issue{{
 				Level: LevelError, Path: location,
@@ -665,8 +665,8 @@ func rulePluginsExist(in Input) []Issue {
 		return []Issue{{
 			Level: LevelError, Path: location,
 			Message: fmt.Sprintf("plugin %q does not exist", raw),
-			Hint: "create ./spwn/plugins/" + ref.Name + "/plugin.yaml for a full plugin, " +
-				"or ./spwn/plugins/" + ref.Name + ".md for a bare skill",
+			Hint: "create ./spwn/packs/" + ref.Name + "/plugin.yaml for a full plugin, " +
+				"or ./spwn/packs/" + ref.Name + ".md for a bare skill",
 		}}
 	}
 
@@ -695,7 +695,7 @@ func rulePluginsExist(in Input) []Issue {
 }
 
 // ruleLockfileConsistent compares every @spwn/* or @<owner>/*
-// plugin ref declared in any agent.yaml or spwn.yaml world against
+// pack ref declared in any agent.yaml or spwn.yaml world against
 // spwn.lock.yaml. Missing entries become errors so `spwn build` fails
 // loudly and points the user at `spwn plugin install`.
 //
@@ -879,7 +879,7 @@ func relPath(root, path string) string {
 
 func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
-		return "check the plugin name, or add it as a local plugin under ./spwn/plugins/"
+		return "check the pack name, or add it as a local pack under ./spwn/packs/"
 	}
 	best := ""
 	bestScore := len(tool) + 1

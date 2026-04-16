@@ -35,7 +35,7 @@ plugins:
 		AgentRefs: []AgentRef{neo, morpheus},
 	}
 
-	issues := rulePluginVersionConflict(in)
+	issues := rulePackVersionConflict(in)
 	if len(issues) != 1 {
 		t.Fatalf("want 1 conflict issue, got %d: %+v", len(issues), issues)
 	}
@@ -73,7 +73,7 @@ plugins:
 		AgentRefs: []AgentRef{neo, morpheus},
 	}
 
-	if got := rulePluginVersionConflict(in); len(got) != 0 {
+	if got := rulePackVersionConflict(in); len(got) != 0 {
 		t.Errorf("matching versions should not flag, got %+v", got)
 	}
 }
@@ -100,7 +100,7 @@ plugins:
 		AgentRefs: []AgentRef{neo},
 	}
 
-	if got := rulePluginVersionConflict(in); len(got) != 0 {
+	if got := rulePackVersionConflict(in); len(got) != 0 {
 		t.Errorf("single-agent world should not fire, got %+v", got)
 	}
 }

@@ -1,12 +1,12 @@
-// Package refs parses and resolves plugin references in agent.yaml
+// Package refs parses and resolves pack references in agent.yaml
 // and spwn.yaml.
 //
 // Spwn projects reference plugins in three ways:
 //
-//  1. Local — a bare name, resolved against ./spwn/plugins/<name>/
+//  1. Local — a bare name, resolved against ./spwn/packs/<name>/
 //     (directory form, with its own plugin.yaml) or
-//     ./spwn/plugins/<name>.md (bare-markdown skill form).
-//  2. @spwn/<name> — a built-in plugin compiled into the spwn
+//     ./spwn/packs/<name>.md (bare-markdown skill form).
+//  2. @spwn/<name> — a built-in pack compiled into the spwn
 //     binary, looked up against the catalog provided by the caller.
 //  3. @<owner>/<name> — a remote registry plugin. Reserved for a
 //     future community registry; resolved today as "unsupported" so
@@ -31,8 +31,8 @@ import (
 type Kind int
 
 const (
-	// KindLocal is a bare name authored in ./spwn/plugins/<name>/
-	// (directory form) or ./spwn/plugins/<name>.md (bare-markdown
+	// KindLocal is a bare name authored in ./spwn/packs/<name>/
+	// (directory form) or ./spwn/packs/<name>.md (bare-markdown
 	// skill form).
 	KindLocal Kind = iota
 	// KindSpwnBuiltin is a @spwn/<name> plugin compiled into the binary.
@@ -126,7 +126,7 @@ const (
 // ResolveTool answers whether a Ref resolves to a real package
 // (directory form — for skill-only markdown refs use ResolveSkill).
 //
-//   - KindLocal: checks that <root>/spwn/plugins/<name>/ is a directory.
+//   - KindLocal: checks that <root>/spwn/packs/<name>/ is a directory.
 //   - KindSpwnBuiltin: checks that @spwn/<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
@@ -167,9 +167,9 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 // package — either the bare-markdown form or a full directory
 // package (same layout as a tool).
 //
-//   - KindLocal: checks that <root>/spwn/plugins/<name>.md exists
+//   - KindLocal: checks that <root>/spwn/packs/<name>.md exists
 //     as a file (bare-markdown skill), or that
-//     <root>/spwn/plugins/<name>/ exists as a directory (full
+//     <root>/spwn/packs/<name>/ exists as a directory (full
 //     package that may or may not ship skills via its own plugin.yaml).
 //   - KindSpwnBuiltin: checks that @spwn/<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.

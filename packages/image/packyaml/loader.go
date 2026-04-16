@@ -1,4 +1,4 @@
-package pluginyaml
+package packyaml
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 
 // Manifest is the canonical basename. Both catalog and local
 // plugins live at <pluginDir>/plugin.yaml.
-const Manifest = "plugin.yaml"
+const Manifest = "pack.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
 // supporting directories (files/, skills/, config/). It abstracts
@@ -100,7 +100,7 @@ func Parse(res Resolver, opts ParseOptions) (ib.Tool, error) {
 }
 
 // DirResolver is a Resolver backed by a host filesystem directory.
-// Used by the project-local plugin loader for spwn/plugins/<name>/.
+// Used by the project-local pack loader for spwn/packs/<name>/.
 type DirResolver struct {
 	Root string
 }
@@ -126,7 +126,7 @@ func (d DirResolver) SkillsFS() fs.FS {
 }
 
 // EmbedResolver is a Resolver backed by an embed.FS. Used by the
-// catalog loader so plugin manifests ship inside the spwn binary.
+// catalog loader so pack manifests ship inside the spwn binary.
 //
 // Example:
 //

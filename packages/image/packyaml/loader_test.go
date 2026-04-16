@@ -1,4 +1,4 @@
-package pluginyaml_test
+package packyaml_test
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/pluginyaml"
+	"spwn.sh/packages/image/packyaml"
 )
 
 func writeManifest(t *testing.T, dir, body string) {
@@ -15,7 +15,7 @@ func writeManifest(t *testing.T, dir, body string) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "plugin.yaml"), []byte(body), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "pack.yaml"), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -30,7 +30,7 @@ verify:
   - command -v git
 `)
 
-	tool, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{})
+	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestParse_defaults(t *testing.T) {
   packages: [curl]
 `)
 
-	tool, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{
+	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{
 		DefaultName:    "local-tool",
 		DefaultVersion: "0.0.0-local",
 	})
@@ -86,7 +86,7 @@ verify:
   - command -v claude
 `)
 
-	tool, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{})
+	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -118,7 +118,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{})
+	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -152,11 +152,11 @@ verify:
   - command -v mempalace
 `)
 
-	tool, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{})
+	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	// The plugin: section surfaces via Runtimes() and Config() on the
+	// The pack: section surfaces via Runtimes() and Config() on the
 	// unified image.Tool interface — no type assertion needed.
 	runtimes := tool.Runtimes()
 	if len(runtimes) != 1 || runtimes[0] != "@spwn/claude-code" {
@@ -205,7 +205,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{})
+	tool, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -219,7 +219,7 @@ func TestParse_unknownKindErrors(t *testing.T) {
 	writeManifest(t, dir, `name: bogus
 kind: weird-kind
 `)
-	if _, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{}); err == nil {
+	if _, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{}); err == nil {
 		t.Fatal("want error for unknown kind")
 	}
 }
@@ -229,7 +229,7 @@ func TestParse_missingNameErrors(t *testing.T) {
 	writeManifest(t, dir, `install:
   packages: [git]
 `)
-	if _, err := pluginyaml.Parse(pluginyaml.DirResolver{Root: dir}, pluginyaml.ParseOptions{}); err == nil {
+	if _, err := packyaml.Parse(packyaml.DirResolver{Root: dir}, packyaml.ParseOptions{}); err == nil {
 		t.Fatal("want error for missing name + no default")
 	}
 }

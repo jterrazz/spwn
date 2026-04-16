@@ -37,8 +37,8 @@ type ProjectSource struct {
 	Agents []AgentSource
 
 	// Skills are every bare-markdown skill at the top of
-	// spwn/plugins/*.md. Nested .md files inside a directory-form
-	// package belong to that plugin's own plugin.yaml and are not
+	// spwn/packs/*.md. Nested .md files inside a directory-form
+	// package belong to that pack's own plugin.yaml and are not
 	// enumerated here.
 	Skills []SkillSource
 
@@ -101,10 +101,10 @@ type LayerFiles struct {
 }
 
 // SkillSource is one bare-markdown skill file directly under
-// spwn/plugins/*.md.
+// spwn/packs/*.md.
 type SkillSource struct {
 	// Name is the skill identifier — the path relative to
-	// spwn/plugins/ with the .md extension stripped.
+	// spwn/packs/ with the .md extension stripped.
 	Name string
 
 	// Content is the raw bytes of the skill file.
@@ -343,9 +343,9 @@ func readTree(dir string) (map[string][]byte, error) {
 }
 
 // loadSkills reads bare-markdown skill packages from
-// <root>/spwn/plugins/*.md. Files are loaded flat at the top level
+// <root>/spwn/packs/*.md. Files are loaded flat at the top level
 // only — nested .md files inside a package directory belong to that
-// plugin's own plugin.yaml and are not project-level skills.
+// pack's own plugin.yaml and are not project-level skills.
 func loadSkills(root string) ([]SkillSource, error) {
 	dir := filepath.Join(root, "spwn", "plugins")
 	entries, err := os.ReadDir(dir)

@@ -167,7 +167,7 @@ describe('spwn agent CRUD', () => {
         // When - remove --plugin for a ref that isn't in its composition
         // Then - exit 1 with a "nothing to remove" message, no green check
         const result = await isolated('remove absent package')
-            .exec(['agent create neo', 'agent remove neo --plugin @spwn/never-added'])
+            .exec(['agent create neo', 'agent remove neo --pack @spwn/never-added'])
             .run();
 
         expect(result.exitCode).toBe(1);
@@ -210,7 +210,7 @@ describe('spwn agent CRUD', () => {
         // Then - exit 1 and agent.yaml is not corrupted
         const result = await spec('add bogus package')
             .project('empty')
-            .exec(['init', 'agent add neo --plugin @spwn/nonexistent'])
+            .exec(['init', 'agent add neo --pack @spwn/nonexistent'])
             .run();
 
         expect(result.exitCode).toBe(1);

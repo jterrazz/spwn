@@ -121,8 +121,8 @@ func TestCLI_ArchitectHelp(t *testing.T) {
 
 // --- Plugin install help ---
 
-func TestCLI_PluginHelp(t *testing.T) {
-	out, _, err := executeCommand("plugin", "--help")
+func TestCLI_PackHelp(t *testing.T) {
+	out, _, err := executeCommand("pack", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}

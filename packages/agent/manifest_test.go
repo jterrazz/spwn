@@ -125,18 +125,18 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 	}
 }
 
-// ── AddPlugin / RemovePlugin ──────────────────────────────────────────────
+// ── AddPack / RemovePack ──────────────────────────────────────────────
 
 func TestAddPackage_AppendsAndIsIdempotent(t *testing.T) {
 	initAgent(t, "neo")
 
-	if err := AddPlugin("neo", "@spwn/python"); err != nil {
+	if err := AddPack("neo", "@spwn/python"); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddPlugin("neo", "@spwn/unix"); err != nil {
+	if err := AddPack("neo", "@spwn/unix"); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddPlugin("neo", "@spwn/python"); err != nil {
+	if err := AddPack("neo", "@spwn/python"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -149,10 +149,10 @@ func TestAddPackage_AppendsAndIsIdempotent(t *testing.T) {
 func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 	initAgent(t, "neo")
 
-	AddPlugin("neo", "@spwn/python")
-	AddPlugin("neo", "@spwn/git")
+	AddPack("neo", "@spwn/python")
+	AddPack("neo", "@spwn/git")
 
-	if err := RemovePlugin("neo", "@spwn/git"); err != nil {
+	if err := RemovePack("neo", "@spwn/git"); err != nil {
 		t.Fatal(err)
 	}
 	m, _ := LoadManifest("neo")
@@ -160,7 +160,7 @@ func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 		t.Errorf("after remove: %v", m.Plugins)
 	}
 
-	if err := RemovePlugin("neo", "@spwn/never-added"); err != nil {
+	if err := RemovePack("neo", "@spwn/never-added"); err != nil {
 		t.Errorf("remove absent: %v", err)
 	}
 	m, _ = LoadManifest("neo")
@@ -172,13 +172,13 @@ func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 func TestComposition_FullRoundtrip(t *testing.T) {
 	initAgent(t, "neo")
 
-	AddPlugin("neo", "@spwn/unix")
-	AddPlugin("neo", "@spwn/python")
-	AddPlugin("neo", "refactoring")
-	AddPlugin("neo", "paper-reading")
+	AddPack("neo", "@spwn/unix")
+	AddPack("neo", "@spwn/python")
+	AddPack("neo", "refactoring")
+	AddPack("neo", "paper-reading")
 
-	RemovePlugin("neo", "@spwn/unix")
-	RemovePlugin("neo", "paper-reading")
+	RemovePack("neo", "@spwn/unix")
+	RemovePack("neo", "paper-reading")
 
 	m, err := LoadManifest("neo")
 	if err != nil {

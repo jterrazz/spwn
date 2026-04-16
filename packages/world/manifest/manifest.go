@@ -45,7 +45,7 @@ func LoadPath(path string) (models.Manifest, error) {
 	return m, nil
 }
 
-// parsePlugins extracts plugin refs from a YAML sequence node.
+// parsePacks extracts pack refs from a YAML sequence node.
 func parsePackages(node *yaml.Node) []string {
 	var elems []string
 	for _, item := range node.Content {

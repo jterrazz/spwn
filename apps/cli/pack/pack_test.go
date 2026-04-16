@@ -1,4 +1,4 @@
-package plugin
+package pack
 
 import (
 	"bytes"
@@ -52,7 +52,7 @@ worlds:
 
 // withProject points paths.ProjectRoot at a scaffolded project and
 // chdirs into it for the duration of a test. Needed because
-// agent.AddPlugin / RemovePlugin resolve AgentDir via paths, and
+// agent.AddPack / RemovePack resolve AgentDir via paths, and
 // RunInstall walks up from cwd.
 func withProject(t *testing.T) string {
 	t.Helper()
@@ -71,13 +71,13 @@ func withProject(t *testing.T) string {
 
 // ── ls ───────────────────────────────────────────────────────────────────────
 
-func TestPluginLs_empty(t *testing.T) {
+func TestPackLs_empty(t *testing.T) {
 	withProject(t)
 	out, err := runWithOut(t, lsCmd)
 	if err != nil {
 		t.Fatalf("ls: %v", err)
 	}
-	if !strings.Contains(out.String(), "No plugins installed") {
+	if !strings.Contains(out.String(), "No packs installed") {
 		t.Errorf("want empty message, got: %s", out.String())
 	}
 }

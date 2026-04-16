@@ -35,7 +35,7 @@ func scaffoldAgent(t *testing.T, root, name, yamlBody string) AgentRef {
 }
 
 // TestRulePackagesExist_ResolvesMixedRefs exercises the unified
-// rulePluginsExist rule: catalog refs + local refs in one list.
+// rulePacksExist rule: catalog refs + local refs in one list.
 func TestRulePackagesExist_ResolvesMixedRefs(t *testing.T) {
 	root := t.TempDir()
 
@@ -59,7 +59,7 @@ plugins:
 		BuiltinTools: []string{"@spwn/known-tool", "@spwn/known-plugin"},
 	}
 
-	issues := rulePluginsExist(in)
+	issues := rulePacksExist(in)
 
 	// Expect exactly one error: the bogus package.
 	var errs []Issue

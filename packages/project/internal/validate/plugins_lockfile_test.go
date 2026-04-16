@@ -18,8 +18,8 @@ func writeLockfile(t *testing.T, root string, l *lockfile.Lockfile) {
 }
 
 // TestRulePackagesExist_localSkillFileForm verifies the local
-// file-form skill path: spwn/plugins/<name>.md counts as a valid
-// bare-name local plugin.
+// file-form skill path: spwn/packs/<name>.md counts as a valid
+// bare-name local pack.
 func TestRulePackagesExist_localSkillFileForm(t *testing.T) {
 	root := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(root, "spwn", "plugins"), 0o755); err != nil {
@@ -45,7 +45,7 @@ plugins:
 		AgentRefs: []AgentRef{ref},
 	}
 
-	issues := rulePluginsExist(in)
+	issues := rulePacksExist(in)
 	var missingFound bool
 	var presentFound bool
 	for _, iss := range issues {
@@ -77,7 +77,7 @@ plugins:
 		AgentRefs: []AgentRef{ref},
 	}
 
-	issues := rulePluginsExist(in)
+	issues := rulePacksExist(in)
 	if len(issues) == 0 || !strings.Contains(issues[0].Message, "remote registries are not yet supported") {
 		t.Errorf("want registry-unsupported, got %+v", issues)
 	}

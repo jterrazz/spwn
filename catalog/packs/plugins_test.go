@@ -1,4 +1,4 @@
-package plugins
+package packs
 
 import (
 	"io/fs"

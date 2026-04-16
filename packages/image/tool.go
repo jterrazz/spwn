@@ -36,10 +36,10 @@ type Tool interface {
 	Verify() []string
 
 	// Skills returns embedded skill files (Vercel SKILL.md convention).
-	// Return nil if the plugin ships no skills.
+	// Return nil if the pack ships no skills.
 	Skills() fs.FS
 
-	// Runtimes returns the runtime backends this plugin injects
+	// Runtimes returns the runtime backends this pack injects
 	// config into (e.g. "@spwn/claude-code"). Return nil for the
 	// common case of "no runtime-config block" — plugins that don't
 	// target a runtime. Non-nil means the spawn-time merge pass
@@ -54,7 +54,7 @@ type Tool interface {
 	Config(runtime string) []byte
 }
 
-// PluginConfig returns the config JSON a plugin would inject for the
+// PluginConfig returns the config JSON a pack would inject for the
 // given runtime, enforcing the Runtimes() allowlist so individual
 // plugins don't have to repeat the check. Returns nil when the
 // plugin doesn't target the runtime or has no config for it.

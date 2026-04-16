@@ -19,7 +19,7 @@ type AgentManifest struct {
 	Role     string        `yaml:"role,omitempty"`    // "chief", "manager", or "worker" (default: "worker")
 	Team     string        `yaml:"team,omitempty"`    // team slug (references ~/.spwn/teams/{slug}.yaml)
 	Runtime  RuntimeConfig `yaml:"runtime,omitempty"` // optional runtime override
-	Plugins []string      `yaml:"plugins,omitempty"` // plugin refs attached to the agent
+	Plugins []string      `yaml:"plugins,omitempty"` // pack refs attached to the agent
 }
 
 // RuntimeConfig allows per-agent runtime override.

@@ -12,7 +12,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	runtimes "spwn.sh/catalog/runtimes"
-	plugins "spwn.sh/catalog/plugins"
+	packs "spwn.sh/catalog/packs"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claudecode"
 	ib "spwn.sh/packages/image"
@@ -180,7 +180,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// plugin config still needs to be merged into the container's
 	// runtime settings file after the container boots.
 	reg := ib.NewRegistry()
-	if err := plugins.RegisterDefaults(reg); err != nil {
+	if err := packs.RegisterDefaults(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
@@ -222,7 +222,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Project root defaults to paths.ProjectRoot() — set by the CLI
 	// PersistentPreRunE when a spwn.yaml is discovered.
 	if projectRoot := paths.ProjectRoot(); projectRoot != "" {
-		hydrated, hErr := hydrateLocalPlugins(reg, projectRoot, toolList)
+		hydrated, hErr := hydrateLocalPacks(reg, projectRoot, toolList)
 		if hErr != nil {
 			return nil, fmt.Errorf("load local tools: %w", hErr)
 		}
@@ -711,7 +711,7 @@ func materialiseWorldTree(ctx context.Context, be backend.Backend, containerID s
 // Current scope: only @spwn/claude-code has a known settings path
 // (/home/spwn/.claude/settings.json). The container's baseline
 // settings file — written by the claude_code tool's UserCommands at
-// image build time — is read back, shallow-merged with every plugin's
+// image build time — is read back, shallow-merged with every pack's
 // Config(runtime) output (last write wins), and rewritten in place.
 //
 // When no plugin targets the runtime, this is a no-op: the baseline
@@ -720,7 +720,7 @@ func materialiseWorldTree(ctx context.Context, be backend.Backend, containerID s
 // Additional runtimes can grow their own branch here as plugins for
 // them materialize.
 func injectPluginRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []ib.Tool) error {
-	// The plugin-facing runtime identifier is the same as the image
+	// The pack-facing runtime identifier is the same as the image
 	// builder's runtime tool name. Spawn always installs
 	// @spwn/claude-code, so hard-code it here until a second runtime
 	// lands (codex is built but has no plugin target yet).

@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"spwn.sh/apps/cli/plugin"
-	plugins "spwn.sh/catalog/plugins"
+	"spwn.sh/apps/cli/pack"
+	packs "spwn.sh/catalog/packs"
 	"spwn.sh/catalog/runtimes"
 )
 
@@ -10,9 +10,9 @@ func init() {
 	// Wire the built-in catalog into the install verbs so
 	// `spwn plugin install @spwn/bogus` can fail with a crisp error
 	// instead of silently pinning garbage. Lives here (not in
-	// plugin.init()) so the plugin package stays free of a catalog import.
-	plugin.SetCatalogLookup(func(ref string) bool {
-		for _, t := range plugins.All {
+	// plugin.init()) so the pack package stays free of a catalog import.
+	pack.SetCatalogLookup(func(ref string) bool {
+		for _, t := range packs.All {
 			if t.Name() == ref {
 				return true
 			}
@@ -26,8 +26,8 @@ func init() {
 // tool/plugin/skill concept) and runtimes. Used to power the
 // "did you mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
-	out := make([]string, 0, len(plugins.All)+len(runtimes.All))
-	for _, t := range plugins.All {
+	out := make([]string, 0, len(packs.All)+len(runtimes.All))
+	for _, t := range packs.All {
 		out = append(out, t.Name())
 	}
 	for _, t := range runtimes.All {

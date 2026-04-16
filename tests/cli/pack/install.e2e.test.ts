@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { spec } from '../../setup/cli.specification.js';
 
 /**
- * Coverage for `spwn plugin install` / `spwn plugin uninstall` —
+ * Coverage for `spwn pack install` / `spwn pack uninstall` —
  * the npm-style dependency-management verbs. These mutate the target
  * agent.yaml plus the project-root spwn.lock.yaml and never touch
  * Docker, so the tests run fast against the lightweight docker-pilot
@@ -16,11 +16,11 @@ import { spec } from '../../setup/cli.specification.js';
  *   - uninstall removes the ref from agent.yaml and the lockfile
  *   - double-install is idempotent (no duplicate agent.yaml entry)
  */
-describe('spwn plugin install', () => {
+describe('spwn pack install', () => {
     test('pins an @spwn/* ref into spwn.lock.yaml', async () => {
-        const result = await spec('plugin install builtin')
+        const result = await spec('pack install builtin')
             .project('docker-pilot')
-            .exec('plugin install @spwn/python')
+            .exec('pack install @spwn/python')
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -34,9 +34,9 @@ describe('spwn plugin install', () => {
     });
 
     test('rejects a bare name with an authoring hint', async () => {
-        const result = await spec('plugin install bare rejected')
+        const result = await spec('pack install bare rejected')
             .project('docker-pilot')
-            .exec('plugin install my-local-tool')
+            .exec('pack install my-local-tool')
             .run();
 
         expect(result.exitCode).not.toBe(0);
@@ -45,9 +45,9 @@ describe('spwn plugin install', () => {
     });
 
     test('rejects @<owner>/* as unsupported', async () => {
-        const result = await spec('plugin install registry rejected')
+        const result = await spec('pack install registry rejected')
             .project('docker-pilot')
-            .exec('plugin install @acme/foo')
+            .exec('pack install @acme/foo')
             .run();
 
         expect(result.exitCode).not.toBe(0);
@@ -55,9 +55,9 @@ describe('spwn plugin install', () => {
     });
 
     test('rejects an unknown @spwn/* ref', async () => {
-        const result = await spec('plugin install unknown builtin')
+        const result = await spec('pack install unknown builtin')
             .project('docker-pilot')
-            .exec('plugin install @spwn/nonesuch')
+            .exec('pack install @spwn/nonesuch')
             .run();
 
         expect(result.exitCode).not.toBe(0);
@@ -65,9 +65,9 @@ describe('spwn plugin install', () => {
     });
 
     test('is idempotent on re-install', async () => {
-        const result = await spec('plugin install idempotent')
+        const result = await spec('pack install idempotent')
             .project('docker-pilot')
-            .exec(['plugin install @spwn/python', 'plugin install @spwn/python'])
+            .exec(['pack install @spwn/python', 'pack install @spwn/python'])
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -87,11 +87,11 @@ describe('spwn plugin install', () => {
     });
 });
 
-describe('spwn plugin uninstall', () => {
+describe('spwn pack uninstall', () => {
     test('removes the ref from agent.yaml and the lockfile', async () => {
-        const result = await spec('plugin uninstall')
+        const result = await spec('pack uninstall')
             .project('docker-pilot')
-            .exec(['plugin install @spwn/python', 'plugin uninstall @spwn/python'])
+            .exec(['pack install @spwn/python', 'pack uninstall @spwn/python'])
             .run();
 
         expect(result.exitCode).toBe(0);
@@ -105,21 +105,18 @@ describe('spwn plugin uninstall', () => {
     });
 });
 
-describe('spwn plugin ls', () => {
+describe('spwn pack ls', () => {
     test('shows an empty state on a project with no installs', async () => {
-        const result = await spec('plugin ls empty')
-            .project('docker-pilot')
-            .exec('plugin ls')
-            .run();
+        const result = await spec('pack ls empty').project('docker-pilot').exec('pack ls').run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toContain('No plugins installed');
+        expect(result.stdout.text).toContain('No packs installed');
     });
 
     test('lists installed plugins after install', async () => {
-        const result = await spec('plugin ls after install')
+        const result = await spec('pack ls after install')
             .project('docker-pilot')
-            .exec(['plugin install @spwn/python', 'plugin ls'])
+            .exec(['pack install @spwn/python', 'pack ls'])
             .run();
 
         expect(result.exitCode).toBe(0);
