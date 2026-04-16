@@ -4,15 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/models"
-)
+	)
 
 func TestGenerateChiefContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "morpheus",
 		Role:      "chief",
 		WorldID:   "w-acme-28373",
-		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
+		Workspaces: []Workspace{{Name: "default", Path: "/host/project"}},
 		Deps:   []string{"bash", "git", "node"},
 		OtherAgents: []AgentInfo{
 			{Name: "neo", Role: "worker"},
@@ -50,7 +49,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 		AgentName: "neo",
 		Role:      "worker",
 		WorldID:   "w-acme-28373",
-		Workspaces: []models.Workspace{{Name: "default", Path: "/host/project"}},
+		Workspaces: []Workspace{{Name: "default", Path: "/host/project"}},
 		Deps:   []string{"bash", "git"},
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{

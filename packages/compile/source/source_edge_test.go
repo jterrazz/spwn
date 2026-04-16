@@ -69,19 +69,19 @@ deps:
 
 	// The merged set should contain both project-level and agent-level deps.
 	depsSet := map[string]bool{}
-	for _, d := range in.Manifest.Deps {
+	for _, d := range in.Deps {
 		depsSet[d] = true
 	}
 
 	for _, want := range []string{"@spwn/unix", "shared-tool", "@spwn/git", "agent-only-tool"} {
 		if !depsSet[want] {
-			t.Errorf("missing expected dep %q in merged list: %v", want, in.Manifest.Deps)
+			t.Errorf("missing expected dep %q in merged list: %v", want, in.Deps)
 		}
 	}
 
 	// VerifiedTools should match Manifest.Deps.
-	if !equalStrings(in.VerifiedTools, in.Manifest.Deps) {
-		t.Errorf("VerifiedTools = %v, Manifest.Deps = %v — should match", in.VerifiedTools, in.Manifest.Deps)
+	if !equalStrings(in.VerifiedTools, in.Deps) {
+		t.Errorf("VerifiedTools = %v, Manifest.Deps = %v — should match", in.VerifiedTools, in.Deps)
 	}
 }
 
@@ -117,8 +117,8 @@ role: worker
 	// Agent has 0 deps, project has 2 — the compile input should have
 	// the project-level deps.
 	want := []string{"@spwn/git", "@spwn/unix"}
-	if !equalStrings(in.Manifest.Deps, want) {
-		t.Errorf("Manifest.Deps = %v, want %v", in.Manifest.Deps, want)
+	if !equalStrings(in.Deps, want) {
+		t.Errorf("Manifest.Deps = %v, want %v", in.Deps, want)
 	}
 }
 
@@ -147,8 +147,8 @@ worlds:
 		t.Fatalf("ToCompileInput: %v", err)
 	}
 
-	if len(in.Manifest.Deps) != 1 || in.Manifest.Deps[0] != "@spwn/python" {
-		t.Errorf("Manifest.Deps = %v, want [@spwn/python]", in.Manifest.Deps)
+	if len(in.Deps) != 1 || in.Deps[0] != "@spwn/python" {
+		t.Errorf("Manifest.Deps = %v, want [@spwn/python]", in.Deps)
 	}
 }
 
@@ -186,8 +186,8 @@ deps:
 
 	// Should be exactly 3 unique deps, not 5.
 	want := []string{"@spwn/git", "@spwn/unix", "extra"}
-	if !equalStrings(in.Manifest.Deps, want) {
-		t.Errorf("Manifest.Deps = %v, want %v (deduplicated)", in.Manifest.Deps, want)
+	if !equalStrings(in.Deps, want) {
+		t.Errorf("Manifest.Deps = %v, want %v (deduplicated)", in.Deps, want)
 	}
 }
 
@@ -216,8 +216,8 @@ role: worker
 		t.Fatalf("ToCompileInput: %v", err)
 	}
 
-	if len(in.Manifest.Deps) != 0 {
-		t.Errorf("expected 0 deps, got %v", in.Manifest.Deps)
+	if len(in.Deps) != 0 {
+		t.Errorf("expected 0 deps, got %v", in.Deps)
 	}
 }
 
@@ -250,16 +250,16 @@ worlds:
 	}
 
 	depsSet := map[string]bool{}
-	for _, d := range in.Manifest.Deps {
+	for _, d := range in.Deps {
 		depsSet[d] = true
 	}
 
 	for _, want := range []string{"shared", "tool-a", "tool-b"} {
 		if !depsSet[want] {
-			t.Errorf("missing %q in merged deps: %v", want, in.Manifest.Deps)
+			t.Errorf("missing %q in merged deps: %v", want, in.Deps)
 		}
 	}
-	if len(in.Manifest.Deps) != 3 {
-		t.Errorf("expected 3 deps, got %d: %v", len(in.Manifest.Deps), in.Manifest.Deps)
+	if len(in.Deps) != 3 {
+		t.Errorf("expected 3 deps, got %d: %v", len(in.Deps), in.Deps)
 	}
 }

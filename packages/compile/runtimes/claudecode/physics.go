@@ -3,11 +3,10 @@ package claudecode
 import (
 	"strings"
 
-	"spwn.sh/packages/world/models"
-)
+	)
 
 // GeneratePhysics returns the contents of /world/physics.md.
-func GeneratePhysics(_ models.Manifest) string {
+func GeneratePhysics(_ []string) string {
 	var sb strings.Builder
 
 	sb.WriteString("# Physics of This World\n\n")

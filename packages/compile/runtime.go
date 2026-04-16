@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sort"
 
-	"spwn.sh/packages/world/models"
 )
 
 // Runtime renders a project into a runtime-specific Tree. A Runtime
@@ -33,7 +32,7 @@ type Runtime interface {
 type Input struct {
 	// Manifest is the parsed spwn.yaml (or whatever synthetic
 	// manifest a single-agent spawn flow constructs).
-	Manifest models.Manifest
+	Deps []string
 
 	// VerifiedTools is the list of tool identifiers the runtime is
 	// known to have access to inside the target container. The
