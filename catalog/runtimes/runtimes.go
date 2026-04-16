@@ -3,7 +3,7 @@
 // (claude-code, codex, ...) — as distinct from tools, which are the
 // things an agent reaches for while thinking.
 //
-// Runtimes stay in Go (unlike tools, which live as pack.yaml) because
+// Runtimes stay in Go (unlike tools, which live as spwn.yaml) because
 // they carry non-trivial spawn-time behavior — credential sync, default
 // config materialisation, prelaunch shell, authentication flows — that
 // declarative YAML can't express cleanly.

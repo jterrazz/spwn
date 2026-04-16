@@ -1,6 +1,6 @@
 // Package pkg aggregates every built-in package into a single
 // registrable list. Every package lives as a YAML manifest under
-// catalog/packs/<name>/pack.yaml and is picked up automatically
+// catalog/packs/<name>/spwn.yaml and is picked up automatically
 // by loadYAMLTools. The Go-based catalog layer is gone — adding a
 // new package is a directory + a yaml + a git add, no Go edit
 // required.

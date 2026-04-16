@@ -14,7 +14,7 @@ func writePack(t *testing.T, root, name, yaml string) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "pack.yaml"), []byte(yaml), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "spwn.yaml"), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -76,7 +76,7 @@ func TestLoadLocalPackage_missingManifest(t *testing.T) {
 	}
 	_, err := loadLocalPack(root, "empty-pkg")
 	if err == nil {
-		t.Fatal("want error for missing pack.yaml")
+		t.Fatal("want error for missing spwn.yaml")
 	}
 }
 

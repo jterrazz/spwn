@@ -20,7 +20,7 @@ The domain has three main abstractions, each owning one concern:
 - **Architect**: The always-on orchestration daemon. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 
 ### Building blocks (composable, reusable)
-- **Pack**: The distribution unit. A `pack.yaml` manifest (catalog or GitHub repo) that ships any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. Agents reference them as external deps.
+- **Pack**: The distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) that ships any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. Agents reference them as external deps.
 - **Skill (bare form)**: A `spwn/skills/<name>.md` file. Simplest authoring path for "write a paragraph of instructions."
 
 ### Agent internals

@@ -59,7 +59,7 @@ Only Claude Code can actually be spawned today. The other names appear in the to
 - **Per-repository**. Agents and local blocks live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
 - **Declared deps only**. An agent can only reach for packs its `agent.yaml` declares in `deps:`. Anything not listed is physically absent from the world's image.
 - **External deps, local blocks**. `deps:` is for external references (`@spwn/*`, `github.com/*`). Local authoring goes in typed directories: `spwn/skills/` (bare `.md`), `spwn/tools/` (install recipes), `spwn/hooks/` (lifecycle scripts). See [`docs/dependencies.md`](dependencies.md) for the full model.
-- **Transitive resolution**. Dependencies declared in a pack's `pack.yaml` are resolved recursively and topologically sorted. Users only list direct deps.
+- **Transitive resolution**. Dependencies declared in a pack's `spwn.yaml` are resolved recursively and topologically sorted. Users only list direct deps.
 - **Lock file is text**. `spwn.lock` is line-oriented (one dep per line), trivially diffable. Managed by `spwn install` / `spwn uninstall`.
 - **Labels are truth**. Any world info the CLI displays comes from reading Docker labels, not an on-disk state file.
 - **Compile is deterministic**. Running `spwn build --tree-only` on an unchanged project tree produces byte-identical output - covered by the renderer golden tests in `packages/compile/runtimes/`.

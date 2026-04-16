@@ -4,7 +4,7 @@
 // Spwn projects reference packs in three ways:
 //
 //  1. Local — a bare name, resolved against ./spwn/tools/<name>/
-//     (directory form, with its own pack.yaml) or
+//     (directory form, with its own spwn.yaml) or
 //     ./spwn/skills/<name>.md (bare-markdown skill form).
 //  2. @spwn/<name> — a built-in pack compiled into the spwn
 //     binary, looked up against the catalog provided by the caller.

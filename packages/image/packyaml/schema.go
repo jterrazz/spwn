@@ -1,7 +1,7 @@
-// Package packyaml is the shared parser for pack.yaml — the
+// Package packyaml is the shared parser for spwn.yaml — the
 // declarative manifest format that describes a spwn pack's
-// image-build recipe. Both the catalog (catalog/packs/<name>/pack.yaml)
-// and project-local tools (spwn/tools/<name>/pack.yaml in a user
+// image-build recipe. Both the catalog (catalog/packs/<name>/spwn.yaml)
+// and project-local tools (spwn/tools/<name>/spwn.yaml in a user
 // project) use the same schema, so a pack can graduate from
 // "authored in a project" to "shipped in the catalog" by moving its
 // directory.
@@ -25,7 +25,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Schema is the on-disk shape of pack.yaml. Every field is
+// Schema is the on-disk shape of spwn.yaml. Every field is
 // optional so a minimal pack ("install one thing, verify it's
 // there") stays short.
 type Schema struct {

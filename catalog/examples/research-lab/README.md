@@ -25,7 +25,7 @@ in `spwn/skills/` and are referenced by name in `agent.yaml`.
 ### Local tools (`spwn/tools/`)
 
 - **jupyter** - a local tool that installs Jupyter via pip. Defined in
-  `spwn/tools/jupyter/pack.yaml` with install commands and a verify step.
+  `spwn/tools/jupyter/spwn.yaml` with install commands and a verify step.
 
 ### Dependency model
 
@@ -55,7 +55,7 @@ research-lab/
       data-analysis.md            # Skill: statistical analysis + viz
     tools/
       jupyter/
-        pack.yaml                 # Tool: install and verify jupyter
+        spwn.yaml                 # Tool: install and verify jupyter
 ```
 
 ## Install
