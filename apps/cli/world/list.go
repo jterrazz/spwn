@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"os/exec"
 	"sort"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/architect"
@@ -45,13 +45,9 @@ var listCmd = &cobra.Command{
 	Short:   "List declared worlds and their running status",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		s := newStepper(cmd)
+		s := ui.New()
 
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		proj, err := project.Find(cwd)
+		proj, err := cliproject.Find()
 		if err != nil {
 			return err
 		}

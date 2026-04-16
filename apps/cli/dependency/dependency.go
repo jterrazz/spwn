@@ -14,10 +14,10 @@ package dependency
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/dependency"
@@ -149,26 +149,10 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 	return nil
 }
 
-// FindProject walks up from cwd looking for spwn.yaml and loads it.
-// Exported for sibling CLI packages that need the same "find-or-fail"
-// boilerplate.
-func FindProject() (*project.Project, error) {
-	return findProject()
-}
-
+// findProject is an alias over cliproject.Require so the install
+// verbs stay concise. The canonical walker lives in apps/cli/cliproject.
 func findProject() (*project.Project, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, fmt.Errorf("resolve cwd: %w", err)
-	}
-	p, err := project.Find(cwd)
-	if err != nil {
-		return nil, err
-	}
-	if p == nil {
-		return nil, fmt.Errorf("no spwn.yaml found — run `spwn init` first")
-	}
-	return p, nil
+	return cliproject.Require()
 }
 
 // catalogLookup checks whether `ref` is a known @spwn/* dependency.

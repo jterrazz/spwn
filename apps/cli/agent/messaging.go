@@ -44,7 +44,7 @@ var sendCmd = &cobra.Command{
 		if content == "" {
 			return fmt.Errorf("message cannot be empty")
 		}
-		s := newStepper(cmd)
+		s := ui.New()
 
 		containerID, _, _, _, err := findAgentContainer(toAgent, "")
 		if err != nil {
@@ -98,7 +98,7 @@ var inboxCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agentName := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		containerID, _, _, _, err := findAgentContainer(agentName, "")
 		if err != nil {
@@ -139,7 +139,7 @@ var watchCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		agentName := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		containerID, worldID, _, _, err := findAgentContainer(agentName, "")
 		if err != nil {

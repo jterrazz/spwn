@@ -24,10 +24,6 @@ func init() {
 	ui.MarkExperimental(inspectCmd)
 }
 
-func newStepper(cmd *cobra.Command) *ui.Stepper {
-	return ui.New()
-}
-
 // ── spwn organization ls ──
 
 var lsCmd = &cobra.Command{
@@ -40,7 +36,7 @@ var lsCmd = &cobra.Command{
 		}
 
 		if len(organizations) == 0 {
-			s := newStepper(cmd)
+			s := ui.New()
 			s.Blank()
 			s.Info("Organizations:", "None found.")
 			s.Log("Create one with: spwn organization new")

@@ -94,7 +94,7 @@ var listCmd = &cobra.Command{
 			agents = filtered
 		}
 
-		s := newStepper(cmd)
+		s := ui.New()
 
 		if len(agents) == 0 {
 			if listAsJSON {
@@ -193,7 +193,7 @@ func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 		}
 	}
 
-	s := newStepper(cmd)
+	s := ui.New()
 
 	if len(allAgents) == 0 {
 		if listAsJSON {

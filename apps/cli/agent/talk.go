@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/platform"
@@ -43,7 +44,7 @@ If no message is provided, opens an interactive session inside the container.`,
 		if len(args) > 1 {
 			message = args[1]
 		}
-		s := newStepper(cmd)
+		s := ui.New()
 
 		if err := agent.ValidateMind(name); err != nil {
 			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent create %s", name, name)

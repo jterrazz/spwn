@@ -33,7 +33,7 @@ The archive must contain at least an identity/ layer.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		archivePath := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		// Validate the archive exists
 		if _, err := os.Stat(archivePath); err != nil {

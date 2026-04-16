@@ -6,6 +6,7 @@ import (
 
 	"spwn.sh/packages/architect"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 )
 
 var deployRole string
@@ -29,7 +30,7 @@ be deployed in that world.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		agentName := args[0]
 		worldID := args[1]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		ctx := context.Background()
 		arc, err := architect.NewFromEnv()

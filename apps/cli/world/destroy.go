@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 
 	"spwn.sh/packages/architect"
 )
@@ -31,7 +32,7 @@ func composeDownRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	ctx := context.Background()
-	s := newStepper(cmd)
+	s := ui.New()
 	arc, err := architect.NewFromEnv()
 	if err != nil {
 		return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
@@ -83,7 +84,7 @@ var destroyCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		s := newStepper(cmd)
+		s := ui.New()
 
 		arc, err := architect.NewFromEnv()
 		if err != nil {

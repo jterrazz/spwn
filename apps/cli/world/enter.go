@@ -5,6 +5,7 @@ import (
 
 	"spwn.sh/packages/architect"
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 )
 
 func init() {
@@ -18,7 +19,7 @@ var enterCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		worldID := args[0]
-		s := newStepper(cmd)
+		s := ui.New()
 
 		arc, err := architect.NewFromEnv()
 		if err != nil {

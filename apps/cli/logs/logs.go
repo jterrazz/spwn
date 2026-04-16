@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	coreactivity "spwn.sh/packages/activity"
-	"spwn.sh/packages/project"
 
 	"github.com/spf13/cobra"
 )
@@ -160,11 +160,7 @@ func Run(cmd *cobra.Command, opts RunOpts) error {
 // is active we accept the value as-is (there's nothing to validate
 // against in legacy global mode).
 func validateWorldFilter(name string) error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil
-	}
-	proj, err := project.Find(cwd)
+	proj, err := cliproject.Find()
 	if err != nil || proj == nil || proj.Manifest == nil || len(proj.Manifest.Worlds) == 0 {
 		return nil
 	}

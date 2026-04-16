@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/ui"
 
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/agent"
@@ -36,7 +37,7 @@ files are recreated and the command exits zero even if the agent
 already exists.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := newStepper(cmd)
+		s := ui.New()
 
 		name := ""
 		if len(args) > 0 {
