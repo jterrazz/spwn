@@ -164,7 +164,7 @@ func TestResolveSkill_MdPathIsDirectory(t *testing.T) {
 
 func TestResolveSkill_EmptyPackDir(t *testing.T) {
 	root := t.TempDir()
-	// Create an empty pack directory (no pack.yaml or anything).
+	// Create an empty pack directory (no spwn.yaml or anything).
 	mustMkdirEdge(t, filepath.Join(root, "spwn", "tools", "empty-pack"))
 
 	got := refs.ResolveSkill(root, refs.Parse("empty-pack"), nil, false)

@@ -58,7 +58,7 @@ Bare names in typed sections resolve from their matching directory:
 | Section | Resolves from |
 |---------|--------------|
 | `skills:` | `spwn/skills/<name>.md` |
-| `tools:` | `spwn/tools/<name>/` (with `pack.yaml`) |
+| `tools:` | `spwn/tools/<name>/` (with `spwn.yaml`) |
 | `hooks:` | `spwn/hooks/<name>.sh` |
 
 ## Local hierarchy
@@ -82,7 +82,7 @@ my-project/
 │   │   └── code-review.md
 │   ├── tools/                 # local tool definitions
 │   │   └── ffmpeg/
-│   │       └── pack.yaml
+│   │       └── spwn.yaml
 │   └── hooks/                 # lifecycle hook scripts
 │       └── pre-spawn.sh
 └── .spwn/                     # gitignored local state
@@ -123,7 +123,7 @@ spwn skill ls                                # list all skills (local + from dep
 When `spwn up` or `spwn build` runs:
 
 1. **Collect deps**: merge project-level `spwn.yaml#deps` + each agent's `agent.yaml#deps`
-2. **Resolve transitive**: for each dep, recursively expand its `dependencies:` field (from `pack.yaml`)
+2. **Resolve transitive**: for each dep, recursively expand its `dependencies:` field (from `spwn.yaml`)
 3. **Topological sort**: Kahn's algorithm orders deps so dependencies come before dependents
 4. **Deduplicate**: same ref from multiple sources appears once
 5. **Build image**: generate Dockerfile with install steps from each resolved dep
@@ -176,7 +176,7 @@ my-pack-repo/
 └── spwn/
     ├── tools/
     │   └── jupyter/
-    │       └── pack.yaml
+    │       └── spwn.yaml
     ├── skills/
     │   └── scientific-method.md
     └── hooks/

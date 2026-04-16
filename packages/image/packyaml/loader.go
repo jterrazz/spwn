@@ -14,8 +14,8 @@ import (
 )
 
 // Manifest is the canonical basename. Both catalog and local
-// packs live at <packDir>/pack.yaml.
-const Manifest = "pack.yaml"
+// packs live at <packDir>/spwn.yaml.
+const Manifest = "spwn.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
 // supporting directories (files/, skills/, config/). It abstracts
@@ -44,7 +44,7 @@ type ParseOptions struct {
 	DefaultVersion string
 }
 
-// Parse reads pack.yaml via the Resolver and returns an
+// Parse reads spwn.yaml via the Resolver and returns an
 // image.Tool instance backed by the parsed schema. File references
 // declared in the `files:` map are read eagerly — the returned Tool
 // is self-contained and can outlive the Resolver.

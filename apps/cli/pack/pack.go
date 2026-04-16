@@ -180,7 +180,7 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	switch ref.Kind {
 	case refs.KindLocal:
 		return fmt.Errorf("%q is a bare name — local packs are authored in place, not installed. "+
-			"Create ./spwn/tools/%s/pack.yaml for a full pack or ./spwn/tools/%s.md for a bare skill",
+			"Create ./spwn/tools/%s/spwn.yaml for a full pack or ./spwn/tools/%s.md for a bare skill",
 			pack, pack, pack)
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
