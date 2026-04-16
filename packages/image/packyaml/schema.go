@@ -1,12 +1,12 @@
 // Package pluginyaml is the shared parser for plugin.yaml — the
-// declarative manifest format that describes a spwn plugin's
+// declarative manifest format that describes a spwn pack's
 // image-build recipe. Both the catalog (catalog/plugins/<name>/plugin.yaml)
-// and project-local plugins (spwn/plugins/<name>/plugin.yaml in a user
-// project) use the same schema, so a plugin can graduate from
+// and project-local packs (spwn/packs/<name>/plugin.yaml in a user
+// project) use the same schema, so a pack can graduate from
 // "authored in a project" to "shipped in the catalog" by moving its
 // directory.
 //
-// A plugin is whatever its fields say it is: install steps + verify
+// A pack is whatever its fields say it is: install steps + verify
 // make it a tool; a runtime-config: section makes it inject runtime
 // configuration; a SKILL.md sibling or content-only body makes it a
 // skill. There is no explicit type field — composability determines
@@ -16,7 +16,7 @@
 // adapter.go), so everything downstream — registry resolution,
 // dockerfile generation, skill collection — is oblivious to whether a
 // given plugin came from Go or YAML.
-package pluginyaml
+package packyaml
 
 import (
 	"encoding/json"
@@ -29,37 +29,37 @@ import (
 // optional so a minimal plugin ("install one thing, verify it's
 // there") stays short.
 type Schema struct {
-	// Name is the plugin identifier (e.g. "@spwn/git"). Optional:
+	// Name is the pack identifier (e.g. "@spwn/git"). Optional:
 	// when empty, the loader derives it from the caller-supplied
 	// DefaultName (catalog loader auto-prefixes with "@spwn/"; local
 	// loader uses the directory basename).
 	Name string `yaml:"name"`
 
-	// Kind classifies the plugin: "runtime", "sdk", "tool", or
+	// Kind classifies the pack: "runtime", "sdk", "tool", or
 	// "platform". Defaults to "tool". Today this is metadata only
 	// (the image builder doesn't branch on it); composability of the
-	// other fields decides what the plugin actually does.
+	// other fields decides what the pack actually does.
 	Kind string `yaml:"kind"`
 
 	// Version is a semver string or "latest". Required for catalog
-	// plugins; defaults to "0.0.0-local" for project-local plugins.
+	// plugins; defaults to "0.0.0-local" for project-local packs.
 	Version string `yaml:"version"`
 
 	// Description is a human-readable one-liner. Optional.
 	Description string `yaml:"description"`
 
-	// Dependencies is a flat list of other plugin refs this one
+	// Dependencies is a flat list of other pack refs this one
 	// needs. The registry resolves them transitively and topologically
 	// sorts the final install order.
 	Dependencies []string `yaml:"dependencies"`
 
-	// Install is the build-time recipe for baking this plugin into
-	// the image. All sub-fields are optional — a plugin that only
+	// Install is the build-time recipe for baking this pack into
+	// the image. All sub-fields are optional — a pack that only
 	// ships skills can leave Install empty entirely.
 	Install InstallSection `yaml:"install"`
 
 	// Files is a map of image-target-path → source path relative to
-	// this plugin's directory. Contents are read at parse time and
+	// this pack's directory. Contents are read at parse time and
 	// baked into the image via the Dockerfile's COPY layer.
 	Files map[string]string `yaml:"files"`
 
@@ -67,7 +67,7 @@ type Schema struct {
 	// exit 0. Typically "command -v <binary>" or "<binary> --version".
 	Verify []string `yaml:"verify"`
 
-	// RuntimeConfig, when present, makes this plugin inject settings
+	// RuntimeConfig, when present, makes this pack inject settings
 	// into one or more target runtimes at spawn time. The merger
 	// reads the runtimes list and the per-runtime config snippets
 	// and shallow-merges them into the runtime's settings file.
@@ -110,7 +110,7 @@ type InstallSection struct {
 
 // RuntimeConfigSection is the optional `runtime-config:` block on a
 // plugin. When present, the Runtimes list scopes which runtime
-// backends the plugin targets, and Configs is a map from runtime
+// backends the pack targets, and Configs is a map from runtime
 // name to the YAML-native snippet that gets merged into the
 // runtime's settings file at spawn time.
 //
@@ -133,9 +133,9 @@ type RuntimeConfigSection struct {
 	Configs  map[string]yaml.Node       `yaml:"configs"`
 }
 
-// ConfigJSON marshals a plugin's config for the given runtime to JSON
+// ConfigJSON marshals a pack's config for the given runtime to JSON
 // bytes, so spawn-time callers that merge into JSON settings files
-// don't have to care the source was YAML. Returns nil when the plugin
+// don't have to care the source was YAML. Returns nil when the pack
 // has no config for that runtime.
 func (p *RuntimeConfigSection) ConfigJSON(runtime string) ([]byte, error) {
 	if p == nil {

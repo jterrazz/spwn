@@ -16,7 +16,7 @@ import (
 	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
-	"spwn.sh/apps/cli/plugin"
+	"spwn.sh/apps/cli/pack"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
@@ -73,7 +73,7 @@ func init() {
 	rootCmd.AddCommand(agent.Cmd)
 
 	// Command groups - building blocks
-	rootCmd.AddCommand(plugin.Cmd)
+	rootCmd.AddCommand(pack.Cmd)
 	rootCmd.AddCommand(skill.Cmd)
 
 	// Command groups - coordination

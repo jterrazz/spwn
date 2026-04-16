@@ -8,20 +8,20 @@ import (
 	ib "spwn.sh/packages/image"
 )
 
-func writePlugin(t *testing.T, root, name, yaml string) {
+func writePack(t *testing.T, root, name, yaml string) {
 	t.Helper()
 	dir := filepath.Join(root, "spwn", "plugins", name)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "plugin.yaml"), []byte(yaml), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "pack.yaml"), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestLoadLocalPackage_happyPath(t *testing.T) {
 	root := t.TempDir()
-	writePlugin(t, root, "my-tool", `name: my-tool
+	writePack(t, root, "my-tool", `name: my-tool
 version: "1.2.3"
 install:
   packages:
@@ -38,7 +38,7 @@ dependencies:
   - "@spwn/unix"
 `)
 
-	tool, err := loadLocalPlugin(root, "my-tool")
+	tool, err := loadLocalPack(root, "my-tool")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestLoadLocalPackage_missingManifest(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(root, "spwn", "plugins", "empty-pkg"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	_, err := loadLocalPlugin(root, "empty-pkg")
+	_, err := loadLocalPack(root, "empty-pkg")
 	if err == nil {
 		t.Fatal("want error for missing plugin.yaml")
 	}
@@ -82,7 +82,7 @@ func TestLoadLocalPackage_missingManifest(t *testing.T) {
 
 func TestLoadLocalPackage_skillsDirExposed(t *testing.T) {
 	root := t.TempDir()
-	writePlugin(t, root, "toolish", `name: toolish
+	writePack(t, root, "toolish", `name: toolish
 install:
   packages: [curl]
 verify:
@@ -96,7 +96,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := loadLocalPlugin(root, "toolish")
+	tool, err := loadLocalPack(root, "toolish")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -110,7 +110,7 @@ func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "@spwn/git"}
-	got, err := hydrateLocalPlugins(reg, root, list)
+	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -121,7 +121,7 @@ func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 
 func TestHydrateLocalPackages_rewritesBareNames(t *testing.T) {
 	root := t.TempDir()
-	writePlugin(t, root, "mine", `name: mine
+	writePack(t, root, "mine", `name: mine
 install:
   packages: [curl]
 verify:
@@ -130,7 +130,7 @@ verify:
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "mine", "@spwn/git"}
-	got, err := hydrateLocalPlugins(reg, root, list)
+	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -145,13 +145,13 @@ verify:
 // Register once per unique name.
 func TestHydrateLocalPackages_mixedListOrderPreserved(t *testing.T) {
 	root := t.TempDir()
-	writePlugin(t, root, "tool-a", `name: tool-a
+	writePack(t, root, "tool-a", `name: tool-a
 install:
   packages: [curl]
 verify:
   - command -v curl
 `)
-	writePlugin(t, root, "tool-b", `name: tool-b
+	writePack(t, root, "tool-b", `name: tool-b
 install:
   packages: [jq]
 verify:
@@ -160,7 +160,7 @@ verify:
 	reg := ib.NewRegistry()
 
 	list := []string{"@spwn/unix", "tool-a", "@spwn/git", "tool-b", "tool-a"}
-	got, err := hydrateLocalPlugins(reg, root, list)
+	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -179,15 +179,15 @@ func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 	root := t.TempDir()
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalPlugins(reg, root, []string{"nonexistent"})
+	_, err := hydrateLocalPacks(reg, root, []string{"nonexistent"})
 	if err == nil {
-		t.Fatal("want error for missing local plugin dir")
+		t.Fatal("want error for missing local pack dir")
 	}
 }
 
 func TestHydrateLocalPackages_idempotentOnDuplicate(t *testing.T) {
 	root := t.TempDir()
-	writePlugin(t, root, "mine", `name: mine
+	writePack(t, root, "mine", `name: mine
 install:
   packages: [curl]
 verify:
@@ -195,7 +195,7 @@ verify:
 `)
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalPlugins(reg, root, []string{"mine", "mine"})
+	_, err := hydrateLocalPacks(reg, root, []string{"mine", "mine"})
 	if err != nil {
 		t.Fatalf("duplicate should not error: %v", err)
 	}

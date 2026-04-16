@@ -8,7 +8,7 @@
 // Runtimes that need host-side Go behavior at spawn time (credential
 // sync, default config materialisation, prelaunch shell) are kept
 // Go-only and registered via packages/world/internal/runtime/.
-package plugins
+package packs
 
 import (
 	"fmt"

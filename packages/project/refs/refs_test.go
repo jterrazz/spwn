@@ -70,12 +70,12 @@ func TestResolveTool_Local(t *testing.T) {
 
 	got := refs.ResolveTool(root, refs.Parse("present"), nil, false)
 	if got != refs.ResolveOK {
-		t.Errorf("present local plugin: want OK, got %v", got)
+		t.Errorf("present local pack: want OK, got %v", got)
 	}
 
 	got = refs.ResolveTool(root, refs.Parse("missing"), nil, false)
 	if got != refs.ResolveNotFound {
-		t.Errorf("missing local plugin: want NotFound, got %v", got)
+		t.Errorf("missing local pack: want NotFound, got %v", got)
 	}
 }
 

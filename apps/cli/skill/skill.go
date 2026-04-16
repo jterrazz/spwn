@@ -3,9 +3,9 @@
 // playbooks, or pieces of knowledge authored in markdown that agents
 // can invoke.
 //
-// Bare-markdown skills live at spwn/plugins/<name>.md. For richer
+// Bare-markdown skills live at spwn/packs/<name>.md. For richer
 // packages with install steps or plugin-config injection, author a
-// directory-form plugin at spwn/plugins/<name>/plugin.yaml and
+// directory-form plugin at spwn/packs/<name>/plugin.yaml and
 // install/reference it via `spwn plugin`. Attach a skill to an
 // agent via `spwn agent add <agent> --plugin <name>`.
 package skill
@@ -26,7 +26,7 @@ var Cmd = &cobra.Command{
 	Use:   "skill",
 	Short: "Author bare-markdown skill packages",
 	Long: `Skills are procedures, playbooks, or pieces of knowledge authored as
-bare markdown files at spwn/plugins/<name>.md. Attach a skill to an
+bare markdown files at spwn/packs/<name>.md. Attach a skill to an
 agent with:
   spwn agent add <agent> --plugin <skill-name>`,
 }

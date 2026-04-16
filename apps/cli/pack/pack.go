@@ -1,20 +1,20 @@
-// Package plugin implements the `spwn plugin` command group — managing
-// the spwn plugin system — the unified installable concept (formerly "package").
+// Package plugin implements the `spwn pack` command group — managing
+// the spwn pack system — the unified installable concept (formerly "package").
 //
 // Packages are declared in each agent's agent.yaml#plugins list and
 // pinned in the project's spwn.lock.yaml. The shape is deliberately
 // npm-ish:
 //
-//   - @spwn/<name> is a catalog plugin compiled into the spwn binary.
-//     `spwn plugin install @spwn/unix` adds it to every agent's
+//   - @spwn/<name> is a catalog pack compiled into the spwn binary.
+//     `spwn pack install @spwn/unix` adds it to every agent's
 //     agent.yaml and records the pin in the lockfile.
-//   - <bare-name> is a local plugin authored under
-//     spwn/plugins/<name>/ (directory form) or spwn/plugins/<name>.md
+//   - <bare-name> is a local pack authored under
+//     spwn/packs/<name>/ (directory form) or spwn/packs/<name>.md
 //     (bare-markdown skill form). The install verb rejects bare names
 //     with a hint — they are not "installed", they are authored.
 //   - @<owner>/<name> (owner != spwn) is a future community-registry
 //     ref, currently rejected as unsupported.
-package plugin
+package pack
 
 import (
 	"fmt"
@@ -29,24 +29,24 @@ import (
 	"spwn.sh/packages/project/refs"
 )
 
-// Cmd is the root `spwn plugin` command group.
+// Cmd is the root `spwn pack` command group.
 var Cmd = &cobra.Command{
-	Use:     "plugin",
-	Aliases: []string{"pkgs", "plugins"},
-	Short:   "Manage plugins (e.g. @spwn/unix, @spwn/mempalace)",
+	Use:     "pack",
+	Aliases: []string{"packs"},
+	Short:   "Manage packs (e.g. @spwn/unix, @spwn/mempalace)",
 	Long: `Plugins are the unified building blocks that agents plug into their worlds.
 One schema covers what used to be split between tools, runtime-config providers, and skills.
 
-Install a catalog plugin into the project's agents + lockfile with:
-  spwn plugin install @spwn/python
+Install a catalog pack into the project's agents + lockfile with:
+  spwn pack install @spwn/python
 
 Remove it with:
-  spwn plugin uninstall @spwn/python
+  spwn pack uninstall @spwn/python
 
 List what's installed with:
-  spwn plugin ls
+  spwn pack ls
 
-Local plugins authored under spwn/plugins/<name>/ are referenced by
+Local plugins authored under spwn/packs/<name>/ are referenced by
 bare name in agent.yaml and do NOT go through the install verb — they
 are authored in place.`,
 }
@@ -61,27 +61,27 @@ func init() {
 }
 
 func pluginHelp(cmd *cobra.Command, args []string) {
-	if cmd.Name() != "plugin" {
+	if cmd.Name() != "pack" {
 		ui.MinimalHelp(cmd, args)
 		return
 	}
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ plugin")+" "+ui.Faint("- reusable plugins for agents"),
+		ui.Strong("⬡ pack")+" "+ui.Faint("- reusable packs for agents"),
 		[]ui.HelpGroup{
 			{Title: "Manage", Commands: []ui.HelpEntry{
-				{Name: "install <ref>", Desc: "Add a plugin to every agent + lockfile"},
-				{Name: "uninstall <ref>", Desc: "Remove a plugin from every agent + lockfile"},
-				{Name: "ls", Desc: "List installed plugins"},
-				{Name: "show <plugin>", Desc: "Inspect a plugin"},
+				{Name: "install <ref>", Desc: "Add a pack to every agent + lockfile"},
+				{Name: "uninstall <ref>", Desc: "Remove a pack from every agent + lockfile"},
+				{Name: "ls", Desc: "List installed packs"},
+				{Name: "show <pack>", Desc: "Inspect a pack"},
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
-				{Name: "spwn plugin install @spwn/python", Desc: ""},
-				{Name: "spwn plugin uninstall @spwn/python", Desc: "Remove it again"},
-				{Name: "spwn plugin ls", Desc: "What's pinned in the lockfile"},
+				{Name: "spwn pack install @spwn/python", Desc: ""},
+				{Name: "spwn pack uninstall @spwn/python", Desc: "Remove it"},
+				{Name: "spwn pack ls", Desc: "What's pinned in the lockfile"},
 			}},
 		},
-		"spwn plugin [command]",
+		"spwn pack [command]",
 		"",
 	)
 }
@@ -90,7 +90,7 @@ func pluginHelp(cmd *cobra.Command, args []string) {
 var lsCmd = &cobra.Command{
 	Use:     "ls",
 	Aliases: []string{"list"},
-	Short:   "List installed plugins",
+	Short:   "List installed packs",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		p, err := findProject()
 		if err != nil {
@@ -103,11 +103,11 @@ var lsCmd = &cobra.Command{
 		out := cmd.OutOrStdout()
 		refs := lock.Refs()
 		if len(refs) == 0 {
-			fmt.Fprintln(out, "No plugins installed.")
-			fmt.Fprintln(out, "Install one with 'spwn plugin install @spwn/<name>'.")
+			fmt.Fprintln(out, "No packs installed.")
+			fmt.Fprintln(out, "Install one with 'spwn pack install @spwn/<name>'.")
 			return nil
 		}
-		fmt.Fprintln(out, "Installed plugins:")
+		fmt.Fprintln(out, "Installed packs:")
 		for _, r := range refs {
 			e := lock.Plugins[r]
 			version := e.Version
@@ -121,8 +121,8 @@ var lsCmd = &cobra.Command{
 }
 
 var showCmd = &cobra.Command{
-	Use:   "show <plugin>",
-	Short: "Inspect a plugin",
+	Use:   "show <pack>",
+	Short: "Inspect a pack",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		p, err := findProject()
@@ -145,10 +145,10 @@ var showCmd = &cobra.Command{
 
 // installCmd adds a ref to every agent's agent.yaml#plugins and
 // pins it in the project lockfile. Bare names are rejected with a
-// pointer to the local-plugin authoring flow.
+// pointer to the local authoring flow.
 var installCmd = &cobra.Command{
 	Use:   "install <ref>",
-	Short: "Install a plugin into the project",
+	Short: "Install a pack into the project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return RunInstall(cmd, args[0])
@@ -158,7 +158,7 @@ var installCmd = &cobra.Command{
 var uninstallCmd = &cobra.Command{
 	Use:     "uninstall <ref>",
 	Aliases: []string{"rm", "remove"},
-	Short:   "Uninstall a plugin from the project",
+	Short:   "Uninstall a pack from the project",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return RunUninstall(cmd, args[0])
@@ -179,17 +179,17 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	ref := refs.Parse(pack)
 	switch ref.Kind {
 	case refs.KindLocal:
-		return fmt.Errorf("%q is a bare name — local plugins are authored in place, not installed. "+
-			"Create ./spwn/plugins/%s/plugin.yaml for a full plugin or ./spwn/plugins/%s.md for a bare skill",
+		return fmt.Errorf("%q is a bare name — local packs are authored in place, not installed. "+
+			"Create ./spwn/packs/%s/plugin.yaml for a full plugin or ./spwn/packs/%s.md for a bare skill",
 			pack, pack, pack)
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
-			"Use @spwn/<name> for built-in plugins, or author a local plugin under ./spwn/plugins/",
+			"Use @spwn/<name> for built-in packs, or author a local pack under ./spwn/packs/",
 			raw, ref.Owner, ref.Name)
 	}
 
 	if !catalogHas(pack) {
-		return fmt.Errorf("unknown builtin %q — run `spwn plugin ls` to see available plugins", pack)
+		return fmt.Errorf("unknown builtin %q — run `spwn pack ls` to see available packs", pack)
 	}
 
 	agents := p.Agents
@@ -201,7 +201,7 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 		if !a.Exists {
 			continue
 		}
-		if err := agent.AddPlugin(a.Name, pack); err != nil {
+		if err := agent.AddPack(a.Name, pack); err != nil {
 			return fmt.Errorf("update %s: %w", a.Name, err)
 		}
 		mutated++
@@ -240,7 +240,7 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
 	if ref.Kind == refs.KindLocal {
-		return fmt.Errorf("%q is a bare name — delete ./spwn/plugins/%s/ (or %s.md) by hand to remove it", pack, pack, pack)
+		return fmt.Errorf("%q is a bare name — delete ./spwn/packs/%s/ (or %s.md) by hand to remove it", pack, pack, pack)
 	}
 
 	mutated := 0
@@ -248,7 +248,7 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 		if !a.Exists {
 			continue
 		}
-		if err := agent.RemovePlugin(a.Name, pack); err != nil {
+		if err := agent.RemovePack(a.Name, pack); err != nil {
 			return fmt.Errorf("update %s: %w", a.Name, err)
 		}
 		mutated++

@@ -1,4 +1,4 @@
-package pluginyaml
+package packyaml
 
 import (
 	"io/fs"
@@ -7,7 +7,7 @@ import (
 )
 
 // toolImpl backs a parsed Schema as an image.Tool. Runtimes() and
-// Config() are part of the unified Tool interface — a plugin with a
+// Config() are part of the unified Tool interface — a pack with a
 // `runtime-config:` block returns a non-empty Runtimes list and the spawn-time
 // merger picks up its Config(runtime) snippet. Packages without a
 // plugin block return nil from both.
@@ -58,9 +58,9 @@ func (t *toolImpl) Verify() []string { return t.schema.Verify }
 // or nil when the directory is absent.
 func (t *toolImpl) Skills() fs.FS { return t.skillsFS }
 
-// Runtimes returns the runtime backends this plugin targets for
+// Runtimes returns the runtime backends this pack targets for
 // runtime-config injection. Returns nil when the manifest has no
-// `runtime-config:` block, which the spawn-time merger reads as "not a plugin."
+// `runtime-config:` block, which the spawn-time merger reads as "not a pack."
 func (t *toolImpl) Runtimes() []string {
 	if t.schema.RuntimeConfig == nil {
 		return nil
@@ -69,7 +69,7 @@ func (t *toolImpl) Runtimes() []string {
 }
 
 // Config returns the JSON bytes for the requested runtime's config
-// snippet, or nil when this plugin has no runtime-config block or no config
+// snippet, or nil when this pack has no runtime-config block or no config
 // for that runtime.
 func (t *toolImpl) Config(runtime string) []byte {
 	if t.schema.RuntimeConfig == nil {

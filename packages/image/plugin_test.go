@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// baseTool is a minimal Tool used to exercise the plugin helpers
+// baseTool is a minimal Tool used to exercise the pack helpers
 // against a plain package (no plugin: block). Runtimes() returns nil
 // so PluginConfig short-circuits.
 type baseTool struct{ name string }
@@ -65,7 +65,7 @@ func TestPluginConfig_RuntimeGate(t *testing.T) {
 
 func TestPluginConfig_EmptyRuntimesIsNotAPlugin(t *testing.T) {
 	// Under the unified Tool interface, empty Runtimes() means "not
-	// a plugin" — every runtime gets nil back regardless of what
+	// a pack" — every runtime gets nil back regardless of what
 	// Config would return. Previously this was "runtime-agnostic
 	// plugin" but that concept is gone: plugins must opt in to a
 	// specific runtime list.

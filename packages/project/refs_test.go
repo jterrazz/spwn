@@ -94,7 +94,7 @@ plugins:
 	if !strings.Contains(jterrazzMsg, "remote registries are not yet supported") {
 		t.Errorf("@jterrazz/python: want registry-unsupported message, got %q", jterrazzMsg)
 	}
-	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/plugins/") {
+	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/packs/") {
 		t.Errorf("@jterrazz/python: hint should mention both workarounds, got %q", jterrazzHint)
 	}
 	if !strings.Contains(communityMsg, "remote registries are not yet supported") {

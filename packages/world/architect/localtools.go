@@ -8,14 +8,14 @@ import (
 	"strings"
 
 	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/pluginyaml"
+	"spwn.sh/packages/image/packyaml"
 )
 
-// localPluginDir is where the project-local plugin loader looks
+// localPackDir is where the project-local pack loader looks
 // for bare-name refs at image-build time. Mirrors what the validator
-// (rulePluginsExist) expects, so `spwn check` and `spwn build`
+// (rulePacksExist) expects, so `spwn check` and `spwn build`
 // resolve refs through the same on-disk layout.
-const localPluginDir = "plugins"
+const localPackDir = "plugins"
 
 // wrappedLocalTool forwards every image.Tool method to an underlying
 // pluginyaml-parsed plugin but forces Name() to the "local:<basename>"
@@ -38,36 +38,36 @@ func (t *wrappedLocalTool) Skills() fs.FS               { return t.inner.Skills(
 func (t *wrappedLocalTool) Runtimes() []string          { return t.inner.Runtimes() }
 func (t *wrappedLocalTool) Config(runtime string) []byte { return t.inner.Config(runtime) }
 
-// loadLocalPlugin parses spwn/plugins/<name>/plugin.yaml via the
+// loadLocalPack parses spwn/packs/<name>/pack.yaml via the
 // shared pluginyaml parser and wraps the result so Name() returns
 // "local:<name>". Missing manifest is a crisp authoring error — an
-// empty local plugin would render to nothing and the user would
+// empty local pack would render to nothing and the user would
 // spend an afternoon debugging a no-op.
-func loadLocalPlugin(projectRoot, name string) (ib.Tool, error) {
-	pkgDir := filepath.Join(projectRoot, "spwn", localPluginDir, name)
+func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
+	pkgDir := filepath.Join(projectRoot, "spwn", localPackDir, name)
 	info, err := os.Stat(pkgDir)
 	if err != nil {
-		return nil, fmt.Errorf("local plugin %q: %w", name, err)
+		return nil, fmt.Errorf("local pack %q: %w", name, err)
 	}
 	if !info.IsDir() {
-		return nil, fmt.Errorf("local plugin %q: %s is not a directory", name, pkgDir)
+		return nil, fmt.Errorf("local pack %q: %s is not a directory", name, pkgDir)
 	}
 
-	tool, err := pluginyaml.Parse(
-		pluginyaml.DirResolver{Root: pkgDir},
-		pluginyaml.ParseOptions{
+	tool, err := packyaml.Parse(
+		packyaml.DirResolver{Root: pkgDir},
+		packyaml.ParseOptions{
 			DefaultName:    name,
 			DefaultVersion: "0.0.0-local",
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("local plugin %q: %w", name, err)
+		return nil, fmt.Errorf("local pack %q: %w", name, err)
 	}
 
 	return &wrappedLocalTool{inner: tool, name: "local:" + name}, nil
 }
 
-// hydrateLocalPlugins walks a flat list of plugin refs, loads
+// hydrateLocalPacks walks a flat list of pack refs, loads
 // every bare (non-@) name as a synthetic image.Tool via the shared
 // pluginyaml parser, registers it, and returns the rewritten list
 // where each bare name has been replaced by its "local:<name>"
@@ -76,7 +76,7 @@ func loadLocalPlugin(projectRoot, name string) (ib.Tool, error) {
 // Order is preserved so users see their ref list echoed back in the
 // same shape they declared it. Duplicates are tolerated — the
 // registry's Register is called once per unique name.
-func hydrateLocalPlugins(reg *ib.Registry, projectRoot string, refs []string) ([]string, error) {
+func hydrateLocalPacks(reg *ib.Registry, projectRoot string, refs []string) ([]string, error) {
 	out := make([]string, 0, len(refs))
 	loaded := map[string]bool{}
 	for _, raw := range refs {
@@ -88,12 +88,12 @@ func hydrateLocalPlugins(reg *ib.Registry, projectRoot string, refs []string) ([
 			out = append(out, "local:"+raw)
 			continue
 		}
-		tool, err := loadLocalPlugin(projectRoot, raw)
+		tool, err := loadLocalPack(projectRoot, raw)
 		if err != nil {
 			return nil, err
 		}
 		if err := reg.Register(tool); err != nil {
-			return nil, fmt.Errorf("register local plugin %q: %w", raw, err)
+			return nil, fmt.Errorf("register local pack %q: %w", raw, err)
 		}
 		loaded[raw] = true
 		out = append(out, "local:"+raw)

@@ -16,7 +16,7 @@ import (
 // key; under the unified package model they all share one `packages:`
 // list. The parser distinguishes what's what by the manifest the ref
 // resolves to (an `install:` block makes it a tool, a `plugin:` block
-// makes it a plugin, a content-only body makes it a skill).
+// makes it a pack, a content-only body makes it a skill).
 type Manifest struct {
 	Name     string        `yaml:"name,omitempty"`
 	Role     string        `yaml:"role,omitempty"`
@@ -73,9 +73,9 @@ func SaveManifest(agentName string, m *Manifest) error {
 	return nil
 }
 
-// AddPlugin appends a plugin ref to the agent's composition
-// (idempotent). Replaces the old AddTool/AddPlugin/AddSkill trio.
-func AddPlugin(agentName, ref string) error {
+// AddPack appends a pack ref to the agent's composition
+// (idempotent). Replaces the old AddTool/AddPack/AddSkill trio.
+func AddPack(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err
@@ -89,9 +89,9 @@ func AddPlugin(agentName, ref string) error {
 	return SaveManifest(agentName, m)
 }
 
-// RemovePlugin removes a plugin ref from the agent's composition.
+// RemovePack removes a pack ref from the agent's composition.
 // No-op when the ref isn't present.
-func RemovePlugin(agentName, ref string) error {
+func RemovePack(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err

@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/catalog/plugins"
+	"spwn.sh/catalog/packs"
 	"spwn.sh/packages/agent"
 )
 
@@ -17,15 +17,15 @@ import (
 // Composition commands for attaching reusable blocks (tools, skills) to an
 // agent. These edit ~/.spwn/agents/<name>/agent.yaml directly.
 
-var composePlugins []string
+var composePacks []string
 
 func init() {
-	addCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin ref to add (repeatable, e.g. @spwn/python)")
-	addCmd.Flags().StringArrayVar(&composePlugins, "plugins", nil, "Plural alias for --plugin")
+	addCmd.Flags().StringArrayVar(&composePacks, "pack", nil, "Pack ref to add (repeatable, e.g. @spwn/python)")
+	addCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --plugin")
 	Cmd.AddCommand(addCmd)
 
-	removeCmd.Flags().StringArrayVar(&composePlugins, "plugin", nil, "Plugin ref to remove (repeatable)")
-	removeCmd.Flags().StringArrayVar(&composePlugins, "plugins", nil, "Plural alias for --plugin")
+	removeCmd.Flags().StringArrayVar(&composePacks, "pack", nil, "Pack ref to remove (repeatable)")
+	removeCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --plugin")
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
@@ -34,17 +34,17 @@ func init() {
 
 var addCmd = &cobra.Command{
 	Use:   "add <agent-name>",
-	Short: "Add plugins to an agent",
+	Short: "Add packs to an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Compose an agent by attaching plugins.
+	Long: `Compose an agent by attaching packs.
 
 Examples:
-  spwn agent add neo --plugin @spwn/python
-  spwn agent add neo --plugins @spwn/unix --plugins @spwn/git
-  spwn agent add neo --plugin @spwn/unix --plugin @spwn/git`,
+  spwn agent add neo --pack @spwn/python
+  spwn agent add neo --packs @spwn/unix --packs @spwn/git
+  spwn agent add neo --pack @spwn/unix --pack @spwn/git`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composePlugins) == 0 {
+		if len(composePacks) == 0 {
 			return fmt.Errorf("nothing to add.\nPass at least one --plugin")
 		}
 
@@ -56,9 +56,9 @@ Examples:
 		// write an unknown plugin to agent.yaml. Bare-name local refs
 		// are skipped here — they resolve against the project tree at
 		// build time, not the catalog.
-		for _, p := range composePlugins {
+		for _, p := range composePacks {
 			if strings.HasPrefix(p, "@") && !knownComposeRef(p) {
-				return unknownComposeRefError("plugin", p)
+				return unknownComposeRefError("pack", p)
 			}
 		}
 
@@ -66,11 +66,11 @@ Examples:
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, p := range composePlugins {
-			if err := agent.AddPlugin(name, p); err != nil {
-				return fmt.Errorf("add plugin %q: %w", p, err)
+		for _, p := range composePacks {
+			if err := agent.AddPack(name, p); err != nil {
+				return fmt.Errorf("add pack %q: %w", p, err)
 			}
-			s.Done("+ plugin", p)
+			s.Done("+ pack", p)
 		}
 
 		s.Blank()
@@ -82,19 +82,19 @@ Examples:
 
 var removeCmd = &cobra.Command{
 	Use:   "remove <agent-name>",
-	Short: "Remove plugins from an agent",
+	Short: "Remove packs from an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Remove plugins from an agent's composition.
+	Long: `Remove packs from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 'spwn agent remove <name> --plugin X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --plugin @spwn/python
-  spwn agent remove neo --plugins @spwn/mempalace`,
+  spwn agent remove neo --pack @spwn/python
+  spwn agent remove neo --packs @spwn/mempalace`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composePlugins) == 0 {
+		if len(composePacks) == 0 {
 			return fmt.Errorf("nothing to remove.\nPass at least one --plugin")
 		}
 
@@ -117,9 +117,9 @@ Examples:
 			}
 			return false
 		}
-		for _, p := range composePlugins {
+		for _, p := range composePacks {
 			if !hasString(preflight.Plugins, p) {
-				return fmt.Errorf("plugin %q is not attached to agent %q — nothing to remove", p, name)
+				return fmt.Errorf("pack %q is not attached to agent %q — nothing to remove", p, name)
 			}
 		}
 
@@ -127,11 +127,11 @@ Examples:
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, p := range composePlugins {
-			if err := agent.RemovePlugin(name, p); err != nil {
-				return fmt.Errorf("remove plugin %q: %w", p, err)
+		for _, p := range composePacks {
+			if err := agent.RemovePack(name, p); err != nil {
+				return fmt.Errorf("remove pack %q: %w", p, err)
 			}
-			s.Done("- plugin", p)
+			s.Done("- pack", p)
 		}
 		s.Blank()
 		s.Success("Composition updated.")
@@ -206,12 +206,12 @@ func (e *notImplementedError) Error() string {
 func (e *notImplementedError) ExitCode() int { return 2 }
 
 // knownComposeRef reports whether the given @scope/name[@version]
-// reference matches a built-in plugin in the catalog. Used by
-// `agent add` to preflight --plugin refs before they
+// reference matches a built-in pack in the catalog. Used by
+// `agent add` to preflight --pack refs before they
 // hit agent.yaml.
 func knownComposeRef(ref string) bool {
 	pack := stripVersion(ref)
-	for _, t := range plugins.All {
+	for _, t := range packs.All {
 		if t.Name() == pack {
 			return true
 		}
@@ -242,8 +242,8 @@ func stripVersion(ref string) string {
 // not know about. The "known:" list mirrors what `spwn check` shows
 // so the two commands never disagree.
 func unknownComposeRefError(kind, ref string) error {
-	known := make([]string, 0, len(plugins.All))
-	for _, t := range plugins.All {
+	known := make([]string, 0, len(packs.All))
+	for _, t := range packs.All {
 		known = append(known, t.Name())
 	}
 	sort.Strings(known)

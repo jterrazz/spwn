@@ -13,7 +13,7 @@ import (
 //
 // Merge rule: last write wins per top-level key. Values are not
 // recursively merged — a later plugin that declares `mcpServers: {foo:
-// ...}` replaces an earlier plugin's `mcpServers` entirely. This is
+// ...}` replaces an earlier pack's `mcpServers` entirely. This is
 // deliberate: deep merge hides conflicts, shallow merge surfaces them
 // and keeps plugin authoring trivial to reason about. Revisit if real
 // plugins start needing deeper composition.
