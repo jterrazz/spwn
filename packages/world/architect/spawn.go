@@ -201,7 +201,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// is no longer part of the baseline footprint. Users who want
 	// node for their own tools still add @spwn/node to agent.yaml.
 	required := []string{"@spwn/unix", "@spwn/claude-code"}
-	toolList := append(required, opts.Manifest.Plugins...)
+	toolList := append(required, opts.Manifest.Deps...)
 
 	// Deduplicate
 	{

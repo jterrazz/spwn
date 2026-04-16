@@ -3,5 +3,5 @@ name: ghost
 runtime:
     backend: '@spwn/claude-code'
 
-plugins:
+deps:
     - '@spwn/unix'

@@ -118,7 +118,7 @@ Examples:
 			return false
 		}
 		for _, p := range composePacks {
-			if !hasString(preflight.Plugins, p) {
+			if !hasString(preflight.Deps, p) {
 				return fmt.Errorf("pack %q is not attached to agent %q — nothing to remove", p, name)
 			}
 		}

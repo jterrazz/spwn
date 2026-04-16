@@ -1,6 +1,11 @@
 version: 2
 name: macrohard
 
+deps:
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/unix"
+
 worlds:
   macrohard:
     agents:
@@ -9,7 +14,3 @@ worlds:
       - nadella
     workspaces:
       - .
-    tools:
-      - "@spwn/unix"
-      - "@spwn/git"
-      - "@spwn/node"

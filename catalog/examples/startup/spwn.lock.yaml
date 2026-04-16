@@ -1,5 +1,5 @@
 version: 1
-plugins:
+deps:
   "@spwn/docker-cli":
     version: ""
     source: builtin

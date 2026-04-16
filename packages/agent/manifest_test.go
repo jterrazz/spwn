@@ -33,7 +33,7 @@ func TestLoadManifest_MissingFileReturnsEmpty(t *testing.T) {
 	if m == nil {
 		t.Fatal("LoadManifest returned nil on missing file; expected empty Manifest")
 	}
-	if m.Name != "" || len(m.Plugins) != 0 {
+	if m.Name != "" || len(m.Deps) != 0 {
 		t.Errorf("expected empty manifest, got %+v", m)
 	}
 }
@@ -44,7 +44,7 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 	m := &Manifest{
 		Name:     "neo",
 		Role:     "chief",
-		Plugins:  []string{"@spwn/unix", "@spwn/python", "kung-fu"},
+		Deps:  []string{"@spwn/unix", "@spwn/python", "kung-fu"},
 	}
 	if err := SaveManifest("neo", m); err != nil {
 		t.Fatalf("SaveManifest: %v", err)
@@ -66,8 +66,8 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 	if got.Name != "neo" {
 		t.Errorf("Name = %q, want \"neo\"", got.Name)
 	}
-	if len(got.Plugins) != 3 {
-		t.Errorf("Packages count = %d, want 3", len(got.Plugins))
+	if len(got.Deps) != 3 {
+		t.Errorf("Packages count = %d, want 3", len(got.Deps))
 	}
 }
 
@@ -104,7 +104,7 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 			Provider: "anthropic",
 			Model:    "claude-sonnet-4-6",
 		},
-		Plugins:  []string{"@spwn/python", "@spwn/unix", "paper-reading"},
+		Deps:  []string{"@spwn/python", "@spwn/unix", "paper-reading"},
 	}
 	if err := SaveManifest("curie", original); err != nil {
 		t.Fatal(err)
@@ -120,8 +120,8 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 	if loaded.Runtime.Backend != "claude-code" {
 		t.Errorf("Runtime.Backend = %q", loaded.Runtime.Backend)
 	}
-	if len(loaded.Plugins) != 3 || loaded.Plugins[0] != "@spwn/python" {
-		t.Errorf("Packages drifted: %v", loaded.Plugins)
+	if len(loaded.Deps) != 3 || loaded.Deps[0] != "@spwn/python" {
+		t.Errorf("Packages drifted: %v", loaded.Deps)
 	}
 }
 
@@ -141,8 +141,8 @@ func TestAddPackage_AppendsAndIsIdempotent(t *testing.T) {
 	}
 
 	m, _ := LoadManifest("neo")
-	if len(m.Plugins) != 2 {
-		t.Errorf("expected 2 packages after double-add, got %d: %v", len(m.Plugins), m.Plugins)
+	if len(m.Deps) != 2 {
+		t.Errorf("expected 2 packages after double-add, got %d: %v", len(m.Deps), m.Deps)
 	}
 }
 
@@ -156,16 +156,16 @@ func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 		t.Fatal(err)
 	}
 	m, _ := LoadManifest("neo")
-	if len(m.Plugins) != 1 || m.Plugins[0] != "@spwn/python" {
-		t.Errorf("after remove: %v", m.Plugins)
+	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
+		t.Errorf("after remove: %v", m.Deps)
 	}
 
 	if err := RemovePack("neo", "@spwn/never-added"); err != nil {
 		t.Errorf("remove absent: %v", err)
 	}
 	m, _ = LoadManifest("neo")
-	if len(m.Plugins) != 1 {
-		t.Errorf("after no-op remove: %v", m.Plugins)
+	if len(m.Deps) != 1 {
+		t.Errorf("after no-op remove: %v", m.Deps)
 	}
 }
 
@@ -184,8 +184,8 @@ func TestComposition_FullRoundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadManifest: %v", err)
 	}
-	if len(m.Plugins) != 2 {
-		t.Errorf("Packages count = %d, want 2", len(m.Plugins))
+	if len(m.Deps) != 2 {
+		t.Errorf("Packages count = %d, want 2", len(m.Deps))
 	}
 }
 

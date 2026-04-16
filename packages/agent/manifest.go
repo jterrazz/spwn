@@ -22,7 +22,7 @@ type Manifest struct {
 	Role     string        `yaml:"role,omitempty"`
 	Team     string        `yaml:"team,omitempty"`
 	Runtime  RuntimeConfig `yaml:"runtime,omitempty"`
-	Plugins []string      `yaml:"plugins,omitempty"`
+	Deps []string `yaml:"deps,omitempty"`
 }
 
 // RuntimeConfig allows per-agent runtime override.
@@ -80,12 +80,12 @@ func AddPack(agentName, ref string) error {
 	if err != nil {
 		return err
 	}
-	for _, p := range m.Plugins {
+	for _, p := range m.Deps {
 		if p == ref {
 			return nil // already present
 		}
 	}
-	m.Plugins = append(m.Plugins, ref)
+	m.Deps = append(m.Deps, ref)
 	return SaveManifest(agentName, m)
 }
 
@@ -96,12 +96,12 @@ func RemovePack(agentName, ref string) error {
 	if err != nil {
 		return err
 	}
-	out := make([]string, 0, len(m.Plugins))
-	for _, p := range m.Plugins {
+	out := make([]string, 0, len(m.Deps))
+	for _, p := range m.Deps {
 		if p != ref {
 			out = append(out, p)
 		}
 	}
-	m.Plugins = out
+	m.Deps = out
 	return SaveManifest(agentName, m)
 }

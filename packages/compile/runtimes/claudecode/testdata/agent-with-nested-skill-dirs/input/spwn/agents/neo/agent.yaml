@@ -1,2 +1,2 @@
 name: neo
-plugins: ["@spwn/unix"]
+deps: ["@spwn/unix"]

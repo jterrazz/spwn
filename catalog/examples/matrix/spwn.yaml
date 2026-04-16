@@ -1,13 +1,14 @@
 version: 2
 name: matrix
 
+deps:
+  - "@spwn/git"
+  - "@spwn/node"
+  - "@spwn/unix"
+
 worlds:
   matrix:
     agents:
       - neo
     workspaces:
       - .
-    tools:
-      - "@spwn/unix"
-      - "@spwn/git"
-      - "@spwn/node"

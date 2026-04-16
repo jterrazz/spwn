@@ -141,13 +141,13 @@ func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 		t.Fatalf("load manifest: %v", err)
 	}
 	var found bool
-	for _, p := range m.Plugins {
+	for _, p := range m.Deps {
 		if p == "@spwn/git" {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("neo.agent.yaml missing @spwn/git, packages=%v", m.Plugins)
+		t.Errorf("neo.agent.yaml missing @spwn/git, packages=%v", m.Deps)
 	}
 }
 
@@ -163,7 +163,7 @@ func TestInstall_idempotent(t *testing.T) {
 	}
 	m, _ := agent.LoadManifest("neo")
 	count := 0
-	for _, p := range m.Plugins {
+	for _, p := range m.Deps {
 		if p == "@spwn/unix" {
 			count++
 		}
@@ -196,7 +196,7 @@ func TestUninstall_removesEntry(t *testing.T) {
 		t.Errorf("lockfile still has @spwn/git after uninstall")
 	}
 	m, _ := agent.LoadManifest("neo")
-	for _, p := range m.Plugins {
+	for _, p := range m.Deps {
 		if p == "@spwn/git" {
 			t.Errorf("neo.agent.yaml still has @spwn/git after uninstall")
 		}

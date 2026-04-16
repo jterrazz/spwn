@@ -18,7 +18,7 @@ type AgentContextOpts struct {
 	OrganizationName string
 	WorldID       string
 	Workspaces    []models.Workspace
-	Plugins []string
+	Deps []string
 	OtherAgents   []AgentInfo // other agents in the world
 	Chief         string      // chief name (empty if this IS the chief or no chief)
 	NPCTask       string      // task for NPC (empty for chief/manager/worker)
@@ -184,8 +184,8 @@ func generateNPCContext(b *strings.Builder, opts AgentContextOpts) {
 
 	b.WriteString("## Your World\n")
 	writeWorkspaces(b, opts.Workspaces)
-	if len(opts.Plugins) > 0 {
-		b.WriteString(fmt.Sprintf("- Packages: %s\n", strings.Join(opts.Plugins, ", ")))
+	if len(opts.Deps) > 0 {
+		b.WriteString(fmt.Sprintf("- Packages: %s\n", strings.Join(opts.Deps, ", ")))
 	}
 }
 
@@ -301,7 +301,7 @@ func writeWorkspaces(b *strings.Builder, workspaces []models.Workspace) {
 func writeWorldInfo(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Your World\n")
 	writeWorkspaces(b, opts.Workspaces)
-	if len(opts.Plugins) > 0 {
-		b.WriteString(fmt.Sprintf("- Packages: %s\n", strings.Join(opts.Plugins, ", ")))
+	if len(opts.Deps) > 0 {
+		b.WriteString(fmt.Sprintf("- Packages: %s\n", strings.Join(opts.Deps, ", ")))
 	}
 }

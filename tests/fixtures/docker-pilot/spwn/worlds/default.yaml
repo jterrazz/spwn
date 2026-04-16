@@ -1,10 +1,1 @@
-# Default world config.
-# Docs: https://spwn.sh/docs/cli/spwn-world
-
-# Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
-plugins:
-  - "@spwn/unix"          # Core Unix tools
-  - "@spwn/git"           # Git version control
-  # - "@spwn/node"        # Node.js + npm
-  # - "@spwn/python"      # Python 3
-  # - "@spwn/build"       # make, gcc, g++
+# Legacy world config — deps moved to spwn.yaml top-level.
