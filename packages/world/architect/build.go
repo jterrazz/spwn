@@ -17,7 +17,7 @@ import (
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world/internal/backend"
-	"spwn.sh/packages/compile/runtimes/claudecode"
+	"spwn.sh/catalog/runtimes/claude_code/compile"
 )
 
 // BuildArchitectImage cross-compiles the spwn binary for linux/amd64 and builds

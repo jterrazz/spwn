@@ -3,9 +3,9 @@ package runtime_test
 import (
 	"testing"
 
-	"spwn.sh/packages/world/internal/runtime"
+	"spwn.sh/packages/world/runtime"
 
-	_ "spwn.sh/packages/world/internal/runtime/claude"
+	_ "spwn.sh/catalog/runtimes/claude_code/adapter"
 )
 
 func TestClaudeCodeRegistered(t *testing.T) {

@@ -8,11 +8,11 @@ import (
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/internal/runtime"
+	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/state"
 
 	// Register the claude-code runtime adapter
-	_ "spwn.sh/packages/world/internal/runtime/claude"
+	_ "spwn.sh/catalog/runtimes/claude_code/adapter"
 )
 
 // Architect orchestrates world lifecycle.
