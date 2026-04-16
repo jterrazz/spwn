@@ -1,4 +1,5 @@
-// Package mind provides team management for grouping agents.
+// Team management lives here (not in packages/agent) because teams
+// are project-scoped entities that group agents across worlds.
 //
 // A team is a first-class entity stored as a YAML file under ~/.spwn/teams/.
 // Each agent's profile can reference a team by slug. Teams carry display

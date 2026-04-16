@@ -12,7 +12,7 @@ import (
 	"spwn.sh/packages/world/state"
 
 	// Register the claude-code runtime adapter
-	_ "spwn.sh/packages/runtimes/claude_code/adapter"
+	_ "spwn.sh/packages/runtimes/claude_code"
 )
 
 // Architect orchestrates world lifecycle.

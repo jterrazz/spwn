@@ -1,4 +1,4 @@
-package claude
+package claude_code
 
 import (
 	"encoding/json"
@@ -6,22 +6,27 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
+	goruntime "runtime"
 	"strings"
 
 	rt "spwn.sh/packages/world/runtime"
 )
 
-// Claude implements the Runtime interface for Claude Code CLI.
-type Claude struct{}
+// Runtime is the claude-code spawn-time adapter — implements the
+// world/runtime.Runtime interface (BuildCommand, credential sync,
+// prelaunch shell, default config files). Distinct from Tool (the
+// image.Tool for image builds) which lives in claude_code.go.
+var Runtime = &runtimeAdapter{}
 
-func init() { rt.Register(&Claude{}) }
+type runtimeAdapter struct{}
+
+func init() { rt.Register(Runtime) }
 
 // Name returns the runtime identifier.
-func (c *Claude) Name() string { return "claude-code" }
+func (c *runtimeAdapter) Name() string { return "claude-code" }
 
 // BuildCommand constructs the claude CLI command with all flags.
-func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
+func (c *runtimeAdapter) BuildCommand(cfg rt.SpawnConfig) []string {
 	cmd := []string{"claude", "--dangerously-skip-permissions"}
 
 	// NPC mode: no named agent, just print
@@ -48,8 +53,8 @@ func (c *Claude) BuildCommand(cfg rt.SpawnConfig) []string {
 }
 
 // SupportsSession returns true if the runtime can resume sessions.
-func (c *Claude) SupportsSession() bool { return true }
-func (c *Claude) Available() bool       { return true }
+func (c *runtimeAdapter) SupportsSession() bool { return true }
+func (c *runtimeAdapter) Available() bool       { return true }
 
 // ── Container-side setup ─────────────────────────────────────────
 
@@ -63,7 +68,7 @@ func (c *Claude) Available() bool       { return true }
 // is the actual HOME the runtime runs under (not /home/spwn).
 // Previous attempts baked these into the base image at build time
 // and lost to the HOME override.
-func (c *Claude) DefaultConfigFiles(agentHome string) map[string][]byte {
+func (c *runtimeAdapter) DefaultConfigFiles(agentHome string) map[string][]byte {
 	// Trust the agent's own home + the workspaces mount root so
 	// Claude Code doesn't prompt on first access. We can't
 	// enumerate the resolved workspace names here without plumbing
@@ -117,7 +122,7 @@ func (c *Claude) DefaultConfigFiles(agentHome string) map[string][]byte {
 // A missing credential source is not an error: the env-var path may
 // still supply working auth. Return an error only for real I/O or
 // command failures.
-func (c *Claude) SyncHostCredentials(credsDir string) error {
+func (c *runtimeAdapter) SyncHostCredentials(credsDir string) error {
 	dstDir := filepath.Join(credsDir, "anthropic")
 	dst := filepath.Join(dstDir, ".credentials.json")
 
@@ -127,7 +132,7 @@ func (c *Claude) SyncHostCredentials(credsDir string) error {
 	}
 
 	// Source 2: macOS Keychain (silent no-op on other platforms).
-	if runtime.GOOS == "darwin" {
+	if goruntime.GOOS == "darwin" {
 		if b, ok := extractFromMacOSKeychain(); ok {
 			return writeCredsFile(dstDir, dst, b)
 		}
@@ -149,7 +154,7 @@ func (c *Claude) SyncHostCredentials(credsDir string) error {
 // Every line guards with test-before-act so missing sources never
 // break the launch - the container may still have working auth via
 // env vars sourced from /credentials/.env alone.
-func (c *Claude) PrelaunchShell() string {
+func (c *runtimeAdapter) PrelaunchShell() string {
 	return strings.Join([]string{
 		"source /credentials/.env 2>/dev/null",
 		// Claude subscription OAuth: point ~/.claude/.credentials.json
