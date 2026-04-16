@@ -351,7 +351,7 @@ func ruleAgentStructure(in Input) []Issue {
 // agentYAML is the validator's local view of agent.yaml. Just enough
 // to drive rules.
 //
-// Packages replaces the old Tools/Plugins/Skills trichotomy under the
+// Deps replaces the old Tools/Packs/Skills trichotomy under the
 // unified package model — see packages/agent/manifest.go.
 type agentYAML struct {
 	Name     string   `yaml:"name"`

@@ -41,7 +41,7 @@ describe('spwn pack install', () => {
 
         expect(result.exitCode).not.toBe(0);
         expect(result.stderr.text).toContain('bare name');
-        expect(result.stderr.text).toContain('spwn/plugins/');
+        expect(result.stderr.text).toContain('spwn/packs/');
     });
 
     test('rejects @<owner>/* as unsupported', async () => {
@@ -113,7 +113,7 @@ describe('spwn pack ls', () => {
         expect(result.stdout.text).toContain('No packs installed');
     });
 
-    test('lists installed plugins after install', async () => {
+    test('lists installed packs after install', async () => {
         const result = await spec('pack ls after install')
             .project('docker-pilot')
             .exec(['pack install @spwn/python', 'pack ls'])

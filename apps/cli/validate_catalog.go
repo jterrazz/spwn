@@ -8,9 +8,9 @@ import (
 
 func init() {
 	// Wire the built-in catalog into the install verbs so
-	// `spwn plugin install @spwn/bogus` can fail with a crisp error
+	// `spwn install @spwn/bogus` can fail with a crisp error
 	// instead of silently pinning garbage. Lives here (not in
-	// plugin.init()) so the pack package stays free of a catalog import.
+	// pack.init()) so the pack package stays free of a catalog import.
 	pack.SetCatalogLookup(func(ref string) bool {
 		for _, t := range packs.All {
 			if t.Name() == ref {
@@ -23,7 +23,7 @@ func init() {
 
 // catalogToolNames returns the @scope/name identifier of every
 // built-in package shipped with spwn — packages (the unified
-// tool/plugin/skill concept) and runtimes. Used to power the
+// tool/pack/skill concept) and runtimes. Used to power the
 // "did you mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
 	out := make([]string, 0, len(packs.All)+len(runtimes.All))

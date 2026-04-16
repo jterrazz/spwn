@@ -56,7 +56,7 @@ Only Claude Code can actually be spawned today. The other names appear in the to
 
 ## Key invariants
 
-- **Per-repository**. Agents and plugins live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
+- **Per-repository**. Agents and packs live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
 - **Declared plugins only**. An agent can only reach for plugins its `agent.yaml` declares under the unified `plugins:` list. Anything not listed is physically absent from the world's image.
 - **Everything is a pack**. Tools, runtime-config injectors, and skills are one concept — the only thing that differs is which fields the manifest populates. A `pack.yaml` with an `install:` block is a tool; one with a `runtime-config:` block also injects runtime config (MCP servers, hooks, settings) into the target runtime's config file at spawn time; a bare `.md` file is a skill.
 - **Dependencies resolve like npm**. `@spwn/<name>` is a catalog pack compiled into the binary; `<bare-name>` is a local pack under `spwn/packs/<name>/` (directory form) or `spwn/packs/<name>.md` (bare-markdown skill); `@<owner>/<name>` is reserved for a future community registry. Catalog pins live in `spwn.lock` at the project root, managed by `spwn install` / `spwn install`. `spwn check` flags drift between agent.yaml and the lockfile.

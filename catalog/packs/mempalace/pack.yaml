@@ -16,7 +16,7 @@ verify:
 
 # Runtime-scoped config injection. The spawn-time merge pass converts
 # the YAML value to JSON and shallow-merges into the target runtime's
-# settings file (~/.claude/settings.json for Claude Code). Plugins
+# settings file (~/.claude/settings.json for Claude Code). Packs
 # that declare runtimes outside this list won't receive any snippet.
 runtime-config:
   runtimes:

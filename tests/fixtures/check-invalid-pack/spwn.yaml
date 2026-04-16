@@ -6,7 +6,7 @@
 # Commit this file.
 
 version: 2
-name: check-valid-plugin
+name: check-invalid-pack
 
 worlds:
   neo:

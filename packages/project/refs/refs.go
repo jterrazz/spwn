@@ -1,14 +1,14 @@
 // Package refs parses and resolves pack references in agent.yaml
 // and spwn.yaml.
 //
-// Spwn projects reference plugins in three ways:
+// Spwn projects reference packs in three ways:
 //
 //  1. Local — a bare name, resolved against ./spwn/packs/<name>/
 //     (directory form, with its own pack.yaml) or
 //     ./spwn/skills/<name>.md (bare-markdown skill form).
 //  2. @spwn/<name> — a built-in pack compiled into the spwn
 //     binary, looked up against the catalog provided by the caller.
-//  3. @<owner>/<name> — a remote registry plugin. Reserved for a
+//  3. @<owner>/<name> — a remote registry pack. Reserved for a
 //     future community registry; resolved today as "unsupported" so
 //     users aren't told their ref is a typo.
 //
@@ -35,7 +35,7 @@ const (
 	// (directory form) or ./spwn/skills/<name>.md (bare-markdown
 	// skill form).
 	KindLocal Kind = iota
-	// KindSpwnBuiltin is a @spwn/<name> plugin compiled into the binary.
+	// KindSpwnBuiltin is a @spwn/<name> pack compiled into the binary.
 	KindSpwnBuiltin
 	// KindRegistry is @<owner>/<name> with owner != "spwn" — reserved
 	// for a future community registry, not yet supported.

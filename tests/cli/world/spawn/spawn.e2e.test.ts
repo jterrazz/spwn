@@ -121,7 +121,7 @@ describe('world spawn', () => {
 
             // The agent's .claude/settings.json should be the minimal
             // Config spwn ships, not the host's (which has hooks,
-            // Plugins, etc.).
+            // Packs, etc.).
             const settings = neo.file('/agents/neo/.claude/settings.json').content;
             const settingsConfig = JSON.parse(settings) as {
                 enabledPlugins?: unknown;

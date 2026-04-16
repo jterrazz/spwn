@@ -39,7 +39,7 @@ func (t *wrappedLocalTool) Runtimes() []string          { return t.inner.Runtime
 func (t *wrappedLocalTool) Config(runtime string) []byte { return t.inner.Config(runtime) }
 
 // loadLocalPack parses spwn/packs/<name>/pack.yaml via the
-// shared pluginyaml parser and wraps the result so Name() returns
+// shared packyaml parser and wraps the result so Name() returns
 // "local:<name>". Missing manifest is a crisp authoring error — an
 // empty local pack would render to nothing and the user would
 // spend an afternoon debugging a no-op.
@@ -69,7 +69,7 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 
 // hydrateLocalPacks walks a flat list of pack refs, loads
 // every bare (non-@) name as a synthetic image.Tool via the shared
-// pluginyaml parser, registers it, and returns the rewritten list
+// packyaml parser, registers it, and returns the rewritten list
 // where each bare name has been replaced by its "local:<name>"
 // registry key.
 //

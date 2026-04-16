@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { goApiUrl } from '@/lib/api-client';
 
-interface Package {
+interface Pack {
     name: string;
     version: string;
     description: string;
@@ -17,15 +17,15 @@ interface Package {
 
 export default function MarketplacePage() {
     usePageTitle('Marketplace');
-    const [packages, setPackages] = useState<Package[]>([]);
+    const [packages, setPackages] = useState<Pack[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<null | string>(null);
 
     useEffect(() => {
-        fetch(goApiUrl('/api/packages'))
+        fetch(goApiUrl('/api/packs'))
             .then((r) => r.json())
             .then((data) => {
-                setPackages(data.packages ?? []);
+                setPackages(data.packs ?? []);
                 if (data.error) {
                     setError(data.error);
                 }
@@ -51,7 +51,7 @@ export default function MarketplacePage() {
                         Browse Marketplace
                     </a>
                 }
-                description="Browse and install packages to extend your worlds."
+                description="Browse and install packs to extend your worlds."
                 title="Marketplace"
             />
 
@@ -71,7 +71,7 @@ export default function MarketplacePage() {
                 </div>
             )}
 
-            {/* Installed packages */}
+            {/* Installed packs */}
             {!loading && packages.length > 0 && (
                 <div>
                     <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">
@@ -119,7 +119,7 @@ export default function MarketplacePage() {
                         <IconPackage className="text-muted-foreground/20" size={32} />
                     </div>
                     <h2 className="text-lg font-heading text-muted-foreground/50 mb-2">
-                        No packages installed
+                        No packs installed
                     </h2>
                     <p className="text-sm text-muted-foreground/30 mb-6 max-w-md mx-auto">
                         Browse the marketplace to discover configs, agents, playbooks, and
