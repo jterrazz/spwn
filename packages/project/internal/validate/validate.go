@@ -608,7 +608,7 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 // Local refs resolve to either:
 //   - spwn/packs/<name>/ (a directory-form package, with or without
 //     a pack.yaml inside), OR
-//   - spwn/packs/<name>.md (a bare-markdown skill).
+//   - spwn/skills/<name>.md (a bare-markdown skill).
 func rulePacksExist(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil

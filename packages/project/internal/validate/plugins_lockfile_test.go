@@ -18,14 +18,14 @@ func writeLockfile(t *testing.T, root string, l *lockfile.Lockfile) {
 }
 
 // TestRulePackagesExist_localSkillFileForm verifies the local
-// file-form skill path: spwn/packs/<name>.md counts as a valid
+// file-form skill path: spwn/skills/<name>.md counts as a valid
 // bare-name local pack.
 func TestRulePackagesExist_localSkillFileForm(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "plugins"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "skills"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "spwn", "plugins", "focus.md"), []byte("# focus"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -143,7 +143,7 @@ deps:
 
 func TestRuleLockfileConsistent_ignoresLocalRefs(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "plugins", "my-tool"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "packs", "my-tool"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "neo", `name: neo

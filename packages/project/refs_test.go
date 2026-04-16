@@ -38,7 +38,7 @@ deps:
 `)
 
 	// Local pack that exists on disk.
-	mustMkdir(t, filepath.Join(root, "spwn", "plugins", "local-tool"))
+	mustMkdir(t, filepath.Join(root, "spwn", "packs", "local-tool"))
 
 	p, err := Load(filepath.Join(root, "spwn.yaml"))
 	if err != nil {

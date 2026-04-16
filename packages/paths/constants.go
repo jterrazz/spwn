@@ -6,13 +6,15 @@ const (
 	WorldsSubDir        = "worlds"
 	AgentsSubDir        = "agents"
 	StateFileName       = "state.json"
-	// PacksSubDir is the subdirectory for project-local packs
-	// (formerly "skills" + "tools" + "packages"; unified
-	// post-migration). Kept under the "Skills" alias for
-	// backwards-compatible symbol use from apps/cli/skill — the CLI
-	// authors bare-markdown skills at <project>/spwn/packs/<name>.md.
-	PacksSubDir       = "plugins"
-	SkillsSubDir        = PacksSubDir
+	// PacksSubDir is where local pack authoring lives
+	// (for users building packs to publish).
+	PacksSubDir  = "packs"
+	// SkillsSubDir is where bare markdown skills live.
+	SkillsSubDir = "skills"
+	// ToolsSubDir is where local tool.yaml definitions live.
+	ToolsSubDir  = "tools"
+	// HooksSubDir is where lifecycle hook scripts live.
+	HooksSubDir  = "hooks"
 	CredentialsSubDir   = "credentials"
 	ActivityFileName    = "activity.jsonl"
 	TeamsSubDir         = "teams"

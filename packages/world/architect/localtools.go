@@ -15,7 +15,7 @@ import (
 // for bare-name refs at image-build time. Mirrors what the validator
 // (rulePacksExist) expects, so `spwn check` and `spwn build`
 // resolve refs through the same on-disk layout.
-const localPackDir = "plugins"
+const localPackDir = "packs"
 
 // wrappedLocalTool forwards every image.Tool method to an underlying
 // pluginyaml-parsed plugin but forces Name() to the "local:<basename>"
