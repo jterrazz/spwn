@@ -76,6 +76,11 @@ func init() {
 	rootCmd.AddCommand(pack.Cmd)
 	rootCmd.AddCommand(skill.Cmd)
 
+	// Root-level install/uninstall — shorthand for `spwn pack install/uninstall`.
+	// Like `go get` or `npm install` — one verb at the top level.
+	rootCmd.AddCommand(installCmd())
+	rootCmd.AddCommand(uninstallCmd())
+
 	// Command groups - coordination
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)

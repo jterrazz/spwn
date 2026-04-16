@@ -162,9 +162,9 @@ describe('spwn agent CRUD', () => {
         expect(result.stderr.text).toMatch(/invalid/i);
     });
 
-    test('agent remove --plugin rejects packages that were never attached', async () => {
+    test('agent remove --pack rejects packs that were never attached', async () => {
         // Given - neo with no packages
-        // When - remove --plugin for a ref that isn't in its composition
+        // When - remove --pack for a ref that isn't in its composition
         // Then - exit 1 with a "nothing to remove" message, no green check
         const result = await isolated('remove absent package')
             .exec(['agent create neo', 'agent remove neo --pack @spwn/never-added'])

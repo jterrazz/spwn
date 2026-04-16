@@ -21,11 +21,11 @@ var composePacks []string
 
 func init() {
 	addCmd.Flags().StringArrayVar(&composePacks, "pack", nil, "Pack ref to add (repeatable, e.g. @spwn/python)")
-	addCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --plugin")
+	addCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --pack")
 	Cmd.AddCommand(addCmd)
 
 	removeCmd.Flags().StringArrayVar(&composePacks, "pack", nil, "Pack ref to remove (repeatable)")
-	removeCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --plugin")
+	removeCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --pack")
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
@@ -45,7 +45,7 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		if len(composePacks) == 0 {
-			return fmt.Errorf("nothing to add.\nPass at least one --plugin")
+			return fmt.Errorf("nothing to add.\nPass at least one --pack")
 		}
 
 		if err := agent.ValidateMind(name); err != nil {
@@ -95,7 +95,7 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		if len(composePacks) == 0 {
-			return fmt.Errorf("nothing to remove.\nPass at least one --plugin")
+			return fmt.Errorf("nothing to remove.\nPass at least one --pack")
 		}
 
 		if err := agent.ValidateMind(name); err != nil {
