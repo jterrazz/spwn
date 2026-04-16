@@ -3,6 +3,7 @@
 package agent
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -13,6 +14,11 @@ import (
 	"spwn.sh/packages/agent/internal/session"
 	"spwn.sh/packages/activity"
 )
+
+// ErrNotFound is returned when an agent name has no matching on-disk
+// tree. Use errors.Is(err, agent.ErrNotFound) instead of matching
+// error strings. User-facing wrapping format: `agent %q not found`.
+var ErrNotFound = errors.New("not found")
 
 // Info describes an agent's Mind structure.
 type Info = mind.AgentInfo
@@ -37,7 +43,7 @@ type ForkResult = evolution.ForkResult
 func DeleteAgent(name string) error {
 	dir := AgentDir(name)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return fmt.Errorf("agent %q not found", name)
+		return fmt.Errorf("agent %q %w", name, ErrNotFound)
 	}
 	if err := os.RemoveAll(dir); err != nil {
 		return err

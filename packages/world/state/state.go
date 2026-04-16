@@ -195,7 +195,7 @@ func (s *Store) Get(id string) (*models.World, error) {
 		s.hydrate(&w)
 		return &w, nil
 	}
-	return nil, fmt.Errorf("world %s not found", id)
+	return nil, fmt.Errorf("world %s %w", id, ErrNotFound)
 }
 
 // hydrate fills the mutable bits of a World from runtime state. Labels
@@ -321,5 +321,6 @@ func (s *Store) UpdateAgentStatus(worldID, agentID string, status models.Status)
 
 // ── Errors ────────────────────────────────────────────────────────────
 
-// ErrNotFound is returned when a world id has no matching container.
-var ErrNotFound = errors.New("world not found")
+// ErrNotFound is returned when a world id has no matching
+// container. User-facing wrapping format: `world %s not found`.
+var ErrNotFound = errors.New("not found")
