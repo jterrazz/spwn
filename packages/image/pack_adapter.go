@@ -1,9 +1,9 @@
-package deps
+package image
 
 import (
 	"io/fs"
 
-	ib "spwn.sh/packages/image"
+	"spwn.sh/packages/deps"
 )
 
 // toolImpl backs a parsed Schema as an image.Tool. Runtimes() and
@@ -11,32 +11,32 @@ import (
 // `runtime-config:` block returns a non-empty Runtimes list and the spawn-time
 // merger picks up its Config(runtime) snippet. Packs without a
 // runtime-config block return nil from both.
-type toolImpl struct {
-	schema    Schema
-	kind      ib.Kind
+type packAdapter struct {
+	schema    deps.Schema
+	kind      deps.Kind
 	fileBytes map[string][]byte
 	skillsFS  fs.FS
 }
 
 // Name returns the fully-qualified ref (e.g. "@spwn/git").
-func (t *toolImpl) Name() string { return t.schema.Name }
+func (t *packAdapter) Name() string { return t.schema.Name }
 
 // Kind returns the classification parsed from the `kind:` field.
-func (t *toolImpl) Kind() ib.Kind { return t.kind }
+func (t *packAdapter) Kind() deps.Kind { return t.kind }
 
 // Version returns the `version:` field, or the default the loader
 // applied when the manifest left it blank.
-func (t *toolImpl) Version() string { return t.schema.Version }
+func (t *packAdapter) Version() string { return t.schema.Version }
 
 // Dependencies returns the flat list of tool refs this one depends
 // on. Resolution and topo sort happen in the registry.
-func (t *toolImpl) Dependencies() []string { return t.schema.Dependencies }
+func (t *packAdapter) Dependencies() []string { return t.schema.Dependencies }
 
 // Install converts the parsed InstallSection into the InstallSpec
 // shape the image builder consumes. File bytes were read eagerly at
 // parse time so this call is allocation-only.
-func (t *toolImpl) Install() ib.InstallSpec {
-	spec := ib.InstallSpec{
+func (t *packAdapter) Install() InstallSpec {
+	spec := InstallSpec{
 		AptPackages:  t.schema.Install.AptPackages,
 		Commands:     t.schema.Install.Commands,
 		UserCommands: t.schema.Install.UserCommands,
@@ -52,16 +52,16 @@ func (t *toolImpl) Install() ib.InstallSpec {
 }
 
 // Verify returns the post-build sanity commands from `verify:`.
-func (t *toolImpl) Verify() []string { return t.schema.Verify }
+func (t *packAdapter) Verify() []string { return t.schema.Verify }
 
 // Skills returns an fs.FS rooted at the tool's skills/ directory,
 // or nil when the directory is absent.
-func (t *toolImpl) Skills() fs.FS { return t.skillsFS }
+func (t *packAdapter) Skills() fs.FS { return t.skillsFS }
 
 // Runtimes returns the runtime backends this pack targets for
 // runtime-config injection. Returns nil when the manifest has no
 // `runtime-config:` block, which the spawn-time merger reads as "not a pack."
-func (t *toolImpl) Runtimes() []string {
+func (t *packAdapter) Runtimes() []string {
 	if t.schema.RuntimeConfig == nil {
 		return nil
 	}
@@ -71,7 +71,7 @@ func (t *toolImpl) Runtimes() []string {
 // Config returns the JSON bytes for the requested runtime's config
 // snippet, or nil when this pack has no runtime-config block or no config
 // for that runtime.
-func (t *toolImpl) Config(runtime string) []byte {
+func (t *packAdapter) Config(runtime string) []byte {
 	if t.schema.RuntimeConfig == nil {
 		return nil
 	}
@@ -98,6 +98,21 @@ func (t *toolImpl) Config(runtime string) []byte {
 // or "" when none. Consumed by the spawn pipeline to look up a
 // Go-registered provider for credential sync / default config files
 // / prelaunch shell setup.
-func (t *toolImpl) RuntimeProvider() string {
+func (t *packAdapter) RuntimeProvider() string {
 	return t.schema.RuntimeProvider
+}
+
+
+// ToolFromParsed adapts a deps.Parsed result into an image.Tool.
+// This is the single bridge between the deps domain and the image
+// builder — deps knows nothing about image.Tool, image knows how to
+// wrap deps.Parsed into a Tool.
+func ToolFromParsed(p *deps.Parsed) Tool {
+	skillsFS, _ := p.SkillsFS.(fs.FS)
+	return &packAdapter{
+		schema:    p.Schema,
+		kind:      p.Kind,
+		fileBytes: p.FileBytes,
+		skillsFS:  skillsFS,
+	}
 }

@@ -11,7 +11,7 @@ import (
 func TestParse(t *testing.T) {
 	cases := []struct {
 		in    string
-		kind  deps.Kind
+		kind  deps.RefKind
 		owner string
 		name  string
 	}{

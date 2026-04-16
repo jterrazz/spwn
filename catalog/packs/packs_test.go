@@ -1,6 +1,7 @@
 package packs
 
 import (
+	"spwn.sh/packages/deps"
 	"io/fs"
 	"strings"
 	"testing"
@@ -33,11 +34,11 @@ func TestAllTools_ValidName(t *testing.T) {
 }
 
 func TestAllTools_ValidKind(t *testing.T) {
-	validKinds := map[ib.Kind]bool{
-		ib.KindRuntime:  true,
-		ib.KindTool:     true,
-		ib.KindSDK:      true,
-		ib.KindPlatform: true,
+	validKinds := map[deps.Kind]bool{
+		deps.KindRuntime:  true,
+		deps.KindTool:     true,
+		deps.KindSDK:      true,
+		deps.KindPlatform: true,
 	}
 	for _, tool := range All {
 		t.Run(tool.Name(), func(t *testing.T) {

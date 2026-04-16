@@ -29,7 +29,7 @@ type wrappedLocalTool struct {
 }
 
 func (t *wrappedLocalTool) Name() string                { return t.name }
-func (t *wrappedLocalTool) Kind() ib.Kind               { return ib.KindTool }
+func (t *wrappedLocalTool) Kind() deps.Kind               { return deps.KindTool }
 func (t *wrappedLocalTool) Version() string             { return t.inner.Version() }
 func (t *wrappedLocalTool) Dependencies() []string      { return t.inner.Dependencies() }
 func (t *wrappedLocalTool) Install() ib.InstallSpec     { return t.inner.Install() }
@@ -53,7 +53,7 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 		return nil, fmt.Errorf("local pack %q: %s is not a directory", name, pkgDir)
 	}
 
-	tool, err := deps.Parse(
+	parsed, err := deps.Parse(
 		deps.DirResolver{Root: pkgDir},
 		deps.ParseOptions{
 			DefaultName:    name,
@@ -64,7 +64,7 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 		return nil, fmt.Errorf("local pack %q: %w", name, err)
 	}
 
-	return &wrappedLocalTool{inner: tool, name: "local:" + name}, nil
+	return &wrappedLocalTool{inner: ib.ToolFromParsed(parsed), name: "local:" + name}, nil
 }
 
 // hydrateLocalPacks walks a flat list of pack refs, loads

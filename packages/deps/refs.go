@@ -28,13 +28,13 @@ import (
 )
 
 // Kind classifies a reference.
-type Kind int
+type RefKind int
 
 const (
 	// KindLocal is a bare name authored in ./spwn/tools/<name>/
 	// (directory form) or ./spwn/skills/<name>.md (bare-markdown
 	// skill form).
-	KindLocal Kind = iota
+	KindLocal RefKind = iota
 	// KindSpwnBuiltin is a @spwn/<name> pack compiled into the binary.
 	KindSpwnBuiltin
 	// KindRegistry is @<owner>/<name> with owner != "spwn" — reserved
@@ -45,7 +45,7 @@ const (
 // Ref is a parsed, classified reference.
 type Ref struct {
 	Raw   string
-	Kind  Kind
+	Kind  RefKind
 	Owner string // "" for local, "spwn" for builtin, user/org for registry
 	Name  string // pack name without scope
 }

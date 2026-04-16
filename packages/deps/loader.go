@@ -10,7 +10,6 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	ib "spwn.sh/packages/image"
 )
 
 // Manifest is the canonical basename. Both catalog and local
@@ -44,11 +43,20 @@ type ParseOptions struct {
 	DefaultVersion string
 }
 
-// Parse reads spwn.yaml via the Resolver and returns an
-// image.Tool instance backed by the parsed schema. File references
-// declared in the `files:` map are read eagerly — the returned Tool
-// is self-contained and can outlive the Resolver.
-func Parse(res Resolver, opts ParseOptions) (ib.Tool, error) {
+// Parsed is the result of parsing a spwn.yaml pack manifest.
+// It carries the schema plus any files read eagerly from the resolver
+// so the result can outlive the Resolver. Converters in other packages
+// (e.g. image.ToolFromParsed) adapt this into their own types.
+type Parsed struct {
+	Schema    Schema
+	Kind      Kind
+	FileBytes map[string][]byte
+	SkillsFS  any // fs.FS but typed as any to avoid the import on the public type
+}
+
+// Parse reads spwn.yaml via the Resolver and returns a Parsed. File
+// references declared in the `files:` map are read eagerly.
+func Parse(res Resolver, opts ParseOptions) (*Parsed, error) {
 	data, err := res.ReadFile(Manifest)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", Manifest, err)
@@ -91,11 +99,11 @@ func Parse(res Resolver, opts ParseOptions) (ib.Tool, error) {
 		fileBytes[imagePath] = b
 	}
 
-	return &toolImpl{
-		schema:    s,
-		kind:      kind,
-		fileBytes: fileBytes,
-		skillsFS:  res.SkillsFS(),
+	return &Parsed{
+		Schema:    s,
+		Kind:      kind,
+		FileBytes: fileBytes,
+		SkillsFS:  res.SkillsFS(),
 	}, nil
 }
 
@@ -162,16 +170,16 @@ func (e EmbedResolver) SkillsFS() fs.FS {
 	return sub
 }
 
-func parseKind(s string) (ib.Kind, error) {
+func parseKind(s string) (Kind, error) {
 	switch strings.ToLower(s) {
 	case "runtime":
-		return ib.KindRuntime, nil
+		return KindRuntime, nil
 	case "sdk":
-		return ib.KindSDK, nil
+		return KindSDK, nil
 	case "tool":
-		return ib.KindTool, nil
+		return KindTool, nil
 	case "platform":
-		return ib.KindPlatform, nil
+		return KindPlatform, nil
 	}
 	return "", fmt.Errorf("unknown kind %q (want runtime|sdk|tool|platform)", s)
 }

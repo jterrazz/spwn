@@ -1,6 +1,7 @@
 package image
 
 import (
+	"spwn.sh/packages/deps"
 	"io/fs"
 	"testing"
 )
@@ -11,7 +12,7 @@ import (
 type baseTool struct{ name string }
 
 func (t *baseTool) Name() string            { return t.name }
-func (t *baseTool) Kind() Kind              { return KindTool }
+func (t *baseTool) Kind() deps.Kind              { return deps.KindTool }
 func (t *baseTool) Version() string         { return "0.0.0" }
 func (t *baseTool) Dependencies() []string  { return nil }
 func (t *baseTool) Install() InstallSpec    { return InstallSpec{} }
@@ -28,7 +29,7 @@ type packTool struct {
 }
 
 func (t *packTool) Name() string                 { return "@spwn/fake" }
-func (t *packTool) Kind() Kind                   { return KindTool }
+func (t *packTool) Kind() deps.Kind                   { return deps.KindTool }
 func (t *packTool) Version() string              { return "0.0.0" }
 func (t *packTool) Dependencies() []string       { return nil }
 func (t *packTool) Install() InstallSpec         { return InstallSpec{} }

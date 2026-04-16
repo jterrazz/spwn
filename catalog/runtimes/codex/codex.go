@@ -1,6 +1,7 @@
 package codex
 
 import (
+	"spwn.sh/packages/deps"
 	"embed"
 	"io/fs"
 
@@ -16,7 +17,7 @@ var Tool = &tool{}
 type tool struct{}
 
 func (*tool) Name() string           { return "@spwn/codex" }
-func (*tool) Kind() ib.Kind          { return ib.KindRuntime }
+func (*tool) Kind() deps.Kind          { return deps.KindRuntime }
 func (*tool) Version() string        { return "latest" }
 func (*tool) Dependencies() []string { return []string{"@spwn/node"} }
 
