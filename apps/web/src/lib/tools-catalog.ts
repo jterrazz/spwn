@@ -17,7 +17,7 @@ export interface ToolDef {
     description: string;
     provides: string;
     useWhen: string;
-    deps: string[];
+    dependencies: string[];
     verify: string[];
     status: ToolStatus;
     skills: SkillFile[];
@@ -31,7 +31,7 @@ export const TOOLS: ToolDef[] = [
         description: 'Core Unix utilities',
         provides: 'bash, coreutils, grep, sed, awk, curl, jq',
         useWhen: 'You need standard shell tools',
-        deps: [],
+        dependencies: [],
         verify: ['bash', 'grep', 'sed', 'awk', 'curl', 'jq'],
         status: 'available',
         skills: [],
@@ -42,7 +42,7 @@ export const TOOLS: ToolDef[] = [
         description: 'Node.js 20 SDK',
         provides: 'node, npm, npx',
         useWhen: 'Your project uses JavaScript or TypeScript',
-        deps: [],
+        dependencies: [],
         verify: ['node', 'npm', 'npx'],
         status: 'available',
         skills: [],
@@ -53,7 +53,7 @@ export const TOOLS: ToolDef[] = [
         description: 'Python 3 SDK',
         provides: 'python3, pip',
         useWhen: 'Your project uses Python',
-        deps: [],
+        dependencies: [],
         verify: ['python3', 'pip3'],
         status: 'available',
         skills: [],
@@ -64,7 +64,7 @@ export const TOOLS: ToolDef[] = [
         description: 'C/C++ build essentials',
         provides: 'make, gcc, g++',
         useWhen: 'You need to compile native code',
-        deps: [],
+        dependencies: [],
         verify: ['make', 'gcc', 'g++'],
         status: 'available',
         skills: [],
@@ -76,7 +76,7 @@ export const TOOLS: ToolDef[] = [
         description: 'Claude Code AI runtime',
         provides: 'claude CLI + pre-configured auth',
         useWhen: "You want Anthropic's agent runtime (default)",
-        deps: ['@spwn/node'],
+        dependencies: ['@spwn/node'],
         verify: ['claude'],
         status: 'available',
         skills: [
@@ -111,7 +111,7 @@ claude --session-id <id> "task"      # Resume specific session
         description: 'OpenAI Codex agent runtime',
         provides: 'codex CLI + pre-configured workspace trust',
         useWhen: 'You want to use OpenAI models (GPT-5, o3) as the agent runtime',
-        deps: ['@spwn/node'],
+        dependencies: ['@spwn/node'],
         verify: ['codex'],
         status: 'available',
         skills: [
@@ -145,7 +145,7 @@ Auth tokens are forwarded from the host automatically.
         description: 'Aider code assistant',
         provides: 'aider CLI',
         useWhen: 'You want an open-source code-focused runtime',
-        deps: ['@spwn/python'],
+        dependencies: ['@spwn/python'],
         verify: ['aider'],
         status: 'planned',
         skills: [],
@@ -157,7 +157,7 @@ Auth tokens are forwarded from the host automatically.
         description: 'Git version control',
         provides: 'git',
         useWhen: 'You need source control (almost always)',
-        deps: [],
+        dependencies: [],
         verify: ['git'],
         status: 'available',
         skills: [],
@@ -168,7 +168,7 @@ Auth tokens are forwarded from the host automatically.
         description: 'Docker CLI for DooD',
         provides: 'docker',
         useWhen: 'The agent needs to manage containers',
-        deps: [],
+        dependencies: [],
         verify: ['docker'],
         status: 'available',
         skills: [],
@@ -179,7 +179,7 @@ Auth tokens are forwarded from the host automatically.
         description: 'On-device markdown search',
         provides: 'qmd - BM25 + semantic search',
         useWhen: 'The agent needs to search docs or knowledge bases locally',
-        deps: ['@spwn/node'],
+        dependencies: ['@spwn/node'],
         verify: ['qmd'],
         status: 'available',
         skills: [
@@ -215,7 +215,7 @@ It runs entirely locally - no external API calls needed for search.`,
         description: 'spwn CLI',
         provides: 'spwn - agent management, messaging, identity',
         useWhen: 'The agent needs to manage its own identity or sub-worlds',
-        deps: [],
+        dependencies: [],
         verify: ['spwn'],
         status: 'available',
         skills: [
@@ -250,7 +250,7 @@ cat /mind/identity/traits.md
         description: 'Orchestration daemon',
         provides: 'spwn + claude + docker (full stack)',
         useWhen: "You're running the always-on Architect",
-        deps: ['@spwn/cli', '@spwn/claude-code', '@spwn/docker-cli'],
+        dependencies: ['@spwn/cli', '@spwn/claude-code', '@spwn/docker-cli'],
         verify: ['spwn', 'claude', 'docker'],
         status: 'available',
         skills: [

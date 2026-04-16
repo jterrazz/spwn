@@ -38,7 +38,7 @@ func scaffoldAgent(t *testing.T, name string) string {
 // runs. Cobra stores flag values in package-level vars, so tests that
 // run sequentially leak state without this reset.
 func resetComposeFlags() {
-	composePacks = nil
+	composeDeps = nil
 }
 
 // ── agent add ──────────────────────────────────────────────────────────────
@@ -61,7 +61,7 @@ func TestAgentAdd_AgentNotFound(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 	resetComposeFlags()
-	composePacks = []string{"@spwn/python"}
+	composeDeps = []string{"@spwn/python"}
 
 	cmd, _ := newComposeCmd()
 	err := addCmd.RunE(cmd, []string{"ghost"})
@@ -73,7 +73,7 @@ func TestAgentAdd_AgentNotFound(t *testing.T) {
 func TestAgentAdd_SinglePackage(t *testing.T) {
 	scaffoldAgent(t, "neo")
 	resetComposeFlags()
-	composePacks = []string{"@spwn/python"}
+	composeDeps = []string{"@spwn/python"}
 
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
@@ -92,7 +92,7 @@ func TestAgentAdd_SinglePackage(t *testing.T) {
 func TestAgentAdd_MultiplePackages(t *testing.T) {
 	scaffoldAgent(t, "neo")
 	resetComposeFlags()
-	composePacks = []string{"@spwn/unix", "@spwn/python", "@spwn/git"}
+	composeDeps = []string{"@spwn/unix", "@spwn/python", "@spwn/git"}
 
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
@@ -109,14 +109,14 @@ func TestAgentAdd_Idempotent(t *testing.T) {
 	scaffoldAgent(t, "neo")
 
 	resetComposeFlags()
-	composePacks = []string{"@spwn/python"}
+	composeDeps = []string{"@spwn/python"}
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
 	}
 
 	resetComposeFlags()
-	composePacks = []string{"@spwn/python"}
+	composeDeps = []string{"@spwn/python"}
 	cmd, _ = newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
@@ -147,11 +147,11 @@ func TestAgentRemove_NoFlagsReturnsError(t *testing.T) {
 func TestAgentRemove_Package(t *testing.T) {
 	scaffoldAgent(t, "neo")
 
-	agent.AddPack("neo", "@spwn/unix")
-	agent.AddPack("neo", "@spwn/python")
+	agent.AddDependency("neo", "@spwn/unix")
+	agent.AddDependency("neo", "@spwn/python")
 
 	resetComposeFlags()
-	composePacks = []string{"@spwn/unix"}
+	composeDeps = []string{"@spwn/unix"}
 	cmd, _ := newComposeCmd()
 	if err := removeCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
@@ -165,10 +165,10 @@ func TestAgentRemove_Package(t *testing.T) {
 
 func TestAgentRemove_AbsentPackageErrors(t *testing.T) {
 	scaffoldAgent(t, "neo")
-	agent.AddPack("neo", "@spwn/python")
+	agent.AddDependency("neo", "@spwn/python")
 
 	resetComposeFlags()
-	composePacks = []string{"@spwn/never-added"}
+	composeDeps = []string{"@spwn/never-added"}
 	cmd, _ := newComposeCmd()
 	// Removing an absent package must error so scripts can distinguish
 	// "I removed it" from "it was never there" — the previous

@@ -12,7 +12,7 @@ Publish an agent to the registry (memory stripped)
 Publish an agent to the community registry for others to pull.
 
 Memory (journal, knowledge, sessions) is stripped before publishing -
-only the composition (tools, skills) and identity ship.
+only the composition (dependencies, skills) and identity ship.
 
 Not yet implemented - tracks the registry (planned).
 

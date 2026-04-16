@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"spwn.sh/apps/cli/pack"
-	packs "spwn.sh/catalog/packs"
+	"spwn.sh/apps/cli/dependency"
+	"spwn.sh/catalog/dependencies"
 	"spwn.sh/catalog/runtimes"
 )
 
@@ -10,9 +10,10 @@ func init() {
 	// Wire the built-in catalog into the install verbs so
 	// `spwn install @spwn/bogus` can fail with a crisp error
 	// instead of silently pinning garbage. Lives here (not in
-	// pack.init()) so the pack package stays free of a catalog import.
-	pack.SetCatalogLookup(func(ref string) bool {
-		for _, t := range packs.All {
+	// dependency.init()) so the dependency package stays free of
+	// a catalog import.
+	dependency.SetCatalogLookup(func(ref string) bool {
+		for _, t := range dependencies.All {
 			if t.Name() == ref {
 				return true
 			}
@@ -22,12 +23,12 @@ func init() {
 }
 
 // catalogToolNames returns the @scope/name identifier of every
-// built-in package shipped with spwn — packages (the unified
-// tool/pack/skill concept) and runtimes. Used to power the
-// "did you mean X?" hints in `spwn check`.
+// built-in shipped with spwn — dependencies (the unified
+// tool/skill/runtime-config concept) and runtimes. Used to power
+// the "did you mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
-	out := make([]string, 0, len(packs.All)+len(runtimes.All))
-	for _, t := range packs.All {
+	out := make([]string, 0, len(dependencies.All)+len(runtimes.All))
+	for _, t := range dependencies.All {
 		out = append(out, t.Name())
 	}
 	for _, t := range runtimes.All {

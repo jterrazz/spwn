@@ -117,13 +117,13 @@ function ToolCard({ tool, onClick }: { tool: ToolDef; onClick: () => void }) {
                         {tool.provides}
                     </span>
                 </div>
-                {tool.deps.length > 0 && (
+                {tool.dependencies.length > 0 && (
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] text-muted-foreground/25 w-16 shrink-0">
                             depends
                         </span>
                         <div className="flex gap-1">
-                            {tool.deps.map((d) => (
+                            {tool.dependencies.map((d) => (
                                 <span
                                     className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] text-muted-foreground/35"
                                     key={d}

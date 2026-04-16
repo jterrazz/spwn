@@ -1,13 +1,13 @@
 // Package skill implements the `spwn skill` command group —
-// authoring bare-markdown skill packages. Skills are procedures,
+// authoring bare-markdown skill files. Skills are procedures,
 // playbooks, or pieces of knowledge authored in markdown that agents
 // can invoke.
 //
 // Bare-markdown skills live at spwn/skills/<name>.md. For richer
-// packs with install steps or runtime-config injection, author a
-// directory-form pack at spwn/tools/<name>/spwn.yaml and
-// install/reference it via `spwn install`. Attach a skill to an
-// agent via `spwn agent add <agent> --pack <name>`.
+// dependencies with install steps or runtime-config injection,
+// author a directory-form dependency at spwn/tools/<name>/spwn.yaml
+// and install/reference it via `spwn install`. Attach a skill to an
+// agent via `spwn agent add <agent> --dep <name>`.
 package skill
 
 import (
@@ -24,11 +24,11 @@ import (
 // Cmd is the root `spwn skill` command group.
 var Cmd = &cobra.Command{
 	Use:   "skill",
-	Short: "Author bare-markdown skill packages",
+	Short: "Author bare-markdown skill files",
 	Long: `Skills are procedures, playbooks, or pieces of knowledge authored as
 bare markdown files at spwn/skills/<name>.md. Attach a skill to an
 agent with:
-  spwn agent add <agent> --pack <skill-name>`,
+  spwn agent add <agent> --dep <skill-name>`,
 }
 
 func init() {
@@ -61,7 +61,7 @@ func skillHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn skill new paper-reading", Desc: ""},
-				{Name: "spwn install @spwn/mempalace", Desc: "Install a catalog pack"},
+				{Name: "spwn install @spwn/mempalace", Desc: "Install a catalog dependency"},
 			}},
 		},
 		"spwn skill [command]",

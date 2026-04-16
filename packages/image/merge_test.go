@@ -1,7 +1,7 @@
 package image
 
 import (
-	"spwn.sh/packages/deps"
+	"spwn.sh/packages/dependency"
 	"encoding/json"
 	"io/fs"
 	"strings"
@@ -78,7 +78,7 @@ func TestMergeRuntimeConfig_EmptyResult(t *testing.T) {
 	}
 }
 
-// fakeConfigPlugin is a minimal in-memory Tool with a pack block
+// fakeConfigPlugin is a minimal in-memory Tool with a dependency block
 // used to drive CollectRuntimeConfigs tests — the architect's
 // injection pipeline consumes the same helper.
 type fakeConfigPlugin struct {
@@ -88,7 +88,7 @@ type fakeConfigPlugin struct {
 }
 
 func (p *fakeConfigPlugin) Name() string           { return p.name }
-func (p *fakeConfigPlugin) Kind() deps.Kind             { return deps.KindTool }
+func (p *fakeConfigPlugin) Kind() dependency.Kind             { return dependency.KindTool }
 func (p *fakeConfigPlugin) Version() string        { return "0.0.0" }
 func (p *fakeConfigPlugin) Dependencies() []string { return nil }
 func (p *fakeConfigPlugin) Install() InstallSpec   { return InstallSpec{} }
@@ -135,12 +135,12 @@ func TestCollectRuntimeConfigs_FiltersByRuntime(t *testing.T) {
 		t.Errorf("base key lost: %v", m)
 	}
 	if m["marker"] != "ok" {
-		t.Errorf("pack c marker missing: %v", m)
+		t.Errorf("dependency c marker missing: %v", m)
 	}
 	if _, ok := m["mcpServers"]; !ok {
-		t.Errorf("pack a mcpServers missing: %v", m)
+		t.Errorf("dependency a mcpServers missing: %v", m)
 	}
-	// codex pack must not leak in
+	// codex dependency must not leak in
 	if _, ok := m["b"]; ok {
 		t.Errorf("codex config leaked into claude-code merge: %v", m)
 	}

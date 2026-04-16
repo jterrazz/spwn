@@ -19,7 +19,7 @@ L5 Build     packages/compile/  packages/image/     (project → image)
    ────────────────────────────────────────────────────────────────
 L4 Project   packages/project/                      (manifest + validation)
    ────────────────────────────────────────────────────────────────
-L3 Domain    packages/deps/  packages/agent/        (packs + agents)
+L3 Domain    packages/deps/  packages/agent/        (dependencies + agents)
    ────────────────────────────────────────────────────────────────
 L2 Platform  packages/activity/  packages/auth/
              packages/upgrade/   packages/mailbox/  (platform utilities)
@@ -36,10 +36,10 @@ L1 Foundation packages/paths/                       (constants + IDs)
 | `auth` | L2 | Provider resolution, credential storage (keychain/env/file/OAuth) |
 | `upgrade` | L2 | Version checking + schema migrations runner |
 | `mailbox` | L2 | Agent-to-agent filesystem inbox |
-| `deps` | L3 | `spwn.yaml` pack schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
+| `deps` | L3 | `spwn.yaml` dependency schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
 | `agent` | L3 | Agent mind (identity/skills/knowledge/playbooks/journal), evolution, session |
 | `project` | L4 | Project manifest, 15 validation rules, scaffolding |
-| `image` | L5 | Docker image build, tool registry, transitive dep resolution, pack→Tool adapter |
+| `image` | L5 | Docker image build, tool registry, transitive dep resolution, dependency→Tool adapter |
 | `compile` | L5 | Pure render: `Input → Tree`, runtime backends (claudecode) |
 | `world` | L6 | Container lifecycle (spawn, destroy, colony), docker-cp sync |
 | `apps/cli` | L7 | `spwn` binary — commands, UI |
@@ -59,7 +59,7 @@ spwn/
 │   ├── auth/                   L2  credentials
 │   ├── upgrade/                L2  version + migrations
 │   ├── mailbox/                L2  agent messaging
-│   ├── deps/                   L3  pack schema, refs, lockfile
+│   ├── deps/                   L3  dependency schema, refs, lockfile
 │   ├── agent/                  L3  agent mind + evolution
 │   ├── project/                L4  project manifest + validation
 │   ├── compile/                L5  render Input → Tree
@@ -67,8 +67,8 @@ spwn/
 │   ├── world/                  L6  container orchestration
 │   └── api/                    L7  HTTP server
 ├── catalog/
-│   ├── packs/                  built-in packs (embedded)
-│   ├── runtimes/               runtime pack definitions
+│   ├── dependencies/                  built-in dependencies (embedded)
+│   ├── runtimes/               runtime dependency definitions
 │   └── examples/               bundled example projects
 └── tests/                      e2e suite (vitest + real Docker)
 ```
@@ -103,7 +103,7 @@ The layer diagram above is the ground truth. When in doubt, check here.
 
 | Abstraction | Where | Purpose |
 |-------------|-------|---------|
-| Pack | `packages/deps` | Distribution unit (schema, refs, lockfile) |
+| Dependency | `packages/deps` | Distribution unit (schema, refs, lockfile) |
 | Tool | `packages/image` | Interface any installable capability implements |
 | Runtime | `packages/compile/runtimes` | Translates agent composition → runtime files |
 | Backend | `packages/image/backend` | Container runtime (Docker today) |
@@ -134,9 +134,9 @@ Every arrow crosses a layer boundary. Every layer has one job.
 ## Key invariants
 
 - **Per-repository**. Agents and local blocks live in `./spwn/`, not `~/.spwn/`.
-- **Declared deps only**. An agent can only use packs declared in `deps:`. Unlisted = physically absent.
+- **Declared deps only**. An agent can only use dependencies declared in `deps:`. Unlisted = physically absent.
 - **External deps, local blocks**. `deps:` for `@spwn/*` and `github.com/*`. Local authoring in typed dirs: `spwn/skills/`, `spwn/tools/`, `spwn/hooks/`. See [`docs/dependencies.md`](dependencies.md).
-- **Transitive resolution**. Pack dependencies resolved recursively, topologically sorted.
+- **Transitive resolution**. Dependency dependencies resolved recursively, topologically sorted.
 - **Lock file is text**. `spwn.lock` — one dep per line, trivially diffable.
 - **Labels are truth**. World info comes from Docker labels, not on-disk state.
 - **Compile is deterministic**. Same input → same output, covered by golden tests.
@@ -147,13 +147,13 @@ Every arrow crosses a layer boundary. Every layer has one job.
 - 🟢 Per-repository projects (`spwn init` / `check` / `build`)
 - 🟢 World creation and isolation
 - 🟢 Persistent agent identity and memory
-- 🟢 Composable pack catalog
+- 🟢 Composable dependency catalog
 - 🟢 Reproducible build artifacts
 - 🟢 Layered package architecture with depguard enforcement
 - 🟡 Agent evolution (dream, sleep, fork)
 - 🟡 Multi-agent coordination via filesystem inboxes
 - 🟡 Snapshots and rollback
 - 🟡 Desktop app (Tauri) + web UI
-- 🔴 GitHub-based pack distribution (`github.com/owner/repo`)
+- 🔴 GitHub-based dependency distribution (`github.com/owner/repo`)
 - 🔴 Additional runtime adapters (Codex, Aider, OpenCode, Gemini CLI)
 - 🔴 Additional backends (Firecracker, gVisor, K3s, Fly.io)

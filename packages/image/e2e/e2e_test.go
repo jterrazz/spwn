@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	runtimes "spwn.sh/catalog/runtimes"
-	packs "spwn.sh/catalog/packs"
+	"spwn.sh/catalog/dependencies"
 	ib "spwn.sh/packages/image"
 	"spwn.sh/packages/image/imagetest"
 )
@@ -14,7 +14,7 @@ import (
 func newRegistry(t *testing.T) *ib.Registry {
 	t.Helper()
 	reg := ib.NewRegistry()
-	if err := packs.RegisterDefaults(reg); err != nil {
+	if err := dependencies.RegisterDefaults(reg); err != nil {
 		t.Fatalf("register tools: %v", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {

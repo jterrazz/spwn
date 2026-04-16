@@ -15,11 +15,11 @@ func TestRulePackageVersionConflict_flagsMismatchAcrossAgents(t *testing.T) {
 	root := t.TempDir()
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
-deps:
+dependencies:
   - "@spwn/unix@24.04"
 `)
 	morpheus := scaffoldAgent(t, root, "morpheus", `name: morpheus
-deps:
+dependencies:
   - "@spwn/unix@22.04"
 `)
 
@@ -53,11 +53,11 @@ func TestRulePackageVersionConflict_identicalVersionsOK(t *testing.T) {
 	root := t.TempDir()
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
-deps:
+dependencies:
   - "@spwn/unix@24.04"
 `)
 	morpheus := scaffoldAgent(t, root, "morpheus", `name: morpheus
-deps:
+dependencies:
   - "@spwn/unix@24.04"
 `)
 
@@ -84,7 +84,7 @@ func TestRulePackageVersionConflict_singleAgentSkipped(t *testing.T) {
 	root := t.TempDir()
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
-deps:
+dependencies:
   - "@spwn/unix@24.04"
 `)
 

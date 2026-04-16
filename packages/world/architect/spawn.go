@@ -12,7 +12,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	runtimes "spwn.sh/catalog/runtimes"
-	packs "spwn.sh/catalog/packs"
+	"spwn.sh/catalog/dependencies"
 	"spwn.sh/packages/compile"
 	"spwn.sh/catalog/runtimes/claude_code/compile"
 	ib "spwn.sh/packages/image"
@@ -172,12 +172,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		explicitImage = true
 	}
 
-	// Registry + resolved pack list are computed unconditionally.
+	// Registry + resolved dependency list are computed unconditionally.
 	// Even when the image is prebuilt (tests injecting SPWN_BASE_IMAGE),
 	// runtime config still needs to be merged into the container's
 	// runtime settings file after the container boots.
 	reg := ib.NewRegistry()
-	if err := packs.RegisterDefaults(reg); err != nil {
+	if err := dependencies.RegisterDefaults(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
@@ -185,8 +185,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Always include runtime essentials, then add user-specified tools
-	// and packs on top. The registry deduplicates and resolves
-	// dependencies; packs share the tool resolution pipeline.
+	// and dependencies on top. The registry deduplicates and resolves
+	// dependencies; dependencies share the tool resolution pipeline.
 	//
 	// @spwn/cli is deliberately excluded here - it installs the
 	// spwn binary itself and is only meaningful inside the
@@ -430,7 +430,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("sync agent homes into container: %w", err)
 	}
 
-	// Merge pack runtime-config into the container's runtime settings
+	// Merge dependency runtime-config into the container's runtime settings
 	// file. Currently only the claude-code backend has a known target
 	// path; additional runtimes can grow their own branch as needed.
 	if err := injectRuntimeConfig(ctx, a.backend, containerID, resolvedTools); err != nil {
@@ -545,9 +545,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 // timeout on CI runners with a modest tool set.
 //
 // This replaces an older implementation that maintained a parallel
-// hardcoded @pack → binary map in packages/world/manifest and fell
+// hardcoded @dependency → binary map in packages/world/manifest and fell
 // back to a static list of binaries. That map drifted as new tools
-// were added and left unknown @pack refs erroring as "base image
+// were added and left unknown @dependency refs erroring as "base image
 // missing @spwn/foo". The catalog is now the single source of
 // truth: each tool's Verify() method decides what must be present.
 func (a *Architect) probeTools(ctx context.Context, containerID string, tools []ib.Tool) ([]string, error) {
@@ -708,19 +708,19 @@ func materialiseWorldTree(ctx context.Context, be backend.Backend, containerID s
 // Current scope: only @spwn/claude-code has a known settings path
 // (/home/spwn/.claude/settings.json). The container's baseline
 // settings file — written by the claude_code tool's UserCommands at
-// image build time — is read back, shallow-merged with every pack's
+// image build time — is read back, shallow-merged with every dependency's
 // Config(runtime) output (last write wins), and rewritten in place.
 //
-// When no pack targets the runtime, this is a no-op: the baseline
+// When no dependency targets the runtime, this is a no-op: the baseline
 // settings.json stays untouched.
 //
-// Additional runtimes can grow their own branch here as packs for
+// Additional runtimes can grow their own branch here as dependencies for
 // them materialize.
 func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []ib.Tool) error {
-	// The pack-facing runtime identifier is the same as the image
+	// The dependency-facing runtime identifier is the same as the image
 	// builder's runtime tool name. Spawn always installs
 	// @spwn/claude-code, so hard-code it here until a second runtime
-	// lands (codex is built but has no pack target yet).
+	// lands (codex is built but has no dependency target yet).
 	const runtimeName = "@spwn/claude-code"
 	const settingsPath = "/home/spwn/.claude/settings.json"
 

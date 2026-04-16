@@ -1,7 +1,7 @@
 version: 2
 name: macrohard
 
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/node"

@@ -41,7 +41,7 @@ func scaffoldProject(t *testing.T, manifest string, agents map[string]string) st
 func TestToCompileInput_MergesProjectAndAgentDeps(t *testing.T) {
 	manifest := `version: 2
 name: merge-test
-deps:
+dependencies:
   - "@spwn/unix"
   - shared-tool
 worlds:
@@ -51,7 +51,7 @@ worlds:
 `
 	agentYAML := `name: neo
 role: worker
-deps:
+dependencies:
   - "@spwn/git"
   - agent-only-tool
 `
@@ -67,7 +67,7 @@ deps:
 		t.Fatalf("ToCompileInput: %v", err)
 	}
 
-	// The merged set should contain both project-level and agent-level deps.
+	// The merged set should contain both project-level and agent-level dependency.
 	depsSet := map[string]bool{}
 	for _, d := range in.Deps {
 		depsSet[d] = true
@@ -90,7 +90,7 @@ deps:
 func TestToCompileInput_AgentInheritsProjectDeps(t *testing.T) {
 	manifest := `version: 2
 name: inherit-test
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
 worlds:
@@ -115,7 +115,7 @@ role: worker
 	}
 
 	// Agent has 0 deps, project has 2 — the compile input should have
-	// the project-level deps.
+	// the project-level dependency.
 	want := []string{"@spwn/git", "@spwn/unix"}
 	if !equalStrings(in.Deps, want) {
 		t.Errorf("Manifest.Deps = %v, want %v", in.Deps, want)
@@ -127,7 +127,7 @@ role: worker
 func TestToCompileInput_NoAgentYAML(t *testing.T) {
 	manifest := `version: 2
 name: noconfig
-deps:
+dependencies:
   - "@spwn/python"
 worlds:
   home:
@@ -157,7 +157,7 @@ worlds:
 func TestToCompileInput_DeduplicatesDeps(t *testing.T) {
 	manifest := `version: 2
 name: dedup-test
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
 worlds:
@@ -167,7 +167,7 @@ worlds:
 `
 	agentYAML := `name: neo
 role: worker
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
   - extra
@@ -226,7 +226,7 @@ role: worker
 func TestToCompileInput_MultiAgentMerge(t *testing.T) {
 	manifest := `version: 2
 name: multi
-deps:
+dependencies:
   - shared
 worlds:
   team:
@@ -234,8 +234,8 @@ worlds:
     workspaces: [.]
 `
 	agents := map[string]string{
-		"alpha": "name: alpha\nrole: worker\ndeps:\n  - tool-a\n",
-		"beta":  "name: beta\nrole: worker\ndeps:\n  - tool-b\n",
+		"alpha": "name: alpha\nrole: worker\ndependencies:\n  - tool-a\n",
+		"beta":  "name: beta\nrole: worker\ndependencies:\n  - tool-b\n",
 	}
 	root := scaffoldProject(t, manifest, agents)
 

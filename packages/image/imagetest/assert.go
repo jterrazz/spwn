@@ -1,7 +1,7 @@
 package imagetest
 
 import (
-	"spwn.sh/packages/deps"
+	"spwn.sh/packages/dependency"
 	"io/fs"
 	"strings"
 	"testing"
@@ -17,9 +17,9 @@ func AssertValidTool(t *testing.T, tool ib.Tool) {
 		t.Errorf("name %q must start with @", tool.Name())
 	}
 
-	validKinds := map[deps.Kind]bool{
-		deps.KindRuntime: true, deps.KindTool: true,
-		deps.KindSDK: true, deps.KindPlatform: true,
+	validKinds := map[dependency.Kind]bool{
+		dependency.KindRuntime: true, dependency.KindTool: true,
+		dependency.KindSDK: true, dependency.KindPlatform: true,
 	}
 	if !validKinds[tool.Kind()] {
 		t.Errorf("invalid kind %q", tool.Kind())

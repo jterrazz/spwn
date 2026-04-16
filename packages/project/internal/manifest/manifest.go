@@ -39,8 +39,8 @@ type Manifest struct {
 
 	// Deps is the project-wide dependency pool. Every agent in
 	// every world inherits these. Agent-level agent.yaml can add
-	// more but cannot remove project-level deps.
-	Deps []string `yaml:"deps,omitempty"`
+	// more but cannot remove project-level dependency.
+	Deps []string `yaml:"dependencies,omitempty"`
 }
 
 // World is one inline world entry in spwn.yaml.

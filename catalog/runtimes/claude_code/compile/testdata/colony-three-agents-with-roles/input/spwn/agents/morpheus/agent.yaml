@@ -2,5 +2,5 @@ name: morpheus
 role: manager
 runtime:
   backend: "@spwn/claude-code"
-deps:
+dependencies:
   - "@spwn/unix"

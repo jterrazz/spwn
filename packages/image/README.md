@@ -100,7 +100,7 @@ mounts, cred sync).
   an existing base image, producing a pushable project artifact.
 - **Build + verify** - run `docker build`, then probe the resulting
   base image to confirm every declared tool actually works.
-- **Runtime config** - collect pack `Config(runtime)` contributions
+- **Runtime config** - collect dependency `Config(runtime)` contributions
   so `architect.Spawn` can merge them into the container's runtime
   settings file after boot.
 

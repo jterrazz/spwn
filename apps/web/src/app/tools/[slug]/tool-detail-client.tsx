@@ -296,10 +296,10 @@ export default function ToolDetailPage() {
                         <p className="text-sm text-muted-foreground/50">{tool.useWhen}</p>
                     </DetailSection>
 
-                    {tool.deps.length > 0 && (
+                    {tool.dependencies.length > 0 && (
                         <DetailSection label="Dependencies">
                             <div className="flex flex-wrap gap-1.5">
-                                {tool.deps.map((d) => (
+                                {tool.dependencies.map((d) => (
                                     <button
                                         className="text-[11px] font-mono px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-muted-foreground/50 hover:text-foreground/70 hover:border-white/[0.15] transition-colors"
                                         key={d}
@@ -339,9 +339,9 @@ export default function ToolDetailPage() {
                             {`tools:
   - ${tool.name}`}
                         </pre>
-                        {tool.deps.length > 0 && (
+                        {tool.dependencies.length > 0 && (
                             <p className="text-[10px] text-muted-foreground/25 mt-2">
-                                {tool.deps.join(', ')} will be installed automatically.
+                                {tool.dependencies.join(', ')} will be installed automatically.
                             </p>
                         )}
                     </DetailSection>

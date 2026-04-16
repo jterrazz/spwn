@@ -7,7 +7,7 @@ runtime:
 # Agent-specific deps — additions only.
 # Project-wide deps (unix, git) are inherited from spwn.yaml.
 # Only list what THIS agent needs beyond the shared set.
-deps:
+dependencies:
   - "@spwn/node"
 
 # Local skills live in spwn/skills/<name>.md at the project root.

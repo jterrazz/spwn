@@ -24,7 +24,7 @@ name: __NAME__
 runtime:
   backend: "@spwn/claude-code"
 
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/python"

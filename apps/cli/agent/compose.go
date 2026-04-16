@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/catalog/packs"
+	"spwn.sh/catalog/dependencies"
 	"spwn.sh/packages/agent"
 )
 
@@ -17,15 +17,15 @@ import (
 // Composition commands for attaching reusable blocks (tools, skills) to an
 // agent. These edit ~/.spwn/agents/<name>/agent.yaml directly.
 
-var composePacks []string
+var composeDeps []string
 
 func init() {
-	addCmd.Flags().StringArrayVar(&composePacks, "pack", nil, "Pack ref to add (repeatable, e.g. @spwn/python)")
-	addCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --pack")
+	addCmd.Flags().StringArrayVar(&composeDeps, "dep", nil, "Dependency ref to add (repeatable, e.g. @spwn/python)")
+	addCmd.Flags().StringArrayVar(&composeDeps, "deps", nil, "Plural alias for --dep")
 	Cmd.AddCommand(addCmd)
 
-	removeCmd.Flags().StringArrayVar(&composePacks, "pack", nil, "Pack ref to remove (repeatable)")
-	removeCmd.Flags().StringArrayVar(&composePacks, "packs", nil, "Plural alias for --pack")
+	removeCmd.Flags().StringArrayVar(&composeDeps, "dep", nil, "Dependency ref to remove (repeatable)")
+	removeCmd.Flags().StringArrayVar(&composeDeps, "deps", nil, "Plural alias for --dep")
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
@@ -34,18 +34,18 @@ func init() {
 
 var addCmd = &cobra.Command{
 	Use:   "add <agent-name>",
-	Short: "Add packs to an agent",
+	Short: "Add dependencies to an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Compose an agent by attaching packs.
+	Long: `Compose an agent by attaching dependencies.
 
 Examples:
-  spwn agent add neo --pack @spwn/python
-  spwn agent add neo --packs @spwn/unix --packs @spwn/git
-  spwn agent add neo --pack @spwn/unix --pack @spwn/git`,
+  spwn agent add neo --dep @spwn/python
+  spwn agent add neo --deps @spwn/unix --deps @spwn/git
+  spwn agent add neo --dep @spwn/unix --dep @spwn/git`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composePacks) == 0 {
-			return fmt.Errorf("nothing to add.\nPass at least one --pack")
+		if len(composeDeps) == 0 {
+			return fmt.Errorf("nothing to add.\nPass at least one --dep")
 		}
 
 		if err := agent.ValidateMind(name); err != nil {
@@ -53,12 +53,12 @@ Examples:
 		}
 
 		// Pre-flight every catalog ref against the catalog so we never
-		// write an unknown pack to agent.yaml. Bare-name local refs
-		// are skipped here — they resolve against the project tree at
-		// build time, not the catalog.
-		for _, p := range composePacks {
+		// write an unknown dependency to agent.yaml. Bare-name local
+		// refs are skipped here — they resolve against the project tree
+		// at build time, not the catalog.
+		for _, p := range composeDeps {
 			if strings.HasPrefix(p, "@") && !knownComposeRef(p) {
-				return unknownComposeRefError("pack", p)
+				return unknownComposeRefError("dependency", p)
 			}
 		}
 
@@ -66,11 +66,11 @@ Examples:
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, p := range composePacks {
-			if err := agent.AddPack(name, p); err != nil {
-				return fmt.Errorf("add pack %q: %w", p, err)
+		for _, p := range composeDeps {
+			if err := agent.AddDependency(name, p); err != nil {
+				return fmt.Errorf("add dependency %q: %w", p, err)
 			}
-			s.Done("+ pack", p)
+			s.Done("+ dep", p)
 		}
 
 		s.Blank()
@@ -82,20 +82,20 @@ Examples:
 
 var removeCmd = &cobra.Command{
 	Use:   "remove <agent-name>",
-	Short: "Remove packs from an agent",
+	Short: "Remove dependencies from an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Remove packs from an agent's composition.
+	Long: `Remove dependencies from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent remove <name> --pack X' removes just that entry.
+'spwn agent remove <name> --dep X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --pack @spwn/python
-  spwn agent remove neo --packs @spwn/mempalace`,
+  spwn agent remove neo --dep @spwn/python
+  spwn agent remove neo --deps @spwn/mempalace`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composePacks) == 0 {
-			return fmt.Errorf("nothing to remove.\nPass at least one --pack")
+		if len(composeDeps) == 0 {
+			return fmt.Errorf("nothing to remove.\nPass at least one --dep")
 		}
 
 		if err := agent.ValidateMind(name); err != nil {
@@ -117,9 +117,9 @@ Examples:
 			}
 			return false
 		}
-		for _, p := range composePacks {
+		for _, p := range composeDeps {
 			if !hasString(preflight.Deps, p) {
-				return fmt.Errorf("pack %q is not attached to agent %q — nothing to remove", p, name)
+				return fmt.Errorf("dependency %q is not attached to agent %q — nothing to remove", p, name)
 			}
 		}
 
@@ -127,11 +127,11 @@ Examples:
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, p := range composePacks {
-			if err := agent.RemovePack(name, p); err != nil {
-				return fmt.Errorf("remove pack %q: %w", p, err)
+		for _, p := range composeDeps {
+			if err := agent.RemoveDependency(name, p); err != nil {
+				return fmt.Errorf("remove dependency %q: %w", p, err)
 			}
-			s.Done("- pack", p)
+			s.Done("- dep", p)
 		}
 		s.Blank()
 		s.Success("Composition updated.")
@@ -147,7 +147,7 @@ var publishCmd = &cobra.Command{
 	Long: `Publish an agent to the community registry for others to pull.
 
 Memory (journal, knowledge, sessions) is stripped before publishing -
-only the composition (tools, skills) and identity ship.
+only the composition (dependencies, skills) and identity ship.
 
 Not yet implemented - tracks the registry (planned).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -206,13 +206,12 @@ func (e *notImplementedError) Error() string {
 func (e *notImplementedError) ExitCode() int { return 2 }
 
 // knownComposeRef reports whether the given @scope/name[@version]
-// reference matches a built-in pack in the catalog. Used by
-// `agent add` to preflight --pack refs before they
-// hit agent.yaml.
+// reference matches a built-in dependency in the catalog. Used by
+// `agent add` to preflight --dep refs before they hit agent.yaml.
 func knownComposeRef(ref string) bool {
-	pack := stripVersion(ref)
-	for _, t := range packs.All {
-		if t.Name() == pack {
+	name := stripVersion(ref)
+	for _, t := range dependencies.All {
+		if t.Name() == name {
 			return true
 		}
 	}
@@ -238,16 +237,15 @@ func stripVersion(ref string) string {
 }
 
 // unknownComposeRefError formats the refusal message shown when the
-// user passes --pack with a reference the catalog does
-// not know about. The "known:" list mirrors what `spwn check` shows
-// so the two commands never disagree.
+// user passes --dep with a reference the catalog does not know about.
+// The "known:" list mirrors what `spwn check` shows so the two
+// commands never disagree.
 func unknownComposeRefError(kind, ref string) error {
-	known := make([]string, 0, len(packs.All))
-	for _, t := range packs.All {
+	known := make([]string, 0, len(dependencies.All))
+	for _, t := range dependencies.All {
 		known = append(known, t.Name())
 	}
 	sort.Strings(known)
 	return fmt.Errorf("%s %q does not exist.\nknown: %s",
 		kind, ref, strings.Join(known, ", "))
 }
-

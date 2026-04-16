@@ -270,7 +270,7 @@ func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir stri
 		walkErr = closeErr
 	}
 	if walkErr != nil {
-		return fmt.Errorf("pack %s: %w", hostSrcDir, walkErr)
+		return fmt.Errorf("dependency %s: %w", hostSrcDir, walkErr)
 	}
 
 	return d.client.CopyToContainer(ctx, containerID, "/", &buf, types.CopyToContainerOptions{})

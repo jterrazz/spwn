@@ -3,6 +3,6 @@ name: morpheus
 runtime:
     backend: '@spwn/claude-code'
 
-deps:
+dependencies:
     - '@spwn/unix'
     - '@spwn/git'

@@ -49,7 +49,7 @@ tools:
 }
 
 func TestSpawn_PackExpansion(t *testing.T) {
-	// Given - a config requesting the @spwn/unix pack
+	// Given - a config requesting the @spwn/unix dependency
 	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
@@ -63,7 +63,7 @@ tools:
 		NoAgent().
 		Execute()
 
-	// Then - the faculties should include all @spwn/unix pack members
+	// Then - the faculties should include all @spwn/unix dependency members
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.FileContains("/world/faculties.md", "bash")
 		c.FileContains("/world/faculties.md", "grep")

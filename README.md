@@ -33,7 +33,7 @@
 
 The real power of AI isn't the model. It's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions. Oppenheimer in a lab - with instruments, notebooks, colleagues, and years of memory - can change the world. **The environment is the multiplier.**
 
-That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code**: stack tool packs, skill files, and an identity into a running mind, then commit the whole declaration to git. Review the PR that changes an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**. **Docker for intelligence.**
+That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code**: stack tool dependencies, skill files, and an identity into a running mind, then commit the whole declaration to git. Review the PR that changes an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**. **Docker for intelligence.**
 
 <br/>
 
@@ -65,7 +65,7 @@ Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent w
 <tr>
 <td align="center" width="33%">
 <h3>🧩 Composable Intelligence</h3>
-Stack tool packs, skill files, and an identity into a running mind. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher identity and you have an autonomous scientist. <b>Docker, but for minds.</b>
+Stack tool dependencies, skill files, and an identity into a running mind. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher identity and you have an autonomous scientist. <b>Docker, but for minds.</b>
 </td>
 <td align="center" width="33%">
 <h3>🧠 Persistent Minds</h3>
@@ -147,7 +147,7 @@ Each agent is a directory of composable blocks - **human-readable, git-friendly,
 
 ```
 spwn/agents/neo/
-├── agent.yaml                # composition: deps + runtime
+├── agent.yaml                # composition: dependencies + runtime
 ├── AGENTS.md                 # entry point (provider-neutral; compiled per runtime)
 ├── identity/                 # who the agent is - profile.md, purpose.md, traits.md
 ├── knowledge/                # facts about the codebase
@@ -155,7 +155,7 @@ spwn/agents/neo/
 └── journal/                  # session history - one file per run
 ```
 
-**Everything is a pack.** Tools, runtime-config injectors, and skills all unified under one concept. A pack can install apt-get deps, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
+**Everything is a dependency.** Tools, runtime-config injectors, and skills all unified under one concept. A dependency can install apt packages, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
 
 ```yaml
 # spwn/agents/neo/agent.yaml
@@ -163,7 +163,7 @@ name: neo
 runtime:
   backend: "@spwn/claude-code"
 
-deps:
+dependencies:
   - "@spwn/unix"                 # bash, coreutils, grep, sed, awk
   - "@spwn/git"                  # version control
   - "@spwn/python"               # python3, pip3
@@ -172,14 +172,14 @@ deps:
   - hypothesis-testing           # local skill
 ```
 
-**If a pack isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [pack catalog](docs/pack-catalog.md).
+**If a dependency isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [dependency catalog](docs/dependency-catalog.md).
 
 Dependency resolution works like npm:
-- `@spwn/<name>` is a catalog pack compiled into the spwn binary.
-- `<bare-name>` is a local skill under `spwn/skills/<name>.md` or a local pack under `spwn/tools/<name>/`.
+- `@spwn/<name>` is a catalog dependency compiled into the spwn binary.
+- `<bare-name>` is a local skill under `spwn/skills/<name>.md` or a local dependency under `spwn/tools/<name>/`.
 - `@<owner>/<name>` is reserved for a future community registry.
 
-Add a catalog pack to every agent with `spwn install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
+Add a catalog dependency to every agent with `spwn install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
 
 **Agents evolve through three mechanisms:**
 
@@ -217,8 +217,8 @@ Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lo
 
 ```bash
 spwn init
-spwn agent add curie --pack @spwn/python --pack @spwn/qmd
-spwn agent add curie --pack paper-reading --plugin hypothesis-testing
+spwn agent add curie --dependency @spwn/python --dependency @spwn/qmd
+spwn agent add curie --dependency paper-reading --plugin hypothesis-testing
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
@@ -230,7 +230,7 @@ spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag a
 ```bash
 cd acme-api
 spwn init
-spwn agent add neo --pack @spwn/node --pack @spwn/git
+spwn agent add neo --dependency @spwn/node --dependency @spwn/git
 
 git add spwn.yaml spwn/
 git commit -m "add neo, our repo maintainer"
@@ -302,9 +302,9 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn agent logs neo                          Event log for this agent
 
 # Compose
-🟢 spwn agent add neo --pack @spwn/python     Attach a dep to the agent
-🟡 spwn agent add neo --pack paper-reading    Attach a local pack
-🟢 spwn agent rm  neo --pack @spwn/python     Remove a dep from the agent
+🟢 spwn agent add neo --dependency @spwn/python     Attach a dep to the agent
+🟡 spwn agent add neo --dependency paper-reading    Attach a local dependency
+🟢 spwn agent rm  neo --dependency @spwn/python     Remove a dep from the agent
 
 # Talk + messaging
 🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`
@@ -396,7 +396,7 @@ Every layer is a swappable Go interface. Same status legend as the CLI table:
 | **LLM provider** | 🟢 Anthropic · 🟡 OpenAI | 🔴 Google, Mistral, Groq, Together, Ollama, AWS Bedrock |
 | **World runtime** | 🟢 Docker | 🔴 Spwn Cloud, K3s, Firecracker, Fly.io, gVisor, Podman |
 | **Memory** | 🟢 Markdown filesystem | 🔴 RAG over Chroma, Qdrant, Pinecone, Weaviate, Turbopuffer |
-| **Tool ecosystem** | 🟢 `@spwn/*` built-in packs · 🟡 local custom packs | 🔴 MCP servers, LangChain tools |
+| **Tool ecosystem** | 🟢 `@spwn/*` built-in dependencies · 🟡 local custom dependencies | 🔴 MCP servers, LangChain tools |
 | **Orchestrator** | 🟡 built-in chief / worker hierarchy | 🔴 Hermes, CrewAI, AutoGen, LangGraph, Swarm, Mastra |
 | **Observability** | 🟡 Web UI | 🔴 Langfuse, LangSmith, Helicone, OpenTelemetry |
 
@@ -412,7 +412,7 @@ Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - 
 | **Dependencies** - deps, local blocks, lock file, resolution | [`docs/dependencies.md`](docs/dependencies.md) |
 | **Architecture** - module map, core abstractions, invariants | [`docs/architecture.md`](docs/architecture.md) |
 | **Worlds** - spawning, isolation, tools-as-structure | [`docs/worlds.md`](docs/worlds.md) |
-| **Pack catalog** - how packs work, how to add one | [`docs/pack-catalog.md`](docs/pack-catalog.md) |
+| **Dependency catalog** - how dependencies work, how to add one | [`docs/dependency-catalog.md`](docs/dependency-catalog.md) |
 | **CLI reference** - every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
 | **Releasing** - release runbook | [`docs/releasing.md`](docs/releasing.md) |
 | **Update system** - CLI + Tauri auto-update, channels | [`docs/update-system.md`](docs/update-system.md) |

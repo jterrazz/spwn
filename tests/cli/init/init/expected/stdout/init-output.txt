@@ -1,6 +1,6 @@
   Committed:
     spwn.yaml                      # project manifest (worlds live inline)
-    spwn.lock                 # committed pack pins (like package-lock.json)
+    spwn.lock                 # committed dependency pins (like package-lock.json)
     spwn/agents/neo/               # starter agent
 
   Gitignored:

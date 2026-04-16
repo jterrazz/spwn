@@ -12,7 +12,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * Dropped legacy coverage:
  *   - "physics constants documented in physics.md": the physics.md
  *     template no longer materialises CPU / Memory / Timeout values.
- *   - "element pack expansion with @spwn/node": the fixture ships
+ *   - "element dependency expansion with @spwn/node": the fixture ships
  *     @spwn/unix + @spwn/git only. Testing @spwn/node would require
  *     a new fixture clone — out of scope.
  */
@@ -28,7 +28,7 @@ describe('world security', () => {
         await world[Symbol.asyncDispose]();
     });
 
-    test('declared element packs expand into live binaries inside the container', async () => {
+    test('declared element dependencies expand into live binaries inside the container', async () => {
         const neo = world.container('neo');
         expect(neo.running).toBe(true);
 
