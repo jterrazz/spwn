@@ -89,7 +89,7 @@ func runInitLocal(cmd *cobra.Command) error {
 	s.Blank()
 	fmt.Fprintln(cmd.OutOrStdout(), "  Committed:")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.yaml                      # project manifest (worlds live inline)")
-	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.lock.yaml                 # committed plugin pins (like package-lock.json)")
+	fmt.Fprintln(cmd.OutOrStdout(), "    spwn.lock                 # committed plugin pins (like package-lock.json)")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/agents/neo/               # starter agent")
 	fmt.Fprintln(cmd.OutOrStdout(), "")
 	fmt.Fprintln(cmd.OutOrStdout(), "  Gitignored:")

@@ -168,10 +168,10 @@ func Install(slug, baseDir string) (InstallReport, error) {
 		rep.WorldsAdded = append(rep.WorldsAdded, ex.Worlds...)
 	}
 
-	// --- spwn.lock.yaml (committed dep pin) ---
-	lockDst := filepath.Join(baseDir, "spwn.lock.yaml")
+	// --- spwn.lock (committed dep pin) ---
+	lockDst := filepath.Join(baseDir, "spwn.lock")
 	if !exists(lockDst) {
-		lockSrc := path(slug, "spwn.lock.yaml")
+		lockSrc := path(slug, "spwn.lock")
 		if data, rerr := examplesFS.ReadFile(lockSrc); rerr == nil {
 			_ = os.WriteFile(lockDst, data, 0o644)
 		}

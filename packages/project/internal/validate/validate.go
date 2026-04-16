@@ -693,7 +693,7 @@ func rulePacksExist(in Input) []Issue {
 
 // ruleLockfileConsistent compares every @spwn/* or @<owner>/*
 // pack ref declared in any agent.yaml or spwn.yaml world against
-// spwn.lock.yaml. Missing entries become errors so `spwn build` fails
+// spwn.lock. Missing entries become errors so `spwn build` fails
 // loudly and points the user at `spwn plugin install`.
 //
 // Local (bare) refs are never lockfile-tracked.

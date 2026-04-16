@@ -5,26 +5,26 @@ import { spec } from '../../setup/cli.specification.js';
 /**
  * Coverage for `spwn pack install` / `spwn pack uninstall` —
  * the npm-style dependency-management verbs. These mutate the target
- * agent.yaml plus the project-root spwn.lock.yaml and never touch
+ * agent.yaml plus the project-root spwn.lock and never touch
  * Docker, so the tests run fast against the lightweight docker-pilot
  * fixture.
  *
  * What's locked in here:
- *   - installing an @spwn/* ref pins it in spwn.lock.yaml
+ *   - installing an @spwn/* ref pins it in spwn.lock
  *   - installing a bare name is rejected with an authoring hint
  *   - installing @<owner>/* is rejected as unsupported
  *   - uninstall removes the ref from agent.yaml and the lockfile
  *   - double-install is idempotent (no duplicate agent.yaml entry)
  */
 describe('spwn pack install', () => {
-    test('pins an @spwn/* ref into spwn.lock.yaml', async () => {
+    test('pins an @spwn/* ref into spwn.lock', async () => {
         const result = await spec('pack install builtin')
             .project('docker-pilot')
             .exec('pack install @spwn/python')
             .run();
 
         expect(result.exitCode).toBe(0);
-        const lock = result.file('spwn.lock.yaml');
+        const lock = result.file('spwn.lock');
         expect(lock.exists).toBe(true);
         expect(lock.content).toContain('@spwn/python');
         expect(lock.content).toContain('source: builtin');
@@ -83,7 +83,7 @@ describe('spwn pack install', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.file('spwn.lock.yaml').content).toContain('@spwn/python');
+        expect(result.file('spwn.lock').content).toContain('@spwn/python');
     });
 });
 
@@ -98,7 +98,7 @@ describe('spwn pack uninstall', () => {
         const agentYaml = result.file('spwn/agents/neo/agent.yaml');
         expect(agentYaml.content).not.toContain('@spwn/python');
 
-        const lock = result.file('spwn.lock.yaml');
+        const lock = result.file('spwn.lock');
         if (lock.exists) {
             expect(lock.content).not.toContain('@spwn/python');
         }

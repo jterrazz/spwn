@@ -26,8 +26,8 @@ func TestLoadOrEmpty_missing(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	if l == nil || l.Version != lockfile.CurrentVersion {
-		t.Errorf("want fresh lockfile at current version, got %+v", l)
+	if l == nil {
+		t.Error("want fresh lockfile, got nil")
 	}
 }
 
@@ -54,6 +54,28 @@ func TestSaveLoad_roundtrip(t *testing.T) {
 	e := got.Deps["@spwn/unix"]
 	if e.Version != "24.04" || e.Source != lockfile.SourceBuiltin {
 		t.Errorf("entry mangled: %+v", e)
+	}
+}
+
+func TestSave_lineOriented(t *testing.T) {
+	root := t.TempDir()
+	l := lockfile.Empty()
+	l.Add("@spwn/unix", lockfile.Entry{Version: "24.04", Source: lockfile.SourceBuiltin})
+
+	if err := lockfile.Save(root, l); err != nil {
+		t.Fatalf("save: %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, lockfile.FileName))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	content := string(data)
+	if !strings.Contains(content, "# spwn.lock") {
+		t.Errorf("missing header comment")
+	}
+	if !strings.Contains(content, "@spwn/unix 24.04 builtin") {
+		t.Errorf("expected line-oriented format, got:\n%s", content)
 	}
 }
 
@@ -90,14 +112,26 @@ func TestRemove(t *testing.T) {
 	}
 }
 
-func TestLoad_unsupportedVersion(t *testing.T) {
+func TestLoad_legacyYAML(t *testing.T) {
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, lockfile.FileName),
-		[]byte("version: 999\npackages: {}\n"), 0o644); err != nil {
+	yaml := `version: 1
+deps:
+  "@spwn/unix":
+    version: "24.04"
+    source: builtin
+  "@spwn/git":
+    version: "2.43"
+    source: builtin
+`
+	if err := os.WriteFile(filepath.Join(root, lockfile.FileName), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := lockfile.Load(root); err == nil {
-		t.Error("expected error for version 999")
+	l, err := lockfile.Load(root)
+	if err != nil {
+		t.Fatalf("load legacy: %v", err)
+	}
+	if !l.Has("@spwn/unix") || !l.Has("@spwn/git") {
+		t.Errorf("legacy parse failed: %+v", l.Deps)
 	}
 }
 
