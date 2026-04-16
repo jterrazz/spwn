@@ -5,13 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/upgrade"
+	"spwn.sh/packages/migration"
 )
 
 // SimplifyArchitectDir consolidates the architect directory to a single
 // stack.md file. If directives.md exists its content is appended to stack.md
 // (with a separator). todo.md is removed unconditionally.
-var SimplifyArchitectDir = upgrade.Migration{
+var SimplifyArchitectDir = migration.Migration{
 	Number:      10,
 	Description: "simplify architect/ to stack.md only",
 	Apply: func(_ context.Context, baseDir string) error {

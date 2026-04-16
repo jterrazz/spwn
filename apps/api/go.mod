@@ -40,6 +40,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	spwn.sh/packages/architect v0.0.0
 	spwn.sh/packages/project v0.0.0
+	spwn.sh/packages/update v0.0.0
 )
 
 replace (
@@ -55,3 +56,5 @@ replace (
 replace spwn.sh/packages/architect => ../../packages/architect
 
 replace spwn.sh/packages/project => ../../packages/project
+
+replace spwn.sh/packages/update => ../../packages/update

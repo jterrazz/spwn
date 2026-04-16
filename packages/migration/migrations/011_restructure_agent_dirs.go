@@ -8,14 +8,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/upgrade"
+	"spwn.sh/packages/migration"
 
 	"gopkg.in/yaml.v3"
 )
 
 // RestructureAgentDirs renames core/ to identity/, flattens memory/ subdirs
 // to root level, and merges sessions/ into journal/.
-var RestructureAgentDirs = upgrade.Migration{
+var RestructureAgentDirs = migration.Migration{
 	Number:      11,
 	Description: "restructure agent dirs: core->identity, flatten memory, merge sessions into journal",
 	Apply: func(_ context.Context, baseDir string) error {

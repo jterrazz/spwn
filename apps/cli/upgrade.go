@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/upgrade/update"
+	"spwn.sh/packages/update"
 	"spwn.sh/packages/architect"
 
 	"github.com/spf13/cobra"
