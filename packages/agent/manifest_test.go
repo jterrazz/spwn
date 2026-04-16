@@ -125,18 +125,18 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 	}
 }
 
-// ── AddPack / RemovePack ──────────────────────────────────────────────
+// ── AddDependency / RemoveDependency ──────────────────────────────────────────────
 
-func TestAddPackage_AppendsAndIsIdempotent(t *testing.T) {
+func TestAddDependency_AppendsAndIsIdempotent(t *testing.T) {
 	initAgent(t, "neo")
 
-	if err := AddPack("neo", "@spwn/python"); err != nil {
+	if err := AddDependency("neo", "@spwn/python"); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddPack("neo", "@spwn/unix"); err != nil {
+	if err := AddDependency("neo", "@spwn/unix"); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddPack("neo", "@spwn/python"); err != nil {
+	if err := AddDependency("neo", "@spwn/python"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -146,13 +146,13 @@ func TestAddPackage_AppendsAndIsIdempotent(t *testing.T) {
 	}
 }
 
-func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
+func TestRemoveDependency_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 	initAgent(t, "neo")
 
-	AddPack("neo", "@spwn/python")
-	AddPack("neo", "@spwn/git")
+	AddDependency("neo", "@spwn/python")
+	AddDependency("neo", "@spwn/git")
 
-	if err := RemovePack("neo", "@spwn/git"); err != nil {
+	if err := RemoveDependency("neo", "@spwn/git"); err != nil {
 		t.Fatal(err)
 	}
 	m, _ := LoadManifest("neo")
@@ -160,7 +160,7 @@ func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 		t.Errorf("after remove: %v", m.Deps)
 	}
 
-	if err := RemovePack("neo", "@spwn/never-added"); err != nil {
+	if err := RemoveDependency("neo", "@spwn/never-added"); err != nil {
 		t.Errorf("remove absent: %v", err)
 	}
 	m, _ = LoadManifest("neo")
@@ -172,13 +172,13 @@ func TestRemovePackage_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 func TestComposition_FullRoundtrip(t *testing.T) {
 	initAgent(t, "neo")
 
-	AddPack("neo", "@spwn/unix")
-	AddPack("neo", "@spwn/python")
-	AddPack("neo", "refactoring")
-	AddPack("neo", "paper-reading")
+	AddDependency("neo", "@spwn/unix")
+	AddDependency("neo", "@spwn/python")
+	AddDependency("neo", "refactoring")
+	AddDependency("neo", "paper-reading")
 
-	RemovePack("neo", "@spwn/unix")
-	RemovePack("neo", "paper-reading")
+	RemoveDependency("neo", "@spwn/unix")
+	RemoveDependency("neo", "paper-reading")
 
 	m, err := LoadManifest("neo")
 	if err != nil {

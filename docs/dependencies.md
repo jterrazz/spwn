@@ -4,14 +4,14 @@ How spwn projects declare, install, and resolve the tools, skills, and capabilit
 
 ## The model
 
-External dependencies live in **`deps:`** — a flat list in `spwn.yaml` (project-wide) and optionally in each `agent.yaml` (agent-specific additions). Local authored blocks live in **typed directories** under `spwn/`.
+External dependencies live in **`dependencies:`** — a flat list in `spwn.yaml` (project-wide) and optionally in each `agent.yaml` (agent-specific additions). Local authored blocks live in **typed directories** under `spwn/`.
 
 ```yaml
 # spwn.yaml — project manifest
 version: 2
 name: acme-api
 
-deps:                              # project-wide — every agent inherits these
+dependencies:                      # project-wide — every agent inherits these
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/python"
@@ -29,7 +29,7 @@ name: neo
 runtime:
   backend: "@spwn/claude-code"
 
-deps:                              # agent-specific additions (on top of project deps)
+dependencies:                      # agent-specific additions (on top of project deps)
   - "@spwn/qmd"
 
 skills:                            # local skills this agent uses
@@ -45,7 +45,7 @@ hooks:                             # lifecycle hooks
 
 ## Reference kinds
 
-Every ref in `deps:` is one of three kinds:
+Every ref in `dependencies:` is one of three kinds:
 
 | Kind | Syntax | Resolved from |
 |------|--------|--------------|
@@ -65,12 +65,12 @@ Bare names in typed sections resolve from their matching directory:
 
 ```
 my-project/
-├── spwn.yaml              # project manifest + deps
+├── spwn.yaml              # project manifest + dependencies
 ├── spwn.lock              # pinned versions (DO NOT EDIT)
 ├── spwn/
 │   ├── agents/
 │   │   └── neo/
-│   │       ├── agent.yaml     # agent deps + local block references
+│   │       ├── agent.yaml     # agent dependencies + local block references
 │   │       ├── AGENTS.md      # agent prompt (provider-neutral)
 │   │       ├── identity/      # who the agent is
 │   │       ├── skills/        # agent-scoped skills (only this agent)
@@ -105,7 +105,7 @@ Each line: `<ref> <version> <source>`. Managed by `spwn install` / `spwn uninsta
 ## CLI
 
 ```bash
-# Install / remove external deps
+# Install / remove external dependencies
 spwn install @spwn/python                    # add to every agent + pin in spwn.lock
 spwn install github.com/jterrazz/skills      # (planned) install from GitHub
 spwn uninstall @spwn/python                  # remove from agents + lockfile
@@ -115,41 +115,41 @@ spwn skill new paper-reading                 # create spwn/skills/paper-reading.
 spwn skill edit paper-reading                # open in $EDITOR
 spwn skill show paper-reading                # display
 spwn skill rm paper-reading                  # delete
-spwn skill ls                                # list all skills (local + from deps)
+spwn skill ls                                # list all skills (local + from dependencies)
 ```
 
 ## Resolution flow
 
 When `spwn up` or `spwn build` runs:
 
-1. **Collect deps**: merge project-level `spwn.yaml#deps` + each agent's `agent.yaml#deps`
-2. **Resolve transitive**: for each dep, recursively expand its `dependencies:` field (from `spwn.yaml`)
-3. **Topological sort**: Kahn's algorithm orders deps so dependencies come before dependents
+1. **Collect dependencies**: merge project-level `spwn.yaml#dependencies` + each agent's `agent.yaml#dependencies`
+2. **Resolve transitive**: for each dependency, recursively expand its `dependencies:` field (from `spwn.yaml`)
+3. **Topological sort**: Kahn's algorithm orders dependencies so dependencies come before dependents
 4. **Deduplicate**: same ref from multiple sources appears once
-5. **Build image**: generate Dockerfile with install steps from each resolved dep
+5. **Build image**: generate Dockerfile with install steps from each resolved dependency
 6. **Compile tree**: render per-agent `CLAUDE.md`, skills, world files into the container
 
-Local blocks (skills, tools, hooks) are discovered from the `spwn/` directories and compiled into the tree alongside dep-provided content.
+Local blocks (skills, tools, hooks) are discovered from the `spwn/` directories and compiled into the tree alongside dependency-provided content.
 
 ## Inheritance
 
-Agents inherit all project-level deps automatically. An agent's `deps:` section adds to the project pool — it cannot remove from it.
+Agents inherit all project-level dependencies automatically. An agent's `dependencies:` section adds to the project pool — it cannot remove from it.
 
 ```yaml
 # spwn.yaml
-deps: ["@spwn/unix", "@spwn/git"]     # every agent gets these
+dependencies: ["@spwn/unix", "@spwn/git"]     # every agent gets these
 
 # agent.yaml for neo
-deps: ["@spwn/python"]                 # neo also gets python
-# neo's resolved deps: @spwn/unix + @spwn/git + @spwn/python
+dependencies: ["@spwn/python"]                # neo also gets python
+# neo's resolved dependencies: @spwn/unix + @spwn/git + @spwn/python
 ```
 
 ## Version pinning
 
-Catalog deps (`@spwn/*`) are compiled into the binary — their version is the spwn CLI version. GitHub deps (planned) will use git tags with minimum version selection:
+Catalog dependencies (`@spwn/*`) are compiled into the binary — their version is the spwn CLI version. GitHub dependencies (planned) will use git tags with minimum version selection:
 
 ```yaml
-deps:
+dependencies:
   - github.com/acme/tools           # latest tag
   - github.com/acme/tools@1.2       # minimum v1.2.x
   - github.com/acme/tools@1.2.3     # exact pin
@@ -157,21 +157,21 @@ deps:
 
 The lock file records the resolved version so builds are reproducible.
 
-## Publishing a pack
+## Publishing a dependency
 
-A pack is a spwn project without `worlds:`. Push it to GitHub, tag a release, and anyone can install it:
+A publishable dependency is a spwn project without `worlds:`. Push it to GitHub, tag a release, and anyone can install it:
 
 ```yaml
-# spwn.yaml in a pack repo
+# spwn.yaml in a dependency repo
 name: my-research-tools
 version: "1.0.0"
 description: "Tools for scientific agents"
 
-# No worlds: — this is a distributable pack, not a project
+# No worlds: — this is a distributable dependency, not a project
 ```
 
 ```
-my-pack-repo/
+my-dep-repo/
 ├── spwn.yaml
 └── spwn/
     ├── tools/

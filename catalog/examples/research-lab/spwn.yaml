@@ -7,7 +7,7 @@
 version: 2
 name: research-lab
 
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/python"

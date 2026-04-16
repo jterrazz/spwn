@@ -1,0 +1,7 @@
+name: neo
+
+runtime:
+  backend: "@spwn/claude-code"
+
+dependencies:
+  - "@spwn/mempalace"

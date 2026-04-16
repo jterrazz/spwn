@@ -1,11 +1,11 @@
 # Agent composition — the source of truth for what this agent needs.
 #
-# deps: lists external dependencies (catalog packs or GitHub repos).
+# dependencies: lists external dependencies (catalog or GitHub repos).
 # skills: / tools: / hooks: list local blocks authored in spwn/.
 #
 # Resolution:
-#   @spwn/<name>                 built-in catalog pack
-#   github.com/<owner>/<repo>    third-party pack (git tags as versions)
+#   @spwn/<name>                 built-in catalog dependency
+#   github.com/<owner>/<repo>    third-party dependency (git tags as versions)
 #   <bare-name>                  local (spwn/skills/, spwn/tools/, spwn/hooks/)
 
 name: neo
@@ -13,7 +13,7 @@ name: neo
 runtime:
   backend: "@spwn/claude-code"
 
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/python"

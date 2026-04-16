@@ -32,7 +32,7 @@ Mind (persistent agent identity).
 * [spwn logs](./spwn_logs.md)	 - Show the system event log across worlds and agents
 * [spwn ls](./spwn_ls.md)	 - Agent-centric status (running / stopped / orphan)
 * [spwn organization](./spwn_organization.md)	 - [experimental] Manage organizations - list and inspect role structures
-* [spwn skill](./spwn_skill.md)	 - Author bare-markdown skill packages
+* [spwn skill](./spwn_skill.md)	 - Author bare-markdown skill files
 * [spwn status](./spwn_status.md)	 - Show the full status of your spwn environment
 * [spwn team](./spwn_team.md)	 - [experimental] Manage teams - create, list, edit, and remove agent groups
 * [spwn uninstall](./spwn_uninstall.md)	 - Remove a dependency from the project

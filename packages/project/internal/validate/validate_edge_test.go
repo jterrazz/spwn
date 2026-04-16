@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
-	"spwn.sh/packages/deps"
+	"spwn.sh/packages/dependency"
 )
 
 // helper: build a minimal Input with one world and given agent refs.
@@ -46,7 +46,7 @@ func TestEdge_PacksExist_EmptyDeps(t *testing.T) {
 func TestEdge_PacksExist_DuplicateRefs(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/unix"
 `)
@@ -61,22 +61,22 @@ deps:
 	}
 }
 
-// 3. rulePacksExist where agent.yaml has a local bare-name ref that exists in spwn/packs/
+// 3. rulePacksExist where agent.yaml has a local bare-name ref that exists in spwn/dependencies/
 func TestEdge_PacksExist_LocalPackDir(t *testing.T) {
 	root := t.TempDir()
-	packDir := filepath.Join(root, "spwn", "tools", "my-local-pack")
+	packDir := filepath.Join(root, "spwn", "tools", "my-local-dependency")
 	if err := os.MkdirAll(packDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
-deps:
-  - my-local-pack
+dependencies:
+  - my-local-dependency
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	issues := rulePacksExist(in)
 	for _, iss := range issues {
-		if strings.Contains(iss.Message, "my-local-pack") {
-			t.Errorf("local pack dir exists, should not error: %+v", iss)
+		if strings.Contains(iss.Message, "my-local-dependency") {
+			t.Errorf("local dependency dir exists, should not error: %+v", iss)
 		}
 	}
 }
@@ -92,7 +92,7 @@ func TestEdge_PacksExist_LocalSkillFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
-deps:
+dependencies:
   - research
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
@@ -108,7 +108,7 @@ deps:
 func TestEdge_PacksExist_VersionedRef(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
-deps:
+dependencies:
   - "@spwn/unix@24.04"
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
@@ -121,15 +121,15 @@ deps:
 	}
 }
 
-// 6. rulePackVersionConflict with two agents using different versions of same pack
+// 6. rulePackVersionConflict with two agents using different versions of same dependency
 func TestEdge_PackVersionConflict_DifferentVersions(t *testing.T) {
 	root := t.TempDir()
 	a1 := scaffoldAgent(t, root, "agent-a", `name: agent-a
-deps:
+dependencies:
   - "@spwn/git@1.0"
 `)
 	a2 := scaffoldAgent(t, root, "agent-b", `name: agent-b
-deps:
+dependencies:
   - "@spwn/git@2.0"
 `)
 	in := minimalInput(root, []AgentRef{a1, a2}, nil)
@@ -149,11 +149,11 @@ deps:
 func TestEdge_PackVersionConflict_IdenticalVersions(t *testing.T) {
 	root := t.TempDir()
 	a1 := scaffoldAgent(t, root, "agent-a", `name: agent-a
-deps:
+dependencies:
   - "@spwn/git@1.0"
 `)
 	a2 := scaffoldAgent(t, root, "agent-b", `name: agent-b
-deps:
+dependencies:
   - "@spwn/git@1.0"
 `)
 	in := minimalInput(root, []AgentRef{a1, a2}, nil)
@@ -166,10 +166,10 @@ deps:
 // 8. ruleLockfileConsistent with project-level deps that ARE in lockfile (no issue)
 func TestEdge_LockfileConsistent_ProjectDepsPresent(t *testing.T) {
 	root := t.TempDir()
-	// No agents needed, just project-level deps.
-	l := deps.EmptyLockfile()
-	l.Add("@spwn/unix", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
-	l.Add("@spwn/git", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
+	// No agents needed, just project-level dependency.
+	l := dependency.EmptyLockfile()
+	l.Add("@spwn/unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
+	l.Add("@spwn/git", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -190,8 +190,8 @@ func TestEdge_LockfileConsistent_ProjectDepsPresent(t *testing.T) {
 // 9. ruleLockfileConsistent with project-level deps missing from lockfile
 func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 	root := t.TempDir()
-	l := deps.EmptyLockfile()
-	l.Add("@spwn/unix", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
+	l := dependency.EmptyLockfile()
+	l.Add("@spwn/unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -218,11 +218,11 @@ func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 	}
 }
 
-// 10. Error messages contain "pack" not "plugin" or "package"
+// 10. Error messages contain "dependency" not "plugin" or "package"
 func TestEdge_ErrorMessages_SayPack(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
-deps:
+dependencies:
   - "@spwn/nonexistent"
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
@@ -234,23 +234,23 @@ deps:
 			t.Errorf("message should not say 'plugin': %q", iss.Message)
 		}
 		// "package" appears in the conflict rule message, check that base
-		// existence messages use "pack" terminology.
-		if strings.Contains(iss.Message, "pack") || strings.Contains(iss.Message, "does not exist") {
-			// OK - contains "pack" wording
+		// existence messages use "dependency" terminology.
+		if strings.Contains(iss.Message, "dependency") || strings.Contains(iss.Message, "does not exist") {
+			// OK - contains "dependency" wording
 		}
 	}
 	if len(issues) == 0 {
 		t.Fatal("expected at least one issue for nonexistent ref")
 	}
-	// Verify the message says "pack" (not "plugin").
+	// Verify the message says "dependency" (not "plugin").
 	found := false
 	for _, iss := range issues {
-		if strings.Contains(iss.Message, "pack") {
+		if strings.Contains(iss.Message, "dependency") {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("expected 'pack' in error message, got: %+v", issues)
+		t.Errorf("expected 'dependency' in error message, got: %+v", issues)
 	}
 }
 
@@ -258,7 +258,7 @@ deps:
 func TestEdge_ErrorPaths_UseDeps(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
-deps:
+dependencies:
   - "@spwn/nonexistent"
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
@@ -284,11 +284,11 @@ deps:
 func TestEdge_Hints_SaySpwnInstall(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
-deps:
+dependencies:
   - "@spwn/missing-thing"
 `)
 	// Create a lockfile so the rule fires.
-	writeLockfile(t, root, deps.EmptyLockfile())
+	writeLockfile(t, root, dependency.EmptyLockfile())
 
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	in.BuiltinTools = []string{"@spwn/something-else"}
@@ -299,7 +299,7 @@ deps:
 	allIssues = append(allIssues, ruleLockfileConsistent(in)...)
 
 	if len(allIssues) == 0 {
-		t.Fatal("expected issues for missing pack")
+		t.Fatal("expected issues for missing dependency")
 	}
 
 	for _, iss := range allIssues {

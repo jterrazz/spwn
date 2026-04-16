@@ -13,8 +13,8 @@ Lifecycle:
   rm <name>                        Delete an agent
 
 Compose:
-  add <name>                       Attach blocks (--pack / --skill)
-  remove <name>                    Detach blocks (--pack / --skill)
+  add <name>                       Attach blocks (--dep / --skill)
+  remove <name>                    Detach blocks (--dep / --skill)
 
 Conversation:
   talk <name> [msg]                Open a session with a running agent (sync)
@@ -40,6 +40,6 @@ Portability:
 
 Examples:
   spwn agent create neo
-  spwn agent add neo --pack @spwn/python --skill paper-reading
+  spwn agent add neo --dep @spwn/python --skill paper-reading
   spwn agent neo
 

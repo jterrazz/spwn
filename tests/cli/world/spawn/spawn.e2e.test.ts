@@ -62,7 +62,7 @@ describe('world spawn', () => {
             const labels = inspectData.Config?.Labels ?? {};
             const worldId = labels['sh.spwn.world.id'];
             expect(worldId).toBeTruthy();
-            expect(worldId).toMatch(/^(?:spwn-world|w)-[a-z0-9-]+-\d{5}$/);
+            expect(worldId).toMatch(/^(?:spwn-world|w)-[a-z0-9-]+-[0-9a-f]{5}$/);
             expect(labels['sh.spwn.world.config']).toBe('neo');
             expect(labels['sh.spwn.kind']).toBe('world');
         });
@@ -120,7 +120,7 @@ describe('world spawn', () => {
 
             // The agent's .claude/settings.json should be the minimal
             // Config spwn ships, not the host's (which has hooks,
-            // Packs, etc.).
+            // Dependencies, etc.).
             const settings = neo.file('/agents/neo/.claude/settings.json').content;
             const settingsConfig = JSON.parse(settings) as {
                 enabledPlugins?: unknown;

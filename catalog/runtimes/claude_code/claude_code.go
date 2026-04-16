@@ -1,7 +1,7 @@
 package claude_code
 
 import (
-	"spwn.sh/packages/deps"
+	"spwn.sh/packages/dependency"
 	"io/fs"
 
 	ib "spwn.sh/packages/image"
@@ -14,7 +14,7 @@ var Tool = &tool{}
 type tool struct{}
 
 func (*tool) Name() string    { return "@spwn/claude-code" }
-func (*tool) Kind() deps.Kind   { return deps.KindRuntime }
+func (*tool) Kind() dependency.Kind   { return dependency.KindRuntime }
 func (*tool) Version() string { return "latest" }
 
 // Dependencies: only @spwn/unix for curl + jq. We used to also

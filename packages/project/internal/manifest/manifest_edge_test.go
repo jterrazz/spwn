@@ -12,7 +12,7 @@ func TestLoadPath_TopLevelDeps(t *testing.T) {
 	dir := t.TempDir()
 	content := `version: 2
 name: deptest
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
   - custom-tool
@@ -68,7 +68,7 @@ func TestLoadPath_EmptyDepsList(t *testing.T) {
 	dir := t.TempDir()
 	content := `version: 2
 name: emptydep
-deps: []
+dependencies: []
 worlds:
   home:
     agents: [neo]
@@ -100,7 +100,7 @@ worlds:
   home:
     agents: [neo]
     workspaces: [.]
-    deps:
+    dependencies:
       - "@spwn/unix"
 `
 	path := filepath.Join(dir, "spwn.yaml")
@@ -137,7 +137,7 @@ worlds:
 func TestLoadPath_AppliesDefaults(t *testing.T) {
 	dir := t.TempDir()
 	content := `name: defaultstest
-deps:
+dependencies:
   - foo
 `
 	path := filepath.Join(dir, "spwn.yaml")

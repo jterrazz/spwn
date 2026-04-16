@@ -9,14 +9,14 @@ import (
 // map[string]any and overlays later values on top of earlier ones at
 // the top level. Used at spawn time to combine a runtime's baseline
 // config (e.g. the claude-code settings.json that ships in the image)
-// with the per-pack config snippets returned by Tool.Config.
+// with the per-dependency config snippets returned by Tool.Config.
 //
 // Merge rule: last write wins per top-level key. Values are not
-// recursively merged — a later pack that declares `mcpServers: {foo:
-// ...}` replaces an earlier pack's `mcpServers` entirely. This is
+// recursively merged — a later dependency that declares `mcpServers: {foo:
+// ...}` replaces an earlier dependency's `mcpServers` entirely. This is
 // deliberate: deep merge hides conflicts, shallow merge surfaces them
-// and keeps pack authoring trivial to reason about. Revisit if real
-// packs start needing deeper composition.
+// and keeps dependency authoring trivial to reason about. Revisit if real
+// dependencies start needing deeper composition.
 //
 // nil inputs are skipped. An empty result (no non-nil inputs) round-
 // trips as "{}".
@@ -51,11 +51,11 @@ func MergeRuntimeConfig(base []byte, additions ...[]byte) ([]byte, error) {
 }
 
 // CollectRuntimeConfigs walks a list of resolved tools, filters to
-// Packs whose Runtimes() includes the given runtime, and returns
+// Dependencies whose Runtimes() includes the given runtime, and returns
 // the non-nil Config() outputs in resolution order (last wins).
 //
 // This helper exists so the architect doesn't need to replicate the
-// Pack runtime-gating logic.
+// Dependency runtime-gating logic.
 func CollectRuntimeConfigs(resolved []Tool, runtime string) [][]byte {
 	var out [][]byte
 	for _, t := range resolved {

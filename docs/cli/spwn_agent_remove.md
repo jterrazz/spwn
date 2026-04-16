@@ -5,18 +5,18 @@ slug: "spwn-agent-remove"
 
 ## spwn agent remove
 
-Remove packs from an agent
+Remove dependencies from an agent
 
 ### Synopsis
 
-Remove packs from an agent's composition.
+Remove dependencies from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
-'spwn agent remove <name> --pack X' removes just that entry.
+'spwn agent remove <name> --dep X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --pack @spwn/python
-  spwn agent remove neo --packs @spwn/mempalace
+  spwn agent remove neo --dep @spwn/python
+  spwn agent remove neo --deps @spwn/mempalace
 
 ```
 spwn agent remove <agent-name> [flags]
@@ -25,9 +25,9 @@ spwn agent remove <agent-name> [flags]
 ### Options
 
 ```
-  -h, --help                help for remove
-      --pack stringArray    Pack ref to remove (repeatable)
-      --packs stringArray   Plural alias for --pack
+      --dep stringArray    Dependency ref to remove (repeatable)
+      --deps stringArray   Plural alias for --dep
+  -h, --help               help for remove
 ```
 
 ### SEE ALSO

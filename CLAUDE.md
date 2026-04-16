@@ -20,7 +20,7 @@ The domain has three main abstractions, each owning one concern:
 - **Architect**: The always-on orchestration daemon. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 
 ### Building blocks (composable, reusable)
-- **Pack**: The distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) that ships any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. Agents reference them as external deps.
+- **Dependency**: The distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) that ships any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. Agents reference them as external deps.
 - **Skill (bare form)**: A `spwn/skills/<name>.md` file. Simplest authoring path for "write a paragraph of instructions."
 
 ### Agent internals
@@ -66,11 +66,11 @@ spwn agent ls                                  # List project agents
 spwn agent inspect neo                         # Inspect composition, memory, history
 spwn agent fork neo neo-v2                     # Clone memory + composition
 spwn agent rm neo                              # Delete an agent
-spwn agent rm neo --pack @spwn/python       # Remove a dep from an agent
+spwn agent rm neo --dependency @spwn/python       # Remove a dep from an agent
 
 # Compose
-spwn agent add neo --pack @spwn/python      # Add a dep
-spwn agent add neo --pack paper-reading     # Add a local pack
+spwn agent add neo --dependency @spwn/python      # Add a dep
+spwn agent add neo --dependency paper-reading     # Add a local dependency
 
 # Talk + messaging
 spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`
@@ -111,7 +111,7 @@ spwn auth login|logout|token                   # Provider credentials
 
 **Design rules:**
 - Strict noun-first grammar: `spwn <noun> <verb>`. Three shortcuts exist: `up`, `ls`, `talk`. No other top-level verbs.
-- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --pack X` removes a dep from it.
+- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --dependency X` removes a dep from it.
 - Inside a project, commands resolve against `./spwn/` first. Outside a project, they operate on user-level paths (legacy).
 
 ## IDs
@@ -138,7 +138,7 @@ my-project/
 │   │       ├── playbooks/       # promoted patterns (via dream)
 │   │       └── journal/         # per-run history
 │   ├── skills/                  # project-scoped skill files
-│   └── tools/                   # project-scoped tool packs (optional)
+│   └── tools/                   # project-scoped tool dependencies (optional)
 └── .spwn/                       # gitignored local state
     ├── state.json               # live world IDs bound to this project
     └── cache/

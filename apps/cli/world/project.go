@@ -68,7 +68,7 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		return nil, fmt.Errorf("world %q is not defined in spwn.yaml", name)
 	}
 
-	// Union: project-level deps + every agent.yaml deps.
+	// Union: project-level deps + every agent.yaml dependency.
 	pkgSet := map[string]struct{}{}
 	var pkgs []string
 	add := func(t string) {

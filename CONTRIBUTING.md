@@ -38,7 +38,7 @@ apps/                   Deployable consumers
 
 catalog/                Shipped catalog (templates, tools, runtimes)
   templates/              Bundled scenario projects
-  tools/                  Composable tool packs
+  tools/                  Composable tool dependencies
   runtimes/               Agent runtimes (claude-code, codex)
 
 tests/                  TypeScript E2E test suite

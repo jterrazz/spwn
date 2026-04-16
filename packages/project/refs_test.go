@@ -29,7 +29,7 @@ worlds:
 	writeFile(t, filepath.Join(agentDir, "AGENTS.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "agent.yaml"), `runtime:
   backend: "@spwn/claude-code"
-deps:
+dependencies:
   - "@spwn/python"
   - "local-tool"
   - "local-missing"
@@ -37,7 +37,7 @@ deps:
   - "@community/sci"
 `)
 
-	// Local pack that exists on disk.
+	// Local dependency that exists on disk.
 	mustMkdir(t, filepath.Join(root, "spwn", "tools", "local-tool"))
 
 	p, err := Load(filepath.Join(root, "spwn.yaml"))

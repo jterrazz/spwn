@@ -50,8 +50,8 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
 			{Title: "Compose", Commands: []ui.HelpEntry{
-				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--pack / --skill)")},
-				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--pack / --skill)")},
+				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--dep / --skill)")},
+				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--dep / --skill)")},
 			}},
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
@@ -77,7 +77,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn agent create neo", Desc: ""},
-				{Name: "spwn agent add neo --pack @spwn/python --skill paper-reading", Desc: ""},
+				{Name: "spwn agent add neo --dep @spwn/python --skill paper-reading", Desc: ""},
 				{Name: "spwn agent neo", Desc: ""},
 			}},
 		},

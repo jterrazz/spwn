@@ -3,24 +3,24 @@ package cli
 import (
 	"github.com/spf13/cobra"
 
-	"spwn.sh/apps/cli/pack"
+	"spwn.sh/apps/cli/dependency"
 )
 
 // installCmd creates the root-level `spwn install <ref>` command.
-// Delegates to pack.RunInstall for the actual install logic.
+// Delegates to dependency.RunInstall for the actual install logic.
 // Like `go get` or `npm install` — one verb, no subcommand.
 func installCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "install <ref>",
 		Short: "Install a dependency into the project",
-		Long: `Add a catalog or GitHub pack to every agent's deps and pin it in spwn.lock.
+		Long: `Add a catalog or GitHub dependency to every agent's manifest and pin it in spwn.lock.
 
 Examples:
   spwn install @spwn/python
   spwn install github.com/jterrazz/research-skills`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return pack.RunInstall(cmd, args[0])
+			return dependency.RunInstall(cmd, args[0])
 		},
 	}
 }
@@ -33,7 +33,7 @@ func uninstallCmd() *cobra.Command {
 		Short:   "Remove a dependency from the project",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return pack.RunUninstall(cmd, args[0])
+			return dependency.RunUninstall(cmd, args[0])
 		},
 	}
 }

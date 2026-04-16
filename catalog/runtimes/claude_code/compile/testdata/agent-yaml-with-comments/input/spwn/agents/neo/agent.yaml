@@ -2,6 +2,6 @@
 name: neo            # basename under spwn/agents/
 role: worker         # default role
 
-# Catalog packs and local refs live in a single flat list.
-deps:
+# Catalog dependencies and local refs live in a single flat list.
+dependencies:
   - "@spwn/unix"     # POSIX basics

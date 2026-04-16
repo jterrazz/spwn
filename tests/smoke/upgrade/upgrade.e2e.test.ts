@@ -121,7 +121,7 @@ describe('smoke: project upgrade cycle', () => {
         // ── Phase 2: mutate the project ──────────────────────────
 
         // 2a. Add a tool the default scaffold doesn't ship. The
-        //     @spwn/qmd pack runs `npm install -g @tobilu/qmd`,
+        //     @spwn/qmd dependency runs `npm install -g @tobilu/qmd`,
         //     Which adds a new RUN layer to the Dockerfile - the
         //     Content hash changes and the cache misses.
         writeFileSync(

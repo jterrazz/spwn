@@ -5,9 +5,9 @@ import { spec } from '../../../setup/cli.specification.js';
 /**
  * Tool reference classification by `spwn check`:
  *
- *   @spwn/<name>      → built-in tool pack (must exist)
+ *   @spwn/<name>      → built-in tool dependency (must exist)
  *   @<owner>/<name>   → remote registry (not yet supported)
- *   <name>            → local pack under spwn/tools/<name>
+ *   <name>            → local dependency under spwn/tools/<name>
  *
  * The canonical success path is already covered by the check suite via
  * the single-agent fixture. These tests pin the classifier edges: a

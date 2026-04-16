@@ -13,6 +13,6 @@ use (
 	./packages/platform
 	./packages/upgrade
 	./packages/project
-	./packages/deps
+	./packages/dependency
 	./packages/world
 )

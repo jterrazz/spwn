@@ -1,2 +1,2 @@
 name: neo
-deps: ["@spwn/unix"]
+dependencies: ["@spwn/unix"]

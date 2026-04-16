@@ -13,16 +13,17 @@ import (
 //
 // The composition is a single flat dependency list. Under the old
 // tool/runtime-config/skill trichotomy, each entry would land in a different
-// key; under the unified package model they all share one `packages:`
-// list. The parser distinguishes what's what by the manifest the ref
-// resolves to (an `install:` block makes it a tool, a `runtime-config:` block
-// makes it a pack, a content-only body makes it a skill).
+// key; under the unified dependency model they all share one
+// `dependencies:` list. The parser distinguishes what's what by the
+// manifest the ref resolves to (an `install:` block makes it a tool,
+// a `runtime-config:` block makes it a runtime-config injector, a
+// content-only body makes it a skill).
 type Manifest struct {
-	Name     string        `yaml:"name,omitempty"`
-	Role     string        `yaml:"role,omitempty"`
-	Team     string        `yaml:"team,omitempty"`
-	Runtime  RuntimeConfig `yaml:"runtime,omitempty"`
-	Deps []string `yaml:"deps,omitempty"`
+	Name    string        `yaml:"name,omitempty"`
+	Role    string        `yaml:"role,omitempty"`
+	Team    string        `yaml:"team,omitempty"`
+	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
+	Deps    []string      `yaml:"dependencies,omitempty"`
 }
 
 // RuntimeConfig allows per-agent runtime override.
@@ -73,9 +74,9 @@ func SaveManifest(agentName string, m *Manifest) error {
 	return nil
 }
 
-// AddPack appends a pack ref to the agent's composition
+// AddDependency appends a dependency ref to the agent's composition
 // (idempotent). Replaces the old AddTool/AddPack/AddSkill trio.
-func AddPack(agentName, ref string) error {
+func AddDependency(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err
@@ -89,9 +90,9 @@ func AddPack(agentName, ref string) error {
 	return SaveManifest(agentName, m)
 }
 
-// RemovePack removes a pack ref from the agent's composition.
-// No-op when the ref isn't present.
-func RemovePack(agentName, ref string) error {
+// RemoveDependency removes a dependency ref from the agent's
+// composition. No-op when the ref isn't present.
+func RemoveDependency(agentName, ref string) error {
 	m, err := LoadManifest(agentName)
 	if err != nil {
 		return err

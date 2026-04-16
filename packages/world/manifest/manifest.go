@@ -13,7 +13,7 @@ import (
 
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
 type rawManifest struct {
-	Deps yaml.Node `yaml:"deps"`
+	Deps yaml.Node `yaml:"dependencies"`
 }
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
@@ -92,7 +92,7 @@ func CreateDefault() error {
 # Docs: https://spwn.sh/docs/cli/spwn-world
 
 # Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
-deps:
+dependencies:
   - "@spwn/unix"          # Core Unix tools
   - "@spwn/git"           # Git version control
   # - "@spwn/node"        # Node.js + npm
@@ -116,7 +116,7 @@ func CreateConfig(name string) error {
 
 	content := fmt.Sprintf(`# World config: %s
 
-deps:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
 `, name)

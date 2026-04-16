@@ -19,5 +19,5 @@ spwn skill ls [flags]
 
 ### SEE ALSO
 
-* [spwn skill](./spwn_skill.md)	 - Author bare-markdown skill packages
+* [spwn skill](./spwn_skill.md)	 - Author bare-markdown skill files
 

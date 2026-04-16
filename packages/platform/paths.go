@@ -74,7 +74,7 @@ func BaseDir() string {
 }
 
 // DataDir is the project-aware root for project assets - agents,
-// worlds, skills, custom tool packs. Returns <projectRoot>/spwn/ when
+// worlds, skills, custom tool dependencies. Returns <projectRoot>/spwn/ when
 // a project is active, or UserDir() otherwise (legacy global mode).
 func DataDir() string {
 	if root := ProjectRoot(); root != "" {

@@ -16,7 +16,7 @@ import (
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/resolve"
-	deps "spwn.sh/packages/deps"
+	"spwn.sh/packages/dependency"
 
 	"gopkg.in/yaml.v3"
 )
@@ -81,7 +81,7 @@ type Input struct {
 	OrphanRefs []AgentRef
 
 	// BuiltinTools is the authoritative catalog of known built-in
-	// packs (tools, skills, runtimes). Nil → fall back to
+	// dependencies (tools, skills, runtimes). Nil → fall back to
 	// @spwn/* prefix heuristic.
 	BuiltinTools []string
 
@@ -350,11 +350,11 @@ func ruleAgentStructure(in Input) []Issue {
 // agentYAML is the validator's local view of agent.yaml. Just enough
 // to drive rules.
 //
-// Deps replaces the old Tools/Packs/Skills trichotomy under the
+// Deps replaces the old Tools/Dependencies/Skills trichotomy under the
 // unified package model — see packages/agent/manifest.go.
 type agentYAML struct {
 	Name     string   `yaml:"name"`
-	Deps []string `yaml:"deps"`
+	Deps []string `yaml:"dependencies"`
 	Runtime  struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
@@ -520,8 +520,8 @@ func rulePackVersionConflict(in Input) []Issue {
 		if len(w.Agents) < 2 {
 			continue
 		}
-		// pack-name → seen versions
-		versions := map[string]map[string]string{} // pack → version → first-agent
+		// dependency-name → seen versions
+		versions := map[string]map[string]string{} // dependency → version → first-agent
 		for _, agentName := range w.Agents {
 			a := findAgent(in.AgentRefs, agentName)
 			if a == nil || !a.Exists {
@@ -532,11 +532,11 @@ func rulePackVersionConflict(in Input) []Issue {
 				continue
 			}
 			for _, t := range parsed.Deps {
-				pack, version := deps.SplitVersion(t)
-				vmap, ok := versions[pack]
+				depRef, version := dependency.SplitVersion(t)
+				vmap, ok := versions[depRef]
 				if !ok {
 					vmap = map[string]string{}
-					versions[pack] = vmap
+					versions[depRef] = vmap
 				}
 				if existing, ok := vmap[version]; !ok {
 					vmap[version] = agentName
@@ -544,14 +544,14 @@ func rulePackVersionConflict(in Input) []Issue {
 				}
 			}
 		}
-		for pack, vmap := range versions {
+		for depRef, vmap := range versions {
 			if len(vmap) <= 1 {
 				continue
 			}
 			out = append(out, Issue{
 				Level: LevelError, Path: "spwn.yaml#worlds." + wname,
-				Message: fmt.Sprintf("package %q has conflicting versions across agents in world %q", pack, wname),
-				Hint:    "align the package version across all agents that share a world",
+				Message: fmt.Sprintf("dependency %q has conflicting versions across agents in world %q", depRef, wname),
+				Hint:    "align the dependency version across all agents that share a world",
 			})
 		}
 	}
@@ -600,7 +600,7 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 	return out
 }
 
-// rulePacksExist checks every pack referenced by any agent or
+// rulePacksExist checks every dependency referenced by any agent or
 // world against the BuiltinTools catalog (for @spwn/* refs) and
 // against the filesystem (for bare local refs).
 //
@@ -619,52 +619,52 @@ func rulePacksExist(in Input) []Issue {
 	haveCatalog := in.BuiltinTools != nil
 	checked := map[string]bool{}
 	check := func(raw, location string) []Issue {
-		pack, _ := deps.SplitVersion(raw)
-		key := pack + "@@" + location
+		depRef, _ := dependency.SplitVersion(raw)
+		key := depRef + "@@" + location
 		if checked[key] {
 			return nil
 		}
 		checked[key] = true
-		ref := deps.ParseRef(pack)
+		ref := dependency.ParseRef(depRef)
 
 		// For @spwn/* and @<owner>/* refs, resolve against the
 		// catalog.
-		if ref.Kind != deps.KindLocal {
-			switch deps.ResolveTool(in.Root, ref, builtin, haveCatalog) {
-			case deps.ResolveOK:
+		if ref.Kind != dependency.KindLocal {
+			switch dependency.ResolveTool(in.Root, ref, builtin, haveCatalog) {
+			case dependency.ResolveOK:
 				return nil
-			case deps.ResolveRegistryUnsupported:
+			case dependency.ResolveRegistryUnsupported:
 				return []Issue{{
 					Level: LevelError, Path: location,
 					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
-					Hint: "use @spwn/<name> for built-in packs or drop a directory under ./spwn/tools/<name>/ for a local tool; " +
+					Hint: "use @spwn/<name> for built-in dependencies or drop a directory under ./spwn/tools/<name>/ for a local tool; " +
 						"remote registries (@<owner>/<name>) are planned but not implemented yet",
 				}}
 			default: // ResolveNotFound
 				return []Issue{{
 					Level: LevelError, Path: location,
-					Message: fmt.Sprintf("pack %q does not exist", raw),
-					Hint:    suggestPackage(pack, in.BuiltinTools),
+					Message: fmt.Sprintf("dependency %q does not exist", raw),
+					Hint:    suggestPackage(depRef, in.BuiltinTools),
 				}}
 			}
 		}
 
-		// Local ref: delegate to deps.ResolveSkill which already
-		// handles both the directory form (full package) and the
+		// Local ref: delegate to dependency.ResolveSkill which already
+		// handles both the directory form (full dependency) and the
 		// file form (bare markdown skill) against spwn/skills/ and spwn/tools/.
 		if ref.Name == "" {
 			return []Issue{{
 				Level: LevelError, Path: location,
-				Message: fmt.Sprintf("package %q is malformed", raw),
+				Message: fmt.Sprintf("dependency %q is malformed", raw),
 			}}
 		}
-		if deps.ResolveSkill(in.Root, ref, nil, false) == deps.ResolveOK {
+		if dependency.ResolveSkill(in.Root, ref, nil, false) == dependency.ResolveOK {
 			return nil
 		}
 		return []Issue{{
 			Level: LevelError, Path: location,
-			Message: fmt.Sprintf("pack %q does not exist", raw),
-			Hint: "create ./spwn/tools/" + ref.Name + "/spwn.yaml for a full pack, " +
+			Message: fmt.Sprintf("dependency %q does not exist", raw),
+			Hint: "create ./spwn/tools/" + ref.Name + "/spwn.yaml for a full dependency, " +
 				"or ./spwn/tools/" + ref.Name + ".md for a bare skill",
 		}}
 	}
@@ -691,7 +691,7 @@ func rulePacksExist(in Input) []Issue {
 }
 
 // ruleLockfileConsistent compares every @spwn/* or @<owner>/*
-// pack ref declared in any agent.yaml or spwn.yaml world against
+// dependency ref declared in any agent.yaml or spwn.yaml world against
 // spwn.lock. Missing entries become errors so `spwn build` fails
 // loudly and points the user at `spwn install`.
 //
@@ -704,12 +704,12 @@ func ruleLockfileConsistent(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
-	lock, err := deps.LoadLockfile(in.Root)
+	lock, err := dependency.LoadLockfile(in.Root)
 	if err != nil {
 		return []Issue{{
-			Level: LevelError, Path: deps.LockFileName,
+			Level: LevelError, Path: dependency.LockFileName,
 			Message: fmt.Sprintf("cannot read lockfile: %v", err),
-			Hint:    "regenerate with `spwn install` for each declared pack, or delete " + deps.LockFileName + " to start fresh",
+			Hint:    "regenerate with `spwn install` for each declared dependency, or delete " + dependency.LockFileName + " to start fresh",
 		}}
 	}
 	if lock == nil {
@@ -728,7 +728,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		}
 	}
 
-	// Project-level deps.
+	// Project-level dependency.
 	collect(in.Manifest.Deps, "spwn.yaml#deps")
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
@@ -745,23 +745,23 @@ func ruleLockfileConsistent(in Input) []Issue {
 	seen := map[string]bool{}
 	var out []Issue
 	for _, rec := range all {
-		pack, _ := deps.SplitVersion(rec.raw)
-		ref := deps.ParseRef(pack)
+		depRef, _ := dependency.SplitVersion(rec.raw)
+		ref := dependency.ParseRef(depRef)
 		// Local refs are never lockfile entries.
-		if ref.Kind == deps.KindLocal {
+		if ref.Kind == dependency.KindLocal {
 			continue
 		}
-		if seen[pack] {
+		if seen[depRef] {
 			continue
 		}
-		seen[pack] = true
-		if lock.Has(pack) {
+		seen[depRef] = true
+		if lock.Has(depRef) {
 			continue
 		}
 		out = append(out, Issue{
 			Level: LevelError, Path: rec.location,
-			Message: fmt.Sprintf("%q is not recorded in %s", pack, deps.LockFileName),
-			Hint:    "run `spwn install " + pack + "` to sync the lockfile",
+			Message: fmt.Sprintf("%q is not recorded in %s", depRef, dependency.LockFileName),
+			Hint:    "run `spwn install " + depRef + "` to sync the lockfile",
 		})
 	}
 	return out
@@ -873,7 +873,7 @@ func relPath(root, path string) string {
 
 func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
-		return "check the pack name, or add it as a local tool under ./spwn/tools/"
+		return "check the dependency name, or add it as a local tool under ./spwn/tools/"
 	}
 	best := ""
 	bestScore := len(tool) + 1

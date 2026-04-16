@@ -472,7 +472,7 @@ type projectManifest struct {
 type projectWorldDef struct {
 	Agents     []string `yaml:"agents"`
 	Workspaces []string `yaml:"workspaces"`
-	Deps []string `yaml:"deps,omitempty"`
+	Deps []string `yaml:"dependencies,omitempty"`
 }
 
 // loadProjectManifest reads <projectRoot>/spwn.yaml when a project

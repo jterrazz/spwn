@@ -1,7 +1,0 @@
-name: neo
-
-runtime:
-  backend: "@spwn/claude-code"
-
-deps:
-  - "@spwn/totally-bogus-pack"

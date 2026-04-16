@@ -1,7 +1,7 @@
 package architect
 
 import (
-	"spwn.sh/packages/deps"
+	"spwn.sh/packages/dependency"
 	"os"
 	"path/filepath"
 	"testing"
@@ -49,7 +49,7 @@ dependencies:
 	if got := tool.Version(); got != "1.2.3" {
 		t.Errorf("version: want 1.2.3, got %q", got)
 	}
-	if got := tool.Kind(); got != deps.KindTool {
+	if got := tool.Kind(); got != dependency.KindTool {
 		t.Errorf("kind: want Tool, got %v", got)
 	}
 	spec := tool.Install()
@@ -182,7 +182,7 @@ func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 
 	_, err := hydrateLocalPacks(reg, root, []string{"nonexistent"})
 	if err == nil {
-		t.Fatal("want error for missing local pack dir")
+		t.Fatal("want error for missing local dependency dir")
 	}
 }
 

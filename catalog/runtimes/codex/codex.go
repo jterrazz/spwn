@@ -1,7 +1,7 @@
 package codex
 
 import (
-	"spwn.sh/packages/deps"
+	"spwn.sh/packages/dependency"
 	"io/fs"
 
 	ib "spwn.sh/packages/image"
@@ -14,7 +14,7 @@ var Tool = &tool{}
 type tool struct{}
 
 func (*tool) Name() string           { return "@spwn/codex" }
-func (*tool) Kind() deps.Kind          { return deps.KindRuntime }
+func (*tool) Kind() dependency.Kind          { return dependency.KindRuntime }
 func (*tool) Version() string        { return "latest" }
 func (*tool) Dependencies() []string { return []string{"@spwn/node"} }
 

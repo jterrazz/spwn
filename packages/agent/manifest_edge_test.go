@@ -13,7 +13,7 @@ import (
 func TestLoadManifest_OldPluginsKeyIgnored(t *testing.T) {
 	dir := initAgent(t, "legacy")
 
-	// Write an agent.yaml that uses the old "plugins:" key instead of "deps:".
+	// Write an agent.yaml that uses the old "plugins:" key instead of "dependencies:".
 	content := `name: legacy
 role: worker
 plugins:
@@ -36,14 +36,14 @@ plugins:
 	}
 }
 
-// ── AddPack to agent with no agent.yaml yet ─────────────────────────────────
+// ── AddDependency to agent with no agent.yaml yet ─────────────────────────────────
 
-func TestAddPack_CreatesManifestIfMissing(t *testing.T) {
+func TestAddDependency_CreatesManifestIfMissing(t *testing.T) {
 	initAgent(t, "fresh")
 
-	// No agent.yaml exists yet — AddPack should create it.
-	if err := AddPack("fresh", "@spwn/python"); err != nil {
-		t.Fatalf("AddPack: %v", err)
+	// No agent.yaml exists yet — AddDependency should create it.
+	if err := AddDependency("fresh", "@spwn/python"); err != nil {
+		t.Fatalf("AddDependency: %v", err)
 	}
 
 	m, err := LoadManifest("fresh")
@@ -57,23 +57,23 @@ func TestAddPack_CreatesManifestIfMissing(t *testing.T) {
 	// Verify file actually exists on disk.
 	path := ManifestPath("fresh")
 	if _, err := os.Stat(path); err != nil {
-		t.Errorf("agent.yaml should exist after AddPack: %v", err)
+		t.Errorf("agent.yaml should exist after AddDependency: %v", err)
 	}
 }
 
-// ── RemovePack for ref not in list → no error ────────────────────────────────
+// ── RemoveDependency for ref not in list → no error ────────────────────────────────
 
-func TestRemovePack_AbsentRefNoError(t *testing.T) {
+func TestRemoveDependency_AbsentRefNoError(t *testing.T) {
 	initAgent(t, "sparse")
 
 	// Start with one dep.
-	if err := AddPack("sparse", "@spwn/unix"); err != nil {
+	if err := AddDependency("sparse", "@spwn/unix"); err != nil {
 		t.Fatal(err)
 	}
 
 	// Remove a ref that was never added — should succeed silently.
-	if err := RemovePack("sparse", "@spwn/never-existed"); err != nil {
-		t.Errorf("RemovePack of absent ref should not error, got: %v", err)
+	if err := RemoveDependency("sparse", "@spwn/never-existed"); err != nil {
+		t.Errorf("RemoveDependency of absent ref should not error, got: %v", err)
 	}
 
 	// Original dep should still be there.
@@ -83,24 +83,24 @@ func TestRemovePack_AbsentRefNoError(t *testing.T) {
 	}
 }
 
-func TestRemovePack_EmptyManifestNoError(t *testing.T) {
+func TestRemoveDependency_EmptyManifestNoError(t *testing.T) {
 	initAgent(t, "empty")
 
 	// No deps at all — remove should be a no-op.
-	if err := RemovePack("empty", "@spwn/anything"); err != nil {
-		t.Errorf("RemovePack on empty manifest should not error, got: %v", err)
+	if err := RemoveDependency("empty", "@spwn/anything"); err != nil {
+		t.Errorf("RemoveDependency on empty manifest should not error, got: %v", err)
 	}
 }
 
-// ── AddPack twice with same ref → idempotent ────────────────────────────────
+// ── AddDependency twice with same ref → idempotent ────────────────────────────────
 
-func TestAddPack_Idempotent(t *testing.T) {
+func TestAddDependency_Idempotent(t *testing.T) {
 	initAgent(t, "idem")
 
 	ref := "@spwn/git"
 	for i := 0; i < 3; i++ {
-		if err := AddPack("idem", ref); err != nil {
-			t.Fatalf("AddPack iteration %d: %v", i, err)
+		if err := AddDependency("idem", ref); err != nil {
+			t.Fatalf("AddDependency iteration %d: %v", i, err)
 		}
 	}
 
@@ -120,7 +120,7 @@ func TestLoadManifest_EmptyDepsList(t *testing.T) {
 
 	content := `name: nodeps
 role: worker
-deps: []
+dependencies: []
 `
 	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
@@ -164,7 +164,7 @@ role: worker
 
 // ── SaveManifest writes deps: not plugins: ───────────────────────────────────
 
-func TestSaveManifest_UsesDepsKey(t *testing.T) {
+func TestSaveManifest_UsesDependenciesKey(t *testing.T) {
 	initAgent(t, "schema")
 
 	m := &Manifest{
@@ -180,15 +180,15 @@ func TestSaveManifest_UsesDepsKey(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// The serialized YAML must use "deps:", never "plugins:".
+	// The serialized YAML must use "dependencies:", never "plugins:".
 	var parsed map[string]interface{}
 	if err := yaml.Unmarshal(raw, &parsed); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := parsed["plugins"]; ok {
-		t.Error("SaveManifest wrote a 'plugins:' key — expected 'deps:' only")
+		t.Error("SaveManifest wrote a 'plugins:' key — expected 'dependencies:' only")
 	}
-	if _, ok := parsed["deps"]; !ok {
-		t.Error("SaveManifest did not write a 'deps:' key")
+	if _, ok := parsed["dependencies"]; !ok {
+		t.Error("SaveManifest did not write a 'dependencies:' key")
 	}
 }

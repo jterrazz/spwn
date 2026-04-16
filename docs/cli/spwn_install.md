@@ -9,7 +9,7 @@ Install a dependency into the project
 
 ### Synopsis
 
-Add a catalog or GitHub pack to every agent's deps and pin it in spwn.lock.
+Add a catalog or GitHub dependency to every agent's manifest and pin it in spwn.lock.
 
 Examples:
   spwn install @spwn/python

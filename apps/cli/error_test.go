@@ -114,7 +114,7 @@ func TestCLI_AgentHelpShowsComposeFlags(t *testing.T) {
 	}
 
 	// The Compose section should mention the composition flags.
-	for _, flag := range []string{"--pack", "--skill"} {
+	for _, flag := range []string{"--dep", "--skill"} {
 		assertContains(t, out, flag, "agent compose flags")
 	}
 }
