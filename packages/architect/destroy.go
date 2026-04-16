@@ -9,6 +9,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/activity"
+	"spwn.sh/packages/world/deploy"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/platform"
 )
@@ -58,7 +59,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 	// Sync memory layers out of the container before stopping it.
 	// Best-effort: warnings surface via log but never block destroy.
 	if len(agentHomes) > 0 {
-		for _, w := range syncAgentsOutOf(ctx, a.backend, u.ContainerID, agentHomes) {
+		for _, w := range deploy.SyncOut(ctx, a.backend, u.ContainerID, agentHomes) {
 			log.Printf("warning: %s", w)
 		}
 	}

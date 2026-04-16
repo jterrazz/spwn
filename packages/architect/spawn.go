@@ -18,6 +18,7 @@ import (
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/world/deploy"
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/models"
@@ -127,8 +128,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	// No /agents bind mount under the new architecture. Each
 	// agent's home directory is copied INTO the container at
-	// /agents/<name>/ by syncAgentsInto() right after container
-	// start. On graceful shutdown (Destroy), syncAgentsOutOf()
+	// /agents/<name>/ by deploy.SyncIn() right after container
+	// start. On graceful shutdown (Destroy), deploy.SyncOut()
 	// copies the allowlisted memory directories back. Dotfiles,
 	// npm cache, .claude/*, etc. stay inside the container and die
 	// with it — the host project tree is never written to by a
@@ -424,7 +425,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// the container never flow back to the host except on graceful
 	// shutdown (see Destroy → syncAgentsOutOf).
 	agentHomes := agentHomesForSpawn(opts)
-	if err := syncAgentsInto(ctx, a.backend, containerID, agentHomes); err != nil {
+	if err := deploy.SyncIn(ctx, a.backend, containerID, agentHomes); err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("sync agent homes into container: %w", err)
@@ -484,7 +485,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("compile world: %w", err)
 	}
-	if err := materialiseWorldTree(ctx, a.backend, containerID, tree, worldStateDir); err != nil {
+	if err := deploy.MaterialiseTree(ctx, a.backend, containerID, tree, worldStateDir); err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("materialise world tree: %w", err)
@@ -659,48 +660,6 @@ func initAgentDeploymentDirs(rec models.AgentRecord, worldID string) error {
 	return nil
 }
 
-// materialiseWorldTree splits a compile.Tree into its two
-// destination surfaces: every entry under world/* goes to
-// worldStateDir on the host (bound as /world in the container),
-// every entry under agents/* is docker-cp'd directly into the
-// running container at /agents/<name>/ (no host side — under the
-// new architecture the agent tree is not bind-mounted).
-//
-// Any other prefix is an error.
-func materialiseWorldTree(ctx context.Context, be backend.Backend, containerID string, tree *compile.Tree, worldStateDir string) error {
-	var worldErr error
-	tree.Walk(func(path string, content []byte) {
-		if worldErr != nil {
-			return
-		}
-		switch {
-		case strings.HasPrefix(path, "world/"):
-			full := filepath.Join(worldStateDir, filepath.FromSlash(strings.TrimPrefix(path, "world/")))
-			if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-				worldErr = fmt.Errorf("mkdir %s: %w", filepath.Dir(full), err)
-				return
-			}
-			if err := os.WriteFile(full, content, 0o644); err != nil {
-				worldErr = fmt.Errorf("write %s: %w", full, err)
-				return
-			}
-		case strings.HasPrefix(path, "agents/"):
-			// Example path: "agents/neo/CLAUDE.md" →
-			// container path "/agents/neo/CLAUDE.md". Deliver via
-			// docker cp straight into the already-running container.
-			containerPath := "/" + path
-			if err := be.CopyTo(ctx, containerID, containerPath, content); err != nil {
-				worldErr = fmt.Errorf("cp %s into container: %w", containerPath, err)
-				return
-			}
-		default:
-			worldErr = fmt.Errorf("unexpected tree path %q: claudecode runtime must namespace files under world/ or agents/", path)
-			return
-		}
-	})
-	return worldErr
-}
-
 // injectRuntimeConfig computes the merged runtime config for the
 // world's runtime backend and writes it into the container's runtime
 // settings file.
@@ -810,58 +769,6 @@ func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containe
 		}
 	}
 	return nil
-}
-
-// syncAgentsInto copies every agent's host-side home tree into the
-// running container at /agents/<name>/. Called right after container
-// start, before any agent command runs.
-//
-// Directories that don't exist on the host (e.g. a freshly scaffolded
-// agent whose memory dirs are still empty) are silently skipped.
-func syncAgentsInto(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
-	hostRoot := platform.AgentsDir()
-	for agentName, containerHome := range agentHomes {
-		hostDir := filepath.Join(hostRoot, agentName)
-		if info, err := os.Stat(hostDir); err != nil || !info.IsDir() {
-			// Nothing to copy — a no-op agent (uncommon in practice).
-			continue
-		}
-		if err := be.CopyDirTo(ctx, containerID, containerHome, hostDir); err != nil {
-			return fmt.Errorf("copy %s → %s: %w", hostDir, containerHome, err)
-		}
-	}
-	return nil
-}
-
-// syncAgentsOutOf is the sync-back step run at graceful shutdown
-// (Destroy). For each agent in the world, it copies the allowlisted
-// memory directories (journal, knowledge, playbooks, skills) out of
-// the container and into the host-side agent tree. Anything else
-// inside /agents/<name>/ — identity files that didn't change, dotfiles,
-// runtime caches — stays in the container and is discarded.
-//
-// Failures per-agent per-dir are logged as warnings but don't abort
-// the destroy: a best-effort snapshot is better than nothing, and
-// the container is about to be removed anyway.
-func syncAgentsOutOf(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) []string {
-	// Allowlist: only these subdirs of /agents/<name>/ sync back.
-	// Everything else (dotfiles, .claude/, .npm/, .cache/, rebuilt
-	// CLAUDE.md, etc.) stays inside the container.
-	syncDirs := []string{"journal", "knowledge", "playbooks", "skills"}
-	hostRoot := platform.AgentsDir()
-
-	var warnings []string
-	for agentName, containerHome := range agentHomes {
-		hostDir := filepath.Join(hostRoot, agentName)
-		for _, sub := range syncDirs {
-			src := containerHome + "/" + sub
-			dst := filepath.Join(hostDir, sub)
-			if err := be.CopyDirFrom(ctx, containerID, src, dst); err != nil {
-				warnings = append(warnings, fmt.Sprintf("sync %s/%s: %v", agentName, sub, err))
-			}
-		}
-	}
-	return warnings
 }
 
 // rosterColony adapts an agent record list into the claudecode
