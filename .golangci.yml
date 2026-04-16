@@ -10,12 +10,70 @@ linters:
     - ineffassign
     - staticcheck
     - unused
-  disable:
     - depguard
 
 linters-settings:
   errcheck:
     check-type-assertions: true
+
+  depguard:
+    # Layer architecture enforcement.
+    #
+    # L1 Foundation  →  (nothing)         paths, base, ids
+    # L2 Domain      →  L1 only           pack, agent
+    # L3 Project     →  L1, L2            project
+    # L4 Build       →  L1, L2, L3       compile, image
+    # L5 Runtime     →  L1, L2, L3, L4   world
+    # L6 CLI         →  anything          apps/cli
+    #
+    # Each rule denies imports from layers above it.
+    rules:
+      # L2: Domain — must not import L3+ (project, compile, image, world).
+      domain-pack:
+        files: ["**/packages/pack/**"]
+        deny:
+          - pkg: "spwn.sh/packages/project"
+            desc: "L2 (domain) must not import L3 (project)"
+          - pkg: "spwn.sh/packages/compile"
+            desc: "L2 (domain) must not import L4 (build)"
+          - pkg: "spwn.sh/packages/world"
+            desc: "L2 (domain) must not import L5 (runtime)"
+
+      domain-agent:
+        files: ["**/packages/agent/**"]
+        deny:
+          - pkg: "spwn.sh/packages/project"
+            desc: "L2 (domain) must not import L3 (project)"
+          - pkg: "spwn.sh/packages/compile"
+            desc: "L2 (domain) must not import L4 (build)"
+          - pkg: "spwn.sh/packages/image"
+            desc: "L2 (domain) must not import L4 (build)"
+          - pkg: "spwn.sh/packages/world"
+            desc: "L2 (domain) must not import L5 (runtime)"
+
+      # L3: Project — must not import L4+ (compile, image, world).
+      project-layer:
+        files: ["**/packages/project/**"]
+        deny:
+          - pkg: "spwn.sh/packages/compile"
+            desc: "L3 (project) must not import L4 (build)"
+          - pkg: "spwn.sh/packages/image"
+            desc: "L3 (project) must not import L4 (build)"
+          - pkg: "spwn.sh/packages/world"
+            desc: "L3 (project) must not import L5 (runtime)"
+
+      # L4: Build — must not import L5 (world).
+      build-compile:
+        files: ["**/packages/compile/**"]
+        deny:
+          - pkg: "spwn.sh/packages/world"
+            desc: "L4 (build) must not import L5 (runtime)"
+
+      build-image:
+        files: ["**/packages/image/**"]
+        deny:
+          - pkg: "spwn.sh/packages/world"
+            desc: "L4 (build) must not import L5 (runtime)"
 
 issues:
   exclude-rules:

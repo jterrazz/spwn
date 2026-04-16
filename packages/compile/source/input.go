@@ -5,8 +5,7 @@ import (
 	"sort"
 
 	"spwn.sh/packages/compile"
-	"spwn.sh/packages/world/models"
-)
+	)
 
 // ToCompileInput projects a ProjectSource onto the compile.Input shape
 // that compile.Runtime.Render expects. worldName selects which world
@@ -98,9 +97,7 @@ func ToCompileInput(src *ProjectSource, worldName string) (compile.Input, error)
 	sort.Strings(packageList)
 
 	return compile.Input{
-		Manifest: models.Manifest{
-			Deps: packageList,
-		},
+		Deps:          packageList,
 		VerifiedTools: packageList,
 		WorldID:       selected,
 		Agents:        agents,

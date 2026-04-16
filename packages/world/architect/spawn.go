@@ -476,7 +476,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// bind mount), agents/* is docker-cp'd directly into the running
 	// container on top of the home tree seeded by syncAgentsInto.
 	compileInput := compile.Input{
-		Manifest:      opts.Manifest,
+		Deps: opts.Manifest.Deps,
 		VerifiedTools: verifiedTools,
 		WorldID:       id,
 		Agents:        rosterCompileAgents(rosterAgents),
@@ -885,6 +885,16 @@ func rosterCompileAgents(recs []models.AgentRecord) []compile.AgentInput {
 	out := make([]compile.AgentInput, 0, len(recs))
 	for _, r := range recs {
 		out = append(out, compile.AgentInput{Name: r.Name, Role: r.Role})
+	}
+	return out
+}
+
+// convertWorkspaces adapts the world-layer Workspace type to the
+// compile-layer Workspace type for rendering.
+func convertWorkspaces(ws []models.Workspace) []claudecode.Workspace {
+	out := make([]claudecode.Workspace, len(ws))
+	for i, w := range ws {
+		out[i] = claudecode.Workspace{Name: w.Name, Path: w.Path, ReadOnly: w.ReadOnly}
 	}
 	return out
 }

@@ -4,18 +4,17 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/models"
-)
+	)
 
 func TestGeneratePhysics(t *testing.T) {
 	tests := []struct {
 		name      string
-		manifest  models.Manifest
+		deps []string
 		wantParts []string
 	}{
 		{
 			name:     "contains_all_sections",
-			manifest: models.Manifest{},
+			deps: nil,
 			wantParts: []string{
 				"# Physics of This World",
 				"## Laws",
@@ -29,7 +28,7 @@ func TestGeneratePhysics(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GeneratePhysics(tt.manifest)
+			got := GeneratePhysics(tt.deps)
 			for _, part := range tt.wantParts {
 				if !strings.Contains(got, part) {
 					t.Errorf("GeneratePhysics() missing %q in output:\n%s", part, got)

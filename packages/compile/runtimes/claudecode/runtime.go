@@ -37,7 +37,7 @@ func (r *Runtime) Render(input compile.Input) (*compile.Tree, error) {
 	// every runtime today, but they still belong to a concrete
 	// runtime until a second target forces the shared bits up into
 	// a neutral sub-package.
-	t.AddString("world/physics.md", GeneratePhysics(input.Manifest))
+	t.AddString("world/physics.md", GeneratePhysics(input.Deps))
 	t.AddString("world/faculties.md", GenerateFaculties(input.VerifiedTools))
 	t.AddString("world/AGENTS.md", AgentsBook)
 

@@ -82,7 +82,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	// copied-in home. We only handle agents/* entries — the world/*
 	// files already exist from spawn time.
 	hotTree, err := compile.Compile("claude-code", compile.Input{
-		Manifest:      models.Manifest{},
+		Deps: nil,
 		VerifiedTools: nil,
 		WorldID:       worldID,
 		Agents:        []compile.AgentInput{{Name: rec.Name, Role: resolvedRole}},

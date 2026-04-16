@@ -35,7 +35,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		Ephemeral:  true,
 		WorldID:    worldID,
 		NPCTask:    task,
-		Workspaces: u.Workspaces,
+		Workspaces: convertWorkspaces(u.Workspaces),
 		Deps:    u.Manifest.Deps,
 	})
 	if err := a.backend.CopyTo(ctx, u.ContainerID, "world/AGENT.md", []byte(agentCtx)); err != nil {

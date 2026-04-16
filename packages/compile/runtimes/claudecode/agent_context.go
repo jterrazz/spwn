@@ -4,8 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"spwn.sh/packages/world/models"
-)
+	)
+
+// Workspace describes a mounted workspace for rendering.
+type Workspace struct {
+	Name     string
+	Path     string
+	ReadOnly bool
+}
+
 
 // AgentContextOpts configures the generation of an AGENTS.md context file.
 type AgentContextOpts struct {
@@ -17,7 +24,7 @@ type AgentContextOpts struct {
 	Superior      string
 	OrganizationName string
 	WorldID       string
-	Workspaces    []models.Workspace
+	Workspaces    []Workspace
 	Deps []string
 	OtherAgents   []AgentInfo // other agents in the world
 	Chief         string      // chief name (empty if this IS the chief or no chief)
@@ -279,7 +286,7 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec) string {
 // writeWorkspaces renders the Workspace: line(s) of the agent
 // context. When no workspaces are mounted the world is "ephemeral"
 // and /workspaces is empty.
-func writeWorkspaces(b *strings.Builder, workspaces []models.Workspace) {
+func writeWorkspaces(b *strings.Builder, workspaces []Workspace) {
 	switch len(workspaces) {
 	case 0:
 		b.WriteString("- Workspaces: none mounted (ephemeral world)\n")

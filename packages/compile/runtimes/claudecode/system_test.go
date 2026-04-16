@@ -4,8 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/models"
-)
+	)
 
 func TestAgentsBookContent(t *testing.T) {
 	// Verify that AGENTS.md content for a worker has key sections
@@ -13,7 +12,7 @@ func TestAgentsBookContent(t *testing.T) {
 		AgentName: "test-agent",
 		Role:      "worker",
 		WorldID:   "w-test-12345",
-		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
+		Workspaces: []Workspace{{Name: "default", Path: "/workspace"}},
 		Deps:   []string{"bash", "git"},
 	})
 
@@ -54,7 +53,7 @@ func TestSystemSkillsExist(t *testing.T) {
 		AgentName: "neo",
 		Role:      "worker",
 		WorldID:   "w-test-99999",
-		Workspaces: []models.Workspace{{Name: "default", Path: "/workspace"}},
+		Workspaces: []Workspace{{Name: "default", Path: "/workspace"}},
 		Deps:[]string{"bash"},
 		Chief:     "morpheus",
 		OtherAgents: []AgentInfo{
