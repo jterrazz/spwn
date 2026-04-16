@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/migration"
+	"spwn.sh/packages/upgrade"
 )
 
 // RenameHierarchiesToOrganizations renames ~/.spwn/hierarchies/ to ~/.spwn/organizations/.
-var RenameHierarchiesToOrganizations = migration.Migration{
+var RenameHierarchiesToOrganizations = upgrade.Migration{
 	Number:      12,
 	Description: "rename hierarchies/ directory to organizations/",
 	Apply: func(_ context.Context, baseDir string) error {

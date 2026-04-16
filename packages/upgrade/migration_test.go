@@ -1,4 +1,4 @@
-package migration
+package upgrade
 
 import (
 	"context"

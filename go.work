@@ -10,10 +10,9 @@ use (
 	./packages/compile
 	./packages/image
 	./packages/mailbox
-	./packages/migration
 	./packages/paths
+	./packages/upgrade
 	./packages/project
 	./packages/pack
-	./packages/version
 	./packages/world
 )

@@ -26,7 +26,7 @@ import (
 	examples "spwn.sh/catalog/examples"
 
 	"gopkg.in/yaml.v3"
-	"spwn.sh/packages/version"
+	"spwn.sh/packages/upgrade"
 )
 
 const webVersionCheckInterval = 1 * time.Hour
@@ -183,7 +183,7 @@ func (s *Server) Start() error {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{
 				"name":    "spwn spwn API",
-				"version": version.Version,
+				"version": upgrade.Version,
 				"docs":    "/api/health",
 				"dashboard": "http://localhost:3000",
 			})
@@ -310,7 +310,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	worlds, _ := s.state.List()
 	agents, _ := agentpkg.ListAgents()
 
-	vi := version.GetVersionInfo(webVersionCheckInterval)
+	vi := upgrade.GetVersionInfo(webVersionCheckInterval)
 
 	status := map[string]interface{}{
 		"worlds":          len(worlds),
@@ -324,7 +324,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
-	vi := version.GetVersionInfo(webVersionCheckInterval)
+	vi := upgrade.GetVersionInfo(webVersionCheckInterval)
 	jsonOK(w, vi)
 }
 
