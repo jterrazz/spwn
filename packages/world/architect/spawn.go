@@ -20,7 +20,6 @@ import (
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/internal/runtime"
-	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
@@ -153,7 +152,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		opts.progress("mind_validated", name)
 		// Parse agent.yaml (optional). Used for future composition validation
 		// against the world's available tools.
-		if _, err := manifest.LoadAgent(agent.AgentDir(name)); err != nil {
+		if _, err := agent.LoadManifestPath(agent.AgentDir(name)); err != nil {
 			return nil, fmt.Errorf("load agent manifest for %s: %w", name, err)
 		}
 	}
@@ -338,7 +337,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		worldRecord.Agent = opts.Agents[0].Name
 		worldRecord.AgentID = platform.GenerateAgentID(opts.Agents[0].Name)
 		for _, spec := range opts.Agents {
-			role := manifest.DefaultRole(spec.Role)
+			role := agent.DefaultRole(spec.Role)
 			worldRecord.Agents = append(worldRecord.Agents, models.AgentRecord{
 				Name:    spec.Name,
 				AgentID: platform.GenerateAgentID(spec.Name),

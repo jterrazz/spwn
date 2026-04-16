@@ -1,10 +1,10 @@
 package architect
 
 import (
+	"spwn.sh/packages/agent"
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/manifest"
 )
 
 func TestAgentSpec_DefaultRole(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAgentSpec_DefaultRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			spec := AgentSpec{Name: "test", Role: tt.role}
-			got := manifest.DefaultRole(spec.Role)
+			got := agent.DefaultRole(spec.Role)
 			if got != tt.wantRole {
 				t.Errorf("DefaultRole(%q) = %q, want %q", tt.role, got, tt.wantRole)
 			}
@@ -61,7 +61,7 @@ func TestChiefLimit(t *testing.T) {
 
 	chiefs := 0
 	for _, a := range agents {
-		if manifest.DefaultRole(a.Role) == "chief" {
+		if agent.DefaultRole(a.Role) == "chief" {
 			chiefs++
 		}
 	}
@@ -92,7 +92,7 @@ func TestMixedColony(t *testing.T) {
 
 	var chs, wkrs int
 	for _, a := range agents {
-		switch manifest.DefaultRole(a.Role) {
+		switch agent.DefaultRole(a.Role) {
 		case "chief":
 			chs++
 		case "worker":
@@ -112,7 +112,7 @@ func TestInvalidRole_Detection(t *testing.T) {
 	// SpawnAgents rejects unknown roles that aren't "chief", "manager", or "worker"
 	invalidRoles := []string{"admin", "root", "superuser", "CHIEF", "Worker"}
 	for _, role := range invalidRoles {
-		resolved := manifest.DefaultRole(role)
+		resolved := agent.DefaultRole(role)
 		if resolved == "chief" || resolved == "manager" || resolved == "worker" {
 			t.Errorf("role %q should not resolve to a valid role, got %q", role, resolved)
 		}
@@ -121,7 +121,7 @@ func TestInvalidRole_Detection(t *testing.T) {
 
 func TestDefaultRole_IsWorker(t *testing.T) {
 	// Explicitly verify the default is "worker", not something else
-	got := manifest.DefaultRole("")
+	got := agent.DefaultRole("")
 	if got != "worker" {
 		t.Errorf("DefaultRole(\"\") = %q, want \"worker\"", got)
 	}
@@ -136,7 +136,7 @@ func TestSingleChiefIsValid(t *testing.T) {
 
 	chiefs := 0
 	for _, a := range agents {
-		if manifest.DefaultRole(a.Role) == "chief" {
+		if agent.DefaultRole(a.Role) == "chief" {
 			chiefs++
 		}
 	}
@@ -154,7 +154,7 @@ func TestNoChiefIsValid(t *testing.T) {
 
 	chiefs := 0
 	for _, a := range agents {
-		if manifest.DefaultRole(a.Role) == "chief" {
+		if agent.DefaultRole(a.Role) == "chief" {
 			chiefs++
 		}
 	}

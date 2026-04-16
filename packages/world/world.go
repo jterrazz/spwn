@@ -3,6 +3,7 @@
 package world
 
 import (
+	"spwn.sh/packages/agent"
 	"context"
 	"fmt"
 	"io"
@@ -53,11 +54,6 @@ type ImageInfo = backend.ImageInfo
 type ContainerInfo = backend.ContainerInfo
 type Store = state.Store
 
-// Re-export manifest types.
-type AgentManifest = manifest.AgentManifest
-// OrgManifest is deprecated - org.yaml is no longer used.
-// Kept temporarily for migration compatibility.
-type OrgManifest = manifest.OrgManifest
 
 // --- Architect constructors ---
 
@@ -140,8 +136,8 @@ func ApplyDefaults(m *Manifest) {
 // treat the manifest as optional. External callers (notably the CLI
 // project resolver) use this to compute the tool union across a
 // world's referenced agents without reaching into internal packages.
-func LoadAgentManifest(agentDir string) (*AgentManifest, error) {
-	return manifest.LoadAgent(agentDir)
+func LoadAgentManifest(agentDir string) (*agent.Manifest, error) {
+	return agent.LoadManifestPath(agentDir)
 }
 
 // --- Runtime ---
