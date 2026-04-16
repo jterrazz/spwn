@@ -9,7 +9,7 @@
 //     `spwn pack install @spwn/unix` adds it to every agent's
 //     agent.yaml and records the pin in the lockfile.
 //   - <bare-name> is a local pack authored under
-//     spwn/packs/<name>/ (directory form) or spwn/packs/<name>.md
+//     spwn/packs/<name>/ (directory form) or spwn/skills/<name>.md
 //     (bare-markdown skill form). The install verb rejects bare names
 //     with a hint — they are not "installed", they are authored.
 //   - @<owner>/<name> (owner != spwn) is a future community-registry

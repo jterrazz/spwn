@@ -73,7 +73,7 @@ func TestOrgPath(t *testing.T) {
 func TestSkillsDir(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
 
-	want := "/tmp/test-spwn/plugins"
+	want := "/tmp/test-spwn/skills"
 	got := SkillsDir()
 	if got != want {
 		t.Errorf("SkillsDir() = %q, want %q", got, want)

@@ -10,7 +10,7 @@ import (
 
 func writePack(t *testing.T, root, name, yaml string) {
 	t.Helper()
-	dir := filepath.Join(root, "spwn", "plugins", name)
+	dir := filepath.Join(root, "spwn", "packs", name)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ dependencies:
 
 func TestLoadLocalPackage_missingManifest(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "plugins", "empty-pkg"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "packs", "empty-pkg"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	_, err := loadLocalPack(root, "empty-pkg")
@@ -88,7 +88,7 @@ install:
 verify:
   - command -v curl
 `)
-	skillsDir := filepath.Join(root, "spwn", "plugins", "toolish", "skills")
+	skillsDir := filepath.Join(root, "spwn", "packs", "toolish", "skills")
 	if err := os.MkdirAll(skillsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

@@ -347,7 +347,7 @@ func readTree(dir string) (map[string][]byte, error) {
 // only — nested .md files inside a package directory belong to that
 // pack's own plugin.yaml and are not project-level skills.
 func loadSkills(root string) ([]SkillSource, error) {
-	dir := filepath.Join(root, "spwn", "plugins")
+	dir := filepath.Join(root, "spwn", "skills")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
