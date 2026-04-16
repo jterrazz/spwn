@@ -1,13 +1,13 @@
-// This file is the example-gallery face of the catalog: the
+// This file is the init-template face of the catalog — the
 // List/Get/Install surface used by `spwn init <slug>` and the web UI
-// marketplace. Example entries live alongside dependency entries
-// under catalog/<slug>/ and share the catalogFS embed defined in
-// loader.go — an entry is an "example" when it ships an
-// example.yaml metadata sidecar next to its spwn.yaml.
+// gallery. Every catalog entry is a raw directory (no spwn/ nesting);
+// the subset with a `worlds:` section in its spwn.yaml is what the
+// gallery surfaces as a ready-to-scaffold project.
 //
-// Contributors edit example directories directly from the repo root;
-// add a new one, update the embed list in loader.go and the
-// shippedSlugs list below, and it shows up in the gallery.
+// Install() is a generic recursive copy: spwn.yaml and spwn.lock land
+// at the destination root; every other top-level subdir (agents/,
+// skills/, tools/, hooks/, files/) is wrapped under dest/spwn/ to
+// match the user-project layout.
 package catalog
 
 import (
@@ -16,36 +16,15 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
+	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/platform"
 )
 
-// shippedSlugs is the canonical list of bundled examples, in
-// display order. The TestShippedSlugsMatchEmbed test asserts this
-// matches both the embed directive above and the directories
-// actually present on disk.
-// shippedSlugs controls the gallery display order. Startup first
-// because it's the best showcase of multi-agent collaboration.
-var shippedSlugs = []string{
-	"startup",
-	"matrix",
-	"paperclip-factory",
-	"research-lab",
-	"macrohard",
-}
-
-// ShippedSlugs returns the list of bundled examples as a fresh copy.
-// Exposed for binary-level bundling tests that need to verify every
-// expected slug is present without reading the embed FS directly.
-func ShippedSlugs() []string {
-	out := make([]string, len(shippedSlugs))
-	copy(out, shippedSlugs)
-	return out
-}
-
-// Example is the public-facing description of one example.
+// Example is the public-facing description of one gallery entry.
 type Example struct {
 	Slug        string   `json:"slug" yaml:"slug"`
 	Name        string   `json:"name" yaml:"name"`
@@ -54,9 +33,6 @@ type Example struct {
 	Agents      []string `json:"agents" yaml:"agents"`
 	Worlds      []string `json:"worlds" yaml:"worlds"`
 	Command     string   `json:"command,omitempty" yaml:"command,omitempty"`
-	// Readme holds the bundled README.md content. Populated by Get,
-	// nil by List (so listing stays cheap).
-	Readme string `json:"readme,omitempty"`
 }
 
 // InstallReport describes everything Install wrote to disk.
@@ -64,79 +40,122 @@ type InstallReport struct {
 	Slug          string   `json:"slug"`
 	AgentsAdded   []string `json:"agentsAdded"`
 	AgentsSkipped []string `json:"agentsSkipped"`
-	// ManifestAdded is true if this install wrote a fresh spwn.yaml,
-	// false if one already existed at baseDir/spwn.yaml (and was left
-	// untouched per the no-overwrite rule).
-	ManifestAdded bool `json:"manifestAdded"`
-	// WorldsAdded/WorldsSkipped are retained for API compatibility
-	// with the old per-world-file install surface. With the v2
-	// schema, at most one entry lands here: the example's world
-	// name, populated from example.yaml#worlds.
+	ManifestAdded bool     `json:"manifestAdded"`
 	WorldsAdded   []string `json:"worldsAdded"`
 	WorldsSkipped []string `json:"worldsSkipped"`
 }
 
 // ErrNotFound is returned by Get and Install when a slug does not
-// match any bundled example.
+// match any gallery-eligible entry (i.e. one with worlds: defined).
 var ErrNotFound = errors.New("example not found")
 
-// List returns every example the binary knows about, sorted by slug
-// for stable output. README bodies are omitted; call Get for details.
-//
-// Iteration order is driven by shippedSlugs rather than embed.FS root
-// ReadDir so the list is deterministic even if new entries appear in
-// the embed before shippedSlugs is updated - keeping the "canonical
-// list" guarantee explicit.
-func List() ([]Example, error) {
-	out := make([]Example, 0, len(shippedSlugs))
-	for _, slug := range shippedSlugs {
-		ex, err := loadMetadata(slug)
+// topLevelSubdirs enumerates which directories under a catalog entry
+// get wrapped under dest/spwn/ at init time. spwn.yaml and spwn.lock
+// stay at the root; everything listed here moves under spwn/.
+var topLevelSubdirs = []string{"agents", "skills", "tools", "hooks", "files"}
+
+// ShippedSlugs returns the list of gallery-eligible entries (those
+// with a `worlds:` section in spwn.yaml), sorted by display order.
+func ShippedSlugs() []string {
+	slugs := galleryBacked()
+	// Canonical gallery order: startup first (multi-agent showcase),
+	// matrix second (zero-to-hello-world), then the rest
+	// alphabetically.
+	sort.SliceStable(slugs, func(i, j int) bool {
+		p := func(s string) int {
+			switch s {
+			case "startup":
+				return 0
+			case "matrix":
+				return 1
+			default:
+				return 2
+			}
+		}
+		if p(slugs[i]) != p(slugs[j]) {
+			return p(slugs[i]) < p(slugs[j])
+		}
+		return slugs[i] < slugs[j]
+	})
+	return slugs
+}
+
+// galleryBacked returns every embedded subdir whose spwn.yaml
+// defines a non-empty `worlds:` section.
+func galleryBacked() []string {
+	entries, err := fs.ReadDir(catalogFS, ".")
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		schema, err := loadEntrySchema(e.Name())
 		if err != nil {
-			// Skip broken examples rather than failing the whole list.
-			// A malformed example should never break the gallery for
-			// users who only care about the other four.
+			continue
+		}
+		if hasWorlds(schema) {
+			out = append(out, e.Name())
+		}
+	}
+	return out
+}
+
+// List returns every gallery-eligible example in canonical display
+// order.
+func List() ([]Example, error) {
+	slugs := ShippedSlugs()
+	out := make([]Example, 0, len(slugs))
+	for _, slug := range slugs {
+		ex, err := Get(slug)
+		if err != nil {
 			continue
 		}
 		out = append(out, ex)
 	}
-	// No sort - shippedSlugs order IS the gallery order.
 	return out, nil
 }
 
-// Get returns one example's metadata + its README. Returns
-// ErrNotFound if the slug is unknown.
+// Get returns one example's metadata (from its spwn.yaml). Returns
+// ErrNotFound when the slug does not exist or does not expose worlds.
 func Get(slug string) (Example, error) {
-	ex, err := loadMetadata(slug)
-	if err != nil {
-		return Example{}, err
+	schema, err := loadEntrySchema(slug)
+	if err != nil || !hasWorlds(schema) {
+		return Example{}, ErrNotFound
 	}
-	readmeBytes, err := catalogFS.ReadFile(joinFS(slug, "README.md"))
-	if err == nil {
-		ex.Readme = string(readmeBytes)
+	worlds, agents := worldsAndAgents(schema)
+	ex := Example{
+		Slug:        slug,
+		Name:        deriveTitle(slug, schema),
+		Tagline:     schema.Tagline,
+		Description: schema.Description,
+		Agents:      agents,
+		Worlds:      worlds,
+	}
+	if len(worlds) > 0 {
+		ex.Command = "spwn up " + worlds[0]
 	}
 	return ex, nil
 }
 
-// Install materializes an example into baseDir as a project tree:
+// Install materialises an example into baseDir as a project tree:
 //
 //	baseDir/
-//	├── spwn.yaml              (copied from <slug>/spwn.yaml)
+//	├── spwn.yaml            (verbatim copy)
+//	├── spwn.lock            (verbatim copy, if present)
 //	└── spwn/
-//	    └── agents/<name>/     (copied from <slug>/agents/<name>/)
+//	    ├── agents/<name>/   (from <slug>/agents/...)
+//	    ├── skills/          (from <slug>/skills/...)
+//	    └── …                (hooks/, tools/, files/)
 //
-// Existing files are NEVER overwritten - whatever the user already
-// has on disk wins. The report tells the caller what was added vs
-// skipped.
-//
-// baseDir should be the project root. In legacy/global mode (no
-// project discoverable) callers can still pass ~/.spwn or the
-// platform.UserDir() and the same layout will appear underneath.
-//
-// After Install, the caller can `spwn up` to bring the world online.
+// Existing files are NEVER overwritten — whatever the user already
+// has on disk wins. The report records what was added vs skipped.
 func Install(slug, baseDir string) (InstallReport, error) {
-	ex, err := loadMetadata(slug)
-	if err != nil {
-		return InstallReport{}, err
+	schema, err := loadEntrySchema(slug)
+	if err != nil || !hasWorlds(schema) {
+		return InstallReport{}, ErrNotFound
 	}
 	rep := InstallReport{Slug: slug}
 
@@ -144,89 +163,102 @@ func Install(slug, baseDir string) (InstallReport, error) {
 		return rep, fmt.Errorf("create project dir: %w", err)
 	}
 
-	// --- spwn.yaml ---
+	worldNames, _ := worldsAndAgents(schema)
+
 	manifestDst := filepath.Join(baseDir, "spwn.yaml")
 	if exists(manifestDst) {
-		// Record the world name(s) declared by the example as skipped
-		// so existing callers (web UI, activity log) still see a
-		// "worlds skipped" signal.
-		rep.WorldsSkipped = append(rep.WorldsSkipped, ex.Worlds...)
+		rep.WorldsSkipped = append(rep.WorldsSkipped, worldNames...)
 	} else {
-		manifestSrc := joinFS(slug, "spwn.yaml")
-		data, rerr := catalogFS.ReadFile(manifestSrc)
+		data, rerr := catalogFS.ReadFile(slug + "/spwn.yaml")
 		if rerr != nil {
-			return rep, fmt.Errorf("read %s: %w", manifestSrc, rerr)
+			return rep, fmt.Errorf("read %s/spwn.yaml: %w", slug, rerr)
 		}
 		if werr := os.WriteFile(manifestDst, data, 0o644); werr != nil {
 			return rep, fmt.Errorf("write %s: %w", manifestDst, werr)
 		}
 		rep.ManifestAdded = true
-		rep.WorldsAdded = append(rep.WorldsAdded, ex.Worlds...)
+		rep.WorldsAdded = append(rep.WorldsAdded, worldNames...)
 	}
 
-	// --- spwn.lock (committed dep pin) ---
 	lockDst := filepath.Join(baseDir, "spwn.lock")
 	if !exists(lockDst) {
-		lockSrc := joinFS(slug, "spwn.lock")
-		if data, rerr := catalogFS.ReadFile(lockSrc); rerr == nil {
+		if data, rerr := catalogFS.ReadFile(slug + "/spwn.lock"); rerr == nil {
 			_ = os.WriteFile(lockDst, data, 0o644)
 		}
 	}
 
-	// --- agents ---
-	agentsRoot := filepath.Join(baseDir, "spwn", "agents")
-	if err := os.MkdirAll(agentsRoot, 0o755); err != nil {
-		return rep, fmt.Errorf("create agents dir: %w", err)
+	spwnRoot := filepath.Join(baseDir, "spwn")
+	if err := os.MkdirAll(spwnRoot, 0o755); err != nil {
+		return rep, fmt.Errorf("create spwn dir: %w", err)
 	}
-	agentsSrc := joinFS(slug, "agents")
-	agentEntries, err := catalogFS.ReadDir(agentsSrc)
-	if err == nil {
-		for _, e := range agentEntries {
-			if !e.IsDir() {
-				continue
+	for _, sub := range topLevelSubdirs {
+		src := slug + "/" + sub
+		if _, err := fs.Stat(catalogFS, src); err != nil {
+			continue
+		}
+		if sub == "agents" {
+			if err := copyAgents(catalogFS, src, spwnRoot, &rep); err != nil {
+				return rep, err
 			}
-			name := e.Name()
-			dst := filepath.Join(agentsRoot, name)
-			if exists(dst) {
-				// Agent directory exists - but it might be broken
-				// (e.g. created by a previous version or partially
-				// cleaned up). If identity/profile.md is missing, copy
-				// the example's identity/ layer on top without touching
-				// user data like journal/ or knowledge/.
-				identityProfile := filepath.Join(dst, "identity", "profile.md")
-				if !exists(identityProfile) {
-					identitySrc := joinFS(agentsSrc, name, "identity")
-					identityDst := filepath.Join(dst, "identity")
-					if cperr := copyDirFS(catalogFS, identitySrc, identityDst); cperr == nil {
-						rep.AgentsAdded = append(rep.AgentsAdded, name+" (repaired)")
-					}
-					// Also copy agent.yaml if missing
-					manifestDst := filepath.Join(dst, "agent.yaml")
-					if !exists(manifestDst) {
-						if data, rerr := catalogFS.ReadFile(joinFS(agentsSrc, name, "agent.yaml")); rerr == nil {
-							_ = os.WriteFile(manifestDst, data, 0o644)
-						}
-					}
-				} else {
-					rep.AgentsSkipped = append(rep.AgentsSkipped, name)
-				}
-				continue
-			}
-			if cperr := copyDirFS(catalogFS, joinFS(agentsSrc, name), dst); cperr != nil {
-				return rep, fmt.Errorf("copy agent %s: %w", name, cperr)
-			}
-			rep.AgentsAdded = append(rep.AgentsAdded, name)
+			continue
+		}
+		dst := filepath.Join(spwnRoot, sub)
+		if exists(dst) {
+			continue
+		}
+		if err := copyDirFS(catalogFS, src, dst); err != nil {
+			return rep, fmt.Errorf("copy %s: %w", sub, err)
 		}
 	}
 
-	_ = ex // reserved for future use (e.g. emitting an activity event)
 	return rep, nil
+}
+
+// copyAgents implements the per-agent granularity Install wants:
+// records per-agent added/skipped in the report and repairs an
+// agent dir that exists but is missing identity/profile.md.
+func copyAgents(src fs.FS, agentsSrc, spwnRoot string, rep *InstallReport) error {
+	agentsDst := filepath.Join(spwnRoot, "agents")
+	if err := os.MkdirAll(agentsDst, 0o755); err != nil {
+		return fmt.Errorf("create agents dir: %w", err)
+	}
+	entries, err := fs.ReadDir(src, agentsSrc)
+	if err != nil {
+		return nil
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		dst := filepath.Join(agentsDst, name)
+		if exists(dst) {
+			identityProfile := filepath.Join(dst, "identity", "profile.md")
+			if !exists(identityProfile) {
+				_ = copyDirFS(src, agentsSrc+"/"+name+"/identity", filepath.Join(dst, "identity"))
+				manifestDst := filepath.Join(dst, "agent.yaml")
+				if !exists(manifestDst) {
+					if data, rerr := fs.ReadFile(src, agentsSrc+"/"+name+"/agent.yaml"); rerr == nil {
+						_ = os.WriteFile(manifestDst, data, 0o644)
+					}
+				}
+				rep.AgentsAdded = append(rep.AgentsAdded, name+" (repaired)")
+			} else {
+				rep.AgentsSkipped = append(rep.AgentsSkipped, name)
+			}
+			continue
+		}
+		if err := copyDirFS(src, agentsSrc+"/"+name, dst); err != nil {
+			return fmt.Errorf("copy agent %s: %w", name, err)
+		}
+		rep.AgentsAdded = append(rep.AgentsAdded, name)
+	}
+	return nil
 }
 
 // InstallInto is a convenience wrapper that installs an example
 // into the active project root when one is discoverable, else into
-// the user-global ~/.spwn (legacy global mode). Callers that need
-// to target an explicit path should use Install directly.
+// the user-global ~/.spwn (legacy global mode).
 func InstallInto(slug string) (InstallReport, error) {
 	root := platform.ProjectRoot()
 	if root == "" {
@@ -237,39 +269,68 @@ func InstallInto(slug string) (InstallReport, error) {
 
 // ── internals ─────────────────────────────────────────────────────────
 
-func loadMetadata(slug string) (Example, error) {
-	data, err := catalogFS.ReadFile(joinFS(slug, "example.yaml"))
+// loadEntrySchema reads an entry's spwn.yaml into the shared
+// dependency.Schema so every catalog face reads the same bytes.
+func loadEntrySchema(slug string) (*dependency.Schema, error) {
+	data, err := catalogFS.ReadFile(slug + "/spwn.yaml")
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return Example{}, ErrNotFound
+		return nil, err
+	}
+	var s dependency.Schema
+	if err := yaml.Unmarshal(data, &s); err != nil {
+		return nil, fmt.Errorf("parse %s/spwn.yaml: %w", slug, err)
+	}
+	return &s, nil
+}
+
+func hasWorlds(s *dependency.Schema) bool {
+	return s != nil && len(s.Worlds.Content) > 0
+}
+
+// worldsAndAgents derives the flat world-name and agent-name slices
+// from the parsed worlds yaml.Node, sorted for stability.
+func worldsAndAgents(s *dependency.Schema) (worlds, agents []string) {
+	if s == nil || s.Worlds.Kind != yaml.MappingNode {
+		return nil, nil
+	}
+	seenAgent := map[string]bool{}
+	for i := 0; i+1 < len(s.Worlds.Content); i += 2 {
+		key := s.Worlds.Content[i]
+		val := s.Worlds.Content[i+1]
+		worlds = append(worlds, key.Value)
+		if val.Kind != yaml.MappingNode {
+			continue
 		}
-		return Example{}, err
+		for j := 0; j+1 < len(val.Content); j += 2 {
+			if val.Content[j].Value != "agents" {
+				continue
+			}
+			agentList := val.Content[j+1]
+			if agentList.Kind != yaml.SequenceNode {
+				continue
+			}
+			for _, a := range agentList.Content {
+				if !seenAgent[a.Value] {
+					seenAgent[a.Value] = true
+					agents = append(agents, a.Value)
+				}
+			}
+		}
 	}
-	var ex Example
-	if err := yaml.Unmarshal(data, &ex); err != nil {
-		return Example{}, fmt.Errorf("parse %s/example.yaml: %w", slug, err)
-	}
-	if ex.Slug == "" {
-		ex.Slug = slug
-	}
-	return ex, nil
+	sort.Strings(worlds)
+	sort.Strings(agents)
+	return worlds, agents
 }
 
-// path joins with forward slashes - required because embed.FS always
-// uses forward slashes regardless of the host OS.
-func joinFS(parts ...string) string {
-	return strings.Join(parts, "/")
-}
-
-func exists(p string) bool {
-	_, err := os.Stat(p)
-	return err == nil
+func deriveTitle(slug string, s *dependency.Schema) string {
+	if s != nil && s.Title != "" {
+		return s.Title
+	}
+	return strings.Title(strings.ReplaceAll(slug, "-", " "))
 }
 
 // copyDirFS recursively copies a directory from the embedded FS onto
-// the host filesystem. Preserves relative structure, creates parent
-// directories as needed, never overwrites existing files (Install
-// pre-checks the destination dir).
+// the host filesystem. Never overwrites existing files.
 func copyDirFS(src fs.FS, srcRoot, dstRoot string) error {
 	return fs.WalkDir(src, srcRoot, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -290,4 +351,9 @@ func copyDirFS(src fs.FS, srcRoot, dstRoot string) error {
 		}
 		return os.WriteFile(target, data, 0o644)
 	})
+}
+
+func exists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
 }

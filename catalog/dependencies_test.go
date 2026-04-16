@@ -61,6 +61,9 @@ func TestAllTools_VersionNotEmpty(t *testing.T) {
 
 func TestAllTools_VerifyNotEmpty(t *testing.T) {
 	for _, tool := range All {
+		if isTemplateTool(tool.Name()) {
+			continue // template entries (e.g. @spwn/matrix) are scaffolds, not installable deps
+		}
 		t.Run(tool.Name(), func(t *testing.T) {
 			if len(tool.Verify()) == 0 {
 				t.Errorf("%s must have at least one verify command", tool.Name())
@@ -71,6 +74,9 @@ func TestAllTools_VerifyNotEmpty(t *testing.T) {
 
 func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 	for _, tool := range All {
+		if isTemplateTool(tool.Name()) {
+			continue
+		}
 		t.Run(tool.Name(), func(t *testing.T) {
 			spec := tool.Install()
 			hasContent := len(spec.AptPackages) > 0 || len(spec.Commands) > 0 || len(spec.UserCommands) > 0 || len(spec.Files) > 0
@@ -79,6 +85,23 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 			}
 		})
 	}
+}
+
+// isTemplateTool returns true when the @spwn/<slug> is a gallery
+// template (has a `worlds:` section) rather than a pure dependency.
+func isTemplateTool(toolName string) bool {
+	slug := strings.TrimPrefix(toolName, "@spwn/")
+	slug = strings.ReplaceAll(slug, "-", "_")
+	schema, err := loadEntrySchema(slug)
+	if err != nil {
+		// Try the hyphen form too — not every slug underscore-maps.
+		schema2, err2 := loadEntrySchema(strings.TrimPrefix(toolName, "@spwn/"))
+		if err2 != nil {
+			return false
+		}
+		return hasWorlds(schema2)
+	}
+	return hasWorlds(schema)
 }
 
 func TestAllTools_NoDuplicateNames(t *testing.T) {
@@ -132,6 +155,11 @@ func TestAllTools_NoDependOnSelf(t *testing.T) {
 
 func TestAllTools_SkillsHaveSkillMD(t *testing.T) {
 	for _, tool := range All {
+		if isTemplateTool(tool.Name()) {
+			// Template entries ship project-shared skills (no SKILL.md
+			// contract — those live in per-agent agent.yaml refs).
+			continue
+		}
 		s := tool.Skills()
 		if s == nil {
 			continue

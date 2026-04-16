@@ -1,16 +1,19 @@
 version: 2
 name: matrix
+title: The Matrix
+tagline: A sandbox with Neo - interactive exploration
+description: |
+  A clean room. One agent named Neo. No goals, no tasks, no backlog -
+  just a place to poke the system, try tools, and see what emerges.
 
-# Project-wide dependencies.
-# Every agent in this project inherits these automatically.
-# Agents should NOT repeat them in their own agent.yaml.
+  Perfect for first-time spwn users: it's the fastest path to "I am
+  talking to an AI agent running in a Docker container on my machine
+  and I can see what it's doing".
+
 dependencies:
   - "@spwn/unix"
   - "@spwn/git"
 
-# Worlds define the runtime environments where agents operate.
-# Each world lists which agents are placed inside it and which
-# directories are mounted as workspaces.
 worlds:
   matrix:
     agents:

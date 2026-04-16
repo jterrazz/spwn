@@ -45,13 +45,30 @@ type Schema struct {
 	// dependencies; defaults to "0.0.0-local" for project-local ones.
 	Version string `yaml:"version"`
 
-	// Description is a human-readable one-liner. Optional.
+	// Title is a human display name for the catalog gallery
+	// (e.g. "The Matrix"). Optional — when empty, callers fall back
+	// to the slug. Distinct from Name (which is the @spwn/<slug>
+	// identifier).
+	Title string `yaml:"title,omitempty"`
+
+	// Tagline is a short one-line pitch used by the catalog gallery
+	// (e.g. "A sandbox with Neo - interactive exploration"). Optional.
+	Tagline string `yaml:"tagline,omitempty"`
+
+	// Description is a longer human-readable blurb. Optional.
 	Description string `yaml:"description"`
 
 	// Dependencies is a flat list of other refs this one needs. The
 	// registry resolves them transitively and topologically sorts
 	// the final install order.
 	Dependencies []string `yaml:"dependencies"`
+
+	// Worlds is the project-world map for entries that double as
+	// installable templates (matrix, startup, …). Opaque here — the
+	// init path reads it by copying spwn.yaml verbatim; the install
+	// path ignores it because worlds don't make sense as an
+	// installable dep (they are a compose-level concept).
+	Worlds yaml.Node `yaml:"worlds,omitempty"`
 
 	// Install is the build-time recipe for baking this dependency
 	// into the image. All sub-fields are optional — a dependency
