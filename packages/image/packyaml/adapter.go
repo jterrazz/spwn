@@ -9,7 +9,7 @@ import (
 // toolImpl backs a parsed Schema as an image.Tool. Runtimes() and
 // Config() are part of the unified Tool interface — a pack with a
 // `runtime-config:` block returns a non-empty Runtimes list and the spawn-time
-// merger picks up its Config(runtime) snippet. Packages without a
+// merger picks up its Config(runtime) snippet. Packs without a
 // runtime-config block return nil from both.
 type toolImpl struct {
 	schema    Schema

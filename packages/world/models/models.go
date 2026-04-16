@@ -6,7 +6,7 @@ import (
 
 // Manifest is the parsed representation of a world config YAML.
 // Packages is the flat dependency list that replaced the old
-// Tools/Plugins/Skills trichotomy; the parser distinguishes what's
+// Tools/Packs/Skills trichotomy; the parser distinguishes what's
 // what by the referenced package's manifest shape.
 type Manifest struct {
 	Deps []string `yaml:"-"`

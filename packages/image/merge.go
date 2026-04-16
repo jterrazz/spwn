@@ -51,11 +51,11 @@ func MergeRuntimeConfig(base []byte, additions ...[]byte) ([]byte, error) {
 }
 
 // CollectRuntimeConfigs walks a list of resolved tools, filters to
-// Plugins whose Runtimes() includes the given runtime, and returns
+// Packs whose Runtimes() includes the given runtime, and returns
 // the non-nil Config() outputs in resolution order (last wins).
 //
 // This helper exists so the architect doesn't need to replicate the
-// Plugin runtime-gating logic.
+// Pack runtime-gating logic.
 func CollectRuntimeConfigs(resolved []Tool, runtime string) [][]byte {
 	var out [][]byte
 	for _, t := range resolved {

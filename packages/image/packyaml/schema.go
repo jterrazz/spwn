@@ -90,7 +90,7 @@ type InstallSection struct {
 	// in the image, so ordering here is irrelevant. YAML key is still
 	// `packages:` because inside an `install:` block the Debian-family
 	// meaning is unambiguous — it's the spwn domain concept that got
-	// renamed to Plugins, not this.
+	// renamed to Deps, not this.
 	AptPackages []string `yaml:"packages"`
 
 	// Commands run as root, before the USER switch. Each item

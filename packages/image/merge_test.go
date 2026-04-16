@@ -134,12 +134,12 @@ func TestCollectRuntimeConfigs_FiltersByRuntime(t *testing.T) {
 		t.Errorf("base key lost: %v", m)
 	}
 	if m["marker"] != "ok" {
-		t.Errorf("plugin c marker missing: %v", m)
+		t.Errorf("pack c marker missing: %v", m)
 	}
 	if _, ok := m["mcpServers"]; !ok {
-		t.Errorf("plugin a mcpServers missing: %v", m)
+		t.Errorf("pack a mcpServers missing: %v", m)
 	}
-	// codex plugin must not leak in
+	// codex pack must not leak in
 	if _, ok := m["b"]; ok {
 		t.Errorf("codex config leaked into claude-code merge: %v", m)
 	}

@@ -4,4 +4,4 @@ runtime:
   backend: "@spwn/claude-code"
 
 deps:
-  - "@spwn/totally-bogus-plugin"
+  - "@spwn/totally-bogus-pack"
