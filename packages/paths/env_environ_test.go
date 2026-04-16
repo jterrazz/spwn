@@ -1,4 +1,4 @@
-package env
+package paths
 
 import (
 	"os"

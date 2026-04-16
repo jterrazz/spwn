@@ -39,7 +39,6 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
-	spwn.sh/packages/ids v0.0.0 // indirect
 )
 
 replace (
@@ -47,7 +46,6 @@ replace (
 	spwn.sh/packages/agent => ../agent
 	spwn.sh/packages/auth => ../auth
 	spwn.sh/catalog => ../../catalog
-	spwn.sh/packages/ids => ../ids
 	spwn.sh/packages/image => ../image
 	spwn.sh/packages/paths => ../paths
 	spwn.sh/packages/version => ../version
