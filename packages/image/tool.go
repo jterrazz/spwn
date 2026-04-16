@@ -1,16 +1,8 @@
 package image
 
+import "spwn.sh/packages/deps"
+
 import "io/fs"
-
-// Kind classifies what role a tool plays in an image.
-type Kind string
-
-const (
-	KindRuntime  Kind = "runtime"  // Agent thinking engine (@spwn/claude-code, @spwn/aider)
-	KindTool     Kind = "tool"     // Extra capability (@spwn/qmd, @jq)
-	KindSDK      Kind = "sdk"      // Language/runtime SDK (@spwn/node, @spwn/python)
-	KindPlatform Kind = "platform" // Spwn infrastructure (@spwn/cli, @spwn/architect)
-)
 
 // Tool is the contract that any installable capability must implement.
 // Built-in tools in catalog/ implement this; third-party tools can too.
@@ -19,7 +11,7 @@ type Tool interface {
 	Name() string
 
 	// Kind returns the tool's category.
-	Kind() Kind
+	Kind() deps.Kind
 
 	// Version returns the tool's version (semver or "latest").
 	Version() string

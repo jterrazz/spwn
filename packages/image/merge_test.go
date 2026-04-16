@@ -1,6 +1,7 @@
 package image
 
 import (
+	"spwn.sh/packages/deps"
 	"encoding/json"
 	"io/fs"
 	"strings"
@@ -87,7 +88,7 @@ type fakeConfigPlugin struct {
 }
 
 func (p *fakeConfigPlugin) Name() string           { return p.name }
-func (p *fakeConfigPlugin) Kind() Kind             { return KindTool }
+func (p *fakeConfigPlugin) Kind() deps.Kind             { return deps.KindTool }
 func (p *fakeConfigPlugin) Version() string        { return "0.0.0" }
 func (p *fakeConfigPlugin) Dependencies() []string { return nil }
 func (p *fakeConfigPlugin) Install() InstallSpec   { return InstallSpec{} }

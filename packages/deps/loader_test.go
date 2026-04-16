@@ -2,11 +2,11 @@ package deps_test
 
 import (
 	"encoding/json"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
 
-	ib "spwn.sh/packages/image"
 	"spwn.sh/packages/deps"
 )
 
@@ -34,17 +34,17 @@ verify:
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Name() != "@spwn/git" {
-		t.Errorf("name: want @spwn/git, got %q", tool.Name())
+	if tool.Schema.Name != "@spwn/git" {
+		t.Errorf("name: want @spwn/git, got %q", tool.Schema.Name)
 	}
-	if tool.Kind() != ib.KindTool {
-		t.Errorf("kind: want Tool, got %v", tool.Kind())
+	if tool.Kind != deps.KindTool {
+		t.Errorf("kind: want Tool, got %v", tool.Kind)
 	}
-	spec := tool.Install()
+	spec := tool.Schema.Install
 	if len(spec.AptPackages) != 1 || spec.AptPackages[0] != "git" {
 		t.Errorf("packages: %v", spec.AptPackages)
 	}
-	if got := tool.Verify(); len(got) != 1 || got[0] != "command -v git" {
+	if got := tool.Schema.Verify; len(got) != 1 || got[0] != "command -v git" {
 		t.Errorf("verify: %v", got)
 	}
 }
@@ -62,14 +62,14 @@ func TestParse_defaults(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Name() != "local-tool" {
-		t.Errorf("default name: want local-tool, got %q", tool.Name())
+	if tool.Schema.Name != "local-tool" {
+		t.Errorf("default name: want local-tool, got %q", tool.Schema.Name)
 	}
-	if tool.Version() != "0.0.0-local" {
-		t.Errorf("default version: want 0.0.0-local, got %q", tool.Version())
+	if tool.Schema.Version != "0.0.0-local" {
+		t.Errorf("default version: want 0.0.0-local, got %q", tool.Schema.Version)
 	}
-	if tool.Kind() != ib.KindTool {
-		t.Errorf("default kind: want Tool, got %v", tool.Kind())
+	if tool.Kind != deps.KindTool {
+		t.Errorf("default kind: want Tool, got %v", tool.Kind)
 	}
 }
 
@@ -90,10 +90,10 @@ verify:
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Kind() != ib.KindRuntime {
-		t.Errorf("kind: want Runtime, got %v", tool.Kind())
+	if tool.Kind != deps.KindRuntime {
+		t.Errorf("kind: want Runtime, got %v", tool.Kind)
 	}
-	if rp, ok := tool.(interface{ RuntimeProvider() string }); !ok || rp.RuntimeProvider() != "claude-code" {
+	if tool.Schema.RuntimeProvider != "claude-code" {
 		t.Errorf("want runtime-provider claude-code")
 	}
 }
@@ -122,10 +122,11 @@ verify:
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	spec := tool.Install()
-	got, ok := spec.Files["/usr/local/bin/entrypoint.sh"]
+	spec := tool.Schema.Install
+	_ = spec
+	got, ok := tool.FileBytes["/usr/local/bin/entrypoint.sh"]
 	if !ok {
-		t.Fatalf("file not baked in, files=%v", spec.Files)
+		t.Fatalf("file not baked in, files=%v", tool.FileBytes)
 	}
 	if string(got) != "#!/bin/sh\nexec sleep infinity\n" {
 		t.Errorf("file content: %q", string(got))
@@ -158,12 +159,12 @@ verify:
 	}
 	// The pack: section surfaces via Runtimes() and Config() on the
 	// unified image.Tool interface — no type assertion needed.
-	runtimes := tool.Runtimes()
+	runtimes := func() []string { if tool.Schema.RuntimeConfig != nil { return tool.Schema.RuntimeConfig.Runtimes }; return nil }()
 	if len(runtimes) != 1 || runtimes[0] != "@spwn/claude-code" {
 		t.Errorf("runtimes: %v", runtimes)
 	}
 
-	cfg := tool.Config("@spwn/claude-code")
+	cfg := configJSONFor(tool, "@spwn/claude-code")
 	if len(cfg) == 0 {
 		t.Fatal("empty config")
 	}
@@ -185,7 +186,7 @@ verify:
 	}
 
 	// Non-matching runtime returns nil.
-	if got := tool.Config("@spwn/codex"); got != nil {
+	if got := configJSONFor(tool, "@spwn/codex"); got != nil {
 		t.Errorf("codex should get nil, got %s", got)
 	}
 }
@@ -209,7 +210,7 @@ verify:
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Skills() == nil {
+	if func() fs.FS { sf, _ := tool.SkillsFS.(fs.FS); return sf }() == nil {
 		t.Error("want non-nil skills fs")
 	}
 }
@@ -232,4 +233,12 @@ func TestParse_missingNameErrors(t *testing.T) {
 	if _, err := deps.Parse(deps.DirResolver{Root: dir}, deps.ParseOptions{}); err == nil {
 		t.Fatal("want error for missing name + no default")
 	}
+}
+
+func configJSONFor(p *deps.Parsed, runtime string) []byte {
+    if p.Schema.RuntimeConfig == nil {
+        return nil
+    }
+    b, _ := p.Schema.RuntimeConfig.ConfigJSON(runtime)
+    return b
 }

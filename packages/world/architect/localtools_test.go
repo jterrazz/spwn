@@ -1,6 +1,7 @@
 package architect
 
 import (
+	"spwn.sh/packages/deps"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,7 +49,7 @@ dependencies:
 	if got := tool.Version(); got != "1.2.3" {
 		t.Errorf("version: want 1.2.3, got %q", got)
 	}
-	if got := tool.Kind(); got != ib.KindTool {
+	if got := tool.Kind(); got != deps.KindTool {
 		t.Errorf("kind: want Tool, got %v", got)
 	}
 	spec := tool.Install()

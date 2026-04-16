@@ -49,7 +49,7 @@ func loadYAMLTools() ([]ib.Tool, error) {
 	}
 	sort.Strings(names) // deterministic order
 	for _, name := range names {
-		tool, err := deps.Parse(
+		parsed, err := deps.Parse(
 			deps.EmbedResolver{FS: yamlToolsFS, Root: name},
 			deps.ParseOptions{
 				DefaultName:    "@spwn/" + strings.ReplaceAll(name, "_", "-"),
@@ -59,7 +59,7 @@ func loadYAMLTools() ([]ib.Tool, error) {
 		if err != nil {
 			return nil, fmt.Errorf("load %s: %w", name, err)
 		}
-		out = append(out, tool)
+		out = append(out, ib.ToolFromParsed(parsed))
 	}
 	return out, nil
 }
