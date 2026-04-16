@@ -42,13 +42,11 @@ describe('CLI output', () => {
         await result.stdout.toMatch('architect-help.txt');
     });
 
-    test('pack --help lists the install subcommands', async () => {
-        const result = await spec('pack help').project('empty').exec('pack --help').run();
+    test('install --help describes the install flow', async () => {
+        const result = await spec('install help').project('empty').exec('install --help').run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toContain('install');
-        expect(result.stdout.text).toContain('uninstall');
-        expect(result.stdout.text).toContain('ls');
+        expect(result.stdout.text).toContain('Install a dependency');
     });
 
     test('upgrade --help describes the install flow', async () => {

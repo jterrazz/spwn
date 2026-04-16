@@ -16,7 +16,6 @@ import (
 	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
-	"spwn.sh/apps/cli/pack"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
@@ -72,14 +71,10 @@ func init() {
 	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 
-	// Command groups - building blocks
-	rootCmd.AddCommand(pack.Cmd)
-	rootCmd.AddCommand(skill.Cmd)
-
-	// Root-level install/uninstall — shorthand for `spwn pack install/uninstall`.
-	// Like `go get` or `npm install` — one verb at the top level.
+	// Building blocks — install/uninstall at top level (like `go get`).
 	rootCmd.AddCommand(installCmd())
 	rootCmd.AddCommand(uninstallCmd())
+	rootCmd.AddCommand(skill.Cmd)
 
 	// Command groups - coordination
 	rootCmd.AddCommand(team.Cmd)
@@ -172,10 +167,9 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	// Building blocks - the things you compose agents from
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
-	printHelpCmd(w, "pack", "Manage packs "+ui.Faint("(ls, show, install, uninstall)"))
-	printHelpCmd(w, "skill", "Reusable skill files "+ui.Faint("(ls, new, edit, show)"))
-	printHelpCmd(w, "install <ref>", "Install a dependency into the project")
-	printHelpCmd(w, "uninstall <ref>", "Remove a dependency from the project")
+	printHelpCmd(w, "install <ref>", "Install a dependency "+ui.Faint("(@spwn/unix, github.com/...)"))
+	printHelpCmd(w, "uninstall <ref>", "Remove a dependency")
+	printHelpCmd(w, "skill", "Author skill files "+ui.Faint("(new, edit, show, rm, ls)"))
 	fmt.Fprintln(w)
 
 	// Shortcuts (compose-style: no-arg = all worlds in spwn.yaml)

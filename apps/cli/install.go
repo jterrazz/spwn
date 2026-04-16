@@ -7,8 +7,8 @@ import (
 )
 
 // installCmd creates the root-level `spwn install <ref>` command.
-// Delegates to pack.RunInstall — same logic as `spwn pack install`,
-// just at the top level for convenience (like `go get`, `npm install`).
+// Delegates to pack.RunInstall for the actual install logic.
+// Like `go get` or `npm install` — one verb, no subcommand.
 func installCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "install <ref>",

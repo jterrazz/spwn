@@ -39,7 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"world", "agent", "pack", "skill", "install", "architect", "web", "init"} {
+	for _, sub := range []string{"world", "agent", "skill", "install", "architect", "web", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -119,17 +119,15 @@ func TestCLI_ArchitectHelp(t *testing.T) {
 	}
 }
 
-// --- Pack install help ---
+// --- Install help ---
 
-func TestCLI_PackHelp(t *testing.T) {
-	out, _, err := executeCommand("pack", "--help")
+func TestCLI_InstallHelp(t *testing.T) {
+	out, _, err := executeCommand("install", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"install", "uninstall", "ls", "show"} {
-		assertContains(t, out, sub, "pack help")
-	}
+	assertContains(t, out, "spwn install", "install help")
 }
 
 // --- Web help ---
