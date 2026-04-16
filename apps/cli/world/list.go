@@ -14,6 +14,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/project"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 )
 
@@ -94,7 +95,7 @@ func renderDeclared(ctx context.Context, s *ui.Stepper, proj *project.Project, c
 	// Live world state, keyed by world name (Config). A world may have
 	// multiple running instances historically; we pick the newest.
 	running := map[string]world.World{}
-	if arc, err := world.NewArchitectFromEnv(); err == nil {
+	if arc, err := architect.NewFromEnv(); err == nil {
 		if ws, err := arc.List(ctx); err == nil {
 			for _, w := range ws {
 				// Skip stale entries whose containers no longer exist.
@@ -196,7 +197,7 @@ func buildDeclaredRows(
 // renderRunningOnly keeps the legacy "list live containers" rendering
 // used when no spwn project is discovered.
 func renderRunningOnly(ctx context.Context, s *ui.Stepper, cmd *cobra.Command) error {
-	arc, err := world.NewArchitectFromEnv()
+	arc, err := architect.NewFromEnv()
 	if err != nil {
 		if listAsJSON {
 			return emitWorldListJSON(cmd, worldListReport{Mode: "global"})

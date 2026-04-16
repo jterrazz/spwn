@@ -4,10 +4,10 @@ go 1.25.0
 
 require (
 	gopkg.in/yaml.v3 v3.0.1
+	spwn.sh/catalog v0.0.0
 	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
-	spwn.sh/catalog v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/platform v0.0.0
 	spwn.sh/packages/world v0.0.0
@@ -38,14 +38,17 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
+	spwn.sh/packages/architect v0.0.0
 )
 
 replace (
+	spwn.sh/catalog => ../../catalog
 	spwn.sh/packages/activity => ../../packages/activity
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/auth => ../../packages/auth
-	spwn.sh/catalog => ../../catalog
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/platform => ../../packages/platform
 	spwn.sh/packages/world => ../../packages/world
 )
+
+replace spwn.sh/packages/architect => ../../packages/architect

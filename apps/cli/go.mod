@@ -50,6 +50,8 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
+	spwn.sh/packages/architect v0.0.0
+	spwn.sh/packages/runtimes v0.0.0
 )
 
 replace (
@@ -64,3 +66,7 @@ replace (
 	spwn.sh/packages/project => ../../packages/project
 	spwn.sh/packages/world => ../../packages/world
 )
+
+replace spwn.sh/packages/runtimes => ../../packages/runtimes
+
+replace spwn.sh/packages/architect => ../../packages/architect

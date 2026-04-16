@@ -14,6 +14,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 )
 
@@ -145,7 +146,7 @@ var statusCmd = &cobra.Command{
 		// Together with the `spwn up` idempotency guard this keeps
 		// `status` and `ls` in lockstep. See finding #10.
 		var worlds []world.World
-		arc, arcErr := world.NewArchitectFromEnv()
+		arc, arcErr := architect.NewFromEnv()
 		if arcErr == nil {
 			raw, _ := arc.List(context.Background())
 			byConfig := map[string]world.World{}

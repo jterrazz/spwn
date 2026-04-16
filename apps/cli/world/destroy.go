@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/packages/world"
+	"spwn.sh/packages/architect"
 )
 
 var destroyAll bool
@@ -32,7 +32,7 @@ func composeDownRunE(cmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 	s := newStepper(cmd)
-	arc, err := world.NewArchitectFromEnv()
+	arc, err := architect.NewFromEnv()
 	if err != nil {
 		return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 	}
@@ -85,7 +85,7 @@ var destroyCmd = &cobra.Command{
 		ctx := context.Background()
 		s := newStepper(cmd)
 
-		arc, err := world.NewArchitectFromEnv()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 		}

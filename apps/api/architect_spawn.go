@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-// ArchitectSpawnOpts mirrors world.StartArchitectDaemonOpts but
-// lives in the api package so we don't create an import cycle
-// (the world public package imports the api package). The cli wires
-// world.StartArchitectDaemonWithOpts in via Server.SpawnArchitect.
+// ArchitectSpawnOpts mirrors architect.StartDaemonOpts but
+// lives in the api package so we don't create an import cycle.
+// The CLI wires architect.StartDaemonWithOpts in via
+// Server.SpawnArchitect.
 type ArchitectSpawnOpts struct {
 	ImageOverride string
 	LogWriter     io.Writer

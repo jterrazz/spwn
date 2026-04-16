@@ -1,40 +1,51 @@
-package examples
+package catalog
 
 import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
 	"testing"
 )
 
-// TestShippedSlugsMatchEmbed is the load-bearing invariant: it asserts
-// that the canonical shippedSlugs list, the go:embed directive, and the
-// on-disk example directories all agree. If any of the three drift
-// (someone adds a directory without updating the embed, or updates
-// shippedSlugs but forgets the embed, etc.), this test fails loudly.
+// TestShippedSlugsMatchEmbed is the load-bearing invariant: every
+// slug in shippedSlugs must have an embedded directory with an
+// example.yaml sidecar, and vice-versa. Dependency-shaped entries
+// (no example.yaml) share the embed FS — they are the other face
+// of the catalog and get filtered out here so the gallery list
+// stays canonical.
 //
-// Runs against examplesFS so it exercises the exact bytes that ship
+// Runs against catalogFS so it exercises the exact bytes that ship
 // in the compiled binary - NOT the filesystem.
 func TestShippedSlugsMatchEmbed(t *testing.T) {
-	entries, err := fs.ReadDir(examplesFS, ".")
+	entries, err := fs.ReadDir(catalogFS, ".")
 	if err != nil {
 		t.Fatalf("read embed root: %v", err)
 	}
 
-	embedded := make([]string, 0, len(entries))
+	embeddedExamples := make(map[string]bool)
 	for _, e := range entries {
-		if e.IsDir() {
-			embedded = append(embedded, e.Name())
+		if !e.IsDir() {
+			continue
+		}
+		if _, err := fs.Stat(catalogFS, e.Name()+"/example.yaml"); err == nil {
+			embeddedExamples[e.Name()] = true
 		}
 	}
-	sort.Strings(embedded)
 
-	canonical := append([]string(nil), shippedSlugs...)
-	sort.Strings(canonical)
+	canonical := make(map[string]bool, len(shippedSlugs))
+	for _, s := range shippedSlugs {
+		canonical[s] = true
+	}
 
-	if !stringsEqual(embedded, canonical) {
-		t.Fatalf("shippedSlugs %v != embedded dirs %v - update the go:embed directive AND shippedSlugs together when adding an example", canonical, embedded)
+	for slug := range canonical {
+		if !embeddedExamples[slug] {
+			t.Errorf("shippedSlugs lists %q but no embedded %q/example.yaml found", slug, slug)
+		}
+	}
+	for slug := range embeddedExamples {
+		if !canonical[slug] {
+			t.Errorf("embedded example %q is missing from shippedSlugs — add it to keep the gallery canonical", slug)
+		}
 	}
 }
 
@@ -56,13 +67,13 @@ func TestShippedSlugsStructure(t *testing.T) {
 				slug + "/spwn.lock",
 			}
 			for _, p := range mustExist {
-				if _, err := fs.Stat(examplesFS, p); err != nil {
+				if _, err := fs.Stat(catalogFS, p); err != nil {
 					t.Errorf("missing %s: %v", p, err)
 				}
 			}
 
 			// At least one agent directory, each with identity/profile.md.
-			agentEntries, err := fs.ReadDir(examplesFS, slug+"/agents")
+			agentEntries, err := fs.ReadDir(catalogFS, slug+"/agents")
 			if err != nil {
 				t.Errorf("read %s/agents: %v", slug, err)
 				return
@@ -73,12 +84,12 @@ func TestShippedSlugsStructure(t *testing.T) {
 					hasAgent = true
 					// Every agent must have identity/profile.md (the current Mind layout).
 					profilePath := slug + "/agents/" + e.Name() + "/identity/profile.md"
-					if _, err := fs.Stat(examplesFS, profilePath); err != nil {
+					if _, err := fs.Stat(catalogFS, profilePath); err != nil {
 						t.Errorf("%s: agent %q missing identity/profile.md", slug, e.Name())
 					}
 					// And an agent.yaml so Install can wire up runtime/tools.
 					agentYAML := slug + "/agents/" + e.Name() + "/agent.yaml"
-					if _, err := fs.Stat(examplesFS, agentYAML); err != nil {
+					if _, err := fs.Stat(catalogFS, agentYAML); err != nil {
 						t.Errorf("%s: agent %q missing agent.yaml", slug, e.Name())
 					}
 				}

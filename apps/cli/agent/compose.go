@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/catalog/dependencies"
+	"spwn.sh/catalog"
 	"spwn.sh/packages/agent"
 )
 
@@ -36,7 +36,7 @@ var addCmd = &cobra.Command{
 	Use:   "add <agent-name>",
 	Short: "Add dependencies to an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Compose an agent by attaching dependencies.
+	Long: `Compose an agent by attaching catalog.
 
 Examples:
   spwn agent add neo --dep @spwn/python
@@ -210,7 +210,7 @@ func (e *notImplementedError) ExitCode() int { return 2 }
 // `agent add` to preflight --dep refs before they hit agent.yaml.
 func knownComposeRef(ref string) bool {
 	name := stripVersion(ref)
-	for _, t := range dependencies.All {
+	for _, t := range catalog.All {
 		if t.Name() == name {
 			return true
 		}
@@ -241,8 +241,8 @@ func stripVersion(ref string) string {
 // The "known:" list mirrors what `spwn check` shows so the two
 // commands never disagree.
 func unknownComposeRefError(kind, ref string) error {
-	known := make([]string, 0, len(dependencies.All))
-	for _, t := range dependencies.All {
+	known := make([]string, 0, len(catalog.All))
+	for _, t := range catalog.All {
 		known = append(known, t.Name())
 	}
 	sort.Strings(known)

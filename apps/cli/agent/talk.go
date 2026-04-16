@@ -14,6 +14,7 @@ import (
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 )
 
@@ -245,10 +246,10 @@ func isContainerRunning(containerID string) bool {
 }
 
 // findAgentContainer returns containerID, worldID, world record, and architect.
-func findAgentContainer(agentName, worldID string) (string, string, *world.World, *world.Architect, error) {
+func findAgentContainer(agentName, worldID string) (string, string, *world.World, *architect.Architect, error) {
 	ctx := context.Background()
 
-	arc, err := world.NewArchitectFromEnv()
+	arc, err := architect.NewFromEnv()
 	if err != nil {
 		if strings.Contains(err.Error(), "cannot connect to Docker") {
 			return "", "", nil, nil, fmt.Errorf("Docker is not running")

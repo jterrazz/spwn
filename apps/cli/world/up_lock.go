@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/models"
 )
@@ -17,7 +18,7 @@ import (
 // if Docker is unreachable the caller will hit a clearer error later
 // in the spawn flow.
 func findRunningWorldByConfig(ctx context.Context, name string) *models.World {
-	arc, err := world.NewArchitectFromEnv()
+	arc, err := architect.NewFromEnv()
 	if err != nil {
 		return nil
 	}

@@ -39,8 +39,9 @@ require (
 	golang.org/x/term v0.40.0 // indirect
 	google.golang.org/grpc v1.80.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
+	spwn.sh/packages/runtimes v0.0.0
 )
 
-replace (
-	spwn.sh/packages/image => ../packages/image
-)
+replace spwn.sh/packages/image => ../packages/image
+
+replace spwn.sh/packages/runtimes => ../packages/runtimes

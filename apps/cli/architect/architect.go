@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
+	arch "spwn.sh/packages/architect"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
 
@@ -110,7 +110,7 @@ func runStart(cmd *cobra.Command, args []string) error {
 		"ready":              "Architect is ready",
 	}
 
-	id, err := world.StartArchitectDaemonWithOpts(ctx, world.StartArchitectDaemonOpts{
+	id, err := arch.StartDaemonWithOpts(ctx, arch.StartDaemonOpts{
 		ImageOverride: imageOverride,
 		LogWriter:     cmd.ErrOrStderr(),
 		OnProgress: func(event, detail string) {
@@ -163,7 +163,7 @@ func runStop(cmd *cobra.Command, args []string) error {
 	s.Blank()
 	s.Start("Stopping Architect...")
 
-	err := world.StopArchitectDaemon(ctx)
+	err := arch.StopDaemon(ctx)
 	if err != nil {
 		msg := err.Error()
 		switch {
@@ -192,7 +192,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	s := newStepper(cmd)
 
-	info, err := world.GetArchitectDaemonStatus(ctx)
+	info, err := arch.GetDaemonStatus(ctx)
 	if err != nil {
 		msg := err.Error()
 		if strings.Contains(msg, "not reachable") {
@@ -233,11 +233,11 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	s := newStepper(cmd)
 
 	// Check if architect container is running. If not, auto-start it.
-	info, err := world.GetArchitectDaemonStatus(ctx)
+	info, err := arch.GetDaemonStatus(ctx)
 	if err != nil || !info.Running {
 		fmt.Fprintf(cmd.ErrOrStderr(), "\n  Architect not running. Starting...\n")
 		imageOverride := os.Getenv("SPWN_ARCHITECT_IMAGE")
-		_, startErr := world.StartArchitectDaemon(ctx, imageOverride, cmd.ErrOrStderr())
+		_, startErr := arch.StartDaemon(ctx, imageOverride, cmd.ErrOrStderr())
 		if startErr != nil {
 			if strings.Contains(startErr.Error(), "already running") {
 				// Race condition - it started between check and start, that's fine
@@ -264,7 +264,7 @@ func runTalk(cmd *cobra.Command, args []string) error {
 	}
 
 	// Get docker exec args from universe package
-	dockerArgs, err := world.TalkToArchitectExecArgs(message)
+	dockerArgs, err := arch.TalkExecArgs(message)
 	if err != nil {
 		return s.FailHint("Talk", err, "")
 	}

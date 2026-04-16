@@ -19,6 +19,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/api"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
@@ -83,7 +84,7 @@ func runWeb(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	arch, archErr := world.NewArchitectFromEnv()
+	arch, archErr := architect.NewFromEnv()
 	mode := ui.Green("full")
 	if archErr != nil {
 		mode = ui.Yellow("read-only") + ui.Faint(" (Docker not available)")
@@ -118,7 +119,7 @@ func runWeb(cmd *cobra.Command, args []string) error {
 
 	srv := api.New(store, arch, ":"+portFlag)
 	srv.SetSpawnArchitect(func(ctx context.Context, opts api.ArchitectSpawnOpts) (string, error) {
-		return world.StartArchitectDaemonWithOpts(ctx, world.StartArchitectDaemonOpts{
+		return architect.StartDaemonWithOpts(ctx, architect.StartDaemonOpts{
 			ImageOverride: opts.ImageOverride,
 			LogWriter:     opts.LogWriter,
 			OnProgress:    opts.OnProgress,

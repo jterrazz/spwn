@@ -5,8 +5,8 @@ package e2e
 import (
 	"testing"
 
-	runtimes "spwn.sh/catalog/runtimes"
-	"spwn.sh/catalog/dependencies"
+	runtimes "spwn.sh/packages/runtimes"
+	"spwn.sh/catalog"
 	ib "spwn.sh/packages/image"
 	"spwn.sh/packages/image/imagetest"
 )
@@ -14,7 +14,7 @@ import (
 func newRegistry(t *testing.T) *ib.Registry {
 	t.Helper()
 	reg := ib.NewRegistry()
-	if err := dependencies.RegisterDefaults(reg); err != nil {
+	if err := catalog.RegisterDefaults(reg); err != nil {
 		t.Fatalf("register tools: %v", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {

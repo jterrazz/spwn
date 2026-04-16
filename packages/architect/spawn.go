@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
-	runtimes "spwn.sh/catalog/runtimes"
-	"spwn.sh/catalog/dependencies"
+	runtimes "spwn.sh/packages/runtimes"
+	"spwn.sh/catalog"
 	"spwn.sh/packages/compile"
-	"spwn.sh/catalog/runtimes/claude_code/compile"
+	"spwn.sh/packages/runtimes/claude_code/compile"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
-	"spwn.sh/packages/world/internal/backend"
-	"spwn.sh/packages/world/internal/labels"
+	"spwn.sh/packages/world/backend"
+	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/platform"
@@ -177,7 +177,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// runtime config still needs to be merged into the container's
 	// runtime settings file after the container boots.
 	reg := ib.NewRegistry()
-	if err := dependencies.RegisterDefaults(reg); err != nil {
+	if err := catalog.RegisterDefaults(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
