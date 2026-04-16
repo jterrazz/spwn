@@ -11,7 +11,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/paths"
-	"spwn.sh/packages/pack"
+	"spwn.sh/packages/deps"
 )
 
 func runWithOut(t *testing.T, c *cobra.Command, args ...string) (*bytes.Buffer, error) {
@@ -128,7 +128,7 @@ func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 		t.Fatalf("install: %v", err)
 	}
 
-	lock, err := pack.LoadLockfile(root)
+	lock, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("load lockfile: %v", err)
 	}
@@ -171,7 +171,7 @@ func TestInstall_idempotent(t *testing.T) {
 	if count != 1 {
 		t.Errorf("want 1 instance of @spwn/unix, got %d", count)
 	}
-	lock, _ := pack.LoadLockfile(root)
+	lock, _ := deps.LoadLockfile(root)
 	if !lock.Has("@spwn/unix") {
 		t.Errorf("lockfile missing @spwn/unix")
 	}
@@ -191,7 +191,7 @@ func TestUninstall_removesEntry(t *testing.T) {
 		t.Fatalf("uninstall: %v", err)
 	}
 
-	lock, _ := pack.LoadLockfile(root)
+	lock, _ := deps.LoadLockfile(root)
 	if lock.Has("@spwn/git") {
 		t.Errorf("lockfile still has @spwn/git after uninstall")
 	}

@@ -1,4 +1,4 @@
-package pack_test
+package deps_test
 
 import (
 	"os"
@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/pack"
+	"spwn.sh/packages/deps"
 )
 
 func TestLoad_missing(t *testing.T) {
 	root := t.TempDir()
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -22,7 +22,7 @@ func TestLoad_missing(t *testing.T) {
 
 func TestLoadOrEmpty_missing(t *testing.T) {
 	root := t.TempDir()
-	l, err := pack.LoadLockfileOrEmpty(root)
+	l, err := deps.LoadLockfileOrEmpty(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -33,16 +33,16 @@ func TestLoadOrEmpty_missing(t *testing.T) {
 
 func TestSaveLoad_roundtrip(t *testing.T) {
 	root := t.TempDir()
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/unix", pack.LockEntry{Version: "24.04", Source: pack.SourceBuiltin})
-	l.Add("@spwn/git", pack.LockEntry{Version: "2.43", Source: pack.SourceBuiltin})
-	l.Add("@spwn/mempalace", pack.LockEntry{Version: "0.1.0", Source: pack.SourceBuiltin})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/unix", deps.LockEntry{Version: "24.04", Source: deps.SourceBuiltin})
+	l.Add("@spwn/git", deps.LockEntry{Version: "2.43", Source: deps.SourceBuiltin})
+	l.Add("@spwn/mempalace", deps.LockEntry{Version: "0.1.0", Source: deps.SourceBuiltin})
 
-	if err := pack.SaveLockfile(root, l); err != nil {
+	if err := deps.SaveLockfile(root, l); err != nil {
 		t.Fatalf("save: %v", err)
 	}
 
-	got, err := pack.LoadLockfile(root)
+	got, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -52,21 +52,21 @@ func TestSaveLoad_roundtrip(t *testing.T) {
 		}
 	}
 	e := got.Deps["@spwn/unix"]
-	if e.Version != "24.04" || e.Source != pack.SourceBuiltin {
+	if e.Version != "24.04" || e.Source != deps.SourceBuiltin {
 		t.Errorf("entry mangled: %+v", e)
 	}
 }
 
 func TestSave_lineOriented(t *testing.T) {
 	root := t.TempDir()
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/unix", pack.LockEntry{Version: "24.04", Source: pack.SourceBuiltin})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/unix", deps.LockEntry{Version: "24.04", Source: deps.SourceBuiltin})
 
-	if err := pack.SaveLockfile(root, l); err != nil {
+	if err := deps.SaveLockfile(root, l); err != nil {
 		t.Fatalf("save: %v", err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(root, pack.LockFileName))
+	data, err := os.ReadFile(filepath.Join(root, deps.LockFileName))
 	if err != nil {
 		t.Fatalf("read: %v", err)
 	}
@@ -81,16 +81,16 @@ func TestSave_lineOriented(t *testing.T) {
 
 func TestSave_deterministicOrder(t *testing.T) {
 	root := t.TempDir()
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/zebra", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
-	l.Add("@spwn/alpha", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
-	l.Add("@spwn/mango", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/zebra", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
+	l.Add("@spwn/alpha", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
+	l.Add("@spwn/mango", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
 
-	if err := pack.SaveLockfile(root, l); err != nil {
+	if err := deps.SaveLockfile(root, l); err != nil {
 		t.Fatalf("save: %v", err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(root, pack.LockFileName))
+	data, err := os.ReadFile(filepath.Join(root, deps.LockFileName))
 	if err != nil {
 		t.Fatalf("read: %v", err)
 	}
@@ -104,8 +104,8 @@ func TestSave_deterministicOrder(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/unix", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/unix", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
 	l.Remove("@spwn/unix")
 	if l.Has("@spwn/unix") {
 		t.Error("Remove did not delete entry")
@@ -123,10 +123,10 @@ deps:
     version: "2.43"
     source: builtin
 `
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(yaml), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("load legacy: %v", err)
 	}
@@ -136,9 +136,9 @@ deps:
 }
 
 func TestRefs(t *testing.T) {
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/zebra", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
-	l.Add("@spwn/alpha", pack.LockEntry{Version: "1", Source: pack.SourceBuiltin})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/zebra", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
+	l.Add("@spwn/alpha", deps.LockEntry{Version: "1", Source: deps.SourceBuiltin})
 	got := l.Refs()
 	if len(got) != 2 || got[0] != "@spwn/alpha" || got[1] != "@spwn/zebra" {
 		t.Errorf("Refs sort broken: %v", got)

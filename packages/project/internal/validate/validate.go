@@ -16,7 +16,7 @@ import (
 
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/resolve"
-	packlib "spwn.sh/packages/pack"
+	deps "spwn.sh/packages/deps"
 
 	"gopkg.in/yaml.v3"
 )
@@ -532,7 +532,7 @@ func rulePackVersionConflict(in Input) []Issue {
 				continue
 			}
 			for _, t := range parsed.Deps {
-				pack, version := packlib.SplitVersion(t)
+				pack, version := deps.SplitVersion(t)
 				vmap, ok := versions[pack]
 				if !ok {
 					vmap = map[string]string{}
@@ -619,21 +619,21 @@ func rulePacksExist(in Input) []Issue {
 	haveCatalog := in.BuiltinTools != nil
 	checked := map[string]bool{}
 	check := func(raw, location string) []Issue {
-		pack, _ := packlib.SplitVersion(raw)
+		pack, _ := deps.SplitVersion(raw)
 		key := pack + "@@" + location
 		if checked[key] {
 			return nil
 		}
 		checked[key] = true
-		ref := packlib.ParseRef(pack)
+		ref := deps.ParseRef(pack)
 
 		// For @spwn/* and @<owner>/* refs, resolve against the
 		// catalog.
-		if ref.Kind != packlib.KindLocal {
-			switch packlib.ResolveTool(in.Root, ref, builtin, haveCatalog) {
-			case packlib.ResolveOK:
+		if ref.Kind != deps.KindLocal {
+			switch deps.ResolveTool(in.Root, ref, builtin, haveCatalog) {
+			case deps.ResolveOK:
 				return nil
-			case packlib.ResolveRegistryUnsupported:
+			case deps.ResolveRegistryUnsupported:
 				return []Issue{{
 					Level: LevelError, Path: location,
 					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
@@ -649,7 +649,7 @@ func rulePacksExist(in Input) []Issue {
 			}
 		}
 
-		// Local ref: delegate to pack.ResolveSkill which already
+		// Local ref: delegate to deps.ResolveSkill which already
 		// handles both the directory form (full package) and the
 		// file form (bare markdown skill) against spwn/skills/ and spwn/tools/.
 		if ref.Name == "" {
@@ -658,7 +658,7 @@ func rulePacksExist(in Input) []Issue {
 				Message: fmt.Sprintf("package %q is malformed", raw),
 			}}
 		}
-		if packlib.ResolveSkill(in.Root, ref, nil, false) == packlib.ResolveOK {
+		if deps.ResolveSkill(in.Root, ref, nil, false) == deps.ResolveOK {
 			return nil
 		}
 		return []Issue{{
@@ -704,12 +704,12 @@ func ruleLockfileConsistent(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
-	lock, err := packlib.LoadLockfile(in.Root)
+	lock, err := deps.LoadLockfile(in.Root)
 	if err != nil {
 		return []Issue{{
-			Level: LevelError, Path: packlib.LockFileName,
+			Level: LevelError, Path: deps.LockFileName,
 			Message: fmt.Sprintf("cannot read lockfile: %v", err),
-			Hint:    "regenerate with `spwn install` for each declared pack, or delete " + packlib.LockFileName + " to start fresh",
+			Hint:    "regenerate with `spwn install` for each declared pack, or delete " + deps.LockFileName + " to start fresh",
 		}}
 	}
 	if lock == nil {
@@ -745,10 +745,10 @@ func ruleLockfileConsistent(in Input) []Issue {
 	seen := map[string]bool{}
 	var out []Issue
 	for _, rec := range all {
-		pack, _ := packlib.SplitVersion(rec.raw)
-		ref := packlib.ParseRef(pack)
+		pack, _ := deps.SplitVersion(rec.raw)
+		ref := deps.ParseRef(pack)
 		// Local refs are never lockfile entries.
-		if ref.Kind == packlib.KindLocal {
+		if ref.Kind == deps.KindLocal {
 			continue
 		}
 		if seen[pack] {
@@ -760,7 +760,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		}
 		out = append(out, Issue{
 			Level: LevelError, Path: rec.location,
-			Message: fmt.Sprintf("%q is not recorded in %s", pack, packlib.LockFileName),
+			Message: fmt.Sprintf("%q is not recorded in %s", pack, deps.LockFileName),
 			Hint:    "run `spwn install " + pack + "` to sync the lockfile",
 		})
 	}

@@ -13,6 +13,6 @@ use (
 	./packages/paths
 	./packages/upgrade
 	./packages/project
-	./packages/pack
+	./packages/deps
 	./packages/world
 )
