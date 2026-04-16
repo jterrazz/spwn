@@ -62,9 +62,9 @@ There is no separate `plugins:` field anywhere — `runtime-config:` is just an 
 
 Spwn classifies every dep reference in `agent.yaml#deps`  into one of three kinds:
 
-- **Local** — a bare name like `my-thing`. Resolved against `./spwn/packs/my-thing/` (directory form, full pack with its own `pack.yaml`) or `./spwn/packs/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
+- **Local** — a bare name like `my-thing`. Resolved against `./spwn/tools/my-thing/` (directory form, full pack with its own `pack.yaml`) or `./spwn/tools/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
 - **Built-in** — `@spwn/<name>`. Looked up in the catalog shipped with the CLI (see tables above). `spwn check` offers "did you mean X?" hints for typos.
-- **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `@spwn/<name>` or drop a local pack under `./spwn/packs/<name>/`.
+- **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `@spwn/<name>` or drop a local tool under `./spwn/tools/<name>/`.
 
 Catalog refs are pinned in `spwn.lock` at the project root. Install one with `spwn install @spwn/<name>`. `spwn check` flags any drift between agent.yaml and the lockfile.
 
@@ -84,6 +84,6 @@ verify:
 
 Richer packs can add `commands:`, `user-commands:` (with `{{.Home}}` / `{{.User}}` templating), `files:` (image-path → source-path map), `dependencies:`, `description:`, `runtime-config:` (with `runtimes:` + `configs:` for runtime-config injection), and optional sibling directories `skills/`, `files/`, `config/`.
 
-Drop the directory under `./spwn/packs/<name>/` to author locally, or under `catalog/packs/<name>/` (inside the spwn monorepo) to ship it in the built-in catalog. The loader picks up both via `go:embed` + filesystem walk — no Go code, no registration list.
+Drop the directory under `./spwn/tools/<name>/` to author locally, or under `catalog/packs/<name>/` (inside the spwn monorepo) to ship it in the built-in catalog. The loader picks up both via `go:embed` + filesystem walk — no Go code, no registration list.
 
 For the full schema, see [`packages/image/packyaml/schema.go`](../packages/image/packyaml/schema.go).

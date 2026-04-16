@@ -143,7 +143,7 @@ deps:
 
 func TestRuleLockfileConsistent_ignoresLocalRefs(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "packs", "my-tool"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "spwn", "tools", "my-tool"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "neo", `name: neo

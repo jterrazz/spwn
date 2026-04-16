@@ -11,11 +11,11 @@ import (
 	"spwn.sh/packages/image/packyaml"
 )
 
-// localPackDir is where the project-local pack loader looks
+// localToolDir is where the project-local pack loader looks
 // for bare-name refs at image-build time. Mirrors what the validator
 // (rulePacksExist) expects, so `spwn check` and `spwn build`
 // resolve refs through the same on-disk layout.
-const localPackDir = "packs"
+const localToolDir = "tools"
 
 // wrappedLocalTool forwards every image.Tool method to an underlying
 // packyaml-parsed pack but forces Name() to the "local:<basename>"
@@ -38,13 +38,13 @@ func (t *wrappedLocalTool) Skills() fs.FS               { return t.inner.Skills(
 func (t *wrappedLocalTool) Runtimes() []string          { return t.inner.Runtimes() }
 func (t *wrappedLocalTool) Config(runtime string) []byte { return t.inner.Config(runtime) }
 
-// loadLocalPack parses spwn/packs/<name>/pack.yaml via the
+// loadLocalPack parses spwn/tools/<name>/pack.yaml via the
 // shared packyaml parser and wraps the result so Name() returns
 // "local:<name>". Missing manifest is a crisp authoring error — an
 // empty local pack would render to nothing and the user would
 // spend an afternoon debugging a no-op.
 func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
-	pkgDir := filepath.Join(projectRoot, "spwn", localPackDir, name)
+	pkgDir := filepath.Join(projectRoot, "spwn", localToolDir, name)
 	info, err := os.Stat(pkgDir)
 	if err != nil {
 		return nil, fmt.Errorf("local pack %q: %w", name, err)

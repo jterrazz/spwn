@@ -38,7 +38,7 @@ deps:
 `)
 
 	// Local pack that exists on disk.
-	mustMkdir(t, filepath.Join(root, "spwn", "packs", "local-tool"))
+	mustMkdir(t, filepath.Join(root, "spwn", "tools", "local-tool"))
 
 	p, err := Load(filepath.Join(root, "spwn.yaml"))
 	if err != nil {
@@ -94,7 +94,7 @@ deps:
 	if !strings.Contains(jterrazzMsg, "remote registries are not yet supported") {
 		t.Errorf("@jterrazz/python: want registry-unsupported message, got %q", jterrazzMsg)
 	}
-	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/packs/") {
+	if !strings.Contains(jterrazzHint, "@spwn/<name>") || !strings.Contains(jterrazzHint, "./spwn/tools/") {
 		t.Errorf("@jterrazz/python: hint should mention both workarounds, got %q", jterrazzHint)
 	}
 	if !strings.Contains(communityMsg, "remote registries are not yet supported") {

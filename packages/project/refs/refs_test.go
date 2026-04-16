@@ -66,7 +66,7 @@ func TestSplitVersion(t *testing.T) {
 
 func TestResolveTool_Local(t *testing.T) {
 	root := t.TempDir()
-	mustMkdir(t, filepath.Join(root, "spwn", "packs", "present"))
+	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
 
 	got := refs.ResolveTool(root, refs.Parse("present"), nil, false)
 	if got != refs.ResolveOK {
@@ -123,7 +123,7 @@ func TestResolveSkill_Local(t *testing.T) {
 	}
 
 	// Directory-form skill.
-	mustMkdir(t, filepath.Join(root, "spwn", "packs", "debug"))
+	mustMkdir(t, filepath.Join(root, "spwn", "tools", "debug"))
 
 	got = refs.ResolveSkill(root, refs.Parse("debug"), nil, false)
 	if got != refs.ResolveOK {

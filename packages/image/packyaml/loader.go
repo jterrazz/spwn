@@ -100,7 +100,7 @@ func Parse(res Resolver, opts ParseOptions) (ib.Tool, error) {
 }
 
 // DirResolver is a Resolver backed by a host filesystem directory.
-// Used by the project-local pack loader for spwn/packs/<name>/.
+// Used by the project-local tool loader for spwn/tools/<name>/.
 type DirResolver struct {
 	Root string
 }

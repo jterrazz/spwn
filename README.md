@@ -121,7 +121,6 @@ my-project/
 │   ├── skills/             #   project-wide shared skills (.md)
 │   ├── tools/              #   local tool definitions (.yaml)
 │   ├── hooks/              #   lifecycle hook scripts
-│   └── packs/              #   local pack authoring (for publishing)
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
 
@@ -177,7 +176,7 @@ deps:
 
 Dependency resolution works like npm:
 - `@spwn/<name>` is a catalog pack compiled into the spwn binary.
-- `<bare-name>` is a local skill under `spwn/skills/<name>.md` or a local pack under `spwn/packs/<name>/`.
+- `<bare-name>` is a local skill under `spwn/skills/<name>.md` or a local pack under `spwn/tools/<name>/`.
 - `@<owner>/<name>` is reserved for a future community registry.
 
 Add a catalog pack to every agent with `spwn install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
