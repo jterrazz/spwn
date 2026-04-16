@@ -1,6 +1,6 @@
 # Pack Catalog
 
-Spwn worlds are assembled from composable plugins. Each plugin is a self-contained unit declared by a single `pack.yaml`: it knows how to install itself, how to verify it works, and optionally ships a skill or injects runtime config. The imagebuilder resolves dependencies, deduplicates packages, and produces one optimized Docker image.
+Spwn worlds are assembled from composable packs. Each pack is a self-contained unit declared by a single `pack.yaml`: it knows how to install itself, how to verify it works, and optionally ships a skill or injects runtime config. The imagebuilder resolves dependencies, deduplicates packs, and produces one optimized Docker image.
 
 Plugins are stackable: `@spwn/qmd` depends on `@spwn/node`, so listing `@spwn/qmd` pulls Node.js in automatically.
 
@@ -60,9 +60,9 @@ There is no separate `plugins:` field anywhere — `runtime-config:` is just an 
 
 ## Plugin reference kinds
 
-Spwn classifies every plugin reference in `agent.yaml#plugins` (and world-level `plugins:`) into one of three kinds:
+Spwn classifies every dep reference in `agent.yaml#deps`  into one of three kinds:
 
-- **Local** — a bare name like `my-thing`. Resolved against `./spwn/packs/my-thing/` (directory form, full plugin with its own `pack.yaml`) or `./spwn/packs/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
+- **Local** — a bare name like `my-thing`. Resolved against `./spwn/packs/my-thing/` (directory form, full pack with its own `pack.yaml`) or `./spwn/packs/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
 - **Built-in** — `@spwn/<name>`. Looked up in the catalog shipped with the CLI (see tables above). `spwn check` offers "did you mean X?" hints for typos.
 - **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `@spwn/<name>` or drop a local pack under `./spwn/packs/<name>/`.
 
@@ -70,7 +70,7 @@ Catalog refs are pinned in `spwn.lock` at the project root. Install one with `sp
 
 ## Adding your own plugins
 
-Every plugin is described by a `pack.yaml` manifest. The schema is small and every field is optional, so a minimal plugin can be four lines:
+Every pack is described by a `pack.yaml` manifest. The schema is small and every field is optional, so a minimal pack can be four lines:
 
 ```yaml
 # spwn/packs/my-thing/pack.yaml

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { spec } from '../../../setup/cli.specification.js';
 
 /**
- * `spwn check` plugin-field resolution. Parallel to the tools-field
+ * `spwn check` pack-field resolution. Parallel to the tools-field
  * tests in ../check/ — each scenario has its own frozen fixture under
  * `tests/fixtures/check-{valid,invalid}-plugin/` that declares a
  * single-agent project whose `agent.yaml` uses the `plugins:` field.
@@ -17,20 +17,20 @@ describe('spwn check: plugins field resolution', () => {
             .exec('check')
             .run();
 
-        // Then - check passes and does not complain about the plugin
+        // Then - check passes and does not complain about the pack
         expect(result.exitCode).toBe(0);
         // `check` renders its report on stdout.
         expect(result.stdout.text).not.toContain('does not exist');
     });
 
-    test('rejects nonexistent plugin refs with the same wording as tools', async () => {
-        // Given - a project whose neo agent declares a bogus plugin
+    test('rejects nonexistent pack refs with the same wording as tools', async () => {
+        // Given - a project whose neo agent declares a bogus pack ref
         const result = await spec('plugins invalid')
             .project('check-invalid-plugin')
             .exec('check')
             .run();
 
-        // Then - check fails and names the offending plugin
+        // Then - check fails and names the offending pack
         expect(result.exitCode).toBe(1);
         // `check` renders its report on stdout.
         result.stdout.toContain('@spwn/totally-bogus-plugin');

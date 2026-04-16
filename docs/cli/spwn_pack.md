@@ -9,8 +9,8 @@ Manage packs (e.g. @spwn/unix, @spwn/mempalace)
 
 ### Synopsis
 
-Plugins are the unified building blocks that agents plug into their worlds.
-One schema covers what used to be split between tools, runtime-config providers, and skills.
+Packs are the distribution unit for agent dependencies.
+Each pack ships any combination of tools, skills, hooks, and agents.
 
 Install a catalog pack into the project's agents + lockfile with:
   spwn pack install @spwn/python
@@ -21,7 +21,7 @@ Remove it with:
 List what's installed with:
   spwn pack ls
 
-Local plugins authored under spwn/packs/<name>/ are referenced by
+Local packs authored under spwn/packs/<name>/ are referenced by
 bare name in agent.yaml and do NOT go through the install verb — they
 are authored in place.
 

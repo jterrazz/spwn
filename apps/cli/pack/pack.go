@@ -1,7 +1,7 @@
-// Package plugin implements the `spwn pack` command group — managing
+// Package pack implements the `spwn pack` command group — managing
 // the spwn pack system — the unified installable concept (formerly "package").
 //
-// Packages are declared in each agent's agent.yaml#plugins list and
+// Packages are declared in each agent's agent.yaml#deps list and
 // pinned in the project's spwn.lock. The shape is deliberately
 // npm-ish:
 //
@@ -34,8 +34,8 @@ var Cmd = &cobra.Command{
 	Use:     "pack",
 	Aliases: []string{"packs"},
 	Short:   "Manage packs (e.g. @spwn/unix, @spwn/mempalace)",
-	Long: `Plugins are the unified building blocks that agents plug into their worlds.
-One schema covers what used to be split between tools, runtime-config providers, and skills.
+	Long: `Packs are the distribution unit for agent dependencies.
+Each pack ships any combination of tools, skills, hooks, and agents.
 
 Install a catalog pack into the project's agents + lockfile with:
   spwn pack install @spwn/python
@@ -46,7 +46,7 @@ Remove it with:
 List what's installed with:
   spwn pack ls
 
-Local plugins authored under spwn/packs/<name>/ are referenced by
+Local packs authored under spwn/packs/<name>/ are referenced by
 bare name in agent.yaml and do NOT go through the install verb — they
 are authored in place.`,
 }
@@ -57,10 +57,10 @@ func init() {
 	Cmd.AddCommand(installCmd)
 	Cmd.AddCommand(uninstallCmd)
 
-	Cmd.SetHelpFunc(pluginHelp)
+	Cmd.SetHelpFunc(packHelp)
 }
 
-func pluginHelp(cmd *cobra.Command, args []string) {
+func packHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "pack" {
 		ui.MinimalHelp(cmd, args)
 		return
@@ -143,7 +143,7 @@ var showCmd = &cobra.Command{
 	},
 }
 
-// installCmd adds a ref to every agent's agent.yaml#plugins and
+// installCmd adds a ref to every agent's agent.yaml#deps and
 // pins it in the project lockfile. Bare names are rejected with a
 // pointer to the local authoring flow.
 var installCmd = &cobra.Command{
@@ -180,7 +180,7 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	switch ref.Kind {
 	case refs.KindLocal:
 		return fmt.Errorf("%q is a bare name — local packs are authored in place, not installed. "+
-			"Create ./spwn/packs/%s/plugin.yaml for a full plugin or ./spwn/packs/%s.md for a bare skill",
+			"Create ./spwn/packs/%s/pack.yaml for a full pack or ./spwn/packs/%s.md for a bare skill",
 			pack, pack, pack)
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+

@@ -76,7 +76,7 @@ func TestLoadLocalPackage_missingManifest(t *testing.T) {
 	}
 	_, err := loadLocalPack(root, "empty-pkg")
 	if err == nil {
-		t.Fatal("want error for missing plugin.yaml")
+		t.Fatal("want error for missing pack.yaml")
 	}
 }
 

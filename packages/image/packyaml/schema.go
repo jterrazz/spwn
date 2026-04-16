@@ -1,7 +1,7 @@
-// Package pluginyaml is the shared parser for plugin.yaml — the
+// Package packyaml is the shared parser for pack.yaml — the
 // declarative manifest format that describes a spwn pack's
-// image-build recipe. Both the catalog (catalog/plugins/<name>/plugin.yaml)
-// and project-local packs (spwn/packs/<name>/plugin.yaml in a user
+// image-build recipe. Both the catalog (catalog/packs/<name>/pack.yaml)
+// and project-local packs (spwn/packs/<name>/pack.yaml in a user
 // project) use the same schema, so a pack can graduate from
 // "authored in a project" to "shipped in the catalog" by moving its
 // directory.
@@ -15,7 +15,7 @@
 // The parser produces image.Tool instances (via the adapter in
 // adapter.go), so everything downstream — registry resolution,
 // dockerfile generation, skill collection — is oblivious to whether a
-// given plugin came from Go or YAML.
+// given pack came from Go or YAML.
 package packyaml
 
 import (
@@ -25,8 +25,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Schema is the on-disk shape of plugin.yaml. Every field is
-// optional so a minimal plugin ("install one thing, verify it's
+// Schema is the on-disk shape of pack.yaml. Every field is
+// optional so a minimal pack ("install one thing, verify it's
 // there") stays short.
 type Schema struct {
 	// Name is the pack identifier (e.g. "@spwn/git"). Optional:
@@ -42,7 +42,7 @@ type Schema struct {
 	Kind string `yaml:"kind"`
 
 	// Version is a semver string or "latest". Required for catalog
-	// plugins; defaults to "0.0.0-local" for project-local packs.
+	// packs; defaults to "0.0.0-local" for project-local packs.
 	Version string `yaml:"version"`
 
 	// Description is a human-readable one-liner. Optional.
@@ -109,7 +109,7 @@ type InstallSection struct {
 }
 
 // RuntimeConfigSection is the optional `runtime-config:` block on a
-// plugin. When present, the Runtimes list scopes which runtime
+// pack. When present, the Runtimes list scopes which runtime
 // backends the pack targets, and Configs is a map from runtime
 // name to the YAML-native snippet that gets merged into the
 // runtime's settings file at spawn time.
@@ -147,11 +147,11 @@ func (p *RuntimeConfigSection) ConfigJSON(runtime string) ([]byte, error) {
 	}
 	var raw any
 	if err := node.Decode(&raw); err != nil {
-		return nil, fmt.Errorf("decode plugin config for %q: %w", runtime, err)
+		return nil, fmt.Errorf("decode runtime config for %q: %w", runtime, err)
 	}
 	out, err := json.Marshal(raw)
 	if err != nil {
-		return nil, fmt.Errorf("marshal plugin config for %q: %w", runtime, err)
+		return nil, fmt.Errorf("marshal runtime config for %q: %w", runtime, err)
 	}
 	return out, nil
 }

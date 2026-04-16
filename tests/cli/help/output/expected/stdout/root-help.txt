@@ -12,10 +12,10 @@ Entities:
   world                            Deployable groupings (start, stop, ls, inspect, enter, snap)
 
 Building blocks:
-  tool                             Reusable tool packs (ls, show, get)
-  plugin                           Runtime-targeted plugins (ls, show)
+  pack                             Manage packs (ls, show, install, uninstall)
   skill                            Reusable skill files (ls, new, edit, show)
-  profile                          Reusable personality templates (ls, new, edit)
+  install <ref>                    Install a dependency into the project
+  uninstall <ref>                  Remove a dependency from the project
 
 Shortcuts:
   up [name]                        Start every world (or one) (alias: world start)

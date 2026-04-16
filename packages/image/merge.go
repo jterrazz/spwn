@@ -9,14 +9,14 @@ import (
 // map[string]any and overlays later values on top of earlier ones at
 // the top level. Used at spawn time to combine a runtime's baseline
 // config (e.g. the claude-code settings.json that ships in the image)
-// with the per-plugin config snippets returned by Plugin.Config.
+// with the per-pack config snippets returned by Tool.Config.
 //
 // Merge rule: last write wins per top-level key. Values are not
-// recursively merged — a later plugin that declares `mcpServers: {foo:
+// recursively merged — a later pack that declares `mcpServers: {foo:
 // ...}` replaces an earlier pack's `mcpServers` entirely. This is
 // deliberate: deep merge hides conflicts, shallow merge surfaces them
-// and keeps plugin authoring trivial to reason about. Revisit if real
-// plugins start needing deeper composition.
+// and keeps pack authoring trivial to reason about. Revisit if real
+// packs start needing deeper composition.
 //
 // nil inputs are skipped. An empty result (no non-nil inputs) round-
 // trips as "{}".

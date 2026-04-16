@@ -10,7 +10,7 @@ import (
 // Config() are part of the unified Tool interface — a pack with a
 // `runtime-config:` block returns a non-empty Runtimes list and the spawn-time
 // merger picks up its Config(runtime) snippet. Packages without a
-// plugin block return nil from both.
+// runtime-config block return nil from both.
 type toolImpl struct {
 	schema    Schema
 	kind      ib.Kind

@@ -12,7 +12,7 @@ Author bare-markdown skill packages
 Skills are procedures, playbooks, or pieces of knowledge authored as
 bare markdown files at spwn/skills/<name>.md. Attach a skill to an
 agent with:
-  spwn agent add <agent> --plugin <skill-name>
+  spwn agent add <agent> --pack <skill-name>
 
 ### Options
 

@@ -41,7 +41,7 @@ type Tool interface {
 
 	// Runtimes returns the runtime backends this pack injects
 	// config into (e.g. "@spwn/claude-code"). Return nil for the
-	// common case of "no runtime-config block" — plugins that don't
+	// common case of "no runtime-config block" — packs that don't
 	// target a runtime. Non-nil means the spawn-time merge pass
 	// should call Config(runtime) for each matching runtime and
 	// shallow-merge the result into the runtime's settings file.
@@ -49,15 +49,15 @@ type Tool interface {
 
 	// Config returns the JSON snippet to merge into the named
 	// runtime's config file inside the container, or nil if this
-	// plugin has no config for that runtime. Called only when the
+	// pack has no config for that runtime. Called only when the
 	// runtime is in Runtimes().
 	Config(runtime string) []byte
 }
 
 // PluginConfig returns the config JSON a pack would inject for the
 // given runtime, enforcing the Runtimes() allowlist so individual
-// plugins don't have to repeat the check. Returns nil when the
-// plugin doesn't target the runtime or has no config for it.
+// packs don't have to repeat the check. Returns nil when the
+// pack doesn't target the runtime or has no config for it.
 func PluginConfig(t Tool, runtime string) []byte {
 	runtimes := t.Runtimes()
 	if len(runtimes) == 0 {

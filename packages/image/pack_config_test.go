@@ -6,7 +6,7 @@ import (
 )
 
 // baseTool is a minimal Tool used to exercise the pack helpers
-// against a plain package (no plugin: block). Runtimes() returns nil
+// against a plain package (no runtime-config: block). Runtimes() returns nil
 // so PluginConfig short-circuits.
 type baseTool struct{ name string }
 
@@ -38,7 +38,7 @@ func (t *pluginTool) Runtimes() []string           { return t.runtimes }
 func (t *pluginTool) Config(runtime string) []byte { return t.config[runtime] }
 
 func TestPluginRuntimes_PlainTool(t *testing.T) {
-	// A package with no plugin: block returns nil from both helpers.
+	// A package with no runtime-config: block returns nil from both helpers.
 	if got := PluginRuntimes(&baseTool{name: "@spwn/plain"}); got != nil {
 		t.Errorf("PluginRuntimes(plain) = %v, want nil", got)
 	}
@@ -67,7 +67,7 @@ func TestPluginConfig_EmptyRuntimesIsNotAPlugin(t *testing.T) {
 	// Under the unified Tool interface, empty Runtimes() means "not
 	// a pack" — every runtime gets nil back regardless of what
 	// Config would return. Previously this was "runtime-agnostic
-	// plugin" but that concept is gone: plugins must opt in to a
+	// plugin" but that concept is gone: packs must opt in to a
 	// specific runtime list.
 	p := &pluginTool{
 		runtimes: nil,
