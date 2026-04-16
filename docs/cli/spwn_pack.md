@@ -1,11 +1,11 @@
 ---
-title: "spwn plugin"
-slug: "spwn-plugin"
+title: "spwn pack"
+slug: "spwn-pack"
 ---
 
-## spwn plugin
+## spwn pack
 
-Manage plugins (e.g. @spwn/unix, @spwn/mempalace)
+Manage packs (e.g. @spwn/unix, @spwn/mempalace)
 
 ### Synopsis
 
@@ -13,10 +13,10 @@ Plugins are the unified building blocks that agents plug into their worlds.
 One schema covers what used to be split between tools, runtime-config providers, and skills.
 
 Install a catalog pack into the project's agents + lockfile with:
-  spwn install @spwn/python
+  spwn pack install @spwn/python
 
 Remove it with:
-  spwn install @spwn/python
+  spwn pack uninstall @spwn/python
 
 List what's installed with:
   spwn pack ls
@@ -28,14 +28,14 @@ are authored in place.
 ### Options
 
 ```
-  -h, --help   help for plugin
+  -h, --help   help for pack
 ```
 
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
-* [spwn install](./spwn_plugin_install.md)	 - Install a pack into the project
-* [spwn pack ls](./spwn_plugin_ls.md)	 - List installed plugins
-* [spwn plugin show](./spwn_plugin_show.md)	 - Inspect a pack
-* [spwn install](./spwn_plugin_uninstall.md)	 - Uninstall a pack from the project
+* [spwn pack install](./spwn_pack_install.md)	 - Install a pack into the project
+* [spwn pack ls](./spwn_pack_ls.md)	 - List installed packs
+* [spwn pack show](./spwn_pack_show.md)	 - Inspect a pack
+* [spwn pack uninstall](./spwn_pack_uninstall.md)	 - Uninstall a pack from the project
 

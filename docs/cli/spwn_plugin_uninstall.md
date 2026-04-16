@@ -1,14 +1,14 @@
 ---
-title: "spwn plugin uninstall"
+title: "spwn install"
 slug: "spwn-plugin-uninstall"
 ---
 
-## spwn plugin uninstall
+## spwn install
 
-Uninstall a plugin from the project
+Uninstall a pack from the project
 
 ```
-spwn plugin uninstall <ref> [flags]
+spwn install <ref> [flags]
 ```
 
 ### Options

@@ -5,18 +5,18 @@ slug: "spwn-agent-remove"
 
 ## spwn agent remove
 
-Remove plugins from an agent
+Remove packs from an agent
 
 ### Synopsis
 
-Remove plugins from an agent's composition.
+Remove packs from an agent's composition.
 
 Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 'spwn agent remove <name> --plugin X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --plugin @spwn/python
-  spwn agent remove neo --plugins @spwn/mempalace
+  spwn agent remove neo --pack @spwn/python
+  spwn agent remove neo --packs @spwn/mempalace
 
 ```
 spwn agent remove <agent-name> [flags]
@@ -25,9 +25,9 @@ spwn agent remove <agent-name> [flags]
 ### Options
 
 ```
-  -h, --help                  help for remove
-      --plugin stringArray    Plugin ref to remove (repeatable)
-      --plugins stringArray   Plural alias for --plugin
+  -h, --help                help for remove
+      --pack stringArray    Pack ref to remove (repeatable)
+      --packs stringArray   Plural alias for --pack
 ```
 
 ### SEE ALSO

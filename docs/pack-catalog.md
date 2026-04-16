@@ -1,6 +1,6 @@
-# Plugin Catalog
+# Pack Catalog
 
-Spwn worlds are assembled from composable plugins. Each plugin is a self-contained unit declared by a single `plugin.yaml`: it knows how to install itself, how to verify it works, and optionally ships a skill or injects runtime config. The imagebuilder resolves dependencies, deduplicates packages, and produces one optimized Docker image.
+Spwn worlds are assembled from composable plugins. Each plugin is a self-contained unit declared by a single `pack.yaml`: it knows how to install itself, how to verify it works, and optionally ships a skill or injects runtime config. The imagebuilder resolves dependencies, deduplicates packages, and produces one optimized Docker image.
 
 Plugins are stackable: `@spwn/qmd` depends on `@spwn/node`, so listing `@spwn/qmd` pulls Node.js in automatically.
 
@@ -50,9 +50,9 @@ Spwn's own infrastructure. Usually included by default.
 
 ## Plugins with runtime-config injection
 
-Any plugin whose `plugin.yaml` declares a `runtime-config:` section participates in spawn-time config injection. At spawn time the merger reaches into the targeted runtime's config file (e.g. `~/.claude/settings.json`) and shallow-merges the plugin's YAML snippet. That's how MCP servers, shell hooks, or any other runtime-specific wiring show up inside the container without the user having to touch config files.
+Any plugin whose `pack.yaml` declares a `runtime-config:` section participates in spawn-time config injection. At spawn time the merger reaches into the targeted runtime's config file (e.g. `~/.claude/settings.json`) and shallow-merges the pack's YAML snippet. That's how MCP servers, shell hooks, or any other runtime-specific wiring show up inside the container without the user having to touch config files.
 
-There is no separate `plugins:` field anywhere — `runtime-config:` is just an optional block on the unified plugin manifest. Install one with `spwn plugin install @spwn/mempalace` and it shows up in `agent.yaml#plugins:` alongside everything else.
+There is no separate `plugins:` field anywhere — `runtime-config:` is just an optional block on the unified pack manifest. Install one with `spwn install @spwn/mempalace` and it shows up in `agent.yaml#plugins:` alongside everything else.
 
 | Plugin | Targets | What it provides | Status |
 |--------|---------|------------------|--------|
@@ -62,18 +62,18 @@ There is no separate `plugins:` field anywhere — `runtime-config:` is just an 
 
 Spwn classifies every plugin reference in `agent.yaml#plugins` (and world-level `plugins:`) into one of three kinds:
 
-- **Local** — a bare name like `my-thing`. Resolved against `./spwn/plugins/my-thing/` (directory form, full plugin with its own `plugin.yaml`) or `./spwn/plugins/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
+- **Local** — a bare name like `my-thing`. Resolved against `./spwn/packs/my-thing/` (directory form, full plugin with its own `pack.yaml`) or `./spwn/packs/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
 - **Built-in** — `@spwn/<name>`. Looked up in the catalog shipped with the CLI (see tables above). `spwn check` offers "did you mean X?" hints for typos.
-- **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `@spwn/<name>` or drop a local plugin under `./spwn/plugins/<name>/`.
+- **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `@spwn/<name>` or drop a local pack under `./spwn/packs/<name>/`.
 
-Catalog refs are pinned in `spwn.lock` at the project root. Install one with `spwn plugin install @spwn/<name>`. `spwn check` flags any drift between agent.yaml and the lockfile.
+Catalog refs are pinned in `spwn.lock` at the project root. Install one with `spwn install @spwn/<name>`. `spwn check` flags any drift between agent.yaml and the lockfile.
 
 ## Adding your own plugins
 
-Every plugin is described by a `plugin.yaml` manifest. The schema is small and every field is optional, so a minimal plugin can be four lines:
+Every plugin is described by a `pack.yaml` manifest. The schema is small and every field is optional, so a minimal plugin can be four lines:
 
 ```yaml
-# spwn/plugins/my-thing/plugin.yaml
+# spwn/packs/my-thing/pack.yaml
 name: my-thing
 install:
   packages:
@@ -84,6 +84,6 @@ verify:
 
 Richer plugins can add `commands:`, `user-commands:` (with `{{.Home}}` / `{{.User}}` templating), `files:` (image-path → source-path map), `dependencies:`, `description:`, `runtime-config:` (with `runtimes:` + `configs:` for runtime-config injection), and optional sibling directories `skills/`, `files/`, `config/`.
 
-Drop the directory under `./spwn/plugins/<name>/` to author locally, or under `catalog/plugins/<name>/` (inside the spwn monorepo) to ship it in the built-in catalog. The loader picks up both via `go:embed` + filesystem walk — no Go code, no registration list.
+Drop the directory under `./spwn/packs/<name>/` to author locally, or under `catalog/plugins/<name>/` (inside the spwn monorepo) to ship it in the built-in catalog. The loader picks up both via `go:embed` + filesystem walk — no Go code, no registration list.
 
 For the full schema, see [`packages/image/pluginyaml/schema.go`](../packages/image/pluginyaml/schema.go).

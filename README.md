@@ -118,7 +118,10 @@ my-project/
 ├── spwn.lock          # committed dep pins (like package-lock.json)
 ├── spwn/                   # committed project assets
 │   ├── agents/             #   your agents - travel with the repo
-│   └── plugins/            #   local plugins (dirs, bare .md skills) you author
+│   ├── skills/             #   project-wide shared skills (.md)
+│   ├── tools/              #   local tool definitions (.yaml)
+│   ├── hooks/              #   lifecycle hook scripts
+│   └── packs/              #   local pack authoring (for publishing)
 └── .spwn/                  # gitignored local state (live world IDs, cache)
 ```
 
@@ -145,7 +148,7 @@ Each agent is a directory of composable blocks - **human-readable, git-friendly,
 
 ```
 spwn/agents/neo/
-├── agent.yaml                # composition: plugins + runtime
+├── agent.yaml                # composition: deps + runtime
 ├── AGENTS.md                 # entry point (provider-neutral; compiled per runtime)
 ├── identity/                 # who the agent is - profile.md, purpose.md, traits.md
 ├── knowledge/                # facts about the codebase
@@ -153,7 +156,7 @@ spwn/agents/neo/
 └── journal/                  # session history - one file per run
 ```
 
-**Everything is a plugin.** Tools, runtime-config injectors, and skills all unified under one concept. A plugin can install apt-get deps, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
+**Everything is a pack.** Tools, runtime-config injectors, and skills all unified under one concept. A pack can install apt-get deps, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
 
 ```yaml
 # spwn/agents/neo/agent.yaml
@@ -161,23 +164,23 @@ name: neo
 runtime:
   backend: "@spwn/claude-code"
 
-plugins:
+deps:
   - "@spwn/unix"                 # bash, coreutils, grep, sed, awk
   - "@spwn/git"                  # version control
   - "@spwn/python"               # python3, pip3
   - "@spwn/mempalace"            # injects MCP server into Claude Code
-  - paper-reading                # local skill: spwn/plugins/paper-reading.md
+  - paper-reading                # local skill: spwn/skills/paper-reading.md
   - hypothesis-testing           # local skill
 ```
 
-**If a plugin isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [plugin catalog](docs/plugin-catalog.md).
+**If a pack isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [pack catalog](docs/pack-catalog.md).
 
 Dependency resolution works like npm:
-- `@spwn/<name>` is a catalog plugin compiled into the spwn binary.
-- `<bare-name>` is a local plugin under `spwn/plugins/<name>/` (directory form) or `spwn/plugins/<name>.md` (bare-markdown skill).
+- `@spwn/<name>` is a catalog pack compiled into the spwn binary.
+- `<bare-name>` is a local skill under `spwn/skills/<name>.md` or a local pack under `spwn/packs/<name>/`.
 - `@<owner>/<name>` is reserved for a future community registry.
 
-Add a catalog plugin to every agent with `spwn plugin install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
+Add a catalog pack to every agent with `spwn install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
 
 **Agents evolve through three mechanisms:**
 
@@ -215,8 +218,8 @@ Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lo
 
 ```bash
 spwn init
-spwn agent add curie --plugin @spwn/python --plugin @spwn/qmd
-spwn agent add curie --plugin paper-reading --plugin hypothesis-testing
+spwn agent add curie --pack @spwn/python --pack @spwn/qmd
+spwn agent add curie --pack paper-reading --plugin hypothesis-testing
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
@@ -228,7 +231,7 @@ spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag a
 ```bash
 cd acme-api
 spwn init
-spwn agent add neo --plugin @spwn/node --plugin @spwn/git
+spwn agent add neo --pack @spwn/node --pack @spwn/git
 
 git add spwn.yaml spwn/
 git commit -m "add neo, our repo maintainer"
@@ -299,10 +302,10 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn agent inspect neo                       Inspect composition, memory, history
 🟢 spwn agent logs neo                          Event log for this agent
 
-# Compose plugins
-🟢 spwn agent add neo --plugin @spwn/python     Add a catalog plugin to the agent
-🟡 spwn agent add neo --plugin paper-reading    Add a local plugin (must exist in spwn/plugins/)
-🟢 spwn agent rm  neo --plugin @spwn/python     Remove a plugin from the agent
+# Compose
+🟢 spwn agent add neo --pack @spwn/python     Attach a dep to the agent
+🟡 spwn agent add neo --pack paper-reading    Attach a local pack
+🟢 spwn agent rm  neo --pack @spwn/python     Remove a dep from the agent
 
 # Talk + messaging
 🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`
@@ -345,12 +348,12 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn world knowledge ls <id>                 List a world's shared knowledge files
 🟢 spwn world knowledge show <id> <path>        Read a knowledge file
 
-# ── Plugins & Skills ─────────────────────────────────────────────
-🟢 spwn plugin install @spwn/python             Pin a catalog plugin in the lockfile
-🟢 spwn plugin uninstall @spwn/python           Remove a catalog plugin
-🟢 spwn plugin ls                               Installed plugins
-🟢 spwn plugin show <ref>                       Inspect a plugin
-🔴 spwn plugin search python                    Search the community registry
+# ── Dependencies & Authoring ─────────────────────────────────────────────
+🟢 spwn install @spwn/python             Pin a catalog pack in the lockfile
+🟢 spwn install @spwn/python           Remove a catalog pack
+🟢 spwn pack ls                               Installed packs
+🟢 spwn pack show <ref>                        Inspect a pack
+🔴 spwn pack search python                     Search the community registry
 
 🟢 spwn skill new paper-reading                 Author a new bare-markdown skill
 🟡 spwn skill edit paper-reading                Open in $EDITOR
@@ -412,7 +415,7 @@ Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - 
 | **Principles** - why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
 | **Architecture** - module map, core abstractions, invariants | [`docs/architecture.md`](docs/architecture.md) |
 | **Worlds** - spawning, isolation, tools-as-structure | [`docs/worlds.md`](docs/worlds.md) |
-| **Plugin catalog** - how plugins work, how to add one | [`docs/plugin-catalog.md`](docs/plugin-catalog.md) |
+| **Pack catalog** - how packs work, how to add one | [`docs/pack-catalog.md`](docs/pack-catalog.md) |
 | **CLI reference** - every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
 | **Releasing** - release runbook | [`docs/releasing.md`](docs/releasing.md) |
 | **Update system** - CLI + Tauri auto-update, channels | [`docs/update-system.md`](docs/update-system.md) |
