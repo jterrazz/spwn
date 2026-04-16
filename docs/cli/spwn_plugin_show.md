@@ -5,7 +5,7 @@ slug: "spwn-plugin-show"
 
 ## spwn plugin show
 
-Inspect a plugin
+Inspect a pack
 
 ```
 spwn plugin show <plugin> [flags]

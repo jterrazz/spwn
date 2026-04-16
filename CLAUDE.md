@@ -20,8 +20,8 @@ The domain has three main abstractions, each owning one concern:
 - **Architect**: The always-on orchestration daemon. Connected to all channels. Creates/destroys worlds. Self-manages via spwn.
 
 ### Building blocks (composable, reusable)
-- **Plugin**: The unified building block. A `plugin.yaml` manifest (catalog or project-local) plus optional `skills/` and `files/` siblings. Composability determines what it is: `install:` + `verify:` → tool, `runtime-config:` section → runtime-config injector, bare `.md` content → skill. All three co-exist under the single `agent.yaml#plugins:` list.
-- **Skill (bare form)**: A `spwn/plugins/<name>.md` file with no wrapping directory. Simplest authoring path for "write a paragraph of instructions."
+- **Pack**: The distribution unit. A `pack.yaml` manifest (catalog or GitHub repo) that ships any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. Agents reference them as external deps.
+- **Skill (bare form)**: A `spwn/skills/<name>.md` file. Simplest authoring path for "write a paragraph of instructions."
 
 ### Agent internals
 - **Identity**: Who the agent is - profile, purpose, traits. Lives in `spwn/agents/<name>/identity/`. Persists across world restarts.
@@ -66,11 +66,11 @@ spwn agent ls                                  # List project agents
 spwn agent inspect neo                         # Inspect composition, memory, history
 spwn agent fork neo neo-v2                     # Clone memory + composition
 spwn agent rm neo                              # Delete an agent
-spwn agent rm neo --plugin @spwn/python       # Remove a plugin from an agent
+spwn agent rm neo --pack @spwn/python       # Remove a dep from an agent
 
-# Compose plugins
-spwn agent add neo --plugin @spwn/python      # Add a catalog plugin
-spwn agent add neo --plugin paper-reading     # Add a local plugin (spwn/plugins/paper-reading.md or dir)
+# Compose
+spwn agent add neo --pack @spwn/python      # Add a dep
+spwn agent add neo --pack paper-reading     # Add a local pack
 
 # Talk + messaging
 spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`
@@ -92,16 +92,16 @@ spwn world inspect <id>                        # Inspect a running world
 spwn world enter   <id>                        # Interactive shell inside the world
 spwn world snap save|ls|restore|rm             # World snapshots
 
-# ── Packages & skills ────────────────────────────────────────────
-spwn plugin install @spwn/python              # Pin a catalog plugin + update every agent
-spwn plugin uninstall @spwn/python            # Remove a catalog plugin
-spwn plugin ls                                # Installed plugins (from lockfile)
+# ── Dependencies ────────────────────────────────────────────
+spwn install @spwn/python              # Install a dep (adds to every agent + lockfile)
+spwn uninstall @spwn/python          # Remove a dep
+spwn pack ls                                # Installed packs (from lockfile)
 
-spwn skill   new|edit|show|rm <name>           # Bare-markdown skill authoring (./spwn/plugins/<name>.md)
+spwn skill   new|edit|show|rm <name>           # Bare-markdown skill authoring (./spwn/skills/<name>.md)
 
 # ── Registry (planned) ───────────────────────────────────────────
 spwn agent   get @community/sci                # Install a shared agent     [planned]
-spwn plugin install @acme/fuzzer               # Install an external plugin [planned]
+spwn install @acme/fuzzer               # Install from GitHub [planned]
 spwn *       publish <name>                    # Push to registry           [planned]
 
 # ── System ───────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ spwn auth login|logout|token                   # Provider credentials
 
 **Design rules:**
 - Strict noun-first grammar: `spwn <noun> <verb>`. Three shortcuts exist: `up`, `ls`, `talk`. No other top-level verbs.
-- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --plugin X` removes a plugin from it.
+- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --pack X` removes a dep from it.
 - Inside a project, commands resolve against `./spwn/` first. Outside a project, they operate on user-level paths (legacy).
 
 ## IDs
@@ -181,7 +181,7 @@ spwn/
 │   │   ├── web/                     #     spwn web (launches the web UI)
 │   │   ├── auth/                    #     spwn auth (login, logout, token)
 │   │   ├── skill/                   #     spwn skill (bare-markdown authoring)
-│   │   ├── plugin/                  #     spwn plugin install/uninstall/ls
+│   │   ├── pack/                    #     spwn install/uninstall + spwn pack ls
 │   │   ├── team/                    #     spwn team
 │   │   ├── organization/            #     spwn organization
 │   │   ├── logs/                    #     spwn logs

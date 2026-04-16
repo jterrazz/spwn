@@ -1,11 +1,11 @@
 ---
 title: "spwn pack ls"
-slug: "spwn-plugin-ls"
+slug: "spwn-pack-ls"
 ---
 
 ## spwn pack ls
 
-List installed plugins
+List installed packs
 
 ```
 spwn pack ls [flags]
@@ -19,5 +19,5 @@ spwn pack ls [flags]
 
 ### SEE ALSO
 
-* [spwn plugin](./spwn_plugin.md)	 - Manage plugins (e.g. @spwn/unix, @spwn/mempalace)
+* [spwn pack](./spwn_pack.md)	 - Manage packs (e.g. @spwn/unix, @spwn/mempalace)
 

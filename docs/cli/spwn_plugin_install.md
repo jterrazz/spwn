@@ -1,14 +1,14 @@
 ---
-title: "spwn plugin install"
+title: "spwn install"
 slug: "spwn-plugin-install"
 ---
 
-## spwn plugin install
+## spwn install
 
-Install a plugin into the project
+Install a pack into the project
 
 ```
-spwn plugin install <ref> [flags]
+spwn install <ref> [flags]
 ```
 
 ### Options

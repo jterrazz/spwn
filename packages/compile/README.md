@@ -72,13 +72,16 @@ my-repo/
 └── spwn/
     ├── agents/
     │   └── neo/
-    │       ├── agent.yaml              # composition: plugins + runtime
+    │       ├── agent.yaml              # composition: deps + runtime
     │       ├── AGENTS.md                # the agent's prompt (provider-neutral)
     │       ├── identity/               # who the agent is (profile, purpose, traits)
     │       ├── knowledge/              # learned facts
     │       ├── playbooks/              # promoted workflows
     │       └── journal/                # session history
-    ├── plugins/                        # project-local plugins (dirs or bare .md)
+    ├── skills/                         # project-wide shared skills (.md)
+    ├── tools/                          # project-local tool definitions
+    ├── hooks/                          # lifecycle hooks
+    ├── packs/                          # local pack authoring
     └── hooks/                          # lifecycle hooks (build-time, spawn-time)
 ```
 
