@@ -8,7 +8,7 @@ import (
 	runtimes "spwn.sh/packages/runtimes"
 	"spwn.sh/catalog"
 	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/imagetest"
+	"spwn.sh/packages/image/internal/imagetest"
 )
 
 func newRegistry(t *testing.T) *ib.Registry {

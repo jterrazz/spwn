@@ -5,7 +5,7 @@ import (
 
 	"spwn.sh/packages/world/runtime"
 
-	_ "spwn.sh/packages/runtimes/claude_code/adapter"
+	_ "spwn.sh/packages/runtimes/claude_code"
 )
 
 func TestClaudeCodeRegistered(t *testing.T) {

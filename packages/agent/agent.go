@@ -1,4 +1,4 @@
-// Package mind provides the public API for the agent domain.
+// Package agent provides the public API for the agent domain.
 // It wraps mind, journal, and session operations.
 package agent
 

@@ -1,4 +1,6 @@
-// Package mind provides organization management for defining role structures.
+// Organization management lives here (not in packages/agent) because
+// organizations define project-level role hierarchies that govern how
+// agents interact within a world.
 //
 // An organization is a first-class entity stored as a YAML file under ~/.spwn/organizations/.
 // Each organization defines a set of roles with levels, command relationships,

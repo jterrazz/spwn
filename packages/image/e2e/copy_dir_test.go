@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/image/imagetest"
+	"spwn.sh/packages/image/internal/imagetest"
 )
 
 // TestCopyDirTo_RoundTrip exercises the CopyDirTo / CopyDirFrom contract
