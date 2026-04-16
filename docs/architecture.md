@@ -56,10 +56,11 @@ Only Claude Code can actually be spawned today. The other names appear in the to
 
 ## Key invariants
 
-- **Per-repository**. Agents and packs live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
-- **Declared plugins only**. An agent can only reach for plugins its `agent.yaml` declares under the unified `plugins:` list. Anything not listed is physically absent from the world's image.
-- **Everything is a pack**. Tools, runtime-config injectors, and skills are one concept — the only thing that differs is which fields the manifest populates. A `pack.yaml` with an `install:` block is a tool; one with a `runtime-config:` block also injects runtime config (MCP servers, hooks, settings) into the target runtime's config file at spawn time; a bare `.md` file is a skill.
-- **Dependencies resolve like npm**. `@spwn/<name>` is a catalog pack compiled into the binary; `<bare-name>` is a local pack under `spwn/tools/<name>/` (directory form) or `spwn/skills/<name>.md` (bare-markdown skill); `@<owner>/<name>` is reserved for a future community registry. Catalog pins live in `spwn.lock` at the project root, managed by `spwn install` / `spwn install`. `spwn check` flags drift between agent.yaml and the lockfile.
+- **Per-repository**. Agents and local blocks live in `./spwn/`, not `~/.spwn/`. `spwn init` enforces this on a fresh directory.
+- **Declared deps only**. An agent can only reach for packs its `agent.yaml` declares in `deps:`. Anything not listed is physically absent from the world's image.
+- **External deps, local blocks**. `deps:` is for external references (`@spwn/*`, `github.com/*`). Local authoring goes in typed directories: `spwn/skills/` (bare `.md`), `spwn/tools/` (install recipes), `spwn/hooks/` (lifecycle scripts). See [`docs/dependencies.md`](dependencies.md) for the full model.
+- **Transitive resolution**. Dependencies declared in a pack's `pack.yaml` are resolved recursively and topologically sorted. Users only list direct deps.
+- **Lock file is text**. `spwn.lock` is line-oriented (one dep per line), trivially diffable. Managed by `spwn install` / `spwn uninstall`.
 - **Labels are truth**. Any world info the CLI displays comes from reading Docker labels, not an on-disk state file.
 - **Compile is deterministic**. Running `spwn build --tree-only` on an unchanged project tree produces byte-identical output - covered by the renderer golden tests in `packages/compile/runtimes/`.
 

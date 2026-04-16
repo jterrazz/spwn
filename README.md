@@ -348,8 +348,8 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 🟢 spwn world knowledge show <id> <path>        Read a knowledge file
 
 # ── Dependencies & Authoring ─────────────────────────────────────────────
-🟢 spwn install @spwn/python             Pin a catalog pack in the lockfile
-🟢 spwn install @spwn/python           Remove a catalog pack
+🟢 spwn install @spwn/python             Install a dep (adds to agents + lockfile)
+🟢 spwn uninstall @spwn/python           Remove a dep
 
 🟢 spwn skill new paper-reading                 Author a new bare-markdown skill
 🟡 spwn skill edit paper-reading                Open in $EDITOR
@@ -409,6 +409,7 @@ Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - 
 | Topic | Link |
 |---|---|
 | **Principles** - why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
+| **Dependencies** - deps, local blocks, lock file, resolution | [`docs/dependencies.md`](docs/dependencies.md) |
 | **Architecture** - module map, core abstractions, invariants | [`docs/architecture.md`](docs/architecture.md) |
 | **Worlds** - spawning, isolation, tools-as-structure | [`docs/worlds.md`](docs/worlds.md) |
 | **Pack catalog** - how packs work, how to add one | [`docs/pack-catalog.md`](docs/pack-catalog.md) |
