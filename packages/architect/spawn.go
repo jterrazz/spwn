@@ -14,7 +14,7 @@ import (
 	runtimes "spwn.sh/packages/runtimes"
 	"spwn.sh/catalog"
 	"spwn.sh/packages/compile"
-	"spwn.sh/packages/runtimes/claude_code/compile"
+	"spwn.sh/packages/compile/runtimes/claude_code"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/image/backend"

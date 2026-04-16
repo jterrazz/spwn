@@ -15,6 +15,7 @@ import (
 	"time"
 
 	agentpkg "spwn.sh/packages/agent"
+	projectpkg "spwn.sh/packages/project"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
@@ -1416,7 +1417,7 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		"-e", "SPWN_HOME=/home/spwn/.spwn",
 	}
 	// Pass auth tokens
-	dockerArgs = append(dockerArgs, auth.DockerEnvArgs()...)
+	dockerArgs = append(dockerArgs, architect.DockerEnvArgs()...)
 	dockerArgs = append(dockerArgs, containerName,
 		"claude", "--dangerously-skip-permissions",
 		"-p", body.Message,
@@ -1682,7 +1683,7 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 
 	// Special case: "team" writes to agent.yaml, not identity/*.md.
 	if body.Field == "team" {
-		if err := agentpkg.SetAgentTeam(name, body.Content); err != nil {
+		if err := projectpkg.SetAgentTeam(name, body.Content); err != nil {
 			jsonError(w, err.Error(), 500)
 			return
 		}
@@ -1728,22 +1729,22 @@ func (s *Server) handleUpdateIdentity(w http.ResponseWriter, r *http.Request) {
 // ============================================================
 
 func (s *Server) handleListTeams(w http.ResponseWriter, r *http.Request) {
-	teams, err := agentpkg.ListTeams()
+	teams, err := projectpkg.ListTeams()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
 	if teams == nil {
-		teams = []agentpkg.Team{}
+		teams = []projectpkg.Team{}
 	}
 	// Enrich each team with its member names.
 	type teamWithMembers struct {
-		agentpkg.Team
+		projectpkg.Team
 		Members []string `json:"members"`
 	}
 	result := make([]teamWithMembers, 0, len(teams))
 	for _, t := range teams {
-		members, _ := agentpkg.TeamMembers(t.Slug)
+		members, _ := projectpkg.TeamMembers(t.Slug)
 		if members == nil {
 			members = []string{}
 		}
@@ -1753,7 +1754,7 @@ func (s *Server) handleListTeams(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCreateTeam(w http.ResponseWriter, r *http.Request) {
-	var body agentpkg.Team
+	var body projectpkg.Team
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
@@ -1763,9 +1764,9 @@ func (s *Server) handleCreateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if body.Slug == "" {
-		body.Slug = agentpkg.Slugify(body.Name)
+		body.Slug = projectpkg.Slugify(body.Name)
 	}
-	if err := agentpkg.CreateTeam(body); err != nil {
+	if err := projectpkg.CreateTeam(body); err != nil {
 		jsonError(w, err.Error(), 400)
 		return
 	}
@@ -1779,12 +1780,12 @@ func (s *Server) handleUpdateTeam(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "team slug is required", 400)
 		return
 	}
-	existing, err := agentpkg.GetTeam(slug)
+	existing, err := projectpkg.GetTeam(slug)
 	if err != nil {
 		jsonError(w, err.Error(), 404)
 		return
 	}
-	var body agentpkg.Team
+	var body projectpkg.Team
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
@@ -1799,7 +1800,7 @@ func (s *Server) handleUpdateTeam(w http.ResponseWriter, r *http.Request) {
 	if body.Description != "" {
 		existing.Description = body.Description
 	}
-	if err := agentpkg.UpdateTeam(*existing); err != nil {
+	if err := projectpkg.UpdateTeam(*existing); err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
@@ -1812,7 +1813,7 @@ func (s *Server) handleDeleteTeam(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "team slug is required", 400)
 		return
 	}
-	if err := agentpkg.DeleteTeam(slug); err != nil {
+	if err := projectpkg.DeleteTeam(slug); err != nil {
 		jsonError(w, err.Error(), 404)
 		return
 	}
@@ -1824,13 +1825,13 @@ func (s *Server) handleDeleteTeam(w http.ResponseWriter, r *http.Request) {
 // ============================================================
 
 func (s *Server) handleListOrganizations(w http.ResponseWriter, r *http.Request) {
-	organizations, err := agentpkg.ListOrganizations()
+	organizations, err := projectpkg.ListOrganizations()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
 	if organizations == nil {
-		organizations = []agentpkg.Organization{}
+		organizations = []projectpkg.Organization{}
 	}
 	jsonOK(w, organizations)
 }
@@ -1841,7 +1842,7 @@ func (s *Server) handleGetOrganization(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "organization slug is required", 400)
 		return
 	}
-	h, err := agentpkg.GetOrganization(slug)
+	h, err := projectpkg.GetOrganization(slug)
 	if err != nil {
 		jsonError(w, err.Error(), 404)
 		return
@@ -1850,7 +1851,7 @@ func (s *Server) handleGetOrganization(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCreateOrganization(w http.ResponseWriter, r *http.Request) {
-	var body agentpkg.Organization
+	var body projectpkg.Organization
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
@@ -1860,9 +1861,9 @@ func (s *Server) handleCreateOrganization(w http.ResponseWriter, r *http.Request
 		return
 	}
 	if body.Slug == "" {
-		body.Slug = agentpkg.Slugify(body.Name)
+		body.Slug = projectpkg.Slugify(body.Name)
 	}
-	if err := agentpkg.CreateOrganization(body); err != nil {
+	if err := projectpkg.CreateOrganization(body); err != nil {
 		jsonError(w, err.Error(), 400)
 		return
 	}
@@ -1876,12 +1877,12 @@ func (s *Server) handleUpdateOrganization(w http.ResponseWriter, r *http.Request
 		jsonError(w, "organization slug is required", 400)
 		return
 	}
-	existing, err := agentpkg.GetOrganization(slug)
+	existing, err := projectpkg.GetOrganization(slug)
 	if err != nil {
 		jsonError(w, err.Error(), 404)
 		return
 	}
-	var body agentpkg.Organization
+	var body projectpkg.Organization
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, "invalid request body: "+err.Error(), 400)
 		return
@@ -1897,7 +1898,7 @@ func (s *Server) handleUpdateOrganization(w http.ResponseWriter, r *http.Request
 		existing.Roles = body.Roles
 	}
 	existing.Slug = slug
-	if err := agentpkg.UpdateOrganization(*existing); err != nil {
+	if err := projectpkg.UpdateOrganization(*existing); err != nil {
 		jsonError(w, err.Error(), 500)
 		return
 	}
@@ -1914,7 +1915,7 @@ func (s *Server) handleDeleteOrganization(w http.ResponseWriter, r *http.Request
 		jsonError(w, "cannot delete the default organization", 400)
 		return
 	}
-	if err := agentpkg.DeleteOrganization(slug); err != nil {
+	if err := projectpkg.DeleteOrganization(slug); err != nil {
 		jsonError(w, err.Error(), 404)
 		return
 	}

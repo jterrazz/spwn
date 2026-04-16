@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/auth"
 	"spwn.sh/packages/image/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtime"
@@ -128,6 +127,6 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 
 // agentEnv builds environment variables for agent execution inside containers.
 func agentEnv() []string {
-	return auth.DockerEnvVars()
+	return DockerEnvVars()
 }
 
