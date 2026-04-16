@@ -95,7 +95,6 @@ spwn world snap save|ls|restore|rm             # World snapshots
 # ── Dependencies ────────────────────────────────────────────
 spwn install @spwn/python              # Install a dep (adds to every agent + lockfile)
 spwn uninstall @spwn/python          # Remove a dep
-spwn pack ls                                # Installed packs (from lockfile)
 
 spwn skill   new|edit|show|rm <name>           # Bare-markdown skill authoring (./spwn/skills/<name>.md)
 
@@ -181,7 +180,6 @@ spwn/
 │   │   ├── web/                     #     spwn web (launches the web UI)
 │   │   ├── auth/                    #     spwn auth (login, logout, token)
 │   │   ├── skill/                   #     spwn skill (bare-markdown authoring)
-│   │   ├── pack/                    #     spwn install/uninstall + spwn pack ls
 │   │   ├── team/                    #     spwn team
 │   │   ├── organization/            #     spwn organization
 │   │   ├── logs/                    #     spwn logs

@@ -12,10 +12,9 @@ Entities:
   world                            Deployable groupings (start, stop, ls, inspect, enter, snap)
 
 Building blocks:
-  pack                             Manage packs (ls, show, install, uninstall)
-  skill                            Reusable skill files (ls, new, edit, show)
-  install <ref>                    Install a dependency into the project
-  uninstall <ref>                  Remove a dependency from the project
+  install <ref>                    Install a dependency (@spwn/unix, github.com/...)
+  uninstall <ref>                  Remove a dependency
+  skill                            Author skill files (new, edit, show, rm, ls)
 
 Shortcuts:
   up [name]                        Start every world (or one) (alias: world start)

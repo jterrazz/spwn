@@ -350,9 +350,6 @@ Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
 # ── Dependencies & Authoring ─────────────────────────────────────────────
 🟢 spwn install @spwn/python             Pin a catalog pack in the lockfile
 🟢 spwn install @spwn/python           Remove a catalog pack
-🟢 spwn pack ls                               Installed packs
-🟢 spwn pack show <ref>                        Inspect a pack
-🔴 spwn pack search python                     Search the community registry
 
 🟢 spwn skill new paper-reading                 Author a new bare-markdown skill
 🟡 spwn skill edit paper-reading                Open in $EDITOR
