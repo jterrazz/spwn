@@ -7,9 +7,8 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"spwn.sh/packages/base"
-	"spwn.sh/packages/activity"
 	"spwn.sh/packages/paths"
+	"spwn.sh/packages/activity"
 )
 
 // Fork clones a Mind from source agent to target agent.
@@ -29,7 +28,7 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	}
 
 	// Determine which layers to copy
-	allLayers := base.MindLayers
+	allLayers := paths.MindLayers
 	if len(layers) > 0 {
 		allLayers = layers
 	}

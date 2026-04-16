@@ -7,7 +7,6 @@ use (
 	./packages/agent
 	./packages/api
 	./packages/auth
-	./packages/base
 	./packages/compile
 	./packages/env
 	./packages/ids

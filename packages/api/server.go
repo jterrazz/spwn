@@ -15,7 +15,7 @@ import (
 	"time"
 
 	agentpkg "spwn.sh/packages/agent"
-	"spwn.sh/packages/base"
+	"spwn.sh/packages/paths"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/image/probe"
@@ -26,7 +26,6 @@ import (
 	examples "spwn.sh/catalog/examples"
 
 	"gopkg.in/yaml.v3"
-	"spwn.sh/packages/paths"
 	"spwn.sh/packages/version"
 )
 
@@ -1187,7 +1186,7 @@ func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
 	if follow {
 		args = append(args, "-f")
 	}
-	args = append(args, "--tail", tail, base.ArchitectContainerName())
+	args = append(args, "--tail", tail, paths.ArchitectContainerName())
 
 	cmd := exec.CommandContext(r.Context(), "docker", args...)
 	stdout, err := cmd.StdoutPipe()

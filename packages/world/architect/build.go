@@ -15,7 +15,7 @@ import (
 	packs "spwn.sh/catalog/packs"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
-	"spwn.sh/packages/base"
+	"spwn.sh/packages/paths"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/compile/runtimes/claudecode"
 )
@@ -62,7 +62,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 	// SkipFooter: architect has its own COPY/entrypoint directives appended below.
 	// User/Home: architect image uses "architect" user, not "spwn".
 	toolInputs := ib.ToolsToInputs(resolved)
-	df := ib.GenerateDockerfile(ibbase.ArchitectDockerfile, toolInputs, base.ArchitectImageVersion, ib.GenerateOpts{
+	df := ib.GenerateDockerfile(ibbase.ArchitectDockerfile, toolInputs, paths.ArchitectImageVersion, ib.GenerateOpts{
 		SkipFooter: true,
 		User:       "architect",
 		Home:       "/home/architect",
@@ -124,8 +124,8 @@ CMD ["sleep", "infinity"]
 	// Build the image
 	_, err = docker.EnsureImageWithContext(
 		ctx,
-		base.ArchitectImage,
-		base.ArchitectImageVersion,
+		paths.ArchitectImage,
+		paths.ArchitectImageVersion,
 		df,
 		contextFiles,
 		logw,

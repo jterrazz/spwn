@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/base"
 	"spwn.sh/packages/paths"
 )
 
@@ -87,7 +86,7 @@ func Init(name string) (string, error) {
 		return "", fmt.Errorf("agent %q already exists", name)
 	}
 
-	for _, layer := range base.MindLayers {
+	for _, layer := range paths.MindLayers {
 		if err := os.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
 			return "", fmt.Errorf("create %s: %w", layer, err)
 		}
@@ -151,7 +150,7 @@ func Repair(name string) error {
 		return err
 	}
 
-	for _, layer := range base.MindLayers {
+	for _, layer := range paths.MindLayers {
 		if err := os.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
 			return fmt.Errorf("create %s: %w", layer, err)
 		}
