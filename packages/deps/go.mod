@@ -1,4 +1,4 @@
-module spwn.sh/packages/pack
+module spwn.sh/packages/deps
 
 go 1.25.0
 

@@ -1,31 +1,31 @@
-package pack_test
+package deps_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/pack"
+	"spwn.sh/packages/deps"
 )
 
 func TestParse(t *testing.T) {
 	cases := []struct {
 		in    string
-		kind  pack.Kind
+		kind  deps.Kind
 		owner string
 		name  string
 	}{
-		{"local-tool", pack.KindLocal, "", "local-tool"},
-		{"  spaced  ", pack.KindLocal, "", "spaced"},
-		{"@spwn/unix", pack.KindSpwnBuiltin, "spwn", "unix"},
-		{"@spwn/claude-code", pack.KindSpwnBuiltin, "spwn", "claude-code"},
-		{"@acme/foo", pack.KindRegistry, "acme", "foo"},
-		{"@jterrazz/python", pack.KindRegistry, "jterrazz", "python"},
-		{"@malformed", pack.KindRegistry, "malformed", ""},
+		{"local-tool", deps.KindLocal, "", "local-tool"},
+		{"  spaced  ", deps.KindLocal, "", "spaced"},
+		{"@spwn/unix", deps.KindSpwnBuiltin, "spwn", "unix"},
+		{"@spwn/claude-code", deps.KindSpwnBuiltin, "spwn", "claude-code"},
+		{"@acme/foo", deps.KindRegistry, "acme", "foo"},
+		{"@jterrazz/python", deps.KindRegistry, "jterrazz", "python"},
+		{"@malformed", deps.KindRegistry, "malformed", ""},
 	}
 	for _, c := range cases {
 		t.Run(c.in, func(t *testing.T) {
-			got := pack.ParseRef(c.in)
+			got := deps.ParseRef(c.in)
 			if got.Kind != c.kind {
 				t.Errorf("kind: want %v, got %v", c.kind, got.Kind)
 			}
@@ -53,7 +53,7 @@ func TestSplitVersion(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.in, func(t *testing.T) {
-			pack, version := pack.SplitVersion(c.in)
+			pack, version := deps.SplitVersion(c.in)
 			if pack != c.pack {
 				t.Errorf("pack: want %q, got %q", c.pack, pack)
 			}
@@ -68,13 +68,13 @@ func TestResolveTool_Local(t *testing.T) {
 	root := t.TempDir()
 	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
 
-	got := pack.ResolveTool(root, pack.ParseRef("present"), nil, false)
-	if got != pack.ResolveOK {
+	got := deps.ResolveTool(root, deps.ParseRef("present"), nil, false)
+	if got != deps.ResolveOK {
 		t.Errorf("present local pack: want OK, got %v", got)
 	}
 
-	got = pack.ResolveTool(root, pack.ParseRef("missing"), nil, false)
-	if got != pack.ResolveNotFound {
+	got = deps.ResolveTool(root, deps.ParseRef("missing"), nil, false)
+	if got != deps.ResolveNotFound {
 		t.Errorf("missing local pack: want NotFound, got %v", got)
 	}
 }
@@ -85,25 +85,25 @@ func TestResolveTool_Builtin(t *testing.T) {
 		"@spwn/git":  {},
 	}
 
-	got := pack.ResolveTool("", pack.ParseRef("@spwn/unix"), builtin, true)
-	if got != pack.ResolveOK {
+	got := deps.ResolveTool("", deps.ParseRef("@spwn/unix"), builtin, true)
+	if got != deps.ResolveOK {
 		t.Errorf("known builtin: want OK, got %v", got)
 	}
 
-	got = pack.ResolveTool("", pack.ParseRef("@spwn/nonesuch"), builtin, true)
-	if got != pack.ResolveNotFound {
+	got = deps.ResolveTool("", deps.ParseRef("@spwn/nonesuch"), builtin, true)
+	if got != deps.ResolveNotFound {
 		t.Errorf("unknown builtin with catalog: want NotFound, got %v", got)
 	}
 
-	got = pack.ResolveTool("", pack.ParseRef("@spwn/nonesuch"), nil, false)
-	if got != pack.ResolveOK {
+	got = deps.ResolveTool("", deps.ParseRef("@spwn/nonesuch"), nil, false)
+	if got != deps.ResolveOK {
 		t.Errorf("unknown builtin without catalog: want OK (permissive), got %v", got)
 	}
 }
 
 func TestResolveTool_Registry(t *testing.T) {
-	got := pack.ResolveTool("", pack.ParseRef("@acme/foo"), nil, false)
-	if got != pack.ResolveRegistryUnsupported {
+	got := deps.ResolveTool("", deps.ParseRef("@acme/foo"), nil, false)
+	if got != deps.ResolveRegistryUnsupported {
 		t.Errorf("registry ref: want RegistryUnsupported, got %v", got)
 	}
 }
@@ -117,21 +117,21 @@ func TestResolveSkill_Local(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := pack.ResolveSkill(root, pack.ParseRef("focus"), nil, false)
-	if got != pack.ResolveOK {
+	got := deps.ResolveSkill(root, deps.ParseRef("focus"), nil, false)
+	if got != deps.ResolveOK {
 		t.Errorf("file-form skill: want OK, got %v", got)
 	}
 
 	// Directory-form skill.
 	mustMkdir(t, filepath.Join(root, "spwn", "tools", "debug"))
 
-	got = pack.ResolveSkill(root, pack.ParseRef("debug"), nil, false)
-	if got != pack.ResolveOK {
+	got = deps.ResolveSkill(root, deps.ParseRef("debug"), nil, false)
+	if got != deps.ResolveOK {
 		t.Errorf("dir-form skill: want OK, got %v", got)
 	}
 
-	got = pack.ResolveSkill(root, pack.ParseRef("missing"), nil, false)
-	if got != pack.ResolveNotFound {
+	got = deps.ResolveSkill(root, deps.ParseRef("missing"), nil, false)
+	if got != deps.ResolveNotFound {
 		t.Errorf("missing skill: want NotFound, got %v", got)
 	}
 }

@@ -1,4 +1,4 @@
-// Package pack owns spwn.lock: the committed, deterministic
+// Package deps owns spwn.lock: the committed, deterministic
 // pin of every @spwn/* and github.com/* dependency the project uses.
 //
 // Format is Go-style, line-oriented text — one entry per line:
@@ -13,7 +13,7 @@
 //
 // Load/Save round-trip is deterministic: entries are sorted lexically
 // so git diffs stay clean.
-package pack
+package deps
 
 import (
 	"bufio"

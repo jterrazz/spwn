@@ -1,4 +1,4 @@
-// Package pack parses and resolves pack references in agent.yaml
+// Package deps parses and resolves pack references in agent.yaml
 // and spwn.yaml.
 //
 // Spwn projects reference packs in three ways:
@@ -19,7 +19,7 @@
 //
 // This package has no dependencies on the validator or compiler so
 // it can be imported from CLI commands and the build pipeline alike.
-package pack
+package deps
 
 import (
 	"os"

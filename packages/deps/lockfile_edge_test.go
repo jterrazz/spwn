@@ -1,4 +1,4 @@
-package pack_test
+package deps_test
 
 import (
 	"os"
@@ -6,17 +6,17 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/pack"
+	"spwn.sh/packages/deps"
 )
 
 // 1. Empty lockfile (just the header comment)
 func TestLoad_emptyWithHeaderOnly(t *testing.T) {
 	root := t.TempDir()
 	content := "# spwn.lock — DO NOT EDIT\n"
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -32,10 +32,10 @@ func TestLoad_emptyWithHeaderOnly(t *testing.T) {
 func TestLoad_onlyCommentsAndBlanks(t *testing.T) {
 	root := t.TempDir()
 	content := "# spwn.lock — DO NOT EDIT\n\n# another comment\n\n# yet another\n\n"
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -51,10 +51,10 @@ func TestLoad_onlyCommentsAndBlanks(t *testing.T) {
 func TestLoad_entryWithRefOnly(t *testing.T) {
 	root := t.TempDir()
 	content := "# spwn.lock — DO NOT EDIT\n@spwn/solo\n"
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -71,10 +71,10 @@ func TestLoad_entryWithRefOnly(t *testing.T) {
 func TestLoad_entryWithVersionNoSource(t *testing.T) {
 	root := t.TempDir()
 	content := "# spwn.lock — DO NOT EDIT\n@spwn/partial v1.0\n"
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -86,8 +86,8 @@ func TestLoad_entryWithVersionNoSource(t *testing.T) {
 		t.Errorf("version = %q, want %q", e.Version, "v1.0")
 	}
 	// Default source should be builtin when no 3rd field is present.
-	if e.Source != pack.SourceBuiltin {
-		t.Errorf("source = %q, want %q", e.Source, pack.SourceBuiltin)
+	if e.Source != deps.SourceBuiltin {
+		t.Errorf("source = %q, want %q", e.Source, deps.SourceBuiltin)
 	}
 }
 
@@ -95,10 +95,10 @@ func TestLoad_entryWithVersionNoSource(t *testing.T) {
 func TestLoad_githubStyleRef(t *testing.T) {
 	root := t.TempDir()
 	content := "# spwn.lock — DO NOT EDIT\ngithub.com/jterrazz/research-skills v0.3.0 github\n"
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -109,29 +109,29 @@ func TestLoad_githubStyleRef(t *testing.T) {
 	if e.Version != "v0.3.0" {
 		t.Errorf("version = %q, want %q", e.Version, "v0.3.0")
 	}
-	if e.Source != pack.SourceGitHub {
-		t.Errorf("source = %q, want %q", e.Source, pack.SourceGitHub)
+	if e.Source != deps.SourceGitHub {
+		t.Errorf("source = %q, want %q", e.Source, deps.SourceGitHub)
 	}
 }
 
 // 6. Round-trip: save then load preserves github refs
 func TestRoundtrip_githubRefs(t *testing.T) {
 	root := t.TempDir()
-	l := pack.EmptyLockfile()
-	l.Add("github.com/jterrazz/research-skills", pack.LockEntry{
+	l := deps.EmptyLockfile()
+	l.Add("github.com/jterrazz/research-skills", deps.LockEntry{
 		Version: "v0.3.0",
-		Source:  pack.SourceGitHub,
+		Source:  deps.SourceGitHub,
 	})
-	l.Add("@spwn/unix", pack.LockEntry{
+	l.Add("@spwn/unix", deps.LockEntry{
 		Version: "24.04",
-		Source:  pack.SourceBuiltin,
+		Source:  deps.SourceBuiltin,
 	})
 
-	if err := pack.SaveLockfile(root, l); err != nil {
+	if err := deps.SaveLockfile(root, l); err != nil {
 		t.Fatalf("save: %v", err)
 	}
 
-	got, err := pack.LoadLockfile(root)
+	got, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -143,30 +143,30 @@ func TestRoundtrip_githubRefs(t *testing.T) {
 		t.Error("spwn ref lost after round-trip")
 	}
 	e := got.Deps["github.com/jterrazz/research-skills"]
-	if e.Version != "v0.3.0" || e.Source != pack.SourceGitHub {
+	if e.Version != "v0.3.0" || e.Source != deps.SourceGitHub {
 		t.Errorf("github entry mangled: %+v", e)
 	}
 }
 
 // 7. Multiple Add() calls for same ref (last wins)
 func TestAdd_lastWins(t *testing.T) {
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/unix", pack.LockEntry{Version: "1.0", Source: pack.SourceBuiltin})
-	l.Add("@spwn/unix", pack.LockEntry{Version: "2.0", Source: pack.SourceGitHub})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/unix", deps.LockEntry{Version: "1.0", Source: deps.SourceBuiltin})
+	l.Add("@spwn/unix", deps.LockEntry{Version: "2.0", Source: deps.SourceGitHub})
 
 	e := l.Deps["@spwn/unix"]
 	if e.Version != "2.0" {
 		t.Errorf("version = %q, want %q (last wins)", e.Version, "2.0")
 	}
-	if e.Source != pack.SourceGitHub {
-		t.Errorf("source = %q, want %q (last wins)", e.Source, pack.SourceGitHub)
+	if e.Source != deps.SourceGitHub {
+		t.Errorf("source = %q, want %q (last wins)", e.Source, deps.SourceGitHub)
 	}
 }
 
 // 8. Remove() on non-existent ref (no panic)
 func TestRemove_nonExistent(t *testing.T) {
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/unix", pack.LockEntry{Version: "1.0", Source: pack.SourceBuiltin})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/unix", deps.LockEntry{Version: "1.0", Source: deps.SourceBuiltin})
 
 	// Should not panic.
 	l.Remove("@spwn/nonexistent")
@@ -178,7 +178,7 @@ func TestRemove_nonExistent(t *testing.T) {
 
 // 9. Has() on empty lockfile
 func TestHas_emptyLockfile(t *testing.T) {
-	l := pack.EmptyLockfile()
+	l := deps.EmptyLockfile()
 	if l.Has("@spwn/anything") {
 		t.Error("Has should return false on empty lockfile")
 	}
@@ -186,7 +186,7 @@ func TestHas_emptyLockfile(t *testing.T) {
 
 // 10. Refs() on empty lockfile returns empty slice
 func TestRefs_emptyLockfile(t *testing.T) {
-	l := pack.EmptyLockfile()
+	l := deps.EmptyLockfile()
 	refs := l.Refs()
 	if refs == nil {
 		t.Error("Refs() should return non-nil empty slice, got nil")
@@ -198,10 +198,10 @@ func TestRefs_emptyLockfile(t *testing.T) {
 
 // 11. Save to non-existent directory fails gracefully
 func TestSave_nonExistentDirectory(t *testing.T) {
-	l := pack.EmptyLockfile()
-	l.Add("@spwn/unix", pack.LockEntry{Version: "1.0", Source: pack.SourceBuiltin})
+	l := deps.EmptyLockfile()
+	l.Add("@spwn/unix", deps.LockEntry{Version: "1.0", Source: deps.SourceBuiltin})
 
-	err := pack.SaveLockfile("/nonexistent/path/that/does/not/exist", l)
+	err := deps.SaveLockfile("/nonexistent/path/that/does/not/exist", l)
 	if err == nil {
 		t.Fatal("expected error when saving to non-existent directory")
 	}
@@ -214,10 +214,10 @@ func TestSave_nonExistentDirectory(t *testing.T) {
 func TestLoad_legacyYAMLEmptyDeps(t *testing.T) {
 	root := t.TempDir()
 	yaml := "version: 1\ndeps:\n"
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(yaml), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -233,10 +233,10 @@ func TestLoad_legacyYAMLEmptyDeps(t *testing.T) {
 func TestLoad_legacyYAMLMissingVersion(t *testing.T) {
 	root := t.TempDir()
 	yaml := "version: 1\ndeps:\n  \"@spwn/unix\":\n    source: builtin\n"
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(yaml), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -247,8 +247,8 @@ func TestLoad_legacyYAMLMissingVersion(t *testing.T) {
 	if e.Version != "" {
 		t.Errorf("version should be empty, got %q", e.Version)
 	}
-	if e.Source != pack.SourceBuiltin {
-		t.Errorf("source = %q, want %q", e.Source, pack.SourceBuiltin)
+	if e.Source != deps.SourceBuiltin {
+		t.Errorf("source = %q, want %q", e.Source, deps.SourceBuiltin)
 	}
 }
 
@@ -263,10 +263,10 @@ func TestLoad_mixedCommentsAndEntries(t *testing.T) {
 @spwn/git 2.43 builtin
 # Trailing comment
 `
-	if err := os.WriteFile(filepath.Join(root, pack.LockFileName), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, deps.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	l, err := pack.LoadLockfile(root)
+	l, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -287,14 +287,14 @@ func TestLoad_veryLongRefAndVersion(t *testing.T) {
 	longRef := "github.com/org/" + strings.Repeat("a", 200)
 	longVersion := "v" + strings.Repeat("1", 200)
 
-	l := pack.EmptyLockfile()
-	l.Add(longRef, pack.LockEntry{Version: longVersion, Source: pack.SourceGitHub})
+	l := deps.EmptyLockfile()
+	l.Add(longRef, deps.LockEntry{Version: longVersion, Source: deps.SourceGitHub})
 
-	if err := pack.SaveLockfile(root, l); err != nil {
+	if err := deps.SaveLockfile(root, l); err != nil {
 		t.Fatalf("save: %v", err)
 	}
 
-	got, err := pack.LoadLockfile(root)
+	got, err := deps.LoadLockfile(root)
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
