@@ -5,7 +5,7 @@ use (
 	./catalog
 	./packages/activity
 	./packages/agent
-	./packages/api
+	./apps/api
 	./packages/auth
 	./packages/compile
 	./packages/image

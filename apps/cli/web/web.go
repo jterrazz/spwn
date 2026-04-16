@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/api"
+	"spwn.sh/apps/api"
 	"spwn.sh/packages/world"
 	"github.com/spf13/cobra"
 )
