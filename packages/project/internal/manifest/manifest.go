@@ -21,7 +21,7 @@ import (
 )
 
 // CurrentVersion is the schema version Load emits for new manifests
-// and the only version LoadPath accepts without migration.
+// and the only version LoadPath accepts without upgrade.
 const CurrentVersion = 2
 
 // Manifest is the parsed content of spwn.yaml.

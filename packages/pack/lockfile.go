@@ -104,7 +104,7 @@ func LoadLockfile(projectRoot string) (*Lockfile, error) {
 	return l, nil
 }
 
-// loadLegacyYAML handles the old YAML lockfile format for migration.
+// loadLegacyYAML handles the old YAML lockfile format for upgrade.
 func loadLegacyYAML(data []byte) (*Lockfile, error) {
 	// Minimal YAML parse — just extract the deps map.
 	l := &Lockfile{Deps: map[string]LockEntry{}}

@@ -46,5 +46,4 @@ replace (
 	spwn.sh/packages/compile => ../compile
 	spwn.sh/packages/image => ../image
 	spwn.sh/packages/paths => ../paths
-	spwn.sh/packages/version => ../version
 )

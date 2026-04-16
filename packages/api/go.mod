@@ -10,7 +10,6 @@ require (
 	spwn.sh/catalog v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/paths v0.0.0
-	spwn.sh/packages/version v0.0.0
 	spwn.sh/packages/world v0.0.0
 )
 
@@ -48,6 +47,5 @@ replace (
 	spwn.sh/catalog => ../../catalog
 	spwn.sh/packages/image => ../image
 	spwn.sh/packages/paths => ../paths
-	spwn.sh/packages/version => ../version
 	spwn.sh/packages/world => ../world
 )

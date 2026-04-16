@@ -1,10 +1,10 @@
 package migrations
 
-import "spwn.sh/packages/migration"
+import "spwn.sh/packages/upgrade"
 
 // All returns every migration in order.
-func All() []migration.Migration {
-	r := migration.NewRegistry()
+func All() []upgrade.Migration {
+	r := upgrade.NewRegistry()
 	r.Register(TierToRoleState)       // 001
 	r.Register(TierToRoleProfiles)    // 002
 	r.Register(EnsureDefaultHierarchy) // 003

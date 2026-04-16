@@ -15,10 +15,8 @@ require (
 	spwn.sh/packages/compile v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mailbox v0.0.0
-	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/paths v0.0.0
 	spwn.sh/packages/project v0.0.0
-	spwn.sh/packages/version v0.0.0
 	spwn.sh/packages/world v0.0.0
 )
 
@@ -62,9 +60,7 @@ replace (
 	spwn.sh/packages/compile => ../../packages/compile
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/mailbox => ../../packages/mailbox
-	spwn.sh/packages/migration => ../../packages/migration
 	spwn.sh/packages/paths => ../../packages/paths
 	spwn.sh/packages/project => ../../packages/project
-	spwn.sh/packages/version => ../../packages/version
 	spwn.sh/packages/world => ../../packages/world
 )
