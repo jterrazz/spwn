@@ -10,7 +10,6 @@ require (
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/catalog v0.0.0
 	spwn.sh/packages/compile v0.0.0
-	spwn.sh/packages/ids v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/paths v0.0.0
 )
@@ -45,7 +44,6 @@ replace (
 	spwn.sh/packages/auth => ../auth
 	spwn.sh/catalog => ../../catalog
 	spwn.sh/packages/compile => ../compile
-	spwn.sh/packages/ids => ../ids
 	spwn.sh/packages/image => ../image
 	spwn.sh/packages/paths => ../paths
 	spwn.sh/packages/version => ../version

@@ -25,7 +25,6 @@ import (
 	"spwn.sh/packages/paths"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
-	"spwn.sh/packages/ids"
 )
 
 // SpawnResult is returned by Spawn with the world and any non-fatal warnings.
@@ -90,7 +89,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	var warnings []string
 
 	// Generate ID
-	id := ids.GenerateWorldID(opts.ConfigName)
+	id := paths.GenerateWorldID(opts.ConfigName)
 
 	// Resolve each workspace to absolute path and validate it exists.
 	// Layout inside the container:
@@ -337,18 +336,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	if len(opts.Agents) > 0 {
 		worldRecord.Agent = opts.Agents[0].Name
-		worldRecord.AgentID = ids.GenerateAgentID(opts.Agents[0].Name)
+		worldRecord.AgentID = paths.GenerateAgentID(opts.Agents[0].Name)
 		for _, spec := range opts.Agents {
 			role := manifest.DefaultRole(spec.Role)
 			worldRecord.Agents = append(worldRecord.Agents, models.AgentRecord{
 				Name:    spec.Name,
-				AgentID: ids.GenerateAgentID(spec.Name),
+				AgentID: paths.GenerateAgentID(spec.Name),
 				Role:    role,
 				Status:  models.StatusIdle,
 			})
 		}
 	} else if opts.AgentName != "" {
-		worldRecord.AgentID = ids.GenerateAgentID(opts.AgentName)
+		worldRecord.AgentID = paths.GenerateAgentID(opts.AgentName)
 		worldRecord.Agents = []models.AgentRecord{{
 			Name:    opts.AgentName,
 			AgentID: worldRecord.AgentID,

@@ -13,8 +13,6 @@ require (
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/compile v0.0.0
-	spwn.sh/packages/env v0.0.0
-	spwn.sh/packages/ids v0.0.0
 	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/mailbox v0.0.0
 	spwn.sh/packages/migration v0.0.0
@@ -62,8 +60,6 @@ replace (
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/auth => ../../packages/auth
 	spwn.sh/packages/compile => ../../packages/compile
-	spwn.sh/packages/env => ../../packages/env
-	spwn.sh/packages/ids => ../../packages/ids
 	spwn.sh/packages/image => ../../packages/image
 	spwn.sh/packages/mailbox => ../../packages/mailbox
 	spwn.sh/packages/migration => ../../packages/migration

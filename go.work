@@ -8,8 +8,6 @@ use (
 	./packages/api
 	./packages/auth
 	./packages/compile
-	./packages/env
-	./packages/ids
 	./packages/image
 	./packages/mailbox
 	./packages/migration
