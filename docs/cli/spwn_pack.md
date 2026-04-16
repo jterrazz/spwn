@@ -21,7 +21,7 @@ Remove it with:
 List what's installed with:
   spwn pack ls
 
-Local packs authored under spwn/packs/<name>/ are referenced by
+Local tools authored under spwn/tools/<name>/ are referenced by
 bare name in agent.yaml and do NOT go through the install verb — they
 are authored in place.
 

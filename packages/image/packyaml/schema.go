@@ -1,7 +1,7 @@
 // Package packyaml is the shared parser for pack.yaml — the
 // declarative manifest format that describes a spwn pack's
 // image-build recipe. Both the catalog (catalog/packs/<name>/pack.yaml)
-// and project-local packs (spwn/packs/<name>/pack.yaml in a user
+// and project-local tools (spwn/tools/<name>/pack.yaml in a user
 // project) use the same schema, so a pack can graduate from
 // "authored in a project" to "shipped in the catalog" by moving its
 // directory.

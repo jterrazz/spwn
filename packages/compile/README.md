@@ -81,7 +81,6 @@ my-repo/
     ├── skills/                         # project-wide shared skills (.md)
     ├── tools/                          # project-local tool definitions
     ├── hooks/                          # lifecycle hooks
-    ├── packs/                          # local pack authoring
     └── hooks/                          # lifecycle hooks (build-time, spawn-time)
 ```
 

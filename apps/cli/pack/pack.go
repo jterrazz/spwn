@@ -9,7 +9,7 @@
 //     `spwn pack install @spwn/unix` adds it to every agent's
 //     agent.yaml and records the pin in the lockfile.
 //   - <bare-name> is a local pack authored under
-//     spwn/packs/<name>/ (directory form) or spwn/skills/<name>.md
+//     spwn/tools/<name>/ (directory form) or spwn/skills/<name>.md
 //     (bare-markdown skill form). The install verb rejects bare names
 //     with a hint — they are not "installed", they are authored.
 //   - @<owner>/<name> (owner != spwn) is a future community-registry
@@ -46,7 +46,7 @@ Remove it with:
 List what's installed with:
   spwn pack ls
 
-Local packs authored under spwn/packs/<name>/ are referenced by
+Local tools authored under spwn/tools/<name>/ are referenced by
 bare name in agent.yaml and do NOT go through the install verb — they
 are authored in place.`,
 }
@@ -180,11 +180,11 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	switch ref.Kind {
 	case refs.KindLocal:
 		return fmt.Errorf("%q is a bare name — local packs are authored in place, not installed. "+
-			"Create ./spwn/packs/%s/pack.yaml for a full pack or ./spwn/packs/%s.md for a bare skill",
+			"Create ./spwn/tools/%s/pack.yaml for a full pack or ./spwn/tools/%s.md for a bare skill",
 			pack, pack, pack)
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
-			"Use @spwn/<name> for built-in packs, or author a local pack under ./spwn/packs/",
+			"Use @spwn/<name> for built-in packs, or author a local pack under ./spwn/tools/",
 			raw, ref.Owner, ref.Name)
 	}
 
@@ -240,7 +240,7 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
 	if ref.Kind == refs.KindLocal {
-		return fmt.Errorf("%q is a bare name — delete ./spwn/packs/%s/ (or %s.md) by hand to remove it", pack, pack, pack)
+		return fmt.Errorf("%q is a bare name — delete ./spwn/tools/%s/ (or %s.md) by hand to remove it", pack, pack, pack)
 	}
 
 	mutated := 0

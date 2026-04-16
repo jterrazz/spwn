@@ -606,7 +606,7 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 // against the filesystem (for bare local refs).
 //
 // Local refs resolve to either:
-//   - spwn/packs/<name>/ (a directory-form package, with or without
+//   - spwn/tools/<name>/ (a directory-form package, with or without
 //     a pack.yaml inside), OR
 //   - spwn/skills/<name>.md (a bare-markdown skill).
 func rulePacksExist(in Input) []Issue {
@@ -638,7 +638,7 @@ func rulePacksExist(in Input) []Issue {
 				return []Issue{{
 					Level: LevelError, Path: location,
 					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
-					Hint: "use @spwn/<name> for built-in packs or drop a directory under ./spwn/packs/<name>/ for a local pack; " +
+					Hint: "use @spwn/<name> for built-in packs or drop a directory under ./spwn/tools/<name>/ for a local tool; " +
 						"remote registries (@<owner>/<name>) are planned but not implemented yet",
 				}}
 			default: // ResolveNotFound
@@ -652,7 +652,7 @@ func rulePacksExist(in Input) []Issue {
 
 		// Local ref: delegate to refs.ResolveSkill which already
 		// handles both the directory form (full package) and the
-		// file form (bare markdown skill) against spwn/packs/.
+		// file form (bare markdown skill) against spwn/skills/ and spwn/tools/.
 		if ref.Name == "" {
 			return []Issue{{
 				Level: LevelError, Path: location,
@@ -665,8 +665,8 @@ func rulePacksExist(in Input) []Issue {
 		return []Issue{{
 			Level: LevelError, Path: location,
 			Message: fmt.Sprintf("pack %q does not exist", raw),
-			Hint: "create ./spwn/packs/" + ref.Name + "/pack.yaml for a full pack, " +
-				"or ./spwn/packs/" + ref.Name + ".md for a bare skill",
+			Hint: "create ./spwn/tools/" + ref.Name + "/pack.yaml for a full pack, " +
+				"or ./spwn/tools/" + ref.Name + ".md for a bare skill",
 		}}
 	}
 
@@ -874,7 +874,7 @@ func relPath(root, path string) string {
 
 func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
-		return "check the pack name, or add it as a local pack under ./spwn/packs/"
+		return "check the pack name, or add it as a local tool under ./spwn/tools/"
 	}
 	best := ""
 	bestScore := len(tool) + 1

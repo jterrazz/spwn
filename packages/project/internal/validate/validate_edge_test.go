@@ -64,7 +64,7 @@ deps:
 // 3. rulePacksExist where agent.yaml has a local bare-name ref that exists in spwn/packs/
 func TestEdge_PacksExist_LocalPackDir(t *testing.T) {
 	root := t.TempDir()
-	packDir := filepath.Join(root, "spwn", "packs", "my-local-pack")
+	packDir := filepath.Join(root, "spwn", "tools", "my-local-pack")
 	if err := os.MkdirAll(packDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

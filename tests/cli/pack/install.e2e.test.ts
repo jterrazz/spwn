@@ -41,7 +41,7 @@ describe('spwn pack install', () => {
 
         expect(result.exitCode).not.toBe(0);
         expect(result.stderr.text).toContain('bare name');
-        expect(result.stderr.text).toContain('spwn/packs/');
+        expect(result.stderr.text).toContain('spwn/tools/');
     });
 
     test('rejects @<owner>/* as unsupported', async () => {
