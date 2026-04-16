@@ -11,6 +11,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 )
 
@@ -178,7 +179,7 @@ func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 	// Live world → duration lookup. We match a live world to a
 	// declared world by config name (set by world spawn).
 	running := map[string]time.Duration{}
-	if arc, aerr := world.NewArchitectFromEnv(); aerr == nil {
+	if arc, aerr := architect.NewFromEnv(); aerr == nil {
 		ctx := context.Background()
 		if worlds, lerr := arc.List(ctx); lerr == nil {
 			for _, u := range worlds {
@@ -289,7 +290,7 @@ func buildAgentWorldMap() map[string]agentWorldInfo {
 	result := make(map[string]agentWorldInfo)
 
 	ctx := context.Background()
-	arc, err := world.NewArchitectFromEnv()
+	arc, err := architect.NewFromEnv()
 	if err != nil {
 		return result
 	}

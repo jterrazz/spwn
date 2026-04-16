@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"spwn.sh/packages/world"
+	"spwn.sh/packages/architect"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +32,7 @@ be deployed in that world.`,
 		s := newStepper(cmd)
 
 		ctx := context.Background()
-		arc, err := world.NewArchitectFromEnv()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 		}

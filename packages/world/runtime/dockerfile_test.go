@@ -6,7 +6,7 @@ import (
 
 	"spwn.sh/packages/world/runtime"
 
-	_ "spwn.sh/catalog/runtimes/claude_code/adapter"
+	_ "spwn.sh/packages/runtimes/claude_code/adapter"
 )
 
 func TestGenerateDockerfileClaudeCode(t *testing.T) {

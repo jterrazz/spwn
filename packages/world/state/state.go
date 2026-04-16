@@ -28,10 +28,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/world/internal/backend"
-	"spwn.sh/packages/world/internal/labels"
+	"spwn.sh/packages/world/backend"
+	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/internal/runtimestate"
+	"spwn.sh/packages/world/runtimestate"
 	"spwn.sh/packages/platform"
 )
 

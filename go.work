@@ -6,6 +6,7 @@ use (
 	./packages/activity
 	./packages/agent
 	./apps/api
+	./packages/architect
 	./packages/auth
 	./packages/compile
 	./packages/image
@@ -14,5 +15,6 @@ use (
 	./packages/upgrade
 	./packages/project
 	./packages/dependency
+	./packages/runtimes
 	./packages/world
 )

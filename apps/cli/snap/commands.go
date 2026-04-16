@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 
 	"github.com/spf13/cobra"
@@ -53,7 +54,7 @@ var saveCmd = &cobra.Command{
 		worldID := args[0]
 		s := newStepper(cmd)
 
-		arc, err := world.NewArchitectFromEnv()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -75,7 +76,7 @@ var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all snapshots",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		arc, err := world.NewArchitectFromEnv()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -118,7 +119,7 @@ var restoreCmd = &cobra.Command{
 		snapshotRef := args[0]
 		s := newStepper(cmd)
 
-		arc, err := world.NewArchitectFromEnv()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}
@@ -140,7 +141,7 @@ var restoreCmd = &cobra.Command{
 			return fmt.Errorf("parse workspace: %w", wsErr)
 		}
 
-		opts := world.SpawnOpts{
+		opts := architect.SpawnOpts{
 			ConfigName: configName,
 			AgentName:  snapAgent,
 			Workspaces: workspaces,
@@ -170,7 +171,7 @@ var rmCmd = &cobra.Command{
 		snapshotRef := args[0]
 		s := newStepper(cmd)
 
-		arc, err := world.NewArchitectFromEnv()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			return dockerHint(err)
 		}

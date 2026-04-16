@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 )
 
@@ -97,7 +98,7 @@ func (b *SpawnBuilder) Execute() *AssertionChain {
 
 	m := b.buildManifest()
 
-	opts := world.SpawnOpts{
+	opts := architect.SpawnOpts{
 		ConfigName: b.configName,
 		Manifest:   m,
 		Image:      b.tc.Image,
@@ -154,7 +155,7 @@ func (b *SpawnBuilder) ExecuteExpectError(substring string) {
 
 	m := b.buildManifest()
 
-	opts := world.SpawnOpts{
+	opts := architect.SpawnOpts{
 		ConfigName: b.configName,
 		Manifest:   m,
 		Image:      b.tc.Image,

@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/world"
+	"spwn.sh/packages/architect"
 )
 
 var (
@@ -137,7 +137,7 @@ survives after the world is destroyed.`,
 				return s.FailHint("Ephemeral requires --world", fmt.Errorf("no world specified"),
 					"Run \"spwn ls\" to see active worlds")
 			}
-			arc, err := world.NewArchitectFromEnv()
+			arc, err := architect.NewFromEnv()
 			if err != nil {
 				s.Blank()
 				return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
@@ -163,7 +163,7 @@ survives after the world is destroyed.`,
 			s.Done("Imported agent", agentName)
 		}
 
-		arc, err := world.NewArchitectFromEnv()
+		arc, err := architect.NewFromEnv()
 		if err != nil {
 			s.Blank()
 			return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")

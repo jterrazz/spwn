@@ -1,4 +1,4 @@
-package dependencies
+package catalog
 
 import (
 	"spwn.sh/packages/dependency"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	runtimes "spwn.sh/catalog/runtimes"
+	runtimes "spwn.sh/packages/runtimes"
 	ib "spwn.sh/packages/image"
 )
 

@@ -11,13 +11,13 @@ import (
 	"runtime/debug"
 	"strings"
 
-	runtimes "spwn.sh/catalog/runtimes"
-	"spwn.sh/catalog/dependencies"
+	runtimes "spwn.sh/packages/runtimes"
+	"spwn.sh/catalog"
 	ib "spwn.sh/packages/image"
 	ibbase "spwn.sh/packages/image/base"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/world/internal/backend"
-	"spwn.sh/catalog/runtimes/claude_code/compile"
+	"spwn.sh/packages/world/backend"
+	"spwn.sh/packages/runtimes/claude_code/compile"
 )
 
 // BuildArchitectImage cross-compiles the spwn binary for linux/amd64 and builds
@@ -43,7 +43,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 
 	// Resolve architect tools via the image package to generate install steps
 	reg := ib.NewRegistry()
-	if err := dependencies.RegisterDefaults(reg); err != nil {
+	if err := catalog.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 )
 
@@ -23,7 +24,7 @@ type TestContext struct {
 	Image   string
 	Backend world.Backend
 	State   *world.Store
-	Arc     *world.Architect
+	Arc     *architect.Architect
 	Spawned []string // world IDs to clean up
 }
 
@@ -54,7 +55,7 @@ func NewTestContext(t *testing.T) *TestContext {
 		Image:   TestImage,
 		Backend: docker,
 		State:   store,
-		Arc:     world.NewArchitect(docker, store),
+		Arc:     architect.New(docker, store),
 	}
 
 	// Verify test image exists

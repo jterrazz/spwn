@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 )
 
@@ -273,7 +274,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 
 	// Build spawn opts based on --agent flags. No --agent = empty world.
 	agentName := ""
-	var agents []world.AgentSpec
+	var agents []architect.AgentSpec
 
 	switch len(spawnAgents) {
 	case 0:
@@ -282,14 +283,14 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		agentName = spawnAgents[0]
 	default:
 		// Multi-agent mode: first is chief, rest are workers
-		agents = append(agents, world.AgentSpec{Name: spawnAgents[0], Role: "chief"})
+		agents = append(agents, architect.AgentSpec{Name: spawnAgents[0], Role: "chief"})
 		for _, name := range spawnAgents[1:] {
-			agents = append(agents, world.AgentSpec{Name: name, Role: "worker"})
+			agents = append(agents, architect.AgentSpec{Name: name, Role: "worker"})
 		}
 	}
 
 	s.Start("Connecting to Docker...")
-	arc, err := world.NewArchitectFromEnv()
+	arc, err := architect.NewFromEnv()
 	if err != nil {
 		return s.FailHint("Docker", err,
 			"Start Docker Desktop or OrbStack, then try again")
@@ -312,7 +313,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	// instead of a mystery spinner during the long image build.
 	buildProgress := s.BuildProgressWriter("Building image")
 
-	result, err := arc.Spawn(ctx, world.SpawnOpts{
+	result, err := arc.Spawn(ctx, architect.SpawnOpts{
 		ConfigName:   configName,
 		Name:         spawnName,
 		AgentName:    agentName,
@@ -486,7 +487,7 @@ func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 }
 
 // spawnHint returns an actionable hint for common spawn errors.
-func spawnHint(err error, agentName string, agents []world.AgentSpec) string {
+func spawnHint(err error, agentName string, agents []architect.AgentSpec) string {
 	msg := err.Error()
 	switch {
 	case strings.Contains(msg, "not found") && strings.Contains(msg, "agent"):

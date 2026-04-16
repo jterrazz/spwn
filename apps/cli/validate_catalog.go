@@ -2,8 +2,8 @@ package cli
 
 import (
 	"spwn.sh/apps/cli/dependency"
-	"spwn.sh/catalog/dependencies"
-	"spwn.sh/catalog/runtimes"
+	"spwn.sh/catalog"
+	"spwn.sh/packages/runtimes"
 )
 
 func init() {
@@ -13,7 +13,7 @@ func init() {
 	// dependency.init()) so the dependency package stays free of
 	// a catalog import.
 	dependency.SetCatalogLookup(func(ref string) bool {
-		for _, t := range dependencies.All {
+		for _, t := range catalog.All {
 			if t.Name() == ref {
 				return true
 			}
@@ -27,8 +27,8 @@ func init() {
 // tool/skill/runtime-config concept) and runtimes. Used to power
 // the "did you mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
-	out := make([]string, 0, len(dependencies.All)+len(runtimes.All))
-	for _, t := range dependencies.All {
+	out := make([]string, 0, len(catalog.All)+len(runtimes.All))
+	for _, t := range catalog.All {
 		out = append(out, t.Name())
 	}
 	for _, t := range runtimes.All {

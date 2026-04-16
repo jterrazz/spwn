@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"spwn.sh/catalog/examples"
+	"spwn.sh/catalog"
 )
 
 func TestParseExampleRef(t *testing.T) {
@@ -65,7 +65,7 @@ func withTempCwd(t *testing.T) string {
 // RunE directly to avoid cobra's shared-state issues with --help
 // flags leaking across tests in the package.
 func TestRunInitExample_InstallsFromCatalog(t *testing.T) {
-	if _, err := examples.Get("matrix"); err != nil {
+	if _, err := catalog.Get("matrix"); err != nil {
 		t.Skipf("matrix example not bundled: %v", err)
 	}
 

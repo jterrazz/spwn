@@ -12,8 +12,8 @@ package runtimes
 import (
 	"fmt"
 
-	"spwn.sh/catalog/runtimes/claude_code"
-	"spwn.sh/catalog/runtimes/codex"
+	"spwn.sh/packages/runtimes/claude_code"
+	"spwn.sh/packages/runtimes/codex"
 	ib "spwn.sh/packages/image"
 )
 

@@ -1,16 +1,16 @@
-// Package examples ships a curated gallery of ready-made spwn
-// example projects - full worlds and agents with pre-written
-// identities - that first-time users can install with one click or
-// one command.
+// This file is the example-gallery face of the catalog: the
+// List/Get/Install surface used by `spwn init <slug>` and the web UI
+// marketplace. Example entries live alongside dependency entries
+// under catalog/<slug>/ and share the catalogFS embed defined in
+// loader.go — an entry is an "example" when it ships an
+// example.yaml metadata sidecar next to its spwn.yaml.
 //
-// Every example lives at /catalog/examples/<slug>/ at the repo root
-// and is embedded into the binary at build time via go:embed. The
-// example directories sit alongside this Go file so contributors can
-// discover and edit them directly from the repo root.
-package examples
+// Contributors edit example directories directly from the repo root;
+// add a new one, update the embed list in loader.go and the
+// shippedSlugs list below, and it shows up in the gallery.
+package catalog
 
 import (
-	"embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -18,13 +18,9 @@ import (
 	"path/filepath"
 	"strings"
 
-
 	"gopkg.in/yaml.v3"
 	"spwn.sh/packages/platform"
 )
-
-//go:embed all:macrohard all:matrix all:paperclip-factory all:research-lab all:startup
-var examplesFS embed.FS
 
 // shippedSlugs is the canonical list of bundled examples, in
 // display order. The TestShippedSlugsMatchEmbed test asserts this
@@ -114,7 +110,7 @@ func Get(slug string) (Example, error) {
 	if err != nil {
 		return Example{}, err
 	}
-	readmeBytes, err := examplesFS.ReadFile(path(slug, "README.md"))
+	readmeBytes, err := catalogFS.ReadFile(joinFS(slug, "README.md"))
 	if err == nil {
 		ex.Readme = string(readmeBytes)
 	}
@@ -156,8 +152,8 @@ func Install(slug, baseDir string) (InstallReport, error) {
 		// "worlds skipped" signal.
 		rep.WorldsSkipped = append(rep.WorldsSkipped, ex.Worlds...)
 	} else {
-		manifestSrc := path(slug, "spwn.yaml")
-		data, rerr := examplesFS.ReadFile(manifestSrc)
+		manifestSrc := joinFS(slug, "spwn.yaml")
+		data, rerr := catalogFS.ReadFile(manifestSrc)
 		if rerr != nil {
 			return rep, fmt.Errorf("read %s: %w", manifestSrc, rerr)
 		}
@@ -171,8 +167,8 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	// --- spwn.lock (committed dep pin) ---
 	lockDst := filepath.Join(baseDir, "spwn.lock")
 	if !exists(lockDst) {
-		lockSrc := path(slug, "spwn.lock")
-		if data, rerr := examplesFS.ReadFile(lockSrc); rerr == nil {
+		lockSrc := joinFS(slug, "spwn.lock")
+		if data, rerr := catalogFS.ReadFile(lockSrc); rerr == nil {
 			_ = os.WriteFile(lockDst, data, 0o644)
 		}
 	}
@@ -182,8 +178,8 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	if err := os.MkdirAll(agentsRoot, 0o755); err != nil {
 		return rep, fmt.Errorf("create agents dir: %w", err)
 	}
-	agentsSrc := path(slug, "agents")
-	agentEntries, err := examplesFS.ReadDir(agentsSrc)
+	agentsSrc := joinFS(slug, "agents")
+	agentEntries, err := catalogFS.ReadDir(agentsSrc)
 	if err == nil {
 		for _, e := range agentEntries {
 			if !e.IsDir() {
@@ -199,15 +195,15 @@ func Install(slug, baseDir string) (InstallReport, error) {
 				// user data like journal/ or knowledge/.
 				identityProfile := filepath.Join(dst, "identity", "profile.md")
 				if !exists(identityProfile) {
-					identitySrc := path(agentsSrc, name, "identity")
+					identitySrc := joinFS(agentsSrc, name, "identity")
 					identityDst := filepath.Join(dst, "identity")
-					if cperr := copyDirFS(examplesFS, identitySrc, identityDst); cperr == nil {
+					if cperr := copyDirFS(catalogFS, identitySrc, identityDst); cperr == nil {
 						rep.AgentsAdded = append(rep.AgentsAdded, name+" (repaired)")
 					}
 					// Also copy agent.yaml if missing
 					manifestDst := filepath.Join(dst, "agent.yaml")
 					if !exists(manifestDst) {
-						if data, rerr := examplesFS.ReadFile(path(agentsSrc, name, "agent.yaml")); rerr == nil {
+						if data, rerr := catalogFS.ReadFile(joinFS(agentsSrc, name, "agent.yaml")); rerr == nil {
 							_ = os.WriteFile(manifestDst, data, 0o644)
 						}
 					}
@@ -216,7 +212,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 				}
 				continue
 			}
-			if cperr := copyDirFS(examplesFS, path(agentsSrc, name), dst); cperr != nil {
+			if cperr := copyDirFS(catalogFS, joinFS(agentsSrc, name), dst); cperr != nil {
 				return rep, fmt.Errorf("copy agent %s: %w", name, cperr)
 			}
 			rep.AgentsAdded = append(rep.AgentsAdded, name)
@@ -242,7 +238,7 @@ func InstallInto(slug string) (InstallReport, error) {
 // ── internals ─────────────────────────────────────────────────────────
 
 func loadMetadata(slug string) (Example, error) {
-	data, err := examplesFS.ReadFile(path(slug, "example.yaml"))
+	data, err := catalogFS.ReadFile(joinFS(slug, "example.yaml"))
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return Example{}, ErrNotFound
@@ -261,7 +257,7 @@ func loadMetadata(slug string) (Example, error) {
 
 // path joins with forward slashes - required because embed.FS always
 // uses forward slashes regardless of the host OS.
-func path(parts ...string) string {
+func joinFS(parts ...string) string {
 	return strings.Join(parts, "/")
 }
 

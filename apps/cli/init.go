@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/catalog/examples"
+	"spwn.sh/catalog"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/platform"
@@ -132,15 +132,15 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 	}
 
 	// Honor --force: if the user passed it and a manifest already
-	// exists, clear it so examples.Install can write fresh content
-	// (examples.Install itself never overwrites).
+	// exists, clear it so catalog.Install can write fresh content
+	// (catalog.Install itself never overwrites).
 	if initForce {
 		if err := os.Remove(filepath.Join(cwd, "spwn.yaml")); err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("remove existing spwn.yaml: %w", err)
 		}
 	}
 
-	rep, err := examples.Install(slug, cwd)
+	rep, err := catalog.Install(slug, cwd)
 	if err != nil {
 		return fmt.Errorf("install example %s: %w", ref, err)
 	}
