@@ -79,8 +79,8 @@ linters-settings:
             desc: "L5 (build) must not import L6 (runtime)"
 
       # L1/L2: Platform — may not import any domain or higher.
-      platform-paths:
-        files: ["**/packages/paths/**"]
+      platform:
+        files: ["**/packages/platform/**"]
         deny:
           - pkg: "spwn.sh/packages/deps"
           - pkg: "spwn.sh/packages/agent"

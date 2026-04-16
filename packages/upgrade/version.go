@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // Version is set at build time via -ldflags. Defaults to "dev" for local builds.
@@ -32,7 +32,7 @@ type VersionInfo struct {
 // maxAge controls cache staleness (e.g. 1h for web, 24h for CLI).
 // Returns "" on any error (network, parse, etc.).
 func CheckLatestVersion(maxAge time.Duration) string {
-	cacheDir := paths.BaseDir()
+	cacheDir := platform.BaseDir()
 	cachePath := filepath.Join(cacheDir, versionCheckFile)
 
 	// Read cache

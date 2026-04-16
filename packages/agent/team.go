@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // Team is a named group of agents with display metadata.
@@ -40,7 +40,7 @@ func Slugify(name string) string {
 }
 
 func teamPath(slug string) string {
-	return filepath.Join(paths.TeamsDir(), slug+".yaml")
+	return filepath.Join(platform.TeamsDir(), slug+".yaml")
 }
 
 // CreateTeam persists a new team. Returns an error if the slug already exists.
@@ -51,7 +51,7 @@ func CreateTeam(t Team) error {
 	if !slugRe.MatchString(t.Slug) {
 		return fmt.Errorf("invalid team slug: %q", t.Slug)
 	}
-	dir := paths.TeamsDir()
+	dir := platform.TeamsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("create teams dir: %w", err)
 	}
@@ -81,7 +81,7 @@ func GetTeam(slug string) (*Team, error) {
 
 // ListTeams returns all teams sorted alphabetically by slug.
 func ListTeams() ([]Team, error) {
-	dir := paths.TeamsDir()
+	dir := platform.TeamsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -129,7 +129,7 @@ func DeleteTeam(slug string) error {
 // TeamMembers returns the names of all agents whose agent.yaml
 // references the given team slug.
 func TeamMembers(teamSlug string) ([]string, error) {
-	agentsDir := paths.AgentsDir()
+	agentsDir := platform.AgentsDir()
 	entries, err := os.ReadDir(agentsDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -160,7 +160,7 @@ func TeamMembers(teamSlug string) ([]string, error) {
 // SetAgentTeam updates the agent's agent.yaml to reference the given
 // team slug. An empty slug clears the team assignment.
 func SetAgentTeam(agentName, teamSlug string) error {
-	agentDir := filepath.Join(paths.AgentsDir(), agentName)
+	agentDir := filepath.Join(platform.AgentsDir(), agentName)
 	if _, err := os.Stat(agentDir); os.IsNotExist(err) {
 		return fmt.Errorf("agent %q not found", agentName)
 	}

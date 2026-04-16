@@ -1,12 +1,12 @@
 package mind
 
 import (
+	"spwn.sh/packages/platform"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/paths"
 )
 
 // defaultAgentYAMLTmpl is the baseline agent.yaml written by
@@ -76,7 +76,7 @@ type AgentInfo struct {
 
 // AgentDir returns the path to ~/.spwn/agents/{name}/.
 func AgentDir(name string) string {
-	return filepath.Join(paths.AgentsDir(), name)
+	return filepath.Join(platform.AgentsDir(), name)
 }
 
 // Init scaffolds a new Mind with all 6 layers.
@@ -86,7 +86,7 @@ func Init(name string) (string, error) {
 		return "", fmt.Errorf("agent %q already exists", name)
 	}
 
-	for _, layer := range paths.MindLayers {
+	for _, layer := range platform.MindLayers {
 		if err := os.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
 			return "", fmt.Errorf("create %s: %w", layer, err)
 		}
@@ -140,7 +140,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 // profile for an already-existing Mind. Unlike Init, Repair never
 // errors when the agent directory already exists — it is idempotent
 // and only writes what is missing, making it safe for --force
-// re-scaffold paths.
+// re-scaffold platform.
 func Repair(name string) error {
 	dir := AgentDir(name)
 	if _, err := os.Stat(dir); err != nil {
@@ -150,7 +150,7 @@ func Repair(name string) error {
 		return err
 	}
 
-	for _, layer := range paths.MindLayers {
+	for _, layer := range platform.MindLayers {
 		if err := os.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
 			return fmt.Errorf("create %s: %w", layer, err)
 		}
@@ -204,7 +204,7 @@ func Validate(name string) error {
 
 // List returns all agents in ~/.spwn/agents/.
 func List() ([]AgentInfo, error) {
-	dir := paths.AgentsDir()
+	dir := platform.AgentsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {

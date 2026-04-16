@@ -15,7 +15,7 @@ import (
 	"time"
 
 	agentpkg "spwn.sh/packages/agent"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/image/probe"
@@ -224,7 +224,7 @@ func (s *Server) handleSystemDocker(w http.ResponseWriter, r *http.Request) {
 // first-run onboarding wizard.
 func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) {
 	completed := false
-	if _, err := os.Stat(filepath.Join(paths.BaseDir(), ".onboarding-complete")); err == nil {
+	if _, err := os.Stat(filepath.Join(platform.BaseDir(), ".onboarding-complete")); err == nil {
 		completed = true
 	}
 	// Also surface a couple of useful first-run signals.
@@ -294,7 +294,7 @@ func (s *Server) handleInstallExample(w http.ResponseWriter, r *http.Request) {
 
 // handleSystemOnboardingComplete marks the wizard as completed.
 func (s *Server) handleSystemOnboardingComplete(w http.ResponseWriter, r *http.Request) {
-	path := filepath.Join(paths.BaseDir(), ".onboarding-complete")
+	path := filepath.Join(platform.BaseDir(), ".onboarding-complete")
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -479,7 +479,7 @@ type projectWorldDef struct {
 // root is active. Returns ok=false on any failure (no project, file
 // missing, parse error) so callers can fall back silently.
 func loadProjectManifest() (projectManifest, bool) {
-	root := paths.ProjectRoot()
+	root := platform.ProjectRoot()
 	if root == "" {
 		return projectManifest{}, false
 	}
@@ -1186,7 +1186,7 @@ func (s *Server) handleArchitectLogs(w http.ResponseWriter, r *http.Request) {
 	if follow {
 		args = append(args, "-f")
 	}
-	args = append(args, "--tail", tail, paths.ArchitectContainerName())
+	args = append(args, "--tail", tail, platform.ArchitectContainerName())
 
 	cmd := exec.CommandContext(r.Context(), "docker", args...)
 	stdout, err := cmd.StdoutPipe()

@@ -10,7 +10,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // formatUptime returns a human-readable duration like "47m" or "2h".
@@ -71,7 +71,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 	// the already-freshened on-disk journal, not a stale copy.
 	duration := time.Since(u.CreatedAt)
 	for name := range agentHomes {
-		agentPath := filepath.Join(paths.AgentsDir(), name)
+		agentPath := filepath.Join(platform.AgentsDir(), name)
 		if journalErr := agent.AppendJournal(agentPath, worldID, -1, duration); journalErr != nil {
 			log.Printf("warning: failed to write journal for agent %s on destroy: %v", name, journalErr)
 		}

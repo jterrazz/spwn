@@ -9,7 +9,7 @@ import (
 
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 var (
@@ -42,7 +42,7 @@ already exists.`,
 		if len(args) > 0 {
 			name = args[0]
 		} else {
-			name = paths.RandomAgentName()
+			name = platform.RandomAgentName()
 		}
 
 		// Reject empty / invalid names before touching disk. The

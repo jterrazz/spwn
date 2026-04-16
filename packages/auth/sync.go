@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // SyncCredentials resolves all credentials and writes them to the credentials
@@ -18,7 +18,7 @@ import (
 //
 // Safe to call repeatedly - uses atomic writes.
 func SyncCredentials() error {
-	dir := paths.CredentialsDir()
+	dir := platform.CredentialsDir()
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("create credentials dir: %w", err)
 	}

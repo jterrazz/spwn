@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/world/architect"
@@ -259,20 +259,20 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 	}
 
 	// Check if already running
-	info, err := docker.Inspect(ctx, paths.ArchitectContainerName())
+	info, err := docker.Inspect(ctx, platform.ArchitectContainerName())
 	if err == nil && info.Running {
 		opts.progress("already_running", info.ID)
-		return info.ID, fmt.Errorf("architect is already running (container %s)", paths.ArchitectContainerName())
+		return info.ID, fmt.Errorf("architect is already running (container %s)", platform.ArchitectContainerName())
 	}
 
 	// If container exists but stopped, remove it first
 	if err == nil && !info.Running {
 		opts.progress("cleanup", "removing stopped architect container")
-		_ = docker.Remove(ctx, paths.ArchitectContainerName())
+		_ = docker.Remove(ctx, platform.ArchitectContainerName())
 	}
 
 	// Resolve image
-	image := paths.ArchitectImage
+	image := platform.ArchitectImage
 	if opts.ImageOverride != "" {
 		image = opts.ImageOverride
 	}
@@ -315,9 +315,9 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 		Labels: architectLabels,
 	}
 	// Ensure architect stack file exists on the host
-	architectStackPath := paths.BaseDir() + "/architect/stack.md"
+	architectStackPath := platform.BaseDir() + "/architect/stack.md"
 	if _, err := os.Stat(architectStackPath); os.IsNotExist(err) {
-		_ = os.MkdirAll(paths.BaseDir()+"/architect", 0755)
+		_ = os.MkdirAll(platform.BaseDir()+"/architect", 0755)
 		_ = os.WriteFile(architectStackPath, []byte("# Architect Stack\n\n## Focus\n\n## Queued\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Done\n"), 0644)
 	}
 
@@ -325,16 +325,16 @@ func StartArchitectDaemonWithOpts(ctx context.Context, opts StartArchitectDaemon
 
 	hostCfg := &containerTypes.HostConfig{
 		Binds: []string{
-			paths.BaseDir() + ":/home/spwn/.spwn",
+			platform.BaseDir() + ":/home/spwn/.spwn",
 			architectStackPath + ":/me/stack.md",
 			"/var/run/docker.sock:/var/run/docker.sock",
-			paths.CredentialsDir() + ":/credentials:ro",
+			platform.CredentialsDir() + ":/credentials:ro",
 		},
 		RestartPolicy: containerTypes.RestartPolicy{Name: "unless-stopped"},
 	}
 
-	opts.progress("container_creating", paths.ArchitectContainerName())
-	id, err := docker.CreateNamedContainer(ctx, paths.ArchitectContainerName(), containerCfg, hostCfg)
+	opts.progress("container_creating", platform.ArchitectContainerName())
+	id, err := docker.CreateNamedContainer(ctx, platform.ArchitectContainerName(), containerCfg, hostCfg)
 	if err != nil {
 		return "", fmt.Errorf("creating architect container: %w", err)
 	}
@@ -364,7 +364,7 @@ func StopArchitectDaemon(ctx context.Context) error {
 		return fmt.Errorf("docker is not reachable: %w", err)
 	}
 
-	info, err := docker.Inspect(ctx, paths.ArchitectContainerName())
+	info, err := docker.Inspect(ctx, platform.ArchitectContainerName())
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			return fmt.Errorf("architect is not running")
@@ -373,12 +373,12 @@ func StopArchitectDaemon(ctx context.Context) error {
 	}
 
 	if info.Running {
-		if err := docker.Stop(ctx, paths.ArchitectContainerName()); err != nil {
+		if err := docker.Stop(ctx, platform.ArchitectContainerName()); err != nil {
 			return fmt.Errorf("stopping architect container: %w", err)
 		}
 	}
 
-	if err := docker.Remove(ctx, paths.ArchitectContainerName()); err != nil {
+	if err := docker.Remove(ctx, platform.ArchitectContainerName()); err != nil {
 		return fmt.Errorf("removing architect container: %w", err)
 	}
 
@@ -400,7 +400,7 @@ func GetArchitectDaemonStatus(ctx context.Context) (*ArchitectDaemonInfo, error)
 		return nil, fmt.Errorf("docker is not reachable: %w", err)
 	}
 
-	info, err := docker.Inspect(ctx, paths.ArchitectContainerName())
+	info, err := docker.Inspect(ctx, platform.ArchitectContainerName())
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			return &ArchitectDaemonInfo{Running: false, Status: "not running"}, nil
@@ -446,7 +446,7 @@ func TalkToArchitectExecArgs(message string) ([]string, error) {
 	// Sync credentials before exec
 	_ = auth.SyncCredentials()
 
-	args = append(args, paths.ArchitectContainerName())
+	args = append(args, platform.ArchitectContainerName())
 
 	// Claude Code invocation - wrapped to source credentials from bind mount
 	claudeArgs := []string{"claude", "--dangerously-skip-permissions"}

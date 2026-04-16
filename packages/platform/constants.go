@@ -1,4 +1,4 @@
-package paths
+package platform
 
 // Directory layout constants.
 const (

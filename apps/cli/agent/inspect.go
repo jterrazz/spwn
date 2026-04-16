@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/agent"
 )
 
@@ -46,7 +46,7 @@ var inspectCmd = &cobra.Command{
 		s.Blank()
 
 		// Mind layers with file sizes
-		for _, layer := range paths.MindLayers {
+		for _, layer := range platform.MindLayers {
 			files := info.Layers[layer]
 			if len(files) == 0 {
 				s.Info(layer+"/", "(empty)")

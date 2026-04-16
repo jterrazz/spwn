@@ -6,13 +6,13 @@ import (
 
 	"spwn.sh/packages/upgrade"
 	"spwn.sh/packages/upgrade/migrations"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // runMigrations applies any pending schema migrations to ~/.spwn.
 // Skipped entirely for fresh installs (directory does not exist yet).
 func runMigrations() error {
-	baseDir := paths.BaseDir()
+	baseDir := platform.BaseDir()
 	if _, err := os.Stat(baseDir); os.IsNotExist(err) {
 		return nil
 	}

@@ -1,21 +1,21 @@
 package evolution
 
 import (
+	"spwn.sh/packages/platform"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 
-	"spwn.sh/packages/paths"
 	"spwn.sh/packages/activity"
 )
 
 // Fork clones a Mind from source agent to target agent.
 // If layers is nil, all layers are copied. Otherwise only the specified layers.
 func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
-	sourceDir := filepath.Join(paths.AgentsDir(), sourceName)
-	targetDir := filepath.Join(paths.AgentsDir(), targetName)
+	sourceDir := filepath.Join(platform.AgentsDir(), sourceName)
+	targetDir := filepath.Join(platform.AgentsDir(), targetName)
 
 	// Verify source exists
 	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
@@ -28,7 +28,7 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	}
 
 	// Determine which layers to copy
-	allLayers := paths.MindLayers
+	allLayers := platform.MindLayers
 	if len(layers) > 0 {
 		allLayers = layers
 	}

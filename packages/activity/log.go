@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 var mu sync.Mutex
@@ -25,7 +25,7 @@ func Log(e Event) {
 	if e.Timestamp.IsZero() {
 		e.Timestamp = time.Now().UTC()
 	}
-	if err := appendJSONL(paths.ActivityPath(), e); err != nil {
+	if err := appendJSONL(platform.ActivityPath(), e); err != nil {
 		fmt.Fprintf(os.Stderr, "activity: %v\n", err)
 	}
 }

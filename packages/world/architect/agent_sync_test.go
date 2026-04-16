@@ -105,8 +105,8 @@ func TestSyncAgentsInto_SkipsMissingHostDirs(t *testing.T) {
 func TestSyncAgentsInto_CopiesPresentHostDirs(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("SPWN_HOME", home)
-	// Create a fake host-side agent home under paths.AgentsDir().
-	// paths.AgentsDir() reads from SPWN_HOME/agents by default.
+	// Create a fake host-side agent home under platform.AgentsDir().
+	// platform.AgentsDir() reads from SPWN_HOME/agents by default.
 	// We write a file so the Stat check passes.
 	agentsRoot := filepath.Join(home, "agents")
 	neoDir := filepath.Join(agentsRoot, "neo")

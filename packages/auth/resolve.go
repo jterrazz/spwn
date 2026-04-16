@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // Resolve finds the best available credential for a provider.
@@ -65,7 +65,7 @@ func resolveAnthropic() *Credential {
 	}
 	// 4. Check cached token file and macOS Keychain.
 	//    When both exist and differ, prefer keychain (more likely to be fresh).
-	tokenPath := paths.BaseDir() + "/.auth-token"
+	tokenPath := platform.BaseDir() + "/.auth-token"
 	cachedToken := ""
 	if data, err := os.ReadFile(tokenPath); err == nil {
 		cachedToken = strings.TrimSpace(string(data))

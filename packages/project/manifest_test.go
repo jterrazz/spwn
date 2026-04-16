@@ -216,7 +216,7 @@ func TestValidate_workspaceMountRules(t *testing.T) {
 	// Two bare entries are fine under the unified form — each gets
 	// auto-named workspace0, workspace1 at spawn time. A container-
 	// path-on-RHS entry (legacy manifest form) is rejected because
-	// users should never write container paths.
+	// users should never write container platform.
 	body := `version: 2
 name: wsm
 worlds:

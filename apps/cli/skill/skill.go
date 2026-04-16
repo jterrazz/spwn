@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // Cmd is the root `spwn skill` command group.
@@ -74,7 +74,7 @@ var lsCmd = &cobra.Command{
 	Aliases: []string{"list"},
 	Short:   "List skill files",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dir := paths.SkillsDir()
+		dir := platform.SkillsDir()
 		entries, err := os.ReadDir(dir)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -107,7 +107,7 @@ var newCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		dir := paths.SkillsDir()
+		dir := platform.SkillsDir()
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("create %s: %w", dir, err)
 		}
@@ -152,7 +152,7 @@ var editCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		path := filepath.Join(paths.SkillsDir(), name+".md")
+		path := filepath.Join(platform.SkillsDir(), name+".md")
 		if _, err := os.Stat(path); err != nil {
 			return fmt.Errorf("skill %q not found at %s", name, path)
 		}
@@ -171,7 +171,7 @@ var showCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		path := filepath.Join(paths.SkillsDir(), name+".md")
+		path := filepath.Join(platform.SkillsDir(), name+".md")
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("skill %q not found at %s", name, path)
@@ -188,7 +188,7 @@ var rmCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		path := filepath.Join(paths.SkillsDir(), name+".md")
+		path := filepath.Join(platform.SkillsDir(), name+".md")
 		if _, err := os.Stat(path); err != nil {
 			return fmt.Errorf("skill %q not found at %s", name, path)
 		}

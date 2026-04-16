@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // SaveToken persists a token to the auth cache file.
@@ -46,7 +46,7 @@ func IsProviderDisabled(p Provider) bool {
 }
 
 func disabledPath(p Provider) string {
-	return filepath.Join(paths.CredentialsDir(), ".disabled-"+string(p))
+	return filepath.Join(platform.CredentialsDir(), ".disabled-"+string(p))
 }
 
 // ReadCachedToken reads the cached token from disk.
@@ -59,5 +59,5 @@ func ReadCachedToken() string {
 }
 
 func tokenPath() string {
-	return paths.BaseDir() + "/.auth-token"
+	return platform.BaseDir() + "/.auth-token"
 }

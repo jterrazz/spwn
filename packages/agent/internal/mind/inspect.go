@@ -1,11 +1,11 @@
 package mind
 
 import (
+	"spwn.sh/packages/platform"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/paths"
 	"gopkg.in/yaml.v3"
 )
 
@@ -33,7 +33,7 @@ func Inspect(name string) (*AgentInfo, error) {
 		}
 	}
 
-	for _, layer := range paths.MindLayers {
+	for _, layer := range platform.MindLayers {
 		layerDir := filepath.Join(dir, layer)
 		entries, err := os.ReadDir(layerDir)
 		if err != nil {
