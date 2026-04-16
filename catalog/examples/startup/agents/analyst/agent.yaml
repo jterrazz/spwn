@@ -4,8 +4,18 @@ role: worker
 runtime:
   backend: "@spwn/claude-code"
 
+# Agent-specific deps — additions only.
+# Project-wide deps (unix, git, node) are inherited from spwn.yaml.
+# Only list what THIS agent needs beyond the shared set.
 deps:
-  - "@spwn/unix"
-  - "@spwn/git"
   - "@spwn/python"
-  - "@spwn/node"
+
+# Local skills live in spwn/skills/<name>.md at the project root.
+# They are injected into the agent's context at boot time.
+skills:
+  - sprint-planning
+  - code-review
+
+# Local hooks live in spwn/hooks/<name>.sh at the project root.
+hooks:
+  - pre-spawn

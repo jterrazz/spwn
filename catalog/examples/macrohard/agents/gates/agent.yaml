@@ -5,6 +5,8 @@ runtime:
   backend: "@spwn/claude-code"
 
 deps:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"
+  - "@spwn/python"
+
+skills:
+  - code-review
+  - architecture

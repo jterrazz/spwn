@@ -1,24 +1,62 @@
 # Research Lab
 
-> Same brain, new soul.
+> Local skills, local tools, and scientific rigor.
 
-A patient, methodical agent named Curie. She keeps a real lab notebook - hypotheses, methods, observations, conclusions - and writes playbooks as she figures things out.
+A meticulous research agent named Curie that investigates questions using
+empirical methods. She designs experiments, analyzes data in Jupyter
+notebooks, and writes reproducible Quarto reports.
 
-This example showcases **agent forking** - once Curie has learned enough, fork her into Darwin and watch him specialize differently. Same starting knowledge, divergent evolution.
+This example demonstrates the **new dependency model**: project-wide deps,
+agent-specific local skills, and local tools.
+
+## What this example demonstrates
+
+### Local skills (`spwn/skills/`)
+
+Three research methodology skills that the agent can invoke:
+
+- **literature-review** - systematic search and synthesis of existing work
+- **experiment-design** - controlled experiment design with pre-registered analysis plans
+- **data-analysis** - data cleaning, statistical testing, and visualization
+
+Skills are Markdown files with detailed procedural instructions. They live
+in `spwn/skills/` and are referenced by name in `agent.yaml`.
+
+### Local tools (`spwn/tools/`)
+
+- **jupyter** - a local tool that installs Jupyter via pip. Defined in
+  `spwn/tools/jupyter/pack.yaml` with install commands and a verify step.
+
+### Dependency model
+
+- `spwn.yaml` declares **project-wide deps** (`@spwn/python`, `@spwn/qmd`)
+  that every agent inherits automatically.
+- `agent.yaml` declares only **agent-specific additions** (skills and tools).
+  It does not repeat the project deps.
+- `spwn.lock` records all resolved dependencies in a flat, line-oriented
+  text format.
 
 ## What's inside
 
-| Component | Details |
-|---|---|
-| **World** | `research-lab` - 4 CPU, 4 GB RAM, 8 GB disk, 2h timeout |
-| **Tools** | Unix, Git, Node.js 20, Python 3 |
-| **Agent: curie** | Worker role. Careful, note-taking, hypothesis-driven. Documents everything in her journal. Writes playbooks from successful experiments. |
-
-## Prerequisites
-
-- spwn installed (`curl -fsSL https://spwn.sh/install.sh | bash`)
-- Docker running
-- An Anthropic API key (set via `claude setup-token` or `ANTHROPIC_API_KEY`)
+```
+research-lab/
+  spwn.yaml                       # Project config: name, deps, worlds
+  spwn.lock                       # Resolved dependency versions
+  agents/
+    curie/
+      agent.yaml                  # Agent config: skills, tools
+      identity/
+        profile.md                # Persona: meticulous scientist
+      AGENTS.md                   # Provider-neutral system prompt
+  spwn/
+    skills/
+      literature-review.md        # Skill: search and synthesize papers
+      experiment-design.md        # Skill: design controlled experiments
+      data-analysis.md            # Skill: statistical analysis + viz
+    tools/
+      jupyter/
+        pack.yaml                 # Tool: install and verify jupyter
+```
 
 ## Install
 
@@ -29,65 +67,30 @@ spwn init @spwn/research-lab
 ## Spawn
 
 ```bash
-# Give Curie a codebase to study
-spwn up -c research-lab --agent curie -w ./my-project
+spwn up -c research-lab --agent curie -w ./my-dataset
 ```
 
-## Explore
+## Example interactions
 
 ```bash
-# Ask Curie to investigate something
-spwn agent talk curie "Analyze the performance of the database queries in this project"
+# Ask Curie to investigate a question
+spwn agent talk curie "Is there a significant difference in response time between v2 and v3 of the API?"
 
 # Curie will:
-#   1. State a hypothesis
-#   2. Design an experiment
-#   3. Run it
-#   4. Record observations in her journal
-#   5. Write conclusions to her knowledge
+#   1. Review existing documentation and benchmarks (literature-review)
+#   2. Design a controlled benchmark experiment (experiment-design)
+#   3. Execute the experiment and analyze results in Jupyter (data-analysis)
+#   4. Write a conclusion with statistical evidence
 
 # Read her lab notebook
 spwn agent journal curie
 
-# Check her accumulated knowledge
+# Check accumulated playbooks
 spwn agent mind curie
-```
-
-## The forking experiment
-
-Once Curie has built up knowledge from a few sessions:
-
-```bash
-# Consolidate what she's learned
-spwn agent dream curie
-
-# Fork her into a new agent
-spwn agent fork curie darwin
-
-# Now run both on different problems
-spwn up -c research-lab --agent curie -w ./project-a
-spwn up -c research-lab --agent darwin -w ./project-b
-
-# Over time, they'll specialize differently
-# - same starting knowledge, divergent playbooks
-```
-
-## What to try next
-
-```bash
-# Compare the two agents after they've diverged
-spwn agent mind curie
-spwn agent mind darwin
-
-# Let them consolidate independently
-spwn agent dream curie
-spwn agent dream darwin
 ```
 
 ## Cleanup
 
 ```bash
 spwn down <world-id>
-rm ~/.spwn/worlds/research-lab.yaml
-rm -rf ~/.spwn/agents/curie ~/.spwn/agents/darwin
 ```

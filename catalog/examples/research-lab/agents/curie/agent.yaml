@@ -4,8 +4,10 @@ role: worker
 runtime:
   backend: "@spwn/claude-code"
 
-deps:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/python"
-  - "@spwn/node"
+skills:
+  - literature-review
+  - experiment-design
+  - data-analysis
+
+tools:
+  - jupyter

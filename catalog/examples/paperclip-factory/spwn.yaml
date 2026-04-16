@@ -2,9 +2,9 @@ version: 2
 name: paperclip-factory
 
 deps:
+  - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/node"
-  - "@spwn/unix"
 
 worlds:
   paperclip-factory:

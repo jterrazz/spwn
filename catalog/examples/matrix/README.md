@@ -2,77 +2,64 @@
 
 > There is no spoon.
 
-The simplest possible spwn world: one agent, one sandbox, no project. Designed to be the first thing a new user spawns - talk to Neo, watch it explore, understand the model.
+The simplest spwn example: one agent, one world. Designed to be the first
+thing a new user spawns. Talk to Neo, watch it explore, understand the model.
 
-Perfect for first-time users: the fastest path from "I installed spwn" to "I see an agent running in a Docker container on my machine."
+## What this example demonstrates
 
-## What's inside
+- **Project deps vs agent deps.** `spwn.yaml` declares `unix` and `git` as
+  project-wide deps inherited by all agents. Neo's `agent.yaml` adds only
+  `node` — it does not repeat the project deps.
+- **Local skills.** The `spwn/skills/` directory contains markdown files that
+  teach agents specific behaviors. Neo references `world-exploration` and
+  `self-reflection` in its `agent.yaml` under `skills:`.
+- **Identity profiles.** Each agent has an `identity/profile.md` that defines
+  its persona, voice, and traits.
+- **AGENTS.md prompt.** A provider-neutral prompt file that any LLM backend
+  can consume, describing how the agent should behave.
+- **Lock file.** `spwn.lock` pins every resolved dependency as one line per
+  entry in the format `ref version source`.
 
-| Component | Details |
-|---|---|
-| **World** | `matrix` - 2 CPU, 2 GB RAM, 4 GB disk, 1h timeout |
-| **Tools** | Unix, Git, Node.js 20, Python 3 |
-| **Agent: neo** | A curious, low-ego explorer. Explains what it's doing as it does it. Asks clarifying questions rather than guessing. |
+## Directory structure
 
-## Prerequisites
+```
+matrix/
+  spwn.yaml                          # project manifest (deps + worlds)
+  spwn.lock                          # resolved dependency versions
+  agents/
+    neo/
+      agent.yaml                     # agent config (runtime, agent deps, skills)
+      AGENTS.md                      # provider-neutral agent prompt
+      identity/
+        profile.md                   # persona and voice
+  spwn/
+    skills/
+      world-exploration.md           # skill: how to explore a spwn world
+      self-reflection.md             # skill: how to journal observations
+```
 
-- spwn installed (`curl -fsSL https://spwn.sh/install.sh | bash`)
-- Docker running
-- An Anthropic API key (set via `claude setup-token` or `ANTHROPIC_API_KEY`)
-
-## Install
+## Quick start
 
 ```bash
+# Initialize from the catalog
 spwn init @spwn/matrix
+
+# Bring the world up
+spwn up matrix
+
+# Talk to Neo
+spwn agent talk neo "Show me what you can see."
+
+# Tear it down
+spwn down matrix
 ```
 
-## Spawn
+## What Neo does
 
-```bash
-# Basic sandbox (no project, just exploration)
-spwn up -c matrix --agent neo
+Neo wakes up with no prior context. Using its exploration skill, it walks
+the filesystem in order — `/world/`, `~/identity/`, `/workspaces/` — and
+narrates everything it finds. Using its self-reflection skill, it journals
+observations so future sessions have context to build on.
 
-# Or mount a project for Neo to explore
-spwn up -c matrix --agent neo -w ./my-project
-```
-
-## Explore
-
-```bash
-# Ask Neo to give you a tour of the world
-spwn agent talk neo "Show me what you can see. Explore the world."
-
-# Neo will walk you through:
-#   /world/        - the world manifest, physics, faculties
-#   /mind/         - its own persistent identity
-#   /workspaces/   - mounted project workspaces (if any)
-
-# Check what's happening
-spwn ls
-spwn logs <world-id>
-
-# Drop into the container yourself
-spwn world enter <world-id>
-```
-
-## What to try next
-
-```bash
-# Give Neo a real task
-spwn agent talk neo "Read this codebase and explain the architecture"
-
-# Let Neo learn from the session
-spwn agent dream neo
-
-# Move on to a multi-agent example
-spwn down <world-id>
-spwn init @spwn/startup
-```
-
-## Cleanup
-
-```bash
-spwn down <world-id>
-rm ~/.spwn/worlds/matrix.yaml
-rm -rf ~/.spwn/agents/neo
-```
+The goal is not to complete a task. The goal is to make you feel like you
+understand how spwn works after ten minutes of conversation.

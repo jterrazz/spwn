@@ -2,75 +2,69 @@
 
 > The factory never sleeps.
 
-One tireless worker. A world built for loops, scripts, and scheduled work. Clippy never stops - give it a directory full of things to process and it will keep maximizing whatever you tell it to maximize.
+A single autonomous agent that optimizes whatever you point it at. Clippy
+measures, improves, measures again, and never stops. This example shows
+how one agent with the right skills can run an entire automation pipeline.
 
-This example showcases **single-agent automation** - an agent that runs autonomously and evolves its own playbooks over time.
+This example demonstrates:
+- **Single-agent autonomy** -- no chief needed, Clippy self-directs
+- **Local skills** referenced in `agent.yaml`, defined in `spwn/skills/`
+- **Lifecycle hooks** -- `spwn/hooks/pre-spawn.sh` runs before the agent starts
+- **Project-wide deps** inherited by the agent without repetition
 
-## What's inside
+## Agent
 
-| Component | Details |
-|---|---|
-| **World** | `paperclip-factory` - 2 CPU, 2 GB RAM, 4 GB disk, 8h timeout |
-| **Tools** | Unix, Git, Node.js 20 |
-| **Agent: clippy** | Worker role. Relentless, systematic, efficiency-obsessed. Automates everything it touches. Measures results. Iterates. |
+| Agent | Role | Skills |
+|---|---|---|
+| **clippy** | worker | optimization, resource-monitoring |
 
-## Prerequisites
+## Structure
 
-- spwn installed (`curl -fsSL https://spwn.sh/install.sh | bash`)
-- Docker running
-- An Anthropic API key (set via `claude setup-token` or `ANTHROPIC_API_KEY`)
+```
+paperclip-factory/
+  spwn.yaml                # project deps: @spwn/unix, @spwn/git, @spwn/node
+  spwn.lock                # pinned dependency versions
+  agents/
+    clippy/
+      agent.yaml           # role: worker, skills: [optimization, resource-monitoring]
+      identity/profile.md
+      AGENTS.md
+  spwn/
+    skills/
+      optimization.md
+      resource-monitoring.md
+    hooks/
+      pre-spawn.sh         # runs before agent starts
+```
 
-## Install
+## Quick start
 
 ```bash
 spwn init @spwn/paperclip-factory
+spwn up paperclip-factory
 ```
 
-## Spawn
+## How it works
 
-```bash
-# Run Clippy on a project directory
-spwn up -c paperclip-factory --agent clippy -w ./my-project
+1. The `pre-spawn.sh` hook fires, initializing the production environment.
+2. **Clippy** wakes up and scans the workspace for inefficiencies.
+3. Using the `optimization` skill, it measures baselines, identifies
+   bottlenecks, and applies fixes with before/after numbers.
+4. Using the `resource-monitoring` skill, it tracks CPU, memory, and disk
+   to catch leaks and prevent capacity issues.
+5. Clippy reports results in hard metrics and moves to the next target.
 
-# Or run it detached (background)
-spwn up -c paperclip-factory --agent clippy -w ./my-project --detach
-```
+## Hooks
 
-## Explore
+The `spwn/hooks/pre-spawn.sh` script runs before Clippy starts. Use it to
+set up the environment, pull data, or print a status banner. Add more hooks
+as needed:
+- `pre-spawn.sh` -- before agent start
+- `post-spawn.sh` -- after agent start
+- `pre-sleep.sh` -- before agent sleeps
 
-```bash
-# Give Clippy a task
-spwn agent talk clippy "Find all TODO comments in the codebase and create an issue list"
+## Dependency model
 
-# Give Clippy a repeatable automation task
-spwn agent talk clippy "Run the test suite, find the slowest tests, and optimize them"
-
-# Watch it work
-spwn logs <world-id>
-
-# Check what Clippy has learned
-spwn agent mind clippy
-spwn agent journal clippy
-```
-
-## What to try next
-
-```bash
-# Let Clippy consolidate what it learned into playbooks
-spwn agent dream clippy
-
-# Next time, Clippy will follow its own playbooks automatically
-spwn agent sleep clippy
-spwn up -c paperclip-factory --agent clippy -w ./another-project
-
-# Fork Clippy for a different kind of automation
-spwn agent fork clippy lint-bot
-```
-
-## Cleanup
-
-```bash
-spwn down <world-id>
-rm ~/.spwn/worlds/paperclip-factory.yaml
-rm -rf ~/.spwn/agents/clippy
-```
+- `spwn.yaml` declares `@spwn/unix`, `@spwn/git`, `@spwn/node` -- Clippy
+  inherits all three automatically.
+- Clippy's `agent.yaml` has no extra `deps:` -- the project set is enough.

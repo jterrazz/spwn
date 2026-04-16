@@ -1,11 +1,17 @@
+# Research Lab — a scientific agent with Python, QMD, and local skills.
+#
+# deps: are project-wide — every agent inherits them.
+# Curie's agent.yaml adds no extra deps; it only references local skills
+# and a local tool (jupyter) for interactive notebooks.
+
 version: 2
 name: research-lab
 
 deps:
-  - "@spwn/git"
-  - "@spwn/node"
-  - "@spwn/python"
   - "@spwn/unix"
+  - "@spwn/git"
+  - "@spwn/python"
+  - "@spwn/qmd"
 
 worlds:
   research-lab:
