@@ -10,7 +10,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claudecode"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 )
@@ -53,7 +53,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	}
 
 	resolvedRole := manifest.DefaultRole(role)
-	agentID := paths.GenerateAgentID(agentName)
+	agentID := platform.GenerateAgentID(agentName)
 	rec := models.AgentRecord{
 		Name:    agentName,
 		AgentID: agentID,
@@ -194,7 +194,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 	// 3. Update existing agent records to "creating" status
 	// (agents are already registered by Spawn() - avoid duplicates)
 	for _, spec := range agents {
-		agentID := paths.GenerateAgentID(spec.Name)
+		agentID := platform.GenerateAgentID(spec.Name)
 		if err := a.state.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
 			// Agent not yet registered (shouldn't happen in normal flow) - add it
 			role := manifest.DefaultRole(spec.Role)

@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/deps"
 )
 
@@ -50,7 +50,7 @@ worlds:
 	return root
 }
 
-// withProject points paths.ProjectRoot at a scaffolded project and
+// withProject points platform.ProjectRoot at a scaffolded project and
 // chdirs into it for the duration of a test. Needed because
 // agent.AddPack / RemovePack resolve AgentDir via paths, and
 // RunInstall walks up from cwd.
@@ -61,9 +61,9 @@ func withProject(t *testing.T) string {
 	if err := os.Chdir(root); err != nil {
 		t.Fatal(err)
 	}
-	paths.SetProjectRoot(root)
+	platform.SetProjectRoot(root)
 	t.Cleanup(func() {
-		paths.SetProjectRoot("")
+		platform.SetProjectRoot("")
 		os.Chdir(oldCwd)
 	})
 	return root

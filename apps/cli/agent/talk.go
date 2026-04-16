@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world"
 )
 
@@ -99,7 +99,7 @@ If no message is provided, opens an interactive session inside the container.`,
 		if rtErr2 != nil {
 			return fmt.Errorf("lookup runtime: %w", rtErr2)
 		}
-		if err := rt.SyncHostCredentials(paths.CredentialsDir()); err != nil {
+		if err := rt.SyncHostCredentials(platform.CredentialsDir()); err != nil {
 			return fmt.Errorf("sync credentials: %w", err)
 		}
 

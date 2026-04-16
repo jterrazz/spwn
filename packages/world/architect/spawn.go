@@ -22,7 +22,7 @@ import (
 	"spwn.sh/packages/world/internal/runtime"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
 )
@@ -40,7 +40,7 @@ type SpawnOpts struct {
 	AgentName     string
 	Workspaces    []models.Workspace
 	Manifest      models.Manifest
-	Image         string                     // Override base image (used for testing). Defaults to paths.WorldImage.
+	Image         string                     // Override base image (used for testing). Defaults to platform.WorldImage.
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
@@ -89,7 +89,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	var warnings []string
 
 	// Generate ID
-	id := paths.GenerateWorldID(opts.ConfigName)
+	id := platform.GenerateWorldID(opts.ConfigName)
 
 	// Resolve each workspace to absolute path and validate it exists.
 	// Layout inside the container:
@@ -123,7 +123,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Architect mode: mount Docker socket + SPWN state directory
 	if opts.IsArchitect {
 		binds = append(binds, "/var/run/docker.sock:/var/run/docker.sock")
-		binds = append(binds, paths.BaseDir()+":/home/spwn/.spwn")
+		binds = append(binds, platform.BaseDir()+":/home/spwn/.spwn")
 	}
 
 	// No /agents bind mount under the new architecture. Each
@@ -162,7 +162,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// exact image, don't rebuild" - they're how tests inject a mock
 	// runtime. Only when neither is set do we auto-build from the base
 	// Dockerfile + tool catalog.
-	image := paths.WorldImage
+	image := platform.WorldImage
 	explicitImage := false
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
@@ -217,9 +217,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Hydrate local (bare-name) refs into synthetic image.Tool
 	// instances before resolving. Without this, a ref like
 	// `my-local-tool` would blow up reg.Resolve with "unknown tool".
-	// Project root defaults to paths.ProjectRoot() — set by the CLI
+	// Project root defaults to platform.ProjectRoot() — set by the CLI
 	// PersistentPreRunE when a spwn.yaml is discovered.
-	if projectRoot := paths.ProjectRoot(); projectRoot != "" {
+	if projectRoot := platform.ProjectRoot(); projectRoot != "" {
 		hydrated, hErr := hydrateLocalPacks(reg, projectRoot, toolList)
 		if hErr != nil {
 			return nil, fmt.Errorf("load local tools: %w", hErr)
@@ -290,7 +290,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	if err := auth.SyncCredentials(); err != nil {
 		warnings = append(warnings, fmt.Sprintf("credential sync: %v", err))
 	}
-	binds = append(binds, paths.CredentialsDir()+":/credentials:ro")
+	binds = append(binds, platform.CredentialsDir()+":/credentials:ro")
 
 	// Determine credential source for progress reporting
 	creds := auth.ResolveAll()
@@ -329,25 +329,25 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Name:       opts.Name,
 		Config:     opts.ConfigName,
 		Agent:      opts.AgentName,
-		Backend:    paths.DefaultBackend,
+		Backend:    platform.DefaultBackend,
 		Workspaces: resolvedWorkspaces,
 		CreatedAt:  time.Now(),
 		Manifest:   opts.Manifest,
 	}
 	if len(opts.Agents) > 0 {
 		worldRecord.Agent = opts.Agents[0].Name
-		worldRecord.AgentID = paths.GenerateAgentID(opts.Agents[0].Name)
+		worldRecord.AgentID = platform.GenerateAgentID(opts.Agents[0].Name)
 		for _, spec := range opts.Agents {
 			role := manifest.DefaultRole(spec.Role)
 			worldRecord.Agents = append(worldRecord.Agents, models.AgentRecord{
 				Name:    spec.Name,
-				AgentID: paths.GenerateAgentID(spec.Name),
+				AgentID: platform.GenerateAgentID(spec.Name),
 				Role:    role,
 				Status:  models.StatusIdle,
 			})
 		}
 	} else if opts.AgentName != "" {
-		worldRecord.AgentID = paths.GenerateAgentID(opts.AgentName)
+		worldRecord.AgentID = platform.GenerateAgentID(opts.AgentName)
 		worldRecord.Agents = []models.AgentRecord{{
 			Name:    opts.AgentName,
 			AgentID: worldRecord.AgentID,
@@ -635,7 +635,7 @@ func workspaceContainerPath(name string, totalWorkspaces int) string {
 // world's per-instance state is stored. Used by both spawn (initial
 // write) and DeployAgent (roster regeneration).
 func worldStateDirFor(worldID string) string {
-	return filepath.Join(paths.LocalStateDir(), "world-states", worldID)
+	return filepath.Join(platform.LocalStateDir(), "world-states", worldID)
 }
 
 // initAgentDeploymentDirs creates the empty per-agent per-world
@@ -820,7 +820,7 @@ func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containe
 // Directories that don't exist on the host (e.g. a freshly scaffolded
 // agent whose memory dirs are still empty) are silently skipped.
 func syncAgentsInto(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
-	hostRoot := paths.AgentsDir()
+	hostRoot := platform.AgentsDir()
 	for agentName, containerHome := range agentHomes {
 		hostDir := filepath.Join(hostRoot, agentName)
 		if info, err := os.Stat(hostDir); err != nil || !info.IsDir() {
@@ -849,7 +849,7 @@ func syncAgentsOutOf(ctx context.Context, be backend.Backend, containerID string
 	// Everything else (dotfiles, .claude/, .npm/, .cache/, rebuilt
 	// CLAUDE.md, etc.) stays inside the container.
 	syncDirs := []string{"journal", "knowledge", "playbooks", "skills"}
-	hostRoot := paths.AgentsDir()
+	hostRoot := platform.AgentsDir()
 
 	var warnings []string
 	for agentName, containerHome := range agentHomes {

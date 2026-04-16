@@ -1,11 +1,11 @@
 package mind
 
 import (
+	"spwn.sh/packages/platform"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/paths"
 )
 
 func TestInit(t *testing.T) {
@@ -19,7 +19,7 @@ func TestInit(t *testing.T) {
 		}
 
 		// Verify all 6 layer directories exist
-		for _, layer := range paths.MindLayers {
+		for _, layer := range platform.MindLayers {
 			layerPath := filepath.Join(dir, layer)
 			info, err := os.Stat(layerPath)
 			if err != nil {

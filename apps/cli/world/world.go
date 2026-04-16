@@ -445,7 +445,7 @@ func dockerHint(err error) error {
 //	"name=path"      → explicit name
 //	"name=path:ro"   → same, read-only
 //
-// Users never write container paths. The container-side layout is
+// Users never write container platform. The container-side layout is
 // decided by the spawn pipeline (currently /workspaces/<name>/).
 //
 // Empty input returns a nil slice (ephemeral world — no mounts).

@@ -1,4 +1,4 @@
-package paths
+package cli
 
 import (
 	"os"

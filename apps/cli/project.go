@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"spwn.sh/packages/project"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // discoverProject walks up from the current directory looking for a
@@ -23,5 +23,5 @@ func discoverProject() {
 	if err != nil || p == nil {
 		return
 	}
-	paths.SetProjectRoot(p.Root)
+	platform.SetProjectRoot(p.Root)
 }

@@ -10,7 +10,7 @@ use (
 	./packages/compile
 	./packages/image
 	./packages/mailbox
-	./packages/paths
+	./packages/platform
 	./packages/upgrade
 	./packages/project
 	./packages/deps

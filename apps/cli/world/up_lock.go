@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/models"
 )
@@ -49,7 +49,7 @@ func findRunningWorldByConfig(ctx context.Context, name string) *models.World {
 // on success, or an error carrying the lock file path on failure
 // (another `spwn up` is in progress, or the file is stale).
 func acquireUpLock(worldName string) (func(), error) {
-	dir := paths.LocalStateDir()
+	dir := platform.LocalStateDir()
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("%s: %w", dir, err)
 	}

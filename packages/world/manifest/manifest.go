@@ -8,7 +8,7 @@ import (
 
 	"spwn.sh/packages/world/models"
 	"gopkg.in/yaml.v3"
-	"spwn.sh/packages/paths"
+	"spwn.sh/packages/platform"
 )
 
 // rawManifest is the intermediate YAML structure before conversion to Manifest.
@@ -18,7 +18,7 @@ type rawManifest struct {
 
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
 func Load(name string) (models.Manifest, error) {
-	path := filepath.Join(paths.WorldsDir(), name+".yaml")
+	path := filepath.Join(platform.WorldsDir(), name+".yaml")
 	return LoadPath(path)
 }
 
@@ -58,7 +58,7 @@ func parseDeps(node *yaml.Node) []string {
 
 // ListConfigs returns the names of all world configs in ~/.spwn/worlds/.
 func ListConfigs() ([]string, error) {
-	dir := paths.WorldsDir()
+	dir := platform.WorldsDir()
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -78,7 +78,7 @@ func ListConfigs() ([]string, error) {
 
 // CreateDefault creates a default.yaml in ~/.spwn/worlds/.
 func CreateDefault() error {
-	dir := paths.WorldsDir()
+	dir := platform.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ deps:
 
 // CreateConfig scaffolds a new named config.
 func CreateConfig(name string) error {
-	dir := paths.WorldsDir()
+	dir := platform.WorldsDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}

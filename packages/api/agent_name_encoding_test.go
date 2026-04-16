@@ -7,8 +7,8 @@ import (
 )
 
 // Regression: agent names with spaces (like "QA Eng") must be decodable
-// from URL paths. The Go mux decodes %20 automatically, but the frontend
-// must encode names before putting them in API paths.
+// from URL platform. The Go mux decodes %20 automatically, but the frontend
+// must encode names before putting them in API platform.
 
 func TestAgentNameWithSpaces_GetProfile(t *testing.T) {
 	_, mux := newFullTestServer(t)
