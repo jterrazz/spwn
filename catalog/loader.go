@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"path"
 	"sort"
-	"strings"
 
 	"spwn.sh/packages/dependency"
 	ib "spwn.sh/packages/image"
@@ -14,24 +13,23 @@ import (
 
 // catalogFS embeds every built-in catalog entry — both installable
 // dependencies (@spwn/unix, @spwn/git, …) and init-able project
-// templates (@spwn/matrix, @spwn/startup, …). Entries are classified
-// at load time by the presence of example.yaml; the verb the user
-// invokes (`spwn install` vs `spwn init`) picks which face of the
-// entry is used.
+// templates (@spwn/matrix, @spwn/startup, …). Every entry is
+// registered as a Tool so `spwn install @spwn/<slug>` works
+// uniformly; the `worlds:` section (when present) is consulted only
+// by the init path and ignored by the image builder.
 //
 // Adding a new entry? Drop the directory in AND update this embed
 // directive — Go's embed doesn't accept a bare wildcard because
 // the package's own Go sources would otherwise land in the FS.
 //
-//go:embed all:build all:docker_cli all:git all:macrohard all:matrix all:mempalace all:node all:paperclip-factory all:python all:qmd all:research-lab all:spwn_architect all:spwn_cli all:startup all:unix
+//go:embed all:architect all:build all:cli all:docker-cli all:git all:macrohard all:matrix all:mempalace all:node all:paperclip-factory all:python all:qmd all:research-lab all:startup all:unix
 var catalogFS embed.FS
 
 // loadYAMLTools walks every embedded entry that declares a spwn.yaml
-// and parses it into an image.Tool. Entries that ship an example.yaml
-// sidecar are project templates, not installable dependencies — they
-// are surfaced through List/Get/Install (for `spwn init <slug>`) and
-// deliberately excluded here so `spwn install @spwn/<slug>` only
-// accepts dep-shaped entries.
+// and parses it into an image.Tool. Every entry is registered — the
+// image builder never reads the opaque `worlds:` field, so entries
+// that double as project templates contribute an empty install spec
+// but coexist cleanly with pure dependencies.
 func loadYAMLTools() ([]ib.Tool, error) {
 	entries, err := fs.ReadDir(catalogFS, ".")
 	if err != nil {
@@ -44,27 +42,31 @@ func loadYAMLTools() ([]ib.Tool, error) {
 		}
 		manifestPath := path.Join(e.Name(), dependency.Manifest)
 		if _, err := fs.Stat(catalogFS, manifestPath); err != nil {
-			continue // directory without a spwn.yaml — not an entry
-		}
-		if _, err := fs.Stat(catalogFS, path.Join(e.Name(), "example.yaml")); err == nil {
-			continue // example/template entry, not an installable dep
+			continue
 		}
 		names = append(names, e.Name())
 	}
-	sort.Strings(names) // deterministic order
+	sort.Strings(names)
 
 	out := make([]ib.Tool, 0, len(names))
 	for _, name := range names {
+		canonical := "@spwn/" + name
 		parsed, err := dependency.Parse(
 			dependency.EmbedResolver{FS: catalogFS, Root: name},
 			dependency.ParseOptions{
-				DefaultName:    "@spwn/" + strings.ReplaceAll(name, "_", "-"),
+				DefaultName:    canonical,
 				DefaultVersion: "latest",
 			},
 		)
 		if err != nil {
 			return nil, fmt.Errorf("load %s: %w", name, err)
 		}
+		// Catalog entries are always keyed by their canonical
+		// @spwn/<slug> in the tool registry, regardless of what
+		// spwn.yaml declares for `name:`. The file's name field is
+		// free to be a user-facing project name (e.g. "matrix") that
+		// survives `spwn init` verbatim.
+		parsed.Schema.Name = canonical
 		out = append(out, ib.ToolFromParsed(parsed))
 	}
 	return out, nil
