@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"spwn.sh/packages/compile"
+	"spwn.sh/packages/world/deploy"
 )
 
 // TestMaterialiseWorldTree_SplitsByPrefix locks down the contract that
@@ -24,7 +25,7 @@ func TestMaterialiseWorldTree_SplitsByPrefix(t *testing.T) {
 	tree.AddString("agents/morpheus/CLAUDE.md", "morpheus entrypoint")
 
 	stateDir := t.TempDir()
-	err := materialiseWorldTree(context.Background(), mb, "ctr-1", tree, stateDir)
+	err := deploy.MaterialiseTree(context.Background(), mb, "ctr-1", tree, stateDir)
 	if err != nil {
 		t.Fatalf("materialiseWorldTree: %v", err)
 	}
@@ -78,7 +79,7 @@ func TestMaterialiseWorldTree_UnknownPrefixIsError(t *testing.T) {
 	tree := compile.New()
 	tree.AddString("stray/foo.md", "should be rejected")
 
-	err := materialiseWorldTree(context.Background(), mb, "ctr", tree, t.TempDir())
+	err := deploy.MaterialiseTree(context.Background(), mb, "ctr", tree, t.TempDir())
 	if err == nil {
 		t.Fatal("expected error for unknown prefix")
 	}
@@ -91,7 +92,7 @@ func TestSyncAgentsInto_SkipsMissingHostDirs(t *testing.T) {
 	t.Setenv("SPWN_HOME", t.TempDir())
 	mb := newMockBackend()
 
-	err := syncAgentsInto(context.Background(), mb, "ctr", map[string]string{
+	err := deploy.SyncIn(context.Background(), mb, "ctr", map[string]string{
 		"ghost": "/agents/ghost",
 	})
 	if err != nil {
@@ -115,7 +116,7 @@ func TestSyncAgentsInto_CopiesPresentHostDirs(t *testing.T) {
 	}
 
 	mb := newMockBackend()
-	err := syncAgentsInto(context.Background(), mb, "ctr-abc", map[string]string{
+	err := deploy.SyncIn(context.Background(), mb, "ctr-abc", map[string]string{
 		"neo": "/agents/neo",
 	})
 	if err != nil {
@@ -141,7 +142,7 @@ func TestSyncAgentsOutOf_CopiesAllowlistedDirs(t *testing.T) {
 	t.Setenv("SPWN_HOME", t.TempDir())
 	mb := newMockBackend()
 
-	warnings := syncAgentsOutOf(context.Background(), mb, "ctr-xyz", map[string]string{
+	warnings := deploy.SyncOut(context.Background(), mb, "ctr-xyz", map[string]string{
 		"neo": "/agents/neo",
 	})
 	if len(warnings) != 0 {
@@ -172,7 +173,7 @@ func TestSyncAgentsOutOf_PerDirFailuresBecomeWarnings(t *testing.T) {
 		"/agents/neo/knowledge": fmt.Errorf("container has no /agents/neo/knowledge"),
 	}
 
-	warnings := syncAgentsOutOf(context.Background(), mb, "ctr", map[string]string{
+	warnings := deploy.SyncOut(context.Background(), mb, "ctr", map[string]string{
 		"neo": "/agents/neo",
 	})
 

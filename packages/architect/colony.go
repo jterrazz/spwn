@@ -11,6 +11,7 @@ import (
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/runtimes/claude_code"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/world/deploy"
 	"spwn.sh/packages/world/models"
 )
 
@@ -72,7 +73,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	// process started in step 4 would find no identity/profile.md,
 	// no agent.yaml, nothing.
 	agentHome := "/agents/" + agentName
-	if err := syncAgentsInto(ctx, a.backend, u.ContainerID, map[string]string{agentName: agentHome}); err != nil {
+	if err := deploy.SyncIn(ctx, a.backend, u.ContainerID, map[string]string{agentName: agentHome}); err != nil {
 		return fmt.Errorf("sync agent into container: %w", err)
 	}
 
