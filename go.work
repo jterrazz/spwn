@@ -11,8 +11,9 @@ use (
 	./packages/compile
 	./packages/image
 	./packages/mailbox
+	./packages/migration
 	./packages/platform
-	./packages/upgrade
+	./packages/update
 	./packages/project
 	./packages/dependency
 	./packages/runtimes

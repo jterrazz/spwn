@@ -5,14 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"spwn.sh/packages/upgrade"
+	"spwn.sh/packages/migration"
 )
 
 // EnsureDefaultOrganization creates the default organization YAML in the
 // organizations/ directory if it doesn't exist. This covers the case where
 // migration 003 wrote to hierarchies/ and migration 012 renamed it, but
 // also handles fresh installs.
-var EnsureDefaultOrganization = upgrade.Migration{
+var EnsureDefaultOrganization = migration.Migration{
 	Number:      13,
 	Description: "ensure default organization file exists",
 	Apply: func(_ context.Context, baseDir string) error {

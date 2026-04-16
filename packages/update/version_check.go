@@ -1,4 +1,4 @@
-package upgrade
+package update
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"spwn.sh/packages/platform"
 )
 
-// Version is set at build time via -ldflags. Defaults to "dev" for local builds.
-var Version = "dev"
+// CLIVersion is set at build time via -ldflags. Defaults to "dev" for local builds.
+var CLIVersion = "dev"
 
 const (
 	versionCheckFile     = ".version-check"
@@ -35,19 +35,17 @@ func CheckLatestVersion(maxAge time.Duration) string {
 	cacheDir := platform.BaseDir()
 	cachePath := filepath.Join(cacheDir, versionCheckFile)
 
-	// Read cache
 	if data, err := os.ReadFile(cachePath); err == nil {
 		parts := strings.SplitN(strings.TrimSpace(string(data)), "\n", 2)
 		if len(parts) == 2 {
 			if ts, err := time.Parse(time.RFC3339, parts[0]); err == nil {
 				if time.Since(ts) < maxAge {
-					return parts[1] // cache is fresh
+					return parts[1]
 				}
 			}
 		}
 	}
 
-	// Fetch from GitHub with a short timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -57,7 +55,6 @@ func CheckLatestVersion(maxAge time.Duration) string {
 		return ""
 	}
 
-	// Parse tag_name from JSON response
 	str := string(output)
 	idx := strings.Index(str, `"tag_name"`)
 	if idx == -1 {
@@ -71,7 +68,6 @@ func CheckLatestVersion(maxAge time.Duration) string {
 	}
 	latest := rest[start : start+end]
 
-	// Write cache
 	os.MkdirAll(cacheDir, 0755)
 	cacheContent := time.Now().UTC().Format(time.RFC3339) + "\n" + latest
 	os.WriteFile(cachePath, []byte(cacheContent), 0644)
@@ -82,7 +78,7 @@ func CheckLatestVersion(maxAge time.Duration) string {
 // GetVersionInfo returns full version info including update availability.
 // maxAge controls cache staleness for the GitHub check.
 func GetVersionInfo(maxAge time.Duration) VersionInfo {
-	current := strings.TrimPrefix(Version, "v")
+	current := strings.TrimPrefix(CLIVersion, "v")
 
 	info := VersionInfo{
 		Current: current,

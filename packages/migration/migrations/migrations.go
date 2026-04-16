@@ -1,7 +1,7 @@
 // Package migrations contains type aliases and the migration catalogue.
 package migrations
 
-import "spwn.sh/packages/upgrade"
+import "spwn.sh/packages/migration"
 
 // Migration is an alias for convenience.
-type Migration = upgrade.Migration
+type Migration = migration.Migration
