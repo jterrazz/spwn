@@ -10,7 +10,7 @@ import (
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/internal/runtime"
+	"spwn.sh/packages/world/runtime"
 )
 
 // SpawnAgent execs Claude Code interactively inside a world.

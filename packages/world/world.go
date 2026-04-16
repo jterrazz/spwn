@@ -19,7 +19,7 @@ import (
 	"spwn.sh/packages/world/internal/labels"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/internal/runtime"
+	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/state"
 
 	containerTypes "github.com/docker/docker/api/types/container"

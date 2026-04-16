@@ -7,8 +7,8 @@ import (
 
 	"spwn.sh/packages/world/internal/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/compile/runtimes/claudecode"
-	"spwn.sh/packages/world/internal/runtime"
+	"spwn.sh/catalog/runtimes/claude_code/compile"
+	"spwn.sh/packages/world/runtime"
 )
 
 // SpawnNPC runs an NPC - an ephemeral agent with a single task, no Mind, no persistence.

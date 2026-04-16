@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	rt "spwn.sh/packages/world/internal/runtime"
+	rt "spwn.sh/packages/world/runtime"
 )
 
 // Claude implements the Runtime interface for Claude Code CLI.

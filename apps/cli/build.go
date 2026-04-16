@@ -13,7 +13,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/compile"
-	_ "spwn.sh/packages/compile/runtimes/claudecode" // register the claude-code runtime
+	_ "spwn.sh/catalog/runtimes/claude_code/compile" // register the claude-code runtime
 	"spwn.sh/packages/compile/source"
 	"spwn.sh/packages/image"
 	"spwn.sh/packages/project"

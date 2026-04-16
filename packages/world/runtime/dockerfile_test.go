@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/world/internal/runtime"
+	"spwn.sh/packages/world/runtime"
 
-	_ "spwn.sh/packages/world/internal/runtime/claude"
+	_ "spwn.sh/catalog/runtimes/claude_code/adapter"
 )
 
 func TestGenerateDockerfileClaudeCode(t *testing.T) {

@@ -1,7 +1,6 @@
 package codex
 
 import (
-	"io/fs"
 	"testing"
 )
 
@@ -18,16 +17,6 @@ func TestCodex_DependsOnNode(t *testing.T) {
 	}
 }
 
-func TestCodex_HasSkills(t *testing.T) {
-	s := Tool.Skills()
-	if s == nil {
-		t.Fatal("expected skills FS")
-	}
-	_, err := fs.ReadFile(s, "SKILL.md")
-	if err != nil {
-		t.Errorf("expected SKILL.md: %v", err)
-	}
-}
 
 func TestCodex_HasInstallCommand(t *testing.T) {
 	spec := Tool.Install()

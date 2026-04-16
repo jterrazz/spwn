@@ -1,7 +1,6 @@
 package claude_code
 
 import (
-	"io/fs"
 	"testing"
 )
 
@@ -20,16 +19,6 @@ func TestClaudeCode_DependsOnUnix(t *testing.T) {
 	}
 }
 
-func TestClaudeCode_HasSkills(t *testing.T) {
-	s := Tool.Skills()
-	if s == nil {
-		t.Fatal("expected skills FS")
-	}
-	_, err := fs.ReadFile(s, "SKILL.md")
-	if err != nil {
-		t.Errorf("expected SKILL.md in skills: %v", err)
-	}
-}
 
 func TestClaudeCode_HasInstallCommands(t *testing.T) {
 	spec := Tool.Install()

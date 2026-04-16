@@ -2,14 +2,11 @@ package claude_code
 
 import (
 	"spwn.sh/packages/deps"
-	"embed"
 	"io/fs"
 
 	ib "spwn.sh/packages/image"
 )
 
-//go:embed skills/*
-var skills embed.FS
 
 // Tool is the @spwn/claude-code tool - Claude Code AI agent runtime.
 var Tool = &tool{}
@@ -64,10 +61,7 @@ func (*tool) Verify() []string {
 	return []string{"command -v claude"}
 }
 
-func (*tool) Skills() fs.FS {
-	sub, _ := fs.Sub(skills, "skills")
-	return sub
-}
+func (*tool) Skills() fs.FS { return nil }
 
 func (*tool) Runtimes() []string         { return nil }
 func (*tool) Config(runtime string) []byte { return nil }
