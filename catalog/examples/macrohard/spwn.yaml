@@ -2,15 +2,15 @@ version: 2
 name: macrohard
 
 deps:
+  - "@spwn/unix"
   - "@spwn/git"
   - "@spwn/node"
-  - "@spwn/unix"
 
 worlds:
   macrohard:
     agents:
-      - ballmer
-      - gates
       - nadella
+      - gates
+      - ballmer
     workspaces:
       - .

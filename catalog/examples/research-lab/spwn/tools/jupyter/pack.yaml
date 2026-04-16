@@ -1,0 +1,9 @@
+name: jupyter
+description: Interactive notebook environment for data exploration, visualization, and reproducible analysis.
+
+install:
+  commands:
+    - pip install jupyter
+
+verify:
+  command: jupyter --version

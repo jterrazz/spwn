@@ -1,10 +1,8 @@
 name: ballmer
-role: chief
+role: worker
 
 runtime:
   backend: "@spwn/claude-code"
 
-deps:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"
+skills:
+  - sales-pitch

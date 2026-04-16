@@ -4,7 +4,14 @@ role: chief
 runtime:
   backend: "@spwn/claude-code"
 
-deps:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"
+# No agent-specific deps — the CEO only needs the project-wide
+# tools (unix, git, node) inherited from spwn.yaml.
+
+# Local skills live in spwn/skills/<name>.md at the project root.
+# They are injected into the agent's context at boot time.
+skills:
+  - sprint-planning
+
+# Local hooks live in spwn/hooks/<name>.sh at the project root.
+hooks:
+  - pre-spawn
