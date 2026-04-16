@@ -22,10 +22,9 @@ import (
 	"spwn.sh/packages/world/internal/runtime"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/base"
+	"spwn.sh/packages/paths"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
-	"spwn.sh/packages/paths"
 	"spwn.sh/packages/ids"
 )
 
@@ -42,7 +41,7 @@ type SpawnOpts struct {
 	AgentName     string
 	Workspaces    []models.Workspace
 	Manifest      models.Manifest
-	Image         string                     // Override base image (used for testing). Defaults to base.WorldImage.
+	Image         string                     // Override base image (used for testing). Defaults to paths.WorldImage.
 	OnProgress    func(event, detail string) // Optional callback at each milestone.
 	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
@@ -164,7 +163,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// exact image, don't rebuild" - they're how tests inject a mock
 	// runtime. Only when neither is set do we auto-build from the base
 	// Dockerfile + tool catalog.
-	image := base.WorldImage
+	image := paths.WorldImage
 	explicitImage := false
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
@@ -331,7 +330,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Name:       opts.Name,
 		Config:     opts.ConfigName,
 		Agent:      opts.AgentName,
-		Backend:    base.DefaultBackend,
+		Backend:    paths.DefaultBackend,
 		Workspaces: resolvedWorkspaces,
 		CreatedAt:  time.Now(),
 		Manifest:   opts.Manifest,
