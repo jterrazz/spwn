@@ -20,7 +20,7 @@ type ToolInput struct {
 
 // GenerateOpts configures Dockerfile generation.
 type GenerateOpts struct {
-	// SkipFooter disables the standard USER/WORKDIR/VOLUME/ENTRYPOINT footer.
+	// SkipFooter disables the standard USER/WORKDIR/ENTRYPOINT footer.
 	// Use this for non-standard images (e.g., architect) that define their own.
 	SkipFooter bool
 
@@ -174,7 +174,11 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 			sb.WriteString(fmt.Sprintf("RUN %s\n", cmd))
 		}
 
-		sb.WriteString("VOLUME [\"/workspaces\", \"/world\"]\n")
+		// No VOLUME declaration. /world and /workspaces/<name> are
+		// bind-mounted by the spawner at container creation time;
+		// pre-declaring them as image volumes makes Docker auto-create
+		// anonymous volumes per container that `docker rm` never
+		// cleans up (leading to 10k+ leaked volumes on heavy e2e runs).
 		sb.WriteString("ENTRYPOINT [\"sleep\", \"infinity\"]\n")
 	}
 

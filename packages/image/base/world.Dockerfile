@@ -12,5 +12,5 @@ RUN useradd -m -s /bin/bash spwn \
 RUN mkdir -p /workspace /mind /universe /world /home/spwn/.spwn \
     && chown -R spwn:spwn /workspace /mind /universe /world /home/spwn /home/spwn/.spwn
 
-# NOTE: USER, WORKDIR, VOLUME, ENTRYPOINT are added by the generator
+# NOTE: USER, WORKDIR, ENTRYPOINT are added by the generator
 # after all tool installs complete (tools need root access).
