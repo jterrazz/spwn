@@ -21,10 +21,10 @@ description: |
     - A one-command fork example once you're ready
 
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/python"
-  - "@spwn/qmd"
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"
+  - "spwn:qmd"
 
 worlds:
   research-lab:

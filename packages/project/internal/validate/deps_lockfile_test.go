@@ -119,22 +119,26 @@ dependencies:
 	}
 	issues := ruleLockfileConsistent(in)
 	var sawGit, sawMempalace, sawUnix bool
+	// Messages now render in the canonical `spwn:<name>` form.
+	// Drift on @spwn/git → "spwn:git"; @spwn/unix is in the
+	// lockfile (as @spwn/unix), so no message should mention it
+	// in either form.
 	for _, iss := range issues {
-		if strings.Contains(iss.Message, "@spwn/git") {
+		if strings.Contains(iss.Message, "spwn:git") {
 			sawGit = true
 		}
-		if strings.Contains(iss.Message, "@spwn/mempalace") {
+		if strings.Contains(iss.Message, "spwn:mempalace") {
 			sawMempalace = true
 		}
-		if strings.Contains(iss.Message, "@spwn/unix") {
+		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "@spwn/unix") {
 			sawUnix = true
 		}
 	}
 	if !sawGit {
-		t.Error("drift on @spwn/git not flagged")
+		t.Error("drift on spwn:git not flagged")
 	}
 	if !sawMempalace {
-		t.Error("drift on @spwn/mempalace not flagged")
+		t.Error("drift on spwn:mempalace not flagged")
 	}
 	if sawUnix {
 		t.Error("@spwn/unix is in the lockfile, should not be flagged")

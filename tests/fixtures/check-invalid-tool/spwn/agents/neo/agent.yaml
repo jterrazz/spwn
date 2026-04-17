@@ -6,6 +6,7 @@
 # resulting container.
 
 name: neo
+description: Fixture agent for the check-invalid-tool e2e — references a nonexistent built-in on purpose.
 
 runtime:
   backend: "@spwn/claude-code"

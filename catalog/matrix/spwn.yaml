@@ -11,8 +11,8 @@ description: |
   and I can see what it's doing".
 
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 
 worlds:
   matrix:

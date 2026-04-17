@@ -205,16 +205,17 @@ func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 	}
 	issues := ruleLockfileConsistent(in)
 	var sawGit bool
+	// Messages render in canonical scheme form.
 	for _, iss := range issues {
-		if strings.Contains(iss.Message, "@spwn/git") {
+		if strings.Contains(iss.Message, "spwn:git") {
 			sawGit = true
 		}
-		if strings.Contains(iss.Message, "@spwn/unix") {
+		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "@spwn/unix") {
 			t.Error("@spwn/unix is in lockfile, should not be flagged")
 		}
 	}
 	if !sawGit {
-		t.Error("@spwn/git missing from lockfile should be flagged")
+		t.Error("spwn:git missing from lockfile should be flagged")
 	}
 }
 

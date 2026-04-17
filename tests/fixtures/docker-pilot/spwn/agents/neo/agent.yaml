@@ -1,4 +1,5 @@
 name: neo
+description: Fixture agent for the docker-pilot e2e — minimal unix+git agent used by the Docker pilot harness.
 
 runtime:
   backend: "@spwn/claude-code"

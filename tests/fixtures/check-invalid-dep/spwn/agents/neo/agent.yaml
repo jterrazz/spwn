@@ -1,4 +1,5 @@
 name: neo
+description: Fixture agent for the check-invalid-dep e2e — declares a bogus dep on purpose.
 
 runtime:
   backend: "@spwn/claude-code"

@@ -64,7 +64,7 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 			ref, ref, ref)
 	case dependency.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
-			"Use @spwn/<name> for built-in dependencies, or author a local one under ./spwn/tools/",
+			"Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/",
 			raw, parsed.Owner, parsed.Name)
 	}
 

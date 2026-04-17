@@ -1,8 +1,9 @@
 name: ballmer
+description: The hype-maker — writes demos, pitches, and customer-facing copy that sells the work the rest of the colony ships.
 role: worker
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 skills:
   - sales-pitch

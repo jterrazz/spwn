@@ -38,7 +38,8 @@ describe('spwn check — lockfile drift', () => {
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        expect(result.stdout.text + result.stderr.text).toContain('@spwn/git');
+        // Canonical scheme form in user-facing output.
+        expect(result.stdout.text + result.stderr.text).toContain('spwn:git');
         expect(result.stdout.text + result.stderr.text).toMatch(/lock/i);
     });
 });

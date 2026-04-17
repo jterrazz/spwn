@@ -1,8 +1,9 @@
 name: nadella
+description: The CEO — sets product strategy, picks what the colony builds next, and arbitrates trade-offs between gates and ballmer.
 role: chief
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 skills:
   - product-strategy

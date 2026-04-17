@@ -1,8 +1,9 @@
 name: curie
+description: A careful scientist — keeps a real lab notebook (hypotheses, methods, observations) and runs reproducible experiments.
 role: worker
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 skills:
   - literature-review

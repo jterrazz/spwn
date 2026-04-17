@@ -1,4 +1,5 @@
 name: neo
+description: Fixture agent for the check-valid-dep e2e — a healthy project with one catalog dependency.
 
 runtime:
   backend: "@spwn/claude-code"

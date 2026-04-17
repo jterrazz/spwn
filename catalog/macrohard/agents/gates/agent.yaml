@@ -1,11 +1,12 @@
 name: gates
+description: The engineer — reviews code, designs systems, and ships the implementation behind each product decision.
 role: worker
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 dependencies:
-  - "@spwn/python"
+  - "spwn:python"
 
 skills:
   - code-review

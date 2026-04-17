@@ -6,6 +6,7 @@
 # resulting container.
 
 name: neo
+description: Fixture agent for the single-agent e2e — the canonical healthy project baseline.
 
 runtime:
   backend: "@spwn/claude-code"

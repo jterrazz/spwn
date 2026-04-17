@@ -77,11 +77,12 @@ type AgentSource struct {
 // about are kept — the full agent package has a richer type that the
 // host-side runtime uses for things like auth and mounts.
 type AgentConfig struct {
-	Name     string        `yaml:"name,omitempty"`
-	Role     string        `yaml:"role,omitempty"`
-	Team     string        `yaml:"team,omitempty"`
-	Runtime  RuntimeConfig `yaml:"runtime,omitempty"`
-	Deps []string `yaml:"dependencies,omitempty"`
+	Name        string        `yaml:"name,omitempty"`
+	Description string        `yaml:"description,omitempty"`
+	Role        string        `yaml:"role,omitempty"`
+	Team        string        `yaml:"team,omitempty"`
+	Runtime     RuntimeConfig `yaml:"runtime,omitempty"`
+	Deps        []string      `yaml:"dependencies,omitempty"`
 }
 
 // RuntimeConfig is the per-agent runtime override section of agent.yaml.

@@ -1,14 +1,15 @@
 name: devops
+description: The devops — owns deployments, container hygiene, and the pre-spawn hook that gates each world before it boots.
 role: worker
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 # Agent-specific deps — additions only.
 # Project-wide deps (unix, git, node) are inherited from spwn.yaml.
 # Only list what THIS agent needs beyond the shared set.
 dependencies:
-  - "@spwn/docker-cli"
+  - "spwn:docker-cli"
 
 # Local skills live in spwn/skills/<name>.md at the project root.
 # They are injected into the agent's context at boot time.

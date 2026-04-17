@@ -13,9 +13,9 @@ description: |
     - Ready to chat the moment it's installed
 
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:node"
 
 worlds:
   paperclip-factory:

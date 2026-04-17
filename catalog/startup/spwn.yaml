@@ -11,9 +11,9 @@ description: |
 # Every agent in this project inherits these automatically.
 # Agents should NOT repeat them in their own agent.yaml.
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:node"
 
 # Worlds define the runtime environments where agents operate.
 # Each world lists which agents are placed inside it and which
