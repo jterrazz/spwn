@@ -181,14 +181,6 @@ Dependency resolution works like npm:
 
 Add a catalog dependency to every agent with `spwn install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
 
-**Agents evolve through three mechanisms:**
-
-- **Dream** (`spwn agent dream neo`) - analyze experience, promote successful patterns to playbooks. Failed ones are discarded. Natural selection for behavior.
-- **Sleep** (`spwn agent sleep neo`) - graceful shutdown. Raw experience consolidates into durable knowledge. Stale strategies get pruned.
-- **Fork** (`spwn agent fork neo neo-v2`) - clone an agent with everything it knows. Run copies in different environments, keep the branch that performs best.
-
-> *"Every task leaves a trace. Every trace becomes knowledge. Every knowledge shapes the next decision."*
-
 <br/>
 
 ### Compile to any runtime
