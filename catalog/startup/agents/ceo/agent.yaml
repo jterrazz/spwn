@@ -1,8 +1,9 @@
 name: ceo
+description: The CEO — sets direction for the colony, approves what the analyst plans, and unblocks devops when shipping stalls.
 role: chief
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 # No agent-specific deps — the CEO only needs the project-wide
 # tools (unix, git, node) inherited from spwn.yaml.

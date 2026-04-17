@@ -19,11 +19,19 @@ import (
 // a `runtime-config:` block makes it a runtime-config injector, a
 // content-only body makes it a skill).
 type Manifest struct {
-	Name    string        `yaml:"name,omitempty"`
-	Role    string        `yaml:"role,omitempty"`
-	Team    string        `yaml:"team,omitempty"`
-	Runtime RuntimeConfig `yaml:"runtime,omitempty"`
-	Deps    []string      `yaml:"dependencies,omitempty"`
+	Name string `yaml:"name,omitempty"`
+
+	// Description is a mandatory one-line pitch of what this agent is
+	// for — the equivalent of the `description:` field in the skill
+	// frontmatter convention. The `spwn check` rule flags an empty
+	// description as LevelError so every agent in a project has a
+	// human-readable purpose line that the inspector, web UI, and
+	// external tooling can render without opening AGENTS.md.
+	Description string        `yaml:"description,omitempty"`
+	Role        string        `yaml:"role,omitempty"`
+	Team        string        `yaml:"team,omitempty"`
+	Runtime     RuntimeConfig `yaml:"runtime,omitempty"`
+	Deps        []string      `yaml:"dependencies,omitempty"`
 }
 
 // RuntimeConfig allows per-agent runtime override.

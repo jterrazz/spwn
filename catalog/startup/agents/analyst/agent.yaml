@@ -1,14 +1,15 @@
 name: analyst
+description: The analyst — turns product decisions into sprint plans and reviews the colony's code before it ships.
 role: worker
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 # Agent-specific deps — additions only.
 # Project-wide deps (unix, git, node) are inherited from spwn.yaml.
 # Only list what THIS agent needs beyond the shared set.
 dependencies:
-  - "@spwn/python"
+  - "spwn:python"
 
 # Local skills live in spwn/skills/<name>.md at the project root.
 # They are injected into the agent's context at boot time.

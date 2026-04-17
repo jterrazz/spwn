@@ -288,11 +288,14 @@ func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 		if raw == "" {
 			continue
 		}
-		// Map catalog refs like "@spwn/codex" -> "codex" before
-		// looking them up. ResolveRuntime uses the same mapping.
+		// Map catalog refs to their bare runtime id: both "spwn:codex"
+		// and "@spwn/codex" need to strip down to "codex" for
+		// compile.Register lookup (ResolveRuntime uses the same map).
 		canonical := raw
 		if strings.HasPrefix(raw, "@spwn/") {
 			canonical = strings.TrimPrefix(raw, "@spwn/")
+		} else if strings.HasPrefix(raw, "spwn:") {
+			canonical = strings.TrimPrefix(raw, "spwn:")
 		}
 		if _, ok := registered[canonical]; ok {
 			continue

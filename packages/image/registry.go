@@ -2,6 +2,8 @@ package image
 
 import (
 	"fmt"
+
+	"spwn.sh/packages/dependency"
 )
 
 // Registry holds all registered tools and resolves dependency graphs.
@@ -24,9 +26,14 @@ func (r *Registry) Register(t Tool) error {
 	return nil
 }
 
-// Get returns a tool by name, or nil if not found.
+// Get returns a tool by name, or nil if not found. Accepts either
+// ref syntax — `spwn:unix` and `@spwn/unix` resolve to the same
+// registered tool.
 func (r *Registry) Get(name string) Tool {
-	return r.tools[name]
+	if t, ok := r.tools[name]; ok {
+		return t
+	}
+	return r.tools[dependency.RegistryKey(name)]
 }
 
 // List returns all registered tools.
@@ -40,7 +47,23 @@ func (r *Registry) List() []Tool {
 
 // Resolve takes a list of requested tool names, expands transitive dependencies,
 // deduplicates, and returns a topologically sorted build order.
+//
+// Each input ref is canonicalised through dependency.RegistryKey so
+// callers can mix and match `spwn:unix` and `@spwn/unix` freely —
+// the registered tool is found either way.
 func (r *Registry) Resolve(requested []string) ([]Tool, error) {
+	// Canonicalise every input ref up-front so the rest of the
+	// algorithm deals in one consistent key space.
+	canon := make([]string, len(requested))
+	for i, name := range requested {
+		if _, ok := r.tools[name]; ok {
+			canon[i] = name
+		} else {
+			canon[i] = dependency.RegistryKey(name)
+		}
+	}
+	requested = canon
+
 	// Validate all requested tools exist
 	for _, name := range requested {
 		if r.tools[name] == nil {

@@ -13,9 +13,9 @@ description: |
     - A ready-made roster so the agents know who each other are
 
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/node"
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:node"
 
 worlds:
   macrohard:

@@ -6,6 +6,7 @@
 # resulting container.
 
 name: neo
+description: Fixture agent for the check-registry-tool e2e — declares a remote-registry ref (@jterrazz/foo) on purpose.
 
 runtime:
   backend: "@spwn/claude-code"

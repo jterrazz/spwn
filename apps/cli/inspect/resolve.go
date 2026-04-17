@@ -378,12 +378,15 @@ func collectHooks(src *source.ProjectSource, a source.AgentSource) []HookRef {
 	return out
 }
 
-// shortRuntime trims the @spwn/ prefix so "claude-code" shows
-// instead of "@spwn/claude-code" in the header. Falls back to the
-// raw value when there's no prefix to strip.
+// shortRuntime strips the spwn scope so "claude-code" shows instead
+// of "spwn:claude-code" or "@spwn/claude-code" in the header. Falls
+// back to the raw value when the ref has no recognised prefix.
 func shortRuntime(backend string) string {
 	if strings.HasPrefix(backend, "@spwn/") {
 		return backend[len("@spwn/"):]
+	}
+	if strings.HasPrefix(backend, "spwn:") {
+		return backend[len("spwn:"):]
 	}
 	return backend
 }

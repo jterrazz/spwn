@@ -20,6 +20,7 @@ const defaultAgentYAMLTmpl = `# Agent composition — the source of truth for th
 # resulting container.
 
 name: __NAME__
+description: A blank-slate agent — replace this one-liner with what __NAME__ is for.
 
 runtime:
   backend: "@spwn/claude-code"

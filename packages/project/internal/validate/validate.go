@@ -102,6 +102,7 @@ func Run(in Input) []Issue {
 		ruleAgentDirsExist,
 		ruleAgentStructure,
 		ruleAgentYAMLParses,
+		ruleAgentDescription,
 		ruleReservedAgentNames,
 		ruleOneAgentOneWorld,
 		ruleWorkspaceMounts,
@@ -354,9 +355,10 @@ func ruleAgentStructure(in Input) []Issue {
 // Deps replaces the old Tools/Dependencies/Skills trichotomy under the
 // unified package model — see packages/agent/manifest.go.
 type agentYAML struct {
-	Name     string   `yaml:"name"`
-	Deps []string `yaml:"dependencies"`
-	Runtime  struct {
+	Name        string   `yaml:"name"`
+	Description string   `yaml:"description"`
+	Deps        []string `yaml:"dependencies"`
+	Runtime     struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
 }
@@ -403,6 +405,36 @@ func ruleAgentYAMLParses(in Input) []Issue {
 			out = append(out, Issue{
 				Level: LevelWarning, Path: relPath(in.Root, yamlPath) + "#name",
 				Message: fmt.Sprintf("agent.yaml name %q does not match directory name %q", parsed.Name, a.Name),
+			})
+		}
+	}
+	return out
+}
+
+// ruleAgentDescription enforces that every agent.yaml sets a
+// non-empty `description:`. The description is a one-line pitch of
+// the agent's purpose — what inspect, status, and the web UI render
+// without opening AGENTS.md. Mirrors the skill frontmatter
+// convention (name + description) applied at the agent level.
+//
+// Unparseable agent.yaml files are already flagged by
+// ruleAgentYAMLParses; here we just skip them to avoid double-reporting.
+func ruleAgentDescription(in Input) []Issue {
+	var out []Issue
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		parsed, err := loadAgentYAML(a.Path)
+		if err != nil {
+			continue
+		}
+		if strings.TrimSpace(parsed.Description) == "" {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#description",
+				Message: fmt.Sprintf("agent %q is missing a description", a.Name),
+				Hint:    "add a one-line `description:` explaining what this agent is for",
 			})
 		}
 	}
@@ -638,8 +670,8 @@ func rulePacksExist(in Input) []Issue {
 				return []Issue{{
 					Level: LevelError, Path: location,
 					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
-					Hint: "use @spwn/<name> for built-in dependencies or drop a directory under ./spwn/tools/<name>/ for a local tool; " +
-						"remote registries (@<owner>/<name>) are planned but not implemented yet",
+					Hint: "use spwn:<name> for built-in dependencies or drop a directory under ./spwn/tools/<name>/ for a local tool; " +
+						"remote registries (github:<owner>/<repo>) are planned but not implemented yet",
 				}}
 			default: // ResolveNotFound
 				return []Issue{{
@@ -756,27 +788,38 @@ func ruleLockfileConsistent(in Input) []Issue {
 			continue
 		}
 		seen[depRef] = true
-		if lock.Has(depRef) {
+		// Accept lockfile entries in either ref syntax: the user's
+		// ref might be `spwn:unix` while the lockfile still stores
+		// the legacy `@spwn/unix`, or vice-versa after migration.
+		if lock.Has(depRef) || lock.Has(dependency.RegistryKey(depRef)) || lock.Has(dependency.Canonical(depRef)) {
 			continue
 		}
 		out = append(out, Issue{
 			Level: LevelError, Path: rec.location,
-			Message: fmt.Sprintf("%q is not recorded in %s", depRef, dependency.LockFileName),
-			Hint:    "run `spwn install " + depRef + "` to sync the lockfile",
+			Message: fmt.Sprintf("%q is not recorded in %s", dependency.Canonical(depRef), dependency.LockFileName),
+			Hint:    "run `spwn install " + dependency.Canonical(depRef) + "` to sync the lockfile",
 		})
 	}
 	return out
 }
 
 // ruleRuntimeSupported checks each agent's runtime backend against
-// the host's SupportedRuntimes list.
+// the host's SupportedRuntimes list. Accepts either ref syntax —
+// `spwn:claude-code` and `@spwn/claude-code` both resolve to the
+// same entry in the supported-runtime set.
 func ruleRuntimeSupported(in Input) []Issue {
 	if len(in.SupportedRuntimes) == 0 {
 		return nil
 	}
 	supported := map[string]struct{}{}
 	for _, r := range in.SupportedRuntimes {
-		supported[r] = struct{}{}
+		supported[dependency.RegistryKey(r)] = struct{}{}
+	}
+	// Display list stays in the canonical scheme form so the hint
+	// matches what scaffold/docs advertise.
+	display := make([]string, len(in.SupportedRuntimes))
+	for i, r := range in.SupportedRuntimes {
+		display[i] = dependency.Canonical(r)
 	}
 	var out []Issue
 	for _, a := range in.AgentRefs {
@@ -787,12 +830,12 @@ func ruleRuntimeSupported(in Input) []Issue {
 		if err != nil || parsed.Runtime.Backend == "" {
 			continue
 		}
-		if _, ok := supported[parsed.Runtime.Backend]; !ok {
+		if _, ok := supported[dependency.RegistryKey(parsed.Runtime.Backend)]; !ok {
 			out = append(out, Issue{
 				Level: LevelError,
 				Path:  relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#runtime.backend",
 				Message: fmt.Sprintf("runtime backend %q is not supported", parsed.Runtime.Backend),
-				Hint:    "supported: " + strings.Join(in.SupportedRuntimes, ", "),
+				Hint:    "supported: " + strings.Join(display, ", "),
 			})
 		}
 	}
@@ -993,18 +1036,27 @@ func suggestPackage(tool string, catalog []string) string {
 	if len(catalog) == 0 {
 		return "check the dependency name, or add it as a local tool under ./spwn/tools/"
 	}
+	// Display every catalog entry in the canonical scheme form
+	// (`spwn:unix`, not `@spwn/unix`) so the hint matches what
+	// scaffold output and docs now advertise. Legacy input like
+	// `@spwn/nonexistent` still matches — the check side uses
+	// dependency.ParseRef, not string equality.
+	display := make([]string, len(catalog))
+	for i, c := range catalog {
+		display[i] = dependency.Canonical(c)
+	}
 	best := ""
 	bestScore := len(tool) + 1
-	for _, c := range catalog {
+	for i, c := range catalog {
 		if d := editDistance(tool, c); d < bestScore && d <= 3 {
-			best = c
+			best = display[i]
 			bestScore = d
 		}
 	}
 	if best != "" {
 		return "did you mean " + best + "?"
 	}
-	return "available built-ins: " + strings.Join(catalog, ", ")
+	return "available built-ins: " + strings.Join(display, ", ")
 }
 
 func editDistance(a, b string) int {

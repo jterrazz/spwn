@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	ib "spwn.sh/packages/image"
 	"spwn.sh/packages/dependency"
@@ -81,23 +80,36 @@ func hydrateLocalPacks(reg *ib.Registry, projectRoot string, refs []string) ([]s
 	out := make([]string, 0, len(refs))
 	loaded := map[string]bool{}
 	for _, raw := range refs {
-		if strings.HasPrefix(raw, "@") {
+		// ParseRef classifies every syntax: @spwn/x, spwn:x,
+		// github:a/b, @a/b → non-local; bare name → local.
+		// Anything non-local passes through for the registry to
+		// resolve via its catalog entry.
+		ref := dependency.ParseRef(raw)
+		if ref.Kind != dependency.KindLocal {
 			out = append(out, raw)
 			continue
 		}
-		if loaded[raw] {
-			out = append(out, "local:"+raw)
+		name := ref.Name
+		if name == "" {
+			// Malformed local ref — let Resolve surface a clear
+			// "unknown tool" error rather than crashing on an empty
+			// filesystem lookup.
+			out = append(out, raw)
 			continue
 		}
-		tool, err := loadLocalPack(projectRoot, raw)
+		if loaded[name] {
+			out = append(out, "local:"+name)
+			continue
+		}
+		tool, err := loadLocalPack(projectRoot, name)
 		if err != nil {
 			return nil, err
 		}
 		if err := reg.Register(tool); err != nil {
-			return nil, fmt.Errorf("register local dependency %q: %w", raw, err)
+			return nil, fmt.Errorf("register local dependency %q: %w", name, err)
 		}
-		loaded[raw] = true
-		out = append(out, "local:"+raw)
+		loaded[name] = true
+		out = append(out, "local:"+name)
 	}
 	return out, nil
 }

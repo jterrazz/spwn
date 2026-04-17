@@ -1,4 +1,5 @@
 name: ghost
+description: Seed fixture used by the agent-list e2e to exercise the orphan-agent path.
 
 runtime:
     backend: '@spwn/claude-code'
