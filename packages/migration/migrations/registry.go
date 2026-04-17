@@ -17,5 +17,6 @@ func All() []migration.Migration {
 	r.Register(RenameHierarchiesToOrganizations) // 012
 	r.Register(EnsureDefaultOrganization)        // 013
 	r.Register(RetireAgentKnowledge)             // 014
+	r.Register(EnsureUserConfig)                 // 015
 	return r.All()
 }
