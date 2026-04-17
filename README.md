@@ -150,9 +150,12 @@ spwn/agents/neo/
 ├── agent.yaml                # composition: dependencies + runtime
 ├── AGENTS.md                 # entry point (provider-neutral; compiled per runtime)
 ├── identity/                 # who the agent is - profile.md, purpose.md, traits.md
-├── knowledge/                # facts about the codebase
+├── skills/                   # authored procedures (file per skill)
 ├── playbooks/                # workflows promoted from experience
 └── journal/                  # session history - one file per run
+
+spwn/worlds/neo/
+└── knowledge/                # facts about the codebase (shared with every agent in this world)
 ```
 
 **Everything is a dependency.** Tools, runtime-config injectors, and skills all unified under one concept. A dependency can install apt packages, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:

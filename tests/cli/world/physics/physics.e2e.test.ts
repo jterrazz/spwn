@@ -52,7 +52,7 @@ describe('world physics', () => {
 
     test('faculties.md lists available tools', () => {
         const faculties = world.container('neo').file('/world/faculties.md').content;
-        expect(faculties).toMatch(/@spwn\/unix/);
+        expect(faculties).toMatch(/spwn:unix/);
     });
 
     test('default network mode is bridge', () => {

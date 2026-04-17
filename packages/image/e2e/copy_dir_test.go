@@ -29,7 +29,7 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 	// ── Arrange: a nested host tree resembling a real agent home ──
 	host := t.TempDir()
 	mustWrite(t, filepath.Join(host, "identity", "profile.md"), "I am neo.")
-	mustWrite(t, filepath.Join(host, "knowledge", "world.md"), "The matrix has you.")
+	mustWrite(t, filepath.Join(host, "skills", "core-concepts.md"), "The matrix has you.")
 	mustWrite(t, filepath.Join(host, "playbooks", "greet.md"), "Hello, world.")
 
 	// ── Act: copy the tree into the container at /agents/neo ──
@@ -40,7 +40,7 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 	// ── Assert: every file is visible inside the container ──
 	for relPath, want := range map[string]string{
 		"/agents/neo/identity/profile.md": "I am neo.",
-		"/agents/neo/knowledge/world.md":  "The matrix has you.",
+		"/agents/neo/skills/core-concepts.md":  "The matrix has you.",
 		"/agents/neo/playbooks/greet.md":  "Hello, world.",
 	} {
 		if !s.FileExists(relPath) {
@@ -63,12 +63,12 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 	if out, code := s.Exec("sudo chown -R spwn:spwn /agents"); code != 0 {
 		t.Fatalf("chown /agents failed: %s", out)
 	}
-	if out, code := s.Exec("echo 'Memory persists.' > /agents/neo/knowledge/learned.md"); code != 0 {
+	if out, code := s.Exec("echo 'Memory persists.' > /agents/neo/skills/learned.md"); code != 0 {
 		t.Fatalf("container write failed: %s", out)
 	}
 
 	hostOut := t.TempDir()
-	if err := be.CopyDirFrom(ctx, s.ContainerID, "/agents/neo/knowledge", hostOut); err != nil {
+	if err := be.CopyDirFrom(ctx, s.ContainerID, "/agents/neo/skills", hostOut); err != nil {
 		t.Fatalf("CopyDirFrom: %v", err)
 	}
 
@@ -76,7 +76,7 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 	//        back to the host. The tar reader strips the source
 	//        basename so files land directly under hostOut. ──
 	for rel, want := range map[string]string{
-		"world.md":   "The matrix has you.",
+		"core-concepts.md":   "The matrix has you.",
 		"learned.md": "Memory persists.",
 	} {
 		b, err := os.ReadFile(filepath.Join(hostOut, rel))

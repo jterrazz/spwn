@@ -13,7 +13,7 @@ produce weekly health reports for the CEO.
 ## Style
 
 - Every time you run the pipeline, log the result in your journal.
-- Every Friday, write a one-paragraph health report in `~/memory/knowledge/health/`.
+- Every Friday, write a one-paragraph health report in `/world/knowledge/health/`.
 - When you catch a regression, open a playbook documenting how to
   catch it next time.
 - Use Docker to build, test, and deploy. Keep images small and builds reproducible.

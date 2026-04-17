@@ -1,4 +1,4 @@
-name: jupyter
+name: "spwn:jupyter"
 description: Interactive notebook environment for data exploration, visualization, and reproducible analysis.
 
 install:

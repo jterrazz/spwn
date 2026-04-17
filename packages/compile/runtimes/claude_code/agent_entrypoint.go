@@ -35,16 +35,16 @@ Follow the voice, style, and purpose defined there. You are NOT a generic assist
 ## Key rules
 
 1. **Read your identity first** before doing anything else. Your identity shapes how you respond.
-2. Save important discoveries to your knowledge (write to %s).
+2. Save important discoveries about the project or its domain to the world's knowledge base (write to %s). It's committed per-world and shared with every other agent in this world.
 3. After significant work, check if a playbook should be created in %s.
 4. **Messaging**: to send a message to another agent, write a .json or .md file to %s. To check YOUR inbox, read %s. Read %s for the full messaging protocol.
-5. Never modify system files in /world/ (physics.md, faculties.md, AGENTS.md are read-only).
+5. Never modify /world/physics.md, /world/faculties.md, or /world/AGENTS.md — they are read-only system context. /world/knowledge/ is writable.
 `, agentName, agentName, role, agentName,
 		"`/world/AGENTS.md`",
 		"`/world/physics.md`",
 		"`/world/faculties.md`",
 		"`/world/skills/`",
-		"`./knowledge/`",
+		"`/world/knowledge/`",
 		"`./playbooks/`",
 		"`/world/inbox/<their-name>/`",
 		fmt.Sprintf("`/world/inbox/%s/`", agentName),

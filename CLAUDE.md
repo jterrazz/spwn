@@ -99,8 +99,8 @@ spwn uninstall spwn:python          # Remove a dep
 spwn skill   new|edit|show|rm <name>           # Bare-markdown skill authoring (./spwn/skills/<name>.md)
 
 # ── Registry (planned) ───────────────────────────────────────────
-spwn agent   get @community/sci                # Install a shared agent     [planned]
-spwn install @acme/fuzzer               # Install from GitHub [planned]
+spwn agent   get github:community/sci          # Install a shared agent     [planned]
+spwn install github:acme/fuzzer                # Install from GitHub [planned]
 spwn *       publish <name>                    # Push to registry           [planned]
 
 # ── System ───────────────────────────────────────────────────────
