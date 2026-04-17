@@ -71,7 +71,7 @@ describe('spwn install', () => {
 
         expect(result.exitCode).toBe(0);
         const agentYaml = result.file('spwn/agents/neo/agent.yaml');
-        const count = (agentYaml.content.match(/@spwn\/python/g) ?? []).length;
+        const count = (agentYaml.content.match(/spwn:python/g) ?? []).length;
         expect(count).toBe(1);
     });
 });

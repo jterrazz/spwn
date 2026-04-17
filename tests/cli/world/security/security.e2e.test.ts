@@ -42,7 +42,7 @@ describe('world security', () => {
         expect(git.stdout.text).toContain('git');
 
         const faculties = neo.file('/world/faculties.md').content;
-        expect(faculties).toMatch(/@spwn\/unix/);
+        expect(faculties).toMatch(/spwn:unix/);
         expect(faculties).toMatch(/git/);
     });
 

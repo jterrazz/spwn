@@ -67,9 +67,11 @@ type AgentSource struct {
 	// if the file is missing.
 	Config AgentConfig
 
-	// Layers contains the four layer directories: skills/, knowledge/,
-	// playbooks/, journal/. Keys are file paths relative to the layer
-	// root (e.g. "foo.md", "category/bar.md").
+	// Layers contains the three content-bearing agent layer directories:
+	// skills/, playbooks/, journal/. Keys are file paths relative to
+	// the layer root (e.g. "foo.md", "category/bar.md"). Knowledge is
+	// not here — it lives on the world (spwn/worlds/<name>/knowledge/)
+	// and is bind-mounted into the container at /world/knowledge/.
 	Layers LayerFiles
 }
 
@@ -93,10 +95,12 @@ type RuntimeConfig struct {
 	Auth     string `yaml:"auth,omitempty"`
 }
 
-// LayerFiles are the four per-agent layer directories.
+// LayerFiles are the content-bearing per-agent layer directories
+// (identity is loaded separately via the entry file pipeline).
+// Knowledge is NOT a per-agent layer — it's world-scoped at
+// spwn/worlds/<name>/knowledge/ and bind-mounted into /world/knowledge/.
 type LayerFiles struct {
 	Skills    map[string][]byte
-	Knowledge map[string][]byte
 	Playbooks map[string][]byte
 	Journal   map[string][]byte
 }
@@ -289,9 +293,6 @@ func loadLayers(agentDir string) (LayerFiles, error) {
 	var lf LayerFiles
 	var err error
 	if lf.Skills, err = readTree(filepath.Join(agentDir, "skills")); err != nil {
-		return lf, err
-	}
-	if lf.Knowledge, err = readTree(filepath.Join(agentDir, "knowledge")); err != nil {
 		return lf, err
 	}
 	if lf.Playbooks, err = readTree(filepath.Join(agentDir, "playbooks")); err != nil {

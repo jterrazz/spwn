@@ -76,7 +76,7 @@ describe('world spawn', () => {
 
         test('faculties.md lists the expanded tool set', () => {
             const faculties = world.container('neo').file('/world/faculties.md').content;
-            expect(faculties).toMatch(/@spwn\/unix/);
+            expect(faculties).toMatch(/spwn:unix/);
         });
 
         test('mind layers are visible at /agents/neo/ inside the container', async () => {

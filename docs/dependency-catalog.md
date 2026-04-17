@@ -64,7 +64,7 @@ Spwn classifies every ref in `agent.yaml#dependencies` into one of three kinds:
 
 - **Local** — a bare name like `my-thing`. Resolved against `./spwn/tools/my-thing/` (directory form, full dependency with its own `tool.yaml`) or `./spwn/tools/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
 - **Built-in** — `spwn:<name>`. Looked up in the catalog shipped with the CLI (see tables above). `spwn check` offers "did you mean X?" hints for typos.
-- **Remote registry** — `@<owner>/<name>` with any owner other than `spwn`, e.g. `@jterrazz/python`. Reserved for a future remote registry. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the registry ships, use `spwn:<name>` or drop a local tool under `./spwn/tools/<name>/`.
+- **Remote registry** — `github:<owner>/<repo>`, e.g. `github:jterrazz/python`. Reserved for a future remote resolver. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the resolver ships, use `spwn:<name>` or drop a local tool under `./spwn/tools/<name>/`.
 
 Catalog refs are pinned in `spwn.lock` at the project root. Install one with `spwn install spwn:<name>`. `spwn check` flags any drift between agent.yaml and the lockfile.
 

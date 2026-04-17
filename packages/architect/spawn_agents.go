@@ -66,9 +66,11 @@ func initAgentDeploymentDirs(rec models.AgentRecord, worldID string) error {
 //
 // Each spawn re-seeds the default config (safe because the
 // container is ephemeral). Any user customisations to .claude.json
-// that land in durable memory layers (journal/knowledge/playbooks/
-// skills) get synced back on graceful shutdown and re-seeded fresh
-// next spawn.
+// that land in durable memory layers (journal/playbooks/skills)
+// get synced back on graceful shutdown and re-seeded fresh next
+// spawn. Knowledge is world-scoped (bind-mounted from
+// spwn/worlds/<name>/knowledge/), so it persists directly and does
+// not ride through the agent sync pipeline.
 //
 // The runtime lookup is hardcoded to claude-code because every
 // world spawn today installs spwn:claude-code as a required tool.
