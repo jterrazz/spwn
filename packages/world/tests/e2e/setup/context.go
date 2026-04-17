@@ -76,9 +76,17 @@ func NewTestContext(t *testing.T) *TestContext {
 	}
 
 	t.Cleanup(func() {
-		bg := context.Background()
+		// Bound each Destroy with a timeout. Without this, a single
+		// hung Docker API call (seen on OrbStack under load after
+		// ~15+ rapid spawn/destroy cycles) would wedge the whole
+		// test process and every subsequent test would see "e2e
+		// [setup failed]" with an unrelated goroutine dump. 30s is
+		// generous for a graceful container teardown and bounds the
+		// worst case at len(Spawned) * 30s.
 		for _, id := range ctx.Spawned {
-			ctx.Arc.Destroy(bg, id)
+			destroyCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			_, _ = ctx.Arc.Destroy(destroyCtx, id)
+			cancel()
 		}
 	})
 
