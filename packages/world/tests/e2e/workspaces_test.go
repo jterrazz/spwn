@@ -27,7 +27,7 @@ func TestSpawn_Ephemeral(t *testing.T) {
 }
 
 // TestSpawn_SingleNamedWorkspace verifies that one named workspace is mounted
-// at /work/<name>.
+// at /workspaces/<name>.
 func TestSpawn_SingleNamedWorkspace(t *testing.T) {
 	// Given - a project workspace
 	// When - a world is spawned with a single named workspace
@@ -36,15 +36,15 @@ func TestSpawn_SingleNamedWorkspace(t *testing.T) {
 		WithNamedWorkspace("proj", filepath.Join(setup.TestdataDir(), "project")).
 		Execute()
 
-	// Then - the project should be visible at /work/proj
+	// Then - the project should be visible at /workspaces/proj
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasMount("/work/proj")
-		c.FileContains("/work/proj/README.md", "test project")
+		c.HasMount("/workspaces/proj")
+		c.FileContains("/workspaces/proj/README.md", "test project")
 	})
 }
 
 // TestSpawn_MultipleWorkspaces verifies that each workspace is mounted under
-// /work/<name>/ so that `ls /work` reveals the workspaces the agent can touch.
+// /workspaces/<name>/ so that `ls /workspaces` reveals the workspaces the agent can touch.
 func TestSpawn_MultipleWorkspaces(t *testing.T) {
 	dir := t.TempDir()
 	webPath := filepath.Join(dir, "web")
@@ -69,18 +69,18 @@ func TestSpawn_MultipleWorkspaces(t *testing.T) {
 		WithNamedWorkspace("api", apiPath).
 		Execute()
 
-	// Then - both workspaces are mounted under /work/<name>.
+	// Then - both workspaces are mounted under /workspaces/<name>.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasMount("/work/web")
-		c.HasMount("/work/api")
-		c.FileContains("/work/web/marker.txt", "from-web")
-		c.FileContains("/work/api/marker.txt", "from-api")
+		c.HasMount("/workspaces/web")
+		c.HasMount("/workspaces/api")
+		c.FileContains("/workspaces/web/marker.txt", "from-web")
+		c.FileContains("/workspaces/api/marker.txt", "from-api")
 	})
 
-	// `ls /work` should list the two workspace names as directories.
-	listing := chain.ExecInContainer([]string{"ls", "/work"})
+	// `ls /workspaces` should list the two workspace names as directories.
+	listing := chain.ExecInContainer([]string{"ls", "/workspaces"})
 	if !strings.Contains(listing, "web") || !strings.Contains(listing, "api") {
-		t.Errorf("expected /work to list 'web' and 'api', got: %q", listing)
+		t.Errorf("expected /workspaces to list 'web' and 'api', got: %q", listing)
 	}
 }
 
@@ -101,12 +101,12 @@ func TestSpawn_ReadOnlyWorkspace(t *testing.T) {
 
 	// Then - the file is readable but writes fail.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasMount("/work/docs")
-		c.FileContains("/work/docs/locked.txt", "read only")
+		c.HasMount("/workspaces/docs")
+		c.FileContains("/workspaces/docs/locked.txt", "read only")
 	})
 
 	// Attempt a write via exec and expect non-zero exit.
-	result := chain.ExecInContainer([]string{"sh", "-c", "echo no > /work/docs/forbidden.txt 2>&1 || echo WRITE_FAILED"})
+	result := chain.ExecInContainer([]string{"sh", "-c", "echo no > /workspaces/docs/forbidden.txt 2>&1 || echo WRITE_FAILED"})
 	if !strings.Contains(result, "WRITE_FAILED") && !strings.Contains(result, "Read-only file system") {
 		t.Errorf("expected read-only mount to reject writes, got: %q", result)
 	}
@@ -137,10 +137,10 @@ func TestSpawn_WorkspaceEnvVars(t *testing.T) {
 	if !strings.Contains(envOut, "SPWN_WORKSPACES=") {
 		t.Errorf("SPWN_WORKSPACES not set, got: %q", envOut)
 	}
-	if !strings.Contains(envOut, "web:/work/web") || !strings.Contains(envOut, "api:/work/api") {
+	if !strings.Contains(envOut, "web:/workspaces/web") || !strings.Contains(envOut, "api:/workspaces/api") {
 		t.Errorf("SPWN_WORKSPACES missing expected pairs, got: %q", envOut)
 	}
-	if !strings.Contains(envOut, "SPWN_WORKSPACE_DEFAULT=/work/web") {
+	if !strings.Contains(envOut, "SPWN_WORKSPACE_DEFAULT=/workspaces/web") {
 		t.Errorf("SPWN_WORKSPACE_DEFAULT should point at first workspace, got: %q", envOut)
 	}
 }

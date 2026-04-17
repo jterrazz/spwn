@@ -11,6 +11,7 @@ import (
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
+	"spwn.sh/apps/cli/inspect"
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/skill"
@@ -79,6 +80,9 @@ func init() {
 	// Command groups - coordination
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)
+
+	// Command groups - introspection
+	rootCmd.AddCommand(inspect.Cmd)
 
 	// Command groups - system
 	rootCmd.AddCommand(auth.Cmd)

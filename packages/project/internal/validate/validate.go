@@ -606,7 +606,7 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 //
 // Local refs resolve to either:
 //   - spwn/tools/<name>/ (a directory-form package, with or without
-//     a spwn.yaml inside), OR
+//     a tool.yaml inside), OR
 //   - spwn/skills/<name>.md (a bare-markdown skill).
 func rulePacksExist(in Input) []Issue {
 	if in.Manifest == nil {
@@ -664,7 +664,7 @@ func rulePacksExist(in Input) []Issue {
 		return []Issue{{
 			Level: LevelError, Path: location,
 			Message: fmt.Sprintf("dependency %q does not exist", raw),
-			Hint: "create ./spwn/tools/" + ref.Name + "/spwn.yaml for a full dependency, " +
+			Hint: "create ./spwn/tools/" + ref.Name + "/tool.yaml for a full dependency, " +
 				"or ./spwn/tools/" + ref.Name + ".md for a bare skill",
 		}}
 	}

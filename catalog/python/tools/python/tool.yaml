@@ -1,0 +1,13 @@
+name: "@spwn/python"
+kind: sdk
+version: "3"
+description: "Python 3 interpreter and pip"
+
+install:
+  packages:
+    - python3
+    - python3-pip
+
+verify:
+  - command -v python3
+  - command -v pip3

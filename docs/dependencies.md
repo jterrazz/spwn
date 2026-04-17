@@ -58,7 +58,7 @@ Bare names in typed sections resolve from their matching directory:
 | Section | Resolves from |
 |---------|--------------|
 | `skills:` | `spwn/skills/<name>.md` |
-| `tools:` | `spwn/tools/<name>/` (with `spwn.yaml`) |
+| `tools:` | `spwn/tools/<name>/` (with `tool.yaml`) |
 | `hooks:` | `spwn/hooks/<name>.sh` |
 
 ## Local hierarchy

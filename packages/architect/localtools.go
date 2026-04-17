@@ -38,7 +38,7 @@ func (t *wrappedLocalTool) Skills() fs.FS               { return t.inner.Skills(
 func (t *wrappedLocalTool) Runtimes() []string          { return t.inner.Runtimes() }
 func (t *wrappedLocalTool) Config(runtime string) []byte { return t.inner.Config(runtime) }
 
-// loadLocalPack parses spwn/tools/<name>/spwn.yaml via the
+// loadLocalPack parses spwn/tools/<name>/tool.yaml via the
 // shared packyaml parser and wraps the result so Name() returns
 // "local:<name>". Missing manifest is a crisp authoring error — an
 // empty local dependency would render to nothing and the user would
@@ -58,6 +58,7 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 		dependency.ParseOptions{
 			DefaultName:    name,
 			DefaultVersion: "0.0.0-local",
+			ManifestFile:   dependency.ToolManifest,
 		},
 	)
 	if err != nil {

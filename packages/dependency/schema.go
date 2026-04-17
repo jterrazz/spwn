@@ -1,8 +1,8 @@
-// Package dependency is the shared parser for spwn.yaml — the
+// Package dependency is the shared parser for tool.yaml — the
 // declarative manifest format that describes a spwn dependency's
 // image-build recipe. Both the catalog
-// (catalog/dependencies/<name>/spwn.yaml) and project-local tools
-// (spwn/tools/<name>/spwn.yaml in a user project) use the same
+// (catalog/<name>/tools/<name>/tool.yaml) and project-local tools
+// (spwn/tools/<name>/tool.yaml in a user project) use the same
 // schema, so a dependency can graduate from "authored in a project"
 // to "shipped in the catalog" by moving its directory.
 //
@@ -25,7 +25,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Schema is the on-disk shape of spwn.yaml. Every field is
+// Schema is the on-disk shape of tool.yaml. Every field is
 // optional so a minimal dependency ("install one thing, verify it's
 // there") stays short.
 type Schema struct {

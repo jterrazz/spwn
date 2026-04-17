@@ -1,24 +1,7 @@
-name: "@spwn/unix"
-kind: sdk
-version: "24.04"
-description: "Core Unix utilities (bash, coreutils, grep, sed, awk, curl, jq)"
-
-install:
-  packages:
-    - bash
-    - coreutils
-    - findutils
-    - grep
-    - sed
-    - gawk
-    - curl
-    - wget
-    - jq
-
-verify:
-  - command -v bash
-  - command -v grep
-  - command -v sed
-  - command -v awk
-  - command -v curl
-  - command -v jq
+# Catalog entry for @spwn/unix.
+# The actual tool definition lives at tools/unix/tool.yaml; this
+# file is the project-shape wrapper so the catalog entry mirrors a
+# real spwn project layout (spwn.yaml at root + spwn/tools/<name>
+# when installed).
+version: 2
+name: unix

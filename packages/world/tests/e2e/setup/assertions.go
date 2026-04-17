@@ -240,7 +240,7 @@ func (m *MindAssertion) HasFile(relPath string) {
 		m.tc.T.Fatalf("Failed to inspect agent: %v", err)
 	}
 
-	// relPath is like "core/default.md" or "knowledge/facts.md"
+	// relPath is like "identity/default.md" or "knowledge/facts.md"
 	// Try to match against known layers (longest prefix first)
 	var matchedLayer, file string
 	for layer := range info.Layers {
@@ -313,7 +313,7 @@ func (m *MockAssertion) SawFaculties() {
 func (m *MockAssertion) SawWorkspace() {
 	m.tc.T.Helper()
 	if !m.mock.WorkspaceExists {
-		m.tc.T.Fatal("Mock claude did not see /workspace")
+		m.tc.T.Fatal("Mock claude did not see /workspaces")
 	}
 }
 

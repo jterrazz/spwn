@@ -56,8 +56,8 @@ func TestDefaults_SpawnWithDefaultAgent(t *testing.T) {
 		c.HasMount("/agents")
 	})
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("core")
-		m.HasFile("core/profile.md")
+		m.HasLayer("identity")
+		m.HasFile("identity/profile.md")
 	})
 }
 

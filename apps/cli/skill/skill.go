@@ -5,7 +5,7 @@
 //
 // Bare-markdown skills live at spwn/skills/<name>.md. For richer
 // dependencies with install steps or runtime-config injection,
-// author a directory-form dependency at spwn/tools/<name>/spwn.yaml
+// author a directory-form dependency at spwn/tools/<name>/tool.yaml
 // and install/reference it via `spwn install`. Attach a skill to an
 // agent via `spwn agent add <agent> --dep <name>`.
 package skill

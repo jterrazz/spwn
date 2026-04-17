@@ -1,0 +1,15 @@
+Name         neo
+Role         worker
+Runtime      claude-code
+World        neo   (○ stopped)
+
+Dependencies (3 direct, 0 transitive)
+  @spwn/unix@24.04                 sdk
+  @spwn/git@latest
+  @spwn/python@3                   sdk
+
+Skills (0)
+  -
+
+Hooks (0)
+  -

@@ -62,11 +62,13 @@ func TestPython_E2E(t *testing.T) {
 func TestClaudeCode_E2E(t *testing.T) {
 	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/claude-code")
 
+	// The native installer ships a self-contained claude binary — no
+	// node, no SKILL.md (runtimes are transport, tools ship skills).
 	imagetest.AssertBinaryExists(t, s, "claude")
-	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
-	imagetest.AssertSkillInstalled(t, s, "@spwn/claude-code")
-	imagetest.AssertFileExists(t, s, "/home/spwn/.claude.json")
-	imagetest.AssertFileExists(t, s, "/home/spwn/.claude/settings.json")
+
+	// ~/.claude.json and ~/.claude/settings.json are written at
+	// spawn-time by runtime.DefaultConfigFiles, not at image-build
+	// time. Image-level tests can't assert them.
 }
 
 func TestQmd_E2E(t *testing.T) {
@@ -83,7 +85,7 @@ func TestCodex_E2E(t *testing.T) {
 
 	imagetest.AssertBinaryExists(t, s, "codex")
 	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
-	imagetest.AssertSkillInstalled(t, s, "@spwn/codex")
+	// Runtimes don't ship a SKILL.md — only tools do (qmd, cli, …).
 
 	// Verify codex config was pre-configured
 	imagetest.AssertFileExists(t, s, "/home/spwn/.codex/config.toml")
@@ -102,12 +104,12 @@ func TestFullWorldStack_E2E(t *testing.T) {
 		imagetest.AssertBinaryExists(t, s, bin)
 	}
 
-	imagetest.AssertSkillInstalled(t, s, "@spwn/claude-code")
+	// @spwn/claude-code is a runtime (no SKILL.md); cli and qmd are
+	// tools with skills.
 	imagetest.AssertSkillInstalled(t, s, "@spwn/cli")
 	imagetest.AssertSkillInstalled(t, s, "@spwn/qmd")
 
 	imagetest.AssertFileExists(t, s, "/world/skills/INDEX.md")
-	imagetest.AssertFileContains(t, s, "/world/skills/INDEX.md", "claude-code")
 	imagetest.AssertFileContains(t, s, "/world/skills/INDEX.md", "qmd")
 }
 

@@ -1,21 +1,7 @@
-name: "@spwn/architect"
-kind: platform
-version: "1.1.0"
-description: "The always-on orchestration daemon"
-
-dependencies:
-  - "@spwn/cli"
-  - "@spwn/claude-code"
-  - "@spwn/docker-cli"
-
-files:
-  /usr/local/bin/architect-entrypoint.sh: files/entrypoint.sh
-
-install:
-  commands:
-    - chmod +x /usr/local/bin/architect-entrypoint.sh
-
-verify:
-  - command -v spwn
-  - command -v claude
-  - command -v docker
+# Catalog entry for @spwn/architect.
+# The actual tool definition lives at tools/architect/tool.yaml; this
+# file is the project-shape wrapper so the catalog entry mirrors a
+# real spwn project layout (spwn.yaml at root + spwn/tools/<name>
+# when installed).
+version: 2
+name: architect

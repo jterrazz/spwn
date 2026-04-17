@@ -17,12 +17,12 @@ func TestAgent_Init(t *testing.T) {
 
 	// Then - the Mind should have all standard layers and a default profile
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("core")
+		m.HasLayer("identity")
 		m.HasLayer("skills")
 		m.HasLayer("knowledge")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
-		m.HasFile("core/profile.md")
+		m.HasFile("identity/profile.md")
 	})
 }
 
@@ -79,14 +79,14 @@ func TestAgent_Inspect(t *testing.T) {
 	}
 
 	// AND all 5 standard layers should exist
-	for _, layer := range []string{"core", "skills", "knowledge", "playbooks", "journal"} {
+	for _, layer := range []string{"identity", "skills", "knowledge", "playbooks", "journal"} {
 		if _, ok := info.Layers[layer]; !ok {
 			t.Fatalf("Missing layer %q", layer)
 		}
 	}
 
-	// AND core should contain profile.md
-	if files, ok := info.Layers["core"]; ok {
+	// AND identity should contain profile.md
+	if files, ok := info.Layers["identity"]; ok {
 		found := false
 		for _, f := range files {
 			if f == "profile.md" {
@@ -94,7 +94,7 @@ func TestAgent_Inspect(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Fatal("Expected profile.md in core layer")
+			t.Fatal("Expected profile.md in identity layer")
 		}
 	}
 }
