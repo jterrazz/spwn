@@ -39,7 +39,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds that live in worlds"),
+		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds with a 4-layer Mind (identity/skills/playbooks/journal); knowledge is world-scoped"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "create <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
