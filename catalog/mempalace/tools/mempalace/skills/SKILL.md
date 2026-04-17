@@ -1,3 +1,8 @@
+---
+name: mempalace
+description: Use when reading from or writing to the agent's persistent memory palace — cross-session notes, facts, and playbooks.
+---
+
 # mempalace — your memory palace
 
 You have a persistent memory palace. It lives on your agent's host and

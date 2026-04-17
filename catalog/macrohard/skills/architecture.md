@@ -1,3 +1,8 @@
+---
+name: architecture
+description: Use when designing a new system, component, or significant refactor — trade-offs, boundaries, invariants.
+---
+
 # Architecture
 
 Use this skill when designing a new system, component, or significant

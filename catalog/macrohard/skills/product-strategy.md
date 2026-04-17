@@ -1,3 +1,8 @@
+---
+name: product-strategy
+description: Use when deciding what to build, what to prioritize, or how to position a feature for customers.
+---
+
 # Product Strategy
 
 Use this skill when deciding what to build, what to prioritize, or how

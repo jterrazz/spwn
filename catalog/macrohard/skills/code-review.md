@@ -1,3 +1,8 @@
+---
+name: code-review
+description: Use when reviewing code written by yourself or another agent — correctness, style, and hidden pitfalls.
+---
+
 # Code Review
 
 Use this skill when reviewing code written by yourself or another agent.

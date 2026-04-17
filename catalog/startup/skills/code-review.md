@@ -1,3 +1,8 @@
+---
+name: code-review
+description: Use when reviewing code changes before they ship — correctness, safety, maintainability, and fit for the codebase.
+---
+
 # Skill: Code Review
 
 How to review code changes before they ship.

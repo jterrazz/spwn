@@ -1,3 +1,8 @@
+---
+name: sales-pitch
+description: Use when writing copy, demos, pitches, or anything that needs to persuade a human to care.
+---
+
 # Sales Pitch
 
 Use this skill when writing copy, demos, pitches, or anything that needs

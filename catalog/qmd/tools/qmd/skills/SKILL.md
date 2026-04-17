@@ -1,3 +1,8 @@
+---
+name: qmd
+description: Use when searching markdown notes, meeting transcripts, documentation, or knowledge bases from the command line.
+---
+
 # QMD - Query Markdown Documents
 
 QMD is an on-device search engine for markdown notes, meeting transcripts, documentation, and knowledge bases.

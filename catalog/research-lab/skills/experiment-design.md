@@ -1,3 +1,8 @@
+---
+name: experiment-design
+description: Use when designing controlled, reproducible experiments that isolate the variable under study and produce statistically meaningful results.
+---
+
 # Experiment Design
 
 Design controlled, reproducible experiments that isolate the variable

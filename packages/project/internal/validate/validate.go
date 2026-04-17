@@ -111,6 +111,7 @@ func Run(in Input) []Issue {
 		ruleLockfileConsistent,
 		ruleRuntimeSupported,
 		ruleMarkdownImports,
+		ruleSkillFrontmatter,
 		ruleOrphanAgents,
 	}
 	for _, r := range rules {
@@ -829,6 +830,123 @@ func ruleMarkdownImports(in Input) []Issue {
 		}
 	}
 	return out
+}
+
+// ruleSkillFrontmatter enforces the skill markdown convention:
+// every .md under spwn/skills/, spwn/tools/<name>/skills/, and
+// spwn/agents/<name>/skills/ must start with a YAML frontmatter
+// block declaring `name:` and `description:`.
+//
+// Shape (the "SKILL" convention, kept as generic markdown
+// frontmatter so non-skill .md can opt in later):
+//
+//	---
+//	name: paper-reading
+//	description: Use when summarising academic papers …
+//	---
+//
+//	<markdown body>
+//
+// Missing block, missing field, or unterminated block all surface
+// as LevelError with a fix-it hint. Other fields in the
+// frontmatter are accepted and ignored so authors can attach
+// their own metadata without tripping the rule.
+func ruleSkillFrontmatter(in Input) []Issue {
+	var out []Issue
+	for _, path := range collectSkillFiles(in.Root) {
+		rel := relPath(in.Root, path)
+		fm, err := ParseMarkdownFrontmatter(path)
+		if err != nil {
+			out = append(out, Issue{
+				Level: LevelError, Path: rel,
+				Message: "skill frontmatter is malformed: " + err.Error(),
+				Hint:    "top of file must be:\n---\nname: <slug>\ndescription: <one-line hint>\n---",
+			})
+			continue
+		}
+		if !fm.Found {
+			out = append(out, Issue{
+				Level: LevelError, Path: rel,
+				Message: "skill is missing YAML frontmatter",
+				Hint:    "add this block at the top of the file:\n---\nname: <slug>\ndescription: <one-line hint>\n---",
+			})
+			continue
+		}
+		if strings.TrimSpace(fm.Keys["name"]) == "" {
+			out = append(out, Issue{
+				Level: LevelError, Path: rel,
+				Message: "skill frontmatter is missing `name`",
+				Hint:    "add `name: <slug>` to the frontmatter",
+			})
+		}
+		if strings.TrimSpace(fm.Keys["description"]) == "" {
+			out = append(out, Issue{
+				Level: LevelError, Path: rel,
+				Message: "skill frontmatter is missing `description`",
+				Hint:    "add a one-line `description:` explaining when the agent should use this skill",
+			})
+		}
+	}
+	return out
+}
+
+// collectSkillFiles walks every place a user authors skills in a
+// spwn project and returns the full list of markdown files found
+// there. The three locations are:
+//
+//   - spwn/skills/              — project-wide bare skills
+//   - spwn/tools/<name>/skills/ — skills shipped by a local tool
+//   - spwn/agents/<name>/skills/— skills attached to one agent
+//
+// Each location is walked recursively so nested skill directories
+// (spwn/skills/reviewing/code-review.md) are covered. Missing
+// locations return an empty slice, never an error.
+func collectSkillFiles(root string) []string {
+	var out []string
+	for _, rel := range skillSearchRoots(root) {
+		_ = filepath.WalkDir(rel, func(path string, d os.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
+			}
+			if strings.HasSuffix(strings.ToLower(d.Name()), ".md") {
+				out = append(out, path)
+			}
+			return nil
+		})
+	}
+	sort.Strings(out)
+	return out
+}
+
+// skillSearchRoots lists every directory under which skill markdown
+// files may appear. Directories that don't exist are silently skipped
+// by the walker (filepath.WalkDir returns os.ErrNotExist which the
+// collector drops).
+func skillSearchRoots(root string) []string {
+	var roots []string
+
+	// Project-wide skills.
+	roots = append(roots, filepath.Join(root, "spwn", "skills"))
+
+	// Local-tool skills. One skills/ dir per tool.
+	if entries, err := os.ReadDir(filepath.Join(root, "spwn", "tools")); err == nil {
+		for _, e := range entries {
+			if e.IsDir() {
+				roots = append(roots, filepath.Join(root, "spwn", "tools", e.Name(), "skills"))
+			}
+		}
+	}
+
+	// Agent-local skills (one skills/ dir per agent).
+	if entries, err := os.ReadDir(filepath.Join(root, "spwn", "agents")); err == nil {
+		for _, e := range entries {
+			if e.IsDir() {
+				roots = append(roots, filepath.Join(root, "spwn", "agents", e.Name(), "skills"))
+			}
+		}
+	}
+
+	return roots
 }
 
 func ruleOrphanAgents(in Input) []Issue {

@@ -1,3 +1,8 @@
+---
+name: spwn-cli
+description: Use when driving spwn from inside an agent container — manage worlds, agents, dependencies, and inspect project state.
+---
+
 # spwn CLI
 
 The spwn CLI manages worlds, agents, and the universe from inside a container.

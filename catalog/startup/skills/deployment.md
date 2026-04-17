@@ -1,3 +1,8 @@
+---
+name: deployment
+description: Use when deploying changes to production — pre-flight checks, rollout sequencing, rollback plans.
+---
+
 # Skill: Deployment
 
 How to safely deploy changes to production.

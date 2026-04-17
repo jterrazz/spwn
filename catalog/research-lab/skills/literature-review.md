@@ -1,3 +1,8 @@
+---
+name: literature-review
+description: Use when systematically searching, evaluating, and synthesising existing work relevant to a research question.
+---
+
 # Literature Review
 
 Systematically search, evaluate, and synthesize existing work relevant to
