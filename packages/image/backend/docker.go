@@ -75,9 +75,16 @@ func (d *Docker) Stop(ctx context.Context, containerID string) error {
 	return d.client.ContainerStop(ctx, containerID, containerTypes.StopOptions{})
 }
 
-// Remove forcibly removes a container.
+// Remove forcibly removes a container along with any anonymous
+// volumes it owns. RemoveVolumes is defense-in-depth against image
+// VOLUME declarations that might slip in — without it, every such
+// volume becomes an unreachable dangling entry that `docker rm`
+// never reclaims.
 func (d *Docker) Remove(ctx context.Context, containerID string) error {
-	return d.client.ContainerRemove(ctx, containerID, containerTypes.RemoveOptions{Force: true})
+	return d.client.ContainerRemove(ctx, containerID, containerTypes.RemoveOptions{
+		Force:         true,
+		RemoveVolumes: true,
+	})
 }
 
 // Exec runs a command inside a container and returns the exit code.

@@ -24,5 +24,8 @@ RUN mkdir -p /work /agents /world /home/spwn/.claude \
 USER spwn
 WORKDIR /home/spwn
 
-VOLUME ["/work", "/agents", "/world"]
+# NOTE: no VOLUME declarations here on purpose. spwn bind-mounts
+# /world and /workspaces/<name> at runtime; /agents content is
+# docker cp'd in. Declared VOLUMEs would auto-create an anonymous
+# volume per container spawn that `docker rm` never cleans up.
 ENTRYPOINT ["sleep", "infinity"]
