@@ -120,7 +120,7 @@ interface AgentMindInfo {
     layers: Record<string, string[]>;
 }
 
-const MIND_LAYERS = ['core', 'skills', 'knowledge', 'playbooks', 'journal'];
+const MIND_LAYERS = ['identity', 'skills', 'playbooks', 'journal'];
 
 async function readDirSafe(dir: string): Promise<string[]> {
     try {

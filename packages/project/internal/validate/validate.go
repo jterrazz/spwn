@@ -312,7 +312,6 @@ func ruleAgentStructure(in Input) []Issue {
 		{filepath.Join("identity", "profile.md"), false, LevelError},
 		{"identity", true, LevelWarning},
 		{"skills", true, LevelWarning},
-		{"knowledge", true, LevelWarning},
 		{"playbooks", true, LevelWarning},
 		{"journal", true, LevelWarning},
 	}

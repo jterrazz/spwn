@@ -9,12 +9,12 @@ otherwise; it doesn't stop existing just because nothing is running.
 
 ## Agent vs world
 
-| Agent (persistent)                       | World (declaration + live instance) |
-| ---------------------------------------- | ----------------------------------- |
-| Identity - profile, purpose, traits      | Entry in `spwn.yaml#worlds`         |
-| Memory - journal, knowledge, playbooks   | Mounted workspace                   |
-| Composition - tools, skills, profile     | Workspace mounts + tool overrides   |
-| Evolution history                        | Running container when deployed     |
+| Agent (persistent)                       | World (declaration + live instance)                   |
+| ---------------------------------------- | ----------------------------------------------------- |
+| Identity - profile, purpose, traits      | Entry in `spwn.yaml#worlds`                           |
+| Memory - journal, playbooks              | Knowledge base at `spwn/worlds/<name>/knowledge/`     |
+| Composition - tools, skills, profile     | Workspace mounts + tool overrides                     |
+| Evolution history                        | Running container when deployed                       |
 
 The agent is *who*. The world is *where this agent is deployed, and
 under what rules*.

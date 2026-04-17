@@ -80,9 +80,9 @@ describe('agent inside world', () => {
     test('the on-disk Mind for neo has all expected layers', async () => {
         // Docker-pilot ships neo's Mind under spwn/agents/neo/ in the
         // Fixture; the on-disk layers must be present in the shared workdir.
+        // Knowledge is world-scoped now — no longer a Mind layer.
         expect(world.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
         expect(world.file('spwn/agents/neo/skills').exists).toBe(true);
-        expect(world.file('spwn/agents/neo/knowledge').exists).toBe(true);
         expect(world.file('spwn/agents/neo/journal').exists).toBe(true);
 
         // And the same profile.md is visible inside the container via

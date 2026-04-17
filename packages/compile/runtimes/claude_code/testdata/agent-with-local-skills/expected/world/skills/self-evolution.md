@@ -12,7 +12,7 @@ To prepare for effective dreaming:
 ## Sleep Cycle
 Sleep is graceful shutdown + consolidation:
 - Saves current session state
-- Prunes stale knowledge files
+- Archives stale playbooks
 - Archives old journal entries
 - Updates your self-model
 

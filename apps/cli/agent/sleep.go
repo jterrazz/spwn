@@ -30,7 +30,6 @@ var sleepCmd = &cobra.Command{
 		}
 
 		s.Done("Archived playbooks", fmt.Sprintf("%d", result.ArchivedPlaybooks))
-		s.Done("Archived knowledge", fmt.Sprintf("%d", result.ArchivedKnowledge))
 		s.Done("Pruned sessions", fmt.Sprintf("%d", result.PrunedSessions))
 		s.Blank()
 

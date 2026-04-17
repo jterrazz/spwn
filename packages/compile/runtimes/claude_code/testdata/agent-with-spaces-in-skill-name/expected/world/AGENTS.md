@@ -9,16 +9,15 @@ Your persistent memory. It survives when worlds are destroyed.
 - `/mind/identity/profile.md` - who you are
 - `/mind/identity/traits.md` - your principles
 - `/mind/skills/` - capabilities you've learned
-- `/mind/knowledge/` - facts and context you've saved
 - `/mind/playbooks/` - step-by-step procedures
 - `/mind/journal/` - auto-logged session and deployment history
 
 ## Your World (/world/)
-Your current environment. Read-only system files.
-- `/world/AGENT.md` - your role in THIS world (role, physics, tools)
-- `/world/AGENTS.md` - this file (the operating manual)
-- `/world/skills/` - system skills (guides for common tasks)
-- `/world/knowledge/` - shared knowledge for this world (read-write, collaborate with other agents here)
+Your current environment.
+- `/world/AGENT.md` - your role in THIS world (role, physics, tools) (read-only)
+- `/world/AGENTS.md` - this file, the operating manual (read-only)
+- `/world/skills/` - system skills, guides for common tasks (read-only)
+- `/world/knowledge/` - the world's durable knowledge base (read-write, committed to the project, shared across every agent in this world)
 
 ## Your Workspaces (/workspaces/)
 The projects you're working on. Read-write. Each entry is a named
@@ -35,8 +34,8 @@ Read `/world/skills/` for detailed guides:
 
 ## Conventions
 1. Read your purpose and traits before starting any task
-2. Save important discoveries to `/mind/knowledge/`
+2. Save important discoveries to `/world/knowledge/` (world-shared, committed to git)
 3. After significant work, check if a playbook should be created
 4. When asked to dream, analyze your journal and promote patterns
 5. Communicate with other agents through `/world/inbox/`
-6. Never modify files in `/world/` (read-only system area)
+6. Never modify `/world/AGENTS.md`, `/world/physics.md`, `/world/faculties.md`, or `/world/skills/` (read-only system area). `/world/knowledge/` and `/world/inbox/` are writable.

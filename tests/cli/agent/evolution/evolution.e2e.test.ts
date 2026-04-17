@@ -132,7 +132,7 @@ describe('spwn agent fork', () => {
         expect(result.exitCode).toBe(0);
         const out = result.stderr.text;
         expect(out).toContain('Forking "neo" -> "neo-v2"');
-        expect(out).toMatch(/Layers copied\s+identity, skills, knowledge, playbooks, journal/);
+        expect(out).toMatch(/Layers copied\s+identity, skills, playbooks, journal/);
         expect(result.file('spwn/agents/neo-v2/identity/profile.md').exists).toBe(true);
     });
 

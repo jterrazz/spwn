@@ -30,11 +30,11 @@ func TestAgentsBookContent(t *testing.T) {
 		}
 	}
 
-	// Must contain core and skills references
+	// Must contain core and skills references. Knowledge is NOT a
+	// Mind layer anymore — it's world-scoped at /world/knowledge/.
 	mindPaths := []string{
 		"/mind/identity/",
 		"/mind/skills/",
-		"/mind/knowledge/",
 		"/mind/playbooks/",
 		"/mind/journal/",
 	}
@@ -43,6 +43,11 @@ func TestAgentsBookContent(t *testing.T) {
 		if !strings.Contains(ctx, path) {
 			t.Errorf("AGENTS.md (worker) missing mind path %q", path)
 		}
+	}
+
+	// World-scoped knowledge must be advertised.
+	if !strings.Contains(ctx, "/world/knowledge/") {
+		t.Errorf("AGENTS.md (worker) missing world knowledge path \"/world/knowledge/\"")
 	}
 }
 

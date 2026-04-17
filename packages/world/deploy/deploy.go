@@ -80,17 +80,21 @@ func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHo
 	return nil
 }
 
-// SyncOut copies the allowlisted memory subdirs (journal, knowledge,
-// playbooks, skills) from each agent's container home back out to
-// the host. Everything else (identity files that didn't change,
-// dotfiles, runtime caches, rebuilt runtime-specific entrypoints)
-// stays inside the container and is discarded with it.
+// SyncOut copies the allowlisted memory subdirs (journal, playbooks,
+// skills) from each agent's container home back out to the host.
+// Everything else (identity files that didn't change, dotfiles,
+// runtime caches, rebuilt runtime-specific entrypoints) stays inside
+// the container and is discarded with it.
+//
+// Knowledge is NOT in the list: it lives at /world/knowledge/ (world-
+// scoped, bind-mounted from spwn/worlds/<name>/knowledge/), so
+// in-container edits hit the project dir directly — no sync needed.
 //
 // Failures are collected as warnings rather than aborting the
 // teardown — a best-effort snapshot is better than none, and the
 // container is about to be removed anyway.
 func SyncOut(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) []string {
-	syncDirs := []string{"journal", "knowledge", "playbooks", "skills"}
+	syncDirs := []string{"journal", "playbooks", "skills"}
 	hostRoot := platform.AgentsDir()
 
 	var warnings []string

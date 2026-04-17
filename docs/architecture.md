@@ -39,7 +39,7 @@ L1 Foundation packages/platform/                    (constants + IDs)
 | `update` | L2 | CLI self-update + version-check |
 | `mailbox` | L2 | Agent-to-agent filesystem inbox |
 | `dependency` | L3 | `spwn.yaml` schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
-| `agent` | L3 | Agent mind (identity/skills/knowledge/playbooks/journal), evolution, session |
+| `agent` | L3 | Agent mind (identity/skills/playbooks/journal), evolution, session. Knowledge is world-scoped, not in the Mind. |
 | `project` | L4 | Project manifest, validation rules, scaffolding, teams + organizations |
 | `image` | L5 | Docker image build, tool registry, transitive dep resolution, dependency→Tool adapter |
 | `compile` | L5 | Pure render: `Input → Tree`, runtime renderers (claude_code) |

@@ -1185,7 +1185,7 @@ function MindFileViewer({
     };
 
     const sortedLayers = Object.keys(mindTree).sort((a, b) => {
-        const order = ['core', 'skills', 'knowledge', 'playbooks', 'journal'];
+        const order = ['identity', 'skills', 'playbooks', 'journal'];
         const rank = (key: string) => (order.includes(key) ? order.indexOf(key) : 99);
         return rank(a) - rank(b);
     });

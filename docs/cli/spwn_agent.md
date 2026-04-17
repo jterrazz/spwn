@@ -12,8 +12,10 @@ Spawn an agent - a living identity that inhabits a world
 Spawn an agent into an existing world.
 
 An agent is backed by a Mind - a persistent directory holding its identity,
-skills, knowledge, playbooks, journal entries, and session state. The agent
-survives after the world is destroyed.
+skills, playbooks, journal entries, and session state. The agent survives
+after the world is destroyed. Knowledge lives at /world/knowledge/ inside
+each world and is committed under spwn/worlds/<name>/knowledge/ — shared
+across every agent in that world.
 
 ```
 spwn agent [name] [flags]
@@ -42,7 +44,7 @@ spwn agent [name] [flags]
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
 * [spwn agent add](./spwn_agent_add.md)	 - Add dependencies to an agent
-* [spwn agent create](./spwn_agent_create.md)	 - Create a new agent with a 5-layer Mind
+* [spwn agent create](./spwn_agent_create.md)	 - Create a new agent with a 4-layer Mind
 * [spwn agent deploy](./spwn_agent_deploy.md)	 - Deploy an agent to a running world
 * [spwn agent dream](./spwn_agent_dream.md)	 - Analyze experience, discover patterns, promote playbooks
 * [spwn agent export](./spwn_agent_export.md)	 - [experimental] Export an agent as tar.gz

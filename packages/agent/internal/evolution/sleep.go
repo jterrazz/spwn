@@ -12,6 +12,11 @@ import (
 
 // Sleep consolidates experience into durable knowledge.
 // It archives stale files and prunes sessions for destroyed worlds.
+//
+// Knowledge is no longer agent-owned — it lives at /world/knowledge/
+// and is committed to the project tree — so sleep only touches
+// agent-scoped layers (playbooks, journal). The world knowledge base
+// is maintained by humans via git, not pruned automatically.
 func Sleep(mindPath string) (*SleepResult, error) {
 	result := &SleepResult{Timestamp: time.Now()}
 
@@ -22,21 +27,14 @@ func Sleep(mindPath string) (*SleepResult, error) {
 	}
 	result.ArchivedPlaybooks = archived
 
-	// 2. Archive stale knowledge
-	archived, err = archiveStaleFiles(mindPath, "knowledge", 60*24*time.Hour)
-	if err != nil {
-		return nil, fmt.Errorf("archiving knowledge: %w", err)
-	}
-	result.ArchivedKnowledge = archived
-
-	// 3. Prune old journal entries (sessions merged into journal)
+	// 2. Prune old journal entries (sessions merged into journal)
 	pruned, err := pruneOldSessions(mindPath, 90*24*time.Hour)
 	if err != nil {
 		return nil, fmt.Errorf("pruning journal: %w", err)
 	}
 	result.PrunedSessions = pruned
 
-	// 4. Write sleep log
+	// 3. Write sleep log
 	journalDir := filepath.Join(mindPath, "journal")
 	os.MkdirAll(journalDir, 0755)
 	logPath := filepath.Join(journalDir, fmt.Sprintf("sleep-%s.md", time.Now().Format("2006-01-02")))
@@ -54,7 +52,6 @@ func Sleep(mindPath string) (*SleepResult, error) {
 		AgentID: agentName,
 		Metadata: map[string]any{
 			"archived_playbooks": result.ArchivedPlaybooks,
-			"archived_knowledge": result.ArchivedKnowledge,
 			"pruned_sessions":    result.PrunedSessions,
 		},
 	})
@@ -65,7 +62,6 @@ func Sleep(mindPath string) (*SleepResult, error) {
 // SleepResult holds the outcome of a sleep cycle.
 type SleepResult struct {
 	ArchivedPlaybooks int
-	ArchivedKnowledge int
 	PrunedSessions    int
 	Timestamp         time.Time
 }
@@ -141,7 +137,6 @@ func formatSleepSummary(r *SleepResult) string {
 	b.WriteString("# Sleep Cycle\n\n")
 	b.WriteString(fmt.Sprintf("Date: %s\n\n", r.Timestamp.Format(time.RFC3339)))
 	b.WriteString(fmt.Sprintf("- Archived playbooks: %d\n", r.ArchivedPlaybooks))
-	b.WriteString(fmt.Sprintf("- Archived knowledge: %d\n", r.ArchivedKnowledge))
 	b.WriteString(fmt.Sprintf("- Pruned sessions: %d\n", r.PrunedSessions))
 	return b.String()
 }

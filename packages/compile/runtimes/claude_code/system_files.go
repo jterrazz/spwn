@@ -15,16 +15,15 @@ Your persistent memory. It survives when worlds are destroyed.
 - ` + "`/mind/identity/profile.md`" + ` - who you are
 - ` + "`/mind/identity/traits.md`" + ` - your principles
 - ` + "`/mind/skills/`" + ` - capabilities you've learned
-- ` + "`/mind/knowledge/`" + ` - facts and context you've saved
 - ` + "`/mind/playbooks/`" + ` - step-by-step procedures
 - ` + "`/mind/journal/`" + ` - auto-logged session and deployment history
 
 ## Your World (/world/)
-Your current environment. Read-only system files.
-- ` + "`/world/AGENT.md`" + ` - your role in THIS world (role, physics, tools)
-- ` + "`/world/AGENTS.md`" + ` - this file (the operating manual)
-- ` + "`/world/skills/`" + ` - system skills (guides for common tasks)
-- ` + "`/world/knowledge/`" + ` - shared knowledge for this world (read-write, collaborate with other agents here)
+Your current environment.
+- ` + "`/world/AGENT.md`" + ` - your role in THIS world (role, physics, tools) (read-only)
+- ` + "`/world/AGENTS.md`" + ` - this file, the operating manual (read-only)
+- ` + "`/world/skills/`" + ` - system skills, guides for common tasks (read-only)
+- ` + "`/world/knowledge/`" + ` - the world's durable knowledge base (read-write, committed to the project, shared across every agent in this world)
 
 ## Your Workspaces (/workspaces/)
 The projects you're working on. Read-write. Each entry is a named
@@ -41,11 +40,11 @@ Read ` + "`/world/skills/`" + ` for detailed guides:
 
 ## Conventions
 1. Read your purpose and traits before starting any task
-2. Save important discoveries to ` + "`/mind/knowledge/`" + `
+2. Save important discoveries to ` + "`/world/knowledge/`" + ` (world-shared, committed to git)
 3. After significant work, check if a playbook should be created
 4. When asked to dream, analyze your journal and promote patterns
 5. Communicate with other agents through ` + "`/world/inbox/`" + `
-6. Never modify files in ` + "`/world/`" + ` (read-only system area)
+6. Never modify ` + "`/world/AGENTS.md`" + `, ` + "`/world/physics.md`" + `, ` + "`/world/faculties.md`" + `, or ` + "`/world/skills/`" + ` (read-only system area). ` + "`/world/knowledge/`" + ` and ` + "`/world/inbox/`" + ` are writable.
 `
 
 // SkillMindManagement is the mind-management.md skill guide.
@@ -60,12 +59,15 @@ cat /mind/identity/traits.md    # Your principles
 ` + "```" + `
 
 ## Saving Knowledge
-When you discover something worth remembering:
+When you discover something worth remembering about the project or its
+domain, write it to the world's knowledge base:
 ` + "```bash" + `
 # Create a knowledge file with a descriptive name
-echo "# What I learned about X" > /mind/knowledge/topic-name.md
+echo "# What I learned about X" > /world/knowledge/topic-name.md
 ` + "```" + `
-Keep files focused on ONE topic. Use clear filenames.
+Knowledge is world-scoped: it's committed with the project and every
+agent in this world sees the same files. Keep each file focused on
+ONE topic and use clear filenames.
 
 ## Creating Playbooks
 When you find a reusable procedure:
@@ -159,7 +161,7 @@ To prepare for effective dreaming:
 ## Sleep Cycle
 Sleep is graceful shutdown + consolidation:
 - Saves current session state
-- Prunes stale knowledge files
+- Archives stale playbooks
 - Archives old journal entries
 - Updates your self-model
 

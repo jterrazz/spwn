@@ -67,8 +67,10 @@ func AgentDir(name string) string {
 	return mind.AgentDir(name)
 }
 
-// InitMind scaffolds a new Mind for the named agent, creating all 5 layers
-// (core, skills, knowledge, playbooks, journal) and returning the directory path.
+// InitMind scaffolds a new Mind for the named agent, creating all 4 layers
+// (identity, skills, playbooks, journal) and returning the directory path.
+// Knowledge used to be a fifth Mind layer but is now world-scoped at
+// /world/knowledge/ (bind-mounted from spwn/worlds/<name>/knowledge/).
 func InitMind(name string) (string, error) {
 	dir, err := mind.Init(name)
 	if err != nil {

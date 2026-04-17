@@ -16,16 +16,18 @@ const isolated = (label: string) =>
     spec(label).project('empty').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
 
 describe('spwn agent CRUD', () => {
-    test('create writes the 5-layer Mind to disk', async () => {
+    test('create writes the 4-layer Mind to disk', async () => {
         const result = await isolated('create neo').exec('agent create neo').run();
 
         expect(result.exitCode).toBe(0);
         // Structural: the on-disk Mind exists with a profile.
+        // Knowledge is NOT a mind layer — it's world-scoped at
+        // /world/knowledge/ (bind-mounted from spwn/worlds/<name>/knowledge/).
         expect(result.file('spwn-home/agents/neo/identity/profile.md').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/skills').exists).toBe(true);
-        expect(result.file('spwn-home/agents/neo/knowledge').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/playbooks').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/journal').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/knowledge').exists).toBe(false);
         // Smoke-check the status banner so regressions in the CLI UX
         // Are caught without pinning the full text.
         result.stderr.toContain('Created agent');
@@ -67,7 +69,6 @@ describe('spwn agent CRUD', () => {
         expect(result.stderr.text).toMatch(/Agent:\s+neo/);
         expect(result.stderr.text).toMatch(/identity\/\s+profile\.md/);
         expect(result.stderr.text).toMatch(/skills\/\s+\(empty\)/);
-        expect(result.stderr.text).toMatch(/knowledge\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/playbooks\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/journal\/\s+\(empty\)/);
     });
@@ -118,7 +119,6 @@ describe('spwn agent CRUD', () => {
         for (const path of [
             'spwn-home/agents/neo/identity/profile.md',
             'spwn-home/agents/neo/skills',
-            'spwn-home/agents/neo/knowledge',
             'spwn-home/agents/neo/playbooks',
             'spwn-home/agents/neo/journal',
         ]) {

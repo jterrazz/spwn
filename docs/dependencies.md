@@ -74,9 +74,11 @@ my-project/
 │   │       ├── AGENTS.md      # agent prompt (provider-neutral)
 │   │       ├── identity/      # who the agent is
 │   │       ├── skills/        # agent-scoped skills (only this agent)
-│   │       ├── knowledge/     # learned facts
 │   │       ├── playbooks/     # promoted workflows
 │   │       └── journal/       # session history
+│   ├── worlds/
+│   │   └── neo/
+│   │       └── knowledge/     # world-scoped facts (bind-mounted to /world/knowledge/, shared across every agent in this world)
 │   ├── skills/                # project-wide shared skills
 │   │   ├── paper-reading.md
 │   │   └── code-review.md

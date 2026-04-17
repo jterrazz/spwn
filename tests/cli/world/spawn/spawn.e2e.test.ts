@@ -81,15 +81,19 @@ describe('world spawn', () => {
 
         test('mind layers are visible at /agents/neo/ inside the container', async () => {
             const neo = world.container('neo');
-            for (const layer of ['identity', 'skills', 'knowledge', 'playbooks', 'journal']) {
+            // Knowledge is world-scoped at /world/knowledge/, not a Mind layer.
+            for (const layer of ['identity', 'skills', 'playbooks', 'journal']) {
                 expect(neo.file(`/agents/neo/${layer}`).exists).toBe(true);
             }
 
             const ls = await neo.exec('ls /agents/neo');
             expect(ls.exitCode).toBe(0);
-            for (const layer of ['identity', 'skills', 'knowledge', 'playbooks', 'journal']) {
+            for (const layer of ['identity', 'skills', 'playbooks', 'journal']) {
                 ls.stdout.toContain(layer);
             }
+
+            // And the world-scoped knowledge base is where it should be.
+            expect(neo.file('/world/knowledge').exists).toBe(true);
         });
 
         test('agent home has Claude trust pre-approved for its workspaces', () => {

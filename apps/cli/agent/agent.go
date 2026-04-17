@@ -100,8 +100,10 @@ var Cmd = &cobra.Command{
 	Long: `Spawn an agent into an existing world.
 
 An agent is backed by a Mind - a persistent directory holding its identity,
-skills, knowledge, playbooks, journal entries, and session state. The agent
-survives after the world is destroyed.`,
+skills, playbooks, journal entries, and session state. The agent survives
+after the world is destroyed. Knowledge lives at /world/knowledge/ inside
+each world and is committed under spwn/worlds/<name>/knowledge/ — shared
+across every agent in that world.`,
 	Args: cobra.ArbitraryArgs, // subcommands still resolve first
 	Example: `  spwn agent create neo              Create a blank agent
   spwn agent neo                     Open an interactive session with neo

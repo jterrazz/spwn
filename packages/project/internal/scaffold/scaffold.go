@@ -64,12 +64,14 @@ func Init(dir string, opts Opts) error {
 		}
 	}
 
-	// Empty layer dirs: preserve them with .gitkeep so git tracks them.
+	// Empty layer dirs: preserve them with .gitkeep so git tracks
+	// them. Knowledge is NOT a Mind layer — it's world-scoped, seeded
+	// below under spwn/worlds/neo/knowledge/.
 	layerDirs := []string{
 		"spwn/agents/neo/skills",
-		"spwn/agents/neo/knowledge",
 		"spwn/agents/neo/playbooks",
 		"spwn/agents/neo/journal",
+		"spwn/worlds/neo/knowledge",
 	}
 	for _, rel := range layerDirs {
 		dst := filepath.Join(absDir, rel, ".gitkeep")

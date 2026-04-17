@@ -28,6 +28,7 @@ Mind (persistent agent identity).
 * [spwn check](./spwn_check.md)	 - Validate the project tree against spwn.yaml
 * [spwn down](./spwn_down.md)	 - Destroy a world
 * [spwn init](./spwn_init.md)	 - Scaffold a spwn project in the current directory
+* [spwn inspect](./spwn_inspect.md)	 - Show per-agent composition: deps, skills, hooks
 * [spwn install](./spwn_install.md)	 - Install a dependency into the project
 * [spwn logs](./spwn_logs.md)	 - Show the system event log across worlds and agents
 * [spwn ls](./spwn_ls.md)	 - Agent-centric status (running / stopped / orphan)
