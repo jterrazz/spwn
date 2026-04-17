@@ -269,116 +269,29 @@ spwn agent talk neo "run every test and benchmark, tell me what the code actuall
 
 ## CLI at a glance
 
-Status legend: 🟢 working · 🟡 in dev / rough edges · 🔴 planned
+The day-one surface — twelve commands that take you from empty
+directory to running agents. Everything else (teams, snapshots,
+evolution, …) lives in [Implementation status](#implementation-status)
+below.
 
 ```
-# ── Shortcuts (compose-style) ────────────────────────────────────
-🟢 spwn up                                      Bring up every world in spwn.yaml
-🟢 spwn up matrix                               Bring up one world by name
-🟢 spwn agent neo                               Start the world that contains neo
-🟢 spwn ls                                      Agent-centric status (running / stopped / orphan)
-🟢 spwn down                                    Stop every world in spwn.yaml
-🟢 spwn down matrix                             Stop one world by name
+# ── Start ────────────────────────────────────────────────────────
+spwn init                             Scaffold a project
+spwn init @spwn/matrix                Install a bundled example
+spwn check                            Validate the project tree
+spwn up                               Bring up every world in spwn.yaml
+spwn down                             Stop every world
 
-# ── Project (per-repo manifest) ──────────────────────────────────
-🟢 spwn init                                    Scaffold a blank project in the current dir
-🟢 spwn init @spwn/matrix                       Install a bundled example (matrix, startup, ...)
-🟢 spwn check                                   Validate the project tree against 15 rules
-🟢 spwn build --tree-only                       Render the project tree to ./dist (preview / debug)
-🟢 spwn build                                   Compile + bake into a project-specific Docker image
+# ── Compose ──────────────────────────────────────────────────────
+spwn install @spwn/python             Install a dependency
+spwn agent create neo                 Create an agent + its world
+spwn agent add neo --dep @spwn/qmd    Attach a dep to one agent
+spwn agent neo                        Interactive session with neo
 
-# ── Agents ───────────────────────────────────────────────────────
-# Lifecycle
-🟢 spwn agent create neo                        Create a blank agent (auto-creates a single-agent world)
-🟢 spwn agent ls                                List your agents
-🟢 spwn agent rm neo                            Delete an agent
-🟢 spwn agent neo                               Open an interactive session with neo (boots the world if needed)
-🔴 spwn agent start neo                         Run neo as an autonomous daemon [planned]
-🔴 spwn agent stop  neo                         Kill neo's daemon loop [planned]
-🟡 spwn agent fork neo neo-v2                   Clone + evolve independently
-
-# Observe
-🟢 spwn agent inspect neo                       Inspect composition, memory, history
-🟢 spwn agent logs neo                          Event log for this agent
-
-# Compose
-🟢 spwn agent add neo --dependency @spwn/python     Attach a dep to the agent
-🟡 spwn agent add neo --dependency paper-reading    Attach a local dependency
-🟢 spwn agent rm  neo --dependency @spwn/python     Remove a dep from the agent
-
-# Talk + messaging
-🟢 spwn agent talk  neo "refactor auth"         Full form of `spwn talk`
-🟡 spwn agent send  neo "do this" --from me     Async message to an agent's inbox
-🟡 spwn agent inbox neo                         Show neo's inbox
-🟡 spwn agent watch neo                         Tail neo's inbox live
-
-# Evolution
-🟡 spwn agent dream neo                         Analyze experience, promote playbooks
-🟡 spwn agent sleep neo                         Consolidate memory, prune stale patterns
-
-# Portability
-🟡 spwn agent export neo                        Archive to neo.tar.gz
-🟡 spwn agent import ./neo.tar.gz               Install from archive
-🔴 spwn agent get @community/sci                Install a shared agent from a registry
-🔴 spwn agent publish neo                       Ship to registry (memory stripped)
-
-# ── Worlds ───────────────────────────────────────────────────────
-# Lifecycle - worlds are inline entries in spwn.yaml (not files)
-🟢 spwn world create matrix --agent neo         Declare a new world in spwn.yaml
-🟢 spwn world rm matrix                         Remove a world declaration from spwn.yaml
-🟢 spwn world ls                                List declared worlds (with status column)
-🟢 spwn world start [name]                      Start a world (no-arg: every world in spwn.yaml)
-🟢 spwn world stop  [name]                      Stop a world
-🟢 spwn world matrix                            Shortcut for `spwn world start matrix`
-🟢 spwn world rename <id> <name>                Rename a running world
-
-# Observe
-🟢 spwn world inspect <id>                      Inspect composition + runtime state
-🟢 spwn world logs <id>                         Event log for a world
-🟢 spwn world enter <id>                        Interactive shell inside the world
-
-# Snapshots
-🟡 spwn world snap save <id>                    Save world state
-🟡 spwn world snap ls                           List snapshots
-🟡 spwn world snap restore <snap-id>            Rollback to a snapshot
-🟡 spwn world snap rm <snap-id>                 Remove a snapshot
-
-# Shared knowledge
-🟢 spwn world knowledge ls <id>                 List a world's shared knowledge files
-🟢 spwn world knowledge show <id> <path>        Read a knowledge file
-
-# ── Dependencies & Authoring ─────────────────────────────────────────────
-🟢 spwn install @spwn/python             Install a dep (adds to agents + lockfile)
-🟢 spwn uninstall @spwn/python           Remove a dep
-
-🟢 spwn skill new paper-reading                 Author a new bare-markdown skill
-🟡 spwn skill edit paper-reading                Open in $EDITOR
-🟢 spwn skill show paper-reading                Display a skill
-🟢 spwn skill rm   paper-reading                Delete a skill
-
-# ── Teams & orgs ─────────────────────────────────────────────────
-🟡 spwn team new     acme                       Create a team
-🟡 spwn team ls                                 List teams
-🟡 spwn team assign  neo acme                   Attach an agent to a team
-🟡 spwn team members acme                       List a team's agents
-🟡 spwn organization ls                         List organizations
-🟡 spwn organization inspect <name>             Show roles in an organization
-
-# ── Architect daemon ─────────────────────────────────────────────
-🟡 spwn architect start                         Start the always-on daemon
-🟡 spwn architect stop                          Stop it
-🟡 spwn architect status                        Show status and active worlds
-🟡 spwn architect talk "..."                    Talk to the Architect
-🟡 spwn architect logs                          Show the Architect's event log
-
-# ── System ───────────────────────────────────────────────────────
-🟡 spwn web                                     Open the local web UI
-🟢 spwn status                                  Global status (worlds, auth, version)
-🟢 spwn auth login                              Connect Anthropic / OpenAI
-🟢 spwn auth logout                             Clear cached credentials
-🟢 spwn auth token <value>                      Set a token directly (CI)
-🟢 spwn auth check                              Validate credentials across providers
-🟢 spwn upgrade                                 Self-update the CLI
+# ── Observe ─────────────────────────────────────────────────────
+spwn ls                               Agent-centric status
+spwn status                           Global status (worlds, auth, version)
+spwn inspect [agent]                  Per-agent composition tree
 ```
 
 Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
@@ -387,20 +300,338 @@ Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
 
 ## Ecosystem
 
-Every layer is a swappable Go interface. Same status legend as the CLI table:
-🟢 working · 🟡 in dev · 🔴 planned.
+Every layer is a swappable Go interface. The table below is what
+actually ships today — the full roadmap across every adapter lives
+in [Implementation status](#implementation-status).
 
-| Layer | Shipping today | On the roadmap |
-|---|---|---|
-| **Agent runtime** | 🟢 Claude Code | 🔴 Codex, Aider, Cline, Continue, OpenCode, Gemini CLI, Amazon Q, Goose |
-| **LLM provider** | 🟢 Anthropic · 🟡 OpenAI | 🔴 Google, Mistral, Groq, Together, Ollama, AWS Bedrock |
-| **World runtime** | 🟢 Docker | 🔴 Spwn Cloud, K3s, Firecracker, Fly.io, gVisor, Podman |
-| **Memory** | 🟢 Markdown filesystem | 🔴 RAG over Chroma, Qdrant, Pinecone, Weaviate, Turbopuffer |
-| **Tool ecosystem** | 🟢 `@spwn/*` built-in dependencies · 🟡 local custom dependencies | 🔴 MCP servers, LangChain tools |
-| **Orchestrator** | 🟡 built-in chief / worker hierarchy | 🔴 Hermes, CrewAI, AutoGen, LangGraph, Swarm, Mastra |
-| **Observability** | 🟡 Web UI | 🔴 Langfuse, LangSmith, Helicone, OpenTelemetry |
+| Layer | Shipping today |
+|---|---|
+| **Agent runtime** | Claude Code |
+| **LLM provider** | Anthropic · OpenAI (partial) |
+| **World runtime** | Docker |
+| **Memory** | Markdown filesystem |
+| **Tool ecosystem** | `@spwn/*` built-in dependencies, local custom dependencies |
 
 Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - every adapter is a single Go file.
+
+<br/>
+
+## Implementation status
+
+A full ledger of every command and every adapter slot. Expand a
+group to see the list. Each summary shows a progress bar
+(`█` done, `▓` in dev, `░` planned) plus the shipped count.
+
+**Legend** 🟢 shipping · 🟡 in dev · 🔴 planned
+
+### CLI
+
+<details>
+<summary><b>Shortcuts</b> &middot; <code>██████ 6/6</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn up` | Bring up every world in spwn.yaml | 🟢 |
+| `spwn up <name>` | Bring up one world by name | 🟢 |
+| `spwn down` | Stop every world | 🟢 |
+| `spwn down <name>` | Stop one world | 🟢 |
+| `spwn agent <name>` | Start the world containing an agent + attach | 🟢 |
+| `spwn ls` | Agent-centric status (running / stopped / orphan) | 🟢 |
+
+</details>
+
+<details>
+<summary><b>Project</b> &middot; <code>█████ 5/5</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn init` | Scaffold a blank project | 🟢 |
+| `spwn init @spwn/<template>` | Install a bundled example | 🟢 |
+| `spwn check` | Validate the project tree (15 rules) | 🟢 |
+| `spwn build` | Compile + bake the project image | 🟢 |
+| `spwn build --tree-only` | Render the compiled tree to ./dist | 🟢 |
+
+</details>
+
+<details>
+<summary><b>Agents · lifecycle</b> &middot; <code>████▓▓░░ 4/8</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn agent create <name>` | Create a blank agent (auto-creates single-agent world) | 🟢 |
+| `spwn agent ls` | List agents | 🟢 |
+| `spwn agent rm <name>` | Delete an agent | 🟢 |
+| `spwn agent <name>` | Interactive session (boots world if needed) | 🟢 |
+| `spwn agent fork <src> <dst>` | Clone + evolve independently | 🟡 |
+| `spwn agent dream <name>` | Analyze experience, promote playbooks | 🟡 |
+| `spwn agent start <name>` | Run agent as autonomous daemon | 🔴 |
+| `spwn agent stop <name>` | Kill agent's daemon loop | 🔴 |
+
+</details>
+
+<details>
+<summary><b>Agents · observe</b> &middot; <code>████ 2/2</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn agent inspect <name>` | Composition, memory, history | 🟢 |
+| `spwn agent logs <name>` | Event log for one agent | 🟢 |
+
+</details>
+
+<details>
+<summary><b>Agents · compose</b> &middot; <code>████▓ 2/3</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn agent add <name> --dep @spwn/<pkg>` | Attach a catalog dep | 🟢 |
+| `spwn agent rm <name> --dep @spwn/<pkg>` | Remove a dep | 🟢 |
+| `spwn agent add <name> --dep <local>` | Attach a local (bare-name) dep | 🟡 |
+
+</details>
+
+<details>
+<summary><b>Agents · talk + messaging</b> &middot; <code>█▓▓▓ 1/4</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn agent talk <name> "..."` | Full form of `spwn talk` | 🟢 |
+| `spwn agent send <name> "..." --from <sender>` | Async message to inbox | 🟡 |
+| `spwn agent inbox <name>` | Show agent's inbox | 🟡 |
+| `spwn agent watch <name>` | Tail agent's inbox live | 🟡 |
+
+</details>
+
+<details>
+<summary><b>Agents · portability</b> &middot; <code>▓▓░░ 0/4</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn agent export <name>` | Archive to `<name>.tar.gz` | 🟡 |
+| `spwn agent import <path>` | Install from archive | 🟡 |
+| `spwn agent get @community/<name>` | Install shared agent from registry | 🔴 |
+| `spwn agent publish <name>` | Ship to registry (memory stripped) | 🔴 |
+
+</details>
+
+<details>
+<summary><b>Agents · evolution</b> &middot; <code>▓▓ 0/2</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn agent dream <name>` | Analyze experience, promote playbooks | 🟡 |
+| `spwn agent sleep <name>` | Consolidate memory, prune stale patterns | 🟡 |
+
+</details>
+
+<details>
+<summary><b>Worlds · lifecycle</b> &middot; <code>███████ 7/7</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn world create <name> --agent <name>` | Declare a world in spwn.yaml | 🟢 |
+| `spwn world rm <name>` | Remove a world declaration | 🟢 |
+| `spwn world ls` | List declared worlds | 🟢 |
+| `spwn world start [name]` | Start world(s); no-arg starts all | 🟢 |
+| `spwn world stop [name]` | Stop world(s) | 🟢 |
+| `spwn world <name>` | Shortcut for `world start <name>` | 🟢 |
+| `spwn world rename <id> <name>` | Rename a running world | 🟢 |
+
+</details>
+
+<details>
+<summary><b>Worlds · observe</b> &middot; <code>███ 3/3</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn world inspect <id>` | Composition + runtime state | 🟢 |
+| `spwn world logs <id>` | Event log for a world | 🟢 |
+| `spwn world enter <id>` | Interactive shell inside the world | 🟢 |
+
+</details>
+
+<details>
+<summary><b>Worlds · snapshots</b> &middot; <code>▓▓▓▓ 0/4</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn world snap save <id>` | Save world state | 🟡 |
+| `spwn world snap ls` | List snapshots | 🟡 |
+| `spwn world snap restore <snap-id>` | Rollback to a snapshot | 🟡 |
+| `spwn world snap rm <snap-id>` | Remove a snapshot | 🟡 |
+
+</details>
+
+<details>
+<summary><b>Worlds · shared knowledge</b> &middot; <code>██ 2/2</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn world knowledge ls <id>` | List shared knowledge files | 🟢 |
+| `spwn world knowledge show <id> <path>` | Read a knowledge file | 🟢 |
+
+</details>
+
+<details>
+<summary><b>Dependencies &amp; authoring</b> &middot; <code>██████▓ 6/7</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn install @spwn/<pkg>` | Install (adds to agents + lockfile) | 🟢 |
+| `spwn uninstall @spwn/<pkg>` | Remove a dep | 🟢 |
+| `spwn inspect [agent]` | Per-agent composition tree | 🟢 |
+| `spwn skill new <name>` | Author a new bare-markdown skill | 🟢 |
+| `spwn skill show <name>` | Display a skill | 🟢 |
+| `spwn skill rm <name>` | Delete a skill | 🟢 |
+| `spwn skill edit <name>` | Open in `$EDITOR` | 🟡 |
+
+</details>
+
+<details>
+<summary><b>Teams &amp; organizations</b> &middot; <code>▓▓▓▓▓▓ 0/6</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn team new <name>` | Create a team | 🟡 |
+| `spwn team ls` | List teams | 🟡 |
+| `spwn team assign <agent> <team>` | Attach agent to a team | 🟡 |
+| `spwn team members <team>` | List a team's agents | 🟡 |
+| `spwn organization ls` | List organizations | 🟡 |
+| `spwn organization inspect <name>` | Show roles in an organization | 🟡 |
+
+</details>
+
+<details>
+<summary><b>Architect daemon</b> &middot; <code>▓▓▓▓▓ 0/5</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn architect start` | Start the always-on daemon | 🟡 |
+| `spwn architect stop` | Stop the daemon | 🟡 |
+| `spwn architect status` | Show status and active worlds | 🟡 |
+| `spwn architect talk "..."` | Talk to the Architect | 🟡 |
+| `spwn architect logs` | Show the Architect's event log | 🟡 |
+
+</details>
+
+<details>
+<summary><b>System</b> &middot; <code>██████▓ 6/7</code></summary>
+
+| Command | Purpose | Status |
+|---|---|:---:|
+| `spwn status` | Global status (worlds, auth, version) | 🟢 |
+| `spwn auth login` | Connect Anthropic / OpenAI | 🟢 |
+| `spwn auth logout` | Clear cached credentials | 🟢 |
+| `spwn auth token <value>` | Set a token directly (CI) | 🟢 |
+| `spwn auth check` | Validate credentials across providers | 🟢 |
+| `spwn upgrade` | Self-update the CLI | 🟢 |
+| `spwn web` | Open the local web UI | 🟡 |
+
+</details>
+
+### Adapters
+
+<details>
+<summary><b>Agent runtimes</b> &middot; <code>█░░░░░░░░ 1/9</code></summary>
+
+| Runtime | Status |
+|---|:---:|
+| Claude Code | 🟢 |
+| Codex | 🔴 |
+| Aider | 🔴 |
+| Cline | 🔴 |
+| Continue | 🔴 |
+| OpenCode | 🔴 |
+| Gemini CLI | 🔴 |
+| Amazon Q | 🔴 |
+| Goose | 🔴 |
+
+</details>
+
+<details>
+<summary><b>LLM providers</b> &middot; <code>█▓░░░░░░ 1/8</code></summary>
+
+| Provider | Status |
+|---|:---:|
+| Anthropic | 🟢 |
+| OpenAI | 🟡 |
+| Google | 🔴 |
+| Mistral | 🔴 |
+| Groq | 🔴 |
+| Together | 🔴 |
+| Ollama | 🔴 |
+| AWS Bedrock | 🔴 |
+
+</details>
+
+<details>
+<summary><b>World runtimes</b> &middot; <code>█░░░░░░ 1/7</code></summary>
+
+| Runtime | Status |
+|---|:---:|
+| Docker | 🟢 |
+| spwn Cloud | 🔴 |
+| K3s | 🔴 |
+| Firecracker | 🔴 |
+| Fly.io | 🔴 |
+| gVisor | 🔴 |
+| Podman | 🔴 |
+
+</details>
+
+<details>
+<summary><b>Memory backends</b> &middot; <code>█░░░░░ 1/6</code></summary>
+
+| Backend | Status |
+|---|:---:|
+| Markdown filesystem | 🟢 |
+| Chroma (RAG) | 🔴 |
+| Qdrant | 🔴 |
+| Pinecone | 🔴 |
+| Weaviate | 🔴 |
+| Turbopuffer | 🔴 |
+
+</details>
+
+<details>
+<summary><b>Tool ecosystems</b> &middot; <code>█▓░░ 1/4</code></summary>
+
+| Source | Status |
+|---|:---:|
+| `@spwn/*` built-in catalog | 🟢 |
+| Local project tools (bare names) | 🟡 |
+| MCP servers | 🔴 |
+| LangChain tools | 🔴 |
+
+</details>
+
+<details>
+<summary><b>Orchestration</b> &middot; <code>▓░░░░░░ 0/7</code></summary>
+
+| Orchestrator | Status |
+|---|:---:|
+| Built-in chief/worker hierarchy | 🟡 |
+| Hermes | 🔴 |
+| CrewAI | 🔴 |
+| AutoGen | 🔴 |
+| LangGraph | 🔴 |
+| Swarm | 🔴 |
+| Mastra | 🔴 |
+
+</details>
+
+<details>
+<summary><b>Observability</b> &middot; <code>▓░░░░ 0/5</code></summary>
+
+| Backend | Status |
+|---|:---:|
+| Web UI | 🟡 |
+| Langfuse | 🔴 |
+| LangSmith | 🔴 |
+| Helicone | 🔴 |
+| OpenTelemetry | 🔴 |
+
+</details>
 
 <br/>
 
