@@ -1,3 +1,8 @@
+---
+name: task-planning
+description: Use when breaking work into tasks, pushing to the Architect's stack, and iterating toward done.
+---
+
 # Task Planning
 
 ## Your Stack

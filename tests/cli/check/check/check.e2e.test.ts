@@ -89,6 +89,25 @@ describe('spwn check', () => {
         result.stdout.toContain('spwn.yaml#worlds.neo.agents');
     });
 
+    test('flags a skill missing the required YAML frontmatter', async () => {
+        // Given - single-agent base + a naked skill dropped under
+        // Spwn/agents/neo/skills/ via the framework's agent/ seed
+        // Handler. The skill has no `--- name: ... ---` block.
+        const result = await spec('skill frontmatter missing')
+            .project('single-agent')
+            .seed('agent/neo/skills/naked.md')
+            .exec('check')
+            .run();
+
+        // Then - check exits non-zero, names the offending file, and
+        // Hints at the header shape the user should add.
+        expect(result.exitCode).toBe(1);
+        expect(result.stdout.text).toContain('spwn/agents/neo/skills/naked.md');
+        expect(result.stdout.text).toContain('missing YAML frontmatter');
+        expect(result.stdout.text).toContain('name: <slug>');
+        expect(result.stdout.text).toContain('description:');
+    });
+
     test('emits a JSON report for a valid project', async () => {
         // Given - the frozen single-agent fixture
         const result = await spec('check json valid')
@@ -133,7 +152,7 @@ describe('spwn check', () => {
         // Has content, so a shallow check sees a valid project.
         const shallow = await spec('check deep shallow-pass')
             .project('single-agent')
-            .seed('agent/neo')
+            .seed('agent/neo/AGENTS.md')
             .exec('check')
             .run();
         expect(shallow.exitCode).toBe(0);
@@ -141,7 +160,7 @@ describe('spwn check', () => {
         // When - the same project is re-run with --deep
         const deep = await spec('check deep catches empty')
             .project('single-agent')
-            .seed('agent/neo')
+            .seed('agent/neo/AGENTS.md')
             .exec('check --deep')
             .run();
 
@@ -155,7 +174,7 @@ describe('spwn check', () => {
     test('--deep --json tags compile issues with source=compile', async () => {
         const result = await spec('check deep json')
             .project('single-agent')
-            .seed('agent/neo')
+            .seed('agent/neo/AGENTS.md')
             .exec('check --deep --json')
             .run();
 

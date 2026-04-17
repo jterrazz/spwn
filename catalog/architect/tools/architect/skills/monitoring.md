@@ -1,3 +1,8 @@
+---
+name: monitoring
+description: Use when running health checks across worlds and agents — probe liveness, inspect container state, surface degraded services.
+---
+
 # Monitoring
 
 ## Health Checks

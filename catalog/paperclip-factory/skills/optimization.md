@@ -1,3 +1,8 @@
+---
+name: optimization
+description: Use when looking for performance improvements, removing waste, or streamlining a process.
+---
+
 # Optimization
 
 Use this skill when looking for performance improvements, removing waste,

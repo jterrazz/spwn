@@ -347,7 +347,7 @@ group to see the list. Each summary shows a progress bar
 |---|---|:---:|
 | `spwn init` | Scaffold a blank project | 🟢 |
 | `spwn init @spwn/<template>` | Install a bundled example | 🟢 |
-| `spwn check` | Validate the project tree (15 rules) | 🟢 |
+| `spwn check` | Validate the project tree (16 rules) | 🟢 |
 | `spwn build` | Compile + bake the project image | 🟢 |
 | `spwn build --tree-only` | Render the compiled tree to ./dist | 🟢 |
 

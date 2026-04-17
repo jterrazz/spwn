@@ -1,3 +1,8 @@
+---
+name: self-reflection
+description: Use when journaling observations, checking in on goals, or carrying awareness across sessions.
+---
+
 # Skill: Self-Reflection
 
 How to journal observations and maintain awareness across sessions.

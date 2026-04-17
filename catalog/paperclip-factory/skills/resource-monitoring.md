@@ -1,3 +1,8 @@
+---
+name: resource-monitoring
+description: Use when tracking system resource usage, detecting waste, or setting up observability for a running process.
+---
+
 # Resource Monitoring
 
 Use this skill when tracking system resource usage, detecting waste, or

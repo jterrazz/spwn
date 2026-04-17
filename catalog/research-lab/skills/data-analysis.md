@@ -1,3 +1,8 @@
+---
+name: data-analysis
+description: Use when cleaning, transforming, exploring, or statistically analysing datasets to support or refute a hypothesis.
+---
+
 # Data Analysis
 
 Clean, transform, explore, and statistically analyze datasets. Produce
