@@ -22,7 +22,7 @@ func writeManifest(t *testing.T, dir, body string) {
 
 func TestParse_minimal(t *testing.T) {
 	dir := t.TempDir()
-	writeManifest(t, dir, `name: "@spwn/git"
+	writeManifest(t, dir, `name: "spwn:git"
 kind: tool
 install:
   packages: [git]
@@ -34,8 +34,8 @@ verify:
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Schema.Name != "@spwn/git" {
-		t.Errorf("name: want @spwn/git, got %q", tool.Schema.Name)
+	if tool.Schema.Name != "spwn:git" {
+		t.Errorf("name: want spwn:git, got %q", tool.Schema.Name)
 	}
 	if tool.Kind != dependency.KindTool {
 		t.Errorf("kind: want Tool, got %v", tool.Kind)
@@ -75,7 +75,7 @@ func TestParse_defaults(t *testing.T) {
 
 func TestParse_runtimeKindAndProvider(t *testing.T) {
 	dir := t.TempDir()
-	writeManifest(t, dir, `name: "@spwn/claude-code"
+	writeManifest(t, dir, `name: "spwn:claude-code"
 kind: runtime
 version: latest
 runtime-provider: claude-code
@@ -100,7 +100,7 @@ verify:
 
 func TestParse_filesBakedIn(t *testing.T) {
 	dir := t.TempDir()
-	writeManifest(t, dir, `name: "@spwn/architect"
+	writeManifest(t, dir, `name: "spwn:architect"
 kind: platform
 files:
   /usr/local/bin/entrypoint.sh: files/entrypoint.sh
@@ -135,13 +135,13 @@ verify:
 
 func TestParse_runtimeConfigSection(t *testing.T) {
 	dir := t.TempDir()
-	writeManifest(t, dir, `name: "@spwn/mempalace"
+	writeManifest(t, dir, `name: "spwn:mempalace"
 kind: tool
 runtime-config:
   runtimes:
-    - "@spwn/claude-code"
+    - "spwn:claude-code"
   configs:
-    "@spwn/claude-code":
+    "spwn:claude-code":
       mcpServers:
         mempalace:
           command: python3
@@ -160,11 +160,11 @@ verify:
 	// The dependency: section surfaces via Runtimes() and Config() on the
 	// unified image.Tool interface — no type assertion needed.
 	runtimes := func() []string { if tool.Schema.RuntimeConfig != nil { return tool.Schema.RuntimeConfig.Runtimes }; return nil }()
-	if len(runtimes) != 1 || runtimes[0] != "@spwn/claude-code" {
+	if len(runtimes) != 1 || runtimes[0] != "spwn:claude-code" {
 		t.Errorf("runtimes: %v", runtimes)
 	}
 
-	cfg := configJSONFor(tool, "@spwn/claude-code")
+	cfg := configJSONFor(tool, "spwn:claude-code")
 	if len(cfg) == 0 {
 		t.Fatal("empty config")
 	}
@@ -186,14 +186,14 @@ verify:
 	}
 
 	// Non-matching runtime returns nil.
-	if got := configJSONFor(tool, "@spwn/codex"); got != nil {
+	if got := configJSONFor(tool, "spwn:codex"); got != nil {
 		t.Errorf("codex should get nil, got %s", got)
 	}
 }
 
 func TestParse_skillsDirExposed(t *testing.T) {
 	dir := t.TempDir()
-	writeManifest(t, dir, `name: "@spwn/qmd"
+	writeManifest(t, dir, `name: "spwn:qmd"
 install:
   commands: [npm install -g qmd]
 verify:

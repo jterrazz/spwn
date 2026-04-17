@@ -61,7 +61,7 @@ func TestAgentAdd_AgentNotFound(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 	resetComposeFlags()
-	composeDeps = []string{"@spwn/python"}
+	composeDeps = []string{"spwn:python"}
 
 	cmd, _ := newComposeCmd()
 	err := addCmd.RunE(cmd, []string{"ghost"})
@@ -73,7 +73,7 @@ func TestAgentAdd_AgentNotFound(t *testing.T) {
 func TestAgentAdd_SinglePackage(t *testing.T) {
 	scaffoldAgent(t, "neo")
 	resetComposeFlags()
-	composeDeps = []string{"@spwn/python"}
+	composeDeps = []string{"spwn:python"}
 
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
@@ -84,15 +84,15 @@ func TestAgentAdd_SinglePackage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
-		t.Errorf("Packages = %v, want [@spwn/python]", m.Deps)
+	if len(m.Deps) != 1 || m.Deps[0] != "spwn:python" {
+		t.Errorf("Packages = %v, want [spwn:python]", m.Deps)
 	}
 }
 
 func TestAgentAdd_MultiplePackages(t *testing.T) {
 	scaffoldAgent(t, "neo")
 	resetComposeFlags()
-	composeDeps = []string{"@spwn/unix", "@spwn/python", "@spwn/git"}
+	composeDeps = []string{"spwn:unix", "spwn:python", "spwn:git"}
 
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
@@ -109,14 +109,14 @@ func TestAgentAdd_Idempotent(t *testing.T) {
 	scaffoldAgent(t, "neo")
 
 	resetComposeFlags()
-	composeDeps = []string{"@spwn/python"}
+	composeDeps = []string{"spwn:python"}
 	cmd, _ := newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
 	}
 
 	resetComposeFlags()
-	composeDeps = []string{"@spwn/python"}
+	composeDeps = []string{"spwn:python"}
 	cmd, _ = newComposeCmd()
 	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
@@ -147,28 +147,28 @@ func TestAgentRemove_NoFlagsReturnsError(t *testing.T) {
 func TestAgentRemove_Package(t *testing.T) {
 	scaffoldAgent(t, "neo")
 
-	agent.AddDependency("neo", "@spwn/unix")
-	agent.AddDependency("neo", "@spwn/python")
+	agent.AddDependency("neo", "spwn:unix")
+	agent.AddDependency("neo", "spwn:python")
 
 	resetComposeFlags()
-	composeDeps = []string{"@spwn/unix"}
+	composeDeps = []string{"spwn:unix"}
 	cmd, _ := newComposeCmd()
 	if err := removeCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
 	}
 
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
-		t.Errorf("Packages = %v, want [@spwn/python]", m.Deps)
+	if len(m.Deps) != 1 || m.Deps[0] != "spwn:python" {
+		t.Errorf("Packages = %v, want [spwn:python]", m.Deps)
 	}
 }
 
 func TestAgentRemove_AbsentPackageErrors(t *testing.T) {
 	scaffoldAgent(t, "neo")
-	agent.AddDependency("neo", "@spwn/python")
+	agent.AddDependency("neo", "spwn:python")
 
 	resetComposeFlags()
-	composeDeps = []string{"@spwn/never-added"}
+	composeDeps = []string{"spwn:never-added"}
 	cmd, _ := newComposeCmd()
 	// Removing an absent package must error so scripts can distinguish
 	// "I removed it" from "it was never there" — the previous
@@ -179,8 +179,8 @@ func TestAgentRemove_AbsentPackageErrors(t *testing.T) {
 
 	// Manifest must stay untouched when the preflight rejects.
 	m, _ := agent.LoadManifest("neo")
-	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
-		t.Errorf("Packages = %v, want [@spwn/python] (unchanged)", m.Deps)
+	if len(m.Deps) != 1 || m.Deps[0] != "spwn:python" {
+		t.Errorf("Packages = %v, want [spwn:python] (unchanged)", m.Deps)
 	}
 }
 

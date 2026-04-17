@@ -26,7 +26,7 @@ physics:
     cpu: 1
     memory: 256m
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"
 `,
 		`
 physics:
@@ -34,7 +34,7 @@ physics:
     cpu: 1
     memory: 512m
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"
 `,
 		`
 physics:
@@ -42,7 +42,7 @@ physics:
     cpu: 1
     memory: 384m
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"
 `,
 	}
 

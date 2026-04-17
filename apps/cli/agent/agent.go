@@ -77,7 +77,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn agent create neo", Desc: ""},
-				{Name: "spwn agent add neo --dep @spwn/python --skill paper-reading", Desc: ""},
+				{Name: "spwn agent add neo --dep spwn:python --skill paper-reading", Desc: ""},
 				{Name: "spwn agent neo", Desc: ""},
 			}},
 		},

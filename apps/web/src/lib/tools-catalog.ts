@@ -26,7 +26,7 @@ export interface ToolDef {
 export const TOOLS: ToolDef[] = [
     // ── SDKs ──
     {
-        name: '@spwn/unix',
+        name: 'spwn:unix',
         kind: 'sdk',
         description: 'Core Unix utilities',
         provides: 'bash, coreutils, grep, sed, awk, curl, jq',
@@ -37,7 +37,7 @@ export const TOOLS: ToolDef[] = [
         skills: [],
     },
     {
-        name: '@spwn/node',
+        name: 'spwn:node',
         kind: 'sdk',
         description: 'Node.js 20 SDK',
         provides: 'node, npm, npx',
@@ -48,7 +48,7 @@ export const TOOLS: ToolDef[] = [
         skills: [],
     },
     {
-        name: '@spwn/python',
+        name: 'spwn:python',
         kind: 'sdk',
         description: 'Python 3 SDK',
         provides: 'python3, pip',
@@ -59,7 +59,7 @@ export const TOOLS: ToolDef[] = [
         skills: [],
     },
     {
-        name: '@spwn/build',
+        name: 'spwn:build',
         kind: 'sdk',
         description: 'C/C++ build essentials',
         provides: 'make, gcc, g++',
@@ -71,12 +71,12 @@ export const TOOLS: ToolDef[] = [
     },
     // ── Runtimes ──
     {
-        name: '@spwn/claude-code',
+        name: 'spwn:claude-code',
         kind: 'runtime',
         description: 'Claude Code AI runtime',
         provides: 'claude CLI + pre-configured auth',
         useWhen: "You want Anthropic's agent runtime (default)",
-        dependencies: ['@spwn/node'],
+        dependencies: ['spwn:node'],
         verify: ['claude'],
         status: 'available',
         skills: [
@@ -106,12 +106,12 @@ claude --session-id <id> "task"      # Resume specific session
         ],
     },
     {
-        name: '@spwn/codex',
+        name: 'spwn:codex',
         kind: 'runtime',
         description: 'OpenAI Codex agent runtime',
         provides: 'codex CLI + pre-configured workspace trust',
         useWhen: 'You want to use OpenAI models (GPT-5, o3) as the agent runtime',
-        dependencies: ['@spwn/node'],
+        dependencies: ['spwn:node'],
         verify: ['codex'],
         status: 'available',
         skills: [
@@ -140,19 +140,19 @@ Auth tokens are forwarded from the host automatically.
         ],
     },
     {
-        name: '@spwn/aider',
+        name: 'spwn:aider',
         kind: 'runtime',
         description: 'Aider code assistant',
         provides: 'aider CLI',
         useWhen: 'You want an open-source code-focused runtime',
-        dependencies: ['@spwn/python'],
+        dependencies: ['spwn:python'],
         verify: ['aider'],
         status: 'planned',
         skills: [],
     },
     // ── Tools ──
     {
-        name: '@spwn/git',
+        name: 'spwn:git',
         kind: 'tool',
         description: 'Git version control',
         provides: 'git',
@@ -163,7 +163,7 @@ Auth tokens are forwarded from the host automatically.
         skills: [],
     },
     {
-        name: '@spwn/docker-cli',
+        name: 'spwn:docker-cli',
         kind: 'tool',
         description: 'Docker CLI for DooD',
         provides: 'docker',
@@ -174,12 +174,12 @@ Auth tokens are forwarded from the host automatically.
         skills: [],
     },
     {
-        name: '@spwn/qmd',
+        name: 'spwn:qmd',
         kind: 'tool',
         description: 'On-device markdown search',
         provides: 'qmd - BM25 + semantic search',
         useWhen: 'The agent needs to search docs or knowledge bases locally',
-        dependencies: ['@spwn/node'],
+        dependencies: ['spwn:node'],
         verify: ['qmd'],
         status: 'available',
         skills: [
@@ -210,7 +210,7 @@ It runs entirely locally - no external API calls needed for search.`,
     },
     // ── Platform ──
     {
-        name: '@spwn/cli',
+        name: 'spwn:cli',
         kind: 'platform',
         description: 'spwn CLI',
         provides: 'spwn - agent management, messaging, identity',
@@ -245,12 +245,12 @@ cat /mind/identity/traits.md
         ],
     },
     {
-        name: '@spwn/architect',
+        name: 'spwn:architect',
         kind: 'platform',
         description: 'Orchestration daemon',
         provides: 'spwn + claude + docker (full stack)',
         useWhen: "You're running the always-on Architect",
-        dependencies: ['@spwn/cli', '@spwn/claude-code', '@spwn/docker-cli'],
+        dependencies: ['spwn:cli', 'spwn:claude-code', 'spwn:docker-cli'],
         verify: ['spwn', 'claude', 'docker'],
         status: 'available',
         skills: [
@@ -357,9 +357,9 @@ export function getToolByName(name: string): ToolDef | undefined {
     return TOOLS.find((t) => t.name === name);
 }
 
-/** Get the slug from a tool name (e.g. "@spwn/qmd" → "qmd"). */
+/** Get the slug from a tool name (e.g. "spwn:qmd" → "qmd"). */
 export function toolSlug(name: string): string {
-    return name.replace('@spwn/', '');
+    return name.replace('spwn:', '');
 }
 
 /** Kind display info. */

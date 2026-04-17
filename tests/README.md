@@ -186,7 +186,7 @@ describe('world lifecycle', () => {
 - Follow-up CLI commands that need a container id (e.g.
   `spwn world inspect <id>`) get it via `neo.id`.
 - Always use the `docker-pilot` fixture (minimal agent without
-  `@spwn/python`). `single-agent` fails to spawn because the
+  `spwn:python`). `single-agent` fails to spawn because the
   base image lacks `pip3`.
 - Banners (`Created container`, `Agent is alive`, `Destroyed`,
   `World destroyed`) go to **stderr**, not stdout - spwn follows

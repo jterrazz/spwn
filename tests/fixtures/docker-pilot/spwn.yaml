@@ -3,8 +3,8 @@ version: 2
 name: docker-pilot
 
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 
 worlds:
   neo:

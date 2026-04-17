@@ -197,14 +197,14 @@ export default function ToolDetailPage() {
     const params = useParams();
     const router = useRouter();
     const slug = params.slug as string;
-    const tool = getToolByName(`@spwn/${slug}`);
+    const tool = getToolByName(`spwn:${slug}`);
 
     usePageTitle(tool ? tool.name : 'Tool Not Found');
 
     if (!tool) {
         return (
             <Page>
-                <PageHeader description={`No tool named @spwn/${slug}`} title="Tool Not Found" />
+                <PageHeader description={`No tool named spwn:${slug}`} title="Tool Not Found" />
                 <button
                     className="text-sm text-muted-foreground/40 hover:text-foreground/60 transition-colors"
                     onClick={() => router.push('/tools')}
@@ -255,10 +255,10 @@ export default function ToolDetailPage() {
                 <MetaCard
                     label="Version"
                     value={(() => {
-                        if (tool.name === '@spwn/node') {
+                        if (tool.name === 'spwn:node') {
                             return '20';
                         }
-                        if (tool.name === '@spwn/python') {
+                        if (tool.name === 'spwn:python') {
                             return '3';
                         }
                         return 'latest';
@@ -306,7 +306,7 @@ export default function ToolDetailPage() {
                                         onClick={() => {
                                             const depTool = TOOLS.find((t) => t.name === d);
                                             if (depTool) {
-                                                router.push(`/tools/${d.replace('@spwn/', '')}`);
+                                                router.push(`/tools/${d.replace('spwn:', '')}`);
                                             }
                                         }}
                                     >
@@ -357,7 +357,7 @@ export default function ToolDetailPage() {
                     <p className="text-[11px] text-muted-foreground/30">
                         Skills are markdown guides installed at{' '}
                         <code className="text-[10px] font-mono bg-white/[0.04] px-1 py-0.5 rounded">
-                            /world/skills/{tool.name.replace('@spwn/', '')}/
+                            /world/skills/{tool.name.replace('spwn:', '')}/
                         </code>{' '}
                         inside the container. Agents read these to learn how to use the tool.
                     </p>

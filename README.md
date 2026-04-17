@@ -53,7 +53,7 @@ Three commands. One working agent.
 
 `spwn auth` checks you're logged in to Claude Code (or any supported runtime). `spwn init` drops `spwn.yaml` + a starter `neo` agent into the current directory. `spwn agent neo` opens an interactive session with neo inside a sandboxed Docker world — the container lifecycle is handled for you.
 
-Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/examples/`).
+Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/examples/`).
 
 > **Requirements:** Docker
 
@@ -65,7 +65,7 @@ Prefer a bundled demo? `spwn init @spwn/matrix` drops a ready-made multi-agent w
 <tr>
 <td align="center" width="33%">
 <h3>🧩 Composable Intelligence</h3>
-Stack tool dependencies, skill files, and an identity into a running mind. Mix <code>@spwn/unix</code> + <code>@spwn/python</code> + a researcher identity and you have an autonomous scientist. <b>Docker, but for minds.</b>
+Stack tool dependencies, skill files, and an identity into a running mind. Mix <code>spwn:unix</code> + <code>spwn:python</code> + a researcher identity and you have an autonomous scientist. <b>Docker, but for minds.</b>
 </td>
 <td align="center" width="33%">
 <h3>🧠 Persistent Minds</h3>
@@ -161,13 +161,13 @@ spwn/agents/neo/
 # spwn/agents/neo/agent.yaml
 name: neo
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 dependencies:
-  - "@spwn/unix"                 # bash, coreutils, grep, sed, awk
-  - "@spwn/git"                  # version control
-  - "@spwn/python"               # python3, pip3
-  - "@spwn/mempalace"            # injects MCP server into Claude Code
+  - "spwn:unix"                 # bash, coreutils, grep, sed, awk
+  - "spwn:git"                  # version control
+  - "spwn:python"               # python3, pip3
+  - "spwn:mempalace"            # injects MCP server into Claude Code
   - paper-reading                # local skill: spwn/skills/paper-reading.md
   - hypothesis-testing           # local skill
 ```
@@ -175,11 +175,11 @@ dependencies:
 **If a dependency isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [dependency catalog](docs/dependency-catalog.md).
 
 Dependency resolution works like npm:
-- `@spwn/<name>` is a catalog dependency compiled into the spwn binary.
+- `spwn:<name>` is a catalog dependency compiled into the spwn binary.
 - `<bare-name>` is a local skill under `spwn/skills/<name>.md` or a local dependency under `spwn/tools/<name>/`.
 - `@<owner>/<name>` is reserved for a future community registry.
 
-Add a catalog dependency to every agent with `spwn install @spwn/<name>`; the ref gets pinned in `spwn.lock`.
+Add a catalog dependency to every agent with `spwn install spwn:<name>`; the ref gets pinned in `spwn.lock`.
 
 <br/>
 
@@ -209,20 +209,20 @@ Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lo
 
 ```bash
 spwn init
-spwn agent add curie --dependency @spwn/python --dependency @spwn/qmd
+spwn agent add curie --dependency spwn:python --dependency spwn:qmd
 spwn agent add curie --dependency paper-reading --plugin hypothesis-testing
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
 
-> Stack `@spwn/python` + `@spwn/qmd` + the right skills and you have an autonomous lab partner. Edit `identity/profile.md` tomorrow - same mind, new voice. **Docker, but for minds.**
+> Stack `spwn:python` + `spwn:qmd` + the right skills and you have an autonomous lab partner. Edit `identity/profile.md` tomorrow - same mind, new voice. **Docker, but for minds.**
 
 ### Ship an agent with your repo
 
 ```bash
 cd acme-api
 spwn init
-spwn agent add neo --dependency @spwn/node --dependency @spwn/git
+spwn agent add neo --dependency spwn:node --dependency spwn:git
 
 git add spwn.yaml spwn/
 git commit -m "add neo, our repo maintainer"
@@ -269,15 +269,15 @@ below.
 ```
 # ── Start ────────────────────────────────────────────────────────
 spwn init                             Scaffold a project
-spwn init @spwn/matrix                Install a bundled example
+spwn init spwn:matrix                Install a bundled example
 spwn check                            Validate the project tree
 spwn up                               Bring up every world in spwn.yaml
 spwn down                             Stop every world
 
 # ── Compose ──────────────────────────────────────────────────────
-spwn install @spwn/python             Install a dependency
+spwn install spwn:python             Install a dependency
 spwn agent create neo                 Create an agent + its world
-spwn agent add neo --dep @spwn/qmd    Attach a dep to one agent
+spwn agent add neo --dep spwn:qmd    Attach a dep to one agent
 spwn agent neo                        Interactive session with neo
 
 # ── Observe ─────────────────────────────────────────────────────
@@ -302,7 +302,7 @@ in [Implementation status](#implementation-status).
 | **LLM provider** | Anthropic · OpenAI (partial) |
 | **World runtime** | Docker |
 | **Memory** | Markdown filesystem |
-| **Tool ecosystem** | `@spwn/*` built-in dependencies, local custom dependencies |
+| **Tool ecosystem** | `spwn:*` built-in dependencies, local custom dependencies |
 
 Want something else? [Open an issue](https://github.com/jterrazz/spwn/issues) - every adapter is a single Go file.
 
@@ -338,7 +338,7 @@ group to see the list. Each summary shows a progress bar
 | Command | Purpose | Status |
 |---|---|:---:|
 | `spwn init` | Scaffold a blank project | 🟢 |
-| `spwn init @spwn/<template>` | Install a bundled example | 🟢 |
+| `spwn init spwn:<template>` | Install a bundled example | 🟢 |
 | `spwn check` | Validate the project tree (16 rules) | 🟢 |
 | `spwn build` | Compile + bake the project image | 🟢 |
 | `spwn build --tree-only` | Render the compiled tree to ./dist | 🟢 |
@@ -376,8 +376,8 @@ group to see the list. Each summary shows a progress bar
 
 | Command | Purpose | Status |
 |---|---|:---:|
-| `spwn agent add <name> --dep @spwn/<pkg>` | Attach a catalog dep | 🟢 |
-| `spwn agent rm <name> --dep @spwn/<pkg>` | Remove a dep | 🟢 |
+| `spwn agent add <name> --dep spwn:<pkg>` | Attach a catalog dep | 🟢 |
+| `spwn agent rm <name> --dep spwn:<pkg>` | Remove a dep | 🟢 |
 | `spwn agent add <name> --dep <local>` | Attach a local (bare-name) dep | 🟡 |
 
 </details>
@@ -469,8 +469,8 @@ group to see the list. Each summary shows a progress bar
 
 | Command | Purpose | Status |
 |---|---|:---:|
-| `spwn install @spwn/<pkg>` | Install (adds to agents + lockfile) | 🟢 |
-| `spwn uninstall @spwn/<pkg>` | Remove a dep | 🟢 |
+| `spwn install spwn:<pkg>` | Install (adds to agents + lockfile) | 🟢 |
+| `spwn uninstall spwn:<pkg>` | Remove a dep | 🟢 |
 | `spwn inspect [agent]` | Per-agent composition tree | 🟢 |
 | `spwn skill new <name>` | Author a new bare-markdown skill | 🟢 |
 | `spwn skill show <name>` | Display a skill | 🟢 |
@@ -590,7 +590,7 @@ group to see the list. Each summary shows a progress bar
 
 | Source | Status |
 |---|:---:|
-| `@spwn/*` built-in catalog | 🟢 |
+| `spwn:*` built-in catalog | 🟢 |
 | Local project tools (bare names) | 🟡 |
 | MCP servers | 🔴 |
 | LangChain tools | 🔴 |

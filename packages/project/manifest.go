@@ -159,7 +159,7 @@ func RemoveWorld(manifestPath, name string) error {
 
 // AppendGitignore adds a `.spwn/` entry to <root>/.gitignore, creating
 // the file when missing and idempotent when already present. Used by
-// Init and by the catalog example installer so `spwn init @spwn/<slug>`
+// Init and by the catalog example installer so `spwn init spwn:<slug>`
 // drops a consistent gitignore too.
 func AppendGitignore(root string) error {
 	return scaffold.AppendGitignore(root)
@@ -204,11 +204,11 @@ func IsValidProjectName(name string) bool {
 type ValidateOpts struct {
 	// BuiltinTools is the authoritative list of @scope/name package
 	// identifiers the host knows how to build. When empty, package
-	// existence falls back to a simple @spwn/* prefix heuristic.
+	// existence falls back to a simple spwn:* prefix heuristic.
 	BuiltinTools []string
 
 	// SupportedRuntimes is the list of runtime identifiers the host
-	// can actually spawn (e.g. "@spwn/claude-code"). When empty,
+	// can actually spawn (e.g. "spwn:claude-code"). When empty,
 	// runtime validity is not checked.
 	SupportedRuntimes []string
 }

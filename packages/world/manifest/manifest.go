@@ -91,13 +91,13 @@ func CreateDefault() error {
 	content := `# Default world config.
 # Docs: https://spwn.sh/docs/cli/spwn-world
 
-# Available tools (@spwn/unix = bash, grep, sed, awk, etc.)
+# Available tools (spwn:unix = bash, grep, sed, awk, etc.)
 dependencies:
-  - "@spwn/unix"          # Core Unix tools
-  - "@spwn/git"           # Git version control
-  # - "@spwn/node"        # Node.js + npm
-  # - "@spwn/python"      # Python 3
-  # - "@spwn/build"       # make, gcc, g++
+  - "spwn:unix"          # Core Unix tools
+  - "spwn:git"           # Git version control
+  # - "spwn:node"        # Node.js + npm
+  # - "spwn:python"      # Python 3
+  # - "spwn:build"       # make, gcc, g++
 `
 	return os.WriteFile(path, []byte(content), 0644)
 }
@@ -117,8 +117,8 @@ func CreateConfig(name string) error {
 	content := fmt.Sprintf(`# World config: %s
 
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 `, name)
 	return os.WriteFile(path, []byte(content), 0644)
 }

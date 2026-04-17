@@ -31,7 +31,7 @@ func TestParse_WhitespaceOnly(t *testing.T) {
 }
 
 func TestParse_ScopeWithNoName(t *testing.T) {
-	got := dependency.ParseRef("@spwn/")
+	got := dependency.ParseRef("spwn:")
 	if got.Kind != dependency.KindSpwnBuiltin {
 		t.Errorf("kind: want KindSpwnBuiltin, got %v", got.Kind)
 	}
@@ -43,25 +43,28 @@ func TestParse_ScopeWithNoName(t *testing.T) {
 	}
 }
 
-func TestParse_EmptyOwner(t *testing.T) {
-	got := dependency.ParseRef("@/foo")
-	// Owner is empty string, which is != "spwn", so KindRegistry.
-	if got.Kind != dependency.KindRegistry {
-		t.Errorf("kind: want KindRegistry, got %v", got.Kind)
-	}
-	if got.Owner != "" {
-		t.Errorf("owner: want empty, got %q", got.Owner)
-	}
-	if got.Name != "foo" {
-		t.Errorf("name: want %q, got %q", "foo", got.Name)
+// TestParse_AtPrefixMalformed: any bare `@`-prefixed ref now parses
+// as a malformed registry ref (empty Name) so the resolver surfaces
+// a clear "unsupported" error instead of silently treating it as
+// local. The legacy `@owner/name` syntax was retired in favour of
+// `spwn:<name>` and `github:<owner>/<repo>`.
+func TestParse_AtPrefixMalformed(t *testing.T) {
+	for _, in := range []string{"@/foo", "@spwn", "@"} {
+		got := dependency.ParseRef(in)
+		if got.Kind != dependency.KindRegistry {
+			t.Errorf("ParseRef(%q) kind = %v, want KindRegistry (malformed)", in, got.Kind)
+		}
+		if got.Name != "" {
+			t.Errorf("ParseRef(%q) name = %q, want empty", in, got.Name)
+		}
 	}
 }
 
 func TestParse_VersionedRefNotStripped(t *testing.T) {
 	// Parse does NOT strip the @version suffix — that is the caller's job
-	// via SplitVersion. So "@spwn/unix@24.04" should be parsed with
+	// via SplitVersion. So "spwn:unix@24.04" should be parsed with
 	// the version baked into the name.
-	got := dependency.ParseRef("@spwn/unix@24.04")
+	got := dependency.ParseRef("spwn:unix@24.04")
 	if got.Kind != dependency.KindSpwnBuiltin {
 		t.Errorf("kind: want KindSpwnBuiltin, got %v", got.Kind)
 	}
@@ -73,9 +76,9 @@ func TestParse_VersionedRefNotStripped(t *testing.T) {
 // ---------- SplitVersion edge cases ----------
 
 func TestSplitVersion_ScopedVersioned(t *testing.T) {
-	dependency, version := dependency.SplitVersion("@spwn/unix@24.04")
-	if dependency != "@spwn/unix" {
-		t.Errorf("dependency: want %q, got %q", "@spwn/unix", dependency)
+	dependency, version := dependency.SplitVersion("spwn:unix@24.04")
+	if dependency != "spwn:unix" {
+		t.Errorf("dependency: want %q, got %q", "spwn:unix", dependency)
 	}
 	if version != "24.04" {
 		t.Errorf("version: want %q, got %q", "24.04", version)
@@ -83,9 +86,9 @@ func TestSplitVersion_ScopedVersioned(t *testing.T) {
 }
 
 func TestSplitVersion_NoVersion(t *testing.T) {
-	dependency, version := dependency.SplitVersion("@spwn/unix")
-	if dependency != "@spwn/unix" {
-		t.Errorf("dependency: want %q, got %q", "@spwn/unix", dependency)
+	dependency, version := dependency.SplitVersion("spwn:unix")
+	if dependency != "spwn:unix" {
+		t.Errorf("dependency: want %q, got %q", "spwn:unix", dependency)
 	}
 	if version != "" {
 		t.Errorf("version: want empty, got %q", version)
@@ -131,7 +134,7 @@ func TestResolveTool_LocalNameWithDotDot(t *testing.T) {
 
 func TestResolveTool_BuiltinWithoutCatalog(t *testing.T) {
 	// haveCatalog=false should accept any well-formed builtin.
-	got := dependency.ResolveTool("", dependency.ParseRef("@spwn/anything"), nil, false)
+	got := dependency.ResolveTool("", dependency.ParseRef("spwn:anything"), nil, false)
 	if got != dependency.ResolveOK {
 		t.Errorf("builtin without catalog: want OK, got %v", got)
 	}
@@ -139,9 +142,9 @@ func TestResolveTool_BuiltinWithoutCatalog(t *testing.T) {
 
 func TestResolveTool_BuiltinWithCatalogMissing(t *testing.T) {
 	catalog := map[string]struct{}{
-		"@spwn/unix": {},
+		"spwn:unix": {},
 	}
-	got := dependency.ResolveTool("", dependency.ParseRef("@spwn/not-in-catalog"), catalog, true)
+	got := dependency.ResolveTool("", dependency.ParseRef("spwn:not-in-catalog"), catalog, true)
 	if got != dependency.ResolveNotFound {
 		t.Errorf("builtin missing from catalog: want NotFound, got %v", got)
 	}
@@ -176,7 +179,7 @@ func TestResolveSkill_EmptyPackDir(t *testing.T) {
 }
 
 func TestResolveSkill_RegistryAlwaysUnsupported(t *testing.T) {
-	got := dependency.ResolveSkill("", dependency.ParseRef("@acme/foo"), nil, false)
+	got := dependency.ResolveSkill("", dependency.ParseRef("github:acme/foo"), nil, false)
 	if got != dependency.ResolveRegistryUnsupported {
 		t.Errorf("registry skill: want RegistryUnsupported, got %v", got)
 	}

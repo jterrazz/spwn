@@ -33,18 +33,18 @@ import {
 // ── Icon map ────────────────────────────────────────────────────────────
 
 const TOOL_ICONS: Record<string, React.ReactNode> = {
-    '@spwn/unix': <IconTerminal2 size={18} />,
-    '@spwn/node': <IconBrandNodejs size={18} />,
-    '@spwn/python': <IconBrandPython size={18} />,
-    '@spwn/build': <IconHammer size={18} />,
-    '@spwn/claude-code': <IconBrain size={18} />,
-    '@spwn/codex': <IconBrain size={18} />,
-    '@spwn/aider': <IconBrain size={18} />,
-    '@spwn/git': <IconBrandGit size={18} />,
-    '@spwn/docker-cli': <IconBrandDocker size={18} />,
-    '@spwn/qmd': <IconSearch size={18} />,
-    '@spwn/cli': <IconRocket size={18} />,
-    '@spwn/architect': <IconPackage size={18} />,
+    'spwn:unix': <IconTerminal2 size={18} />,
+    'spwn:node': <IconBrandNodejs size={18} />,
+    'spwn:python': <IconBrandPython size={18} />,
+    'spwn:build': <IconHammer size={18} />,
+    'spwn:claude-code': <IconBrain size={18} />,
+    'spwn:codex': <IconBrain size={18} />,
+    'spwn:aider': <IconBrain size={18} />,
+    'spwn:git': <IconBrandGit size={18} />,
+    'spwn:docker-cli': <IconBrandDocker size={18} />,
+    'spwn:qmd': <IconSearch size={18} />,
+    'spwn:cli': <IconRocket size={18} />,
+    'spwn:architect': <IconPackage size={18} />,
 };
 
 // ── Components ──────────────────────────────────────────────────────────

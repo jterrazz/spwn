@@ -4,7 +4,7 @@
 //
 // Reference kinds (delegated to packages/dependency):
 //
-//   - @spwn/<name>               built-in catalog (compiled into the binary)
+//   - spwn:<name>               built-in catalog (compiled into the binary)
 //   - github.com/<owner>/<repo>  third-party (planned — git tags as versions)
 //   - <bare-name>                local authoring (./spwn/tools/<name>/)
 //
@@ -155,7 +155,7 @@ func findProject() (*project.Project, error) {
 	return cliproject.Require()
 }
 
-// catalogLookup checks whether `ref` is a known @spwn/* dependency.
+// catalogLookup checks whether `ref` is a known spwn:* dependency.
 // The catalog list is supplied by the parent CLI — this package
 // doesn't import spwn.sh/catalog to avoid a cycle.
 var catalogLookup func(ref string) bool

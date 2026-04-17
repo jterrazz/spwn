@@ -14,7 +14,7 @@ import { spec } from '../../../setup/cli.specification.js';
 
 describe('spwn inspect', () => {
     test('renders a single-agent project end-to-end', async () => {
-        // Given - the frozen single-agent fixture (one agent, three @spwn/ deps)
+        // Given - the frozen single-agent fixture (one agent, three spwn: deps)
         const result = await spec('inspect single')
             .project('single-agent')
             .exec('inspect --offline')

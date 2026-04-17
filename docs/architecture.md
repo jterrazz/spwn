@@ -73,7 +73,7 @@ spwn/
 │   ├── runtimes/               L5  spawn-time runtime adapters
 │   ├── world/                  L6  container state, labels, deploy helpers
 │   └── architect/              L6  world orchestration (spawn/destroy/daemon)
-├── catalog/                    flat tree of @spwn/* catalog entries
+├── catalog/                    flat tree of spwn:* catalog entries
 └── tests/                      e2e suite (vitest + real Docker)
 ```
 
@@ -139,7 +139,7 @@ Every arrow crosses a layer boundary. Every layer has one job.
 
 - **Per-repository**. Agents and local blocks live in `./spwn/`, not `~/.spwn/`.
 - **Declared deps only**. An agent can only use dependencies declared in `deps:`. Unlisted = physically absent.
-- **External deps, local blocks**. `deps:` for `@spwn/*` and `github.com/*`. Local authoring in typed dirs: `spwn/skills/`, `spwn/tools/`, `spwn/hooks/`. See [`docs/dependencies.md`](dependencies.md).
+- **External deps, local blocks**. `deps:` for `spwn:*` and `github.com/*`. Local authoring in typed dirs: `spwn/skills/`, `spwn/tools/`, `spwn/hooks/`. See [`docs/dependencies.md`](dependencies.md).
 - **Transitive resolution**. Dependency dependencies resolved recursively, topologically sorted.
 - **Lock file is text**. `spwn.lock` — one dep per line, trivially diffable.
 - **Labels are truth**. World info comes from Docker labels, not on-disk state.

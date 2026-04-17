@@ -48,12 +48,12 @@ func TestRender_DepTreeWithDedup(t *testing.T) {
 		DirectDepsCount:     2,
 		TransitiveDepsCount: 2,
 		Deps: []DepNode{
-			{Name: "@spwn/unix", Version: "24.04"},
-			{Name: "@spwn/qmd", Version: "1.4.0", Skills: 2, Config: true,
+			{Name: "spwn:unix", Version: "24.04"},
+			{Name: "spwn:qmd", Version: "1.4.0", Skills: 2, Config: true,
 				Children: []DepNode{
-					{Name: "@spwn/python", Version: "3.12", Kind: dependency.KindRuntime,
+					{Name: "spwn:python", Version: "3.12", Kind: dependency.KindRuntime,
 						Children: []DepNode{
-							{Name: "@spwn/unix", Version: "24.04", DedupSeen: true},
+							{Name: "spwn:unix", Version: "24.04", DedupSeen: true},
 						}},
 				}},
 		},
@@ -64,12 +64,12 @@ func TestRender_DepTreeWithDedup(t *testing.T) {
 
 	checks := []string{
 		"Dependencies (2 direct, 2 transitive)",
-		"  @spwn/unix@24.04",
-		"  @spwn/qmd@1.4.0",
+		"  spwn:unix@24.04",
+		"  spwn:qmd@1.4.0",
 		"skills(2) · config",
-		"    @spwn/python@3.12",
+		"    spwn:python@3.12",
 		"runtime",
-		"      @spwn/unix@24.04  (*)",
+		"      spwn:unix@24.04  (*)",
 	}
 	for _, want := range checks {
 		if !strings.Contains(got, want) {
@@ -88,7 +88,7 @@ func TestRender_DedupSuppressesChildren(t *testing.T) {
 		Runtime:         "claude-code",
 		DirectDepsCount: 1,
 		Deps: []DepNode{
-			{Name: "@spwn/qmd", DedupSeen: true, Children: []DepNode{
+			{Name: "spwn:qmd", DedupSeen: true, Children: []DepNode{
 				{Name: "should-not-appear"},
 			}},
 		},
@@ -114,7 +114,7 @@ func TestRender_SkillsAndHooksAlignOrigin(t *testing.T) {
 		Runtime: "claude-code",
 		Skills: []SkillRef{
 			{Name: "a", Origin: "spwn/skills"},
-			{Name: "looooooooong-name", Origin: "@spwn/qmd"},
+			{Name: "looooooooong-name", Origin: "spwn:qmd"},
 		},
 		Hooks: []HookRef{
 			{Name: "short", Origin: "spwn/hooks"},
@@ -127,7 +127,7 @@ func TestRender_SkillsAndHooksAlignOrigin(t *testing.T) {
 
 	// Both origin tokens must appear preceded by 4+ spaces (the gap
 	// between the padded name column and the origin column).
-	for _, frag := range []string{"    spwn/skills", "    @spwn/qmd", "    spwn/hooks"} {
+	for _, frag := range []string{"    spwn/skills", "    spwn:qmd", "    spwn/hooks"} {
 		if !strings.Contains(got, frag) {
 			t.Errorf("origin column not aligned, missing %q in:\n%s", frag, got)
 		}

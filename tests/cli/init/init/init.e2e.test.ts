@@ -8,7 +8,7 @@ import { spec } from '../../../setup/cli.specification.js';
  *
  *   - bare `init` in an empty dir writes the starter project tree
  *   - re-running in a populated dir errors unless --force is passed
- *   - `init @spwn/matrix` installs a bundled example
+ *   - `init spwn:matrix` installs a bundled example
  *
  * We pass --name so the stdout banner is stable across runs (otherwise
  * the basename of the temp working directory would leak into the
@@ -92,16 +92,16 @@ describe('spwn init', () => {
         expect(result.file('spwn/worlds/default.yaml').exists).toBe(false);
     });
 
-    test('init @spwn/matrix installs the bundled example', async () => {
+    test('init spwn:matrix installs the bundled example', async () => {
         // Given - an empty dir
-        const result = await spec('init matrix').project('empty').exec('init @spwn/matrix').run();
+        const result = await spec('init matrix').project('empty').exec('init spwn:matrix').run();
 
         // Then - the example's starter files land on disk
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
-        // The "Installed example @spwn/matrix" banner lands on stderr.
+        // The "Installed example spwn:matrix" banner lands on stderr.
         await result.stderr.toMatch('init-matrix-banner.txt');
         // And the stdout summary describes what was added.
         const out = result.stdout.text;

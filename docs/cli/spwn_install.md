@@ -12,7 +12,7 @@ Install a dependency into the project
 Add a catalog or GitHub dependency to every agent's manifest and pin it in spwn.lock.
 
 Examples:
-  spwn install @spwn/python
+  spwn install spwn:python
   spwn install github.com/jterrazz/research-skills
 
 ```

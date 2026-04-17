@@ -2,8 +2,8 @@ name: morpheus
 description: Seed fixture used by the build tree-only e2e to exercise a second-agent compile path.
 
 runtime:
-    backend: '@spwn/claude-code'
+    backend: 'spwn:claude-code'
 
 dependencies:
-    - '@spwn/unix'
-    - '@spwn/git'
+    - 'spwn:unix'
+    - 'spwn:git'

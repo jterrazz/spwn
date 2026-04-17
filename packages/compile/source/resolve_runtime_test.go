@@ -29,9 +29,9 @@ func TestResolveRuntime_tableCases(t *testing.T) {
 			want:     want{runtime: "claude-code"},
 		},
 		{
-			name: "single agent with @spwn/claude-code is canonicalised",
+			name: "single agent with spwn:claude-code is canonicalised",
 			src: &ProjectSource{Agents: []AgentSource{
-				{Name: "neo", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "@spwn/claude-code"}}},
+				{Name: "neo", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "spwn:claude-code"}}},
 			}},
 			want: want{runtime: "claude-code"},
 		},
@@ -52,14 +52,14 @@ func TestResolveRuntime_tableCases(t *testing.T) {
 		},
 		{
 			name:     "override gets canonicalised",
-			override: "@spwn/claude-code",
+			override: "spwn:claude-code",
 			src:      nil,
 			want:     want{runtime: "claude-code"},
 		},
 		{
 			name: "two agents, same runtime: picked",
 			src: &ProjectSource{Agents: []AgentSource{
-				{Name: "neo", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "@spwn/claude-code"}}},
+				{Name: "neo", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "spwn:claude-code"}}},
 				{Name: "morpheus", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "claude-code"}}},
 			}},
 			want: want{runtime: "claude-code"},
@@ -67,8 +67,8 @@ func TestResolveRuntime_tableCases(t *testing.T) {
 		{
 			name: "two agents, conflicting runtimes: error",
 			src: &ProjectSource{Agents: []AgentSource{
-				{Name: "neo", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "@spwn/claude-code"}}},
-				{Name: "morpheus", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "@spwn/codex"}}},
+				{Name: "neo", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "spwn:claude-code"}}},
+				{Name: "morpheus", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "spwn:codex"}}},
 			}},
 			want: want{errSub: "conflicting runtimes"},
 		},
@@ -76,7 +76,7 @@ func TestResolveRuntime_tableCases(t *testing.T) {
 			name: "agent without runtime declared: ignored",
 			src: &ProjectSource{Agents: []AgentSource{
 				{Name: "neo", Config: AgentConfig{}},
-				{Name: "morpheus", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "@spwn/claude-code"}}},
+				{Name: "morpheus", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "spwn:claude-code"}}},
 			}},
 			want: want{runtime: "claude-code"},
 		},

@@ -1,6 +1,6 @@
 name: neo
 role: worker
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"

@@ -26,7 +26,7 @@ func newRegistry(t *testing.T) *ib.Registry {
 // ── Per-tool E2E tests ──
 
 func TestUnix_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix")
 
 	imagetest.AssertBinaryExists(t, s, "bash")
 	imagetest.AssertBinaryExists(t, s, "grep")
@@ -37,14 +37,14 @@ func TestUnix_E2E(t *testing.T) {
 }
 
 func TestGit_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/git")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:git")
 
 	imagetest.AssertBinaryExists(t, s, "git")
 	imagetest.AssertBinaryVersion(t, s, "git", "--version", "git version")
 }
 
 func TestNode_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/node")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:node")
 
 	imagetest.AssertBinaryExists(t, s, "node")
 	imagetest.AssertBinaryExists(t, s, "npm")
@@ -53,14 +53,14 @@ func TestNode_E2E(t *testing.T) {
 }
 
 func TestPython_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/python")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:python")
 
 	imagetest.AssertBinaryExists(t, s, "python3")
 	imagetest.AssertBinaryVersion(t, s, "python3", "--version", "Python 3")
 }
 
 func TestClaudeCode_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/claude-code")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:claude-code")
 
 	// The native installer ships a self-contained claude binary — no
 	// node, no SKILL.md (runtimes are transport, tools ship skills).
@@ -72,16 +72,16 @@ func TestClaudeCode_E2E(t *testing.T) {
 }
 
 func TestQmd_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/qmd")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:qmd")
 
 	imagetest.AssertBinaryExists(t, s, "qmd")
 	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
-	imagetest.AssertSkillInstalled(t, s, "@spwn/qmd")
-	imagetest.AssertSkillContains(t, s, "@spwn/qmd", "QMD")
+	imagetest.AssertSkillInstalled(t, s, "spwn:qmd")
+	imagetest.AssertSkillContains(t, s, "spwn:qmd", "QMD")
 }
 
 func TestCodex_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/codex")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:codex")
 
 	imagetest.AssertBinaryExists(t, s, "codex")
 	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
@@ -96,7 +96,7 @@ func TestCodex_E2E(t *testing.T) {
 
 func TestFullWorldStack_E2E(t *testing.T) {
 	s := imagetest.SpinUp(t, newRegistry(t),
-		"@spwn/unix", "@spwn/git", "@spwn/node", "@spwn/claude-code", "@spwn/cli", "@spwn/qmd",
+		"spwn:unix", "spwn:git", "spwn:node", "spwn:claude-code", "spwn:cli", "spwn:qmd",
 	)
 
 	binaries := []string{"bash", "grep", "curl", "git", "node", "npm", "claude", "qmd"}
@@ -104,17 +104,17 @@ func TestFullWorldStack_E2E(t *testing.T) {
 		imagetest.AssertBinaryExists(t, s, bin)
 	}
 
-	// @spwn/claude-code is a runtime (no SKILL.md); cli and qmd are
+	// spwn:claude-code is a runtime (no SKILL.md); cli and qmd are
 	// tools with skills.
-	imagetest.AssertSkillInstalled(t, s, "@spwn/cli")
-	imagetest.AssertSkillInstalled(t, s, "@spwn/qmd")
+	imagetest.AssertSkillInstalled(t, s, "spwn:cli")
+	imagetest.AssertSkillInstalled(t, s, "spwn:qmd")
 
 	imagetest.AssertFileExists(t, s, "/world/skills/INDEX.md")
 	imagetest.AssertFileContains(t, s, "/world/skills/INDEX.md", "qmd")
 }
 
 func TestMinimalStack_E2E(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix")
 
 	imagetest.AssertBinaryExists(t, s, "bash")
 	imagetest.AssertBinaryExists(t, s, "curl")
@@ -122,13 +122,13 @@ func TestMinimalStack_E2E(t *testing.T) {
 	// Node should NOT be present
 	_, exitCode := s.Exec("command -v node")
 	if exitCode == 0 {
-		t.Error("node should not be present in minimal @spwn/unix stack")
+		t.Error("node should not be present in minimal spwn:unix stack")
 	}
 }
 
 func TestDependencyAutoResolve_E2E(t *testing.T) {
-	// Request @spwn/qmd without explicit @spwn/node - should auto-resolve
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix", "@spwn/qmd")
+	// Request spwn:qmd without explicit spwn:node - should auto-resolve
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix", "spwn:qmd")
 
 	imagetest.AssertBinaryExists(t, s, "qmd")
 	imagetest.AssertBinaryExists(t, s, "node")

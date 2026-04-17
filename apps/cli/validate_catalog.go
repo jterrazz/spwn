@@ -8,7 +8,7 @@ import (
 
 func init() {
 	// Wire the built-in catalog into the install verbs so
-	// `spwn install @spwn/bogus` can fail with a crisp error
+	// `spwn install spwn:bogus` can fail with a crisp error
 	// instead of silently pinning garbage. Lives here (not in
 	// dependency.init()) so the dependency package stays free of
 	// a catalog import.

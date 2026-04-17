@@ -171,7 +171,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	// Building blocks - the things you compose agents from
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
-	printHelpCmd(w, "install <ref>", "Install a dependency "+ui.Faint("(@spwn/unix, github.com/...)"))
+	printHelpCmd(w, "install <ref>", "Install a dependency "+ui.Faint("(spwn:unix, github.com/...)"))
 	printHelpCmd(w, "uninstall <ref>", "Remove a dependency")
 	printHelpCmd(w, "skill", "Author skill files "+ui.Faint("(new, edit, show, rm, ls)"))
 	fmt.Fprintln(w)

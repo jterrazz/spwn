@@ -19,8 +19,8 @@ func TestGenerate_EmptyTools(t *testing.T) {
 func TestGenerate_MergesAptPackages(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "@spwn/unix", Kind: "sdk", AptPackages: []string{"bash", "grep", "curl"}},
-		{Name: "@spwn/git", Kind: "tool", AptPackages: []string{"git", "curl"}}, // curl is duplicate
+		{Name: "spwn:unix", Kind: "sdk", AptPackages: []string{"bash", "grep", "curl"}},
+		{Name: "spwn:git", Kind: "tool", AptPackages: []string{"git", "curl"}}, // curl is duplicate
 	}
 
 	result := string(Generate(base, tools, ""))
@@ -36,22 +36,22 @@ func TestGenerate_MergesAptPackages(t *testing.T) {
 func TestGenerate_OrdersToolSections(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "@spwn/node", Kind: "sdk", Commands: []string{"curl -fsSL https://deb.nodesource.com/setup_20.x | bash -"}},
-		{Name: "@spwn/qmd", Kind: "tool", Commands: []string{"npm install -g @tobilu/qmd"}},
+		{Name: "spwn:node", Kind: "sdk", Commands: []string{"curl -fsSL https://deb.nodesource.com/setup_20.x | bash -"}},
+		{Name: "spwn:qmd", Kind: "tool", Commands: []string{"npm install -g @tobilu/qmd"}},
 	}
 
 	result := string(Generate(base, tools, ""))
-	nodeIdx := strings.Index(result, "# @spwn/node")
-	qmdIdx := strings.Index(result, "# @spwn/qmd")
+	nodeIdx := strings.Index(result, "# spwn:node")
+	qmdIdx := strings.Index(result, "# spwn:qmd")
 	if nodeIdx >= qmdIdx {
-		t.Error("@spwn/node section should come before @spwn/qmd section")
+		t.Error("spwn:node section should come before spwn:qmd section")
 	}
 }
 
 func TestGenerate_IncludesEnv(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "@spwn/node", Kind: "sdk", Env: map[string]string{"NODE_ENV": "production"}},
+		{Name: "spwn:node", Kind: "sdk", Env: map[string]string{"NODE_ENV": "production"}},
 	}
 
 	result := string(Generate(base, tools, ""))

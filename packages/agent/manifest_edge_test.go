@@ -17,8 +17,8 @@ func TestLoadManifest_OldPluginsKeyIgnored(t *testing.T) {
 	content := `name: legacy
 role: worker
 plugins:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 `
 	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
@@ -42,7 +42,7 @@ func TestAddDependency_CreatesManifestIfMissing(t *testing.T) {
 	initAgent(t, "fresh")
 
 	// No agent.yaml exists yet — AddDependency should create it.
-	if err := AddDependency("fresh", "@spwn/python"); err != nil {
+	if err := AddDependency("fresh", "spwn:python"); err != nil {
 		t.Fatalf("AddDependency: %v", err)
 	}
 
@@ -50,8 +50,8 @@ func TestAddDependency_CreatesManifestIfMissing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
-		t.Errorf("Deps = %v, want [@spwn/python]", m.Deps)
+	if len(m.Deps) != 1 || m.Deps[0] != "spwn:python" {
+		t.Errorf("Deps = %v, want [spwn:python]", m.Deps)
 	}
 
 	// Verify file actually exists on disk.
@@ -67,19 +67,19 @@ func TestRemoveDependency_AbsentRefNoError(t *testing.T) {
 	initAgent(t, "sparse")
 
 	// Start with one dep.
-	if err := AddDependency("sparse", "@spwn/unix"); err != nil {
+	if err := AddDependency("sparse", "spwn:unix"); err != nil {
 		t.Fatal(err)
 	}
 
 	// Remove a ref that was never added — should succeed silently.
-	if err := RemoveDependency("sparse", "@spwn/never-existed"); err != nil {
+	if err := RemoveDependency("sparse", "spwn:never-existed"); err != nil {
 		t.Errorf("RemoveDependency of absent ref should not error, got: %v", err)
 	}
 
 	// Original dep should still be there.
 	m, _ := LoadManifest("sparse")
-	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/unix" {
-		t.Errorf("Deps after no-op remove = %v, want [@spwn/unix]", m.Deps)
+	if len(m.Deps) != 1 || m.Deps[0] != "spwn:unix" {
+		t.Errorf("Deps after no-op remove = %v, want [spwn:unix]", m.Deps)
 	}
 }
 
@@ -87,7 +87,7 @@ func TestRemoveDependency_EmptyManifestNoError(t *testing.T) {
 	initAgent(t, "empty")
 
 	// No deps at all — remove should be a no-op.
-	if err := RemoveDependency("empty", "@spwn/anything"); err != nil {
+	if err := RemoveDependency("empty", "spwn:anything"); err != nil {
 		t.Errorf("RemoveDependency on empty manifest should not error, got: %v", err)
 	}
 }
@@ -97,7 +97,7 @@ func TestRemoveDependency_EmptyManifestNoError(t *testing.T) {
 func TestAddDependency_Idempotent(t *testing.T) {
 	initAgent(t, "idem")
 
-	ref := "@spwn/git"
+	ref := "spwn:git"
 	for i := 0; i < 3; i++ {
 		if err := AddDependency("idem", ref); err != nil {
 			t.Fatalf("AddDependency iteration %d: %v", i, err)
@@ -169,7 +169,7 @@ func TestSaveManifest_UsesDependenciesKey(t *testing.T) {
 
 	m := &Manifest{
 		Name: "schema",
-		Deps: []string{"@spwn/unix"},
+		Deps: []string{"spwn:unix"},
 	}
 	if err := SaveManifest("schema", m); err != nil {
 		t.Fatal(err)

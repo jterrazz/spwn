@@ -83,7 +83,7 @@ func Test_requireAgentPrompts(t *testing.T) {
 
 // Test_crossCheckRuntimeAdapters locks the `spwn check` warning that
 // fires when an agent declares a catalog-known but compile-unimplemented
-// runtime (e.g. `@spwn/codex`). Without this warning, `check` says
+// runtime (e.g. `spwn:codex`). Without this warning, `check` says
 // "valid" and `compile` fails with "unknown runtime" — a silent gap
 // between the two commands.
 func Test_crossCheckRuntimeAdapters(t *testing.T) {
@@ -110,8 +110,8 @@ worlds:
 	}
 	if err := os.WriteFile(filepath.Join(agentDir, "agent.yaml"), []byte(`name: neo
 runtime:
-  backend: "@spwn/codex"
-packages: ["@spwn/unix"]
+  backend: "spwn:codex"
+packages: ["spwn:unix"]
 `), 0o644); err != nil {
 		t.Fatalf("write agent yaml: %v", err)
 	}
@@ -126,8 +126,8 @@ packages: ["@spwn/unix"]
 	if issues[0].Level != "warning" {
 		t.Fatalf("want warning, got %q", issues[0].Level)
 	}
-	if !strings.Contains(issues[0].Message, "@spwn/codex") {
-		t.Fatalf("message does not mention @spwn/codex: %q", issues[0].Message)
+	if !strings.Contains(issues[0].Message, "spwn:codex") {
+		t.Fatalf("message does not mention spwn:codex: %q", issues[0].Message)
 	}
 	if !strings.Contains(issues[0].Hint, "claude-code") {
 		t.Fatalf("hint should list claude-code: %q", issues[0].Hint)

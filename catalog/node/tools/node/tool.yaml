@@ -1,4 +1,4 @@
-name: "@spwn/node"
+name: "spwn:node"
 kind: sdk
 version: "20"
 description: "Node.js 20 runtime (node, npm, npx)"

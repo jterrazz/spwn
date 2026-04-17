@@ -50,7 +50,7 @@ func TestLoad_onlyCommentsAndBlanks(t *testing.T) {
 // 3. Entry with no version or source (just a ref name)
 func TestLoad_entryWithRefOnly(t *testing.T) {
 	root := t.TempDir()
-	content := "# spwn.lock — DO NOT EDIT\n@spwn/solo\n"
+	content := "# spwn.lock — DO NOT EDIT\nspwn:solo\n"
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func TestLoad_entryWithRefOnly(t *testing.T) {
 		t.Fatal("expected non-nil lockfile")
 	}
 	// A single-field line has len(parts) < 2, so it should be skipped.
-	if l.Has("@spwn/solo") {
+	if l.Has("spwn:solo") {
 		t.Error("single-field line should be skipped")
 	}
 }
@@ -70,7 +70,7 @@ func TestLoad_entryWithRefOnly(t *testing.T) {
 // 4. Entry with version but no source
 func TestLoad_entryWithVersionNoSource(t *testing.T) {
 	root := t.TempDir()
-	content := "# spwn.lock — DO NOT EDIT\n@spwn/partial v1.0\n"
+	content := "# spwn.lock — DO NOT EDIT\nspwn:partial v1.0\n"
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -78,10 +78,10 @@ func TestLoad_entryWithVersionNoSource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	if !l.Has("@spwn/partial") {
+	if !l.Has("spwn:partial") {
 		t.Fatal("expected entry to be parsed")
 	}
-	e := l.Deps["@spwn/partial"]
+	e := l.Deps["spwn:partial"]
 	if e.Version != "v1.0" {
 		t.Errorf("version = %q, want %q", e.Version, "v1.0")
 	}
@@ -122,7 +122,7 @@ func TestRoundtrip_githubRefs(t *testing.T) {
 		Version: "v0.3.0",
 		Source:  dependency.SourceGitHub,
 	})
-	l.Add("@spwn/unix", dependency.LockEntry{
+	l.Add("spwn:unix", dependency.LockEntry{
 		Version: "24.04",
 		Source:  dependency.SourceBuiltin,
 	})
@@ -139,7 +139,7 @@ func TestRoundtrip_githubRefs(t *testing.T) {
 	if !got.Has("github.com/jterrazz/research-skills") {
 		t.Error("github ref lost after round-trip")
 	}
-	if !got.Has("@spwn/unix") {
+	if !got.Has("spwn:unix") {
 		t.Error("spwn ref lost after round-trip")
 	}
 	e := got.Deps["github.com/jterrazz/research-skills"]
@@ -151,10 +151,10 @@ func TestRoundtrip_githubRefs(t *testing.T) {
 // 7. Multiple Add() calls for same ref (last wins)
 func TestAdd_lastWins(t *testing.T) {
 	l := dependency.EmptyLockfile()
-	l.Add("@spwn/unix", dependency.LockEntry{Version: "1.0", Source: dependency.SourceBuiltin})
-	l.Add("@spwn/unix", dependency.LockEntry{Version: "2.0", Source: dependency.SourceGitHub})
+	l.Add("spwn:unix", dependency.LockEntry{Version: "1.0", Source: dependency.SourceBuiltin})
+	l.Add("spwn:unix", dependency.LockEntry{Version: "2.0", Source: dependency.SourceGitHub})
 
-	e := l.Deps["@spwn/unix"]
+	e := l.Deps["spwn:unix"]
 	if e.Version != "2.0" {
 		t.Errorf("version = %q, want %q (last wins)", e.Version, "2.0")
 	}
@@ -166,12 +166,12 @@ func TestAdd_lastWins(t *testing.T) {
 // 8. Remove() on non-existent ref (no panic)
 func TestRemove_nonExistent(t *testing.T) {
 	l := dependency.EmptyLockfile()
-	l.Add("@spwn/unix", dependency.LockEntry{Version: "1.0", Source: dependency.SourceBuiltin})
+	l.Add("spwn:unix", dependency.LockEntry{Version: "1.0", Source: dependency.SourceBuiltin})
 
 	// Should not panic.
-	l.Remove("@spwn/nonexistent")
+	l.Remove("spwn:nonexistent")
 
-	if !l.Has("@spwn/unix") {
+	if !l.Has("spwn:unix") {
 		t.Error("existing entry should not be affected")
 	}
 }
@@ -179,7 +179,7 @@ func TestRemove_nonExistent(t *testing.T) {
 // 9. Has() on empty lockfile
 func TestHas_emptyLockfile(t *testing.T) {
 	l := dependency.EmptyLockfile()
-	if l.Has("@spwn/anything") {
+	if l.Has("spwn:anything") {
 		t.Error("Has should return false on empty lockfile")
 	}
 }
@@ -199,7 +199,7 @@ func TestRefs_emptyLockfile(t *testing.T) {
 // 11. Save to non-existent directory fails gracefully
 func TestSave_nonExistentDirectory(t *testing.T) {
 	l := dependency.EmptyLockfile()
-	l.Add("@spwn/unix", dependency.LockEntry{Version: "1.0", Source: dependency.SourceBuiltin})
+	l.Add("spwn:unix", dependency.LockEntry{Version: "1.0", Source: dependency.SourceBuiltin})
 
 	err := dependency.SaveLockfile("/nonexistent/path/that/does/not/exist", l)
 	if err == nil {
@@ -210,57 +210,15 @@ func TestSave_nonExistentDirectory(t *testing.T) {
 	}
 }
 
-// 12. Load legacy YAML with empty deps map
-func TestLoad_legacyYAMLEmptyDeps(t *testing.T) {
-	root := t.TempDir()
-	yaml := "version: 1\ndeps:\n"
-	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(yaml), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	l, err := dependency.LoadLockfile(root)
-	if err != nil {
-		t.Fatalf("unexpected err: %v", err)
-	}
-	if l == nil {
-		t.Fatal("expected non-nil lockfile")
-	}
-	if len(l.Deps) != 0 {
-		t.Errorf("expected 0 deps, got %d", len(l.Deps))
-	}
-}
-
-// 13. Load legacy YAML with missing version field
-func TestLoad_legacyYAMLMissingVersion(t *testing.T) {
-	root := t.TempDir()
-	yaml := "version: 1\ndeps:\n  \"@spwn/unix\":\n    source: builtin\n"
-	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(yaml), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	l, err := dependency.LoadLockfile(root)
-	if err != nil {
-		t.Fatalf("unexpected err: %v", err)
-	}
-	if !l.Has("@spwn/unix") {
-		t.Fatal("expected @spwn/unix to be present")
-	}
-	e := l.Deps["@spwn/unix"]
-	if e.Version != "" {
-		t.Errorf("version should be empty, got %q", e.Version)
-	}
-	if e.Source != dependency.SourceBuiltin {
-		t.Errorf("source = %q, want %q", e.Source, dependency.SourceBuiltin)
-	}
-}
-
 // 14. File with mixed comments and entries
 func TestLoad_mixedCommentsAndEntries(t *testing.T) {
 	root := t.TempDir()
 	content := `# spwn.lock — DO NOT EDIT
 # This is a comment
-@spwn/unix 24.04 builtin
+spwn:unix 24.04 builtin
 
 # Another comment between entries
-@spwn/git 2.43 builtin
+spwn:git 2.43 builtin
 # Trailing comment
 `
 	if err := os.WriteFile(filepath.Join(root, dependency.LockFileName), []byte(content), 0o644); err != nil {
@@ -273,11 +231,11 @@ func TestLoad_mixedCommentsAndEntries(t *testing.T) {
 	if len(l.Deps) != 2 {
 		t.Errorf("expected 2 deps, got %d", len(l.Deps))
 	}
-	if !l.Has("@spwn/unix") {
-		t.Error("missing @spwn/unix")
+	if !l.Has("spwn:unix") {
+		t.Error("missing spwn:unix")
 	}
-	if !l.Has("@spwn/git") {
-		t.Error("missing @spwn/git")
+	if !l.Has("spwn:git") {
+		t.Error("missing spwn:git")
 	}
 }
 

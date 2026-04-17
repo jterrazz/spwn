@@ -80,7 +80,7 @@ func TestToCompileInputPicksSoleWorld(t *testing.T) {
 	if in.Agents[0].Role != "worker" {
 		t.Errorf("role: got %q", in.Agents[0].Role)
 	}
-	wantTools := []string{"@spwn/git", "@spwn/unix"}
+	wantTools := []string{"spwn:git", "spwn:unix"}
 	if got := in.VerifiedTools; !equalStrings(got, wantTools) {
 		t.Errorf("tools: got %v, want %v", got, wantTools)
 	}

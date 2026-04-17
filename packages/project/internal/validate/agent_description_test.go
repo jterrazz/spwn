@@ -14,7 +14,7 @@ func TestRuleAgentDescription_flagsMissing(t *testing.T) {
 	agentDir := writeAgentYAML(t, root, "neo", `name: neo
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 `)
 
 	issues := ruleAgentDescription(Input{
@@ -46,7 +46,7 @@ func TestRuleAgentDescription_flagsEmpty(t *testing.T) {
 description: "   "
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 `)
 
 	issues := ruleAgentDescription(Input{
@@ -65,7 +65,7 @@ func TestRuleAgentDescription_passes(t *testing.T) {
 description: The explorer — learns by doing.
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 `)
 
 	issues := ruleAgentDescription(Input{
@@ -113,8 +113,8 @@ func TestRuleAgentDescription_skipsUnparseable(t *testing.T) {
 // fail granularly in a colony where only some members forgot.
 func TestRuleAgentDescription_multipleAgents(t *testing.T) {
 	root := t.TempDir()
-	neoDir := writeAgentYAML(t, root, "neo", "name: neo\ndescription: set\nruntime:\n  backend: \"@spwn/claude-code\"\n")
-	trinityDir := writeAgentYAML(t, root, "trinity", "name: trinity\nruntime:\n  backend: \"@spwn/codex\"\n")
+	neoDir := writeAgentYAML(t, root, "neo", "name: neo\ndescription: set\nruntime:\n  backend: \"spwn:claude-code\"\n")
+	trinityDir := writeAgentYAML(t, root, "trinity", "name: trinity\nruntime:\n  backend: \"spwn:codex\"\n")
 
 	issues := ruleAgentDescription(Input{
 		Root: root,

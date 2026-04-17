@@ -29,7 +29,7 @@ type BuildRequest struct {
 	// BaseDockerfile is the raw base Dockerfile content.
 	BaseDockerfile []byte
 
-	// Tools is the list of tool names to include (e.g., ["@spwn/unix", "@spwn/node", "@spwn/qmd"]).
+	// Tools is the list of tool names to include (e.g., ["spwn:unix", "spwn:node", "spwn:qmd"]).
 	Tools []string
 
 	// Tag is the Docker image tag to apply.

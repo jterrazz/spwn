@@ -1,6 +1,6 @@
 name: neo
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/claude-code/oauth"
+  - "spwn:unix"
+  - "spwn:claude-code/oauth"

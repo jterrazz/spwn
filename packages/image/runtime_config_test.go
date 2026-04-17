@@ -28,7 +28,7 @@ type packTool struct {
 	config   map[string][]byte
 }
 
-func (t *packTool) Name() string                 { return "@spwn/fake" }
+func (t *packTool) Name() string                 { return "spwn:fake" }
 func (t *packTool) Kind() dependency.Kind                   { return dependency.KindTool }
 func (t *packTool) Version() string              { return "0.0.0" }
 func (t *packTool) Dependencies() []string       { return nil }
@@ -40,10 +40,10 @@ func (t *packTool) Config(runtime string) []byte { return t.config[runtime] }
 
 func TestPackRuntimes_PlainTool(t *testing.T) {
 	// A package with no runtime-config: block returns nil from both helpers.
-	if got := PluginRuntimes(&baseTool{name: "@spwn/plain"}); got != nil {
+	if got := PluginRuntimes(&baseTool{name: "spwn:plain"}); got != nil {
 		t.Errorf("PluginRuntimes(plain) = %v, want nil", got)
 	}
-	if got := PluginConfig(&baseTool{name: "@spwn/plain"}, "@spwn/claude-code"); got != nil {
+	if got := PluginConfig(&baseTool{name: "spwn:plain"}, "spwn:claude-code"); got != nil {
 		t.Errorf("PluginConfig(plain) = %v, want nil", got)
 	}
 }
@@ -51,15 +51,15 @@ func TestPackRuntimes_PlainTool(t *testing.T) {
 func TestPackConfig_RuntimeGate(t *testing.T) {
 	marker := []byte(`{"hello":"world"}`)
 	p := &packTool{
-		runtimes: []string{"@spwn/claude-code"},
-		config:   map[string][]byte{"@spwn/claude-code": marker, "@spwn/codex": marker},
+		runtimes: []string{"spwn:claude-code"},
+		config:   map[string][]byte{"spwn:claude-code": marker, "spwn:codex": marker},
 	}
 	// Matching runtime → config flows through.
-	if got := PluginConfig(p, "@spwn/claude-code"); string(got) != string(marker) {
+	if got := PluginConfig(p, "spwn:claude-code"); string(got) != string(marker) {
 		t.Errorf("PluginConfig(claude-code) = %q, want %q", got, marker)
 	}
 	// Non-declared runtime → gated to nil even if Config would return bytes.
-	if got := PluginConfig(p, "@spwn/codex"); got != nil {
+	if got := PluginConfig(p, "spwn:codex"); got != nil {
 		t.Errorf("PluginConfig(codex) = %q, want nil (gated)", got)
 	}
 }
@@ -72,9 +72,9 @@ func TestPackConfig_EmptyRuntimesIsNotAPack(t *testing.T) {
 	// specific runtime list.
 	p := &packTool{
 		runtimes: nil,
-		config:   map[string][]byte{"@spwn/claude-code": []byte("ok")},
+		config:   map[string][]byte{"spwn:claude-code": []byte("ok")},
 	}
-	if got := PluginConfig(p, "@spwn/claude-code"); got != nil {
+	if got := PluginConfig(p, "spwn:claude-code"); got != nil {
 		t.Errorf("PluginConfig(no-runtimes) = %q, want nil", got)
 	}
 }

@@ -23,13 +23,13 @@ func TestPhysics_ContainsLaws(t *testing.T) {
 }
 
 func TestFaculties_ContainsTools(t *testing.T) {
-	// Given - a config with @spwn/unix and @spwn/git tools
+	// Given - a config with spwn:unix and spwn:git tools
 	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 `).
 		NoAgent().
 		Execute()
@@ -38,7 +38,7 @@ dependencies:
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasFile("/world/faculties.md")
 		c.FileContains("/world/faculties.md", "Tools")
-		c.FileContains("/world/faculties.md", "@spwn/unix")
-		c.FileContains("/world/faculties.md", "@spwn/git")
+		c.FileContains("/world/faculties.md", "spwn:unix")
+		c.FileContains("/world/faculties.md", "spwn:git")
 	})
 }

@@ -8,21 +8,21 @@ import (
 )
 
 
-// Tool is the @spwn/claude-code tool - Claude Code AI agent runtime.
+// Tool is the spwn:claude-code tool - Claude Code AI agent runtime.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string    { return "@spwn/claude-code" }
+func (*tool) Name() string    { return "spwn:claude-code" }
 func (*tool) Kind() dependency.Kind   { return dependency.KindRuntime }
 func (*tool) Version() string { return "latest" }
 
-// Dependencies: only @spwn/unix for curl + jq. We used to also
-// require @spwn/node because the old install path was
+// Dependencies: only spwn:unix for curl + jq. We used to also
+// require spwn:node because the old install path was
 // `npm install -g @anthropic-ai/claude-code`; the native installer
 // below ships a self-contained binary so node is no longer part
 // of the required world footprint.
-func (*tool) Dependencies() []string { return []string{"@spwn/unix"} }
+func (*tool) Dependencies() []string { return []string{"spwn:unix"} }
 
 func (*tool) Install() ib.InstallSpec {
 	return ib.InstallSpec{

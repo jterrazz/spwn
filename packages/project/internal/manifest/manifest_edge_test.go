@@ -13,8 +13,8 @@ func TestLoadPath_TopLevelDeps(t *testing.T) {
 	content := `version: 2
 name: deptest
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
   - custom-tool
 worlds:
   home:
@@ -33,7 +33,7 @@ worlds:
 	if len(m.Deps) != 3 {
 		t.Fatalf("expected 3 deps, got %d: %v", len(m.Deps), m.Deps)
 	}
-	want := []string{"@spwn/unix", "@spwn/git", "custom-tool"}
+	want := []string{"spwn:unix", "spwn:git", "custom-tool"}
 	for i, w := range want {
 		if m.Deps[i] != w {
 			t.Errorf("Deps[%d] = %q, want %q", i, m.Deps[i], w)
@@ -101,7 +101,7 @@ worlds:
     agents: [neo]
     workspaces: [.]
     dependencies:
-      - "@spwn/unix"
+      - "spwn:unix"
 `
 	path := filepath.Join(dir, "spwn.yaml")
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {

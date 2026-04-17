@@ -44,7 +44,7 @@ func TestSaveManifest_WritesYAML(t *testing.T) {
 	m := &Manifest{
 		Name:     "neo",
 		Role:     "chief",
-		Deps:  []string{"@spwn/unix", "@spwn/python", "kung-fu"},
+		Deps:  []string{"spwn:unix", "spwn:python", "kung-fu"},
 	}
 	if err := SaveManifest("neo", m); err != nil {
 		t.Fatalf("SaveManifest: %v", err)
@@ -104,7 +104,7 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 			Provider: "anthropic",
 			Model:    "claude-sonnet-4-6",
 		},
-		Deps:  []string{"@spwn/python", "@spwn/unix", "paper-reading"},
+		Deps:  []string{"spwn:python", "spwn:unix", "paper-reading"},
 	}
 	if err := SaveManifest("curie", original); err != nil {
 		t.Fatal(err)
@@ -120,7 +120,7 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 	if loaded.Runtime.Backend != "claude-code" {
 		t.Errorf("Runtime.Backend = %q", loaded.Runtime.Backend)
 	}
-	if len(loaded.Deps) != 3 || loaded.Deps[0] != "@spwn/python" {
+	if len(loaded.Deps) != 3 || loaded.Deps[0] != "spwn:python" {
 		t.Errorf("Packages drifted: %v", loaded.Deps)
 	}
 }
@@ -130,13 +130,13 @@ func TestLoadManifest_RoundtripPreservesFields(t *testing.T) {
 func TestAddDependency_AppendsAndIsIdempotent(t *testing.T) {
 	initAgent(t, "neo")
 
-	if err := AddDependency("neo", "@spwn/python"); err != nil {
+	if err := AddDependency("neo", "spwn:python"); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddDependency("neo", "@spwn/unix"); err != nil {
+	if err := AddDependency("neo", "spwn:unix"); err != nil {
 		t.Fatal(err)
 	}
-	if err := AddDependency("neo", "@spwn/python"); err != nil {
+	if err := AddDependency("neo", "spwn:python"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -149,18 +149,18 @@ func TestAddDependency_AppendsAndIsIdempotent(t *testing.T) {
 func TestRemoveDependency_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 	initAgent(t, "neo")
 
-	AddDependency("neo", "@spwn/python")
-	AddDependency("neo", "@spwn/git")
+	AddDependency("neo", "spwn:python")
+	AddDependency("neo", "spwn:git")
 
-	if err := RemoveDependency("neo", "@spwn/git"); err != nil {
+	if err := RemoveDependency("neo", "spwn:git"); err != nil {
 		t.Fatal(err)
 	}
 	m, _ := LoadManifest("neo")
-	if len(m.Deps) != 1 || m.Deps[0] != "@spwn/python" {
+	if len(m.Deps) != 1 || m.Deps[0] != "spwn:python" {
 		t.Errorf("after remove: %v", m.Deps)
 	}
 
-	if err := RemoveDependency("neo", "@spwn/never-added"); err != nil {
+	if err := RemoveDependency("neo", "spwn:never-added"); err != nil {
 		t.Errorf("remove absent: %v", err)
 	}
 	m, _ = LoadManifest("neo")
@@ -172,12 +172,12 @@ func TestRemoveDependency_RemovesPresentAndIsNoOpForAbsent(t *testing.T) {
 func TestComposition_FullRoundtrip(t *testing.T) {
 	initAgent(t, "neo")
 
-	AddDependency("neo", "@spwn/unix")
-	AddDependency("neo", "@spwn/python")
+	AddDependency("neo", "spwn:unix")
+	AddDependency("neo", "spwn:python")
 	AddDependency("neo", "refactoring")
 	AddDependency("neo", "paper-reading")
 
-	RemoveDependency("neo", "@spwn/unix")
+	RemoveDependency("neo", "spwn:unix")
 	RemoveDependency("neo", "paper-reading")
 
 	m, err := LoadManifest("neo")

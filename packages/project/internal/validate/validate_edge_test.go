@@ -47,11 +47,11 @@ func TestEdge_PacksExist_DuplicateRefs(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/unix"
+  - "spwn:unix"
+  - "spwn:unix"
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
-	in.BuiltinTools = []string{"@spwn/unix"}
+	in.BuiltinTools = []string{"spwn:unix"}
 	issues := rulePacksExist(in)
 	// Duplicates of a valid ref should not produce errors (dedup or pass-through).
 	for _, iss := range issues {
@@ -104,15 +104,15 @@ dependencies:
 	}
 }
 
-// 5. rulePacksExist with a versioned ref like @spwn/unix@24.04
+// 5. rulePacksExist with a versioned ref like spwn:unix@24.04
 func TestEdge_PacksExist_VersionedRef(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - "@spwn/unix@24.04"
+  - "spwn:unix@24.04"
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
-	in.BuiltinTools = []string{"@spwn/unix"}
+	in.BuiltinTools = []string{"spwn:unix"}
 	issues := rulePacksExist(in)
 	for _, iss := range issues {
 		if iss.Level == LevelError && strings.Contains(iss.Message, "unix") {
@@ -126,19 +126,19 @@ func TestEdge_PackVersionConflict_DifferentVersions(t *testing.T) {
 	root := t.TempDir()
 	a1 := scaffoldAgent(t, root, "agent-a", `name: agent-a
 dependencies:
-  - "@spwn/git@1.0"
+  - "spwn:git@1.0"
 `)
 	a2 := scaffoldAgent(t, root, "agent-b", `name: agent-b
 dependencies:
-  - "@spwn/git@2.0"
+  - "spwn:git@2.0"
 `)
 	in := minimalInput(root, []AgentRef{a1, a2}, nil)
 	issues := rulePackVersionConflict(in)
 	if len(issues) != 1 {
 		t.Fatalf("want 1 conflict, got %d: %+v", len(issues), issues)
 	}
-	if !strings.Contains(issues[0].Message, "@spwn/git") {
-		t.Errorf("should mention @spwn/git: %q", issues[0].Message)
+	if !strings.Contains(issues[0].Message, "spwn:git") {
+		t.Errorf("should mention spwn:git: %q", issues[0].Message)
 	}
 	if !strings.Contains(issues[0].Message, "conflicting versions") {
 		t.Errorf("should mention conflict: %q", issues[0].Message)
@@ -150,11 +150,11 @@ func TestEdge_PackVersionConflict_IdenticalVersions(t *testing.T) {
 	root := t.TempDir()
 	a1 := scaffoldAgent(t, root, "agent-a", `name: agent-a
 dependencies:
-  - "@spwn/git@1.0"
+  - "spwn:git@1.0"
 `)
 	a2 := scaffoldAgent(t, root, "agent-b", `name: agent-b
 dependencies:
-  - "@spwn/git@1.0"
+  - "spwn:git@1.0"
 `)
 	in := minimalInput(root, []AgentRef{a1, a2}, nil)
 	issues := rulePackVersionConflict(in)
@@ -168,8 +168,8 @@ func TestEdge_LockfileConsistent_ProjectDepsPresent(t *testing.T) {
 	root := t.TempDir()
 	// No agents needed, just project-level dependency.
 	l := dependency.EmptyLockfile()
-	l.Add("@spwn/unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
-	l.Add("@spwn/git", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
+	l.Add("spwn:unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
+	l.Add("spwn:git", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -178,7 +178,7 @@ func TestEdge_LockfileConsistent_ProjectDepsPresent(t *testing.T) {
 			Version: intmanifest.CurrentVersion,
 			Name:    "edge-test",
 			Worlds:  map[string]intmanifest.World{"main": {Agents: []string{}, Workspaces: []string{"."}}},
-			Deps:    []string{"@spwn/unix", "@spwn/git"},
+			Deps:    []string{"spwn:unix", "spwn:git"},
 		},
 	}
 	issues := ruleLockfileConsistent(in)
@@ -191,7 +191,7 @@ func TestEdge_LockfileConsistent_ProjectDepsPresent(t *testing.T) {
 func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 	root := t.TempDir()
 	l := dependency.EmptyLockfile()
-	l.Add("@spwn/unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
+	l.Add("spwn:unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -200,7 +200,7 @@ func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 			Version: intmanifest.CurrentVersion,
 			Name:    "edge-test",
 			Worlds:  map[string]intmanifest.World{"main": {Agents: []string{}, Workspaces: []string{"."}}},
-			Deps:    []string{"@spwn/unix", "@spwn/git"},
+			Deps:    []string{"spwn:unix", "spwn:git"},
 		},
 	}
 	issues := ruleLockfileConsistent(in)
@@ -210,8 +210,8 @@ func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 		if strings.Contains(iss.Message, "spwn:git") {
 			sawGit = true
 		}
-		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "@spwn/unix") {
-			t.Error("@spwn/unix is in lockfile, should not be flagged")
+		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "spwn:unix") {
+			t.Error("spwn:unix is in lockfile, should not be flagged")
 		}
 	}
 	if !sawGit {
@@ -224,10 +224,10 @@ func TestEdge_ErrorMessages_SayPack(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - "@spwn/nonexistent"
+  - "spwn:nonexistent"
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
-	in.BuiltinTools = []string{"@spwn/something-else"}
+	in.BuiltinTools = []string{"spwn:something-else"}
 	issues := rulePacksExist(in)
 	for _, iss := range issues {
 		lower := strings.ToLower(iss.Message)
@@ -260,10 +260,10 @@ func TestEdge_ErrorPaths_UseDeps(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - "@spwn/nonexistent"
+  - "spwn:nonexistent"
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
-	in.BuiltinTools = []string{"@spwn/something-else"}
+	in.BuiltinTools = []string{"spwn:something-else"}
 	issues := rulePacksExist(in)
 	if len(issues) == 0 {
 		t.Fatal("expected at least one issue")
@@ -286,13 +286,13 @@ func TestEdge_Hints_SaySpwnInstall(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - "@spwn/missing-thing"
+  - "spwn:missing-thing"
 `)
 	// Create a lockfile so the rule fires.
 	writeLockfile(t, root, dependency.EmptyLockfile())
 
 	in := minimalInput(root, []AgentRef{ref}, nil)
-	in.BuiltinTools = []string{"@spwn/something-else"}
+	in.BuiltinTools = []string{"spwn:something-else"}
 
 	// Collect issues from both rulePacksExist and ruleLockfileConsistent.
 	var allIssues []Issue

@@ -12,8 +12,8 @@ import (
 )
 
 // catalogFS embeds every built-in catalog entry — both installable
-// dependencies (@spwn/unix, @spwn/git, …) and init-able project
-// templates (@spwn/matrix, @spwn/startup, …). Every entry ships a
+// dependencies (spwn:unix, spwn:git, …) and init-able project
+// templates (spwn:matrix, spwn:startup, …). Every entry ships a
 // root spwn.yaml (project-shape); pure-dep entries additionally
 // carry the actual tool definition at tools/<slug>/tool.yaml.
 //
@@ -50,7 +50,7 @@ func loadYAMLTools() ([]ib.Tool, error) {
 
 	out := make([]ib.Tool, 0, len(names))
 	for _, name := range names {
-		canonical := "@spwn/" + name
+		canonical := "spwn:" + name
 		parsed, err := dependency.Parse(
 			dependency.EmbedResolver{FS: catalogFS, Root: path.Join(name, "tools", name)},
 			dependency.ParseOptions{
@@ -63,7 +63,7 @@ func loadYAMLTools() ([]ib.Tool, error) {
 			return nil, fmt.Errorf("load %s: %w", name, err)
 		}
 		// Catalog entries are always keyed by their canonical
-		// @spwn/<slug> in the tool registry, regardless of what
+		// spwn:<slug> in the tool registry, regardless of what
 		// tool.yaml declares for `name:`.
 		parsed.Schema.Name = canonical
 		out = append(out, ib.ToolFromParsed(parsed))

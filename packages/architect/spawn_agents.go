@@ -71,7 +71,7 @@ func initAgentDeploymentDirs(rec models.AgentRecord, worldID string) error {
 // next spawn.
 //
 // The runtime lookup is hardcoded to claude-code because every
-// world spawn today installs @spwn/claude-code as a required tool.
+// world spawn today installs spwn:claude-code as a required tool.
 // When the runtime becomes a per-world choice this should resolve
 // off the world manifest.
 func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {

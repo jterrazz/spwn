@@ -46,7 +46,7 @@ describe('spwn check', () => {
     });
 
     test('flags an agent that references a non-existent built-in tool', async () => {
-        // Given - check-invalid-tool has tools: ["@spwn/nonexistent"]
+        // Given - check-invalid-tool has tools: ["spwn:nonexistent"]
         const result = await spec('check invalid tool')
             .project('check-invalid-tool')
             .exec('check')

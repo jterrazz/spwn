@@ -11,7 +11,7 @@ import (
 )
 
 // fullRegistry registers tools + runtimes. Some tools like
-// @spwn/architect depend on runtime dependencies (e.g. @spwn/claude-code),
+// spwn:architect depend on runtime dependencies (e.g. spwn:claude-code),
 // so dependency-resolution tests need both sides available.
 func fullRegistry() *ib.Registry {
 	reg := ib.NewRegistry()
@@ -23,11 +23,11 @@ func fullRegistry() *ib.Registry {
 func TestAllTools_ValidName(t *testing.T) {
 	for _, tool := range All {
 		t.Run(tool.Name(), func(t *testing.T) {
-			if !strings.HasPrefix(tool.Name(), "@") {
-				t.Errorf("tool name %q must start with @", tool.Name())
+			if !strings.HasPrefix(tool.Name(), "spwn:") {
+				t.Errorf("tool name %q must start with spwn:", tool.Name())
 			}
-			if tool.Name() == "@" {
-				t.Error("tool name must not be just @")
+			if tool.Name() == "spwn:" {
+				t.Error("tool name must not be just spwn:")
 			}
 		})
 	}
@@ -62,7 +62,7 @@ func TestAllTools_VersionNotEmpty(t *testing.T) {
 func TestAllTools_VerifyNotEmpty(t *testing.T) {
 	for _, tool := range All {
 		if isTemplateTool(tool.Name()) {
-			continue // template entries (e.g. @spwn/matrix) are scaffolds, not installable deps
+			continue // template entries (e.g. spwn:matrix) are scaffolds, not installable deps
 		}
 		t.Run(tool.Name(), func(t *testing.T) {
 			if len(tool.Verify()) == 0 {
@@ -87,15 +87,15 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 	}
 }
 
-// isTemplateTool returns true when the @spwn/<slug> is a gallery
+// isTemplateTool returns true when the spwn:<slug> is a gallery
 // template (has a `worlds:` section) rather than a pure dependency.
 func isTemplateTool(toolName string) bool {
-	slug := strings.TrimPrefix(toolName, "@spwn/")
+	slug := strings.TrimPrefix(toolName, "spwn:")
 	slug = strings.ReplaceAll(slug, "-", "_")
 	schema, err := loadEntrySchema(slug)
 	if err != nil {
 		// Try the hyphen form too — not every slug underscore-maps.
-		schema2, err2 := loadEntrySchema(strings.TrimPrefix(toolName, "@spwn/"))
+		schema2, err2 := loadEntrySchema(strings.TrimPrefix(toolName, "spwn:"))
 		if err2 != nil {
 			return false
 		}
@@ -206,18 +206,18 @@ func TestResolve_FullToolStack(t *testing.T) {
 	reg := ib.NewRegistry()
 	RegisterDefaults(reg)
 
-	tools, err := reg.Resolve([]string{"@spwn/unix", "@spwn/git", "@spwn/node", "@spwn/cli", "@spwn/qmd"})
+	tools, err := reg.Resolve([]string{"spwn:unix", "spwn:git", "spwn:node", "spwn:cli", "spwn:qmd"})
 	if err != nil {
 		t.Fatalf("resolve failed: %v", err)
 	}
 
-	// @spwn/node must come before @spwn/qmd (qmd depends on node)
+	// spwn:node must come before spwn:qmd (qmd depends on node)
 	idx := make(map[string]int)
 	for i, tool := range tools {
 		idx[tool.Name()] = i
 	}
 
-	if idx["@spwn/node"] >= idx["@spwn/qmd"] {
-		t.Error("@spwn/node must come before @spwn/qmd")
+	if idx["spwn:node"] >= idx["spwn:qmd"] {
+		t.Error("spwn:node must come before spwn:qmd")
 	}
 }

@@ -22,7 +22,7 @@ type SpawnConfig struct {
 //
 // The runtime's image-build recipe (base image, apt packages, install
 // commands) is NOT part of this interface — it lives in the catalog
-// entry for the runtime (e.g. @spwn/claude-code's spwn.yaml) and is
+// entry for the runtime (e.g. spwn:claude-code's spwn.yaml) and is
 // consumed by the generic image builder. This interface covers only
 // the spawn-time behavior the world layer drives: command building,
 // credential sync, and prelaunch shell setup.

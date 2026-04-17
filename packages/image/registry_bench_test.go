@@ -19,11 +19,11 @@ func BenchmarkRegistryResolve(b *testing.B) {
 			reg := NewRegistry()
 			names := make([]string, n)
 			for i := 0; i < n; i++ {
-				name := fmt.Sprintf("@spwn/tool-%d", i)
+				name := fmt.Sprintf("spwn:tool-%d", i)
 				names[i] = name
 				tool := &benchTool{baseTool: baseTool{name: name}}
 				if i > 0 {
-					tool.deps = []string{fmt.Sprintf("@spwn/tool-%d", i-1)}
+					tool.deps = []string{fmt.Sprintf("spwn:tool-%d", i-1)}
 				}
 				_ = reg.Register(tool)
 			}

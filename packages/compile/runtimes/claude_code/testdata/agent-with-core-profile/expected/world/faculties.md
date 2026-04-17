@@ -1,4 +1,4 @@
 # Faculties
 
 ## Tools
-@spwn/unix
+spwn:unix

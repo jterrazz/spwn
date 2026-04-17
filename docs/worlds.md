@@ -36,7 +36,7 @@ worlds:
     workspaces: [.]
     # Optional extra tools injected on top of each agent's own tools.
     tools:
-      - "@spwn/docker-cli"
+      - "spwn:docker-cli"
 
   lab:
     agents: [curie]
@@ -87,12 +87,12 @@ can't prompt-inject a missing binary.
 # spwn/agents/neo/agent.yaml
 name: neo
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 tools:
-  - "@spwn/unix"         # bash, grep, sed, awk…
-  - "@spwn/git"          # version control
-  - "@spwn/node"         # Node.js
+  - "spwn:unix"         # bash, grep, sed, awk…
+  - "spwn:git"          # version control
+  - "spwn:node"         # Node.js
 ```
 
 The effective tool set for a live container is the union of the

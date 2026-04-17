@@ -23,12 +23,12 @@ name: __NAME__
 description: A blank-slate agent — replace this one-liner with what __NAME__ is for.
 
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/python"
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"
 `
 
 // defaultAgentMDTmpl is the baseline source AGENTS.md written by

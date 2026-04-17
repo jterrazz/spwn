@@ -1,4 +1,4 @@
-name: "@spwn/cli"
+name: "spwn:cli"
 kind: platform
 version: latest
 description: "The spwn CLI for managing worlds and agents"

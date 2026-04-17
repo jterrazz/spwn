@@ -154,7 +154,7 @@ func TestGet_UnknownSlug(t *testing.T) {
 }
 
 func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
-	// @spwn/unix has no worlds: section so Get must treat it as
+	// spwn:unix has no worlds: section so Get must treat it as
 	// not-gallery-eligible.
 	if _, err := Get("unix"); err != ErrNotFound {
 		t.Errorf("Get(\"unix\") should fail: deps without worlds are not gallery-eligible (got err=%v)", err)

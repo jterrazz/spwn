@@ -1,4 +1,4 @@
 # Faculties
 
 ## Tools
-@spwn/claude-code/oauth, @spwn/unix
+spwn:claude-code/oauth, spwn:unix
