@@ -30,7 +30,11 @@ func BackupBaseDir(baseDir string) error {
 	// Copy relevant files/dirs (not .backups itself)
 	err := filepath.WalkDir(baseDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			// An unreadable entry shouldn't fail the whole backup.
+			// Common cause: a symlink inside an agent dir pointing at a
+			// container-side path (/credentials/...) that doesn't exist
+			// on the host. Skip and keep going.
+			return nil
 		}
 		rel, _ := filepath.Rel(baseDir, path)
 		if rel == "." {
@@ -39,6 +43,16 @@ func BackupBaseDir(baseDir string) error {
 		// Skip backups dir
 		if strings.HasPrefix(rel, backupSubDir) {
 			return filepath.SkipDir
+		}
+
+		// Skip symlinks entirely — they route credentials into container
+		// namespaces (e.g. ~/.spwn/agents/<name>/.codex/auth.json ->
+		// /credentials/...) and their targets are meaningless on the
+		// host. Copying either produces a broken link in the backup or
+		// (with Open following the link) an error when the target is
+		// missing. The sources the migration cares about are real files.
+		if d.Type()&fs.ModeSymlink != 0 {
+			return nil
 		}
 
 		target := filepath.Join(dest, rel)
