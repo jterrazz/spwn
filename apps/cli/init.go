@@ -28,7 +28,7 @@ var (
 	initName   string
 )
 
-const exampleRefPrefix = "@spwn/"
+const exampleRefPrefix = "spwn:"
 
 var initCmd = &cobra.Command{
 	Use:   "init [example-ref]",
@@ -38,10 +38,10 @@ var initCmd = &cobra.Command{
 Without arguments, creates a blank spwn.yaml plus a default ./spwn/
 tree (one world, one agent) and adds .spwn/ to .gitignore.
 
-A positional example ref of the form @spwn/<slug> installs one of
+A positional example ref of the form spwn:<slug> installs one of
 the bundled examples into the current directory instead. Example:
 
-    spwn init @spwn/matrix
+    spwn init spwn:matrix
 
 Use --global to instead seed ~/.spwn/ with a world config (legacy
 user-home mode, kept for backward compatibility).`,
@@ -103,15 +103,15 @@ func runInitLocal(cmd *cobra.Command) error {
 	return nil
 }
 
-// parseExampleRef validates a `@spwn/<slug>` argument and returns the
+// parseExampleRef validates a `spwn:<slug>` argument and returns the
 // bare slug. Anything else is a hard error with a one-line hint.
 func parseExampleRef(ref string) (string, error) {
 	if !strings.HasPrefix(ref, exampleRefPrefix) {
-		return "", fmt.Errorf("example ref must start with %q (e.g. @spwn/matrix), got %q", exampleRefPrefix, ref)
+		return "", fmt.Errorf("example ref must start with %q (e.g. spwn:matrix), got %q", exampleRefPrefix, ref)
 	}
 	slug := strings.TrimPrefix(ref, exampleRefPrefix)
 	if slug == "" || strings.ContainsAny(slug, "/ \t") {
-		return "", fmt.Errorf("invalid example slug in %q (expected @spwn/<slug>)", ref)
+		return "", fmt.Errorf("invalid example slug in %q (expected spwn:<slug>)", ref)
 	}
 	return slug, nil
 }

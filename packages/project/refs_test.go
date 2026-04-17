@@ -9,7 +9,7 @@ import (
 
 // TestValidate_refKinds exercises the three ref kinds end-to-end
 // through manifest.Validate against an on-disk project: local,
-// @spwn/* builtin, and @<owner>/<name> remote registry.
+// spwn:* builtin, and @<owner>/<name> remote registry.
 func TestValidate_refKinds(t *testing.T) {
 	root := t.TempDir()
 
@@ -28,9 +28,9 @@ worlds:
 	writeFile(t, filepath.Join(agentDir, "identity", "profile.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "AGENTS.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "agent.yaml"), `runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 dependencies:
-  - "@spwn/python"
+  - "spwn:python"
   - "local-tool"
   - "local-missing"
   - "@jterrazz/python"
@@ -47,8 +47,8 @@ dependencies:
 
 	issues := Validate(p, ValidateOpts{
 		// Fake catalog so the test doesn't depend on the real one.
-		BuiltinTools:      []string{"@spwn/python", "@spwn/claude-code"},
-		SupportedRuntimes: []string{"@spwn/claude-code"},
+		BuiltinTools:      []string{"spwn:python", "spwn:claude-code"},
+		SupportedRuntimes: []string{"spwn:claude-code"},
 	})
 
 	// Collect tool-related messages.
@@ -65,7 +65,7 @@ dependencies:
 	for _, iss := range issues {
 		msg := iss.Message
 		switch {
-		case strings.Contains(msg, `"@spwn/python"`):
+		case strings.Contains(msg, `"spwn:python"`):
 			spwnPythonIssues++
 		case strings.Contains(msg, `"local-tool"`):
 			localToolIssues++
@@ -83,7 +83,7 @@ dependencies:
 	}
 
 	if spwnPythonIssues != 0 {
-		t.Errorf("@spwn/python should produce no issue, got %d", spwnPythonIssues)
+		t.Errorf("spwn:python should produce no issue, got %d", spwnPythonIssues)
 	}
 	if localToolIssues != 0 {
 		t.Errorf("local-tool (present on disk) should produce no issue, got %d", localToolIssues)

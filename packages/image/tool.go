@@ -7,7 +7,7 @@ import "io/fs"
 // Tool is the contract that any installable capability must implement.
 // Built-in tools in catalog/ implement this; third-party tools can too.
 type Tool interface {
-	// Name returns the tool identifier (e.g., "@spwn/qmd", "@spwn/node").
+	// Name returns the tool identifier (e.g., "spwn:qmd", "spwn:node").
 	Name() string
 
 	// Kind returns the tool's category.
@@ -32,7 +32,7 @@ type Tool interface {
 	Skills() fs.FS
 
 	// Runtimes returns the runtime backends this dependency injects
-	// config into (e.g. "@spwn/claude-code"). Return nil for the
+	// config into (e.g. "spwn:claude-code"). Return nil for the
 	// common case of "no runtime-config block" — dependencies that don't
 	// target a runtime. Non-nil means the spawn-time merge pass
 	// should call Config(runtime) for each matching runtime and

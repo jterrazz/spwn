@@ -98,7 +98,7 @@ func TestInstall_rejectsUnknownBuiltin(t *testing.T) {
 	SetCatalogLookup(func(ref string) bool { return false })
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
-	_, err := runWithOut(t, installCmd, "@spwn/nonesuch")
+	_, err := runWithOut(t, installCmd, "spwn:nonesuch")
 	if err == nil {
 		t.Fatal("want error for unknown builtin")
 	}
@@ -111,7 +111,7 @@ func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 	SetCatalogLookup(func(ref string) bool { return true })
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
-	if _, err := runWithOut(t, installCmd, "@spwn/git"); err != nil {
+	if _, err := runWithOut(t, installCmd, "spwn:git"); err != nil {
 		t.Fatalf("install: %v", err)
 	}
 
@@ -119,8 +119,8 @@ func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load lockfile: %v", err)
 	}
-	if !lock.Has("@spwn/git") {
-		t.Errorf("lockfile missing @spwn/git, got %+v", lock)
+	if !lock.Has("spwn:git") {
+		t.Errorf("lockfile missing spwn:git, got %+v", lock)
 	}
 
 	m, err := agent.LoadManifest("neo")
@@ -129,12 +129,12 @@ func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 	}
 	var found bool
 	for _, p := range m.Deps {
-		if p == "@spwn/git" {
+		if p == "spwn:git" {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("neo.agent.yaml missing @spwn/git, deps=%v", m.Deps)
+		t.Errorf("neo.agent.yaml missing spwn:git, deps=%v", m.Deps)
 	}
 }
 
@@ -144,23 +144,23 @@ func TestInstall_idempotent(t *testing.T) {
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
 	for i := 0; i < 3; i++ {
-		if _, err := runWithOut(t, installCmd, "@spwn/unix"); err != nil {
+		if _, err := runWithOut(t, installCmd, "spwn:unix"); err != nil {
 			t.Fatalf("install #%d: %v", i, err)
 		}
 	}
 	m, _ := agent.LoadManifest("neo")
 	count := 0
 	for _, p := range m.Deps {
-		if p == "@spwn/unix" {
+		if p == "spwn:unix" {
 			count++
 		}
 	}
 	if count != 1 {
-		t.Errorf("want 1 instance of @spwn/unix, got %d", count)
+		t.Errorf("want 1 instance of spwn:unix, got %d", count)
 	}
 	lock, _ := dependency.LoadLockfile(root)
-	if !lock.Has("@spwn/unix") {
-		t.Errorf("lockfile missing @spwn/unix")
+	if !lock.Has("spwn:unix") {
+		t.Errorf("lockfile missing spwn:unix")
 	}
 }
 
@@ -171,21 +171,21 @@ func TestUninstall_removesEntry(t *testing.T) {
 	SetCatalogLookup(func(ref string) bool { return true })
 	t.Cleanup(func() { SetCatalogLookup(nil) })
 
-	if _, err := runWithOut(t, installCmd, "@spwn/git"); err != nil {
+	if _, err := runWithOut(t, installCmd, "spwn:git"); err != nil {
 		t.Fatalf("install: %v", err)
 	}
-	if _, err := runWithOut(t, uninstallCmd, "@spwn/git"); err != nil {
+	if _, err := runWithOut(t, uninstallCmd, "spwn:git"); err != nil {
 		t.Fatalf("uninstall: %v", err)
 	}
 
 	lock, _ := dependency.LoadLockfile(root)
-	if lock.Has("@spwn/git") {
-		t.Errorf("lockfile still has @spwn/git after uninstall")
+	if lock.Has("spwn:git") {
+		t.Errorf("lockfile still has spwn:git after uninstall")
 	}
 	m, _ := agent.LoadManifest("neo")
 	for _, p := range m.Deps {
-		if p == "@spwn/git" {
-			t.Errorf("neo.agent.yaml still has @spwn/git after uninstall")
+		if p == "spwn:git" {
+			t.Errorf("neo.agent.yaml still has spwn:git after uninstall")
 		}
 	}
 }

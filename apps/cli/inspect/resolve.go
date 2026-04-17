@@ -190,7 +190,7 @@ func countSkills(fsys fs.FS) int {
 
 // registerLocalTools walks <root>/spwn/tools/ and registers every
 // directory-form dependency it finds, prefixing names with "local:"
-// to stay out of the @spwn/ namespace (mirrors the hydration path
+// to stay out of the spwn: namespace (mirrors the hydration path
 // in packages/architect/localtools.go).
 func registerLocalTools(reg *ib.Registry, root string) error {
 	toolsDir := filepath.Join(root, "spwn", "tools")
@@ -311,7 +311,7 @@ func fromWorldStatus(s wmodels.Status) Status {
 
 // collectSkills enumerates every markdown skill the agent will see
 // at spawn-time: project-local (spwn/skills/), tool-provided
-// (@spwn/<tool>/skills/ or my-tool/skills/), and agent-local
+// (spwn:<tool>/skills/ or my-tool/skills/), and agent-local
 // (spwn/agents/<name>/skills/).
 func collectSkills(a source.AgentSource, src *source.ProjectSource, fullDeps []string, reg *ib.Registry) []SkillRef {
 	var out []SkillRef
@@ -379,11 +379,11 @@ func collectHooks(src *source.ProjectSource, a source.AgentSource) []HookRef {
 }
 
 // shortRuntime strips the spwn scope so "claude-code" shows instead
-// of "spwn:claude-code" or "@spwn/claude-code" in the header. Falls
+// of "spwn:claude-code" or "spwn:claude-code" in the header. Falls
 // back to the raw value when the ref has no recognised prefix.
 func shortRuntime(backend string) string {
-	if strings.HasPrefix(backend, "@spwn/") {
-		return backend[len("@spwn/"):]
+	if strings.HasPrefix(backend, "spwn:") {
+		return backend[len("spwn:"):]
 	}
 	if strings.HasPrefix(backend, "spwn:") {
 		return backend[len("spwn:"):]

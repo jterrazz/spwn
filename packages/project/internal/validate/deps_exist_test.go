@@ -41,9 +41,9 @@ func TestRulePackagesExist_ResolvesMixedRefs(t *testing.T) {
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - "@spwn/known-tool"
-  - "@spwn/known-dependency"
-  - "@spwn/bogus-package"
+  - "spwn:known-tool"
+  - "spwn:known-dependency"
+  - "spwn:bogus-package"
 `)
 
 	in := Input{
@@ -56,7 +56,7 @@ dependencies:
 			},
 		},
 		AgentRefs:    []AgentRef{ref},
-		BuiltinTools: []string{"@spwn/known-tool", "@spwn/known-dependency"},
+		BuiltinTools: []string{"spwn:known-tool", "spwn:known-dependency"},
 	}
 
 	issues := rulePacksExist(in)
@@ -71,8 +71,8 @@ dependencies:
 	if len(errs) != 1 {
 		t.Fatalf("want 1 error (bogus package), got %d: %+v", len(errs), errs)
 	}
-	if got := errs[0].Message; got == "" || !contains(got, "@spwn/bogus-package") {
-		t.Errorf("error message %q should mention @spwn/bogus-package", got)
+	if got := errs[0].Message; got == "" || !contains(got, "spwn:bogus-package") {
+		t.Errorf("error message %q should mention spwn:bogus-package", got)
 	}
 	if got := errs[0].Path; got == "" || !contains(got, "#deps") {
 		t.Errorf("error path %q should mention #deps", got)

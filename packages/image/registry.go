@@ -7,6 +7,7 @@ import (
 )
 
 // Registry holds all registered tools and resolves dependency graphs.
+// Keys are the canonical scheme-form ref (`spwn:unix`, `github:owner/repo`).
 type Registry struct {
 	tools map[string]Tool
 }
@@ -26,14 +27,12 @@ func (r *Registry) Register(t Tool) error {
 	return nil
 }
 
-// Get returns a tool by name, or nil if not found. Accepts either
-// ref syntax — `spwn:unix` and `@spwn/unix` resolve to the same
-// registered tool.
+// Get returns a tool by name, or nil if not found.
 func (r *Registry) Get(name string) Tool {
 	if t, ok := r.tools[name]; ok {
 		return t
 	}
-	return r.tools[dependency.RegistryKey(name)]
+	return r.tools[dependency.Canonical(name)]
 }
 
 // List returns all registered tools.
@@ -47,10 +46,6 @@ func (r *Registry) List() []Tool {
 
 // Resolve takes a list of requested tool names, expands transitive dependencies,
 // deduplicates, and returns a topologically sorted build order.
-//
-// Each input ref is canonicalised through dependency.RegistryKey so
-// callers can mix and match `spwn:unix` and `@spwn/unix` freely —
-// the registered tool is found either way.
 func (r *Registry) Resolve(requested []string) ([]Tool, error) {
 	// Canonicalise every input ref up-front so the rest of the
 	// algorithm deals in one consistent key space.
@@ -59,7 +54,7 @@ func (r *Registry) Resolve(requested []string) ([]Tool, error) {
 		if _, ok := r.tools[name]; ok {
 			canon[i] = name
 		} else {
-			canon[i] = dependency.RegistryKey(name)
+			canon[i] = dependency.Canonical(name)
 		}
 	}
 	requested = canon

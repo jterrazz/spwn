@@ -29,9 +29,9 @@ import (
 // optional so a minimal dependency ("install one thing, verify it's
 // there") stays short.
 type Schema struct {
-	// Name is the dependency identifier (e.g. "@spwn/git"). Optional:
+	// Name is the dependency identifier (e.g. "spwn:git"). Optional:
 	// when empty, the loader derives it from the caller-supplied
-	// DefaultName (catalog loader auto-prefixes with "@spwn/"; local
+	// DefaultName (catalog loader auto-prefixes with "spwn:"; local
 	// loader uses the directory basename).
 	Name string `yaml:"name"`
 
@@ -47,7 +47,7 @@ type Schema struct {
 
 	// Title is a human display name for the catalog gallery
 	// (e.g. "The Matrix"). Optional — when empty, callers fall back
-	// to the slug. Distinct from Name (which is the @spwn/<slug>
+	// to the slug. Distinct from Name (which is the spwn:<slug>
 	// identifier).
 	Title string `yaml:"title,omitempty"`
 
@@ -94,7 +94,7 @@ type Schema struct {
 	// RuntimeProvider names a host-side Go implementation that
 	// handles credential sync, default config file materialisation,
 	// and prelaunch shell setup at spawn time. Only runtimes
-	// ("@spwn/claude-code", "@spwn/codex") need this today; a tool
+	// ("spwn:claude-code", "spwn:codex") need this today; a tool
 	// that leaves it blank gets no spawn-time hooks. The string is
 	// looked up against a Go-side registry — unknown names fail at
 	// load time so typos are caught early.
@@ -136,9 +136,9 @@ type InstallSection struct {
 //
 //	runtime-config:
 //	  runtimes:
-//	    - "@spwn/claude-code"
+//	    - "spwn:claude-code"
 //	  configs:
-//	    "@spwn/claude-code":
+//	    "spwn:claude-code":
 //	      mcpServers:
 //	        mempalace:
 //	          command: python3

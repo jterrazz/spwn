@@ -82,11 +82,11 @@ type Input struct {
 
 	// BuiltinTools is the authoritative catalog of known built-in
 	// dependencies (tools, skills, runtimes). Nil → fall back to
-	// @spwn/* prefix heuristic.
+	// spwn:* prefix heuristic.
 	BuiltinTools []string
 
 	// SupportedRuntimes is the list of runtime backends the host can
-	// actually spawn (e.g. "@spwn/claude-code"). Nil → don't check.
+	// actually spawn (e.g. "spwn:claude-code"). Nil → don't check.
 	SupportedRuntimes []string
 }
 
@@ -633,7 +633,7 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 }
 
 // rulePacksExist checks every dependency referenced by any agent or
-// world against the BuiltinTools catalog (for @spwn/* refs) and
+// world against the BuiltinTools catalog (for spwn:* refs) and
 // against the filesystem (for bare local refs).
 //
 // Local refs resolve to either:
@@ -659,7 +659,7 @@ func rulePacksExist(in Input) []Issue {
 		checked[key] = true
 		ref := dependency.ParseRef(depRef)
 
-		// For @spwn/* and @<owner>/* refs, resolve against the
+		// For spwn:* and @<owner>/* refs, resolve against the
 		// catalog.
 		if ref.Kind != dependency.KindLocal {
 			switch dependency.ResolveTool(in.Root, ref, builtin, haveCatalog) {
@@ -722,7 +722,7 @@ func rulePacksExist(in Input) []Issue {
 	return out
 }
 
-// ruleLockfileConsistent compares every @spwn/* or @<owner>/*
+// ruleLockfileConsistent compares every spwn:* or @<owner>/*
 // dependency ref declared in any agent.yaml or spwn.yaml world against
 // spwn.lock. Missing entries become errors so `spwn build` fails
 // loudly and points the user at `spwn install`.
@@ -787,10 +787,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 			continue
 		}
 		seen[depRef] = true
-		// Accept lockfile entries in either ref syntax: the user's
-		// ref might be `spwn:unix` while the lockfile still stores
-		// the legacy `@spwn/unix`, or vice-versa after migration.
-		if lock.Has(depRef) || lock.Has(dependency.RegistryKey(depRef)) || lock.Has(dependency.Canonical(depRef)) {
+		if lock.Has(depRef) || lock.Has(dependency.Canonical(depRef)) {
 			continue
 		}
 		out = append(out, Issue{
@@ -804,7 +801,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 
 // ruleRuntimeSupported checks each agent's runtime backend against
 // the host's SupportedRuntimes list. Accepts either ref syntax —
-// `spwn:claude-code` and `@spwn/claude-code` both resolve to the
+// `spwn:claude-code` and `spwn:claude-code` both resolve to the
 // same entry in the supported-runtime set.
 func ruleRuntimeSupported(in Input) []Issue {
 	if len(in.SupportedRuntimes) == 0 {
@@ -812,7 +809,7 @@ func ruleRuntimeSupported(in Input) []Issue {
 	}
 	supported := map[string]struct{}{}
 	for _, r := range in.SupportedRuntimes {
-		supported[dependency.RegistryKey(r)] = struct{}{}
+		supported[dependency.Canonical(r)] = struct{}{}
 	}
 	// Display list stays in the canonical scheme form so the hint
 	// matches what scaffold/docs advertise.
@@ -829,7 +826,7 @@ func ruleRuntimeSupported(in Input) []Issue {
 		if err != nil || parsed.Runtime.Backend == "" {
 			continue
 		}
-		if _, ok := supported[dependency.RegistryKey(parsed.Runtime.Backend)]; !ok {
+		if _, ok := supported[dependency.Canonical(parsed.Runtime.Backend)]; !ok {
 			out = append(out, Issue{
 				Level: LevelError,
 				Path:  relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#runtime.backend",
@@ -1036,9 +1033,9 @@ func suggestPackage(tool string, catalog []string) string {
 		return "check the dependency name, or add it as a local tool under ./spwn/tools/"
 	}
 	// Display every catalog entry in the canonical scheme form
-	// (`spwn:unix`, not `@spwn/unix`) so the hint matches what
+	// (`spwn:unix`, not `spwn:unix`) so the hint matches what
 	// scaffold output and docs now advertise. Legacy input like
-	// `@spwn/nonexistent` still matches — the check side uses
+	// `spwn:nonexistent` still matches — the check side uses
 	// dependency.ParseRef, not string equality.
 	display := make([]string, len(catalog))
 	for i, c := range catalog {

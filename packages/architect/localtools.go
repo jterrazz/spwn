@@ -20,7 +20,7 @@ const localToolDir = "tools"
 // packyaml-parsed dependency but forces Name() to the "local:<basename>"
 // form. Catalog refs and local refs share a single registry keyed by
 // name, so the prefix keeps them in separate namespaces — any future
-// promotion of a local name to an @spwn/ dependency doesn't collide with
+// promotion of a local name to an spwn: dependency doesn't collide with
 // existing bare-name references in agent.yaml.
 type wrappedLocalTool struct {
 	inner ib.Tool
@@ -80,7 +80,7 @@ func hydrateLocalPacks(reg *ib.Registry, projectRoot string, refs []string) ([]s
 	out := make([]string, 0, len(refs))
 	loaded := map[string]bool{}
 	for _, raw := range refs {
-		// ParseRef classifies every syntax: @spwn/x, spwn:x,
+		// ParseRef classifies every syntax: spwn:x, spwn:x,
 		// github:a/b, @a/b → non-local; bare name → local.
 		// Anything non-local passes through for the registry to
 		// resolve via its catalog entry.

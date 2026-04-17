@@ -10,7 +10,7 @@ import { spec } from '../../setup/cli.specification.js';
  * content-addressed image build runs (generate Dockerfile, install
  * apt packages, probe every declared tool inside the container).
  * The previous failure mode this guards against: a default scaffold
- * declared @spwn/python, the user's cached spwn/world:latest image
+ * declared spwn:python, the user's cached spwn/world:latest image
  * predated that declaration, the manual version constant hadn't
  * been bumped so the stale image was reused, and `spwn up` failed
  * on the first invocation with "base image does not provide pip3".
@@ -57,9 +57,9 @@ describe('smoke: default scaffold', () => {
 });
 
 describe('smoke: catalog examples', () => {
-    smokeTest('smoke matrix', '@spwn/matrix');
-    smokeTest('smoke startup', '@spwn/startup');
-    smokeTest('smoke paperclip-factory', '@spwn/paperclip-factory');
-    smokeTest('smoke research-lab', '@spwn/research-lab');
-    smokeTest('smoke macrohard', '@spwn/macrohard');
+    smokeTest('smoke matrix', 'spwn:matrix');
+    smokeTest('smoke startup', 'spwn:startup');
+    smokeTest('smoke paperclip-factory', 'spwn:paperclip-factory');
+    smokeTest('smoke research-lab', 'spwn:research-lab');
+    smokeTest('smoke macrohard', 'spwn:macrohard');
 });

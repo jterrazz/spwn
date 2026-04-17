@@ -12,7 +12,7 @@ Entities:
   world                            Deployable groupings (start, stop, ls, inspect, enter, snap)
 
 Building blocks:
-  install <ref>                    Install a dependency (@spwn/unix, github.com/...)
+  install <ref>                    Install a dependency (spwn:unix, github.com/...)
   uninstall <ref>                  Remove a dependency
   skill                            Author skill files (new, edit, show, rm, ls)
 

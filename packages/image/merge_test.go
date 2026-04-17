@@ -105,23 +105,23 @@ func (p *fakeConfigPlugin) Config(runtime string) []byte {
 func TestCollectRuntimeConfigs_FiltersByRuntime(t *testing.T) {
 	resolved := []Tool{
 		&fakeConfigPlugin{
-			name:     "@spwn/a",
-			runtimes: []string{"@spwn/claude-code"},
-			cfg:      map[string]string{"@spwn/claude-code": `{"mcpServers":{"a":1}}`},
+			name:     "spwn:a",
+			runtimes: []string{"spwn:claude-code"},
+			cfg:      map[string]string{"spwn:claude-code": `{"mcpServers":{"a":1}}`},
 		},
 		&fakeConfigPlugin{
-			name:     "@spwn/b",
-			runtimes: []string{"@spwn/codex"},
-			cfg:      map[string]string{"@spwn/codex": `{"b":true}`},
+			name:     "spwn:b",
+			runtimes: []string{"spwn:codex"},
+			cfg:      map[string]string{"spwn:codex": `{"b":true}`},
 		},
 		&fakeConfigPlugin{
-			name:     "@spwn/c",
-			runtimes: []string{"@spwn/claude-code"},
-			cfg:      map[string]string{"@spwn/claude-code": `{"marker":"ok"}`},
+			name:     "spwn:c",
+			runtimes: []string{"spwn:claude-code"},
+			cfg:      map[string]string{"spwn:claude-code": `{"marker":"ok"}`},
 		},
 	}
 
-	cfgs := CollectRuntimeConfigs(resolved, "@spwn/claude-code")
+	cfgs := CollectRuntimeConfigs(resolved, "spwn:claude-code")
 	if len(cfgs) != 2 {
 		t.Fatalf("want 2 configs, got %d", len(cfgs))
 	}

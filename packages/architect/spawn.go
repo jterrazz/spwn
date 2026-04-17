@@ -203,16 +203,16 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// and dependencies on top. The registry deduplicates and resolves
 	// dependencies; dependencies share the tool resolution pipeline.
 	//
-	// @spwn/cli is deliberately excluded here - it installs the
+	// spwn:cli is deliberately excluded here - it installs the
 	// spwn binary itself and is only meaningful inside the
 	// architect container, not inside the workers' world container.
 	//
-	// @spwn/node used to live here because the claude-code runtime
+	// spwn:node used to live here because the claude-code runtime
 	// was installed via `npm install -g @anthropic-ai/claude-code`.
 	// The native binary installer removed that dependency, so node
 	// is no longer part of the baseline footprint. Users who want
-	// node for their own tools still add @spwn/node to agent.yaml.
-	required := []string{"@spwn/unix", "@spwn/claude-code"}
+	// node for their own tools still add spwn:node to agent.yaml.
+	required := []string{"spwn:unix", "spwn:claude-code"}
 	toolList := append(required, opts.Manifest.Deps...)
 
 	// Deduplicate

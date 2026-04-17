@@ -1,12 +1,12 @@
 // Package dependency owns spwn.lock: the committed, deterministic
-// pin of every @spwn/* and github.com/* dependency the project uses.
+// pin of every spwn:* and github:*/* dependency the project uses.
 //
 // Format is Go-style, line-oriented text — one entry per line:
 //
 //	# spwn.lock — DO NOT EDIT
-//	@spwn/unix v24.04 builtin
-//	@spwn/git v2.43 builtin
-//	github.com/jterrazz/research-skills v0.3.0 sha256:b7e12...
+//	spwn:unix v24.04 builtin
+//	spwn:git v2.43 builtin
+//	github:jterrazz/research-skills v0.3.0 sha256:b7e12...
 //
 // Local (bare-name) refs never land in the lockfile — they are
 // authored in-place under spwn/skills/, spwn/tools/, etc.
@@ -84,11 +84,6 @@ func LoadLockfile(projectRoot string) (*Lockfile, error) {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		// Legacy YAML format detection: if the first non-comment line
-		// starts with "version:" or "deps:", fall back to YAML parse.
-		if strings.HasPrefix(line, "version:") || strings.HasPrefix(line, "deps:") {
-			return loadLegacyYAML(data)
-		}
 		parts := strings.Fields(line)
 		if len(parts) < 2 {
 			continue
@@ -100,52 +95,6 @@ func LoadLockfile(projectRoot string) (*Lockfile, error) {
 			source = Source(parts[2])
 		}
 		l.Deps[ref] = LockEntry{Version: version, Source: source}
-	}
-	return l, nil
-}
-
-// loadLegacyYAML handles the old YAML lockfile format for upgrade.
-func loadLegacyYAML(data []byte) (*Lockfile, error) {
-	// Minimal YAML parse — just extract the deps map.
-	l := &Lockfile{Deps: map[string]LockEntry{}}
-	scanner := bufio.NewScanner(strings.NewReader(string(data)))
-	inDeps := false
-	var currentRef string
-	for scanner.Scan() {
-		line := scanner.Text()
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "deps:" {
-			inDeps = true
-			continue
-		}
-		if !inDeps {
-			continue
-		}
-		indent := len(line) - len(strings.TrimLeft(line, " "))
-		if indent == 0 && trimmed != "" {
-			break
-		}
-		if indent == 2 && strings.HasSuffix(trimmed, ":") {
-			currentRef = strings.Trim(strings.TrimSuffix(trimmed, ":"), "\"")
-			l.Deps[currentRef] = LockEntry{}
-			continue
-		}
-		if indent == 4 && currentRef != "" {
-			parts := strings.SplitN(trimmed, ":", 2)
-			if len(parts) != 2 {
-				continue
-			}
-			key := strings.TrimSpace(parts[0])
-			val := strings.Trim(strings.TrimSpace(parts[1]), "\"")
-			e := l.Deps[currentRef]
-			switch key {
-			case "version":
-				e.Version = val
-			case "source":
-				e.Source = Source(val)
-			}
-			l.Deps[currentRef] = e
-		}
 	}
 	return l, nil
 }

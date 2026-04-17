@@ -42,7 +42,7 @@ func TestConfig_DefaultsApplied(t *testing.T) {
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"
 `).
 		NoAgent().
 		Execute()
@@ -56,13 +56,13 @@ dependencies:
 }
 
 func TestConfig_CustomToolsReflectedInFaculties(t *testing.T) {
-	// Given - a config with @spwn/unix and @spwn/git tools
+	// Given - a config with spwn:unix and spwn:git tools
 	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 `).
 		NoAgent().
 		Execute()
@@ -70,8 +70,8 @@ dependencies:
 	// Then - the faculties file should list bash and git
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasFile("/world/faculties.md")
-		c.FileContains("/world/faculties.md", "@spwn/unix")
-		c.FileContains("/world/faculties.md", "@spwn/git")
+		c.FileContains("/world/faculties.md", "spwn:unix")
+		c.FileContains("/world/faculties.md", "spwn:git")
 	})
 }
 

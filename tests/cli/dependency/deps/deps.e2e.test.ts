@@ -11,8 +11,8 @@ import { spec } from '../../../setup/cli.specification.js';
  */
 
 describe('spwn check: dependencies field resolution', () => {
-    test('accepts @spwn/mempalace without error', async () => {
-        // Given - a project whose neo agent declares dependencies: ["@spwn/mempalace"]
+    test('accepts spwn:mempalace without error', async () => {
+        // Given - a project whose neo agent declares dependencies: ["spwn:mempalace"]
         const result = await spec('deps valid').project('check-valid-dep').exec('check').run();
 
         // Then - check passes and does not complain about the dependency
@@ -28,7 +28,7 @@ describe('spwn check: dependencies field resolution', () => {
         // Then - check fails and names the offending dependency
         expect(result.exitCode).toBe(1);
         // `check` renders its report on stdout.
-        result.stdout.toContain('@spwn/totally-bogus-dep');
+        result.stdout.toContain('spwn:totally-bogus-dep');
         expect(result.stdout.text.toLowerCase()).toContain('does not exist');
     });
 });

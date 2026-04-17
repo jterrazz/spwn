@@ -51,7 +51,7 @@ const TERMS: Term[] = [
     {
         word: 'Tool',
         short: 'A composable capability.',
-        long: 'A piece of an image - a binary, configuration, or skill - that can be installed into a world. Tools live under @spwn/* in the catalog.',
+        long: 'A piece of an image - a binary, configuration, or skill - that can be installed into a world. Tools live under spwn:* in the catalog.',
     },
     {
         word: 'Skill',

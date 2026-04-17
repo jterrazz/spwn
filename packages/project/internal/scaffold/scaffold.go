@@ -91,12 +91,12 @@ func Init(dir string, opts Opts) error {
 		return fmt.Errorf("write .spwn/state.json: %w", err)
 	}
 
-	// Seed spwn.lock with the initial @spwn/* refs baked into
+	// Seed spwn.lock with the initial spwn:* refs baked into
 	// the template agent.yaml so `spwn check` is clean on the very
 	// first run. Without this the lockfile rule would flag drift on
 	// any brand-new project.
 	initialLock := dependency.EmptyLockfile()
-	for _, ref := range []string{"@spwn/unix", "@spwn/git", "@spwn/python"} {
+	for _, ref := range []string{"spwn:unix", "spwn:git", "spwn:python"} {
 		initialLock.Add(ref, dependency.LockEntry{Source: dependency.SourceBuiltin})
 	}
 	if err := dependency.SaveLockfile(absDir, initialLock); err != nil {
@@ -422,7 +422,7 @@ func defaultName(absDir string) string {
 // AppendGitignore appends the `.spwn/` entry to <root>/.gitignore
 // when it's not already present. Idempotent and file-creating. Used
 // by Init (for blank scaffolds) and by the example installer (so
-// `spwn init @spwn/<slug>` in a fresh dir also gets the entry).
+// `spwn init spwn:<slug>` in a fresh dir also gets the entry).
 func AppendGitignore(root string) error {
 	return appendGitignore(root)
 }

@@ -41,7 +41,7 @@ type Resolver interface {
 // ParseOptions configures a Parse call.
 type ParseOptions struct {
 	// DefaultName is applied when the manifest doesn't set `name:`.
-	// Catalog loaders pass "@spwn/<basename>"; the project-local
+	// Catalog loaders pass "spwn:<basename>"; the project-local
 	// loader passes the bare directory name.
 	DefaultName string
 

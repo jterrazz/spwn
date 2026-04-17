@@ -5,7 +5,7 @@ import { spec } from '../../../setup/cli.specification.js';
 /**
  * Tool reference classification by `spwn check`:
  *
- *   @spwn/<name>      → built-in tool dependency (must exist)
+ *   spwn:<name>      → built-in tool dependency (must exist)
  *   @<owner>/<name>   → remote registry (not yet supported)
  *   <name>            → local dependency under spwn/tools/<name>
  *
@@ -17,7 +17,7 @@ import { spec } from '../../../setup/cli.specification.js';
 
 describe('spwn check: tool ref classification', () => {
     test('accepts mixed @spwn and local refs without error', async () => {
-        // Given - the mixed-tool-refs fixture declares @spwn/unix plus
+        // Given - the mixed-tool-refs fixture declares spwn:unix plus
         // A local tool `my-local-tool` that actually exists on disk
         // Under spwn/tools/.
         const result = await spec('mixed refs').project('mixed-tool-refs').exec('check').run();

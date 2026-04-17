@@ -36,7 +36,7 @@ install:
 verify:
   - command -v my-tool
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"
 `)
 
 	tool, err := loadLocalPack(root, "my-tool")
@@ -65,7 +65,7 @@ dependencies:
 	if got := tool.Verify(); len(got) != 1 || got[0] != "command -v my-tool" {
 		t.Errorf("verify: %v", got)
 	}
-	if got := tool.Dependencies(); len(got) != 1 || got[0] != "@spwn/unix" {
+	if got := tool.Dependencies(); len(got) != 1 || got[0] != "spwn:unix" {
 		t.Errorf("deps: %v", got)
 	}
 }
@@ -110,12 +110,12 @@ func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 	root := t.TempDir()
 	reg := ib.NewRegistry()
 
-	list := []string{"@spwn/unix", "@spwn/git"}
+	list := []string{"spwn:unix", "spwn:git"}
 	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
-	if len(got) != 2 || got[0] != "@spwn/unix" || got[1] != "@spwn/git" {
+	if len(got) != 2 || got[0] != "spwn:unix" || got[1] != "spwn:git" {
 		t.Errorf("passthrough mangled: %v", got)
 	}
 }
@@ -130,7 +130,7 @@ verify:
 `)
 	reg := ib.NewRegistry()
 
-	list := []string{"@spwn/unix", "mine", "@spwn/git"}
+	list := []string{"spwn:unix", "mine", "spwn:git"}
 	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
@@ -160,12 +160,12 @@ verify:
 `)
 	reg := ib.NewRegistry()
 
-	list := []string{"@spwn/unix", "tool-a", "@spwn/git", "tool-b", "tool-a"}
+	list := []string{"spwn:unix", "tool-a", "spwn:git", "tool-b", "tool-a"}
 	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
-	want := []string{"@spwn/unix", "local:tool-a", "@spwn/git", "local:tool-b", "local:tool-a"}
+	want := []string{"spwn:unix", "local:tool-a", "spwn:git", "local:tool-b", "local:tool-a"}
 	if len(got) != len(want) {
 		t.Fatalf("length: got %v, want %v", got, want)
 	}

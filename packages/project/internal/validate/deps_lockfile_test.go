@@ -87,7 +87,7 @@ func TestRuleLockfileConsistent_missingLockfileIsSilent(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"
 `)
 	in := Input{
 		Root:      root,
@@ -103,13 +103,13 @@ func TestRuleLockfileConsistent_driftFlagged(t *testing.T) {
 	root := t.TempDir()
 	ref := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/mempalace"
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:mempalace"
 `)
-	// Lockfile only has @spwn/unix — git and mempalace are drift.
+	// Lockfile only has spwn:unix — git and mempalace are drift.
 	l := dependency.EmptyLockfile()
-	l.Add("@spwn/unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
+	l.Add("spwn:unix", dependency.LockEntry{Version: "1", Source: dependency.SourceBuiltin})
 	writeLockfile(t, root, l)
 
 	in := Input{
@@ -120,8 +120,8 @@ dependencies:
 	issues := ruleLockfileConsistent(in)
 	var sawGit, sawMempalace, sawUnix bool
 	// Messages now render in the canonical `spwn:<name>` form.
-	// Drift on @spwn/git → "spwn:git"; @spwn/unix is in the
-	// lockfile (as @spwn/unix), so no message should mention it
+	// Drift on spwn:git → "spwn:git"; spwn:unix is in the
+	// lockfile (as spwn:unix), so no message should mention it
 	// in either form.
 	for _, iss := range issues {
 		if strings.Contains(iss.Message, "spwn:git") {
@@ -130,7 +130,7 @@ dependencies:
 		if strings.Contains(iss.Message, "spwn:mempalace") {
 			sawMempalace = true
 		}
-		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "@spwn/unix") {
+		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "spwn:unix") {
 			sawUnix = true
 		}
 	}
@@ -141,7 +141,7 @@ dependencies:
 		t.Error("drift on spwn:mempalace not flagged")
 	}
 	if sawUnix {
-		t.Error("@spwn/unix is in the lockfile, should not be flagged")
+		t.Error("spwn:unix is in the lockfile, should not be flagged")
 	}
 }
 

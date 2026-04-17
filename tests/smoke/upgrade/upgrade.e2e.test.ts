@@ -106,7 +106,7 @@ describe('smoke: project upgrade cycle', () => {
         // Baseline tools from the default scaffold (unix + git + python).
         expect(exec(cid1, 'command -v python3')).not.toBe('');
         expect(exec(cid1, 'command -v git')).not.toBe('');
-        // The Phase 2 marker tool (@spwn/qmd) is added in Phase 2
+        // The Phase 2 marker tool (spwn:qmd) is added in Phase 2
         // And verified in Phase 3. Asserting its absence here would
         // Be brittle against evolving base images, so we rely on
         // The image-version-label diff + the Phase 3 presence
@@ -121,7 +121,7 @@ describe('smoke: project upgrade cycle', () => {
         // ── Phase 2: mutate the project ──────────────────────────
 
         // 2a. Add a tool the default scaffold doesn't ship. The
-        //     @spwn/qmd dependency runs `npm install -g @tobilu/qmd`,
+        //     spwn:qmd dependency runs `npm install -g @tobilu/qmd`,
         //     Which adds a new RUN layer to the Dockerfile - the
         //     Content hash changes and the cache misses.
         writeFileSync(
@@ -130,13 +130,13 @@ describe('smoke: project upgrade cycle', () => {
                 'name: neo',
                 '',
                 'runtime:',
-                '  backend: "@spwn/claude-code"',
+                '  backend: "spwn:claude-code"',
                 '',
                 'dependencies:',
-                '  - "@spwn/unix"',
-                '  - "@spwn/git"',
-                '  - "@spwn/python"',
-                '  - "@spwn/qmd"',
+                '  - "spwn:unix"',
+                '  - "spwn:git"',
+                '  - "spwn:python"',
+                '  - "spwn:qmd"',
                 '',
             ].join('\n'),
         );
@@ -176,10 +176,10 @@ describe('smoke: project upgrade cycle', () => {
                 'name: trinity',
                 '',
                 'runtime:',
-                '  backend: "@spwn/claude-code"',
+                '  backend: "spwn:claude-code"',
                 '',
                 'dependencies:',
-                '  - "@spwn/unix"',
+                '  - "spwn:unix"',
                 '',
             ].join('\n'),
         );
@@ -216,7 +216,7 @@ describe('smoke: project upgrade cycle', () => {
 
         const cid2 = container();
 
-        // New tool: @spwn/qmd installed a `qmd` binary via npm
+        // New tool: spwn:qmd installed a `qmd` binary via npm
         // During the content-hash-triggered rebuild. If this
         // Command fails, either the rebuild didn't happen or the
         // Generator dropped the tool - both are regressions in

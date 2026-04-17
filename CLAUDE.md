@@ -66,10 +66,10 @@ spwn agent ls                                  # List project agents
 spwn agent inspect neo                         # Inspect composition, memory, history
 spwn agent fork neo neo-v2                     # Clone memory + composition
 spwn agent rm neo                              # Delete an agent
-spwn agent rm neo --dependency @spwn/python       # Remove a dep from an agent
+spwn agent rm neo --dependency spwn:python       # Remove a dep from an agent
 
 # Compose
-spwn agent add neo --dependency @spwn/python      # Add a dep
+spwn agent add neo --dependency spwn:python      # Add a dep
 spwn agent add neo --dependency paper-reading     # Add a local dependency
 
 # Talk + messaging
@@ -93,8 +93,8 @@ spwn world enter   <id>                        # Interactive shell inside the wo
 spwn world snap save|ls|restore|rm             # World snapshots
 
 # ── Dependencies ────────────────────────────────────────────
-spwn install @spwn/python              # Install a dep (adds to every agent + lockfile)
-spwn uninstall @spwn/python          # Remove a dep
+spwn install spwn:python              # Install a dep (adds to every agent + lockfile)
+spwn uninstall spwn:python          # Remove a dep
 
 spwn skill   new|edit|show|rm <name>           # Bare-markdown skill authoring (./spwn/skills/<name>.md)
 

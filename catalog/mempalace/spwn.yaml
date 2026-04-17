@@ -1,4 +1,4 @@
-# Catalog entry for @spwn/mempalace.
+# Catalog entry for spwn:mempalace.
 # The actual tool definition lives at tools/mempalace/tool.yaml; this
 # file is the project-shape wrapper so the catalog entry mirrors a
 # real spwn project layout (spwn.yaml at root + spwn/tools/<name>

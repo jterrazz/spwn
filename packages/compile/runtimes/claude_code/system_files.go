@@ -132,11 +132,11 @@ Read ` + "`/world/physics.md`" + ` for the rules of this world
 
 ## Tools
 Tools are capabilities available in your world:
-- ` + "`@spwn/unix`" + ` - bash, coreutils, standard CLI tools
-- ` + "`@spwn/git`" + ` - version control
-- ` + "`@spwn/node`" + ` - Node.js runtime
-- ` + "`@spwn/python`" + ` - Python runtime
-- ` + "`@spwn/docker-cli`" + ` - Docker CLI (for the Architect)
+- ` + "`spwn:unix`" + ` - bash, coreutils, standard CLI tools
+- ` + "`spwn:git`" + ` - version control
+- ` + "`spwn:node`" + ` - Node.js runtime
+- ` + "`spwn:python`" + ` - Python runtime
+- ` + "`spwn:docker-cli`" + ` - Docker CLI (for the Architect)
 Read ` + "`/world/faculties.md`" + ` for what's installed.
 
 ## Workspaces

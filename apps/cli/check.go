@@ -79,7 +79,7 @@ severity. Exits non-zero when errors are found (or warnings, with
 			compileIssues = runCompileDeepCheck(p.Root)
 		}
 		// Cross-check: an agent may declare a runtime the catalog
-		// recognises (e.g. `@spwn/codex`) even when no compile
+		// recognises (e.g. `spwn:codex`) even when no compile
 		// adapter is registered for it. Without this warning,
 		// `spwn check` happily reports "valid" and the user only
 		// discovers the gap when `spwn build` fails with
@@ -289,11 +289,11 @@ func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 			continue
 		}
 		// Map catalog refs to their bare runtime id: both "spwn:codex"
-		// and "@spwn/codex" need to strip down to "codex" for
+		// and "spwn:codex" need to strip down to "codex" for
 		// compile.Register lookup (ResolveRuntime uses the same map).
 		canonical := raw
-		if strings.HasPrefix(raw, "@spwn/") {
-			canonical = strings.TrimPrefix(raw, "@spwn/")
+		if strings.HasPrefix(raw, "spwn:") {
+			canonical = strings.TrimPrefix(raw, "spwn:")
 		} else if strings.HasPrefix(raw, "spwn:") {
 			canonical = strings.TrimPrefix(raw, "spwn:")
 		}

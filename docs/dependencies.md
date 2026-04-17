@@ -12,10 +12,10 @@ version: 2
 name: acme-api
 
 dependencies:                      # project-wide — every agent inherits these
-  - "@spwn/unix"
-  - "@spwn/git"
-  - "@spwn/python"
-  - "@spwn/mempalace"
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"
+  - "spwn:mempalace"
 
 worlds:
   matrix:
@@ -27,10 +27,10 @@ worlds:
 # spwn/agents/neo/agent.yaml — agent composition
 name: neo
 runtime:
-  backend: "@spwn/claude-code"
+  backend: "spwn:claude-code"
 
 dependencies:                      # agent-specific additions (on top of project deps)
-  - "@spwn/qmd"
+  - "spwn:qmd"
 
 skills:                            # local skills this agent uses
   - paper-reading
@@ -49,7 +49,7 @@ Every ref in `dependencies:` is one of three kinds:
 
 | Kind | Syntax | Resolved from |
 |------|--------|--------------|
-| **Builtin** | `@spwn/<name>` | Catalog compiled into the spwn binary |
+| **Builtin** | `spwn:<name>` | Catalog compiled into the spwn binary |
 | **GitHub** | `github.com/<owner>/<repo>` | Git clone + git tags as versions (planned) |
 | **Local** | `<bare-name>` | `spwn/tools/<name>/` directory |
 
@@ -96,10 +96,10 @@ my-project/
 
 ```
 # spwn.lock — DO NOT EDIT
-@spwn/git latest builtin
-@spwn/mempalace latest builtin
-@spwn/python latest builtin
-@spwn/unix latest builtin
+spwn:git latest builtin
+spwn:mempalace latest builtin
+spwn:python latest builtin
+spwn:unix latest builtin
 ```
 
 Each line: `<ref> <version> <source>`. Managed by `spwn install` / `spwn uninstall`. Commit this file.
@@ -108,9 +108,9 @@ Each line: `<ref> <version> <source>`. Managed by `spwn install` / `spwn uninsta
 
 ```bash
 # Install / remove external dependencies
-spwn install @spwn/python                    # add to every agent + pin in spwn.lock
+spwn install spwn:python                    # add to every agent + pin in spwn.lock
 spwn install github.com/jterrazz/skills      # (planned) install from GitHub
-spwn uninstall @spwn/python                  # remove from agents + lockfile
+spwn uninstall spwn:python                  # remove from agents + lockfile
 
 # Author local blocks
 spwn skill new paper-reading                 # create spwn/skills/paper-reading.md
@@ -139,16 +139,16 @@ Agents inherit all project-level dependencies automatically. An agent's `depende
 
 ```yaml
 # spwn.yaml
-dependencies: ["@spwn/unix", "@spwn/git"]     # every agent gets these
+dependencies: ["spwn:unix", "spwn:git"]     # every agent gets these
 
 # agent.yaml for neo
-dependencies: ["@spwn/python"]                # neo also gets python
-# neo's resolved dependencies: @spwn/unix + @spwn/git + @spwn/python
+dependencies: ["spwn:python"]                # neo also gets python
+# neo's resolved dependencies: spwn:unix + spwn:git + spwn:python
 ```
 
 ## Version pinning
 
-Catalog dependencies (`@spwn/*`) are compiled into the binary — their version is the spwn CLI version. GitHub dependencies (planned) will use git tags with minimum version selection:
+Catalog dependencies (`spwn:*`) are compiled into the binary — their version is the spwn CLI version. GitHub dependencies (planned) will use git tags with minimum version selection:
 
 ```yaml
 dependencies:

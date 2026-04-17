@@ -4,4 +4,4 @@ role: worker         # default role
 
 # Catalog dependencies and local refs live in a single flat list.
 dependencies:
-  - "@spwn/unix"     # POSIX basics
+  - "spwn:unix"     # POSIX basics

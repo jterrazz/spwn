@@ -12,8 +12,8 @@ import { spec } from '../../../setup/cli.specification.js';
  * Dropped legacy coverage:
  *   - "physics constants documented in physics.md": the physics.md
  *     template no longer materialises CPU / Memory / Timeout values.
- *   - "element dependency expansion with @spwn/node": the fixture ships
- *     @spwn/unix + @spwn/git only. Testing @spwn/node would require
+ *   - "element dependency expansion with spwn:node": the fixture ships
+ *     spwn:unix + spwn:git only. Testing spwn:node would require
  *     a new fixture clone — out of scope.
  */
 describe('world security', () => {
@@ -32,7 +32,7 @@ describe('world security', () => {
         const neo = world.container('neo');
         expect(neo.running).toBe(true);
 
-        // Docker-pilot's worlds/default.yaml declares @spwn/unix + @spwn/git.
+        // Docker-pilot's worlds/default.yaml declares spwn:unix + spwn:git.
         const bash = await neo.exec('which bash');
         expect(bash.exitCode).toBe(0);
         expect(bash.stdout.text).toContain('bash');

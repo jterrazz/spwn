@@ -17,11 +17,15 @@ func TestParse(t *testing.T) {
 	}{
 		{"local-tool", dependency.KindLocal, "", "local-tool"},
 		{"  spaced  ", dependency.KindLocal, "", "spaced"},
-		{"@spwn/unix", dependency.KindSpwnBuiltin, "spwn", "unix"},
-		{"@spwn/claude-code", dependency.KindSpwnBuiltin, "spwn", "claude-code"},
-		{"@acme/foo", dependency.KindRegistry, "acme", "foo"},
-		{"@jterrazz/python", dependency.KindRegistry, "jterrazz", "python"},
-		{"@malformed", dependency.KindRegistry, "malformed", ""},
+		{"spwn:unix", dependency.KindSpwnBuiltin, "spwn", "unix"},
+		{"spwn:claude-code", dependency.KindSpwnBuiltin, "spwn", "claude-code"},
+		{"github:acme/foo", dependency.KindRegistry, "acme", "foo"},
+		{"github:jterrazz/python", dependency.KindRegistry, "jterrazz", "python"},
+		// Legacy `@owner/name` form is malformed and surfaces as an
+		// empty-name KindRegistry ref so the resolver can reject it.
+		{"@acme/foo", dependency.KindRegistry, "", ""},
+		{"@jterrazz/python", dependency.KindRegistry, "", ""},
+		{"@malformed", dependency.KindRegistry, "", ""},
 	}
 	for _, c := range cases {
 		t.Run(c.in, func(t *testing.T) {
@@ -45,11 +49,11 @@ func TestSplitVersion(t *testing.T) {
 		dependency    string
 		version string
 	}{
-		{"@spwn/unix", "@spwn/unix", ""},
-		{"@spwn/unix@24.04", "@spwn/unix", "24.04"},
+		{"spwn:unix", "spwn:unix", ""},
+		{"spwn:unix@24.04", "spwn:unix", "24.04"},
 		{"local-tool", "local-tool", ""},
 		{"local-tool@0.1", "local-tool", "0.1"},
-		{"@acme/foo@1.2.3", "@acme/foo", "1.2.3"},
+		{"github:acme/foo@1.2.3", "github:acme/foo", "1.2.3"},
 	}
 	for _, c := range cases {
 		t.Run(c.in, func(t *testing.T) {
@@ -81,28 +85,28 @@ func TestResolveTool_Local(t *testing.T) {
 
 func TestResolveTool_Builtin(t *testing.T) {
 	builtin := map[string]struct{}{
-		"@spwn/unix": {},
-		"@spwn/git":  {},
+		"spwn:unix": {},
+		"spwn:git":  {},
 	}
 
-	got := dependency.ResolveTool("", dependency.ParseRef("@spwn/unix"), builtin, true)
+	got := dependency.ResolveTool("", dependency.ParseRef("spwn:unix"), builtin, true)
 	if got != dependency.ResolveOK {
 		t.Errorf("known builtin: want OK, got %v", got)
 	}
 
-	got = dependency.ResolveTool("", dependency.ParseRef("@spwn/nonesuch"), builtin, true)
+	got = dependency.ResolveTool("", dependency.ParseRef("spwn:nonesuch"), builtin, true)
 	if got != dependency.ResolveNotFound {
 		t.Errorf("unknown builtin with catalog: want NotFound, got %v", got)
 	}
 
-	got = dependency.ResolveTool("", dependency.ParseRef("@spwn/nonesuch"), nil, false)
+	got = dependency.ResolveTool("", dependency.ParseRef("spwn:nonesuch"), nil, false)
 	if got != dependency.ResolveOK {
 		t.Errorf("unknown builtin without catalog: want OK (permissive), got %v", got)
 	}
 }
 
 func TestResolveTool_Registry(t *testing.T) {
-	got := dependency.ResolveTool("", dependency.ParseRef("@acme/foo"), nil, false)
+	got := dependency.ResolveTool("", dependency.ParseRef("github:acme/foo"), nil, false)
 	if got != dependency.ResolveRegistryUnsupported {
 		t.Errorf("registry ref: want RegistryUnsupported, got %v", got)
 	}

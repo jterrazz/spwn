@@ -17,13 +17,13 @@ func TestParseExampleRef(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"@spwn/matrix", "matrix", false},
-		{"@spwn/startup", "startup", false},
+		{"spwn:matrix", "matrix", false},
+		{"spwn:startup", "startup", false},
 		{"matrix", "", true},
 		{"@other/matrix", "", true},
-		{"@spwn/", "", true},
-		{"@spwn/ma trix", "", true},
-		{"@spwn/foo/bar", "", true},
+		{"spwn:", "", true},
+		{"spwn:ma trix", "", true},
+		{"spwn:foo/bar", "", true},
 	}
 	for _, c := range cases {
 		t.Run(c.in, func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestRunInitExample_InstallsFromCatalog(t *testing.T) {
 	cmd.SetOut(new(bytes.Buffer))
 	cmd.SetErr(new(bytes.Buffer))
 
-	if err := runInitExample(cmd, "@spwn/matrix"); err != nil {
+	if err := runInitExample(cmd, "spwn:matrix"); err != nil {
 		t.Fatalf("runInitExample: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(tmp, "spwn.yaml")); err != nil {
@@ -123,7 +123,7 @@ func TestRunInitExample_RejectsNameFlag(t *testing.T) {
 	cmd.SetOut(new(bytes.Buffer))
 	cmd.SetErr(new(bytes.Buffer))
 
-	if err := runInitExample(cmd, "@spwn/matrix"); err == nil {
+	if err := runInitExample(cmd, "spwn:matrix"); err == nil {
 		t.Fatalf("expected error when --name is combined with an example ref")
 	}
 }

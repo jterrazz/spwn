@@ -1,4 +1,4 @@
-name: "@spwn/git"
+name: "spwn:git"
 kind: tool
 version: latest
 description: "Git version control"

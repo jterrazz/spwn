@@ -16,7 +16,7 @@ func installCmd() *cobra.Command {
 		Long: `Add a catalog or GitHub dependency to every agent's manifest and pin it in spwn.lock.
 
 Examples:
-  spwn install @spwn/python
+  spwn install spwn:python
   spwn install github.com/jterrazz/research-skills`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

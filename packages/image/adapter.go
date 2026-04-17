@@ -18,7 +18,7 @@ type dependencyAdapter struct {
 	skillsFS  fs.FS
 }
 
-// Name returns the fully-qualified ref (e.g. "@spwn/git").
+// Name returns the fully-qualified ref (e.g. "spwn:git").
 func (t *dependencyAdapter) Name() string { return t.schema.Name }
 
 // Kind returns the classification parsed from the `kind:` field.

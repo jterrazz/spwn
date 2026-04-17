@@ -16,7 +16,7 @@ worlds:
   default:
     agents: [neo]
     workspaces: [.]
-dependencies: ["@spwn/unix"]
+dependencies: ["spwn:unix"]
 `))
 	f.Add([]byte(`version: 2
 name: empty`))

@@ -9,7 +9,7 @@
 // consume.
 //
 // The Ref kinds (Local, SpwnBuiltin, Registry) classify what a
-// user-facing ref like "@spwn/unix" or "github.com/foo/bar" means.
+// user-facing ref like "spwn:unix" or "github.com/foo/bar" means.
 // ResolveTool and ResolveSkill answer whether a ref actually
 // resolves to something on disk. Lockfile owns the line-oriented
 // spwn.lock text format (plus a legacy-YAML fallback for migration).

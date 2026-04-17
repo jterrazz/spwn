@@ -42,7 +42,7 @@ func TestToCompileInput_MergesProjectAndAgentDeps(t *testing.T) {
 	manifest := `version: 2
 name: merge-test
 dependencies:
-  - "@spwn/unix"
+  - "spwn:unix"
   - shared-tool
 worlds:
   home:
@@ -52,7 +52,7 @@ worlds:
 	agentYAML := `name: neo
 role: worker
 dependencies:
-  - "@spwn/git"
+  - "spwn:git"
   - agent-only-tool
 `
 	root := scaffoldProject(t, manifest, map[string]string{"neo": agentYAML})
@@ -73,7 +73,7 @@ dependencies:
 		depsSet[d] = true
 	}
 
-	for _, want := range []string{"@spwn/unix", "shared-tool", "@spwn/git", "agent-only-tool"} {
+	for _, want := range []string{"spwn:unix", "shared-tool", "spwn:git", "agent-only-tool"} {
 		if !depsSet[want] {
 			t.Errorf("missing expected dep %q in merged list: %v", want, in.Deps)
 		}
@@ -91,8 +91,8 @@ func TestToCompileInput_AgentInheritsProjectDeps(t *testing.T) {
 	manifest := `version: 2
 name: inherit-test
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 worlds:
   home:
     agents: [bare]
@@ -116,7 +116,7 @@ role: worker
 
 	// Agent has 0 deps, project has 2 — the compile input should have
 	// the project-level dependency.
-	want := []string{"@spwn/git", "@spwn/unix"}
+	want := []string{"spwn:git", "spwn:unix"}
 	if !equalStrings(in.Deps, want) {
 		t.Errorf("Manifest.Deps = %v, want %v", in.Deps, want)
 	}
@@ -128,7 +128,7 @@ func TestToCompileInput_NoAgentYAML(t *testing.T) {
 	manifest := `version: 2
 name: noconfig
 dependencies:
-  - "@spwn/python"
+  - "spwn:python"
 worlds:
   home:
     agents: [ghost]
@@ -147,8 +147,8 @@ worlds:
 		t.Fatalf("ToCompileInput: %v", err)
 	}
 
-	if len(in.Deps) != 1 || in.Deps[0] != "@spwn/python" {
-		t.Errorf("Manifest.Deps = %v, want [@spwn/python]", in.Deps)
+	if len(in.Deps) != 1 || in.Deps[0] != "spwn:python" {
+		t.Errorf("Manifest.Deps = %v, want [spwn:python]", in.Deps)
 	}
 }
 
@@ -158,8 +158,8 @@ func TestToCompileInput_DeduplicatesDeps(t *testing.T) {
 	manifest := `version: 2
 name: dedup-test
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
 worlds:
   home:
     agents: [neo]
@@ -168,8 +168,8 @@ worlds:
 	agentYAML := `name: neo
 role: worker
 dependencies:
-  - "@spwn/unix"
-  - "@spwn/git"
+  - "spwn:unix"
+  - "spwn:git"
   - extra
 `
 	root := scaffoldProject(t, manifest, map[string]string{"neo": agentYAML})
@@ -185,7 +185,7 @@ dependencies:
 	}
 
 	// Should be exactly 3 unique deps, not 5.
-	want := []string{"@spwn/git", "@spwn/unix", "extra"}
+	want := []string{"extra", "spwn:git", "spwn:unix"}
 	if !equalStrings(in.Deps, want) {
 		t.Errorf("Manifest.Deps = %v, want %v (deduplicated)", in.Deps, want)
 	}

@@ -8,15 +8,15 @@ import (
 )
 
 
-// Tool is the @spwn/codex tool - OpenAI Codex agent runtime.
+// Tool is the spwn:codex tool - OpenAI Codex agent runtime.
 var Tool = &tool{}
 
 type tool struct{}
 
-func (*tool) Name() string           { return "@spwn/codex" }
+func (*tool) Name() string           { return "spwn:codex" }
 func (*tool) Kind() dependency.Kind          { return dependency.KindRuntime }
 func (*tool) Version() string        { return "latest" }
-func (*tool) Dependencies() []string { return []string{"@spwn/node"} }
+func (*tool) Dependencies() []string { return []string{"spwn:node"} }
 
 func (*tool) Install() ib.InstallSpec {
 	return ib.InstallSpec{

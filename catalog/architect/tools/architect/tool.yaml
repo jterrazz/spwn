@@ -1,12 +1,12 @@
-name: "@spwn/architect"
+name: "spwn:architect"
 kind: platform
 version: "1.1.0"
 description: "The always-on orchestration daemon"
 
 dependencies:
-  - "@spwn/cli"
-  - "@spwn/claude-code"
-  - "@spwn/docker-cli"
+  - "spwn:cli"
+  - "spwn:claude-code"
+  - "spwn:docker-cli"
 
 files:
   /usr/local/bin/architect-entrypoint.sh: files/entrypoint.sh

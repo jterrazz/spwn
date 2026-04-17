@@ -1,4 +1,4 @@
-name: "@spwn/docker-cli"
+name: "spwn:docker-cli"
 kind: tool
 version: latest
 description: "Docker CLI for Docker-out-of-Docker access"

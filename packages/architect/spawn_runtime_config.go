@@ -15,7 +15,7 @@ import (
 // world's runtime backend and writes it into the container's
 // runtime settings file.
 //
-// Current scope: only @spwn/claude-code has a known settings path
+// Current scope: only spwn:claude-code has a known settings path
 // (/home/spwn/.claude/settings.json). The container's baseline
 // settings file — written by the claude_code tool's UserCommands
 // at image build time — is read back, shallow-merged with every
@@ -30,10 +30,10 @@ import (
 func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []ib.Tool) error {
 	// The dependency-facing runtime identifier is the same as the
 	// image builder's runtime tool name. Spawn always installs
-	// @spwn/claude-code, so hard-code it here until a second
+	// spwn:claude-code, so hard-code it here until a second
 	// runtime lands (codex is built but has no dependency target
 	// yet).
-	const runtimeName = "@spwn/claude-code"
+	const runtimeName = "spwn:claude-code"
 	const settingsPath = "/home/spwn/.claude/settings.json"
 
 	configs := ib.CollectRuntimeConfigs(resolved, runtimeName)

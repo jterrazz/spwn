@@ -15,8 +15,8 @@ Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 'spwn agent remove <name> --dep X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --dep @spwn/python
-  spwn agent remove neo --deps @spwn/mempalace
+  spwn agent remove neo --dep spwn:python
+  spwn agent remove neo --deps spwn:mempalace
 
 ```
 spwn agent remove <agent-name> [flags]

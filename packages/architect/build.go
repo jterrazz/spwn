@@ -50,9 +50,9 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		return fmt.Errorf("register runtimes: %w", err)
 	}
 	// The architect needs these tools installed in the image.
-	// @spwn/cli is handled separately (cross-compiled binary), so we only need
-	// the other tools that @spwn/architect depends on.
-	architectTools := []string{"@spwn/unix", "@spwn/node", "@spwn/claude-code", "@spwn/docker-cli"}
+	// spwn:cli is handled separately (cross-compiled binary), so we only need
+	// the other tools that spwn:architect depends on.
+	architectTools := []string{"spwn:unix", "spwn:node", "spwn:claude-code", "spwn:docker-cli"}
 	resolved, err := reg.Resolve(architectTools)
 	if err != nil {
 		return fmt.Errorf("resolve architect tools: %w", err)

@@ -158,7 +158,7 @@ Examples:
 		// Resolve runtime: --runtime override > agent declaration >
 		// claude-code fallback. source.ResolveRuntime handles all
 		// three precedence levels and canonicalises catalog refs
-		// (@spwn/claude-code -> claude-code).
+		// (spwn:claude-code -> claude-code).
 		runtimeName, err := source.ResolveRuntime(src, buildRuntime)
 		if err != nil {
 			return err

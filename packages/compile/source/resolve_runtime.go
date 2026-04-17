@@ -7,17 +7,14 @@ import (
 )
 
 // runtimeCanonical maps catalog-style runtime refs (e.g.
-// "@spwn/claude-code" or the canonical "spwn:claude-code") to the
-// short names used by the compile runtime registry (e.g.
-// "claude-code"). Agents declare their runtime via
-// `runtime.backend: spwn:claude-code` (or the legacy @spwn form)
-// to match the tool-catalog namespace, but compile.Register uses
-// the short name. This map is the one-way bridge between the two.
+// "spwn:claude-code") to the short names used by the compile runtime
+// registry (e.g. "claude-code"). Agents declare their runtime via
+// `runtime.backend: spwn:claude-code` to match the tool-catalog
+// namespace, but compile.Register uses the short name. This map is
+// the one-way bridge between the two.
 var runtimeCanonical = map[string]string{
-	"@spwn/claude-code": "claude-code",
-	"@spwn/codex":       "codex",
-	"spwn:claude-code":  "claude-code",
-	"spwn:codex":        "codex",
+	"spwn:claude-code": "claude-code",
+	"spwn:codex":       "codex",
 }
 
 // canonicalRuntime returns the short registry name for a runtime

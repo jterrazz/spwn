@@ -8,7 +8,7 @@ import (
 
 // TestRulePackageVersionConflict_flagsMismatchAcrossAgents locks in
 // the invariant that two agents sharing a world cannot pin the same
-// @spwn/ package at different versions. The image builder can only
+// spwn: package at different versions. The image builder can only
 // install one version of a given package per world, so "A wants
 // 24.04, B wants 22.04" is ambiguous and must fail fast.
 func TestRulePackageVersionConflict_flagsMismatchAcrossAgents(t *testing.T) {
@@ -16,11 +16,11 @@ func TestRulePackageVersionConflict_flagsMismatchAcrossAgents(t *testing.T) {
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - "@spwn/unix@24.04"
+  - "spwn:unix@24.04"
 `)
 	morpheus := scaffoldAgent(t, root, "morpheus", `name: morpheus
 dependencies:
-  - "@spwn/unix@22.04"
+  - "spwn:unix@22.04"
 `)
 
 	in := Input{
@@ -39,8 +39,8 @@ dependencies:
 	if len(issues) != 1 {
 		t.Fatalf("want 1 conflict issue, got %d: %+v", len(issues), issues)
 	}
-	if !contains(issues[0].Message, "@spwn/unix") {
-		t.Errorf("message should mention @spwn/unix: %q", issues[0].Message)
+	if !contains(issues[0].Message, "spwn:unix") {
+		t.Errorf("message should mention spwn:unix: %q", issues[0].Message)
 	}
 	if !contains(issues[0].Message, "conflicting versions") {
 		t.Errorf("message should mention conflict: %q", issues[0].Message)
@@ -54,11 +54,11 @@ func TestRulePackageVersionConflict_identicalVersionsOK(t *testing.T) {
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - "@spwn/unix@24.04"
+  - "spwn:unix@24.04"
 `)
 	morpheus := scaffoldAgent(t, root, "morpheus", `name: morpheus
 dependencies:
-  - "@spwn/unix@24.04"
+  - "spwn:unix@24.04"
 `)
 
 	in := Input{
@@ -85,7 +85,7 @@ func TestRulePackageVersionConflict_singleAgentSkipped(t *testing.T) {
 
 	neo := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - "@spwn/unix@24.04"
+  - "spwn:unix@24.04"
 `)
 
 	in := Input{

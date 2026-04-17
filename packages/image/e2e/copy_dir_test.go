@@ -20,7 +20,7 @@ import (
 // memory dirs back out. Both directions must survive files, nested
 // subdirectories, and the tar-stream round trip.
 func TestCopyDirTo_RoundTrip(t *testing.T) {
-	s := imagetest.SpinUp(t, newRegistry(t), "@spwn/unix")
+	s := imagetest.SpinUp(t, newRegistry(t), "spwn:unix")
 	be := s.Backend()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)

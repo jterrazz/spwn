@@ -37,7 +37,7 @@ const (
 type AgentView struct {
 	Name    string
 	Role    string
-	Runtime string // stripped of @spwn/ prefix for display
+	Runtime string // stripped of spwn: prefix for display
 	World   string
 	Status  Status
 
@@ -69,7 +69,7 @@ type DepNode struct {
 }
 
 // SkillRef is one entry under the Skills section. Origin is the
-// short source label ("spwn/skills", "@spwn/qmd", "my-parser").
+// short source label ("spwn/skills", "spwn:qmd", "my-parser").
 type SkillRef struct {
 	Name   string
 	Origin string
@@ -176,7 +176,7 @@ func renderDep(w io.Writer, d DepNode, depth int) {
 }
 
 // badgeColumn is the fixed column where composition badges start.
-// Wide enough to cover "  @spwn/paperclip-factory@latest" + one
+// Wide enough to cover "  spwn:paperclip-factory@latest" + one
 // space of breathing room at depth 1; deeper nodes lose alignment
 // only when the name is extraordinarily long.
 const badgeColumn = 35

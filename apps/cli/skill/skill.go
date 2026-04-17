@@ -61,7 +61,7 @@ func skillHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn skill new paper-reading", Desc: ""},
-				{Name: "spwn install @spwn/mempalace", Desc: "Install a catalog dependency"},
+				{Name: "spwn install spwn:mempalace", Desc: "Install a catalog dependency"},
 			}},
 		},
 		"spwn skill [command]",

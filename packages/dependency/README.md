@@ -4,7 +4,7 @@ Parser for `tool.yaml` dependency manifests + the project lockfile.
 
 ## Role
 
-Every spwn dependency — whether shipped in the built-in catalog or authored under `spwn/tools/<name>/` in a user project — is described by a single `tool.yaml`. This package is the shared parser: it reads one of those manifests via an abstract `Resolver` (host filesystem or `go:embed`), turns it into a typed `Schema`, and classifies the ref (`@spwn/<name>`, `github.com/...`, or local bare name). It also owns `spwn.lock`, the line-oriented text file pinning each dep's version. No Docker, no image building — just parsing + ref classification.
+Every spwn dependency — whether shipped in the built-in catalog or authored under `spwn/tools/<name>/` in a user project — is described by a single `tool.yaml`. This package is the shared parser: it reads one of those manifests via an abstract `Resolver` (host filesystem or `go:embed`), turns it into a typed `Schema`, and classifies the ref (`spwn:<name>`, `github.com/...`, or local bare name). It also owns `spwn.lock`, the line-oriented text file pinning each dep's version. No Docker, no image building — just parsing + ref classification.
 
 ## Key types
 

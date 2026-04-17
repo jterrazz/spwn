@@ -20,7 +20,7 @@ import (
 var composeDeps []string
 
 func init() {
-	addCmd.Flags().StringArrayVar(&composeDeps, "dep", nil, "Dependency ref to add (repeatable, e.g. @spwn/python)")
+	addCmd.Flags().StringArrayVar(&composeDeps, "dep", nil, "Dependency ref to add (repeatable, e.g. spwn:python)")
 	addCmd.Flags().StringArrayVar(&composeDeps, "deps", nil, "Plural alias for --dep")
 	Cmd.AddCommand(addCmd)
 
@@ -39,9 +39,9 @@ var addCmd = &cobra.Command{
 	Long: `Compose an agent by attaching catalog.
 
 Examples:
-  spwn agent add neo --dep @spwn/python
-  spwn agent add neo --deps @spwn/unix --deps @spwn/git
-  spwn agent add neo --dep @spwn/unix --dep @spwn/git`,
+  spwn agent add neo --dep spwn:python
+  spwn agent add neo --deps spwn:unix --deps spwn:git
+  spwn agent add neo --dep spwn:unix --dep spwn:git`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		if len(composeDeps) == 0 {
@@ -90,8 +90,8 @@ Note: 'spwn agent rm <name>' (without flags) deletes the entire agent.
 'spwn agent remove <name> --dep X' removes just that entry.
 
 Examples:
-  spwn agent remove neo --dep @spwn/python
-  spwn agent remove neo --deps @spwn/mempalace`,
+  spwn agent remove neo --dep spwn:python
+  spwn agent remove neo --deps spwn:mempalace`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		if len(composeDeps) == 0 {

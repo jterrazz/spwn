@@ -11,7 +11,7 @@ import (
 // error — never panic.
 func FuzzSchemaUnmarshal(f *testing.F) {
 	// Seed corpus: known-good + known-malformed samples.
-	f.Add([]byte(`name: "@spwn/unix"
+	f.Add([]byte(`name: "spwn:unix"
 version: "1.0"
 install:
   packages: [bash, coreutils]`))
@@ -34,8 +34,8 @@ worlds:
 // inputs. ParseRef must never panic regardless of input shape.
 func FuzzParseRef(f *testing.F) {
 	f.Add("")
-	f.Add("@spwn/unix")
-	f.Add("@spwn/unix@24.04")
+	f.Add("spwn:unix")
+	f.Add("spwn:unix@24.04")
 	f.Add("github.com/jterrazz/skills")
 	f.Add("bare-name")
 	f.Add("@")
@@ -53,7 +53,7 @@ func FuzzParseRef(f *testing.F) {
 // equals the input or the version is empty.
 func FuzzSplitVersion(f *testing.F) {
 	f.Add("")
-	f.Add("@spwn/unix@1.0")
+	f.Add("spwn:unix@1.0")
 	f.Add("bare@1.0")
 	f.Add("@@@")
 	f.Add("no-version")
