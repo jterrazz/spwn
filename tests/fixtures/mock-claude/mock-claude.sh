@@ -24,9 +24,10 @@ if [ -d /agents ] && [ -n "$(ls -A /agents 2>/dev/null)" ]; then
   MIND_EXISTS=true
 fi
 
-# /work is the workspace root when any workspace is mounted.
+# /workspaces is the workspace root when any workspace is mounted.
+# The container may use /workspaces/default (unnamed) or /workspaces/<name>.
 WORKSPACE_EXISTS=false
-if [ -d /work ] && [ -n "$(ls -A /work 2>/dev/null)" ]; then
+if [ -d /workspaces ] && [ -n "$(ls -A /workspaces 2>/dev/null)" ]; then
   WORKSPACE_EXISTS=true
 fi
 
@@ -47,10 +48,10 @@ cat > "$OUTPUT" <<RECORD
 RECORD
 
 # Write to the first workspace (if any) to prove the agent can DO something.
-if [ -d /work ]; then
-  FIRST_WS=$(ls /work 2>/dev/null | head -1)
-  if [ -n "$FIRST_WS" ] && [ -d "/work/$FIRST_WS" ]; then
-    echo "mock-claude was here" > "/work/$FIRST_WS/mock-output.txt" 2>/dev/null || true
+if [ -d /workspaces ]; then
+  FIRST_WS=$(ls /workspaces 2>/dev/null | head -1)
+  if [ -n "$FIRST_WS" ] && [ -d "/workspaces/$FIRST_WS" ]; then
+    echo "mock-claude was here" > "/workspaces/$FIRST_WS/mock-output.txt" 2>/dev/null || true
   fi
 fi
 

@@ -60,7 +60,7 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	switch parsed.Kind {
 	case dependency.KindLocal:
 		return fmt.Errorf("%q is a bare name — local dependencies are authored in place, not installed. "+
-			"Create ./spwn/tools/%s/spwn.yaml for a full dependency or ./spwn/tools/%s.md for a bare skill",
+			"Create ./spwn/tools/%s/tool.yaml for a full dependency or ./spwn/tools/%s.md for a bare skill",
 			ref, ref, ref)
 	case dependency.KindRegistry:
 		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+

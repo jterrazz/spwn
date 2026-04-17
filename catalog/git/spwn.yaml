@@ -1,11 +1,7 @@
-name: "@spwn/git"
-kind: tool
-version: latest
-description: "Git version control"
-
-install:
-  packages:
-    - git
-
-verify:
-  - command -v git
+# Catalog entry for @spwn/git.
+# The actual tool definition lives at tools/git/tool.yaml; this
+# file is the project-shape wrapper so the catalog entry mirrors a
+# real spwn project layout (spwn.yaml at root + spwn/tools/<name>
+# when installed).
+version: 2
+name: git

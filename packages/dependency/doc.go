@@ -1,4 +1,4 @@
-// Package dependency owns the spwn.yaml manifest schema, ref
+// Package dependency owns the tool.yaml manifest schema, ref
 // parsing, filesystem loading, and the committed spwn.lock file.
 //
 // One shared schema backs both catalog entries (built-in,

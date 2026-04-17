@@ -55,8 +55,8 @@ func TestSpawn_WithWorkspace(t *testing.T) {
 
 	// Then - the workspace should be mounted and contain the test project files
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasMount("/work/default")
-		c.FileContains("/work/default/README.md", "test project")
+		c.HasMount("/workspaces/default")
+		c.FileContains("/workspaces/default/README.md", "test project")
 	})
 }
 
@@ -74,12 +74,12 @@ func TestSpawn_WithAgent(t *testing.T) {
 
 	// AND the Mind should have all standard layers
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("core")
+		m.HasLayer("identity")
 		m.HasLayer("skills")
 		m.HasLayer("knowledge")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
-		m.HasFile("core/profile.md")
+		m.HasFile("identity/profile.md")
 	})
 }
 

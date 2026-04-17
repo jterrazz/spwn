@@ -17,35 +17,32 @@ physics:
   constants:
     cpu: 1
     memory: 512m
-tools:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
 `).
 		NoAgent().
 		Execute()
 
-	// Then - the faculties file should list bash and git capabilities
+	// Then - the faculties file lists the verified tools by ref.
+	// Binaries live under each tool's Verify() spec, not in faculties.md.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/world/faculties.md", "bash")
-		c.FileContains("/world/faculties.md", "git")
+		c.FileContains("/world/faculties.md", "@spwn/unix")
+		c.FileContains("/world/faculties.md", "@spwn/git")
 	})
 }
 
 func TestSpawn_MissingToolFails(t *testing.T) {
 	// Given - a config requesting a non-existent tool
 	// When - a world is spawned
-	// Then - it should fail with an error about the missing tool
+	// Then - it should fail with "tool not found" (image.Registry.Resolve)
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics:
-  constants:
-    cpu: 1
-    memory: 512m
-tools:
+dependencies:
   - totally-fake-binary
 `).
 		NoAgent().
-		ExecuteExpectError("does not provide it")
+		ExecuteExpectError("tool not found")
 }
 
 func TestSpawn_PackExpansion(t *testing.T) {
@@ -53,20 +50,14 @@ func TestSpawn_PackExpansion(t *testing.T) {
 	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics:
-  constants:
-    cpu: 1
-    memory: 512m
-tools:
+dependencies:
   - "@spwn/unix"
 `).
 		NoAgent().
 		Execute()
 
-	// Then - the faculties should include all @spwn/unix dependency members
+	// Then - the faculties file lists @spwn/unix as a verified tool.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/world/faculties.md", "bash")
-		c.FileContains("/world/faculties.md", "grep")
-		c.FileContains("/world/faculties.md", "curl")
+		c.FileContains("/world/faculties.md", "@spwn/unix")
 	})
 }

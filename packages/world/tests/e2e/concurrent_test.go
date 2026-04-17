@@ -25,7 +25,7 @@ physics:
   constants:
     cpu: 1
     memory: 256m
-tools:
+dependencies:
   - "@spwn/unix"
 `,
 		`
@@ -33,7 +33,7 @@ physics:
   constants:
     cpu: 1
     memory: 512m
-tools:
+dependencies:
   - "@spwn/unix"
 `,
 		`
@@ -41,7 +41,7 @@ physics:
   constants:
     cpu: 1
     memory: 384m
-tools:
+dependencies:
   - "@spwn/unix"
 `,
 	}

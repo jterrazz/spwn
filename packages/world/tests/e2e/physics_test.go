@@ -27,7 +27,7 @@ func TestFaculties_ContainsTools(t *testing.T) {
 	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-tools:
+dependencies:
   - "@spwn/unix"
   - "@spwn/git"
 `).
@@ -38,7 +38,7 @@ tools:
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.HasFile("/world/faculties.md")
 		c.FileContains("/world/faculties.md", "Tools")
-		c.FileContains("/world/faculties.md", "bash")
-		c.FileContains("/world/faculties.md", "git")
+		c.FileContains("/world/faculties.md", "@spwn/unix")
+		c.FileContains("/world/faculties.md", "@spwn/git")
 	})
 }

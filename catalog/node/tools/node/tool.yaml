@@ -1,0 +1,14 @@
+name: "@spwn/node"
+kind: sdk
+version: "20"
+description: "Node.js 20 runtime (node, npm, npx)"
+
+install:
+  commands:
+    - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    - apt-get install -y nodejs && rm -rf /var/lib/apt/lists/*
+
+verify:
+  - command -v node
+  - command -v npm
+  - command -v npx

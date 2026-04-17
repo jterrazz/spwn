@@ -1,15 +1,7 @@
-name: "@spwn/build"
-kind: sdk
-version: latest
-description: "C/C++ build essentials (make, gcc, g++)"
-
-install:
-  packages:
-    - make
-    - gcc
-    - g++
-
-verify:
-  - command -v make
-  - command -v gcc
-  - command -v g++
+# Catalog entry for @spwn/build.
+# The actual tool definition lives at tools/build/tool.yaml; this
+# file is the project-shape wrapper so the catalog entry mirrors a
+# real spwn project layout (spwn.yaml at root + spwn/tools/<name>
+# when installed).
+version: 2
+name: build

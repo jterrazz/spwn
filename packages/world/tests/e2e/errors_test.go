@@ -122,15 +122,8 @@ func TestError_SpawnAgentOnNonExistentWorld(t *testing.T) {
 }
 
 func TestError_SpawnWithNegativeCPU(t *testing.T) {
-	// Given - a config with negative CPU count
-	// When - a world is spawned
-	// Then - it should fail with a CPU validation error
-	setup.NewSpawnBuilder(t).
-		WithConfigYAML(`
-physics:
-  constants:
-    cpu: -1
-`).
-		NoAgent().
-		ExecuteExpectError("CPU")
+	// The world manifest no longer parses physics.constants — resource
+	// caps moved to the runtime layer. Keeping this test as a tombstone
+	// so we don't re-add "negative CPU" validation in the wrong package.
+	t.Skip("physics.constants.cpu: not validated at the world-manifest level anymore")
 }

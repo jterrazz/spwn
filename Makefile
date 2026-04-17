@@ -1,8 +1,8 @@
 .PHONY: help build install uninstall clean \
         lint go-vet \
-        test go-test test-pkg \
+        test go-test test-pkg test-all \
         test-e2e test-e2e-imagebuilder \
-        test-ts test-web test-web-headed \
+        test-ts test-smoke test-web test-web-headed \
         build-test-image \
         web-build web-dev \
         docs
@@ -20,8 +20,11 @@ help:
 	@echo "  make test                Go unit tests across the workspace"
 	@echo "  make test-pkg PKG=mind   Verbose go test for one package"
 	@echo "  make test-e2e            Go E2E (Docker required)"
-	@echo "  make test-ts             TypeScript E2E (Docker + Node 22)"
+	@echo "  make test-e2e-imagebuilder  Go image-build E2E (Docker required)"
+	@echo "  make test-ts             TypeScript CLI E2E (Docker + Node 22)"
+	@echo "  make test-smoke          Real-build smoke tests (Docker + Node 22)"
 	@echo "  make test-web            Playwright web E2E (Docker + browser)"
+	@echo "  make test-all            Everything except test-web (Docker + Node 22)"
 	@echo "  make web-dev             Run the Next.js dev server"
 	@echo "  make docs                Regenerate apps/cli docs"
 	@echo "  make clean               rm -rf bin/"
@@ -79,7 +82,7 @@ test-pkg:
 # ── E2E ───────────────────────────────────────────────────────────
 
 test-e2e: build-test-image
-	cd packages/world && go test -v -tags=e2e -timeout=5m ./tests/e2e/...
+	cd packages/world && go test -v -tags=e2e -timeout=30m ./tests/e2e/...
 
 test-e2e-imagebuilder:
 	cd packages/image && go test -v -tags=e2e -timeout=10m ./e2e/...
@@ -88,12 +91,25 @@ test-e2e-imagebuilder:
 test-ts: build build-test-image
 	pnpm -C tests test
 
+# Real-build smoke tests: spwn init -> spwn up -> tool probe against
+# the default scaffold plus every shipped catalog example. Bypasses
+# SPWN_BASE_IMAGE so the actual image build + probe path runs. Each
+# test builds a Docker image from scratch; the full suite takes
+# ~10 minutes on a cold machine.
+test-smoke: build
+	pnpm -C tests test:smoke
+
 # Playwright against the Next.js web UI.
 test-web: build
 	pnpm -C tests test:web
 
 test-web-headed: build
 	pnpm -C tests test:web:headed
+
+# Meta-target: runs every test bucket a developer can execute locally
+# without a browser. Order is cheapest-first so the fast Go unit pass
+# fails before burning Docker build minutes on an E2E run.
+test-all: go-test test-e2e test-e2e-imagebuilder test-ts test-smoke
 
 # ── Web (apps/web) ────────────────────────────────────────────────
 

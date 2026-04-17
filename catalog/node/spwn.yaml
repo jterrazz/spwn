@@ -1,14 +1,7 @@
-name: "@spwn/node"
-kind: sdk
-version: "20"
-description: "Node.js 20 runtime (node, npm, npx)"
-
-install:
-  commands:
-    - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-    - apt-get install -y nodejs && rm -rf /var/lib/apt/lists/*
-
-verify:
-  - command -v node
-  - command -v npm
-  - command -v npx
+# Catalog entry for @spwn/node.
+# The actual tool definition lives at tools/node/tool.yaml; this
+# file is the project-shape wrapper so the catalog entry mirrors a
+# real spwn project layout (spwn.yaml at root + spwn/tools/<name>
+# when installed).
+version: 2
+name: node

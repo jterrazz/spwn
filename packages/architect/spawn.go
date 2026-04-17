@@ -48,12 +48,13 @@ type SpawnOpts struct {
 // Validate returns a non-nil error when SpawnOpts is missing
 // required fields or has an internally inconsistent combination.
 // Called at the top of Spawn before any side-effectful work.
+//
+// Agent-less spawns are legitimate: a world can be created first
+// and the agent attached later via SpawnAgent / SpawnAgentDetached.
+// The e2e suite exercises this path via the NoAgent() builder.
 func (opts *SpawnOpts) Validate() error {
 	if opts.ConfigName == "" {
 		return fmt.Errorf("SpawnOpts.ConfigName is required")
-	}
-	if opts.AgentName == "" && len(opts.Agents) == 0 {
-		return fmt.Errorf("SpawnOpts needs at least one agent (AgentName or Agents)")
 	}
 	return nil
 }

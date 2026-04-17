@@ -71,7 +71,7 @@ func TestColony_AgentMindLayersPresent(t *testing.T) {
 
 	// Then - the Mind should have all standard layers
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("core")
+		m.HasLayer("identity")
 		m.HasLayer("skills")
 		m.HasLayer("knowledge")
 		m.HasLayer("playbooks")

@@ -11,7 +11,7 @@
             "level": "error",
             "path": "spwn/agents/neo/agent.yaml#deps",
             "message": "dependency \"@spwn/nonexistent\" does not exist",
-            "hint": "available built-ins: @spwn/architect, @spwn/build, @spwn/cli, @spwn/docker-cli, @spwn/git, @spwn/macrohard, @spwn/matrix, @spwn/mempalace, @spwn/node, @spwn/paperclip-factory, @spwn/python, @spwn/qmd, @spwn/research-lab, @spwn/startup, @spwn/unix, @spwn/claude-code, @spwn/codex",
+            "hint": "available built-ins: @spwn/architect, @spwn/build, @spwn/cli, @spwn/docker-cli, @spwn/git, @spwn/mempalace, @spwn/node, @spwn/python, @spwn/qmd, @spwn/unix, @spwn/claude-code, @spwn/codex",
             "source": "manifest"
         }
     ]

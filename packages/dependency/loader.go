@@ -14,7 +14,15 @@ import (
 
 // Manifest is the canonical basename. Both catalog and local
 // dependencies live at <depDir>/spwn.yaml.
+// Manifest is the basename of the project-level manifest that
+// defines a spwn project (name, worlds, deps, lockfile anchor).
 const Manifest = "spwn.yaml"
+
+// ToolManifest is the basename for an individual tool definition
+// (install / verify / files / runtime-config / skills-sibling).
+// Lives under spwn/tools/<name>/tool.yaml in a user project and
+// catalog/<slug>/tools/<slug>/tool.yaml in the catalog.
+const ToolManifest = "tool.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
 // supporting directories (files/, skills/, config/). It abstracts
@@ -41,6 +49,13 @@ type ParseOptions struct {
 	// `version:`. Project-local tools default to "0.0.0-local";
 	// catalog tools default to "latest".
 	DefaultVersion string
+
+	// ManifestFile overrides the on-disk filename the resolver
+	// reads. Empty defaults to Manifest ("spwn.yaml"). Callers
+	// reading tool-specific manifests pass ToolManifest
+	// ("tool.yaml"). Error messages and unmarshal context carry
+	// this filename so debugging stays clear.
+	ManifestFile string
 }
 
 // Parsed is the result of parsing a spwn.yaml dependency manifest.
@@ -54,17 +69,24 @@ type Parsed struct {
 	SkillsFS  any // fs.FS but typed as any to avoid the import on the public type
 }
 
-// Parse reads spwn.yaml via the Resolver and returns a Parsed. File
-// references declared in the `files:` map are read eagerly.
+// Parse reads the manifest file via the Resolver and returns a
+// Parsed. File references declared in the `files:` map are read
+// eagerly. The manifest filename defaults to "spwn.yaml"; pass
+// ParseOptions.ManifestFile = ToolManifest to read "tool.yaml"
+// for tool-level manifests.
 func Parse(res Resolver, opts ParseOptions) (*Parsed, error) {
-	data, err := res.ReadFile(Manifest)
+	manifestFile := opts.ManifestFile
+	if manifestFile == "" {
+		manifestFile = Manifest
+	}
+	data, err := res.ReadFile(manifestFile)
 	if err != nil {
-		return nil, fmt.Errorf("read %s: %w", Manifest, err)
+		return nil, fmt.Errorf("read %s: %w", manifestFile, err)
 	}
 
 	var s Schema
 	if err := yaml.Unmarshal(data, &s); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", Manifest, err)
+		return nil, fmt.Errorf("parse %s: %w", manifestFile, err)
 	}
 
 	if s.Name == "" {

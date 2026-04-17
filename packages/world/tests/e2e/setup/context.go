@@ -5,6 +5,7 @@ package setup
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,6 +14,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
+	"spwn.sh/packages/world/labels"
 )
 
 const TestImage = "spwn-test:latest"
@@ -34,6 +36,12 @@ func NewTestContext(t *testing.T) *TestContext {
 
 	baseDir := t.TempDir()
 	t.Setenv("SPWN_HOME", baseDir)
+
+	// Stamp every container spawned by this test with a unique label
+	// so List()/Get() only see THIS test's containers, not leftovers
+	// from prior runs or concurrently-running tests. The architect
+	// reads labels.TestRunEnv inside Spawn() to apply the label.
+	t.Setenv(labels.TestRunEnv, fmt.Sprintf("e2e-%s-%d", t.Name(), time.Now().UnixNano()))
 
 	// Create required subdirectories
 	os.MkdirAll(filepath.Join(baseDir, "worlds"), 0755)

@@ -1,14 +1,7 @@
-name: "@spwn/qmd"
-kind: tool
-version: latest
-description: "On-device markdown search engine"
-
-dependencies:
-  - "@spwn/node"
-
-install:
-  commands:
-    - npm install -g @tobilu/qmd
-
-verify:
-  - command -v qmd
+# Catalog entry for @spwn/qmd.
+# The actual tool definition lives at tools/qmd/tool.yaml; this
+# file is the project-shape wrapper so the catalog entry mirrors a
+# real spwn project layout (spwn.yaml at root + spwn/tools/<name>
+# when installed).
+version: 2
+name: qmd

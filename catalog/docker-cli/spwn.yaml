@@ -1,11 +1,7 @@
-name: "@spwn/docker-cli"
-kind: tool
-version: latest
-description: "Docker CLI for Docker-out-of-Docker access"
-
-install:
-  packages:
-    - docker.io
-
-verify:
-  - command -v docker
+# Catalog entry for @spwn/docker-cli.
+# The actual tool definition lives at tools/docker-cli/tool.yaml; this
+# file is the project-shape wrapper so the catalog entry mirrors a
+# real spwn project layout (spwn.yaml at root + spwn/tools/<name>
+# when installed).
+version: 2
+name: docker-cli

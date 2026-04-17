@@ -55,8 +55,16 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 
 	// ── Act: mutate one file inside the container to simulate a
 	//        mid-session memory write, then copy the subdirectory out ──
-	if _, code := s.Exec("echo 'Memory persists.' > /agents/neo/knowledge/learned.md"); code != 0 {
-		t.Fatalf("container write failed")
+	//
+	// CopyDirTo lands root-owned tar entries; the default user in
+	// world.Dockerfile is `spwn` (non-root). Production spawns
+	// chown /agents/<name>/ right after SyncIn — we mirror that
+	// step here with sudo so the non-root user can write.
+	if out, code := s.Exec("sudo chown -R spwn:spwn /agents"); code != 0 {
+		t.Fatalf("chown /agents failed: %s", out)
+	}
+	if out, code := s.Exec("echo 'Memory persists.' > /agents/neo/knowledge/learned.md"); code != 0 {
+		t.Fatalf("container write failed: %s", out)
 	}
 
 	hostOut := t.TempDir()
