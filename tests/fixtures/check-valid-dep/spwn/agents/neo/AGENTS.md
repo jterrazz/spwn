@@ -18,7 +18,7 @@ Before doing anything else, read your profile:
 ## Conventions
 
 1. Read your profile first. It shapes how you respond.
-2. Save important discoveries to `./knowledge/` so you remember them next time.
+2. Save important discoveries to `/world/knowledge/` so the whole world remembers them next time (committed per-world, shared across agents).
 3. After significant work, consider promoting a pattern to `./playbooks/`.
 4. Before committing changes, run the project's existing tests if they exist.
-5. Never modify `/world/` files - they are read-only system context.
+5. Never modify `/world/physics.md`, `/world/faculties.md`, or `/world/AGENTS.md` - they are read-only system context. `/world/knowledge/` is writable.

@@ -1,7 +1,9 @@
 // Package agent owns the agent domain: composition manifests
-// (agent.yaml), mind layers (identity, skills, knowledge, playbooks,
-// journal), per-world sessions, and evolution operations (dream,
-// sleep, fork).
+// (agent.yaml), mind layers (identity, skills, playbooks, journal),
+// per-world sessions, and evolution operations (dream, sleep, fork).
+// Knowledge is NOT a Mind layer — it's world-scoped and lives at
+// spwn/worlds/<name>/knowledge/ on the host (bind-mounted into
+// /world/knowledge/ inside the container).
 //
 // The public surface is intentionally narrow — most callers reach
 // in through LoadManifest / SaveManifest / AddDependency /

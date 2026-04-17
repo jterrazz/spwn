@@ -18,7 +18,7 @@ func TestInit(t *testing.T) {
 			t.Fatalf("Init: %v", err)
 		}
 
-		// Verify all 6 layer directories exist
+		// Verify all 4 layer directories exist
 		for _, layer := range platform.MindLayers {
 			layerPath := filepath.Join(dir, layer)
 			info, err := os.Stat(layerPath)
@@ -239,7 +239,7 @@ func TestLayerCount(t *testing.T) {
 				Layers: map[string][]string{
 					"identity":  {"a.md"},
 					"skills":    {"b.md"},
-					"knowledge": {"c.md"},
+					"playbooks": {"c.md"},
 				},
 			},
 			want: 3,

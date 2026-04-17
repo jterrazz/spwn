@@ -380,12 +380,28 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		filepath.Join("shared", "notes"),
 		filepath.Join("shared", "outputs"),
 		"skills",
+		"knowledge",
 	} {
 		if err := os.MkdirAll(filepath.Join(worldStateDir, sub), 0o755); err != nil {
 			return nil, fmt.Errorf("create world-state dir %s: %w", sub, err)
 		}
 	}
 	binds = append(binds, worldStateDir+":/world")
+
+	// If the project tree has a committed per-world knowledge
+	// directory, mount it on top of /world/knowledge so edits inside
+	// the container persist straight back into git. Knowledge is
+	// world-scoped by design — it's environmental (about the domain),
+	// not about the agent's personality, and should be versioned with
+	// the project. Absent a project dir (user-level one-off `spwn up`),
+	// /world/knowledge falls through to the ephemeral state-dir copy
+	// above.
+	if projectRoot := platform.ProjectRoot(); projectRoot != "" {
+		projectKnowledge := filepath.Join(projectRoot, "spwn", "worlds", opts.ConfigName, "knowledge")
+		if info, err := os.Stat(projectKnowledge); err == nil && info.IsDir() {
+			binds = append(binds, projectKnowledge+":/world/knowledge")
+		}
+	}
 
 	// Per-agent per-world deployment dirs. Each agent gets a personal
 	// inbox/outbox/notes scoped to this world id, all rooted in the

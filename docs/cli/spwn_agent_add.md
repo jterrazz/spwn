@@ -9,7 +9,7 @@ Add dependencies to an agent
 
 ### Synopsis
 
-Compose an agent by attaching dependencies.
+Compose an agent by attaching catalog.
 
 Examples:
   spwn agent add neo --dep @spwn/python

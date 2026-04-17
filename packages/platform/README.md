@@ -13,7 +13,7 @@ The foundation layer: every other package asks `platform` for "where does this t
 - `ArchitectContainerName()`, `ArchitectImage`, `ArchitectImageVersion` — constants for the always-on Architect container.
 - `GenerateWorldID(name)` → `spwn-world-<slug>-<5-hex>`, `GenerateAgentID(name)` → `a-<name>-<5-hex>`.
 - `RandomPlanetName()`, `RandomAgentName()` — bundled name lists for scaffolds.
-- `MindLayers` — canonical ordered list of the five mind-layer directories.
+- `MindLayers` — canonical ordered list of the four mind-layer directories (identity, skills, playbooks, journal). Knowledge is world-scoped, not agent-scoped.
 
 ## Related
 

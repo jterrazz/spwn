@@ -16,5 +16,6 @@ func All() []migration.Migration {
 	r.Register(RestructureAgentDirs)              // 011
 	r.Register(RenameHierarchiesToOrganizations) // 012
 	r.Register(EnsureDefaultOrganization)        // 013
+	r.Register(RetireAgentKnowledge)             // 014
 	return r.All()
 }

@@ -118,7 +118,6 @@ func createTestAgent(t *testing.T, name string) string {
 		filepath.Join(agentDir, "skills"),
 		filepath.Join(agentDir, "journal"),
 		filepath.Join(agentDir, "playbooks"),
-		filepath.Join(agentDir, "knowledge"),
 	}
 	for _, d := range dirs {
 		if err := os.MkdirAll(d, 0755); err != nil {

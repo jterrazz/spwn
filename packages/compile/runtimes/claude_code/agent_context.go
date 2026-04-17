@@ -130,9 +130,9 @@ func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("### Your Mind\n")
 	b.WriteString("- /mind/identity/ - who you are (profile, purpose, traits)\n")
 	b.WriteString("- /mind/skills/ - what you can do\n")
-	b.WriteString("- /mind/knowledge/ - facts you've learned\n")
 	b.WriteString("- /mind/playbooks/ - procedures that work\n")
-	b.WriteString("- /mind/journal/ - session history\n\n")
+	b.WriteString("- /mind/journal/ - session history\n")
+	b.WriteString("- /world/knowledge/ - world-scoped facts (shared with other agents, committed to git)\n\n")
 
 	writeWorldInfo(b, opts)
 }
@@ -171,9 +171,9 @@ func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("### Your Mind\n")
 	b.WriteString("- /mind/identity/ - who you are (profile, purpose, traits)\n")
 	b.WriteString("- /mind/skills/ - what you can do\n")
-	b.WriteString("- /mind/knowledge/ - facts you've learned\n")
 	b.WriteString("- /mind/playbooks/ - procedures that work\n")
-	b.WriteString("- /mind/journal/ - session history\n\n")
+	b.WriteString("- /mind/journal/ - session history\n")
+	b.WriteString("- /world/knowledge/ - world-scoped facts (shared with other agents, committed to git)\n\n")
 
 	writeWorldInfo(b, opts)
 }
@@ -269,8 +269,11 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec) string {
 	b.WriteString("## Where to find each member\n")
 	b.WriteString("- Identity: `/agents/<name>/identity/`\n")
 	b.WriteString("- Skills: `/agents/<name>/skills/`\n")
-	b.WriteString("- Memory (knowledge, playbooks, journal): `/agents/<name>/memory/`\n")
+	b.WriteString("- Playbooks: `/agents/<name>/playbooks/`\n")
+	b.WriteString("- Journal: `/agents/<name>/journal/`\n")
 	b.WriteString("- Their inbox in **this** world: `/agents/<name>/worlds/" + worldID + "/inbox/`\n")
+	b.WriteString("\n")
+	b.WriteString("Shared world knowledge (facts about the domain, not about any one agent) lives at `/world/knowledge/` — read and write freely; it's committed to the project.\n")
 	b.WriteString("\n")
 
 	b.WriteString("## Sending a message\n")

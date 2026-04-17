@@ -133,13 +133,15 @@ func TestAgentLifecycle_JournalAcrossWorlds(t *testing.T) {
 }
 
 func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
-	// Given - an agent with a custom knowledge file
+	// Given - an agent with a custom playbook file (knowledge is
+	// world-scoped now, so it's no longer part of the agent's Mind
+	// export).
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("export-src-agent")
 
-	knowledgePath := filepath.Join(agent.AgentDir("export-src-agent"), "knowledge")
-	os.MkdirAll(knowledgePath, 0755)
-	os.WriteFile(filepath.Join(knowledgePath, "custom.md"), []byte("# Custom Knowledge\nThis is unique."), 0644)
+	playbooksPath := filepath.Join(agent.AgentDir("export-src-agent"), "playbooks")
+	os.MkdirAll(playbooksPath, 0755)
+	os.WriteFile(filepath.Join(playbooksPath, "custom.md"), []byte("# Custom Playbook\nThis is unique."), 0644)
 
 	// When - the agent is exported and imported into a new agent
 	outputDir := t.TempDir()
@@ -169,14 +171,14 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 		}
 	}
 
-	// AND the custom knowledge file should be preserved
-	customPath := filepath.Join(agent.AgentDir("export-dst-agent"), "knowledge", "custom.md")
+	// AND the custom playbook file should be preserved
+	customPath := filepath.Join(agent.AgentDir("export-dst-agent"), "playbooks", "custom.md")
 	content, err := os.ReadFile(customPath)
 	if err != nil {
-		t.Fatalf("Custom knowledge file not found in imported agent: %v", err)
+		t.Fatalf("Custom playbook file not found in imported agent: %v", err)
 	}
-	if string(content) != "# Custom Knowledge\nThis is unique." {
-		t.Fatalf("Custom knowledge content mismatch: %q", string(content))
+	if string(content) != "# Custom Playbook\nThis is unique." {
+		t.Fatalf("Custom playbook content mismatch: %q", string(content))
 	}
 }
 

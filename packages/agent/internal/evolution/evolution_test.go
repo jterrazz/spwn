@@ -152,7 +152,7 @@ func TestFork_AllLayers(t *testing.T) {
 
 	// Create source agent with some layers
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"identity", "skills", "knowledge", "playbooks", "journal"} {
+	for _, layer := range []string{"identity", "skills", "playbooks", "journal"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
 	os.WriteFile(filepath.Join(sourceDir, "identity", "profile.md"), []byte("# Test"), 0644)
@@ -186,12 +186,12 @@ func TestFork_SpecificLayers(t *testing.T) {
 
 	// Create source agent
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"identity", "skills", "knowledge"} {
+	for _, layer := range []string{"identity", "skills", "playbooks"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
 	os.WriteFile(filepath.Join(sourceDir, "identity", "profile.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
-	os.WriteFile(filepath.Join(sourceDir, "knowledge", "facts.md"), []byte("# Facts"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "playbooks", "deploy.md"), []byte("# Deploy"), 0644)
 
 	// Fork only identity layer
 	result, err := Fork("source-agent", "target-agent", []string{"identity"})

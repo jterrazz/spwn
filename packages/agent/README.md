@@ -4,7 +4,7 @@ The agent domain — manifests, minds, journals, sessions, evolution.
 
 ## Role
 
-Owns everything an "agent" is on disk. The composition manifest (`agent.yaml`) and the mind layers (`identity/`, `skills/`, `knowledge/`, `playbooks/`, `journal/`) all live here. CLI verbs like `spwn agent create`, `spwn agent add`, and `spwn agent dream` all ultimately route through this package. The agent is provider-neutral at rest — runtime-specific translation happens later, in `packages/compile`.
+Owns everything an "agent" is on disk. The composition manifest (`agent.yaml`) and the mind layers (`identity/`, `skills/`, `playbooks/`, `journal/`) all live here. Knowledge is NOT a Mind layer — it's world-scoped at `spwn/worlds/<name>/knowledge/`, bind-mounted into the running container at `/world/knowledge/`, shared across every agent in that world. CLI verbs like `spwn agent create`, `spwn agent add`, and `spwn agent dream` all ultimately route through this package. The agent is provider-neutral at rest — runtime-specific translation happens later, in `packages/compile`.
 
 ## Key types
 

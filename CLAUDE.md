@@ -10,7 +10,7 @@ The domain has three main abstractions, each owning one concern:
 |---|---|---|
 | **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` - Claude Code today, others swap in as a ~50 LOC Go file |
 | **Backend** | Where worlds run | `packages/world/internal/backend` - Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (identity/skills/knowledge/playbooks/journal) on the host filesystem |
+| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (identity/skills/playbooks/journal) on the host filesystem. Knowledge is world-scoped, not in the Mind — it lives at `spwn/worlds/<name>/knowledge/` and is bind-mounted into `/world/knowledge/`. |
 
 ## Vocabulary
 
@@ -25,7 +25,7 @@ The domain has three main abstractions, each owning one concern:
 
 ### Agent internals
 - **Identity**: Who the agent is - profile, purpose, traits. Lives in `spwn/agents/<name>/identity/`. Persists across world restarts.
-- **Memory**: Journal, sessions, and knowledge. Persists across worlds, grows with experience.
+- **Memory**: Journal and sessions. Persists across worlds, grows with experience. (Knowledge is world-scoped, not agent-scoped.)
 - **Composition**: An agent's active tools + skills, declared in `agent.yaml`.
 
 ### Hierarchy (inside a world - "coming soon" on landing page)
@@ -134,9 +134,11 @@ my-project/
 │   │       ├── AGENTS.md         # entry point (provider-neutral, compiled per runtime)
 │   │       ├── identity/        # who the agent is - profile.md, purpose.md, traits.md
 │   │       ├── skills/          # authored procedures
-│   │       ├── knowledge/       # facts, codebase notes
 │   │       ├── playbooks/       # promoted patterns (via dream)
 │   │       └── journal/         # per-run history
+│   ├── worlds/
+│   │   └── neo/
+│   │       └── knowledge/       # world-scoped facts, bind-mounted to /world/knowledge/
 │   ├── skills/                  # project-scoped skill files
 │   └── tools/                   # project-scoped tool dependencies (optional)
 └── .spwn/                       # gitignored local state
@@ -144,8 +146,11 @@ my-project/
     └── cache/
 ```
 
-Worlds are declared **inline** under `spwn.yaml#worlds` - there is
-no `spwn/worlds/` directory any more. Each world entry names the
+Worlds are declared **inline** under `spwn.yaml#worlds` - the
+world record (agents, workspaces, tool overrides) lives in yaml,
+not in separate yaml files. The only filesystem artifact a world
+owns is `spwn/worlds/<name>/knowledge/`, bind-mounted into the
+running container at `/world/knowledge/`. Each world entry names the
 agents it deploys, the workspace mounts, and optional tool
 overrides.
 

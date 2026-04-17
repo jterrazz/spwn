@@ -21,9 +21,9 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"spwn/agents/neo/AGENTS.md",
 		"spwn/agents/neo/identity/profile.md",
 		"spwn/agents/neo/skills/.gitkeep",
-		"spwn/agents/neo/knowledge/.gitkeep",
 		"spwn/agents/neo/playbooks/.gitkeep",
 		"spwn/agents/neo/journal/.gitkeep",
+		"spwn/worlds/neo/knowledge/.gitkeep",
 		".spwn/state.json",
 		".gitignore",
 	}
@@ -34,9 +34,9 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		}
 	}
 
-	// New shape: no spwn/worlds/ directory at all.
-	if _, err := os.Stat(filepath.Join(dir, "spwn", "worlds")); err == nil {
-		t.Errorf("spwn/worlds/ should not exist in new schema")
+	// Agent no longer owns a knowledge layer — it moved to the world.
+	if _, err := os.Stat(filepath.Join(dir, "spwn", "agents", "neo", "knowledge")); err == nil {
+		t.Errorf("spwn/agents/neo/knowledge/ should not exist (knowledge moved to world scope)")
 	}
 
 	gitignore, err := os.ReadFile(filepath.Join(dir, ".gitignore"))

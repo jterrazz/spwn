@@ -9,12 +9,15 @@ cat /mind/identity/traits.md    # Your principles
 ```
 
 ## Saving Knowledge
-When you discover something worth remembering:
+When you discover something worth remembering about the project or its
+domain, write it to the world's knowledge base:
 ```bash
 # Create a knowledge file with a descriptive name
-echo "# What I learned about X" > /mind/knowledge/topic-name.md
+echo "# What I learned about X" > /world/knowledge/topic-name.md
 ```
-Keep files focused on ONE topic. Use clear filenames.
+Knowledge is world-scoped: it's committed with the project and every
+agent in this world sees the same files. Keep each file focused on
+ONE topic and use clear filenames.
 
 ## Creating Playbooks
 When you find a reusable procedure:

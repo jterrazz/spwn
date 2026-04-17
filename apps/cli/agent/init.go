@@ -27,9 +27,11 @@ func init() {
 var initCmd = &cobra.Command{
 	Use:     "create [name]",
 	Aliases: []string{"new"},
-	Short:   "Create a new agent with a 5-layer Mind",
-	Long: `Create a new agent with the 5-layer Mind structure
-(core/skills/knowledge/playbooks/journal). If no name is provided,
+	Short:   "Create a new agent with a 4-layer Mind",
+	Long: `Create a new agent with the 4-layer Mind structure
+(identity/skills/playbooks/journal). Knowledge is world-scoped, not
+agent-scoped — it lives at /world/knowledge/ and is committed under
+spwn/worlds/<name>/knowledge/ in the project. If no name is provided,
 a random name is picked from a curated dictionary.
 
 With --force, an existing agent's Mind is re-scaffolded: any missing

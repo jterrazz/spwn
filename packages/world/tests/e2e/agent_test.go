@@ -19,7 +19,6 @@ func TestAgent_Init(t *testing.T) {
 	chain.ExpectMind(func(m *setup.MindAssertion) {
 		m.HasLayer("identity")
 		m.HasLayer("skills")
-		m.HasLayer("knowledge")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
 		m.HasFile("identity/profile.md")
@@ -78,8 +77,8 @@ func TestAgent_Inspect(t *testing.T) {
 		t.Fatalf("Expected name 'inspect-agent', got %q", info.Name)
 	}
 
-	// AND all 5 standard layers should exist
-	for _, layer := range []string{"identity", "skills", "knowledge", "playbooks", "journal"} {
+	// AND all 4 standard layers should exist (knowledge moved to world scope)
+	for _, layer := range []string{"identity", "skills", "playbooks", "journal"} {
 		if _, ok := info.Layers[layer]; !ok {
 			t.Fatalf("Missing layer %q", layer)
 		}

@@ -12,7 +12,7 @@ import { spec } from '../../../setup/cli.specification.js';
  */
 
 describe('agent mind structure', () => {
-    test('agent create writes the 5-layer Mind structure under spwn/agents/', async () => {
+    test('agent create writes the 4-layer Mind structure under spwn/agents/', async () => {
         // Given - the single-agent fixture already has `neo`; we create
         // A second agent alongside it to exercise the command without
         // Clobbering the frozen fixture state.
@@ -21,13 +21,15 @@ describe('agent mind structure', () => {
             .exec('agent create trinity')
             .run();
 
-        // Then - exits zero and creates the 5 Mind layers on disk.
+        // Then - exits zero and creates the 4 Mind layers on disk.
+        // Knowledge is world-scoped, not a Mind layer.
         expect(result.exitCode).toBe(0);
-        for (const layer of ['identity', 'skills', 'knowledge', 'playbooks', 'journal']) {
+        for (const layer of ['identity', 'skills', 'playbooks', 'journal']) {
             expect(result.file(`spwn/agents/trinity/${layer}`).exists, `missing ${layer}/`).toBe(
                 true,
             );
         }
+        expect(result.file('spwn/agents/trinity/knowledge').exists).toBe(false);
 
         // The starter persona is seeded into identity/profile.md
         const persona = result.file('spwn/agents/trinity/identity/profile.md');
