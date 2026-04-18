@@ -1,0 +1,5 @@
+# Input: catalog entry that ships a skills/ subdir.
+# Expected output: /world/skills/cli/SKILL.md lands in the bundle,
+# plus the auto-generated /world/skills/INDEX.md.
+tools:
+  - spwn:cli

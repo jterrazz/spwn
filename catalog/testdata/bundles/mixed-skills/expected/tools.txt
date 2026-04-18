@@ -1,0 +1,9 @@
+spwn:cli
+spwn:unix
+spwn:docker-cli
+spwn:python
+spwn:node
+spwn:claude-code
+spwn:mempalace
+spwn:qmd
+spwn:architect
