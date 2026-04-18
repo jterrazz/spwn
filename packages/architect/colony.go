@@ -9,7 +9,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/transpile"
-	"spwn.sh/packages/runtimes/claudecode"
+	"spwn.sh/packages/transpile/worldbook"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/architect/internal/deploy"
 	"spwn.sh/packages/world/models"
@@ -157,7 +157,7 @@ func regenRoster(worldID string, a *Architect) error {
 		return fmt.Errorf("world %s not found", worldID)
 	}
 	worldStateDir := worldStateDirFor(worldID)
-	roster := claudecode.GenerateRoster(worldID, rosterColony(current.Agents), current.KnowledgeMounted)
+	roster := worldbook.GenerateRoster(worldID, rosterColony(current.Agents), current.KnowledgeMounted)
 	return os.WriteFile(filepath.Join(worldStateDir, "roster.md"), []byte(roster), 0o644)
 }
 

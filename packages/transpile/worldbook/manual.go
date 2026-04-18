@@ -1,4 +1,4 @@
-package claudecode
+package worldbook
 
 // System files that are written into every agent world at spawn time.
 // These provide the global operating manual and skill guides.
