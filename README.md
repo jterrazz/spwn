@@ -114,15 +114,15 @@ Three ideas to hold in your head before you dive in:
 
 ```
 my-project/
-├── spwn.yaml              # project manifest — declares virtual worlds, deps, knowledge paths (docker-compose.yaml for agents)
-├── spwn.lock              # pinned dep versions — commit alongside the manifest (like package-lock.json)
-├── spwn/                  # committed project assets — travel with the repo
-│   ├── agents/            #   your agents: SOUL.md + composition + memory layer dirs
-│   ├── skills/            #   project-wide shared skills (.md with YAML frontmatter)
-│   ├── tools/             #   local tool definitions (tool.yaml + install recipe)
-│   └── hooks/             #   lifecycle shell scripts (pre-spawn, post-destroy, …)
-├── knowledge/             # world knowledge base — bind-mounts into /world/knowledge/ when referenced by spwn.yaml#worlds.<name>.knowledge
-└── .spwn/                 # gitignored local state — live world IDs, build cache, activity log
+├── spwn.yaml              # manifest
+├── spwn.lock              # lockfile
+├── spwn/                  # committed project assets
+│   ├── agents/
+│   ├── skills/
+│   ├── tools/
+│   └── hooks/
+├── knowledge/             # mounted at /world/knowledge/
+└── .spwn/                 # gitignored
 ```
 
 `spwn.yaml` is the declarative entry point. Worlds live **inline** under `worlds:` - each one names the agents it deploys and the workspace it mounts. No imperative setup scripts, no "works on my machine": whoever clones the repo gets the same agents with the same tools, byte-for-byte.
