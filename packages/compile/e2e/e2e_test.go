@@ -9,6 +9,8 @@ import (
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/dependency/resolver"
 	runtimes "spwn.sh/packages/runtimes"
+
+	_ "spwn.sh/packages/runtimes/defaults"
 )
 
 func newRegistry(t *testing.T) *resolver.Registry {

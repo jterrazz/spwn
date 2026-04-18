@@ -17,6 +17,10 @@ import (
 	"spwn.sh/packages/compile/base"
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/runtimes"
+
+	// Blank-import every built-in runtime so its Adapter registers.
+	_ "spwn.sh/packages/runtimes/claudecode"
+	_ "spwn.sh/packages/runtimes/codex"
 )
 
 // TestCatalogBundles walks every subdir under testdata/bundles and
@@ -87,10 +91,8 @@ func TestCatalogBundles(t *testing.T) {
 			// packages/runtimes, not the catalog. The CLI wires both
 			// Into the same registry at startup; the test mirrors that
 			// So tools with transitive deps on runtimes resolve.
-			for _, rt := range runtimes.All {
-				if err := reg.Register(rt); err != nil {
-					t.Fatalf("register %s: %v", rt.Name(), err)
-				}
+			if err := runtimes.RegisterDefaults(reg); err != nil {
+				t.Fatalf("register runtimes: %v", err)
 			}
 			resolved, err := reg.Resolve(in.Tools)
 			if err != nil {

@@ -19,7 +19,7 @@
 //  1. Blank-import its package below so its init() registers the
 //     renderer.
 //  2. Regenerate goldens with
-//     UPDATE_GOLDEN=1 go test ./packages/transpile/runtimes/...
+//     UPDATE_GOLDEN=1 go test ./packages/runtimes/...
 //
 // Regenerating one runtime only: set UPDATE_GOLDEN=<runtime-name>
 // (e.g. UPDATE_GOLDEN=claude-code).
@@ -40,7 +40,7 @@ import (
 	// Blank-import every runtime so its init() registers the renderer
 	// With transpile.Compile. Order doesn't matter; each registration
 	// Is keyed by Runtime.Name().
-	_ "spwn.sh/packages/transpile/runtimes/claude_code"
+	_ "spwn.sh/packages/runtimes/claudecode"
 )
 
 // outputDirPrefix marks the directories the test treats as

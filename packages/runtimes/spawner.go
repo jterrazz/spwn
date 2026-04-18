@@ -1,4 +1,4 @@
-package runtime
+package runtimes
 
 // SpawnConfig holds the configuration for a single agent spawn.
 //
@@ -18,16 +18,15 @@ type SpawnConfig struct {
 	ExtraFlags []string
 }
 
-// Runtime defines the adapter interface for any agent backend.
-//
-// The runtime's image-build recipe (base image, apt packages, install
-// commands) is NOT part of this interface — it lives in the catalog
-// entry for the runtime (e.g. spwn:claude-code's spwn.yaml) and is
-// consumed by the generic image builder. This interface covers only
-// the spawn-time behavior the world layer drives: command building,
-// credential sync, and prelaunch shell setup.
-type Runtime interface {
-	// Name returns the runtime identifier.
+// Spawner is the spawn-time adapter port for a runtime. It covers
+// everything a runtime does on the host/container boundary at spawn
+// time: command building, credential sync, prelaunch shell setup,
+// default-config materialisation, session-id handling. The image-
+// build recipe lives separately as a tool.Tool (Adapter.Tool) and the
+// source-to-Tree renderer lives separately as a transpile.Runtime
+// (Adapter.Render).
+type Spawner interface {
+	// Name returns the runtime identifier (e.g. "claude-code").
 	Name() string
 	// BuildCommand returns the CLI command + args to execute inside the container.
 	BuildCommand(cfg SpawnConfig) []string
@@ -60,4 +59,12 @@ type Runtime interface {
 	// their expected paths on the agent home, set runtime-specific
 	// env vars. An empty string means no wrapping is needed.
 	PrelaunchShell() string
+
+	// ContainerConfigPath returns the container-side path to the
+	// runtime's baseline config file (e.g. "/home/spwn/.claude/
+	// settings.json" for claude-code). Empty when the runtime has
+	// no post-spawn config merging. Used by the architect to know
+	// where to materialise merged runtime-config JSON assembled
+	// from the resolved dependency set.
+	ContainerConfigPath() string
 }

@@ -19,7 +19,7 @@ import (
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/transpile/runtimes/claude_code"
+	"spwn.sh/packages/runtimes/claudecode"
 )
 
 // BuildArchitectImage cross-compiles the spwn binary for linux/amd64 and builds

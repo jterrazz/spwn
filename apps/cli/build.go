@@ -14,7 +14,7 @@ import (
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/transpile"
-	_ "spwn.sh/packages/transpile/runtimes/claude_code" // register the claude-code runtime
+	_ "spwn.sh/packages/runtimes/defaults" // register every built-in runtime
 	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/project"

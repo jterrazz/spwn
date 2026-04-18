@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	claudecode "spwn.sh/packages/transpile/runtimes/claude_code"
+	"spwn.sh/packages/runtimes/claudecode"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world/models"
 )

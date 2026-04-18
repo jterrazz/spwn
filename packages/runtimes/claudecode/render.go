@@ -6,19 +6,23 @@ import (
 	"spwn.sh/packages/transpile"
 )
 
-// Runtime is the transpile.Runtime implementation for Claude Code.
+// renderer is the transpile.Runtime implementation for Claude Code.
 //
 // Claude Code reads a CLAUDE.md at the working directory on startup.
 // This runtime translates the provider-neutral spwn source format
 // into that convention: each agent's source AGENTS.md becomes an
 // emitted CLAUDE.md inside the container's agent home.
-type Runtime struct{}
+type renderer struct{}
 
-func init() { transpile.Register(&Runtime{}) }
+// Renderer is the exported render adapter for Claude Code. It is
+// bundled into the package-level Adapter (see adapter.go) which
+// registers itself into both the runtimes registry and transpile's
+// global renderer registry at init time.
+var Renderer = &renderer{}
 
 // Name returns "claude-code", the identifier used by
 // transpile.Compile to look up this runtime.
-func (r *Runtime) Name() string { return "claude-code" }
+func (r *renderer) Name() string { return "claude-code" }
 
 // Render translates the Input into a Tree laid out the way Claude
 // Code expects. It produces:
@@ -30,7 +34,7 @@ func (r *Runtime) Name() string { return "claude-code" }
 //
 // This is the in-memory equivalent of what architect.Spawn used to
 // write file-by-file.
-func (r *Runtime) Render(input transpile.Input) (*transpile.Tree, error) {
+func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 	t := transpile.New()
 
 	// World-wide files. These happen to be rendered the same way for

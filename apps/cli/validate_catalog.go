@@ -38,12 +38,15 @@ func init() {
 // tool/skill/runtime-config concept) and runtimes. Used to power
 // the "did you mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
-	out := make([]string, 0, len(dependency.BuiltinTools())+len(runtimes.All))
+	adapters := runtimes.All()
+	out := make([]string, 0, len(dependency.BuiltinTools())+len(adapters))
 	for _, t := range dependency.BuiltinTools() {
 		out = append(out, t.Name())
 	}
-	for _, t := range runtimes.All {
-		out = append(out, t.Name())
+	for _, a := range adapters {
+		if a.Tool != nil {
+			out = append(out, a.Tool.Name())
+		}
 	}
 	return out
 }
@@ -52,9 +55,13 @@ func catalogToolNames() []string {
 // the CLI knows about, taken from catalog/runtimes. Used to validate
 // each agent's runtime.backend at `spwn check` time.
 func supportedRuntimes() []string {
-	out := make([]string, 0, len(runtimes.All))
-	for _, r := range runtimes.All {
-		out = append(out, r.Name())
+	adapters := runtimes.All()
+	out := make([]string, 0, 2*len(adapters))
+	for _, a := range adapters {
+		out = append(out, a.Name)
+		if a.CatalogRef != "" {
+			out = append(out, a.CatalogRef)
+		}
 	}
 	return out
 }

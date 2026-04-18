@@ -9,7 +9,7 @@ import (
 	"spwn.sh/packages/project"
 	runtimespkg "spwn.sh/packages/runtimes"
 	"spwn.sh/packages/transpile"
-	_ "spwn.sh/packages/transpile/runtimes/claude_code" // register the claude-code compile renderer
+	_ "spwn.sh/packages/runtimes/claudecode" // register the claude-code compile renderer
 	"spwn.sh/packages/transpile/source"
 )
 
@@ -34,14 +34,20 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 		t.Fatal("no gallery entries found — ShippedSlugs returned empty")
 	}
 
-	builtins := make([]string, 0, len(dependency.BuiltinTools())+len(runtimespkg.All))
+	adapters := runtimespkg.All()
+	builtins := make([]string, 0, len(dependency.BuiltinTools())+len(adapters))
 	for _, tool := range dependency.BuiltinTools() {
 		builtins = append(builtins, tool.Name())
 	}
-	supportedRuntimes := make([]string, 0, len(runtimespkg.All))
-	for _, rt := range runtimespkg.All {
-		builtins = append(builtins, rt.Name())
-		supportedRuntimes = append(supportedRuntimes, rt.Name())
+	supportedRuntimes := make([]string, 0, 2*len(adapters))
+	for _, a := range adapters {
+		if a.Tool != nil {
+			builtins = append(builtins, a.Tool.Name())
+		}
+		supportedRuntimes = append(supportedRuntimes, a.Name)
+		if a.CatalogRef != "" {
+			supportedRuntimes = append(supportedRuntimes, a.CatalogRef)
+		}
 	}
 
 	for _, slug := range slugs {

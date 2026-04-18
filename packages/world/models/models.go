@@ -38,6 +38,12 @@ type World struct {
 	Agent       string        `json:"agent,omitempty"`
 	AgentID     string        `json:"agent_id,omitempty"`
 	Backend     string        `json:"backend"`
+	// Runtime is the short-name runtime adapter ("claude-code",
+	// "codex") selected for this world. Used at hot-deploy and talk
+	// time to route through the right transpile.Runtime and
+	// runtimes.Spawner. Empty on legacy state files — callers fall
+	// back to "claude-code".
+	Runtime     string        `json:"runtime,omitempty"`
 	ContainerID string        `json:"container_id"`
 	Workspaces  []Workspace   `json:"workspaces,omitempty"`
 	// Legacy single-workspace field. Retained so old state files unmarshal cleanly.

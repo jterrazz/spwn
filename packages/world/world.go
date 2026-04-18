@@ -8,7 +8,6 @@ import (
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/state"
 )
 
@@ -106,31 +105,3 @@ func LoadAgentManifest(agentDir string) (*agent.Manifest, error) {
 	return agent.LoadManifestPath(agentDir)
 }
 
-// --- Runtime ---
-
-// RuntimeSpawnConfig holds the parameters for building a runtime command.
-type RuntimeSpawnConfig = runtime.SpawnConfig
-
-// Runtime is the public alias for the internal runtime adapter
-// interface. Exposed so CLI callers (talk.go, the interactive
-// session path) can reach SyncHostCredentials / PrelaunchShell
-// without importing the internal package.
-type Runtime = runtime.Runtime
-
-// GetRuntime looks up a registered runtime adapter by backend name
-// ("claude-code", "codex", …) and returns the canonical interface.
-// Callers use the returned Runtime for credential sync, prelaunch
-// shell, and command building.
-func GetRuntime(name string) (Runtime, error) {
-	return runtime.Get(name)
-}
-
-// BuildRuntimeCommand returns the CLI command for a given runtime and config.
-// This is the single source of truth for how to invoke any runtime inside a container.
-func BuildRuntimeCommand(runtimeName string, cfg RuntimeSpawnConfig) ([]string, error) {
-	rt, err := runtime.Get(runtimeName)
-	if err != nil {
-		return nil, err
-	}
-	return rt.BuildCommand(cfg), nil
-}

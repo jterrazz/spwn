@@ -1,15 +1,15 @@
-package runtime_test
+package runtimes_test
 
 import (
 	"testing"
 
-	"spwn.sh/packages/world/runtime"
+	"spwn.sh/packages/runtimes"
 
-	_ "spwn.sh/packages/runtimes/claude_code"
+	_ "spwn.sh/packages/runtimes/claudecode"
 )
 
 func TestClaudeCodeRegistered(t *testing.T) {
-	r, err := runtime.Get("claude-code")
+	r, err := runtimes.GetSpawner("claude-code")
 	if err != nil {
 		t.Fatalf("claude-code not registered: %v", err)
 	}
@@ -19,19 +19,19 @@ func TestClaudeCodeRegistered(t *testing.T) {
 }
 
 func TestGetUnknownRuntime(t *testing.T) {
-	_, err := runtime.Get("nonexistent")
+	_, err := runtimes.GetSpawner("nonexistent")
 	if err == nil {
 		t.Error("expected error for unknown runtime, got nil")
 	}
 }
 
 func TestClaudeCodeBuildCommand(t *testing.T) {
-	r, err := runtime.Get("claude-code")
+	r, err := runtimes.GetSpawner("claude-code")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cmd := r.BuildCommand(runtime.SpawnConfig{Prompt: "hello world"})
+	cmd := r.BuildCommand(runtimes.SpawnConfig{Prompt: "hello world"})
 	if len(cmd) == 0 {
 		t.Fatal("empty command")
 	}
@@ -52,12 +52,12 @@ func TestClaudeCodeBuildCommand(t *testing.T) {
 }
 
 func TestClaudeCodeWithModel(t *testing.T) {
-	r, err := runtime.Get("claude-code")
+	r, err := runtimes.GetSpawner("claude-code")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cmd := r.BuildCommand(runtime.SpawnConfig{
+	cmd := r.BuildCommand(runtimes.SpawnConfig{
 		Prompt: "test",
 		Model:  "test-model",
 	})
@@ -67,7 +67,7 @@ func TestClaudeCodeWithModel(t *testing.T) {
 }
 
 func TestClaudeCodeMetadata(t *testing.T) {
-	r, err := runtime.Get("claude-code")
+	r, err := runtimes.GetSpawner("claude-code")
 	if err != nil {
 		t.Fatal(err)
 	}

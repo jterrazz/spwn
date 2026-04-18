@@ -1,4 +1,4 @@
-package claude_code
+package claudecode
 
 import (
 	"testing"
