@@ -8,6 +8,7 @@ use (
 	./packages/architect
 	./packages/auth
 	./packages/compile
+	./packages/container
 	./packages/transpile
 	./packages/mailbox
 	./packages/migration

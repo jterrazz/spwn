@@ -1,12 +1,12 @@
-package compile
-
-import "spwn.sh/packages/dependency/tool"
+package resolver
 
 import (
 	"encoding/json"
 	"io/fs"
 	"strings"
 	"testing"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 func parseJSON(t *testing.T, raw []byte) map[string]any {

@@ -1,7 +1,7 @@
 package local
 
 import (
-	compile "spwn.sh/packages/compile"
+	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
 	"os"
 	"path/filepath"
@@ -108,7 +108,7 @@ verify:
 
 func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 	root := t.TempDir()
-	reg := compile.NewRegistry()
+	reg := resolver.NewRegistry()
 
 	list := []string{"spwn:unix", "spwn:git"}
 	got, err := Hydrate(reg, root, list)
@@ -128,7 +128,7 @@ install:
 verify:
   - command -v curl
 `)
-	reg := compile.NewRegistry()
+	reg := resolver.NewRegistry()
 
 	list := []string{"spwn:unix", "tool:mine", "spwn:git"}
 	got, err := Hydrate(reg, root, list)
@@ -158,7 +158,7 @@ install:
 verify:
   - command -v jq
 `)
-	reg := compile.NewRegistry()
+	reg := resolver.NewRegistry()
 
 	list := []string{"spwn:unix", "tool:tool-a", "spwn:git", "tool:tool-b", "tool:tool-a"}
 	got, err := Hydrate(reg, root, list)
@@ -178,7 +178,7 @@ verify:
 
 func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 	root := t.TempDir()
-	reg := compile.NewRegistry()
+	reg := resolver.NewRegistry()
 
 	_, err := Hydrate(reg, root, []string{"tool:nonexistent"})
 	if err == nil {
@@ -194,7 +194,7 @@ install:
 verify:
   - command -v curl
 `)
-	reg := compile.NewRegistry()
+	reg := resolver.NewRegistry()
 
 	_, err := Hydrate(reg, root, []string{"tool:mine", "tool:mine"})
 	if err != nil {
@@ -208,7 +208,7 @@ verify:
 // on an empty filesystem lookup.
 func TestHydrateLocalPackages_bareRefPassesThrough(t *testing.T) {
 	root := t.TempDir()
-	reg := compile.NewRegistry()
+	reg := resolver.NewRegistry()
 
 	got, err := Hydrate(reg, root, []string{"bare-name"})
 	if err != nil {

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
 
 
@@ -53,7 +53,7 @@ func Build(cwd string, opts Opts) (*Model, error) {
 		return nil, err
 	}
 
-	reg := ib.NewRegistry()
+	reg := resolver.NewRegistry()
 	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return nil, fmt.Errorf("register catalog: %w", err)
 	}
@@ -141,7 +141,7 @@ func Build(cwd string, opts Opts) (*Model, error) {
 // set of dep names already emitted at any depth — the second (and
 // further) visits return a DedupSeen node (cargo-tree `(*)` marker)
 // with no children.
-func buildNode(reg *ib.Registry, ref string, seen map[string]struct{}) DepNode {
+func buildNode(reg *resolver.Registry, ref string, seen map[string]struct{}) DepNode {
 	if _, already := seen[ref]; already {
 		// Still resolve version/kind for the display, but short-circuit children.
 		n := DepNode{Name: ref, DedupSeen: true}
@@ -194,7 +194,7 @@ func countSkills(fsys fs.FS) int {
 // directory-form dependency it finds, prefixing names with "local:"
 // to stay out of the spwn: namespace (mirrors the hydration path
 // in packages/architect/localtools.go).
-func registerLocalTools(reg *ib.Registry, root string) error {
+func registerLocalTools(reg *resolver.Registry, root string) error {
 	toolsDir := filepath.Join(root, "spwn", "tools")
 	entries, err := os.ReadDir(toolsDir)
 	if err != nil {
@@ -312,7 +312,7 @@ func fromWorldStatus(s wmodels.Status) Status {
 // agent's Mind memory layer — written to at runtime — and are
 // deliberately NOT enumerated here: spwn does not discover, inject,
 // or surface them as composable skills.
-func collectSkills(a source.AgentSource, src *source.ProjectSource, fullDeps []string, reg *ib.Registry) []SkillRef {
+func collectSkills(a source.AgentSource, src *source.ProjectSource, fullDeps []string, reg *resolver.Registry) []SkillRef {
 	_ = a // agent-local skills/ is an opaque Mind memory layer
 	var out []SkillRef
 
@@ -333,7 +333,7 @@ func collectSkills(a source.AgentSource, src *source.ProjectSource, fullDeps []s
 	return out
 }
 
-func collectToolSkills(reg *ib.Registry, ref string, seen map[string]struct{}, out *[]SkillRef) {
+func collectToolSkills(reg *resolver.Registry, ref string, seen map[string]struct{}, out *[]SkillRef) {
 	if _, ok := seen[ref]; ok {
 		return
 	}

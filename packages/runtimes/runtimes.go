@@ -12,7 +12,7 @@ package runtimes
 import (
 	"fmt"
 
-	ib "spwn.sh/packages/compile"
+	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
 	"spwn.sh/packages/runtimes/claude_code"
 	"spwn.sh/packages/runtimes/codex"
@@ -26,7 +26,7 @@ var All = []tool.Tool{
 }
 
 // RegisterDefaults registers all built-in runtimes into the given registry.
-func RegisterDefaults(r *ib.Registry) error {
+func RegisterDefaults(r *resolver.Registry) error {
 	for _, t := range All {
 		if err := r.Register(t); err != nil {
 			return fmt.Errorf("register built-in runtime %q: %w", t.Name(), err)

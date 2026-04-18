@@ -16,7 +16,7 @@ import (
 	"strings"
 
 	"spwn.sh/packages/transpile"
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/platform"
 )
 

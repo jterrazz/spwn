@@ -15,6 +15,7 @@ import (
 
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/base"
+	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/runtimes"
 )
 
@@ -76,7 +77,7 @@ func TestCatalogBundles(t *testing.T) {
 			// Build a fresh registry from the embedded catalog and
 			// resolve the requested refs. This exercises the same
 			// code path `packages/architect` runs at spawn time.
-			reg := compile.NewRegistry()
+			reg := resolver.NewRegistry()
 			for _, tool := range dependency.BuiltinTools() {
 				if err := reg.Register(tool); err != nil {
 					t.Fatalf("register %s: %v", tool.Name(), err)
@@ -111,7 +112,7 @@ func TestCatalogBundles(t *testing.T) {
 				}
 				got.tools = b.String()
 			}
-			skills, err := compile.CollectSkills(resolved)
+			skills, err := resolver.CollectSkills(resolved)
 			if err != nil {
 				t.Fatalf("CollectSkills: %v", err)
 			}

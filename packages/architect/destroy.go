@@ -9,7 +9,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/activity"
-	"spwn.sh/packages/world/deploy"
+	"spwn.sh/packages/architect/internal/deploy"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/platform"
 )

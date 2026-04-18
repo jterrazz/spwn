@@ -1,10 +1,10 @@
-package compile
-
-import "spwn.sh/packages/dependency/tool"
+package resolver
 
 import (
 	"io/fs"
 	"testing"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 // stubTool is a minimal Tool implementation for testing.

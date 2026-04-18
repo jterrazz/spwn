@@ -35,7 +35,7 @@ dependencies:
 func TestSpawn_MissingToolFails(t *testing.T) {
 	// Given - a config requesting a non-existent tool
 	// When - a world is spawned
-	// Then - it should fail with "tool not found" (compile.Registry.Resolve)
+	// Then - it should fail with "tool not found" (resolver.Registry.Resolve)
 	setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:

@@ -1,10 +1,10 @@
-package compile
-
-import "spwn.sh/packages/dependency/tool"
+package resolver
 
 import (
 	"fmt"
 	"testing"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 // BenchmarkRegistryResolve measures the cost of topologically

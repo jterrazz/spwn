@@ -13,7 +13,6 @@ package spwn
 import (
 	"fmt"
 
-	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/dependency/tool"
 )
 
@@ -29,17 +28,4 @@ func init() {
 		panic(fmt.Errorf("spwn adapter: load yaml tools: %w", err))
 	}
 	All = yaml
-}
-
-// RegisterDefaults registers every built-in tool into the given
-// registry. Returns an error if any tool fails to register
-// (typically a naming collision — indicates a programmer error in
-// the catalog).
-func RegisterDefaults(r *ib.Registry) error {
-	for _, t := range All {
-		if err := r.Register(t); err != nil {
-			return fmt.Errorf("register built-in tool %q: %w", t.Name(), err)
-		}
-	}
-	return nil
 }

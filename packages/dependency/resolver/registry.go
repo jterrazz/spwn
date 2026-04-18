@@ -1,4 +1,14 @@
-package compile
+// Package resolver is the dependency resolver: given a flat list of
+// requested tool refs, it transitively expands their dependencies,
+// deduplicates, and returns a topologically sorted build order.
+//
+// The Registry is a plain map keyed by canonical ref. Callers
+// hydrate it from adapters (spwn catalog builtins via
+// dependency.RegisterBuiltins, project-local tool:<name> refs via
+// dependency.HydrateLocals) and then call Resolve to drive an image
+// build. CollectSkills + CollectRuntimeConfigs are small aggregation
+// helpers on top of the resolved slice.
+package resolver
 
 import (
 	"fmt"

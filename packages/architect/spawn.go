@@ -17,8 +17,9 @@ import (
 	"spwn.sh/packages/transpile"
 	ib "spwn.sh/packages/compile"
 	ibbase "spwn.sh/packages/compile/base"
-	"spwn.sh/packages/compile/backend"
-	"spwn.sh/packages/world/deploy"
+	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/dependency/resolver"
+	"spwn.sh/packages/architect/internal/deploy"
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/platform"
@@ -199,7 +200,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Even when the image is prebuilt (tests injecting SPWN_BASE_IMAGE),
 	// runtime config still needs to be merged into the container's
 	// runtime settings file after the container boots.
-	reg := ib.NewRegistry()
+	reg := resolver.NewRegistry()
 	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
 	}
