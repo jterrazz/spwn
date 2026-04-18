@@ -9,11 +9,12 @@ import (
 // All phrases are authored here so the copy stays consistent.
 
 // extractName pulls the human-readable name out of a world ID.
-// Supports both legacy "w-saturn-12345" and new "spwn-world-saturn-12345" formats.
+// Expects the canonical "world-{name}-{hex}" format; falls back to the
+// first non-prefix segment for any other shape.
 func extractName(id string) string {
-	// New format: spwn-world-{name}-{digits}
-	if strings.HasPrefix(id, "spwn-world-") {
-		trimmed := strings.TrimPrefix(id, "spwn-world-")
+	// Canonical format: world-{name}-{hex}
+	if strings.HasPrefix(id, "world-") {
+		trimmed := strings.TrimPrefix(id, "world-")
 		if idx := strings.LastIndex(trimmed, "-"); idx > 0 {
 			n := trimmed[:idx]
 			if len(n) > 0 {
@@ -21,7 +22,7 @@ func extractName(id string) string {
 			}
 		}
 	}
-	// Legacy format: w-{name}-{digits}
+	// Fallback: take the segment after the first hyphen.
 	parts := strings.Split(id, "-")
 	if len(parts) >= 2 {
 		n := parts[1]

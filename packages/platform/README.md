@@ -11,7 +11,7 @@ The foundation layer: every other package asks `platform` for "where does this t
 - `BaseDir()`, `AgentsDir()`, `WorldsDir()`, `CredentialsDir()`, `SkillsDir()`, … — host-side directory resolvers. Respect `SPWN_HOME`, default to `~/.spwn`.
 - `ProjectRoot()`, `SetProjectRoot(path)` — optional project mode; set by the CLI at startup when a `spwn.yaml` is discovered.
 - `ArchitectContainerName()`, `ArchitectImage`, `ArchitectImageVersion` — constants for the always-on Architect container.
-- `GenerateWorldID(name)` → `spwn-world-<slug>-<5-hex>`, `GenerateAgentID(name)` → `a-<name>-<5-hex>`.
+- `GenerateWorldID(name)` → `world-<slug>-<5-hex>`, `GenerateAgentID(name)` → `agent-<name>-<5-hex>`.
 - `RandomPlanetName()`, `RandomAgentName()` — bundled name lists for scaffolds.
 - `MindLayers` — canonical ordered list of the four mind-layer directories (identity, skills, playbooks, journal). Knowledge is world-scoped, not agent-scoped.
 

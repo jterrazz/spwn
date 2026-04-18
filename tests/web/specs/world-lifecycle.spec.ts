@@ -9,7 +9,7 @@ test.describe('World lifecycle (requires Docker)', () => {
     test('spawn → appears in UI → destroy → disappears', async ({ page, api }) => {
         const result = await api.spawnWorld('matrix', 'Neo');
         const worldId = result.World.id;
-        expect(worldId).toMatch(/^spwn-world-/);
+        expect(worldId).toMatch(/^world-/);
 
         await page.goto('/');
         await page.waitForTimeout(4000);

@@ -1383,7 +1383,7 @@ function SpawnWorldDialog({
     const defaultWorkspacePath = useMemo(() => {
         const first = [...selectedAgents][0];
         const rand = Math.random().toString(36).substring(2, 6);
-        return first ? `/tmp/spwn-${first}-${rand}` : `/tmp/spwn-world-${rand}`;
+        return first ? `/tmp/spwn-${first}-${rand}` : `/tmp/spwn-workspace-${rand}`;
     }, [selectedAgents]);
 
     // Fetch available agents for the checkable list

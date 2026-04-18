@@ -8,19 +8,19 @@ import (
 )
 
 // GenerateWorldID returns a world ID of the shape
-// spwn-world-<slug>-<5-hex-digits>. The hash prevents name collisions
+// world-<slug>-<5-hex-digits>. The hash prevents name collisions
 // on concurrent spawns.
 func GenerateWorldID(name string) string {
 	b := make([]byte, 3)
 	_, _ = rand.Read(b)
-	return fmt.Sprintf("spwn-world-%s-%02x%02x%x", slugify(name), b[0], b[1], b[2]&0xf)
+	return fmt.Sprintf("world-%s-%02x%02x%x", slugify(name), b[0], b[1], b[2]&0xf)
 }
 
-// GenerateAgentID returns an agent ID of the shape a-<name>-<5-hex>.
+// GenerateAgentID returns an agent ID of the shape agent-<name>-<5-hex>.
 func GenerateAgentID(name string) string {
 	b := make([]byte, 3)
 	_, _ = rand.Read(b)
-	return fmt.Sprintf("a-%s-%02x%02x%x", name, b[0], b[1], b[2]&0xf)
+	return fmt.Sprintf("agent-%s-%02x%02x%x", name, b[0], b[1], b[2]&0xf)
 }
 
 // RandomPlanetName picks a random planet/moon for a world.
