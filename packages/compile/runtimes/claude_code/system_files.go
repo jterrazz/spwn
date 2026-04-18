@@ -2,9 +2,18 @@ package claudecode
 
 // System files that are written into every agent world at spawn time.
 // These provide the global operating manual and skill guides.
+//
+// Every top-level text block comes in two flavours: one emitted when a
+// world has a bound knowledge directory (/world/knowledge/) and one
+// emitted when it does not. The caller picks the variant at render time
+// via compile.Input.WorldKnowledgeMounted. When false, every reference
+// to /world/knowledge/ is omitted so the agent is never told a
+// knowledge base exists.
 
-// AgentsBook is the global AGENTS.md - the operating manual every agent reads.
-const AgentsBook = `# SPWN - Agent Operating Manual
+// AgentsBookWithKnowledge is the global AGENTS.md - the operating
+// manual every agent reads — emitted when the world has a mounted
+// knowledge directory at /world/knowledge/.
+const AgentsBookWithKnowledge = `# SPWN - Agent Operating Manual
 
 You are a spwn agent - a persistent AI entity living inside an isolated world.
 Your memory survives world destruction. You grow through experience.
@@ -47,8 +56,55 @@ Read ` + "`/world/skills/`" + ` for detailed guides:
 6. Never modify ` + "`/world/AGENTS.md`" + `, ` + "`/world/physics.md`" + `, ` + "`/world/faculties.md`" + `, or ` + "`/world/skills/`" + ` (read-only system area). ` + "`/world/knowledge/`" + ` and ` + "`/world/inbox/`" + ` are writable.
 `
 
-// SkillMindManagement is the mind-management.md skill guide.
-const SkillMindManagement = `# Mind Management
+// AgentsBookWithoutKnowledge is the AGENTS.md variant emitted for
+// worlds that declare no knowledge path in spwn.yaml. Every reference
+// to /world/knowledge/ is omitted — the agent is never told a
+// knowledge base exists.
+const AgentsBookWithoutKnowledge = `# SPWN - Agent Operating Manual
+
+You are a spwn agent - a persistent AI entity living inside an isolated world.
+Your memory survives world destruction. You grow through experience.
+
+## Your Mind (/mind/)
+Your persistent memory. It survives when worlds are destroyed.
+- ` + "`/mind/identity/purpose.md`" + ` - why you exist
+- ` + "`/mind/SOUL.md`" + ` - who you are
+- ` + "`/mind/identity/traits.md`" + ` - your principles
+- ` + "`/mind/skills/`" + ` - capabilities you've learned
+- ` + "`/mind/playbooks/`" + ` - step-by-step procedures
+- ` + "`/mind/journal/`" + ` - auto-logged session and deployment history
+
+## Your World (/world/)
+Your current environment.
+- ` + "`/world/AGENT.md`" + ` - your role in THIS world (role, physics, tools) (read-only)
+- ` + "`/world/AGENTS.md`" + ` - this file, the operating manual (read-only)
+- ` + "`/world/skills/`" + ` - system skills, guides for common tasks (read-only)
+
+## Your Workspaces (/workspaces/)
+The projects you're working on. Read-write. Each entry is a named
+subdirectory under /workspaces/ mounted from a host path. Persists
+on the host. A world with zero declared workspaces has /workspaces
+empty.
+
+## System Skills
+Read ` + "`/world/skills/`" + ` for detailed guides:
+- ` + "`mind-management.md`" + ` - how to read/write your identity and memory
+- ` + "`collaboration.md`" + ` - how to communicate with other agents
+- ` + "`world-awareness.md`" + ` - understanding physics, tools, faculties
+- ` + "`self-evolution.md`" + ` - how to improve through dream cycles
+
+## Conventions
+1. Read your purpose and traits before starting any task
+2. After significant work, check if a playbook should be created
+3. When asked to dream, analyze your journal and promote patterns
+4. Communicate with other agents through ` + "`/world/inbox/`" + `
+5. Never modify ` + "`/world/AGENTS.md`" + `, ` + "`/world/physics.md`" + `, ` + "`/world/faculties.md`" + `, or ` + "`/world/skills/`" + ` (read-only system area). ` + "`/world/inbox/`" + ` is writable.
+`
+
+// SkillMindManagementWithKnowledge is the mind-management.md skill
+// guide variant emitted when the world has a mounted knowledge
+// directory.
+const SkillMindManagementWithKnowledge = `# Mind Management
 
 ## Reading Your Identity
 Before starting any task, read your identity files:
@@ -68,6 +124,39 @@ echo "# What I learned about X" > /world/knowledge/topic-name.md
 Knowledge is world-scoped: it's committed with the project and every
 agent in this world sees the same files. Keep each file focused on
 ONE topic and use clear filenames.
+
+## Creating Playbooks
+When you find a reusable procedure:
+` + "```bash" + `
+echo "# How to Deploy" > /mind/playbooks/deploy.md
+# Include: trigger conditions, numbered steps, pitfalls
+` + "```" + `
+
+## Journal Entries
+Journal entries are auto-created by the system after each session.
+You can read them at ` + "`/mind/journal/`" + `.
+
+## Updating Your Identity
+You can evolve your own identity:
+` + "```bash" + `
+# Update your purpose as you learn
+echo "# Purpose\nI exist to maintain the production API" > /mind/identity/purpose.md
+` + "```" + `
+`
+
+// SkillMindManagementWithoutKnowledge is the mind-management.md variant
+// emitted for worlds with no knowledge path declared. The "Saving
+// Knowledge" section is dropped entirely — the agent is never told a
+// knowledge base exists.
+const SkillMindManagementWithoutKnowledge = `# Mind Management
+
+## Reading Your Identity
+Before starting any task, read your identity files:
+` + "```bash" + `
+cat /mind/identity/purpose.md   # Why you exist
+cat /mind/SOUL.md   # Who you are
+cat /mind/identity/traits.md    # Your principles
+` + "```" + `
 
 ## Creating Playbooks
 When you find a reusable procedure:
@@ -173,10 +262,27 @@ When you discover a reusable approach:
 
 `
 
-// SystemSkills returns a map of filename → content for all system skill files.
-func SystemSkills() map[string]string {
+// AgentsBook returns the AGENTS.md variant for the given
+// WorldKnowledgeMounted flag. Kept as a thin function so call sites
+// read cleanly (`AgentsBook(input.WorldKnowledgeMounted)`).
+func AgentsBook(knowledgeMounted bool) string {
+	if knowledgeMounted {
+		return AgentsBookWithKnowledge
+	}
+	return AgentsBookWithoutKnowledge
+}
+
+// SystemSkills returns a map of filename → content for all system skill
+// files. The mind-management skill varies based on whether the world
+// has a mounted knowledge directory; every other skill is
+// knowledge-agnostic.
+func SystemSkills(knowledgeMounted bool) map[string]string {
+	mindManagement := SkillMindManagementWithoutKnowledge
+	if knowledgeMounted {
+		mindManagement = SkillMindManagementWithKnowledge
+	}
 	return map[string]string{
-		"mind-management.md": SkillMindManagement,
+		"mind-management.md": mindManagement,
 		"collaboration.md":   SkillCollaboration,
 		"world-awareness.md": SkillWorldAwareness,
 		"self-evolution.md":  SkillSelfEvolution,

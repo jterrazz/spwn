@@ -313,6 +313,16 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	// instead of a mystery spinner during the long image build.
 	buildProgress := s.BuildProgressWriter("Building image")
 
+	// Knowledge path resolution: the CLI is the ONLY layer that turns
+	// the manifest's project-relative `worlds.<name>.knowledge` value
+	// into an absolute host path. When no inline world is active
+	// (pw == nil, legacy global-mode spawn), knowledge stays empty and
+	// the spawn pipeline drops the bind mount.
+	knowledge := ""
+	if pw != nil {
+		knowledge = pw.Knowledge
+	}
+
 	result, err := arc.Spawn(ctx, architect.SpawnOpts{
 		ConfigName:   configName,
 		Name:         spawnName,
@@ -321,6 +331,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		Manifest:     m,
 		Agents:       agents,
 		ForceRebuild: spawnForceRebuild,
+		Knowledge:    knowledge,
 		LogWriter:    buildProgress,
 		OnProgress: func(event, detail string) {
 			switch event {

@@ -12,7 +12,7 @@ otherwise; it doesn't stop existing just because nothing is running.
 | Agent (persistent)                       | World (declaration + live instance)                   |
 | ---------------------------------------- | ----------------------------------------------------- |
 | Identity - profile, purpose, traits      | Entry in `spwn.yaml#worlds`                           |
-| Memory - journal, playbooks              | Knowledge base at `spwn/worlds/<name>/knowledge/`     |
+| Memory - journal, playbooks              | Optional knowledge base at the path declared by `worlds.<name>.knowledge` |
 | Composition - tools, skills, profile     | Workspace mounts + tool overrides                     |
 | Evolution history                        | Running container when deployed                       |
 
@@ -34,6 +34,10 @@ worlds:
   default:
     agents: [neo]
     workspaces: [.]
+    # Optional shared knowledge directory bound at /world/knowledge/.
+    # Omit the key entirely to spawn a world whose agents are never
+    # told a knowledge base exists.
+    knowledge: ./knowledge
     # Optional extra tools injected on top of each agent's own tools.
     tools:
       - "spwn:docker-cli"

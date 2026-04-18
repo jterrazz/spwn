@@ -4,3 +4,4 @@ worlds:
   home:
     agents: [architect, morpheus, neo]
     workspaces: [.]
+    knowledge: ./knowledge

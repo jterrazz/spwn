@@ -2,7 +2,9 @@ package world
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
+	"strings"
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/packages/project"
@@ -18,6 +20,14 @@ type projectWorld struct {
 	Agents     []string
 	Workspaces []string
 	Manifest   world.Manifest
+	// Knowledge is the absolute host path to bind into
+	// /world/knowledge/, resolved from the manifest's
+	// worlds.<name>.knowledge key relative to the project root.
+	// Empty when the manifest declares no knowledge path — in which
+	// case the spawn pipeline skips the bind mount entirely and the
+	// rendered AGENTS.md / CLAUDE.md / mind-management skill omit
+	// every reference to /world/knowledge/.
+	Knowledge string
 }
 
 // loadProject is kept as a thin alias over cliproject.Find so the
@@ -105,11 +115,25 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 
 	m := world.Manifest{Deps: pkgs}
 
+	// Resolve the knowledge path (if any) relative to the project root
+	// so SpawnOpts receives an absolute host path. Empty string means
+	// "no knowledge base" — the spawn pipeline drops the bind mount and
+	// compile omits every /world/knowledge/ reference.
+	var knowledge string
+	if kp := strings.TrimSpace(w.Knowledge); kp != "" {
+		if filepath.IsAbs(kp) {
+			knowledge = kp
+		} else {
+			knowledge = filepath.Join(p.Root, kp)
+		}
+	}
+
 	return &projectWorld{
 		Project:    p,
 		Name:       name,
 		Agents:     append([]string(nil), w.Agents...),
 		Workspaces: append([]string(nil), w.Workspaces...),
 		Manifest:   m,
+		Knowledge:  knowledge,
 	}, nil
 }

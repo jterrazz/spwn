@@ -10,3 +10,4 @@ worlds:
   neo:
     agents: [neo]
     workspaces: [.]
+    knowledge: ./knowledge

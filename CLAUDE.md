@@ -10,7 +10,7 @@ The domain has three main abstractions, each owning one concern:
 |---|---|---|
 | **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` - Claude Code today, others swap in as a ~50 LOC Go file |
 | **Backend** | Where worlds run | `packages/world/internal/backend` - Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (skills/playbooks/journal) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — it lives at `spwn/worlds/<name>/knowledge/` and is bind-mounted into `/world/knowledge/`. |
+| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (skills/playbooks/journal) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (e.g. `./knowledge`) and it gets bind-mounted into `/world/knowledge/`. Omit the key to spawn a world whose agents are never told a knowledge base exists. |
 
 ## Vocabulary
 
@@ -148,9 +148,11 @@ my-project/
 
 Worlds are declared **inline** under `spwn.yaml#worlds` - the
 world record (agents, workspaces, tool overrides) lives in yaml,
-not in separate yaml files. The only filesystem artifact a world
-owns is `spwn/worlds/<name>/knowledge/`, bind-mounted into the
-running container at `/world/knowledge/`. Each world entry names the
+not in separate yaml files. A world optionally owns one filesystem
+artifact: the directory referenced by its `knowledge:` key (e.g.
+`./knowledge`), which gets bind-mounted at `/world/knowledge/` inside
+the running container. Omit the key and no mount happens — the agent
+is never told a knowledge base exists. Each world entry names the
 agents it deploys, the workspace mounts, and optional tool
 overrides.
 

@@ -20,3 +20,4 @@ worlds:
       - neo
     workspaces:
       - .
+    knowledge: ./knowledge

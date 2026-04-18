@@ -39,17 +39,19 @@ func (r *Runtime) Render(input compile.Input) (*compile.Tree, error) {
 	// a neutral sub-package.
 	t.AddString("world/physics.md", GeneratePhysics(input.Deps))
 	t.AddString("world/faculties.md", GenerateFaculties(input.VerifiedTools))
-	t.AddString("world/AGENTS.md", AgentsBook)
+	t.AddString("world/AGENTS.md", AgentsBook(input.WorldKnowledgeMounted))
 
 	// Roster, if we have agents to put in it.
 	roster := make([]ColonyAgentSpec, 0, len(input.Agents))
 	for _, a := range input.Agents {
 		roster = append(roster, ColonyAgentSpec{Name: a.Name, Role: a.Role})
 	}
-	t.AddString("world/roster.md", GenerateRoster(input.WorldID, roster))
+	t.AddString("world/roster.md", GenerateRoster(input.WorldID, roster, input.WorldKnowledgeMounted))
 
-	// System skills.
-	for name, body := range SystemSkills() {
+	// System skills. The mind-management guide varies with the
+	// knowledge-mount flag — when no knowledge dir is bound, the
+	// "Saving Knowledge" section is dropped entirely.
+	for name, body := range SystemSkills(input.WorldKnowledgeMounted) {
 		t.AddString("world/skills/"+name, body)
 	}
 
@@ -72,7 +74,7 @@ func (r *Runtime) Render(input compile.Input) (*compile.Tree, error) {
 		)
 		t.AddString(
 			fmt.Sprintf("agents/%s/CLAUDE.md", a.Name),
-			GenerateAgentCLAUDEMD(a.Name, role),
+			GenerateAgentCLAUDEMD(a.Name, role, input.WorldKnowledgeMounted),
 		)
 	}
 

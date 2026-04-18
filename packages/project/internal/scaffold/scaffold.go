@@ -65,13 +65,15 @@ func Init(dir string, opts Opts) error {
 	}
 
 	// Empty layer dirs: preserve them with .gitkeep so git tracks
-	// them. Knowledge is NOT a Mind layer — it's world-scoped, seeded
-	// below under spwn/worlds/neo/knowledge/.
+	// them. Knowledge is NOT a Mind layer — it's world-scoped and
+	// lives at the project-level ./knowledge/ directory by default.
+	// The default spwn.yaml template wires the auto-world to this path
+	// via its `knowledge: ./knowledge` key.
 	layerDirs := []string{
 		"spwn/agents/neo/skills",
 		"spwn/agents/neo/playbooks",
 		"spwn/agents/neo/journal",
-		"spwn/worlds/neo/knowledge",
+		"knowledge",
 	}
 	for _, rel := range layerDirs {
 		dst := filepath.Join(absDir, rel, ".gitkeep")
@@ -155,6 +157,8 @@ func AddAgentWorld(manifestPath, agentName string) error {
 		flowSeq([]string{agentName}),
 		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "workspaces"},
 		flowSeq([]string{"."}),
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "knowledge"},
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "./knowledge"},
 	)
 	worlds.Content = append(worlds.Content,
 		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: agentName},

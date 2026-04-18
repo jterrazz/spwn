@@ -43,6 +43,12 @@ type SpawnOpts struct {
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
 	IsArchitect   bool                       // When true, mounts Docker socket + SPWN_HOME for Architect mode.
 	ForceRebuild  bool                       // When true, bypass the content-addressed image cache.
+	// Knowledge is an absolute host path to bind into /world/knowledge/.
+	// When empty, no bind mount is performed and the compile step is
+	// told no knowledge base exists (so the agent's system prompt
+	// never mentions /world/knowledge/). The CLI resolves any
+	// project-relative path to absolute before calling Spawn.
+	Knowledge string
 }
 
 // Validate returns a non-nil error when SpawnOpts is missing
@@ -335,18 +341,34 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		env = append(env, "SPWN_WORKSPACE_DEFAULT="+workspaceContainerPath(resolvedWorkspaces[0].Name, total))
 	}
 
+	// Resolve the requested knowledge bind BEFORE constructing
+	// worldRecord so the labels-as-truth store captures whether a
+	// knowledge dir was actually mounted. The actual `binds` append
+	// happens further below alongside the other world state mounts,
+	// but the decision is made here so the worldRecord reflects
+	// reality.
+	knowledgeMounted := false
+	if opts.Knowledge != "" {
+		if info, err := os.Stat(opts.Knowledge); err == nil && info.IsDir() {
+			knowledgeMounted = true
+		} else {
+			warnings = append(warnings, fmt.Sprintf("knowledge path %s not found; skipping bind", opts.Knowledge))
+		}
+	}
+
 	// Build the World record up-front so we can imprint it onto the
 	// container as labels at create time. The container becomes the
 	// canonical store - see packages/world/internal/labels.
 	worldRecord := models.World{
-		ID:         id,
-		Name:       opts.Name,
-		Config:     opts.ConfigName,
-		Agent:      opts.AgentName,
-		Backend:    platform.DefaultBackend,
-		Workspaces: resolvedWorkspaces,
-		CreatedAt:  time.Now(),
-		Manifest:   opts.Manifest,
+		ID:               id,
+		Name:             opts.Name,
+		Config:           opts.ConfigName,
+		Agent:            opts.AgentName,
+		Backend:          platform.DefaultBackend,
+		Workspaces:       resolvedWorkspaces,
+		CreatedAt:        time.Now(),
+		Manifest:         opts.Manifest,
+		KnowledgeMounted: knowledgeMounted,
 	}
 	if len(opts.Agents) > 0 {
 		worldRecord.Agent = opts.Agents[0].Name
@@ -376,11 +398,15 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// here. Surviving container destroy is a deliberate choice: the
 	// user's notes belong to the world, not the runtime.
 	worldStateDir := worldStateDirFor(id)
+	// The world state dir becomes /world inside the container via the
+	// bind below. We no longer seed an empty "knowledge" subdir here —
+	// knowledge is opt-in via the manifest's worlds.<name>.knowledge key.
+	// Without a knowledge mount, /world/knowledge simply does not exist
+	// and the agent's system prompt never mentions it.
 	for _, sub := range []string{
 		filepath.Join("shared", "notes"),
 		filepath.Join("shared", "outputs"),
 		"skills",
-		"knowledge",
 	} {
 		if err := os.MkdirAll(filepath.Join(worldStateDir, sub), 0o755); err != nil {
 			return nil, fmt.Errorf("create world-state dir %s: %w", sub, err)
@@ -388,19 +414,15 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	binds = append(binds, worldStateDir+":/world")
 
-	// If the project tree has a committed per-world knowledge
-	// directory, mount it on top of /world/knowledge so edits inside
-	// the container persist straight back into git. Knowledge is
-	// world-scoped by design — it's environmental (about the domain),
-	// not about the agent's personality, and should be versioned with
-	// the project. Absent a project dir (user-level one-off `spwn up`),
-	// /world/knowledge falls through to the ephemeral state-dir copy
-	// above.
-	if projectRoot := platform.ProjectRoot(); projectRoot != "" {
-		projectKnowledge := filepath.Join(projectRoot, "spwn", "worlds", opts.ConfigName, "knowledge")
-		if info, err := os.Stat(projectKnowledge); err == nil && info.IsDir() {
-			binds = append(binds, projectKnowledge+":/world/knowledge")
-		}
+	// Bind the explicit knowledge path on top of /world/knowledge so
+	// edits inside the container persist straight back into git. The
+	// CLI resolves any project-relative path in spwn.yaml to an
+	// absolute host path before calling Spawn. When the field is
+	// empty (or stat failed earlier), there is no bind mount AND the
+	// compile step below is told no knowledge base exists, so the
+	// agent's system prompt never mentions /world/knowledge/.
+	if knowledgeMounted {
+		binds = append(binds, opts.Knowledge+":/world/knowledge")
 	}
 
 	// Per-agent per-world deployment dirs. Each agent gets a personal
@@ -504,10 +526,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// bind mount), agents/* is docker-cp'd directly into the running
 	// container on top of the home tree seeded by syncAgentsInto.
 	compileInput := compile.Input{
-		Deps: opts.Manifest.Deps,
-		VerifiedTools: verifiedTools,
-		WorldID:       id,
-		Agents:        rosterCompileAgents(rosterAgents),
+		Deps:                 opts.Manifest.Deps,
+		VerifiedTools:        verifiedTools,
+		WorldID:              id,
+		Agents:               rosterCompileAgents(rosterAgents),
+		WorldKnowledgeMounted: knowledgeMounted,
 	}
 	tree, err := compile.Compile("claude-code", compileInput)
 	if err != nil {

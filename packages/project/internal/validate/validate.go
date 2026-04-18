@@ -114,6 +114,7 @@ func Run(in Input) []Issue {
 		ruleMarkdownImports,
 		ruleSkillFrontmatter,
 		ruleOrphanAgents,
+		ruleKnowledgePath,
 	}
 	for _, r := range rules {
 		out = append(out, r(in)...)
@@ -995,6 +996,46 @@ func ruleOrphanAgents(in Input) []Issue {
 			Message: "agent " + o.Name + " is not referenced by any world",
 			Hint:    "add it to a worlds: entry, or `spwn agent rm " + o.Name + "`",
 		})
+	}
+	return out
+}
+
+// ruleKnowledgePath surfaces issues around the worlds.<name>.knowledge
+// key. When a world declares a path, the path must exist on disk
+// (LevelWarning if missing — spawn still works, it just skips the
+// bind mount). When a world declares no path, an info-level hint
+// reminds the user that agents in that world will never be told a
+// knowledge base exists.
+func ruleKnowledgePath(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	var out []Issue
+	for _, name := range sortedKeys(in.Manifest.Worlds) {
+		w := in.Manifest.Worlds[name]
+		path := strings.TrimSpace(w.Knowledge)
+		if path == "" {
+			out = append(out, Issue{
+				Level:   LevelInfo,
+				Path:    "spwn.yaml#worlds." + name + ".knowledge",
+				Message: fmt.Sprintf("world %q has no knowledge path; agents will see an empty /world/knowledge/ and won't be told one exists.", name),
+				Hint:    "add `knowledge: ./knowledge` (or another path) to enable the shared knowledge base for this world",
+			})
+			continue
+		}
+		resolved := path
+		if !filepath.IsAbs(resolved) {
+			resolved = filepath.Join(in.Root, path)
+		}
+		info, err := os.Stat(resolved)
+		if err != nil || !info.IsDir() {
+			out = append(out, Issue{
+				Level:   LevelWarning,
+				Path:    "spwn.yaml#worlds." + name + ".knowledge",
+				Message: fmt.Sprintf("knowledge path %q does not exist for world %q", path, name),
+				Hint:    "create the directory (e.g. `mkdir -p " + path + "`) or drop the `knowledge:` key to disable the bind mount",
+			})
+		}
 	}
 	return out
 }

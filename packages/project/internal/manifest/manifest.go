@@ -55,6 +55,12 @@ type World struct {
 	// form.
 	Workspaces []string `yaml:"workspaces"`
 
+	// Knowledge, when set, is a project-relative (or absolute) path to
+	// a directory that will be bind-mounted into the container at
+	// /world/knowledge/. When empty, no bind mount is performed and
+	// the agent's system prompt omits every reference to the knowledge
+	// base — the agent is never told a knowledge base exists.
+	Knowledge string `yaml:"knowledge,omitempty"`
 }
 
 // LoadPath reads and parses spwn.yaml from an explicit file path.

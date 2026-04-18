@@ -74,6 +74,7 @@ const (
 	WorldWorkspaces   = Prefix + "world.workspaces" // JSON-encoded []models.Workspace
 	WorldAgents       = Prefix + "world.agents"     // JSON-encoded []models.AgentRecord (creation-time only)
 	WorldCreatedAt    = Prefix + "world.created_at" // RFC3339
+	WorldKnowledgeMounted = Prefix + "world.knowledge_mounted" // "1" when a knowledge dir was bound
 )
 
 // WorldLabels builds the full label map for a world container. The
@@ -110,6 +111,9 @@ func WorldLabels(w models.World) map[string]string {
 		if data, err := json.Marshal(w.Agents); err == nil {
 			out[WorldAgents] = string(data)
 		}
+	}
+	if w.KnowledgeMounted {
+		out[WorldKnowledgeMounted] = "1"
 	}
 	ApplyTestRun(out)
 	return out
@@ -159,6 +163,9 @@ func ParseWorld(lbls map[string]string) (models.World, error) {
 		if err := json.Unmarshal([]byte(raw), &agents); err == nil {
 			w.Agents = agents
 		}
+	}
+	if lbls[WorldKnowledgeMounted] == "1" {
+		w.KnowledgeMounted = true
 	}
 
 	return w, nil

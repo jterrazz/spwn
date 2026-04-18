@@ -38,8 +38,9 @@ describe('agent lifecycle (CLI-only)', () => {
         expect(result.exitCode).toBe(0);
 
         // Project-mode scaffold writes the 4-layer Mind under
-        // spwn/agents/neo. Knowledge is world-scoped, seeded under
-        // spwn/worlds/<world>/knowledge/.
+        // spwn/agents/neo. Knowledge is world-scoped, opt-in via the
+        // worlds.<name>.knowledge key — default scaffold creates the
+        // flat ./knowledge/ directory at the project root.
         expect(result.file('spwn/agents/neo').exists).toBe(true);
         expect(result.file('spwn/agents/neo/identity').exists).toBe(true);
         expect(result.file('spwn/agents/neo/skills').exists).toBe(true);
@@ -48,7 +49,8 @@ describe('agent lifecycle (CLI-only)', () => {
         expect(result.file('spwn/agents/neo/knowledge').exists).toBe(false);
         expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
-        expect(result.file('spwn/worlds/neo/knowledge').exists).toBe(true);
+        expect(result.file('knowledge').exists).toBe(true);
+        expect(result.file('spwn/worlds').exists).toBe(false);
     });
 
     test('multiple agents can coexist in the same project', async () => {

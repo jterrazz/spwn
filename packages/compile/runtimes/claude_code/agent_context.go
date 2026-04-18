@@ -246,7 +246,11 @@ type ColonyAgentSpec struct {
 // file. Each agent reads their own identity from ~/identity/, learns about
 // their role from ~/worlds/<world-id>/role.md, and learns about everyone
 // else from /world/roster.md (this file).
-func GenerateRoster(worldID string, agents []ColonyAgentSpec) string {
+//
+// knowledgeMounted controls whether the roster advertises the shared
+// /world/knowledge/ directory. When false, the paragraph is omitted —
+// the agent is never told a knowledge base exists.
+func GenerateRoster(worldID string, agents []ColonyAgentSpec, knowledgeMounted bool) string {
 	var b strings.Builder
 
 	b.WriteString(fmt.Sprintf("# Roster - %s\n\n", worldID))
@@ -273,8 +277,10 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec) string {
 	b.WriteString("- Journal: `/agents/<name>/journal/`\n")
 	b.WriteString("- Their inbox in **this** world: `/agents/<name>/worlds/" + worldID + "/inbox/`\n")
 	b.WriteString("\n")
-	b.WriteString("Shared world knowledge (facts about the domain, not about any one agent) lives at `/world/knowledge/` — read and write freely; it's committed to the project.\n")
-	b.WriteString("\n")
+	if knowledgeMounted {
+		b.WriteString("Shared world knowledge (facts about the domain, not about any one agent) lives at `/world/knowledge/` — read and write freely; it's committed to the project.\n")
+		b.WriteString("\n")
+	}
 
 	b.WriteString("## Sending a message\n")
 	b.WriteString("To deliver a message to an agent in this world, write a markdown file into their per-world inbox:\n\n")
