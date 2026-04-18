@@ -1,4 +1,4 @@
-package architect
+package local
 
 import (
 	"fmt"
@@ -37,12 +37,12 @@ func (t *wrappedLocalTool) Skills() fs.FS               { return t.inner.Skills(
 func (t *wrappedLocalTool) Runtimes() []string          { return t.inner.Runtimes() }
 func (t *wrappedLocalTool) Config(runtime string) []byte { return t.inner.Config(runtime) }
 
-// loadLocalPack parses spwn/tools/<name>/tool.yaml via the
+// LoadTool parses spwn/tools/<name>/tool.yaml via the
 // shared packyaml parser and wraps the result so Name() returns
 // "local:<name>". Missing manifest is a crisp authoring error — an
 // empty local dependency would render to nothing and the user would
 // spend an afternoon debugging a no-op.
-func loadLocalPack(projectRoot, name string) (dependency.Tool, error) {
+func LoadTool(projectRoot, name string) (dependency.Tool, error) {
 	pkgDir := filepath.Join(projectRoot, "spwn", localToolDir, name)
 	info, err := os.Stat(pkgDir)
 	if err != nil {
@@ -67,7 +67,7 @@ func loadLocalPack(projectRoot, name string) (dependency.Tool, error) {
 	return &wrappedLocalTool{inner: dependency.ToolFromParsed(parsed), name: "local:" + name}, nil
 }
 
-// hydrateLocalPacks walks a flat list of dependency refs, loads
+// Hydrate walks a flat list of dependency refs, loads
 // every tool:<name> entry as a synthetic dependency.Tool via the shared
 // packyaml parser, registers it, and returns the rewritten list
 // where each tool: ref has been replaced by its "local:<name>"
@@ -86,7 +86,7 @@ func loadLocalPack(projectRoot, name string) (dependency.Tool, error) {
 // Order is preserved so users see their ref list echoed back in the
 // same shape they declared it. Duplicates are tolerated — the
 // registry's Register is called once per unique name.
-func hydrateLocalPacks(reg *ib.Registry, projectRoot string, refs []string) ([]string, error) {
+func Hydrate(reg *ib.Registry, projectRoot string, refs []string) ([]string, error) {
 	out := make([]string, 0, len(refs))
 	loaded := map[string]bool{}
 	for _, raw := range refs {
@@ -116,7 +116,7 @@ func hydrateLocalPacks(reg *ib.Registry, projectRoot string, refs []string) ([]s
 			out = append(out, "local:"+name)
 			continue
 		}
-		tool, err := loadLocalPack(projectRoot, name)
+		tool, err := LoadTool(projectRoot, name)
 		if err != nil {
 			return nil, err
 		}

@@ -1,14 +1,14 @@
-// Package dependencies aggregates every built-in dependency into a
-// single registrable list. Every dependency lives as a YAML manifest
-// under catalog/dependencies/<name>/spwn.yaml and is picked up
-// automatically by loadYAMLTools. The Go-based catalog layer is
-// gone — adding a new dependency is a directory + a yaml + a git
-// add, no Go edit required.
+// Package spwn is the built-in catalog adapter for dependency
+// resolution. Every entry lives as a YAML manifest under
+// /catalog/<name>/spwn.yaml (mirrored into ./content at generate
+// time) and is picked up automatically by loadYAMLTools.
 //
-// Runtimes that need host-side Go behavior at spawn time (credential
-// sync, default config materialisation, prelaunch shell) are kept
-// Go-only and registered via packages/world/runtime/.
-package catalog
+// Adding a new dependency is a directory + a yaml + a git add, no
+// Go edit required. Runtimes that need host-side Go behavior at
+// spawn time (credential sync, default config materialisation,
+// prelaunch shell) are kept Go-only and registered via
+// packages/world/runtime/.
+package spwn
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ var All []dependency.Tool
 func init() {
 	yaml, err := loadYAMLTools()
 	if err != nil {
-		panic(fmt.Errorf("catalog: load yaml tools: %w", err))
+		panic(fmt.Errorf("spwn adapter: load yaml tools: %w", err))
 	}
 	All = yaml
 }

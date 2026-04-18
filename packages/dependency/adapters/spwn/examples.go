@@ -8,7 +8,7 @@
 // at the destination root; every other top-level subdir (agents/,
 // skills/, tools/, hooks/, files/) is wrapped under dest/spwn/ to
 // match the user-project layout.
-package catalog
+package spwn
 
 import (
 	"errors"
@@ -91,7 +91,7 @@ func ShippedSlugs() []string {
 // galleryBacked returns every embedded subdir whose spwn.yaml
 // defines a non-empty `worlds:` section.
 func galleryBacked() []string {
-	entries, err := fs.ReadDir(catalogFS, ".")
+	entries, err := fs.ReadDir(catalogFS, contentRoot)
 	if err != nil {
 		return nil
 	}
@@ -177,7 +177,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	if exists(manifestDst) {
 		rep.WorldsSkipped = append(rep.WorldsSkipped, worldNames...)
 	} else {
-		data, rerr := catalogFS.ReadFile(slug + "/spwn.yaml")
+		data, rerr := catalogFS.ReadFile(contentRoot + "/" + slug + "/spwn.yaml")
 		if rerr != nil {
 			return rep, fmt.Errorf("read %s/spwn.yaml: %w", slug, rerr)
 		}
@@ -190,7 +190,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 
 	lockDst := filepath.Join(baseDir, "spwn.lock")
 	if !exists(lockDst) {
-		if data, rerr := catalogFS.ReadFile(slug + "/spwn.lock"); rerr == nil {
+		if data, rerr := catalogFS.ReadFile(contentRoot + "/" + slug + "/spwn.lock"); rerr == nil {
 			_ = os.WriteFile(lockDst, data, 0o644)
 		}
 	}
@@ -200,7 +200,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 		return rep, fmt.Errorf("create spwn dir: %w", err)
 	}
 	for _, sub := range topLevelSubdirs {
-		src := slug + "/" + sub
+		src := contentRoot + "/" + slug + "/" + sub
 		if _, err := fs.Stat(catalogFS, src); err != nil {
 			continue
 		}
@@ -223,7 +223,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 	// `knowledge: ./knowledge` in spwn.yaml#worlds resolves correctly
 	// on first spawn.
 	for _, sub := range rootLevelSubdirs {
-		src := slug + "/" + sub
+		src := contentRoot + "/" + slug + "/" + sub
 		if _, err := fs.Stat(catalogFS, src); err != nil {
 			continue
 		}
@@ -301,7 +301,7 @@ func InstallInto(slug string) (InstallReport, error) {
 // loadEntrySchema reads an entry's spwn.yaml into the shared
 // dependency.Schema so every catalog face reads the same bytes.
 func loadEntrySchema(slug string) (*dependency.Schema, error) {
-	data, err := catalogFS.ReadFile(slug + "/spwn.yaml")
+	data, err := catalogFS.ReadFile(contentRoot + "/" + slug + "/spwn.yaml")
 	if err != nil {
 		return nil, err
 	}

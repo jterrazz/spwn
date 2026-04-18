@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/catalog"
+	spwn "spwn.sh/packages/dependency/adapters/spwn"
 	"spwn.sh/packages/project"
 	runtimespkg "spwn.sh/packages/runtimes"
 	"spwn.sh/packages/transpile"
@@ -28,13 +28,13 @@ import (
 // compile time and would fail for any user who ran `spwn init
 // <slug> && spwn check`.
 func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
-	slugs := catalog.ShippedSlugs()
+	slugs := spwn.ShippedSlugs()
 	if len(slugs) == 0 {
 		t.Fatal("no gallery entries found — ShippedSlugs returned empty")
 	}
 
-	builtins := make([]string, 0, len(catalog.All)+len(runtimespkg.All))
-	for _, tool := range catalog.All {
+	builtins := make([]string, 0, len(spwn.All)+len(runtimespkg.All))
+	for _, tool := range spwn.All {
 		builtins = append(builtins, tool.Name())
 	}
 	supportedRuntimes := make([]string, 0, len(runtimespkg.All))
@@ -48,7 +48,7 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 			base := t.TempDir()
 
 			// Step 1: install.
-			if _, err := catalog.Install(slug, base); err != nil {
+			if _, err := spwn.Install(slug, base); err != nil {
 				t.Fatalf("Install %q: %v", slug, err)
 			}
 

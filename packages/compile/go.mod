@@ -6,10 +6,10 @@ require (
 	github.com/docker/docker v27.5.1+incompatible
 	golang.org/x/term v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
-	spwn.sh/catalog v0.0.0
+	spwn.sh/packages/dependency v0.0.0
 )
 
-replace spwn.sh/catalog => ../../catalog
+replace spwn.sh/packages/dependency => ../dependency
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect

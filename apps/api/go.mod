@@ -4,7 +4,6 @@ go 1.25.0
 
 require (
 	gopkg.in/yaml.v3 v3.0.1
-	spwn.sh/catalog v0.0.0
 	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
@@ -44,7 +43,6 @@ require (
 )
 
 replace (
-	spwn.sh/catalog => ../../catalog
 	spwn.sh/packages/activity => ../../packages/activity
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/auth => ../../packages/auth

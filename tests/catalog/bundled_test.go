@@ -11,7 +11,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"spwn.sh/catalog"
+	spwn "spwn.sh/packages/dependency/adapters/spwn"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/base"
 	"spwn.sh/packages/runtimes"
@@ -76,7 +76,7 @@ func TestCatalogBundles(t *testing.T) {
 			// resolve the requested refs. This exercises the same
 			// code path `packages/architect` runs at spawn time.
 			reg := compile.NewRegistry()
-			for _, tool := range catalog.All {
+			for _, tool := range spwn.All {
 				if err := reg.Register(tool); err != nil {
 					t.Fatalf("register %s: %v", tool.Name(), err)
 				}
