@@ -8,8 +8,8 @@ The domain has three main abstractions, each owning one concern:
 
 | Abstraction | What it owns | Implementation |
 |---|---|---|
-| **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` - Claude Code today, others swap in as a ~50 LOC Go file |
-| **Backend** | Where worlds run | `packages/world/internal/backend` - Docker; container labels are the source of truth for world state |
+| **Runtime** | How an agent actually runs (CLI invocation, session capture, credential plumbing) | `packages/runtimes` - Claude Code today, codex next, others plug in as a ~50 LOC Adapter |
+| **Backend** | Where worlds run | `packages/container/backend` - Docker; container labels are the source of truth for world state |
 | **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (skills/playbooks/journal) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (e.g. `./knowledge`) and it gets bind-mounted into `/world/knowledge/`. Omit the key to spawn a world whose agents are never told a knowledge base exists. |
 
 ## Vocabulary

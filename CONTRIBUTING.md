@@ -50,23 +50,36 @@ tests/                  TypeScript E2E test suite
 
 ## Adding a Runtime Adapter
 
-1. Create `packages/world/internal/runtime/{name}/{name}.go`
-2. Implement the `runtime.Runtime` interface
-3. Call `runtime.Register(&YourRuntime{})` in `init()`
-4. The adapter auto-registers via blank import in `architect.go`
+Runtimes live under `packages/runtimes/<name>/`. A runtime can ship any subset of three facets:
+
+| Facet | Interface | Purpose |
+|---|---|---|
+| `Tool` | `tool.Tool` | Install recipe (apt/curl/npm, user config) — runs at image build time |
+| `Render` | `transpile.Runtime` | Translates a provider-neutral source tree into runtime-specific output files |
+| `Spawn` | `runtimes.Spawner` | Host-side spawn-time behavior — `BuildCommand`, credential sync, prelaunch shell, default config files, container config path |
+
+1. Create `packages/runtimes/{name}/` with `tool.go`, `spawn.go` (and optionally `render.go`).
+2. Implement the facets you need. For `Render`, read runtime-neutral prose from `packages/transpile/worldbook` — don't duplicate it.
+3. Create `packages/runtimes/{name}/adapter.go` bundling the facets and registering via `init()`:
 
 ```go
 package myruntime
 
-import rt "spwn.sh/packages/world/internal/runtime"
+import "spwn.sh/packages/runtimes"
 
-type MyRuntime struct{}
-func init() { rt.Register(&MyRuntime{}) }
-func (r *MyRuntime) Name() string { return "my-runtime" }
-func (r *MyRuntime) BuildCommand(cfg rt.SpawnConfig) []string { ... }
-func (r *MyRuntime) BaseImage() string { return "node:20" }
-// ... implement remaining interface methods
+var Adapter = runtimes.Adapter{
+    Name:            "my-runtime",
+    CatalogRef:      "spwn:my-runtime",
+    DefaultProvider: "openai", // or "anthropic", "google", ""
+    Tool:            Tool,     // *myTool implementing tool.Tool (optional)
+    Render:          Renderer, // *renderer implementing transpile.Runtime (optional)
+    Spawn:           Spawner,  // *spawner implementing runtimes.Spawner (optional)
+}
+
+func init() { runtimes.Register(Adapter) }
 ```
+
+4. Add a blank import to `packages/runtimes/defaults/defaults.go` so production binaries pick up the new runtime automatically.
 
 ## Adding a CLI Command
 
@@ -111,7 +124,7 @@ make lint
 
 - **Spec-first**: write the test before the implementation
 - **Go unit tests**: `*_test.go` next to source. No Docker needed.
-- **Go E2E tests**: `packages/world/tests/e2e/`. Build tag `//go:build e2e`. Needs Docker.
+- **Go E2E tests**: `packages/world/tests/e2e/` and `packages/compile/e2e/`. Build tag `//go:build e2e`. Needs Docker.
 - **TypeScript E2E**: `tests/e2e/`. Runs against real `spwn` binary. Needs Docker.
 - **Output assertions**: use `expectLine()`, `expectTableHeader()` - not weak `toContain()`
 - See [tests/README.md](./tests/README.md) for full testing documentation and patterns
