@@ -108,6 +108,78 @@ describe('spwn install', () => {
         expect(entries.length).toBe(1);
     });
 
+    test('errors when the project has no agents declared', async () => {
+        // Given - a manifest with an empty worlds: map → no agents
+        // When - we try to install anything
+        // Then - the CLI refuses with a pointer at `spwn agent new`
+        // So the user knows what to do next. Silent success here
+        // Would be a worse UX — the install would write the lockfile
+        // Entry with zero consumers.
+        const result = await spec('install no agents')
+            .project('empty')
+            .exec(['init', 'agent rm neo', 'install python'])
+            .run();
+
+        expect(result.exitCode).not.toBe(0);
+        expect(result.stderr.text).toContain('no agents declared');
+        expect(result.stderr.text).toContain('spwn agent new');
+    });
+
+    test('project-wide install reaches every agent in a multi-agent project', async () => {
+        // Given - the severance fixture declares 4 agents
+        // When - we install without --agent
+        // Then - every single agent's manifest picks up the ref.
+        // The banner reports "4 agents updated" so the user sees
+        // The fan-out explicitly.
+        const result = await spec('install all agents')
+            .project('empty')
+            .exec(['init severance', 'install qmd'])
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+        for (const name of ['mark', 'helly', 'irving', 'dylan']) {
+            const manifest = result.file(`spwn/agents/${name}/agent.yaml`).content;
+            expect(manifest, `${name} missing spwn:qmd`).toContain('spwn:qmd');
+        }
+        // The banner reports the full fan-out so the user can't miss
+        // That the ref landed on every agent.
+        expect(result.stdout.text).toMatch(/4 agents updated/);
+    });
+
+    test('project-wide install is idempotent across mixed pre-existing state', async () => {
+        // Given - a multi-agent project where one agent already
+        // Carries the dep (e.g. attached earlier via --agent), and
+        // The others don't.
+        // When - we run a project-wide install of the same ref
+        // Then - the dep is added where missing but stays singleton
+        // On the agent that already had it. No duplicate entries.
+        const result = await spec('install idempotent mixed')
+            .project('empty')
+            .exec([
+                'init severance',
+                // Scope the first install to mark only — now mark has qmd,
+                // The other three don't.
+                'install qmd --agent mark',
+                // Project-wide install fans out: helly/irving/dylan
+                // Gain the ref, mark stays as-is.
+                'install qmd',
+            ])
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+        // Every agent has exactly one `- "spwn:qmd"` list entry —
+        // Mark's prior entry wasn't duplicated, the others each got
+        // Exactly one.
+        for (const name of ['mark', 'helly', 'irving', 'dylan']) {
+            const manifest = result.file(`spwn/agents/${name}/agent.yaml`).content;
+            const entries = manifest.match(/^\s*-\s+["']?spwn:qmd["']?\s*$/gm) ?? [];
+            expect(
+                entries.length,
+                `${name} should have exactly 1 spwn:qmd entry, got ${entries.length}`,
+            ).toBe(1);
+        }
+    });
+
     test('--agent narrows scope to a single agent (others untouched)', async () => {
         // Given - a multi-agent project seeded by `init severance`
         // (mark + helly + irving + dylan)
@@ -225,6 +297,65 @@ describe('spwn uninstall', () => {
         const lock = result.file('spwn.lock');
         if (lock.exists) {
             expect(lock.content).not.toContain('spwn:python');
+        }
+    });
+
+    test('scoped uninstall keeps the lockfile pin when others still carry the ref', async () => {
+        // Given - a project where two agents both have spwn:qmd
+        // When - we uninstall qmd from only one of them
+        // Then - that agent's manifest loses the entry, the other
+        // Keeps it, AND the lockfile pin survives because the ref
+        // Is still in use somewhere in the project. Only when the
+        // Last agent loses it does the lockfile entry go.
+        const result = await spec('scoped uninstall keeps lock')
+            .project('empty')
+            .exec([
+                'init severance',
+                'install qmd',                    // all four agents
+                'uninstall qmd --agent mark',     // drop from mark only
+            ])
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+        expect(result.file('spwn/agents/mark/agent.yaml').content).not.toContain('spwn:qmd');
+        // The other three still carry the ref.
+        for (const name of ['helly', 'irving', 'dylan']) {
+            expect(
+                result.file(`spwn/agents/${name}/agent.yaml`).content,
+                `${name} should still carry spwn:qmd after scoped uninstall`,
+            ).toContain('spwn:qmd');
+        }
+        // And the lockfile still pins qmd because helly/irving/dylan
+        // Still depend on it.
+        expect(result.file('spwn.lock').content).toContain('spwn:qmd');
+    });
+
+    test('scoped uninstall drops the lockfile pin when the last carrier loses it', async () => {
+        // Given - only one agent carries the ref
+        // When - we scope-uninstall from that single agent
+        // Then - nobody carries it anymore, so the lockfile entry
+        // Also goes. Keeps the lockfile honest.
+        const result = await spec('last carrier uninstall drops lock')
+            .project('empty')
+            .exec([
+                'init severance',
+                'install qmd --agent mark',        // only mark
+                'uninstall qmd --agent mark',      // now nobody
+            ])
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+        // No agent carries qmd.
+        for (const name of ['mark', 'helly', 'irving', 'dylan']) {
+            expect(
+                result.file(`spwn/agents/${name}/agent.yaml`).content,
+                `${name} should not carry spwn:qmd`,
+            ).not.toContain('spwn:qmd');
+        }
+        // And the lockfile no longer pins it.
+        const lock = result.file('spwn.lock');
+        if (lock.exists) {
+            expect(lock.content).not.toContain('spwn:qmd');
         }
     });
 
