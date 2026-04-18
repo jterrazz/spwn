@@ -234,7 +234,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		toolList = deduped
 	}
 
-	// Hydrate local (tool:<name>) refs into synthetic compile.Tool
+	// Hydrate local (tool:<name>) refs into synthetic dependency.Tool
 	// instances before resolving. Without this, a ref like
 	// `tool:my-local-tool` would blow up reg.Resolve with "unknown tool".
 	// Project root defaults to platform.ProjectRoot() — set by the CLI

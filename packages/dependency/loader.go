@@ -61,7 +61,7 @@ type ParseOptions struct {
 // Parsed is the result of parsing a spwn.yaml dependency manifest.
 // It carries the schema plus any files read eagerly from the resolver
 // so the result can outlive the Resolver. Converters in other packages
-// (e.g. compile.ToolFromParsed) adapt this into their own types.
+// (e.g. dependency.ToolFromParsed) adapt this into their own types.
 type Parsed struct {
 	Schema    Schema
 	Kind      Kind

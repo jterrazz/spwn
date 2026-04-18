@@ -3,8 +3,6 @@ package codex
 import (
 	"spwn.sh/packages/dependency"
 	"io/fs"
-
-	ib "spwn.sh/packages/compile"
 )
 
 
@@ -18,8 +16,8 @@ func (*tool) Kind() dependency.Kind          { return dependency.KindRuntime }
 func (*tool) Version() string        { return "latest" }
 func (*tool) Dependencies() []string { return []string{"spwn:node"} }
 
-func (*tool) Install() ib.InstallSpec {
-	return ib.InstallSpec{
+func (*tool) Install() dependency.InstallSpec {
+	return dependency.InstallSpec{
 		Commands: []string{
 			"npm install -g @openai/codex",
 		},

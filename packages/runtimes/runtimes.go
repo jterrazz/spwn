@@ -12,14 +12,15 @@ package runtimes
 import (
 	"fmt"
 
+	ib "spwn.sh/packages/compile"
+	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/runtimes/claude_code"
 	"spwn.sh/packages/runtimes/codex"
-	ib "spwn.sh/packages/compile"
 )
 
 // All is the list of every built-in runtime. Adding a new runtime?
 // Import it and append.
-var All = []ib.Tool{
+var All = []dependency.Tool{
 	claude_code.Tool,
 	codex.Tool,
 }

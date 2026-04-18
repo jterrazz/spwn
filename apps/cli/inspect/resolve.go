@@ -220,7 +220,7 @@ func registerLocalTools(reg *ib.Registry, root string) error {
 			// still render everything else.
 			continue
 		}
-		wrapped := &localToolAdapter{inner: ib.ToolFromParsed(parsed), name: e.Name()}
+		wrapped := &localToolAdapter{inner: dependency.ToolFromParsed(parsed), name: e.Name()}
 		_ = reg.Register(wrapped)
 	}
 	return nil
@@ -229,7 +229,7 @@ func registerLocalTools(reg *ib.Registry, root string) error {
 // localToolAdapter forces Name() to a bare basename (no @-scope) so
 // the renderer prints `my-parser` instead of `local:my-parser`.
 type localToolAdapter struct {
-	inner ib.Tool
+	inner dependency.Tool
 	name  string
 }
 
@@ -237,7 +237,7 @@ func (t *localToolAdapter) Name() string                 { return t.name }
 func (t *localToolAdapter) Kind() dependency.Kind        { return t.inner.Kind() }
 func (t *localToolAdapter) Version() string              { return t.inner.Version() }
 func (t *localToolAdapter) Dependencies() []string       { return t.inner.Dependencies() }
-func (t *localToolAdapter) Install() ib.InstallSpec      { return t.inner.Install() }
+func (t *localToolAdapter) Install() dependency.InstallSpec      { return t.inner.Install() }
 func (t *localToolAdapter) Verify() []string             { return t.inner.Verify() }
 func (t *localToolAdapter) Skills() fs.FS                { return t.inner.Skills() }
 func (t *localToolAdapter) Runtimes() []string           { return t.inner.Runtimes() }
