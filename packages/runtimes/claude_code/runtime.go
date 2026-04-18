@@ -66,7 +66,7 @@ func (c *runtimeAdapter) Available() bool       { return true }
 //
 // The files are written at spawn time into /agents/<name>/, which
 // is the actual HOME the runtime runs under (not /home/spwn).
-// Previous attempts baked these into the base image at build time
+// Previous attempts compiled these into the base image at build time
 // and lost to the HOME override.
 func (c *runtimeAdapter) DefaultConfigFiles(agentHome string) map[string][]byte {
 	// Trust the agent's own home + the workspaces mount root so

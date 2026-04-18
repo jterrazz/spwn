@@ -7,9 +7,10 @@
 //   - imagebuilder.Build — the shared base world image. Resolves a
 //     dependency catalog into a Dockerfile, runs docker build,
 //     probes the result. Cached on a version label.
-//   - BuildFromBase — project-specific derived images. Bakes a
-//     compile.Tree onto a base image via a single streamed tar
-//     build context.
+//   - BuildFromBase — project-specific derived images. Compiles a
+//     transpile.Tree (currently named compile.Tree for historical
+//     reasons) onto a base image via a single streamed tar build
+//     context.
 //
 // Sub-packages:
 //

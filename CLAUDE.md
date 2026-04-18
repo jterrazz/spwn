@@ -50,7 +50,7 @@ shortcuts act on every world declared in `spwn.yaml`.
 spwn init                                      # Scaffold spwn.yaml + ./spwn/ + .spwn/
 spwn check                                     # Validate the tree
 spwn build --tree-only                         # Render the project tree to ./dist (preview/debug)
-spwn build                                     # Compile + bake into a project-specific Docker image
+spwn build                                     # Transpile + compile into a project-specific Docker image
 spwn up                                        # Spawn a world from the current project
 
 # ── Compose-style shortcuts ──────────────────────────────────────

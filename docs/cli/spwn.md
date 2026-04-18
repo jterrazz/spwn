@@ -24,7 +24,7 @@ Mind (persistent agent identity).
 * [spwn agent](./spwn_agent.md)	 - Spawn an agent - a living identity that inhabits a world
 * [spwn architect](./spwn_architect.md)	 - Your always-on world builder
 * [spwn auth](./spwn_auth.md)	 - Manage credentials - login, logout, status
-* [spwn build](./spwn_build.md)	 - Compile the project and bake it into a Docker image
+* [spwn build](./spwn_build.md)	 - Transpile the project and compile it into a Docker image
 * [spwn check](./spwn_check.md)	 - Validate the project tree against spwn.yaml
 * [spwn down](./spwn_down.md)	 - Destroy a world
 * [spwn init](./spwn_init.md)	 - Scaffold a spwn project in the current directory

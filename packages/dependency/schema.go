@@ -77,7 +77,7 @@ type Schema struct {
 
 	// Files is a map of image-target-path → source path relative to
 	// this dependency's directory. Contents are read at parse time
-	// and baked into the image via the Dockerfile's COPY layer.
+	// and compiled into the image via the Dockerfile's COPY layer.
 	Files map[string]string `yaml:"files"`
 
 	// Verify is the list of post-build sanity commands. Each must

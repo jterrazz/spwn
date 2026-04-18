@@ -5,35 +5,35 @@ slug: "spwn-build"
 
 ## spwn build
 
-Compile the project and bake it into a Docker image
+Transpile the project and compile it into a Docker image
 
 ### Synopsis
 
-Compile the project with the target runtime (default: claude-code)
-and bake the result into a derived Docker image.
+Transpile the project with the target runtime (default: claude-code)
+and compile the result into a derived Docker image.
 
-The image is FROM spwn-world:latest by default, with the compiled
+The image is FROM spwn-world:latest by default, with the transpiled
 tree COPY'd to /world/. The resulting image carries the project's
 name and the runtime name as Docker labels, so it's push-ready and
 reproducible.
 
-Pass --tree-only to stop after the compile step and write the
+Pass --tree-only to stop after the transpile step and write the
 generated file tree to --output (default: ./dist). No Docker
 required, useful for previewing renderer output or authoring a
 new runtime backend.
 
 Use 'spwn up' to spawn a world from the current project. Use 'spwn
-check --deep' to run the compile dry-run as part of validation.
+check --deep' to run the transpile dry-run as part of validation.
 
 Examples:
-  spwn build                                  # compile + image, tag spwn-<project>:latest
+  spwn build                                  # transpile + image, tag spwn-<project>:latest
   spwn build --tag spwn-myproj:v1
   spwn build --base spwn-world:2.1
   spwn build --runtime claude-code
   spwn build --world <name>                   # multi-world projects
   spwn build --no-cache
   spwn build --json
-  spwn build --tree-only                      # compile only, write to ./dist
+  spwn build --tree-only                      # transpile only, write to ./dist
   spwn build --tree-only --output ./preview
   spwn build --tree-only --dry-run            # list paths, touch nothing
   spwn build --tree-only --agent neo          # filter to one agent
