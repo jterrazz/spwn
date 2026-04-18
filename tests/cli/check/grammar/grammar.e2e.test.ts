@@ -6,7 +6,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * Grammar-contract suite for dependency refs.
  *
  * The CLI accepts bare names as shorthand (`spwn init qmd`,
- * `agent add neo --dep qmd`) and auto-promotes them to `spwn:<name>`
+ * `spwn install qmd`) and auto-promotes them to `spwn:<name>`
  * via the catalog resolver. Manifests stay strict: every dep in
  * agent.yaml must use one of the five explicit schemes (spwn:,
  * github:, skill:, tool:, hook:). Bare names, the retired `local:`
@@ -59,7 +59,7 @@ describe('dependency grammar', () => {
         // because the manifest carries the canonical scheme-form.
         const result = await spec('bare on cli yields spwn: on disk')
             .project('empty')
-            .exec(['init', 'agent add neo --dep python', 'check'])
+            .exec(['init', 'install python', 'check'])
             .run();
 
         expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
@@ -72,23 +72,24 @@ describe('dependency grammar', () => {
     });
 
     test('manifest is the strict boundary even when the CLI would accept', async () => {
-        // Given - a project scaffolded by init (clean state), we
-        // Manually corrupt the manifest by writing a bare-name dep
-        // Via `spwn agent add` (which canonicalises) — THEN overwrite
-        // The manifest via a follow-up install that also canonicalises.
+        // Given - a project scaffolded by init (clean state), we run
+        // Several install invocations mixing bare, catalog-explicit,
+        // And local-explicit refs. The resolver must canonicalise
+        // Every input to its scheme-form before it lands on disk —
+        // The on-disk shape is what `spwn check` validates.
         //
-        // To exercise the boundary directly, we prove the inverse: if
-        // Someone hand-edits agent.yaml with a bare name (the shape
-        // Taken by `check-legacy-refs` above), it must be rejected.
-        // That's covered in the first test of this file; this test
-        // Proves the CLI never produces such a manifest itself.
+        // To exercise the boundary directly, we also prove the
+        // Inverse: a hand-edited agent.yaml with a bare name (the
+        // Check-legacy-refs fixture at the top of this file) must be
+        // Rejected. The CLI itself, though, never produces such a
+        // Manifest.
         const result = await spec('cli canonicalises mixed input')
             .project('empty')
             .exec([
                 'init',
-                'agent add neo --dep qmd',
-                'agent add neo --skill skill:paper-reading',
-                'agent add neo --dep spwn:unix',
+                'install qmd',
+                'install skill:paper-reading --agent neo',
+                'install spwn:unix',
             ])
             .run();
 

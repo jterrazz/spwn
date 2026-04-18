@@ -9,11 +9,18 @@ Install a dependency into the project
 
 ### Synopsis
 
-Add a catalog or GitHub dependency to every agent's manifest and pin it in spwn.lock.
+Add a catalog, GitHub, or local dependency to agent manifests and pin it in spwn.lock.
+
+Bare names resolve to the spwn: catalog ("spwn install qmd" installs spwn:qmd).
+Without --agent, the ref is added to every agent in the project.
+Local refs (skill:/tool:/hook:) require --agent to pick a target.
 
 Examples:
-  spwn install spwn:python
-  spwn install github.com/jterrazz/research-skills
+  spwn install python                         # catalog dep, every agent
+  spwn install spwn:python                    # explicit form, every agent
+  spwn install github:jterrazz/research-skills
+  spwn install qmd --agent mark               # catalog dep, only mark
+  spwn install skill:refine --agent dylan     # local skill, only dylan
 
 ```
 spwn install <ref> [flags]
@@ -22,7 +29,8 @@ spwn install <ref> [flags]
 ### Options
 
 ```
-  -h, --help   help for install
+      --agent string   Target a single agent instead of every agent in the project
+  -h, --help           help for install
 ```
 
 ### SEE ALSO

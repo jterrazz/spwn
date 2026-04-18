@@ -12,10 +12,6 @@ Lifecycle:
   ls                               List agents
   rm <name>                        Delete an agent
 
-Compose:
-  add <name>                       Attach blocks (--dep / --skill / --tool / --hook)
-  remove <name>                    Detach blocks (--dep)
-
 Conversation:
   talk <name> [msg]                Open a session with a running agent (sync)
   send <name> <msg>                Send an async message to an agent's inbox
@@ -40,7 +36,7 @@ Portability:
 
 Examples:
   spwn agent create neo
-  spwn agent add neo --dep python
-  spwn agent add neo --skill skill:paper-reading
+  spwn install python --agent neo
+  spwn install skill:paper-reading --agent neo
   spwn agent neo
 

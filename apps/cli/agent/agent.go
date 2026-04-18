@@ -49,10 +49,10 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "ls", Desc: "List agents"},
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
-			{Title: "Compose", Commands: []ui.HelpEntry{
-				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--dep / --skill / --tool / --hook)")},
-				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--dep)")},
-			}},
+			// Composition lives on the root `spwn install` /
+			// `spwn uninstall` verbs now; pass --agent <name> to
+			// Scope a change to a single agent. The old `agent add`
+			// / `agent remove` subcommands were retired.
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
 				{Name: "send <name> <msg>", Desc: "Send an async message to an agent's inbox"},
@@ -77,8 +77,8 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn agent create neo", Desc: ""},
-				{Name: "spwn agent add neo --dep python", Desc: ""},
-				{Name: "spwn agent add neo --skill skill:paper-reading", Desc: ""},
+				{Name: "spwn install python --agent neo", Desc: ""},
+				{Name: "spwn install skill:paper-reading --agent neo", Desc: ""},
 				{Name: "spwn agent neo", Desc: ""},
 			}},
 		},

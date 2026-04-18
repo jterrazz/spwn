@@ -1,6 +1,7 @@
-// Package dependency implements the project-wide install/uninstall
-// logic behind `spwn install` and `spwn uninstall`. It mutates every
-// agent's agent.yaml#dependencies list and keeps spwn.lock pinned.
+// Package dependency implements the install/uninstall verbs behind
+// `spwn install` and `spwn uninstall`. It mutates agent.yaml lists
+// (scoped to one agent via --agent, or across the whole project by
+// default) and keeps spwn.lock pinned.
 //
 // Reference kinds (delegated to packages/dependency):
 //
@@ -10,13 +11,14 @@
 //   - tool:<name>                local tool (./spwn/tools/<name>/)
 //   - hook:<name>                local hook (./spwn/hooks/<name>.sh)
 //
-// Local refs (skill:/tool:/hook:) are never installed — they are
-// authored in place. The install verb rejects them with a hint
-// pointing at the local authoring flow.
+// Local refs (skill:/tool:/hook:) attach the in-repo block to the
+// named agent; they require --agent because bolting a local onto
+// every agent by default is almost never what the user wants.
 package dependency
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -30,14 +32,18 @@ import (
 // installCmd and uninstallCmd are retained so the dependency_test
 // suite can drive the install/uninstall flow directly without going
 // through the top-level root command.
+var installAgentFilter string
+
 var installCmd = &cobra.Command{
 	Use:   "install <ref>",
 	Short: "Install a dependency into the project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return RunInstall(cmd, args[0])
+		return RunInstall(cmd, args[0], installAgentFilter)
 	},
 }
+
+var uninstallAgentFilter string
 
 var uninstallCmd = &cobra.Command{
 	Use:     "uninstall <ref>",
@@ -45,14 +51,25 @@ var uninstallCmd = &cobra.Command{
 	Short:   "Uninstall a dependency from the project",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return RunUninstall(cmd, args[0])
+		return RunUninstall(cmd, args[0], uninstallAgentFilter)
 	},
 }
 
+func init() {
+	installCmd.Flags().StringVar(&installAgentFilter, "agent", "", "Target a single agent instead of every agent in the project")
+	uninstallCmd.Flags().StringVar(&uninstallAgentFilter, "agent", "", "Target a single agent instead of every agent in the project")
+}
+
 // RunInstall parses the ref, rejects bare/registry refs with crisp
-// hints, mutates every agent.yaml in the project, and updates the
+// hints, mutates each targeted agent's agent.yaml, and updates the
 // lockfile.
-func RunInstall(cmd *cobra.Command, raw string) error {
+//
+// agentFilter narrows scope: empty means "every agent in the project"
+// (npm-style), a non-empty value means "only this agent" (poetry-
+// group-style). The lockfile is project-scoped either way — it
+// tracks the set of refs that are pinned somewhere in the project,
+// not which agents carry them.
+func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	p, err := findProject()
 	if err != nil {
 		return err
@@ -71,10 +88,15 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	parsed := dependency.ParseRef(ref)
 	switch parsed.Kind {
 	case dependency.KindLocalSkill, dependency.KindLocalTool, dependency.KindLocalHook:
-		return fmt.Errorf("%q is a local ref — local dependencies are authored in place, not installed. "+
-			"Use `spwn skill new %s` (for skill: refs), drop a directory at ./spwn/tools/%s/ (for tool: refs), "+
-			"or author ./spwn/hooks/%s.sh (for hook: refs) instead",
-			ref, parsed.Name, parsed.Name, parsed.Name)
+		// Local refs ARE installable (they attach the in-repo block
+		// To an agent's manifest), but only when a specific agent is
+		// Named — bolting a local skill onto every agent in the
+		// Project is almost never what the user wants. Without
+		// --agent, point them at the flag.
+		if agentFilter == "" {
+			return fmt.Errorf("%q is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.sh`",
+				ref, parsed.Name, parsed.Name, parsed.Name)
+		}
 	case dependency.KindRegistry:
 		return fmt.Errorf("%q targets github:%s/%s — remote registries are not yet supported. "+
 			"Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/",
@@ -85,19 +107,19 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 			raw)
 	}
 
-	if !catalogHas(ref) {
+	// Catalog-existence check applies only to spwn:<name> refs; local
+	// Schemes are authored in-repo so the catalog lookup doesn't gate
+	// Them.
+	if parsed.Kind == dependency.KindSpwnBuiltin && !catalogHas(ref) {
 		return fmt.Errorf("unknown builtin %q — see the catalog for available dependencies", ref)
 	}
 
-	agents := p.Agents
-	if len(agents) == 0 {
-		return fmt.Errorf("no agents declared in this project — add one with `spwn agent new`")
+	targets, terr := filterAgents(p.Agents, agentFilter)
+	if terr != nil {
+		return terr
 	}
 	mutated := 0
-	for _, a := range agents {
-		if !a.Exists {
-			continue
-		}
+	for _, a := range targets {
 		if err := agent.AddDependency(a.Name, ref); err != nil {
 			return fmt.Errorf("update %s: %w", a.Name, err)
 		}
@@ -123,9 +145,13 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	return nil
 }
 
-// RunUninstall mirrors RunInstall: removes the ref from every
-// agent.yaml and from the lockfile.
-func RunUninstall(cmd *cobra.Command, raw string) error {
+// RunUninstall mirrors RunInstall: removes the ref from each
+// targeted agent's agent.yaml, and from the lockfile when no agent
+// still carries the ref.
+//
+// agentFilter narrows scope the same way as RunInstall: empty
+// targets every agent, non-empty targets one.
+func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 	p, err := findProject()
 	if err != nil {
 		return err
@@ -145,18 +171,19 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 	if parsed.Kind == dependency.KindRegistry {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
-	if dependency.IsLocalKind(parsed.Kind) {
-		return fmt.Errorf("%q is a local ref — delete the underlying file (spwn/skills/%s.md, spwn/tools/%s/, or spwn/hooks/%s.sh) by hand to remove it", ref, parsed.Name, parsed.Name, parsed.Name)
-	}
 	if parsed.Kind == dependency.KindInvalid {
 		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name>, github:<owner>/<repo>, skill:<name>, tool:<name>, or hook:<name>", raw)
 	}
+	// Local refs are authorable in-repo but also attachable via
+	// `install skill:foo --agent mark` — so uninstall accepts them
+	// Symmetrically. The underlying file is left alone.
 
+	targets, terr := filterAgents(p.Agents, agentFilter)
+	if terr != nil {
+		return terr
+	}
 	mutated := 0
-	for _, a := range p.Agents {
-		if !a.Exists {
-			continue
-		}
+	for _, a := range targets {
 		if err := agent.RemoveDependency(a.Name, ref); err != nil {
 			return fmt.Errorf("update %s: %w", a.Name, err)
 		}
@@ -167,7 +194,13 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 	if err != nil {
 		return err
 	}
-	lock.Remove(ref)
+	// Only drop the lockfile entry when no agent still carries the
+	// Ref. This matters for scoped uninstalls: `uninstall python
+	// --agent mark` shouldn't nuke python's lockfile pin if dylan
+	// Still depends on it.
+	if !anyAgentCarriesRef(p.Agents, ref) {
+		lock.Remove(ref)
+	}
 	if err := dependency.SaveLockfile(p.Root, lock); err != nil {
 		return err
 	}
@@ -176,6 +209,57 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 	fmt.Fprintf(out, "  %s  %s\n", ui.Green("\u2713"), ui.Strong("uninstalled "+ref))
 	fmt.Fprintf(out, "     %d agent%s updated\n", mutated, plural(mutated))
 	return nil
+}
+
+// filterAgents narrows the project's agent list to the set targeted
+// by an install/uninstall run. An empty filter returns every agent
+// that exists on disk; a non-empty filter returns exactly the named
+// agent or errors with a list of valid names so the user can
+// correct a typo.
+func filterAgents(all []project.AgentRef, filter string) ([]project.AgentRef, error) {
+	available := make([]project.AgentRef, 0, len(all))
+	for _, a := range all {
+		if a.Exists {
+			available = append(available, a)
+		}
+	}
+	if len(available) == 0 {
+		return nil, fmt.Errorf("no agents declared in this project — add one with `spwn agent new`")
+	}
+	if filter == "" {
+		return available, nil
+	}
+	for _, a := range available {
+		if a.Name == filter {
+			return []project.AgentRef{a}, nil
+		}
+	}
+	names := make([]string, len(available))
+	for i, a := range available {
+		names[i] = a.Name
+	}
+	return nil, fmt.Errorf("agent %q is not in this project.\nknown: %s", filter, strings.Join(names, ", "))
+}
+
+// anyAgentCarriesRef reports whether any agent still carries the
+// given ref in its agent.yaml after a scoped uninstall. Used to
+// decide whether the lockfile pin should be dropped.
+func anyAgentCarriesRef(all []project.AgentRef, ref string) bool {
+	for _, a := range all {
+		if !a.Exists {
+			continue
+		}
+		m, err := agent.LoadManifest(a.Name)
+		if err != nil || m == nil {
+			continue
+		}
+		for _, d := range m.Deps {
+			if d == ref {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // findProject is an alias over cliproject.Require so the install

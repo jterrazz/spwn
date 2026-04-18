@@ -29,23 +29,21 @@ describe('subcommand help text', () => {
         expect(result.stdout.text).toMatch(/SOUL\.md|3-layer/i);
     });
 
-    test('agent add --help documents all four compose flags', async () => {
-        const result = await spec('agent add help')
+    test('install --help documents scoping + scheme grammar', async () => {
+        const result = await spec('install help scoped')
             .project('empty')
-            .exec('agent add --help')
+            .exec('install --help')
             .run();
 
         expect(result.exitCode).toBe(0);
         const help = result.stdout.text;
-        // The four compose flags are the stable public API. If any
-        // Renames or disappears, this test fails.
-        expect(help).toMatch(/--dep/);
-        expect(help).toMatch(/--skill/);
-        expect(help).toMatch(/--tool/);
-        expect(help).toMatch(/--hook/);
-        // Examples should mention both bare (CLI sugar) and scheme
-        // Forms so users see both idioms.
-        expect(help).toMatch(/--dep\s+python|--dep python/);
+        // --agent is the narrowing flag that replaced the retired
+        // `agent add`. It must stay documented.
+        expect(help).toMatch(/--agent/);
+        // Examples must exercise both scopes so users see both.
+        expect(help).toMatch(/spwn install python\b/);
+        expect(help).toMatch(/--agent mark|--agent dylan|--agent neo/);
+        // And the local-ref / local-authoring semantics are surfaced.
         expect(help).toMatch(/skill:|tool:|hook:/);
     });
 

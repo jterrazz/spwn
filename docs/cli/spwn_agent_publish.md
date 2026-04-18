@@ -11,10 +11,10 @@ Publish an agent to the registry (memory stripped)
 
 Publish an agent to the community registry for others to pull.
 
-Memory (journal, knowledge, sessions) is stripped before publishing -
-only the composition (dependencies, skills) and identity ship.
+Memory (journal, knowledge, sessions) is stripped before publishing —
+only the composition (dependencies) and SOUL.md ship.
 
-Not yet implemented - tracks the registry (planned).
+Not yet implemented — tracks the registry (planned).
 
 ```
 spwn agent publish <agent-name> [flags]

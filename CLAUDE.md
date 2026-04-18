@@ -66,13 +66,14 @@ spwn agent ls                                  # List project agents
 spwn agent inspect neo                         # Inspect composition, memory, history
 spwn agent fork neo neo-v2                     # Clone memory + composition
 spwn agent rm neo                              # Delete an agent
-spwn agent rm neo --dependency spwn:python       # Remove a dep from an agent
 
-# Compose
-spwn agent add neo --dependency spwn:python            # Add a catalog dep
-spwn agent add neo --dependency skill:paper-reading    # Add a local skill
-spwn agent add neo --dependency tool:ffmpeg            # Add a local tool
-spwn agent add neo --dependency hook:pre-spawn         # Add a local hook
+# Compose (via the project-level install / uninstall verbs)
+spwn install python                            # Catalog dep, every agent
+spwn install python --agent neo                # Catalog dep, only neo
+spwn install skill:paper-reading --agent neo   # Local skill, only neo
+spwn install tool:ffmpeg --agent neo           # Local tool, only neo
+spwn install hook:pre-spawn --agent neo        # Local hook, only neo
+spwn uninstall python --agent neo              # Detach from one agent
 
 # Talk + messaging
 spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`

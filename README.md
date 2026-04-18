@@ -216,8 +216,9 @@ Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lo
 
 ```bash
 spwn init
-spwn agent add curie --dependency spwn:python --dependency spwn:qmd
-spwn agent add curie --dependency paper-reading --plugin hypothesis-testing
+spwn install python --agent curie
+spwn install qmd --agent curie
+spwn install skill:paper-reading --agent curie
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
@@ -229,7 +230,8 @@ spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag a
 ```bash
 cd acme-api
 spwn init
-spwn agent add neo --dependency spwn:node --dependency spwn:git
+spwn install node --agent neo
+spwn install git --agent neo
 
 git add spwn.yaml spwn/
 git commit -m "add neo, our repo maintainer"
@@ -282,9 +284,10 @@ spwn up                               Bring up every world in spwn.yaml
 spwn down                             Stop every world
 
 # ── Compose ──────────────────────────────────────────────────────
-spwn install spwn:python             Install a dependency
+spwn install python                   Install a catalog dep (every agent)
+spwn install qmd --agent neo          Install a catalog dep (one agent)
+spwn install skill:focus --agent neo  Attach a local skill
 spwn agent create neo                 Create an agent + its world
-spwn agent add neo --dep spwn:qmd    Attach a dep to one agent
 spwn agent neo                        Interactive session with neo
 
 # ── Observe ─────────────────────────────────────────────────────
@@ -379,13 +382,13 @@ group to see the list. Each summary shows a progress bar
 </details>
 
 <details>
-<summary><b>Agents · compose</b> &middot; <code>████▓ 2/3</code></summary>
+<summary><b>Compose</b> &middot; <code>████ 3/3</code></summary>
 
 | Command | Purpose | Status |
 |---|---|:---:|
-| `spwn agent add <name> --dep spwn:<pkg>` | Attach a catalog dep | 🟢 |
-| `spwn agent rm <name> --dep spwn:<pkg>` | Remove a dep | 🟢 |
-| `spwn agent add <name> --dep skill:<name>` | Attach a local skill/tool/hook dep | 🟡 |
+| `spwn install <ref>` | Install a dep into every agent (npm-style) | 🟢 |
+| `spwn install <ref> --agent <name>` | Install a dep into one specific agent | 🟢 |
+| `spwn uninstall <ref> [--agent <name>]` | Detach a dep; project-wide or per-agent | 🟢 |
 
 </details>
 
