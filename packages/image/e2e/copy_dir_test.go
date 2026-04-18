@@ -26,9 +26,11 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
-	// ── Arrange: a nested host tree resembling a real agent home ──
+	// ── Arrange: a nested host tree resembling a real agent home.
+	// SOUL.md lives at the agent root (identity was collapsed to a
+	// single file); skills and playbooks remain as Mind-layer dirs.
 	host := t.TempDir()
-	mustWrite(t, filepath.Join(host, "identity", "profile.md"), "I am neo.")
+	mustWrite(t, filepath.Join(host, "SOUL.md"), "I am neo.")
 	mustWrite(t, filepath.Join(host, "skills", "core-concepts.md"), "The matrix has you.")
 	mustWrite(t, filepath.Join(host, "playbooks", "greet.md"), "Hello, world.")
 
@@ -39,7 +41,7 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 
 	// ── Assert: every file is visible inside the container ──
 	for relPath, want := range map[string]string{
-		"/agents/neo/identity/profile.md": "I am neo.",
+		"/agents/neo/SOUL.md": "I am neo.",
 		"/agents/neo/skills/core-concepts.md":  "The matrix has you.",
 		"/agents/neo/playbooks/greet.md":  "Hello, world.",
 	} {

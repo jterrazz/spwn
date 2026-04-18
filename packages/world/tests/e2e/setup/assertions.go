@@ -240,8 +240,18 @@ func (m *MindAssertion) HasFile(relPath string) {
 		m.tc.T.Fatalf("Failed to inspect agent: %v", err)
 	}
 
-	// relPath is like "identity/default.md" or "knowledge/facts.md"
-	// Try to match against known layers (longest prefix first)
+	// Root-level files (SOUL.md, AGENTS.md, agent.yaml) live directly
+	// under info.Path — no layer prefix. Fall back to a stat check.
+	if !strings.Contains(relPath, "/") {
+		p := filepath.Join(info.Path, relPath)
+		if _, err := os.Stat(p); err != nil {
+			m.tc.T.Fatalf("Expected %s at agent root, stat err=%v", relPath, err)
+		}
+		return
+	}
+
+	// relPath is like "skills/coding.md" or "journal/2025-01-01.md".
+	// Try to match against known layers (longest prefix first).
 	var matchedLayer, file string
 	for layer := range info.Layers {
 		prefix := layer + "/"

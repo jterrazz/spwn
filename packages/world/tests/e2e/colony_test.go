@@ -69,13 +69,13 @@ func TestColony_AgentMindLayersPresent(t *testing.T) {
 		WithAgent("test-agent").
 		Execute()
 
-	// Then - the Mind should have all standard layers
-	// (knowledge moved to world scope in 2026-04)
+	// Then - the Mind should have all standard layers and SOUL.md
+	// (identity collapsed into SOUL.md; knowledge moved to world scope)
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("identity")
 		m.HasLayer("skills")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
+		m.HasFile("SOUL.md")
 	})
 }
 

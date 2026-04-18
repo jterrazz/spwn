@@ -72,7 +72,7 @@ my-project/
 │   │   └── neo/
 │   │       ├── agent.yaml     # agent dependencies + local block references
 │   │       ├── AGENTS.md      # agent prompt (provider-neutral)
-│   │       ├── identity/      # who the agent is
+│   │       ├── SOUL.md        # who the agent is (one file)
 │   │       ├── skills/        # agent-scoped skills (only this agent)
 │   │       ├── playbooks/     # promoted workflows
 │   │       └── journal/       # session history

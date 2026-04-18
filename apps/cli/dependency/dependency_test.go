@@ -36,7 +36,7 @@ worlds:
 		t.Fatal(err)
 	}
 	agentDir := filepath.Join(root, "spwn", "agents", "neo")
-	if err := os.MkdirAll(filepath.Join(agentDir, "identity"), 0o755); err != nil {
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	for _, f := range []string{"AGENTS.md", "agent.yaml"} {
@@ -44,7 +44,8 @@ worlds:
 			t.Fatal(err)
 		}
 	}
-	if err := os.WriteFile(filepath.Join(agentDir, "identity", "profile.md"), []byte("# profile"), 0o644); err != nil {
+	// SOUL.md at the agent root replaces the old identity/profile.md.
+	if err := os.WriteFile(filepath.Join(agentDir, "SOUL.md"), []byte("# soul\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	return root

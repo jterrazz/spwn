@@ -31,10 +31,10 @@ func TestInit(t *testing.T) {
 			}
 		}
 
-		// Verify default profile exists
-		profilePath := filepath.Join(dir, "identity", "profile.md")
-		if _, err := os.Stat(profilePath); err != nil {
-			t.Errorf("expected default profile to exist: %v", err)
+		// Verify SOUL.md exists at the agent root
+		soulPath := filepath.Join(dir, platform.SoulFileName)
+		if _, err := os.Stat(soulPath); err != nil {
+			t.Errorf("expected SOUL.md to exist: %v", err)
 		}
 	})
 
@@ -216,8 +216,8 @@ func TestLayerCount(t *testing.T) {
 			name: "all_empty",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"identity": nil,
-					"skills":   nil,
+					"skills":    nil,
+					"playbooks": nil,
 				},
 			},
 			want: 0,
@@ -226,20 +226,19 @@ func TestLayerCount(t *testing.T) {
 			name: "some_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"identity": {"default.md"},
-					"skills":   nil,
-					"journal":  {"entry.md"},
+					"skills":  nil,
+					"journal": {"entry.md"},
 				},
 			},
-			want: 2,
+			want: 1,
 		},
 		{
 			name: "all_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"identity":  {"a.md"},
-					"skills":    {"b.md"},
-					"playbooks": {"c.md"},
+					"skills":    {"a.md"},
+					"playbooks": {"b.md"},
+					"journal":   {"c.md"},
 				},
 			},
 			want: 3,

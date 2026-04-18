@@ -21,8 +21,7 @@ func TestAgentLifecycle_SurvivesWorldDestruction(t *testing.T) {
 		Execute()
 
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("identity")
-		m.HasFile("identity/profile.md")
+		m.HasFile("SOUL.md")
 	})
 
 	// When - the world is destroyed
@@ -36,8 +35,9 @@ func TestAgentLifecycle_SurvivesWorldDestruction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Agent should survive world destruction: %v", err)
 	}
-	if _, ok := info.Layers["identity"]; !ok {
-		t.Fatal("Agent Mind should still have identity layer after world destruction")
+	soulPath := filepath.Join(info.Path, "SOUL.md")
+	if _, err := os.Stat(soulPath); err != nil {
+		t.Fatalf("Agent SOUL.md should still exist after world destruction: %v", err)
 	}
 }
 
@@ -81,8 +81,9 @@ func TestAgentLifecycle_SpawnInDifferentWorlds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Agent inspect failed: %v", err)
 	}
-	if _, ok := info.Layers["identity"]; !ok {
-		t.Fatal("Agent should retain Mind layers after spanning multiple worlds (identity layer check)")
+	soulPath := filepath.Join(info.Path, "SOUL.md")
+	if _, err := os.Stat(soulPath); err != nil {
+		t.Fatalf("Agent should retain its SOUL.md after spanning multiple worlds: %v", err)
 	}
 }
 
@@ -183,12 +184,15 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 }
 
 func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
-	// Given - an agent with a custom file in the identity layer
+	// Given - an agent with a customized SOUL.md (identity is a file
+	// at the agent root now, not a directory; use a skill file for
+	// "extra personality" content)
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("profile-agent")
 
-	identityDir := filepath.Join(agent.AgentDir("profile-agent"), "identity")
-	os.WriteFile(filepath.Join(identityDir, "custom.md"), []byte("# Custom Profile\nYou are a specialist."), 0644)
+	skillsDir := filepath.Join(agent.AgentDir("profile-agent"), "skills")
+	os.MkdirAll(skillsDir, 0755)
+	os.WriteFile(filepath.Join(skillsDir, "custom.md"), []byte("# Custom Skill\nYou are a specialist."), 0644)
 
 	// When - the agent is spawned in a world
 	chain := tc.Spawn().
@@ -196,14 +200,14 @@ func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
 		Detached().
 		Execute()
 
-	// Then - the mock should see the Mind with the custom profile
+	// Then - the mock should see the Mind with the custom skill
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.SawMind()
 	})
 
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasFile("identity/custom.md")
+		m.HasFile("skills/custom.md")
 	})
 }
 

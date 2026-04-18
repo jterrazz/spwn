@@ -309,8 +309,7 @@ func ruleAgentStructure(in Input) []Issue {
 	}{
 		{"agent.yaml", false, LevelError},
 		{"AGENTS.md", false, LevelError},
-		{filepath.Join("identity", "profile.md"), false, LevelError},
-		{"identity", true, LevelWarning},
+		{"SOUL.md", false, LevelError},
 		{"skills", true, LevelWarning},
 		{"playbooks", true, LevelWarning},
 		{"journal", true, LevelWarning},

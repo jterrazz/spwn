@@ -145,15 +145,22 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	t.Run("03_init_writes_4_layer_mind", func(t *testing.T) {
-		// A03: fresh init writes identity/skills/playbooks/journal but NO knowledge.
+		// A03: fresh init writes SOUL.md + skills/playbooks/journal, no knowledge.
+		// (identity/ directory was collapsed into a single SOUL.md at agent root.)
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		for _, layer := range []string{"identity", "skills", "playbooks", "journal"} {
+		for _, layer := range []string{"skills", "playbooks", "journal"} {
 			if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo", layer)); err != nil {
 				t.Errorf("missing agent layer %s: %v", layer, err)
 			}
+		}
+		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/SOUL.md")); err != nil {
+			t.Errorf("missing SOUL.md at agent root: %v", err)
+		}
+		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/identity")); !os.IsNotExist(err) {
+			t.Errorf("identity/ directory should NOT exist (collapsed into SOUL.md), stat err=%v", err)
 		}
 		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/knowledge")); !os.IsNotExist(err) {
 			t.Errorf("agent knowledge layer should NOT exist, stat err=%v", err)
@@ -340,7 +347,7 @@ func TestReleaseReadiness(t *testing.T) {
 	// --------------------------------------------------------------------
 
 	t.Run("15_agent_create_global_4_layer", func(t *testing.T) {
-		// C15: user-mode `agent create` produces a 4-layer Mind (no knowledge).
+		// C15: user-mode `agent create` produces SOUL.md + 3 layer dirs, no knowledge.
 		t.Parallel()
 		env, home := freshEnv(t)
 		// No project: operate in global mode from a fresh dir.
@@ -349,10 +356,16 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("global agent create should succeed")
 		}
 		base := filepath.Join(home, "agents/neo")
-		for _, layer := range []string{"identity", "skills", "playbooks", "journal"} {
+		for _, layer := range []string{"skills", "playbooks", "journal"} {
 			if _, err := os.Stat(filepath.Join(base, layer)); err != nil {
 				t.Errorf("missing %s layer: %v", layer, err)
 			}
+		}
+		if _, err := os.Stat(filepath.Join(base, "SOUL.md")); err != nil {
+			t.Errorf("missing SOUL.md at agent root: %v", err)
+		}
+		if _, err := os.Stat(filepath.Join(base, "identity")); !os.IsNotExist(err) {
+			t.Errorf("identity/ directory should NOT exist (collapsed into SOUL.md), stat err=%v", err)
 		}
 		if _, err := os.Stat(filepath.Join(base, "knowledge")); !os.IsNotExist(err) {
 			t.Errorf("agent knowledge dir should NOT exist under user mode, stat err=%v", err)
@@ -664,8 +677,9 @@ func TestReleaseReadiness(t *testing.T) {
 	// G — help text consistency
 	// --------------------------------------------------------------------
 
-	t.Run("34_agent_help_mentions_4_layer", func(t *testing.T) {
-		// G34: `agent --help` describes the new 4-layer Mind.
+	t.Run("34_agent_help_mentions_soul_and_layers", func(t *testing.T) {
+		// G34: `agent --help` advertises SOUL.md at root + the three
+		// Mind layer dirs (skills/playbooks/journal).
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -674,16 +688,16 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("agent --help failed: stderr=%s", stderr)
 		}
 		combined := stdout + stderr
-		if !strings.Contains(combined, "4-layer") {
-			t.Fatalf("agent --help missing `4-layer`:\n%s", combined)
+		if !strings.Contains(combined, "SOUL.md") {
+			t.Fatalf("agent --help missing `SOUL.md`:\n%s", combined)
 		}
-		if !strings.Contains(combined, "identity/skills/playbooks/journal") {
+		if !strings.Contains(combined, "skills/playbooks/journal") {
 			t.Fatalf("agent --help missing layer list:\n%s", combined)
 		}
 	})
 
-	t.Run("35_agent_create_help_mentions_4_layer", func(t *testing.T) {
-		// G35: `agent create --help` mentions the 4-layer Mind.
+	t.Run("35_agent_create_help_mentions_soul", func(t *testing.T) {
+		// G35: `agent create --help` advertises SOUL.md + 3 Mind layers.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -692,8 +706,11 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("agent create --help failed: stderr=%s", stderr)
 		}
 		combined := stdout + stderr
-		if !strings.Contains(combined, "4-layer Mind") {
-			t.Fatalf("agent create --help missing `4-layer Mind`:\n%s", combined)
+		if !strings.Contains(combined, "SOUL.md") {
+			t.Fatalf("agent create --help missing `SOUL.md`:\n%s", combined)
+		}
+		if !strings.Contains(combined, "skills/playbooks/journal") {
+			t.Fatalf("agent create --help missing layer list:\n%s", combined)
 		}
 	})
 
@@ -874,21 +891,21 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("45_check_flags_missing_profile", func(t *testing.T) {
-		// I45: deleting identity/profile.md surfaces a loud error.
+	t.Run("45_check_flags_missing_soul", func(t *testing.T) {
+		// I45: deleting SOUL.md surfaces a loud error.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		if err := os.Remove(filepath.Join(wd, "spwn/agents/neo/identity/profile.md")); err != nil {
+		if err := os.Remove(filepath.Join(wd, "spwn/agents/neo/SOUL.md")); err != nil {
 			t.Fatal(err)
 		}
 		stdout, stderr, code := runCLI(t, env, wd, "check")
 		if code == 0 {
-			t.Fatalf("check should fail when profile.md is missing")
+			t.Fatalf("check should fail when SOUL.md is missing")
 		}
-		if !strings.Contains(stdout+stderr, "profile.md") {
-			t.Fatalf("check output should mention profile.md")
+		if !strings.Contains(stdout+stderr, "SOUL.md") {
+			t.Fatalf("check output should mention SOUL.md")
 		}
 	})
 
@@ -959,8 +976,9 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("50_docs_match_help_4_layer", func(t *testing.T) {
-		// J50: both `agent create --help` and the docs page say `4-layer Mind`.
+	t.Run("50_docs_match_help_soul", func(t *testing.T) {
+		// J50: `agent create --help` and the generated docs page both
+		// advertise SOUL.md (identity collapsed into a single file).
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -968,13 +986,13 @@ func TestReleaseReadiness(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("agent create --help failed: stderr=%s", stderr)
 		}
-		if !strings.Contains(stdout+stderr, "4-layer Mind") {
-			t.Fatalf("agent create --help missing 4-layer Mind")
+		if !strings.Contains(stdout+stderr, "SOUL.md") {
+			t.Fatalf("agent create --help missing SOUL.md")
 		}
 		docPath := findDocPath(t, "docs/cli/spwn_agent_create.md")
 		body := readFile(t, docPath)
-		if !strings.Contains(body, "4-layer Mind") {
-			t.Fatalf("doc %s missing 4-layer Mind", docPath)
+		if !strings.Contains(body, "SOUL.md") {
+			t.Fatalf("doc %s missing SOUL.md", docPath)
 		}
 	})
 }
@@ -996,7 +1014,7 @@ worlds:
 		t.Fatal(err)
 	}
 	agentDir := filepath.Join(root, "spwn/agents", agentName)
-	if err := os.MkdirAll(filepath.Join(agentDir, "identity"), 0o755); err != nil {
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	for _, layer := range []string{"skills", "playbooks", "journal"} {
@@ -1018,7 +1036,7 @@ dependencies: []
 	if err := os.WriteFile(filepath.Join(agentDir, "AGENTS.md"), []byte("# "+agentName+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(agentDir, "identity/profile.md"), []byte("# Profile\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(agentDir, "SOUL.md"), []byte("# Profile\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(root, "spwn.lock"), []byte("# spwn.lock — DO NOT EDIT\n"), 0o644); err != nil {

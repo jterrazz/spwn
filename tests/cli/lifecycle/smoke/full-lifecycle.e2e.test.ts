@@ -46,7 +46,7 @@ describe('agent lifecycle (CLI-only)', () => {
         expect(result.file('spwn/agents/neo/playbooks').exists).toBe(true);
         expect(result.file('spwn/agents/neo/journal').exists).toBe(true);
         expect(result.file('spwn/agents/neo/knowledge').exists).toBe(false);
-        expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
         expect(result.file('spwn/worlds/neo/knowledge').exists).toBe(true);
     });

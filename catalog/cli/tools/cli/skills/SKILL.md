@@ -20,6 +20,6 @@ spwn msg send <to> --from <me> "msg"  # Send message
 Your mind is at `/mind/` - read your purpose, traits, and profile before starting work.
 ```bash
 cat /mind/identity/purpose.md
-cat /mind/identity/profile.md
+cat /mind/SOUL.md
 cat /mind/identity/traits.md
 ```

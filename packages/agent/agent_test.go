@@ -35,11 +35,17 @@ func TestInitMind_HasStandardLayers(t *testing.T) {
 		t.Fatalf("InspectAgent failed: %v", err)
 	}
 
-	expectedLayers := []string{"identity", "skills", "playbooks", "journal"}
+	expectedLayers := []string{"skills", "playbooks", "journal"}
 	for _, layer := range expectedLayers {
 		if _, ok := info.Layers[layer]; !ok {
 			t.Errorf("Expected layer %q not found in Mind", layer)
 		}
+	}
+
+	// SOUL.md is not a layer; it's a file at the agent root.
+	soulPath := filepath.Join(info.Path, "SOUL.md")
+	if _, err := os.Stat(soulPath); err != nil {
+		t.Errorf("expected SOUL.md at %q: %v", soulPath, err)
 	}
 }
 
@@ -175,9 +181,21 @@ func TestLayerCount_ReturnsNonZero(t *testing.T) {
 		t.Fatalf("InspectAgent failed: %v", err)
 	}
 
+	// A freshly initialized agent has empty layer dirs (skills, playbooks,
+	// journal) but its SOUL.md file sits at the agent root. Seed one
+	// skill so LayerCount has something to count.
+	skillPath := filepath.Join(info.Path, "skills", "seed.md")
+	if err := os.WriteFile(skillPath, []byte("# seed\n"), 0644); err != nil {
+		t.Fatalf("seed skill: %v", err)
+	}
+	info, err = InspectAgent("test-agent")
+	if err != nil {
+		t.Fatalf("InspectAgent (re): %v", err)
+	}
+
 	count := LayerCount(info)
 	if count == 0 {
-		t.Error("Expected non-zero layer count for freshly initialized agent")
+		t.Error("Expected non-zero layer count after seeding a skill")
 	}
 }
 
@@ -195,8 +213,7 @@ func TestLayerCount_MixedLayers(t *testing.T) {
 	info := &Info{
 		Name: "mixed",
 		Layers: map[string][]string{
-			"identity":  {"profile.md"},
-			"skills":    {},
+			"skills":    {"coding.md"},
 			"playbooks": {"fact.md"},
 			"journal":   nil,
 		},

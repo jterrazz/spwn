@@ -108,6 +108,10 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 }
 
 // createTestAgent creates a minimal agent directory structure in SPWN_HOME.
+// The layout matches the current on-disk shape: SOUL.md at the agent root
+// plus skills/journal/playbooks layer dirs. identity/profile.md etc. still
+// get written because the API's profile endpoint continues to read them
+// (this stays until the API is migrated to SOUL.md too).
 func createTestAgent(t *testing.T, name string) string {
 	t.Helper()
 	home := os.Getenv("SPWN_HOME")
@@ -125,7 +129,11 @@ func createTestAgent(t *testing.T, name string) string {
 		}
 	}
 
-	// Write identity files
+	// Write SOUL.md at the agent root — the new canonical identity file.
+	writeFile(t, filepath.Join(agentDir, "SOUL.md"), "# Soul\n\nA helpful test agent.\n")
+
+	// Write legacy identity files (the API's GetAgentProfile handler still
+	// reads them; this helper seeds them until that handler is migrated).
 	writeFile(t, filepath.Join(agentDir, "identity", "profile.md"), "# Profile\n\nA helpful test agent.\n")
 	writeFile(t, filepath.Join(agentDir, "identity", "purpose.md"), "# Purpose\n\nTo test the API.\n")
 	writeFile(t, filepath.Join(agentDir, "identity", "traits.md"), "# Traits\n\n- curious\n- diligent\n")
@@ -507,11 +515,14 @@ func TestGetAgentMind(t *testing.T) {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
 	}
 
-	// Response should be a JSON object (layers map)
+	// Response should be a JSON object (layers map). Identity is no
+	// longer a layer — it collapsed into SOUL.md at the agent root.
+	// The mind tree still exposes skills/playbooks/journal.
 	body := decodeBody(t, w)
-	// Should have at least the identity layer
-	if body["identity"] == nil {
-		t.Errorf("expected identity layer in mind response, got keys: %v", body)
+	for _, layer := range []string{"skills", "playbooks", "journal"} {
+		if _, ok := body[layer]; !ok {
+			t.Errorf("expected %q layer in mind response, got keys: %v", layer, body)
+		}
 	}
 }
 
@@ -519,7 +530,7 @@ func TestGetAgentFile(t *testing.T) {
 	_, mux := newFullTestServer(t)
 	createTestAgent(t, "dave")
 
-	w := doJSON(t, mux, "GET", "/api/agents/dave/files/identity/profile.md", nil)
+	w := doJSON(t, mux, "GET", "/api/agents/dave/files/SOUL.md", nil)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d (body: %s)", w.Code, w.Body.String())
 	}
@@ -529,8 +540,8 @@ func TestGetAgentFile(t *testing.T) {
 	if !ok || content == "" {
 		t.Errorf("expected file content, got %v", body["content"])
 	}
-	if body["path"] != "identity/profile.md" {
-		t.Errorf("expected path=identity/profile.md, got %v", body["path"])
+	if body["path"] != "SOUL.md" {
+		t.Errorf("expected path=SOUL.md, got %v", body["path"])
 	}
 }
 
@@ -627,7 +638,7 @@ func TestFork(t *testing.T) {
 
 	w := doJSON(t, mux, "POST", "/api/agents/original/fork", map[string]interface{}{
 		"target": "clone",
-		"layers": []string{"identity"},
+		"layers": []string{"skills"},
 	})
 	if w.Code != 201 {
 		t.Fatalf("expected 201, got %d (body: %s)", w.Code, w.Body.String())

@@ -25,7 +25,7 @@ what network access exists, which languages are installed.
 ### 2. ~/identity/ — Who you are
 
 ```
-cat ~/identity/profile.md
+cat ~/SOUL.md
 ```
 
 Your persona, voice, and purpose. Re-read this if you ever feel lost.

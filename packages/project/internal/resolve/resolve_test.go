@@ -9,9 +9,9 @@ import (
 func TestWalk_simpleImport(t *testing.T) {
 	root := t.TempDir()
 	claude := filepath.Join(root, "CLAUDE.md")
-	profile := filepath.Join(root, "identity", "profile.md")
-	mustWrite(t, profile, "# profile\n")
-	mustWrite(t, claude, "# header\n\nread @identity/profile.md for the profile\n")
+	soul := filepath.Join(root, "SOUL.md")
+	mustWrite(t, soul, "# soul\n")
+	mustWrite(t, claude, "# header\n\nread @SOUL.md for the agent's soul\n")
 
 	r, err := Walk(root, claude)
 	if err != nil {
@@ -20,8 +20,8 @@ func TestWalk_simpleImport(t *testing.T) {
 	if len(r.Visited) != 2 {
 		t.Fatalf("Visited len = %d, want 2: %v", len(r.Visited), r.Visited)
 	}
-	if r.Visited[0] != claude || r.Visited[1] != profile {
-		t.Errorf("visit order = %v, want [%s %s]", r.Visited, claude, profile)
+	if r.Visited[0] != claude || r.Visited[1] != soul {
+		t.Errorf("visit order = %v, want [%s %s]", r.Visited, claude, soul)
 	}
 	if len(r.Missing) != 0 {
 		t.Errorf("expected no missing, got: %v", r.Missing)

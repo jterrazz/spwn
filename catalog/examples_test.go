@@ -56,7 +56,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 //
 //	<slug>/spwn.yaml
 //	<slug>/spwn.lock
-//	<slug>/agents/<at-least-one-dir>/identity/profile.md
+//	<slug>/agents/<at-least-one-dir>/SOUL.md
 //	<slug>/agents/<at-least-one-dir>/agent.yaml
 //
 // Without these, the binary ships but misbehaves at runtime.
@@ -80,9 +80,9 @@ func TestShippedSlugsStructure(t *testing.T) {
 					continue
 				}
 				hasAgent = true
-				profilePath := slug + "/agents/" + e.Name() + "/identity/profile.md"
+				profilePath := slug + "/agents/" + e.Name() + "/SOUL.md"
 				if _, err := fs.Stat(catalogFS, profilePath); err != nil {
-					t.Errorf("%s: agent %q missing identity/profile.md", slug, e.Name())
+					t.Errorf("%s: agent %q missing SOUL.md", slug, e.Name())
 				}
 				agentYAML := slug + "/agents/" + e.Name() + "/agent.yaml"
 				if _, err := fs.Stat(catalogFS, agentYAML); err != nil {
@@ -181,8 +181,8 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	if !exists(filepath.Join(base, "spwn.yaml")) {
 		t.Error("spwn.yaml was not written")
 	}
-	if !exists(filepath.Join(base, "spwn", "agents", "neo", "identity", "profile.md")) {
-		t.Error("agent identity/profile.md was not copied into spwn/agents/")
+	if !exists(filepath.Join(base, "spwn", "agents", "neo", "SOUL.md")) {
+		t.Error("agent SOUL.md was not copied into spwn/agents/")
 	}
 	if !exists(filepath.Join(base, "spwn", "agents", "neo", "agent.yaml")) {
 		t.Error("agent.yaml was not copied into spwn/agents/")

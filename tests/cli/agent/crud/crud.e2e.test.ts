@@ -23,7 +23,7 @@ describe('spwn agent CRUD', () => {
         // Structural: the on-disk Mind exists with a profile.
         // Knowledge is NOT a mind layer — it's world-scoped at
         // /world/knowledge/ (bind-mounted from spwn/worlds/<name>/knowledge/).
-        expect(result.file('spwn-home/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/skills').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/playbooks').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/journal').exists).toBe(true);
@@ -117,7 +117,7 @@ describe('spwn agent CRUD', () => {
         expect(aliased.exitCode).toBe(0);
 
         for (const path of [
-            'spwn-home/agents/neo/identity/profile.md',
+            'spwn-home/agents/neo/SOUL.md',
             'spwn-home/agents/neo/skills',
             'spwn-home/agents/neo/playbooks',
             'spwn-home/agents/neo/journal',
@@ -136,7 +136,7 @@ describe('spwn agent CRUD', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.file('spwn-home/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/SOUL.md').exists).toBe(true);
     });
 
     test('agent create without --force still rejects duplicates', async () => {

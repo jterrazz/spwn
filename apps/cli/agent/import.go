@@ -11,6 +11,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/platform"
 )
 
 var importAs string
@@ -27,7 +28,7 @@ var importCmd = &cobra.Command{
 	Long: `Import an agent's Mind from a previously exported tar.gz archive.
 
 The agent name is derived from the archive filename (e.g., neo.tar.gz → neo).
-The archive must contain at least an identity/ layer.`,
+The archive must contain at least a SOUL.md at the agent root.`,
 	Example: `  spwn agent import neo.tar.gz
   spwn agent import /path/to/backup.tar.gz`,
 	Args: cobra.ExactArgs(1),
@@ -77,13 +78,13 @@ The archive must contain at least an identity/ layer.`,
 				"Check that the archive is a valid tar.gz created by \"spwn agent export\"")
 		}
 
-		// Validate extracted structure has identity/ layer
-		identityDir := filepath.Join(agentDir, "identity")
-		if _, err := os.Stat(identityDir); err != nil {
+		// Validate extracted structure has SOUL.md at the agent root.
+		soulPath := filepath.Join(agentDir, platform.SoulFileName)
+		if _, err := os.Stat(soulPath); err != nil {
 			os.RemoveAll(agentDir)
 			s.Blank()
-			return s.FailHint("Invalid archive content", fmt.Errorf("missing identity/ layer"),
-				"Archive must contain at least an identity/ directory")
+			return s.FailHint("Invalid archive content", fmt.Errorf("missing %s", platform.SoulFileName),
+				"Archive must contain a SOUL.md at the agent root")
 		}
 
 		// When --as was used, rewrite agent.yaml so the embedded

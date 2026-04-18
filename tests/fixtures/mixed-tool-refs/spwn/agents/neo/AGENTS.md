@@ -1,3 +1,3 @@
 # neo
 
-@identity/profile.md
+@SOUL.md

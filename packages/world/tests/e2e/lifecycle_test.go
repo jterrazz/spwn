@@ -3,6 +3,8 @@
 package e2e
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"spwn.sh/packages/agent"
@@ -56,7 +58,8 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Agent should survive after destroy: %v", err)
 	}
-	if _, ok := info.Layers["identity"]; !ok {
-		t.Fatal("Agent Mind should still have identity layer")
+	soulPath := filepath.Join(info.Path, "SOUL.md")
+	if _, err := os.Stat(soulPath); err != nil {
+		t.Fatalf("Agent SOUL.md should still exist: %v", err)
 	}
 }

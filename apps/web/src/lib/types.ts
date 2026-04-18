@@ -73,7 +73,7 @@ export interface AgentProfile {
     engine: string;
     provider: string;
     purpose: string; // Read from identity/purpose.md
-    profile: string; // Read from identity/profile.md
+    profile: string; // Read from SOUL.md
     traits: string[]; // Read from identity/traits.md
     skills: string[];
     journal: { date: string; summary: string }[];

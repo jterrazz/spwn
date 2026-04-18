@@ -27,9 +27,14 @@ func scaffoldAgent(t *testing.T, name string) string {
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
-	dir := filepath.Join(tmp, "agents", name, "identity")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	agentDir := filepath.Join(tmp, "agents", name)
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
+	}
+	// SOUL.md at the agent root is what makes it a valid agent now —
+	// the old identity/ directory was collapsed into a single file.
+	if err := os.WriteFile(filepath.Join(agentDir, "SOUL.md"), []byte("# soul\n"), 0o644); err != nil {
+		t.Fatalf("write SOUL.md: %v", err)
 	}
 	return tmp
 }

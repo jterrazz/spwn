@@ -149,7 +149,7 @@ Each agent is a directory of composable blocks - **human-readable, git-friendly,
 spwn/agents/neo/
 ├── agent.yaml                # composition: dependencies + runtime
 ├── AGENTS.md                 # entry point (provider-neutral; compiled per runtime)
-├── identity/                 # who the agent is - profile.md, purpose.md, traits.md
+├── SOUL.md                   # who the agent is - purpose, voice, values (one file)
 ├── skills/                   # authored procedures (file per skill)
 ├── playbooks/                # workflows promoted from experience
 └── journal/                  # session history - one file per run
@@ -196,7 +196,7 @@ Think of spwn the way you think of `tsc` or `babel`. You write in one clean, pro
             transpile  +  compile
 ```
 
-- **Source** is provider-neutral. `AGENTS.md`, `identity/`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
+- **Source** is provider-neutral. `AGENTS.md`, `SOUL.md`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
 - **Transpile** renders that source into the exact file layout your chosen runtime expects. Claude Code wants `CLAUDE.md` in a particular place? The claude-code backend emits it. Codex wants something else? Its backend emits that. Same source, different targets - like transpiling TypeScript to ES5 vs ES2022.
 - **Compile** links the transpiled tree with the tools your agent declared and produces a normal Docker image. Push it, pull it, run it anywhere - byte-identical on every machine.
 
@@ -218,7 +218,7 @@ spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
 
-> Stack `spwn:python` + `spwn:qmd` + the right skills and you have an autonomous lab partner. Edit `identity/profile.md` tomorrow - same mind, new voice. **Docker, but for minds.**
+> Stack `spwn:python` + `spwn:qmd` + the right skills and you have an autonomous lab partner. Edit `SOUL.md` tomorrow - same mind, new voice. **Docker, but for minds.**
 
 ### Ship an agent with your repo
 

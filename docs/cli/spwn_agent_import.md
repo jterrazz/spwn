@@ -12,7 +12,7 @@ slug: "spwn-agent-import"
 Import an agent's Mind from a previously exported tar.gz archive.
 
 The agent name is derived from the archive filename (e.g., neo.tar.gz → neo).
-The archive must contain at least an identity/ layer.
+The archive must contain at least a SOUL.md at the agent root.
 
 ⚠ Experimental: this command is in development and may change or break without notice.
 

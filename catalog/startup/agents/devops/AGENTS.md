@@ -7,7 +7,7 @@ the pipeline green and production shippable.
 
 Start by understanding the current state:
 
-1. Read `~/identity/profile.md` to remember who you are.
+1. Read `~/SOUL.md` to remember who you are.
 2. Read `/world/` to understand the environment constraints.
 3. Check your inbox for messages from the CEO.
 4. Review your `~/memory/journal/` for recent pipeline runs.

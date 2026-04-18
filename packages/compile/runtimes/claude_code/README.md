@@ -22,7 +22,7 @@ mention `CLAUDE.md` directly.
 | Source (provider-neutral)                | Target (Claude Code)                        |
 | ---------------------------------------- | ------------------------------------------- |
 | `spwn/agents/<name>/AGENTS.md`            | `/agents/<name>/CLAUDE.md`                  |
-| `spwn/agents/<name>/identity/profile.md` | `/agents/<name>/identity/profile.md` (as-is)|
+| `spwn/agents/<name>/SOUL.md` | `/agents/<name>/SOUL.md` (as-is)|
 | `spwn/agents/<name>/skills/*`            | `/agents/<name>/skills/*` (as-is)           |
 | `compile.Input.VerifiedTools`            | `/world/faculties.md` (generated)           |
 | `compile.Input.Manifest`                 | `/world/physics.md` (generated)             |
