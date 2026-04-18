@@ -18,4 +18,5 @@ use (
 	./packages/dependency
 	./packages/runtimes
 	./packages/world
+	./tests/catalog
 )

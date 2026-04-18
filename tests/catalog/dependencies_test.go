@@ -1,13 +1,14 @@
-package catalog
+package catalog_test
 
 import (
-	"spwn.sh/packages/dependency"
 	"io/fs"
 	"strings"
 	"testing"
 
-	runtimes "spwn.sh/packages/runtimes"
+	"spwn.sh/catalog"
 	ib "spwn.sh/packages/compile"
+	"spwn.sh/packages/dependency"
+	runtimes "spwn.sh/packages/runtimes"
 )
 
 // fullRegistry registers tools + runtimes. Some tools like
@@ -15,13 +16,13 @@ import (
 // so dependency-resolution tests need both sides available.
 func fullRegistry() *ib.Registry {
 	reg := ib.NewRegistry()
-	_ = RegisterDefaults(reg)
+	_ = catalog.RegisterDefaults(reg)
 	_ = runtimes.RegisterDefaults(reg)
 	return reg
 }
 
 func TestAllTools_ValidName(t *testing.T) {
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		t.Run(tool.Name(), func(t *testing.T) {
 			if !strings.HasPrefix(tool.Name(), "spwn:") {
 				t.Errorf("tool name %q must start with spwn:", tool.Name())
@@ -40,7 +41,7 @@ func TestAllTools_ValidKind(t *testing.T) {
 		dependency.KindSDK:      true,
 		dependency.KindPlatform: true,
 	}
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		t.Run(tool.Name(), func(t *testing.T) {
 			if !validKinds[tool.Kind()] {
 				t.Errorf("invalid kind %q", tool.Kind())
@@ -50,7 +51,7 @@ func TestAllTools_ValidKind(t *testing.T) {
 }
 
 func TestAllTools_VersionNotEmpty(t *testing.T) {
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		t.Run(tool.Name(), func(t *testing.T) {
 			if tool.Version() == "" {
 				t.Error("version must not be empty")
@@ -60,7 +61,7 @@ func TestAllTools_VersionNotEmpty(t *testing.T) {
 }
 
 func TestAllTools_VerifyNotEmpty(t *testing.T) {
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		if isTemplateTool(tool.Name()) {
 			continue // template entries (e.g. spwn:matrix) are scaffolds, not installable deps
 		}
@@ -73,7 +74,7 @@ func TestAllTools_VerifyNotEmpty(t *testing.T) {
 }
 
 func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		if isTemplateTool(tool.Name()) {
 			continue
 		}
@@ -89,24 +90,22 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 
 // isTemplateTool returns true when the spwn:<slug> is a gallery
 // template (has a `worlds:` section) rather than a pure dependency.
+// Uses the exported Get API — returns ErrNotFound on non-gallery
+// entries — so no internal state is reached.
 func isTemplateTool(toolName string) bool {
 	slug := strings.TrimPrefix(toolName, "spwn:")
-	slug = strings.ReplaceAll(slug, "-", "_")
-	schema, err := loadEntrySchema(slug)
-	if err != nil {
-		// Try the hyphen form too — not every slug underscore-maps.
-		schema2, err2 := loadEntrySchema(strings.TrimPrefix(toolName, "spwn:"))
-		if err2 != nil {
-			return false
-		}
-		return hasWorlds(schema2)
+	if _, err := catalog.Get(slug); err == nil {
+		return true
 	}
-	return hasWorlds(schema)
+	if _, err := catalog.Get(strings.ReplaceAll(slug, "-", "_")); err == nil {
+		return true
+	}
+	return false
 }
 
 func TestAllTools_NoDuplicateNames(t *testing.T) {
 	seen := make(map[string]bool)
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		if seen[tool.Name()] {
 			t.Errorf("duplicate tool name: %s", tool.Name())
 		}
@@ -117,7 +116,7 @@ func TestAllTools_NoDuplicateNames(t *testing.T) {
 func TestAllTools_DependenciesExist(t *testing.T) {
 	reg := fullRegistry()
 
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		t.Run(tool.Name(), func(t *testing.T) {
 			for _, dep := range tool.Dependencies() {
 				if reg.Get(dep) == nil {
@@ -131,7 +130,7 @@ func TestAllTools_DependenciesExist(t *testing.T) {
 func TestAllTools_NoDependencyCycles(t *testing.T) {
 	reg := fullRegistry()
 
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		t.Run(tool.Name(), func(t *testing.T) {
 			_, err := reg.Resolve([]string{tool.Name()})
 			if err != nil {
@@ -142,7 +141,7 @@ func TestAllTools_NoDependencyCycles(t *testing.T) {
 }
 
 func TestAllTools_NoDependOnSelf(t *testing.T) {
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		t.Run(tool.Name(), func(t *testing.T) {
 			for _, dep := range tool.Dependencies() {
 				if dep == tool.Name() {
@@ -154,7 +153,7 @@ func TestAllTools_NoDependOnSelf(t *testing.T) {
 }
 
 func TestAllTools_SkillsHaveSkillMD(t *testing.T) {
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		if isTemplateTool(tool.Name()) {
 			// Template entries ship project-shared skills (no SKILL.md
 			// contract — those live in per-agent agent.yaml refs).
@@ -174,7 +173,7 @@ func TestAllTools_SkillsHaveSkillMD(t *testing.T) {
 }
 
 func TestAllTools_UserCommandsUseTemplates(t *testing.T) {
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		spec := tool.Install()
 		if len(spec.UserCommands) == 0 {
 			continue
@@ -193,9 +192,9 @@ func TestAllTools_UserCommandsUseTemplates(t *testing.T) {
 
 func TestRegisterDefaults_AllRegistered(t *testing.T) {
 	reg := ib.NewRegistry()
-	RegisterDefaults(reg)
+	catalog.RegisterDefaults(reg)
 
-	for _, tool := range All {
+	for _, tool := range catalog.All {
 		if reg.Get(tool.Name()) == nil {
 			t.Errorf("tool %s not found after RegisterDefaults", tool.Name())
 		}
@@ -204,7 +203,7 @@ func TestRegisterDefaults_AllRegistered(t *testing.T) {
 
 func TestResolve_FullToolStack(t *testing.T) {
 	reg := ib.NewRegistry()
-	RegisterDefaults(reg)
+	catalog.RegisterDefaults(reg)
 
 	tools, err := reg.Resolve([]string{"spwn:unix", "spwn:git", "spwn:node", "spwn:cli", "spwn:qmd"})
 	if err != nil {
