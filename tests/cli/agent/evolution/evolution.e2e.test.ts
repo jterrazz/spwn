@@ -90,7 +90,7 @@ describe('spwn agent sleep', () => {
         const out = result.stderr.text;
         expect(out).toContain('Sleep cycle for agent "neo"');
         expect(out).toMatch(/Archived playbooks\s+0/);
-        expect(out).toMatch(/Archived knowledge\s+0/);
+        // Knowledge is world-scoped now, no longer in the sleep banner.
         expect(out).toMatch(/Pruned sessions\s+0/);
     });
 
@@ -104,7 +104,6 @@ describe('spwn agent sleep', () => {
         const out = result.stderr.text;
         expect(out).toContain('Sleep cycle for agent "ghost"');
         expect(out).toMatch(/Archived playbooks\s+0/);
-        expect(out).toMatch(/Archived knowledge\s+0/);
         expect(out).toMatch(/Pruned sessions\s+0/);
     });
 
@@ -132,7 +131,9 @@ describe('spwn agent fork', () => {
         expect(result.exitCode).toBe(0);
         const out = result.stderr.text;
         expect(out).toContain('Forking "neo" -> "neo-v2"');
-        expect(out).toMatch(/Layers copied\s+identity, skills, playbooks, journal/);
+        // identity/ is gone; Mind layers are skills/playbooks/journal.
+        // SOUL.md is copied alongside the layers but isn't listed here.
+        expect(out).toMatch(/Layers copied\s+skills, playbooks, journal/);
         expect(result.file('spwn/agents/neo-v2/SOUL.md').exists).toBe(true);
     });
 
@@ -188,6 +189,8 @@ describe('spwn agent fork', () => {
         expect(result.exitCode).toBe(0);
         const out = result.stderr.text;
         expect(out).toMatch(/Agent:\s+neo-clone/);
-        expect(out).toMatch(/identity\/\s+profile\.md/);
+        // Mind tree now renders skills/playbooks/journal; identity
+        // collapsed into SOUL.md at the agent root.
+        expect(out).toMatch(/skills\//);
     });
 });

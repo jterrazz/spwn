@@ -1,3 +1,4 @@
+
   <PROJECT>/spwn.yaml
 
   errors
@@ -6,3 +7,4 @@
        → use spwn:<name> for built-in dependencies, or author a local dep with skill:<name>, tool:<name>, or hook:<name>; remote registries (github:<owner>/<repo>) are planned but not implemented yet
 
   1 error(s), 0 warning(s), 0 info
+

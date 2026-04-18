@@ -1,5 +1,5 @@
 name: neo
-description: Fixture agent for the mixed-tool-refs e2e — exercises a spwn: ref alongside a tool: local ref.
+description: "Fixture agent for the mixed-tool-refs e2e — exercises a spwn: ref alongside a tool: local ref."
 
 runtime:
   backend: "spwn:claude-code"

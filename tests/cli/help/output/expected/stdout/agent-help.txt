@@ -1,5 +1,5 @@
 
-⬡ agent - composed minds that live in worlds
+⬡ agent - composed minds: SOUL.md at root + 3 Mind layers (skills/playbooks/journal); knowledge is world-scoped
 
 Usage:
   spwn agent [command]
