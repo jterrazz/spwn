@@ -1,5 +1,5 @@
 // Package world provides the public API for the world domain.
-// It wraps backend, manifest, state, and related operations.
+// It wraps backend, manifest, runtimestate, and related operations.
 package world
 
 import (
@@ -8,7 +8,7 @@ import (
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/state"
+	"spwn.sh/packages/world/runtimestate"
 )
 
 // Re-export model types so consumers don't need to reach into internal packages.
@@ -32,7 +32,10 @@ type AgentRecord = models.AgentRecord
 type Backend = backend.Backend
 type ImageInfo = backend.ImageInfo
 type ContainerInfo = backend.ContainerInfo
-type Store = state.Store
+// Store is the world-facing store: enumerates worlds from Docker
+// labels and persists per-world mutable data (session ids, deployed
+// agents, editable display name) under ~/.spwn/world-states/.
+type Store = runtimestate.Store
 
 // --- Backend constructors ---
 
@@ -42,18 +45,20 @@ func NewDocker() (*backend.Docker, error) {
 	return backend.NewDocker()
 }
 
-// --- State constructors ---
+// --- Store constructors ---
 
-// NewStore returns a Store backed by ~/.spwn/state.json, creating the file
-// if it does not exist.
+// NewStore returns a production Store wired to the host Docker
+// daemon and the user's world-state directory.
 func NewStore() (*Store, error) {
-	return state.NewStore()
+	return runtimestate.NewStore()
 }
 
-// NewStoreAt returns a Store backed by the file at the given path, creating it
-// if it does not exist.
-func NewStoreAt(path string) (*Store, error) {
-	return state.NewStoreAt(path)
+// NewStoreAt returns a Store rooted at dir with no Docker backend.
+// Suitable for tests that only exercise the mutable-state methods
+// (SetSessionID, AddAgent, SetDisplayName, …). List/Get error until
+// a backend is wired in via NewStoreWith.
+func NewStoreAt(dir string) (*Store, error) {
+	return runtimestate.NewStoreAt(dir)
 }
 
 // --- Manifest operations ---

@@ -284,8 +284,9 @@ func sortStrings(s []string) {
 	}
 }
 
-// buildAgentWorldMap reads state.json and returns a map of agent name
-// to the world it is currently attached to.
+// buildAgentWorldMap lists every live world (Docker labels, hydrated
+// from runtimestate) and returns a map of agent name → the world it
+// is currently attached to.
 func buildAgentWorldMap() map[string]agentWorldInfo {
 	result := make(map[string]agentWorldInfo)
 

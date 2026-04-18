@@ -13,7 +13,6 @@ import (
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtimestate"
-	"spwn.sh/packages/world/state"
 )
 
 // mockBackend implements backend.Backend for unit testing without Docker.
@@ -236,13 +235,12 @@ func (m *mockBackend) ListContainersByLabel(_ context.Context, key, value string
 
 // --- Tests ---
 
-func newTestArchitect(t *testing.T, b *mockBackend) (*Architect, *state.Store) {
+func newTestArchitect(t *testing.T, b *mockBackend) (*Architect, *runtimestate.Store) {
 	t.Helper()
-	rs, err := runtimestate.NewStoreAt(t.TempDir())
+	store, err := runtimestate.NewStoreWith(b, t.TempDir())
 	if err != nil {
 		t.Fatalf("runtimestate: %v", err)
 	}
-	store := state.NewStoreWith(b, rs)
 	arch := New(b, store)
 	return arch, store
 }
@@ -331,6 +329,67 @@ func TestInspect_NotFound(t *testing.T) {
 	arch, _ := newTestArchitect(t, mb)
 
 	_, err := arch.Inspect(context.Background(), "world-nonexistent-00000")
+	if err == nil {
+		t.Fatal("expected error for nonexistent world")
+	}
+	if !strings.Contains(err.Error(), "not found") {
+		t.Errorf("error should mention 'not found', got: %v", err)
+	}
+}
+
+// TestRename_PersistsAcrossInspect locks in the rename fix: the old
+// implementation silently did nothing because container labels are
+// immutable. The new path writes to runtimestate, and hydrate()
+// overrides the label-derived name on every List/Get. A regression
+// here would re-hide the bug.
+func TestRename_PersistsAcrossInspect(t *testing.T) {
+	mb := newMockBackend()
+	arch, _ := newTestArchitect(t, mb)
+
+	w := models.World{
+		ID:          "w-rename-1",
+		Name:        "original-label-name",
+		Config:      "rename-test",
+		ContainerID: "mock-rename-1",
+		Status:      models.StatusRunning,
+	}
+	seedWorld(mb, w)
+
+	if err := arch.Rename(context.Background(), "w-rename-1", "new-name"); err != nil {
+		t.Fatalf("Rename: %v", err)
+	}
+
+	got, err := arch.Inspect(context.Background(), "w-rename-1")
+	if err != nil {
+		t.Fatalf("Inspect after rename: %v", err)
+	}
+	if got.Name != "new-name" {
+		t.Errorf("post-rename Name = %q, want new-name", got.Name)
+	}
+
+	// Clearing the override restores whatever the label said at spawn.
+	if err := arch.Rename(context.Background(), "w-rename-1", ""); err != nil {
+		t.Fatalf("Rename clear: %v", err)
+	}
+	got, err = arch.Inspect(context.Background(), "w-rename-1")
+	if err != nil {
+		t.Fatalf("Inspect after clear: %v", err)
+	}
+	if got.Name != "original-label-name" {
+		t.Errorf("cleared rename should fall back to label name; got %q", got.Name)
+	}
+}
+
+// TestRename_NonexistentWorld verifies that renaming a world that
+// doesn't exist surfaces the Docker-side "not found" error instead of
+// silently creating a runtimestate file for a ghost id. This is the
+// second half of the rename fix — the user needs to know the world
+// isn't there.
+func TestRename_NonexistentWorld(t *testing.T) {
+	mb := newMockBackend()
+	arch, _ := newTestArchitect(t, mb)
+
+	err := arch.Rename(context.Background(), "w-ghost", "anything")
 	if err == nil {
 		t.Fatal("expected error for nonexistent world")
 	}

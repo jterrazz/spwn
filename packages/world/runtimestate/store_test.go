@@ -121,3 +121,30 @@ func TestDelete(t *testing.T) {
 		t.Errorf("Delete missing should be no-op: %v", err)
 	}
 }
+
+// TestSetDisplayName_Persists locks in the rename fix: setting a
+// display name writes it into runtimestate, Load surfaces it, and a
+// follow-up call can clear it. This replaces the old no-op Rename
+// that silently did nothing.
+func TestSetDisplayName_Persists(t *testing.T) {
+	s := newTestStore(t)
+	if err := s.SetDisplayName("w-1", "my-world"); err != nil {
+		t.Fatalf("SetDisplayName: %v", err)
+	}
+	f, err := s.Load("w-1")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if f.DisplayName != "my-world" {
+		t.Errorf("DisplayName = %q, want my-world", f.DisplayName)
+	}
+	// Clear and re-check.
+	if err := s.SetDisplayName("w-1", ""); err != nil {
+		t.Fatalf("clear SetDisplayName: %v", err)
+	}
+	f, _ = s.Load("w-1")
+	if f.DisplayName != "" {
+		t.Errorf("DisplayName should clear to empty, got %q", f.DisplayName)
+	}
+}
+
