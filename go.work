@@ -13,7 +13,7 @@ use (
 	./packages/mailbox
 	./packages/migration
 	./packages/platform
-	./packages/update
+	./packages/upgrade
 	./packages/project
 	./packages/dependency
 	./packages/runtimes

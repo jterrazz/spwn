@@ -8,7 +8,7 @@
 // This file contains version parsing and comparison. The CLI uses
 // semver-style tags (v1.2.3, v1.2.3-beta.1). Comparison is tolerant of
 // a leading "v" and of the special "dev" string used for local builds.
-package update
+package upgrade
 
 import (
 	"fmt"

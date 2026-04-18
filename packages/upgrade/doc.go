@@ -16,4 +16,4 @@
 // used by the startup banner (`spwn --version` hint) and the web
 // UI's "update available" badge. CLIVersion is the var that
 // -ldflags -X "=" populates at build time.
-package update
+package upgrade

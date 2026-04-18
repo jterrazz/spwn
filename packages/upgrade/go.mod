@@ -1,4 +1,4 @@
-module spwn.sh/packages/update
+module spwn.sh/packages/upgrade
 
 go 1.25.0
 

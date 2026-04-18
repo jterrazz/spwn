@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/update"
+	"spwn.sh/packages/upgrade"
 	"spwn.sh/packages/architect"
 
 	"github.com/spf13/cobra"
@@ -47,11 +47,11 @@ the current binary. Running worlds are stopped gracefully before the swap.`,
 		s.Blank()
 		s.Info("Current version:", Version)
 
-		client := &update.GitHubClient{Owner: "jterrazz", Repo: "spwn"}
+		client := &upgrade.GitHubClient{Owner: "jterrazz", Repo: "spwn"}
 
 		s.Start("Checking for updates...")
-		plan, err := update.CheckForUpdate(ctx, client, Version, update.CheckOpts{
-			Channel: update.Channel(upgradeChannel),
+		plan, err := upgrade.CheckForUpdate(ctx, client, Version, upgrade.CheckOpts{
+			Channel: upgrade.Channel(upgradeChannel),
 		})
 		if err != nil {
 			return s.FailHint("Check failed", err, "Verify your internet connection and try again")
@@ -92,7 +92,7 @@ the current binary. Running worlds are stopped gracefully before the swap.`,
 			return fmt.Errorf("locate current binary: %w", err)
 		}
 
-		err = update.Apply(ctx, plan, update.ApplyOpts{
+		err = upgrade.Apply(ctx, plan, upgrade.ApplyOpts{
 			BinaryName: "spwn",
 			TargetPath: targetPath,
 			Progress: func(msg string) {
