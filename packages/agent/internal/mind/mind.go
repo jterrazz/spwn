@@ -16,7 +16,7 @@ import (
 // parameterised by name.
 const defaultAgentYAMLTmpl = `# Agent composition — the source of truth for the agent's packages
 # and runtime. When the agent is deployed in a world alongside others,
-# the union of every member's packages is what gets baked into the
+# the union of every member's packages is what gets compiled into the
 # resulting container.
 
 name: __NAME__

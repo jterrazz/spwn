@@ -1,13 +1,20 @@
-// Package compile is spwn's two-phase compiler. It translates a
+// Package compile is spwn's transpiler (historical package name;
+// semantically: the source → runtime-specific tree step of the
+// pipeline, i.e. what a compiler's front-end does). It translates a
 // provider-neutral spwn project (spwn.yaml + spwn/agents/* + skills +
 // hooks) into a runtime-specific file layout (Tree) that can then be
-// materialised to disk or handed to packages/image to bake into a
-// Docker image.
+// materialised to disk or handed to packages/image for the compile
+// step — linking the tree with tools into a Docker image.
 //
 // Think tsc: source = .ts files, intermediate = typed AST, emit =
 // .js files under outDir. Spwn: source = the project tree, intermediate
 // = the in-memory Tree, emit = a directory of files a concrete runtime
 // understands.
+//
+// Pipeline:
+//   packages/compile   — transpile source → Tree
+//   packages/image     — compile Tree + tools → Docker image
+//   packages/architect — spawn world from image
 package compile
 
 import (

@@ -33,7 +33,7 @@ type BuildFromBaseRequest struct {
 	// pull it.
 	BaseImage string
 
-	// Tree is the compiled project tree to bake into the image.
+	// Tree is the transpiled project tree to compile into the image.
 	// Its contents land at TreeDestination inside the final image.
 	Tree TreeTarballer
 

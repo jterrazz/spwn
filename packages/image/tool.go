@@ -20,7 +20,7 @@ type Tool interface {
 	// The engine resolves these transitively, deduplicates, and topologically sorts.
 	Dependencies() []string
 
-	// Install returns the recipe to bake this tool into a Docker image.
+	// Install returns the recipe to compile this tool into a Docker image.
 	Install() InstallSpec
 
 	// Verify returns commands to run post-build to confirm installation.

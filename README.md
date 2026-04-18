@@ -87,7 +87,7 @@ If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit yo
 </td>
 <td align="center">
 <h3>📦 Reproducible Builds</h3>
-<code>spwn check</code> validates the project tree. <code>spwn build</code> compiles it and bakes the result into a project-specific Docker image - pushable to any registry, reproducible anywhere. <b>Byte-identical agents across environments.</b>
+<code>spwn check</code> validates the project tree. <code>spwn build</code> transpiles it and compiles the result into a project-specific Docker image - pushable to any registry, reproducible anywhere. <b>Byte-identical agents across environments.</b>
 </td>
 </tr>
 </table>
@@ -102,7 +102,7 @@ Three ideas to hold in your head before you dive in:
 
 - **[Agent orchestration as code](#agent-orchestration-as-code)** - agents, worlds, and tool composition are declarative files committed alongside your code. Like Terraform or `docker-compose.yaml`, but for the agents that work on your repo. Clone it, get the same agents byte-for-byte.
 - **[Agents built from blocks](#agents-built-from-blocks)** - tools, skills, and identity composed in `agent.yaml`. Human-readable, git-friendly, no database.
-- **[Compile to any runtime](#compile-to-any-runtime)** - you write provider-neutral source; `spwn build` adapts it to whatever runtime you target and bakes the result into a reproducible Docker image. Like `tsc`, but for agent runtimes.
+- **[Compile to any runtime](#compile-to-any-runtime)** - you write provider-neutral source; `spwn build` adapts it to whatever runtime you target and compiles the result into a reproducible Docker image. Like `tsc`, but for agent runtimes.
 
 <br/>
 
@@ -188,19 +188,19 @@ Add a catalog dependency to every agent with `spwn install spwn:<name>`; the ref
 
 ### Compile to any runtime
 
-Think of spwn the way you think of `tsc` or `babel`. You write in one clean, provider-neutral source; a compiler adapts it to whatever runtime you target and emits exactly what that runtime expects. You never touch the output by hand.
+Think of spwn the way you think of `tsc` or `babel`. You write in one clean, provider-neutral source; a transpiler adapts it to whatever runtime you target and emits exactly what that runtime expects. You never touch the output by hand.
 
 ```
  spwn/           spwn build          Docker image
  (source)   ──────────────────▶     (artifact you run)
-             compile  +  bake
+            transpile  +  compile
 ```
 
 - **Source** is provider-neutral. `AGENTS.md`, `identity/`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
-- **Compile** renders that source into the exact file layout your chosen runtime expects. Claude Code wants `CLAUDE.md` in a particular place? The claude-code backend emits it. Codex wants something else? Its backend emits that. Same source, different targets - like compiling TypeScript to ES5 vs ES2022.
-- **Bake** links the compiled tree with the tools your agent declared and produces a normal Docker image. Push it, pull it, run it anywhere - byte-identical on every machine.
+- **Transpile** renders that source into the exact file layout your chosen runtime expects. Claude Code wants `CLAUDE.md` in a particular place? The claude-code backend emits it. Codex wants something else? Its backend emits that. Same source, different targets - like transpiling TypeScript to ES5 vs ES2022.
+- **Compile** links the transpiled tree with the tools your agent declared and produces a normal Docker image. Push it, pull it, run it anywhere - byte-identical on every machine.
 
-`spwn check` is the type-checker: it runs the compile step in dry-run to catch broken imports, missing skills, and invalid tool refs before you ever touch Docker.
+`spwn check` is the type-checker: it runs the transpile step in dry-run to catch broken imports, missing skills, and invalid tool refs before you ever touch Docker.
 
 Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lock-in. See [`packages/compile/README.md`](packages/compile/README.md) for internals and how to add a new backend.
 
@@ -343,8 +343,8 @@ group to see the list. Each summary shows a progress bar
 | `spwn init` | Scaffold a blank project | 🟢 |
 | `spwn init spwn:<template>` | Install a bundled example | 🟢 |
 | `spwn check` | Validate the project tree (16 rules) | 🟢 |
-| `spwn build` | Compile + bake the project image | 🟢 |
-| `spwn build --tree-only` | Render the compiled tree to ./dist | 🟢 |
+| `spwn build` | Transpile + compile the project image | 🟢 |
+| `spwn build --tree-only` | Render the transpiled tree to ./dist | 🟢 |
 
 </details>
 
