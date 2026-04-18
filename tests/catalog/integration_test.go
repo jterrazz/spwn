@@ -1,14 +1,15 @@
-package catalog
+package catalog_test
 
 import (
 	"strings"
 	"testing"
 
+	"spwn.sh/catalog"
+	"spwn.sh/packages/project"
+	runtimespkg "spwn.sh/packages/runtimes"
 	"spwn.sh/packages/transpile"
 	_ "spwn.sh/packages/transpile/runtimes/claude_code" // register the claude-code compile renderer
 	"spwn.sh/packages/transpile/source"
-	"spwn.sh/packages/project"
-	runtimespkg "spwn.sh/packages/runtimes"
 )
 
 // TestCatalog_EveryGalleryEntryBuilds exercises the check→build
@@ -27,13 +28,13 @@ import (
 // compile time and would fail for any user who ran `spwn init
 // <slug> && spwn check`.
 func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
-	slugs := ShippedSlugs()
+	slugs := catalog.ShippedSlugs()
 	if len(slugs) == 0 {
 		t.Fatal("no gallery entries found — ShippedSlugs returned empty")
 	}
 
-	builtins := make([]string, 0, len(All)+len(runtimespkg.All))
-	for _, tool := range All {
+	builtins := make([]string, 0, len(catalog.All)+len(runtimespkg.All))
+	for _, tool := range catalog.All {
 		builtins = append(builtins, tool.Name())
 	}
 	supportedRuntimes := make([]string, 0, len(runtimespkg.All))
@@ -47,7 +48,7 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 			base := t.TempDir()
 
 			// Step 1: install.
-			if _, err := Install(slug, base); err != nil {
+			if _, err := catalog.Install(slug, base); err != nil {
 				t.Fatalf("Install %q: %v", slug, err)
 			}
 

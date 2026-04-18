@@ -1,21 +1,33 @@
-package catalog
+package catalog_test
 
 import (
 	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"spwn.sh/catalog"
+	"spwn.sh/packages/dependency"
 )
+
+// hasWorlds reports whether a parsed catalog schema declares at
+// least one world. Mirrors the internal helper in catalog/ — kept
+// local here so the test package doesn't depend on that predicate
+// being exported.
+func hasWorlds(s *dependency.Schema) bool {
+	return s != nil && len(s.Worlds.Content) > 0
+}
 
 // TestShippedSlugsMatchEmbed asserts every gallery-eligible entry
 // (one with a `worlds:` section in spwn.yaml) is reachable via
 // ShippedSlugs(), and vice-versa. Dependency-shaped entries (no
 // worlds:) live in the same embed FS but stay out of the gallery.
 //
-// Runs against catalogFS so it exercises the exact bytes that ship
-// in the compiled binary — not the filesystem.
+// Runs against catalog.EmbedFS() so it exercises the exact bytes
+// that ship in the compiled binary — not the filesystem.
 func TestShippedSlugsMatchEmbed(t *testing.T) {
-	entries, err := fs.ReadDir(catalogFS, ".")
+	embed := catalog.EmbedFS()
+	entries, err := fs.ReadDir(embed, ".")
 	if err != nil {
 		t.Fatalf("read embed root: %v", err)
 	}
@@ -25,7 +37,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 		if !e.IsDir() {
 			continue
 		}
-		schema, err := loadEntrySchema(e.Name())
+		schema, err := catalog.EntrySchema(e.Name())
 		if err != nil {
 			continue
 		}
@@ -35,7 +47,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 	}
 
 	canonical := make(map[string]bool)
-	for _, s := range ShippedSlugs() {
+	for _, s := range catalog.ShippedSlugs() {
 		canonical[s] = true
 	}
 
@@ -61,15 +73,16 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 //
 // Without these, the binary ships but misbehaves at runtime.
 func TestShippedSlugsStructure(t *testing.T) {
-	for _, slug := range ShippedSlugs() {
+	embed := catalog.EmbedFS()
+	for _, slug := range catalog.ShippedSlugs() {
 		t.Run(slug, func(t *testing.T) {
 			for _, p := range []string{slug + "/spwn.yaml", slug + "/spwn.lock"} {
-				if _, err := fs.Stat(catalogFS, p); err != nil {
+				if _, err := fs.Stat(embed, p); err != nil {
 					t.Errorf("missing %s: %v", p, err)
 				}
 			}
 
-			agentEntries, err := fs.ReadDir(catalogFS, slug+"/agents")
+			agentEntries, err := fs.ReadDir(embed, slug+"/agents")
 			if err != nil {
 				t.Errorf("read %s/agents: %v", slug, err)
 				return
@@ -81,11 +94,11 @@ func TestShippedSlugsStructure(t *testing.T) {
 				}
 				hasAgent = true
 				profilePath := slug + "/agents/" + e.Name() + "/SOUL.md"
-				if _, err := fs.Stat(catalogFS, profilePath); err != nil {
+				if _, err := fs.Stat(embed, profilePath); err != nil {
 					t.Errorf("%s: agent %q missing SOUL.md", slug, e.Name())
 				}
 				agentYAML := slug + "/agents/" + e.Name() + "/agent.yaml"
-				if _, err := fs.Stat(catalogFS, agentYAML); err != nil {
+				if _, err := fs.Stat(embed, agentYAML); err != nil {
 					t.Errorf("%s: agent %q missing agent.yaml", slug, e.Name())
 				}
 			}
@@ -100,7 +113,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 // should be the first example users see since it's the multi-agent
 // showcase.
 func TestList_StartupIsFirst(t *testing.T) {
-	got, err := List()
+	got, err := catalog.List()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -113,7 +126,7 @@ func TestList_StartupIsFirst(t *testing.T) {
 }
 
 func TestList_AllShippedExamplesParse(t *testing.T) {
-	got, err := List()
+	got, err := catalog.List()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -149,7 +162,7 @@ func TestList_AllShippedExamplesParse(t *testing.T) {
 }
 
 func TestGet_UnknownSlug(t *testing.T) {
-	if _, err := Get("nope"); err != ErrNotFound {
+	if _, err := catalog.Get("nope"); err != catalog.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
@@ -157,7 +170,7 @@ func TestGet_UnknownSlug(t *testing.T) {
 func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 	// spwn:unix has no worlds: section so Get must treat it as
 	// not-gallery-eligible.
-	if _, err := Get("unix"); err != ErrNotFound {
+	if _, err := catalog.Get("unix"); err != catalog.ErrNotFound {
 		t.Errorf("Get(\"unix\") should fail: deps without worlds are not gallery-eligible (got err=%v)", err)
 	}
 }
@@ -165,7 +178,7 @@ func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	base := t.TempDir()
 
-	rep, err := Install("matrix", base)
+	rep, err := catalog.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -179,18 +192,18 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 		t.Error("expected at least one agent to be added")
 	}
 
-	if !exists(filepath.Join(base, "spwn.yaml")) {
+	if !fileExists(filepath.Join(base, "spwn.yaml")) {
 		t.Error("spwn.yaml was not written")
 	}
-	if !exists(filepath.Join(base, "spwn", "agents", "neo", "SOUL.md")) {
+	if !fileExists(filepath.Join(base, "spwn", "agents", "neo", "SOUL.md")) {
 		t.Error("agent SOUL.md was not copied into spwn/agents/")
 	}
-	if !exists(filepath.Join(base, "spwn", "agents", "neo", "agent.yaml")) {
+	if !fileExists(filepath.Join(base, "spwn", "agents", "neo", "agent.yaml")) {
 		t.Error("agent.yaml was not copied into spwn/agents/")
 	}
 
 	// Re-install: no new additions, every world + agent skipped.
-	rep2, err := Install("matrix", base)
+	rep2, err := catalog.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("second Install: %v", err)
 	}
@@ -207,7 +220,7 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 
 func TestInstall_PreservesLocalEdits(t *testing.T) {
 	base := t.TempDir()
-	_, err := Install("paperclip-factory", base)
+	_, err := catalog.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -218,7 +231,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = Install("paperclip-factory", base)
+	_, err = catalog.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("re-Install: %v", err)
 	}
@@ -232,7 +245,12 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 }
 
 func TestInstall_UnknownSlug(t *testing.T) {
-	if _, err := Install("nope", t.TempDir()); err != ErrNotFound {
+	if _, err := catalog.Install("nope", t.TempDir()); err != catalog.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
+}
+
+func fileExists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
 }
