@@ -6,7 +6,7 @@ The spwn transpiler — provider-neutral source → runtime-specific file tree.
 
 Spwn is a transpiler the same way `tsc` is: you author a portable source language (`spwn.yaml` + `spwn/agents/*` + skills + hooks), and the transpiler emits files a concrete runtime (Claude Code today, Codex tomorrow) understands. You never write a `.js` file by hand for TypeScript; you should never write a `CLAUDE.md` by hand for spwn.
 
-The transpile phase is a **pure function**: `Input → *Tree`. No disk writes, no Docker. A `Tree` is a sorted, in-memory `path → bytes` map — same input, same bytes, deterministic for golden tests. Materialisation (writing the tree into a container or onto disk) is the compile phase, owned by `packages/compile`. Runtime-specific rendering lives in `packages/runtimes/<runtime>/compile/`.
+The transpile phase is a **pure function**: `Input → *Tree`. No disk writes, no Docker. A `Tree` is a sorted, in-memory `path → bytes` map — same input, same bytes, deterministic for golden tests. Materialisation (writing the tree into a container or onto disk) is the compile phase, owned by `packages/compile`. Runtime-specific renderers live in `packages/runtimes/<runtime>/render.go` — thin layout adapters that read content from `worldbook/` (spwn's opinionated world defaults) and place files at runtime-specific paths.
 
 ```
         spwn source                   target runtime
@@ -29,11 +29,12 @@ Powers two delivery shapes, sharing the transpile phase verbatim:
 
 - `Input` — the source snapshot handed to every renderer: manifest, verified tools, selected world, agents with their layers, imports, hooks.
 - `Tree` — flat `path → bytes` map. `AddString` / `AddBytes`, sorted iteration, `WriteTo(dir)` for host-side materialisation.
-- `Runtime` interface — `Name()` + `Render(Input) → *Tree`. Pure. Implementations live in `packages/runtimes/<name>/compile/`.
-- `Transpile(name, input) → *Tree` — look up the registered runtime and render.
+- `Runtime` interface — `Name()` + `Render(Input) → *Tree`. Pure. Implementations live in `packages/runtimes/<name>/`.
+- `Compile(name, input) → *Tree` — look up the registered runtime and render.
 - `source/` sub-package — `Load(root)` walks a project directory into a `ProjectSource`; `ToCompileInput(source, worldName)` projects it onto an `Input`.
+- `worldbook/` sub-package — spwn's opinionated world content (physics, manual, system skills, architect identity, roster, role-aware agent prompts). Runtime-neutral; imported by every runtime renderer and by `packages/architect` for image-build + hot-deploy + NPC flows.
 
 ## Related
 
-- **Imported by** — `apps/cli` (`spwn build`, `spwn check --deep`), `packages/architect` (spawn pipeline), `packages/runtimes/*/compile`
+- **Imported by** — `apps/cli` (`spwn build`, `spwn check --deep`), `packages/architect` (spawn pipeline), `packages/runtimes/*` (renderers)
 - **Imports** — `packages/project`, `packages/agent`, `packages/dependency`
