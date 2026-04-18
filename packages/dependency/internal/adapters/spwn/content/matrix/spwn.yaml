@@ -1,0 +1,23 @@
+version: 2
+name: matrix
+title: The Matrix
+tagline: A sandbox with Neo - interactive exploration
+description: |
+  A clean room. One agent named Neo. No goals, no tasks, no backlog -
+  just a place to poke the system, try tools, and see what emerges.
+
+  Perfect for first-time spwn users: it's the fastest path to "I am
+  talking to an AI agent running in a Docker container on my machine
+  and I can see what it's doing".
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+
+worlds:
+  matrix:
+    agents:
+      - neo
+    workspaces:
+      - .
+    knowledge: ./knowledge

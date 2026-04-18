@@ -15,7 +15,7 @@ import (
 // Runtime is the claude-code spawn-time adapter — implements the
 // world/runtime.Runtime interface (BuildCommand, credential sync,
 // prelaunch shell, default config files). Distinct from Tool (the
-// dependency.Tool for image builds) which lives in claude_code.go.
+// tool.Tool for image builds) which lives in claude_code.go.
 var Runtime = &runtimeAdapter{}
 
 type runtimeAdapter struct{}

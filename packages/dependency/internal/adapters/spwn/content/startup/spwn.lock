@@ -1,0 +1,6 @@
+# spwn.lock — DO NOT EDIT
+spwn:docker-cli latest builtin
+spwn:git latest builtin
+spwn:node latest builtin
+spwn:python latest builtin
+spwn:unix latest builtin

@@ -10,7 +10,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 )
 
 // Manifest is the canonical basename. Both catalog and local
@@ -65,7 +65,7 @@ type ParseOptions struct {
 // (e.g. dependency.ToolFromParsed) adapt this into their own types.
 type Parsed struct {
 	Schema    Schema
-	Kind      dependency.Kind
+	Kind      tool.Kind
 	FileBytes map[string][]byte
 	SkillsFS  any // fs.FS but typed as any to avoid the import on the public type
 }
@@ -193,16 +193,16 @@ func (e EmbedResolver) SkillsFS() fs.FS {
 	return sub
 }
 
-func parseKind(s string) (dependency.Kind, error) {
+func parseKind(s string) (tool.Kind, error) {
 	switch strings.ToLower(s) {
 	case "runtime":
-		return dependency.KindRuntime, nil
+		return tool.KindRuntime, nil
 	case "sdk":
-		return dependency.KindSDK, nil
+		return tool.KindSDK, nil
 	case "tool":
-		return dependency.KindTool, nil
+		return tool.KindTool, nil
 	case "platform":
-		return dependency.KindPlatform, nil
+		return tool.KindPlatform, nil
 	}
 	return "", fmt.Errorf("unknown kind %q (want runtime|sdk|tool|platform)", s)
 }

@@ -10,7 +10,7 @@
 //
 // The package aggregator (runtimes.go) exposes All and
 // RegisterDefaults. Each runtime lives in its own sub-package
-// (claude_code, codex) with a Tool singleton (the dependency.Tool side)
+// (claude_code, codex) with a Tool singleton (the tool.Tool side)
 // and, when needed, a Runtime (the spawn-time adapter registered
 // with world/runtime).
 package runtimes

@@ -2,7 +2,7 @@ package compile
 
 import (
 	"spwn.sh/packages/compile/internal/dockerfile"
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 )
 
 // GenerateOpts configures Dockerfile generation.
@@ -19,7 +19,7 @@ func GenerateDockerfile(baseDockerfile []byte, tools []ToolInput, imageVersion s
 
 // ToolsToInputs converts resolved Tool interfaces to ToolInput structs
 // for use with GenerateDockerfile.
-func ToolsToInputs(tools []dependency.Tool) []ToolInput {
+func ToolsToInputs(tools []tool.Tool) []ToolInput {
 	inputs := make([]ToolInput, len(tools))
 	for i, t := range tools {
 		spec := t.Install()

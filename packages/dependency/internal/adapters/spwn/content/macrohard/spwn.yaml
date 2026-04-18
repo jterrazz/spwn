@@ -1,0 +1,28 @@
+version: 2
+name: macrohard
+title: Macrohard
+tagline: Your three-agent software company in a box
+description: |
+  A tiny company with a chief and two developers. Ballmer assigns work,
+  Gates and Nadella build it. The three agents live in the same world
+  and communicate through their per-world inboxes.
+
+  What you get:
+    - One world pre-configured with Unix, Git, Node and build tools
+    - Three agents: ballmer (chief), gates (worker), nadella (worker)
+    - A ready-made roster so the agents know who each other are
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:node"
+
+worlds:
+  macrohard:
+    agents:
+      - nadella
+      - gates
+      - ballmer
+    workspaces:
+      - .
+    knowledge: ./knowledge

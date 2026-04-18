@@ -1,53 +1,53 @@
 package imagetest
 
+import "spwn.sh/packages/dependency/tool"
+
 import (
 	"io/fs"
 	"strings"
 	"testing"
-
-	"spwn.sh/packages/dependency"
 )
 
 // AssertValidTool checks all interface invariants on a tool.
-func AssertValidTool(t *testing.T, tool dependency.Tool) {
+func AssertValidTool(t *testing.T, tl tool.Tool) {
 	t.Helper()
 
-	if !strings.HasPrefix(tool.Name(), "@") {
-		t.Errorf("name %q must start with @", tool.Name())
+	if !strings.HasPrefix(tl.Name(), "@") {
+		t.Errorf("name %q must start with @", tl.Name())
 	}
 
-	validKinds := map[dependency.Kind]bool{
-		dependency.KindRuntime: true, dependency.KindTool: true,
-		dependency.KindSDK: true, dependency.KindPlatform: true,
+	validKinds := map[tool.Kind]bool{
+		tool.KindRuntime: true, tool.KindTool: true,
+		tool.KindSDK: true, tool.KindPlatform: true,
 	}
-	if !validKinds[tool.Kind()] {
-		t.Errorf("invalid kind %q", tool.Kind())
+	if !validKinds[tl.Kind()] {
+		t.Errorf("invalid kind %q", tl.Kind())
 	}
 
-	if tool.Version() == "" {
+	if tl.Version() == "" {
 		t.Error("version must not be empty")
 	}
 
-	spec := tool.Install()
+	spec := tl.Install()
 	if len(spec.AptPackages) == 0 && len(spec.Commands) == 0 && len(spec.Files) == 0 {
 		t.Error("install spec must have packages, commands, or files")
 	}
 
-	if len(tool.Verify()) == 0 {
+	if len(tl.Verify()) == 0 {
 		t.Error("must have at least one verify command")
 	}
 
-	for _, dep := range tool.Dependencies() {
-		if dep == tool.Name() {
+	for _, dep := range tl.Dependencies() {
+		if dep == tl.Name() {
 			t.Errorf("tool depends on itself: %s", dep)
 		}
 	}
 }
 
 // AssertHasSkillMD checks that a tool's Skills() FS contains SKILL.md.
-func AssertHasSkillMD(t *testing.T, tool dependency.Tool) {
+func AssertHasSkillMD(t *testing.T, tl tool.Tool) {
 	t.Helper()
-	s := tool.Skills()
+	s := tl.Skills()
 	if s == nil {
 		t.Fatal("Skills() returned nil")
 	}

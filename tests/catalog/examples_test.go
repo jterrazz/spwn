@@ -1,109 +1,23 @@
 package catalog_test
 
 import (
-	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
 
-	spwn "spwn.sh/packages/dependency/adapters/spwn"
+	"spwn.sh/packages/dependency"
 )
 
-// TestShippedSlugsMatchEmbed asserts every gallery-eligible entry
-// (one with a `worlds:` section in spwn.yaml) is reachable via
-// ShippedSlugs(), and vice-versa. Dependency-shaped entries (no
-// worlds:) live in the same embed FS but stay out of the gallery.
-//
-// Uses spwn.Get (returns ErrNotFound for non-gallery entries) as
-// The "is this a gallery entry?" oracle — that predicate is what
-// ShippedSlugs() uses internally, so the two must agree.
-func TestShippedSlugsMatchEmbed(t *testing.T) {
-	embed := spwn.EmbedFS()
-	entries, err := fs.ReadDir(embed, ".")
-	if err != nil {
-		t.Fatalf("read embed root: %v", err)
-	}
-
-	gallerySlugs := make(map[string]bool)
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		// spwn.Get returns ErrNotFound when the entry has no
-		// Worlds: section. A nil error == gallery-eligible.
-		if _, err := spwn.Get(e.Name()); err == nil {
-			gallerySlugs[e.Name()] = true
-		}
-	}
-
-	canonical := make(map[string]bool)
-	for _, s := range spwn.ShippedSlugs() {
-		canonical[s] = true
-	}
-
-	for slug := range canonical {
-		if !gallerySlugs[slug] {
-			t.Errorf("ShippedSlugs lists %q but its spwn.yaml has no worlds: section", slug)
-		}
-	}
-	for slug := range gallerySlugs {
-		if !canonical[slug] {
-			t.Errorf("embedded gallery entry %q is missing from ShippedSlugs", slug)
-		}
-	}
-}
-
-// TestShippedSlugsStructure asserts every gallery entry ships the
-// minimum filesystem contract that Install and Get depend on:
-//
-//	<slug>/spwn.yaml
-//	<slug>/spwn.lock
-//	<slug>/agents/<at-least-one-dir>/SOUL.md
-//	<slug>/agents/<at-least-one-dir>/agent.yaml
-//
-// Without these, the binary ships but misbehaves at runtime.
-func TestShippedSlugsStructure(t *testing.T) {
-	embed := spwn.EmbedFS()
-	for _, slug := range spwn.ShippedSlugs() {
-		t.Run(slug, func(t *testing.T) {
-			for _, p := range []string{slug + "/spwn.yaml", slug + "/spwn.lock"} {
-				if _, err := fs.Stat(embed, p); err != nil {
-					t.Errorf("missing %s: %v", p, err)
-				}
-			}
-
-			agentEntries, err := fs.ReadDir(embed, slug+"/agents")
-			if err != nil {
-				t.Errorf("read %s/agents: %v", slug, err)
-				return
-			}
-			hasAgent := false
-			for _, e := range agentEntries {
-				if !e.IsDir() {
-					continue
-				}
-				hasAgent = true
-				profilePath := slug + "/agents/" + e.Name() + "/SOUL.md"
-				if _, err := fs.Stat(embed, profilePath); err != nil {
-					t.Errorf("%s: agent %q missing SOUL.md", slug, e.Name())
-				}
-				agentYAML := slug + "/agents/" + e.Name() + "/agent.yaml"
-				if _, err := fs.Stat(embed, agentYAML); err != nil {
-					t.Errorf("%s: agent %q missing agent.yaml", slug, e.Name())
-				}
-			}
-			if !hasAgent {
-				t.Errorf("%s: no agent directory under agents/", slug)
-			}
-		})
-	}
-}
+// Structural embed-walking tests live inside the spwn adapter
+// (packages/dependency/internal/adapters/spwn/structure_test.go)
+// where they can access the embed FS white-box. This file covers
+// the public facade only.
 
 // TestList_StartupIsFirst verifies the gallery ordering — startup
 // should be the first example users see since it's the multi-agent
 // showcase.
 func TestList_StartupIsFirst(t *testing.T) {
-	got, err := spwn.List()
+	got, err := dependency.Gallery()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -116,7 +30,7 @@ func TestList_StartupIsFirst(t *testing.T) {
 }
 
 func TestList_AllShippedExamplesParse(t *testing.T) {
-	got, err := spwn.List()
+	got, err := dependency.Gallery()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -152,7 +66,7 @@ func TestList_AllShippedExamplesParse(t *testing.T) {
 }
 
 func TestGet_UnknownSlug(t *testing.T) {
-	if _, err := spwn.Get("nope"); err != spwn.ErrNotFound {
+	if _, err := dependency.GalleryEntryBySlug("nope"); err != dependency.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
@@ -160,7 +74,7 @@ func TestGet_UnknownSlug(t *testing.T) {
 func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 	// spwn:unix has no worlds: section so Get must treat it as
 	// not-gallery-eligible.
-	if _, err := spwn.Get("unix"); err != spwn.ErrNotFound {
+	if _, err := dependency.GalleryEntryBySlug("unix"); err != dependency.ErrNotFound {
 		t.Errorf("Get(\"unix\") should fail: deps without worlds are not gallery-eligible (got err=%v)", err)
 	}
 }
@@ -168,7 +82,7 @@ func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	base := t.TempDir()
 
-	rep, err := spwn.Install("matrix", base)
+	rep, err := dependency.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -193,7 +107,7 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	}
 
 	// Re-install: no new additions, every world + agent skipped.
-	rep2, err := spwn.Install("matrix", base)
+	rep2, err := dependency.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("second Install: %v", err)
 	}
@@ -210,7 +124,7 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 
 func TestInstall_PreservesLocalEdits(t *testing.T) {
 	base := t.TempDir()
-	_, err := spwn.Install("paperclip-factory", base)
+	_, err := dependency.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -221,7 +135,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = spwn.Install("paperclip-factory", base)
+	_, err = dependency.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("re-Install: %v", err)
 	}
@@ -235,7 +149,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 }
 
 func TestInstall_UnknownSlug(t *testing.T) {
-	if _, err := spwn.Install("nope", t.TempDir()); err != spwn.ErrNotFound {
+	if _, err := dependency.Install("nope", t.TempDir()); err != dependency.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }

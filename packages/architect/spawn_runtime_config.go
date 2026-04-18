@@ -9,7 +9,7 @@ import (
 
 	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/backend"
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 )
 
 // injectRuntimeConfig computes the merged runtime config for the
@@ -28,7 +28,7 @@ import (
 //
 // Additional runtimes can grow their own branch here as
 // dependencies for them materialise.
-func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []dependency.Tool) error {
+func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []tool.Tool) error {
 	// The dependency-facing runtime identifier is the same as the
 	// image builder's runtime tool name. Spawn always installs
 	// spwn:claude-code, so hard-code it here until a second

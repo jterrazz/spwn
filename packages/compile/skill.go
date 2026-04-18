@@ -1,7 +1,8 @@
 package compile
 
+import "spwn.sh/packages/dependency/tool"
+
 import (
-	"spwn.sh/packages/dependency"
 	"fmt"
 	"io/fs"
 	"strings"
@@ -10,7 +11,7 @@ import (
 // CollectSkills aggregates skill files from all resolved tools into a map
 // of destination paths → content for copying into the compile.
 // Skills are placed at /world/skills/{tool-name}/.
-func CollectSkills(tools []dependency.Tool) (map[string][]byte, error) {
+func CollectSkills(tools []tool.Tool) (map[string][]byte, error) {
 	result := make(map[string][]byte)
 
 	var skillTools []string

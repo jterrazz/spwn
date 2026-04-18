@@ -1,10 +1,10 @@
 package compile
 
+import "spwn.sh/packages/dependency/tool"
+
 import (
 	"fmt"
 	"testing"
-
-	"spwn.sh/packages/dependency"
 )
 
 // BenchmarkRegistryResolve measures the cost of topologically
@@ -44,4 +44,4 @@ type benchTool struct {
 }
 
 func (t *benchTool) Dependencies() []string { return t.deps }
-func (t *benchTool) Kind() dependency.Kind  { return dependency.KindTool }
+func (t *benchTool) Kind() tool.Kind  { return tool.KindTool }

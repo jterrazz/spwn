@@ -1,29 +1,29 @@
 package claude_code
 
 import (
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 	"io/fs"
 )
 
 
 // Tool is the spwn:claude-code tool - Claude Code AI agent runtime.
-var Tool = &tool{}
+var Tool = &claudeCodeTool{}
 
-type tool struct{}
+type claudeCodeTool struct{}
 
-func (*tool) Name() string    { return "spwn:claude-code" }
-func (*tool) Kind() dependency.Kind   { return dependency.KindRuntime }
-func (*tool) Version() string { return "latest" }
+func (*claudeCodeTool) Name() string    { return "spwn:claude-code" }
+func (*claudeCodeTool) Kind() tool.Kind   { return tool.KindRuntime }
+func (*claudeCodeTool) Version() string { return "latest" }
 
 // Dependencies: only spwn:unix for curl + jq. We used to also
 // require spwn:node because the old install path was
 // `npm install -g @anthropic-ai/claude-code`; the native installer
 // below ships a self-contained binary so node is no longer part
 // of the required world footprint.
-func (*tool) Dependencies() []string { return []string{"spwn:unix"} }
+func (*claudeCodeTool) Dependencies() []string { return []string{"spwn:unix"} }
 
-func (*tool) Install() dependency.InstallSpec {
-	return dependency.InstallSpec{
+func (*claudeCodeTool) Install() tool.InstallSpec {
+	return tool.InstallSpec{
 		Commands: []string{
 			// Native install: downloads a self-contained binary,
 			// no Node.js / npm in the compile. The installer drops
@@ -55,11 +55,11 @@ func (*tool) Install() dependency.InstallSpec {
 	}
 }
 
-func (*tool) Verify() []string {
+func (*claudeCodeTool) Verify() []string {
 	return []string{"command -v claude"}
 }
 
-func (*tool) Skills() fs.FS { return nil }
+func (*claudeCodeTool) Skills() fs.FS { return nil }
 
-func (*tool) Runtimes() []string         { return nil }
-func (*tool) Config(runtime string) []byte { return nil }
+func (*claudeCodeTool) Runtimes() []string         { return nil }
+func (*claudeCodeTool) Config(runtime string) []byte { return nil }

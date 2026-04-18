@@ -12,7 +12,8 @@ import (
 	"strings"
 
 	runtimes "spwn.sh/packages/runtimes"
-	spwn "spwn.sh/packages/dependency/adapters/spwn"
+	"spwn.sh/packages/dependency"
+
 	ib "spwn.sh/packages/compile"
 	ibbase "spwn.sh/packages/compile/base"
 	"spwn.sh/packages/platform"
@@ -43,7 +44,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 
 	// Resolve architect tools via the image package to generate install steps
 	reg := ib.NewRegistry()
-	if err := spwn.RegisterDefaults(reg); err != nil {
+	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {

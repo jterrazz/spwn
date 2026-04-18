@@ -5,10 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
 	"github.com/spf13/cobra"
 
-	spwn "spwn.sh/packages/dependency/adapters/spwn"
+	"spwn.sh/packages/dependency"
 )
 
 func TestParseExampleRef(t *testing.T) {
@@ -76,7 +75,7 @@ func withTempCwd(t *testing.T) string {
 // RunE directly to avoid cobra's shared-state issues with --help
 // flags leaking across tests in the package.
 func TestRunInitExample_InstallsFromCatalog(t *testing.T) {
-	if _, err := spwn.Get("matrix"); err != nil {
+	if _, err := dependency.GalleryEntryBySlug("matrix"); err != nil {
 		t.Skipf("matrix example not bundled: %v", err)
 	}
 
@@ -128,7 +127,7 @@ func TestRunInitExample_RejectsBadRef(t *testing.T) {
 // bare name that matches a gallery entry must install the example
 // through the catalog resolver, same as the explicit spwn:<slug> form.
 func TestRunInitExample_AcceptsBareGallerySlug(t *testing.T) {
-	if _, err := spwn.Get("matrix"); err != nil {
+	if _, err := dependency.GalleryEntryBySlug("matrix"); err != nil {
 		t.Skipf("matrix example not bundled: %v", err)
 	}
 

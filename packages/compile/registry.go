@@ -3,22 +3,23 @@ package compile
 import (
 	"fmt"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/refs"
+	"spwn.sh/packages/dependency/tool"
 )
 
 // Registry holds all registered tools and resolves dependency graphs.
 // Keys are the canonical scheme-form ref (`spwn:unix`, `github:owner/repo`).
 type Registry struct {
-	tools map[string]dependency.Tool
+	tools map[string]tool.Tool
 }
 
 // NewRegistry creates an empty tool registry.
 func NewRegistry() *Registry {
-	return &Registry{tools: make(map[string]dependency.Tool)}
+	return &Registry{tools: make(map[string]tool.Tool)}
 }
 
 // Register adds a tool to the registry. Returns error on duplicate name.
-func (r *Registry) Register(t dependency.Tool) error {
+func (r *Registry) Register(t tool.Tool) error {
 	name := t.Name()
 	if _, exists := r.tools[name]; exists {
 		return fmt.Errorf("%w: %s", ErrDuplicateTool, name)
@@ -28,16 +29,16 @@ func (r *Registry) Register(t dependency.Tool) error {
 }
 
 // Get returns a tool by name, or nil if not found.
-func (r *Registry) Get(name string) dependency.Tool {
+func (r *Registry) Get(name string) tool.Tool {
 	if t, ok := r.tools[name]; ok {
 		return t
 	}
-	return r.tools[dependency.Canonical(name)]
+	return r.tools[refs.Canonical(name)]
 }
 
 // List returns all registered tools.
-func (r *Registry) List() []dependency.Tool {
-	result := make([]dependency.Tool, 0, len(r.tools))
+func (r *Registry) List() []tool.Tool {
+	result := make([]tool.Tool, 0, len(r.tools))
 	for _, t := range r.tools {
 		result = append(result, t)
 	}
@@ -46,7 +47,7 @@ func (r *Registry) List() []dependency.Tool {
 
 // Resolve takes a list of requested tool names, expands transitive dependencies,
 // deduplicates, and returns a topologically sorted build order.
-func (r *Registry) Resolve(requested []string) ([]dependency.Tool, error) {
+func (r *Registry) Resolve(requested []string) ([]tool.Tool, error) {
 
 	// Canonicalise every input ref up-front so the rest of the
 	// algorithm deals in one consistent key space.
@@ -55,7 +56,7 @@ func (r *Registry) Resolve(requested []string) ([]dependency.Tool, error) {
 		if _, ok := r.tools[name]; ok {
 			canon[i] = name
 		} else {
-			canon[i] = dependency.Canonical(name)
+			canon[i] = refs.Canonical(name)
 		}
 	}
 	requested = canon
@@ -123,7 +124,7 @@ func (r *Registry) Resolve(requested []string) ([]dependency.Tool, error) {
 		}
 	}
 
-	var sorted []dependency.Tool
+	var sorted []tool.Tool
 	for len(queue) > 0 {
 		name := queue[0]
 		queue = queue[1:]

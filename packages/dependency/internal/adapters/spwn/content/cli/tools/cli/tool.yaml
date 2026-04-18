@@ -1,0 +1,11 @@
+name: "spwn:cli"
+kind: platform
+version: latest
+description: "The spwn CLI for managing worlds and agents"
+
+install:
+  commands:
+    - curl -fsSL https://spwn.sh/install.sh | bash || true
+
+verify:
+  - command -v spwn
