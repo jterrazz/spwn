@@ -7,7 +7,7 @@ import (
 
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/runtimes/claudecode"
+	"spwn.sh/packages/transpile/worldbook"
 	"spwn.sh/packages/runtimes"
 )
 
@@ -30,7 +30,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 	a.state.UpdateStatus(worldID, models.StatusRunning)
 
 	// Generate AGENT.md for NPC (minimal context)
-	agentCtx := claudecode.GenerateAgentContext(claudecode.AgentContextOpts{
+	agentCtx := worldbook.GenerateAgentContext(worldbook.AgentContextOpts{
 		Role:       "npc",
 		Ephemeral:  true,
 		WorldID:    worldID,

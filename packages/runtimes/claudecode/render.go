@@ -4,14 +4,17 @@ import (
 	"fmt"
 
 	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/transpile/worldbook"
 )
 
 // renderer is the transpile.Runtime implementation for Claude Code.
 //
 // Claude Code reads a CLAUDE.md at the working directory on startup.
-// This runtime translates the provider-neutral spwn source format
-// into that convention: each agent's source AGENTS.md becomes an
-// emitted CLAUDE.md inside the container's agent home.
+// This renderer is a thin LAYOUT adapter: the prose itself lives in
+// packages/transpile/worldbook (physics, manual, skills, roster,
+// architect identity — all runtime-neutral spwn content). Our job
+// here is to place that content at Claude-specific paths and to emit
+// the per-agent CLAUDE.md entrypoint with Claude's @-import syntax.
 type renderer struct{}
 
 // Renderer is the exported render adapter for Claude Code. It is
@@ -24,44 +27,43 @@ var Renderer = &renderer{}
 // transpile.Compile to look up this runtime.
 func (r *renderer) Name() string { return "claude-code" }
 
-// Render translates the Input into a Tree laid out the way Claude
-// Code expects. It produces:
+// Render lays out worldbook content at Claude-specific paths. Paths
+// it chooses:
 //
 //   - world/physics.md, world/faculties.md, world/AGENTS.md,
-//     world/roster.md
-//   - world/skills/*.md (system skills)
-//   - agents/<name>/CLAUDE.md + agents/<name>/role.md for every agent
+//     world/roster.md                          (runtime-neutral content)
+//   - world/skills/*.md                        (runtime-neutral content)
+//   - agents/<name>/CLAUDE.md                  (Claude-specific entrypoint)
+//   - agents/<name>/worlds/<id>/role.md        (runtime-neutral content)
 //
-// This is the in-memory equivalent of what architect.Spawn used to
-// write file-by-file.
+// The world/ paths happen to be the same ones codex would likely use
+// if it grew a renderer — they're generic filesystem layout. The
+// agents/<name>/CLAUDE.md filename is where Claude-specificity lives;
+// another runtime would pick its own entrypoint name.
 func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 	t := transpile.New()
 
-	// World-wide files. These happen to be rendered the same way for
-	// every runtime today, but they still belong to a concrete
-	// runtime until a second target forces the shared bits up into
-	// a neutral sub-package.
-	t.AddString("world/physics.md", GeneratePhysics(input.Deps))
-	t.AddString("world/faculties.md", GenerateFaculties(input.VerifiedTools))
-	t.AddString("world/AGENTS.md", AgentsBook(input.WorldKnowledgeMounted))
+	t.AddString("world/physics.md", worldbook.GeneratePhysics(input.Deps))
+	t.AddString("world/faculties.md", worldbook.GenerateFaculties(input.VerifiedTools))
+	t.AddString("world/AGENTS.md", worldbook.AgentsBook(input.WorldKnowledgeMounted))
 
 	// Roster, if we have agents to put in it.
-	roster := make([]ColonyAgentSpec, 0, len(input.Agents))
+	roster := make([]worldbook.ColonyAgentSpec, 0, len(input.Agents))
 	for _, a := range input.Agents {
-		roster = append(roster, ColonyAgentSpec{Name: a.Name, Role: a.Role})
+		roster = append(roster, worldbook.ColonyAgentSpec{Name: a.Name, Role: a.Role})
 	}
-	t.AddString("world/roster.md", GenerateRoster(input.WorldID, roster, input.WorldKnowledgeMounted))
+	t.AddString("world/roster.md", worldbook.GenerateRoster(input.WorldID, roster, input.WorldKnowledgeMounted))
 
 	// System skills. The mind-management guide varies with the
 	// knowledge-mount flag — when no knowledge dir is bound, the
 	// "Saving Knowledge" section is dropped entirely.
-	for name, body := range SystemSkills(input.WorldKnowledgeMounted) {
+	for name, body := range worldbook.SystemSkills(input.WorldKnowledgeMounted) {
 		t.AddString("world/skills/"+name, body)
 	}
 
 	// Per-agent files. Source AGENTS.md -> target CLAUDE.md lives
-	// here: the claudecode renderer is the single place that
-	// encodes "Claude Code reads CLAUDE.md".
+	// here: this renderer is the single place that encodes "Claude
+	// Code reads CLAUDE.md".
 	for _, a := range input.Agents {
 		role := a.Role
 		if role == "" {
