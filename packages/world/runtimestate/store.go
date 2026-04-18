@@ -79,8 +79,9 @@ type Store struct {
 
 // NewStore returns a production Store wired to the host Docker
 // daemon and rooted at ~/.spwn/world-states/. The legacy
-// ~/.spwn/state.json file (from pre-labels installs) is removed on
-// first construction — keeping it around would invite confusion.
+// ~/.spwn/state.json and ~/.spwn/runtime/ paths are removed by the
+// 016 migration at CLI boot — not here — so there's a single
+// source of truth for schema transitions.
 func NewStore() (*Store, error) {
 	docker, err := backend.NewDocker()
 	if err != nil {
@@ -90,9 +91,7 @@ func NewStore() (*Store, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("create world-states dir: %w", err)
 	}
-	s := &Store{dir: dir, backend: docker}
-	s.evictLegacyStateFile()
-	return s, nil
+	return &Store{dir: dir, backend: docker}, nil
 }
 
 // NewStoreWith creates a Store from an explicit backend + root dir.
@@ -115,21 +114,6 @@ func NewStoreAt(dir string) (*Store, error) {
 	return &Store{dir: dir}, nil
 }
 
-// evictLegacyStateFile removes the old ~/.spwn/state.json and the
-// short-lived ~/.spwn/runtime/ tree (used by an earlier refactor) if
-// either is present. Safe to call repeatedly.
-func (s *Store) evictLegacyStateFile() {
-	legacy := platform.LegacyStatePath()
-	if legacy != "" {
-		if _, err := os.Stat(legacy); err == nil {
-			_ = os.Remove(legacy)
-			_ = os.Remove(legacy + ".bak")
-		}
-	}
-	if oldRuntime := filepath.Join(platform.BaseDir(), "runtime"); oldRuntime != "" {
-		_ = os.RemoveAll(oldRuntime)
-	}
-}
 
 // ── World enumeration (Docker-label-backed) ───────────────────────────
 

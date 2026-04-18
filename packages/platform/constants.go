@@ -2,10 +2,9 @@ package platform
 
 // Directory layout constants.
 const (
-	SpwnBaseDir         = ".spwn"
-	WorldsSubDir        = "worlds"
-	AgentsSubDir        = "agents"
-	StateFileName       = "state.json"
+	SpwnBaseDir  = ".spwn"
+	WorldsSubDir = "worlds"
+	AgentsSubDir = "agents"
 	// SkillsSubDir is where bare markdown skills live.
 	SkillsSubDir = "skills"
 	// ToolsSubDir is where local tool.yaml definitions live.

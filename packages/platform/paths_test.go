@@ -50,15 +50,6 @@ func TestAgentsDir(t *testing.T) {
 	}
 }
 
-func TestLegacyStatePath(t *testing.T) {
-	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
-
-	want := "/tmp/test-spwn/state.json"
-	got := LegacyStatePath()
-	if got != want {
-		t.Errorf("LegacyStatePath() = %q, want %q", got, want)
-	}
-}
 
 func TestOrgPath(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
