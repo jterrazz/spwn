@@ -50,8 +50,8 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
 			{Title: "Compose", Commands: []ui.HelpEntry{
-				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--dep / --skill)")},
-				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--dep / --skill)")},
+				{Name: "add <name>", Desc: "Attach blocks " + ui.Faint("(--dep / --skill / --tool / --hook)")},
+				{Name: "remove <name>", Desc: "Detach blocks " + ui.Faint("(--dep)")},
 			}},
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
@@ -77,7 +77,8 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn agent create neo", Desc: ""},
-				{Name: "spwn agent add neo --dep spwn:python --skill paper-reading", Desc: ""},
+				{Name: "spwn agent add neo --dep python", Desc: ""},
+				{Name: "spwn agent add neo --skill skill:paper-reading", Desc: ""},
 				{Name: "spwn agent neo", Desc: ""},
 			}},
 		},
@@ -99,11 +100,11 @@ var Cmd = &cobra.Command{
 	Short: "Spawn an agent - a living identity that inhabits a world",
 	Long: `Spawn an agent into an existing world.
 
-An agent is backed by a Mind - a persistent directory holding its identity,
-skills, playbooks, journal entries, and session state. The agent survives
-after the world is destroyed. Knowledge lives at /world/knowledge/ inside
-each world when the manifest opts in via worlds.<name>.knowledge — the
-path resolves relative to the project root and is shared across every
+An agent is backed by a Mind - a persistent directory holding its SOUL.md
+(purpose, voice, principles), skills/, playbooks/, and journal/. The agent
+survives after the world is destroyed. Knowledge lives at /world/knowledge/
+inside each world when the manifest opts in via worlds.<name>.knowledge —
+the path resolves relative to the project root and is shared across every
 agent in that world.`,
 	Args: cobra.ArbitraryArgs, // subcommands still resolve first
 	Example: `  spwn agent create neo              Create a blank agent

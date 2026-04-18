@@ -38,8 +38,8 @@ worlds:
     # Omit the key entirely to spawn a world whose agents are never
     # told a knowledge base exists.
     knowledge: ./knowledge
-    # Optional extra tools injected on top of each agent's own tools.
-    tools:
+    # Optional extra dependencies injected on top of each agent's own.
+    dependencies:
       - "spwn:docker-cli"
 
   lab:
@@ -93,16 +93,17 @@ name: neo
 runtime:
   backend: "spwn:claude-code"
 
-tools:
+dependencies:
   - "spwn:unix"         # bash, grep, sed, awk…
   - "spwn:git"          # version control
   - "spwn:node"         # Node.js
 ```
 
-The effective tool set for a live container is the union of the
-agent's `tools:` and the world's `tools:`. If two agents in the same
-multi-agent world disagree on a tool's *version*, `spwn check` fails
-the project - version conflicts are errors, not last-writer-wins.
+The effective dependency set for a live container is the union of
+the agent's `dependencies:` and the world's `dependencies:`. If two
+agents in the same multi-agent world disagree on a dependency's
+*version*, `spwn check` fails the project — version conflicts are
+errors, not last-writer-wins.
 
 ## Limits
 

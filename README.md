@@ -408,7 +408,7 @@ group to see the list. Each summary shows a progress bar
 |---|---|:---:|
 | `spwn agent export <name>` | Archive to `<name>.tar.gz` | 🟡 |
 | `spwn agent import <path>` | Install from archive | 🟡 |
-| `spwn agent get @community/<name>` | Install shared agent from registry | 🔴 |
+| `spwn agent get github:<owner>/<repo>` | Install shared agent from registry | 🔴 |
 | `spwn agent publish <name>` | Ship to registry (memory stripped) | 🔴 |
 
 </details>

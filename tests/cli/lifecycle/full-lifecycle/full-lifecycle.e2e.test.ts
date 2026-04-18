@@ -166,7 +166,7 @@ describe('full agent lifecycle', () => {
     test('error recovery: down on an invalid world id fails gracefully', async () => {
         await using result = await spec('journey bad id')
             .project('docker-pilot')
-            .exec('down w-fake-99999')
+            .exec('down world-fake-99999')
             .run();
 
         expect(result.exitCode).toBe(1);

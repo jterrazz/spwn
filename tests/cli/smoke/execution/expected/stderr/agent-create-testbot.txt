@@ -1,7 +1,7 @@
 
   → Creating agent "testbot"...
   ✓ Created agent            testbot
-  ✓ Created profile          profile.md
+  ✓ Created soul             SOUL.md
 
   ✓ Spawn with: spwn up --agent testbot
 

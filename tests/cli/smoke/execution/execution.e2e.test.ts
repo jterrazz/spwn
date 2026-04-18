@@ -57,7 +57,7 @@ describe('CLI execution - agent commands', () => {
 
 describe('CLI execution - enter command', () => {
     test("'spwn world enter <nonexistent-id>' returns clean error", async () => {
-        const result = await isolated('enter nonexistent').exec('world enter w-fake-99999').run();
+        const result = await isolated('enter nonexistent').exec('world enter world-fake-99999').run();
 
         expect(result.exitCode).toBe(1);
         expect(result.stderr.text).not.toContain('panic:');

@@ -94,7 +94,7 @@ already exists.`,
 		}
 
 		s.Done("Created agent", name)
-		s.Done("Created profile", "profile.md")
+		s.Done("Created soul", "SOUL.md")
 
 		// Auto-world: when a spwn project is active, also add a
 		// single-agent world entry to spwn.yaml so the agent is

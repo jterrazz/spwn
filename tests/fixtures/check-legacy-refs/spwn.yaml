@@ -1,0 +1,18 @@
+# Fixture: manifest with three legacy / malformed dep refs.
+#
+# Exercises the check-time grammar enforcement. The agent's
+# dependencies list intentionally encodes every shape the current
+# scheme-only grammar rejects:
+#   - bare name (no scheme)
+#   - `local:<name>` retired alias
+#   - `@owner/name` legacy syntax
+# `spwn check` must surface all three as errors pointing at the
+# five valid schemes.
+version: 2
+name: check-legacy-refs
+
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: [.]
+    knowledge: ./knowledge

@@ -10,7 +10,7 @@ func TestGenerateChiefContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "morpheus",
 		Role:      "chief",
-		WorldID:   "w-acme-28373",
+		WorldID:   "world-acme-28373",
 		Workspaces: []Workspace{{Name: "default", Path: "/host/project"}},
 		Deps:   []string{"bash", "git", "node"},
 		OtherAgents: []AgentInfo{
@@ -27,7 +27,7 @@ func TestGenerateChiefContext(t *testing.T) {
 		"Messaging":        "missing messaging skill",
 		"/world/inbox":     "missing inbox reference",
 		"Delegation":       "missing delegation pattern",
-		"w-acme-28373":     "missing world ID",
+		"world-acme-28373":     "missing world ID",
 		"/host/project":    "missing workspace path",
 		"bash, git, node":  "missing tools",
 	}
@@ -48,7 +48,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "neo",
 		Role:      "worker",
-		WorldID:   "w-acme-28373",
+		WorldID:   "world-acme-28373",
 		Workspaces: []Workspace{{Name: "default", Path: "/host/project"}},
 		Deps:   []string{"bash", "git"},
 		Chief:     "morpheus",
@@ -62,14 +62,14 @@ func TestGenerateWorkerContext(t *testing.T) {
 		"neo":            "missing name",
 		"morpheus":       "missing chief",
 		"trinity":        "missing peer",
-		"/mind/identity/":   "missing mind identity",
+		"/mind/SOUL.md":     "missing mind soul",
 		"/mind/skills/":     "missing mind skills",
 		"/mind/playbooks/":  "missing mind playbooks",
 		"/mind/journal/":    "missing mind journal",
 		"/world/knowledge/": "missing world knowledge",
 		"/world/inbox":   "missing inbox",
 		"Messaging":      "missing messaging skill",
-		"w-acme-28373":   "missing world ID",
+		"world-acme-28373":   "missing world ID",
 		"/host/project":  "missing workspace path",
 		"bash, git":      "missing tools",
 	}
@@ -84,7 +84,7 @@ func TestGenerateWorkerContext(t *testing.T) {
 func TestGenerateNPCContext(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		Role:    "npc",
-		WorldID: "w-acme-28373",
+		WorldID: "world-acme-28373",
 		NPCTask: "lint src/",
 		Deps:[]string{"bash"},
 	})
@@ -92,7 +92,7 @@ func TestGenerateNPCContext(t *testing.T) {
 	checks := map[string]string{
 		"NPC":          "missing NPC role",
 		"lint src/":    "missing task",
-		"w-acme-28373": "missing world ID",
+		"world-acme-28373": "missing world ID",
 		"bash":         "missing tools",
 	}
 

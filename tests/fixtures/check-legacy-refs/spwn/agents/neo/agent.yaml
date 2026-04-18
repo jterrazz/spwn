@@ -1,0 +1,16 @@
+# Fixture agent for the grammar-rejection e2e.
+#
+# The dependencies list below deliberately mixes three shapes the
+# current grammar refuses. This is the negative-path analogue of the
+# single-agent fixture: `spwn check` must flag every entry, and none
+# may reach the container build.
+name: neo
+description: Fixture agent for check-legacy-refs — encodes the three rejected dep shapes.
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "python"          # bare name — must error (scheme required)
+  - "local:foo"       # retired local: alias — must error
+  - "@acme/foo"       # legacy @owner/name — must error

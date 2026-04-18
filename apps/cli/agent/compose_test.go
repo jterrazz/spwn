@@ -44,6 +44,10 @@ func scaffoldAgent(t *testing.T, name string) string {
 // run sequentially leak state without this reset.
 func resetComposeFlags() {
 	composeDeps = nil
+	composeSkills = nil
+	composeTools = nil
+	composeHooks = nil
+	composeRemoves = nil
 }
 
 // ── agent add ──────────────────────────────────────────────────────────────
@@ -133,6 +137,77 @@ func TestAgentAdd_Idempotent(t *testing.T) {
 	}
 }
 
+// TestAgentAdd_BareNameResolvesToCatalog verifies the CLI shorthand
+// where `--dep qmd` auto-promotes to `spwn:qmd` via the catalog.
+// The manifest stores the explicit scheme form — no bare names ever
+// land on disk, even when the CLI accepts them.
+func TestAgentAdd_BareNameResolvesToCatalog(t *testing.T) {
+	scaffoldAgent(t, "neo")
+	resetComposeFlags()
+	composeDeps = []string{"python"}
+
+	cmd, _ := newComposeCmd()
+	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
+		t.Fatalf("add: %v", err)
+	}
+
+	m, _ := agent.LoadManifest("neo")
+	if len(m.Deps) != 1 || m.Deps[0] != "spwn:python" {
+		t.Errorf("Packages = %v, want [spwn:python]", m.Deps)
+	}
+}
+
+// TestAgentAdd_BareNameMissErrors verifies a bare name that doesn't
+// match any catalog entry is rejected with a catalog-aware hint, and
+// agent.yaml stays untouched (no half-written entries).
+func TestAgentAdd_BareNameMissErrors(t *testing.T) {
+	scaffoldAgent(t, "neo")
+	resetComposeFlags()
+	composeDeps = []string{"nonesuch"}
+
+	cmd, _ := newComposeCmd()
+	err := addCmd.RunE(cmd, []string{"neo"})
+	if err == nil {
+		t.Fatal("bare miss should error")
+	}
+	if !contains(err.Error(), "not in the catalog") {
+		t.Errorf("error should mention 'not in the catalog': %v", err)
+	}
+	m, _ := agent.LoadManifest("neo")
+	if len(m.Deps) != 0 {
+		t.Errorf("manifest should stay empty on rejection, got %v", m.Deps)
+	}
+}
+
+// TestAgentAdd_MixedFlags verifies all four flags (--dep / --skill /
+// --tool / --hook) feed into the same deps list and share the same
+// catalog resolver. The flag name is pure UX sugar; resolution is
+// identical.
+func TestAgentAdd_MixedFlags(t *testing.T) {
+	scaffoldAgent(t, "neo")
+	resetComposeFlags()
+	composeDeps = []string{"python"}
+	composeSkills = []string{"qmd"}
+	composeTools = []string{"spwn:unix"}
+	composeHooks = []string{"skill:focus"}
+
+	cmd, _ := newComposeCmd()
+	if err := addCmd.RunE(cmd, []string{"neo"}); err != nil {
+		t.Fatalf("add: %v", err)
+	}
+
+	m, _ := agent.LoadManifest("neo")
+	got := map[string]bool{}
+	for _, d := range m.Deps {
+		got[d] = true
+	}
+	for _, want := range []string{"spwn:python", "spwn:qmd", "spwn:unix", "skill:focus"} {
+		if !got[want] {
+			t.Errorf("missing %q in %v", want, m.Deps)
+		}
+	}
+}
+
 // ── agent remove ────────────────────────────────────────────────────────────
 
 func TestAgentRemove_NoFlagsReturnsError(t *testing.T) {
@@ -156,7 +231,7 @@ func TestAgentRemove_Package(t *testing.T) {
 	agent.AddDependency("neo", "spwn:python")
 
 	resetComposeFlags()
-	composeDeps = []string{"spwn:unix"}
+	composeRemoves = []string{"spwn:unix"}
 	cmd, _ := newComposeCmd()
 	if err := removeCmd.RunE(cmd, []string{"neo"}); err != nil {
 		t.Fatal(err)
@@ -173,7 +248,7 @@ func TestAgentRemove_AbsentPackageErrors(t *testing.T) {
 	agent.AddDependency("neo", "spwn:python")
 
 	resetComposeFlags()
-	composeDeps = []string{"spwn:never-added"}
+	composeRemoves = []string{"spwn:never-added"}
 	cmd, _ := newComposeCmd()
 	// Removing an absent package must error so scripts can distinguish
 	// "I removed it" from "it was never there" — the previous

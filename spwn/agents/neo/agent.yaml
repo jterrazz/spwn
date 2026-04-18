@@ -1,0 +1,21 @@
+# Agent composition — the source of truth for what this agent needs.
+#
+# dependencies: lists every external and local dep with an explicit scheme.
+# Five schemes are recognised:
+#   spwn:<name>                  built-in catalog dep (e.g. spwn:python)
+#   github:<owner>/<repo>        third-party dep (planned, not yet resolved)
+#   skill:<name>                 local skill   (./spwn/skills/<name>.md)
+#   tool:<name>                  local tool    (./spwn/tools/<name>/)
+#   hook:<name>                  local hook    (./spwn/hooks/<name>.sh)
+# Bare names are invalid — always use one of the five schemes above.
+
+name: neo
+description: A blank-slate agent — replace this one-liner with what neo is for.
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"

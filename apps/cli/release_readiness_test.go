@@ -144,7 +144,7 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("03_init_writes_4_layer_mind", func(t *testing.T) {
+	t.Run("03_init_writes_soul_and_3_layer_mind", func(t *testing.T) {
 		// A03: fresh init writes SOUL.md + skills/playbooks/journal, no knowledge.
 		// (identity/ directory was collapsed into a single SOUL.md at agent root.)
 		t.Parallel()
@@ -389,7 +389,7 @@ func TestReleaseReadiness(t *testing.T) {
 	// C — agent CRUD
 	// --------------------------------------------------------------------
 
-	t.Run("15_agent_create_global_4_layer", func(t *testing.T) {
+	t.Run("15_agent_create_global_soul_and_3_layer", func(t *testing.T) {
 		// C15: user-mode `agent create` produces SOUL.md + 3 layer dirs, no knowledge.
 		t.Parallel()
 		env, home := freshEnv(t)

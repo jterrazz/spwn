@@ -74,12 +74,20 @@ func withProject(t *testing.T) string {
 
 func TestInstall_rejectsBareName(t *testing.T) {
 	withProject(t)
+	// No catalog wired, so the bare-name resolver fails with the
+	// "not in the catalog" hint. This is the happy path: the CLI
+	// shorthand tried to auto-promote `my-local-tool` to
+	// `spwn:my-local-tool` and missed, and the error surfaces the
+	// local-scheme alternative so the user can correct.
 	_, err := runWithOut(t, installCmd, "my-local-tool")
 	if err == nil {
 		t.Fatal("want error for bare name")
 	}
-	if !strings.Contains(err.Error(), "not a valid dependency ref") {
-		t.Errorf("want invalid-ref hint, got: %v", err)
+	if !strings.Contains(err.Error(), "not in the catalog") {
+		t.Errorf("want catalog-miss hint, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "skill:my-local-tool") {
+		t.Errorf("error should suggest the local-scheme alternative: %v", err)
 	}
 }
 
@@ -111,15 +119,18 @@ func TestInstall_rejectsLegacyAtRef(t *testing.T) {
 	if err == nil {
 		t.Fatal("want error for legacy @ ref")
 	}
-	if !strings.Contains(err.Error(), "not a valid dependency ref") {
-		t.Errorf("want invalid-ref hint, got: %v", err)
+	// Legacy @owner/name fails the grammar (it's neither a bare
+	// identifier nor an explicit scheme), so the resolver surfaces
+	// the "malformed" hint pointing at the five valid schemes.
+	if !strings.Contains(err.Error(), "malformed") {
+		t.Errorf("want malformed-grammar hint, got: %v", err)
 	}
 }
 
 func TestInstall_rejectsUnknownBuiltin(t *testing.T) {
 	withProject(t)
-	SetCatalogLookup(func(ref string) bool { return false })
-	t.Cleanup(func() { SetCatalogLookup(nil) })
+	SetCatalogLookup(func(ref string) bool { return false }, nil)
+	t.Cleanup(func() { SetCatalogLookup(nil, nil) })
 
 	_, err := runWithOut(t, installCmd, "spwn:nonesuch")
 	if err == nil {
@@ -131,8 +142,8 @@ func TestInstall_rejectsUnknownBuiltin(t *testing.T) {
 
 func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 	root := withProject(t)
-	SetCatalogLookup(func(ref string) bool { return true })
-	t.Cleanup(func() { SetCatalogLookup(nil) })
+	SetCatalogLookup(func(ref string) bool { return true }, nil)
+	t.Cleanup(func() { SetCatalogLookup(nil, nil) })
 
 	if _, err := runWithOut(t, installCmd, "spwn:git"); err != nil {
 		t.Fatalf("install: %v", err)
@@ -163,8 +174,8 @@ func TestInstall_addsToAgentAndLockfile(t *testing.T) {
 
 func TestInstall_idempotent(t *testing.T) {
 	root := withProject(t)
-	SetCatalogLookup(func(ref string) bool { return true })
-	t.Cleanup(func() { SetCatalogLookup(nil) })
+	SetCatalogLookup(func(ref string) bool { return true }, nil)
+	t.Cleanup(func() { SetCatalogLookup(nil, nil) })
 
 	for i := 0; i < 3; i++ {
 		if _, err := runWithOut(t, installCmd, "spwn:unix"); err != nil {
@@ -191,8 +202,8 @@ func TestInstall_idempotent(t *testing.T) {
 
 func TestUninstall_removesEntry(t *testing.T) {
 	root := withProject(t)
-	SetCatalogLookup(func(ref string) bool { return true })
-	t.Cleanup(func() { SetCatalogLookup(nil) })
+	SetCatalogLookup(func(ref string) bool { return true }, nil)
+	t.Cleanup(func() { SetCatalogLookup(nil, nil) })
 
 	if _, err := runWithOut(t, installCmd, "spwn:git"); err != nil {
 		t.Fatalf("install: %v", err)

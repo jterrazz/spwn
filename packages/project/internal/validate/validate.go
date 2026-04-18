@@ -102,6 +102,7 @@ func Run(in Input) []Issue {
 		ruleAgentDirsExist,
 		ruleAgentStructure,
 		ruleAgentYAMLParses,
+		ruleAgentYAMLLegacyKeys,
 		ruleAgentDescription,
 		ruleReservedAgentNames,
 		ruleOneAgentOneWorld,
@@ -404,6 +405,47 @@ func ruleAgentYAMLParses(in Input) []Issue {
 			out = append(out, Issue{
 				Level: LevelWarning, Path: relPath(in.Root, yamlPath) + "#name",
 				Message: fmt.Sprintf("agent.yaml name %q does not match directory name %q", parsed.Name, a.Name),
+			})
+		}
+	}
+	return out
+}
+
+// ruleAgentYAMLLegacyKeys flags legacy top-level keys in agent.yaml
+// (`tools:`, `skills:`, `hooks:`) that pre-date the unified
+// `dependencies:` list. The YAML parser silently ignores unknown
+// top-level keys, which meant a pre-refactor manifest upgraded
+// in-place would lose every dep without any user-visible signal.
+// This rule catches that case with a migration hint pointing at the
+// current schema.
+func ruleAgentYAMLLegacyKeys(in Input) []Issue {
+	var out []Issue
+	legacyKeys := []string{"tools", "skills", "hooks"}
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		yamlPath := filepath.Join(a.Path, "agent.yaml")
+		data, err := os.ReadFile(yamlPath)
+		if err != nil {
+			continue
+		}
+		// Parse into a generic map so unknown top-level keys are
+		// visible. A strict-typed struct would silently drop them,
+		// which is exactly the rot this rule exists to catch.
+		var raw map[string]yaml.Node
+		if yaml.Unmarshal(data, &raw) != nil {
+			continue
+		}
+		for _, key := range legacyKeys {
+			if _, ok := raw[key]; !ok {
+				continue
+			}
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    relPath(in.Root, yamlPath) + "#" + key,
+				Message: fmt.Sprintf("legacy top-level %q block in agent.yaml", key),
+				Hint:    fmt.Sprintf("move entries into the flat `dependencies:` list (e.g. `dependencies: [\"spwn:unix\", \"%s:<name>\"]`); top-level `%s:` is no longer read", strings.TrimSuffix(key, "s"), key),
 			})
 		}
 	}

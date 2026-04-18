@@ -58,7 +58,16 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 		return err
 	}
 
-	ref, version := dependency.SplitVersion(raw)
+	// Run the raw input through the shared CLI resolver so bare names
+	// auto-promote to spwn:<name> ("spwn install qmd" → "spwn install
+	// spwn:qmd"). Explicit schemes pass through unchanged. Manifests
+	// always receive the canonical scheme-form.
+	resolved, rerr := dependency.ResolveCLI(raw, knownCatalogNames())
+	if rerr != nil {
+		return rerr
+	}
+
+	ref, version := dependency.SplitVersion(resolved)
 	parsed := dependency.ParseRef(ref)
 	switch parsed.Kind {
 	case dependency.KindLocalSkill, dependency.KindLocalTool, dependency.KindLocalHook:
@@ -122,7 +131,16 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 		return err
 	}
 
-	ref, _ := dependency.SplitVersion(raw)
+	// Symmetry with install: run the input through the CLI resolver
+	// so `spwn uninstall python` finds `spwn:python` in the manifest
+	// just like `spwn install python` would have written it there.
+	// Explicit schemes pass through unchanged.
+	resolved, rerr := dependency.ResolveCLI(raw, knownCatalogNames())
+	if rerr != nil {
+		return rerr
+	}
+
+	ref, _ := dependency.SplitVersion(resolved)
 	parsed := dependency.ParseRef(ref)
 	if parsed.Kind == dependency.KindRegistry {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
@@ -169,12 +187,18 @@ func findProject() (*project.Project, error) {
 // catalogLookup checks whether `ref` is a known spwn:* dependency.
 // The catalog list is supplied by the parent CLI — this package
 // doesn't import spwn.sh/catalog to avoid a cycle.
-var catalogLookup func(ref string) bool
+var (
+	catalogLookup func(ref string) bool
+	catalogNames  func() []string
+)
 
 // SetCatalogLookup wires the built-in catalog into the install verbs.
 // Called from the CLI entrypoint to avoid a direct catalog import.
-func SetCatalogLookup(f func(ref string) bool) {
-	catalogLookup = f
+// Pass both a membership predicate and a names-list supplier so the
+// bare-name resolver can surface a known-list hint on miss.
+func SetCatalogLookup(has func(ref string) bool, names func() []string) {
+	catalogLookup = has
+	catalogNames = names
 }
 
 func catalogHas(ref string) bool {
@@ -182,6 +206,13 @@ func catalogHas(ref string) bool {
 		return true // permissive when no catalog wired — fallback for tests
 	}
 	return catalogLookup(ref)
+}
+
+func knownCatalogNames() []string {
+	if catalogNames == nil {
+		return nil
+	}
+	return catalogNames()
 }
 
 func plural(n int) string {

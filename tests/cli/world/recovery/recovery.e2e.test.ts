@@ -50,7 +50,7 @@ describe('error recovery', () => {
     test('world inspect on a non-existent id fails cleanly', async () => {
         await using result = await spec('inspect missing')
             .project('docker-pilot')
-            .exec('world inspect w-ghost-99999')
+            .exec('world inspect world-ghost-99999')
             .run();
 
         expect(result.exitCode).toBe(1);
@@ -84,7 +84,7 @@ describe('error recovery', () => {
         // DockerSpec calls using the same project fixture.
         await using errorResult = await spec('error first')
             .project('docker-pilot')
-            .exec('down w-ghost-00000')
+            .exec('down world-ghost-00000')
             .run();
         expect(errorResult.exitCode).toBe(1);
 
