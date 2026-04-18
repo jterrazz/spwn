@@ -72,8 +72,8 @@ Stack dependencies, skills, and a soul into an agent. Like Lego for minds.
 Memory is a folder of markdown files. Readable, diffable, survives restarts.
 </td>
 <td align="center" width="33%">
-<h3>🧬 Evolving</h3>
-Agents dream, sleep, and fork. What works becomes a playbook. What doesn't, fades.
+<h3>🧐 Checked</h3>
+<code>spwn check</code> validates your project tree. Bad refs, missing files, lockfile drift — caught before spawn.
 </td>
 </tr>
 <tr>
