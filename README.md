@@ -326,6 +326,29 @@ group to see the list. Each summary shows a progress bar
 
 **Legend** 🟢 shipping · 🟡 in dev · 🔴 planned
 
+### Domains
+
+The bird's-eye view. Each row is a whole area of the system; the
+commands and adapters below belong to one or more of these.
+
+| Domain | Scope | Status |
+|---|---|:---:|
+| **Transpile** | Source tree → rendered Tree (SOUL, deps, system skills woven in) | 🟢 |
+| **Compile** | Tree → reproducible Docker image | 🟢 |
+| **Lint / check** | Static rules on manifests + tree (scheme grammar, one-agent-one-world, lockfile drift…) | 🟢 |
+| **Compose** | `install` / `uninstall` / pinning (project-wide + `--agent` scoping) | 🟢 |
+| **Identity** | `SOUL.md` at agent root — per-agent voice, purpose, principles | 🟢 |
+| **Mind** | 3-layer persistent memory: `skills/` `playbooks/` `journal/` | 🟢 |
+| **Knowledge** | World-scoped `./knowledge/` bind-mount (opt-in per world) | 🟢 |
+| **Runtimes** | `claude-code`, `codex` — swappable Go adapters | 🟢 |
+| **Observability** | Per-session journal, activity log, `spwn logs` | 🟡 |
+| **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |
+| **Web dashboard** | Agent roster + composition viewer (`apps/web`) | 🟡 |
+| **Apps / SDK** | Programmatic Go SDK for embedding spwn in external tools | 🔴 |
+| **Managed agents** | Autonomous daemon mode (`agent start` / `agent stop`, hosted) | 🔴 |
+| **Evaluation** | Task-level pass/fail, quality metrics, replay diffing | 🔴 |
+| **Registry** | `agent publish` / `agent get` — shared agents on the hub | 🔴 |
+
 ### CLI
 
 <details>
