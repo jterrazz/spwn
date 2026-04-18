@@ -262,15 +262,15 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("10_agent_add_rejects_at_prefix", func(t *testing.T) {
-		// B10: `@spwn/node` is malformed under the new ref grammar.
+	t.Run("10_install_rejects_at_prefix", func(t *testing.T) {
+		// B10: `@spwn/node` is malformed under the scheme grammar.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		stdout, stderr, code := runCLI(t, env, wd, "agent", "add", "neo", "--dep", "@spwn/node")
+		stdout, stderr, code := runCLI(t, env, wd, "install", "@spwn/node")
 		if code == 0 {
-			t.Fatalf("agent add @spwn/node should fail, got exit 0.\nstdout=%s", stdout)
+			t.Fatalf("install @spwn/node should fail, got exit 0.\nstdout=%s", stdout)
 		}
 		combined := stdout + stderr
 		if !(strings.Contains(combined, "does not exist") || strings.Contains(combined, "unsupported") || strings.Contains(combined, "malformed")) {
@@ -279,20 +279,19 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	t.Run("11_check_reports_registry_unsupported", func(t *testing.T) {
-		// B11: github: refs surface as "remote registries are not yet supported".
+		// B11: github: refs surface as "not yet supported" at install
+		// Time — they never reach agent.yaml, so check has nothing
+		// To complain about.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		if _, _, code := runCLI(t, env, wd, "agent", "add", "neo", "--dep", "github:acme/x"); code != 0 {
-			t.Fatalf("agent add github:acme/x should accept the ref, got exit %d", code)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
+		stdout, stderr, code := runCLI(t, env, wd, "install", "github:acme/x")
 		if code == 0 {
-			t.Fatalf("check should fail with github registry ref")
+			t.Fatalf("install github:acme/x should fail, got exit 0")
 		}
 		combined := stdout + stderr
-		if !strings.Contains(combined, "remote registries are not yet supported") {
+		if !strings.Contains(combined, "not yet supported") {
 			t.Fatalf("expected registry-unsupported message, got:\n%s", combined)
 		}
 	})
@@ -496,21 +495,21 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// D — agent compose
+	// D — install (project-scope + --agent scope)
 	// --------------------------------------------------------------------
 
-	t.Run("22_agent_add_appends_dep", func(t *testing.T) {
-		// D22: `agent add --dep` appends to agent.yaml dependencies.
+	t.Run("22_install_appends_dep", func(t *testing.T) {
+		// D22: `install` appends to every agent.yaml.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		// Remove the default python to prove add appends it.
-		if _, _, code := runCLI(t, env, wd, "agent", "remove", "neo", "--dep", "spwn:python"); code != 0 {
-			t.Fatalf("pre-remove python failed")
+		// Remove the default python first to prove install re-adds it.
+		if _, _, code := runCLI(t, env, wd, "uninstall", "spwn:python"); code != 0 {
+			t.Fatalf("pre-uninstall python failed")
 		}
-		if _, _, code := runCLI(t, env, wd, "agent", "add", "neo", "--dep", "spwn:python"); code != 0 {
-			t.Fatalf("agent add spwn:python failed")
+		if _, _, code := runCLI(t, env, wd, "install", "spwn:python"); code != 0 {
+			t.Fatalf("install spwn:python failed")
 		}
 		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
 		if !strings.Contains(y, "spwn:python") {
@@ -518,15 +517,15 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("23_agent_add_is_idempotent", func(t *testing.T) {
-		// D23: adding the same dep twice still results in one entry.
+	t.Run("23_install_is_idempotent", func(t *testing.T) {
+		// D23: installing the same dep twice still yields one entry.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
 		for i := 0; i < 2; i++ {
-			if _, _, code := runCLI(t, env, wd, "agent", "add", "neo", "--dep", "spwn:node"); code != 0 {
-				t.Fatalf("iter %d add failed", i)
+			if _, _, code := runCLI(t, env, wd, "install", "spwn:node"); code != 0 {
+				t.Fatalf("iter %d install failed", i)
 			}
 		}
 		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
@@ -535,14 +534,14 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("24_agent_remove_detaches", func(t *testing.T) {
-		// D24: `agent remove --dep` drops the entry.
+	t.Run("24_uninstall_detaches", func(t *testing.T) {
+		// D24: `uninstall` drops the entry from every agent.yaml.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		if _, _, code := runCLI(t, env, wd, "agent", "remove", "neo", "--dep", "spwn:python"); code != 0 {
-			t.Fatalf("agent remove failed")
+		if _, _, code := runCLI(t, env, wd, "uninstall", "spwn:python"); code != 0 {
+			t.Fatalf("uninstall failed")
 		}
 		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
 		if strings.Contains(y, "spwn:python") {
@@ -550,20 +549,21 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("25_agent_remove_absent_errors", func(t *testing.T) {
-		// D25: removing an un-attached dep must error, not silently no-op.
+	t.Run("25_uninstall_absent_is_silent", func(t *testing.T) {
+		// D25: uninstalling a dep no agent carries is a silent no-op
+		// (matches npm — install/uninstall are declarative, not
+		// Transactional).
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		_, _, code := runCLI(t, env, wd, "agent", "remove", "neo", "--dep", "spwn:never-added")
-		if code == 0 {
-			t.Fatalf("remove of absent dep should error")
+		if _, _, code := runCLI(t, env, wd, "uninstall", "spwn:never-added"); code != 0 {
+			t.Fatalf("uninstall of absent dep should be a no-op, got non-zero exit")
 		}
 	})
 
 	// --------------------------------------------------------------------
-	// E — install / uninstall
+	// E — install extra: scoping + lockfile
 	// --------------------------------------------------------------------
 
 	t.Run("26_install_updates_agents_and_lockfile", func(t *testing.T) {
@@ -572,9 +572,10 @@ func TestReleaseReadiness(t *testing.T) {
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		// First remove the default entry so we can prove install re-adds it.
-		if _, _, code := runCLI(t, env, wd, "agent", "remove", "neo", "--dep", "spwn:python"); code != 0 {
-			t.Fatalf("pre-remove failed")
+		// First uninstall the default entry so we can prove install
+		// Re-adds it.
+		if _, _, code := runCLI(t, env, wd, "uninstall", "spwn:python"); code != 0 {
+			t.Fatalf("pre-uninstall failed")
 		}
 		if _, _, code := runCLI(t, env, wd, "install", "spwn:python"); code != 0 {
 			t.Fatalf("install failed")

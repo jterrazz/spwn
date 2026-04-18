@@ -15,7 +15,7 @@ Install a shared agent from the community registry into
 The installed agent starts with a fresh memory but inherits the
 full composition from its published form.
 
-Not yet implemented - tracks the registry port (planned).
+Not yet implemented — tracks the registry port (planned).
 
 ```
 spwn agent get <agent-ref> [flags]

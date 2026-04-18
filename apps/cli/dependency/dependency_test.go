@@ -93,12 +93,15 @@ func TestInstall_rejectsBareName(t *testing.T) {
 
 func TestInstall_rejectsLocalSchemeRef(t *testing.T) {
 	withProject(t)
+	// Without --agent, installing a local ref is refused because
+	// Bolting a local block onto every agent is almost never what
+	// The user wants. The error points at --agent as the fix.
 	_, err := runWithOut(t, installCmd, "skill:paper-reading")
 	if err == nil {
-		t.Fatal("want error for local ref")
+		t.Fatal("want error for local ref without --agent")
 	}
-	if !strings.Contains(err.Error(), "authored in place") {
-		t.Errorf("want local-authoring hint, got: %v", err)
+	if !strings.Contains(err.Error(), "--agent") {
+		t.Errorf("want --agent hint, got: %v", err)
 	}
 }
 

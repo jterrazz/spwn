@@ -91,7 +91,9 @@ func TestCLI_AgentHelpGrouped(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Lifecycle:", "Compose:", "Conversation:", "Evolution:", "Portability:"} {
+	// Composition lives on `spwn install`/`spwn uninstall` now —
+	// The Compose section was retired when agent add/remove were.
+	for _, section := range []string{"Lifecycle:", "Conversation:", "Evolution:", "Portability:"} {
 		assertContains(t, out, section, "agent help sections")
 	}
 }
@@ -107,16 +109,15 @@ func TestCLI_WorldHelpShowsSpawnFlags(t *testing.T) {
 	}
 }
 
-func TestCLI_AgentHelpShowsComposeFlags(t *testing.T) {
-	out, _, err := executeCommand("agent", "--help")
+func TestCLI_InstallHelpShowsAgentFlag(t *testing.T) {
+	out, _, err := executeCommand("install", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// The Compose section should mention the composition flags.
-	for _, flag := range []string{"--dep", "--skill"} {
-		assertContains(t, out, flag, "agent compose flags")
-	}
+	// --agent is the narrowing flag that replaced `agent add`.
+	// It must stay documented in install's help.
+	assertContains(t, out, "--agent", "install --agent flag")
 }
 
 // --- Root help structure ---
