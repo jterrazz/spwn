@@ -7,31 +7,17 @@ import (
 	"testing"
 )
 
-func TestRetireAgentKnowledge_empty(t *testing.T) {
-	base := t.TempDir()
-	agentDir := filepath.Join(base, "agents", "alice")
-	knowledgeDir := filepath.Join(agentDir, "knowledge")
-	if err := os.MkdirAll(knowledgeDir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	// Only a .gitkeep — counts as trivially empty.
-	if err := os.WriteFile(filepath.Join(knowledgeDir, ".gitkeep"), nil, 0o644); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := RetireAgentKnowledge.Apply(context.Background(), base); err != nil {
-		t.Fatalf("Apply: %v", err)
-	}
-
-	if _, err := os.Stat(knowledgeDir); !os.IsNotExist(err) {
-		t.Fatalf("expected knowledge dir removed, got err=%v", err)
-	}
-	// Agent dir itself should survive.
-	if _, err := os.Stat(agentDir); err != nil {
-		t.Fatalf("agent dir should still exist: %v", err)
-	}
+// TestRetireAgentKnowledge_Fixture covers the byte-deterministic
+// happy path: agents/<name>/knowledge/ with only a .gitkeep inside
+// (trivially empty) is removed cleanly; the agent dir survives.
+// Fixture at testdata/user/014_retire_agent_knowledge/.
+func TestRetireAgentKnowledge_Fixture(t *testing.T) {
+	runFixture(t, RetireAgentKnowledge, "014_retire_agent_knowledge")
 }
 
+// TestRetireAgentKnowledge_nonEmpty lives inline because the
+// retired dir name embeds a timestamp when a second retire ever
+// happens — not byte-stable enough for a golden fixture.
 func TestRetireAgentKnowledge_nonEmpty(t *testing.T) {
 	base := t.TempDir()
 	agentDir := filepath.Join(base, "agents", "bob")
@@ -60,6 +46,8 @@ func TestRetireAgentKnowledge_nonEmpty(t *testing.T) {
 	}
 }
 
+// TestRetireAgentKnowledge_noAgentsDir: fresh install, no agents/ at
+// all — migration must be a no-op.
 func TestRetireAgentKnowledge_noAgentsDir(t *testing.T) {
 	base := t.TempDir()
 	if err := RetireAgentKnowledge.Apply(context.Background(), base); err != nil {
@@ -67,6 +55,8 @@ func TestRetireAgentKnowledge_noAgentsDir(t *testing.T) {
 	}
 }
 
+// TestRetireAgentKnowledge_noKnowledgeDir: agents exist but none
+// have a knowledge/ dir — another no-op, agent dirs survive.
 func TestRetireAgentKnowledge_noKnowledgeDir(t *testing.T) {
 	base := t.TempDir()
 	agentDir := filepath.Join(base, "agents", "carol")

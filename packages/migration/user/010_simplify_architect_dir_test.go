@@ -7,40 +7,16 @@ import (
 	"testing"
 )
 
-func TestSimplifyArchitectDir(t *testing.T) {
-	dir := t.TempDir()
-	archDir := filepath.Join(dir, "architect")
-	os.MkdirAll(archDir, 0755)
-
-	os.WriteFile(filepath.Join(archDir, "stack.md"), []byte("## Focus\n- [ ] Ship v2"), 0644)
-	os.WriteFile(filepath.Join(archDir, "directives.md"), []byte("Always test first."), 0644)
-	os.WriteFile(filepath.Join(archDir, "todo.md"), []byte("- old todo item"), 0644)
-
-	if err := SimplifyArchitectDir.Apply(context.Background(), dir); err != nil {
-		t.Fatal(err)
-	}
-
-	// stack.md should contain merged content
-	data, err := os.ReadFile(filepath.Join(archDir, "stack.md"))
-	if err != nil {
-		t.Fatal("stack.md should exist:", err)
-	}
-	content := string(data)
-	if content != "## Focus\n- [ ] Ship v2\n\n---\n\n# Archived Directives\n\nAlways test first." {
-		t.Errorf("unexpected stack.md content:\n%s", content)
-	}
-
-	// directives.md should be gone
-	if _, err := os.Stat(filepath.Join(archDir, "directives.md")); !os.IsNotExist(err) {
-		t.Error("directives.md should have been removed")
-	}
-
-	// todo.md should be gone
-	if _, err := os.Stat(filepath.Join(archDir, "todo.md")); !os.IsNotExist(err) {
-		t.Error("todo.md should have been removed")
-	}
+// TestSimplifyArchitectDir_Fixture is the happy path via the shared
+// fixture harness. The before/after tree lives at
+// testdata/user/010_simplify_architect_dir/ — the transformation is
+// visible on disk instead of hidden inside an inline setup.
+func TestSimplifyArchitectDir_Fixture(t *testing.T) {
+	runFixture(t, SimplifyArchitectDir, "010_simplify_architect_dir")
 }
 
+// TestSimplifyArchitectDir_NoArchitectDir covers the no-op path: a
+// baseDir without architect/ should pass through without error.
 func TestSimplifyArchitectDir_NoArchitectDir(t *testing.T) {
 	dir := t.TempDir()
 	if err := SimplifyArchitectDir.Apply(context.Background(), dir); err != nil {
@@ -48,6 +24,8 @@ func TestSimplifyArchitectDir_NoArchitectDir(t *testing.T) {
 	}
 }
 
+// TestSimplifyArchitectDir_OnlyTodo: todo.md present, no stack or
+// directives. stack.md should stay unwritten; todo.md goes away.
 func TestSimplifyArchitectDir_OnlyTodo(t *testing.T) {
 	dir := t.TempDir()
 	archDir := filepath.Join(dir, "architect")
@@ -63,6 +41,8 @@ func TestSimplifyArchitectDir_OnlyTodo(t *testing.T) {
 	}
 }
 
+// TestSimplifyArchitectDir_OnlyDirectivesNoStack: no stack.md
+// present, so the directive content becomes the whole stack.md.
 func TestSimplifyArchitectDir_OnlyDirectivesNoStack(t *testing.T) {
 	dir := t.TempDir()
 	archDir := filepath.Join(dir, "architect")
@@ -86,6 +66,9 @@ func TestSimplifyArchitectDir_OnlyDirectivesNoStack(t *testing.T) {
 	}
 }
 
+// TestSimplifyArchitectDir_Idempotent: running the migration twice
+// is safe. After the first run directives.md is gone so the second
+// run is a full no-op.
 func TestSimplifyArchitectDir_Idempotent(t *testing.T) {
 	dir := t.TempDir()
 	archDir := filepath.Join(dir, "architect")
@@ -95,7 +78,6 @@ func TestSimplifyArchitectDir_Idempotent(t *testing.T) {
 
 	SimplifyArchitectDir.Apply(context.Background(), dir)
 
-	// Second run - files already gone, should be a no-op
 	if err := SimplifyArchitectDir.Apply(context.Background(), dir); err != nil {
 		t.Fatal(err)
 	}
