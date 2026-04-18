@@ -23,8 +23,8 @@ describe('spwn agent CRUD', () => {
         // Structural: the on-disk Mind exists with a profile.
         // Knowledge is NOT a mind layer — it's world-scoped at
         // /world/knowledge/ (bind-mounted from the path declared in
-        // worlds.<name>.knowledge in spwn.yaml; omitted by default in
-        // user-mode agent creation).
+        // Worlds.<name>.knowledge in spwn.yaml; omitted by default in
+        // User-mode agent creation).
         expect(result.file('spwn-home/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/skills').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/playbooks').exists).toBe(true);
@@ -68,9 +68,9 @@ describe('spwn agent CRUD', () => {
 
         expect(result.exitCode).toBe(0);
         // `agent show` renders the Mind tree on stderr in spwn's UX.
-        // identity/ was collapsed into SOUL.md at the agent root in
+        // Identity/ was collapsed into SOUL.md at the agent root in
         // 2026-04; the Mind now has three layer directories plus the
-        // soul file.
+        // Soul file.
         expect(result.stderr.text).toMatch(/Agent:\s+neo/);
         expect(result.stderr.text).toMatch(/skills\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/playbooks\/\s+\(empty\)/);
@@ -178,7 +178,7 @@ describe('spwn agent CRUD', () => {
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn/agents/trinity/agent.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/trinity/AGENTS.md').exists).toBe(true);
-        // identity/ dir was collapsed into SOUL.md at agent root.
+        // Identity/ dir was collapsed into SOUL.md at agent root.
         expect(result.file('spwn/agents/trinity/SOUL.md').exists).toBe(true);
     });
 

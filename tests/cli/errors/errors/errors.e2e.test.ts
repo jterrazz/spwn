@@ -59,7 +59,9 @@ describe('error handling', () => {
          * `spwn world logs` filters by world ID; a missing world yields
          * no events. The important part is the absence of a crash.
          */
-        const result = await isolated('logs missing').exec('world logs world-nonexistent-00000').run();
+        const result = await isolated('logs missing')
+            .exec('world logs world-nonexistent-00000')
+            .run();
 
         expect(result.stderr.text).not.toContain('panic:');
         expect(result.stderr.text).not.toContain('goroutine');
@@ -98,7 +100,9 @@ describe('error handling', () => {
          * maintaining a separate assertion on lowercase/format: we
          * reuse the same snapshot to anchor the wording.
          */
-        const result = await isolated('error format check').exec('down world-nonexistent-00000').run();
+        const result = await isolated('error format check')
+            .exec('down world-nonexistent-00000')
+            .run();
 
         expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('destroy-missing.txt');

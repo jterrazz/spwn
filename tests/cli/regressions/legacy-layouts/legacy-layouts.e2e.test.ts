@@ -44,9 +44,9 @@ describe('legacy agent.yaml shapes', () => {
 
     test('migration hints include the scheme form for each retired bucket', async () => {
         // Each legacy bucket maps to an explicit scheme prefix:
-        //   tools:  → tool:<name>
-        //   skills: → skill:<name>
-        //   hooks:  → hook:<name>
+        //   Tools:  → tool:<name>
+        //   Skills: → skill:<name>
+        //   Hooks:  → hook:<name>
         // The hint should show the right prefix for each so the
         // User can copy-paste from the hint into their new list.
         const result = await spec('legacy hints show schemes')

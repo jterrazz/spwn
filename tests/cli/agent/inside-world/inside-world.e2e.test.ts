@@ -36,9 +36,9 @@ describe('agent inside world', () => {
         const neo = world.container('neo');
         expect(neo.running).toBe(true);
 
-        // identity/ was collapsed into SOUL.md; the agent's soul now
-        // lives at /agents/<name>/SOUL.md and the Mind layer dirs sit
-        // alongside it (skills/, playbooks/, journal/).
+        // Identity/ was collapsed into SOUL.md; the agent's soul now
+        // Lives at /agents/<name>/SOUL.md and the Mind layer dirs sit
+        // Alongside it (skills/, playbooks/, journal/).
         expect(neo.file('/agents/neo').exists).toBe(true);
         expect(neo.file('/agents/neo/SOUL.md').exists).toBe(true);
         expect(neo.file('/agents/neo/skills').exists).toBe(true);

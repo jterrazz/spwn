@@ -20,8 +20,8 @@ import { spec } from '../../../setup/cli.specification.js';
 describe('spwn check: tool ref classification', () => {
     test('accepts mixed spwn: and tool: refs without error', async () => {
         // Given - the mixed-tool-refs fixture declares spwn:unix plus
-        // a local tool `tool:my-local-tool` that actually exists on disk
-        // under spwn/tools/.
+        // A local tool `tool:my-local-tool` that actually exists on disk
+        // Under spwn/tools/.
         const result = await spec('mixed refs').project('mixed-tool-refs').exec('check').run();
 
         // Then - check passes and neither the registry nor the

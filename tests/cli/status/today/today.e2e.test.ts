@@ -22,8 +22,8 @@ describe('agent mind structure', () => {
             .run();
 
         // Then - exits zero and creates SOUL.md + the three Mind layer
-        // directories on disk. identity/ was collapsed into SOUL.md at
-        // the agent root in 2026-04; knowledge is world-scoped, not a
+        // Directories on disk. identity/ was collapsed into SOUL.md at
+        // The agent root in 2026-04; knowledge is world-scoped, not a
         // Mind layer.
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn/agents/trinity/SOUL.md').exists).toBe(true);

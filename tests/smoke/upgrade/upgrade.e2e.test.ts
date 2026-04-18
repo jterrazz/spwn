@@ -121,7 +121,7 @@ describe('smoke: project upgrade cycle', () => {
         // ── Phase 2: mutate the project ──────────────────────────
 
         // 2a. Add a tool the default scaffold doesn't ship. The
-        //     spwn:qmd dependency runs `npm install -g @tobilu/qmd`,
+        //     Spwn:qmd dependency runs `npm install -g @tobilu/qmd`,
         //     Which adds a new RUN layer to the Dockerfile - the
         //     Content hash changes and the cache misses.
         writeFileSync(
@@ -236,9 +236,7 @@ describe('smoke: project upgrade cycle', () => {
         // The ride as part of the same world spawn.
         expect(exec(cid2, 'test -d /agents/neo && echo ok')).toBe('ok');
         expect(exec(cid2, 'test -d /agents/trinity && echo ok')).toBe('ok');
-        expect(exec(cid2, 'cat /agents/trinity/SOUL.md')).toContain(
-            'edge case specialist',
-        );
+        expect(exec(cid2, 'cat /agents/trinity/SOUL.md')).toContain('edge case specialist');
 
         // Old baseline tools are still there too - a new tool
         // Must not regress the existing ones.

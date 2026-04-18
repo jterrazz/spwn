@@ -54,9 +54,9 @@ describe('dependency grammar', () => {
 
     test('bare names accepted on the CLI land as spwn:<name> in agent.yaml', async () => {
         // This is the keystone of the sugar mechanism: the CLI
-        // resolver auto-promotes bare names, but the resolved form is
-        // what reaches disk. A follow-up `spwn check` must then pass
-        // because the manifest carries the canonical scheme-form.
+        // Resolver auto-promotes bare names, but the resolved form is
+        // What reaches disk. A follow-up `spwn check` must then pass
+        // Because the manifest carries the canonical scheme-form.
         const result = await spec('bare on cli yields spwn: on disk')
             .project('empty')
             .exec(['init', 'install python', 'check'])
@@ -66,7 +66,7 @@ describe('dependency grammar', () => {
 
         const manifest = result.file('spwn/agents/neo/agent.yaml').content;
         // The bare input `python` was canonicalised on write. No
-        // manifest ever sees the bare token.
+        // Manifest ever sees the bare token.
         expect(manifest).toContain('spwn:python');
         expect(manifest).not.toMatch(/^\s*-\s+python\s*$/m);
     });

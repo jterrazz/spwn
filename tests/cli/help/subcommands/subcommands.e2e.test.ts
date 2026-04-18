@@ -84,10 +84,7 @@ describe('subcommand help text', () => {
     });
 
     test('skill new --help documents the local authoring flow', async () => {
-        const result = await spec('skill new help')
-            .project('empty')
-            .exec('skill new --help')
-            .run();
+        const result = await spec('skill new help').project('empty').exec('skill new --help').run();
 
         expect(result.exitCode).toBe(0);
         // `skill new` is how users author local skills. The help
