@@ -64,30 +64,30 @@ Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent wo
 <table>
 <tr>
 <td align="center" width="33%">
-<h3>🧩 Composable Intelligence</h3>
-Stack tool dependencies, skill files, and an identity into a running mind. Mix <code>spwn:unix</code> + <code>spwn:python</code> + a researcher identity and you have an autonomous scientist. <b>Docker, but for minds.</b>
+<h3>🧩 Composable</h3>
+Stack dependencies, skills, and a soul into an agent. Like Lego for minds.
 </td>
 <td align="center" width="33%">
-<h3>🧠 Persistent Minds</h3>
-Memory is a folder of markdown files, not a database. Knowledge survives across runs, playbooks accumulate, a mind that worked on your codebase last week <b>remembers it today</b>.
+<h3>🧠 Persistent</h3>
+Memory is a folder of markdown files. Readable, diffable, survives restarts.
 </td>
 <td align="center" width="33%">
-<h3>🧬 Agents That Evolve</h3>
-<i>Dream</i> to analyze experience, <i>sleep</i> to consolidate memory, <i>fork</i> to branch. Successful patterns become playbooks. Failed ones are discarded. <b>Natural selection for behavior.</b>
+<h3>🧬 Evolving</h3>
+Agents dream, sleep, and fork. What works becomes a playbook. What doesn't, fades.
 </td>
 </tr>
 <tr>
 <td align="center">
-<h3>🔒 Laws of Physics, Not ACLs</h3>
-No network interface means HTTP doesn't exist - not forbidden, physically impossible. Hard, kernel-enforced limits on CPU, memory, disk, time. No prompt jailbreak can change the laws of physics. <b>Security by absence.</b>
+<h3>🔒 Sandboxed</h3>
+Each agent runs in a Docker world with kernel limits. No network means HTTP doesn't exist — no prompt can break out.
 </td>
 <td align="center">
 <h3>🧾 Agents as Code</h3>
-If Terraform is infrastructure as code, spwn is <i>agents</i> as code. Commit your agents alongside your app code. Review behavior changes in PRs. <b>Reproduce the same mind on any machine.</b>
+Commit agents next to your app. Review behavior in PRs. Same mind, any machine.
 </td>
 <td align="center">
-<h3>📦 Reproducible Builds</h3>
-<code>spwn check</code> validates the project tree. <code>spwn build</code> transpiles it and compiles the result into a project-specific Docker image - pushable to any registry, reproducible anywhere. <b>Byte-identical agents across environments.</b>
+<h3>📦 Reproducible</h3>
+One <code>spwn build</code> turns your project into a Docker image. Push it, run it anywhere — byte-identical.
 </td>
 </tr>
 </table>
