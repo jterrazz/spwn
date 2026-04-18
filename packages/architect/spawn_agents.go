@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/compile"
-	claudecode "spwn.sh/packages/compile/runtimes/claude_code"
-	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/transpile"
+	claudecode "spwn.sh/packages/transpile/runtimes/claude_code"
+	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtime"
 )
@@ -100,7 +100,7 @@ func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containe
 // rosterColony adapts an agent record list into the claudecode
 // ColonyAgentSpec list (used by colony.go's GenerateRoster call
 // for roster regeneration on hot-deploy). New code should build
-// a compile.Input instead.
+// a transpile.Input instead.
 func rosterColony(recs []models.AgentRecord) []claudecode.ColonyAgentSpec {
 	out := make([]claudecode.ColonyAgentSpec, 0, len(recs))
 	for _, r := range recs {
@@ -110,11 +110,11 @@ func rosterColony(recs []models.AgentRecord) []claudecode.ColonyAgentSpec {
 }
 
 // rosterCompileAgents projects the world record's agent list onto
-// the compile.Input shape.
-func rosterCompileAgents(recs []models.AgentRecord) []compile.AgentInput {
-	out := make([]compile.AgentInput, 0, len(recs))
+// the transpile.Input shape.
+func rosterCompileAgents(recs []models.AgentRecord) []transpile.AgentInput {
+	out := make([]transpile.AgentInput, 0, len(recs))
 	for _, r := range recs {
-		out = append(out, compile.AgentInput{Name: r.Name, Role: r.Role})
+		out = append(out, transpile.AgentInput{Name: r.Name, Role: r.Role})
 	}
 	return out
 }

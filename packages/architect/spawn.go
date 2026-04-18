@@ -12,10 +12,10 @@ import (
 	"spwn.sh/packages/agent"
 	runtimes "spwn.sh/packages/runtimes"
 	"spwn.sh/catalog"
-	"spwn.sh/packages/compile"
-	ib "spwn.sh/packages/image"
-	ibbase "spwn.sh/packages/image/base"
-	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/transpile"
+	ib "spwn.sh/packages/compile"
+	ibbase "spwn.sh/packages/compile/base"
+	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/world/deploy"
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/models"
@@ -84,7 +84,7 @@ func (opts *SpawnOpts) logWriter() io.Writer {
 // stream: the first byte arriving from `docker build` is the
 // signal that the cache was missed and a real build started. No
 // bytes ever arrive on a pure cache hit, so `once` never fires
-// and the UI stays on "Resolving image...".
+// and the UI stays on "Resolving compile...".
 type firstWriteNotifier struct {
 	inner io.Writer
 	once  func()
@@ -178,7 +178,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Resolve image. SPWN_BASE_IMAGE and opts.Image both mean "use this
+	// Resolve compile. SPWN_BASE_IMAGE and opts.Image both mean "use this
 	// exact image, don't rebuild" - they're how tests inject a mock
 	// runtime. Only when neither is set do we auto-build from the base
 	// Dockerfile + tool catalog.
@@ -234,7 +234,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		toolList = deduped
 	}
 
-	// Hydrate local (tool:<name>) refs into synthetic image.Tool
+	// Hydrate local (tool:<name>) refs into synthetic compile.Tool
 	// instances before resolving. Without this, a ref like
 	// `tool:my-local-tool` would blow up reg.Resolve with "unknown tool".
 	// Project root defaults to platform.ProjectRoot() — set by the CLI
@@ -267,7 +267,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		builder := ib.New(reg, a.backend)
 
 		// Wrap the log writer so the first docker build line
-		// flips the spinner label from "Resolving image..." to
+		// flips the spinner label from "Resolving compile..." to
 		// "Building image". Emits image_building exactly once,
 		// the first time we see actual build output - which
 		// means cache-hit spawns never raise the build label.
@@ -525,14 +525,14 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// to the host state dir (visible in the container via the /world
 	// bind mount), agents/* is docker-cp'd directly into the running
 	// container on top of the home tree seeded by syncAgentsInto.
-	compileInput := compile.Input{
+	compileInput := transpile.Input{
 		Deps:                 opts.Manifest.Deps,
 		VerifiedTools:        verifiedTools,
 		WorldID:              id,
 		Agents:               rosterCompileAgents(rosterAgents),
 		WorldKnowledgeMounted: knowledgeMounted,
 	}
-	tree, err := compile.Compile("claude-code", compileInput)
+	tree, err := transpile.Compile("claude-code", compileInput)
 	if err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)

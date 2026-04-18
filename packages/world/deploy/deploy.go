@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/compile"
-	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/platform"
 )
 
@@ -30,7 +30,7 @@ import (
 //
 // Any other prefix is an error; the caller must namespace every
 // tree entry under one of the two.
-func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string, tree *compile.Tree, worldStateDir string) error {
+func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string, tree *transpile.Tree, worldStateDir string) error {
 	var firstErr error
 	tree.Walk(func(path string, content []byte) {
 		if firstErr != nil {

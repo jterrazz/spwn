@@ -13,11 +13,11 @@ import (
 
 	runtimes "spwn.sh/packages/runtimes"
 	"spwn.sh/catalog"
-	ib "spwn.sh/packages/image"
-	ibbase "spwn.sh/packages/image/base"
+	ib "spwn.sh/packages/compile"
+	ibbase "spwn.sh/packages/compile/base"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/image/backend"
-	"spwn.sh/packages/compile/runtimes/claude_code"
+	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/transpile/runtimes/claude_code"
 )
 
 // BuildArchitectImage cross-compiles the spwn binary for linux/amd64 and builds
@@ -49,7 +49,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 	if err := runtimes.RegisterDefaults(reg); err != nil {
 		return fmt.Errorf("register runtimes: %w", err)
 	}
-	// The architect needs these tools installed in the image.
+	// The architect needs these tools installed in the compile.
 	// spwn:cli is handled separately (cross-compiled binary), so we only need
 	// the other tools that spwn:architect depends on.
 	architectTools := []string{"spwn:unix", "spwn:node", "spwn:claude-code", "spwn:docker-cli"}

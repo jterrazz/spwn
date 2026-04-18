@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 )
 
 func writePack(t *testing.T, root, name, yaml string) {

@@ -14,7 +14,7 @@ import (
 
 	"spwn.sh/packages/runtimes/claude_code"
 	"spwn.sh/packages/runtimes/codex"
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 )
 
 // All is the list of every built-in runtime. Adding a new runtime?

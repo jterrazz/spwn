@@ -5,7 +5,7 @@ package world
 import (
 	"spwn.sh/packages/agent"
 
-	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtime"

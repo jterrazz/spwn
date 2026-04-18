@@ -12,8 +12,8 @@
 // makes it a skill. There is no explicit type field — composability
 // determines identity.
 //
-// The parser produces image.Tool instances (via the adapter in
-// packages/image/adapter.go), so everything downstream — registry
+// The parser produces compile.Tool instances (via the adapter in
+// packages/compile/adapter.go), so everything downstream — registry
 // resolution, dockerfile generation, skill collection — is oblivious
 // to whether a given dependency came from Go or YAML.
 package dependency
@@ -71,7 +71,7 @@ type Schema struct {
 	Worlds yaml.Node `yaml:"worlds,omitempty"`
 
 	// Install is the build-time recipe for baking this dependency
-	// into the image. All sub-fields are optional — a dependency
+	// into the compile. All sub-fields are optional — a dependency
 	// that only ships skills can leave Install empty entirely.
 	Install InstallSection `yaml:"install"`
 
@@ -101,7 +101,7 @@ type Schema struct {
 	RuntimeProvider string `yaml:"runtime-provider,omitempty"`
 }
 
-// InstallSection mirrors packages/image.InstallSpec but uses wire-level
+// InstallSection mirrors packages/compile.InstallSpec but uses wire-level
 // types so the parser is self-contained.
 type InstallSection struct {
 	// AptPackages are apt-get packages. Deduplicated across every

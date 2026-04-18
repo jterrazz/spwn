@@ -13,10 +13,10 @@ import (
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/transpile"
+	_ "spwn.sh/packages/transpile/runtimes/claude_code" // register the claude-code runtime
+	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/compile"
-	_ "spwn.sh/packages/compile/runtimes/claude_code" // register the claude-code runtime
-	"spwn.sh/packages/compile/source"
-	"spwn.sh/packages/image"
 	"spwn.sh/packages/project"
 )
 
@@ -78,7 +78,7 @@ var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Transpile the project and compile it into a Docker image",
 	Long: `Transpile the project with the target runtime (default: claude-code)
-and compile the result into a derived Docker image.
+and compile the result into a derived Docker compile.
 
 The image is FROM spwn-world:latest by default, with the transpiled
 tree COPY'd to /world/. The resulting image carries the project's
@@ -178,7 +178,7 @@ Examples:
 			return err
 		}
 
-		tree, err := compile.Compile(runtimeName, input)
+		tree, err := transpile.Compile(runtimeName, input)
 		if err != nil {
 			// Surface the known runtime list so typos ("codex" ->
 			// "claude-code") are self-correcting. Query the real
@@ -186,7 +186,7 @@ Examples:
 			if strings.Contains(err.Error(), "unknown runtime") {
 				return fmt.Errorf(
 					"%v\n\nKnown runtimes: %s", err,
-					strings.Join(compile.RegisteredRuntimes(), ", "))
+					strings.Join(transpile.RegisteredRuntimes(), ", "))
 			}
 			return fmt.Errorf("compile: %w", err)
 		}
@@ -212,7 +212,7 @@ Examples:
 // the path formerly known as `spwn compile`: pure, no Docker,
 // useful for previewing renderer output and writing new runtime
 // backends.
-func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *compile.Tree) error {
+func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *transpile.Tree) error {
 	out := cmd.OutOrStdout()
 
 	if buildDryRun {
@@ -273,12 +273,12 @@ func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *com
 	return nil
 }
 
-// runBuildImage compiles the tree into a derived Docker image.
+// runBuildImage compiles the tree into a derived Docker compile.
 // The project's name becomes the default tag, labels identify the
 // runtime and world, and the base image defaults to
 // spwn-world:latest so the result is layered on top of whatever
 // the user's `spwn up` would have spawned from.
-func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID string, tree *compile.Tree) error {
+func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID string, tree *transpile.Tree) error {
 	// Compute the image tag: explicit flag wins, otherwise
 	// spwn-<project>:latest.
 	tag := buildTag
@@ -327,7 +327,7 @@ func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID 
 	defer dockerCli.Close()
 
 	ctx := context.Background()
-	result, err := image.BuildFromBase(ctx, dockerCli, image.BuildFromBaseRequest{
+	result, err := compile.BuildFromBase(ctx, dockerCli, compile.BuildFromBaseRequest{
 		BaseImage:       baseImage,
 		Tree:            tree,
 		TreeDestination: "/world",
@@ -370,14 +370,14 @@ func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID 
 	return nil
 }
 
-// ── shared helpers (formerly in compile.go) ──────────────────────
+// ── shared helpers (formerly in transpile.go) ──────────────────────
 
 // filterTreeByAgent returns a new Tree containing only entries that
 // belong to the named agent (prefix "agents/<name>/"), along with the
 // sorted set of agent names observed in the input tree — useful for
 // error messages when the filter drops everything.
-func filterTreeByAgent(t *compile.Tree, name string) (*compile.Tree, []string) {
-	out := compile.New()
+func filterTreeByAgent(t *transpile.Tree, name string) (*transpile.Tree, []string) {
+	out := transpile.New()
 	prefix := "agents/" + name + "/"
 	for _, p := range t.Paths() {
 		if !strings.HasPrefix(p, prefix) {
@@ -391,7 +391,7 @@ func filterTreeByAgent(t *compile.Tree, name string) (*compile.Tree, []string) {
 
 // listTreeAgents returns the sorted set of agent names present in the
 // Tree (extracted from paths of shape "agents/<name>/...").
-func listTreeAgents(t *compile.Tree) []string {
+func listTreeAgents(t *transpile.Tree) []string {
 	seen := map[string]struct{}{}
 	for _, p := range t.Paths() {
 		if !strings.HasPrefix(p, "agents/") {
@@ -413,7 +413,7 @@ func listTreeAgents(t *compile.Tree) []string {
 // build has a non-empty AGENTS.md on disk. Empty prompts would
 // otherwise produce a silently-templated CLAUDE.md with no system
 // instructions — worse than a loud error.
-func requireAgentPrompts(src *source.ProjectSource, input compile.Input) error {
+func requireAgentPrompts(src *source.ProjectSource, input transpile.Input) error {
 	if src == nil {
 		return nil
 	}

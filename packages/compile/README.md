@@ -1,39 +1,38 @@
 # packages/compile
 
-The spwn compiler — provider-neutral source → runtime-specific file tree.
+The compile layer — every Docker-touching concern, from Dockerfile generation to container lifecycle.
 
 ## Role
 
-Spwn is a compiler the same way `tsc` is: you author a portable source language (`spwn.yaml` + `spwn/agents/*` + skills + hooks), and the compiler emits files a concrete runtime (Claude Code today, Codex tomorrow) understands. You never write a `.js` file by hand for TypeScript; you should never write a `CLAUDE.md` by hand for spwn.
+Two entry points live here because they share the tool registry, the Docker backend adapter, and the Dockerfile generator:
 
-The compile phase is a **pure function**: `Input → *Tree`. No disk writes, no Docker. A `Tree` is a sorted, in-memory `path → bytes` map — same input, same bytes, deterministic for golden tests. Materialisation (writing the tree into a container or onto disk) is the next phase, owned by `packages/architect` and `packages/image`. Runtime-specific rendering lives in `packages/runtimes/<runtime>/compile/`.
+1. **`imagebuilder.Build(req)`** — the shared base world image. Resolves a dependency catalog into a Dockerfile, runs `docker build`, probes the result to verify every tool works. Cached on a version label. Called by `packages/architect` at spawn time.
+2. **`compile.BuildFromBase(ctx, cli, req)`** — project-specific derived images. Takes a base image plus a transpiled `Tree` (from `packages/transpile`) and produces `FROM <base> / COPY tree/ /world/` as a pushable artifact. Called by `spwn build`.
 
 ```
-        spwn source                   target runtime
-        ───────────                    ──────────────
-       ┌──────────┐                   ┌──────────┐
-spwn.yaml ─►│          │ ──► Tree ──► │  Docker  │
-AGENTS.md ─►│ compile  │   (files)    │  image/  │
-skills/*  ─►│ (this    │              │ container│
-hooks/*   ─►│ package) │              │          │
-       └──────────┘                   └──────────┘
-           pure                      side-effectful
+packages/transpile    →   Tree (in-memory path → bytes)
+                              │
+                              ▼
+packages/compile      →   Docker image   (base world + derived project)
+                              │
+                              ▼
+packages/architect    →   running container
 ```
 
-Powers two delivery shapes, sharing Phase 1 verbatim:
-
-1. **Spawn-time injection** (`spwn up`) — the tree is docker-cp'd into a running base container. Every spawn recompiles; no rebuild needed for source edits.
-2. **Build-time baking** (`spwn build`) — the same tree is `COPY`'d into a derived image at `docker build` time. Produces a self-contained artifact you can push and run without the source tree.
+Transpile is pure; compile has side effects against Docker; architect orchestrates. The split is deliberate: compile does not write agent content, does not start containers, does not parse `spwn.yaml`. It stops at "image exists."
 
 ## Key types
 
-- `Input` — the source snapshot handed to every renderer: manifest, verified tools, selected world, agents with their layers, imports, hooks.
-- `Tree` — flat `path → bytes` map. `AddString` / `AddBytes`, sorted iteration, `WriteTo(dir)` for host-side materialisation.
-- `Runtime` interface — `Name()` + `Render(Input) → *Tree`. Pure. Implementations live in `packages/runtimes/<name>/compile/`.
-- `Compile(name, input) → *Tree` — look up the registered runtime and render.
-- `source/` sub-package — `Load(root)` walks a project directory into a `ProjectSource`; `ToCompileInput(source, worldName)` projects it onto an `Input`.
+- `imagebuilder.Build(req)` / `compile.New(registry, backend)` — resolve deps → Dockerfile → docker build → verify. Result cached on version label.
+- `compile.BuildFromBase(ctx, cli, req)` — compose a `TreeTarballer` onto a base image. Interface (not concrete `*transpile.Tree`) to avoid a `compile → transpile → compile` cycle.
+- `Backend` (in `backend/`) — thin abstraction over "a running container runtime". Four families: lifecycle (`Create`/`Start`/`Stop`), execution (`Exec`), image plumbing (`EnsureImage`/`Commit`), file transport (`CopyTo` / `CopyDirTo` / `CopyDirFrom`). `CopyDirTo`+`CopyDirFrom` exist because spwn deliberately avoided binding `spwn/agents/<name>/` — tar-stream snapshots at boot/shutdown preserve container isolation without leaking runtime dotfiles onto the host.
+- `Registry` / `Tool` — the in-memory dependency catalog; tools are registered here and resolved transitively before Dockerfile generation.
+- `base/` — embedded `world.Dockerfile`, `architect.Dockerfile`, `test.Dockerfile` templates plus `entrypoint.sh`.
+- `backend/` — the Docker client adapter (the only concrete `Backend` today).
+- `internal/dockerfile/` — the generic Dockerfile generator fed by the tool registry.
+- `probe/` — post-build verification (each tool's `verify:` commands run inside the image).
 
 ## Related
 
-- **Imported by** — `apps/cli` (`spwn build`, `spwn check --deep`), `packages/architect` (spawn pipeline), `packages/runtimes/*/compile`
-- **Imports** — `packages/project`, `packages/agent`, `packages/dependency`
+- **Imported by** — `apps/api`, `apps/cli`, `catalog`, `packages/architect`, `packages/runtimes`, `packages/world`
+- **Imports** — `packages/dependency` (for parsing tool manifests via the adapter), `packages/platform`

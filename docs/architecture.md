@@ -15,7 +15,7 @@ L7 Surface   apps/cli/  apps/web/  apps/api/        (imports anything)
    ────────────────────────────────────────────────────────────────
 L6 Runtime   packages/world/                        (orchestration hub)
    ────────────────────────────────────────────────────────────────
-L5 Build     packages/compile/  packages/image/     (project → image)
+L5 Build     packages/transpile/  packages/compile/     (project → image)
    ────────────────────────────────────────────────────────────────
 L4 Project   packages/project/                      (manifest + validation)
    ────────────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@ Implementation details live under `internal/` — the Go compiler itself rejects
 - `packages/project/internal/manifest/` — parsing details
 - `packages/project/internal/resolve/` — dep merging
 - `packages/world/runtime/` — runtime adapter port interface
-- `packages/image/backend/` — Docker API wrapper
+- `packages/compile/backend/` — Docker API wrapper
 
 ### 3. This document
 
@@ -108,9 +108,9 @@ The layer diagram above is the ground truth. When in doubt, check here.
 | Abstraction | Where | Purpose |
 |-------------|-------|---------|
 | Dependency | `packages/dependency` | Distribution unit (schema, refs, lockfile) |
-| Tool | `packages/image` | Interface any installable capability implements |
-| Runtime | `packages/compile/runtimes` | Translates agent composition → runtime files |
-| Backend | `packages/image/backend` | Container runtime (Docker today) |
+| Tool | `packages/compile` | Interface any installable capability implements |
+| Runtime | `packages/transpile/runtimes` | Translates agent composition → runtime files |
+| Backend | `packages/compile/backend` | Container runtime (Docker today) |
 | Mind | `packages/agent` | How an agent persists and evolves |
 
 ## Data flow: `spwn up`

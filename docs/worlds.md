@@ -120,7 +120,7 @@ spwn up                     # every world in spwn.yaml
 spwn up default             # just "default"
 ```
 
-`spwn up` compiles the project through `packages/compile` (render the
+`spwn up` compiles the project through `packages/transpile` (render the
 per-world `Tree`), assembles each agent's composition (tools + skills
 + profile) into a Docker image, boots a container, mounts the
 workspaces under `/workspaces/`, and hands the runtime control. The

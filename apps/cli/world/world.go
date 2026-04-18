@@ -345,7 +345,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 				if detail != "" {
 					s.Info("Tools", detail)
 				}
-				s.Start("Resolving image...")
+				s.Start("Resolving compile...")
 			case "image_resolving":
 				s.UpdateLabel("Resolving image (checking cache)...")
 			case "image_building":

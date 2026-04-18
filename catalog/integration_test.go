@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/compile"
-	_ "spwn.sh/packages/compile/runtimes/claude_code" // register the claude-code compile renderer
-	"spwn.sh/packages/compile/source"
+	"spwn.sh/packages/transpile"
+	_ "spwn.sh/packages/transpile/runtimes/claude_code" // register the claude-code compile renderer
+	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/project"
 	runtimespkg "spwn.sh/packages/runtimes"
 )
@@ -20,7 +20,7 @@ import (
 //  2. Loads the installed project via `project.Find` (same walker
 //     the CLI uses).
 //  3. Runs `project.Validate` (the rule engine behind `spwn check`).
-//  4. Loads the project source and calls `compile.Compile` (the
+//  4. Loads the project source and calls `transpile.Compile` (the
 //     pure half of `spwn build --tree-only`, no Docker).
 //
 // If any of those steps fails, the catalog entry is broken at
@@ -85,9 +85,9 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 			if err != nil {
 				t.Fatalf("source.ToCompileInput: %v", err)
 			}
-			tree, err := compile.Compile("claude-code", in)
+			tree, err := transpile.Compile("claude-code", in)
 			if err != nil {
-				t.Fatalf("compile.Compile: %v", err)
+				t.Fatalf("transpile.Compile: %v", err)
 			}
 			if tree == nil || len(tree.Paths()) == 0 {
 				t.Fatal("compile produced an empty tree")

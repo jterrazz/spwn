@@ -158,7 +158,7 @@ verify:
 		t.Fatalf("parse: %v", err)
 	}
 	// The dependency: section surfaces via Runtimes() and Config() on the
-	// unified image.Tool interface — no type assertion needed.
+	// unified compile.Tool interface — no type assertion needed.
 	runtimes := func() []string { if tool.Schema.RuntimeConfig != nil { return tool.Schema.RuntimeConfig.Runtimes }; return nil }()
 	if len(runtimes) != 1 || runtimes[0] != "spwn:claude-code" {
 		t.Errorf("runtimes: %v", runtimes)

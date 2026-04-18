@@ -1,5 +1,5 @@
 // Package architect is the world orchestrator. It sits on top of
-// packages/world (state, runtime port, labels) and packages/image
+// packages/world (state, runtime port, labels) and packages/compile
 // (backend, build) and turns a declarative spwn project into
 // running Docker containers.
 //

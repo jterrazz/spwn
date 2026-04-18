@@ -9,8 +9,8 @@ require (
 	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
+	spwn.sh/packages/transpile v0.0.0
 	spwn.sh/packages/compile v0.0.0
-	spwn.sh/packages/image v0.0.0
 	spwn.sh/packages/platform v0.0.0
 )
 
@@ -44,8 +44,8 @@ replace (
 	spwn.sh/packages/activity => ../activity
 	spwn.sh/packages/agent => ../agent
 	spwn.sh/packages/auth => ../auth
+	spwn.sh/packages/transpile => ../transpile
 	spwn.sh/packages/compile => ../compile
-	spwn.sh/packages/image => ../image
 	spwn.sh/packages/platform => ../platform
 )
 

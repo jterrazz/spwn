@@ -9,7 +9,7 @@ use (
 	./packages/architect
 	./packages/auth
 	./packages/compile
-	./packages/image
+	./packages/transpile
 	./packages/mailbox
 	./packages/migration
 	./packages/platform

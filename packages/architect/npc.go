@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/compile/runtimes/claude_code"
+	"spwn.sh/packages/transpile/runtimes/claude_code"
 	"spwn.sh/packages/world/runtime"
 )
 

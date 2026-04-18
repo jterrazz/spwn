@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	ib "spwn.sh/packages/image"
-	"spwn.sh/packages/image/backend"
+	ib "spwn.sh/packages/compile"
+	"spwn.sh/packages/compile/backend"
 )
 
 // injectRuntimeConfig computes the merged runtime config for the

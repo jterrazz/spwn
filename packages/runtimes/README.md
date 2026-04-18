@@ -15,5 +15,5 @@ A "runtime" is the thinking engine that actually executes an agent's prompts —
 
 ## Related
 
-- **Imported by** — `apps/cli` (to register runtimes into the catalog), `catalog` (for dep-resolution tests), `packages/architect` (to build runtime images), `packages/image`, `packages/world`
-- **Imports** — `packages/dependency`, `packages/image`, `packages/world/runtime` (the Runtime port interface)
+- **Imported by** — `apps/cli` (to register runtimes into the catalog), `catalog` (for dep-resolution tests), `packages/architect` (to build runtime images), `packages/compile`, `packages/world`
+- **Imports** — `packages/dependency`, `packages/compile`, `packages/world/runtime` (the Runtime port interface)

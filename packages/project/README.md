@@ -17,5 +17,5 @@ A spwn project is a directory tree with a top-level `spwn.yaml`, one or more age
 
 ## Related
 
-- **Imported by** — `apps/cli`, `packages/compile`
+- **Imported by** — `apps/cli`, `packages/transpile`
 - **Imports** — `packages/agent`, `packages/dependency`, `packages/platform`, internal sub-packages (`manifest/`, `discovery/`, `scaffold/`, `validate/`, `resolve/`)
