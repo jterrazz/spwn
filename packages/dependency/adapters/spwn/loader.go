@@ -1,4 +1,4 @@
-package catalog
+package spwn
 
 import (
 	"embed"
@@ -10,18 +10,21 @@ import (
 	"spwn.sh/packages/dependency"
 )
 
-// catalogFS embeds every built-in catalog entry — both installable
-// dependencies (spwn:unix, spwn:git, …) and init-able project
-// templates (spwn:matrix, spwn:startup, …). Every entry ships a
-// root spwn.yaml (project-shape); pure-dep entries additionally
-// carry the actual tool definition at tools/<slug>/tool.yaml.
+// Every built-in catalog entry is mirrored here at `content/<slug>/`
+// by the go:generate below — source-of-truth lives at /catalog/ in
+// the repo root. The mirror is gitignored; `go generate` rehydrates
+// it before every build. Go's go:embed directive can't walk `..`
+// out of a package's directory, so the copy step is what keeps
+// /catalog/ pure content while the loader lives here.
 //
-// Adding a new entry? Drop the directory in AND update this embed
-// directive — Go's embed doesn't accept a bare wildcard because
-// the package's own Go sources would otherwise land in the FS.
-//
-//go:embed all:architect all:build all:cli all:docker-cli all:git all:macrohard all:matrix all:mempalace all:node all:paperclip-factory all:python all:qmd all:research-lab all:severance all:startup all:unix
+//go:generate bash -c "rm -rf content && mkdir content && cp -R ../../../../catalog/. content/ && rm -f content/go.mod content/go.sum"
+//go:embed all:content
 var catalogFS embed.FS
+
+// contentRoot is the directory prefix the go:generate mirror drops
+// every source entry under. Paths flowing through the loader /
+// gallery API stay relative to this root — consumers never see it.
+const contentRoot = "content"
 
 // loadYAMLTools walks every catalog entry that ships a
 // tools/<slug>/tool.yaml and parses it into an dependency.Tool. Project
@@ -29,17 +32,16 @@ var catalogFS embed.FS
 // that don't ship a tool.yaml) are not tool-shaped and are not
 // registered — they surface through the init gallery only.
 func loadYAMLTools() ([]dependency.Tool, error) {
-	entries, err := fs.ReadDir(catalogFS, ".")
+	entries, err := fs.ReadDir(catalogFS, contentRoot)
 	if err != nil {
-		return nil, fmt.Errorf("read embedded catalog: %w", err)
+		return nil, fmt.Errorf("read embedded catalog (is go:generate ran?): %w", err)
 	}
 	var names []string
 	for _, e := range entries {
 		if !e.IsDir() {
 			continue
 		}
-		// A pure-dep entry is <slug>/tools/<slug>/tool.yaml.
-		toolPath := path.Join(e.Name(), "tools", e.Name(), dependency.ToolManifest)
+		toolPath := path.Join(contentRoot, e.Name(), "tools", e.Name(), dependency.ToolManifest)
 		if _, err := fs.Stat(catalogFS, toolPath); err != nil {
 			continue
 		}
@@ -51,7 +53,7 @@ func loadYAMLTools() ([]dependency.Tool, error) {
 	for _, name := range names {
 		canonical := "spwn:" + name
 		parsed, err := dependency.Parse(
-			dependency.EmbedResolver{FS: catalogFS, Root: path.Join(name, "tools", name)},
+			dependency.EmbedResolver{FS: catalogFS, Root: path.Join(contentRoot, name, "tools", name)},
 			dependency.ParseOptions{
 				DefaultName:    canonical,
 				DefaultVersion: "latest",

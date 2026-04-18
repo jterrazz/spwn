@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/catalog"
+	spwn "spwn.sh/packages/dependency/adapters/spwn"
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
@@ -108,14 +108,14 @@ func runInitLocal(cmd *cobra.Command) error {
 // parseExampleRef normalises an init argument to the bare slug. Accepts:
 //   - "spwn:<slug>" — explicit form, slug extracted.
 //   - "<slug>"      — bare form, resolved against the gallery
-//     (catalog.ShippedSlugs) and rejected with a known-list hint when
+//     (spwn.ShippedSlugs) and rejected with a known-list hint when
 //     no gallery entry matches.
 //
 // Anything else (uppercase, other schemes, legacy `@owner/name`) is
 // rejected with the scheme grammar error.
 func parseExampleRef(ref string) (string, error) {
 	trimmed := strings.TrimSpace(ref)
-	resolved, err := dependency.ResolveCLI(trimmed, catalog.ShippedSlugs())
+	resolved, err := dependency.ResolveCLI(trimmed, spwn.ShippedSlugs())
 	if err != nil {
 		return "", err
 	}
@@ -149,15 +149,15 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 	}
 
 	// Honor --force: if the user passed it and a manifest already
-	// exists, clear it so catalog.Install can write fresh content
-	// (catalog.Install itself never overwrites).
+	// exists, clear it so spwn.Install can write fresh content
+	// (spwn.Install itself never overwrites).
 	if initForce {
 		if err := os.Remove(filepath.Join(cwd, "spwn.yaml")); err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("remove existing spwn.yaml: %w", err)
 		}
 	}
 
-	rep, err := catalog.Install(slug, cwd)
+	rep, err := spwn.Install(slug, cwd)
 	if err != nil {
 		return fmt.Errorf("install example %s: %w", ref, err)
 	}

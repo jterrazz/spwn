@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"spwn.sh/catalog"
+	spwn "spwn.sh/packages/dependency/adapters/spwn"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/dependency"
@@ -52,7 +52,7 @@ func Build(cwd string, opts Opts) (*Model, error) {
 	}
 
 	reg := ib.NewRegistry()
-	if err := catalog.RegisterDefaults(reg); err != nil {
+	if err := spwn.RegisterDefaults(reg); err != nil {
 		return nil, fmt.Errorf("register catalog: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {

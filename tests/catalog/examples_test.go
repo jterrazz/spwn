@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/catalog"
+	spwn "spwn.sh/packages/dependency/adapters/spwn"
 	"spwn.sh/packages/dependency"
 )
 
@@ -23,10 +23,10 @@ func hasWorlds(s *dependency.Schema) bool {
 // ShippedSlugs(), and vice-versa. Dependency-shaped entries (no
 // worlds:) live in the same embed FS but stay out of the gallery.
 //
-// Runs against catalog.EmbedFS() so it exercises the exact bytes
+// Runs against spwn.EmbedFS() so it exercises the exact bytes
 // that ship in the compiled binary — not the filesystem.
 func TestShippedSlugsMatchEmbed(t *testing.T) {
-	embed := catalog.EmbedFS()
+	embed := spwn.EmbedFS()
 	entries, err := fs.ReadDir(embed, ".")
 	if err != nil {
 		t.Fatalf("read embed root: %v", err)
@@ -37,7 +37,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 		if !e.IsDir() {
 			continue
 		}
-		schema, err := catalog.EntrySchema(e.Name())
+		schema, err := spwn.EntrySchema(e.Name())
 		if err != nil {
 			continue
 		}
@@ -47,7 +47,7 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 	}
 
 	canonical := make(map[string]bool)
-	for _, s := range catalog.ShippedSlugs() {
+	for _, s := range spwn.ShippedSlugs() {
 		canonical[s] = true
 	}
 
@@ -73,8 +73,8 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 //
 // Without these, the binary ships but misbehaves at runtime.
 func TestShippedSlugsStructure(t *testing.T) {
-	embed := catalog.EmbedFS()
-	for _, slug := range catalog.ShippedSlugs() {
+	embed := spwn.EmbedFS()
+	for _, slug := range spwn.ShippedSlugs() {
 		t.Run(slug, func(t *testing.T) {
 			for _, p := range []string{slug + "/spwn.yaml", slug + "/spwn.lock"} {
 				if _, err := fs.Stat(embed, p); err != nil {
@@ -113,7 +113,7 @@ func TestShippedSlugsStructure(t *testing.T) {
 // should be the first example users see since it's the multi-agent
 // showcase.
 func TestList_StartupIsFirst(t *testing.T) {
-	got, err := catalog.List()
+	got, err := spwn.List()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestList_StartupIsFirst(t *testing.T) {
 }
 
 func TestList_AllShippedExamplesParse(t *testing.T) {
-	got, err := catalog.List()
+	got, err := spwn.List()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestList_AllShippedExamplesParse(t *testing.T) {
 }
 
 func TestGet_UnknownSlug(t *testing.T) {
-	if _, err := catalog.Get("nope"); err != catalog.ErrNotFound {
+	if _, err := spwn.Get("nope"); err != spwn.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
@@ -170,7 +170,7 @@ func TestGet_UnknownSlug(t *testing.T) {
 func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 	// spwn:unix has no worlds: section so Get must treat it as
 	// not-gallery-eligible.
-	if _, err := catalog.Get("unix"); err != catalog.ErrNotFound {
+	if _, err := spwn.Get("unix"); err != spwn.ErrNotFound {
 		t.Errorf("Get(\"unix\") should fail: deps without worlds are not gallery-eligible (got err=%v)", err)
 	}
 }
@@ -178,7 +178,7 @@ func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	base := t.TempDir()
 
-	rep, err := catalog.Install("matrix", base)
+	rep, err := spwn.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	}
 
 	// Re-install: no new additions, every world + agent skipped.
-	rep2, err := catalog.Install("matrix", base)
+	rep2, err := spwn.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("second Install: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 
 func TestInstall_PreservesLocalEdits(t *testing.T) {
 	base := t.TempDir()
-	_, err := catalog.Install("paperclip-factory", base)
+	_, err := spwn.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -231,7 +231,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = catalog.Install("paperclip-factory", base)
+	_, err = spwn.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("re-Install: %v", err)
 	}
@@ -245,7 +245,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 }
 
 func TestInstall_UnknownSlug(t *testing.T) {
-	if _, err := catalog.Install("nope", t.TempDir()); err != catalog.ErrNotFound {
+	if _, err := spwn.Install("nope", t.TempDir()); err != spwn.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"spwn.sh/apps/cli/dependency"
-	"spwn.sh/catalog"
+	spwn "spwn.sh/packages/dependency/adapters/spwn"
 	"spwn.sh/packages/runtimes"
 )
 
@@ -18,7 +18,7 @@ func init() {
 	// auto-promotes to `spwn install spwn:qmd`.
 	dependency.SetCatalogLookup(
 		func(ref string) bool {
-			for _, t := range catalog.All {
+			for _, t := range spwn.All {
 				if t.Name() == ref {
 					return true
 				}
@@ -26,8 +26,8 @@ func init() {
 			return false
 		},
 		func() []string {
-			out := make([]string, 0, len(catalog.All))
-			for _, t := range catalog.All {
+			out := make([]string, 0, len(spwn.All))
+			for _, t := range spwn.All {
 				out = append(out, strings.TrimPrefix(t.Name(), "spwn:"))
 			}
 			return out
@@ -40,8 +40,8 @@ func init() {
 // tool/skill/runtime-config concept) and runtimes. Used to power
 // the "did you mean X?" hints in `spwn check`.
 func catalogToolNames() []string {
-	out := make([]string, 0, len(catalog.All)+len(runtimes.All))
-	for _, t := range catalog.All {
+	out := make([]string, 0, len(spwn.All)+len(runtimes.All))
+	for _, t := range spwn.All {
 		out = append(out, t.Name())
 	}
 	for _, t := range runtimes.All {

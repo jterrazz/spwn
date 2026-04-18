@@ -31,7 +31,13 @@ help:
 
 # ── Build ─────────────────────────────────────────────────────────
 
-build:
+# generate runs every //go:generate directive. Used by build + test
+# to (re)hydrate the spwn adapter's embedded catalog mirror from
+# /catalog/ before compilation. Cheap (~100ms) so we always run it.
+generate:
+	@cd packages/dependency && go generate ./...
+
+build: generate
 	cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
 
 install: build
@@ -60,7 +66,7 @@ go-vet:
 
 # ── Test ──────────────────────────────────────────────────────────
 
-test: go-test
+test: generate go-test
 
 go-test:
 	@for mod in $(GO_MODS); do \
