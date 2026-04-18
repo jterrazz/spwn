@@ -167,13 +167,13 @@ name: neo
 runtime:
   backend: "spwn:claude-code"
 
+# scheme refs (spwn:*, github:*) pull from catalogs;
+# bare names resolve to spwn/skills/<name>.md or spwn/tools/<name>/.
 dependencies:
-  - "spwn:unix"                 # bash, coreutils, grep, sed, awk
-  - "spwn:git"                  # version control
-  - "spwn:python"               # python3, pip3
-  - "spwn:mempalace"            # injects MCP server into Claude Code
-  - paper-reading                # local skill: spwn/skills/paper-reading.md
-  - hypothesis-testing           # local skill
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"
+  - code-review
 ```
 
 **If a dependency isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [dependency catalog](docs/dependency-catalog.md).
