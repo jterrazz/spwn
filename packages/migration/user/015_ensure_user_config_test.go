@@ -4,33 +4,24 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"spwn.sh/packages/platform"
 )
 
-func TestEnsureUserConfig_createsWhenMissing(t *testing.T) {
-	base := t.TempDir()
-	if err := EnsureUserConfig.Apply(context.Background(), base); err != nil {
-		t.Fatalf("Apply: %v", err)
-	}
-	data, err := os.ReadFile(filepath.Join(base, platform.ConfigFileName))
-	if err != nil {
-		t.Fatalf("config not written: %v", err)
-	}
-	content := string(data)
-	if !strings.Contains(content, "apiVersion: "+platform.CurrentConfigAPIVersion) {
-		t.Errorf("config missing apiVersion header:\n%s", content)
-	}
-	if !strings.Contains(content, "default_backend: spwn:claude-code") {
-		t.Errorf("config missing default_backend:\n%s", content)
-	}
-	if !strings.Contains(content, "channel: stable") {
-		t.Errorf("config missing update.channel:\n%s", content)
-	}
+// TestEnsureUserConfig_Fixture asserts that the baked-in default
+// config.yaml is byte-exact. Regression guard: if the
+// platform.CurrentConfigAPIVersion constant or the seed template
+// drifts, the fixture diff surfaces it immediately.
+// Fixture at testdata/user/015_ensure_user_config/.
+func TestEnsureUserConfig_Fixture(t *testing.T) {
+	runFixture(t, EnsureUserConfig, "015_ensure_user_config")
 }
 
+// TestEnsureUserConfig_keepsExistingFile covers the
+// don't-overwrite-user-edits contract, which a fixture can't
+// express (the fixture shows one transformation, not the "skip if
+// present" branch).
 func TestEnsureUserConfig_keepsExistingFile(t *testing.T) {
 	base := t.TempDir()
 	existing := "# user customisations preserved\napiVersion: spwn/v2\nonboarded: true\n"
@@ -52,6 +43,8 @@ func TestEnsureUserConfig_keepsExistingFile(t *testing.T) {
 	}
 }
 
+// TestEnsureUserConfig_idempotent: running twice is a no-op after
+// the first run — the second Apply does not touch the file.
 func TestEnsureUserConfig_idempotent(t *testing.T) {
 	base := t.TempDir()
 	if err := EnsureUserConfig.Apply(context.Background(), base); err != nil {

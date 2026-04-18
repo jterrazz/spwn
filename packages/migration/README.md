@@ -39,6 +39,32 @@ spawn).
 - `BackupBaseDir(baseDir)` — tar the whole base dir (excluding `backups/`) into `backups/` before migration runs.
 - `user/` sub-package — the built-in user-scope migration catalogue. Drop in a new `NNN_<name>.go` and register it in `user.All()`.
 
+## Testing pattern
+
+Each scope's sub-package has its own `testdata/` tree that mirrors
+the migrations catalogue:
+
+```
+packages/migration/<scope>/testdata/<NNN_migration_name>/
+  before/   — seeded into t.TempDir() before Apply runs
+  after/    — expected state of the tempdir once Apply returns
+```
+
+A shared `runFixture(t, m, "NNN_migration_name")` helper (in each
+scope's `harness_test.go`) copies `before/` into a fresh temp dir,
+runs `m.Apply`, then diffs the temp dir against `after/`
+file-by-file. Any missing/extra path or content mismatch fails the
+test with the path reported.
+
+`.gitkeep` markers in `after/` are filtered by the harness so
+fixtures can preserve otherwise-empty directories in git without
+breaking the diff. Migrations whose output is not byte-deterministic
+(YAML round-trips, timestamp-suffixed renames) keep their happy-path
+tests inline; edge-case tests (no-op paths, idempotency, user-edit
+preservation) stay inline across the board. Fixtures express the
+*transformation contract*; inline tests express the *behavioural
+invariants*.
+
 ## History
 
 Migrations 001-008 were deleted in the pre-1.0 migration squash.

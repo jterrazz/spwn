@@ -1,0 +1,9 @@
+# spwn user config — edit freely; spwn re-reads on every CLI invocation.
+# Docs: https://spwn.sh/docs/config
+apiVersion: spwn/v2
+runtime:
+    default_backend: spwn:claude-code
+telemetry:
+    enabled: false
+update:
+    channel: stable

@@ -2,53 +2,22 @@ package user
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 )
 
-// TestDropLegacyStateJSON_RemovesLegacyArtifacts covers the real
-// pre-labels install shape: state.json + state.json.bak + runtime/
-// all populated. After the migration none should exist.
-func TestDropLegacyStateJSON_RemovesLegacyArtifacts(t *testing.T) {
-	baseDir := t.TempDir()
-
-	// Seed the three legacy artifacts.
-	mustWrite(t, filepath.Join(baseDir, "state.json"), `{"worlds":[]}`)
-	mustWrite(t, filepath.Join(baseDir, "state.json.bak"), `{"worlds":[]}`)
-	runtimeDir := filepath.Join(baseDir, "runtime")
-	if err := os.MkdirAll(runtimeDir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	mustWrite(t, filepath.Join(runtimeDir, "w-1.json"), `{}`)
-
-	if err := DropLegacyStateJSON.Apply(context.Background(), baseDir); err != nil {
-		t.Fatalf("Apply: %v", err)
-	}
-
-	for _, path := range []string{"state.json", "state.json.bak", "runtime"} {
-		if _, err := os.Stat(filepath.Join(baseDir, path)); !os.IsNotExist(err) {
-			t.Errorf("%s should be gone, stat err = %v", path, err)
-		}
-	}
+// TestDropLegacyStateJSON_Fixture covers the pre-labels install
+// shape end-to-end via the shared harness. Before: state.json +
+// state.json.bak + runtime/ with a per-world file. After: all
+// three gone. Fixture at testdata/user/016_drop_legacy_state_json/.
+func TestDropLegacyStateJSON_Fixture(t *testing.T) {
+	runFixture(t, DropLegacyStateJSON, "016_drop_legacy_state_json")
 }
 
-// TestDropLegacyStateJSON_NoopOnFreshInstall verifies the migration
-// is safe on a fresh install where none of the three legacy paths
-// exist. This is the shape every new install hits.
+// TestDropLegacyStateJSON_NoopOnFreshInstall: a fresh install has
+// none of the three legacy paths. Migration must not error.
 func TestDropLegacyStateJSON_NoopOnFreshInstall(t *testing.T) {
-	baseDir := t.TempDir()
-	if err := DropLegacyStateJSON.Apply(context.Background(), baseDir); err != nil {
+	base := t.TempDir()
+	if err := DropLegacyStateJSON.Apply(context.Background(), base); err != nil {
 		t.Errorf("Apply on empty baseDir should be no-op; got %v", err)
-	}
-}
-
-func mustWrite(t *testing.T, path, content string) {
-	t.Helper()
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
