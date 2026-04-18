@@ -1070,6 +1070,132 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("doc %s missing SOUL.md", docPath)
 		}
 	})
+
+	// ── K. Regression tests for bugs surfaced this session ───────────
+
+	t.Run("51_catalog_install_ships_knowledge_dir", func(t *testing.T) {
+		// Regression for commit 6319e3a6: `spwn init spwn:<name>` used
+		// to drop the catalog's knowledge/ dir on the floor — the
+		// installer only copied agents/skills/tools/hooks/files under
+		// spwn/. After the fix, root-level knowledge/ ships too, so
+		// seed handbooks + starter notes actually materialise.
+		t.Parallel()
+		env, _ := freshEnv(t)
+		wd := t.TempDir()
+		_, stderr, code := runCLI(t, env, wd, "init", "spwn:severance")
+		if code != 0 {
+			t.Fatalf("init spwn:severance failed (code=%d): %s", code, stderr)
+		}
+		for _, rel := range []string{
+			"knowledge/handbook.md",
+			"knowledge/raw/note-001.md",
+		} {
+			if _, err := os.Stat(filepath.Join(wd, rel)); err != nil {
+				t.Errorf("expected %s on disk after init, got: %v", rel, err)
+			}
+		}
+	})
+
+	t.Run("52_catalog_install_severance_passes_check", func(t *testing.T) {
+		// The severance MDR team catalog entry must install + pass
+		// check cleanly (shape of agents/*/SOUL.md, dependencies with
+		// scheme refs, knowledge: ./knowledge world key, etc).
+		t.Parallel()
+		env, _ := freshEnv(t)
+		wd := t.TempDir()
+		if _, stderr, code := runCLI(t, env, wd, "init", "spwn:severance"); code != 0 {
+			t.Fatalf("init: %s", stderr)
+		}
+		_, stderr, code := runCLI(t, env, wd, "check")
+		if code != 0 {
+			t.Fatalf("check failed on severance project (code=%d):\n%s", code, stderr)
+		}
+	})
+
+	t.Run("53_catalog_install_research_lab_passes_check", func(t *testing.T) {
+		// Parallel coverage for research-lab — the other bundled
+		// example that uses the knowledge/ ship. If either catalog
+		// entry drifts out of sync with the current manifest schema
+		// this fires.
+		t.Parallel()
+		env, _ := freshEnv(t)
+		wd := t.TempDir()
+		if _, stderr, code := runCLI(t, env, wd, "init", "spwn:research-lab"); code != 0 {
+			t.Fatalf("init: %s", stderr)
+		}
+		_, stderr, code := runCLI(t, env, wd, "check")
+		if code != 0 {
+			t.Fatalf("check failed on research-lab project (code=%d):\n%s", code, stderr)
+		}
+	})
+
+	t.Run("54_skill_new_output_passes_check", func(t *testing.T) {
+		// Regression for the `spwn skill new` paper-cut: the command
+		// used to scaffold a .md file without YAML frontmatter, which
+		// then immediately failed `spwn check`'s ruleSkillFrontmatter.
+		// After the fix, a skill authored via the CLI passes check
+		// end-to-end when referenced by agent.yaml via skill:<name>.
+		t.Parallel()
+		env, _ := freshEnv(t)
+		wd := t.TempDir()
+		if _, stderr, code := runCLI(t, env, wd, "init", "--name", "skill-check"); code != 0 {
+			t.Fatalf("init: %s", stderr)
+		}
+		if _, stderr, code := runCLI(t, env, wd, "skill", "new", "note-taking"); code != 0 {
+			t.Fatalf("skill new: %s", stderr)
+		}
+		// Attach via the new scheme grammar and re-run check — must pass.
+		agentYAML := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
+		body, err := os.ReadFile(agentYAML)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(body), "dependencies:") {
+			t.Fatalf("expected agent.yaml to contain dependencies: block:\n%s", body)
+		}
+		patched := strings.Replace(string(body),
+			"dependencies:\n", "dependencies:\n  - \"skill:note-taking\"\n", 1)
+		if err := os.WriteFile(agentYAML, []byte(patched), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		_, stderr, code := runCLI(t, env, wd, "check")
+		if code != 0 {
+			t.Fatalf("check after skill new + attach: code=%d\n%s", code, stderr)
+		}
+	})
+
+	t.Run("55_migration_backup_tolerates_broken_symlink", func(t *testing.T) {
+		// Regression for a794d543: the pre-migration backup walked a
+		// credential-routing symlink (e.g. ~/.spwn/agents/<name>/.codex/
+		// auth.json -> /credentials/openai/auth.json) and errored
+		// out because the symlink target only exists INSIDE a
+		// container namespace. Every spwn command on the host was
+		// broken until the backup learned to skip symlinks. This
+		// test reproduces the broken-link setup and asserts any
+		// migrating command still completes.
+		t.Parallel()
+		env, home := freshEnv(t)
+		agentDir := filepath.Join(home, "agents", "atlas", ".codex")
+		if err := os.MkdirAll(agentDir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		// Target intentionally does not exist on the host.
+		if err := os.Symlink("/credentials/openai/auth.json",
+			filepath.Join(agentDir, "auth.json")); err != nil {
+			t.Fatal(err)
+		}
+		// `auth status` triggers PersistentPreRunE → migration
+		// runner → pre-migration backup → walk SPWN_HOME. Must not
+		// blow up on the broken link.
+		_, stderr, code := runCLI(t, env, t.TempDir(), "auth", "status")
+		if code != 0 {
+			t.Fatalf("auth status failed on SPWN_HOME with broken symlink (code=%d):\n%s", code, stderr)
+		}
+		if strings.Contains(stderr, "pre-migration backup") &&
+			strings.Contains(stderr, "no such file") {
+			t.Fatalf("pre-migration backup followed broken symlink:\n%s", stderr)
+		}
+	})
 }
 
 // mustWriteProject writes a minimal but valid spwn project skeleton so
