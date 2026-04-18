@@ -57,11 +57,25 @@ func Init(dir string, opts Opts) error {
 		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
 		{"templates/AGENTS.md.tmpl", "spwn/agents/neo/AGENTS.md"},
 		{"templates/SOUL.md.tmpl", "spwn/agents/neo/SOUL.md"},
+		// One example per local scheme so users land on a project that
+		// demonstrates skill:, tool:, and hook: out of the box. The
+		// scaffold agent.yaml references all three.
+		{"templates/skill.focus.md.tmpl", "spwn/skills/focus.md"},
+		{"templates/tool.greet.yaml.tmpl", "spwn/tools/greet/tool.yaml"},
+		{"templates/hook.pre-spawn.sh.tmpl", "spwn/hooks/pre-spawn.sh"},
 	}
 	for _, f := range files {
 		if err := writeTemplate(absDir, f.src, f.dst, data); err != nil {
 			return err
 		}
+	}
+
+	// Hook scripts must be executable — the runtime launches them
+	// directly on the host. Only chmod the one file so we don't
+	// accidentally mark every scaffolded file as +x.
+	hookPath := filepath.Join(absDir, "spwn/hooks/pre-spawn.sh")
+	if err := os.Chmod(hookPath, 0o755); err != nil {
+		return fmt.Errorf("chmod %s: %w", hookPath, err)
 	}
 
 	// Empty layer dirs: preserve them with .gitkeep so git tracks

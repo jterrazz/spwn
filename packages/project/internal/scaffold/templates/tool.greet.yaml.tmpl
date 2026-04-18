@@ -1,0 +1,25 @@
+# Local tool: greet
+#
+# Ships a tiny `greet` CLI into the world image as a demo of the
+# tool:<name> scheme. Edit install.commands to change what the tool
+# does, add apt packages under install.packages, or rename the dir
+# and the ref in spwn/agents/neo/agent.yaml to make it your own.
+#
+# Docs: https://spwn.sh/docs/tools
+
+name: greet
+version: "0.1.0"
+description: Example local tool — prints a friendly greeting inside the world.
+
+install:
+  commands:
+    - |
+      cat > /usr/local/bin/greet <<'SPWN_GREET_EOF'
+      #!/usr/bin/env bash
+      echo "hello from spwn, $(whoami) — it is $(date +%H:%M:%S)"
+      SPWN_GREET_EOF
+    - chmod +x /usr/local/bin/greet
+
+verify:
+  - command -v greet
+  - greet
