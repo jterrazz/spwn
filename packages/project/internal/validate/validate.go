@@ -878,9 +878,14 @@ func ruleMarkdownImports(in Input) []Issue {
 }
 
 // ruleSkillFrontmatter enforces the skill markdown convention:
-// every .md under spwn/skills/, spwn/tools/<name>/skills/, and
-// spwn/agents/<name>/skills/ must start with a YAML frontmatter
-// block declaring `name:` and `description:`.
+// every .md under spwn/skills/ and spwn/tools/<name>/skills/ must
+// start with a YAML frontmatter block declaring `name:` and
+// `description:`.
+//
+// Per-agent skill directories (spwn/agents/<name>/skills/) are NOT
+// walked: they are a pure Mind memory layer — the agent writes to
+// them at runtime — and spwn neither validates nor injects their
+// contents as skills.
 //
 // Shape (the "SKILL" convention, kept as generic markdown
 // frontmatter so non-skill .md can opt in later):
@@ -937,11 +942,15 @@ func ruleSkillFrontmatter(in Input) []Issue {
 
 // collectSkillFiles walks every place a user authors skills in a
 // spwn project and returns the full list of markdown files found
-// there. The three locations are:
+// there. The two locations are:
 //
 //   - spwn/skills/              — project-wide bare skills
 //   - spwn/tools/<name>/skills/ — skills shipped by a local tool
-//   - spwn/agents/<name>/skills/— skills attached to one agent
+//
+// Per-agent skill directories (spwn/agents/<name>/skills/) are a
+// pure Mind memory layer and are intentionally NOT walked: the
+// agent writes to them at runtime and spwn neither validates nor
+// injects their contents.
 //
 // Each location is walked recursively so nested skill directories
 // (spwn/skills/reviewing/code-review.md) are covered. Missing
@@ -967,6 +976,10 @@ func collectSkillFiles(root string) []string {
 // files may appear. Directories that don't exist are silently skipped
 // by the walker (filepath.WalkDir returns os.ErrNotExist which the
 // collector drops).
+//
+// Agent-local skills/ directories (spwn/agents/<name>/skills/) are
+// deliberately absent: they are a pure Mind memory layer written by
+// the agent at runtime, not an authoring surface for spwn.
 func skillSearchRoots(root string) []string {
 	var roots []string
 
@@ -978,15 +991,6 @@ func skillSearchRoots(root string) []string {
 		for _, e := range entries {
 			if e.IsDir() {
 				roots = append(roots, filepath.Join(root, "spwn", "tools", e.Name(), "skills"))
-			}
-		}
-	}
-
-	// Agent-local skills (one skills/ dir per agent).
-	if entries, err := os.ReadDir(filepath.Join(root, "spwn", "agents")); err == nil {
-		for _, e := range entries {
-			if e.IsDir() {
-				roots = append(roots, filepath.Join(root, "spwn", "agents", e.Name(), "skills"))
 			}
 		}
 	}

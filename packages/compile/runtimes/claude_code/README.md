@@ -23,7 +23,7 @@ mention `CLAUDE.md` directly.
 | ---------------------------------------- | ------------------------------------------- |
 | `spwn/agents/<name>/AGENTS.md`            | `/agents/<name>/CLAUDE.md`                  |
 | `spwn/agents/<name>/SOUL.md` | `/agents/<name>/SOUL.md` (as-is)|
-| `spwn/agents/<name>/skills/*`            | `/agents/<name>/skills/*` (as-is)           |
+| `spwn/agents/<name>/skills/*`            | `/agents/<name>/skills/*` (opaque Mind memory layer; runtime-writable, never injected) |
 | `compile.Input.VerifiedTools`            | `/world/faculties.md` (generated)           |
 | `compile.Input.Manifest`                 | `/world/physics.md` (generated)             |
 | `compile.Input.Agents`                   | `/world/roster.md` (generated)              |

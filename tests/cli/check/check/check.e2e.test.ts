@@ -89,23 +89,24 @@ describe('spwn check', () => {
         result.stdout.toContain('spwn.yaml#worlds.neo.agents');
     });
 
-    test('flags a skill missing the required YAML frontmatter', async () => {
+    test('ignores agent-local skills — they are an opaque Mind memory layer', async () => {
         // Given - single-agent base + a naked skill dropped under
-        // Spwn/agents/neo/skills/ via the framework's agent/ seed
-        // Handler. The skill has no `--- name: ... ---` block.
-        const result = await spec('skill frontmatter missing')
+        // Spwn/agents/neo/skills/. That directory is the agent's
+        // Private Mind memory layer (written to at runtime), not an
+        // Authoring surface: spwn must neither validate nor discover
+        // Its contents.
+        const result = await spec('agent-local skills are opaque')
             .project('single-agent')
             .seed('agent/neo/skills/naked.md')
             .exec('check')
             .run();
 
-        // Then - check exits non-zero, names the offending file, and
-        // Hints at the header shape the user should add.
-        expect(result.exitCode).toBe(1);
-        expect(result.stdout.text).toContain('spwn/agents/neo/skills/naked.md');
-        expect(result.stdout.text).toContain('missing YAML frontmatter');
-        expect(result.stdout.text).toContain('name: <slug>');
-        expect(result.stdout.text).toContain('description:');
+        // Then - check still passes. The broken file is invisible to
+        // The validator; the rule only walks spwn/skills/ and
+        // Spwn/tools/<name>/skills/.
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).not.toContain('naked.md');
+        expect(result.stdout.text).not.toContain('missing YAML frontmatter');
     });
 
     test('emits a JSON report for a valid project', async () => {
