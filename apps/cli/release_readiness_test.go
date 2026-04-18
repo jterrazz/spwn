@@ -298,24 +298,58 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	t.Run("12_check_reports_unknown_local", func(t *testing.T) {
-		// B12: bare local refs with no matching file surface as "does not exist".
+		// B12: scheme-form refs with no matching file surface as "does not exist".
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		// Append a bare ref that resolves to nothing on disk.
+		// Append a scheme-form ref that resolves to nothing on disk.
 		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
 		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - unknown-local\n"), 0o644); err != nil {
+		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill:unknown-local\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		stdout, stderr, code := runCLI(t, env, wd, "check")
 		if code == 0 {
-			t.Fatalf("check should fail for unknown bare ref")
+			t.Fatalf("check should fail for missing skill ref")
 		}
 		combined := stdout + stderr
 		if !strings.Contains(combined, "unknown-local") || !strings.Contains(combined, "does not exist") {
 			t.Fatalf("expected unknown-local not-found message, got:\n%s", combined)
+		}
+	})
+
+	t.Run("12b_check_rejects_bare_ref", func(t *testing.T) {
+		// B12b: a bare ref (no scheme) is rejected up-front with a
+		// hint pointing the author at skill:/tool:/hook:. This is the
+		// exact failure mode the new scheme-only grammar prevents.
+		t.Parallel()
+		env, _ := freshEnv(t)
+		wd := t.TempDir()
+		mustInit(t, env, wd, "acme")
+		// Scaffold a real skill file on disk so the hint can suggest
+		// the right scheme rather than falling back to the generic form.
+		if _, _, code := runCLI(t, env, wd, "skill", "new", "code-review"); code != 0 {
+			t.Fatal("skill new failed")
+		}
+		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
+		y := readFile(t, yamlPath)
+		if err := os.WriteFile(yamlPath, []byte(y+"\n  - code-review\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		stdout, stderr, code := runCLI(t, env, wd, "check")
+		if code == 0 {
+			t.Fatalf("check should reject bare ref")
+		}
+		combined := stdout + stderr
+		if !strings.Contains(combined, "code-review") {
+			t.Fatalf("expected error to mention code-review, got:\n%s", combined)
+		}
+		if !strings.Contains(combined, "invalid") {
+			t.Fatalf("expected bare ref to be flagged invalid, got:\n%s", combined)
+		}
+		if !strings.Contains(combined, "skill:code-review") {
+			t.Fatalf("expected hint pointing at skill:code-review, got:\n%s", combined)
 		}
 	})
 
@@ -662,8 +696,9 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("33_bare_local_ref_passes_check", func(t *testing.T) {
-		// F33: a bare local ref resolves to spwn/skills/<name>.md and `check` stays clean.
+	t.Run("33_skill_scheme_ref_passes_check", func(t *testing.T) {
+		// F33: a skill:<name> ref resolves to spwn/skills/<name>.md and
+		// `check` stays clean.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -673,12 +708,12 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
 		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - reading\n"), 0o644); err != nil {
+		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill:reading\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		stdout, stderr, code := runCLI(t, env, wd, "check")
 		if code != 0 {
-			t.Fatalf("check should pass with bare local ref, got exit %d:\nstdout=%s\nstderr=%s", code, stdout, stderr)
+			t.Fatalf("check should pass with skill: scheme ref, got exit %d:\nstdout=%s\nstderr=%s", code, stdout, stderr)
 		}
 	})
 

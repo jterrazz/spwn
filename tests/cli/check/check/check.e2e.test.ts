@@ -58,7 +58,7 @@ describe('spwn check', () => {
     });
 
     test('flags a remote-registry tool reference as unsupported', async () => {
-        // Given - check-registry-tool has tools: ["@jterrazz/foo"]
+        // Given - check-registry-tool has dependencies: ["github:jterrazz/foo"]
         const result = await spec('check registry tool')
             .project('check-registry-tool')
             .exec('check')

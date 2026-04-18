@@ -634,12 +634,11 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 
 // rulePacksExist checks every dependency referenced by any agent or
 // world against the BuiltinTools catalog (for spwn:* refs) and
-// against the filesystem (for bare local refs).
+// against the filesystem (for local scheme refs: skill:/tool:/hook:).
 //
-// Local refs resolve to either:
-//   - spwn/tools/<name>/ (a directory-form package, with or without
-//     a tool.yaml inside), OR
-//   - spwn/skills/<name>.md (a bare-markdown skill).
+// Every ref must use an explicit scheme. Bare names (including the
+// retired `local:<name>` alias) are rejected with a hint pointing the
+// author at the three local schemes.
 func rulePacksExist(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -659,45 +658,50 @@ func rulePacksExist(in Input) []Issue {
 		checked[key] = true
 		ref := dependency.ParseRef(depRef)
 
-		// For spwn:* and @<owner>/* refs, resolve against the
-		// catalog.
-		if ref.Kind != dependency.KindLocal {
-			switch dependency.ResolveTool(in.Root, ref, builtin, haveCatalog) {
-			case dependency.ResolveOK:
-				return nil
-			case dependency.ResolveRegistryUnsupported:
-				return []Issue{{
-					Level: LevelError, Path: location,
-					Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
-					Hint: "use spwn:<name> for built-in dependencies or drop a directory under ./spwn/tools/<name>/ for a local tool; " +
-						"remote registries (github:<owner>/<repo>) are planned but not implemented yet",
-				}}
-			default: // ResolveNotFound
-				return []Issue{{
-					Level: LevelError, Path: location,
-					Message: fmt.Sprintf("dependency %q does not exist", raw),
-					Hint:    suggestPackage(depRef, in.BuiltinTools),
-				}}
-			}
-		}
-
-		// Local ref: delegate to dependency.ResolveSkill which already
-		// handles both the directory form (full dependency) and the
-		// file form (bare markdown skill) against spwn/skills/ and spwn/tools/.
-		if ref.Name == "" {
+		switch dependency.ResolveTool(in.Root, ref, builtin, haveCatalog) {
+		case dependency.ResolveOK:
+			return nil
+		case dependency.ResolveRegistryUnsupported:
 			return []Issue{{
 				Level: LevelError, Path: location,
-				Message: fmt.Sprintf("dependency %q is malformed", raw),
+				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
+				Hint: "use spwn:<name> for built-in dependencies, or author a local dep with " +
+					"skill:<name>, tool:<name>, or hook:<name>; remote registries " +
+					"(github:<owner>/<repo>) are planned but not implemented yet",
+			}}
+		case dependency.ResolveInvalid:
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("dependency %q is invalid", raw),
+				Hint:    invalidRefHint(in.Root, raw),
 			}}
 		}
-		if dependency.ResolveSkill(in.Root, ref, nil, false) == dependency.ResolveOK {
-			return nil
+
+		// ResolveNotFound falls through here.
+		switch ref.Kind {
+		case dependency.KindLocalSkill:
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("dependency %q does not exist", raw),
+				Hint:    "author ./spwn/skills/" + ref.Name + ".md (e.g. `spwn skill new " + ref.Name + "`)",
+			}}
+		case dependency.KindLocalTool:
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("dependency %q does not exist", raw),
+				Hint:    "create ./spwn/tools/" + ref.Name + "/tool.yaml for a full local tool",
+			}}
+		case dependency.KindLocalHook:
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("dependency %q does not exist", raw),
+				Hint:    "create ./spwn/hooks/" + ref.Name + ".sh for a lifecycle hook",
+			}}
 		}
 		return []Issue{{
 			Level: LevelError, Path: location,
 			Message: fmt.Sprintf("dependency %q does not exist", raw),
-			Hint: "create ./spwn/tools/" + ref.Name + "/tool.yaml for a full dependency, " +
-				"or ./spwn/tools/" + ref.Name + ".md for a bare skill",
+			Hint:    suggestPackage(depRef, in.BuiltinTools),
 		}}
 	}
 
@@ -779,8 +783,10 @@ func ruleLockfileConsistent(in Input) []Issue {
 	for _, rec := range all {
 		depRef, _ := dependency.SplitVersion(rec.raw)
 		ref := dependency.ParseRef(depRef)
-		// Local refs are never lockfile entries.
-		if ref.Kind == dependency.KindLocal {
+		// Local refs are never lockfile entries. Invalid refs are
+		// already surfaced by rulePacksExist with a crisper error;
+		// skip them here to avoid double-reporting.
+		if dependency.IsLocalKind(ref.Kind) || ref.Kind == dependency.KindInvalid {
 			continue
 		}
 		if seen[depRef] {
@@ -1066,6 +1072,41 @@ func relPath(root, path string) string {
 		return path
 	}
 	return rel
+}
+
+// invalidRefHint produces the canonical "use skill:/tool:/hook:" hint
+// for a bare/malformed dependency ref. When the bare name happens to
+// match exactly one on-disk target (skill file, tool dir, or hook
+// script) we point at that specific scheme so the author's fix is a
+// one-character edit; otherwise we list all three options.
+func invalidRefHint(root, raw string) string {
+	name := strings.TrimSpace(raw)
+	// Drop any accidental leading `@` or `local:` so the scheme
+	// suggestion still works for legacy authorings that sneak through.
+	name = strings.TrimPrefix(name, "@")
+	name = strings.TrimPrefix(name, "local:")
+
+	if name != "" && !strings.ContainsAny(name, ":/") {
+		var matches []string
+		if st, err := os.Stat(filepath.Join(root, "spwn", "skills", name+".md")); err == nil && !st.IsDir() {
+			matches = append(matches, "skill:"+name)
+		}
+		if st, err := os.Stat(filepath.Join(root, "spwn", "tools", name)); err == nil && st.IsDir() {
+			matches = append(matches, "tool:"+name)
+		}
+		if st, err := os.Stat(filepath.Join(root, "spwn", "hooks", name+".sh")); err == nil && !st.IsDir() {
+			matches = append(matches, "hook:"+name)
+		}
+		if len(matches) == 1 {
+			return "did you mean " + matches[0] + "?"
+		}
+		if len(matches) > 1 {
+			return "this name matches multiple local blocks — use one of: " + strings.Join(matches, ", ")
+		}
+	}
+
+	return "use skill:<name> (for spwn/skills/<name>.md), tool:<name> (for spwn/tools/<name>/), " +
+		"or hook:<name> (for spwn/hooks/<name>.sh); spwn:<name> and github:<owner>/<repo> remain the two external schemes"
 }
 
 func suggestPackage(tool string, catalog []string) string {

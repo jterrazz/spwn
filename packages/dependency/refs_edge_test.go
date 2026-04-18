@@ -12,8 +12,8 @@ import (
 
 func TestParse_EmptyString(t *testing.T) {
 	got := dependency.ParseRef("")
-	if got.Kind != dependency.KindLocal {
-		t.Errorf("kind: want KindLocal, got %v", got.Kind)
+	if got.Kind != dependency.KindInvalid {
+		t.Errorf("kind: want KindInvalid, got %v", got.Kind)
 	}
 	if got.Name != "" {
 		t.Errorf("name: want empty, got %q", got.Name)
@@ -22,8 +22,8 @@ func TestParse_EmptyString(t *testing.T) {
 
 func TestParse_WhitespaceOnly(t *testing.T) {
 	got := dependency.ParseRef("  ")
-	if got.Kind != dependency.KindLocal {
-		t.Errorf("kind: want KindLocal, got %v", got.Kind)
+	if got.Kind != dependency.KindInvalid {
+		t.Errorf("kind: want KindInvalid, got %v", got.Kind)
 	}
 	if got.Name != "" {
 		t.Errorf("name: want empty after trim, got %q", got.Name)
@@ -43,19 +43,13 @@ func TestParse_ScopeWithNoName(t *testing.T) {
 	}
 }
 
-// TestParse_AtPrefixMalformed: any bare `@`-prefixed ref now parses
-// as a malformed registry ref (empty Name) so the resolver surfaces
-// a clear "unsupported" error instead of silently treating it as
-// local. The legacy `@owner/name` syntax was retired in favour of
-// `spwn:<name>` and `github:<owner>/<repo>`.
+// TestParse_AtPrefixMalformed: any `@`-prefixed ref now parses as
+// malformed (KindInvalid) under the new scheme-only grammar.
 func TestParse_AtPrefixMalformed(t *testing.T) {
 	for _, in := range []string{"@/foo", "@spwn", "@"} {
 		got := dependency.ParseRef(in)
-		if got.Kind != dependency.KindRegistry {
-			t.Errorf("ParseRef(%q) kind = %v, want KindRegistry (malformed)", in, got.Kind)
-		}
-		if got.Name != "" {
-			t.Errorf("ParseRef(%q) name = %q, want empty", in, got.Name)
+		if got.Kind != dependency.KindInvalid {
+			t.Errorf("ParseRef(%q) kind = %v, want KindInvalid", in, got.Kind)
 		}
 	}
 }
@@ -108,9 +102,9 @@ func TestSplitVersion_GithubVersioned(t *testing.T) {
 // ---------- ResolveTool edge cases ----------
 
 func TestResolveTool_EmptyRoot(t *testing.T) {
-	// Empty root means the path spwn/dependencies/<name> is relative to "".
+	// Empty root means the path spwn/tools/<name>/ is relative to "".
 	// The directory almost certainly does not exist, so expect NotFound.
-	got := dependency.ResolveTool("", dependency.ParseRef("something"), nil, false)
+	got := dependency.ResolveTool("", dependency.ParseRef("tool:something"), nil, false)
 	if got != dependency.ResolveNotFound {
 		t.Errorf("empty root local: want NotFound, got %v", got)
 	}
@@ -118,7 +112,7 @@ func TestResolveTool_EmptyRoot(t *testing.T) {
 
 func TestResolveTool_LocalNameWithSlash(t *testing.T) {
 	root := t.TempDir()
-	got := dependency.ResolveTool(root, dependency.Ref{Kind: dependency.KindLocal, Name: "foo/bar"}, nil, false)
+	got := dependency.ResolveTool(root, dependency.Ref{Kind: dependency.KindLocalTool, Name: "foo/bar"}, nil, false)
 	if got != dependency.ResolveNotFound {
 		t.Errorf("name with slash: want NotFound, got %v", got)
 	}
@@ -126,7 +120,7 @@ func TestResolveTool_LocalNameWithSlash(t *testing.T) {
 
 func TestResolveTool_LocalNameWithDotDot(t *testing.T) {
 	root := t.TempDir()
-	got := dependency.ResolveTool(root, dependency.Ref{Kind: dependency.KindLocal, Name: "../escape"}, nil, false)
+	got := dependency.ResolveTool(root, dependency.Ref{Kind: dependency.KindLocalTool, Name: "../escape"}, nil, false)
 	if got != dependency.ResolveNotFound {
 		t.Errorf("name with ..: want NotFound, got %v", got)
 	}
@@ -157,24 +151,23 @@ func TestResolveSkill_MdPathIsDirectory(t *testing.T) {
 	// Create a directory named "trick.md" instead of a file.
 	mustMkdirEdge(t, filepath.Join(root, "spwn", "skills", "trick.md"))
 
-	got := dependency.ResolveSkill(root, dependency.ParseRef("trick"), nil, false)
-	// The .md path exists but is a directory, not a file — should NOT resolve
-	// via the file-form path. And there is no dependencies/trick/ dir either.
+	got := dependency.ResolveSkill(root, dependency.ParseRef("skill:trick"), nil, false)
+	// The .md path exists but is a directory, not a file — should NOT resolve.
 	if got != dependency.ResolveNotFound {
 		t.Errorf("md-is-directory skill: want NotFound, got %v", got)
 	}
 }
 
-func TestResolveSkill_EmptyPackDir(t *testing.T) {
+func TestResolveSkill_EmptyToolDir(t *testing.T) {
 	root := t.TempDir()
-	// Create an empty dependency directory (no spwn.yaml or anything).
-	mustMkdirEdge(t, filepath.Join(root, "spwn", "tools", "empty-dependency"))
+	// Create an empty tool directory (no spwn.yaml or anything).
+	mustMkdirEdge(t, filepath.Join(root, "spwn", "tools", "empty-tool"))
 
-	got := dependency.ResolveSkill(root, dependency.ParseRef("empty-dependency"), nil, false)
+	got := dependency.ResolveSkill(root, dependency.ParseRef("tool:empty-tool"), nil, false)
 	// The directory exists, so ResolveSkill should return OK (it does not
 	// validate contents).
 	if got != dependency.ResolveOK {
-		t.Errorf("empty dependency dir skill: want OK, got %v", got)
+		t.Errorf("empty tool dir: want OK, got %v", got)
 	}
 }
 

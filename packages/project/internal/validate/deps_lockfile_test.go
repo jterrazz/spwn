@@ -17,9 +17,8 @@ func writeLockfile(t *testing.T, root string, l *dependency.Lockfile) {
 	}
 }
 
-// TestRulePackagesExist_localSkillFileForm verifies the local
-// file-form skill path: spwn/skills/<name>.md counts as a valid
-// bare-name local dependency.
+// TestRulePackagesExist_localSkillFileForm verifies the skill:<name>
+// scheme: spwn/skills/<name>.md counts as a valid local dependency.
 func TestRulePackagesExist_localSkillFileForm(t *testing.T) {
 	root := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(root, "spwn", "skills"), 0o755); err != nil {
@@ -31,8 +30,8 @@ func TestRulePackagesExist_localSkillFileForm(t *testing.T) {
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - focus
-  - missing-package
+  - skill:focus
+  - skill:missing-package
 `)
 
 	in := Input{
@@ -49,18 +48,18 @@ dependencies:
 	var missingFound bool
 	var presentFound bool
 	for _, iss := range issues {
-		if strings.Contains(iss.Message, `"focus"`) {
+		if strings.Contains(iss.Message, `"skill:focus"`) {
 			presentFound = true
 		}
-		if strings.Contains(iss.Message, `"missing-package"`) {
+		if strings.Contains(iss.Message, `"skill:missing-package"`) {
 			missingFound = true
 		}
 	}
 	if presentFound {
-		t.Error("focus is on disk, should not error")
+		t.Error("skill:focus is on disk, should not error")
 	}
 	if !missingFound {
-		t.Error("missing-package should error")
+		t.Error("skill:missing-package should error")
 	}
 }
 
@@ -69,7 +68,7 @@ func TestRulePackagesExist_registryUnsupported(t *testing.T) {
 
 	ref := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - "@jterrazz/focus"
+  - "github:jterrazz/focus"
 `)
 	in := Input{
 		Root:      root,
@@ -152,9 +151,9 @@ func TestRuleLockfileConsistent_ignoresLocalRefs(t *testing.T) {
 	}
 	ref := scaffoldAgent(t, root, "neo", `name: neo
 dependencies:
-  - my-tool
+  - tool:my-tool
 `)
-	// Empty lockfile — bare names should not produce errors.
+	// Empty lockfile — local scheme refs should not produce lockfile errors.
 	writeLockfile(t, root, dependency.EmptyLockfile())
 
 	in := Input{
@@ -163,6 +162,6 @@ dependencies:
 		AgentRefs: []AgentRef{ref},
 	}
 	if got := ruleLockfileConsistent(in); len(got) != 0 {
-		t.Errorf("bare ref should not be in lockfile, got %+v", got)
+		t.Errorf("local ref should not be in lockfile, got %+v", got)
 	}
 }

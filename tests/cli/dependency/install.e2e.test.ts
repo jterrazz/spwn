@@ -32,21 +32,31 @@ describe('spwn install', () => {
         expect(agentYaml.content).toContain('spwn:python');
     });
 
-    test('rejects a bare name with an authoring hint', async () => {
+    test('rejects a bare name with a scheme-grammar hint', async () => {
         const result = await spec('install bare rejected')
             .project('docker-pilot')
             .exec('install my-local-tool')
             .run();
 
         expect(result.exitCode).not.toBe(0);
-        expect(result.stderr.text).toContain('bare name');
-        expect(result.stderr.text).toContain('spwn/tools/');
+        // Bare names are invalid under the scheme-only grammar.
+        expect(result.stderr.text).toContain('not a valid dependency ref');
     });
 
-    test('rejects @<owner>/* as unsupported', async () => {
+    test('rejects skill:/tool:/hook: with a local-authoring hint', async () => {
+        const result = await spec('install local rejected')
+            .project('docker-pilot')
+            .exec('install skill:paper-reading')
+            .run();
+
+        expect(result.exitCode).not.toBe(0);
+        expect(result.stderr.text).toContain('authored in place');
+    });
+
+    test('rejects github:<owner>/<repo> as unsupported', async () => {
         const result = await spec('install registry rejected')
             .project('docker-pilot')
-            .exec('install @acme/foo')
+            .exec('install github:acme/foo')
             .run();
 
         expect(result.exitCode).not.toBe(0);

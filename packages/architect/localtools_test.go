@@ -120,7 +120,7 @@ func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 	}
 }
 
-func TestHydrateLocalPackages_rewritesBareNames(t *testing.T) {
+func TestHydrateLocalPackages_rewritesToolRefs(t *testing.T) {
 	root := t.TempDir()
 	writePack(t, root, "mine", `name: mine
 install:
@@ -130,19 +130,19 @@ verify:
 `)
 	reg := ib.NewRegistry()
 
-	list := []string{"spwn:unix", "mine", "spwn:git"}
+	list := []string{"spwn:unix", "tool:mine", "spwn:git"}
 	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
 	if len(got) != 3 || got[1] != "local:mine" {
-		t.Errorf("want mine -> local:mine, got %v", got)
+		t.Errorf("want tool:mine -> local:mine, got %v", got)
 	}
 }
 
 // TestHydrateLocalPackages_mixedListOrderPreserved locks in that the
 // rewritten list preserves the original ordering and deduplicates
-// bare names after the first registration. The registry only sees
+// tool: refs after the first registration. The registry only sees
 // Register once per unique name.
 func TestHydrateLocalPackages_mixedListOrderPreserved(t *testing.T) {
 	root := t.TempDir()
@@ -160,7 +160,7 @@ verify:
 `)
 	reg := ib.NewRegistry()
 
-	list := []string{"spwn:unix", "tool-a", "spwn:git", "tool-b", "tool-a"}
+	list := []string{"spwn:unix", "tool:tool-a", "spwn:git", "tool:tool-b", "tool:tool-a"}
 	got, err := hydrateLocalPacks(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
@@ -180,7 +180,7 @@ func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 	root := t.TempDir()
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalPacks(reg, root, []string{"nonexistent"})
+	_, err := hydrateLocalPacks(reg, root, []string{"tool:nonexistent"})
 	if err == nil {
 		t.Fatal("want error for missing local dependency dir")
 	}
@@ -196,8 +196,25 @@ verify:
 `)
 	reg := ib.NewRegistry()
 
-	_, err := hydrateLocalPacks(reg, root, []string{"mine", "mine"})
+	_, err := hydrateLocalPacks(reg, root, []string{"tool:mine", "tool:mine"})
 	if err != nil {
 		t.Fatalf("duplicate should not error: %v", err)
+	}
+}
+
+// TestHydrateLocalPackages_bareRefPassesThrough: bare refs (invalid
+// under the new grammar) are left as-is so the validator/resolver
+// downstream surfaces the scheme-grammar error rather than crashing
+// on an empty filesystem lookup.
+func TestHydrateLocalPackages_bareRefPassesThrough(t *testing.T) {
+	root := t.TempDir()
+	reg := ib.NewRegistry()
+
+	got, err := hydrateLocalPacks(reg, root, []string{"bare-name"})
+	if err != nil {
+		t.Fatalf("hydrate: %v", err)
+	}
+	if len(got) != 1 || got[0] != "bare-name" {
+		t.Errorf("want bare ref passthrough, got %v", got)
 	}
 }

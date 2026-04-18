@@ -15,17 +15,22 @@ func TestParse(t *testing.T) {
 		owner string
 		name  string
 	}{
-		{"local-tool", dependency.KindLocal, "", "local-tool"},
-		{"  spaced  ", dependency.KindLocal, "", "spaced"},
 		{"spwn:unix", dependency.KindSpwnBuiltin, "spwn", "unix"},
 		{"spwn:claude-code", dependency.KindSpwnBuiltin, "spwn", "claude-code"},
 		{"github:acme/foo", dependency.KindRegistry, "acme", "foo"},
 		{"github:jterrazz/python", dependency.KindRegistry, "jterrazz", "python"},
-		// Legacy `@owner/name` form is malformed and surfaces as an
-		// empty-name KindRegistry ref so the resolver can reject it.
-		{"@acme/foo", dependency.KindRegistry, "", ""},
-		{"@jterrazz/python", dependency.KindRegistry, "", ""},
-		{"@malformed", dependency.KindRegistry, "", ""},
+		{"skill:focus", dependency.KindLocalSkill, "", "focus"},
+		{"tool:my-parser", dependency.KindLocalTool, "", "my-parser"},
+		{"hook:pre-spawn", dependency.KindLocalHook, "", "pre-spawn"},
+		// Bare names are now invalid under the new grammar.
+		{"local-tool", dependency.KindInvalid, "", ""},
+		{"  spaced  ", dependency.KindInvalid, "", ""},
+		// Legacy `@owner/name` form is malformed.
+		{"@acme/foo", dependency.KindInvalid, "", ""},
+		{"@jterrazz/python", dependency.KindInvalid, "", ""},
+		{"@malformed", dependency.KindInvalid, "", ""},
+		// The legacy `local:<name>` alias was retired alongside bare names.
+		{"local:my-parser", dependency.KindInvalid, "", ""},
 	}
 	for _, c := range cases {
 		t.Run(c.in, func(t *testing.T) {
@@ -45,14 +50,14 @@ func TestParse(t *testing.T) {
 
 func TestSplitVersion(t *testing.T) {
 	cases := []struct {
-		in      string
-		dependency    string
-		version string
+		in         string
+		dependency string
+		version    string
 	}{
 		{"spwn:unix", "spwn:unix", ""},
 		{"spwn:unix@24.04", "spwn:unix", "24.04"},
-		{"local-tool", "local-tool", ""},
-		{"local-tool@0.1", "local-tool", "0.1"},
+		{"skill:focus", "skill:focus", ""},
+		{"tool:my-parser@0.1", "tool:my-parser", "0.1"},
 		{"github:acme/foo@1.2.3", "github:acme/foo", "1.2.3"},
 	}
 	for _, c := range cases {
@@ -68,18 +73,66 @@ func TestSplitVersion(t *testing.T) {
 	}
 }
 
-func TestResolveTool_Local(t *testing.T) {
+func TestResolveTool_LocalTool(t *testing.T) {
 	root := t.TempDir()
 	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
 
-	got := dependency.ResolveTool(root, dependency.ParseRef("present"), nil, false)
+	got := dependency.ResolveTool(root, dependency.ParseRef("tool:present"), nil, false)
 	if got != dependency.ResolveOK {
-		t.Errorf("present local dependency: want OK, got %v", got)
+		t.Errorf("present local tool: want OK, got %v", got)
 	}
 
-	got = dependency.ResolveTool(root, dependency.ParseRef("missing"), nil, false)
+	got = dependency.ResolveTool(root, dependency.ParseRef("tool:missing"), nil, false)
 	if got != dependency.ResolveNotFound {
-		t.Errorf("missing local dependency: want NotFound, got %v", got)
+		t.Errorf("missing local tool: want NotFound, got %v", got)
+	}
+}
+
+func TestResolveTool_LocalSkill(t *testing.T) {
+	root := t.TempDir()
+	mustMkdir(t, filepath.Join(root, "spwn", "skills"))
+	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got := dependency.ResolveTool(root, dependency.ParseRef("skill:focus"), nil, false)
+	if got != dependency.ResolveOK {
+		t.Errorf("present local skill: want OK, got %v", got)
+	}
+
+	got = dependency.ResolveTool(root, dependency.ParseRef("skill:missing"), nil, false)
+	if got != dependency.ResolveNotFound {
+		t.Errorf("missing local skill: want NotFound, got %v", got)
+	}
+}
+
+func TestResolveTool_LocalHook(t *testing.T) {
+	root := t.TempDir()
+	mustMkdir(t, filepath.Join(root, "spwn", "hooks"))
+	if err := os.WriteFile(filepath.Join(root, "spwn", "hooks", "pre-spawn.sh"), []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	got := dependency.ResolveTool(root, dependency.ParseRef("hook:pre-spawn"), nil, false)
+	if got != dependency.ResolveOK {
+		t.Errorf("present local hook: want OK, got %v", got)
+	}
+
+	got = dependency.ResolveTool(root, dependency.ParseRef("hook:missing"), nil, false)
+	if got != dependency.ResolveNotFound {
+		t.Errorf("missing local hook: want NotFound, got %v", got)
+	}
+}
+
+func TestResolveTool_InvalidBareName(t *testing.T) {
+	root := t.TempDir()
+	// Even if a file named "present" existed in spwn/tools/, a bare
+	// ref must NOT resolve — the new grammar rejects it up front.
+	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
+
+	got := dependency.ResolveTool(root, dependency.ParseRef("present"), nil, false)
+	if got != dependency.ResolveInvalid {
+		t.Errorf("bare ref: want ResolveInvalid, got %v", got)
 	}
 }
 
@@ -112,31 +165,35 @@ func TestResolveTool_Registry(t *testing.T) {
 	}
 }
 
-func TestResolveSkill_Local(t *testing.T) {
+func TestResolveSkill_SchemeForm(t *testing.T) {
 	root := t.TempDir()
 
-	// File-form skill.
+	// skill: scheme — file form.
 	mustMkdir(t, filepath.Join(root, "spwn", "skills"))
 	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-
-	got := dependency.ResolveSkill(root, dependency.ParseRef("focus"), nil, false)
+	got := dependency.ResolveSkill(root, dependency.ParseRef("skill:focus"), nil, false)
 	if got != dependency.ResolveOK {
-		t.Errorf("file-form skill: want OK, got %v", got)
+		t.Errorf("skill: scheme resolves: want OK, got %v", got)
 	}
 
-	// Directory-form skill.
+	// tool: scheme — directory form.
 	mustMkdir(t, filepath.Join(root, "spwn", "tools", "debug"))
-
-	got = dependency.ResolveSkill(root, dependency.ParseRef("debug"), nil, false)
+	got = dependency.ResolveSkill(root, dependency.ParseRef("tool:debug"), nil, false)
 	if got != dependency.ResolveOK {
-		t.Errorf("dir-form skill: want OK, got %v", got)
+		t.Errorf("tool: scheme resolves: want OK, got %v", got)
 	}
 
-	got = dependency.ResolveSkill(root, dependency.ParseRef("missing"), nil, false)
+	// Bare name is rejected outright.
+	got = dependency.ResolveSkill(root, dependency.ParseRef("focus"), nil, false)
+	if got != dependency.ResolveInvalid {
+		t.Errorf("bare ref via ResolveSkill: want ResolveInvalid, got %v", got)
+	}
+
+	got = dependency.ResolveSkill(root, dependency.ParseRef("skill:missing"), nil, false)
 	if got != dependency.ResolveNotFound {
-		t.Errorf("missing skill: want NotFound, got %v", got)
+		t.Errorf("missing skill: scheme: want NotFound, got %v", got)
 	}
 }
 

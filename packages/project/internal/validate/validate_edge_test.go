@@ -61,7 +61,7 @@ dependencies:
 	}
 }
 
-// 3. rulePacksExist where agent.yaml has a local bare-name ref that exists in spwn/dependencies/
+// 3. rulePacksExist where agent.yaml has a tool:<name> ref that exists in spwn/tools/
 func TestEdge_PacksExist_LocalPackDir(t *testing.T) {
 	root := t.TempDir()
 	packDir := filepath.Join(root, "spwn", "tools", "my-local-dependency")
@@ -70,7 +70,7 @@ func TestEdge_PacksExist_LocalPackDir(t *testing.T) {
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - my-local-dependency
+  - tool:my-local-dependency
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	issues := rulePacksExist(in)
@@ -81,7 +81,8 @@ dependencies:
 	}
 }
 
-// 4. rulePacksExist where agent.yaml has a local bare-name ref that exists only as spwn/skills/<name>.md
+// 4. rulePacksExist where agent.yaml has a skill:<name> ref that exists
+// as spwn/skills/<name>.md
 func TestEdge_PacksExist_LocalSkillFile(t *testing.T) {
 	root := t.TempDir()
 	skillDir := filepath.Join(root, "spwn", "skills")
@@ -93,13 +94,73 @@ func TestEdge_PacksExist_LocalSkillFile(t *testing.T) {
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - research
+  - skill:research
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	issues := rulePacksExist(in)
 	for _, iss := range issues {
 		if strings.Contains(iss.Message, "research") {
 			t.Errorf("local skill file exists, should not error: %+v", iss)
+		}
+	}
+}
+
+// TestEdge_PacksExist_BareRefRejected: a bare ref fails with a clear
+// hint that suggests the right scheme when the underlying file exists
+// on disk. Bare names are the exact failure mode the new grammar is
+// here to prevent.
+func TestEdge_PacksExist_BareRefRejected(t *testing.T) {
+	root := t.TempDir()
+	skillDir := filepath.Join(root, "spwn", "skills")
+	if err := os.MkdirAll(skillDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(skillDir, "code-review.md"), []byte("# review"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ref := scaffoldAgent(t, root, "alpha", `name: alpha
+dependencies:
+  - code-review
+`)
+	in := minimalInput(root, []AgentRef{ref}, nil)
+	issues := rulePacksExist(in)
+	if len(issues) == 0 {
+		t.Fatal("bare ref should produce an error")
+	}
+	var sawInvalid bool
+	for _, iss := range issues {
+		if strings.Contains(iss.Message, "code-review") && strings.Contains(iss.Message, "invalid") {
+			sawInvalid = true
+			if !strings.Contains(iss.Hint, "skill:code-review") {
+				t.Errorf("hint should point at skill:code-review, got %q", iss.Hint)
+			}
+		}
+	}
+	if !sawInvalid {
+		t.Errorf("want invalid-ref issue for bare code-review, got: %+v", issues)
+	}
+}
+
+// TestEdge_PacksExist_LocalHookFile: hook:<name> resolves to
+// spwn/hooks/<name>.sh with no fallback to other kinds.
+func TestEdge_PacksExist_LocalHookFile(t *testing.T) {
+	root := t.TempDir()
+	hookDir := filepath.Join(root, "spwn", "hooks")
+	if err := os.MkdirAll(hookDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(hookDir, "pre-spawn.sh"), []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	ref := scaffoldAgent(t, root, "alpha", `name: alpha
+dependencies:
+  - hook:pre-spawn
+`)
+	in := minimalInput(root, []AgentRef{ref}, nil)
+	issues := rulePacksExist(in)
+	for _, iss := range issues {
+		if strings.Contains(iss.Message, "pre-spawn") {
+			t.Errorf("local hook file exists, should not error: %+v", iss)
 		}
 	}
 }

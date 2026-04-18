@@ -4,12 +4,15 @@
 //
 // Reference kinds (delegated to packages/dependency):
 //
-//   - spwn:<name>               built-in catalog (compiled into the binary)
-//   - github.com/<owner>/<repo>  third-party (planned — git tags as versions)
-//   - <bare-name>                local authoring (./spwn/tools/<name>/)
+//   - spwn:<name>                built-in catalog (compiled into the binary)
+//   - github:<owner>/<repo>      third-party (planned — git tags as versions)
+//   - skill:<name>               local skill (./spwn/skills/<name>.md)
+//   - tool:<name>                local tool (./spwn/tools/<name>/)
+//   - hook:<name>                local hook (./spwn/hooks/<name>.sh)
 //
-// Bare names are never installed — they are authored in place. The
-// install verb rejects them with a hint pointing at the local flow.
+// Local refs (skill:/tool:/hook:) are never installed — they are
+// authored in place. The install verb rejects them with a hint
+// pointing at the local authoring flow.
 package dependency
 
 import (
@@ -58,14 +61,19 @@ func RunInstall(cmd *cobra.Command, raw string) error {
 	ref, version := dependency.SplitVersion(raw)
 	parsed := dependency.ParseRef(ref)
 	switch parsed.Kind {
-	case dependency.KindLocal:
-		return fmt.Errorf("%q is a bare name — local dependencies are authored in place, not installed. "+
-			"Create ./spwn/tools/%s/tool.yaml for a full dependency or ./spwn/tools/%s.md for a bare skill",
-			ref, ref, ref)
+	case dependency.KindLocalSkill, dependency.KindLocalTool, dependency.KindLocalHook:
+		return fmt.Errorf("%q is a local ref — local dependencies are authored in place, not installed. "+
+			"Use `spwn skill new %s` (for skill: refs), drop a directory at ./spwn/tools/%s/ (for tool: refs), "+
+			"or author ./spwn/hooks/%s.sh (for hook: refs) instead",
+			ref, parsed.Name, parsed.Name, parsed.Name)
 	case dependency.KindRegistry:
-		return fmt.Errorf("%q targets @%s/%s — remote registries are not yet supported. "+
+		return fmt.Errorf("%q targets github:%s/%s — remote registries are not yet supported. "+
 			"Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/",
 			raw, parsed.Owner, parsed.Name)
+	case dependency.KindInvalid:
+		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name> (for built-ins), "+
+			"github:<owner>/<repo> (for remote deps), skill:<name>, tool:<name>, or hook:<name>",
+			raw)
 	}
 
 	if !catalogHas(ref) {
@@ -119,8 +127,11 @@ func RunUninstall(cmd *cobra.Command, raw string) error {
 	if parsed.Kind == dependency.KindRegistry {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
-	if parsed.Kind == dependency.KindLocal {
-		return fmt.Errorf("%q is a bare name — delete ./spwn/tools/%s/ (or %s.md) by hand to remove it", ref, ref, ref)
+	if dependency.IsLocalKind(parsed.Kind) {
+		return fmt.Errorf("%q is a local ref — delete the underlying file (spwn/skills/%s.md, spwn/tools/%s/, or spwn/hooks/%s.sh) by hand to remove it", ref, parsed.Name, parsed.Name, parsed.Name)
+	}
+	if parsed.Kind == dependency.KindInvalid {
+		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name>, github:<owner>/<repo>, skill:<name>, tool:<name>, or hook:<name>", raw)
 	}
 
 	mutated := 0
