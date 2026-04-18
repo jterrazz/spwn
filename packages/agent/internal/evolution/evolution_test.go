@@ -150,12 +150,12 @@ func TestFork_AllLayers(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("SPWN_HOME", home)
 
-	// Create source agent with some layers
+	// Create source agent with all mind layers and a SOUL.md at root.
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"identity", "skills", "playbooks", "journal"} {
+	for _, layer := range []string{"skills", "playbooks", "journal"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "identity", "profile.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "SOUL.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 
 	result, err := Fork("source-agent", "target-agent", nil)
@@ -169,10 +169,10 @@ func TestFork_AllLayers(t *testing.T) {
 		t.Errorf("Target = %q, want %q", result.Target, "target-agent")
 	}
 
-	// Verify files exist in target
-	targetProfile := filepath.Join(home, "agents", "target-agent", "identity", "profile.md")
-	if _, err := os.Stat(targetProfile); err != nil {
-		t.Errorf("target profile not found: %v", err)
+	// Verify SOUL.md and layer contents were copied to target.
+	targetSoul := filepath.Join(home, "agents", "target-agent", "SOUL.md")
+	if _, err := os.Stat(targetSoul); err != nil {
+		t.Errorf("target SOUL.md not found: %v", err)
 	}
 	targetSkill := filepath.Join(home, "agents", "target-agent", "skills", "coding.md")
 	if _, err := os.Stat(targetSkill); err != nil {
@@ -186,29 +186,36 @@ func TestFork_SpecificLayers(t *testing.T) {
 
 	// Create source agent
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"identity", "skills", "playbooks"} {
+	for _, layer := range []string{"skills", "playbooks", "journal"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
-	os.WriteFile(filepath.Join(sourceDir, "identity", "profile.md"), []byte("# Test"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "SOUL.md"), []byte("# Test"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "playbooks", "deploy.md"), []byte("# Deploy"), 0644)
 
-	// Fork only identity layer
-	result, err := Fork("source-agent", "target-agent", []string{"identity"})
+	// Fork only playbooks layer
+	result, err := Fork("source-agent", "target-agent", []string{"playbooks"})
 	if err != nil {
 		t.Fatalf("Fork() error: %v", err)
 	}
 
-	// Verify identity was copied
-	targetProfile := filepath.Join(home, "agents", "target-agent", "identity", "profile.md")
-	if _, err := os.Stat(targetProfile); err != nil {
-		t.Errorf("target profile not found: %v", err)
+	// Verify playbooks was copied
+	targetPlaybook := filepath.Join(home, "agents", "target-agent", "playbooks", "deploy.md")
+	if _, err := os.Stat(targetPlaybook); err != nil {
+		t.Errorf("target playbook not found: %v", err)
 	}
 
 	// Verify skills was NOT copied (no file inside)
 	targetSkill := filepath.Join(home, "agents", "target-agent", "skills", "coding.md")
 	if _, err := os.Stat(targetSkill); !os.IsNotExist(err) {
-		t.Error("skills should not have been copied when only identity specified")
+		t.Error("skills should not have been copied when only playbooks specified")
+	}
+
+	// SOUL.md is a file (not a layer) and is always copied alongside the
+	// forked layers so the target is a complete, valid agent.
+	targetSoul := filepath.Join(home, "agents", "target-agent", "SOUL.md")
+	if _, err := os.Stat(targetSoul); err != nil {
+		t.Errorf("target SOUL.md not found: %v", err)
 	}
 
 	if len(result.LayersCopied) == 0 {

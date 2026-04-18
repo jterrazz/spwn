@@ -39,7 +39,7 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		LayersCopied: []string{},
 	}
 
-	// Copy mind layers (includes identity)
+	// Copy mind layers (skills, playbooks, journal)
 	for _, layer := range allLayers {
 		src := filepath.Join(sourceDir, layer)
 		dst := filepath.Join(targetDir, layer)
@@ -51,6 +51,16 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 			return nil, fmt.Errorf("copying layer %s: %w", layer, err)
 		}
 		result.LayersCopied = append(result.LayersCopied, layer)
+	}
+
+	// Copy SOUL.md — the agent's identity file lives at the agent root,
+	// not inside a layer. It must be forked alongside the Mind layers so
+	// the target is a complete, valid agent post-fork.
+	sourceSoul := filepath.Join(sourceDir, platform.SoulFileName)
+	if _, err := os.Stat(sourceSoul); err == nil {
+		if err := copyFile(sourceSoul, filepath.Join(targetDir, platform.SoulFileName)); err != nil {
+			return nil, fmt.Errorf("copying %s: %w", platform.SoulFileName, err)
+		}
 	}
 
 	// Copy agent.yaml if it exists, rewriting the name: field to

@@ -3,6 +3,8 @@
 package e2e
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"spwn.sh/packages/agent"
@@ -15,13 +17,13 @@ func TestAgent_Init(t *testing.T) {
 	chain := setup.NewAgentBuilder(t).
 		Init("fresh-agent")
 
-	// Then - the Mind should have all standard layers and a default profile
+	// Then - the Mind should have all standard layers plus SOUL.md at root
+	// (identity collapsed into a single file; knowledge moved to worlds)
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("identity")
 		m.HasLayer("skills")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
-		m.HasFile("identity/profile.md")
+		m.HasFile("SOUL.md")
 	})
 }
 
@@ -77,23 +79,17 @@ func TestAgent_Inspect(t *testing.T) {
 		t.Fatalf("Expected name 'inspect-agent', got %q", info.Name)
 	}
 
-	// AND all 4 standard layers should exist (knowledge moved to world scope)
-	for _, layer := range []string{"identity", "skills", "playbooks", "journal"} {
+	// AND the 3 standard layers should exist (identity collapsed into
+	// SOUL.md at agent root; knowledge moved to world scope).
+	for _, layer := range []string{"skills", "playbooks", "journal"} {
 		if _, ok := info.Layers[layer]; !ok {
 			t.Fatalf("Missing layer %q", layer)
 		}
 	}
 
-	// AND identity should contain profile.md
-	if files, ok := info.Layers["identity"]; ok {
-		found := false
-		for _, f := range files {
-			if f == "profile.md" {
-				found = true
-			}
-		}
-		if !found {
-			t.Fatal("Expected profile.md in identity layer")
-		}
+	// AND SOUL.md should exist at the agent root.
+	soulPath := filepath.Join(info.Path, "SOUL.md")
+	if _, err := os.Stat(soulPath); err != nil {
+		t.Fatalf("Expected SOUL.md at agent root: %v", err)
 	}
 }

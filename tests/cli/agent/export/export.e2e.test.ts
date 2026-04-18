@@ -35,7 +35,7 @@ describe('spwn agent export', () => {
         expect(result.exitCode).toBe(0);
         const tarPath = join(result.filesystem.cwd, 'neo.tar.gz');
         const listing = execSync(`tar tzf ${tarPath}`, { encoding: 'utf8' });
-        expect(listing).toContain('identity/profile.md');
+        expect(listing).toContain('SOUL.md');
         expect(listing).toMatch(/(^|\n)identity(\/|\n|$)/);
         expect(listing).toMatch(/(^|\n)skills(\/|\n|$)/);
         expect(listing).toMatch(/(^|\n)knowledge(\/|\n|$)/);
@@ -75,8 +75,8 @@ describe('spwn agent export', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.file('spwn-home/agents/neo-copy/identity/profile.md').exists).toBe(true);
-        expect(result.file('spwn-home/agents/neo/identity/profile.md').exists).toBe(false);
+        expect(result.file('spwn-home/agents/neo-copy/SOUL.md').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/SOUL.md').exists).toBe(false);
     });
 
     test('import restores an agent from its own export', async () => {
@@ -93,7 +93,7 @@ describe('spwn agent export', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        expect(result.file('spwn-home/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/SOUL.md').exists).toBe(true);
         result.stderr.toContain('Imported agent');
     });
 });

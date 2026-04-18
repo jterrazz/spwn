@@ -10,7 +10,7 @@ The domain has three main abstractions, each owning one concern:
 |---|---|---|
 | **Runtime** | How an agent actually runs (CLI invocation, session capture) | `packages/world/internal/runtime` - Claude Code today, others swap in as a ~50 LOC Go file |
 | **Backend** | Where worlds run | `packages/world/internal/backend` - Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (identity/skills/playbooks/journal) on the host filesystem. Knowledge is world-scoped, not in the Mind — it lives at `spwn/worlds/<name>/knowledge/` and is bind-mounted into `/world/knowledge/`. |
+| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (skills/playbooks/journal) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — it lives at `spwn/worlds/<name>/knowledge/` and is bind-mounted into `/world/knowledge/`. |
 
 ## Vocabulary
 
@@ -24,7 +24,7 @@ The domain has three main abstractions, each owning one concern:
 - **Skill (bare form)**: A `spwn/skills/<name>.md` file. Simplest authoring path for "write a paragraph of instructions."
 
 ### Agent internals
-- **Identity**: Who the agent is - profile, purpose, traits. Lives in `spwn/agents/<name>/identity/`. Persists across world restarts.
+- **Soul**: Who the agent is - purpose, voice, values, in a single file at `spwn/agents/<name>/SOUL.md`. Persists across world restarts. (Formerly split across `identity/profile.md`, `purpose.md`, `traits.md`; collapsed in 2026-04.)
 - **Memory**: Journal and sessions. Persists across worlds, grows with experience. (Knowledge is world-scoped, not agent-scoped.)
 - **Composition**: An agent's active tools + skills, declared in `agent.yaml`.
 
@@ -132,7 +132,7 @@ my-project/
 │   │   └── neo/
 │   │       ├── agent.yaml       # composition: tools + skills + runtime.backend
 │   │       ├── AGENTS.md         # entry point (provider-neutral, compiled per runtime)
-│   │       ├── identity/        # who the agent is - profile.md, purpose.md, traits.md
+│   │       ├── SOUL.md          # who the agent is (one file: purpose, voice, values)
 │   │       ├── skills/          # authored procedures
 │   │       ├── playbooks/       # promoted patterns (via dream)
 │   │       └── journal/         # per-run history

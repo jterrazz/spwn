@@ -70,7 +70,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 
 	// Sync the agent's home tree into the container at /agents/<name>/
 	// — the same copy-in step spawn uses. Without this the runtime
-	// process started in step 4 would find no identity/profile.md,
+	// process started in step 4 would find no SOUL.md,
 	// no agent.yaml, nothing.
 	agentHome := "/agents/" + agentName
 	if err := deploy.SyncIn(ctx, a.backend, u.ContainerID, map[string]string{agentName: agentHome}); err != nil {

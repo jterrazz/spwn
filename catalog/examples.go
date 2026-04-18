@@ -216,7 +216,7 @@ func Install(slug, baseDir string) (InstallReport, error) {
 
 // copyAgents implements the per-agent granularity Install wants:
 // records per-agent added/skipped in the report and repairs an
-// agent dir that exists but is missing identity/profile.md.
+// agent dir that exists but is missing SOUL.md.
 func copyAgents(src fs.FS, agentsSrc, spwnRoot string, rep *InstallReport) error {
 	agentsDst := filepath.Join(spwnRoot, "agents")
 	if err := os.MkdirAll(agentsDst, 0o755); err != nil {
@@ -233,9 +233,13 @@ func copyAgents(src fs.FS, agentsSrc, spwnRoot string, rep *InstallReport) error
 		name := e.Name()
 		dst := filepath.Join(agentsDst, name)
 		if exists(dst) {
-			identityProfile := filepath.Join(dst, "identity", "profile.md")
-			if !exists(identityProfile) {
-				_ = copyDirFS(src, agentsSrc+"/"+name+"/identity", filepath.Join(dst, "identity"))
+			soulDst := filepath.Join(dst, platform.SoulFileName)
+			if !exists(soulDst) {
+				// Repair: seed the missing SOUL.md from the catalog copy.
+				if data, rerr := fs.ReadFile(src, agentsSrc+"/"+name+"/"+platform.SoulFileName); rerr == nil {
+					_ = os.MkdirAll(dst, 0o755)
+					_ = os.WriteFile(soulDst, data, 0o644)
+				}
 				manifestDst := filepath.Join(dst, "agent.yaml")
 				if !exists(manifestDst) {
 					if data, rerr := fs.ReadFile(src, agentsSrc+"/"+name+"/agent.yaml"); rerr == nil {

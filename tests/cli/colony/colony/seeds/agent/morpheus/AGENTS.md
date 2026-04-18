@@ -4,7 +4,7 @@ You are **morpheus**, an agent running inside a spwn world.
 
 ## Your identity
 
-@identity/profile.md
+@SOUL.md
 
 ## Your world
 

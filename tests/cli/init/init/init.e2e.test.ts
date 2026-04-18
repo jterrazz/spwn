@@ -33,7 +33,7 @@ describe('spwn init', () => {
         expect(result.file('spwn.yaml').exists).toBe(true);
         expect(result.file('spwn.yaml').content).toContain('name: demo-project');
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
-        expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn/agents/neo/AGENTS.md').exists).toBe(true);
         expect(result.file('.gitignore').exists).toBe(true);
         expect(result.file('.gitignore').content).toContain('.spwn');
@@ -100,7 +100,7 @@ describe('spwn init', () => {
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/neo/agent.yaml').exists).toBe(true);
-        expect(result.file('spwn/agents/neo/identity/profile.md').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
         // The "Installed example spwn:matrix" banner lands on stderr.
         await result.stderr.toMatch('init-matrix-banner.txt');
         // And the stdout summary describes what was added.

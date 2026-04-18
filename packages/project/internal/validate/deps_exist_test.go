@@ -14,7 +14,7 @@ import (
 func scaffoldAgent(t *testing.T, root, name, yamlBody string) AgentRef {
 	t.Helper()
 	dir := filepath.Join(root, "spwn", "agents", name)
-	if err := os.MkdirAll(filepath.Join(dir, "identity"), 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	for _, p := range []string{"AGENTS.md", "agent.yaml"} {
@@ -28,7 +28,8 @@ func scaffoldAgent(t *testing.T, root, name, yamlBody string) AgentRef {
 			t.Fatal(err)
 		}
 	}
-	if err := os.WriteFile(filepath.Join(dir, "identity", "profile.md"), []byte("# profile\n"), 0o644); err != nil {
+	// SOUL.md at the agent root replaces the old identity/profile.md.
+	if err := os.WriteFile(filepath.Join(dir, "SOUL.md"), []byte("# soul\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	return AgentRef{Name: name, Path: dir, Exists: true}

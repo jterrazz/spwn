@@ -156,7 +156,7 @@ describe('smoke: project upgrade cycle', () => {
         //     Lives under the /agents bind, so the container sees
         //     The new bytes after the rewrite.
         writeFileSync(
-            join(workdir, 'spwn/agents/neo/identity/profile.md'),
+            join(workdir, 'spwn/agents/neo/SOUL.md'),
             '# Upgraded identity\n\nI am the post-upgrade neo.\n',
         );
 
@@ -188,7 +188,7 @@ describe('smoke: project upgrade cycle', () => {
             "# trinity\n\nYou are trinity, neo's partner.\n",
         );
         writeFileSync(
-            join(trinityDir, 'identity/profile.md'),
+            join(trinityDir, 'SOUL.md'),
             '# trinity\n\nOperator, partner, edge case specialist.\n',
         );
 
@@ -230,13 +230,13 @@ describe('smoke: project upgrade cycle', () => {
         );
 
         // New identity: the upgraded body is visible.
-        expect(exec(cid2, 'cat /agents/neo/identity/profile.md')).toContain('post-upgrade neo');
+        expect(exec(cid2, 'cat /agents/neo/SOUL.md')).toContain('post-upgrade neo');
 
         // Both agent homes exist; the second agent came along for
         // The ride as part of the same world spawn.
         expect(exec(cid2, 'test -d /agents/neo && echo ok')).toBe('ok');
         expect(exec(cid2, 'test -d /agents/trinity && echo ok')).toBe('ok');
-        expect(exec(cid2, 'cat /agents/trinity/identity/profile.md')).toContain(
+        expect(exec(cid2, 'cat /agents/trinity/SOUL.md')).toContain(
             'edge case specialist',
         );
 

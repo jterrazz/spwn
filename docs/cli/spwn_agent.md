@@ -44,7 +44,7 @@ spwn agent [name] [flags]
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
 * [spwn agent add](./spwn_agent_add.md)	 - Add dependencies to an agent
-* [spwn agent create](./spwn_agent_create.md)	 - Create a new agent with a 4-layer Mind
+* [spwn agent create](./spwn_agent_create.md)	 - Create a new agent (SOUL.md + 3-layer Mind)
 * [spwn agent deploy](./spwn_agent_deploy.md)	 - Deploy an agent to a running world
 * [spwn agent dream](./spwn_agent_dream.md)	 - Analyze experience, discover patterns, promote playbooks
 * [spwn agent export](./spwn_agent_export.md)	 - [experimental] Export an agent as tar.gz

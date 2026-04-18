@@ -41,11 +41,11 @@ const defaultAgentMDTmpl = `# __NAME__
 
 You are **__NAME__**, an agent running inside a spwn world.
 
-## Your identity
+## Your soul
 
-Before doing anything else, read your identity:
+Before doing anything else, read your soul:
 
-@identity/profile.md
+@SOUL.md
 
 ## Your world
 
@@ -56,7 +56,7 @@ Before doing anything else, read your identity:
 
 ## Conventions
 
-1. Read your identity first. It shapes how you respond.
+1. Read your soul first. It shapes how you respond.
 2. Save important discoveries to ` + "`/world/knowledge/`" + ` so the whole world remembers them next time (committed per-world, shared across agents).
 3. After significant work, consider promoting a pattern to ` + "`./playbooks/`" + `.
 4. Before committing changes, run the project's existing tests if they exist.
@@ -93,14 +93,14 @@ func Init(name string) (string, error) {
 		}
 	}
 
-	// Create default profile
-	profile := `# Default Profile
+	// Create default SOUL.md — the agent's identity in one file.
+	soul := `# Default Soul
 
 You are a spwn agent - a persistent AI worker living inside an isolated world.
 
 ## Your Identity
-- You have a Mind that persists across sessions at /mind (identity, skills, playbooks, journal)
-- Your identity defines your purpose and values - you are reading it now
+- You have a Mind that persists across sessions (skills, playbooks, journal)
+- Your soul (this file) defines your purpose and values - you are reading it now
 - You evolve through experience: dream to analyze tasks, learn from outcomes, update your playbooks
 
 ## Your World
@@ -119,9 +119,9 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 - Use your full Unix shell access (bash, git, curl, etc.)
 - Stay within the Laws - they describe what is physically possible
 `
-	profilePath := filepath.Join(dir, "identity", "profile.md")
-	if err := os.WriteFile(profilePath, []byte(profile), 0644); err != nil {
-		return "", fmt.Errorf("create profile: %w", err)
+	soulPath := filepath.Join(dir, platform.SoulFileName)
+	if err := os.WriteFile(soulPath, []byte(soul), 0644); err != nil {
+		return "", fmt.Errorf("create soul: %w", err)
 	}
 
 	// Write the baseline agent.yaml and AGENTS.md so `spwn check`
@@ -157,14 +157,14 @@ func Repair(name string) error {
 		}
 	}
 
-	profilePath := filepath.Join(dir, "identity", "profile.md")
-	if _, err := os.Stat(profilePath); err != nil && os.IsNotExist(err) {
-		profile := `# Default Profile
+	soulPath := filepath.Join(dir, platform.SoulFileName)
+	if _, err := os.Stat(soulPath); err != nil && os.IsNotExist(err) {
+		soul := `# Default Soul
 
 You are a spwn agent - a persistent AI worker living inside an isolated world.
 `
-		if err := os.WriteFile(profilePath, []byte(profile), 0644); err != nil {
-			return fmt.Errorf("create profile: %w", err)
+		if err := os.WriteFile(soulPath, []byte(soul), 0644); err != nil {
+			return fmt.Errorf("create soul: %w", err)
 		}
 	}
 
@@ -185,7 +185,7 @@ You are a spwn agent - a persistent AI worker living inside an isolated world.
 	return nil
 }
 
-// Validate checks that a Mind directory exists and has the core layer.
+// Validate checks that a Mind directory exists and has a SOUL.md.
 func Validate(name string) error {
 	dir := AgentDir(name)
 	info, err := os.Stat(dir)
@@ -196,9 +196,9 @@ func Validate(name string) error {
 		return fmt.Errorf("agent %q is not a directory", name)
 	}
 
-	identityDir := filepath.Join(dir, "identity")
-	if _, err := os.Stat(identityDir); err != nil {
-		return fmt.Errorf("agent %q is missing the identity/ layer", name)
+	soulPath := filepath.Join(dir, platform.SoulFileName)
+	if _, err := os.Stat(soulPath); err != nil {
+		return fmt.Errorf("agent %q is missing %s", name, platform.SoulFileName)
 	}
 	return nil
 }

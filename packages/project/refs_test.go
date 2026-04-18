@@ -24,8 +24,8 @@ worlds:
 `)
 
 	agentDir := filepath.Join(root, "spwn", "agents", "neo")
-	mustMkdir(t, filepath.Join(agentDir, "identity"))
-	writeFile(t, filepath.Join(agentDir, "identity", "profile.md"), "test")
+	mustMkdir(t, agentDir)
+	writeFile(t, filepath.Join(agentDir, "SOUL.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "AGENTS.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "agent.yaml"), `runtime:
   backend: "spwn:claude-code"

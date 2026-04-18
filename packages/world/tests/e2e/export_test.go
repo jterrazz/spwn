@@ -50,21 +50,15 @@ func TestAgent_ImportRestoresMind(t *testing.T) {
 		t.Fatalf("Import failed: %v", err)
 	}
 
-	// Then - the imported agent should have identity/profile.md
+	// Then - the imported agent should have SOUL.md at its root
 	info, err := agent.InspectAgent("import-dst")
 	if err != nil {
 		t.Fatalf("Inspect failed: %v", err)
 	}
 
-	files := info.Layers["identity"]
-	found := false
-	for _, f := range files {
-		if f == "profile.md" {
-			found = true
-		}
-	}
-	if !found {
-		t.Fatalf("Expected identity/profile.md in imported Mind, got: %v", files)
+	soulPath := filepath.Join(info.Path, "SOUL.md")
+	if _, err := os.Stat(soulPath); err != nil {
+		t.Fatalf("Expected SOUL.md at imported agent root: %v", err)
 	}
 }
 

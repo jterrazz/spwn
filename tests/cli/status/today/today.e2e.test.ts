@@ -31,8 +31,8 @@ describe('agent mind structure', () => {
         }
         expect(result.file('spwn/agents/trinity/knowledge').exists).toBe(false);
 
-        // The starter persona is seeded into identity/profile.md
-        const persona = result.file('spwn/agents/trinity/identity/profile.md');
+        // The starter persona is seeded into SOUL.md
+        const persona = result.file('spwn/agents/trinity/SOUL.md');
         expect(persona.exists).toBe(true);
         expect(persona.content.length).toBeGreaterThan(10);
 
