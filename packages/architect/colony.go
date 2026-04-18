@@ -11,7 +11,7 @@ import (
 	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/transpile/runtimes/claude_code"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/world/deploy"
+	"spwn.sh/packages/architect/internal/deploy"
 	"spwn.sh/packages/world/models"
 )
 

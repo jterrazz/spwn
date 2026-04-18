@@ -9,19 +9,20 @@ import (
 	"sort"
 	"strings"
 
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/compile/internal/dockerfile"
+	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
 )
 
 // Builder composes Docker images from tool definitions.
 type Builder struct {
-	registry *Registry
+	registry *resolver.Registry
 	backend  backend.Backend
 }
 
 // New creates a Builder with the given registry and Docker backend.
-func New(registry *Registry, b backend.Backend) *Builder {
+func New(registry *resolver.Registry, b backend.Backend) *Builder {
 	return &Builder{registry: registry, backend: b}
 }
 
@@ -121,7 +122,7 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	}
 
 	// Collect and add skills
-	skills, err := CollectSkills(resolved)
+	skills, err := resolver.CollectSkills(resolved)
 	if err != nil {
 		return nil, fmt.Errorf("collect skills: %w", err)
 	}

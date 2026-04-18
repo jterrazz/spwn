@@ -1,10 +1,10 @@
-package compile
-
-import "spwn.sh/packages/dependency/tool"
+package resolver
 
 import (
 	"io/fs"
 	"testing"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 // baseTool is a minimal Tool used to exercise the dependency helpers

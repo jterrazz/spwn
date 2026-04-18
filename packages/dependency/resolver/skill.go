@@ -1,11 +1,11 @@
-package compile
-
-import "spwn.sh/packages/dependency/tool"
+package resolver
 
 import (
 	"fmt"
 	"io/fs"
 	"strings"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 // CollectSkills aggregates skill files from all resolved tools into a map

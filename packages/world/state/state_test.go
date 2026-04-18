@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtimestate"

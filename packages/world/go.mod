@@ -9,7 +9,7 @@ require (
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/transpile v0.0.0
-	spwn.sh/packages/compile v0.0.0
+	spwn.sh/packages/container v0.0.0
 	spwn.sh/packages/platform v0.0.0
 )
 
@@ -43,7 +43,7 @@ replace (
 	spwn.sh/packages/agent => ../agent
 	spwn.sh/packages/auth => ../auth
 	spwn.sh/packages/transpile => ../transpile
-	spwn.sh/packages/compile => ../compile
+	spwn.sh/packages/container => ../container
 	spwn.sh/packages/platform => ../platform
 )
 

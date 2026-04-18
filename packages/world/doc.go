@@ -1,5 +1,5 @@
 // Package world is the world domain — the primitives that sit
-// above the Docker daemon (via packages/compile/backend) and below
+// above the Docker daemon (via packages/container/backend) and below
 // the orchestrator (packages/architect).
 //
 // The top-level package is a thin facade that re-exports the
@@ -13,11 +13,9 @@
 //   - runtime/       — the Runtime adapter port interface.
 //   - labels/        — Docker label-key constants (sh.spwn.*).
 //   - runtimestate/  — container-state tracking via labels.
-//   - deploy/        — spawn-time helpers (tree materialisation,
-//                      agent-home sync in/out).
 //
 // External code (architect, apps/cli) imports the facade; sub-
 // packages are consumed directly only when the caller genuinely
-// needs the narrower surface (e.g. architect uses labels and
-// deploy directly for orchestration).
+// needs the narrower surface (e.g. architect uses labels directly
+// for orchestration).
 package world

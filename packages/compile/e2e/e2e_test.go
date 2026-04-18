@@ -5,15 +5,15 @@ package e2e
 import (
 	"testing"
 
-	runtimes "spwn.sh/packages/runtimes"
-
-	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/compile/internal/imagetest"
+	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/resolver"
+	runtimes "spwn.sh/packages/runtimes"
 )
 
-func newRegistry(t *testing.T) *ib.Registry {
+func newRegistry(t *testing.T) *resolver.Registry {
 	t.Helper()
-	reg := ib.NewRegistry()
+	reg := resolver.NewRegistry()
 	if err := dependency.RegisterBuiltins(reg); err != nil {
 		t.Fatalf("register tools: %v", err)
 	}

@@ -14,7 +14,7 @@ import (
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/labels"
 )
 

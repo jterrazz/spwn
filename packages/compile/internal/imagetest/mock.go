@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
 )
 
 // MockBackend is a test double for the Docker backend.

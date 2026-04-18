@@ -9,7 +9,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/transpile"
 	claudecode "spwn.sh/packages/transpile/runtimes/claude_code"
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtime"
 )

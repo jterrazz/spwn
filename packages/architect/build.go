@@ -16,8 +16,9 @@ import (
 
 	ib "spwn.sh/packages/compile"
 	ibbase "spwn.sh/packages/compile/base"
+	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/transpile/runtimes/claude_code"
 )
 
@@ -43,7 +44,7 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 	}
 
 	// Resolve architect tools via the image package to generate install steps
-	reg := ib.NewRegistry()
+	reg := resolver.NewRegistry()
 	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return fmt.Errorf("register tools: %w", err)
 	}

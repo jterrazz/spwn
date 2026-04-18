@@ -11,6 +11,7 @@ require (
 	spwn.sh/packages/transpile v0.0.0
 	spwn.sh/packages/dependency v0.0.0
 	spwn.sh/packages/compile v0.0.0
+	spwn.sh/packages/container v0.0.0
 	spwn.sh/packages/platform v0.0.0
 	spwn.sh/packages/runtimes v0.0.0
 	spwn.sh/packages/world v0.0.0
@@ -23,6 +24,7 @@ replace (
 	spwn.sh/packages/transpile => ../transpile
 	spwn.sh/packages/dependency => ../dependency
 	spwn.sh/packages/compile => ../compile
+	spwn.sh/packages/container => ../container
 	spwn.sh/packages/platform => ../platform
 	spwn.sh/packages/runtimes => ../runtimes
 	spwn.sh/packages/world => ../world

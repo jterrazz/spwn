@@ -1,10 +1,10 @@
-package compile
-
-import "spwn.sh/packages/dependency/tool"
+package resolver
 
 import (
 	"encoding/json"
 	"fmt"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 // MergeRuntimeConfig shallow-merges JSON objects: parses each input as

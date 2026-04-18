@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	ib "spwn.sh/packages/compile"
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
 )
 
@@ -37,7 +37,7 @@ func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID st
 	const runtimeName = "spwn:claude-code"
 	const settingsPath = "/home/spwn/.claude/settings.json"
 
-	configs := ib.CollectRuntimeConfigs(resolved, runtimeName)
+	configs := resolver.CollectRuntimeConfigs(resolved, runtimeName)
 	if len(configs) == 0 {
 		return nil
 	}
@@ -47,7 +47,7 @@ func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID st
 	baseStdout, _ := be.ExecOutput(ctx, containerID, []string{"sh", "-c", "cat " + settingsPath + " 2>/dev/null || true"})
 	base := []byte(strings.TrimSpace(baseStdout))
 
-	merged, err := ib.MergeRuntimeConfig(base, configs...)
+	merged, err := resolver.MergeRuntimeConfig(base, configs...)
 	if err != nil {
 		return fmt.Errorf("merge config: %w", err)
 	}

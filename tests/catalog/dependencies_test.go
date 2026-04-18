@@ -7,16 +7,16 @@ import (
 	"testing"
 
 
-	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/resolver"
 	runtimes "spwn.sh/packages/runtimes"
 )
 
 // fullRegistry registers tools + runtimes. Some tools like
 // spwn:architect depend on runtime dependencies (e.g. spwn:claude-code),
 // so dependency-resolution tests need both sides available.
-func fullRegistry() *ib.Registry {
-	reg := ib.NewRegistry()
+func fullRegistry() *resolver.Registry {
+	reg := resolver.NewRegistry()
 	_ = dependency.RegisterBuiltins(reg)
 	_ = runtimes.RegisterDefaults(reg)
 	return reg
@@ -192,7 +192,7 @@ func TestAllTools_UserCommandsUseTemplates(t *testing.T) {
 }
 
 func TestRegisterDefaults_AllRegistered(t *testing.T) {
-	reg := ib.NewRegistry()
+	reg := resolver.NewRegistry()
 	dependency.RegisterBuiltins(reg)
 
 	for _, tool := range dependency.BuiltinTools() {
@@ -203,7 +203,7 @@ func TestRegisterDefaults_AllRegistered(t *testing.T) {
 }
 
 func TestResolve_FullToolStack(t *testing.T) {
-	reg := ib.NewRegistry()
+	reg := resolver.NewRegistry()
 	dependency.RegisterBuiltins(reg)
 
 	tools, err := reg.Resolve([]string{"spwn:unix", "spwn:git", "spwn:node", "spwn:cli", "spwn:qmd"})

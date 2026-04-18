@@ -8,8 +8,9 @@ import (
 	"time"
 
 	ib "spwn.sh/packages/compile"
-	"spwn.sh/packages/compile/backend"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/compile/base"
+	"spwn.sh/packages/dependency/resolver"
 )
 
 // Sandbox is a running container built from specific tools, used for E2E testing.
@@ -23,7 +24,7 @@ type Sandbox struct {
 
 // SpinUp builds an image with the given registry and tools, then starts a container.
 // The container is cleaned up automatically via t.Cleanup.
-func SpinUp(t *testing.T, reg *ib.Registry, tools ...string) *Sandbox {
+func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 	t.Helper()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)

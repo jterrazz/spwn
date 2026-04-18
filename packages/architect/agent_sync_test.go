@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"spwn.sh/packages/transpile"
-	"spwn.sh/packages/world/deploy"
+	"spwn.sh/packages/architect/internal/deploy"
 )
 
 // TestMaterialiseWorldTree_SplitsByPrefix locks down the contract that
