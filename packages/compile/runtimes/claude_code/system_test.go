@@ -93,7 +93,7 @@ func TestArchitectSkillsExist(t *testing.T) {
 	ctx := GenerateAgentContext(AgentContextOpts{
 		AgentName: "architect",
 		Role:      "architect",
-		WorldID:   "spwn-world-architect-00001",
+		WorldID:   "world-architect-00001",
 		Deps:   []string{"bash", "git", "docker"},
 	})
 

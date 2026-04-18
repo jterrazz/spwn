@@ -445,8 +445,8 @@ func TestDestroy_MultiAgentWritesAllJournals(t *testing.T) {
 		Status:      models.StatusRunning,
 		CreatedAt:   time.Now().Add(-10 * time.Minute),
 		Agents: []models.AgentRecord{
-			{Name: "chief-a", AgentID: "a-chief-a-11111", Role: "chief", Status: models.StatusRunning},
-			{Name: "worker-b", AgentID: "a-worker-b-22222", Role: "worker", Status: models.StatusRunning},
+			{Name: "chief-a", AgentID: "agent-chief-a-11111", Role: "chief", Status: models.StatusRunning},
+			{Name: "worker-b", AgentID: "agent-worker-b-22222", Role: "worker", Status: models.StatusRunning},
 		},
 	}
 	seedWorld(mb, w)

@@ -118,8 +118,8 @@ spwn auth login|logout|token                   # Provider credentials
 
 ## IDs
 
-- World: `spwn-world-{planet}-{5digits}` (e.g. `spwn-world-rhea-84721`)
-- Agent: `a-{name}-{5digits}` (e.g. `a-neo-52103`)
+- World: `world-{planet}-{5digits}` (e.g. `world-rhea-84721`)
+- Agent: `agent-{name}-{5digits}` (e.g. `agent-neo-52103`)
 - Generated with `crypto/rand`.
 
 ## Config layout (per-repo)

@@ -15,7 +15,7 @@ import { spec } from '../../../setup/cli.specification.js';
  *
  * Dropped from legacy coverage (all intentional — CLI shapes changed):
  *   - "world ID format is w-{name}-{5digits}": current ids use
- *     `spwn-world-<planet>-<digits>`. Covered indirectly by the label
+ *     `world-<planet>-<hex>`. Covered indirectly by the label
  *     assertion below.
  *   - "ID does not contain 'default'": there is no "default" config
  *     concept in project mode.
@@ -62,7 +62,7 @@ describe('world spawn', () => {
             const labels = inspectData.Config?.Labels ?? {};
             const worldId = labels['sh.spwn.world.id'];
             expect(worldId).toBeTruthy();
-            expect(worldId).toMatch(/^(?:spwn-world|w)-[a-z0-9-]+-[0-9a-f]{5}$/);
+            expect(worldId).toMatch(/^world-[a-z0-9-]+-[0-9a-f]{5}$/);
             expect(labels['sh.spwn.world.config']).toBe('neo');
             expect(labels['sh.spwn.kind']).toBe('world');
         });

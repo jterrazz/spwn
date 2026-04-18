@@ -46,7 +46,7 @@ func TestWorldLabels_RoundTrip(t *testing.T) {
 		Name:         "default",
 		Config:       "default",
 		Agent:        "neo",
-		AgentID:      "a-neo-99999",
+		AgentID:      "agent-neo-99999",
 		Organization: "acme",
 		CreatedAt:    created,
 		Workspaces: []models.Workspace{
@@ -54,8 +54,8 @@ func TestWorldLabels_RoundTrip(t *testing.T) {
 			{Name: "api", Path: "/Users/x/proj/api"},
 		},
 		Agents: []models.AgentRecord{
-			{Name: "neo", AgentID: "a-neo-99999", Role: "worker", Status: models.StatusIdle},
-			{Name: "morpheus", AgentID: "a-morph-77777", Role: "chief", Status: models.StatusIdle},
+			{Name: "neo", AgentID: "agent-neo-99999", Role: "worker", Status: models.StatusIdle},
+			{Name: "morpheus", AgentID: "agent-morph-77777", Role: "chief", Status: models.StatusIdle},
 		},
 	}
 
