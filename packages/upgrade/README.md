@@ -1,10 +1,10 @@
-# packages/update
+# packages/upgrade
 
-CLI self-update + version-check.
+CLI self-upgrade + version-check.
 
 ## Role
 
-Owns `spwn upgrade`: fetches release metadata from GitHub, downloads the platform-appropriate binary, verifies it against the SHA256SUMS published with the release, and atomically replaces the current binary. Also exposes a lightweight version-check used by the CLI startup banner and the web UI's "update available" badge. Split from the former `packages/upgrade` so self-update and state migration (`packages/migration`) are independently composable.
+Owns `spwn upgrade`: fetches release metadata from GitHub, downloads the platform-appropriate binary, verifies it against the SHA256SUMS published with the release, and atomically replaces the current binary. Also exposes a lightweight version-check used by the CLI startup banner and the web UI's "upgrade available" badge. Split from `packages/migration` so self-upgrade and state migration stay independently composable — one pulls a newer binary, the other walks in-place state forward.
 
 ## Key types
 

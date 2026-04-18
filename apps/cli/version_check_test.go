@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"spwn.sh/packages/update"
+	"spwn.sh/packages/upgrade"
 )
 
 func TestVersionCheckCache_FreshCacheReturnsValue(t *testing.T) {
@@ -20,7 +20,7 @@ func TestVersionCheckCache_FreshCacheReturnsValue(t *testing.T) {
 	os.WriteFile(filepath.Join(tmpDir, ".version-check"), []byte(cacheContent), 0644)
 
 	// Should return cached value without hitting network
-	result := update.CheckLatestVersion(versionCheckInterval)
+	result := upgrade.CheckLatestVersion(versionCheckInterval)
 	if result != "v1.2.3" {
 		t.Errorf("expected v1.2.3, got %q", result)
 	}
@@ -36,7 +36,7 @@ func TestVersionCheckCache_StaleCacheHitsNetwork(t *testing.T) {
 	os.WriteFile(filepath.Join(tmpDir, ".version-check"), []byte(cacheContent), 0644)
 
 	// This will try to hit the network (may fail in CI, that's OK)
-	result := update.CheckLatestVersion(versionCheckInterval)
+	result := upgrade.CheckLatestVersion(versionCheckInterval)
 	// If network is available, result should be non-empty and different from stale
 	// If not, it returns "" which is also acceptable
 	_ = result
@@ -47,7 +47,7 @@ func TestVersionCheckCache_MissingCacheFile(t *testing.T) {
 	t.Setenv("SPWN_HOME", tmpDir)
 
 	// No cache file - will try network, may return "" in offline env
-	result := update.CheckLatestVersion(versionCheckInterval)
+	result := upgrade.CheckLatestVersion(versionCheckInterval)
 	_ = result // just ensure no panic
 }
 

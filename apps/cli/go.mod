@@ -53,7 +53,7 @@ require (
 	spwn.sh/packages/architect v0.0.0
 	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/runtimes v0.0.0
-	spwn.sh/packages/update v0.0.0
+	spwn.sh/packages/upgrade v0.0.0
 )
 
 replace (
@@ -75,4 +75,4 @@ replace spwn.sh/packages/architect => ../../packages/architect
 
 replace spwn.sh/packages/migration => ../../packages/migration
 
-replace spwn.sh/packages/update => ../../packages/update
+replace spwn.sh/packages/upgrade => ../../packages/upgrade
