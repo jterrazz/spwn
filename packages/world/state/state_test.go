@@ -111,7 +111,7 @@ func newStore(t *testing.T, fb *fakeBackend) *Store {
 func TestList_ReadsFromContainerLabels(t *testing.T) {
 	fb := &fakeBackend{containers: []backend.ContainerInfo{
 		newWorldContainer("w-default-11111", "", "default", true),
-		newWorldContainer("w-acme-22222", "Acme", "acme", false),
+		newWorldContainer("world-acme-22222", "Acme", "acme", false),
 	}}
 	s := newStore(t, fb)
 
@@ -130,10 +130,10 @@ func TestList_ReadsFromContainerLabels(t *testing.T) {
 	if byID["w-default-11111"].Status != models.StatusRunning {
 		t.Errorf("running world should map to StatusRunning")
 	}
-	if byID["w-acme-22222"].Status != models.StatusStopped {
+	if byID["world-acme-22222"].Status != models.StatusStopped {
 		t.Errorf("exited world should map to StatusStopped")
 	}
-	if byID["w-acme-22222"].Name != "Acme" {
+	if byID["world-acme-22222"].Name != "Acme" {
 		t.Errorf("name should round-trip from labels")
 	}
 }

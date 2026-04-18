@@ -20,9 +20,7 @@ Your memory survives world destruction. You grow through experience.
 
 ## Your Mind (/mind/)
 Your persistent memory. It survives when worlds are destroyed.
-- ` + "`/mind/identity/purpose.md`" + ` - why you exist
-- ` + "`/mind/SOUL.md`" + ` - who you are
-- ` + "`/mind/identity/traits.md`" + ` - your principles
+- ` + "`/mind/SOUL.md`" + ` - who you are (purpose, voice, principles)
 - ` + "`/mind/skills/`" + ` - capabilities you've learned
 - ` + "`/mind/playbooks/`" + ` - step-by-step procedures
 - ` + "`/mind/journal/`" + ` - auto-logged session and deployment history
@@ -42,13 +40,13 @@ empty.
 
 ## System Skills
 Read ` + "`/world/skills/`" + ` for detailed guides:
-- ` + "`mind-management.md`" + ` - how to read/write your identity and memory
+- ` + "`mind-management.md`" + ` - how to read and evolve your SOUL.md and memory
 - ` + "`collaboration.md`" + ` - how to communicate with other agents
 - ` + "`world-awareness.md`" + ` - understanding physics, tools, faculties
 - ` + "`self-evolution.md`" + ` - how to improve through dream cycles
 
 ## Conventions
-1. Read your purpose and traits before starting any task
+1. Read your ` + "`/mind/SOUL.md`" + ` before starting any task
 2. Save important discoveries to ` + "`/world/knowledge/`" + ` (world-shared, committed to git)
 3. After significant work, check if a playbook should be created
 4. When asked to dream, analyze your journal and promote patterns
@@ -67,9 +65,7 @@ Your memory survives world destruction. You grow through experience.
 
 ## Your Mind (/mind/)
 Your persistent memory. It survives when worlds are destroyed.
-- ` + "`/mind/identity/purpose.md`" + ` - why you exist
-- ` + "`/mind/SOUL.md`" + ` - who you are
-- ` + "`/mind/identity/traits.md`" + ` - your principles
+- ` + "`/mind/SOUL.md`" + ` - who you are (purpose, voice, principles)
 - ` + "`/mind/skills/`" + ` - capabilities you've learned
 - ` + "`/mind/playbooks/`" + ` - step-by-step procedures
 - ` + "`/mind/journal/`" + ` - auto-logged session and deployment history
@@ -88,13 +84,13 @@ empty.
 
 ## System Skills
 Read ` + "`/world/skills/`" + ` for detailed guides:
-- ` + "`mind-management.md`" + ` - how to read/write your identity and memory
+- ` + "`mind-management.md`" + ` - how to read and evolve your SOUL.md and memory
 - ` + "`collaboration.md`" + ` - how to communicate with other agents
 - ` + "`world-awareness.md`" + ` - understanding physics, tools, faculties
 - ` + "`self-evolution.md`" + ` - how to improve through dream cycles
 
 ## Conventions
-1. Read your purpose and traits before starting any task
+1. Read your ` + "`/mind/SOUL.md`" + ` before starting any task
 2. After significant work, check if a playbook should be created
 3. When asked to dream, analyze your journal and promote patterns
 4. Communicate with other agents through ` + "`/world/inbox/`" + `
@@ -106,12 +102,12 @@ Read ` + "`/world/skills/`" + ` for detailed guides:
 // directory.
 const SkillMindManagementWithKnowledge = `# Mind Management
 
-## Reading Your Identity
-Before starting any task, read your identity files:
+## Reading Your Soul
+Before starting any task, read your SOUL.md — it carries your purpose,
+voice, and principles. This is the single source of truth for who you
+are.
 ` + "```bash" + `
-cat /mind/identity/purpose.md   # Why you exist
-cat /mind/SOUL.md   # Who you are
-cat /mind/identity/traits.md    # Your principles
+cat /mind/SOUL.md
 ` + "```" + `
 
 ## Saving Knowledge
@@ -136,11 +132,13 @@ echo "# How to Deploy" > /mind/playbooks/deploy.md
 Journal entries are auto-created by the system after each session.
 You can read them at ` + "`/mind/journal/`" + `.
 
-## Updating Your Identity
-You can evolve your own identity:
+## Evolving Your Soul
+You can edit your own SOUL.md over time — as you grow, update your
+purpose, voice, and principles. The file survives world destruction.
 ` + "```bash" + `
-# Update your purpose as you learn
-echo "# Purpose\nI exist to maintain the production API" > /mind/identity/purpose.md
+# Append a newly clarified value, or rewrite a section that no
+# longer fits.
+vim /mind/SOUL.md
 ` + "```" + `
 `
 
@@ -150,12 +148,12 @@ echo "# Purpose\nI exist to maintain the production API" > /mind/identity/purpos
 // knowledge base exists.
 const SkillMindManagementWithoutKnowledge = `# Mind Management
 
-## Reading Your Identity
-Before starting any task, read your identity files:
+## Reading Your Soul
+Before starting any task, read your SOUL.md — it carries your purpose,
+voice, and principles. This is the single source of truth for who you
+are.
 ` + "```bash" + `
-cat /mind/identity/purpose.md   # Why you exist
-cat /mind/SOUL.md   # Who you are
-cat /mind/identity/traits.md    # Your principles
+cat /mind/SOUL.md
 ` + "```" + `
 
 ## Creating Playbooks
@@ -169,11 +167,13 @@ echo "# How to Deploy" > /mind/playbooks/deploy.md
 Journal entries are auto-created by the system after each session.
 You can read them at ` + "`/mind/journal/`" + `.
 
-## Updating Your Identity
-You can evolve your own identity:
+## Evolving Your Soul
+You can edit your own SOUL.md over time — as you grow, update your
+purpose, voice, and principles. The file survives world destruction.
 ` + "```bash" + `
-# Update your purpose as you learn
-echo "# Purpose\nI exist to maintain the production API" > /mind/identity/purpose.md
+# Append a newly clarified value, or rewrite a section that no
+# longer fits.
+vim /mind/SOUL.md
 ` + "```" + `
 `
 

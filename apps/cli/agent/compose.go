@@ -18,15 +18,30 @@ import (
 // Composition commands for attaching reusable blocks (tools, skills) to an
 // agent. These edit ~/.spwn/agents/<name>/agent.yaml directly.
 
-var composeDeps []string
+// composeDeps is filled by any of --dep/--deps/--skill/--tool/--hook.
+// All four flags append to the same list and share identical resolution
+// (bare name → spwn:<name>; explicit scheme passes through). The
+// semantic flavour of each flag is purely a docs/discoverability hint —
+// `--skill qmd` and `--dep qmd` behave identically, but the former reads
+// better in tutorials and scripts.
+var (
+	composeDeps    []string
+	composeSkills  []string
+	composeTools   []string
+	composeHooks   []string
+	composeRemoves []string
+)
 
 func init() {
-	addCmd.Flags().StringArrayVar(&composeDeps, "dep", nil, "Dependency ref to add (repeatable, e.g. spwn:python)")
+	addCmd.Flags().StringArrayVar(&composeDeps, "dep", nil, "Dependency ref to add (repeatable, e.g. --dep python)")
 	addCmd.Flags().StringArrayVar(&composeDeps, "deps", nil, "Plural alias for --dep")
+	addCmd.Flags().StringArrayVar(&composeSkills, "skill", nil, "Skill ref to add (bare name resolves to catalog; use skill:<name> for local)")
+	addCmd.Flags().StringArrayVar(&composeTools, "tool", nil, "Tool ref to add (bare name resolves to catalog; use tool:<name> for local)")
+	addCmd.Flags().StringArrayVar(&composeHooks, "hook", nil, "Hook ref to add (bare name resolves to catalog; use hook:<name> for local)")
 	Cmd.AddCommand(addCmd)
 
-	removeCmd.Flags().StringArrayVar(&composeDeps, "dep", nil, "Dependency ref to remove (repeatable)")
-	removeCmd.Flags().StringArrayVar(&composeDeps, "deps", nil, "Plural alias for --dep")
+	removeCmd.Flags().StringArrayVar(&composeRemoves, "dep", nil, "Dependency ref to remove (repeatable)")
+	removeCmd.Flags().StringArrayVar(&composeRemoves, "deps", nil, "Plural alias for --dep")
 	Cmd.AddCommand(removeCmd)
 
 	Cmd.AddCommand(publishCmd)
@@ -37,51 +52,60 @@ var addCmd = &cobra.Command{
 	Use:   "add <agent-name>",
 	Short: "Add dependencies to an agent",
 	Args:  cobra.ExactArgs(1),
-	Long: `Compose an agent by attaching catalog.
+	Long: `Compose an agent by attaching catalog entries or local blocks.
+
+Bare names resolve to the spwn: catalog ("--dep qmd" adds spwn:qmd).
+Locals must use the explicit skill:/tool:/hook: scheme.
 
 Examples:
-  spwn agent add neo --dep spwn:python
-  spwn agent add neo --deps spwn:unix --deps spwn:git
-  spwn agent add neo --dep spwn:unix --dep spwn:git`,
+  spwn agent add neo --dep python
+  spwn agent add neo --dep spwn:unix --dep spwn:git
+  spwn agent add neo --dep skill:focus --dep tool:my-parser`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeDeps) == 0 {
-			return fmt.Errorf("nothing to add.\nPass at least one --dep")
+
+		combined := make([]string, 0,
+			len(composeDeps)+len(composeSkills)+len(composeTools)+len(composeHooks))
+		combined = append(combined, composeDeps...)
+		combined = append(combined, composeSkills...)
+		combined = append(combined, composeTools...)
+		combined = append(combined, composeHooks...)
+
+		if len(combined) == 0 {
+			return fmt.Errorf("nothing to add.\nPass at least one of --dep / --skill / --tool / --hook")
 		}
 
 		if err := agent.ValidateMind(name); err != nil {
 			return err
 		}
 
-		// Pre-flight every ref before we touch agent.yaml. Three
-		// outcomes refused here:
-		//   * KindInvalid (bare names, `@owner/name`, `local:`, unknown
-		//     schemes): malformed under the scheme-only grammar.
-		//   * KindSpwnBuiltin with an unknown name: would pass yaml
-		//     validation but fail `check` with a confusing "does not
-		//     exist" later.
-		// Local-scheme refs (skill:, tool:, hook:) are accepted here
-		// and resolve against the project tree at build time; github:
-		// refs are accepted and surface as "registries not yet
-		// supported" during `check`.
-		for _, p := range composeDeps {
-			name, _ := dependency.SplitVersion(p)
-			parsed := dependency.ParseRef(name)
-			switch parsed.Kind {
-			case dependency.KindInvalid:
-				return fmt.Errorf("dependency %q is malformed: use spwn:<name>, skill:<name>, tool:<name>, hook:<name>, or github:<owner>/<repo>", p)
-			case dependency.KindSpwnBuiltin:
-				if !knownComposeRef(p) {
-					return unknownComposeRefError("dependency", p)
-				}
+		// Resolve every ref through the shared CLI resolver: bare
+		// names become spwn:<name>, explicit schemes pass through,
+		// everything else errors out with a catalog-aware hint. The
+		// resolved form is what we persist to agent.yaml — manifests
+		// stay scheme-only.
+		catalogNames := catalogToolNames()
+		resolved := make([]string, len(combined))
+		for i, p := range combined {
+			r, err := dependency.ResolveCLI(p, catalogNames)
+			if err != nil {
+				return err
 			}
+			// `spwn:<name>` refs still need to exist in the catalog —
+			// ResolveCLI only confirms grammar for explicit schemes.
+			base, _ := dependency.SplitVersion(r)
+			parsed := dependency.ParseRef(base)
+			if parsed.Kind == dependency.KindSpwnBuiltin && !knownComposeRef(r) {
+				return unknownComposeRefError("dependency", p)
+			}
+			resolved[i] = r
 		}
 
 		s := ui.New()
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, p := range composeDeps {
+		for _, p := range resolved {
 			if err := agent.AddDependency(name, p); err != nil {
 				return fmt.Errorf("add dependency %q: %w", p, err)
 			}
@@ -109,7 +133,7 @@ Examples:
   spwn agent remove neo --deps spwn:mempalace`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
-		if len(composeDeps) == 0 {
+		if len(composeRemoves) == 0 {
 			return fmt.Errorf("nothing to remove.\nPass at least one --dep")
 		}
 
@@ -132,7 +156,7 @@ Examples:
 			}
 			return false
 		}
-		for _, p := range composeDeps {
+		for _, p := range composeRemoves {
 			if !hasString(preflight.Deps, p) {
 				return fmt.Errorf("dependency %q is not attached to agent %q — nothing to remove", p, name)
 			}
@@ -142,7 +166,7 @@ Examples:
 		s.Blank()
 		s.Info("Agent:", name)
 
-		for _, p := range composeDeps {
+		for _, p := range composeRemoves {
 			if err := agent.RemoveDependency(name, p); err != nil {
 				return fmt.Errorf("remove dependency %q: %w", p, err)
 			}
@@ -231,6 +255,21 @@ func knownComposeRef(ref string) bool {
 		}
 	}
 	return false
+}
+
+// catalogToolNames returns the bare names (without the spwn: prefix)
+// of every tool-shaped entry in the catalog. Used as the bare-name
+// lookup set for dependency.ResolveCLI — "--dep qmd" only resolves
+// when "qmd" is in this list.
+func catalogToolNames() []string {
+	out := make([]string, 0, len(catalog.All))
+	for _, t := range catalog.All {
+		// catalog.All keys are canonical spwn:<name>. Trim the prefix
+		// so ResolveCLI can match against bare input.
+		name := strings.TrimPrefix(t.Name(), "spwn:")
+		out = append(out, name)
+	}
+	return out
 }
 
 // stripVersion drops the "@version" suffix from an @scope/name@version

@@ -1,11 +1,11 @@
 # Mind Management
 
-## Reading Your Identity
-Before starting any task, read your identity files:
+## Reading Your Soul
+Before starting any task, read your SOUL.md — it carries your purpose,
+voice, and principles. This is the single source of truth for who you
+are.
 ```bash
-cat /mind/identity/purpose.md   # Why you exist
-cat /mind/SOUL.md   # Who you are
-cat /mind/identity/traits.md    # Your principles
+cat /mind/SOUL.md
 ```
 
 ## Creating Playbooks
@@ -19,9 +19,11 @@ echo "# How to Deploy" > /mind/playbooks/deploy.md
 Journal entries are auto-created by the system after each session.
 You can read them at `/mind/journal/`.
 
-## Updating Your Identity
-You can evolve your own identity:
+## Evolving Your Soul
+You can edit your own SOUL.md over time — as you grow, update your
+purpose, voice, and principles. The file survives world destruction.
 ```bash
-# Update your purpose as you learn
-echo "# Purpose\nI exist to maintain the production API" > /mind/identity/purpose.md
+# Append a newly clarified value, or rewrite a section that no
+# longer fits.
+vim /mind/SOUL.md
 ```

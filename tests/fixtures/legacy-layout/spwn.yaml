@@ -1,0 +1,16 @@
+# Fixture: project with a pre-refactor agent layout.
+#
+# The agent.yaml below uses the legacy top-level `tools:` / `skills:`
+# / `hooks:` blocks that pre-date the unified `dependencies:` list.
+# Modern spwn silently ignores unknown top-level keys on strict-typed
+# parse, which used to mean an upgraded project would lose all its
+# deps without any user-visible signal. `spwn check` must now
+# surface this as an error with a migration hint.
+version: 2
+name: legacy-layout
+
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: [.]
+    knowledge: ./knowledge

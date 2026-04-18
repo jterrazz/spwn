@@ -1,0 +1,19 @@
+# Legacy agent manifest (pre-refactor shape). The three top-level
+# buckets below are all retired — everything must live on the flat
+# `dependencies:` list. Included here so `spwn check` exercises the
+# migration-hint rule; this is NOT a template for new agents.
+name: neo
+description: Fixture agent for the legacy-layout e2e — encodes the pre-refactor shape.
+
+runtime:
+  backend: "spwn:claude-code"
+
+tools:
+  - "spwn:unix"
+  - "spwn:git"
+
+skills:
+  - "skill:paper-reading"
+
+hooks:
+  - "hook:pre-spawn"

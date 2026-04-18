@@ -128,7 +128,7 @@ func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("4. Report back to your chief\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/identity/ - who you are (profile, purpose, traits)\n")
+	b.WriteString("- /mind/SOUL.md - who you are (purpose, voice, principles)\n")
 	b.WriteString("- /mind/skills/ - what you can do\n")
 	b.WriteString("- /mind/playbooks/ - procedures that work\n")
 	b.WriteString("- /mind/journal/ - session history\n")
@@ -169,7 +169,7 @@ func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("Message peers: write to /world/inbox/{peer}/\n\n")
 
 	b.WriteString("### Your Mind\n")
-	b.WriteString("- /mind/identity/ - who you are (profile, purpose, traits)\n")
+	b.WriteString("- /mind/SOUL.md - who you are (purpose, voice, principles)\n")
 	b.WriteString("- /mind/skills/ - what you can do\n")
 	b.WriteString("- /mind/playbooks/ - procedures that work\n")
 	b.WriteString("- /mind/journal/ - session history\n")
@@ -192,7 +192,7 @@ func generateNPCContext(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Your World\n")
 	writeWorkspaces(b, opts.Workspaces)
 	if len(opts.Deps) > 0 {
-		b.WriteString(fmt.Sprintf("- Packages: %s\n", strings.Join(opts.Deps, ", ")))
+		b.WriteString(fmt.Sprintf("- Dependencies: %s\n", strings.Join(opts.Deps, ", ")))
 	}
 }
 
@@ -243,7 +243,7 @@ type ColonyAgentSpec struct {
 // answer "who am I in here with?" and to address messages.
 //
 // In the labels-as-truth architecture there is no per-agent AGENT-<name>.md
-// file. Each agent reads their own identity from ~/identity/, learns about
+// file. Each agent reads their own identity from ~/SOUL.md, learns about
 // their role from ~/worlds/<world-id>/role.md, and learns about everyone
 // else from /world/roster.md (this file).
 //
@@ -271,7 +271,7 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec, knowledgeMounted b
 	b.WriteString("\n")
 
 	b.WriteString("## Where to find each member\n")
-	b.WriteString("- Identity: `/agents/<name>/identity/`\n")
+	b.WriteString("- Soul: `/agents/<name>/SOUL.md`\n")
 	b.WriteString("- Skills: `/agents/<name>/skills/`\n")
 	b.WriteString("- Playbooks: `/agents/<name>/playbooks/`\n")
 	b.WriteString("- Journal: `/agents/<name>/journal/`\n")
@@ -318,6 +318,6 @@ func writeWorldInfo(b *strings.Builder, opts AgentContextOpts) {
 	b.WriteString("## Your World\n")
 	writeWorkspaces(b, opts.Workspaces)
 	if len(opts.Deps) > 0 {
-		b.WriteString(fmt.Sprintf("- Packages: %s\n", strings.Join(opts.Deps, ", ")))
+		b.WriteString(fmt.Sprintf("- Dependencies: %s\n", strings.Join(opts.Deps, ", ")))
 	}
 }

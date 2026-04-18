@@ -30,10 +30,12 @@ func TestAgentsBookContent(t *testing.T) {
 		}
 	}
 
-	// Must contain core and skills references. Knowledge is NOT a
-	// Mind layer anymore — it's world-scoped at /world/knowledge/.
+	// Must contain SOUL.md (who you are) plus the three Mind-layer
+	// directories. identity/ was collapsed into SOUL.md at the agent
+	// root; knowledge is world-scoped at /world/knowledge/, not a
+	// Mind layer.
 	mindPaths := []string{
-		"/mind/identity/",
+		"/mind/SOUL.md",
 		"/mind/skills/",
 		"/mind/playbooks/",
 		"/mind/journal/",
@@ -43,6 +45,13 @@ func TestAgentsBookContent(t *testing.T) {
 		if !strings.Contains(ctx, path) {
 			t.Errorf("AGENTS.md (worker) missing mind path %q", path)
 		}
+	}
+
+	// And the retired /mind/identity/ path must NEVER appear — a
+	// regression here means an agent is being told about a directory
+	// that doesn't exist on disk.
+	if strings.Contains(ctx, "/mind/identity/") {
+		t.Error("AGENTS.md (worker) still references the retired /mind/identity/ path")
 	}
 
 	// World-scoped knowledge must be advertised.

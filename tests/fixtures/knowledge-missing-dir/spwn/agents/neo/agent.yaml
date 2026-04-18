@@ -1,0 +1,8 @@
+name: neo
+description: Fixture agent for the knowledge-missing-dir e2e.
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"

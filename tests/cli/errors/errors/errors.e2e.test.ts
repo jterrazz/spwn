@@ -19,7 +19,7 @@ const isolated = (label: string) =>
 
 describe('error handling', () => {
     test('destroy non-existent world', async () => {
-        const result = await isolated('destroy missing').exec('down w-nonexistent-00000').run();
+        const result = await isolated('destroy missing').exec('down world-nonexistent-00000').run();
 
         expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('destroy-missing.txt');
@@ -27,7 +27,7 @@ describe('error handling', () => {
 
     test('inspect non-existent world', async () => {
         const result = await isolated('inspect missing')
-            .exec('world inspect w-nonexistent-00000')
+            .exec('world inspect world-nonexistent-00000')
             .run();
 
         expect(result.exitCode).toBe(1);
@@ -59,7 +59,7 @@ describe('error handling', () => {
          * `spwn world logs` filters by world ID; a missing world yields
          * no events. The important part is the absence of a crash.
          */
-        const result = await isolated('logs missing').exec('world logs w-nonexistent-00000').run();
+        const result = await isolated('logs missing').exec('world logs world-nonexistent-00000').run();
 
         expect(result.stderr.text).not.toContain('panic:');
         expect(result.stderr.text).not.toContain('goroutine');
@@ -80,7 +80,7 @@ describe('error handling', () => {
     });
 
     test('no usage dump on errors', async () => {
-        const result = await isolated('error no usage').exec('down w-nonexistent-00000').run();
+        const result = await isolated('error no usage').exec('down world-nonexistent-00000').run();
 
         expect(result.exitCode).toBe(1);
         // Hygiene: errors must not leak help text into either stream.
@@ -98,7 +98,7 @@ describe('error handling', () => {
          * maintaining a separate assertion on lowercase/format: we
          * reuse the same snapshot to anchor the wording.
          */
-        const result = await isolated('error format check').exec('down w-nonexistent-00000').run();
+        const result = await isolated('error format check').exec('down world-nonexistent-00000').run();
 
         expect(result.exitCode).toBe(1);
         await result.stderr.toMatch('destroy-missing.txt');

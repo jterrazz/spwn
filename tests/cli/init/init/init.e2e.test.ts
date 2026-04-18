@@ -109,4 +109,70 @@ describe('spwn init', () => {
         expect(out).toContain('Worlds added:');
         expect(out).toContain('matrix');
     });
+
+    test('init matrix (bare) resolves to the catalog gallery entry', async () => {
+        // Given - an empty dir
+        // When - running with a bare catalog slug (no `spwn:` prefix)
+        // Then - the bare name auto-resolves to spwn:matrix and the
+        // Install proceeds exactly as the explicit form would. This is
+        // the documentation-friendly shorthand: `spwn init matrix`.
+        const result = await spec('init matrix bare').project('empty').exec('init matrix').run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.file('spwn.yaml').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
+        // Banner still prints the canonical spwn:matrix form even when
+        // the user typed the bare slug — callers should never have to
+        // guess which scheme landed on disk.
+        expect(result.stderr.text).toContain('Installed example spwn:matrix');
+    });
+
+    test('init <bare-miss> errors with the catalog hint', async () => {
+        // Given - an empty dir
+        // When - running init with a slug the catalog does not know
+        // Then - exit 1, no spwn.yaml written, and the error names the
+        // Available gallery entries so the user can correct their typo.
+        const result = await spec('init bare miss').project('empty').exec('init nonesuch').run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.file('spwn.yaml').exists).toBe(false);
+        expect(result.stderr.text).toContain('"nonesuch" is not in the catalog');
+        // The hint must list real gallery entries — otherwise the user
+        // is left guessing which names are valid.
+        expect(result.stderr.text).toMatch(/matrix|startup/);
+    });
+
+    test('scaffold passes spwn check --deep with no edits', async () => {
+        // Sanity rail: whatever `spwn init` produces must pass the
+        // Deep validator out of the box. If it doesn't, every new
+        // User hits friction on their very first `check` command.
+        // Deep mode runs the transpiler too, so this also catches
+        // Any compile-time contract breakage in the scaffold.
+        const result = await spec('init self-check')
+            .project('empty')
+            .exec(['init --name sanity-check', 'check --deep'])
+            .run();
+
+        expect(result.exitCode, `stdout:\n${result.stdout.text}\nstderr:\n${result.stderr.text}`).toBe(0);
+        // On a clean project, the check command prints "Project is
+        // Valid" and exits 0. If the scaffold ever regresses, the
+        // Exit code flips non-zero and this test fails with the full
+        // Report.
+        expect(result.stdout.text).toContain('Project is valid');
+    });
+
+    test('init rejects tool-shaped catalog entries (not gallery-eligible)', async () => {
+        // Given - an empty dir. `qmd` is a valid catalog tool entry
+        // (--dep qmd works), but it has no `worlds:` section, so it's
+        // not installable via init.
+        // When - running init qmd
+        // Then - the resolver accepts the bare name up front (qmd is
+        // NOT in ShippedSlugs), surfaces the gallery-entry hint, and
+        // leaves the directory empty.
+        const result = await spec('init tool entry').project('empty').exec('init qmd').run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.file('spwn.yaml').exists).toBe(false);
+        expect(result.stderr.text).toContain('not in the catalog');
+    });
 });

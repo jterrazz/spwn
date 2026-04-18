@@ -71,8 +71,17 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 // every tool:<name> entry as a synthetic image.Tool via the shared
 // packyaml parser, registers it, and returns the rewritten list
 // where each tool: ref has been replaced by its "local:<name>"
-// registry key. Non-tool refs (spwn:, github:, skill:, hook:) pass
-// through unchanged for other stages to handle.
+// registry key.
+//
+// skill: and hook: refs are stripped from the list entirely — those
+// are compile-time artifacts that the runtime renderer weaves into
+// the Tree (as /mind/skills/<name>.md and hook scripts respectively),
+// not image-builder inputs. Passing them through to the image
+// registry's Resolve would blow up with "tool not found" because
+// they're never registered there.
+//
+// spwn: and github: refs pass through unchanged for the image
+// resolver to handle.
 //
 // Order is preserved so users see their ref list echoed back in the
 // same shape they declared it. Duplicates are tolerated — the
@@ -82,10 +91,19 @@ func hydrateLocalPacks(reg *ib.Registry, projectRoot string, refs []string) ([]s
 	loaded := map[string]bool{}
 	for _, raw := range refs {
 		ref := dependency.ParseRef(raw)
-		if ref.Kind != dependency.KindLocalTool {
+		switch ref.Kind {
+		case dependency.KindLocalSkill, dependency.KindLocalHook:
+			// Strip — compile step consumes these, image builder
+			// Doesn't know how to.
+			continue
+		case dependency.KindLocalTool:
+			// Fall through to the hydrate path below.
+		default:
+			// spwn:, github:, KindInvalid — pass through untouched.
 			out = append(out, raw)
 			continue
 		}
+
 		name := ref.Name
 		if name == "" {
 			// Malformed local ref — let Resolve surface a clear

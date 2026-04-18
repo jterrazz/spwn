@@ -79,7 +79,7 @@ describe('world destroy', () => {
     test('destroy non-existent world fails', async () => {
         await using result = await spec('down missing world')
             .project('docker-pilot')
-            .exec('down w-nonexistent-00000')
+            .exec('down world-nonexistent-00000')
             .run();
 
         expect(result.exitCode).toBe(1);
@@ -89,5 +89,38 @@ describe('world destroy', () => {
         expect(result.stderr.text).not.toContain('goroutine');
         // Error line mentions the missing world by name and says "not found"
         await result.stderr.toMatch('destroy-missing-world.txt');
+    });
+
+    test('destroy rejects legacy w-<name>-<hex> ID shape cleanly', async () => {
+        // Given - a user types an ID in the pre-2026 format
+        // When - we pass it to `spwn down`
+        // Then - the CLI surfaces a "not found" error (because no
+        // World with that ID exists) without panicking, goroutine
+        // Dumping, or silently succeeding. The error message is
+        // Scrutable enough for the user to discover the modern
+        // World-<slug>-<hex> format.
+        await using result = await spec('down legacy w- id')
+            .project('docker-pilot')
+            .exec('down w-acme-12345')
+            .run();
+
+        expect(result.exitCode).not.toBe(0);
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).not.toContain('goroutine');
+        // The error path still surfaces something the user can act on.
+        expect(result.stderr.text).toMatch(/not found|does not exist|unknown world/i);
+    });
+
+    test('destroy rejects legacy spwn-world-<slug>-<hex> ID shape cleanly', async () => {
+        // Same as above but for the even older prefix that was
+        // Retired when IDs moved to `world-<slug>-<hex>`.
+        await using result = await spec('down legacy spwn-world- id')
+            .project('docker-pilot')
+            .exec('down spwn-world-acme-12345')
+            .run();
+
+        expect(result.exitCode).not.toBe(0);
+        expect(result.stderr.text).not.toContain('panic');
+        expect(result.stderr.text).toMatch(/not found|does not exist|unknown world/i);
     });
 });

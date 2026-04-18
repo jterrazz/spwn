@@ -51,7 +51,7 @@ describe('zero-friction UX', () => {
         // Given - an empty project with no worlds
         const result = await spec('inspect missing hint')
             .project('empty')
-            .exec('world inspect w-nonexistent-00000')
+            .exec('world inspect world-nonexistent-00000')
             .run();
 
         // Then - error points at spwn ls so the user can find their worlds
@@ -65,7 +65,7 @@ describe('zero-friction UX', () => {
         // Then - hint text references the correct list command
         const result = await spec('inspect missing correct hint')
             .project('empty')
-            .exec('world inspect w-nonexistent-00000')
+            .exec('world inspect world-nonexistent-00000')
             .run();
 
         expect(result.exitCode).toBe(1);

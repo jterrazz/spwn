@@ -10,9 +10,10 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/catalog"
+	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
-	"spwn.sh/packages/platform"
 )
 
 func init() {
@@ -38,10 +39,11 @@ var initCmd = &cobra.Command{
 Without arguments, creates a blank spwn.yaml plus a default ./spwn/
 tree (one world, one agent) and adds .spwn/ to .gitignore.
 
-A positional example ref of the form spwn:<slug> installs one of
-the bundled examples into the current directory instead. Example:
+A positional example ref installs one of the bundled gallery entries
+into the current directory. Bare names resolve through the catalog:
 
-    spwn init spwn:matrix
+    spwn init matrix          # shorthand for spwn init spwn:matrix
+    spwn init spwn:matrix     # explicit form
 
 Use --global to instead seed ~/.spwn/ with a world config (legacy
 user-home mode, kept for backward compatibility).`,
@@ -103,13 +105,28 @@ func runInitLocal(cmd *cobra.Command) error {
 	return nil
 }
 
-// parseExampleRef validates a `spwn:<slug>` argument and returns the
-// bare slug. Anything else is a hard error with a one-line hint.
+// parseExampleRef normalises an init argument to the bare slug. Accepts:
+//   - "spwn:<slug>" — explicit form, slug extracted.
+//   - "<slug>"      — bare form, resolved against the gallery
+//     (catalog.ShippedSlugs) and rejected with a known-list hint when
+//     no gallery entry matches.
+//
+// Anything else (uppercase, other schemes, legacy `@owner/name`) is
+// rejected with the scheme grammar error.
 func parseExampleRef(ref string) (string, error) {
-	if !strings.HasPrefix(ref, exampleRefPrefix) {
-		return "", fmt.Errorf("example ref must start with %q (e.g. spwn:matrix), got %q", exampleRefPrefix, ref)
+	trimmed := strings.TrimSpace(ref)
+	resolved, err := dependency.ResolveCLI(trimmed, catalog.ShippedSlugs())
+	if err != nil {
+		return "", err
 	}
-	slug := strings.TrimPrefix(ref, exampleRefPrefix)
+	// After resolution the ref must be `spwn:<slug>` — `spwn init`
+	// only accepts catalog gallery entries. Local-scheme refs
+	// (skill:/tool:/hook:) and github: refs are not installable.
+	if !strings.HasPrefix(resolved, exampleRefPrefix) {
+		return "", fmt.Errorf("example ref must be a gallery entry (e.g. spwn:matrix), got %q", ref)
+	}
+	slug := strings.TrimPrefix(resolved, exampleRefPrefix)
+	slug, _ = dependency.SplitVersion(slug)
 	if slug == "" || strings.ContainsAny(slug, "/ \t") {
 		return "", fmt.Errorf("invalid example slug in %q (expected spwn:<slug>)", ref)
 	}
@@ -154,7 +171,7 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 
 	s := ui.New()
 	s.Blank()
-	s.Success(fmt.Sprintf("Installed example %s", ref))
+	s.Success(fmt.Sprintf("Installed example %s%s", exampleRefPrefix, slug))
 	s.Blank()
 	out := cmd.OutOrStdout()
 	if rep.ManifestAdded {

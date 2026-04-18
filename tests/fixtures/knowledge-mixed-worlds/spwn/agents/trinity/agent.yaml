@@ -1,0 +1,8 @@
+name: trinity
+description: Fixture agent for the knowledge-mixed-worlds e2e — lives in the ephemeral world.
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"

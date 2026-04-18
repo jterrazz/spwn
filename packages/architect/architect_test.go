@@ -330,7 +330,7 @@ func TestInspect_NotFound(t *testing.T) {
 	mb := newMockBackend()
 	arch, _ := newTestArchitect(t, mb)
 
-	_, err := arch.Inspect(context.Background(), "w-nonexistent-00000")
+	_, err := arch.Inspect(context.Background(), "world-nonexistent-00000")
 	if err == nil {
 		t.Fatal("expected error for nonexistent world")
 	}
@@ -378,7 +378,7 @@ func TestDestroy_NotFound(t *testing.T) {
 	mb := newMockBackend()
 	arch, _ := newTestArchitect(t, mb)
 
-	_, err := arch.Destroy(context.Background(), "w-ghost-00000")
+	_, err := arch.Destroy(context.Background(), "world-ghost-00000")
 	if err == nil {
 		t.Fatal("expected error destroying nonexistent world")
 	}

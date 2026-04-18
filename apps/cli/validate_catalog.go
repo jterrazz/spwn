@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"strings"
+
 	"spwn.sh/apps/cli/dependency"
 	"spwn.sh/catalog"
 	"spwn.sh/packages/runtimes"
@@ -11,15 +13,26 @@ func init() {
 	// `spwn install spwn:bogus` can fail with a crisp error
 	// instead of silently pinning garbage. Lives here (not in
 	// dependency.init()) so the dependency package stays free of
-	// a catalog import.
-	dependency.SetCatalogLookup(func(ref string) bool {
-		for _, t := range catalog.All {
-			if t.Name() == ref {
-				return true
+	// a catalog import. The bare-name list (without the spwn:
+	// prefix) feeds the CLI resolver so `spwn install qmd`
+	// auto-promotes to `spwn install spwn:qmd`.
+	dependency.SetCatalogLookup(
+		func(ref string) bool {
+			for _, t := range catalog.All {
+				if t.Name() == ref {
+					return true
+				}
 			}
-		}
-		return false
-	})
+			return false
+		},
+		func() []string {
+			out := make([]string, 0, len(catalog.All))
+			for _, t := range catalog.All {
+				out = append(out, strings.TrimPrefix(t.Name(), "spwn:"))
+			}
+			return out
+		},
+	)
 }
 
 // catalogToolNames returns the @scope/name identifier of every

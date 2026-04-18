@@ -34,7 +34,7 @@ describe('CLI input validation', () => {
         const stderr = result.stderr.text;
         expect(stderr).toContain('Creating agent');
         expect(stderr).toContain('Created agent');
-        expect(stderr).toContain('Created profile');
+        expect(stderr).toContain('Created soul');
     });
 
     test("'spwn agent create a b c' with too many args shows error", async () => {
@@ -81,8 +81,8 @@ describe('CLI input validation', () => {
 
     test('error messages do NOT dump full usage/help', async () => {
         const commands = [
-            'down w-nonexistent-00000',
-            'world inspect w-nonexistent-00000',
+            'down world-nonexistent-00000',
+            'world inspect world-nonexistent-00000',
             'agent export nonexistent',
         ];
 
@@ -101,7 +101,7 @@ describe('CLI input validation', () => {
 
     test('error messages contain actionable hints', async () => {
         // Destroy a non-existent world - should show a clean error.
-        const result = await isolated('actionable hint').exec('down w-nonexistent-00000').run();
+        const result = await isolated('actionable hint').exec('down world-nonexistent-00000').run();
 
         expect(result.exitCode).not.toBe(0);
         expect(result.stderr.text).toMatch(/not found/);

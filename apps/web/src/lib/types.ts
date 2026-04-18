@@ -72,9 +72,13 @@ export interface AgentProfile {
     team?: string;
     engine: string;
     provider: string;
-    purpose: string; // Read from identity/purpose.md
-    profile: string; // Read from SOUL.md
-    traits: string[]; // Read from identity/traits.md
+    // Legacy three-field split (purpose/profile/traits). The on-disk
+    // layout collapsed into a single SOUL.md at the agent root — these
+    // fields now all derive from SOUL.md via the API. Kept separate
+    // here until apps/web's profile editor is reworked around SOUL.md.
+    purpose: string
+    profile: string
+    traits: string[]
     skills: string[];
     journal: { date: string; summary: string }[];
 }
