@@ -11,8 +11,9 @@ import (
 
 	"spwn.sh/packages/agent"
 	runtimes "spwn.sh/packages/runtimes"
-	"spwn.sh/packages/dependency/adapters/local"
-	spwn "spwn.sh/packages/dependency/adapters/spwn"
+	"spwn.sh/packages/dependency"
+
+
 	"spwn.sh/packages/transpile"
 	ib "spwn.sh/packages/compile"
 	ibbase "spwn.sh/packages/compile/base"
@@ -199,7 +200,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// runtime config still needs to be merged into the container's
 	// runtime settings file after the container boots.
 	reg := ib.NewRegistry()
-	if err := spwn.RegisterDefaults(reg); err != nil {
+	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
@@ -235,13 +236,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		toolList = deduped
 	}
 
-	// Hydrate local (tool:<name>) refs into synthetic dependency.Tool
+	// Hydrate local (tool:<name>) refs into synthetic tool.Tool
 	// instances before resolving. Without this, a ref like
 	// `tool:my-local-tool` would blow up reg.Resolve with "unknown tool".
 	// Project root defaults to platform.ProjectRoot() — set by the CLI
 	// PersistentPreRunE when a spwn.yaml is discovered.
 	if projectRoot := platform.ProjectRoot(); projectRoot != "" {
-		hydrated, hErr := local.Hydrate(reg, projectRoot, toolList)
+		hydrated, hErr := dependency.HydrateLocals(reg, projectRoot, toolList)
 		if hErr != nil {
 			return nil, fmt.Errorf("load local tools: %w", hErr)
 		}

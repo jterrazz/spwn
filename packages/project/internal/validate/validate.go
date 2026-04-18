@@ -17,6 +17,7 @@ import (
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/resolve"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/refs"
 
 	"gopkg.in/yaml.v3"
 )
@@ -606,7 +607,7 @@ func rulePackVersionConflict(in Input) []Issue {
 				continue
 			}
 			for _, t := range parsed.Deps {
-				depRef, version := dependency.SplitVersion(t)
+				depRef, version := refs.SplitVersion(t)
 				vmap, ok := versions[depRef]
 				if !ok {
 					vmap = map[string]string{}
@@ -692,18 +693,18 @@ func rulePacksExist(in Input) []Issue {
 	haveCatalog := in.BuiltinTools != nil
 	checked := map[string]bool{}
 	check := func(raw, location string) []Issue {
-		depRef, _ := dependency.SplitVersion(raw)
+		depRef, _ := refs.SplitVersion(raw)
 		key := depRef + "@@" + location
 		if checked[key] {
 			return nil
 		}
 		checked[key] = true
-		ref := dependency.ParseRef(depRef)
+		ref := refs.ParseRef(depRef)
 
-		switch dependency.ResolveTool(in.Root, ref, builtin, haveCatalog) {
-		case dependency.ResolveOK:
+		switch refs.ResolveTool(in.Root, ref, builtin, haveCatalog) {
+		case refs.ResolveOK:
 			return nil
-		case dependency.ResolveRegistryUnsupported:
+		case refs.ResolveRegistryUnsupported:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
@@ -711,7 +712,7 @@ func rulePacksExist(in Input) []Issue {
 					"skill:<name>, tool:<name>, or hook:<name>; remote registries " +
 					"(github:<owner>/<repo>) are planned but not implemented yet",
 			}}
-		case dependency.ResolveInvalid:
+		case refs.ResolveInvalid:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q is invalid", raw),
@@ -721,19 +722,19 @@ func rulePacksExist(in Input) []Issue {
 
 		// ResolveNotFound falls through here.
 		switch ref.Kind {
-		case dependency.KindLocalSkill:
+		case refs.KindLocalSkill:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
 				Hint:    "author ./spwn/skills/" + ref.Name + ".md (e.g. `spwn skill new " + ref.Name + "`)",
 			}}
-		case dependency.KindLocalTool:
+		case refs.KindLocalTool:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
 				Hint:    "create ./spwn/tools/" + ref.Name + "/tool.yaml for a full local tool",
 			}}
-		case dependency.KindLocalHook:
+		case refs.KindLocalHook:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
@@ -823,25 +824,25 @@ func ruleLockfileConsistent(in Input) []Issue {
 	seen := map[string]bool{}
 	var out []Issue
 	for _, rec := range all {
-		depRef, _ := dependency.SplitVersion(rec.raw)
-		ref := dependency.ParseRef(depRef)
+		depRef, _ := refs.SplitVersion(rec.raw)
+		ref := refs.ParseRef(depRef)
 		// Local refs are never lockfile entries. Invalid refs are
 		// already surfaced by rulePacksExist with a crisper error;
 		// skip them here to avoid double-reporting.
-		if dependency.IsLocalKind(ref.Kind) || ref.Kind == dependency.KindInvalid {
+		if refs.IsLocalKind(ref.Kind) || ref.Kind == refs.KindInvalid {
 			continue
 		}
 		if seen[depRef] {
 			continue
 		}
 		seen[depRef] = true
-		if lock.Has(depRef) || lock.Has(dependency.Canonical(depRef)) {
+		if lock.Has(depRef) || lock.Has(refs.Canonical(depRef)) {
 			continue
 		}
 		out = append(out, Issue{
 			Level: LevelError, Path: rec.location,
-			Message: fmt.Sprintf("%q is not recorded in %s", dependency.Canonical(depRef), dependency.LockFileName),
-			Hint:    "run `spwn install " + dependency.Canonical(depRef) + "` to sync the lockfile",
+			Message: fmt.Sprintf("%q is not recorded in %s", refs.Canonical(depRef), dependency.LockFileName),
+			Hint:    "run `spwn install " + refs.Canonical(depRef) + "` to sync the lockfile",
 		})
 	}
 	return out
@@ -857,13 +858,13 @@ func ruleRuntimeSupported(in Input) []Issue {
 	}
 	supported := map[string]struct{}{}
 	for _, r := range in.SupportedRuntimes {
-		supported[dependency.Canonical(r)] = struct{}{}
+		supported[refs.Canonical(r)] = struct{}{}
 	}
 	// Display list stays in the canonical scheme form so the hint
 	// matches what scaffold/docs advertise.
 	display := make([]string, len(in.SupportedRuntimes))
 	for i, r := range in.SupportedRuntimes {
-		display[i] = dependency.Canonical(r)
+		display[i] = refs.Canonical(r)
 	}
 	var out []Issue
 	for _, a := range in.AgentRefs {
@@ -874,7 +875,7 @@ func ruleRuntimeSupported(in Input) []Issue {
 		if err != nil || parsed.Runtime.Backend == "" {
 			continue
 		}
-		if _, ok := supported[dependency.Canonical(parsed.Runtime.Backend)]; !ok {
+		if _, ok := supported[refs.Canonical(parsed.Runtime.Backend)]; !ok {
 			out = append(out, Issue{
 				Level: LevelError,
 				Path:  relPath(in.Root, filepath.Join(a.Path, "agent.yaml")) + "#runtime.backend",
@@ -1163,10 +1164,10 @@ func suggestPackage(tool string, catalog []string) string {
 	// (`spwn:unix`, not `spwn:unix`) so the hint matches what
 	// scaffold output and docs now advertise. Legacy input like
 	// `spwn:nonexistent` still matches — the check side uses
-	// dependency.ParseRef, not string equality.
+	// refs.ParseRef, not string equality.
 	display := make([]string, len(catalog))
 	for i, c := range catalog {
-		display[i] = dependency.Canonical(c)
+		display[i] = refs.Canonical(c)
 	}
 	best := ""
 	bestScore := len(tool) + 1

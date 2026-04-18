@@ -1,7 +1,8 @@
 package compile
 
+import "spwn.sh/packages/dependency/tool"
+
 import (
-	"spwn.sh/packages/dependency"
 	"encoding/json"
 	"fmt"
 )
@@ -57,10 +58,10 @@ func MergeRuntimeConfig(base []byte, additions ...[]byte) ([]byte, error) {
 //
 // This helper exists so the architect doesn't need to replicate the
 // Dependency runtime-gating logic.
-func CollectRuntimeConfigs(resolved []dependency.Tool, runtime string) [][]byte {
+func CollectRuntimeConfigs(resolved []tool.Tool, runtime string) [][]byte {
 	var out [][]byte
 	for _, t := range resolved {
-		cfg := dependency.PluginConfig(t, runtime)
+		cfg := tool.PluginConfig(t, runtime)
 		if cfg != nil {
 			out = append(out, cfg)
 		}

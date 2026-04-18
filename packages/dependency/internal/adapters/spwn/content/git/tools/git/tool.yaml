@@ -1,0 +1,11 @@
+name: "spwn:git"
+kind: tool
+version: latest
+description: "Git version control"
+
+install:
+  packages:
+    - git
+
+verify:
+  - command -v git

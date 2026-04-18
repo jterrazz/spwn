@@ -3,10 +3,10 @@ package manifest
 import (
 	"io/fs"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 )
 
-// dependencyAdapter backs a parsed Schema as a dependency.Tool. The
+// dependencyAdapter backs a parsed Schema as a tool.Tool. The
 // Runtimes() / Config() methods are part of the unified Tool interface
 // — a dependency with a `runtime-config:` block returns a non-empty
 // Runtimes list and the spawn-time merger picks up its Config(runtime)
@@ -14,7 +14,7 @@ import (
 // both.
 type dependencyAdapter struct {
 	schema    Schema
-	kind      dependency.Kind
+	kind      tool.Kind
 	fileBytes map[string][]byte
 	skillsFS  fs.FS
 }
@@ -23,7 +23,7 @@ type dependencyAdapter struct {
 func (t *dependencyAdapter) Name() string { return t.schema.Name }
 
 // Kind returns the classification parsed from the `kind:` field.
-func (t *dependencyAdapter) Kind() dependency.Kind { return t.kind }
+func (t *dependencyAdapter) Kind() tool.Kind { return t.kind }
 
 // Version returns the `version:` field, or the default the loader
 // applied when the manifest left it blank.
@@ -36,8 +36,8 @@ func (t *dependencyAdapter) Dependencies() []string { return t.schema.Dependenci
 // Install converts the parsed InstallSection into the InstallSpec
 // shape the image builder consumes. File bytes were read eagerly at
 // parse time so this call is allocation-only.
-func (t *dependencyAdapter) Install() dependency.InstallSpec {
-	spec := dependency.InstallSpec{
+func (t *dependencyAdapter) Install() tool.InstallSpec {
+	spec := tool.InstallSpec{
 		AptPackages:  t.schema.Install.AptPackages,
 		Commands:     t.schema.Install.Commands,
 		UserCommands: t.schema.Install.UserCommands,
@@ -101,11 +101,11 @@ func (t *dependencyAdapter) RuntimeProvider() string {
 	return t.schema.RuntimeProvider
 }
 
-// ToolFromParsed adapts a Parsed result into a dependency.Tool.
+// ToolFromParsed adapts a Parsed result into a tool.Tool.
 // This is the bridge between the manifest domain and the rest of
 // the codebase — adapters call this to hand Tool-shaped values to
 // packages/compile's Registry.
-func ToolFromParsed(p *Parsed) dependency.Tool {
+func ToolFromParsed(p *Parsed) tool.Tool {
 	skillsFS, _ := p.SkillsFS.(fs.FS)
 	return &dependencyAdapter{
 		schema:    p.Schema,

@@ -13,8 +13,9 @@ import (
 	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/dependency"
-	"spwn.sh/packages/dependency/adapters/local"
-	spwn "spwn.sh/packages/dependency/adapters/spwn"
+	"spwn.sh/packages/dependency/tool"
+
+
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/transpile/source"
@@ -53,7 +54,7 @@ func Build(cwd string, opts Opts) (*Model, error) {
 	}
 
 	reg := ib.NewRegistry()
-	if err := spwn.RegisterDefaults(reg); err != nil {
+	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return nil, fmt.Errorf("register catalog: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
@@ -206,11 +207,11 @@ func registerLocalTools(reg *ib.Registry, root string) error {
 		if !e.IsDir() {
 			continue
 		}
-		// local.LoadTool reads tool.yaml + skills/ + files/ and wraps
-		// The result as a dependency.Tool — the same path the spawn
+		// dependency.LoadLocalTool reads tool.yaml + skills/ + files/ and wraps
+		// The result as a tool.Tool — the same path the spawn
 		// Pipeline takes. Missing tool.yaml is not fatal; users may
 		// Author the dir before filling it in, so we skip silently.
-		tool, err := local.LoadTool(root, e.Name())
+		tool, err := dependency.LoadLocalTool(root, e.Name())
 		if err != nil {
 			continue
 		}
@@ -223,15 +224,15 @@ func registerLocalTools(reg *ib.Registry, root string) error {
 // localToolAdapter forces Name() to a bare basename (no @-scope) so
 // the renderer prints `my-parser` instead of `local:my-parser`.
 type localToolAdapter struct {
-	inner dependency.Tool
+	inner tool.Tool
 	name  string
 }
 
 func (t *localToolAdapter) Name() string                 { return t.name }
-func (t *localToolAdapter) Kind() dependency.Kind        { return t.inner.Kind() }
+func (t *localToolAdapter) Kind() tool.Kind        { return t.inner.Kind() }
 func (t *localToolAdapter) Version() string              { return t.inner.Version() }
 func (t *localToolAdapter) Dependencies() []string       { return t.inner.Dependencies() }
-func (t *localToolAdapter) Install() dependency.InstallSpec      { return t.inner.Install() }
+func (t *localToolAdapter) Install() tool.InstallSpec      { return t.inner.Install() }
 func (t *localToolAdapter) Verify() []string             { return t.inner.Verify() }
 func (t *localToolAdapter) Skills() fs.FS                { return t.inner.Skills() }
 func (t *localToolAdapter) Runtimes() []string           { return t.inner.Runtimes() }

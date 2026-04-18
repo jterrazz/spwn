@@ -9,8 +9,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
-	spwn "spwn.sh/packages/dependency/adapters/spwn"
+
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/refs"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/world"
@@ -115,7 +116,7 @@ func runInitLocal(cmd *cobra.Command) error {
 // rejected with the scheme grammar error.
 func parseExampleRef(ref string) (string, error) {
 	trimmed := strings.TrimSpace(ref)
-	resolved, err := dependency.ResolveCLI(trimmed, spwn.ShippedSlugs())
+	resolved, err := refs.ResolveCLI(trimmed, dependency.GallerySlugs())
 	if err != nil {
 		return "", err
 	}
@@ -126,7 +127,7 @@ func parseExampleRef(ref string) (string, error) {
 		return "", fmt.Errorf("example ref must be a gallery entry (e.g. spwn:matrix), got %q", ref)
 	}
 	slug := strings.TrimPrefix(resolved, exampleRefPrefix)
-	slug, _ = dependency.SplitVersion(slug)
+	slug, _ = refs.SplitVersion(slug)
 	if slug == "" || strings.ContainsAny(slug, "/ \t") {
 		return "", fmt.Errorf("invalid example slug in %q (expected spwn:<slug>)", ref)
 	}
@@ -149,15 +150,15 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 	}
 
 	// Honor --force: if the user passed it and a manifest already
-	// exists, clear it so spwn.Install can write fresh content
-	// (spwn.Install itself never overwrites).
+	// exists, clear it so dependency.Install can write fresh content
+	// (dependency.Install itself never overwrites).
 	if initForce {
 		if err := os.Remove(filepath.Join(cwd, "spwn.yaml")); err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("remove existing spwn.yaml: %w", err)
 		}
 	}
 
-	rep, err := spwn.Install(slug, cwd)
+	rep, err := dependency.Install(slug, cwd)
 	if err != nil {
 		return fmt.Errorf("install example %s: %w", ref, err)
 	}

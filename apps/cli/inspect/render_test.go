@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 )
 
 // TestRender_HeaderShape verifies the kubectl-describe header lines
@@ -51,7 +51,7 @@ func TestRender_DepTreeWithDedup(t *testing.T) {
 			{Name: "spwn:unix", Version: "24.04"},
 			{Name: "spwn:qmd", Version: "1.4.0", Skills: 2, Config: true,
 				Children: []DepNode{
-					{Name: "spwn:python", Version: "3.12", Kind: dependency.KindRuntime,
+					{Name: "spwn:python", Version: "3.12", Kind: tool.KindRuntime,
 						Children: []DepNode{
 							{Name: "spwn:unix", Version: "24.04", DedupSeen: true},
 						}},
@@ -191,11 +191,11 @@ func TestRender_ComposeBadges(t *testing.T) {
 		in   DepNode
 		want string
 	}{
-		{"empty tool", DepNode{Kind: dependency.KindTool}, ""},
+		{"empty tool", DepNode{Kind: tool.KindTool}, ""},
 		{"skills only", DepNode{Skills: 3}, "skills(3)"},
 		{"config only", DepNode{Config: true}, "config"},
-		{"runtime only", DepNode{Kind: dependency.KindRuntime}, "runtime"},
-		{"all three", DepNode{Kind: dependency.KindRuntime, Skills: 2, Config: true},
+		{"runtime only", DepNode{Kind: tool.KindRuntime}, "runtime"},
+		{"all three", DepNode{Kind: tool.KindRuntime, Skills: 2, Config: true},
 			"runtime · skills(2) · config"},
 	}
 	for _, tc := range cases {

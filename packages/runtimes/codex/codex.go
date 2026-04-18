@@ -1,23 +1,23 @@
 package codex
 
 import (
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 	"io/fs"
 )
 
 
 // Tool is the spwn:codex tool - OpenAI Codex agent runtime.
-var Tool = &tool{}
+var Tool = &codexTool{}
 
-type tool struct{}
+type codexTool struct{}
 
-func (*tool) Name() string           { return "spwn:codex" }
-func (*tool) Kind() dependency.Kind          { return dependency.KindRuntime }
-func (*tool) Version() string        { return "latest" }
-func (*tool) Dependencies() []string { return []string{"spwn:node"} }
+func (*codexTool) Name() string           { return "spwn:codex" }
+func (*codexTool) Kind() tool.Kind          { return tool.KindRuntime }
+func (*codexTool) Version() string        { return "latest" }
+func (*codexTool) Dependencies() []string { return []string{"spwn:node"} }
 
-func (*tool) Install() dependency.InstallSpec {
-	return dependency.InstallSpec{
+func (*codexTool) Install() tool.InstallSpec {
+	return tool.InstallSpec{
 		Commands: []string{
 			"npm install -g @openai/codex",
 		},
@@ -29,11 +29,11 @@ func (*tool) Install() dependency.InstallSpec {
 	}
 }
 
-func (*tool) Verify() []string {
+func (*codexTool) Verify() []string {
 	return []string{"command -v codex"}
 }
 
-func (*tool) Skills() fs.FS { return nil }
+func (*codexTool) Skills() fs.FS { return nil }
 
-func (*tool) Runtimes() []string         { return nil }
-func (*tool) Config(runtime string) []byte { return nil }
+func (*codexTool) Runtimes() []string         { return nil }
+func (*codexTool) Config(runtime string) []byte { return nil }

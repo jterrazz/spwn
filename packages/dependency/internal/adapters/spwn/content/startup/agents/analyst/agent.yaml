@@ -1,0 +1,18 @@
+name: analyst
+description: The analyst — turns product decisions into sprint plans and reviews the colony's code before it ships.
+role: worker
+
+runtime:
+  backend: "spwn:claude-code"
+
+# Agent-specific deps — additions only.
+# Project-wide deps (unix, git, node) are inherited from spwn.yaml.
+# Only list what THIS agent needs beyond the shared set.
+#
+# Local blocks are referenced via the skill:/tool:/hook: schemes and
+# live at the project root (spwn/skills/<name>.md, spwn/hooks/<name>.sh).
+dependencies:
+  - "spwn:python"
+  - "skill:sprint-planning"
+  - "skill:code-review"
+  - "hook:pre-spawn"

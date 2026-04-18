@@ -26,6 +26,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/refs"
 	"spwn.sh/packages/project"
 )
 
@@ -79,15 +80,15 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	// auto-promote to spwn:<name> ("spwn install qmd" → "spwn install
 	// spwn:qmd"). Explicit schemes pass through unchanged. Manifests
 	// always receive the canonical scheme-form.
-	resolved, rerr := dependency.ResolveCLI(raw, knownCatalogNames())
+	resolved, rerr := refs.ResolveCLI(raw, knownCatalogNames())
 	if rerr != nil {
 		return rerr
 	}
 
-	ref, version := dependency.SplitVersion(resolved)
-	parsed := dependency.ParseRef(ref)
+	ref, version := refs.SplitVersion(resolved)
+	parsed := refs.ParseRef(ref)
 	switch parsed.Kind {
-	case dependency.KindLocalSkill, dependency.KindLocalTool, dependency.KindLocalHook:
+	case refs.KindLocalSkill, refs.KindLocalTool, refs.KindLocalHook:
 		// Local refs ARE installable (they attach the in-repo block
 		// To an agent's manifest), but only when a specific agent is
 		// Named — bolting a local skill onto every agent in the
@@ -97,11 +98,11 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 			return fmt.Errorf("%q is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.sh`",
 				ref, parsed.Name, parsed.Name, parsed.Name)
 		}
-	case dependency.KindRegistry:
+	case refs.KindRegistry:
 		return fmt.Errorf("%q targets github:%s/%s — remote registries are not yet supported. "+
 			"Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/",
 			raw, parsed.Owner, parsed.Name)
-	case dependency.KindInvalid:
+	case refs.KindInvalid:
 		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name> (for built-ins), "+
 			"github:<owner>/<repo> (for remote deps), skill:<name>, tool:<name>, or hook:<name>",
 			raw)
@@ -110,7 +111,7 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	// Catalog-existence check applies only to spwn:<name> refs; local
 	// Schemes are authored in-repo so the catalog lookup doesn't gate
 	// Them.
-	if parsed.Kind == dependency.KindSpwnBuiltin && !catalogHas(ref) {
+	if parsed.Kind == refs.KindSpwnBuiltin && !catalogHas(ref) {
 		return fmt.Errorf("unknown builtin %q — see the catalog for available dependencies", ref)
 	}
 
@@ -161,17 +162,17 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 	// so `spwn uninstall python` finds `spwn:python` in the manifest
 	// just like `spwn install python` would have written it there.
 	// Explicit schemes pass through unchanged.
-	resolved, rerr := dependency.ResolveCLI(raw, knownCatalogNames())
+	resolved, rerr := refs.ResolveCLI(raw, knownCatalogNames())
 	if rerr != nil {
 		return rerr
 	}
 
-	ref, _ := dependency.SplitVersion(resolved)
-	parsed := dependency.ParseRef(ref)
-	if parsed.Kind == dependency.KindRegistry {
+	ref, _ := refs.SplitVersion(resolved)
+	parsed := refs.ParseRef(ref)
+	if parsed.Kind == refs.KindRegistry {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
-	if parsed.Kind == dependency.KindInvalid {
+	if parsed.Kind == refs.KindInvalid {
 		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name>, github:<owner>/<repo>, skill:<name>, tool:<name>, or hook:<name>", raw)
 	}
 	// Local refs are authorable in-repo but also attachable via

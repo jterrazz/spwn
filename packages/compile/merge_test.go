@@ -1,7 +1,8 @@
 package compile
 
+import "spwn.sh/packages/dependency/tool"
+
 import (
-	"spwn.sh/packages/dependency"
 	"encoding/json"
 	"io/fs"
 	"strings"
@@ -88,10 +89,10 @@ type fakeConfigPlugin struct {
 }
 
 func (p *fakeConfigPlugin) Name() string           { return p.name }
-func (p *fakeConfigPlugin) Kind() dependency.Kind             { return dependency.KindTool }
+func (p *fakeConfigPlugin) Kind() tool.Kind             { return tool.KindTool }
 func (p *fakeConfigPlugin) Version() string        { return "0.0.0" }
 func (p *fakeConfigPlugin) Dependencies() []string { return nil }
-func (p *fakeConfigPlugin) Install() dependency.InstallSpec   { return dependency.InstallSpec{} }
+func (p *fakeConfigPlugin) Install() tool.InstallSpec   { return tool.InstallSpec{} }
 func (p *fakeConfigPlugin) Verify() []string       { return nil }
 func (p *fakeConfigPlugin) Skills() fs.FS          { return nil }
 func (p *fakeConfigPlugin) Runtimes() []string     { return p.runtimes }
@@ -103,7 +104,7 @@ func (p *fakeConfigPlugin) Config(runtime string) []byte {
 }
 
 func TestCollectRuntimeConfigs_FiltersByRuntime(t *testing.T) {
-	resolved := []dependency.Tool{
+	resolved := []tool.Tool{
 		&fakeConfigPlugin{
 			name:     "spwn:a",
 			runtimes: []string{"spwn:claude-code"},

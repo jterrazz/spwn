@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-		"spwn.sh/packages/dependency"
 	"spwn.sh/packages/dependency/internal/manifest"
+	"spwn.sh/packages/dependency/tool"
 )
 
 func writeManifest(t *testing.T, dir, body string) {
@@ -31,21 +31,21 @@ verify:
   - command -v git
 `)
 
-	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Schema.Name != "spwn:git" {
-		t.Errorf("name: want spwn:git, got %q", tool.Schema.Name)
+	if parsed.Schema.Name != "spwn:git" {
+		t.Errorf("name: want spwn:git, got %q", parsed.Schema.Name)
 	}
-	if tool.Kind != dependency.KindTool {
-		t.Errorf("kind: want Tool, got %v", tool.Kind)
+	if parsed.Kind != tool.KindTool {
+		t.Errorf("kind: want Tool, got %v", parsed.Kind)
 	}
-	spec := tool.Schema.Install
+	spec := parsed.Schema.Install
 	if len(spec.AptPackages) != 1 || spec.AptPackages[0] != "git" {
 		t.Errorf("packages: %v", spec.AptPackages)
 	}
-	if got := tool.Schema.Verify; len(got) != 1 || got[0] != "command -v git" {
+	if got := parsed.Schema.Verify; len(got) != 1 || got[0] != "command -v git" {
 		t.Errorf("verify: %v", got)
 	}
 }
@@ -56,21 +56,21 @@ func TestParse_defaults(t *testing.T) {
   packages: [curl]
 `)
 
-	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{
+	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{
 		DefaultName:    "local-tool",
 		DefaultVersion: "0.0.0-local",
 	})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Schema.Name != "local-tool" {
-		t.Errorf("default name: want local-tool, got %q", tool.Schema.Name)
+	if parsed.Schema.Name != "local-tool" {
+		t.Errorf("default name: want local-tool, got %q", parsed.Schema.Name)
 	}
-	if tool.Schema.Version != "0.0.0-local" {
-		t.Errorf("default version: want 0.0.0-local, got %q", tool.Schema.Version)
+	if parsed.Schema.Version != "0.0.0-local" {
+		t.Errorf("default version: want 0.0.0-local, got %q", parsed.Schema.Version)
 	}
-	if tool.Kind != dependency.KindTool {
-		t.Errorf("default kind: want Tool, got %v", tool.Kind)
+	if parsed.Kind != tool.KindTool {
+		t.Errorf("default kind: want Tool, got %v", parsed.Kind)
 	}
 }
 
@@ -87,14 +87,14 @@ verify:
   - command -v claude
 `)
 
-	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if tool.Kind != dependency.KindRuntime {
-		t.Errorf("kind: want Runtime, got %v", tool.Kind)
+	if parsed.Kind != tool.KindRuntime {
+		t.Errorf("kind: want Runtime, got %v", parsed.Kind)
 	}
-	if tool.Schema.RuntimeProvider != "claude-code" {
+	if parsed.Schema.RuntimeProvider != "claude-code" {
 		t.Errorf("want runtime-provider claude-code")
 	}
 }
@@ -119,15 +119,15 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	spec := tool.Schema.Install
+	spec := parsed.Schema.Install
 	_ = spec
-	got, ok := tool.FileBytes["/usr/local/bin/entrypoint.sh"]
+	got, ok := parsed.FileBytes["/usr/local/bin/entrypoint.sh"]
 	if !ok {
-		t.Fatalf("file not baked in, files=%v", tool.FileBytes)
+		t.Fatalf("file not baked in, files=%v", parsed.FileBytes)
 	}
 	if string(got) != "#!/bin/sh\nexec sleep infinity\n" {
 		t.Errorf("file content: %q", string(got))
@@ -154,29 +154,29 @@ verify:
   - command -v mempalace
 `)
 
-	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
 	// The dependency: section surfaces via Runtimes() and Config() on the
-	// unified dependency.Tool interface — no type assertion needed.
-	runtimes := func() []string { if tool.Schema.RuntimeConfig != nil { return tool.Schema.RuntimeConfig.Runtimes }; return nil }()
+	// unified tool.Tool interface — no type assertion needed.
+	runtimes := func() []string { if parsed.Schema.RuntimeConfig != nil { return parsed.Schema.RuntimeConfig.Runtimes }; return nil }()
 	if len(runtimes) != 1 || runtimes[0] != "spwn:claude-code" {
 		t.Errorf("runtimes: %v", runtimes)
 	}
 
-	cfg := configJSONFor(tool, "spwn:claude-code")
+	cfg := configJSONFor(parsed, "spwn:claude-code")
 	if len(cfg) == 0 {
 		t.Fatal("empty config")
 	}
 	// Round-trip through JSON to verify shape.
-	var parsed map[string]any
-	if err := json.Unmarshal(cfg, &parsed); err != nil {
+	var decoded map[string]any
+	if err := json.Unmarshal(cfg, &decoded); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
-	mcp, ok := parsed["mcpServers"].(map[string]any)
+	mcp, ok := decoded["mcpServers"].(map[string]any)
 	if !ok {
-		t.Fatalf("missing mcpServers: %v", parsed)
+		t.Fatalf("missing mcpServers: %v", decoded)
 	}
 	mem, ok := mcp["mempalace"].(map[string]any)
 	if !ok {
@@ -187,7 +187,7 @@ verify:
 	}
 
 	// Non-matching runtime returns nil.
-	if got := configJSONFor(tool, "spwn:codex"); got != nil {
+	if got := configJSONFor(parsed, "spwn:codex"); got != nil {
 		t.Errorf("codex should get nil, got %s", got)
 	}
 }
@@ -207,11 +207,11 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if func() fs.FS { sf, _ := tool.SkillsFS.(fs.FS); return sf }() == nil {
+	if func() fs.FS { sf, _ := parsed.SkillsFS.(fs.FS); return sf }() == nil {
 		t.Error("want non-nil skills fs")
 	}
 }

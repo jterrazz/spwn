@@ -1,0 +1,11 @@
+name: mark
+description: Mark — team lead; reads the handbook first, delegates second, finishes the batch.
+role: chief
+
+runtime:
+  backend: "spwn:claude-code"
+
+# Project-wide deps (unix, git) are inherited from spwn.yaml.
+# Local blocks are referenced via the skill:/tool:/hook: schemes.
+dependencies:
+  - "skill:refine"

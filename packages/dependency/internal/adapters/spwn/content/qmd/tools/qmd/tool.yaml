@@ -1,0 +1,14 @@
+name: "spwn:qmd"
+kind: tool
+version: latest
+description: "On-device markdown search engine"
+
+dependencies:
+  - "spwn:node"
+
+install:
+  commands:
+    - npm install -g @tobilu/qmd
+
+verify:
+  - command -v qmd

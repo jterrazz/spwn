@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/tool"
 )
 
 // probeTools runs each resolved tool's Verify() commands inside
@@ -17,7 +17,7 @@ import (
 // "FAIL <tool> :: <cmd>" and exits 1. On success the block emits
 // "OK <tool>". The final exit 0 is only reached when every tool
 // passed.
-func (a *Architect) probeTools(ctx context.Context, containerID string, tools []dependency.Tool) ([]string, error) {
+func (a *Architect) probeTools(ctx context.Context, containerID string, tools []tool.Tool) ([]string, error) {
 	if len(tools) == 0 {
 		return nil, nil
 	}
