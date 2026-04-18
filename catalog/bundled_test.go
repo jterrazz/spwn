@@ -12,6 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"spwn.sh/packages/compile"
+	"spwn.sh/packages/compile/base"
 	"spwn.sh/packages/runtimes"
 )
 
@@ -20,6 +21,9 @@ import (
 //
 //   - the resolved tool list (after transitive-dependency expansion)
 //   - the skill files that land under /world/skills/ in the image
+//   - the rendered Dockerfile (the bytes `docker build` would see),
+//     so regressions in apt packages, RUN lines, or env exports
+//     surface as a byte-level golden diff
 //
 // Layout of each fixture:
 //
@@ -27,6 +31,7 @@ import (
 //	  input.yaml          — tools: [...] list of refs to resolve
 //	  expected/
 //	    tools.txt         — resolved tool names, one per line, in order
+//	    Dockerfile        — full rendered Dockerfile bytes
 //	    skills/           — mirror of the /world/skills/ tree the image
 //	                        will carry (paths relative here; content
 //	                        byte-identical to what CollectSkills emits)
@@ -89,10 +94,12 @@ func TestCatalogBundles(t *testing.T) {
 				t.Fatalf("resolve: %v", err)
 			}
 
-			// Actual tool list.
+			// Actual outputs captured from the same APIs the image
+			// Builder uses at build time.
 			got := struct {
-				tools  string
-				skills map[string][]byte
+				tools      string
+				skills     map[string][]byte
+				dockerfile []byte
 			}{}
 			{
 				var b strings.Builder
@@ -107,6 +114,15 @@ func TestCatalogBundles(t *testing.T) {
 				t.Fatalf("CollectSkills: %v", err)
 			}
 			got.skills = skills
+			// Render the Dockerfile with a pinned image version so
+			// The golden stays stable across version bumps of the
+			// Base tree — the label line takes the constant below
+			// And everything else derives from the resolved tools.
+			got.dockerfile = compile.GenerateDockerfile(
+				base.WorldDockerfile,
+				compile.ToolsToInputs(resolved),
+				"v-test",
+			)
 
 			expectedDir := filepath.Join(fixtureDir, "expected")
 
@@ -119,6 +135,9 @@ func TestCatalogBundles(t *testing.T) {
 				}
 				if err := os.WriteFile(filepath.Join(expectedDir, "tools.txt"), []byte(got.tools), 0o644); err != nil {
 					t.Fatalf("write tools.txt: %v", err)
+				}
+				if err := os.WriteFile(filepath.Join(expectedDir, "Dockerfile"), got.dockerfile, 0o644); err != nil {
+					t.Fatalf("write Dockerfile: %v", err)
 				}
 				for path, content := range got.skills {
 					rel := strings.TrimPrefix(path, "/world/")
@@ -140,6 +159,16 @@ func TestCatalogBundles(t *testing.T) {
 			}
 			if string(wantTools) != got.tools {
 				t.Errorf("resolved tools mismatch:\n--- want ---\n%s--- got ---\n%s", wantTools, got.tools)
+			}
+
+			// Compare rendered Dockerfile.
+			wantDockerfile, err := os.ReadFile(filepath.Join(expectedDir, "Dockerfile"))
+			if err != nil {
+				t.Fatalf("read Dockerfile: %v", err)
+			}
+			if !bytes.Equal(wantDockerfile, got.dockerfile) {
+				t.Errorf("Dockerfile mismatch:\n--- want ---\n%s\n--- got ---\n%s",
+					truncateBytes(wantDockerfile, 800), truncateBytes(got.dockerfile, 800))
 			}
 
 			// Compare skill tree. Walk the expected/skills dir
