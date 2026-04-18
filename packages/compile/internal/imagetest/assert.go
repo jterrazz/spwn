@@ -1,16 +1,15 @@
 package imagetest
 
 import (
-	"spwn.sh/packages/dependency"
 	"io/fs"
 	"strings"
 	"testing"
 
-	ib "spwn.sh/packages/compile"
+	"spwn.sh/packages/dependency"
 )
 
 // AssertValidTool checks all interface invariants on a tool.
-func AssertValidTool(t *testing.T, tool ib.Tool) {
+func AssertValidTool(t *testing.T, tool dependency.Tool) {
 	t.Helper()
 
 	if !strings.HasPrefix(tool.Name(), "@") {
@@ -46,7 +45,7 @@ func AssertValidTool(t *testing.T, tool ib.Tool) {
 }
 
 // AssertHasSkillMD checks that a tool's Skills() FS contains SKILL.md.
-func AssertHasSkillMD(t *testing.T, tool ib.Tool) {
+func AssertHasSkillMD(t *testing.T, tool dependency.Tool) {
 	t.Helper()
 	s := tool.Skills()
 	if s == nil {

@@ -1,6 +1,4 @@
-package compile
-
-import "spwn.sh/packages/dependency"
+package dependency
 
 import "io/fs"
 
@@ -11,7 +9,7 @@ type Tool interface {
 	Name() string
 
 	// Kind returns the tool's category.
-	Kind() dependency.Kind
+	Kind() Kind
 
 	// Version returns the tool's version (semver or "latest").
 	Version() string

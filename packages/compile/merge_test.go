@@ -91,7 +91,7 @@ func (p *fakeConfigPlugin) Name() string           { return p.name }
 func (p *fakeConfigPlugin) Kind() dependency.Kind             { return dependency.KindTool }
 func (p *fakeConfigPlugin) Version() string        { return "0.0.0" }
 func (p *fakeConfigPlugin) Dependencies() []string { return nil }
-func (p *fakeConfigPlugin) Install() InstallSpec   { return InstallSpec{} }
+func (p *fakeConfigPlugin) Install() dependency.InstallSpec   { return dependency.InstallSpec{} }
 func (p *fakeConfigPlugin) Verify() []string       { return nil }
 func (p *fakeConfigPlugin) Skills() fs.FS          { return nil }
 func (p *fakeConfigPlugin) Runtimes() []string     { return p.runtimes }
@@ -103,7 +103,7 @@ func (p *fakeConfigPlugin) Config(runtime string) []byte {
 }
 
 func TestCollectRuntimeConfigs_FiltersByRuntime(t *testing.T) {
-	resolved := []Tool{
+	resolved := []dependency.Tool{
 		&fakeConfigPlugin{
 			name:     "spwn:a",
 			runtimes: []string{"spwn:claude-code"},

@@ -11,6 +11,7 @@ import (
 
 	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/compile/internal/dockerfile"
+	"spwn.sh/packages/dependency"
 )
 
 // Builder composes Docker images from tool definitions.
@@ -204,7 +205,7 @@ func hashBuildContext(dockerfile []byte, extraFiles map[string][]byte) string {
 
 // verify creates a temporary container from the built image and runs each tool's
 // verify commands inside it.
-func (b *Builder) verify(ctx context.Context, imageTag string, tools []Tool, logw io.Writer) error {
+func (b *Builder) verify(ctx context.Context, imageTag string, tools []dependency.Tool, logw io.Writer) error {
 	containerID, err := b.backend.Create(ctx, backend.ContainerConfig{
 		Image: imageTag,
 		Name:  "spwn-verify-temp",

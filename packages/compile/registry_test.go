@@ -12,7 +12,7 @@ type stubTool struct {
 	kind    dependency.Kind
 	version string
 	deps    []string
-	install InstallSpec
+	install dependency.InstallSpec
 	verify  []string
 	skills  fs.FS
 }
@@ -21,7 +21,7 @@ func (s *stubTool) Name() string          { return s.name }
 func (s *stubTool) Kind() dependency.Kind            { return s.kind }
 func (s *stubTool) Version() string       { return s.version }
 func (s *stubTool) Dependencies() []string { return s.deps }
-func (s *stubTool) Install() InstallSpec  { return s.install }
+func (s *stubTool) Install() dependency.InstallSpec  { return s.install }
 func (s *stubTool) Verify() []string      { return s.verify }
 func (s *stubTool) Skills() fs.FS         { return s.skills }
 func (s *stubTool) Runtimes() []string    { return nil }

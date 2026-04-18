@@ -14,13 +14,14 @@ import (
 	"fmt"
 
 	ib "spwn.sh/packages/compile"
+	"spwn.sh/packages/dependency"
 )
 
 // All is populated at package init from every YAML-backed tool in
 // the embedded catalog tree. Init panics if any manifest fails to
 // parse — a malformed catalog is a programmer error and should fail
 // loudly at CLI startup.
-var All []ib.Tool
+var All []dependency.Tool
 
 func init() {
 	yaml, err := loadYAMLTools()

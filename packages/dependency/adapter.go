@@ -1,19 +1,15 @@
-package compile
+package dependency
 
-import (
-	"io/fs"
+import "io/fs"
 
-	"spwn.sh/packages/dependency"
-)
-
-// dependencyAdapter backs a parsed Schema as an compile.Tool. Runtimes() and
+// dependencyAdapter backs a parsed Schema as an Tool. Runtimes() and
 // Config() are part of the unified Tool interface — a dependency with a
 // `runtime-config:` block returns a non-empty Runtimes list and the spawn-time
 // merger picks up its Config(runtime) snippet. Dependencies without a
 // runtime-config block return nil from both.
 type dependencyAdapter struct {
-	schema    dependency.Schema
-	kind      dependency.Kind
+	schema    Schema
+	kind      Kind
 	fileBytes map[string][]byte
 	skillsFS  fs.FS
 }
@@ -22,7 +18,7 @@ type dependencyAdapter struct {
 func (t *dependencyAdapter) Name() string { return t.schema.Name }
 
 // Kind returns the classification parsed from the `kind:` field.
-func (t *dependencyAdapter) Kind() dependency.Kind { return t.kind }
+func (t *dependencyAdapter) Kind() Kind { return t.kind }
 
 // Version returns the `version:` field, or the default the loader
 // applied when the manifest left it blank.
@@ -103,11 +99,11 @@ func (t *dependencyAdapter) RuntimeProvider() string {
 }
 
 
-// ToolFromParsed adapts a dependency.Parsed result into an compile.Tool.
+// ToolFromParsed adapts a Parsed result into an Tool.
 // This is the single bridge between the dependency domain and the image
-// builder — dependency knows nothing about compile.Tool, image knows how to
-// wrap dependency.Parsed into a Tool.
-func ToolFromParsed(p *dependency.Parsed) Tool {
+// builder — dependency knows nothing about Tool, image knows how to
+// wrap Parsed into a Tool.
+func ToolFromParsed(p *Parsed) Tool {
 	skillsFS, _ := p.SkillsFS.(fs.FS)
 	return &dependencyAdapter{
 		schema:    p.Schema,

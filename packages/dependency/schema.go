@@ -12,7 +12,7 @@
 // makes it a skill. There is no explicit type field — composability
 // determines identity.
 //
-// The parser produces compile.Tool instances (via the adapter in
+// The parser produces dependency.Tool instances (via the adapter in
 // packages/compile/adapter.go), so everything downstream — registry
 // resolution, dockerfile generation, skill collection — is oblivious
 // to whether a given dependency came from Go or YAML.
@@ -101,7 +101,7 @@ type Schema struct {
 	RuntimeProvider string `yaml:"runtime-provider,omitempty"`
 }
 
-// InstallSection mirrors packages/compile.InstallSpec but uses wire-level
+// InstallSection mirrors packages/dependency.InstallSpec but uses wire-level
 // types so the parser is self-contained.
 type InstallSection struct {
 	// AptPackages are apt-get packages. Deduplicated across every

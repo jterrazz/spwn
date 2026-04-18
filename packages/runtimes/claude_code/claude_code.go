@@ -3,8 +3,6 @@ package claude_code
 import (
 	"spwn.sh/packages/dependency"
 	"io/fs"
-
-	ib "spwn.sh/packages/compile"
 )
 
 
@@ -24,8 +22,8 @@ func (*tool) Version() string { return "latest" }
 // of the required world footprint.
 func (*tool) Dependencies() []string { return []string{"spwn:unix"} }
 
-func (*tool) Install() ib.InstallSpec {
-	return ib.InstallSpec{
+func (*tool) Install() dependency.InstallSpec {
+	return dependency.InstallSpec{
 		Commands: []string{
 			// Native install: downloads a self-contained binary,
 			// no Node.js / npm in the compile. The installer drops

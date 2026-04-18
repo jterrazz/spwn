@@ -9,16 +9,16 @@ import (
 // Registry holds all registered tools and resolves dependency graphs.
 // Keys are the canonical scheme-form ref (`spwn:unix`, `github:owner/repo`).
 type Registry struct {
-	tools map[string]Tool
+	tools map[string]dependency.Tool
 }
 
 // NewRegistry creates an empty tool registry.
 func NewRegistry() *Registry {
-	return &Registry{tools: make(map[string]Tool)}
+	return &Registry{tools: make(map[string]dependency.Tool)}
 }
 
 // Register adds a tool to the registry. Returns error on duplicate name.
-func (r *Registry) Register(t Tool) error {
+func (r *Registry) Register(t dependency.Tool) error {
 	name := t.Name()
 	if _, exists := r.tools[name]; exists {
 		return fmt.Errorf("%w: %s", ErrDuplicateTool, name)
@@ -28,7 +28,7 @@ func (r *Registry) Register(t Tool) error {
 }
 
 // Get returns a tool by name, or nil if not found.
-func (r *Registry) Get(name string) Tool {
+func (r *Registry) Get(name string) dependency.Tool {
 	if t, ok := r.tools[name]; ok {
 		return t
 	}
@@ -36,8 +36,8 @@ func (r *Registry) Get(name string) Tool {
 }
 
 // List returns all registered tools.
-func (r *Registry) List() []Tool {
-	result := make([]Tool, 0, len(r.tools))
+func (r *Registry) List() []dependency.Tool {
+	result := make([]dependency.Tool, 0, len(r.tools))
 	for _, t := range r.tools {
 		result = append(result, t)
 	}
@@ -46,7 +46,8 @@ func (r *Registry) List() []Tool {
 
 // Resolve takes a list of requested tool names, expands transitive dependencies,
 // deduplicates, and returns a topologically sorted build order.
-func (r *Registry) Resolve(requested []string) ([]Tool, error) {
+func (r *Registry) Resolve(requested []string) ([]dependency.Tool, error) {
+
 	// Canonicalise every input ref up-front so the rest of the
 	// algorithm deals in one consistent key space.
 	canon := make([]string, len(requested))
@@ -122,7 +123,7 @@ func (r *Registry) Resolve(requested []string) ([]Tool, error) {
 		}
 	}
 
-	var sorted []Tool
+	var sorted []dependency.Tool
 	for len(queue) > 0 {
 		name := queue[0]
 		queue = queue[1:]

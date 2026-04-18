@@ -8,7 +8,6 @@ import (
 	"sort"
 
 	"spwn.sh/packages/dependency"
-	ib "spwn.sh/packages/compile"
 )
 
 // catalogFS embeds every built-in catalog entry — both installable
@@ -25,11 +24,11 @@ import (
 var catalogFS embed.FS
 
 // loadYAMLTools walks every catalog entry that ships a
-// tools/<slug>/tool.yaml and parses it into an compile.Tool. Project
+// tools/<slug>/tool.yaml and parses it into an dependency.Tool. Project
 // templates (entries whose root spwn.yaml declares `worlds:` but
 // that don't ship a tool.yaml) are not tool-shaped and are not
 // registered — they surface through the init gallery only.
-func loadYAMLTools() ([]ib.Tool, error) {
+func loadYAMLTools() ([]dependency.Tool, error) {
 	entries, err := fs.ReadDir(catalogFS, ".")
 	if err != nil {
 		return nil, fmt.Errorf("read embedded catalog: %w", err)
@@ -48,7 +47,7 @@ func loadYAMLTools() ([]ib.Tool, error) {
 	}
 	sort.Strings(names)
 
-	out := make([]ib.Tool, 0, len(names))
+	out := make([]dependency.Tool, 0, len(names))
 	for _, name := range names {
 		canonical := "spwn:" + name
 		parsed, err := dependency.Parse(
@@ -66,7 +65,7 @@ func loadYAMLTools() ([]ib.Tool, error) {
 		// spwn:<slug> in the tool registry, regardless of what
 		// tool.yaml declares for `name:`.
 		parsed.Schema.Name = canonical
-		out = append(out, ib.ToolFromParsed(parsed))
+		out = append(out, dependency.ToolFromParsed(parsed))
 	}
 	return out, nil
 }
