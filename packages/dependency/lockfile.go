@@ -8,8 +8,8 @@
 //	spwn:git v2.43 builtin
 //	github:jterrazz/research-skills v0.3.0 sha256:b7e12...
 //
-// Local (bare-name) refs never land in the lockfile — they are
-// authored in-place under spwn/skills/, spwn/tools/, etc.
+// Local refs (skill:, tool:, hook:) never land in the lockfile — they
+// are authored in-place under spwn/skills/, spwn/tools/, and spwn/hooks/.
 //
 // Load/Save round-trip is deterministic: entries are sorted lexically
 // so git diffs stay clean.

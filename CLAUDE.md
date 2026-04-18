@@ -69,8 +69,10 @@ spwn agent rm neo                              # Delete an agent
 spwn agent rm neo --dependency spwn:python       # Remove a dep from an agent
 
 # Compose
-spwn agent add neo --dependency spwn:python      # Add a dep
-spwn agent add neo --dependency paper-reading     # Add a local dependency
+spwn agent add neo --dependency spwn:python            # Add a catalog dep
+spwn agent add neo --dependency skill:paper-reading    # Add a local skill
+spwn agent add neo --dependency tool:ffmpeg            # Add a local tool
+spwn agent add neo --dependency hook:pre-spawn         # Add a local hook
 
 # Talk + messaging
 spwn agent talk  neo "refactor auth"           # Full form of `spwn talk`

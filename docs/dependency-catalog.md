@@ -60,11 +60,13 @@ There is no separate `plugins:` field anywhere — `runtime-config:` is just an 
 
 ## Dependency reference kinds
 
-Spwn classifies every ref in `agent.yaml#dependencies` into one of three kinds:
+Spwn classifies every ref in `agent.yaml#dependencies` by its scheme. Every ref is `scheme:target`; bare names are invalid and `spwn check` flags them with a hint pointing at the right scheme.
 
-- **Local** — a bare name like `my-thing`. Resolved against `./spwn/tools/my-thing/` (directory form, full dependency with its own `tool.yaml`) or `./spwn/tools/my-thing.md` (bare-markdown skill). Drop the directory or file and it's picked up automatically.
 - **Built-in** — `spwn:<name>`. Looked up in the catalog shipped with the CLI (see tables above). `spwn check` offers "did you mean X?" hints for typos.
-- **Remote registry** — `github:<owner>/<repo>`, e.g. `github:jterrazz/python`. Reserved for a future remote resolver. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the resolver ships, use `spwn:<name>` or drop a local tool under `./spwn/tools/<name>/`.
+- **Remote registry** — `github:<owner>/<repo>`, e.g. `github:jterrazz/python`. Reserved for a future remote resolver. Today `spwn check` reports these as `remote registries are not yet supported (ref: …)` so they aren't confused with typos. Until the resolver ships, use `spwn:<name>` or author a local dep with one of the three schemes below.
+- **Local skill** — `skill:<name>`. Resolved against `./spwn/skills/<name>.md`. Use `spwn skill new <name>` to scaffold one.
+- **Local tool** — `tool:<name>`. Resolved against `./spwn/tools/<name>/`, a directory holding its own `tool.yaml` (install / verify / skills).
+- **Local hook** — `hook:<name>`. Resolved against `./spwn/hooks/<name>.sh`, a lifecycle script the runtime executes at the appropriate stage.
 
 Catalog refs are pinned in `spwn.lock` at the project root. Install one with `spwn install spwn:<name>`. `spwn check` flags any drift between agent.yaml and the lockfile.
 

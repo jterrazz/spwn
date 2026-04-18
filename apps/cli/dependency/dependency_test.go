@@ -78,19 +78,41 @@ func TestInstall_rejectsBareName(t *testing.T) {
 	if err == nil {
 		t.Fatal("want error for bare name")
 	}
-	if !strings.Contains(err.Error(), "bare name") {
-		t.Errorf("want bare-name hint, got: %v", err)
+	if !strings.Contains(err.Error(), "not a valid dependency ref") {
+		t.Errorf("want invalid-ref hint, got: %v", err)
+	}
+}
+
+func TestInstall_rejectsLocalSchemeRef(t *testing.T) {
+	withProject(t)
+	_, err := runWithOut(t, installCmd, "skill:paper-reading")
+	if err == nil {
+		t.Fatal("want error for local ref")
+	}
+	if !strings.Contains(err.Error(), "authored in place") {
+		t.Errorf("want local-authoring hint, got: %v", err)
 	}
 }
 
 func TestInstall_rejectsRegistryRef(t *testing.T) {
 	withProject(t)
-	_, err := runWithOut(t, installCmd, "@acme/foo")
+	_, err := runWithOut(t, installCmd, "github:acme/foo")
 	if err == nil {
 		t.Fatal("want error for registry ref")
 	}
 	if !strings.Contains(err.Error(), "not yet supported") {
 		t.Errorf("want registry-unsupported, got: %v", err)
+	}
+}
+
+func TestInstall_rejectsLegacyAtRef(t *testing.T) {
+	withProject(t)
+	_, err := runWithOut(t, installCmd, "@acme/foo")
+	if err == nil {
+		t.Fatal("want error for legacy @ ref")
+	}
+	if !strings.Contains(err.Error(), "not a valid dependency ref") {
+		t.Errorf("want invalid-ref hint, got: %v", err)
 	}
 }
 

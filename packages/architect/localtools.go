@@ -11,9 +11,9 @@ import (
 )
 
 // localToolDir is where the project-local dependency loader looks
-// for bare-name refs at image-build time. Mirrors what the validator
-// (rulePacksExist) expects, so `spwn check` and `spwn build`
-// resolve refs through the same on-disk layout.
+// for tool:<name> refs at image-build time. Mirrors what the
+// validator (rulePacksExist) expects, so `spwn check` and
+// `spwn build` resolve refs through the same on-disk layout.
 const localToolDir = "tools"
 
 // wrappedLocalTool forwards every image.Tool method to an underlying
@@ -21,7 +21,7 @@ const localToolDir = "tools"
 // form. Catalog refs and local refs share a single registry keyed by
 // name, so the prefix keeps them in separate namespaces — any future
 // promotion of a local name to an spwn: dependency doesn't collide with
-// existing bare-name references in agent.yaml.
+// existing tool: references in agent.yaml.
 type wrappedLocalTool struct {
 	inner ib.Tool
 	name  string
@@ -68,10 +68,11 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 }
 
 // hydrateLocalPacks walks a flat list of dependency refs, loads
-// every bare (non-@) name as a synthetic image.Tool via the shared
+// every tool:<name> entry as a synthetic image.Tool via the shared
 // packyaml parser, registers it, and returns the rewritten list
-// where each bare name has been replaced by its "local:<name>"
-// registry key.
+// where each tool: ref has been replaced by its "local:<name>"
+// registry key. Non-tool refs (spwn:, github:, skill:, hook:) pass
+// through unchanged for other stages to handle.
 //
 // Order is preserved so users see their ref list echoed back in the
 // same shape they declared it. Duplicates are tolerated — the
@@ -80,12 +81,8 @@ func hydrateLocalPacks(reg *ib.Registry, projectRoot string, refs []string) ([]s
 	out := make([]string, 0, len(refs))
 	loaded := map[string]bool{}
 	for _, raw := range refs {
-		// ParseRef classifies every syntax: spwn:x, spwn:x,
-		// github:a/b, @a/b → non-local; bare name → local.
-		// Anything non-local passes through for the registry to
-		// resolve via its catalog entry.
 		ref := dependency.ParseRef(raw)
-		if ref.Kind != dependency.KindLocal {
+		if ref.Kind != dependency.KindLocalTool {
 			out = append(out, raw)
 			continue
 		}

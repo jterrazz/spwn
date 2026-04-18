@@ -234,9 +234,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		toolList = deduped
 	}
 
-	// Hydrate local (bare-name) refs into synthetic image.Tool
+	// Hydrate local (tool:<name>) refs into synthetic image.Tool
 	// instances before resolving. Without this, a ref like
-	// `my-local-tool` would blow up reg.Resolve with "unknown tool".
+	// `tool:my-local-tool` would blow up reg.Resolve with "unknown tool".
 	// Project root defaults to platform.ProjectRoot() — set by the CLI
 	// PersistentPreRunE when a spwn.yaml is discovered.
 	if projectRoot := platform.ProjectRoot(); projectRoot != "" {

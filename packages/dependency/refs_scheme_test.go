@@ -36,54 +36,74 @@ func TestParse_SchemeFormGitHub(t *testing.T) {
 	}
 }
 
-// TestParse_SchemeFormLocal: an explicit `local:<name>` scheme maps
-// to KindLocal just like a bare name. Useful when authors want to
-// be explicit in lists that mix local and external refs.
-func TestParse_SchemeFormLocal(t *testing.T) {
-	got := dependency.ParseRef("local:my-parser")
-	if got.Kind != dependency.KindLocal {
-		t.Errorf("kind: want KindLocal, got %v", got.Kind)
+// TestParse_SchemeFormSkill: skill:<name> parses as a local skill ref.
+func TestParse_SchemeFormSkill(t *testing.T) {
+	got := dependency.ParseRef("skill:code-review")
+	if got.Kind != dependency.KindLocalSkill {
+		t.Errorf("kind: want KindLocalSkill, got %v", got.Kind)
 	}
-	if got.Name != "my-parser" {
-		t.Errorf("name: want my-parser, got %q", got.Name)
+	if got.Name != "code-review" {
+		t.Errorf("name: want code-review, got %q", got.Name)
 	}
 }
 
-// TestParse_UnknownSchemeFallsBackToLocal: a ref with an unknown
-// scheme (`gitlab:…`, `foo:bar`) is treated as a local bare name
-// so existing error paths fire rather than a silent reject.
-func TestParse_UnknownSchemeFallsBackToLocal(t *testing.T) {
-	got := dependency.ParseRef("gitlab:x/y")
-	if got.Kind != dependency.KindLocal {
-		t.Errorf("kind: want KindLocal (unknown scheme), got %v", got.Kind)
+// TestParse_SchemeFormTool: tool:<name> parses as a local tool ref.
+func TestParse_SchemeFormTool(t *testing.T) {
+	got := dependency.ParseRef("tool:ffmpeg")
+	if got.Kind != dependency.KindLocalTool {
+		t.Errorf("kind: want KindLocalTool, got %v", got.Kind)
 	}
-	if got.Name != "gitlab:x/y" {
-		t.Errorf("name: want raw string for unknown scheme, got %q", got.Name)
+	if got.Name != "ffmpeg" {
+		t.Errorf("name: want ffmpeg, got %q", got.Name)
+	}
+}
+
+// TestParse_SchemeFormHook: hook:<name> parses as a local hook ref.
+func TestParse_SchemeFormHook(t *testing.T) {
+	got := dependency.ParseRef("hook:pre-spawn")
+	if got.Kind != dependency.KindLocalHook {
+		t.Errorf("kind: want KindLocalHook, got %v", got.Kind)
+	}
+	if got.Name != "pre-spawn" {
+		t.Errorf("name: want pre-spawn, got %q", got.Name)
+	}
+}
+
+// TestParse_RetiredLocalScheme: the old `local:<name>` alias is gone;
+// it now parses as KindInvalid so callers point the user at skill:,
+// tool:, or hook: instead.
+func TestParse_RetiredLocalScheme(t *testing.T) {
+	got := dependency.ParseRef("local:my-parser")
+	if got.Kind != dependency.KindInvalid {
+		t.Errorf("local: alias should be invalid, got kind=%v", got.Kind)
+	}
+}
+
+// TestParse_UnknownSchemeInvalid: a ref with an unknown scheme
+// (`gitlab:…`, `foo:bar`) is invalid under the new grammar.
+func TestParse_UnknownSchemeInvalid(t *testing.T) {
+	got := dependency.ParseRef("gitlab:x/y")
+	if got.Kind != dependency.KindInvalid {
+		t.Errorf("kind: want KindInvalid (unknown scheme), got %v", got.Kind)
 	}
 }
 
 // TestParse_LocalNameWithColon: a bare name that happens to contain
-// a colon (unusual but legal on the filesystem) must NOT be parsed
-// as a scheme.
+// a colon but doesn't match a recognised scheme is invalid.
 func TestParse_LocalNameWithColon(t *testing.T) {
 	got := dependency.ParseRef("my-tool:extra")
-	if got.Kind != dependency.KindLocal {
-		t.Errorf("kind: want KindLocal (not a recognised scheme), got %v", got.Kind)
+	if got.Kind != dependency.KindInvalid {
+		t.Errorf("kind: want KindInvalid (not a recognised scheme), got %v", got.Kind)
 	}
 }
 
 // TestParse_LegacyAtPrefixRejected: the removed `@owner/name` form
-// now parses as malformed (empty Name in a KindRegistry ref) so the
-// resolver can surface a clear error instead of silently treating it
-// as a local name.
+// now parses as KindInvalid so the resolver can surface a clear error.
 func TestParse_LegacyAtPrefixRejected(t *testing.T) {
 	for _, in := range []string{"@spwn/unix", "@jterrazz/foo", "@"} {
 		got := dependency.ParseRef(in)
-		if got.Kind != dependency.KindRegistry {
-			t.Errorf("ParseRef(%q) kind = %v, want KindRegistry (legacy rejected)", in, got.Kind)
-		}
-		if got.Name != "" {
-			t.Errorf("ParseRef(%q) name = %q, want empty (malformed)", in, got.Name)
+		if got.Kind != dependency.KindInvalid {
+			t.Errorf("ParseRef(%q) kind = %v, want KindInvalid", in, got.Kind)
 		}
 	}
 }
@@ -94,9 +114,13 @@ func TestCanonical_EmitsSchemeForm(t *testing.T) {
 	cases := map[string]string{
 		"spwn:unix":           "spwn:unix",
 		"github:jterrazz/foo": "github:jterrazz/foo",
-		"my-parser":           "my-parser",
-		"local:my-parser":     "my-parser",
+		"skill:code-review":   "skill:code-review",
+		"tool:my-parser":      "tool:my-parser",
+		"hook:pre-spawn":      "hook:pre-spawn",
 		"spwn:unix@24.04":     "spwn:unix",
+		// Invalid inputs fall through unchanged for display.
+		"bare-name":       "bare-name",
+		"local:my-parser": "local:my-parser",
 	}
 	for in, want := range cases {
 		if got := dependency.Canonical(in); got != want {

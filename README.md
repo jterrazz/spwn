@@ -167,21 +167,24 @@ name: neo
 runtime:
   backend: "spwn:claude-code"
 
-# scheme refs (spwn:*, github:*) pull from catalogs;
-# bare names resolve to spwn/skills/<name>.md or spwn/tools/<name>/.
+# Every ref is `scheme:target`. spwn:/github: pull from catalogs;
+# skill:/tool:/hook: resolve to spwn/skills/<name>.md, spwn/tools/<name>/,
+# or spwn/hooks/<name>.sh respectively.
 dependencies:
   - "spwn:unix"
   - "spwn:git"
   - "spwn:python"
-  - code-review
+  - "skill:code-review"
 ```
 
 **If a dependency isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [dependency catalog](docs/dependency-catalog.md).
 
-Dependency resolution works like npm:
+Dependency resolution works like npm — every ref is `scheme:target`:
 - `spwn:<name>` is a catalog dependency compiled into the spwn binary.
-- `<bare-name>` is a local skill under `spwn/skills/<name>.md` or a local dependency under `spwn/tools/<name>/`.
-- `@<owner>/<name>` is reserved for a future community registry.
+- `github:<owner>/<repo>` is reserved for a future community registry.
+- `skill:<name>` is a local skill at `spwn/skills/<name>.md`.
+- `tool:<name>` is a local tool at `spwn/tools/<name>/` (with `tool.yaml`).
+- `hook:<name>` is a local hook at `spwn/hooks/<name>.sh`.
 
 Add a catalog dependency to every agent with `spwn install spwn:<name>`; the ref gets pinned in `spwn.lock`.
 
@@ -382,7 +385,7 @@ group to see the list. Each summary shows a progress bar
 |---|---|:---:|
 | `spwn agent add <name> --dep spwn:<pkg>` | Attach a catalog dep | 🟢 |
 | `spwn agent rm <name> --dep spwn:<pkg>` | Remove a dep | 🟢 |
-| `spwn agent add <name> --dep <local>` | Attach a local (bare-name) dep | 🟡 |
+| `spwn agent add <name> --dep skill:<name>` | Attach a local skill/tool/hook dep | 🟡 |
 
 </details>
 
@@ -595,7 +598,7 @@ group to see the list. Each summary shows a progress bar
 | Source | Status |
 |---|:---:|
 | `spwn:*` built-in catalog | 🟢 |
-| Local project tools (bare names) | 🟡 |
+| Local project deps (`skill:`/`tool:`/`hook:`) | 🟡 |
 | MCP servers | 🔴 |
 | LangChain tools | 🔴 |
 

@@ -32,35 +32,23 @@ runtime:
 
 dependencies:                      # agent-specific additions (on top of project deps)
   - "spwn:qmd"
-
-skills:                            # local skills this agent uses
-  - paper-reading
-  - code-review
-
-tools:                             # local tool definitions
-  - ffmpeg
-
-hooks:                             # lifecycle hooks
-  - pre-spawn
+  - "skill:paper-reading"          # local skill (spwn/skills/paper-reading.md)
+  - "skill:code-review"
+  - "tool:ffmpeg"                  # local tool (spwn/tools/ffmpeg/)
+  - "hook:pre-spawn"               # local hook (spwn/hooks/pre-spawn.sh)
 ```
 
 ## Reference kinds
 
-Every ref in `dependencies:` is one of three kinds:
+Every ref in `dependencies:` is `scheme:target`. Five schemes are recognised; bare names are invalid.
 
 | Kind | Syntax | Resolved from |
 |------|--------|--------------|
 | **Builtin** | `spwn:<name>` | Catalog compiled into the spwn binary |
-| **GitHub** | `github.com/<owner>/<repo>` | Git clone + git tags as versions (planned) |
-| **Local** | `<bare-name>` | `spwn/tools/<name>/` directory |
-
-Bare names in typed sections resolve from their matching directory:
-
-| Section | Resolves from |
-|---------|--------------|
-| `skills:` | `spwn/skills/<name>.md` |
-| `tools:` | `spwn/tools/<name>/` (with `tool.yaml`) |
-| `hooks:` | `spwn/hooks/<name>.sh` |
+| **GitHub** | `github:<owner>/<repo>` | Git clone + git tags as versions (planned) |
+| **Local skill** | `skill:<name>` | `spwn/skills/<name>.md` |
+| **Local tool**  | `tool:<name>`  | `spwn/tools/<name>/` (with `tool.yaml`) |
+| **Local hook**  | `hook:<name>`  | `spwn/hooks/<name>.sh` |
 
 ## Local hierarchy
 
@@ -145,6 +133,7 @@ dependencies: ["spwn:unix", "spwn:git"]     # every agent gets these
 # agent.yaml for neo
 dependencies: ["spwn:python"]                # neo also gets python
 # neo's resolved dependencies: spwn:unix + spwn:git + spwn:python
+
 ```
 
 ## Version pinning
