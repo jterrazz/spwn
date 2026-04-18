@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/internal/manifest"
 )
 
 // Every built-in catalog entry is mirrored here at `content/<slug>/`
@@ -41,7 +42,7 @@ func loadYAMLTools() ([]dependency.Tool, error) {
 		if !e.IsDir() {
 			continue
 		}
-		toolPath := path.Join(contentRoot, e.Name(), "tools", e.Name(), dependency.ToolManifest)
+		toolPath := path.Join(contentRoot, e.Name(), "tools", e.Name(), manifest.ToolManifest)
 		if _, err := fs.Stat(catalogFS, toolPath); err != nil {
 			continue
 		}
@@ -52,12 +53,12 @@ func loadYAMLTools() ([]dependency.Tool, error) {
 	out := make([]dependency.Tool, 0, len(names))
 	for _, name := range names {
 		canonical := "spwn:" + name
-		parsed, err := dependency.Parse(
-			dependency.EmbedResolver{FS: catalogFS, Root: path.Join(contentRoot, name, "tools", name)},
-			dependency.ParseOptions{
+		parsed, err := manifest.Parse(
+			manifest.EmbedResolver{FS: catalogFS, Root: path.Join(contentRoot, name, "tools", name)},
+			manifest.ParseOptions{
 				DefaultName:    canonical,
 				DefaultVersion: "latest",
-				ManifestFile:   dependency.ToolManifest,
+				ManifestFile:   manifest.ToolManifest,
 			},
 		)
 		if err != nil {
@@ -67,7 +68,7 @@ func loadYAMLTools() ([]dependency.Tool, error) {
 		// spwn:<slug> in the tool registry, regardless of what
 		// tool.yaml declares for `name:`.
 		parsed.Schema.Name = canonical
-		out = append(out, dependency.ToolFromParsed(parsed))
+		out = append(out, manifest.ToolFromParsed(parsed))
 	}
 	return out, nil
 }

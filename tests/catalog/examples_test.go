@@ -7,24 +7,16 @@ import (
 	"testing"
 
 	spwn "spwn.sh/packages/dependency/adapters/spwn"
-	"spwn.sh/packages/dependency"
 )
-
-// hasWorlds reports whether a parsed catalog schema declares at
-// least one world. Mirrors the internal helper in catalog/ — kept
-// local here so the test package doesn't depend on that predicate
-// being exported.
-func hasWorlds(s *dependency.Schema) bool {
-	return s != nil && len(s.Worlds.Content) > 0
-}
 
 // TestShippedSlugsMatchEmbed asserts every gallery-eligible entry
 // (one with a `worlds:` section in spwn.yaml) is reachable via
 // ShippedSlugs(), and vice-versa. Dependency-shaped entries (no
 // worlds:) live in the same embed FS but stay out of the gallery.
 //
-// Runs against spwn.EmbedFS() so it exercises the exact bytes
-// that ship in the compiled binary — not the filesystem.
+// Uses spwn.Get (returns ErrNotFound for non-gallery entries) as
+// The "is this a gallery entry?" oracle — that predicate is what
+// ShippedSlugs() uses internally, so the two must agree.
 func TestShippedSlugsMatchEmbed(t *testing.T) {
 	embed := spwn.EmbedFS()
 	entries, err := fs.ReadDir(embed, ".")
@@ -37,11 +29,9 @@ func TestShippedSlugsMatchEmbed(t *testing.T) {
 		if !e.IsDir() {
 			continue
 		}
-		schema, err := spwn.EntrySchema(e.Name())
-		if err != nil {
-			continue
-		}
-		if hasWorlds(schema) {
+		// spwn.Get returns ErrNotFound when the entry has no
+		// Worlds: section. A nil error == gallery-eligible.
+		if _, err := spwn.Get(e.Name()); err == nil {
 			gallerySlugs[e.Name()] = true
 		}
 	}

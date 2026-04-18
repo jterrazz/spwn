@@ -16,7 +16,7 @@
 // packages/compile/adapter.go), so everything downstream — registry
 // resolution, dockerfile generation, skill collection — is oblivious
 // to whether a given dependency came from Go or YAML.
-package dependency
+package manifest
 
 import (
 	"encoding/json"

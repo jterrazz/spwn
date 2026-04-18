@@ -10,13 +10,14 @@ import (
 	"strings"
 	"time"
 
-	spwn "spwn.sh/packages/dependency/adapters/spwn"
-	"spwn.sh/packages/architect"
-	"spwn.sh/packages/transpile/source"
-	"spwn.sh/packages/dependency"
 	ib "spwn.sh/packages/compile"
+	"spwn.sh/packages/architect"
+	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/adapters/local"
+	spwn "spwn.sh/packages/dependency/adapters/spwn"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/runtimes"
+	"spwn.sh/packages/transpile/source"
 	wmodels "spwn.sh/packages/world/models"
 )
 
@@ -205,22 +206,15 @@ func registerLocalTools(reg *ib.Registry, root string) error {
 		if !e.IsDir() {
 			continue
 		}
-		pkgDir := filepath.Join(toolsDir, e.Name())
-		parsed, err := dependency.Parse(
-			dependency.DirResolver{Root: pkgDir},
-			dependency.ParseOptions{
-				DefaultName:    e.Name(),
-				DefaultVersion: "0.0.0-local",
-				ManifestFile:   dependency.ToolManifest,
-			},
-		)
+		// local.LoadTool reads tool.yaml + skills/ + files/ and wraps
+		// The result as a dependency.Tool — the same path the spawn
+		// Pipeline takes. Missing tool.yaml is not fatal; users may
+		// Author the dir before filling it in, so we skip silently.
+		tool, err := local.LoadTool(root, e.Name())
 		if err != nil {
-			// Missing tool.yaml is not fatal — users may author the
-			// dir before filling it in. Skip silently so inspect can
-			// still render everything else.
 			continue
 		}
-		wrapped := &localToolAdapter{inner: dependency.ToolFromParsed(parsed), name: e.Name()}
+		wrapped := &localToolAdapter{inner: tool, name: e.Name()}
 		_ = reg.Register(wrapped)
 	}
 	return nil
