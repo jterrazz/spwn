@@ -6,3 +6,4 @@ worlds:
     workspaces:
       - ./src
       - ./tests
+    knowledge: ./knowledge

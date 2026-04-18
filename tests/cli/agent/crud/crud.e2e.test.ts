@@ -22,7 +22,9 @@ describe('spwn agent CRUD', () => {
         expect(result.exitCode).toBe(0);
         // Structural: the on-disk Mind exists with a profile.
         // Knowledge is NOT a mind layer — it's world-scoped at
-        // /world/knowledge/ (bind-mounted from spwn/worlds/<name>/knowledge/).
+        // /world/knowledge/ (bind-mounted from the path declared in
+        // worlds.<name>.knowledge in spwn.yaml; omitted by default in
+        // user-mode agent creation).
         expect(result.file('spwn-home/agents/neo/SOUL.md').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/skills').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/playbooks').exists).toBe(true);

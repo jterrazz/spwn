@@ -14,8 +14,9 @@ Spawn an agent into an existing world.
 An agent is backed by a Mind - a persistent directory holding its identity,
 skills, playbooks, journal entries, and session state. The agent survives
 after the world is destroyed. Knowledge lives at /world/knowledge/ inside
-each world and is committed under spwn/worlds/<name>/knowledge/ — shared
-across every agent in that world.
+each world when the manifest opts in via worlds.<name>.knowledge — the
+path resolves relative to the project root and is shared across every
+agent in that world.
 
 ```
 spwn agent [name] [flags]

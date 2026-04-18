@@ -49,6 +49,11 @@ type World struct {
 	CreatedAt   time.Time     `json:"created_at"`
 	Agents      []AgentRecord `json:"agents,omitempty"` // multi-agent support
 	Manifest    Manifest      `json:"manifest,omitempty"`
+	// KnowledgeMounted records whether the spawn pipeline bound a host
+	// knowledge directory into this world's /world/knowledge/. When
+	// false, the rendered roster and per-agent prompts omit every
+	// reference to the knowledge base.
+	KnowledgeMounted bool `json:"knowledge_mounted,omitempty"`
 }
 
 // PrimaryWorkspacePath returns the first workspace's host path, or empty if

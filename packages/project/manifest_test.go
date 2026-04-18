@@ -23,7 +23,7 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"spwn/agents/neo/skills/.gitkeep",
 		"spwn/agents/neo/playbooks/.gitkeep",
 		"spwn/agents/neo/journal/.gitkeep",
-		"spwn/worlds/neo/knowledge/.gitkeep",
+		"knowledge/.gitkeep",
 		".spwn/state.json",
 		".gitignore",
 	}
@@ -37,6 +37,12 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	// Agent no longer owns a knowledge layer — it moved to the world.
 	if _, err := os.Stat(filepath.Join(dir, "spwn", "agents", "neo", "knowledge")); err == nil {
 		t.Errorf("spwn/agents/neo/knowledge/ should not exist (knowledge moved to world scope)")
+	}
+
+	// The old per-world nested location should be gone — knowledge now
+	// lives flat at the project root by convention.
+	if _, err := os.Stat(filepath.Join(dir, "spwn", "worlds")); err == nil {
+		t.Errorf("spwn/worlds/ should not exist (retired in favour of explicit manifest paths)")
 	}
 
 	gitignore, err := os.ReadFile(filepath.Join(dir, ".gitignore"))

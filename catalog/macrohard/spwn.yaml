@@ -25,3 +25,4 @@ worlds:
       - ballmer
     workspaces:
       - .
+    knowledge: ./knowledge

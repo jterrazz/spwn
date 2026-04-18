@@ -11,9 +11,10 @@ Create a new agent (SOUL.md + 3-layer Mind)
 
 Create a new agent with a SOUL.md at the agent root and the
 three Mind layer directories (skills/playbooks/journal). Knowledge is
-world-scoped, not agent-scoped — it lives at /world/knowledge/ and is
-committed under spwn/worlds/<name>/knowledge/ in the project. If no
-name is provided, a random name is picked from a curated dictionary.
+world-scoped, not agent-scoped — it lives at /world/knowledge/ when a
+world opts in via spwn.yaml's worlds.<name>.knowledge key, which resolves
+to a host path under the project root. If no name is provided, a random
+name is picked from a curated dictionary.
 
 With --force, an existing agent's Mind is re-scaffolded: any missing
 files are recreated and the command exits zero even if the agent

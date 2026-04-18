@@ -154,8 +154,8 @@ spwn/agents/neo/
 ├── playbooks/                # workflows promoted from experience
 └── journal/                  # session history - one file per run
 
-spwn/worlds/neo/
-└── knowledge/                # facts about the codebase (shared with every agent in this world)
+./knowledge/                   # optional, opt-in per world via worlds.<name>.knowledge in spwn.yaml
+                               # facts about the codebase (shared with every agent in this world)
 ```
 
 **Everything is a dependency.** Tools, runtime-config injectors, and skills all unified under one concept. A dependency can install apt packages, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:

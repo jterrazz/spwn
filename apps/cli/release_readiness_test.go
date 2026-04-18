@@ -168,14 +168,23 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	t.Run("04_init_writes_world_knowledge", func(t *testing.T) {
-		// A04: fresh init seeds spwn/worlds/neo/knowledge/.gitkeep.
+		// A04: fresh init seeds a project-root ./knowledge/.gitkeep AND
+		// records the path explicitly in spwn.yaml. Also asserts that
+		// the retired spwn/worlds/ nested tree is not created.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		gk := filepath.Join(wd, "spwn/worlds/neo/knowledge/.gitkeep")
+		gk := filepath.Join(wd, "knowledge/.gitkeep")
 		if _, err := os.Stat(gk); err != nil {
 			t.Fatalf("world knowledge .gitkeep missing: %v", err)
+		}
+		manifest := readFile(t, filepath.Join(wd, "spwn.yaml"))
+		if !strings.Contains(manifest, "knowledge: ./knowledge") {
+			t.Fatalf("spwn.yaml missing `knowledge: ./knowledge`:\n%s", manifest)
+		}
+		if _, err := os.Stat(filepath.Join(wd, "spwn/worlds")); !os.IsNotExist(err) {
+			t.Fatalf("spwn/worlds/ should not exist after init, stat err=%v", err)
 		}
 	})
 
@@ -926,6 +935,37 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 		if !strings.Contains(stdout+stderr, "already deployed") {
 			t.Fatalf("check output missing one-agent-one-world message")
+		}
+	})
+
+	t.Run("47b_check_hints_on_missing_knowledge_key", func(t *testing.T) {
+		// I47b: a world with no `knowledge:` key emits a LevelInfo hint
+		// explaining that agents won't be told a knowledge base exists.
+		t.Parallel()
+		env, _ := freshEnv(t)
+		wd := t.TempDir()
+		mustInit(t, env, wd, "acme")
+		// Strip the `knowledge: ./knowledge` line init emitted.
+		yamlPath := filepath.Join(wd, "spwn.yaml")
+		data := readFile(t, yamlPath)
+		var filtered []string
+		for _, line := range strings.Split(data, "\n") {
+			if strings.Contains(line, "knowledge:") {
+				continue
+			}
+			filtered = append(filtered, line)
+		}
+		if err := os.WriteFile(yamlPath, []byte(strings.Join(filtered, "\n")), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		stdout, stderr, code := runCLI(t, env, wd, "check")
+		if code != 0 && code != 1 {
+			// LevelInfo should not block. If it did, we'd see code > 1.
+			t.Fatalf("unexpected check exit code %d\nstdout=%s\nstderr=%s", code, stdout, stderr)
+		}
+		combined := stdout + stderr
+		if !strings.Contains(combined, "no knowledge path") {
+			t.Fatalf("check output should hint about missing knowledge path, got:\n%s", combined)
 		}
 	})
 

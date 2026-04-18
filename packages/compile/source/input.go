@@ -2,10 +2,13 @@ package source
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 
 	"spwn.sh/packages/compile"
-	)
+)
 
 // ToCompileInput projects a ProjectSource onto the compile.Input shape
 // that compile.Runtime.Render expects. worldName selects which world
@@ -96,11 +99,30 @@ func ToCompileInput(src *ProjectSource, worldName string) (compile.Input, error)
 	}
 	sort.Strings(packageList)
 
+	// WorldKnowledgeMounted mirrors what the spawn pipeline would do
+	// at runtime: when the world declares a knowledge path AND the
+	// directory exists on disk, the renderer emits the "with
+	// knowledge" boilerplate. Empty key or missing dir → omit every
+	// /world/knowledge/ reference so the agent is never told a
+	// knowledge base exists. This matches the architect's behaviour
+	// in packages/architect/spawn.go.
+	knowledgeMounted := false
+	if kp := strings.TrimSpace(world.Knowledge); kp != "" {
+		resolved := kp
+		if !filepath.IsAbs(resolved) {
+			resolved = filepath.Join(src.RootDir, kp)
+		}
+		if info, err := os.Stat(resolved); err == nil && info.IsDir() {
+			knowledgeMounted = true
+		}
+	}
+
 	return compile.Input{
-		Deps:          packageList,
-		VerifiedTools: packageList,
-		WorldID:       selected,
-		Agents:        agents,
+		Deps:                  packageList,
+		VerifiedTools:         packageList,
+		WorldID:               selected,
+		Agents:                agents,
+		WorldKnowledgeMounted: knowledgeMounted,
 	}, nil
 }
 

@@ -46,6 +46,14 @@ type Input struct {
 	// Agents is the roster of agents being deployed into this world.
 	// Empty for NPC-only or boot-only renders.
 	Agents []AgentInput
+
+	// WorldKnowledgeMounted is true when the spawn pipeline bound a
+	// host knowledge directory into /world/knowledge. Runtimes use
+	// this to decide whether to emit the "knowledge base" boilerplate
+	// in AGENTS.md / mind-management.md / per-agent CLAUDE.md. When
+	// false, every reference to /world/knowledge/ is omitted — the
+	// agent is never told a knowledge base exists.
+	WorldKnowledgeMounted bool
 }
 
 // AgentInput is the per-agent slice of compile.Input.
