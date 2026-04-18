@@ -20,7 +20,7 @@ dependencies:                      # project-wide — every agent inherits these
 worlds:
   matrix:
     agents: [neo]
-    workspaces: [.]
+    workspaces: [.]          # host paths mounted under /workspaces/
     knowledge: ./knowledge   # optional; bind into /world/knowledge/
 ```
 

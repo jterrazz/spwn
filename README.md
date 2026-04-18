@@ -134,7 +134,7 @@ name: acme-api
 worlds:
   matrix:
     agents: [neo]
-    workspaces: [.]
+    workspaces: [.]          # host paths mounted under /workspaces/. Use `name=path` to name them.
     knowledge: ./knowledge   # optional; bind into /world/knowledge/. Omit for no mount.
 ```
 
