@@ -114,7 +114,7 @@ Three ideas to hold in your head before you dive in:
 
 ```
 my-project/
-├── spwn.yaml               # manifest - declares worlds, like docker-compose.yaml
+├── spwn.yaml               # manifest - declares virtual worlds, like docker-compose.yaml
 ├── spwn.lock          # committed dep pins (like package-lock.json)
 ├── spwn/                   # committed project assets
 │   ├── agents/             #   your agents - travel with the repo
