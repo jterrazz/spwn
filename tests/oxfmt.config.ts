@@ -13,5 +13,6 @@ export default defineConfig({
         'fixtures/**',
         'cli/**/expected/**',
         'cli/**/seeds/**',
+        'catalog/testdata/**',
     ],
 });

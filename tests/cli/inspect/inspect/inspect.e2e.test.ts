@@ -60,8 +60,8 @@ describe('spwn inspect', () => {
 
     test('renders a local tool dependency without the local: prefix', async () => {
         // Given - mixed-tool-refs declares `tool:my-local-tool`. The
-        // local tool directory exists under spwn/tools/ with no
-        // tool.yaml, so inspect should fall back gracefully.
+        // Local tool directory exists under spwn/tools/ with no
+        // Tool.yaml, so inspect should fall back gracefully.
         const result = await spec('inspect local')
             .project('mixed-tool-refs')
             .exec('inspect --offline')

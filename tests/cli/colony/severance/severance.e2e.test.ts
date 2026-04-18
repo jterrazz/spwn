@@ -36,8 +36,14 @@ describe('severance catalog', () => {
         // Own SOUL.md. If any agent is missing, the catalog installer
         // Silently regressed.
         for (const name of ['mark', 'helly', 'irving', 'dylan']) {
-            expect(result.file(`spwn/agents/${name}/agent.yaml`).exists, `missing agent.yaml for ${name}`).toBe(true);
-            expect(result.file(`spwn/agents/${name}/SOUL.md`).exists, `missing SOUL.md for ${name}`).toBe(true);
+            expect(
+                result.file(`spwn/agents/${name}/agent.yaml`).exists,
+                `missing agent.yaml for ${name}`,
+            ).toBe(true);
+            expect(
+                result.file(`spwn/agents/${name}/SOUL.md`).exists,
+                `missing SOUL.md for ${name}`,
+            ).toBe(true);
         }
 
         // Knowledge ships at the project root (NOT under spwn/) and

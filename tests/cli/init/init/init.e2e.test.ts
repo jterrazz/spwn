@@ -39,9 +39,9 @@ describe('spwn init', () => {
         expect(result.file('.gitignore').content).toContain('.spwn');
 
         // One concrete example per local-ref scheme so users see how
-        // skill: / tool: / hook: are authored from their very first
+        // Skill: / tool: / hook: are authored from their very first
         // `spwn init`. Regressions here mean the default project no
-        // longer demonstrates composition end-to-end.
+        // Longer demonstrates composition end-to-end.
         expect(result.file('spwn/skills/focus.md').exists).toBe(true);
         expect(result.file('spwn/skills/focus.md').content).toContain('name: focus');
         expect(result.file('spwn/tools/greet/tool.yaml').exists).toBe(true);
@@ -50,7 +50,7 @@ describe('spwn init', () => {
         expect(result.file('spwn/hooks/pre-spawn.sh').content).toContain('#!/usr/bin/env bash');
 
         // Default agent.yaml must reference all three so a fresh
-        // project shows the full composition grammar (spwn: + skill:
+        // Project shows the full composition grammar (spwn: + skill:
         // + tool: + hook:) inline.
         const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
         expect(agentYaml).toContain('skill:focus');
@@ -134,15 +134,15 @@ describe('spwn init', () => {
         // When - running with a bare catalog slug (no `spwn:` prefix)
         // Then - the bare name auto-resolves to spwn:matrix and the
         // Install proceeds exactly as the explicit form would. This is
-        // the documentation-friendly shorthand: `spwn init matrix`.
+        // The documentation-friendly shorthand: `spwn init matrix`.
         const result = await spec('init matrix bare').project('empty').exec('init matrix').run();
 
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
         // Banner still prints the canonical spwn:matrix form even when
-        // the user typed the bare slug — callers should never have to
-        // guess which scheme landed on disk.
+        // The user typed the bare slug — callers should never have to
+        // Guess which scheme landed on disk.
         expect(result.stderr.text).toContain('Installed example spwn:matrix');
     });
 
@@ -157,7 +157,7 @@ describe('spwn init', () => {
         expect(result.file('spwn.yaml').exists).toBe(false);
         expect(result.stderr.text).toContain('"nonesuch" is not in the catalog');
         // The hint must list real gallery entries — otherwise the user
-        // is left guessing which names are valid.
+        // Is left guessing which names are valid.
         expect(result.stderr.text).toMatch(/matrix|startup/);
     });
 
@@ -172,7 +172,10 @@ describe('spwn init', () => {
             .exec(['init --name sanity-check', 'check --deep'])
             .run();
 
-        expect(result.exitCode, `stdout:\n${result.stdout.text}\nstderr:\n${result.stderr.text}`).toBe(0);
+        expect(
+            result.exitCode,
+            `stdout:\n${result.stdout.text}\nstderr:\n${result.stderr.text}`,
+        ).toBe(0);
         // On a clean project, the check command prints "Project is
         // Valid" and exits 0. If the scaffold ever regresses, the
         // Exit code flips non-zero and this test fails with the full
@@ -183,11 +186,11 @@ describe('spwn init', () => {
     test('init rejects tool-shaped catalog entries (not gallery-eligible)', async () => {
         // Given - an empty dir. `qmd` is a valid catalog tool entry
         // (--dep qmd works), but it has no `worlds:` section, so it's
-        // not installable via init.
+        // Not installable via init.
         // When - running init qmd
         // Then - the resolver accepts the bare name up front (qmd is
         // NOT in ShippedSlugs), surfaces the gallery-entry hint, and
-        // leaves the directory empty.
+        // Leaves the directory empty.
         const result = await spec('init tool entry').project('empty').exec('init qmd').run();
 
         expect(result.exitCode).toBe(1);

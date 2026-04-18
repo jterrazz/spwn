@@ -311,8 +311,8 @@ describe('spwn uninstall', () => {
             .project('empty')
             .exec([
                 'init severance',
-                'install qmd',                    // all four agents
-                'uninstall qmd --agent mark',     // drop from mark only
+                'install qmd', // All four agents
+                'uninstall qmd --agent mark', // Drop from mark only
             ])
             .run();
 
@@ -339,8 +339,8 @@ describe('spwn uninstall', () => {
             .project('empty')
             .exec([
                 'init severance',
-                'install qmd --agent mark',        // only mark
-                'uninstall qmd --agent mark',      // now nobody
+                'install qmd --agent mark', // Only mark
+                'uninstall qmd --agent mark', // Now nobody
             ])
             .run();
 
