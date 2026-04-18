@@ -122,6 +122,7 @@ func TestList_AllShippedExamplesParse(t *testing.T) {
 		"matrix":            false,
 		"paperclip-factory": false,
 		"research-lab":      false,
+		"severance":         false,
 		"startup":           false,
 	}
 	for _, ex := range got {
