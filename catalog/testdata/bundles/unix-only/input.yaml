@@ -1,0 +1,6 @@
+# Input: single tool ref. Exercises the minimal path — a catalog
+# entry that ships tool.yaml but no skills/ or files/ subdirs.
+# Expected output: no /world/skills/* entries, just the resolved
+# tool list.
+tools:
+  - spwn:unix

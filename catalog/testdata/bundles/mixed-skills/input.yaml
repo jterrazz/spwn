@@ -1,0 +1,10 @@
+# Input: several catalog entries mixing skill-carrying and plain
+# entries. Exercises CollectSkills' ordering + indexing across
+# multiple resolved tools + the transitive-dependency resolution
+# inside Registry.Resolve.
+tools:
+  - spwn:architect
+  - spwn:cli
+  - spwn:mempalace
+  - spwn:qmd
+  - spwn:unix
