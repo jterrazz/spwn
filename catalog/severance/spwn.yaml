@@ -1,0 +1,20 @@
+version: 2
+name: severance
+title: Severance
+tagline: Four innies, one batch to refine
+description: |
+  A Macrodata Refinement team — Mark, Helly, Irving, Dylan — working
+  on a shared corpus. Four distinct souls coordinating through a
+  shared world knowledge base. Shows off multi-agent hierarchy
+  (chief + workers), inbox messaging, and how distinct SOUL.md files
+  produce distinct agent behavior.
+
+worlds:
+  mdr:
+    agents: [mark, helly, irving, dylan]
+    workspaces: [.]
+    knowledge: ./knowledge
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"

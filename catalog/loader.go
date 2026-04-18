@@ -21,7 +21,7 @@ import (
 // directive — Go's embed doesn't accept a bare wildcard because
 // the package's own Go sources would otherwise land in the FS.
 //
-//go:embed all:architect all:build all:cli all:docker-cli all:git all:macrohard all:matrix all:mempalace all:node all:paperclip-factory all:python all:qmd all:research-lab all:startup all:unix
+//go:embed all:architect all:build all:cli all:docker-cli all:git all:macrohard all:matrix all:mempalace all:node all:paperclip-factory all:python all:qmd all:research-lab all:severance all:startup all:unix
 var catalogFS embed.FS
 
 // loadYAMLTools walks every catalog entry that ships a
