@@ -341,8 +341,10 @@ commands and adapters below belong to one or more of these.
 | **Mind** | 3-layer persistent memory: `skills/` `playbooks/` `journal/` | 🟢 |
 | **Knowledge** | World-scoped `./knowledge/` bind-mount (opt-in per world) | 🟢 |
 | **Runtimes** | `claude-code`, `codex` — swappable Go adapters | 🟢 |
-| **Observability** | Per-session journal, activity log, `spwn logs` | 🟡 |
+| **Architect** | Always-on orchestration daemon — spawns worlds, routes inboxes, delegates | 🟡 |
 | **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |
+| **Observability** | Per-session journal, activity log, `spwn logs` | 🟡 |
+| **Teams & orgs** | Group agents into coordinated units (chief / workers, role structures) | 🟡 |
 | **Web dashboard** | Agent roster + composition viewer (`apps/web`) | 🟡 |
 | **Apps / SDK** | Programmatic Go SDK for embedding spwn in external tools | 🔴 |
 | **Managed agents** | Autonomous daemon mode (`agent start` / `agent stop`, hosted) | 🔴 |
