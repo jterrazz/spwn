@@ -135,6 +135,7 @@ worlds:
   matrix:
     agents: [neo]
     workspaces: [.]
+    knowledge: ./knowledge   # optional; bind into /world/knowledge/. Omit for no mount.
 ```
 
 **`~/.spwn/` holds only your user identity** - credentials, daemon state, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, publish it (`spwn agent publish`) and pull it in the next repo with `spwn agent get`.
