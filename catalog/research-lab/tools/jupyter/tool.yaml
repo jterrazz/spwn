@@ -6,4 +6,4 @@ install:
     - pip install jupyter
 
 verify:
-  command: jupyter --version
+  - jupyter --version
