@@ -9,7 +9,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/runtime"
+	"spwn.sh/packages/runtimes"
 )
 
 // SpawnAgent execs Claude Code interactively inside a world.
@@ -31,7 +31,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 	a.state.UpdateStatus(worldID, models.StatusRunning)
 
 	// Session management - claude-code is the only runtime
-	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
+	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
 		AgentName: agentName,
 		WorldID:   worldID,
 	})
@@ -98,7 +98,7 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 
 	a.state.UpdateStatus(worldID, models.StatusRunning)
 
-	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
+	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
 		AgentName: agentName,
 		WorldID:   worldID,
 	})

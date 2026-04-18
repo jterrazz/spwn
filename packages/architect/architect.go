@@ -7,24 +7,24 @@ import (
 
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/state"
 
-	// Register the claude-code runtime adapter
-	_ "spwn.sh/packages/runtimes/claude_code"
+	// Register every built-in runtime adapter
+	_ "spwn.sh/packages/runtimes/defaults"
 )
 
 // Architect orchestrates world lifecycle.
 type Architect struct {
 	backend backend.Backend
 	state   *state.Store
-	runtime runtime.Runtime // injected runtime adapter - claude-code
+	runtime runtimes.Spawner // injected runtime adapter - claude-code
 }
 
 // New creates an Architect with the given backend and state store.
 func New(b backend.Backend, s *state.Store) *Architect {
-	rt, _ := runtime.Get("claude-code")
+	rt, _ := runtimes.GetSpawner("claude-code")
 	return &Architect{
 		backend: b,
 		state:   s,

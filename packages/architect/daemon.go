@@ -13,8 +13,9 @@ import (
 
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/platform"
+	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/labels"
 )
 
@@ -292,9 +293,23 @@ func TalkExecArgs(message string) ([]string, error) {
 	for i, arg := range claudeArgs {
 		escaped[i] = "'" + strings.ReplaceAll(arg, "'", "'\\''") + "'"
 	}
-	setup := "source /credentials/.env 2>/dev/null"
-	setup += "; [ -f /credentials/openai/auth.json ] && mkdir -p $HOME/.codex && ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null"
-	shellCmd := setup + "; exec " + strings.Join(escaped, " ")
+
+	// The architect container bundles every built-in runtime (claude,
+	// codex, …) so their OAuth/API-key files are all available under
+	// /credentials/<provider>/ and need to be plumbed into each
+	// runtime's expected home location. Compose the prelaunch from
+	// every adapter that supplies one — each adapter owns its own
+	// container-side wiring (symlinks, config-file copies, etc).
+	setupParts := []string{"source /credentials/.env 2>/dev/null"}
+	for _, a := range runtimes.All() {
+		if a.Spawn == nil {
+			continue
+		}
+		if s := a.Spawn.PrelaunchShell(); s != "" {
+			setupParts = append(setupParts, s)
+		}
+	}
+	shellCmd := strings.Join(setupParts, "; ") + "; exec " + strings.Join(escaped, " ")
 	args = append(args, "bash", "-c", shellCmd)
 	return args, nil
 }

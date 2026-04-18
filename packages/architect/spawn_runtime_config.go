@@ -10,39 +10,49 @@ import (
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/dependency/tool"
+	"spwn.sh/packages/runtimes"
 )
 
 // injectRuntimeConfig computes the merged runtime config for the
-// world's runtime backend and writes it into the container's
-// runtime settings file.
+// world's runtime backend and writes it into the container's runtime
+// settings file.
 //
-// Current scope: only spwn:claude-code has a known settings path
-// (/home/spwn/.claude/settings.json). The container's baseline
-// settings file — written by the claude_code tool's UserCommands
-// at image build time — is read back, shallow-merged with every
-// dependency's Config(runtime) output (last write wins), and
-// rewritten in place.
+// The runtime adapter (runtimes.Adapter, resolved by runtimeName)
+// owns two pieces of knowledge:
 //
-// When no dependency targets the runtime, this is a no-op: the
-// baseline settings.json stays untouched.
+//   - CatalogRef — the dep-facing identifier ("spwn:claude-code")
+//     that tool authors key their runtime-config: blocks against.
+//   - Spawn.ContainerConfigPath — the container-side path to the
+//     baseline settings file the adapter wants merged in place.
 //
-// Additional runtimes can grow their own branch here as
-// dependencies for them materialise.
-func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID string, resolved []tool.Tool) error {
-	// The dependency-facing runtime identifier is the same as the
-	// image builder's runtime tool name. Spawn always installs
-	// spwn:claude-code, so hard-code it here until a second
-	// runtime lands (codex is built but has no dependency target
-	// yet).
-	const runtimeName = "spwn:claude-code"
-	const settingsPath = "/home/spwn/.claude/settings.json"
+// When the resolved adapter has no Spawn or no ContainerConfigPath,
+// the injection is skipped — the runtime doesn't participate in the
+// runtime-config merge path (codex today).
+//
+// The merge is shallow (last write wins per top-level key). The
+// baseline settings file — written by the runtime tool's UserCommands
+// at image-build time — is read back, shallow-merged with every
+// dependency's Config(runtimeRef) output, and rewritten in place.
+func injectRuntimeConfig(ctx context.Context, be backend.Backend, containerID, runtimeName string, resolved []tool.Tool) error {
+	adapter, ok := runtimes.Get(runtimeName)
+	if !ok || adapter.Spawn == nil {
+		return nil
+	}
+	settingsPath := adapter.Spawn.ContainerConfigPath()
+	if settingsPath == "" {
+		return nil
+	}
+	ref := adapter.CatalogRef
+	if ref == "" {
+		return nil
+	}
 
-	configs := resolver.CollectRuntimeConfigs(resolved, runtimeName)
+	configs := resolver.CollectRuntimeConfigs(resolved, ref)
 	if len(configs) == 0 {
 		return nil
 	}
 
-	// Read the container's baseline settings.json. Missing file is
+	// Read the container's baseline settings file. Missing file is
 	// fine — an empty base layer merges cleanly.
 	baseStdout, _ := be.ExecOutput(ctx, containerID, []string{"sh", "-c", "cat " + settingsPath + " 2>/dev/null || true"})
 	base := []byte(strings.TrimSpace(baseStdout))

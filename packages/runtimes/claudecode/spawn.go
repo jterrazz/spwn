@@ -1,4 +1,4 @@
-package claude_code
+package claudecode
 
 import (
 	"encoding/json"
@@ -9,24 +9,23 @@ import (
 	goruntime "runtime"
 	"strings"
 
-	rt "spwn.sh/packages/world/runtime"
+	"spwn.sh/packages/runtimes"
 )
 
-// Runtime is the claude-code spawn-time adapter — implements the
-// world/runtime.Runtime interface (BuildCommand, credential sync,
+// Spawner is the claude-code spawn-time adapter — implements the
+// runtimes.Spawner interface (BuildCommand, credential sync,
 // prelaunch shell, default config files). Distinct from Tool (the
-// tool.Tool for image builds) which lives in claude_code.go.
-var Runtime = &runtimeAdapter{}
+// tool.Tool for image builds) which lives in tool.go and from
+// Renderer (the transpile.Runtime) which lives in render.go.
+var Spawner = &spawner{}
 
-type runtimeAdapter struct{}
-
-func init() { rt.Register(Runtime) }
+type spawner struct{}
 
 // Name returns the runtime identifier.
-func (c *runtimeAdapter) Name() string { return "claude-code" }
+func (c *spawner) Name() string { return "claude-code" }
 
 // BuildCommand constructs the claude CLI command with all flags.
-func (c *runtimeAdapter) BuildCommand(cfg rt.SpawnConfig) []string {
+func (c *spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
 	cmd := []string{"claude", "--dangerously-skip-permissions"}
 
 	// NPC mode: no named agent, just print
@@ -53,8 +52,15 @@ func (c *runtimeAdapter) BuildCommand(cfg rt.SpawnConfig) []string {
 }
 
 // SupportsSession returns true if the runtime can resume sessions.
-func (c *runtimeAdapter) SupportsSession() bool { return true }
-func (c *runtimeAdapter) Available() bool       { return true }
+func (c *spawner) SupportsSession() bool { return true }
+func (c *spawner) Available() bool       { return true }
+
+// ContainerConfigPath returns the container-side settings.json path
+// that receives merged runtime-config JSON from the resolved
+// dependency set. Written by the architect after container start.
+func (c *spawner) ContainerConfigPath() string {
+	return "/home/spwn/.claude/settings.json"
+}
 
 // ── Container-side setup ─────────────────────────────────────────
 
@@ -68,7 +74,7 @@ func (c *runtimeAdapter) Available() bool       { return true }
 // is the actual HOME the runtime runs under (not /home/spwn).
 // Previous attempts compiled these into the base image at build time
 // and lost to the HOME override.
-func (c *runtimeAdapter) DefaultConfigFiles(agentHome string) map[string][]byte {
+func (c *spawner) DefaultConfigFiles(agentHome string) map[string][]byte {
 	// Trust the agent's own home + the workspaces mount root so
 	// Claude Code doesn't prompt on first access. We can't
 	// enumerate the resolved workspace names here without plumbing
@@ -122,7 +128,7 @@ func (c *runtimeAdapter) DefaultConfigFiles(agentHome string) map[string][]byte 
 // A missing credential source is not an error: the env-var path may
 // still supply working auth. Return an error only for real I/O or
 // command failures.
-func (c *runtimeAdapter) SyncHostCredentials(credsDir string) error {
+func (c *spawner) SyncHostCredentials(credsDir string) error {
 	dstDir := filepath.Join(credsDir, "anthropic")
 	dst := filepath.Join(dstDir, ".credentials.json")
 
@@ -145,27 +151,26 @@ func (c *runtimeAdapter) SyncHostCredentials(credsDir string) error {
 	return nil
 }
 
-// PrelaunchShell returns the shell snippet that wraps every runtime
-// exec. It sources env vars from /credentials/.env (set by
-// packages/auth.SyncCredentials), then copies the credential file
-// Claude Code expects into the agent's HOME.
+// PrelaunchShell returns the container-side shell fragment that
+// wires /credentials/anthropic/.credentials.json (populated by
+// SyncHostCredentials + auth.SyncCredentials) into the location
+// Claude Code reads on startup: ~/.claude/.credentials.json.
 //
 // Runs as the agent user with /credentials bind-mounted read-only.
-// Every line guards with test-before-act so missing sources never
-// break the launch - the container may still have working auth via
-// env vars sourced from /credentials/.env alone.
-func (c *runtimeAdapter) PrelaunchShell() string {
-	return strings.Join([]string{
-		"source /credentials/.env 2>/dev/null",
-		// Claude subscription OAuth: point ~/.claude/.credentials.json
-		// at the host-synced file. Use a copy rather than a symlink
-		// so Claude Code's in-place token refresh doesn't mutate the
-		// bind-mounted source.
-		`if [ -f /credentials/anthropic/.credentials.json ]; then ` +
-			`mkdir -p "$HOME/.claude" && ` +
-			`cp /credentials/anthropic/.credentials.json "$HOME/.claude/.credentials.json" && ` +
-			`chmod 600 "$HOME/.claude/.credentials.json"; fi`,
-	}, "; ")
+// Guards with test-before-act so missing creds never break the
+// launch — the container may still have working auth via env vars
+// already sourced from /credentials/.env by the outer composer. Uses
+// a copy rather than a symlink so Claude Code's in-place token
+// refresh doesn't mutate the bind-mounted source.
+//
+// Intentionally omits `source /credentials/.env` — that belongs to
+// the outer prelaunch composition (daemon.go / talk.go) which chains
+// every registered Spawner's PrelaunchShell and owns the env load.
+func (c *spawner) PrelaunchShell() string {
+	return `if [ -f /credentials/anthropic/.credentials.json ]; then ` +
+		`mkdir -p "$HOME/.claude" && ` +
+		`cp /credentials/anthropic/.credentials.json "$HOME/.claude/.credentials.json" && ` +
+		`chmod 600 "$HOME/.claude/.credentials.json"; fi`
 }
 
 // ── internal helpers ─────────────────────────────────────────────

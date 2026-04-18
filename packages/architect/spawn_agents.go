@@ -8,10 +8,10 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/transpile"
-	claudecode "spwn.sh/packages/transpile/runtimes/claude_code"
+	"spwn.sh/packages/runtimes/claudecode"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/runtime"
+	"spwn.sh/packages/runtimes"
 )
 
 // agentHomesForSpawn returns the agentName → containerHomePath map
@@ -72,14 +72,13 @@ func initAgentDeploymentDirs(rec models.AgentRecord, worldID string) error {
 // spwn/worlds/<name>/knowledge/), so it persists directly and does
 // not ride through the agent sync pipeline.
 //
-// The runtime lookup is hardcoded to claude-code because every
-// world spawn today installs spwn:claude-code as a required tool.
-// When the runtime becomes a per-world choice this should resolve
-// off the world manifest.
-func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
-	rt, err := runtime.Get("claude-code")
+// runtimeName selects the spawn adapter whose DefaultConfigFiles are
+// materialised for each agent. Adapters without a Spawn are skipped
+// silently (runtimes that don't need pre-seeded container config).
+func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containerID, runtimeName string, agentHomes map[string]string) error {
+	rt, err := runtimes.GetSpawner(runtimeName)
 	if err != nil {
-		return fmt.Errorf("unknown runtime: %w", err)
+		return fmt.Errorf("unknown runtime %q: %w", runtimeName, err)
 	}
 
 	for _, agentHome := range agentHomes {

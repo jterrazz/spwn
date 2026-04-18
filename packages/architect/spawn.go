@@ -46,12 +46,28 @@ type SpawnOpts struct {
 	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
 	IsArchitect   bool                       // When true, mounts Docker socket + SPWN_HOME for Architect mode.
 	ForceRebuild  bool                       // When true, bypass the content-addressed image cache.
+	// RuntimeName selects the runtime adapter that drives spawn-time
+	// behavior (BuildCommand, credential sync, prelaunch shell) and
+	// the transpile target. Short form: "claude-code", "codex".
+	// Empty defaults to "claude-code" — the historical behavior and
+	// the only runtime with a Renderer today.
+	RuntimeName string
 	// Knowledge is an absolute host path to bind into /world/knowledge/.
 	// When empty, no bind mount is performed and the compile step is
 	// told no knowledge base exists (so the agent's system prompt
 	// never mentions /world/knowledge/). The CLI resolves any
 	// project-relative path to absolute before calling Spawn.
 	Knowledge string
+}
+
+// runtimeName returns opts.RuntimeName with the "claude-code"
+// fallback. Keeps callers and tests that don't populate the field
+// working on the legacy default.
+func (opts *SpawnOpts) runtimeName() string {
+	if opts.RuntimeName != "" {
+		return opts.RuntimeName
+	}
+	return "claude-code"
 }
 
 // Validate returns a non-nil error when SpawnOpts is missing
@@ -368,6 +384,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Config:           opts.ConfigName,
 		Agent:            opts.AgentName,
 		Backend:          platform.DefaultBackend,
+		Runtime:          opts.runtimeName(),
 		Workspaces:       resolvedWorkspaces,
 		CreatedAt:        time.Now(),
 		Manifest:         opts.Manifest,
@@ -487,9 +504,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Merge dependency runtime-config into the container's runtime settings
-	// file. Currently only the claude-code backend has a known target
-	// path; additional runtimes can grow their own branch as needed.
-	if err := injectRuntimeConfig(ctx, a.backend, containerID, resolvedTools); err != nil {
+	// file. The selected runtime's Spawner supplies the container-side
+	// path; adapters without one skip the merge silently.
+	if err := injectRuntimeConfig(ctx, a.backend, containerID, opts.runtimeName(), resolvedTools); err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("inject runtime config: %w", err)
@@ -502,7 +519,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// drops straight into a clean session. docker cp'd per file,
 	// overwrites any placeholder that came in via the host copy.
 	if len(agentHomes) > 0 {
-		if err := writeRuntimeDefaultConfig(ctx, a.backend, containerID, agentHomes); err != nil {
+		if err := writeRuntimeDefaultConfig(ctx, a.backend, containerID, opts.runtimeName(), agentHomes); err != nil {
 			warnings = append(warnings, fmt.Sprintf("runtime default config: %v", err))
 		}
 	}
@@ -535,7 +552,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Agents:               rosterCompileAgents(rosterAgents),
 		WorldKnowledgeMounted: knowledgeMounted,
 	}
-	tree, err := transpile.Compile("claude-code", compileInput)
+	tree, err := transpile.Compile(opts.runtimeName(), compileInput)
 	if err != nil {
 		a.backend.Stop(ctx, containerID)
 		a.backend.Remove(ctx, containerID)

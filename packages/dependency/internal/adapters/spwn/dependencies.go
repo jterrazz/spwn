@@ -7,7 +7,7 @@
 // Go edit required. Runtimes that need host-side Go behavior at
 // spawn time (credential sync, default config materialisation,
 // prelaunch shell) are kept Go-only and registered via
-// packages/world/runtime/.
+// packages/runtimes/.
 package spwn
 
 import (

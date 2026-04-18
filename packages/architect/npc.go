@@ -7,8 +7,8 @@ import (
 
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/transpile/runtimes/claude_code"
-	"spwn.sh/packages/world/runtime"
+	"spwn.sh/packages/runtimes/claudecode"
+	"spwn.sh/packages/runtimes"
 )
 
 // SpawnNPC runs an NPC - an ephemeral agent with a single task, no Mind, no persistence.
@@ -44,7 +44,7 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 	}
 
 	// Build a minimal claude command - no Mind, no session
-	cmd := a.runtime.BuildCommand(runtime.SpawnConfig{
+	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
 		Prompt: task,
 	})
 

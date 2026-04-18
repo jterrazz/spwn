@@ -16,6 +16,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/architect"
+	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world"
 )
 
@@ -69,16 +70,23 @@ If no message is provided, opens an interactive session inside the container.`,
 			sessionID = arc.GetSessionID(worldID, name)
 		}
 
-		_ = w // world record kept for future use; runtime config no longer needs MindPath
-		runtimeCmd, rtErr := world.BuildRuntimeCommand("claude-code", world.RuntimeSpawnConfig{
+		// Runtime is stored on the world record at spawn time.
+		// Legacy state files may be missing it — fall back to the
+		// historical default so old worlds keep working.
+		runtimeName := "claude-code"
+		if w != nil && w.Runtime != "" {
+			runtimeName = w.Runtime
+		}
+		rtSpawner, rtErr := runtimes.GetSpawner(runtimeName)
+		if rtErr != nil {
+			return fmt.Errorf("cannot resolve runtime %q for world %s: %w", runtimeName, worldID, rtErr)
+		}
+		runtimeCmd := rtSpawner.BuildCommand(runtimes.SpawnConfig{
 			AgentName: name,
 			WorldID:   worldID,
 			Prompt:    message,
 			SessionID: sessionID,
 		})
-		if rtErr != nil {
-			return fmt.Errorf("cannot build claude-code runtime command for world %s", worldID)
-		}
 
 		// Configure output format for session ID capture.
 		// Claude: --print --output-format json → single JSON with session_id
@@ -97,11 +105,7 @@ If no message is provided, opens an interactive session inside the container.`,
 		//      (e.g. Claude's ~/.claude/.credentials.json or the
 		//      macOS Keychain) into the same directory.
 		_ = auth.SyncCredentials()
-		rt, rtErr2 := world.GetRuntime("claude-code")
-		if rtErr2 != nil {
-			return fmt.Errorf("lookup runtime: %w", rtErr2)
-		}
-		if err := rt.SyncHostCredentials(platform.CredentialsDir()); err != nil {
+		if err := rtSpawner.SyncHostCredentials(platform.CredentialsDir()); err != nil {
 			return fmt.Errorf("sync credentials: %w", err)
 		}
 
@@ -136,7 +140,11 @@ If no message is provided, opens an interactive session inside the container.`,
 			for i, arg := range cmd {
 				escaped[i] = "'" + strings.ReplaceAll(arg, "'", "'\\''") + "'"
 			}
-			setup := rt.PrelaunchShell()
+			// Source env vars first (the outer composer owns this),
+			// then chain the runtime-specific plumbing. The adapter's
+			// PrelaunchShell is pure container-side setup — no env
+			// sourcing — so callers can compose multiple adapters.
+			setup := "source /credentials/.env 2>/dev/null; " + rtSpawner.PrelaunchShell()
 			shellCmd := setup + "; exec " + strings.Join(escaped, " ")
 			return []string{"bash", "-c", shellCmd}
 		}
@@ -180,7 +188,7 @@ If no message is provided, opens an interactive session inside the container.`,
 					// sees the original event stream byte-for-byte.
 					_, _ = os.Stdout.Write(line)
 					_, _ = os.Stdout.Write([]byte{'\n'})
-					if id := extractSessionID("claude-code", line); id != "" {
+					if id := extractSessionID(runtimeName, line); id != "" {
 						persistSession(id)
 					}
 				}
@@ -216,7 +224,7 @@ If no message is provided, opens an interactive session inside the container.`,
 				// Fallback: even if the wrapper JSON failed to parse,
 				// scan the raw output for an embedded session_id so we
 				// don't silently lose continuity.
-				if id := extractSessionID("claude-code", output); id != "" {
+				if id := extractSessionID(runtimeName, output); id != "" {
 					persistSession(id)
 				}
 				fmt.Fprint(os.Stdout, string(output))
