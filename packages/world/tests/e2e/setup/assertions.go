@@ -31,7 +31,8 @@ func (a *AssertionChain) ExecInContainer(cmd []string) string {
 	return a.tc.ExecInContainer(a.w.ContainerID, cmd)
 }
 
-// ExpectState asserts against the state.json contents.
+// ExpectState asserts against the world-state surface (Docker labels
+// + runtimestate, the replacement for the old state.json).
 func (a *AssertionChain) ExpectState(fn func(s *StateAssertion)) *AssertionChain {
 	a.tc.T.Helper()
 	fn(&StateAssertion{tc: a.tc})

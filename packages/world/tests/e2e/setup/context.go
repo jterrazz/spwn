@@ -15,6 +15,7 @@ import (
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world"
 	"spwn.sh/packages/world/labels"
+	"spwn.sh/packages/world/runtimestate"
 )
 
 const TestImage = "spwn-test:latest"
@@ -52,9 +53,9 @@ func NewTestContext(t *testing.T) *TestContext {
 		t.Fatalf("Docker must be running for E2E tests: %v", err)
 	}
 
-	store, err := world.NewStoreAt(filepath.Join(baseDir, "state.json"))
+	store, err := runtimestate.NewStoreWith(docker, filepath.Join(baseDir, "world-states"))
 	if err != nil {
-		t.Fatalf("Failed to create state store: %v", err)
+		t.Fatalf("Failed to create runtimestate store: %v", err)
 	}
 
 	ctx := &TestContext{
@@ -98,7 +99,8 @@ func (tc *TestContext) TrackWorld(id string) {
 	tc.Spawned = append(tc.Spawned, id)
 }
 
-// LoadState reads the state.json file and returns the list of worlds.
+// LoadState lists every world the daemon currently knows about
+// (sourced from Docker container labels + hydrated from runtimestate).
 func (tc *TestContext) LoadState() []world.World {
 	tc.T.Helper()
 	worlds, err := tc.State.List()

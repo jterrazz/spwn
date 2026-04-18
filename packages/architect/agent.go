@@ -8,13 +8,12 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/runtimes"
 )
 
 // SpawnAgent execs Claude Code interactively inside a world.
 func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) error {
-	u, err := a.state.Get(worldID)
+	u, err := a.rstate.Get(worldID)
 	if err != nil {
 		return err
 	}
@@ -27,10 +26,9 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
-	// Update status
-	a.state.UpdateStatus(worldID, models.StatusRunning)
-
-	// Session management - claude-code is the only runtime
+	// Session management - claude-code is the only runtime.
+	// Status is derived from container state on every List/Get —
+	// no explicit transition needed here.
 	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
 		AgentName: agentName,
 		WorldID:   worldID,
@@ -70,8 +68,6 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 		log.Printf("warning: failed to write journal: %v", journalErr)
 	}
 
-	a.state.UpdateStatus(worldID, models.StatusIdle)
-
 	if err != nil {
 		return fmt.Errorf("exec claude: %w", err)
 	}
@@ -83,7 +79,7 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 
 // SpawnAgentDetached starts Claude Code in the background.
 func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName string) error {
-	u, err := a.state.Get(worldID)
+	u, err := a.rstate.Get(worldID)
 	if err != nil {
 		return err
 	}
@@ -95,8 +91,6 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 	if !running {
 		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
-
-	a.state.UpdateStatus(worldID, models.StatusRunning)
 
 	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
 		AgentName: agentName,

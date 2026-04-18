@@ -38,7 +38,7 @@ func formatUptime(d time.Duration) string {
 // discarded with it. Non-graceful shutdowns (crash, docker kill)
 // skip this step and lose any unsaved memory writes.
 func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World, error) {
-	u, err := a.state.Get(worldID)
+	u, err := a.rstate.Get(worldID)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		}
 	}
 
-	a.state.Delete(worldID)
+	a.rstate.Delete(worldID)
 
 	// Emit activity events
 	uptime := formatUptime(duration)
@@ -110,7 +110,7 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 // DestroyAll stops and removes all worlds sequentially.
 // Returns the list of destroyed worlds and the first error encountered (if any).
 func (a *Architect) DestroyAll(ctx context.Context) ([]*models.World, error) {
-	worlds, err := a.state.List()
+	worlds, err := a.rstate.List()
 	if err != nil {
 		return nil, err
 	}

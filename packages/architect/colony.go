@@ -38,7 +38,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 		return fmt.Errorf("agent %q: %w", agentName, err)
 	}
 
-	u, err := a.state.Get(worldID)
+	u, err := a.rstate.Get(worldID)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 
 	// 2. Register in runtimestate so the next List() includes the
 	// agent in u.Agents.
-	if err := a.state.AddAgent(worldID, rec); err != nil {
+	if err := a.rstate.AddAgent(worldID, rec); err != nil {
 		return fmt.Errorf("register agent: %w", err)
 	}
 
@@ -130,7 +130,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 
 	// 4. Start the runtime process in the background.
 	if err := a.SpawnAgentDetached(ctx, worldID, agentName); err != nil {
-		_ = a.state.RemoveAgent(worldID, agentID)
+		_ = a.rstate.RemoveAgent(worldID, agentID)
 		return fmt.Errorf("start agent: %w", err)
 	}
 
@@ -142,7 +142,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 // agent removal in future). The file is written to the host so the
 // bind mount propagates it into the container.
 func regenRoster(worldID string, a *Architect) error {
-	worlds, err := a.state.List()
+	worlds, err := a.rstate.List()
 	if err != nil {
 		return err
 	}
@@ -199,7 +199,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 	// (agents are already registered by Spawn() - avoid duplicates)
 	for _, spec := range agents {
 		agentID := platform.GenerateAgentID(spec.Name)
-		if err := a.state.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
+		if err := a.rstate.UpdateAgentStatus(worldID, agentID, models.StatusCreating); err != nil {
 			// Agent not yet registered (shouldn't happen in normal flow) - add it
 			role := agent.DefaultRole(spec.Role)
 			rec := models.AgentRecord{
@@ -208,7 +208,7 @@ func (a *Architect) SpawnAgents(ctx context.Context, worldID string, agents []Ag
 				Role:    role,
 				Status:  models.StatusCreating,
 			}
-			if addErr := a.state.AddAgent(worldID, rec); addErr != nil {
+			if addErr := a.rstate.AddAgent(worldID, rec); addErr != nil {
 				return fmt.Errorf("register agent %q: %w", spec.Name, addErr)
 			}
 		}

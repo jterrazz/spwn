@@ -9,7 +9,7 @@ import (
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/state"
+	"spwn.sh/packages/world/runtimestate"
 
 	// Register every built-in runtime adapter
 	_ "spwn.sh/packages/runtimes/defaults"
@@ -18,40 +18,40 @@ import (
 // Architect orchestrates world lifecycle.
 type Architect struct {
 	backend backend.Backend
-	state   *state.Store
+	rstate  *runtimestate.Store
 	runtime runtimes.Spawner // injected runtime adapter - claude-code
 }
 
-// New creates an Architect with the given backend and state store.
-func New(b backend.Backend, s *state.Store) *Architect {
+// New creates an Architect with the given backend and runtimestate store.
+func New(b backend.Backend, s *runtimestate.Store) *Architect {
 	rt, _ := runtimes.GetSpawner("claude-code")
 	return &Architect{
 		backend: b,
-		state:   s,
+		rstate:  s,
 		runtime: rt,
 	}
 }
 
 // SetSessionID stores a runtime session ID for an agent in a world.
 func (a *Architect) SetSessionID(worldID, agentName, sessionID string) error {
-	return a.state.SetSessionID(worldID, agentName, sessionID)
+	return a.rstate.SetSessionID(worldID, agentName, sessionID)
 }
 
 // GetSessionID returns the runtime session ID for an agent in a world.
 func (a *Architect) GetSessionID(worldID, agentName string) string {
-	return a.state.GetSessionID(worldID, agentName)
+	return a.rstate.GetSessionID(worldID, agentName)
 }
 
-// NewFromEnv creates an Architect using the default Docker backend and state store.
+// NewFromEnv creates an Architect using the default Docker backend and runtimestate store.
 func NewFromEnv() (*Architect, error) {
 	docker, err := backend.NewDocker()
 	if err != nil {
 		return nil, fmt.Errorf("cannot connect to Docker: %w", err)
 	}
 
-	store, err := state.NewStore()
+	store, err := runtimestate.NewStore()
 	if err != nil {
-		return nil, fmt.Errorf("cannot initialize state store: %w", err)
+		return nil, fmt.Errorf("cannot initialize runtimestate store: %w", err)
 	}
 
 	return New(docker, store), nil
@@ -59,25 +59,25 @@ func NewFromEnv() (*Architect, error) {
 
 // List returns all worlds.
 func (a *Architect) List(ctx context.Context) ([]models.World, error) {
-	return a.state.List()
+	return a.rstate.List()
 }
 
 // Inspect returns a world by ID.
 func (a *Architect) Inspect(ctx context.Context, worldID string) (*models.World, error) {
-	return a.state.Get(worldID)
+	return a.rstate.Get(worldID)
 }
 
-// Rename updates a world's display name. Empty name clears the field (UIs fall back to the ID).
+// Rename updates a world's display name. Persists via runtimestate
+// so the label-derived name on the container stays unchanged while
+// every subsequent List/Get surfaces the new value via hydrate(). An
+// empty name clears the override and restores the label default.
 func (a *Architect) Rename(ctx context.Context, worldID, name string) error {
-	if _, err := a.state.Get(worldID); err != nil {
-		return err
-	}
-	return a.state.Rename(worldID, name)
+	return a.rstate.SetDisplayName(worldID, name)
 }
 
 // Snapshot commits the current state of a world's container as a Docker compile.
 func (a *Architect) Snapshot(ctx context.Context, worldID, name string) (string, error) {
-	u, err := a.state.Get(worldID)
+	u, err := a.rstate.Get(worldID)
 	if err != nil {
 		return "", fmt.Errorf("world %s not found.\nRun 'spwn list' to see active worlds", worldID)
 	}
@@ -121,7 +121,7 @@ func (a *Architect) DeleteSnapshot(ctx context.Context, snapshotTag string) erro
 
 // Attach opens an interactive shell into a running world.
 func (a *Architect) Attach(ctx context.Context, worldID string) error {
-	u, err := a.state.Get(worldID)
+	u, err := a.rstate.Get(worldID)
 	if err != nil {
 		return err
 	}

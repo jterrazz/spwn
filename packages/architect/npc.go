@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/transpile/worldbook"
 	"spwn.sh/packages/runtimes"
 )
@@ -14,7 +13,7 @@ import (
 // SpawnNPC runs an NPC - an ephemeral agent with a single task, no Mind, no persistence.
 // NPCs have no persistent identity, no journal, and no session state.
 func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) error {
-	u, err := a.state.Get(worldID)
+	u, err := a.rstate.Get(worldID)
 	if err != nil {
 		return fmt.Errorf("world %s not found.\nRun 'spwn list' to see active worlds", worldID)
 	}
@@ -26,8 +25,6 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 	if !running {
 		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
-
-	a.state.UpdateStatus(worldID, models.StatusRunning)
 
 	// Generate AGENT.md for NPC (minimal context)
 	agentCtx := worldbook.GenerateAgentContext(worldbook.AgentContextOpts{
@@ -55,8 +52,6 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		Env: env,
 		TTY: false,
 	})
-
-	a.state.UpdateStatus(worldID, models.StatusIdle)
 
 	if err != nil {
 		return fmt.Errorf("exec NPC: %w", err)

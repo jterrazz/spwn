@@ -24,7 +24,7 @@ import (
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/world/state"
+	"spwn.sh/packages/world/runtimestate"
 
 
 	"gopkg.in/yaml.v3"
@@ -35,10 +35,10 @@ const webVersionCheckInterval = 1 * time.Hour
 
 // Server serves the HTTP API.
 type Server struct {
-	state *state.Store
-	arch  *architect.Architect // nil = read-only mode
-	addr  string
-	srv   *http.Server
+	rstate *runtimestate.Store
+	arch   *architect.Architect // nil = read-only mode
+	addr   string
+	srv    *http.Server
 
 	// spawnArchitectFn is injected by the cli wiring (world pkg
 	// can't be imported here without a cycle). When nil, the
@@ -60,8 +60,8 @@ func (s *Server) SetSpawnArchitect(fn ArchitectSpawnFunc) {
 }
 
 // New creates an API server. arch may be nil for read-only mode.
-func New(s *state.Store, arch *architect.Architect, addr string) *Server {
-	return &Server{state: s, arch: arch, addr: addr}
+func New(s *runtimestate.Store, arch *architect.Architect, addr string) *Server {
+	return &Server{rstate: s, arch: arch, addr: addr}
 }
 
 // cors wraps a handler with CORS headers.
@@ -230,7 +230,7 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 		completed = true
 	}
 	// Also surface a couple of useful first-run signals.
-	worlds, _ := s.state.List()
+	worlds, _ := s.rstate.List()
 	agents, _ := agentpkg.ListAgents()
 	docker := probe.CheckDocker(r.Context())
 	hasAuth := false
@@ -309,7 +309,7 @@ func (s *Server) handleSystemOnboardingComplete(w http.ResponseWriter, r *http.R
 }
 
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
-	worlds, _ := s.state.List()
+	worlds, _ := s.rstate.List()
 	agents, _ := agentpkg.ListAgents()
 
 	vi := upgrade.GetVersionInfo(webVersionCheckInterval)
@@ -350,7 +350,7 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 	// runtime world list if we can't read the manifest.
 	if pm, ok := loadProjectManifest(); ok {
 		running := map[string]bool{}
-		if liveWorlds, err := s.state.List(); err == nil {
+		if liveWorlds, err := s.rstate.List(); err == nil {
 			for _, lw := range liveWorlds {
 				if lw.Config != "" {
 					running[lw.Config] = true
@@ -375,7 +375,7 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	worlds, err := s.state.List()
+	worlds, err := s.rstate.List()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
@@ -420,7 +420,7 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Index running worlds by config name.
-	if liveWorlds, lerr := s.state.List(); lerr == nil {
+	if liveWorlds, lerr := s.rstate.List(); lerr == nil {
 		for _, lw := range liveWorlds {
 			if lw.Config != "" {
 				runningWorlds[lw.Config] = true
@@ -1022,7 +1022,7 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 	// 1. Explicit agent field in request body (multi-agent aware)
 	// 2. Legacy single-agent field on the world (u.Agent)
 	// 3. First agent in the world's Agents slice
-	worlds, err := s.state.List()
+	worlds, err := s.rstate.List()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return
@@ -1137,7 +1137,7 @@ func (s *Server) handleArchitectStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build KPIs - always included regardless of Docker status
-	worlds, _ := s.state.List()
+	worlds, _ := s.rstate.List()
 	agents, _ := agentpkg.ListAgents()
 
 	// Count stack tasks from file
@@ -1480,7 +1480,7 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 
 // getWorldContainerID looks up the container ID for a world by its ID.
 func (s *Server) getWorldContainerID(worldID string) (string, error) {
-	worlds, err := s.state.List()
+	worlds, err := s.rstate.List()
 	if err != nil {
 		return "", fmt.Errorf("failed to list worlds: %w", err)
 	}
@@ -2220,7 +2220,7 @@ func (s *Server) handleWorldHistory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Find container ID from state
-	worlds, err := s.state.List()
+	worlds, err := s.rstate.List()
 	if err != nil {
 		jsonError(w, err.Error(), 500)
 		return

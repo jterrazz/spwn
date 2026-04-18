@@ -99,14 +99,6 @@ func Init(dir string, opts Opts) error {
 		}
 	}
 
-	stateDir := filepath.Join(absDir, ".spwn")
-	if err := os.MkdirAll(stateDir, 0o755); err != nil {
-		return fmt.Errorf("mkdir .spwn: %w", err)
-	}
-	if err := os.WriteFile(filepath.Join(stateDir, "state.json"), []byte("{}\n"), 0o644); err != nil {
-		return fmt.Errorf("write .spwn/state.json: %w", err)
-	}
-
 	// Seed spwn.lock with the initial spwn:* refs baked into
 	// the template agent.yaml so `spwn check` is clean on the very
 	// first run. Without this the lockfile rule would flag drift on

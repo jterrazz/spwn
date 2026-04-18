@@ -24,7 +24,6 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"spwn/agents/neo/playbooks/.gitkeep",
 		"spwn/agents/neo/journal/.gitkeep",
 		"knowledge/.gitkeep",
-		".spwn/state.json",
 		".gitignore",
 		// One example per local-ref scheme so the scaffold demonstrates
 		// skill: / tool: / hook: authoring patterns end-to-end.
