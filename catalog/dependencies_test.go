@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	runtimes "spwn.sh/packages/runtimes"
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 )
 
 // fullRegistry registers tools + runtimes. Some tools like

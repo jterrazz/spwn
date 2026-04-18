@@ -13,7 +13,7 @@ package catalog
 import (
 	"fmt"
 
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 )
 
 // All is populated at package init from every YAML-backed tool in

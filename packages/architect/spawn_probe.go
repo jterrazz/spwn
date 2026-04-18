@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 )
 
 // probeTools runs each resolved tool's Verify() commands inside

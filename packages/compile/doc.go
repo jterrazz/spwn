@@ -1,18 +1,27 @@
-// Package compile is the spwn compiler: provider-neutral source
-// (spwn.yaml + spwn/agents/* + skills + hooks) → runtime-specific
-// file layout a concrete agent runtime can boot from.
+// Package image owns every Docker-touching concern: Dockerfile
+// generation, Docker backend adapter, image build pipeline,
+// post-build tool verification.
 //
-// Phase 1, Compile(name, input), is a pure function: given an
-// Input it returns a *Tree, a deterministic path→bytes map. No
-// disk writes, no Docker. Same input → same bytes → golden tests
-// diff cleanly.
+// Two entry points share the registry, backend, and generator:
 //
-// Phase 2, materialisation, lives in packages/architect (spawn-time
-// docker-cp into the running container) or in packages/image
-// (build-time COPY into a derived image). Compile is deliberately
-// oblivious to which delivery shape consumes its output.
+//   - imagebuilder.Build — the shared base world compile. Resolves a
+//     dependency catalog into a Dockerfile, runs docker build,
+//     probes the result. Cached on a version label.
+//   - BuildFromBase — project-specific derived images. Compiles a
+//     transpile.Tree (currently named transpile.Tree for historical
+//     reasons) onto a base image via a single streamed tar build
+//     context.
 //
-// Runtime-specific renderers live in packages/compile/runtimes/
-// (claude_code today). Adding a new runtime is a sub-package with
-// a Render method and an init() that calls Register.
+// Sub-packages:
+//
+//   - backend/ — Docker client adapter (the only concrete Backend).
+//   - base/    — embedded world.Dockerfile / architect.Dockerfile.
+//   - probe/   — post-build verification (tool Verify commands).
+//   - internal/dockerfile/ — generator internals.
+//   - internal/imagetest/  — integration-test harness.
+//
+// The package does not parse spwn.yaml (that's packages/dependency),
+// does not write agent content (that's packages/compile), and does
+// not start containers (that's packages/architect). It stops at
+// "image exists."
 package compile

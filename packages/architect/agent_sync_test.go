@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/compile"
+	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/world/deploy"
 )
 
@@ -17,7 +17,7 @@ import (
 // error. This is the core of the docker-cp-not-bind-mount architecture.
 func TestMaterialiseWorldTree_SplitsByPrefix(t *testing.T) {
 	mb := newMockBackend()
-	tree := compile.New()
+	tree := transpile.New()
 	tree.AddString("world/physics.md", "laws of the world")
 	tree.AddString("world/roster.md", "roster content")
 	tree.AddString("agents/neo/CLAUDE.md", "neo entrypoint")
@@ -76,7 +76,7 @@ func TestMaterialiseWorldTree_SplitsByPrefix(t *testing.T) {
 
 func TestMaterialiseWorldTree_UnknownPrefixIsError(t *testing.T) {
 	mb := newMockBackend()
-	tree := compile.New()
+	tree := transpile.New()
 	tree.AddString("stray/foo.md", "should be rejected")
 
 	err := deploy.MaterialiseTree(context.Background(), mb, "ctr", tree, t.TempDir())

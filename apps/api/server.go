@@ -19,7 +19,7 @@ import (
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
-	"spwn.sh/packages/image/probe"
+	"spwn.sh/packages/compile/probe"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"

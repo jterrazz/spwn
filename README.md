@@ -206,7 +206,7 @@ Think of spwn the way you think of `tsc` or `babel`. You write in one clean, pro
 
 `spwn check` is the type-checker: it runs the transpile step in dry-run to catch broken imports, missing skills, and invalid tool refs before you ever touch Docker.
 
-Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lock-in. See [`packages/compile/README.md`](packages/compile/README.md) for internals and how to add a new backend.
+Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lock-in. See [`packages/transpile/README.md`](packages/transpile/README.md) for internals and how to add a new backend.
 
 <br/>
 

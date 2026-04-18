@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/compile"
-	"spwn.sh/packages/compile/source"
+	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/transpile/source"
 )
 
 // Test_requireAgentPrompts pins the QA-surfaced behaviour: compile
@@ -19,7 +19,7 @@ func Test_requireAgentPrompts(t *testing.T) {
 	cases := []struct {
 		name    string
 		src     *source.ProjectSource
-		input   compile.Input
+		input   transpile.Input
 		wantErr string
 	}{
 		{
@@ -27,14 +27,14 @@ func Test_requireAgentPrompts(t *testing.T) {
 			src: &source.ProjectSource{Agents: []source.AgentSource{
 				{Name: "neo", AgentMD: []byte("# neo\n\nhi there")},
 			}},
-			input: compile.Input{Agents: []compile.AgentInput{{Name: "neo"}}},
+			input: transpile.Input{Agents: []transpile.AgentInput{{Name: "neo"}}},
 		},
 		{
 			name: "empty AGENTS.md errors",
 			src: &source.ProjectSource{Agents: []source.AgentSource{
 				{Name: "neo", AgentMD: []byte("")},
 			}},
-			input:   compile.Input{Agents: []compile.AgentInput{{Name: "neo"}}},
+			input:   transpile.Input{Agents: []transpile.AgentInput{{Name: "neo"}}},
 			wantErr: "agent prompt is missing or empty for: neo",
 		},
 		{
@@ -42,7 +42,7 @@ func Test_requireAgentPrompts(t *testing.T) {
 			src: &source.ProjectSource{Agents: []source.AgentSource{
 				{Name: "neo", AgentMD: []byte("   \n\t\n")},
 			}},
-			input:   compile.Input{Agents: []compile.AgentInput{{Name: "neo"}}},
+			input:   transpile.Input{Agents: []transpile.AgentInput{{Name: "neo"}}},
 			wantErr: "agent prompt is missing or empty for: neo",
 		},
 		{
@@ -51,7 +51,7 @@ func Test_requireAgentPrompts(t *testing.T) {
 				{Name: "neo", AgentMD: []byte("# neo")},
 				{Name: "trin", AgentMD: nil},
 			}},
-			input: compile.Input{Agents: []compile.AgentInput{
+			input: transpile.Input{Agents: []transpile.AgentInput{
 				{Name: "neo"}, {Name: "trin"},
 			}},
 			wantErr: "agent prompt is missing or empty for: trin",
@@ -59,7 +59,7 @@ func Test_requireAgentPrompts(t *testing.T) {
 		{
 			name:  "nil source is a no-op",
 			src:   nil,
-			input: compile.Input{Agents: []compile.AgentInput{{Name: "neo"}}},
+			input: transpile.Input{Agents: []transpile.AgentInput{{Name: "neo"}}},
 		},
 	}
 	for _, tc := range cases {

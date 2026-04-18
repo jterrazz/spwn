@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/compile"
-	"spwn.sh/packages/compile/runtimes/claude_code"
+	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/transpile/runtimes/claude_code"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world/deploy"
 	"spwn.sh/packages/world/models"
@@ -81,11 +81,11 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	// role.md) through the compiler and docker-cp it on top of the
 	// copied-in home. We only handle agents/* entries — the world/*
 	// files already exist from spawn time.
-	hotTree, err := compile.Compile("claude-code", compile.Input{
+	hotTree, err := transpile.Compile("claude-code", transpile.Input{
 		Deps: nil,
 		VerifiedTools: nil,
 		WorldID:       worldID,
-		Agents:        []compile.AgentInput{{Name: rec.Name, Role: resolvedRole}},
+		Agents:        []transpile.AgentInput{{Name: rec.Name, Role: resolvedRole}},
 	})
 	if err != nil {
 		return fmt.Errorf("compile agent deployment: %w", err)

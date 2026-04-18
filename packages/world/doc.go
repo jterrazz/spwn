@@ -1,5 +1,5 @@
 // Package world is the world domain — the primitives that sit
-// above the Docker daemon (via packages/image/backend) and below
+// above the Docker daemon (via packages/compile/backend) and below
 // the orchestrator (packages/architect).
 //
 // The top-level package is a thin facade that re-exports the

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/activity"
-	"spwn.sh/packages/image/backend"
+	"spwn.sh/packages/compile/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtime"
 	"spwn.sh/packages/world/state"
@@ -75,7 +75,7 @@ func (a *Architect) Rename(ctx context.Context, worldID, name string) error {
 	return a.state.Rename(worldID, name)
 }
 
-// Snapshot commits the current state of a world's container as a Docker image.
+// Snapshot commits the current state of a world's container as a Docker compile.
 func (a *Architect) Snapshot(ctx context.Context, worldID, name string) (string, error) {
 	u, err := a.state.Get(worldID)
 	if err != nil {
@@ -108,13 +108,13 @@ func (a *Architect) ListSnapshots(ctx context.Context) ([]backend.ImageInfo, err
 	return a.backend.ImageList(ctx, "spwn-snapshot:")
 }
 
-// RestoreSnapshot creates a new world from a snapshot image.
+// RestoreSnapshot creates a new world from a snapshot compile.
 func (a *Architect) RestoreSnapshot(ctx context.Context, snapshotTag string, opts SpawnOpts) (*SpawnResult, error) {
 	opts.Image = snapshotTag
 	return a.Spawn(ctx, opts)
 }
 
-// DeleteSnapshot removes a snapshot image.
+// DeleteSnapshot removes a snapshot compile.
 func (a *Architect) DeleteSnapshot(ctx context.Context, snapshotTag string) error {
 	return a.backend.ImageRemove(ctx, snapshotTag)
 }

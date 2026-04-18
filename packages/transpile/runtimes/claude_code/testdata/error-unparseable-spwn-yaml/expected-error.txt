@@ -1,0 +1,1 @@
+load manifest /Users/jterrazz/Developer/spwn/spwn/packages/transpile/runtimes/claude_code/testdata/error-unparseable-spwn-yaml/input/spwn.yaml: parse /Users/jterrazz/Developer/spwn/spwn/packages/transpile/runtimes/claude_code/testdata/error-unparseable-spwn-yaml/input/spwn.yaml: yaml: line 1: did not find expected ',' or '}'

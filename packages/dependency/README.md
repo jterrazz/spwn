@@ -17,5 +17,5 @@ Every spwn dependency — whether shipped in the built-in catalog or authored un
 
 ## Related
 
-- **Imported by** — `apps/cli`, `catalog`, `packages/architect`, `packages/image` (adapter), `packages/project` (validator), `packages/runtimes`
+- **Imported by** — `apps/cli`, `catalog`, `packages/architect`, `packages/compile` (adapter), `packages/project` (validator), `packages/runtimes`
 - **Imports** — stdlib only

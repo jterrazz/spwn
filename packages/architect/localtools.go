@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/dependency"
 )
 
@@ -16,7 +16,7 @@ import (
 // `spwn build` resolve refs through the same on-disk layout.
 const localToolDir = "tools"
 
-// wrappedLocalTool forwards every image.Tool method to an underlying
+// wrappedLocalTool forwards every compile.Tool method to an underlying
 // packyaml-parsed dependency but forces Name() to the "local:<basename>"
 // form. Catalog refs and local refs share a single registry keyed by
 // name, so the prefix keeps them in separate namespaces — any future
@@ -68,7 +68,7 @@ func loadLocalPack(projectRoot, name string) (ib.Tool, error) {
 }
 
 // hydrateLocalPacks walks a flat list of dependency refs, loads
-// every tool:<name> entry as a synthetic image.Tool via the shared
+// every tool:<name> entry as a synthetic compile.Tool via the shared
 // packyaml parser, registers it, and returns the rewritten list
 // where each tool: ref has been replaced by its "local:<name>"
 // registry key.

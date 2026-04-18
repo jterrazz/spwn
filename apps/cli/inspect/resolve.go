@@ -12,9 +12,9 @@ import (
 
 	"spwn.sh/catalog"
 	"spwn.sh/packages/architect"
-	"spwn.sh/packages/compile/source"
+	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/dependency"
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/runtimes"
 	wmodels "spwn.sh/packages/world/models"

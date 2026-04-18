@@ -10,8 +10,8 @@ import (
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/packages/compile"
-	"spwn.sh/packages/compile/source"
+	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/project"
 )
 
@@ -235,7 +235,7 @@ func runCompileDeepCheck(projectRoot string) []compileIssue {
 		}
 	}
 
-	tree, err := compile.Compile("claude-code", input)
+	tree, err := transpile.Compile("claude-code", input)
 	if err != nil {
 		return append(issues, compileIssue{
 			Level:   "error",
@@ -279,7 +279,7 @@ func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 		return nil
 	}
 	registered := map[string]struct{}{}
-	for _, name := range compile.RegisteredRuntimes() {
+	for _, name := range transpile.RegisteredRuntimes() {
 		registered[name] = struct{}{}
 	}
 	var out []compileIssue
@@ -290,7 +290,7 @@ func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 		}
 		// Map catalog refs to their bare runtime id: both "spwn:codex"
 		// and "spwn:codex" need to strip down to "codex" for
-		// compile.Register lookup (ResolveRuntime uses the same map).
+		// transpile.Register lookup (ResolveRuntime uses the same map).
 		canonical := raw
 		if strings.HasPrefix(raw, "spwn:") {
 			canonical = strings.TrimPrefix(raw, "spwn:")
@@ -300,7 +300,7 @@ func crossCheckRuntimeAdapters(projectRoot string) []compileIssue {
 		if _, ok := registered[canonical]; ok {
 			continue
 		}
-		known := strings.Join(compile.RegisteredRuntimes(), ", ")
+		known := strings.Join(transpile.RegisteredRuntimes(), ", ")
 		out = append(out, compileIssue{
 			Level:   "warning",
 			Path:    "spwn/agents/" + a.Name + "/agent.yaml#runtime.backend",

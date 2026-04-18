@@ -271,7 +271,7 @@ apps/cli  ──→ packages/{world, agent, mailbox, image, migration, base, pro
 packages/world ──→ packages/{agent, image, base}
 packages/agent ──→ packages/base
 packages/mailbox ──→ packages/base
-packages/image ──→ (no spwn deps)
+packages/compile ──→ (no spwn deps)
 packages/migration ──→ packages/base
 packages/project ──→ (no spwn deps)
 ```

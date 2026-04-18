@@ -1,1 +1,0 @@
-parse /Users/jterrazz/Developer/spwn/spwn/packages/compile/runtimes/claude_code/testdata/error-invalid-agent-yaml/input/spwn/agents/neo/agent.yaml: yaml: line 1: did not find expected ',' or ']'

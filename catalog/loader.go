@@ -8,7 +8,7 @@ import (
 	"sort"
 
 	"spwn.sh/packages/dependency"
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 )
 
 // catalogFS embeds every built-in catalog entry — both installable
@@ -25,7 +25,7 @@ import (
 var catalogFS embed.FS
 
 // loadYAMLTools walks every catalog entry that ships a
-// tools/<slug>/tool.yaml and parses it into an image.Tool. Project
+// tools/<slug>/tool.yaml and parses it into an compile.Tool. Project
 // templates (entries whose root spwn.yaml declares `worlds:` but
 // that don't ship a tool.yaml) are not tool-shaped and are not
 // registered — they surface through the init gallery only.

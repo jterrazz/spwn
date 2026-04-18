@@ -4,7 +4,7 @@ import (
 	"spwn.sh/packages/dependency"
 	"io/fs"
 
-	ib "spwn.sh/packages/image"
+	ib "spwn.sh/packages/compile"
 )
 
 
