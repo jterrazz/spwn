@@ -149,15 +149,14 @@ Each agent is a directory of composable blocks - **human-readable, git-friendly,
 
 ```
 spwn/agents/neo/
-├── agent.yaml                # composition: dependencies + runtime
-├── AGENTS.md                 # entry point (provider-neutral; compiled per runtime)
-├── SOUL.md                   # who the agent is - purpose, voice, values (one file)
-├── skills/                   # authored procedures (file per skill)
-├── playbooks/                # workflows promoted from experience
-└── journal/                  # session history - one file per run
+├── agent.yaml      # composition (deps + runtime)
+├── AGENTS.md       # boot-time prompt
+├── SOUL.md         # identity
+├── skills/
+├── playbooks/
+└── journal/
 
-./knowledge/                   # optional, opt-in per world via worlds.<name>.knowledge in spwn.yaml
-                               # facts about the codebase (shared with every agent in this world)
+./knowledge/        # opt-in per world via spwn.yaml#worlds.<name>.knowledge
 ```
 
 **Everything is a dependency.** Tools, runtime-config injectors, and skills all unified under one concept. A dependency can install apt packages, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
