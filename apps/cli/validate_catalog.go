@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"sort"
 	"strings"
 
 	clidep "spwn.sh/apps/cli/dependency"
@@ -37,18 +38,29 @@ func init() {
 // built-in shipped with spwn — dependencies (the unified
 // tool/skill/runtime-config concept) and runtimes. Used to power
 // the "did you mean X?" hints in `spwn check`.
+//
+// Order: dependencies first (sorted), then runtimes (sorted). Kept
+// stable so user-facing hints and the golden tests that pin the
+// hint string don't drift when Go's init() order of the runtime
+// subpackages changes.
 func catalogToolNames() []string {
-	adapters := runtimes.All()
-	out := make([]string, 0, len(dependency.BuiltinTools())+len(adapters))
-	for _, t := range dependency.BuiltinTools() {
-		out = append(out, t.Name())
+	deps := dependency.BuiltinTools()
+	depNames := make([]string, 0, len(deps))
+	for _, t := range deps {
+		depNames = append(depNames, t.Name())
 	}
+	sort.Strings(depNames)
+
+	adapters := runtimes.All()
+	rtNames := make([]string, 0, len(adapters))
 	for _, a := range adapters {
 		if a.Tool != nil {
-			out = append(out, a.Tool.Name())
+			rtNames = append(rtNames, a.Tool.Name())
 		}
 	}
-	return out
+	sort.Strings(rtNames)
+
+	return append(depNames, rtNames...)
 }
 
 // supportedRuntimes returns the identifiers of every runtime adapter
