@@ -1,4 +1,0 @@
-role: citizen
-runtime:
-  engine: claude-code
-  provider: anthropic

@@ -1,5 +1,5 @@
 // Package migrations contains type aliases and the migration catalogue.
-package migrations
+package user
 
 import "spwn.sh/packages/migration"
 

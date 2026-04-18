@@ -1,9 +1,0 @@
-[
-  {
-    "id": "w-mars-99999",
-    "config": "default",
-    "workspace": "/tmp/project",
-    "status": "running",
-    "agents": [{"name": "coder", "agent_id": "a-1", "role": "citizen", "status": "running"}]
-  }
-]

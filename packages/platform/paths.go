@@ -120,14 +120,6 @@ func CredentialsDir() string {
 	return filepath.Join(UserDir(), CredentialsSubDir)
 }
 
-// LegacyStatePath returns the user-level path to the pre-labels
-// ~/.spwn/state.json file. Returned so runtimestate can evict the
-// file on boot — no live code reads or writes it. Removed entirely
-// once we're confident no install predates the labels-as-truth cut.
-func LegacyStatePath() string {
-	return filepath.Join(UserDir(), StateFileName)
-}
-
 // ActivityPath returns the user-level activity log.
 func ActivityPath() string {
 	return filepath.Join(UserDir(), ActivityFileName)
