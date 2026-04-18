@@ -26,6 +26,11 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"knowledge/.gitkeep",
 		".spwn/state.json",
 		".gitignore",
+		// One example per local-ref scheme so the scaffold demonstrates
+		// skill: / tool: / hook: authoring patterns end-to-end.
+		"spwn/skills/focus.md",
+		"spwn/tools/greet/tool.yaml",
+		"spwn/hooks/pre-spawn.sh",
 	}
 	for _, rel := range required {
 		path := filepath.Join(dir, rel)
@@ -76,6 +81,63 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		if !strings.Contains(lockStr, ref) {
 			t.Errorf("lockfile missing %s:\n%s", ref, lockStr)
 		}
+	}
+}
+
+// TestInit_scaffoldsLocalRefExamples locks in the end-to-end story:
+// the scaffold materialises one concrete example for each local-ref
+// scheme (skill:/tool:/hook:), wires all three into the default
+// agent's dependencies list, and makes the hook executable so the
+// spawn pipeline can actually launch it. Without this the "it just
+// works on first init" promise slips.
+func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "local-refs"}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	agentYAML, err := os.ReadFile(filepath.Join(dir, "spwn/agents/neo/agent.yaml"))
+	if err != nil {
+		t.Fatalf("read agent.yaml: %v", err)
+	}
+	for _, ref := range []string{"skill:focus", "tool:greet", "hook:pre-spawn"} {
+		if !strings.Contains(string(agentYAML), ref) {
+			t.Errorf("agent.yaml missing %q, got:\n%s", ref, agentYAML)
+		}
+	}
+
+	// Hook must be executable — runtime launches it directly.
+	info, err := os.Stat(filepath.Join(dir, "spwn/hooks/pre-spawn.sh"))
+	if err != nil {
+		t.Fatalf("stat hook: %v", err)
+	}
+	if info.Mode()&0o111 == 0 {
+		t.Errorf("hook pre-spawn.sh is not executable, mode=%v", info.Mode())
+	}
+
+	// Skill must be a valid frontmatter-first markdown block: starts
+	// with --- so the skill loader picks up its name/description.
+	skill, err := os.ReadFile(filepath.Join(dir, "spwn/skills/focus.md"))
+	if err != nil {
+		t.Fatalf("read skill: %v", err)
+	}
+	if !strings.HasPrefix(string(skill), "---\n") {
+		t.Errorf("skill focus.md should start with YAML frontmatter, got:\n%s", skill)
+	}
+
+	// Tool must declare a name and a verify command — the two fields
+	// the dep resolver cares about. No YAML parse needed; substring
+	// checks are enough to catch regressions in the template.
+	tool, err := os.ReadFile(filepath.Join(dir, "spwn/tools/greet/tool.yaml"))
+	if err != nil {
+		t.Fatalf("read tool: %v", err)
+	}
+	toolStr := string(tool)
+	if !strings.Contains(toolStr, "name: greet") {
+		t.Errorf("tool.yaml missing `name: greet`:\n%s", toolStr)
+	}
+	if !strings.Contains(toolStr, "verify:") {
+		t.Errorf("tool.yaml missing verify block:\n%s", toolStr)
 	}
 }
 
