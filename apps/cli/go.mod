@@ -13,7 +13,6 @@ require (
 	spwn.sh/packages/auth v0.0.0
 	spwn.sh/packages/transpile v0.0.0
 	spwn.sh/packages/compile v0.0.0
-	spwn.sh/packages/mailbox v0.0.0
 	spwn.sh/packages/platform v0.0.0
 	spwn.sh/packages/project v0.0.0
 	spwn.sh/packages/world v0.0.0
@@ -61,7 +60,6 @@ replace (
 	spwn.sh/packages/auth => ../../packages/auth
 	spwn.sh/packages/transpile => ../../packages/transpile
 	spwn.sh/packages/compile => ../../packages/compile
-	spwn.sh/packages/mailbox => ../../packages/mailbox
 	spwn.sh/packages/platform => ../../packages/platform
 	spwn.sh/packages/project => ../../packages/project
 	spwn.sh/packages/world => ../../packages/world

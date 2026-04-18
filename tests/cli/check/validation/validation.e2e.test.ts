@@ -69,14 +69,6 @@ describe('CLI input validation', () => {
         expect(combined).toMatch(/world|required|argument|missing|id|accepts|arg/);
     });
 
-    test("'spwn agent send' with missing args shows error", async () => {
-        const result = await isolated('agent send no args').exec('agent send').run();
-
-        expect(result.exitCode).not.toBe(0);
-        const combined = result.stderr.text.toLowerCase();
-        expect(combined).toMatch(/required|argument|missing|world|message|accepts|arg/);
-    });
-
     // ── Error messages quality ─────────────────────────────
 
     test('error messages do NOT dump full usage/help', async () => {

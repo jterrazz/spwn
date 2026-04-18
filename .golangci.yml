@@ -20,7 +20,7 @@ linters-settings:
     # Layer architecture enforcement.
     #
     # L1 Foundation  →  (nothing)         paths
-    # L2 Platform    →  L1                activity, auth, upgrade, mailbox
+    # L2 Platform    →  L1                activity, auth, upgrade
     # L3 Domain      →  L1-L2             deps, agent
     # L4 Project     →  L1-L3             project
     # L5 Build       →  L1-L4             compile, image
