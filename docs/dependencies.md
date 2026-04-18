@@ -62,7 +62,7 @@ my-project/
 │   │       ├── agent.yaml     # agent dependencies + local block references
 │   │       ├── AGENTS.md      # agent prompt (provider-neutral)
 │   │       ├── SOUL.md        # who the agent is (one file)
-│   │       ├── skills/        # agent-scoped skills (only this agent)
+│   │       ├── skills/        # Mind memory layer — written by the agent at runtime; opaque to spwn (no discovery, no validation, no auto-injection)
 │   │       ├── playbooks/     # promoted workflows
 │   │       └── journal/       # session history
 │   ├── worlds/

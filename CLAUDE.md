@@ -26,7 +26,7 @@ The domain has three main abstractions, each owning one concern:
 ### Agent internals
 - **Soul**: Who the agent is - purpose, voice, values, in a single file at `spwn/agents/<name>/SOUL.md`. Persists across world restarts. (Formerly split across `identity/profile.md`, `purpose.md`, `traits.md`; collapsed in 2026-04.)
 - **Memory**: Journal and sessions. Persists across worlds, grows with experience. (Knowledge is world-scoped, not agent-scoped.)
-- **Composition**: An agent's active tools + skills, declared in `agent.yaml`.
+- **Composition**: An agent's active dependencies (tools, skills, hooks), declared as a unified `dependencies:` list in `agent.yaml` using the `spwn:`/`skill:`/`tool:`/`hook:` schemes.
 
 ### Hierarchy (inside a world - "coming soon" on landing page)
 - **Chief**: Lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
@@ -132,10 +132,10 @@ my-project/
 ├── spwn/                        # committed project assets
 │   ├── agents/
 │   │   └── neo/
-│   │       ├── agent.yaml       # composition: tools + skills + runtime.backend
+│   │       ├── agent.yaml       # composition: dependencies + runtime.backend
 │   │       ├── AGENTS.md         # entry point (provider-neutral, compiled per runtime)
 │   │       ├── SOUL.md          # who the agent is (one file: purpose, voice, values)
-│   │       ├── skills/          # authored procedures
+│   │       ├── skills/          # Mind memory layer (runtime-written, opaque to spwn - no discovery or auto-injection)
 │   │       ├── playbooks/       # promoted patterns (via dream)
 │   │       └── journal/         # per-run history
 │   ├── worlds/
@@ -165,7 +165,7 @@ overrides.
 └── state/                       # architect daemon state
 ```
 
-**Config hierarchy:** `agent.yaml` declares composition (tools + skills + `runtime.backend`). `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces + optional tools). The union of agent tools and world tools is what actually materializes inside the container.
+**Config hierarchy:** `agent.yaml` declares composition via a unified `dependencies:` list (`spwn:<name>` for catalog deps; `skill:<name>` / `tool:<name>` / `hook:<name>` for local blocks authored under `spwn/skills/`, `spwn/tools/`, `spwn/hooks/`) plus `runtime.backend`. `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces). The union of project-wide and agent-specific dependencies is what actually materializes inside the container.
 
 ## Repository Structure
 

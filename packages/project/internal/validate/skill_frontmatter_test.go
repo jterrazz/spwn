@@ -83,18 +83,18 @@ body
 	}
 }
 
-// TestRuleSkillFrontmatter_walksAllSkillRoots: the rule covers every
-// location where users author skills — project-wide, per-tool, and
-// per-agent — so a convention violation anywhere produces an issue.
-func TestRuleSkillFrontmatter_walksAllSkillRoots(t *testing.T) {
+// TestRuleSkillFrontmatter_walksAuthoredSkillRoots: the rule covers
+// every authoring location — project-wide (spwn/skills/) and per-tool
+// (spwn/tools/<name>/skills/) — so a convention violation in either
+// produces an issue.
+func TestRuleSkillFrontmatter_walksAuthoredSkillRoots(t *testing.T) {
 	root := t.TempDir()
 	writeSkill(t, root, "spwn/skills", "project.md", "no header\n")
 	writeSkill(t, root, "spwn/tools/my-tool/skills", "tool.md", "no header\n")
-	writeSkill(t, root, "spwn/agents/neo/skills", "agent.md", "no header\n")
 
 	issues := ruleSkillFrontmatter(Input{Root: root})
-	if len(issues) != 3 {
-		t.Fatalf("want 3 issues (one per skill root), got %d: %+v", len(issues), issues)
+	if len(issues) != 2 {
+		t.Fatalf("want 2 issues (one per authoring root), got %d: %+v", len(issues), issues)
 	}
 	// Issues are sorted by path (deterministic); verify each root is
 	// represented so we don't silently drop one location.
@@ -103,10 +103,25 @@ func TestRuleSkillFrontmatter_walksAllSkillRoots(t *testing.T) {
 		paths = append(paths, i.Path)
 	}
 	joined := strings.Join(paths, "|")
-	for _, want := range []string{"spwn/skills/project.md", "spwn/tools/my-tool/skills/tool.md", "spwn/agents/neo/skills/agent.md"} {
+	for _, want := range []string{"spwn/skills/project.md", "spwn/tools/my-tool/skills/tool.md"} {
 		if !strings.Contains(joined, want) {
 			t.Errorf("missing coverage of %s in paths: %v", want, paths)
 		}
+	}
+}
+
+// TestRuleSkillFrontmatter_ignoresAgentLocalSkills: per-agent skills/
+// directories are a Mind memory layer — the agent writes to them at
+// runtime — and spwn must neither validate nor discover their
+// contents. A broken-frontmatter file at spwn/agents/<name>/skills/
+// therefore produces zero issues.
+func TestRuleSkillFrontmatter_ignoresAgentLocalSkills(t *testing.T) {
+	root := t.TempDir()
+	writeSkill(t, root, "spwn/agents/neo/skills", "agent.md", "no header\n")
+
+	issues := ruleSkillFrontmatter(Input{Root: root})
+	if len(issues) != 0 {
+		t.Fatalf("agent-local skills must be opaque to spwn check; got %d issues: %+v", len(issues), issues)
 	}
 }
 

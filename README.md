@@ -152,7 +152,7 @@ spwn/agents/neo/
 ├── agent.yaml      # composition (deps + runtime)
 ├── AGENTS.md       # boot-time prompt
 ├── SOUL.md         # identity
-├── skills/
+├── skills/         # Mind memory layer — written by the agent at runtime, opaque to spwn (no discovery, no auto-injection)
 ├── playbooks/
 └── journal/
 
