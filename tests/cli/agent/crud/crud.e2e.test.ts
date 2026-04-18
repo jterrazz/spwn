@@ -16,7 +16,7 @@ const isolated = (label: string) =>
     spec(label).project('empty').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
 
 describe('spwn agent CRUD', () => {
-    test('create writes the 4-layer Mind to disk', async () => {
+    test('create writes the Mind structure to disk', async () => {
         const result = await isolated('create neo').exec('agent create neo').run();
 
         expect(result.exitCode).toBe(0);
@@ -68,8 +68,10 @@ describe('spwn agent CRUD', () => {
 
         expect(result.exitCode).toBe(0);
         // `agent show` renders the Mind tree on stderr in spwn's UX.
+        // identity/ was collapsed into SOUL.md at the agent root in
+        // 2026-04; the Mind now has three layer directories plus the
+        // soul file.
         expect(result.stderr.text).toMatch(/Agent:\s+neo/);
-        expect(result.stderr.text).toMatch(/identity\/\s+profile\.md/);
         expect(result.stderr.text).toMatch(/skills\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/playbooks\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/journal\/\s+\(empty\)/);
@@ -189,7 +191,8 @@ describe('spwn agent CRUD', () => {
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn/agents/trinity/agent.yaml').exists).toBe(true);
         expect(result.file('spwn/agents/trinity/AGENTS.md').exists).toBe(true);
-        expect(result.file('spwn/agents/trinity/identity').exists).toBe(true);
+        // identity/ dir was collapsed into SOUL.md at agent root.
+        expect(result.file('spwn/agents/trinity/SOUL.md').exists).toBe(true);
     });
 
     test('agent rm cleans the manifest so check stays green', async () => {

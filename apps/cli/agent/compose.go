@@ -10,6 +10,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/catalog"
 	"spwn.sh/packages/agent"
+	"spwn.sh/packages/dependency"
 )
 
 // ── agent add / remove ─────────────────────────────────────────────────────
@@ -52,13 +53,27 @@ Examples:
 			return err
 		}
 
-		// Pre-flight every catalog ref against the catalog so we never
-		// write an unknown dependency to agent.yaml. Bare-name local
-		// refs are skipped here — they resolve against the project tree
-		// at build time, not the catalog.
+		// Pre-flight every ref before we touch agent.yaml. Three
+		// outcomes refused here:
+		//   * KindInvalid (bare names, `@owner/name`, `local:`, unknown
+		//     schemes): malformed under the scheme-only grammar.
+		//   * KindSpwnBuiltin with an unknown name: would pass yaml
+		//     validation but fail `check` with a confusing "does not
+		//     exist" later.
+		// Local-scheme refs (skill:, tool:, hook:) are accepted here
+		// and resolve against the project tree at build time; github:
+		// refs are accepted and surface as "registries not yet
+		// supported" during `check`.
 		for _, p := range composeDeps {
-			if strings.HasPrefix(p, "@") && !knownComposeRef(p) {
-				return unknownComposeRefError("dependency", p)
+			name, _ := dependency.SplitVersion(p)
+			parsed := dependency.ParseRef(name)
+			switch parsed.Kind {
+			case dependency.KindInvalid:
+				return fmt.Errorf("dependency %q is malformed: use spwn:<name>, skill:<name>, tool:<name>, hook:<name>, or github:<owner>/<repo>", p)
+			case dependency.KindSpwnBuiltin:
+				if !knownComposeRef(p) {
+					return unknownComposeRefError("dependency", p)
+				}
 			}
 		}
 

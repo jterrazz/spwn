@@ -5,3 +5,4 @@ worlds:
   default:
     agents: [neo]
     workspaces: [.]
+    knowledge: ./knowledge

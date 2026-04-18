@@ -81,14 +81,18 @@ describe('world spawn', () => {
 
         test('mind layers are visible at /agents/neo/ inside the container', async () => {
             const neo = world.container('neo');
-            // Knowledge is world-scoped at /world/knowledge/, not a Mind layer.
-            for (const layer of ['identity', 'skills', 'playbooks', 'journal']) {
+            // identity/ was collapsed into SOUL.md at the agent root in
+            // 2026-04. The Mind now has three directory layers plus the
+            // soul file. Knowledge is world-scoped at /world/knowledge/.
+            expect(neo.file('/agents/neo/SOUL.md').exists).toBe(true);
+            for (const layer of ['skills', 'playbooks', 'journal']) {
                 expect(neo.file(`/agents/neo/${layer}`).exists).toBe(true);
             }
 
             const ls = await neo.exec('ls /agents/neo');
             expect(ls.exitCode).toBe(0);
-            for (const layer of ['identity', 'skills', 'playbooks', 'journal']) {
+            ls.stdout.toContain('SOUL.md');
+            for (const layer of ['skills', 'playbooks', 'journal']) {
                 ls.stdout.toContain(layer);
             }
 

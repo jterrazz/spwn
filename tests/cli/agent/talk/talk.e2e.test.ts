@@ -201,6 +201,8 @@ describe('agent talk', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.stderr.text).toMatch(/Agent:\s+neo/);
-        expect(result.stderr.text).toMatch(/identity\/\s+profile\.md/);
+        // Mind tree now renders skills/playbooks/journal; identity
+        // collapsed into SOUL.md at the agent root.
+        expect(result.stderr.text).toMatch(/skills\//);
     });
 });
