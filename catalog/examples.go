@@ -54,6 +54,14 @@ var ErrNotFound = errors.New("example not found")
 // stay at the root; everything listed here moves under spwn/.
 var topLevelSubdirs = []string{"agents", "skills", "tools", "hooks", "files"}
 
+// rootLevelSubdirs enumerates directories that land at the PROJECT
+// ROOT (sibling to spwn/), not under spwn/. Today that's only
+// knowledge/ — a catalog entry can ship a seed knowledge base
+// (handbook, starter notes) that gets bound into /world/knowledge/
+// at spawn time. The path matches the `knowledge: ./knowledge`
+// convention in spwn.yaml#worlds.<name>.knowledge.
+var rootLevelSubdirs = []string{"knowledge"}
+
 // ShippedSlugs returns the list of gallery-eligible entries (those
 // with a `worlds:` section in spwn.yaml), sorted by display order.
 func ShippedSlugs() []string {
@@ -203,6 +211,23 @@ func Install(slug, baseDir string) (InstallReport, error) {
 			continue
 		}
 		dst := filepath.Join(spwnRoot, sub)
+		if exists(dst) {
+			continue
+		}
+		if err := copyDirFS(catalogFS, src, dst); err != nil {
+			return rep, fmt.Errorf("copy %s: %w", sub, err)
+		}
+	}
+
+	// Root-level subdirs (knowledge/) — copied to the project root so
+	// `knowledge: ./knowledge` in spwn.yaml#worlds resolves correctly
+	// on first spawn.
+	for _, sub := range rootLevelSubdirs {
+		src := slug + "/" + sub
+		if _, err := fs.Stat(catalogFS, src); err != nil {
+			continue
+		}
+		dst := filepath.Join(baseDir, sub)
 		if exists(dst) {
 			continue
 		}
