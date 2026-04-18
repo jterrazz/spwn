@@ -14,7 +14,6 @@ make test-foundation       # packages/base only
 make test-agent            # packages/mind only
 make test-world            # packages/world only
 make test-cli              # apps/cli only
-make test-messenger        # packages/mailbox only
 ```
 
 Examples:

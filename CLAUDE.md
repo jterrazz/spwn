@@ -218,8 +218,6 @@ spwn/
 │   │   ├── agent.go                 #   Public API (InitMind, Validate, Export, Fork…)
 │   │   └── internal/{mind,journal,session,evolution,memory}/
 │   │
-│   ├── messenger/                   #   go.mod - agent-to-agent messaging
-│   │
 │   ├── imagebuilder/                #   go.mod - composable tool-based image builder
 │   │
 │   ├── migration/                   #   go.mod - ~/.spwn schema migrations
@@ -267,10 +265,9 @@ Host machine
 ## Dependency Graph
 
 ```
-apps/cli  ──→ packages/{world, agent, mailbox, image, migration, base, project}
+apps/cli  ──→ packages/{world, agent, image, migration, base, project}
 packages/world ──→ packages/{agent, image, base}
 packages/agent ──→ packages/base
-packages/mailbox ──→ packages/base
 packages/compile ──→ (no spwn deps)
 packages/migration ──→ packages/base
 packages/project ──→ (no spwn deps)

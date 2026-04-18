@@ -22,8 +22,7 @@ L4 Project   packages/project/                      (manifest + validation)
 L3 Domain    packages/dependency/  packages/agent/   (dependencies + agents)
    ────────────────────────────────────────────────────────────────
 L2 Platform  packages/activity/  packages/auth/
-             packages/migration/ packages/update/
-             packages/mailbox/                      (platform utilities)
+             packages/migration/ packages/update/   (platform utilities)
    ────────────────────────────────────────────────────────────────
 L1 Foundation packages/platform/                    (constants + IDs)
 ```
@@ -37,7 +36,6 @@ L1 Foundation packages/platform/                    (constants + IDs)
 | `auth` | L2 | Provider resolution, credential storage (keychain/env/file/OAuth) |
 | `migration` | L2 | Schema migrations runner + registry + backups |
 | `update` | L2 | CLI self-update + version-check |
-| `mailbox` | L2 | Agent-to-agent filesystem inbox |
 | `dependency` | L3 | `spwn.yaml` schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
 | `agent` | L3 | Agent mind (SOUL.md at root + skills/playbooks/journal layers), evolution, session. Knowledge is world-scoped, not in the Mind. |
 | `project` | L4 | Project manifest, validation rules, scaffolding, teams + organizations |
@@ -64,7 +62,6 @@ spwn/
 │   ├── auth/                   L2  credentials
 │   ├── migration/              L2  schema migrations runner
 │   ├── update/                 L2  CLI self-update + version-check
-│   ├── mailbox/                L2  agent messaging
 │   ├── dependency/             L3  dependency schema, refs, lockfile
 │   ├── agent/                  L3  agent mind + evolution
 │   ├── project/                L4  project manifest + validation + teams/orgs

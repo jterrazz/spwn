@@ -10,7 +10,6 @@ use (
 	./packages/compile
 	./packages/container
 	./packages/transpile
-	./packages/mailbox
 	./packages/migration
 	./packages/platform
 	./packages/upgrade
