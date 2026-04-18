@@ -1,4 +1,4 @@
-package dependency_test
+package manifest_test
 
 import (
 	"encoding/json"
@@ -7,7 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/dependency"
+		"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/internal/manifest"
 )
 
 func writeManifest(t *testing.T, dir, body string) {
@@ -30,7 +31,7 @@ verify:
   - command -v git
 `)
 
-	tool, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{})
+	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -55,7 +56,7 @@ func TestParse_defaults(t *testing.T) {
   packages: [curl]
 `)
 
-	tool, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{
+	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{
 		DefaultName:    "local-tool",
 		DefaultVersion: "0.0.0-local",
 	})
@@ -86,7 +87,7 @@ verify:
   - command -v claude
 `)
 
-	tool, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{})
+	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -118,7 +119,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{})
+	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -153,7 +154,7 @@ verify:
   - command -v mempalace
 `)
 
-	tool, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{})
+	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -206,7 +207,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tool, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{})
+	tool, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -220,7 +221,7 @@ func TestParse_unknownKindErrors(t *testing.T) {
 	writeManifest(t, dir, `name: bogus
 kind: weird-kind
 `)
-	if _, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{}); err == nil {
+	if _, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{}); err == nil {
 		t.Fatal("want error for unknown kind")
 	}
 }
@@ -230,12 +231,12 @@ func TestParse_missingNameErrors(t *testing.T) {
 	writeManifest(t, dir, `install:
   packages: [git]
 `)
-	if _, err := dependency.Parse(dependency.DirResolver{Root: dir}, dependency.ParseOptions{}); err == nil {
+	if _, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{}); err == nil {
 		t.Fatal("want error for missing name + no default")
 	}
 }
 
-func configJSONFor(p *dependency.Parsed, runtime string) []byte {
+func configJSONFor(p *manifest.Parsed, runtime string) []byte {
     if p.Schema.RuntimeConfig == nil {
         return nil
     }

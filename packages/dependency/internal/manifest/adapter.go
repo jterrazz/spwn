@@ -1,15 +1,20 @@
-package dependency
+package manifest
 
-import "io/fs"
+import (
+	"io/fs"
 
-// dependencyAdapter backs a parsed Schema as an Tool. Runtimes() and
-// Config() are part of the unified Tool interface — a dependency with a
-// `runtime-config:` block returns a non-empty Runtimes list and the spawn-time
-// merger picks up its Config(runtime) snippet. Dependencies without a
-// runtime-config block return nil from both.
+	"spwn.sh/packages/dependency"
+)
+
+// dependencyAdapter backs a parsed Schema as a dependency.Tool. The
+// Runtimes() / Config() methods are part of the unified Tool interface
+// — a dependency with a `runtime-config:` block returns a non-empty
+// Runtimes list and the spawn-time merger picks up its Config(runtime)
+// snippet. Dependencies without a runtime-config block return nil from
+// both.
 type dependencyAdapter struct {
 	schema    Schema
-	kind      Kind
+	kind      dependency.Kind
 	fileBytes map[string][]byte
 	skillsFS  fs.FS
 }
@@ -18,7 +23,7 @@ type dependencyAdapter struct {
 func (t *dependencyAdapter) Name() string { return t.schema.Name }
 
 // Kind returns the classification parsed from the `kind:` field.
-func (t *dependencyAdapter) Kind() Kind { return t.kind }
+func (t *dependencyAdapter) Kind() dependency.Kind { return t.kind }
 
 // Version returns the `version:` field, or the default the loader
 // applied when the manifest left it blank.
@@ -31,8 +36,8 @@ func (t *dependencyAdapter) Dependencies() []string { return t.schema.Dependenci
 // Install converts the parsed InstallSection into the InstallSpec
 // shape the image builder consumes. File bytes were read eagerly at
 // parse time so this call is allocation-only.
-func (t *dependencyAdapter) Install() InstallSpec {
-	spec := InstallSpec{
+func (t *dependencyAdapter) Install() dependency.InstallSpec {
+	spec := dependency.InstallSpec{
 		AptPackages:  t.schema.Install.AptPackages,
 		Commands:     t.schema.Install.Commands,
 		UserCommands: t.schema.Install.UserCommands,
@@ -56,7 +61,7 @@ func (t *dependencyAdapter) Skills() fs.FS { return t.skillsFS }
 
 // Runtimes returns the runtime backends this dependency targets for
 // runtime-config injection. Returns nil when the manifest has no
-// `runtime-config:` block, which the spawn-time merger reads as "not configurable."
+// `runtime-config:` block.
 func (t *dependencyAdapter) Runtimes() []string {
 	if t.schema.RuntimeConfig == nil {
 		return nil
@@ -71,8 +76,6 @@ func (t *dependencyAdapter) Config(runtime string) []byte {
 	if t.schema.RuntimeConfig == nil {
 		return nil
 	}
-	// Enforce Runtimes() allowlist at the boundary so individual
-	// tools don't have to.
 	match := false
 	for _, r := range t.schema.RuntimeConfig.Runtimes {
 		if r == runtime {
@@ -98,12 +101,11 @@ func (t *dependencyAdapter) RuntimeProvider() string {
 	return t.schema.RuntimeProvider
 }
 
-
-// ToolFromParsed adapts a Parsed result into an Tool.
-// This is the single bridge between the dependency domain and the image
-// builder — dependency knows nothing about Tool, image knows how to
-// wrap Parsed into a Tool.
-func ToolFromParsed(p *Parsed) Tool {
+// ToolFromParsed adapts a Parsed result into a dependency.Tool.
+// This is the bridge between the manifest domain and the rest of
+// the codebase — adapters call this to hand Tool-shaped values to
+// packages/compile's Registry.
+func ToolFromParsed(p *Parsed) dependency.Tool {
 	skillsFS, _ := p.SkillsFS.(fs.FS)
 	return &dependencyAdapter{
 		schema:    p.Schema,

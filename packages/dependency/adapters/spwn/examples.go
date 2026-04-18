@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/internal/manifest"
 	"spwn.sh/packages/platform"
 )
 
@@ -299,26 +299,26 @@ func InstallInto(slug string) (InstallReport, error) {
 // ── internals ─────────────────────────────────────────────────────────
 
 // loadEntrySchema reads an entry's spwn.yaml into the shared
-// dependency.Schema so every catalog face reads the same bytes.
-func loadEntrySchema(slug string) (*dependency.Schema, error) {
+// manifest.Schema so every catalog face reads the same bytes.
+func loadEntrySchema(slug string) (*manifest.Schema, error) {
 	data, err := catalogFS.ReadFile(contentRoot + "/" + slug + "/spwn.yaml")
 	if err != nil {
 		return nil, err
 	}
-	var s dependency.Schema
+	var s manifest.Schema
 	if err := yaml.Unmarshal(data, &s); err != nil {
 		return nil, fmt.Errorf("parse %s/spwn.yaml: %w", slug, err)
 	}
 	return &s, nil
 }
 
-func hasWorlds(s *dependency.Schema) bool {
+func hasWorlds(s *manifest.Schema) bool {
 	return s != nil && len(s.Worlds.Content) > 0
 }
 
 // worldsAndAgents derives the flat world-name and agent-name slices
 // from the parsed worlds yaml.Node, sorted for stability.
-func worldsAndAgents(s *dependency.Schema) (worlds, agents []string) {
+func worldsAndAgents(s *manifest.Schema) (worlds, agents []string) {
 	if s == nil || s.Worlds.Kind != yaml.MappingNode {
 		return nil, nil
 	}
@@ -351,7 +351,7 @@ func worldsAndAgents(s *dependency.Schema) (worlds, agents []string) {
 	return worlds, agents
 }
 
-func deriveTitle(slug string, s *dependency.Schema) string {
+func deriveTitle(slug string, s *manifest.Schema) string {
 	if s != nil && s.Title != "" {
 		return s.Title
 	}

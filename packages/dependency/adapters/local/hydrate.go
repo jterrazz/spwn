@@ -8,6 +8,7 @@ import (
 
 	ib "spwn.sh/packages/compile"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/internal/manifest"
 )
 
 // localToolDir is where the project-local dependency loader looks
@@ -52,19 +53,19 @@ func LoadTool(projectRoot, name string) (dependency.Tool, error) {
 		return nil, fmt.Errorf("local dependency %q: %s is not a directory", name, pkgDir)
 	}
 
-	parsed, err := dependency.Parse(
-		dependency.DirResolver{Root: pkgDir},
-		dependency.ParseOptions{
+	parsed, err := manifest.Parse(
+		manifest.DirResolver{Root: pkgDir},
+		manifest.ParseOptions{
 			DefaultName:    name,
 			DefaultVersion: "0.0.0-local",
-			ManifestFile:   dependency.ToolManifest,
+			ManifestFile:   manifest.ToolManifest,
 		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("local dependency %q: %w", name, err)
 	}
 
-	return &wrappedLocalTool{inner: dependency.ToolFromParsed(parsed), name: "local:" + name}, nil
+	return &wrappedLocalTool{inner: manifest.ToolFromParsed(parsed), name: "local:" + name}, nil
 }
 
 // Hydrate walks a flat list of dependency refs, loads
