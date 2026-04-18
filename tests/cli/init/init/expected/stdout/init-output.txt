@@ -1,7 +1,10 @@
   Committed:
     spwn.yaml                      # project manifest (worlds live inline)
-    spwn.lock                 # committed dependency pins (like package-lock.json)
+    spwn.lock                      # committed dependency pins (like package-lock.json)
     spwn/agents/neo/               # starter agent
+    spwn/skills/focus.md           # example local skill  (skill:focus)
+    spwn/tools/greet/              # example local tool   (tool:greet)
+    spwn/hooks/pre-spawn.sh        # example host hook    (hook:pre-spawn)
 
   Gitignored:
     .spwn/                         # local state

@@ -37,6 +37,25 @@ describe('spwn init', () => {
         expect(result.file('spwn/agents/neo/AGENTS.md').exists).toBe(true);
         expect(result.file('.gitignore').exists).toBe(true);
         expect(result.file('.gitignore').content).toContain('.spwn');
+
+        // One concrete example per local-ref scheme so users see how
+        // skill: / tool: / hook: are authored from their very first
+        // `spwn init`. Regressions here mean the default project no
+        // longer demonstrates composition end-to-end.
+        expect(result.file('spwn/skills/focus.md').exists).toBe(true);
+        expect(result.file('spwn/skills/focus.md').content).toContain('name: focus');
+        expect(result.file('spwn/tools/greet/tool.yaml').exists).toBe(true);
+        expect(result.file('spwn/tools/greet/tool.yaml').content).toContain('name: greet');
+        expect(result.file('spwn/hooks/pre-spawn.sh').exists).toBe(true);
+        expect(result.file('spwn/hooks/pre-spawn.sh').content).toContain('#!/usr/bin/env bash');
+
+        // Default agent.yaml must reference all three so a fresh
+        // project shows the full composition grammar (spwn: + skill:
+        // + tool: + hook:) inline.
+        const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
+        expect(agentYaml).toContain('skill:focus');
+        expect(agentYaml).toContain('tool:greet');
+        expect(agentYaml).toContain('hook:pre-spawn');
     });
 
     test('errors when spwn.yaml already exists', async () => {
