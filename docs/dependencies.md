@@ -21,6 +21,7 @@ worlds:
   matrix:
     agents: [neo]
     workspaces: [.]
+    knowledge: ./knowledge   # optional; bind into /world/knowledge/
 ```
 
 ```yaml
