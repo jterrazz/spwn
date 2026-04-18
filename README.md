@@ -335,12 +335,12 @@ commands and adapters below belong to one or more of these.
 |---|---|:---:|
 | **Transpile** | Source tree → rendered Tree (SOUL, deps, system skills woven in) | 🟢 |
 | **Compile** | Tree → reproducible Docker image | 🟢 |
-| **Lint / check** | Static rules on manifests + tree (scheme grammar, one-agent-one-world, lockfile drift…) | 🟢 |
 | **Compose** | `install` / `uninstall` / pinning (project-wide + `--agent` scoping) | 🟢 |
 | **Identity** | `SOUL.md` at agent root — per-agent voice, purpose, principles | 🟢 |
-| **Mind** | 3-layer persistent memory: `skills/` `playbooks/` `journal/` | 🟢 |
-| **Knowledge** | World-scoped `./knowledge/` bind-mount (opt-in per world) | 🟢 |
-| **Runtimes** | `claude-code`, `codex` — swappable Go adapters | 🟢 |
+| **Lint / check** | Static rules on manifests + tree (scheme grammar, one-agent-one-world, lockfile drift…) | 🟡 |
+| **Mind** | 3-layer persistent memory: `skills/` `playbooks/` `journal/` | 🟡 |
+| **Knowledge** | World-scoped `./knowledge/` bind-mount (opt-in per world) | 🟡 |
+| **Runtimes** | `claude-code`, `codex` — swappable Go adapters | 🟡 |
 | **Architect** | Always-on orchestration daemon — spawns worlds, routes inboxes, delegates | 🟡 |
 | **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |
 | **Observability** | Per-session journal, activity log, `spwn logs` | 🟡 |
