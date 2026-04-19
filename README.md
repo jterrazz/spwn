@@ -682,15 +682,11 @@ commands and adapters below belong to one or more of these.
 
 | Topic | Link |
 |---|---|
-| **Principles** - why spwn is built this way | [`docs/principles.md`](docs/principles.md) |
-| **Dependencies** - deps, local blocks, lock file, resolution | [`docs/dependencies.md`](docs/dependencies.md) |
-| **Architecture** - module map, core abstractions, invariants | [`docs/architecture.md`](docs/architecture.md) |
-| **Worlds** - spawning, isolation, tools-as-structure | [`docs/worlds.md`](docs/worlds.md) |
-| **Dependency catalog** - how dependencies work, how to add one | [`docs/dependency-catalog.md`](docs/dependency-catalog.md) |
-| **CLI reference** - every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
-| **Releasing** - release runbook | [`docs/releasing.md`](docs/releasing.md) |
-| **Update system** - CLI + Tauri auto-update, channels | [`docs/update-system.md`](docs/update-system.md) |
-| **Contributing** - setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| **Recipes** — five worked examples that show spwn in action | [`docs/recipes.md`](docs/recipes.md) |
+| **Dependency catalog** — the built-in `spwn:*` refs and how to author your own | [`docs/dependency-catalog.md`](docs/dependency-catalog.md) |
+| **CLI reference** — every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
+| **Contributing** — setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| **Internals** — architecture, release runbook, update system | [`docs/contributing/`](docs/contributing/) |
 
 <br/>
 
