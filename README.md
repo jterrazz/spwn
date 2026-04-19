@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Compose AI agents as code. In your repo.
+  Compose AI agents as code. One source, run anywhere.
 </p>
 
 <p align="center">
