@@ -298,12 +298,22 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			},
 		}
 
+		// Bake project-local skills (skill:<name> refs pointing at
+		// spwn/skills/<name>.md) into the image alongside the tool-
+		// shipped ones. Hydrate stripped these from toolList on the
+		// assumption that a renderer would weave them in; nothing
+		// actually did, so Claude Code's native skill discovery never
+		// saw them. We read + key them here by the canonical
+		// /world/skills/<name>/SKILL.md path.
+		extraSkills := collectLocalSkills(platform.ProjectRoot(), opts.Manifest.Deps)
+
 		buildResult, err := builder.Build(ctx, ib.BuildRequest{
 			BaseDockerfile: ibbase.WorldDockerfile,
 			Tools:          toolList,
 			Tag:            image,
 			ForceRebuild:   opts.ForceRebuild,
 			SkipVerify:     true, // probeTools handles verification below
+			ExtraSkills:    extraSkills,
 			LogWriter:      buildLogWriter,
 		})
 		if err != nil {
