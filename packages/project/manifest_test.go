@@ -20,7 +20,6 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"spwn/agents/neo/agent.yaml",
 		"spwn/agents/neo/AGENTS.md",
 		"spwn/agents/neo/SOUL.md",
-		"spwn/agents/neo/skills/.gitkeep",
 		"spwn/agents/neo/playbooks/.gitkeep",
 		"spwn/agents/neo/journal/.gitkeep",
 		"knowledge/.gitkeep",

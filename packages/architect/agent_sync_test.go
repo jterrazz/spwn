@@ -136,10 +136,10 @@ func TestSyncAgentsInto_CopiesPresentHostDirs(t *testing.T) {
 }
 
 // TestSyncAgentsOutOf_CopiesAllowlistedDirs verifies the sync-back
-// contract: only journal/playbooks/skills are pulled back, and
-// failures are reported as warnings rather than aborting the loop.
-// Knowledge used to be in this list but is now world-scoped and
-// bind-mounted, so no sync is needed.
+// contract: only journal/playbooks are pulled back, and failures are
+// reported as warnings rather than aborting the loop. Knowledge used
+// to be in this list but is now world-scoped and bind-mounted; skills
+// moved to build-time dependencies at /world/skills/.
 func TestSyncAgentsOutOf_CopiesAllowlistedDirs(t *testing.T) {
 	t.Setenv("SPWN_HOME", t.TempDir())
 	mb := newMockBackend()
@@ -154,7 +154,6 @@ func TestSyncAgentsOutOf_CopiesAllowlistedDirs(t *testing.T) {
 	wantSrcs := map[string]bool{
 		"/agents/neo/journal":   true,
 		"/agents/neo/playbooks": true,
-		"/agents/neo/skills":    true,
 	}
 	if len(mb.copyDirFromCalls) != len(wantSrcs) {
 		t.Fatalf("got %d CopyDirFrom calls, want %d: %+v",
@@ -181,9 +180,9 @@ func TestSyncAgentsOutOf_PerDirFailuresBecomeWarnings(t *testing.T) {
 	if len(warnings) != 1 {
 		t.Fatalf("expected 1 warning, got %d: %v", len(warnings), warnings)
 	}
-	// Other two dirs should still have been attempted.
-	if len(mb.copyDirFromCalls) != 3 {
-		t.Errorf("expected 3 CopyDirFrom attempts (one per allowlist entry), got %d",
+	// The other dir should still have been attempted.
+	if len(mb.copyDirFromCalls) != 2 {
+		t.Errorf("expected 2 CopyDirFrom attempts (one per allowlist entry), got %d",
 			len(mb.copyDirFromCalls))
 	}
 }

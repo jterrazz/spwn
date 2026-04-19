@@ -307,13 +307,7 @@ func fromWorldStatus(s wmodels.Status) Status {
 // collectSkills enumerates every markdown skill the agent will see
 // at spawn-time: project-local (spwn/skills/) and tool-provided
 // (spwn:<tool>/skills/ or my-tool/skills/).
-//
-// Per-agent skill directories (spwn/agents/<name>/skills/) are the
-// agent's Mind memory layer — written to at runtime — and are
-// deliberately NOT enumerated here: spwn does not discover, inject,
-// or surface them as composable skills.
-func collectSkills(a source.AgentSource, src *source.ProjectSource, fullDeps []string, reg *resolver.Registry) []SkillRef {
-	_ = a // agent-local skills/ is an opaque Mind memory layer
+func collectSkills(_ source.AgentSource, src *source.ProjectSource, fullDeps []string, reg *resolver.Registry) []SkillRef {
 	var out []SkillRef
 
 	// Project-wide bare-markdown skills.

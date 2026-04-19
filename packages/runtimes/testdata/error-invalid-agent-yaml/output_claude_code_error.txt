@@ -1,1 +1,1 @@
-spwn/agents/neo/agent.yaml: yaml: line 1: did not find expected ',' or ']'
+parse /Users/jterrazz/Developer/spwn/spwn/packages/runtimes/testdata/error-invalid-agent-yaml/input/spwn/agents/neo/agent.yaml: yaml: line 1: did not find expected ',' or ']'

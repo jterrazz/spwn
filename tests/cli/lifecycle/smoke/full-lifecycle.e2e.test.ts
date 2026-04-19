@@ -37,15 +37,16 @@ describe('agent lifecycle (CLI-only)', () => {
             .run();
         expect(result.exitCode).toBe(0);
 
-        // Project-mode scaffold writes SOUL.md + the three Mind layer
-        // Directories (skills/playbooks/journal) under spwn/agents/neo.
-        // Identity/ was collapsed into SOUL.md in 2026-04. Knowledge
-        // Is world-scoped, opt-in via the worlds.<name>.knowledge key —
+        // Project-mode scaffold writes SOUL.md + the two Mind layer
+        // Directories (playbooks/journal) under spwn/agents/neo.
+        // Identity/ was collapsed into SOUL.md in 2026-04; skills moved
+        // To build-time dependencies at /world/skills/. Knowledge is
+        // World-scoped, opt-in via the worlds.<name>.knowledge key —
         // Default scaffold creates the flat ./knowledge/ directory at
         // The project root.
         expect(result.file('spwn/agents/neo').exists).toBe(true);
         expect(result.file('spwn/agents/neo/identity').exists).toBe(false);
-        expect(result.file('spwn/agents/neo/skills').exists).toBe(true);
+        expect(result.file('spwn/agents/neo/skills').exists).toBe(false);
         expect(result.file('spwn/agents/neo/playbooks').exists).toBe(true);
         expect(result.file('spwn/agents/neo/journal').exists).toBe(true);
         expect(result.file('spwn/agents/neo/knowledge').exists).toBe(false);

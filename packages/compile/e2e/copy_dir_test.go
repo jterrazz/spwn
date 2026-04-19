@@ -28,11 +28,11 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 
 	// ── Arrange: a nested host tree resembling a real agent home.
 	// SOUL.md lives at the agent root (identity was collapsed to a
-	// single file); skills and playbooks remain as Mind-layer dirs.
+	// single file); playbooks and journal remain as Mind-layer dirs.
 	host := t.TempDir()
 	mustWrite(t, filepath.Join(host, "SOUL.md"), "I am neo.")
-	mustWrite(t, filepath.Join(host, "skills", "core-concepts.md"), "The matrix has you.")
 	mustWrite(t, filepath.Join(host, "playbooks", "greet.md"), "Hello, world.")
+	mustWrite(t, filepath.Join(host, "journal", "day-1.md"), "The matrix has you.")
 
 	// ── Act: copy the tree into the container at /agents/neo ──
 	if err := be.CopyDirTo(ctx, s.ContainerID, "/agents/neo", host); err != nil {
@@ -41,9 +41,9 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 
 	// ── Assert: every file is visible inside the container ──
 	for relPath, want := range map[string]string{
-		"/agents/neo/SOUL.md": "I am neo.",
-		"/agents/neo/skills/core-concepts.md":  "The matrix has you.",
+		"/agents/neo/SOUL.md":             "I am neo.",
 		"/agents/neo/playbooks/greet.md":  "Hello, world.",
+		"/agents/neo/journal/day-1.md":    "The matrix has you.",
 	} {
 		if !s.FileExists(relPath) {
 			t.Errorf("expected %s to exist in container after CopyDirTo", relPath)
@@ -65,12 +65,12 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 	if out, code := s.Exec("sudo chown -R spwn:spwn /agents"); code != 0 {
 		t.Fatalf("chown /agents failed: %s", out)
 	}
-	if out, code := s.Exec("echo 'Memory persists.' > /agents/neo/skills/learned.md"); code != 0 {
+	if out, code := s.Exec("echo 'Memory persists.' > /agents/neo/journal/learned.md"); code != 0 {
 		t.Fatalf("container write failed: %s", out)
 	}
 
 	hostOut := t.TempDir()
-	if err := be.CopyDirFrom(ctx, s.ContainerID, "/agents/neo/skills", hostOut); err != nil {
+	if err := be.CopyDirFrom(ctx, s.ContainerID, "/agents/neo/journal", hostOut); err != nil {
 		t.Fatalf("CopyDirFrom: %v", err)
 	}
 
@@ -78,7 +78,7 @@ func TestCopyDirTo_RoundTrip(t *testing.T) {
 	//        back to the host. The tar reader strips the source
 	//        basename so files land directly under hostOut. ──
 	for rel, want := range map[string]string{
-		"core-concepts.md":   "The matrix has you.",
+		"day-1.md":   "The matrix has you.",
 		"learned.md": "Memory persists.",
 	} {
 		b, err := os.ReadFile(filepath.Join(hostOut, rel))

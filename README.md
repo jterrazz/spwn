@@ -145,12 +145,13 @@ spwn/agents/neo/
 ├── agent.yaml      # composition (deps + runtime)
 ├── AGENTS.md       # boot-time prompt
 ├── SOUL.md         # identity
-├── skills/         # Mind memory layer — written by the agent at runtime, opaque to spwn (no discovery, no auto-injection)
-├── playbooks/
-└── journal/
+├── playbooks/      # Mind memory layer — written by the agent at runtime
+└── journal/        # Mind memory layer — written by the agent at runtime
 
 ./knowledge/        # opt-in per world via spwn.yaml#worlds.<name>.knowledge — signal on the host side only, so users know what to set up
 ```
+
+Skills aren't a per-agent memory layer — they're dependencies. Declare `skill:focus` in `agent.yaml` (resolving to `spwn/skills/focus.md`) or let a tool ship its own `SKILL.md`; the build pipeline injects everything into `/world/skills/` at image time. One source of truth, no runtime-writable shadow tree.
 
 **Everything is a dependency.** Tools, runtime-config injectors, and skills all unified under one concept. A dependency can install apt packages, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
 
@@ -358,7 +359,7 @@ commands and adapters below belong to one or more of these.
 | **Compose** | `install` / `uninstall` / pinning (project-wide + `--agent` scoping) | 🟢 |
 | **Identity** | `SOUL.md` at agent root — per-agent voice, purpose, principles | 🟢 |
 | **Lint / check** | Static rules on manifests + tree (scheme grammar, one-agent-one-world, lockfile drift…) | 🟡 |
-| **Mind** | 3-layer persistent memory: `skills/` `playbooks/` `journal/` | 🟡 |
+| **Mind** | 2-layer persistent memory: `playbooks/` `journal/` (skills are dependencies, not memory) | 🟡 |
 | **Knowledge** | World-scoped `./knowledge/` bind-mount (opt-in per world) | 🟡 |
 | **Runtimes** | `claude-code`, `codex` — swappable Go adapters | 🟡 |
 | **Architect** | Always-on orchestration daemon — spawns worlds, routes inboxes, delegates | 🟡 |

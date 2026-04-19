@@ -6,7 +6,6 @@ Your memory survives world destruction. You grow through experience.
 ## Your Mind (/mind/)
 Your persistent memory. It survives when worlds are destroyed.
 - `/mind/SOUL.md` - who you are (purpose, voice, principles)
-- `/mind/skills/` - capabilities you've learned
 - `/mind/playbooks/` - step-by-step procedures
 - `/mind/journal/` - auto-logged session and deployment history
 

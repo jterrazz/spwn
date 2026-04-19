@@ -73,9 +73,9 @@ func TestSpawn_WithAgent(t *testing.T) {
 	})
 
 	// AND the Mind should have all standard layers plus SOUL.md at root
-	// (identity collapsed to SOUL.md; knowledge moved to world scope)
+	// (identity collapsed to SOUL.md; knowledge moved to world scope;
+	// skills moved to build-time dependencies).
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("skills")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
 		m.HasFile("SOUL.md")

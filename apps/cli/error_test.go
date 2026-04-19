@@ -167,10 +167,11 @@ func TestCLI_AgentCreateHelp(t *testing.T) {
 	assertContains(t, out, "create", "agent create help")
 	// QA finding #31: the help long description used to lie about
 	// a "6-layer Mind". The truth is now: SOUL.md at the agent root
-	// plus three Mind layer directories (skills/playbooks/journal).
-	// Knowledge moved to world scope; identity collapsed into SOUL.md.
+	// plus two Mind layer directories (playbooks/journal). Knowledge
+	// moved to world scope; identity collapsed into SOUL.md; skills
+	// moved to build-time dependencies at /world/skills/.
 	assertContains(t, out, "SOUL.md", "agent create description")
-	assertContains(t, out, "skills/playbooks/journal", "agent create description")
+	assertContains(t, out, "playbooks/journal", "agent create description")
 }
 
 // --- Bare command shows help ---

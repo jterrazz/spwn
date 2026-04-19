@@ -184,15 +184,15 @@ func TestAgentLifecycle_ExportImportMindIdentical(t *testing.T) {
 }
 
 func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
-	// Given - an agent with a customized SOUL.md (identity is a file
-	// at the agent root now, not a directory; use a skill file for
+	// Given - an agent with a customized playbook (identity is a file
+	// at the agent root now, not a directory; use a playbook for
 	// "extra personality" content)
 	tc := setup.NewTestContext(t)
 	tc.InitAgent("profile-agent")
 
-	skillsDir := filepath.Join(agent.AgentDir("profile-agent"), "skills")
-	os.MkdirAll(skillsDir, 0755)
-	os.WriteFile(filepath.Join(skillsDir, "custom.md"), []byte("# Custom Skill\nYou are a specialist."), 0644)
+	playbooksDir := filepath.Join(agent.AgentDir("profile-agent"), "playbooks")
+	os.MkdirAll(playbooksDir, 0755)
+	os.WriteFile(filepath.Join(playbooksDir, "custom.md"), []byte("# Custom Playbook\nYou are a specialist."), 0644)
 
 	// When - the agent is spawned in a world
 	chain := tc.Spawn().
@@ -200,14 +200,14 @@ func TestAgentLifecycle_CustomCoreFile(t *testing.T) {
 		Detached().
 		Execute()
 
-	// Then - the mock should see the Mind with the custom skill
+	// Then - the mock should see the Mind with the custom playbook
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.SawMind()
 	})
 
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasFile("skills/custom.md")
+		m.HasFile("playbooks/custom.md")
 	})
 }
 

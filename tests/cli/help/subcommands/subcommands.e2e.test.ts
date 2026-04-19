@@ -17,7 +17,7 @@ import { spec } from '../../../setup/cli.specification.js';
  */
 
 describe('subcommand help text', () => {
-    test('agent create --help names the 3-layer Mind', async () => {
+    test('agent create --help names the 2-layer Mind', async () => {
         const result = await spec('agent create help')
             .project('empty')
             .exec('agent create --help')
@@ -25,8 +25,9 @@ describe('subcommand help text', () => {
 
         expect(result.exitCode).toBe(0);
         // The create verb documents what's scaffolded on disk; the
-        // Mind layout (SOUL.md + 3 layers) is the contract.
-        expect(result.stdout.text).toMatch(/SOUL\.md|3-layer/i);
+        // Mind layout (SOUL.md + 2 layers) is the contract — skills
+        // Moved to build-time dependencies at /world/skills/.
+        expect(result.stdout.text).toMatch(/SOUL\.md|2-layer/i);
     });
 
     test('install --help documents scoping + scheme grammar', async () => {

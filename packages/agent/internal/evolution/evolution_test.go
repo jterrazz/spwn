@@ -152,11 +152,11 @@ func TestFork_AllLayers(t *testing.T) {
 
 	// Create source agent with all mind layers and a SOUL.md at root.
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"skills", "playbooks", "journal"} {
+	for _, layer := range []string{"playbooks", "journal"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
 	os.WriteFile(filepath.Join(sourceDir, "SOUL.md"), []byte("# Test"), 0644)
-	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "playbooks", "deploy.md"), []byte("# Deploy"), 0644)
 
 	result, err := Fork("source-agent", "target-agent", nil)
 	if err != nil {
@@ -174,9 +174,9 @@ func TestFork_AllLayers(t *testing.T) {
 	if _, err := os.Stat(targetSoul); err != nil {
 		t.Errorf("target SOUL.md not found: %v", err)
 	}
-	targetSkill := filepath.Join(home, "agents", "target-agent", "skills", "coding.md")
-	if _, err := os.Stat(targetSkill); err != nil {
-		t.Errorf("target skill not found: %v", err)
+	targetPlaybook := filepath.Join(home, "agents", "target-agent", "playbooks", "deploy.md")
+	if _, err := os.Stat(targetPlaybook); err != nil {
+		t.Errorf("target playbook not found: %v", err)
 	}
 }
 
@@ -186,12 +186,12 @@ func TestFork_SpecificLayers(t *testing.T) {
 
 	// Create source agent
 	sourceDir := filepath.Join(home, "agents", "source-agent")
-	for _, layer := range []string{"skills", "playbooks", "journal"} {
+	for _, layer := range []string{"playbooks", "journal"} {
 		os.MkdirAll(filepath.Join(sourceDir, layer), 0755)
 	}
 	os.WriteFile(filepath.Join(sourceDir, "SOUL.md"), []byte("# Test"), 0644)
-	os.WriteFile(filepath.Join(sourceDir, "skills", "coding.md"), []byte("# Coding"), 0644)
 	os.WriteFile(filepath.Join(sourceDir, "playbooks", "deploy.md"), []byte("# Deploy"), 0644)
+	os.WriteFile(filepath.Join(sourceDir, "journal", "2025-01-01.md"), []byte("# Log"), 0644)
 
 	// Fork only playbooks layer
 	result, err := Fork("source-agent", "target-agent", []string{"playbooks"})
@@ -205,10 +205,10 @@ func TestFork_SpecificLayers(t *testing.T) {
 		t.Errorf("target playbook not found: %v", err)
 	}
 
-	// Verify skills was NOT copied (no file inside)
-	targetSkill := filepath.Join(home, "agents", "target-agent", "skills", "coding.md")
-	if _, err := os.Stat(targetSkill); !os.IsNotExist(err) {
-		t.Error("skills should not have been copied when only playbooks specified")
+	// Verify journal was NOT copied (no file inside)
+	targetJournal := filepath.Join(home, "agents", "target-agent", "journal", "2025-01-01.md")
+	if _, err := os.Stat(targetJournal); !os.IsNotExist(err) {
+		t.Error("journal should not have been copied when only playbooks specified")
 	}
 
 	// SOUL.md is a file (not a layer) and is always copied alongside the

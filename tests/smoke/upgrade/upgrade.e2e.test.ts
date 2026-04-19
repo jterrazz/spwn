@@ -141,18 +141,18 @@ describe('smoke: project upgrade cycle', () => {
             ].join('\n'),
         );
 
-        // 2b. Drop in a new skill file. Skills live under the
+        // 2b. Drop in a new playbook. Playbooks live under the
         //     Shared /agents bind mount, so the new file becomes
         //     Visible inside the container as soon as it lands on
         //     Disk - no rebuild required. We verify it's present
         //     After the second spawn anyway to rule out a stale
         //     Cache holding old contents.
         writeFileSync(
-            join(workdir, 'spwn/agents/neo/skills/arithmetic.md'),
+            join(workdir, 'spwn/agents/neo/playbooks/arithmetic.md'),
             '# Arithmetic\n\nReturn 2 + 2 when asked.\n',
         );
 
-        // 2c. Rewrite the agent's identity. Same story as skills:
+        // 2c. Rewrite the agent's identity. Same story as playbooks:
         //     Lives under the /agents bind, so the container sees
         //     The new bytes after the rewrite.
         writeFileSync(
@@ -165,9 +165,6 @@ describe('smoke: project upgrade cycle', () => {
         //     Entry in spwn.yaml's worlds map. The next `spwn up`
         //     Brings up both homes inside the shared container.
         const trinityDir = join(workdir, 'spwn/agents/trinity');
-        mkdirSync(join(trinityDir, 'identity'), { recursive: true });
-        mkdirSync(join(trinityDir, 'skills'), { recursive: true });
-        mkdirSync(join(trinityDir, 'knowledge'), { recursive: true });
         mkdirSync(join(trinityDir, 'playbooks'), { recursive: true });
         mkdirSync(join(trinityDir, 'journal'), { recursive: true });
         writeFileSync(
@@ -223,9 +220,9 @@ describe('smoke: project upgrade cycle', () => {
         // The cache / generator pipeline.
         expect(exec(cid2, 'command -v qmd')).not.toBe('');
 
-        // New skill: present inside neo's home at the expected
+        // New playbook: present inside neo's home at the expected
         // Path, with the content we wrote on the host.
-        expect(exec(cid2, 'cat /agents/neo/skills/arithmetic.md')).toContain(
+        expect(exec(cid2, 'cat /agents/neo/playbooks/arithmetic.md')).toContain(
             'Return 2 + 2 when asked',
         );
 

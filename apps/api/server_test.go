@@ -109,9 +109,10 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 
 // createTestAgent creates a minimal agent directory structure in SPWN_HOME.
 // The layout matches the current on-disk shape: SOUL.md at the agent root
-// plus skills/journal/playbooks layer dirs. identity/profile.md etc. still
-// get written because the API's profile endpoint continues to read them
-// (this stays until the API is migrated to SOUL.md too).
+// plus journal/playbooks layer dirs. identity/profile.md etc. still get
+// written because the API's profile endpoint continues to read them
+// (this stays until the API is migrated to SOUL.md too). Skills moved to
+// build-time dependencies at /world/skills/, not per-agent memory.
 func createTestAgent(t *testing.T, name string) string {
 	t.Helper()
 	home := os.Getenv("SPWN_HOME")
@@ -119,7 +120,6 @@ func createTestAgent(t *testing.T, name string) string {
 
 	dirs := []string{
 		filepath.Join(agentDir, "identity"),
-		filepath.Join(agentDir, "skills"),
 		filepath.Join(agentDir, "journal"),
 		filepath.Join(agentDir, "playbooks"),
 	}
@@ -141,8 +141,8 @@ func createTestAgent(t *testing.T, name string) string {
 	// Write journal entries
 	writeFile(t, filepath.Join(agentDir, "journal", "2025-01-01.md"), "# 2025-01-01\n\nFirst journal entry.\n")
 
-	// Write a skill
-	writeFile(t, filepath.Join(agentDir, "skills", "coding.md"), "# Coding\n\nWrites Go code.\n")
+	// Write a playbook
+	writeFile(t, filepath.Join(agentDir, "playbooks", "deploy.md"), "# Deploy\n\nShip the code.\n")
 
 	// Write agent.yaml
 	writeFile(t, filepath.Join(agentDir, "agent.yaml"), "role: worker\nruntime:\n  engine: claude-code\n  provider: anthropic\n  model: claude-4\n")
@@ -466,15 +466,6 @@ func TestGetAgentProfile(t *testing.T) {
 	if len(traits) != 2 {
 		t.Errorf("expected 2 traits, got %d", len(traits))
 	}
-
-	// Skills should include "coding"
-	skills, ok := body["skills"].([]interface{})
-	if !ok {
-		t.Fatalf("skills should be an array, got %T", body["skills"])
-	}
-	if len(skills) != 1 || skills[0] != "coding" {
-		t.Errorf("expected skills=[coding], got %v", skills)
-	}
 }
 
 func TestGetAgentProfile_NotFound(t *testing.T) {
@@ -517,9 +508,10 @@ func TestGetAgentMind(t *testing.T) {
 
 	// Response should be a JSON object (layers map). Identity is no
 	// longer a layer — it collapsed into SOUL.md at the agent root.
-	// The mind tree still exposes skills/playbooks/journal.
+	// Skills moved to build-time dependencies at /world/skills/.
+	// The mind tree still exposes playbooks/journal.
 	body := decodeBody(t, w)
-	for _, layer := range []string{"skills", "playbooks", "journal"} {
+	for _, layer := range []string{"playbooks", "journal"} {
 		if _, ok := body[layer]; !ok {
 			t.Errorf("expected %q layer in mind response, got keys: %v", layer, body)
 		}

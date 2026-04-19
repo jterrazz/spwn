@@ -10,7 +10,7 @@ Transpile the project and compile it into a Docker image
 ### Synopsis
 
 Transpile the project with the target runtime (default: claude-code)
-and compile the result into a derived Docker image.
+and compile the result into a derived Docker compile.
 
 The image is FROM spwn-world:latest by default, with the transpiled
 tree COPY'd to /world/. The resulting image carries the project's

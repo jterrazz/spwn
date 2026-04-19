@@ -37,7 +37,7 @@ L1 Foundation packages/platform/                    (constants + IDs)
 | `migration` | L2 | Schema migrations runner + registry + backups |
 | `update` | L2 | CLI self-update + version-check |
 | `dependency` | L3 | `spwn.yaml` schema, ref parsing, `spwn.lock` read/write, filesystem loaders |
-| `agent` | L3 | Agent mind (SOUL.md at root + skills/playbooks/journal layers), evolution, session. Knowledge is world-scoped, not in the Mind. |
+| `agent` | L3 | Agent mind (SOUL.md at root + playbooks/journal layers), evolution, session. Skills and knowledge are world-scoped, not in the Mind. |
 | `project` | L4 | Project manifest, validation rules, scaffolding, teams + organizations |
 | `image` | L5 | Docker image build, tool registry, transitive dep resolution, dependency→Tool adapter |
 | `compile` | L5 | Pure render: `Input → Tree`, runtime renderers (claude_code) |

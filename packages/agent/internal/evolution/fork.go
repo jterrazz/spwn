@@ -39,7 +39,7 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		LayersCopied: []string{},
 	}
 
-	// Copy mind layers (skills, playbooks, journal)
+	// Copy mind layers (playbooks, journal)
 	for _, layer := range allLayers {
 		src := filepath.Join(sourceDir, layer)
 		dst := filepath.Join(targetDir, layer)

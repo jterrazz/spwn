@@ -99,8 +99,10 @@ type RuntimeConfig struct {
 // (identity is loaded separately via the entry file pipeline).
 // Knowledge is NOT a per-agent layer — it's world-scoped at
 // spwn/worlds/<name>/knowledge/ and bind-mounted into /world/knowledge/.
+// Skills are NOT a per-agent layer either — they're build-time
+// dependencies resolved via the `skill:` scheme or shipped by tools,
+// injected into /world/skills/ at image time.
 type LayerFiles struct {
-	Skills    map[string][]byte
 	Playbooks map[string][]byte
 	Journal   map[string][]byte
 }
@@ -292,9 +294,6 @@ func loadAgent(name, dir string) (AgentSource, error) {
 func loadLayers(agentDir string) (LayerFiles, error) {
 	var lf LayerFiles
 	var err error
-	if lf.Skills, err = readTree(filepath.Join(agentDir, "skills")); err != nil {
-		return lf, err
-	}
 	if lf.Playbooks, err = readTree(filepath.Join(agentDir, "playbooks")); err != nil {
 		return lf, err
 	}

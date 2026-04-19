@@ -129,7 +129,6 @@ func generateManagerContext(b *strings.Builder, opts AgentContextOpts) {
 
 	b.WriteString("### Your Mind\n")
 	b.WriteString("- /mind/SOUL.md - who you are (purpose, voice, principles)\n")
-	b.WriteString("- /mind/skills/ - what you can do\n")
 	b.WriteString("- /mind/playbooks/ - procedures that work\n")
 	b.WriteString("- /mind/journal/ - session history\n")
 	b.WriteString("- /world/knowledge/ - world-scoped facts (shared with other agents, committed to git)\n\n")
@@ -170,7 +169,6 @@ func generateWorkerContext(b *strings.Builder, opts AgentContextOpts) {
 
 	b.WriteString("### Your Mind\n")
 	b.WriteString("- /mind/SOUL.md - who you are (purpose, voice, principles)\n")
-	b.WriteString("- /mind/skills/ - what you can do\n")
 	b.WriteString("- /mind/playbooks/ - procedures that work\n")
 	b.WriteString("- /mind/journal/ - session history\n")
 	b.WriteString("- /world/knowledge/ - world-scoped facts (shared with other agents, committed to git)\n\n")
@@ -272,7 +270,6 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec, knowledgeMounted b
 
 	b.WriteString("## Where to find each member\n")
 	b.WriteString("- Soul: `/agents/<name>/SOUL.md`\n")
-	b.WriteString("- Skills: `/agents/<name>/skills/`\n")
 	b.WriteString("- Playbooks: `/agents/<name>/playbooks/`\n")
 	b.WriteString("- Journal: `/agents/<name>/journal/`\n")
 	b.WriteString("- Their inbox in **this** world: `/agents/<name>/worlds/" + worldID + "/inbox/`\n")

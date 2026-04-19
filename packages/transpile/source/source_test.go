@@ -35,12 +35,6 @@ func TestLoadMinimalProject(t *testing.T) {
 	if len(neo.Config.Deps) != 2 {
 		t.Errorf("agent.yaml packages: got %d, want 2", len(neo.Config.Deps))
 	}
-	if got, want := len(neo.Layers.Skills), 1; got != want {
-		t.Errorf("layer skills: got %d, want %d", got, want)
-	}
-	if _, ok := neo.Layers.Skills["warm-up.md"]; !ok {
-		t.Errorf("skills layer missing warm-up.md; keys: %v", keys(neo.Layers.Skills))
-	}
 	if len(src.Skills) != 1 {
 		t.Errorf("skills: got %d, want 1", len(src.Skills))
 	}

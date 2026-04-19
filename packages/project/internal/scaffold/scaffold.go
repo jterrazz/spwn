@@ -84,7 +84,6 @@ func Init(dir string, opts Opts) error {
 	// The default spwn.yaml template wires the auto-world to this path
 	// via its `knowledge: ./knowledge` key.
 	layerDirs := []string{
-		"spwn/agents/neo/skills",
 		"spwn/agents/neo/playbooks",
 		"spwn/agents/neo/journal",
 		"knowledge",
