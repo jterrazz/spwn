@@ -36,7 +36,9 @@ describe('spwn build --tree-only', () => {
         // World-shared context (physics, faculties, roster, AGENTS.md)
         // Is inlined into each agent's CLAUDE.md; no separate files.
         expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
-        expect(result.file('dist/agents/neo/worlds/default/role.md').exists).toBe(true);
+        // Per-deployment role.md still lands under worlds/<id>/, where
+        // <id> is the world name from spwn.yaml (`neo` in docker-pilot).
+        expect(result.file('dist/agents/neo/worlds/neo/role.md').exists).toBe(true);
     });
 
     test('--dry-run prints paths without touching disk', async () => {
