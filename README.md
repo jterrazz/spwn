@@ -78,8 +78,8 @@ One <code>spwn build</code> produces a Docker image — or a runtime-native tree
 </tr>
 <tr>
 <td align="center">
-<h3>🔒 Sandboxed</h3>
-Every agent runs in a Docker world with kernel limits; no network means HTTP doesn't exist, and no prompt can break out.
+<h3>🪐 Worlds</h3>
+Bundle agents, workspaces, and knowledge into a world — <code>spwn up</code> deploys them together, <code>spwn down</code> tears it all down.
 </td>
 <td align="center">
 <h3>🧠 Persistent</h3>
