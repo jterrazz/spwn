@@ -104,14 +104,14 @@ spwn turns your repo into a **portable agent artifact** — consumed by the spwn
 
 Four ideas to hold in your head before you dive in:
 
-- **[Agents built from blocks](#agents-built-from-blocks)** — tools, skills, hooks, and identity composed in one `agent.yaml`. Human-readable, git-friendly, no database.
-- **[Agents as code](#agents-as-code)** — the whole project is declarative files committed alongside your app. Clone the repo, get the same agents byte-for-byte.
-- **[Worlds orchestrate running agents](#worlds-orchestrate-running-agents)** — a world bundles agents, workspaces, and knowledge into one container. `spwn up` brings them live; `spwn down` tears them down.
-- **[Compile to any runtime](#compile-to-any-runtime)** — provider-neutral source in; Docker image or runtime-native tree out. Like `tsc`, but for agent runtimes.
+- **[One file, one agent](#one-file-one-agent)** — `agent.yaml` lists the runtime, tools, skills, hooks. Human-readable. Git-friendly. No database.
+- **[Lives in your repo, not a SaaS](#lives-in-your-repo-not-a-saas)** — every agent is a folder in your project. Commit it, review it, diff it like any other code.
+- **[A world is one `spwn up` away](#a-world-is-one-spwn-up-away)** — group agents, workspaces, and knowledge; launch them together; tear them down together.
+- **[Runtime-agnostic](#runtime-agnostic)** — works with Claude Code today, Codex tomorrow. Swap backends with one line.
 
 <br/>
 
-### Agents built from blocks
+### One file, one agent
 
 An agent **is** a composition of blocks, declared in one file:
 
@@ -154,7 +154,7 @@ spwn/agents/neo/
 
 <br/>
 
-### Agents as code
+### Lives in your repo, not a SaaS
 
 **Your agents and their composition are declarative files committed alongside your code** - reviewed in PRs, versioned in git, diffed like any other config. Think Terraform for infrastructure, `docker-compose.yaml` for services, `package.json` for dependencies. Spwn plays the same role for the agents that work on your repo.
 
@@ -179,7 +179,7 @@ Whoever clones the repo gets the same agents with the same tools, byte-for-byte.
 
 <br/>
 
-### Worlds orchestrate running agents
+### A world is one `spwn up` away
 
 An agent defines **what** can think. A **world** defines *where* and *with whom* they run. Worlds are the runtime unit: one long-running container per world, one shared filesystem, one declared set of agents talking to each other and to the mounted workspace.
 
@@ -201,7 +201,7 @@ worlds:
 
 <br/>
 
-### Compile to any runtime
+### Runtime-agnostic
 
 Think of spwn the way you think of `tsc` or `babel`. You write in one clean, provider-neutral source; a transpiler adapts it to whatever runtime you target and emits exactly what that runtime expects. You never touch the output by hand.
 
