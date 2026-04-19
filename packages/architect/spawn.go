@@ -127,6 +127,16 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	var warnings []string
 
+	// Run any `hook:pre-spawn` scripts declared in the manifest
+	// before we touch Docker. These execute on the host with cwd set
+	// to the project root; a non-zero exit aborts the spawn so the
+	// user can fix the problem before infrastructure is provisioned.
+	// Invariants (cache warmups, env validation, generated config) go
+	// here so they run as close to "fresh state" as possible.
+	if err := runLifecycleHooks(ctx, platform.ProjectRoot(), "pre-spawn", opts.Manifest.Deps); err != nil {
+		return nil, err
+	}
+
 	// Generate ID
 	id := platform.GenerateWorldID(opts.ConfigName)
 
