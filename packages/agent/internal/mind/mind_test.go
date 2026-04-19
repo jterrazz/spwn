@@ -216,8 +216,8 @@ func TestLayerCount(t *testing.T) {
 			name: "all_empty",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"skills":    nil,
 					"playbooks": nil,
+					"journal":   nil,
 				},
 			},
 			want: 0,
@@ -226,8 +226,8 @@ func TestLayerCount(t *testing.T) {
 			name: "some_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"skills":  nil,
-					"journal": {"entry.md"},
+					"playbooks": nil,
+					"journal":   {"entry.md"},
 				},
 			},
 			want: 1,
@@ -236,12 +236,11 @@ func TestLayerCount(t *testing.T) {
 			name: "all_with_files",
 			info: AgentInfo{
 				Layers: map[string][]string{
-					"skills":    {"a.md"},
 					"playbooks": {"b.md"},
 					"journal":   {"c.md"},
 				},
 			},
-			want: 3,
+			want: 2,
 		},
 	}
 

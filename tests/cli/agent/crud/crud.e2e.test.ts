@@ -26,9 +26,9 @@ describe('spwn agent CRUD', () => {
         // Worlds.<name>.knowledge in spwn.yaml; omitted by default in
         // User-mode agent creation).
         expect(result.file('spwn-home/agents/neo/SOUL.md').exists).toBe(true);
-        expect(result.file('spwn-home/agents/neo/skills').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/playbooks').exists).toBe(true);
         expect(result.file('spwn-home/agents/neo/journal').exists).toBe(true);
+        expect(result.file('spwn-home/agents/neo/skills').exists).toBe(false);
         expect(result.file('spwn-home/agents/neo/knowledge').exists).toBe(false);
         // Smoke-check the status banner so regressions in the CLI UX
         // Are caught without pinning the full text.
@@ -69,10 +69,9 @@ describe('spwn agent CRUD', () => {
         expect(result.exitCode).toBe(0);
         // `agent show` renders the Mind tree on stderr in spwn's UX.
         // Identity/ was collapsed into SOUL.md at the agent root in
-        // 2026-04; the Mind now has three layer directories plus the
-        // Soul file.
+        // 2026-04; skills moved to build-time dependencies. The
+        // Mind now has two layer directories plus the Soul file.
         expect(result.stderr.text).toMatch(/Agent:\s+neo/);
-        expect(result.stderr.text).toMatch(/skills\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/playbooks\/\s+\(empty\)/);
         expect(result.stderr.text).toMatch(/journal\/\s+\(empty\)/);
     });
@@ -122,7 +121,6 @@ describe('spwn agent CRUD', () => {
 
         for (const path of [
             'spwn-home/agents/neo/SOUL.md',
-            'spwn-home/agents/neo/skills',
             'spwn-home/agents/neo/playbooks',
             'spwn-home/agents/neo/journal',
         ]) {

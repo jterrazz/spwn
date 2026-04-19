@@ -18,9 +18,9 @@ func TestAgent_Init(t *testing.T) {
 		Init("fresh-agent")
 
 	// Then - the Mind should have all standard layers plus SOUL.md at root
-	// (identity collapsed into a single file; knowledge moved to worlds)
+	// (identity collapsed into a single file; knowledge moved to worlds;
+	// skills moved to build-time dependencies).
 	chain.ExpectMind(func(m *setup.MindAssertion) {
-		m.HasLayer("skills")
 		m.HasLayer("playbooks")
 		m.HasLayer("journal")
 		m.HasFile("SOUL.md")
@@ -79,9 +79,10 @@ func TestAgent_Inspect(t *testing.T) {
 		t.Fatalf("Expected name 'inspect-agent', got %q", info.Name)
 	}
 
-	// AND the 3 standard layers should exist (identity collapsed into
-	// SOUL.md at agent root; knowledge moved to world scope).
-	for _, layer := range []string{"skills", "playbooks", "journal"} {
+	// AND the 2 standard layers should exist (identity collapsed into
+	// SOUL.md at agent root; knowledge moved to world scope; skills
+	// moved to build-time dependencies).
+	for _, layer := range []string{"playbooks", "journal"} {
 		if _, ok := info.Layers[layer]; !ok {
 			t.Fatalf("Missing layer %q", layer)
 		}

@@ -38,10 +38,11 @@ describe('agent inside world', () => {
 
         // Identity/ was collapsed into SOUL.md; the agent's soul now
         // Lives at /agents/<name>/SOUL.md and the Mind layer dirs sit
-        // Alongside it (skills/, playbooks/, journal/).
+        // Alongside it (playbooks/, journal/). Skills moved to
+        // Build-time dependencies at /world/skills/.
         expect(neo.file('/agents/neo').exists).toBe(true);
         expect(neo.file('/agents/neo/SOUL.md').exists).toBe(true);
-        expect(neo.file('/agents/neo/skills').exists).toBe(true);
+        expect(neo.file('/agents/neo/playbooks').exists).toBe(true);
 
         const ls = await neo.exec('ls /agents/neo');
         expect(ls.exitCode).toBe(0);
@@ -84,8 +85,9 @@ describe('agent inside world', () => {
         // Docker-pilot ships neo's Mind under spwn/agents/neo/ in the
         // Fixture; the on-disk layers must be present in the shared workdir.
         // Knowledge is world-scoped now — no longer a Mind layer.
+        // Skills moved to build-time dependencies at /world/skills/.
         expect(world.file('spwn/agents/neo/SOUL.md').exists).toBe(true);
-        expect(world.file('spwn/agents/neo/skills').exists).toBe(true);
+        expect(world.file('spwn/agents/neo/playbooks').exists).toBe(true);
         expect(world.file('spwn/agents/neo/journal').exists).toBe(true);
 
         // And the same profile.md is visible inside the container via

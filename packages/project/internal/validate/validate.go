@@ -313,7 +313,6 @@ func ruleAgentStructure(in Input) []Issue {
 		{"agent.yaml", false, LevelError},
 		{"AGENTS.md", false, LevelError},
 		{"SOUL.md", false, LevelError},
-		{"skills", true, LevelWarning},
 		{"playbooks", true, LevelWarning},
 		{"journal", true, LevelWarning},
 	}
@@ -925,11 +924,6 @@ func ruleMarkdownImports(in Input) []Issue {
 // start with a YAML frontmatter block declaring `name:` and
 // `description:`.
 //
-// Per-agent skill directories (spwn/agents/<name>/skills/) are NOT
-// walked: they are a pure Mind memory layer — the agent writes to
-// them at runtime — and spwn neither validates nor injects their
-// contents as skills.
-//
 // Shape (the "SKILL" convention, kept as generic markdown
 // frontmatter so non-skill .md can opt in later):
 //
@@ -990,11 +984,6 @@ func ruleSkillFrontmatter(in Input) []Issue {
 //   - spwn/skills/              — project-wide bare skills
 //   - spwn/tools/<name>/skills/ — skills shipped by a local tool
 //
-// Per-agent skill directories (spwn/agents/<name>/skills/) are a
-// pure Mind memory layer and are intentionally NOT walked: the
-// agent writes to them at runtime and spwn neither validates nor
-// injects their contents.
-//
 // Each location is walked recursively so nested skill directories
 // (spwn/skills/reviewing/code-review.md) are covered. Missing
 // locations return an empty slice, never an error.
@@ -1019,10 +1008,6 @@ func collectSkillFiles(root string) []string {
 // files may appear. Directories that don't exist are silently skipped
 // by the walker (filepath.WalkDir returns os.ErrNotExist which the
 // collector drops).
-//
-// Agent-local skills/ directories (spwn/agents/<name>/skills/) are
-// deliberately absent: they are a pure Mind memory layer written by
-// the agent at runtime, not an authoring surface for spwn.
 func skillSearchRoots(root string) []string {
 	var roots []string
 

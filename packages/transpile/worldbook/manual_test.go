@@ -30,13 +30,13 @@ func TestAgentsBookContent(t *testing.T) {
 		}
 	}
 
-	// Must contain SOUL.md (who you are) plus the three Mind-layer
+	// Must contain SOUL.md (who you are) plus the two Mind-layer
 	// directories. identity/ was collapsed into SOUL.md at the agent
 	// root; knowledge is world-scoped at /world/knowledge/, not a
-	// Mind layer.
+	// Mind layer; skills moved to build-time dependencies at
+	// /world/skills/, not a per-agent memory layer.
 	mindPaths := []string{
 		"/mind/SOUL.md",
-		"/mind/skills/",
 		"/mind/playbooks/",
 		"/mind/journal/",
 	}

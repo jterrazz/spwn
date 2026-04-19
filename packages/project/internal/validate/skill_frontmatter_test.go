@@ -110,21 +110,6 @@ func TestRuleSkillFrontmatter_walksAuthoredSkillRoots(t *testing.T) {
 	}
 }
 
-// TestRuleSkillFrontmatter_ignoresAgentLocalSkills: per-agent skills/
-// directories are a Mind memory layer — the agent writes to them at
-// runtime — and spwn must neither validate nor discover their
-// contents. A broken-frontmatter file at spwn/agents/<name>/skills/
-// therefore produces zero issues.
-func TestRuleSkillFrontmatter_ignoresAgentLocalSkills(t *testing.T) {
-	root := t.TempDir()
-	writeSkill(t, root, "spwn/agents/neo/skills", "agent.md", "no header\n")
-
-	issues := ruleSkillFrontmatter(Input{Root: root})
-	if len(issues) != 0 {
-		t.Fatalf("agent-local skills must be opaque to spwn check; got %d issues: %+v", len(issues), issues)
-	}
-}
-
 // TestRuleSkillFrontmatter_nestedSkills: a nested skill file (e.g.
 // spwn/skills/reviewing/code.md) is still a skill. Walk is recursive.
 func TestRuleSkillFrontmatter_nestedSkills(t *testing.T) {

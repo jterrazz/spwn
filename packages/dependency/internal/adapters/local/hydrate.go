@@ -76,7 +76,7 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 //
 // skill: and hook: refs are stripped from the list entirely — those
 // are compile-time artifacts that the runtime renderer weaves into
-// the Tree (as /mind/skills/<name>.md and hook scripts respectively),
+// the Tree (as /world/skills/<name>.md and hook scripts respectively),
 // not image-builder inputs. Passing them through to the image
 // registry's Resolve would blow up with "tool not found" because
 // they're never registered there.

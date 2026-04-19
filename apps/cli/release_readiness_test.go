@@ -144,14 +144,15 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("03_init_writes_soul_and_3_layer_mind", func(t *testing.T) {
-		// A03: fresh init writes SOUL.md + skills/playbooks/journal, no knowledge.
-		// (identity/ directory was collapsed into a single SOUL.md at agent root.)
+	t.Run("03_init_writes_soul_and_2_layer_mind", func(t *testing.T) {
+		// A03: fresh init writes SOUL.md + playbooks/journal, no knowledge.
+		// (identity/ directory was collapsed into a single SOUL.md at agent
+		// root; skills moved to build-time dependencies at /world/skills/.)
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		for _, layer := range []string{"skills", "playbooks", "journal"} {
+		for _, layer := range []string{"playbooks", "journal"} {
 			if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo", layer)); err != nil {
 				t.Errorf("missing agent layer %s: %v", layer, err)
 			}
@@ -161,6 +162,9 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/identity")); !os.IsNotExist(err) {
 			t.Errorf("identity/ directory should NOT exist (collapsed into SOUL.md), stat err=%v", err)
+		}
+		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/skills")); !os.IsNotExist(err) {
+			t.Errorf("agent skills layer should NOT exist (moved to build-time deps), stat err=%v", err)
 		}
 		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/knowledge")); !os.IsNotExist(err) {
 			t.Errorf("agent knowledge layer should NOT exist, stat err=%v", err)
@@ -388,8 +392,9 @@ func TestReleaseReadiness(t *testing.T) {
 	// C — agent CRUD
 	// --------------------------------------------------------------------
 
-	t.Run("15_agent_create_global_soul_and_3_layer", func(t *testing.T) {
-		// C15: user-mode `agent create` produces SOUL.md + 3 layer dirs, no knowledge.
+	t.Run("15_agent_create_global_soul_and_2_layer", func(t *testing.T) {
+		// C15: user-mode `agent create` produces SOUL.md + 2 layer dirs,
+		// no knowledge, no skills (skills moved to build-time deps).
 		t.Parallel()
 		env, home := freshEnv(t)
 		// No project: operate in global mode from a fresh dir.
@@ -398,7 +403,7 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("global agent create should succeed")
 		}
 		base := filepath.Join(home, "agents/neo")
-		for _, layer := range []string{"skills", "playbooks", "journal"} {
+		for _, layer := range []string{"playbooks", "journal"} {
 			if _, err := os.Stat(filepath.Join(base, layer)); err != nil {
 				t.Errorf("missing %s layer: %v", layer, err)
 			}
@@ -408,6 +413,9 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 		if _, err := os.Stat(filepath.Join(base, "identity")); !os.IsNotExist(err) {
 			t.Errorf("identity/ directory should NOT exist (collapsed into SOUL.md), stat err=%v", err)
+		}
+		if _, err := os.Stat(filepath.Join(base, "skills")); !os.IsNotExist(err) {
+			t.Errorf("skills/ should NOT exist (moved to build-time deps), stat err=%v", err)
 		}
 		if _, err := os.Stat(filepath.Join(base, "knowledge")); !os.IsNotExist(err) {
 			t.Errorf("agent knowledge dir should NOT exist under user mode, stat err=%v", err)
@@ -723,8 +731,9 @@ func TestReleaseReadiness(t *testing.T) {
 	// --------------------------------------------------------------------
 
 	t.Run("34_agent_help_mentions_soul_and_layers", func(t *testing.T) {
-		// G34: `agent --help` advertises SOUL.md at root + the three
-		// Mind layer dirs (skills/playbooks/journal).
+		// G34: `agent --help` advertises SOUL.md at root + the two Mind
+		// layer dirs (playbooks/journal). Skills moved to build-time
+		// dependencies.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -736,13 +745,14 @@ func TestReleaseReadiness(t *testing.T) {
 		if !strings.Contains(combined, "SOUL.md") {
 			t.Fatalf("agent --help missing `SOUL.md`:\n%s", combined)
 		}
-		if !strings.Contains(combined, "skills/playbooks/journal") {
+		if !strings.Contains(combined, "playbooks/journal") {
 			t.Fatalf("agent --help missing layer list:\n%s", combined)
 		}
 	})
 
 	t.Run("35_agent_create_help_mentions_soul", func(t *testing.T) {
-		// G35: `agent create --help` advertises SOUL.md + 3 Mind layers.
+		// G35: `agent create --help` advertises SOUL.md + 2 Mind layers
+		// (skills moved to build-time dependencies).
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -754,7 +764,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if !strings.Contains(combined, "SOUL.md") {
 			t.Fatalf("agent create --help missing `SOUL.md`:\n%s", combined)
 		}
-		if !strings.Contains(combined, "skills/playbooks/journal") {
+		if !strings.Contains(combined, "playbooks/journal") {
 			t.Fatalf("agent create --help missing layer list:\n%s", combined)
 		}
 	})
@@ -1077,9 +1087,9 @@ func TestReleaseReadiness(t *testing.T) {
 	t.Run("51_catalog_install_ships_knowledge_dir", func(t *testing.T) {
 		// Regression for commit 6319e3a6: `spwn init spwn:<name>` used
 		// to drop the catalog's knowledge/ dir on the floor — the
-		// installer only copied agents/skills/tools/hooks/files under
-		// spwn/. After the fix, root-level knowledge/ ships too, so
-		// seed handbooks + starter notes actually materialise.
+		// installer only copied agents/tools/hooks/files under spwn/.
+		// After the fix, root-level knowledge/ ships too, so seed
+		// handbooks + starter notes actually materialise.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -1219,7 +1229,7 @@ worlds:
 	if err := os.MkdirAll(agentDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	for _, layer := range []string{"skills", "playbooks", "journal"} {
+	for _, layer := range []string{"playbooks", "journal"} {
 		if err := os.MkdirAll(filepath.Join(agentDir, layer), 0o755); err != nil {
 			t.Fatal(err)
 		}

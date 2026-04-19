@@ -21,7 +21,7 @@ the others are placeholders for when a real schema change lands.
 |---|---|---|---|
 | **user** | `~/.spwn/` | config.yaml, organizations/, credentials/, activity.jsonl, world-states/ | live — `user/` sub-package |
 | project | `./spwn.yaml` + `./spwn/` | manifest, agents, skills, tools, hooks, knowledge | not populated |
-| agent | `./spwn/agents/<name>/` | SOUL.md, agent.yaml, skills/, playbooks/, journal/ | not populated |
+| agent | `./spwn/agents/<name>/` | SOUL.md, agent.yaml, playbooks/, journal/ | not populated |
 | world | `~/.spwn/world-states/<id>/` | runtime.json, manifest snapshot, roster | not populated |
 
 The `Runner` + `Migration` types are scope-agnostic. Each category

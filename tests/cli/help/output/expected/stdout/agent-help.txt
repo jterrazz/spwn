@@ -1,5 +1,5 @@
 
-⬡ agent - composed minds: SOUL.md at root + 3 Mind layers (skills/playbooks/journal); knowledge is world-scoped
+⬡ agent - composed minds: SOUL.md at root + 2 Mind layers (playbooks/journal); skills and knowledge are world-scoped
 
 Usage:
   spwn agent [command]

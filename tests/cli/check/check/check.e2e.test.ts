@@ -89,19 +89,20 @@ describe('spwn check', () => {
         result.stdout.toContain('spwn.yaml#worlds.neo.agents');
     });
 
-    test('ignores agent-local skills — they are an opaque Mind memory layer', async () => {
-        // Given - single-agent base + a naked skill dropped under
-        // Spwn/agents/neo/skills/. That directory is the agent's
-        // Private Mind memory layer (written to at runtime), not an
-        // Authoring surface: spwn must neither validate nor discover
-        // Its contents.
-        const result = await spec('agent-local skills are opaque')
+    test('ignores stray files under agent directories', async () => {
+        // Given - single-agent base + a stray markdown dropped under
+        // Spwn/agents/neo/. Skills moved to build-time dependencies at
+        // /world/skills/, so per-agent skills/ is no longer a concept.
+        // The validator only walks spwn/skills/ and
+        // Spwn/tools/<name>/skills/ — stray markdown under an agent's
+        // Directory must not trip the frontmatter rule.
+        const result = await spec('stray agent files are opaque')
             .project('single-agent')
             .seed('agent/neo/skills/naked.md')
             .exec('check')
             .run();
 
-        // Then - check still passes. The broken file is invisible to
+        // Then - check still passes. The stray file is invisible to
         // The validator; the rule only walks spwn/skills/ and
         // Spwn/tools/<name>/skills/.
         expect(result.exitCode).toBe(0);

@@ -524,7 +524,6 @@ type agentProfileResponse struct {
 	Purpose  string              `json:"purpose"`
 	Profile  string              `json:"profile"`
 	Traits   []string            `json:"traits"`
-	Skills   []string            `json:"skills"`
 	Journal  []journalEntry      `json:"journal"`
 	Layers   map[string][]string `json:"layers"`
 }
@@ -550,21 +549,6 @@ func readFirstLineContent(path string) string {
 		}
 	}
 	return ""
-}
-
-// listMdFiles returns base names (without .md extension) of markdown files in a directory.
-func listMdFiles(dir string) []string {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return nil
-	}
-	var result []string
-	for _, e := range entries {
-		if !e.IsDir() && strings.HasSuffix(e.Name(), ".md") {
-			result = append(result, strings.TrimSuffix(e.Name(), ".md"))
-		}
-	}
-	return result
 }
 
 // parseTraits reads a traits.md file and returns individual traits as a slice.
@@ -652,12 +636,6 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		traits = []string{}
 	}
 
-	// List capability files
-	skills := listMdFiles(filepath.Join(mindPath, "skills"))
-	if skills == nil {
-		skills = []string{}
-	}
-
 	// Journal entries (now at root level)
 	journal := parseJournalFiles(filepath.Join(mindPath, "journal"))
 	if journal == nil {
@@ -674,7 +652,6 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 		Purpose:  purpose,
 		Profile:  profileText,
 		Traits:   traits,
-		Skills:   skills,
 		Journal:  journal,
 		Layers:   info.Layers,
 	}

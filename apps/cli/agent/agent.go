@@ -39,7 +39,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
-		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds: SOUL.md at root + 3 Mind layers (skills/playbooks/journal); knowledge is world-scoped"),
+		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds: SOUL.md at root + 2 Mind layers (playbooks/journal); skills and knowledge are world-scoped"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "create <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
@@ -101,11 +101,12 @@ var Cmd = &cobra.Command{
 	Long: `Spawn an agent into an existing world.
 
 An agent is backed by a Mind - a persistent directory holding its SOUL.md
-(purpose, voice, principles), skills/, playbooks/, and journal/. The agent
-survives after the world is destroyed. Knowledge lives at /world/knowledge/
-inside each world when the manifest opts in via worlds.<name>.knowledge —
-the path resolves relative to the project root and is shared across every
-agent in that world.`,
+(purpose, voice, principles), playbooks/, and journal/. The agent survives
+after the world is destroyed. Skills are build-time dependencies injected
+into /world/skills/; knowledge lives at /world/knowledge/ inside each
+world when the manifest opts in via worlds.<name>.knowledge — the path
+resolves relative to the project root and is shared across every agent
+in that world.`,
 	Args: cobra.ArbitraryArgs, // subcommands still resolve first
 	Example: `  spwn agent create neo              Create a blank agent
   spwn agent neo                     Open an interactive session with neo
