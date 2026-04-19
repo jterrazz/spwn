@@ -98,14 +98,23 @@ Memory is a folder of markdown files — readable, diffable, and alive across re
 
 ## How spwn works
 
+spwn turns your repo into a **portable agent artifact** — consumed by the spwn CLI today, and by web UIs, apps, and embedded SDKs on the roadmap. One bundle format, many future surfaces.
+
 ```
-   YOUR REPO              BUILD                ARTIFACT
-  ───────────           ─────                ────────
-   spwn.yaml
-   spwn/agents/          spwn build           Docker image, or
-   spwn/skills/    ──▶   transpile      ──▶   runtime-native tree
-   spwn/tools/           + compile            (claude-code, codex, …)
-   spwn/hooks/
+  ╭──────────────╮     ╭──────────────╮     ╭────────────────────╮
+  │  YOUR REPO   │     │  spwn build  │     │      ARTIFACT      │
+  │              │     │              │     │                    │
+  │  spwn.yaml   │ ──▶ │  transpile   │ ──▶ │  Docker image      │
+  │  spwn/agents │     │  + compile   │     │     or             │
+  │  spwn/skills │     │              │     │  runtime-native    │
+  │  spwn/tools  │     │              │     │  tree (claude,     │
+  │  spwn/hooks  │     │              │     │   codex, …)        │
+  ╰──────────────╯     ╰──────────────╯     ╰─────────┬──────────╯
+                                                      │
+                                                      ▼  consumed by
+                                                ✓ spwn CLI       (today)
+                                                · apps & web UI  (soon)
+                                                · embedded SDKs  (soon)
 ```
 
 Four ideas to hold in your head before you dive in:
