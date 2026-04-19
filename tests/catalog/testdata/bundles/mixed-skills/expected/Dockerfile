@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM ubuntu:24.04
 
 # Minimal base — tools are added by the compile package

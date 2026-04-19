@@ -55,9 +55,9 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			// / `agent remove` subcommands were retired.
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
-				{Name: "send <name> <msg>", Desc: "Send an async message to an agent's inbox"},
-				{Name: "inbox <name>", Desc: "Show an agent's inbox"},
-				{Name: "watch <name>", Desc: "Tail an agent's inbox in real time"},
+				{Name: "send <name> <msg>", Desc: "Send an async message to an agent's inbox " + ui.Faint("[planned]")},
+				{Name: "inbox <name>", Desc: "Show an agent's inbox " + ui.Faint("[planned]")},
+				{Name: "watch <name>", Desc: "Tail an agent's inbox in real time " + ui.Faint("[planned]")},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
 				{Name: "show <name>", Desc: "Show agent details " + ui.Faint("(alias of inspect)")},
