@@ -29,11 +29,11 @@
 
 ## Play god with AI agents.
 
-**The building blocks of artificial life.** Compose any mix of tools, skills, hooks, and an identity into a living agent — then spawn it into a world. Every block is a declarative file in your repo, reviewed in PRs, pinned in lockfiles, reproducible on any machine.
+**The building blocks of artificial life.** Compose any mix of tools, skills, hooks, and an identity into a living agent; spawn it into a world; commit the whole thing to git. Every block is a declarative file — reviewed in PRs, pinned in lockfiles, reproducible on any machine.
 
 The real power of AI isn't the model — it's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
-That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code** — stack tool dependencies, skill files, and an identity into a running mind, then commit the whole declaration to git. Review the PR that changes its behavior, clone the repo to reproduce the same mind on any machine, run `spwn build` to bake it into a shippable Docker image. **Docker for intelligence.**
+That's what spwn gives you. If Terraform is infrastructure as code, spwn is **agents as code** — the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
 
 <br/>
 
@@ -98,11 +98,22 @@ Memory is a folder of markdown files — readable, diffable, and alive across re
 
 ## How spwn works
 
-Three ideas to hold in your head before you dive in:
+```
+   YOUR REPO              BUILD                ARTIFACT
+  ───────────           ─────                ────────
+   spwn.yaml
+   spwn/agents/          spwn build           Docker image, or
+   spwn/skills/    ──▶   transpile      ──▶   runtime-native tree
+   spwn/tools/           + compile            (claude-code, codex, …)
+   spwn/hooks/
+```
 
-- **[Agent orchestration as code](#agent-orchestration-as-code)** - agents, worlds, and tool composition are declarative files committed alongside your code. Like Terraform or `docker-compose.yaml`, but for the agents that work on your repo. Clone it, get the same agents byte-for-byte.
-- **[Agents built from blocks](#agents-built-from-blocks)** - tools, skills, and identity composed in `agent.yaml`. Human-readable, git-friendly, no database.
-- **[Compile to any runtime](#compile-to-any-runtime)** - you write provider-neutral source; `spwn build` adapts it to whatever runtime you target and compiles the result into a reproducible Docker image. Like `tsc`, but for agent runtimes.
+Four ideas to hold in your head before you dive in:
+
+- **[Agents as code](#agents-as-code)** — agents and their composition are declarative files committed alongside your app. Clone the repo, get the same agents byte-for-byte.
+- **[Agents built from blocks](#agents-built-from-blocks)** — tools, skills, hooks, and identity composed in `agent.yaml`. Human-readable, git-friendly, no database.
+- **[Worlds orchestrate running agents](#worlds-orchestrate-running-agents)** — a world bundles agents, workspaces, and knowledge into one container. `spwn up` brings them live; `spwn down` tears them down.
+- **[Compile to any runtime](#compile-to-any-runtime)** — provider-neutral source in; Docker image or runtime-native tree out. Like `tsc`, but for agent runtimes.
 
 <br/>
 
