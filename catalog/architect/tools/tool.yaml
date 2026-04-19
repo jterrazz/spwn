@@ -8,7 +8,7 @@ dependencies:
   - "spwn:docker-cli"
 
 files:
-  /usr/local/bin/architect-entrypoint.sh: files/entrypoint.sh
+  /usr/local/bin/architect-entrypoint.sh: tools/files/entrypoint.sh
 
 install:
   commands:

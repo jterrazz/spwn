@@ -27,10 +27,14 @@ var catalogFS embed.FS
 const contentRoot = "content"
 
 // loadYAMLTools walks every catalog entry that ships a
-// tools/tool.yaml and parses it into an tool.Tool. Project
-// templates (entries whose root spwn.yaml declares `worlds:` but
-// that don't ship a tool.yaml) are not tool-shaped and are not
-// registered — they surface through the init gallery only.
+// tools/tool.yaml and parses it into an tool.Tool. The resolver is
+// rooted at the catalog entry itself so tool.yaml (under tools/),
+// sibling skills/ (lifted to catalog entry root for visibility),
+// and file references (tool.yaml#files: paths) all resolve from
+// the same base. Project templates (entries whose root spwn.yaml
+// declares `worlds:` but that don't ship a tools/tool.yaml) are
+// not tool-shaped and are not registered — they surface through
+// the init gallery only.
 func loadYAMLTools() ([]tool.Tool, error) {
 	entries, err := fs.ReadDir(catalogFS, contentRoot)
 	if err != nil {
@@ -53,11 +57,11 @@ func loadYAMLTools() ([]tool.Tool, error) {
 	for _, name := range names {
 		canonical := "spwn:" + name
 		parsed, err := manifest.Parse(
-			manifest.EmbedResolver{FS: catalogFS, Root: path.Join(contentRoot, name, "tools")},
+			manifest.EmbedResolver{FS: catalogFS, Root: path.Join(contentRoot, name)},
 			manifest.ParseOptions{
 				DefaultName:    canonical,
 				DefaultVersion: "latest",
-				ManifestFile:   manifest.ToolManifest,
+				ManifestFile:   path.Join("tools", manifest.ToolManifest),
 			},
 		)
 		if err != nil {
