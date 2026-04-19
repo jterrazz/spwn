@@ -34,7 +34,7 @@ const contentRoot = "content"
 func loadYAMLTools() ([]tool.Tool, error) {
 	entries, err := fs.ReadDir(catalogFS, contentRoot)
 	if err != nil {
-		return nil, fmt.Errorf("read embedded catalog (is go:generate ran?): %w", err)
+		return nil, fmt.Errorf("read embedded catalog (did you run `make generate` or `go generate ./packages/dependency/...`?): %w", err)
 	}
 	var names []string
 	for _, e := range entries {
