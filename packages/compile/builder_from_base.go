@@ -17,10 +17,10 @@ import (
 )
 
 // TreeTarballer is anything that can serialise itself as a tar stream.
-// The compile package's *Tree satisfies this interface via its Tar
+// packages/transpile's *Tree satisfies this interface via its Tar
 // method — we keep the contract minimal so packages/compile avoids a
-// hard dependency on packages/compile (which would cycle back through
-// packages/world -> packages/compile).
+// hard dependency on packages/transpile (which would otherwise create
+// an import cycle once packages/world pulls us both in).
 type TreeTarballer interface {
 	Tar(w io.Writer) error
 }
@@ -33,8 +33,8 @@ type BuildFromBaseRequest struct {
 	// pull it.
 	BaseImage string
 
-	// Tree is the transpiled project tree to compile into the compile.
-	// Its contents land at TreeDestination inside the final compile.
+	// Tree is the transpiled project tree to compile into the image.
+	// Its contents land at TreeDestination inside the final image.
 	Tree TreeTarballer
 
 	// TreeDestination is the absolute path inside the image where
@@ -45,8 +45,8 @@ type BuildFromBaseRequest struct {
 	// Required.
 	Tag string
 
-	// Labels are Docker labels written onto the produced compile.
-	// Used for test cleanup (sh.spwn.test.run) and project identity
+	// Labels are Docker labels written onto the produced image. Used
+	// for test cleanup (sh.spwn.test.run) and project identity
 	// (sh.spwn.project).
 	Labels map[string]string
 
@@ -60,7 +60,7 @@ type BuildFromBaseRequest struct {
 
 // BuildFromBaseResult is the outcome of a successful BuildFromBase.
 type BuildFromBaseResult struct {
-	// ImageID is the short sha256: ID of the resulting compile.
+	// ImageID is the short sha256: ID of the resulting image.
 	ImageID string
 	// Tag is the tag that was applied.
 	Tag string

@@ -62,7 +62,7 @@ type Schema struct {
 	Worlds yaml.Node `yaml:"worlds,omitempty"`
 
 	// Install is the build-time recipe for baking this dependency
-	// into the compile. All sub-fields are optional — a dependency
+	// into the image. All sub-fields are optional — a dependency
 	// that only ships skills can leave Install empty entirely.
 	Install InstallSection `yaml:"install"`
 

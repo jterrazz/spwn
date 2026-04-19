@@ -3,6 +3,8 @@ package architect
 import (
 	"bufio"
 	"bytes"
+	"errors"
+	"io"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -23,7 +25,7 @@ import (
 func parsePlaybookHeader(body []byte) (transpile.PlaybookEntry, bool) {
 	r := bufio.NewReader(bytes.NewReader(body))
 	first, err := r.ReadString('\n')
-	if err != nil && err.Error() != "EOF" {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return transpile.PlaybookEntry{}, false
 	}
 	if strings.TrimRight(first, "\r\n") != "---" {

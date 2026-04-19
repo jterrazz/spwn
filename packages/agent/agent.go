@@ -61,8 +61,9 @@ func DeleteAgent(name string) error {
 
 // --- Mind operations ---
 
-// AgentDir returns the absolute path to the agent's Mind directory
-// (~/.spwn/agents/{name}/).
+// AgentDir returns the absolute path to the agent's Mind directory.
+// Resolves to <projectRoot>/spwn/agents/{name}/ when running inside
+// a spwn project, and ~/.spwn/agents/{name}/ otherwise.
 func AgentDir(name string) string {
 	return mind.AgentDir(name)
 }

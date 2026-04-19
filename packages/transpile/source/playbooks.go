@@ -3,6 +3,8 @@ package source
 import (
 	"bufio"
 	"bytes"
+	"errors"
+	"io"
 	"sort"
 	"strings"
 
@@ -44,7 +46,7 @@ func promotedPlaybooks(playbooks map[string][]byte) []transpile.PlaybookEntry {
 func parsePlaybookHeader(body []byte) (transpile.PlaybookEntry, bool) {
 	r := bufio.NewReader(bytes.NewReader(body))
 	first, err := r.ReadString('\n')
-	if err != nil && err.Error() != "EOF" {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return transpile.PlaybookEntry{}, false
 	}
 	if strings.TrimRight(first, "\r\n") != "---" {

@@ -43,6 +43,6 @@ type InstallSpec struct {
 	// Env are ENV key=value directives added to the Dockerfile.
 	Env map[string]string
 
-	// Files are paths→content pairs COPYd into the compile.
+	// Files are paths→content pairs COPYd into the image.
 	Files map[string][]byte
 }
