@@ -66,6 +66,13 @@ func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string
 // agentHomes[name]. One-way snapshot at spawn; no live bind.
 // Agents whose host dir doesn't exist (first-time scaffolds, memory
 // still empty) are silently skipped.
+//
+// Note: docker's CopyToContainer extracts tar entries as root (tar
+// headers don't carry uid/gid today), so every file under
+// /agents/<name>/ lands owned root:root. The caller must re-own via
+// ChownAgentHomes *after* all docker-cp operations complete —
+// including the runtime default-config writes that happen downstream.
+// A single chown here wouldn't catch those later writes.
 func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
 	hostRoot := platform.AgentsDir()
 	for agentName, containerHome := range agentHomes {
@@ -75,6 +82,30 @@ func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHo
 		}
 		if err := be.CopyDirTo(ctx, containerID, containerHome, hostDir); err != nil {
 			return fmt.Errorf("copy %s → %s: %w", hostDir, containerHome, err)
+		}
+	}
+	return nil
+}
+
+// ChownAgentHomes re-owns every /agents/<name>/ tree to the non-root
+// agent user. Must be called after every docker-cp into the agent
+// home (SyncIn + runtime default-config writes + any other source).
+// Without this, the claude-code PrelaunchShell's credential cp into
+// $HOME/.claude/.credentials.json fails silently, and the agent then
+// launches un-authenticated and exits 0 with empty output — the
+// failure mode that made `spwn agent talk` look like a black hole.
+//
+// `docker exec` honours the image's USER directive, which the base
+// Dockerfile sets to "spwn" — a non-root account that can't chown
+// files owned by root. We route through sudo instead; the base image
+// grants spwn NOPASSWD sudo specifically so post-cp bookkeeping like
+// this stays straightforward.
+func ChownAgentHomes(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
+	for _, containerHome := range agentHomes {
+		if _, err := be.Exec(ctx, containerID, backend.ExecConfig{
+			Cmd: []string{"sudo", "chown", "-R", "spwn:spwn", containerHome},
+		}); err != nil {
+			return fmt.Errorf("chown %s: %w", containerHome, err)
 		}
 	}
 	return nil

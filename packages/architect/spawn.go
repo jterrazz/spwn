@@ -518,6 +518,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
+	// Every docker-cp into /agents/<name>/ lands root:root (tar
+	// headers don't carry uid/gid today). Chown the whole tree to
+	// the non-root agent user in one pass — see ChownAgentHomes for
+	// why this matters (short version: claude won't auth otherwise).
+	if len(agentHomes) > 0 {
+		if err := deploy.ChownAgentHomes(ctx, a.backend, containerID, agentHomes); err != nil {
+			a.backend.Stop(ctx, containerID)
+			a.backend.Remove(ctx, containerID)
+			return nil, fmt.Errorf("chown agent homes: %w", err)
+		}
+	}
+
 	// Probe tools by running each resolved tool's Verify() commands
 	// inside the container. This is the canonical "is my image
 	// actually healthy" check - the probe pulls its expectations
