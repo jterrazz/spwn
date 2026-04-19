@@ -148,10 +148,10 @@ func (d DirResolver) SkillsFS() fs.FS {
 //
 // Example:
 //
-//	//go:embed all:catalog/dependencies
+//	//go:embed all:content
 //	var catalogFS embed.FS
 //
-//	res := EmbedResolver{FS: catalogFS, Root: "catalog/dependencies/git"}
+//	res := EmbedResolver{FS: catalogFS, Root: "content/git/tools"}
 //
 // Paths inside EmbedResolver always use forward slashes because
 // embed.FS normalises to POSIX regardless of host OS.

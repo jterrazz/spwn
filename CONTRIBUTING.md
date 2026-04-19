@@ -25,27 +25,33 @@ cd tests && pnpm install && pnpm test
 
 ```
 packages/               Domain libraries (Go modules)
-  world/                  World lifecycle (architect, backend, runtime, api)
   agent/                  Mind lifecycle (journal, session, evolution)
-  imagebuilder/           Composable Docker image builder + tool catalog
-  messenger/              Inter-agent messaging (inbox, models)
+  architect/              World orchestration daemon
+  compile/                Docker image builder (dependency resolution → image)
+  dependency/             tool.yaml parser, refs, lockfile, resolver
+  project/                spwn.yaml parser, scaffolding, validation
+  runtimes/               Agent runtimes (claude-code, codex)
+  transpile/              Provider-neutral source → runtime-specific Tree
+  platform/               Cross-cutting primitives (paths, IDs, config)
+  world/                  World-state + container labels
+  auth/                   Provider resolution + credential storage
   migration/              ~/.spwn schema migrations
-  foundation/             Cross-cutting primitives (paths, IDs, auth, activity)
+  activity/               Append-only event log
 
 apps/                   Deployable consumers
   cli/                    The spwn binary (Cobra → domain APIs → output)
+  api/                    HTTP API for the web UI
   web/                    Next.js + Tauri web/desktop UI
 
-catalog/                Shipped catalog (templates, tools, runtimes)
-  templates/              Bundled scenario projects
-  tools/                  Composable tool dependencies
-  runtimes/               Agent runtimes (claude-code, codex)
+catalog/                Shipped catalog, one directory per entry
+  <dep-slug>/             Installable dependency (tools/tool.yaml + optional skills/, files/)
+  <template-slug>/        Scaffoldable project (agents/, skills/, knowledge/, spwn.yaml)
 
-tests/                  TypeScript E2E test suite
-  e2e/                    Behavioral specs (world, agent, messaging, etc.)
-  fixtures/               Test fixtures (mock-claude, testdata, Dockerfile.test)
-  setup/                  Test infrastructure (runners, assertions, mock LLM)
-  ui/                     Playwright specs for the web UI
+tests/                  E2E test suites (Go + TypeScript)
+  cli/                    TypeScript CLI E2E (vitest)
+  catalog/                Catalog invariant tests (Go)
+  smoke/                  Full-build smoke tests
+  fixtures/               Project fixtures used by the specs above
 ```
 
 ## Adding a Runtime Adapter
