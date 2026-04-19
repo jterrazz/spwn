@@ -237,6 +237,6 @@ apps/web/src-tauri/src/lib.rs             # plugin registration
 apps/web/src-tauri/capabilities/default.json  # updater:default
 apps/web/src/lib/tauri-updater.ts         # frontend check + dialog
 apps/web/src/components/app-shell.tsx     # startup hook
-docs/update-system.md                   # this file
-docs/releasing.md                       # release runbook
+docs/contributing/update-system.md      # this file
+docs/contributing/releasing.md          # release runbook
 ```
