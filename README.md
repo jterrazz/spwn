@@ -45,13 +45,11 @@ curl -fsSL https://spwn.sh/install.sh | bash
 
 Three commands. One working agent.
 
-|        | Step                 | Example            |
-| ------ | -------------------- | ------------------ |
-| **01** | Log in               | `spwn auth`        |
-| **02** | Scaffold a project   | `spwn init`        |
-| **03** | Talk to your agent   | `spwn agent neo`   |
-
-`spwn auth` checks you're logged in to Claude Code (or any supported runtime). `spwn init` drops `spwn.yaml` + a starter `neo` agent into the current directory. `spwn agent neo` opens an interactive session with neo inside a sandboxed Docker world — the container lifecycle is handled for you.
+|        | Step                 | Command            | What it does                                                                                                |
+| ------ | -------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **01** | Log in               | `spwn auth`        | Checks you're signed in to Claude Code (or any supported runtime).                                          |
+| **02** | Scaffold a project   | `spwn init`        | Drops `spwn.yaml` + a starter `neo` agent into the current directory.                                       |
+| **03** | Talk to your agent   | `spwn agent neo`   | Opens an interactive session with neo inside a sandboxed Docker world — container lifecycle handled for you. |
 
 Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any slug under `catalog/examples/`).
 
@@ -101,20 +99,7 @@ Memory is a folder of markdown files — readable, diffable, and alive across re
 spwn turns your repo into a **portable agent artifact** — consumed by the spwn CLI today, and by web UIs, apps, and embedded SDKs on the roadmap. One bundle format, many future surfaces.
 
 ```
-  ╭──────────────╮     ╭──────────────╮     ╭────────────────────╮
-  │  YOUR REPO   │     │  spwn build  │     │      ARTIFACT      │
-  │              │     │              │     │                    │
-  │  spwn.yaml   │ ──▶ │  transpile   │ ──▶ │  Docker image      │
-  │  spwn/agents │     │  + compile   │     │     or             │
-  │  spwn/skills │     │              │     │  runtime-native    │
-  │  spwn/tools  │     │              │     │  tree (claude,     │
-  │  spwn/hooks  │     │              │     │   codex, …)        │
-  ╰──────────────╯     ╰──────────────╯     ╰─────────┬──────────╯
-                                                      │
-                                                      ▼  consumed by
-                                                ✓ spwn CLI       (today)
-                                                · apps & web UI  (soon)
-                                                · embedded SDKs  (soon)
+   repo  ──▶  spwn build  ──▶  artifact  ──▶  anywhere
 ```
 
 Four ideas to hold in your head before you dive in:
@@ -225,9 +210,14 @@ worlds:
 Think of spwn the way you think of `tsc` or `babel`. You write in one clean, provider-neutral source; a transpiler adapts it to whatever runtime you target and emits exactly what that runtime expects. You never touch the output by hand.
 
 ```
- spwn/           spwn build          Docker image
- (source)   ──────────────────▶     (artifact you run)
-            transpile  +  compile
+   YOUR REPO             BUILD                ARTIFACT
+  ───────────          ─────────             ──────────────────────────
+   spwn.yaml                                ┌──▶  Docker image
+   spwn/agents/         spwn build          │     (push, pull, run anywhere)
+   spwn/skills/    ──▶  transpile     ──▶  ─┤
+   spwn/tools/          + compile           │
+   spwn/hooks/                              └──▶  runtime-native tree
+                                                  (claude-code, codex — no Docker)
 ```
 
 - **Source** is provider-neutral. `AGENTS.md`, `SOUL.md`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
