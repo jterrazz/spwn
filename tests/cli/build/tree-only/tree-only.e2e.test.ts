@@ -33,10 +33,10 @@ describe('spwn build --tree-only', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
+        // World-shared context (physics, faculties, roster, AGENTS.md)
+        // Is inlined into each agent's CLAUDE.md; no separate files.
         expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
-        expect(result.file('dist/world/physics.md').exists).toBe(true);
-        expect(result.file('dist/world/faculties.md').exists).toBe(true);
-        expect(result.file('dist/world/AGENTS.md').exists).toBe(true);
+        expect(result.file('dist/agents/neo/worlds/default/role.md').exists).toBe(true);
     });
 
     test('--dry-run prints paths without touching disk', async () => {
@@ -47,7 +47,6 @@ describe('spwn build --tree-only', () => {
 
         expect(result.exitCode).toBe(0);
         result.stdout.toContain('agents/neo/CLAUDE.md');
-        result.stdout.toContain('world/physics.md');
         expect(result.file('dist').exists).toBe(false);
     });
 
@@ -59,7 +58,6 @@ describe('spwn build --tree-only', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.file('build/preview/agents/neo/CLAUDE.md').exists).toBe(true);
-        expect(result.file('build/preview/world/physics.md').exists).toBe(true);
         expect(result.file('dist').exists).toBe(false);
     });
 
@@ -82,7 +80,6 @@ describe('spwn build --tree-only', () => {
         expect(report.treeFiles).toBeGreaterThan(0);
         expect(Array.isArray(report.paths)).toBe(true);
         expect(report.paths).toContain('agents/neo/CLAUDE.md');
-        expect(report.paths).toContain('world/physics.md');
         expect(report.treeFiles).toBe(report.paths.length);
     });
 
@@ -98,7 +95,6 @@ describe('spwn build --tree-only', () => {
         result.stdout.toContain('agents/neo/CLAUDE.md');
         const text = result.stdout.text;
         expect(text).not.toContain('agents/morpheus');
-        expect(text).not.toContain('world/physics.md');
     });
 
     test('--runtime <bogus> errors with a hint about known runtimes', async () => {
@@ -121,8 +117,8 @@ describe('spwn build --tree-only', () => {
 
         expect(result.exitCode).toBe(0);
         expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
-        expect(result.file('dist/world/physics.md').exists).toBe(false);
-        expect(result.file('dist/world/AGENTS.md').exists).toBe(false);
+        // No per-world shared files any more — everything is inlined.
+        expect(result.file('dist/world').exists).toBe(false);
     });
 
     test('empty AGENTS.md is rejected with a loud error', async () => {

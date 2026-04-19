@@ -80,8 +80,8 @@ describe('severance catalog', () => {
 
     test('mdr world spawns all four agents in one container', async () => {
         // Docker-gated smoke: the full 4-agent colony comes up, the
-        // World's container is running, and the generated
-        // /world/roster.md names every MDR member. Proves the
+        // World's container is running, and the roster inlined into
+        // Each agent's CLAUDE.md names every MDR member. Proves the
         // Severance entry is end-to-end live, not just well-scaffolded.
         await using result = await spec('severance up mdr')
             .project('empty')
@@ -96,11 +96,12 @@ describe('severance catalog', () => {
         const mdr = result.container('mdr');
         expect(mdr.running).toBe(true);
 
-        // Roster is regenerated on every spawn. Every Severance
-        // Member must be listed.
-        const roster = mdr.file('/world/roster.md').content;
+        // Roster is regenerated on every spawn and inlined into each
+        // Agent's CLAUDE.md. Pick one agent and assert every member
+        // Appears in the prompt.
+        const claude = mdr.file('/agents/mark/CLAUDE.md').content;
         for (const name of ['mark', 'helly', 'irving', 'dylan']) {
-            expect(roster, `roster missing ${name}`).toContain(name);
+            expect(claude, `roster missing ${name}`).toContain(name);
         }
     });
 });
