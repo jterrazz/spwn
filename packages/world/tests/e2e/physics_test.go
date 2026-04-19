@@ -8,37 +8,39 @@ import (
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
 
+// TestPhysics_ContainsLaws checks the Physics section Claude Code
+// sees on boot mentions the world's network law. Physics content is
+// inlined into every agent's CLAUDE.md; there is no separate
+// /world/physics.md file anymore.
 func TestPhysics_ContainsLaws(t *testing.T) {
-	// Given - the default laws configuration
-	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
-		NoAgent().
+		WithAgent("test-agent").
 		Execute()
 
-	// Then - the physics file should document the default network law
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasFile("/world/physics.md")
-		c.FileContains("/world/physics.md", "Network: bridge")
+		c.HasFile("/agents/test-agent/CLAUDE.md")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "## Physics")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "Network: bridge")
 	})
 }
 
+// TestFaculties_ContainsTools checks the Faculties section Claude
+// Code sees on boot lists the project's verified tools. Faculties
+// content is inlined into every agent's CLAUDE.md.
 func TestFaculties_ContainsTools(t *testing.T) {
-	// Given - a config with spwn:unix and spwn:git tools
-	// When - a world is spawned
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:
   - "spwn:unix"
   - "spwn:git"
 `).
-		NoAgent().
+		WithAgent("test-agent").
 		Execute()
 
-	// Then - the faculties file should list the available tools
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasFile("/world/faculties.md")
-		c.FileContains("/world/faculties.md", "Tools")
-		c.FileContains("/world/faculties.md", "spwn:unix")
-		c.FileContains("/world/faculties.md", "spwn:git")
+		c.HasFile("/agents/test-agent/CLAUDE.md")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "## Faculties")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "spwn:unix")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "spwn:git")
 	})
 }

@@ -10,7 +10,7 @@ The domain has three main abstractions, each owning one concern:
 |---|---|---|
 | **Runtime** | How an agent actually runs (CLI invocation, session capture, credential plumbing) | `packages/runtimes` - Claude Code today, codex next, others plug in as a ~50 LOC Adapter |
 | **Backend** | Where worlds run | `packages/container/backend` - Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/agent` - flat markdown layers (skills/playbooks/journal) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (e.g. `./knowledge`) and it gets bind-mounted into `/world/knowledge/`. Omit the key to spawn a world whose agents are never told a knowledge base exists. |
+| **Mind** | How an agent persists across worlds | `packages/agent` - two markdown layers (`playbooks/`, `journal/`) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (e.g. `./knowledge`) and it gets bind-mounted into `/world/knowledge/`. Omit the key to spawn a world whose agents are never told a knowledge base exists. |
 
 ## Vocabulary
 
@@ -136,8 +136,7 @@ my-project/
 │   │       ├── agent.yaml       # composition: dependencies + runtime.backend
 │   │       ├── AGENTS.md         # entry point (provider-neutral, compiled per runtime)
 │   │       ├── SOUL.md          # who the agent is (one file: purpose, voice, values)
-│   │       ├── skills/          # Mind memory layer (runtime-written, opaque to spwn - no discovery or auto-injection)
-│   │       ├── playbooks/       # promoted patterns (via dream)
+│   │       ├── playbooks/       # promoted patterns (name:/description: header = auto-indexed in CLAUDE.md)
 │   │       └── journal/         # per-run history
 │   ├── worlds/
 │   │   └── neo/
@@ -207,7 +206,6 @@ spwn/
 │   │       ├── backend/             #     Docker adapter
 │   │       ├── runtime/             #     Claude Code runtime
 │   │       ├── api/                 #     HTTP API server (consumed by apps/web)
-│   │       ├── physics/             #     physics.md / faculties.md generation
 │   │       ├── manifest/            #     Config parsing (world.yaml, agent.yaml)
 │   │       ├── labels/              #     Container labels as source of truth
 │   │       ├── state/               #     State hydrated from labels

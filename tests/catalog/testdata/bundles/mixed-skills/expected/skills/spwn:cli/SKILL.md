@@ -17,8 +17,9 @@ spwn msg send <to> --from <me> "msg"  # Send message
 ```
 
 ## Agent Identity
-Your mind is at `/mind/` — read your SOUL.md before starting work. It carries
-your purpose, voice, and principles in a single file at the agent root.
+Your mind is your home directory (`/agents/<your-name>/`). The soul
+file there is the source of truth for who you are; read it before
+starting work.
 ```bash
-cat /mind/SOUL.md
+cat ~/SOUL.md
 ```

@@ -5,7 +5,11 @@ import (
 
 	)
 
-// GeneratePhysics returns the contents of /world/physics.md.
+// GeneratePhysics returns the world-physics markdown block. The
+// claude-code renderer inlines it into each agent's CLAUDE.md under
+// a "## Physics" heading. Callers that need the raw string (e.g.
+// NPC prompts) use it directly; no separate /world/physics.md file
+// is emitted by any active renderer.
 func GeneratePhysics(_ []string) string {
 	var sb strings.Builder
 
@@ -37,7 +41,9 @@ func GeneratePhysics(_ []string) string {
 	return sb.String()
 }
 
-// GenerateFaculties returns the contents of /world/faculties.md.
+// GenerateFaculties returns the world-faculties markdown block
+// (installed tools). Inlined by the claude-code renderer under
+// "## Faculties" in each agent's CLAUDE.md.
 func GenerateFaculties(verifiedTools []string) string {
 	var sb strings.Builder
 

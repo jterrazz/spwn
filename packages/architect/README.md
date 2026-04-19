@@ -6,7 +6,7 @@ World orchestrator — spawn, destroy, and coordinate live containers.
 
 The Architect sits on top of `packages/world` + `packages/compile` + `packages/container` and turns a declarative spwn project into running Docker containers. It owns:
 
-- **Spawn pipeline** — image build → render tree → docker-cp agent files → start container → sync credentials → materialise runtime config.
+- **Spawn pipeline** — image build → render tree → start container → sync credentials → docker-cp agent files (CLAUDE.md + role.md).
 - **Architect daemon** — the always-on `spwn-architect` container that runs the CLI inside Docker-over-Docker.
 - **Colony logic** — multi-agent world wiring (chief + managers + workers, hot-deploy, NPC flows).
 

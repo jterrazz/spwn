@@ -7,11 +7,10 @@ import (
 	"path/filepath"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/transpile"
-	"spwn.sh/packages/transpile/worldbook"
 	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/runtimes"
+	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/world/models"
 )
 
 // agentHomesForSpawn returns the agentName → containerHomePath map
@@ -94,18 +93,6 @@ func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containe
 		}
 	}
 	return nil
-}
-
-// rosterColony adapts an agent record list into the worldbook
-// ColonyAgentSpec list (used by colony.go's GenerateRoster call
-// for roster regeneration on hot-deploy). New code should build
-// a transpile.Input instead.
-func rosterColony(recs []models.AgentRecord) []worldbook.ColonyAgentSpec {
-	out := make([]worldbook.ColonyAgentSpec, 0, len(recs))
-	for _, r := range recs {
-		out = append(out, worldbook.ColonyAgentSpec{Name: r.Name, Role: r.Role})
-	}
-	return out
 }
 
 // rosterCompileAgents projects the world record's agent list onto

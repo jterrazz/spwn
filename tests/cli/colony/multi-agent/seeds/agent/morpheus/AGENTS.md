@@ -8,6 +8,5 @@ You are **morpheus**, an agent running inside a spwn world.
 
 ## Your world
 
-- `/world/physics.md` - the rules of this world
-- `/world/faculties.md` - installed tools
-- `/workspaces/` - mounted workspaces
+Everything — physics, tools, roster, conventions — is inlined into
+your CLAUDE.md at spawn time. Workspaces mount at `/workspaces/`.

@@ -49,8 +49,8 @@ type Input struct {
 
 	// WorldKnowledgeMounted is true when the spawn pipeline bound a
 	// host knowledge directory into /world/knowledge. Runtimes use
-	// this to decide whether to emit the "knowledge base" boilerplate
-	// in AGENTS.md / mind-management.md / per-agent CLAUDE.md. When
+	// this to decide whether to mention the "knowledge base" in the
+	// per-agent CLAUDE.md's Roster / Conventions sections. When
 	// false, every reference to /world/knowledge/ is omitted — the
 	// agent is never told a knowledge base exists.
 	WorldKnowledgeMounted bool

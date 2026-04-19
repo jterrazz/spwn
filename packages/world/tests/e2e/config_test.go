@@ -38,40 +38,41 @@ func TestConfig_SpawnWithNamedConfig(t *testing.T) {
 
 func TestConfig_DefaultsApplied(t *testing.T) {
 	// Given - a minimal YAML config with only tools specified
-	// When - a world is spawned
+	// When - a world is spawned with an agent
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:
   - "spwn:unix"
 `).
-		NoAgent().
+		WithAgent("test-agent").
 		Execute()
 
-	// Then - the world should come up with physics/faculties files present
+	// Then - the world comes up with physics+faculties inlined into
+	// The agent's CLAUDE.md (no standalone /world/*.md files).
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/world/physics.md")
-		c.HasFile("/world/faculties.md")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "## Physics")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "## Faculties")
 	})
 }
 
 func TestConfig_CustomToolsReflectedInFaculties(t *testing.T) {
 	// Given - a config with spwn:unix and spwn:git tools
-	// When - a world is spawned
+	// When - a world is spawned with an agent
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:
   - "spwn:unix"
   - "spwn:git"
 `).
-		NoAgent().
+		WithAgent("test-agent").
 		Execute()
 
-	// Then - the faculties file should list bash and git
+	// Then - the agent's CLAUDE.md lists both tools in its inlined
+	// Faculties section.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.HasFile("/world/faculties.md")
-		c.FileContains("/world/faculties.md", "spwn:unix")
-		c.FileContains("/world/faculties.md", "spwn:git")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "spwn:unix")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "spwn:git")
 	})
 }
 

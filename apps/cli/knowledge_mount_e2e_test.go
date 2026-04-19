@@ -75,17 +75,8 @@ func TestKnowledgeMountE1_UnsetMeansNoBind(t *testing.T) {
 		t.Errorf("/world/knowledge should not exist when no knowledge path is declared")
 	}
 
-	// Verify the rendered files omit every knowledge reference.
-	agentsMD := tc.ReadFileInContainer(w.ContainerID, "/world/AGENTS.md")
-	if strings.Contains(agentsMD, "/world/knowledge/") {
-		t.Errorf("/world/AGENTS.md should not mention /world/knowledge/:\n%s", agentsMD)
-	}
-
-	mindMgmt := tc.ReadFileInContainer(w.ContainerID, "/world/skills/mind-management.md")
-	if strings.Contains(mindMgmt, "/world/knowledge/") {
-		t.Errorf("mind-management.md should not mention /world/knowledge/:\n%s", mindMgmt)
-	}
-
+	// Per-agent CLAUDE.md (which inlines every former /world/*.md
+	// file) must not mention /world/knowledge/ when the mount is off.
 	claudeMD := tc.ReadFileInContainer(w.ContainerID, "/agents/neo-e1/CLAUDE.md")
 	if strings.Contains(claudeMD, "/world/knowledge/") {
 		t.Errorf("per-agent CLAUDE.md should not mention /world/knowledge/:\n%s", claudeMD)
@@ -125,14 +116,10 @@ func TestKnowledgeMountE2_SetMeansBindAndInjection(t *testing.T) {
 		t.Errorf("seed content mismatch: got %q, want %q", got, "HELLO-E2")
 	}
 
-	// Rendered files DO mention /world/knowledge/.
-	agentsMD := tc.ReadFileInContainer(w.ContainerID, "/world/AGENTS.md")
-	if !strings.Contains(agentsMD, "/world/knowledge/") {
-		t.Errorf("/world/AGENTS.md should mention /world/knowledge/ when mounted:\n%s", agentsMD)
-	}
-	mindMgmt := tc.ReadFileInContainer(w.ContainerID, "/world/skills/mind-management.md")
-	if !strings.Contains(mindMgmt, "/world/knowledge/") {
-		t.Errorf("mind-management.md should mention /world/knowledge/ when mounted:\n%s", mindMgmt)
+	// Per-agent CLAUDE.md DOES mention /world/knowledge/ when mounted.
+	claudeMD := tc.ReadFileInContainer(w.ContainerID, "/agents/neo-e2/CLAUDE.md")
+	if !strings.Contains(claudeMD, "/world/knowledge/") {
+		t.Errorf("per-agent CLAUDE.md should mention /world/knowledge/ when mounted:\n%s", claudeMD)
 	}
 
 	// Bind mount roundtrip: writing inside the container should
@@ -205,25 +192,21 @@ func TestKnowledgeMountE4_MixedWorldsNoLeakage(t *testing.T) {
 	alpha := spawnForKnowledgeTest(t, tc, "neo-e4-alpha", "alpha", alphaDir)
 	beta := spawnForKnowledgeTest(t, tc, "neo-e4-beta", "beta", "")
 
-	// Alpha: mount + skill injection.
+	// Alpha: mount + CLAUDE.md injection.
 	if !tc.FileExistsInContainer(alpha.ContainerID, "/world/knowledge/alpha-seed.md") {
 		t.Errorf("alpha: seed missing from /world/knowledge")
 	}
-	alphaAgents := tc.ReadFileInContainer(alpha.ContainerID, "/world/AGENTS.md")
-	if !strings.Contains(alphaAgents, "/world/knowledge/") {
-		t.Errorf("alpha: AGENTS.md should mention /world/knowledge/")
+	alphaClaude := tc.ReadFileInContainer(alpha.ContainerID, "/agents/neo-alpha/CLAUDE.md")
+	if !strings.Contains(alphaClaude, "/world/knowledge/") {
+		t.Errorf("alpha: CLAUDE.md should mention /world/knowledge/")
 	}
 
 	// Beta: no mount, no mention of /world/knowledge/ anywhere.
 	if tc.DirExistsInContainer(beta.ContainerID, "/world/knowledge") {
 		t.Errorf("beta: /world/knowledge should not exist")
 	}
-	betaAgents := tc.ReadFileInContainer(beta.ContainerID, "/world/AGENTS.md")
-	if strings.Contains(betaAgents, "/world/knowledge/") {
-		t.Errorf("beta: AGENTS.md should not mention /world/knowledge/:\n%s", betaAgents)
-	}
-	betaSkill := tc.ReadFileInContainer(beta.ContainerID, "/world/skills/mind-management.md")
-	if strings.Contains(betaSkill, "/world/knowledge/") {
-		t.Errorf("beta: mind-management.md should not mention /world/knowledge/:\n%s", betaSkill)
+	betaClaude := tc.ReadFileInContainer(beta.ContainerID, "/agents/neo-beta/CLAUDE.md")
+	if strings.Contains(betaClaude, "/world/knowledge/") {
+		t.Errorf("beta: CLAUDE.md should not mention /world/knowledge/:\n%s", betaClaude)
 	}
 }

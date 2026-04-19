@@ -307,17 +307,14 @@ func (m *MockAssertion) SawMind() {
 	}
 }
 
-func (m *MockAssertion) SawPhysics() {
+// SawClaudeMD asserts the mock observed the per-agent CLAUDE.md —
+// the single self-contained system prompt that replaces the old
+// /world/AGENTS.md + /world/physics.md + /world/faculties.md +
+// /world/skills/* split emission.
+func (m *MockAssertion) SawClaudeMD() {
 	m.tc.T.Helper()
-	if !m.mock.PhysicsExists {
-		m.tc.T.Fatal("Mock claude did not see /world/physics.md")
-	}
-}
-
-func (m *MockAssertion) SawFaculties() {
-	m.tc.T.Helper()
-	if !m.mock.FacultiesExists {
-		m.tc.T.Fatal("Mock claude did not see /world/faculties.md")
+	if !m.mock.ClaudeMDExists {
+		m.tc.T.Fatal("Mock claude did not see /agents/<name>/CLAUDE.md")
 	}
 }
 
@@ -328,17 +325,13 @@ func (m *MockAssertion) SawWorkspace() {
 	}
 }
 
-func (m *MockAssertion) PhysicsContains(substring string) {
+// ClaudeMDContains asserts the CLAUDE.md the mock captured contains
+// `substring`. Use to verify the inlined physics / faculties / roster
+// content made it into the prompt.
+func (m *MockAssertion) ClaudeMDContains(substring string) {
 	m.tc.T.Helper()
-	if !strings.Contains(m.mock.PhysicsContent, substring) {
-		m.tc.T.Fatalf("Expected physics to contain %q, got:\n%s", substring, m.mock.PhysicsContent)
-	}
-}
-
-func (m *MockAssertion) FacultiesContains(substring string) {
-	m.tc.T.Helper()
-	if !strings.Contains(m.mock.FacultiesContent, substring) {
-		m.tc.T.Fatalf("Expected faculties to contain %q, got:\n%s", substring, m.mock.FacultiesContent)
+	if !strings.Contains(m.mock.ClaudeMDContent, substring) {
+		m.tc.T.Fatalf("Expected CLAUDE.md to contain %q, got:\n%s", substring, m.mock.ClaudeMDContent)
 	}
 }
 

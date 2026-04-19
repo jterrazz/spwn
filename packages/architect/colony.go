@@ -3,15 +3,12 @@ package architect
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/transpile"
-	"spwn.sh/packages/transpile/worldbook"
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/architect/internal/deploy"
+	"spwn.sh/packages/platform"
+	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/world/models"
 )
 
@@ -118,47 +115,19 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 		return fmt.Errorf("register agent: %w", err)
 	}
 
-	// 3. Regenerate /world/roster.md so existing agents in the
-	// container can see the new member on their next read. The file
-	// lives in ~/.spwn/world-states/<world-id>/, visible at /world/
-	// in the container via the bind mount.
-	if rosterErr := regenRoster(worldID, a); rosterErr != nil {
-		// Non-fatal: the agent is registered, the host filesystem is
-		// in place, the runtime can talk. Just log the warning.
-		fmt.Printf("warning: failed to regenerate roster: %v\n", rosterErr)
-	}
+	// NOTE: roster is inlined into each agent's CLAUDE.md at render
+	// time. Hot-deploy does NOT regenerate the CLAUDE.md of already-
+	// running agents — they'll see the new teammate on their next
+	// spawn. TODO: re-render every agent's CLAUDE.md on DeployAgent
+	// to close that gap.
 
-	// 4. Start the runtime process in the background.
+	// 3. Start the runtime process in the background.
 	if err := a.SpawnAgentDetached(ctx, worldID, agentName); err != nil {
 		_ = a.rstate.RemoveAgent(worldID, agentID)
 		return fmt.Errorf("start agent: %w", err)
 	}
 
 	return nil
-}
-
-// regenRoster rebuilds /world/roster.md from the current set of agents
-// in the world. Called whenever the roster changes (DeployAgent today;
-// agent removal in future). The file is written to the host so the
-// bind mount propagates it into the container.
-func regenRoster(worldID string, a *Architect) error {
-	worlds, err := a.rstate.List()
-	if err != nil {
-		return err
-	}
-	var current *models.World
-	for i := range worlds {
-		if worlds[i].ID == worldID {
-			current = &worlds[i]
-			break
-		}
-	}
-	if current == nil {
-		return fmt.Errorf("world %s not found", worldID)
-	}
-	worldStateDir := worldStateDirFor(worldID)
-	roster := worldbook.GenerateRoster(worldID, rosterColony(current.Agents), current.KnowledgeMounted)
-	return os.WriteFile(filepath.Join(worldStateDir, "roster.md"), []byte(roster), 0o644)
 }
 
 // SpawnAgents spawns multiple agents in a world.

@@ -23,11 +23,12 @@ func TestSpawn_DefaultConfig(t *testing.T) {
 		s.WorldStatus(world.StatusRunning)
 	})
 
-	// AND the container should have physics and faculties files
+	// AND the container should have the agent's CLAUDE.md with
+	// Physics + faculties inlined.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/world/physics.md")
-		c.HasFile("/world/faculties.md")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "## Physics")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "## Faculties")
 	})
 }
 
@@ -95,8 +96,7 @@ func TestSpawn_MockSeesEverything(t *testing.T) {
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.SawMind()
-		m.SawPhysics()
-		m.SawFaculties()
+		m.SawClaudeMD()
 		m.SawWorkspace()
 	})
 }

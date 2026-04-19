@@ -10,25 +10,21 @@ import (
 
 func TestSpawn_ToolsVerified(t *testing.T) {
 	// Given - a config requesting spwn:unix and spwn:git tools
-	// When - a world is spawned
+	// When - a world is spawned with an agent
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
-physics:
-  constants:
-    cpu: 1
-    memory: 512m
 dependencies:
   - "spwn:unix"
   - "spwn:git"
 `).
-		NoAgent().
+		WithAgent("test-agent").
 		Execute()
 
-	// Then - the faculties file lists the verified tools by ref.
-	// Binaries live under each tool's Verify() spec, not in faculties.md.
+	// Then - the agent's CLAUDE.md lists the verified tools by ref
+	// In its inlined Faculties section.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/world/faculties.md", "spwn:unix")
-		c.FileContains("/world/faculties.md", "spwn:git")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "spwn:unix")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "spwn:git")
 	})
 }
 
@@ -47,17 +43,17 @@ dependencies:
 
 func TestSpawn_PackExpansion(t *testing.T) {
 	// Given - a config requesting the spwn:unix dependency
-	// When - a world is spawned
+	// When - a world is spawned with an agent
 	chain := setup.NewSpawnBuilder(t).
 		WithConfigYAML(`
 dependencies:
   - "spwn:unix"
 `).
-		NoAgent().
+		WithAgent("test-agent").
 		Execute()
 
-	// Then - the faculties file lists spwn:unix as a verified tool.
+	// Then - the agent's CLAUDE.md lists spwn:unix as a verified tool.
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
-		c.FileContains("/world/faculties.md", "spwn:unix")
+		c.FileContains("/agents/test-agent/CLAUDE.md", "spwn:unix")
 	})
 }

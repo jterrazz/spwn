@@ -1,42 +1,38 @@
 # packages/transpile/worldbook
 
-Spwn's opinionated world content — the default prose, skills, and identity material that every compiled world ships with regardless of which runtime renders it.
+Spwn's opinionated world content — the runtime-neutral prose blocks
+that every renderer inlines into the boot prompt it emits.
 
 ## Role
 
-Runtime renderers (`packages/runtimes/<name>/render.go`) do two things:
+worldbook hands renderers three markdown strings: physics, faculties,
+roster. Each runtime's renderer then decides where to place them
+(the claude-code adapter inlines all three into every agent's
+`CLAUDE.md`; a future codex adapter may do something different).
 
-1. Emit spwn's opinionated world content (physics, agent operating manual, system skills, architect identity, roster, role-aware agent context).
-2. Place each file at a runtime-specific path (`agents/<n>/CLAUDE.md` for Claude, whatever codex wants, …).
-
-worldbook owns (1). It's runtime-neutral — every renderer imports from here for the prose and layers only its layout choices on top. This keeps the content authored once and shared across every runtime that ships a renderer.
+The split keeps content authored once and shared across every
+runtime renderer.
 
 ## What lives here
 
 | File | Content |
 |---|---|
 | `physics.go` | `GeneratePhysics`, `GenerateFaculties` — the world filesystem rules and the verified-tools briefing. |
-| `manual.go` | `AgentsBook`, `SystemSkills` + every system-skill const (mind-management, collaboration, world-awareness, self-evolution). Two variants gated by `WorldKnowledgeMounted`. |
-| `context.go` | `GenerateAgentContext` (role-aware prompt: chief / manager / worker / npc / architect), `GenerateRoster`, shared value types (`Workspace`, `AgentContextOpts`, `AgentInfo`, `ColonyAgentSpec`). |
+| `context.go` | `GenerateAgentContext` (role-aware prompt for the architect and for ephemeral NPCs), `GenerateRoster`, shared value types (`Workspace`, `AgentContextOpts`, `AgentInfo`, `ColonyAgentSpec`). |
 | `architect.go` | `ArchitectIdentity`, `ArchitectSystemFiles`, architect skills (fleet ops, task planning, monitoring). |
 
 ## What does NOT live here
 
 - **Runtime-specific layout** — which file path, what entrypoint filename, whether to use `@-imports`. Lives in `packages/runtimes/<name>/render.go`.
-- **User content** — the user's own `AGENTS.md`, `SOUL.md`, `mind/`, `skills/`. That flows through `packages/transpile/source/` unchanged.
+- **Per-agent CLAUDE.md assembly** — the self-contained system prompt is built by `packages/runtimes/claudecode/render_agent.go` (inlines physics + faculties + roster + playbook index + conventions).
+- **User content** — the user's own `AGENTS.md`, `SOUL.md`, `playbooks/`, `skills/`. That flows through `packages/transpile/source/` unchanged.
 - **Compile state** — tool lists, manifest, agent roster data. Lives in `transpile.Input`.
 
 ## Consumers
 
-- `packages/runtimes/claudecode/render.go` — emits `worldbook.GeneratePhysics(...)`, `worldbook.AgentsBook(...)`, etc. at Claude-specific paths.
-- `packages/architect/build.go` — bakes `worldbook.ArchitectSystemFiles()` into the architect image.
-- `packages/architect/npc.go` — uses `worldbook.GenerateAgentContext` for NPC prompt composition.
-- `packages/architect/colony.go` — uses `worldbook.GenerateRoster` to regenerate `roster.md` on hot-deploy.
-- `packages/architect/spawn_workspaces.go`, `spawn_agents.go` — use the shared `Workspace` / `ColonyAgentSpec` value types.
-
-## Future: `spwn build --bare`
-
-The content/layout split makes a "bare" compile mode a one-flag change: skip `worldbook` injection and emit only user content + runtime layout. Useful for users who want spwn to compile refs and produce a tree without injecting spwn's opinions about how agents should think about their world.
+- `packages/runtimes/claudecode/render.go` — calls `GeneratePhysics`, `GenerateFaculties`, `GenerateRoster` for the inlined sections of each agent's CLAUDE.md.
+- `packages/architect/build.go` — bakes `ArchitectSystemFiles()` into the architect image.
+- `packages/architect/npc.go` — uses `GenerateAgentContext` for NPC prompt composition.
 
 ## Related
 

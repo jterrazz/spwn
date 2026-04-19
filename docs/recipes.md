@@ -29,9 +29,10 @@ What happened:
   `spwn.lock`. Same for `spwn:qmd`.
 - `spwn install skill:paper-reading --agent curie` scaffolds
   `spwn/skills/paper-reading.md` (empty; fill it in) and attaches the
-  `skill:paper-reading` ref to the agent. The image build injects the
-  markdown at `/world/skills/paper-reading.md` so the runtime picks
-  it up at boot.
+  `skill:paper-reading` ref to the agent. At build time the skill is
+  staged to `/world/skills/paper-reading/SKILL.md` inside the image;
+  at spawn time Claude Code picks it up through its native
+  `.claude/skills/` discovery path (symlinked from the agent's home).
 - `spwn up` materialises every world in `spwn.yaml` — by default,
   `spwn init` gave you one single-agent world named `curie`.
 - `spwn agent talk` opens a session inside the running container with

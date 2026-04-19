@@ -27,11 +27,12 @@ func TestFullLifecycle_SpawnInspectDestroy(t *testing.T) {
 		s.WorldStatus(world.StatusRunning)
 	})
 
-	// AND the container should be running with physics, faculties, and mind
+	// AND the container should be running with physics + faculties
+	// inlined in the test agent's CLAUDE.md (plus /agents mounted).
 	u.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/world/physics.md")
-		c.HasFile("/world/faculties.md")
+		c.FileContains("/agents/e2e-agent/CLAUDE.md", "## Physics")
+		c.FileContains("/agents/e2e-agent/CLAUDE.md", "## Faculties")
 		c.HasMount("/agents")
 	})
 

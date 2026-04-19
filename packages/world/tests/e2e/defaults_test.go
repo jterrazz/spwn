@@ -17,20 +17,21 @@ func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
 	world.CreateDefaultConfig()
 	agent.InitMind("default")
 
-	// When - a world is spawned with no agent
+	// When - a world is spawned with the default agent
 	chain := setup.NewSpawnBuilder(t).
-		NoAgent().
+		WithAgent("default").
 		Execute()
 
-	// Then - the state should show one live world with physics and faculties
+	// Then - the state shows one live world with physics + faculties
+	// Inlined in the agent's CLAUDE.md.
 	chain.ExpectState(func(s *setup.StateAssertion) {
 		s.WorldCount(1)
 		s.WorldStatus(world.StatusRunning)
 	})
 	chain.ExpectContainer(func(c *setup.ContainerAssertion) {
 		c.IsRunning()
-		c.HasFile("/world/physics.md")
-		c.HasFile("/world/faculties.md")
+		c.FileContains("/agents/default/CLAUDE.md", "## Physics")
+		c.FileContains("/agents/default/CLAUDE.md", "## Faculties")
 	})
 }
 
