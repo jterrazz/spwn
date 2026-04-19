@@ -1,6 +1,7 @@
 package dockerfile
 
 import (
+	"encoding/base64"
 	"fmt"
 	"sort"
 	"strings"
@@ -51,6 +52,38 @@ func (o GenerateOpts) templateUserCmd(cmd string) string {
 	cmd = strings.ReplaceAll(cmd, "{{.Home}}", o.home())
 	cmd = strings.ReplaceAll(cmd, "{{.User}}", o.user())
 	return cmd
+}
+
+// writeRunCommand emits a `RUN` directive for cmd. Single-line
+// commands land as plain `RUN <cmd>`. Multi-line commands — typically
+// tool.yaml entries authored as a YAML `|` block scalar that wants to
+// `cat > /bin/foo <<HEREDOC` — are wrapped so Docker treats the
+// whole block as one shell invocation.
+//
+// Plain `RUN` only accepts one shell-command-line; a naive
+// fmt.Sprintf("RUN %s\n", multiLine) emits the first line as the
+// command and the rest as subsequent unrelated Dockerfile lines,
+// which parses but does nothing useful — shell heredocs end up as
+// empty files. We pipe the whole thing through `bash -c`, which
+// gives the author the shell semantics they expect (including
+// heredocs, `set -e`, subshells, pipes) without them having to
+// escape anything.
+func writeRunCommand(sb *strings.Builder, cmd string) {
+	trimmed := strings.TrimRight(cmd, "\n")
+	if !strings.ContainsRune(trimmed, '\n') {
+		sb.WriteString(fmt.Sprintf("RUN %s\n", trimmed))
+		return
+	}
+	// Multi-line cmd — tool.yaml authored as a YAML `|` block scalar,
+	// typically wrapping a `cat > /bin/foo <<HEREDOC`. Plain `RUN
+	// <multi-line>` makes Docker split on newlines and emit only the
+	// first line, dropping the heredoc body + EOF marker and producing
+	// empty files. We encode the whole command as base64 and decode-
+	// execute at build time — zero escaping concerns, preserves exact
+	// bytes, works with plain Dockerfile syntax (no BuildKit heredoc
+	// dependency).
+	encoded := base64.StdEncoding.EncodeToString([]byte(trimmed))
+	sb.WriteString("RUN echo " + encoded + " | base64 -d | bash -e\n")
 }
 
 // Generate composes a final Dockerfile from a base Dockerfile and tool inputs.
@@ -128,7 +161,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		}
 
 		for _, cmd := range t.Commands {
-			sb.WriteString(fmt.Sprintf("RUN %s\n", cmd))
+			writeRunCommand(&sb, cmd)
 		}
 
 		sb.WriteString("\n")
@@ -170,7 +203,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 
 		// Run user-level setup commands (config files, etc.)
 		for _, cmd := range allUserCmds {
-			sb.WriteString(fmt.Sprintf("RUN %s\n", cmd))
+			writeRunCommand(&sb, cmd)
 		}
 
 		// No VOLUME declaration. /world and /workspaces/<name> are
