@@ -45,14 +45,16 @@ describe('world spawn', () => {
             world.stderr.toContain('Agent is alive');
         });
 
-        test('container is running with world/ files laid down', () => {
+        test('container is running with per-agent CLAUDE.md laid down', () => {
             const neo = world.container('neo');
             expect(neo.exists).toBe(true);
             expect(neo.running).toBe(true);
             expect(neo.status).toBe('running');
 
-            expect(neo.file('/world/physics.md').exists).toBe(true);
-            expect(neo.file('/world/faculties.md').exists).toBe(true);
+            // World context (physics, faculties, roster) used to live
+            // At /world/*.md. It's inlined into each agent's CLAUDE.md
+            // Now — the system prompt is self-contained at boot.
+            expect(neo.file('/agents/neo/CLAUDE.md').exists).toBe(true);
         });
 
         test('container carries a valid world id label', () => {
@@ -67,16 +69,16 @@ describe('world spawn', () => {
             expect(labels['sh.spwn.kind']).toBe('world');
         });
 
-        test('physics.md carries meaningful content (laws, network, /workspaces)', () => {
-            const physics = world.container('neo').file('/world/physics.md').content;
-            expect(physics).toMatch(/Laws/);
-            expect(physics).toMatch(/network/i);
-            expect(physics).toMatch(/\/workspaces/);
+        test('CLAUDE.md inlines physics content (laws, network, /workspaces)', () => {
+            const claude = world.container('neo').file('/agents/neo/CLAUDE.md').content;
+            expect(claude).toMatch(/Laws/);
+            expect(claude).toMatch(/network/i);
+            expect(claude).toMatch(/\/workspaces/);
         });
 
-        test('faculties.md lists the expanded tool set', () => {
-            const faculties = world.container('neo').file('/world/faculties.md').content;
-            expect(faculties).toMatch(/spwn:unix/);
+        test('CLAUDE.md inlines the faculties (tool list)', () => {
+            const claude = world.container('neo').file('/agents/neo/CLAUDE.md').content;
+            expect(claude).toMatch(/spwn:unix/);
         });
 
         test('mind layers are visible at /agents/neo/ inside the container', async () => {

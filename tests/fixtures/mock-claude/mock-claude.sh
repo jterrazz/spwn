@@ -31,15 +31,28 @@ if [ -d /workspaces ] && [ -n "$(ls -A /workspaces 2>/dev/null)" ]; then
   WORKSPACE_EXISTS=true
 fi
 
+# A CLAUDE.md file under /agents/<name>/ proves the renderer ran and
+# inlined the world context. Under the new claude-code renderer
+# there's no separate /world/physics.md or /world/faculties.md.
+CLAUDE_EXISTS=false
+FIRST_CLAUDE=""
+if [ -d /agents ]; then
+  for agent_dir in /agents/*/; do
+    if [ -f "${agent_dir}CLAUDE.md" ]; then
+      CLAUDE_EXISTS=true
+      FIRST_CLAUDE="${agent_dir}CLAUDE.md"
+      break
+    fi
+  done
+fi
+
 cat > "$OUTPUT" <<RECORD
 {
   "mind_exists": $MIND_EXISTS,
   "mind_personas": false,
-  "physics_exists": $([ -f /world/physics.md ] && echo true || echo false),
-  "faculties_exists": $([ -f /world/faculties.md ] && echo true || echo false),
+  "claude_md_exists": $CLAUDE_EXISTS,
   "workspace_exists": $WORKSPACE_EXISTS,
-  "physics_content": $(cat /world/physics.md 2>/dev/null | head -20 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),
-  "faculties_content": $(cat /world/faculties.md 2>/dev/null | head -20 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),
+  "claude_md_content": $(cat "$FIRST_CLAUDE" 2>/dev/null | head -40 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),
   "session_id": "$SESSION_ID",
   "resume": $RESUME,
   "pid": $$,

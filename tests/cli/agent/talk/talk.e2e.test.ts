@@ -79,18 +79,16 @@ describe('agent talk', () => {
         // Container every time it's invoked. Reading it back confirms
         // That talk actually shelled into the container and executed
         // The runtime, and that the mock observed the bind mounts we
-        // Expect (/agents, /world/physics.md, /world/faculties.md).
+        // Expect (/agents with a CLAUDE.md inside).
         const cat = await neo.exec('cat /tmp/claude-mock.json');
         expect(cat.exitCode).toBe(0);
 
         const receipt = JSON.parse(cat.stdout.text) as {
-            faculties_exists: boolean;
+            claude_md_exists: boolean;
             mind_exists: boolean;
-            physics_exists: boolean;
         };
         expect(receipt.mind_exists).toBe(true);
-        expect(receipt.physics_exists).toBe(true);
-        expect(receipt.faculties_exists).toBe(true);
+        expect(receipt.claude_md_exists).toBe(true);
     });
 
     test('talk can be invoked multiple times on the same world', async () => {

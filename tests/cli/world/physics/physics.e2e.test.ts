@@ -30,29 +30,28 @@ describe('world physics', () => {
         await world[Symbol.asyncDispose]();
     });
 
-    test('physics.md and faculties.md exist inside the container', async () => {
+    test('CLAUDE.md inlines physics and faculties', () => {
         const neo = world.container('neo');
         expect(neo.running).toBe(true);
 
-        expect(neo.file('/world/physics.md').exists).toBe(true);
-        expect(neo.file('/world/faculties.md').exists).toBe(true);
-
-        const ls = await neo.exec('ls /world');
-        expect(ls.exitCode).toBe(0);
-        ls.stdout.toContain('physics.md');
-        ls.stdout.toContain('faculties.md');
+        // Physics and faculties used to live as separate /world/*.md
+        // Files. They're now inlined into every agent's CLAUDE.md so
+        // The system prompt is self-contained at boot.
+        const claude = neo.file('/agents/neo/CLAUDE.md').content;
+        expect(claude).toMatch(/## Physics/);
+        expect(claude).toMatch(/## Faculties/);
     });
 
-    test('physics.md documents the network law and topology', () => {
-        const physics = world.container('neo').file('/world/physics.md').content;
-        expect(physics).toMatch(/network/i);
-        expect(physics).toMatch(/Laws/);
-        expect(physics).toMatch(/\/workspace/);
+    test('inlined physics documents the network law and topology', () => {
+        const claude = world.container('neo').file('/agents/neo/CLAUDE.md').content;
+        expect(claude).toMatch(/network/i);
+        expect(claude).toMatch(/Laws/);
+        expect(claude).toMatch(/\/workspace/);
     });
 
-    test('faculties.md lists available tools', () => {
-        const faculties = world.container('neo').file('/world/faculties.md').content;
-        expect(faculties).toMatch(/spwn:unix/);
+    test('inlined faculties lists available tools', () => {
+        const claude = world.container('neo').file('/agents/neo/CLAUDE.md').content;
+        expect(claude).toMatch(/spwn:unix/);
     });
 
     test('default network mode is bridge', () => {

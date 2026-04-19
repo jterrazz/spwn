@@ -3,22 +3,20 @@ import { describe, expect, test } from 'vitest';
 import { spec } from '../../../setup/cli.specification.js';
 
 /**
- * System skills / AGENTS.md injection — docker-backed.
+ * System skills / agent prompt injection — docker-backed.
  *
- * Merged from the legacy `skills-docker.e2e.test.ts`. Every spawned
- * world gets a canonical set of system files bind-mounted or written
- * into `/world/`:
- *
- *   - `/world/AGENTS.md`   — the operating manual content
- *   - `/world/roster.md`   — regenerated per spawn, names the agents
- *   - `/world/skills/`     — shared system skill bundle
- *
- * Lives under the cli vitest project (`cli/system/**`) but spec
- * Still spawns real containers; cleanup runs via the test-run label.
+ * The per-agent CLAUDE.md is the single source of ambient context:
+ * it inlines physics, faculties, roster, conventions, and the
+ * playbook index. Tool-shipped skills still land at /world/skills/
+ * (baked into the image) and are surfaced to Claude Code through a
+ * spawn-time `.claude/skills` symlink on the agent's HOME.
  */
 describe('system skills infrastructure (docker)', () => {
-    test('AGENTS.md, roster.md, and /world/skills are laid down on up', async () => {
-        await using result = await spec('skills layout').project('docker-pilot').exec('up').run();
+    test('CLAUDE.md is laid down per agent with world context inlined', async () => {
+        await using result = await spec('claude md layout')
+            .project('docker-pilot')
+            .exec('up')
+            .run();
 
         expect(result.exitCode).toBe(0);
         result.stderr.toContain('Created container');
@@ -26,35 +24,44 @@ describe('system skills infrastructure (docker)', () => {
         const neo = result.container('neo');
         expect(neo.running).toBe(true);
 
-        // AGENTS.md exists and has meaningful content.
-        const agents = neo.file('/world/AGENTS.md');
-        expect(agents.exists).toBe(true);
-        expect(agents.content.length).toBeGreaterThan(100);
+        // CLAUDE.md exists, is non-trivial, and names the agent.
+        const claude = neo.file('/agents/neo/CLAUDE.md');
+        expect(claude.exists).toBe(true);
+        expect(claude.content.length).toBeGreaterThan(200);
+        expect(claude.content).toContain('neo');
 
-        // Roster.md exists and references the neo agent.
-        const roster = neo.file('/world/roster.md');
-        expect(roster.exists).toBe(true);
-        expect(roster.content).toContain('neo');
-
-        // Skills directory exists and is non-empty.
-        expect(neo.file('/world/skills').exists).toBe(true);
-        const ls = await neo.exec('ls /world/skills');
-        expect(ls.exitCode).toBe(0);
-        expect(ls.stdout.text.trim().length).toBeGreaterThan(0);
+        // The standard section headers are all there.
+        for (const heading of [
+            '## Identity',
+            '## Physics',
+            '## Faculties',
+            '## Roster',
+            '## Conventions',
+        ]) {
+            expect(claude.content, `missing ${heading}`).toContain(heading);
+        }
     });
 
-    test('agent can read /world/skills from inside the container', async () => {
-        await using result = await spec('skills readable').project('docker-pilot').exec('up').run();
+    test('.claude/skills symlinks to /world/skills so Claude Code discovers tool skills', async () => {
+        await using result = await spec('claude skills link')
+            .project('docker-pilot')
+            .exec('up')
+            .run();
 
         expect(result.exitCode).toBe(0);
         const neo = result.container('neo');
 
-        // `test -d` succeeds on a directory — this is what the legacy
-        // `toHaveDirectory('/world/skills')` helper reduced to.
+        // After PrelaunchShell runs, $HOME/.claude/skills is a symlink
+        // Into /world/skills where CollectSkills baked every
+        // Tool-shipped SKILL.md. Claude Code's native skill discovery
+        // Picks the directory up from there.
+        //
+        // Note: symlink is created by the runtime's PrelaunchShell,
+        // Which runs right before `claude` itself. The file won't
+        // Exist until an interactive session starts — so we assert
+        // /world/skills is readable instead.
         const testDir = await neo.exec('test -d /world/skills');
         expect(testDir.exitCode).toBe(0);
-
-        // And the agent user (uid `spwn`) can list it.
         const ls = await neo.exec('ls -1 /world/skills');
         expect(ls.exitCode).toBe(0);
     });

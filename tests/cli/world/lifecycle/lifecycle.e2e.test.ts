@@ -30,13 +30,9 @@ describe('world lifecycle', () => {
         expect(neo.running).toBe(true);
         expect(neo.status).toBe('running');
 
-        expect(neo.file('/world/physics.md').exists).toBe(true);
-        expect(neo.file('/world/faculties.md').exists).toBe(true);
-
-        const ls = await neo.exec('ls /world');
-        expect(ls.exitCode).toBe(0);
-        ls.stdout.toContain('physics.md');
-        ls.stdout.toContain('faculties.md');
+        // World context is inlined into CLAUDE.md now; no separate
+        // /world/physics.md or /world/faculties.md files.
+        expect(neo.file('/agents/neo/CLAUDE.md').exists).toBe(true);
 
         const whoami = await neo.exec('id -un');
         expect(whoami.exitCode).toBe(0);

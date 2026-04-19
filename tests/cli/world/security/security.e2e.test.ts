@@ -41,9 +41,10 @@ describe('world security', () => {
         expect(git.exitCode).toBe(0);
         expect(git.stdout.text).toContain('git');
 
-        const faculties = neo.file('/world/faculties.md').content;
-        expect(faculties).toMatch(/spwn:unix/);
-        expect(faculties).toMatch(/git/);
+        // Faculties (tool list) is inlined into CLAUDE.md.
+        const claude = neo.file('/agents/neo/CLAUDE.md').content;
+        expect(claude).toMatch(/spwn:unix/);
+        expect(claude).toMatch(/git/);
     });
 
     test('default network mode is bridge', () => {

@@ -10,7 +10,7 @@ import { spec } from '../../../setup/cli.specification.js';
  * spawns two agents + container mounts" path. This file focuses on the
  * colony-specific behaviours the legacy test exercised on top of that:
  *
- *   - `/world/roster.md` exists inside the container and names both agents
+ *   - `each agent's CLAUDE.md inlines a roster that names both agents
  *   - `spwn down` tears the colony down cleanly; both agent minds
  *     survive on disk so a follow-up `up` can resurrect them
  *
@@ -45,12 +45,13 @@ describe('colony', () => {
         const neo = result.container('neo');
         expect(neo.running).toBe(true);
 
-        // Roster.md is regenerated on every spawn from the live agent
-        // Set. Assert both colony members are listed.
-        const roster = neo.file('/world/roster.md').content;
-        expect(roster).toContain('neo');
-        expect(roster).toContain('morpheus');
-        expect(roster).toContain('Roster');
+        // Roster used to live at /world/roster.md; it's now inlined
+        // Into each agent's CLAUDE.md under "## Roster". Assert both
+        // Colony members are listed in neo's prompt.
+        const claude = neo.file('/agents/neo/CLAUDE.md').content;
+        expect(claude).toMatch(/## Roster/);
+        expect(claude).toContain('neo');
+        expect(claude).toContain('morpheus');
     });
 
     test('destroying the colony removes the container but both agent minds survive', async () => {
