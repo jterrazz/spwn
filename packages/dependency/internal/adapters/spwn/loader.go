@@ -27,7 +27,7 @@ var catalogFS embed.FS
 const contentRoot = "content"
 
 // loadYAMLTools walks every catalog entry that ships a
-// tools/<slug>/tool.yaml and parses it into an tool.Tool. Project
+// tools/tool.yaml and parses it into an tool.Tool. Project
 // templates (entries whose root spwn.yaml declares `worlds:` but
 // that don't ship a tool.yaml) are not tool-shaped and are not
 // registered — they surface through the init gallery only.
@@ -41,7 +41,7 @@ func loadYAMLTools() ([]tool.Tool, error) {
 		if !e.IsDir() {
 			continue
 		}
-		toolPath := path.Join(contentRoot, e.Name(), "tools", e.Name(), manifest.ToolManifest)
+		toolPath := path.Join(contentRoot, e.Name(), "tools", manifest.ToolManifest)
 		if _, err := fs.Stat(catalogFS, toolPath); err != nil {
 			continue
 		}
@@ -53,7 +53,7 @@ func loadYAMLTools() ([]tool.Tool, error) {
 	for _, name := range names {
 		canonical := "spwn:" + name
 		parsed, err := manifest.Parse(
-			manifest.EmbedResolver{FS: catalogFS, Root: path.Join(contentRoot, name, "tools", name)},
+			manifest.EmbedResolver{FS: catalogFS, Root: path.Join(contentRoot, name, "tools")},
 			manifest.ParseOptions{
 				DefaultName:    canonical,
 				DefaultVersion: "latest",

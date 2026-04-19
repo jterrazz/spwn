@@ -1,10 +1,9 @@
 // Package dependency is the shared parser for tool.yaml — the
 // declarative manifest format that describes a spwn dependency's
 // image-build recipe. Both the catalog
-// (catalog/<name>/tools/<name>/tool.yaml) and project-local tools
+// (catalog/<name>/tools/tool.yaml) and project-local tools
 // (spwn/tools/<name>/tool.yaml in a user project) use the same
-// schema, so a dependency can graduate from "authored in a project"
-// to "shipped in the catalog" by moving its directory.
+// schema.
 //
 // A dependency is whatever its fields say it is: install steps +
 // verify make it a tool; a SKILL.md sibling or content-only body

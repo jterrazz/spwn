@@ -42,5 +42,5 @@ Reference it from `agent.yaml#dependencies` as `tool:my-thing`.
 Richer tools add `commands:` / `user-commands:` / `env:` / `files:`
 plus sibling `skills/` and `files/` directories. See the [internal
 schema](../packages/dependency/internal/manifest/schema.go) for the
-full shape, or drop a directory under `catalog/<name>/tools/<name>/`
-in the monorepo to ship a new built-in.
+full shape, or drop a `tool.yaml` under `catalog/<name>/tools/` in
+the monorepo to ship a new built-in.

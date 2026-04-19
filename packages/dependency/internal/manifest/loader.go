@@ -19,7 +19,7 @@ const Manifest = "spwn.yaml"
 // ToolManifest is the basename for an individual tool definition
 // (install / verify / files / skills-sibling).
 // Lives under spwn/tools/<name>/tool.yaml in a user project and
-// catalog/<slug>/tools/<slug>/tool.yaml in the catalog.
+// catalog/<slug>/tools/tool.yaml in the catalog.
 const ToolManifest = "tool.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
