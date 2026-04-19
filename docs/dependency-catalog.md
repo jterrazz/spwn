@@ -9,47 +9,19 @@ automatically, since qmd declares it as a transitive dep.
 
 Status: 🟢 working · 🟡 installed but rough · 🔴 planned.
 
-## SDKs
-
-Language runtimes and core system utilities.
-
 | Dependency | Provides | Use when | Status |
 |---|---|---|---|
 | `spwn:unix` | bash, coreutils, grep, sed, awk, curl, jq | You need standard shell tools | 🟢 |
 | `spwn:node` | Node.js 20, npm, npx | Your project uses JavaScript/TypeScript | 🟢 |
 | `spwn:python` | Python 3, pip | Your project uses Python | 🟢 |
 | `spwn:build` | make, gcc, g++ | You need to compile C/C++ | 🟢 |
-
-## Runtimes
-
-The thinking engine that drives the agent. Pick one per agent in
-`agent.yaml#runtime.backend`.
-
-| Runtime | Provides | Use when | Status |
-|---|---|---|---|
-| `spwn:claude-code` | Claude Code CLI + pre-configured auth | You want Anthropic's agent runtime (default) | 🟢 |
-| `spwn:codex` | Codex CLI installed in the image | You want OpenAI-style models | 🟡 installed, no runtime adapter wired |
-| `spwn:aider` | Aider CLI | You want an open-source code-focused runtime | 🔴 planned |
-
-## Tools
-
-Extra capabilities. Many ship a `SKILL.md` that teaches the agent
-how to use them.
-
-| Dependency | Provides | Use when | Status |
-|---|---|---|---|
 | `spwn:git` | Git version control | You need source control (almost always) | 🟢 |
 | `spwn:docker-cli` | Docker CLI (DooD) | The agent needs to manage containers | 🟢 |
 | `spwn:qmd` | [QMD](https://github.com/tobi/qmd) on-device search | The agent needs to search docs, notes, or knowledge bases locally | 🟢 |
 | `spwn:mempalace` | [MemPalace](https://github.com/MemPalace/mempalace) local memory palace CLI | The agent needs persistent cross-session notes | 🟡 experimental |
-
-## Platform
-
-Spwn's own infrastructure. Usually only needed for the Architect
-tier.
-
-| Dependency | Provides | Use when | Status |
-|---|---|---|---|
+| `spwn:claude-code` | Claude Code CLI + pre-configured auth | You want Anthropic's agent runtime (default) | 🟢 |
+| `spwn:codex` | Codex CLI installed in the image | You want OpenAI-style models | 🟡 installed, no runtime adapter wired |
+| `spwn:aider` | Aider CLI | You want an open-source code-focused runtime | 🔴 planned |
 | `spwn:cli` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | 🟢 |
 | `spwn:architect` | Full orchestration daemon (includes `spwn:cli`, `spwn:claude-code`, `spwn:docker-cli`) | You're running the always-on Architect | 🟡 architect mode is in dev |
 

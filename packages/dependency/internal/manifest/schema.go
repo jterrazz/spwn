@@ -31,12 +31,6 @@ type Schema struct {
 	// loader uses the directory basename).
 	Name string `yaml:"name"`
 
-	// Kind classifies the dependency: "runtime", "sdk", "tool", or
-	// "platform". Defaults to "tool". Today this is metadata only
-	// (the image builder doesn't branch on it); composability of the
-	// other fields decides what the dependency actually does.
-	Kind string `yaml:"kind"`
-
 	// Version is a semver string or "latest". Required for catalog
 	// dependencies; defaults to "0.0.0-local" for project-local ones.
 	Version string `yaml:"version"`

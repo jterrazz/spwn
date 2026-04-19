@@ -29,7 +29,6 @@ type wrappedLocalTool struct {
 }
 
 func (t *wrappedLocalTool) Name() string             { return t.name }
-func (t *wrappedLocalTool) Kind() tool.Kind          { return tool.KindTool }
 func (t *wrappedLocalTool) Version() string          { return t.inner.Version() }
 func (t *wrappedLocalTool) Dependencies() []string   { return t.inner.Dependencies() }
 func (t *wrappedLocalTool) Install() tool.InstallSpec { return t.inner.Install() }

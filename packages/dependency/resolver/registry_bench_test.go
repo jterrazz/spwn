@@ -15,13 +15,12 @@ type baseTool struct {
 	name string
 }
 
-func (t baseTool) Name() string            { return t.name }
-func (t baseTool) Kind() tool.Kind         { return tool.KindTool }
-func (t baseTool) Version() string         { return "0.0.0" }
-func (t baseTool) Dependencies() []string  { return nil }
+func (t baseTool) Name() string              { return t.name }
+func (t baseTool) Version() string           { return "0.0.0" }
+func (t baseTool) Dependencies() []string    { return nil }
 func (t baseTool) Install() tool.InstallSpec { return tool.InstallSpec{} }
-func (t baseTool) Verify() []string        { return nil }
-func (t baseTool) Skills() fs.FS           { return nil }
+func (t baseTool) Verify() []string          { return nil }
+func (t baseTool) Skills() fs.FS             { return nil }
 
 // BenchmarkRegistryResolve measures the cost of topologically
 // sorting a dependency chain. Baseline for guarding the hot path
@@ -60,4 +59,3 @@ type benchTool struct {
 }
 
 func (t *benchTool) Dependencies() []string { return t.deps }
-func (t *benchTool) Kind() tool.Kind  { return tool.KindTool }

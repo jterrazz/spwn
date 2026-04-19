@@ -12,7 +12,6 @@ var Tool = &codexTool{}
 type codexTool struct{}
 
 func (*codexTool) Name() string           { return "spwn:codex" }
-func (*codexTool) Kind() tool.Kind          { return tool.KindRuntime }
 func (*codexTool) Version() string        { return "latest" }
 func (*codexTool) Dependencies() []string { return []string{"spwn:node"} }
 

@@ -1,5 +1,4 @@
 name: "spwn:qmd"
-kind: tool
 version: latest
 description: "On-device markdown search engine"
 

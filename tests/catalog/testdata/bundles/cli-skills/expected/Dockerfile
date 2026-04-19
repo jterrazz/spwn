@@ -17,7 +17,7 @@ RUN mkdir -p /workspace /mind /universe /world /home/spwn/.spwn \
 
 LABEL sh.spwn.image-version="v-test"
 
-# spwn:cli (platform)
+# spwn:cli
 RUN curl -fsSL https://spwn.sh/install.sh | bash || true
 
 # Skills (copied from build context)

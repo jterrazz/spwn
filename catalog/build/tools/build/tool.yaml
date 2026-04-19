@@ -1,5 +1,4 @@
 name: "spwn:build"
-kind: sdk
 version: latest
 description: "C/C++ build essentials (make, gcc, g++)"
 

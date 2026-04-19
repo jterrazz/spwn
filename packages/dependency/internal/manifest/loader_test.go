@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"spwn.sh/packages/dependency/internal/manifest"
-	"spwn.sh/packages/dependency/tool"
 )
 
 func writeManifest(t *testing.T, dir, body string) {
@@ -23,7 +22,6 @@ func writeManifest(t *testing.T, dir, body string) {
 func TestParse_minimal(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `name: "spwn:git"
-kind: tool
 install:
   packages: [git]
 verify:
@@ -36,9 +34,6 @@ verify:
 	}
 	if parsed.Schema.Name != "spwn:git" {
 		t.Errorf("name: want spwn:git, got %q", parsed.Schema.Name)
-	}
-	if parsed.Kind != tool.KindTool {
-		t.Errorf("kind: want Tool, got %v", parsed.Kind)
 	}
 	spec := parsed.Schema.Install
 	if len(spec.AptPackages) != 1 || spec.AptPackages[0] != "git" {
@@ -68,15 +63,11 @@ func TestParse_defaults(t *testing.T) {
 	if parsed.Schema.Version != "0.0.0-local" {
 		t.Errorf("default version: want 0.0.0-local, got %q", parsed.Schema.Version)
 	}
-	if parsed.Kind != tool.KindTool {
-		t.Errorf("default kind: want Tool, got %v", parsed.Kind)
-	}
 }
 
-func TestParse_runtimeKindAndProvider(t *testing.T) {
+func TestParse_runtimeProvider(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `name: "spwn:claude-code"
-kind: runtime
 version: latest
 runtime-provider: claude-code
 install:
@@ -90,9 +81,6 @@ verify:
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if parsed.Kind != tool.KindRuntime {
-		t.Errorf("kind: want Runtime, got %v", parsed.Kind)
-	}
 	if parsed.Schema.RuntimeProvider != "claude-code" {
 		t.Errorf("want runtime-provider claude-code")
 	}
@@ -101,7 +89,6 @@ verify:
 func TestParse_filesBakedIn(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `name: "spwn:architect"
-kind: platform
 files:
   /usr/local/bin/entrypoint.sh: files/entrypoint.sh
 install:
@@ -157,16 +144,6 @@ verify:
 	}
 }
 
-func TestParse_unknownKindErrors(t *testing.T) {
-	dir := t.TempDir()
-	writeManifest(t, dir, `name: bogus
-kind: weird-kind
-`)
-	if _, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{}); err == nil {
-		t.Fatal("want error for unknown kind")
-	}
-}
-
 func TestParse_missingNameErrors(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `install:
@@ -176,4 +153,3 @@ func TestParse_missingNameErrors(t *testing.T) {
 		t.Fatal("want error for missing name + no default")
 	}
 }
-

@@ -10,7 +10,6 @@ import (
 // stubTool is a minimal Tool implementation for testing.
 type stubTool struct {
 	name    string
-	kind    tool.Kind
 	version string
 	deps    []string
 	install tool.InstallSpec
@@ -18,25 +17,22 @@ type stubTool struct {
 	skills  fs.FS
 }
 
-func (s *stubTool) Name() string          { return s.name }
-func (s *stubTool) Kind() tool.Kind            { return s.kind }
-func (s *stubTool) Version() string       { return s.version }
+func (s *stubTool) Name() string           { return s.name }
+func (s *stubTool) Version() string        { return s.version }
 func (s *stubTool) Dependencies() []string { return s.deps }
-func (s *stubTool) Install() tool.InstallSpec  { return s.install }
-func (s *stubTool) Verify() []string      { return s.verify }
-func (s *stubTool) Skills() fs.FS         { return s.skills }
-func (s *stubTool) Runtimes() []string    { return nil }
-func (s *stubTool) Config(string) []byte  { return nil }
+func (s *stubTool) Install() tool.InstallSpec { return s.install }
+func (s *stubTool) Verify() []string       { return s.verify }
+func (s *stubTool) Skills() fs.FS          { return s.skills }
 
 func TestRegistry_Register(t *testing.T) {
 	r := NewRegistry()
-	err := r.Register(&stubTool{name: "spwn:node", kind: tool.KindSDK, version: "20"})
+	err := r.Register(&stubTool{name: "spwn:node", version: "20"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	// Duplicate should fail
-	err = r.Register(&stubTool{name: "spwn:node", kind: tool.KindSDK, version: "20"})
+	err = r.Register(&stubTool{name: "spwn:node", version: "20"})
 	if err == nil {
 		t.Fatal("expected error for duplicate registration")
 	}

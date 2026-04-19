@@ -12,8 +12,6 @@ import (
 	"io"
 	"sort"
 	"strings"
-
-	"spwn.sh/packages/dependency/tool"
 )
 
 // Model is the top-level inspect document — one block per agent.
@@ -61,7 +59,6 @@ type AgentView struct {
 type DepNode struct {
 	Name      string
 	Version   string
-	Kind      tool.Kind
 	Skills    int // count of markdown files in the tool's skills/ dir
 	DedupSeen bool
 	Children  []DepNode
@@ -182,9 +179,6 @@ const badgeColumn = 35
 
 func composeBadges(d DepNode) string {
 	var parts []string
-	if d.Kind != tool.KindTool && d.Kind != "" {
-		parts = append(parts, string(d.Kind))
-	}
 	if d.Skills > 0 {
 		parts = append(parts, fmt.Sprintf("skills(%d)", d.Skills))
 	}

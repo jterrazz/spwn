@@ -16,19 +16,11 @@ import {
     IconTerminal2,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 import { Page } from '@/components/page';
 import { PageHeader } from '@/components/page-header';
 import { usePageTitle } from '@/hooks/use-page-title';
-import {
-    KIND_META,
-    type ToolDef,
-    type ToolKind,
-    TOOLS,
-    toolSlug,
-    type ToolStatus,
-} from '@/lib/tools-catalog';
+import { type ToolDef, TOOLS, toolSlug, type ToolStatus } from '@/lib/tools-catalog';
 
 // ── Icon map ────────────────────────────────────────────────────────────
 
@@ -48,17 +40,6 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 };
 
 // ── Components ──────────────────────────────────────────────────────────
-
-function KindBadge({ kind }: { kind: ToolKind }) {
-    const { label, color } = KIND_META[kind];
-    return (
-        <span
-            className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${color}`}
-        >
-            {label}
-        </span>
-    );
-}
 
 function StatusBadge({ status }: { status: ToolStatus }) {
     if (status === 'available') {
@@ -92,7 +73,6 @@ function ToolCard({ tool, onClick }: { tool: ToolDef; onClick: () => void }) {
                             <span className="text-sm font-mono font-medium text-foreground/80">
                                 {tool.name}
                             </span>
-                            <KindBadge kind={tool.kind} />
                         </div>
                         <p className="text-[11px] text-muted-foreground/40 mt-0.5">
                             {tool.description}
@@ -159,23 +139,10 @@ function ToolCard({ tool, onClick }: { tool: ToolDef; onClick: () => void }) {
 
 // ── Page ─────────────────────────────────────────────────────────────────
 
-type FilterKind = 'all' | ToolKind;
-
 export default function ToolsPage() {
     usePageTitle('Tools');
     const router = useRouter();
-    const [filter, setFilter] = useState<FilterKind>('all');
-
-    const filtered = filter === 'all' ? TOOLS : TOOLS.filter((t) => t.kind === filter);
     const available = TOOLS.filter((t) => t.status === 'available').length;
-
-    const filters: { key: FilterKind; label: string }[] = [
-        { key: 'all', label: 'All' },
-        { key: 'sdk', label: 'SDKs' },
-        { key: 'runtime', label: 'Runtimes' },
-        { key: 'tool', label: 'Tools' },
-        { key: 'platform', label: 'Platform' },
-    ];
 
     return (
         <Page>
@@ -184,31 +151,8 @@ export default function ToolsPage() {
                 title="Tools"
             />
 
-            {/* Filter tabs */}
-            <div className="flex items-center gap-1">
-                {filters.map(({ key, label }) => {
-                    const count =
-                        key === 'all' ? TOOLS.length : TOOLS.filter((t) => t.kind === key).length;
-                    return (
-                        <button
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono transition-all ${
-                                filter === key
-                                    ? 'bg-white/[0.08] text-foreground/70 border border-white/[0.12]'
-                                    : 'text-muted-foreground/30 hover:text-muted-foreground/50 border border-transparent'
-                            }`}
-                            key={key}
-                            onClick={() => setFilter(key)}
-                        >
-                            {label}
-                            <span className="text-[9px] text-muted-foreground/20">{count}</span>
-                        </button>
-                    );
-                })}
-            </div>
-
-            {/* Tool grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                {filtered.map((tool) => (
+                {TOOLS.map((tool) => (
                     <ToolCard
                         key={tool.name}
                         onClick={() => router.push(`/tools/${toolSlug(tool.name)}`)}

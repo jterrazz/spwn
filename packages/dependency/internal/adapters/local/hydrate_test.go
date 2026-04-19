@@ -1,13 +1,12 @@
 package local
 
 import (
-	"spwn.sh/packages/dependency/resolver"
-	"spwn.sh/packages/dependency/tool"
 	"os"
 	"path/filepath"
 	"testing"
 
-	)
+	"spwn.sh/packages/dependency/resolver"
+)
 
 func writePack(t *testing.T, root, name, yaml string) {
 	t.Helper()
@@ -48,9 +47,6 @@ dependencies:
 	}
 	if got := tl.Version(); got != "1.2.3" {
 		t.Errorf("version: want 1.2.3, got %q", got)
-	}
-	if got := tl.Kind(); got != tool.KindTool {
-		t.Errorf("kind: want Tool, got %v", got)
 	}
 	spec := tl.Install()
 	if len(spec.AptPackages) != 1 || spec.AptPackages[0] != "build-essential" {

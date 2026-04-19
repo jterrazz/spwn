@@ -1,11 +1,9 @@
 package catalog_test
 
 import (
-	"spwn.sh/packages/dependency/tool"
 	"io/fs"
 	"strings"
 	"testing"
-
 
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/dependency/resolver"
@@ -30,22 +28,6 @@ func TestAllTools_ValidName(t *testing.T) {
 			}
 			if tool.Name() == "spwn:" {
 				t.Error("tool name must not be just spwn:")
-			}
-		})
-	}
-}
-
-func TestAllTools_ValidKind(t *testing.T) {
-	validKinds := map[tool.Kind]bool{
-		tool.KindRuntime:  true,
-		tool.KindTool:     true,
-		tool.KindSDK:      true,
-		tool.KindPlatform: true,
-	}
-	for _, tool := range dependency.BuiltinTools() {
-		t.Run(tool.Name(), func(t *testing.T) {
-			if !validKinds[tool.Kind()] {
-				t.Errorf("invalid kind %q", tool.Kind())
 			}
 		})
 	}

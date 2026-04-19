@@ -16,7 +16,6 @@ version: "1.0"
 install:
   packages: [bash, coreutils]`))
 	f.Add([]byte(`name: matrix
-kind: tool
 worlds:
   matrix:
     agents: [neo]`))

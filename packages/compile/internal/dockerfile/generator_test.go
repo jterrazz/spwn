@@ -19,8 +19,8 @@ func TestGenerate_EmptyTools(t *testing.T) {
 func TestGenerate_MergesAptPackages(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "spwn:unix", Kind: "sdk", AptPackages: []string{"bash", "grep", "curl"}},
-		{Name: "spwn:git", Kind: "tool", AptPackages: []string{"git", "curl"}}, // curl is duplicate
+		{Name: "spwn:unix", AptPackages: []string{"bash", "grep", "curl"}},
+		{Name: "spwn:git", AptPackages: []string{"git", "curl"}}, // curl is duplicate
 	}
 
 	result := string(Generate(base, tools, ""))
@@ -36,8 +36,8 @@ func TestGenerate_MergesAptPackages(t *testing.T) {
 func TestGenerate_OrdersToolSections(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "spwn:node", Kind: "sdk", Commands: []string{"curl -fsSL https://deb.nodesource.com/setup_20.x | bash -"}},
-		{Name: "spwn:qmd", Kind: "tool", Commands: []string{"npm install -g @tobilu/qmd"}},
+		{Name: "spwn:node", Commands: []string{"curl -fsSL https://deb.nodesource.com/setup_20.x | bash -"}},
+		{Name: "spwn:qmd", Commands: []string{"npm install -g @tobilu/qmd"}},
 	}
 
 	result := string(Generate(base, tools, ""))
@@ -51,7 +51,7 @@ func TestGenerate_OrdersToolSections(t *testing.T) {
 func TestGenerate_IncludesEnv(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "spwn:node", Kind: "sdk", Env: map[string]string{"NODE_ENV": "production"}},
+		{Name: "spwn:node", Env: map[string]string{"NODE_ENV": "production"}},
 	}
 
 	result := string(Generate(base, tools, ""))

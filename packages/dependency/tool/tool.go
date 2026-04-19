@@ -8,9 +8,6 @@ type Tool interface {
 	// Name returns the tool identifier (e.g., "spwn:qmd", "spwn:node").
 	Name() string
 
-	// Kind returns the tool's category.
-	Kind() Kind
-
 	// Version returns the tool's version (semver or "latest").
 	Version() string
 
