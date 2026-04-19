@@ -73,7 +73,7 @@ Stack tools, skills, hooks, and a soul into an agent — Lego for minds.
 </td>
 <td align="center" width="33%">
 <h3>📦 Reproducible</h3>
-One <code>spwn build</code> packages your project into a Docker image you can push, pull, and run anywhere — byte-identical.
+One <code>spwn build</code> produces a Docker image — or a runtime-native tree (claude-code, codex, …) if you skip Docker. Byte-identical on every machine.
 </td>
 </tr>
 <tr>
