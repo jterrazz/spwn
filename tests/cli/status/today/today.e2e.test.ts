@@ -21,17 +21,18 @@ describe('agent mind structure', () => {
             .exec('agent create trinity')
             .run();
 
-        // Then - exits zero and creates SOUL.md + the three Mind layer
+        // Then - exits zero and creates SOUL.md + the two Mind layer
         // Directories on disk. identity/ was collapsed into SOUL.md at
         // The agent root in 2026-04; knowledge is world-scoped, not a
-        // Mind layer.
+        // Mind layer; skills moved to build-time deps at /world/skills/.
         expect(result.exitCode).toBe(0);
         expect(result.file('spwn/agents/trinity/SOUL.md').exists).toBe(true);
-        for (const layer of ['skills', 'playbooks', 'journal']) {
+        for (const layer of ['playbooks', 'journal']) {
             expect(result.file(`spwn/agents/trinity/${layer}`).exists, `missing ${layer}/`).toBe(
                 true,
             );
         }
+        expect(result.file('spwn/agents/trinity/skills').exists).toBe(false);
         expect(result.file('spwn/agents/trinity/identity').exists).toBe(false);
         expect(result.file('spwn/agents/trinity/knowledge').exists).toBe(false);
 

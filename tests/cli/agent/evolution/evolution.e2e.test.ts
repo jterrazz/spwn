@@ -131,9 +131,10 @@ describe('spwn agent fork', () => {
         expect(result.exitCode).toBe(0);
         const out = result.stderr.text;
         expect(out).toContain('Forking "neo" -> "neo-v2"');
-        // Identity/ is gone; Mind layers are skills/playbooks/journal.
-        // SOUL.md is copied alongside the layers but isn't listed here.
-        expect(out).toMatch(/Layers copied\s+skills, playbooks, journal/);
+        // Identity/ is gone; skills moved to build-time deps; Mind
+        // Layers are playbooks/journal. SOUL.md is copied alongside
+        // The layers but isn't listed here.
+        expect(out).toMatch(/Layers copied\s+playbooks, journal/);
         expect(result.file('spwn/agents/neo-v2/SOUL.md').exists).toBe(true);
     });
 
@@ -189,8 +190,9 @@ describe('spwn agent fork', () => {
         expect(result.exitCode).toBe(0);
         const out = result.stderr.text;
         expect(out).toMatch(/Agent:\s+neo-clone/);
-        // Mind tree now renders skills/playbooks/journal; identity
-        // Collapsed into SOUL.md at the agent root.
-        expect(out).toMatch(/skills\//);
+        // Mind tree now renders playbooks/journal; identity collapsed
+        // Into SOUL.md at the agent root; skills moved to build-time
+        // Deps at /world/skills/.
+        expect(out).toMatch(/playbooks\//);
     });
 });
