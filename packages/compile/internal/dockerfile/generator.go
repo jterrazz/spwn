@@ -23,7 +23,7 @@ type GenerateOpts struct {
 	// Use this for non-standard images (e.g., architect) that define their own.
 	SkipFooter bool
 
-	// User is the non-root user in the compile. Defaults to "spwn".
+	// User is the non-root user in the image. Defaults to "spwn".
 	// Used to template {{.User}} in UserCommands and for chown/USER directives.
 	User string
 

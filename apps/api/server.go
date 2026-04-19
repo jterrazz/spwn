@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -1480,6 +1481,52 @@ func dockerExecOutput(ctx context.Context, containerID string, args ...string) (
 	return string(out), err
 }
 
+// decodeJSONBody decodes the request body into v with DisallowUnknownFields
+// off (so new client versions don't break older handlers) but returns a
+// clear error when the body is malformed. Callers should jsonError 400 on
+// a non-nil return rather than silently accepting zero-valued fields.
+func decodeJSONBody(r *http.Request, v interface{}) error {
+	if r.Body == nil {
+		return fmt.Errorf("empty request body")
+	}
+	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
+		return fmt.Errorf("invalid request body: %w", err)
+	}
+	return nil
+}
+
+// sanitizeKnowledgePath validates that relPath is safe to concatenate
+// under /world/knowledge/ inside a container. Rejects absolute paths,
+// paths that escape the base via "..", and empty cleaned paths. The
+// returned string is the forward-slash-cleaned form to use.
+//
+// A plain strings.Contains("..") check is not sufficient: legitimate
+// filenames like "..foo.md" would be blocked. We clean the path and
+// reject anything that's absolute or that still starts with ".." after
+// cleaning (which indicates an escape attempt).
+func sanitizeKnowledgePath(relPath string) (string, bool) {
+	if relPath == "" {
+		return "", false
+	}
+	// Reject absolute paths outright; /world/knowledge/ is the only
+	// root allowed and it's prepended by the caller.
+	if strings.HasPrefix(relPath, "/") {
+		return "", false
+	}
+	cleaned := path.Clean(relPath)
+	if cleaned == "." {
+		return "", false
+	}
+	// After Clean, a path that still starts with "..", or is exactly
+	// "..", has escaped the logical root. Block it. Note: a filename
+	// like "..foo.md" is fine because Clean leaves it alone and it
+	// does not start with "../".
+	if cleaned == ".." || strings.HasPrefix(cleaned, "../") {
+		return "", false
+	}
+	return cleaned, true
+}
+
 // handleWorldKnowledgeList returns all files in the knowledge directory inside a world container.
 func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request) {
 	worldID := r.PathValue("id")
@@ -1554,8 +1601,8 @@ func (s *Server) handleWorldKnowledgeRead(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Prevent directory traversal
-	if strings.Contains(relPath, "..") {
+	safe, ok := sanitizeKnowledgePath(relPath)
+	if !ok {
 		jsonError(w, "invalid path", 400)
 		return
 	}
@@ -1566,14 +1613,14 @@ func (s *Server) handleWorldKnowledgeRead(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fullPath := "/world/knowledge/" + relPath
+	fullPath := "/world/knowledge/" + safe
 	out, err := dockerExecOutput(r.Context(), containerID, "cat", fullPath)
 	if err != nil {
-		jsonError(w, "file not found: "+relPath, 404)
+		jsonError(w, "file not found: "+safe, 404)
 		return
 	}
 
-	jsonOK(w, map[string]string{"path": relPath, "content": out})
+	jsonOK(w, map[string]string{"path": safe, "content": out})
 }
 
 // handleWorldKnowledgeWrite writes content to a specific knowledge file inside a world container.
@@ -1590,8 +1637,8 @@ func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Prevent directory traversal
-	if strings.Contains(relPath, "..") {
+	safe, ok := sanitizeKnowledgePath(relPath)
+	if !ok {
 		jsonError(w, "invalid path", 400)
 		return
 	}
@@ -1610,7 +1657,7 @@ func (s *Server) handleWorldKnowledgeWrite(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	fullPath := "/world/knowledge/" + relPath
+	fullPath := "/world/knowledge/" + safe
 
 	// Ensure parent directory exists inside container
 	dir := filepath.Dir(fullPath)
@@ -1985,7 +2032,10 @@ func (s *Server) handleAuthCheck(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Provider string `json:"provider"`
 	}
-	json.NewDecoder(r.Body).Decode(&body)
+	if err := decodeJSONBody(r, &body); err != nil {
+		jsonError(w, err.Error(), 400)
+		return
+	}
 	cred := auth.Resolve(auth.Provider(body.Provider))
 	status := auth.Validate(r.Context(), cred)
 	jsonOK(w, status)
@@ -1996,7 +2046,10 @@ func (s *Server) handleAuthConfigure(w http.ResponseWriter, r *http.Request) {
 		Provider string `json:"provider"`
 		Token    string `json:"token"`
 	}
-	json.NewDecoder(r.Body).Decode(&body)
+	if err := decodeJSONBody(r, &body); err != nil {
+		jsonError(w, err.Error(), 400)
+		return
+	}
 	if body.Token == "" {
 		jsonError(w, "token required", 400)
 		return
@@ -2018,7 +2071,10 @@ func (s *Server) handleAuthReconnect(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Provider string `json:"provider"`
 	}
-	json.NewDecoder(r.Body).Decode(&body)
+	if err := decodeJSONBody(r, &body); err != nil {
+		jsonError(w, err.Error(), 400)
+		return
+	}
 	if body.Provider != "" {
 		_ = auth.EnableProvider(auth.Provider(body.Provider))
 	}
@@ -2030,7 +2086,10 @@ func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Provider string `json:"provider"`
 	}
-	json.NewDecoder(r.Body).Decode(&body)
+	if err := decodeJSONBody(r, &body); err != nil {
+		jsonError(w, err.Error(), 400)
+		return
+	}
 
 	// Clear cached token
 	_ = auth.ClearToken()

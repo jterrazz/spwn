@@ -64,8 +64,16 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		}
 	}
 
-	a.backend.Stop(ctx, u.ContainerID)
-	a.backend.Remove(ctx, u.ContainerID)
+	// Stop may fail benignly when the container already exited; log
+	// but continue so Remove still runs. Remove failures are the real
+	// problem (zombie container with state.json already cleared below);
+	// surface them so operators know to docker rm manually.
+	if err := a.backend.Stop(ctx, u.ContainerID); err != nil {
+		log.Printf("warning: stop container %s: %v", u.ContainerID, err)
+	}
+	if err := a.backend.Remove(ctx, u.ContainerID); err != nil {
+		log.Printf("warning: remove container %s: %v", u.ContainerID, err)
+	}
 
 	// Write a journal entry for every agent that was deployed in
 	// this world. Happens after the sync-out so the new entry joins
@@ -78,7 +86,9 @@ func (a *Architect) Destroy(ctx context.Context, worldID string) (*models.World,
 		}
 	}
 
-	a.rstate.Delete(worldID)
+	if err := a.rstate.Delete(worldID); err != nil {
+		log.Printf("warning: delete rstate for %s: %v", worldID, err)
+	}
 
 	// Emit activity events
 	uptime := formatUptime(duration)

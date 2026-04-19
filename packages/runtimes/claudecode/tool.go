@@ -25,7 +25,7 @@ func (*claudeCodeTool) Install() tool.InstallSpec {
 	return tool.InstallSpec{
 		Commands: []string{
 			// Native install: downloads a self-contained binary,
-			// no Node.js / npm in the compile. The installer drops
+			// no Node.js / npm in the image. The installer drops
 			// the binary at $HOME/.local/share/claude/versions/<ver>
 			// and places a symlink at $HOME/.local/bin/claude
 			// pointing at the current version. $HOME during a

@@ -9,7 +9,7 @@ import (
 )
 
 // CollectSkills aggregates skill files from all resolved tools into a map
-// of destination paths → content for copying into the compile.
+// of destination paths → content for copying into the image.
 // Skills are placed at /world/skills/{tool-name}/.
 func CollectSkills(tools []tool.Tool) (map[string][]byte, error) {
 	result := make(map[string][]byte)
