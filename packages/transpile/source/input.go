@@ -84,8 +84,9 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 			packages[p] = struct{}{}
 		}
 		agents = append(agents, transpile.AgentInput{
-			Name: a.Name,
-			Role: a.Config.Role,
+			Name:      a.Name,
+			Role:      a.Config.Role,
+			Playbooks: promotedPlaybooks(a.Layers.Playbooks),
 		})
 	}
 	// Add project-level deps (top-level deps: in spwn.yaml).

@@ -10,11 +10,16 @@ import (
 // renderer is the transpile.Runtime implementation for Claude Code.
 //
 // Claude Code reads a CLAUDE.md at the working directory on startup.
-// This renderer is a thin LAYOUT adapter: the prose itself lives in
-// packages/transpile/worldbook (physics, manual, skills, roster,
-// architect identity — all runtime-neutral spwn content). Our job
-// here is to place that content at Claude-specific paths and to emit
-// the per-agent CLAUDE.md entrypoint with Claude's @-import syntax.
+// This renderer emits one per agent, inlining every world-shared
+// context block (physics, faculties, roster, conventions) directly
+// into that file so the agent's system prompt is self-contained —
+// no separate world/AGENTS.md, no world/physics.md, no
+// world/skills/*.md indirection. Tool-shipped skills keep living at
+// /world/skills/<tool>/SKILL.md (baked into the image via the
+// dependency resolver's CollectSkills) and surface to Claude Code
+// through a spawn-time symlink at /agents/<name>/.claude/skills.
+// Playbook-index entries come from AgentInput.Playbooks —
+// frontmatter-promoted playbooks the agent has authored.
 type renderer struct{}
 
 // Renderer is the exported render adapter for Claude Code. It is
@@ -27,60 +32,47 @@ var Renderer = &renderer{}
 // transpile.Compile to look up this runtime.
 func (r *renderer) Name() string { return "claude-code" }
 
-// Render lays out worldbook content at Claude-specific paths. Paths
-// it chooses:
+// Render lays out Claude-specific output for each agent. Paths:
 //
-//   - world/physics.md, world/faculties.md, world/AGENTS.md,
-//     world/roster.md                          (runtime-neutral content)
-//   - world/skills/*.md                        (runtime-neutral content)
-//   - agents/<name>/CLAUDE.md                  (Claude-specific entrypoint)
-//   - agents/<name>/worlds/<id>/role.md        (runtime-neutral content)
+//   - agents/<name>/CLAUDE.md              self-contained system prompt
+//   - agents/<name>/worlds/<id>/role.md    per-deployment role
 //
-// The world/ paths happen to be the same ones codex would likely use
-// if it grew a renderer — they're generic filesystem layout. The
-// agents/<name>/CLAUDE.md filename is where Claude-specificity lives;
-// another runtime would pick its own entrypoint name.
+// Nothing lands under world/ — the world-shared context (physics,
+// faculties, roster) is inlined into every agent's CLAUDE.md so the
+// runtime boots with all of it already in the prompt.
 func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 	t := transpile.New()
 
-	t.AddString("world/physics.md", worldbook.GeneratePhysics(input.Deps))
-	t.AddString("world/faculties.md", worldbook.GenerateFaculties(input.VerifiedTools))
-	t.AddString("world/AGENTS.md", worldbook.AgentsBook(input.WorldKnowledgeMounted))
+	physics := worldbook.GeneratePhysics(input.Deps)
+	faculties := worldbook.GenerateFaculties(input.VerifiedTools)
 
-	// Roster, if we have agents to put in it.
 	roster := make([]worldbook.ColonyAgentSpec, 0, len(input.Agents))
 	for _, a := range input.Agents {
 		roster = append(roster, worldbook.ColonyAgentSpec{Name: a.Name, Role: a.Role})
 	}
-	t.AddString("world/roster.md", worldbook.GenerateRoster(input.WorldID, roster, input.WorldKnowledgeMounted))
+	rosterMD := worldbook.GenerateRoster(input.WorldID, roster, input.WorldKnowledgeMounted)
 
-	// System skills. The mind-management guide varies with the
-	// knowledge-mount flag — when no knowledge dir is bound, the
-	// "Saving Knowledge" section is dropped entirely.
-	for name, body := range worldbook.SystemSkills(input.WorldKnowledgeMounted) {
-		t.AddString("world/skills/"+name, body)
-	}
-
-	// Per-agent files. Source AGENTS.md -> target CLAUDE.md lives
-	// here: this renderer is the single place that encodes "Claude
-	// Code reads CLAUDE.md".
 	for _, a := range input.Agents {
 		role := a.Role
 		if role == "" {
 			role = "worker"
 		}
-		// role.md is per-deployment -- it describes what the agent
-		// does in THIS world -- so it lives under worlds/<id>/. The
-		// CLAUDE.md entrypoint lives at the agent root because
-		// Claude Code loads the cwd's CLAUDE.md on startup and the
-		// agent runs with cwd = /agents/<name>/.
 		t.AddString(
 			fmt.Sprintf("agents/%s/worlds/%s/role.md", a.Name, input.WorldID),
 			fmt.Sprintf("# Role in %s\n\n%s\n", input.WorldID, role),
 		)
 		t.AddString(
 			fmt.Sprintf("agents/%s/CLAUDE.md", a.Name),
-			GenerateAgentCLAUDEMD(a.Name, role, input.WorldKnowledgeMounted),
+			GenerateAgentCLAUDEMD(AgentClaudeMDInput{
+				AgentName:        a.Name,
+				Role:             role,
+				WorldID:          input.WorldID,
+				Physics:          physics,
+				Faculties:        faculties,
+				Roster:           rosterMD,
+				Playbooks:        a.Playbooks,
+				KnowledgeMounted: input.WorldKnowledgeMounted,
+			}),
 		)
 	}
 

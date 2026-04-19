@@ -184,23 +184,10 @@ func ArchitectSystemFiles() map[string]string {
 		// Architect identity
 		"system/architect/ARCHITECT.md": ArchitectIdentity,
 
-		// Global agent operating manual. The architect base image
-		// assumes a shared knowledge base is available — every world
-		// spawned by the architect inherits the conventional
-		// /world/knowledge/ mount — so the "with knowledge" variant
-		// is baked in.
-		"system/AGENTS.md": AgentsBookWithKnowledge,
-
-		// Global skills (same as regular worlds)
-		"system/skills/mind-management.md": SkillMindManagementWithKnowledge,
-		"system/skills/collaboration.md":   SkillCollaboration,
-		"system/skills/world-awareness.md":  SkillWorldAwareness,
-		"system/skills/self-evolution.md":    SkillSelfEvolution,
-
 		// Architect-specific skills
-		"system/architect/skills/fleet-ops.md":      ArchitectSkillFleetOps,
-		"system/architect/skills/task-planning.md":   ArchitectSkillTaskPlanning,
-		"system/architect/skills/monitoring.md":      ArchitectSkillMonitoring,
+		"system/architect/skills/fleet-ops.md":     ArchitectSkillFleetOps,
+		"system/architect/skills/task-planning.md": ArchitectSkillTaskPlanning,
+		"system/architect/skills/monitoring.md":    ArchitectSkillMonitoring,
 
 		// Default stack
 		"system/architect/stack.md": "# Architect Stack\n\n## Focus\n\n## Queued\n- [ ] Review agent health and journal entries\n- [ ] Consolidate old agent memories\n\n## Done\n",
