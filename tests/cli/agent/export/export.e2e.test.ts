@@ -36,10 +36,9 @@ describe('spwn agent export', () => {
         const tarPath = join(result.filesystem.cwd, 'neo.tar.gz');
         const listing = execSync(`tar tzf ${tarPath}`, { encoding: 'utf8' });
         // Identity/ collapsed into SOUL.md; knowledge is world-scoped
-        // Now, not an agent-level layer. Archive carries SOUL.md + the
-        // Three remaining Mind layer directories.
+        // Now; skills moved to build-time deps. Archive carries
+        // SOUL.md + the two remaining Mind layer directories.
         expect(listing).toContain('SOUL.md');
-        expect(listing).toMatch(/(^|\n)skills(\/|\n|$)/);
         expect(listing).toMatch(/(^|\n)playbooks(\/|\n|$)/);
         expect(listing).toMatch(/(^|\n)journal(\/|\n|$)/);
     });

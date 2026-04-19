@@ -55,7 +55,7 @@ build-test-image:
 
 # ── Lint ──────────────────────────────────────────────────────────
 
-lint: go-vet
+lint: generate go-vet
 	pnpm -r lint
 
 go-vet:
