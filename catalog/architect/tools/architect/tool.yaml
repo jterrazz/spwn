@@ -1,5 +1,4 @@
 name: "spwn:architect"
-kind: platform
 version: "1.1.0"
 description: "The always-on orchestration daemon"
 

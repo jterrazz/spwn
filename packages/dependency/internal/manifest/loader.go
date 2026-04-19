@@ -6,11 +6,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"gopkg.in/yaml.v3"
-
-	"spwn.sh/packages/dependency/tool"
 )
 
 // Manifest is the canonical basename. Both catalog and local
@@ -65,7 +62,6 @@ type ParseOptions struct {
 // (e.g. dependency.ToolFromParsed) adapt this into their own types.
 type Parsed struct {
 	Schema    Schema
-	Kind      tool.Kind
 	FileBytes map[string][]byte
 	SkillsFS  any // fs.FS but typed as any to avoid the import on the public type
 }
@@ -102,14 +98,6 @@ func Parse(res Resolver, opts ParseOptions) (*Parsed, error) {
 	if s.Version == "" {
 		s.Version = "latest"
 	}
-	if s.Kind == "" {
-		s.Kind = "tool"
-	}
-
-	kind, err := parseKind(s.Kind)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", s.Name, err)
-	}
 
 	// Read every file in the files map eagerly so the returned Tool
 	// doesn't depend on the resolver staying alive.
@@ -124,7 +112,6 @@ func Parse(res Resolver, opts ParseOptions) (*Parsed, error) {
 
 	return &Parsed{
 		Schema:    s,
-		Kind:      kind,
 		FileBytes: fileBytes,
 		SkillsFS:  res.SkillsFS(),
 	}, nil
@@ -193,16 +180,3 @@ func (e EmbedResolver) SkillsFS() fs.FS {
 	return sub
 }
 
-func parseKind(s string) (tool.Kind, error) {
-	switch strings.ToLower(s) {
-	case "runtime":
-		return tool.KindRuntime, nil
-	case "sdk":
-		return tool.KindSDK, nil
-	case "tool":
-		return tool.KindTool, nil
-	case "platform":
-		return tool.KindPlatform, nil
-	}
-	return "", fmt.Errorf("unknown kind %q (want runtime|sdk|tool|platform)", s)
-}

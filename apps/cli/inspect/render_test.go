@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"strings"
 	"testing"
-
-	"spwn.sh/packages/dependency/tool"
 )
 
 // TestRender_HeaderShape verifies the kubectl-describe header lines
@@ -51,7 +49,7 @@ func TestRender_DepTreeWithDedup(t *testing.T) {
 			{Name: "spwn:unix", Version: "24.04"},
 			{Name: "spwn:qmd", Version: "1.4.0", Skills: 2,
 				Children: []DepNode{
-					{Name: "spwn:python", Version: "3.12", Kind: tool.KindRuntime,
+					{Name: "spwn:python", Version: "3.12",
 						Children: []DepNode{
 							{Name: "spwn:unix", Version: "24.04", DedupSeen: true},
 						}},
@@ -68,7 +66,6 @@ func TestRender_DepTreeWithDedup(t *testing.T) {
 		"  spwn:qmd@1.4.0",
 		"skills(2)",
 		"    spwn:python@3.12",
-		"runtime",
 		"      spwn:unix@24.04  (*)",
 	}
 	for _, want := range checks {
@@ -182,20 +179,16 @@ func TestRender_StatusGlyphs(t *testing.T) {
 	}
 }
 
-// TestRender_ComposeBadges — kind and skills count each contribute a
-// badge; they concatenate with " · " in a stable order (kind, skills)
-// regardless of the input order.
+// TestRender_ComposeBadges — the skills count is the only badge
+// today; empty deps render nothing.
 func TestRender_ComposeBadges(t *testing.T) {
 	cases := []struct {
 		name string
 		in   DepNode
 		want string
 	}{
-		{"empty tool", DepNode{Kind: tool.KindTool}, ""},
+		{"empty", DepNode{}, ""},
 		{"skills only", DepNode{Skills: 3}, "skills(3)"},
-		{"runtime only", DepNode{Kind: tool.KindRuntime}, "runtime"},
-		{"both", DepNode{Kind: tool.KindRuntime, Skills: 2},
-			"runtime · skills(2)"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

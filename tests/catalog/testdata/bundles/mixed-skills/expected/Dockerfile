@@ -33,26 +33,26 @@ RUN apt-get update && apt-get install -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-# spwn:cli (platform)
+# spwn:cli
 RUN curl -fsSL https://spwn.sh/install.sh | bash || true
 
-# spwn:node (sdk)
+# spwn:node
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs && rm -rf /var/lib/apt/lists/*
 
-# spwn:claude-code (runtime)
+# spwn:claude-code
 RUN curl -fsSL https://claude.ai/install.sh | bash
 RUN cp -L /root/.local/bin/claude /usr/local/bin/claude
 RUN chmod +x /usr/local/bin/claude
 RUN rm -rf /root/.local /root/.claude
 
-# spwn:mempalace (tool)
+# spwn:mempalace
 RUN pip install --no-cache-dir --break-system-packages mempalace
 
-# spwn:qmd (tool)
+# spwn:qmd
 RUN npm install -g @tobilu/qmd
 
-# spwn:architect (platform)
+# spwn:architect
 COPY tools/spwn:architect/usr/local/bin/architect-entrypoint.sh /usr/local/bin/architect-entrypoint.sh
 RUN chmod +x /usr/local/bin/architect-entrypoint.sh
 

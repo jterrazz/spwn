@@ -1,5 +1,4 @@
 name: "spwn:mempalace"
-kind: tool
 version: "0.1.0"
 description: "Local memory palace CLI — persistent notes across sessions"
 

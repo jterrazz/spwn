@@ -16,14 +16,6 @@ func AssertValidTool(t *testing.T, tl tool.Tool) {
 		t.Errorf("name %q must start with @", tl.Name())
 	}
 
-	validKinds := map[tool.Kind]bool{
-		tool.KindRuntime: true, tool.KindTool: true,
-		tool.KindSDK: true, tool.KindPlatform: true,
-	}
-	if !validKinds[tl.Kind()] {
-		t.Errorf("invalid kind %q", tl.Kind())
-	}
-
 	if tl.Version() == "" {
 		t.Error("version must not be empty")
 	}

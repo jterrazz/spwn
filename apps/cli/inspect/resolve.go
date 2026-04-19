@@ -143,11 +143,10 @@ func Build(cwd string, opts Opts) (*Model, error) {
 // with no children.
 func buildNode(reg *resolver.Registry, ref string, seen map[string]struct{}) DepNode {
 	if _, already := seen[ref]; already {
-		// Still resolve version/kind for the display, but short-circuit children.
+		// Still resolve version for the display, but short-circuit children.
 		n := DepNode{Name: ref, DedupSeen: true}
 		if t := reg.Get(ref); t != nil {
 			n.Version = t.Version()
-			n.Kind = t.Kind()
 		}
 		return n
 	}
@@ -163,7 +162,6 @@ func buildNode(reg *resolver.Registry, ref string, seen map[string]struct{}) Dep
 	node := DepNode{
 		Name:    t.Name(),
 		Version: t.Version(),
-		Kind:    t.Kind(),
 		Skills:  countSkills(t.Skills()),
 	}
 	for _, child := range t.Dependencies() {
@@ -228,7 +226,6 @@ type localToolAdapter struct {
 }
 
 func (t *localToolAdapter) Name() string             { return t.name }
-func (t *localToolAdapter) Kind() tool.Kind          { return t.inner.Kind() }
 func (t *localToolAdapter) Version() string          { return t.inner.Version() }
 func (t *localToolAdapter) Dependencies() []string   { return t.inner.Dependencies() }
 func (t *localToolAdapter) Install() tool.InstallSpec { return t.inner.Install() }

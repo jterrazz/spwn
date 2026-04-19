@@ -12,7 +12,6 @@ var Tool = &claudeCodeTool{}
 type claudeCodeTool struct{}
 
 func (*claudeCodeTool) Name() string    { return "spwn:claude-code" }
-func (*claudeCodeTool) Kind() tool.Kind   { return tool.KindRuntime }
 func (*claudeCodeTool) Version() string { return "latest" }
 
 // Dependencies: only spwn:unix for curl + jq. We used to also

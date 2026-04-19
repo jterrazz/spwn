@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { Page } from '@/components/page';
 import { PageHeader } from '@/components/page-header';
 import { usePageTitle } from '@/hooks/use-page-title';
-import { getToolByName, KIND_META, type SkillFile, TOOLS } from '@/lib/tools-catalog';
+import { getToolByName, type SkillFile, TOOLS } from '@/lib/tools-catalog';
 
 // ── Markdown renderer (simple) ──────────────────────────────────────────
 
@@ -215,18 +215,9 @@ export default function ToolDetailPage() {
         );
     }
 
-    const { label: kindLabel, color: kindColor } = KIND_META[tool.kind];
-
     return (
         <Page>
             <PageHeader
-                actions={
-                    <span
-                        className={`text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full border ${kindColor}`}
-                    >
-                        {kindLabel}
-                    </span>
-                }
                 description={tool.description}
                 leading={
                     <button

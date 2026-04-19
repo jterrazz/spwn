@@ -3,7 +3,6 @@
  * Skill content is inlined from the embedded markdown files.
  */
 
-export type ToolKind = 'platform' | 'runtime' | 'sdk' | 'tool';
 export type ToolStatus = 'available' | 'planned';
 
 export interface SkillFile {
@@ -13,7 +12,6 @@ export interface SkillFile {
 
 export interface ToolDef {
     name: string;
-    kind: ToolKind;
     description: string;
     provides: string;
     useWhen: string;
@@ -24,10 +22,8 @@ export interface ToolDef {
 }
 
 export const TOOLS: ToolDef[] = [
-    // ── SDKs ──
     {
         name: 'spwn:unix',
-        kind: 'sdk',
         description: 'Core Unix utilities',
         provides: 'bash, coreutils, grep, sed, awk, curl, jq',
         useWhen: 'You need standard shell tools',
@@ -38,7 +34,6 @@ export const TOOLS: ToolDef[] = [
     },
     {
         name: 'spwn:node',
-        kind: 'sdk',
         description: 'Node.js 20 SDK',
         provides: 'node, npm, npx',
         useWhen: 'Your project uses JavaScript or TypeScript',
@@ -49,7 +44,6 @@ export const TOOLS: ToolDef[] = [
     },
     {
         name: 'spwn:python',
-        kind: 'sdk',
         description: 'Python 3 SDK',
         provides: 'python3, pip',
         useWhen: 'Your project uses Python',
@@ -60,7 +54,6 @@ export const TOOLS: ToolDef[] = [
     },
     {
         name: 'spwn:build',
-        kind: 'sdk',
         description: 'C/C++ build essentials',
         provides: 'make, gcc, g++',
         useWhen: 'You need to compile native code',
@@ -69,10 +62,8 @@ export const TOOLS: ToolDef[] = [
         status: 'available',
         skills: [],
     },
-    // ── Runtimes ──
     {
         name: 'spwn:claude-code',
-        kind: 'runtime',
         description: 'Claude Code AI runtime',
         provides: 'claude CLI + pre-configured auth',
         useWhen: "You want Anthropic's agent runtime (default)",
@@ -107,7 +98,6 @@ claude --session-id <id> "task"      # Resume specific session
     },
     {
         name: 'spwn:codex',
-        kind: 'runtime',
         description: 'OpenAI Codex agent runtime',
         provides: 'codex CLI + pre-configured workspace trust',
         useWhen: 'You want to use OpenAI models (GPT-5, o3) as the agent runtime',
@@ -141,7 +131,6 @@ Auth tokens are forwarded from the host automatically.
     },
     {
         name: 'spwn:aider',
-        kind: 'runtime',
         description: 'Aider code assistant',
         provides: 'aider CLI',
         useWhen: 'You want an open-source code-focused runtime',
@@ -150,10 +139,8 @@ Auth tokens are forwarded from the host automatically.
         status: 'planned',
         skills: [],
     },
-    // ── Tools ──
     {
         name: 'spwn:git',
-        kind: 'tool',
         description: 'Git version control',
         provides: 'git',
         useWhen: 'You need source control (almost always)',
@@ -164,7 +151,6 @@ Auth tokens are forwarded from the host automatically.
     },
     {
         name: 'spwn:docker-cli',
-        kind: 'tool',
         description: 'Docker CLI for DooD',
         provides: 'docker',
         useWhen: 'The agent needs to manage containers',
@@ -175,7 +161,6 @@ Auth tokens are forwarded from the host automatically.
     },
     {
         name: 'spwn:qmd',
-        kind: 'tool',
         description: 'On-device markdown search',
         provides: 'qmd - BM25 + semantic search',
         useWhen: 'The agent needs to search docs or knowledge bases locally',
@@ -208,10 +193,8 @@ It runs entirely locally - no external API calls needed for search.`,
             },
         ],
     },
-    // ── Platform ──
     {
         name: 'spwn:cli',
-        kind: 'platform',
         description: 'spwn CLI',
         provides: 'spwn - agent management, messaging, identity',
         useWhen: 'The agent needs to manage its own identity or sub-worlds',
@@ -245,7 +228,6 @@ cat /mind/SOUL.md
     },
     {
         name: 'spwn:architect',
-        kind: 'platform',
         description: 'Orchestration daemon',
         provides: 'spwn + claude + docker (full stack)',
         useWhen: "You're running the always-on Architect",
@@ -360,14 +342,3 @@ export function getToolByName(name: string): ToolDef | undefined {
 export function toolSlug(name: string): string {
     return name.replace('spwn:', '');
 }
-
-/** Kind display info. */
-export const KIND_META: Record<ToolKind, { label: string; color: string }> = {
-    sdk: { label: 'SDK', color: 'bg-blue-500/15 text-blue-400/80 border-blue-500/20' },
-    runtime: {
-        label: 'Runtime',
-        color: 'bg-purple-500/15 text-purple-400/80 border-purple-500/20',
-    },
-    tool: { label: 'Tool', color: 'bg-green-500/15 text-green-400/80 border-green-500/20' },
-    platform: { label: 'Platform', color: 'bg-amber-500/15 text-amber-400/80 border-amber-500/20' },
-};

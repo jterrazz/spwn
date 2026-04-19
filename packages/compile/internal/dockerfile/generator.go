@@ -9,8 +9,7 @@ import (
 // ToolInput is the data the generator needs from each tool.
 type ToolInput struct {
 	Name         string
-	Kind         string
-	AptPackages []string
+	AptPackages  []string
 	Commands     []string
 	UserCommands []string // Commands that run after USER switch (templates: {{.Home}}, {{.User}})
 	Env          map[string]string
@@ -102,7 +101,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 			continue
 		}
 
-		sb.WriteString(fmt.Sprintf("# %s (%s)\n", t.Name, t.Kind))
+		sb.WriteString(fmt.Sprintf("# %s\n", t.Name))
 
 		// Sort env keys for deterministic output (Go map iteration
 		// order is randomized; content-addressed image hashing

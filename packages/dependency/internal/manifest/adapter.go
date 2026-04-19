@@ -9,16 +9,12 @@ import (
 // dependencyAdapter backs a parsed Schema as a tool.Tool.
 type dependencyAdapter struct {
 	schema    Schema
-	kind      tool.Kind
 	fileBytes map[string][]byte
 	skillsFS  fs.FS
 }
 
 // Name returns the fully-qualified ref (e.g. "spwn:git").
 func (t *dependencyAdapter) Name() string { return t.schema.Name }
-
-// Kind returns the classification parsed from the `kind:` field.
-func (t *dependencyAdapter) Kind() tool.Kind { return t.kind }
 
 // Version returns the `version:` field, or the default the loader
 // applied when the manifest left it blank.
@@ -70,7 +66,6 @@ func ToolFromParsed(p *Parsed) tool.Tool {
 	skillsFS, _ := p.SkillsFS.(fs.FS)
 	return &dependencyAdapter{
 		schema:    p.Schema,
-		kind:      p.Kind,
 		fileBytes: p.FileBytes,
 		skillsFS:  skillsFS,
 	}
