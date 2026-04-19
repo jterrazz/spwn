@@ -29,7 +29,7 @@
 
 ## Play god with AI agents.
 
-**The building blocks of artificial life.** Assemble tools, skills, and minds into **living worlds** - one command away.
+**The building blocks of artificial life.** Stack any mix — tools, skills, hooks, an identity — into a living agent. Spawn it into a world. Every block lives as a declarative file in your repo: reviewed in PRs, pinned in lockfiles, reproducible on any machine.
 
 The real power of AI isn't the model. It's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions. Oppenheimer in a lab - with instruments, notebooks, colleagues, and years of memory - can change the world. **The environment is the multiplier.**
 
@@ -106,38 +106,26 @@ Three ideas to hold in your head before you dive in:
 
 <br/>
 
-### Agent orchestration as code
+### Agents as code
 
-**Your agents, your worlds, and your tool composition are declarative files committed alongside your code** - reviewed in PRs, versioned in git, diffed like any other config. Think Terraform for infrastructure, `docker-compose.yaml` for services, `package.json` for dependencies. Spwn plays the same role for the agents that work on your repo.
+**Your agents and their composition are declarative files committed alongside your code** - reviewed in PRs, versioned in git, diffed like any other config. Think Terraform for infrastructure, `docker-compose.yaml` for services, `package.json` for dependencies. Spwn plays the same role for the agents that work on your repo.
 
 `spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do:
 
 ```
 my-project/
-├── spwn.yaml              # manifest
-├── spwn.lock              # lockfile
+├── spwn.yaml              # manifest (the thing that ties everything together)
+├── spwn.lock              # lockfile (pinned catalog deps)
 ├── spwn/                  # committed project assets
-│   ├── agents/
-│   ├── skills/
-│   ├── tools/
-│   └── hooks/
-├── knowledge/             # mounted at /world/knowledge/
-└── .spwn/                 # gitignored
+│   ├── agents/            # one subdir per agent — identity, prompt, composition
+│   ├── skills/            # reusable skill files (markdown blocks)
+│   ├── tools/             # local tool definitions
+│   └── hooks/             # shell hooks the runtime fires
+├── knowledge/             # opt-in world-scoped knowledge base
+└── .spwn/                 # gitignored local state
 ```
 
-`spwn.yaml` is the declarative entry point. Worlds live **inline** under `worlds:` - each one names the agents it deploys and the workspace it mounts. No imperative setup scripts, no "works on my machine": whoever clones the repo gets the same agents with the same tools, byte-for-byte.
-
-```yaml
-# spwn.yaml
-version: 2
-name: acme-api
-
-worlds:
-  matrix:
-    agents: [neo]
-    workspaces: [.]          # host paths mounted under /workspaces/. Use `name=path` to name them.
-    knowledge: ./knowledge   # optional; bind into /world/knowledge/. Omit for no mount.
-```
+Every agent lives under `spwn/agents/<name>/` — identity, prompt, composition, memory — as plain files. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
 
 **`~/.spwn/` holds only your user identity** - credentials, daemon state, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, publish it (`spwn agent publish`) and pull it in the next repo with `spwn agent get`.
 
@@ -156,7 +144,7 @@ spwn/agents/neo/
 ├── playbooks/
 └── journal/
 
-./knowledge/        # opt-in per world via spwn.yaml#worlds.<name>.knowledge
+./knowledge/        # opt-in per world via spwn.yaml#worlds.<name>.knowledge — signal on the host side only, so users know what to set up
 ```
 
 **Everything is a dependency.** Tools, runtime-config injectors, and skills all unified under one concept. A dependency can install apt packages, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
@@ -177,7 +165,7 @@ dependencies:
   - "skill:code-review"
 ```
 
-**If a dependency isn't listed, it doesn't exist.** Not forbidden - physically absent. Browse the full [dependency catalog](docs/dependency-catalog.md).
+Browse the full [dependency catalog](docs/dependency-catalog.md).
 
 Dependency resolution works like npm — every ref is `scheme:target`:
 - `spwn:<name>` is a catalog dependency compiled into the spwn binary.
@@ -187,6 +175,28 @@ Dependency resolution works like npm — every ref is `scheme:target`:
 - `hook:<name>` is a local hook at `spwn/hooks/<name>.sh`.
 
 Add a catalog dependency to every agent with `spwn install spwn:<name>`; the ref gets pinned in `spwn.lock`.
+
+<br/>
+
+### Worlds orchestrate running agents
+
+An agent defines **what** can think. A **world** defines *where* and *with whom* they run. Worlds are the runtime unit: one long-running container per world, one shared filesystem, one declared set of agents talking to each other and to the mounted workspace.
+
+Worlds live **inline** under `spwn.yaml#worlds:` — each entry names the agents it deploys, the workspaces it mounts, and the optional knowledge base it exposes.
+
+```yaml
+# spwn.yaml
+version: 2
+name: acme-api
+
+worlds:
+  matrix:
+    agents: [neo]
+    workspaces: [.]          # host paths mounted under /workspaces/. Use `name=path` to name them.
+    knowledge: ./knowledge   # optional; bind into /world/knowledge/. Omit for no mount.
+```
+
+`spwn up` materialises every world in the manifest; `spwn down` tears them down. A single agent can appear in many worlds — each world keeps its own runtime state (sessions, inbox, shared scratchpad), separate from the agent's long-lived memory on disk. Destroying a world doesn't destroy the agent.
 
 <br/>
 
