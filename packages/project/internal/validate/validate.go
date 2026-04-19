@@ -129,13 +129,21 @@ var (
 	projectName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
 )
 
+// MaxAgentNameLen caps agent names below the tightest filesystem
+// limit likely to matter in practice. Most Linux filesystems allow
+// up to 255 bytes per path component; `docker cp` uses tar headers
+// that have their own length rules. 63 mirrors the DNS label limit
+// and is plenty for a human-memorable agent name — anything longer
+// is probably a typo or pathological test input.
+const MaxAgentNameLen = 63
+
 // IsValidAgentName reports whether the given name is a valid agent
-// name — i.e. a slug matching the same regex the manifest enforces
-// for world names (`^[a-z][a-z0-9-]*$`). Empty names are invalid.
-// Callers use this to reject invalid names at creation time, before
-// anything is written to disk.
+// name — a slug matching the same regex the manifest enforces for
+// world names (`^[a-z][a-z0-9-]*$`) and at most MaxAgentNameLen
+// bytes. Empty names are invalid. Callers use this to reject bad
+// names at creation time, before anything is written to disk.
 func IsValidAgentName(name string) bool {
-	return name != "" && slugRe.MatchString(name)
+	return name != "" && len(name) <= MaxAgentNameLen && slugRe.MatchString(name)
 }
 
 // IsValidProjectName reports whether the given name matches the
@@ -146,14 +154,26 @@ func IsValidProjectName(name string) bool {
 }
 
 // reservedAgentSubcommands is the set of names that collide with
-// `spwn agent <subcommand>` and therefore cannot be used as agent
-// names.
+// `spwn agent <subcommand>` OR with top-level `spwn <noun>` commands
+// that the `spwn <agent-name>` shortcut form would ambiguously match.
+// The former group prevents `spwn agent create agent` shadowing the
+// subcommand; the latter prevents `spwn architect` meaning both "run
+// the daemon" and "talk to the agent named architect".
 var reservedAgentSubcommands = map[string]struct{}{
+	// `spwn agent <subcommand>` collisions
 	"create": {}, "new": {}, "ls": {}, "rm": {}, "fork": {}, "inspect": {},
 	"logs": {}, "add": {}, "remove": {}, "talk": {}, "send": {}, "inbox": {},
 	"watch": {}, "dream": {}, "sleep": {}, "publish": {}, "get": {},
 	"export": {}, "import": {}, "start": {}, "stop": {}, "delete": {},
 	"deploy": {}, "compose": {}, "list": {}, "init": {},
+
+	// `spwn <top-level>` collisions — the bare-name shortcut
+	// `spwn <agent-name>` would route to the top-level command
+	// instead of the agent session, shadowing it permanently.
+	"architect": {}, "world": {}, "agent": {}, "check": {}, "up": {},
+	"down": {}, "build": {}, "install": {}, "uninstall": {}, "skill": {},
+	"auth": {}, "status": {}, "web": {}, "upgrade": {}, "team": {},
+	"organization": {}, "snap": {}, "help": {}, "version": {},
 }
 
 // IsReservedAgentName reports whether the given name would collide

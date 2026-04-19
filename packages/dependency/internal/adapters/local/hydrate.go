@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"spwn.sh/packages/dependency/internal/manifest"
 	"spwn.sh/packages/dependency/refs"
@@ -28,12 +29,31 @@ type wrappedLocalTool struct {
 	name  string
 }
 
-func (t *wrappedLocalTool) Name() string             { return t.name }
-func (t *wrappedLocalTool) Version() string          { return t.inner.Version() }
-func (t *wrappedLocalTool) Dependencies() []string   { return t.inner.Dependencies() }
+func (t *wrappedLocalTool) Name() string              { return t.name }
+func (t *wrappedLocalTool) Version() string           { return t.inner.Version() }
 func (t *wrappedLocalTool) Install() tool.InstallSpec { return t.inner.Install() }
-func (t *wrappedLocalTool) Verify() []string         { return t.inner.Verify() }
-func (t *wrappedLocalTool) Skills() fs.FS            { return t.inner.Skills() }
+func (t *wrappedLocalTool) Verify() []string          { return t.inner.Verify() }
+func (t *wrappedLocalTool) Skills() fs.FS             { return t.inner.Skills() }
+
+// Dependencies rewrites `tool:<x>` inner deps to the `local:<x>`
+// registry key so the resolver's lookups match the name under which
+// we registered each local tool. Without this, a local tool whose
+// tool.yaml lists `dependencies: [tool:b]` can't find tool:b —
+// the registry only knows it as `local:b` — and the whole resolve
+// step errors with "not registered", masking dependency cycles as
+// missing-dep errors.
+func (t *wrappedLocalTool) Dependencies() []string {
+	raw := t.inner.Dependencies()
+	out := make([]string, len(raw))
+	for i, d := range raw {
+		if strings.HasPrefix(d, "tool:") {
+			out[i] = "local:" + strings.TrimPrefix(d, "tool:")
+		} else {
+			out[i] = d
+		}
+	}
+	return out
+}
 
 // LoadTool parses spwn/tools/<name>/tool.yaml via the
 // shared packyaml parser and wraps the result so Name() returns
@@ -85,8 +105,57 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 // same shape they declared it. Duplicates are tolerated — the
 // registry's Register is called once per unique name.
 func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string, error) {
-	out := make([]string, 0, len(depRefs))
 	loaded := map[string]bool{}
+
+	// hydrateOne loads one tool:<name> (recursively following its
+	// own `tool:` deps so the registry ends up with every local
+	// tool reachable from the project). Deduplicated via `loaded`;
+	// returns the registry key ("local:<name>") for the caller.
+	var hydrateOne func(name string) (string, error)
+	hydrateOne = func(name string) (string, error) {
+		if loaded[name] {
+			return "local:" + name, nil
+		}
+		t, err := LoadTool(projectRoot, name)
+		if err != nil {
+			return "", err
+		}
+		loaded[name] = true
+
+		// Collect inner deps BEFORE wrapping swaps "tool:" →
+		// "local:" on the returned slice. Type-assert down to the
+		// wrapper we constructed in LoadTool so we can read the
+		// original Dependencies() entries that still carry the
+		// `tool:<x>` ref form.
+		var innerDeps []string
+		if wrapped, ok := t.(*wrappedLocalTool); ok {
+			innerDeps = wrapped.inner.Dependencies()
+		} else {
+			innerDeps = t.Dependencies()
+		}
+
+		if err := reg.Register(t); err != nil {
+			return "", fmt.Errorf("register local dependency %q: %w", name, err)
+		}
+
+		// Recurse into local-tool inner deps so the registry has
+		// every transitively-reachable local tool. Without this, a
+		// local tool whose tool.yaml declares `dependencies: [tool:b]`
+		// causes resolver.Resolve to error with "local:b not
+		// registered" at spawn, masking real cycles behind a
+		// missing-dep message.
+		for _, innerRaw := range innerDeps {
+			innerRef := refs.ParseRef(innerRaw)
+			if innerRef.Kind == refs.KindLocalTool && innerRef.Name != "" {
+				if _, ierr := hydrateOne(innerRef.Name); ierr != nil {
+					return "", ierr
+				}
+			}
+		}
+		return "local:" + name, nil
+	}
+
+	out := make([]string, 0, len(depRefs))
 	for _, raw := range depRefs {
 		ref := refs.ParseRef(raw)
 		switch ref.Kind {
@@ -102,27 +171,18 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 			continue
 		}
 
-		name := ref.Name
-		if name == "" {
+		if ref.Name == "" {
 			// Malformed local ref — let Resolve surface a clear
 			// "unknown tool" error rather than crashing on an empty
 			// filesystem lookup.
 			out = append(out, raw)
 			continue
 		}
-		if loaded[name] {
-			out = append(out, "local:"+name)
-			continue
-		}
-		t, err := LoadTool(projectRoot, name)
+		key, err := hydrateOne(ref.Name)
 		if err != nil {
 			return nil, err
 		}
-		if err := reg.Register(t); err != nil {
-			return nil, fmt.Errorf("register local dependency %q: %w", name, err)
-		}
-		loaded[name] = true
-		out = append(out, "local:"+name)
+		out = append(out, key)
 	}
 	return out, nil
 }
