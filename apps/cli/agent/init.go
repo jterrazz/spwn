@@ -60,7 +60,7 @@ already exists.`,
 			return fmt.Errorf("agent name is required")
 		}
 		if !project.IsValidAgentName(name) {
-			return fmt.Errorf("agent name %q is invalid — must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter)", name)
+			return fmt.Errorf("agent name %q is invalid — must match ^[a-z][a-z0-9-]*$ (lowercase letters, digits, and dashes; must start with a letter) and be at most %d characters", name, project.MaxAgentNameLen)
 		}
 
 		// Reject names that would shadow `spwn agent <subcommand>`.
