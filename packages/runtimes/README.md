@@ -56,7 +56,7 @@ This mirrors the `database/sql` driver pattern. Binaries can pick individual run
 
 ## Content vs layout
 
-The spwn-opinionated world content (physics, faculties, roster, architect identity, role-aware NPC prompts) lives in **`packages/transpile/worldbook/`**, not here. Runtime renderers import worldbook's strings and decide how to surface them — the claude-code adapter inlines them into a single self-contained `CLAUDE.md` per agent; a future codex adapter may choose differently. This keeps the prose runtime-neutral and authored once.
+The spwn-opinionated world content (physics, faculties, roster, architect identity + skills) lives in **`packages/transpile/worldbook/`**, not here. Runtime renderers import worldbook's strings and decide how to surface them — the claude-code adapter inlines them into a single self-contained `CLAUDE.md` per agent; a future codex adapter may choose differently. This keeps the prose runtime-neutral and authored once.
 
 ## Related
 

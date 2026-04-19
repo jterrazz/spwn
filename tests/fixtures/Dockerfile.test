@@ -16,10 +16,10 @@ RUN useradd -m -s /bin/bash spwn \
     && echo "spwn ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create mount points + Claude Code config (onboarding + workspace trust + permission skip)
-RUN mkdir -p /work /agents /world /home/spwn/.claude \
-    && echo '{"hasCompletedOnboarding":true,"projects":{"/workspace":{"hasTrustDialogAccepted":true},"/home/spwn":{"hasTrustDialogAccepted":true}}}' > /home/spwn/.claude.json \
+RUN mkdir -p /agents /world /home/spwn/.claude \
+    && echo '{"hasCompletedOnboarding":true,"projects":{"/workspaces":{"hasTrustDialogAccepted":true},"/home/spwn":{"hasTrustDialogAccepted":true}}}' > /home/spwn/.claude.json \
     && echo '{"skipDangerousModePermissionPrompt":true}' > /home/spwn/.claude/settings.json \
-    && chown -R spwn:spwn /work /agents /world /home/spwn /home/spwn/.claude.json /home/spwn/.claude
+    && chown -R spwn:spwn /agents /world /home/spwn /home/spwn/.claude.json /home/spwn/.claude
 
 USER spwn
 WORKDIR /home/spwn

@@ -1,4 +1,4 @@
-// Package update powers `spwn upgrade` and the CLI's version-check
+// Package upgrade powers `spwn upgrade` and the CLI's version-check
 // banner.
 //
 // Two entry points:

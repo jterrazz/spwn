@@ -18,25 +18,20 @@ func GeneratePhysics(_ []string) string {
 	// Laws
 	sb.WriteString("## Laws\n")
 	sb.WriteString("- Network: bridge (outbound access enabled)\n")
-	sb.WriteString("- Filesystem is ephemeral except /workspaces and /mind\n\n")
+	sb.WriteString("- Filesystem is ephemeral except /workspaces and /agents\n\n")
 
-	// Tools
-	sb.WriteString("## Tools\n")
-	sb.WriteString("/workspaces - project files, mounted from Host (read-write)\n")
-	sb.WriteString("/mind - agent identity and memory (read-write)\n")
-	sb.WriteString("/tmp - ephemeral scratch space\n\n")
+	// Topology — where the agent can read and write.
+	sb.WriteString("## Topology\n")
+	sb.WriteString("/agents/<your-name>/ - your home: SOUL.md, playbooks/, journal/ (read-write, persists across worlds)\n")
+	sb.WriteString("/workspaces/         - host project dirs mounted read-write, your actual work surface\n")
+	sb.WriteString("/world/              - world-shared state: knowledge/, inbox/<name>/ (read-write)\n")
+	sb.WriteString("/tmp                 - ephemeral scratch\n\n")
 
 	// Communication
 	sb.WriteString("## Communication\n")
 	sb.WriteString("Agents communicate via the inbox at /world/inbox/.\n")
-	sb.WriteString("To send a message: write a JSON file to /world/inbox/{recipient}/.\n")
-	sb.WriteString("To check messages: read files from /world/inbox/{your-name}/.\n\n")
-
-	// Topology
-	sb.WriteString("## Topology\n")
-	sb.WriteString("/workspaces - project files, mounted from Host (read-write)\n")
-	sb.WriteString("/mind - agent identity and memory (read-write)\n")
-	sb.WriteString("/tmp - ephemeral scratch space\n")
+	sb.WriteString("To send a message: write a file to /world/inbox/{recipient}/.\n")
+	sb.WriteString("To check your inbox: read files from /world/inbox/{your-name}/.\n")
 
 	return sb.String()
 }

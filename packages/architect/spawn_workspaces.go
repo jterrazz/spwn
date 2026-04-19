@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"spwn.sh/packages/transpile/worldbook"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world/models"
 )
@@ -47,12 +46,3 @@ func worldStateDirFor(worldID string) string {
 	return filepath.Join(platform.LocalStateDir(), "world-states", worldID)
 }
 
-// convertWorkspaces adapts the world-layer Workspace type to the
-// compile-layer Workspace type for rendering.
-func convertWorkspaces(ws []models.Workspace) []worldbook.Workspace {
-	out := make([]worldbook.Workspace, len(ws))
-	for i, w := range ws {
-		out[i] = worldbook.Workspace{Name: w.Name, Path: w.Path, ReadOnly: w.ReadOnly}
-	}
-	return out
-}

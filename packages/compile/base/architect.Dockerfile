@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim
 
-# Minimal base — tools are added by imagebuilder
+# Minimal base — tools are added by the compile package
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl gnupg sudo \
     && rm -rf /var/lib/apt/lists/*
@@ -12,5 +12,5 @@ RUN useradd -m -s /bin/bash architect
 RUN mkdir -p /me /universe && chmod 777 /universe && chown -R architect:architect /me
 ENV SPWN_HOME=/universe
 
-# NOTE: imagebuilder inserts tool installs here (Node.js, Claude Code, Docker CLI, etc.)
+# NOTE: the compile package inserts tool installs here (Node.js, Claude Code, Docker CLI, etc.)
 # Then the architect-specific COPY and entrypoint directives are appended by BuildArchitectImage.

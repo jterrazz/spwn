@@ -15,9 +15,9 @@ Every Monday (or when the CEO initiates a planning cycle), follow this process:
 
 ```
 # Read what each agent accomplished last week
-cat /agents/devops/memory/journal/latest.md
-cat /agents/analyst/memory/journal/latest.md
-cat ~/memory/journal/latest.md
+cat /agents/devops/journal/latest.md
+cat /agents/analyst/journal/latest.md
+cat /agents/ceo/journal/latest.md
 ```
 
 ### 2. Identify priorities
@@ -38,7 +38,7 @@ Create a sprint document with:
 
 ```
 # Save to your journal
-echo "## Sprint $(date +%Y-%W)" >> ~/memory/journal/sprints.md
+echo "## Sprint $(date +%Y-%W)" >> /agents/ceo/journal/sprints.md
 ```
 
 ### 4. Communicate

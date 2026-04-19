@@ -21,5 +21,5 @@ Your mind is your home directory (`/agents/<your-name>/`). The soul
 file there is the source of truth for who you are; read it before
 starting work.
 ```bash
-cat ~/SOUL.md
+cat /agents/<your-name>/SOUL.md
 ```

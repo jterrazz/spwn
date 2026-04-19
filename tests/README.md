@@ -9,27 +9,25 @@ This document describes the test layers, tooling, and conventions used across th
 Fast, isolated tests that run without Docker. Located next to their source files as `*_test.go`.
 
 ```bash
-make test                  # all unit tests
-make test-foundation       # packages/base only
-make test-agent            # packages/mind only
-make test-world            # packages/world only
-make test-cli              # apps/cli only
+make test                        # all unit tests across the Go workspace
+make test-pkg PKG=agent          # verbose go test for a single package
+make test-pkg PKG=apps/cli       # path-form also works
 ```
 
 Examples:
 
-- `packages/base/paths_test.go` - path resolution logic
-- `packages/mind/mind_test.go` - agent lifecycle
-- `packages/world/internal/manifest/manifest_test.go` - YAML parsing
-- `apps/cli/ui/table_test.go` - table formatting
+- `packages/platform/paths_test.go` - path resolution logic
+- `packages/agent/agent_test.go` - agent lifecycle
+- `packages/world/manifest/manifest_test.go` - YAML parsing
+- `apps/cli/cli_test.go` - flag parsing + help output
 
 ### 2. Go E2E Tests
 
-Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with `mock-claude` replacing the real Claude binary). Located in `packages/world/tests/cli/`.
+Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with `mock-claude` replacing the real Claude binary). Located in `packages/world/tests/e2e/`.
 
 ```bash
-make test-e2e              # builds test image, then runs E2E suite
-make test-e2e-world     # world E2E only
+make test-e2e              # builds test image, then runs the world E2E suite
+make test-e2e-compile      # separate image-build E2E under packages/compile/e2e
 ```
 
 These tests use the build tag `//go:build e2e` and are excluded from `make test`.
@@ -68,7 +66,7 @@ The Go E2E framework reads this JSON via `TestContext.ReadMockOutput()` and expo
 
 ## Test Infrastructure
 
-### Go E2E Setup (`packages/world/tests/cli/setup/`)
+### Go E2E Setup (`packages/world/tests/e2e/setup/`)
 
 | File            | Purpose                                                                                                                                                   |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -199,7 +197,7 @@ describe('world lifecycle', () => {
 
 ### Go E2E Test
 
-1. Create `your_feature_test.go` in `packages/world/tests/cli/`.
+1. Create `your_feature_test.go` in `packages/world/tests/e2e/`.
 2. Add `//go:build e2e` build tag at the top.
 3. Use `setup.NewSpawnBuilder(t)` to create test infrastructure.
 4. Follow GIVEN/WHEN/THEN comment structure.
@@ -224,7 +222,7 @@ describe('world lifecycle', () => {
 | Layer   | Pattern                                    | Example             |
 | ------- | ------------------------------------------ | ------------------- |
 | Go unit | `*_test.go` (next to source)               | `manifest_test.go`  |
-| Go E2E  | `*_test.go` (in `tests/cli/`)              | `spawn_test.go`     |
+| Go E2E  | `*_test.go` (in `tests/e2e/`)              | `spawn_test.go`     |
 | TS E2E  | `*.e2e.test.ts` (in `tests/cli/{domain}/`) | `spawn.e2e.test.ts` |
 
 ## Test Function Naming

@@ -130,7 +130,7 @@ make lint
 - **Spec-first**: write the test before the implementation
 - **Go unit tests**: `*_test.go` next to source. No Docker needed.
 - **Go E2E tests**: `packages/world/tests/e2e/` and `packages/compile/e2e/`. Build tag `//go:build e2e`. Needs Docker.
-- **TypeScript E2E**: `tests/e2e/`. Runs against real `spwn` binary. Needs Docker.
+- **TypeScript E2E**: `tests/cli/`. Runs against real `spwn` binary. Needs Docker.
 - **Output assertions**: use `expectLine()`, `expectTableHeader()` - not weak `toContain()`
 - See [tests/README.md](./tests/README.md) for full testing documentation and patterns
 

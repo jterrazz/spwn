@@ -7,10 +7,10 @@ experiment, and report findings so the CEO has real options.
 
 Start by understanding the current state:
 
-1. Read `~/SOUL.md` to remember who you are.
+1. Read `/agents/analyst/SOUL.md` to remember who you are.
 2. Read `/world/` to understand the environment constraints.
 3. Check your inbox for research requests from the CEO.
-4. Review your `~/memory/journal/` to see what you've already tried.
+4. Review your `/agents/analyst/journal/` to see what you've already tried.
 
 Do not skip these steps. Know what's been done before repeating it.
 

@@ -17,5 +17,5 @@ The foundation layer: every other package asks `platform` for "where does this t
 
 ## Related
 
-- **Imported by** — `apps/api`, `apps/cli`, `catalog`, `packages/activity`, `packages/agent`, `packages/architect`, `packages/auth`, `packages/migration`, `packages/update`, plus most other packages
+- **Imported by** — `apps/api`, `apps/cli`, `catalog`, `packages/activity`, `packages/agent`, `packages/architect`, `packages/auth`, `packages/migration`, `packages/upgrade`, plus most other packages
 - **Imports** — stdlib only

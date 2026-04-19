@@ -1,4 +1,4 @@
-// Package manifest owns everything about a spwn project's declarative
+// Package project owns everything about a spwn project's declarative
 // config: parsing spwn.yaml, scaffolding a new project, discovering the
 // project from a child directory, and validating the resulting tree.
 //

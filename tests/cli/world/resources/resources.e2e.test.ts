@@ -5,7 +5,7 @@ import { spec } from '../../../setup/cli.specification.js';
 /**
  * World resource limits under the docker() spec mode.
  *
- * Currently, the project-mode up path (packages/image/backend/docker.go)
+ * Currently, the project-mode up path (packages/container/backend/docker.go)
  * Only wires `PidsLimit` onto the container's HostConfig. Memory and CPU
  * Limits the legacy test asserted (`Memory`, `NanoCpus`, `CpuQuota`) are
  * Not applied by the backend at all, so those assertions are dropped —

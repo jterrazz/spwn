@@ -9,7 +9,7 @@ RUN useradd -m -s /bin/bash spwn \
     && echo "spwn ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create mount points
-RUN mkdir -p /workspace /mind /universe /world /home/spwn/.spwn \
-    && chown -R spwn:spwn /workspace /mind /universe /world /home/spwn /home/spwn/.spwn
+RUN mkdir -p /workspaces /agents /universe /world /home/spwn/.spwn \
+    && chown -R spwn:spwn /workspaces /agents /universe /world /home/spwn /home/spwn/.spwn
 
 # NOTE: USER, WORKDIR, ENTRYPOINT are added by the generator

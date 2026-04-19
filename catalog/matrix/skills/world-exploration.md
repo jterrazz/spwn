@@ -21,7 +21,7 @@ you're unsure.
 ### 2. SOUL.md — Who you are
 
 ```
-cat ~/SOUL.md
+cat /agents/neo/SOUL.md
 ```
 
 Your persona, voice, and purpose. Re-read this if you ever feel lost.

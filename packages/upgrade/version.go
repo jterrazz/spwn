@@ -1,4 +1,4 @@
-// Package update implements the spwn CLI self-update system.
+// Package upgrade implements the spwn CLI self-update system.
 //
 // The update system is GitHub-only: it fetches release metadata via the
 // GitHub API, downloads platform-appropriate binaries from release assets,

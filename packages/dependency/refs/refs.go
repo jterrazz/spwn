@@ -1,4 +1,4 @@
-// Package dependency parses and resolves dependency references in
+// Package refs parses and classifies dependency references in
 // agent.yaml and spwn.yaml.
 //
 // Every ref is `scheme:target`. There is no bare-name form. Five schemes

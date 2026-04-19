@@ -67,11 +67,12 @@ type AgentSource struct {
 	// if the file is missing.
 	Config AgentConfig
 
-	// Layers contains the three content-bearing agent layer directories:
-	// skills/, playbooks/, journal/. Keys are file paths relative to
-	// the layer root (e.g. "foo.md", "category/bar.md"). Knowledge is
-	// not here — it lives on the world (spwn/worlds/<name>/knowledge/)
-	// and is bind-mounted into the container at /world/knowledge/.
+	// Layers contains the two content-bearing agent layer directories:
+	// playbooks/, journal/. Keys are file paths relative to the layer
+	// root (e.g. "foo.md", "category/bar.md"). Skills live at the
+	// world scope (see LayerFiles doc) and knowledge lives on the
+	// world (spwn/worlds/<name>/knowledge/, bind-mounted at
+	// /world/knowledge/).
 	Layers LayerFiles
 }
 

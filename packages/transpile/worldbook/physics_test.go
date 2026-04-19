@@ -19,9 +19,9 @@ func TestGeneratePhysics(t *testing.T) {
 				"# Physics of This World",
 				"## Laws",
 				"bridge (outbound access enabled)",
-				"## Tools",
-				"/workspace",
-				"/mind",
+				"## Topology",
+				"/workspaces/",
+				"/agents/<your-name>/",
 			},
 		},
 	}
