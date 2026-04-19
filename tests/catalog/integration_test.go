@@ -45,8 +45,8 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 			builtins = append(builtins, a.Tool.Name())
 		}
 		supportedRuntimes = append(supportedRuntimes, a.Name)
-		if a.CatalogRef != "" {
-			supportedRuntimes = append(supportedRuntimes, a.CatalogRef)
+		if a.Tool != nil {
+			supportedRuntimes = append(supportedRuntimes, a.Tool.Name())
 		}
 	}
 

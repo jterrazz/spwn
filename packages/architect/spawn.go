@@ -503,15 +503,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("sync agent homes into container: %w", err)
 	}
 
-	// Merge dependency runtime-config into the container's runtime settings
-	// file. The selected runtime's Spawner supplies the container-side
-	// path; adapters without one skip the merge silently.
-	if err := injectRuntimeConfig(ctx, a.backend, containerID, opts.runtimeName(), resolvedTools); err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
-		return nil, fmt.Errorf("inject runtime config: %w", err)
-	}
-
 	// Write the runtime provider's default config files directly
 	// into the running container at each agent's HOME. These
 	// pre-dismiss first-run UI — Claude Code's onboarding banner,

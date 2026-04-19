@@ -8,7 +8,7 @@ Every spwn dependency — whether shipped in the built-in catalog or authored un
 
 ## Key types
 
-- `Schema` — on-disk shape of `tool.yaml`: name, kind, version, dependencies, install spec, files, verify, runtime-config injection.
+- `Schema` — on-disk shape of `tool.yaml`: name, kind, version, dependencies, install spec, files, verify.
 - `Parse(Resolver, ParseOptions) → *Parsed` — the single entry point. `DirResolver` reads from disk; `EmbedResolver` reads from `embed.FS`.
 - `Ref`, `ParseRef(string) → Ref` — classify a ref as `KindSpwnBuiltin`, `KindRegistry`, `KindLocalSkill`, `KindLocalTool`, `KindLocalHook`, or `KindInvalid` (bare names, unknown schemes).
 - `SplitVersion`, `Canonical` — strip and normalise `@version` suffixes.

@@ -5,18 +5,6 @@ import (
 	"testing"
 )
 
-// TestSpawner_ContainerConfigPath pins the container-side settings
-// path Claude Code reads on startup. The architect's runtime-config
-// injector reads this to know WHERE to merge per-tool MCP config; a
-// regression here silently breaks every tool whose runtime-config
-// block targets spwn:claude-code.
-func TestSpawner_ContainerConfigPath(t *testing.T) {
-	got := Spawner.ContainerConfigPath()
-	if got != "/home/spwn/.claude/settings.json" {
-		t.Errorf("ContainerConfigPath() = %q, want /home/spwn/.claude/settings.json", got)
-	}
-}
-
 // TestSpawner_PrelaunchShell is pure container-side plumbing now —
 // the outer composer (daemon, talk.go) owns `source /credentials/
 // .env`. The adapter's job is the claude-specific cred copy.
@@ -50,9 +38,6 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 func TestAdapter(t *testing.T) {
 	if Adapter.Name != "claude-code" {
 		t.Errorf("Adapter.Name = %q, want claude-code", Adapter.Name)
-	}
-	if Adapter.CatalogRef != "spwn:claude-code" {
-		t.Errorf("Adapter.CatalogRef = %q, want spwn:claude-code", Adapter.CatalogRef)
 	}
 	if Adapter.DefaultProvider != "anthropic" {
 		t.Errorf("Adapter.DefaultProvider = %q, want anthropic", Adapter.DefaultProvider)

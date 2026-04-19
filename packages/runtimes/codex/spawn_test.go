@@ -41,18 +41,6 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 	}
 }
 
-// TestSpawner_ContainerConfigPath is empty for codex: the
-// runtime-config merge path does not target codex today, and
-// config.toml is immutable once written at image-build time.
-// Keeping this test locks in the choice — if codex ever gains a
-// merge target, this fails and forces the author to update both the
-// adapter and the architect runtime-config injector.
-func TestSpawner_ContainerConfigPath(t *testing.T) {
-	if got := Spawner.ContainerConfigPath(); got != "" {
-		t.Errorf("ContainerConfigPath() = %q, want empty", got)
-	}
-}
-
 // TestSpawner_SupportsSession reflects the current state: codex is
 // not yet wired as a spwn-driven interactive runtime, so we advertise
 // no session support. Flip when architect learns to drive codex
@@ -92,14 +80,9 @@ func TestSpawner_DefaultConfigFiles(t *testing.T) {
 }
 
 // TestAdapter pins the codex umbrella: install + spawn, no render.
-// This is the contract every caller (architect, CLI, runtime-config
-// injector) builds on.
 func TestAdapter(t *testing.T) {
 	if Adapter.Name != "codex" {
 		t.Errorf("Adapter.Name = %q, want codex", Adapter.Name)
-	}
-	if Adapter.CatalogRef != "spwn:codex" {
-		t.Errorf("Adapter.CatalogRef = %q, want spwn:codex", Adapter.CatalogRef)
 	}
 	if Adapter.DefaultProvider != "openai" {
 		t.Errorf("Adapter.DefaultProvider = %q, want openai", Adapter.DefaultProvider)

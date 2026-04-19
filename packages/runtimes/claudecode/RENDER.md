@@ -8,7 +8,7 @@ Full three-facet adapter:
 |---|---|---|
 | Tool | `tool.go` | Image-build recipe — curl-based native installer for the `claude` binary. |
 | Render | `render.go`, `render_agent.go` | Translates a provider-neutral `transpile.Input` into a Tree laid out the way Claude Code expects. |
-| Spawn | `spawn.go` | Host-side spawn-time behavior — `BuildCommand`, credential sync, prelaunch shell, default config files, container config path. |
+| Spawn | `spawn.go` | Host-side spawn-time behavior — `BuildCommand`, credential sync, prelaunch shell, default config files. |
 
 The `Adapter` value in `adapter.go` bundles all three and self-registers with `packages/runtimes` at init time.
 
@@ -44,7 +44,6 @@ Anything else is a bug — `architect.Spawn`'s tree materialiser rejects unknown
 ## What this adapter does NOT touch
 
 - **Runtime state** — `inbox/`, `outbox/`, `notes/` are `mkdir`'d by `architect.Spawn`, not rendered. They're state, not content.
-- **Runtime-config merge** — the container-side `settings.json` is merged at spawn time by `architect.injectRuntimeConfig`, reading `Spawner.ContainerConfigPath()` and `Adapter.CatalogRef` to know the merge target.
 - **Docker config** — base image, binds, env vars, labels. `packages/compile` and `packages/architect`.
 
 ## Extending

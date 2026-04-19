@@ -6,8 +6,8 @@
 // hydrate it from adapters (spwn catalog builtins via
 // dependency.RegisterBuiltins, project-local tool:<name> refs via
 // dependency.HydrateLocals) and then call Resolve to drive an image
-// build. CollectSkills + CollectRuntimeConfigs are small aggregation
-// helpers on top of the resolved slice.
+// build. CollectSkills is a small aggregation helper on top of the
+// resolved slice.
 package resolver
 
 import (

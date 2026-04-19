@@ -28,15 +28,13 @@ type wrappedLocalTool struct {
 	name  string
 }
 
-func (t *wrappedLocalTool) Name() string                { return t.name }
-func (t *wrappedLocalTool) Kind() tool.Kind               { return tool.KindTool }
-func (t *wrappedLocalTool) Version() string             { return t.inner.Version() }
-func (t *wrappedLocalTool) Dependencies() []string      { return t.inner.Dependencies() }
-func (t *wrappedLocalTool) Install() tool.InstallSpec     { return t.inner.Install() }
-func (t *wrappedLocalTool) Verify() []string            { return t.inner.Verify() }
-func (t *wrappedLocalTool) Skills() fs.FS               { return t.inner.Skills() }
-func (t *wrappedLocalTool) Runtimes() []string          { return t.inner.Runtimes() }
-func (t *wrappedLocalTool) Config(runtime string) []byte { return t.inner.Config(runtime) }
+func (t *wrappedLocalTool) Name() string             { return t.name }
+func (t *wrappedLocalTool) Kind() tool.Kind          { return tool.KindTool }
+func (t *wrappedLocalTool) Version() string          { return t.inner.Version() }
+func (t *wrappedLocalTool) Dependencies() []string   { return t.inner.Dependencies() }
+func (t *wrappedLocalTool) Install() tool.InstallSpec { return t.inner.Install() }
+func (t *wrappedLocalTool) Verify() []string         { return t.inner.Verify() }
+func (t *wrappedLocalTool) Skills() fs.FS            { return t.inner.Skills() }
 
 // LoadTool parses spwn/tools/<name>/tool.yaml via the
 // shared packyaml parser and wraps the result so Name() returns

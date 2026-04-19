@@ -49,7 +49,7 @@ func TestRender_DepTreeWithDedup(t *testing.T) {
 		TransitiveDepsCount: 2,
 		Deps: []DepNode{
 			{Name: "spwn:unix", Version: "24.04"},
-			{Name: "spwn:qmd", Version: "1.4.0", Skills: 2, Config: true,
+			{Name: "spwn:qmd", Version: "1.4.0", Skills: 2,
 				Children: []DepNode{
 					{Name: "spwn:python", Version: "3.12", Kind: tool.KindRuntime,
 						Children: []DepNode{
@@ -66,7 +66,7 @@ func TestRender_DepTreeWithDedup(t *testing.T) {
 		"Dependencies (2 direct, 2 transitive)",
 		"  spwn:unix@24.04",
 		"  spwn:qmd@1.4.0",
-		"skills(2) · config",
+		"skills(2)",
 		"    spwn:python@3.12",
 		"runtime",
 		"      spwn:unix@24.04  (*)",
@@ -182,9 +182,9 @@ func TestRender_StatusGlyphs(t *testing.T) {
 	}
 }
 
-// TestRender_ComposeBadges — kind, skills count, and config flag
-// each contribute a badge; they concatenate with " · " in a stable
-// order (kind, skills, config) regardless of the input order.
+// TestRender_ComposeBadges — kind and skills count each contribute a
+// badge; they concatenate with " · " in a stable order (kind, skills)
+// regardless of the input order.
 func TestRender_ComposeBadges(t *testing.T) {
 	cases := []struct {
 		name string
@@ -193,10 +193,9 @@ func TestRender_ComposeBadges(t *testing.T) {
 	}{
 		{"empty tool", DepNode{Kind: tool.KindTool}, ""},
 		{"skills only", DepNode{Skills: 3}, "skills(3)"},
-		{"config only", DepNode{Config: true}, "config"},
 		{"runtime only", DepNode{Kind: tool.KindRuntime}, "runtime"},
-		{"all three", DepNode{Kind: tool.KindRuntime, Skills: 2, Config: true},
-			"runtime · skills(2) · config"},
+		{"both", DepNode{Kind: tool.KindRuntime, Skills: 2},
+			"runtime · skills(2)"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

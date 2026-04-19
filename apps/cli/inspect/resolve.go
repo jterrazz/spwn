@@ -165,7 +165,6 @@ func buildNode(reg *resolver.Registry, ref string, seen map[string]struct{}) Dep
 		Version: t.Version(),
 		Kind:    t.Kind(),
 		Skills:  countSkills(t.Skills()),
-		Config:  len(t.Runtimes()) > 0,
 	}
 	for _, child := range t.Dependencies() {
 		node.Children = append(node.Children, buildNode(reg, child, seen))
@@ -228,15 +227,13 @@ type localToolAdapter struct {
 	name  string
 }
 
-func (t *localToolAdapter) Name() string                 { return t.name }
-func (t *localToolAdapter) Kind() tool.Kind        { return t.inner.Kind() }
-func (t *localToolAdapter) Version() string              { return t.inner.Version() }
-func (t *localToolAdapter) Dependencies() []string       { return t.inner.Dependencies() }
-func (t *localToolAdapter) Install() tool.InstallSpec      { return t.inner.Install() }
-func (t *localToolAdapter) Verify() []string             { return t.inner.Verify() }
-func (t *localToolAdapter) Skills() fs.FS                { return t.inner.Skills() }
-func (t *localToolAdapter) Runtimes() []string           { return t.inner.Runtimes() }
-func (t *localToolAdapter) Config(runtime string) []byte { return t.inner.Config(runtime) }
+func (t *localToolAdapter) Name() string             { return t.name }
+func (t *localToolAdapter) Kind() tool.Kind          { return t.inner.Kind() }
+func (t *localToolAdapter) Version() string          { return t.inner.Version() }
+func (t *localToolAdapter) Dependencies() []string   { return t.inner.Dependencies() }
+func (t *localToolAdapter) Install() tool.InstallSpec { return t.inner.Install() }
+func (t *localToolAdapter) Verify() []string         { return t.inner.Verify() }
+func (t *localToolAdapter) Skills() fs.FS            { return t.inner.Skills() }
 
 // findWorldFor returns the first world name that lists the agent.
 // Returns "" when no world claims it (orphan agent).

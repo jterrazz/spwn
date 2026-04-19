@@ -7,7 +7,6 @@ import "spwn.sh/packages/runtimes"
 // source→Tree compiler yet.
 var Adapter = runtimes.Adapter{
 	Name:            "codex",
-	CatalogRef:      "spwn:codex",
 	DefaultProvider: "openai",
 	Tool:            Tool,
 	Spawn:           Spawner,

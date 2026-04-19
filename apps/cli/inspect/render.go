@@ -62,8 +62,7 @@ type DepNode struct {
 	Name      string
 	Version   string
 	Kind      tool.Kind
-	Skills    int  // count of markdown files in the tool's skills/ dir
-	Config    bool // has runtime-config: that injects settings
+	Skills    int // count of markdown files in the tool's skills/ dir
 	DedupSeen bool
 	Children  []DepNode
 }
@@ -188,9 +187,6 @@ func composeBadges(d DepNode) string {
 	}
 	if d.Skills > 0 {
 		parts = append(parts, fmt.Sprintf("skills(%d)", d.Skills))
-	}
-	if d.Config {
-		parts = append(parts, "config")
 	}
 	return strings.Join(parts, " · ")
 }

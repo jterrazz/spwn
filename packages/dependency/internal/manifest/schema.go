@@ -7,8 +7,7 @@
 // to "shipped in the catalog" by moving its directory.
 //
 // A dependency is whatever its fields say it is: install steps +
-// verify make it a tool; a runtime-config: section makes it inject
-// runtime configuration; a SKILL.md sibling or content-only body
+// verify make it a tool; a SKILL.md sibling or content-only body
 // makes it a skill. There is no explicit type field — composability
 // determines identity.
 //
@@ -19,9 +18,6 @@
 package manifest
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"gopkg.in/yaml.v3"
 )
 
@@ -84,13 +80,6 @@ type Schema struct {
 	// exit 0. Typically "command -v <binary>" or "<binary> --version".
 	Verify []string `yaml:"verify"`
 
-	// RuntimeConfig, when present, makes this dependency inject
-	// settings into one or more target runtimes at spawn time. The
-	// merger reads the runtimes list and the per-runtime config
-	// snippets and shallow-merges them into the runtime's settings
-	// file.
-	RuntimeConfig *RuntimeConfigSection `yaml:"runtime-config,omitempty"`
-
 	// RuntimeProvider names a host-side Go implementation that
 	// handles credential sync, default config file materialisation,
 	// and prelaunch shell setup at spawn time. Only runtimes
@@ -124,52 +113,4 @@ type InstallSection struct {
 
 	// Env are ENV directives added to the Dockerfile.
 	Env map[string]string `yaml:"env"`
-}
-
-// RuntimeConfigSection is the optional `runtime-config:` block on a
-// dependency. When present, the Runtimes list scopes which runtime
-// backends the dependency targets, and Configs is a map from runtime
-// name to the YAML-native snippet that gets merged into the
-// runtime's settings file at spawn time.
-//
-// Example (mempalace targeting Claude Code):
-//
-//	runtime-config:
-//	  runtimes:
-//	    - "spwn:claude-code"
-//	  configs:
-//	    "spwn:claude-code":
-//	      mcpServers:
-//	        mempalace:
-//	          command: python3
-//	          args: ["-m", "mempalace.mcp_server"]
-//
-// The merger converts the YAML value to JSON at spawn time and
-// shallow-merges into ~/.claude/settings.json.
-type RuntimeConfigSection struct {
-	Runtimes []string                   `yaml:"runtimes"`
-	Configs  map[string]yaml.Node       `yaml:"configs"`
-}
-
-// ConfigJSON marshals a dependency's config for the given runtime
-// to JSON bytes, so spawn-time callers that merge into JSON
-// settings files don't have to care the source was YAML. Returns
-// nil when the dependency has no config for that runtime.
-func (p *RuntimeConfigSection) ConfigJSON(runtime string) ([]byte, error) {
-	if p == nil {
-		return nil, nil
-	}
-	node, ok := p.Configs[runtime]
-	if !ok {
-		return nil, nil
-	}
-	var raw any
-	if err := node.Decode(&raw); err != nil {
-		return nil, fmt.Errorf("decode runtime config for %q: %w", runtime, err)
-	}
-	out, err := json.Marshal(raw)
-	if err != nil {
-		return nil, fmt.Errorf("marshal runtime config for %q: %w", runtime, err)
-	}
-	return out, nil
 }

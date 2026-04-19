@@ -1,6 +1,6 @@
 # Dependency Catalog
 
-Spwn worlds are assembled from composable dependencies. Each dependency is a self-contained unit declared by a single `spwn.yaml`: it knows how to install itself, how to verify it works, and optionally ships a skill or injects runtime config. The imagebuilder resolves dependencies, deduplicates them, and produces one optimized Docker image.
+Spwn worlds are assembled from composable dependencies. Each dependency is a self-contained unit declared by a single `spwn.yaml`: it knows how to install itself, how to verify it works, and optionally ships a skill. The imagebuilder resolves dependencies, deduplicates them, and produces one optimized Docker image.
 
 Dependencies are stackable: `spwn:qmd` depends on `spwn:node`, so listing `spwn:qmd` pulls Node.js in automatically.
 
@@ -38,6 +38,7 @@ Extra capabilities you add to a world. Each ships skills that teach the agent ho
 | `spwn:git` | Git version control | You need source control (almost always) | 🟢 |
 | `spwn:docker-cli` | Docker CLI (DooD) | The agent needs to manage containers | 🟢 |
 | `spwn:qmd` | [QMD](https://github.com/tobi/qmd) on-device search | The agent needs to search docs, notes, or knowledge bases locally | 🟢 |
+| `spwn:mempalace` | [MemPalace](https://github.com/MemPalace/mempalace) local memory palace CLI | The agent needs persistent cross-session notes | 🟡 experimental |
 
 ## Platform
 
@@ -47,16 +48,6 @@ Spwn's own infrastructure. Usually included by default.
 |--------|-----------------|----------|--------|
 | `spwn:cli` | spwn CLI inside the world | The agent needs to manage its own identity, messages, or sub-worlds | 🟢 |
 | `spwn:architect` | Full orchestration daemon (includes spwn:cli, spwn:claude-code, spwn:docker-cli) | You're running the always-on Architect | 🟡 architect mode is in dev |
-
-## Dependencies with runtime-config injection
-
-Any dependency whose `spwn.yaml` declares a `runtime-config:` section participates in spawn-time config injection. At spawn time the merger reaches into the targeted runtime's config file (e.g. `~/.claude/settings.json`) and shallow-merges the dependency's YAML snippet. That's how MCP servers, shell hooks, or any other runtime-specific wiring show up inside the container without the user having to touch config files.
-
-There is no separate `plugins:` field anywhere — `runtime-config:` is just an optional block on the unified dependency manifest. Install one with `spwn install spwn:mempalace` and it shows up in `agent.yaml#dependencies:` alongside everything else.
-
-| Dependency | Targets | What it provides | Status |
-|--------|---------|------------------|--------|
-| `spwn:mempalace` | `spwn:claude-code` | [MemPalace](https://github.com/MemPalace/mempalace) memory palace exposed as an MCP server | 🟡 experimental |
 
 ## Dependency reference kinds
 
@@ -84,7 +75,7 @@ verify:
   - command -v curl
 ```
 
-Richer dependencies can add `commands:`, `user-commands:` (with `{{.Home}}` / `{{.User}}` templating), `files:` (image-path → source-path map), `dependencies:`, `description:`, `runtime-config:` (with `runtimes:` + `configs:` for runtime-config injection), and optional sibling directories `skills/`, `files/`, `config/`.
+Richer dependencies can add `commands:`, `user-commands:` (with `{{.Home}}` / `{{.User}}` templating), `files:` (image-path → source-path map), `dependencies:`, `description:`, and optional sibling directories `skills/`, `files/`, `config/`.
 
 Drop the directory under `./spwn/tools/<name>/` to author locally, or under `catalog/<name>/tools/<name>/` (inside the spwn monorepo) to ship it in the built-in catalog. The loader picks up both via `go:embed` + filesystem walk — no Go code, no registration list.
 

@@ -2,10 +2,26 @@ package resolver
 
 import (
 	"fmt"
+	"io/fs"
 	"testing"
 
 	"spwn.sh/packages/dependency/tool"
 )
+
+// baseTool is a minimal tool.Tool stub used by the bench. Every
+// method returns a zero value; subtypes override what they care
+// about.
+type baseTool struct {
+	name string
+}
+
+func (t baseTool) Name() string            { return t.name }
+func (t baseTool) Kind() tool.Kind         { return tool.KindTool }
+func (t baseTool) Version() string         { return "0.0.0" }
+func (t baseTool) Dependencies() []string  { return nil }
+func (t baseTool) Install() tool.InstallSpec { return tool.InstallSpec{} }
+func (t baseTool) Verify() []string        { return nil }
+func (t baseTool) Skills() fs.FS           { return nil }
 
 // BenchmarkRegistryResolve measures the cost of topologically
 // sorting a dependency chain. Baseline for guarding the hot path

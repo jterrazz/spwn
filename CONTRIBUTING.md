@@ -69,7 +69,6 @@ import "spwn.sh/packages/runtimes"
 
 var Adapter = runtimes.Adapter{
     Name:            "my-runtime",
-    CatalogRef:      "spwn:my-runtime",
     DefaultProvider: "openai", // or "anthropic", "google", ""
     Tool:            Tool,     // *myTool implementing tool.Tool (optional)
     Render:          Renderer, // *renderer implementing transpile.Runtime (optional)

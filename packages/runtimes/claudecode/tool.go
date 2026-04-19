@@ -60,6 +60,3 @@ func (*claudeCodeTool) Verify() []string {
 }
 
 func (*claudeCodeTool) Skills() fs.FS { return nil }
-
-func (*claudeCodeTool) Runtimes() []string         { return nil }
-func (*claudeCodeTool) Config(runtime string) []byte { return nil }

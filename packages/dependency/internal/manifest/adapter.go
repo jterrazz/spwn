@@ -6,12 +6,7 @@ import (
 	"spwn.sh/packages/dependency/tool"
 )
 
-// dependencyAdapter backs a parsed Schema as a tool.Tool. The
-// Runtimes() / Config() methods are part of the unified Tool interface
-// — a dependency with a `runtime-config:` block returns a non-empty
-// Runtimes list and the spawn-time merger picks up its Config(runtime)
-// snippet. Dependencies without a runtime-config block return nil from
-// both.
+// dependencyAdapter backs a parsed Schema as a tool.Tool.
 type dependencyAdapter struct {
 	schema    Schema
 	kind      tool.Kind
@@ -58,40 +53,6 @@ func (t *dependencyAdapter) Verify() []string { return t.schema.Verify }
 // Skills returns an fs.FS rooted at the tool's skills/ directory,
 // or nil when the directory is absent.
 func (t *dependencyAdapter) Skills() fs.FS { return t.skillsFS }
-
-// Runtimes returns the runtime backends this dependency targets for
-// runtime-config injection. Returns nil when the manifest has no
-// `runtime-config:` block.
-func (t *dependencyAdapter) Runtimes() []string {
-	if t.schema.RuntimeConfig == nil {
-		return nil
-	}
-	return t.schema.RuntimeConfig.Runtimes
-}
-
-// Config returns the JSON bytes for the requested runtime's config
-// snippet, or nil when this dependency has no runtime-config block or no config
-// for that runtime.
-func (t *dependencyAdapter) Config(runtime string) []byte {
-	if t.schema.RuntimeConfig == nil {
-		return nil
-	}
-	match := false
-	for _, r := range t.schema.RuntimeConfig.Runtimes {
-		if r == runtime {
-			match = true
-			break
-		}
-	}
-	if !match {
-		return nil
-	}
-	b, err := t.schema.RuntimeConfig.ConfigJSON(runtime)
-	if err != nil {
-		return nil
-	}
-	return b
-}
 
 // RuntimeProvider returns the name declared in `runtime-provider:`,
 // or "" when none. Consumed by the spawn pipeline to look up a
