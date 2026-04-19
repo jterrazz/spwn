@@ -1,5 +1,5 @@
 /**
- * Static tool catalog - mirrors core/imagebuilder/catalog.
+ * Static tool catalog - mirrors the /catalog/ tree at the repo root.
  * Skill content is inlined from the embedded markdown files.
  */
 
