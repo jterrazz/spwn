@@ -39,7 +39,7 @@ func scaffoldProject(t *testing.T, manifest string, agents map[string]string) st
 // ── ToCompileInput merges project-level deps with agent-level deps ──────────
 
 func TestToCompileInput_MergesProjectAndAgentDeps(t *testing.T) {
-	manifest := `version: 2
+	manifest := `version: 1
 name: merge-test
 dependencies:
   - "spwn:unix"
@@ -88,7 +88,7 @@ dependencies:
 // ── Agent with no deps but project has deps → agent inherits them ───────────
 
 func TestToCompileInput_AgentInheritsProjectDeps(t *testing.T) {
-	manifest := `version: 2
+	manifest := `version: 1
 name: inherit-test
 dependencies:
   - "spwn:unix"
@@ -125,7 +125,7 @@ role: worker
 // ── Agent with no agent.yaml at all → project deps still present ────────────
 
 func TestToCompileInput_NoAgentYAML(t *testing.T) {
-	manifest := `version: 2
+	manifest := `version: 1
 name: noconfig
 dependencies:
   - "spwn:python"
@@ -155,7 +155,7 @@ worlds:
 // ── Duplicate deps across project and agent are deduplicated ────────────────
 
 func TestToCompileInput_DeduplicatesDeps(t *testing.T) {
-	manifest := `version: 2
+	manifest := `version: 1
 name: dedup-test
 dependencies:
   - "spwn:unix"
@@ -194,7 +194,7 @@ dependencies:
 // ── No project deps, no agent deps → empty list ────────────────────────────
 
 func TestToCompileInput_NoDepsAnywhere(t *testing.T) {
-	manifest := `version: 2
+	manifest := `version: 1
 name: bare-project
 worlds:
   home:
@@ -224,7 +224,7 @@ role: worker
 // ── Multi-agent world merges deps from all agents + project ─────────────────
 
 func TestToCompileInput_MultiAgentMerge(t *testing.T) {
-	manifest := `version: 2
+	manifest := `version: 1
 name: multi
 dependencies:
   - shared

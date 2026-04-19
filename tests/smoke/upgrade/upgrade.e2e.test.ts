@@ -193,7 +193,7 @@ describe('smoke: project upgrade cycle', () => {
         writeFileSync(
             join(workdir, 'spwn.yaml'),
             [
-                'version: 2',
+                'version: 1',
                 `name: smoke-upgrade`,
                 '',
                 'worlds:',

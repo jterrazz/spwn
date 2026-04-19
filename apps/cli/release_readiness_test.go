@@ -1214,7 +1214,7 @@ func TestReleaseReadiness(t *testing.T) {
 // never produce naturally.
 func mustWriteProject(t *testing.T, root, projectName, worldName, agentName string) {
 	t.Helper()
-	manifest := fmt.Sprintf(`version: 2
+	manifest := fmt.Sprintf(`version: 1
 name: %s
 
 worlds:

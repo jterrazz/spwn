@@ -283,7 +283,7 @@ func TestValidate_workspaceMountRules(t *testing.T) {
 	// auto-named workspace0, workspace1 at spawn time. A container-
 	// path-on-RHS entry (legacy manifest form) is rejected because
 	// users should never write container platform.
-	body := `version: 2
+	body := `version: 1
 name: wsm
 worlds:
   neo:
@@ -316,7 +316,7 @@ func TestValidate_workspaceBareEntriesOK(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifestPath := filepath.Join(dir, "spwn.yaml")
-	body := `version: 2
+	body := `version: 1
 name: bare
 worlds:
   neo:

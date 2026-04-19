@@ -1,5 +1,5 @@
 # spwn - project manifest
-version: 2
+version: 1
 name: docker-pilot
 
 dependencies:

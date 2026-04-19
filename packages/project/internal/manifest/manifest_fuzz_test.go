@@ -10,7 +10,7 @@ import (
 // arbitrary bytes. It must never panic — malformed input should
 // surface as a yaml error, not a runtime crash.
 func FuzzManifestUnmarshal(f *testing.F) {
-	f.Add([]byte(`version: 2
+	f.Add([]byte(`version: 1
 name: my-proj
 worlds:
   default:
@@ -18,7 +18,7 @@ worlds:
     workspaces: [.]
 dependencies: ["spwn:unix"]
 `))
-	f.Add([]byte(`version: 2
+	f.Add([]byte(`version: 1
 name: empty`))
 	f.Add([]byte(`worlds: "not a map"`))
 	f.Add([]byte(`---

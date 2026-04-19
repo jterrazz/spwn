@@ -6,7 +6,7 @@
 # parse, which used to mean an upgraded project would lose all its
 # deps without any user-visible signal. `spwn check` must now
 # surface this as an error with a migration hint.
-version: 2
+version: 1
 name: legacy-layout
 
 worlds:
