@@ -412,30 +412,21 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}}
 	}
 
-	// Per-world state directory on the host. Bind-mounted into the
-	// container at /world/. Under the new renderer it holds the
-	// shared skills dir (tool-shipped SKILL.md baked into the image,
-	// symlinked per agent as .claude/skills/ by PrelaunchShell) and
-	// the optional knowledge base. Physics / faculties / roster are
-	// inlined directly into each agent's CLAUDE.md — no separate
-	// /world/*.md files. Surviving container destroy is a deliberate
-	// choice: the user's notes belong to the world, not the runtime.
+	// Per-world state directory on the host. Used as a stable target
+	// for optional sub-path binds (`/world/knowledge`, and historically
+	// `/world/shared` + `/world/skills`). We no longer bind-mount it at
+	// `/world/` wholesale: that shadowed the image-baked `/world/skills/`
+	// (CollectSkills bakes tool-shipped SKILL.md files there at build
+	// time), which meant Claude Code's native skill discovery found an
+	// empty directory and never surfaced any spwn-provided skill.
+	//
+	// Instead: leave `/world/` coming from the image (contains
+	// `/world/skills/*` + anything a runtime's build step wrote) and
+	// only bind the subpaths that need host-side persistence.
 	worldStateDir := worldStateDirFor(id)
-	// The world state dir becomes /world inside the container via the
-	// bind below. We no longer seed an empty "knowledge" subdir here —
-	// knowledge is opt-in via the manifest's worlds.<name>.knowledge key.
-	// Without a knowledge mount, /world/knowledge simply does not exist
-	// and the agent's system prompt never mentions it.
-	for _, sub := range []string{
-		filepath.Join("shared", "notes"),
-		filepath.Join("shared", "outputs"),
-		"skills",
-	} {
-		if err := os.MkdirAll(filepath.Join(worldStateDir, sub), 0o755); err != nil {
-			return nil, fmt.Errorf("create world-state dir %s: %w", sub, err)
-		}
+	if err := os.MkdirAll(worldStateDir, 0o755); err != nil {
+		return nil, fmt.Errorf("create world-state dir %s: %w", worldStateDir, err)
 	}
-	binds = append(binds, worldStateDir+":/world")
 
 	// Bind the explicit knowledge path on top of /world/knowledge so
 	// edits inside the container persist straight back into git. The
