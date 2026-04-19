@@ -10,7 +10,7 @@ import (
 
 func TestLoadPath_TopLevelDeps(t *testing.T) {
 	dir := t.TempDir()
-	content := `version: 2
+	content := `version: 1
 name: deptest
 dependencies:
   - "spwn:unix"
@@ -43,7 +43,7 @@ worlds:
 
 func TestLoadPath_NoDeps(t *testing.T) {
 	dir := t.TempDir()
-	content := `version: 2
+	content := `version: 1
 name: nodep
 worlds:
   home:
@@ -66,7 +66,7 @@ worlds:
 
 func TestLoadPath_EmptyDepsList(t *testing.T) {
 	dir := t.TempDir()
-	content := `version: 2
+	content := `version: 1
 name: emptydep
 dependencies: []
 worlds:
@@ -94,7 +94,7 @@ func TestLoadPath_WorldDepsKeyIgnored(t *testing.T) {
 	dir := t.TempDir()
 	// If someone adds a deps: key inside a world entry, it should be
 	// silently ignored (not parsed into the World struct).
-	content := `version: 2
+	content := `version: 1
 name: worlddep
 worlds:
   home:

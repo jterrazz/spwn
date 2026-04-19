@@ -2,7 +2,7 @@
 # from disk. Exercises the validator's "path doesn't exist"
 # warning surface — recoverable with a `mkdir` but must NOT crash
 # or silently bind-mount nothing.
-version: 2
+version: 1
 name: knowledge-missing-dir
 
 worlds:

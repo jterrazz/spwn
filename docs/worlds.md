@@ -27,7 +27,7 @@ at most one world (enforced by `spwn check`).
 
 ```yaml
 # spwn.yaml
-version: 2
+version: 1
 name: acme-api
 
 worlds:

@@ -8,7 +8,7 @@
 #   - `@owner/name` legacy syntax
 # `spwn check` must surface all three as errors pointing at the
 # five valid schemes.
-version: 2
+version: 1
 name: check-legacy-refs
 
 worlds:

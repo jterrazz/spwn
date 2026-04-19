@@ -14,7 +14,7 @@ import (
 func TestValidate_refKinds(t *testing.T) {
 	root := t.TempDir()
 
-	writeFile(t, filepath.Join(root, "spwn.yaml"), `version: 2
+	writeFile(t, filepath.Join(root, "spwn.yaml"), `version: 1
 name: refs-test
 worlds:
   default:

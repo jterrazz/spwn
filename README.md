@@ -187,7 +187,7 @@ Worlds live **inline** under `spwn.yaml#worlds:` — each entry names the agents
 
 ```yaml
 # spwn.yaml
-version: 2
+version: 1
 name: acme-api
 
 worlds:

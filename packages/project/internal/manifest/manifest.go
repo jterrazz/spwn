@@ -1,7 +1,7 @@
 // Package manifest is the internal parser and schema for spwn.yaml.
 // The public surface is re-exported from packages/manifest.
 //
-// Schema model (v2):
+// Schema model (v1):
 //
 //   - Agents are the primary runtime unit. Their on-disk presence at
 //     spwn/agents/<name>/ is the source of truth for the project's
@@ -9,8 +9,6 @@
 //   - Worlds are inline entries in spwn.yaml under `worlds:`. Each one
 //     declares which agents it deploys, where the workspace mounts
 //     come from, and optional tool overrides.
-//   - There is no top-level world: or agents: list anymore, and
-//     spwn/worlds/*.yaml files are gone — worlds live in spwn.yaml.
 package manifest
 
 import (
@@ -22,7 +20,7 @@ import (
 
 // CurrentVersion is the schema version Load emits for new manifests
 // and the only version LoadPath accepts without upgrade.
-const CurrentVersion = 2
+const CurrentVersion = 1
 
 // Manifest is the parsed content of spwn.yaml.
 type Manifest struct {

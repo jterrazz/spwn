@@ -8,7 +8,7 @@ External dependencies live in **`dependencies:`** — a flat list in `spwn.yaml`
 
 ```yaml
 # spwn.yaml — project manifest
-version: 2
+version: 1
 name: acme-api
 
 dependencies:                      # project-wide — every agent inherits these

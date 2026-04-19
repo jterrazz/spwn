@@ -26,7 +26,7 @@ func runWithOut(t *testing.T, c *cobra.Command, args ...string) (*bytes.Buffer, 
 func scaffoldProject(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"), []byte(`version: 2
+	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"), []byte(`version: 1
 name: test-proj
 worlds:
   default:

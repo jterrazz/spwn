@@ -92,7 +92,7 @@ func Test_crossCheckRuntimeAdapters(t *testing.T) {
 	// registered at test time, so this should surface as a warning.
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"),
-		[]byte(`version: 2
+		[]byte(`version: 1
 name: qa
 worlds:
   home:

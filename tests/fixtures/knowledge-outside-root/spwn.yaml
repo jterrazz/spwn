@@ -3,7 +3,7 @@
 # Surfaces as a "does not exist" warning rather than a hard
 # rejection. If the validator ever grows explicit escape detection,
 # this fixture's test moves from warning-assert to error-assert.
-version: 2
+version: 1
 name: knowledge-outside-root
 
 worlds:

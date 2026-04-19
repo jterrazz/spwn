@@ -3,5 +3,5 @@
 # file is the project-shape wrapper so the catalog entry mirrors a
 # real spwn project layout (spwn.yaml at root + spwn/tools/<name>
 # when installed).
-version: 2
+version: 1
 name: architect

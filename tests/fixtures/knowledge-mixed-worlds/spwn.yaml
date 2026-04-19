@@ -4,7 +4,7 @@
 # out. Exercises the validator's per-world knowledge logic and the
 # info-level hint that surfaces for worlds with no knowledge path —
 # the signal that tells the user they're running a "dry" world.
-version: 2
+version: 1
 name: knowledge-mixed-worlds
 
 worlds:
