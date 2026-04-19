@@ -1,6 +1,6 @@
 # Catalog entry for spwn:architect.
-# Project-shape wrapper: the tool manifest lives at tools/tool.yaml,
-# skills the tool ships sit at skills/ alongside it. Mirrors a real
-# spwn project layout so browsing the catalog feels familiar.
+# Mirrors a real spwn project layout: tool manifests under
+# tools/<name>/tool.yaml, skills lifted to skills/ at the
+# catalog-entry root so they're exposed alongside the tools bundle.
 version: 1
 name: architect

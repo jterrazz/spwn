@@ -17,9 +17,9 @@ import (
 const Manifest = "spwn.yaml"
 
 // ToolManifest is the basename for an individual tool definition
-// (install / verify / files / skills-sibling).
-// Lives under spwn/tools/<name>/tool.yaml in a user project and
-// catalog/<slug>/tools/tool.yaml in the catalog.
+// (install / verify / files). Lives under spwn/tools/<name>/tool.yaml
+// in a user project and catalog/<slug>/tools/<name>/tool.yaml in the
+// catalog.
 const ToolManifest = "tool.yaml"
 
 // Resolver handles filesystem lookups for a tool's manifest and
@@ -151,13 +151,23 @@ func (d DirResolver) SkillsFS() fs.FS {
 //	//go:embed all:content
 //	var catalogFS embed.FS
 //
-//	res := EmbedResolver{FS: catalogFS, Root: "content/git/tools"}
+//	res := EmbedResolver{
+//	    FS:         catalogFS,
+//	    Root:       "content/git/tools/git",  // manifest + files:
+//	    SkillsRoot: "content/git/skills",      // catalog-entry-level
+//	}
 //
 // Paths inside EmbedResolver always use forward slashes because
 // embed.FS normalises to POSIX regardless of host OS.
 type EmbedResolver struct {
 	FS   fs.FS
 	Root string
+
+	// SkillsRoot overrides the location of the skills/ directory.
+	// Empty defaults to <Root>/skills. Catalog entries set this to
+	// the catalog-entry root so skills live alongside tools/ rather
+	// than buried under a specific tool's dir.
+	SkillsRoot string
 }
 
 // ReadFile reads <Root>/<rel> from the embedded filesystem.
@@ -165,10 +175,14 @@ func (e EmbedResolver) ReadFile(rel string) ([]byte, error) {
 	return fs.ReadFile(e.FS, path.Join(e.Root, rel))
 }
 
-// SkillsFS returns an fs.Sub of <Root>/skills/ when that directory
-// exists and contains at least one entry.
+// SkillsFS returns an fs.Sub of the configured skills directory when
+// it exists and contains at least one entry. Uses SkillsRoot when
+// set, otherwise falls back to <Root>/skills.
 func (e EmbedResolver) SkillsFS() fs.FS {
-	skillsRoot := path.Join(e.Root, "skills")
+	skillsRoot := e.SkillsRoot
+	if skillsRoot == "" {
+		skillsRoot = path.Join(e.Root, "skills")
+	}
 	entries, err := fs.ReadDir(e.FS, skillsRoot)
 	if err != nil || len(entries) == 0 {
 		return nil

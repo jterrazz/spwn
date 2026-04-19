@@ -1,9 +1,11 @@
 // Package dependency is the shared parser for tool.yaml — the
 // declarative manifest format that describes a spwn dependency's
-// image-build recipe. Catalog entries keep their manifest under
-// catalog/<name>/tools/tool.yaml and lift skills to
-// catalog/<name>/skills/; project-local tools live at
-// spwn/tools/<name>/tool.yaml. All paths share this schema.
+// image-build recipe. Catalog entries keep their manifests under
+// catalog/<slug>/tools/<name>/tool.yaml (one dir per tool, so a
+// single catalog entry can ship multiple tools) and lift skills to
+// catalog/<slug>/skills/ so they're shared across the bundle.
+// Project-local tools live at spwn/tools/<name>/tool.yaml. All
+// paths share this schema.
 //
 // A dependency is whatever its fields say it is: install steps +
 // verify make it a tool; a SKILL.md sibling or content-only body
