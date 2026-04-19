@@ -98,6 +98,23 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 			return fmt.Errorf("%q is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.sh`",
 				ref, parsed.Name, parsed.Name, parsed.Name)
 		}
+		// Validate the target file/dir actually exists. Installing a
+		// ref to a missing local block lets the user accumulate broken
+		// state quietly (the failure only surfaces at `spwn up` time).
+		// Catch it at install time with an actionable hint.
+		if res := refs.ResolveSkill(p.Root, parsed, nil, false); res == refs.ResolveNotFound {
+			switch parsed.Kind {
+			case refs.KindLocalSkill:
+				return fmt.Errorf("skill:%s not found at spwn/skills/%s.md — create it first with `spwn skill new %s`",
+					parsed.Name, parsed.Name, parsed.Name)
+			case refs.KindLocalTool:
+				return fmt.Errorf("tool:%s not found at spwn/tools/%s/ — scaffold a tool.yaml there first",
+					parsed.Name, parsed.Name)
+			case refs.KindLocalHook:
+				return fmt.Errorf("hook:%s not found at spwn/hooks/%s.sh — create the hook script first",
+					parsed.Name, parsed.Name)
+			}
+		}
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets github:%s/%s — remote registries are not yet supported. "+
 			"Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/",

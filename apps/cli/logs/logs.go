@@ -84,7 +84,7 @@ var (
 func init() {
 	Cmd.Flags().IntVarP(&limit, "limit", "n", 20, "Number of events to show")
 	Cmd.Flags().StringVarP(&filter, "type", "t", "", "Filter by event type (e.g. agent.dreamed)")
-	Cmd.Flags().StringVarP(&world, "world", "w", "", "Filter by world ID")
+	Cmd.Flags().StringVarP(&world, "world", "w", "", "Filter by world config name (e.g. 'matrix' from spwn.yaml#worlds). Use `spwn world logs <id>` to filter by a runtime world ID.")
 	Cmd.Flags().StringVarP(&agent, "agent", "a", "", "Filter by agent name")
 }
 
