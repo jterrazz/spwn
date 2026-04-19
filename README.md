@@ -104,10 +104,53 @@ spwn turns your repo into a **portable agent artifact** — consumed by the spwn
 
 Four ideas to hold in your head before you dive in:
 
-- **[Agents as code](#agents-as-code)** — agents and their composition are declarative files committed alongside your app. Clone the repo, get the same agents byte-for-byte.
-- **[Agents built from blocks](#agents-built-from-blocks)** — tools, skills, hooks, and identity composed in `agent.yaml`. Human-readable, git-friendly, no database.
+- **[Agents built from blocks](#agents-built-from-blocks)** — tools, skills, hooks, and identity composed in one `agent.yaml`. Human-readable, git-friendly, no database.
+- **[Agents as code](#agents-as-code)** — the whole project is declarative files committed alongside your app. Clone the repo, get the same agents byte-for-byte.
 - **[Worlds orchestrate running agents](#worlds-orchestrate-running-agents)** — a world bundles agents, workspaces, and knowledge into one container. `spwn up` brings them live; `spwn down` tears them down.
 - **[Compile to any runtime](#compile-to-any-runtime)** — provider-neutral source in; Docker image or runtime-native tree out. Like `tsc`, but for agent runtimes.
+
+<br/>
+
+### Agents built from blocks
+
+An agent **is** a composition of blocks, declared in one file:
+
+```yaml
+# spwn/agents/neo/agent.yaml
+name: neo
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"          # catalog: shell + coreutils
+  - "spwn:python"        # catalog: python 3 + pip
+  - "skill:code-review"  # local:   ./spwn/skills/code-review.md
+  - "tool:greet"         # local:   ./spwn/tools/greet/
+  - "hook:pre-spawn"     # local:   ./spwn/hooks/pre-spawn.sh
+```
+
+**Every dependency is a `scheme:target` ref.** Five schemes, nothing else:
+
+| Scheme | Resolves to |
+|---|---|
+| `spwn:<name>` | Built-in catalog dep compiled into the binary |
+| `github:<owner>/<repo>` | Community registry *(planned)* |
+| `skill:<name>` | `./spwn/skills/<name>.md` |
+| `tool:<name>` | `./spwn/tools/<name>/` (with `tool.yaml`) |
+| `hook:<name>` | `./spwn/hooks/<name>.sh` |
+
+Add one with `spwn install <ref> --agent neo` — the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/dependency-catalog.md).
+
+The rest of the agent directory sits next to the manifest — identity and memory as plain files:
+
+```
+spwn/agents/neo/
+├── agent.yaml       # composition (the file above)
+├── SOUL.md          # identity — who the agent is
+├── AGENTS.md        # boot-time prompt — what it should do
+├── playbooks/       # memory — procedures the agent has learned
+└── journal/         # memory — session history
+```
 
 <br/>
 
@@ -122,7 +165,7 @@ my-project/
 ├── spwn.yaml              # manifest (the thing that ties everything together)
 ├── spwn.lock              # lockfile (pinned catalog deps)
 ├── spwn/                  # committed project assets
-│   ├── agents/            # one subdir per agent — identity, prompt, composition
+│   ├── agents/            # one subdir per agent (the block you saw above)
 │   ├── skills/            # reusable skill files (markdown blocks)
 │   ├── tools/             # local tool definitions
 │   └── hooks/             # shell hooks the runtime fires
@@ -130,57 +173,9 @@ my-project/
 └── .spwn/                 # gitignored local state
 ```
 
-Every agent lives under `spwn/agents/<name>/` — identity, prompt, composition, memory — as plain files. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
+Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
 
 **`~/.spwn/` holds only your user identity** - credentials, daemon state, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, publish it (`spwn agent publish`) and pull it in the next repo with `spwn agent get`.
-
-<br/>
-
-### Agents built from blocks
-
-Each agent is a directory of composable blocks - **human-readable, git-friendly, no database**:
-
-```
-spwn/agents/neo/
-├── agent.yaml      # composition (deps + runtime)
-├── AGENTS.md       # boot-time prompt
-├── SOUL.md         # identity
-├── playbooks/      # Mind memory layer — written by the agent at runtime
-└── journal/        # Mind memory layer — written by the agent at runtime
-
-./knowledge/        # opt-in per world via spwn.yaml#worlds.<name>.knowledge — signal on the host side only, so users know what to set up
-```
-
-Skills aren't a per-agent memory layer — they're dependencies. Declare `skill:focus` in `agent.yaml` (resolving to `spwn/skills/focus.md`) or let a tool ship its own `SKILL.md`; the build pipeline injects everything into `/world/skills/` at image time. One source of truth, no runtime-writable shadow tree.
-
-**Everything is a dependency.** Tools, runtime-config injectors, and skills all unified under one concept. A dependency can install apt packages, run setup commands, inject runtime config, ship a skill file, or any combination. Stack them into `agent.yaml`:
-
-```yaml
-# spwn/agents/neo/agent.yaml
-name: neo
-runtime:
-  backend: "spwn:claude-code"
-
-# Every ref is `scheme:target`. spwn:/github: pull from catalogs;
-# skill:/tool:/hook: resolve to spwn/skills/<name>.md, spwn/tools/<name>/,
-# or spwn/hooks/<name>.sh respectively.
-dependencies:
-  - "spwn:unix"
-  - "spwn:git"
-  - "spwn:python"
-  - "skill:code-review"
-```
-
-Browse the full [dependency catalog](docs/dependency-catalog.md).
-
-Dependency resolution works like npm — every ref is `scheme:target`:
-- `spwn:<name>` is a catalog dependency compiled into the spwn binary.
-- `github:<owner>/<repo>` is reserved for a future community registry.
-- `skill:<name>` is a local skill at `spwn/skills/<name>.md`.
-- `tool:<name>` is a local tool at `spwn/tools/<name>/` (with `tool.yaml`).
-- `hook:<name>` is a local hook at `spwn/hooks/<name>.sh`.
-
-Add a catalog dependency to every agent with `spwn install spwn:<name>`; the ref gets pinned in `spwn.lock`.
 
 <br/>
 
