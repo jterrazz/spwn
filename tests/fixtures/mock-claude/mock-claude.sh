@@ -49,7 +49,6 @@ fi
 cat > "$OUTPUT" <<RECORD
 {
   "mind_exists": $MIND_EXISTS,
-  "mind_personas": false,
   "claude_md_exists": $CLAUDE_EXISTS,
   "workspace_exists": $WORKSPACE_EXISTS,
   "claude_md_content": $(cat "$FIRST_CLAUDE" 2>/dev/null | head -40 | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))' 2>/dev/null || echo '""'),

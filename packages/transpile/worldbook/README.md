@@ -18,7 +18,7 @@ runtime renderer.
 | File | Content |
 |---|---|
 | `physics.go` | `GeneratePhysics`, `GenerateFaculties` — the world filesystem rules and the verified-tools briefing. |
-| `context.go` | `GenerateAgentContext` (role-aware prompt for the architect and for ephemeral NPCs), `GenerateRoster`, shared value types (`Workspace`, `AgentContextOpts`, `AgentInfo`, `ColonyAgentSpec`). |
+| `context.go` | `GenerateRoster` (who else is in this world) plus its `ColonyAgentSpec` value type. |
 | `architect.go` | `ArchitectIdentity`, `ArchitectSystemFiles`, architect skills (fleet ops, task planning, monitoring). |
 
 ## What does NOT live here
@@ -32,7 +32,6 @@ runtime renderer.
 
 - `packages/runtimes/claudecode/render.go` — calls `GeneratePhysics`, `GenerateFaculties`, `GenerateRoster` for the inlined sections of each agent's CLAUDE.md.
 - `packages/architect/build.go` — bakes `ArchitectSystemFiles()` into the architect image.
-- `packages/architect/npc.go` — uses `GenerateAgentContext` for NPC prompt composition.
 
 ## Related
 

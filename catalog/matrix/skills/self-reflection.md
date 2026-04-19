@@ -18,11 +18,11 @@ Pause and write a journal entry when:
 
 ## Journal format
 
-Write entries to `~/journal/` using timestamped filenames:
+Write entries to `/agents/neo/journal/` using timestamped filenames:
 
 ```
-mkdir -p ~/journal
-cat > ~/journal/$(date +%Y-%m-%d-%H%M).md << 'ENTRY'
+mkdir -p /agents/neo/journal
+cat > /agents/neo/journal/$(date +%Y-%m-%d-%H%M).md << 'ENTRY'
 # Observation
 
 ## What I explored

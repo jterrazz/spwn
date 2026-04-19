@@ -199,44 +199,29 @@ spwn/
 │       └── src-tauri/               #     Tauri shell (Rust)
 │
 ├── packages/                        # Go domain modules (shared libraries)
-│   ├── world/                       #   go.mod - world lifecycle (the core)
-│   │   ├── world.go                 #   Public API (World, Manifest, Architect…)
-│   │   └── internal/
-│   │       ├── architect/           #     Orchestration (spawn, destroy, deploy)
-│   │       ├── backend/             #     Docker adapter
-│   │       ├── runtime/             #     Claude Code runtime
-│   │       ├── api/                 #     HTTP API server (consumed by apps/web)
-│   │       ├── manifest/            #     Config parsing (world.yaml, agent.yaml)
-│   │       ├── labels/              #     Container labels as source of truth
-│   │       ├── state/               #     State hydrated from labels
-│   │       ├── runtimestate/        #     Mutable runtime state (sessions, agents)
-│   │       └── models/              #     Domain types
-│   │
-│   ├── agent/                       #   go.mod - agent/mind management
-│   │   ├── agent.go                 #   Public API (InitMind, Validate, Export, Fork…)
-│   │   └── internal/{mind,journal,session,evolution,memory}/
-│   │
-│   ├── imagebuilder/                #   go.mod - composable tool-based image builder
-│   │
-│   ├── migration/                   #   go.mod - ~/.spwn schema migrations
-│   │
-│   └── foundation/                  #   go.mod - cross-cutting primitives
-│       ├── constants.go             #     Defaults, directory layout, mind layers
-│       ├── paths.go                 #     BaseDir(), WorldsDir(), AgentsDir()
-│       ├── identity.go              #     GenerateWorldID(), GenerateAgentID()
-│       ├── auth/                    #     Credential resolution
-│       ├── activity/                #     Activity log
-│       └── update/                  #     Self-update logic
+│   ├── world/                       #   World lifecycle state, manifest, labels, models
+│   ├── architect/                   #   Orchestration (spawn, destroy, deploy, NPCs)
+│   ├── runtimes/                    #   Runtime adapters (claude-code, codex, …)
+│   ├── transpile/                   #   Source → Tree rendering (worldbook, source)
+│   ├── compile/                     #   Docker image assembly (base + derived)
+│   ├── container/                   #   Docker backend adapter
+│   ├── agent/                       #   Agent/mind management (playbooks + journal)
+│   ├── dependency/                  #   Dep resolution + catalog mirror
+│   ├── project/                     #   spwn.yaml parser + project scaffold
+│   ├── platform/                    #   Cross-cutting primitives (paths, ids)
+│   ├── activity/                    #   Activity log
+│   ├── auth/                        #   Credential resolution
+│   ├── upgrade/                     #   Self-update logic
+│   └── migration/                   #   ~/.spwn schema migrations
 │
-├── examples/                        # Shipped example worlds
-├── fixtures/                        # Test fixtures
-│   ├── Dockerfile.test              #   Mock-claude test image
-│   ├── mock-claude/                 #   Bash script standing in for claude CLI
-│   └── testdata/                    #   Shared fixtures
+├── catalog/                         # Shipped example worlds + block bundles
 ├── tests/                           # TypeScript vitest E2E suite
-│   ├── e2e/                         #   Behavioral specs against the compiled binary
-│   ├── setup/                       #   Test harness (world-assertion, state-assertion…)
-│   └── ui/                          #   Playwright specs for the web UI
+│   ├── cli/                         #   Behavioral specs against the compiled binary
+│   ├── catalog/                     #   Catalog-bundle smoke + Dockerfile goldens
+│   ├── smoke/                       #   Real-build end-to-end (spwn init → up → probe)
+│   ├── setup/                       #   Shared test harness
+│   ├── fixtures/                    #   Mock-claude image + shared fixtures
+│   └── web/                         #   Playwright specs for the web UI
 ├── docs/                            # Prose docs (architecture, releasing, CLI man pages)
 │
 ├── Makefile
@@ -262,13 +247,17 @@ Host machine
 
 ## Dependency Graph
 
+Enforced via depguard (`.golangci.yml`). Seven layers, each denies
+imports from layers above:
+
 ```
-apps/cli  ──→ packages/{world, agent, image, migration, base, project}
-packages/world ──→ packages/{agent, image, base}
-packages/agent ──→ packages/base
-packages/compile ──→ (no spwn deps)
-packages/migration ──→ packages/base
-packages/project ──→ (no spwn deps)
+L1 Foundation  →  (nothing)              platform, container
+L2 Platform    →  L1                     activity, auth, upgrade
+L3 Domain      →  L1-L2                  dependency, agent
+L4 Project     →  L1-L3                  project
+L5 Build       →  L1-L4                  compile, transpile, runtimes
+L6 Runtime     →  L1-L5                  world, architect
+L7 Surface     →  anything               apps/cli, apps/api
 ```
 
 Each `packages/` module exposes a public API in its root `.go` file.
@@ -289,17 +278,17 @@ Implementation details live under `internal/`.
 make build               # cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
 make build-test-image    # docker build spwn-test:latest for E2E
 
-make test                # Unit tests across all modules
-make test-foundation     # cd packages/base && go test -v ./...
-make test-world          # cd packages/world && go test -v ./...
-make test-agent          # cd packages/agent && go test -v ./...
-make test-cli            # cd apps/cli && go test -v ./...
+make test                # Unit tests across the Go workspace
+make test-pkg PKG=agent  # Verbose go test for a single package
 
-make test-e2e            # Go E2E against Docker
-make test-e2e-world      # Same, explicit alias
+make test-e2e            # Go world E2E against Docker
+make test-e2e-compile    # Image-build E2E under packages/compile/e2e
+make test-ts             # TypeScript CLI E2E (Docker + Node 22)
+make test-smoke          # Real-build smoke tests (spwn init → up → probe)
 make test-web            # Playwright web E2E (Docker + browser)
+make test-all            # Everything except test-web
 
-make lint                # go vet across all modules
+make lint                # go vet across every module in go.work + pnpm lint
 make clean               # rm -rf bin/
 ```
 
@@ -310,8 +299,8 @@ Three-layer pyramid:
 | Layer | Location | Speed | Infra |
 |-------|----------|-------|-------|
 | **Unit** | `*_test.go` next to source files | ~1s | None |
-| **E2E (Go)** | `packages/world/tests/e2e/` | ~30s | Docker |
-| **E2E (TS)** | `tests/e2e/` | ~2min | Built binary |
+| **E2E (Go)** | `packages/world/tests/e2e/`, `packages/compile/e2e/` | ~30s | Docker |
+| **E2E (TS)** | `tests/cli/`, `tests/smoke/` | ~2min | Built binary |
 
 Each domain tests only its own contract. Cross-domain flows (spawn universe + agent → verify journal) are the CLI's responsibility.
 
@@ -334,7 +323,7 @@ The E2E test suite is the behavioral specification of spwn. Each test describes 
 ```
 
 ### Test layers:
-- **Behavioral specs** (`packages/world/tests/e2e/`, `tests/e2e/`) - what the system does (the specification)
+- **Behavioral specs** (`packages/world/tests/e2e/`, `tests/cli/`) - what the system does (the specification)
 - **CLI specs** (`apps/cli/cli_test.go`) - what the user sees (flag parsing, help, output)
 - **Unit tests** (`*_test.go` next to source) - how the code works (implementation details)
 

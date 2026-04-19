@@ -18,4 +18,4 @@ Owns everything an "agent" is on disk. The composition manifest (`agent.yaml`), 
 ## Related
 
 - **Imported by** — `apps/api`, `apps/cli`, `packages/architect`, `packages/world`
-- **Imports** — `packages/platform` (paths), internal sub-packages (`mind/`, `journal/`, `session/`, `evolution/`, `memory/`)
+- **Imports** — `packages/platform` (paths), internal sub-packages (`mind/`, `journal/`, `session/`, `evolution/`, `manifest/`)

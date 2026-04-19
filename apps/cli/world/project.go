@@ -25,8 +25,8 @@ type projectWorld struct {
 	// worlds.<name>.knowledge key relative to the project root.
 	// Empty when the manifest declares no knowledge path — in which
 	// case the spawn pipeline skips the bind mount entirely and the
-	// rendered AGENTS.md / CLAUDE.md / mind-management skill omit
-	// every reference to /world/knowledge/.
+	// rendered per-agent CLAUDE.md omits every reference to
+	// /world/knowledge/.
 	Knowledge string
 }
 

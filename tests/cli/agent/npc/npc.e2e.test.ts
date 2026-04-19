@@ -22,10 +22,8 @@ import { spec } from '../../../setup/cli.specification.js';
  *   - ephemeral does not register a new agent in `agent ls`
  *
  * Augmented over the legacy test:
- *   - Reaches into the container and confirms /world/AGENT.md was
- *     materialised (the NPC context file architect writes before exec)
  *   - Asserts the target container is still running after the ephemeral
- *     command exits
+ *     command exits (ephemeral must not kill its host world)
  */
 describe('agent --ephemeral (NPC)', () => {
     test('ephemeral without --world fails with a helpful error', async () => {
@@ -80,10 +78,6 @@ describe('agent --ephemeral (NPC)', () => {
         // And the container still exists and is running after dispatch —
         // Ephemerals must not kill their host world.
         expect(up.container('neo').running).toBe(true);
-
-        // And architect wrote the NPC AGENT.md context file into the
-        // Container before exec'ing the runtime command.
-        expect(up.container('neo').file('/world/AGENT.md').exists).toBe(true);
     });
 
     test('ephemeral does not register a persistent agent', async () => {

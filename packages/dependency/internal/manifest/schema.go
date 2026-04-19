@@ -1,4 +1,4 @@
-// Package dependency is the shared parser for tool.yaml — the
+// Package manifest is the shared parser for tool.yaml — the
 // declarative manifest format that describes a spwn dependency's
 // image-build recipe. Catalog entries keep their manifests under
 // catalog/<slug>/tools/<name>/tool.yaml (one dir per tool, so a
@@ -13,9 +13,9 @@
 // determines identity.
 //
 // The parser produces tool.Tool instances (via the adapter in
-// packages/compile/adapter.go), so everything downstream — registry
-// resolution, dockerfile generation, skill collection — is oblivious
-// to whether a given dependency came from Go or YAML.
+// packages/dependency/internal/adapters/), so everything downstream —
+// registry resolution, dockerfile generation, skill collection — is
+// oblivious to whether a given dependency came from Go or YAML.
 package manifest
 
 import (

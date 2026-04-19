@@ -1,7 +1,7 @@
 .PHONY: help build install uninstall clean \
         lint go-vet \
         test go-test test-pkg test-all \
-        test-e2e test-e2e-imagebuilder \
+        test-e2e test-e2e-compile \
         test-ts test-smoke test-web test-web-headed \
         build-test-image \
         web-build web-dev \
@@ -18,9 +18,9 @@ help:
 	@echo "  make install             Build and install to ~/.local/bin"
 	@echo "  make lint                go vet all modules + pnpm -r lint"
 	@echo "  make test                Go unit tests across the workspace"
-	@echo "  make test-pkg PKG=mind   Verbose go test for one package"
+	@echo "  make test-pkg PKG=agent   Verbose go test for one package"
 	@echo "  make test-e2e            Go E2E (Docker required)"
-	@echo "  make test-e2e-imagebuilder  Go image-build E2E (Docker required)"
+	@echo "  make test-e2e-compile  Go image-build E2E (Docker required)"
 	@echo "  make test-ts             TypeScript CLI E2E (Docker + Node 22)"
 	@echo "  make test-smoke          Real-build smoke tests (Docker + Node 22)"
 	@echo "  make test-web            Playwright web E2E (Docker + browser)"
@@ -74,7 +74,7 @@ go-test:
 		(cd $$mod && go test ./...) || exit 1; \
 	done
 
-# Run verbose tests for a single package: `make test-pkg PKG=mind` or
+# Run verbose tests for a single package: `make test-pkg PKG=agent` or
 # `make test-pkg PKG=apps/cli`. Path is resolved relative to repo root.
 test-pkg:
 	@if [ -z "$(PKG)" ]; then \
@@ -90,8 +90,8 @@ test-pkg:
 test-e2e: build-test-image
 	cd packages/world && go test -v -tags=e2e -timeout=30m ./tests/e2e/...
 
-test-e2e-imagebuilder:
-	cd packages/image && go test -v -tags=e2e -timeout=10m ./e2e/...
+test-e2e-compile:
+	cd packages/compile && go test -v -tags=e2e -timeout=10m ./e2e/...
 
 # TypeScript E2E against the compiled spwn CLI (vitest + real Docker).
 test-ts: build build-test-image
@@ -115,7 +115,7 @@ test-web-headed: build
 # Meta-target: runs every test bucket a developer can execute locally
 # without a browser. Order is cheapest-first so the fast Go unit pass
 # fails before burning Docker build minutes on an E2E run.
-test-all: go-test test-e2e test-e2e-imagebuilder test-ts test-smoke
+test-all: go-test test-e2e test-e2e-compile test-ts test-smoke
 
 # ── Web (apps/web) ────────────────────────────────────────────────
 

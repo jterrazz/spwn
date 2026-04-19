@@ -29,7 +29,7 @@ supporting data, and no experiment runs without a written protocol first.
    Jupyter notebooks when the pattern is easier to see than to describe.
 5. **Write conclusions.** Summarize findings in a structured report:
    question, method, results, interpretation, limitations. If the
-   finding is reusable, promote it to a playbook in `~/memory/playbooks/`.
+   finding is reusable, promote it to a playbook in `/agents/curie/playbooks/`.
 
 ## On reproducibility
 

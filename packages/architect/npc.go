@@ -3,10 +3,8 @@ package architect
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/transpile/worldbook"
 	"spwn.sh/packages/runtimes"
 )
 
@@ -26,21 +24,9 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
-	// Generate AGENT.md for NPC (minimal context)
-	agentCtx := worldbook.GenerateAgentContext(worldbook.AgentContextOpts{
-		Role:       "npc",
-		Ephemeral:  true,
-		WorldID:    worldID,
-		NPCTask:    task,
-		Workspaces: convertWorkspaces(u.Workspaces),
-		Deps:    u.Manifest.Deps,
-	})
-	if err := a.backend.CopyTo(ctx, u.ContainerID, "world/AGENT.md", []byte(agentCtx)); err != nil {
-		// Non-fatal: log warning but continue
-		fmt.Fprintf(os.Stderr, "warning: failed to write NPC AGENT.md: %v\n", err)
-	}
-
-	// Build a minimal claude command - no Mind, no session
+	// Build a minimal claude command - no Mind, no session. NPCs
+	// receive their full context via the task prompt itself (see the
+	// `Prompt:` field below); nothing needs to be written to disk.
 	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
 		Prompt: task,
 	})

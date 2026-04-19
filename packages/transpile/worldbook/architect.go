@@ -60,7 +60,6 @@ Read /me/skills/ for detailed guides on:
 - Fleet operations (fleet-ops.md)
 - Task planning (task-planning.md)
 - Monitoring (monitoring.md)
-- Mind management (mind-management.md)
 
 ## Your Capabilities
 - Full access to the spwn CLI

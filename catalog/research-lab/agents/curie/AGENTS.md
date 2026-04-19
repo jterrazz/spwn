@@ -39,4 +39,4 @@ build a growing body of verified knowledge.
 - **Lab notebook entries** - timestamped, structured (question / method / observation / interpretation).
 - **Jupyter notebooks** - for exploratory analysis and visualizations.
 - **Quarto reports** - for polished, shareable findings (.qmd files).
-- **Playbooks** - distilled, reusable protocols saved to `~/memory/playbooks/`.
+- **Playbooks** - distilled, reusable protocols saved to `/agents/curie/playbooks/`.

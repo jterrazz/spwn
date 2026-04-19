@@ -11,15 +11,14 @@ Runtime adapters live in `packages/runtimes/` — they were moved out of `world/
 ## Key types
 
 - `World`, `Workspace`, `Manifest`, `Status`, `AgentRecord` — re-exports of the `models/` types. `World.Runtime` holds the runtime adapter selected at spawn time ("claude-code", "codex") so hot-deploy and talk routes can resolve the right spawner.
-- `Store` / `NewStore` — JSON-persisted world state at `~/.spwn/state.json`.
+- `Store` / `NewStore` — enumerates worlds from Docker labels and persists per-world mutable state under `~/.spwn/world-states/`.
 - `Backend`, `NewDocker()` — convenience re-exports of `packages/container/backend`'s Docker adapter.
 - `LoadManifest` / `LoadManifestPath` / `ListConfigs` / `CreateDefaultConfig` / `CreateConfig` / `ValidateManifest` — CRUD over the legacy `~/.spwn/worlds/<name>.yaml`.
 
 ## Sub-packages
 
 - `labels/` — docker label key constants (`sh.spwn.*`).
-- `runtimestate/` — per-world mutable state (session IDs, agent roster).
-- `state/` — JSON `~/.spwn/state.json` persistence.
+- `runtimestate/` — world store: lists from Docker labels, persists session IDs and agent roster under `~/.spwn/world-states/`.
 - `manifest/` — legacy global world-config parser (`~/.spwn/worlds/<name>.yaml`).
 - `models/` — the typed shape of worlds, workspaces, agents.
 - `tests/e2e/` — end-to-end integration tests.

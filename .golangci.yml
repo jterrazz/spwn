@@ -31,13 +31,13 @@ linters-settings:
     rules:
       # L3: Domain — must not import L4+ (project, compile, image, world).
       domain-deps:
-        files: ["**/packages/deps/**"]
+        files: ["**/packages/dependency/**"]
         deny:
           - pkg: "spwn.sh/packages/project"
             desc: "L3 (domain) must not import L4 (project)"
           - pkg: "spwn.sh/packages/compile"
             desc: "L3 (domain) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/image"
+          - pkg: "spwn.sh/packages/compile"
             desc: "L3 (domain) must not import L5 (build)"
           - pkg: "spwn.sh/packages/world"
             desc: "L3 (domain) must not import L6 (runtime)"
@@ -49,7 +49,7 @@ linters-settings:
             desc: "L3 (domain) must not import L4 (project)"
           - pkg: "spwn.sh/packages/compile"
             desc: "L3 (domain) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/image"
+          - pkg: "spwn.sh/packages/compile"
             desc: "L3 (domain) must not import L5 (build)"
           - pkg: "spwn.sh/packages/world"
             desc: "L3 (domain) must not import L6 (runtime)"
@@ -60,7 +60,7 @@ linters-settings:
         deny:
           - pkg: "spwn.sh/packages/compile"
             desc: "L4 (project) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/image"
+          - pkg: "spwn.sh/packages/compile"
             desc: "L4 (project) must not import L5 (build)"
           - pkg: "spwn.sh/packages/world"
             desc: "L4 (project) must not import L6 (runtime)"
@@ -72,51 +72,45 @@ linters-settings:
           - pkg: "spwn.sh/packages/world"
             desc: "L5 (build) must not import L6 (runtime)"
 
-      build-image:
-        files: ["**/packages/image/**"]
-        deny:
-          - pkg: "spwn.sh/packages/world"
-            desc: "L5 (build) must not import L6 (runtime)"
-
       # L1/L2: Platform — may not import any domain or higher.
       platform:
         files: ["**/packages/platform/**"]
         deny:
-          - pkg: "spwn.sh/packages/deps"
+          - pkg: "spwn.sh/packages/dependency"
           - pkg: "spwn.sh/packages/agent"
           - pkg: "spwn.sh/packages/project"
           - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/image"
+          - pkg: "spwn.sh/packages/compile"
           - pkg: "spwn.sh/packages/world"
 
       platform-activity:
         files: ["**/packages/activity/**"]
         deny:
-          - pkg: "spwn.sh/packages/deps"
+          - pkg: "spwn.sh/packages/dependency"
           - pkg: "spwn.sh/packages/agent"
           - pkg: "spwn.sh/packages/project"
           - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/image"
+          - pkg: "spwn.sh/packages/compile"
           - pkg: "spwn.sh/packages/world"
 
       platform-auth:
         files: ["**/packages/auth/**"]
         deny:
-          - pkg: "spwn.sh/packages/deps"
+          - pkg: "spwn.sh/packages/dependency"
           - pkg: "spwn.sh/packages/agent"
           - pkg: "spwn.sh/packages/project"
           - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/image"
+          - pkg: "spwn.sh/packages/compile"
           - pkg: "spwn.sh/packages/world"
 
       platform-upgrade:
         files: ["**/packages/upgrade/**"]
         deny:
-          - pkg: "spwn.sh/packages/deps"
+          - pkg: "spwn.sh/packages/dependency"
           - pkg: "spwn.sh/packages/agent"
           - pkg: "spwn.sh/packages/project"
           - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/image"
+          - pkg: "spwn.sh/packages/compile"
           - pkg: "spwn.sh/packages/world"
 
 issues:

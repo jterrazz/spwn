@@ -1,4 +1,4 @@
-// Package compile is the spwn compiler: provider-neutral source
+// Package transpile is the spwn transpiler: provider-neutral source
 // (spwn.yaml + spwn/agents/* + skills + hooks) → runtime-specific
 // file layout a concrete agent runtime can boot from.
 //
@@ -9,10 +9,11 @@
 //
 // Phase 2, materialisation, lives in packages/architect (spawn-time
 // docker-cp into the running container) or in packages/compile
-// (build-time COPY into a derived image). Compile is deliberately
+// (build-time COPY into a derived image). Transpile is deliberately
 // oblivious to which delivery shape consumes its output.
 //
-// Runtime-specific renderers live in packages/compile/runtimes/
-// (claude_code today). Adding a new runtime is a sub-package with
-// a Render method and an init() that calls Register.
+// Runtime-specific renderers live in packages/runtimes/<name>/
+// (claudecode today, codex next). Adding a new runtime is a
+// sub-package with a Render method and an init() that calls
+// Register.
 package transpile

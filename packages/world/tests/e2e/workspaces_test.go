@@ -11,8 +11,9 @@ import (
 	"spwn.sh/packages/world/tests/e2e/setup"
 )
 
-// TestSpawn_Ephemeral verifies that a world with zero workspaces has no /work
-// mounts and no SPWN_WORKSPACES env var advertising mounts that don't exist.
+// TestSpawn_Ephemeral verifies that a world with zero workspaces has no
+// /workspaces/* mounts and no SPWN_WORKSPACES env var advertising mounts
+// that don't exist.
 func TestSpawn_Ephemeral(t *testing.T) {
 	// Given - the default configuration
 	// When - a world is spawned without any -w flags

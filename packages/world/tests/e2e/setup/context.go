@@ -122,7 +122,6 @@ func (tc *TestContext) InitAgent(name string) {
 // MockOutput represents the JSON recorded by the mock Claude binary.
 type MockOutput struct {
 	MindExists      bool   `json:"mind_exists"`
-	MindPersonas    bool   `json:"mind_personas"`
 	ClaudeMDExists  bool   `json:"claude_md_exists"`
 	WorkspaceExists bool   `json:"workspace_exists"`
 	ClaudeMDContent string `json:"claude_md_content"`

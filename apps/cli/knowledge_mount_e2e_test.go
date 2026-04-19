@@ -49,9 +49,8 @@ func spawnForKnowledgeTest(t *testing.T, tc *setup.TestContext, agentName, confi
 }
 
 // TestKnowledgeMountE1_UnsetMeansNoBind covers scenario E1:
-// the world declares no knowledge path → no bind mount, AND every
-// rendered file (AGENTS.md, mind-management skill, per-agent
-// CLAUDE.md) omits every reference to /world/knowledge/.
+// the world declares no knowledge path → no bind mount, AND the
+// per-agent CLAUDE.md omits every reference to /world/knowledge/.
 func TestKnowledgeMountE1_UnsetMeansNoBind(t *testing.T) {
 	// NewTestContext uses t.Setenv so t.Parallel would panic here.
 	tc := setup.NewTestContext(t)

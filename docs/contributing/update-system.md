@@ -35,7 +35,7 @@ triggers the entire pipeline.
 
 ### Client flow (`spwn upgrade`)
 
-Implemented in `packages/base/update/`. High-level sequence:
+Implemented in `packages/upgrade/`. High-level sequence:
 
 ```
 ┌─ CheckForUpdate ─────────────────────────────────┐
@@ -176,7 +176,7 @@ as a GitHub prerelease, so the stable "latest" endpoint still returns only
 ### Unit tests
 
 ```
-packages/base/update/
+packages/upgrade/
   version_test.go         - semver parse + comparison
   release_test.go         - GitHub API client, channel resolution, asset lookup
   download_test.go        - download retries, checksums parse, SHA256 verify
@@ -185,7 +185,7 @@ packages/base/update/
                             enforcement + mismatch rejection + dev-build handling
 ```
 
-Run all with `go test ./packages/base/update/...`.
+Run all with `go test ./packages/upgrade/...`.
 
 ### Release dry-run
 
@@ -230,7 +230,7 @@ Verify the version, platform URLs, and that signatures are populated.
 .goreleaser.yml                         # CLI cross-build + checksums
 apps/cli/upgrade.go                     # spwn upgrade command
 apps/cli/version_check.go               # background version check
-packages/base/update/                 # reusable update logic + tests
+packages/upgrade/                 # reusable update logic + tests
 apps/web/src-tauri/tauri.conf.json        # updater endpoint + pubkey
 apps/web/src-tauri/Cargo.toml             # tauri-plugin-updater dep
 apps/web/src-tauri/src/lib.rs             # plugin registration
