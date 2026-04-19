@@ -1,0 +1,6 @@
+# Catalog entry for spwn:node.
+# Project-shape wrapper: the tool manifest lives at tools/tool.yaml,
+# skills the tool ships sit at skills/ alongside it. Mirrors a real
+# spwn project layout so browsing the catalog feels familiar.
+version: 1
+name: node
