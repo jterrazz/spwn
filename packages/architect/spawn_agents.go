@@ -109,11 +109,50 @@ func rosterColony(recs []models.AgentRecord) []worldbook.ColonyAgentSpec {
 }
 
 // rosterCompileAgents projects the world record's agent list onto
-// the transpile.Input shape.
+// the transpile.Input shape. For each agent, walk the host-side
+// playbooks dir (~/.spwn/agents/<name>/playbooks/) and collect
+// frontmatter-promoted playbooks so the renderer can index them in
+// CLAUDE.md. Missing dirs and malformed frontmatter are tolerated
+// silently — `spwn check` is the authoring-side gate; spawn is
+// best-effort.
 func rosterCompileAgents(recs []models.AgentRecord) []transpile.AgentInput {
 	out := make([]transpile.AgentInput, 0, len(recs))
 	for _, r := range recs {
-		out = append(out, transpile.AgentInput{Name: r.Name, Role: r.Role})
+		out = append(out, transpile.AgentInput{
+			Name:      r.Name,
+			Role:      r.Role,
+			Playbooks: loadAgentPlaybookIndex(r.Name),
+		})
+	}
+	return out
+}
+
+// loadAgentPlaybookIndex reads the agent's host-side playbooks dir
+// and returns the subset of files that carry valid `name:` +
+// `description:` frontmatter. Returns nil when the dir is absent or
+// empty. Kept inline here (not in packages/transpile/source) because
+// the spawn path doesn't go through ProjectSource — it resolves
+// agent dirs directly via packages/agent.AgentDir.
+func loadAgentPlaybookIndex(agentName string) []transpile.PlaybookEntry {
+	playbooksDir := filepath.Join(agent.AgentDir(agentName), "playbooks")
+	entries, err := os.ReadDir(playbooksDir)
+	if err != nil {
+		return nil
+	}
+	var out []transpile.PlaybookEntry
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		body, err := os.ReadFile(filepath.Join(playbooksDir, e.Name()))
+		if err != nil {
+			continue
+		}
+		entry, ok := parsePlaybookHeader(body)
+		if !ok {
+			continue
+		}
+		out = append(out, entry)
 	}
 	return out
 }

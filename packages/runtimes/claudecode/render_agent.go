@@ -1,97 +1,140 @@
 package claudecode
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
 
-// GenerateAgentCLAUDEMD returns the per-agent CLAUDE.md file that
-// Claude Code loads on startup. It inlines a reference to the
-// agent's soul and the world's shared manuals so the runtime always
-// boots with the agent's identity in context.
+	"spwn.sh/packages/transpile"
+)
+
+// AgentClaudeMDInput carries everything the renderer needs to write
+// the per-agent CLAUDE.md. World-shared bodies (physics, faculties,
+// roster) are already rendered as markdown strings and get inlined
+// verbatim into the output.
+type AgentClaudeMDInput struct {
+	AgentName        string
+	Role             string
+	WorldID          string
+	Physics          string
+	Faculties        string
+	Roster           string
+	Playbooks        []transpile.PlaybookEntry
+	KnowledgeMounted bool
+}
+
+// GenerateAgentCLAUDEMD returns the per-agent CLAUDE.md — the file
+// Claude Code loads on startup. It:
 //
-// This is Claude Code specific on purpose: the filename, the use of
-// @-imports for soul loading, and the paths under /world/ are all
-// conventions that belong to Claude Code, not to spwn's source
-// format. A future Codex renderer will produce its own entrypoint
-// file under its own name.
+//   - imports the agent's identity via `@SOUL.md`
+//   - inlines the world-shared physics, faculties, and roster bodies
+//     so the agent never has to go read separate files
+//   - imports the per-deployment role via `@worlds/<id>/role.md`
+//   - emits a "Your playbooks" section iff at least one playbook
+//     carries valid frontmatter (name + description)
+//   - spells out the spwn conventions (memory, messaging, knowledge)
+//     that used to live scattered across four "system skills" and a
+//     standalone world/AGENTS.md
 //
-// The knowledgeMounted flag controls whether the emitted CLAUDE.md
-// mentions the world's knowledge base. When false, the "save
-// discoveries to /world/knowledge/" rule is dropped and no mention of
-// the knowledge base appears anywhere in the file — the agent is
-// never told one exists.
-func GenerateAgentCLAUDEMD(agentName, role string, knowledgeMounted bool) string {
-	if knowledgeMounted {
-		return fmt.Sprintf(`# %s
+// Tool-shipped skills aren't listed here — Claude Code auto-
+// discovers them from `.claude/skills/` (symlinked at spawn time to
+// /world/skills/ where CollectSkills baked them into the image).
+func GenerateAgentCLAUDEMD(in AgentClaudeMDInput) string {
+	var sb strings.Builder
 
-You are **%s**, a spwn agent with role: %s.
+	fmt.Fprintf(&sb, "# %s — %s in world %q\n\n", in.AgentName, in.Role, in.WorldID)
 
-## Your soul
+	sb.WriteString("## Identity\n\n")
+	sb.WriteString("Your soul is the source of truth for who you are. Read it first, every session.\n\n")
+	sb.WriteString("@SOUL.md\n\n")
 
-Read your full identity and behavioral instructions from:
+	sb.WriteString("## Physics\n\n")
+	sb.WriteString(strings.TrimSpace(demoteHeadings(stripLeadingH1(in.Physics))))
+	sb.WriteString("\n\n")
 
-@SOUL.md
+	sb.WriteString("## Faculties\n\n")
+	sb.WriteString(strings.TrimSpace(demoteHeadings(stripLeadingH1(in.Faculties))))
+	sb.WriteString("\n\n")
 
-Follow the voice, style, and purpose defined there. You are NOT a generic assistant - you are %s.
+	sb.WriteString("## Roster\n\n")
+	sb.WriteString(strings.TrimSpace(demoteHeadings(stripLeadingH1(in.Roster))))
+	sb.WriteString("\n\n")
 
-## Your world
+	sb.WriteString("## Role here\n\n")
+	fmt.Fprintf(&sb, "@worlds/%s/role.md\n\n", in.WorldID)
 
-- Read %s for your operating manual (how memory, skills, and communication work).
-- Read %s for the rules of this world (network, filesystem, communication).
-- Read %s to see what tools are physically available.
-- Read %s for system skills (mind management, collaboration, evolution).
-
-## Key rules
-
-1. **Read your soul first** before doing anything else. Your soul shapes how you respond.
-2. Save important discoveries about the project or its domain to the world's knowledge base (write to %s). It's committed per-world and shared with every other agent in this world.
-3. After significant work, check if a playbook should be created in %s.
-4. **Messaging**: to send a message to another agent, write a .json or .md file to %s. To check YOUR inbox, read %s. Read %s for the full messaging protocol.
-5. Never modify /world/physics.md, /world/faculties.md, or /world/AGENTS.md — they are read-only system context. /world/knowledge/ is writable.
-`, agentName, agentName, role, agentName,
-			"`/world/AGENTS.md`",
-			"`/world/physics.md`",
-			"`/world/faculties.md`",
-			"`/world/skills/`",
-			"`/world/knowledge/`",
-			"`./playbooks/`",
-			"`/world/inbox/<their-name>/`",
-			fmt.Sprintf("`/world/inbox/%s/`", agentName),
-			"`/world/skills/collaboration.md`")
+	if len(in.Playbooks) > 0 {
+		sb.WriteString("## Your playbooks\n\n")
+		for _, p := range in.Playbooks {
+			fmt.Fprintf(&sb, "- **%s** — %s\n", p.Name, p.Description)
+		}
+		sb.WriteString("\n_Read the full procedure at `./playbooks/<name>.md`. Promote a procedure by adding a `name:` + `description:` YAML header — that's how it appears in this list._\n\n")
 	}
 
-	// No knowledge directory was bound into this world. Every mention of
-	// /world/knowledge/ is dropped so the agent is never told one exists.
-	return fmt.Sprintf(`# %s
+	sb.WriteString("## Conventions\n\n")
+	sb.WriteString(conventionsSection(in))
 
-You are **%s**, a spwn agent with role: %s.
+	return sb.String()
+}
 
-## Your soul
+// conventionsSection folds the content of the four retired
+// /world/skills/*.md files into one block of rules. Content is
+// preserved in spirit; wording is tightened.
+func conventionsSection(in AgentClaudeMDInput) string {
+	var sb strings.Builder
 
-Read your full identity and behavioral instructions from:
+	sb.WriteString("1. **Read your soul first** every session. It shapes your voice, values, and priorities.\n")
+	sb.WriteString("2. **Mind lives at `/agents/" + in.AgentName + "/`**:\n")
+	sb.WriteString("   - `SOUL.md` — who you are (edit freely to grow).\n")
+	sb.WriteString("   - `playbooks/` — reusable procedures. Add a `name:`/`description:` header to any playbook to have it indexed in this prompt as a shortcut.\n")
+	sb.WriteString("   - `journal/` — session history; auto-appended by the system.\n")
+	sb.WriteString("3. **Messaging** — send with `/world/inbox/<their-name>/<timestamp>-from-" + in.AgentName + ".md`; check yours at `/world/inbox/" + in.AgentName + "/`.\n")
+	if in.KnowledgeMounted {
+		sb.WriteString("4. **World knowledge** — save durable facts about this project or its domain to `/world/knowledge/`. Committed to the project; every agent in this world sees it.\n")
+		sb.WriteString("5. **Evolve** — when asked to dream, analyze the journal and promote recurring patterns to playbooks.\n")
+	} else {
+		sb.WriteString("4. **Evolve** — when asked to dream, analyze the journal and promote recurring patterns to playbooks.\n")
+	}
+	sb.WriteString("\n")
 
-@SOUL.md
+	return sb.String()
+}
 
-Follow the voice, style, and purpose defined there. You are NOT a generic assistant - you are %s.
+// stripLeadingH1 drops a `# …` heading if the body starts with one,
+// so inlined blocks don't double up with the "## Physics" / "##
+// Faculties" / "## Roster" headings we wrap them in above.
+func stripLeadingH1(body string) string {
+	body = strings.TrimLeft(body, "\n")
+	if !strings.HasPrefix(body, "# ") {
+		return body
+	}
+	if idx := strings.Index(body, "\n"); idx != -1 {
+		return strings.TrimLeft(body[idx+1:], "\n")
+	}
+	return ""
+}
 
-## Your world
-
-- Read %s for your operating manual (how memory, skills, and communication work).
-- Read %s for the rules of this world (network, filesystem, communication).
-- Read %s to see what tools are physically available.
-- Read %s for system skills (mind management, collaboration, evolution).
-
-## Key rules
-
-1. **Read your soul first** before doing anything else. Your soul shapes how you respond.
-2. After significant work, check if a playbook should be created in %s.
-3. **Messaging**: to send a message to another agent, write a .json or .md file to %s. To check YOUR inbox, read %s. Read %s for the full messaging protocol.
-4. Never modify /world/physics.md, /world/faculties.md, or /world/AGENTS.md — they are read-only system context.
-`, agentName, agentName, role, agentName,
-		"`/world/AGENTS.md`",
-		"`/world/physics.md`",
-		"`/world/faculties.md`",
-		"`/world/skills/`",
-		"`./playbooks/`",
-		"`/world/inbox/<their-name>/`",
-		fmt.Sprintf("`/world/inbox/%s/`", agentName),
-		"`/world/skills/collaboration.md`")
+// demoteHeadings prefixes every markdown heading line with one more
+// "#" so an inlined block whose top-level sections were H2s nests
+// cleanly under the H2 wrapper we emit for it. Code fences (```)
+// are skipped so shell examples that happen to contain # comments
+// aren't mangled.
+func demoteHeadings(body string) string {
+	var out strings.Builder
+	inFence := false
+	for _, line := range strings.Split(body, "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "```") {
+			inFence = !inFence
+			out.WriteString(line)
+			out.WriteByte('\n')
+			continue
+		}
+		if !inFence && strings.HasPrefix(line, "#") {
+			out.WriteByte('#')
+		}
+		out.WriteString(line)
+		out.WriteByte('\n')
+	}
+	// strings.Split adds a trailing empty element for bodies ending
+	// in \n; strip the extra newline we appended for that element.
+	return strings.TrimRight(out.String(), "\n") + "\n"
 }

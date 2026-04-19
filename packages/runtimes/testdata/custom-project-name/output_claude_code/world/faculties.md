@@ -1,4 +1,0 @@
-# Faculties
-
-## Tools
-spwn:unix

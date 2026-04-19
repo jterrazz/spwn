@@ -20,11 +20,14 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 		t.Errorf("PrelaunchShell must not source /credentials/.env (outer composer owns env loading); got: %s", got)
 	}
 	// Spot-check the credential copy lands in the claude-specific
-	// location. The actual shell quoting is golden-tested by the
-	// integration path.
+	// location and that /world/skills is symlinked into Claude Code's
+	// native skill discovery path.
 	for _, want := range []string{
 		"/credentials/anthropic/.credentials.json",
 		"$HOME/.claude",
+		"/world/skills",
+		"$HOME/.claude/skills",
+		"ln -sf",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("PrelaunchShell missing %q; got: %s", want, got)

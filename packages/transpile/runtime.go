@@ -60,6 +60,25 @@ type Input struct {
 type AgentInput struct {
 	Name string
 	Role string
+
+	// Playbooks lists the agent's promotable playbooks — the subset of
+	// files under spwn/agents/<name>/playbooks/ that carry valid
+	// `name:` + `description:` frontmatter. The renderer emits the list
+	// as a discoverability index in CLAUDE.md so Claude sees which
+	// playbooks are available as named shortcuts. Plain playbooks
+	// without frontmatter stay invisible until the agent decides to
+	// promote them.
+	Playbooks []PlaybookEntry
+}
+
+// PlaybookEntry is one frontmatter-promoted playbook, ready to index
+// in CLAUDE.md. Name comes from frontmatter `name:` (not the
+// filename) so agents can rename a playbook without touching the
+// file on disk. Description is the one-line `description:` that
+// explains when to reach for this procedure.
+type PlaybookEntry struct {
+	Name        string
+	Description string
 }
 
 var runtimes = map[string]Runtime{}

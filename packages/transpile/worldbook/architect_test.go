@@ -9,11 +9,6 @@ func TestArchitectSystemFiles_HasRequiredFiles(t *testing.T) {
 
 	required := []string{
 		"system/architect/ARCHITECT.md",
-		"system/AGENTS.md",
-		"system/skills/mind-management.md",
-		"system/skills/collaboration.md",
-		"system/skills/world-awareness.md",
-		"system/skills/self-evolution.md",
 		"system/architect/skills/fleet-ops.md",
 		"system/architect/skills/task-planning.md",
 		"system/architect/skills/monitoring.md",
