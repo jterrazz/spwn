@@ -29,11 +29,11 @@
 
 ## Play god with AI agents.
 
-**The building blocks of artificial life.** Stack any mix — tools, skills, hooks, an identity — into a living agent. Spawn it into a world. Every block lives as a declarative file in your repo: reviewed in PRs, pinned in lockfiles, reproducible on any machine.
+**The building blocks of artificial life.** Compose any mix of tools, skills, hooks, and an identity into a living agent — then spawn it into a world. Every block is a declarative file in your repo, reviewed in PRs, pinned in lockfiles, reproducible on any machine.
 
-The real power of AI isn't the model. It's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions. Oppenheimer in a lab - with instruments, notebooks, colleagues, and years of memory - can change the world. **The environment is the multiplier.**
+The real power of AI isn't the model — it's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
-That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code**: stack tool dependencies, skill files, and an identity into a running mind, then commit the whole declaration to git. Review the PR that changes an agent's behavior. Reproduce the same mind across three machines. One `spwn.yaml`, one `spwn build`, one **reproducible artifact**. **Docker for intelligence.**
+That's what spwn gives you, declaratively. If Terraform is infrastructure as code, spwn is **agents as code** — stack tool dependencies, skill files, and an identity into a running mind, then commit the whole declaration to git. Review the PR that changes its behavior, clone the repo to reproduce the same mind on any machine, run `spwn build` to bake it into a shippable Docker image. **Docker for intelligence.**
 
 <br/>
 
@@ -64,30 +64,30 @@ Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent wo
 <table>
 <tr>
 <td align="center" width="33%">
+<h3>🧾 Agents as Code</h3>
+Commit agents alongside your app, review behavior changes in PRs, ship the same mind to every machine.
+</td>
+<td align="center" width="33%">
 <h3>🧩 Composable</h3>
-Stack dependencies, skills, and a soul into an agent. Like Lego for minds.
+Stack tools, skills, hooks, and a soul into an agent — Lego for minds.
 </td>
 <td align="center" width="33%">
-<h3>🧠 Persistent</h3>
-Memory is a folder of markdown files. Readable, diffable, survives restarts.
-</td>
-<td align="center" width="33%">
-<h3>🧐 Checked</h3>
-<code>spwn check</code> validates your project tree. Bad refs, missing files, lockfile drift — caught before spawn.
+<h3>📦 Reproducible</h3>
+One <code>spwn build</code> packages your project into a Docker image you can push, pull, and run anywhere — byte-identical.
 </td>
 </tr>
 <tr>
 <td align="center">
 <h3>🔒 Sandboxed</h3>
-Each agent runs in a Docker world with kernel limits. No network means HTTP doesn't exist — no prompt can break out.
+Every agent runs in a Docker world with kernel limits; no network means HTTP doesn't exist, and no prompt can break out.
 </td>
 <td align="center">
-<h3>🧾 Agents as Code</h3>
-Commit agents next to your app. Review behavior in PRs. Same mind, any machine.
+<h3>🧠 Persistent</h3>
+Memory is a folder of markdown files — readable, diffable, and alive across restarts.
 </td>
 <td align="center">
-<h3>📦 Reproducible</h3>
-One <code>spwn build</code> turns your project into a Docker image. Push it, run it anywhere — byte-identical.
+<h3>🧐 Checked</h3>
+<code>spwn check</code> walks your project and surfaces bad refs, missing files, or lockfile drift before spawn.
 </td>
 </tr>
 </table>
