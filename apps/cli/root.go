@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
@@ -122,13 +123,19 @@ func GetRootCmd() *cobra.Command {
 
 // smartLsCmd wraps agent.LsCmd as a top-level `spwn ls` shortcut.
 // We wrap rather than re-register the same *cobra.Command instance
-// because cobra only allows a command to have a single parent.
+// because cobra only allows a command to have a single parent. The
+// wrapper inherits every flag from LsCmd so `spwn ls --json` works
+// identically to `spwn agent ls --json`.
 func smartLsCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "ls",
 		Short: "Agent-centric status (running / stopped / orphan)",
 		RunE:  agent.LsCmd.RunE,
 	}
+	agent.LsCmd.Flags().VisitAll(func(f *pflag.Flag) {
+		c.Flags().AddFlag(f)
+	})
+	return c
 }
 
 // printHelpCmd prints a command entry indented one level under its section
