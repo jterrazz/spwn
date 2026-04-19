@@ -43,8 +43,8 @@ type Adapter struct {
 	Render transpile.Runtime
 
 	// Spawn is the host-side spawn-time adapter (BuildCommand,
-	// credential sync, prelaunch shell, default configs, container
-	// config path). nil when the runtime is purely declarative.
+	// credential sync, prelaunch shell, default configs). nil when
+	// the runtime is purely declarative.
 	Spawn Spawner
 }
 

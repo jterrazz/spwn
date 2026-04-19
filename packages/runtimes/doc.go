@@ -24,9 +24,8 @@
 // (apps/cli, tests) or the convenience aggregator runtimes/defaults
 // (the production path).
 //
-// Spwn's opinionated world content (physics, the agent operating
-// manual, system skills, architect identity, roster, role-aware
-// agent prompts) lives in packages/transpile/worldbook — not here.
-// Runtime renderers read from worldbook for the prose and layer
-// only runtime-specific layout on top.
+// Spwn's opinionated world content (physics, faculties, roster,
+// architect identity) lives in packages/transpile/worldbook — not
+// here. Runtime renderers read from worldbook for the prose and
+// decide how to inline or lay it out on disk.
 package runtimes

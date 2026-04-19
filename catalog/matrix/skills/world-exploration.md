@@ -11,18 +11,14 @@ How to systematically explore a spwn world when you first wake up.
 
 Every spwn world has a predictable layout. Walk it in this order:
 
-### 1. /world/ — The world manifest
+### 1. CLAUDE.md — The world, already in your prompt
 
-```
-ls /world/
-cat /world/physics.md    # network, resource limits, runtime rules
-cat /world/faculties.md  # what tools and deps are available
-```
+Your spawn-time CLAUDE.md inlines physics (network rules, filesystem
+semantics), faculties (every tool installed and verified), and the
+roster (who else is in here). Re-read the relevant section when
+you're unsure.
 
-This tells you what kind of environment you are in: how much memory,
-what network access exists, which languages are installed.
-
-### 2. ~/identity/ — Who you are
+### 2. SOUL.md — Who you are
 
 ```
 cat ~/SOUL.md

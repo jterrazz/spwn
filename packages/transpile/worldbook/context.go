@@ -236,14 +236,13 @@ type ColonyAgentSpec struct {
 	Role string
 }
 
-// GenerateRoster produces /world/roster.md - the world's authoritative
-// list of who is currently in this world. The runtime can read this to
-// answer "who am I in here with?" and to address messages.
+// GenerateRoster produces the world's authoritative list of who is
+// currently in this world. Inlined by the claude-code renderer into
+// each agent's CLAUDE.md under a "## Roster" heading — how agents
+// learn "who am I in here with?" and how to address messages.
 //
-// In the labels-as-truth architecture there is no per-agent AGENT-<name>.md
-// file. Each agent reads their own identity from ~/SOUL.md, learns about
-// their role from ~/worlds/<world-id>/role.md, and learns about everyone
-// else from /world/roster.md (this file).
+// Each agent still reads their own identity from SOUL.md and their
+// per-deployment role from worlds/<world-id>/role.md.
 //
 // knowledgeMounted controls whether the roster advertises the shared
 // /world/knowledge/ directory. When false, the paragraph is omitted —

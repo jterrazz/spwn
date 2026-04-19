@@ -213,9 +213,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	// Registry + resolved dependency list are computed unconditionally.
-	// Even when the image is prebuilt (tests injecting SPWN_BASE_IMAGE),
-	// runtime config still needs to be merged into the container's
-	// runtime settings file after the container boots.
+	// Even when the image is prebuilt (tests injecting SPWN_BASE_IMAGE)
+	// we still need the resolved tool list for tool-probe verification
+	// and for rendering the Faculties block in every agent's CLAUDE.md.
 	reg := resolver.NewRegistry()
 	if err := dependency.RegisterBuiltins(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
@@ -412,11 +412,14 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}}
 	}
 
-	// Per-world state directory on the host. This is the canonical
-	// /world/ inside the container - physics, faculties, roster,
-	// AGENTS.md, system skills, and the shared whiteboard all live
-	// here. Surviving container destroy is a deliberate choice: the
-	// user's notes belong to the world, not the runtime.
+	// Per-world state directory on the host. Bind-mounted into the
+	// container at /world/. Under the new renderer it holds the
+	// shared skills dir (tool-shipped SKILL.md baked into the image,
+	// symlinked per agent as .claude/skills/ by PrelaunchShell) and
+	// the optional knowledge base. Physics / faculties / roster are
+	// inlined directly into each agent's CLAUDE.md — no separate
+	// /world/*.md files. Surviving container destroy is a deliberate
+	// choice: the user's notes belong to the world, not the runtime.
 	worldStateDir := worldStateDirFor(id)
 	// The world state dir becomes /world inside the container via the
 	// bind below. We no longer seed an empty "knowledge" subdir here —
@@ -529,13 +532,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
 
 	// Render every file this world needs through the compiler. The
-	// claude-code Runtime produces a Tree with two kinds of entries:
-	// world/* (shared per-world files -- physics, roster, skills)
-	// and agents/<name>/* (per-agent entrypoint + per-deployment
-	// role.md). materialiseWorldTree splits by prefix: world/* goes
-	// to the host state dir (visible in the container via the /world
-	// bind mount), agents/* is docker-cp'd directly into the running
-	// container on top of the home tree seeded by syncAgentsInto.
+	// claude-code Runtime produces agents/<name>/CLAUDE.md (fully
+	// self-contained system prompt — world context inlined) and
+	// agents/<name>/worlds/<id>/role.md per deployment. Nothing
+	// lands under world/ any more: physics, faculties, and roster
+	// are inlined into each CLAUDE.md. MaterialiseTree is still
+	// prefix-aware in case a future runtime emits world/* files;
+	// today every entry flows via docker-cp into the agent home.
 	compileInput := transpile.Input{
 		Deps:                 opts.Manifest.Deps,
 		VerifiedTools:        verifiedTools,
@@ -554,7 +557,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("materialise world tree: %w", err)
 	}
-	opts.progress("world_state_written", "physics, faculties, roster, AGENTS.md")
+	opts.progress("world_state_written", "per-agent CLAUDE.md + role.md")
 
 	// Finalize the world record. The labels we already wrote to the
 	// container are the canonical store - this struct is just what we

@@ -45,8 +45,7 @@ func TestDetach_MockSeesEnvironment(t *testing.T) {
 	chain.ExpectMock(func(m *setup.MockAssertion) {
 		m.WasCalled()
 		m.SawMind()
-		m.SawPhysics()
-		m.SawFaculties()
+		m.SawClaudeMD()
 	})
 }
 

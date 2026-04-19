@@ -86,10 +86,11 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 COPY spwn /usr/local/bin/spwn
 RUN chmod +x /usr/local/bin/spwn
 
-# Architect identity and skills
+# Architect identity and skills — the four "world-agent" system
+# skills (mind-management, collaboration, world-awareness,
+# self-evolution) were folded into each worker's CLAUDE.md and
+# retired; the architect now only ships its own architect/ content.
 COPY system/architect/ARCHITECT.md /me/ARCHITECT.md
-COPY system/AGENTS.md /me/AGENTS.md
-COPY system/skills/ /me/skills/
 COPY system/architect/skills/ /me/skills/
 RUN chown -R architect:architect /me /home/architect
 
