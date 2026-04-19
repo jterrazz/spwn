@@ -12,13 +12,13 @@ A runtime has up to three orthogonal facets, bundled into a single `Adapter`:
 |---|---|---|
 | **Tool** | Install recipe (apt, curl, npm install, user-side config) | Image build time |
 | **Render** | Source → Tree (`transpile.Runtime`) — where each piece of content lands on disk | Compile time |
-| **Spawn** | `BuildCommand`, `SyncHostCredentials`, `PrelaunchShell`, `DefaultConfigFiles`, `ContainerConfigPath` | Host at spawn time + container prelaunch |
+| **Spawn** | `BuildCommand`, `SyncHostCredentials`, `PrelaunchShell`, `DefaultConfigFiles` | Host at spawn time + container prelaunch |
 
 Each facet is optional. `claudecode` ships all three (full-featured runtime). `codex` ships Tool + Spawn (install + auth plumbing, no renderer yet). A future YAML-first runtime could ship Tool only.
 
 ## Key types
 
-- `Adapter` — the umbrella struct bundling Tool + Render + Spawn with identity fields (`Name`, `CatalogRef`, `DefaultProvider`).
+- `Adapter` — the umbrella struct bundling Tool + Render + Spawn with identity fields (`Name`, `DefaultProvider`).
 - `Spawner` interface — the spawn-time port. Lives here because its only implementers are runtime adapters.
 - `SpawnConfig` — parameters for `Spawner.BuildCommand`.
 - `Register(Adapter)` / `All() []Adapter` / `Get(name)` / `Names()` — the Adapter registry.

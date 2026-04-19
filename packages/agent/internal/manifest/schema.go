@@ -7,13 +7,11 @@ package manifest
 
 // Manifest is the parsed agent.yaml — composition + runtime config.
 //
-// The composition is a single flat dependency list. Under the old
-// tool/runtime-config/skill trichotomy, each entry would land in a
-// different key; under the unified dependency model they all share
-// one `dependencies:` list. The parser distinguishes what's what by
-// the manifest the ref resolves to (an `install:` block makes it a
-// tool, a `runtime-config:` block makes it a runtime-config injector,
-// a content-only body makes it a skill).
+// The composition is a single flat dependency list. Every entry is a
+// `scheme:target` ref resolved via one of the known schemes
+// (spwn:/github:/skill:/tool:/hook:); the parser distinguishes what's
+// what by the manifest the ref resolves to (an `install:` block makes
+// it a tool, a content-only body makes it a skill).
 type Manifest struct {
 	Name string `yaml:"name,omitempty"`
 

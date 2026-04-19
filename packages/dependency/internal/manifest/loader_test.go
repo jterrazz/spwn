@@ -1,7 +1,6 @@
 package manifest_test
 
 import (
-	"encoding/json"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -134,64 +133,6 @@ verify:
 	}
 }
 
-func TestParse_runtimeConfigSection(t *testing.T) {
-	dir := t.TempDir()
-	writeManifest(t, dir, `name: "spwn:mempalace"
-kind: tool
-runtime-config:
-  runtimes:
-    - "spwn:claude-code"
-  configs:
-    "spwn:claude-code":
-      mcpServers:
-        mempalace:
-          command: python3
-          args: ["-m", "mempalace.mcp_server"]
-install:
-  commands:
-    - pip install mempalace
-verify:
-  - command -v mempalace
-`)
-
-	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
-	if err != nil {
-		t.Fatalf("parse: %v", err)
-	}
-	// The dependency: section surfaces via Runtimes() and Config() on the
-	// unified tool.Tool interface — no type assertion needed.
-	runtimes := func() []string { if parsed.Schema.RuntimeConfig != nil { return parsed.Schema.RuntimeConfig.Runtimes }; return nil }()
-	if len(runtimes) != 1 || runtimes[0] != "spwn:claude-code" {
-		t.Errorf("runtimes: %v", runtimes)
-	}
-
-	cfg := configJSONFor(parsed, "spwn:claude-code")
-	if len(cfg) == 0 {
-		t.Fatal("empty config")
-	}
-	// Round-trip through JSON to verify shape.
-	var decoded map[string]any
-	if err := json.Unmarshal(cfg, &decoded); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
-	mcp, ok := decoded["mcpServers"].(map[string]any)
-	if !ok {
-		t.Fatalf("missing mcpServers: %v", decoded)
-	}
-	mem, ok := mcp["mempalace"].(map[string]any)
-	if !ok {
-		t.Fatalf("missing mempalace: %v", mcp)
-	}
-	if mem["command"] != "python3" {
-		t.Errorf("command: %v", mem["command"])
-	}
-
-	// Non-matching runtime returns nil.
-	if got := configJSONFor(parsed, "spwn:codex"); got != nil {
-		t.Errorf("codex should get nil, got %s", got)
-	}
-}
-
 func TestParse_skillsDirExposed(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `name: "spwn:qmd"
@@ -236,10 +177,3 @@ func TestParse_missingNameErrors(t *testing.T) {
 	}
 }
 
-func configJSONFor(p *manifest.Parsed, runtime string) []byte {
-    if p.Schema.RuntimeConfig == nil {
-        return nil
-    }
-    b, _ := p.Schema.RuntimeConfig.ConfigJSON(runtime)
-    return b
-}

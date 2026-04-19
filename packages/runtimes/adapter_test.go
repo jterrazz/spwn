@@ -32,17 +32,14 @@ func TestAdapterRegistration(t *testing.T) {
 }
 
 // TestAdapterIdentityFields locks in the invariant that every
-// built-in adapter declares Name, CatalogRef, and DefaultProvider —
-// the three bits of metadata the rest of the codebase reads to route
-// work (dep-resolution, auth plumbing, runtime lookup).
+// built-in adapter declares Name and DefaultProvider — the two bits
+// of metadata the rest of the codebase reads to route work (auth
+// plumbing, runtime lookup).
 func TestAdapterIdentityFields(t *testing.T) {
 	for _, a := range runtimes.All() {
 		t.Run(a.Name, func(t *testing.T) {
 			if a.Name == "" {
 				t.Error("empty Name")
-			}
-			if a.CatalogRef == "" {
-				t.Errorf("%s: empty CatalogRef", a.Name)
 			}
 			if a.DefaultProvider == "" {
 				t.Errorf("%s: empty DefaultProvider", a.Name)
@@ -60,9 +57,6 @@ func TestAdapterShipInstallRecipe(t *testing.T) {
 		t.Run(a.Name, func(t *testing.T) {
 			if a.Tool == nil {
 				t.Fatalf("%s: Tool is nil — built-in runtimes ship an install recipe", a.Name)
-			}
-			if a.Tool.Name() != a.CatalogRef {
-				t.Errorf("%s: Tool.Name() = %q, want CatalogRef %q (dep-resolution needs them equal)", a.Name, a.Tool.Name(), a.CatalogRef)
 			}
 		})
 	}

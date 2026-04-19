@@ -55,13 +55,6 @@ func (c *spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
 func (c *spawner) SupportsSession() bool { return true }
 func (c *spawner) Available() bool       { return true }
 
-// ContainerConfigPath returns the container-side settings.json path
-// that receives merged runtime-config JSON from the resolved
-// dependency set. Written by the architect after container start.
-func (c *spawner) ContainerConfigPath() string {
-	return "/home/spwn/.claude/settings.json"
-}
-
 // ── Container-side setup ─────────────────────────────────────────
 
 // DefaultConfigFiles pre-dismisses Claude Code's first-run UI.

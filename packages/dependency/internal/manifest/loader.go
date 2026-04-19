@@ -20,7 +20,7 @@ import (
 const Manifest = "spwn.yaml"
 
 // ToolManifest is the basename for an individual tool definition
-// (install / verify / files / runtime-config / skills-sibling).
+// (install / verify / files / skills-sibling).
 // Lives under spwn/tools/<name>/tool.yaml in a user project and
 // catalog/<slug>/tools/<slug>/tool.yaml in the catalog.
 const ToolManifest = "tool.yaml"

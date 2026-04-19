@@ -57,8 +57,3 @@ func (*spawner) SyncHostCredentials(credsDir string) error { return nil }
 func (*spawner) PrelaunchShell() string {
 	return `[ -f /credentials/openai/auth.json ] && mkdir -p $HOME/.codex && ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null`
 }
-
-// ContainerConfigPath is empty: codex's config.toml is immutable at
-// spawn time (written at image-build) and the runtime-config merge
-// path does not target codex today.
-func (*spawner) ContainerConfigPath() string { return "" }

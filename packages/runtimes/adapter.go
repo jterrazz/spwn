@@ -23,10 +23,6 @@ type Adapter struct {
 	// "claude-code", "codex".
 	Name string
 
-	// CatalogRef is how this runtime appears as a tool ref in the
-	// catalog and in agent dependencies. Example: "spwn:claude-code".
-	CatalogRef string
-
 	// DefaultProvider names the auth provider this runtime uses by
 	// default ("anthropic", "openai", …). Empty means the runtime
 	// does not require an auth provider or supports multiple without

@@ -6,7 +6,6 @@ import "spwn.sh/packages/runtimes"
 // All three facets are implemented, so the Adapter fills every field.
 var Adapter = runtimes.Adapter{
 	Name:            "claude-code",
-	CatalogRef:      "spwn:claude-code",
 	DefaultProvider: "anthropic",
 	Tool:            Tool,
 	Render:          Renderer,

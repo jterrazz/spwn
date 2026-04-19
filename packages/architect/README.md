@@ -14,7 +14,7 @@ Below it: container backend, image build, render tree. Above it: CLI and HTTP AP
 
 ## Runtime routing
 
-The spawn pipeline is data-driven on runtime choice. `SpawnOpts.RuntimeName` selects which adapter drives the spawn (empty defaults to `"claude-code"`), and `models.World.Runtime` persists the choice on the world record so hot-deploy + talk can resolve the right spawner later. Container-side paths (settings file location) come from `runtimes.Adapter.Spawn.ContainerConfigPath()` — the architect no longer hardcodes Claude-specific paths.
+The spawn pipeline is data-driven on runtime choice. `SpawnOpts.RuntimeName` selects which adapter drives the spawn (empty defaults to `"claude-code"`), and `models.World.Runtime` persists the choice on the world record so hot-deploy + talk can resolve the right spawner later.
 
 ## Key types
 

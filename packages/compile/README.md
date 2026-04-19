@@ -21,7 +21,7 @@ packages/architect    →   running container
 
 Transpile is pure; compile has side effects against Docker; architect orchestrates. The split is deliberate: compile does not write agent content, does not start containers, does not parse `spwn.yaml`. It stops at "image exists."
 
-Dependency resolution (the `Registry`, transitive expansion, topological sort) and auxiliary aggregation helpers (`CollectSkills`, `CollectRuntimeConfigs`, `MergeRuntimeConfig`) live in **`packages/dependency/resolver/`** — compile consumes them as inputs. The Docker daemon adapter lives in **`packages/container/backend/`**.
+Dependency resolution (the `Registry`, transitive expansion, topological sort) and the `CollectSkills` aggregation helper live in **`packages/dependency/resolver/`** — compile consumes them as inputs. The Docker daemon adapter lives in **`packages/container/backend/`**.
 
 ## Key types
 

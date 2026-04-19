@@ -34,6 +34,3 @@ func (*codexTool) Verify() []string {
 }
 
 func (*codexTool) Skills() fs.FS { return nil }
-
-func (*codexTool) Runtimes() []string         { return nil }
-func (*codexTool) Config(runtime string) []byte { return nil }

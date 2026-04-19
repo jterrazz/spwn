@@ -59,12 +59,4 @@ type Spawner interface {
 	// their expected paths on the agent home, set runtime-specific
 	// env vars. An empty string means no wrapping is needed.
 	PrelaunchShell() string
-
-	// ContainerConfigPath returns the container-side path to the
-	// runtime's baseline config file (e.g. "/home/spwn/.claude/
-	// settings.json" for claude-code). Empty when the runtime has
-	// no post-spawn config merging. Used by the architect to know
-	// where to materialise merged runtime-config JSON assembled
-	// from the resolved dependency set.
-	ContainerConfigPath() string
 }
