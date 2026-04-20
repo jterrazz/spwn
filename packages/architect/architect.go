@@ -7,35 +7,33 @@ import (
 
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtimestate"
 
-	// Register every built-in runtime adapter
+	// Register every built-in runtime adapter so resolveSpawner
+	// finds them at lookup time. The blank import is the whole
+	// contract — nothing in this file refers to the runtimes
+	// package directly any more; the per-world resolver in
+	// runtime_route.go owns that.
 	_ "spwn.sh/packages/runtimes/defaults"
 )
 
-// Architect orchestrates world lifecycle.
+// Architect orchestrates world lifecycle. The runtime adapter is
+// resolved per-world at operation time (see resolveSpawner) rather
+// than held as state, so a single Architect drives claude-code and
+// codex worlds side-by-side without re-instantiation.
 type Architect struct {
 	backend backend.Backend
 	rstate  *runtimestate.Store
-	runtime runtimes.Spawner // injected runtime adapter - claude-code
 }
 
-// New creates an Architect with the given backend and runtimestate store.
-// Panics if the claude-code runtime adapter isn't registered — the blank
-// import of runtimes/defaults at the top of this file guarantees it is,
-// so a nil Spawner here means the build went out of sync with itself.
+// New creates an Architect with the given backend and runtimestate
+// store. Runtime adapters are looked up per-world at call time, so
+// the constructor takes no runtime dependency — the blank-import of
+// runtimes/defaults at the top of this file is the only wiring needed
+// to make every built-in adapter discoverable.
 func New(b backend.Backend, s *runtimestate.Store) *Architect {
-	rt, err := runtimes.GetSpawner("claude-code")
-	if err != nil || rt == nil {
-		panic(fmt.Sprintf("architect: claude-code runtime not registered: %v", err))
-	}
-	return &Architect{
-		backend: b,
-		rstate:  s,
-		runtime: rt,
-	}
+	return &Architect{backend: b, rstate: s}
 }
 
 // SetSessionID stores a runtime session ID for an agent in a world.

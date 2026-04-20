@@ -78,11 +78,7 @@ func (a *Architect) DeployAgent(ctx context.Context, worldID, agentName, role st
 	// role.md) through the compiler and docker-cp it on top of the
 	// copied-in home. We only handle agents/* entries — the world/*
 	// files already exist from spawn time.
-	runtimeName := u.Runtime
-	if runtimeName == "" {
-		runtimeName = "claude-code"
-	}
-	hotTree, err := transpile.Compile(runtimeName, transpile.Input{
+	hotTree, err := transpile.Compile(resolveRuntimeName(u), transpile.Input{
 		Deps: nil,
 		VerifiedTools: nil,
 		WorldID:       worldID,

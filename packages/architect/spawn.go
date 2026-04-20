@@ -60,14 +60,16 @@ type SpawnOpts struct {
 	Knowledge string
 }
 
-// runtimeName returns opts.RuntimeName with the "claude-code"
+// runtimeName returns opts.RuntimeName with the default-runtime
 // fallback. Keeps callers and tests that don't populate the field
-// working on the legacy default.
+// working on the legacy default. Shares the same constant used by
+// the per-world resolver (see runtime_route.go) so the "what does
+// empty mean" question has exactly one answer in the package.
 func (opts *SpawnOpts) runtimeName() string {
 	if opts.RuntimeName != "" {
 		return opts.RuntimeName
 	}
-	return "claude-code"
+	return defaultRuntimeName
 }
 
 // Validate returns a non-nil error when SpawnOpts is missing

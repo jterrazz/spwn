@@ -24,10 +24,17 @@ func (a *Architect) SpawnNPC(ctx context.Context, worldID string, task string) e
 		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
-	// Build a minimal claude command - no Mind, no session. NPCs
+	rt, err := a.resolveSpawner(u)
+	if err != nil {
+		return err
+	}
+
+	// Build a minimal one-shot command — no Mind, no session. NPCs
 	// receive their full context via the task prompt itself (see the
 	// `Prompt:` field below); nothing needs to be written to disk.
-	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
+	// The runtime adapter decides what "one-shot" means — claude
+	// takes `-p --print`, codex takes `exec`, etc.
+	cmd := rt.BuildCommand(runtimes.SpawnConfig{
 		Prompt: task,
 	})
 
