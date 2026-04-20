@@ -38,12 +38,15 @@ func (r *renderer) Name() string { return "claude-code" }
 
 // Render lays out Claude-specific output for each agent. Paths:
 //
-//   - agents/<name>/CLAUDE.md              self-contained system prompt
-//   - agents/<name>/worlds/<id>/role.md    per-deployment role
+//   - agents/<name>/CLAUDE.md                   self-contained system prompt
+//   - agents/<name>/.claude/settings.json       hooks + model + permissions
+//   - agents/<name>/.claude/skills/<n>/SKILL.md every resolved skill (+ sidecar)
 //
-// Nothing lands under world/ — the world-shared context (physics,
-// faculties, roster) is inlined into every agent's CLAUDE.md so the
-// runtime boots with all of it already in the prompt.
+// Nothing lands under world/ or worlds/ — world-shared context
+// (physics, faculties, roster) and the per-deployment role line are
+// all inlined into each CLAUDE.md, so the runtime boots with every
+// required context block already in the prompt. No @-import side
+// files, no `worlds/<id>/role.md` indirection.
 func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 	t := transpile.New()
 
@@ -61,10 +64,6 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 		if role == "" {
 			role = "worker"
 		}
-		t.AddString(
-			fmt.Sprintf("agents/%s/worlds/%s/role.md", a.Name, input.WorldID),
-			fmt.Sprintf("# Role in %s\n\n%s\n", input.WorldID, role),
-		)
 		t.AddString(
 			fmt.Sprintf("agents/%s/CLAUDE.md", a.Name),
 			GenerateAgentCLAUDEMD(AgentClaudeMDInput{

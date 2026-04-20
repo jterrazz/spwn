@@ -46,7 +46,7 @@ Shared world knowledge (facts about the domain, not about any one agent) lives a
 
 ## Role here
 
-@worlds/home/role.md
+You are deployed as a manager in home.
 
 ## Conventions
 
