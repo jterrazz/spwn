@@ -91,7 +91,11 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 		// PrelaunchShell via the user-level ~/.codex/config.toml.
 		t.Add(
 			fmt.Sprintf("agents/%s/.codex/config.toml", a.Name),
-			GenerateAgentConfigTOML(ConfigInput{HasHooks: len(input.Hooks) > 0}),
+			GenerateAgentConfigTOML(ConfigInput{
+				AgentName: a.Name,
+				Model:     a.Model,
+				HasHooks:  len(input.Hooks) > 0,
+			}),
 		)
 		if body := GenerateAgentHooksJSON(input.Hooks); body != nil {
 			t.Add(

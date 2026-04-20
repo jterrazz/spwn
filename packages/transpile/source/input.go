@@ -89,6 +89,8 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 			Soul:      a.Soul,
 			AgentMD:   a.AgentMD,
 			Playbooks: promotedPlaybooks(a.Layers.Playbooks),
+			Model:     a.Config.Runtime.Model,
+			Provider:  a.Config.Runtime.Provider,
 		})
 	}
 	// Add project-level deps (top-level deps: in spwn.yaml).

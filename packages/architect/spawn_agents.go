@@ -112,15 +112,30 @@ func rosterCompileAgents(recs []models.AgentRecord) []transpile.AgentInput {
 	out := make([]transpile.AgentInput, 0, len(recs))
 	for _, r := range recs {
 		home := agent.AgentDir(r.Name)
+		model, provider := loadAgentRuntimePrefs(r.Name)
 		out = append(out, transpile.AgentInput{
 			Name:      r.Name,
 			Role:      r.Role,
 			Soul:      readAgentFile(home, "SOUL.md"),
 			AgentMD:   readAgentFile(home, "AGENTS.md"),
 			Playbooks: loadAgentPlaybookIndex(r.Name),
+			Model:     model,
+			Provider:  provider,
 		})
 	}
 	return out
+}
+
+// loadAgentRuntimePrefs reads runtime.{model,provider} from the
+// agent's on-disk manifest. Missing manifest or missing keys return
+// empty strings — the renderer treats them as "use the runtime's
+// default" rather than erroring.
+func loadAgentRuntimePrefs(name string) (model, provider string) {
+	m, err := agent.LoadManifest(name)
+	if err != nil || m == nil {
+		return "", ""
+	}
+	return m.Runtime.Model, m.Runtime.Provider
 }
 
 // readAgentFile returns the body of a file relative to the agent's
