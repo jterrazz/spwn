@@ -8,32 +8,34 @@ import (
 	"time"
 )
 
-// resolveGoogle returns the best available Google credential.
-// Priority: GOOGLE_API_KEY > GEMINI_API_KEY (alias).
-func resolveGoogle() *Credential {
+// detectGoogle enumerates every detected Google credential.
+//  1. env GOOGLE_API_KEY
+//  2. env GEMINI_API_KEY (alias)
+func detectGoogle() []*Credential {
+	var out []*Credential
 	if key := os.Getenv("GOOGLE_API_KEY"); key != "" {
-		return &Credential{
+		out = append(out, &Credential{
 			Provider: ProviderGoogle,
 			Type:     CredTypeAPIKey,
 			Token:    key,
 			Source:   "env:GOOGLE_API_KEY",
 			EnvVar:   "GOOGLE_API_KEY",
-		}
+		})
 	}
 	if key := os.Getenv("GEMINI_API_KEY"); key != "" {
-		return &Credential{
+		out = append(out, &Credential{
 			Provider: ProviderGoogle,
 			Type:     CredTypeAPIKey,
 			Token:    key,
 			Source:   "env:GEMINI_API_KEY",
 			EnvVar:   "GOOGLE_API_KEY",
-		}
+		})
 	}
-	return &Credential{
-		Provider: ProviderGoogle,
-		Type:     CredTypeNone,
-		Source:   "not configured",
-	}
+	return out
+}
+
+func resolveGoogle() *Credential {
+	return pickByPref(ProviderGoogle, detectGoogle())
 }
 
 func validateGoogle(ctx context.Context, cred *Credential) *ProviderStatus {

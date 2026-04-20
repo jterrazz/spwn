@@ -28,6 +28,24 @@ type Credential struct {
 	EnvVar   string // the env var to use when injecting (ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN)
 }
 
+// Method returns the user-facing credential method (oauth | api_key)
+// for this Credential. Callers that present a choice to the user —
+// "use OAuth or API key?" — talk in Method rather than Type so that
+// "OAuth from keychain" and "OAuth from env" collapse into one bucket.
+// Returns the empty Method when the credential is not configured.
+func (c *Credential) Method() Method {
+	if c == nil {
+		return ""
+	}
+	switch c.Type {
+	case CredTypeAPIKey:
+		return MethodAPIKey
+	case CredTypeOAuth, CredTypeKeychain:
+		return MethodOAuth
+	}
+	return ""
+}
+
 // ProviderStatus represents the health/usage of a provider.
 type ProviderStatus struct {
 	Provider  Provider       `json:"provider"`
