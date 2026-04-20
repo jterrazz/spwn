@@ -11,7 +11,10 @@ import (
 	"spwn.sh/packages/runtimes"
 )
 
-// SpawnAgent execs Claude Code interactively inside a world.
+// SpawnAgent execs the world's runtime interactively inside its
+// container. The runtime is whatever the world record declares
+// (`spwn:claude-code`, `spwn:codex`, …) — resolved per-call so one
+// Architect drives heterogeneous worlds without re-instantiation.
 func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) error {
 	u, err := a.rstate.Get(worldID)
 	if err != nil {
@@ -26,10 +29,16 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
-	// Session management - claude-code is the only runtime.
-	// Status is derived from container state on every List/Get —
-	// no explicit transition needed here.
-	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
+	rt, err := a.resolveSpawner(u)
+	if err != nil {
+		return err
+	}
+
+	// Session management lives entirely in the runtime adapter —
+	// BuildCommand knows whether to pass --resume (claude), --thread
+	// (codex), etc. Status is derived from container state on every
+	// List/Get — no explicit transition needed here.
+	cmd := rt.BuildCommand(runtimes.SpawnConfig{
 		AgentName: agentName,
 		WorldID:   worldID,
 	})
@@ -77,7 +86,10 @@ func (a *Architect) SpawnAgent(ctx context.Context, worldID, agentName string) e
 	return nil
 }
 
-// SpawnAgentDetached starts Claude Code in the background.
+// SpawnAgentDetached starts the world's runtime in the background.
+// Mirrors SpawnAgent for session continuity but returns as soon as
+// the exec is accepted by the container — no TTY, no blocking on
+// the runtime process.
 func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName string) error {
 	u, err := a.rstate.Get(worldID)
 	if err != nil {
@@ -92,7 +104,12 @@ func (a *Architect) SpawnAgentDetached(ctx context.Context, worldID, agentName s
 		return fmt.Errorf("world %s is not running.\nStart a world first with 'spwn world'", worldID)
 	}
 
-	cmd := a.runtime.BuildCommand(runtimes.SpawnConfig{
+	rt, err := a.resolveSpawner(u)
+	if err != nil {
+		return err
+	}
+
+	cmd := rt.BuildCommand(runtimes.SpawnConfig{
 		AgentName: agentName,
 		WorldID:   worldID,
 	})
