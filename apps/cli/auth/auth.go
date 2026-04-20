@@ -2,104 +2,452 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/auth"
-	"github.com/spf13/cobra"
 	"spwn.sh/packages/platform"
 )
 
-// --- Parent command: spwn auth (shows status) ---
-
-var defaultAuthHelp func(*cobra.Command, []string)
-
-// Cmd is the auth command group.
+// Cmd is the auth command group. The bare invocation renders the
+// multi-method dashboard so users see every credential spwn detected,
+// which one is active, and every disable/use/logout action available.
 var Cmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Manage credentials - login, logout, status",
+	Short: "Manage credentials — status, login, use, logout, disable",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New()
-
-		// Resolve all providers via auth package
-		creds := auth.ResolveAll()
-
-		s.Blank()
-
-		// Table
-		t := ui.NewTable("PROVIDER", "STATUS", "SOURCE")
-		for _, p := range []auth.Provider{auth.ProviderAnthropic, auth.ProviderOpenAI} {
-			cred := creds[p]
-			t.AddRow(string(p), statusText(cred.Type != auth.CredTypeNone), cred.Source)
-		}
-		t.Render()
-
-		// Token cache info
-		s.Blank()
-		cached := auth.ReadCachedToken()
-		if cached != "" {
-			tokenPath := platform.BaseDir() + "/.auth-token"
-			if info, err := os.Stat(tokenPath); err == nil {
-				age := time.Since(info.ModTime())
-				s.Info("Cached token:", fmt.Sprintf("%s (%s ago)", abbreviate(tokenPath), formatAge(age)))
-			}
-		} else {
-			s.Info("Cached token:", ui.Faint("none"))
-		}
-
-		s.Blank()
-		anyConfigured := false
-		for _, cred := range creds {
-			if cred.Type != auth.CredTypeNone {
-				anyConfigured = true
-				break
-			}
-		}
-		if !anyConfigured {
-			fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint(`Sign in: "claude login" (Anthropic) or "codex login" (OpenAI)`))
-			s.Blank()
-		}
-
-		return nil
+		return runStatus()
 	},
 }
+
+var defaultAuthHelp func(*cobra.Command, []string)
 
 func init() {
 	defaultAuthHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(authHelp)
 
+	Cmd.AddCommand(statusCmd)
+	Cmd.AddCommand(useCmd)
 	Cmd.AddCommand(loginCmd)
 	Cmd.AddCommand(logoutCmd)
-	Cmd.AddCommand(tokenCmd)
+	Cmd.AddCommand(disableCmd)
+	Cmd.AddCommand(enableCmd)
 	Cmd.AddCommand(checkCmd)
-	Cmd.AddCommand(statusCmd)
-	Cmd.AddCommand(providersCmd)
+	Cmd.AddCommand(tokenCmd) // deprecated alias for login anthropic --api-key
+
+	loginCmd.Flags().StringVar(&loginAPIKey, "api-key", "", "Save an API key for this provider")
+	loginCmd.Flags().BoolVar(&loginOAuth, "oauth", false, "Print OAuth login instructions for this provider")
+	logoutCmd.Flags().StringVar(&logoutMethod, "method", "", "Scope logout to a single method (oauth | api_key)")
 }
 
-// statusCmd is a named alias for the bare `spwn auth` command — both
-// render the provider table. Exposed as an explicit subcommand so it
-// shows up in `auth --help`.
+// providers is the set we render + accept as CLI args. Google is left
+// off because it has no runtime wired in today; keeping it here would
+// pollute the dashboard with a permanently-empty row.
+var providers = []auth.Provider{auth.ProviderAnthropic, auth.ProviderOpenAI}
+
+// methods is the fixed set of user-facing credential styles.
+var methods = []auth.Method{auth.MethodOAuth, auth.MethodAPIKey}
+
+// ── status / dashboard ──────────────────────────────────────────────
+
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Show authentication status for every AI provider",
+	Short: "Show every detected credential and which one is active",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return Cmd.RunE(cmd, args)
+		return runStatus()
 	},
 }
 
-// providersCmd is another alias of the bare `spwn auth` command.
-// Kept as a distinct entry because it's the name users reach for
-// when they want to "see what providers are configured".
-var providersCmd = &cobra.Command{
-	Use:   "providers",
-	Short: "List configured AI providers (alias of \"auth status\")",
+// runStatus renders a row per detected (provider, method) pair so
+// users can see what spwn found, what won, and why. Providers with
+// no creds still get a single "missing" row — the dashboard must
+// always show every provider, not just the configured ones.
+func runStatus() error {
+	s := ui.New()
+	s.Blank()
+
+	t := ui.NewTable("PROVIDER", "METHOD", "STATE", "SOURCE")
+	for _, p := range providers {
+		disabled := auth.IsProviderDisabled(p)
+		activeMethod := auth.ActiveMethod(p)
+		detected := auth.DetectMethods(p)
+
+		if len(detected) == 0 {
+			state := "missing"
+			if disabled {
+				state = "disabled"
+			}
+			t.AddRow(string(p), "—", state, "—")
+			continue
+		}
+
+		// Figure out which single detection is "active" — the one
+		// Resolve would return right now. pickByPref logic is
+		// reproduced here so the dashboard doesn't disagree with
+		// the runtime.
+		winner := pickActive(p, detected, activeMethod, disabled)
+		for _, cred := range detected {
+			state := "known"
+			switch {
+			case disabled:
+				state = "disabled"
+			case cred == winner:
+				state = "active"
+			}
+			t.AddRow(string(p), string(cred.Method()), state, cred.Source)
+		}
+	}
+	t.Render()
+
+	// Hints — keep them short and action-oriented. The dashboard
+	// should teach by example, not blog.
+	s.Blank()
+	s.Info("Pick a method:", "spwn auth use <provider> <oauth|api_key>")
+	s.Info("Log out cleanly:", "spwn auth logout <provider>")
+	s.Info("Opt out entirely:", "spwn auth disable <provider>")
+	s.Blank()
+	return nil
+}
+
+// pickActive mirrors auth.pickByPref's selection logic for the
+// dashboard. Returns nil when no credential would be active (disabled
+// provider, empty detection list).
+func pickActive(p auth.Provider, detected []*auth.Credential, pref auth.Method, disabled bool) *auth.Credential {
+	if disabled || len(detected) == 0 {
+		return nil
+	}
+	if pref != "" {
+		for _, c := range detected {
+			if c.Method() == pref {
+				return c
+			}
+		}
+	}
+	return detected[0]
+}
+
+// ── use ─────────────────────────────────────────────────────────────
+
+var useCmd = &cobra.Command{
+	Use:   "use <provider> <method>",
+	Short: "Pick which credential method spwn should prefer",
+	Long: `Flip the active method for a provider. Run without a method
+to clear the preference (back to auto-select).
+
+Example:
+  spwn auth use anthropic oauth
+  spwn auth use openai api_key`,
+	Args: cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return Cmd.RunE(cmd, args)
+		p, err := parseProvider(args[0])
+		if err != nil {
+			return err
+		}
+		var m auth.Method
+		if len(args) == 2 {
+			m, err = parseMethod(args[1])
+			if err != nil {
+				return err
+			}
+		}
+		if err := auth.SetActiveMethod(p, m); err != nil {
+			return err
+		}
+		s := ui.New()
+		s.Blank()
+		if m == "" {
+			s.Success(fmt.Sprintf("%s: auto-select restored", p))
+		} else {
+			s.Success(fmt.Sprintf("%s: active method set to %s", p, m))
+		}
+		s.Blank()
+		return runStatus()
 	},
 }
+
+// ── login ───────────────────────────────────────────────────────────
+
+var (
+	loginAPIKey string
+	loginOAuth  bool
+)
+
+var loginCmd = &cobra.Command{
+	Use:   "login <provider>",
+	Short: "Set up credentials for a provider",
+	Long: `Register credentials for a provider. The simplest path is an
+API key:
+
+  spwn auth login anthropic --api-key sk-ant-...
+
+For OAuth-backed subscription access (Claude.ai / ChatGPT Plus via codex),
+run the upstream CLI login first, then re-run this command — spwn will
+detect the new credential and record it:
+
+  claude login   # then: spwn auth login anthropic
+  codex login    # then: spwn auth login openai`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		p, err := parseProvider(args[0])
+		if err != nil {
+			return err
+		}
+		s := ui.New()
+		s.Blank()
+
+		// Explicit API-key path: persist into the provider's cache.
+		if loginAPIKey != "" {
+			if err := saveAPIKey(p, strings.TrimSpace(loginAPIKey)); err != nil {
+				return s.FailHint("Save failed", err,
+					"Check permissions on "+abbreviate(platform.BaseDir()))
+			}
+			_ = auth.SyncCredentials()
+			s.Done(fmt.Sprintf("%s API key saved", p), "spwn auth status to confirm")
+			s.Blank()
+			return nil
+		}
+
+		// OAuth: we don't own the flow (yet). Point at the upstream CLI
+		// and then re-resolve so the user sees the result in-line.
+		if loginOAuth {
+			s.Info("OAuth login", "run the runtime CLI's login flow:")
+			switch p {
+			case auth.ProviderAnthropic:
+				fmt.Fprintln(os.Stderr, "    claude login")
+			case auth.ProviderOpenAI:
+				fmt.Fprintln(os.Stderr, "    codex login")
+			}
+			s.Blank()
+			s.Info("Then verify:", "spwn auth status")
+			s.Blank()
+			return nil
+		}
+
+		// No flags: detect and report what spwn can see. Keeps the
+		// old verb's discovery behaviour reachable.
+		detected := auth.DetectMethods(p)
+		if len(detected) == 0 {
+			return s.FailHint(fmt.Sprintf("%s not configured", p),
+				errors.New("no credentials detected"),
+				fmt.Sprintf("Run `spwn auth login %s --api-key <key>` or `--oauth` for instructions", p))
+		}
+		for _, cred := range detected {
+			s.Done(fmt.Sprintf("%s: %s", p, cred.Method()), cred.Source)
+		}
+		_ = auth.SyncCredentials()
+		s.Blank()
+		return nil
+	},
+}
+
+// saveAPIKey persists a user-entered API key into the right per-provider
+// slot. Anthropic reuses the legacy `.auth-token` cache so downstream
+// tools that read it directly (Claude CLI, VS Code extension) keep
+// working. OpenAI needs a net-new cache since `~/.codex/auth.json` is
+// OAuth-shaped and owned by codex; we drop ours under CredentialsDir.
+func saveAPIKey(p auth.Provider, key string) error {
+	if key == "" {
+		return errors.New("empty key")
+	}
+	switch p {
+	case auth.ProviderAnthropic:
+		return auth.SaveToken(key)
+	case auth.ProviderOpenAI:
+		return errors.New("OpenAI API key persistence not yet supported; export OPENAI_API_KEY in your shell for now")
+	}
+	return fmt.Errorf("unsupported provider %q", p)
+}
+
+// ── logout ──────────────────────────────────────────────────────────
+
+var logoutMethod string
+
+var logoutCmd = &cobra.Command{
+	Use:   "logout <provider>",
+	Short: "Clear stored credentials for a provider",
+	Long: `Remove every stored credential for a provider — cache file,
+macOS keychain entry, runtime-CLI auth files. Does NOT unset env vars
+(the shell owns those); any active env vars are surfaced so you know
+to unset them manually.
+
+  spwn auth logout anthropic
+  spwn auth logout openai
+  spwn auth logout anthropic --method api_key   # spare keychain`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		p, err := parseProvider(args[0])
+		if err != nil {
+			return err
+		}
+		opts := auth.LogoutOpts{}
+		if logoutMethod != "" {
+			opts.Method, err = parseMethod(logoutMethod)
+			if err != nil {
+				return err
+			}
+		}
+		s := ui.New()
+		s.Blank()
+
+		res := auth.LogoutProvider(p, opts)
+
+		if len(res.Cleared) == 0 && len(res.Remaining) == 0 && !res.HasErrors() {
+			s.Info(string(p), "already logged out")
+			s.Blank()
+			return nil
+		}
+		for _, item := range res.Cleared {
+			s.Done("Removed", item)
+		}
+		for _, item := range res.Remaining {
+			s.Warn("Still set (shell env)", item+"  — run `unset "+strings.TrimPrefix(item, "env:")+"` to clear")
+		}
+		for _, err := range res.Errors {
+			s.Warn("Error", err.Error())
+		}
+		s.Blank()
+		if res.HasErrors() {
+			return errors.New("logout completed with errors")
+		}
+		return nil
+	},
+}
+
+// ── disable / enable ────────────────────────────────────────────────
+
+var disableCmd = &cobra.Command{
+	Use:   "disable <provider>",
+	Short: "Tell spwn not to use this provider, even if creds exist",
+	Long: `Opt a provider out without touching credentials. Useful when
+you want spwn to ignore (say) codex OAuth on your machine but leave
+the codex CLI working.`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		p, err := parseProvider(args[0])
+		if err != nil {
+			return err
+		}
+		if err := auth.DisableProvider(p); err != nil {
+			return err
+		}
+		s := ui.New()
+		s.Blank()
+		s.Success(fmt.Sprintf("%s disabled; spwn will behave as though it has no credentials", p))
+		s.Info("Re-enable with:", fmt.Sprintf("spwn auth enable %s", p))
+		s.Blank()
+		return nil
+	},
+}
+
+var enableCmd = &cobra.Command{
+	Use:   "enable <provider>",
+	Short: "Reverse a previous `disable`",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		p, err := parseProvider(args[0])
+		if err != nil {
+			return err
+		}
+		if err := auth.EnableProvider(p); err != nil {
+			return err
+		}
+		s := ui.New()
+		s.Blank()
+		s.Success(fmt.Sprintf("%s enabled", p))
+		s.Blank()
+		return runStatus()
+	},
+}
+
+// ── check ───────────────────────────────────────────────────────────
+
+var checkCmd = &cobra.Command{
+	Use:   "check [provider]",
+	Short: "Validate active credentials against each provider's API",
+	Args:  cobra.MaximumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		s := ui.New()
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		s.Blank()
+		s.Start("Validating credentials...")
+
+		var results []auth.ProviderStatus
+		if len(args) == 1 {
+			p, err := parseProvider(args[0])
+			if err != nil {
+				return err
+			}
+			cred := auth.Resolve(p)
+			results = append(results, *auth.Validate(ctx, cred))
+		} else {
+			results = auth.ValidateAll(ctx)
+		}
+
+		s.Done("Validation complete", fmt.Sprintf("%d provider(s)", len(results)))
+		s.Blank()
+
+		t := ui.NewTable("PROVIDER", "STATUS", "METHOD", "SOURCE")
+		for _, r := range results {
+			var status string
+			switch {
+			case r.Connected:
+				status = "connected"
+			case r.Error != "":
+				status = ui.Red("✗") + " " + r.Error
+			default:
+				status = "not configured"
+			}
+			method := string((&auth.Credential{Type: r.CredType}).Method())
+			if method == "" {
+				method = "—"
+			}
+			t.AddRow(string(r.Provider), status, method, r.Source)
+		}
+		t.Render()
+
+		for _, r := range results {
+			if r.Usage != nil && r.Connected {
+				s.Blank()
+				s.Info(string(r.Provider)+" usage:", "")
+				if r.Usage.SessionPercent > 0 {
+					s.Info("  Session:", fmt.Sprintf("%.1f%% used", r.Usage.SessionPercent))
+				}
+				if r.Usage.WeeklyPercent > 0 {
+					s.Info("  Weekly:", fmt.Sprintf("%.1f%% used", r.Usage.WeeklyPercent))
+				}
+				if r.Usage.CreditsLimit > 0 {
+					s.Info("  Credits:", fmt.Sprintf("%.2f / %.2f %s", r.Usage.CreditsUsed, r.Usage.CreditsLimit, r.Usage.Currency))
+				}
+			}
+		}
+		s.Blank()
+		return nil
+	},
+}
+
+// ── token (deprecated) ──────────────────────────────────────────────
+
+var tokenCmd = &cobra.Command{
+	Use:    "token <token>",
+	Short:  "Deprecated — use `login anthropic --api-key <token>` instead",
+	Hidden: true,
+	Args:   cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		loginAPIKey = args[0]
+		return loginCmd.RunE(cmd, []string{"anthropic"})
+	},
+}
+
+// ── help ────────────────────────────────────────────────────────────
 
 func authHelp(cmd *cobra.Command, args []string) {
 	if cmd.Name() != "auth" {
@@ -108,22 +456,26 @@ func authHelp(cmd *cobra.Command, args []string) {
 		}
 		return
 	}
-
 	w := cmd.OutOrStdout()
 	ui.RenderGroupedHelp(w,
 		ui.Strong("⬡ auth")+" "+ui.Faint("- manage credentials"),
 		[]ui.HelpGroup{
-			{Title: "Commands", Commands: []ui.HelpEntry{
-				{Name: "status", Desc: "Show authentication status " + ui.Faint("(default when no subcommand)")},
-				{Name: "providers", Desc: "List configured AI providers"},
-				{Name: "login", Desc: "Set up credentials (Keychain or manual)"},
-				{Name: "logout", Desc: "Clear cached credentials"},
-				{Name: "token <token>", Desc: "Set a token directly (CI / scripts)"},
-				{Name: "check", Desc: "Validate credentials for all AI providers"},
+			{Title: "Inspect", Commands: []ui.HelpEntry{
+				{Name: "status", Desc: "Show every detected credential (default when no subcommand)"},
+				{Name: "check [provider]", Desc: "Validate active credentials against each API"},
 			}},
-			{Title: "Environment Variables", Commands: []ui.HelpEntry{
-				{Name: "ANTHROPIC_API_KEY", Desc: "Anthropic Claude API key"},
-				{Name: "OPENAI_API_KEY", Desc: "OpenAI API key"},
+			{Title: "Configure", Commands: []ui.HelpEntry{
+				{Name: "use <provider> <method>", Desc: "Pick oauth or api_key for a provider"},
+				{Name: "login <provider>", Desc: "Register credentials (--api-key <val> or --oauth)"},
+				{Name: "disable <provider>", Desc: "Ignore a provider without deleting creds"},
+				{Name: "enable <provider>", Desc: "Reverse a previous disable"},
+			}},
+			{Title: "Remove", Commands: []ui.HelpEntry{
+				{Name: "logout <provider>", Desc: "Clear all credentials for a provider (keychain, files)"},
+			}},
+			{Title: "Supported providers", Commands: []ui.HelpEntry{
+				{Name: "anthropic", Desc: "Claude — OAuth (subscription) or API key"},
+				{Name: "openai", Desc: "Codex — OAuth (ChatGPT Plus) or API key (env-only today)"},
 			}},
 		},
 		"spwn auth [command]",
@@ -131,199 +483,36 @@ func authHelp(cmd *cobra.Command, args []string) {
 	)
 }
 
-// --- spwn auth login ---
+// ── shared helpers ──────────────────────────────────────────────────
 
-var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Detect credentials from CLI logins and system keychain",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New()
-		s.Blank()
-
-		found := false
-
-		// Anthropic: check keychain (Claude Code subscription)
-		s.Start("Checking Anthropic...")
-		cred := auth.Resolve(auth.ProviderAnthropic)
-		if cred.Type != auth.CredTypeNone {
-			if cred.Type == auth.CredTypeKeychain {
-				_ = auth.SaveToken(cred.Token)
-			}
-			_ = auth.EnableProvider(auth.ProviderAnthropic)
-			s.Done("Anthropic", cred.Source)
-			found = true
-		} else {
-			s.Done("Anthropic", ui.Faint("not found - run: claude login"))
-		}
-
-		// OpenAI: check codex auth.json
-		s.Start("Checking OpenAI...")
-		openai := auth.Resolve(auth.ProviderOpenAI)
-		if openai.Type != auth.CredTypeNone {
-			_ = auth.EnableProvider(auth.ProviderOpenAI)
-			s.Done("OpenAI", openai.Source)
-			found = true
-		} else {
-			s.Done("OpenAI", ui.Faint("not found - run: codex login"))
-		}
-
-		// Sync credentials
-		_ = auth.SyncCredentials()
-
-		s.Blank()
-		if found {
-			s.Success("Credentials synced.")
-		} else {
-			fmt.Fprintf(os.Stderr, "  %s\n", ui.Faint("Sign in with your runtime CLI first:"))
-			fmt.Fprintf(os.Stderr, "    %s\n", "claude login    (Anthropic subscription)")
-			fmt.Fprintf(os.Stderr, "    %s\n", "codex login     (OpenAI subscription)")
-		}
-		s.Blank()
-		return nil
-	},
-}
-
-// --- spwn auth logout ---
-
-var logoutCmd = &cobra.Command{
-	Use:   "logout",
-	Short: "Clear cached credentials",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New()
-		s.Blank()
-
-		cached := auth.ReadCachedToken()
-		if cached == "" {
-			s.Info("No cached token", "nothing to clear")
-			s.Blank()
-			return nil
-		}
-
-		if err := auth.ClearToken(); err != nil {
-			return s.FailHint("Clear failed", err, "Try removing manually: rm "+platform.BaseDir()+"/.auth-token")
-		}
-
-		s.Done("Cleared cached token", abbreviate(platform.BaseDir()+"/.auth-token"))
-
-		// Warn about lingering env vars
-		var active []string
-		for _, key := range []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_AUTH_TOKEN"} {
-			if os.Getenv(key) != "" {
-				active = append(active, key)
-			}
-		}
-		if len(active) > 0 {
-			s.Blank()
-			s.Warn("Environment", strings.Join(active, ", ")+" still set in your shell")
-		}
-
-		s.Blank()
-		return nil
-	},
-}
-
-// --- spwn auth token <token> ---
-
-var tokenCmd = &cobra.Command{
-	Use:   "token <token>",
-	Short: "Set a token directly - for CI and scripts",
-	Args:  cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New()
-		s.Blank()
-
-		input := strings.TrimSpace(args[0])
-		if input == "" {
-			return s.FailHint("Empty token", fmt.Errorf("no token provided"), "Pass a non-empty token")
-		}
-
-		if err := auth.SaveToken(input); err != nil {
-			return s.FailHint("Save failed", err, "Check permissions on "+abbreviate(platform.BaseDir()))
-		}
-
-		kind := "token"
-		if strings.HasPrefix(input, "sk-ant-") {
-			kind = "API key"
-		}
-
-		s.Done("Saved "+kind, abbreviate(platform.BaseDir()+"/.auth-token"))
-		s.Blank()
-		return nil
-	},
-}
-
-// --- spwn auth check ---
-
-var checkCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Validate credentials for all AI providers",
-	RunE:  runCheck,
-}
-
-func runCheck(cmd *cobra.Command, _ []string) error {
-	s := ui.New()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	s.Blank()
-	s.Start("Validating credentials...")
-
-	results := auth.ValidateAll(ctx)
-
-	s.Done("Validation complete", fmt.Sprintf("%d providers checked", len(results)))
-	s.Blank()
-
-	t := ui.NewTable("PROVIDER", "STATUS", "TYPE", "SOURCE")
-	for _, r := range results {
-		// Bare words hand off to ui.Table's auto-indicator; error
-		// messages are pre-formatted with a red ✗ + explanation so
-		// the table passes them through verbatim.
-		var status string
-		switch {
-		case r.Connected:
-			status = "connected"
-		case r.Error != "":
-			status = ui.Red("✗") + " " + r.Error
-		default:
-			status = "not configured"
-		}
-		t.AddRow(string(r.Provider), status, string(r.CredType), r.Source)
-	}
-	t.Render()
-
-	// Show usage details for connected providers
-	for _, r := range results {
-		if r.Usage != nil && r.Connected {
-			s.Blank()
-			s.Info(string(r.Provider)+" usage:", "")
-			if r.Usage.SessionPercent > 0 {
-				s.Info("  Session:", fmt.Sprintf("%.1f%% used", r.Usage.SessionPercent))
-			}
-			if r.Usage.WeeklyPercent > 0 {
-				s.Info("  Weekly:", fmt.Sprintf("%.1f%% used", r.Usage.WeeklyPercent))
-			}
-			if r.Usage.CreditsLimit > 0 {
-				s.Info("  Credits:", fmt.Sprintf("%.2f / %.2f %s", r.Usage.CreditsUsed, r.Usage.CreditsLimit, r.Usage.Currency))
-			}
+func parseProvider(raw string) (auth.Provider, error) {
+	lower := strings.ToLower(strings.TrimSpace(raw))
+	for _, p := range providers {
+		if string(p) == lower {
+			return p, nil
 		}
 	}
-
-	s.Blank()
-	return nil
+	names := make([]string, len(providers))
+	for i, p := range providers {
+		names[i] = string(p)
+	}
+	sort.Strings(names)
+	return "", fmt.Errorf("unknown provider %q; try one of: %s", raw, strings.Join(names, ", "))
 }
 
-// --- Helpers ---
-
-// statusText returns the bare status word the table renderer
-// expects. The ui.Table's STATUS column auto-applies a colored
-// indicator based on this value - do not embed icons or ANSI
-// codes here or the table will double up (you'll see "○ ✓ …").
-func statusText(ok bool) string {
-	if ok {
-		return "connected"
+func parseMethod(raw string) (auth.Method, error) {
+	lower := strings.ToLower(strings.TrimSpace(raw))
+	for _, m := range methods {
+		if string(m) == lower {
+			return m, nil
+		}
 	}
-	return "not configured"
+	names := make([]string, len(methods))
+	for i, m := range methods {
+		names[i] = string(m)
+	}
+	sort.Strings(names)
+	return "", fmt.Errorf("unknown method %q; try one of: %s", raw, strings.Join(names, ", "))
 }
 
 func abbreviate(path string) string {
@@ -332,17 +521,4 @@ func abbreviate(path string) string {
 		return "~" + path[len(home):]
 	}
 	return path
-}
-
-func formatAge(d time.Duration) string {
-	switch {
-	case d < time.Minute:
-		return fmt.Sprintf("%ds", int(d.Seconds()))
-	case d < time.Hour:
-		return fmt.Sprintf("%dm", int(d.Minutes()))
-	case d < 24*time.Hour:
-		return fmt.Sprintf("%dh", int(d.Hours()))
-	default:
-		return fmt.Sprintf("%dd", int(d.Hours()/24))
-	}
 }
