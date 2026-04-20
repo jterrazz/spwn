@@ -36,20 +36,15 @@ func (*spawner) Name() string { return "codex" }
 // the CLI already bridges the terminology so callers don't need to
 // know the runtime's internal vocabulary).
 func (*spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
-	// Interactive mode: no prompt, no session — just drop the user
-	// into codex's REPL.
-	if cfg.Prompt == "" && cfg.AgentName == "" {
+	// Interactive mode: no prompt. Covers both the anonymous REPL
+	// (no AgentName) and the architect's detached "just start the
+	// agent in its container" spawn (AgentName set, no prompt) — both
+	// want the same bare `codex` REPL.
+	if cfg.Prompt == "" {
 		return []string{"codex"}
 	}
 
-	// Non-interactive exec. Named agent or anonymous NPC both go
-	// through `codex exec`; the prompt is the final positional arg
-	// (required). Missing prompt with AgentName set would be a
-	// no-op exec — return nothing so the caller can error cleanly.
-	if cfg.Prompt == "" {
-		return nil
-	}
-
+	// Non-interactive exec path: a prompt was supplied.
 	cmd := []string{"codex", "exec"}
 	if cfg.SessionID != "" {
 		cmd = append(cmd, "--thread", cfg.SessionID)

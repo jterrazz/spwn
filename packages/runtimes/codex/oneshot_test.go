@@ -30,14 +30,13 @@ func TestBuildCommand_oneShotResume(t *testing.T) {
 	assertEqStrings(t, got, []string{"codex", "exec", "--thread", "th_abc", "follow up"})
 }
 
-func TestBuildCommand_missingPromptForNamedAgent(t *testing.T) {
-	// Named agent without prompt is a degenerate call — BuildCommand
-	// returns nil so the caller errors cleanly rather than silently
-	// running `codex exec` with no prompt.
+func TestBuildCommand_namedAgentNoPromptIsInteractive(t *testing.T) {
+	// Named agent without a prompt is how the architect spawns an
+	// agent in detached mode — it wants a blocking REPL process
+	// running inside the container. That's the same shape as the
+	// anonymous interactive case: `codex` with no flags.
 	got := Spawner.BuildCommand(runtimes.SpawnConfig{AgentName: "neo"})
-	if got != nil {
-		t.Errorf("expected nil for named agent without prompt, got %v", got)
-	}
+	assertEqStrings(t, got, []string{"codex"})
 }
 
 func TestOneShotFlags_appendsJSON(t *testing.T) {

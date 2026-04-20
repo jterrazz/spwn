@@ -319,8 +319,10 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	// (pw == nil, legacy global-mode spawn), knowledge stays empty and
 	// the spawn pipeline drops the bind mount.
 	knowledge := ""
+	runtimeName := ""
 	if pw != nil {
 		knowledge = pw.Knowledge
+		runtimeName = pw.Runtime
 	}
 
 	result, err := arc.Spawn(ctx, architect.SpawnOpts{
@@ -332,6 +334,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		Agents:       agents,
 		ForceRebuild: spawnForceRebuild,
 		Knowledge:    knowledge,
+		RuntimeName:  runtimeName,
 		LogWriter:    buildProgress,
 		OnProgress: func(event, detail string) {
 			switch event {
