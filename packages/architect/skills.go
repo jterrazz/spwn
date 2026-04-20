@@ -8,9 +8,52 @@ import (
 	"sort"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"spwn.sh/packages/dependency/tool"
 	"spwn.sh/packages/transpile"
 )
+
+// loadRuntimeHooks parses <root>/spwn/hooks.yaml into transpile.HookEntry
+// slices for the architect-driven spawn path. Mirrors the source
+// package's loadHooks but lives here so the spawn flow doesn't need to
+// construct a full ProjectSource just to read the manifest. Malformed
+// YAML returns nil rather than erroring — `spwn check` is the
+// authoring-side gate; spawn is best-effort.
+func loadRuntimeHooks(projectRoot string) []transpile.HookEntry {
+	if projectRoot == "" {
+		return nil
+	}
+	path := filepath.Join(projectRoot, "spwn", "hooks.yaml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var parsed struct {
+		Hooks []struct {
+			Name    string `yaml:"name"`
+			Event   string `yaml:"event"`
+			Matcher string `yaml:"matcher,omitempty"`
+			Command string `yaml:"command"`
+		} `yaml:"hooks"`
+	}
+	if err := yaml.Unmarshal(data, &parsed); err != nil {
+		return nil
+	}
+	out := make([]transpile.HookEntry, 0, len(parsed.Hooks))
+	for _, h := range parsed.Hooks {
+		if h.Name == "" || h.Event == "" || h.Command == "" {
+			continue
+		}
+		out = append(out, transpile.HookEntry{
+			Name:    h.Name,
+			Event:   h.Event,
+			Matcher: h.Matcher,
+			Command: h.Command,
+		})
+	}
+	return out
+}
 
 // collectRuntimeSkills assembles every skill the compiled tree should
 // emit into each agent's native skill directory (.claude/skills/ for

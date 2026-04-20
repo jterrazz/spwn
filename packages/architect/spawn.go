@@ -518,17 +518,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Every docker-cp into /agents/<name>/ lands root:root (tar
-	// headers don't carry uid/gid today). Chown the whole tree to
-	// the non-root agent user in one pass — see ChownAgentHomes for
-	// why this matters (short version: claude won't auth otherwise).
-	if len(agentHomes) > 0 {
-		if err := deploy.ChownAgentHomes(ctx, a.backend, containerID, agentHomes); err != nil {
-			a.backend.Stop(ctx, containerID)
-			a.backend.Remove(ctx, containerID)
-			return nil, fmt.Errorf("chown agent homes: %w", err)
-		}
-	}
+	// The chown used to sit here — but the transpile tree gets
+	// docker-cp'd further down, which re-creates root-owned files
+	// on top of our work. ChownAgentHomes now runs AFTER every cp
+	// step (see the second call below) so spwn can actually write
+	// to its own home (e.g. codex's PrelaunchShell appending the
+	// trust table to $HOME/.codex/config.toml).
 
 	// Probe tools by running each resolved tool's Verify() commands
 	// inside the container. This is the canonical "is my image
@@ -558,6 +553,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		Agents:                rosterCompileAgents(rosterAgents),
 		WorldKnowledgeMounted: knowledgeMounted,
 		Skills:                collectRuntimeSkills(platform.ProjectRoot(), resolvedTools),
+		Hooks:                 loadRuntimeHooks(platform.ProjectRoot()),
 	}
 	tree, err := transpile.Compile(opts.runtimeName(), compileInput)
 	if err != nil {
@@ -571,6 +567,19 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("materialise world tree: %w", err)
 	}
 	opts.progress("world_state_written", "per-agent CLAUDE.md + role.md")
+
+	// Chown the whole agent home tree AFTER every docker-cp step so
+	// every file the agent might need to touch at runtime (auth
+	// writes, codex config appends, journal scribbles) is spwn-owned
+	// and writable. Tar extraction from docker cp always lands files
+	// as root:root regardless of source; this pass repairs that.
+	if len(agentHomes) > 0 {
+		if err := deploy.ChownAgentHomes(ctx, a.backend, containerID, agentHomes); err != nil {
+			a.backend.Stop(ctx, containerID)
+			a.backend.Remove(ctx, containerID)
+			return nil, fmt.Errorf("chown agent homes: %w", err)
+		}
+	}
 
 	// Finalize the world record. The labels we already wrote to the
 	// container are the canonical store - this struct is just what we
