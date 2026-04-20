@@ -85,7 +85,24 @@ func (*spawner) SyncHostCredentials(credsDir string) error { return nil }
 // outer prelaunch composition, not this adapter. Callers that need
 // env sourcing chain it themselves.
 func (*spawner) PrelaunchShell() string {
-	return `[ -f /credentials/openai/auth.json ] && mkdir -p $HOME/.codex && ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null`
+	// Three concerns, chained so any one can quietly no-op:
+	//
+	//   1. OAuth symlink — bring /credentials/openai/auth.json into
+	//      $HOME/.codex/ so codex reads the shared credential.
+	//   2. Project trust seed — codex ignores `<cwd>/.codex/config.toml`
+	//      unless the directory is listed in `~/.codex/config.toml`
+	//      under `[projects."<cwd>"] trust_level = "trusted"`. Append
+	//      that block (idempotently via a grep guard) so the renderer-
+	//      emitted project config actually takes effect.
+	//   3. The `$HOME` env var at this point is the agent's home
+	//      (/agents/<name>) — the exact directory codex's cwd points at
+	//      and the exact key the trust table needs.
+	return `mkdir -p $HOME/.codex; ` +
+		`[ -f /credentials/openai/auth.json ] && ` +
+		`ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null; ` +
+		`if ! grep -q "projects.\"$HOME\"" $HOME/.codex/config.toml 2>/dev/null; then ` +
+		`printf '\n[projects."%s"]\ntrust_level = "trusted"\n' "$HOME" >> $HOME/.codex/config.toml; ` +
+		`fi`
 }
 
 // OneShotFlags appends codex's non-interactive output-format flag to
