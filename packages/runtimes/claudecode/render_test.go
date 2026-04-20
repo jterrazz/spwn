@@ -20,9 +20,9 @@ func TestRenderer_Name(t *testing.T) {
 	}
 }
 
-// TestRender_BasePaths — every agent always gets CLAUDE.md, role.md,
-// and a settings.json (the last one is owned by the renderer, not by
-// spawn's DefaultConfigFiles, so we must see it here).
+// TestRender_BasePaths — every agent gets CLAUDE.md + settings.json.
+// Nothing under worlds/ — the per-deployment role is inlined into
+// CLAUDE.md (dropping the worlds/<id>/role.md side file entirely).
 func TestRender_BasePaths(t *testing.T) {
 	tree, err := Renderer.Render(transpile.Input{
 		WorldID: "home",
@@ -33,13 +33,35 @@ func TestRender_BasePaths(t *testing.T) {
 	}
 	want := []string{
 		"agents/neo/CLAUDE.md",
-		"agents/neo/worlds/home/role.md",
 		"agents/neo/.claude/settings.json",
 	}
 	for _, p := range want {
 		if !tree.Has(p) {
 			t.Errorf("tree missing %s", p)
 		}
+	}
+	// Guard against the retired side file.
+	for _, p := range tree.Paths() {
+		if strings.Contains(p, "/worlds/") && strings.HasSuffix(p, "/role.md") {
+			t.Errorf("tree still emits role.md at %s — role is inlined into CLAUDE.md now", p)
+		}
+	}
+}
+
+// TestRender_RoleInlinedIntoCLAUDEMD — role flows into the CLAUDE.md
+// "## Role here" block as a single sentence instead of being linked
+// via @worlds/<id>/role.md.
+func TestRender_RoleInlinedIntoCLAUDEMD(t *testing.T) {
+	tree, _ := Renderer.Render(transpile.Input{
+		WorldID: "home",
+		Agents:  []transpile.AgentInput{{Name: "neo", Role: "chief"}},
+	})
+	body, _ := tree.Get("agents/neo/CLAUDE.md")
+	if !strings.Contains(string(body), "deployed as a chief in home") {
+		t.Errorf("role not inlined into CLAUDE.md; got:\n%s", body)
+	}
+	if strings.Contains(string(body), "@worlds/") {
+		t.Errorf("CLAUDE.md still has a @worlds/ import; got:\n%s", body)
 	}
 }
 

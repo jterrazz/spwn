@@ -28,16 +28,16 @@ type AgentClaudeMDInput struct {
 //   - imports the agent's identity via `@SOUL.md`
 //   - inlines the world-shared physics, faculties, and roster bodies
 //     so the agent never has to go read separate files
-//   - imports the per-deployment role via `@worlds/<id>/role.md`
+//   - inlines the one-line "Role here" directly (no separate role.md)
 //   - emits a "Your playbooks" section iff at least one playbook
 //     carries valid frontmatter (name + description)
 //   - spells out the spwn conventions (memory, messaging, knowledge)
 //     that used to live scattered across four "system skills" and a
 //     standalone world/AGENTS.md
 //
-// Tool-shipped skills aren't listed here — Claude Code auto-
-// discovers them from `.claude/skills/` (symlinked at spawn time to
-// /world/skills/ where CollectSkills baked them into the image).
+// Tool-shipped skills land in `.claude/skills/<n>/SKILL.md` at render
+// time (see render.go) — Claude Code's native walker picks them up
+// with no boot-time indirection.
 func GenerateAgentCLAUDEMD(in AgentClaudeMDInput) string {
 	var sb strings.Builder
 
@@ -60,7 +60,7 @@ func GenerateAgentCLAUDEMD(in AgentClaudeMDInput) string {
 	sb.WriteString("\n\n")
 
 	sb.WriteString("## Role here\n\n")
-	fmt.Fprintf(&sb, "@worlds/%s/role.md\n\n", in.WorldID)
+	fmt.Fprintf(&sb, "You are deployed as a %s in %s.\n\n", in.Role, in.WorldID)
 
 	if len(in.Playbooks) > 0 {
 		sb.WriteString("## Your playbooks\n\n")

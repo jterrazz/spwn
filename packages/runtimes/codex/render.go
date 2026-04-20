@@ -30,14 +30,15 @@ func (r *renderer) Name() string { return "codex" }
 
 // Render lays out codex-specific output for each agent. Paths:
 //
-//   - agents/<name>/AGENTS.md              self-contained boot prompt
-//   - agents/<name>/worlds/<id>/role.md    per-deployment role (parity)
+//   - agents/<name>/AGENTS.md                  self-contained boot prompt
+//   - agents/<name>/.codex/config.toml         profile pin + hook feature flag
+//   - agents/<name>/.codex/hooks.json          hook definitions (iff any)
+//   - agents/<name>/.agents/skills/<n>/SKILL.md every resolved skill
 //
 // The AGENTS.md file inlines SOUL + physics + faculties + roster +
 // playbooks + conventions + role + user's AGENTS.md body (if any).
-// Everything that claude-code delivers via `@-imports` in CLAUDE.md
-// arrives here as inlined markdown — codex's runtime contract
-// doesn't resolve imports.
+// Nothing lands under worlds/ — codex doesn't resolve imports and
+// the per-deployment role line is inlined into AGENTS.md directly.
 func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 	t := transpile.New()
 
@@ -55,10 +56,6 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 		if role == "" {
 			role = "worker"
 		}
-		t.AddString(
-			fmt.Sprintf("agents/%s/worlds/%s/role.md", a.Name, input.WorldID),
-			fmt.Sprintf("# Role in %s\n\n%s\n", input.WorldID, role),
-		)
 		t.AddString(
 			fmt.Sprintf("agents/%s/AGENTS.md", a.Name),
 			GenerateAgentAgentsMD(AgentAgentsMDInput{

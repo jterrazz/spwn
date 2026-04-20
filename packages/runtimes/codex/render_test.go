@@ -30,9 +30,8 @@ func TestRender_EmitsAgentsMDAndRoleMD(t *testing.T) {
 	}
 	paths := tree.Paths()
 	wantPaths := map[string]bool{
-		"agents/neo/AGENTS.md":           false,
-		"agents/neo/worlds/home/role.md": false,
-		"agents/neo/.codex/config.toml":  false, // always emitted so codex picks up spwn-owned flags
+		"agents/neo/AGENTS.md":          false,
+		"agents/neo/.codex/config.toml": false, // always emitted so codex picks up spwn-owned flags
 	}
 	for _, p := range paths {
 		if _, ok := wantPaths[p]; ok {
@@ -42,6 +41,13 @@ func TestRender_EmitsAgentsMDAndRoleMD(t *testing.T) {
 	for p, seen := range wantPaths {
 		if !seen {
 			t.Errorf("tree missing %s", p)
+		}
+	}
+	// role.md used to be emitted alongside AGENTS.md; the role line
+	// is inlined into AGENTS.md now so the side file must NOT exist.
+	for _, p := range paths {
+		if strings.Contains(p, "/worlds/") && strings.HasSuffix(p, "/role.md") {
+			t.Errorf("tree still emits role.md at %s — role is inlined into AGENTS.md now", p)
 		}
 	}
 }
@@ -214,26 +220,33 @@ func TestRender_HooksJSON_shape(t *testing.T) {
 	}
 }
 
-func TestRender_RoleMDContent(t *testing.T) {
+// TestRender_RoleInlinedIntoAgentsMD — role flows into the AGENTS.md
+// "## Role here" block as a single sentence. No separate role.md file.
+func TestRender_RoleInlinedIntoAgentsMD(t *testing.T) {
 	tree, _ := Renderer.Render(transpile.Input{
 		WorldID: "home",
 		Agents:  []transpile.AgentInput{{Name: "neo", Role: "chief"}},
 	})
-	got, _ := tree.Get("agents/neo/worlds/home/role.md")
-	want := "# Role in home\n\nchief\n"
-	if string(got) != want {
-		t.Errorf("role.md:\n got %q\nwant %q", got, want)
+	body, ok := tree.Get("agents/neo/AGENTS.md")
+	if !ok {
+		t.Fatal("missing AGENTS.md")
+	}
+	if !strings.Contains(string(body), "deployed as a chief in home") {
+		t.Errorf("role not inlined into AGENTS.md; got:\n%s", body)
 	}
 }
 
+// TestRender_EmptyRoleDefaultsToWorker — an unset role is still
+// surfaced in the AGENTS.md, defaulting to "worker" so the agent
+// always knows its stance in the world.
 func TestRender_EmptyRoleDefaultsToWorker(t *testing.T) {
 	tree, _ := Renderer.Render(transpile.Input{
 		WorldID: "home",
 		Agents:  []transpile.AgentInput{{Name: "neo"}},
 	})
-	got, _ := tree.Get("agents/neo/worlds/home/role.md")
-	if !strings.Contains(string(got), "worker") {
-		t.Errorf("expected default role 'worker' in role.md, got %q", got)
+	body, _ := tree.Get("agents/neo/AGENTS.md")
+	if !strings.Contains(string(body), "deployed as a worker in home") {
+		t.Errorf("empty role should default to worker; got:\n%s", body)
 	}
 }
 
