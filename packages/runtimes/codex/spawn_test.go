@@ -41,21 +41,24 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 	}
 }
 
-// TestSpawner_SupportsSession reflects the current state: codex is
-// not yet wired as a spwn-driven interactive runtime, so we advertise
-// no session support. Flip when architect learns to drive codex
-// sessions directly.
+// TestSpawner_SupportsSession pins codex's resumable-session
+// contract. Codex sessions are identified by `thread_id`; the CLI
+// resumes via `--thread <id>`. spwn plumbs the id through
+// SpawnConfig.SessionID and BuildCommand emits the flag — see the
+// oneshot_test.go suite for the detailed argv round-trip.
 func TestSpawner_SupportsSession(t *testing.T) {
-	if Spawner.SupportsSession() {
-		t.Error("codex SupportsSession() should be false until spwn drives codex sessions")
+	if !Spawner.SupportsSession() {
+		t.Error("codex SupportsSession() should be true now that BuildCommand wires --thread")
 	}
 }
 
-// TestSpawner_BuildCommand returns nil: codex sessions are launched
-// via ad-hoc bash in the architect, not via a spwn-built command.
-func TestSpawner_BuildCommand(t *testing.T) {
-	if cmd := Spawner.BuildCommand(runtimes.SpawnConfig{}); cmd != nil {
-		t.Errorf("BuildCommand should be nil until codex has a spwn-driven invocation; got %v", cmd)
+// TestSpawner_BuildCommand_interactive returns the bare `codex`
+// command for interactive mode (no prompt, no named agent). The full
+// one-shot / exec-subcommand argv is exercised in oneshot_test.go.
+func TestSpawner_BuildCommand_interactive(t *testing.T) {
+	cmd := Spawner.BuildCommand(runtimes.SpawnConfig{})
+	if len(cmd) != 1 || cmd[0] != "codex" {
+		t.Errorf("interactive BuildCommand should be `[codex]`; got %v", cmd)
 	}
 }
 

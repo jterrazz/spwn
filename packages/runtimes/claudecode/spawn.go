@@ -55,6 +55,48 @@ func (c *spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
 func (c *spawner) SupportsSession() bool { return true }
 func (c *spawner) Available() bool       { return true }
 
+// OneShotFlags wraps BuildCommand's argv with Claude Code's non-
+// interactive output flags. Claude has two relevant modes:
+//
+//   - `--print --output-format json` — single envelope on stdout:
+//     {"result": "<text>", "session_id": "<id>", ...}. The CLI's
+//     `spwn agent talk` one-shot path uses this when the caller
+//     doesn't ask for streaming. ParseOneShotResult unmarshals it.
+//
+//   - `--output-format stream-json --verbose` — one JSONL event per
+//     turn as it happens. Used by the web UI's SSE relay so users
+//     see live token arrival. Each line is its own JSON envelope
+//     with a session_id repeated on every event; the talk path
+//     scans the stream in-flight via extractSessionID.
+//
+// Anything other than "stream-json" falls through to the envelope
+// mode. `--print` is absent in the stream path because
+// `--output-format stream-json` already implies non-interactive.
+func (c *spawner) OneShotFlags(base []string, outputFormat string) []string {
+	if outputFormat == "stream-json" {
+		return append(base, "--output-format", "stream-json", "--verbose")
+	}
+	return append(base, "--print", "--output-format", "json")
+}
+
+// ParseOneShotResult unmarshals Claude Code's
+// `--print --output-format json` envelope and returns its text body +
+// session identifier. The envelope shape has been stable across
+// Claude Code releases; missing or extra fields are tolerated (json
+// decoder ignores unknowns by default). A malformed envelope surfaces
+// as a non-nil error so the caller falls back to the raw-output
+// display path.
+func (c *spawner) ParseOneShotResult(raw []byte) (string, string, error) {
+	var resp struct {
+		Result    string `json:"result"`
+		SessionID string `json:"session_id"`
+	}
+	if err := json.Unmarshal(raw, &resp); err != nil {
+		return "", "", fmt.Errorf("parse claude-code result envelope: %w", err)
+	}
+	return resp.Result, resp.SessionID, nil
+}
+
 // ── Container-side setup ─────────────────────────────────────────
 
 // DefaultConfigFiles pre-dismisses Claude Code's first-run UI.
