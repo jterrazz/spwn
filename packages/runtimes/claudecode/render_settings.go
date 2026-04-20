@@ -16,6 +16,11 @@ type SettingsInput struct {
 	// under each event name. Unsupported events are passed through;
 	// Claude Code tolerates unknown events silently.
 	Hooks []transpile.HookEntry
+
+	// Model mirrors agent.yaml#runtime.model. Written verbatim into
+	// `.claude/settings.json#model` so Claude Code pins the agent to
+	// the requested model at startup. Empty string → key omitted.
+	Model string
 }
 
 // GenerateAgentSettingsJSON emits the canonical `.claude/settings.json`
@@ -34,6 +39,9 @@ type SettingsInput struct {
 func GenerateAgentSettingsJSON(in SettingsInput) []byte {
 	payload := map[string]any{
 		"skipDangerousModePermissionPrompt": true,
+	}
+	if in.Model != "" {
+		payload["model"] = in.Model
 	}
 	if hooks := buildHooksMap(in.Hooks); hooks != nil {
 		payload["hooks"] = hooks

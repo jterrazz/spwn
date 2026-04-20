@@ -132,6 +132,16 @@ type AgentInput struct {
 	// without frontmatter stay invisible until the agent decides to
 	// promote them.
 	Playbooks []PlaybookEntry
+
+	// Model is the `runtime.model` override from agent.yaml, passed
+	// through to the renderer so it can pin the agent's model in
+	// `.claude/settings.json` / `[profiles.<agent>]` in codex
+	// config.toml. Empty string means "use the runtime's default".
+	Model string
+	// Provider mirrors `runtime.provider` (anthropic, openai, …).
+	// Mostly informational today; future renderers may use it to
+	// pick between API-key-vs-OAuth config paths.
+	Provider string
 }
 
 // PlaybookEntry is one frontmatter-promoted playbook, ready to index
