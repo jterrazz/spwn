@@ -1999,29 +1999,51 @@ func (s *Server) handleGetAgentFile(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleAuthProviders(w http.ResponseWriter, r *http.Request) {
 	creds := auth.ResolveAll()
+
+	// detectionInfo surfaces every credential spwn found for a provider,
+	// not just the winner. The web UI can mirror the CLI dashboard's
+	// multi-method view without a second round-trip.
+	type detectionInfo struct {
+		Method         string `json:"method"`         // "oauth" | "api_key"
+		CredentialType string `json:"credentialType"` // internal: api_key | oauth | keychain
+		Source         string `json:"source"`
+	}
 	type providerInfo struct {
-		Provider       string         `json:"provider"`
-		Connected      bool           `json:"connected"`
-		CredentialType string         `json:"credentialType"`
-		Source         string         `json:"source"`
-		Error          string         `json:"error,omitempty"`
-		Plan           string         `json:"plan,omitempty"`
+		Provider       string          `json:"provider"`
+		Connected      bool            `json:"connected"`
+		Disabled       bool            `json:"disabled,omitempty"`
+		Method         string          `json:"method,omitempty"`       // active method if any
+		ActiveMethod   string          `json:"activeMethod,omitempty"` // user's pref, if set
+		CredentialType string          `json:"credentialType"`
+		Source         string          `json:"source"`
+		Detections     []detectionInfo `json:"detections,omitempty"`
+		Error          string          `json:"error,omitempty"`
+		Plan           string          `json:"plan,omitempty"`
 		Usage          *auth.UsageInfo `json:"usage,omitempty"`
 	}
+
 	var providers []providerInfo
 	for p, cred := range creds {
-		// Respect disabled state (user clicked Reset)
-		connected := cred.Type != auth.CredTypeNone
-		if auth.IsProviderDisabled(p) {
-			connected = false
-			cred.Type = auth.CredTypeNone
-			cred.Source = ""
-		}
+		disabled := auth.IsProviderDisabled(p)
+		connected := cred.Type != auth.CredTypeNone && !disabled
 		info := providerInfo{
 			Provider:       string(cred.Provider),
 			CredentialType: string(cred.Type),
 			Source:         cred.Source,
 			Connected:      connected,
+			Disabled:       disabled,
+			Method:         string(cred.Method()),
+			ActiveMethod:   string(auth.ActiveMethod(p)),
+		}
+		// Always publish detections — the UI can decide whether to
+		// render them — so "disabled provider with three detections"
+		// still carries the full context.
+		for _, d := range auth.DetectMethods(p) {
+			info.Detections = append(info.Detections, detectionInfo{
+				Method:         string(d.Method()),
+				CredentialType: string(d.Type),
+				Source:         d.Source,
+			})
 		}
 		providers = append(providers, info)
 	}
@@ -2091,18 +2113,24 @@ func (s *Server) handleAuthReset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Clear cached token
-	_ = auth.ClearToken()
-
-	// Disable the provider so keychain/env creds aren't re-resolved
+	// Reset = logout (real, per-provider) + disable so keychain/env
+	// creds aren't silently re-resolved on the next refresh. The old
+	// implementation called ClearToken unconditionally, which cleared
+	// Anthropic's `.auth-token` even when the UI asked to reset OpenAI
+	// — fixed here by routing through LogoutProvider.
+	result := &auth.LogoutResult{}
 	if body.Provider != "" {
-		_ = auth.DisableProvider(auth.Provider(body.Provider))
+		p := auth.Provider(body.Provider)
+		result = auth.LogoutProvider(p, auth.LogoutOpts{})
+		_ = auth.DisableProvider(p)
 	}
+	// SyncCredentials runs inside LogoutProvider; no need to re-call.
 
-	// Re-sync credentials (removes disabled provider from .env)
-	_ = auth.SyncCredentials()
-
-	jsonOK(w, map[string]string{"status": "ok"})
+	jsonOK(w, map[string]interface{}{
+		"status":    "ok",
+		"cleared":   result.Cleared,
+		"remaining": result.Remaining,
+	})
 }
 
 // ============================================================
