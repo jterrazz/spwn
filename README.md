@@ -690,6 +690,208 @@ commands and adapters below belong to one or more of these.
 
 <br/>
 
+## Primitive reference
+
+<details>
+<summary><b>Tools</b> &middot; <code>deps in agent.yaml / spwn.yaml</code></summary>
+
+Tools are runnable dependencies — a binary, an install recipe, sometimes a
+bundle of sidecar files. They're declared in `dependencies:` blocks and
+resolved against a catalog at image-build time.
+
+**Declaration forms** (any of these is a ref):
+
+| Ref | Resolves to | Notes |
+|---|---|---|
+| `spwn:<name>` | Bundled catalog entry | e.g. `spwn:unix`, `spwn:git`, `spwn:codex` |
+| `tool:<name>` | Project-local tool at `spwn/tools/<name>/tool.yaml` | Lives in the repo; no catalog needed |
+| `github:<owner>/<repo>` | Remote tool package | Fetched at resolve time |
+
+**Where declared:**
+
+```yaml
+# spwn.yaml — dependencies shared by every agent in the project
+dependencies:
+  - spwn:unix
+  - spwn:git
+
+# spwn/agents/<n>/agent.yaml — per-agent additions
+dependencies:
+  - spwn:claude-code
+  - tool:my-local-thing
+```
+
+**What the compiler does with them:**
+- Unions all deps across the world's agents, topo-sorts, resolves to a
+  concrete `tool.Tool` implementation
+- Each tool contributes: apt packages, install commands, env vars, user-
+  commands (run after USER switch), optional file drops, optional skills
+- Everything lands in one world image; agents share the binaries at runtime
+
+**Built-in catalog:** `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`,
+`spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect` — see
+[`docs/dependency-catalog.md`](docs/dependency-catalog.md) for the full list.
+
+</details>
+
+<details>
+<summary><b>Agents</b> &middot; <code>spwn/agents/&lt;name&gt;/</code></summary>
+
+An agent is a first-class entity with an identity, a role in a world, a
+set of declared tools, and a persistent mind on disk.
+
+**On-disk layout** (everything is optional except `agent.yaml`):
+
+```
+spwn/agents/<name>/
+  agent.yaml         # required: declarative agent config
+  AGENTS.md          # provider-neutral system prompt body
+  SOUL.md            # the agent's identity — who they are
+  playbooks/         # reusable procedures (frontmatter-promoted in the entry file)
+  journal/           # session history (auto-appended by the system)
+```
+
+**`agent.yaml` fields:**
+
+```yaml
+name: neo                     # required; must match directory
+description: CI auditor       # one-line pitch
+role: worker                  # chief | manager | worker | npc
+team: platform                # optional grouping
+
+runtime:
+  backend: spwn:claude-code   # which runtime drives this agent
+  model: opus                 # pinned into .claude/settings.json#model
+  provider: anthropic         # auth-path hint (anthropic / openai / ...)
+
+dependencies:                 # unioned with spwn.yaml's top-level deps
+  - spwn:unix
+  - spwn:git
+```
+
+**What renders for each agent inside the container:**
+
+| Claude Code | Codex |
+|---|---|
+| `/agents/<n>/CLAUDE.md` | `/agents/<n>/AGENTS.md` |
+| `/agents/<n>/.claude/settings.json` | `/agents/<n>/.codex/config.toml` |
+| `/agents/<n>/.claude/skills/<skill>/…` | `/agents/<n>/.codex/hooks.json` (iff hooks) |
+| `/agents/<n>/SOUL.md` (user-authored, copied verbatim) | `/agents/<n>/.agents/skills/<skill>/…` |
+| `/agents/<n>/playbooks/`, `journal/` | `/agents/<n>/SOUL.md` / `playbooks/` / `journal/` |
+
+The per-agent `CLAUDE.md` / `AGENTS.md` inlines world-shared context
+(physics, faculties, roster) + the agent's role, so the runtime boots
+fully loaded — no `@-imports` to chase at startup.
+
+</details>
+
+<details>
+<summary><b>Skills</b> &middot; <code>spwn/skills/&lt;name&gt;/SKILL.md</code></summary>
+
+Skills are reusable sub-prompts both runtimes auto-discover at startup.
+spwn ships them to the native paths each runtime expects — no bind-mount
+indirection, no symlinks.
+
+**Source form:** directory per skill, entry at `SKILL.md`, any sidecar
+files travel alongside.
+
+```
+spwn/skills/greeter/
+  SKILL.md                      # required; YAML frontmatter + body
+  template.md                   # optional sidecar
+  scripts/run.sh                # optional sidecar
+```
+
+**SKILL.md frontmatter** (minimum required by both runtimes):
+
+```markdown
+---
+name: greeter
+description: Say hello when the session starts.
+---
+Body is the skill's system-prompt fragment the runtime loads.
+```
+
+**Legacy bare-markdown form** is still accepted — `spwn/skills/<n>.md`
+auto-wraps into `<n>/SKILL.md` on load, with synthetic frontmatter
+injected when the body has none.
+
+**What the compiler emits per agent:**
+
+| Runtime | Path |
+|---|---|
+| Claude Code | `.claude/skills/<skill>/SKILL.md` (+ sidecar) |
+| Codex | `.agents/skills/<skill>/SKILL.md` (+ sidecar) |
+
+Note: codex uses `.agents/skills/`, NOT `.codex/skills/`. That's the
+cross-vendor `AGENTS.md` ecosystem convention. Tool-shipped skills
+(from resolved deps) merge into the same tree so both kinds coexist.
+
+</details>
+
+<details>
+<summary><b>Hooks</b> &middot; <code>spwn/hooks.yaml</code></summary>
+
+Hooks fire on runtime events inside the container — tool use, prompt
+submit, session start, etc. They are NOT host-side lifecycle scripts;
+the retired `hook:<phase>` ref is gone.
+
+**Source form:** one declarative manifest, flat list of hook records.
+
+```yaml
+# spwn/hooks.yaml
+hooks:
+  - name: bash-audit
+    event: PreToolUse
+    matcher: Bash
+    command: echo "[audit] $CLAUDE_TOOL_INPUT"
+  - name: welcome
+    event: SessionStart
+    command: echo "session up"
+```
+
+**Fields:**
+
+| Field | Required | Description |
+|---|---|---|
+| `name` | yes | Stable identifier; keys the entry so re-renders are idempotent |
+| `event` | yes | Runtime event name (see below) |
+| `matcher` | no | Scope pattern; defaults to `*`. Passed verbatim — both runtimes honour their own glob/regex convention |
+| `command` | yes | Shell fragment invoked when the hook fires |
+
+**Events supported by both runtimes** (safe cross-runtime set):
+`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`.
+Runtime-specific events (Claude Code has 28, Codex has 5) pass through —
+each runtime silently ignores events it doesn't know.
+
+**What the compiler emits:**
+
+| Runtime | Path | Notes |
+|---|---|---|
+| Claude Code | `.claude/settings.json#hooks` | Merged with the permissions + model keys |
+| Codex | `.codex/hooks.json` + `[features] codex_hooks = true` in `.codex/config.toml` | Without the flag, codex ignores the hooks file |
+
+**Envelope shape** (same for both — one `HookEntry` fans 1:1):
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "..." }] }
+    ]
+  }
+}
+```
+
+Why YAML source when both runtimes store hooks as JSON? Comments,
+multi-line commands, and no quoting hell — same reason `spwn.yaml` and
+`agent.yaml` exist. The YAML → JSON translation is the whole point of
+`spwn build`.
+
+</details>
+
+<br/>
+
 ## Community
 
 - [Website](https://spwn.sh) &middot; [Docs](https://spwn.sh/docs) &middot; [Manifesto](https://spwn.sh/manifesto) &middot; [Issues](https://github.com/jterrazz/spwn/issues)
