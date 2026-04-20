@@ -63,6 +63,12 @@ type AgentSource struct {
 	// provider-neutral prompt. May be nil if the file is missing.
 	AgentMD []byte
 
+	// Soul is the raw bytes of spwn/agents/<name>/SOUL.md — the
+	// agent's identity body. May be nil if the file is missing.
+	// Renderers that can @-import (claude-code) don't need this;
+	// renderers that must inline (codex) do.
+	Soul []byte
+
 	// Config is the parsed spwn/agents/<name>/agent.yaml. Zero value
 	// if the file is missing.
 	Config AgentConfig
@@ -268,6 +274,16 @@ func loadAgent(name, dir string) (AgentSource, error) {
 		src.AgentMD = b
 	} else if !os.IsNotExist(err) {
 		return src, fmt.Errorf("read %s: %w", agentMDPath, err)
+	}
+
+	// SOUL.md — identity body. Missing is fine (renderers that need
+	// it surface a clear error later; tolerant-reads keep the loader
+	// useful during scaffolding and partial-project states).
+	soulPath := filepath.Join(dir, "SOUL.md")
+	if b, err := os.ReadFile(soulPath); err == nil {
+		src.Soul = b
+	} else if !os.IsNotExist(err) {
+		return src, fmt.Errorf("read %s: %w", soulPath, err)
 	}
 
 	// agent.yaml

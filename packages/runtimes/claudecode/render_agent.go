@@ -48,15 +48,15 @@ func GenerateAgentCLAUDEMD(in AgentClaudeMDInput) string {
 	sb.WriteString("@SOUL.md\n\n")
 
 	sb.WriteString("## Physics\n\n")
-	sb.WriteString(strings.TrimSpace(demoteHeadings(stripLeadingH1(in.Physics))))
+	sb.WriteString(strings.TrimSpace(transpile.DemoteHeadings(transpile.StripLeadingH1(in.Physics))))
 	sb.WriteString("\n\n")
 
 	sb.WriteString("## Faculties\n\n")
-	sb.WriteString(strings.TrimSpace(demoteHeadings(stripLeadingH1(in.Faculties))))
+	sb.WriteString(strings.TrimSpace(transpile.DemoteHeadings(transpile.StripLeadingH1(in.Faculties))))
 	sb.WriteString("\n\n")
 
 	sb.WriteString("## Roster\n\n")
-	sb.WriteString(strings.TrimSpace(demoteHeadings(stripLeadingH1(in.Roster))))
+	sb.WriteString(strings.TrimSpace(transpile.DemoteHeadings(transpile.StripLeadingH1(in.Roster))))
 	sb.WriteString("\n\n")
 
 	sb.WriteString("## Role here\n\n")
@@ -99,42 +99,8 @@ func conventionsSection(in AgentClaudeMDInput) string {
 	return sb.String()
 }
 
-// stripLeadingH1 drops a `# …` heading if the body starts with one,
-// so inlined blocks don't double up with the "## Physics" / "##
-// Faculties" / "## Roster" headings we wrap them in above.
-func stripLeadingH1(body string) string {
-	body = strings.TrimLeft(body, "\n")
-	if !strings.HasPrefix(body, "# ") {
-		return body
-	}
-	if idx := strings.Index(body, "\n"); idx != -1 {
-		return strings.TrimLeft(body[idx+1:], "\n")
-	}
-	return ""
-}
-
-// demoteHeadings prefixes every markdown heading line with one more
-// "#" so an inlined block whose top-level sections were H2s nests
-// cleanly under the H2 wrapper we emit for it. Code fences (```)
-// are skipped so shell examples that happen to contain # comments
-// aren't mangled.
-func demoteHeadings(body string) string {
-	var out strings.Builder
-	inFence := false
-	for _, line := range strings.Split(body, "\n") {
-		if strings.HasPrefix(strings.TrimSpace(line), "```") {
-			inFence = !inFence
-			out.WriteString(line)
-			out.WriteByte('\n')
-			continue
-		}
-		if !inFence && strings.HasPrefix(line, "#") {
-			out.WriteByte('#')
-		}
-		out.WriteString(line)
-		out.WriteByte('\n')
-	}
-	// strings.Split adds a trailing empty element for bodies ending
-	// in \n; strip the extra newline we appended for that element.
-	return strings.TrimRight(out.String(), "\n") + "\n"
-}
+// Markdown-shape helpers — `stripLeadingH1` and `demoteHeadings` —
+// used to live here; they moved to `packages/transpile/mdfmt.go` when
+// codex became a first-class renderer that needed the same inlining
+// primitives. Refer to `transpile.StripLeadingH1` and
+// `transpile.DemoteHeadings`.

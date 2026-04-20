@@ -86,6 +86,8 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		agents = append(agents, transpile.AgentInput{
 			Name:      a.Name,
 			Role:      a.Config.Role,
+			Soul:      a.Soul,
+			AgentMD:   a.AgentMD,
 			Playbooks: promotedPlaybooks(a.Layers.Playbooks),
 		})
 	}

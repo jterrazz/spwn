@@ -82,7 +82,10 @@ func TestSpawner_DefaultConfigFiles(t *testing.T) {
 	}
 }
 
-// TestAdapter pins the codex umbrella: install + spawn, no render.
+// TestAdapter pins the codex umbrella as a full three-facet runtime:
+// install + renderer + spawn-time plumbing. All three must stay
+// registered for `spwn agent talk` on a codex-backed world to work
+// end-to-end (same shape as claude-code).
 func TestAdapter(t *testing.T) {
 	if Adapter.Name != "codex" {
 		t.Errorf("Adapter.Name = %q, want codex", Adapter.Name)
@@ -96,7 +99,7 @@ func TestAdapter(t *testing.T) {
 	if Adapter.Spawn == nil {
 		t.Error("Adapter.Spawn is nil — codex ships prelaunch plumbing")
 	}
-	if Adapter.Render != nil {
-		t.Error("Adapter.Render is non-nil — codex has no renderer today")
+	if Adapter.Render == nil {
+		t.Error("Adapter.Render is nil — codex ships a source→Tree renderer")
 	}
 }

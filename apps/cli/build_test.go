@@ -87,9 +87,10 @@ func Test_requireAgentPrompts(t *testing.T) {
 // "valid" and `compile` fails with "unknown runtime" — a silent gap
 // between the two commands.
 func Test_crossCheckRuntimeAdapters(t *testing.T) {
-	// Build a minimal project: spwn.yaml + one agent declaring the
-	// codex backend. The claude-code compile adapter is the only one
-	// registered at test time, so this should surface as a warning.
+	// Safety-net warning for agents that declare a runtime whose
+	// compile adapter isn't registered. Historically used
+	// `spwn:codex` as the example; codex became a first-class
+	// renderer, so the test uses a deliberately-fictional slug.
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"),
 		[]byte(`version: 1
@@ -110,7 +111,7 @@ worlds:
 	}
 	if err := os.WriteFile(filepath.Join(agentDir, "agent.yaml"), []byte(`name: neo
 runtime:
-  backend: "spwn:codex"
+  backend: "spwn:fictional-runtime"
 packages: ["spwn:unix"]
 `), 0o644); err != nil {
 		t.Fatalf("write agent yaml: %v", err)
@@ -126,11 +127,14 @@ packages: ["spwn:unix"]
 	if issues[0].Level != "warning" {
 		t.Fatalf("want warning, got %q", issues[0].Level)
 	}
-	if !strings.Contains(issues[0].Message, "spwn:codex") {
-		t.Fatalf("message does not mention spwn:codex: %q", issues[0].Message)
+	if !strings.Contains(issues[0].Message, "spwn:fictional-runtime") {
+		t.Fatalf("message does not mention spwn:fictional-runtime: %q", issues[0].Message)
 	}
 	if !strings.Contains(issues[0].Hint, "claude-code") {
 		t.Fatalf("hint should list claude-code: %q", issues[0].Hint)
+	}
+	if !strings.Contains(issues[0].Hint, "codex") {
+		t.Fatalf("hint should now list codex too: %q", issues[0].Hint)
 	}
 }
 

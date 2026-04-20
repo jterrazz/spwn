@@ -97,21 +97,43 @@ func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containe
 
 // rosterCompileAgents projects the world record's agent list onto
 // the transpile.Input shape. For each agent, walk the host-side
-// playbooks dir (~/.spwn/agents/<name>/playbooks/) and collect
-// frontmatter-promoted playbooks so the renderer can index them in
-// CLAUDE.md. Missing dirs and malformed frontmatter are tolerated
-// silently — `spwn check` is the authoring-side gate; spawn is
-// best-effort.
+// home (agent.AgentDir(name)) and populate everything a renderer
+// might need: promoted-playbook index, SOUL.md body, user-authored
+// AGENTS.md body. Missing files and malformed frontmatter are
+// tolerated silently — `spwn check` is the authoring-side gate;
+// spawn is best-effort.
+//
+// The bodies are there for renderers that can't @-import (codex),
+// which inline identity + task into a single AGENTS.md at the
+// agent's cwd. Renderers that @-import (claude-code) ignore the
+// bodies; the files survive independently on the docker-cp'd agent
+// home, so the @-references still resolve.
 func rosterCompileAgents(recs []models.AgentRecord) []transpile.AgentInput {
 	out := make([]transpile.AgentInput, 0, len(recs))
 	for _, r := range recs {
+		home := agent.AgentDir(r.Name)
 		out = append(out, transpile.AgentInput{
 			Name:      r.Name,
 			Role:      r.Role,
+			Soul:      readAgentFile(home, "SOUL.md"),
+			AgentMD:   readAgentFile(home, "AGENTS.md"),
 			Playbooks: loadAgentPlaybookIndex(r.Name),
 		})
 	}
 	return out
+}
+
+// readAgentFile returns the body of a file relative to the agent's
+// home. Missing files return nil (not an error) so renderers can
+// tolerate partial scaffolds; any other I/O error surfaces as an
+// empty result rather than crashing the spawn — the renderer still
+// has enough to produce a usable prompt.
+func readAgentFile(home, name string) []byte {
+	b, err := os.ReadFile(filepath.Join(home, name))
+	if err != nil {
+		return nil
+	}
+	return b
 }
 
 // loadAgentPlaybookIndex reads the agent's host-side playbooks dir
