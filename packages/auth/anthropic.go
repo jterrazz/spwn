@@ -16,73 +16,114 @@ import (
 
 // ── Resolution ────────────────────────────────────────────────────────
 
-// resolveAnthropic returns the best available Anthropic credential.
-// Priority: env vars (API key, OAuth, auth token) > cached token
-// file > macOS Keychain.
-func resolveAnthropic() *Credential {
+// detectAnthropic returns every detected Anthropic credential, in the
+// order a naive resolver would prefer them. The single-winner Resolve
+// and the multi-method dashboard both go through this list — one
+// source of truth for "what did we find?".
+//
+// Order (descending priority for auto-select):
+//  1. env ANTHROPIC_API_KEY         (api_key)
+//  2. env CLAUDE_CODE_OAUTH_TOKEN   (oauth)
+//  3. env ANTHROPIC_AUTH_TOKEN      (api_key via CLAUDE's alt header)
+//  4. keychain entry "Claude Code"  (oauth)
+//  5. file ~/.spwn/.auth-token      (oauth or api_key by prefix)
+//
+// Keychain is preferred over the cached token file because a login
+// from the Claude app is more likely to be fresh than a long-sitting
+// spwn cache. Earlier implementations overwrote the cache with keychain
+// contents as a side-effect of resolution; that write is preserved for
+// back-compat with tools that still read `.auth-token` directly.
+func detectAnthropic() []*Credential {
+	var out []*Credential
+
 	if key := os.Getenv("ANTHROPIC_API_KEY"); key != "" {
-		return &Credential{
+		out = append(out, &Credential{
 			Provider: ProviderAnthropic,
 			Type:     CredTypeAPIKey,
 			Token:    key,
 			Source:   "env:ANTHROPIC_API_KEY",
 			EnvVar:   "ANTHROPIC_API_KEY",
-		}
+		})
 	}
 	if token := os.Getenv("CLAUDE_CODE_OAUTH_TOKEN"); token != "" {
-		return &Credential{
+		out = append(out, &Credential{
 			Provider: ProviderAnthropic,
 			Type:     CredTypeOAuth,
 			Token:    token,
 			Source:   "env:CLAUDE_CODE_OAUTH_TOKEN",
 			EnvVar:   "CLAUDE_CODE_OAUTH_TOKEN",
-		}
+		})
 	}
 	if token := os.Getenv("ANTHROPIC_AUTH_TOKEN"); token != "" {
-		return &Credential{
+		out = append(out, &Credential{
 			Provider: ProviderAnthropic,
 			Type:     CredTypeAPIKey,
 			Token:    token,
 			Source:   "env:ANTHROPIC_AUTH_TOKEN",
 			EnvVar:   "ANTHROPIC_API_KEY",
-		}
+		})
 	}
-	// Cached token file + macOS Keychain. When both exist and
-	// differ, prefer keychain (more likely to be fresh).
+	if keychainCred := readKeychainAnthropic(); keychainCred != nil {
+		out = append(out, keychainCred)
+	}
+
+	// Cached `.auth-token` file: type is heuristic on the prefix. This
+	// predates auth.yaml and is kept so older installs still work.
 	tokenPath := platform.BaseDir() + "/.auth-token"
-	cachedToken := ""
 	if data, err := os.ReadFile(tokenPath); err == nil {
-		cachedToken = strings.TrimSpace(string(data))
+		cached := strings.TrimSpace(string(data))
+		if cached != "" {
+			credType := CredTypeOAuth
+			envVar := "CLAUDE_CODE_OAUTH_TOKEN"
+			if strings.HasPrefix(cached, "sk-ant-") {
+				credType = CredTypeAPIKey
+				envVar = "ANTHROPIC_API_KEY"
+			}
+			out = append(out, &Credential{
+				Provider: ProviderAnthropic,
+				Type:     credType,
+				Token:    cached,
+				Source:   "file:~/.spwn/.auth-token",
+				EnvVar:   envVar,
+			})
+		}
 	}
-	keychainCred := readKeychainAnthropic()
 
-	if keychainCred != nil {
-		if cachedToken != keychainCred.Token {
-			_ = SaveToken(keychainCred.Token)
-		}
-		return keychainCred
-	}
+	return out
+}
 
-	if cachedToken != "" {
-		credType := CredTypeOAuth
-		envVar := "CLAUDE_CODE_OAUTH_TOKEN"
-		if strings.HasPrefix(cachedToken, "sk-ant-") {
-			credType = CredTypeAPIKey
-			envVar = "ANTHROPIC_API_KEY"
-		}
-		return &Credential{
-			Provider: ProviderAnthropic,
-			Type:     credType,
-			Token:    cachedToken,
-			Source:   "file:~/.spwn/.auth-token",
-			EnvVar:   envVar,
+// resolveAnthropic picks the single credential the runtime should use
+// for Anthropic. Selection is:
+//   - user explicitly disabled the provider → none
+//   - user set ActiveMethod → first detection matching that method
+//   - otherwise → first detection in discovery order
+//
+// The "sync keychain token back to the cache file" side-effect from
+// the old resolver lives here so `claude login` still populates
+// `.auth-token` for tools that read it directly.
+func resolveAnthropic() *Credential {
+	detected := detectAnthropic()
+	cred := pickByPref(ProviderAnthropic, detected)
+	// Best-effort: when the active credential is keychain-backed, mirror
+	// it into the cache file. Legacy consumers of `.auth-token` depend
+	// on the file staying in sync with the latest login.
+	if cred != nil && cred.Type == CredTypeKeychain {
+		if existing := readAuthTokenFile(); existing != cred.Token {
+			_ = SaveToken(cred.Token)
 		}
 	}
-	return &Credential{
-		Provider: ProviderAnthropic,
-		Type:     CredTypeNone,
-		Source:   "not configured",
+	return cred
+}
+
+// readAuthTokenFile returns the trimmed contents of ~/.spwn/.auth-token,
+// or empty string if absent/unreadable. Extracted so resolveAnthropic's
+// keychain-mirror logic doesn't duplicate the scan used by detection.
+func readAuthTokenFile() string {
+	data, err := os.ReadFile(platform.BaseDir() + "/.auth-token")
+	if err != nil {
+		return ""
 	}
+	return strings.TrimSpace(string(data))
 }
 
 // readKeychainAnthropic pulls the Claude Code-credentials entry

@@ -9,18 +9,24 @@ import (
 	"time"
 )
 
-// resolveOpenAI returns the best available OpenAI credential.
-// Priority: OPENAI_API_KEY env var > Codex OAuth auth.json
-// (subscription-based, e.g. ChatGPT Plus).
-func resolveOpenAI() *Credential {
+// detectOpenAI enumerates every detected OpenAI credential in
+// discovery order:
+//  1. env OPENAI_API_KEY       (api_key)
+//  2. file ~/.codex/auth.json  (oauth — ChatGPT subscription via codex)
+//
+// Returned credentials flow into pickByPref to honour any user-declared
+// method preference (`spwn auth use openai oauth` / `api_key`).
+func detectOpenAI() []*Credential {
+	var out []*Credential
+
 	if key := os.Getenv("OPENAI_API_KEY"); key != "" {
-		return &Credential{
+		out = append(out, &Credential{
 			Provider: ProviderOpenAI,
 			Type:     CredTypeAPIKey,
 			Token:    key,
 			Source:   "env:OPENAI_API_KEY",
 			EnvVar:   "OPENAI_API_KEY",
-		}
+		})
 	}
 
 	home, _ := os.UserHomeDir()
@@ -32,21 +38,21 @@ func resolveOpenAI() *Credential {
 			} `json:"tokens"`
 		}
 		if json.Unmarshal(data, &tokens) == nil && tokens.Tokens.AccessToken != "" {
-			return &Credential{
+			out = append(out, &Credential{
 				Provider: ProviderOpenAI,
 				Type:     CredTypeOAuth,
 				Token:    tokens.Tokens.AccessToken,
 				Source:   "file:~/.codex/auth.json",
 				EnvVar:   "OPENAI_API_KEY",
-			}
+			})
 		}
 	}
 
-	return &Credential{
-		Provider: ProviderOpenAI,
-		Type:     CredTypeNone,
-		Source:   "not configured",
-	}
+	return out
+}
+
+func resolveOpenAI() *Credential {
+	return pickByPref(ProviderOpenAI, detectOpenAI())
 }
 
 func validateOpenAI(ctx context.Context, cred *Credential) *ProviderStatus {
