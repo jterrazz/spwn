@@ -23,30 +23,62 @@ func ClearToken() error {
 	return os.Remove(tokenPath())
 }
 
-// DisableProvider marks a provider as disabled (credentials won't be synced).
+// DisableProvider marks a provider as disabled — the resolver will
+// behave as though it had no credentials. Backed by the auth.yaml
+// user config so the choice survives across spwn upgrades and is
+// visible to any tool that reads the same file.
 func DisableProvider(p Provider) error {
-	path := disabledPath(p)
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0700); err != nil {
-		return err
-	}
-	return os.WriteFile(path, []byte("disabled"), 0600)
+	return mutateConfig(func(c *Config) {
+		pref := c.Pref(p)
+		pref.Disabled = true
+		c.SetPref(p, pref)
+	})
 }
 
-// EnableProvider removes the disabled marker for a provider.
+// EnableProvider re-enables a previously-disabled provider. Idempotent
+// — calling it on an already-enabled provider is a cheap no-op aside
+// from the file rewrite.
 func EnableProvider(p Provider) error {
-	os.Remove(disabledPath(p))
-	return nil
+	return mutateConfig(func(c *Config) {
+		pref := c.Pref(p)
+		pref.Disabled = false
+		c.SetPref(p, pref)
+	})
 }
 
-// IsProviderDisabled checks if a provider has been explicitly disabled.
+// IsProviderDisabled reports whether the user has opted this provider
+// out. Reads through LoadConfig, which transparently migrates legacy
+// `.disabled-<provider>` marker files on first call.
 func IsProviderDisabled(p Provider) bool {
-	_, err := os.Stat(disabledPath(p))
-	return err == nil
+	return LoadConfig().Pref(p).Disabled
 }
 
-func disabledPath(p Provider) string {
-	return filepath.Join(platform.CredentialsDir(), ".disabled-"+string(p))
+// mutateConfig runs fn against the current Config under configMu, then
+// persists the result. Keeps concurrent DisableProvider / SetActiveMethod
+// callers from clobbering each other's writes.
+func mutateConfig(fn func(*Config)) error {
+	configMu.Lock()
+	defer configMu.Unlock()
+	c, _ := loadLocked()
+	fn(c)
+	return saveLocked(c)
+}
+
+// SetActiveMethod records the user's preferred credential method for a
+// provider. Empty Method reverts to auto-selection. Persists via the
+// same auth.yaml file as DisableProvider.
+func SetActiveMethod(p Provider, m Method) error {
+	return mutateConfig(func(c *Config) {
+		pref := c.Pref(p)
+		pref.Method = m
+		c.SetPref(p, pref)
+	})
+}
+
+// ActiveMethod reports the user's preferred credential method for a
+// provider, or the empty Method when none was chosen (auto-select).
+func ActiveMethod(p Provider) Method {
+	return LoadConfig().Pref(p).Method
 }
 
 // ReadCachedToken reads the cached token from disk.
