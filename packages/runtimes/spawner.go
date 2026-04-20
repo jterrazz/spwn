@@ -59,4 +59,36 @@ type Spawner interface {
 	// their expected paths on the agent home, set runtime-specific
 	// env vars. An empty string means no wrapping is needed.
 	PrelaunchShell() string
+
+	// OneShotFlags returns base with runtime-specific flags appended
+	// that tell the CLI to execute a single prompt in non-interactive
+	// mode and emit its output in the requested format.
+	//
+	//   outputFormat == "stream-json" — runtime emits one JSONL event
+	//     per turn as it happens; caller streams each line verbatim.
+	//   anything else (including "") — runtime emits a single JSON
+	//     envelope at end-of-run; caller parses it via ParseOneShotResult.
+	//
+	// Called by the `spwn agent talk <name> <message>` path after
+	// BuildCommand, so `base` already includes the runtime binary,
+	// session identifier, and prompt argv. Runtimes that have no
+	// output-format flag return base unchanged; runtimes whose output
+	// is always parseable JSON by default can ignore outputFormat.
+	//
+	// The interactive path (no message) does not call this — every
+	// flag here is a one-shot concern.
+	OneShotFlags(base []string, outputFormat string) []string
+
+	// ParseOneShotResult extracts the assistant's response text and
+	// the runtime's session/thread identifier from one complete
+	// non-streaming one-shot invocation's stdout bytes.
+	//
+	// Returns a non-nil error when the bytes don't match any known
+	// envelope shape for this runtime — callers then fall back to
+	// printing the raw output + scanning for an embedded session-id
+	// via extractSessionID so users never lose conversation
+	// continuity on a parser miss. A blank sessionID is valid for
+	// runtimes that don't surface one; a blank text is valid for a
+	// prompt that produced no assistant reply.
+	ParseOneShotResult(raw []byte) (text string, sessionID string, err error)
 }

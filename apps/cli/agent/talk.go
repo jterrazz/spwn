@@ -88,14 +88,15 @@ If no message is provided, opens an interactive session inside the container.`,
 			SessionID: sessionID,
 		})
 
-		// Configure output format for session ID capture.
-		// Claude: --print --output-format json → single JSON with session_id
+		// Non-interactive mode (message provided): ask the adapter to
+		// append runtime-specific flags that switch the CLI into
+		// one-shot output. Each runtime decides what that means:
+		//   - claude-code: --print --output-format json (or stream-json --verbose)
+		//   - codex:       --json
+		// Interactive mode (no message) never adds these — the runtime
+		// drops into its REPL and owns stdout/stdin directly.
 		if message != "" {
-			if talkOutputFormat == "stream-json" {
-				runtimeCmd = append(runtimeCmd, "--output-format", "stream-json", "--verbose")
-			} else {
-				runtimeCmd = append(runtimeCmd, "--print", "--output-format", "json")
-			}
+			runtimeCmd = rtSpawner.OneShotFlags(runtimeCmd, talkOutputFormat)
 		}
 
 		// Sync credentials before talking. Two layers:
@@ -212,18 +213,18 @@ If no message is provided, opens an interactive session inside the container.`,
 				return formatExecError(err, combined)
 			}
 
-			// Parse the claude-code response to extract session ID and text.
-			var resp struct {
-				Result    string `json:"result"`
-				SessionID string `json:"session_id"`
-			}
-			if jsonErr := json.Unmarshal(output, &resp); jsonErr == nil {
-				persistSession(resp.SessionID)
-				fmt.Fprintln(os.Stdout, resp.Result)
+			// Ask the runtime adapter to parse its own output envelope.
+			// claude-code's `{"result": "...", "session_id": "..."}` and
+			// codex's JSONL `thread.started` + `item.completed` stream
+			// both route through a single codepath here. Parser errors
+			// fall back to raw-output + the permissive extractSessionID
+			// scanner so users never lose session continuity on a
+			// parser miss (stray stderr, partial truncation, etc).
+			text, sessionID, parseErr := rtSpawner.ParseOneShotResult(output)
+			if parseErr == nil {
+				persistSession(sessionID)
+				fmt.Fprintln(os.Stdout, text)
 			} else {
-				// Fallback: even if the wrapper JSON failed to parse,
-				// scan the raw output for an embedded session_id so we
-				// don't silently lose continuity.
 				if id := extractSessionID(runtimeName, output); id != "" {
 					persistSession(id)
 				}
