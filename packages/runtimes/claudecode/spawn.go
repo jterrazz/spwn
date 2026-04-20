@@ -202,21 +202,16 @@ func (c *spawner) SyncHostCredentials(credsDir string) error {
 // the outer prelaunch composition (daemon.go / talk.go) which chains
 // every registered Spawner's PrelaunchShell and owns the env load.
 func (c *spawner) PrelaunchShell() string {
-	// Two container-side steps, chained with &&-guards so either can
-	// quietly skip when its prerequisite is missing:
-	//
-	//   1. Credential copy: bring /credentials/anthropic/.credentials.json
-	//      into $HOME/.claude/ so the claude CLI finds it on startup.
-	//   2. Skills symlink: expose /world/skills/ (where the image
-	//      builder baked every tool-shipped SKILL.md) at
-	//      $HOME/.claude/skills so Claude Code's native skill
-	//      discovery picks them up with zero per-tool config.
+	// Credential copy only: bring /credentials/anthropic/.credentials.json
+	// into $HOME/.claude/ so the claude CLI finds it on startup. Skills
+	// are no longer delivered via a spawn-time symlink — the transpile
+	// renderer writes them directly into $HOME/.claude/skills/<name>/
+	// alongside CLAUDE.md, so Claude Code's native discovery sees them
+	// without any bind-mount indirection.
 	return `mkdir -p "$HOME/.claude"; ` +
 		`if [ -f /credentials/anthropic/.credentials.json ]; then ` +
 		`cp /credentials/anthropic/.credentials.json "$HOME/.claude/.credentials.json" && ` +
-		`chmod 600 "$HOME/.claude/.credentials.json"; fi; ` +
-		`if [ -d /world/skills ] && [ ! -e "$HOME/.claude/skills" ]; then ` +
-		`ln -sf /world/skills "$HOME/.claude/skills"; fi`
+		`chmod 600 "$HOME/.claude/.credentials.json"; fi`
 }
 
 // ── internal helpers ─────────────────────────────────────────────

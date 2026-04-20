@@ -74,6 +74,17 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				KnowledgeMounted: input.WorldKnowledgeMounted,
 			}),
 		)
+		// Skills land under `.agents/skills/<n>/SKILL.md` (not
+		// `.codex/skills/` — codex follows the cross-vendor AGENTS.md
+		// ecosystem convention where skills live at `.agents/skills/`).
+		for _, skill := range input.Skills {
+			for relPath, body := range skill.Files {
+				t.Add(
+					fmt.Sprintf("agents/%s/.agents/skills/%s/%s", a.Name, skill.Name, relPath),
+					body,
+				)
+			}
+		}
 	}
 
 	return t, nil

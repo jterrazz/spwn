@@ -57,9 +57,6 @@ RUN npm install -g @tobilu/qmd
 COPY tools/spwn:architect/usr/local/bin/architect-entrypoint.sh /usr/local/bin/architect-entrypoint.sh
 RUN chmod +x /usr/local/bin/architect-entrypoint.sh
 
-# Skills (copied from build context)
-COPY skills/ /
-
 # Final setup
 RUN chown -R spwn:spwn /home/spwn
 USER spwn

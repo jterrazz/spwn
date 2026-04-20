@@ -136,26 +136,6 @@ func AssertBinaryVersion(t *testing.T, s *Sandbox, binary, flag, contains string
 	}
 }
 
-// AssertSkillInstalled checks that a tool's SKILL.md exists in the container.
-func AssertSkillInstalled(t *testing.T, s *Sandbox, toolName string) {
-	t.Helper()
-	name := strings.TrimPrefix(toolName, "@")
-	path := fmt.Sprintf("/world/skills/%s/SKILL.md", name)
-	if !s.FileExists(path) {
-		t.Errorf("skill not found at %s", path)
-	}
-}
-
-// AssertSkillContains checks that a tool's SKILL.md contains a substring.
-func AssertSkillContains(t *testing.T, s *Sandbox, toolName, substring string) {
-	t.Helper()
-	name := strings.TrimPrefix(toolName, "@")
-	content := s.ReadFile(fmt.Sprintf("/world/skills/%s/SKILL.md", name))
-	if !strings.Contains(content, substring) {
-		t.Errorf("skill for %s does not contain %q", toolName, substring)
-	}
-}
-
 // AssertFileExists checks that a file exists in the container.
 func AssertFileExists(t *testing.T, s *Sandbox, path string) {
 	t.Helper()

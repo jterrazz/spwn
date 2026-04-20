@@ -15,7 +15,6 @@ type ToolInput struct {
 	UserCommands []string // Commands that run after USER switch (templates: {{.Home}}, {{.User}})
 	Env          map[string]string
 	Files        map[string][]byte
-	HasSkills    bool // If true, generator adds COPY for skills directory
 }
 
 // GenerateOpts configures Dockerfile generation.
@@ -167,21 +166,9 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		sb.WriteString("\n")
 	}
 
-	// Copy skills into the image (if any tool has skills)
-	// Skip when SkipFooter is set - the caller manages their own COPY directives.
-	if !opt.SkipFooter {
-		hasAnySkills := false
-		for _, t := range tools {
-			if t.HasSkills {
-				hasAnySkills = true
-				break
-			}
-		}
-		if hasAnySkills {
-			sb.WriteString("# Skills (copied from build context)\n")
-			sb.WriteString("COPY skills/ /\n\n")
-		}
-	}
+	// Skills no longer live in the image — the transpile layer writes
+	// them into each agent's `.claude/skills/` / `.agents/skills/` at
+	// spawn time via docker-cp. No COPY directive needed here.
 
 	// Collect UserCommands across all tools (run after USER switch)
 	var allUserCmds []string

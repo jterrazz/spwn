@@ -120,12 +120,21 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		}
 	}
 
+	skills := make([]transpile.SkillEntry, 0, len(src.Skills))
+	for _, s := range src.Skills {
+		skills = append(skills, transpile.SkillEntry{
+			Name:  s.Name,
+			Files: s.Files,
+		})
+	}
+
 	return transpile.Input{
 		Deps:                  packageList,
 		VerifiedTools:         packageList,
 		WorldID:               selected,
 		Agents:                agents,
 		WorldKnowledgeMounted: knowledgeMounted,
+		Skills:                skills,
 	}, nil
 }
 

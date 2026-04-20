@@ -46,15 +46,6 @@ type BuildRequest struct {
 	// SkipVerify disables post-build verification.
 	SkipVerify bool
 
-	// ExtraSkills is an opt-in map of container-path → content for
-	// project-local skills (i.e. `skill:<name>` refs that Hydrate
-	// strips before the registry sees them). Keys should be absolute
-	// container paths beginning with "/world/skills/<name>/SKILL.md".
-	// Merged into the image's skills layer alongside tool-shipped
-	// skills so Claude Code's native discovery finds both kinds.
-	// Nil or empty map means "no local skills".
-	ExtraSkills map[string][]byte
-
 	// LogWriter receives build output. If nil, output is discarded.
 	LogWriter io.Writer
 }
@@ -74,10 +65,9 @@ func (req *BuildRequest) Validate() error {
 
 // BuildResult describes the outcome of a successful build.
 type BuildResult struct {
-	Tag        string
-	Tools      []string          // Resolved tool list (after dependency expansion)
-	SkillPaths map[string]string // tool name → base path in image
-	Cached     bool
+	Tag    string
+	Tools  []string // Resolved tool list (after dependency expansion)
+	Cached bool
 }
 
 // Build resolves tools, generates a Dockerfile, builds the image, and verifies it.
@@ -114,11 +104,14 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 			UserCommands: spec.UserCommands,
 			Env:          spec.Env,
 			Files:        spec.Files,
-			HasSkills:    t.Skills() != nil,
 		}
 	}
 
-	// Collect extra files for build context (tool files + skills)
+	// Collect extra files for build context (tool install files only).
+	// Skills no longer flow through the image: the transpile layer
+	// emits them per-agent at .claude/skills/ / .agents/skills/
+	// directly (see packages/architect/skills.go), so nothing image-
+	// resident is needed for Claude Code's native discovery.
 	extraFiles := make(map[string][]byte)
 
 	for _, t := range resolved {
@@ -127,33 +120,6 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 			contextPath := fmt.Sprintf("tools/%s%s", t.Name(), path)
 			extraFiles[contextPath] = content
 		}
-	}
-
-	// Collect and add skills. Tool-shipped skills come from resolved
-	// tools' Skills() fs.FS; project-local skills come pre-baked in
-	// req.ExtraSkills (caller reads spwn/skills/*.md and passes a
-	// path→content map). Merged here so both populate the same
-	// /world/skills/ tree the image-build layer COPYs into place.
-	skills, err := resolver.CollectSkills(resolved)
-	if err != nil {
-		return nil, fmt.Errorf("collect skills: %w", err)
-	}
-	for path, content := range skills {
-		contextPath := fmt.Sprintf("skills%s", path)
-		extraFiles[contextPath] = content
-	}
-	for absPath, content := range req.ExtraSkills {
-		// Container-side path like "/world/skills/foo/SKILL.md" maps
-		// to build-context path "skills/foo/SKILL.md" so the Dockerfile
-		// generator's `COPY skills/ /world/skills/` rule delivers it.
-		rel := strings.TrimPrefix(absPath, "/world/")
-		if rel == absPath {
-			// Permissive: if the caller handed us a non-/world path,
-			// prefix with "skills/" so it at least lands somewhere
-			// predictable. Shouldn't happen with the architect caller.
-			rel = "skills/" + strings.TrimPrefix(absPath, "/")
-		}
-		extraFiles[rel] = content
 	}
 
 	// Content-addressed versioning: hash the Dockerfile we'd
@@ -188,17 +154,9 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	}
 
 	result := &BuildResult{
-		Tag:        req.Tag,
-		Tools:      resolvedNames,
-		Cached:     !rebuilt,
-		SkillPaths: make(map[string]string),
-	}
-
-	for _, t := range resolved {
-		if t.Skills() != nil {
-			toolName := strings.TrimPrefix(t.Name(), "@")
-			result.SkillPaths[t.Name()] = "/world/skills/" + toolName
-		}
+		Tag:    req.Tag,
+		Tools:  resolvedNames,
+		Cached: !rebuilt,
 	}
 
 	return result, nil

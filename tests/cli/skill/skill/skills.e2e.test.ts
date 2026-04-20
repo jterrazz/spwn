@@ -42,8 +42,8 @@ describe('system skills infrastructure (docker)', () => {
         }
     });
 
-    test('.claude/skills symlinks to /world/skills so Claude Code discovers tool skills', async () => {
-        await using result = await spec('claude skills link')
+    test('.claude/skills is materialised directly under the agent home', async () => {
+        await using result = await spec('claude skills tree')
             .project('docker-pilot')
             .exec('up')
             .run();
@@ -51,18 +51,14 @@ describe('system skills infrastructure (docker)', () => {
         expect(result.exitCode).toBe(0);
         const neo = result.container('neo');
 
-        // After PrelaunchShell runs, $HOME/.claude/skills is a symlink
-        // Into /world/skills where CollectSkills baked every
-        // Tool-shipped SKILL.md. Claude Code's native skill discovery
-        // Picks the directory up from there.
-        //
-        // Note: symlink is created by the runtime's PrelaunchShell,
-        // Which runs right before `claude` itself. The file won't
-        // Exist until an interactive session starts — so we assert
-        // /world/skills is readable instead.
-        const testDir = await neo.exec('test -d /world/skills');
-        expect(testDir.exitCode).toBe(0);
-        const ls = await neo.exec('ls -1 /world/skills');
+        // The transpile layer writes every resolved skill (tool-shipped
+        // Plus user-authored) under /agents/<name>/.claude/skills/<skill>/SKILL.md
+        // Via docker-cp at spawn time. No symlink, no /world/skills
+        // Indirection — Claude Code's native walker finds the tree at
+        // Its canonical location on startup.
+        const dir = await neo.exec('test -d /agents/neo/.claude/skills');
+        expect(dir.exitCode).toBe(0);
+        const ls = await neo.exec('ls -1 /agents/neo/.claude/skills');
         expect(ls.exitCode).toBe(0);
     });
 });
