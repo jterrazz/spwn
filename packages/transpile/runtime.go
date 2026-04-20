@@ -61,10 +61,27 @@ type AgentInput struct {
 	Name string
 	Role string
 
+	// Soul is the raw bytes of spwn/agents/<name>/SOUL.md. Renderers
+	// that can @-import (claude-code) ignore this; renderers that
+	// must inline everything into a single boot prompt (codex) read
+	// it as the agent's identity body. Nil when SOUL.md is missing —
+	// renderers that rely on it treat a nil Soul as "agent has no
+	// declared identity".
+	Soul []byte
+	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md — the
+	// user-authored provider-neutral prompt body. Renderers that
+	// consume it inline it at the bottom of the per-agent boot prompt
+	// (codex) so the user's own instructions survive transpilation.
+	// Claude-code ignores this because it ships the file to
+	// /agents/<name>/AGENTS.md via docker-cp and the CLAUDE.md entry
+	// point doesn't reference it.
+	AgentMD []byte
+
 	// Playbooks lists the agent's promotable playbooks — the subset of
 	// files under spwn/agents/<name>/playbooks/ that carry valid
 	// `name:` + `description:` frontmatter. The renderer emits the list
-	// as a discoverability index in CLAUDE.md so Claude sees which
+	// as a discoverability index in the entry file (CLAUDE.md for
+	// claude-code, AGENTS.md for codex) so the runtime sees which
 	// playbooks are available as named shortcuts. Plain playbooks
 	// without frontmatter stay invisible until the agent decides to
 	// promote them.
