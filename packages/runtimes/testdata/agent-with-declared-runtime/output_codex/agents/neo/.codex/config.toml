@@ -6,3 +6,5 @@ profile = "neo"
 [profiles.neo]
 model = "opus"
 
+[features]
+codex_hooks = true

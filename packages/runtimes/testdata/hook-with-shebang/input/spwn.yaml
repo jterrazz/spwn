@@ -1,7 +1,0 @@
-version: 1
-name: shebang-hook
-worlds:
-  home:
-    agents: [neo]
-    workspaces: [.]
-    knowledge: ./knowledge
