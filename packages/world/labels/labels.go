@@ -75,6 +75,7 @@ const (
 	WorldAgents       = Prefix + "world.agents"     // JSON-encoded []models.AgentRecord (creation-time only)
 	WorldCreatedAt    = Prefix + "world.created_at" // RFC3339
 	WorldKnowledgeMounted = Prefix + "world.knowledge_mounted" // "1" when a knowledge dir was bound
+	WorldRuntime      = Prefix + "world.runtime" // short-name runtime adapter ("claude-code", "codex")
 )
 
 // WorldLabels builds the full label map for a world container. The
@@ -114,6 +115,9 @@ func WorldLabels(w models.World) map[string]string {
 	}
 	if w.KnowledgeMounted {
 		out[WorldKnowledgeMounted] = "1"
+	}
+	if w.Runtime != "" {
+		out[WorldRuntime] = w.Runtime
 	}
 	ApplyTestRun(out)
 	return out
@@ -166,6 +170,9 @@ func ParseWorld(lbls map[string]string) (models.World, error) {
 	}
 	if lbls[WorldKnowledgeMounted] == "1" {
 		w.KnowledgeMounted = true
+	}
+	if raw := lbls[WorldRuntime]; raw != "" {
+		w.Runtime = raw
 	}
 
 	return w, nil

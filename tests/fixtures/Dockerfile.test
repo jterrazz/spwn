@@ -6,10 +6,12 @@ RUN apt-get update && apt-get install -y \
     nodejs npm \
     && rm -rf /var/lib/apt/lists/*
 
-# Mock claude binary (stubs the claude-code runtime so tool probing
-# passes without actually shipping Claude Code in the mock image).
-COPY mock-claude.sh /usr/local/bin/claude
-RUN chmod +x /usr/local/bin/claude
+# Mock runtime binaries (stub the claude-code and codex runtimes so
+# tool probing + one-shot exec succeed without shipping the real CLIs
+# in the test image).
+COPY mock-claude/mock-claude.sh /usr/local/bin/claude
+COPY mock-codex/mock-codex.sh /usr/local/bin/codex
+RUN chmod +x /usr/local/bin/claude /usr/local/bin/codex
 
 # Non-root user (matching production image)
 RUN useradd -m -s /bin/bash spwn \

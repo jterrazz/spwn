@@ -8,6 +8,7 @@ import (
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/packages/project"
+	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/world"
 )
 
@@ -28,6 +29,11 @@ type projectWorld struct {
 	// rendered per-agent CLAUDE.md omits every reference to
 	// /world/knowledge/.
 	Knowledge string
+	// Runtime is the agent-declared runtime name ("claude-code",
+	// "codex") resolved via source.ResolveRuntime across every agent
+	// in this world. Empty falls back to the architect's default
+	// ("claude-code") at spawn time.
+	Runtime string
 }
 
 // loadProject is kept as a thin alias over cliproject.Find so the
@@ -128,6 +134,20 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		}
 	}
 
+	// Resolve the runtime across every agent in the project. Agents
+	// in the selected world dominate the source-wide resolution, but
+	// the canonicalisation + conflict-detection logic is the same one
+	// `spwn build` uses — keep them in sync by going through
+	// source.ResolveRuntime. Best-effort: if loading the source tree
+	// fails, leave Runtime empty and let the architect fall back.
+	var runtimeName string
+	if src, srcErr := source.Load(p.Root); srcErr == nil && src != nil {
+		rn, rnErr := source.ResolveRuntime(src, "")
+		if rnErr == nil {
+			runtimeName = rn
+		}
+	}
+
 	return &projectWorld{
 		Project:    p,
 		Name:       name,
@@ -135,5 +155,6 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 		Workspaces: append([]string(nil), w.Workspaces...),
 		Manifest:   m,
 		Knowledge:  knowledge,
+		Runtime:    runtimeName,
 	}, nil
 }

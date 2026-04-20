@@ -1,0 +1,1 @@
+world "home" references missing agent "ghost"

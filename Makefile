@@ -51,7 +51,7 @@ clean:
 	rm -rf bin/
 
 build-test-image:
-	docker build -t spwn-test:latest -f tests/fixtures/Dockerfile.test ./tests/fixtures/mock-claude
+	docker build -t spwn-test:latest -f tests/fixtures/Dockerfile.test ./tests/fixtures
 
 # ── Lint ──────────────────────────────────────────────────────────
 
