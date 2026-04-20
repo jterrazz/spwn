@@ -14,10 +14,14 @@ import (
 // context block (physics, faculties, roster, conventions) directly
 // into that file so the agent's system prompt is self-contained —
 // no separate world/AGENTS.md, no world/physics.md, no
-// world/skills/*.md indirection. Tool-shipped skills keep living at
-// /world/skills/<tool>/SKILL.md (baked into the image via the
-// dependency resolver's CollectSkills) and surface to Claude Code
-// through a spawn-time symlink at /agents/<name>/.claude/skills.
+// world/skills/*.md indirection.
+//
+// Skills (both user-authored from spwn/skills/ and tool-shipped from
+// resolved deps) land under each agent's `.claude/skills/<n>/` so
+// Claude Code's native skill walker picks them up without a spawn-time
+// symlink — the renderer is the single source of truth for the skill
+// tree, not the image build step.
+//
 // Playbook-index entries come from AgentInput.Playbooks —
 // frontmatter-promoted playbooks the agent has authored.
 type renderer struct{}
@@ -74,6 +78,18 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				KnowledgeMounted: input.WorldKnowledgeMounted,
 			}),
 		)
+		// Skills: every skill gets its own directory under the agent's
+		// `.claude/skills/` so Claude Code's native walker picks them
+		// up. File ordering is deterministic because transpile.Tree
+		// sorts by path at render time.
+		for _, skill := range input.Skills {
+			for relPath, body := range skill.Files {
+				t.Add(
+					fmt.Sprintf("agents/%s/.claude/skills/%s/%s", a.Name, skill.Name, relPath),
+					body,
+				)
+			}
+		}
 	}
 
 	return t, nil

@@ -78,8 +78,9 @@ func TestQmd_E2E(t *testing.T) {
 
 	imagetest.AssertBinaryExists(t, s, "qmd")
 	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
-	imagetest.AssertSkillInstalled(t, s, "spwn:qmd")
-	imagetest.AssertSkillContains(t, s, "spwn:qmd", "QMD")
+	// Skill content assertions retired alongside the /world/skills
+	// pipeline — spwn:qmd's SKILL.md now reaches agents via the
+	// transpile layer, not the base image.
 }
 
 func TestCodex_E2E(t *testing.T) {
@@ -106,13 +107,11 @@ func TestFullWorldStack_E2E(t *testing.T) {
 		imagetest.AssertBinaryExists(t, s, bin)
 	}
 
-	// spwn:claude-code is a runtime (no SKILL.md); cli and qmd are
-	// tools with skills.
-	imagetest.AssertSkillInstalled(t, s, "spwn:cli")
-	imagetest.AssertSkillInstalled(t, s, "spwn:qmd")
-
-	imagetest.AssertFileExists(t, s, "/world/skills/INDEX.md")
-	imagetest.AssertFileContains(t, s, "/world/skills/INDEX.md", "qmd")
+	// Skills no longer land in the image — they're emitted per-agent
+	// under each agent's `.claude/skills/` at spawn time via the
+	// transpile renderer (see packages/architect/skills.go). The
+	// skill-install assertions that used to live here exercised the
+	// retired `/world/skills/` pipeline.
 }
 
 func TestMinimalStack_E2E(t *testing.T) {

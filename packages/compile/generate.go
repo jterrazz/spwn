@@ -30,7 +30,6 @@ func ToolsToInputs(tools []tool.Tool) []ToolInput {
 			UserCommands: spec.UserCommands,
 			Env:          spec.Env,
 			Files:        spec.Files,
-			HasSkills:    t.Skills() != nil,
 		}
 	}
 	return inputs

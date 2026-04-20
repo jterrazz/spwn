@@ -54,6 +54,29 @@ type Input struct {
 	// false, every reference to /world/knowledge/ is omitted — the
 	// agent is never told a knowledge base exists.
 	WorldKnowledgeMounted bool
+
+	// Skills is every skill the renderer should materialise into each
+	// agent's native skill directory (`.claude/skills/<n>/` for
+	// claude-code, `.agents/skills/<n>/` for codex). Union of two
+	// sources:
+	//   - user-authored under spwn/skills/<n>/SKILL.md (loaded by
+	//     packages/transpile/source)
+	//   - tool-shipped skills resolved from each agent's `deps:`
+	//     (collected by the architect at spawn time via the
+	//     dependency resolver and handed in here)
+	// The renderer treats both kinds identically; the single source
+	// of truth for what "a skill" is lives in SkillEntry.
+	Skills []SkillEntry
+}
+
+// SkillEntry is one complete skill the renderer must emit into each
+// agent's native skill directory. Files is keyed by path relative to
+// the skill's own root (`SKILL.md`, optional sidecar files like
+// `template.md`, `scripts/run.sh`). SKILL.md is always required —
+// both Claude Code and Codex refuse to load a skill without it.
+type SkillEntry struct {
+	Name  string
+	Files map[string][]byte
 }
 
 // AgentInput is the per-agent slice of transpile.Input.

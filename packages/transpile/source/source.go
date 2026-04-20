@@ -114,15 +114,29 @@ type LayerFiles struct {
 	Journal   map[string][]byte
 }
 
-// SkillSource is one bare-markdown skill file directly under
-// spwn/skills/*.md.
+// SkillSource is one project-authored skill under spwn/skills/. The
+// canonical on-disk shape is a directory per skill:
+//
+//	spwn/skills/<name>/
+//	  SKILL.md          (required; YAML frontmatter + body)
+//	  template.md       (optional sidecar — anything goes)
+//	  scripts/run.sh    (optional sidecar — preserved verbatim)
+//
+// Legacy bare-markdown form (`spwn/skills/<name>.md`) is still
+// accepted: the loader synthesises a `<name>/SKILL.md` entry (and
+// injects minimal `name:`/`description:` frontmatter when the file
+// has none) so downstream renderers can treat both forms identically.
 type SkillSource struct {
-	// Name is the skill identifier — the path relative to
-	// spwn/dependencies/ with the .md extension stripped.
+	// Name is the skill identifier — either the sub-directory name
+	// under spwn/skills/ (dir form) or the bare filename minus .md.
 	Name string
 
-	// Content is the raw bytes of the skill file.
-	Content []byte
+	// Files is every file that belongs to the skill, keyed by path
+	// relative to the skill's own root. `SKILL.md` is always
+	// present; additional keys (e.g. "template.md",
+	// "scripts/run.sh") cover sidecar content the skill author
+	// wants shipped alongside the entry point.
+	Files map[string][]byte
 }
 
 // HookSource is one file directly under spwn/hooks/.
@@ -360,10 +374,20 @@ func readTree(dir string) (map[string][]byte, error) {
 	return out, nil
 }
 
-// loadSkills reads bare-markdown skill packages from
-// <root>/spwn/skills/*.md. Files are loaded flat at the top level
-// only — nested .md files inside a package directory belong to that
-// dependency's own spwn.yaml and are not project-level skills.
+// loadSkills walks <root>/spwn/skills/ and returns one SkillSource per
+// directory-form skill plus one per legacy bare-markdown skill. Both
+// forms coexist without conflict — a directory `foo/` and a file
+// `foo.md` would produce two distinct SkillSource entries called "foo"
+// which the renderer would then flag as a duplicate.
+//
+// Directory form accepts any sidecar layout; every file under the dir
+// (including nested paths) is captured in SkillSource.Files keyed by
+// its path relative to the skill root. SKILL.md is required; skills
+// missing it are skipped silently (spwn check surfaces the warning).
+//
+// Bare form wraps the file as `<name>/SKILL.md`. If the markdown
+// lacks YAML frontmatter we inject minimal `name:`/`description:`
+// front-matter so the output is a valid Claude/Codex skill.
 func loadSkills(root string) ([]SkillSource, error) {
 	dir := filepath.Join(root, "spwn", "skills")
 	entries, err := os.ReadDir(dir)
@@ -375,26 +399,85 @@ func loadSkills(root string) ([]SkillSource, error) {
 	}
 	var out []SkillSource
 	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
 		name := e.Name()
 		if strings.HasPrefix(name, ".") {
+			continue
+		}
+		if e.IsDir() {
+			skill, ok, err := loadSkillDir(filepath.Join(dir, name), name)
+			if err != nil {
+				return nil, err
+			}
+			if ok {
+				out = append(out, skill)
+			}
 			continue
 		}
 		if !strings.HasSuffix(name, ".md") {
 			continue
 		}
 		path := filepath.Join(dir, name)
-		b, err := os.ReadFile(path)
+		body, err := os.ReadFile(path)
 		if err != nil {
 			return nil, fmt.Errorf("read %s: %w", path, err)
 		}
 		id := strings.TrimSuffix(name, ".md")
-		out = append(out, SkillSource{Name: id, Content: b})
+		out = append(out, SkillSource{
+			Name:  id,
+			Files: map[string][]byte{"SKILL.md": ensureSkillFrontmatter(body, id)},
+		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, nil
+}
+
+// loadSkillDir reads every file under a skill directory into a
+// SkillSource. Returns ok=false (without error) when SKILL.md is
+// missing — treat those dirs as "not yet a skill" rather than failing
+// the whole project load so half-authored skills don't block spwn check.
+func loadSkillDir(root, name string) (SkillSource, bool, error) {
+	files := map[string][]byte{}
+	err := filepath.Walk(root, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		rel, relErr := filepath.Rel(root, p)
+		if relErr != nil {
+			return relErr
+		}
+		rel = filepath.ToSlash(rel)
+		body, readErr := os.ReadFile(p)
+		if readErr != nil {
+			return fmt.Errorf("read %s: %w", p, readErr)
+		}
+		files[rel] = body
+		return nil
+	})
+	if err != nil {
+		return SkillSource{}, false, err
+	}
+	if _, ok := files["SKILL.md"]; !ok {
+		return SkillSource{}, false, nil
+	}
+	files["SKILL.md"] = ensureSkillFrontmatter(files["SKILL.md"], name)
+	return SkillSource{Name: name, Files: files}, true, nil
+}
+
+// ensureSkillFrontmatter injects a minimal `name:`/`description:`
+// YAML front-matter block when one is absent. Claude Code and Codex
+// both reject SKILL.md files without these fields; synthesising them
+// lets legacy bare-markdown skills render without forcing authors to
+// rewrite every file the day we ship this.
+func ensureSkillFrontmatter(body []byte, name string) []byte {
+	trimmed := strings.TrimLeft(string(body), "\n\t ")
+	if strings.HasPrefix(trimmed, "---") {
+		return body
+	}
+	header := fmt.Sprintf("---\nname: %s\ndescription: %s\n---\n\n", name, name)
+	return append([]byte(header), body...)
 }
 
 func loadHooks(root string) ([]HookSource, error) {

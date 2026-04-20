@@ -21,9 +21,6 @@ LABEL sh.spwn.image-version="v-test"
 # spwn:cli
 RUN curl -fsSL https://spwn.sh/install.sh | bash || true
 
-# Skills (copied from build context)
-COPY skills/ /
-
 # Final setup
 RUN chown -R spwn:spwn /home/spwn
 USER spwn
