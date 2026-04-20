@@ -128,6 +128,16 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		})
 	}
 
+	hooks := make([]transpile.HookEntry, 0, len(src.Hooks))
+	for _, h := range src.Hooks {
+		hooks = append(hooks, transpile.HookEntry{
+			Name:    h.Name,
+			Event:   h.Event,
+			Matcher: h.Matcher,
+			Command: h.Command,
+		})
+	}
+
 	return transpile.Input{
 		Deps:                  packageList,
 		VerifiedTools:         packageList,
@@ -135,6 +145,7 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		Agents:                agents,
 		WorldKnowledgeMounted: knowledgeMounted,
 		Skills:                skills,
+		Hooks:                 hooks,
 	}, nil
 }
 

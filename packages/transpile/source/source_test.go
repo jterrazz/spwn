@@ -42,10 +42,19 @@ func TestLoadMinimalProject(t *testing.T) {
 		t.Errorf("skill name: got %q, want %q", src.Skills[0].Name, "shared-skill")
 	}
 	if len(src.Hooks) != 1 {
-		t.Errorf("hooks: got %d, want 1", len(src.Hooks))
+		t.Fatalf("hooks: got %d, want 1", len(src.Hooks))
 	}
 	if src.Hooks[0].Name != "pre-commit" {
 		t.Errorf("hook name: got %q", src.Hooks[0].Name)
+	}
+	if src.Hooks[0].Event != "PreToolUse" {
+		t.Errorf("hook event: got %q, want PreToolUse", src.Hooks[0].Event)
+	}
+	if src.Hooks[0].Matcher != "Bash" {
+		t.Errorf("hook matcher: got %q, want Bash", src.Hooks[0].Matcher)
+	}
+	if src.Hooks[0].Command == "" {
+		t.Error("hook command is empty")
 	}
 }
 

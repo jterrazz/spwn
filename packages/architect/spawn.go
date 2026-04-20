@@ -129,15 +129,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	var warnings []string
 
-	// Run any `hook:pre-spawn` scripts declared in the manifest
-	// before we touch Docker. These execute on the host with cwd set
-	// to the project root; a non-zero exit aborts the spawn so the
-	// user can fix the problem before infrastructure is provisioned.
-	// Invariants (cache warmups, env validation, generated config) go
-	// here so they run as close to "fresh state" as possible.
-	if err := runLifecycleHooks(ctx, platform.ProjectRoot(), "pre-spawn", opts.Manifest.Deps); err != nil {
-		return nil, err
-	}
+	// Lifecycle hooks (`hook:pre-spawn` and friends) were retired
+	// alongside the old `/world/skills/` pipeline. Runtime hooks
+	// (Claude Code / Codex PreToolUse + UserPromptSubmit + …) are
+	// now declared in spwn/hooks.yaml and rendered into each agent's
+	// `.claude/settings.json` / `.codex/hooks.json` by the transpile
+	// layer — they run inside the container, not on the host.
 
 	// Generate ID
 	id := platform.GenerateWorldID(opts.ConfigName)

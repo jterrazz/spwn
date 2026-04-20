@@ -128,14 +128,13 @@ func (c *spawner) DefaultConfigFiles(agentHome string) map[string][]byte {
 	}
 	claudeJSONBytes, _ := json.Marshal(claudeJSON)
 
-	settingsJSON := map[string]any{
-		"skipDangerousModePermissionPrompt": true,
-	}
-	settingsBytes, _ := json.Marshal(settingsJSON)
-
+	// `.claude/settings.json` is owned by the transpile renderer —
+	// it wires permissions + hooks + model pins alongside
+	// skipDangerousModePermissionPrompt, and the overwrite-order at
+	// spawn time (DefaultConfigFiles first, tree second) could hide
+	// a renderer bug if we wrote settings from two places.
 	return map[string][]byte{
-		".claude.json":          claudeJSONBytes,
-		".claude/settings.json": settingsBytes,
+		".claude.json": claudeJSONBytes,
 	}
 }
 

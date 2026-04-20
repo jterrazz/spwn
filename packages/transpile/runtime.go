@@ -67,6 +67,12 @@ type Input struct {
 	// The renderer treats both kinds identically; the single source
 	// of truth for what "a skill" is lives in SkillEntry.
 	Skills []SkillEntry
+
+	// Hooks is every runtime hook declared in spwn/hooks.yaml. The
+	// renderer fans each entry out into per-agent native config —
+	// `.claude/settings.json#hooks` for claude-code,
+	// `.codex/hooks.json` + `codex_hooks = true` for codex.
+	Hooks []HookEntry
 }
 
 // SkillEntry is one complete skill the renderer must emit into each
@@ -77,6 +83,23 @@ type Input struct {
 type SkillEntry struct {
 	Name  string
 	Files map[string][]byte
+}
+
+// HookEntry is one runtime hook the renderer fans out into every
+// agent's native hook config:
+//   - claude-code: merged into `.claude/settings.json#hooks.<Event>[]`
+//   - codex:       appended to `.codex/hooks.json#hooks.<Event>[]`
+//     with `[features] codex_hooks = true` forced in config.toml
+//
+// Name keys the entry so re-renders stay idempotent; Event is the
+// runtime-defined trigger (PreToolUse, UserPromptSubmit, SessionStart,
+// Stop, …); Matcher scopes the event (e.g. `Bash`); Command is the
+// shell fragment invoked when the hook fires.
+type HookEntry struct {
+	Name    string
+	Event   string
+	Matcher string
+	Command string
 }
 
 // AgentInput is the per-agent slice of transpile.Input.
