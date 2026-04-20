@@ -90,6 +90,15 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				)
 			}
 		}
+		// Settings: always emitted so the renderer owns every key
+		// Claude Code reads at startup (permissions prompt, hooks,
+		// future model pin). The spawn adapter's DefaultConfigFiles
+		// intentionally does NOT emit this file — two writers would
+		// race on the same path via docker cp.
+		t.Add(
+			fmt.Sprintf("agents/%s/.claude/settings.json", a.Name),
+			GenerateAgentSettingsJSON(SettingsInput{Hooks: input.Hooks}),
+		)
 	}
 
 	return t, nil

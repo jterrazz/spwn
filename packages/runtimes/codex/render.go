@@ -85,6 +85,20 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				)
 			}
 		}
+		// Config: always emit the project-local config.toml so codex
+		// picks up spwn-owned flags without user intervention. Trust
+		// for this directory is seeded by the spawn adapter's
+		// PrelaunchShell via the user-level ~/.codex/config.toml.
+		t.Add(
+			fmt.Sprintf("agents/%s/.codex/config.toml", a.Name),
+			GenerateAgentConfigTOML(ConfigInput{HasHooks: len(input.Hooks) > 0}),
+		)
+		if body := GenerateAgentHooksJSON(input.Hooks); body != nil {
+			t.Add(
+				fmt.Sprintf("agents/%s/.codex/hooks.json", a.Name),
+				body,
+			)
+		}
 	}
 
 	return t, nil

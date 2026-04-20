@@ -139,11 +139,30 @@ type SkillSource struct {
 	Files map[string][]byte
 }
 
-// HookSource is one file directly under spwn/hooks/.
+// HookSource is one runtime hook entry declared in
+// <root>/spwn/hooks.yaml. Runtime hooks fire on runtime-defined events
+// (PreToolUse, UserPromptSubmit, SessionStart, …) inside the container
+// — they are NOT host-side lifecycle scripts. The retired lifecycle
+// mechanism (hook:<phase> refs + spwn/hooks/<phase>.sh) is gone.
 type HookSource struct {
-	Name    string
-	Content []byte
-	Mode    os.FileMode
+	// Name is a stable identifier used by the renderer to disambiguate
+	// multiple hooks on the same event (e.g. two PreToolUse hooks).
+	Name string
+	// Event is one of Claude Code's / Codex's event names. The set is
+	// small and shared across runtimes for the events both support;
+	// runtime-specific events degrade gracefully (the renderer skips
+	// events the target runtime doesn't know).
+	Event string
+	// Matcher narrows the event to a subset — e.g. `Bash` for
+	// PreToolUse. Empty matches every instance of the event. The
+	// value is written verbatim into the target config, so both
+	// runtimes' glob/regex conventions are honoured.
+	Matcher string
+	// Command is the shell fragment the runtime runs when the hook
+	// fires. V1 supports inline commands only; if a hook needs a
+	// long script, users can invoke `bash /agents/<n>/scripts/foo.sh`
+	// from here after materialising the script via a skill's sidecar.
+	Command string
 }
 
 // ProfileSource is one file under spwn/profiles/.
@@ -480,40 +499,64 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 	return append([]byte(header), body...)
 }
 
+// loadHooks parses <root>/spwn/hooks.yaml into HookSource entries.
+// Missing file → nil, nil. A malformed file surfaces as an error so
+// spwn check can flag it before the user hits a silent spawn.
+//
+// The manifest shape is intentionally small and declarative:
+//
+//	hooks:
+//	  - name: bash-audit
+//	    event: PreToolUse
+//	    matcher: Bash
+//	    command: echo "[audit] $CLAUDE_TOOL_INPUT"
+//	  - name: welcome
+//	    event: SessionStart
+//	    command: echo "Session started"
+//
+// `name` is required (used by the renderer to key config entries);
+// `event` is required and passed through verbatim; `matcher` is
+// optional; `command` is the shell fragment that the runtime invokes
+// when the hook fires. Keep V1 inline-only — if the shell fragment
+// gets long, author it as a file under a skill and invoke it here.
 func loadHooks(root string) ([]HookSource, error) {
-	dir := filepath.Join(root, "spwn", "hooks")
-	if _, err := os.Stat(dir); err != nil {
+	path := filepath.Join(root, "spwn", "hooks.yaml")
+	data, err := os.ReadFile(path)
+	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("stat %s: %w", dir, err)
+		return nil, fmt.Errorf("read %s: %w", path, err)
 	}
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, fmt.Errorf("read %s: %w", dir, err)
+
+	var parsed struct {
+		Hooks []struct {
+			Name    string `yaml:"name"`
+			Event   string `yaml:"event"`
+			Matcher string `yaml:"matcher,omitempty"`
+			Command string `yaml:"command"`
+		} `yaml:"hooks"`
 	}
-	var out []HookSource
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
+	if err := yaml.Unmarshal(data, &parsed); err != nil {
+		return nil, fmt.Errorf("parse %s: %w", path, err)
+	}
+
+	out := make([]HookSource, 0, len(parsed.Hooks))
+	for i, h := range parsed.Hooks {
+		if strings.TrimSpace(h.Name) == "" {
+			return nil, fmt.Errorf("%s: hook[%d] missing `name`", path, i)
 		}
-		name := e.Name()
-		if strings.HasPrefix(name, ".") {
-			continue
+		if strings.TrimSpace(h.Event) == "" {
+			return nil, fmt.Errorf("%s: hook %q missing `event`", path, h.Name)
 		}
-		full := filepath.Join(dir, name)
-		info, err := e.Info()
-		if err != nil {
-			return nil, fmt.Errorf("stat %s: %w", full, err)
-		}
-		b, err := os.ReadFile(full)
-		if err != nil {
-			return nil, fmt.Errorf("read %s: %w", full, err)
+		if strings.TrimSpace(h.Command) == "" {
+			return nil, fmt.Errorf("%s: hook %q missing `command`", path, h.Name)
 		}
 		out = append(out, HookSource{
-			Name:    name,
-			Content: b,
-			Mode:    info.Mode(),
+			Name:    h.Name,
+			Event:   h.Event,
+			Matcher: h.Matcher,
+			Command: h.Command,
 		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
