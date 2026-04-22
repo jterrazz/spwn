@@ -34,7 +34,7 @@ describe('spwn build --tree-only', () => {
 
         expect(result.exitCode).toBe(0);
         // World-shared context (physics, faculties, roster) and the
-        // per-deployment role block are all inlined into each agent's
+        // Per-deployment role block are all inlined into each agent's
         // CLAUDE.md — no separate role.md / worlds/ tree. (The
         // `worlds/<id>/role.md` file was retired in d06f1517.)
         expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
@@ -104,9 +104,9 @@ describe('spwn build --tree-only', () => {
 
     test('--runtime <bogus> errors with a hint about known runtimes', async () => {
         // Pick a runtime name that will never be registered. `codex`
-        // used to be the canonical "bogus" input here — it's now a
-        // real registered runtime, so the test needs a genuinely
-        // unknown name.
+        // Used to be the canonical "bogus" input here — it's now a
+        // Real registered runtime, so the test needs a genuinely
+        // Unknown name.
         const result = await spec('tree-only bad runtime')
             .project('docker-pilot')
             .exec('build --tree-only --runtime unknown-runtime')
@@ -115,7 +115,7 @@ describe('spwn build --tree-only', () => {
         expect(result.exitCode).toBe(1);
         const stderr = result.stderr.text.toLowerCase();
         // The error hint lists the runtimes that ARE registered so
-        // users can correct their typo.
+        // Users can correct their typo.
         expect(stderr).toContain('claude-code');
         expect(stderr).toContain('codex');
     });

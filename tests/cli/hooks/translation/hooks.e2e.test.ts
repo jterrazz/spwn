@@ -33,10 +33,7 @@ import { spec } from '../../../setup/cli.specification.js';
  */
 describe('hooks.yaml translation', () => {
     test('hooks.yaml lands in .claude/settings.json and its commands run inside the world', async () => {
-        await using result = await spec('hooks translation')
-            .project('hook-pilot')
-            .exec('up')
-            .run();
+        await using result = await spec('hooks translation').project('hook-pilot').exec('up').run();
 
         expect(
             result.exitCode,
@@ -52,7 +49,10 @@ describe('hooks.yaml translation', () => {
 
         const settingsRaw = neo.file('/agents/neo/.claude/settings.json').content;
         const settings = JSON.parse(settingsRaw) as {
-            hooks?: Record<string, Array<{ matcher?: string; hooks: Array<{ command: string; type: string }> }>>;
+            hooks?: Record<
+                string,
+                Array<{ matcher?: string; hooks: Array<{ command: string; type: string }> }>
+            >;
         };
 
         // SessionStart — no matcher on the source hook; the Claude
@@ -63,7 +63,7 @@ describe('hooks.yaml translation', () => {
         expect(sessionCmds.some((c) => c.includes('/tmp/hook-pilot-session.log'))).toBe(true);
 
         // PreToolUse — source hook specifies matcher: Bash, which
-        // must land as the entry's matcher key.
+        // Must land as the entry's matcher key.
         const preToolUse = settings.hooks?.PreToolUse ?? [];
         const bashEntry = preToolUse.find((e) => e.matcher === 'Bash');
         expect(bashEntry, 'PreToolUse entry with matcher=Bash must be present').toBeDefined();
@@ -76,7 +76,9 @@ describe('hooks.yaml translation', () => {
         const runSession = await neo.exec(`sh -c ${JSON.stringify(sessionCmds[0])}`);
         expect(runSession.exitCode).toBe(0);
         expect(neo.file('/tmp/hook-pilot-session.log').exists).toBe(true);
-        expect(neo.file('/tmp/hook-pilot-session.log').content).toMatch(/session-start=\d{4}-\d{2}-\d{2}T/);
+        expect(neo.file('/tmp/hook-pilot-session.log').content).toMatch(
+            /session-start=\d{4}-\d{2}-\d{2}T/,
+        );
 
         const bashCmd = bashEntry?.hooks[0]?.command ?? '';
         const runBash = await neo.exec(`sh -c ${JSON.stringify(bashCmd)}`);

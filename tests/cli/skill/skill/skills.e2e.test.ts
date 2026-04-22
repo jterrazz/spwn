@@ -44,10 +44,10 @@ describe('system skills infrastructure (docker)', () => {
 
     test('.claude/skills is materialised directly under the agent home', async () => {
         // Default `spwn init` scaffolds `skill:focus` into agent.yaml
-        // and ships spwn/skills/focus.md; the transpile layer must
-        // lift it into /agents/<name>/.claude/skills/<skill>/SKILL.md
-        // at spawn time. docker-pilot has no skills, so this test
-        // must drive a scaffold that actually declares one.
+        // And ships spwn/skills/focus.md; the transpile layer must
+        // Lift it into /agents/<name>/.claude/skills/<skill>/SKILL.md
+        // At spawn time. docker-pilot has no skills, so this test
+        // Must drive a scaffold that actually declares one.
         await using result = await spec('claude skills tree')
             .project('empty')
             .exec(['init', 'up'])
@@ -57,10 +57,10 @@ describe('system skills infrastructure (docker)', () => {
         const neo = result.container('neo');
 
         // The transpile layer writes every resolved skill (tool-shipped
-        // plus user-authored) under /agents/<name>/.claude/skills/<skill>/SKILL.md
-        // via docker-cp at spawn time. No symlink, no /world/skills
-        // indirection — Claude Code's native walker finds the tree at
-        // its canonical location on startup.
+        // Plus user-authored) under /agents/<name>/.claude/skills/<skill>/SKILL.md
+        // Via docker-cp at spawn time. No symlink, no /world/skills
+        // Indirection — Claude Code's native walker finds the tree at
+        // Its canonical location on startup.
         const dir = await neo.exec('test -d /agents/neo/.claude/skills');
         expect(dir.exitCode).toBe(0);
         expect(neo.file('/agents/neo/.claude/skills/focus/SKILL.md').exists).toBe(true);

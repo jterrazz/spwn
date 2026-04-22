@@ -39,27 +39,27 @@ describe('spwn init', () => {
         expect(result.file('.gitignore').content).toContain('.spwn');
 
         // One concrete example per local-ref scheme so users see how
-        // skill: and tool: are authored from their very first
+        // Skill: and tool: are authored from their very first
         // `spwn init`. Regressions here mean the default project no
-        // longer demonstrates composition end-to-end.
+        // Longer demonstrates composition end-to-end.
         expect(result.file('spwn/skills/focus.md').exists).toBe(true);
         expect(result.file('spwn/skills/focus.md').content).toContain('name: focus');
         expect(result.file('spwn/tools/greet/tool.yaml').exists).toBe(true);
         expect(result.file('spwn/tools/greet/tool.yaml').content).toContain('name: greet');
 
         // Runtime hooks have their own top-level file — not a dep
-        // scheme. The scaffold ships one SessionStart example so the
-        // generic hooks.yaml → Claude/Codex translation has a live
-        // demo on day one.
+        // Scheme. The scaffold ships one SessionStart example so the
+        // Generic hooks.yaml → Claude/Codex translation has a live
+        // Demo on day one.
         expect(result.file('spwn/hooks.yaml').exists).toBe(true);
         const hooksYaml = result.file('spwn/hooks.yaml').content;
         expect(hooksYaml).toContain('event: SessionStart');
         expect(hooksYaml).toContain('command:');
 
         // Default agent.yaml must reference the two dep-scheme
-        // examples so a fresh project shows the composition grammar
+        // Examples so a fresh project shows the composition grammar
         // (spwn: + skill: + tool:) inline. The retired `hook:` scheme
-        // must NOT leak back into the scaffold.
+        // Must NOT leak back into the scaffold.
         const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
         expect(agentYaml).toContain('skill:focus');
         expect(agentYaml).toContain('tool:greet');

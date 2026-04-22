@@ -31,7 +31,7 @@ describe('CLI - auth command', () => {
         const stderr = result.stderr.text;
         expect(stderr).toContain('PROVIDER');
         // The status-table column header is `STATE` (active | known |
-        // none); it was briefly called `STATUS` in an earlier revision.
+        // None); it was briefly called `STATUS` in an earlier revision.
         expect(stderr).toContain('STATE');
         expect(stderr).toContain('anthropic');
         expect(stderr).toContain('openai');

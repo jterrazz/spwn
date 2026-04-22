@@ -83,20 +83,15 @@ describe('dependency grammar', () => {
         // Check-legacy-refs fixture at the top of this file) must be
         // Rejected. The CLI itself, though, never produces such a
         // Manifest.
-        // skill:focus is scaffolded by `spwn init`, so it's available
-        // to install — prior revisions of this test used
+        // Skill:focus is scaffolded by `spwn init`, so it's available
+        // To install — prior revisions of this test used
         // `skill:paper-reading` which would require a separate
         // `spwn skill new` call. The resolver now errors on missing
-        // local files at install time, which is the right behaviour
-        // but broke the old form.
+        // Local files at install time, which is the right behaviour
+        // But broke the old form.
         const result = await spec('cli canonicalises mixed input')
             .project('empty')
-            .exec([
-                'init',
-                'install qmd',
-                'install skill:focus --agent neo',
-                'install spwn:unix',
-            ])
+            .exec(['init', 'install qmd', 'install skill:focus --agent neo', 'install spwn:unix'])
             .run();
 
         expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
