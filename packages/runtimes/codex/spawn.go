@@ -36,18 +36,42 @@ func (*spawner) Name() string { return "codex" }
 // the CLI already bridges the terminology so callers don't need to
 // know the runtime's internal vocabulary).
 func (*spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
+	// Flags shared by interactive and non-interactive modes:
+	//   --skip-git-repo-check: the agent's home (/agents/<name>) is
+	//     not a git repo; codex otherwise refuses with "Not inside a
+	//     trusted directory and --skip-git-repo-check was not
+	//     specified." The directory is still trust-seeded via
+	//     PrelaunchShell, but the git check is orthogonal.
+	//   --dangerously-bypass-approvals-and-sandbox: codex's default
+	//     bwrap sandbox fails inside a worker container ("No
+	//     permissions to create a new namespace"). The container IS
+	//     the sandbox — spwn isolates the whole runtime, so nested
+	//     sandboxing just blocks tool use without adding safety.
+	safetyFlags := []string{"--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox"}
+
 	// Interactive mode: no prompt. Covers both the anonymous REPL
 	// (no AgentName) and the architect's detached "just start the
 	// agent in its container" spawn (AgentName set, no prompt) — both
 	// want the same bare `codex` REPL.
 	if cfg.Prompt == "" {
-		return []string{"codex"}
+		return append([]string{"codex"}, safetyFlags...)
 	}
 
-	// Non-interactive exec path: a prompt was supplied.
+	// Non-interactive exec path: a prompt was supplied. Session
+	// resume uses the `resume <id>` subcommand rather than a flag —
+	// codex ≥ 0.122 dropped `--thread` in favour of the positional
+	// subcommand form. `--json` is baked in here (not in
+	// OneShotFlags) because codex's exec subcommand parses PROMPT as
+	// the first non-flag positional; any flag appended AFTER the
+	// prompt is swallowed or errors out.
 	cmd := []string{"codex", "exec"}
 	if cfg.SessionID != "" {
-		cmd = append(cmd, "--thread", cfg.SessionID)
+		cmd = append(cmd, "resume")
+	}
+	cmd = append(cmd, safetyFlags...)
+	cmd = append(cmd, "--json")
+	if cfg.SessionID != "" {
+		cmd = append(cmd, cfg.SessionID)
 	}
 	cmd = append(cmd, cfg.Prompt)
 	return cmd
@@ -105,23 +129,18 @@ func (*spawner) PrelaunchShell() string {
 		`fi`
 }
 
-// OneShotFlags appends codex's non-interactive output-format flag to
-// the base argv (which BuildCommand has already built). Codex's exec
-// subcommand emits JSONL by default when `--json` is set: one event
-// per line, last event carries the completion envelope.
+// OneShotFlags is a no-op for codex. The `--json` output flag MUST
+// sit before the positional PROMPT argument, which means it belongs
+// in BuildCommand (where the prompt lives) rather than appended after
+// the fact. Kept on the interface so other runtimes can still layer
+// mode-specific flags post-hoc.
 //
 // `stream-json` and the default both map to `--json` — codex has no
 // separate "final envelope" format, the stream IS the contract. The
 // talk path either scans the JSONL in-flight (stream mode) or joins
 // everything and asks ParseOneShotResult to pull out the final text.
 func (*spawner) OneShotFlags(base []string, outputFormat string) []string {
-	// Guard against empty base: BuildCommand returns nil in a couple
-	// of degenerate cases (missing prompt on a named agent); don't
-	// promote nil to a runnable argv just because flags got appended.
-	if len(base) == 0 {
-		return base
-	}
-	return append(base, "--json")
+	return base
 }
 
 // ParseOneShotResult walks codex's JSONL exec output from last-line
@@ -165,12 +184,21 @@ func (*spawner) ParseOneShotResult(raw []byte) (string, string, error) {
 			threadID = event.ThreadID
 		}
 		if event.Type == "item.completed" && len(event.Item) > 0 {
+			// Codex ≥0.122 renamed the item discriminator from
+			// `item_type` to `type`. Read both so the parser works
+			// across the transition; the newer key wins when both
+			// are present on a single envelope.
 			var item struct {
+				Type     string `json:"type"`
 				ItemType string `json:"item_type"`
 				Text     string `json:"text"`
 			}
 			if err := json.Unmarshal(event.Item, &item); err == nil {
-				if item.ItemType == "agent_message" && strings.TrimSpace(item.Text) != "" {
+				kind := item.Type
+				if kind == "" {
+					kind = item.ItemType
+				}
+				if kind == "agent_message" && strings.TrimSpace(item.Text) != "" {
 					// Take the LAST agent_message — multi-turn exec
 					// can have several; the last is the final reply.
 					text = item.Text
