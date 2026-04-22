@@ -52,13 +52,29 @@ func TestSpawner_SupportsSession(t *testing.T) {
 	}
 }
 
-// TestSpawner_BuildCommand_interactive returns the bare `codex`
-// command for interactive mode (no prompt, no named agent). The full
-// one-shot / exec-subcommand argv is exercised in oneshot_test.go.
+// TestSpawner_BuildCommand_interactive returns `codex` plus the
+// container-safety flags for interactive mode (no prompt, no named
+// agent). The full one-shot / exec-subcommand argv is exercised in
+// oneshot_test.go.
+//
+// Both safety flags MUST be on the interactive path too:
+//   --skip-git-repo-check                       – /agents/<name> is not a git repo
+//   --dangerously-bypass-approvals-and-sandbox  – bwrap can't nest inside Docker
+//
+// Regression guard: stripping either flag silently breaks `spwn agent
+// talk` on a codex-backed world (first symptom: codex errors out with
+// "Not inside a trusted directory" or "No permissions to create a
+// new namespace").
 func TestSpawner_BuildCommand_interactive(t *testing.T) {
 	cmd := Spawner.BuildCommand(runtimes.SpawnConfig{})
-	if len(cmd) != 1 || cmd[0] != "codex" {
-		t.Errorf("interactive BuildCommand should be `[codex]`; got %v", cmd)
+	if len(cmd) == 0 || cmd[0] != "codex" {
+		t.Errorf("interactive BuildCommand should start with `codex`; got %v", cmd)
+	}
+	joined := strings.Join(cmd, " ")
+	for _, want := range []string{"--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox"} {
+		if !strings.Contains(joined, want) {
+			t.Errorf("interactive BuildCommand missing %q; got %v", want, cmd)
+		}
 	}
 }
 

@@ -17,7 +17,7 @@ func TestBuildCommand_oneShot(t *testing.T) {
 		WorldID:   "w-1",
 		Prompt:    "hello",
 	})
-	assertEqStrings(t, got, []string{"codex", "exec", "hello"})
+	assertEqStrings(t, got, []string{"codex", "exec", "--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox", "--json", "hello"})
 }
 
 func TestBuildCommand_oneShotResume(t *testing.T) {
@@ -27,41 +27,33 @@ func TestBuildCommand_oneShotResume(t *testing.T) {
 		Prompt:    "follow up",
 		SessionID: "th_abc",
 	})
-	assertEqStrings(t, got, []string{"codex", "exec", "--thread", "th_abc", "follow up"})
+	assertEqStrings(t, got, []string{"codex", "exec", "resume", "--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox", "--json", "th_abc", "follow up"})
 }
 
 func TestBuildCommand_namedAgentNoPromptIsInteractive(t *testing.T) {
 	// Named agent without a prompt is how the architect spawns an
 	// agent in detached mode — it wants a blocking REPL process
-	// running inside the container. That's the same shape as the
-	// anonymous interactive case: `codex` with no flags.
+	// running inside the container. Same shape as the anonymous
+	// interactive case: `codex` with the container-safety flags
+	// (--skip-git-repo-check + --dangerously-bypass-approvals-and-sandbox)
+	// so the container's agent home + nested bwrap don't trip codex
+	// into refusing to run.
 	got := Spawner.BuildCommand(runtimes.SpawnConfig{AgentName: "neo"})
-	assertEqStrings(t, got, []string{"codex"})
+	assertEqStrings(t, got, []string{"codex", "--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox"})
 }
 
-func TestOneShotFlags_appendsJSON(t *testing.T) {
-	base := []string{"codex", "exec", "hi"}
+func TestOneShotFlags_isNoOp(t *testing.T) {
+	// Codex's `--json` flag must precede the positional prompt, so
+	// it's baked into BuildCommand rather than appended here. The
+	// talk path still calls OneShotFlags on every invocation —
+	// verify it returns the input untouched so we don't accidentally
+	// reintroduce the "--json appears after prompt" bug.
+	base := []string{"codex", "exec", "--json", "hi"}
 	got := Spawner.OneShotFlags(base, "")
-	assertEqStrings(t, got, []string{"codex", "exec", "hi", "--json"})
-}
+	assertEqStrings(t, got, base)
 
-func TestOneShotFlags_streamFormat(t *testing.T) {
-	// Codex has no separate stream-vs-envelope format — `--json` is
-	// JSONL regardless. stream-json from the caller resolves to the
-	// same flag set; the difference lives in how talk.go consumes
-	// stdout, not in codex's CLI.
-	base := []string{"codex", "exec", "hi"}
-	got := Spawner.OneShotFlags(base, "stream-json")
-	assertEqStrings(t, got, []string{"codex", "exec", "hi", "--json"})
-}
-
-func TestOneShotFlags_emptyBaseNoOp(t *testing.T) {
-	// BuildCommand can return nil on degenerate config; don't
-	// promote that to a runnable argv by sticking `--json` onto it.
-	got := Spawner.OneShotFlags(nil, "")
-	if got != nil {
-		t.Errorf("expected nil for empty base, got %v", got)
-	}
+	got = Spawner.OneShotFlags(base, "stream-json")
+	assertEqStrings(t, got, base)
 }
 
 func TestParseOneShotResult_happy(t *testing.T) {
@@ -80,6 +72,30 @@ func TestParseOneShotResult_happy(t *testing.T) {
 	}
 	if sid != "th_abc" {
 		t.Errorf("sessionID = %q, want th_abc", sid)
+	}
+}
+
+// TestParseOneShotResult_newItemTypeKey pins the parser against the
+// post-0.122 codex shape where the item discriminator moved from
+// `item_type` to `type`. The real CLI emits `type` today; without
+// this the parser silently returned an empty text field and the
+// `spwn agent talk` subcommand printed nothing while codex had
+// already produced a perfectly good reply.
+func TestParseOneShotResult_newItemTypeKey(t *testing.T) {
+	raw := []byte(strings.Join([]string{
+		`{"type":"thread.started","thread_id":"019db62c-b56e-7931-9417-e305ace444e9"}`,
+		`{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I observe: hi."}}`,
+		`{"type":"turn.completed"}`,
+	}, "\n"))
+	text, sid, err := Spawner.ParseOneShotResult(raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if text != "I observe: hi." {
+		t.Errorf("text = %q, want %q", text, "I observe: hi.")
+	}
+	if sid != "019db62c-b56e-7931-9417-e305ace444e9" {
+		t.Errorf("sessionID = %q", sid)
 	}
 }
 
