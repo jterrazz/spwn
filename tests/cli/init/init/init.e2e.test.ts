@@ -39,23 +39,31 @@ describe('spwn init', () => {
         expect(result.file('.gitignore').content).toContain('.spwn');
 
         // One concrete example per local-ref scheme so users see how
-        // Skill: / tool: / hook: are authored from their very first
+        // skill: and tool: are authored from their very first
         // `spwn init`. Regressions here mean the default project no
-        // Longer demonstrates composition end-to-end.
+        // longer demonstrates composition end-to-end.
         expect(result.file('spwn/skills/focus.md').exists).toBe(true);
         expect(result.file('spwn/skills/focus.md').content).toContain('name: focus');
         expect(result.file('spwn/tools/greet/tool.yaml').exists).toBe(true);
         expect(result.file('spwn/tools/greet/tool.yaml').content).toContain('name: greet');
-        expect(result.file('spwn/hooks/pre-spawn.sh').exists).toBe(true);
-        expect(result.file('spwn/hooks/pre-spawn.sh').content).toContain('#!/usr/bin/env bash');
 
-        // Default agent.yaml must reference all three so a fresh
-        // Project shows the full composition grammar (spwn: + skill:
-        // + tool: + hook:) inline.
+        // Runtime hooks have their own top-level file — not a dep
+        // scheme. The scaffold ships one SessionStart example so the
+        // generic hooks.yaml → Claude/Codex translation has a live
+        // demo on day one.
+        expect(result.file('spwn/hooks.yaml').exists).toBe(true);
+        const hooksYaml = result.file('spwn/hooks.yaml').content;
+        expect(hooksYaml).toContain('event: SessionStart');
+        expect(hooksYaml).toContain('command:');
+
+        // Default agent.yaml must reference the two dep-scheme
+        // examples so a fresh project shows the composition grammar
+        // (spwn: + skill: + tool:) inline. The retired `hook:` scheme
+        // must NOT leak back into the scaffold.
         const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
         expect(agentYaml).toContain('skill:focus');
         expect(agentYaml).toContain('tool:greet');
-        expect(agentYaml).toContain('hook:pre-spawn');
+        expect(agentYaml).not.toContain('hook:');
     });
 
     test('errors when spwn.yaml already exists', async () => {

@@ -25,10 +25,11 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"knowledge/.gitkeep",
 		".gitignore",
 		// One example per local-ref scheme so the scaffold demonstrates
-		// skill: / tool: / hook: authoring patterns end-to-end.
+		// skill: and tool: authoring patterns end-to-end. Runtime hooks
+		// live in spwn/hooks.yaml (not a dep scheme) — see below.
 		"spwn/skills/focus.md",
 		"spwn/tools/greet/tool.yaml",
-		"spwn/hooks/pre-spawn.sh",
+		"spwn/hooks.yaml",
 	}
 	for _, rel := range required {
 		path := filepath.Join(dir, rel)
@@ -84,10 +85,9 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 
 // TestInit_scaffoldsLocalRefExamples locks in the end-to-end story:
 // the scaffold materialises one concrete example for each local-ref
-// scheme (skill:/tool:/hook:), wires all three into the default
-// agent's dependencies list, and makes the hook executable so the
-// spawn pipeline can actually launch it. Without this the "it just
-// works on first init" promise slips.
+// scheme (skill:/tool:) and ships a runtime hooks file (spwn/hooks.yaml)
+// with a sample SessionStart hook. Without this the "it just works on
+// first init" promise slips.
 func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	dir := t.TempDir()
 	if err := Init(dir, InitOpts{Name: "local-refs"}); err != nil {
@@ -98,19 +98,26 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read agent.yaml: %v", err)
 	}
-	for _, ref := range []string{"skill:focus", "tool:greet", "hook:pre-spawn"} {
+	for _, ref := range []string{"skill:focus", "tool:greet"} {
 		if !strings.Contains(string(agentYAML), ref) {
 			t.Errorf("agent.yaml missing %q, got:\n%s", ref, agentYAML)
 		}
 	}
-
-	// Hook must be executable — runtime launches it directly.
-	info, err := os.Stat(filepath.Join(dir, "spwn/hooks/pre-spawn.sh"))
-	if err != nil {
-		t.Fatalf("stat hook: %v", err)
+	// The retired `hook:<name>` scheme should no longer leak into new
+	// projects — a fresh scaffold must not reference it.
+	if strings.Contains(string(agentYAML), "hook:") {
+		t.Errorf("agent.yaml still references the retired hook: scheme:\n%s", agentYAML)
 	}
-	if info.Mode()&0o111 == 0 {
-		t.Errorf("hook pre-spawn.sh is not executable, mode=%v", info.Mode())
+
+	// spwn/hooks.yaml carries the runtime-hook examples now.
+	hooksYAML, err := os.ReadFile(filepath.Join(dir, "spwn/hooks.yaml"))
+	if err != nil {
+		t.Fatalf("stat hooks.yaml: %v", err)
+	}
+	for _, part := range []string{"hooks:", "event: SessionStart", "command:"} {
+		if !strings.Contains(string(hooksYAML), part) {
+			t.Errorf("hooks.yaml missing %q, got:\n%s", part, hooksYAML)
+		}
 	}
 
 	// Skill must be a valid frontmatter-first markdown block: starts

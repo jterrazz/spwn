@@ -4,7 +4,7 @@
     spwn/agents/neo/               # starter agent
     spwn/skills/focus.md           # example local skill  (skill:focus)
     spwn/tools/greet/              # example local tool   (tool:greet)
-    spwn/hooks/pre-spawn.sh        # example host hook    (hook:pre-spawn)
+    spwn/hooks.yaml                # runtime hooks (Claude/Codex)
 
   Gitignored:
     .spwn/                         # local state

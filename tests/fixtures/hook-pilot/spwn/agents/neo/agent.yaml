@@ -1,0 +1,9 @@
+name: neo
+description: Hook-pilot agent — exists only to anchor the hooks.yaml translation test.
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
