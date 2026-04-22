@@ -15,7 +15,7 @@ Your soul is the source of truth for who you are. Read it first, every session.
 ### Topology
 /agents/<your-name>/ - your home: SOUL.md, playbooks/, journal/ (read-write, persists across worlds)
 /workspaces/         - host project dirs mounted read-write, your actual work surface
-/world/              - world-shared state: knowledge/, inbox/<name>/ (read-write)
+/world/              - world-shared state: inbox/<name>/ (read-write)
 /tmp                 - ephemeral scratch
 
 ### Communication
