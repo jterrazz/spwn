@@ -24,12 +24,11 @@ func ToolsToInputs(tools []tool.Tool) []ToolInput {
 	for i, t := range tools {
 		spec := t.Install()
 		inputs[i] = ToolInput{
-			Name:         t.Name(),
-			Packages:     spec.Packages,
-			Commands:     spec.Commands,
-			UserCommands: spec.UserCommands,
-			Env:          spec.Env,
-			Files:        spec.Files,
+			Name:     t.Name(),
+			Packages: spec.Packages,
+			Commands: spec.Commands,
+			Env:      spec.Env,
+			Files:    spec.Files,
 		}
 	}
 	return inputs

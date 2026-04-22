@@ -11,12 +11,11 @@ import (
 
 // ToolInput is the data the generator needs from each tool.
 type ToolInput struct {
-	Name         string
-	Packages     tool.Packages
-	Commands     []string
-	UserCommands []string // Commands that run after USER switch (templates: {{.Home}}, {{.User}})
-	Env          map[string]string
-	Files        map[string][]byte
+	Name     string
+	Packages tool.Packages
+	Commands []string
+	Env      map[string]string
+	Files    map[string][]byte
 }
 
 // GenerateOpts configures Dockerfile generation.
@@ -26,11 +25,11 @@ type GenerateOpts struct {
 	SkipFooter bool
 
 	// User is the non-root user in the image. Defaults to "spwn".
-	// Used to template {{.User}} in UserCommands and for chown/USER directives.
+	// Used for the chown + USER directives in the footer.
 	User string
 
 	// Home is the user's home directory. Defaults to "/home/<User>".
-	// Used to template {{.Home}} in UserCommands.
+	// Used for the WORKDIR directive in the footer.
 	Home string
 }
 
@@ -46,13 +45,6 @@ func (o GenerateOpts) home() string {
 		return o.Home
 	}
 	return "/home/" + o.user()
-}
-
-// templateUserCmd replaces {{.Home}} and {{.User}} in a command string.
-func (o GenerateOpts) templateUserCmd(cmd string) string {
-	cmd = strings.ReplaceAll(cmd, "{{.Home}}", o.home())
-	cmd = strings.ReplaceAll(cmd, "{{.User}}", o.user())
-	return cmd
 }
 
 // writeRunCommand emits a `RUN` directive for cmd. Single-line
@@ -175,14 +167,6 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 	// them into each agent's `.claude/skills/` / `.agents/skills/` at
 	// spawn time via docker-cp. No COPY directive needed here.
 
-	// Collect UserCommands across all tools (run after USER switch)
-	var allUserCmds []string
-	for _, t := range tools {
-		for _, cmd := range t.UserCommands {
-			allUserCmds = append(allUserCmds, opt.templateUserCmd(cmd))
-		}
-	}
-
 	if !opt.SkipFooter {
 		user := opt.user()
 		home := opt.home()
@@ -192,11 +176,6 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		sb.WriteString(fmt.Sprintf("RUN chown -R %s:%s %s\n", user, user, home))
 		sb.WriteString(fmt.Sprintf("USER %s\n", user))
 		sb.WriteString(fmt.Sprintf("WORKDIR %s\n", home))
-
-		// Run user-level setup commands (config files, etc.)
-		for _, cmd := range allUserCmds {
-			writeRunCommand(&sb, cmd)
-		}
 
 		// No VOLUME declaration. /world and /workspaces/<name> are
 		// bind-mounted by the spawner at container creation time;

@@ -100,14 +100,13 @@ type InstallSection struct {
 
 	// Commands run as root, before the USER switch. Each item
 	// becomes one RUN line in the Dockerfile, so order matters.
+	//
+	// Runtime-user config belongs at spawn time, not here — see the
+	// runtime adapter's DefaultConfigFiles (e.g.
+	// packages/runtimes/claudecode/spawn.go) for files that need to
+	// land in the agent's real HOME rather than the image's
+	// build-time /home/spwn.
 	Commands []string `yaml:"commands"`
-
-	// UserCommands run after the USER switch. Each item becomes one
-	// RUN line. The strings {{.Home}} and {{.User}} are templated
-	// with the actual home directory and username by the Dockerfile
-	// generator — use these instead of hard-coding /home/spwn so
-	// the same tool works under any user.
-	UserCommands []string `yaml:"user-commands"`
 
 	// Env are ENV directives added to the Dockerfile.
 	Env map[string]string `yaml:"env"`

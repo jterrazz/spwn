@@ -56,13 +56,13 @@ type InstallSpec struct {
 	// Packages for the supported set.
 	Packages Packages
 
-	// Commands are RUN lines executed as root, before the USER switch.
+	// Commands are RUN lines executed as root, in the order declared.
+	// Runtime-user config (dotfiles, per-agent settings) does NOT
+	// belong here — it's materialised at spawn time by each runtime
+	// adapter's DefaultConfigFiles method, which lands files directly
+	// under the agent's real HOME (/agents/<name>/) instead of the
+	// image's build-time /home/spwn.
 	Commands []string
-
-	// UserCommands are RUN lines executed after the USER switch.
-	// Use these for writing config files to $HOME or other user-specific setup.
-	// The generator templates {{.Home}} and {{.User}} with the actual values.
-	UserCommands []string
 
 	// Env are ENV key=value directives added to the Dockerfile.
 	Env map[string]string

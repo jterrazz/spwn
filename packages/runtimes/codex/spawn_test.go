@@ -88,10 +88,10 @@ func TestSpawner_SyncHostCredentials(t *testing.T) {
 	}
 }
 
-// TestSpawner_DefaultConfigFiles returns nil: codex's config.toml is
-// written at image-build time by Tool.Install UserCommands, not
-// per-spawn. Keeps the spawn pipeline from re-seeding a file the
-// runtime doesn't need.
+// TestSpawner_DefaultConfigFiles returns nil: the per-agent
+// .codex/config.toml is emitted by the transpile renderer
+// (GenerateAgentConfigTOML), and the project-trust entry is seeded
+// by PrelaunchShell. No extra spawn-time file materialisation needed.
 func TestSpawner_DefaultConfigFiles(t *testing.T) {
 	if got := Spawner.DefaultConfigFiles("/agents/neo"); got != nil {
 		t.Errorf("DefaultConfigFiles should be nil; got %v", got)

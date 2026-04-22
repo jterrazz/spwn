@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
-	"strings"
 
 	runtimes "spwn.sh/packages/runtimes"
 	"spwn.sh/packages/dependency"
@@ -70,17 +69,11 @@ func BuildArchitectImage(ctx context.Context, docker *backend.Docker, logw io.Wr
 		Home:       "/home/architect",
 	})
 
-	// Append architect-specific Dockerfile directives (COPY binary, system files, entrypoint)
-	// Collect and template UserCommands for the architect user
-	var userCmdLines string
-	for _, t := range resolved {
-		for _, cmd := range t.Install().UserCommands {
-			cmd = strings.ReplaceAll(cmd, "{{.Home}}", "/home/architect")
-			cmd = strings.ReplaceAll(cmd, "{{.User}}", "architect")
-			userCmdLines += fmt.Sprintf("RUN %s\n", cmd)
-		}
-	}
-
+	// Append architect-specific Dockerfile directives (COPY binary,
+	// system files, entrypoint). Runtime-user config (dotfiles etc.)
+	// is not written during the image build — each runtime adapter's
+	// DefaultConfigFiles method materialises it at spawn time into
+	// the actual per-agent HOME.
 	architectFooter := `
 # Architect: cross-compiled spwn binary
 COPY spwn /usr/local/bin/spwn
@@ -98,10 +91,7 @@ RUN chown -R architect:architect /me /home/architect
 COPY entrypoint.sh /usr/local/bin/architect-entrypoint.sh
 RUN chmod +x /usr/local/bin/architect-entrypoint.sh
 
-# User-level tool configuration (runs as architect)
-USER architect
-` + userCmdLines + `
-# Switch back to root for entrypoint (needs usermod for docker socket GID)
+# Entrypoint runs as root so it can usermod for docker socket GID.
 # Claude Code runs via: docker exec -u architect
 USER root
 WORKDIR /me
