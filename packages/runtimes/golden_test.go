@@ -41,6 +41,7 @@ import (
 	// With transpile.Compile. Order doesn't matter; each registration
 	// Is keyed by Runtime.Name().
 	_ "spwn.sh/packages/runtimes/claudecode"
+	_ "spwn.sh/packages/runtimes/codex"
 )
 
 // outputDirPrefix marks the directories the test treats as
