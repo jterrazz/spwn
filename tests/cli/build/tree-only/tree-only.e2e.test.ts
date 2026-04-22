@@ -33,12 +33,15 @@ describe('spwn build --tree-only', () => {
             .run();
 
         expect(result.exitCode).toBe(0);
-        // World-shared context (physics, faculties, roster, AGENTS.md)
-        // Is inlined into each agent's CLAUDE.md; no separate files.
+        // World-shared context (physics, faculties, roster) and the
+        // per-deployment role block are all inlined into each agent's
+        // CLAUDE.md — no separate role.md / worlds/ tree. (The
+        // `worlds/<id>/role.md` file was retired in d06f1517.)
         expect(result.file('dist/agents/neo/CLAUDE.md').exists).toBe(true);
-        // Per-deployment role.md still lands under worlds/<id>/, where
-        // <id> is the world name from spwn.yaml (`neo` in docker-pilot).
-        expect(result.file('dist/agents/neo/worlds/neo/role.md').exists).toBe(true);
+        expect(
+            result.file('dist/agents/neo/CLAUDE.md').content,
+            'CLAUDE.md missing inlined Role here block',
+        ).toContain('## Role here');
     });
 
     test('--dry-run prints paths without touching disk', async () => {
@@ -100,15 +103,21 @@ describe('spwn build --tree-only', () => {
     });
 
     test('--runtime <bogus> errors with a hint about known runtimes', async () => {
+        // Pick a runtime name that will never be registered. `codex`
+        // used to be the canonical "bogus" input here — it's now a
+        // real registered runtime, so the test needs a genuinely
+        // unknown name.
         const result = await spec('tree-only bad runtime')
             .project('docker-pilot')
-            .exec('build --tree-only --runtime codex')
+            .exec('build --tree-only --runtime unknown-runtime')
             .run();
 
         expect(result.exitCode).toBe(1);
         const stderr = result.stderr.text.toLowerCase();
-        expect(stderr).toContain('codex');
+        // The error hint lists the runtimes that ARE registered so
+        // users can correct their typo.
         expect(stderr).toContain('claude-code');
+        expect(stderr).toContain('codex');
     });
 
     test('--force re-compile replaces stale files from a filtered run', async () => {

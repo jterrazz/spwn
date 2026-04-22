@@ -14,9 +14,9 @@ Lifecycle:
 
 Conversation:
   talk <name> [msg]                Open a session with a running agent (sync)
-  send <name> <msg>                Send an async message to an agent's inbox
-  inbox <name>                     Show an agent's inbox
-  watch <name>                     Tail an agent's inbox in real time
+  send <name> <msg>                Send an async message to an agent's inbox [planned]
+  inbox <name>                     Show an agent's inbox [planned]
+  watch <name>                     Tail an agent's inbox in real time [planned]
 
 Observe:
   show <name>                      Show agent details (alias of inspect)

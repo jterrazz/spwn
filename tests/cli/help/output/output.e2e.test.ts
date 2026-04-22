@@ -94,7 +94,8 @@ describe('CLI output', () => {
         expect(result.exitCode).toBe(0);
         const stderr = result.stderr.text;
         expect(stderr).toContain('PROVIDER');
-        expect(stderr).toContain('STATUS');
+        // Column header is `STATE` (was briefly called `STATUS`).
+        expect(stderr).toContain('STATE');
         expect(stderr).toContain('SOURCE');
         expect(stderr).toContain('anthropic');
         expect(stderr).toContain('openai');

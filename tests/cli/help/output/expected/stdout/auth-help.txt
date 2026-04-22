@@ -4,15 +4,20 @@
 Usage:
   spwn auth [command]
 
-Commands:
-  status                           Show authentication status (default when no subcommand)
-  providers                        List configured AI providers
-  login                            Set up credentials (Keychain or manual)
-  logout                           Clear cached credentials
-  token <token>                    Set a token directly (CI / scripts)
-  check                            Validate credentials for all AI providers
+Inspect:
+  status                           Show every detected credential (default when no subcommand)
+  check [provider]                 Validate active credentials against each API
 
-Environment Variables:
-  ANTHROPIC_API_KEY                Anthropic Claude API key
-  OPENAI_API_KEY                   OpenAI API key
+Configure:
+  use <provider> <method>          Pick oauth or api_key for a provider
+  login <provider>                 Register credentials (--api-key <val> or --oauth)
+  disable <provider>               Ignore a provider without deleting creds
+  enable <provider>                Reverse a previous disable
+
+Remove:
+  logout <provider>                Clear all credentials for a provider (keychain, files)
+
+Supported providers:
+  anthropic                        Claude — OAuth (subscription) or API key
+  openai                           Codex — OAuth (ChatGPT Plus) or API key (env-only today)
 
