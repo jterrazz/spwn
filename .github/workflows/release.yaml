@@ -59,6 +59,13 @@ jobs:
       project-path: apps/web
       go-version: "1.25"
       pre-build-script: |
+        # Regenerate the embedded catalog mirror. `//go:embed all:content`
+        # in packages/dependency/internal/adapters/spwn/loader.go points
+        # at a gitignored tree that's only populated by this generate
+        # step — missing it makes every `go build` fail with "pattern
+        # all:content: no matching files found". `make build` wires
+        # this as a prerequisite; the release pipeline must too.
+        cd packages/dependency && go generate ./... && cd ../..
         # Build the CLI sidecar that the Tauri app will spawn at runtime.
         cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
         cd ../..
