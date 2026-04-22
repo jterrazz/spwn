@@ -10,7 +10,12 @@ import (
 // a "## Physics" heading. Callers that need the raw string (e.g.
 // NPC prompts) use it directly; no separate /world/physics.md file
 // is emitted by any active renderer.
-func GeneratePhysics(_ []string) string {
+//
+// knowledgeMounted controls whether the Topology line advertises
+// /world/knowledge/ as a readable path. When a world has no
+// `knowledge:` key in spwn.yaml the directory is absent from the
+// container, so mentioning it would mislead the agent.
+func GeneratePhysics(knowledgeMounted bool) string {
 	var sb strings.Builder
 
 	sb.WriteString("# Physics of This World\n\n")
@@ -24,7 +29,11 @@ func GeneratePhysics(_ []string) string {
 	sb.WriteString("## Topology\n")
 	sb.WriteString("/agents/<your-name>/ - your home: SOUL.md, playbooks/, journal/ (read-write, persists across worlds)\n")
 	sb.WriteString("/workspaces/         - host project dirs mounted read-write, your actual work surface\n")
-	sb.WriteString("/world/              - world-shared state: knowledge/, inbox/<name>/ (read-write)\n")
+	if knowledgeMounted {
+		sb.WriteString("/world/              - world-shared state: knowledge/, inbox/<name>/ (read-write)\n")
+	} else {
+		sb.WriteString("/world/              - world-shared state: inbox/<name>/ (read-write)\n")
+	}
 	sb.WriteString("/tmp                 - ephemeral scratch\n\n")
 
 	// Communication

@@ -50,7 +50,7 @@ func (r *renderer) Name() string { return "claude-code" }
 func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 	t := transpile.New()
 
-	physics := worldbook.GeneratePhysics(input.Deps)
+	physics := worldbook.GeneratePhysics(input.WorldKnowledgeMounted)
 	faculties := worldbook.GenerateFaculties(input.VerifiedTools)
 
 	roster := make([]worldbook.ColonyAgentSpec, 0, len(input.Agents))
