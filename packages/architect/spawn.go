@@ -241,12 +241,14 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// spwn binary itself and is only meaningful inside the
 	// architect container, not inside the workers' world container.
 	//
-	// spwn:node used to live here because the claude-code runtime
-	// was installed via `npm install -g @anthropic-ai/claude-code`.
-	// The native binary installer removed that dependency, so node
-	// is no longer part of the baseline footprint. Users who want
-	// node for their own tools still add spwn:node to agent.yaml.
-	required := []string{"spwn:unix", "spwn:claude-code"}
+	// The runtime tool is chosen from the declared backend:
+	//   claude-code → spwn:claude-code (self-contained binary install)
+	//   codex       → spwn:codex (npm install -g @openai/codex; pulls
+	//                 spwn:node transitively)
+	// Hardcoding spwn:claude-code here silently installed the wrong
+	// runtime for codex agents, making their containers non-functional.
+	runtimeTool := runtimeBackendTool(opts.runtimeName())
+	required := []string{"spwn:unix", runtimeTool}
 	toolList := append(required, opts.Manifest.Deps...)
 
 	// Deduplicate

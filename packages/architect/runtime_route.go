@@ -13,6 +13,26 @@ import (
 // any caller that leaves SpawnOpts.RuntimeName empty.
 const defaultRuntimeName = "claude-code"
 
+// runtimeBackendTool returns the `spwn:<name>` catalog dep that
+// installs the runtime binary for the given runtime name. Keep this
+// in lockstep with each runtime adapter's Tool.Name() — the registry
+// would happily accept an unknown string, but the spawn pipeline
+// would then fail the tool-probe step with a confusing error.
+func runtimeBackendTool(runtimeName string) string {
+	switch runtimeName {
+	case "codex":
+		return "spwn:codex"
+	case "claude-code", "":
+		return "spwn:claude-code"
+	default:
+		// Unknown runtime — fall back to the default so probe errors
+		// surface cleanly instead of us silently installing the wrong
+		// binary. The validator (ruleRuntimeSupported) should catch
+		// this upstream; this is defense-in-depth.
+		return "spwn:claude-code"
+	}
+}
+
 // resolveRuntimeName returns the runtime name associated with a
 // world record, with the legacy fallback applied. Pure string math —
 // no registry lookup — so callers that need to pass a name to
