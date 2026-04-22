@@ -27,10 +27,34 @@ type Tool interface {
 	Skills() fs.FS
 }
 
+// Packages groups install-time package-manager lists. Each non-empty
+// field becomes one RUN recipe in the generated Dockerfile.
+//
+// Today only Apt is wired end-to-end: the base image is Debian-family,
+// so apt-get is the only manager the Dockerfile generator knows how
+// to call. New managers (Apk for Alpine, Brew for macOS, Pacman for
+// Arch, …) are added as new fields here *and* as matching cases in
+// the generator. Splitting by field is intentional — each manager has
+// its own flag shape, cache-cleanup pattern, and dedup semantics, so
+// a single flat `[]string` couldn't be reliably translated.
+//
+// Unknown keys in yaml (e.g. `packages: { apy: [...] }`) are silently
+// ignored by the default yaml decoder — a regrettable footgun. When
+// a tool declares packages but everything lands under an unknown key,
+// the image-build step's verify step still catches it (the binary
+// won't exist), but a stricter parse is on the todo list.
+type Packages struct {
+	// Apt is Debian/Ubuntu apt-get packages. Deduplicated across
+	// every tool in the image before one merged `apt-get install`
+	// line is emitted.
+	Apt []string `yaml:"apt,omitempty"`
+}
+
 // InstallSpec describes how to install a tool into a Docker compile.
 type InstallSpec struct {
-	// AptPackages are apt-get packages to install. Deduplicated across tools.
-	AptPackages []string
+	// Packages groups package-manager installs by manager. See
+	// Packages for the supported set.
+	Packages Packages
 
 	// Commands are RUN lines executed as root, before the USER switch.
 	Commands []string

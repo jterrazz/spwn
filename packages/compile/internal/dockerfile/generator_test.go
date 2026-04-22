@@ -3,6 +3,8 @@ package dockerfile
 import (
 	"strings"
 	"testing"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 func TestGenerate_EmptyTools(t *testing.T) {
@@ -19,8 +21,8 @@ func TestGenerate_EmptyTools(t *testing.T) {
 func TestGenerate_MergesAptPackages(t *testing.T) {
 	base := []byte("FROM ubuntu:24.04\n")
 	tools := []ToolInput{
-		{Name: "spwn:unix", AptPackages: []string{"bash", "grep", "curl"}},
-		{Name: "spwn:git", AptPackages: []string{"git", "curl"}}, // curl is duplicate
+		{Name: "spwn:unix", Packages: tool.Packages{Apt: []string{"bash", "grep", "curl"}}},
+		{Name: "spwn:git", Packages: tool.Packages{Apt: []string{"git", "curl"}}}, // curl is duplicate
 	}
 
 	result := string(Generate(base, tools, ""))

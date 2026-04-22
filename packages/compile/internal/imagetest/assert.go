@@ -21,7 +21,7 @@ func AssertValidTool(t *testing.T, tl tool.Tool) {
 	}
 
 	spec := tl.Install()
-	if len(spec.AptPackages) == 0 && len(spec.Commands) == 0 && len(spec.Files) == 0 {
+	if len(spec.Packages.Apt) == 0 && len(spec.Commands) == 0 && len(spec.Files) == 0 {
 		t.Error("install spec must have packages, commands, or files")
 	}
 

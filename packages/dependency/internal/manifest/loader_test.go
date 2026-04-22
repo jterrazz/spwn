@@ -23,7 +23,8 @@ func TestParse_minimal(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `name: "spwn:git"
 install:
-  packages: [git]
+  packages:
+    apt: [git]
 verify:
   - command -v git
 `)
@@ -36,8 +37,8 @@ verify:
 		t.Errorf("name: want spwn:git, got %q", parsed.Schema.Name)
 	}
 	spec := parsed.Schema.Install
-	if len(spec.AptPackages) != 1 || spec.AptPackages[0] != "git" {
-		t.Errorf("packages: %v", spec.AptPackages)
+	if len(spec.Packages.Apt) != 1 || spec.Packages.Apt[0] != "git" {
+		t.Errorf("packages.apt: %v", spec.Packages.Apt)
 	}
 	if got := parsed.Schema.Verify; len(got) != 1 || got[0] != "command -v git" {
 		t.Errorf("verify: %v", got)
@@ -47,7 +48,8 @@ verify:
 func TestParse_defaults(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `install:
-  packages: [curl]
+  packages:
+    apt: [curl]
 `)
 
 	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{
@@ -147,7 +149,8 @@ verify:
 func TestParse_missingNameErrors(t *testing.T) {
 	dir := t.TempDir()
 	writeManifest(t, dir, `install:
-  packages: [git]
+  packages:
+    apt: [git]
 `)
 	if _, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{}); err == nil {
 		t.Fatal("want error for missing name + no default")

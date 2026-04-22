@@ -14,7 +14,8 @@ func FuzzSchemaUnmarshal(f *testing.F) {
 	f.Add([]byte(`name: "spwn:unix"
 version: "1.0"
 install:
-  packages: [bash, coreutils]`))
+  packages:
+    apt: [bash, coreutils]`))
 	f.Add([]byte(`name: matrix
 worlds:
   matrix:

@@ -25,7 +25,7 @@ func ToolsToInputs(tools []tool.Tool) []ToolInput {
 		spec := t.Install()
 		inputs[i] = ToolInput{
 			Name:         t.Name(),
-			AptPackages:  spec.AptPackages,
+			Packages:     spec.Packages,
 			Commands:     spec.Commands,
 			UserCommands: spec.UserCommands,
 			Env:          spec.Env,
