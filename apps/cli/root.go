@@ -108,12 +108,20 @@ func Execute() error {
 	return err
 }
 
-// ExitCoder is implemented by errors that want to set a non-default
-// process exit code. The spwn binary entry point inspects the returned
-// error and, if it satisfies this interface, forwards ExitCode() to
-// os.Exit. Unknown errors default to exit 1.
+// ExitCoder is implemented by spwn-side errors that want to set a
+// non-default process exit code. The marker method distinguishes
+// spwn's own wrappers from stdlib errors that happen to expose an
+// ExitCode() — notably os/exec's *ExitError, which implements
+// ExitCode via *os.ProcessState. Without the marker, any docker/
+// subcommand failure would be treated as a "silent" spwn-managed
+// exit and the Execute() error banner would be suppressed, hiding
+// real failures from the user.
 type ExitCoder interface {
 	ExitCode() int
+	// IsSpwnExitCoder is a zero-cost marker. Implementers satisfy
+	// the interface only when they OPT IN explicitly; exec.ExitError
+	// does not, so it no longer over-matches.
+	IsSpwnExitCoder()
 }
 
 // GetRootCmd returns the root command for documentation generation.
