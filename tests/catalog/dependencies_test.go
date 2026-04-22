@@ -63,7 +63,7 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 		}
 		t.Run(tool.Name(), func(t *testing.T) {
 			spec := tool.Install()
-			hasContent := len(spec.AptPackages) > 0 || len(spec.Commands) > 0 || len(spec.UserCommands) > 0 || len(spec.Files) > 0
+			hasContent := len(spec.Packages.Apt) > 0 || len(spec.Commands) > 0 || len(spec.UserCommands) > 0 || len(spec.Files) > 0
 			if !hasContent {
 				t.Errorf("%s install spec must have packages, commands, user commands, or files", tool.Name())
 			}

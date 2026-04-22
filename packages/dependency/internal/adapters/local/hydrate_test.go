@@ -25,7 +25,8 @@ func TestLoadLocalPackage_happyPath(t *testing.T) {
 version: "1.2.3"
 install:
   packages:
-    - build-essential
+    apt:
+      - build-essential
   commands:
     - echo hi
   user-commands:
@@ -49,8 +50,8 @@ dependencies:
 		t.Errorf("version: want 1.2.3, got %q", got)
 	}
 	spec := tl.Install()
-	if len(spec.AptPackages) != 1 || spec.AptPackages[0] != "build-essential" {
-		t.Errorf("packages: %v", spec.AptPackages)
+	if len(spec.Packages.Apt) != 1 || spec.Packages.Apt[0] != "build-essential" {
+		t.Errorf("packages.apt: %v", spec.Packages.Apt)
 	}
 	if len(spec.Commands) != 1 || spec.Commands[0] != "echo hi" {
 		t.Errorf("commands: %v", spec.Commands)
@@ -81,7 +82,8 @@ func TestLoadLocalPackage_skillsDirExposed(t *testing.T) {
 	root := t.TempDir()
 	writePack(t, root, "toolish", `name: toolish
 install:
-  packages: [curl]
+  packages:
+    apt: [curl]
 verify:
   - command -v curl
 `)
@@ -120,7 +122,8 @@ func TestHydrateLocalPackages_rewritesToolRefs(t *testing.T) {
 	root := t.TempDir()
 	writePack(t, root, "mine", `name: mine
 install:
-  packages: [curl]
+  packages:
+    apt: [curl]
 verify:
   - command -v curl
 `)
@@ -144,13 +147,15 @@ func TestHydrateLocalPackages_mixedListOrderPreserved(t *testing.T) {
 	root := t.TempDir()
 	writePack(t, root, "tool-a", `name: tool-a
 install:
-  packages: [curl]
+  packages:
+    apt: [curl]
 verify:
   - command -v curl
 `)
 	writePack(t, root, "tool-b", `name: tool-b
 install:
-  packages: [jq]
+  packages:
+    apt: [jq]
 verify:
   - command -v jq
 `)
@@ -186,7 +191,8 @@ func TestHydrateLocalPackages_idempotentOnDuplicate(t *testing.T) {
 	root := t.TempDir()
 	writePack(t, root, "mine", `name: mine
 install:
-  packages: [curl]
+  packages:
+    apt: [curl]
 verify:
   - command -v curl
 `)

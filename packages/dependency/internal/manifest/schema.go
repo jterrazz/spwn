@@ -20,6 +20,8 @@ package manifest
 
 import (
 	"gopkg.in/yaml.v3"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 // Schema is the on-disk shape of tool.yaml. Every field is
@@ -85,15 +87,16 @@ type Schema struct {
 	RuntimeProvider string `yaml:"runtime-provider,omitempty"`
 }
 
-// InstallSection mirrors packages/tool.InstallSpec but uses wire-level
-// types so the parser is self-contained.
+// InstallSection mirrors packages/tool.InstallSpec for the wire
+// format. Keeping the domain struct (tool.Packages) in both layers
+// avoids a parallel schema — the yaml tags on tool.Packages are the
+// on-disk contract.
 type InstallSection struct {
-	// AptPackages are apt-get packages. Deduplicated across every
-	// dependency in the image, so ordering here is irrelevant. YAML
-	// key is still `packages:` because inside an `install:` block
-	// the Debian-family meaning is unambiguous — it's the spwn
-	// domain concept that got renamed to dependencies, not this.
-	AptPackages []string `yaml:"packages"`
+	// Packages groups package-manager installs by manager (apt today;
+	// apk/brew/... as new base images land). Authored as a keyed
+	// map: `packages: { apt: [...] }`. Unknown keys fail at parse
+	// time so typos don't silently drop everything on the floor.
+	Packages tool.Packages `yaml:"packages"`
 
 	// Commands run as root, before the USER switch. Each item
 	// becomes one RUN line in the Dockerfile, so order matters.

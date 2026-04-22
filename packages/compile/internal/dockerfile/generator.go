@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"spwn.sh/packages/dependency/tool"
 )
 
 // ToolInput is the data the generator needs from each tool.
 type ToolInput struct {
 	Name         string
-	AptPackages  []string
+	Packages     tool.Packages
 	Commands     []string
 	UserCommands []string // Commands that run after USER switch (templates: {{.Home}}, {{.User}})
 	Env          map[string]string
@@ -103,24 +105,27 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		sb.WriteString(fmt.Sprintf("LABEL sh.spwn.image-version=%q\n\n", imageVersion))
 	}
 
-	// Collect all apt packages across tools (deduplicated)
-	var allPackages []string
-	seen := make(map[string]bool)
+	// Collect apt packages across tools (deduplicated). New
+	// managers (apk/brew/...) add their own collect+emit block
+	// mirroring this one — each manager has its own flag shape and
+	// cache-cleanup pattern, so they don't trivially share code.
+	var allAptPackages []string
+	seenApt := make(map[string]bool)
 	for _, t := range tools {
-		for _, pkg := range t.AptPackages {
-			if !seen[pkg] {
-				seen[pkg] = true
-				allPackages = append(allPackages, pkg)
+		for _, pkg := range t.Packages.Apt {
+			if !seenApt[pkg] {
+				seenApt[pkg] = true
+				allAptPackages = append(allAptPackages, pkg)
 			}
 		}
 	}
 
-	// Single apt-get install for all packages
-	if len(allPackages) > 0 {
-		sort.Strings(allPackages)
+	// Single apt-get install for all apt packages
+	if len(allAptPackages) > 0 {
+		sort.Strings(allAptPackages)
 		sb.WriteString("# Packages (merged from all tools)\n")
 		sb.WriteString("RUN apt-get update && apt-get install -y \\\n")
-		for _, pkg := range allPackages {
+		for _, pkg := range allAptPackages {
 			sb.WriteString(fmt.Sprintf("    %s \\\n", pkg))
 		}
 		sb.WriteString("    && rm -rf /var/lib/apt/lists/*\n\n")

@@ -29,7 +29,7 @@ func (t *dependencyAdapter) Dependencies() []string { return t.schema.Dependenci
 // parse time so this call is allocation-only.
 func (t *dependencyAdapter) Install() tool.InstallSpec {
 	spec := tool.InstallSpec{
-		AptPackages:  t.schema.Install.AptPackages,
+		Packages:     t.schema.Install.Packages,
 		Commands:     t.schema.Install.Commands,
 		UserCommands: t.schema.Install.UserCommands,
 		Env:          t.schema.Install.Env,

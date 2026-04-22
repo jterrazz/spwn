@@ -4,15 +4,16 @@ description: "Core Unix utilities (bash, coreutils, grep, sed, awk, curl, jq)"
 
 install:
   packages:
-    - bash
-    - coreutils
-    - findutils
-    - grep
-    - sed
-    - gawk
-    - curl
-    - wget
-    - jq
+    apt:
+      - bash
+      - coreutils
+      - findutils
+      - grep
+      - sed
+      - gawk
+      - curl
+      - wget
+      - jq
 
 verify:
   - command -v bash
