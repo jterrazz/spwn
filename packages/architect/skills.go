@@ -170,7 +170,13 @@ func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
 		if skillFS == nil {
 			continue
 		}
-		toolName := strings.TrimPrefix(t.Name(), "@")
+		// Strip the dependency scheme prefix so the skill directory
+		// matches the bare skill slug (`qmd`) rather than the dep ref
+		// (`spwn:qmd`). Colons in path components are legal on Linux
+		// but break plenty of downstream tooling — and the SKILL.md's
+		// own `name:` frontmatter uses the bare slug, so the dir name
+		// should agree.
+		toolName := skillDirName(t.Name())
 
 		// Flat form: SKILL.md at FS root.
 		if rootBody, err := fs.ReadFile(skillFS, "SKILL.md"); err == nil {
@@ -242,4 +248,17 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 	}
 	header := fmt.Sprintf("---\nname: %s\ndescription: %s\n---\n\n", name, name)
 	return append([]byte(header), body...)
+}
+
+// skillDirName turns a dep ref into the directory component used under
+// `.claude/skills/`. The goal is the bare slug: `spwn:qmd` → `qmd`,
+// `local:my-skill` → `my-skill`, `@owner/skill` → `owner/skill`. Keep
+// in lockstep with refs.Kind recognisers in packages/dependency/refs.
+func skillDirName(ref string) string {
+	for _, scheme := range []string{"spwn:", "local:", "tool:", "skill:", "hook:"} {
+		if strings.HasPrefix(ref, scheme) {
+			return strings.TrimPrefix(ref, scheme)
+		}
+	}
+	return strings.TrimPrefix(ref, "@")
 }
