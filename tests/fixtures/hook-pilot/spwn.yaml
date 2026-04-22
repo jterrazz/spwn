@@ -1,0 +1,12 @@
+# E2E fixture: runtime-hook translation into container config.
+version: 1
+name: hook-pilot
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: [.]

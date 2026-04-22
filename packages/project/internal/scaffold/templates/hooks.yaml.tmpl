@@ -1,0 +1,22 @@
+# Runtime hooks — fired by the agent's runtime (Claude Code, Codex,
+# …) at well-known lifecycle points. spwn translates this one file
+# into each runtime's native hook format at build time:
+#
+#   Claude Code  →  ~/.claude/settings.json#hooks
+#   Codex        →  ~/.codex/hooks.json
+#
+# Author once here; run everywhere.
+#
+# Schema:
+#   name:    stable identifier (required)
+#   event:   lifecycle event (required; e.g. SessionStart, PreToolUse,
+#            UserPromptSubmit, Stop)
+#   matcher: optional scope inside the event (e.g. "Bash" under PreToolUse)
+#   command: shell fragment to execute (required)
+#
+# Docs: https://spwn.sh/docs/hooks
+
+hooks:
+  - name: session-banner
+    event: SessionStart
+    command: echo "[spwn] {{.Name}} session started at $(date -u +%FT%TZ)"
