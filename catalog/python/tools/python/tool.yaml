@@ -6,7 +6,12 @@ install:
   packages:
     - python3
     - python3-pip
+  commands:
+    # Debian/Ubuntu ship only `python3`; alias `python` so the common
+    # user reflex `python --version` Just Works.
+    - ln -sf /usr/bin/python3 /usr/local/bin/python
 
 verify:
   - command -v python3
+  - command -v python
   - command -v pip3

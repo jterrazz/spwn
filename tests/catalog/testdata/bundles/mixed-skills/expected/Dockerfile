@@ -37,6 +37,9 @@ RUN apt-get update && apt-get install -y \
 # spwn:cli
 RUN curl -fsSL https://spwn.sh/install.sh | bash || true
 
+# spwn:python
+RUN ln -sf /usr/bin/python3 /usr/local/bin/python
+
 # spwn:node
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs && rm -rf /var/lib/apt/lists/*
