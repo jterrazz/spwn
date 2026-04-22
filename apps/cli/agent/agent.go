@@ -44,8 +44,9 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
 				{Name: "create <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
 				{Name: "<name>", Desc: "Open an interactive session with <name> " + ui.Faint("(shortcut)")},
-				{Name: "start <name>", Desc: "Run <name> as an autonomous daemon " + ui.Faint("[planned]")},
-				{Name: "stop <name>", Desc: "Kill <name>'s daemon loop " + ui.Faint("[planned]")},
+				// Start/stop land when agents become autonomous daemons.
+				// {Name: "start <name>", Desc: "Run <name> as an autonomous daemon " + ui.Faint("[planned]")},
+				// {Name: "stop <name>", Desc: "Kill <name>'s daemon loop " + ui.Faint("[planned]")},
 				{Name: "ls", Desc: "List agents"},
 				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
@@ -55,9 +56,11 @@ func agentHelp(cmd *cobra.Command, args []string) {
 			// / `agent remove` subcommands were retired.
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
-				{Name: "send <name> <msg>", Desc: "Send an async message to an agent's inbox " + ui.Faint("[planned]")},
-				{Name: "inbox <name>", Desc: "Show an agent's inbox " + ui.Faint("[planned]")},
-				{Name: "watch <name>", Desc: "Tail an agent's inbox in real time " + ui.Faint("[planned]")},
+				// Async inbox verbs (send / inbox / watch) land with the
+				// agent-to-agent messaging daemon.
+				// {Name: "send <name> <msg>", Desc: "Send an async message to an agent's inbox " + ui.Faint("[planned]")},
+				// {Name: "inbox <name>", Desc: "Show an agent's inbox " + ui.Faint("[planned]")},
+				// {Name: "watch <name>", Desc: "Tail an agent's inbox in real time " + ui.Faint("[planned]")},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
 				{Name: "show <name>", Desc: "Show agent details " + ui.Faint("(alias of inspect)")},
@@ -70,8 +73,10 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "fork <src> <dst>", Desc: "Clone an agent with everything it knows"},
 			}},
 			{Title: "Portability", Commands: []ui.HelpEntry{
-				{Name: "publish <name>", Desc: "Ship to registry " + ui.Faint("[planned]")},
-				{Name: "get <ref>", Desc: "Install a shared agent " + ui.Faint("[planned]")},
+				// Registry verbs (publish / get) ship when the
+				// community registry lands.
+				// {Name: "publish <name>", Desc: "Ship to registry " + ui.Faint("[planned]")},
+				// {Name: "get <ref>", Desc: "Install a shared agent " + ui.Faint("[planned]")},
 				{Name: "export <name>", Desc: "Export as tar.gz"},
 				{Name: "import <path>", Desc: "Import from tar.gz"},
 			}},

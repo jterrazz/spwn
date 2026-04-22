@@ -7,16 +7,11 @@ Usage:
 Lifecycle:
   create <name>                    Create a blank agent (auto-creates a single-agent world)
   <name>                           Open an interactive session with <name> (shortcut)
-  start <name>                     Run <name> as an autonomous daemon [planned]
-  stop <name>                      Kill <name>'s daemon loop [planned]
   ls                               List agents
   rm <name>                        Delete an agent
 
 Conversation:
   talk <name> [msg]                Open a session with a running agent (sync)
-  send <name> <msg>                Send an async message to an agent's inbox [planned]
-  inbox <name>                     Show an agent's inbox [planned]
-  watch <name>                     Tail an agent's inbox in real time [planned]
 
 Observe:
   show <name>                      Show agent details (alias of inspect)
@@ -29,8 +24,6 @@ Evolution:
   fork <src> <dst>                 Clone an agent with everything it knows
 
 Portability:
-  publish <name>                   Ship to registry [planned]
-  get <ref>                        Install a shared agent [planned]
   export <name>                    Export as tar.gz
   import <path>                    Import from tar.gz
 
