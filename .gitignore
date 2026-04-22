@@ -27,6 +27,14 @@ Thumbs.db
 .claude/
 .spwn/
 
+# Re-include .claude/ trees under golden-fixture directories so the
+# claude-code renderer's output snapshots (settings.json, SKILL.md
+# files) are tracked. Without this, the global `.claude/` rule above
+# silently strips them and CI fails with "tree has extra
+# agents/<name>/.claude/..." against every fixture.
+!packages/runtimes/testdata/**/.claude/
+!packages/runtimes/testdata/**/.claude/**
+
 # Archives (agent exports etc.)
 *.tar.gz
 *.tar
