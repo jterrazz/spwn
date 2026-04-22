@@ -30,7 +30,9 @@ describe('CLI - auth command', () => {
         expect(result.exitCode).toBe(0);
         const stderr = result.stderr.text;
         expect(stderr).toContain('PROVIDER');
-        expect(stderr).toContain('STATUS');
+        // The status-table column header is `STATE` (active | known |
+        // none); it was briefly called `STATUS` in an earlier revision.
+        expect(stderr).toContain('STATE');
         expect(stderr).toContain('anthropic');
         expect(stderr).toContain('openai');
     });
@@ -86,20 +88,17 @@ describe('CLI - auth command', () => {
      */
     test.skip("'spwn auth login' handles non-interactive gracefully", () => {});
 
-    test("'spwn auth logout' on a fresh home emits the no-op banner", async () => {
-        const result = await isolated('auth logout').exec('auth logout').run();
+    /*
+     * SKIPPED: `spwn auth logout <provider>` now requires a provider
+     * argument, and the keychain-backed anthropic credential is read
+     * and mutated from the OS keychain — SPWN_HOME isolation does
+     * NOT stub that out. Running this test against the real keychain
+     * deletes the user's Claude Code OAuth token as collateral
+     * damage. Re-enable once the auth layer grows a keychain-stub
+     * mode (e.g. SPWN_KEYCHAIN_BACKEND=memory) that tests can opt
+     * into. Until then, logout behaviour is covered manually.
+     */
+    test.skip("'spwn auth logout <provider>' on a fresh home emits the no-op banner", () => {});
 
-        expect(result.exitCode).toBe(0);
-        await result.stderr.toMatch('logout-noop.txt');
-    });
-
-    test("'spwn auth logout' is idempotent", async () => {
-        await isolated('auth logout 1').exec('auth logout').run();
-        const result2 = await isolated('auth logout 2').exec('auth logout').run();
-
-        // The second logout sees the same state as the first and emits
-        // The same no-op banner.
-        expect(result2.exitCode).toBe(0);
-        await result2.stderr.toMatch('logout-noop.txt');
-    });
+    test.skip("'spwn auth logout <provider>' is idempotent", () => {});
 });
