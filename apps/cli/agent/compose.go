@@ -86,3 +86,8 @@ func (e *notImplementedError) Error() string {
 // os.Exit. The CLI reserves exit code 2 for "planned but not yet
 // implemented" features; exit 1 stays for runtime failures.
 func (e *notImplementedError) ExitCode() int { return 2 }
+
+// IsSpwnExitCoder marks this as spwn's own ExitCoder — satisfies the
+// marker on cli.ExitCoder so Execute() distinguishes it from
+// stdlib's os/exec.*ExitError (which also has ExitCode()).
+func (e *notImplementedError) IsSpwnExitCoder() {}
