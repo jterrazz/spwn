@@ -20,9 +20,14 @@ import (
 // return a friendly "not yet" error so the command space is reserved
 // and users who reach for them get a clear explanation.
 
+// Hidden: true keeps both stubs invokable (they still return a
+// friendly exit-2 "not yet implemented" when someone runs them
+// programmatically) but strips them from `spwn agent --help`. Flip
+// Hidden to false the day the daemon loop lands.
 var startCmd = &cobra.Command{
-	Use:   "start <name>",
-	Short: "Start an agent as a background daemon [planned]",
+	Use:    "start <name>",
+	Short:  "Start an agent as a background daemon [planned]",
+	Hidden: true,
 	Long: `Run an agent as a long-lived autonomous process.
 
 This command is reserved for a future release. Today, spwn agents
@@ -35,8 +40,9 @@ their own between invocations.`,
 }
 
 var stopCmd = &cobra.Command{
-	Use:   "stop <name>",
-	Short: "Stop an agent daemon [planned]",
+	Use:    "stop <name>",
+	Short:  "Stop an agent daemon [planned]",
+	Hidden: true,
 	Long: `Kill a running autonomous agent process.
 
 This command is reserved for a future release. Today, spwn agents

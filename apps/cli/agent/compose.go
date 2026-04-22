@@ -22,10 +22,14 @@ func init() {
 	Cmd.AddCommand(getCmd)
 }
 
+// Hidden: true keeps these reachable programmatically but strips
+// them from `spwn agent --help`. Flip to false when the registry
+// ships.
 var publishCmd = &cobra.Command{
-	Use:   "publish <agent-name>",
-	Short: "Publish an agent to the registry (memory stripped)",
-	Args:  cobra.ExactArgs(1),
+	Use:    "publish <agent-name>",
+	Short:  "Publish an agent to the registry (memory stripped)",
+	Hidden: true,
+	Args:   cobra.ExactArgs(1),
 	Long: `Publish an agent to the community registry for others to pull.
 
 Memory (journal, knowledge, sessions) is stripped before publishing —
@@ -40,9 +44,10 @@ Not yet implemented — tracks the registry (planned).`,
 }
 
 var getCmd = &cobra.Command{
-	Use:   "get <agent-ref>",
-	Short: "Install a shared agent from the registry",
-	Args:  cobra.ExactArgs(1),
+	Use:    "get <agent-ref>",
+	Short:  "Install a shared agent from the registry",
+	Hidden: true,
+	Args:   cobra.ExactArgs(1),
 	Long: `Install a shared agent from the community registry into
 ./spwn/agents/<name>/.
 
