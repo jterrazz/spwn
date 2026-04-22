@@ -87,9 +87,10 @@ func (*spawner) SupportsSession() bool { return true }
 func (*spawner) Available() bool { return true }
 
 // DefaultConfigFiles returns the files codex wants materialised into
-// the agent's HOME at spawn time. Codex's config.toml is written at
-// image-build time by Tool.Install (see tool.go UserCommands), so
-// nothing extra is needed per-spawn today.
+// the agent's HOME at spawn time. The per-agent .codex/config.toml
+// (profile + hooks feature flag) is already emitted by the transpile
+// renderer (see GenerateAgentConfigTOML) and the trust entry is
+// seeded by PrelaunchShell, so nothing else needs seeding here.
 func (*spawner) DefaultConfigFiles(agentHome string) map[string][]byte { return nil }
 
 // SyncHostCredentials is a no-op: codex's OAuth file lives at

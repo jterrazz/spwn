@@ -29,10 +29,9 @@ func (t *dependencyAdapter) Dependencies() []string { return t.schema.Dependenci
 // parse time so this call is allocation-only.
 func (t *dependencyAdapter) Install() tool.InstallSpec {
 	spec := tool.InstallSpec{
-		Packages:     t.schema.Install.Packages,
-		Commands:     t.schema.Install.Commands,
-		UserCommands: t.schema.Install.UserCommands,
-		Env:          t.schema.Install.Env,
+		Packages: t.schema.Install.Packages,
+		Commands: t.schema.Install.Commands,
+		Env:      t.schema.Install.Env,
 	}
 	if len(t.fileBytes) > 0 {
 		spec.Files = make(map[string][]byte, len(t.fileBytes))

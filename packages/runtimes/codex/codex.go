@@ -16,14 +16,14 @@ func (*codexTool) Version() string        { return "latest" }
 func (*codexTool) Dependencies() []string { return []string{"spwn:node"} }
 
 func (*codexTool) Install() tool.InstallSpec {
+	// Per-agent config (model pin, trust, warning suppression) lives
+	// in the agent's HOME (/agents/<name>/.codex/config.toml), written
+	// at spawn time by GenerateAgentConfigTOML + PrelaunchShell — not
+	// here at image-build time where $HOME is /home/spwn and the
+	// running agent never reads it.
 	return tool.InstallSpec{
 		Commands: []string{
 			"npm install -g @openai/codex",
-		},
-		// User-level config: runs after USER switch.
-		// Pre-configure codex to trust /workspace and skip sandbox prompts.
-		UserCommands: []string{
-			`mkdir -p {{.Home}}/.codex && printf 'model = "gpt-5.4"\n\n[projects."/"]\ntrust_level = "trusted"\n\n[notice]\nhide_full_access_warning = true\n' > {{.Home}}/.codex/config.toml`,
 		},
 	}
 }

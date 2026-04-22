@@ -41,16 +41,11 @@ func (*claudeCodeTool) Install() tool.InstallSpec {
 			"chmod +x /usr/local/bin/claude",
 			"rm -rf /root/.local /root/.claude",
 		},
-		// Note: first-run UI dismissal (hasCompletedOnboarding,
-		// trust dialogs, skipDangerousModePermissionPrompt) used to
-		// live here as UserCommands but the generated files landed
-		// at /home/spwn/.claude.json - the wrong HOME once every
-		// agent mounts its own /agents/<name>/ at spawn time. That
-		// logic moved to
-		// packages/world/internal/runtime/claude.DefaultConfigFiles,
-		// which writes the files directly into the per-agent home
-		// via the /agents bind mount at spawn time so they land
-		// under the HOME the runtime actually reads.
+		// First-run UI dismissal (hasCompletedOnboarding, trust
+		// dialogs, skipDangerousModePermissionPrompt) belongs at
+		// spawn time, not image-build time — the image's /home/spwn
+		// is not the agent's actual HOME (/agents/<name>/). See
+		// spawn.go's DefaultConfigFiles for the live path.
 	}
 }
 

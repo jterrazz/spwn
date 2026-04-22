@@ -29,8 +29,6 @@ install:
       - build-essential
   commands:
     - echo hi
-  user-commands:
-    - echo user
   env:
     FOO: bar
 verify:

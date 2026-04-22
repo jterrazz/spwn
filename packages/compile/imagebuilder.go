@@ -98,12 +98,11 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	for i, t := range resolved {
 		spec := t.Install()
 		toolInputs[i] = dockerfile.ToolInput{
-			Name:         t.Name(),
-			Packages:     spec.Packages,
-			Commands:     spec.Commands,
-			UserCommands: spec.UserCommands,
-			Env:          spec.Env,
-			Files:        spec.Files,
+			Name:     t.Name(),
+			Packages: spec.Packages,
+			Commands: spec.Commands,
+			Env:      spec.Env,
+			Files:    spec.Files,
 		}
 	}
 

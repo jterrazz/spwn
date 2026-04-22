@@ -63,7 +63,7 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 		}
 		t.Run(tool.Name(), func(t *testing.T) {
 			spec := tool.Install()
-			hasContent := len(spec.Packages.Apt) > 0 || len(spec.Commands) > 0 || len(spec.UserCommands) > 0 || len(spec.Files) > 0
+			hasContent := len(spec.Packages.Apt) > 0 || len(spec.Commands) > 0 || len(spec.Files) > 0
 			if !hasContent {
 				t.Errorf("%s install spec must have packages, commands, user commands, or files", tool.Name())
 			}
@@ -150,24 +150,6 @@ func TestAllTools_SkillsHaveSkillMD(t *testing.T) {
 			_, err := fs.ReadFile(s, "SKILL.md")
 			if err != nil {
 				t.Errorf("%s has Skills() but no SKILL.md: %v", tool.Name(), err)
-			}
-		})
-	}
-}
-
-func TestAllTools_UserCommandsUseTemplates(t *testing.T) {
-	for _, tool := range dependency.BuiltinTools() {
-		spec := tool.Install()
-		if len(spec.UserCommands) == 0 {
-			continue
-		}
-		t.Run(tool.Name(), func(t *testing.T) {
-			for _, cmd := range spec.UserCommands {
-				// UserCommands should use {{.Home}} or {{.User}} templates,
-				// never hardcode /home/spwn or specific usernames
-				if strings.Contains(cmd, "/home/spwn") {
-					t.Errorf("%s UserCommand hardcodes /home/spwn - use {{.Home}} template instead", tool.Name())
-				}
 			}
 		})
 	}

@@ -25,9 +25,3 @@ func TestCodex_HasInstallCommand(t *testing.T) {
 	}
 }
 
-func TestCodex_HasUserCommands(t *testing.T) {
-	spec := Tool.Install()
-	if len(spec.UserCommands) == 0 {
-		t.Error("expected user commands for config setup")
-	}
-}
