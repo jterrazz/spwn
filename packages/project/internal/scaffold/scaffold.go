@@ -28,6 +28,11 @@ type Opts struct {
 	Name        string
 	Force       bool
 	NoGitignore bool
+	// Backend, when non-empty, is emitted as `runtime.backend:` in the
+	// scaffolded agent.yaml. Empty leaves the scaffold runtime-agnostic
+	// so resolution happens at spawn time based on project-wide config
+	// and the user's authenticated backends.
+	Backend string
 }
 
 // Init materializes a fresh spwn project under dir. The directory
@@ -50,7 +55,7 @@ func Init(dir string, opts Opts) error {
 	if name == "" {
 		name = defaultName(absDir)
 	}
-	data := templateData{Name: name}
+	data := templateData{Name: name, Backend: opts.Backend}
 
 	files := []fileSpec{
 		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
@@ -378,7 +383,8 @@ type fileSpec struct {
 }
 
 type templateData struct {
-	Name string
+	Name    string
+	Backend string
 }
 
 func writeTemplate(root, srcRel, dstRel string, data templateData) error {
