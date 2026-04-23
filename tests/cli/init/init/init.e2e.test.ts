@@ -69,9 +69,9 @@ describe('spwn init', () => {
     test('scaffolds the knowledge tree under spwn/, not at the project root', async () => {
         // Pin the 2026-04 relocation of the default knowledge path from
         // `./knowledge/` at the project root → `./spwn/knowledge/` so the
-        // whole spwn project is self-contained in one directory. A
-        // regression would put users back in the old layout and
-        // silently re-introduce a sibling dir at the repo root.
+        // Whole spwn project is self-contained in one directory. A
+        // Regression would put users back in the old layout and
+        // Silently re-introduce a sibling dir at the repo root.
         const result = await spec('init knowledge default')
             .project('empty')
             .exec('init --name demo-project')
