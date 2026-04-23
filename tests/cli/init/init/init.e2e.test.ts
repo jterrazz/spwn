@@ -66,6 +66,35 @@ describe('spwn init', () => {
         expect(agentYaml).not.toContain('hook:');
     });
 
+    test('scaffolds the knowledge tree under spwn/, not at the project root', async () => {
+        // Pin the 2026-04 relocation of the default knowledge path from
+        // `./knowledge/` at the project root → `./spwn/knowledge/` so the
+        // whole spwn project is self-contained in one directory. A
+        // regression would put users back in the old layout and
+        // silently re-introduce a sibling dir at the repo root.
+        const result = await spec('init knowledge default')
+            .project('empty')
+            .exec('init --name demo-project')
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+
+        // The scaffolded knowledge dir lives under spwn/ and is kept
+        // Alive in git via the .gitkeep sentinel.
+        expect(result.file('spwn/knowledge').exists).toBe(true);
+        expect(result.file('spwn/knowledge/.gitkeep').exists).toBe(true);
+
+        // The legacy path (project-root ./knowledge/) must NOT be
+        // Created. This is the anti-regression half — anyone
+        // Restoring the old scaffold would trip this.
+        expect(result.file('knowledge').exists).toBe(false);
+
+        // And the manifest records the matching path so `spwn up`
+        // Can resolve it. This is the user-facing contract.
+        expect(result.file('spwn.yaml').content).toContain('knowledge: ./spwn/knowledge');
+        expect(result.file('spwn.yaml').content).not.toMatch(/knowledge: \.\/knowledge$/m);
+    });
+
     test('errors when spwn.yaml already exists', async () => {
         // Given - the single-agent fixture already has spwn.yaml
         const result = await spec('init conflict').project('single-agent').exec('init').run();
