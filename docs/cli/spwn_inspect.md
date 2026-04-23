@@ -11,7 +11,8 @@ Show per-agent composition: deps, skills, hooks
 
 Inspect a spwn project: one block per agent, showing the
 resolved dependency tree (with transitive (*)-dedup and composition
-badges), the merged skills list, and the hooks bound to the agent.
+badges), the skills contributed by tool deps, and the hooks bound
+to the agent.
 
 Mirrors the kubectl describe / cargo tree convention: key-value
 header, section titles with counts, whitespace-separated sections.

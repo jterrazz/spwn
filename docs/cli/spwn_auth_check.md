@@ -5,10 +5,10 @@ slug: "spwn-auth-check"
 
 ## spwn auth check
 
-Validate credentials for all AI providers
+Validate active credentials against each provider's API
 
 ```
-spwn auth check [flags]
+spwn auth check [provider] [flags]
 ```
 
 ### Options
@@ -19,5 +19,5 @@ spwn auth check [flags]
 
 ### SEE ALSO
 
-* [spwn auth](./spwn_auth.md)	 - Manage credentials - login, logout, status
+* [spwn auth](./spwn_auth.md)	 - Manage credentials — status, login, use, logout, disable
 

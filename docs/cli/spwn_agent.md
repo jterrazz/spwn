@@ -50,15 +50,11 @@ spwn agent [name] [flags]
 * [spwn agent dream](./spwn_agent_dream.md)	 - Analyze experience, discover patterns, promote playbooks
 * [spwn agent export](./spwn_agent_export.md)	 - [experimental] Export an agent as tar.gz
 * [spwn agent fork](./spwn_agent_fork.md)	 - [experimental] Clone a Mind from one agent to another
-* [spwn agent get](./spwn_agent_get.md)	 - Install a shared agent from the registry
 * [spwn agent import](./spwn_agent_import.md)	 - [experimental] Import an agent from a tar.gz archive
 * [spwn agent inspect](./spwn_agent_inspect.md)	 - Inspect an agent - composition, memory, world status, history
 * [spwn agent logs](./spwn_agent_logs.md)	 - Show the event log for a specific agent
 * [spwn agent ls](./spwn_agent_ls.md)	 - List all agents on this Host
-* [spwn agent publish](./spwn_agent_publish.md)	 - Publish an agent to the registry (memory stripped)
 * [spwn agent rm](./spwn_agent_rm.md)	 - Remove an agent and its Mind directory
 * [spwn agent sleep](./spwn_agent_sleep.md)	 - Consolidate experience - archive stale files, prune old sessions
-* [spwn agent start](./spwn_agent_start.md)	 - Start an agent as a background daemon [planned]
-* [spwn agent stop](./spwn_agent_stop.md)	 - Stop an agent daemon [planned]
 * [spwn agent talk](./spwn_agent_talk.md)	 - Talk to a running agent - interactive or one-shot
 

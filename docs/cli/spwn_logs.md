@@ -24,11 +24,11 @@ spwn logs [flags]
 ### Options
 
 ```
-  -a, --agent string   Filter by agent name
-  -h, --help           help for logs
-  -n, --limit int      Number of events to show (default 20)
-  -t, --type string    Filter by event type (e.g. agent.dreamed)
-  -w, --world string   Filter by world ID
+  -a, --agent string                 Filter by agent name
+  -h, --help                         help for logs
+  -n, --limit int                    Number of events to show (default 20)
+  -t, --type string                  Filter by event type (e.g. agent.dreamed)
+  -w, --world spwn world logs <id>   Filter by world config name (e.g. 'matrix' from spwn.yaml#worlds). Use spwn world logs <id> to filter by a runtime world ID.
 ```
 
 ### SEE ALSO

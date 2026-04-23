@@ -5,7 +5,7 @@ slug: "spwn-auth"
 
 ## spwn auth
 
-Manage credentials - login, logout, status
+Manage credentials — status, login, use, logout, disable
 
 ```
 spwn auth [flags]
@@ -20,10 +20,11 @@ spwn auth [flags]
 ### SEE ALSO
 
 * [spwn](./spwn.md)	 - spwn - create realities for things that can think
-* [spwn auth check](./spwn_auth_check.md)	 - Validate credentials for all AI providers
-* [spwn auth login](./spwn_auth_login.md)	 - Detect credentials from CLI logins and system keychain
-* [spwn auth logout](./spwn_auth_logout.md)	 - Clear cached credentials
-* [spwn auth providers](./spwn_auth_providers.md)	 - List configured AI providers (alias of "auth status")
-* [spwn auth status](./spwn_auth_status.md)	 - Show authentication status for every AI provider
-* [spwn auth token](./spwn_auth_token.md)	 - Set a token directly - for CI and scripts
+* [spwn auth check](./spwn_auth_check.md)	 - Validate active credentials against each provider's API
+* [spwn auth disable](./spwn_auth_disable.md)	 - Tell spwn not to use this provider, even if creds exist
+* [spwn auth enable](./spwn_auth_enable.md)	 - Reverse a previous `disable`
+* [spwn auth login](./spwn_auth_login.md)	 - Set up credentials for a provider
+* [spwn auth logout](./spwn_auth_logout.md)	 - Clear stored credentials for a provider
+* [spwn auth status](./spwn_auth_status.md)	 - Show every detected credential and which one is active
+* [spwn auth use](./spwn_auth_use.md)	 - Pick which credential method spwn should prefer
 

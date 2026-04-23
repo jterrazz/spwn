@@ -14,7 +14,9 @@ spwn ls [flags]
 ### Options
 
 ```
-  -h, --help   help for ls
+  -h, --help           help for ls
+      --json           Emit results as structured JSON on stdout
+      --world string   Filter agents by world ID
 ```
 
 ### SEE ALSO

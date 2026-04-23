@@ -5,7 +5,7 @@ slug: "spwn-auth-status"
 
 ## spwn auth status
 
-Show authentication status for every AI provider
+Show every detected credential and which one is active
 
 ```
 spwn auth status [flags]
@@ -19,5 +19,5 @@ spwn auth status [flags]
 
 ### SEE ALSO
 
-* [spwn auth](./spwn_auth.md)	 - Manage credentials - login, logout, status
+* [spwn auth](./spwn_auth.md)	 - Manage credentials — status, login, use, logout, disable
 
