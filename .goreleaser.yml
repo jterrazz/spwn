@@ -4,6 +4,15 @@ project_name: spwn
 
 before:
   hooks:
+    # Populate the embedded catalog mirror at
+    # packages/dependency/internal/adapters/spwn/content/ by running
+    # the `go:generate` directive in loader.go. The `content/` tree
+    # is a mirror of /catalog/ at the repo root (embedded via
+    # `//go:embed all:content`); it's gitignored and regenerated
+    # on demand. `make build` does this as a prerequisite; goreleaser
+    # must do it too, else the bundling test below fails with
+    # "pattern all:content: no matching files found".
+    - sh -c "cd packages/dependency && go generate ./..."
     # `go mod tidy` does NOT honor go.work — it tries to resolve
     # every intra-monorepo `spwn.sh/packages/*` import as a remote
     # module and fails with a 404 at spwn.sh. `make build` works
