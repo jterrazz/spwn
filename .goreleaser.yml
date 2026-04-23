@@ -6,22 +6,24 @@ before:
   hooks:
     # Populate the embedded catalog mirror at
     # packages/dependency/internal/adapters/spwn/content/ by running
-    # the `go:generate` directive in loader.go. The `content/` tree
-    # is a mirror of /catalog/ at the repo root (embedded via
-    # `//go:embed all:content`); it's gitignored and regenerated
-    # on demand. `make build` does this as a prerequisite; goreleaser
-    # must do it too, else the bundling test below fails with
+    # the `go:generate` directive in loader.go. The content/ tree is
+    # a mirror of /catalog/ at the repo root (embedded via
+    # `//go:embed all:content`); it's gitignored and regenerated on
+    # demand. `make build` wires this as a prerequisite; goreleaser
+    # must do it too, else the embed fails with
     # "pattern all:content: no matching files found".
     - sh -c "cd packages/dependency && go generate ./..."
-    # `go mod tidy` does NOT honor go.work — it tries to resolve
-    # every intra-monorepo `spwn.sh/packages/*` import as a remote
-    # module and fails with a 404 at spwn.sh. `make build` works
-    # because workspace resolution kicks in at build time. Keep
-    # the release path identical: rely on go.work, skip tidying.
-    # Bundling gate: if the embed is broken (missing template dirs,
-    # stale go:embed directive, shippedSlugs drift, etc.) we fail the
-    # release here rather than shipping a hollow binary like v28.x.
-    - sh -c "cd apps/cli && go test -run TestBundling_CompiledBinaryShipsExamples -v ."
+    # Historical footguns we DON'T want back:
+    #   - `go mod tidy` here was removed because it doesn't honour
+    #     go.work and tries to fetch intra-repo `spwn.sh/packages/*`
+    #     imports as remote modules (404 at spwn.sh). Build relies on
+    #     go.work, which kicks in automatically at `go build` time.
+    #   - A pre-release `go test -run TestBundling_...` gate that
+    #     pointed at a test name that no longer exists (test got
+    #     renamed); `go test` with no matching name exits 0, so the
+    #     hook silently guarded nothing. The real bundling probe
+    #     lives at tests/catalog/dependencies_test.go and runs in
+    #     Validate CI — that's the gate on tagging.
 
 builds:
   - id: spwn
@@ -38,14 +40,12 @@ builds:
       - arm64
     ldflags:
       - -s -w -X spwn.sh/apps/cli.Version={{.Version}}
-    hooks:
-      # Post-build bundling gate: run the freshly-compiled binary
-      # targeting the host OS/arch only. `example list` returns a
-      # non-zero exit code when the embed is empty, so an exit
-      # status check is enough to catch a hollow binary. Skips
-      # cross-compiled builds since we can't execute them here.
-      post:
-        - cmd: sh -c 'if [ "{{ .Os }}" = "$(go env GOOS)" ] && [ "{{ .Arch }}" = "$(go env GOARCH)" ]; then "{{ .Path }}" example list > /dev/null; fi'
+    # No post-build hook. The previous one ran `{{ .Path }} example
+    # list` on the host-native binary to catch a hollow embed, but
+    # `spwn example` was retired; the check became "unknown command
+    # for spwn" and failed every release. Embed health is guarded by
+    # Validate CI's catalog tests (tests/catalog/dependencies_test.go)
+    # before the tag is ever pushed.
 
 archives:
   - id: spwn
