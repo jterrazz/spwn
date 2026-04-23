@@ -20,4 +20,4 @@ worlds:
       - neo
     workspaces:
       - .
-    knowledge: ./knowledge
+    knowledge: ./spwn/knowledge

@@ -26,4 +26,4 @@ worlds:
       - analyst
     workspaces:
       - .
-    knowledge: ./knowledge
+    knowledge: ./spwn/knowledge

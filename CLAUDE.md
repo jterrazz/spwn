@@ -10,7 +10,7 @@ The domain has three main abstractions, each owning one concern:
 |---|---|---|
 | **Runtime** | How an agent actually runs (CLI invocation, session capture, credential plumbing) | `packages/runtimes` - Claude Code today, codex next, others plug in as a ~50 LOC Adapter |
 | **Backend** | Where worlds run | `packages/container/backend` - Docker; container labels are the source of truth for world state |
-| **Mind** | How an agent persists across worlds | `packages/agent` - two markdown layers (`playbooks/`, `journal/`) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (e.g. `./knowledge`) and it gets bind-mounted into `/world/knowledge/`. Omit the key to spawn a world whose agents are never told a knowledge base exists. |
+| **Mind** | How an agent persists across worlds | `packages/agent` - two markdown layers (`playbooks/`, `journal/`) on the host filesystem plus a single `SOUL.md` at the agent root. Knowledge is world-scoped, not in the Mind — declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (default `./spwn/knowledge`) and it gets bind-mounted into `/world/knowledge/`. Omit the key to spawn a world whose agents are never told a knowledge base exists. |
 
 ## Vocabulary
 
@@ -138,9 +138,7 @@ my-project/
 │   │       ├── SOUL.md          # who the agent is (one file: purpose, voice, values)
 │   │       ├── playbooks/       # promoted patterns (name:/description: header = auto-indexed in CLAUDE.md)
 │   │       └── journal/         # per-run history
-│   ├── worlds/
-│   │   └── neo/
-│   │       └── knowledge/       # world-scoped facts, bind-mounted to /world/knowledge/
+│   ├── knowledge/               # world-scoped facts, bind-mounted to /world/knowledge/ (default path)
 │   ├── skills/                  # project-scoped skill files
 │   └── tools/                   # project-scoped tool dependencies (optional)
 └── .spwn/                       # gitignored local state
@@ -151,8 +149,8 @@ my-project/
 Worlds are declared **inline** under `spwn.yaml#worlds` - the
 world record (agents, workspaces, tool overrides) lives in yaml,
 not in separate yaml files. A world optionally owns one filesystem
-artifact: the directory referenced by its `knowledge:` key (e.g.
-`./knowledge`), which gets bind-mounted at `/world/knowledge/` inside
+artifact: the directory referenced by its `knowledge:` key (default
+`./spwn/knowledge`), which gets bind-mounted at `/world/knowledge/` inside
 the running container. Omit the key and no mount happens — the agent
 is never told a knowledge base exists. Each world entry names the
 agents it deploys, the workspace mounts, and optional tool

@@ -52,15 +52,14 @@ var ErrNotFound = errors.New("example not found")
 // topLevelSubdirs enumerates which directories under a catalog entry
 // get wrapped under dest/spwn/ at init time. spwn.yaml and spwn.lock
 // stay at the root; everything listed here moves under spwn/.
-var topLevelSubdirs = []string{"agents", "skills", "tools", "hooks", "files"}
-
-// rootLevelSubdirs enumerates directories that land at the PROJECT
-// ROOT (sibling to spwn/), not under spwn/. Today that's only
-// knowledge/ — a catalog entry can ship a seed knowledge base
-// (handbook, starter notes) that gets bound into /world/knowledge/
-// at spawn time. The path matches the `knowledge: ./knowledge`
-// convention in spwn.yaml#worlds.<name>.knowledge.
-var rootLevelSubdirs = []string{"knowledge"}
+//
+// `knowledge` is included so a catalog entry's seed knowledge base
+// (handbook, starter notes) lands at `spwn/knowledge/`, matching
+// the `knowledge: ./spwn/knowledge` convention in
+// spwn.yaml#worlds.<name>.knowledge. Historically this lived at the
+// project root as `./knowledge/`; that layout was moved under spwn/
+// so the whole project tree is self-contained in one directory.
+var topLevelSubdirs = []string{"agents", "skills", "tools", "hooks", "files", "knowledge"}
 
 // ShippedSlugs returns the list of gallery-eligible entries (those
 // with a `worlds:` section in spwn.yaml), sorted by display order.
@@ -211,23 +210,6 @@ func Install(slug, baseDir string) (InstallReport, error) {
 			continue
 		}
 		dst := filepath.Join(spwnRoot, sub)
-		if exists(dst) {
-			continue
-		}
-		if err := copyDirFS(catalogFS, src, dst); err != nil {
-			return rep, fmt.Errorf("copy %s: %w", sub, err)
-		}
-	}
-
-	// Root-level subdirs (knowledge/) — copied to the project root so
-	// `knowledge: ./knowledge` in spwn.yaml#worlds resolves correctly
-	// on first spawn.
-	for _, sub := range rootLevelSubdirs {
-		src := contentRoot + "/" + slug + "/" + sub
-		if _, err := fs.Stat(catalogFS, src); err != nil {
-			continue
-		}
-		dst := filepath.Join(baseDir, sub)
 		if exists(dst) {
 			continue
 		}

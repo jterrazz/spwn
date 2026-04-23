@@ -10,9 +10,10 @@ import { spec } from '../../../setup/cli.specification.js';
  * exercises:
  *
  *   - catalog install via `spwn init severance` (bare → spwn:severance)
- *   - project-root knowledge (./knowledge/ ships at project root)
+ *   - knowledge tree under ./spwn/knowledge/ (moved there in 2026-04
+ *     so the whole project lives under spwn/; was ./knowledge/ before)
  *   - four agent directories, each with a distinct SOUL.md
- *   - the manifest's `worlds.mdr.knowledge: ./knowledge` key
+ *   - the manifest's `worlds.mdr.knowledge: ./spwn/knowledge` key
  *
  * The file has two passes: a fast CLI-only pass that proves install +
  * check + on-disk layout, and a Docker-gated pass that spins the full
@@ -24,7 +25,7 @@ describe('severance catalog', () => {
         // Given - an empty dir
         // When - we install the severance gallery entry
         // Then - every expected file lands on disk, knowledge ships
-        // At the project root, and the whole project passes check.
+        // Under spwn/, and the whole project passes check.
         const result = await spec('severance init')
             .project('empty')
             .exec(['init severance', 'check'])
@@ -46,10 +47,12 @@ describe('severance catalog', () => {
             ).toBe(true);
         }
 
-        // Knowledge ships at the project root (NOT under spwn/) and
-        // The spwn.yaml's `worlds.mdr.knowledge` key points at it.
-        expect(result.file('knowledge').exists).toBe(true);
-        expect(result.file('spwn.yaml').content).toMatch(/knowledge: \.\/knowledge/);
+        // Knowledge ships at ./spwn/knowledge/ (moved here from the
+        // Project root in 2026-04 so the whole spwn tree is
+        // Self-contained). The spwn.yaml's `worlds.mdr.knowledge`
+        // Key matches the on-disk location.
+        expect(result.file('spwn/knowledge').exists).toBe(true);
+        expect(result.file('spwn.yaml').content).toMatch(/knowledge: \.\/spwn\/knowledge/);
 
         // And `spwn check` is clean on the freshly installed tree.
         expect(result.stdout.text).toContain('Project is valid');

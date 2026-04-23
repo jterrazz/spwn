@@ -172,20 +172,23 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	t.Run("04_init_writes_world_knowledge", func(t *testing.T) {
-		// A04: fresh init seeds a project-root ./knowledge/.gitkeep AND
+		// A04: fresh init seeds a ./spwn/knowledge/.gitkeep AND
 		// records the path explicitly in spwn.yaml. Also asserts that
-		// the retired spwn/worlds/ nested tree is not created.
+		// the retired spwn/worlds/ nested tree is not created. The
+		// knowledge dir moved from the project root (./knowledge/)
+		// to live under spwn/ so the whole project tree is
+		// self-contained in one directory.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		gk := filepath.Join(wd, "knowledge/.gitkeep")
+		gk := filepath.Join(wd, "spwn/knowledge/.gitkeep")
 		if _, err := os.Stat(gk); err != nil {
 			t.Fatalf("world knowledge .gitkeep missing: %v", err)
 		}
 		manifest := readFile(t, filepath.Join(wd, "spwn.yaml"))
-		if !strings.Contains(manifest, "knowledge: ./knowledge") {
-			t.Fatalf("spwn.yaml missing `knowledge: ./knowledge`:\n%s", manifest)
+		if !strings.Contains(manifest, "knowledge: ./spwn/knowledge") {
+			t.Fatalf("spwn.yaml missing `knowledge: ./spwn/knowledge`:\n%s", manifest)
 		}
 		if _, err := os.Stat(filepath.Join(wd, "spwn/worlds")); !os.IsNotExist(err) {
 			t.Fatalf("spwn/worlds/ should not exist after init, stat err=%v", err)
@@ -1088,8 +1091,10 @@ func TestReleaseReadiness(t *testing.T) {
 		// Regression for commit 6319e3a6: `spwn init spwn:<name>` used
 		// to drop the catalog's knowledge/ dir on the floor — the
 		// installer only copied agents/tools/hooks/files under spwn/.
-		// After the fix, root-level knowledge/ ships too, so seed
-		// handbooks + starter notes actually materialise.
+		// After the fix, the knowledge/ tree ships too, so seed
+		// handbooks + starter notes actually materialise. The path
+		// moved from ./knowledge/ (project root) to ./spwn/knowledge/
+		// so the whole spwn project tree is self-contained.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -1098,8 +1103,8 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("init spwn:severance failed (code=%d): %s", code, stderr)
 		}
 		for _, rel := range []string{
-			"knowledge/handbook.md",
-			"knowledge/raw/note-001.md",
+			"spwn/knowledge/handbook.md",
+			"spwn/knowledge/raw/note-001.md",
 		} {
 			if _, err := os.Stat(filepath.Join(wd, rel)); err != nil {
 				t.Errorf("expected %s on disk after init, got: %v", rel, err)
