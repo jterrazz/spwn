@@ -194,7 +194,7 @@ worlds:
   matrix:
     agents: [neo]
     workspaces: [.]          # host paths mounted under /workspaces/. Use `name=path` to name them.
-    knowledge: ./knowledge   # optional; bind into /world/knowledge/. Omit for no mount.
+    knowledge: ./spwn/knowledge   # optional; bind into /world/knowledge/. Omit for no mount.
 ```
 
 `spwn up` materialises every world in the manifest; `spwn down` tears them down. A single agent can appear in many worlds — each world keeps its own runtime state (sessions, inbox, shared scratchpad), separate from the agent's long-lived memory on disk. Destroying a world doesn't destroy the agent.
@@ -355,7 +355,7 @@ commands and adapters below belong to one or more of these.
 | **Identity** | `SOUL.md` at agent root — per-agent voice, purpose, principles | 🟢 |
 | **Lint / check** | Static rules on manifests + tree (scheme grammar, one-agent-one-world, lockfile drift…) | 🟡 |
 | **Mind** | 2-layer persistent memory: `playbooks/` `journal/` (skills are dependencies, not memory) | 🟡 |
-| **Knowledge** | World-scoped `./knowledge/` bind-mount (opt-in per world) | 🟡 |
+| **Knowledge** | World-scoped `./spwn/knowledge/` bind-mount (opt-in per world) | 🟡 |
 | **Runtimes** | `claude-code`, `codex` — swappable Go adapters | 🟡 |
 | **Architect** | Always-on orchestration daemon — spawns worlds, routes inboxes, delegates | 🟡 |
 | **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |

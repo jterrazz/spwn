@@ -13,7 +13,7 @@ worlds:
   mdr:
     agents: [mark, helly, irving, dylan]
     workspaces: [.]
-    knowledge: ./knowledge
+    knowledge: ./spwn/knowledge
 
 dependencies:
   - "spwn:unix"

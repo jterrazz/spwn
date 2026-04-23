@@ -22,7 +22,7 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"spwn/agents/neo/SOUL.md",
 		"spwn/agents/neo/playbooks/.gitkeep",
 		"spwn/agents/neo/journal/.gitkeep",
-		"knowledge/.gitkeep",
+		"spwn/knowledge/.gitkeep",
 		".gitignore",
 		// One example per local-ref scheme so the scaffold demonstrates
 		// skill: and tool: authoring patterns end-to-end. Runtime hooks

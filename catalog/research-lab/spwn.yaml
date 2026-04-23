@@ -32,4 +32,4 @@ worlds:
       - curie
     workspaces:
       - .
-    knowledge: ./knowledge
+    knowledge: ./spwn/knowledge
