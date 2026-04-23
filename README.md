@@ -31,7 +31,7 @@
 
 The real power of AI isn't the model — it's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
-That's what spwn gives you — **the building blocks of agent intelligence**. Compose tools, skills, hooks, and an identity into a living agent; spawn it; commit it to git. If Terraform is infrastructure as code, spwn is **agents as code** — declarative, PR-reviewed, lockfile-pinned. One `spwn build`, one portable artifact. **Docker for intelligence.**
+That's what spwn gives you — **the building blocks of agent intelligence**. Every agent runs inside a **full Linux sandbox**: `bash`, `grep`, `git`, `ffmpeg`, `psql`, anything `apt install` gives you. Not a curated API, not a handful of functions — real tools, real pipes, real files. Compose those tools with skills, hooks, and an identity into a living agent; spawn it; commit it to git. If Terraform is infrastructure as code, spwn is **agents as code** — declarative, PR-reviewed, lockfile-pinned. One `spwn build`, one portable artifact. **Docker for intelligence.**
 
 <br/>
 
@@ -64,8 +64,8 @@ Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent wo
 Commit agents alongside your app, review behavior changes in PRs, ship the same mind to every machine.
 </td>
 <td align="center" width="33%">
-<h3>🧩 Composable</h3>
-Stack tools, skills, hooks, and a soul into an agent — Lego for minds.
+<h3>🛠️ Real environment</h3>
+A full Linux sandbox, not a curated API — <code>bash</code>, <code>git</code>, <code>ffmpeg</code>, anything <code>apt install</code> gives you.
 </td>
 <td align="center" width="33%">
 <h3>📦 Reproducible</h3>
