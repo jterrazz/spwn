@@ -29,11 +29,11 @@
 
 ## Agents as code.
 
-The real power of AI isn't the model — it's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
+The real power of AI isn't the model. It's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
-With spwn, **you build that environment, block by block**. Stack `spwn:python` with `spwn:qmd`, add a local `tool:ffmpeg`, pin a few skills and a soul — and your agent wakes up inside a sandbox assembled exactly for its job. Two agents in the same project can live in two totally different worlds: one talks to Postgres and runs tests, the other compiles video. Every block is a declarative file — reviewed in PRs, pinned in lockfiles, swapped like Lego.
+With spwn, **you build that environment, block by block**. Stack `spwn:python` with `spwn:qmd`, add a local `tool:ffmpeg`, pin a few skills and a soul, and your agent wakes up inside a sandbox assembled exactly for its job. Two agents in the same project can live in two totally different worlds: one talks to Postgres and runs tests, the other compiles video. Every block is a declarative file, reviewed in PRs, pinned in lockfiles, swapped like Lego.
 
-Spawn it, commit it to git, ship it. If Terraform is infrastructure as code, spwn is **agents as code** — the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
+Spawn it, commit it to git, ship it. If Terraform is infrastructure as code, spwn is **agents as code**: the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
 
 <br/>
 
@@ -49,7 +49,7 @@ Three commands. One working agent.
 | ------ | -------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------- |
 | **01** | Log in               | `spwn auth`        | Checks you're signed in to Claude Code (or any supported runtime).                                          |
 | **02** | Scaffold a project   | `spwn init`        | Drops `spwn.yaml` + a starter `neo` agent into the current directory.                                       |
-| **03** | Talk to your agent   | `spwn agent neo`   | Opens an interactive session with neo inside a sandboxed Docker world — container lifecycle handled for you. |
+| **03** | Talk to your agent   | `spwn agent neo`   | Opens an interactive session with neo inside a sandboxed Docker world. Container lifecycle is handled for you. |
 
 Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](catalog/)).
 
@@ -71,17 +71,17 @@ Stack <code>spwn:python</code>, <code>spwn:qmd</code>, <code>tool:ffmpeg</code>,
 </td>
 <td align="center" width="33%">
 <h3>📦 Reproducible</h3>
-One <code>spwn build</code> produces a Docker image — or a runtime-native tree (claude-code, codex, …) if you skip Docker. Byte-identical on every machine.
+One <code>spwn build</code> produces a Docker image, or a runtime-native tree (claude-code, codex, …) if you skip Docker. Byte-identical on every machine.
 </td>
 </tr>
 <tr>
 <td align="center">
 <h3>🪐 Worlds</h3>
-Bundle agents, workspaces, and knowledge into a world — <code>spwn up</code> deploys them together, <code>spwn down</code> tears it all down.
+Bundle agents, workspaces, and knowledge into a world. <code>spwn up</code> deploys them together, <code>spwn down</code> tears it all down.
 </td>
 <td align="center">
 <h3>🧠 Persistent</h3>
-Memory is a folder of markdown files — readable, diffable, and alive across restarts.
+Memory is a folder of markdown files. Readable, diffable, and alive across restarts.
 </td>
 <td align="center">
 <h3>🧐 Checked</h3>
@@ -96,7 +96,7 @@ Memory is a folder of markdown files — readable, diffable, and alive across re
 
 ## How spwn works
 
-spwn turns your repo into a **portable agent artifact** — consumed by the spwn CLI today, and by web UIs, apps, and embedded SDKs on the roadmap. One bundle format, many future surfaces.
+spwn turns your repo into a **portable agent artifact**, consumed by the spwn CLI today, and by web UIs, apps, and embedded SDKs on the roadmap. One bundle format, many future surfaces.
 
 ```
    repo  ──▶  spwn build  ──▶  artifact  ──▶  anywhere
@@ -104,10 +104,10 @@ spwn turns your repo into a **portable agent artifact** — consumed by the spwn
 
 Four ideas to hold in your head before you dive in:
 
-- **[One file, one agent](#one-file-one-agent)** — `agent.yaml` lists the runtime, tools, skills, hooks. Human-readable. Git-friendly. No database.
-- **[Lives in your repo, not a SaaS](#lives-in-your-repo-not-a-saas)** — every agent is a folder in your project. Commit it, review it, diff it like any other code.
-- **[A world is one `spwn up` away](#a-world-is-one-spwn-up-away)** — group agents, workspaces, and knowledge; launch them together; tear them down together.
-- **[Runtime-agnostic](#runtime-agnostic)** — works with Claude Code today, Codex tomorrow. Swap backends with one line.
+- **[One file, one agent](#one-file-one-agent)**: `agent.yaml` lists the runtime, tools, skills, hooks. Human-readable. Git-friendly. No database.
+- **[Lives in your repo, not a SaaS](#lives-in-your-repo-not-a-saas)**: every agent is a folder in your project. Commit it, review it, diff it like any other code.
+- **[A world is one `spwn up` away](#a-world-is-one-spwn-up-away)**: group agents, workspaces, and knowledge; launch them together; tear them down together.
+- **[Runtime-agnostic](#runtime-agnostic)**: works with Claude Code today, Codex tomorrow. Swap backends with one line.
 
 <br/>
 
@@ -139,17 +139,17 @@ dependencies:
 | `tool:<name>` | `./spwn/tools/<name>/` (with `tool.yaml`) |
 | `hook:<name>` | `./spwn/hooks/<name>.sh` |
 
-Add one with `spwn install <ref> --agent neo` — the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/dependency-catalog.md).
+Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/dependency-catalog.md).
 
-The rest of the agent directory sits next to the manifest — identity and memory as plain files:
+The rest of the agent directory sits next to the manifest. Identity and memory live as plain files:
 
 ```
 spwn/agents/neo/
 ├── agent.yaml       # composition (the file above)
-├── SOUL.md          # identity — who the agent is
-├── AGENTS.md        # boot-time prompt — what it should do
-├── playbooks/       # memory — procedures the agent has learned
-└── journal/         # memory — session history
+├── SOUL.md          # identity (who the agent is)
+├── AGENTS.md        # boot-time prompt (what it should do)
+├── playbooks/       # memory: procedures the agent has learned
+└── journal/         # memory: session history
 ```
 
 <br/>
@@ -183,7 +183,7 @@ Whoever clones the repo gets the same agents with the same tools, byte-for-byte.
 
 An agent defines **what** can think. A **world** defines *where* and *with whom* they run. Worlds are the runtime unit: one long-running container per world, one shared filesystem, one declared set of agents talking to each other and to the mounted workspace.
 
-Worlds live **inline** under `spwn.yaml#worlds:` — each entry names the agents it deploys, the workspaces it mounts, and the optional knowledge base it exposes.
+Worlds live **inline** under `spwn.yaml#worlds:`. Each entry names the agents it deploys, the workspaces it mounts, and the optional knowledge base it exposes.
 
 ```yaml
 # spwn.yaml
@@ -197,7 +197,7 @@ worlds:
     knowledge: ./spwn/knowledge   # optional; bind into /world/knowledge/. Omit for no mount.
 ```
 
-`spwn up` materialises every world in the manifest; `spwn down` tears them down. A single agent can appear in many worlds — each world keeps its own runtime state (sessions, inbox, shared scratchpad), separate from the agent's long-lived memory on disk. Destroying a world doesn't destroy the agent.
+`spwn up` materialises every world in the manifest; `spwn down` tears them down. A single agent can appear in many worlds; each world keeps its own runtime state (sessions, inbox, shared scratchpad), separate from the agent's long-lived memory on disk. Destroying a world doesn't destroy the agent.
 
 <br/>
 
@@ -213,7 +213,7 @@ Think of spwn the way you think of `tsc` or `babel`. You write in one clean, pro
    spwn/skills/    ──▶  transpile     ──▶  ─┤
    spwn/tools/          + compile           │
    spwn/hooks/                              └──▶  runtime-native tree
-                                                  (claude-code, codex — no Docker)
+                                                  (claude-code, codex; no Docker)
 ```
 
 - **Source** is provider-neutral. `AGENTS.md`, `SOUL.md`, `skills/`, `agent.yaml` - nothing in your repo mentions Claude Code, Codex, or any runtime by name.
@@ -286,7 +286,7 @@ spwn agent talk neo "run every test and benchmark, tell me what the code actuall
 
 ## CLI at a glance
 
-The day-one surface — twelve commands that take you from empty
+The day-one surface: twelve commands that take you from empty
 directory to running agents. Everything else (teams, snapshots,
 evolution, …) lives in [Implementation status](#implementation-status)
 below.
@@ -319,7 +319,7 @@ Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
 ## Ecosystem
 
 Every layer is a swappable Go interface. The table below is what
-actually ships today — the full roadmap across every adapter lives
+actually ships today; the full roadmap across every adapter lives
 in [Implementation status](#implementation-status).
 
 | Layer | Shipping today |
@@ -352,12 +352,12 @@ commands and adapters below belong to one or more of these.
 | **Transpile** | Source tree → rendered Tree (SOUL, deps, system skills woven in) | 🟢 |
 | **Compile** | Tree → reproducible Docker image | 🟢 |
 | **Compose** | `install` / `uninstall` / pinning (project-wide + `--agent` scoping) | 🟢 |
-| **Identity** | `SOUL.md` at agent root — per-agent voice, purpose, principles | 🟢 |
+| **Identity** | `SOUL.md` at agent root: per-agent voice, purpose, principles | 🟢 |
 | **Lint / check** | Static rules on manifests + tree (scheme grammar, one-agent-one-world, lockfile drift…) | 🟡 |
 | **Mind** | 2-layer persistent memory: `playbooks/` `journal/` (skills are dependencies, not memory) | 🟡 |
 | **Knowledge** | World-scoped `./spwn/knowledge/` bind-mount (opt-in per world) | 🟡 |
-| **Runtimes** | `claude-code`, `codex` — swappable Go adapters | 🟡 |
-| **Architect** | Always-on orchestration daemon — spawns worlds, routes inboxes, delegates | 🟡 |
+| **Runtimes** | `claude-code`, `codex` (swappable Go adapters) | 🟡 |
+| **Architect** | Always-on orchestration daemon. Spawns worlds, routes inboxes, delegates. | 🟡 |
 | **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |
 | **Observability** | Per-session journal, activity log, `spwn logs` | 🟡 |
 | **Teams & orgs** | Group agents into coordinated units (chief / workers, role structures) | 🟡 |
@@ -365,7 +365,7 @@ commands and adapters below belong to one or more of these.
 | **Apps / SDK** | Programmatic Go SDK for embedding spwn in external tools | 🔴 |
 | **Managed agents** | Autonomous daemon mode (`agent start` / `agent stop`, hosted) | 🔴 |
 | **Evaluation** | Task-level pass/fail, quality metrics, replay diffing | 🔴 |
-| **Registry** | `agent publish` / `agent get` — shared agents on the hub | 🔴 |
+| **Registry** | `agent publish` / `agent get`: shared agents on the hub | 🔴 |
 
 ### CLI
 
@@ -682,11 +682,11 @@ commands and adapters below belong to one or more of these.
 
 | Topic | Link |
 |---|---|
-| **Recipes** — five worked examples that show spwn in action | [`docs/recipes.md`](docs/recipes.md) |
-| **Dependency catalog** — the built-in `spwn:*` refs and how to author your own | [`docs/dependency-catalog.md`](docs/dependency-catalog.md) |
-| **CLI reference** — every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
-| **Contributing** — setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
-| **Internals** — architecture, release runbook, update system | [`docs/contributing/`](docs/contributing/) |
+| **Recipes**: five worked examples that show spwn in action | [`docs/recipes.md`](docs/recipes.md) |
+| **Dependency catalog**: the built-in `spwn:*` refs and how to author your own | [`docs/dependency-catalog.md`](docs/dependency-catalog.md) |
+| **CLI reference**: every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
+| **Contributing**: setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| **Internals**: architecture, release runbook, update system | [`docs/contributing/`](docs/contributing/) |
 
 <br/>
 
@@ -695,7 +695,7 @@ commands and adapters below belong to one or more of these.
 <details>
 <summary><b>Tools</b> &middot; <code>deps in agent.yaml / spwn.yaml</code></summary>
 
-Tools are runnable dependencies — a binary, an install recipe, sometimes a
+Tools are runnable dependencies: a binary, an install recipe, sometimes a
 bundle of sidecar files. They're declared in `dependencies:` blocks and
 resolved against a catalog at image-build time.
 
@@ -710,12 +710,12 @@ resolved against a catalog at image-build time.
 **Where declared:**
 
 ```yaml
-# spwn.yaml — dependencies shared by every agent in the project
+# spwn.yaml: dependencies shared by every agent in the project
 dependencies:
   - spwn:unix
   - spwn:git
 
-# spwn/agents/<n>/agent.yaml — per-agent additions
+# spwn/agents/<n>/agent.yaml: per-agent additions
 dependencies:
   - spwn:claude-code
   - tool:my-local-thing
@@ -729,7 +729,7 @@ dependencies:
 - Everything lands in one world image; agents share the binaries at runtime
 
 **Built-in catalog:** `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`,
-`spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect` — see
+`spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect`. See
 [`docs/dependency-catalog.md`](docs/dependency-catalog.md) for the full list.
 
 </details>
@@ -746,7 +746,7 @@ set of declared tools, and a persistent mind on disk.
 spwn/agents/<name>/
   agent.yaml         # required: declarative agent config
   AGENTS.md          # provider-neutral system prompt body
-  SOUL.md            # the agent's identity — who they are
+  SOUL.md            # the agent's identity (who they are)
   playbooks/         # reusable procedures (frontmatter-promoted in the entry file)
   journal/           # session history (auto-appended by the system)
 ```
@@ -781,7 +781,7 @@ dependencies:                 # unioned with spwn.yaml's top-level deps
 
 The per-agent `CLAUDE.md` / `AGENTS.md` inlines world-shared context
 (physics, faculties, roster) + the agent's role, so the runtime boots
-fully loaded — no `@-imports` to chase at startup.
+fully loaded. No `@-imports` to chase at startup.
 
 </details>
 
@@ -789,7 +789,7 @@ fully loaded — no `@-imports` to chase at startup.
 <summary><b>Skills</b> &middot; <code>spwn/skills/&lt;name&gt;/SKILL.md</code></summary>
 
 Skills are reusable sub-prompts both runtimes auto-discover at startup.
-spwn ships them to the native paths each runtime expects — no bind-mount
+spwn ships them to the native paths each runtime expects. No bind-mount
 indirection, no symlinks.
 
 **Source form:** directory per skill, entry at `SKILL.md`, any sidecar
@@ -812,7 +812,7 @@ description: Say hello when the session starts.
 Body is the skill's system-prompt fragment the runtime loads.
 ```
 
-**Legacy bare-markdown form** is still accepted — `spwn/skills/<n>.md`
+**Legacy bare-markdown form** is still accepted: `spwn/skills/<n>.md`
 auto-wraps into `<n>/SKILL.md` on load, with synthetic frontmatter
 injected when the body has none.
 
@@ -832,7 +832,7 @@ cross-vendor `AGENTS.md` ecosystem convention. Tool-shipped skills
 <details>
 <summary><b>Hooks</b> &middot; <code>spwn/hooks.yaml</code></summary>
 
-Hooks fire on runtime events inside the container — tool use, prompt
+Hooks fire on runtime events inside the container: tool use, prompt
 submit, session start, etc. They are NOT host-side lifecycle scripts;
 the retired `hook:<phase>` ref is gone.
 
@@ -856,12 +856,12 @@ hooks:
 |---|---|---|
 | `name` | yes | Stable identifier; keys the entry so re-renders are idempotent |
 | `event` | yes | Runtime event name (see below) |
-| `matcher` | no | Scope pattern; defaults to `*`. Passed verbatim — both runtimes honour their own glob/regex convention |
+| `matcher` | no | Scope pattern; defaults to `*`. Passed verbatim. Each runtime honours its own glob/regex convention. |
 | `command` | yes | Shell fragment invoked when the hook fires |
 
 **Events supported by both runtimes** (safe cross-runtime set):
 `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`.
-Runtime-specific events (Claude Code has 28, Codex has 5) pass through —
+Runtime-specific events (Claude Code has 28, Codex has 5) pass through;
 each runtime silently ignores events it doesn't know.
 
 **What the compiler emits:**
@@ -871,7 +871,7 @@ each runtime silently ignores events it doesn't know.
 | Claude Code | `.claude/settings.json#hooks` | Merged with the permissions + model keys |
 | Codex | `.codex/hooks.json` + `[features] codex_hooks = true` in `.codex/config.toml` | Without the flag, codex ignores the hooks file |
 
-**Envelope shape** (same for both — one `HookEntry` fans 1:1):
+**Envelope shape** (same for both; one `HookEntry` fans 1:1):
 
 ```json
 {
@@ -884,7 +884,7 @@ each runtime silently ignores events it doesn't know.
 ```
 
 Why YAML source when both runtimes store hooks as JSON? Comments,
-multi-line commands, and no quoting hell — same reason `spwn.yaml` and
+multi-line commands, and no quoting hell. Same reason `spwn.yaml` and
 `agent.yaml` exist. The YAML → JSON translation is the whole point of
 `spwn build`.
 
