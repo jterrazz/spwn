@@ -23,11 +23,12 @@ import (
 //
 //  1. Explicit override (--runtime / --backend flag), canonicalised.
 //  2. Per-agent declaration in agent.yaml (all agents must agree).
-//  3. Authenticated provider — exactly one provider is connected
+//  3. Project-wide default (spwn.yaml#runtime.backend).
+//  4. Authenticated provider — exactly one provider is connected
 //     and maps to a registered runtime (via Adapter.DefaultProvider).
-//  4. Hardcoded default "claude-code".
+//  5. Hardcoded default "claude-code".
 //
-// Returns an error when (2) has conflicts OR (3) is ambiguous — the
+// Returns an error when (2) has conflicts OR (4) is ambiguous — the
 // user is logged into multiple providers and hasn't pinned a backend
 // anywhere. The error names the candidates and suggests how to
 // disambiguate.
@@ -42,7 +43,24 @@ func Resolve(src *source.ProjectSource, override string) (string, error) {
 	if declared != "" {
 		return declared, nil
 	}
+	if proj := projectDefault(src); proj != "" {
+		return proj, nil
+	}
 	return fromAuth()
+}
+
+// projectDefault returns the canonical runtime name declared at
+// Project scope in spwn.yaml#runtime.backend. Empty when no default
+// Is set, the source is nil, or the manifest is absent.
+func projectDefault(src *source.ProjectSource) string {
+	if src == nil || src.Manifest == nil {
+		return ""
+	}
+	backend := src.Manifest.Runtime.Backend
+	if backend == "" {
+		return ""
+	}
+	return source.CanonicalRuntime(backend)
 }
 
 // fromAuth returns the runtime name that matches the user's

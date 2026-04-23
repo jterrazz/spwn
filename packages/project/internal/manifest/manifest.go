@@ -30,6 +30,11 @@ type Manifest struct {
 	// Name is the project name. Used in world IDs, UI, and logs.
 	Name string `yaml:"name"`
 
+	// Runtime is the project-wide runtime default. Agents that omit
+	// runtime.backend in their agent.yaml inherit this value.
+	// Mirrors the agent.yaml#runtime shape so authors recognise it.
+	Runtime Runtime `yaml:"runtime,omitempty"`
+
 	// Worlds is the deployable world map keyed by world name. Each
 	// entry declares which agents it spawns and what workspaces are
 	// mounted into the resulting container.
@@ -39,6 +44,17 @@ type Manifest struct {
 	// every world inherits these. Agent-level agent.yaml can add
 	// more but cannot remove project-level dependency.
 	Deps []string `yaml:"dependencies,omitempty"`
+}
+
+// Runtime is the project-wide runtime block. Exactly one field today
+// (Backend), but authored as a sub-map for parity with agent.yaml so
+// future additions (provider, flags…) don't reshape existing files.
+type Runtime struct {
+	// Backend is the runtime adapter ref agents inherit when their
+	// agent.yaml#runtime.backend is empty. Accepts the same forms as
+	// the agent-level field — scheme ("spwn:codex") or short name
+	// ("codex"). Empty means "no project-wide preference".
+	Backend string `yaml:"backend,omitempty"`
 }
 
 // World is one inline world entry in spwn.yaml.
