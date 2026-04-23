@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/cliproject"
+	"spwn.sh/apps/cli/runtimeres"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/transpile"
 	_ "spwn.sh/packages/runtimes/defaults" // register every built-in runtime
@@ -156,10 +157,12 @@ Examples:
 		}
 
 		// Resolve runtime: --runtime override > agent declaration >
-		// claude-code fallback. source.ResolveRuntime handles all
-		// three precedence levels and canonicalises catalog refs
-		// (spwn:claude-code -> claude-code).
-		runtimeName, err := source.ResolveRuntime(src, buildRuntime)
+		// single authenticated provider > claude-code fallback. See
+		// runtimeres.Resolve for the full precedence cascade; it
+		// wraps source.ResolveRuntime with auth-state awareness so a
+		// scaffold without a pinned backend picks the right runtime
+		// for the logged-in user.
+		runtimeName, err := runtimeres.Resolve(src, buildRuntime)
 		if err != nil {
 			return err
 		}

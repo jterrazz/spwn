@@ -28,20 +28,28 @@ func canonicalRuntime(name string) string {
 	return name
 }
 
-// ResolveRuntime picks the runtime name for a project. Precedence:
+// ResolveRuntime picks the runtime name declared by a project.
+// Precedence:
 //
 //  1. Explicit override (CLI flag) — canonicalised then returned.
 //  2. Per-agent runtime (all agents must agree, after canonicalisation).
-//  3. Fallback to "claude-code".
+//  3. Empty string — "no preference declared". The caller chooses
+//     how to break the tie (consult auth state, hardcode a default, …).
 //
 // Returns an error if agents declare conflicting runtimes and no
 // override is set; the user must disambiguate with --runtime.
+//
+// The empty-on-no-preference contract (vs the old "claude-code"
+// hardcoded fallback) lets the CLI layer consult auth state before
+// silently defaulting to claude-code. Callers that just need any
+// valid runtime (e.g. tests, tree-only builds) can still substitute
+// "claude-code" themselves after seeing the empty return.
 func ResolveRuntime(src *ProjectSource, override string) (string, error) {
 	if override != "" {
 		return canonicalRuntime(override), nil
 	}
 	if src == nil {
-		return "claude-code", nil
+		return "", nil
 	}
 
 	seen := map[string]struct{}{}
@@ -54,7 +62,7 @@ func ResolveRuntime(src *ProjectSource, override string) (string, error) {
 
 	switch len(seen) {
 	case 0:
-		return "claude-code", nil
+		return "", nil
 	case 1:
 		for name := range seen {
 			return name, nil
