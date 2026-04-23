@@ -27,7 +27,7 @@
 
 <br/>
 
-## Play god with AI agents.
+## Agents as code.
 
 **The building blocks of agent intelligence.** Compose any mix of tools, skills, hooks, and an identity into a living agent; spawn it into a world; commit the whole thing to git. Every block is a declarative file — reviewed in PRs, pinned in lockfiles, reproducible on any machine.
 
