@@ -32,14 +32,16 @@ func init() {
 	Cmd.AddCommand(membersCmd)
 
 	// The team subsystem is in active design - the manifest, storage layout,
-	// and CLI surface are all subject to change. Mark every entry point.
-	ui.MarkExperimental(Cmd)
-	ui.MarkExperimental(newCmd)
-	ui.MarkExperimental(lsCmd)
-	ui.MarkExperimental(editCmd)
-	ui.MarkExperimental(rmCmd)
-	ui.MarkExperimental(assignCmd)
-	ui.MarkExperimental(membersCmd)
+	// and CLI surface are all subject to change. Hide every entry point
+	// from `--help` and generated docs; still invokable by name for
+	// design-iteration purposes.
+	ui.HideExperimental(Cmd)
+	ui.HideExperimental(newCmd)
+	ui.HideExperimental(lsCmd)
+	ui.HideExperimental(editCmd)
+	ui.HideExperimental(rmCmd)
+	ui.HideExperimental(assignCmd)
+	ui.HideExperimental(membersCmd)
 }
 
 // ── spwn team new ──

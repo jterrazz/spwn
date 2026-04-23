@@ -19,9 +19,11 @@ func init() {
 	Cmd.AddCommand(lsCmd)
 	Cmd.AddCommand(inspectCmd)
 
-	ui.MarkExperimental(Cmd)
-	ui.MarkExperimental(lsCmd)
-	ui.MarkExperimental(inspectCmd)
+	// Organizations are still a design sketch; hide the whole subtree
+	// until the surface stabilises. Name-invocation still works.
+	ui.HideExperimental(Cmd)
+	ui.HideExperimental(lsCmd)
+	ui.HideExperimental(inspectCmd)
 }
 
 // ── spwn organization ls ──

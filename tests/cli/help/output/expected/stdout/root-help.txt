@@ -23,7 +23,6 @@ Shortcuts:
 
 Coordination:
   architect                        Always-on orchestration daemon
-  web                              Open the local web UI
   logs                             System event log (--world, --agent, --type)
 
 System:
