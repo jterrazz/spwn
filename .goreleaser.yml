@@ -4,7 +4,11 @@ project_name: spwn
 
 before:
   hooks:
-    - sh -c "cd apps/cli && go mod tidy"
+    # `go mod tidy` does NOT honor go.work — it tries to resolve
+    # every intra-monorepo `spwn.sh/packages/*` import as a remote
+    # module and fails with a 404 at spwn.sh. `make build` works
+    # because workspace resolution kicks in at build time. Keep
+    # the release path identical: rely on go.work, skip tidying.
     # Bundling gate: if the embed is broken (missing template dirs,
     # stale go:embed directive, shippedSlugs drift, etc.) we fail the
     # release here rather than shipping a hollow binary like v28.x.
