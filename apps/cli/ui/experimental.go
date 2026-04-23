@@ -53,6 +53,24 @@ func IsExperimental(cmd *cobra.Command) bool {
 	return cmd.Annotations[ExperimentalAnnotation] == "true"
 }
 
+// HideExperimental tags a command as experimental AND hides it from help +
+// generated docs. Intended for commands that aren't ready to be advertised
+// yet (team, organization, web) — they still function at the keyboard, but
+// the surface area is too unstable to promise anyone they work. Callers
+// reaching for the command by name get the full `--help` and normal
+// execution; browsers of `spwn --help` and the docs site never see them.
+//
+// The marker differs from MarkExperimental, which is for stable-but-evolving
+// commands (agent fork, export, import, skill edit) that are safe to
+// advertise with an "[experimental]" prefix.
+func HideExperimental(cmd *cobra.Command) {
+	if cmd == nil {
+		return
+	}
+	MarkExperimental(cmd)
+	cmd.Hidden = true
+}
+
 func startsWith(s, prefix string) bool {
 	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
 }

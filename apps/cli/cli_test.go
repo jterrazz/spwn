@@ -38,8 +38,11 @@ func TestCLI_Help(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Verify all top-level subcommands are listed.
-	for _, sub := range []string{"world", "agent", "skill", "install", "architect", "web", "init"} {
+	// Verify the stable top-level subcommands are listed in the grouped
+	// help. `web` was dropped from this list when the command was hidden
+	// pending a richer dashboard; it remains invokable by name (covered
+	// separately in TestCLI_WebHelp below).
+	for _, sub := range []string{"world", "agent", "skill", "install", "architect", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }

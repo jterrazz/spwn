@@ -201,7 +201,9 @@ func customHelp(cmd *cobra.Command, args []string) {
 	// Coordination - multi-agent + orchestration
 	fmt.Fprintf(w, "%s\n", ui.Strong("Coordination:"))
 	printHelpCmd(w, "architect", "Always-on orchestration daemon")
-	printHelpCmd(w, "web", "Open the local web UI")
+	// The web dashboard is hidden from help until the UI is worth
+	// advertising; it's still runnable via `spwn web` by name.
+	// printHelpCmd(w, "web", "Open the local web UI")
 	printHelpCmd(w, "logs", "System event log "+ui.Faint("(--world, --agent, --type)"))
 	fmt.Fprintln(w)
 
