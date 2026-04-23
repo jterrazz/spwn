@@ -146,6 +146,59 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	}
 }
 
+// TestInit_defaultScaffoldOmitsRuntimeBackend pins the 2026-04 decision
+// to ship a blank scaffold without pinning runtime.backend — agents
+// resolve their backend at spawn time, so `spwn init` should not
+// hard-pick one on the user's behalf. Regressions here would bring
+// back the opinionated default and silently lock new projects to
+// claude-code even when the user is logged into codex.
+func TestInit_defaultScaffoldOmitsRuntimeBackend(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "no-backend"}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	agentYAML, err := os.ReadFile(filepath.Join(dir, "spwn/agents/neo/agent.yaml"))
+	if err != nil {
+		t.Fatalf("read agent.yaml: %v", err)
+	}
+	// Walk non-comment lines: if any line starts with "runtime:" or
+	// Has a "backend:" YAML key (leading spaces + backend:), the
+	// Scaffold is hard-pinning a backend.
+	for _, line := range strings.Split(string(agentYAML), "\n") {
+		trimmed := strings.TrimLeft(line, " \t")
+		if strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		if trimmed == "runtime:" {
+			t.Errorf("scaffold should omit runtime block by default, got:\n%s", agentYAML)
+		}
+		if strings.HasPrefix(trimmed, "backend:") {
+			t.Errorf("scaffold should not hard-pin runtime.backend by default, got:\n%s", agentYAML)
+		}
+	}
+}
+
+// TestInit_backendOptEmitsRuntimeBlock pins the --backend flag
+// contract: when the caller pins a backend, the scaffolded agent.yaml
+// emits the runtime.backend line verbatim. Accepts the value as-is
+// (canonicalisation happens at the CLI layer in resolveInitBackend).
+func TestInit_backendOptEmitsRuntimeBlock(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "pinned", Backend: "spwn:codex"}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	agentYAML, err := os.ReadFile(filepath.Join(dir, "spwn/agents/neo/agent.yaml"))
+	if err != nil {
+		t.Fatalf("read agent.yaml: %v", err)
+	}
+	if !strings.Contains(string(agentYAML), "runtime:") {
+		t.Errorf("scaffold should contain runtime block when --backend pinned, got:\n%s", agentYAML)
+	}
+	if !strings.Contains(string(agentYAML), `backend: "spwn:codex"`) {
+		t.Errorf(`scaffold should contain backend: "spwn:codex", got:\n%s`, agentYAML)
+	}
+}
+
 func TestInit_refusesOverwriteWithoutForce(t *testing.T) {
 	dir := t.TempDir()
 	if err := Init(dir, InitOpts{}); err != nil {

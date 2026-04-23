@@ -21,13 +21,15 @@ func init() {
 	initCmd.Flags().BoolVar(&initGlobal, "global", false, "Initialise ~/.spwn/ (legacy user-home mode)")
 	initCmd.Flags().BoolVarP(&initForce, "force", "f", false, "Overwrite existing spwn.yaml")
 	initCmd.Flags().StringVar(&initName, "name", "", "Project name (default: current directory name)")
+	initCmd.Flags().StringVar(&initBackend, "backend", "", "Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let spwn resolve at spawn time.")
 	rootCmd.AddCommand(initCmd)
 }
 
 var (
-	initGlobal bool
-	initForce  bool
-	initName   string
+	initGlobal  bool
+	initForce   bool
+	initName    string
+	initBackend string
 )
 
 const exampleRefPrefix = "spwn:"
@@ -75,9 +77,15 @@ func runInitLocal(cmd *cobra.Command) error {
 		return fmt.Errorf("invalid --name %q — must match ^[a-z0-9][a-z0-9-]*$ (lowercase letters, digits, and dashes)", initName)
 	}
 
+	backend, err := resolveInitBackend(initBackend)
+	if err != nil {
+		return err
+	}
+
 	if err := project.Init(cwd, project.InitOpts{
-		Name:  initName,
-		Force: initForce,
+		Name:    initName,
+		Force:   initForce,
+		Backend: backend,
 	}); err != nil {
 		return err
 	}
@@ -107,6 +115,28 @@ func runInitLocal(cmd *cobra.Command) error {
 	s.Blank()
 
 	return nil
+}
+
+// resolveInitBackend normalises the --backend flag value to a canonical
+// `spwn:<name>` ref after verifying it's a known runtime. Accepts either
+// the short name (`claude-code`, `codex`) or the full scheme form
+// (`spwn:claude-code`). Empty input passes through as empty — the
+// scaffold omits the runtime block entirely in that case.
+func resolveInitBackend(raw string) (string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return "", nil
+	}
+	candidate := raw
+	if !strings.Contains(candidate, ":") {
+		candidate = "spwn:" + candidate
+	}
+	for _, known := range supportedRuntimes() {
+		if known == candidate || known == raw {
+			return "spwn:" + strings.TrimPrefix(candidate, "spwn:"), nil
+		}
+	}
+	return "", fmt.Errorf("unknown --backend %q — supported: %s", raw, strings.Join(supportedRuntimes(), ", "))
 }
 
 // parseExampleRef normalises an init argument to the bare slug. Accepts:

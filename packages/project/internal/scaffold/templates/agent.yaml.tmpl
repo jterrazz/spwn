@@ -10,14 +10,18 @@
 #
 # Runtime hooks (PreToolUse, SessionStart, …) live in a separate file
 # at spwn/hooks.yaml; they're not composed via the dependency list.
+#
+# Optional `runtime.backend:` pins this agent to a specific backend
+# (spwn:claude-code, spwn:codex). Omit to let spwn pick based on
+# project-wide config and the backend you're authenticated with.
 
 name: neo
 description: A blank-slate agent — replace this one-liner with what neo is for.
-
+{{if .Backend}}
 runtime:
-  backend: "spwn:claude-code"
+  backend: "{{.Backend}}"
 
-dependencies:
+{{end}}dependencies:
   - "spwn:unix"
   - "spwn:git"
   - "spwn:python"

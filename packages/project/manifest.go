@@ -77,6 +77,12 @@ type InitOpts struct {
 
 	// NoGitignore skips appending .spwn/ to .gitignore.
 	NoGitignore bool
+
+	// Backend, when non-empty, is written to the scaffolded agent's
+	// `runtime.backend:` line (e.g. "spwn:claude-code", "spwn:codex").
+	// Empty leaves the scaffold backend-agnostic so `spwn up` can
+	// resolve the runtime at spawn time.
+	Backend string
 }
 
 // Issue is one finding produced by Validate.
@@ -123,6 +129,7 @@ func Init(dir string, opts InitOpts) error {
 		Name:        opts.Name,
 		Force:       opts.Force,
 		NoGitignore: opts.NoGitignore,
+		Backend:     opts.Backend,
 	})
 }
 
