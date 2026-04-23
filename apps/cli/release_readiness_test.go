@@ -48,16 +48,35 @@ func runCLI(t *testing.T, env []string, wd string, args ...string) (string, stri
 	cmd := exec.Command(spwnBinary, args...)
 	cmd.Dir = wd
 	// Inherit PATH etc. but wipe anything that could leak host state
-	// into the test — particularly a user's real SPWN_HOME.
+	// into the test — particularly a user's real SPWN_HOME and any
+	// provider credentials that would tip the runtime auto-resolver
+	// (runtimeres.Resolve) away from the default claude-code path.
+	leakyPrefixes := []string{
+		"SPWN_HOME=",
+		"ANTHROPIC_API_KEY=",
+		"CLAUDE_CODE_OAUTH_TOKEN=",
+		"ANTHROPIC_AUTH_TOKEN=",
+		"OPENAI_API_KEY=",
+	}
 	base := os.Environ()
 	filtered := base[:0]
 	for _, kv := range base {
-		if strings.HasPrefix(kv, "SPWN_HOME=") {
+		skip := false
+		for _, p := range leakyPrefixes {
+			if strings.HasPrefix(kv, p) {
+				skip = true
+				break
+			}
+		}
+		if skip {
 			continue
 		}
 		filtered = append(filtered, kv)
 	}
-	cmd.Env = append(filtered, env...)
+	// Force keychain detection to stay off so a developer running
+	// `make test` locally doesn't hit macOS Keychain prompts.
+	cmd.Env = append(filtered, "SPWN_SKIP_KEYCHAIN=1")
+	cmd.Env = append(cmd.Env, env...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

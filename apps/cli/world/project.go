@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"spwn.sh/apps/cli/cliproject"
+	"spwn.sh/apps/cli/runtimeres"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/world"
@@ -135,17 +136,21 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 	}
 
 	// Resolve the runtime across every agent in the project. Agents
-	// in the selected world dominate the source-wide resolution, but
-	// the canonicalisation + conflict-detection logic is the same one
-	// `spwn build` uses — keep them in sync by going through
-	// source.ResolveRuntime. Best-effort: if loading the source tree
-	// fails, leave Runtime empty and let the architect fall back.
+	// in the selected world dominate the source-wide resolution; we
+	// go through runtimeres.Resolve so the same auth-state cascade
+	// `spwn build` uses also drives `spwn up` (override → agent
+	// pin → single authenticated provider → claude-code fallback).
+	// Errors from the resolver — runtime conflicts between agents,
+	// multiple authenticated providers with no pinned choice — are
+	// propagated so the user sees them before the spawn starts
+	// rather than after a mismatched container boots.
 	var runtimeName string
 	if src, srcErr := source.Load(p.Root); srcErr == nil && src != nil {
-		rn, rnErr := source.ResolveRuntime(src, "")
-		if rnErr == nil {
-			runtimeName = rn
+		rn, rnErr := runtimeres.Resolve(src, "")
+		if rnErr != nil {
+			return nil, rnErr
 		}
+		runtimeName = rn
 	}
 
 	return &projectWorld{

@@ -17,16 +17,16 @@ func TestResolveRuntime_tableCases(t *testing.T) {
 		want     want
 	}{
 		{
-			name:     "nil source falls back to claude-code",
+			name:     "nil source returns empty (no preference)",
 			src:      nil,
 			override: "",
-			want:     want{runtime: "claude-code"},
+			want:     want{runtime: ""},
 		},
 		{
-			name:     "empty source falls back to claude-code",
+			name:     "empty source returns empty (no preference)",
 			src:      &ProjectSource{},
 			override: "",
-			want:     want{runtime: "claude-code"},
+			want:     want{runtime: ""},
 		},
 		{
 			name: "single agent with spwn:claude-code is canonicalised",
@@ -79,6 +79,14 @@ func TestResolveRuntime_tableCases(t *testing.T) {
 				{Name: "morpheus", Config: AgentConfig{Runtime: RuntimeConfig{Backend: "spwn:claude-code"}}},
 			}},
 			want: want{runtime: "claude-code"},
+		},
+		{
+			name: "all agents blank returns empty (no preference)",
+			src: &ProjectSource{Agents: []AgentSource{
+				{Name: "neo", Config: AgentConfig{}},
+				{Name: "morpheus", Config: AgentConfig{}},
+			}},
+			want: want{runtime: ""},
 		},
 	}
 
