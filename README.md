@@ -31,7 +31,9 @@
 
 The real power of AI isn't the model — it's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
-That's what spwn gives you — **the building blocks of agent intelligence**. Every agent runs inside a **full Linux sandbox**: `bash`, `grep`, `git`, `ffmpeg`, `psql`, anything `apt install` gives you. Not a curated API, not a handful of functions — real tools, real pipes, real files. Compose those tools with skills, hooks, and an identity into a living agent; spawn it; commit it to git. If Terraform is infrastructure as code, spwn is **agents as code** — declarative, PR-reviewed, lockfile-pinned. One `spwn build`, one portable artifact. **Docker for intelligence.**
+With spwn, **you build that environment, block by block**. Stack `spwn:python` with `spwn:qmd`, add a local `tool:ffmpeg`, pin a few skills and a soul — and your agent wakes up inside a sandbox assembled exactly for its job. Two agents in the same project can live in two totally different worlds: one talks to Postgres and runs tests, the other compiles video. Every block is a declarative file — reviewed in PRs, pinned in lockfiles, swapped like Lego.
+
+Spawn it, commit it to git, ship it. If Terraform is infrastructure as code, spwn is **agents as code** — the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
 
 <br/>
 
@@ -64,8 +66,8 @@ Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent wo
 Commit agents alongside your app, review behavior changes in PRs, ship the same mind to every machine.
 </td>
 <td align="center" width="33%">
-<h3>🛠️ Real environment</h3>
-A full Linux sandbox, not a curated API — <code>bash</code>, <code>git</code>, <code>ffmpeg</code>, anything <code>apt install</code> gives you.
+<h3>🛠️ Composable environment</h3>
+Stack <code>spwn:python</code>, <code>spwn:qmd</code>, <code>tool:ffmpeg</code>, whatever your agent needs. Each one wakes up in a sandbox assembled for its job.
 </td>
 <td align="center" width="33%">
 <h3>📦 Reproducible</h3>
