@@ -33,6 +33,9 @@ type Manifest = intmanifest.Manifest
 // World is one inline world entry under spwn.yaml#worlds.
 type World = intmanifest.World
 
+// Runtime is the project-wide runtime block from spwn.yaml.
+type Runtime = intmanifest.Runtime
+
 // Project is a loaded spwn project - manifest plus resolved references
 // to the agents it declares.
 type Project struct {

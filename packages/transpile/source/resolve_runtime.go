@@ -28,6 +28,14 @@ func canonicalRuntime(name string) string {
 	return name
 }
 
+// CanonicalRuntime is the exported twin of canonicalRuntime, for
+// callers that resolve runtime refs outside this package (the CLI
+// auth-aware resolver) but still need to match the compile registry
+// lookup the transpiler itself uses.
+func CanonicalRuntime(name string) string {
+	return canonicalRuntime(name)
+}
+
 // ResolveRuntime picks the runtime name declared by a project.
 // Precedence:
 //
