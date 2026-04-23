@@ -29,11 +29,9 @@
 
 ## Agents as code.
 
-**The building blocks of agent intelligence.** Compose any mix of tools, skills, hooks, and an identity into a living agent; spawn it into a world; commit the whole thing to git. Every block is a declarative file — reviewed in PRs, pinned in lockfiles, reproducible on any machine.
-
 The real power of AI isn't the model — it's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
-That's what spwn gives you. If Terraform is infrastructure as code, spwn is **agents as code** — the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
+That's what spwn gives you — **the building blocks of agent intelligence**. Compose tools, skills, hooks, and an identity into a living agent; spawn it; commit it to git. If Terraform is infrastructure as code, spwn is **agents as code** — declarative, PR-reviewed, lockfile-pinned. One `spwn build`, one portable artifact. **Docker for intelligence.**
 
 <br/>
 
