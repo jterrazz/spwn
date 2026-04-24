@@ -18,6 +18,7 @@ var (
 	spawnAgents       []string
 	spawnWorkspaces   []string
 	spawnWorld        string
+	spawnBackend      string
 	spawnInteractive  bool
 	spawnForceRebuild bool
 )
@@ -43,6 +44,7 @@ func registerSpawnFlags(c *cobra.Command) {
 	c.Flags().StringArrayVarP(&spawnAgents, "agent", "a", nil, "Agent name (repeatable; first agent becomes chief in multi-agent worlds)")
 	c.Flags().StringArrayVarP(&spawnWorkspaces, "workspace", "w", nil, `Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.`)
 	c.Flags().StringVarP(&spawnWorld, "world", "u", "", "Explicit path to a YAML config file")
+	c.Flags().StringVar(&spawnBackend, "backend", "", "Override the runtime backend for this spawn (e.g. claude-code, codex). Skips the auth-state auto-resolver.")
 	c.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Drop into the agent's session after spawn")
 	c.Flags().BoolVar(&spawnForceRebuild, "force-rebuild", false, "Ignore the image cache and rebuild the world image from scratch")
 }
@@ -186,6 +188,7 @@ func resetSpawnFlags(cmd *cobra.Command) {
 	spawnName = ""
 	spawnAgents = nil
 	spawnWorkspaces = nil
+	spawnBackend = ""
 }
 
 func spawnRunE(cmd *cobra.Command, args []string) error {
@@ -235,7 +238,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	// over the legacy ~/.spwn/worlds/<name>.yaml file. When a project is
 	// active we synthesize a world.Manifest straight from the inline
 	// map, so no stub file needs to exist on disk.
-	pw, projectErr := applyProjectDefaults(cmd, positionalName)
+	pw, projectErr := applyProjectDefaults(cmd, positionalName, spawnBackend)
 	if projectErr != nil {
 		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
 	}
@@ -534,12 +537,12 @@ func spawnHint(err error, agentName string, agents []architect.AgentSpec) string
 // If requestedName is non-empty and the project has no such world,
 // this returns a hard error - we refuse to silently fall through to
 // the legacy config path because the user asked for a specific name.
-func applyProjectDefaults(cmd *cobra.Command, requestedName string) (*projectWorld, error) {
+func applyProjectDefaults(cmd *cobra.Command, requestedName, backendOverride string) (*projectWorld, error) {
 	p, err := loadProject()
 	if err != nil || p == nil {
 		return nil, nil
 	}
-	pw, err := resolveProjectWorld(p, requestedName)
+	pw, err := resolveProjectWorld(p, requestedName, backendOverride)
 	if err != nil {
 		// Named world explicitly requested but missing -> hard error.
 		if requestedName != "" {

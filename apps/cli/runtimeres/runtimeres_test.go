@@ -111,7 +111,19 @@ func TestResolve_multipleAuthProvidersErrors(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected ambiguity error, got nil")
 	}
-	for _, want := range []string{"multiple providers", "claude-code", "codex", "--runtime"} {
+	// Hint must name both durable options (agent + project-level
+	// Pinning) and the one-off CLI override so the user can pick
+	// Based on their situation. Previously we suggested --runtime
+	// Which only exists on `spwn build`; the hint now points at
+	// `spwn up --backend` which is the actual spawn-time flag.
+	for _, want := range []string{
+		"multiple providers",
+		"claude-code",
+		"codex",
+		"agent.yaml#runtime.backend",
+		"spwn.yaml#runtime.backend",
+		"spwn up --backend",
+	} {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("error message missing %q: %s", want, err.Error())
 		}

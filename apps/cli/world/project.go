@@ -65,7 +65,7 @@ func sortedWorldNames(p *project.Project) []string {
 // The resulting world.Manifest has Packages unioned from (1) the
 // inline world's explicit Packages list and (2) every referenced
 // agent's agent.yaml Packages field.
-func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error) {
+func resolveProjectWorld(p *project.Project, name, backendOverride string) (*projectWorld, error) {
 	if p == nil || p.Manifest == nil {
 		return nil, fmt.Errorf("no project loaded")
 	}
@@ -146,7 +146,7 @@ func resolveProjectWorld(p *project.Project, name string) (*projectWorld, error)
 	// rather than after a mismatched container boots.
 	var runtimeName string
 	if src, srcErr := source.Load(p.Root); srcErr == nil && src != nil {
-		rn, rnErr := runtimeres.Resolve(src, "")
+		rn, rnErr := runtimeres.Resolve(src, backendOverride)
 		if rnErr != nil {
 			return nil, rnErr
 		}
