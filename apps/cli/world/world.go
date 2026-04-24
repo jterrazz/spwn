@@ -220,12 +220,36 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	// Same world. See finding #7.
 	if positionalName != "" {
 		if existing := findRunningWorldByConfig(ctx, positionalName); existing != nil {
-			s.Blank()
-			s.Success(fmt.Sprintf("world %q is already running (%s)", positionalName, existing.ID))
-			s.Blank()
-			s.Info("Enter:", fmt.Sprintf("spwn world enter %s", existing.ID))
-			s.Blank()
-			return nil
+			// Runtime-drift guard: the world was spawned with some
+			// Runtime (claude-code / codex / …) recorded on its
+			// Container labels. If the user has since changed
+			// `runtime.backend` in agent.yaml / spwn.yaml / via
+			// `--backend`, the OLD binary baked into the container
+			// Won't match the NEW resolved runtime. Taking the
+			// Idempotency no-op branch in that case silently leaves
+			// The user talking to the wrong binary. Force a
+			// Destroy+respawn so the image rebuilds with the right
+			// Tools.
+			wanted := resolveWantedRuntime(positionalName, spawnBackend)
+			if wanted != "" && existing.Runtime != "" && existing.Runtime != wanted {
+				s.Blank()
+				s.Warn("Runtime drift",
+					fmt.Sprintf("world %q was spawned with %q; now wants %q — rebuilding",
+						positionalName, existing.Runtime, wanted))
+				s.Blank()
+				if arc, derr := architect.NewFromEnv(); derr == nil {
+					_, _ = arc.Destroy(ctx, existing.ID)
+				}
+				// Fall through to normal spawn flow with the lock,
+				// Fresh project resolve, image rebuild.
+			} else {
+				s.Blank()
+				s.Success(fmt.Sprintf("world %q is already running (%s)", positionalName, existing.ID))
+				s.Blank()
+				s.Info("Enter:", fmt.Sprintf("spwn world enter %s", existing.ID))
+				s.Blank()
+				return nil
+			}
 		}
 	}
 
@@ -518,6 +542,25 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	s.Blank()
 
 	return nil
+}
+
+// resolveWantedRuntime returns the runtime name the current project
+// + flag state would spawn, as a cheap pre-resolve used only by the
+// Idempotency-drift guard. Mirrors the logic in resolveProjectWorld
+// But skips the full manifest validation — we only need to know
+// Which runtime comes out at the end. Returns "" on any resolution
+// Error; the caller treats that as "don't know, fall through to the
+// Normal path" rather than blocking.
+func resolveWantedRuntime(worldName, backendOverride string) string {
+	p, err := loadProject()
+	if err != nil || p == nil {
+		return ""
+	}
+	pw, err := resolveProjectWorld(p, worldName, backendOverride)
+	if err != nil || pw == nil {
+		return ""
+	}
+	return pw.Runtime
 }
 
 // runtimeAuthProvider returns the auth provider string ("anthropic",
