@@ -1,6 +1,9 @@
 package ui
 
-import "testing"
+import (
+	"io"
+	"testing"
+)
 
 func TestSummariseInstruction(t *testing.T) {
 	cases := []struct {
@@ -81,17 +84,27 @@ func TestSummariseInstruction(t *testing.T) {
 }
 
 // TestBuildProgressWriter_ParsesStepLines covers the end-to-end
-// path: a Docker build stream (one fragment at a time, because the
+// Path: a Docker build stream (one fragment at a time, because the
 // HTTP stream rarely matches line boundaries) arrives at the
-// writer, and the stepper's label is updated exactly once per
-// `Step N/M :` line with the summarised action.
+// Writer, prior steps become frozen tree lines, and the spinner
+// Live-updates to reflect the currently-running step.
 func TestBuildProgressWriter_ParsesStepLines(t *testing.T) {
-	s := &Stepper{isTTY: true}
-	w := s.BuildProgressWriter("Building image").(*buildProgressWriter)
+	// Direct-construct a Stepper writing into a harmless sink so the
+	// Spinner goroutine (TreeSpin) has something to print into — the
+	// Test asserts on state, not on captured output.
+	s := &Stepper{isTTY: true, w: io.Discard}
+	bp := s.BuildProgressWriter()
+	w := bp.(*buildProgressWriter)
+	t.Cleanup(func() {
+		// Kill any running spinner before the test returns so the
+		// Goroutine doesn't leak and print into the next test.
+		w.CompleteCurrent()
+		s.stopSpinner()
+	})
 
 	// Feed the stream in a few chunks that split across line
-	// boundaries. This exercises the bytes.Buffer half of the
-	// writer - a naive line-based parser would miss partial lines.
+	// Boundaries. This exercises the bytes.Buffer half of the
+	// Writer — a naive line-based parser would miss partial lines.
 	fragments := []string{
 		"Step 1/3 : FROM ubuntu:24.04\n",
 		"Step 2/3 : RUN apt-ge",
@@ -108,17 +121,23 @@ func TestBuildProgressWriter_ParsesStepLines(t *testing.T) {
 		}
 	}
 
-	// The last `Step N/M :` line wins because each overwrites
-	// the previous label in place.
+	// After streaming the three Step lines in, the CURRENT live step
+	// Should be `[3/3] Copying files` — the spinner label tracks it.
 	s.mu.Lock()
 	got := s.label
 	s.mu.Unlock()
 
-	// Labels contain the base + the ANSI-wrapped [N/M] + action.
-	// We strip colours before comparing.
-	const want = "Building image [3/3] Copying files"
-	if !containsVisible(got, want) {
-		t.Errorf("spinner label = %q, want visible %q", got, want)
+	if !containsVisible(got, "[3/3]") || !containsVisible(got, "Copying files") {
+		t.Errorf("spinner label = %q, want [3/3] + Copying files", got)
+	}
+
+	// CompleteCurrent freezes the live step as a permanent tree line
+	// And clears the in-progress state. The stepper's `label` stays
+	// On the last value (we don't reset it explicitly) but haveCurrent
+	// Must flip to false so no stale spinner hangs around.
+	w.CompleteCurrent()
+	if w.haveCurrent {
+		t.Errorf("CompleteCurrent left haveCurrent=true")
 	}
 }
 

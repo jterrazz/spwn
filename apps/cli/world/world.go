@@ -205,20 +205,16 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	s := ui.New()
 
-	s.Blank()
-
-	// A positional name arg always refers to a world entry in spwn.yaml.
-	// `spwn up foo` = start world `foo`. This is the compose-style path.
 	positionalName := ""
 	if len(args) > 0 {
 		positionalName = args[0]
 	}
 
 	// Idempotency guard: if a world with the same config name is
-	// already running, treat `spwn up` as a no-op. This matches docker
-	// compose semantics and prevents the duplicate-container bug where
-	// two invocations of `spwn up` would spawn two containers for the
-	// same world. See finding #7.
+	// Already running, treat `spwn up` as a no-op. This matches docker
+	// Compose semantics and prevents the duplicate-container bug where
+	// Two invocations of `spwn up` would spawn two containers for the
+	// Same world. See finding #7.
 	if positionalName != "" {
 		if existing := findRunningWorldByConfig(ctx, positionalName); existing != nil {
 			s.Blank()
@@ -231,9 +227,9 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// Per-world spawn lock: prevents two concurrent `spwn up` calls
-	// from racing past the idempotency check above and both creating
-	// containers. The lock lives under the project's local state dir
-	// and is released in a defer. See finding #8.
+	// From racing past the idempotency check above and both creating
+	// Containers. The lock lives under the project's local state dir
+	// And is released in a defer. See finding #8.
 	if positionalName != "" {
 		unlock, lockErr := acquireUpLock(positionalName)
 		if lockErr != nil {
@@ -245,15 +241,13 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// If we're inside a spwn project, prefer the inline spwn.yaml world
-	// over the legacy ~/.spwn/worlds/<name>.yaml file. When a project is
-	// active we synthesize a world.Manifest straight from the inline
-	// map, so no stub file needs to exist on disk.
+	// Over the legacy ~/.spwn/worlds/<name>.yaml file. When a project is
+	// Active we synthesize a world.Manifest straight from the inline
+	// Map, so no stub file needs to exist on disk.
 	pw, projectErr := applyProjectDefaults(cmd, positionalName, spawnBackend)
 	if projectErr != nil {
 		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
 	}
-
-	s.Start("Loading config...")
 
 	configName := "default"
 	if spawnConfig != "" {
@@ -283,32 +277,22 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		return s.FailHint("Config invalid", err, "Check ~/.spwn/worlds/"+configName+".yaml")
 	}
 
-	s.Done("Loaded config", configName)
-
 	// Build spawn opts based on --agent flags. No --agent = empty world.
 	agentName := ""
 	var agents []architect.AgentSpec
 
 	switch len(spawnAgents) {
 	case 0:
-		// empty world
+		// Empty world.
 	case 1:
 		agentName = spawnAgents[0]
 	default:
-		// Multi-agent mode: first is chief, rest are workers
+		// Multi-agent mode: first is chief, rest are workers.
 		agents = append(agents, architect.AgentSpec{Name: spawnAgents[0], Role: "chief"})
 		for _, name := range spawnAgents[1:] {
 			agents = append(agents, architect.AgentSpec{Name: name, Role: "worker"})
 		}
 	}
-
-	s.Start("Connecting to Docker...")
-	arc, err := architect.NewFromEnv()
-	if err != nil {
-		return s.FailHint("Docker", err,
-			"Start Docker Desktop or OrbStack, then try again")
-	}
-	s.Done("Docker connected", "")
 
 	workspaces, wsErr := parseWorkspaceFlags(spawnWorkspaces)
 	if wsErr != nil {
@@ -316,26 +300,65 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 			`Expected: "path", "name=path", or "name=path:ro"`)
 	}
 
-	if agentName != "" || len(agents) > 0 {
-		s.Start("Validating agent...")
+	// ── Hero ─────────────────────────────────────────────────────────
+	s.Blank()
+	switch {
+	case agentName != "":
+		s.Hero("⬡", "Waking "+agentName)
+	case len(agents) > 0:
+		s.Hero("⬡", fmt.Sprintf("Waking %d agents", len(agents)))
+	default:
+		s.Hero("⬡", "Waking "+configName)
 	}
 
-	// BuildProgressWriter parses the Docker build stream for
-	// `Step N/M :` lines and updates the spinner label in place.
-	// Callers see "Building image [5/12] Installing packages"
-	// instead of a mystery spinner during the long image build.
-	buildProgress := s.BuildProgressWriter("Building image")
+	// ── Phase: Environment ───────────────────────────────────────────
+	s.Phase("Environment")
+	s.SubStart("Connecting to Docker…")
+	arc, err := architect.NewFromEnv()
+	if err != nil {
+		return s.SubFailHint("Docker", err,
+			"Start Docker Desktop or OrbStack, then try again")
+	}
+	s.SubDone("Docker", "connected")
 
-	// Knowledge path resolution: the CLI is the ONLY layer that turns
-	// the manifest's project-relative `worlds.<name>.knowledge` value
-	// into an absolute host path. When no inline world is active
-	// (pw == nil, legacy global-mode spawn), knowledge stays empty and
-	// the spawn pipeline drops the bind mount.
+	// ── Spawn pipeline ───────────────────────────────────────────────
+	//
+	// The architect fires an event stream we turn into sub-steps. The
+	// Phase state machine below idempotently transitions from
+	// Environment → Image → Spawn as the relevant events arrive, so
+	// Callers don't have to keep the visual shape in their head.
 	knowledge := ""
 	runtimeName := ""
 	if pw != nil {
 		knowledge = pw.Knowledge
 		runtimeName = pw.Runtime
+	}
+
+	buildProgress := s.BuildProgressWriter()
+
+	const (
+		phaseEnv   = 0
+		phaseImage = 1
+		phaseSpawn = 2
+	)
+	phase := phaseEnv
+
+	enterImage := func() {
+		if phase >= phaseImage {
+			return
+		}
+		s.PhaseBreak()
+		s.Phase("Image")
+		phase = phaseImage
+	}
+	enterSpawn := func() {
+		enterImage()
+		if phase >= phaseSpawn {
+			return
+		}
+		s.PhaseBreak()
+		s.Phase("Spawn")
+		phase = phaseSpawn
 	}
 
 	result, err := arc.Spawn(ctx, architect.SpawnOpts{
@@ -352,103 +375,115 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		OnProgress: func(event, detail string) {
 			switch event {
 			case "mind_validated":
-				s.Done("Validated agent", detail)
+				// Still in Environment — the agent's on-disk Mind
+				// Has been located and parsed. Detail is the agent
+				// Name.
+				s.SubDone("Agent", detail)
 			case "tools_resolved":
-				// Surface the resolved tool list right after the
-				// agent validation so users can see exactly what's
-				// about to flow into the world image before the
-				// spinner starts.
+				// Transition to Image phase and record the resolved
+				// Tool set as the first tree child — the rest of the
+				// Tree (build Step N/M lines) streams in via
+				// BuildProgressWriter underneath.
+				enterImage()
 				if detail != "" {
-					s.Info("Tools", detail)
+					s.TreeLine("tools: "+ui.Faint(detail), "")
 				}
-				s.Start("Resolving compile...")
-			case "image_resolving":
-				s.UpdateLabel("Resolving image (checking cache)...")
-			case "image_building":
-				// Flip the spinner label to "Building image" so
-				// BuildProgressWriter's in-place step updates land
-				// on the right base. Each docker `Step N/M :`
-				// line rewrites this label with the current action.
-				s.UpdateLabel("Building image")
+			case "image_resolving", "image_building":
+				// No visual — BuildProgressWriter drives the live
+				// Spinner on each docker Step as it arrives, and
+				// Completed steps leave frozen ├ tree lines behind.
 			case "image_built":
-				s.Done("Built image", detail)
-				s.Start("Resolving credentials...")
+				buildProgress.CompleteCurrent()
+				s.SubDone("Built", detail)
 			case "image_cached":
-				s.Done("Image cached", detail)
-				s.Start("Resolving credentials...")
+				buildProgress.CompleteCurrent()
+				s.SubDone("Cached", detail)
 			case "image_ready":
-				s.Done("Image ready", detail)
-				s.Start("Resolving credentials...")
+				buildProgress.CompleteCurrent()
+				s.SubDone("Ready", detail)
 			case "credentials_resolved":
-				s.Done("Credentials", detail)
-				s.Start("Creating container...")
+				enterSpawn()
+				s.SubDone("Auth", detail)
 			case "container_created":
-				s.Done("Created container", detail)
-				s.Start("Probing tools...")
+				enterSpawn()
+				s.SubDone("Created container", detail)
 			case "tools_probed":
-				s.Done("Probed tools", detail)
-				s.Start("Generating physics...")
-			case "faculties_generated":
-				s.Done("Generated physics", detail)
+				enterSpawn()
+				s.SubDone("Tools verified", detail)
+			case "world_state_written":
+				enterSpawn()
+				s.SubDone("Prompt", detail)
 			}
 		},
 	})
 	if err != nil {
-		return s.FailHint("Spawn failed", err, spawnHint(err, agentName, agents))
+		// Freeze any live build-spinner so the ✗ banner below doesn't
+		// Leave a stale spinner line above it.
+		buildProgress.CompleteCurrent()
+		return s.SubFailHint("Spawn failed", err, spawnHint(err, agentName, agents))
 	}
 
 	u := result.World
 
-	// Show non-fatal warnings
+	// Non-fatal warnings from the architect surface as yellow `!`
+	// Lines after the Spawn phase — scoped enough that we don't need
+	// A separate phase for them.
 	for _, w := range result.Warnings {
 		s.Warn("Warning", w)
 	}
 
-	// Spawn agents
+	// Agent spawn. Colony mode vs single-agent vs empty world, plus
+	// The interactive / detached split. In interactive mode the
+	// Runtime's own banner (Claude Code's `╭─ claude ─╮`, codex's
+	// REPL header, …) takes over the next instant, so we stay quiet
+	// And hand off cleanly.
 	if len(agents) > 0 {
-		// Multi-agent mode
-		s.Start("Spawning colony...")
+		enterSpawn()
+		s.SubStart("Spawning colony…")
 		if err := arc.SpawnAgents(ctx, u.ID, agents); err != nil {
-			return s.FailHint("Colony failed", err, "Check events with \"spwn world logs "+u.ID+"\"")
+			return s.SubFailHint("Colony failed", err, "Check events with \"spwn world logs "+u.ID+"\"")
 		}
-		s.Done("Colony spawned", fmt.Sprintf("%d agent(s)", len(agents)))
+		s.SubDone("Colony spawned", fmt.Sprintf("%d agent(s)", len(agents)))
 	} else if agentName != "" {
-		// Single-agent mode
 		if spawnInteractive {
-			s.Blank()
-			s.Success("Agent is alive.")
-			s.Blank()
+			// Silent handoff — the runtime's banner replaces ours.
 			if err := arc.SpawnAgent(ctx, u.ID, agentName); err != nil {
 				return err
 			}
-		} else {
-			s.Start("Spawning agent...")
-			if err := arc.SpawnAgentDetached(ctx, u.ID, agentName); err != nil {
-				return s.FailHint("Agent failed", err, "Check events with \"spwn world logs "+u.ID+"\"")
-			}
-			s.Done("Agent spawned", "detached")
+			return nil
 		}
+		enterSpawn()
+		s.SubStart("Spawning agent…")
+		if err := arc.SpawnAgentDetached(ctx, u.ID, agentName); err != nil {
+			return s.SubFailHint("Agent failed", err, "Check events with \"spwn world logs "+u.ID+"\"")
+		}
+		s.SubDone("Agent spawned", "detached")
 	}
 
-	if !spawnInteractive {
-		s.Blank()
-		if agentName == "" && len(agents) == 0 {
-			s.Success("World spawned.")
-		} else {
-			s.Success("Agent is alive.")
-		}
-		s.Blank()
-		s.Info("World:", u.ID)
-		if u.AgentID != "" {
-			s.Info("Agent:", u.AgentID)
-		}
-		s.Info("Status:", string(u.Status))
-		if agentName != "" {
-			s.Blank()
-			fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Talk: spwn agent talk %s", agentName)))
-			fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint(fmt.Sprintf("Logs: spwn world logs %s", u.ID)))
-		}
+	// Footer is only useful for non-interactive spawns where the
+	// User's shell stays their shell afterwards. Interactive agent
+	// Sessions returned above; colony / detached / empty-world land
+	// Here. Success banner first so "Agent is alive." reads as the
+	// Punctuation mark at the end of the phase sequence, followed by
+	// The cold info block with IDs + quick-action hints.
+	s.Blank()
+	switch {
+	case agentName == "" && len(agents) == 0:
+		s.Success("World spawned.")
+	default:
+		s.Success("Agent is alive.")
 	}
+	s.Blank()
+	s.Info("World:", u.ID)
+	if u.AgentID != "" {
+		s.Info("Agent:", u.AgentID)
+	}
+	if agentName != "" {
+		s.Blank()
+		fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint("Talk: spwn agent talk "+agentName))
+		fmt.Fprintf(cmd.ErrOrStderr(), "  %s\n", ui.Faint("Logs: spwn world logs "+u.ID))
+	}
+	s.Blank()
 
 	return nil
 }

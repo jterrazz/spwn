@@ -245,6 +245,12 @@ func runInteractiveSession(cmd *cobra.Command, agentName string) error {
 	if err := worldcmd.UpCmd.RunE(cmd, []string{worldName}); err != nil {
 		return err
 	}
+
+	// The Spawn phase above already announced the world + agent IDs,
+	// So suppress talk's redundant "Agent: X / World: Y" header on the
+	// Next call. Flag is one-shot — talk resets it after reading.
+	SuppressTalkHeader()
+
 	// Attach an interactive session inside the running container.
 	return talkCmd.RunE(cmd, []string{agentName})
 }

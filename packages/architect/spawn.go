@@ -568,7 +568,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("materialise world tree: %w", err)
 	}
-	opts.progress("world_state_written", "per-agent CLAUDE.md + role.md")
+	opts.progress("world_state_written", "per-agent CLAUDE.md")
 
 	// Chown the whole agent home tree AFTER every docker-cp step so
 	// every file the agent might need to touch at runtime (auth
