@@ -20,6 +20,8 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"golang.org/x/term"
+
+	"spwn.sh/packages/container/probe"
 )
 
 // Docker implements Backend using the Docker Engine API.
@@ -27,17 +29,50 @@ type Docker struct {
 	client *client.Client
 }
 
-// NewDocker creates a Docker backend from the environment.
+// NewDocker creates a Docker backend connected to the first daemon the
+// Probe can reach. See NewDockerClient for the resolution rules.
 func NewDocker() (*Docker, error) {
-	c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	c, err := NewDockerClient(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("docker client: %w", err)
-	}
-	_, err = c.Ping(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("docker not reachable: %w", err)
+		return nil, err
 	}
 	return &Docker{client: c}, nil
+}
+
+// NewDockerClient returns a ready-to-use Docker SDK client connected to
+// The first reachable daemon. Unlike client.NewClientWithOpts(FromEnv),
+// This helper walks the full probe fallback list so user-mode
+// Installs (OrbStack without admin rights, per-user Docker Desktop,
+// Rootless Podman, Colima, Rancher Desktop, Lima) "just work" without
+// The user having to set DOCKER_HOST by hand.
+//
+// Discovery precedence (see probe.CheckDocker):
+//   1. SPWN_DOCKER_HOST  — explicit spwn escape hatch.
+//   2. DOCKER_HOST       — standard SDK env var.
+//   3. /var/run/docker.sock — system default.
+//   4. Per-user socket fallback list (every runtime we know about).
+//
+// The returned error is already humanized (which socket we tried last,
+// Which runtime it looks like, what the user can do) so CLI callers
+// Can surface it verbatim.
+func NewDockerClient(ctx context.Context) (*client.Client, error) {
+	probeCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	st := probe.CheckDocker(probeCtx)
+	if !st.Running {
+		msg := st.Error
+		if msg == "" {
+			msg = "docker daemon is not reachable"
+		}
+		if st.Hint != "" {
+			return nil, fmt.Errorf("%s (%s)", msg, st.Hint)
+		}
+		return nil, fmt.Errorf("%s", msg)
+	}
+	return client.NewClientWithOpts(
+		client.WithHost(st.Host),
+		client.WithAPIVersionNegotiation(),
+	)
 }
 
 // Create provisions a new container with the given configuration and returns its ID.

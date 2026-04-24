@@ -3,7 +3,13 @@ package probe
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestDockerStatus_OK(t *testing.T) {
@@ -135,5 +141,49 @@ func TestCheckDocker_AlwaysReturnsPlatform(t *testing.T) {
 	st := CheckDocker(context.Background())
 	if st.Platform == "" {
 		t.Error("Platform should always be populated")
+	}
+}
+
+// TestCheckDocker_SpwnDockerHostTakesPriority proves that when users
+// Set SPWN_DOCKER_HOST, the probe connects to that socket before
+// Anything else — including DOCKER_HOST, /var/run/docker.sock, or the
+// Per-user fallback list. Stands up a minimal HTTP server on a temp
+// Unix socket that speaks enough of the Docker /_ping API to satisfy
+// The SDK, points SPWN_DOCKER_HOST at it, and asserts the probe
+// Lands on exactly that socket.
+func TestCheckDocker_SpwnDockerHostTakesPriority(t *testing.T) {
+	// Use /tmp directly instead of t.TempDir() because sun_path on
+	// MacOS is limited to 104 bytes and Go's TempDir is too long.
+	sockPath := filepath.Join(os.TempDir(), fmt.Sprintf("spwn-probe-%d.sock", os.Getpid()))
+	_ = os.Remove(sockPath)
+	t.Cleanup(func() { _ = os.Remove(sockPath) })
+	ln, err := net.Listen("unix", sockPath)
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	defer ln.Close()
+
+	// Minimal Docker daemon stand-in: every route answers 200. The SDK's
+	// Ping + ServerVersion only need status + the API-version header.
+	srv := &http.Server{
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Api-Version", "1.41")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"Version":"test-daemon","ApiVersion":"1.41"}`))
+		}),
+		ReadHeaderTimeout: 2 * time.Second,
+	}
+	go srv.Serve(ln)
+	defer srv.Close()
+
+	t.Setenv("SPWN_DOCKER_HOST", "unix://"+sockPath)
+
+	st := CheckDocker(context.Background())
+	if !st.Running {
+		t.Fatalf("expected SPWN_DOCKER_HOST socket to be reached, got error=%q", st.Error)
+	}
+	if st.Host != "unix://"+sockPath {
+		t.Errorf("Host = %q, want %q (SPWN_DOCKER_HOST should have won)", st.Host, "unix://"+sockPath)
 	}
 }
