@@ -49,6 +49,21 @@ func startVersionCheck() {
 	}()
 }
 
+// ranUpgradeCommand reports whether the user's invocation resolves to
+// The top-level `spwn upgrade` command. Used by Execute() to suppress
+// The update banner after a user has already run upgrade — stacking
+// The banner below the upgrade command's own output would be redundant
+// Noise. Heuristic: the first non-flag argument is "upgrade".
+func ranUpgradeCommand() bool {
+	for _, arg := range os.Args[1:] {
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
+		return arg == "upgrade"
+	}
+	return false
+}
+
 // applyLatestVersion compares a fetched/cached "latest" string
 // Against the current build version and records a pending upgrade
 // When they differ. Centralised so the sync and async paths agree
@@ -64,15 +79,58 @@ func applyLatestVersion(latest string) {
 	}
 }
 
-// printUpgradeHint prints a yellow message if a newer version was detected.
-// Called after the command finishes.
+// bannerBoxWidth is the target visible width of the upgrade banner's
+// Dash lines, measured in terminal columns. 46 fits comfortably on an
+// 80-col terminal, leaves breathing room around the content, and keeps
+// The two dash sequences visually balanced.
+const bannerBoxWidth = 46
+
+// printUpgradeHint renders a boxed "Update available" callout on
+// Stderr when a newer release is pending. Shape:
+//
+//	┌─ Update available ──────────────────────
+//	│  spwn 0.17.1 is out  (you're on 0.0.1)
+//	│  Run  spwn upgrade
+//	└──────────────────────────────────────────
+//
+// The label is yellow-bold, the new version is green-bold, the current
+// Version is faint, and `spwn upgrade` is cyan-bold. Borders render
+// Faint grey so the callout is visible without screaming.
 func printUpgradeHint() {
 	if pendingUpgrade == "" {
 		return
 	}
-	fmt.Fprintf(os.Stderr, "\n  %s %s\n  %s\n\n",
-		ui.Yellow("!"),
-		ui.Yellow(fmt.Sprintf("spwn %s is available (current: %s)", pendingUpgrade, strings.TrimPrefix(Version, "v"))),
-		ui.Faint("Run \"spwn upgrade\" to update"),
+	current := strings.TrimPrefix(Version, "v")
+	latest := strings.TrimPrefix(pendingUpgrade, "v")
+	w := os.Stderr
+
+	// Top-border layout: "┌─ Update available " (20 visible chars)
+	// Plus dashes to fill bannerBoxWidth. Using a constant label
+	// Keeps the math trivial and the eye aligned across invocations.
+	const topPrefixVisible = 2 /* ┌─ */ + 1 /* sp */ + 16 /* Update available */ + 1 /* sp */
+	topDashes := bannerBoxWidth - topPrefixVisible
+	if topDashes < 1 {
+		topDashes = 1
+	}
+
+	fmt.Fprintln(w)
+	fmt.Fprintf(w, "  %s %s %s\n",
+		ui.Faint("┌─"),
+		ui.Yellow(ui.Strong("Update available")),
+		ui.Faint(strings.Repeat("─", topDashes)),
 	)
+	fmt.Fprintf(w, "  %s  spwn %s is out  %s\n",
+		ui.Faint("│"),
+		ui.Green(ui.Strong(latest)),
+		ui.Faint(fmt.Sprintf("(you're on %s)", current)),
+	)
+	fmt.Fprintf(w, "  %s  Run  %s\n",
+		ui.Faint("│"),
+		ui.Cyan(ui.Strong("spwn upgrade")),
+	)
+	fmt.Fprintf(w, "  %s%s\n",
+		ui.Faint("└"),
+		ui.Faint(strings.Repeat("─", bannerBoxWidth-1)),
+	)
+	fmt.Fprintln(w)
 }
