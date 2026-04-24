@@ -48,9 +48,14 @@ describe('system skills infrastructure (docker)', () => {
         // Lift it into /agents/<name>/.claude/skills/<skill>/SKILL.md
         // At spawn time. docker-pilot has no skills, so this test
         // Must drive a scaffold that actually declares one.
+        //
+        // Pin --backend claude-code so the runtime resolver doesn't
+        // Error on dev machines that happen to be authenticated with
+        // Both providers. The skill-tree behaviour under test is
+        // Identical for any claude-code spawn.
         await using result = await spec('claude skills tree')
             .project('empty')
-            .exec(['init', 'up'])
+            .exec(['init --backend claude-code', 'up'])
             .run();
 
         expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);

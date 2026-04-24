@@ -95,6 +95,83 @@ describe('spwn init', () => {
         expect(result.file('spwn.yaml').content).not.toMatch(/knowledge: \.\/knowledge$/m);
     });
 
+    test('default scaffold omits runtime.backend (unpinned)', async () => {
+        // Pin the 2026-04 decision to ship a blank runtime surface so
+        // The resolver is free to pick based on auth state at spawn
+        // Time. A regression would hard-pin `spwn:claude-code` again,
+        // Silently locking new projects to claude-code even for users
+        // Logged into codex.
+        const result = await spec('init no-backend')
+            .project('empty')
+            .exec('init --name demo-project')
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+        const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
+
+        // Walk every non-comment line; none should declare a runtime
+        // Block or a backend key. Doing it this way (instead of a bare
+        // Substring check) avoids catching the doc comment that
+        // Explains the OPTIONAL runtime.backend surface.
+        for (const raw of agentYaml.split('\n')) {
+            const line = raw.trimStart();
+            if (line.startsWith('#')) {
+                continue;
+            }
+            expect(line).not.toMatch(/^runtime:\s*$/);
+            expect(line).not.toMatch(/^backend:/);
+        }
+    });
+
+    test('--backend writes runtime.backend into the scaffolded agent', async () => {
+        // User opts into a specific backend at scaffold time — the
+        // Scaffolder canonicalises the short form to spwn:<name> and
+        // Emits a runtime block. Captures the happy path end-to-end
+        // Through the FS round-trip.
+        const result = await spec('init backend codex')
+            .project('empty')
+            .exec('init --name codex-demo --backend codex')
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+        const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
+        expect(agentYaml).toContain('runtime:');
+        expect(agentYaml).toContain('backend: "spwn:codex"');
+    });
+
+    test('--backend accepts the spwn:<name> scheme form verbatim', async () => {
+        // Mirrors the short-name test for authors who prefer the
+        // Canonical catalog ref. Both forms must produce the same
+        // Output line so tooling (grep, audits) can rely on a single
+        // Shape.
+        const result = await spec('init backend scheme')
+            .project('empty')
+            .exec('init --name scheme-demo --backend spwn:claude-code')
+            .run();
+
+        expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
+        expect(result.file('spwn/agents/neo/agent.yaml').content).toContain(
+            'backend: "spwn:claude-code"',
+        );
+    });
+
+    test('--backend rejects unknown runtimes with a supported-list hint', async () => {
+        // Guards against a typo silently producing an agent.yaml that
+        // Fails later at spawn time with a less-specific error. The
+        // Resolver's supported-list is the authoritative source of
+        // Truth and must name each valid backend.
+        const result = await spec('init backend unknown')
+            .project('empty')
+            .exec('init --name bad-demo --backend does-not-exist')
+            .run();
+
+        expect(result.exitCode).toBe(1);
+        expect(result.file('spwn.yaml').exists).toBe(false);
+        expect(result.stderr.text).toContain('unknown --backend');
+        expect(result.stderr.text).toContain('claude-code');
+        expect(result.stderr.text).toContain('codex');
+    });
+
     test('errors when spwn.yaml already exists', async () => {
         // Given - the single-agent fixture already has spwn.yaml
         const result = await spec('init conflict').project('single-agent').exec('init').run();
