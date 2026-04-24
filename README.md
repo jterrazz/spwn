@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Compose AI agents as code. One source, run anywhere.
+  AI agents orchestration as code. One source, run anywhere.
 </p>
 
 <p align="center">
@@ -27,13 +27,13 @@
 
 <br/>
 
-## Agents as code.
+## Agents orchestration as code.
 
 The real power of AI isn't the model. It's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
 With spwn, **you build that environment, block by block**. Stack `spwn:python` with `spwn:qmd`, add a local `tool:ffmpeg`, pin a few skills and a soul, and your agent wakes up inside a sandbox assembled exactly for its job. Two agents in the same project can live in two totally different worlds: one talks to Postgres and runs tests, the other compiles video. Every block is a declarative file, reviewed in PRs, pinned in lockfiles, swapped like Lego.
 
-Spawn it, commit it to git, ship it. If Terraform is infrastructure as code, spwn is **agents as code**: the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
+Spawn it, commit it to git, ship it. If Terraform is infrastructure as code, spwn is **agents orchestration as code**: the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
 
 <br/>
 
@@ -256,7 +256,7 @@ git push
 # every teammate who clones the repo gets the same mind, byte-for-byte
 ```
 
-> Agents as code, shared like code. PR-review a behavior change. Bisect an agent's memory like bisecting a bug. **The Dockerfile metaphor, all the way.**
+> Agents orchestration as code, shared like code. PR-review a behavior change. Bisect an agent's memory like bisecting a bug. **The Dockerfile metaphor, all the way.**
 
 ### Fork a mind, throw it away if it breaks
 
