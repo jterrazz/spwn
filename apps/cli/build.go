@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/docker/docker/client"
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/runtimeres"
 	"spwn.sh/apps/cli/ui"
+	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/transpile"
 	_ "spwn.sh/packages/runtimes/defaults" // register every built-in runtime
 	"spwn.sh/packages/transpile/source"
@@ -318,18 +318,17 @@ func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID 
 	out := cmd.OutOrStdout()
 	errOut := cmd.ErrOrStderr()
 
-	// Docker client. We stream build output to stderr so stdout
-	// stays clean for --json.
-	dockerCli, err := client.NewClientWithOpts(
-		client.FromEnv,
-		client.WithAPIVersionNegotiation(),
-	)
+	// Docker client. Routed through backend.NewDockerClient so
+	// `spwn build` picks up the same per-user socket discovery as
+	// `spwn up` (OrbStack without admin rights, per-user Docker
+	// Desktop, rootless Podman, etc.). stdout stays clean for --json;
+	// build logs go to stderr further down.
+	ctx := context.Background()
+	dockerCli, err := backend.NewDockerClient(ctx)
 	if err != nil {
 		return fmt.Errorf("docker client: %w", err)
 	}
 	defer dockerCli.Close()
-
-	ctx := context.Background()
 	result, err := compile.BuildFromBase(ctx, dockerCli, compile.BuildFromBaseRequest{
 		BaseImage:       baseImage,
 		Tree:            tree,

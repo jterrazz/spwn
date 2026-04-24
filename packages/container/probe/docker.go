@@ -89,20 +89,37 @@ func (s DockerStatus) Summary() string {
 // Always returns a value - never nil - so callers can render the result
 // directly without nil checks. The returned status is the result of the
 // FIRST host that answered; subsequent hosts are not contacted.
+//
+// Discovery order:
+//   1. SPWN_DOCKER_HOST env var — explicit spwn-specific escape hatch
+//      that takes priority over every other source. Useful for CI,
+//      remote podman sockets, or any pathological host config.
+//   2. SDK default (DOCKER_HOST, /var/run/docker.sock).
+//   3. Per-user socket fallback list (OrbStack, Colima, Docker Desktop
+//      per-user, Rancher, Lima, Podman rootless) + system defaults.
 func CheckDocker(ctx context.Context) DockerStatus {
 	st := DockerStatus{Platform: runtime.GOOS}
 
-	// 1. Default attempt - honors DOCKER_HOST, ~/.docker/contexts, etc.
+	// 1. Explicit spwn override — highest priority. Lets users with
+	// Pathological setups (per-user OrbStack without admin rights, CI,
+	// Remote Podman) unstick spwn with one env var.
+	if override := strings.TrimSpace(os.Getenv("SPWN_DOCKER_HOST")); override != "" {
+		if res := tryHost(ctx, override, 2*time.Second); res.ok {
+			return res.apply(st)
+		}
+	}
+
+	// 2. Default attempt - honors DOCKER_HOST, ~/.docker/contexts, etc.
 	if res := tryHost(ctx, "", 4*time.Second); res.ok {
 		return res.apply(st)
 	}
 
-	// 2. Probe well-known per-user sockets sequentially. Each attempt is
-	// short so the worst-case total stays well under the 10s API window.
+	// 3. Probe well-known per-user sockets sequentially. Each attempt is
+	// Short so the worst-case total stays well under the 10s API window.
 	var lastErr error
 	for _, host := range candidateHosts() {
 		// Cheap pre-check for unix sockets: skip the SDK round-trip if
-		// the file does not exist or is not a socket.
+		// The file does not exist or is not a socket.
 		if path, ok := unixPath(host); ok {
 			info, err := os.Stat(path)
 			if err != nil || info.Mode()&os.ModeSocket == 0 {
@@ -119,8 +136,8 @@ func CheckDocker(ctx context.Context) DockerStatus {
 	}
 
 	// Nothing answered. Surface a single, honest error message -
-	// re-using the daemon error from the default attempt is more useful
-	// than the last fallback's generic "no such file" noise.
+	// Re-using the daemon error from the default attempt is more useful
+	// Than the last fallback's generic "no such file" noise.
 	if defRes := tryHost(ctx, "", 1500*time.Millisecond); defRes.err != nil {
 		st.Error = humanizeDaemonError(defRes.err)
 	} else if lastErr != nil {
