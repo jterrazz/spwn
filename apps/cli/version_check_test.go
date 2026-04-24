@@ -70,3 +70,83 @@ func TestPendingUpgrade_NewerVersionSetsHint(t *testing.T) {
 	}
 	pendingUpgrade = "" // cleanup
 }
+
+// TestStartVersionCheck_FreshCacheSetsPendingSynchronously pins the
+// Fix for fast commands (`spwn ls`, `spwn status`) that used to exit
+// Before the background goroutine set pendingUpgrade. A fresh cache
+// Pointing at a NEWER version must land in pendingUpgrade *before*
+// StartVersionCheck returns.
+func TestStartVersionCheck_FreshCacheSetsPendingSynchronously(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("SPWN_HOME", tmpDir)
+	t.Setenv("SPWN_NO_UPDATE_CHECK", "") // explicit: do not skip
+
+	// Save and restore the package-level Version so the test doesn't
+	// Leak state into neighbours.
+	orig := Version
+	t.Cleanup(func() {
+		Version = orig
+		pendingUpgrade = ""
+	})
+	Version = "v0.0.1"
+
+	cacheContent := time.Now().UTC().Format(time.RFC3339) + "\nv9.9.9"
+	if err := os.WriteFile(filepath.Join(tmpDir, ".version-check"), []byte(cacheContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	pendingUpgrade = ""
+	startVersionCheck()
+
+	// No goroutine race — the cache path is synchronous, so
+	// PendingUpgrade must be populated immediately on return.
+	if pendingUpgrade != "9.9.9" {
+		t.Errorf("pendingUpgrade = %q, want 9.9.9 (fresh-cache path must be synchronous)", pendingUpgrade)
+	}
+}
+
+// TestStartVersionCheck_DevBuildSkipsCheck locks in that local
+// Development builds never trigger the upgrade banner regardless of
+// Cache state.
+func TestStartVersionCheck_DevBuildSkipsCheck(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("SPWN_HOME", tmpDir)
+	cacheContent := time.Now().UTC().Format(time.RFC3339) + "\nv9.9.9"
+	_ = os.WriteFile(filepath.Join(tmpDir, ".version-check"), []byte(cacheContent), 0644)
+
+	orig := Version
+	t.Cleanup(func() {
+		Version = orig
+		pendingUpgrade = ""
+	})
+	Version = "dev"
+
+	pendingUpgrade = ""
+	startVersionCheck()
+	if pendingUpgrade != "" {
+		t.Errorf("dev build should skip, got pendingUpgrade=%q", pendingUpgrade)
+	}
+}
+
+// TestStartVersionCheck_OptOutEnvVarSkipsCheck locks in that the
+// Documented SPWN_NO_UPDATE_CHECK escape hatch still works.
+func TestStartVersionCheck_OptOutEnvVarSkipsCheck(t *testing.T) {
+	tmpDir := t.TempDir()
+	t.Setenv("SPWN_HOME", tmpDir)
+	t.Setenv("SPWN_NO_UPDATE_CHECK", "1")
+	cacheContent := time.Now().UTC().Format(time.RFC3339) + "\nv9.9.9"
+	_ = os.WriteFile(filepath.Join(tmpDir, ".version-check"), []byte(cacheContent), 0644)
+
+	orig := Version
+	t.Cleanup(func() {
+		Version = orig
+		pendingUpgrade = ""
+	})
+	Version = "v0.0.1"
+
+	pendingUpgrade = ""
+	startVersionCheck()
+	if pendingUpgrade != "" {
+		t.Errorf("SPWN_NO_UPDATE_CHECK=1 should skip, got pendingUpgrade=%q", pendingUpgrade)
+	}
+}
