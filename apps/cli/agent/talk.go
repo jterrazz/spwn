@@ -21,9 +21,19 @@ import (
 )
 
 var (
-	talkOutputFormat string
-	talkWorldID      string
+	talkOutputFormat   string
+	talkWorldID        string
+	talkSuppressHeader bool
 )
+
+// SuppressTalkHeader is set by runInteractiveSession just before it
+// Delegates to talkCmd.RunE. The `spwn agent <name>` shortcut already
+// Printed a Hero + Spawn phase with world/agent IDs, so repeating
+// "Agent: X / World: Y" inside talk would be redundant. One-shot
+// Resets itself at the end of the talk call.
+func SuppressTalkHeader() {
+	talkSuppressHeader = true
+}
 
 func init() {
 	talkCmd.Flags().StringVar(&talkOutputFormat, "output-format", "", "Output format: text (default) or stream-json")
@@ -56,8 +66,13 @@ If no message is provided, opens an interactive session inside the container.`,
 			return err
 		}
 
-		// Suppress stepper output in stream-json mode (web UI reads raw JSON)
-		if talkOutputFormat != "stream-json" {
+		// Suppress the duplicate "Agent:/World:" header when:
+		//   - Stream-json mode (web UI reads raw JSON),
+		//   - Or we're called from `spwn agent <name>`'s shortcut path
+		//     Which has already printed the full Spawn phase output.
+		suppressed := talkOutputFormat == "stream-json" || talkSuppressHeader
+		talkSuppressHeader = false // one-shot flag — reset for next invocation
+		if !suppressed {
 			s.Blank()
 			s.Info("Agent:", name)
 			s.Info("World:", worldID)
