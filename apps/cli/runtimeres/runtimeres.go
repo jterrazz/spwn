@@ -88,7 +88,9 @@ func fromAuth() (string, error) {
 	}
 	return "", fmt.Errorf(
 		"multiple providers authenticated (%s) and no runtime pinned. "+
-			"Pass --runtime %s, or pin one in agent.yaml#runtime.backend",
+			"Pin one in agent.yaml#runtime.backend (per agent) or "+
+			"spwn.yaml#runtime.backend (project-wide), or override with "+
+			"`spwn up --backend %s`",
 		strings.Join(candidates, ", "),
 		candidates[0],
 	)
