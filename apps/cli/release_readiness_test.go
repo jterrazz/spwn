@@ -850,7 +850,7 @@ func TestReleaseReadiness(t *testing.T) {
 		t.Parallel()
 		env, home := freshEnv(t)
 		wd := t.TempDir()
-		_, _, code := runCLI(t, env, wd, "auth", "status")
+		_, _, code := runCLI(t, env, wd, "auth")
 		if code != 0 {
 			t.Fatalf("auth status failed with exit %d", code)
 		}
@@ -865,7 +865,7 @@ func TestReleaseReadiness(t *testing.T) {
 		t.Parallel()
 		env, home := freshEnv(t)
 		wd := t.TempDir()
-		if _, _, code := runCLI(t, env, wd, "auth", "status"); code != 0 {
+		if _, _, code := runCLI(t, env, wd, "auth"); code != 0 {
 			t.Fatalf("auth status failed")
 		}
 		cfg := readFile(t, filepath.Join(home, "config.yaml"))
@@ -889,7 +889,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if err := os.WriteFile(cfgPath, []byte(custom), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if _, _, code := runCLI(t, env, wd, "auth", "status"); code != 0 {
+		if _, _, code := runCLI(t, env, wd, "auth"); code != 0 {
 			t.Fatalf("auth status failed")
 		}
 		got := readFile(t, cfgPath)
@@ -922,7 +922,7 @@ func TestReleaseReadiness(t *testing.T) {
 		envB, homeB := freshEnv(t)
 		wd := t.TempDir()
 		for _, env := range [][]string{envA, envB} {
-			if _, _, code := runCLI(t, env, wd, "auth", "status"); code != 0 {
+			if _, _, code := runCLI(t, env, wd, "auth"); code != 0 {
 				t.Fatalf("auth status failed for %v", env)
 			}
 		}
@@ -1222,7 +1222,7 @@ func TestReleaseReadiness(t *testing.T) {
 		// `auth status` triggers PersistentPreRunE → migration
 		// runner → pre-migration backup → walk SPWN_HOME. Must not
 		// blow up on the broken link.
-		_, stderr, code := runCLI(t, env, t.TempDir(), "auth", "status")
+		_, stderr, code := runCLI(t, env, t.TempDir(), "auth")
 		if code != 0 {
 			t.Fatalf("auth status failed on SPWN_HOME with broken symlink (code=%d):\n%s", code, stderr)
 		}

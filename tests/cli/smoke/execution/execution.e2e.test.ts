@@ -113,12 +113,13 @@ describe('CLI execution - status command', () => {
         expect(stderr).toContain('Architect');
     });
 
-    test("'spwn auth' from an empty project still renders the provider table", async () => {
+    test("'spwn auth' from an empty project still renders the dashboard", async () => {
         const result = await isolated('auth from execution').exec('auth').run();
         expect(result.exitCode).toBe(0);
-        // Provider table is keychain-dependent (see auth.e2e.test.ts),
-        // So we only assert on the stable header row here.
-        expect(result.stderr.text).toContain('PROVIDER');
+        // Dashboard content is keychain-dependent (see
+        // Auth.e2e.test.ts); we only assert on the stable scaffolding.
+        expect(result.stderr.text).toContain('Credentials');
+        expect(result.stderr.text).toContain('Anthropic');
     });
 });
 

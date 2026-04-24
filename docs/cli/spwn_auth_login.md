@@ -30,10 +30,9 @@ spwn auth login <provider> [flags]
 ```
       --api-key string   Save an API key for this provider
   -h, --help             help for login
-      --oauth            Print OAuth login instructions for this provider
 ```
 
 ### SEE ALSO
 
-* [spwn auth](./spwn_auth.md)	 - Manage credentials — status, login, use, logout, disable
+* [spwn auth](./spwn_auth.md)	 - Manage credentials — dashboard, login, use, logout, disable
 

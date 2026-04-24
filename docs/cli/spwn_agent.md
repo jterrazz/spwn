@@ -35,6 +35,7 @@ spwn agent [name] [flags]
 ### Options
 
 ```
+      --backend string     Override the runtime backend for this session (e.g. claude-code, codex).
       --ephemeral string   Run as ephemeral agent - no Mind, no memory, just execute this task
   -h, --help               help for agent
       --import string      Import Mind from tar.gz before spawning

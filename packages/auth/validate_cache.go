@@ -55,6 +55,21 @@ func ValidateWithCache(ctx context.Context, cred *Credential, maxAge time.Durati
 		return Validate(ctx, cred)
 	}
 
+	// Escape hatch for tests / CI / offline runs: SPWN_SKIP_AUTH_VALIDATION
+	// Bypasses the network-touching validator entirely and treats every
+	// Detected credential as connected. The spawn pre-flight and auth
+	// Dashboard both honor this, so e2e suites that spin up many
+	// Commands in parallel don't hammer Anthropic's /oauth/usage with
+	// Duplicate probes and hit 429s.
+	if os.Getenv("SPWN_SKIP_AUTH_VALIDATION") != "" {
+		return &ProviderStatus{
+			Provider:  cred.Provider,
+			Connected: true,
+			CredType:  cred.Type,
+			Source:    cred.Source,
+		}
+	}
+
 	if maxAge > 0 {
 		cache := loadValidationCache()
 		if entry, ok := cache[cred.Provider]; ok {

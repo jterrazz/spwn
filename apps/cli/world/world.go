@@ -355,8 +355,8 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		cancelCred()
 		if status == nil || !status.Connected {
 			return s.SubFailHint("Credentials",
-				credentialError(p, cred, status),
-				credentialFixHint(p, cred))
+				auth.CredentialError(p, cred, status),
+				auth.CredentialFixHint(p, cred))
 		}
 		s.SubDone("Credentials", credentialDetail(cred))
 	}
@@ -533,61 +533,6 @@ func runtimeAuthProvider(runtimeName string) string {
 		return ""
 	}
 	return adapter.DefaultProvider
-}
-
-// credentialError builds the user-visible error message for a
-// Pre-flight validation failure. We surface the provider name, the
-// Detected source, and the provider's own error text (typically
-// "invalid or expired OAuth token" or "invalid API key") so the
-// User knows exactly which credential spwn looked at and what the
-// API said about it.
-func credentialError(p auth.Provider, cred *auth.Credential, status *auth.ProviderStatus) error {
-	source := "no credentials configured"
-	if cred != nil && cred.Source != "" {
-		source = cred.Source
-	}
-	reason := "validation failed"
-	if status != nil && status.Error != "" {
-		reason = status.Error
-	}
-	return fmt.Errorf("%s credentials rejected (%s): %s", p, source, reason)
-}
-
-// credentialFixHint returns an actionable hint tailored to the
-// Credential source that failed. Keychain/file-backed creds point
-// At `claude login`; env-var creds point at re-exporting; API-key
-// Creds point at the login command. The goal is to get the user
-// Back to green in one copy-paste.
-func credentialFixHint(p auth.Provider, cred *auth.Credential) string {
-	// No creds at all.
-	if cred == nil || cred.Type == auth.CredTypeNone {
-		switch p {
-		case auth.ProviderAnthropic:
-			return "Run `claude login` on the host, or `spwn auth login anthropic --api-key sk-ant-…`"
-		case auth.ProviderOpenAI:
-			return "Run `codex login` on the host, or export OPENAI_API_KEY=sk-…"
-		}
-		return "Configure credentials for " + string(p)
-	}
-
-	// Env-var backed — user can't clear without touching their
-	// Shell; tell them exactly which var is stale.
-	if strings.HasPrefix(cred.Source, "env:") {
-		varName := strings.TrimPrefix(cred.Source, "env:")
-		return "unset " + varName + " (stale in your shell) or replace with a fresh credential"
-	}
-
-	// Keychain / file / OAuth-ish — route to the tool's native login.
-	switch p {
-	case auth.ProviderAnthropic:
-		return "Your Anthropic credential is present but the API rejected it. " +
-			"Refresh with `claude login` on the host, then retry. " +
-			"Or switch to an API key: `spwn auth login anthropic --api-key sk-ant-…`"
-	case auth.ProviderOpenAI:
-		return "Your OpenAI credential is present but the API rejected it. " +
-			"Refresh with `codex login` on the host, then retry."
-	}
-	return "Refresh " + string(p) + " credentials and retry"
 }
 
 // credentialDetail renders the short right-hand detail for the

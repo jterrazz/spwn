@@ -61,6 +61,20 @@ func validateOpenAI(ctx context.Context, cred *Credential) *ProviderStatus {
 		CredType: cred.Type,
 		Source:   cred.Source,
 	}
+	// OAuth tokens from `codex login` are ChatGPT-subscription-scoped
+	// And do NOT authenticate against the OpenAI /v1/models endpoint
+	// The way API keys do — they're a different auth universe. We
+	// Can't cheaply verify them from here without hitting codex's
+	// Private backend, so we trust the presence of a well-formed
+	// Auth.json file and let the runtime surface any real failure at
+	// Spawn time. Marking as Connected here means "spwn won't block
+	// On this credential," not "we confirmed it works."
+	if cred.Type == CredTypeOAuth {
+		status.Connected = true
+		status.Plan = "subscription (unverified)"
+		return status
+	}
+
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequestWithContext(ctx, "GET", "https://api.openai.com/v1/models", nil)
 	if err != nil {

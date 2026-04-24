@@ -33,6 +33,15 @@ import { parse, stringify } from 'yaml';
  */
 const SPWN_BIN = resolve(import.meta.dirname, '../../bin/spwn');
 
+// Blanket-disable live credential validation in the test process so
+// Child `spwn` invocations don't hit real provider APIs. Each test
+// That actually wants to exercise validation can unset this via
+// `.env({ SPWN_SKIP_AUTH_VALIDATION: null })`. Rationale: the auth
+// Dashboard + spawn pre-flight both run validations; a parallel e2e
+// Suite of ~30 tests hitting Anthropic /oauth/usage burns rate
+// Limits and flakes on 429s. See packages/auth/validate_cache.go.
+process.env.SPWN_SKIP_AUTH_VALIDATION = '1';
+
 const PROJECT_PATH_PLACEHOLDER = '<PROJECT>';
 
 /**

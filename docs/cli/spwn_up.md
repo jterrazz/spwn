@@ -35,6 +35,7 @@ spwn up [name] [flags]
 
 ```
   -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
+      --backend string          Override the runtime backend for this spawn (e.g. claude-code, codex). Skips the auth-state auto-resolver.
   -c, --config string           Named world config (default: default)
       --force-rebuild           Ignore the image cache and rebuild the world image from scratch
   -h, --help                    help for up

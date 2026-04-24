@@ -558,15 +558,14 @@ commands and adapters below belong to one or more of these.
 </details>
 
 <details>
-<summary><b>System</b> &middot; <code>██████▓ 6/7</code></summary>
+<summary><b>System</b> &middot; <code>█████▒░ 5/7</code></summary>
 
 | Command | Purpose | Status |
 |---|---|:---:|
 | `spwn status` | Global status (worlds, auth, version) | 🟢 |
-| `spwn auth login` | Connect Anthropic / OpenAI | 🟢 |
-| `spwn auth logout` | Clear cached credentials | 🟢 |
-| `spwn auth token <value>` | Set a token directly (CI) | 🟢 |
-| `spwn auth check` | Validate credentials across providers | 🟢 |
+| `spwn auth` | Live credentials dashboard (auto-validates) | 🟢 |
+| `spwn auth login <p> --api-key <k>` | Save an API key for a provider | 🟢 |
+| `spwn auth logout <provider>` | Clear cached credentials | 🟢 |
 | `spwn upgrade` | Self-update the CLI | 🟢 |
 | `spwn web` | Open the local web UI | 🟡 |
 

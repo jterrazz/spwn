@@ -5,8 +5,7 @@ Usage:
   spwn auth [command]
 
 Inspect:
-  status                           Show every detected credential (default when no subcommand)
-  check [provider]                 Validate active credentials against each API
+  (bare)                           Live credential dashboard — auto-validates against each provider API
 
 Configure:
   use <provider> <method>          Pick oauth or api_key for a provider

@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -17,11 +19,16 @@ import (
 )
 
 // Cmd is the auth command group. The bare invocation renders the
-// multi-method dashboard so users see every credential spwn detected,
-// which one is active, and every disable/use/logout action available.
+// Credential dashboard — auto-validates, shows every supported
+// Method for every provider, surfaces the exact command to set or
+// Refresh each one. Unknown positional args fail loudly so that
+// Retired verbs (`status`, `check`, `token`) don't silently succeed
+// With misleading output — users get an "unknown command" and see
+// The real command list in help.
 var Cmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Manage credentials — status, login, use, logout, disable",
+	Short: "Manage credentials — dashboard, login, use, logout, disable",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runStatus()
 	},
@@ -33,18 +40,19 @@ func init() {
 	defaultAuthHelp = Cmd.HelpFunc()
 	Cmd.SetHelpFunc(authHelp)
 
-	Cmd.AddCommand(statusCmd)
 	Cmd.AddCommand(useCmd)
 	Cmd.AddCommand(loginCmd)
 	Cmd.AddCommand(logoutCmd)
 	Cmd.AddCommand(disableCmd)
 	Cmd.AddCommand(enableCmd)
 	Cmd.AddCommand(defaultCmd)
-	Cmd.AddCommand(checkCmd)
-	Cmd.AddCommand(tokenCmd) // deprecated alias for login anthropic --api-key
 
+	// `spwn auth login <provider>` today only persists API keys —
+	// OAuth is owned by the upstream tool (`claude login` /
+	// `codex login`). The --oauth flag is retired: bare `spwn auth`
+	// Already surfaces the "run claude login" hint when no OAuth
+	// Credential is detected.
 	loginCmd.Flags().StringVar(&loginAPIKey, "api-key", "", "Save an API key for this provider")
-	loginCmd.Flags().BoolVar(&loginOAuth, "oauth", false, "Print OAuth login instructions for this provider")
 	logoutCmd.Flags().StringVar(&logoutMethod, "method", "", "Scope logout to a single method (oauth | api_key)")
 	defaultCmd.Flags().Bool("clear", false, "Remove the default preference (revert to auto-resolve)")
 }
@@ -57,90 +65,232 @@ var providers = []auth.Provider{auth.ProviderAnthropic, auth.ProviderOpenAI}
 // methods is the fixed set of user-facing credential styles.
 var methods = []auth.Method{auth.MethodOAuth, auth.MethodAPIKey}
 
-// ── status / dashboard ──────────────────────────────────────────────
+// ── dashboard (bare `spwn auth`) ────────────────────────────────────
 
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Show every detected credential and which one is active",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return runStatus()
-	},
-}
-
-// runStatus renders a row per detected (provider, method) pair so
-// users can see what spwn found, what won, and why. Providers with
-// no creds still get a single "missing" row — the dashboard must
-// always show every provider, not just the configured ones.
+// runStatus renders the Extended-C credentials dashboard. For every
+// Supported provider it emits one row per supported method (even if
+// Unset) — each row reports what was detected, whether it validated
+// Against the live API, and the next action: source+age for ✓ rows,
+// Refresh hint for ✗ rows, setup command for · rows.
+//
+// Validations run in parallel with a 3-second budget. The 5-minute
+// Positive-only cache (packages/auth/validate_cache.go) makes every
+// Run after the first one instant.
+//
+// No file paths leak into user-visible text. Every "how to fix this"
+// String comes from packages/auth/hints so the spawn pre-flight and
+// This dashboard stay aligned.
 func runStatus() error {
-	s := ui.New()
-	s.Blank()
+	w := os.Stderr
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-	t := ui.NewTable("PROVIDER", "METHOD", "STATE", "SOURCE")
+	// Kick off every provider's methods in parallel. Each job returns
+	// A single rendered row plus any follow-up action hint.
+	type providerBlock struct {
+		name    auth.Provider
+		title   string
+		rows    []dashboardRow
+		active  string // human-readable active-method line when multi-valid
+	}
+
+	blocks := make([]providerBlock, 0, len(providers))
 	for _, p := range providers {
-		disabled := auth.IsProviderDisabled(p)
-		activeMethod := auth.ActiveMethod(p)
-		detected := auth.DetectMethods(p)
-
-		if len(detected) == 0 {
-			state := "missing"
-			if disabled {
-				state = "disabled"
-			}
-			t.AddRow(string(p), "—", state, "—")
-			continue
-		}
-
-		// Figure out which single detection is "active" — the one
-		// Resolve would return right now. pickByPref logic is
-		// reproduced here so the dashboard doesn't disagree with
-		// the runtime.
-		winner := pickActive(p, detected, activeMethod, disabled)
-		for _, cred := range detected {
-			state := "known"
-			switch {
-			case disabled:
-				state = "disabled"
-			case cred == winner:
-				state = "active"
-			}
-			t.AddRow(string(p), string(cred.Method()), state, cred.Source)
-		}
-	}
-	t.Render()
-
-	// Surface the default provider right under the table so users can
-	// See it at a glance before reaching for the command list.
-	if def := auth.DefaultProvider(); def != "" {
-		s.Blank()
-		s.Info("default provider:", string(def))
+		blocks = append(blocks, renderProviderBlock(ctx, p))
 	}
 
-	// Hints — keep them short and action-oriented. The dashboard
-	// Should teach by example, not blog.
-	s.Blank()
-	s.Info("Pick a method:", "spwn auth use <provider> <oauth|api_key>")
-	s.Info("Pick a default:", "spwn auth default <provider>")
-	s.Info("Log out cleanly:", "spwn auth logout <provider>")
-	s.Info("Opt out entirely:", "spwn auth disable <provider>")
-	s.Blank()
+	fmt.Fprintln(w)
+	fmt.Fprintf(w, "  %s %s\n\n", ui.Cyan("⬡"), ui.Strong("Credentials"))
+	for _, blk := range blocks {
+		fmt.Fprintf(w, "  %s\n", ui.Strong(blk.title))
+		for _, row := range blk.rows {
+			renderDashboardRow(w, row)
+		}
+		if blk.active != "" {
+			fmt.Fprintf(w, "      %s\n", ui.Faint(blk.active))
+		}
+		fmt.Fprintln(w)
+	}
+
+	// Default provider footer. Faint label + bold value + faint
+	// "change" hint, all on one line.
+	def := auth.DefaultProvider()
+	defText := "none set"
+	if def != "" {
+		defText = string(def)
+	}
+	fmt.Fprintf(w, "  %s %s  %s  %s\n\n",
+		ui.Faint("Default:"),
+		ui.Strong(defText),
+		ui.Faint("·"),
+		ui.Faint("spwn auth default <provider>"),
+	)
 	return nil
 }
 
-// pickActive mirrors auth.pickByPref's selection logic for the
-// dashboard. Returns nil when no credential would be active (disabled
-// provider, empty detection list).
-func pickActive(p auth.Provider, detected []*auth.Credential, pref auth.Method, disabled bool) *auth.Credential {
-	if disabled || len(detected) == 0 {
-		return nil
+// dashboardRow is one rendered method line, fully resolved — the
+// Renderer is pure formatting.
+type dashboardRow struct {
+	glyph       string // green ✓, red ✗, faint ·
+	method      string // bold method name
+	detail      string // right-hand "source · age" or "not set"
+	hintCommand string // trailing action; rendered cyan (inline cmd)
+}
+
+// renderDashboardRow prints one method row at col 4.
+func renderDashboardRow(w io.Writer, row dashboardRow) {
+	// Method column is padded so the detail columns line up across
+	// Rows. 14 chars is wide enough for "api_key"/"oauth" without
+	// Hogging screen width.
+	const methodCol = 14
+	methodPadded := ui.PadVisible(ui.Strong(row.method), methodCol)
+	line := fmt.Sprintf("    %s %s %s", row.glyph, methodPadded, ui.Faint(row.detail))
+	if row.hintCommand != "" {
+		line += "  " + ui.Faint("·") + "  " + ui.Cyan(row.hintCommand)
 	}
-	if pref != "" {
-		for _, c := range detected {
-			if c.Method() == pref {
-				return c
-			}
+	fmt.Fprintln(w, line)
+}
+
+// renderProviderBlock resolves + validates every supported method
+// For one provider and returns the rendered rows plus any active-
+// Method note. Parallelises the method probes so the whole block
+// Finishes in max(one API call) rather than sum(all).
+func renderProviderBlock(ctx context.Context, p auth.Provider) struct {
+	name   auth.Provider
+	title  string
+	rows   []dashboardRow
+	active string
+} {
+	result := struct {
+		name   auth.Provider
+		title  string
+		rows   []dashboardRow
+		active string
+	}{name: p, title: providerTitle(p)}
+
+	methods := auth.MethodCatalog(p)
+	if len(methods) == 0 {
+		return result
+	}
+
+	// Detect once so we see every source, not just the winner. The
+	// Resolver's "pick one" logic is what the active: line names.
+	detected := auth.DetectMethods(p)
+	disabled := auth.IsProviderDisabled(p)
+	byMethod := map[auth.Method]*auth.Credential{}
+	for _, c := range detected {
+		// First detection per method wins the row — mirrors the
+		// Discovery order the resolver uses.
+		if _, seen := byMethod[c.Method()]; !seen {
+			byMethod[c.Method()] = c
 		}
 	}
-	return detected[0]
+
+	// Parallel validate. Cached positives come back instantly.
+	type valResult struct {
+		method auth.Method
+		cred   *auth.Credential
+		status *auth.ProviderStatus
+	}
+	results := make(chan valResult, len(methods))
+	var wg sync.WaitGroup
+	for _, m := range methods {
+		cred := byMethod[auth.Method(m)]
+		if cred == nil {
+			// Nothing to validate — skip the goroutine.
+			continue
+		}
+		wg.Add(1)
+		go func(m auth.HintMethod, cred *auth.Credential) {
+			defer wg.Done()
+			results <- valResult{
+				method: auth.Method(m),
+				cred:   cred,
+				status: auth.ValidateWithCache(ctx, cred, 5*time.Minute),
+			}
+		}(m, cred)
+	}
+	go func() { wg.Wait(); close(results) }()
+	validations := map[auth.Method]valResult{}
+	for r := range results {
+		validations[r.method] = r
+	}
+
+	// Build one row per supported method.
+	var validCreds []*auth.Credential
+	for _, m := range methods {
+		method := auth.Method(m)
+		row := dashboardRow{method: string(method)}
+		cred := byMethod[method]
+
+		switch {
+		case disabled:
+			row.glyph = ui.Faint("·")
+			row.detail = "disabled"
+			row.hintCommand = "spwn auth enable " + string(p)
+		case cred == nil:
+			row.glyph = ui.Faint("·")
+			row.detail = "not set"
+			row.hintCommand = auth.NotSetHint(p, m)
+		default:
+			v, ok := validations[method]
+			if ok && v.status != nil && v.status.Connected {
+				row.glyph = ui.Green("✓")
+				row.detail = credSourceDetail(cred)
+				validCreds = append(validCreds, cred)
+			} else {
+				row.glyph = ui.Red("✗")
+				reason := "rejected"
+				if v.status != nil && v.status.Error != "" {
+					reason = v.status.Error
+				}
+				row.detail = cred.Source + " · " + reason
+				row.hintCommand = auth.RejectedHint(p, cred)
+			}
+		}
+		result.rows = append(result.rows, row)
+	}
+
+	// Active note only when there's an ambiguity to resolve — 2+
+	// Methods validated.
+	if len(validCreds) >= 2 && !disabled {
+		pref := auth.ActiveMethod(p)
+		winner := validCreds[0]
+		if pref != "" {
+			for _, c := range validCreds {
+				if c.Method() == pref {
+					winner = c
+					break
+				}
+			}
+		}
+		result.active = fmt.Sprintf("active: %s  ·  spwn auth use %s <method>", winner.Method(), p)
+	}
+	return result
+}
+
+// providerTitle returns the human-facing provider name ("Anthropic",
+// "OpenAI") rather than the lowercase provider id. Small detail but
+// The dashboard is the one place where branding is worth the cycles.
+func providerTitle(p auth.Provider) string {
+	switch p {
+	case auth.ProviderAnthropic:
+		return "Anthropic"
+	case auth.ProviderOpenAI:
+		return "OpenAI"
+	}
+	return string(p)
+}
+
+// credSourceDetail returns the right-hand detail for a ✓ row:
+// "<source> · <age>" where source is the credential origin
+// (keychain, env var name, …) and age is the cached validation age
+// When available.
+func credSourceDetail(cred *auth.Credential) string {
+	if cred == nil {
+		return ""
+	}
+	return cred.Source
 }
 
 // ── use ─────────────────────────────────────────────────────────────
@@ -186,7 +336,6 @@ Example:
 
 var (
 	loginAPIKey string
-	loginOAuth  bool
 )
 
 var loginCmd = &cobra.Command{
@@ -219,44 +368,19 @@ detect the new credential and record it:
 					"Check permissions on "+abbreviate(platform.BaseDir()))
 			}
 			_ = auth.SyncCredentials()
-			s.Done(fmt.Sprintf("%s API key saved", p), "spwn auth status to confirm")
+			s.Done(fmt.Sprintf("%s API key saved", p), "run `spwn auth` to confirm")
 			s.Blank()
 			return nil
 		}
 
-		// OAuth: spwn does NOT run its own OAuth flow for subscription-
-		// Backed providers — Anthropic's ToS restricts where Claude
-		// Pro/Max tokens may be used, and we forward whatever the
-		// Official tool's login wrote. Point the user at the upstream
-		// Tool and tell them how to verify afterwards.
-		if loginOAuth {
-			s.Info("OAuth login", "spwn observes the upstream tool's login; run it directly:")
-			switch p {
-			case auth.ProviderAnthropic:
-				fmt.Fprintln(os.Stderr, "    claude login")
-			case auth.ProviderOpenAI:
-				fmt.Fprintln(os.Stderr, "    codex login")
-			}
-			s.Blank()
-			s.Info("Then verify:", "spwn auth check "+string(p))
-			s.Blank()
-			return nil
-		}
-
-		// No flags: detect and report what spwn can see. Keeps the
-		// old verb's discovery behaviour reachable.
-		detected := auth.DetectMethods(p)
-		if len(detected) == 0 {
-			return s.FailHint(fmt.Sprintf("%s not configured", p),
-				errors.New("no credentials detected"),
-				fmt.Sprintf("Run `spwn auth login %s --api-key <key>` or `--oauth` for instructions", p))
-		}
-		for _, cred := range detected {
-			s.Done(fmt.Sprintf("%s: %s", p, cred.Method()), cred.Source)
-		}
+		// No flags: fall through to the same dashboard that bare
+		// `spwn auth` renders. Users who reach for `spwn auth login
+		// Anthropic` with no flag expecting a wizard get the
+		// Self-explanatory method catalog instead, which surfaces
+		// The exact commands for both OAuth (run claude login) and
+		// API-key paths.
 		_ = auth.SyncCredentials()
-		s.Blank()
-		return nil
+		return runStatus()
 	},
 }
 
@@ -444,87 +568,6 @@ Example:
 	},
 }
 
-// ── check ───────────────────────────────────────────────────────────
-
-var checkCmd = &cobra.Command{
-	Use:   "check [provider]",
-	Short: "Validate active credentials against each provider's API",
-	Args:  cobra.MaximumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		s := ui.New()
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		s.Blank()
-		s.Start("Validating credentials...")
-
-		var results []auth.ProviderStatus
-		if len(args) == 1 {
-			p, err := parseProvider(args[0])
-			if err != nil {
-				return err
-			}
-			cred := auth.Resolve(p)
-			results = append(results, *auth.Validate(ctx, cred))
-		} else {
-			results = auth.ValidateAll(ctx)
-		}
-
-		s.Done("Validation complete", fmt.Sprintf("%d provider(s)", len(results)))
-		s.Blank()
-
-		t := ui.NewTable("PROVIDER", "STATUS", "METHOD", "SOURCE")
-		for _, r := range results {
-			var status string
-			switch {
-			case r.Connected:
-				status = "connected"
-			case r.Error != "":
-				status = ui.Red("✗") + " " + r.Error
-			default:
-				status = "not configured"
-			}
-			method := string((&auth.Credential{Type: r.CredType}).Method())
-			if method == "" {
-				method = "—"
-			}
-			t.AddRow(string(r.Provider), status, method, r.Source)
-		}
-		t.Render()
-
-		for _, r := range results {
-			if r.Usage != nil && r.Connected {
-				s.Blank()
-				s.Info(string(r.Provider)+" usage:", "")
-				if r.Usage.SessionPercent > 0 {
-					s.Info("  Session:", fmt.Sprintf("%.1f%% used", r.Usage.SessionPercent))
-				}
-				if r.Usage.WeeklyPercent > 0 {
-					s.Info("  Weekly:", fmt.Sprintf("%.1f%% used", r.Usage.WeeklyPercent))
-				}
-				if r.Usage.CreditsLimit > 0 {
-					s.Info("  Credits:", fmt.Sprintf("%.2f / %.2f %s", r.Usage.CreditsUsed, r.Usage.CreditsLimit, r.Usage.Currency))
-				}
-			}
-		}
-		s.Blank()
-		return nil
-	},
-}
-
-// ── token (deprecated) ──────────────────────────────────────────────
-
-var tokenCmd = &cobra.Command{
-	Use:    "token <token>",
-	Short:  "Deprecated — use `login anthropic --api-key <token>` instead",
-	Hidden: true,
-	Args:   cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		loginAPIKey = args[0]
-		return loginCmd.RunE(cmd, []string{"anthropic"})
-	},
-}
-
 // ── help ────────────────────────────────────────────────────────────
 
 func authHelp(cmd *cobra.Command, args []string) {
@@ -539,8 +582,7 @@ func authHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ auth")+" "+ui.Faint("- manage credentials"),
 		[]ui.HelpGroup{
 			{Title: "Inspect", Commands: []ui.HelpEntry{
-				{Name: "status", Desc: "Show every detected credential (default when no subcommand)"},
-				{Name: "check [provider]", Desc: "Validate active credentials against each API"},
+				{Name: "(bare)", Desc: "Live credential dashboard — auto-validates against each provider API"},
 			}},
 			{Title: "Configure", Commands: []ui.HelpEntry{
 				{Name: "use <provider> <method>", Desc: "Pick oauth or api_key for a provider"},

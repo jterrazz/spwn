@@ -25,5 +25,5 @@ spwn auth disable <provider> [flags]
 
 ### SEE ALSO
 
-* [spwn auth](./spwn_auth.md)	 - Manage credentials — status, login, use, logout, disable
+* [spwn auth](./spwn_auth.md)	 - Manage credentials — dashboard, login, use, logout, disable
 

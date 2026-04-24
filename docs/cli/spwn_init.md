@@ -30,10 +30,11 @@ spwn init [example-ref] [flags]
 ### Options
 
 ```
-  -f, --force         Overwrite existing spwn.yaml
-      --global        Initialise ~/.spwn/ (legacy user-home mode)
-  -h, --help          help for init
-      --name string   Project name (default: current directory name)
+      --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let spwn resolve at spawn time.
+  -f, --force            Overwrite existing spwn.yaml
+      --global           Initialise ~/.spwn/ (legacy user-home mode)
+  -h, --help             help for init
+      --name string      Project name (default: current directory name)
 ```
 
 ### SEE ALSO

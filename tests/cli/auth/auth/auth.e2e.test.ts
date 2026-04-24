@@ -3,82 +3,97 @@ import { describe, expect, test } from 'vitest';
 import { spec } from '../../../setup/cli.specification.js';
 
 /**
- * Spwn auth — credential / provider status flows.
+ * Spwn auth — credentials dashboard flows.
  *
  * Every test runs with an isolated SPWN_HOME so we never touch the
- * user's real keychain or credentials file. No real network calls
- * are made; the only subcommands we exercise are status / check /
- * help / logout, which are safe on a fresh home.
+ * User's real keychain or credentials file. No real network calls
+ * Are made on a fresh home (no credentials → no validation targets),
+ * Making the dashboard output stable.
  *
- * `spwn auth` renders its provider table to stderr (Unix convention
- * for status output). The table content is keychain/OS-dependent, so
- * we assert on intent-level substrings against `result.stderr.text`
- * rather than snapshotting. The `auth logout` messages are stable
- * and get full stderr snapshots.
+ * `spwn auth` renders to stderr (Unix: data on stdout, status on
+ * Stderr). Content varies with host state (keychain on macOS, env
+ * Vars on CI), so we assert on intent-level substrings rather than
+ * Snapshotting.
  */
 
 const isolated = (label: string) =>
     spec(label).project('empty').env({ SPWN_HOME: '$WORKDIR/spwn-home' });
 
 describe('CLI - auth command', () => {
-    test("'spwn auth' prints the provider status table", async () => {
-        const result = await isolated('auth status').exec('auth').run();
+    test("'spwn auth' renders the credentials dashboard", async () => {
+        const result = await isolated('auth dashboard').exec('auth').run();
 
-        // The provider table is keychain-dependent (the anthropic row
-        // Reads Claude Code's real keychain entry on the dev box) so
-        // We assert on the stable header row rather than a snapshot.
         expect(result.exitCode).toBe(0);
         const stderr = result.stderr.text;
-        expect(stderr).toContain('PROVIDER');
-        // The status-table column header is `STATE` (active | known |
-        // None); it was briefly called `STATUS` in an earlier revision.
-        expect(stderr).toContain('STATE');
-        expect(stderr).toContain('anthropic');
-        expect(stderr).toContain('openai');
+        // Hero + provider blocks + default footer are the stable
+        // Scaffolding. Content of each row varies by host state.
+        expect(stderr).toContain('Credentials');
+        expect(stderr).toContain('Anthropic');
+        expect(stderr).toContain('OpenAI');
+        expect(stderr).toContain('oauth');
+        expect(stderr).toContain('api_key');
+        expect(stderr).toContain('Default:');
     });
 
-    test("'spwn auth check' validates credentials against each provider", async () => {
-        const result = await isolated('auth check').exec('auth check').run();
+    test("'spwn auth' lists every supported method per provider", async () => {
+        // Fresh home with no host creds → every method is unset, so
+        // The dashboard doubles as a cheat-sheet: each row must name
+        // The exact command to set that provider/method combo.
+        // SPWN_SKIP_KEYCHAIN + HOME override prevents leaking the dev
+        // Box's real claude login into the test.
+        const result = await spec('auth method catalog')
+            .project('empty')
+            .env({
+                SPWN_HOME: '$WORKDIR/spwn-home',
+                HOME: '$WORKDIR/empty-home',
+                SPWN_SKIP_KEYCHAIN: '1',
+            })
+            .exec('auth')
+            .run();
 
-        // Validation output is keychain/network-dependent. Intent: the
-        // Validate banner fires and the provider table is rendered.
         expect(result.exitCode).toBe(0);
         const stderr = result.stderr.text;
-        expect(stderr).toContain('Validating credentials');
-        expect(stderr).toContain('PROVIDER');
-        expect(stderr).toContain('anthropic');
+        // Unset rows point at the fix command. Use generic matches
+        // Since the exact hint text is subject to iteration.
+        expect(stderr).toMatch(/claude login/);
+        expect(stderr).toMatch(/codex login|OPENAI_API_KEY/);
+        expect(stderr).toMatch(/spwn auth login anthropic --api-key/);
     });
 
-    test("'spwn auth --help' shows subcommands", async () => {
+    test("'spwn auth status' returns a clean error (command retired)", async () => {
+        // Users with muscle memory for the deleted subcommands get a
+        // Crisp "unknown command" so they read the help and discover
+        // The new bare-command UX.
+        const result = await isolated('retired status').exec('auth status').run();
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toContain('unknown command');
+    });
+
+    test("'spwn auth check' returns a clean error (command retired)", async () => {
+        const result = await isolated('retired check').exec('auth check').run();
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toContain('unknown command');
+    });
+
+    test("'spwn auth token' returns a clean error (command retired)", async () => {
+        const result = await isolated('retired token').exec('auth token sk-ant-foo').run();
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr.text).toContain('unknown command');
+    });
+
+    test("'spwn auth --help' shows the remaining subcommand surface", async () => {
         const result = await isolated('auth help').exec('auth --help').run();
 
         expect(result.exitCode).toBe(0);
         const out = result.stdout.text;
         expect(out).toContain('auth');
-        const hasSubcommands =
-            out.includes('check') ||
-            out.includes('token') ||
-            out.includes('login') ||
-            out.includes('logout') ||
-            out.includes('Commands') ||
-            out.includes('COMMANDS') ||
-            out.includes('Usage');
-        expect(hasSubcommands).toBe(true);
-    });
-
-    test("'spwn auth token --help' shows usage", async () => {
-        const result = await isolated('auth token help').exec('auth token --help').run();
-
-        expect(result.exitCode).toBe(0);
-        const out = result.stdout.text;
-        expect(out).toContain('token');
-        const hasUsage =
-            out.includes('Usage') ||
-            out.includes('usage') ||
-            out.includes('USAGE') ||
-            out.includes('Options') ||
-            out.includes('--help');
-        expect(hasUsage).toBe(true);
+        expect(out).toContain('login');
+        expect(out).toContain('logout');
+        expect(out).toContain('use');
+        expect(out).toContain('default');
+        // Retired verbs must not show up in the help surface.
+        expect(out).not.toContain('status');
+        expect(out).not.toContain('check');
     });
 
     test("'spwn auth default' on a fresh home reports 'not set'", async () => {
@@ -163,20 +178,18 @@ describe('CLI - auth command', () => {
         expect(err).toContain('spwn auth enable openai');
     });
 
-    test("'spwn auth' status table shows the default provider when set", async () => {
+    test("'spwn auth' dashboard shows the default provider when set", async () => {
         // Dashboard contract: once a default exists, it must be
-        // Visible at a glance alongside the provider table so the
-        // User doesn't forget why the resolver is picking one over
-        // The other.
-        const result = await isolated('auth status with default')
+        // Visible at a glance so the user doesn't forget why the
+        // Resolver picks one over the other when both are present.
+        const result = await isolated('auth dashboard with default')
             .exec(['auth default anthropic', 'auth'])
             .run();
 
         expect(result.exitCode).toBe(0);
         const err = result.stderr.text;
-        expect(err).toContain('default provider:');
+        expect(err).toContain('Default:');
         expect(err).toContain('anthropic');
-        expect(err).toContain('Pick a default:');
     });
 
     /*

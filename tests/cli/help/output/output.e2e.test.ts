@@ -80,12 +80,12 @@ describe('CLI output', () => {
         await result.stderr.toMatch('unknown-command.txt');
     });
 
-    test('auth status table is rendered on stderr', async () => {
-        // The provider table contents are keychain-dependent (reads the
-        // Real anthropic keychain entry, the real ~/.codex/auth.json,
-        // Etc.) so we match on the stable header row rather than a
-        // Byte-for-byte snapshot.
-        const result = await spec('auth status output')
+    test('auth dashboard renders on stderr', async () => {
+        // Dashboard content is keychain-dependent (reads the real
+        // Anthropic keychain entry, the real ~/.codex/auth.json,
+        // Etc.) so we match on the stable scaffolding rather than
+        // A byte-for-byte snapshot.
+        const result = await spec('auth dashboard output')
             .project('empty')
             .env({ SPWN_HOME: '$WORKDIR/spwn-home' })
             .exec('auth')
@@ -93,11 +93,9 @@ describe('CLI output', () => {
 
         expect(result.exitCode).toBe(0);
         const stderr = result.stderr.text;
-        expect(stderr).toContain('PROVIDER');
-        // Column header is `STATE` (was briefly called `STATUS`).
-        expect(stderr).toContain('STATE');
-        expect(stderr).toContain('SOURCE');
-        expect(stderr).toContain('anthropic');
-        expect(stderr).toContain('openai');
+        expect(stderr).toContain('Credentials');
+        expect(stderr).toContain('Anthropic');
+        expect(stderr).toContain('OpenAI');
+        expect(stderr).toContain('Default:');
     });
 });
