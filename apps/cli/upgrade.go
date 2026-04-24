@@ -102,6 +102,15 @@ the current binary. Running worlds are stopped gracefully before the swap.`,
 		if err != nil {
 			return s.FailHint("Install failed", err, "Check permissions on "+targetPath)
 		}
+		// Invalidate the ~/.spwn/.version-check cache so the next
+		// `spwn ls` / `spwn status` re-fetches instead of clinging to
+		// The "latest" we held before this swap. Without this, a
+		// `spwn upgrade --force` inside the 24h window would still
+		// Trigger the "vOLD available" banner on the upgraded binary
+		// Until the TTL expired.
+		_ = upgrade.InvalidateVersionCache()
+		pendingUpgrade = "" // clear in-process state for this invocation too
+
 		s.Done("Upgraded", fmt.Sprintf("%s → %s", Version, plan.Latest.String()))
 		s.Info("Release notes:", plan.Release.HTMLURL)
 		s.Blank()

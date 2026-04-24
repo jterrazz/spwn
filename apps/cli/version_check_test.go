@@ -3,7 +3,6 @@ package cli
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -51,24 +50,47 @@ func TestVersionCheckCache_MissingCacheFile(t *testing.T) {
 	_ = result // just ensure no panic
 }
 
-func TestPendingUpgrade_SameVersionNoHint(t *testing.T) {
-	pendingUpgrade = ""
-	// Simulate: latest == current
-	// pendingUpgrade stays empty → no hint
-	if pendingUpgrade != "" {
-		t.Error("expected no pending upgrade")
+// TestApplyLatestVersion_SemverCompare pins the bug where the banner
+// Fired on any "latest != current" instead of "latest > current".
+// The stale-cache-below-current case (cached v0.17.0 after force-
+// Upgrade to v0.17.4) must NOT produce a banner — that would tell
+// The user to "upgrade" to an older version.
+func TestApplyLatestVersion_SemverCompare(t *testing.T) {
+	cases := []struct {
+		name    string
+		current string
+		latest  string
+		wantSet bool
+	}{
+		{"latest strictly newer", "v0.17.0", "v0.17.4", true},
+		{"latest minor newer", "v0.17.4", "v0.18.0", true},
+		{"latest major newer", "v0.17.4", "v1.0.0", true},
+		{"equal versions", "v0.17.4", "v0.17.4", false},
+		{"latest older (stale cache after force upgrade)", "v0.17.4", "v0.17.0", false},
+		{"latest much older", "v1.0.0", "v0.9.0", false},
+		{"no v prefix still compares", "0.17.0", "0.17.4", true},
+		{"mixed v prefix still compares", "v0.17.0", "0.17.4", true},
+		{"dev current, real latest", "dev", "v0.17.4", true},
+		{"unparseable latest no-op", "v0.17.0", "garbage", false},
+		{"empty latest no-op", "v0.17.0", "", false},
 	}
-}
-
-func TestPendingUpgrade_NewerVersionSetsHint(t *testing.T) {
-	pendingUpgrade = "1.3.0"
-	if pendingUpgrade == "" {
-		t.Error("expected pending upgrade to be set")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			orig := Version
+			t.Cleanup(func() {
+				Version = orig
+				pendingUpgrade = ""
+			})
+			Version = tc.current
+			pendingUpgrade = ""
+			applyLatestVersion(tc.latest)
+			got := pendingUpgrade != ""
+			if got != tc.wantSet {
+				t.Errorf("current=%q latest=%q: pendingUpgrade set=%v, want %v (value=%q)",
+					tc.current, tc.latest, got, tc.wantSet, pendingUpgrade)
+			}
+		})
 	}
-	if !strings.Contains(pendingUpgrade, "1.3.0") {
-		t.Errorf("unexpected value: %q", pendingUpgrade)
-	}
-	pendingUpgrade = "" // cleanup
 }
 
 // TestStartVersionCheck_FreshCacheSetsPendingSynchronously pins the

@@ -66,16 +66,30 @@ func ranUpgradeCommand() bool {
 
 // applyLatestVersion compares a fetched/cached "latest" string
 // Against the current build version and records a pending upgrade
-// When they differ. Centralised so the sync and async paths agree
-// On the comparison rule (both strip a leading "v").
+// Only when latest is strictly NEWER (semver >). This matters because
+// The cache may sit at a stale value below the current build — for
+// Example after the user runs `spwn upgrade --force` inside the
+// 24-hour cache window — and the old "latest != current" check would
+// Then render an "upgrade to vOLD" banner. Semver precedence fixes
+// Both directions: downgrades (current > latest) never prompt, and
+// Equality (already current) never prompts.
+//
+// Unparseable inputs degrade to "no banner" rather than raising —
+// This is a best-effort UX nudge, not a correctness-critical path.
 func applyLatestVersion(latest string) {
 	if latest == "" {
 		return
 	}
-	current := strings.TrimPrefix(Version, "v")
-	latest = strings.TrimPrefix(latest, "v")
-	if latest != current {
-		pendingUpgrade = latest
+	latestV, err := upgrade.ParseVersion(latest)
+	if err != nil {
+		return
+	}
+	currentV, err := upgrade.ParseVersion(Version)
+	if err != nil {
+		return
+	}
+	if latestV.Compare(currentV) > 0 {
+		pendingUpgrade = strings.TrimPrefix(latest, "v")
 	}
 }
 

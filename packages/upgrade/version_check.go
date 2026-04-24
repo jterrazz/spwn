@@ -28,6 +28,20 @@ type VersionInfo struct {
 	ReleaseURL      string `json:"releaseUrl"`
 }
 
+// InvalidateVersionCache removes the cached remote-version file so
+// The next CheckLatestVersion / LatestVersionFromCache call performs
+// A fresh network lookup. Called by `spwn upgrade` on successful
+// Completion so the banner doesn't cling to the pre-upgrade "latest"
+// Value until its 24-hour TTL expires. Safe to call when the cache
+// File is missing — not-found errors are swallowed.
+func InvalidateVersionCache() error {
+	path := filepath.Join(platform.BaseDir(), versionCheckFile)
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
+}
+
 // LatestVersionFromCache returns the cached latest version without
 // Making any network call. Returns "" when the cache is missing,
 // Stale (older than maxAge), or malformed. Used by the CLI's
