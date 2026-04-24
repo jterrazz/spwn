@@ -81,6 +81,26 @@ func ActiveMethod(p Provider) Method {
 	return LoadConfig().Pref(p).Method
 }
 
+// SetDefaultProvider records the user's preferred provider for when
+// Multiple are authenticated simultaneously. Pass the empty Provider
+// To clear the preference. Persists via auth.yaml.
+//
+// Soft preference only: it does not disable any other provider or
+// Override an agent.yaml / spwn.yaml runtime pin. Consumed by the
+// Runtime resolver in the CLI layer to break ambiguity ties silently
+// Instead of erroring.
+func SetDefaultProvider(p Provider) error {
+	return mutateConfig(func(c *Config) {
+		c.DefaultProvider = p
+	})
+}
+
+// DefaultProvider returns the user's preferred provider when multiple
+// Are authenticated, or the empty Provider when none was chosen.
+func DefaultProvider() Provider {
+	return LoadConfig().DefaultProvider
+}
+
 // ReadCachedToken reads the cached token from disk.
 func ReadCachedToken() string {
 	data, err := os.ReadFile(tokenPath())

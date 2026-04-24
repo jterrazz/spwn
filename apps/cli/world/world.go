@@ -35,9 +35,19 @@ func init() {
 	Cmd.SetHelpFunc(worldHelp)
 }
 
+// SetSpawnBackend overrides the runtime backend used by the next
+// Spawn. Intended for callers in sibling packages (apps/cli/agent)
+// That delegate to UpCmd.RunE without going through cobra flag parsing
+// On the world command itself — see agent.runInteractiveSession where
+// `spwn agent neo --backend codex` routes the backend through here
+// Before handing off to UpCmd.
+func SetSpawnBackend(backend string) {
+	spawnBackend = backend
+}
+
 // registerSpawnFlags attaches the spawn flag set to a cobra command. It's
-// reused by `spwn world up`, the top-level `spwn up` alias, and any future
-// shortcut that needs the same surface.
+// Reused by `spwn world up`, the top-level `spwn up` alias, and any future
+// Shortcut that needs the same surface.
 func registerSpawnFlags(c *cobra.Command) {
 	c.Flags().StringVarP(&spawnConfig, "config", "c", "", "Named world config (default: default)")
 	c.Flags().StringVarP(&spawnName, "name", "n", "", "Display name for the world")
