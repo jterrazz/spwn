@@ -224,10 +224,13 @@ detect the new credential and record it:
 			return nil
 		}
 
-		// OAuth: we don't own the flow (yet). Point at the upstream CLI
-		// and then re-resolve so the user sees the result in-line.
+		// OAuth: spwn does NOT run its own OAuth flow for subscription-
+		// Backed providers — Anthropic's ToS restricts where Claude
+		// Pro/Max tokens may be used, and we forward whatever the
+		// Official tool's login wrote. Point the user at the upstream
+		// Tool and tell them how to verify afterwards.
 		if loginOAuth {
-			s.Info("OAuth login", "run the runtime CLI's login flow:")
+			s.Info("OAuth login", "spwn observes the upstream tool's login; run it directly:")
 			switch p {
 			case auth.ProviderAnthropic:
 				fmt.Fprintln(os.Stderr, "    claude login")
@@ -235,7 +238,7 @@ detect the new credential and record it:
 				fmt.Fprintln(os.Stderr, "    codex login")
 			}
 			s.Blank()
-			s.Info("Then verify:", "spwn auth status")
+			s.Info("Then verify:", "spwn auth check "+string(p))
 			s.Blank()
 			return nil
 		}
