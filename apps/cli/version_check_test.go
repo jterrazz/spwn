@@ -128,6 +128,38 @@ func TestStartVersionCheck_DevBuildSkipsCheck(t *testing.T) {
 	}
 }
 
+// TestRanUpgradeCommand pins the detector so the banner correctly
+// Suppresses itself below `spwn upgrade` (durable noise-avoidance)
+// Without over-matching flag values or unrelated subcommands.
+func TestRanUpgradeCommand(t *testing.T) {
+	cases := []struct {
+		name string
+		args []string
+		want bool
+	}{
+		{"bare upgrade", []string{"spwn", "upgrade"}, true},
+		{"upgrade with --check", []string{"spwn", "upgrade", "--check"}, true},
+		{"ls is not upgrade", []string{"spwn", "ls"}, false},
+		{"status is not upgrade", []string{"spwn", "status"}, false},
+		{"flag before subcommand", []string{"spwn", "--json", "upgrade"}, true},
+		{"no args", []string{"spwn"}, false},
+		{"help command", []string{"spwn", "help"}, false},
+		{"agent named 'upgrade' would match but is a reserved word",
+			[]string{"spwn", "agent", "upgrade"}, false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			orig := os.Args
+			t.Cleanup(func() { os.Args = orig })
+			os.Args = tc.args
+			got := ranUpgradeCommand()
+			if got != tc.want {
+				t.Errorf("args=%v got=%v want=%v", tc.args, got, tc.want)
+			}
+		})
+	}
+}
+
 // TestStartVersionCheck_OptOutEnvVarSkipsCheck locks in that the
 // Documented SPWN_NO_UPDATE_CHECK escape hatch still works.
 func TestStartVersionCheck_OptOutEnvVarSkipsCheck(t *testing.T) {

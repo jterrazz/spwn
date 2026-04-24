@@ -39,15 +39,11 @@ Mind (persistent agent identity).`,
 		if isArchitectMode() {
 			return validateArchitectCommand(cmd)
 		}
-		startVersionCheck()
 		if err := runMigrations(); err != nil {
 			return err
 		}
 		discoverProject()
 		return ensureDefaults()
-	},
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {
-		printUpgradeHint()
 	},
 }
 
@@ -93,12 +89,32 @@ func init() {
 }
 
 // Execute runs the root command.
+//
+// Wraps cobra's lifecycle so the upgrade-banner middleware always
+// Fires — even on error returns, subcommand-help short-circuits, or
+// Handlers that os.Exit without returning. The pre-hook kicks off the
+// Version check (synchronous cache read + async refresh); the deferred
+// Post-hook renders the banner. Both short-circuit in architect mode
+// And the post-hook also skips when the user just ran `spwn upgrade`
+// (the upgrade command prints its own progress, stacking a banner on
+// Top would be redundant noise).
 func Execute() error {
+	skipBanner := isArchitectMode()
+	if !skipBanner {
+		startVersionCheck()
+	}
+	defer func() {
+		if skipBanner || ranUpgradeCommand() {
+			return
+		}
+		printUpgradeHint()
+	}()
+
 	err := rootCmd.Execute()
 	if err != nil {
 		// Don't re-print errors already shown by a Stepper — or
-		// by a custom error type that rendered its own banner (e.g.
-		// notImplementedError, which implements ExitCoder).
+		// By a custom error type that rendered its own banner (e.g.
+		// NotImplementedError, which implements ExitCoder).
 		var displayed *ui.DisplayedError
 		var coded ExitCoder
 		if !errors.As(err, &displayed) && !errors.As(err, &coded) {
