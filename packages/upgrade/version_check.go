@@ -28,22 +28,36 @@ type VersionInfo struct {
 	ReleaseURL      string `json:"releaseUrl"`
 }
 
+// LatestVersionFromCache returns the cached latest version without
+// Making any network call. Returns "" when the cache is missing,
+// Stale (older than maxAge), or malformed. Used by the CLI's
+// Per-command upgrade hint which must not block on the network.
+func LatestVersionFromCache(maxAge time.Duration) string {
+	cachePath := filepath.Join(platform.BaseDir(), versionCheckFile)
+	data, err := os.ReadFile(cachePath)
+	if err != nil {
+		return ""
+	}
+	parts := strings.SplitN(strings.TrimSpace(string(data)), "\n", 2)
+	if len(parts) != 2 {
+		return ""
+	}
+	ts, err := time.Parse(time.RFC3339, parts[0])
+	if err != nil || time.Since(ts) >= maxAge {
+		return ""
+	}
+	return parts[1]
+}
+
 // CheckLatestVersion returns the latest release version using a file cache.
-// maxAge controls cache staleness (e.g. 1h for web, 24h for CLI).
+// MaxAge controls cache staleness (e.g. 1h for web, 24h for CLI).
 // Returns "" on any error (network, parse, etc.).
 func CheckLatestVersion(maxAge time.Duration) string {
 	cacheDir := platform.BaseDir()
 	cachePath := filepath.Join(cacheDir, versionCheckFile)
 
-	if data, err := os.ReadFile(cachePath); err == nil {
-		parts := strings.SplitN(strings.TrimSpace(string(data)), "\n", 2)
-		if len(parts) == 2 {
-			if ts, err := time.Parse(time.RFC3339, parts[0]); err == nil {
-				if time.Since(ts) < maxAge {
-					return parts[1]
-				}
-			}
-		}
+	if cached := LatestVersionFromCache(maxAge); cached != "" {
+		return cached
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
