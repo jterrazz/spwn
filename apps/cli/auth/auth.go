@@ -413,10 +413,10 @@ Example:
 			s.Blank()
 			if current == "" {
 				s.Info("default provider:", "not set (auto-resolve)")
-				s.Log("Set one with: spwn auth default <provider>")
+				s.Info("Set one with:", "spwn auth default <provider>")
 			} else {
 				s.Info("default provider:", string(current))
-				s.Log("Clear with: spwn auth default --clear")
+				s.Info("Clear with:", "spwn auth default --clear")
 			}
 			s.Blank()
 			return nil
@@ -542,6 +542,7 @@ func authHelp(cmd *cobra.Command, args []string) {
 			{Title: "Configure", Commands: []ui.HelpEntry{
 				{Name: "use <provider> <method>", Desc: "Pick oauth or api_key for a provider"},
 				{Name: "login <provider>", Desc: "Register credentials (--api-key <val> or --oauth)"},
+				{Name: "default <provider>", Desc: "Prefer this provider when multiple are authenticated"},
 				{Name: "disable <provider>", Desc: "Ignore a provider without deleting creds"},
 				{Name: "enable <provider>", Desc: "Reverse a previous disable"},
 			}},

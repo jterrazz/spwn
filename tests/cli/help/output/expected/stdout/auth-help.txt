@@ -11,6 +11,7 @@ Inspect:
 Configure:
   use <provider> <method>          Pick oauth or api_key for a provider
   login <provider>                 Register credentials (--api-key <val> or --oauth)
+  default <provider>               Prefer this provider when multiple are authenticated
   disable <provider>               Ignore a provider without deleting creds
   enable <provider>                Reverse a previous disable
 
