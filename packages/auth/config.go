@@ -42,10 +42,17 @@ type ProviderPref struct {
 }
 
 // Config is the root of auth.yaml. Version is written so future
-// format changes can migrate in-place.
+// Format changes can migrate in-place.
 type Config struct {
-	Version   int                       `yaml:"version"`
-	Providers map[Provider]ProviderPref `yaml:"providers,omitempty"`
+	Version int `yaml:"version"`
+	// DefaultProvider names the provider spwn uses when multiple are
+	// Authenticated and no runtime is pinned at the project/agent
+	// Level. Empty means "no preference" — the resolver then either
+	// Silently picks the only connected provider or errors with a
+	// Disambiguation hint when more than one is present. Soft
+	// Preference only; disabled providers are skipped regardless.
+	DefaultProvider Provider                  `yaml:"default_provider,omitempty"`
+	Providers       map[Provider]ProviderPref `yaml:"providers,omitempty"`
 }
 
 // currentConfigVersion is bumped whenever the YAML shape changes in a

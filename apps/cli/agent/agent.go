@@ -16,6 +16,7 @@ var (
 	spawnName     string
 	spawnWorld    string
 	spawnImport   string
+	spawnBackend  string
 	ephemeralTask string
 	npcTaskCompat string // deprecated alias for ephemeralTask
 )
@@ -24,6 +25,7 @@ func init() {
 	Cmd.Flags().StringVarP(&spawnName, "name", "n", "", "Agent name (default: default)")
 	Cmd.Flags().StringVarP(&spawnWorld, "world", "u", "", "Target world ID")
 	Cmd.Flags().StringVar(&spawnImport, "import", "", "Import Mind from tar.gz before spawning")
+	Cmd.Flags().StringVar(&spawnBackend, "backend", "", "Override the runtime backend for this session (e.g. claude-code, codex).")
 	Cmd.Flags().StringVar(&ephemeralTask, "ephemeral", "", "Run as ephemeral agent - no Mind, no memory, just execute this task")
 	Cmd.Flags().StringVar(&npcTaskCompat, "npc", "", "Run as ephemeral agent (deprecated: use --ephemeral)")
 	_ = Cmd.Flags().MarkHidden("npc")
@@ -230,10 +232,16 @@ func runInteractiveSession(cmd *cobra.Command, agentName string) error {
 	if err != nil {
 		return err
 	}
+	// Forward the --backend flag (if the user passed one to
+	// `spwn agent <name>`) into the world package's spawn state
+	// before delegating. Without this the backend override would be
+	// Bound to agent.Cmd's flag set and invisible to UpCmd.
+	worldcmd.SetSpawnBackend(spawnBackend)
+
 	// Bring the world up. composeUpRunE is idempotent: if a container
-	// for this world config is already running it prints a notice and
-	// returns nil, so we can call it unconditionally without paying
-	// the Docker bootstrap cost twice.
+	// For this world config is already running it prints a notice and
+	// Returns nil, so we can call it unconditionally without paying
+	// The Docker bootstrap cost twice.
 	if err := worldcmd.UpCmd.RunE(cmd, []string{worldName}); err != nil {
 		return err
 	}

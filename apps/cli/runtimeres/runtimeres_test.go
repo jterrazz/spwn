@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"spwn.sh/packages/auth"
 	"spwn.sh/packages/project"
 	_ "spwn.sh/packages/runtimes/defaults"
 	"spwn.sh/packages/transpile/source"
@@ -111,15 +112,15 @@ func TestResolve_multipleAuthProvidersErrors(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected ambiguity error, got nil")
 	}
-	// Hint must name both durable options (agent + project-level
-	// Pinning) and the one-off CLI override so the user can pick
-	// Based on their situation. Previously we suggested --runtime
-	// Which only exists on `spwn build`; the hint now points at
-	// `spwn up --backend` which is the actual spawn-time flag.
+	// Hint must name every escape hatch so the user can pick based
+	// On their situation: the durable `spwn auth default` command
+	// (one-time, persists across projects), the per-agent /
+	// project-wide config pins, and the one-off CLI override.
 	for _, want := range []string{
 		"multiple providers",
 		"claude-code",
 		"codex",
+		"spwn auth default",
 		"agent.yaml#runtime.backend",
 		"spwn.yaml#runtime.backend",
 		"spwn up --backend",
@@ -127,6 +128,55 @@ func TestResolve_multipleAuthProvidersErrors(t *testing.T) {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("error message missing %q: %s", want, err.Error())
 		}
+	}
+}
+
+func TestResolve_authDefaultProviderBreaksAmbiguity(t *testing.T) {
+	// Two providers authenticated, no config pin — but the user set
+	// `spwn auth default anthropic`. Resolver should silently pick
+	// Claude-code instead of erroring.
+	isolateAuth(t)
+	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
+	t.Setenv("OPENAI_API_KEY", "sk-openai")
+	if err := auth.SetDefaultProvider(auth.ProviderAnthropic); err != nil {
+		t.Fatalf("SetDefaultProvider: %v", err)
+	}
+
+	src := &source.ProjectSource{Agents: []source.AgentSource{
+		{Name: "neo", Config: source.AgentConfig{}},
+	}}
+	got, err := Resolve(src, "")
+	if err != nil {
+		t.Fatalf("default should have broken ambiguity, got error: %v", err)
+	}
+	if got != "claude-code" {
+		t.Errorf("got %q want claude-code", got)
+	}
+}
+
+func TestResolve_authDefaultIgnoredWhenProviderDisabled(t *testing.T) {
+	// Default provider is set but that provider is disabled — the
+	// Disabled flag dominates (ResolveAll filters it out), so the
+	// Candidate list only has one entry and we silently pick it.
+	isolateAuth(t)
+	t.Setenv("ANTHROPIC_API_KEY", "sk-ant-api")
+	t.Setenv("OPENAI_API_KEY", "sk-openai")
+	if err := auth.SetDefaultProvider(auth.ProviderAnthropic); err != nil {
+		t.Fatalf("SetDefaultProvider: %v", err)
+	}
+	if err := auth.DisableProvider(auth.ProviderAnthropic); err != nil {
+		t.Fatalf("DisableProvider: %v", err)
+	}
+
+	src := &source.ProjectSource{Agents: []source.AgentSource{
+		{Name: "neo", Config: source.AgentConfig{}},
+	}}
+	got, err := Resolve(src, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "codex" {
+		t.Errorf("got %q want codex (anthropic disabled even though default)", got)
 	}
 }
 

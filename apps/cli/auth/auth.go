@@ -39,12 +39,14 @@ func init() {
 	Cmd.AddCommand(logoutCmd)
 	Cmd.AddCommand(disableCmd)
 	Cmd.AddCommand(enableCmd)
+	Cmd.AddCommand(defaultCmd)
 	Cmd.AddCommand(checkCmd)
 	Cmd.AddCommand(tokenCmd) // deprecated alias for login anthropic --api-key
 
 	loginCmd.Flags().StringVar(&loginAPIKey, "api-key", "", "Save an API key for this provider")
 	loginCmd.Flags().BoolVar(&loginOAuth, "oauth", false, "Print OAuth login instructions for this provider")
 	logoutCmd.Flags().StringVar(&logoutMethod, "method", "", "Scope logout to a single method (oauth | api_key)")
+	defaultCmd.Flags().Bool("clear", false, "Remove the default preference (revert to auto-resolve)")
 }
 
 // providers is the set we render + accept as CLI args. Google is left
@@ -106,10 +108,18 @@ func runStatus() error {
 	}
 	t.Render()
 
+	// Surface the default provider right under the table so users can
+	// See it at a glance before reaching for the command list.
+	if def := auth.DefaultProvider(); def != "" {
+		s.Blank()
+		s.Info("default provider:", string(def))
+	}
+
 	// Hints — keep them short and action-oriented. The dashboard
-	// should teach by example, not blog.
+	// Should teach by example, not blog.
 	s.Blank()
 	s.Info("Pick a method:", "spwn auth use <provider> <oauth|api_key>")
+	s.Info("Pick a default:", "spwn auth default <provider>")
 	s.Info("Log out cleanly:", "spwn auth logout <provider>")
 	s.Info("Opt out entirely:", "spwn auth disable <provider>")
 	s.Blank()
@@ -363,6 +373,71 @@ var enableCmd = &cobra.Command{
 		s.Success(fmt.Sprintf("%s enabled", p))
 		s.Blank()
 		return runStatus()
+	},
+}
+
+// ── default ─────────────────────────────────────────────────────────
+
+var defaultCmd = &cobra.Command{
+	Use:   "default [provider]",
+	Short: "Pick which provider spwn prefers when multiple are authenticated",
+	Long: `Set a soft preference for which provider's runtime spwn picks
+when you're logged into more than one and no runtime is pinned at the
+project or agent level.
+
+This is the durable answer to the "multiple providers authenticated
+and no runtime pinned" error — set it once and spwn will quietly
+resolve ambiguity in that provider's favour. Does NOT disable the
+other provider or override agent.yaml / spwn.yaml pins.
+
+Example:
+  spwn auth default anthropic        # prefer claude-code
+  spwn auth default --clear          # revert to auto-resolve`,
+	Args: cobra.MaximumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		clear, _ := cmd.Flags().GetBool("clear")
+		s := ui.New()
+
+		if clear {
+			if err := auth.SetDefaultProvider(""); err != nil {
+				return err
+			}
+			s.Blank()
+			s.Success("default provider cleared")
+			s.Blank()
+			return nil
+		}
+
+		if len(args) == 0 {
+			current := auth.DefaultProvider()
+			s.Blank()
+			if current == "" {
+				s.Info("default provider:", "not set (auto-resolve)")
+				s.Log("Set one with: spwn auth default <provider>")
+			} else {
+				s.Info("default provider:", string(current))
+				s.Log("Clear with: spwn auth default --clear")
+			}
+			s.Blank()
+			return nil
+		}
+
+		p, err := parseProvider(args[0])
+		if err != nil {
+			return err
+		}
+		if auth.IsProviderDisabled(p) {
+			return s.FailHint("Default refused",
+				fmt.Errorf("%s is currently disabled", p),
+				fmt.Sprintf("Run `spwn auth enable %s` first, or pick a different provider", p))
+		}
+		if err := auth.SetDefaultProvider(p); err != nil {
+			return err
+		}
+		s.Blank()
+		s.Success(fmt.Sprintf("default provider set to %s", p))
+		s.Blank()
+		return nil
 	},
 }
 

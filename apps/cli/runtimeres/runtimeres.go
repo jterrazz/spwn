@@ -24,17 +24,18 @@ import (
 //  1. Explicit override (--runtime / --backend flag), canonicalised.
 //  2. Per-agent declaration in agent.yaml (all agents must agree).
 //  3. Project-wide default (spwn.yaml#runtime.backend).
-//  4. Authenticated provider — exactly one provider is connected
-//     and maps to a registered runtime (via Adapter.DefaultProvider).
-//  5. Hardcoded default "claude-code".
+//  4. Exactly one authenticated provider → its runtime (silent pick).
+//  5. Multiple authenticated providers + user default (auth.yaml
+//     `default_provider`) → that provider's runtime (silent pick).
+//  6. Hardcoded default "claude-code".
 //
-// Returns an error when (2) has conflicts OR (4) is ambiguous — the
-// user is logged into multiple providers and hasn't pinned a backend
-// anywhere. The error names the candidates and suggests how to
-// disambiguate.
+// Returns an error when (2) has conflicts OR (4/5) is ambiguous — the
+// User is logged into multiple providers and hasn't pinned a backend
+// Anywhere. The error names the candidates and suggests how to
+// Disambiguate (pin in config, set auth default, or pass --backend).
 //
 // When src is nil (legacy global-mode spawn), falls straight through
-// to the auth-state / hardcoded default cascade.
+// To the auth-state / hardcoded default cascade.
 func Resolve(src *source.ProjectSource, override string) (string, error) {
 	declared, err := source.ResolveRuntime(src, override)
 	if err != nil {
@@ -68,31 +69,57 @@ func projectDefault(src *source.ProjectSource) string {
 //
 //   - 0 runtime-mapped providers → "claude-code".
 //   - 1 runtime-mapped provider → the matching runtime.
-//   - 2+ runtime-mapped providers → error with a disambiguation hint.
+//   - 2+ runtime-mapped providers + auth.DefaultProvider set → that
+//     provider's runtime (silent pick).
+//   - 2+ runtime-mapped providers + no default → disambiguation error.
 func fromAuth() (string, error) {
 	providerToRuntime := runtimeByProvider()
 
-	candidates := make([]string, 0, 2)
+	// Keep provider identity alongside the runtime name so we can
+	// Honor auth.DefaultProvider when the candidate list has more
+	// Than one entry.
+	type candidate struct {
+		provider auth.Provider
+		runtime  string
+	}
+	var cands []candidate
 	for _, p := range connectedProviders() {
 		if rt, ok := providerToRuntime[string(p)]; ok {
-			candidates = append(candidates, rt)
+			cands = append(cands, candidate{provider: p, runtime: rt})
 		}
 	}
-	sort.Strings(candidates)
+	sort.Slice(cands, func(i, j int) bool { return cands[i].runtime < cands[j].runtime })
 
-	switch len(candidates) {
+	switch len(cands) {
 	case 0:
 		return "claude-code", nil
 	case 1:
-		return candidates[0], nil
+		return cands[0].runtime, nil
+	}
+
+	// Multi-provider: let the user's auth.yaml default break the tie
+	// Before erroring. Disabled providers never reach the candidate
+	// List (ResolveAll honors Disabled), so DefaultProvider pointing
+	// At a disabled one is simply ignored.
+	if def := auth.DefaultProvider(); def != "" {
+		for _, c := range cands {
+			if c.provider == def {
+				return c.runtime, nil
+			}
+		}
+	}
+
+	names := make([]string, 0, len(cands))
+	for _, c := range cands {
+		names = append(names, c.runtime)
 	}
 	return "", fmt.Errorf(
 		"multiple providers authenticated (%s) and no runtime pinned. "+
-			"Pin one in agent.yaml#runtime.backend (per agent) or "+
-			"spwn.yaml#runtime.backend (project-wide), or override with "+
-			"`spwn up --backend %s`",
-		strings.Join(candidates, ", "),
-		candidates[0],
+			"Set a default with `spwn auth default <provider>`, pin one in "+
+			"agent.yaml#runtime.backend or spwn.yaml#runtime.backend, or "+
+			"override with `spwn up --backend %s`",
+		strings.Join(names, ", "),
+		names[0],
 	)
 }
 
