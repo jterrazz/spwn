@@ -27,6 +27,8 @@ func TestSpawner_PrelaunchShell(t *testing.T) {
 		"$HOME/.codex/auth.json",        // destination
 		"ln -sf",                        // the symlink command
 		"[ -f",                          // guard: source must exist
+		`trust_level = "trusted"`,       // codex config trust-seed
+		`git init -q "$HOME"`,           // codex "trusted directory" git-check bypass
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("PrelaunchShell missing %q; got: %s", want, got)
@@ -52,29 +54,33 @@ func TestSpawner_SupportsSession(t *testing.T) {
 	}
 }
 
-// TestSpawner_BuildCommand_interactive returns `codex` plus the
-// container-safety flags for interactive mode (no prompt, no named
-// agent). The full one-shot / exec-subcommand argv is exercised in
-// oneshot_test.go.
+// TestSpawner_BuildCommand_interactive pins the argv for interactive
+// Codex: `codex --dangerously-bypass-approvals-and-sandbox`. Only the
+// Top-level-accepted flag belongs here — codex ≥ 0.122 treats
+// --skip-git-repo-check as an `exec` subcommand flag and rejects it
+// On the interactive REPL with "error: unexpected argument". The
+// Trusted-directory check is instead satisfied by PrelaunchShell,
+// Which writes a trust_level=trusted entry into ~/.codex/config.toml
+// AND runs `git init -q $HOME` — together they pass codex's two-step
+// "is this a trusted git repo" check without needing an exec-only
+// Flag that the interactive binary doesn't understand.
 //
-// Both safety flags MUST be on the interactive path too:
-//   --skip-git-repo-check                       – /agents/<name> is not a git repo
-//   --dangerously-bypass-approvals-and-sandbox  – bwrap can't nest inside Docker
-//
-// Regression guard: stripping either flag silently breaks `spwn agent
-// talk` on a codex-backed world (first symptom: codex errors out with
-// "Not inside a trusted directory" or "No permissions to create a
-// new namespace").
+// Regression guard: re-introducing --skip-git-repo-check here
+// Silently breaks `spwn agent <name>` on a codex-backed world
+// (first symptom: codex errors out with
+// "error: unexpected argument '--skip-git-repo-check'" and the
+// Session never opens).
 func TestSpawner_BuildCommand_interactive(t *testing.T) {
 	cmd := Spawner.BuildCommand(runtimes.SpawnConfig{})
 	if len(cmd) == 0 || cmd[0] != "codex" {
 		t.Errorf("interactive BuildCommand should start with `codex`; got %v", cmd)
 	}
 	joined := strings.Join(cmd, " ")
-	for _, want := range []string{"--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox"} {
-		if !strings.Contains(joined, want) {
-			t.Errorf("interactive BuildCommand missing %q; got %v", want, cmd)
-		}
+	if !strings.Contains(joined, "--dangerously-bypass-approvals-and-sandbox") {
+		t.Errorf("interactive BuildCommand missing --dangerously-bypass-approvals-and-sandbox; got %v", cmd)
+	}
+	if strings.Contains(joined, "--skip-git-repo-check") {
+		t.Errorf("interactive BuildCommand must NOT carry --skip-git-repo-check (exec-only flag): %v", cmd)
 	}
 }
 

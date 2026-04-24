@@ -32,14 +32,18 @@ func TestBuildCommand_oneShotResume(t *testing.T) {
 
 func TestBuildCommand_namedAgentNoPromptIsInteractive(t *testing.T) {
 	// Named agent without a prompt is how the architect spawns an
-	// agent in detached mode — it wants a blocking REPL process
-	// running inside the container. Same shape as the anonymous
-	// interactive case: `codex` with the container-safety flags
-	// (--skip-git-repo-check + --dangerously-bypass-approvals-and-sandbox)
-	// so the container's agent home + nested bwrap don't trip codex
-	// into refusing to run.
+	// Agent in detached mode — it wants a blocking REPL process
+	// Running inside the container. Interactive codex only accepts
+	// --dangerously-bypass-approvals-and-sandbox at the top level;
+	// --skip-git-repo-check is an `exec` subcommand flag. The
+	// Trusted-directory check is satisfied by PrelaunchShell
+	// (config.toml trust seed + `git init` on the agent home).
+	// A regression that adds --skip-git-repo-check back here causes
+	// Codex ≥ 0.122 to fail with "error: unexpected argument
+	// '--skip-git-repo-check'" and `spwn agent <name>` never opens a
+	// Session.
 	got := Spawner.BuildCommand(runtimes.SpawnConfig{AgentName: "neo"})
-	assertEqStrings(t, got, []string{"codex", "--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox"})
+	assertEqStrings(t, got, []string{"codex", "--dangerously-bypass-approvals-and-sandbox"})
 }
 
 func TestOneShotFlags_isNoOp(t *testing.T) {

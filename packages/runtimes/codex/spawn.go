@@ -36,40 +36,47 @@ func (*spawner) Name() string { return "codex" }
 // the CLI already bridges the terminology so callers don't need to
 // know the runtime's internal vocabulary).
 func (*spawner) BuildCommand(cfg runtimes.SpawnConfig) []string {
-	// Flags shared by interactive and non-interactive modes:
-	//   --skip-git-repo-check: the agent's home (/agents/<name>) is
-	//     not a git repo; codex otherwise refuses with "Not inside a
-	//     trusted directory and --skip-git-repo-check was not
-	//     specified." The directory is still trust-seeded via
-	//     PrelaunchShell, but the git check is orthogonal.
-	//   --dangerously-bypass-approvals-and-sandbox: codex's default
-	//     bwrap sandbox fails inside a worker container ("No
-	//     permissions to create a new namespace"). The container IS
-	//     the sandbox — spwn isolates the whole runtime, so nested
-	//     sandboxing just blocks tool use without adding safety.
-	safetyFlags := []string{"--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox"}
+	// `--dangerously-bypass-approvals-and-sandbox` is accepted by
+	// Both the top-level `codex` (interactive REPL) and the `codex
+	// Exec` subcommand. Codex's default bwrap sandbox can't nest
+	// Inside our worker container ("No permissions to create a new
+	// Namespace"); the container IS the sandbox, so nested sandboxing
+	// Just blocks tool use without adding safety.
+	//
+	// `--skip-git-repo-check` is ONLY accepted by the `exec`
+	// Subcommand. In interactive mode we rely on the trust-seed
+	// Written by PrelaunchShell (~/.codex/config.toml with
+	// `[projects."$HOME"] trust_level = "trusted"`) plus a `git init`
+	// Of /agents/<name> in that same prelaunch — both together
+	// Satisfy codex's "trusted directory" check without needing the
+	// Exec-only flag.
+	const sandboxBypass = "--dangerously-bypass-approvals-and-sandbox"
 
 	// Interactive mode: no prompt. Covers both the anonymous REPL
 	// (no AgentName) and the architect's detached "just start the
-	// agent in its container" spawn (AgentName set, no prompt) — both
-	// want the same bare `codex` REPL.
+	// Agent in its container" spawn (AgentName set, no prompt) — both
+	// Want the same bare `codex` REPL with ONLY the flags the
+	// Top-level command accepts. Passing `--skip-git-repo-check`
+	// Here used to produce "error: unexpected argument
+	// '--skip-git-repo-check'" from codex ≥ 0.122.
 	if cfg.Prompt == "" {
-		return append([]string{"codex"}, safetyFlags...)
+		return []string{"codex", sandboxBypass}
 	}
 
-	// Non-interactive exec path: a prompt was supplied. Session
-	// resume uses the `resume <id>` subcommand rather than a flag —
-	// codex ≥ 0.122 dropped `--thread` in favour of the positional
-	// subcommand form. `--json` is baked in here (not in
+	// Non-interactive exec path: a prompt was supplied. The exec
+	// Subcommand DOES accept --skip-git-repo-check, keep it there as
+	// Belt-and-suspenders alongside the trust seed. Session resume
+	// Uses the `resume <id>` subcommand rather than a flag — codex
+	// ≥ 0.122 dropped `--thread` in favour of the positional
+	// Subcommand form. `--json` is baked in here (not in
 	// OneShotFlags) because codex's exec subcommand parses PROMPT as
-	// the first non-flag positional; any flag appended AFTER the
-	// prompt is swallowed or errors out.
+	// The first non-flag positional; any flag appended AFTER the
+	// Prompt is swallowed or errors out.
 	cmd := []string{"codex", "exec"}
 	if cfg.SessionID != "" {
 		cmd = append(cmd, "resume")
 	}
-	cmd = append(cmd, safetyFlags...)
-	cmd = append(cmd, "--json")
+	cmd = append(cmd, "--skip-git-repo-check", sandboxBypass, "--json")
 	if cfg.SessionID != "" {
 		cmd = append(cmd, cfg.SessionID)
 	}
@@ -127,7 +134,16 @@ func (*spawner) PrelaunchShell() string {
 		`ln -sf /credentials/openai/auth.json $HOME/.codex/auth.json 2>/dev/null; ` +
 		`if ! grep -q "projects.\"$HOME\"" $HOME/.codex/config.toml 2>/dev/null; then ` +
 		`printf '\n[projects."%s"]\ntrust_level = "trusted"\n' "$HOME" >> $HOME/.codex/config.toml; ` +
-		`fi`
+		`fi; ` +
+		// Codex's "trusted directory" check in interactive mode
+		// Additionally requires the cwd to sit inside a git repo.
+		// The exec subcommand has a --skip-git-repo-check flag; the
+		// Interactive REPL does not. An empty `git init` here makes
+		// /agents/<name> a valid git repo without changing any
+		// Workspace or user files — 100% idempotent, silent when a
+		// .git already exists. Paired with the trust_level=trusted
+		// Entry above, codex interactive starts clean.
+		`git init -q "$HOME" 2>/dev/null || true`
 }
 
 // OneShotFlags is a no-op for codex. The `--json` output flag MUST
