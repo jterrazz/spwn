@@ -63,9 +63,13 @@ func LogoutProvider(p Provider, opts LogoutOpts) *LogoutResult {
 		logoutGoogle(opts, res)
 	}
 	// Always best-effort re-sync the bind-mount credential dir so the
-	// next container spawn doesn't inject a stale token it remembers
-	// but that we just cleared on the host.
+	// Next container spawn doesn't inject a stale token it remembers
+	// But that we just cleared on the host.
 	_ = SyncCredentials()
+	// Clear any positive-validation cache for this provider so the
+	// Next spawn re-checks from scratch instead of trusting a stale
+	// "last time it worked" marker for creds we just deleted.
+	InvalidateValidation(p)
 	return res
 }
 

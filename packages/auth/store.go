@@ -8,42 +8,58 @@ import (
 	"spwn.sh/packages/platform"
 )
 
-// SaveToken persists a token to the auth cache file.
+// SaveToken persists a token to the auth cache file. Also clears any
+// Anthropic validation cache so the next spawn re-checks against the
+// Fresh credential.
 func SaveToken(token string) error {
 	path := tokenPath()
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(strings.TrimSpace(token)), 0600)
+	if err := os.WriteFile(path, []byte(strings.TrimSpace(token)), 0600); err != nil {
+		return err
+	}
+	InvalidateValidation(ProviderAnthropic)
+	return nil
 }
 
-// ClearToken removes the cached token.
+// ClearToken removes the cached token and invalidates its validation
+// Entry.
 func ClearToken() error {
+	InvalidateValidation(ProviderAnthropic)
 	return os.Remove(tokenPath())
 }
 
 // DisableProvider marks a provider as disabled — the resolver will
-// behave as though it had no credentials. Backed by the auth.yaml
-// user config so the choice survives across spwn upgrades and is
-// visible to any tool that reads the same file.
+// Behave as though it had no credentials. Backed by the auth.yaml
+// User config so the choice survives across spwn upgrades and is
+// Visible to any tool that reads the same file.
 func DisableProvider(p Provider) error {
-	return mutateConfig(func(c *Config) {
+	err := mutateConfig(func(c *Config) {
 		pref := c.Pref(p)
 		pref.Disabled = true
 		c.SetPref(p, pref)
 	})
+	if err == nil {
+		InvalidateValidation(p)
+	}
+	return err
 }
 
 // EnableProvider re-enables a previously-disabled provider. Idempotent
 // — calling it on an already-enabled provider is a cheap no-op aside
-// from the file rewrite.
+// From the file rewrite.
 func EnableProvider(p Provider) error {
-	return mutateConfig(func(c *Config) {
+	err := mutateConfig(func(c *Config) {
 		pref := c.Pref(p)
 		pref.Disabled = false
 		c.SetPref(p, pref)
 	})
+	if err == nil {
+		InvalidateValidation(p)
+	}
+	return err
 }
 
 // IsProviderDisabled reports whether the user has opted this provider

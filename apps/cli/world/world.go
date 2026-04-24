@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/architect"
+	"spwn.sh/packages/auth"
+	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world"
 )
 
@@ -334,6 +337,30 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		runtimeName = pw.Runtime
 	}
 
+	// Pre-flight credential check. Before we build the image and
+	// Burn the 30–60 seconds a cold spawn costs, confirm the host's
+	// Credentials for the chosen runtime's provider actually validate
+	// Against the live API. Catches the class of bug where the
+	// Keychain (or ~/.claude/.credentials.json, or a CI env var) is
+	// Present but stale/expired — previously the container would
+	// Spawn, the runtime would 401, and the user would see nothing
+	// Pointing them at the fix. Result is cached for 5 minutes so
+	// Repeat spawns in the same session are instant.
+	if providerName := runtimeAuthProvider(runtimeName); providerName != "" {
+		s.SubStart("Checking credentials…")
+		ctxCred, cancelCred := context.WithTimeout(ctx, 4*time.Second)
+		p := auth.Provider(providerName)
+		cred := auth.Resolve(p)
+		status := auth.ValidateWithCache(ctxCred, cred, 5*time.Minute)
+		cancelCred()
+		if status == nil || !status.Connected {
+			return s.SubFailHint("Credentials",
+				credentialError(p, cred, status),
+				credentialFixHint(p, cred))
+		}
+		s.SubDone("Credentials", credentialDetail(cred))
+	}
+
 	buildProgress := s.BuildProgressWriter()
 
 	const (
@@ -402,8 +429,13 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 				buildProgress.CompleteCurrent()
 				s.SubDone("Ready", detail)
 			case "credentials_resolved":
+				// Pre-flight Credentials check in Environment phase
+				// Already showed the user what's been resolved. The
+				// Architect's own "credentials_resolved" event is
+				// Internal to the spawn pipeline — surface it as
+				// Part of Spawn transition, not as a distinct
+				// sub-step.
 				enterSpawn()
-				s.SubDone("Auth", detail)
 			case "container_created":
 				enterSpawn()
 				s.SubDone("Created container", detail)
@@ -488,8 +520,95 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// runtimeAuthProvider returns the auth provider string ("anthropic",
+// "openai", …) for a runtime name. Empty when the runtime has no
+// Registered adapter or no DefaultProvider declared — we skip the
+// Pre-flight credential check rather than guess.
+func runtimeAuthProvider(runtimeName string) string {
+	if runtimeName == "" {
+		runtimeName = "claude-code" // same default as runtime_route.go
+	}
+	adapter, ok := runtimes.Get(runtimeName)
+	if !ok {
+		return ""
+	}
+	return adapter.DefaultProvider
+}
+
+// credentialError builds the user-visible error message for a
+// Pre-flight validation failure. We surface the provider name, the
+// Detected source, and the provider's own error text (typically
+// "invalid or expired OAuth token" or "invalid API key") so the
+// User knows exactly which credential spwn looked at and what the
+// API said about it.
+func credentialError(p auth.Provider, cred *auth.Credential, status *auth.ProviderStatus) error {
+	source := "no credentials configured"
+	if cred != nil && cred.Source != "" {
+		source = cred.Source
+	}
+	reason := "validation failed"
+	if status != nil && status.Error != "" {
+		reason = status.Error
+	}
+	return fmt.Errorf("%s credentials rejected (%s): %s", p, source, reason)
+}
+
+// credentialFixHint returns an actionable hint tailored to the
+// Credential source that failed. Keychain/file-backed creds point
+// At `claude login`; env-var creds point at re-exporting; API-key
+// Creds point at the login command. The goal is to get the user
+// Back to green in one copy-paste.
+func credentialFixHint(p auth.Provider, cred *auth.Credential) string {
+	// No creds at all.
+	if cred == nil || cred.Type == auth.CredTypeNone {
+		switch p {
+		case auth.ProviderAnthropic:
+			return "Run `claude login` on the host, or `spwn auth login anthropic --api-key sk-ant-…`"
+		case auth.ProviderOpenAI:
+			return "Run `codex login` on the host, or export OPENAI_API_KEY=sk-…"
+		}
+		return "Configure credentials for " + string(p)
+	}
+
+	// Env-var backed — user can't clear without touching their
+	// Shell; tell them exactly which var is stale.
+	if strings.HasPrefix(cred.Source, "env:") {
+		varName := strings.TrimPrefix(cred.Source, "env:")
+		return "unset " + varName + " (stale in your shell) or replace with a fresh credential"
+	}
+
+	// Keychain / file / OAuth-ish — route to the tool's native login.
+	switch p {
+	case auth.ProviderAnthropic:
+		return "Your Anthropic credential is present but the API rejected it. " +
+			"Refresh with `claude login` on the host, then retry. " +
+			"Or switch to an API key: `spwn auth login anthropic --api-key sk-ant-…`"
+	case auth.ProviderOpenAI:
+		return "Your OpenAI credential is present but the API rejected it. " +
+			"Refresh with `codex login` on the host, then retry."
+	}
+	return "Refresh " + string(p) + " credentials and retry"
+}
+
+// credentialDetail renders the short right-hand detail for the
+// Successful Credentials sub-step. Shape: "<method> · <source>" —
+// Enough to eyeball which auth spwn resolved on this spawn.
+func credentialDetail(cred *auth.Credential) string {
+	if cred == nil {
+		return ""
+	}
+	method := string(cred.Method())
+	if method == "" {
+		method = string(cred.Type)
+	}
+	if cred.Source == "" {
+		return method
+	}
+	return method + " · " + cred.Source
+}
+
 // dockerHint wraps a NewArchitectFromEnv error with a user-friendly hint
-// when Docker is not running.
+// When Docker is not running.
 func dockerHint(err error) error {
 	if strings.Contains(err.Error(), "cannot connect to Docker") {
 		return fmt.Errorf("Docker is not running")

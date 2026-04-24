@@ -93,37 +93,20 @@ func detectAnthropic() []*Credential {
 }
 
 // resolveAnthropic picks the single credential the runtime should use
-// for Anthropic. Selection is:
+// For Anthropic. Selection is:
 //   - user explicitly disabled the provider → none
 //   - user set ActiveMethod → first detection matching that method
 //   - otherwise → first detection in discovery order
 //
-// The "sync keychain token back to the cache file" side-effect from
-// the old resolver lives here so `claude login` still populates
-// `.auth-token` for tools that read it directly.
+// Previously this function also mirrored the winning keychain token
+// Into ~/.spwn/.auth-token as a side-effect. That mirror has been
+// Removed — claude's own store (keychain on macOS,
+// ~/.claude/.credentials.json on Linux) is the source of truth, and
+// Spwn no longer maintains a second copy that could drift out of
+// Sync. Existing `.auth-token` files stay readable via detectAnthropic
+// For back-compat, but we no longer WRITE them here.
 func resolveAnthropic() *Credential {
-	detected := detectAnthropic()
-	cred := pickByPref(ProviderAnthropic, detected)
-	// Best-effort: when the active credential is keychain-backed, mirror
-	// it into the cache file. Legacy consumers of `.auth-token` depend
-	// on the file staying in sync with the latest login.
-	if cred != nil && cred.Type == CredTypeKeychain {
-		if existing := readAuthTokenFile(); existing != cred.Token {
-			_ = SaveToken(cred.Token)
-		}
-	}
-	return cred
-}
-
-// readAuthTokenFile returns the trimmed contents of ~/.spwn/.auth-token,
-// or empty string if absent/unreadable. Extracted so resolveAnthropic's
-// keychain-mirror logic doesn't duplicate the scan used by detection.
-func readAuthTokenFile() string {
-	data, err := os.ReadFile(platform.BaseDir() + "/.auth-token")
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(data))
+	return pickByPref(ProviderAnthropic, detectAnthropic())
 }
 
 // readKeychainAnthropic pulls the Claude Code-credentials entry
