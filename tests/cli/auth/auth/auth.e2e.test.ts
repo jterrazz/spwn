@@ -35,6 +35,53 @@ describe('CLI - auth command', () => {
         expect(stderr).toContain('Default:');
     });
 
+    test("'spwn auth' surfaces the MCP-tools section", async () => {
+        // Discoverability: the only place a user finds out that
+        // `spwn auth login notion` exists is the dashboard. The
+        // Section header + at least one provider row + the per-row
+        // Hint must all be there.
+        const result = await isolated('auth dashboard mcp section')
+            .env({
+                SPWN_HOME: '$WORKDIR/spwn-home',
+                HOME: '$WORKDIR/empty-home',
+                SPWN_SKIP_KEYCHAIN: '1',
+            })
+            .exec('auth')
+            .run();
+        expect(result.exitCode).toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('Tools (MCP)');
+        expect(stderr).toContain('notion');
+        // Fresh home → not authenticated → row points at the login verb
+        expect(stderr).toContain('spwn auth login notion');
+    });
+
+    test("'spwn auth' surfaces the CLI-tools section (github)", async () => {
+        // Same discoverability concern as the MCP section — the
+        // Dashboard must advertise `spwn auth login github` so
+        // Users find the gh-import path without reading code.
+        const result = await isolated('auth dashboard cli section')
+            .env({
+                SPWN_HOME: '$WORKDIR/spwn-home',
+                HOME: '$WORKDIR/empty-home',
+                SPWN_SKIP_KEYCHAIN: '1',
+            })
+            .exec('auth')
+            .run();
+        expect(result.exitCode).toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('Tools (CLI)');
+        expect(stderr).toContain('github');
+        expect(stderr).toContain('spwn auth login github');
+    });
+
+    // The hermetic "host gh missing" + "host gh logged out"
+    // Failure-mode tests live in Go (packages/auth/gh/login_test.go)
+    // Because they need PATH manipulation that the TS harness
+    // Doesn't isolate from the parent process's PATH. The TS
+    // Dashboard tests above guarantee discoverability — together
+    // They cover the surface.
+
     test("'spwn auth' lists every supported method per provider", async () => {
         // Fresh home with no host creds → every method is unset, so
         // The dashboard doubles as a cheat-sheet: each row must name
@@ -198,6 +245,63 @@ describe('CLI - auth command', () => {
      * reliably without hanging. See tests/setup/spwn.specification.ts.
      */
     test.skip("'spwn auth login' handles non-interactive gracefully", () => {});
+
+    test("'spwn auth login --help' documents the MCP-provider path", async () => {
+        // The MCP block is what tells users `spwn auth login notion`
+        // Is even a thing — it's the only discovery surface short of
+        // Reading the provider registry. Drift here = users don't
+        // Find it.
+        const result = await isolated('login help mcp').exec('auth login --help').run();
+        expect(result.exitCode).toBe(0);
+        const out = result.stdout.text;
+        expect(out).toContain('hosted MCP providers');
+        expect(out).toContain('Notion');
+        expect(out).toContain('spwn auth login notion');
+    });
+
+    test("'spwn auth login bogus' lists both AI and MCP providers", async () => {
+        // The error must surface both registries — a user typing a
+        // Wrong name shouldn't have to know which family the right
+        // Name lives in.
+        const result = await isolated('login unknown provider').exec('auth login bogus-name').run();
+        expect(result.exitCode).not.toBe(0);
+        const stderr = result.stderr.text;
+        expect(stderr).toContain('unknown provider');
+        // AI providers from parseProvider's error
+        expect(stderr).toMatch(/anthropic|openai/);
+        // MCP providers from the wrap
+        expect(stderr).toContain('MCP providers');
+        expect(stderr).toContain('notion');
+    });
+
+    test("'spwn auth login notion' takes the MCP branch (not the API-key branch)", async () => {
+        // Without docker, login fails fast at ensureHelperImage. The
+        // Shape of the failure tells us we hit the MCP path: the
+        // Error mentions the helper image, not API keys. We point
+        // DOCKER_HOST at a dead address so this test stays
+        // Hermetic — no docker daemon required.
+        const result = await isolated('login mcp branch')
+            .env({
+                DOCKER_HOST: 'tcp://127.0.0.1:1',
+                SPWN_HOME: '$WORKDIR/spwn-home',
+            })
+            .exec('auth login notion')
+            .run();
+        expect(result.exitCode).not.toBe(0);
+        const stderr = result.stderr.text;
+        // The error message must reference the helper image build /
+        // Mcp oauth path — proof we did NOT silently fall through
+        // To the API-key dashboard.
+        expect(stderr.toLowerCase()).toMatch(/notion|helper|docker|mcp|oauth|build/);
+        // The cache dir gets created (it's a precondition for the
+        // Bind-mount), but no tokens.json should have landed for
+        // Any provider — every login path past dir-create must
+        // Fail with no docker.
+        expect(
+            result.file('spwn-home/credentials/mcp/oauth').exists ||
+                result.file('spwn-home/credentials/mcp/oauth/').exists,
+        ).toBe(false);
+    });
 
     /*
      * SKIPPED: `spwn auth logout <provider>` now requires a provider
