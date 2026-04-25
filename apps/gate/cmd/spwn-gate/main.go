@@ -56,18 +56,33 @@ func main() {
 	logger.Printf("clean shutdown")
 }
 
-// registerElements wires every spwn-known MCP provider into the
-// registry as a generic auth-injecting reverse proxy. Adding a new
-// provider is now a one-line change in
-// packages/auth/mcp/provider.go — the gate picks it up automatically.
+// registerElements wires every gate element into the registry.
+// Two layers:
+//
+//   - ProxyElement (auth-injecting reverse proxy) for every spwn-known
+//     hosted MCP provider in mcp.Registry — notion today, linear etc.
+//     come for free as one-line additions in packages/auth/mcp/provider.go.
+//   - MCPServer (hand-rolled HTTP MCP) for backend-CLI elements — gmail
+//     and gcal both back onto the gws CLI installed in this image.
 func registerElements(reg *gate.Registry, logger *log.Logger) error {
 	added, err := gate.RegisterAllProviders(reg)
 	if err != nil {
-		// Per-provider failures aren't fatal — RegisterAllProviders
-		// continues iterating and reports the first error. Log it
-		// and let the gate start with whatever did register.
 		logger.Printf("warning: register providers: %v", err)
 	}
+
+	// gws-backed elements. Construction never fails — credentials are
+	// checked per-request and surfaced as actionable errors.
+	if err := reg.Add(gate.NewGmailElement()); err != nil {
+		logger.Printf("warning: add gmail: %v", err)
+	} else {
+		added++
+	}
+	if err := reg.Add(gate.NewGcalElement()); err != nil {
+		logger.Printf("warning: add gcal: %v", err)
+	} else {
+		added++
+	}
+
 	logger.Printf("registered %d element(s): %v", added, reg.Names())
 	return nil
 }
