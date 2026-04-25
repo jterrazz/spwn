@@ -1,14 +1,17 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
+	"spwn.sh/packages/auth/mcp"
 	"spwn.sh/packages/platform"
 )
 
@@ -42,6 +45,18 @@ func SyncCredentials() error {
 	// Sync runtime-specific files (e.g., codex auth.json)
 	if err := syncRuntimeFiles(dir); err != nil {
 		return fmt.Errorf("sync runtime files: %w", err)
+	}
+
+	// Refresh expiring MCP OAuth tokens (Notion etc) so containers
+	// spawned with the cred bind mount get fresh tokens. Per-provider
+	// failures are logged but never block sync — a broken refresh
+	// shouldn't take down `spwn up` or `spwn agent talk`.
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	if _, errs := mcp.RefreshAll(ctx, mcp.DefaultRefreshLeeway); len(errs) > 0 {
+		for _, err := range errs {
+			log.Printf("warning: mcp token refresh: %v", err)
+		}
 	}
 
 	// Write sync timestamp
