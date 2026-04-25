@@ -1,0 +1,17 @@
+FROM python:3.12-slim
+
+RUN pip install --no-cache-dir mcp2cli==3.0.2
+
+# mcp2cli pins the OAuth callback server's bind to a loopback
+# address, which Docker's -p flag can't forward into on macOS. Flip
+# both bind paths to 0.0.0.0 — the one in the explicit
+# --oauth-redirect-uri branch and the implicit-default branch. The
+# Redirect URI the OAuth server sees stays a 127.0.0.1 host-loopback,
+# Which Docker forwards into the container. Linux --network host
+# Doesn't need this but the patch is harmless there.
+RUN sed -i \
+    -e 's/callback_host = parsed.hostname/callback_host = "0.0.0.0"/' \
+    -e 's/callback_host = "127.0.0.1"/callback_host = "0.0.0.0"/' \
+    /usr/local/lib/python3.12/site-packages/mcp2cli/__init__.py
+
+ENTRYPOINT ["mcp2cli"]

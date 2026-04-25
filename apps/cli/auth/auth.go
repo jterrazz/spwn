@@ -15,6 +15,8 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/auth"
+	authgh "spwn.sh/packages/auth/gh"
+	authmcp "spwn.sh/packages/auth/mcp"
 	"spwn.sh/packages/platform"
 )
 
@@ -112,6 +114,18 @@ func runStatus() error {
 		fmt.Fprintln(w)
 	}
 
+	// CLI tools (gh, …) — third bucket below "models" and "MCP".
+	// CLI tools have their own auth shape (gh device-flow + a host
+	// Hosts.yml) and a single row per tool covers it.
+	renderCLISection(w)
+
+	// MCP providers (Notion, …) — separate section because they're
+	// A different kind of credential (OAuth token cached for an MCP
+	// Server) than the AI-provider blocks above. We deliberately
+	// Don't fold them in: users mentally separate "models" from
+	// "Tools", and so should the dashboard.
+	renderMCPSection(w)
+
 	// Default provider footer. Faint label + bold value + faint
 	// "change" hint, all on one line.
 	def := auth.DefaultProvider()
@@ -126,6 +140,52 @@ func runStatus() error {
 		ui.Faint("spwn auth default <provider>"),
 	)
 	return nil
+}
+
+// renderCLISection prints the "Tools (CLI)" block — currently just
+// gh, but the shape is the same as renderMCPSection so adding
+// future CLIs (e.g. linear-cli, atlassian-cli) is a one-liner.
+func renderCLISection(w io.Writer) {
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Tools (CLI)"))
+	row := dashboardRow{method: "github"}
+	if authgh.IsAuthenticated() {
+		row.glyph = ui.Green("✓")
+		row.detail = "file:" + abbreviate(authgh.CacheDir())
+		row.hintCommand = "spwn auth logout github"
+	} else {
+		row.glyph = ui.Faint("·")
+		row.detail = "not set"
+		row.hintCommand = "spwn auth login github"
+	}
+	renderDashboardRow(w, row)
+	fmt.Fprintln(w)
+}
+
+// renderMCPSection prints the "Tools (MCP)" block under the AI
+// Provider blocks. One row per known MCP provider; the row says
+// Whether tokens are cached and points at the right verb to set
+// Or clear them.
+func renderMCPSection(w io.Writer) {
+	names := authmcp.Names()
+	if len(names) == 0 {
+		return
+	}
+	fmt.Fprintf(w, "  %s\n", ui.Strong("Tools (MCP)"))
+	for _, name := range names {
+		p, _ := authmcp.Lookup(name)
+		row := dashboardRow{method: name}
+		if authmcp.IsAuthenticated(p) {
+			row.glyph = ui.Green("✓")
+			row.detail = "file:" + abbreviate(authmcp.CacheDir())
+			row.hintCommand = "spwn auth logout " + name
+		} else {
+			row.glyph = ui.Faint("·")
+			row.detail = "not set"
+			row.hintCommand = "spwn auth login " + name
+		}
+		renderDashboardRow(w, row)
+	}
+	fmt.Fprintln(w)
 }
 
 // dashboardRow is one rendered method line, fully resolved — the
@@ -351,12 +411,30 @@ run the upstream CLI login first, then re-run this command — spwn will
 detect the new credential and record it:
 
   claude login   # then: spwn auth login anthropic
-  codex login    # then: spwn auth login openai`,
+  codex login    # then: spwn auth login openai
+
+For hosted MCP providers (Notion, …), the command runs the OAuth dance
+itself in a one-shot helper container — click the link it prints,
+approve in your browser, the token persists for every world:
+
+  spwn auth login notion`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// CLI-tool branch (gh) — host import or device-flow.
+		if strings.EqualFold(args[0], "github") {
+			return runGitHubLogin(cmd)
+		}
+		// MCP providers branch — ref-by-name and own a different
+		// storage path than AI providers.
+		if mp, ok := authmcp.Lookup(args[0]); ok {
+			return runMCPLogin(cmd, mp)
+		}
 		p, err := parseProvider(args[0])
 		if err != nil {
-			return err
+			// If the user passed something that's neither an AI
+			// provider, an MCP provider, nor a CLI-tool provider,
+			// surface every list so the help is complete.
+			return fmt.Errorf("%w (or one of the MCP providers: %s; or one of the CLI tools: github)", err, strings.Join(authmcp.Names(), ", "))
 		}
 		s := ui.New()
 		s.Blank()
@@ -382,6 +460,55 @@ detect the new credential and record it:
 		_ = auth.SyncCredentials()
 		return runStatus()
 	},
+}
+
+// runGitHubLogin imports an existing host gh login (the happy path
+// — most users already ran `gh auth login` once on their machine)
+// or, in the future, drives a device-flow login when host gh isn't
+// available. Either way the result is a plaintext hosts.yml under
+// ~/.spwn/credentials/gh that bind-mounts cleanly into every world.
+func runGitHubLogin(cmd *cobra.Command) error {
+	s := ui.New()
+	s.Blank()
+	s.Info("Logging in to github", "importing host gh CLI credentials")
+	s.Blank()
+	err := authgh.Login(cmd.Context(), cmd.OutOrStdout())
+	switch {
+	case errors.Is(err, authgh.ErrGhNotInstalled):
+		return s.FailHint("gh CLI not found on host", err,
+			"Install gh first (e.g. `brew install gh`), run `gh auth login`, then re-run this command.")
+	case errors.Is(err, authgh.ErrHostNotLoggedIn):
+		return s.FailHint("host gh CLI is not logged in", err,
+			"Run `gh auth login` on the host first (one-time, device-flow), then re-run this command.")
+	case err != nil:
+		return s.FailHint("github login failed", err,
+			"Check ~/.config/gh permissions, then retry.")
+	}
+	s.Blank()
+	s.Done("github tokens saved",
+		fmt.Sprintf("ready — `gh ...` and `gh-mcp ...` inside any world will use these (cache: %s)", abbreviate(authgh.CacheDir())))
+	s.Blank()
+	return nil
+}
+
+// runMCPLogin drives `spwn auth login <mcp>`. The OAuth dance runs in
+// a one-shot helper container; mcp2cli streams the "open this URL"
+// hint to the user's terminal, waits for the redirect, exchanges the
+// code, and persists tokens to ~/.spwn/credentials/mcp/.
+func runMCPLogin(cmd *cobra.Command, p authmcp.Provider) error {
+	s := ui.New()
+	s.Blank()
+	s.Info(fmt.Sprintf("Logging in to %s", p.Name), "a browser link will appear; click Allow, then this command exits")
+	s.Blank()
+	if err := authmcp.Login(cmd.Context(), p, cmd.OutOrStdout()); err != nil {
+		return s.FailHint(fmt.Sprintf("%s login failed", p.Name), err,
+			"Re-run `spwn auth login "+p.Name+"`. If the helper image build keeps failing, ensure Docker is running.")
+	}
+	s.Blank()
+	s.Done(fmt.Sprintf("%s tokens saved", p.Name),
+		fmt.Sprintf("ready — `notion-mcp ...` inside any world will use these tokens (cache: %s)", abbreviate(authmcp.CacheDir())))
+	s.Blank()
+	return nil
 }
 
 // saveAPIKey persists a user-entered API key into the right per-provider
@@ -419,9 +546,43 @@ to unset them manually.
   spwn auth logout anthropic --method api_key   # spare keychain`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// CLI-tool branch (github).
+		if strings.EqualFold(args[0], "github") {
+			s := ui.New()
+			s.Blank()
+			if err := authgh.Logout(); err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					s.Info("github", "already logged out")
+					s.Blank()
+					return nil
+				}
+				return s.FailHint("github logout failed", err,
+					"Inspect "+abbreviate(authgh.CacheDir())+" by hand if this persists")
+			}
+			s.Done("Removed", "github tokens ("+abbreviate(authgh.HostsPath())+")")
+			s.Blank()
+			return nil
+		}
+		// MCP providers branch first, same shape as login.
+		if mp, ok := authmcp.Lookup(args[0]); ok {
+			s := ui.New()
+			s.Blank()
+			if err := authmcp.Logout(mp); err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					s.Info(mp.Name, "already logged out")
+					s.Blank()
+					return nil
+				}
+				return s.FailHint(fmt.Sprintf("%s logout failed", mp.Name), err,
+					"Inspect "+abbreviate(authmcp.CacheDir())+" by hand if this persists")
+			}
+			s.Done("Removed", mp.Name+" tokens ("+abbreviate(authmcp.ProviderTokenPath(mp))+")")
+			s.Blank()
+			return nil
+		}
 		p, err := parseProvider(args[0])
 		if err != nil {
-			return err
+			return fmt.Errorf("%w (or one of the MCP providers: %s; or one of the CLI tools: github)", err, strings.Join(authmcp.Names(), ", "))
 		}
 		opts := auth.LogoutOpts{}
 		if logoutMethod != "" {
