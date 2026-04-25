@@ -6,145 +6,100 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
-// withGate spins up a CookieSync wired to a fresh httptest mux and
-// returns helpers for testing. Sets SPWN_HOME to a tmpdir so cookie
-// writes land somewhere disposable.
-func withGate(t *testing.T) (*CookieSync, http.Handler, func(method, path string, headers map[string]string, body any) *httptest.ResponseRecorder) {
+// gateWithProviders spins up a CookieSync with a couple of test
+// providers wired into a fresh httptest mux. Sets SPWN_HOME to a
+// tmpdir so cookie writes land somewhere disposable.
+func gateWithProviders(t *testing.T) (*CookieSync, http.Handler) {
 	t.Helper()
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
 
 	cs := NewCookieSync()
+	cs.RegisterProvider(CookieProvider{
+		Name:    "x",
+		Domains: []string{"x.com", "twitter.com"},
+		Cookies: []string{"auth_token", "ct0"},
+	})
+	cs.RegisterProvider(CookieProvider{
+		Name:    "linkedin",
+		Domains: []string{"linkedin.com"},
+		Cookies: []string{"li_at"},
+	})
+
 	mux := http.NewServeMux()
 	cs.RegisterRoutes(mux)
+	return cs, mux
+}
 
-	do := func(method, path string, headers map[string]string, body any) *httptest.ResponseRecorder {
-		var reader *bytes.Reader
-		if body != nil {
-			b, _ := json.Marshal(body)
-			reader = bytes.NewReader(b)
-		} else {
-			reader = bytes.NewReader(nil)
-		}
-		req := httptest.NewRequest(method, path, reader)
-		for k, v := range headers {
-			req.Header.Set(k, v)
-		}
-		rec := httptest.NewRecorder()
-		mux.ServeHTTP(rec, req)
-		return rec
+func do(t *testing.T, mux http.Handler, method, path string, body any) *httptest.ResponseRecorder {
+	t.Helper()
+	var reader *bytes.Reader
+	if body != nil {
+		b, _ := json.Marshal(body)
+		reader = bytes.NewReader(b)
+	} else {
+		reader = bytes.NewReader(nil)
 	}
-	return cs, mux, do
+	req := httptest.NewRequest(method, path, reader)
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+	return rec
 }
 
 func TestCookies_ProvidersListsRegistry(t *testing.T) {
-	_, _, do := withGate(t)
-	rec := do("GET", "/sync/providers", nil, nil)
+	_, mux := gateWithProviders(t)
+	rec := do(t, mux, "GET", "/sync/providers", nil)
 	if rec.Code != 200 {
 		t.Fatalf("status = %d", rec.Code)
 	}
 	var got []CookieProvider
 	_ = json.Unmarshal(rec.Body.Bytes(), &got)
-	if len(got) < 2 {
-		t.Errorf("expected default registry to have ≥2 entries, got %d", len(got))
+	if len(got) != 2 {
+		t.Errorf("expected 2 registered providers, got %d", len(got))
 	}
-	hasX, hasLI := false, false
-	for _, p := range got {
-		if p.Name == "x" {
-			hasX = true
-		}
-		if p.Name == "linkedin" {
-			hasLI = true
-		}
-	}
-	if !hasX || !hasLI {
-		t.Errorf("default providers missing x or linkedin: %+v", got)
+	// Sorted by name → linkedin first, x second.
+	if len(got) >= 2 && (got[0].Name != "linkedin" || got[1].Name != "x") {
+		t.Errorf("provider order should be sorted by name: got %+v", got)
 	}
 }
 
-func TestCookies_StatusRequiresSecret(t *testing.T) {
-	_, _, do := withGate(t)
-	rec := do("GET", "/sync/status", nil, nil)
-	if rec.Code != 401 {
-		t.Errorf("expected 401 without secret, got %d", rec.Code)
+func TestCookies_StatusIsPublic(t *testing.T) {
+	_, mux := gateWithProviders(t)
+	rec := do(t, mux, "GET", "/sync/status", nil)
+	if rec.Code != 200 {
+		t.Errorf("status should be public (no auth), got %d", rec.Code)
 	}
-}
-
-func TestCookies_PushRequiresSecret(t *testing.T) {
-	_, _, do := withGate(t)
-	rec := do("POST", "/sync/x", nil, map[string]any{"cookies": map[string]string{"auth_token": "x"}})
-	if rec.Code != 401 {
-		t.Errorf("expected 401 without secret, got %d", rec.Code)
+	var resp struct {
+		Providers []struct {
+			Name       string `json:"name"`
+			HasCookies bool   `json:"has_cookies"`
+		} `json:"providers"`
 	}
-}
-
-func TestCookies_PushRejectsUnknownProvider(t *testing.T) {
-	_, _, _ = withGate(t)
-	secret, _ := GenerateSecret()
-	_, _, do := withGate(t) // re-init to pick up secret in fresh tmp
-	_ = secret
-
-	// Re-create with a known secret in this tmp.
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-	_ = os.MkdirAll(filepath.Join(tmp, "gate"), 0o700)
-	secret, _ = GenerateSecret()
-
-	cs := NewCookieSync()
-	mux := http.NewServeMux()
-	cs.RegisterRoutes(mux)
-
-	body, _ := json.Marshal(map[string]any{"cookies": map[string]string{"foo": "bar"}})
-	req := httptest.NewRequest("POST", "/sync/bogus", bytes.NewReader(body))
-	req.Header.Set("X-Spwn-Secret", secret)
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-	if rec.Code != 404 {
-		t.Errorf("expected 404 for unknown provider, got %d", rec.Code)
+	_ = json.Unmarshal(rec.Body.Bytes(), &resp)
+	if len(resp.Providers) != 2 {
+		t.Errorf("status should list both registered providers, got %d", len(resp.Providers))
 	}
-
-	_ = do
 }
 
 func TestCookies_PushPersistsAndDropsUnknownNames(t *testing.T) {
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-	_ = os.MkdirAll(filepath.Join(tmp, "gate"), 0o700)
-	secret, err := GenerateSecret()
-	if err != nil {
-		t.Fatalf("GenerateSecret: %v", err)
-	}
-
-	cs := NewCookieSync()
-	mux := http.NewServeMux()
-	cs.RegisterRoutes(mux)
-
-	body, _ := json.Marshal(map[string]any{
+	cs, mux := gateWithProviders(t)
+	rec := do(t, mux, "POST", "/sync/x", map[string]any{
 		"cookies": map[string]string{
-			"auth_token":  "real-x-token",
-			"ct0":         "csrf-value",
-			"some_other":  "should-be-dropped",
-			"PII_LEAK":    "should-also-be-dropped",
+			"auth_token": "real-x-token",
+			"ct0":        "csrf-value",
+			"some_other": "should-be-dropped",
+			"PII_LEAK":   "should-also-be-dropped",
 		},
 		"captured": "2026-04-25T18:00:00Z",
 	})
-	req := httptest.NewRequest("POST", "/sync/x", bytes.NewReader(body))
-	req.Header.Set("X-Spwn-Secret", secret)
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-
 	if rec.Code != 204 {
 		t.Fatalf("status = %d, body=%s", rec.Code, rec.Body.String())
 	}
-
-	// Verify on-disk file shape.
 	raw, err := os.ReadFile(CookieFile("x"))
 	if err != nil {
 		t.Fatalf("read cookies.json: %v", err)
@@ -159,33 +114,22 @@ func TestCookies_PushPersistsAndDropsUnknownNames(t *testing.T) {
 	if _, ok := got.Cookies["some_other"]; ok {
 		t.Errorf("non-allowlisted cookie 'some_other' was persisted: %v", got.Cookies)
 	}
-	if _, ok := got.Cookies["PII_LEAK"]; ok {
-		t.Errorf("non-allowlisted cookie 'PII_LEAK' was persisted: %v", got.Cookies)
-	}
-
-	// Verify last-sync was recorded.
 	if cs.ProviderLastSync("x").IsZero() {
-		t.Errorf("ProviderLastSync(x) is zero, expected a recent timestamp")
+		t.Errorf("ProviderLastSync(x) should be set after a successful push")
+	}
+}
+
+func TestCookies_PushRejectsUnknownProvider(t *testing.T) {
+	_, mux := gateWithProviders(t)
+	rec := do(t, mux, "POST", "/sync/bogus", map[string]any{"cookies": map[string]string{"auth_token": "x"}})
+	if rec.Code != 404 {
+		t.Errorf("unknown provider should be 404, got %d", rec.Code)
 	}
 }
 
 func TestCookies_PushRejectsEmptyAllowlistedSet(t *testing.T) {
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-	_ = os.MkdirAll(filepath.Join(tmp, "gate"), 0o700)
-	secret, _ := GenerateSecret()
-
-	cs := NewCookieSync()
-	mux := http.NewServeMux()
-	cs.RegisterRoutes(mux)
-	_ = cs
-
-	// Body has cookies but none on the x allowlist.
-	body, _ := json.Marshal(map[string]any{"cookies": map[string]string{"random": "junk"}})
-	req := httptest.NewRequest("POST", "/sync/x", bytes.NewReader(body))
-	req.Header.Set("X-Spwn-Secret", secret)
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
+	_, mux := gateWithProviders(t)
+	rec := do(t, mux, "POST", "/sync/x", map[string]any{"cookies": map[string]string{"random": "junk"}})
 	if rec.Code != 400 {
 		t.Errorf("expected 400 for empty allowlisted set, got %d", rec.Code)
 	}
@@ -194,84 +138,62 @@ func TestCookies_PushRejectsEmptyAllowlistedSet(t *testing.T) {
 	}
 }
 
-func TestCookies_StatusReportsLastSync(t *testing.T) {
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-	_ = os.MkdirAll(filepath.Join(tmp, "gate"), 0o700)
-	secret, _ := GenerateSecret()
-
-	cs := NewCookieSync()
-	mux := http.NewServeMux()
-	cs.RegisterRoutes(mux)
-
-	// Push a sync.
-	body, _ := json.Marshal(map[string]any{"cookies": map[string]string{"auth_token": "tok"}})
-	req := httptest.NewRequest("POST", "/sync/x", bytes.NewReader(body))
-	req.Header.Set("X-Spwn-Secret", secret)
-	mux.ServeHTTP(httptest.NewRecorder(), req)
-
-	// Status should now show the last sync.
-	req = httptest.NewRequest("GET", "/sync/status", nil)
-	req.Header.Set("X-Spwn-Secret", secret)
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-	if rec.Code != 200 {
-		t.Fatalf("status = %d", rec.Code)
+func TestCookies_PushMethodOnlyPOST(t *testing.T) {
+	_, mux := gateWithProviders(t)
+	rec := do(t, mux, "GET", "/sync/x", nil)
+	if rec.Code != 405 {
+		t.Errorf("GET /sync/x should be 405, got %d", rec.Code)
 	}
+}
+
+func TestCookies_OPTIONSReturns204ForCORS(t *testing.T) {
+	_, mux := gateWithProviders(t)
+	rec := do(t, mux, "OPTIONS", "/sync/x", nil)
+	if rec.Code != 204 {
+		t.Errorf("OPTIONS should be 204 for CORS preflight, got %d", rec.Code)
+	}
+}
+
+func TestCookies_StatusReportsHasCookiesFromDisk(t *testing.T) {
+	cs, mux := gateWithProviders(t)
+
+	// Push first, then check status.
+	do(t, mux, "POST", "/sync/x", map[string]any{"cookies": map[string]string{"auth_token": "t"}})
+
+	rec := do(t, mux, "GET", "/sync/status", nil)
 	var resp struct {
 		Providers []struct {
-			Name     string `json:"name"`
-			LastSync string `json:"last_sync"`
+			Name       string `json:"name"`
+			HasCookies bool   `json:"has_cookies"`
+			LastSync   string `json:"last_sync"`
 		} `json:"providers"`
 	}
 	_ = json.Unmarshal(rec.Body.Bytes(), &resp)
 	for _, p := range resp.Providers {
 		if p.Name == "x" {
+			if !p.HasCookies {
+				t.Errorf("status should report has_cookies=true for x after push")
+			}
 			if p.LastSync == "" {
-				t.Errorf("status didn't include x last_sync timestamp")
+				t.Errorf("status should include last_sync after push")
 			}
 			return
 		}
 	}
-	t.Errorf("status didn't include x at all: %+v", resp)
-}
-
-func TestCookies_GenerateSecret_FormatAndPersistence(t *testing.T) {
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-
-	secret, err := GenerateSecret()
-	if err != nil {
-		t.Fatalf("GenerateSecret: %v", err)
-	}
-	if !strings.HasPrefix(secret, "SP-") {
-		t.Errorf("secret should start with SP-, got %q", secret)
-	}
-	if !HasSecret() {
-		t.Errorf("HasSecret should be true after GenerateSecret")
-	}
-	raw, _ := os.ReadFile(SecretPath())
-	if strings.TrimSpace(string(raw)) != secret {
-		t.Errorf("secret on disk doesn't match returned value: disk=%q returned=%q", raw, secret)
-	}
-}
-
-func TestCookies_PushMethodOnlyPOST(t *testing.T) {
-	tmp := t.TempDir()
-	t.Setenv("SPWN_HOME", tmp)
-	_ = os.MkdirAll(filepath.Join(tmp, "gate"), 0o700)
-	secret, _ := GenerateSecret()
-
-	cs := NewCookieSync()
-	mux := http.NewServeMux()
-	cs.RegisterRoutes(mux)
+	t.Errorf("status didn't include x: %+v", resp)
 	_ = cs
+}
 
-	req := httptest.NewRequest("GET", "/sync/x", nil)
-	req.Header.Set("X-Spwn-Secret", secret)
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, req)
-	if rec.Code != 405 {
-		t.Errorf("GET /sync/x should be 405, got %d", rec.Code)
+func TestCookies_RegisterProviderIdempotent(t *testing.T) {
+	cs := NewCookieSync()
+	cs.RegisterProvider(CookieProvider{Name: "x", Cookies: []string{"v1"}})
+	cs.RegisterProvider(CookieProvider{Name: "x", Cookies: []string{"v2"}}) // overrides
+
+	got := cs.Providers()
+	if len(got) != 1 {
+		t.Errorf("expected 1 provider after re-register, got %d", len(got))
+	}
+	if got[0].Cookies[0] != "v2" {
+		t.Errorf("re-register didn't overwrite, got %v", got)
 	}
 }

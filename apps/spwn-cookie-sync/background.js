@@ -1,27 +1,18 @@
 // spwn cookie sync — service worker
 //
-// Listens for tab loads and cookie changes on allowlisted hosts, and
-// pushes the relevant session cookies to a locally-running spwn-gate
-// at http://127.0.0.1:9000/sync/<provider>. Auth is a shared secret
-// the user pastes once into the popup after running
-// `spwn cookie-sync register` on their host.
+// Watches allowlisted hosts for cookie changes and tab loads, pushes
+// fresh cookies to a locally-running spwn-gate at /sync/<provider>.
+// No pairing, no secret — the gate listens on 127.0.0.1 and rejects
+// anything not in its per-provider cookie allowlist, which is enough
+// for personal use.
 //
-// Provider list is fetched from the gate at /sync/providers — no
-// extension update needed when spwn adds a new provider.
+// Provider list comes from the gate at /sync/providers, refreshed
+// every 5 min — so adding a new provider in spwn doesn't require an
+// extension reinstall.
 
 const GATE = "http://127.0.0.1:9000";
 
-// Throttle per-provider so we don't hammer the gate when the user
-// browses several pages on the same site quickly.
-const THROTTLE_MS = 30_000;
-const lastSync = new Map(); // provider name → epoch ms
-
 let providers = {}; // domain → { name, cookies: [string] }
-
-async function getSecret() {
-  const r = await chrome.storage.local.get("secret");
-  return r.secret || null;
-}
 
 async function loadProviders() {
   try {
@@ -47,12 +38,6 @@ function matchProvider(host) {
 }
 
 async function pushCookies(provider, url) {
-  const now = Date.now();
-  if ((lastSync.get(provider.name) || 0) + THROTTLE_MS > now) return;
-
-  const secret = await getSecret();
-  if (!secret) return; // not paired yet
-
   const cookies = {};
   for (const name of provider.cookies) {
     const c = await chrome.cookies.get({ url, name });
@@ -61,22 +46,16 @@ async function pushCookies(provider, url) {
   if (Object.keys(cookies).length === 0) return; // user not logged in to this site
 
   try {
-    const resp = await fetch(`${GATE}/sync/${provider.name}`, {
+    await fetch(`${GATE}/sync/${provider.name}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Spwn-Secret": secret,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         cookies,
         captured: new Date().toISOString(),
       }),
     });
-    if (resp.ok) {
-      lastSync.set(provider.name, now);
-    }
   } catch (_) {
-    /* gate down — silent retry on next page load */
+    /* gate down — silent retry on next event */
   }
 }
 
@@ -92,19 +71,16 @@ chrome.tabs.onUpdated.addListener(async (_tabId, info, tab) => {
   if (p) await pushCookies(p, tab.url);
 });
 
-// Real-time sync when X rotates ct0 or LinkedIn refreshes JSESSIONID
-// mid-session (without a full page reload).
+// Real-time sync when the site rotates a cookie mid-session (X
+// rotates ct0 on actions, LinkedIn refreshes JSESSIONID).
 chrome.cookies.onChanged.addListener(async (change) => {
   if (change.removed) return;
   const c = change.cookie;
   const p = matchProvider(c.domain);
   if (!p || !p.cookies.includes(c.name)) return;
-  // Reconstruct a URL the cookie applies to so chrome.cookies.get finds it.
   const url = (c.secure ? "https://" : "http://") + c.domain.replace(/^\./, "") + (c.path || "/");
   await pushCookies(p, url);
 });
 
-// Refresh provider registry on startup + every 5 min so the extension
-// picks up new providers added to the gate without a reinstall.
 loadProviders();
 setInterval(loadProviders, 5 * 60 * 1000);

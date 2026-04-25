@@ -32,11 +32,11 @@ func main() {
 	}
 
 	cookies := gate.NewCookieSync()
-	if gate.HasSecret() {
-		logger.Printf("cookie-sync paired (secret loaded from %s)", gate.SecretPath())
-	} else {
-		logger.Printf("cookie-sync unpaired — run `spwn cookie-sync register` on the host to enable the browser extension")
-	}
+	// Register cookie providers alongside the elements that consume
+	// them. Adding a new cookie-using element = define a CookieProvider
+	// next to NewXxxElement and register it here.
+	cookies.RegisterProvider(gate.XCookieProvider())
+	logger.Printf("cookie-sync ready: %d provider(s) registered", len(cookies.Providers()))
 
 	srv := gate.NewServer(addr, reg, cookies, logger)
 	sched := gate.NewScheduler(reg, 0, logger)

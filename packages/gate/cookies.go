@@ -1,9 +1,6 @@
 package gate
 
 import (
-	"crypto/rand"
-	"crypto/subtle"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,115 +14,112 @@ import (
 )
 
 // CookieProvider is one site whose session cookies the spwn-cookie-sync
-// extension is allowed to push at the gate. Only the named cookies are
-// persisted — anything else in the request body is silently dropped.
+// extension is allowed to push at the gate. Only the named cookies
+// are persisted — anything else in the request body is silently
+// dropped as defense-in-depth against fork extensions trying to leak
+// unrelated cookies.
+//
+// Providers are registered by gate elements that need cookie auth
+// (see XCookieProvider in x.go for the pattern), and wired into the
+// CookieSync at startup in apps/gate/cmd/spwn-gate/main.go.
 type CookieProvider struct {
 	Name    string   `json:"name"`    // url-safe id, e.g. "x", "linkedin"
 	Domains []string `json:"domains"` // suffix-matched against tab hostnames
 	Cookies []string `json:"cookies"` // allowlisted cookie names
 }
 
-// DefaultCookieProviders is the seed registry. Add new entries here
-// as new gate elements gain cookie-auth support; the extension's
-// /sync/providers fetch picks them up at next refresh tick.
-var DefaultCookieProviders = []CookieProvider{
-	{Name: "x", Domains: []string{"x.com", "twitter.com"}, Cookies: []string{"auth_token", "ct0"}},
-	{Name: "linkedin", Domains: []string{"linkedin.com"}, Cookies: []string{"li_at", "JSESSIONID"}},
-}
-
 // CookieSync owns the /sync/* endpoints — the receive-end of the
 // browser extension. Wired into the server's mux alongside /mcp/*.
 //
-// State held on disk under ~/.spwn/gate/ on the host (bind-mounted
-// to /gate inside the container):
-//
-//   /gate/cookie-sync-secret   — paired-extension shared secret (0600)
-//
-// Persisted cookies land under ~/.spwn/credentials/<provider>/cookies.json
-// so the same path is reachable both from the gate (rw) and from
-// other elements that read them (XActions, linkedin-mcp, …).
+// Trust model: localhost-only binding + cookie-name allowlist. No
+// shared secret. The gate listens on 127.0.0.1, so the only callers
+// that can reach /sync are processes already running on the user's
+// machine; anything that has local execution can already do worse.
+// Defense-in-depth is the cookie allowlist (only the named cookies
+// per provider are persisted; anything else is dropped silently).
 type CookieSync struct {
-	providers []CookieProvider
-
-	mu        sync.Mutex
-	lastSync  map[string]time.Time // provider name → most-recent successful sync
-	secret    string               // cached after first read; "" until register
-	secretMTime time.Time
+	mu        sync.RWMutex
+	providers map[string]CookieProvider // keyed by name
+	lastSync  map[string]time.Time      // provider name → most-recent successful sync
 }
 
-// NewCookieSync builds the sync service with the default provider
-// list. Call AddProvider before serving for custom additions.
+// NewCookieSync returns an empty sync service. Register providers
+// before calling RegisterRoutes (typically from element constructors
+// in apps/gate/cmd/spwn-gate/main.go).
 func NewCookieSync() *CookieSync {
-	cs := &CookieSync{
-		providers: append([]CookieProvider(nil), DefaultCookieProviders...),
+	return &CookieSync{
+		providers: map[string]CookieProvider{},
 		lastSync:  map[string]time.Time{},
 	}
-	_ = cs.loadSecret() // best-effort; absent secret = unpaired
-	return cs
 }
 
-// AddProvider registers an extra provider. Not concurrent-safe; call
-// during startup before RegisterRoutes.
-func (cs *CookieSync) AddProvider(p CookieProvider) { cs.providers = append(cs.providers, p) }
+// RegisterProvider adds a provider to the registry. Idempotent
+// (later calls with the same Name overwrite the earlier entry).
+// Concurrent-safe.
+func (cs *CookieSync) RegisterProvider(p CookieProvider) {
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
+	cs.providers[p.Name] = p
+}
 
-// RegisterRoutes wires /sync/* into mux. /mcp/* stays its own
-// namespace handled elsewhere in server.go.
+// RegisterRoutes wires /sync/* into mux.
 func (cs *CookieSync) RegisterRoutes(mux *http.ServeMux) {
-	// /sync/providers — public, no secret required (extension fetches
-	// this before pairing to know what to listen for).
 	mux.HandleFunc("/sync/providers", cs.handleProviders)
-
-	// /sync/status — paired-only, used by popup to show last-sync timestamps.
 	mux.HandleFunc("/sync/status", cs.handleStatus)
-
-	// /sync/<provider> — paired-only, accepts cookies and persists.
-	// Catch-all under /sync/; provider name is the path tail.
 	mux.HandleFunc("/sync/", cs.handlePush)
 }
 
 func (cs *CookieSync) handleProviders(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "chrome-extension://")
-	_ = json.NewEncoder(w).Encode(cs.providers)
+	// Localhost-only binding makes CORS lax safe — the only origins
+	// that can reach this endpoint live on this machine.
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_ = json.NewEncoder(w).Encode(cs.Providers())
 }
 
-func (cs *CookieSync) handleStatus(w http.ResponseWriter, r *http.Request) {
-	if !cs.checkSecret(r) {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	cs.mu.Lock()
+func (cs *CookieSync) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	type row struct {
-		Name     string `json:"name"`
-		LastSync string `json:"last_sync,omitempty"`
+		Name       string   `json:"name"`
+		Domains    []string `json:"domains"`
+		LastSync   string   `json:"last_sync,omitempty"`
+		HasCookies bool     `json:"has_cookies"`
 	}
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
 	rows := make([]row, 0, len(cs.providers))
 	for _, p := range cs.providers {
-		r := row{Name: p.Name}
+		r := row{Name: p.Name, Domains: p.Domains}
 		if t, ok := cs.lastSync[p.Name]; ok {
 			r.LastSync = t.UTC().Format(time.RFC3339)
 		}
+		// has_cookies is on-disk presence — survives gate restarts so
+		// the popup can still say "connected" even if in-memory
+		// lastSync is empty after a fresh start.
+		if _, err := os.Stat(CookieFile(p.Name)); err == nil {
+			r.HasCookies = true
+		}
 		rows = append(rows, r)
 	}
-	cs.mu.Unlock()
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]any{"paired": true, "providers": rows})
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	_ = json.NewEncoder(w).Encode(map[string]any{"providers": rows})
 }
 
 func (cs *CookieSync) handlePush(w http.ResponseWriter, r *http.Request) {
-	// /sync/providers + /sync/status are handled above; this is the
-	// catch-all for /sync/<provider>. Skip the well-known sub-paths.
 	tail := strings.TrimPrefix(r.URL.Path, "/sync/")
 	if tail == "" || tail == "providers" || tail == "status" {
 		http.NotFound(w, r)
 		return
 	}
-	if r.Method != http.MethodPost {
-		http.Error(w, "POST only", http.StatusMethodNotAllowed)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	if !cs.checkSecret(r) {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST only", http.StatusMethodNotAllowed)
 		return
 	}
 	provider := cs.providerByName(tail)
@@ -143,8 +137,6 @@ func (cs *CookieSync) handlePush(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Drop any cookie name not in the allowlist — defense-in-depth
-	// against an extension fork that tries to leak unrelated cookies.
 	allowed := map[string]bool{}
 	for _, n := range provider.Cookies {
 		allowed[n] = true
@@ -179,57 +171,13 @@ func (cs *CookieSync) handlePush(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cs *CookieSync) providerByName(name string) *CookieProvider {
-	for i := range cs.providers {
-		if cs.providers[i].Name == name {
-			return &cs.providers[i]
-		}
-	}
-	return nil
-}
-
-// checkSecret validates the X-Spwn-Secret header against the secret
-// stored in /gate/cookie-sync-secret. Re-reads the file on each call
-// so `spwn cookie-sync register --rotate` takes effect without a
-// gate restart.
-func (cs *CookieSync) checkSecret(r *http.Request) bool {
-	got := r.Header.Get("X-Spwn-Secret")
-	if got == "" {
-		return false
-	}
-	if err := cs.loadSecret(); err != nil || cs.secret == "" {
-		return false
-	}
-	return subtle.ConstantTimeCompare([]byte(got), []byte(cs.secret)) == 1
-}
-
-// loadSecret refreshes the cached secret from disk if the file's
-// mtime has changed. Cheap (one stat per request); avoids re-reading
-// the file when it hasn't moved.
-func (cs *CookieSync) loadSecret() error {
-	path := SecretPath()
-	fi, err := os.Stat(path)
-	if err != nil {
-		cs.secret = ""
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
-	}
-	if !fi.ModTime().After(cs.secretMTime) && cs.secret != "" {
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
+	p, ok := cs.providers[name]
+	if !ok {
 		return nil
 	}
-	raw, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	cs.secret = strings.TrimSpace(string(raw))
-	cs.secretMTime = fi.ModTime()
-	return nil
-}
-
-// SecretPath returns the on-disk location of the pairing secret.
-func SecretPath() string {
-	return filepath.Join(platform.UserDir(), "gate", "cookie-sync-secret")
+	return &p
 }
 
 // CookieDir returns the directory where /sync/<name> persists per-
@@ -243,47 +191,29 @@ func CookieFile(provider string) string {
 	return filepath.Join(CookieDir(provider), "cookies.json")
 }
 
-// GenerateSecret creates a fresh pairing secret and writes it to
-// SecretPath() with 0600 perms. Returns the human-formatted display
-// string (SP-XXXX-XXXX-XXXX) the user pastes into the popup.
-func GenerateSecret() (string, error) {
-	b := make([]byte, 12)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	raw := strings.ToUpper(hex.EncodeToString(b))
-	display := "SP-" + raw[0:6] + "-" + raw[6:12] + "-" + raw[12:18] + "-" + raw[18:24]
-
-	dir := filepath.Dir(SecretPath())
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return "", err
-	}
-	if err := os.WriteFile(SecretPath(), []byte(display), 0o600); err != nil {
-		return "", err
-	}
-	return display, nil
-}
-
-// HasSecret reports whether the gate has been paired (a secret file
-// exists). Used by the CLI dashboard.
-func HasSecret() bool {
-	_, err := os.Stat(SecretPath())
-	return err == nil
-}
-
 // ProviderLastSync returns the most recent in-memory last-sync time
 // for a provider, or zero. CLI status uses this to render "synced
 // 2 min ago" rows.
 func (cs *CookieSync) ProviderLastSync(name string) time.Time {
-	cs.mu.Lock()
-	defer cs.mu.Unlock()
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
 	return cs.lastSync[name]
 }
 
-// Providers returns a copy of the registered provider list.
+// Providers returns a copy of the registered provider list, sorted
+// by name for deterministic output (popup + tests rely on it).
 func (cs *CookieSync) Providers() []CookieProvider {
-	out := make([]CookieProvider, len(cs.providers))
-	copy(out, cs.providers)
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
+	out := make([]CookieProvider, 0, len(cs.providers))
+	for _, p := range cs.providers {
+		out = append(out, p)
+	}
+	for i := 1; i < len(out); i++ {
+		for j := i; j > 0 && out[j-1].Name > out[j].Name; j-- {
+			out[j-1], out[j] = out[j], out[j-1]
+		}
+	}
 	return out
 }
 

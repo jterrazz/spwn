@@ -3,37 +3,56 @@
   <head>
     <meta charset="utf-8" />
     <style>
-      body { font-family: -apple-system, system-ui, sans-serif; width: 320px; padding: 12px; margin: 0; }
-      h1 { font-size: 14px; margin: 0 0 8px; }
-      p { font-size: 12px; color: #555; margin: 6px 0; }
-      input[type=text] { width: 100%; box-sizing: border-box; padding: 6px; font-family: monospace; font-size: 12px; }
-      button { margin-top: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
-      .status-ok { color: #2a7; font-weight: 600; }
-      .status-bad { color: #c33; font-weight: 600; }
-      .row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
-      .muted { color: #888; }
-      hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
+      body {
+        font-family: -apple-system, system-ui, sans-serif;
+        width: 320px;
+        padding: 12px;
+        margin: 0;
+        font-size: 13px;
+      }
+      h1 { font-size: 13px; margin: 0 0 4px; font-weight: 600; }
+      .gate-status { font-size: 11px; color: #888; margin-bottom: 10px; }
+      .gate-ok { color: #2a7; }
+      .gate-bad { color: #c33; }
+      hr { border: 0; border-top: 1px solid #eee; margin: 8px 0; }
+      .provider {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px solid #f4f4f4;
+      }
+      .provider:last-child { border-bottom: 0; }
+      .glyph { font-size: 16px; line-height: 1; flex: 0 0 16px; text-align: center; }
+      .glyph-on { color: #2a7; }
+      .glyph-off { color: #bbb; }
+      .name { font-weight: 600; flex: 1; }
+      .tag {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .tag-connected { background: #e8f7ed; color: #2a7; }
+      .tag-pending { background: #f2f2f2; color: #888; }
+      .meta { width: 100%; font-size: 10px; color: #888; padding-left: 24px; margin-top: -4px; }
+      .empty { font-size: 12px; color: #888; padding: 12px 0; text-align: center; }
     </style>
   </head>
   <body>
     <h1>spwn cookie sync</h1>
-    <p id="state"></p>
+    <div id="gate-status" class="gate-status">checking gate…</div>
 
-    <div id="pair-form">
-      <p>
-        Paste the secret printed by
-        <code style="font-size:11px">spwn cookie-sync register</code>:
-      </p>
-      <input type="text" id="secret" placeholder="SP-XXXX-XXXX-XXXX" autocomplete="off" />
-      <button id="pair">Pair</button>
-    </div>
+    <hr />
 
-    <div id="paired" hidden>
-      <hr />
-      <p><strong>Synced providers</strong></p>
-      <div id="providers" class="muted">loading…</div>
-      <hr />
-      <button id="unpair">Unpair</button>
+    <div id="providers" class="empty">loading…</div>
+
+    <hr />
+
+    <div class="gate-status">
+      gate at 127.0.0.1:9000 — visit a listed site to sync its cookies
     </div>
 
     <script src="popup.js"></script>

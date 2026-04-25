@@ -8,6 +8,19 @@ import (
 	"os/exec"
 )
 
+// XCookieProvider is the cookie-sync registration for the X element.
+// The spwn-cookie-sync browser extension fetches this from the gate's
+// /sync/providers endpoint and watches the listed domains for the
+// listed cookie names. Defining the registration alongside the
+// element keeps the contract close to the code that depends on it.
+func XCookieProvider() CookieProvider {
+	return CookieProvider{
+		Name:    "x",
+		Domains: []string{"x.com", "twitter.com"},
+		Cookies: []string{"auth_token", "ct0"},
+	}
+}
+
 // NewXElement exposes a small curated set of X (Twitter) read-only
 // tools backed by twscrape, with cookies from the spwn-cookie-sync
 // browser extension. Writes (post, reply) deliberately stay out of

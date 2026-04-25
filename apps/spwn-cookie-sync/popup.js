@@ -2,44 +2,54 @@ const GATE = "http://127.0.0.1:9000";
 
 const $ = (id) => document.getElementById(id);
 
+function relativeTime(iso) {
+  if (!iso) return "no sync yet";
+  const t = new Date(iso).getTime();
+  const sec = Math.floor((Date.now() - t) / 1000);
+  if (sec < 5) return "just now";
+  if (sec < 60) return `${sec}s ago`;
+  if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+  if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
+  return `${Math.floor(sec / 86400)}d ago`;
+}
+
+function renderProvider(p) {
+  const connected = p.has_cookies || !!p.last_sync;
+  const status = connected ? "connected" : "pending";
+  const meta = connected
+    ? `synced ${relativeTime(p.last_sync)} — ${(p.domains || []).join(", ")}`
+    : `visit ${(p.domains || []).join(" or ")} once to sync`;
+
+  return `
+    <div class="provider">
+      <span class="glyph ${connected ? "glyph-on" : "glyph-off"}">${connected ? "●" : "○"}</span>
+      <span class="name">${p.name}</span>
+      <span class="tag ${connected ? "tag-connected" : "tag-pending"}">${status}</span>
+    </div>
+    <div class="meta">${meta}</div>
+  `;
+}
+
 async function refresh() {
-  const { secret } = await chrome.storage.local.get("secret");
-  if (!secret) {
-    $("state").innerHTML = '<span class="status-bad">·</span> not paired';
-    $("pair-form").hidden = false;
-    $("paired").hidden = true;
-    return;
-  }
-
-  $("pair-form").hidden = true;
-  $("paired").hidden = false;
-
-  // Probe gate health
   try {
-    const r = await fetch(`${GATE}/sync/status`, { headers: { "X-Spwn-Secret": secret } });
-    if (!r.ok) throw new Error("gate rejected");
-    const status = await r.json();
-    $("state").innerHTML = '<span class="status-ok">✓</span> paired with spwn-gate';
-    const rows = (status.providers || []).map((p) => {
-      const seen = p.last_sync ? new Date(p.last_sync).toLocaleString() : "no sync yet";
-      return `<div class="row"><span>${p.name}</span><span class="muted">${seen}</span></div>`;
-    });
-    $("providers").innerHTML = rows.length ? rows.join("") : '<div class="muted">no providers configured</div>';
+    const r = await fetch(`${GATE}/sync/status`);
+    if (!r.ok) throw new Error(`status ${r.status}`);
+    const data = await r.json();
+    $("gate-status").innerHTML = '<span class="gate-ok">●</span> gate connected';
+    const list = data.providers || [];
+    if (list.length === 0) {
+      $("providers").className = "empty";
+      $("providers").textContent = "no providers registered yet — start a gate element that uses cookies";
+    } else {
+      $("providers").className = "";
+      $("providers").innerHTML = list.map(renderProvider).join("");
+    }
   } catch (_) {
-    $("state").innerHTML = '<span class="status-bad">·</span> gate not reachable on 127.0.0.1:9000';
+    $("gate-status").innerHTML = '<span class="gate-bad">●</span> gate not reachable on 127.0.0.1:9000 — run `spwn gate start`';
+    $("providers").className = "empty";
+    $("providers").textContent = "—";
   }
 }
 
-$("pair").addEventListener("click", async () => {
-  const v = $("secret").value.trim();
-  if (!v) return;
-  await chrome.storage.local.set({ secret: v });
-  refresh();
-});
-
-$("unpair").addEventListener("click", async () => {
-  await chrome.storage.local.remove("secret");
-  refresh();
-});
-
 refresh();
+setInterval(refresh, 5000); // popup is open: poll every 5s for live updates
