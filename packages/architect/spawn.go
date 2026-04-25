@@ -26,7 +26,6 @@ import (
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
 	authgh "spwn.sh/packages/auth/gh"
-	authmcp "spwn.sh/packages/auth/mcp"
 	"spwn.sh/packages/gate"
 )
 
@@ -353,23 +352,18 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		warnings = append(warnings, fmt.Sprintf("gate ensure-running: %v", err))
 	}
 
-	// MCP OAuth tokens (Notion, etc). The /credentials root is
-	// Bind-mounted ro above; we layer a rw bind on the mcp/ subdir
-	// So mcp2cli can refresh tokens. The in-container path is fixed
-	// (/credentials/mcp) — independent of the agent's $HOME, which
-	// Varies per runtime — and tools point at it via
-	// MCP2CLI_CACHE_DIR set on every container env list.
-	if mcpCache := authmcp.CacheDir(); mcpCache != "" {
-		if err := os.MkdirAll(mcpCache, 0o700); err == nil {
-			binds = append(binds, mcpCache+":/credentials/mcp")
-		}
-	}
+	// MCP OAuth tokens are no longer bind-mounted into worlds — the
+	// gate (host-side daemon, see packages/gate) holds them and
+	// proxies authenticated MCP requests on the world's behalf via
+	// `mcp2cli --mcp http://host.docker.internal:9000/mcp/<element>`.
+	// World containers therefore have zero MCP credentials in their
+	// filesystem; they get a thin CLI wrapper that talks to the gate.
 
 	// gh CLI auth (~/.spwn/credentials/gh, written by `spwn auth
-	// Login github`). Same pattern as mcp/: rw layered over the ro
-	// /credentials root. GH_CONFIG_DIR points at it on every
-	// Container so both `gh ...` cobra commands and `gh-mcp` (which
-	// Reads `gh auth token`) see the same token without an env var.
+	// login github`). Layered rw over the ro /credentials root.
+	// GH_CONFIG_DIR points at it on every container so both `gh ...`
+	// cobra commands AND `gh-mcp` (which reads `gh auth token`) see
+	// the same token without an env var. (gh isn't gate-routed yet.)
 	if ghCache := authgh.CacheDir(); ghCache != "" {
 		if err := os.MkdirAll(ghCache, 0o700); err == nil {
 			binds = append(binds, ghCache+":/credentials/gh")
@@ -394,11 +388,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		env = append(env, "SPWN_HOME=/home/spwn/.spwn")
 	}
 
-	// Pin mcp2cli's cache to the rw bind-mount at /credentials/mcp.
-	// Set unconditionally — the var is harmless when no MCP tool is
-	// Installed, and we want it stable across every runtime
-	// (claude-code, codex, …) without each one having to know.
-	env = append(env, "MCP2CLI_CACHE_DIR=/credentials/mcp")
+	// MCP wrappers route through the gate, so mcp2cli is used purely
+	// in HTTP-proxy mode (--mcp http://host.docker.internal:9000/mcp/...)
+	// from inside worlds. No local cache, no MCP2CLI_CACHE_DIR.
 	// Same idea for gh: hosts.yml + config.yml live at the rw
 	// /credentials/gh bind-mount. Setting GH_CONFIG_DIR works for
 	// `gh` cobra commands AND `gh auth token`, which is what the
