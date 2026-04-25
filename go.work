@@ -1,21 +1,23 @@
 go 1.25.0
 
 use (
+	./apps/api
 	./apps/cli
+	./apps/gate
 	./packages/activity
 	./packages/agent
-	./apps/api
 	./packages/architect
 	./packages/auth
 	./packages/compile
 	./packages/container
-	./packages/transpile
+	./packages/dependency
+	./packages/gate
 	./packages/migration
 	./packages/platform
-	./packages/upgrade
 	./packages/project
-	./packages/dependency
 	./packages/runtimes
+	./packages/transpile
+	./packages/upgrade
 	./packages/world
 	./tests/catalog
 )

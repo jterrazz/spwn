@@ -18,8 +18,6 @@ require (
 	spwn.sh/packages/world v0.0.0
 )
 
-require github.com/kardianos/service v1.2.4 // indirect
-
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -51,6 +49,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	spwn.sh/packages/architect v0.0.0
+	spwn.sh/packages/gate v0.0.0
 	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/runtimes v0.0.0
 	spwn.sh/packages/upgrade v0.0.0
@@ -74,3 +73,5 @@ replace spwn.sh/packages/architect => ../../packages/architect
 replace spwn.sh/packages/migration => ../../packages/migration
 
 replace spwn.sh/packages/upgrade => ../../packages/upgrade
+
+replace spwn.sh/packages/gate => ../../packages/gate

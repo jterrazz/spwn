@@ -1,0 +1,14 @@
+module spwn.sh/packages/gate
+
+go 1.25.0
+
+require spwn.sh/packages/auth v0.0.0
+
+require (
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+	spwn.sh/packages/platform v0.0.0 // indirect
+)
+
+replace spwn.sh/packages/auth => ../auth
+
+replace spwn.sh/packages/platform => ../platform

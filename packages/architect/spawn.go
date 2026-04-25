@@ -27,6 +27,7 @@ import (
 	"spwn.sh/packages/auth"
 	authgh "spwn.sh/packages/auth/gh"
 	authmcp "spwn.sh/packages/auth/mcp"
+	"spwn.sh/packages/gate"
 )
 
 // SpawnResult is returned by Spawn with the world and any non-fatal warnings.
@@ -343,6 +344,14 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		warnings = append(warnings, fmt.Sprintf("credential sync: %v", err))
 	}
 	binds = append(binds, platform.CredentialsDir()+":/credentials:ro")
+
+	// Bring up the gate (host-side credential broker) if not already
+	// running. Idempotent and cheap when already up — a single docker
+	// inspect. The gate is what world containers will call for
+	// credentialed MCP requests once their wrappers route through it.
+	if err := gate.EnsureRunning(ctx, opts.logWriter()); err != nil {
+		warnings = append(warnings, fmt.Sprintf("gate ensure-running: %v", err))
+	}
 
 	// MCP OAuth tokens (Notion, etc). The /credentials root is
 	// Bind-mounted ro above; we layer a rw bind on the mcp/ subdir
