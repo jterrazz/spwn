@@ -7,40 +7,43 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-)
 
-// gwsCredsPath is where the gate looks for the Google credentials
-// file. The user runs `gws auth setup` + `gws auth export` on the
-// host, drops the resulting credentials.json into ~/.spwn/gate/google/,
-// and the gate's bind mount surfaces it here.
-const gwsCredsPath = "/gate/google/credentials.json"
+	authgoogle "spwn.sh/packages/auth/google"
+)
 
 // runGws executes a gws subprocess with credentials wired and returns
 // its stdout as a parsed JSON value. Falls back to raw text content
 // when the response isn't JSON (gws errors are sometimes plain text).
+//
+// Auth is always-fresh: every call asks google.AccessToken for a
+// non-expired access token (refreshing on demand) and passes it to
+// gws via GOOGLE_WORKSPACE_CLI_TOKEN. This means tokens managed by
+// `spwn auth login google` on the host land here without any
+// per-call credential file shuffling — google.LoadTokens reads from
+// ~/.spwn/credentials/google/tokens.json which is bind-mounted as
+// /credentials/google/tokens.json inside the gate container.
 func runGws(ctx context.Context, args ...string) (any, error) {
-	if _, err := os.Stat(gwsCredsPath); err != nil {
+	tok, err := authgoogle.AccessToken(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get google access token: %w", err)
+	}
+	if tok == "" {
 		return nil, fmt.Errorf(
-			"no Google credentials at %s — run on the host:\n"+
-				"  gws auth setup\n"+
-				"  gws auth login -s gmail,calendar\n"+
-				"  mkdir -p ~/.spwn/gate/google\n"+
-				"  gws auth export --unmasked > ~/.spwn/gate/google/credentials.json\n"+
-				"then `spwn gate restart`",
-			gwsCredsPath,
+			"no google credentials — run on the host:\n" +
+				"  spwn auth login google\n" +
+				"the wizard guides you through a one-time GCP project setup,\n" +
+				"then opens a browser for the OAuth click-Allow step",
 		)
 	}
 
 	cmd := exec.CommandContext(ctx, "gws", args...)
 	cmd.Env = append(os.Environ(),
-		"GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE="+gwsCredsPath,
+		"GOOGLE_WORKSPACE_CLI_TOKEN="+tok,
 	)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		// gws exit codes carry meaning, but for now just surface
-		// stderr — the caller wraps as MCP isError=true content.
 		return nil, fmt.Errorf("gws %v: %w (stderr: %s)", args, err, bytes.TrimSpace(stderr.Bytes()))
 	}
 
@@ -49,7 +52,6 @@ func runGws(ctx context.Context, args ...string) (any, error) {
 		return map[string]any{"ok": true}, nil
 	}
 
-	// Try to parse as JSON; fall back to text.
 	var parsed any
 	if err := json.Unmarshal(out, &parsed); err == nil {
 		return parsed, nil
@@ -63,6 +65,13 @@ func runGws(ctx context.Context, args ...string) (any, error) {
 // the gws surface is huge but most agents only need a handful.
 func NewGmailElement() *MCPServer {
 	s := NewMCPServer("gmail", "Gmail (via gws)", "0.1.0")
+	s.OnRefresh = func(ctx context.Context) error {
+		// Pre-warm google access token alongside the gate's other
+		// scheduled refreshes so the first gmail call after a long
+		// idle period doesn't pay the OAuth-refresh round-trip.
+		_, err := authgoogle.Refresh(ctx)
+		return err
+	}
 
 	s.AddTool(&MCPTool{
 		Name:        "search-threads",
@@ -130,9 +139,14 @@ func NewGmailElement() *MCPServer {
 }
 
 // NewGcalElement exposes Google Calendar tools via gws. Same pattern
-// as Gmail: small curated tool set, gws backend.
+// as Gmail: small curated tool set, gws backend, OnRefresh pre-warms
+// the access token.
 func NewGcalElement() *MCPServer {
 	s := NewMCPServer("gcal", "Google Calendar (via gws)", "0.1.0")
+	s.OnRefresh = func(ctx context.Context) error {
+		_, err := authgoogle.Refresh(ctx)
+		return err
+	}
 
 	s.AddTool(&MCPTool{
 		Name:        "list-calendars",

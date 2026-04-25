@@ -16,6 +16,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/auth"
 	authgh "spwn.sh/packages/auth/gh"
+	authgoogle "spwn.sh/packages/auth/google"
 	authmcp "spwn.sh/packages/auth/mcp"
 	"spwn.sh/packages/platform"
 )
@@ -142,22 +143,36 @@ func runStatus() error {
 	return nil
 }
 
-// renderCLISection prints the "Tools (CLI)" block — currently just
-// gh, but the shape is the same as renderMCPSection so adding
-// future CLIs (e.g. linear-cli, atlassian-cli) is a one-liner.
+// renderCLISection prints the "Tools (CLI)" block — gh today, plus
+// google (BYO-GCP, OAuth installed-app flow). Adding future CLIs is
+// a one-liner once their auth package is wired.
 func renderCLISection(w io.Writer) {
 	fmt.Fprintf(w, "  %s\n", ui.Strong("Tools (CLI)"))
-	row := dashboardRow{method: "github"}
+
+	gh := dashboardRow{method: "github"}
 	if authgh.IsAuthenticated() {
-		row.glyph = ui.Green("✓")
-		row.detail = "file:" + abbreviate(authgh.CacheDir())
-		row.hintCommand = "spwn auth logout github"
+		gh.glyph = ui.Green("✓")
+		gh.detail = "file:" + abbreviate(authgh.CacheDir())
+		gh.hintCommand = "spwn auth logout github"
 	} else {
-		row.glyph = ui.Faint("·")
-		row.detail = "not set"
-		row.hintCommand = "spwn auth login github"
+		gh.glyph = ui.Faint("·")
+		gh.detail = "not set"
+		gh.hintCommand = "spwn auth login github"
 	}
-	renderDashboardRow(w, row)
+	renderDashboardRow(w, gh)
+
+	google := dashboardRow{method: "google"}
+	if authgoogle.IsAuthenticated() {
+		google.glyph = ui.Green("✓")
+		google.detail = "file:" + abbreviate(authgoogle.CacheDir())
+		google.hintCommand = "spwn auth logout google"
+	} else {
+		google.glyph = ui.Faint("·")
+		google.detail = "not set"
+		google.hintCommand = "spwn auth login google"
+	}
+	renderDashboardRow(w, google)
+
 	fmt.Fprintln(w)
 }
 
@@ -424,6 +439,10 @@ approve in your browser, the token persists for every world:
 		if strings.EqualFold(args[0], "github") {
 			return runGitHubLogin(cmd)
 		}
+		// Google branch — BYO-GCP wizard + installed-app PKCE flow.
+		if strings.EqualFold(args[0], "google") {
+			return runGoogleLogin(cmd)
+		}
 		// MCP providers branch — ref-by-name and own a different
 		// storage path than AI providers.
 		if mp, ok := authmcp.Lookup(args[0]); ok {
@@ -527,6 +546,53 @@ func saveAPIKey(p auth.Provider, key string) error {
 		return errors.New("OpenAI API key persistence not yet supported; export OPENAI_API_KEY in your shell for now")
 	}
 	return fmt.Errorf("unsupported provider %q", p)
+}
+
+// runGoogleLogin walks the user through the one-time GCP setup the
+// first time it's invoked, then runs Google's OAuth installed-app
+// PKCE flow. Tokens land in ~/.spwn/credentials/google/, ready for
+// the gate to consume via google.AccessToken on every gws call.
+//
+// Why an interactive wizard instead of `claude login`-style "go run
+// this other tool first" — Google's restricted scopes (Gmail) make
+// shipping a single OAuth client cost-prohibitive ($15k/yr CASA
+// audit), so every spwn user runs their own OAuth client. The
+// wizard keeps that ~10 min experience as low-friction as we can
+// without paying for verification.
+func runGoogleLogin(cmd *cobra.Command) error {
+	s := ui.New()
+	s.Blank()
+
+	c, err := authgoogle.LoadClient()
+	if err != nil {
+		return s.FailHint("read client.json failed", err,
+			"Check ~/.spwn/credentials/google/ permissions")
+	}
+	if c == nil {
+		// First run: walk the user through GCP project setup, capture
+		// their client_id/secret, persist before doing OAuth.
+		c, err = authgoogle.PromptClient(cmd.InOrStdin(), cmd.OutOrStderr())
+		if err != nil {
+			return s.FailHint("OAuth client setup cancelled", err, "")
+		}
+		if err := authgoogle.SaveClient(c); err != nil {
+			return s.FailHint("save client.json failed", err,
+				"Check ~/.spwn/credentials/google/ is writable")
+		}
+	}
+
+	s.Info("Logging in to google", "a browser tab will open; click Allow, then this command exits")
+	s.Blank()
+
+	if err := authgoogle.Login(cmd.Context(), c, cmd.OutOrStderr()); err != nil {
+		return s.FailHint("google login failed", err,
+			"Re-run `spwn auth login google`. If it loops, check that the OAuth consent screen has your email listed under Test users.")
+	}
+	s.Blank()
+	s.Done("google tokens saved",
+		fmt.Sprintf("ready — `gmail-mcp ...` and `gcal-mcp ...` inside any world will use these (cache: %s)", abbreviate(authgoogle.CacheDir())))
+	s.Blank()
+	return nil
 }
 
 // ── logout ──────────────────────────────────────────────────────────
