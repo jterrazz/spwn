@@ -3,6 +3,11 @@
 package world
 
 import (
+	"fmt"
+	"path/filepath"
+	"regexp"
+	"strings"
+
 	"spwn.sh/packages/agent"
 
 	"spwn.sh/packages/container/backend"
@@ -108,5 +113,29 @@ func ApplyDefaults(m *Manifest) {
 // world's referenced agents without reaching into internal packages.
 func LoadAgentManifest(agentDir string) (*agent.Manifest, error) {
 	return agent.LoadManifestPath(agentDir)
+}
+
+// workspaceNameRe mirrors the slug rule enforced by validate.ruleWorkspaceMounts.
+// Kept inline here to avoid pulling packages/project into the world layer.
+var workspaceNameRe = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
+
+// AutoWorkspaceName derives a workspace name from a host path when the
+// caller didn't provide one with the `name=path` syntax. It returns the
+// lowercased basename of the absolute path when slug-compliant
+// (`^[a-z][a-z0-9-]*$`); otherwise it falls back to "workspace<index>".
+//
+// This keeps single-workspace projects discoverable: `workspaces: [.]`
+// from /Users/me/my-project/ mounts at /workspaces/my-project/ rather
+// than the opaque /workspaces/workspace0/. Paths with uppercase, spaces,
+// leading digits, or other non-slug characters in their basename should
+// use the explicit `name=path` form to pick a friendly name.
+func AutoWorkspaceName(path string, index int) string {
+	if abs, err := filepath.Abs(path); err == nil {
+		base := strings.ToLower(filepath.Base(abs))
+		if workspaceNameRe.MatchString(base) {
+			return base
+		}
+	}
+	return fmt.Sprintf("workspace%d", index)
 }
 

@@ -15,11 +15,14 @@ func TestParseWorkspaceFlags(t *testing.T) {
 		wantErr  bool
 	}{
 		{name: "empty → ephemeral", in: nil, wantLen: 0},
-		{name: "single bare path", in: []string{"/host/a"}, wantName: "workspace0", wantPath: "/host/a", wantLen: 1},
+		{name: "single bare path uses basename", in: []string{"/host/myproject"}, wantName: "myproject", wantPath: "/host/myproject", wantLen: 1},
+		{name: "basename lowercased", in: []string{"/host/MyProject"}, wantName: "myproject", wantPath: "/host/MyProject", wantLen: 1},
 		{name: "single named", in: []string{"web=/host/a"}, wantName: "web", wantPath: "/host/a", wantLen: 1},
 		{name: "read-only", in: []string{"docs=/host/d:ro"}, wantName: "docs", wantPath: "/host/d", wantRO: true, wantLen: 1},
 		{name: "multi named", in: []string{"web=/a", "api=/b"}, wantName: "web", wantPath: "/a", wantLen: 2},
-		{name: "bare in multi gets workspace<N>", in: []string{"/a", "/b"}, wantName: "workspace0", wantPath: "/a", wantLen: 2},
+		{name: "bare basename in multi", in: []string{"/host/alpha", "/host/beta"}, wantName: "alpha", wantPath: "/host/alpha", wantLen: 2},
+		{name: "non-slug basename falls back to workspace<N>", in: []string{"/host/My Project"}, wantName: "workspace0", wantPath: "/host/My Project", wantLen: 1},
+		{name: "leading-digit basename falls back", in: []string{"/host/123-app"}, wantName: "workspace0", wantPath: "/host/123-app", wantLen: 1},
 		{name: "empty path errors", in: []string{"name="}, wantErr: true},
 	}
 

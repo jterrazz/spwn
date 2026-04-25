@@ -607,11 +607,12 @@ func dockerHint(err error) error {
 // parseWorkspaceFlags parses a list of "-w" values into world.Workspace.
 // Accepted forms:
 //
-//	"path"           → auto-named workspace<N>
+//	"path"           → auto-named from the path basename (lowercased) when
+//	                   slug-compliant; "workspace<N>" otherwise.
 //	"name=path"      → explicit name
 //	"name=path:ro"   → same, read-only
 //
-// Users never write container platform. The container-side layout is
+// Users never write container paths. The container-side layout is
 // decided by the spawn pipeline (currently /workspaces/<name>/).
 //
 // Empty input returns a nil slice (ephemeral world — no mounts).
@@ -644,7 +645,7 @@ func parseWorkspaceFlags(flags []string) ([]world.Workspace, error) {
 			return nil, fmt.Errorf("workspace #%d has empty path", i+1)
 		}
 		if name == "" {
-			name = fmt.Sprintf("workspace%d", i)
+			name = world.AutoWorkspaceName(path, i)
 		}
 		result = append(result, world.Workspace{Name: name, Path: path, ReadOnly: readOnly})
 	}

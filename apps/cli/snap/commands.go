@@ -212,11 +212,7 @@ func parseSnapWorkspaces(flags []string) ([]world.Workspace, error) {
 			return nil, fmt.Errorf("workspace #%d has empty path", i+1)
 		}
 		if name == "" {
-			if i == 0 && len(flags) == 1 {
-				name = "default"
-			} else {
-				name = fmt.Sprintf("w%d", i)
-			}
+			name = world.AutoWorkspaceName(path, i)
 		}
 		result = append(result, world.Workspace{Name: name, Path: path, ReadOnly: readOnly})
 	}

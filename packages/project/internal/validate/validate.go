@@ -551,13 +551,15 @@ func ruleOneAgentOneWorld(in Input) []Issue {
 // ruleWorkspaceMounts enforces the workspace mount form. Accepted
 // entries:
 //
-//   - "path"           (bare host path — auto-named workspace<N>)
+//   - "path"           (bare host path — auto-named from the path basename
+//                       when slug-compliant, falling back to workspace<N>)
 //   - "name=path"      (named mount; container-side becomes /workspaces/<name>)
 //   - "name=path:ro"   (same, read-only)
 //
 // Container paths never appear in the manifest. Users don't write
 // `/workspaces/...` — that's an implementation detail of where the
-// mount lands inside the container.
+// mount lands inside the container. See world.AutoWorkspaceName for
+// the bare-path naming logic.
 func ruleWorkspaceMounts(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
