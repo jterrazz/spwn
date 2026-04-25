@@ -1,24 +1,34 @@
 // spwn cookie sync — service worker
 //
-// Watches allowlisted hosts for cookie changes and tab loads, pushes
+// Watches granted hosts for cookie changes and tab loads, pushes
 // fresh cookies to a locally-running spwn-gate at /sync/<provider>.
 // No pairing, no secret — the gate listens on 127.0.0.1 and rejects
 // anything not in its per-provider cookie allowlist, which is enough
 // for personal use.
 //
-// Provider list comes from the gate at /sync/providers, refreshed
-// every 5 min — so adding a new provider in spwn doesn't require an
-// extension reinstall.
+// Provider list comes from the gate at /sync/providers (refreshed
+// every 5 min). New providers landed by `spwn install spwn:linkedin`
+// show up here automatically — but Chrome MV3 forbids reading
+// cookies from a host the user hasn't explicitly authorized. So
+// permissions for x.com / linkedin.com / etc. live in
+// optional_host_permissions and are granted via the popup
+// (chrome.permissions.request needs a user gesture).
+//
+// The popup shows a "Grant access" button for any provider whose
+// domains aren't yet permitted, then this worker takes over the
+// sync once the user clicks.
 
 const GATE = "http://127.0.0.1:9000";
 
 let providers = {}; // domain → { name, cookies: [string] }
+let providersList = []; // full list, kept for the popup's permission UI
 
 async function loadProviders() {
   try {
     const resp = await fetch(`${GATE}/sync/providers`);
     if (!resp.ok) return;
     const list = await resp.json();
+    providersList = list;
     const next = {};
     for (const p of list) {
       for (const d of p.domains || []) next[d] = { name: p.name, cookies: p.cookies };
@@ -80,6 +90,21 @@ chrome.cookies.onChanged.addListener(async (change) => {
   if (!p || !p.cookies.includes(c.name)) return;
   const url = (c.secure ? "https://" : "http://") + c.domain.replace(/^\./, "") + (c.path || "/");
   await pushCookies(p, url);
+});
+
+// Allow the popup to query the provider list + check granted perms
+// without re-fetching from the gate (popup polls /sync/status for
+// live timestamps but uses this for the perms-to-request UI).
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (msg.type === "list-providers") {
+    sendResponse({ providers: providersList });
+    return true;
+  }
+  if (msg.type === "refresh-providers") {
+    loadProviders().then(() => sendResponse({ providers: providersList }));
+    return true; // async
+  }
+  return false;
 });
 
 loadProviders();

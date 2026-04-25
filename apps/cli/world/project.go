@@ -13,6 +13,42 @@ import (
 	"spwn.sh/packages/world"
 )
 
+// mergeDepPolicy unions two per-tool policies for the same ref:
+// deny is the union (any agent denying wins), allow is the
+// intersection (must be allowed by every agent that opined).
+// Empty policy on either side passes the other through unchanged.
+func mergeDepPolicy(a, b world.DepPolicy) world.DepPolicy {
+	if len(a.Allow) == 0 && len(a.Deny) == 0 {
+		return b
+	}
+	if len(b.Allow) == 0 && len(b.Deny) == 0 {
+		return a
+	}
+	out := world.DepPolicy{Deny: append([]string{}, a.Deny...)}
+	denySeen := map[string]struct{}{}
+	for _, d := range a.Deny {
+		denySeen[d] = struct{}{}
+	}
+	for _, d := range b.Deny {
+		if _, ok := denySeen[d]; !ok {
+			out.Deny = append(out.Deny, d)
+			denySeen[d] = struct{}{}
+		}
+	}
+	if len(a.Allow) > 0 && len(b.Allow) > 0 {
+		bAllow := map[string]struct{}{}
+		for _, x := range b.Allow {
+			bAllow[x] = struct{}{}
+		}
+		for _, x := range a.Allow {
+			if _, ok := bAllow[x]; ok {
+				out.Allow = append(out.Allow, x)
+			}
+		}
+	}
+	return out
+}
+
 // projectWorld is the fully-resolved spawn plan for one inline world
 // entry in spwn.yaml. It contains everything spawnRunE needs to skip
 // the legacy ~/.spwn/worlds/<name>.yaml file load entirely.
@@ -106,6 +142,11 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	for _, a := range p.OrphanAgents {
 		agentPath[a.Name] = a.Path
 	}
+	// Per-tool policy union across agents in this world. Strategy:
+	// deny-takes-precedence — any agent denying a method denies it
+	// for the world image; allows must intersect across agents.
+	// Single-agent worlds get the agent's policy verbatim.
+	policies := map[string]world.DepPolicy{}
 	for _, aname := range w.Agents {
 		dir, ok := agentPath[aname]
 		if !ok {
@@ -118,9 +159,12 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		for _, t := range am.Deps {
 			add(t)
 		}
+		for ref, p := range am.DepPolicies {
+			policies[ref] = mergeDepPolicy(policies[ref], world.DepPolicy{Allow: p.Allow, Deny: p.Deny})
+		}
 	}
 
-	m := world.Manifest{Deps: pkgs}
+	m := world.Manifest{Deps: pkgs, DepPolicies: policies}
 
 	// Resolve the knowledge path (if any) relative to the project root
 	// so SpawnOpts receives an absolute host path. Empty string means

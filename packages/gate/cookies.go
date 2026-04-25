@@ -1,6 +1,7 @@
 package gate
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -198,6 +199,29 @@ func (cs *CookieSync) ProviderLastSync(name string) time.Time {
 	cs.mu.RLock()
 	defer cs.mu.RUnlock()
 	return cs.lastSync[name]
+}
+
+// WriteDomainHints persists each provider's `Domains` to
+// /credentials/<provider>/.domains (one host per line) so the
+// gate-browser sidecar can seed cookies on the right hosts when a
+// session for that provider is opened. Idempotent — overwrites on
+// every gate startup.
+func (cs *CookieSync) WriteDomainHints() error {
+	for _, p := range cs.Providers() {
+		dir := CookieDir(p.Name)
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			return fmt.Errorf("mkdir %s: %w", dir, err)
+		}
+		var buf bytes.Buffer
+		for _, d := range p.Domains {
+			buf.WriteString(d)
+			buf.WriteByte('\n')
+		}
+		if err := os.WriteFile(filepath.Join(dir, ".domains"), buf.Bytes(), 0o600); err != nil {
+			return fmt.Errorf("write hints for %s: %w", p.Name, err)
+		}
+	}
+	return nil
 }
 
 // Providers returns a copy of the registered provider list, sorted

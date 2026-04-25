@@ -2,12 +2,34 @@ package dockerfile
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
 
 	"spwn.sh/packages/dependency/tool"
 )
+
+// encodePolicyJSON serializes a Policy to its on-disk shape. Keeps
+// only the allow/deny lists — short is encoded in the filename, not
+// the body.
+func encodePolicyJSON(p *Policy) string {
+	type wire struct {
+		Allow []string `json:"allow,omitempty"`
+		Deny  []string `json:"deny,omitempty"`
+	}
+	b, _ := json.Marshal(wire{Allow: p.Allow, Deny: p.Deny})
+	return string(b)
+}
+
+// escapeSingleQuoteForShell turns ' into '"'"' so the value can be
+// embedded inside a single-quoted shell argument without breaking
+// out of it. Shell-safe; no risk of arbitrary execution from policy
+// content because we control the entire string and JSON-escape it
+// first.
+func escapeSingleQuoteForShell(s string) string {
+	return strings.ReplaceAll(s, "'", `'"'"'`)
+}
 
 // ToolInput is the data the generator needs from each tool.
 type ToolInput struct {
@@ -16,6 +38,23 @@ type ToolInput struct {
 	Commands []string
 	Env      map[string]string
 	Files    map[string][]byte
+
+	// Policy, when set, materializes a per-agent allow/deny filter
+	// at /etc/spwn/policy/<short>.json. Catalog-tool wrappers (the
+	// scripts emitted by Commands) read this file at runtime to
+	// reject denied methods. Short is the tool's slug, e.g. "x" for
+	// "spwn:x" — used both as the filename and as the JSON object's
+	// implicit subject.
+	Policy *Policy
+}
+
+// Policy is the on-image shape of an agent's allow/deny filter for
+// one tool. Empty Allow + empty Deny means no policy file is
+// written (caller normalizes).
+type Policy struct {
+	Short string   // slug used in the filename (e.g. "x")
+	Allow []string `json:"allow,omitempty"`
+	Deny  []string `json:"deny,omitempty"`
 }
 
 // GenerateOpts configures Dockerfile generation.
@@ -158,6 +197,19 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 
 		for _, cmd := range t.Commands {
 			writeRunCommand(&sb, cmd)
+		}
+
+		// Per-agent method allow/deny — materialized as a JSON file
+		// the tool's wrapper reads at runtime. Catalog tools emit a
+		// `spwn-policy-check <short> <method>` step in their wrappers
+		// that consults this file.
+		if t.Policy != nil && (len(t.Policy.Allow) > 0 || len(t.Policy.Deny) > 0) && t.Policy.Short != "" {
+			policyJSON := encodePolicyJSON(t.Policy)
+			sb.WriteString(fmt.Sprintf(
+				"RUN mkdir -p /etc/spwn/policy && printf '%%s' '%s' > /etc/spwn/policy/%s.json\n",
+				escapeSingleQuoteForShell(policyJSON),
+				t.Policy.Short,
+			))
 		}
 
 		sb.WriteString("\n")

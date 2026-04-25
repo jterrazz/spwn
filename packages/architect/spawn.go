@@ -29,6 +29,21 @@ import (
 	"spwn.sh/packages/gate"
 )
 
+// buildPolicyMap converts the world's per-tool allow/deny config
+// (already merged across agents by the project resolver) into the
+// compile package's typed shape. The compile layer cannot import
+// world/models (would cycle) so we re-pack here at the boundary.
+func buildPolicyMap(in map[string]models.DepPolicy) map[string]ib.ToolPolicy {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]ib.ToolPolicy, len(in))
+	for k, v := range in {
+		out[k] = ib.ToolPolicy{Allow: v.Allow, Deny: v.Deny}
+	}
+	return out
+}
+
 // SpawnResult is returned by Spawn with the world and any non-fatal warnings.
 type SpawnResult struct {
 	World    *models.World
@@ -314,6 +329,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		buildResult, err := builder.Build(ctx, ib.BuildRequest{
 			BaseDockerfile: ibbase.WorldDockerfile,
 			Tools:          toolList,
+			Policies:       buildPolicyMap(opts.Manifest.DepPolicies),
+
 			Tag:            image,
 			ForceRebuild:   opts.ForceRebuild,
 			SkipVerify:     true, // probeTools handles verification below

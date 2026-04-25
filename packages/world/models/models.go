@@ -10,6 +10,23 @@ import (
 // what by the referenced package's manifest shape.
 type Manifest struct {
 	Deps []string `yaml:"-"`
+
+	// DepPolicies is the per-tool allow/deny filter, accumulated
+	// from every agent that ships in this world. When two agents
+	// declare conflicting policies on the same tool, the union
+	// strategy (deny-takes-precedence) is used: an entry in *any*
+	// agent's deny wins, an entry must be in *every* agent's allow
+	// to remain allowed. Single-agent worlds (the common case) get
+	// the agent's policy verbatim.
+	DepPolicies map[string]DepPolicy `yaml:"-"`
+}
+
+// DepPolicy mirrors agent.DepPolicy at the world layer. Carried
+// here so the compile pipeline can read it without importing
+// agent (the agent package depends on world, not vice versa).
+type DepPolicy struct {
+	Allow []string
+	Deny  []string
 }
 
 // Workspace is a single host directory mounted into a world. A world may have

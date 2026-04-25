@@ -22,6 +22,11 @@ type Workspace = models.Workspace
 type Manifest = models.Manifest
 type Status = models.Status
 
+// DepPolicy is the per-tool allow/deny filter, rolled up across
+// every agent in the world. Re-exported so apps/cli/world doesn't
+// reach into models/ directly.
+type DepPolicy = models.DepPolicy
+
 // Re-export status constants.
 const (
 	StatusCreating  = models.StatusCreating

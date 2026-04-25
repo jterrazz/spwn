@@ -21,6 +21,23 @@ type Builder struct {
 	backend  backend.Backend
 }
 
+// ToolPolicy mirrors agent.DepPolicy at the compile layer so the
+// compile package doesn't import agent (would cycle).
+type ToolPolicy struct {
+	Allow []string
+	Deny  []string
+}
+
+// shortNameFromRef pulls the slug out of a tool ref (e.g.
+// "spwn:x" → "x"). Catalog tools register their wrapper + policy
+// file under this slug so on-disk paths stay short and stable.
+func shortNameFromRef(ref string) string {
+	if i := strings.Index(ref, ":"); i >= 0 {
+		return ref[i+1:]
+	}
+	return ref
+}
+
 // New creates a Builder with the given registry and Docker backend.
 func New(registry *resolver.Registry, b backend.Backend) *Builder {
 	return &Builder{registry: registry, backend: b}
@@ -33,6 +50,13 @@ type BuildRequest struct {
 
 	// Tools is the list of tool names to include (e.g., ["spwn:unix", "spwn:node", "spwn:qmd"]).
 	Tools []string
+
+	// Policies is the per-tool allow/deny filter inferred from the
+	// agent's manifest. Keyed by the tool ref (e.g. "spwn:x"). Tools
+	// without an entry are unfiltered. Materialized at image build
+	// time as /etc/spwn/policy/<short>.json — catalog tool wrappers
+	// consult that file at runtime.
+	Policies map[string]ToolPolicy
 
 	// Tag is the Docker image tag to apply.
 	Tag string
@@ -97,13 +121,21 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	toolInputs := make([]dockerfile.ToolInput, len(resolved))
 	for i, t := range resolved {
 		spec := t.Install()
-		toolInputs[i] = dockerfile.ToolInput{
+		ti := dockerfile.ToolInput{
 			Name:     t.Name(),
 			Packages: spec.Packages,
 			Commands: spec.Commands,
 			Env:      spec.Env,
 			Files:    spec.Files,
 		}
+		if pol, ok := req.Policies[t.Name()]; ok && (len(pol.Allow) > 0 || len(pol.Deny) > 0) {
+			ti.Policy = &dockerfile.Policy{
+				Short: shortNameFromRef(t.Name()),
+				Allow: pol.Allow,
+				Deny:  pol.Deny,
+			}
+		}
+		toolInputs[i] = ti
 	}
 
 	// Collect extra files for build context (tool install files only).

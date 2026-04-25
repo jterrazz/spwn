@@ -1,0 +1,44 @@
+name: "spwn:x"
+version: latest
+description: "X (Twitter) read + write via session cookies (Playwright in the gate)"
+
+dependencies:
+  - "spwn:mcp2cli"
+
+# gate: section — the gate parses this on startup and:
+#   1. Auto-registers `cookies` with the cookie-sync extension
+#      (the extension picks it up next refresh cycle).
+#   2. Spawns `mcp.entry` as a long-lived subprocess, reverse-proxies
+#      /mcp/x → that subprocess.
+#
+# Tool authors only ever touch this file + index.js — no Go.
+gate:
+  cookies:
+    domains: [x.com, twitter.com]
+    cookies: [auth_token, ct0]
+
+  mcp:
+    entry: ["node", "index.js", "mcp-serve"]
+
+# Agent-container-side install: the agent calls X via mcp2cli over
+# HTTP/MCP to the gate. Same wrapper pattern as spwn:notion.
+#
+# The wrapper consults spwn-policy-check (installed by spwn:mcp2cli)
+# before forwarding — when agent.yaml denies a method, the call fails
+# fast with a clear message instead of hitting the gate.
+install:
+  commands:
+    - |
+      cat > /usr/local/bin/x-mcp <<'WRAPPER'
+      #!/bin/bash
+      # x-mcp — X (Twitter) read + write via the gate's spwn:x element.
+      # Session cookies come from the spwn-cookie-sync browser
+      # extension. Install + load it once, browse x.com normally,
+      # and the gate's Playwright pool uses your session.
+      spwn-policy-check x "${1:-}" || exit 1
+      exec mcp2cli --mcp "http://host.docker.internal:9000/mcp/x" "$@"
+      WRAPPER
+    - "chmod +x /usr/local/bin/x-mcp"
+
+verify:
+  - command -v x-mcp

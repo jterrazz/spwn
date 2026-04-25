@@ -15,6 +15,11 @@ type Manifest = intmanifest.Manifest
 // RuntimeConfig is the per-agent runtime override.
 type RuntimeConfig = intmanifest.RuntimeConfig
 
+// DepPolicy is the per-dependency allow/deny filter declared in
+// agent.yaml. Re-exported so callers (architect, compile boundary)
+// can reference it without reaching into internal/.
+type DepPolicy = intmanifest.DepPolicy
+
 // ManifestPath returns the full path to an agent's manifest file.
 func ManifestPath(agentName string) string {
 	return intmanifest.Path(AgentDir(agentName))

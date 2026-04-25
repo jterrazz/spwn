@@ -27,6 +27,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/dependency/refs"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 )
 
@@ -160,6 +161,25 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	fmt.Fprintf(out, "  %s  %s\n", ui.Green("\u2713"), ui.Strong("installed "+ref))
 	fmt.Fprintf(out, "     %d agent%s updated, %s pinned\n",
 		mutated, plural(mutated), dependency.LockFileName)
+
+	// Catalog tools that declare a gate: section in their tool.yaml
+	// (cookies / mcp.entry) need to land under ~/.spwn/gate/tools/
+	// for the gate daemon to pick them up. Do this transparently as
+	// part of `spwn install` so users don't have to copy files by
+	// hand. Lockfile + agent.yaml are already updated; this is purely
+	// the "make the gate aware" half.
+	if parsed.Kind == refs.KindSpwnBuiltin {
+		gateToolsRoot, err := platform.GateToolsDir()
+		if err == nil {
+			gateSlugs, gerr := dependency.CopyGateTools(parsed.Name, gateToolsRoot)
+			if gerr != nil {
+				fmt.Fprintf(out, "  %s  warning: gate-tool sync: %v\n", ui.Strong("!"), gerr)
+			} else if len(gateSlugs) > 0 {
+				fmt.Fprintf(out, "  %s  gate tool(s) installed: %s\n", ui.Green("\u2713"), strings.Join(gateSlugs, ", "))
+				fmt.Fprintf(out, "     restart the gate to load: %s\n", ui.Strong("spwn gate restart"))
+			}
+		}
+	}
 	return nil
 }
 

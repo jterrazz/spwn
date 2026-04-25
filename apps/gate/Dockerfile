@@ -1,42 +1,51 @@
 # spwn-gate — host-side credential broker / element bridge.
 #
-# Two layers of elements:
+# Three layers inside the container:
 #
-#   1. Reverse-proxy elements (notion, future linear/atlassian/…):
-#      pure Go, the binary handles them entirely.
+#   1. spwn-gate (Go binary) — entrypoint. Hosts the public HTTP API
+#      on :9000 (cookie sync + MCP routing). Spawns and supervises
+#      the gate-browser sidecar; will spawn catalog-tool subprocesses
+#      once Phase 2 of the generic refactor lands.
 #
-#   2. Backend-CLI elements: the gate hand-rolls a minimal MCP HTTP
-#      server (packages/gate/mcpserver.go) and translates tools/call
-#      to subprocess invocations of a backend CLI:
-#        - gmail / gcal → gws (Google Workspace CLI, npm)
-#        - x            → twscrape via x-fetch helper (pip)
+#   2. gate-browser (Node sidecar, internal :9001) — Playwright
+#      Chromium pool. Loads session cookies per provider from
+#      /credentials/<p>/cookies.json. Catalog tools call its HTTP
+#      API to drive scraped sites.
+#
+#   3. Element handlers (Go in-tree for now: notion proxy, gws
+#      gmail/gcal, x via x-browse). Migrating to catalog tools.
 #
 # The Go binary is cross-compiled on the host (so go.work + every
 # workspace module resolve correctly) and COPY'd in. Same pattern as
 # packages/architect builds its image.
 #
 # Build context expected: a directory containing the linux binary at
-# ./spwn-gate. packages/gate/lifecycle.go produces that.
+# ./spwn-gate plus ./browser/ (the Node sidecar dir). packages/gate/
+# lifecycle.go produces that.
 
-FROM node:20-alpine
+FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
-# System deps: python3 for twscrape, jq for the x-fetch helper to read
-# cookies.json without pulling in a JSON-parsing Python dep.
-RUN apk add --no-cache python3 py3-pip jq && \
-    addgroup -S spwn && adduser -S spwn -G spwn
+# jq for shell-side cookie inspection; gws for gmail/gcal elements.
+# The Microsoft Playwright image ships browsers (in /ms-playwright)
+# but NOT the `playwright` npm module — install it globally so the
+# sidecar + tools can `require('playwright')`. SKIP_BROWSER_DOWNLOAD
+# avoids re-downloading the chromium the base image already provides.
+RUN apt-get update && apt-get install -y --no-install-recommends jq \
+ && rm -rf /var/lib/apt/lists/* \
+ && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g playwright @googleworkspace/cli
 
-# gws (Google Workspace CLI) — used by the gmail/gcal elements.
-RUN npm install -g @googleworkspace/cli
+ENV NODE_PATH=/usr/lib/node_modules
 
-# twscrape — used by the x element. Cookie auth, well-maintained
-# unofficial X scraper. Read-only by design (search, profiles,
-# tweets, bookmarks, followers); writes flow through agent-browser
-# in publish.sh.
-RUN pip3 install --break-system-packages twscrape
+# Non-root user for the gate process.
+RUN groupadd --system spwn && useradd --system --gid spwn --create-home --shell /bin/bash spwn
 
 COPY spwn-gate /usr/local/bin/spwn-gate
-COPY x-fetch /usr/local/bin/x-fetch
-RUN chmod +x /usr/local/bin/spwn-gate /usr/local/bin/x-fetch
+COPY browser /opt/gate-browser
+# @spwn/gate-tool — the Node SDK every catalog tool requires.
+# Drop it under the global node_modules path so tools can resolve it
+# via NODE_PATH=/usr/lib/node_modules without per-tool npm install.
+COPY sdk /usr/lib/node_modules/@spwn/gate-tool
+RUN chmod +x /usr/local/bin/spwn-gate /opt/gate-browser/index.js
 
 USER spwn
 WORKDIR /home/spwn
@@ -47,14 +56,16 @@ EXPOSE 9000
 #   /credentials  ← ~/.spwn/credentials  (rw)  — gate is the cred broker
 #   /gate         ← ~/.spwn/gate         (rw)  — persistent state
 #
-# Cookie sources (browser extension writes; elements read):
-#   /credentials/x/cookies.json        — auth_token + ct0 (twscrape)
-#   /credentials/linkedin/cookies.json — li_at + JSESSIONID (future)
+# Cookie sources (browser extension writes; sidecar reads):
+#   /credentials/<provider>/cookies.json  — pushed by spwn-cookie-sync
+#   /credentials/<provider>/.domains      — domain hint (one host per line),
+#                                           written by gate when registering
+#                                           the provider so the sidecar knows
+#                                           which domains to seed cookies on.
 #
 # Other creds:
 #   /credentials/google/{client.json,tokens.json} — google OAuth
 #   /credentials/mcp/oauth/<hash>/tokens.json     — notion etc. MCP OAuth
-#   /gate/cookie-sync-secret                       — extension pairing secret
 
 ENTRYPOINT ["/usr/local/bin/spwn-gate"]
 CMD ["run"]

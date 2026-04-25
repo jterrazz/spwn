@@ -1,0 +1,7 @@
+{
+  "name": "@spwn/gate-tool",
+  "version": "0.1.0",
+  "description": "Node SDK for catalog tools that plug into the spwn gate. Provides the browser-session client (talks to the gate-browser sidecar over HTTP) and the MCP server harness — tools register methods, the SDK serves them as MCP tools and exposes the same methods as a CLI.",
+  "private": true,
+  "main": "index.js"
+}

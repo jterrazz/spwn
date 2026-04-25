@@ -1,0 +1,7 @@
+{
+  "name": "spwn-tool-x",
+  "version": "0.1.0",
+  "description": "X (Twitter) reads + writes via the user's session cookies, routed through the spwn gate browser sidecar.",
+  "private": true,
+  "main": "index.js"
+}

@@ -85,6 +85,19 @@ func Install(slug, baseDir string) (InstallReport, error) { return spwn.Install(
 // mode). Convenience wrapper for the CLI.
 func InstallInto(slug string) (InstallReport, error) { return spwn.InstallInto(slug) }
 
+// CopyGateTools materialises every catalog tool under spwn:<refName>
+// that has a `gate:` section into `<gateToolsRoot>/<short>/`. Called
+// from the install CLI immediately after the manifest mutation so a
+// `spwn install spwn:x` followed by `spwn gate restart` picks up
+// the new tool with no manual file dance. Idempotent — overwrites
+// existing files so catalog updates flow through on re-install.
+//
+// Returns the list of slugs copied (empty when the entry has no
+// gate-shaped tools — most catalog entries are agent-side only).
+func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
+	return spwn.CopyGateTools(refName, gateToolsRoot)
+}
+
 // ── Project-local blocks (the local adapter) ──────────────────────
 
 // LoadLocalTool reads spwn/tools/<name>/ inside projectRoot and

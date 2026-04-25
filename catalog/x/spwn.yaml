@@ -1,0 +1,6 @@
+# spwn:x — X (Twitter) reads + writes via the user's browser
+# session cookies. Routes through the gate's Playwright sidecar;
+# cookies sync from the spwn-cookie-sync browser extension. No API
+# keys, no twscrape — the agent borrows your real session.
+version: 1
+name: x

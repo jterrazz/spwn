@@ -250,12 +250,16 @@ func buildImage(ctx context.Context, w io.Writer) error {
 	if err := copyFile(filepath.Join(root, "apps", "gate", "Dockerfile"), filepath.Join(stage, "Dockerfile")); err != nil {
 		return fmt.Errorf("stage Dockerfile: %w", err)
 	}
-	// x-fetch is the Python helper the XElement shells out to for X
-	// scraping (twscrape backend). Bake it into the image so it's on
-	// PATH inside the gate without the gate having to track its
-	// path on the host.
-	if err := copyFile(filepath.Join(root, "apps", "gate", "x-fetch"), filepath.Join(stage, "x-fetch")); err != nil {
-		return fmt.Errorf("stage x-fetch: %w", err)
+	// gate-browser is the Playwright sidecar — a Node HTTP service
+	// that catalog tools call to drive a cookie-loaded Chromium.
+	// Stage the whole dir.
+	if err := copyDir(filepath.Join(root, "apps", "gate", "browser"), filepath.Join(stage, "browser")); err != nil {
+		return fmt.Errorf("stage browser sidecar: %w", err)
+	}
+	// @spwn/gate-tool SDK — required by every catalog tool. Baked
+	// into /usr/lib/node_modules/@spwn/gate-tool/ inside the image.
+	if err := copyDir(filepath.Join(root, "apps", "gate", "sdk"), filepath.Join(stage, "sdk")); err != nil {
+		return fmt.Errorf("stage @spwn/gate-tool SDK: %w", err)
 	}
 
 	cmd := exec.CommandContext(ctx, "docker", "build",
@@ -274,6 +278,29 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return os.WriteFile(dst, in, 0o755)
+}
+
+// copyDir recursively copies src to dst (file mode 0644, dirs 0755).
+// Used by the gate build to stage the Node sidecar tree.
+func copyDir(src, dst string) error {
+	return filepath.Walk(src, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(src, p)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(dst, rel)
+		if info.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		data, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(target, data, 0o644)
+	})
 }
 
 func dockerCmd(ctx context.Context, args ...string) error {

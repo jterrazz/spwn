@@ -120,6 +120,26 @@ func CredentialsDir() string {
 	return filepath.Join(UserDir(), CredentialsSubDir)
 }
 
+// GateDir is the host-side state directory bind-mounted into the
+// gate container at /gate. Holds installed catalog tools (under
+// tools/), per-tool persistence, and any other gate-owned state.
+func GateDir() string {
+	return filepath.Join(UserDir(), "gate")
+}
+
+// GateToolsDir is where `spwn install spwn:<name>` materialises
+// catalog tools that declare a `gate:` section. The gate scans this
+// dir at startup and registers each tool's CookieProvider + MCP
+// subprocess. Returns the host path; inside the gate container the
+// same dir is visible at /gate/tools/.
+func GateToolsDir() (string, error) {
+	dir := filepath.Join(GateDir(), "tools")
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", err
+	}
+	return dir, nil
+}
+
 // ActivityPath returns the user-level activity log.
 func ActivityPath() string {
 	return filepath.Join(UserDir(), ActivityFileName)

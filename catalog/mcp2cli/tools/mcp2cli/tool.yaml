@@ -14,6 +14,45 @@ install:
     # Runtime user's ~/.local/bin which isn't on PATH at first
     # Spawn.
     - "HOME=/root pip install --break-system-packages mcp2cli==3.0.2"
+    # spwn-policy-check — shared per-agent allow/deny enforcer.
+    # Catalog tool wrappers call `spwn-policy-check <tool> <method>`
+    # before forwarding to mcp2cli; the script no-ops when no policy
+    # file is present and exits non-zero with a clear message when
+    # the method is denied. Installed alongside mcp2cli because
+    # every gate-element tool already depends on mcp2cli.
+    - |
+      cat > /usr/local/bin/spwn-policy-check <<'POLICYCHECK'
+      #!/usr/bin/env python3
+      """Per-agent method allow/deny check, materialized at image build
+      time by the spwn compile pipeline. Reads /etc/spwn/policy/<tool>.json
+      written from agent.yaml's dependency entries. Wrapper convention:
+          spwn-policy-check <tool> <method>  || exit 1
+      No file → no policy → exit 0 (allow). Empty method or list-style
+      methods (list, tools/list) are always allowed."""
+      import json, os, sys
+      if len(sys.argv) < 3:
+          sys.exit(0)
+      tool, method = sys.argv[1], sys.argv[2]
+      if not method or method in ('list', 'tools/list'):
+          sys.exit(0)
+      path = f"/etc/spwn/policy/{tool}.json"
+      if not os.path.isfile(path):
+          sys.exit(0)
+      try:
+          pol = json.load(open(path))
+      except Exception:
+          sys.exit(0)
+      if method in (pol.get('deny') or []):
+          print(f"{tool}: method '{method}' denied by agent policy", file=sys.stderr)
+          sys.exit(1)
+      allow = pol.get('allow') or []
+      if allow and method not in allow:
+          print(f"{tool}: method '{method}' not in agent allow-list", file=sys.stderr)
+          sys.exit(1)
+      sys.exit(0)
+      POLICYCHECK
+    - "chmod +x /usr/local/bin/spwn-policy-check"
 
 verify:
   - command -v mcp2cli
+  - command -v spwn-policy-check

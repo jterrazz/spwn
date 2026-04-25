@@ -1,0 +1,10 @@
+{
+  "name": "spwn-gate-browser",
+  "version": "0.1.0",
+  "description": "In-gate Playwright sidecar — HTTP service that any catalog tool can call to drive a session-cookie-loaded Chromium.",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
