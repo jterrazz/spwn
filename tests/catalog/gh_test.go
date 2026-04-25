@@ -41,3 +41,27 @@ func TestGh_WrapperUsesGhAuthToken(t *testing.T) {
 		t.Errorf("gh wrapper must not gate on env var presence — gate on `gh auth token` exit code instead")
 	}
 }
+
+// TestGh_GitCredentialHelperBakedIn locks in that /etc/gitconfig
+// gets written with the gh credential helper at install time.
+// Without it, `git push` over HTTPS prompts for a username and
+// hangs in an agent context — the helper is what makes the same
+// gh token usable for git operations as for `gh ...` and
+// `gh-mcp ...`. Per-user `gh auth setup-git` would die with the
+// container; the system-level config survives.
+func TestGh_GitCredentialHelperBakedIn(t *testing.T) {
+	tool := findTool("spwn:gh")
+	if tool == nil {
+		t.Skip("spwn:gh not registered")
+	}
+	all := strings.Join(tool.Install().Commands, "\n")
+	for _, want := range []string{
+		"/etc/gitconfig",
+		"!/usr/bin/gh auth git-credential",
+		`https://github.com`,
+	} {
+		if !strings.Contains(all, want) {
+			t.Errorf("gh install must bake the git credential helper into /etc/gitconfig (missing %q)", want)
+		}
+	}
+}

@@ -40,6 +40,22 @@ install:
       exec mcp2cli --mcp-stdio "mcp-server-github" "$@"
       WRAPPER
     - "chmod +x /usr/local/bin/gh-mcp"
+    # Wire git's credential helper to gh — `git push` over HTTPS
+    # Then borrows the same token gh has, instead of prompting for a
+    # Username/password (which hangs in agent contexts). Equivalent
+    # To running `gh auth setup-git` per-user, but baked into
+    # /etc/gitconfig so every spawn inherits it without any per-
+    # Container setup. The empty `helper =` line is gh's pattern —
+    # It clears any previously-configured helper before adding ours.
+    - |
+      mkdir -p /etc && cat > /etc/gitconfig <<'GITCONFIG'
+      [credential "https://github.com"]
+      	helper =
+      	helper = !/usr/bin/gh auth git-credential
+      [credential "https://gist.github.com"]
+      	helper =
+      	helper = !/usr/bin/gh auth git-credential
+      GITCONFIG
 
 verify:
   - command -v gh
