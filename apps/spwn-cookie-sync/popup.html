@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { font-family: -apple-system, system-ui, sans-serif; width: 320px; padding: 12px; margin: 0; }
+      h1 { font-size: 14px; margin: 0 0 8px; }
+      p { font-size: 12px; color: #555; margin: 6px 0; }
+      input[type=text] { width: 100%; box-sizing: border-box; padding: 6px; font-family: monospace; font-size: 12px; }
+      button { margin-top: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
+      .status-ok { color: #2a7; font-weight: 600; }
+      .status-bad { color: #c33; font-weight: 600; }
+      .row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
+      .muted { color: #888; }
+      hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>spwn cookie sync</h1>
+    <p id="state"></p>
+
+    <div id="pair-form">
+      <p>
+        Paste the secret printed by
+        <code style="font-size:11px">spwn cookie-sync register</code>:
+      </p>
+      <input type="text" id="secret" placeholder="SP-XXXX-XXXX-XXXX" autocomplete="off" />
+      <button id="pair">Pair</button>
+    </div>
+
+    <div id="paired" hidden>
+      <hr />
+      <p><strong>Synced providers</strong></p>
+      <div id="providers" class="muted">loading…</div>
+      <hr />
+      <button id="unpair">Unpair</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

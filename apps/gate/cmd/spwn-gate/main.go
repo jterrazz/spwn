@@ -31,7 +31,14 @@ func main() {
 		logger.Fatalf("register elements: %v", err)
 	}
 
-	srv := gate.NewServer(addr, reg, logger)
+	cookies := gate.NewCookieSync()
+	if gate.HasSecret() {
+		logger.Printf("cookie-sync paired (secret loaded from %s)", gate.SecretPath())
+	} else {
+		logger.Printf("cookie-sync unpaired — run `spwn cookie-sync register` on the host to enable the browser extension")
+	}
+
+	srv := gate.NewServer(addr, reg, cookies, logger)
 	sched := gate.NewScheduler(reg, 0, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())

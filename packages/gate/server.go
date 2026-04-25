@@ -10,18 +10,24 @@ import (
 	"time"
 )
 
-// Server is the gate's HTTP frontend. It mounts each element under
-// `/mcp/<name>/`, plus a couple of operational endpoints under `/`.
+// Server is the gate's HTTP frontend. Three route namespaces:
+//
+//   /healthz         operational liveness
+//   /mcp/<element>/  the element bridge (proxy or hand-rolled MCP)
+//   /sync/*          cookie-sync receive-end for the spwn-cookie-sync
+//                    browser extension; nil cookies disables it
 type Server struct {
 	addr     string
 	registry *Registry
+	cookies  *CookieSync
 	log      *log.Logger
 	http     *http.Server
 }
 
 // NewServer constructs a server listening on addr (use "" for
-// DefaultListenAddr). The server doesn't start until Run is called.
-func NewServer(addr string, reg *Registry, logger *log.Logger) *Server {
+// DefaultListenAddr). Pass cookies=nil to disable /sync/* (test
+// harness convenience; production gates always wire it).
+func NewServer(addr string, reg *Registry, cookies *CookieSync, logger *log.Logger) *Server {
 	if addr == "" {
 		addr = DefaultListenAddr
 	}
@@ -33,8 +39,13 @@ func NewServer(addr string, reg *Registry, logger *log.Logger) *Server {
 	s := &Server{
 		addr:     addr,
 		registry: reg,
+		cookies:  cookies,
 		log:      logger,
 		http:     &http.Server{Addr: addr, Handler: mux},
+	}
+
+	if cookies != nil {
+		cookies.RegisterRoutes(mux)
 	}
 
 	// /healthz — liveness probe, used by `spwn gate status` and

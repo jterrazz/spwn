@@ -12,6 +12,7 @@ import (
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/auth"
+	"spwn.sh/apps/cli/cookiesync"
 	"spwn.sh/apps/cli/gate"
 	"spwn.sh/apps/cli/inspect"
 	"spwn.sh/apps/cli/logs"
@@ -86,6 +87,7 @@ func init() {
 	rootCmd.AddCommand(auth.Cmd)
 	rootCmd.AddCommand(architect.Cmd)
 	rootCmd.AddCommand(gate.Cmd)
+	rootCmd.AddCommand(cookiesync.Cmd)
 	rootCmd.AddCommand(web.Cmd)
 	rootCmd.AddCommand(logs.Cmd)
 }

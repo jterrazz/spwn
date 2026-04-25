@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "spwn cookie sync",
+  "short_name": "spwn-sync",
+  "version": "0.1.0",
+  "description": "Auto-sync session cookies from your logged-in browser to a local spwn-gate so spwn agents can act as you on the same sites you already use.",
+
+  "permissions": ["cookies", "tabs", "storage"],
+  "host_permissions": [
+    "https://*.x.com/*",
+    "https://*.twitter.com/*",
+    "https://*.linkedin.com/*",
+    "http://127.0.0.1:9000/*",
+    "http://localhost:9000/*"
+  ],
+
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "spwn cookie sync",
+    "default_popup": "popup.html"
+  }
+}

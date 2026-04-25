@@ -51,7 +51,7 @@ func TestServer_HealthzListsElements(t *testing.T) {
 	_ = r.Add(&fakeElement{name: "alpha", handler: http.NotFoundHandler()})
 	_ = r.Add(&fakeElement{name: "beta", handler: http.NotFoundHandler()})
 
-	s := NewServer(":0", r, nil)
+	s := NewServer(":0", r, nil, nil)
 	rec := httptest.NewRecorder()
 	s.http.Handler.ServeHTTP(rec, httptest.NewRequest("GET", "/healthz", nil))
 
@@ -82,7 +82,7 @@ func TestServer_RoutesByElementName(t *testing.T) {
 		}),
 	})
 
-	s := NewServer(":0", r, nil)
+	s := NewServer(":0", r, nil, nil)
 	rec := httptest.NewRecorder()
 	s.http.Handler.ServeHTTP(rec, httptest.NewRequest("POST", "/mcp/notion/initialize", strings.NewReader(`{}`)))
 
@@ -95,7 +95,7 @@ func TestServer_RoutesByElementName(t *testing.T) {
 }
 
 func TestServer_404OnUnknownElement(t *testing.T) {
-	s := NewServer(":0", NewRegistry(), nil)
+	s := NewServer(":0", NewRegistry(), nil, nil)
 	rec := httptest.NewRecorder()
 	s.http.Handler.ServeHTTP(rec, httptest.NewRequest("GET", "/mcp/unknown/x", nil))
 	if rec.Code != 404 {
@@ -104,7 +104,7 @@ func TestServer_404OnUnknownElement(t *testing.T) {
 }
 
 func TestServer_404OnMissingName(t *testing.T) {
-	s := NewServer(":0", NewRegistry(), nil)
+	s := NewServer(":0", NewRegistry(), nil, nil)
 	rec := httptest.NewRecorder()
 	s.http.Handler.ServeHTTP(rec, httptest.NewRequest("GET", "/mcp/", nil))
 	if rec.Code != 404 {
@@ -156,7 +156,7 @@ func TestScheduler_PerElementErrorsDontBreakTheSweep(t *testing.T) {
 }
 
 func TestServer_RunStopsOnContextCancel(t *testing.T) {
-	s := NewServer(":0", NewRegistry(), nil)
+	s := NewServer(":0", NewRegistry(), nil, nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	errCh := make(chan error, 1)
 	go func() { errCh <- s.Run(ctx) }()
