@@ -1,0 +1,46 @@
+name: "spwn:gh"
+version: latest
+description: "GitHub CLI + GitHub MCP server, both as CLI"
+
+dependencies:
+  - "spwn:node"
+  - "spwn:mcp2cli"
+
+install:
+  packages:
+    apt:
+      - gh
+  commands:
+    # Pre-fetch the MCP server package so first invocation isn't
+    # Slow. `npx -y` would download lazily; baking it in shaves
+    # ~5–10s off every cold call from the agent.
+    - "npm install -g @modelcontextprotocol/server-github"
+    # Install the gh-mcp wrapper so the agent invokes a normal CLI
+    # (`gh-mcp <tool> --flag`) and never has to think about the MCP
+    # transport. Auth comes from the bind-mounted gh hosts.yml at
+    # $GH_CONFIG_DIR (set to /credentials/gh by spwn at spawn time)
+    # — the wrapper extracts the token via `gh auth token`. One
+    # `spwn auth login github` on the host unlocks both `gh` cobra
+    # commands AND `gh-mcp` for every world.
+    - |
+      cat > /usr/local/bin/gh-mcp <<'WRAPPER'
+      #!/bin/bash
+      # gh-mcp — GitHub MCP server exposed as a CLI via mcp2cli.
+      # Auth: derived from `gh auth token` (which reads
+      # $GH_CONFIG_DIR/hosts.yml — bind-mounted from the host).
+      TOKEN=$(gh auth token 2>/dev/null)
+      if [ -z "$TOKEN" ]; then
+        echo "gh-mcp: not authenticated." >&2
+        echo "On the host (outside the container), run:" >&2
+        echo "  spwn auth login github" >&2
+        echo "(this imports an existing gh login or runs the device flow)." >&2
+        exit 1
+      fi
+      export GITHUB_PERSONAL_ACCESS_TOKEN="$TOKEN"
+      exec mcp2cli --mcp-stdio "mcp-server-github" "$@"
+      WRAPPER
+    - "chmod +x /usr/local/bin/gh-mcp"
+
+verify:
+  - command -v gh
+  - command -v gh-mcp

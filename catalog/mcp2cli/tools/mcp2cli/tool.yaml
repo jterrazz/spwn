@@ -1,0 +1,19 @@
+name: "spwn:mcp2cli"
+version: latest
+description: "MCP-to-CLI adapter — exposes any MCP server as agent CLI subcommands"
+
+dependencies:
+  - "spwn:python"
+
+install:
+  commands:
+    # PEP-668 protects the system Python install in Debian/Ubuntu.
+    # We're root in a throwaway container at build time, so
+    # --break-system-packages is the right escape. HOME=/root keeps
+    # The binary in /usr/local/bin instead of falling back to the
+    # Runtime user's ~/.local/bin which isn't on PATH at first
+    # Spawn.
+    - "HOME=/root pip install --break-system-packages mcp2cli==3.0.2"
+
+verify:
+  - command -v mcp2cli

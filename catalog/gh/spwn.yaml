@@ -1,0 +1,7 @@
+# spwn:gh — GitHub CLI plus the official GitHub MCP server, both
+# Exposed as agent-callable CLIs. `gh ...` is the upstream Cobra
+# Tool authenticated via ~/.config/gh; `gh-mcp ...` is the MCP
+# Server's tool surface routed through mcp2cli, authenticated via
+# $GITHUB_PERSONAL_ACCESS_TOKEN.
+version: 1
+name: gh

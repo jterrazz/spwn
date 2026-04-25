@@ -1,0 +1,39 @@
+name: "spwn:notion"
+version: latest
+description: "Notion hosted MCP exposed as CLI (OAuth via spwn auth login notion)"
+
+dependencies:
+  - "spwn:mcp2cli"
+
+install:
+  commands:
+    # Wrapper makes the agent see a normal CLI (`notion-mcp <tool>
+    # --flag`) even though the transport is HTTP MCP. mcp2cli reads
+    # cached OAuth tokens from $MCP2CLI_CACHE_DIR (set to
+    # /credentials/mcp by spwn at spawn time), which is bind-mounted
+    # rw from the host's ~/.spwn/credentials/mcp/ — so a one-time
+    # `spwn auth login notion` on the host unlocks Notion for every
+    # world that ships this dep, regardless of which runtime owns
+    # the agent's HOME.
+    - |
+      cat > /usr/local/bin/notion-mcp <<'WRAPPER'
+      #!/bin/bash
+      # notion-mcp — Notion hosted MCP exposed as a CLI via mcp2cli.
+      # Auth: OAuth tokens cached at $MCP2CLI_CACHE_DIR (defaults to
+      # /credentials/mcp inside spwn worlds, bind-mounted from host).
+      # Path-checks happen against the same dir mcp2cli will read.
+      CACHE="${MCP2CLI_CACHE_DIR:-/credentials/mcp}"
+      KEY=$(printf %s "https://mcp.notion.com/mcp" | sha256sum | cut -c1-16)
+      if [ ! -f "${CACHE}/oauth/${KEY}/tokens.json" ]; then
+        echo "notion-mcp: not authenticated." >&2
+        echo "On the host (outside the container), run:" >&2
+        echo "  spwn auth login notion" >&2
+        echo "Click the link, approve in your browser, then retry." >&2
+        exit 1
+      fi
+      exec mcp2cli --mcp "https://mcp.notion.com/mcp" --oauth "$@"
+      WRAPPER
+    - "chmod +x /usr/local/bin/notion-mcp"
+
+verify:
+  - command -v notion-mcp

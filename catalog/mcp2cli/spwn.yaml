@@ -1,0 +1,7 @@
+# spwn:mcp2cli — runtime MCP-to-CLI adapter. Foundation tool every
+# MCP-backed dependency builds on: tools like spwn:gh and
+# Spwn:notion ship a thin wrapper script that exec's mcp2cli with
+# Their server command pre-filled, so the agent always sees a
+# Plain CLI even when the transport is MCP.
+version: 1
+name: mcp2cli
