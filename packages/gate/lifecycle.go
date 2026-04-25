@@ -30,8 +30,27 @@ const (
 // Safe to call from spwn up's hot path on every spawn — running case
 // is a single docker inspect.
 func EnsureRunning(ctx context.Context, w io.Writer) error {
+	return ensureRunning(ctx, w, false)
+}
+
+// EnsureRunningRebuild is like EnsureRunning but also forces an
+// image rebuild. Use after a binary upgrade, otherwise the existing
+// container keeps running the previous gate binary indefinitely.
+func EnsureRunningRebuild(ctx context.Context, w io.Writer) error {
+	return ensureRunning(ctx, w, true)
+}
+
+func ensureRunning(ctx context.Context, w io.Writer, forceRebuild bool) error {
 	if w == nil {
 		w = io.Discard
+	}
+
+	if forceRebuild {
+		// Stop+rm so the new image takes effect, then drop the image
+		// so build runs unconditionally. Errors are non-fatal: missing
+		// container/image is the success state we're heading toward.
+		_ = Stop(ctx)
+		_ = removeImage(ctx)
 	}
 
 	if running, err := isRunning(ctx); err != nil {
@@ -63,6 +82,10 @@ func EnsureRunning(ctx context.Context, w io.Writer) error {
 
 	fmt.Fprintln(w, "creating + starting spwn-gate container")
 	return runContainer(ctx)
+}
+
+func removeImage(ctx context.Context) error {
+	return exec.CommandContext(ctx, "docker", "image", "rm", "-f", ImageName).Run()
 }
 
 // Stop stops + removes the gate container. Image stays on disk so the
@@ -141,16 +164,19 @@ func runContainer(ctx context.Context) error {
 }
 
 func isRunning(ctx context.Context) (bool, error) {
-	out, err := exec.CommandContext(ctx, "docker", "inspect", "-f", "{{.State.Running}}", ContainerName).Output()
+	// `docker container inspect` (vs the bare `docker inspect`) is
+	// scoped to containers only — without `container`, docker matches
+	// images by the same name first, which yields a false positive
+	// because the image and container share the `spwn-gate` name.
+	out, err := exec.CommandContext(ctx, "docker", "container", "inspect", "-f", "{{.State.Running}}", ContainerName).Output()
 	if err != nil {
-		// Likely "No such object" → not running.
 		return false, nil
 	}
 	return strings.TrimSpace(string(out)) == "true", nil
 }
 
 func containerExists(ctx context.Context) (bool, error) {
-	err := exec.CommandContext(ctx, "docker", "inspect", ContainerName).Run()
+	err := exec.CommandContext(ctx, "docker", "container", "inspect", ContainerName).Run()
 	if err == nil {
 		return true, nil
 	}

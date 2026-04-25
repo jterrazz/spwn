@@ -56,17 +56,18 @@ func main() {
 	logger.Printf("clean shutdown")
 }
 
-// registerElements wires every built-in element into the registry.
-// As we add more upstream providers (gcp, x, …), each becomes one
-// line here.
+// registerElements wires every spwn-known MCP provider into the
+// registry as a generic auth-injecting reverse proxy. Adding a new
+// provider is now a one-line change in
+// packages/auth/mcp/provider.go — the gate picks it up automatically.
 func registerElements(reg *gate.Registry, logger *log.Logger) error {
-	notion, err := gate.NewNotionElement()
+	added, err := gate.RegisterAllProviders(reg)
 	if err != nil {
-		return fmt.Errorf("notion: %w", err)
+		// Per-provider failures aren't fatal — RegisterAllProviders
+		// continues iterating and reports the first error. Log it
+		// and let the gate start with whatever did register.
+		logger.Printf("warning: register providers: %v", err)
 	}
-	if err := reg.Add(notion); err != nil {
-		return fmt.Errorf("add notion: %w", err)
-	}
-	logger.Printf("registered element: notion")
+	logger.Printf("registered %d element(s): %v", added, reg.Names())
 	return nil
 }

@@ -29,13 +29,21 @@ Auto-started on first ` + "`spwn up`" + `; explicit lifecycle commands let you
 inspect, restart, or troubleshoot.`,
 }
 
+var startRebuild bool
+
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Build the gate image (if missing) and start the container",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		ctx := context.Background()
-		if err := gate.EnsureRunning(ctx, cmd.OutOrStderr()); err != nil {
+		var err error
+		if startRebuild {
+			err = gate.EnsureRunningRebuild(ctx, cmd.OutOrStderr())
+		} else {
+			err = gate.EnsureRunning(ctx, cmd.OutOrStderr())
+		}
+		if err != nil {
 			return err
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), "  ✓ gate running on 127.0.0.1:"+gate.HostPort)
@@ -58,14 +66,20 @@ var stopCmd = &cobra.Command{
 
 var restartCmd = &cobra.Command{
 	Use:   "restart",
-	Short: "Stop + start the gate container (e.g. after a binary upgrade)",
+	Short: "Stop + start the gate container; --rebuild forces a fresh image build first",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		ctx := context.Background()
 		if err := gate.Stop(ctx); err != nil {
 			return err
 		}
-		if err := gate.EnsureRunning(ctx, cmd.OutOrStderr()); err != nil {
+		var err error
+		if startRebuild {
+			err = gate.EnsureRunningRebuild(ctx, cmd.OutOrStderr())
+		} else {
+			err = gate.EnsureRunning(ctx, cmd.OutOrStderr())
+		}
+		if err != nil {
 			return err
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), "  ✓ gate restarted")
@@ -110,6 +124,9 @@ var logsCmd = &cobra.Command{
 }
 
 func init() {
+	startCmd.Flags().BoolVar(&startRebuild, "rebuild", false, "Force a fresh image build (use after a spwn binary upgrade)")
+	restartCmd.Flags().BoolVar(&startRebuild, "rebuild", false, "Force a fresh image build before restart")
+
 	logsCmd.Flags().BoolVarP(&logsFollow, "follow", "f", false, "Follow log output")
 	logsCmd.Flags().IntVarP(&logsTail, "tail", "n", 50, "Number of lines from the tail (0 = all)")
 
