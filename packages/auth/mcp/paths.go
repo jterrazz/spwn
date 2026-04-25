@@ -40,3 +40,9 @@ func providerKey(url string) string {
 func ProviderTokenPath(p Provider) string {
 	return filepath.Join(CacheDir(), "oauth", providerKey(p.URL), "tokens.json")
 }
+
+// ProviderClientPath returns the path to client.json (DCR-issued
+// client_id/secret) for p, whether or not it exists yet.
+func ProviderClientPath(p Provider) string {
+	return filepath.Join(CacheDir(), "oauth", providerKey(p.URL), "client.json")
+}
