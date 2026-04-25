@@ -25,6 +25,8 @@ import (
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
 	"spwn.sh/packages/auth"
+	authgh "spwn.sh/packages/auth/gh"
+	authmcp "spwn.sh/packages/auth/mcp"
 )
 
 // SpawnResult is returned by Spawn with the world and any non-fatal warnings.
@@ -342,6 +344,29 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	binds = append(binds, platform.CredentialsDir()+":/credentials:ro")
 
+	// MCP OAuth tokens (Notion, etc). The /credentials root is
+	// Bind-mounted ro above; we layer a rw bind on the mcp/ subdir
+	// So mcp2cli can refresh tokens. The in-container path is fixed
+	// (/credentials/mcp) — independent of the agent's $HOME, which
+	// Varies per runtime — and tools point at it via
+	// MCP2CLI_CACHE_DIR set on every container env list.
+	if mcpCache := authmcp.CacheDir(); mcpCache != "" {
+		if err := os.MkdirAll(mcpCache, 0o700); err == nil {
+			binds = append(binds, mcpCache+":/credentials/mcp")
+		}
+	}
+
+	// gh CLI auth (~/.spwn/credentials/gh, written by `spwn auth
+	// Login github`). Same pattern as mcp/: rw layered over the ro
+	// /credentials root. GH_CONFIG_DIR points at it on every
+	// Container so both `gh ...` cobra commands and `gh-mcp` (which
+	// Reads `gh auth token`) see the same token without an env var.
+	if ghCache := authgh.CacheDir(); ghCache != "" {
+		if err := os.MkdirAll(ghCache, 0o700); err == nil {
+			binds = append(binds, ghCache+":/credentials/gh")
+		}
+	}
+
 	// Determine credential source for progress reporting
 	creds := auth.ResolveAll()
 	credSource := "none"
@@ -359,6 +384,17 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		env = append(env, "SPWN_ARCHITECT_MODE=1")
 		env = append(env, "SPWN_HOME=/home/spwn/.spwn")
 	}
+
+	// Pin mcp2cli's cache to the rw bind-mount at /credentials/mcp.
+	// Set unconditionally — the var is harmless when no MCP tool is
+	// Installed, and we want it stable across every runtime
+	// (claude-code, codex, …) without each one having to know.
+	env = append(env, "MCP2CLI_CACHE_DIR=/credentials/mcp")
+	// Same idea for gh: hosts.yml + config.yml live at the rw
+	// /credentials/gh bind-mount. Setting GH_CONFIG_DIR works for
+	// `gh` cobra commands AND `gh auth token`, which is what the
+	// gh-mcp wrapper consults to drive the GitHub MCP server.
+	env = append(env, "GH_CONFIG_DIR=/credentials/gh")
 
 	// Workspace discovery env vars
 	if len(resolvedWorkspaces) > 0 {
