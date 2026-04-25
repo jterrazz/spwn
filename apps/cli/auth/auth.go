@@ -453,7 +453,7 @@ approve in your browser, the token persists for every world:
 			// If the user passed something that's neither an AI
 			// provider, an MCP provider, nor a CLI-tool provider,
 			// surface every list so the help is complete.
-			return fmt.Errorf("%w (or one of the MCP providers: %s; or one of the CLI tools: github)", err, strings.Join(authmcp.Names(), ", "))
+			return fmt.Errorf("%w (or one of the MCP providers: %s; or one of the CLI tools: github, google)", err, strings.Join(authmcp.Names(), ", "))
 		}
 		s := ui.New()
 		s.Blank()
@@ -629,6 +629,31 @@ to unset them manually.
 			s.Blank()
 			return nil
 		}
+		// Google branch — delete client.json + tokens.json from
+		// ~/.spwn/credentials/google/. Idempotent: removing a missing
+		// file is a no-op.
+		if strings.EqualFold(args[0], "google") {
+			s := ui.New()
+			s.Blank()
+			removed := false
+			for _, path := range []string{authgoogle.TokensPath(), authgoogle.ClientPath()} {
+				err := os.Remove(path)
+				if err == nil {
+					removed = true
+				} else if !errors.Is(err, os.ErrNotExist) {
+					return s.FailHint("google logout failed", err,
+						"Inspect "+abbreviate(authgoogle.CacheDir())+" by hand if this persists")
+				}
+			}
+			if !removed {
+				s.Info("google", "already logged out")
+				s.Blank()
+				return nil
+			}
+			s.Done("Removed", "google credentials ("+abbreviate(authgoogle.CacheDir())+")")
+			s.Blank()
+			return nil
+		}
 		// MCP providers branch first, same shape as login.
 		if mp, ok := authmcp.Lookup(args[0]); ok {
 			s := ui.New()
@@ -648,7 +673,7 @@ to unset them manually.
 		}
 		p, err := parseProvider(args[0])
 		if err != nil {
-			return fmt.Errorf("%w (or one of the MCP providers: %s; or one of the CLI tools: github)", err, strings.Join(authmcp.Names(), ", "))
+			return fmt.Errorf("%w (or one of the MCP providers: %s; or one of the CLI tools: github, google)", err, strings.Join(authmcp.Names(), ", "))
 		}
 		opts := auth.LogoutOpts{}
 		if logoutMethod != "" {

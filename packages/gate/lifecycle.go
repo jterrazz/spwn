@@ -153,7 +153,11 @@ func runContainer(ctx context.Context) error {
 		"--name", ContainerName,
 		"--restart", "unless-stopped",
 		"-p", "127.0.0.1:" + HostPort + ":" + HostPort,
-		"-v", credsDir + ":/credentials:ro",
+		// Gate is the credential BROKER — owns the tokens, refreshes
+		// them on its own schedule, and rotates them in-place via
+		// atomic-replace (write tmp + rename). Worlds get the same
+		// path as :ro; only the gate gets rw.
+		"-v", credsDir + ":/credentials",
 		"-v", gateDir + ":/gate",
 		// Match the in-container default cred path; the gate reads
 		// `mcp.ProviderTokenPath` which expands to /credentials/mcp/...
