@@ -11,12 +11,14 @@ require (
 	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/agent v0.0.0
 	spwn.sh/packages/auth v0.0.0
-	spwn.sh/packages/transpile v0.0.0
 	spwn.sh/packages/compile v0.0.0
 	spwn.sh/packages/platform v0.0.0
 	spwn.sh/packages/project v0.0.0
+	spwn.sh/packages/transpile v0.0.0
 	spwn.sh/packages/world v0.0.0
 )
+
+require github.com/kardianos/service v1.2.4 // indirect
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -58,10 +60,10 @@ replace (
 	spwn.sh/packages/activity => ../../packages/activity
 	spwn.sh/packages/agent => ../../packages/agent
 	spwn.sh/packages/auth => ../../packages/auth
-	spwn.sh/packages/transpile => ../../packages/transpile
 	spwn.sh/packages/compile => ../../packages/compile
 	spwn.sh/packages/platform => ../../packages/platform
 	spwn.sh/packages/project => ../../packages/project
+	spwn.sh/packages/transpile => ../../packages/transpile
 	spwn.sh/packages/world => ../../packages/world
 )
 
