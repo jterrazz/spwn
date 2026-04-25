@@ -89,6 +89,13 @@ func registerElements(reg *gate.Registry, logger *log.Logger) error {
 	} else {
 		added++
 	}
+	// twscrape-backed read-only X scraper. Cookies come from the
+	// browser extension via /sync/x → /credentials/x/cookies.json.
+	if err := reg.Add(gate.NewXElement()); err != nil {
+		logger.Printf("warning: add x: %v", err)
+	} else {
+		added++
+	}
 
 	logger.Printf("registered %d element(s): %v", added, reg.Names())
 	return nil
