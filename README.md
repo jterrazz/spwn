@@ -51,7 +51,7 @@ Three commands. One working agent.
 | **02** | Scaffold a project   | `spwn init`        | Drops `spwn.yaml` + a starter `neo` agent into the current directory.                                       |
 | **03** | Talk to your agent   | `spwn agent neo`   | Opens an interactive session with neo inside a sandboxed Docker world. Container lifecycle is handled for you. |
 
-Prefer a bundled demo? `spwn init spwn:matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](catalog/)).
+Prefer a bundled demo? `spwn init matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](catalog/)).
 
 > **Requirements:** Docker
 
@@ -578,7 +578,7 @@ below.
 ```
 # ── Start ────────────────────────────────────────────────────────
 spwn init                             Scaffold a project
-spwn init spwn:matrix                Install a bundled example
+spwn init matrix                     Install a bundled example
 spwn check                            Validate the project tree
 spwn up                               Bring up every world in spwn.yaml
 spwn down                             Stop every world
@@ -673,7 +673,7 @@ commands and adapters below belong to one or more of these.
 | Command | Purpose | Status |
 |---|---|:---:|
 | `spwn init` | Scaffold a blank project | 🟢 |
-| `spwn init spwn:<template>` | Install a bundled example | 🟢 |
+| `spwn init <template>` | Install a bundled example (e.g. `spwn init matrix`) | 🟢 |
 | `spwn check` | Validate the project tree (16 rules) | 🟢 |
 | `spwn build` | Transpile + compile the project image | 🟢 |
 | `spwn build --tree-only` | Render the transpiled tree to ./dist | 🟢 |
