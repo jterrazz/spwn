@@ -7,9 +7,9 @@ import { spec } from '../../../setup/cli.specification.js';
  *
  *   spwn:<name>              → built-in tool dependency (must exist)
  *   github:<owner>/<repo>    → remote registry (not yet supported)
- *   skill:<name>             → local skill (spwn/skills/<name>.md)
- *   tool:<name>              → local tool (spwn/tools/<name>/)
- *   hook:<name>              → local hook (spwn/hooks/<name>.sh)
+ *   skill/<name>             → local skill (spwn/skills/<name>.md)
+ *   tool/<name>              → local tool (spwn/tools/<name>/)
+ *   hook/<name>              → local hook (spwn/hooks/<name>.sh)
  *
  * The canonical success path is already covered by the check suite via
  * the single-agent fixture. These tests pin the classifier edges: a
