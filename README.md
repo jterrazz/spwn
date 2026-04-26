@@ -197,13 +197,17 @@ verify:                         # optional: smoke-tests run at image-build end
   - command -v bash             #   any non-zero exit fails the build
   - command -v jq
 
-gate:                           # optional: register as a gate element
+gate:                           # 🚧 experimental — API will change
   cookies:                      #   cookie sync (browser extension picks it up)
     domains: [x.com]
     cookies: [auth_token, ct0]
   mcp:                          #   spawn an MCP server; gate reverse-proxies /mcp/<name>/*
     entry: ["node", "index.js", "mcp-serve"]
 ```
+
+> 🚧 **Gate is experimental.** The `gate:` block, the host-side gate container,
+> and the cookie-sync extension are all in active development — schema, CLI,
+> and behaviour will change without notice. Don't depend on it in production.
 
 **What the compiler does with them:**
 - Unions all deps across the world's agents, topo-sorts, resolves to a
@@ -212,7 +216,7 @@ gate:                           # optional: register as a gate element
   commands (run after USER switch), optional file drops, optional skills
 - Everything lands in one world image; agents share the binaries at runtime
 - Tools with a `gate:` section additionally register with the host-side
-  gate container (cookie-bearing tools that drive Playwright in a sidecar)
+  gate container (cookie-bearing tools that drive Playwright in a sidecar) — *experimental*
 
 **Built-in catalog:** `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`,
 `spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect`. See
@@ -316,7 +320,11 @@ cross-vendor `AGENTS.md` ecosystem convention. Tool-shipped skills
 </details>
 
 <details>
-<summary><b>Hooks</b> &middot; <code>spwn/hooks.yaml</code></summary>
+<summary><b>Hooks</b> &middot; <code>spwn/hooks.yaml</code> &middot; 🚧 experimental</summary>
+
+> 🚧 **Hooks are experimental.** The `hooks.yaml` schema, the supported event
+> set, and the cross-runtime translation are all in active development —
+> expect changes without notice. Don't depend on it in production.
 
 Hooks fire on runtime events inside the container: tool use, prompt
 submit, session start, etc. They are NOT host-side lifecycle scripts;
@@ -624,7 +632,7 @@ A full ledger of every command and every adapter slot. Expand a
 group to see the list. Each summary shows a progress bar
 (`█` done, `▓` in dev, `░` planned) plus the shipped count.
 
-**Legend** 🟢 shipping · 🟡 in dev · 🔴 planned
+**Legend** 🟢 shipping · 🟡 in dev · 🚧 experimental (API will change) · 🔴 planned
 
 ### Domains
 
@@ -641,7 +649,9 @@ commands and adapters below belong to one or more of these.
 | **Mind** | 2-layer persistent memory: `playbooks/` `journal/` (skills are dependencies, not memory) | 🟡 |
 | **Knowledge** | World-scoped `./spwn/knowledge/` bind-mount (opt-in per world) | 🟡 |
 | **Runtimes** | `claude-code`, `codex` (swappable Go adapters) | 🟡 |
+| **Hooks** | `spwn/hooks.yaml` → `.claude/settings.json#hooks` / `.codex/hooks.json` (PreToolUse, SessionStart, …) | 🚧 |
 | **Architect** | Always-on orchestration daemon. Spawns worlds, routes inboxes, delegates. | 🟡 |
+| **Gate** | Host-side broker for cookie-bearing tools — cookie sync, MCP routing, Playwright sidecar | 🚧 |
 | **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |
 | **Observability** | Per-session journal, activity log, `spwn logs` | 🟡 |
 | **Teams & orgs** | Group agents into coordinated units (chief / workers, role structures) | 🟡 |
