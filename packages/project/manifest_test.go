@@ -98,15 +98,18 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read agent.yaml: %v", err)
 	}
-	for _, ref := range []string{"skill:focus", "tool:greet"} {
+	for _, ref := range []string{"skill/focus", "tool/greet"} {
 		if !strings.Contains(string(agentYAML), ref) {
 			t.Errorf("agent.yaml missing %q, got:\n%s", ref, agentYAML)
 		}
 	}
-	// The retired `hook:<name>` scheme should no longer leak into new
-	// projects — a fresh scaffold must not reference it.
-	if strings.Contains(string(agentYAML), "hook:") {
-		t.Errorf("agent.yaml still references the retired hook: scheme:\n%s", agentYAML)
+	// The retired colon-form local schemes (skill:/tool:/hook:)
+	// should no longer leak into new projects — a fresh scaffold
+	// must use the path-style form exclusively.
+	for _, retired := range []string{"skill:", "tool:", "hook:"} {
+		if strings.Contains(string(agentYAML), retired) {
+			t.Errorf("agent.yaml still references the retired %s scheme:\n%s", retired, agentYAML)
+		}
 	}
 
 	// spwn/hooks.yaml carries the runtime-hook examples now.

@@ -13,14 +13,14 @@ Add a catalog, GitHub, or local dependency to agent manifests and pin it in spwn
 
 Bare names resolve to the spwn: catalog ("spwn install qmd" installs spwn:qmd).
 Without --agent, the ref is added to every agent in the project.
-Local refs (skill:/tool:/hook:) require --agent to pick a target.
+Local refs (skill/, tool/, hook/) require --agent to pick a target.
 
 Examples:
   spwn install python                         # catalog dep, every agent
   spwn install spwn:python                    # explicit form, every agent
   spwn install github:jterrazz/research-skills
   spwn install qmd --agent mark               # catalog dep, only mark
-  spwn install skill:refine --agent dylan     # local skill, only dylan
+  spwn install skill/refine --agent dylan     # local skill, only dylan
 
 ```
 spwn install <ref> [flags]

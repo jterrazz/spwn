@@ -70,9 +70,9 @@ spwn agent rm neo                              # Delete an agent
 # Compose (via the project-level install / uninstall verbs)
 spwn install python                            # Catalog dep, every agent
 spwn install python --agent neo                # Catalog dep, only neo
-spwn install skill:paper-reading --agent neo   # Local skill, only neo
-spwn install tool:ffmpeg --agent neo           # Local tool, only neo
-spwn install hook:pre-spawn --agent neo        # Local hook, only neo
+spwn install skill/paper-reading --agent neo   # Local skill, only neo
+spwn install tool/ffmpeg --agent neo           # Local tool, only neo
+spwn install hook/pre-spawn --agent neo        # Local hook, only neo
 spwn uninstall python --agent neo              # Detach from one agent
 
 # Talk + messaging
@@ -163,7 +163,7 @@ overrides.
 └── state/                       # architect daemon state
 ```
 
-**Config hierarchy:** `agent.yaml` declares composition via a unified `dependencies:` list (`spwn:<name>` for catalog deps; `skill:<name>` / `tool:<name>` / `hook:<name>` for local blocks authored under `spwn/skills/`, `spwn/tools/`, `spwn/hooks/`) plus `runtime.backend`. `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces). The union of project-wide and agent-specific dependencies is what actually materializes inside the container.
+**Config hierarchy:** `agent.yaml` declares composition via a unified `dependencies:` list. The grammar splits **source** (the colon prefix) from **type** (the leading path segment): `spwn:<name>` is a catalog dep; `github:<owner>/<repo>` is a remote dep (planned); `skill/<name>`, `tool/<name>`, `hook/<name>` are local blocks authored under `spwn/skills/`, `spwn/tools/`, `spwn/hooks/`. Plus `runtime.backend`. `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces). The union of project-wide and agent-specific dependencies is what actually materializes inside the container.
 
 ## Repository Structure
 

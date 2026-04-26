@@ -43,7 +43,7 @@ describe('system skills infrastructure (docker)', () => {
     });
 
     test('.claude/skills is materialised directly under the agent home', async () => {
-        // Default `spwn init` scaffolds `skill:focus` into agent.yaml
+        // Default `spwn init` scaffolds `skill/focus` into agent.yaml
         // And ships spwn/skills/focus.md; the transpile layer must
         // Lift it into /agents/<name>/.claude/skills/<skill>/SKILL.md
         // At spawn time. docker-pilot has no skills, so this test

@@ -7,7 +7,7 @@ and refine a lot of them, and know exactly how many.
 
 1. Check your inbox: `/world/inbox/dylan/`.
 2. Grab the task. Do not overthink it.
-3. Run `skill:refine` end to end.
+3. Run `skill/refine` end to end.
 4. Write a one-line status to `/world/inbox/mark/`: which note, when
    closed, running count for the week.
 5. Update your own journal with the count. Beat last week's number.

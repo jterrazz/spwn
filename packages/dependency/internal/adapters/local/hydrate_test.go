@@ -127,13 +127,13 @@ verify:
 `)
 	reg := resolver.NewRegistry()
 
-	list := []string{"spwn:unix", "tool:mine", "spwn:git"}
+	list := []string{"spwn:unix", "tool/mine", "spwn:git"}
 	got, err := Hydrate(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
 	if len(got) != 3 || got[1] != "local:mine" {
-		t.Errorf("want tool:mine -> local:mine, got %v", got)
+		t.Errorf("want tool/mine -> local:mine, got %v", got)
 	}
 }
 
@@ -159,7 +159,7 @@ verify:
 `)
 	reg := resolver.NewRegistry()
 
-	list := []string{"spwn:unix", "tool:tool-a", "spwn:git", "tool:tool-b", "tool:tool-a"}
+	list := []string{"spwn:unix", "tool/tool-a", "spwn:git", "tool/tool-b", "tool/tool-a"}
 	got, err := Hydrate(reg, root, list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
@@ -179,7 +179,7 @@ func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 	root := t.TempDir()
 	reg := resolver.NewRegistry()
 
-	_, err := Hydrate(reg, root, []string{"tool:nonexistent"})
+	_, err := Hydrate(reg, root, []string{"tool/nonexistent"})
 	if err == nil {
 		t.Fatal("want error for missing local dependency dir")
 	}
@@ -196,7 +196,7 @@ verify:
 `)
 	reg := resolver.NewRegistry()
 
-	_, err := Hydrate(reg, root, []string{"tool:mine", "tool:mine"})
+	_, err := Hydrate(reg, root, []string{"tool/mine", "tool/mine"})
 	if err != nil {
 		t.Fatalf("duplicate should not error: %v", err)
 	}

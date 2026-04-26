@@ -12,7 +12,7 @@ sense in the first place.
 3. If the assumption holds, refine. If it doesn't, write Mark a short
    note at `/world/inbox/mark/` flagging it before you burn time on a
    broken batch.
-4. Follow `skill:refine`. Close the batch. Update your journal.
+4. Follow `skill/refine`. Close the batch. Update your journal.
 
 ## Skill
 

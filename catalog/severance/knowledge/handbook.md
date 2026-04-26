@@ -50,7 +50,7 @@ does not.
 5. Move the raw file out of `raw/` to mark the batch done. (Delete the
    original raw note once the refined entry is in place.)
 
-See `skill:refine` for the full procedure.
+See `skill/refine` for the full procedure.
 
 ## Inbox protocol
 

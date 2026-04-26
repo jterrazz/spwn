@@ -42,12 +42,12 @@ describe('legacy agent.yaml shapes', () => {
         expect(report).toMatch(/dependencies:/);
     });
 
-    test('migration hints include the scheme form for each retired bucket', async () => {
-        // Each legacy bucket maps to an explicit scheme prefix:
-        //   Tools:  → tool:<name>
-        //   Skills: → skill:<name>
-        //   Hooks:  → hook:<name>
-        // The hint should show the right prefix for each so the
+    test('migration hints include the path form for each retired bucket', async () => {
+        // Each legacy bucket maps to an explicit local-ref form:
+        //   Tools:  → tool/<name>
+        //   Skills: → skill/<name>
+        //   Hooks:  → hook/<name>
+        // The hint should show the right form for each so the
         // User can copy-paste from the hint into their new list.
         const result = await spec('legacy hints show schemes')
             .project('legacy-layout')
@@ -56,8 +56,8 @@ describe('legacy agent.yaml shapes', () => {
 
         expect(result.exitCode).not.toBe(0);
         const report = result.stdout.text;
-        expect(report).toMatch(/tool:<name>/);
-        expect(report).toMatch(/skill:<name>/);
-        expect(report).toMatch(/hook:<name>/);
+        expect(report).toMatch(/tool\/<name>/);
+        expect(report).toMatch(/skill\/<name>/);
+        expect(report).toMatch(/hook\/<name>/);
     });
 });

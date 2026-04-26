@@ -25,14 +25,16 @@ func TestResolveCLI(t *testing.T) {
 		{"bare match preserves version", "qmd@1.0", "spwn:qmd@1.0", ""},
 		{"bare match trims whitespace", "  unix  ", "spwn:unix", ""},
 
-		// Explicit schemes pass through, including versions.
+		// Source-prefixed forms pass through, including versions.
 		{"explicit spwn", "spwn:python", "spwn:python", ""},
 		{"explicit spwn version", "spwn:unix@24.04", "spwn:unix@24.04", ""},
-		{"explicit skill", "skill:focus", "skill:focus", ""},
-		{"explicit tool", "tool:my-parser", "tool:my-parser", ""},
-		{"explicit hook", "hook:pre-spawn", "hook:pre-spawn", ""},
 		{"explicit github", "github:acme/foo", "github:acme/foo", ""},
 		{"explicit github version", "github:acme/foo@1.2.3", "github:acme/foo@1.2.3", ""},
+		// Path-style local forms pass through, including versions.
+		{"explicit skill", "skill/focus", "skill/focus", ""},
+		{"explicit tool", "tool/my-parser", "tool/my-parser", ""},
+		{"explicit hook", "hook/pre-spawn", "hook/pre-spawn", ""},
+		{"explicit tool version", "tool/my-parser@0.1", "tool/my-parser@0.1", ""},
 		// Unknown spwn: passes grammar — caller validates existence.
 		{"explicit spwn unknown", "spwn:nonesuch", "spwn:nonesuch", ""},
 
@@ -40,11 +42,14 @@ func TestResolveCLI(t *testing.T) {
 		// lists the catalog so the user can correct their typo.
 		{"bare miss", "nonesuch", "", "not in the catalog"},
 		{"bare miss shows known list", "nonesuch", "", "known: paper-reading, python, qmd, unix"},
-		{"bare miss suggests local scheme", "nonesuch", "", "skill:nonesuch"},
+		{"bare miss suggests path-style", "nonesuch", "", "skill/nonesuch"},
 
-		// Invalid shapes fall through to the scheme-grammar error.
+		// Invalid shapes fall through to the grammar error.
 		{"legacy at prefix", "@acme/foo", "", "malformed"},
 		{"retired local scheme", "local:foo", "", "malformed"},
+		{"retired skill scheme", "skill:focus", "", "malformed"},
+		{"retired tool scheme", "tool:foo", "", "malformed"},
+		{"retired hook scheme", "hook:foo", "", "malformed"},
 		{"uppercase", "QMD", "", "malformed"},
 		{"contains slash", "acme/foo", "", "malformed"},
 		{"trailing dash", "qmd-", "", "malformed"},

@@ -108,11 +108,11 @@ func LoadLocalTool(projectRoot, name string) (tool.Tool, error) {
 	return local.LoadTool(projectRoot, name)
 }
 
-// HydrateLocals filters a dep ref list for `tool:<name>` entries,
+// HydrateLocals filters a dep ref list for `tool/<name>` entries,
 // loads each from <projectRoot>/spwn/tools/<name>/, registers it
-// into target, and returns the rewritten list where each `tool:`
-// ref is replaced by its registered `local:<name>` key. `skill:`
-// and `hook:` refs are stripped (consumed elsewhere — the image
+// into target, and returns the rewritten list where each `tool/`
+// ref is replaced by its registered `local:<name>` key. `skill/`
+// and `hook/` refs are stripped (consumed elsewhere — the image
 // builder has no use for them). `spwn:` and `github:` refs pass
 // through untouched.
 //

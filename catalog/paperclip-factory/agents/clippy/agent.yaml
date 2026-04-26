@@ -5,8 +5,8 @@ role: worker
 runtime:
   backend: "spwn:claude-code"
 
-# Local blocks are referenced via the skill:/tool:/hook: schemes and
+# Local blocks are referenced via the skill/, tool/, hook/ schemes and
 # live at the project root (spwn/skills/<name>.md).
 dependencies:
-  - "skill:optimization"
-  - "skill:resource-monitoring"
+  - "skill/optimization"
+  - "skill/resource-monitoring"

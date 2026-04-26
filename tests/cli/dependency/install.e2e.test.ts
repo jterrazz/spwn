@@ -44,7 +44,7 @@ describe('spwn install', () => {
         // Rejected with a list of what IS in the catalog + a local-
         // Scheme alternative when the name is unknown.
         expect(result.stderr.text).toContain('not in the catalog');
-        expect(result.stderr.text).toContain('skill:my-local-tool');
+        expect(result.stderr.text).toContain('skill/my-local-tool');
     });
 
     test('accepts a bare name that matches the catalog and installs the spwn:<name>', async () => {
@@ -62,13 +62,13 @@ describe('spwn install', () => {
         expect(result.file('spwn/agents/neo/agent.yaml').content).toContain('spwn:python');
     });
 
-    test('rejects skill:/tool:/hook: without --agent (local-scope hint)', async () => {
+    test('rejects skill/, tool/, hook/ without --agent (local-scope hint)', async () => {
         // Without --agent, a local ref is refused — bolting a local
         // Block onto every agent is almost never the intent. The
         // Error points at --agent as the fix.
         const result = await spec('install local rejected')
             .project('docker-pilot')
-            .exec('install skill:paper-reading')
+            .exec('install skill/paper-reading')
             .run();
 
         expect(result.exitCode).not.toBe(0);
@@ -220,12 +220,12 @@ describe('spwn install', () => {
     });
 
     test('local refs need --agent (bolting onto every agent is a footgun)', async () => {
-        // Without a scope, `install skill:refine` would write the
+        // Without a scope, `install skill/refine` would write the
         // Entry into every agent — rarely the intent for a local
         // Block. The CLI refuses and points at the --agent flag.
         const result = await spec('install local no agent')
             .project('empty')
-            .exec(['init severance', 'install skill:refine'])
+            .exec(['init severance', 'install skill/refine'])
             .run();
 
         expect(result.exitCode).not.toBe(0);
@@ -236,17 +236,17 @@ describe('spwn install', () => {
     test('--agent attaches an explicit local skill to one agent', async () => {
         // Given - the severance fixture ships spwn/skills/refine.md
         // When - we attach it to dylan via --agent
-        // Then - dylan's manifest picks up `skill:refine`; the other
+        // Then - dylan's manifest picks up `skill/refine`; the other
         // MDR agents stay clean. The skill file itself is left alone.
         const result = await spec('install local scoped')
             .project('empty')
-            .exec(['init severance', 'install skill:refine --agent dylan'])
+            .exec(['init severance', 'install skill/refine --agent dylan'])
             .run();
 
         expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
-        expect(result.file('spwn/agents/dylan/agent.yaml').content).toContain('skill:refine');
+        expect(result.file('spwn/agents/dylan/agent.yaml').content).toContain('skill/refine');
         for (const name of ['mark', 'helly', 'irving']) {
-            // These agents may already reference skill:refine from
+            // These agents may already reference skill/refine from
             // The seed — we only check that no EXTRA entry was added
             // By the scoped install (not a hard "does not contain").
             // So just confirm dylan was the one mutated by inspecting

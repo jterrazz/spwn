@@ -82,7 +82,7 @@ func AgentDir(name string) string {
 // Init scaffolds a new Mind (playbooks/ + journal/) plus SOUL.md
 // at the agent root. Skills used to be a Mind layer but were
 // retired — they are build-time dependencies resolved via
-// skill:<name> in agent.yaml now.
+// skill/<name> in agent.yaml now.
 func Init(name string) (string, error) {
 	dir := AgentDir(name)
 	if _, err := os.Stat(dir); err == nil {

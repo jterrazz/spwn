@@ -45,7 +45,7 @@ describe('subcommand help text', () => {
         expect(help).toMatch(/spwn install python\b/);
         expect(help).toMatch(/--agent mark|--agent dylan|--agent neo/);
         // And the local-ref / local-authoring semantics are surfaced.
-        expect(help).toMatch(/skill:|tool:|hook:/);
+        expect(help).toMatch(/skill\/|tool\/|hook\//);
     });
 
     test('init --help advertises the bare-name gallery shorthand', async () => {

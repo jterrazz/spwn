@@ -61,7 +61,7 @@ dependencies:
 	}
 }
 
-// 3. rulePacksExist where agent.yaml has a tool:<name> ref that exists in spwn/tools/
+// 3. rulePacksExist where agent.yaml has a tool/<name> ref that exists in spwn/tools/
 func TestEdge_PacksExist_LocalPackDir(t *testing.T) {
 	root := t.TempDir()
 	packDir := filepath.Join(root, "spwn", "tools", "my-local-dependency")
@@ -70,7 +70,7 @@ func TestEdge_PacksExist_LocalPackDir(t *testing.T) {
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - tool:my-local-dependency
+  - tool/my-local-dependency
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	issues := rulePacksExist(in)
@@ -81,7 +81,7 @@ dependencies:
 	}
 }
 
-// 4. rulePacksExist where agent.yaml has a skill:<name> ref that exists
+// 4. rulePacksExist where agent.yaml has a skill/<name> ref that exists
 // as spwn/skills/<name>.md
 func TestEdge_PacksExist_LocalSkillFile(t *testing.T) {
 	root := t.TempDir()
@@ -94,7 +94,7 @@ func TestEdge_PacksExist_LocalSkillFile(t *testing.T) {
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - skill:research
+  - skill/research
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	issues := rulePacksExist(in)
@@ -131,8 +131,8 @@ dependencies:
 	for _, iss := range issues {
 		if strings.Contains(iss.Message, "code-review") && strings.Contains(iss.Message, "invalid") {
 			sawInvalid = true
-			if !strings.Contains(iss.Hint, "skill:code-review") {
-				t.Errorf("hint should point at skill:code-review, got %q", iss.Hint)
+			if !strings.Contains(iss.Hint, "skill/code-review") {
+				t.Errorf("hint should point at skill/code-review, got %q", iss.Hint)
 			}
 		}
 	}
@@ -141,7 +141,7 @@ dependencies:
 	}
 }
 
-// TestEdge_PacksExist_LocalHookFile: hook:<name> resolves to
+// TestEdge_PacksExist_LocalHookFile: hook/<name> resolves to
 // spwn/hooks/<name>.sh with no fallback to other kinds.
 func TestEdge_PacksExist_LocalHookFile(t *testing.T) {
 	root := t.TempDir()
@@ -154,7 +154,7 @@ func TestEdge_PacksExist_LocalHookFile(t *testing.T) {
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha
 dependencies:
-  - hook:pre-spawn
+  - hook/pre-spawn
 `)
 	in := minimalInput(root, []AgentRef{ref}, nil)
 	issues := rulePacksExist(in)

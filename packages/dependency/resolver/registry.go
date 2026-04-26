@@ -4,7 +4,7 @@
 //
 // The Registry is a plain map keyed by canonical ref. Callers
 // hydrate it from adapters (spwn catalog builtins via
-// dependency.RegisterBuiltins, project-local tool:<name> refs via
+// dependency.RegisterBuiltins, project-local tool/<name> refs via
 // dependency.HydrateLocals) and then call Resolve to drive an image
 // build. CollectSkills is a small aggregation helper on top of the
 // resolved slice.

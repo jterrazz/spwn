@@ -6,6 +6,6 @@ runtime:
   backend: "spwn:claude-code"
 
 # Project-wide deps (unix, git) are inherited from spwn.yaml.
-# Local blocks are referenced via the skill:/tool:/hook: schemes.
+# Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
 dependencies:
-  - "skill:refine"
+  - "skill/refine"

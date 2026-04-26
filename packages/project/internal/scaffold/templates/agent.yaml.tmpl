@@ -1,12 +1,14 @@
 # Agent composition — the source of truth for what this agent needs.
 #
-# dependencies: lists every external and local dep with an explicit scheme.
-# Four schemes are recognised:
+# dependencies: lists every external and local dep with an explicit form.
+# The prefix tells you the source; the leading path segment tells you
+# the kind of local block:
 #   spwn:<name>                  built-in catalog dep (e.g. spwn:python)
 #   github:<owner>/<repo>        third-party dep (planned, not yet resolved)
-#   skill:<name>                 local skill   (./spwn/skills/<name>.md)
-#   tool:<name>                  local tool    (./spwn/tools/<name>/)
-# Bare names are invalid — always use one of the schemes above.
+#   skill/<name>                 local skill   (./spwn/skills/<name>.md)
+#   tool/<name>                  local tool    (./spwn/tools/<name>/)
+#   hook/<name>                  local hook    (./spwn/hooks/<name>.sh)
+# Bare names are invalid — always use one of the forms above.
 #
 # Runtime hooks (PreToolUse, SessionStart, …) live in a separate file
 # at spwn/hooks.yaml; they're not composed via the dependency list.
@@ -25,8 +27,8 @@ runtime:
   - "spwn:unix"
   - "spwn:git"
   - "spwn:python"
-  # Local blocks scaffolded by `spwn init` — one of each scheme so you
+  # Local blocks scaffolded by `spwn init` — one of each form so you
   # can see how they're authored and used. Keep, edit, or delete them;
   # `spwn check` is happy either way.
-  - "skill:focus"       # ./spwn/skills/focus.md
-  - "tool:greet"        # ./spwn/tools/greet/
+  - "skill/focus"       # ./spwn/skills/focus.md
+  - "tool/greet"        # ./spwn/tools/greet/

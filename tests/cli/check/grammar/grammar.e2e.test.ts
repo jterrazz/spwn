@@ -43,11 +43,12 @@ describe('dependency grammar', () => {
         expect(report).toContain('dependency "local:foo" is invalid');
         expect(report).toContain('dependency "@acme/foo" is invalid');
 
-        // Every hint must point at the five-scheme grammar so the
-        // User has a concrete fix path.
-        expect(report).toMatch(/skill:<name>/);
-        expect(report).toMatch(/tool:<name>/);
-        expect(report).toMatch(/hook:<name>/);
+        // Every hint must point at the grammar so the user has a
+        // Concrete fix path: two source-prefixed schemes plus three
+        // Path-style local forms.
+        expect(report).toMatch(/skill\/<name>/);
+        expect(report).toMatch(/tool\/<name>/);
+        expect(report).toMatch(/hook\/<name>/);
         expect(report).toMatch(/spwn:<name>/);
         expect(report).toMatch(/github:<owner>\/<repo>/);
     });
@@ -83,25 +84,25 @@ describe('dependency grammar', () => {
         // Check-legacy-refs fixture at the top of this file) must be
         // Rejected. The CLI itself, though, never produces such a
         // Manifest.
-        // Skill:focus is scaffolded by `spwn init`, so it's available
+        // Skill/focus is scaffolded by `spwn init`, so it's available
         // To install — prior revisions of this test used
-        // `skill:paper-reading` which would require a separate
+        // `skill/paper-reading` which would require a separate
         // `spwn skill new` call. The resolver now errors on missing
         // Local files at install time, which is the right behaviour
         // But broke the old form.
         const result = await spec('cli canonicalises mixed input')
             .project('empty')
-            .exec(['init', 'install qmd', 'install skill:focus --agent neo', 'install spwn:unix'])
+            .exec(['init', 'install qmd', 'install skill/focus --agent neo', 'install spwn:unix'])
             .run();
 
         expect(result.exitCode, `stderr:\n${result.stderr.text}`).toBe(0);
 
         const manifest = result.file('spwn/agents/neo/agent.yaml').content;
-        // Every entry on disk carries an explicit scheme — bare
-        // `qmd` becomes `spwn:qmd`; the explicit `skill:` and
+        // Every entry on disk carries an explicit form — bare
+        // `qmd` becomes `spwn:qmd`; the explicit `skill/` and
         // `spwn:` pass through unchanged.
         expect(manifest).toContain('spwn:qmd');
-        expect(manifest).toContain('skill:focus');
+        expect(manifest).toContain('skill/focus');
         expect(manifest).toContain('spwn:unix');
         // Nothing on disk is bare — a simple structural scan proves
         // The grammar is preserved by the CLI writer.

@@ -6,9 +6,9 @@ import (
 	"spwn.sh/packages/dependency/refs"
 )
 
-// TestParse_SchemeFormSpwn: `spwn:<name>` parses to the canonical
+// TestParse_SourceFormSpwn: `spwn:<name>` parses to the canonical
 // KindSpwnBuiltin shape.
-func TestParse_SchemeFormSpwn(t *testing.T) {
+func TestParse_SourceFormSpwn(t *testing.T) {
 	got := refs.ParseRef("spwn:unix")
 	if got.Kind != refs.KindSpwnBuiltin {
 		t.Errorf("kind: want KindSpwnBuiltin, got %v (raw=%q)", got.Kind, got.Raw)
@@ -21,9 +21,9 @@ func TestParse_SchemeFormSpwn(t *testing.T) {
 	}
 }
 
-// TestParse_SchemeFormGitHub: `github:owner/repo` parses as a registry
+// TestParse_SourceFormGitHub: `github:owner/repo` parses as a registry
 // ref with the owner/name split out.
-func TestParse_SchemeFormGitHub(t *testing.T) {
+func TestParse_SourceFormGitHub(t *testing.T) {
 	got := refs.ParseRef("github:jterrazz/foo")
 	if got.Kind != refs.KindRegistry {
 		t.Errorf("kind: want KindRegistry, got %v", got.Kind)
@@ -36,9 +36,9 @@ func TestParse_SchemeFormGitHub(t *testing.T) {
 	}
 }
 
-// TestParse_SchemeFormSkill: skill:<name> parses as a local skill ref.
-func TestParse_SchemeFormSkill(t *testing.T) {
-	got := refs.ParseRef("skill:code-review")
+// TestParse_PathFormSkill: skill/<name> parses as a local skill ref.
+func TestParse_PathFormSkill(t *testing.T) {
+	got := refs.ParseRef("skill/code-review")
 	if got.Kind != refs.KindLocalSkill {
 		t.Errorf("kind: want KindLocalSkill, got %v", got.Kind)
 	}
@@ -47,9 +47,9 @@ func TestParse_SchemeFormSkill(t *testing.T) {
 	}
 }
 
-// TestParse_SchemeFormTool: tool:<name> parses as a local tool ref.
-func TestParse_SchemeFormTool(t *testing.T) {
-	got := refs.ParseRef("tool:ffmpeg")
+// TestParse_PathFormTool: tool/<name> parses as a local tool ref.
+func TestParse_PathFormTool(t *testing.T) {
+	got := refs.ParseRef("tool/ffmpeg")
 	if got.Kind != refs.KindLocalTool {
 		t.Errorf("kind: want KindLocalTool, got %v", got.Kind)
 	}
@@ -58,9 +58,9 @@ func TestParse_SchemeFormTool(t *testing.T) {
 	}
 }
 
-// TestParse_SchemeFormHook: hook:<name> parses as a local hook ref.
-func TestParse_SchemeFormHook(t *testing.T) {
-	got := refs.ParseRef("hook:pre-spawn")
+// TestParse_PathFormHook: hook/<name> parses as a local hook ref.
+func TestParse_PathFormHook(t *testing.T) {
+	got := refs.ParseRef("hook/pre-spawn")
 	if got.Kind != refs.KindLocalHook {
 		t.Errorf("kind: want KindLocalHook, got %v", got.Kind)
 	}
@@ -69,18 +69,46 @@ func TestParse_SchemeFormHook(t *testing.T) {
 	}
 }
 
-// TestParse_RetiredLocalScheme: the old `local:<name>` alias is gone;
-// it now parses as KindInvalid so callers point the user at skill:,
-// tool:, or hook: instead.
-func TestParse_RetiredLocalScheme(t *testing.T) {
-	got := refs.ParseRef("local:my-parser")
-	if got.Kind != refs.KindInvalid {
-		t.Errorf("local: alias should be invalid, got kind=%v", got.Kind)
+// TestParse_RetiredColonForms: the colon-form local schemes
+// (`skill:`, `tool:`, `hook:`, `local:`) are gone; they all parse as
+// KindInvalid so callers can point the user at the new path-style
+// forms.
+func TestParse_RetiredColonForms(t *testing.T) {
+	for _, in := range []string{"skill:focus", "tool:my-parser", "hook:pre-spawn", "local:my-parser"} {
+		got := refs.ParseRef(in)
+		if got.Kind != refs.KindInvalid {
+			t.Errorf("ParseRef(%q) kind = %v, want KindInvalid", in, got.Kind)
+		}
 	}
 }
 
-// TestParse_UnknownSchemeInvalid: a ref with an unknown scheme
-// (`gitlab:…`, `foo:bar`) is invalid under the new grammar.
+// TestParse_PathFormUnknownTypeInvalid: a path-form ref with an
+// unknown leading segment is invalid.
+func TestParse_PathFormUnknownTypeInvalid(t *testing.T) {
+	for _, in := range []string{"thing/foo", "agent/neo", "world/default"} {
+		got := refs.ParseRef(in)
+		if got.Kind != refs.KindInvalid {
+			t.Errorf("ParseRef(%q) kind = %v, want KindInvalid", in, got.Kind)
+		}
+	}
+}
+
+// TestParse_PathFormDeepPathInvalid: only one slash is allowed in
+// path-form local refs. `tool/foo/bar` is rejected — names with
+// embedded slashes aren't supported, and accepting them now would
+// box future grammars (e.g. `github:owner/repo/tool/foo`) into a
+// reinterpretation.
+func TestParse_PathFormDeepPathInvalid(t *testing.T) {
+	for _, in := range []string{"tool/foo/bar", "skill/a/b", "hook/x/y/z"} {
+		got := refs.ParseRef(in)
+		if got.Kind != refs.KindInvalid {
+			t.Errorf("ParseRef(%q) kind = %v, want KindInvalid (deep paths not allowed)", in, got.Kind)
+		}
+	}
+}
+
+// TestParse_UnknownSchemeInvalid: a ref with an unknown source
+// scheme (`gitlab:…`, `foo:bar`) is invalid.
 func TestParse_UnknownSchemeInvalid(t *testing.T) {
 	got := refs.ParseRef("gitlab:x/y")
 	if got.Kind != refs.KindInvalid {
@@ -89,7 +117,7 @@ func TestParse_UnknownSchemeInvalid(t *testing.T) {
 }
 
 // TestParse_LocalNameWithColon: a bare name that happens to contain
-// a colon but doesn't match a recognised scheme is invalid.
+// a colon but doesn't match a recognised source scheme is invalid.
 func TestParse_LocalNameWithColon(t *testing.T) {
 	got := refs.ParseRef("my-tool:extra")
 	if got.Kind != refs.KindInvalid {
@@ -98,7 +126,7 @@ func TestParse_LocalNameWithColon(t *testing.T) {
 }
 
 // TestParse_LegacyAtPrefixRejected: the removed `@owner/name` form
-// now parses as KindInvalid so the resolver can surface a clear error.
+// parses as KindInvalid so the resolver can surface a clear error.
 func TestParse_LegacyAtPrefixRejected(t *testing.T) {
 	for _, in := range []string{"@spwn/unix", "@jterrazz/foo", "@"} {
 		got := refs.ParseRef(in)
@@ -108,19 +136,24 @@ func TestParse_LegacyAtPrefixRejected(t *testing.T) {
 	}
 }
 
-// TestCanonical_EmitsSchemeForm: Canonical is the display helper; it
-// always emits the scheme form, with `@version` suffixes stripped.
-func TestCanonical_EmitsSchemeForm(t *testing.T) {
+// TestCanonical_EmitsCanonicalForm: Canonical is the display helper;
+// it always emits the canonical form, with `@version` suffixes
+// stripped. Local refs canonicalise to the path form; spwn/github
+// keep their colon source prefix.
+func TestCanonical_EmitsCanonicalForm(t *testing.T) {
 	cases := map[string]string{
 		"spwn:unix":           "spwn:unix",
 		"github:jterrazz/foo": "github:jterrazz/foo",
-		"skill:code-review":   "skill:code-review",
-		"tool:my-parser":      "tool:my-parser",
-		"hook:pre-spawn":      "hook:pre-spawn",
+		"skill/code-review":   "skill/code-review",
+		"tool/my-parser":      "tool/my-parser",
+		"hook/pre-spawn":      "hook/pre-spawn",
 		"spwn:unix@24.04":     "spwn:unix",
-		// Invalid inputs fall through unchanged for display.
+		// Invalid inputs (including retired colon-forms) fall through
+		// unchanged for display.
 		"bare-name":       "bare-name",
 		"local:my-parser": "local:my-parser",
+		"skill:focus":     "skill:focus",
+		"tool:ffmpeg":     "tool:ffmpeg",
 	}
 	for in, want := range cases {
 		if got := refs.Canonical(in); got != want {
@@ -129,9 +162,9 @@ func TestCanonical_EmitsSchemeForm(t *testing.T) {
 	}
 }
 
-// TestSplitVersion_SchemeForm: `spwn:unix@24.04` splits cleanly off
+// TestSplitVersion_SourceForm: `spwn:unix@24.04` splits cleanly off
 // the final `@`.
-func TestSplitVersion_SchemeForm(t *testing.T) {
+func TestSplitVersion_SourceForm(t *testing.T) {
 	name, version := refs.SplitVersion("spwn:unix@24.04")
 	if name != "spwn:unix" || version != "24.04" {
 		t.Errorf("split: got (%q, %q), want (spwn:unix, 24.04)", name, version)

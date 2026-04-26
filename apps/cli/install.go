@@ -12,7 +12,7 @@ import (
 //
 // The optional `--agent <name>` flag narrows scope to a single
 // agent in the project. Without it, the ref is added to every
-// agent (npm-style). Local refs (skill:/tool:/hook:) require
+// agent (npm-style). Local refs (skill/, tool/, hook/) require
 // --agent because bolting a local block onto every agent by
 // default is almost never what the user wants.
 func installCmd() *cobra.Command {
@@ -24,14 +24,14 @@ func installCmd() *cobra.Command {
 
 Bare names resolve to the spwn: catalog ("spwn install qmd" installs spwn:qmd).
 Without --agent, the ref is added to every agent in the project.
-Local refs (skill:/tool:/hook:) require --agent to pick a target.
+Local refs (skill/, tool/, hook/) require --agent to pick a target.
 
 Examples:
   spwn install python                         # catalog dep, every agent
   spwn install spwn:python                    # explicit form, every agent
   spwn install github:jterrazz/research-skills
   spwn install qmd --agent mark               # catalog dep, only mark
-  spwn install skill:refine --agent dylan     # local skill, only dylan`,
+  spwn install skill/refine --agent dylan     # local skill, only dylan`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return dependency.RunInstall(cmd, args[0], agentFilter)
@@ -59,7 +59,7 @@ to detach it from a single agent while leaving others untouched.
 
 Examples:
   spwn uninstall python                     # every agent
-  spwn uninstall skill:refine --agent mark  # only mark`,
+  spwn uninstall skill/refine --agent mark  # only mark`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return dependency.RunUninstall(cmd, args[0], agentFilter)

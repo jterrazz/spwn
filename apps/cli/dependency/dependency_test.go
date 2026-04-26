@@ -86,8 +86,8 @@ func TestInstall_rejectsBareName(t *testing.T) {
 	if !strings.Contains(err.Error(), "not in the catalog") {
 		t.Errorf("want catalog-miss hint, got: %v", err)
 	}
-	if !strings.Contains(err.Error(), "skill:my-local-tool") {
-		t.Errorf("error should suggest the local-scheme alternative: %v", err)
+	if !strings.Contains(err.Error(), "skill/my-local-tool") {
+		t.Errorf("error should suggest the local-form alternative: %v", err)
 	}
 }
 
@@ -96,7 +96,7 @@ func TestInstall_rejectsLocalSchemeRef(t *testing.T) {
 	// Without --agent, installing a local ref is refused because
 	// Bolting a local block onto every agent is almost never what
 	// The user wants. The error points at --agent as the fix.
-	_, err := runWithOut(t, installCmd, "skill:paper-reading")
+	_, err := runWithOut(t, installCmd, "skill/paper-reading")
 	if err == nil {
 		t.Fatal("want error for local ref without --agent")
 	}

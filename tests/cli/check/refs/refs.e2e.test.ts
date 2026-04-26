@@ -13,14 +13,14 @@ import { spec } from '../../../setup/cli.specification.js';
  *
  * The canonical success path is already covered by the check suite via
  * the single-agent fixture. These tests pin the classifier edges: a
- * mixed spwn: + tool: project should pass, a registry ref should fail
+ * mixed spwn: + tool/ project should pass, a registry ref should fail
  * with explicit wording quoting the offending ref.
  */
 
 describe('spwn check: tool ref classification', () => {
-    test('accepts mixed spwn: and tool: refs without error', async () => {
+    test('accepts mixed spwn: and tool/ refs without error', async () => {
         // Given - the mixed-tool-refs fixture declares spwn:unix plus
-        // A local tool `tool:my-local-tool` that actually exists on disk
+        // A local tool `tool/my-local-tool` that actually exists on disk
         // Under spwn/tools/.
         const result = await spec('mixed refs').project('mixed-tool-refs').exec('check').run();
 

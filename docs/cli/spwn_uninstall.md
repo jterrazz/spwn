@@ -17,7 +17,7 @@ to detach it from a single agent while leaving others untouched.
 
 Examples:
   spwn uninstall python                     # every agent
-  spwn uninstall skill:refine --agent mark  # only mark
+  spwn uninstall skill/refine --agent mark  # only mark
 
 ```
 spwn uninstall <ref> [flags]

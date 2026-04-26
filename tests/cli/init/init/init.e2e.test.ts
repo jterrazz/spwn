@@ -56,14 +56,21 @@ describe('spwn init', () => {
         expect(hooksYaml).toContain('event: SessionStart');
         expect(hooksYaml).toContain('command:');
 
-        // Default agent.yaml must reference the two dep-scheme
+        // Default agent.yaml must reference the two dep-form
         // Examples so a fresh project shows the composition grammar
-        // (spwn: + skill: + tool:) inline. The retired `hook:` scheme
-        // Must NOT leak back into the scaffold.
+        // (spwn: + skill/ + tool/) inline. The retired colon-form
+        // Schemes (skill:, tool:, hook:) must NOT leak back into
+        // The scaffold.
         const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
-        expect(agentYaml).toContain('skill:focus');
-        expect(agentYaml).toContain('tool:greet');
-        expect(agentYaml).not.toContain('hook:');
+        expect(agentYaml).toContain('skill/focus');
+        expect(agentYaml).toContain('tool/greet');
+        // No `hook/` ENTRY in the dep list (the form is mentioned in
+        // The header comment but not used as a default dep).
+        expect(agentYaml).not.toMatch(/^\s*-\s+["']?hook\//m);
+        // None of the retired colon-form schemes for local refs.
+        expect(agentYaml).not.toMatch(/\bskill:[a-z]/);
+        expect(agentYaml).not.toMatch(/\btool:[a-z]/);
+        expect(agentYaml).not.toMatch(/\bhook:[a-z]/);
     });
 
     test('scaffolds the knowledge tree under spwn/, not at the project root', async () => {

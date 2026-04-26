@@ -465,7 +465,7 @@ func ruleAgentYAMLLegacyKeys(in Input) []Issue {
 				Level:   LevelError,
 				Path:    relPath(in.Root, yamlPath) + "#" + key,
 				Message: fmt.Sprintf("legacy top-level %q block in agent.yaml", key),
-				Hint:    fmt.Sprintf("move entries into the flat `dependencies:` list (e.g. `dependencies: [\"spwn:unix\", \"%s:<name>\"]`); top-level `%s:` is no longer read", strings.TrimSuffix(key, "s"), key),
+				Hint:    fmt.Sprintf("move entries into the flat `dependencies:` list (e.g. `dependencies: [\"spwn:unix\", \"%s/<name>\"]`); top-level `%s:` is no longer read", strings.TrimSuffix(key, "s"), key),
 			})
 		}
 	}
@@ -698,11 +698,11 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 
 // rulePacksExist checks every dependency referenced by any agent or
 // world against the BuiltinTools catalog (for spwn:* refs) and
-// against the filesystem (for local scheme refs: skill:/tool:/hook:).
+// against the filesystem (for local refs: skill/, tool/, hook/).
 //
-// Every ref must use an explicit scheme. Bare names (including the
-// retired `local:<name>` alias) are rejected with a hint pointing the
-// author at the three local schemes.
+// Every ref must use an explicit form. Bare names and the retired
+// `skill:` / `tool:` / `hook:` / `local:` colon-schemes are rejected
+// with a hint pointing the author at the path-style local grammar.
 func rulePacksExist(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
@@ -730,7 +730,7 @@ func rulePacksExist(in Input) []Issue {
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
 				Hint: "use spwn:<name> for built-in dependencies, or author a local dep with " +
-					"skill:<name>, tool:<name>, or hook:<name>; remote registries " +
+					"skill/<name>, tool/<name>, or hook/<name>; remote registries " +
 					"(github:<owner>/<repo>) are planned but not implemented yet",
 			}}
 		case refs.ResolveInvalid:
@@ -1128,28 +1128,34 @@ func relPath(root, path string) string {
 	return rel
 }
 
-// invalidRefHint produces the canonical "use skill:/tool:/hook:" hint
-// for a bare/malformed dependency ref. When the bare name happens to
-// match exactly one on-disk target (skill file, tool dir, or hook
-// script) we point at that specific scheme so the author's fix is a
+// invalidRefHint produces the canonical "use skill/, tool/, or hook/"
+// hint for a bare/malformed dependency ref. When the bare name happens
+// to match exactly one on-disk target (skill file, tool dir, or hook
+// script) we point at that specific form so the author's fix is a
 // one-character edit; otherwise we list all three options.
 func invalidRefHint(root, raw string) string {
 	name := strings.TrimSpace(raw)
-	// Drop any accidental leading `@` or `local:` so the scheme
-	// suggestion still works for legacy authorings that sneak through.
+	// Drop any accidental leading `@` or retired colon-form prefixes
+	// so the path-style suggestion still works for legacy authorings
+	// that sneak through.
 	name = strings.TrimPrefix(name, "@")
-	name = strings.TrimPrefix(name, "local:")
+	for _, retired := range []string{"local:", "skill:", "tool:", "hook:"} {
+		if strings.HasPrefix(name, retired) {
+			name = strings.TrimPrefix(name, retired)
+			break
+		}
+	}
 
 	if name != "" && !strings.ContainsAny(name, ":/") {
 		var matches []string
 		if st, err := os.Stat(filepath.Join(root, "spwn", "skills", name+".md")); err == nil && !st.IsDir() {
-			matches = append(matches, "skill:"+name)
+			matches = append(matches, "skill/"+name)
 		}
 		if st, err := os.Stat(filepath.Join(root, "spwn", "tools", name)); err == nil && st.IsDir() {
-			matches = append(matches, "tool:"+name)
+			matches = append(matches, "tool/"+name)
 		}
 		if st, err := os.Stat(filepath.Join(root, "spwn", "hooks", name+".sh")); err == nil && !st.IsDir() {
-			matches = append(matches, "hook:"+name)
+			matches = append(matches, "hook/"+name)
 		}
 		if len(matches) == 1 {
 			return "did you mean " + matches[0] + "?"
@@ -1159,8 +1165,8 @@ func invalidRefHint(root, raw string) string {
 		}
 	}
 
-	return "use skill:<name> (for spwn/skills/<name>.md), tool:<name> (for spwn/tools/<name>/), " +
-		"or hook:<name> (for spwn/hooks/<name>.sh); spwn:<name> and github:<owner>/<repo> remain the two external schemes"
+	return "use skill/<name> (for spwn/skills/<name>.md), tool/<name> (for spwn/tools/<name>/), " +
+		"or hook/<name> (for spwn/hooks/<name>.sh); spwn:<name> and github:<owner>/<repo> remain the two source-prefixed schemes"
 }
 
 func suggestPackage(tool string, catalog []string) string {

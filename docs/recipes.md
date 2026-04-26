@@ -17,7 +17,7 @@ your notebooks, and a skill that teaches the agent how to read papers.
 spwn init
 spwn install python --agent curie
 spwn install qmd --agent curie
-spwn install skill:paper-reading --agent curie
+spwn install skill/paper-reading --agent curie
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
@@ -27,9 +27,9 @@ What happened:
 - `spwn install python --agent curie` adds `spwn:python` to
   `spwn/agents/curie/agent.yaml#dependencies:` **and** pins it in
   `spwn.lock`. Same for `spwn:qmd`.
-- `spwn install skill:paper-reading --agent curie` scaffolds
+- `spwn install skill/paper-reading --agent curie` scaffolds
   `spwn/skills/paper-reading.md` (empty; fill it in) and attaches the
-  `skill:paper-reading` ref to the agent. At build time the skill is
+  `skill/paper-reading` ref to the agent. At build time the skill is
   staged to `/world/skills/paper-reading/SKILL.md` inside the image;
   at spawn time Claude Code picks it up through its native
   `.claude/skills/` discovery path (symlinked from the agent's home).

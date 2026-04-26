@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"spwn.sh/packages/dependency/internal/manifest"
 	"spwn.sh/packages/dependency/refs"
@@ -13,7 +12,7 @@ import (
 )
 
 // localToolDir is where the project-local dependency loader looks
-// for tool:<name> refs at image-build time. Mirrors what the
+// for tool/<name> refs at image-build time. Mirrors what the
 // validator (rulePacksExist) expects, so `spwn check` and
 // `spwn build` resolve refs through the same on-disk layout.
 const localToolDir = "tools"
@@ -21,9 +20,9 @@ const localToolDir = "tools"
 // wrappedLocalTool forwards every tool.Tool method to an underlying
 // packyaml-parsed dependency but forces Name() to the "local:<basename>"
 // form. Catalog refs and local refs share a single registry keyed by
-// name, so the prefix keeps them in separate namespaces — any future
-// promotion of a local name to an spwn: dependency doesn't collide with
-// existing tool: references in agent.yaml.
+// name, so the `local:` prefix keeps them in separate namespaces —
+// any future promotion of a local name to an spwn: dependency doesn't
+// collide with existing `tool/` references in agent.yaml.
 type wrappedLocalTool struct {
 	inner tool.Tool
 	name  string
@@ -35,10 +34,10 @@ func (t *wrappedLocalTool) Install() tool.InstallSpec { return t.inner.Install()
 func (t *wrappedLocalTool) Verify() []string          { return t.inner.Verify() }
 func (t *wrappedLocalTool) Skills() fs.FS             { return t.inner.Skills() }
 
-// Dependencies rewrites `tool:<x>` inner deps to the `local:<x>`
+// Dependencies rewrites `tool/<x>` inner deps to the `local:<x>`
 // registry key so the resolver's lookups match the name under which
 // we registered each local tool. Without this, a local tool whose
-// tool.yaml lists `dependencies: [tool:b]` can't find tool:b —
+// tool.yaml lists `dependencies: [tool/b]` can't find tool/b —
 // the registry only knows it as `local:b` — and the whole resolve
 // step errors with "not registered", masking dependency cycles as
 // missing-dep errors.
@@ -46,8 +45,9 @@ func (t *wrappedLocalTool) Dependencies() []string {
 	raw := t.inner.Dependencies()
 	out := make([]string, len(raw))
 	for i, d := range raw {
-		if strings.HasPrefix(d, "tool:") {
-			out[i] = "local:" + strings.TrimPrefix(d, "tool:")
+		ref := refs.ParseRef(d)
+		if ref.Kind == refs.KindLocalTool {
+			out[i] = "local:" + ref.Name
 		} else {
 			out[i] = d
 		}
@@ -86,12 +86,12 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 }
 
 // Hydrate walks a flat list of dependency refs, loads
-// every tool:<name> entry as a synthetic tool.Tool via the shared
+// every tool/<name> entry as a synthetic tool.Tool via the shared
 // packyaml parser, registers it, and returns the rewritten list
-// where each tool: ref has been replaced by its "local:<name>"
+// where each tool/ ref has been replaced by its "local:<name>"
 // registry key.
 //
-// skill: and hook: refs are stripped from the list entirely — those
+// skill/ and hook/ refs are stripped from the list entirely — those
 // are compile-time artifacts that the runtime renderer weaves into
 // the Tree (as /world/skills/<name>/SKILL.md and hook scripts
 // respectively), not image-builder inputs. Passing them through to
@@ -107,8 +107,8 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string, error) {
 	loaded := map[string]bool{}
 
-	// hydrateOne loads one tool:<name> (recursively following its
-	// own `tool:` deps so the registry ends up with every local
+	// hydrateOne loads one tool/<name> (recursively following its
+	// own `tool/` deps so the registry ends up with every local
 	// tool reachable from the project). Deduplicated via `loaded`;
 	// returns the registry key ("local:<name>") for the caller.
 	var hydrateOne func(name string) (string, error)
@@ -122,11 +122,11 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 		}
 		loaded[name] = true
 
-		// Collect inner deps BEFORE wrapping swaps "tool:" →
+		// Collect inner deps BEFORE wrapping swaps "tool/" →
 		// "local:" on the returned slice. Type-assert down to the
 		// wrapper we constructed in LoadTool so we can read the
 		// original Dependencies() entries that still carry the
-		// `tool:<x>` ref form.
+		// `tool/<x>` ref form.
 		var innerDeps []string
 		if wrapped, ok := t.(*wrappedLocalTool); ok {
 			innerDeps = wrapped.inner.Dependencies()
@@ -140,7 +140,7 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 
 		// Recurse into local-tool inner deps so the registry has
 		// every transitively-reachable local tool. Without this, a
-		// local tool whose tool.yaml declares `dependencies: [tool:b]`
+		// local tool whose tool.yaml declares `dependencies: [tool/b]`
 		// causes resolver.Resolve to error with "local:b not
 		// registered" at spawn, masking real cycles behind a
 		// missing-dep message.

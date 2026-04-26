@@ -8,8 +8,8 @@ import { spec } from '../../../setup/cli.specification.js';
  * Contract: a single `spwn/hooks.yaml` authored by the user is
  * translated by the transpile layer into each runtime's native hook
  * config at build time — Claude Code's `.claude/settings.json` and
- * Codex's `.codex/hooks.json`. Previous regression: the `hook:` dep
- * scheme was left in the scaffold long after host-side lifecycle
+ * Codex's `.codex/hooks.json`. Previous regression: the `hook/` dep
+ * form was left in the scaffold long after host-side lifecycle
  * hooks were retired, so users wrote host shell scripts that silently
  * never ran. The fix centralised all runtime hooks under hooks.yaml
  * and this test locks that contract in place.

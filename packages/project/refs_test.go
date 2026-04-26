@@ -9,7 +9,7 @@ import (
 
 // TestValidate_refKinds exercises every ref kind end-to-end through
 // manifest.Validate against an on-disk project: spwn:* builtin,
-// tool:<name> local, github:<owner>/<repo> remote registry, and
+// tool/<name> local, github:<owner>/<repo> remote registry, and
 // bare/legacy forms that must now surface as invalid.
 func TestValidate_refKinds(t *testing.T) {
 	root := t.TempDir()
@@ -30,8 +30,8 @@ worlds:
   backend: "spwn:claude-code"
 dependencies:
   - "spwn:python"
-  - "tool:local-tool"
-  - "tool:local-missing"
+  - "tool/local-tool"
+  - "tool/local-missing"
   - "github:jterrazz/python"
   - "bare-legacy"
 `)
@@ -50,22 +50,22 @@ dependencies:
 	})
 
 	var (
-		spwnPythonIssues    int
-		localToolIssues     int
-		missingLocalMsg     string
-		jterrazzMsg         string
-		jterrazzHint        string
-		bareInvalidMsg      string
-		bareInvalidHint     string
+		spwnPythonIssues int
+		localToolIssues  int
+		missingLocalMsg  string
+		jterrazzMsg      string
+		jterrazzHint     string
+		bareInvalidMsg   string
+		bareInvalidHint  string
 	)
 	for _, iss := range issues {
 		msg := iss.Message
 		switch {
 		case strings.Contains(msg, `"spwn:python"`):
 			spwnPythonIssues++
-		case strings.Contains(msg, `"tool:local-tool"`):
+		case strings.Contains(msg, `"tool/local-tool"`):
 			localToolIssues++
-		case strings.Contains(msg, `"tool:local-missing"`):
+		case strings.Contains(msg, `"tool/local-missing"`):
 			missingLocalMsg = msg
 		case strings.Contains(msg, `"github:jterrazz/python"`):
 			jterrazzMsg = msg
@@ -80,10 +80,10 @@ dependencies:
 		t.Errorf("spwn:python should produce no issue, got %d", spwnPythonIssues)
 	}
 	if localToolIssues != 0 {
-		t.Errorf("tool:local-tool (present on disk) should produce no issue, got %d", localToolIssues)
+		t.Errorf("tool/local-tool (present on disk) should produce no issue, got %d", localToolIssues)
 	}
 	if !strings.Contains(missingLocalMsg, "does not exist") {
-		t.Errorf("tool:local-missing: want generic 'does not exist' error, got %q", missingLocalMsg)
+		t.Errorf("tool/local-missing: want generic 'does not exist' error, got %q", missingLocalMsg)
 	}
 	if !strings.Contains(jterrazzMsg, "remote registries are not yet supported") {
 		t.Errorf("github:jterrazz/python: want registry-unsupported message, got %q", jterrazzMsg)
@@ -94,8 +94,8 @@ dependencies:
 	if !strings.Contains(bareInvalidMsg, "invalid") {
 		t.Errorf("bare-legacy: want invalid-ref message, got %q", bareInvalidMsg)
 	}
-	if !strings.Contains(bareInvalidHint, "skill:") || !strings.Contains(bareInvalidHint, "tool:") || !strings.Contains(bareInvalidHint, "hook:") {
-		t.Errorf("bare-legacy hint should mention all three local schemes, got %q", bareInvalidHint)
+	if !strings.Contains(bareInvalidHint, "skill/") || !strings.Contains(bareInvalidHint, "tool/") || !strings.Contains(bareInvalidHint, "hook/") {
+		t.Errorf("bare-legacy hint should mention all three local forms, got %q", bareInvalidHint)
 	}
 }
 

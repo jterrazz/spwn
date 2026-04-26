@@ -323,15 +323,15 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	t.Run("12_check_reports_unknown_local", func(t *testing.T) {
-		// B12: scheme-form refs with no matching file surface as "does not exist".
+		// B12: well-formed local refs with no matching file surface as "does not exist".
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		// Append a scheme-form ref that resolves to nothing on disk.
+		// Append a well-formed ref that resolves to nothing on disk.
 		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
 		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill:unknown-local\n"), 0o644); err != nil {
+		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill/unknown-local\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		stdout, stderr, code := runCLI(t, env, wd, "check")
@@ -346,8 +346,8 @@ func TestReleaseReadiness(t *testing.T) {
 
 	t.Run("12b_check_rejects_bare_ref", func(t *testing.T) {
 		// B12b: a bare ref (no scheme) is rejected up-front with a
-		// hint pointing the author at skill:/tool:/hook:. This is the
-		// exact failure mode the new scheme-only grammar prevents.
+		// hint pointing the author at skill/, tool/, hook/. This is
+		// the exact failure mode the new explicit-form grammar prevents.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -373,8 +373,8 @@ func TestReleaseReadiness(t *testing.T) {
 		if !strings.Contains(combined, "invalid") {
 			t.Fatalf("expected bare ref to be flagged invalid, got:\n%s", combined)
 		}
-		if !strings.Contains(combined, "skill:code-review") {
-			t.Fatalf("expected hint pointing at skill:code-review, got:\n%s", combined)
+		if !strings.Contains(combined, "skill/code-review") {
+			t.Fatalf("expected hint pointing at skill/code-review, got:\n%s", combined)
 		}
 	})
 
@@ -727,8 +727,8 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("33_skill_scheme_ref_passes_check", func(t *testing.T) {
-		// F33: a skill:<name> ref resolves to spwn/skills/<name>.md and
+	t.Run("33_skill_path_ref_passes_check", func(t *testing.T) {
+		// F33: a skill/<name> ref resolves to spwn/skills/<name>.md and
 		// `check` stays clean.
 		t.Parallel()
 		env, _ := freshEnv(t)
@@ -739,12 +739,12 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
 		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill:reading\n"), 0o644); err != nil {
+		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill/reading\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		stdout, stderr, code := runCLI(t, env, wd, "check")
 		if code != 0 {
-			t.Fatalf("check should pass with skill: scheme ref, got exit %d:\nstdout=%s\nstderr=%s", code, stdout, stderr)
+			t.Fatalf("check should pass with skill/ ref, got exit %d:\nstdout=%s\nstderr=%s", code, stdout, stderr)
 		}
 	})
 
@@ -1189,7 +1189,7 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("expected agent.yaml to contain dependencies: block:\n%s", body)
 		}
 		patched := strings.Replace(string(body),
-			"dependencies:\n", "dependencies:\n  - \"skill:note-taking\"\n", 1)
+			"dependencies:\n", "dependencies:\n  - \"skill/note-taking\"\n", 1)
 		if err := os.WriteFile(agentYAML, []byte(patched), 0o644); err != nil {
 			t.Fatal(err)
 		}

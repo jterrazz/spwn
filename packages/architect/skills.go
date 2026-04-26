@@ -252,12 +252,21 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 
 // skillDirName turns a dep ref into the directory component used under
 // `.claude/skills/`. The goal is the bare slug: `spwn:qmd` → `qmd`,
-// `local:my-skill` → `my-skill`, `@owner/skill` → `owner/skill`. Keep
+// `local:my-skill` → `my-skill` (post-hydrate registry key),
+// `tool/foo` → `foo`, `skill/bar` → `bar`, `hook/baz` → `baz`. Keep
 // in lockstep with refs.Kind recognisers in packages/dependency/refs.
 func skillDirName(ref string) string {
-	for _, scheme := range []string{"spwn:", "local:", "tool:", "skill:", "hook:"} {
+	// Internal post-hydrate registry keys (`spwn:`, `local:`) are not
+	// user-facing and don't go through the parser.
+	for _, scheme := range []string{"spwn:", "local:"} {
 		if strings.HasPrefix(ref, scheme) {
 			return strings.TrimPrefix(ref, scheme)
+		}
+	}
+	// User-facing path-style local refs (tool/foo, skill/bar, hook/baz).
+	for _, prefix := range []string{"tool/", "skill/", "hook/"} {
+		if strings.HasPrefix(ref, prefix) {
+			return strings.TrimPrefix(ref, prefix)
 		}
 	}
 	return strings.TrimPrefix(ref, "@")

@@ -38,7 +38,7 @@ verify:
   - command -v curl
 ```
 
-Reference it from `agent.yaml#dependencies` as `tool:my-thing`.
+Reference it from `agent.yaml#dependencies` as `tool/my-thing`.
 Richer tools add `commands:` / `user-commands:` / `env:` / `files:`
 plus a sibling `files/` directory referenced by `tool.yaml#files:`.
 See the [internal schema](../packages/dependency/internal/manifest/schema.go)

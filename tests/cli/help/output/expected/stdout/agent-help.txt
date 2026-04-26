@@ -30,6 +30,6 @@ Portability:
 Examples:
   spwn agent create neo
   spwn install python --agent neo
-  spwn install skill:paper-reading --agent neo
+  spwn install skill/paper-reading --agent neo
   spwn agent neo
 

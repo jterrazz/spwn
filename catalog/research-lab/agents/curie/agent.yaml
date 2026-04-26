@@ -5,10 +5,10 @@ role: worker
 runtime:
   backend: "spwn:claude-code"
 
-# Local blocks are referenced via the skill:/tool:/hook: schemes and
+# Local blocks are referenced via the skill/, tool/, hook/ schemes and
 # live at the project root (spwn/skills/<name>.md, spwn/tools/<name>/).
 dependencies:
-  - "skill:literature-review"
-  - "skill:experiment-design"
-  - "skill:data-analysis"
-  - "tool:jupyter"
+  - "skill/literature-review"
+  - "skill/experiment-design"
+  - "skill/data-analysis"
+  - "tool/jupyter"

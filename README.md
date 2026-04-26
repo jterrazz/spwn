@@ -31,7 +31,7 @@
 
 The real power of AI isn't the model. It's the model *plus everything around it*. Oppenheimer in a chatbox can answer questions; Oppenheimer in a lab, surrounded by instruments, notebooks, colleagues, and years of memory, can change the world. **The environment is the multiplier.**
 
-With spwn, **you build that environment, block by block**. Stack `spwn:python` with `spwn:qmd`, add a local `tool:ffmpeg`, pin a few skills and a soul, and your agent wakes up inside a sandbox assembled exactly for its job. Two agents in the same project can live in two totally different worlds: one talks to Postgres and runs tests, the other compiles video. Every block is a declarative file, reviewed in PRs, pinned in lockfiles, swapped like Lego.
+With spwn, **you build that environment, block by block**. Stack `spwn:python` with `spwn:qmd`, add a local `tool/ffmpeg`, pin a few skills and a soul, and your agent wakes up inside a sandbox assembled exactly for its job. Two agents in the same project can live in two totally different worlds: one talks to Postgres and runs tests, the other compiles video. Every block is a declarative file, reviewed in PRs, pinned in lockfiles, swapped like Lego.
 
 Spawn it, commit it to git, ship it. If Terraform is infrastructure as code, spwn is **agents orchestration as code**: the same discipline, now for the minds that work on your repo. One `spwn build`, one portable artifact. **Docker for intelligence.**
 
@@ -67,7 +67,7 @@ Commit agents alongside your app, review behavior changes in PRs, ship the same 
 </td>
 <td align="center" width="33%">
 <h3>🛠️ Composable environment</h3>
-Stack <code>spwn:python</code>, <code>spwn:qmd</code>, <code>tool:ffmpeg</code>, whatever your agent needs. Each one wakes up in a sandbox assembled for its job.
+Stack <code>spwn:python</code>, <code>spwn:qmd</code>, <code>tool/ffmpeg</code>, whatever your agent needs. Each one wakes up in a sandbox assembled for its job.
 </td>
 <td align="center" width="33%">
 <h3>📦 Reproducible</h3>
@@ -124,20 +124,20 @@ runtime:
 dependencies:
   - "spwn:unix"          # catalog: shell + coreutils
   - "spwn:python"        # catalog: python 3 + pip
-  - "skill:code-review"  # local:   ./spwn/skills/code-review.md
-  - "tool:greet"         # local:   ./spwn/tools/greet/
-  - "hook:pre-spawn"     # local:   ./spwn/hooks/pre-spawn.sh
+  - "skill/code-review"  # local:   ./spwn/skills/code-review.md
+  - "tool/greet"         # local:   ./spwn/tools/greet/
+  - "hook/pre-spawn"     # local:   ./spwn/hooks/pre-spawn.sh
 ```
 
-**Every dependency is a `scheme:target` ref.** Five schemes, nothing else:
+**Every dependency declares its source and type explicitly.** Two source-prefixed schemes (`spwn:`, `github:`) plus three local path-style forms (`skill/`, `tool/`, `hook/`):
 
 | Scheme | Resolves to |
 |---|---|
 | `spwn:<name>` | Built-in catalog dep compiled into the binary |
 | `github:<owner>/<repo>` | Community registry *(planned)* |
-| `skill:<name>` | `./spwn/skills/<name>.md` |
-| `tool:<name>` | `./spwn/tools/<name>/` (with `tool.yaml`) |
-| `hook:<name>` | `./spwn/hooks/<name>.sh` |
+| `skill/<name>` | `./spwn/skills/<name>.md` |
+| `tool/<name>` | `./spwn/tools/<name>/` (with `tool.yaml`) |
+| `hook/<name>` | `./spwn/hooks/<name>.sh` |
 
 Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/dependency-catalog.md).
 
@@ -234,7 +234,7 @@ Switching runtimes is a one-line change in `agent.yaml` - no source edits, no lo
 spwn init
 spwn install python --agent curie
 spwn install qmd --agent curie
-spwn install skill:paper-reading --agent curie
+spwn install skill/paper-reading --agent curie
 spwn up
 spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag anomalies"
 ```
@@ -302,7 +302,7 @@ spwn down                             Stop every world
 # ── Compose ──────────────────────────────────────────────────────
 spwn install python                   Install a catalog dep (every agent)
 spwn install qmd --agent neo          Install a catalog dep (one agent)
-spwn install skill:focus --agent neo  Attach a local skill
+spwn install skill/focus --agent neo  Attach a local skill
 spwn agent create neo                 Create an agent + its world
 spwn agent neo                        Interactive session with neo
 
@@ -641,7 +641,7 @@ commands and adapters below belong to one or more of these.
 | Source | Status |
 |---|:---:|
 | `spwn:*` built-in catalog | 🟢 |
-| Local project deps (`skill:`/`tool:`/`hook:`) | 🟡 |
+| Local project deps (`skill/`/`tool/`/`hook/`) | 🟡 |
 | MCP servers | 🔴 |
 | LangChain tools | 🔴 |
 
@@ -703,7 +703,7 @@ resolved against a catalog at image-build time.
 | Ref | Resolves to | Notes |
 |---|---|---|
 | `spwn:<name>` | Bundled catalog entry | e.g. `spwn:unix`, `spwn:git`, `spwn:codex` |
-| `tool:<name>` | Project-local tool at `spwn/tools/<name>/tool.yaml` | Lives in the repo; no catalog needed |
+| `tool/<name>` | Project-local tool at `spwn/tools/<name>/tool.yaml` | Lives in the repo; no catalog needed |
 | `github:<owner>/<repo>` | Remote tool package | Fetched at resolve time |
 
 **Where declared:**
@@ -717,7 +717,7 @@ dependencies:
 # spwn/agents/<n>/agent.yaml: per-agent additions
 dependencies:
   - spwn:claude-code
-  - tool:my-local-thing
+  - tool/my-local-thing
 ```
 
 **What the compiler does with them:**
@@ -833,7 +833,7 @@ cross-vendor `AGENTS.md` ecosystem convention. Tool-shipped skills
 
 Hooks fire on runtime events inside the container: tool use, prompt
 submit, session start, etc. They are NOT host-side lifecycle scripts;
-the retired `hook:<phase>` ref is gone.
+the retired colon-form `hook:<phase>` ref is gone.
 
 **Source form:** one declarative manifest, flat list of hook records.
 

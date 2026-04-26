@@ -13,7 +13,7 @@ tools:
   - "spwn:git"
 
 skills:
-  - "skill:paper-reading"
+  - "skill/paper-reading"
 
 hooks:
-  - "hook:pre-spawn"
+  - "hook/pre-spawn"

@@ -7,11 +7,11 @@
 //
 //   - spwn:<name>                built-in catalog (compiled into the binary)
 //   - github:<owner>/<repo>      third-party (planned — git tags as versions)
-//   - skill:<name>               local skill (./spwn/skills/<name>.md)
-//   - tool:<name>                local tool (./spwn/tools/<name>/)
-//   - hook:<name>                local hook (./spwn/hooks/<name>.sh)
+//   - skill/<name>               local skill (./spwn/skills/<name>.md)
+//   - tool/<name>                local tool (./spwn/tools/<name>/)
+//   - hook/<name>                local hook (./spwn/hooks/<name>.sh)
 //
-// Local refs (skill:/tool:/hook:) attach the in-repo block to the
+// Local refs (skill/, tool/, hook/) attach the in-repo block to the
 // named agent; they require --agent because bolting a local onto
 // every agent by default is almost never what the user wants.
 package dependency
@@ -106,13 +106,13 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 		if res := refs.ResolveSkill(p.Root, parsed, nil, false); res == refs.ResolveNotFound {
 			switch parsed.Kind {
 			case refs.KindLocalSkill:
-				return fmt.Errorf("skill:%s not found at spwn/skills/%s.md — create it first with `spwn skill new %s`",
+				return fmt.Errorf("skill/%s not found at spwn/skills/%s.md — create it first with `spwn skill new %s`",
 					parsed.Name, parsed.Name, parsed.Name)
 			case refs.KindLocalTool:
-				return fmt.Errorf("tool:%s not found at spwn/tools/%s/ — scaffold a tool.yaml there first",
+				return fmt.Errorf("tool/%s not found at spwn/tools/%s/ — scaffold a tool.yaml there first",
 					parsed.Name, parsed.Name)
 			case refs.KindLocalHook:
-				return fmt.Errorf("hook:%s not found at spwn/hooks/%s.sh — create the hook script first",
+				return fmt.Errorf("hook/%s not found at spwn/hooks/%s.sh — create the hook script first",
 					parsed.Name, parsed.Name)
 			}
 		}
@@ -122,7 +122,7 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 			raw, parsed.Owner, parsed.Name)
 	case refs.KindInvalid:
 		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name> (for built-ins), "+
-			"github:<owner>/<repo> (for remote deps), skill:<name>, tool:<name>, or hook:<name>",
+			"github:<owner>/<repo> (for remote deps), skill/<name>, tool/<name>, or hook/<name>",
 			raw)
 	}
 
@@ -210,10 +210,10 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 		return fmt.Errorf("%q is a registry ref; nothing to uninstall", raw)
 	}
 	if parsed.Kind == refs.KindInvalid {
-		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name>, github:<owner>/<repo>, skill:<name>, tool:<name>, or hook:<name>", raw)
+		return fmt.Errorf("%q is not a valid dependency ref — use spwn:<name>, github:<owner>/<repo>, skill/<name>, tool/<name>, or hook/<name>", raw)
 	}
 	// Local refs are authorable in-repo but also attachable via
-	// `install skill:foo --agent mark` — so uninstall accepts them
+	// `install skill/foo --agent mark` — so uninstall accepts them
 	// Symmetrically. The underlying file is left alone.
 
 	targets, terr := filterAgents(p.Agents, agentFilter)

@@ -11,7 +11,7 @@ Create a new agent (SOUL.md + 2-layer Mind)
 
 Create a new agent with a SOUL.md at the agent root and the
 two Mind layer directories (playbooks/journal). Skills aren't a Mind
-layer — they're build-time dependencies resolved via the skill: scheme
+layer — they're build-time dependencies resolved via the skill/ form
 or shipped by tools, injected into /world/skills/ at image time.
 Knowledge is world-scoped, not agent-scoped — it lives at
 /world/knowledge/ when a world opts in via spwn.yaml's
