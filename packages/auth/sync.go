@@ -97,11 +97,18 @@ func writeEnvFile(dir string, creds map[Provider]*Credential) error {
 }
 
 // syncRuntimeFiles copies runtime-specific credential files into the
-// credentials directory. Currently handles:
-// - Codex: ~/.codex/auth.json → credentials/openai/auth.json
+// credentials directory. Handled today:
+//   - Codex:  ~/.codex/auth.json          → credentials/openai/auth.json
+//   - Claude: ~/.claude/.credentials.json → credentials/anthropic/.credentials.json
+//
+// These mirror what the user produces by running `codex login` /
+// `claude login` on the host. The bind into world containers is the
+// per-tier-zero auth bind (see spawn.go), so once written here the
+// next spawn picks them up without an extra step.
 func syncRuntimeFiles(dir string) error {
-	// Codex auth.json
 	home, _ := os.UserHomeDir()
+
+	// Codex auth.json
 	codexAuth := filepath.Join(home, ".codex", "auth.json")
 	if _, err := os.Stat(codexAuth); err == nil {
 		destDir := filepath.Join(dir, "openai")
@@ -110,6 +117,21 @@ func syncRuntimeFiles(dir string) error {
 		}
 		if err := copyFile(codexAuth, filepath.Join(destDir, "auth.json")); err != nil {
 			return fmt.Errorf("copy codex auth: %w", err)
+		}
+	}
+
+	// Claude .credentials.json — present on Linux and as a macOS
+	// fallback. detectAnthropic also reads from ~/.claude directly,
+	// but the sync is what makes the credential available INSIDE
+	// worker containers (which see /credentials, not the host home).
+	claudeCreds := filepath.Join(home, ".claude", ".credentials.json")
+	if _, err := os.Stat(claudeCreds); err == nil {
+		destDir := filepath.Join(dir, "anthropic")
+		if err := os.MkdirAll(destDir, 0700); err != nil {
+			return err
+		}
+		if err := copyFile(claudeCreds, filepath.Join(destDir, ".credentials.json")); err != nil {
+			return fmt.Errorf("copy claude credentials: %w", err)
 		}
 	}
 

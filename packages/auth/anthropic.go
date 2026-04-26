@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -22,17 +23,19 @@ import (
 // source of truth for "what did we find?".
 //
 // Order (descending priority for auto-select):
-//  1. env ANTHROPIC_API_KEY         (api_key)
-//  2. env CLAUDE_CODE_OAUTH_TOKEN   (oauth)
-//  3. env ANTHROPIC_AUTH_TOKEN      (api_key via CLAUDE's alt header)
-//  4. keychain entry "Claude Code"  (oauth)
-//  5. file ~/.spwn/.auth-token      (oauth or api_key by prefix)
+//  1. env ANTHROPIC_API_KEY              (api_key)
+//  2. env CLAUDE_CODE_OAUTH_TOKEN        (oauth)
+//  3. env ANTHROPIC_AUTH_TOKEN           (api_key via CLAUDE's alt header)
+//  4. keychain entry "Claude Code"       (oauth, macOS only)
+//  5. file ~/.claude/.credentials.json   (oauth, Linux + macOS fallback)
+//  6. file ~/.spwn/.auth-token           (oauth or api_key by prefix)
 //
-// Keychain is preferred over the cached token file because a login
-// from the Claude app is more likely to be fresh than a long-sitting
-// spwn cache. Earlier implementations overwrote the cache with keychain
-// contents as a side-effect of resolution; that write is preserved for
-// back-compat with tools that still read `.auth-token` directly.
+// Keychain is preferred over the file paths because a login from the
+// Claude app is more likely to be fresh than a long-sitting cache.
+// The ~/.claude/.credentials.json path mirrors what the codex sync
+// already does for ~/.codex/auth.json — without it, `claude login` on
+// non-keychain systems leaves spwn unable to see the credentials even
+// though the hint tells the user that's the right command.
 func detectAnthropic() []*Credential {
 	var out []*Credential
 
@@ -65,6 +68,9 @@ func detectAnthropic() []*Credential {
 	}
 	if keychainCred := readKeychainAnthropic(); keychainCred != nil {
 		out = append(out, keychainCred)
+	}
+	if fileCred := readClaudeCredentialsFile(); fileCred != nil {
+		out = append(out, fileCred)
 	}
 
 	// Cached `.auth-token` file: type is heuristic on the prefix. This
@@ -137,6 +143,46 @@ func readKeychainAnthropic() *Credential {
 		Type:     CredTypeKeychain,
 		Token:    creds.ClaudeAIOAuth.AccessToken,
 		Source:   "keychain:Claude Code",
+		EnvVar:   "CLAUDE_CODE_OAUTH_TOKEN",
+	}
+}
+
+// readClaudeCredentialsFile reads ~/.claude/.credentials.json — the
+// store the `claude` CLI writes on Linux (and as a fallback on macOS
+// when the keychain isn't reachable). Mirrors the keychain JSON shape
+// (claudeAiOauth.accessToken). Returns nil when the file is missing
+// or malformed; callers treat that as "not detected".
+//
+// Without this reader, users who follow the "run `claude login` on
+// the host" hint on Linux would see spwn report no credentials —
+// because `claude` writes here, not to the env vars or keychain that
+// detectAnthropic was previously checking.
+func readClaudeCredentialsFile() *Credential {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil
+	}
+	path := filepath.Join(home, ".claude", ".credentials.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var creds struct {
+		ClaudeAIOAuth struct {
+			AccessToken string `json:"accessToken"`
+		} `json:"claudeAiOauth"`
+	}
+	if err := json.Unmarshal(data, &creds); err != nil {
+		return nil
+	}
+	if creds.ClaudeAIOAuth.AccessToken == "" {
+		return nil
+	}
+	return &Credential{
+		Provider: ProviderAnthropic,
+		Type:     CredTypeOAuth,
+		Token:    creds.ClaudeAIOAuth.AccessToken,
+		Source:   "file:~/.claude/.credentials.json",
 		EnvVar:   "CLAUDE_CODE_OAUTH_TOKEN",
 	}
 }

@@ -33,6 +33,27 @@ func runtimeBackendTool(runtimeName string) string {
 	}
 }
 
+// runtimeProvider returns the auth provider name a runtime needs
+// credentials for ("anthropic" for claude-code, "openai" for codex).
+// Empty string when the runtime is unknown or its adapter declares no
+// DefaultProvider — callers that block on the result skip the check
+// in that case rather than guess.
+//
+// Mirrors apps/cli/world.runtimeAuthProvider but lives here so the
+// architect's Spawn enforcement does not depend on apps/cli (would
+// violate L7→L6 layering). Both helpers read from the same
+// runtimes.Adapter source of truth.
+func runtimeProvider(runtimeName string) string {
+	if runtimeName == "" {
+		runtimeName = defaultRuntimeName
+	}
+	adapter, ok := runtimes.Get(runtimeName)
+	if !ok {
+		return ""
+	}
+	return adapter.DefaultProvider
+}
+
 // resolveRuntimeName returns the runtime name associated with a
 // world record, with the legacy fallback applied. Pure string math —
 // no registry lookup — so callers that need to pass a name to

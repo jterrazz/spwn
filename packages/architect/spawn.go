@@ -387,13 +387,30 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	// Determine credential source for progress reporting
+	// Pre-flight credential check (defense-in-depth at the architect
+	// level). The CLI's `spwn world up` already does a live-API
+	// validation upstream — but other entry points (snap restore in
+	// apps/cli/snap, the apps/api server, future SDK callers) reach
+	// Spawn directly. Without this hard-fail those paths would burn
+	// the 30–60s cold-spawn cost only to land on a runtime 401 with
+	// no breadcrumb back to "you forgot to log in".
+	//
+	// We do NOT call the live API here (that's the CLI's job; it
+	// caches per-session). We only block the "zero credentials
+	// configured for any provider" case — the cheap, deterministic
+	// check that catches the class-1 bug.
 	creds := auth.ResolveAll()
 	credSource := "none"
 	for _, cred := range creds {
 		if cred.Type != auth.CredTypeNone {
 			credSource = string(cred.Type)
 			break
+		}
+	}
+	if credSource == "none" {
+		if providerName := runtimeProvider(opts.runtimeName()); providerName != "" {
+			p := auth.Provider(providerName)
+			return nil, fmt.Errorf("no credentials configured for %s.\n%s", p, auth.NotConfiguredHint(p))
 		}
 	}
 	opts.progress("credentials_resolved", credSource)
