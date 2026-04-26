@@ -18,7 +18,7 @@ jobs:
   #      matrix + checksums + archive needs.
   #
   #   2. The Tauri desktop app - built, code-signed and notarized
-  #      by the centralized jterrazz/jterrazz-workflows reusable
+  #      by the centralized jterrazz/jterrazz-actions reusable
   #      workflow. The desktop bundle ships the spwn CLI as a Tauri
   #      sidecar, so the desktop job runs Go itself and re-builds
   #      the CLI in-place via the pre-build-script input. The
@@ -54,7 +54,7 @@ jobs:
   desktop:
     name: Desktop release
     needs: cli
-    uses: jterrazz/jterrazz-workflows/.github/workflows/release-tauri.yaml@main
+    uses: jterrazz/jterrazz-actions/.github/workflows/release-tauri.yaml@main
     with:
       project-path: apps/web
       go-version: "1.25"
