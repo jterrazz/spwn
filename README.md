@@ -53,6 +53,21 @@ Three commands. One working agent.
 
 Prefer a bundled demo? `spwn init matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](catalog/)).
 
+Here's what lands in your project:
+
+```
+my-project/
+├── spwn.yaml              # manifest (the thing that ties everything together)
+├── spwn.lock              # lockfile (pinned catalog deps)
+├── spwn/                  # committed project assets
+│   ├── agents/            # one subdir per agent (the block you saw above)
+│   ├── skills/            # reusable skill files (markdown blocks)
+│   ├── tools/             # local tool definitions
+│   └── hooks/             # shell hooks the runtime fires
+├── knowledge/             # opt-in world-scoped knowledge base
+└── .spwn/                 # gitignored local state
+```
+
 > **Requirements:** Docker
 
 <br/>
@@ -450,22 +465,7 @@ spwn/agents/neo/
 
 **Your agents and their composition are declarative files committed alongside your code** - reviewed in PRs, versioned in git, diffed like any other config. Think Terraform for infrastructure, `docker-compose.yaml` for services, `package.json` for dependencies. Spwn plays the same role for the agents that work on your repo.
 
-`spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do:
-
-```
-my-project/
-├── spwn.yaml              # manifest (the thing that ties everything together)
-├── spwn.lock              # lockfile (pinned catalog deps)
-├── spwn/                  # committed project assets
-│   ├── agents/            # one subdir per agent (the block you saw above)
-│   ├── skills/            # reusable skill files (markdown blocks)
-│   ├── tools/             # local tool definitions
-│   └── hooks/             # shell hooks the runtime fires
-├── knowledge/             # opt-in world-scoped knowledge base
-└── .spwn/                 # gitignored local state
-```
-
-Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
+`spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do — see the [Quickstart](#quickstart) for the layout. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
 
 **`~/.spwn/` holds only your user identity** - credentials, daemon state, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, publish it (`spwn agent publish`) and pull it in the next repo with `spwn agent get`.
 
