@@ -1,93 +1,71 @@
-.PHONY: help build install uninstall clean \
-        lint go-vet \
-        test go-test test-pkg test-all \
-        test-e2e test-e2e-compile \
-        test-contracts test-pr test-docker-pr test-release test-nightly \
-        test-ts test-smoke test-web-unit test-web test-web-headed test-gate-node test-real-runtime \
-        build-test-image \
-        web-build web-dev \
-        docs
+# spwn — top-level orchestration.
+#
+# CI calls these targets directly; the workflow file at
+# .github/workflows/validate.yaml is the canonical aggregate. There is
+# no "test-pr" or "test-release" meta-target by design — if you want
+# to know what CI runs, read validate.yaml.
+#
+# Help is auto-generated from `## comment` markers after the colon, so
+# `make` (or `make help`) never goes stale. Sections are introduced
+# by `##@ Section Name` lines below.
+
+.DEFAULT_GOAL := help
 
 # Go modules are the single source of truth: every entry in go.work
-# Gets linted and tested. Adding a new module to go.work is the only
-# Thing needed to bring it under CI coverage — no Makefile edits.
+# gets linted and tested. Adding a new module to go.work is the only
+# thing needed to bring it under CI coverage — no Makefile edits.
 GO_MODS := $(shell go work edit -json 2>/dev/null | jq -r '.Use[].DiskPath')
 
-help:
-	@echo "Common targets:"
-	@echo "  make build               Build bin/spwn"
-	@echo "  make install             Build and install to ~/.local/bin"
-	@echo "  make lint                go vet all modules + pnpm -r lint"
-	@echo "  make test                Go unit tests across the workspace"
-	@echo "  make test-contracts     Check test coverage contracts"
-	@echo "  make test-pr            PR-grade checks (lint, unit, contracts, TS, web build)"
-	@echo "  make test-pkg PKG=agent   Verbose go test for one package"
-	@echo "  make test-e2e            Go E2E (Docker required)"
-	@echo "  make test-e2e-compile  Go image-build E2E (Docker required)"
-	@echo "  make test-ts             TypeScript CLI E2E (Docker + Node 22)"
-	@echo "  make test-smoke          Real-build smoke tests (Docker + Node 22)"
-	@echo "  make test-web            Playwright web E2E (Docker + browser)"
-	@echo "  make test-release        Full release-grade test suite"
-	@echo "  make test-all            Everything except test-web (Docker + Node 22)"
-	@echo "  make web-dev             Run the Next.js dev server"
-	@echo "  make docs                Regenerate apps/cli docs"
-	@echo "  make clean               rm -rf bin/"
+.PHONY: help
+help:  ## Show this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} \
+		/^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5); next } \
+		/^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-# ── Build ─────────────────────────────────────────────────────────
+##@ Build
 
-# generate runs every //go:generate directive. Used by build + test
-# to (re)hydrate the spwn adapter's embedded catalog mirror from
-# /catalog/ before compilation. Cheap (~100ms) so we always run it.
-generate:
+.PHONY: build install uninstall clean generate docs
+
+generate:  ## Run every //go:generate directive (refreshes the embedded catalog)
 	@cd packages/dependency && go generate ./...
 
-build: generate
+build: generate  ## Build bin/spwn
 	cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
 
-install: build
+install: build  ## Build and install to ~/.local/bin
 	@scripts/install.sh
 
-uninstall:
+uninstall:  ## Remove the installed bin/spwn
 	@rm -f $${INSTALL_DIR:-$$HOME/.local/bin}/spwn
 	@echo "  ✓ spwn removed"
 
-clean:
+clean:  ## rm -rf bin/
 	rm -rf bin/
 
-build-test-image:
-	docker build -t spwn-test:latest -f tests/_simulators/Dockerfile.test ./tests/_simulators
+docs:  ## Regenerate docs/cli from Cobra
+	cd apps/cli && go run ./cmd/gen-docs ../../docs/cli
 
-# ── Lint ──────────────────────────────────────────────────────────
+##@ Lint
 
-lint: generate go-vet
-	pnpm -r lint
-
-go-vet:
+.PHONY: lint
+lint: generate  ## go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip)
 	@for mod in $(GO_MODS); do \
 		echo "==> go vet $$mod"; \
 		(cd $$mod && go vet ./...) || exit 1; \
 	done
+	@pnpm -r lint
 
-# ── Test ──────────────────────────────────────────────────────────
+##@ Test — fast (no Docker)
 
-test: generate go-test
+.PHONY: test test-pkg test-contracts test-web-unit test-gate-node
 
-go-test:
+test: generate  ## Go unit tests across the workspace (~5s)
 	@for mod in $(GO_MODS); do \
 		echo "==> go test $$mod"; \
 		(cd $$mod && go test ./...) || exit 1; \
 	done
 
-test-contracts:
-	node tests/_contracts/assert-contracts.mjs
-
-test-pr: lint test test-contracts test-web-unit test-gate-node test-ts web-build
-
-test-docker-pr: test-e2e test-e2e-compile
-
-# Run verbose tests for a single package: `make test-pkg PKG=agent` or
-# `make test-pkg PKG=apps/cli`. Path is resolved relative to repo root.
-test-pkg:
+test-pkg:  ## Verbose go test for one package — usage: make test-pkg PKG=agent
 	@if [ -z "$(PKG)" ]; then \
 		echo "usage: make test-pkg PKG=<module-path-or-name>" >&2; \
 		exit 1; \
@@ -96,60 +74,46 @@ test-pkg:
 	elif [ -d "$(PKG)" ]; then cd $(PKG) && go test -v ./...; \
 	else echo "no such package: $(PKG)" >&2; exit 1; fi
 
-# ── E2E ───────────────────────────────────────────────────────────
+test-contracts:  ## Static checks that every surface declared its tests
+	@node tests/_contracts/assert-contracts.mjs
 
-test-e2e: build-test-image
+test-web-unit:  ## apps/web vitest (MSW-mocked network, ~1s)
+	@pnpm -C apps/web test
+
+test-gate-node:  ## apps/gate vitest (sidecar + SDK, ~1s)
+	@pnpm -C apps/gate test
+
+##@ Test — Docker required
+
+.PHONY: test-image test-go-e2e test-compile-e2e test-cli test-smoke test-web test-web-headed
+
+test-image:  ## Build spwn-test:latest (mock Claude/Codex runtimes)
+	docker build -t spwn-test:latest -f tests/_simulators/Dockerfile.test ./tests/_simulators
+
+test-go-e2e: test-image  ## Go world E2E (//go:build e2e) — Architect/world/container
 	cd packages/world && go test -v -tags=e2e -timeout=30m ./tests/e2e/...
 
-test-e2e-compile:
+test-compile-e2e:  ## Go image-build E2E (compile + Dockerfile rendering)
 	cd packages/compile && go test -v -tags=e2e -timeout=10m ./e2e/...
 
-# TypeScript E2E against the compiled spwn CLI (vitest + real Docker).
-test-ts: build build-test-image
+test-cli: build test-image  ## TypeScript CLI E2E against compiled bin/spwn (vitest)
 	pnpm -C tests test
 
-# Real-build smoke tests: spwn init -> spwn up -> tool probe against
-# the default scaffold plus every shipped catalog example. Bypasses
-# SPWN_BASE_IMAGE so the actual image build + probe path runs. Each
-# test builds a Docker image from scratch; the full suite takes
-# ~10 minutes on a cold machine.
-test-smoke: build
+test-smoke: build  ## Real-build smoke: spwn init → up → tool probe (~10min cold)
 	pnpm -C tests test:smoke
 
-# Playwright against the Next.js web UI.
-test-web: build build-test-image
+test-web: build test-image  ## Playwright web E2E (real Next.js + Go API + Chromium)
 	pnpm -C tests test:web
 
-test-web-headed: build
+test-web-headed: build  ## Playwright in headed mode (visual debugging)
 	pnpm -C tests test:web:headed
 
-test-web-unit:
-	pnpm -C apps/web test
+##@ Web (apps/web)
 
-test-gate-node:
-	pnpm -C apps/gate test
+.PHONY: web-build web-dev
 
-test-real-runtime:
-	SPWN_REAL_RUNTIME=1 pnpm -C tests exec vitest run --config vitest.real-runtime.config.ts
+web-build:  ## Production Next.js build
+	@pnpm -C apps/web build
 
-# Meta-target: runs every test bucket a developer can execute locally
-# without a browser. Order is cheapest-first so the fast Go unit pass
-# fails before burning Docker build minutes on an E2E run.
-test-all: go-test test-e2e test-e2e-compile test-ts test-smoke
-
-test-release: test-pr test-docker-pr test-smoke test-web
-
-test-nightly: test-release test-real-runtime
-
-# ── Web (apps/web) ────────────────────────────────────────────────
-
-web-build:
-	pnpm -C apps/web build
-
-web-dev:
-	pnpm -C apps/web dev
-
-# ── Docs ──────────────────────────────────────────────────────────
-
-docs:
-	cd apps/cli && go run ./cmd/gen-docs ../../docs/cli
+web-dev:  ## Next.js dev server
+	@pnpm -C apps/web dev

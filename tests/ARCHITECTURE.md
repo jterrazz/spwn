@@ -48,7 +48,7 @@ For **how to run** tests, see [README.md](README.md). For the original design ra
 │     L4a Go: packages/world/tests/e2e (//go:build e2e)            │
 │     L4b TS: tests/cli/<noun>/<verb>/*.e2e.test.ts (compiled bin) │
 │     ⏱  ~30s–2m  📦  Real Docker + spwn-test:latest               │
-│     ▶  make test-e2e, make test-e2e-compile, make test-ts        │
+│     ▶  make test-go-e2e, make test-compile-e2e, make test-cli        │
 ├──────────────────────────────────────────────────────────────────┤
 │ L5  Web E2E (Playwright)                                         │
 │     Real Next.js + real Go API + real Chromium + real Docker     │
@@ -59,7 +59,7 @@ For **how to run** tests, see [README.md](README.md). For the original design ra
 │ L6  Real-runtime Smoke                                           │
 │     Real Claude/Codex CLIs against real provider APIs            │
 │     ⏱  ~30s  📦  Live credentials + budget cap                   │
-│     ▶  make test-smoke (planned: make test-real-runtime)         │
+│     ▶  make test-smoke                                           │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -403,7 +403,7 @@ Gate sidecar tests stand up a real HTTP server in-process to exercise the SDK's 
 
 ### L4a · Go: `packages/world/tests/e2e/`
 
-Build tag `//go:build e2e`. Excluded from `make test`; runs only via `make test-e2e`.
+Build tag `//go:build e2e`. Excluded from `make test`; runs only via `make test-go-e2e`.
 
 **Pattern (fluent builder + assertion chain):**
 
@@ -573,17 +573,9 @@ Real Claude/Codex CLIs, real provider APIs. Currently:
 
 ## Make Targets and CI
 
-The Makefile is the source of truth. CI calls Make targets — never raw `go test` or `vitest`.
+The Makefile is the source of truth. CI calls Make targets — never raw `go test` or `vitest`. There is **no aggregate meta-target** (`test-pr`, `test-release`, …) by design — `.github/workflows/validate.yaml` enumerates the granular targets and is itself the aggregate. To know what CI runs, read the workflow.
 
-### Aggregate gates
-
-```makefile
-test-pr: lint test test-contracts test-web-unit test-gate-node test-ts web-build
-test-docker-pr: test-e2e test-e2e-compile
-test-release: test-pr test-docker-pr test-smoke test-web
-```
-
-### Granular targets
+### Targets
 
 | Target                     | Layer    | What it runs                                                       |
 | -------------------------- | -------- | ------------------------------------------------------------------ |
@@ -592,22 +584,22 @@ test-release: test-pr test-docker-pr test-smoke test-web
 | `make test-contracts`      | L0       | `node tests/_contracts/assert-contracts.mjs`                       |
 | `make test-web-unit`       | L1+L3    | `pnpm -C apps/web test` (vitest + MSW)                             |
 | `make test-gate-node`      | L1+L3    | `pnpm -C apps/gate test`                                           |
-| `make test-ts`             | L4b      | `pnpm -C tests exec vitest run` (full CLI E2E)                     |
-| `make test-e2e`            | L4a      | Go world E2E with `//go:build e2e`                                 |
-| `make test-e2e-compile`    | L4       | Image-build E2E in `packages/compile/e2e`                          |
-| `make test-web`            | L5       | Playwright (depends on `make build` + `make build-test-image`)     |
+| `make test-cli`            | L4b      | `pnpm -C tests exec vitest run` (full CLI E2E)                     |
+| `make test-go-e2e`         | L4a      | Go world E2E with `//go:build e2e`                                 |
+| `make test-compile-e2e`    | L4       | Image-build E2E in `packages/compile/e2e`                          |
+| `make test-web`            | L5       | Playwright (depends on `make build` + `make test-image`)           |
 | `make test-smoke`          | L6       | Real-build init→up→probe                                           |
 | `make test-pkg PKG=<name>` | L1       | Verbose go test for one module                                     |
-| `make build-test-image`    | infra    | Builds `spwn-test:latest` from `tests/_simulators/Dockerfile.test` |
+| `make test-image`          | infra    | Builds `spwn-test:latest` from `tests/_simulators/Dockerfile.test` |
 
 ### CI: `.github/workflows/validate.yaml`
 
 One job per Make target. Every job sets up Go + pnpm and calls `make <target>`. If CI ever runs commands that local Make doesn't, that's a bug.
 
 ```
-PR jobs:           lint, test, contracts, web-unit, gate-node, e2e (test-ts), web-build
-Push to main:      + test-docker-pr, test-smoke, test-web
-Nightly (planned): + test-real-runtime
+PR jobs:        lint, test, test-contracts, test-web-unit, test-gate-node,
+                test-cli, test-go-e2e, test-compile-e2e, build, web-build
+Push to main:   + test-smoke, test-web
 ```
 
 ---
@@ -650,7 +642,7 @@ These scripts are protocol contracts. If the real Codex CLI changes its resume s
 1. Create `tests/e2e/your_feature_test.go` with `//go:build e2e` at the top.
 2. Use `setup.NewSpawnBuilder(t)` to spawn a world.
 3. Follow GIVEN/WHEN/THEN comment structure.
-4. Run `make test-e2e`.
+4. Run `make test-go-e2e`.
 
 ### Add a CLI E2E test
 
@@ -726,7 +718,7 @@ These will fail CI or get caught in review:
 - **Casing-sensitive assertions on user-facing text without checking what the UI actually renders.** Read the page snapshot in the failure first.
 - **Adding a new runtime/route/command/catalog entry without updating `tests/_contracts/`.** `make test-contracts` will fail.
 - **Bundling multiple features into one web spec file.** Split into `<domain>/<feature>/<feature>.spec.ts` so each feature owns its proof.
-- **Hand-written CI commands.** CI calls Make targets. If `make test-pr` doesn't cover it, it doesn't exist for CI.
+- **Hand-written CI commands.** CI calls Make targets. The validate.yaml workflow IS the aggregate; if you want a new gate, add a job there, not a meta-target in the Makefile.
 
 ---
 

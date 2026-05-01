@@ -73,7 +73,7 @@ func NewTestContext(t *testing.T) *TestContext {
 		t.Fatalf("Failed to check test image: %v", err)
 	}
 	if !exists {
-		t.Fatalf("Test image %s not found. Run 'make build-test-image' first.", TestImage)
+		t.Fatalf("Test image %s not found. Run 'make test-image' first.", TestImage)
 	}
 
 	t.Cleanup(func() {

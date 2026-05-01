@@ -103,8 +103,8 @@ func init() { runtimes.Register(Adapter) }
 make test
 
 # Go E2E tests - requires Docker + test image
-make build-test-image   # build spwn-test:latest (once)
-make test-e2e           # run Go E2E suite
+make test-image         # build spwn-test:latest (once)
+make test-go-e2e        # run Go world E2E suite
 
 # TypeScript E2E tests - requires built binary + Docker + test image
 make build              # build bin/spwn
@@ -122,7 +122,7 @@ make lint
 | Layer | Command | Docker? | Speed | What it tests |
 |-------|---------|---------|-------|---------------|
 | Unit | `make test` | No | Fast | Pure logic, parsers, helpers |
-| Go E2E | `make test-e2e` | Yes | Medium | Architect API, containers, state |
+| Go E2E | `make test-go-e2e` | Yes | Medium | Architect API, containers, state |
 | TS E2E | `cd tests && npx vitest run` | Yes | Slow | Full CLI binary, end-to-end |
 
 ### Writing New Tests

@@ -377,20 +377,23 @@ Implementation details live under `internal/`.
 
 ```bash
 make build               # cd apps/cli && go build -o ../../bin/spwn ./cmd/spwn
-make build-test-image    # docker build spwn-test:latest for E2E
+make test-image    # docker build spwn-test:latest for E2E
 
 make test                # Unit tests across the Go workspace
 make test-pkg PKG=agent  # Verbose go test for a single package
 
-make test-e2e            # Go world E2E against Docker
-make test-e2e-compile    # Image-build E2E under packages/compile/e2e
-make test-ts             # TypeScript CLI E2E (Docker + Node 22)
+make test-go-e2e         # Go world E2E against Docker
+make test-compile-e2e    # Image-build E2E under packages/compile/e2e
+make test-cli            # TypeScript CLI E2E (Docker + Node 22)
 make test-smoke          # Real-build smoke tests (spwn init → up → probe)
 make test-web            # Playwright web E2E (Docker + browser)
-make test-all            # Everything except test-web
 
 make lint                # go vet across every module in go.work + pnpm lint
 make clean               # rm -rf bin/
+
+# Run `make` (no args) for the full target list with descriptions.
+# CI lives in .github/workflows/validate.yaml — there's no aggregate
+# meta-target on purpose; the workflow IS the aggregate.
 ```
 
 ## Testing Strategy

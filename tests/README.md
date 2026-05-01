@@ -26,8 +26,8 @@ Examples:
 Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with the runtime simulators in `tests/_simulators/` replacing the real Claude/Codex CLIs). Located in `packages/world/tests/e2e/`.
 
 ```bash
-make test-e2e              # builds test image, then runs the world E2E suite
-make test-e2e-compile      # separate image-build E2E under packages/compile/e2e
+make test-go-e2e              # builds test image, then runs the world E2E suite
+make test-compile-e2e      # separate image-build E2E under packages/compile/e2e
 ```
 
 These tests use the build tag `//go:build e2e` and are excluded from `make test`.
@@ -47,7 +47,7 @@ cd tests && npx tsc --noEmit     # type-check only
 - **Docker**: Required for all E2E tests (both Go and TypeScript).
 - **Go 1.25+**: Required for Go tests.
 - **Node.js 20+**: Required for TypeScript E2E tests.
-- **Test image**: Run `make build-test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `tests/_simulators/Dockerfile.test`.
+- **Test image**: Run `make test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `tests/_simulators/Dockerfile.test`.
 - **Binary**: TypeScript E2E tests require `bin/spwn`. Run `make build` first.
 
 ## How runtime simulators work
@@ -205,7 +205,7 @@ describe('world lifecycle', () => {
 2. Add `//go:build e2e` build tag at the top.
 3. Use `setup.NewSpawnBuilder(t)` to create test infrastructure.
 4. Follow GIVEN/WHEN/THEN comment structure.
-5. Run with `make test-e2e`.
+5. Run with `make test-go-e2e`.
 
 ### TypeScript E2E Test
 
