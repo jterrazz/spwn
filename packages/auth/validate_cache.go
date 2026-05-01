@@ -51,23 +51,25 @@ type validationCache map[Provider]validationEntry
 // When maxAge is zero the cache is bypassed entirely (always hits
 // The network). Useful for an explicit "revalidate now" flag.
 func ValidateWithCache(ctx context.Context, cred *Credential, maxAge time.Duration) *ProviderStatus {
-	if cred == nil || cred.Type == CredTypeNone {
-		return Validate(ctx, cred)
-	}
-
 	// Escape hatch for tests / CI / offline runs: SPWN_SKIP_AUTH_VALIDATION
 	// Bypasses the network-touching validator entirely and treats every
-	// Detected credential as connected. The spawn pre-flight and auth
-	// Dashboard both honor this, so e2e suites that spin up many
-	// Commands in parallel don't hammer Anthropic's /oauth/usage with
-	// Duplicate probes and hit 429s.
+	// Credential — including the no-credentials sentinel — as connected.
+	// Sits ABOVE the nil/CredTypeNone short-circuit on purpose: CI runs
+	// Have no host credentials at all (Resolve returns CredTypeNone), and
+	// We still want the spawn pre-flight to wave the world through so
+	// The mock runtime image (spwn-test:latest) can drive the suite.
 	if os.Getenv("SPWN_SKIP_AUTH_VALIDATION") != "" {
-		return &ProviderStatus{
-			Provider:  cred.Provider,
-			Connected: true,
-			CredType:  cred.Type,
-			Source:    cred.Source,
+		status := &ProviderStatus{Connected: true}
+		if cred != nil {
+			status.Provider = cred.Provider
+			status.CredType = cred.Type
+			status.Source = cred.Source
 		}
+		return status
+	}
+
+	if cred == nil || cred.Type == CredTypeNone {
+		return Validate(ctx, cred)
 	}
 
 	if maxAge > 0 {

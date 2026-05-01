@@ -38,6 +38,15 @@ func NewTestContext(t *testing.T) *TestContext {
 	baseDir := t.TempDir()
 	t.Setenv("SPWN_HOME", baseDir)
 
+	// Skip the spawn pre-flight credential check. These tests run
+	// against the mock spwn-test:latest image (mock-claude / mock-codex),
+	// which doesn't need real provider credentials — but the architect
+	// still hard-fails on "no credentials configured" without this hint
+	// (see packages/architect/spawn.go). CI runners have zero host
+	// credentials, so the bypass is mandatory there; locally it just
+	// shaves the validate-cache round-trip too.
+	t.Setenv("SPWN_SKIP_AUTH_VALIDATION", "1")
+
 	// Stamp every container spawned by this test with a unique label
 	// so List()/Get() only see THIS test's containers, not leftovers
 	// from prior runs or concurrently-running tests. The architect
