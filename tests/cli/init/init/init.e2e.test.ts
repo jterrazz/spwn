@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * `spwn init` — project scaffolding. The legacy --global mode is gone;
@@ -39,34 +39,30 @@ describe('spwn init', () => {
         expect(result.file('.gitignore').content).toContain('.spwn');
 
         // One concrete example per local-ref scheme so users see how
-        // Skill: and tool: are authored from their very first
+        // Skill/, tool/, and hook/ are authored from their very first
         // `spwn init`. Regressions here mean the default project no
-        // Longer demonstrates composition end-to-end.
+        // Longer demonstrates composition end-to-end. All three local
+        // Schemes are iso: single file/dir on disk, selected per agent.
         expect(result.file('spwn/skills/focus.md').exists).toBe(true);
         expect(result.file('spwn/skills/focus.md').content).toContain('name: focus');
         expect(result.file('spwn/tools/greet/tool.yaml').exists).toBe(true);
         expect(result.file('spwn/tools/greet/tool.yaml').content).toContain('name: greet');
+        expect(result.file('spwn/hooks/session-banner.yaml').exists).toBe(true);
+        const hookYaml = result.file('spwn/hooks/session-banner.yaml').content;
+        expect(hookYaml).toContain('event: SessionStart');
+        expect(hookYaml).toContain('command:');
+        // The legacy single-file project hooks.yaml must not be created.
+        expect(result.file('spwn/hooks.yaml').exists).toBe(false);
 
-        // Runtime hooks have their own top-level file — not a dep
-        // Scheme. The scaffold ships one SessionStart example so the
-        // Generic hooks.yaml → Claude/Codex translation has a live
-        // Demo on day one.
-        expect(result.file('spwn/hooks.yaml').exists).toBe(true);
-        const hooksYaml = result.file('spwn/hooks.yaml').content;
-        expect(hooksYaml).toContain('event: SessionStart');
-        expect(hooksYaml).toContain('command:');
-
-        // Default agent.yaml must reference the two dep-form
+        // Default agent.yaml must reference all three local-ref
         // Examples so a fresh project shows the composition grammar
-        // (spwn: + skill/ + tool/) inline. The retired colon-form
-        // Schemes (skill:, tool:, hook:) must NOT leak back into
-        // The scaffold.
+        // (spwn: + skill/ + tool/ + hook/) inline. The retired
+        // Colon-form schemes (skill:, tool:, hook:) must NOT leak back
+        // Into the scaffold.
         const agentYaml = result.file('spwn/agents/neo/agent.yaml').content;
         expect(agentYaml).toContain('skill/focus');
         expect(agentYaml).toContain('tool/greet');
-        // No `hook/` ENTRY in the dep list (the form is mentioned in
-        // The header comment but not used as a default dep).
-        expect(agentYaml).not.toMatch(/^\s*-\s+["']?hook\//m);
+        expect(agentYaml).toContain('hook/session-banner');
         // None of the retired colon-form schemes for local refs.
         expect(agentYaml).not.toMatch(/\bskill:[a-z]/);
         expect(agentYaml).not.toMatch(/\btool:[a-z]/);

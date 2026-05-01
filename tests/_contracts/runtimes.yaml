@@ -1,0 +1,25 @@
+runtimes:
+    claude-code:
+        facets: [tool, render, spawn]
+        docs:
+            - packages/runtimes/README.md
+            - packages/runtimes/claudecode/RENDER.md
+        tests:
+            - packages/runtimes/claudecode/render_test.go
+            - packages/runtimes/claudecode/spawn_test.go
+            - packages/runtimes/claudecode/tool_test.go
+            - packages/runtimes/golden_test.go
+        goldenOutput: output_claude_code
+    codex:
+        facets: [tool, render, spawn]
+        docs:
+            - packages/runtimes/README.md
+        tests:
+            - packages/runtimes/codex/render_test.go
+            - packages/runtimes/codex/spawn_test.go
+            - packages/runtimes/codex/codex_test.go
+            - packages/runtimes/golden_test.go
+            - tests/cli/build/tree-only/tree-only.e2e.test.ts
+            - tests/cli/build/build/build.e2e.test.ts
+            - tests/cli/agent/talk/talk.e2e.test.ts
+        goldenOutput: output_codex

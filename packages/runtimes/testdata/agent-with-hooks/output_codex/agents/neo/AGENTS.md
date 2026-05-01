@@ -26,7 +26,7 @@ To check your inbox: read files from /world/inbox/{your-name}/.
 ## Faculties
 
 ### Tools
-spwn:unix
+hook/bash-audit, hook/session-start, spwn:unix
 
 ## Roster
 

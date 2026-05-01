@@ -1,5 +1,0 @@
-hooks:
-  - name: pre-commit
-    event: PreToolUse
-    matcher: Bash
-    command: echo "pre-commit"

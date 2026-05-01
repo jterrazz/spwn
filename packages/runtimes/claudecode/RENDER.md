@@ -8,7 +8,7 @@ Full three-facet adapter:
 |---|---|---|
 | Tool | `tool.go` | Image-build recipe — curl-based native installer for the `claude` binary. |
 | Render | `render.go`, `render_agent.go` | Turns a provider-neutral `transpile.Input` into a tree of files Claude Code can boot from. |
-| Spawn | `spawn.go` | Host-side spawn-time behavior — `BuildCommand`, credential sync, prelaunch shell (including the `.claude/skills` symlink), default config files. |
+| Spawn | `spawn.go` | Host-side spawn-time behavior — `BuildCommand`, credential sync, prelaunch shell, default config files. |
 
 The `Adapter` value in `adapter.go` bundles all three and self-registers with `packages/runtimes` at init time.
 
@@ -26,7 +26,7 @@ This package is the only place in spwn that encodes those conventions. Everythin
 - Physics — world rules (inlined from `worldbook.GeneratePhysics`)
 - Faculties — installed tools (inlined from `worldbook.GenerateFaculties`)
 - Roster — who else is in this world (inlined from `worldbook.GenerateRoster`)
-- `@worlds/<id>/role.md` — per-deployment role import
+- Role here — per-deployment role sentence
 - Your playbooks — auto-index of frontmatter-promoted playbooks (omitted when empty)
 - Conventions — memory, messaging, evolution rules folded in as bullets
 
@@ -37,9 +37,10 @@ No separate `world/physics.md`, `world/faculties.md`, `world/AGENTS.md`, `world/
 | Path | Source |
 |---|---|
 | `agents/<name>/CLAUDE.md` | `claudecode.GenerateAgentCLAUDEMD` — self-contained system prompt |
-| `agents/<name>/worlds/<id>/role.md` | Per-deployment role description |
+| `agents/<name>/.claude/settings.json` | Claude Code settings: permissions, hooks, model pin |
+| `agents/<name>/.claude/skills/<skill>/...` | User-authored and tool-shipped skills |
 
-Tool-shipped skills (`SKILL.md` files from each resolved `tool.Tool`) live at `/world/skills/<tool>/SKILL.md` inside the image (baked in by `packages/dependency/resolver.CollectSkills`). `PrelaunchShell` symlinks `$HOME/.claude/skills` → `/world/skills` at spawn time so Claude Code discovers them through its native mechanism — no manual index needed.
+User-authored skills (`spwn/skills/...`) and tool-shipped skills (`SKILL.md` files from each resolved `tool.Tool`) are emitted by the renderer into each agent's `.claude/skills/<skill>/` tree. Claude Code discovers them through its native skill walker; no `/world/skills` directory or spawn-time symlink is involved.
 
 ## What this adapter does NOT touch
 

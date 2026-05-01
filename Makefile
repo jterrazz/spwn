@@ -2,7 +2,8 @@
         lint go-vet \
         test go-test test-pkg test-all \
         test-e2e test-e2e-compile \
-        test-ts test-smoke test-web test-web-headed \
+        test-contracts test-pr test-docker-pr test-release test-nightly \
+        test-ts test-smoke test-web-unit test-web test-web-headed test-gate-node test-real-runtime \
         build-test-image \
         web-build web-dev \
         docs
@@ -18,12 +19,15 @@ help:
 	@echo "  make install             Build and install to ~/.local/bin"
 	@echo "  make lint                go vet all modules + pnpm -r lint"
 	@echo "  make test                Go unit tests across the workspace"
+	@echo "  make test-contracts     Check test coverage contracts"
+	@echo "  make test-pr            PR-grade checks (lint, unit, contracts, TS, web build)"
 	@echo "  make test-pkg PKG=agent   Verbose go test for one package"
 	@echo "  make test-e2e            Go E2E (Docker required)"
 	@echo "  make test-e2e-compile  Go image-build E2E (Docker required)"
 	@echo "  make test-ts             TypeScript CLI E2E (Docker + Node 22)"
 	@echo "  make test-smoke          Real-build smoke tests (Docker + Node 22)"
 	@echo "  make test-web            Playwright web E2E (Docker + browser)"
+	@echo "  make test-release        Full release-grade test suite"
 	@echo "  make test-all            Everything except test-web (Docker + Node 22)"
 	@echo "  make web-dev             Run the Next.js dev server"
 	@echo "  make docs                Regenerate apps/cli docs"
@@ -51,7 +55,7 @@ clean:
 	rm -rf bin/
 
 build-test-image:
-	docker build -t spwn-test:latest -f tests/fixtures/Dockerfile.test ./tests/fixtures
+	docker build -t spwn-test:latest -f tests/_simulators/Dockerfile.test ./tests/_simulators
 
 # ── Lint ──────────────────────────────────────────────────────────
 
@@ -73,6 +77,13 @@ go-test:
 		echo "==> go test $$mod"; \
 		(cd $$mod && go test ./...) || exit 1; \
 	done
+
+test-contracts:
+	node tests/_contracts/assert-contracts.mjs
+
+test-pr: lint test test-contracts test-web-unit test-gate-node test-ts web-build
+
+test-docker-pr: test-e2e test-e2e-compile
 
 # Run verbose tests for a single package: `make test-pkg PKG=agent` or
 # `make test-pkg PKG=apps/cli`. Path is resolved relative to repo root.
@@ -106,16 +117,29 @@ test-smoke: build
 	pnpm -C tests test:smoke
 
 # Playwright against the Next.js web UI.
-test-web: build
+test-web: build build-test-image
 	pnpm -C tests test:web
 
 test-web-headed: build
 	pnpm -C tests test:web:headed
 
+test-web-unit:
+	pnpm -C apps/web test
+
+test-gate-node:
+	pnpm -C apps/gate test
+
+test-real-runtime:
+	SPWN_REAL_RUNTIME=1 pnpm -C tests exec vitest run --config vitest.real-runtime.config.ts
+
 # Meta-target: runs every test bucket a developer can execute locally
 # without a browser. Order is cheapest-first so the fast Go unit pass
 # fails before burning Docker build minutes on an E2E run.
 test-all: go-test test-e2e test-e2e-compile test-ts test-smoke
+
+test-release: test-pr test-docker-pr test-smoke test-web
+
+test-nightly: test-release test-real-runtime
 
 # ── Web (apps/web) ────────────────────────────────────────────────
 

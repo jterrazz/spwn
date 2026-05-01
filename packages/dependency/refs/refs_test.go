@@ -113,7 +113,8 @@ func TestResolveTool_LocalSkill(t *testing.T) {
 func TestResolveTool_LocalHook(t *testing.T) {
 	root := t.TempDir()
 	mustMkdir(t, filepath.Join(root, "spwn", "hooks"))
-	if err := os.WriteFile(filepath.Join(root, "spwn", "hooks", "pre-spawn.sh"), []byte("#!/bin/sh\n"), 0o755); err != nil {
+	body := []byte("event: SessionStart\ncommand: echo hi\n")
+	if err := os.WriteFile(filepath.Join(root, "spwn", "hooks", "pre-spawn.yaml"), body, 0o644); err != nil {
 		t.Fatal(err)
 	}
 

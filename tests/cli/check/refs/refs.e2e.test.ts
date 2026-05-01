@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * Tool reference classification by `spwn check`:
@@ -9,7 +9,7 @@ import { spec } from '../../../setup/cli.specification.js';
  *   github:<owner>/<repo>    → remote registry (not yet supported)
  *   skill/<name>             → local skill (spwn/skills/<name>.md)
  *   tool/<name>              → local tool (spwn/tools/<name>/)
- *   hook/<name>              → local hook (spwn/hooks/<name>.sh)
+ *   hook/<name>              → local hook (spwn/hooks/<name>.yaml)
  *
  * The canonical success path is already covered by the check suite via
  * the single-agent fixture. These tests pin the classifier edges: a

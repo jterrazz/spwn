@@ -14,7 +14,7 @@ A runtime has up to three orthogonal facets, bundled into a single `Adapter`:
 | **Render** | Source → Tree (`transpile.Runtime`) — where each piece of content lands on disk | Compile time |
 | **Spawn** | `BuildCommand`, `SyncHostCredentials`, `PrelaunchShell`, `DefaultConfigFiles` | Host at spawn time + container prelaunch |
 
-Each facet is optional. `claudecode` ships all three (full-featured runtime). `codex` ships Tool + Spawn (install + auth plumbing, no renderer yet). A future YAML-first runtime could ship Tool only.
+Each facet is optional. `claudecode` and `codex` both ship all three facets today (install recipe, renderer, and spawn-time adapter). A future YAML-first runtime could ship Tool only.
 
 ## Key types
 
@@ -35,7 +35,7 @@ package <name>
 
 import "spwn.sh/packages/runtimes"
 
-var Adapter = runtimes.Adapter{ Name: …, Tool: Tool, Spawn: Spawner, … }
+var Adapter = runtimes.Adapter{ Name: …, Tool: Tool, Render: Renderer, Spawn: Spawner, … }
 
 func init() { runtimes.Register(Adapter) }
 ```
@@ -50,15 +50,15 @@ This mirrors the `database/sql` driver pattern. Binaries can pick individual run
 
 ## Subpackages
 
-- `claudecode/` — Claude Code (Tool + Render + Spawn). See `claudecode/RENDER.md` for the layout contract.
-- `codex/` — OpenAI Codex (Tool + Spawn). No renderer; codex sessions are launched ad-hoc.
+- `claudecode/` — Claude Code (Tool + Render + Spawn). Emits `CLAUDE.md`, `.claude/settings.json`, and `.claude/skills/...`.
+- `codex/` — OpenAI Codex (Tool + Render + Spawn). Emits `AGENTS.md`, `.codex/config.toml`, `.codex/hooks.json`, and `.agents/skills/...`.
 - `defaults/` — convenience blank-import aggregator for every built-in runtime.
 
 ## Content vs layout
 
-The spwn-opinionated world content (physics, faculties, roster, architect identity + skills) lives in **`packages/transpile/worldbook/`**, not here. Runtime renderers import worldbook's strings and decide how to surface them — the claude-code adapter inlines them into a single self-contained `CLAUDE.md` per agent; a future codex adapter may choose differently. This keeps the prose runtime-neutral and authored once.
+The spwn-opinionated world content (physics, faculties, roster, architect identity + skills) lives in **`packages/transpile/worldbook/`**, not here. Runtime renderers import worldbook's strings and decide how to surface them — the claude-code adapter inlines them into a single self-contained `CLAUDE.md` per agent, while the codex adapter inlines them into a single self-contained `AGENTS.md` per agent. This keeps the prose runtime-neutral and authored once.
 
 ## Related
 
-- **Imported by** — `apps/cli`, `apps/api`, `packages/architect`, `tests/catalog`
+- **Imported by** — `apps/cli`, `apps/api`, `packages/architect`, `tests/_catalog`
 - **Imports** — `packages/dependency` (tool interface), `packages/transpile` (render + Runtime interface)

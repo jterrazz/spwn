@@ -335,43 +335,74 @@ cross-vendor `AGENTS.md` ecosystem convention. Tool-shipped skills
 </details>
 
 <details>
-<summary><b>Hooks</b> &middot; <code>spwn/hooks.yaml</code> &middot; 🚧 experimental</summary>
+<summary><b>Hooks</b> &middot; <code>spwn/hooks/&lt;name&gt;.yaml</code> &middot; 🚧 experimental</summary>
 
-> 🚧 **Hooks are experimental.** The `hooks.yaml` schema, the supported event
-> set, and the cross-runtime translation are all in active development —
-> expect changes without notice. Don't depend on it in production.
+> 🚧 **Hooks are experimental.** The schema, supported event set, and
+> cross-runtime translation are all in active development — expect
+> changes without notice. Don't depend on it in production.
 
 Hooks fire on runtime events inside the container: tool use, prompt
-submit, session start, etc. They are NOT host-side lifecycle scripts;
-the retired colon-form `hook:<phase>` ref is gone.
+submit, session start, etc. One file = one hook, iso with skills and
+tools. Each agent inherits only the hooks it explicitly subscribes to
+via `hook/<name>` in `agent.yaml#dependencies`.
 
-**Source form:** one declarative manifest, flat list of hook records.
+**Source form:** one file per hook under `spwn/hooks/`. Filename minus
+`.yaml` is the hook name; the body is the entry shape.
 
 ```yaml
-# spwn/hooks.yaml
-hooks:
-  - name: bash-audit
-    event: PreToolUse
-    matcher: Bash
-    command: echo "[audit] $CLAUDE_TOOL_INPUT"
-  - name: welcome
-    event: SessionStart
-    command: echo "session up"
+# spwn/hooks/bash-audit.yaml
+event: PreToolUse
+matcher: Bash
+command: echo "[audit] $CLAUDE_TOOL_INPUT"
 ```
+
+```yaml
+# spwn/hooks/welcome.yaml
+event: SessionStart
+command: echo "session up"
+```
+
+**Selection** (per-agent, in `agent.yaml#dependencies`):
+
+```yaml
+dependencies:
+  - "hook/bash-audit"
+  - "hook/welcome"
+```
+
+An agent that doesn't list `hook/<name>` won't receive that hook.
 
 **Fields:**
 
 | Field | Required | Description |
 |---|---|---|
-| `name` | yes | Stable identifier; keys the entry so re-renders are idempotent |
 | `event` | yes | Runtime event name (see below) |
 | `matcher` | no | Scope pattern; defaults to `*`. Passed verbatim. Each runtime honours its own glob/regex convention. |
 | `command` | yes | Shell fragment invoked when the hook fires |
 
-**Events supported by both runtimes** (safe cross-runtime set):
-`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`.
-Runtime-specific events (Claude Code has 28, Codex has 5) pass through;
-each runtime silently ignores events it doesn't know.
+**Event support matrix.** Codex aligned its hook event names with
+Claude Code's, so an `event:` value goes 1:1 into both runtimes'
+config files. The set Codex supports is narrower:
+
+| Event | Claude Code | Codex | Notes |
+|---|---|---|---|
+| `PreToolUse` | ✓ | ✓ | Before any tool call (with `matcher: Bash` / `Edit` / …) |
+| `PostToolUse` | ✓ | ✓ | After tool completes |
+| `UserPromptSubmit` | ✓ | ✓ | User pressed Enter |
+| `SessionStart` | ✓ | ✓ | Session boots |
+| `Stop` | ✓ | ✓ | Main agent finished |
+| `Notification` | ✓ | — | Permission dialogs / queue events |
+| `SubagentStop` | ✓ | — | Sub-agent finished |
+| `PreCompact` | ✓ | — | Before context compaction |
+| `SessionEnd` | ✓ | — | Session terminates |
+
+**`spwn check` warns** when a hook targets an event the selecting
+agent's runtime doesn't fire — e.g. attaching `event: PreCompact` to
+a Codex agent surfaces as a `LevelWarning` rather than silently never
+firing. Hook files no agent subscribes to also surface as
+`LevelInfo` orphan-hook hints. The runtime registries live in
+[`packages/runtimes/<runtime>/events.go`](packages/runtimes); update
+them when a vendor ships a new event.
 
 **What the compiler emits:**
 
@@ -433,7 +464,7 @@ dependencies:
   - "spwn:python"        # catalog: python 3 + pip
   - "skill/code-review"  # local:   ./spwn/skills/code-review.md
   - "tool/greet"         # local:   ./spwn/tools/greet/
-  - "hook/pre-spawn"     # local:   ./spwn/hooks/pre-spawn.sh
+  - "hook/welcome"       # local:   ./spwn/hooks/welcome.yaml
 ```
 
 **Every dependency declares its source and type explicitly.** Two source-prefixed schemes (`spwn:`, `github:`) plus three local path-style forms (`skill/`, `tool/`, `hook/`):
@@ -444,7 +475,7 @@ dependencies:
 | `github:<owner>/<repo>` | Community registry *(planned)* |
 | `skill/<name>` | `./spwn/skills/<name>.md` |
 | `tool/<name>` | `./spwn/tools/<name>/` (with `tool.yaml`) |
-| `hook/<name>` | `./spwn/hooks/<name>.sh` |
+| `hook/<name>` | `./spwn/hooks/<name>.yaml` |
 
 Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/dependency-catalog.md).
 
@@ -649,7 +680,7 @@ commands and adapters below belong to one or more of these.
 | **Mind** | 2-layer persistent memory: `playbooks/` `journal/` (skills are dependencies, not memory) | 🟡 |
 | **Knowledge** | World-scoped `./spwn/knowledge/` bind-mount (opt-in per world) | 🟡 |
 | **Runtimes** | `claude-code`, `codex` (swappable Go adapters) | 🟡 |
-| **Hooks** | `spwn/hooks.yaml` → `.claude/settings.json#hooks` / `.codex/hooks.json` (PreToolUse, SessionStart, …) | 🚧 |
+| **Hooks** | `spwn/hooks/<name>.yaml` → `.claude/settings.json#hooks` / `.codex/hooks.json` (PreToolUse, SessionStart, …) | 🚧 |
 | **Architect** | Always-on orchestration daemon. Spawns worlds, routes inboxes, delegates. | 🟡 |
 | **Gate** | Host-side broker for cookie-bearing tools — cookie sync, MCP routing, Playwright sidecar | 🚧 |
 | **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |

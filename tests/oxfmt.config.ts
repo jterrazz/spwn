@@ -10,9 +10,9 @@ export default defineConfig({
     // Like spwn/, .spwn/, playwright-report/, test-results/.)
     ignorePatterns: [
         ...(oxfmt.ignorePatterns ?? []),
-        'fixtures/**',
+        '_fixtures/**',
         'cli/**/expected/**',
         'cli/**/seeds/**',
-        'catalog/testdata/**',
+        '_catalog/testdata/**',
     ],
 });

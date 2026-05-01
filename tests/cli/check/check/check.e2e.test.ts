@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * Stage 2a of the @jterrazz/test migration: per-feature folder layout

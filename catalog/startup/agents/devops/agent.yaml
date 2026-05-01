@@ -1,5 +1,5 @@
 name: devops
-description: The devops — owns deployments, container hygiene, and the pre-spawn hook that gates each world before it boots.
+description: The devops — owns deployments and container hygiene; reaches for the deployment + code-review skills.
 role: worker
 
 runtime:
@@ -11,9 +11,8 @@ runtime:
 #
 # Local blocks are referenced via the skill/, tool/, hook/ schemes and
 # live at the project root (spwn/skills/<name>.md, spwn/tools/<name>/,
-# spwn/hooks/<name>.sh).
+# spwn/hooks/<name>.yaml).
 dependencies:
   - "spwn:docker-cli"
   - "skill/deployment"
   - "skill/code-review"
-  - "hook/pre-spawn"

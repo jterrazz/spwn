@@ -13,7 +13,7 @@ import (
 // Lives here (inside the adapter, white-box) so it can walk the
 // embed directly and catch contract drift before anything else
 // reaches for the catalog. Black-box facade tests live in
-// tests/catalog/.
+// tests/_catalog/.
 func TestShippedSlugsMatchEmbed(t *testing.T) {
 	embed := EmbedFS()
 	entries, err := fs.ReadDir(embed, ".")

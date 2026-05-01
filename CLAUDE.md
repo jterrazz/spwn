@@ -139,8 +139,9 @@ my-project/
 │   │       ├── playbooks/       # promoted patterns (name:/description: header = auto-indexed in CLAUDE.md)
 │   │       └── journal/         # per-run history
 │   ├── knowledge/               # world-scoped facts, bind-mounted to /world/knowledge/ (default path)
-│   ├── skills/                  # project-scoped skill files
-│   └── tools/                   # project-scoped tool dependencies (optional)
+│   ├── skills/                  # project-scoped skill files (skill/<name> → spwn/skills/<name>.md)
+│   ├── tools/                   # project-scoped tool dependencies (tool/<name> → spwn/tools/<name>/)
+│   └── hooks/                   # project-scoped runtime hooks (hook/<name> → spwn/hooks/<name>.yaml)
 └── .spwn/                       # gitignored local state
     ├── state.json               # live world IDs bound to this project
     └── cache/
@@ -163,7 +164,7 @@ overrides.
 └── state/                       # architect daemon state
 ```
 
-**Config hierarchy:** `agent.yaml` declares composition via a unified `dependencies:` list. The grammar splits **source** (the colon prefix) from **type** (the leading path segment): `spwn:<name>` is a catalog dep; `github:<owner>/<repo>` is a remote dep (planned); `skill/<name>`, `tool/<name>`, `hook/<name>` are local blocks authored under `spwn/skills/`, `spwn/tools/`, `spwn/hooks/`. Plus `runtime.backend`. `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces). The union of project-wide and agent-specific dependencies is what actually materializes inside the container.
+**Config hierarchy:** `agent.yaml` declares composition via a unified `dependencies:` list. The grammar splits **source** (the colon prefix) from **type** (the leading path segment): `spwn:<name>` is a catalog dep; `github:<owner>/<repo>` is a remote dep (planned); `skill/<name>`, `tool/<name>`, `hook/<name>` are local blocks authored under `spwn/skills/<name>.md`, `spwn/tools/<name>/`, `spwn/hooks/<name>.yaml`. All three local schemes are iso: a path-style ref selected per agent, resolving to one file or directory on disk. Hooks are runtime-fired (PreToolUse, SessionStart, …); each agent inherits only the hooks it explicitly subscribes to. Plus `runtime.backend`. `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces). The union of project-wide and agent-specific dependencies is what actually materializes inside the container.
 
 ## Repository Structure
 
@@ -213,13 +214,17 @@ spwn/
 │   └── migration/                   #   ~/.spwn schema migrations
 │
 ├── catalog/                         # Shipped example worlds + block bundles
-├── tests/                           # TypeScript vitest E2E suite
+├── tests/                           # TypeScript vitest E2E + Playwright + governance
 │   ├── cli/                         #   Behavioral specs against the compiled binary
-│   ├── catalog/                     #   Catalog-bundle smoke + Dockerfile goldens
-│   ├── smoke/                       #   Real-build end-to-end (spwn init → up → probe)
-│   ├── setup/                       #   Shared test harness
-│   ├── fixtures/                    #   Mock-claude image + shared fixtures
-│   └── web/                         #   Playwright specs for the web UI
+│   ├── web/                         #   Playwright specs (one folder per feature)
+│   ├── _contracts/                  #   Governance YAMLs + assert-contracts.mjs
+│   ├── _simulators/                 #   Runtime simulators (claude/codex stubs + test image)
+│   ├── _setup/                      #   Shared CLI E2E harness (`spec` runner)
+│   ├── _fixtures/                   #   Project skeletons consumed by `spec`
+│   ├── _smoke/                      #   Real-build end-to-end (spwn init → up → probe)
+│   └── _catalog/                    #   Catalog-bundle smoke + Dockerfile goldens
+│   #
+│   # See tests/ARCHITECTURE.md for layer pyramid + cookbook
 ├── docs/                            # Prose docs (architecture, releasing, CLI man pages)
 │
 ├── Makefile
@@ -396,7 +401,7 @@ Three-layer pyramid:
 |-------|----------|-------|-------|
 | **Unit** | `*_test.go` next to source files | ~1s | None |
 | **E2E (Go)** | `packages/world/tests/e2e/`, `packages/compile/e2e/` | ~30s | Docker |
-| **E2E (TS)** | `tests/cli/`, `tests/smoke/` | ~2min | Built binary |
+| **E2E (TS)** | `tests/cli/`, `tests/_smoke/` | ~2min | Built binary |
 
 Each domain tests only its own contract. Cross-domain flows (spawn universe + agent → verify journal) are the CLI's responsibility.
 

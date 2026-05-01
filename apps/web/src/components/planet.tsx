@@ -30,7 +30,10 @@ const STATUS_SAT: Record<string, number> = {
 };
 
 // Deterministic hue from world id - matches the sidebar's hashHue() so the same world reads as the same planet everywhere.
-function hashHue(id: string): number {
+function hashHue(id: null | string | undefined): number {
+    if (!id) {
+        return 0;
+    }
     let h = 0;
     for (let i = 0; i < id.length; i++) {
         h = (h * 31 + id.charCodeAt(i)) >>> 0;
@@ -95,7 +98,10 @@ function _timeAgo(iso: string): string {
 }
 
 // Deterministic seed from string so each planet/agent has unique position
-function hashCode(s: string): number {
+function hashCode(s: null | string | undefined): number {
+    if (!s) {
+        return 0;
+    }
     let h = 0;
     for (let i = 0; i < s.length; i++) {
         h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
@@ -195,7 +201,7 @@ export function Planet({
         const continentMarkers = generateContinents(world.id, dotCount);
 
         // Agent markers (slightly larger, on top)
-        const agentMarkers = world.agents.map((a) => ({
+        const agentMarkers = (world.agents ?? []).map((a) => ({
             location: stringToLocation(a.name),
             size: 0.03,
         }));
@@ -256,7 +262,7 @@ export function Planet({
             // Sync glow overlay positions from cobe's auto-generated anchor divs
             const wrapper = wrapperRef.current;
             if (wrapper) {
-                world.agents.forEach((a) => {
+                (world.agents ?? []).forEach((a) => {
                     const anchor = wrapper.querySelector(
                         `[style*="--cobe-marker-${a.name}"]`,
                     ) as HTMLElement | null;
@@ -353,7 +359,7 @@ export function Planet({
                         />
                     </svg>
                 )}
-                {world.agents.map((a) => (
+                {(world.agents ?? []).map((a) => (
                     <div
                         className="absolute pointer-events-none"
                         key={`glow-${a.name}`}

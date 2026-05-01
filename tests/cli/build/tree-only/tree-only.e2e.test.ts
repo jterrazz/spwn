@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * E2E coverage for `spwn build --tree-only` - the disk
@@ -86,6 +86,38 @@ describe('spwn build --tree-only', () => {
         expect(Array.isArray(report.paths)).toBe(true);
         expect(report.paths).toContain('agents/neo/CLAUDE.md');
         expect(report.treeFiles).toBe(report.paths.length);
+    });
+
+    test('codex runtime writes AGENTS.md, .codex config, and native skills', async () => {
+        const result = await spec('tree-only codex conventions')
+            .project('codex-pilot')
+            .exec('build --tree-only --json')
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        const report = result.json.value as {
+            runtime: string;
+            paths: string[];
+        };
+        expect(report.runtime).toBe('codex');
+        expect(report.paths).toContain('agents/neo/AGENTS.md');
+        expect(report.paths).toContain('agents/neo/.codex/config.toml');
+        expect(report.paths).toContain('agents/neo/.agents/skills/focus/SKILL.md');
+        expect(report.paths).not.toContain('agents/neo/CLAUDE.md');
+        expect(report.paths.some((p) => p.startsWith('agents/neo/.claude/'))).toBe(false);
+        expect(report.paths.some((p) => p.startsWith('agents/neo/.codex/skills/'))).toBe(false);
+        expect(report.paths.some((p) => p.startsWith('worlds/'))).toBe(false);
+
+        expect(result.file('dist/agents/neo/AGENTS.md').content).toContain('Codex pilot prompt');
+        expect(result.file('dist/agents/neo/.codex/config.toml').content).toContain(
+            'model = "gpt-5"',
+        );
+        expect(result.file('dist/agents/neo/.agents/skills/focus/SKILL.md').content).toContain(
+            'name: focus',
+        );
+        expect(result.file('dist/agents/neo/.agents/skills/focus/SKILL.md').content).toContain(
+            'Focus Skill',
+        );
     });
 
     test('--agent filters the Tree to one agent in a colony', async () => {

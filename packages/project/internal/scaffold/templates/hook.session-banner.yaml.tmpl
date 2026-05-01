@@ -1,0 +1,21 @@
+# Runtime hook — fired by the agent's runtime (Claude Code, Codex,
+# …) at a well-known lifecycle point. Filename (minus .yaml) is the
+# hook name; agents subscribe via `hook/session-banner` in their
+# agent.yaml#dependencies.
+#
+# spwn translates this file into each runtime's native hook format
+# at build time, but only for agents that selected it:
+#
+#   Claude Code  →  ~/.claude/settings.json#hooks
+#   Codex        →  ~/.codex/hooks.json
+#
+# Schema (one file = one hook):
+#   event:   lifecycle event (required; e.g. SessionStart, PreToolUse,
+#            UserPromptSubmit, Stop)
+#   matcher: optional scope inside the event (e.g. "Bash" under PreToolUse)
+#   command: shell fragment to execute (required)
+#
+# Docs: https://spwn.sh/docs/hooks
+
+event: SessionStart
+command: echo "[spwn] {{.Name}} session started at $(date -u +%FT%TZ)"

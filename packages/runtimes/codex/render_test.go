@@ -144,19 +144,20 @@ func TestRender_ConfigTOML_NoModelOmitsProfile(t *testing.T) {
 // feature flag in `.codex/config.toml`. Without the flag, codex
 // ignores the hooks file entirely.
 func TestRender_HooksJSON_emittedWhenHooksExist(t *testing.T) {
+	hooks := []transpile.HookEntry{
+		{Name: "audit", Event: "PreToolUse", Matcher: "Bash", Command: "echo"},
+	}
 	tree, _ := Renderer.Render(transpile.Input{
 		WorldID: "home",
-		Agents:  []transpile.AgentInput{{Name: "neo"}},
-		Hooks: []transpile.HookEntry{
-			{Name: "audit", Event: "PreToolUse", Matcher: "Bash", Command: "echo"},
-		},
+		Agents:  []transpile.AgentInput{{Name: "neo", Hooks: hooks}},
+		Hooks:   hooks,
 	})
-	hooks, ok := tree.Get("agents/neo/.codex/hooks.json")
+	hooksJSON, ok := tree.Get("agents/neo/.codex/hooks.json")
 	if !ok {
 		t.Fatal("missing .codex/hooks.json")
 	}
-	if !strings.Contains(string(hooks), "PreToolUse") {
-		t.Errorf("hooks.json missing PreToolUse; got:\n%s", hooks)
+	if !strings.Contains(string(hooksJSON), "PreToolUse") {
+		t.Errorf("hooks.json missing PreToolUse; got:\n%s", hooksJSON)
 	}
 
 	cfg, _ := tree.Get("agents/neo/.codex/config.toml")
@@ -186,13 +187,14 @@ func TestRender_HooksJSON_omittedWhenEmpty(t *testing.T) {
 // (same shape claude uses in settings.json#hooks) so a single spwn
 // HookEntry fans into both targets without format drift.
 func TestRender_HooksJSON_shape(t *testing.T) {
+	hooks := []transpile.HookEntry{
+		{Name: "a", Event: "PreToolUse", Matcher: "Bash", Command: "echo a"},
+		{Name: "b", Event: "UserPromptSubmit", Command: "echo b"},
+	}
 	tree, _ := Renderer.Render(transpile.Input{
 		WorldID: "home",
-		Agents:  []transpile.AgentInput{{Name: "neo"}},
-		Hooks: []transpile.HookEntry{
-			{Name: "a", Event: "PreToolUse", Matcher: "Bash", Command: "echo a"},
-			{Name: "b", Event: "UserPromptSubmit", Command: "echo b"},
-		},
+		Agents:  []transpile.AgentInput{{Name: "neo", Hooks: hooks}},
+		Hooks:   hooks,
 	})
 	body, _ := tree.Get("agents/neo/.codex/hooks.json")
 	var parsed struct {

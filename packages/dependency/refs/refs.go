@@ -17,7 +17,7 @@
 //	github:<owner>/<repo>        remote dependency (planned)
 //	tool/<name>                  local, resolves to ./spwn/tools/<name>/
 //	skill/<name>                 local, resolves to ./spwn/skills/<name>.md
-//	hook/<name>                  local, resolves to ./spwn/hooks/<name>.sh
+//	hook/<name>                  local, resolves to ./spwn/hooks/<name>.yaml
 //
 // Anything else — bare names, the retired `skill:` / `tool:` / `hook:`
 // schemes, the retired `local:<name>` alias, legacy `@owner/name` —
@@ -55,7 +55,7 @@ const (
 	KindLocalSkill
 	// KindLocalTool is tool/<name>, resolving to spwn/tools/<name>/.
 	KindLocalTool
-	// KindLocalHook is hook/<name>, resolving to spwn/hooks/<name>.sh.
+	// KindLocalHook is hook/<name>, resolving to spwn/hooks/<name>.yaml.
 	KindLocalHook
 )
 
@@ -234,7 +234,7 @@ const (
 //
 //   - KindLocalTool: checks that <root>/spwn/tools/<name>/ is a directory.
 //   - KindLocalSkill: checks that <root>/spwn/skills/<name>.md is a file.
-//   - KindLocalHook: checks that <root>/spwn/hooks/<name>.sh is a file.
+//   - KindLocalHook: checks that <root>/spwn/hooks/<name>.yaml is a file.
 //   - KindSpwnBuiltin: checks that spwn:<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
@@ -266,7 +266,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "hooks", ref.Name+".sh")
+		filePath := filepath.Join(root, "spwn", "hooks", ref.Name+".yaml")
 		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
 			return ResolveOK
 		}
@@ -325,7 +325,7 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "hooks", ref.Name+".sh")
+		filePath := filepath.Join(root, "spwn", "hooks", ref.Name+".yaml")
 		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
 			return ResolveOK
 		}

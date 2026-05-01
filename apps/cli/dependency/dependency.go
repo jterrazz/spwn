@@ -9,7 +9,7 @@
 //   - github:<owner>/<repo>      third-party (planned — git tags as versions)
 //   - skill/<name>               local skill (./spwn/skills/<name>.md)
 //   - tool/<name>                local tool (./spwn/tools/<name>/)
-//   - hook/<name>                local hook (./spwn/hooks/<name>.sh)
+//   - hook/<name>                local hook (./spwn/hooks/<name>.yaml)
 //
 // Local refs (skill/, tool/, hook/) attach the in-repo block to the
 // named agent; they require --agent because bolting a local onto
@@ -96,7 +96,7 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 		// Project is almost never what the user wants. Without
 		// --agent, point them at the flag.
 		if agentFilter == "" {
-			return fmt.Errorf("%q is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.sh`",
+			return fmt.Errorf("%q is a local ref — pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.yaml`",
 				ref, parsed.Name, parsed.Name, parsed.Name)
 		}
 		// Validate the target file/dir actually exists. Installing a
@@ -112,7 +112,7 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 				return fmt.Errorf("tool/%s not found at spwn/tools/%s/ — scaffold a tool.yaml there first",
 					parsed.Name, parsed.Name)
 			case refs.KindLocalHook:
-				return fmt.Errorf("hook/%s not found at spwn/hooks/%s.sh — create the hook script first",
+				return fmt.Errorf("hook/%s not found at spwn/hooks/%s.yaml — create the hook script first",
 					parsed.Name, parsed.Name)
 			}
 		}

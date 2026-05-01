@@ -69,8 +69,9 @@ severity. Exits non-zero when errors are found (or warnings, with
 		}
 
 		issues := project.Validate(p, project.ValidateOpts{
-			BuiltinTools:      catalogToolNames(),
-			SupportedRuntimes: supportedRuntimes(),
+			BuiltinTools:        catalogToolNames(),
+			SupportedRuntimes:   supportedRuntimes(),
+			HookEventsByRuntime: transpile.HookEventsByRuntime(),
 		})
 		out := cmd.OutOrStdout()
 

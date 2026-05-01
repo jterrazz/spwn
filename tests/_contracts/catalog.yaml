@@ -1,0 +1,41 @@
+catalog:
+    - slug: architect
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: build
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: cli
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: docker-cli
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: gh
+      tests: [tests/_catalog/gh_test.go]
+    - slug: git
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: macrohard
+      tests: [tests/_catalog/examples_test.go]
+    - slug: matrix
+      tests: [tests/_catalog/examples_test.go]
+    - slug: mcp2cli
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: mempalace
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: node
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: notion
+      tests: [tests/_catalog/notion_test.go]
+    - slug: paperclip-factory
+      tests: [tests/_catalog/examples_test.go]
+    - slug: python
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: qmd
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: research-lab
+      tests: [tests/_catalog/examples_test.go]
+    - slug: severance
+      tests: [tests/_catalog/examples_test.go]
+    - slug: startup
+      tests: [tests/_catalog/examples_test.go]
+    - slug: unix
+      tests: [tests/_catalog/bundled_test.go]
+    - slug: x
+      tests: [tests/_catalog/bundled_test.go]

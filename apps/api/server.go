@@ -15,18 +15,18 @@ import (
 	"sync"
 	"time"
 
-	agentpkg "spwn.sh/packages/agent"
-	projectpkg "spwn.sh/packages/project"
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/activity"
+	agentpkg "spwn.sh/packages/agent"
+	"spwn.sh/packages/architect"
 	"spwn.sh/packages/auth"
 	"spwn.sh/packages/container/probe"
-	"spwn.sh/packages/architect"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/platform"
+	projectpkg "spwn.sh/packages/project"
+	worldpkg "spwn.sh/packages/world"
 	"spwn.sh/packages/world/manifest"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtimestate"
-
 
 	"gopkg.in/yaml.v3"
 	"spwn.sh/packages/upgrade"
@@ -101,10 +101,15 @@ func (s *Server) requireArch(w http.ResponseWriter) bool {
 	return true
 }
 
-// Start begins serving the API.
-func (s *Server) Start() error {
+// Handler returns the production HTTP handler. Tests use this same
+// router so route registration cannot drift from Start().
+func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
+	s.registerRoutes(mux)
+	return mux
+}
 
+func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// --- READ endpoints ---
 	mux.HandleFunc("GET /api/health", cors(s.handleHealth))
 	mux.HandleFunc("GET /api/status", cors(s.handleStatus))
@@ -185,9 +190,9 @@ func (s *Server) Start() error {
 		if r.URL.Path == "/" {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{
-				"name":    "spwn spwn API",
-				"version": upgrade.CLIVersion,
-				"docs":    "/api/health",
+				"name":      "spwn spwn API",
+				"version":   upgrade.CLIVersion,
+				"docs":      "/api/health",
 				"dashboard": "http://localhost:3000",
 			})
 			return
@@ -195,8 +200,11 @@ func (s *Server) Start() error {
 		http.NotFound(w, r)
 	})
 	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
+}
 
-	s.srv = &http.Server{Addr: s.addr, Handler: mux}
+// Start begins serving the API.
+func (s *Server) Start() error {
+	s.srv = &http.Server{Addr: s.addr, Handler: s.Handler()}
 	fmt.Printf("spwn API listening on %s\n", s.addr)
 	return s.srv.ListenAndServe()
 }
@@ -242,12 +250,12 @@ func (s *Server) handleSystemOnboarding(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 	jsonOK(w, map[string]interface{}{
-		"completed":   completed,
-		"hasDocker":   docker.OK(),
-		"hasAuth":     hasAuth,
-		"hasWorlds":   len(worlds) > 0,
-		"hasAgents":   len(agents) > 0,
-		"docker":      docker,
+		"completed": completed,
+		"hasDocker": docker.OK(),
+		"hasAuth":   hasAuth,
+		"hasWorlds": len(worlds) > 0,
+		"hasAgents": len(agents) > 0,
+		"docker":    docker,
 	})
 }
 
@@ -338,7 +346,7 @@ type declaredWorldItem struct {
 	Name       string   `json:"name"`
 	Agents     []string `json:"agents"`
 	Workspaces []string `json:"workspaces"`
-	Deps []string `json:"deps,omitempty"`
+	Deps       []string `json:"deps,omitempty"`
 	// Status is "running" when any live world carries this config
 	// name, "stopped" otherwise. Declared-but-undeployed worlds are
 	// "stopped", not absent.
@@ -368,7 +376,7 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 				Name:       name,
 				Agents:     def.Agents,
 				Workspaces: def.Workspaces,
-				Deps:    def.Deps,
+				Deps:       def.Deps,
 				Status:     status,
 			})
 		}
@@ -475,6 +483,67 @@ type projectWorldDef struct {
 	Agents     []string
 	Workspaces []string
 	Deps       []string
+}
+
+// loadInlineWorldManifest synthesises a world.Manifest for the named
+// inline world entry in spwn.yaml#worlds, mirroring what the CLI's
+// resolveProjectWorld does. Returns ok=false when no project is
+// active or the requested world isn't declared inline so callers can
+// fall back to the legacy <projectRoot>/spwn/worlds/<name>.yaml file.
+//
+// Deps are the union of project-wide dependencies and every
+// referenced agent's agent.yaml dependencies, matching how `spwn up`
+// composes the spawn input.
+func loadInlineWorldManifest(name string) (models.Manifest, bool) {
+	root := platform.ProjectRoot()
+	if root == "" {
+		return models.Manifest{}, false
+	}
+	p, err := projectpkg.Find(root)
+	if err != nil || p == nil || p.Manifest == nil {
+		return models.Manifest{}, false
+	}
+	w, exists := p.Manifest.Worlds[name]
+	if !exists {
+		return models.Manifest{}, false
+	}
+
+	seen := map[string]struct{}{}
+	var deps []string
+	add := func(t string) {
+		if t == "" {
+			return
+		}
+		if _, dup := seen[t]; dup {
+			return
+		}
+		seen[t] = struct{}{}
+		deps = append(deps, t)
+	}
+	for _, d := range p.Manifest.Deps {
+		add(d)
+	}
+	agentPath := map[string]string{}
+	for _, a := range p.Agents {
+		agentPath[a.Name] = a.Path
+	}
+	for _, a := range p.OrphanAgents {
+		agentPath[a.Name] = a.Path
+	}
+	for _, aname := range w.Agents {
+		dir, ok := agentPath[aname]
+		if !ok {
+			continue
+		}
+		am, aerr := worldpkg.LoadAgentManifest(dir)
+		if aerr != nil || am == nil {
+			continue
+		}
+		for _, d := range am.Deps {
+			add(d)
+		}
+	}
+	return models.Manifest{Deps: deps}, true
 }
 
 // loadProjectManifest returns a view of the current project's
@@ -676,7 +745,6 @@ func (s *Server) handleGetAgentJournal(w http.ResponseWriter, r *http.Request) {
 	jsonOK(w, entries)
 }
 
-
 // ============================================================
 // WRITE handlers
 // ============================================================
@@ -747,10 +815,14 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 	if cfgName == "" {
 		cfgName = "default"
 	}
-	m, err := manifest.Load(cfgName)
-	if err != nil {
-		jsonError(w, "config not found: "+err.Error(), 400)
-		return
+	m, ok := loadInlineWorldManifest(cfgName)
+	if !ok {
+		var err error
+		m, err = manifest.Load(cfgName)
+		if err != nil {
+			jsonError(w, "config not found: "+err.Error(), 400)
+			return
+		}
 	}
 	manifest.ApplyDefaults(&m)
 
@@ -1304,7 +1376,7 @@ func (s *Server) handleArchitectStop(w http.ResponseWriter, r *http.Request) {
 
 // StackAction represents a parsed stack action from the architect's response.
 type StackAction struct {
-	Type        string `json:"type"`                  // "push", "pop", "update"
+	Type        string `json:"type"` // "push", "pop", "update"
 	Title       string `json:"title"`
 	Priority    string `json:"priority,omitempty"`
 	Description string `json:"description,omitempty"`

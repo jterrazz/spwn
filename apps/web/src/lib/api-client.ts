@@ -9,6 +9,16 @@ import type { AgentProfile, World } from './types';
 // Dynamic API base - Tauri app uses a random port, browser defaults to 3001
 let _goApiBase: null | string = null;
 
+function browserApiBase(): null | string {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+        return process.env.NEXT_PUBLIC_API_URL;
+    }
+    if (typeof globalThis.location === 'undefined' || !globalThis.location.hostname) {
+        return null;
+    }
+    return `http://${globalThis.location.hostname}:3001`;
+}
+
 /**
  * Resolves the Go API base URL. In Tauri mode, waits for the port to be
  * retrieved from the Rust backend before returning. This ensures every API
@@ -36,9 +46,9 @@ async function resolveGoApiBase(): Promise<string> {
         return tauriBase;
     }
 
-    // Browser fallback
-    if (typeof globalThis !== 'undefined') {
-        return process.env.NEXT_PUBLIC_API_URL || `http://${globalThis.location.hostname}:3001`;
+    const browserBase = browserApiBase();
+    if (browserBase) {
+        return browserBase;
     }
     return 'http://localhost:3001';
 }
@@ -52,7 +62,7 @@ export function setApiBase(base: string) {
 // Callers (goApiUrl) get the right value as soon as possible. The promise
 // Is fire-and-forget - by the time a user interaction triggers a fetch,
 // The port will be cached.
-if (typeof globalThis !== 'undefined') {
+if (typeof globalThis.location !== 'undefined' || isTauri()) {
     void resolveGoApiBase();
 }
 
@@ -282,11 +292,6 @@ export async function isGoApiAvailable(): Promise<boolean> {
  * localhost:3001 if not yet initialized.
  */
 export function goApiUrl(path: string): string {
-    const base =
-        _goApiBase ||
-        getTauriApiBase() ||
-        (typeof globalThis !== 'undefined'
-            ? process.env.NEXT_PUBLIC_API_URL || `http://${globalThis.location.hostname}:3001`
-            : 'http://localhost:3001');
+    const base = _goApiBase || getTauriApiBase() || browserApiBase() || 'http://localhost:3001';
     return `${base}${path}`;
 }

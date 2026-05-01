@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * `spwn check` dependencies-field resolution. Parallel to the
  * tools-field tests in ../check/ — each scenario has its own frozen
- * fixture under `tests/fixtures/check-{valid,invalid}-dep/` that
+ * fixture under `tests/_fixtures/check-{valid,invalid}-dep/` that
  * declares a single-agent project whose `agent.yaml` uses the
  * `dependencies:` field.
  */

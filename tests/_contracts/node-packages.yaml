@@ -1,0 +1,14 @@
+packages:
+    - path: apps/web
+      scripts: [test, build]
+      tests:
+          - apps/web/src/lib/__tests__/stream-chat.test.ts
+    - path: apps/gate
+      scripts: [test]
+      tests:
+          - apps/gate/sdk/index.test.mjs
+    - path: tests
+      scripts: [test, test:contracts, test:web]
+      tests:
+          - tests/cli/agent/talk/talk.e2e.test.ts
+          - tests/web/navigation/sidebar/sidebar.spec.ts

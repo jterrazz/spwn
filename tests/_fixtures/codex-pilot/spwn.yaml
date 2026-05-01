@@ -1,0 +1,12 @@
+version: 1
+name: codex-pilot
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: [.]
+    knowledge: ./knowledge

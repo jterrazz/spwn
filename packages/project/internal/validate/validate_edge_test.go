@@ -142,14 +142,15 @@ dependencies:
 }
 
 // TestEdge_PacksExist_LocalHookFile: hook/<name> resolves to
-// spwn/hooks/<name>.sh with no fallback to other kinds.
+// spwn/hooks/<name>.yaml with no fallback to other kinds.
 func TestEdge_PacksExist_LocalHookFile(t *testing.T) {
 	root := t.TempDir()
 	hookDir := filepath.Join(root, "spwn", "hooks")
 	if err := os.MkdirAll(hookDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(hookDir, "pre-spawn.sh"), []byte("#!/bin/sh\n"), 0o755); err != nil {
+	body := []byte("event: SessionStart\ncommand: echo hi\n")
+	if err := os.WriteFile(filepath.Join(hookDir, "pre-spawn.yaml"), body, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "alpha", `name: alpha

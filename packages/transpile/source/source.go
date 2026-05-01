@@ -139,11 +139,16 @@ type SkillSource struct {
 	Files map[string][]byte
 }
 
-// HookSource is one runtime hook entry declared in
-// <root>/spwn/hooks.yaml. Runtime hooks fire on runtime-defined events
-// (PreToolUse, UserPromptSubmit, SessionStart, …) inside the container
-// — they are NOT host-side lifecycle scripts. The retired lifecycle
-// mechanism (hook:<phase> refs + spwn/hooks/<phase>.sh) is gone.
+// HookSource is one runtime hook entry loaded from
+// <root>/spwn/hooks/<name>.yaml. Runtime hooks fire on runtime-defined
+// events (PreToolUse, UserPromptSubmit, SessionStart, …) inside the
+// container — they are NOT host-side lifecycle scripts.
+//
+// One file = one hook. The filename (minus .yaml) is the hook's Name;
+// each file's body is just `event: / matcher: / command:`. Per-agent
+// selection happens via `hook/<name>` in agent.yaml#dependencies — an
+// agent only receives hooks it explicitly declares, mirroring how
+// `skill/<name>` and `tool/<name>` work.
 type HookSource struct {
 	// Name is a stable identifier used by the renderer to disambiguate
 	// multiple hooks on the same event (e.g. two PreToolUse hooks).
@@ -499,68 +504,86 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 	return append([]byte(header), body...)
 }
 
-// loadHooks parses <root>/spwn/hooks.yaml into HookSource entries.
-// Missing file → nil, nil. A malformed file surfaces as an error so
-// spwn check can flag it before the user hits a silent spawn.
+// loadHooks walks <root>/spwn/hooks/*.yaml and returns one HookSource
+// per file. Filename (minus .yaml) is the hook Name; the file body
+// is the entry shape (`event:` / `matcher:` / `command:`). Missing
+// directory → nil, nil. Malformed file surfaces as an error so
+// `spwn check` can flag it before the user hits a silent spawn.
 //
-// The manifest shape is intentionally small and declarative:
+// Per-file schema:
 //
-//	hooks:
-//	  - name: bash-audit
-//	    event: PreToolUse
-//	    matcher: Bash
-//	    command: echo "[audit] $CLAUDE_TOOL_INPUT"
-//	  - name: welcome
-//	    event: SessionStart
-//	    command: echo "Session started"
+//	# spwn/hooks/bash-audit.yaml
+//	event: PreToolUse
+//	matcher: Bash
+//	command: echo "[audit] $CLAUDE_TOOL_INPUT"
 //
-// `name` is required (used by the renderer to key config entries);
 // `event` is required and passed through verbatim; `matcher` is
 // optional; `command` is the shell fragment that the runtime invokes
 // when the hook fires. Keep V1 inline-only — if the shell fragment
 // gets long, author it as a file under a skill and invoke it here.
+//
+// The legacy <root>/spwn/hooks.yaml form (one project-level file with
+// a `hooks:` array) is rejected with a migration hint — `spwn check`
+// surfaces this so users update before downstream silently drops their
+// hooks.
 func loadHooks(root string) ([]HookSource, error) {
-	path := filepath.Join(root, "spwn", "hooks.yaml")
-	data, err := os.ReadFile(path)
+	if legacy := filepath.Join(root, "spwn", "hooks.yaml"); fileExists(legacy) {
+		return nil, fmt.Errorf(
+			"%s: legacy hooks.yaml is no longer supported; "+
+				"migrate each entry to its own file at spwn/hooks/<name>.yaml "+
+				"(filename = hook name, body = event/matcher/command)",
+			legacy,
+		)
+	}
+
+	dir := filepath.Join(root, "spwn", "hooks")
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("read %s: %w", path, err)
+		return nil, fmt.Errorf("read %s: %w", dir, err)
 	}
 
-	var parsed struct {
-		Hooks []struct {
-			Name    string `yaml:"name"`
+	out := make([]HookSource, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
+			continue
+		}
+		name := strings.TrimSuffix(e.Name(), ".yaml")
+		path := filepath.Join(dir, e.Name())
+		data, rerr := os.ReadFile(path)
+		if rerr != nil {
+			return nil, fmt.Errorf("read %s: %w", path, rerr)
+		}
+		var parsed struct {
 			Event   string `yaml:"event"`
 			Matcher string `yaml:"matcher,omitempty"`
 			Command string `yaml:"command"`
-		} `yaml:"hooks"`
-	}
-	if err := yaml.Unmarshal(data, &parsed); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", path, err)
-	}
-
-	out := make([]HookSource, 0, len(parsed.Hooks))
-	for i, h := range parsed.Hooks {
-		if strings.TrimSpace(h.Name) == "" {
-			return nil, fmt.Errorf("%s: hook[%d] missing `name`", path, i)
 		}
-		if strings.TrimSpace(h.Event) == "" {
-			return nil, fmt.Errorf("%s: hook %q missing `event`", path, h.Name)
+		if uerr := yaml.Unmarshal(data, &parsed); uerr != nil {
+			return nil, fmt.Errorf("parse %s: %w", path, uerr)
 		}
-		if strings.TrimSpace(h.Command) == "" {
-			return nil, fmt.Errorf("%s: hook %q missing `command`", path, h.Name)
+		if strings.TrimSpace(parsed.Event) == "" {
+			return nil, fmt.Errorf("%s: missing `event`", path)
+		}
+		if strings.TrimSpace(parsed.Command) == "" {
+			return nil, fmt.Errorf("%s: missing `command`", path)
 		}
 		out = append(out, HookSource{
-			Name:    h.Name,
-			Event:   h.Event,
-			Matcher: h.Matcher,
-			Command: h.Command,
+			Name:    name,
+			Event:   parsed.Event,
+			Matcher: parsed.Matcher,
+			Command: parsed.Command,
 		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, nil
+}
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 func loadProfiles(root string) ([]ProfileSource, error) {

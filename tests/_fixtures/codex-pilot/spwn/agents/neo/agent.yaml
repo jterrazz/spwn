@@ -1,0 +1,13 @@
+name: neo
+description: Fixture agent for Codex runtime E2E coverage.
+role: worker
+
+runtime:
+  backend: "spwn:codex"
+  model: gpt-5
+  provider: openai
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+  - "skill/focus"

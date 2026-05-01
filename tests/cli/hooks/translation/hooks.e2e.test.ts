@@ -1,25 +1,25 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * Generic-hook translation E2E.
  *
- * Contract: a single `spwn/hooks.yaml` authored by the user is
- * translated by the transpile layer into each runtime's native hook
+ * Contract: each `spwn/hooks/<name>.yaml` the user authors is
+ * translated by the transpile layer into the runtime's native hook
  * config at build time — Claude Code's `.claude/settings.json` and
- * Codex's `.codex/hooks.json`. Previous regression: the `hook/` dep
- * form was left in the scaffold long after host-side lifecycle
- * hooks were retired, so users wrote host shell scripts that silently
- * never ran. The fix centralised all runtime hooks under hooks.yaml
- * and this test locks that contract in place.
+ * Codex's `.codex/hooks.json` — but only for the agents that
+ * subscribed via `hook/<name>` in their agent.yaml#dependencies.
+ * One hook = one file = one ref, iso with skill/<name> and tool/<name>.
  *
  * Strategy:
  *   1. Spawn a real world from the hook-pilot fixture (real Docker
- *      build path, no SPWN_BASE_IMAGE shortcut).
+ *      build path, no SPWN_BASE_IMAGE shortcut). The fixture's neo
+ *      agent declares both hooks; an unsubscribed agent would see
+ *      none.
  *   2. Read `/agents/neo/.claude/settings.json` from inside the
- *      container and assert the two hooks landed with the right
- *      event/matcher/command shape.
+ *      container and assert both selected hooks landed with the
+ *      right event/matcher/command shape.
  *   3. Run each hook command directly via docker exec and assert
  *      the side-effect file appears — proves the shell fragment
  *      itself is valid inside the container's environment.
@@ -31,8 +31,8 @@ import { spec } from '../../../setup/cli.specification.js';
  * packages/runtimes/claudecode this exercises every link of the
  * chain spwn is responsible for.
  */
-describe('hooks.yaml translation', () => {
-    test('hooks.yaml lands in .claude/settings.json and its commands run inside the world', async () => {
+describe('hook/<name> translation', () => {
+    test('subscribed hooks land in .claude/settings.json and the commands run inside the world', async () => {
         await using result = await spec('hooks translation').project('hook-pilot').exec('up').run();
 
         expect(

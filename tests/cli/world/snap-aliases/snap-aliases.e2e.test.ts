@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { afterEach, describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * World snapshot CLI under the docker() spec mode.

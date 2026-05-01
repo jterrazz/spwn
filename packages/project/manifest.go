@@ -226,6 +226,13 @@ type ValidateOpts struct {
 	// can actually spawn (e.g. "spwn:claude-code"). When empty,
 	// runtime validity is not checked.
 	SupportedRuntimes []string
+
+	// HookEventsByRuntime maps each runtime adapter's short name
+	// (e.g. "claude-code") to the hook events it actually fires.
+	// Used to flag hooks whose `event:` would silently no-op for
+	// the agent's runtime. When empty, the event-support check is
+	// skipped entirely (golden tests + scaffold paths).
+	HookEventsByRuntime map[string][]string
 }
 
 // Validate runs every validation rule against the project and returns
@@ -241,10 +248,11 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 		o = opts[0]
 	}
 	in := validate.Input{
-		Root:              p.Root,
-		Manifest:          p.Manifest,
-		BuiltinTools:      o.BuiltinTools,
-		SupportedRuntimes: o.SupportedRuntimes,
+		Root:                p.Root,
+		Manifest:            p.Manifest,
+		BuiltinTools:        o.BuiltinTools,
+		SupportedRuntimes:   o.SupportedRuntimes,
+		HookEventsByRuntime: o.HookEventsByRuntime,
 	}
 	for _, a := range p.Agents {
 		in.AgentRefs = append(in.AgentRefs, validate.AgentRef{

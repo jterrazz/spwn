@@ -7,11 +7,12 @@
 #   github:<owner>/<repo>        third-party dep (planned, not yet resolved)
 #   skill/<name>                 local skill   (./spwn/skills/<name>.md)
 #   tool/<name>                  local tool    (./spwn/tools/<name>/)
-#   hook/<name>                  local hook    (./spwn/hooks/<name>.sh)
+#   hook/<name>                  local hook    (./spwn/hooks/<name>.yaml)
 # Bare names are invalid — always use one of the forms above.
 #
-# Runtime hooks (PreToolUse, SessionStart, …) live in a separate file
-# at spwn/hooks.yaml; they're not composed via the dependency list.
+# Hooks are runtime-fired (PreToolUse, SessionStart, …) and selected
+# per-agent via the dependency list — same shape as skills and tools.
+# An agent inherits only the hooks it lists here.
 #
 # Optional `runtime.backend:` pins this agent to a specific backend
 # (spwn:claude-code, spwn:codex). Omit to let spwn pick based on
@@ -30,5 +31,6 @@ runtime:
   # Local blocks scaffolded by `spwn init` — one of each form so you
   # can see how they're authored and used. Keep, edit, or delete them;
   # `spwn check` is happy either way.
-  - "skill/focus"       # ./spwn/skills/focus.md
-  - "tool/greet"        # ./spwn/tools/greet/
+  - "skill/focus"           # ./spwn/skills/focus.md
+  - "tool/greet"            # ./spwn/tools/greet/
+  - "hook/session-banner"   # ./spwn/hooks/session-banner.yaml

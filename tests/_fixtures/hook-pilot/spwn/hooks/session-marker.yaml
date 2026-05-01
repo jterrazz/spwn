@@ -1,0 +1,2 @@
+event: SessionStart
+command: echo "session-start=$(date -u +%FT%TZ)" > /tmp/hook-pilot-session.log

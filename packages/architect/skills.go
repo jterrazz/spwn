@@ -10,48 +10,103 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"spwn.sh/packages/agent"
 	"spwn.sh/packages/dependency/tool"
 	"spwn.sh/packages/transpile"
 )
 
-// loadRuntimeHooks parses <root>/spwn/hooks.yaml into transpile.HookEntry
-// slices for the architect-driven spawn path. Mirrors the source
-// package's loadHooks but lives here so the spawn flow doesn't need to
-// construct a full ProjectSource just to read the manifest. Malformed
-// YAML returns nil rather than erroring — `spwn check` is the
-// authoring-side gate; spawn is best-effort.
+// loadRuntimeHooks walks <root>/spwn/hooks/*.yaml and returns one
+// transpile.HookEntry per file. Filename (minus .yaml) is the hook
+// Name; file body holds `event: / matcher: / command:`. Mirrors the
+// source package's loadHooks but lives here so the spawn flow doesn't
+// need to construct a full ProjectSource just to read hooks.
+// Malformed files are skipped rather than erroring — `spwn check` is
+// the authoring-side gate; spawn is best-effort.
+//
+// The returned slice is the project-wide pool. Agents only inherit
+// the subset they declare via `hook/<name>` in agent.yaml#dependencies
+// — the per-agent filter happens later in rosterCompileAgents.
 func loadRuntimeHooks(projectRoot string) []transpile.HookEntry {
 	if projectRoot == "" {
 		return nil
 	}
-	path := filepath.Join(projectRoot, "spwn", "hooks.yaml")
-	data, err := os.ReadFile(path)
+	dir := filepath.Join(projectRoot, "spwn", "hooks")
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil
 	}
-	var parsed struct {
-		Hooks []struct {
-			Name    string `yaml:"name"`
+	out := make([]transpile.HookEntry, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
+			continue
+		}
+		name := strings.TrimSuffix(e.Name(), ".yaml")
+		data, rerr := os.ReadFile(filepath.Join(dir, e.Name()))
+		if rerr != nil {
+			continue
+		}
+		var parsed struct {
 			Event   string `yaml:"event"`
 			Matcher string `yaml:"matcher,omitempty"`
 			Command string `yaml:"command"`
-		} `yaml:"hooks"`
-	}
-	if err := yaml.Unmarshal(data, &parsed); err != nil {
-		return nil
-	}
-	out := make([]transpile.HookEntry, 0, len(parsed.Hooks))
-	for _, h := range parsed.Hooks {
-		if h.Name == "" || h.Event == "" || h.Command == "" {
+		}
+		if uerr := yaml.Unmarshal(data, &parsed); uerr != nil {
+			continue
+		}
+		if parsed.Event == "" || parsed.Command == "" {
 			continue
 		}
 		out = append(out, transpile.HookEntry{
-			Name:    h.Name,
-			Event:   h.Event,
-			Matcher: h.Matcher,
-			Command: h.Command,
+			Name:    name,
+			Event:   parsed.Event,
+			Matcher: parsed.Matcher,
+			Command: parsed.Command,
 		})
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
+}
+
+// agentHookSelection returns the subset of the project hook pool the
+// agent's agent.yaml dependencies select via `hook/<n>` refs. Mirrors
+// the source-side selectAgentHooks; duplicated rather than imported so
+// the architect package doesn't pull in transpile/source. Returns nil
+// when the agent declares no hook deps or none of them resolve.
+func agentHookSelection(agentName string, pool []transpile.HookEntry) []transpile.HookEntry {
+	if len(pool) == 0 {
+		return nil
+	}
+	m, err := agent.LoadManifest(agentName)
+	if err != nil || m == nil || len(m.Deps) == 0 {
+		return nil
+	}
+	byName := make(map[string]transpile.HookEntry, len(pool))
+	for _, h := range pool {
+		byName[h.Name] = h
+	}
+	out := make([]transpile.HookEntry, 0, len(m.Deps))
+	seen := make(map[string]struct{}, len(m.Deps))
+	for _, dep := range m.Deps {
+		dep = strings.TrimSpace(dep)
+		const prefix = "hook/"
+		if !strings.HasPrefix(dep, prefix) {
+			continue
+		}
+		name := strings.TrimPrefix(dep, prefix)
+		if name == "" {
+			continue
+		}
+		if _, dup := seen[name]; dup {
+			continue
+		}
+		entry, ok := byName[name]
+		if !ok {
+			continue
+		}
+		seen[name] = struct{}{}
+		out = append(out, entry)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out
 }
 
@@ -77,6 +132,42 @@ func collectRuntimeSkills(projectRoot string, tools []tool.Tool) []transpile.Ski
 	out = append(out, loadUserSkills(projectRoot)...)
 	out = append(out, toolSkillEntries(tools)...)
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
+}
+
+// facultiesForRuntime returns the entries shown in the prompt's
+// Faculties section during a real spawn. Tool refs come from the
+// runtime probe so failed tools stay hidden; local skills are copied
+// directly into the agent home rather than probed, so declared
+// skill/<name> deps are appended here for discoverability.
+func facultiesForRuntime(verifiedTools, deps []string) []string {
+	out := make([]string, 0, len(verifiedTools)+len(deps))
+	seen := map[string]struct{}{}
+	add := func(ref string) {
+		ref = strings.TrimSpace(ref)
+		if ref == "" {
+			return
+		}
+		if _, ok := seen[ref]; ok {
+			return
+		}
+		seen[ref] = struct{}{}
+		out = append(out, ref)
+	}
+	for _, ref := range verifiedTools {
+		add(ref)
+	}
+	localSkills := make([]string, 0)
+	for _, dep := range deps {
+		dep = strings.TrimSpace(dep)
+		if strings.HasPrefix(dep, "skill/") {
+			localSkills = append(localSkills, dep)
+		}
+	}
+	sort.Strings(localSkills)
+	for _, ref := range localSkills {
+		add(ref)
+	}
 	return out
 }
 

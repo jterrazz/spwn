@@ -104,7 +104,7 @@ func runInitLocal(cmd *cobra.Command) error {
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/agents/neo/               # starter agent")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/skills/focus.md           # example local skill  (skill/focus)")
 	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/tools/greet/              # example local tool   (tool/greet)")
-	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/hooks.yaml                # runtime hooks (Claude/Codex)")
+	fmt.Fprintln(cmd.OutOrStdout(), "    spwn/hooks/session-banner.yaml # example local hook   (hook/session-banner)")
 	fmt.Fprintln(cmd.OutOrStdout(), "")
 	fmt.Fprintln(cmd.OutOrStdout(), "  Gitignored:")
 	fmt.Fprintln(cmd.OutOrStdout(), "    .spwn/                         # local state")

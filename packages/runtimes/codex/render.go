@@ -28,6 +28,16 @@ var Renderer = &renderer{}
 // look up this runtime.
 func (r *renderer) Name() string { return "codex" }
 
+// SupportedHookEvents returns every hook event Codex recognises today.
+// Codex's set is narrower than Claude Code's — events outside this
+// list (Notification, SubagentStop, PreCompact, SessionEnd) ship into
+// `.codex/hooks.json` but never fire. `spwn check` warns when an
+// agent backed by codex declares one of those. See events.go for the
+// canonical set.
+func (r *renderer) SupportedHookEvents() []string {
+	return append([]string(nil), SupportedEvents...)
+}
+
 // Render lays out codex-specific output for each agent. Paths:
 //
 //   - agents/<name>/AGENTS.md                  self-contained boot prompt
@@ -91,10 +101,10 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 			GenerateAgentConfigTOML(ConfigInput{
 				AgentName: a.Name,
 				Model:     a.Model,
-				HasHooks:  len(input.Hooks) > 0,
+				HasHooks:  len(a.Hooks) > 0,
 			}),
 		)
-		if body := GenerateAgentHooksJSON(input.Hooks); body != nil {
+		if body := GenerateAgentHooksJSON(a.Hooks); body != nil {
 			t.Add(
 				fmt.Sprintf("agents/%s/.codex/hooks.json", a.Name),
 				body,

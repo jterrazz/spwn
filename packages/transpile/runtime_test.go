@@ -8,8 +8,9 @@ import (
 // fakeRuntime is a test-only Runtime that records nothing.
 type fakeRuntime struct{ name string }
 
-func (f *fakeRuntime) Name() string                { return f.name }
-func (f *fakeRuntime) Render(Input) (*Tree, error) { return New(), nil }
+func (f *fakeRuntime) Name() string                  { return f.name }
+func (f *fakeRuntime) Render(Input) (*Tree, error)   { return New(), nil }
+func (f *fakeRuntime) SupportedHookEvents() []string { return nil }
 
 // TestRegisteredRuntimes locks the shape of RegisteredRuntimes:
 // every registered name shows up, sorted. Used by the CLI to print

@@ -1,0 +1,11 @@
+name: neo
+description: Hook-pilot agent — exercises per-agent hook selection (session + bash audit).
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+  - "hook/session-marker"
+  - "hook/bash-audit"

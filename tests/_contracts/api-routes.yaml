@@ -1,0 +1,115 @@
+routes:
+    - route: GET /api/health
+      tests: [apps/api/server_test.go, tests/web/system/api-health/api-health.spec.ts]
+    - route: GET /api/status
+      tests: [apps/api/server_test.go]
+    - route: GET /api/version
+      tests: [apps/api/server_test.go]
+    - route: GET /api/system/docker
+      tests: [apps/api/server_test.go]
+    - route: GET /api/system/onboarding
+      tests: [apps/api/server_test.go]
+    - route: POST /api/system/onboarding/complete
+      tests: [apps/api/server_test.go]
+    - route: GET /api/examples
+      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.spec.ts]
+    - route: GET /api/examples/{slug}
+      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.spec.ts]
+    - route: POST /api/examples/{slug}/install
+      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.spec.ts]
+    - route: GET /api/worlds
+      tests: [apps/api/server_test.go, tests/web/worlds/list/list.spec.ts]
+    - route: GET /api/agents
+      tests: [apps/api/server_test.go, tests/web/agents/list/list.spec.ts]
+    - route: GET /api/agents/{name}
+      tests: [apps/api/server_test.go]
+    - route: GET /api/agents/{name}/journal
+      tests: [apps/api/server_test.go]
+    - route: GET /api/agents/{name}/mind
+      tests: [apps/api/server_test.go]
+    - route: GET /api/agents/{name}/files/{path...}
+      tests: [apps/api/server_test.go]
+    - route: POST /api/worlds
+      tests: [apps/api/create_world_body_test.go, tests/web/worlds/lifecycle/lifecycle.spec.ts]
+    - route: PATCH /api/worlds/{id}
+      tests: [apps/api/server_test.go]
+    - route: DELETE /api/worlds/{id}
+      tests: [apps/api/server_test.go, tests/web/worlds/lifecycle/lifecycle.spec.ts]
+    - route: POST /api/worlds/{id}/snapshot
+      tests: [apps/api/server_test.go]
+    - route: POST /api/agents
+      tests: [apps/api/server_test.go, tests/web/agents/list/list.spec.ts]
+    - route: DELETE /api/agents/{name}
+      tests: [apps/api/server_test.go]
+    - route: POST /api/agents/{name}/dream
+      tests: [apps/api/server_test.go]
+    - route: POST /api/agents/{name}/sleep
+      tests: [apps/api/server_test.go]
+    - route: POST /api/agents/{name}/fork
+      tests: [apps/api/server_test.go]
+    - route: POST /api/worlds/{id}/agents
+      tests: [apps/api/deploy_agent_test.go, tests/web/worlds/lifecycle/lifecycle.spec.ts]
+    - route: POST /api/worlds/{id}/talk
+      tests: [apps/api/talk_agent_test.go]
+    - route: POST /api/agents/{name}/export
+      tests: [apps/api/server_test.go]
+    - route: PUT /api/agents/{name}/identity
+      tests: [apps/api/server_test.go]
+    - route: GET /api/teams
+      tests: [apps/api/server_test.go]
+    - route: POST /api/teams
+      tests: [apps/api/server_test.go]
+    - route: PUT /api/teams/{slug}
+      tests: [apps/api/server_test.go]
+    - route: DELETE /api/teams/{slug}
+      tests: [apps/api/server_test.go]
+    - route: GET /api/organizations
+      tests: [apps/api/server_test.go]
+    - route: GET /api/organizations/{slug}
+      tests: [apps/api/server_test.go]
+    - route: POST /api/organizations
+      tests: [apps/api/server_test.go]
+    - route: PUT /api/organizations/{slug}
+      tests: [apps/api/server_test.go]
+    - route: DELETE /api/organizations/{slug}
+      tests: [apps/api/server_test.go]
+    - route: GET /api/architect/status
+      tests: [apps/api/server_test.go]
+    - route: GET /api/architect/history
+      tests: [apps/api/server_test.go]
+    - route: GET /api/architect/logs
+      tests: [apps/api/server_test.go]
+    - route: POST /api/architect/start
+      tests: [apps/api/server_test.go]
+    - route: POST /api/architect/stop
+      tests: [apps/api/server_test.go]
+    - route: POST /api/architect/talk
+      tests: [apps/api/server_test.go]
+    - route: GET /api/architect/stack
+      tests: [apps/api/server_test.go]
+    - route: POST /api/architect/stack
+      tests: [apps/api/server_test.go]
+    - route: GET /api/worlds/{id}/history
+      tests: [apps/api/server_test.go]
+    - route: GET /api/activity
+      tests: [apps/api/server_test.go]
+    - route: GET /api/auth/providers
+      tests: [apps/api/server_test.go]
+    - route: POST /api/auth/check
+      tests: [apps/api/server_test.go]
+    - route: POST /api/auth/configure
+      tests: [apps/api/server_test.go]
+    - route: POST /api/auth/reset
+      tests: [apps/api/server_test.go]
+    - route: POST /api/auth/reconnect
+      tests: [apps/api/server_test.go]
+    - route: GET /api/worlds/{id}/knowledge
+      tests: [apps/api/knowledge_path_test.go]
+    - route: GET /api/worlds/{id}/knowledge/{path...}
+      tests: [apps/api/knowledge_path_test.go]
+    - route: PUT /api/worlds/{id}/knowledge/{path...}
+      tests: [apps/api/knowledge_path_test.go]
+    - route: GET /
+      tests: [apps/api/server_test.go]
+    - route: OPTIONS /
+      tests: [apps/api/server_test.go]

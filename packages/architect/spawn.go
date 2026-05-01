@@ -10,23 +10,22 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
-	runtimes "spwn.sh/packages/runtimes"
 	"spwn.sh/packages/dependency"
+	runtimes "spwn.sh/packages/runtimes"
 
-
-	"spwn.sh/packages/transpile"
+	"spwn.sh/packages/activity"
+	"spwn.sh/packages/architect/internal/deploy"
+	"spwn.sh/packages/auth"
+	authgh "spwn.sh/packages/auth/gh"
 	ib "spwn.sh/packages/compile"
 	ibbase "spwn.sh/packages/compile/base"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
-	"spwn.sh/packages/architect/internal/deploy"
+	"spwn.sh/packages/gate"
+	"spwn.sh/packages/platform"
+	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/models"
-	"spwn.sh/packages/platform"
-	"spwn.sh/packages/activity"
-	"spwn.sh/packages/auth"
-	authgh "spwn.sh/packages/auth/gh"
-	"spwn.sh/packages/gate"
 )
 
 // buildPolicyMap converts the world's per-tool allow/deny config
@@ -52,17 +51,17 @@ type SpawnResult struct {
 
 // SpawnOpts configures world creation.
 type SpawnOpts struct {
-	ConfigName    string
-	Name          string // Optional user-facing display name.
-	AgentName     string
-	Workspaces    []models.Workspace
-	Manifest      models.Manifest
-	Image         string                     // Override base image (used for testing). Defaults to platform.WorldImage.
-	OnProgress    func(event, detail string) // Optional callback at each milestone.
-	LogWriter     io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
-	Agents        []AgentSpec                // Multi-agent list (alternative to single AgentName).
-	IsArchitect   bool                       // When true, mounts Docker socket + SPWN_HOME for Architect mode.
-	ForceRebuild  bool                       // When true, bypass the content-addressed image cache.
+	ConfigName   string
+	Name         string // Optional user-facing display name.
+	AgentName    string
+	Workspaces   []models.Workspace
+	Manifest     models.Manifest
+	Image        string                     // Override base image (used for testing). Defaults to platform.WorldImage.
+	OnProgress   func(event, detail string) // Optional callback at each milestone.
+	LogWriter    io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
+	Agents       []AgentSpec                // Multi-agent list (alternative to single AgentName).
+	IsArchitect  bool                       // When true, mounts Docker socket + SPWN_HOME for Architect mode.
+	ForceRebuild bool                       // When true, bypass the content-addressed image cache.
 	// RuntimeName selects the runtime adapter that drives spawn-time
 	// behavior (BuildCommand, credential sync, prelaunch shell) and
 	// the transpile target. Short form: "claude-code", "codex".
@@ -149,7 +148,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Lifecycle hooks (`hook:pre-spawn` and friends) were retired
 	// alongside the old `/world/skills/` pipeline. Runtime hooks
 	// (Claude Code / Codex PreToolUse + UserPromptSubmit + …) are
-	// now declared in spwn/hooks.yaml and rendered into each agent's
+	// now declared per-file in spwn/hooks/<name>.yaml and selected per
 	// `.claude/settings.json` / `.codex/hooks.json` by the transpile
 	// layer — they run inside the container, not on the host.
 
@@ -331,10 +330,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			Tools:          toolList,
 			Policies:       buildPolicyMap(opts.Manifest.DepPolicies),
 
-			Tag:            image,
-			ForceRebuild:   opts.ForceRebuild,
-			SkipVerify:     true, // probeTools handles verification below
-			LogWriter:      buildLogWriter,
+			Tag:          image,
+			ForceRebuild: opts.ForceRebuild,
+			SkipVerify:   true, // probeTools handles verification below
+			LogWriter:    buildLogWriter,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("build world image: %w", err)
@@ -611,22 +610,22 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
 
-	// Render every file this world needs through the compiler. The
-	// claude-code Runtime produces agents/<name>/CLAUDE.md (fully
-	// self-contained system prompt — world context inlined) and
-	// agents/<name>/worlds/<id>/role.md per deployment. Nothing
-	// lands under world/ any more: physics, faculties, and roster
-	// are inlined into each CLAUDE.md. MaterialiseTree is still
-	// prefix-aware in case a future runtime emits world/* files;
-	// today every entry flows via docker-cp into the agent home.
+	// Render every file this world needs through the compiler. Each
+	// runtime emits its own native prompt file (CLAUDE.md for
+	// claude-code, AGENTS.md for codex) with world context inlined.
+	// MaterialiseTree is still prefix-aware in case a future runtime
+	// emits world/* files; today every entry flows via docker-cp into
+	// the agent home.
+	runtimeSkills := collectRuntimeSkills(platform.ProjectRoot(), resolvedTools)
+	hookPool := loadRuntimeHooks(platform.ProjectRoot())
 	compileInput := transpile.Input{
 		Deps:                  opts.Manifest.Deps,
-		VerifiedTools:         verifiedTools,
+		VerifiedTools:         facultiesForRuntime(verifiedTools, opts.Manifest.Deps),
 		WorldID:               id,
-		Agents:                rosterCompileAgents(rosterAgents),
+		Agents:                rosterCompileAgents(rosterAgents, hookPool),
 		WorldKnowledgeMounted: knowledgeMounted,
-		Skills:                collectRuntimeSkills(platform.ProjectRoot(), resolvedTools),
-		Hooks:                 loadRuntimeHooks(platform.ProjectRoot()),
+		Skills:                runtimeSkills,
+		Hooks:                 hookPool,
 	}
 	tree, err := transpile.Compile(opts.runtimeName(), compileInput)
 	if err != nil {
@@ -639,7 +638,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		a.backend.Remove(ctx, containerID)
 		return nil, fmt.Errorf("materialise world tree: %w", err)
 	}
-	opts.progress("world_state_written", "per-agent CLAUDE.md")
+	opts.progress("world_state_written", "per-agent "+runtimePromptFile(opts.runtimeName()))
 
 	// Chown the whole agent home tree AFTER every docker-cp step so
 	// every file the agent might need to touch at runtime (auth
@@ -693,4 +692,3 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	return &SpawnResult{World: &u, Warnings: warnings}, nil
 }
-

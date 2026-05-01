@@ -6,6 +6,7 @@
     "scripts": {
         "lint": "codestyle check",
         "lint:fix": "codestyle fix",
+        "test:contracts": "node _contracts/assert-contracts.mjs",
         "test": "vitest --run",
         "test:watch": "vitest",
         "test:smoke": "vitest --run --config vitest.smoke.config.ts",

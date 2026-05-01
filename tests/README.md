@@ -23,7 +23,7 @@ Examples:
 
 ### 2. Go E2E Tests
 
-Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with `mock-claude` replacing the real Claude binary). Located in `packages/world/tests/e2e/`.
+Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with the runtime simulators in `tests/_simulators/` replacing the real Claude/Codex CLIs). Located in `packages/world/tests/e2e/`.
 
 ```bash
 make test-e2e              # builds test image, then runs the world E2E suite
@@ -47,14 +47,18 @@ cd tests && npx tsc --noEmit     # type-check only
 - **Docker**: Required for all E2E tests (both Go and TypeScript).
 - **Go 1.25+**: Required for Go tests.
 - **Node.js 20+**: Required for TypeScript E2E tests.
-- **Test image**: Run `make build-test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `tests/fixtures/Dockerfile.test`.
+- **Test image**: Run `make build-test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `tests/_simulators/Dockerfile.test`.
 - **Binary**: TypeScript E2E tests require `bin/spwn`. Run `make build` first.
 
-## How mock-claude Works
+## How runtime simulators work
 
-E2E tests do not call the real Claude Code CLI. Instead, they use a mock:
+E2E tests do not call the real Claude Code or Codex CLIs. Instead, they use protocol-faithful **simulators** that ship inside the test image:
 
-**`tests/fixtures/mock-claude/mock-claude.sh`** is a bash script installed as `/usr/local/bin/claude` inside the test Docker image. It:
+- `tests/_simulators/claude/mock.sh` — installed as `/usr/local/bin/claude`
+- `tests/_simulators/codex/mock.sh` — installed as `/usr/local/bin/codex`
+- `tests/_simulators/Dockerfile.test` — builds `spwn-test:latest` with both pre-installed
+
+The Claude simulator:
 
 1. Accepts and ignores real Claude CLI flags (`--session-id`, `--resume`, etc.)
 2. Inspects the container environment (checks for `/agents/<name>/CLAUDE.md`, `/workspaces`, etc.)
@@ -100,7 +104,7 @@ Key design points:
 - `SpawnBuilder.Execute()` returns an `AssertionChain` for fluent assertions.
 - `WaitFor(t, timeout, interval, desc, conditionFn)` polls a condition instead of using `time.Sleep`.
 
-### TypeScript E2E Setup (`tests/setup/`)
+### TypeScript E2E Setup (`tests/_setup/`)
 
 All TypeScript E2E tests run under `@jterrazz/test` via one
 specification runner:
@@ -125,7 +129,7 @@ each test's `seeds/` directory.
 
 ```typescript
 import { describe, expect, test } from 'vitest';
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 describe('spwn check', () => {
     test('valid project prints a clean success report', async () => {
@@ -137,7 +141,7 @@ describe('spwn check', () => {
 });
 ```
 
-- `.project('name')` copies `tests/fixtures/<name>/` into a fresh
+- `.project('name')` copies `tests/_fixtures/<name>/` into a fresh
   temp dir before the command runs.
 - `result.stdout.toMatch('name.txt')` compares against
   `<test-dir>/expected/stdout/name.txt`. Regenerate with
@@ -151,7 +155,7 @@ describe('spwn check', () => {
 
 ```typescript
 import { describe, expect, test } from 'vitest';
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 describe('world lifecycle', () => {
     test('up provisions a running world', async () => {
@@ -207,7 +211,7 @@ describe('world lifecycle', () => {
 
 1. Create `tests/cli/<area>/<feature>/<feature>.e2e.test.ts` (one
    per-feature folder per test file, siblings: `expected/`, `seeds/`).
-2. Import `spec` from `tests/setup/cli.specification.js`.
+2. Import `spec` from `tests/_setup/cli.specification.js`.
 3. Use `describe`/`test` with clear behavioral names.
 4. Prefer structured assertions: `.toMatch('file.txt')`,
    `.json.toMatch('file.json')`, `.container(name).file(path)`,

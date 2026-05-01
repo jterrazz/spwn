@@ -1,0 +1,2 @@
+event: SessionStart
+command: echo "session up"

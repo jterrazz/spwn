@@ -1,8 +1,0 @@
-hooks:
-  - name: bash-audit
-    event: PreToolUse
-    matcher: Bash
-    command: echo "[audit] $CLAUDE_TOOL_INPUT"
-  - name: session-start
-    event: SessionStart
-    command: echo "session up"

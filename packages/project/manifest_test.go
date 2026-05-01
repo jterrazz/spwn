@@ -25,11 +25,12 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"spwn/knowledge/.gitkeep",
 		".gitignore",
 		// One example per local-ref scheme so the scaffold demonstrates
-		// skill: and tool: authoring patterns end-to-end. Runtime hooks
-		// live in spwn/hooks.yaml (not a dep scheme) — see below.
+		// skill/, tool/, and hook/ authoring patterns end-to-end. All
+		// three are iso: a path-style ref selected per agent in
+		// agent.yaml#dependencies, resolving to one file/dir on disk.
 		"spwn/skills/focus.md",
 		"spwn/tools/greet/tool.yaml",
-		"spwn/hooks.yaml",
+		"spwn/hooks/session-banner.yaml",
 	}
 	for _, rel := range required {
 		path := filepath.Join(dir, rel)
@@ -85,9 +86,8 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 
 // TestInit_scaffoldsLocalRefExamples locks in the end-to-end story:
 // the scaffold materialises one concrete example for each local-ref
-// scheme (skill:/tool:) and ships a runtime hooks file (spwn/hooks.yaml)
-// with a sample SessionStart hook. Without this the "it just works on
-// first init" promise slips.
+// scheme (skill/, tool/, hook/) and the agent.yaml subscribes to all
+// three. Without this the "it just works on first init" promise slips.
 func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	dir := t.TempDir()
 	if err := Init(dir, InitOpts{Name: "local-refs"}); err != nil {
@@ -98,7 +98,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read agent.yaml: %v", err)
 	}
-	for _, ref := range []string{"skill/focus", "tool/greet"} {
+	for _, ref := range []string{"skill/focus", "tool/greet", "hook/session-banner"} {
 		if !strings.Contains(string(agentYAML), ref) {
 			t.Errorf("agent.yaml missing %q, got:\n%s", ref, agentYAML)
 		}
@@ -112,15 +112,21 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 		}
 	}
 
-	// spwn/hooks.yaml carries the runtime-hook examples now.
-	hooksYAML, err := os.ReadFile(filepath.Join(dir, "spwn/hooks.yaml"))
+	// spwn/hooks/<name>.yaml carries the runtime-hook examples now —
+	// one file per hook, body is just the entry shape.
+	hookYAML, err := os.ReadFile(filepath.Join(dir, "spwn/hooks/session-banner.yaml"))
 	if err != nil {
-		t.Fatalf("stat hooks.yaml: %v", err)
+		t.Fatalf("stat hooks/session-banner.yaml: %v", err)
 	}
-	for _, part := range []string{"hooks:", "event: SessionStart", "command:"} {
-		if !strings.Contains(string(hooksYAML), part) {
-			t.Errorf("hooks.yaml missing %q, got:\n%s", part, hooksYAML)
+	for _, part := range []string{"event: SessionStart", "command:"} {
+		if !strings.Contains(string(hookYAML), part) {
+			t.Errorf("hooks/session-banner.yaml missing %q, got:\n%s", part, hookYAML)
 		}
+	}
+	// The legacy single-file project hooks.yaml must NOT be created —
+	// it's the migration error condition the loader rejects.
+	if _, err := os.Stat(filepath.Join(dir, "spwn/hooks.yaml")); err == nil {
+		t.Errorf("legacy spwn/hooks.yaml leaked into the scaffold output")
 	}
 
 	// Skill must be a valid frontmatter-first markdown block: starts

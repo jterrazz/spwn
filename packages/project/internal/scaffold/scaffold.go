@@ -63,11 +63,13 @@ func Init(dir string, opts Opts) error {
 		{"templates/AGENTS.md.tmpl", "spwn/agents/neo/AGENTS.md"},
 		{"templates/SOUL.md.tmpl", "spwn/agents/neo/SOUL.md"},
 		// One example per local scheme so users land on a project that
-		// demonstrates skill: and tool: out of the box. Runtime hooks
-		// live in spwn/hooks.yaml — they're not a dependency scheme.
+		// demonstrates skill/, tool/, hook/ out of the box. All three
+		// are iso: a path-style ref `<scheme>/<name>` selected per
+		// agent in agent.yaml#dependencies, resolving to a single
+		// file or directory on disk.
 		{"templates/skill.focus.md.tmpl", "spwn/skills/focus.md"},
 		{"templates/tool.greet.yaml.tmpl", "spwn/tools/greet/tool.yaml"},
-		{"templates/hooks.yaml.tmpl", "spwn/hooks.yaml"},
+		{"templates/hook.session-banner.yaml.tmpl", "spwn/hooks/session-banner.yaml"},
 	}
 	for _, f := range files {
 		if err := writeTemplate(absDir, f.src, f.dst, data); err != nil {

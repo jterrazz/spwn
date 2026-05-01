@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import { afterEach, describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * `spwn build` e2e coverage. Each happy-path test produces a real
@@ -76,6 +76,39 @@ describe('spwn build', () => {
         expect(report.imageId).toMatch(/^sha256:[a-f0-9]{12}/);
         expect(report.baseImage).toBe('spwn-test:latest');
         expect(report.treeFiles).toBeGreaterThan(0);
+    });
+
+    test('codex image contains AGENTS.md, .codex config, and native skills', async () => {
+        const result = await spec('build codex image conventions')
+            .project('codex-pilot')
+            .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
+            .exec('build --tag spwn-codex-pilot:test')
+            .run();
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr.text).toContain('runtime=codex');
+
+        const check = execSync(
+            [
+                'docker run --rm --entrypoint sh spwn-codex-pilot:test -lc',
+                JSON.stringify(
+                    [
+                        'test -f /world/agents/neo/AGENTS.md',
+                        'test -f /world/agents/neo/.codex/config.toml',
+                        'test -f /world/agents/neo/.agents/skills/focus/SKILL.md',
+                        'test ! -e /world/agents/neo/CLAUDE.md',
+                        'test ! -e /world/agents/neo/.claude',
+                        'test ! -e /world/agents/neo/.codex/skills',
+                        'grep -q "Codex pilot prompt" /world/agents/neo/AGENTS.md',
+                        String.raw`grep -q "model = \"gpt-5\"" /world/agents/neo/.codex/config.toml`,
+                        'grep -q "Focus Skill" /world/agents/neo/.agents/skills/focus/SKILL.md',
+                        'echo ok',
+                    ].join(' && '),
+                ),
+            ].join(' '),
+            { encoding: 'utf8', timeout: 30_000 },
+        );
+        expect(check.trim()).toBe('ok');
     });
 
     test('--tag uses a custom image tag', async () => {

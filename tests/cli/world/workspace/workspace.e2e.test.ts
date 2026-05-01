@@ -1,15 +1,16 @@
 import type { CliResult } from '@jterrazz/test';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * World workspace persistence under the docker() spec mode.
  *
  * Read-only / independent-write tests share one container. Each
- * Writing test targets a distinct filename in /workspaces/workspace0 so they
- * don't conflict. The bad-workspace-path error case spins up its own
- * spec since it tests a failing `up`.
+ * Writing test targets a distinct filename in the resolved
+ * /workspaces/<name> mount so they don't conflict. The
+ * bad-workspace-path error case spins up its own spec since it tests
+ * a failing `up`.
  *
  * Legacy semantics preserved:
  *   - Files on the host are visible inside the container
@@ -30,12 +31,8 @@ describe('world workspace', () => {
             await world[Symbol.asyncDispose]();
         });
 
-        test('workspace is bind-mounted read-write into the container', () => {
+        const workspaceRoot = () => {
             const neo = world.container('neo');
-            expect(neo.running).toBe(true);
-
-            // Docker-pilot declares workspaces: [.] so the project root is
-            // Mounted at /workspaces/workspace0 read-write.
             const inspectData = neo.inspect.value as {
                 HostConfig?: { Binds?: string[] };
                 Mounts?: Array<{
@@ -47,7 +44,23 @@ describe('world workspace', () => {
             };
 
             const mounts = inspectData.Mounts ?? [];
-            const workspaceMount = mounts.find((m) => m.Destination === '/workspaces/workspace0');
+            const workspaceMount = mounts.find((m) => m.Destination.startsWith('/workspaces/'));
+            expect(workspaceMount, `mounts: ${JSON.stringify(mounts)}`).toBeDefined();
+            if (!workspaceMount) {
+                throw new Error('workspace mount not found');
+            }
+            return workspaceMount;
+        };
+
+        test('workspace is bind-mounted read-write into the container', () => {
+            const neo = world.container('neo');
+            expect(neo.running).toBe(true);
+
+            // Docker-pilot declares workspaces: [.] so the project root is
+            // Mounted under /workspaces/<resolved-name> read-write. The
+            // Name depends on the temp project basename and can be
+            // Workspace0 or a slugified fixture/test label.
+            const workspaceMount = workspaceRoot();
             expect(workspaceMount).toBeDefined();
             expect(workspaceMount?.RW).toBe(true);
             expect(workspaceMount?.Source).toBeTruthy();
@@ -55,18 +68,20 @@ describe('world workspace', () => {
 
         test('host project files are visible inside the container', () => {
             const neo = world.container('neo');
+            const mount = workspaceRoot();
             // The spwn.yaml file lives at the root of the docker-pilot fixture.
-            expect(neo.file('/workspaces/workspace0/spwn.yaml').exists).toBe(true);
-            const content = neo.file('/workspaces/workspace0/spwn.yaml').content;
+            expect(neo.file(`${mount.Destination}/spwn.yaml`).exists).toBe(true);
+            const content = neo.file(`${mount.Destination}/spwn.yaml`).content;
             expect(content).toContain('docker-pilot');
         });
 
         test('files written in the container persist to the host workspace', async () => {
             const neo = world.container('neo');
+            const mount = workspaceRoot();
 
             // Unique filename so other shared tests never race this one.
             const write = await neo.exec(
-                'sh -c "echo \'created in container\' > /workspaces/workspace0/persist-test.txt"',
+                `sh -c ${JSON.stringify(`echo 'created in container' > ${mount.Destination}/persist-test.txt`)}`,
             );
             expect(write.exitCode).toBe(0);
 
@@ -77,14 +92,15 @@ describe('world workspace', () => {
 
         test('workspace mount is read-write (write then read back inside container)', async () => {
             const neo = world.container('neo');
+            const mount = workspaceRoot();
 
             // Distinct filename from the persist test above.
             const write = await neo.exec(
-                'sh -c "echo \'rw-test-content\' > /workspaces/workspace0/rw-test.txt"',
+                `sh -c ${JSON.stringify(`echo 'rw-test-content' > ${mount.Destination}/rw-test.txt`)}`,
             );
             expect(write.exitCode).toBe(0);
 
-            const read = await neo.exec('cat /workspaces/workspace0/rw-test.txt');
+            const read = await neo.exec(`cat ${mount.Destination}/rw-test.txt`);
             expect(read.exitCode).toBe(0);
             expect(read.stdout.text.trim()).toBe('rw-test-content');
         });

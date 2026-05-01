@@ -1,5 +1,0 @@
-hooks:
-  - name: audit-bash
-    event: PreToolUse
-    matcher: Bash
-    command: echo "[audit] $CLAUDE_TOOL_INPUT"

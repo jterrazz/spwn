@@ -68,6 +68,20 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		byName[a.Name] = a
 	}
 
+	// Index project hooks by name so we can attach per-agent slices
+	// based on each agent's `hook/<n>` deps. Hooks an agent doesn't
+	// declare are silently absent for that agent — selection is
+	// explicit, mirroring how skill/<name> and tool/<name> work.
+	hookByName := make(map[string]transpile.HookEntry, len(src.Hooks))
+	for _, h := range src.Hooks {
+		hookByName[h.Name] = transpile.HookEntry{
+			Name:    h.Name,
+			Event:   h.Event,
+			Matcher: h.Matcher,
+			Command: h.Command,
+		}
+	}
+
 	// Collect the union of packages from every agent in this world.
 	// This mirrors what spawn does before probing the container: the
 	// render doesn't need a verified list, it just needs to know what
@@ -91,6 +105,7 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 			Playbooks: promotedPlaybooks(a.Layers.Playbooks),
 			Model:     a.Config.Runtime.Model,
 			Provider:  a.Config.Runtime.Provider,
+			Hooks:     selectAgentHooks(a.Config.Deps, hookByName),
 		})
 	}
 	// Add project-level deps (top-level deps: in spwn.yaml).
@@ -149,6 +164,41 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		Skills:                skills,
 		Hooks:                 hooks,
 	}, nil
+}
+
+// selectAgentHooks returns the subset of project hooks the agent's
+// dependency list explicitly subscribes to via `hook/<n>` refs.
+// Unknown hook names (declared in agent.yaml but not present under
+// spwn/hooks/) are silently dropped here — the validator surfaces
+// those as proper errors via the ResolveTool path.
+func selectAgentHooks(deps []string, byName map[string]transpile.HookEntry) []transpile.HookEntry {
+	if len(deps) == 0 || len(byName) == 0 {
+		return nil
+	}
+	out := make([]transpile.HookEntry, 0, len(deps))
+	seen := make(map[string]struct{}, len(deps))
+	for _, dep := range deps {
+		ref := strings.TrimSpace(dep)
+		const prefix = "hook/"
+		if !strings.HasPrefix(ref, prefix) {
+			continue
+		}
+		name := strings.TrimPrefix(ref, prefix)
+		if name == "" {
+			continue
+		}
+		if _, dup := seen[name]; dup {
+			continue
+		}
+		entry, ok := byName[name]
+		if !ok {
+			continue
+		}
+		seen[name] = struct{}{}
+		out = append(out, entry)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
 }
 
 // WorldNames returns the set of world names declared in the manifest,

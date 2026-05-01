@@ -89,6 +89,15 @@ type Input struct {
 	// SupportedRuntimes is the list of runtime backends the host can
 	// actually spawn (e.g. "spwn:claude-code"). Nil → don't check.
 	SupportedRuntimes []string
+
+	// HookEventsByRuntime maps the runtime adapter's short name
+	// (e.g. "claude-code", "codex") to the list of hook events that
+	// runtime fires inside the container. The validator uses it to
+	// warn when an agent's runtime would silently drop a hook
+	// because it doesn't know the event. Nil or empty → skip the
+	// check (golden tests + edge cases that don't construct a full
+	// catalog stay quiet).
+	HookEventsByRuntime map[string][]string
 }
 
 // Run executes every rule against the input and returns all issues.
@@ -117,6 +126,7 @@ func Run(in Input) []Issue {
 		ruleSkillFrontmatter,
 		ruleOrphanAgents,
 		ruleKnowledgePath,
+		ruleHookEventsSupported,
 	}
 	for _, r := range rules {
 		out = append(out, r(in)...)
@@ -759,7 +769,7 @@ func rulePacksExist(in Input) []Issue {
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
-				Hint:    "create ./spwn/hooks/" + ref.Name + ".sh for a lifecycle hook",
+				Hint:    "create ./spwn/hooks/" + ref.Name + ".yaml for a runtime hook",
 			}}
 		}
 		return []Issue{{
@@ -1102,6 +1112,168 @@ func ruleKnowledgePath(in Input) []Issue {
 
 // ----- helpers -----
 
+// ruleHookEventsSupported walks every spwn/hooks/<n>.yaml and warns
+// when the event field targets a runtime that doesn't support it —
+// the silent-no-op path the user almost certainly didn't intend.
+//
+// Strategy:
+//   - Build "selecting agents" per hook from each agent.yaml's deps:
+//     `hook/<n>` means the agent subscribes to that hook.
+//   - For each selecting agent, resolve the agent's runtime backend
+//     (agent-level override falls back to the project-level
+//     spwn.yaml#runtime.backend, then to claude-code).
+//   - Look up the runtime's event registry. If the hook's event is
+//     not in it, emit a LevelWarning naming both the hook and the
+//     agent whose runtime would drop it.
+//   - When a hook is declared but no agent in the project subscribes,
+//     emit a LevelInfo so dead hook files don't accumulate silently.
+//
+// Skips entirely when HookEventsByRuntime is empty (golden tests +
+// catalog scaffold paths that don't construct a full registry).
+func ruleHookEventsSupported(in Input) []Issue {
+	if len(in.HookEventsByRuntime) == 0 || in.Manifest == nil {
+		return nil
+	}
+	hooksDir := filepath.Join(in.Root, "spwn", "hooks")
+	entries, err := os.ReadDir(hooksDir)
+	if err != nil {
+		return nil
+	}
+
+	// Project-default runtime, used when agent.yaml leaves runtime.backend
+	// blank. Mirrors the architect resolver's fallback chain.
+	defaultRuntime := strings.TrimSpace(in.Manifest.Runtime.Backend)
+
+	// Map agent name → resolved runtime short name (no `spwn:` prefix).
+	agentRuntime := make(map[string]string, len(in.AgentRefs))
+	agentDeps := make(map[string][]string, len(in.AgentRefs))
+	for _, a := range in.AgentRefs {
+		if !a.Exists {
+			continue
+		}
+		y, ferr := loadAgentYAML(a.Path)
+		if ferr != nil || y == nil {
+			continue
+		}
+		backend := strings.TrimSpace(y.Runtime.Backend)
+		if backend == "" {
+			backend = defaultRuntime
+		}
+		agentRuntime[a.Name] = stripCatalogPrefix(backend)
+		agentDeps[a.Name] = y.Deps
+	}
+
+	// Build selecting-agents per hook from the deps lists.
+	selectors := make(map[string][]string)
+	for agentName, deps := range agentDeps {
+		for _, dep := range deps {
+			ref := strings.TrimSpace(dep)
+			if !strings.HasPrefix(ref, "hook/") {
+				continue
+			}
+			hookName := strings.TrimPrefix(ref, "hook/")
+			if hookName == "" {
+				continue
+			}
+			selectors[hookName] = append(selectors[hookName], agentName)
+		}
+	}
+
+	var out []Issue
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".yaml") {
+			continue
+		}
+		hookName := strings.TrimSuffix(e.Name(), ".yaml")
+		path := filepath.Join(hooksDir, e.Name())
+		data, rerr := os.ReadFile(path)
+		if rerr != nil {
+			continue
+		}
+		var parsed struct {
+			Event string `yaml:"event"`
+		}
+		if uerr := yaml.Unmarshal(data, &parsed); uerr != nil {
+			continue
+		}
+		event := strings.TrimSpace(parsed.Event)
+		if event == "" {
+			continue
+		}
+
+		display := relPath(in.Root, path)
+		picked := selectors[hookName]
+		sort.Strings(picked)
+
+		// Orphan hook: no agent subscribes via hook/<n>.
+		if len(picked) == 0 {
+			out = append(out, Issue{
+				Level:   LevelInfo,
+				Path:    display,
+				Message: fmt.Sprintf("hook %q is not selected by any agent's `hook/%s` dep — it will never fire", hookName, hookName),
+				Hint:    fmt.Sprintf("add `- hook/%s` to the agent.yaml of every agent that should run it", hookName),
+			})
+			continue
+		}
+
+		// Per selecting agent, check the event is in that runtime's set.
+		seen := map[string]struct{}{}
+		for _, agentName := range picked {
+			runtime := agentRuntime[agentName]
+			if runtime == "" {
+				continue
+			}
+			supported, ok := in.HookEventsByRuntime[runtime]
+			if !ok {
+				continue // unknown runtime is reported by ruleRuntimeSupported
+			}
+			if eventInList(event, supported) {
+				continue
+			}
+			key := runtime + "\x00" + event
+			if _, dup := seen[key]; dup {
+				continue
+			}
+			seen[key] = struct{}{}
+			out = append(out, Issue{
+				Level: LevelWarning,
+				Path:  display,
+				Message: fmt.Sprintf(
+					"hook %q targets event %q which runtime %q (used by agent %q) does not fire",
+					hookName, event, runtime, agentName,
+				),
+				Hint: fmt.Sprintf(
+					"either rename the event to one of [%s], detach this hook from %q, or add a runtime that supports %q",
+					strings.Join(supported, ", "), agentName, event,
+				),
+			})
+		}
+	}
+	return out
+}
+
+// eventInList does a linear membership check; the event lists are
+// short (≤10 entries) so allocating a map per call would cost more
+// than the scan.
+func eventInList(want string, set []string) bool {
+	for _, s := range set {
+		if s == want {
+			return true
+		}
+	}
+	return false
+}
+
+// stripCatalogPrefix turns "spwn:claude-code" → "claude-code" and
+// leaves bare names untouched. Matches what the architect resolver
+// passes to runtime adapters at compile time.
+func stripCatalogPrefix(ref string) string {
+	if strings.HasPrefix(ref, "spwn:") {
+		return strings.TrimPrefix(ref, "spwn:")
+	}
+	return ref
+}
+
 func findAgent(refs []AgentRef, name string) *AgentRef {
 	for i := range refs {
 		if refs[i].Name == name {
@@ -1154,7 +1326,7 @@ func invalidRefHint(root, raw string) string {
 		if st, err := os.Stat(filepath.Join(root, "spwn", "tools", name)); err == nil && st.IsDir() {
 			matches = append(matches, "tool/"+name)
 		}
-		if st, err := os.Stat(filepath.Join(root, "spwn", "hooks", name+".sh")); err == nil && !st.IsDir() {
+		if st, err := os.Stat(filepath.Join(root, "spwn", "hooks", name+".yaml")); err == nil && !st.IsDir() {
 			matches = append(matches, "hook/"+name)
 		}
 		if len(matches) == 1 {
@@ -1166,7 +1338,7 @@ func invalidRefHint(root, raw string) string {
 	}
 
 	return "use skill/<name> (for spwn/skills/<name>.md), tool/<name> (for spwn/tools/<name>/), " +
-		"or hook/<name> (for spwn/hooks/<name>.sh); spwn:<name> and github:<owner>/<repo> remain the two source-prefixed schemes"
+		"or hook/<name> (for spwn/hooks/<name>.yaml); spwn:<name> and github:<owner>/<repo> remain the two source-prefixed schemes"
 }
 
 func suggestPackage(tool string, catalog []string) string {

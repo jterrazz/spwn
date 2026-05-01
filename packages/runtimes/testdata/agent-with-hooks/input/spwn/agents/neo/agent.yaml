@@ -3,3 +3,5 @@ runtime:
   backend: "spwn:claude-code"
 dependencies:
   - "spwn:unix"
+  - "hook/bash-audit"
+  - "hook/session-start"

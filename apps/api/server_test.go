@@ -17,7 +17,7 @@ import (
 	"spwn.sh/packages/world/runtimestate"
 )
 
-func newTestServer(t *testing.T) (*Server, *http.ServeMux) {
+func newTestServer(t *testing.T) (*Server, http.Handler) {
 	t.Helper()
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
@@ -28,15 +28,11 @@ func newTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	}
 
 	srv := New(store, nil, "127.0.0.1:0")
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/health", srv.handleHealth)
-	mux.HandleFunc("GET /api/worlds", srv.handleListWorlds)
-	mux.HandleFunc("GET /api/agents", srv.handleListAgents)
-	return srv, mux
+	return srv, srv.Handler()
 }
 
-// newFullTestServer registers ALL routes (matching Start()) for integration tests.
-func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
+// newFullTestServer returns the production router for integration tests.
+func newFullTestServer(t *testing.T) (*Server, http.Handler) {
 	t.Helper()
 	tmp := t.TempDir()
 	t.Setenv("SPWN_HOME", tmp)
@@ -47,64 +43,7 @@ func newFullTestServer(t *testing.T) (*Server, *http.ServeMux) {
 	}
 
 	srv := New(store, nil, "127.0.0.1:0")
-	mux := http.NewServeMux()
-
-	// READ endpoints
-	mux.HandleFunc("GET /api/health", cors(srv.handleHealth))
-	mux.HandleFunc("GET /api/status", cors(srv.handleStatus))
-	mux.HandleFunc("GET /api/worlds", cors(srv.handleListWorlds))
-	mux.HandleFunc("GET /api/agents", cors(srv.handleListAgents))
-	mux.HandleFunc("GET /api/agents/{name}", cors(srv.handleGetAgent))
-	mux.HandleFunc("GET /api/agents/{name}/journal", cors(srv.handleGetAgentJournal))
-	mux.HandleFunc("GET /api/agents/{name}/mind", cors(srv.handleGetAgentMind))
-	mux.HandleFunc("GET /api/agents/{name}/files/{path...}", cors(srv.handleGetAgentFile))
-
-	// WRITE endpoints
-	mux.HandleFunc("POST /api/agents", cors(srv.handleCreateAgent))
-	mux.HandleFunc("DELETE /api/agents/{name}", cors(srv.handleDeleteAgent))
-	mux.HandleFunc("POST /api/agents/{name}/dream", cors(srv.handleDream))
-	mux.HandleFunc("POST /api/agents/{name}/sleep", cors(srv.handleSleep))
-	mux.HandleFunc("POST /api/agents/{name}/fork", cors(srv.handleFork))
-	mux.HandleFunc("PUT /api/agents/{name}/identity", cors(srv.handleUpdateIdentity))
-
-	// Team endpoints
-	mux.HandleFunc("GET /api/teams", cors(srv.handleListTeams))
-	mux.HandleFunc("POST /api/teams", cors(srv.handleCreateTeam))
-	mux.HandleFunc("PUT /api/teams/{slug}", cors(srv.handleUpdateTeam))
-	mux.HandleFunc("DELETE /api/teams/{slug}", cors(srv.handleDeleteTeam))
-
-	// Organization endpoints
-	mux.HandleFunc("GET /api/organizations", cors(srv.handleListOrganizations))
-	mux.HandleFunc("GET /api/organizations/{slug}", cors(srv.handleGetOrganization))
-	mux.HandleFunc("POST /api/organizations", cors(srv.handleCreateOrganization))
-	mux.HandleFunc("PUT /api/organizations/{slug}", cors(srv.handleUpdateOrganization))
-	mux.HandleFunc("DELETE /api/organizations/{slug}", cors(srv.handleDeleteOrganization))
-
-	// Docker-dependent endpoints (read-only mode - arch is nil)
-	mux.HandleFunc("POST /api/worlds", cors(srv.handleCreateWorld))
-	mux.HandleFunc("POST /api/worlds/{id}/agents", cors(srv.handleDeployAgent))
-	mux.HandleFunc("DELETE /api/worlds/{id}", cors(srv.handleDestroyWorld))
-	mux.HandleFunc("POST /api/worlds/{id}/snapshot", cors(srv.handleSnapshot))
-	mux.HandleFunc("POST /api/worlds/{id}/talk", cors(srv.handleTalk))
-
-	// Architect endpoints
-	mux.HandleFunc("GET /api/architect/status", cors(srv.handleArchitectStatus))
-	mux.HandleFunc("GET /api/architect/stack", cors(srv.handleArchitectStackGet))
-	mux.HandleFunc("POST /api/architect/stack", cors(srv.handleArchitectStackUpdate))
-
-	// History endpoints
-	mux.HandleFunc("GET /api/architect/history", cors(srv.handleArchitectHistory))
-	mux.HandleFunc("GET /api/worlds/{id}/history", cors(srv.handleWorldHistory))
-
-	// Auth endpoints
-	mux.HandleFunc("GET /api/auth/providers", cors(srv.handleAuthProviders))
-	mux.HandleFunc("POST /api/auth/check", cors(srv.handleAuthCheck))
-	mux.HandleFunc("POST /api/auth/configure", cors(srv.handleAuthConfigure))
-
-	// CORS preflight
-	mux.HandleFunc("OPTIONS /", cors(func(w http.ResponseWriter, r *http.Request) {}))
-
-	return srv, mux
+	return srv, srv.Handler()
 }
 
 // createTestAgent creates a minimal agent directory structure in SPWN_HOME.
@@ -157,7 +96,7 @@ func writeFile(t *testing.T, path, content string) {
 	}
 }
 
-func doJSON(t *testing.T, mux *http.ServeMux, method, url string, body interface{}) *httptest.ResponseRecorder {
+func doJSON(t *testing.T, handler http.Handler, method, url string, body interface{}) *httptest.ResponseRecorder {
 	t.Helper()
 	var reqBody *bytes.Buffer
 	if body != nil {
@@ -171,7 +110,7 @@ func doJSON(t *testing.T, mux *http.ServeMux, method, url string, body interface
 		req.Header.Set("Content-Type", "application/json")
 	}
 	w := httptest.NewRecorder()
-	mux.ServeHTTP(w, req)
+	handler.ServeHTTP(w, req)
 	return w
 }
 
@@ -258,7 +197,6 @@ func TestInvalidRoute_Returns404(t *testing.T) {
 		"/api/nonexistent",
 		"/api/health/extra",
 		"/invalid",
-		"/",
 	}
 
 	for _, route := range routes {
@@ -959,40 +897,40 @@ func TestArchitectStatusStackParsing(t *testing.T) {
 		expectedDone    float64
 	}{
 		{
-			name:              "empty file",
-			content:           "",
-			expectedPending:   0,
-			expectedDone: 0,
+			name:            "empty file",
+			content:         "",
+			expectedPending: 0,
+			expectedDone:    0,
 		},
 		{
-			name:              "only pending",
-			content:           "# TODO\n- [ ] Task 1\n- [ ] Task 2\n",
-			expectedPending:   2,
-			expectedDone: 0,
+			name:            "only pending",
+			content:         "# TODO\n- [ ] Task 1\n- [ ] Task 2\n",
+			expectedPending: 2,
+			expectedDone:    0,
 		},
 		{
-			name:              "only completed",
-			content:           "# TODO\n- [x] Done 1\n- [X] Done 2\n- [x] Done 3\n",
-			expectedPending:   0,
-			expectedDone: 3,
+			name:            "only completed",
+			content:         "# TODO\n- [x] Done 1\n- [X] Done 2\n- [x] Done 3\n",
+			expectedPending: 0,
+			expectedDone:    3,
 		},
 		{
-			name:              "mixed tasks",
-			content:           "# TODO\n\n## Focus\n- [ ] Active 1\n\n## Queued\n- [ ] Backlog 1\n- [ ] Backlog 2\n\n## Done\n- [x] Done 1\n",
-			expectedPending:   3,
-			expectedDone: 1,
+			name:            "mixed tasks",
+			content:         "# TODO\n\n## Focus\n- [ ] Active 1\n\n## Queued\n- [ ] Backlog 1\n- [ ] Backlog 2\n\n## Done\n- [x] Done 1\n",
+			expectedPending: 3,
+			expectedDone:    1,
 		},
 		{
-			name:              "indented tasks",
-			content:           "# TODO\n  - [ ] Indented pending\n  - [x] Indented done\n",
-			expectedPending:   1,
-			expectedDone: 1,
+			name:            "indented tasks",
+			content:         "# TODO\n  - [ ] Indented pending\n  - [x] Indented done\n",
+			expectedPending: 1,
+			expectedDone:    1,
 		},
 		{
-			name:              "non-task lines ignored",
-			content:           "# TODO\n\nSome text\n- Regular bullet\n- [ ] Real task\n## Heading\n- [x] Done task\n",
-			expectedPending:   1,
-			expectedDone: 1,
+			name:            "non-task lines ignored",
+			content:         "# TODO\n\nSome text\n- Regular bullet\n- [ ] Real task\n## Heading\n- [x] Done task\n",
+			expectedPending: 1,
+			expectedDone:    1,
 		},
 	}
 

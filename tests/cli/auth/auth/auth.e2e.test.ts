@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * Spwn auth — credentials dashboard flows.
@@ -242,7 +242,7 @@ describe('CLI - auth command', () => {
     /*
      * SKIPPED: `spwn auth login` enters an interactive prompt reading
      * from stdin; the ExecAdapter has no way to pipe empty input / EOF
-     * reliably without hanging. See tests/setup/spwn.specification.ts.
+     * reliably without hanging. See tests/_setup/spwn.specification.ts.
      */
     test.skip("'spwn auth login' handles non-interactive gracefully", () => {});
 

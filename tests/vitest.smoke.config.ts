@@ -10,7 +10,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
     test: {
         exclude: ['**/node_modules/**', '**/dist/**', 'web/**'],
-        include: ['smoke/**/*.e2e.test.ts'],
+        include: ['_smoke/**/*.e2e.test.ts'],
         // Each test builds a world image from scratch on a cold run.
         // First apt-get in a fresh layer can easily take 3-5 minutes.
         testTimeout: 600_000,

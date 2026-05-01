@@ -117,17 +117,20 @@ func TestRender_EmptyModelOmitsKey(t *testing.T) {
 	}
 }
 
-// TestRender_HooksFanIntoSettings — spwn/hooks.yaml entries must
-// surface as Claude Code's nested {event: [{matcher, hooks:[{type,
-// command}]}]} structure inside settings.json.
+// TestRender_HooksFanIntoSettings — hooks selected by the agent
+// (via hook/<n> deps in agent.yaml) must surface as Claude Code's
+// nested {event: [{matcher, hooks:[{type, command}]}]} structure
+// inside settings.json. Hooks the agent didn't subscribe to are
+// silently absent — see TestRender_HooksAreAgentScoped below.
 func TestRender_HooksFanIntoSettings(t *testing.T) {
+	agentHooks := []transpile.HookEntry{
+		{Name: "audit", Event: "PreToolUse", Matcher: "Bash", Command: "echo audit"},
+		{Name: "welcome", Event: "SessionStart", Command: "echo hi"},
+	}
 	tree, _ := Renderer.Render(transpile.Input{
 		WorldID: "home",
-		Agents:  []transpile.AgentInput{{Name: "neo"}},
-		Hooks: []transpile.HookEntry{
-			{Name: "audit", Event: "PreToolUse", Matcher: "Bash", Command: "echo audit"},
-			{Name: "welcome", Event: "SessionStart", Command: "echo hi"},
-		},
+		Agents:  []transpile.AgentInput{{Name: "neo", Hooks: agentHooks}},
+		Hooks:   agentHooks,
 	})
 	body, _ := tree.Get("agents/neo/.claude/settings.json")
 	var parsed struct {
@@ -164,12 +167,13 @@ func TestRender_HooksFanIntoSettings(t *testing.T) {
 // "*" as "match anything"; emitting an empty matcher would be a
 // schema violation in both Claude Code and Codex.
 func TestRender_EmptyMatcherDefaultsToStar(t *testing.T) {
+	hooks := []transpile.HookEntry{
+		{Name: "any", Event: "UserPromptSubmit", Command: "echo x"},
+	}
 	tree, _ := Renderer.Render(transpile.Input{
 		WorldID: "home",
-		Agents:  []transpile.AgentInput{{Name: "neo"}},
-		Hooks: []transpile.HookEntry{
-			{Name: "any", Event: "UserPromptSubmit", Command: "echo x"},
-		},
+		Agents:  []transpile.AgentInput{{Name: "neo", Hooks: hooks}},
+		Hooks:   hooks,
 	})
 	body, _ := tree.Get("agents/neo/.claude/settings.json")
 	if !strings.Contains(string(body), `"matcher": "*"`) {

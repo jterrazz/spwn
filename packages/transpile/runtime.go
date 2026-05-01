@@ -19,6 +19,14 @@ type Runtime interface {
 	// Render translates the generic project into this runtime's
 	// conventions. May inspect manifest + agents + skills + hooks.
 	Render(input Input) (*Tree, error)
+
+	// SupportedHookEvents returns the runtime hook event names this
+	// adapter actually fires inside the container. Used by `spwn
+	// check` to warn when an agent's hook targets an event the
+	// agent's runtime would silently ignore. The returned slice
+	// should be alphabetically sorted; an empty slice means the
+	// adapter has no opinion (validator skips the check for it).
+	SupportedHookEvents() []string
 }
 
 // Input is everything a Runtime needs to render a project. It exists
@@ -68,10 +76,13 @@ type Input struct {
 	// of truth for what "a skill" is lives in SkillEntry.
 	Skills []SkillEntry
 
-	// Hooks is every runtime hook declared in spwn/hooks.yaml. The
-	// renderer fans each entry out into per-agent native config —
-	// `.claude/settings.json#hooks` for claude-code,
-	// `.codex/hooks.json` + `codex_hooks = true` for codex.
+	// Hooks is every runtime hook the project declares under
+	// spwn/hooks/<name>.yaml. This is the project-wide pool — agents
+	// receive only the subset they explicitly select via `hook/<name>`
+	// in their agent.yaml#dependencies. Per-agent selection lands on
+	// each AgentInput.Hooks; renderers should consume that, not this
+	// pool. Kept here so callers (golden tests, dry-run reporters)
+	// can inspect the full available set.
 	Hooks []HookEntry
 }
 
@@ -142,6 +153,13 @@ type AgentInput struct {
 	// Mostly informational today; future renderers may use it to
 	// pick between API-key-vs-OAuth config paths.
 	Provider string
+
+	// Hooks is the subset of project-wide hooks that this agent
+	// selected via `hook/<name>` deps in its agent.yaml. Renderers
+	// emit only these into the agent's native config (no agent
+	// silently inherits hooks it didn't ask for). Empty when the
+	// agent declared no hook deps.
+	Hooks []HookEntry
 }
 
 // PlaybookEntry is one frontmatter-promoted playbook, ready to index
@@ -182,5 +200,23 @@ func RegisteredRuntimes() []string {
 		out = append(out, name)
 	}
 	sort.Strings(out)
+	return out
+}
+
+// HookEventsByRuntime returns each registered runtime's supported
+// hook events, keyed by runtime name. The CLI hands this map to
+// validate.Input so `spwn check` can warn when a hook targets an
+// event the agent's runtime would silently drop. Each value slice
+// is the runtime adapter's own SupportedHookEvents() output (already
+// sorted by the adapter).
+func HookEventsByRuntime() map[string][]string {
+	out := make(map[string][]string, len(runtimes))
+	for name, r := range runtimes {
+		events := r.SupportedHookEvents()
+		if len(events) == 0 {
+			continue
+		}
+		out[name] = append([]string(nil), events...)
+	}
 	return out
 }

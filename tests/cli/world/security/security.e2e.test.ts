@@ -1,7 +1,7 @@
 import type { CliResult } from '@jterrazz/test';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * World security / physics enforcement.

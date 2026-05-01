@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 // Column spacing varies with row content, so collapse runs of whitespace to a single space before comparing the header row.
 const extractAgentLsHeader = (txt: string) =>

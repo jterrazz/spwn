@@ -33,6 +33,17 @@ func runtimeBackendTool(runtimeName string) string {
 	}
 }
 
+func runtimePromptFile(runtimeName string) string {
+	switch runtimeName {
+	case "codex":
+		return "AGENTS.md"
+	case "claude-code", "":
+		return "CLAUDE.md"
+	default:
+		return "prompt"
+	}
+}
+
 // runtimeProvider returns the auth provider name a runtime needs
 // credentials for ("anthropic" for claude-code, "openai" for codex).
 // Empty string when the runtime is unknown or its adapter declares no

@@ -8,6 +8,8 @@
         "start": "next start",
         "lint": "codestyle check",
         "lint:fix": "codestyle fix",
+        "test": "vitest --run",
+        "test:watch": "vitest",
         "build:static": "TAURI_STATIC_BUILD=1 next build",
         "tauri": "cargo tauri"
     },
@@ -35,10 +37,12 @@
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "msw": "^2.12.4",
         "oxfmt": "^0.45.0",
         "oxlint": "^1.60.0",
         "tailwindcss": "^4",
-        "typescript": "^5"
+        "typescript": "^5",
+        "vitest": "^4.0.0"
     },
     "ignoreScripts": [
         "sharp",

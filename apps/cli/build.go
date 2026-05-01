@@ -143,8 +143,9 @@ Examples:
 		// "render what you have, regardless of validation state".
 		if !buildTreeOnly {
 			issues := project.Validate(p, project.ValidateOpts{
-				BuiltinTools:      catalogToolNames(),
-				SupportedRuntimes: supportedRuntimes(),
+				BuiltinTools:        catalogToolNames(),
+				SupportedRuntimes:   supportedRuntimes(),
+				HookEventsByRuntime: transpile.HookEventsByRuntime(),
 			})
 			if project.HasErrors(issues) {
 				return fmt.Errorf("project has validation errors - run `spwn check` to see them")

@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { beforeAll, describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * `spwn architect <start|stop|status|talk>` under the docker() spec mode.

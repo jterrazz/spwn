@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { spec } from '../../../setup/cli.specification.js';
+import { spec } from '../../../_setup/cli.specification.js';
 
 /**
  * `spwn agent talk <name> [msg]` under the docker() spec mode.
@@ -89,6 +89,54 @@ describe('agent talk', () => {
         };
         expect(receipt.mind_exists).toBe(true);
         expect(receipt.claude_md_exists).toBe(true);
+    });
+
+    test('talk against a codex world sees AGENTS.md, native skills, and resumes the thread', async () => {
+        await using result = await spec('talk codex runtime skills')
+            .project('codex-pilot')
+            .env({ SPWN_BASE_IMAGE: 'spwn-test:latest' })
+            .exec([
+                'up',
+                'agent talk neo "Do you see your native skills?"',
+                'agent talk neo "Continue in the same Codex thread."',
+            ])
+            .run();
+
+        expect(result.exitCode).toBe(0);
+
+        const neo = result.container('neo');
+        expect(neo.running).toBe(true);
+
+        const receiptRaw = await neo.exec('cat /tmp/codex-mock.json');
+        expect(receiptRaw.exitCode).toBe(0);
+        const receipt = JSON.parse(receiptRaw.stdout.text) as {
+            agents_md_content: string;
+            agents_md_exists: boolean;
+            json_mode: boolean;
+            prompt: string;
+            resume: boolean;
+            skills_exists: boolean;
+            skill_content: string;
+            subcommand: string;
+            thread_id: string;
+            workspace_exists: boolean;
+        };
+
+        expect(receipt.subcommand).toBe('exec');
+        expect(receipt.json_mode).toBe(true);
+        expect(receipt.resume).toBe(true);
+        expect(receipt.prompt).toBe('Continue in the same Codex thread.');
+        expect(receipt.thread_id).toMatch(/^th_mock_/);
+        expect(receipt.agents_md_exists).toBe(true);
+        expect(receipt.agents_md_content).toContain('skill/focus');
+        expect(receipt.skills_exists).toBe(true);
+        expect(receipt.skill_content).toContain('Focus Skill');
+        expect(receipt.workspace_exists).toBe(true);
+
+        const prompt = await neo.exec('grep -q "Codex pilot prompt" /agents/neo/AGENTS.md');
+        expect(prompt.exitCode).toBe(0);
+        const skill = await neo.exec('test -f /agents/neo/.agents/skills/focus/SKILL.md');
+        expect(skill.exitCode).toBe(0);
     });
 
     test('talk can be invoked multiple times on the same world', async () => {

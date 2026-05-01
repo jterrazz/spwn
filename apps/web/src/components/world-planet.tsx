@@ -2,7 +2,10 @@ import type { World } from '@/lib/types';
 
 // Deterministic hue from world id - same world reads as the same color
 // Wherever it's rendered (sidebar hero, switcher pill, world page title).
-function hashHue(id: string): number {
+function hashHue(id: null | string | undefined): number {
+    if (!id) {
+        return 0;
+    }
     let h = 0;
     for (let i = 0; i < id.length; i++) {
         h = (h * 31 + id.charCodeAt(i)) >>> 0;
