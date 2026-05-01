@@ -74,10 +74,7 @@ function normalise(actual: string): string {
     // Pre-flight need to ignore this difference. Collapse the
     // Detail to a single placeholder so stored fixtures stay
     // Portable across machines.
-    out = out.replace(
-        /(✓ Credentials\s+)[^\n]*/g,
-        '$1<credentials>',
-    );
+    out = out.replace(/(✓ Credentials\s+)[^\n]*/g, '$1<credentials>');
     return out;
 }
 
