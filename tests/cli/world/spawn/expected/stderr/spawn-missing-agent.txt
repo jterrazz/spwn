@@ -1,11 +1,9 @@
-
   ⬡ Waking ghost
 
   Environment
     → Connecting to Docker…
     ✓ Docker                 connected
     → Checking credentials…
-    ✓ Credentials            oauth · keychain:Claude Code
+    ✓ Credentials            <credentials>
     ✗ Spawn failed           agent "ghost" not found
       Run "spwn agent new ghost" to create the agent first
-

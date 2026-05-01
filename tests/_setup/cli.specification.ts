@@ -68,6 +68,16 @@ function normalise(actual: string): string {
         /(?:\/private)?\/(?:var\/folders\/[^\s/]+\/[^\s/]+\/T|tmp)\/[A-Za-z0-9._-]+/g,
         PROJECT_PATH_PLACEHOLDER,
     );
+    // The Credentials sub-step renders host-dependent text — local
+    // Dev shows `oauth · keychain:Claude Code`, CI shows `none · not
+    // Configured`. Goldens that capture spawn output across the
+    // Pre-flight need to ignore this difference. Collapse the
+    // Detail to a single placeholder so stored fixtures stay
+    // Portable across machines.
+    out = out.replace(
+        /(✓ Credentials\s+)[^\n]*/g,
+        '$1<credentials>',
+    );
     return out;
 }
 

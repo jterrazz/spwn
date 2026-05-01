@@ -37,7 +37,17 @@ function spwn(cmd: string, opts: { timeout?: number } = {}): string {
         cwd: workdir,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
-        env: { ...process.env, SPWN_TEST_LABEL: TEST_LABEL },
+        // SPWN_SKIP_AUTH_VALIDATION bypasses the spawn pre-flight that
+        // Hard-fails on missing credentials. CI runners have no host
+        // Auth configured; this test exercises the build/upgrade
+        // Pipeline, not the credential plumbing. The shared spec()
+        // Helper sets this on import side-effect, but this file
+        // Talks to spwn via raw execSync, so we set it explicitly.
+        env: {
+            ...process.env,
+            SPWN_SKIP_AUTH_VALIDATION: '1',
+            SPWN_TEST_LABEL: TEST_LABEL,
+        },
         timeout: opts.timeout ?? 300_000,
     });
 }
