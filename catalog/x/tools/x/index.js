@@ -17,6 +17,68 @@ const SCROLL_WAIT = 1800;
 const MAX_SCROLLS = 60;
 const STALE_SCROLLS_FOR_END = 3;
 
+// ── Stealth helpers ─────────────────────────────────────────────
+// X has been getting more aggressive about silently dropping data
+// XHRs when it detects automation patterns: identical scroll deltas,
+// uniform timing, no mouse movement, no idle "reading" pauses. The
+// page shell loads fine but the GraphQL data fetch never fires.
+// These helpers introduce human-like jitter.
+
+function jitter(min, max) { return min + Math.floor(Math.random() * (max - min)); }
+
+// Replacement for the robotic `s.scroll({delta_y: 4000, wait_ms: 1800})`
+// loop. Each step picks a different delta + post-scroll wait, and
+// every few scrolls inserts a longer "reading" pause. Returns when
+// the iteration is done — drop-in for a single scroll call.
+async function humanScroll(s, scrollIndex) {
+  const delta = jitter(2800, 5400);
+  const wait = jitter(1400, 2900);
+  await s.scroll({ delta_y: delta, count: 1, wait_ms: wait });
+  // Every ~4 scrolls, pretend to read.
+  if (scrollIndex > 0 && scrollIndex % jitter(3, 5) === 0) {
+    await sleep(jitter(2500, 5500));
+  }
+}
+
+// Warm up the session before hitting a content-heavy URL. A "cold"
+// session that lands directly on /<handle>/likes is a stronger bot
+// signal than one that pokes around /home first. ALSO dismisses the
+// EU cookie-consent banner — when shown, it blocks content render
+// (we found content stuck behind it on /likes and /following).
+async function warmUp(s) {
+  try {
+    await s.goto('https://x.com/home', { wait_until: 'domcontentloaded', timeout_ms: NAV_TIMEOUT });
+    await sleep(jitter(1500, 3000));
+    await dismissCookieBanner(s);
+    await s.scroll({ delta_y: jitter(800, 1600), count: 1, wait_ms: jitter(1200, 2200) });
+  } catch (_) { /* best-effort — if /home fails, push on to the real target */ }
+}
+
+// X's EU cookie banner blocks rendering of timeline content (we
+// confirmed: with banner up, /jterrazz/likes silently shows "account
+// doesn't exist"). Click "Refuse non-essential" if visible — preserves
+// privacy AND unblocks content. Idempotent / silent if not shown.
+async function dismissCookieBanner(s) {
+  try {
+    await s.eval(`
+      (function() {
+        const all = Array.from(document.querySelectorAll('button, [role="button"]'));
+        for (const b of all) {
+          const t = (b.textContent || '').trim().toLowerCase();
+          if (t.startsWith('refuse non-essential') ||
+              t.startsWith('refuser les cookies non essentiels') ||
+              t.startsWith('reject non-essential')) {
+            b.click();
+            return 'refused';
+          }
+        }
+        return 'not-shown';
+      })();
+    `);
+    await sleep(jitter(800, 1500));
+  } catch (_) { /* swallow — banner gone or DOM changed */ }
+}
+
 // ── Shared helpers ──────────────────────────────────────────────
 
 function findAuthor(tw) {
@@ -106,6 +168,37 @@ function tweetToDict(tw, depth = 0) {
   };
 }
 
+// Walks a GraphQL response and yields user_results objects (the
+// shape used by /<handle>/following and /<handle>/followers).
+function harvestUsers(node, sink, seen) {
+  if (!node || typeof node !== 'object') return;
+  if (node.__typename === 'User' && node.rest_id && !seen.has(node.rest_id)) {
+    seen.add(node.rest_id);
+    sink.push(node);
+  }
+  if (Array.isArray(node)) for (const v of node) harvestUsers(v, sink, seen);
+  else for (const k of Object.keys(node)) harvestUsers(node[k], sink, seen);
+}
+
+function userToDict(u) {
+  const legacy = u.legacy || {};
+  const core = u.core || {};
+  return {
+    id: String(u.rest_id || legacy.id_str || ''),
+    handle: core.screen_name || legacy.screen_name || null,
+    name: core.name || legacy.name || null,
+    bio: legacy.description || null,
+    followers: legacy.followers_count || 0,
+    following: legacy.friends_count || 0,
+    tweets: legacy.statuses_count || 0,
+    verified: !!(u.is_blue_verified || legacy.verified),
+    location: legacy.location || null,
+    url: legacy.url || null,
+    profile_image: legacy.profile_image_url_https || null,
+    created_at: core.created_at || legacy.created_at || null,
+  };
+}
+
 function tweetCreatedFromResponse(json) {
   const result = json?.data?.create_tweet?.tweet_results?.result;
   if (!result || !result.rest_id) return null;
@@ -123,11 +216,20 @@ async function withSession(fn) {
 // Navigate + scroll until we have `limit` tweets or hit end-of-feed.
 // Sidecar's captured-responses gives us all matching XHRs since
 // session start, body included.
-async function captureFeed(s, url, opNamePattern, limit, postNavHook = null) {
+//
+// `opNamePattern` is now optional — when omitted, we harvest from
+// ALL graphql responses on the page. Useful when X renames an
+// operation (e.g. Likes → ProfileLikesTimeline) or when bot-detection
+// is strict enough that we can't rely on a known op name.
+async function captureFeed(s, url, opNamePattern, limit, postNavHook = null, opts = {}) {
+  const { warmup = false } = opts;
   const tweets = [];
   const seen = new Set();
+  if (warmup) await warmUp(s);
   await s.goto(url, { wait_until: 'domcontentloaded', timeout_ms: NAV_TIMEOUT });
-  await sleep(POST_NAV_WAIT);
+  await sleep(jitter(2200, 3800));
+  // Banner can re-appear after navigation if first dismiss didn't take.
+  await dismissCookieBanner(s);
   if (postNavHook) await postNavHook(s);
 
   // Initial harvest from any responses already received during goto.
@@ -136,7 +238,7 @@ async function captureFeed(s, url, opNamePattern, limit, postNavHook = null) {
   let stale = 0;
   let last = tweets.length;
   for (let i = 0; i < MAX_SCROLLS && tweets.length < limit && stale < STALE_SCROLLS_FOR_END; i++) {
-    await s.scroll({ delta_y: 4000, count: 1, wait_ms: SCROLL_WAIT });
+    await humanScroll(s, i);
     await harvestFromCaptured(s, opNamePattern, tweets, seen);
     if (tweets.length === last) stale++; else { stale = 0; last = tweets.length; }
   }
@@ -144,10 +246,46 @@ async function captureFeed(s, url, opNamePattern, limit, postNavHook = null) {
 }
 
 async function harvestFromCaptured(s, opNamePattern, sink, seen) {
-  const r = await s.capturedResponses({ url_pattern: '/i/api/graphql/.*' + opNamePattern });
+  // When opNamePattern is empty/null we match all graphql responses
+  // — useful when X has renamed an op or bot-detection is masking the
+  // real op name.
+  const url_pattern = opNamePattern ? '/i/api/graphql/.*' + opNamePattern : '/i/api/graphql/';
+  const r = await s.capturedResponses({ url_pattern });
   for (const resp of r.responses) {
     if (resp.body && typeof resp.body === 'object') harvestTweets(resp.body, sink, seen);
   }
+}
+
+// Same scroll loop as captureFeed, but yields User objects instead
+// of Tweet objects. Used by fetch-following. Same op-name fallback
+// behaviour.
+async function captureUsers(s, url, opNamePattern, limit, opts = {}) {
+  const { warmup = false } = opts;
+  const users = [];
+  const seen = new Set();
+  if (warmup) await warmUp(s);
+  await s.goto(url, { wait_until: 'domcontentloaded', timeout_ms: NAV_TIMEOUT });
+  await sleep(jitter(2200, 3800));
+  await dismissCookieBanner(s);
+
+  const harvest = async () => {
+    const url_pattern = opNamePattern ? '/i/api/graphql/.*' + opNamePattern : '/i/api/graphql/';
+    const r = await s.capturedResponses({ url_pattern });
+    for (const resp of r.responses) {
+      if (resp.body && typeof resp.body === 'object') harvestUsers(resp.body, users, seen);
+    }
+  };
+
+  await harvest();
+
+  let stale = 0;
+  let last = users.length;
+  for (let i = 0; i < MAX_SCROLLS && users.length < limit && stale < STALE_SCROLLS_FOR_END; i++) {
+    await humanScroll(s, i);
+    await harvest();
+    if (users.length === last) stale++; else { stale = 0; last = users.length; }
+  }
+  return users.slice(0, limit);
 }
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
@@ -210,6 +348,56 @@ tool.method('fetch-favorites', {
     return withSession(async (s) => {
       const tw = await captureFeed(s, 'https://x.com/i/bookmarks', 'Bookmarks', limit);
       return { items: tw.map((t) => tweetToDict(t)), count: tw.length };
+    });
+  },
+});
+
+tool.method('fetch-likes', {
+  description: "Fetch a user's liked tweets. Requires being logged in as that user (likes are private to others).",
+  schema: {
+    type: 'object',
+    properties: {
+      handle: { type: 'string', description: 'X handle (without @). Defaults to env X_HANDLE.' },
+      limit: { type: 'integer', description: 'Max tweets (default 50)' },
+    },
+  },
+  async handler({ args }) {
+    const handle = String(args.handle || process.env.X_HANDLE || '').replace(/^@/, '');
+    if (!handle) throw new Error('handle is required (pass --handle or set X_HANDLE)');
+    const limit = intArg(args, 'limit', 50);
+    return withSession(async (s) => {
+      // Stealth path: warm up via /home, jittered scrolls, and harvest
+      // tweets from ALL graphql responses on the page (X has renamed
+      // the Likes op at least once and bot-detection silently drops
+      // the data XHR if we look too robotic). Using opNamePattern=null
+      // is fine here — only the likes-tab graphql responses contain
+      // Tweet objects on this page.
+      const tw = await captureFeed(s, `https://x.com/${handle}/likes`, null, limit, null, { warmup: true });
+      return { handle, items: tw.map((t) => tweetToDict(t)), count: tw.length };
+    });
+  },
+});
+
+tool.method('fetch-following', {
+  description: "Fetch the accounts a user follows.",
+  schema: {
+    type: 'object',
+    properties: {
+      handle: { type: 'string', description: 'X handle (without @). Defaults to env X_HANDLE.' },
+      limit: { type: 'integer', description: 'Max users (default 200)' },
+    },
+  },
+  async handler({ args }) {
+    const handle = String(args.handle || process.env.X_HANDLE || '').replace(/^@/, '');
+    if (!handle) throw new Error('handle is required (pass --handle or set X_HANDLE)');
+    const limit = intArg(args, 'limit', 200);
+    return withSession(async (s) => {
+      // Stealth path: warm up + permissive harvest. Note: sidebar
+      // recommendations also surface User objects; the dedup-by-rest_id
+      // means at most ~5-10 sidebar accounts can leak in. Acceptable
+      // noise vs the alternative of fetching nothing.
+      const us = await captureUsers(s, `https://x.com/${handle}/following`, null, limit, { warmup: true });
+      return { handle, items: us.map(userToDict), count: us.length };
     });
   },
 });
