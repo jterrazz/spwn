@@ -383,14 +383,75 @@ func ruleAgentStructure(in Input) []Issue {
 // to drive rules.
 //
 // Deps replaces the old Tools/Dependencies/Skills trichotomy under the
-// unified package model — see packages/agent/manifest.go.
+// unified package model — see packages/agent/manifest.go. Each entry
+// can be either a scalar string ("spwn:x") or a mapping with name +
+// optional allow/deny ("name: spwn:x\n  deny: [...]"). The local
+// agentYAML keeps only the ref name; per-method policies are the
+// runtime's concern, not the validator's.
 type agentYAML struct {
-	Name        string   `yaml:"name"`
-	Description string   `yaml:"description"`
-	Deps        []string `yaml:"dependencies"`
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
+	Deps        []string
 	Runtime     struct {
 		Backend string `yaml:"backend"`
 	} `yaml:"runtime"`
+}
+
+// rawAgentYAML mirrors agentYAML but exposes Deps as a yaml.Node so
+// we can split string vs mapping entries before populating Deps. The
+// mapping form (with allow/deny) was previously rejected by a strict
+// []string decode — leading to spurious "cannot unmarshal !!map into
+// string" errors on perfectly valid agent.yamls.
+type rawAgentYAML struct {
+	Name        string    `yaml:"name"`
+	Description string    `yaml:"description"`
+	Deps        yaml.Node `yaml:"dependencies"`
+	Runtime     struct {
+		Backend string `yaml:"backend"`
+	} `yaml:"runtime"`
+}
+
+// UnmarshalYAML accepts each `dependencies:` entry as either a scalar
+// string ("spwn:x") or a mapping with at least a "name:" key. Mapping
+// entries without a name field cause a structured error rather than
+// a cryptic !!map-into-string diagnostic.
+func (a *agentYAML) UnmarshalYAML(node *yaml.Node) error {
+	var raw rawAgentYAML
+	if err := node.Decode(&raw); err != nil {
+		return err
+	}
+	a.Name = raw.Name
+	a.Description = raw.Description
+	a.Runtime = raw.Runtime
+	if raw.Deps.Kind == 0 {
+		return nil
+	}
+	for i := range raw.Deps.Content {
+		entry := raw.Deps.Content[i]
+		switch entry.Kind {
+		case yaml.ScalarNode:
+			a.Deps = append(a.Deps, entry.Value)
+		case yaml.MappingNode:
+			// Look for "name:" key — that's the dep ref. Other keys
+			// (allow/deny) are runtime concerns the validator skips.
+			var name string
+			for j := 0; j < len(entry.Content)-1; j += 2 {
+				k := entry.Content[j]
+				v := entry.Content[j+1]
+				if k.Value == "name" && v.Kind == yaml.ScalarNode {
+					name = v.Value
+					break
+				}
+			}
+			if name == "" {
+				return fmt.Errorf("dependencies[%d]: mapping entry missing required 'name' key", i)
+			}
+			a.Deps = append(a.Deps, name)
+		default:
+			return fmt.Errorf("dependencies[%d]: must be a string or a mapping with a 'name' key", i)
+		}
+	}
+	return nil
 }
 
 func loadAgentYAML(dir string) (*agentYAML, error) {
