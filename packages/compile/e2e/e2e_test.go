@@ -89,10 +89,13 @@ func TestCodex_E2E(t *testing.T) {
 	imagetest.AssertBinaryExists(t, s, "codex")
 	imagetest.AssertBinaryExists(t, s, "node") // transitive dep
 	// Runtimes don't ship a SKILL.md — only tools do (qmd, cli, …).
-
-	// Verify codex config was pre-configured
-	imagetest.AssertFileExists(t, s, "/home/spwn/.codex/config.toml")
-	imagetest.AssertFileContains(t, s, "/home/spwn/.codex/config.toml", "trust_level")
+	//
+	// Project trust seeding (~/.codex/config.toml with
+	// `[projects."<cwd>"] trust_level = "trusted"`) moved to spawn-time
+	// PrelaunchShell in 734de13c, so the image build no longer
+	// produces this file. Coverage lives in
+	// packages/runtimes/codex/spawn_test.go where the prelaunch
+	// command shape can be asserted directly.
 }
 
 // ── Integration tests ──

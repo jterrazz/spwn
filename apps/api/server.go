@@ -826,18 +826,24 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 	}
 	manifest.ApplyDefaults(&m)
 
-	// Verify at least one AI provider is connected before spawning
-	creds := auth.ResolveAll()
-	hasProvider := false
-	for _, cred := range creds {
-		if cred.Type != auth.CredTypeNone {
-			hasProvider = true
-			break
+	// Verify at least one AI provider is connected before spawning.
+	// SPWN_SKIP_AUTH_VALIDATION matches the bypass honoured by the
+	// CLI spawn pre-flight + the validate-cache layer, so the web
+	// E2E suite (which spawns against the spwn-test:latest mock
+	// runtime) doesn't need real provider creds on its CI runner.
+	if os.Getenv("SPWN_SKIP_AUTH_VALIDATION") == "" {
+		creds := auth.ResolveAll()
+		hasProvider := false
+		for _, cred := range creds {
+			if cred.Type != auth.CredTypeNone {
+				hasProvider = true
+				break
+			}
 		}
-	}
-	if !hasProvider {
-		jsonError(w, "No AI provider configured. Go to Settings to connect an API key or subscription.", 400)
-		return
+		if !hasProvider {
+			jsonError(w, "No AI provider configured. Go to Settings to connect an API key or subscription.", 400)
+			return
+		}
 	}
 
 	result, err := s.arch.Spawn(r.Context(), architect.SpawnOpts{
