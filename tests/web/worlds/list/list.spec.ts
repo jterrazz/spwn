@@ -19,7 +19,7 @@ test.describe('Worlds list', () => {
 
     test('shows planets when worlds exist', async ({ page, api }) => {
         await api.installExample('matrix');
-        await api.spawnWorld('matrix', 'Neo');
+        await api.spawnWorld('matrix', 'neo');
         await page.goto('/');
 
         await expect(page.getByRole('button', { name: 'New World' })).toBeVisible({

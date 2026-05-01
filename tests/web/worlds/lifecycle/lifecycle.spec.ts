@@ -7,7 +7,7 @@ test.describe('World lifecycle (requires Docker)', () => {
     });
 
     test('spawn → appears in UI → destroy → disappears', async ({ page, api }) => {
-        const result = await api.spawnWorld('matrix', 'Neo');
+        const result = await api.spawnWorld('matrix', 'neo');
         const worldId = result.World.id;
         expect(worldId).toMatch(/^world-/);
 
@@ -51,7 +51,7 @@ test.describe('World lifecycle (requires Docker)', () => {
     });
 
     test('world detail page loads', async ({ page, api }) => {
-        const result = await api.spawnWorld('matrix', 'Neo');
+        const result = await api.spawnWorld('matrix', 'neo');
         const worldId = result.World.id;
 
         await page.goto(`/world/${worldId}`);
