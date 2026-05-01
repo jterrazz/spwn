@@ -65,7 +65,7 @@ test: generate  ## Go unit tests across the workspace (~5s)
 		(cd $$mod && go test ./...) || exit 1; \
 	done
 
-test-pkg:  ## Verbose go test for one package — usage: make test-pkg PKG=agent
+test-pkg: generate  ## Verbose go test for one package — usage: make test-pkg PKG=agent
 	@if [ -z "$(PKG)" ]; then \
 		echo "usage: make test-pkg PKG=<module-path-or-name>" >&2; \
 		exit 1; \
@@ -90,10 +90,10 @@ test-gate-node:  ## apps/gate vitest (sidecar + SDK, ~1s)
 test-image:  ## Build spwn-test:latest (mock Claude/Codex runtimes)
 	docker build -t spwn-test:latest -f tests/_simulators/Dockerfile.test ./tests/_simulators
 
-test-go-e2e: test-image  ## Go world E2E (//go:build e2e) — Architect/world/container
+test-go-e2e: generate test-image  ## Go world E2E (//go:build e2e) — Architect/world/container
 	cd packages/world && go test -v -tags=e2e -timeout=30m ./tests/e2e/...
 
-test-compile-e2e:  ## Go image-build E2E (compile + Dockerfile rendering)
+test-compile-e2e: generate  ## Go image-build E2E (compile + Dockerfile rendering)
 	cd packages/compile && go test -v -tags=e2e -timeout=10m ./e2e/...
 
 test-cli: build test-image  ## TypeScript CLI E2E against compiled bin/spwn (vitest)

@@ -407,7 +407,16 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 	if credSource == "none" {
-		if providerName := runtimeProvider(opts.runtimeName()); providerName != "" {
+		// Escape hatch for tests / CI / offline runs: when
+		// SPWN_SKIP_AUTH_VALIDATION is set the suite is exercising a
+		// mock runtime image (spwn-test:latest with mock-claude /
+		// mock-codex), which doesn't need real provider credentials
+		// to spawn. Same env var the validate-cache layer honours;
+		// keeping it in lockstep here so a CI run without secrets
+		// configured still drives the spawn pipeline end-to-end.
+		if os.Getenv("SPWN_SKIP_AUTH_VALIDATION") != "" {
+			credSource = "skipped"
+		} else if providerName := runtimeProvider(opts.runtimeName()); providerName != "" {
 			p := auth.Provider(providerName)
 			return nil, fmt.Errorf("no credentials configured for %s.\n%s", p, auth.NotConfiguredHint(p))
 		}

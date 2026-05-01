@@ -30,7 +30,10 @@ interface AgentListItem {
     layers: Record<string, string[]>;
 }
 
-function extractName(id: string): string {
+function extractName(id: null | string | undefined): string {
+    if (!id) {
+        return '';
+    }
     const parts = id.split('-');
     return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
 }
