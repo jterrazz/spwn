@@ -18,6 +18,7 @@
 //	tool/<name>                  local, resolves to ./spwn/tools/<name>/
 //	skill/<name>                 local, resolves to ./spwn/skills/<name>.md
 //	hook/<name>                  local, resolves to ./spwn/hooks/<name>.yaml
+//	command/<name>               local, resolves to ./spwn/commands/<name>.md
 //
 // Anything else — bare names, the retired `skill:` / `tool:` / `hook:`
 // schemes, the retired `local:<name>` alias, legacy `@owner/name` —
@@ -57,6 +58,11 @@ const (
 	KindLocalTool
 	// KindLocalHook is hook/<name>, resolving to spwn/hooks/<name>.yaml.
 	KindLocalHook
+	// KindLocalCommand is command/<name>, resolving to spwn/commands/<name>.md.
+	// Commands are slash-invoked prompt shortcuts the runtime exposes
+	// to the user (`/<name>` in Claude Code / Codex). The body is the
+	// prompt that gets injected when the user types the slash.
+	KindLocalCommand
 )
 
 // Ref is a parsed, classified reference.
@@ -77,6 +83,7 @@ type Ref struct {
 //   - "skill/<name>": KindLocalSkill, Name=<name>.
 //   - "tool/<name>": KindLocalTool, Name=<name>.
 //   - "hook/<name>": KindLocalHook, Name=<name>.
+//   - "command/<name>": KindLocalCommand, Name=<name>.
 //   - Anything else — bare names, unknown source schemes, the retired
 //     `skill:` / `tool:` / `hook:` / `local:` colon-schemes,
 //     `@`-prefixed refs — parses to KindInvalid.
@@ -105,6 +112,8 @@ func ParseRef(s string) Ref {
 			return Ref{Raw: raw, Kind: KindLocalTool, Name: name}
 		case "hook":
 			return Ref{Raw: raw, Kind: KindLocalHook, Name: name}
+		case "command":
+			return Ref{Raw: raw, Kind: KindLocalCommand, Name: name}
 		}
 	}
 
@@ -151,7 +160,7 @@ func splitPathStyle(s string) (typ, name string, ok bool) {
 	typ = s[:slash]
 	name = s[slash+1:]
 	switch typ {
-	case "skill", "tool", "hook":
+	case "skill", "tool", "hook", "command":
 	default:
 		return "", "", false
 	}
@@ -206,6 +215,11 @@ func Canonical(ref string) string {
 			return name
 		}
 		return "hook/" + r.Name
+	case KindLocalCommand:
+		if r.Name == "" {
+			return name
+		}
+		return "command/" + r.Name
 	}
 	return name
 }
@@ -235,6 +249,7 @@ const (
 //   - KindLocalTool: checks that <root>/spwn/tools/<name>/ is a directory.
 //   - KindLocalSkill: checks that <root>/spwn/skills/<name>.md is a file.
 //   - KindLocalHook: checks that <root>/spwn/hooks/<name>.yaml is a file.
+//   - KindLocalCommand: checks that <root>/spwn/commands/<name>.md is a file.
 //   - KindSpwnBuiltin: checks that spwn:<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
@@ -267,6 +282,16 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 			return ResolveNotFound
 		}
 		filePath := filepath.Join(root, "spwn", "hooks", ref.Name+".yaml")
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			return ResolveOK
+		}
+		return ResolveNotFound
+
+	case KindLocalCommand:
+		if ref.Name == "" {
+			return ResolveNotFound
+		}
+		filePath := filepath.Join(root, "spwn", "commands", ref.Name+".md")
 		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
 			return ResolveOK
 		}
@@ -331,6 +356,16 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		}
 		return ResolveNotFound
 
+	case KindLocalCommand:
+		if ref.Name == "" {
+			return ResolveNotFound
+		}
+		filePath := filepath.Join(root, "spwn", "commands", ref.Name+".md")
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			return ResolveOK
+		}
+		return ResolveNotFound
+
 	case KindSpwnBuiltin:
 		if ref.Name == "" {
 			return ResolveNotFound
@@ -356,11 +391,11 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 }
 
 // IsLocalKind reports whether the RefKind refers to an on-disk local
-// block (skill, tool, or hook) — i.e. not a spwn: catalog ref, not a
-// github: registry ref, and not KindInvalid.
+// block (skill, tool, hook, or command) — i.e. not a spwn: catalog
+// ref, not a github: registry ref, and not KindInvalid.
 func IsLocalKind(k RefKind) bool {
 	switch k {
-	case KindLocalSkill, KindLocalTool, KindLocalHook:
+	case KindLocalSkill, KindLocalTool, KindLocalHook, KindLocalCommand:
 		return true
 	}
 	return false

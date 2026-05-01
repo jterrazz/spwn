@@ -430,6 +430,49 @@ multi-line commands, and no quoting hell. Same reason `spwn.yaml` and
 
 </details>
 
+<details>
+<summary><b>Commands</b> &middot; <code>spwn/commands/&lt;name&gt;.md</code></summary>
+
+Slash-invoked prompt shortcuts the runtime exposes inside the agent's
+session. Type `/<name>` and the runtime injects the file's body as the
+next prompt. Iso with skills/tools/hooks: one file per command,
+selected per-agent via `command/<name>` in `agent.yaml#dependencies`.
+
+```markdown
+<!-- spwn/commands/refactor.md -->
+---
+description: Refactor the selected code while preserving behaviour.
+---
+
+# Refactor
+
+Refactor the code I've selected without changing observable
+behaviour. Prioritise smaller named functions, earlier returns,
+removing dead code, and meaningful naming.
+```
+
+```yaml
+# agent.yaml
+dependencies:
+  - "command/refactor"
+```
+
+**What the compiler emits:**
+
+| Runtime | Path |
+|---|---|
+| Claude Code | `agents/<n>/.claude/commands/refactor.md` |
+| Codex | `agents/<n>/.codex/commands/refactor.md` |
+
+The body is written verbatim — frontmatter (`description:`,
+`allowed-tools:`, `version:`) is interpreted by the runtime, not by
+spwn. An agent that doesn't list `command/<name>` doesn't get the
+slash command in its session. Use commands for short prompt shortcuts
+(5–20 lines); use skills (`skill/<name>`) for multi-phase capabilities
+with state and tool plumbing.
+
+</details>
+
 <br/>
 
 ## How spwn works
@@ -465,9 +508,10 @@ dependencies:
   - "skill/code-review"  # local:   ./spwn/skills/code-review.md
   - "tool/greet"         # local:   ./spwn/tools/greet/
   - "hook/welcome"       # local:   ./spwn/hooks/welcome.yaml
+  - "command/refactor"   # local:   ./spwn/commands/refactor.md
 ```
 
-**Every dependency declares its source and type explicitly.** Two source-prefixed schemes (`spwn:`, `github:`) plus three local path-style forms (`skill/`, `tool/`, `hook/`):
+**Every dependency declares its source and type explicitly.** Two source-prefixed schemes (`spwn:`, `github:`) plus four local path-style forms (`skill/`, `tool/`, `hook/`, `command/`):
 
 | Scheme | Resolves to |
 |---|---|
@@ -476,6 +520,7 @@ dependencies:
 | `skill/<name>` | `./spwn/skills/<name>.md` |
 | `tool/<name>` | `./spwn/tools/<name>/` (with `tool.yaml`) |
 | `hook/<name>` | `./spwn/hooks/<name>.yaml` |
+| `command/<name>` | `./spwn/commands/<name>.md` |
 
 Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/dependency-catalog.md).
 
@@ -681,6 +726,7 @@ commands and adapters below belong to one or more of these.
 | **Knowledge** | World-scoped `./spwn/knowledge/` bind-mount (opt-in per world) | 🟡 |
 | **Runtimes** | `claude-code`, `codex` (swappable Go adapters) | 🟡 |
 | **Hooks** | `spwn/hooks/<name>.yaml` → `.claude/settings.json#hooks` / `.codex/hooks.json` (PreToolUse, SessionStart, …) | 🚧 |
+| **Commands** | `spwn/commands/<name>.md` → `.claude/commands/` / `.codex/commands/` (slash-invoked `/<name>`) | 🟢 |
 | **Architect** | Always-on orchestration daemon. Spawns worlds, routes inboxes, delegates. | 🟡 |
 | **Gate** | Host-side broker for cookie-bearing tools — cookie sync, MCP routing, Playwright sidecar | 🚧 |
 | **Evolution** | `dream` / `sleep` / `fork` (playbook promotion, session replay) | 🟡 |

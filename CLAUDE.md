@@ -73,6 +73,7 @@ spwn install python --agent neo                # Catalog dep, only neo
 spwn install skill/paper-reading --agent neo   # Local skill, only neo
 spwn install tool/ffmpeg --agent neo           # Local tool, only neo
 spwn install hook/pre-spawn --agent neo        # Local hook, only neo
+spwn install command/refactor --agent neo      # Local command, only neo
 spwn uninstall python --agent neo              # Detach from one agent
 
 # Talk + messaging
@@ -141,7 +142,8 @@ my-project/
 │   ├── knowledge/               # world-scoped facts, bind-mounted to /world/knowledge/ (default path)
 │   ├── skills/                  # project-scoped skill files (skill/<name> → spwn/skills/<name>.md)
 │   ├── tools/                   # project-scoped tool dependencies (tool/<name> → spwn/tools/<name>/)
-│   └── hooks/                   # project-scoped runtime hooks (hook/<name> → spwn/hooks/<name>.yaml)
+│   ├── hooks/                   # project-scoped runtime hooks (hook/<name> → spwn/hooks/<name>.yaml)
+│   └── commands/                # project-scoped slash commands (command/<name> → spwn/commands/<name>.md)
 └── .spwn/                       # gitignored local state
     ├── state.json               # live world IDs bound to this project
     └── cache/
@@ -164,7 +166,7 @@ overrides.
 └── state/                       # architect daemon state
 ```
 
-**Config hierarchy:** `agent.yaml` declares composition via a unified `dependencies:` list. The grammar splits **source** (the colon prefix) from **type** (the leading path segment): `spwn:<name>` is a catalog dep; `github:<owner>/<repo>` is a remote dep (planned); `skill/<name>`, `tool/<name>`, `hook/<name>` are local blocks authored under `spwn/skills/<name>.md`, `spwn/tools/<name>/`, `spwn/hooks/<name>.yaml`. All three local schemes are iso: a path-style ref selected per agent, resolving to one file or directory on disk. Hooks are runtime-fired (PreToolUse, SessionStart, …); each agent inherits only the hooks it explicitly subscribes to. Plus `runtime.backend`. `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces). The union of project-wide and agent-specific dependencies is what actually materializes inside the container.
+**Config hierarchy:** `agent.yaml` declares composition via a unified `dependencies:` list. The grammar splits **source** (the colon prefix) from **type** (the leading path segment): `spwn:<name>` is a catalog dep; `github:<owner>/<repo>` is a remote dep (planned); `skill/<name>`, `tool/<name>`, `hook/<name>`, `command/<name>` are local blocks authored under `spwn/skills/<name>.md`, `spwn/tools/<name>/`, `spwn/hooks/<name>.yaml`, `spwn/commands/<name>.md`. All four local schemes are iso: a path-style ref selected per agent, resolving to one file or directory on disk. Hooks are runtime-fired (PreToolUse, SessionStart, …); commands are slash-invoked prompt shortcuts (`/<name>`); each agent inherits only the blocks it explicitly subscribes to. Plus `runtime.backend`. `spwn.yaml#worlds[<name>]` declares the runtime environment (agents + workspaces). The union of project-wide and agent-specific dependencies is what actually materializes inside the container.
 
 ## Repository Structure
 

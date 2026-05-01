@@ -8,11 +8,17 @@
 #   skill/<name>                 local skill   (./spwn/skills/<name>.md)
 #   tool/<name>                  local tool    (./spwn/tools/<name>/)
 #   hook/<name>                  local hook    (./spwn/hooks/<name>.yaml)
+#   command/<name>               local command (./spwn/commands/<name>.md)
 # Bare names are invalid — always use one of the forms above.
 #
-# Hooks are runtime-fired (PreToolUse, SessionStart, …) and selected
-# per-agent via the dependency list — same shape as skills and tools.
-# An agent inherits only the hooks it lists here.
+# Hooks fire on runtime events (PreToolUse, SessionStart, …) and are
+# selected per-agent via the dependency list — same shape as skills
+# and tools. An agent inherits only the hooks it lists here.
+#
+# Commands are slash-invoked prompt shortcuts (`/refactor`, `/review`)
+# the runtime exposes inside the agent's session. Same per-agent
+# selection — only the commands the agent subscribes to land in its
+# native commands directory.
 #
 # Optional `runtime.backend:` pins this agent to a specific backend
 # (spwn:claude-code, spwn:codex). Omit to let spwn pick based on
@@ -34,3 +40,4 @@ runtime:
   - "skill/focus"           # ./spwn/skills/focus.md
   - "tool/greet"            # ./spwn/tools/greet/
   - "hook/session-banner"   # ./spwn/hooks/session-banner.yaml
+  - "command/refactor"      # ./spwn/commands/refactor.md (slash-invoked)

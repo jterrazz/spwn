@@ -69,6 +69,17 @@ func TestParse_PathFormHook(t *testing.T) {
 	}
 }
 
+// TestParse_PathFormCommand: command/<name> parses as a local command ref.
+func TestParse_PathFormCommand(t *testing.T) {
+	got := refs.ParseRef("command/refactor")
+	if got.Kind != refs.KindLocalCommand {
+		t.Errorf("kind: want KindLocalCommand, got %v", got.Kind)
+	}
+	if got.Name != "refactor" {
+		t.Errorf("name: want refactor, got %q", got.Name)
+	}
+}
+
 // TestParse_RetiredColonForms: the colon-form local schemes
 // (`skill:`, `tool:`, `hook:`, `local:`) are gone; they all parse as
 // KindInvalid so callers can point the user at the new path-style
@@ -147,6 +158,7 @@ func TestCanonical_EmitsCanonicalForm(t *testing.T) {
 		"skill/code-review":   "skill/code-review",
 		"tool/my-parser":      "tool/my-parser",
 		"hook/pre-spawn":      "hook/pre-spawn",
+		"command/refactor":    "command/refactor",
 		"spwn:unix@24.04":     "spwn:unix",
 		// Invalid inputs (including retired colon-forms) fall through
 		// unchanged for display.

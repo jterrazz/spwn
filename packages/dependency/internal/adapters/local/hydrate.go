@@ -91,12 +91,13 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 // where each tool/ ref has been replaced by its "local:<name>"
 // registry key.
 //
-// skill/ and hook/ refs are stripped from the list entirely — those
-// are compile-time artifacts that the runtime renderer weaves into
-// the Tree (as /world/skills/<name>/SKILL.md and hook scripts
-// respectively), not image-builder inputs. Passing them through to
-// the image registry's Resolve would blow up with "tool not found"
-// because they're never registered there.
+// skill/, hook/, and command/ refs are stripped from the list
+// entirely — those are compile-time artifacts that the runtime
+// renderer weaves into the Tree (as /world/skills/<name>/SKILL.md,
+// hook entries in settings.json/hooks.json, and slash-invoked
+// commands respectively), not image-builder inputs. Passing them
+// through to the image registry's Resolve would blow up with "tool
+// not found" because they're never registered there.
 //
 // spwn: and github: refs pass through unchanged for the image
 // resolver to handle.
@@ -159,7 +160,7 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 	for _, raw := range depRefs {
 		ref := refs.ParseRef(raw)
 		switch ref.Kind {
-		case refs.KindLocalSkill, refs.KindLocalHook:
+		case refs.KindLocalSkill, refs.KindLocalHook, refs.KindLocalCommand:
 			// Strip — compile step consumes these, image builder
 			// doesn't know how to.
 			continue

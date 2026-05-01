@@ -60,6 +60,7 @@ func TestInit_WritesExpectedStarterFiles(t *testing.T) {
 		"spwn/skills/focus.md",
 		"spwn/tools/greet/tool.yaml",
 		"spwn/hooks/session-banner.yaml",
+		"spwn/commands/refactor.md",
 		"spwn/knowledge/.gitkeep",
 	} {
 		if _, err := os.Stat(filepath.Join(dir, rel)); err != nil {

@@ -740,7 +740,7 @@ func rulePacksExist(in Input) []Issue {
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("remote registries are not yet supported (ref: %q)", raw),
 				Hint: "use spwn:<name> for built-in dependencies, or author a local dep with " +
-					"skill/<name>, tool/<name>, or hook/<name>; remote registries " +
+					"skill/<name>, tool/<name>, hook/<name>, or command/<name>; remote registries " +
 					"(github:<owner>/<repo>) are planned but not implemented yet",
 			}}
 		case refs.ResolveInvalid:
@@ -770,6 +770,12 @@ func rulePacksExist(in Input) []Issue {
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
 				Hint:    "create ./spwn/hooks/" + ref.Name + ".yaml for a runtime hook",
+			}}
+		case refs.KindLocalCommand:
+			return []Issue{{
+				Level: LevelError, Path: location,
+				Message: fmt.Sprintf("dependency %q does not exist", raw),
+				Hint:    "create ./spwn/commands/" + ref.Name + ".md for a slash-invoked command",
 			}}
 		}
 		return []Issue{{
@@ -1329,6 +1335,9 @@ func invalidRefHint(root, raw string) string {
 		if st, err := os.Stat(filepath.Join(root, "spwn", "hooks", name+".yaml")); err == nil && !st.IsDir() {
 			matches = append(matches, "hook/"+name)
 		}
+		if st, err := os.Stat(filepath.Join(root, "spwn", "commands", name+".md")); err == nil && !st.IsDir() {
+			matches = append(matches, "command/"+name)
+		}
 		if len(matches) == 1 {
 			return "did you mean " + matches[0] + "?"
 		}
@@ -1338,7 +1347,8 @@ func invalidRefHint(root, raw string) string {
 	}
 
 	return "use skill/<name> (for spwn/skills/<name>.md), tool/<name> (for spwn/tools/<name>/), " +
-		"or hook/<name> (for spwn/hooks/<name>.yaml); spwn:<name> and github:<owner>/<repo> remain the two source-prefixed schemes"
+		"hook/<name> (for spwn/hooks/<name>.yaml), or command/<name> (for spwn/commands/<name>.md); " +
+		"spwn:<name> and github:<owner>/<repo> remain the two source-prefixed schemes"
 }
 
 func suggestPackage(tool string, catalog []string) string {

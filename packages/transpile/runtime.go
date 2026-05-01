@@ -84,6 +84,13 @@ type Input struct {
 	// pool. Kept here so callers (golden tests, dry-run reporters)
 	// can inspect the full available set.
 	Hooks []HookEntry
+
+	// Commands is every slash-invoked prompt shortcut the project
+	// declares under spwn/commands/<name>.md. Project-wide pool;
+	// agents receive only the subset they select via `command/<name>`
+	// in agent.yaml#dependencies. Per-agent selection lands on
+	// AgentInput.Commands.
+	Commands []CommandEntry
 }
 
 // SkillEntry is one complete skill the renderer must emit into each
@@ -111,6 +118,18 @@ type HookEntry struct {
 	Event   string
 	Matcher string
 	Command string
+}
+
+// CommandEntry is one slash-invoked prompt shortcut the renderer
+// emits into each subscribing agent's native command directory:
+//   - claude-code: agents/<name>/.claude/commands/<Name>.md
+//   - codex:       agents/<name>/.codex/commands/<Name>.md
+//
+// Body is written verbatim — frontmatter (description, allowed-tools,
+// version) is interpreted by the runtime, not by spwn.
+type CommandEntry struct {
+	Name string
+	Body []byte
 }
 
 // AgentInput is the per-agent slice of transpile.Input.
@@ -160,6 +179,12 @@ type AgentInput struct {
 	// silently inherits hooks it didn't ask for). Empty when the
 	// agent declared no hook deps.
 	Hooks []HookEntry
+
+	// Commands is the subset of project-wide commands that this
+	// agent selected via `command/<name>` deps in its agent.yaml.
+	// Renderers emit one file per command into the agent's native
+	// commands directory; empty when the agent declared none.
+	Commands []CommandEntry
 }
 
 // PlaybookEntry is one frontmatter-promoted playbook, ready to index

@@ -53,6 +53,12 @@ describe('spwn init', () => {
         expect(hookYaml).toContain('command:');
         // The legacy single-file project hooks.yaml must not be created.
         expect(result.file('spwn/hooks.yaml').exists).toBe(false);
+        // Commands ship as one .md per slash invocation. The body is
+        // The prompt the runtime injects when the user types `/<name>`.
+        expect(result.file('spwn/commands/refactor.md').exists).toBe(true);
+        const cmdMD = result.file('spwn/commands/refactor.md').content;
+        expect(cmdMD).toContain('Refactor');
+        expect(cmdMD).toContain('description:');
 
         // Default agent.yaml must reference all three local-ref
         // Examples so a fresh project shows the composition grammar
@@ -63,6 +69,7 @@ describe('spwn init', () => {
         expect(agentYaml).toContain('skill/focus');
         expect(agentYaml).toContain('tool/greet');
         expect(agentYaml).toContain('hook/session-banner');
+        expect(agentYaml).toContain('command/refactor');
         // None of the retired colon-form schemes for local refs.
         expect(agentYaml).not.toMatch(/\bskill:[a-z]/);
         expect(agentYaml).not.toMatch(/\btool:[a-z]/);

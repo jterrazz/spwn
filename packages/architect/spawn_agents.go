@@ -108,7 +108,7 @@ func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containe
 // agent's cwd. Renderers that @-import (claude-code) ignore the
 // bodies; the files survive independently on the docker-cp'd agent
 // home, so the @-references still resolve.
-func rosterCompileAgents(recs []models.AgentRecord, hookPool []transpile.HookEntry) []transpile.AgentInput {
+func rosterCompileAgents(recs []models.AgentRecord, hookPool []transpile.HookEntry, commandPool []transpile.CommandEntry) []transpile.AgentInput {
 	out := make([]transpile.AgentInput, 0, len(recs))
 	for _, r := range recs {
 		home := agent.AgentDir(r.Name)
@@ -122,6 +122,7 @@ func rosterCompileAgents(recs []models.AgentRecord, hookPool []transpile.HookEnt
 			Model:     model,
 			Provider:  provider,
 			Hooks:     agentHookSelection(r.Name, hookPool),
+			Commands:  agentCommandSelection(r.Name, commandPool),
 		})
 	}
 	return out

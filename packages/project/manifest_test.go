@@ -25,12 +25,14 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 		"spwn/knowledge/.gitkeep",
 		".gitignore",
 		// One example per local-ref scheme so the scaffold demonstrates
-		// skill/, tool/, and hook/ authoring patterns end-to-end. All
-		// three are iso: a path-style ref selected per agent in
-		// agent.yaml#dependencies, resolving to one file/dir on disk.
+		// skill/, tool/, hook/, and command/ authoring patterns
+		// end-to-end. All four are iso: a path-style ref selected per
+		// agent in agent.yaml#dependencies, resolving to one file/dir
+		// on disk.
 		"spwn/skills/focus.md",
 		"spwn/tools/greet/tool.yaml",
 		"spwn/hooks/session-banner.yaml",
+		"spwn/commands/refactor.md",
 	}
 	for _, rel := range required {
 		path := filepath.Join(dir, rel)
@@ -98,7 +100,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read agent.yaml: %v", err)
 	}
-	for _, ref := range []string{"skill/focus", "tool/greet", "hook/session-banner"} {
+	for _, ref := range []string{"skill/focus", "tool/greet", "hook/session-banner", "command/refactor"} {
 		if !strings.Contains(string(agentYAML), ref) {
 			t.Errorf("agent.yaml missing %q, got:\n%s", ref, agentYAML)
 		}
@@ -127,6 +129,18 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	// it's the migration error condition the loader rejects.
 	if _, err := os.Stat(filepath.Join(dir, "spwn/hooks.yaml")); err == nil {
 		t.Errorf("legacy spwn/hooks.yaml leaked into the scaffold output")
+	}
+
+	// spwn/commands/<name>.md is the slash-invoked prompt shape.
+	// One file per command; body is the prompt body verbatim.
+	cmdMD, err := os.ReadFile(filepath.Join(dir, "spwn/commands/refactor.md"))
+	if err != nil {
+		t.Fatalf("stat commands/refactor.md: %v", err)
+	}
+	for _, part := range []string{"name: refactor", "Refactor"} {
+		if !strings.Contains(string(cmdMD), part) {
+			t.Errorf("commands/refactor.md missing %q, got:\n%s", part, cmdMD)
+		}
 	}
 
 	// Skill must be a valid frontmatter-first markdown block: starts

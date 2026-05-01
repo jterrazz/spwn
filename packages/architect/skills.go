@@ -110,6 +110,83 @@ func agentHookSelection(agentName string, pool []transpile.HookEntry) []transpil
 	return out
 }
 
+// loadRuntimeCommands walks <root>/spwn/commands/*.md at spawn time
+// and returns one transpile.CommandEntry per file. Mirrors the
+// source-side loadCommands but lives here so the spawn flow doesn't
+// need to construct a full ProjectSource. Body bytes pass through
+// verbatim — the runtime parses any frontmatter at runtime.
+func loadRuntimeCommands(projectRoot string) []transpile.CommandEntry {
+	if projectRoot == "" {
+		return nil
+	}
+	dir := filepath.Join(projectRoot, "spwn", "commands")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	out := make([]transpile.CommandEntry, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") {
+			continue
+		}
+		body, rerr := os.ReadFile(filepath.Join(dir, name))
+		if rerr != nil {
+			continue
+		}
+		out = append(out, transpile.CommandEntry{
+			Name: strings.TrimSuffix(name, ".md"),
+			Body: body,
+		})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
+}
+
+// agentCommandSelection returns the subset of the project command
+// pool that the agent's agent.yaml dependencies select via
+// `command/<n>` refs. Mirrors agentHookSelection.
+func agentCommandSelection(agentName string, pool []transpile.CommandEntry) []transpile.CommandEntry {
+	if len(pool) == 0 {
+		return nil
+	}
+	m, err := agent.LoadManifest(agentName)
+	if err != nil || m == nil || len(m.Deps) == 0 {
+		return nil
+	}
+	byName := make(map[string]transpile.CommandEntry, len(pool))
+	for _, c := range pool {
+		byName[c.Name] = c
+	}
+	out := make([]transpile.CommandEntry, 0, len(m.Deps))
+	seen := make(map[string]struct{}, len(m.Deps))
+	for _, dep := range m.Deps {
+		dep = strings.TrimSpace(dep)
+		const prefix = "command/"
+		if !strings.HasPrefix(dep, prefix) {
+			continue
+		}
+		name := strings.TrimPrefix(dep, prefix)
+		if name == "" {
+			continue
+		}
+		if _, dup := seen[name]; dup {
+			continue
+		}
+		entry, ok := byName[name]
+		if !ok {
+			continue
+		}
+		seen[name] = struct{}{}
+		out = append(out, entry)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
+}
+
 // collectRuntimeSkills assembles every skill the compiled tree should
 // emit into each agent's native skill directory (.claude/skills/ for
 // claude-code, .agents/skills/ for codex). Two sources feed it:

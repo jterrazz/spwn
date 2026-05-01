@@ -16,8 +16,8 @@ import (
 // Resolution rules:
 //   - Source-prefixed (`spwn:`, `github:`) passes through unchanged,
 //     including any `@version` suffix.
-//   - Path-style local (`tool/`, `skill/`, `hook/`) passes through
-//     unchanged, including any `@version` suffix.
+//   - Path-style local (`tool/`, `skill/`, `hook/`, `command/`) passes
+//     through unchanged, including any `@version` suffix.
 //   - Bare identifier ([a-z0-9][a-z0-9-]*) that matches a catalog name
 //     rewrites to "spwn:<name>" (again preserving `@version`).
 //   - Bare identifier with no catalog match returns an error listing
@@ -42,7 +42,7 @@ func ResolveCLI(input string, catalog []string) (string, error) {
 	// its own existence check (catalog miss / local file missing);
 	// ResolveCLI's job ends at grammar.
 	switch parsed.Kind {
-	case KindSpwnBuiltin, KindRegistry, KindLocalSkill, KindLocalTool, KindLocalHook:
+	case KindSpwnBuiltin, KindRegistry, KindLocalSkill, KindLocalTool, KindLocalHook, KindLocalCommand:
 		return trimmed, nil
 	}
 
@@ -53,11 +53,11 @@ func ResolveCLI(input string, catalog []string) (string, error) {
 				return "spwn:" + trimmed, nil
 			}
 		}
-		return "", fmt.Errorf("%q is not in the catalog.\n%s\n\nhint: pass skill/%s, tool/%s, or hook/%s for a local block", input, formatKnown(catalog), name, name, name)
+		return "", fmt.Errorf("%q is not in the catalog.\n%s\n\nhint: pass skill/%s, tool/%s, hook/%s, or command/%s for a local block", input, formatKnown(catalog), name, name, name, name)
 	}
 
 	// Anything else: malformed under the grammar.
-	return "", fmt.Errorf("ref %q is malformed: pass spwn:<name>, skill/<name>, tool/<name>, hook/<name>, or github:<owner>/<repo>", input)
+	return "", fmt.Errorf("ref %q is malformed: pass spwn:<name>, skill/<name>, tool/<name>, hook/<name>, command/<name>, or github:<owner>/<repo>", input)
 }
 
 // isBareIdentifier reports whether s is a lowercase-kebab identifier

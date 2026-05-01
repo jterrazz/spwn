@@ -82,6 +82,15 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		}
 	}
 
+	// Same pattern for slash-invoked commands.
+	commandByName := make(map[string]transpile.CommandEntry, len(src.Commands))
+	for _, c := range src.Commands {
+		commandByName[c.Name] = transpile.CommandEntry{
+			Name: c.Name,
+			Body: c.Body,
+		}
+	}
+
 	// Collect the union of packages from every agent in this world.
 	// This mirrors what spawn does before probing the container: the
 	// render doesn't need a verified list, it just needs to know what
@@ -106,6 +115,7 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 			Model:     a.Config.Runtime.Model,
 			Provider:  a.Config.Runtime.Provider,
 			Hooks:     selectAgentHooks(a.Config.Deps, hookByName),
+			Commands:  selectAgentCommands(a.Config.Deps, commandByName),
 		})
 	}
 	// Add project-level deps (top-level deps: in spwn.yaml).
@@ -155,6 +165,14 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		})
 	}
 
+	commands := make([]transpile.CommandEntry, 0, len(src.Commands))
+	for _, c := range src.Commands {
+		commands = append(commands, transpile.CommandEntry{
+			Name: c.Name,
+			Body: c.Body,
+		})
+	}
+
 	return transpile.Input{
 		Deps:                  packageList,
 		VerifiedTools:         packageList,
@@ -163,7 +181,42 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		WorldKnowledgeMounted: knowledgeMounted,
 		Skills:                skills,
 		Hooks:                 hooks,
+		Commands:              commands,
 	}, nil
+}
+
+// selectAgentCommands returns the subset of project commands the
+// agent's dependency list explicitly subscribes to via `command/<n>`
+// refs. Mirrors selectAgentHooks; unknown command names are dropped
+// silently here and surface as resolver errors via the validator.
+func selectAgentCommands(deps []string, byName map[string]transpile.CommandEntry) []transpile.CommandEntry {
+	if len(deps) == 0 || len(byName) == 0 {
+		return nil
+	}
+	out := make([]transpile.CommandEntry, 0, len(deps))
+	seen := make(map[string]struct{}, len(deps))
+	for _, dep := range deps {
+		ref := strings.TrimSpace(dep)
+		const prefix = "command/"
+		if !strings.HasPrefix(ref, prefix) {
+			continue
+		}
+		name := strings.TrimPrefix(ref, prefix)
+		if name == "" {
+			continue
+		}
+		if _, dup := seen[name]; dup {
+			continue
+		}
+		entry, ok := byName[name]
+		if !ok {
+			continue
+		}
+		seen[name] = struct{}{}
+		out = append(out, entry)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
 }
 
 // selectAgentHooks returns the subset of project hooks the agent's

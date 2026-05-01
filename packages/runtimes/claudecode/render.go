@@ -109,6 +109,15 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				Model: a.Model,
 			}),
 		)
+		// Commands: one file per slash-invoked prompt, written
+		// verbatim into Claude Code's native commands directory so
+		// `/<name>` works inside the agent's session.
+		for _, cmd := range a.Commands {
+			t.Add(
+				fmt.Sprintf("agents/%s/.claude/commands/%s.md", a.Name, cmd.Name),
+				cmd.Body,
+			)
+		}
 	}
 
 	return t, nil

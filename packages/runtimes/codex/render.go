@@ -110,6 +110,14 @@ func (r *renderer) Render(input transpile.Input) (*transpile.Tree, error) {
 				body,
 			)
 		}
+		// Commands: one file per slash-invoked prompt, written
+		// verbatim into Codex's native commands directory.
+		for _, cmd := range a.Commands {
+			t.Add(
+				fmt.Sprintf("agents/%s/.codex/commands/%s.md", a.Name, cmd.Name),
+				cmd.Body,
+			)
+		}
 	}
 
 	return t, nil

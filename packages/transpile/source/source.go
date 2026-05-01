@@ -45,6 +45,12 @@ type ProjectSource struct {
 	// Hooks is every file directly under spwn/hooks/.
 	Hooks []HookSource
 
+	// Commands is every *.md file directly under spwn/commands/.
+	// Each command becomes a slash-invoked prompt shortcut in the
+	// runtime (e.g. `/refactor` in Claude Code / Codex). Empty if
+	// the directory does not exist.
+	Commands []CommandSource
+
 	// Profiles is every *.md file under spwn/profiles/ (optional).
 	// Empty if the directory does not exist.
 	Profiles []ProfileSource
@@ -176,6 +182,24 @@ type ProfileSource struct {
 	Content []byte
 }
 
+// CommandSource is one slash-invoked prompt shortcut loaded from
+// <root>/spwn/commands/<name>.md. The body becomes the prompt the
+// runtime injects when the user types `/<name>` inside an agent
+// session. Per-agent selection happens via `command/<name>` in
+// agent.yaml#dependencies — an agent only ships the commands it
+// explicitly subscribes to, mirroring how `skill/<name>`,
+// `tool/<name>`, and `hook/<name>` work.
+type CommandSource struct {
+	// Name is the filename minus `.md` — used as the slash invocation
+	// (e.g. `refactor.md` → `/refactor`).
+	Name string
+	// Body is the raw markdown that gets written verbatim into each
+	// runtime's command directory. spwn does not parse frontmatter
+	// here — runtimes that read frontmatter (Claude Code's
+	// `description:`, `allowed-tools:`) consume it directly.
+	Body []byte
+}
+
 // Load parses a spwn project rooted at projectRoot and returns a
 // ProjectSource ready for a transpile.Runtime to consume.
 //
@@ -226,6 +250,13 @@ func Load(projectRoot string) (*ProjectSource, error) {
 		return nil, err
 	}
 	src.Hooks = hooks
+
+	// Commands (optional slash-invoked prompts)
+	commands, err := loadCommands(abs)
+	if err != nil {
+		return nil, err
+	}
+	src.Commands = commands
 
 	// Profiles (optional)
 	profiles, err := loadProfiles(abs)
@@ -584,6 +615,47 @@ func loadHooks(root string) ([]HookSource, error) {
 func fileExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && !info.IsDir()
+}
+
+// loadCommands walks <root>/spwn/commands/*.md and returns one
+// CommandSource per file. Filename minus `.md` is the slash command
+// name (`refactor.md` → `/refactor`). Missing directory → nil, nil.
+//
+// Subdirectories and dotfiles are skipped so authors can drop helper
+// files alongside the command markdown without spwn picking them up
+// as commands. Body bytes pass through verbatim — runtimes that read
+// frontmatter (Claude Code's `description:` / `allowed-tools:`)
+// consume it directly without spwn parsing it.
+func loadCommands(root string) ([]CommandSource, error) {
+	dir := filepath.Join(root, "spwn", "commands")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read %s: %w", dir, err)
+	}
+	out := make([]CommandSource, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") {
+			continue
+		}
+		path := filepath.Join(dir, name)
+		body, rerr := os.ReadFile(path)
+		if rerr != nil {
+			return nil, fmt.Errorf("read %s: %w", path, rerr)
+		}
+		out = append(out, CommandSource{
+			Name: strings.TrimSuffix(name, ".md"),
+			Body: body,
+		})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out, nil
 }
 
 func loadProfiles(root string) ([]ProfileSource, error) {

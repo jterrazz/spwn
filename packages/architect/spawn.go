@@ -618,14 +618,16 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// the agent home.
 	runtimeSkills := collectRuntimeSkills(platform.ProjectRoot(), resolvedTools)
 	hookPool := loadRuntimeHooks(platform.ProjectRoot())
+	commandPool := loadRuntimeCommands(platform.ProjectRoot())
 	compileInput := transpile.Input{
 		Deps:                  opts.Manifest.Deps,
 		VerifiedTools:         facultiesForRuntime(verifiedTools, opts.Manifest.Deps),
 		WorldID:               id,
-		Agents:                rosterCompileAgents(rosterAgents, hookPool),
+		Agents:                rosterCompileAgents(rosterAgents, hookPool, commandPool),
 		WorldKnowledgeMounted: knowledgeMounted,
 		Skills:                runtimeSkills,
 		Hooks:                 hookPool,
+		Commands:              commandPool,
 	}
 	tree, err := transpile.Compile(opts.runtimeName(), compileInput)
 	if err != nil {

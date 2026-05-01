@@ -129,6 +129,25 @@ func TestResolveTool_LocalHook(t *testing.T) {
 	}
 }
 
+func TestResolveTool_LocalCommand(t *testing.T) {
+	root := t.TempDir()
+	mustMkdir(t, filepath.Join(root, "spwn", "commands"))
+	body := []byte("# Refactor\n\nRefactor the selected code while preserving behaviour.\n")
+	if err := os.WriteFile(filepath.Join(root, "spwn", "commands", "refactor.md"), body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got := refs.ResolveTool(root, refs.ParseRef("command/refactor"), nil, false)
+	if got != refs.ResolveOK {
+		t.Errorf("present local command: want OK, got %v", got)
+	}
+
+	got = refs.ResolveTool(root, refs.ParseRef("command/missing"), nil, false)
+	if got != refs.ResolveNotFound {
+		t.Errorf("missing local command: want NotFound, got %v", got)
+	}
+}
+
 func TestResolveTool_InvalidBareName(t *testing.T) {
 	root := t.TempDir()
 	// Even if a file named "present" existed in spwn/tools/, a bare
