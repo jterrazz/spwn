@@ -51,8 +51,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Desktop app + updater manifest are temporarily disabled while we
+  # stabilise the CLI release path. The Tauri build kept failing on
+  # signing/notarization secrets that aren't worth chasing right now;
+  # CLI artefacts ship via the `cli` job above and that's enough for
+  # `curl | bash` install + `spwn upgrade`. Re-enable both jobs by
+  # restoring the `if: false` guard below to a real condition (or
+  # removing the guard entirely) once the desktop pipeline is green.
   desktop:
     name: Desktop release
+    if: false  # disabled — see comment above
     needs: cli
     uses: jterrazz/jterrazz-actions/.github/workflows/release-tauri.yaml@main
     with:
@@ -75,6 +83,7 @@ jobs:
 
   updater:
     name: Updater manifest
+    if: false  # disabled — depends on desktop, see comment on `desktop`
     needs: desktop
     runs-on: ubuntu-latest
     steps:
