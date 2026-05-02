@@ -412,6 +412,100 @@ func TestEngine_DispatchErrorDoesNotAdvanceState(t *testing.T) {
 	}
 }
 
+// ── FS trigger end-to-end through the engine ───────────────────────
+
+func TestEngine_FSFiresAfterDebounce(t *testing.T) {
+	source := NewFakeFSSource()
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	fsWatcher := NewFSWatcher(source, clock)
+	disp := NewMockDispatcher()
+	rec := NewMemoryReceiptWriter()
+	state := NewMemoryStateStore()
+	eng, err := New(Config{
+		Clock:      clock,
+		Dispatcher: disp,
+		Receipts:   rec,
+		State:      state,
+		FS:         fsWatcher,
+	})
+	must(t, err)
+
+	must(t, eng.Register("brain", map[string]project.Automation{
+		"inbox": {
+			On: project.Trigger{
+				FS: &project.FSTrigger{
+					Path:     "/inbox",
+					Events:   []string{"create"},
+					Debounce: project.Duration(100 * time.Millisecond),
+				},
+			},
+			Agent:  "curator",
+			Prompt: "new file: {{ .Event.Name }}",
+		},
+	}))
+	must(t, eng.Start(context.Background()))
+	defer eng.Stop()
+
+	// Drive the watcher synchronously through its handle path so we
+	// don't race the source pump.
+	fsWatcher.handle(context.Background(), RawFSEvent{Path: "/inbox/foo.md", Kind: "create"})
+	clock.Advance(100 * time.Millisecond)
+
+	// The fire path is async (per-agent lock + dispatch); poll.
+	deadline := time.Now().Add(500 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		if disp.Count() >= 1 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	if got := disp.Count(); got != 1 {
+		t.Fatalf("dispatch count = %d, want 1", got)
+	}
+	got := disp.Requests()[0]
+	if got.World != "brain" || got.Agent != "curator" {
+		t.Errorf("request = %+v", got)
+	}
+	if got.Prompt != "new file: foo.md" {
+		t.Errorf("prompt = %q, want \"new file: foo.md\"", got.Prompt)
+	}
+
+	recs := rec.Receipts()
+	if len(recs) != 1 || recs[0].Trigger != "fs" {
+		t.Errorf("receipts = %+v", recs)
+	}
+	if recs[0].Reason != "create:foo.md" {
+		t.Errorf("reason = %q, want create:foo.md", recs[0].Reason)
+	}
+}
+
+func TestEngine_FSWithoutWatcherInConfigRejects(t *testing.T) {
+	// Defensive: if the engine is built without an FSWatcher, fs
+	// automations must error at Register so a programmer doesn't
+	// silently lose their triggers.
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	eng, err := New(Config{
+		Clock:      clock,
+		Dispatcher: NewMockDispatcher(),
+		Receipts:   NewMemoryReceiptWriter(),
+		State:      NewMemoryStateStore(),
+		// FS intentionally omitted
+	})
+	must(t, err)
+
+	err = eng.Register("brain", map[string]project.Automation{
+		"x": {
+			On:     project.Trigger{FS: &project.FSTrigger{Path: "/x"}},
+			Agent:  "curator",
+			Prompt: "p",
+		},
+	})
+	if err == nil {
+		t.Error("expected error registering fs trigger without FSWatcher")
+	}
+}
+
 // ── countMissed / lastScheduled (white-box) ─────────────────────────
 
 func TestCountMissed_OnExactSlot(t *testing.T) {

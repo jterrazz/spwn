@@ -55,6 +55,7 @@ package automation
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"sync"
 	"time"
@@ -72,6 +73,7 @@ type Engine struct {
 	dispatcher Dispatcher
 	receipts   ReceiptWriter
 	state      StateStore
+	fs         *FSWatcher // nil if no fs triggers were registered
 
 	cronParser cron.Parser
 	registered []*registered
@@ -97,14 +99,16 @@ type registered struct {
 	Schedule cron.Schedule // nil for fs (Phase 3)
 }
 
-// Config bundles the engine's collaborators. All fields are required
-// — pass NewMemoryStateStore / NewMemoryReceiptWriter in tests when
-// you don't want disk side effects.
+// Config bundles the engine's collaborators. Clock/Dispatcher/
+// Receipts/State are required; FS is optional — projects with only
+// cron automations can leave it nil. New rejects fs-trigger
+// registrations when FS is nil.
 type Config struct {
 	Clock      Clock
 	Dispatcher Dispatcher
 	Receipts   ReceiptWriter
 	State      StateStore
+	FS         *FSWatcher
 }
 
 // New constructs an Engine. Returns an error if any collaborator is
@@ -129,6 +133,7 @@ func New(cfg Config) (*Engine, error) {
 		dispatcher: cfg.Dispatcher,
 		receipts:   cfg.Receipts,
 		state:      cfg.State,
+		fs:         cfg.FS,
 		cronParser: cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow),
 	}, nil
 }
@@ -152,8 +157,32 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 			}
 			r.Schedule = sched
 		case a.On.FS != nil:
-			// Phase 3 territory — accept the registration so the
-			// engine has a complete view, but skip scheduling.
+			if e.fs == nil {
+				return fmt.Errorf("automation %s/%s: fs trigger registered but engine Config.FS is nil", world, name)
+			}
+			// Capture r in the closure so the handler routes to the
+			// right registered{} when its fired.
+			rr := r
+			spec := FSWatchSpec{
+				ID:        stateKey(world, name),
+				Path:      a.On.FS.Path,
+				Events:    a.On.FS.Events,
+				Recursive: a.On.FS.Recursive,
+				Patterns:  a.On.FS.Patterns,
+				Debounce:  a.On.FS.Debounce.AsDuration(),
+			}
+			handler := func(ev DebouncedFSEvent) {
+				e.fire(context.Background(), rr, FireSource{
+					Kind:       "fs",
+					Reason:     ev.Kind + ":" + filepath.Base(ev.Paths[0]),
+					Now:        e.clock.Now(),
+					EventPaths: ev.Paths,
+					EventKind:  ev.Kind,
+				})
+			}
+			if err := e.fs.Watch(spec, handler); err != nil {
+				return fmt.Errorf("automation %s/%s: fs watch: %w", world, name, err)
+			}
 		default:
 			// Validation already rejects this; defence-in-depth.
 			return fmt.Errorf("automation %s/%s: no trigger (validation should have caught this)", world, name)
@@ -197,11 +226,21 @@ func (e *Engine) Start(ctx context.Context) error {
 		e.wg.Add(1)
 		go e.runCron(ctx, r)
 	}
+	// Fs watcher pump runs only if fs triggers were registered.
+	// Idempotent: harmless to call when no specs exist.
+	if e.fs != nil {
+		if err := e.fs.Start(ctx); err != nil {
+			return fmt.Errorf("automation: fs Start: %w", err)
+		}
+	}
 	return nil
 }
 
 // Stop cancels the engine's context and waits for every scheduler
 // goroutine to drain. Safe to call before Start (no-op).
+//
+// The fs watcher's Close() is called too — its pump goroutine and
+// any in-flight debounce timers exit before Stop returns.
 func (e *Engine) Stop() {
 	e.mu.Lock()
 	if !e.started {
@@ -209,9 +248,13 @@ func (e *Engine) Stop() {
 		return
 	}
 	cancel := e.cancel
+	fs := e.fs
 	e.mu.Unlock()
 	if cancel != nil {
 		cancel()
+	}
+	if fs != nil {
+		_ = fs.Close()
 	}
 	e.wg.Wait()
 }
