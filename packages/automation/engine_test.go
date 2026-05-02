@@ -480,6 +480,128 @@ func TestEngine_FSFiresAfterDebounce(t *testing.T) {
 	}
 }
 
+// ── CommandResolver wiring ──────────────────────────────────────────
+
+func TestEngine_CommandResolverLoadsBody(t *testing.T) {
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	disp := NewMockDispatcher()
+	rec := NewMemoryReceiptWriter()
+	state := NewMemoryStateStore()
+
+	// Fake resolver returns a templated body from the "filesystem".
+	resolver := CommandResolverFunc(func(ref string) (string, error) {
+		if ref == "command/morning-brief" {
+			return "Brief for {{ .Now | date \"2006-01-02\" }}.", nil
+		}
+		return "", errors.New("not found")
+	})
+
+	eng, err := New(Config{
+		Clock:      clock,
+		Dispatcher: disp,
+		Receipts:   rec,
+		State:      state,
+		Commands:   resolver,
+	})
+	must(t, err)
+
+	must(t, eng.Register("brain", map[string]project.Automation{
+		"brief": {
+			On:      project.Trigger{Cron: "0 6 * * *"},
+			Agent:   "editor",
+			Command: "command/morning-brief",
+			Catchup: "collapse",
+		},
+	}))
+	must(t, eng.Start(context.Background()))
+	defer eng.Stop()
+
+	// Wait for the runCron goroutine to register its first timer.
+	deadline := time.Now().Add(200 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		if clock.Pending() >= 1 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	clock.AdvanceTo(mustParse(t, "2026-05-01T06:00:00Z"))
+
+	// Wait for dispatch.
+	deadline = time.Now().Add(500 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		if disp.Count() >= 1 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	if disp.Count() != 1 {
+		t.Fatalf("dispatch count = %d, want 1", disp.Count())
+	}
+	if got := disp.Requests()[0].Prompt; got != "Brief for 2026-05-01." {
+		t.Errorf("prompt = %q", got)
+	}
+}
+
+func TestEngine_CommandResolverErrorWritesFailedReceipt(t *testing.T) {
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	disp := NewMockDispatcher()
+	rec := NewMemoryReceiptWriter()
+	state := NewMemoryStateStore()
+
+	resolver := CommandResolverFunc(func(ref string) (string, error) {
+		return "", errors.New("file not found")
+	})
+
+	eng, err := New(Config{
+		Clock:      clock,
+		Dispatcher: disp,
+		Receipts:   rec,
+		State:      state,
+		Commands:   resolver,
+	})
+	must(t, err)
+	must(t, eng.Register("brain", map[string]project.Automation{
+		"brief": {
+			On:      project.Trigger{Cron: "0 6 * * *"},
+			Agent:   "editor",
+			Command: "command/missing",
+			Catchup: "collapse",
+		},
+	}))
+	must(t, eng.Start(context.Background()))
+	defer eng.Stop()
+
+	deadline := time.Now().Add(200 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		if clock.Pending() >= 1 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+	clock.AdvanceTo(mustParse(t, "2026-05-01T06:00:00Z"))
+
+	deadline = time.Now().Add(500 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		if len(rec.Receipts()) >= 1 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	recs := rec.Receipts()
+	if len(recs) != 1 {
+		t.Fatalf("receipts = %d, want 1", len(recs))
+	}
+	if recs[0].OK {
+		t.Errorf("receipt should be OK=false on resolver error")
+	}
+	if disp.Count() != 0 {
+		t.Errorf("dispatch should not be called when resolver fails")
+	}
+}
+
 func TestEngine_FSWithoutWatcherInConfigRejects(t *testing.T) {
 	// Defensive: if the engine is built without an FSWatcher, fs
 	// automations must error at Register so a programmer doesn't

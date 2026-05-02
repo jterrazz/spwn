@@ -18,24 +18,14 @@ func TestRender_PlainPromptUnchanged(t *testing.T) {
 	}
 }
 
-// ── command: ref placeholder (Phase 2 stub) ─────────────────────────
+// ── empty body errors ───────────────────────────────────────────────
 
-func TestRender_CommandRefPlaceholder(t *testing.T) {
-	// Phase 2 doesn't read spwn/commands/<n>.md from disk yet; the
-	// caller (engine) still has to fire so we can receipt-log the
-	// path. The placeholder is explicit so QA finds it instantly.
-	got, err := renderPrompt("", "command/morning-brief", FireSource{Now: time.Now()})
-	if err != nil {
-		t.Fatalf("render: %v", err)
-	}
-	if !strings.Contains(got, "morning-brief") {
-		t.Errorf("placeholder missing command name: %q", got)
-	}
-}
-
-func TestRender_NeitherBodyErrors(t *testing.T) {
+func TestRender_EmptyBodyErrors(t *testing.T) {
+	// renderPrompt now expects a pre-resolved body. Command refs are
+	// loaded by the Engine via CommandResolver before reaching this
+	// path, so an empty body here is unambiguously a misconfiguration.
 	if _, err := renderPrompt("", "", FireSource{Now: time.Now()}); err == nil {
-		t.Error("expected error when neither prompt nor command set")
+		t.Error("expected error when body is empty")
 	}
 }
 

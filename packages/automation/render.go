@@ -8,41 +8,34 @@ import (
 	"time"
 )
 
-// renderPrompt resolves an automation's body into the final string
-// the dispatcher delivers to the agent. Returns an error if the body
-// is empty (validation should have caught it) or if templating
-// fails — the caller writes a receipt with OK=false and a "render: …"
-// error message rather than dispatching garbage.
+// renderPrompt resolves a pre-loaded body into the final string the
+// dispatcher delivers to the agent. The Engine has already resolved
+// `command:` refs by the time this is called, so body is always the
+// raw template text (whether from `prompt:` or from a command file).
+//
+// Returns an error if body is empty or templating fails — the caller
+// writes a receipt with OK=false and a "render: …" error rather than
+// dispatching garbage.
 //
 // Templating is Go's text/template with a small helper set:
 //
-//   - {{ .Now }}           — wall time of the fire
-//   - {{ .Now | date "..." }} — strftime-style format (Go-layout under the hood)
-//   - {{ .Missed }}        — count of catch-up slots collapsed (0 for on-time)
-//   - {{ .LastFired }}     — previous successful fire's scheduled time
-//   - {{ .Scheduled }}     — the slot this fire covers
-//   - {{ .Reason }}        — "on-time" / "catchup" / fs-event labels
-//   - {{ .Event.Path }}    — fs only (Phase 3); first event path
-//   - {{ .Event.Name }}    — fs only; basename of Path
-//   - {{ .Event.Paths }}   — fs only; full list (debounce coalesces)
-//   - {{ .Event.Kind }}    — fs only; create | write | rename
+//   - {{ .Now }}              — wall time of the fire
+//   - {{ .Now | date "..." }} — strftime-style format
+//   - {{ .Missed }}           — catch-up slot count (0 for on-time)
+//   - {{ .LastFired }}        — previous successful fire's scheduled
+//   - {{ .Scheduled }}        — the slot this fire covers
+//   - {{ .Reason }}           — "on-time" / "catchup" / fs labels
+//   - {{ .Event.Path }}       — fs only; first event path
+//   - {{ .Event.Name }}       — fs only; basename of Path
+//   - {{ .Event.Paths }}      — fs only; full list
+//   - {{ .Event.Kind }}       — fs only; create | write | rename
 //
-// Phase 2 only populates the cron fields; Event is nil and the helper
-// won't crash if a template references it (text/template's missingkey
-// behaviour is handled by Option below).
-//
-// The template fixture for `command:` refs is read by the caller and
-// passed in via body — this function doesn't touch the filesystem.
+// The signature retains the trailing unused `command` arg for
+// backward-compat with the Phase 2 tests that pass it; the engine no
+// longer relies on it.
 func renderPrompt(prompt, command string, src FireSource) (string, error) {
+	_ = command // retained for test signature; Engine resolves refs upstream
 	body := prompt
-	if body == "" && command != "" {
-		// command: ref. Phase 2 stub — Phase 4 will load
-		// spwn/commands/<name>.md from disk. For now, surface a
-		// clear-enough placeholder so the engine can still fire and
-		// integration tests catch the missing-file path.
-		// (Fully wired once the project Root is plumbed through.)
-		body = fmt.Sprintf("[command/%s — body loading deferred to phase 4]", strings.TrimPrefix(command, "command/"))
-	}
 	if body == "" {
 		return "", fmt.Errorf("automation has neither prompt nor command body")
 	}

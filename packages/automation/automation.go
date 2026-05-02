@@ -73,7 +73,8 @@ type Engine struct {
 	dispatcher Dispatcher
 	receipts   ReceiptWriter
 	state      StateStore
-	fs         *FSWatcher // nil if no fs triggers were registered
+	fs         *FSWatcher       // nil if no fs triggers were registered
+	commands   CommandResolver  // nil → only prompt: bodies allowed
 
 	cronParser cron.Parser
 	registered []*registered
@@ -103,13 +104,33 @@ type registered struct {
 // Receipts/State are required; FS is optional — projects with only
 // cron automations can leave it nil. New rejects fs-trigger
 // registrations when FS is nil.
+//
+// Commands resolves `command:` refs to their markdown body. Pass
+// nil for in-process tests with prompt-only automations; in
+// production the architect supplies a loader that reads
+// spwn/commands/<name>.md from the project root.
 type Config struct {
 	Clock      Clock
 	Dispatcher Dispatcher
 	Receipts   ReceiptWriter
 	State      StateStore
 	FS         *FSWatcher
+	Commands   CommandResolver
 }
+
+// CommandResolver loads the body of a `command/<name>` ref. The
+// engine calls Resolve once per fire (no caching) so authors editing
+// command files mid-session see updates without restarting the
+// architect.
+type CommandResolver interface {
+	Resolve(ref string) (string, error)
+}
+
+// CommandResolverFunc adapts a plain function to CommandResolver.
+type CommandResolverFunc func(ref string) (string, error)
+
+// Resolve calls the underlying function.
+func (f CommandResolverFunc) Resolve(ref string) (string, error) { return f(ref) }
 
 // New constructs an Engine. Returns an error if any collaborator is
 // nil — callers can defer those decisions to a builder, but this
@@ -134,6 +155,7 @@ func New(cfg Config) (*Engine, error) {
 		receipts:   cfg.Receipts,
 		state:      cfg.State,
 		fs:         cfg.FS,
+		commands:   cfg.Commands,
 		cronParser: cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow),
 	}, nil
 }
@@ -322,10 +344,23 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 }
 
 // fire is the dispatch path shared by on-time + catch-up cron fires
-// (and, in Phase 3, fs events). Renders the prompt, serialises on
-// the per-agent lock, dispatches, writes a receipt.
+// and fs events. Renders the prompt, serialises on the per-agent
+// lock, dispatches, writes a receipt.
 func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
-	prompt, renderErr := renderPrompt(r.Auto.Prompt, r.Auto.Command, src)
+	body := r.Auto.Prompt
+	if body == "" && r.Auto.Command != "" {
+		if e.commands == nil {
+			e.failFire(r, src, fmt.Errorf("command ref %q used but no CommandResolver configured", r.Auto.Command))
+			return
+		}
+		resolved, err := e.commands.Resolve(r.Auto.Command)
+		if err != nil {
+			e.failFire(r, src, fmt.Errorf("resolve %s: %w", r.Auto.Command, err))
+			return
+		}
+		body = resolved
+	}
+	prompt, renderErr := renderPrompt(body, "", src)
 
 	mu := e.lockForAgent(r.World, r.Auto.Agent)
 	mu.Lock()
@@ -370,6 +405,29 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 		// catch-up that ran 2h late should advance the cursor to
 		// the slot it covered, not to "now".
 		_ = e.state.RecordFire(r.World, r.Name, src.Scheduled)
+	}
+	_ = e.receipts.Write(rec)
+}
+
+// failFire commits a not-OK receipt without ever calling Dispatch.
+// Used when prompt rendering / command resolution fails — the
+// dispatcher would have nothing to send anyway.
+func (e *Engine) failFire(r *registered, src FireSource, cause error) {
+	now := e.clock.Now()
+	rec := Receipt{
+		World:      r.World,
+		Automation: r.Name,
+		Trigger:    src.Kind,
+		Scheduled:  src.Scheduled,
+		Fired:      now,
+		Finished:   now,
+		Reason:     src.Reason,
+		OK:         false,
+		Error:      cause.Error(),
+	}
+	if src.Missed > 0 {
+		rec.Missed = src.Missed
+		rec.LastFired = src.LastFired
 	}
 	_ = e.receipts.Write(rec)
 }
