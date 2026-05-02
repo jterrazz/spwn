@@ -49,6 +49,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	spwn.sh/packages/architect v0.0.0
+	spwn.sh/packages/automation v0.0.0
 	spwn.sh/packages/gate v0.0.0
 	spwn.sh/packages/migration v0.0.0
 	spwn.sh/packages/runtimes v0.0.0
@@ -69,6 +70,8 @@ replace (
 replace spwn.sh/packages/runtimes => ../../packages/runtimes
 
 replace spwn.sh/packages/architect => ../../packages/architect
+
+replace spwn.sh/packages/automation => ../../packages/automation
 
 replace spwn.sh/packages/migration => ../../packages/migration
 
