@@ -36,6 +36,21 @@ type World = intmanifest.World
 // Runtime is the project-wide runtime block from spwn.yaml.
 type Runtime = intmanifest.Runtime
 
+// Automation is one trigger → agent wakeup binding inside a world.
+// See packages/project/internal/manifest for full schema docs.
+type Automation = intmanifest.Automation
+
+// Trigger is the event source of an Automation. Exactly one of
+// Cron / FS is set.
+type Trigger = intmanifest.Trigger
+
+// FSTrigger configures a filesystem-watch event source.
+type FSTrigger = intmanifest.FSTrigger
+
+// Duration wraps time.Duration with a YAML codec that accepts the
+// natural "10s" / "1m" / "1h30m" string form.
+type Duration = intmanifest.Duration
+
 // Project is a loaded spwn project - manifest plus resolved references
 // to the agents it declares.
 type Project struct {

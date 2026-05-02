@@ -127,6 +127,7 @@ func Run(in Input) []Issue {
 		ruleOrphanAgents,
 		ruleKnowledgePath,
 		ruleHookEventsSupported,
+		ruleAutomations,
 	}
 	for _, r := range rules {
 		out = append(out, r(in)...)
