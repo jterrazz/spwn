@@ -173,14 +173,10 @@ func ruleAutomations(in Input) []Issue {
 					Hint:    "use \"collapse\" (single fire on resume; default), \"skip\" (drop missed slots), or \"stack\" (one fire per missed slot, capped at 100)",
 				})
 			}
-			if a.Catchup != "" && hasFS && !hasCron {
-				out = append(out, Issue{
-					Level:   LevelInfo,
-					Path:    pathPrefix + ".catchup",
-					Message: "catchup is cron-only and has no effect on fs triggers",
-					Hint:    "fs watchers always replay the seen-list diff on resume; remove the `catchup:` key here",
-				})
-			}
+			// catchup is meaningful for fs in v1+: `skip` disables
+			// replay-on-startup. Earlier versions emitted an info
+			// "fs is cron-only" — that's been wrong since the
+			// replay path landed.
 
 			// (11) Agent membership.
 			if a.Agent == "" {

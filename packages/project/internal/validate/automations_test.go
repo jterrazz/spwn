@@ -509,7 +509,9 @@ func TestAutomations_Catchup_UnknownModeRejected(t *testing.T) {
 	expectIssue(t, ruleAutomations(in), LevelError, "unknown catchup mode")
 }
 
-func TestAutomations_Catchup_OnFsLogsInfo(t *testing.T) {
+func TestAutomations_Catchup_OnFsAccepted(t *testing.T) {
+	// catchup is meaningful for fs since v1+: `skip` disables
+	// replay-on-startup. Validator should accept it without warning.
 	root := t.TempDir()
 	mkdir(t, root, "inbox")
 	in := automationInput(t, root, automationFixture{
@@ -521,13 +523,17 @@ func TestAutomations_Catchup_OnFsLogsInfo(t *testing.T) {
 						On:      intmanifest.Trigger{FS: &intmanifest.FSTrigger{Path: "./inbox"}},
 						Agent:   "curator",
 						Prompt:  "go",
-						Catchup: "collapse", // legal value, but no effect on fs
+						Catchup: "skip", // disables fs replay-on-startup
 					},
 				},
 			},
 		},
 	})
-	expectIssue(t, ruleAutomations(in), LevelInfo, "catchup is cron-only")
+	for _, iss := range ruleAutomations(in) {
+		if strings.Contains(iss.Message, "catchup") {
+			t.Errorf("unexpected catchup-related issue on fs: %+v", iss)
+		}
+	}
 }
 
 // ── (11) Agent membership ───────────────────────────────────────────
