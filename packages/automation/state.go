@@ -62,9 +62,25 @@ func (s *MemoryStateStore) RecordFire(world, name string, scheduled time.Time) e
 // → RFC3339 timestamps. Adding fields later (e.g. "last_run_id" for
 // dashboard correlation) means widening to a struct value, which can
 // be done without breaking old files via a migration step.
+//
+// The map is loaded once on first access and held in memory; reads
+// are O(1) instead of file-IO per call. Writes update the in-memory
+// map AND rewrite the file atomically, so a crash leaves the cache
+// and disk consistent on next boot.
+//
+// Corruption safety: if the on-disk JSON fails to parse, the store
+// flips into a "tainted" mode that refuses RecordFire so a subsequent
+// successful fire can't atomically overwrite the (presumably
+// hand-edited or partially-written) file and lose the rest of the
+// project's cursors. The engine surfaces the write error; callers
+// see the surface and can intervene before more data is at risk.
 type FileStateStore struct {
 	Path string
-	mu   sync.Mutex
+
+	mu      sync.Mutex
+	loaded  bool
+	tainted error                // non-nil if the file existed but failed to parse
+	entries map[string]time.Time // in-memory cache, mirrors disk
 }
 
 // NewFileStateStore constructs a writer rooted at path. The file is
@@ -74,45 +90,78 @@ func NewFileStateStore(path string) *FileStateStore {
 	return &FileStateStore{Path: path}
 }
 
-// LastFired returns the persisted cursor, reading the file each call.
-// JSON re-decode is cheap (the file holds at most one entry per
-// automation) and stale-cache hazards beat the perf cost.
+// LastFired returns the persisted cursor. Reads the in-memory cache;
+// the cache is loaded from disk on first call.
 func (s *FileStateStore) LastFired(world, name string) (time.Time, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	entries, _ := s.readLocked()
-	t, ok := entries[stateKey(world, name)]
+	s.ensureLoadedLocked()
+	t, ok := s.entries[stateKey(world, name)]
 	return t, ok
 }
 
 // RecordFire persists scheduled and rewrites the file atomically.
-// Errors propagate so the engine can log them, but the engine treats
-// state-write failures as non-fatal: the next catch-up will
-// re-detect the missed slot and re-fire, matching the
-// "rappels-Apple" semantics of the catch-up design.
+// Returns an error when the on-disk file was corrupt at load — the
+// store refuses to write so the existing data isn't clobbered.
+// Engine treats other state-write failures as non-fatal (the next
+// catch-up re-detects the missed slot), but a tainted store means
+// the user has to intervene.
 func (s *FileStateStore) RecordFire(world, name string, scheduled time.Time) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	entries, _ := s.readLocked()
-	if entries == nil {
-		entries = map[string]time.Time{}
+	s.ensureLoadedLocked()
+	if s.tainted != nil {
+		return fmt.Errorf("state file is tainted (parse failed at load) — refusing to overwrite: %w", s.tainted)
 	}
-	entries[stateKey(world, name)] = scheduled
-	return s.writeLocked(entries)
+	if s.entries == nil {
+		s.entries = map[string]time.Time{}
+	}
+	s.entries[stateKey(world, name)] = scheduled
+	return s.writeLocked(s.entries)
 }
 
-// readLocked parses the on-disk JSON. Caller holds s.mu.
-func (s *FileStateStore) readLocked() (map[string]time.Time, error) {
+// ensureLoadedLocked populates the in-memory cache from disk on
+// first call. Subsequent calls are O(1). Caller holds s.mu.
+func (s *FileStateStore) ensureLoadedLocked() {
+	if s.loaded {
+		return
+	}
+	s.loaded = true
 	data, err := os.ReadFile(s.Path)
 	if err != nil {
 		// Missing file is the empty-state case, not an error.
-		return map[string]time.Time{}, nil
+		s.entries = map[string]time.Time{}
+		return
 	}
 	var raw map[string]time.Time
 	if err := json.Unmarshal(data, &raw); err != nil {
-		return map[string]time.Time{}, fmt.Errorf("state file %s parse: %w", s.Path, err)
+		// File exists but is corrupt. Keep the cache empty (so
+		// LastFired returns "not found" → engine treats every
+		// automation as first-boot, no catch-up) AND mark the store
+		// tainted so RecordFire refuses to overwrite the file.
+		// Operator must inspect / repair before the cursor advances
+		// again.
+		s.entries = map[string]time.Time{}
+		s.tainted = err
+		return
 	}
-	return raw, nil
+	if raw == nil {
+		raw = map[string]time.Time{}
+	}
+	s.entries = raw
+}
+
+// IsTainted reports whether the store refused to load the file due
+// to parse error. Returns the underlying parse error or nil.
+//
+// Callers (CLI status, daemon boot) should check this and surface
+// the error to the user — a silent tainted store means catch-up
+// won't fire and the user gets no warning.
+func (s *FileStateStore) IsTainted() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.ensureLoadedLocked()
+	return s.tainted
 }
 
 // writeLocked atomically replaces the state file. Caller holds s.mu.

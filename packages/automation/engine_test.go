@@ -3,6 +3,8 @@ package automation
 import (
 	"context"
 	"errors"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -625,6 +627,92 @@ func TestEngine_FSWithoutWatcherInConfigRejects(t *testing.T) {
 	})
 	if err == nil {
 		t.Error("expected error registering fs trigger without FSWatcher")
+	}
+}
+
+// ── Error logging surfaces ──────────────────────────────────────────
+
+// captureLogger is a Logger that records Warnf calls. Used to assert
+// that swallowed errors are surfaced rather than silently dropped.
+type captureLogger struct {
+	mu   sync.Mutex
+	msgs []string
+}
+
+func (c *captureLogger) Warnf(format string, args ...any) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.msgs = append(c.msgs, format)
+}
+
+func (c *captureLogger) snapshot() []string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	out := make([]string, len(c.msgs))
+	copy(out, c.msgs)
+	return out
+}
+
+// failingReceiptWriter returns a stub error from every Write so we
+// can confirm the engine logs the failure rather than swallowing it.
+type failingReceiptWriter struct{}
+
+func (failingReceiptWriter) Write(_ Receipt) error { return errors.New("disk full") }
+
+func TestEngine_ReceiptWriteFailureIsLogged(t *testing.T) {
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	logger := &captureLogger{}
+	disp := NewMockDispatcher()
+	state := NewMemoryStateStore()
+
+	eng, err := New(Config{
+		Clock:      clock,
+		Dispatcher: disp,
+		Receipts:   failingReceiptWriter{},
+		State:      state,
+		Logger:     logger,
+	})
+	must(t, err)
+	must(t, eng.Register("brain", map[string]project.Automation{
+		"brief": cronAuto("0 6 * * *", "editor", "go"),
+	}))
+	must(t, eng.Start(context.Background()))
+	defer eng.Stop()
+
+	// Wait for the cron loop to register its timer, then advance
+	// past the slot.
+	deadline := time.Now().Add(200 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		if clock.Pending() >= 1 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+	clock.AdvanceTo(mustParse(t, "2026-05-01T06:00:00Z"))
+
+	// Wait for the dispatcher to be hit (which means fire ran +
+	// receipt write was attempted).
+	deadline = time.Now().Add(500 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		if disp.Count() >= 1 && len(logger.snapshot()) >= 1 {
+			break
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	got := logger.snapshot()
+	if len(got) == 0 {
+		t.Fatal("expected at least one Warnf call from the failed receipt write")
+	}
+	found := false
+	for _, msg := range got {
+		if strings.Contains(msg, "receipt write failed") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected 'receipt write failed' in logger messages, got: %v", got)
 	}
 }
 

@@ -18,7 +18,20 @@ This page is the user guide. For the public Go API see
 
 ## Quickstart
 
-Add an automation to one of your worlds:
+**Prerequisites.** Automations dispatch INTO a running world's
+container. Before you write your first automation, scaffold the
+project end-to-end:
+
+```bash
+spwn init                    # creates spwn.yaml + spwn/agents/
+spwn agent new editor        # creates spwn/agents/editor/
+spwn check                   # confirm the tree is valid
+spwn up                      # bring up the world (architect spawns containers)
+```
+
+Once you have a running world, add the automation block to your
+`spwn.yaml` (the example shows a minimal entry; merge into the
+existing worlds map):
 
 ```yaml
 # spwn.yaml
@@ -26,7 +39,7 @@ version: 1
 name: my-project
 
 worlds:
-  brain:
+  brain:                                # the world `spwn up` brought online
     agents: [editor]
     workspaces: [.]
     automations:
@@ -37,7 +50,18 @@ worlds:
         prompt: "Review yesterday's journal and write a brief."
 ```
 
-Run the engine:
+Verify with `spwn check` (parses the new block) and `spwn automation ls`
+(shows the entry plus its placeholder `LAST FIRED`):
+
+```
+$ spwn check
+✓ Project is valid
+$ spwn automation ls
+WORLD  NAME           TRIGGER         AGENT   LAST FIRED
+brain  morning-brief  cron 0 6 * * *  editor  —
+```
+
+Then run the engine:
 
 ```
 $ spwn automation daemon
@@ -50,6 +74,12 @@ ctrl-c to stop
 The daemon blocks. Every time a trigger fires, a row is appended to
 `.spwn/runs.jsonl` and the agent receives the prompt inside its
 running world.
+
+> **Heads up:** `spwn automation daemon` does NOT bring worlds up.
+> Run `spwn up <world>` first; otherwise fires record as failed
+> receipts ("no running world found"). The daemon is stateless
+> beyond its receipts — it loads the manifest at boot, so any edit
+> to `spwn.yaml` requires a daemon restart to take effect.
 
 ---
 
@@ -121,6 +151,21 @@ fires a catch-up. The engine doesn't fabricate history.
 naturally via fsnotify; events that arrived during downtime are
 just lost (architect-down windows are visible as gaps in the
 receipts log).
+
+**DST gaps are silently dropped.** Cron expressions evaluate against
+the host's local time. On the spring-forward day in regions that
+observe DST, the wall-clock hour skipped (e.g. 02:00→03:00 in US
+Eastern) is missing entirely — `cron: "0 2 * * *"` will not fire on
+the gap day, and no catch-up is recorded for the missing slot. If
+this matters, schedule the cron at a non-gap hour (`0 3 * * *`) or
+express it in UTC by running the daemon with `TZ=UTC`.
+
+**Time-zone footgun.** The engine evaluates schedules in the time
+zone of the recorded last-fired cursor. If the host's `TZ` changes
+between fires (laptop travel, server reconfiguration), slots may
+land at unexpected wall-clock hours until the cursor is rewritten
+by a successful fire. Run the daemon with a fixed `TZ` if cron
+slots must be stable across moves.
 
 ---
 
@@ -333,14 +378,39 @@ every day". When in doubt, paste your expression into
 
 ### My fs trigger doesn't fire
 
-- Confirm the path exists: `spwn check` warns about missing paths,
-  but a typo'd absolute path skips that warning.
+- Confirm the path exists: `spwn check` blocks on missing paths
+  with an explicit error.
 - Check the events filter. Default is `[create]` — files modified
   in place but never created don't fire.
-- Pattern globs match the **basename**, not the full path. Use
-  `*.md`, not `**/*.md`.
 - The engine watches directories, not files. Set `path:` to the
   parent directory and use `patterns:` to filter.
+- **Pattern syntax is `filepath.Match`, not shell glob.** Brace
+  expansion (`*.{md,txt}`) and doublestar (`**/*.md`) are NOT
+  supported and `spwn check` rejects them. Use multiple patterns
+  for the brace case (`["*.md", "*.txt"]`) and combine
+  `recursive: true` + a basename pattern for the doublestar case
+  (`recursive: true, patterns: ["*.md"]`).
+- Files added while the daemon was down are NOT replayed. fsnotify
+  only sees events from after `daemon` started.
+
+### Editor saves fire two receipts per save
+
+Most editors save atomically: write `foo.md.tmp`, then rename to
+`foo.md`. fsnotify reports a Create on both files. Filter out the
+temp file with patterns:
+
+```yaml
+patterns: ["*.md", "!*.tmp", "!.*.swp"]   # last two NOT supported — see below
+```
+
+Negation isn't supported by `filepath.Match` either. The pragmatic
+workarounds:
+
+- Use a debounce window (default 1s) wide enough that both events
+  collapse into a single fire — the rendered prompt's `.Event.Paths`
+  lists every file touched in the burst.
+- Have the agent inspect `.Event.Paths` and skip swap/temp files
+  itself.
 
 ### `spwn automation logs` is empty
 
@@ -349,6 +419,20 @@ running. `spwn automation status` shows whether any fires have been
 recorded.
 
 ---
+
+## Limitations (v1)
+
+- **One automation = one agent.** Multi-step pipelines (e.g. run
+  agent A, then B with A's output, then C with both) cannot be
+  expressed as a single automation. Workarounds: have the trigger
+  fire a coordinator agent that delegates to others, or shell out
+  from the prompt to a `make` target that orchestrates.
+- **No hot-reload.** The engine loads the manifest at `Start` and
+  registers triggers once. Editing `spwn.yaml` while the daemon
+  runs has no effect until restart.
+- **No flock on receipts/state.** Two `spwn automation daemon`
+  processes targeting the same project can interleave receipts
+  and clobber the state cursor. Run one daemon per project.
 
 ## What's next
 

@@ -200,26 +200,46 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 		return out
 	}
 
-	// fs.path resolves on disk (warn if missing — engine still wires
-	// the watcher, just won't fire until the dir exists).
-	resolved := fs.Path
-	if !filepath.IsAbs(resolved) {
-		resolved = filepath.Join(root, resolved)
-	}
-	if info, err := os.Stat(resolved); err != nil {
-		out = append(out, Issue{
-			Level:   LevelWarning,
-			Path:    pathPrefix + ".path",
-			Message: fmt.Sprintf("watch path %q does not exist on disk", fs.Path),
-			Hint:    fmt.Sprintf("create the directory (e.g. `mkdir -p %s`) before `spwn up`, or fix the path", fs.Path),
-		})
-	} else if !info.IsDir() {
+	// Reject paths that contain glob meta-characters at the path
+	// position — these belong in `patterns:`, not `path:`. Without
+	// this, the validator's "does not exist" hint would tell users
+	// to `mkdir -p ./inbox/*.md`, which is nonsense.
+	pathHasGlob := strings.ContainsAny(fs.Path, "*?[")
+	if pathHasGlob {
 		out = append(out, Issue{
 			Level:   LevelError,
 			Path:    pathPrefix + ".path",
-			Message: fmt.Sprintf("watch path %q is a file, not a directory", fs.Path),
-			Hint:    "fs triggers watch directories — use the parent directory and `patterns:` to filter",
+			Message: fmt.Sprintf("watch path %q contains glob characters", fs.Path),
+			Hint:    "the watcher watches directories; move the glob to `patterns:` and set `path:` to the parent dir",
 		})
+	}
+
+	// fs.path must exist on disk. The watcher's recursive-walk on
+	// Add (filepath.Walk) returns an error when the root is missing
+	// — the daemon dies at register time with a confusing
+	// "lstat ./inbox: no such file" error rather than the friendly
+	// hint here. Upgrading missing-path from warning to error so
+	// `spwn check` blocks before the daemon ever fails.
+	resolved := strings.TrimSpace(fs.Path)
+	if !filepath.IsAbs(resolved) {
+		resolved = filepath.Join(root, resolved)
+	}
+	if !pathHasGlob {
+		if info, err := os.Stat(resolved); err != nil {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    pathPrefix + ".path",
+				Message: fmt.Sprintf("watch path %q does not exist on disk", strings.TrimSpace(fs.Path)),
+				Hint:    fmt.Sprintf("create the directory before `spwn up` (e.g. `mkdir -p %s`), or fix the path", strings.TrimSpace(fs.Path)),
+			})
+		} else if !info.IsDir() {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    pathPrefix + ".path",
+				Message: fmt.Sprintf("watch path %q is a file, not a directory", fs.Path),
+				Hint:    "fs triggers watch directories — use the parent directory and `patterns:` to filter",
+			})
+		}
 	}
 
 	// fs.events allow-list. The default ([create]) was applied by
@@ -262,15 +282,49 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 		})
 	}
 
-	// fs.patterns — string non-emptiness only. Doublestar's grammar
-	// is too permissive to validate fully here without false positives.
+	// fs.patterns — non-empty + supported-syntax. The engine uses
+	// stdlib filepath.Match which does NOT support brace expansion
+	// (`{md,txt}`) or doublestar (`**`). Both are common shell-glob
+	// idioms; users copy-paste from .gitignore and silently get zero
+	// matches. Probe each pattern with filepath.Match against a
+	// dummy basename — Match returns ErrBadPattern for syntactically
+	// invalid globs.
 	for i, p := range fs.Patterns {
-		if strings.TrimSpace(p) == "" {
+		field := fmt.Sprintf("%s.patterns[%d]", pathPrefix, i)
+		trimmed := strings.TrimSpace(p)
+		if trimmed == "" {
 			out = append(out, Issue{
 				Level:   LevelError,
-				Path:    fmt.Sprintf("%s.patterns[%d]", pathPrefix, i),
+				Path:    field,
 				Message: "pattern must be a non-empty glob",
 				Hint:    "remove the entry, or use \"*.md\" / \"prefix-*\" / similar",
+			})
+			continue
+		}
+		if strings.Contains(trimmed, "{") || strings.Contains(trimmed, "}") {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    field,
+				Message: fmt.Sprintf("pattern %q uses brace expansion, which filepath.Match does not support", trimmed),
+				Hint:    "split into multiple patterns — e.g. [\"*.md\", \"*.txt\"] instead of \"*.{md,txt}\"",
+			})
+			continue
+		}
+		if strings.Contains(trimmed, "**") {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    field,
+				Message: fmt.Sprintf("pattern %q uses doublestar, which filepath.Match does not support", trimmed),
+				Hint:    "set `recursive: true` on the trigger and use a basename pattern like \"*.md\"",
+			})
+			continue
+		}
+		if _, err := filepath.Match(trimmed, "x"); err != nil {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    field,
+				Message: fmt.Sprintf("pattern %q is not a valid filepath.Match glob: %v", trimmed, err),
+				Hint:    "supported: literal names, `*` (any chars except `/`), `?` (single char), `[abc]` character classes",
 			})
 		}
 	}

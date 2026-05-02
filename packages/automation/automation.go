@@ -55,6 +55,8 @@ package automation
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"path/filepath"
 	"sort"
 	"sync"
@@ -65,6 +67,31 @@ import (
 	"spwn.sh/packages/project"
 )
 
+// Logger is the engine's minimal sink for non-fatal errors that
+// would otherwise be swallowed (receipt write fails, state cursor
+// fails, fsnotify watcher errors). The default writes a "spwn:
+// automation:" prefixed line to stderr; production callers can
+// inject a structured logger that routes to journald / etc.
+type Logger interface {
+	Warnf(format string, args ...any)
+}
+
+// stderrLogger is the default Logger. Wraps the standard log package
+// with a fixed prefix so a single grep ("spwn: automation:") finds
+// every dropped-error line in journalctl / `tail -f /var/log`.
+type stderrLogger struct{ l *log.Logger }
+
+func (s stderrLogger) Warnf(format string, args ...any) {
+	s.l.Printf("spwn: automation: "+format, args...)
+}
+
+// defaultLogger writes to os.Stderr and is used when Config.Logger
+// is nil. Constructed lazily in New so tests that inject a Logger
+// don't see stray output.
+func defaultLogger() Logger {
+	return stderrLogger{l: log.New(os.Stderr, "", log.LstdFlags|log.Lmsgprefix)}
+}
+
 // Engine is the in-process trigger scheduler. One Engine per
 // architect daemon — Register tracked automations before Start, then
 // Stop on shutdown.
@@ -73,8 +100,9 @@ type Engine struct {
 	dispatcher Dispatcher
 	receipts   ReceiptWriter
 	state      StateStore
-	fs         *FSWatcher       // nil if no fs triggers were registered
-	commands   CommandResolver  // nil → only prompt: bodies allowed
+	fs         *FSWatcher      // nil if no fs triggers were registered
+	commands   CommandResolver // nil → only prompt: bodies allowed
+	logger     Logger          // never nil; defaults to stderr
 
 	cronParser cron.Parser
 	registered []*registered
@@ -87,7 +115,11 @@ type Engine struct {
 	mu      sync.Mutex
 	started bool
 	cancel  context.CancelFunc
-	wg      sync.WaitGroup
+	// runCtx is the cancellable context handed out to per-trigger
+	// goroutines (cron loops and fs handlers). Set in Start, cancelled
+	// in Stop. Nil before Start; readers should check.
+	runCtx context.Context
+	wg     sync.WaitGroup
 }
 
 // registered is the engine's view of one automation: the parsed
@@ -116,6 +148,10 @@ type Config struct {
 	State      StateStore
 	FS         *FSWatcher
 	Commands   CommandResolver
+	// Logger receives non-fatal errors that would otherwise be
+	// swallowed (receipt write failure, state cursor write failure).
+	// Defaults to a stderr logger when nil.
+	Logger Logger
 }
 
 // CommandResolver loads the body of a `command/<name>` ref. The
@@ -149,6 +185,10 @@ func New(cfg Config) (*Engine, error) {
 	if cfg.State == nil {
 		return nil, fmt.Errorf("automation: State is required")
 	}
+	logger := cfg.Logger
+	if logger == nil {
+		logger = defaultLogger()
+	}
 	return &Engine{
 		clock:      cfg.Clock,
 		dispatcher: cfg.Dispatcher,
@@ -156,6 +196,7 @@ func New(cfg Config) (*Engine, error) {
 		state:      cfg.State,
 		fs:         cfg.FS,
 		commands:   cfg.Commands,
+		logger:     logger,
 		cronParser: cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow),
 	}, nil
 }
@@ -194,7 +235,17 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 				Debounce:  a.On.FS.Debounce.AsDuration(),
 			}
 			handler := func(ev DebouncedFSEvent) {
-				e.fire(context.Background(), rr, FireSource{
+				// Capture the engine's runCtx at fire time so an
+				// in-flight Dispatch is interruptible by Stop. Until
+				// Start runs, runCtx is nil — and the watcher's pump
+				// also doesn't dispatch until Start, so the nil
+				// branch is unreachable in normal flow. Defensive
+				// fallback to Background keeps a misuse safe.
+				ctx := e.runCtx
+				if ctx == nil {
+					ctx = context.Background()
+				}
+				e.fire(ctx, rr, FireSource{
 					Kind:       "fs",
 					Reason:     ev.Kind + ":" + filepath.Base(ev.Paths[0]),
 					Now:        e.clock.Now(),
@@ -238,6 +289,7 @@ func (e *Engine) Start(ctx context.Context) error {
 	e.started = true
 	ctx, cancel := context.WithCancel(ctx)
 	e.cancel = cancel
+	e.runCtx = ctx
 	e.mu.Unlock()
 
 	for _, r := range e.registered {
@@ -383,7 +435,9 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 		rec.Finished = e.clock.Now()
 		rec.OK = false
 		rec.Error = "render: " + renderErr.Error()
-		_ = e.receipts.Write(rec)
+		if werr := e.receipts.Write(rec); werr != nil {
+			e.logger.Warnf("receipt write failed for %s/%s (render error): %v", r.World, r.Name, werr)
+		}
 		return
 	}
 
@@ -404,9 +458,18 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 		// anchor. We record the SCHEDULED time, not Fired — a
 		// catch-up that ran 2h late should advance the cursor to
 		// the slot it covered, not to "now".
-		_ = e.state.RecordFire(r.World, r.Name, src.Scheduled)
+		if serr := e.state.RecordFire(r.World, r.Name, src.Scheduled); serr != nil {
+			// State write failure is non-fatal: the next catch-up
+			// will re-detect the missed slot and re-fire (collapse
+			// mode) or skip (skip mode). Surface the error so an
+			// operator with a tainted state file or a disk-full
+			// condition has a trail.
+			e.logger.Warnf("state cursor write failed for %s/%s: %v", r.World, r.Name, serr)
+		}
 	}
-	_ = e.receipts.Write(rec)
+	if werr := e.receipts.Write(rec); werr != nil {
+		e.logger.Warnf("receipt write failed for %s/%s: %v", r.World, r.Name, werr)
+	}
 }
 
 // failFire commits a not-OK receipt without ever calling Dispatch.
@@ -429,13 +492,26 @@ func (e *Engine) failFire(r *registered, src FireSource, cause error) {
 		rec.Missed = src.Missed
 		rec.LastFired = src.LastFired
 	}
-	_ = e.receipts.Write(rec)
+	if werr := e.receipts.Write(rec); werr != nil {
+		e.logger.Warnf("receipt write failed for %s/%s (failFire %s): %v", r.World, r.Name, cause, werr)
+	}
+}
+
+// agentLockKey is the registry key for a (world, agent) pair. We use
+// a struct rather than `world+"/"+agent` because the slug regex
+// allows `-` but not `/` per validation, however a programmatic
+// caller (or a future scheme that does allow `/`) could collide
+// `("foo/bar","baz")` with `("foo","bar/baz")` and silently
+// serialise unrelated agents on a single mutex.
+type agentLockKey struct {
+	world string
+	agent string
 }
 
 // lockForAgent returns the mutex serialising Dispatch for a given
 // (world, agent) pair. Lazy-allocated.
 func (e *Engine) lockForAgent(world, agent string) *sync.Mutex {
-	key := world + "/" + agent
+	key := agentLockKey{world: world, agent: agent}
 	if m, ok := e.agentLocks.Load(key); ok {
 		return m.(*sync.Mutex)
 	}

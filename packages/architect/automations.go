@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"spwn.sh/packages/automation"
@@ -13,6 +14,14 @@ import (
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/models"
 )
+
+// commandSlugRe is the same kebab-case slug regex the validator
+// enforces on command/<name> refs at parse time. The resolver
+// re-applies it so a programmatic caller bypassing the validator
+// (engine-side, today; or a future API consumer) can't smuggle in
+// `command/../../etc/passwd` and read arbitrary .md files outside
+// the project's commands directory. Defence-in-depth.
+var commandSlugRe = regexp.MustCompile(`^[a-z][a-z0-9-]*$`)
 
 // AutomationDispatcher implements automation.Dispatcher by reaching
 // into a running world's container and exec'ing the agent's runtime
@@ -187,6 +196,16 @@ func (r *CommandFileResolver) Resolve(ref string) (string, error) {
 	name := strings.TrimPrefix(ref, prefix)
 	if name == "" {
 		return "", fmt.Errorf("empty command name")
+	}
+	// Path-traversal guard: enforce the same slug regex the
+	// validator applies at parse time. Without this, a ref like
+	// `command/../../etc/passwd` would walk above the project root
+	// and read arbitrary .md files. The validator already rejects
+	// such refs in static manifests, but the resolver is the only
+	// thing the engine relies on at fire time — a programmatic
+	// caller bypassing the validator would otherwise sneak through.
+	if !commandSlugRe.MatchString(name) {
+		return "", fmt.Errorf("command name %q must be a kebab-case slug (^[a-z][a-z0-9-]*$)", name)
 	}
 	path := filepath.Join(r.ProjectRoot, "spwn", "commands", name+".md")
 	data, err := os.ReadFile(path)

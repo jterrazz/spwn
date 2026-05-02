@@ -51,12 +51,24 @@ type fsnotifySource struct {
 	// recursiveRoots tracks which Add calls were recursive so we
 	// know whether to follow new subdirs created under them.
 	recursiveRoots map[string]struct{}
+	// logger receives every fsnotify error. Critical for diagnosing
+	// "watcher silently died" scenarios (kqueue exhaustion, ENFILE,
+	// directory deleted out from under us).
+	logger Logger
 }
 
 // NewFSNotifySource constructs a production RawFSSource backed by
 // fsnotify. Returns an error if the OS-level watcher can't be
 // allocated (rare — typically inotify/kqueue exhaustion).
-func NewFSNotifySource() (RawFSSource, error) {
+//
+// The logger receives non-fatal fsnotify errors that would otherwise
+// be dropped (e.g. kqueue exhaustion mid-flight). Pass nil for the
+// stderr default; tests can supply a capturing logger to assert on
+// surfaced errors.
+func NewFSNotifySource(logger Logger) (RawFSSource, error) {
+	if logger == nil {
+		logger = defaultLogger()
+	}
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fmt.Errorf("fsnotify: %w", err)
@@ -66,6 +78,7 @@ func NewFSNotifySource() (RawFSSource, error) {
 		out:            make(chan RawFSEvent, 64),
 		done:           make(chan struct{}),
 		recursiveRoots: make(map[string]struct{}),
+		logger:         logger,
 	}
 	go s.pump()
 	return s, nil
@@ -120,11 +133,19 @@ func (s *fsnotifySource) pump() {
 			case <-s.done:
 				return
 			}
-		case <-s.watcher.Errors:
-			// fsnotify errors are non-fatal for our purposes — the
-			// watcher continues. Drop the error rather than crashing
-			// the engine; surfacing it would require an out-of-band
-			// channel we don't have wired yet.
+		case err, ok := <-s.watcher.Errors:
+			if !ok {
+				return
+			}
+			// fsnotify errors are non-fatal — the watcher continues
+			// where possible. Surface them through the logger so
+			// kqueue exhaustion / ENFILE / "watched dir deleted"
+			// scenarios leave a trail; without this the watcher
+			// would silently die and the user would only notice
+			// from "no receipts" hours later.
+			if err != nil && s.logger != nil {
+				s.logger.Warnf("fsnotify: %v", err)
+			}
 		}
 	}
 }

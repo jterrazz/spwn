@@ -98,6 +98,68 @@ func TestFileStateStore_AtomicReplace(t *testing.T) {
 	}
 }
 
+func TestFileStateStore_CorruptFileTaintsStore(t *testing.T) {
+	// Corrupt JSON in state.json must NOT silently produce an empty
+	// map that the next RecordFire could atomically overwrite —
+	// that would clobber every other automation's cursor with one
+	// hand-edit. The store flips into "tainted" mode and refuses
+	// RecordFire until the file is repaired.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "state.json")
+	if err := os.WriteFile(path, []byte("{not valid json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := NewFileStateStore(path)
+
+	// LastFired returns not-found (engine treats this as first-boot).
+	if _, ok := s.LastFired("brain", "x"); ok {
+		t.Errorf("tainted store should report not-found from LastFired")
+	}
+
+	// IsTainted surfaces the parse error.
+	if err := s.IsTainted(); err == nil {
+		t.Errorf("IsTainted should return parse error, got nil")
+	}
+
+	// RecordFire refuses to overwrite the corrupt file.
+	err := s.RecordFire("brain", "x", mustParse(t, "2026-05-01T06:00:00Z"))
+	if err == nil {
+		t.Errorf("RecordFire on tainted store should error")
+	}
+
+	// File on disk is unchanged.
+	data, _ := os.ReadFile(path)
+	if string(data) != "{not valid json" {
+		t.Errorf("state file should be unchanged on tainted store, got: %s", string(data))
+	}
+}
+
+func TestFileStateStore_LoadOnceCachesAcrossReads(t *testing.T) {
+	// LastFired re-reads the file every call before this fix —
+	// 100×5.7ms = 576ms boot stall. After the fix, the cache loads
+	// once. We can't time it directly but we can confirm a corrupt
+	// file written AFTER load doesn't change behaviour.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "state.json")
+	s := NewFileStateStore(path)
+	must(t, s.RecordFire("brain", "x", mustParse(t, "2026-05-01T06:00:00Z")))
+
+	// Caller observes the value.
+	if _, ok := s.LastFired("brain", "x"); !ok {
+		t.Fatal("first LastFired should find the entry")
+	}
+
+	// Corrupt the file behind the store's back. Cache should hide
+	// this from subsequent reads (well-behaved test fixture: nothing
+	// else mutates the store while corruption is in place).
+	if err := os.WriteFile(path, []byte("{not valid json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := s.LastFired("brain", "x"); !ok {
+		t.Errorf("cached read should still find entry after on-disk corruption")
+	}
+}
+
 func TestFileStateStore_ParentDirCreated(t *testing.T) {
 	dir := t.TempDir()
 	// Nested path that doesn't exist yet — RecordFire should mkdir it.

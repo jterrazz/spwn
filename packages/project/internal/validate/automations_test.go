@@ -133,7 +133,11 @@ func TestAutomations_Cron_StandardFiveFieldAccepted(t *testing.T) {
 
 // ── (4) FS path on disk ─────────────────────────────────────────────
 
-func TestAutomations_FS_MissingPathWarns(t *testing.T) {
+func TestAutomations_FS_MissingPathErrors(t *testing.T) {
+	// Upgraded from warning to error: filepath.Walk in the watcher's
+	// Add fails at register time when the root is missing, killing
+	// the daemon with a confusing lstat error. Block at validate
+	// time instead.
 	in := automationInput(t, t.TempDir(), automationFixture{
 		Worlds: map[string]worldFixture{
 			"brain": {
@@ -148,7 +152,71 @@ func TestAutomations_FS_MissingPathWarns(t *testing.T) {
 			},
 		},
 	})
-	expectIssue(t, ruleAutomations(in), LevelWarning, "does not exist")
+	expectIssue(t, ruleAutomations(in), LevelError, "does not exist")
+}
+
+func TestAutomations_FS_GlobInPathRejected(t *testing.T) {
+	in := automationInput(t, t.TempDir(), automationFixture{
+		Worlds: map[string]worldFixture{
+			"brain": {
+				Agents: []string{"curator"},
+				Automations: map[string]intmanifest.Automation{
+					"inbox": {
+						On:     intmanifest.Trigger{FS: &intmanifest.FSTrigger{Path: "./inbox/*.md"}},
+						Agent:  "curator",
+						Prompt: "go",
+					},
+				},
+			},
+		},
+	})
+	expectIssue(t, ruleAutomations(in), LevelError, "contains glob characters")
+}
+
+func TestAutomations_FS_BraceExpansionRejected(t *testing.T) {
+	root := t.TempDir()
+	mkdir(t, root, "inbox")
+	in := automationInput(t, root, automationFixture{
+		Worlds: map[string]worldFixture{
+			"brain": {
+				Agents: []string{"curator"},
+				Automations: map[string]intmanifest.Automation{
+					"inbox": {
+						On: intmanifest.Trigger{FS: &intmanifest.FSTrigger{
+							Path:     "./inbox",
+							Patterns: []string{"*.{md,txt}"},
+						}},
+						Agent:  "curator",
+						Prompt: "go",
+					},
+				},
+			},
+		},
+	})
+	expectIssue(t, ruleAutomations(in), LevelError, "brace expansion")
+}
+
+func TestAutomations_FS_DoublestarRejected(t *testing.T) {
+	root := t.TempDir()
+	mkdir(t, root, "inbox")
+	in := automationInput(t, root, automationFixture{
+		Worlds: map[string]worldFixture{
+			"brain": {
+				Agents: []string{"curator"},
+				Automations: map[string]intmanifest.Automation{
+					"inbox": {
+						On: intmanifest.Trigger{FS: &intmanifest.FSTrigger{
+							Path:     "./inbox",
+							Patterns: []string{"**/*.md"},
+						}},
+						Agent:  "curator",
+						Prompt: "go",
+					},
+				},
+			},
+		},
+	})
+	expectIssue(t, ruleAutomations(in), LevelError, "doublestar")
 }
 
 func TestAutomations_FS_FileInsteadOfDirErrors(t *testing.T) {

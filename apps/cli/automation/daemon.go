@@ -65,7 +65,7 @@ resumes at the next scheduled time.`,
 		// real clock for cron. The factory wires up the rest
 		// (dispatcher, receipts, state, command resolver) from the
 		// project root.
-		fsSource, err := automation.NewFSNotifySource()
+		fsSource, err := automation.NewFSNotifySource(nil) // nil → stderr default
 		if err != nil {
 			return fmt.Errorf("fsnotify: %w", err)
 		}

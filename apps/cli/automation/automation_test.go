@@ -115,6 +115,33 @@ func TestDecodeReceipts_ParsesAllRows(t *testing.T) {
 	}
 }
 
+func TestDecodeReceipts_OversizedLineSkippedNotPropagated(t *testing.T) {
+	// A single 5MB error string (e.g. a panic stack trace from the
+	// runtime) crosses the scanner's 4MB cap. Before the fix this
+	// returned bufio.ErrTooLong from the whole readReceipts call,
+	// which the CLI's logs/status surfaced as a hard error AND
+	// dropped every prior good row. After the fix the oversized
+	// line is treated like a bad JSON line: skipped, prior rows
+	// retained, no error.
+	huge := strings.Repeat("e", 5*1024*1024)
+	mixed := `{"world":"brain","automation":"x","trigger":"cron","fired":"2026-05-01T06:00:00Z","finished":"2026-05-01T06:00:00Z","duration_ms":0,"ok":true,"reason":"on-time"}
+{"world":"brain","automation":"y","trigger":"cron","fired":"2026-05-01T07:00:00Z","finished":"2026-05-01T07:00:00Z","duration_ms":0,"ok":false,"reason":"on-time","error":"` + huge + `"}
+{"world":"brain","automation":"z","trigger":"cron","fired":"2026-05-01T08:00:00Z","finished":"2026-05-01T08:00:00Z","duration_ms":0,"ok":true,"reason":"on-time"}
+`
+	rows, err := decodeReceipts(strings.NewReader(mixed))
+	if err != nil {
+		t.Fatalf("oversized line should not error the read, got: %v", err)
+	}
+	if len(rows) != 2 {
+		t.Errorf("rows = %d, want 2 (good lines kept, oversized dropped)", len(rows))
+	}
+	// The two surviving rows are x and z (y was the oversized one).
+	if rows[0].Automation != "x" || rows[1].Automation != "z" {
+		t.Errorf("surviving rows = %s, %s; want x, z",
+			rows[0].Automation, rows[1].Automation)
+	}
+}
+
 func TestDecodeReceipts_SkipsBadLines(t *testing.T) {
 	mixed := `{"world":"brain","automation":"x","trigger":"cron","fired":"2026-05-01T06:00:00Z","finished":"2026-05-01T06:00:00Z","duration_ms":0,"ok":true,"reason":"on-time"}
 not-json

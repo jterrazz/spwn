@@ -118,16 +118,22 @@ func (c *FakeClock) Advance(d time.Duration) {
 }
 
 // AdvanceTo moves the fake clock to the absolute time t. Panics if
-// t is before the current time — moving backwards in tests is almost
-// always a bug.
+// t is before the current time — moving backwards in tests is
+// almost always a bug.
+//
+// Computes the delta under the same lock that holds c.now so a
+// concurrent Advance can't slip in between read and apply (which
+// would let "current time" race past `t` and falsely trip the
+// backwards-panic, or skip a goroutine's timer).
 func (c *FakeClock) AdvanceTo(t time.Time) {
 	c.mu.Lock()
-	cur := c.now
-	c.mu.Unlock()
-	if t.Before(cur) {
+	if t.Before(c.now) {
+		c.mu.Unlock()
 		panic("FakeClock.AdvanceTo: target is before current time")
 	}
-	c.Advance(t.Sub(cur))
+	d := t.Sub(c.now)
+	c.mu.Unlock()
+	c.Advance(d)
 }
 
 // Pending reports the number of timers waiting to fire. Test helper

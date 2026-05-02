@@ -60,23 +60,62 @@ func readReceipts(projectRoot string) ([]receiptRow, error) {
 	return decodeReceipts(f)
 }
 
+// maxReceiptLineBytes caps how large a single receipt line we'll
+// json-decode. Lines longer than this are skipped (same contract as
+// bad-JSON lines). A 4MB cap covers a panic stack trace plus padding;
+// pathological dispatcher errors that produce 100MB lines are best
+// dropped from the dashboard view rather than blocking the whole log.
+const maxReceiptLineBytes = 4 * 1024 * 1024
+
 // decodeReceipts is split out so tests can pass an in-memory reader
 // without touching the filesystem.
+//
+// We use bufio.Reader.ReadBytes('\n') rather than bufio.Scanner
+// because Scanner aborts the entire read on a token-size violation
+// (returning bufio.ErrTooLong from Err()), which would silently drop
+// every row after the first oversized one. ReadBytes returns the
+// long line and lets us decide per-line whether to keep, skip, or
+// stop. Skipping oversized matches the bad-JSON behaviour.
 func decodeReceipts(r io.Reader) ([]receiptRow, error) {
 	var out []receiptRow
-	sc := bufio.NewScanner(r)
-	// Default token size is 64KB. Receipts are small, but a future
-	// catch-up mode that includes long error strings could push
-	// near. 1MB cap is plenty without inviting attacks.
-	sc.Buffer(make([]byte, 64*1024), 1024*1024)
-	for sc.Scan() {
-		var row receiptRow
-		if err := json.Unmarshal(sc.Bytes(), &row); err != nil {
-			continue
+	br := bufio.NewReader(r)
+	for {
+		line, err := br.ReadBytes('\n')
+		// Trim newline + leading/trailing whitespace before deciding
+		// what to do with the line. ReadBytes returns a non-empty
+		// slice even on the final line without a trailing '\n',
+		// hence handling the line BEFORE checking err.
+		trimmed := dropTrailingNewline(line)
+		switch {
+		case len(trimmed) == 0:
+			// blank line — fall through to err handling
+		case len(trimmed) > maxReceiptLineBytes:
+			// oversized — skip silently, same as bad-JSON
+		default:
+			var row receiptRow
+			if jerr := json.Unmarshal(trimmed, &row); jerr == nil {
+				out = append(out, row)
+			}
 		}
-		out = append(out, row)
+		if err == io.EOF {
+			return out, nil
+		}
+		if err != nil {
+			return out, err
+		}
 	}
-	return out, sc.Err()
+}
+
+// dropTrailingNewline returns the slice without a single trailing
+// '\n' or '\r\n'. ReadBytes preserves the delimiter; we don't.
+func dropTrailingNewline(b []byte) []byte {
+	if n := len(b); n > 0 && b[n-1] == '\n' {
+		b = b[:n-1]
+	}
+	if n := len(b); n > 0 && b[n-1] == '\r' {
+		b = b[:n-1]
+	}
+	return b
 }
 
 // readLastFiredFromReceipts collapses the receipt log into a
