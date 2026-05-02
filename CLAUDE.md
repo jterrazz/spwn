@@ -22,6 +22,7 @@ The domain has three main abstractions, each owning one concern:
 ### Building blocks (composable, reusable)
 - **Dependency**: The distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) that ships any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. Agents reference them as external deps.
 - **Skill (bare form)**: A `spwn/skills/<name>.md` file. Simplest authoring path for "write a paragraph of instructions."
+- **Automation**: A `worlds.<name>.automations.<id>` map entry that wakes one agent on a trigger (cron expression or filesystem watch). Receipts land at `<root>/.spwn/runs.jsonl`. Engine in `packages/automation`; user guide at [`docs/automations.md`](docs/automations.md).
 
 ### Agent internals
 - **Soul**: Who the agent is - purpose, voice, values, in a single file at `spwn/agents/<name>/SOUL.md`. Persists across world restarts. (Formerly split across `identity/profile.md`, `purpose.md`, `traits.md`; collapsed in 2026-04.)
@@ -102,6 +103,12 @@ spwn uninstall spwn:python          # Remove a dep
 
 spwn skill   new|edit|show|rm <name>           # Bare-markdown skill authoring (./spwn/skills/<name>.md)
 
+# ── Automations ──────────────────────────────────────────────────
+spwn automation ls                             # List declared automations + last-fired
+spwn automation status                         # Per-automation rollup (fires/ok/fail)
+spwn automation logs [-f] [-n N]               # Tail .spwn/runs.jsonl receipts
+spwn automation daemon                         # Run the engine until interrupted
+
 # ── Registry (planned) ───────────────────────────────────────────
 spwn agent   get github:community/sci          # Install a shared agent     [planned]
 spwn install github:acme/fuzzer                # Install from GitHub [planned]
@@ -146,6 +153,8 @@ my-project/
 │   └── commands/                # project-scoped slash commands (command/<name> → spwn/commands/<name>.md)
 └── .spwn/                       # gitignored local state
     ├── state.json               # live world IDs bound to this project
+    ├── runs.jsonl               # automation receipts (one line per fire)
+    ├── automations/state.json   # last-fired cursor per automation (catch-up math)
     └── cache/
 ```
 
@@ -202,6 +211,7 @@ spwn/
 ├── packages/                        # Go domain modules (shared libraries)
 │   ├── world/                       #   World lifecycle state, manifest, labels, models
 │   ├── architect/                   #   Orchestration (spawn, destroy, deploy, NPCs)
+│   ├── automation/                  #   Trigger engine (cron + fs) — receipts, catch-up
 │   ├── runtimes/                    #   Runtime adapters (claude-code, codex, …)
 │   ├── transpile/                   #   Source → Tree rendering (worldbook, source)
 │   ├── compile/                     #   Docker image assembly (base + derived)

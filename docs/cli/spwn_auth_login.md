@@ -21,6 +21,12 @@ detect the new credential and record it:
   claude login   # then: spwn auth login anthropic
   codex login    # then: spwn auth login openai
 
+For hosted MCP providers (Notion, …), the command runs the OAuth dance
+itself in a one-shot helper container — click the link it prints,
+approve in your browser, the token persists for every world:
+
+  spwn auth login notion
+
 ```
 spwn auth login <provider> [flags]
 ```

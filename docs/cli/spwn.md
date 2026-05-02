@@ -24,9 +24,12 @@ Mind (persistent agent identity).
 * [spwn agent](./spwn_agent.md)	 - Spawn an agent - a living identity that inhabits a world
 * [spwn architect](./spwn_architect.md)	 - Your always-on world builder
 * [spwn auth](./spwn_auth.md)	 - Manage credentials — dashboard, login, use, logout, disable
+* [spwn automation](./spwn_automation.md)	 - Trigger-driven agent wakeups (cron + filesystem)
 * [spwn build](./spwn_build.md)	 - Transpile the project and compile it into a Docker image
 * [spwn check](./spwn_check.md)	 - Validate the project tree against spwn.yaml
+* [spwn cookie-sync](./spwn_cookie-sync.md)	 - Browser extension that auto-syncs session cookies to the gate (status + providers)
 * [spwn down](./spwn_down.md)	 - Destroy a world
+* [spwn gate](./spwn_gate.md)	 - Manage the host-side credential broker (start/stop/status/logs/restart)
 * [spwn init](./spwn_init.md)	 - Scaffold a spwn project in the current directory
 * [spwn inspect](./spwn_inspect.md)	 - Show per-agent composition: deps, skills, hooks
 * [spwn install](./spwn_install.md)	 - Install a dependency into the project

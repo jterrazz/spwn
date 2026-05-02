@@ -103,6 +103,12 @@ Memory is a folder of markdown files. Readable, diffable, and alive across resta
 <code>spwn check</code> walks your project and surfaces bad refs, missing files, or lockfile drift before spawn.
 </td>
 </tr>
+<tr>
+<td align="center" colspan="3">
+<h3>⏰ Automations</h3>
+Wake an agent on a cron tick or a filesystem event. <code>worlds.&lt;name&gt;.automations</code> in spwn.yaml; receipts in <code>.spwn/runs.jsonl</code>; <code>spwn automation daemon</code> runs the engine. <a href="docs/automations.md">Full guide</a>.
+</td>
+</tr>
 </table>
 
 > *"The next breakthrough isn't smarter models. It's richer worlds."*
@@ -678,6 +684,10 @@ spwn agent neo                        Interactive session with neo
 spwn ls                               Agent-centric status
 spwn status                           Global status (worlds, auth, version)
 spwn inspect [agent]                  Per-agent composition tree
+
+# ── Automate ────────────────────────────────────────────────────
+spwn automation ls                    List declared automations
+spwn automation daemon                Run trigger engine until ctrl-c
 ```
 
 Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)

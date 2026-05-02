@@ -316,6 +316,17 @@ test('falls back to JSON when SSE returns 404', async () => {
 
 The Gate SDK is CommonJS but tests are ESM via `createRequire` (Vitest 4 doesn't allow `require('vitest')` from CJS). Tests cover MCP manifest generation, CLI dispatch, JSON-RPC method registration, and HTTP error propagation against a local `http.createServer` simulating the sidecar.
 
+### Automations: `packages/automation/*_test.go`
+
+The automation engine is intentionally testable without Docker, fsnotify, or real time. Four collaborator interfaces (`Clock`, `Dispatcher`, `ReceiptWriter`, `StateStore`) plus the `RawFSSource` for the watcher all have memory/fake implementations alongside the production ones. Tests drive the engine directly:
+
+- **`FakeClock.Advance(d)`** moves time forward and fires every pending `After` channel whose deadline elapsed — cron schedules tick deterministically.
+- **`FakeFSSource.Emit(ev)`** + `watcher.handle(ctx, ev)` injects synthetic filesystem events; debounce + pattern + recursive logic runs without fsnotify.
+- **`MockDispatcher.Hold`** blocks each Dispatch on a channel — lets concurrency tests assert "exactly one in flight per agent" without timing flakes.
+- **`MemoryReceiptWriter` / `MemoryStateStore`** keep receipt + last-fired state in slices/maps for trivial assertion.
+
+72 tests cover the engine; 12 more cover the architect-side dispatcher + command resolver; 13 cover the CLI helpers. All `-race` clean.
+
 ---
 
 ## Layer 2 — Contract & Golden Tests
