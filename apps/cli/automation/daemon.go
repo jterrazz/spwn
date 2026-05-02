@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -55,6 +56,22 @@ resumes at the next scheduled time.`,
 			fmt.Fprintln(cmd.OutOrStdout(), "no automations declared — nothing to run")
 			return nil
 		}
+
+		// Cross-process safety: hold an exclusive flock on
+		// `.spwn/automations/daemon.lock` for the daemon's lifetime.
+		// A second `spwn automation daemon` for the same project
+		// would otherwise interleave appended receipts and race the
+		// state cursor's tmp+rename. Released automatically on
+		// process exit (OS releases flock on close).
+		lockPath := filepath.Join(p.Root, ".spwn", "automations", "daemon.lock")
+		if err := os.MkdirAll(filepath.Dir(lockPath), 0o755); err != nil {
+			return fmt.Errorf("create lockfile directory: %w", err)
+		}
+		lockFile, err := acquireDaemonLock(lockPath)
+		if err != nil {
+			return err
+		}
+		defer releaseDaemonLock(lockFile)
 
 		arc, err := architect.NewFromEnv()
 		if err != nil {

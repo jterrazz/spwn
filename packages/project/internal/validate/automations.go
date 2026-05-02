@@ -100,13 +100,34 @@ func ruleAutomations(in Input) []Issue {
 
 			// (3) Cron expression parses.
 			if hasCron {
-				if _, err := parser.Parse(a.On.Cron); err != nil {
+				schedule, err := parser.Parse(a.On.Cron)
+				if err != nil {
 					out = append(out, Issue{
 						Level:   LevelError,
 						Path:    pathPrefix + ".on.cron",
 						Message: fmt.Sprintf("invalid cron expression %q: %v", a.On.Cron, err),
 						Hint:    "use 5 fields (min hour dom month dow) — e.g. \"0 6 * * *\" for daily 6am",
 					})
+				} else {
+					// Sub-minute cadence sanity check. cron's
+					// minimum granularity is 1 minute (5-field
+					// expressions don't have seconds), so the only
+					// way to fire faster than 1/min is to write
+					// `* * * * *`. That's almost always a footgun:
+					// the user wanted "once a day" and forgot the
+					// hour. Probe the schedule by looking at the
+					// next two slots — if their gap is ≤ 1 minute,
+					// emit an info reminding the user.
+					next := schedule.Next(time.Time{})
+					afterNext := schedule.Next(next)
+					if afterNext.Sub(next) <= time.Minute {
+						out = append(out, Issue{
+							Level:   LevelWarning,
+							Path:    pathPrefix + ".on.cron",
+							Message: fmt.Sprintf("cron %q fires every minute — agents will be woken 1440×/day", a.On.Cron),
+							Hint:    "if you meant \"once a day at midnight\", use \"0 0 * * *\". See https://crontab.guru",
+						})
+					}
 				}
 			}
 

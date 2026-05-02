@@ -147,10 +147,16 @@ render "ran 2h late" trivially.
 prior fire (no entry in `.spwn/automations/state.json`), it never
 fires a catch-up. The engine doesn't fabricate history.
 
-**FS triggers don't have a catch-up notion.** They replay-on-diff
-naturally via fsnotify; events that arrived during downtime are
-just lost (architect-down windows are visible as gaps in the
-receipts log).
+**FS triggers also catch up.** On daemon start, every fs trigger
+walks its watched directory and fires once for files whose mtime
+is newer than the last successful fire. Same `catchup: skip` opt-out
+as cron. Use cases: laptop asleep while a partner drops files into
+the inbox; daemon restart during a deploy.
+
+The reason for replay fires is `replay:<basename>` (vs `create:<basename>`
+for live fsnotify events). The full path list lands in the
+receipt's `event_paths` field — your prompt template can iterate
+with `{{ range .Event.Paths }}…{{ end }}`.
 
 **DST gaps are silently dropped.** Cron expressions evaluate against
 the host's local time. On the spring-forward day in regions that
@@ -210,13 +216,17 @@ Two files per project:
 
 ### `runs.jsonl`
 
-One JSON line per fire. Schema:
+One JSON line per fire. Schema (every field is timestamped UTC,
+sortable as plain text):
 
 ```json
 {
   "world": "brain",
   "automation": "morning-brief",
+  "agent": "editor",
   "trigger": "cron",
+  "run_id": "9f3a7b2e8c1d4502",
+  "engine_version": "spwn-automation/1",
   "scheduled": "2026-05-02T06:00:00Z",
   "fired":     "2026-05-02T06:00:01Z",
   "finished":  "2026-05-02T06:04:23Z",
@@ -226,8 +236,25 @@ One JSON line per fire. Schema:
 }
 ```
 
-Catch-up fires add `"missed": <count>` and `"last_fired": <prev>`.
-Failures add `"error": <message>` and set `"ok": false`.
+| Field            | Always set | Notes |
+|------------------|---|---|
+| `world`          | ✓ | Manifest world key |
+| `automation`     | ✓ | Manifest automation key |
+| `agent`          | ✓ | Saves a join when grouping by agent |
+| `trigger`        | ✓ | `cron` or `fs` |
+| `run_id`         | ✓ | 16-hex unique per fire; pair with structured-logger output |
+| `engine_version` | ✓ | Schema generation; dashboards branch on this |
+| `fired`          | ✓ | When the engine started dispatch |
+| `finished`       | ✓ | When dispatch returned |
+| `duration_ms`    | ✓ | `finished - fired`, pre-computed |
+| `ok`             | ✓ | true iff dispatch succeeded |
+| `reason`         | ✓ | `on-time` / `catchup` / `replay:<file>` / `create:<file>` |
+| `scheduled`      | when present | Cron slot the fire covered |
+| `missed`         | catch-up only | Slots collapsed into this fire |
+| `last_fired`     | catch-up only | Previous successful fire's scheduled |
+| `error`          | failure only | Dispatcher's verbatim error string |
+| `event_paths`    | fs only | Full path list of a debounce burst |
+| `event_kind`     | fs only | Dominant op (`create` / `write` / `rename`) |
 
 ### `state.json`
 
@@ -430,9 +457,11 @@ recorded.
 - **No hot-reload.** The engine loads the manifest at `Start` and
   registers triggers once. Editing `spwn.yaml` while the daemon
   runs has no effect until restart.
-- **No flock on receipts/state.** Two `spwn automation daemon`
-  processes targeting the same project can interleave receipts
-  and clobber the state cursor. Run one daemon per project.
+
+The daemon takes an exclusive `flock` on
+`<project>/.spwn/automations/daemon.lock` for its lifetime, so a
+second `spwn automation daemon` for the same project fails fast
+instead of interleaving receipts.
 
 ## What's next
 

@@ -131,6 +131,51 @@ func TestAutomations_Cron_StandardFiveFieldAccepted(t *testing.T) {
 	}
 }
 
+func TestAutomations_Cron_EveryMinuteWarns(t *testing.T) {
+	// `* * * * *` parses as valid cron but fires 1440×/day —
+	// almost always a footgun (user meant "once a day at midnight"
+	// and forgot the hour field). Validator emits a LevelWarning.
+	in := automationInput(t, t.TempDir(), automationFixture{
+		Worlds: map[string]worldFixture{
+			"brain": {
+				Agents: []string{"editor"},
+				Automations: map[string]intmanifest.Automation{
+					"x": {
+						On:      intmanifest.Trigger{Cron: "* * * * *"},
+						Agent:   "editor",
+						Prompt:  "go",
+						Catchup: "collapse",
+					},
+				},
+			},
+		},
+	})
+	expectIssue(t, ruleAutomations(in), LevelWarning, "fires every minute")
+}
+
+func TestAutomations_Cron_EveryHourNoWarn(t *testing.T) {
+	in := automationInput(t, t.TempDir(), automationFixture{
+		Worlds: map[string]worldFixture{
+			"brain": {
+				Agents: []string{"editor"},
+				Automations: map[string]intmanifest.Automation{
+					"x": {
+						On:      intmanifest.Trigger{Cron: "0 * * * *"},
+						Agent:   "editor",
+						Prompt:  "go",
+						Catchup: "collapse",
+					},
+				},
+			},
+		},
+	})
+	for _, iss := range ruleAutomations(in) {
+		if strings.Contains(iss.Message, "every minute") {
+			t.Errorf("hourly cron should not warn about every-minute, got: %+v", iss)
+		}
+	}
+}
+
 // ── (4) FS path on disk ─────────────────────────────────────────────
 
 func TestAutomations_FS_MissingPathErrors(t *testing.T) {

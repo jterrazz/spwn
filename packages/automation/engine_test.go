@@ -3,6 +3,8 @@ package automation
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -602,6 +604,149 @@ func TestEngine_CommandResolverErrorWritesFailedReceipt(t *testing.T) {
 	if disp.Count() != 0 {
 		t.Errorf("dispatch should not be called when resolver fails")
 	}
+}
+
+// ── FS replay-on-startup ─────────────────────────────────────────
+
+func TestEngine_FSReplay_FiresForNewerFiles(t *testing.T) {
+	// Setup: last_fired cursor points at T0; two files exist —
+	// "old.md" with mtime T-1h, "new.md" with mtime T+1h. On Start,
+	// only new.md should be replayed.
+	source := NewFakeFSSource()
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	fsWatcher := NewFSWatcher(source, clock)
+	disp := NewMockDispatcher()
+	rec := NewMemoryReceiptWriter()
+	state := NewMemoryStateStore()
+
+	dir := t.TempDir()
+	last := mustParse(t, testEpoch)
+	must(t, state.RecordFire("brain", "inbox", last))
+
+	// Write old + new files with crafted mtimes.
+	oldPath := filepath.Join(dir, "old.md")
+	newPath := filepath.Join(dir, "new.md")
+	must(t, os.WriteFile(oldPath, []byte("old"), 0o644))
+	must(t, os.WriteFile(newPath, []byte("new"), 0o644))
+	mustChtimes(t, oldPath, last.Add(-1*time.Hour))
+	mustChtimes(t, newPath, last.Add(1*time.Hour))
+
+	eng, err := New(Config{
+		Clock:      clock,
+		Dispatcher: disp,
+		Receipts:   rec,
+		State:      state,
+		FS:         fsWatcher,
+	})
+	must(t, err)
+	must(t, eng.Register("brain", map[string]project.Automation{
+		"inbox": {
+			On: project.Trigger{
+				FS: &project.FSTrigger{
+					Path:     dir,
+					Events:   []string{"create"},
+					Debounce: project.Duration(100 * time.Millisecond),
+				},
+			},
+			Agent:  "curator",
+			Prompt: "{{ range .Event.Paths }}{{ . }}\n{{ end }}",
+		},
+	}))
+	must(t, eng.Start(context.Background()))
+	defer eng.Stop()
+
+	// Replay runs synchronously inside Start, so the receipt
+	// should already exist.
+	recs := rec.Receipts()
+	if len(recs) != 1 {
+		t.Fatalf("got %d replay receipts, want 1", len(recs))
+	}
+	got := recs[0]
+	if len(got.EventPaths) != 1 || got.EventPaths[0] != newPath {
+		t.Errorf("EventPaths = %v, want [%s]", got.EventPaths, newPath)
+	}
+	if got.Reason != "replay:new.md" {
+		t.Errorf("Reason = %q, want replay:new.md", got.Reason)
+	}
+}
+
+func TestEngine_FSReplay_SkippedOnFirstBoot(t *testing.T) {
+	// No state cursor — engine has no baseline to compare against.
+	// Replay must skip even if files exist with future mtimes.
+	source := NewFakeFSSource()
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	fsWatcher := NewFSWatcher(source, clock)
+	disp := NewMockDispatcher()
+	rec := NewMemoryReceiptWriter()
+	state := NewMemoryStateStore()
+
+	dir := t.TempDir()
+	must(t, os.WriteFile(filepath.Join(dir, "a.md"), []byte("a"), 0o644))
+	must(t, os.WriteFile(filepath.Join(dir, "b.md"), []byte("b"), 0o644))
+
+	eng, err := New(Config{
+		Clock: clock, Dispatcher: disp, Receipts: rec, State: state, FS: fsWatcher,
+	})
+	must(t, err)
+	must(t, eng.Register("brain", map[string]project.Automation{
+		"inbox": {
+			On: project.Trigger{FS: &project.FSTrigger{
+				Path: dir, Events: []string{"create"}, Debounce: project.Duration(100 * time.Millisecond),
+			}},
+			Agent:  "curator",
+			Prompt: "p",
+		},
+	}))
+	must(t, eng.Start(context.Background()))
+	defer eng.Stop()
+
+	if got := len(rec.Receipts()); got != 0 {
+		t.Errorf("first-boot replay produced %d receipts, want 0", got)
+	}
+}
+
+func TestEngine_FSReplay_SkipModeDisablesReplay(t *testing.T) {
+	source := NewFakeFSSource()
+	clock := NewFakeClock(mustParse(t, testEpoch))
+	fsWatcher := NewFSWatcher(source, clock)
+	disp := NewMockDispatcher()
+	rec := NewMemoryReceiptWriter()
+	state := NewMemoryStateStore()
+
+	dir := t.TempDir()
+	last := mustParse(t, testEpoch)
+	must(t, state.RecordFire("brain", "inbox", last))
+
+	newer := filepath.Join(dir, "new.md")
+	must(t, os.WriteFile(newer, []byte("n"), 0o644))
+	mustChtimes(t, newer, last.Add(1*time.Hour))
+
+	eng, err := New(Config{
+		Clock: clock, Dispatcher: disp, Receipts: rec, State: state, FS: fsWatcher,
+	})
+	must(t, err)
+	must(t, eng.Register("brain", map[string]project.Automation{
+		"inbox": {
+			On: project.Trigger{FS: &project.FSTrigger{
+				Path: dir, Events: []string{"create"}, Debounce: project.Duration(100 * time.Millisecond),
+			}},
+			Agent:   "curator",
+			Prompt:  "p",
+			Catchup: "skip",
+		},
+	}))
+	must(t, eng.Start(context.Background()))
+	defer eng.Stop()
+
+	if got := len(rec.Receipts()); got != 0 {
+		t.Errorf("catchup:skip replay produced %d receipts, want 0", got)
+	}
+}
+
+// mustChtimes sets atime + mtime on the given path or fails the test.
+func mustChtimes(t *testing.T, path string, when time.Time) {
+	t.Helper()
+	must(t, os.Chtimes(path, when, when))
 }
 
 func TestEngine_FSWithoutWatcherInConfigRejects(t *testing.T) {

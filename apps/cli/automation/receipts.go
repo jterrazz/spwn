@@ -28,19 +28,31 @@ func receiptsPath(projectRoot string) string {
 //   - On-disk schema stability is the contract; the CLI is just a
 //     reader, and an explicit local struct with json tags makes that
 //     contract visible.
+//
+// Forward-compat: every new optional field carries omitempty here
+// AND in the engine's Receipt. A CLI from yesterday reading a row
+// written by today's engine simply ignores unknown fields (json
+// unmarshal default behaviour); a CLI from tomorrow reading
+// yesterday's row sees zero values for the new fields, which is
+// what the renderer must tolerate.
 type receiptRow struct {
-	World      string    `json:"world"`
-	Automation string    `json:"automation"`
-	Trigger    string    `json:"trigger"`
-	Scheduled  time.Time `json:"scheduled,omitempty"`
-	Fired      time.Time `json:"fired"`
-	Finished   time.Time `json:"finished"`
-	DurationMS int64     `json:"duration_ms"`
-	OK         bool      `json:"ok"`
-	Reason     string    `json:"reason"`
-	Error      string    `json:"error,omitempty"`
-	Missed     int       `json:"missed,omitempty"`
-	LastFired  time.Time `json:"last_fired,omitempty"`
+	World         string    `json:"world"`
+	Automation    string    `json:"automation"`
+	Agent         string    `json:"agent,omitempty"`
+	Trigger       string    `json:"trigger"`
+	RunID         string    `json:"run_id,omitempty"`
+	EngineVersion string    `json:"engine_version,omitempty"`
+	Scheduled     time.Time `json:"scheduled,omitempty"`
+	Fired         time.Time `json:"fired"`
+	Finished      time.Time `json:"finished"`
+	DurationMS    int64     `json:"duration_ms"`
+	OK            bool      `json:"ok"`
+	Reason        string    `json:"reason"`
+	Error         string    `json:"error,omitempty"`
+	Missed        int       `json:"missed,omitempty"`
+	LastFired     time.Time `json:"last_fired,omitempty"`
+	EventPaths    []string  `json:"event_paths,omitempty"`
+	EventKind     string    `json:"event_kind,omitempty"`
 }
 
 // readReceipts decodes every row in the receipts log. Bad lines are

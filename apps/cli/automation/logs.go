@@ -87,7 +87,7 @@ func init() {
 // formatReceiptLine renders one row in a fixed compact form:
 //
 //	2026-05-02T06:00:00Z brain/morning-brief cron on-time ok 263ms
-//	2026-05-02T11:23:14Z brain/inbox-pull   fs   create:foo.md ok 4s
+//	2026-05-02T11:23:14Z brain/inbox-pull   fs   create:foo.md ok 4s  paths=5
 //
 // Width is intentional — fits in 100 cols even with long automation
 // names. Failed rows append the trimmed error message.
@@ -108,6 +108,12 @@ func formatReceiptLine(r receiptRow) string {
 	)
 	if r.Missed > 0 {
 		line += fmt.Sprintf("  missed=%d", r.Missed)
+	}
+	// Surface multi-path bursts so a fire that processed 50 inbox
+	// files renders as "paths=50" instead of just the first
+	// basename in Reason.
+	if len(r.EventPaths) > 1 {
+		line += fmt.Sprintf("  paths=%d", len(r.EventPaths))
 	}
 	if r.Error != "" {
 		// Truncate so a multi-line stack trace doesn't shred the log.

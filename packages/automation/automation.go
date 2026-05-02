@@ -54,6 +54,8 @@ package automation
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
@@ -66,6 +68,30 @@ import (
 
 	"spwn.sh/packages/project"
 )
+
+// newRunID returns a 16-hex-char unique identifier for one fire.
+// Used as the receipt's run_id so dashboards can trace a fire across
+// the receipt log + structured-logger output. crypto/rand for
+// uniqueness; 64 bits of entropy is overkill for per-day fire
+// counts but cheap.
+//
+// On the off chance crypto/rand fails (kernel entropy starvation
+// on a freshly-booted VM), fall back to a clock-derived id so the
+// fire path never fails — receipts are observability, not
+// correctness.
+func newRunID() string {
+	var b [8]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		// Fallback: nanoseconds since epoch in hex. Not unique
+		// across processes but never repeats within one process.
+		now := time.Now().UnixNano()
+		for i := 7; i >= 0; i-- {
+			b[i] = byte(now)
+			now >>= 8
+		}
+	}
+	return hex.EncodeToString(b[:])
+}
 
 // Logger is the engine's minimal sink for non-fatal errors that
 // would otherwise be swallowed (receipt write fails, state cursor
@@ -245,10 +271,17 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 				if ctx == nil {
 					ctx = context.Background()
 				}
+				now := e.clock.Now()
 				e.fire(ctx, rr, FireSource{
-					Kind:       "fs",
-					Reason:     ev.Kind + ":" + filepath.Base(ev.Paths[0]),
-					Now:        e.clock.Now(),
+					Kind: "fs",
+					Reason: ev.Kind + ":" + filepath.Base(ev.Paths[0]),
+					Now:  now,
+					// Scheduled = Now for fs fires so the state
+					// cursor advances. The replay-on-startup logic
+					// uses this cursor to decide which files are
+					// "new" since the last fire; a zero cursor would
+					// match every file forever.
+					Scheduled:  now,
 					EventPaths: ev.Paths,
 					EventKind:  ev.Kind,
 				})
@@ -299,6 +332,19 @@ func (e *Engine) Start(ctx context.Context) error {
 		e.runCatchUp(ctx, r)
 		e.wg.Add(1)
 		go e.runCron(ctx, r)
+	}
+	// Fs replay-on-startup: synthesise create events for files
+	// whose mtime is newer than the last successful fire. Mirrors
+	// cron's catch-up so a daemon-down window doesn't lose files
+	// dropped into the inbox during the gap.
+	for _, r := range e.registered {
+		if r.Auto.On.FS == nil {
+			continue
+		}
+		if r.Auto.Catchup == "skip" {
+			continue
+		}
+		e.runFSReplay(ctx, r)
 	}
 	// Fs watcher pump runs only if fs triggers were registered.
 	// Idempotent: harmless to call when no specs exist.
@@ -395,6 +441,113 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 	})
 }
 
+// runFSReplay synthesises create events for files newer than the
+// last successful fire. Bridges the gap between architect-down
+// windows (when fsnotify isn't running) and "files dropped into
+// inbox during downtime should be processed".
+//
+// Walks the watched directory, filters by the spec's pattern +
+// events allow-list, and if any matches exist with mtime > last,
+// fires once with the full path list as the burst payload. Same
+// debounce-coalesces semantics as a real fsnotify burst — the
+// agent sees one "burst of N files" prompt, not N separate fires.
+//
+// Skipped on first boot (no last-fired cursor → no comparison
+// baseline). Skipped when catchup == "skip" — matches cron's
+// catchup-skip semantics so users have one knob for both.
+//
+// Errors during the walk are logged but don't abort: a permission-
+// denied subdirectory shouldn't block replay of the rest. The
+// engine receipts the synthesised fire normally.
+func (e *Engine) runFSReplay(ctx context.Context, r *registered) {
+	last, ok := e.state.LastFired(r.World, r.Name)
+	if !ok {
+		return // first boot — nothing to compare against
+	}
+
+	spec := r.Auto.On.FS
+	if spec == nil {
+		return // defensive — caller should have filtered
+	}
+
+	// The replay synthesises create events. If the spec doesn't
+	// allow Create, skip — there's no other event we can sensibly
+	// reconstruct from a static directory snapshot.
+	allowsCreate := false
+	events := spec.Events
+	if len(events) == 0 {
+		events = []string{"create"} // mirror ApplyDefaults
+	}
+	for _, ev := range events {
+		if ev == "create" {
+			allowsCreate = true
+			break
+		}
+	}
+	if !allowsCreate {
+		return
+	}
+
+	var paths []string
+	collect := func(path string, info os.FileInfo) {
+		if info.IsDir() {
+			return
+		}
+		if !info.ModTime().After(last) {
+			return
+		}
+		if !matchPatterns(spec.Patterns, filepath.Base(path)) {
+			return
+		}
+		paths = append(paths, path)
+	}
+
+	if spec.Recursive {
+		err := filepath.Walk(spec.Path, func(p string, info os.FileInfo, walkErr error) error {
+			if walkErr != nil {
+				// Permission denied / vanished directory. Log and
+				// skip — don't abort the whole replay.
+				e.logger.Warnf("fs replay walk %s: %v", p, walkErr)
+				return nil
+			}
+			collect(p, info)
+			return nil
+		})
+		if err != nil {
+			e.logger.Warnf("fs replay %s/%s walk failed: %v", r.World, r.Name, err)
+			return
+		}
+	} else {
+		entries, err := os.ReadDir(spec.Path)
+		if err != nil {
+			e.logger.Warnf("fs replay %s/%s readdir %s: %v", r.World, r.Name, spec.Path, err)
+			return
+		}
+		for _, entry := range entries {
+			info, ierr := entry.Info()
+			if ierr != nil {
+				continue
+			}
+			collect(filepath.Join(spec.Path, entry.Name()), info)
+		}
+	}
+
+	if len(paths) == 0 {
+		return
+	}
+	sort.Strings(paths)
+
+	now := e.clock.Now()
+	e.fire(ctx, r, FireSource{
+		Kind:       "fs",
+		Reason:     "replay:" + filepath.Base(paths[0]),
+		Now:        now,
+		Scheduled:  now,
+		EventPaths: paths,
+		EventKind:  "create",
+	})
+}
+
 // fire is the dispatch path shared by on-time + catch-up cron fires
 // and fs events. Renders the prompt, serialises on the per-agent
 // lock, dispatches, writes a receipt.
@@ -419,16 +572,23 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 	defer mu.Unlock()
 
 	rec := Receipt{
-		World:      r.World,
-		Automation: r.Name,
-		Trigger:    src.Kind,
-		Scheduled:  src.Scheduled,
-		Fired:      e.clock.Now(),
-		Reason:     src.Reason,
+		World:         r.World,
+		Automation:    r.Name,
+		Agent:         r.Auto.Agent,
+		Trigger:       src.Kind,
+		RunID:         newRunID(),
+		EngineVersion: EngineVersion,
+		Scheduled:     src.Scheduled,
+		Fired:         e.clock.Now(),
+		Reason:        src.Reason,
 	}
 	if src.Missed > 0 {
 		rec.Missed = src.Missed
 		rec.LastFired = src.LastFired
+	}
+	if src.Kind == "fs" {
+		rec.EventPaths = append([]string(nil), src.EventPaths...)
+		rec.EventKind = src.EventKind
 	}
 
 	if renderErr != nil {
@@ -478,19 +638,26 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 func (e *Engine) failFire(r *registered, src FireSource, cause error) {
 	now := e.clock.Now()
 	rec := Receipt{
-		World:      r.World,
-		Automation: r.Name,
-		Trigger:    src.Kind,
-		Scheduled:  src.Scheduled,
-		Fired:      now,
-		Finished:   now,
-		Reason:     src.Reason,
-		OK:         false,
-		Error:      cause.Error(),
+		World:         r.World,
+		Automation:    r.Name,
+		Agent:         r.Auto.Agent,
+		Trigger:       src.Kind,
+		RunID:         newRunID(),
+		EngineVersion: EngineVersion,
+		Scheduled:     src.Scheduled,
+		Fired:         now,
+		Finished:      now,
+		Reason:        src.Reason,
+		OK:            false,
+		Error:         cause.Error(),
 	}
 	if src.Missed > 0 {
 		rec.Missed = src.Missed
 		rec.LastFired = src.LastFired
+	}
+	if src.Kind == "fs" {
+		rec.EventPaths = append([]string(nil), src.EventPaths...)
+		rec.EventKind = src.EventKind
 	}
 	if werr := e.receipts.Write(rec); werr != nil {
 		e.logger.Warnf("receipt write failed for %s/%s (failFire %s): %v", r.World, r.Name, cause, werr)
@@ -519,19 +686,30 @@ func (e *Engine) lockForAgent(world, agent string) *sync.Mutex {
 	return m.(*sync.Mutex)
 }
 
+// catchUpIterCap bounds catch-up math iterations across both
+// countMissed and lastScheduled. 10k slots covers seven days of
+// minutely cron (most-frequent realistic cadence × longest realistic
+// daemon-down window without the user noticing). Hand-edited or
+// corrupt state cursors that produce millions of slots would
+// otherwise block Engine.Start; the cap keeps boot bounded at ~6.5ms
+// per registered cron in pathological cases.
+const catchUpIterCap = 10_000
+
 // countMissed returns the number of cron occurrences strictly after
 // `last` and at-or-before `now`. The exclusive-inclusive boundary is
 // intentional: `last` is the time of the previous successful fire,
 // not a missed slot itself.
+//
+// Capped at catchUpIterCap iterations. Hitting the cap means catch-up
+// "saw" 10000 missed slots — the user should treat this as "many"
+// rather than a precise count.
 func countMissed(schedule cron.Schedule, last, now time.Time) int {
 	count := 0
 	t := schedule.Next(last)
 	for !t.After(now) {
 		count++
 		t = schedule.Next(t)
-		// Defensive: prevent runaway if Next ever returns a non-
-		// monotonic time. In practice robfig/cron is well-behaved.
-		if count > 100_000 {
+		if count >= catchUpIterCap {
 			return count
 		}
 	}
@@ -542,13 +720,20 @@ func countMissed(schedule cron.Schedule, last, now time.Time) int {
 // (last, now]. Used as the receipt's "scheduled" field for catch-up
 // fires so the dashboard renders the slot the fire covered, not a
 // time that doesn't match the cron grid.
+//
+// Capped at catchUpIterCap iterations. Mirrors countMissed; in the
+// cap-hit case the returned time is the catchUpIterCap'th slot after
+// `last`, not the truly-most-recent slot. The user trades precision
+// for bounded boot time.
 func lastScheduled(schedule cron.Schedule, last, now time.Time) time.Time {
 	prev := time.Time{}
 	t := schedule.Next(last)
+	count := 0
 	for !t.After(now) {
 		prev = t
 		t = schedule.Next(t)
-		if prev.Year() > 9000 {
+		count++
+		if count >= catchUpIterCap {
 			break
 		}
 	}
