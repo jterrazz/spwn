@@ -8,6 +8,7 @@ use (
 	./packages/agent
 	./packages/architect
 	./packages/auth
+	./packages/automation
 	./packages/compile
 	./packages/container
 	./packages/dependency
