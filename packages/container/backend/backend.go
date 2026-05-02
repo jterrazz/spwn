@@ -29,6 +29,15 @@ type ExecConfig struct {
 	Cmd []string
 	Env []string
 	TTY bool
+	// Stdout / Stderr, when non-nil, receive the runtime's output
+	// instead of being copied to os.Stdout/os.Stderr. The
+	// automation dispatcher uses this to capture the rendered
+	// runtime's output into a receipt's `output` field for
+	// dashboard display. Both streams are written separately so
+	// callers can route them to different sinks (most callers
+	// just want both into one bytes.Buffer).
+	Stdout io.Writer
+	Stderr io.Writer
 }
 
 // ImageInfo describes a Docker compile.

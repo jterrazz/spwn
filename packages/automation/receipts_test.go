@@ -3,6 +3,7 @@ package automation
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -152,6 +153,69 @@ func TestFileReceiptWriter_CreatesParentDir(t *testing.T) {
 	must(t, w.Write(sampleReceipt(t)))
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("file should exist: %v", err)
+	}
+}
+
+// ── Rotation ────────────────────────────────────────────────────────
+
+func TestFileReceiptWriter_RotatesPastSizeThreshold(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "runs.jsonl")
+	// Tiny RotateSize so the test fires fast.
+	w := &FileReceiptWriter{Path: path, RotateSize: 200, RotateKeep: 3}
+	must(t, w.Write(sampleReceipt(t)))
+	must(t, w.Write(sampleReceipt(t))) // ~360B total → next Write triggers
+	must(t, w.Write(sampleReceipt(t)))
+
+	// .1 should exist (the original got renamed before the third write).
+	if _, err := os.Stat(path + ".1"); err != nil {
+		t.Errorf(".1 should exist after rotation: %v", err)
+	}
+	// The active file now has only the third receipt.
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read active log: %v", err)
+	}
+	count := strings.Count(string(data), "\n")
+	if count != 1 {
+		t.Errorf("active log should have 1 line after rotation, got %d:\n%s", count, string(data))
+	}
+}
+
+func TestFileReceiptWriter_ShiftsHistoricalFiles(t *testing.T) {
+	// Simulate three rotations and confirm .1 / .2 / .3 exist with the
+	// expected ordering (most recent in .1).
+	dir := t.TempDir()
+	path := filepath.Join(dir, "runs.jsonl")
+	w := &FileReceiptWriter{Path: path, RotateSize: 100, RotateKeep: 3}
+
+	// Force four rotations.
+	for i := 0; i < 5; i++ {
+		must(t, w.Write(sampleReceipt(t)))
+		must(t, w.Write(sampleReceipt(t)))
+	}
+
+	// .1, .2, .3 should exist; .4 must NOT (RotateKeep cap).
+	for i := 1; i <= 3; i++ {
+		p := fmt.Sprintf("%s.%d", path, i)
+		if _, err := os.Stat(p); err != nil {
+			t.Errorf(".%d should exist: %v", i, err)
+		}
+	}
+	if _, err := os.Stat(path + ".4"); err == nil {
+		t.Errorf(".4 should NOT exist (cap=3)")
+	}
+}
+
+func TestFileReceiptWriter_RotationDisabledWhenSizeZero(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "runs.jsonl")
+	w := &FileReceiptWriter{Path: path, RotateSize: 0}
+	for i := 0; i < 10; i++ {
+		must(t, w.Write(sampleReceipt(t)))
+	}
+	if _, err := os.Stat(path + ".1"); err == nil {
+		t.Errorf(".1 should NOT exist when rotation disabled")
 	}
 }
 

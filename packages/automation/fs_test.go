@@ -2,6 +2,7 @@ package automation
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -318,6 +319,66 @@ func TestFSWatcher_NonRecursiveRejectsSubdirEvents(t *testing.T) {
 	ev := getter()[0]
 	if len(ev.Paths) != 1 || ev.Paths[0] != "/x/top.md" {
 		t.Errorf("Paths = %v, want only /x/top.md", ev.Paths)
+	}
+}
+
+// ── Hidden-dir filtering ────────────────────────────────────────────
+
+func TestFSWatcher_RecursiveExcludesHiddenDirsByDefault(t *testing.T) {
+	// `.git/foo.md` and `sub/.cache/bar.md` should be filtered out
+	// of a recursive watch unless IncludeHidden is set. Most users
+	// don't want their inbox watcher fired by every git commit.
+	f := newFSFixture(t)
+	handler, getter := captureHandler()
+
+	must(t, f.watcher.Watch(FSWatchSpec{
+		ID:        "x",
+		Path:      "/x",
+		Recursive: true,
+		Debounce:  50 * time.Millisecond,
+	}, handler))
+
+	f.emit("/x/top.md", "create")          // included
+	f.emit("/x/.git/objects/abc", "create") // excluded
+	f.emit("/x/sub/.cache/foo.md", "create") // excluded (deep hidden)
+	f.emit("/x/sub/visible.md", "create")    // included
+
+	f.clock.Advance(100 * time.Millisecond)
+	waitForEvents(t, getter, 1, 200*time.Millisecond)
+
+	ev := getter()[0]
+	if len(ev.Paths) != 2 {
+		t.Errorf("Paths = %v, want 2 visible files (hidden dirs filtered)", ev.Paths)
+	}
+	for _, p := range ev.Paths {
+		if strings.Contains(p, "/.") {
+			t.Errorf("hidden path slipped through: %s", p)
+		}
+	}
+}
+
+func TestFSWatcher_IncludeHiddenAllowsDotDirs(t *testing.T) {
+	f := newFSFixture(t)
+	handler, getter := captureHandler()
+
+	must(t, f.watcher.Watch(FSWatchSpec{
+		ID:            "x",
+		Path:          "/x",
+		Recursive:     true,
+		IncludeHidden: true,
+		Debounce:      50 * time.Millisecond,
+	}, handler))
+
+	f.emit("/x/top.md", "create")
+	f.emit("/x/.git/objects/abc", "create")
+	f.emit("/x/sub/.cache/foo.md", "create")
+
+	f.clock.Advance(100 * time.Millisecond)
+	waitForEvents(t, getter, 1, 200*time.Millisecond)
+
+	ev := getter()[0]
+	if len(ev.Paths) != 3 {
+		t.Errorf("IncludeHidden=true should pick up all 3, got %d", len(ev.Paths))
 	}
 }
 

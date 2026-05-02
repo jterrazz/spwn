@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -69,6 +70,12 @@ type FSWatchSpec struct {
 
 	// Debounce coalesces bursts. Default 1s.
 	Debounce time.Duration
+
+	// IncludeHidden, when true, fires for paths inside directories
+	// whose basename starts with `.` (e.g. `.cache/foo.md`). Default
+	// false — most recursive watches don't want git/cache-internal
+	// noise.
+	IncludeHidden bool
 }
 
 // FSHandler is called with each debounced event batch. The engine's
@@ -211,6 +218,15 @@ func (w *FSWatcher) Close() error {
 	return w.source.Close()
 }
 
+// HandleForTest is a test-only entry point that synchronously drives
+// the watcher's filter chain for one event. Skips the source pump
+// goroutine so integration tests don't race fsnotify timing. Same
+// semantics as a real raw event arriving via the source — passes
+// through pathCoveredBy / events filter / pattern match / debounce.
+func (w *FSWatcher) HandleForTest(path, kind string) {
+	w.handle(context.Background(), RawFSEvent{Path: path, Kind: kind})
+}
+
 // pump drains events from the source and dispatches them to the
 // matching specs. One source produces one stream; the watcher fans
 // out to every spec whose path-prefix matches.
@@ -328,6 +344,13 @@ func (w *FSWatcher) flush(r *registeredFS) {
 // events from registered subtrees, but this guard catches bugs in
 // fake sources and prevents cross-spec leakage when two specs share
 // a parent.
+//
+// Hidden-directory filtering: when Recursive is true and
+// IncludeHidden is false (default), paths whose relative dir starts
+// with `.` are excluded — git internal writes, editor swap files,
+// .cache directories. Most recursive watches want this. Authors who
+// genuinely need to watch dotfiles (configs, dotfile editors) set
+// IncludeHidden: true.
 func pathCoveredBy(spec FSWatchSpec, eventPath string) bool {
 	if eventPath == "" {
 		return false
@@ -345,7 +368,23 @@ func pathCoveredBy(spec FSWatchSpec, eventPath string) bool {
 	if err != nil {
 		return false
 	}
-	return rel != ".." && len(rel) > 0 && rel[0] != '.' || rel == "."
+	if rel == "." {
+		return true
+	}
+	if rel == ".." || len(rel) == 0 {
+		return false
+	}
+	// Hidden-dir filter (default-on). Skip when the relative path
+	// has any component starting with `.` (e.g. `.git/objects` or
+	// `sub/.cache`).
+	if !spec.IncludeHidden {
+		for _, segment := range strings.Split(rel, string(filepath.Separator)) {
+			if len(segment) > 0 && segment[0] == '.' {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // matchPatterns returns true if patterns is empty (match all) or any

@@ -163,14 +163,14 @@ func ruleAutomations(in Input) []Issue {
 
 			// (10) Catchup mode + cron-only enforcement.
 			switch a.Catchup {
-			case "", "collapse", "skip":
+			case "", "collapse", "skip", "stack":
 				// OK
 			default:
 				out = append(out, Issue{
 					Level:   LevelError,
 					Path:    pathPrefix + ".catchup",
 					Message: fmt.Sprintf("unknown catchup mode %q", a.Catchup),
-					Hint:    "use \"collapse\" (default — single fire on resume) or \"skip\" (drop missed slots)",
+					Hint:    "use \"collapse\" (single fire on resume; default), \"skip\" (drop missed slots), or \"stack\" (one fire per missed slot, capped at 100)",
 				})
 			}
 			if a.Catchup != "" && hasFS && !hasCron {

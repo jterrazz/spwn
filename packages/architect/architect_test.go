@@ -39,6 +39,11 @@ type mockBackend struct {
 	imageListErr  error
 	imageRemoveE  error
 	execDetachErr error
+	// execStdoutWrite, when non-empty, is written to ExecConfig.Stdout
+	// on every Exec call before the call returns. Lets the
+	// automation E2E tests assert that runtime output is captured
+	// into the receipt without spinning up a real container.
+	execStdoutWrite []byte
 
 	// Call tracking
 	createdConfigs   []backend.ContainerConfig
@@ -135,6 +140,14 @@ func (m *mockBackend) Remove(_ context.Context, containerID string) error {
 
 func (m *mockBackend) Exec(_ context.Context, containerID string, cfg backend.ExecConfig) (int, error) {
 	m.execCalls = append(m.execCalls, execCall{containerID, cfg})
+	// Honour the test-injected stdout payload so the automation E2E
+	// suite can assert "the dispatcher captured the runtime's
+	// output" without a real container. Stderr left empty —
+	// dispatcher uses the same writer for both, so writing to one
+	// is enough to exercise the capture path.
+	if cfg.Stdout != nil && len(m.execStdoutWrite) > 0 {
+		_, _ = cfg.Stdout.Write(m.execStdoutWrite)
+	}
 	if m.execErr != nil {
 		return 1, m.execErr
 	}

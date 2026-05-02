@@ -244,6 +244,69 @@ func TestEngine_CatchupSkipFiresZero(t *testing.T) {
 	}
 }
 
+func TestEngine_CatchupStack_FiresOncePerMissedSlot(t *testing.T) {
+	// catchup: stack — one fire per missed cron slot, in order.
+	// Setup: cursor at Mon 06:00, boot at Wed 08:00, 6am cron.
+	// Should produce 2 catch-up receipts (Tue + Wed slots) plus
+	// schedule resumes for Thu onwards.
+	f := newEngineFixture(t)
+	last := mustParse(t, "2026-04-27T06:00:00Z") // Mon
+	must(t, f.state.RecordFire("brain", "x", last))
+	f.clock = NewFakeClock(mustParse(t, "2026-04-29T08:00:00Z")) // Wed 08:00
+	f.engine, _ = New(Config{
+		Clock: f.clock, Dispatcher: f.dispatcher, Receipts: f.receipts, State: f.state,
+	})
+
+	auto := cronAuto("0 6 * * *", "editor", "go")
+	auto.Catchup = "stack"
+	must(t, f.engine.Register("brain", map[string]project.Automation{"x": auto}))
+	must(t, f.engine.Start(context.Background()))
+	defer f.engine.Stop()
+
+	recs := f.receipts.Receipts()
+	if len(recs) != 2 {
+		t.Fatalf("stack mode should produce 2 catch-up receipts (Tue + Wed); got %d", len(recs))
+	}
+	if !recs[0].Scheduled.Equal(mustParse(t, "2026-04-28T06:00:00Z")) {
+		t.Errorf("first catchup Scheduled = %s, want Tue 06:00", recs[0].Scheduled)
+	}
+	if !recs[1].Scheduled.Equal(mustParse(t, "2026-04-29T06:00:00Z")) {
+		t.Errorf("second catchup Scheduled = %s, want Wed 06:00", recs[1].Scheduled)
+	}
+	for _, rec := range recs {
+		if rec.Missed != 1 {
+			t.Errorf("stack-mode receipt should have Missed=1, got %d", rec.Missed)
+		}
+		if rec.Reason != "catchup" {
+			t.Errorf("Reason = %q, want catchup", rec.Reason)
+		}
+	}
+}
+
+func TestEngine_CatchupStack_RespectsCap(t *testing.T) {
+	// 200 missed minutely slots → cap caps at 100. Verify we don't
+	// blast 200 receipts.
+	f := newEngineFixture(t)
+	last := mustParse(t, "2026-05-01T00:00:00Z")
+	must(t, f.state.RecordFire("brain", "x", last))
+	// Advance ~3.5 hours = 210 minutely slots; cap should clamp.
+	f.clock = NewFakeClock(mustParse(t, "2026-05-01T03:30:00Z"))
+	f.engine, _ = New(Config{
+		Clock: f.clock, Dispatcher: f.dispatcher, Receipts: f.receipts, State: f.state,
+	})
+
+	auto := cronAuto("* * * * *", "editor", "go")
+	auto.Catchup = "stack"
+	must(t, f.engine.Register("brain", map[string]project.Automation{"x": auto}))
+	must(t, f.engine.Start(context.Background()))
+	defer f.engine.Stop()
+
+	got := len(f.receipts.Receipts())
+	if got != catchUpStackCap {
+		t.Errorf("stack cap test: got %d receipts, want %d (cap)", got, catchUpStackCap)
+	}
+}
+
 func TestEngine_CatchupNoPriorFireSkipsCatchup(t *testing.T) {
 	// First-ever boot — engine has nothing in state. Even with N
 	// "missed" slots in the abstract, we don't fire a catch-up

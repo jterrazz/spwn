@@ -144,16 +144,28 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 	}
 	defer resp.Close()
 
+	// Resolve output sinks: explicit ExecConfig writers (used by
+	// the automation dispatcher to capture output into a buffer)
+	// or process stdout/stderr by default.
+	stdout := io.Writer(os.Stdout)
+	if cfg.Stdout != nil {
+		stdout = cfg.Stdout
+	}
+	stderr := io.Writer(os.Stderr)
+	if cfg.Stderr != nil {
+		stderr = cfg.Stderr
+	}
+
 	if cfg.TTY {
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 		if err == nil {
 			defer term.Restore(int(os.Stdin.Fd()), oldState)
 		}
 		go io.Copy(resp.Conn, os.Stdin)
-		io.Copy(os.Stdout, resp.Reader)
+		io.Copy(stdout, resp.Reader)
 	} else {
 		go io.Copy(resp.Conn, os.Stdin)
-		stdcopy.StdCopy(os.Stdout, os.Stderr, resp.Reader)
+		stdcopy.StdCopy(stdout, stderr, resp.Reader)
 	}
 
 	inspect, err := d.client.ContainerExecInspect(ctx, execID.ID)

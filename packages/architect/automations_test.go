@@ -90,13 +90,13 @@ func newDispatcherFixture(t *testing.T, configName, agentName string) *dispatche
 func TestAutomationDispatcher_FindsRunningWorldByConfigName(t *testing.T) {
 	f := newDispatcherFixture(t, "brain", "editor")
 
-	err := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
+	res := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
 		World:  "brain",
 		Agent:  "editor",
 		Prompt: "go",
 	})
-	if err != nil {
-		t.Fatalf("dispatch: %v", err)
+	if res.Err != nil {
+		t.Fatalf("dispatch: %v", res.Err)
 	}
 	if len(f.mb.execCalls) != 1 {
 		t.Fatalf("exec calls = %d, want 1", len(f.mb.execCalls))
@@ -114,10 +114,11 @@ func TestAutomationDispatcher_FindsRunningWorldByConfigName(t *testing.T) {
 func TestAutomationDispatcher_NoSuchWorldErrors(t *testing.T) {
 	f := newDispatcherFixture(t, "brain", "editor")
 
-	err := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
+	res := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
 		World: "ghosts", // not in the mock
 		Agent: "editor",
 	})
+	err := res.Err
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -132,10 +133,11 @@ func TestAutomationDispatcher_NoSuchWorldErrors(t *testing.T) {
 func TestAutomationDispatcher_AgentNotInWorldErrors(t *testing.T) {
 	f := newDispatcherFixture(t, "brain", "editor")
 
-	err := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
+	res := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
 		World: "brain",
 		Agent: "ghost", // editor is in the world, ghost is not
 	})
+	err := res.Err
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -159,12 +161,12 @@ func TestAutomationDispatcher_RuntimeExitNonZeroErrors(t *testing.T) {
 	// an error to simulate "runtime exited with code 1".
 	f.mb.execErr = errFakeExit
 
-	err := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
+	res := f.dispatcher.Dispatch(context.Background(), automation.DispatchRequest{
 		World:  "brain",
 		Agent:  "editor",
 		Prompt: "go",
 	})
-	if err == nil {
+	if res.Err == nil {
 		t.Fatal("expected error")
 	}
 }

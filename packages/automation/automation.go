@@ -55,6 +55,7 @@ package automation
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -68,6 +69,14 @@ import (
 
 	"spwn.sh/packages/project"
 )
+
+// promptSHA returns the first 12 hex chars of sha256(prompt). 48
+// bits of identifier is plenty for "did the prompt change between
+// fires?" debugging without storing the full body in every receipt.
+func promptSHA(prompt string) string {
+	sum := sha256.Sum256([]byte(prompt))
+	return hex.EncodeToString(sum[:])[:12]
+}
 
 // newRunID returns a 16-hex-char unique identifier for one fire.
 // Used as the receipt's run_id so dashboards can trace a fire across
@@ -253,12 +262,13 @@ func (e *Engine) Register(world string, autos map[string]project.Automation) err
 			// right registered{} when its fired.
 			rr := r
 			spec := FSWatchSpec{
-				ID:        stateKey(world, name),
-				Path:      a.On.FS.Path,
-				Events:    a.On.FS.Events,
-				Recursive: a.On.FS.Recursive,
-				Patterns:  a.On.FS.Patterns,
-				Debounce:  a.On.FS.Debounce.AsDuration(),
+				ID:            stateKey(world, name),
+				Path:          a.On.FS.Path,
+				Events:        a.On.FS.Events,
+				Recursive:     a.On.FS.Recursive,
+				Patterns:      a.On.FS.Patterns,
+				Debounce:      a.On.FS.Debounce.AsDuration(),
+				IncludeHidden: a.On.FS.IncludeHidden,
 			}
 			handler := func(ev DebouncedFSEvent) {
 				// Capture the engine's runCtx at fire time so an
@@ -408,13 +418,24 @@ func (e *Engine) runCron(ctx context.Context, r *registered) {
 	}
 }
 
+// catchUpStackCap caps how many missed slots a `catchup: stack`
+// automation will fire on resume. Without it, a 7-day downtime of a
+// minutely cron would dispatch 10080 receipts in a row, hammering
+// the agent and the receipt log. 100 is enough to express
+// "yesterday's queued work is processed individually" without
+// blast-radius pathologies.
+const catchUpStackCap = 100
+
 // runCatchUp inspects the state store and, if the automation has been
-// fired before, counts the cron slots missed since. Emits exactly one
-// "catchup" fire (collapse mode) or zero (skip mode). Schedules
-// resume normally afterwards via runCron.
+// fired before, fires the catch-up dispatch(es). Three modes:
+//
+//   - collapse (default): one fire on resume regardless of slot count
+//   - skip:               no fires on resume
+//   - stack:              one fire per missed slot, capped at
+//                         catchUpStackCap
 //
 // Called synchronously from Start so a caller that immediately
-// inspects receipts after Start sees the catch-up entry already
+// inspects receipts after Start sees the catch-up entries already
 // committed. Tests rely on this ordering.
 func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 	if r.Auto.Catchup == "skip" {
@@ -427,6 +448,38 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 		return
 	}
 	now := e.clock.Now()
+
+	if r.Auto.Catchup == "stack" {
+		// One fire per missed slot. Walk the schedule from `last`
+		// forward, firing for each occurrence ≤ now, up to the cap.
+		// Each fire records the slot it covered as Scheduled so a
+		// catch-up that ran 1h late for the 06:00 slot still
+		// receipts as "scheduled: 06:00".
+		count := 0
+		t := r.Schedule.Next(last)
+		for !t.After(now) {
+			if count >= catchUpStackCap {
+				e.logger.Warnf("catchup stack cap reached for %s/%s after %d fires; remaining missed slots dropped", r.World, r.Name, count)
+				break
+			}
+			e.fire(ctx, r, FireSource{
+				Kind:      "cron",
+				Reason:    "catchup",
+				Scheduled: t,
+				Now:       e.clock.Now(),
+				LastFired: last,
+				// Missed=1 marks each row in stack mode as a single
+				// missed-slot replay, distinct from collapse mode's
+				// rolled-up Missed=N.
+				Missed: 1,
+			})
+			count++
+			t = r.Schedule.Next(t)
+		}
+		return
+	}
+
+	// collapse mode (default).
 	missed := countMissed(r.Schedule, last, now)
 	if missed == 0 {
 		return
@@ -567,6 +620,11 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 	}
 	prompt, renderErr := renderPrompt(body, "", src)
 
+	// EnqueuedAt: stamped BEFORE the per-agent lock so dashboards
+	// can render lock-wait time = Fired - EnqueuedAt. Otherwise a
+	// Fired stamp set inside the critical section conflates queue
+	// time with runtime time.
+	enqueuedAt := e.clock.Now()
 	mu := e.lockForAgent(r.World, r.Auto.Agent)
 	mu.Lock()
 	defer mu.Unlock()
@@ -579,6 +637,7 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 		RunID:         newRunID(),
 		EngineVersion: EngineVersion,
 		Scheduled:     src.Scheduled,
+		EnqueuedAt:    enqueuedAt,
 		Fired:         e.clock.Now(),
 		Reason:        src.Reason,
 	}
@@ -600,8 +659,9 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 		}
 		return
 	}
+	rec.PromptSHA = promptSHA(prompt)
 
-	dispatchErr := e.dispatcher.Dispatch(ctx, DispatchRequest{
+	result := e.dispatcher.Dispatch(ctx, DispatchRequest{
 		World:  r.World,
 		Agent:  r.Auto.Agent,
 		Prompt: prompt,
@@ -609,9 +669,10 @@ func (e *Engine) fire(ctx context.Context, r *registered, src FireSource) {
 	})
 	rec.Finished = e.clock.Now()
 	rec.DurationMS = rec.Finished.Sub(rec.Fired).Milliseconds()
-	if dispatchErr != nil {
+	rec.Output = truncateOutput(result.Output)
+	if result.Err != nil {
 		rec.OK = false
-		rec.Error = dispatchErr.Error()
+		rec.Error = result.Err.Error()
 	} else {
 		rec.OK = true
 		// Record success so the next catch-up math has a fresh

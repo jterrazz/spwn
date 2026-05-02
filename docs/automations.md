@@ -99,6 +99,7 @@ automations:
         recursive: <bool>          # default: false
         debounce: <duration>       # default: 1s; min 100ms, max 1h
         patterns: ["*.md", "*.pdf"] # default: match all
+        include_hidden: <bool>     # default: false; recursive only
     agent: <name>                  # must be in worlds.<world>.agents
     prompt: <inline text>          # XOR with command:
     command: command/<name>        # XOR with prompt:; resolves to spwn/commands/<name>.md
@@ -128,6 +129,7 @@ scheduled cron slots? Two modes, mirroring Apple Reminders semantics:
 |------------|----------------------------------------------------------------------------|
 | `collapse` | One fire on resume regardless of how many slots were missed (default).     |
 | `skip`     | No fire on resume. The schedule resumes at the next scheduled slot.        |
+| `stack`    | One fire per missed slot, in order, capped at 100 to bound blast radius.   |
 
 In `collapse` mode the prompt template can reference the missed
 count via `{{ .Missed }}` and the previous successful fire via
@@ -216,8 +218,11 @@ Two files per project:
 
 ### `runs.jsonl`
 
-One JSON line per fire. Schema (every field is timestamped UTC,
-sortable as plain text):
+One JSON line per fire. Rotates at 100MB to `runs.jsonl.1` (with
+`.1`→`.2`, etc., keeping 5 historical files). Total disk footprint
+per project is bounded at ~500MB.
+
+Schema (every field is timestamped UTC, sortable as plain text):
 
 ```json
 {
@@ -255,6 +260,9 @@ sortable as plain text):
 | `error`          | failure only | Dispatcher's verbatim error string |
 | `event_paths`    | fs only | Full path list of a debounce burst |
 | `event_kind`     | fs only | Dominant op (`create` / `write` / `rename`) |
+| `output`         | when present | Truncated stdout+stderr from the runtime exec (max 8KB) |
+| `prompt_sha`     | success only | First 12 hex chars of sha256(prompt). "Did the prompt change between fires?" |
+| `enqueued_at`    | success only | When the fire path entered (before the per-agent lock). `fired - enqueued_at` = lock wait |
 
 ### `state.json`
 
@@ -451,9 +459,11 @@ recorded.
 
 - **One automation = one agent.** Multi-step pipelines (e.g. run
   agent A, then B with A's output, then C with both) cannot be
-  expressed as a single automation. Workarounds: have the trigger
-  fire a coordinator agent that delegates to others, or shell out
-  from the prompt to a `make` target that orchestrates.
+  expressed as a single automation in v1. Two workarounds for now:
+  (a) have the trigger fire a coordinator agent that delegates to
+  others via `Task`/`Bash`; (b) keep an existing `make` target as
+  the orchestrator and let the automation just fire the pipeline.
+  See `Pipelines (v2)` below for the planned schema.
 - **No hot-reload.** The engine loads the manifest at `Start` and
   registers triggers once. Editing `spwn.yaml` while the daemon
   runs has no effect until restart.
@@ -462,6 +472,37 @@ The daemon takes an exclusive `flock` on
 `<project>/.spwn/automations/daemon.lock` for its lifetime, so a
 second `spwn automation daemon` for the same project fails fast
 instead of interleaving receipts.
+
+## Pipelines (v2, planned)
+
+Sequential multi-agent pipelines are scheduled for the next pass.
+Sketch of the planned schema for forward planning:
+
+```yaml
+automations:
+  morning-newsroom:
+    on: { cron: "0 6 * * *" }
+    pipeline:
+      - name: cluster
+        agent: themer
+        prompt: "Cluster yesterday's signal..."
+      - name: assign
+        agent: editor
+        prompt: |
+          Themer output: {{ .Steps.cluster.Output }}
+          Now assign sections to writers.
+      - name: write
+        agent: writer
+        prompt: "Editor's assignments: {{ .Steps.assign.Output }}"
+```
+
+Each step would be one fire (its own receipt), all sharing the
+same `run_id`. Prior step outputs become available via
+`{{ .Steps.<name>.Output }}` in subsequent prompts. Error policy:
+abort on first failed step (or `continue: true` per-step opt-in).
+Parallel steps + branching may follow if usage warrants. Until
+v2 ships, the workarounds in the limitation above are first-class
+solutions, not stopgaps.
 
 ## What's next
 

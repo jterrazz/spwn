@@ -3,6 +3,7 @@ package automation
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -157,6 +158,64 @@ func TestFileStateStore_LoadOnceCachesAcrossReads(t *testing.T) {
 	}
 	if _, ok := s.LastFired("brain", "x"); !ok {
 		t.Errorf("cached read should still find entry after on-disk corruption")
+	}
+}
+
+// ── Schema versioning + migration ───────────────────────────────────
+
+func TestFileStateStore_LegacyBareMapMigratedOnRead(t *testing.T) {
+	// Pre-v1 files were a bare flat map without the {version,
+	// entries} envelope. The reader still loads them; the next
+	// successful RecordFire rewrites in v1 shape.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "state.json")
+	legacy := `{"brain/morning":"2026-05-01T06:00:00Z"}`
+	if err := os.WriteFile(path, []byte(legacy), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	s := NewFileStateStore(path)
+	got, ok := s.LastFired("brain", "morning")
+	if !ok {
+		t.Fatal("legacy file should be readable")
+	}
+	if !got.Equal(mustParse(t, "2026-05-01T06:00:00Z")) {
+		t.Errorf("LastFired = %s", got)
+	}
+
+	// First RecordFire should rewrite in v1 envelope.
+	must(t, s.RecordFire("brain", "morning", mustParse(t, "2026-05-02T06:00:00Z")))
+	data, _ := os.ReadFile(path)
+	if !strings.Contains(string(data), `"version"`) {
+		t.Errorf("after RecordFire, file should be v1 envelope; got: %s", string(data))
+	}
+	if !strings.Contains(string(data), `"entries"`) {
+		t.Errorf("after RecordFire, file should have entries field; got: %s", string(data))
+	}
+}
+
+func TestFileStateStore_FutureVersionTaintsStore(t *testing.T) {
+	// Reading a file from a newer engine version: the store loads
+	// what it can but refuses to write back (would drop the future
+	// fields). User has to upgrade the engine or delete state.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "state.json")
+	future := `{"version":99,"entries":{"brain/x":"2026-05-01T06:00:00Z"},"future_field":"surprise"}`
+	if err := os.WriteFile(path, []byte(future), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	s := NewFileStateStore(path)
+	if err := s.IsTainted(); err == nil {
+		t.Errorf("future-version file should taint the store")
+	}
+	// Reads still work (we got what we could).
+	if _, ok := s.LastFired("brain", "x"); !ok {
+		t.Errorf("LastFired should return the entry we loaded")
+	}
+	// Writes refuse to overwrite.
+	if err := s.RecordFire("brain", "x", mustParse(t, "2026-05-02T06:00:00Z")); err == nil {
+		t.Errorf("RecordFire on tainted-by-future-version should error")
 	}
 }
 

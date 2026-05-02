@@ -7,21 +7,37 @@ import (
 )
 
 // Dispatcher is what the engine calls when an automation fires. The
-// architect-side adapter (added in a later phase) implements this by
-// auto-spawning the world if cold, then exec'ing the agent's runtime
-// with the rendered prompt. The engine itself has no Docker / runtime
-// awareness — Dispatch is the contract that hides all of that.
+// architect-side adapter implements this by exec'ing the agent's
+// runtime with the rendered prompt and capturing the output. The
+// engine itself has no Docker / runtime awareness — Dispatch is the
+// contract that hides all of that.
 //
 // Implementations must:
-//   - Return nil on successful delivery (the runtime accepted the
-//     prompt; whether the agent's reasoning then errors is not the
-//     dispatcher's concern).
-//   - Return non-nil on any failure — receipt OK is set from this
-//     return value verbatim.
+//   - Return DispatchResult.Err == nil on successful delivery.
+//   - Capture stdout+stderr in DispatchResult.Output (truncated to
+//     a sensible cap; see FailedDispatch tests for the contract).
 //   - Honour ctx cancellation as a "stop trying" signal; the engine
 //     cancels its context on Stop.
+//
+// The output is recorded in the receipt's `output` field (truncated)
+// so dashboards can show "what did the runtime print?" without
+// re-execing the agent.
 type Dispatcher interface {
-	Dispatch(ctx context.Context, req DispatchRequest) error
+	Dispatch(ctx context.Context, req DispatchRequest) DispatchResult
+}
+
+// DispatchResult is the per-fire output of a Dispatcher. Output and
+// Err are independent: a runtime can produce useful stderr while
+// still exiting non-zero, so callers must check Err before treating
+// Output as authoritative.
+type DispatchResult struct {
+	// Output is the rendered runtime's stdout + stderr (combined),
+	// truncated by the dispatcher to a sane cap. Empty string when
+	// the runtime emitted nothing or output capture failed.
+	Output string
+	// Err is the dispatch error: container missing, exec syscall
+	// failure, non-zero exit code. nil iff dispatch succeeded.
+	Err error
 }
 
 // DispatchRequest is the payload the engine hands to a Dispatcher
@@ -78,6 +94,9 @@ type MockDispatcher struct {
 	// Tests assertions for the "dispatch failed → receipt OK=false"
 	// path set this.
 	Err error
+	// Output, when non-empty, makes Dispatch return that as its
+	// DispatchResult.Output. Defaults to empty string.
+	Output string
 	// Hold blocks each Dispatch on this channel before returning. Lets
 	// tests drive concurrency: send N values for the first N calls to
 	// proceed serially, or close to release everything. Nil → no hold.
@@ -89,22 +108,25 @@ type MockDispatcher struct {
 func NewMockDispatcher() *MockDispatcher { return &MockDispatcher{} }
 
 // Dispatch records the request on entry, optionally blocks on Hold,
-// then returns d.Err. Recording before Hold lets tests observe "the
-// engine has reached Dispatch but Dispatch has not yet returned" via
-// Count() — which is what serialisation checks need (e.g. only one
-// request in flight per agent).
-func (d *MockDispatcher) Dispatch(ctx context.Context, req DispatchRequest) error {
+// then returns d.Err wrapped in a DispatchResult. Recording before
+// Hold lets tests observe "the engine has reached Dispatch but
+// Dispatch has not yet returned" via Count() — which is what
+// serialisation checks need (e.g. only one request in flight per
+// agent).
+func (d *MockDispatcher) Dispatch(ctx context.Context, req DispatchRequest) DispatchResult {
 	d.mu.Lock()
 	d.requests = append(d.requests, req)
+	output := d.Output
+	derr := d.Err
 	d.mu.Unlock()
 	if d.Hold != nil {
 		select {
 		case <-d.Hold:
 		case <-ctx.Done():
-			return ctx.Err()
+			return DispatchResult{Err: ctx.Err()}
 		}
 	}
-	return d.Err
+	return DispatchResult{Output: output, Err: derr}
 }
 
 // Requests returns a snapshot of every recorded Dispatch call in

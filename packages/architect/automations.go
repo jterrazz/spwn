@@ -1,6 +1,7 @@
 package architect
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -14,6 +15,12 @@ import (
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/models"
 )
+
+// maxDispatchOutputBytes caps the runtime output captured into a
+// receipt. 32 KB covers the tail of a verbose claude/codex run + a
+// final answer; pathological dispatchers writing 100 MB of debug
+// noise are best truncated rather than poisoning the receipt log.
+const maxDispatchOutputBytes = 32 * 1024
 
 // commandSlugRe is the same kebab-case slug regex the validator
 // enforces on command/<name> refs at parse time. The resolver
@@ -49,10 +56,10 @@ func NewAutomationDispatcher(arc *Architect) *AutomationDispatcher {
 }
 
 // Dispatch satisfies automation.Dispatcher.
-func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.DispatchRequest) error {
+func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.DispatchRequest) automation.DispatchResult {
 	world, err := d.findRunningWorld(ctx, req.World)
 	if err != nil {
-		return err
+		return automation.DispatchResult{Err: err}
 	}
 
 	// Verify the agent is actually in this world. Validation already
@@ -60,12 +67,12 @@ func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.Disp
 	// at runtime (or the manifest reloaded with a different roster);
 	// re-check before exec.
 	if !worldHasAgent(world, req.Agent) {
-		return fmt.Errorf("agent %q is not in world %q", req.Agent, req.World)
+		return automation.DispatchResult{Err: fmt.Errorf("agent %q is not in world %q", req.Agent, req.World)}
 	}
 
 	rt, err := d.arc.resolveSpawner(world)
 	if err != nil {
-		return fmt.Errorf("resolve runtime for world %s: %w", world.ID, err)
+		return automation.DispatchResult{Err: fmt.Errorf("resolve runtime for world %s: %w", world.ID, err)}
 	}
 
 	// Build the runtime command in one-shot mode. SessionID is left
@@ -86,28 +93,62 @@ func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.Disp
 	env := append(automationEnv(),
 		"HOME="+agentHome,
 		"SPWN_AGENT_NAME="+req.Agent,
-		"SPWN_WORLD_ID="+world.ID,
+		"SPWN_WORLD_ID="+req.World,
 	)
 
-	// HOME is enough for the runtime tools (claude, codex) to resolve
-	// the agent's persistent dir; backend.Exec doesn't currently
-	// expose a WorkingDir field so we don't override cwd. If a future
-	// runtime needs cwd ≠ HOME we'll widen ExecConfig and update
-	// here in lockstep.
+	// Capture runtime output into a bounded bytes.Buffer so we can
+	// surface it in the receipt. ExecConfig.Stdout/Stderr go to
+	// these writers instead of os.Stdout/Stderr; the limitWriter
+	// caps the buffer at maxDispatchOutputBytes so a chatty runtime
+	// can't blow up memory or the receipt log.
+	var captured bytes.Buffer
+	bound := &limitWriter{w: &captured, max: maxDispatchOutputBytes}
+
 	exitCode, err := d.arc.backend.Exec(ctx, world.ContainerID, backend.ExecConfig{
-		Cmd: cmd,
-		Env: env,
+		Cmd:    cmd,
+		Env:    env,
+		Stdout: bound,
+		Stderr: bound,
 		// No TTY — automations run unattended; the runtime adapter's
 		// OneShotFlags has already switched to a non-interactive output
 		// format.
 	})
+	output := captured.String()
 	if err != nil {
-		return fmt.Errorf("exec runtime in world %s: %w", world.ID, err)
+		return automation.DispatchResult{Output: output, Err: fmt.Errorf("exec runtime in world %s: %w", world.ID, err)}
 	}
 	if exitCode != 0 {
-		return fmt.Errorf("runtime exited with code %d", exitCode)
+		return automation.DispatchResult{Output: output, Err: fmt.Errorf("runtime exited with code %d", exitCode)}
 	}
-	return nil
+	return automation.DispatchResult{Output: output}
+}
+
+// limitWriter wraps an io.Writer with a hard byte cap. Writes past
+// the cap are silently dropped; the underlying buffer never grows
+// past `max`. Used to stop a verbose runtime from poisoning the
+// receipt log with 100 MB of debug output.
+type limitWriter struct {
+	w     interface{ Write(p []byte) (int, error) }
+	max   int
+	count int
+}
+
+func (l *limitWriter) Write(p []byte) (int, error) {
+	if l.count >= l.max {
+		// Already past cap — pretend we wrote everything so the
+		// caller (Docker SDK) doesn't error out on a short write.
+		return len(p), nil
+	}
+	remaining := l.max - l.count
+	if len(p) > remaining {
+		p = p[:remaining]
+	}
+	n, err := l.w.Write(p)
+	l.count += n
+	if err != nil {
+		return n, err
+	}
+	return n, nil
 }
 
 // findRunningWorld looks up a world by its manifest key. Returns an

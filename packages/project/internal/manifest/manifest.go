@@ -180,6 +180,14 @@ type FSTrigger struct {
 	// filename (not the full path). Empty = match all.
 	// Examples: ["*.md"], ["*.{md,txt}"].
 	Patterns []string `yaml:"patterns,omitempty"`
+
+	// IncludeHidden enables fires for files inside dot-prefixed
+	// directories (.git/, .cache/, etc) when Recursive is true. By
+	// default the recursive watcher silently excludes them — most
+	// users don't want their inbox watcher woken by every git
+	// operation. Set true for cases where the hidden tree is
+	// intentional content (e.g. dotfile editors).
+	IncludeHidden bool `yaml:"include_hidden,omitempty"`
 }
 
 // Duration wraps time.Duration so spwn.yaml can use the natural
