@@ -81,17 +81,31 @@ async function dismissCookieBanner(s) {
 
 // ── Shared helpers ──────────────────────────────────────────────
 
+// Robust author extraction. The GraphQL shape varies — promoted
+// tweets, ads, "X ranked" filler, and tombstones can lack the
+// canonical user_results.result.core.screen_name. We try multiple
+// fallbacks before giving up; with screen_name still missing we
+// surface a numeric placeholder so the row isn't lost to nullity.
 function findAuthor(tw) {
   let found = {};
   (function walk(n) {
     if (!n || typeof n !== 'object' || found.screen_name) return;
-    if (n.user_results?.result) {
-      const r = n.user_results.result;
+    // Canonical: user_results.result with core.screen_name
+    const r = n.user_results?.result;
+    if (r) {
       const sn = r.core?.screen_name || r.legacy?.screen_name;
-      if (sn) {
-        found = { screen_name: sn, name: r.core?.name || r.legacy?.name || null };
-        return;
-      }
+      const nm = r.core?.name || r.legacy?.name || null;
+      if (sn) { found = { screen_name: sn, name: nm }; return; }
+    }
+    // Fallback 1: flat user object (sometimes promoted-content shape)
+    if (typeof n.screen_name === 'string') {
+      found = { screen_name: n.screen_name, name: n.name || null };
+      return;
+    }
+    // Fallback 2: result has author wrapped under different keys
+    if (n.user?.legacy?.screen_name) {
+      found = { screen_name: n.user.legacy.screen_name, name: n.user.legacy.name || null };
+      return;
     }
     for (const v of Array.isArray(n) ? n : Object.values(n)) walk(v);
   })(tw);
@@ -130,6 +144,32 @@ function extractMedia(legacy) {
   });
 }
 
+// Pull external link entities so the dashboard can render article
+// preview cards instead of opaque t.co shorturls. Twitter exposes
+// each URL as { url (t.co), expanded_url (real), display_url (clean),
+// indices } in legacy.entities.urls. Self-references (status links
+// to the same tweet) and Twitter-internal URLs are filtered.
+function extractUrls(legacy) {
+  const urls = legacy?.entities?.urls || [];
+  if (!urls.length) return null;
+  const out = urls
+    .filter((u) => u?.expanded_url)
+    .map((u) => ({
+      url: u.url || null,                  // the t.co shortlink
+      expanded_url: u.expanded_url,        // the real article URL
+      display_url: u.display_url || null,  // human-readable form
+    }))
+    .filter((u) => {
+      try {
+        const host = new URL(u.expanded_url).hostname;
+        // Drop x.com / twitter.com self-links — those are quote-tweet
+        // markers, surfaced separately via .quoted
+        return host !== 'x.com' && host !== 'twitter.com';
+      } catch { return false; }
+    });
+  return out.length ? out : null;
+}
+
 function tweetToDict(tw, depth = 0) {
   const legacy = tw.legacy || tw.tweet?.legacy || {};
   const author = findAuthor(tw);
@@ -162,6 +202,7 @@ function tweetToDict(tw, depth = 0) {
     in_reply_to_user: legacy.in_reply_to_screen_name || null,
     source: stripSourceHtml(tw.source),
     media: extractMedia(legacy),
+    urls: extractUrls(legacy),
     quoted: depth === 0 && quotedResult ? tweetToDict(quotedResult, 1) : null,
     retweeted: depth === 0 && retweetedResult ? tweetToDict(retweetedResult, 1) : null,
     lang: legacy.lang || null,
@@ -222,7 +263,7 @@ async function withSession(fn) {
 // operation (e.g. Likes → ProfileLikesTimeline) or when bot-detection
 // is strict enough that we can't rely on a known op name.
 async function captureFeed(s, url, opNamePattern, limit, postNavHook = null, opts = {}) {
-  const { warmup = false } = opts;
+  const { warmup = false, sinceMs = null } = opts;
   const tweets = [];
   const seen = new Set();
   if (warmup) await warmUp(s);
@@ -235,14 +276,39 @@ async function captureFeed(s, url, opNamePattern, limit, postNavHook = null, opt
   // Initial harvest from any responses already received during goto.
   await harvestFromCaptured(s, opNamePattern, tweets, seen);
 
+  // When a sinceMs boundary is set, we early-stop the scroll once the
+  // OLDEST captured tweet falls below it — the timeline is reverse-chrono
+  // so anything further down is older still. Saves 30-50 scrolls on
+  // cron-friendly "give me the last 24h" calls.
+  const oldestMs = () => {
+    let min = Infinity;
+    for (const tw of tweets) {
+      const t = tweetCreatedMs(tw);
+      if (t != null && t < min) min = t;
+    }
+    return Number.isFinite(min) ? min : null;
+  };
+
   let stale = 0;
   let last = tweets.length;
   for (let i = 0; i < MAX_SCROLLS && tweets.length < limit && stale < STALE_SCROLLS_FOR_END; i++) {
+    if (sinceMs != null) {
+      const om = oldestMs();
+      if (om != null && om < sinceMs) break; // crossed the boundary
+    }
     await humanScroll(s, i);
     await harvestFromCaptured(s, opNamePattern, tweets, seen);
     if (tweets.length === last) stale++; else { stale = 0; last = tweets.length; }
   }
-  return tweets.slice(0, limit);
+
+  // Final filter — drop anything older than sinceMs (the boundary may
+  // have been hit mid-scroll, so the last batch can include stragglers).
+  let out = tweets;
+  if (sinceMs != null) out = out.filter((tw) => {
+    const t = tweetCreatedMs(tw);
+    return t == null || t >= sinceMs;
+  });
+  return out.slice(0, limit);
 }
 
 async function harvestFromCaptured(s, opNamePattern, sink, seen) {
@@ -300,18 +366,57 @@ const tool = new Tool({
 
 const intArg = (a, k, d) => (a[k] != null ? parseInt(a[k], 10) : d);
 
+// Parse a `--since` argument into a JS millis timestamp (UTC). Accepts:
+//   • absolute ISO date    "2026-05-02"      → 2026-05-02T00:00:00Z
+//   • absolute ISO datetime "2026-05-02T06:00:00Z"
+//   • relative duration    "26h" / "3d" / "120m"
+// Returns null when the arg is missing or unparseable. Used by the
+// scroll-based methods (fetch-home/favorites/likes/account/search) to
+// (1) stop scrolling once the timeline crosses the boundary and (2)
+// filter the final result list — saving real wall time on cron loops
+// that only care about "what's new since X".
+function parseSince(raw) {
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  if (!s) return null;
+  // Relative: <num><unit> with unit in m/h/d
+  const rel = s.match(/^(\d+)\s*([mhd])$/i);
+  if (rel) {
+    const n = parseInt(rel[1], 10);
+    const unit = rel[2].toLowerCase();
+    const ms = unit === 'm' ? 60_000 : unit === 'h' ? 3_600_000 : 86_400_000;
+    return Date.now() - n * ms;
+  }
+  // Absolute: pad bare YYYY-MM-DD to start-of-day UTC, otherwise let
+  // Date parse it. Reject NaN.
+  const padded = /^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00Z' : s;
+  const t = Date.parse(padded);
+  return Number.isNaN(t) ? null : t;
+}
+
+// Tweet `created_at` is the legacy Twitter format ("Wed Oct 30
+// 18:25:15 +0000 2024"). Date.parse handles it natively.
+function tweetCreatedMs(tw) {
+  const c = tw?.legacy?.created_at || tw?.tweet?.legacy?.created_at;
+  if (!c) return null;
+  const t = Date.parse(c);
+  return Number.isNaN(t) ? null : t;
+}
+
 tool.method('fetch-home', {
-  description: 'Fetch your home timeline. feed="following" (default, chronological) or feed="for-you" (algorithmic).',
+  description: 'Fetch your home timeline. feed="following" (default, chronological) or feed="for-you" (algorithmic). Pass --since for date-bounded fetches (early-stops scroll once timeline crosses the boundary).',
   schema: {
     type: 'object',
     properties: {
       feed: { type: 'string', enum: ['following', 'for-you'], description: 'Which timeline tab' },
       limit: { type: 'integer', description: 'Max tweets (default 50)' },
+      since: { type: 'string', description: 'ISO date (YYYY-MM-DD), ISO datetime, or duration (e.g. "26h", "3d"). Stops scroll once timeline crosses this boundary and filters out older items.' },
     },
   },
   async handler({ args }) {
     const feed = args.feed || 'following';
     const limit = intArg(args, 'limit', 50);
+    const sinceMs = parseSince(args.since);
     const wantFollowing = feed === 'following';
     const op = wantFollowing ? 'HomeLatestTimeline' : 'HomeTimeline';
     return withSession(async (s) => {
@@ -334,8 +439,9 @@ tool.method('fetch-home', {
           `);
           await sleep(2000);
         } catch (_) { /* tab may not be present yet — fall through */ }
-      });
-      return { feed: wantFollowing ? 'following' : 'for-you', items: tw.map((t) => tweetToDict(t)), count: tw.length };
+      }, { sinceMs });
+      const items = tw.map((t) => tweetToDict(t)).filter((t) => t && t.user && t.id);
+      return { feed: wantFollowing ? 'following' : 'for-you', items, count: items.length, since: args.since ?? null };
     });
   },
 });
@@ -347,7 +453,8 @@ tool.method('fetch-favorites', {
     const limit = intArg(args, 'limit', 50);
     return withSession(async (s) => {
       const tw = await captureFeed(s, 'https://x.com/i/bookmarks', 'Bookmarks', limit);
-      return { items: tw.map((t) => tweetToDict(t)), count: tw.length };
+      const items = tw.map((t) => tweetToDict(t)).filter((t) => t && t.user && t.id);
+      return { items, count: items.length };
     });
   },
 });
@@ -373,7 +480,8 @@ tool.method('fetch-likes', {
       // is fine here — only the likes-tab graphql responses contain
       // Tweet objects on this page.
       const tw = await captureFeed(s, `https://x.com/${handle}/likes`, null, limit, null, { warmup: true });
-      return { handle, items: tw.map((t) => tweetToDict(t)), count: tw.length };
+      const items = tw.map((t) => tweetToDict(t)).filter((t) => t && t.user && t.id);
+      return { handle, items, count: items.length };
     });
   },
 });
@@ -418,7 +526,8 @@ tool.method('fetch-account', {
     const limit = intArg(args, 'limit', 50);
     return withSession(async (s) => {
       const tw = await captureFeed(s, `https://x.com/${handle}`, 'UserTweets', limit);
-      return { handle, items: tw.map((t) => tweetToDict(t)), count: tw.length };
+      const items = tw.map((t) => tweetToDict(t)).filter((t) => t && t.user && t.id);
+      return { handle, items, count: items.length };
     });
   },
 });
@@ -439,7 +548,8 @@ tool.method('search', {
     const url = `https://x.com/search?q=${encodeURIComponent(args.query)}&f=live`;
     return withSession(async (s) => {
       const tw = await captureFeed(s, url, 'SearchTimeline', limit);
-      return { query: args.query, items: tw.map((t) => tweetToDict(t)), count: tw.length };
+      const items = tw.map((t) => tweetToDict(t)).filter((t) => t && t.user && t.id);
+      return { query: args.query, items, count: items.length };
     });
   },
 });
