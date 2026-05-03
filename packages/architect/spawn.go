@@ -6,9 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"spwn.sh/packages/agent"
@@ -63,14 +61,6 @@ type SpawnOpts struct {
 	LogWriter    io.Writer                  // Receives Docker build output. nil defaults to io.Discard.
 	Agents       []AgentSpec                // Multi-agent list (alternative to single AgentName).
 	IsArchitect  bool                       // When true, mounts Docker socket + SPWN_HOME for Architect mode.
-	// HasChiefs flips the world container into "admin-injected" mode:
-	// /var/run/docker.sock + the host spwn binary + ~/.spwn are
-	// bind-mounted in, so role:chief agents inside can call
-	// `spwn agent talk <other> "..."` and orchestrate their team.
-	// Same DooD pattern as the architect daemon, just descended one
-	// level (per-world instead of host-level). Computed at spawn-call
-	// time by inspecting each agent's manifest for role:chief.
-	HasChiefs    bool
 	ForceRebuild bool                       // When true, bypass the content-addressed image cache.
 	// RuntimeName selects the runtime adapter that drives spawn-time
 	// behavior (BuildCommand, credential sync, prelaunch shell) and
@@ -123,132 +113,6 @@ func (opts *SpawnOpts) logWriter() io.Writer {
 		return opts.LogWriter
 	}
 	return io.Discard
-}
-
-// resolveSpwnBinary returns the absolute host path of a Linux spwn
-// binary so it can be bind-mounted into chief-mode worlds. The
-// container is linux/amd64 (or linux/arm64 on Apple Silicon Docker
-// Desktop) — bind-mounting the host's macOS Mach-O binary yields
-// "Exec format error" inside the container.
-//
-// Order of resolution:
-//   1. SPWN_BINARY env var — must point to a Linux ELF (test seam).
-//   2. Cached cross-compile at platform.BaseDir()/cache/spwn-linux.
-//      If missing OR older than 24h, rebuild via crossCompileSpwn
-//      (the same helper the architect-image build uses).
-//
-// Returns ok=false on any failure. Caller skips the bind mount — the
-// chief world still spawns; the chief inside surfaces a "spwn:
-// command not found" error if it tries to dispatch a worker.
-func resolveSpwnBinary() (string, bool) {
-	if env := os.Getenv("SPWN_BINARY"); env != "" {
-		if st, err := os.Stat(env); err == nil && !st.IsDir() {
-			return env, true
-		}
-	}
-
-	cacheDir := filepath.Join(platform.BaseDir(), "cache")
-	cached := filepath.Join(cacheDir, "spwn-linux")
-
-	// Reuse cached binary when fresh enough (24h). Cross-compile is
-	// 2-4s but adds a measurable spawn delay; idempotent caching
-	// keeps repeated `spwn up` invocations snappy.
-	if st, err := os.Stat(cached); err == nil && !st.IsDir() {
-		if time.Since(st.ModTime()) < 24*time.Hour {
-			return cached, true
-		}
-	}
-
-	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
-		return "", false
-	}
-	tmp, err := crossCompileSpwn(context.Background(), io.Discard)
-	if err != nil {
-		// Fall back to the cached one even if stale — better an
-		// older Linux binary than no binary at all.
-		if st, err2 := os.Stat(cached); err2 == nil && !st.IsDir() {
-			return cached, true
-		}
-		return "", false
-	}
-	defer os.Remove(tmp)
-	if err := copyFile(tmp, cached, 0o755); err != nil {
-		return "", false
-	}
-	return cached, true
-}
-
-// dockerSocketGID returns the GID of the host's docker.sock as a
-// string suitable for HostConfig.GroupAdd. Chief mode uses this to
-// grant the container's spwn user access to the bind-mounted socket.
-//
-// macOS rabbit hole: /var/run/docker.sock is typically a symlink to
-// the actual socket which lives under the user's ~/.docker (Docker
-// Desktop), ~/.orbstack (OrbStack), or ~/.colima (Colima). The
-// symlink target may not exist when the runtime stores the socket
-// elsewhere — Docker Desktop, OrbStack, and Colima each have
-// different layouts. We try DOCKER_HOST first (authoritative), then
-// the well-known symlinks, then OrbStack and Docker Desktop direct
-// paths.
-func dockerSocketGID() (string, bool) {
-	candidates := dockerSocketCandidates()
-	for _, p := range candidates {
-		st, err := os.Stat(p)
-		if err != nil || st.IsDir() {
-			continue
-		}
-		sys := st.Sys()
-		if sys == nil {
-			continue
-		}
-		if stat, ok := sys.(*syscall.Stat_t); ok {
-			return strconv.FormatUint(uint64(stat.Gid), 10), true
-		}
-	}
-	return "", false
-}
-
-func dockerSocketCandidates() []string {
-	out := []string{}
-	if h := os.Getenv("DOCKER_HOST"); strings.HasPrefix(h, "unix://") {
-		out = append(out, strings.TrimPrefix(h, "unix://"))
-	}
-	out = append(out, "/var/run/docker.sock")
-	if home, err := os.UserHomeDir(); err == nil {
-		out = append(out,
-			filepath.Join(home, ".orbstack", "run", "docker.sock"),
-			filepath.Join(home, ".docker", "run", "docker.sock"),
-			filepath.Join(home, ".colima", "default", "docker.sock"),
-		)
-	}
-	return out
-}
-
-// copyFile is a tiny mode-preserving copy used by resolveSpwnBinary
-// to promote the cross-compiled tempfile into the cache. Overwrites
-// the destination atomically (write-tmp + rename) so a concurrent
-// reader never sees a half-written binary.
-func copyFile(src, dst string, mode os.FileMode) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	tmp := dst + ".tmp"
-	out, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
-	if err != nil {
-		return err
-	}
-	if _, err := io.Copy(out, in); err != nil {
-		out.Close()
-		os.Remove(tmp)
-		return err
-	}
-	if err := out.Close(); err != nil {
-		os.Remove(tmp)
-		return err
-	}
-	return os.Rename(tmp, dst)
 }
 
 // firstWriteNotifier forwards writes to an inner writer and calls
@@ -317,37 +181,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		resolvedWorkspaces = append(resolvedWorkspaces, models.Workspace{Name: name, Path: abs, ReadOnly: ws.ReadOnly})
 	}
 
-	// Detect chief mode BEFORE assembling binds. We need to know
-	// whether to mount docker.sock + spwn-binary + ~/.spwn into the
-	// world container, and the world container is created with these
-	// mounts WAY before the per-agent validation loop runs further
-	// down. So we eagerly scan the AgentSpec list (when present) for
-	// any role:chief, and ALSO eagerly load each agent.yaml to catch
-	// the case where the CLI didn't pre-tag the role (most common:
-	// `spwn up brain` populates Agents[0]=chief by position regardless
-	// of what their manifest says).
-	for _, spec := range opts.Agents {
-		if spec.Role == "chief" {
-			opts.HasChiefs = true
-		}
-	}
-	if !opts.HasChiefs {
-		// Eager agent.yaml scan — covers the case where AgentSpec
-		// doesn't carry the role (callers like `spwn up <world>` set
-		// Role by position, not by manifest).
-		for _, spec := range opts.Agents {
-			if mfst, _ := agent.LoadManifestPath(agent.AgentDir(spec.Name)); mfst != nil && mfst.Role == "chief" {
-				opts.HasChiefs = true
-				break
-			}
-		}
-		if !opts.HasChiefs && opts.AgentName != "" {
-			if mfst, _ := agent.LoadManifestPath(agent.AgentDir(opts.AgentName)); mfst != nil && mfst.Role == "chief" {
-				opts.HasChiefs = true
-			}
-		}
-	}
-
 	// Build mounts.
 	binds := buildWorkspaceBinds(resolvedWorkspaces)
 	var groupAdd []string
@@ -358,49 +191,12 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		binds = append(binds, platform.BaseDir()+":/home/spwn/.spwn")
 	}
 
-	// Chief mode: same DooD pattern, scoped to a world hosting one or
-	// more role:chief agents. Mounts:
-	//   - docker.sock so chiefs can `docker exec` sibling containers
-	//     (which is what `spwn agent talk` does under the hood).
-	//   - host spwn binary at /usr/local/bin/spwn so chiefs find it on
-	//     PATH without rebuilding the world image. Bind-mount keeps
-	//     the binary auto-fresh after `make install`.
-	//   - ~/.spwn so chiefs see the runtime state (lockfile,
-	//     receipts, automation cursor, world records).
-	//
-	// IsArchitect implies docker.sock + ~/.spwn already. We also add
-	// the host docker.sock GID to the container's supplementary
-	// groups so the unprivileged spwn user inside can read/write the
-	// socket without a separate usermod entrypoint (the architect
-	// image solves the same problem with a usermod-as-root entrypoint;
-	// world containers don't have that, so --group-add is the cleaner
-	// equivalent).
-	if opts.HasChiefs {
-		if !opts.IsArchitect {
-			binds = append(binds, "/var/run/docker.sock:/var/run/docker.sock")
-			binds = append(binds, platform.BaseDir()+":/home/spwn/.spwn")
-		}
-		if spwnBin, ok := resolveSpwnBinary(); ok {
-			binds = append(binds, spwnBin+":/usr/local/bin/spwn:ro")
-		}
-		// Add the host's docker.sock GID (e.g. 20=staff on Mac with
-		// OrbStack/Colima, 999=docker on Linux). On Linux this gives
-		// the spwn user direct read access to the socket.
-		if gid, ok := dockerSocketGID(); ok {
-			groupAdd = append(groupAdd, gid)
-		}
-		// Also add gid 0. OrbStack/Colima remap the host GID to 0
-		// (root) inside the container's user namespace, so the
-		// supplementary GID we computed above doesn't always match
-		// the in-container ownership. Adding 0 is the catch-all that
-		// makes the bind-mounted socket reachable across runtimes.
-		// Tradeoff: the container's spwn user becomes a member of
-		// the root GROUP (not the root USER) — it can read root-owned
-		// files, but can't escalate to root user privileges. For a
-		// chief-mode world this is the bargain we've already taken
-		// (DooD = chief can spawn arbitrary containers anyway).
-		groupAdd = append(groupAdd, "0")
-	}
+	// (role:chief / DooD chief-mode plumbing was here. Removed
+	// 2026-05-03 — chief-style multi-agent orchestration now lives
+	// in the gate via the spwn:dispatch tool: chiefs are normal
+	// agents that call dispatch over MCP, the gate runs `spwn agent
+	// talk` host-side. See packages/gate/lifecycle.go for the
+	// gate-level mounts that replaced this.)
 
 	// No /agents bind mount under the new architecture. Each
 	// agent's home directory is copied INTO the container at
@@ -767,17 +563,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// Create container. CPU/memory limits intentionally omitted — the
 	// Docker host defaults govern. Per-world hard limits may return as
 	// a dedicated knob later but are not declared in spwn.yaml.
-	// PidsLimit baseline = 256 (good for worker-only worlds). Chief
-	// mode raises it to 1024 because a chief invocation cascades:
-	// chief's claude turn → spwn agent talk → docker exec → another
-	// claude turn for the worker. Each layer is multi-process (claude
-	// + node child + agent runtime). 256 hits SIGKILL (exit 137) in
-	// practice; 1024 leaves enough headroom for 3-4 concurrent
-	// dispatches without bloating limits for non-chief worlds.
+	// PidsLimit = 256 — sufficient for any worker-style agent. Chiefs
+	// no longer need a higher limit because they don't fork claude
+	// sessions inside their own container; they call the gate over
+	// MCP and the gate forks `spwn agent talk` host-side.
 	pidsLimit := int64(256)
-	if opts.HasChiefs {
-		pidsLimit = 1024
-	}
 	containerCfg := backend.ContainerConfig{
 		Image:       image,
 		Name:        id,
