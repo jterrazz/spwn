@@ -22,6 +22,13 @@ type ContainerConfig struct {
 	// create time. spwn uses labels as the canonical store for world
 	// metadata so the daemon itself becomes the source of truth.
 	Labels map[string]string
+	// GroupAdd are additional supplementary GIDs the container's main
+	// user receives at startup. Used by chief-mode worlds to grant
+	// the spwn user access to the bind-mounted /var/run/docker.sock
+	// (which is owned by the host's root:docker group, GID = host's
+	// docker group, NOT the container's "spwn" GID). Equivalent to
+	// `docker run --group-add <gid>`.
+	GroupAdd []string
 }
 
 // ExecConfig defines a command to run inside a container.

@@ -84,6 +84,7 @@ func (d *Docker) Create(ctx context.Context, cfg ContainerConfig) (string, error
 		NetworkMode: containerTypes.NetworkMode(cfg.NetworkMode),
 		Binds:       cfg.Binds,
 		ExtraHosts:  cfg.ExtraHosts,
+		GroupAdd:    cfg.GroupAdd,
 	}
 
 	containerCfg := &containerTypes.Config{

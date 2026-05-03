@@ -289,8 +289,24 @@ func collectAgentNames(u world.World) string {
 	return strings.Join(names, ", ")
 }
 
-// containerExists checks if a Docker container exists (running or stopped).
+// containerExists checks if a Docker container exists (running or
+// stopped). Uses the `docker` CLI when available; falls back to
+// "assume present" when the CLI is missing — this is critical when
+// spwn is invoked from INSIDE a chief-mode world container, which
+// has the docker daemon socket bind-mounted but no `docker` binary
+// on PATH. Without the fallback, containerExists returns false for
+// every world (including the chief's own), which triggers
+// arc.Destroy in renderDeclared → SIGKILL on the chief's own
+// container (exit 137). The conservative "assume present" keeps the
+// list honest from inside (it'll show worlds it can't verify) and
+// only fires the cleanup path from host context where the CLI is
+// guaranteed.
 func containerExists(containerID string) bool {
+	if _, err := exec.LookPath("docker"); err != nil {
+		// Likely running inside a world container — skip the existence
+		// probe entirely so the auto-Destroy cleanup never fires here.
+		return true
+	}
 	err := exec.Command("docker", "inspect", "--format", "{{.Id}}", containerID).Run()
 	return err == nil
 }
