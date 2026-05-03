@@ -54,3 +54,4 @@ tests/test-results/
 # `test`, so any make-driven workflow sees it. Fresh `go build`
 # without Make needs one `go generate` first.
 /packages/dependency/internal/adapters/spwn/content/
+spwn/agents/
