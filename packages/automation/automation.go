@@ -437,14 +437,29 @@ const catchUpStackCap = 100
 // Called synchronously from Start so a caller that immediately
 // inspects receipts after Start sees the catch-up entries already
 // committed. Tests rely on this ordering.
+// firstBootCatchUpWindow caps how far back the engine looks on its
+// first-ever boot. A daily 6am cron installed at noon should still
+// fire today's missed slot; a daily cron installed three months ago
+// (and only just enabled) should NOT replay a hundred old slots.
+// 24h is the smallest window that covers a daily cron without
+// risking a flood. Hourly crons see at most one fire (collapse
+// semantics) regardless of catchup mode — the engine treats them
+// like a missed one-shot, not a backlog to drain.
+const firstBootCatchUpWindow = 24 * time.Hour
+
 func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 	if r.Auto.Catchup == "skip" {
 		return
 	}
 	last, ok := e.state.LastFired(r.World, r.Name)
 	if !ok {
-		// First-ever boot — never fire catch-up. The engine has no
-		// "what ought to have happened before I existed" view.
+		// First-ever boot — fire ONCE for the most recent past slot
+		// if it's within firstBootCatchUpWindow. Apple-Reminders
+		// behaviour: a 6am cron whose daemon comes online at noon
+		// still triggers today's brief. Slots older than the window
+		// are silently dropped — the engine doesn't replay arbitrary
+		// history on first install.
+		e.runFirstBootCatchUp(ctx, r)
 		return
 	}
 	now := e.clock.Now()
@@ -491,6 +506,40 @@ func (e *Engine) runCatchUp(ctx context.Context, r *registered) {
 		Now:       now,
 		Missed:    missed,
 		LastFired: last,
+	})
+}
+
+// runFirstBootCatchUp fires the most recent past slot for a fresh
+// install when there's no LastFired cursor in state. Exists to make
+// `daemon → start at 12:00 → daily 6am cron` produce today's brief,
+// not "wait until tomorrow morning".
+//
+// The lookback is bounded by firstBootCatchUpWindow (24h) so a long-
+// dormant cron doesn't replay months of slots when its daemon is
+// finally started. Inside that window we fire ONCE regardless of
+// catchup mode (collapse/stack) — first boot is treated as a
+// missed-one-shot, not a backlog drain.
+//
+// Recording the fired slot via fire() → state.RecordFire() means the
+// next runCatchUp tick sees a real cursor and uses the configured
+// mode normally.
+func (e *Engine) runFirstBootCatchUp(ctx context.Context, r *registered) {
+	now := e.clock.Now()
+	cutoff := now.Add(-firstBootCatchUpWindow)
+	scheduled := lastScheduled(r.Schedule, cutoff, now)
+	if scheduled.IsZero() {
+		// No occurrence in the window — schedule sparser than 24h or
+		// already fired since the cutoff but before the daemon came
+		// up (impossible without a cursor, but defensive).
+		return
+	}
+	e.fire(ctx, r, FireSource{
+		Kind:      "cron",
+		Reason:    "catchup",
+		Scheduled: scheduled,
+		Now:       now,
+		Missed:    1,
+		// LastFired stays zero — there genuinely was no previous fire.
 	})
 }
 

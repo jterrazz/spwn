@@ -98,16 +98,19 @@ func TestAutomationDispatcher_FindsRunningWorldByConfigName(t *testing.T) {
 	if res.Err != nil {
 		t.Fatalf("dispatch: %v", res.Err)
 	}
-	if len(f.mb.execCalls) != 1 {
-		t.Fatalf("exec calls = %d, want 1", len(f.mb.execCalls))
+	// Expect at least 1 exec — the runtime dispatch. A prelaunch
+	// shell call may precede it (per-fire credentials refresh), so
+	// the dispatch is the LAST exec, not the first.
+	if len(f.mb.execCalls) < 1 {
+		t.Fatalf("exec calls = %d, want ≥1", len(f.mb.execCalls))
 	}
-	if f.mb.execCalls[0].containerID != "mock-1" {
-		t.Errorf("container = %q", f.mb.execCalls[0].containerID)
+	dispatch := f.mb.execCalls[len(f.mb.execCalls)-1]
+	if dispatch.containerID != "mock-1" {
+		t.Errorf("container = %q", dispatch.containerID)
 	}
 	// The runtime command embeds the prompt — assert it propagated.
-	cmd := f.mb.execCalls[0].cfg.Cmd
-	if !cmdContains(cmd, "go") {
-		t.Errorf("prompt %q not in exec command %v", "go", cmd)
+	if !cmdContains(dispatch.cfg.Cmd, "go") {
+		t.Errorf("prompt %q not in exec command %v", "go", dispatch.cfg.Cmd)
 	}
 }
 

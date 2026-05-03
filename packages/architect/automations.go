@@ -9,8 +9,10 @@ import (
 	"regexp"
 	"strings"
 
+	"spwn.sh/packages/auth"
 	"spwn.sh/packages/automation"
 	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/models"
@@ -75,6 +77,24 @@ func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.Disp
 		return automation.DispatchResult{Err: fmt.Errorf("resolve runtime for world %s: %w", world.ID, err)}
 	}
 
+	// Refresh credentials before every fire. Mirrors what
+	// `spwn agent talk` does at the human-talk path. Without this,
+	// the daemon hands the world a stale OAuth token cached at
+	// world-spawn time — fine for hours, fatal once the token
+	// expires (~24h). Per-fire keychain pull is cheap (≪ 50 ms)
+	// and guarantees the next dispatch sees fresh creds. A sync
+	// failure is non-fatal: env-var auth may still supply working
+	// creds, and a real 401 will surface in the runtime output
+	// captured into the receipt. We log the error to stderr so a
+	// persistent keychain failure leaves a breadcrumb for the
+	// operator (silent swallow was hiding 401-loop root causes).
+	if err := auth.SyncCredentials(); err != nil {
+		fmt.Fprintf(os.Stderr, "spwn: automation: sync credentials before %s/%s: %v\n", req.World, req.Agent, err)
+	}
+	if err := rt.SyncHostCredentials(platform.CredentialsDir()); err != nil {
+		fmt.Fprintf(os.Stderr, "spwn: automation: sync runtime credentials before %s/%s: %v\n", req.World, req.Agent, err)
+	}
+
 	// Build the runtime command in one-shot mode. SessionID is left
 	// empty — automations are independent invocations, not a
 	// continuous conversation. The renderer has already templated
@@ -95,6 +115,23 @@ func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.Disp
 		"SPWN_AGENT_NAME="+req.Agent,
 		"SPWN_WORLD_ID="+req.World,
 	)
+
+	// Re-run the runtime's prelaunch shell INSIDE the container
+	// before the actual dispatch. The host-side SyncHostCredentials
+	// above refreshes /credentials/anthropic/.credentials.json (the
+	// bind-mount source), but Claude Code reads $HOME/.claude/
+	// .credentials.json — a COPY made by PrelaunchShell at world
+	// spawn. After the OAuth token expires (~24h), every subsequent
+	// fire reads the stale copy and gets 401. Re-running prelaunch
+	// per dispatch is ~5 ms (a `cp` + `chmod`) and is the only path
+	// that keeps the in-container copy aligned with the bind-mount
+	// without restarting the world.
+	if pre := rt.PrelaunchShell(); strings.TrimSpace(pre) != "" {
+		_, _ = d.arc.backend.Exec(ctx, world.ContainerID, backend.ExecConfig{
+			Cmd: []string{"sh", "-c", pre},
+			Env: env,
+		})
+	}
 
 	// Capture runtime output into a bounded bytes.Buffer so we can
 	// surface it in the receipt. ExecConfig.Stdout/Stderr go to

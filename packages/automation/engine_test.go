@@ -116,6 +116,9 @@ func TestEngine_StopBeforeStartIsNoop(t *testing.T) {
 
 func TestEngine_CronFiresAtScheduledTime(t *testing.T) {
 	f := newEngineFixture(t) // anchored at testEpoch = 2026-05-01T00:00:00Z
+	// Pre-seed state so first-boot catch-up doesn't muddy the receipt
+	// stream — this test asserts a clean on-time fire path.
+	must(t, f.state.RecordFire("brain", "morning-brief", mustParse(t, testEpoch)))
 	must(t, f.engine.Register("brain", map[string]project.Automation{
 		"morning-brief": cronAuto("0 6 * * *", "editor", "Brief."),
 	}))
@@ -307,11 +310,12 @@ func TestEngine_CatchupStack_RespectsCap(t *testing.T) {
 	}
 }
 
-func TestEngine_CatchupNoPriorFireSkipsCatchup(t *testing.T) {
-	// First-ever boot — engine has nothing in state. Even with N
-	// "missed" slots in the abstract, we don't fire a catch-up
-	// because the engine has no view of "what should have happened
-	// before I existed".
+func TestEngine_FirstBootFiresMostRecentSlotInWindow(t *testing.T) {
+	// First-ever boot at 08:14 with a daily 6am cron — the 06:00
+	// slot two hours ago is the latest missed within the 24h first-
+	// boot lookback window, so the engine fires exactly ONCE for it.
+	// Apple-Reminders behaviour: install the daemon at noon, you
+	// still get this morning's brief.
 	f := newEngineFixture(t)
 	f.clock = NewFakeClock(mustParse(t, "2026-04-29T08:14:00Z"))
 	f.engine, _ = New(Config{
@@ -326,8 +330,68 @@ func TestEngine_CatchupNoPriorFireSkipsCatchup(t *testing.T) {
 	must(t, f.engine.Start(context.Background()))
 	defer f.engine.Stop()
 
+	receipts := f.receipts.Receipts()
+	if got := len(receipts); got != 1 {
+		t.Fatalf("first-boot produced %d catch-up receipts, want 1", got)
+	}
+	if reason := receipts[0].Reason; reason != "catchup" {
+		t.Errorf("reason = %q, want %q", reason, "catchup")
+	}
+	wantScheduled := mustParse(t, "2026-04-29T06:00:00Z")
+	if got := receipts[0].Scheduled; !got.Equal(wantScheduled) {
+		t.Errorf("scheduled = %s, want %s", got, wantScheduled)
+	}
+	if missed := receipts[0].Missed; missed != 1 {
+		t.Errorf("missed = %d, want 1 (collapse semantics on first boot)", missed)
+	}
+}
+
+func TestEngine_FirstBootSkipsWhenNoSlotInWindow(t *testing.T) {
+	// First-ever boot but the schedule's most recent slot was more
+	// than 24h ago (here: weekly Sunday 9am, daemon comes up the
+	// following Friday). The engine doesn't replay arbitrary history
+	// — older slots are dropped silently. Avoids a brand-new daemon
+	// firing months of weekly briefs the moment it starts.
+	f := newEngineFixture(t)
+	// Fri 2026-05-01 12:00 — last Sunday 9am was 2026-04-26, ~5 days
+	// ago, well outside the 24h window.
+	f.clock = NewFakeClock(mustParse(t, "2026-05-01T12:00:00Z"))
+	f.engine, _ = New(Config{
+		Clock:      f.clock,
+		Dispatcher: f.dispatcher,
+		Receipts:   f.receipts,
+		State:      f.state,
+	})
+	must(t, f.engine.Register("brain", map[string]project.Automation{
+		"weekly": cronAuto("0 9 * * 0", "editor", "go"),
+	}))
+	must(t, f.engine.Start(context.Background()))
+	defer f.engine.Stop()
+
 	if got := len(f.receipts.Receipts()); got != 0 {
-		t.Errorf("first-boot produced %d catch-up receipts, want 0", got)
+		t.Errorf("first-boot outside 24h window produced %d receipts, want 0", got)
+	}
+}
+
+func TestEngine_FirstBootSkipsWhenCatchupSkip(t *testing.T) {
+	// Catchup: skip is honoured even on first boot — the user opted
+	// out of any catch-up behaviour, including the first-boot one.
+	f := newEngineFixture(t)
+	f.clock = NewFakeClock(mustParse(t, "2026-04-29T08:14:00Z"))
+	f.engine, _ = New(Config{
+		Clock:      f.clock,
+		Dispatcher: f.dispatcher,
+		Receipts:   f.receipts,
+		State:      f.state,
+	})
+	auto := cronAuto("0 6 * * *", "editor", "go")
+	auto.Catchup = "skip"
+	must(t, f.engine.Register("brain", map[string]project.Automation{"morning-brief": auto}))
+	must(t, f.engine.Start(context.Background()))
+	defer f.engine.Stop()
+
+	if got := len(f.receipts.Receipts()); got != 0 {
+		t.Errorf("catchup:skip on first boot produced %d receipts, want 0", got)
 	}
 }
 
@@ -376,6 +440,14 @@ func TestEngine_PerAgentSerialisation(t *testing.T) {
 	hold := make(chan struct{})
 	f.dispatcher.Hold = hold
 
+	// Pre-seed state so the first-boot catch-up path doesn't fire
+	// against the held dispatcher and deadlock Start. This test is
+	// about cron-tick serialisation, not catch-up — handing each
+	// automation a non-zero LastFired routes Start through the
+	// regular collapse-mode path (which finds 0 missed and exits).
+	must(t, f.state.RecordFire("brain", "a", mustParse(t, testEpoch)))
+	must(t, f.state.RecordFire("brain", "b", mustParse(t, testEpoch)))
+
 	must(t, f.engine.Register("brain", map[string]project.Automation{
 		"a": cronAuto("0 6 * * *", "editor", "p1"),
 		"b": cronAuto("0 6 * * *", "editor", "p2"),
@@ -410,6 +482,12 @@ func TestEngine_CrossAgentParallel(t *testing.T) {
 	f := newEngineFixture(t)
 	hold := make(chan struct{})
 	f.dispatcher.Hold = hold
+
+	// Pre-seed state so first-boot catch-up doesn't block Start
+	// against the held dispatcher. This test is about cross-agent
+	// parallelism on a cron tick, not catch-up.
+	must(t, f.state.RecordFire("brain", "a", mustParse(t, testEpoch)))
+	must(t, f.state.RecordFire("brain", "b", mustParse(t, testEpoch)))
 
 	must(t, f.engine.Register("brain", map[string]project.Automation{
 		"a": cronAuto("0 6 * * *", "editor", "p"),
