@@ -2,7 +2,7 @@
 
 This document explains **how** spwn is tested — the layers, where files live, the patterns each layer uses, the governance that prevents drift, and the cookbook for adding new tests.
 
-For **how to run** tests, see [README.md](README.md). For the original design rationale and open issues, see the plan at `~/Desktop/spwn-test-architecture-plan.md`.
+For **how to run** tests, see [README.md](README.md). For the original design rationale and open issues, see [`docs/notes/test-architecture-rationale.md`](../docs/notes/test-architecture-rationale.md). For manual QA passes that complement this suite, see [`docs/qa/`](../docs/qa/).
 
 ---
 
