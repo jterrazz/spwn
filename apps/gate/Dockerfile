@@ -25,12 +25,14 @@
 
 FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
-# jq for shell-side cookie inspection; gws for gmail/gcal elements.
+# jq for shell-side cookie inspection; gws for gmail/gcal elements;
+# docker CLI so the spwn:dispatch tool can `spwn agent talk` (which
+# shells docker exec) when /var/run/docker.sock is bind-mounted in.
 # The Microsoft Playwright image ships browsers (in /ms-playwright)
 # but NOT the `playwright` npm module — install it globally so the
 # sidecar + tools can `require('playwright')`. SKIP_BROWSER_DOWNLOAD
 # avoids re-downloading the chromium the base image already provides.
-RUN apt-get update && apt-get install -y --no-install-recommends jq \
+RUN apt-get update && apt-get install -y --no-install-recommends jq docker.io \
  && rm -rf /var/lib/apt/lists/* \
  && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install -g playwright @googleworkspace/cli
 

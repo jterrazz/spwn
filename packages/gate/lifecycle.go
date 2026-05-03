@@ -10,7 +10,10 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
+	"strconv"
 	"strings"
+	"syscall"
+	"time"
 )
 
 // Container/image identity. Stable across upgrades so docker
@@ -145,6 +148,7 @@ func runContainer(ctx context.Context) error {
 	}
 	credsDir := filepath.Join(home, ".spwn", "credentials")
 	gateDir := filepath.Join(home, ".spwn", "gate")
+	spwnHome := filepath.Join(home, ".spwn")
 	_ = os.MkdirAll(credsDir, 0o700)
 	_ = os.MkdirAll(gateDir, 0o700)
 
@@ -162,9 +166,178 @@ func runContainer(ctx context.Context) error {
 		// Match the in-container default cred path; the gate reads
 		// `mcp.ProviderTokenPath` which expands to /credentials/mcp/...
 		"-e", "SPWN_HOME=/",
-		ImageName,
 	}
+
+	// Orchestration broker mounts. Optional — if any of these aren't
+	// resolvable, the gate still starts (cookie sync + element
+	// brokering work without them); the spwn:dispatch tool inside
+	// just fails fast with a clear error when invoked.
+	//
+	// Three things a dispatch tool needs to call `spwn agent talk`:
+	//   1. The spwn binary on PATH (linux ELF, cross-compiled on host)
+	//   2. /var/run/docker.sock so spwn can `docker exec` into worlds
+	//   3. ~/.spwn/state.json + activity.jsonl so spwn finds the live
+	//      world IDs bound to the project on the host
+	if spwnBin, ok := resolveLinuxSpwnBinary(); ok {
+		args = append(args,
+			"-v", spwnBin+":/usr/local/bin/spwn:ro",
+		)
+	}
+	if sockPath, gid, ok := resolveDockerSocket(); ok {
+		args = append(args,
+			"-v", sockPath+":/var/run/docker.sock",
+			"--group-add", gid,
+			// OrbStack + Docker Desktop both expose the bind-mounted
+			// socket as root-owned inside the container regardless of
+			// the host file's GID. Add group 0 (root) so the gate's
+			// non-root spwn user can read the socket. On a true Linux
+			// host this is a no-op; on macOS it's the only thing that
+			// makes `docker ps` work from inside the gate.
+			"--group-add", "0",
+		)
+	}
+	// Mount host ~/.spwn into the gate user's home so spwn-the-binary
+	// finds its state. The gate runs as user `spwn` (see Dockerfile)
+	// whose home is /home/spwn — that's where spwn looks for ~/.spwn.
+	args = append(args,
+		"-v", spwnHome+":/home/spwn/.spwn",
+	)
+	// Mirror-mount the user's home directory at the same path inside
+	// the gate (read-only). The spwn:dispatch tool needs to chdir to
+	// a project workspace before invoking `spwn agent talk`, and it
+	// reads the workspace host path from the target world container's
+	// labels (sh.spwn.world.workspaces). Mirroring the path keeps the
+	// label data directly usable — no host→container translation.
+	//
+	// Trust note: the gate is already a privileged broker (owns OAuth
+	// tokens, talks to Docker daemon). Read-only access to the user's
+	// home extends nothing meaningful in the threat model.
+	args = append(args,
+		"-v", home+":"+home+":ro",
+	)
+
+	args = append(args, ImageName)
 	return dockerCmd(ctx, args...)
+}
+
+// resolveLinuxSpwnBinary returns the absolute host path of a Linux
+// spwn binary suitable for bind-mounting into the gate. The gate
+// container is linux/<host-arch>; the host's macOS Mach-O binary
+// would yield "Exec format error" inside the container.
+//
+// Order of resolution:
+//  1. SPWN_BINARY env var — must point to a Linux ELF (test seam).
+//  2. Cached cross-compile at ~/.spwn/cache/spwn-linux. If missing
+//     OR older than 24h, rebuild via the same go-build path the
+//     gate-binary build uses. Falls back to stale cache on rebuild
+//     failure (a stale binary beats no binary).
+//
+// Returns ok=false on any unrecoverable failure. The gate still
+// starts; only the spwn:dispatch tool inside loses functionality.
+func resolveLinuxSpwnBinary() (string, bool) {
+	if env := os.Getenv("SPWN_BINARY"); env != "" {
+		if st, err := os.Stat(env); err == nil && !st.IsDir() {
+			return env, true
+		}
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", false
+	}
+	cacheDir := filepath.Join(home, ".spwn", "cache")
+	cached := filepath.Join(cacheDir, "spwn-linux")
+
+	if st, err := os.Stat(cached); err == nil && !st.IsDir() {
+		if time.Since(st.ModTime()) < 24*time.Hour {
+			return cached, true
+		}
+	}
+
+	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
+		return "", false
+	}
+	root, err := findSourceRoot()
+	if err != nil {
+		// Fall back to stale cache if we can't locate the source tree
+		// (binary distribution case — no source on disk).
+		if st, err2 := os.Stat(cached); err2 == nil && !st.IsDir() {
+			return cached, true
+		}
+		return "", false
+	}
+
+	tmp, err := os.CreateTemp("", "spwn-linux-*")
+	if err != nil {
+		return "", false
+	}
+	tmp.Close()
+	defer os.Remove(tmp.Name())
+
+	build := exec.Command("go", "build",
+		"-trimpath", "-ldflags=-s -w",
+		"-o", tmp.Name(),
+		"./apps/cli/cmd/spwn",
+	)
+	build.Dir = root
+	build.Env = append(os.Environ(),
+		"GOOS=linux",
+		"GOARCH="+runtime.GOARCH,
+		"CGO_ENABLED=0",
+	)
+	if err := build.Run(); err != nil {
+		// Fall back to stale cache.
+		if st, err2 := os.Stat(cached); err2 == nil && !st.IsDir() {
+			return cached, true
+		}
+		return "", false
+	}
+	if err := copyFile(tmp.Name(), cached); err != nil {
+		return "", false
+	}
+	_ = os.Chmod(cached, 0o755)
+	return cached, true
+}
+
+// resolveDockerSocket finds the host docker.sock path and the GID
+// it's owned by. The gate's `spwn` user needs that GID added via
+// --group-add to actually read the bind-mounted socket.
+//
+// macOS rabbit hole: /var/run/docker.sock is typically a symlink to
+// the actual socket which lives under the user's ~/.docker (Docker
+// Desktop), ~/.orbstack (OrbStack), or ~/.colima (Colima). We try
+// DOCKER_HOST first (authoritative), then the well-known symlinks,
+// then the runtime-specific direct paths.
+//
+// Returns the path to bind-mount + the GID as a string. ok=false if
+// no socket found or GID couldn't be resolved.
+func resolveDockerSocket() (string, string, bool) {
+	candidates := []string{}
+	if h := os.Getenv("DOCKER_HOST"); strings.HasPrefix(h, "unix://") {
+		candidates = append(candidates, strings.TrimPrefix(h, "unix://"))
+	}
+	candidates = append(candidates, "/var/run/docker.sock")
+	if home, err := os.UserHomeDir(); err == nil {
+		candidates = append(candidates,
+			filepath.Join(home, ".orbstack", "run", "docker.sock"),
+			filepath.Join(home, ".docker", "run", "docker.sock"),
+			filepath.Join(home, ".colima", "default", "docker.sock"),
+		)
+	}
+	for _, p := range candidates {
+		st, err := os.Stat(p)
+		if err != nil || st.IsDir() {
+			continue
+		}
+		sys := st.Sys()
+		if sys == nil {
+			continue
+		}
+		if stat, ok := sys.(*syscall.Stat_t); ok {
+			return p, strconv.FormatUint(uint64(stat.Gid), 10), true
+		}
+	}
+	return "", "", false
 }
 
 func isRunning(ctx context.Context) (bool, error) {
