@@ -178,10 +178,17 @@ func (c *spawner) SyncHostCredentials(credsDir string) error {
 		}
 	}
 
-	// No file/Keychain source available. Clear any stale file
-	// from a previous sync so we never mislead the container into
-	// thinking it has working creds.
-	_ = os.Remove(dst)
+	// No file/Keychain source available — but DO NOT clear an existing
+	// dst. The keychain probe can transiently fail (non-interactive
+	// shells, launchd-spawned daemons, gate-side spwn invocations
+	// inside containers where keychain isn't reachable at all). If
+	// dst already has working creds from a prior sync, leaving it
+	// alone keeps the next dispatch alive; if it's already gone we
+	// still no-op cleanly.
+	//
+	// The cost is that an explicit logout won't propagate via this
+	// path — but `spwn auth logout` writes a cleared file directly,
+	// it doesn't rely on the next sync to "discover" the absence.
 	return nil
 }
 

@@ -66,7 +66,25 @@ func SyncCredentials() error {
 }
 
 // writeEnvFile writes all resolved credentials as KEY=VALUE lines.
-// Uses atomic write: .env.tmp → rename → .env
+// Uses atomic write: .env.tmp → rename → .env.
+//
+// Empty-result protection: if the resolver returned no usable
+// credentials (every entry is CredTypeNone / empty Token) AND the
+// existing .env on disk already has content, we LEAVE the file
+// alone and log a warning. Rationale: the resolver can transiently
+// return empty when keychain access fails in a non-interactive
+// process context (launchd-spawned daemons, `make`-spawned
+// subprocesses, gate-side spwn invocations inside the container
+// where keychain isn't reachable at all). Overwriting good creds
+// with the empty result corrupts every subsequent dispatch
+// (containers' prelaunch script copies the now-empty
+// /credentials/anthropic/.credentials.json over the in-container
+// one, breaking auth for every worker that next runs).
+//
+// We're optimising for "don't break working creds"; the cost is
+// that a USER-DRIVEN auth removal (logout) won't propagate until
+// they explicitly clear the creds dir. That's an explicit user
+// action anyway and `spwn auth logout` already handles it directly.
 func writeEnvFile(dir string, creds map[Provider]*Credential) error {
 	var lines []string
 
@@ -76,6 +94,18 @@ func writeEnvFile(dir string, creds map[Provider]*Credential) error {
 		}
 		// Write the primary env var
 		lines = append(lines, fmt.Sprintf("export %s=%q", cred.EnvVar, cred.Token))
+	}
+
+	envPath := filepath.Join(dir, ".env")
+
+	// Empty-result protection — see function doc.
+	if len(lines) == 0 {
+		if st, err := os.Stat(envPath); err == nil && st.Size() > 0 {
+			log.Printf("warning: SyncCredentials resolved no credentials but %s already has content; leaving it alone (likely a transient keychain probe failure)", envPath)
+			return nil
+		}
+		// No existing content either — write the empty file so
+		// callers see "synced, just no creds" rather than "missing".
 	}
 
 	// Sort for deterministic output
@@ -88,7 +118,6 @@ func writeEnvFile(dir string, creds map[Provider]*Credential) error {
 
 	// Atomic write
 	tmpPath := filepath.Join(dir, ".env.tmp")
-	envPath := filepath.Join(dir, ".env")
 
 	if err := os.WriteFile(tmpPath, []byte(content), 0600); err != nil {
 		return err
