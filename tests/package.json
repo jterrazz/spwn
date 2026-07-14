@@ -4,8 +4,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "lint": "codestyle check",
-        "lint:fix": "codestyle fix",
+        "lint": "typescript check",
+        "lint:fix": "typescript fix",
         "test:contracts": "node _contracts/assert-contracts.mjs",
         "test": "vitest --run",
         "test:watch": "vitest",
@@ -19,9 +19,8 @@
     },
     "devDependencies": {
         "@hono/node-server": "^1.0.0",
-        "@jterrazz/codestyle": "^3.4.0",
         "@jterrazz/test": "^8.0.0",
-        "@jterrazz/typescript": "^5.3.0",
+        "@jterrazz/typescript": "^6.0.3",
         "@playwright/test": "^1.59.1",
         "@types/node": "^25.5.0",
         "hono": "^4.0.0",

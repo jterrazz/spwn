@@ -1,4 +1,4 @@
-import { oxlint } from '@jterrazz/codestyle';
+import { oxlint } from '@jterrazz/typescript';
 import { defineConfig } from 'oxlint';
 
 export default defineConfig({
