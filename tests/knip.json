@@ -15,6 +15,7 @@
         "web/_fixtures/app.ts",
         "web/**/*.spec.ts"
     ],
+    "ignoreBinaries": ["make", "pgrep"],
     "project": ["**/*.{ts,mjs}"],
     "ignore": ["_fixtures/**", "_catalog/**", "cli/**/seeds/**", "cli/**/expected/**"]
 }
