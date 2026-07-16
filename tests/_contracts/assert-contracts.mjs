@@ -3,8 +3,8 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const repo = resolve(__dirname, '../..');
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const repo = resolve(currentDir, '../..');
 const errors = [];
 
 function fail(message) {
@@ -12,7 +12,7 @@ function fail(message) {
 }
 
 function readYaml(name) {
-    return parse(readFileSync(join(__dirname, name), 'utf8'));
+    return parse(readFileSync(join(currentDir, name), 'utf8'));
 }
 
 function rel(path) {
@@ -110,8 +110,8 @@ function assertApiRoutes() {
     const doc = readYaml('api-routes.yaml');
     const declared = new Map((doc.routes ?? []).map((entry) => [entry.route, entry]));
     const server = readFileSync(join(repo, 'apps/api/server.go'), 'utf8');
-    const actual = [...server.matchAll(/mux\.HandleFunc\("([A-Z]+ [^"]+)"/g)]
-        .map((match) => match[1])
+    const actual = [...server.matchAll(/mux\.HandleFunc\("(?<route>[A-Z]+ [^"]+)"/g)]
+        .map((match) => match.groups.route)
         .sort();
 
     for (const route of actual) {
@@ -173,7 +173,7 @@ function assertWebContracts() {
     }
 
     for (const path of walkFiles('tests/web')) {
-        if (!/\.(ts|tsx)$/.test(path)) {
+        if (!/\.(?:ts|tsx)$/.test(path)) {
             continue;
         }
         const body = readFileSync(join(repo, path), 'utf8');

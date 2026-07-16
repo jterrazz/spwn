@@ -4,3 +4,11 @@ packages:
 
 minimumReleaseAgeExclude:
   - "@jterrazz/*"
+
+# Perfectionist probes `typescript` at runtime without declaring it, so pnpm's
+# hoist fallback hands it typescript-go (v7, no JS API) and sort-imports crashes.
+# Declare the peer so pnpm links the real TypeScript next to the plugin.
+packageExtensions:
+  eslint-plugin-perfectionist:
+    peerDependencies:
+      typescript: "*"

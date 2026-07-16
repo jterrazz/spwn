@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(__dirname, '../..');
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(currentDir, '../..');
 const BIN = resolve(REPO_ROOT, 'bin/spwn');
 const SPWN_HOME = process.env.SPWN_WEB_E2E_HOME ?? mkdtempSync(resolve(tmpdir(), 'spwn-web-e2e-'));
 const SPWN_PROJECT =

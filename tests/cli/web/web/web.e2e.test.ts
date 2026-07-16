@@ -76,7 +76,7 @@ describe('spwn web', () => {
                 .split('\n')
                 .filter((line) => line && !line.includes('pgrep'))
                 .filter((line) => !/^\s*\d+\s+sh\s*$/.test(line))
-                .filter((line) => !/^\s*\d+\s+(sh|bash)\s+-c\s/.test(line))
+                .filter((line) => !/^\s*\d+\s+(?:sh|bash)\s+-c\s/.test(line))
                 .join('\n');
             if (orphans === '') {
                 break;

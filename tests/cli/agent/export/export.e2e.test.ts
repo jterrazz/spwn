@@ -39,8 +39,8 @@ describe('spwn agent export', () => {
         // Now; skills moved to build-time deps. Archive carries
         // SOUL.md + the two remaining Mind layer directories.
         expect(listing).toContain('SOUL.md');
-        expect(listing).toMatch(/(^|\n)playbooks(\/|\n|$)/);
-        expect(listing).toMatch(/(^|\n)journal(\/|\n|$)/);
+        expect(listing).toMatch(/(?:^|\n)playbooks(?:\/|\n|$)/);
+        expect(listing).toMatch(/(?:^|\n)journal(?:\/|\n|$)/);
     });
 
     test('export --exclude still succeeds', async () => {

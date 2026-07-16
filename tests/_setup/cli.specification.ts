@@ -74,7 +74,7 @@ function normalise(actual: string): string {
     // Pre-flight need to ignore this difference. Collapse the
     // Detail to a single placeholder so stored fixtures stay
     // Portable across machines.
-    out = out.replace(/(✓ Credentials\s+)[^\n]*/g, '$1<credentials>');
+    out = out.replace(/(?<label>✓ Credentials\s+)[^\n]*/g, '$<label><credentials>');
     return out;
 }
 
@@ -99,12 +99,12 @@ function copyTree(srcPath: string, dstPath: string): void {
  * per-call casts. Followup: tighten upstream so this cast goes away.
  */
 type CliBuilder = {
-    project(name: string): CliBuilder;
-    seed(path: string): CliBuilder;
-    env(env: Record<string, null | string>): CliBuilder;
-    exec(args: string | string[]): CliBuilder;
-    spawn(args: string, options: { waitFor: string; timeout: number }): CliBuilder;
-    run(): Promise<CliResult>;
+    project: (name: string) => CliBuilder;
+    seed: (path: string) => CliBuilder;
+    env: (env: Record<string, null | string>) => CliBuilder;
+    exec: (args: string | string[]) => CliBuilder;
+    spawn: (args: string, options: { waitFor: string; timeout: number }) => CliBuilder;
+    run: () => Promise<CliResult>;
 };
 
 const seedHandlers = {

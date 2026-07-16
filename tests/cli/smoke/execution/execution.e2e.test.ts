@@ -223,6 +223,6 @@ describe('CLI execution - world aliases (docker)', () => {
 
         expect(snap.exitCode).toBe(0);
         // Snapshot save banner lands on stderr.
-        expect(snap.stderr.text).toMatch(/[Ss]aved|[Ss]nap(shot)? saved|created/);
+        expect(snap.stderr.text).toMatch(/[Ss]aved|[Ss]nap(?:shot)? saved|created/);
     });
 });

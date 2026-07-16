@@ -38,7 +38,7 @@ describe('error recovery', () => {
             .run();
 
         expect(secondDown.exitCode).toBe(1);
-        expect(secondDown.stderr.text).toMatch(/not (found|running)|no (running )?worlds?/i);
+        expect(secondDown.stderr.text).toMatch(/not (?:found|running)|no (?:running )?worlds?/i);
         // No stack trace, no usage dump.
         expect(secondDown.stderr.text).not.toContain('TypeError');
         expect(secondDown.stderr.text).not.toContain('panic');

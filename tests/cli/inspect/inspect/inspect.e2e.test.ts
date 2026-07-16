@@ -33,7 +33,7 @@ describe('spwn inspect', () => {
 
         expect(result.exitCode).toBe(0);
         // One block only — no second "Name" header (no trailing agents).
-        const headerCount = (result.stdout.text.match(/(^|\n)Name\s+/g) ?? []).length;
+        const headerCount = (result.stdout.text.match(/(?:^|\n)Name\s+/g) ?? []).length;
         expect(headerCount).toBe(1);
         expect(result.stdout.text).toContain('Name         neo');
     });

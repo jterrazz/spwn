@@ -4,6 +4,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+packageExtensionsChecksum: sha256-/jRwzCkZyXXsU8nlDSQ4bkCBrW0Q6OHJ9cpDOGOZqKQ=
+
 importers:
 
   apps/gate:
@@ -3566,12 +3568,14 @@ packages:
     engines: {node: ^20.0.0 || >=22.0.0}
     peerDependencies:
       eslint: ^8.45.0 || ^9.0.0 || ^10.0.0
+      typescript: '*'
 
   eslint-plugin-perfectionist@5.8.0:
     resolution: {integrity: sha512-k8uIptWIxkUclonCFGyDzgYs9NI+Qh0a7cUXS3L7IYZDEsjXuimFBVbxXPQQngWqMiaxJRwbtYB4smMGMqF+cw==}
     engines: {node: ^20.0.0 || >=22.0.0}
     peerDependencies:
       eslint: ^8.45.0 || ^9.0.0 || ^10.0.0
+      typescript: '*'
 
   eslint-scope@9.1.2:
     resolution: {integrity: sha512-xS90H51cKw0jltxmvmHy2Iai1LIqrfbw57b79w/J7MfvDfkIkFZ+kj6zC3BjtUwh150HsSSdxXZcsuv72miDFQ==}
@@ -6424,6 +6428,13 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
+  '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)':
+    dependencies:
+      '@emnapi/core': 1.9.2
+      '@emnapi/runtime': 1.9.2
+      '@tybys/wasm-util': 0.10.3
+    optional: true
+
   '@next/env@16.2.2': {}
 
   '@next/swc-darwin-arm64@16.2.2':
@@ -7356,7 +7367,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.9.2
       '@emnapi/runtime': 1.9.2
-      '@napi-rs/wasm-runtime': 1.1.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
     optional: true
 
   '@rolldown/binding-wasm32-wasi@1.0.0-rc.16':
@@ -8500,18 +8511,18 @@ snapshots:
       '@typescript-eslint/utils': 8.64.0(eslint@10.2.0(jiti@2.7.0))(typescript@6.0.3)
       eslint: 10.2.0(jiti@2.7.0)
       natural-orderby: 5.0.0
+      typescript: 6.0.3
     transitivePeerDependencies:
       - supports-color
-      - typescript
 
   eslint-plugin-perfectionist@5.8.0(eslint@10.2.0(jiti@2.7.0))(typescript@5.9.3):
     dependencies:
       '@typescript-eslint/utils': 8.58.2(eslint@10.2.0(jiti@2.7.0))(typescript@5.9.3)
       eslint: 10.2.0(jiti@2.7.0)
       natural-orderby: 5.0.0
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
-      - typescript
 
   eslint-scope@9.1.2:
     dependencies:
@@ -10693,10 +10704,10 @@ snapshots:
   vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.32.0
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       postcss: 8.5.10
       rolldown: 1.0.0-rc.15
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 20.19.39
       fsevents: 2.3.3
@@ -10706,10 +10717,10 @@ snapshots:
   vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3):
     dependencies:
       lightningcss: 1.32.0
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       postcss: 8.5.10
       rolldown: 1.0.0-rc.15
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 25.6.0
       fsevents: 2.3.3
@@ -10719,10 +10730,10 @@ snapshots:
   vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.32.0
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       postcss: 8.5.10
       rolldown: 1.0.0-rc.15
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 25.6.0
       fsevents: 2.3.3

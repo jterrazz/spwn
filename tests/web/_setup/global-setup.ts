@@ -2,8 +2,8 @@ import { execSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(__dirname, '../../..');
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(currentDir, '../../..');
 
 /**
  * Build the binary so the Tauri sidecar exists. Examples are

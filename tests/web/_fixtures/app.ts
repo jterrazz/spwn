@@ -3,10 +3,10 @@ import { execSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const currentDir = dirname(fileURLToPath(import.meta.url));
 const API_PORT = 9877;
 const API_BASE = `http://localhost:${API_PORT}`;
-const BIN = resolve(__dirname, '../../../bin/spwn');
+const BIN = resolve(currentDir, '../../../bin/spwn');
 
 /**
  * API helper - calls the Go API directly (faster than UI for setup).
@@ -182,4 +182,4 @@ export const test = base.extend<{
     },
 });
 
-export { expect };
+export { expect } from '@playwright/test';
