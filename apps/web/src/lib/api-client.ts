@@ -7,7 +7,7 @@ import { getTauriApiBase, initTauriApiPort, isTauri } from './tauri';
 import type { AgentProfile, World } from './types';
 
 // Dynamic API base - Tauri app uses a random port, browser defaults to 3001
-let _goApiBase: null | string = null;
+let goApiBase: null | string = null;
 
 function browserApiBase(): null | string {
     if (process.env.NEXT_PUBLIC_API_URL) {
@@ -26,23 +26,23 @@ function browserApiBase(): null | string {
  * the Tauri webview has finished initializing.
  */
 async function resolveGoApiBase(): Promise<string> {
-    if (_goApiBase) {
-        return _goApiBase;
+    if (goApiBase) {
+        return goApiBase;
     }
 
     // In Tauri, wait for the port from the Rust side
     if (isTauri()) {
         const port = await initTauriApiPort();
         if (port) {
-            _goApiBase = `http://localhost:${port}`;
-            return _goApiBase;
+            goApiBase = `http://localhost:${port}`;
+            return goApiBase;
         }
     }
 
     // Check if the port was already cached synchronously
     const tauriBase = getTauriApiBase();
     if (tauriBase) {
-        _goApiBase = tauriBase;
+        goApiBase = tauriBase;
         return tauriBase;
     }
 
@@ -55,7 +55,7 @@ async function resolveGoApiBase(): Promise<string> {
 
 // Allow external code to set the port explicitly
 export function setApiBase(base: string) {
-    _goApiBase = base;
+    goApiBase = base;
 }
 
 // Eagerly resolve the API base on module load so that even synchronous
@@ -70,24 +70,24 @@ if (typeof globalThis.location !== 'undefined' || isTauri()) {
 
 export type ConnectionStatus = 'connected' | 'disconnected';
 
-let _connectionStatus: ConnectionStatus = 'disconnected';
-const _statusListeners = new Set<(status: ConnectionStatus) => void>();
+let connectionStatus: ConnectionStatus = 'disconnected';
+const statusListeners = new Set<(status: ConnectionStatus) => void>();
 
 function setConnectionStatus(status: ConnectionStatus) {
-    if (_connectionStatus !== status) {
-        _connectionStatus = status;
-        _statusListeners.forEach((fn) => fn(status));
+    if (connectionStatus !== status) {
+        connectionStatus = status;
+        statusListeners.forEach((fn) => fn(status));
     }
 }
 
 export function getConnectionStatus(): ConnectionStatus {
-    return _connectionStatus;
+    return connectionStatus;
 }
 
 export function onConnectionStatusChange(fn: (status: ConnectionStatus) => void): () => void {
-    _statusListeners.add(fn);
+    statusListeners.add(fn);
     return () => {
-        _statusListeners.delete(fn);
+        statusListeners.delete(fn);
     };
 }
 
@@ -292,6 +292,6 @@ export async function isGoApiAvailable(): Promise<boolean> {
  * localhost:3001 if not yet initialized.
  */
 export function goApiUrl(path: string): string {
-    const base = _goApiBase || getTauriApiBase() || browserApiBase() || 'http://localhost:3001';
+    const base = goApiBase || getTauriApiBase() || browserApiBase() || 'http://localhost:3001';
     return `${base}${path}`;
 }

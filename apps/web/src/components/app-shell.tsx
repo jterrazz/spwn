@@ -68,8 +68,8 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
     // Track the last-visited world so the sidebar remembers the selection
     // Across page navigations (e.g. going from /world/w-x to /agents).
-    const worldMatch = pathname.match(/^\/world\/([^/]+)/);
-    const urlWorldId = worldMatch?.[1];
+    const worldMatch = pathname.match(/^\/world\/(?<id>[^/]+)/);
+    const urlWorldId = worldMatch?.groups?.id;
     const [lastWorldId, setLastWorldId] = useState<string | undefined>(urlWorldId);
 
     useEffect(() => {

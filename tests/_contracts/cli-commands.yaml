@@ -1,23 +1,23 @@
 generatedDocsDir: docs/cli
 requiredBehaviorSpecs:
     - command: spwn init
-      tests: [tests/cli/init/init/init.e2e.test.ts]
+      tests: [tests/specs/cli/init/init.test.ts]
     - command: spwn check
-      tests: [tests/cli/check/check/check.e2e.test.ts]
+      tests: [tests/specs/cli/check/check.test.ts]
     - command: spwn build
       tests:
-          [tests/cli/build/build/build.e2e.test.ts, tests/cli/build/tree-only/tree-only.e2e.test.ts]
+          [tests/specs/cli/build/build.test.ts, tests/specs/cli/build/tree-only.test.ts]
     - command: spwn up
-      tests: [tests/cli/world/up-down/up-down.e2e.test.ts]
+      tests: [tests/specs/cli/world/up-down.test.ts]
     - command: spwn down
-      tests: [tests/cli/world/up-down/up-down.e2e.test.ts]
+      tests: [tests/specs/cli/world/up-down.test.ts]
     - command: spwn agent talk
-      tests: [tests/cli/agent/talk/talk.e2e.test.ts]
+      tests: [tests/specs/cli/agent/talk.test.ts]
     - command: spwn world list
-      tests: [tests/cli/world/list/world-list.e2e.test.ts]
+      tests: [tests/specs/cli/world/world-list.test.ts]
     - command: spwn skill
-      tests: [tests/cli/skill/skill/skills.e2e.test.ts]
+      tests: [tests/specs/cli/skill/skills.test.ts]
     - command: spwn install
-      tests: [tests/cli/dependency/install.e2e.test.ts]
+      tests: [tests/specs/cli/dependency/install.test.ts]
     - command: spwn auth
-      tests: [tests/cli/auth/auth/auth.e2e.test.ts]
+      tests: [tests/specs/cli/auth/auth.test.ts]

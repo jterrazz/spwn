@@ -61,6 +61,46 @@ const LOG_LEVEL_COLORS: Record<string, string> = {
 
 type Panel = 'logs' | 'snapshots' | null;
 
+// Hoisted out of the dashboard component so cell renderers are stable across renders.
+const AGENT_COLUMNS = [
+    {
+        key: 'name',
+        label: 'Name',
+        width: '1fr',
+        render: (a: Agent) => (
+            <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>
+        ),
+    },
+    {
+        key: 'role',
+        label: 'Role',
+        width: '80px',
+        render: (a: Agent) => {
+            const badge = ROLE_BADGE[a.role] ?? ROLE_BADGE.default;
+            return (
+                <span
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}
+                >
+                    {a.role}
+                </span>
+            );
+        },
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        width: '100px',
+        render: (a: Agent) => (
+            <span className="flex items-center gap-1.5">
+                <DSStatusDot status={a.status} />
+                <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">
+                    {a.status}
+                </span>
+            </span>
+        ),
+    },
+];
+
 export default function WorldDashboard() {
     const params = useParams();
     const router = useRouter();
@@ -485,46 +525,7 @@ export default function WorldDashboard() {
                         <EmptyAgentsView onDeployed={fetchWorld} worldId={worldId} />
                     ) : (
                         <DataTable<Agent>
-                            columns={[
-                                {
-                                    key: 'name',
-                                    label: 'Name',
-                                    width: '1fr',
-                                    render: (a) => (
-                                        <span className="text-[13px] font-mono text-foreground/85 truncate">
-                                            {a.name}
-                                        </span>
-                                    ),
-                                },
-                                {
-                                    key: 'role',
-                                    label: 'Role',
-                                    width: '80px',
-                                    render: (a) => {
-                                        const badge = ROLE_BADGE[a.role] ?? ROLE_BADGE.default;
-                                        return (
-                                            <span
-                                                className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}
-                                            >
-                                                {a.role}
-                                            </span>
-                                        );
-                                    },
-                                },
-                                {
-                                    key: 'status',
-                                    label: 'Status',
-                                    width: '100px',
-                                    render: (a) => (
-                                        <span className="flex items-center gap-1.5">
-                                            <DSStatusDot status={a.status} />
-                                            <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">
-                                                {a.status}
-                                            </span>
-                                        </span>
-                                    ),
-                                },
-                            ]}
+                            columns={AGENT_COLUMNS}
                             emptyText="No agents deployed."
                             rowHref={(a) =>
                                 `/agents/${encodeURIComponent(a.name)}?world=${worldId}`

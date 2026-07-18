@@ -66,20 +66,6 @@ const AGENT_ICON: Record<string, { icon: typeof IconBoltFilled; color: string; d
     stopped: { icon: IconCircleFilled, color: 'text-zinc-500/30', dim: true },
 };
 
-const _WORLD_DOT: Record<string, string> = {
-    running: 'bg-green-500',
-    idle: 'bg-amber-400',
-    stopped: 'bg-zinc-400/30',
-    creating: 'bg-white/80',
-};
-
-// Thin wrapper for legacy callers that only have an id. When a full World is available,
-// Prefer getWorldName(world) so a custom display name is respected.
-function _extractName(id: string): string {
-    const parts = id.split('-');
-    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
-}
-
 export function AppSidebar({
     worlds,
     currentWorldId,

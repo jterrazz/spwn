@@ -385,6 +385,10 @@ function DockerStep({
     );
 }
 
+const reconnect = async (provider: string) => {
+    await apiAction('/api/auth/reconnect', { provider });
+};
+
 function AuthStep({
     status,
     onAdvance,
@@ -399,10 +403,6 @@ function AuthStep({
             .then((d) => setProviders(d.providers ?? []))
             .catch(() => setProviders([]));
     }, [status?.hasAuth]);
-
-    const reconnect = async (provider: string) => {
-        await apiAction('/api/auth/reconnect', { provider });
-    };
 
     return (
         <div className="space-y-3">

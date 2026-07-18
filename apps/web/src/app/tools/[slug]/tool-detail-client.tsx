@@ -88,7 +88,7 @@ function SkillContent({ content }: { content: string }) {
         }
 
         // Numbered list
-        const numMatch = line.trimStart().match(/^(\d+)\.\s+(.+)/);
+        const numMatch = line.trimStart().match(/^(?<num>\d+)\.\s+(?<text>.+)/);
         if (numMatch) {
             elements.push(
                 <div
@@ -96,9 +96,9 @@ function SkillContent({ content }: { content: string }) {
                     key={key++}
                 >
                     <span className="text-muted-foreground/25 shrink-0 w-4 text-right">
-                        {numMatch[1]}.
+                        {numMatch.groups!.num}.
                     </span>
-                    <span>{renderInlineCode(numMatch[2])}</span>
+                    <span>{renderInlineCode(numMatch.groups!.text!)}</span>
                 </div>,
             );
             i++;
@@ -124,7 +124,7 @@ function SkillContent({ content }: { content: string }) {
 }
 
 function renderInlineCode(text: string): React.ReactNode {
-    const parts = text.split(/(`[^`]+`)/g);
+    const parts = text.split(/(?<code>`[^`]+`)/g);
     let codeSeq = 0;
     return parts.map((part) => {
         if (part.startsWith('`') && part.endsWith('`')) {

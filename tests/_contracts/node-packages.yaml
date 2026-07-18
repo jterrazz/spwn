@@ -10,5 +10,5 @@ packages:
     - path: tests
       scripts: [test, test:contracts, test:web]
       tests:
-          - tests/cli/agent/talk/talk.e2e.test.ts
+          - tests/specs/cli/agent/talk.test.ts
           - tests/web/navigation/sidebar/sidebar.spec.ts

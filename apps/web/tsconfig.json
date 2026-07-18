@@ -2,6 +2,7 @@
     "extends": "@jterrazz/typescript/presets/tsconfig/next",
     "compilerOptions": {
         "moduleResolution": "bundler",
+        "target": "ES2022",
         "paths": {
             "@/*": ["./src/*"]
         }

@@ -37,7 +37,7 @@ function getTauri(): null | TauriGlobal {
     if (!isTauri()) {
         return null;
     }
-    return (globalThis as unknown as { __TAURI__: TauriGlobal }).__TAURI__;
+    return (globalThis as unknown as { __TAURI__: TauriGlobal })['__TAURI__'];
 }
 
 /**

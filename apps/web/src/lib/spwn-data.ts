@@ -221,10 +221,10 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
                 );
                 // Extract purpose from content
                 const purposeMatch = content.match(
-                    /## (?:Purpose|Your Identity)\n([\s\S]*?)(?:\n##|$)/,
+                    /## (?:Purpose|Your Identity)\n(?<body>[\s\S]*?)(?:\n##|$)/,
                 );
                 if (purposeMatch) {
-                    purpose = purposeMatch[1].trim().slice(0, 200);
+                    purpose = purposeMatch.groups!.body!.trim().slice(0, 200);
                 }
                 // Use first paragraph as profile text
                 const lines = content.split('\n').filter((l) => l.trim() && !l.startsWith('#'));
@@ -247,8 +247,8 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
                 'utf8',
             );
             // Extract date from filename (e.g., 2026-04-01_w-titan.md)
-            const dateMatch = file.match(/^(\d{4}-\d{2}-\d{2})/);
-            const date = dateMatch ? dateMatch[1] : file.replace(/\.md$/, '');
+            const dateMatch = file.match(/^(?<date>\d{4}-\d{2}-\d{2})/);
+            const date = dateMatch ? dateMatch.groups!.date! : file.replace(/\.md$/, '');
             // Use first non-header line as summary
             const summaryLine = content
                 .split('\n')

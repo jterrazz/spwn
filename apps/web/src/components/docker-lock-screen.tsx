@@ -24,8 +24,10 @@ export function DockerLockScreen() {
         if (!lastChecked) {
             return;
         }
-        const tick = () =>
-            setSecondsAgo(Math.max(0, Math.floor((Date.now() - lastChecked) / 1000)));
+        const tick = () => {
+            const elapsed = Math.floor((Date.now() - lastChecked) / 1000);
+            setSecondsAgo(Math.max(0, elapsed));
+        };
         tick();
         const id = setInterval(tick, 1000);
         return () => clearInterval(id);

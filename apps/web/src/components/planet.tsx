@@ -72,31 +72,6 @@ function getPlanetConfig(worldId: string, status: string) {
     };
 }
 
-const _ROLE_ICON: Record<string, string> = {
-    chief: '♛',
-    manager: '♜',
-    worker: '◉',
-    npc: '◌',
-};
-
-function _extractName(id: string): string {
-    const parts = id.split('-');
-    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
-}
-
-function _timeAgo(iso: string): string {
-    const d = Date.now() - new Date(iso).getTime();
-    const m = Math.floor(d / 60_000);
-    if (m < 60) {
-        return `${m}m`;
-    }
-    const h = Math.floor(m / 60);
-    if (h < 24) {
-        return `${h}h`;
-    }
-    return `${Math.floor(h / 24)}d`;
-}
-
 // Deterministic seed from string so each planet/agent has unique position
 function hashCode(s: null | string | undefined): number {
     if (!s) {

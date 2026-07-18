@@ -276,7 +276,6 @@ function AgentProfilePage() {
 
     const totalFiles = Object.values(mindTree).reduce((n, f) => n + (f?.length ?? 0), 0);
 
-    const _roleStyle = ROLE_BADGE[profile.role] ?? ROLE_BADGE.worker;
     const deployedAgent = worldData?.agents.find((a) => a.name === agentName);
     const worldName = worldData ? getWorldName(worldData) : undefined;
 

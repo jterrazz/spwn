@@ -38,6 +38,59 @@ interface EnrichedAgent {
 
 type StatusFilter = 'all' | 'deployed' | 'limbo';
 
+// Hoisted out of the page component so cell renderers are stable across renders.
+const AGENT_COLUMNS = [
+    {
+        key: 'name',
+        label: 'Name',
+        width: '1fr',
+        render: (a: EnrichedAgent) => (
+            <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>
+        ),
+    },
+    {
+        key: 'role',
+        label: 'Role',
+        width: '80px',
+        render: (a: EnrichedAgent) => {
+            const badge = ROLE_BADGE[a.role] ?? ROLE_BADGE.default;
+            return (
+                <span
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}
+                >
+                    {a.role}
+                </span>
+            );
+        },
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        width: '100px',
+        render: (a: EnrichedAgent) => (
+            <span className="flex items-center gap-1.5">
+                <StatusDot status={a.status === 'limbo' ? 'stopped' : a.status} />
+                <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">
+                    {a.status}
+                </span>
+            </span>
+        ),
+    },
+    {
+        key: 'world',
+        label: 'World',
+        width: '120px',
+        render: (a: EnrichedAgent) =>
+            a.worldName ? (
+                <span className="text-[11px] font-mono text-foreground/60 truncate">
+                    {a.worldName}
+                </span>
+            ) : (
+                <span className="text-[11px] font-mono text-muted-foreground/25">-</span>
+            ),
+    },
+];
+
 function countLayerFiles(layers: Record<string, null | string[]>): {
     journal: number;
     sessions: number;
@@ -380,65 +433,7 @@ export default function AgentsPage() {
                             </div>
                             {/* Agent table */}
                             <DataTable<EnrichedAgent>
-                                columns={[
-                                    {
-                                        key: 'name',
-                                        label: 'Name',
-                                        width: '1fr',
-                                        render: (a) => (
-                                            <span className="text-[13px] font-mono text-foreground/85 truncate">
-                                                {a.name}
-                                            </span>
-                                        ),
-                                    },
-                                    {
-                                        key: 'role',
-                                        label: 'Role',
-                                        width: '80px',
-                                        render: (a) => {
-                                            const badge = ROLE_BADGE[a.role] ?? ROLE_BADGE.default;
-                                            return (
-                                                <span
-                                                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}
-                                                >
-                                                    {a.role}
-                                                </span>
-                                            );
-                                        },
-                                    },
-                                    {
-                                        key: 'status',
-                                        label: 'Status',
-                                        width: '100px',
-                                        render: (a) => (
-                                            <span className="flex items-center gap-1.5">
-                                                <StatusDot
-                                                    status={
-                                                        a.status === 'limbo' ? 'stopped' : a.status
-                                                    }
-                                                />
-                                                <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">
-                                                    {a.status}
-                                                </span>
-                                            </span>
-                                        ),
-                                    },
-                                    {
-                                        key: 'world',
-                                        label: 'World',
-                                        width: '120px',
-                                        render: (a) =>
-                                            a.worldName ? (
-                                                <span className="text-[11px] font-mono text-foreground/60 truncate">
-                                                    {a.worldName}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[11px] font-mono text-muted-foreground/25">
-                                                    -
-                                                </span>
-                                            ),
-                                    },
-                                ]}
+                                columns={AGENT_COLUMNS}
                                 rowHref={(a) =>
                                     a.worldID
                                         ? `/agents/${encodeURIComponent(a.name)}?world=${a.worldID}`
