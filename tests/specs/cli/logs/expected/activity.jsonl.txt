@@ -1,0 +1,3 @@
+{"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.created","actor":"user","verb":"created","target":"neo","phrase":"You created neo","agent_id":"neo"}
+{"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.created","actor":"user","verb":"created","target":"morpheus","phrase":"You created morpheus","agent_id":"morpheus"}
+{"id":"{{hex}}","timestamp":"{{iso8601}}","type":"agent.forked","actor":"user","verb":"forked","target":"trinity","phrase":"trinity forked from neo","agent_id":"trinity","metadata":{"layers":["playbooks","journal"],"source":"neo"}}

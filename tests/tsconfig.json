@@ -1,10 +1,5 @@
 {
     "extends": "@jterrazz/typescript/presets/tsconfig/node",
-    "include": [
-        "setup/**/*.ts",
-        "cli/**/*.ts",
-        "web/**/*.ts",
-        "vitest.config.ts",
-        "vitest.workspace.ts"
-    ]
+    "include": ["specs/**/*.ts"],
+    "exclude": ["node_modules", "dist", "specs/fixtures/**", "**/expected/**"]
 }

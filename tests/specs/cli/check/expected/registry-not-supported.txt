@@ -1,0 +1,10 @@
+
+  {{workdir}}/spwn.yaml
+
+  errors
+    •  remote registries are not yet supported (ref: "github:jterrazz/foo")
+       spwn/agents/neo/agent.yaml#deps
+       → use spwn:<name> for built-in dependencies, or author a local dep with skill/<name>, tool/<name>, hook/<name>, or command/<name>; remote registries (github:<owner>/<repo>) are planned but not implemented yet
+
+  1 error(s), 0 warning(s), 0 info
+

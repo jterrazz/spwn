@@ -1,0 +1,13 @@
+# Overlay: single-agent base + a second world "duplicate" claiming the same
+# neo agent, layered after $FIXTURES/single-agent/.
+version: 1
+name: single-agent
+
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: [.]
+    knowledge: ./knowledge
+  duplicate:
+    agents: [neo]
+    workspaces: [.]

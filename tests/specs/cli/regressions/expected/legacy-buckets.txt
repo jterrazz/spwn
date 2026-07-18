@@ -1,0 +1,16 @@
+
+  {{workdir}}/spwn.yaml
+
+  errors
+    •  legacy top-level "tools" block in agent.yaml
+       spwn/agents/neo/agent.yaml#tools
+       → move entries into the flat `dependencies:` list (e.g. `dependencies: ["spwn:unix", "tool/<name>"]`); top-level `tools:` is no longer read
+    •  legacy top-level "skills" block in agent.yaml
+       spwn/agents/neo/agent.yaml#skills
+       → move entries into the flat `dependencies:` list (e.g. `dependencies: ["spwn:unix", "skill/<name>"]`); top-level `skills:` is no longer read
+    •  legacy top-level "hooks" block in agent.yaml
+       spwn/agents/neo/agent.yaml#hooks
+       → move entries into the flat `dependencies:` list (e.g. `dependencies: ["spwn:unix", "hook/<name>"]`); top-level `hooks:` is no longer read
+
+  3 error(s), 0 warning(s), 0 info
+

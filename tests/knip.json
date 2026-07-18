@@ -1,21 +1,15 @@
 {
     "$schema": "https://unpkg.com/knip@6/schema.json",
     "entry": [
-        "_contracts/assert-contracts.mjs",
-        "_setup/cli.specification.ts",
+        "specs/cli/cli.specification.ts",
+        "specs/cli/**/*.test.ts",
         "vitest.config.ts",
         "vitest.smoke.config.ts",
         "oxlint.config.ts",
-        "oxfmt.config.ts",
-        "cli/**/*.e2e.test.ts",
-        "_smoke/**/*.e2e.test.ts",
-        "web/playwright.config.ts",
-        "web/_setup/global-setup.ts",
-        "web/_setup/global-teardown.ts",
-        "web/_fixtures/app.ts",
-        "web/**/*.spec.ts"
+        "oxfmt.config.ts"
     ],
     "ignoreBinaries": ["make", "pgrep"],
-    "project": ["**/*.{ts,mjs}"],
-    "ignore": ["_fixtures/**", "_catalog/**", "cli/**/seeds/**", "cli/**/expected/**"]
+    "ignoreDependencies": ["hono", "@hono/node-server"],
+    "project": ["specs/**/*.ts"],
+    "ignore": ["specs/fixtures/**", "specs/cli/**/fixtures/**", "specs/cli/**/expected/**"]
 }

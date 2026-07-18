@@ -10,7 +10,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
     test: {
         exclude: ['**/node_modules/**', '**/dist/**', 'web/**'],
-        include: ['_smoke/**/*.e2e.test.ts'],
+        // The framework-based real-build smoke lives under specs/ (it needs
+        // $FIXTURES); the raw-execSync upgrade smoke stays under _smoke/.
+        include: ['specs/cli/smoke/init-up.test.ts', '_smoke/**/*.e2e.test.ts'],
         // Each test builds a world image from scratch on a cold run.
         // First apt-get in a fresh layer can easily take 3-5 minutes.
         testTimeout: 600_000,

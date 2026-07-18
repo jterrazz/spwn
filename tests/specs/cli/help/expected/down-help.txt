@@ -1,0 +1,10 @@
+
+Destroy a world
+
+Usage:
+  spwn down [name-or-id] [flags]
+
+Flags:
+      --all    Destroy all running worlds
+  -h, --help   help for down
+

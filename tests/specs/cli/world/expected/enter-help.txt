@@ -1,0 +1,9 @@
+
+Open an interactive shell inside a running world
+
+Usage:
+  spwn world enter <world-id> [flags]
+
+Flags:
+  -h, --help   help for enter
+

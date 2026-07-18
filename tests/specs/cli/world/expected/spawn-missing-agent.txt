@@ -1,0 +1,11 @@
+
+  ⬡ Waking ghost
+
+  Environment
+    → Connecting to Docker…
+    ✓ Docker                 connected
+    → Checking credentials…
+    ✓ Credentials            {{any}}
+    ✗ Spawn failed           agent "ghost" not found
+      Run "spwn agent new ghost" to create the agent first
+

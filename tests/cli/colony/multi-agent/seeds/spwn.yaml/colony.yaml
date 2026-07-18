@@ -1,4 +1,0 @@
-worlds:
-  neo:
-    agents: [morpheus, neo]
-    workspaces: [.]

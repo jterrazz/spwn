@@ -1,9 +1,0 @@
-
-  spwn vdev
-  <PROJECT>/spwn-home · not configured · 0 skills
-
-  ── Worlds ────────────────────────────────────── none ──
-     spwn up --agent <name> -w .
-
-  ── Architect ──────────────────────────────── offline ──
-

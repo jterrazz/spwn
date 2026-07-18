@@ -6,6 +6,11 @@ RUN apt-get update && apt-get install -y \
     nodejs npm \
     && rm -rf /var/lib/apt/lists/*
 
+# The default `spwn init` scaffold declares the spwn:python tool, whose probe
+# is `command -v python`. ubuntu ships only python3, so alias python→python3 so
+# the mock base can verify that tool (the real world base already provides it).
+RUN ln -sf /usr/bin/python3 /usr/local/bin/python
+
 # Runtime simulators: protocol-faithful stubs for the claude-code and
 # codex CLIs so tool probing + one-shot exec succeed without shipping
 # the real vendor binaries in the test image.

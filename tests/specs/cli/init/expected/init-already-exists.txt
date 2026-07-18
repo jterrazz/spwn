@@ -1,0 +1,4 @@
+
+  Error: spwn.yaml already exists at {{workdir}}/spwn.yaml.
+Use --force to overwrite
+

@@ -1,0 +1,14 @@
+# Overlay: docker-pilot base with worlds.neo carrying a bad workspace
+# (workspaces points at a non-existent host path), layered after
+# $FIXTURES/docker-pilot/.
+version: 1
+name: docker-pilot
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: ['/tmp/nonexistent-path-12345']

@@ -1,0 +1,9 @@
+
+  spwn vdev
+  {{path}} · not configured · 0 skills
+
+  ── Worlds ────────────────────────────────────── none ──
+     spwn up --agent <name> -w .
+
+  ── Architect ──────────────────────────────── offline ──
+

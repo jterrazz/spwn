@@ -1,0 +1,9 @@
+
+Author a new skill file
+
+Usage:
+  spwn skill new <skill-name> [flags]
+
+Flags:
+  -h, --help   help for new
+

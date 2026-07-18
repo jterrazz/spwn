@@ -1,0 +1,10 @@
+
+  {{workdir}}/spwn.yaml
+
+  warnings
+    •  knowledge path "../escape" does not exist for world "neo"
+       spwn.yaml#worlds.neo.knowledge
+       → create the directory (e.g. `mkdir -p ../escape`) or drop the `knowledge:` key to disable the bind mount
+
+  0 error(s), 1 warning(s), 0 info
+

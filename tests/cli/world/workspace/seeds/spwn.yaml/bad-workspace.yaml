@@ -1,4 +1,0 @@
-worlds:
-  neo:
-    agents: [neo]
-    workspaces: ['/tmp/nonexistent-path-12345']

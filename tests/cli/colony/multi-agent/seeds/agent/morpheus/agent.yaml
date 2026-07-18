@@ -1,9 +1,0 @@
-name: morpheus
-description: Seed fixture used by the multi-agent colony e2e to exercise two-agent world spawning.
-
-runtime:
-    backend: 'spwn:claude-code'
-
-dependencies:
-    - 'spwn:unix'
-    - 'spwn:git'

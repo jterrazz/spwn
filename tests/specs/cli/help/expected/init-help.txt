@@ -1,0 +1,25 @@
+
+Scaffold a spwn project in the current directory.
+
+Without arguments, creates a blank spwn.yaml plus a default ./spwn/
+tree (one world, one agent) and adds .spwn/ to .gitignore.
+
+A positional example ref installs one of the bundled gallery entries
+into the current directory. Bare names resolve through the catalog:
+
+    spwn init matrix          # shorthand for spwn init spwn:matrix
+    spwn init spwn:matrix     # explicit form
+
+Use --global to instead seed ~/.spwn/ with a world config (legacy
+user-home mode, kept for backward compatibility).
+
+Usage:
+  spwn init [example-ref] [flags]
+
+Flags:
+      --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let spwn resolve at spawn time.
+  -f, --force            Overwrite existing spwn.yaml
+      --global           Initialise ~/.spwn/ (legacy user-home mode)
+  -h, --help             help for init
+      --name string      Project name (default: current directory name)
+

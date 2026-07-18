@@ -1,0 +1,7 @@
+
+  → Creating agent "neo"...
+  ✓ Created agent            neo
+  ✓ Created soul             SOUL.md
+
+  ✓ Spawn with: spwn up --agent neo
+
