@@ -19,13 +19,13 @@
     },
     "devDependencies": {
         "@hono/node-server": "^1.0.0",
-        "@jterrazz/test": "^9.0.0",
-        "@jterrazz/typescript": "^6.2.0",
+        "@jterrazz/test": "^9.1.0",
+        "@jterrazz/typescript": "^7.0.0",
         "@playwright/test": "^1.59.1",
         "@types/node": "^25.5.0",
         "hono": "^4.0.0",
         "oxfmt": "^0.45.0",
         "oxlint": "^1.60.0",
-        "vitest": "^4.0.0"
+        "vitest": "^4.1.10"
     }
 }

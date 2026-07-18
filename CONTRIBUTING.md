@@ -148,4 +148,5 @@ docs: update CLI reference
 
 - [Knowledge Wiki](https://github.com/jterrazz/spwn-wiki) - ADRs, domain models, epoch plans
 - [CLI Reference](https://spwn.sh/docs) - auto-generated from source
-- [CLAUDE.md](./CLAUDE.md) - full project conventions
+- [docs/](./docs/README.md) - the corpus (architecture, concepts, primitives, testing)
+- [AGENTS.md](./AGENTS.md) - the agent brief / routing map (`CLAUDE.md` symlinks to it)
