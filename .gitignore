@@ -35,6 +35,15 @@ Thumbs.db
 !packages/runtimes/testdata/**/.claude/
 !packages/runtimes/testdata/**/.claude/**
 
+# Re-include the held-lock fixture's .spwn/ overlay so the concurrency
+# stress spec (`lock-held/`) is checked out in CI. The global `.spwn/`
+# rule above is for runtime state, but this `.up.<world>.lock` is
+# intentional fixture content the "up refuses while locked" test depends
+# on; without this the dir is empty on a fresh clone → ENOENT + the
+# c8-referenced-fixture-exists lint error.
+!tests/specs/cli/concurrency/fixtures/lock-held/.spwn/
+!tests/specs/cli/concurrency/fixtures/lock-held/.spwn/**
+
 # Archives (agent exports etc.)
 *.tar.gz
 *.tar
