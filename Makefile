@@ -55,11 +55,12 @@ lint: generate docs-layout  ## go vet across go.work + pnpm -r lint (oxlint + ox
 	done
 	@pnpm -r lint
 
-# --package= is required: npm would otherwise infer the bin name from the
-# package name and pick the wrong `typescript` in an ephemeral tree.
+# pnpm, not npx: npm's ephemeral install dies on `edgesOut` of null when it
+# resolves this package on the CI runner, with or without --package=. The lint
+# job already sets pnpm up for the workspace half, so there is nothing to add.
 docs-layout:  ## Check docs/ against the estate's manual spine
 	@echo "==> docs layout"
-	@npx --yes --package=@jterrazz/typescript@9.2.1 -- typescript docs-layout .
+	@pnpm --package=@jterrazz/typescript@9.2.1 dlx typescript docs-layout .
 
 ##@ Test — fast (no Docker)
 
