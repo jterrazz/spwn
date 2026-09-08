@@ -1,4 +1,4 @@
-generatedDocsDir: docs/cli
+generatedDocsDir: docs/reference
 requiredBehaviorSpecs:
     - command: spwn init
       tests:

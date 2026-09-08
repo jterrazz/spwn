@@ -42,8 +42,8 @@ uninstall:  ## Remove the installed spwn
 clean:  ## rm -rf .artifacts/
 	rm -rf .artifacts/
 
-docs:  ## Regenerate docs/cli from Cobra
-	cd apps/cli && go run ./cmd/gen-docs ../../docs/cli
+docs: generate  ## Regenerate docs/reference from Cobra
+	cd apps/cli && go run ./cmd/gen-docs ../../docs/reference
 
 ##@ Lint
 
