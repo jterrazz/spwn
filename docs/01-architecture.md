@@ -118,17 +118,11 @@ Thin SDKs are designed, not shipped: language wrappers (TypeScript first, then P
 
 The runtime stack has further designed-but-unshipped layers, each with its own record: a runtime normalization layer inside worlds ([ADR-008](decisions/008-rivet-runtime-layer.md)), multi-provider and subscription auth behind it ([ADR-010](decisions/010-pi-mono-multi-provider.md)), and the Architect's messaging channels ([ADR-009](decisions/009-zeroclaw-as-claw.md), [ADR-012](decisions/012-organization-manifest.md)).
 
-## Code style
-
-- No cgo.
-- Errors: `error: lowercase message.\nActionable hint.`
-- Domain modules own all business logic; the CLI is a thin wrapper (parse flags → call domain API → format output).
-- Types avoid stutter: `world.World` not `world.WorldInstance`, `agent.Info` not `agent.AgentInfo` — the package name provides context.
-
 ## Related
 
+- [Developing](02-developing.md) — the toolchain, which file a change opens, the code style these layers hold to.
+- [Testing](03-testing.md) — how the layers are covered.
+- [Operating](04-operating.md) · [Update system](16-update-system.md) — how the binary ships and updates itself.
 - [Concepts](05-concepts.md) — the abstractions these packages implement.
 - [Gate](08-gate.md) — the host-side broker container.
-- [Testing](03-testing.md) — how the layers are covered.
 - [Decisions](decisions/) — why the stack, the layering, and the container model are what they are.
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) · [`04-operating.md`](04-operating.md) · [`16-update-system.md`](16-update-system.md) — contributor runbooks.

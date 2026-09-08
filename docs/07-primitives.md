@@ -2,6 +2,43 @@
 
 Everything an agent is made of is a declarative file, reviewed in PRs and pinned in lockfiles. This chapter is the canonical reference for those blocks and the grammar that references them. The README carries the marketing tour of the same ideas; this is the working spec.
 
+## The project on disk
+
+A spwn project is per-repo: everything an agent is made of is committed beside the code it works on. `~/.spwn/` holds only user-level credentials and daemon state, and nothing a teammate needs to reproduce the project.
+
+```
+my-project/
+├── spwn.yaml                    # manifest — version, name, inline worlds map, project-wide deps
+├── spwn.lock                    # lockfile — pinned catalog deps
+├── spwn/                        # committed project assets
+│   ├── agents/
+│   │   └── neo/
+│   │       ├── agent.yaml        # composition: dependencies + runtime.backend
+│   │       ├── AGENTS.md          # provider-neutral entry point (compiled per runtime)
+│   │       ├── SOUL.md            # who the agent is (purpose, voice, values)
+│   │       ├── playbooks/         # promoted patterns (auto-indexed from name:/description: headers)
+│   │       └── journal/           # per-run history
+│   ├── knowledge/                # world-scoped facts, bind-mounted at /world/knowledge/ (default path)
+│   ├── skills/                   # project-scoped skills   (skill/<name> → spwn/skills/<name>.md)
+│   ├── tools/                    # project-scoped tools    (tool/<name>  → spwn/tools/<name>/)
+│   ├── hooks/                    # project-scoped hooks    (hook/<name>  → spwn/hooks/<name>.yaml)
+│   └── commands/                 # project-scoped commands (command/<name> → spwn/commands/<name>.md)
+└── .spwn/                        # gitignored local state
+    ├── state.json               # live world IDs bound to this project
+    ├── runs.jsonl               # automation receipts (one line per fire)
+    ├── automations/state.json   # last-fired cursor per automation (catch-up math)
+    └── cache/
+```
+
+```
+~/.spwn/                         # USER-LEVEL only, never per-project
+├── credentials/                 # auth material surfaced to containers at /credentials
+├── activity.jsonl               # global activity log
+└── state/                       # architect daemon state
+```
+
+The two manifests compose. `spwn.yaml` declares project-wide `dependencies:`, an optional `runtime.backend` default, and the inline `worlds:` map; `agent.yaml` declares one agent's `dependencies:` and its `runtime.backend`. An agent's deps are **unioned** with the project-wide pool — it can add to that pool, never remove from it — and the union is exactly what materializes inside that agent's container.
+
 ## The dependency grammar
 
 An agent's composition is one `dependencies:` list. The grammar splits **source** (the colon prefix) from **type** (the leading path segment):
@@ -144,7 +181,6 @@ The body is written verbatim to `.claude/commands/<name>.md` or `.codex/commands
 
 ## Related
 
-- [Getting started](02-developing.md) — the config hierarchy in context.
 - [CLI](06-cli.md) — `spwn install` / `uninstall` for these refs.
 - [`15-dependency-catalog.md`](15-dependency-catalog.md) — the built-in `spwn:*` catalog.
 - [Gate](08-gate.md) — the `gate:` block and cookie-bearing tools.

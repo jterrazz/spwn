@@ -1,87 +1,105 @@
-# Getting started
+# Developing
 
-spwn is the operating system for autonomous agent worlds: compose tools, skills, and identity into agents, then spawn them into isolated Docker worlds where they wake up, find their tools, and get to work. A spwn project lives **in your repo**, not in a SaaS — every agent is a folder you commit, review, and diff like any other code.
+How spwn is changed: the toolchain a clone needs, the loop a change runs through, the file a given change opens, and what it owes before it lands. What proves a change is [Testing](03-testing.md); the shape it must respect is [Architecture](01-architecture.md).
 
-This chapter gets you from install to a running agent. For the model behind the words (Agent, World, Architect, Mind…) read [Concepts](05-concepts.md); for the CLI surface read [CLI](06-cli.md).
+## The toolchain
 
-## Install
-
-```bash
-curl -fsSL https://spwn.sh/install.sh | bash
-```
-
-Requirements: **Docker** (worlds are containers). For building from source see [`../CONTRIBUTING.md`](../CONTRIBUTING.md).
-
-## Three commands, one agent
-
-| Step | Command | What it does |
-| ---- | ------- | ------------ |
-| Log in | `spwn auth` | Confirms you are signed in to Claude Code (or another supported runtime). |
-| Scaffold | `spwn init` | Drops `spwn.yaml` + a starter `neo` agent into the current directory. |
-| Talk | `spwn agent neo` | Opens an interactive session with `neo` inside a sandboxed Docker world; container lifecycle is handled for you. |
-
-`spwn init <template>` (e.g. `spwn init matrix`) drops a ready-made multi-agent world instead — swap the slug for any entry in [`../catalog/`](../catalog/).
-
-## What lands in your project
-
-A spwn project is per-repo. `~/.spwn/` holds only user-level credentials and daemon state.
-
-```
-my-project/
-├── spwn.yaml                    # manifest — version, name, inline worlds map, project-wide deps
-├── spwn.lock                    # lockfile — pinned catalog deps
-├── spwn/                        # committed project assets
-│   ├── agents/
-│   │   └── neo/
-│   │       ├── agent.yaml        # composition: dependencies + runtime.backend
-│   │       ├── AGENTS.md          # provider-neutral entry point (compiled per runtime)
-│   │       ├── SOUL.md            # who the agent is (purpose, voice, values)
-│   │       ├── playbooks/         # promoted patterns (auto-indexed from name:/description: headers)
-│   │       └── journal/           # per-run history
-│   ├── knowledge/                # world-scoped facts, bind-mounted at /world/knowledge/ (default path)
-│   ├── skills/                   # project-scoped skills   (skill/<name> → spwn/skills/<name>.md)
-│   ├── tools/                    # project-scoped tools    (tool/<name>  → spwn/tools/<name>/)
-│   ├── hooks/                    # project-scoped hooks    (hook/<name>  → spwn/hooks/<name>.yaml)
-│   └── commands/                 # project-scoped commands (command/<name> → spwn/commands/<name>.md)
-└── .spwn/                        # gitignored local state
-    ├── state.json               # live world IDs bound to this project
-    ├── runs.jsonl               # automation receipts (one line per fire)
-    ├── automations/state.json   # last-fired cursor per automation (catch-up math)
-    └── cache/
-```
-
-```
-~/.spwn/                         # USER-LEVEL only, never per-project
-├── credentials/                 # auth material surfaced to containers at /credentials
-├── activity.jsonl               # global activity log
-└── state/                       # architect daemon state
-```
-
-## Config hierarchy
-
-`spwn.yaml` is the manifest; `agent.yaml` is each agent's composition. The two compose:
-
-- **`spwn.yaml`** declares project-wide `dependencies:`, an optional `runtime.backend` default, and the inline `worlds:` map (each world names its agents, workspace mounts, optional `knowledge:` path, and optional tool overrides). Worlds are inline map entries — there is no `spwn/worlds/` directory.
-- **`agent.yaml`** declares one agent's `dependencies:` list and `runtime.backend`. Its deps are **unioned** with the project-wide pool — an agent cannot remove a project-level dep, only add to it.
-
-The union of project-wide and agent-specific dependencies is exactly what materializes inside that agent's container. Full field reference and the dependency grammar are in [Primitives](07-primitives.md).
-
-## Everyday workflow
+| Tool         | Why                                                          |
+| ------------ | ------------------------------------------------------------ |
+| **Go 1.25+** | Every domain package and the `spwn` binary; wired by `go.work` |
+| **Docker**   | Worlds are containers, and every E2E layer needs a daemon     |
+| **Node 20+** | The TypeScript E2E suites and the web UI, driven by pnpm      |
+| **Rust**     | Only `apps/web/src-tauri`, the desktop shell                  |
 
 ```bash
-spwn init            # scaffold spwn.yaml + ./spwn/ + .spwn/
-spwn check           # validate the tree (bad refs, missing files, lockfile drift)
-spwn build           # transpile + compile into a project-specific Docker image
-spwn up              # spawn a world from the current project
-spwn ls              # agent-centric status (running / stopped / orphan)
-spwn down            # stop every world
+git clone https://github.com/jterrazz/spwn.git
+cd spwn
+go work sync
+pnpm install --frozen-lockfile
+make build              # .artifacts/go/spwn
 ```
 
-`spwn build --tree-only` renders the project tree to `./dist` for preview/debug without building an image. The complete command surface is in [CLI](06-cli.md).
+## The loop
+
+The `Makefile` is the single entry point for both toolchains, and CI calls its targets directly — [`.github/workflows/validate.yaml`](../.github/workflows/validate.yaml) *is* the aggregate, so there is no `test-pr` meta-target to keep in sync. Run `make` with no arguments for the annotated list; the four gates a change runs locally before it is pushed are:
+
+```bash
+make lint            # go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip)
+make test            # Go unit tests across the workspace (~5s)
+make test-contracts  # every surface declared the proof it needs
+make test-cli        # the TypeScript CLI E2E against the compiled binary (Docker)
+```
+
+Adding a module to `go.work` is the only thing needed to bring it under lint and test coverage: `GO_MODS` is read from `go work edit -json`, so the Makefile never lists a package.
+
+## Which file a change opens
+
+| Change                                  | Opens                                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------------- |
+| Business logic of a domain              | `packages/<domain>/` — the root `.go` file is the public API, `internal/` is private |
+| A CLI command                           | `apps/cli/<domain>/<command>.go`, registered with `Cmd.AddCommand` in `init()`       |
+| A runtime (Claude Code, codex, …)       | `packages/runtimes/<name>/` — see below                                             |
+| A shipped tool or template              | `catalog/<slug>/`, one directory per entry                                          |
+| The layer a package may import          | [`.golangci.yml`](../.golangci.yml), the depguard deny rules                        |
+| A world's on-disk shape                 | `packages/compile/` and `packages/transpile/`                                       |
+
+A CLI command carries no business logic: it parses flags, calls a domain API, and formats output through the `ui.New()` stepper (✓/✗/→). A new top-level command is also added to the custom help in `apps/cli/root.go`.
+
+### Adding a runtime adapter
+
+A runtime lives at `packages/runtimes/<name>/` and ships any subset of three facets:
+
+| Facet    | Interface           | Does                                                                                                       |
+| -------- | ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `Tool`   | `tool.Tool`         | The install recipe (apt/curl/npm, user config) — runs at image-build time                                    |
+| `Render` | `transpile.Runtime` | Translates the provider-neutral source tree into runtime-specific output files                               |
+| `Spawn`  | `runtimes.Spawner`  | Host-side spawn behaviour — `BuildCommand`, credential sync, prelaunch shell, default config, container path |
+
+Create `tool.go`, `spawn.go` and optionally `render.go`; a `Render` facet reads its runtime-neutral prose from `packages/transpile/worldbook` rather than restating it. Bundle the facets in `adapter.go` and register them from `init()`:
+
+```go
+package myruntime
+
+import "spwn.sh/packages/runtimes"
+
+var Adapter = runtimes.Adapter{
+    Name:            "my-runtime",
+    DefaultProvider: "openai", // or "anthropic", "google", ""
+    Tool:            Tool,     // *myTool implementing tool.Tool (optional)
+    Render:          Renderer, // *renderer implementing transpile.Runtime (optional)
+    Spawn:           Spawner,  // *spawner implementing runtimes.Spawner (optional)
+}
+
+func init() { runtimes.Register(Adapter) }
+```
+
+Then add a blank import to `packages/runtimes/defaults/defaults.go`, which is what makes a production binary pick the runtime up.
+
+## Conventions
+
+- **No cgo.**
+- **Errors read as two lines** — `error: lowercase message.\nActionable hint.`
+- **Types avoid stutter** — `world.World`, not `world.WorldInstance`; `agent.Info`, not `agent.AgentInfo`. The package name already carries the context.
+- **Domain modules own all business logic**; a surface is a wrapper.
+- **Commit messages are imperative and lowercase**, prefixed by the kind of change: `feat: add world snapshot restore`, `fix: agent talk skips dead containers`, `test: add messaging inbox E2E specs`, `docs: update CLI reference`.
+
+## What a change owes
+
+Four things land in the same commit as the change that makes them true:
+
+1. **The guard.** A discovery grows a test, a `spwn check` rule, or a runtime error in the same change — the suite is the specification ([Testing](03-testing.md)).
+2. **The contract entry.** A new runtime, route, command or catalog entry declares the proof it needs; `make test-contracts` refuses a surface that declared none.
+3. **The regenerated projection.** [`reference/`](reference/) is projected from Cobra by `make docs` and is never hand-edited; the embedded catalog is projected by `make generate`, which `build`, `lint` and `test` already run.
+4. **The chapter the behaviour falsified.** A page of this corpus that a change makes untrue is repaired by that change, not by a follow-up.
+
+## Decision records
+
+A decision this repository alone took is written to [`decisions/`](decisions/) as `NNN-kebab.md`, cut from [`decisions/_template.md`](decisions/_template.md). The status is `Proposed` until the owner writes `Accepted` — an agent never accepts its own record.
+
+Numbers are historical and never reused, which is why 003 is absent: *security as physics* is a decision about the product rather than about this codebase, and it lives in spwn's product knowledge outside this repository. A decision spanning two repositories is recorded in the corpus that spans them, and linked from here.
 
 ## Related
 
-- [Concepts](05-concepts.md) — the world/agent model and vocabulary.
-- [Primitives](07-primitives.md) — `spwn.yaml`, agents, tools, skills, hooks, commands.
-- [Automations](13-automations.md) — waking agents on cron or filesystem triggers.
-- [Recipes](14-recipes.md) — worked examples.
+- [Architecture](01-architecture.md) — the layers a change must not cross upward.
+- [Testing](03-testing.md) — the pyramid, and what a test may assume.
+- [Operating](04-operating.md) — cutting a release once the change has landed.
