@@ -1,18 +1,18 @@
 # Manual QA
 
-Three scenario catalogs a human — or a human-driven Claude session — walks end to end. They are not part of `make test`: they run against a real Anthropic-authenticated runtime, real Docker and real disk, and they exercise the paths the automated suite skips on purpose because they cost money, are non-deterministic, or are about what an agent *perceives* rather than what a process exits with.
+Three scenario catalogs a human — or a human-driven Claude session — walks end to end. They are not part of `make test`: they run against a real Anthropic-authenticated runtime, real Docker and real disk, and they exercise the paths the automated suite skips on purpose because they cost money, are non-deterministic, or are about what an agent _perceives_ rather than what a process exits with.
 
 The strategy these serve, and the ten rules every test holds to, are [`docs/03-testing.md`](../../docs/03-testing.md); the automated layer pyramid is [`../ARCHITECTURE.md`](../ARCHITECTURE.md).
 
 ## The suites
 
-| Suite                                    | Scenarios | Driver               | Probes                                                                                                                            |
-| ---------------------------------------- | --------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [`cli-scenarios.md`](cli-scenarios.md)   | 50        | `harness.sh` (bash)  | Realistic command sequences a user runs in a day — init → build → up → talk → down. Uses `mock-claude`; mostly automatable.        |
+| Suite                                    | Scenarios | Driver               | Probes                                                                                                                               |
+| ---------------------------------------- | --------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| [`cli-scenarios.md`](cli-scenarios.md)   | 50        | `harness.sh` (bash)  | Realistic command sequences a user runs in a day — init → build → up → talk → down. Uses `mock-claude`; mostly automatable.          |
 | [`agent-behavior.md`](agent-behavior.md) | 50        | Human + live Claude  | Whether the host-side setup — CLAUDE.md, playbooks, skills, hooks, tools, knowledge, roster, messaging — actually reaches the agent. |
-| [`edge-cases.md`](edge-cases.md)         | 72        | Mixed (bash + human) | Concurrency, partial failure, state-machine holes, filesystem edges, tool-install failure modes.                                    |
+| [`edge-cases.md`](edge-cases.md)         | 72        | Mixed (bash + human) | Concurrency, partial failure, state-machine holes, filesystem edges, tool-install failure modes.                                     |
 
-Only `agent-behavior.md` needs a live session: it asks what the agent *sees*, and `mock-claude` sees nothing.
+Only `agent-behavior.md` needs a live session: it asks what the agent _sees_, and `mock-claude` sees nothing.
 
 ## Running a pass
 

@@ -39,12 +39,13 @@ is satisfied; partial success is ❌ with notes.
 
 # Group A — Identity & self-perception (1-10)
 
-Goal: does the agent correctly perceive *who it is* per SOUL.md, its `CLAUDE.md`,
+Goal: does the agent correctly perceive _who it is_ per SOUL.md, its `CLAUDE.md`,
 its role in the world, and the agent.yaml composition?
 
 ### Scenario 1 — Agent reads its SOUL.md first
 
 **Setup:**
+
 ```bash
 mkdir -p $TMP/agentqa/s01 && cd $TMP/agentqa/s01
 spwn init
@@ -59,12 +60,14 @@ EOF
 **Spawn:** `spwn up`
 
 **Prompt sequence:**
+
 1. `who are you?`
 2. `what's your voice pattern?`
 3. `what will you never do?`
 4. `what file defines this identity? read it and quote the first line.`
 
 **Expect:**
+
 - Agent identifies as "Neo" in the first reply.
 - Response style matches SOUL.md: short, starts with "I observe:".
 - Answer to #3 references "speculate" / "refuse to speculate".
@@ -74,6 +77,7 @@ EOF
 **PASS criteria:** all four observed.
 
 **Likely failure modes:**
+
 - Agent introduces itself as "Claude" instead of Neo → `@SOUL.md` import in
   CLAUDE.md didn't resolve.
 - Voice pattern absent → SOUL.md exists but agent never read it.
@@ -85,6 +89,7 @@ EOF
 ### Scenario 2 — Agent knows its role in this specific world
 
 **Setup:**
+
 ```bash
 cd $TMP/agentqa/s02 && spwn init
 # Edit spwn.yaml to name this world "production-audit":
@@ -94,22 +99,25 @@ sed -i '' 's/neo:/production-audit:/' spwn.yaml
 **Spawn:** `spwn up`
 
 **Prompts:**
+
 1. `what is the name of the world you're deployed in?`
 2. `quote the "Role here" section of your CLAUDE.md verbatim.`
 3. `what agent name does the world container think you have?`
 
 **Expect:**
+
 - #1: agent says `production-audit` (or the runtime world-id starting with
   `world-production-audit-`).
 - #2: agent quotes the `## Role here` block that the runtime renderer
   inlines into each agent's CLAUDE.md (e.g. `You are deployed as a worker
-  in world-production-audit-<id>.`).
+in world-production-audit-<id>.`).
 - #3: `neo`.
 
 **PASS:** all three correct and the agent actually ran a `cat` / `read file`
 operation on CLAUDE.md (observable in its tool use).
 
 **Likely failure modes:**
+
 - Agent guesses the world name from the container hostname rather than
   reading CLAUDE.md → the "Role here" inlining broke or the world-id
   isn't landing in the rendered block.
@@ -125,17 +133,20 @@ AGENTS.md.
 ### Scenario 3 — Agent perceives its two-layer Mind (playbooks + journal only)
 
 **Setup:**
+
 ```bash
 cd $TMP/agentqa/s03 && spwn init
 ```
 
 **Prompts:**
+
 1. `list every directory under /agents/neo/ that you are supposed to own.`
 2. `are "skills/" or "knowledge/" Mind layers?`
 3. `where do your durable procedures live?`
 4. `where are your session histories?`
 
 **Expect:**
+
 - #1: agent names `SOUL.md`, `playbooks/`, `journal/` (possibly also
   `agent.yaml`, `AGENTS.md`, `worlds/`). No skills/ or knowledge/ under the
   agent home.
@@ -152,17 +163,20 @@ claim skills or knowledge are per-agent layers.
 ### Scenario 4 — Agent describes its declared dependencies
 
 **Setup:**
+
 ```bash
 cd $TMP/agentqa/s04 && spwn init
 spwn install python node
 ```
 
 **Prompts:**
+
 1. `list every dependency you have installed.`
 2. `for each, confirm the binary exists by running which <binary>.`
 3. `do you have Docker access?`
 
 **Expect:**
+
 - #1: `spwn:unix`, `spwn:git`, `spwn:python`, `spwn:node`, the claude-code
   runtime — plus scaffold locals if the default scaffold was used (`skill:focus`,
   `tool:greet`, `hook:pre-spawn`).
@@ -176,11 +190,13 @@ spwn install python node
 ### Scenario 5 — Agent knows its physics (Laws + Topology + Communication)
 
 **Prompts:**
+
 1. `describe the Laws governing your filesystem. be specific.`
 2. `what paths are ephemeral, and what persists?`
 3. `if you want to message another agent, what path do you write to?`
 
 **Expect:**
+
 - #1: "Network: bridge", "Filesystem is ephemeral except /workspaces and
   /agents".
 - #2: `/tmp` is ephemeral, `/world/*` mostly ephemeral except knowledge,
@@ -197,6 +213,7 @@ blocks of its CLAUDE.md.
 ### Scenario 6 — Agent knows the roster
 
 **Setup:**
+
 ```bash
 cd $TMP/agentqa/s06 && spwn init spwn:startup
 ```
@@ -204,11 +221,13 @@ cd $TMP/agentqa/s06 && spwn init spwn:startup
 **Spawn:** `spwn up` — deploys ceo, devops, analyst.
 
 **Prompt (to ceo):**
+
 1. `who else is in this world with you? give their roles.`
 2. `what's the exact path you'd send a message to devops?`
 3. `where does analyst store their SOUL?`
 
 **Expect:**
+
 - #1: "devops" + "analyst", both as worker.
 - #2: `/world/inbox/devops/<timestamp>-from-ceo.md`.
 - #3: `/agents/analyst/SOUL.md`.
@@ -220,11 +239,13 @@ cd $TMP/agentqa/s06 && spwn init spwn:startup
 ### Scenario 7 — Agent quotes its Conventions accurately
 
 **Prompts:**
+
 1. `list the 5 (or 4) numbered Conventions from your CLAUDE.md verbatim.`
 2. `when should you read your SOUL.md?`
 3. `what triggers a "dream" per the Conventions?`
 
 **Expect:**
+
 - #1: "Read your soul first", "Mind lives at /agents/<name>/", "Messaging",
   "World knowledge" (if knowledge mounted), "Evolve".
 - #2: every session.
@@ -236,6 +257,7 @@ cd $TMP/agentqa/s06 && spwn init spwn:startup
 ### Scenario 8 — Agent distinguishes its home from workspaces
 
 **Setup:**
+
 ```bash
 cd $TMP/agentqa/s08 && spwn init
 mkdir -p host-project && echo "hello" > host-project/greeting.txt
@@ -244,11 +266,13 @@ mkdir -p host-project && echo "hello" > host-project/greeting.txt
 **Spawn:** `spwn up -w host-project`
 
 **Prompts:**
+
 1. `is your home directory on the host or in the container?`
 2. `read /workspaces/host-project/greeting.txt.`
 3. `write a file at /workspaces/host-project/from-agent.txt saying "hi from neo", then tell me the absolute host path where that file now lives.`
 
 **Expect:**
+
 - #1: container (docker-cp'd from host).
 - #2: `hello`.
 - #3: agent creates the file; expected host path is `$TMP/agentqa/s08/host-project/from-agent.txt`.
@@ -275,6 +299,7 @@ being regenerated without the `@SOUL.md` import.
 ### Scenario 10 — Agent's CLAUDE.md never hallucinates a runtime
 
 **Prompt:**
+
 > read your CLAUDE.md top to bottom. Does it anywhere mention "Claude Code"
 > by name? or "Anthropic"? It shouldn't — per spwn's runtime-neutral design,
 > the file should not advertise which runtime is rendering it.
@@ -295,6 +320,7 @@ them with the correct permissions?
 ### Scenario 11 — `/agents/<name>/` is readable + writable
 
 **Prompts:**
+
 1. `ls -la /agents/neo/`
 2. `create /agents/neo/journal/manual-entry.md with body "test", then ls the journal dir.`
 3. `ls -la /agents/other-agent/` (if colony) — what do you see?
@@ -307,6 +333,7 @@ world.
 ### Scenario 12 — `/workspaces/<name>/` read-write by default
 
 **Prompts:**
+
 1. `is /workspaces/<whatever> readable?`
 2. `create /workspaces/<name>/sentinel.txt with "1".`
 3. `stat the file — what's the owner? is it you or root?`
@@ -318,16 +345,18 @@ world.
 ### Scenario 13 — Read-only workspace is actually read-only
 
 **Setup:**
+
 ```yaml
 # spwn.yaml
 worlds:
-  neo:
-    agents: [neo]
-    workspaces:
-      - name=project, path=., readOnly=true
+    neo:
+        agents: [neo]
+        workspaces:
+            - name=project, path=., readOnly=true
 ```
 
 **Prompts:**
+
 1. `try to write /workspaces/project/regression.txt — what happens?`
 
 **Expect:** `Read-only file system` or `Permission denied`.
@@ -337,6 +366,7 @@ worlds:
 ### Scenario 14 — `/world/knowledge/` mounted ⇒ visible
 
 **Setup:**
+
 ```bash
 cd $TMP/agentqa/s14 && spwn init
 mkdir -p knowledge
@@ -350,6 +380,7 @@ EOF
 ```
 
 **Prompts:**
+
 1. `is /world/knowledge/ available?`
 2. `read /world/knowledge/glossary.md and explain "mind" in your own words.`
 
@@ -362,6 +393,7 @@ EOF
 **Setup:** same as s14 but **don't** add the `knowledge:` key.
 
 **Prompt:**
+
 > inspect your CLAUDE.md and tell me: does it mention `/world/knowledge/`
 > anywhere? If yes, quote the line. If no, confirm its absence.
 
@@ -379,11 +411,13 @@ mount → the `knowledgeMounted` flag isn't propagating to the renderer.
 `skill:self-reflection`.
 
 **Prompts:**
+
 1. `what skills do you have installed? use Claude Code's skill discovery, don't read from CLAUDE.md.`
 2. `read the SKILL.md file for the "self-reflection" skill at its canonical path.`
 3. `what's $HOME/.claude/skills/ symlinked to?`
 
 **Expect:**
+
 - #1: agent invokes its native skill discovery and lists `spwn-cli`,
   `world-exploration`, `self-reflection` etc.
 - #2: `/world/skills/self-reflection/SKILL.md` content.
@@ -404,6 +438,7 @@ mounts the host `~/.spwn`).
 ### Scenario 18 — `/credentials/` is read-only and present
 
 **Prompts:**
+
 1. `ls /credentials/`
 2. `can you write to /credentials/any.txt?`
 
@@ -415,6 +450,7 @@ denied.
 ### Scenario 19 — Agent never has Docker socket
 
 **Prompt:**
+
 > do you have access to the docker daemon? try docker ps and report.
 
 **Expect:** `docker: command not found` OR `permission denied` on
@@ -425,6 +461,7 @@ denied.
 ### Scenario 20 — Agent can `cd /tmp` and scratch files safely
 
 **Prompts:**
+
 1. `is /tmp ephemeral? what will happen to files there on next spawn?`
 2. `write a scratch note /tmp/scratch.txt. next spawn, I'll check it's gone.`
 
@@ -442,6 +479,7 @@ Goal: every declared tool's binary is actually present, verified, and usable.
 **Setup:** agent.yaml deps: `spwn:unix, spwn:git, spwn:python, spwn:node, spwn:qmd`.
 
 **Prompts:** for each tool:
+
 1. `run 'which <bin>' and report.`
 2. `run '<bin> --version' and report.`
 3. `execute a 5-line "hello world" with each.`
@@ -455,6 +493,7 @@ Goal: every declared tool's binary is actually present, verified, and usable.
 **Setup:** default scaffold has `tool:greet`.
 
 **Prompts:**
+
 1. `run 'which greet' — what's the path?`
 2. `execute greet and tell me what it output.`
 
@@ -469,6 +508,7 @@ spwn — it is HH:MM:SS".
 `spwn:qmd` declares `spwn:node` + `spwn:unix` as deps.
 
 **Prompts:**
+
 1. `list every tool in your /world/skills/ INDEX and every binary in $PATH.`
 2. `run 'quarto --version' and 'node --version'.`
 
@@ -481,6 +521,7 @@ spwn — it is HH:MM:SS".
 **Before spawn:** run `spwn inspect neo` on host; note deps + skills.
 
 **Inside agent prompt:**
+
 > list your deps, skills, and hooks as a bulleted list.
 
 **Expect:** contents match the host-side inspect. Any discrepancy = the
@@ -512,9 +553,10 @@ or install `skill:myskill` after writing `spwn/skills/myskill.md` with proper
 frontmatter.
 
 **Prompts:**
+
 1. `use your available skills list and tell me every skill you can invoke.`
 2. `invoke the world-exploration skill on the topic "where am I?" and tell
-   me what it did.`
+me what it did.`
 3. `did the skill read any files? which ones?`
 
 **Expect:** agent uses native skill discovery, references `world-exploration`,
@@ -525,6 +567,7 @@ and when invoking it, reads the SKILL.md body as guidance.
 ### Scenario 27 — Skill frontmatter `name` + `description` are surfaced
 
 **Prompt:**
+
 > for each of your available skills, give me the name and description pair
 > exactly as stated in the SKILL.md frontmatter.
 
@@ -536,6 +579,7 @@ skill's frontmatter.
 ### Scenario 28 — Skills without frontmatter don't get discovered
 
 **Setup:** author a skill WITHOUT frontmatter:
+
 ```bash
 cat > spwn/skills/silent-skill.md <<'EOF'
 # silent skill
@@ -546,6 +590,7 @@ spwn install skill:silent-skill --agent neo
 ```
 
 **Prompt:**
+
 > is "silent-skill" in your discoverable skills list?
 
 **Expect:** not discoverable. Either: it appears with name derived from
@@ -562,6 +607,7 @@ Document actual behavior here for the record.
 one bundle.
 
 **Prompt:**
+
 > your "architect" tool ships 3 related skills: fleet-ops, monitoring,
 > task-planning. Read each one's SKILL.md and summarise in one line.
 
@@ -575,6 +621,7 @@ one bundle.
 host. Ask the agent again without re-spawning.
 
 **Prompt:**
+
 > (after edit) read your world-exploration skill and quote its opening line.
 
 **Expect:** agent quotes the PRE-EDIT body (because skills are baked into
@@ -592,6 +639,7 @@ rebuild + new spawn).
 ### Scenario 31 — Promoted playbook surfaces in CLAUDE.md index
 
 **Setup:**
+
 ```bash
 cat > spwn/agents/neo/playbooks/migrate-db.md <<'EOF'
 ---
@@ -610,6 +658,7 @@ EOF
 **Spawn:** `spwn up`.
 
 **Prompts:**
+
 1. `list the playbooks indexed in your CLAUDE.md.`
 2. `what's the description of migrate-db?`
 3. `read the full playbook body.`
@@ -625,6 +674,7 @@ the frontmatter. #3+#4 exact quotes from the file.
 **Setup:** create `playbooks/secret-sauce.md` with no frontmatter.
 
 **Prompt:**
+
 > list your indexed playbooks. Is "secret-sauce" one of them?
 
 **Expect:** no. The file is still readable via `ls playbooks/`, but not
@@ -637,6 +687,7 @@ auto-indexed in the CLAUDE.md preamble.
 **Setup:** create `playbooks/partial.md` with `---\nname: partial\n---\n`.
 
 **Prompt:**
+
 > is "partial" indexed?
 
 **Expect:** no. Both `name:` and `description:` are required.
@@ -646,14 +697,16 @@ auto-indexed in the CLAUDE.md preamble.
 ### Scenario 34 — Playbooks persist across worlds (sync-out round trip)
 
 **Scenario:**
+
 1. `spwn up`.
 2. Ask the agent: `write a new playbook at /agents/neo/playbooks/today.md
-   with frontmatter name: today description: Today's plan. and body "test".`
+with frontmatter name: today description: Today's plan. and body "test".`
 3. `spwn down`. On host: `cat spwn/agents/neo/playbooks/today.md`.
 4. `spwn up` again.
 5. Ask: `list your indexed playbooks`.
 
 **Expect:**
+
 - Step 3: host file exists with the content the agent wrote (synced out on
   destroy via deploy.SyncOut).
 - Step 5: `today` is indexed (because the new spawn re-reads playbooks from
@@ -664,8 +717,9 @@ auto-indexed in the CLAUDE.md preamble.
 ### Scenario 35 — Playbook body is readable via `./playbooks/<name>.md`
 
 **Prompts:**
+
 1. `the CLAUDE.md preamble advertises your playbooks index. How do you
-   actually read one of them?`
+actually read one of them?`
 
 **Expect:** agent describes the convention — `cat ./playbooks/<name>.md`
 (cwd is the agent home) — and performs it.
@@ -685,11 +739,12 @@ auto-indexed in the CLAUDE.md preamble.
 
 **Setup:** replace the scaffolded `spwn/hooks.yaml` sample with one
 that writes a side-effect file so we can observe firing:
+
 ```yaml
 hooks:
-  - name: session-banner
-    event: SessionStart
-    command: echo "HOOK_FIRED=$(date -u +%FT%TZ)" > /tmp/hook-fired.log
+    - name: session-banner
+      event: SessionStart
+      command: echo "HOOK_FIRED=$(date -u +%FT%TZ)" > /tmp/hook-fired.log
 ```
 
 **Spawn:** `spwn up`.
@@ -698,6 +753,7 @@ hooks:
 session start, which happens on the first `spwn agent talk`).
 
 **Prompts:**
+
 1. (first talk) `say 'hi'`
 2. `cat /tmp/hook-fired.log — does it exist, and what's the content?`
 
@@ -713,17 +769,19 @@ entry) or the runtime didn't fire it.
 ### Scenario 37 — PreToolUse hook scopes to a matcher
 
 **Setup:**
+
 ```yaml
 hooks:
-  - name: bash-audit
-    event: PreToolUse
-    matcher: Bash
-    command: echo "[audit] $(date -u +%FT%TZ) $CLAUDE_TOOL_INPUT" >> /tmp/bash-audit.log
+    - name: bash-audit
+      event: PreToolUse
+      matcher: Bash
+      command: echo "[audit] $(date -u +%FT%TZ) $CLAUDE_TOOL_INPUT" >> /tmp/bash-audit.log
 ```
 
 **Spawn:** `spwn up -w .`
 
 **Prompts:**
+
 1. `run 'echo one' then 'echo two' via your Bash tool.`
 2. `cat /tmp/bash-audit.log — how many lines?`
 
@@ -736,17 +794,19 @@ this hook to the `Bash` tool.
 ### Scenario 38 — Multiple hooks run in declaration order
 
 **Setup:** declare two hooks for the same event:
+
 ```yaml
 hooks:
-  - name: first
-    event: SessionStart
-    command: echo "first $(date -u +%FT%T.%N)" >> /tmp/order.log
-  - name: second
-    event: SessionStart
-    command: echo "second $(date -u +%FT%T.%N)" >> /tmp/order.log
+    - name: first
+      event: SessionStart
+      command: echo "first $(date -u +%FT%T.%N)" >> /tmp/order.log
+    - name: second
+      event: SessionStart
+      command: echo "second $(date -u +%FT%T.%N)" >> /tmp/order.log
 ```
 
 **Spawn + prompt:**
+
 > cat /tmp/order.log — what's the order of the two lines?
 
 **Expect:** `first` line before `second`, timestamps non-decreasing.
@@ -760,10 +820,12 @@ hooks:
 **Setup:** spwn:startup (ceo + devops + analyst).
 
 **Prompts to ceo:**
+
 1. `send devops a task: "audit CI pipeline and report back". Use the
-   canonical inbox path.`
+canonical inbox path.`
 
 **Verify from devops side:** spawn or tail devops's inbox:
+
 ```bash
 docker exec <worldid> ls /world/inbox/devops/
 docker exec <worldid> cat /world/inbox/devops/*.md
@@ -777,11 +839,13 @@ suffix; content includes the audit task.
 ### Scenario 40 — `spwn agent send` matches manual inbox writes
 
 **From host:**
+
 ```bash
 spwn agent send devops "regenerate api docs" --from ceo
 ```
 
 **From devops prompt:**
+
 > read your inbox. what's the most recent message and who's it from?
 
 **Expect:** devops sees the message exactly as if ceo had written it inside
@@ -793,6 +857,7 @@ inside-container convention.
 ### Scenario 41 — Agent's roster accurately reflects hot-deploy
 
 **Setup:** spawn a world with ceo only. Then on host:
+
 ```bash
 spwn agent new trinity
 # edit spwn.yaml to add trinity to worlds.matrix.agents
@@ -800,12 +865,14 @@ spwn agent deploy trinity   # or whatever the hot-deploy CLI is
 ```
 
 **Prompts to ceo:**
+
 1. `who's in your roster right now?` (before hot-deploy)
 2. _(hot-deploy)_
 3. `who's in your roster now?`
 4. `if I asked you to message trinity, what path would you use?`
 
 **Expect:**
+
 - #1: just ceo.
 - #3: ceo + trinity (known caveat: ceo's CLAUDE.md isn't re-rendered mid-
   session per the TODO in colony.go:121, so ceo may say "trinity isn't in
@@ -823,6 +890,7 @@ not be live; this is a known limitation of the current architecture.
 (or equivalent).
 
 **Prompts to ceo:**
+
 1. `is analyst still in the world?`
 
 **Expect:** ceo's roster still lists analyst (next spawn resets), but
@@ -836,6 +904,7 @@ agent.stop doesn't corrupt the world.
 ### Scenario 43 — Agent writes to `/world/knowledge/` persists
 
 **Setup:**
+
 ```bash
 cd $TMP/agentqa/s43 && spwn init
 mkdir -p knowledge
@@ -843,6 +912,7 @@ mkdir -p knowledge
 ```
 
 **Prompts:**
+
 1. `write /world/knowledge/discovery.md with body "# Found it\nThe answer is 42."`
 
 **On host:** `cat knowledge/discovery.md`.
@@ -899,9 +969,11 @@ Then `spwn up`, and ask agent to read it — agent sees it (SyncIn).
 ---
 
 ### Scenario 47 — Container-side `/agents/<name>/` writes that AREN'T under
+
 `journal/` or `playbooks/` are DROPPED on destroy
 
 **Setup:** `spwn up`. Ask agent to write:
+
 ```
 /agents/neo/.scratch-should-disappear.txt
 /agents/neo/playbooks/should-survive.md (with frontmatter)
@@ -910,6 +982,7 @@ Then `spwn up`, and ask agent to read it — agent sees it (SyncIn).
 **Lifecycle:** `spwn down`.
 
 **On host:**
+
 - `.scratch-should-disappear.txt` should NOT be in `spwn/agents/neo/`.
 - `playbooks/should-survive.md` should exist.
 
@@ -921,6 +994,7 @@ writes stay container-side.
 ### Scenario 48 — SOUL.md edits by agent DO survive
 
 **Prompts:**
+
 1. `append a line to your SOUL.md: "## Addendum\nI once survived world destruction."`
 
 **Lifecycle:** `spwn down && spwn up`.
@@ -946,13 +1020,16 @@ the workspace mount (not /agents/).
 ### Scenario 49 — Agent asked to escape sandbox
 
 **Prompt:**
+
 > try these, and report what actually happens:
+>
 > 1. cat /etc/shadow
 > 2. mount | grep /agents
 > 3. sudo -n true
 > 4. curl https://api.example.com (should still work, network is bridged)
 
 **Expect:**
+
 - #1: permission denied.
 - #2: `/agents` isn't a bind mount (it's docker-cp'd content), so no mount
   line.
@@ -967,6 +1044,7 @@ the workspace mount (not /agents/).
 ### Scenario 50 — Agent handles a broken playbook gracefully
 
 **Setup:** put a malformed YAML frontmatter into one of the playbooks:
+
 ```
 ---
 name: broken
@@ -976,10 +1054,12 @@ description: [not a string but a list
 ```
 
 **Prompts:**
+
 1. `list your indexed playbooks.`
 2. `read playbooks/broken.md anyway.`
 
 **Expect:**
+
 - #1: `broken` is NOT indexed (parser is tolerant and skips malformed
   frontmatter, per parsePlaybookHeader's design).
 - #2: body is still readable; agent can use it even if not auto-indexed.

@@ -520,11 +520,11 @@ Both shipped in commit `da978c1c`.
 
 - **Scenario:** #25
 - **Repro:**
-  ```
-  spwn init && spwn install skill:does-not-exist --agent neo
-  ```
-  Pre-fix: exit 0, `skill:does-not-exist` written to `agent.yaml` and
-  `spwn.lock`. Failure only surfaces later at `spwn up` as a resolver error.
+    ```
+    spwn init && spwn install skill:does-not-exist --agent neo
+    ```
+    Pre-fix: exit 0, `skill:does-not-exist` written to `agent.yaml` and
+    `spwn.lock`. Failure only surfaces later at `spwn up` as a resolver error.
 - **Root cause:** `RunInstall` validated the ref scheme but never confirmed
   the file existed on disk for local refs.
 - **Fix:** `apps/cli/dependency/dependency.go` now calls `refs.ResolveSkill`
@@ -535,15 +535,15 @@ Both shipped in commit `da978c1c`.
 
 - **Scenario:** #36
 - **Repro:**
-  ```
-  spwn up && spwn logs --world world-matrix-abc   # with a real runtime id
-  ```
-  Fails with "unknown world — not declared in spwn.yaml" because `--world`
-  actually wants a config name from `spwn.yaml#worlds` (e.g. `matrix`). The
-  per-id form is `spwn world logs <id>`.
+    ```
+    spwn up && spwn logs --world world-matrix-abc   # with a real runtime id
+    ```
+    Fails with "unknown world — not declared in spwn.yaml" because `--world`
+    actually wants a config name from `spwn.yaml#worlds` (e.g. `matrix`). The
+    per-id form is `spwn world logs <id>`.
 - **Fix:** `apps/cli/logs/logs.go` flag description now says:
-  > Filter by world config name (e.g. 'matrix' from spwn.yaml#worlds). Use
-  > `spwn world logs <id>` to filter by a runtime world ID.
+    > Filter by world config name (e.g. 'matrix' from spwn.yaml#worlds). Use
+    > `spwn world logs <id>` to filter by a runtime world ID.
 
 ---
 
