@@ -10,7 +10,7 @@ spwn/
 │   ├── cli/                         #   Go — the `spwn` binary (cmd/spwn, cobra commands, ui)
 │   ├── api/                         #   Go — HTTP server backing the web UI
 │   ├── web/                         #   Next.js (src/) + Tauri shell (src-tauri/, Rust)
-│   ├── gate/                        #   host-side broker + Playwright browser sidecar (see 06-gate)
+│   ├── gate/                        #   host-side broker + Playwright browser sidecar (see 08-gate)
 │   └── spwn-cookie-sync/            #   Chrome extension feeding the gate
 ├── packages/                        # Go domain modules (shared libraries)
 │   ├── platform/                    #   cross-cutting primitives (paths, IDs, env)
@@ -24,8 +24,8 @@ spwn/
 │   ├── gate/                        #   host-side gate logic
 │   ├── world/  architect/           #   runtime (container lifecycle/labels; orchestration daemon)
 ├── catalog/                         # shipped example worlds + block bundles (spwn:* entries)
-├── tests/                           # TypeScript vitest E2E + Playwright + governance (see 07-testing)
-├── docs/                            # this corpus (+ generated cli/ man pages)
+├── tests/                           # TypeScript vitest E2E + Playwright + governance (see 03-testing)
+├── docs/                            # this corpus (+ generated reference/ man pages)
 ├── go.work · pnpm-workspace.yaml · Makefile
 ```
 

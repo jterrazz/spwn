@@ -71,7 +71,7 @@ spwn automation daemon        # run the engine until interrupted
 
 # ── System ───────────────────────────────────────────────────────
 spwn architect start|stop|status|talk|logs   # always-on orchestration daemon
-spwn gate start|stop|status   # host-side broker for cookie-bearing tools (see 06-gate)
+spwn gate start|stop|status   # host-side broker for cookie-bearing tools (see 08-gate)
 spwn web                      # open the local web UI
 spwn auth login|logout|token  # provider credentials
 

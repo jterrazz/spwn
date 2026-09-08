@@ -1,5 +1,5 @@
 #!/bin/bash
-# spwn QA harness — 50 scenarios. Run: bash docs/qa/cli-scenarios/harness.sh [first] [last]
+# spwn QA harness — 50 scenarios. Run: bash tests/manual/harness.sh [first] [last]
 # Isolates state under $TMP_ROOT so the host's ~/.spwn is untouched.
 
 set -o pipefail
