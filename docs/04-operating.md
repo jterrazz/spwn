@@ -1,11 +1,13 @@
-# Release Runbook
+# Operating
 
-Everything needed to cut a new spwn release. The full pipeline runs from a
-single `git push --tags`.
+spwn is not deployed — it is released. This chapter is everything needed to cut
+one: the keys a clone signs with, the tag that starts the pipeline, how to
+verify what came out, and how to undo it. The machinery underneath — the
+GitHub-only distribution channel, the updater manifest, the checksum
+verification — is [Update system](16-update-system.md).
 
-For architecture/security details see [Update system](16-update-system.md).
-
----
+There is nothing to run and nothing to keep alive: the artifacts live in a
+GitHub Release, and a user's `spwn upgrade` or the Tauri updater does the rest.
 
 ## One-time setup (do this once per clone)
 
@@ -55,8 +57,6 @@ Commit that change **once**. Never rotate the pubkey casually - see
 
 No extra setup needed. `.goreleaser.yml` is committed and the workflow
 uses the default `GITHUB_TOKEN`.
-
----
 
 ## Cutting a release
 
@@ -134,8 +134,6 @@ spwn --version                 # should print v1.2.3
 Nothing to do here - users running the CLI or web UI will be notified
 automatically via the background check / Tauri updater.
 
----
-
 ## Dry runs
 
 ### CLI build (no upload)
@@ -163,8 +161,6 @@ Expect:
 - `version` matches the latest release
 - `platforms.darwin-aarch64.signature` is non-empty
 - `platforms.*.url` points at valid assets
-
----
 
 ## Troubleshooting
 
@@ -201,8 +197,6 @@ git tag -a v1.2.3 -m "..."
 git push origin v1.2.3
 ```
 
----
-
 ## Key rotation
 
 If the Tauri private key leaks:
@@ -214,8 +208,6 @@ If the Tauri private key leaks:
    to it (signatures won't verify with the old pubkey).
 5. Publish a manual-install notice on the website. Users must download
    the new bundle directly and replace their app.
-
----
 
 ## Reverting a release
 
@@ -232,3 +224,10 @@ gh release delete v1.2.3 --yes
 
 The background check caches for 24h, so existing installs will continue
 to see the deleted version for up to a day.
+
+## Related
+
+- [Update system](16-update-system.md) — the pipeline, the artifacts, and how a
+  running install discovers a new version.
+- [Developing](02-developing.md) — the loop and the gates a change passes before
+  it is ever in a tag.
