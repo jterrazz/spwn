@@ -51,16 +51,31 @@ make test-web            # Playwright web E2E (real Next.js + Go API + Chromium)
 
 Run `make` with no arguments for the full annotated target list.
 
+## What a test may assume
+
+Ten rules govern every layer of the pyramid. They are what the suite is built to hold, not aspirations, and a review that lets one go is the review that lets the pyramid rot from the bottom.
+
+1. **Tests follow architecture.** Every package and every layer has a default proof type; a new surface inherits it rather than negotiating one.
+2. **No hidden manual gates.** Anything that stays manual is listed with an owner, a reason, and the path to automating it.
+3. **Use real boundaries.** Real parsers, real filesystems in temp dirs, real HTTP servers, real Docker, real Playwright, wherever that is practical.
+4. **Mock external vendors, not your own system.** Anthropic, OpenAI, the OS keychain — never a spwn package standing in for another spwn package.
+5. **Prefer network-level doubles.** `httptest.Server` in Go, MSW in Node and the web; stubbing `fetch` directly is for a pure parser test and nothing else.
+6. **Every E2E reads like a spec.** Helpers expose `givenProject`, `whenWorldStarts`, `thenAgentSeesSkill` — never raw process plumbing.
+7. **No fixed sleeps in browser tests.** `waitForTimeout` is replaced by a locator expectation, an API poll, an event probe, or a readiness marker.
+8. **Local equals CI.** Make targets are the source of truth; CI calls them and never a hand-written variant.
+9. **Coverage is a signal, not a goal.** A threshold is added where it makes architectural sense, and nowhere else.
+10. **Regression surfaces get golden or contract tests.** Runtime render output, CLI output, generated docs, API schemas and catalog manifests are machine-compared.
+
+Rule 1 is the one with a gate behind it. `make test-contracts` reads the registry in `tests/_contracts/` and refuses a surface that declared no proof: every runtime needs its renderer/tool/spawn tests, every API route its route contract, every CLI command at least help coverage plus one behaviour spec or a declared exemption, every catalog entry its manifest validation, every web route its component or Playwright cover. Without it a contributor can add a command, a route or a tool and nothing anywhere notices that it is unproven.
+
 ## Deeper reference
 
 The test suite has its own detailed reference, co-located with the tests:
 
 - [`../tests/ARCHITECTURE.md`](../tests/ARCHITECTURE.md) — the full layer breakdown, the `spec` harness cookbook, contracts/governance, simulators, and fixtures.
 - [`../tests/README.md`](../tests/README.md) — how to run each layer and its conventions.
-- [`03-testing.md`](03-testing.md) — original design rationale and open issues.
-- [`qa/`](qa/) — manual QA passes that complement the automated suite.
 
 ## Related
 
 - [Architecture](01-architecture.md) — the layers the pyramid covers.
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — contributor setup.
+- [Developing](02-developing.md) — the loop these gates run in, and what a change owes.

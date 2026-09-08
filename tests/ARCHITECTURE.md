@@ -2,7 +2,7 @@
 
 This document explains **how** spwn is tested — the layers, where files live, the patterns each layer uses, the governance that prevents drift, and the cookbook for adding new tests.
 
-For **how to run** tests, see [README.md](README.md). For the original design rationale and open issues, see [`docs/03-testing.md`](../docs/03-testing.md). For manual QA passes that complement this suite, see [`docs/qa/`](../docs/qa/).
+For **how to run** tests, see [README.md](README.md). For the strategy this suite serves — the pyramid, the two spec forms, and the ten rules a test holds to — see [`docs/03-testing.md`](../docs/03-testing.md). For the manual passes that complement it, see [`manual/README.md`](manual/README.md).
 
 ---
 
