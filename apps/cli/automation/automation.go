@@ -32,7 +32,7 @@ to one of your project's agents. The architect daemon fires them as
 events arrive and writes a receipt for every dispatch.
 
 Declare automations under spwn.yaml#worlds.<name>.automations. See
-docs/automations.md for the full schema.`,
+docs/13-automations.md for the full schema.`,
 }
 
 func init() {

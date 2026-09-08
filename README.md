@@ -22,7 +22,7 @@
 <br/>
 
 <p align="center">
-  <img src="docs/assets/hero-v2.gif" alt="spwn - spawning an agent" width="560" />
+  <img src="docs/_assets/hero-v2.gif" alt="spwn - spawning an agent" width="560" />
 </p>
 
 <br/>
@@ -106,7 +106,7 @@ Memory is a folder of markdown files. Readable, diffable, and alive across resta
 <tr>
 <td align="center" colspan="3">
 <h3>⏰ Automations</h3>
-Wake an agent on a cron tick or a filesystem event. <code>worlds.&lt;name&gt;.automations</code> in spwn.yaml; receipts in <code>.spwn/runs.jsonl</code>; <code>spwn automation daemon</code> runs the engine. <a href="docs/automations.md">Full guide</a>.
+Wake an agent on a cron tick or a filesystem event. <code>worlds.&lt;name&gt;.automations</code> in spwn.yaml; receipts in <code>.spwn/runs.jsonl</code>; <code>spwn automation daemon</code> runs the engine. <a href="docs/13-automations.md">Full guide</a>.
 </td>
 </tr>
 </table>
@@ -241,7 +241,7 @@ gate:                           # 🚧 experimental — API will change
 
 **Built-in catalog:** `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`,
 `spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect`. See
-[`docs/dependency-catalog.md`](docs/dependency-catalog.md) for the full list.
+[`docs/15-dependency-catalog.md`](docs/15-dependency-catalog.md) for the full list.
 
 </details>
 
@@ -528,7 +528,7 @@ dependencies:
 | `hook/<name>` | `./spwn/hooks/<name>.yaml` |
 | `command/<name>` | `./spwn/commands/<name>.md` |
 
-Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/dependency-catalog.md).
+Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](docs/15-dependency-catalog.md).
 
 The rest of the agent directory sits next to the manifest. Identity and memory live as plain files:
 
@@ -690,7 +690,7 @@ spwn automation ls                    List declared automations
 spwn automation daemon                Run trigger engine until ctrl-c
 ```
 
-Full CLI reference → [`docs/cli/`](docs/cli/spwn.md)
+Full CLI reference → [`docs/reference/`](docs/reference/spwn.md)
 
 <br/>
 
@@ -1064,15 +1064,15 @@ The full corpus lives in [`docs/`](docs/) — start at the [chapter index](docs/
 
 | Topic | Link |
 |---|---|
-| **Getting started**: install, first agent, project layout | [`docs/01-getting-started.md`](docs/01-getting-started.md) |
-| **Concepts**: the world/agent model and vocabulary | [`docs/02-concepts.md`](docs/02-concepts.md) |
-| **Primitives**: `spwn.yaml`, agents, tools, skills, hooks, commands | [`docs/04-primitives.md`](docs/04-primitives.md) |
-| **Architecture**: monorepo layout, layered dependency graph, DooD | [`docs/05-architecture.md`](docs/05-architecture.md) |
-| **Recipes**: five worked examples that show spwn in action | [`docs/recipes.md`](docs/recipes.md) |
-| **Dependency catalog**: the built-in `spwn:*` refs and how to author your own | [`docs/dependency-catalog.md`](docs/dependency-catalog.md) |
-| **CLI reference**: every command, auto-generated | [`docs/cli/`](docs/cli/spwn.md) |
+| **Concepts**: the world/agent model and vocabulary | [`docs/05-concepts.md`](docs/05-concepts.md) |
+| **Primitives**: `spwn.yaml`, agents, tools, skills, hooks, commands | [`docs/07-primitives.md`](docs/07-primitives.md) |
+| **Architecture**: monorepo layout, layered dependency graph, DooD | [`docs/01-architecture.md`](docs/01-architecture.md) |
+| **Recipes**: five worked examples that show spwn in action | [`docs/14-recipes.md`](docs/14-recipes.md) |
+| **Dependency catalog**: the built-in `spwn:*` refs and how to author your own | [`docs/15-dependency-catalog.md`](docs/15-dependency-catalog.md) |
+| **CLI reference**: every command, auto-generated | [`docs/reference/`](docs/reference/spwn.md) |
 | **Contributing**: setup, testing, conventions | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
-| **Internals**: release runbook, update system | [`docs/contributing/`](docs/contributing/) |
+| **Developing**: the toolchain, the loop, what a change owes | [`docs/02-developing.md`](docs/02-developing.md) |
+| **Internals**: release runbook, update system | [`docs/04-operating.md`](docs/04-operating.md) · [`docs/16-update-system.md`](docs/16-update-system.md) |
 
 <br/>
 

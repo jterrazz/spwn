@@ -1,6 +1,6 @@
 # CLI
 
-The `spwn` binary (`apps/cli`) is a thin surface over the domain packages: parse flags → call a domain API → format output. This chapter is the grammar and a task-oriented map. The **per-command reference is generated** from Cobra into [`cli/`](cli/) — regenerate it with `make docs`; never hand-edit those pages.
+The `spwn` binary (`apps/cli`) is a thin surface over the domain packages: parse flags → call a domain API → format output. This chapter is the grammar and a task-oriented map. The **per-command reference is generated** from Cobra into [`reference/`](reference/) — regenerate it with `make docs`; never hand-edit those pages.
 
 ## Grammar
 
@@ -11,7 +11,7 @@ Design rules:
 - Strict noun-first grammar. The only top-level verbs are the shortcuts `up`, `ls`, `talk`.
 - `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --dependency X` removes a dep from it.
 - Inside a project, commands resolve against `./spwn/` first. Outside a project, they operate on user-level paths.
-- Names for creation, IDs for reference: creation takes a name, and a running instance is addressed by the ID it was given ([Concepts](02-concepts.md#ids)).
+- Names for creation, IDs for reference: creation takes a name, and a running instance is addressed by the ID it was given ([Concepts](05-concepts.md#ids)).
 - `--json` wherever output is worth consuming programmatically.
 
 Two invariants hold across the surface. Commands speak the domain's vocabulary — worlds, agents, souls, dreams — never the backend's. And the manifest is the input while the running world is the output: no command mutates a world image in place, so changing reality means changing `spwn.yaml` or a block file and rebuilding.
@@ -83,7 +83,7 @@ spwn *       publish <name>             # push to registry         [planned]
 
 ## Related
 
-- [`cli/`](cli/) — the generated per-command reference (regenerate with `make docs`).
-- [Concepts](02-concepts.md) — what the nouns mean.
-- [Primitives](04-primitives.md) — the `install` targets (`spwn:`, `skill/`, `tool/`, `hook/`, `command/`).
-- [Automations](automations.md) — the automation subsystem in depth.
+- [`reference/`](reference/) — the generated per-command reference (regenerate with `make docs`).
+- [Concepts](05-concepts.md) — what the nouns mean.
+- [Primitives](07-primitives.md) — the `install` targets (`spwn:`, `skill/`, `tool/`, `hook/`, `command/`).
+- [Automations](13-automations.md) — the automation subsystem in depth.

@@ -26,7 +26,7 @@ Knowledge is **world-scoped**, not held in the Mind: declare a host path via `wo
 
 - **Dependency** — the distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) shipping any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`.
 - **Skill (bare form)** — a `spwn/skills/<name>.md` file. The simplest authoring path for "write a paragraph of instructions."
-- **Automation** — a `worlds.<name>.automations.<id>` entry that wakes one agent on a trigger (cron expression or filesystem watch). Receipts land at `<root>/.spwn/runs.jsonl`. Engine in `packages/automation`; user guide in [Automations](automations.md).
+- **Automation** — a `worlds.<name>.automations.<id>` entry that wakes one agent on a trigger (cron expression or filesystem watch). Receipts land at `<root>/.spwn/runs.jsonl`. Engine in `packages/automation`; user guide in [Automations](13-automations.md).
 
 ### Agent internals
 
@@ -40,7 +40,7 @@ Knowledge is **world-scoped**, not held in the Mind: declare a host path via `wo
 - **Worker** — persistent worker agent with its own identity and memory.
 - **NPC** — ephemeral agent, no persistent memory. Single task, fire-and-forget.
 
-Each agent declares one of these as its `role:` — `chief`, `manager`, `worker`, or `npc` ([Primitives](04-primitives.md)). Product and marketing material uses a parallel vocabulary for the same tiers: a Governor is a chief, a Citizen is a worker, an NPC is an npc. The role names above are the ones the manifests and the CLI accept.
+Each agent declares one of these as its `role:` — `chief`, `manager`, `worker`, or `npc` ([Primitives](07-primitives.md)). Product and marketing material uses a parallel vocabulary for the same tiers: a Governor is a chief, a Citizen is a worker, an NPC is an npc. The role names above are the ones the manifests and the CLI accept.
 
 ### Evolution
 
@@ -57,11 +57,11 @@ Generated with `crypto/rand`.
 
 ## Development methodology: spec-first
 
-spwn is built spec-first — the test suite is the living specification. See [Testing](07-testing.md) for the workflow (specify → encode → implement → verify) and the layer pyramid.
+spwn is built spec-first — the test suite is the living specification. See [Testing](03-testing.md) for the workflow (specify → encode → implement → verify) and the layer pyramid.
 
 ## Related
 
-- [Getting started](01-getting-started.md) — install and first agent.
-- [Primitives](04-primitives.md) — the on-disk shape of each block.
-- [Architecture](05-architecture.md) — how the packages that own these abstractions are layered.
-- [Worlds](08-worlds.md) · [Physics](09-physics.md) · [The Mind](10-mind.md) — the design behind the three abstractions.
+- [Getting started](02-developing.md) — install and first agent.
+- [Primitives](07-primitives.md) — the on-disk shape of each block.
+- [Architecture](01-architecture.md) — how the packages that own these abstractions are layered.
+- [Worlds](09-worlds.md) · [Physics](10-physics.md) · [The Mind](11-mind.md) — the design behind the three abstractions.

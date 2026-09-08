@@ -1,6 +1,6 @@
 # Physics
 
-Every world has its own physics: the constants, laws, and elements that decide what is possible inside it. This chapter is what those three mean, what the agent reads at startup, and why capability is modelled as physics rather than as configuration. How they are declared is [Primitives](04-primitives.md).
+Every world has its own physics: the constants, laws, and elements that decide what is possible inside it. This chapter is what those three mean, what the agent reads at startup, and why capability is modelled as physics rather than as configuration. How they are declared is [Primitives](07-primitives.md).
 
 ## The three pillars
 
@@ -32,7 +32,7 @@ Platform instructions travel the same way. Rather than teaching every runtime ad
 
 ## Elements bridged from the host
 
-Some elements are not binaries in the image but host capabilities surfaced inside the world as ordinary commands by the [gate](06-gate.md). From the agent's side there is no difference: a bridged capability is an element that exists, listed in its faculties. A capability that is not bridged appears nowhere — not forbidden, absent.
+Some elements are not binaries in the image but host capabilities surfaced inside the world as ordinary commands by the [gate](08-gate.md). From the agent's side there is no difference: a bridged capability is an element that exists, listed in its faculties. A capability that is not bridged appears nowhere — not forbidden, absent.
 
 ## Why elements are physics, not configuration
 
@@ -50,6 +50,6 @@ Undecided — what happens when a world hits its timeout constant: hard kill (SI
 
 ## Related
 
-- [Worlds](08-worlds.md) — the container the physics apply to.
-- [Primitives](04-primitives.md) — the manifests that declare constants, laws, and elements.
-- [Gate](06-gate.md) — how a host capability becomes an element.
+- [Worlds](09-worlds.md) — the container the physics apply to.
+- [Primitives](07-primitives.md) — the manifests that declare constants, laws, and elements.
+- [Gate](08-gate.md) — how a host capability becomes an element.

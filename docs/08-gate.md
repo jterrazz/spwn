@@ -2,7 +2,7 @@
 
 > 🚧 **Experimental.** The gate container, the `gate:` block, the Node SDK, and the cookie-sync extension are in active development — schema, CLI, and behaviour will change without notice. Don't depend on it in production.
 
-The gate is the one sanctioned crossing between the host and a world. Everything else about a world is closed by construction; the gate is where declared, scoped capability enters — a host service surfaced inside the world as an ordinary command, so the agent sees an element that exists and never an endpoint ([Physics](09-physics.md)).
+The gate is the one sanctioned crossing between the host and a world. Everything else about a world is closed by construction; the gate is where declared, scoped capability enters — a host service surfaced inside the world as an ordinary command, so the agent sees an element that exists and never an endpoint ([Physics](10-physics.md)).
 
 Four concerns sit behind that: **capability bridging** (external services as plain CLI commands), **credential custody** (secrets and cookies stay host-side, never in a world's image or filesystem), **session relay** (operator traffic in, agent output back), and **supervision** (the bridged capability is spawned, health-checked, and respawned by the gate, not by the agent).
 
@@ -90,7 +90,7 @@ Undecided — whether two worlds should be able to reach each other. No direct c
 
 ## Related
 
-- [Primitives](04-primitives.md) — the `gate:` block on a `tool.yaml`.
-- [Physics](09-physics.md) — why a bridged capability is modelled as an element.
-- [Architecture](05-architecture.md) — where the gate sits relative to worlds.
+- [Primitives](07-primitives.md) — the `gate:` block on a `tool.yaml`.
+- [Physics](10-physics.md) — why a bridged capability is modelled as an element.
+- [Architecture](01-architecture.md) — where the gate sits relative to worlds.
 - [ADR-001](decisions/001-gate-over-socket.md) · [ADR-006](decisions/006-acp-inside-container.md) · [ADR-007](decisions/007-rust-container-gate.md) — the transport abstraction and the two-sided design that preceded the shipped host broker.

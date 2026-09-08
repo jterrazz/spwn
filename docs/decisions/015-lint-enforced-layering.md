@@ -29,12 +29,12 @@ never aspirational.** Three mechanisms, layered themselves:
    carries deny rules for every package above it, so an upward import
    fails CI.
 3. **The layer diagram in the corpus** — the human-readable map
-   ([Architecture](../05-architecture.md)), rewritten as the roster churns.
+   ([Architecture](../01-architecture.md)), rewritten as the roster churns.
 
 At decision time the roster had five layers (foundation → domain →
 project → build → runtime, with the CLI free above); it has since grown.
 The invariant is the **direction and the enforcement**, not the layer
-count: `.golangci.yml` and [Architecture](../05-architecture.md) own the
+count: `.golangci.yml` and [Architecture](../01-architecture.md) own the
 current graph.
 
 ## Consequences

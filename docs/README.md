@@ -1,27 +1,24 @@
 # spwn docs
 
-The written corpus for spwn — knowledge lives here exactly once. The root [`AGENTS.md`](../AGENTS.md) (and its `CLAUDE.md` symlink) and the [`README.md`](../README.md) vitrine route here; they never restate a chapter.
+The written corpus for spwn — every piece of knowledge lives here exactly once, and the root brief and the README vitrine route in without restating a word.
 
-## Chapters
-
-1. [Getting started](01-getting-started.md) — install, first agent, project + config layout.
-2. [Concepts](02-concepts.md) — domain model, vocabulary, IDs, evolution.
-3. [CLI](03-cli.md) — grammar + command map (per-command pages generated in [`cli/`](cli/)).
-4. [Primitives](04-primitives.md) — `spwn.yaml`, agents, tools, skills, hooks, commands, the dep grammar.
-5. [Architecture](05-architecture.md) — monorepo layout, layered dependency graph, DooD, non-goals, code style.
-6. [Gate](06-gate.md) — host-side broker: cookies, MCP routing, browser sidecar (experimental).
-7. [Testing](07-testing.md) — strategy, layer pyramid, running the suites.
-8. [Worlds](08-worlds.md) — how a world runs, the Backend port, what crosses the boundary.
-9. [Physics](09-physics.md) — constants, laws, elements, and the world context an agent reads.
-10. [The Mind](10-mind.md) — identity, skills, memory; Dream, Sleep, and versioning a Mind.
-11. [Observatory](11-observatory.md) — the web UI and the API behind it.
-
-## Topic references
-
-- [Automations](automations.md) · [Recipes](recipes.md) · [Dependency catalog](dependency-catalog.md)
-- [`decisions/`](decisions/README.md) — the decision records: why the stack, the layering, the container model.
-- [`cli/`](cli/) — generated Cobra man pages (regenerate with `make docs`).
-- [`contributing/`](contributing/) — release runbook, self-update system.
-- [`notes/`](notes/) — design rationale and audits. · [`qa/`](qa/) — manual QA passes.
-
-This is an **application** repo: it adopts the corpus + routing doctrine but generates no `docs/reference/` (no public API surface to project).
+| Chapter                                            | Holds                                                                              |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [01 Architecture](01-architecture.md)              | The monorepo layout, the seven layers imports flow down, DooD, the non-goals.       |
+| [02 Developing](02-developing.md)                  | The toolchain, the loop, which file a change opens, and what a change owes.         |
+| [03 Testing](03-testing.md)                        | The layer pyramid, the two spec forms, the manual passes, what a test may assume.   |
+| [04 Operating](04-operating.md)                    | The release runbook — signing keys, the tag that ships, the rollback.               |
+| [05 Concepts](05-concepts.md)                      | The domain model, the vocabulary, the IDs, how an agent evolves.                    |
+| [06 CLI](06-cli.md)                                | The `spwn <noun> <verb>` grammar and the command map.                               |
+| [07 Primitives](07-primitives.md)                  | `spwn.yaml`, agents, tools, skills, hooks, commands, and the dependency grammar.    |
+| [08 Gate](08-gate.md)                              | The host-side broker: cookies, MCP routing, the browser sidecar.                    |
+| [09 Worlds](09-worlds.md)                          | How a world runs, the Backend port, what crosses the boundary.                      |
+| [10 Physics](10-physics.md)                        | Constants, laws, elements, and the world context an agent reads at startup.         |
+| [11 The Mind](11-mind.md)                          | Identity, skills, memory; Dream, Sleep, and versioning a Mind.                      |
+| [12 Observatory](12-observatory.md)                | The web UI and the API behind it.                                                   |
+| [13 Automations](13-automations.md)                | Waking an agent on a cron tick or a filesystem event.                               |
+| [14 Recipes](14-recipes.md)                        | Worked examples, end to end.                                                        |
+| [15 Dependency catalog](15-dependency-catalog.md)  | The built-in `spwn:*` entries and how to author your own.                           |
+| [16 Update system](16-update-system.md)            | How spwn ships and updates itself, from the git tag to the binary swap.             |
+| [decisions/](decisions/)                           | The decision records — why the stack, the layering, the container model.            |
+| [reference/](reference/)                           | The generated per-command pages, projected from Cobra by `make docs`.               |

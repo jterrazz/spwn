@@ -47,5 +47,5 @@ Manual QA tests **whole-system coherence** — the kind of bug where
 two correct subsystems produce wrong behavior together. The
 automated suite tests subsystems in isolation. Both are necessary;
 neither replaces the other. See `tests/ARCHITECTURE.md` for the
-automated layer pyramid and `../notes/test-architecture-rationale.md`
+automated layer pyramid and `../03-testing.md`
 for the original design rationale that produced both.

@@ -2,7 +2,7 @@
 
 This document explains **how** spwn is tested — the layers, where files live, the patterns each layer uses, the governance that prevents drift, and the cookbook for adding new tests.
 
-For **how to run** tests, see [README.md](README.md). For the original design rationale and open issues, see [`docs/notes/test-architecture-rationale.md`](../docs/notes/test-architecture-rationale.md). For manual QA passes that complement this suite, see [`docs/qa/`](../docs/qa/).
+For **how to run** tests, see [README.md](README.md). For the original design rationale and open issues, see [`docs/03-testing.md`](../docs/03-testing.md). For manual QA passes that complement this suite, see [`docs/qa/`](../docs/qa/).
 
 ---
 
@@ -691,7 +691,7 @@ These scripts are protocol contracts. If the real Codex CLI changes its resume s
 1. Add the Cobra command under `apps/cli/<noun>/<verb>.go`.
 2. Add a behaviour spec under `tests/specs/cli/<domain>/<case>.spec.yaml`, and its `--help` page under `tests/specs/cli/help/`.
 3. Add it to `tests/_contracts/cli-commands.yaml` (with `--help` snapshot path).
-4. Generated docs under `docs/cli/spwn_<noun>_<verb>.md` are checked into the repo.
+4. Generated docs under `docs/reference/spwn_<noun>_<verb>.md` are checked into the repo.
 
 ### Add a catalog entry
 

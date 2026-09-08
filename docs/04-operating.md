@@ -3,7 +3,7 @@
 Everything needed to cut a new spwn release. The full pipeline runs from a
 single `git push --tags`.
 
-For architecture/security details see [`update-system.md`](./update-system.md).
+For architecture/security details see [Update system](16-update-system.md).
 
 ---
 

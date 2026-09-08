@@ -94,12 +94,12 @@ install:                        # optional: how to install into the image
 verify:                         # optional: smoke-tests at image-build end (non-zero exit fails)
   - command -v bash
 
-gate:                           # 🚧 experimental — see 06-gate.md
+gate:                           # 🚧 experimental — see 08-gate.md
   cookies: { domains: [x.com], cookies: [auth_token, ct0] }
   mcp: { entry: ["node", "index.js", "mcp-serve"] }
 ```
 
-The compiler unions all deps across a world's agents, topo-sorts, resolves each to a concrete tool, and bakes apt packages + install commands + env + file drops + skills into one world image. Built-in catalog: `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`, `spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect`, … — the full list is in [`dependency-catalog.md`](dependency-catalog.md). Tools with a `gate:` block additionally register with the host-side gate ([Gate](06-gate.md)).
+The compiler unions all deps across a world's agents, topo-sorts, resolves each to a concrete tool, and bakes apt packages + install commands + env + file drops + skills into one world image. Built-in catalog: `spwn:unix`, `spwn:git`, `spwn:node`, `spwn:claude-code`, `spwn:codex`, `spwn:cli`, `spwn:qmd`, `spwn:architect`, … — the full list is in [`15-dependency-catalog.md`](15-dependency-catalog.md). Tools with a `gate:` block additionally register with the host-side gate ([Gate](08-gate.md)).
 
 ## Skills — `spwn/skills/<name>/SKILL.md`
 
@@ -136,7 +136,7 @@ The body is written verbatim to `.claude/commands/<name>.md` or `.codex/commands
 
 ## Invariants
 
-- **Input, not output.** The manifests declare what reality should be; what the agent reads at startup — physics, faculties, roster — is what it is after the build ([Physics](09-physics.md)). Operators author YAML, agents read rendered markdown.
+- **Input, not output.** The manifests declare what reality should be; what the agent reads at startup — physics, faculties, roster — is what it is after the build ([Physics](10-physics.md)). Operators author YAML, agents read rendered markdown.
 - **Declarative all the way down.** No manifest triggers behaviour by being edited; reality changes only through `spwn build` and `spwn up`.
 - **Composition, not restriction.** Security comes from what the world image lacks, never from a rule in YAML.
 - **Blocks are files.** Every skill, tool, hook, and command is one file or directory on disk, diffable and reviewable like code.
@@ -144,7 +144,7 @@ The body is written verbatim to `.claude/commands/<name>.md` or `.codex/commands
 
 ## Related
 
-- [Getting started](01-getting-started.md) — the config hierarchy in context.
-- [CLI](03-cli.md) — `spwn install` / `uninstall` for these refs.
-- [`dependency-catalog.md`](dependency-catalog.md) — the built-in `spwn:*` catalog.
-- [Gate](06-gate.md) — the `gate:` block and cookie-bearing tools.
+- [Getting started](02-developing.md) — the config hierarchy in context.
+- [CLI](06-cli.md) — `spwn install` / `uninstall` for these refs.
+- [`15-dependency-catalog.md`](15-dependency-catalog.md) — the built-in `spwn:*` catalog.
+- [Gate](08-gate.md) — the `gate:` block and cookie-bearing tools.

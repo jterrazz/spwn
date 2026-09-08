@@ -1,6 +1,6 @@
 # spwn — agent brief
 
-The operating system for autonomous agent worlds. Compose tools, skills, and identity into **agents**, then spawn them into isolated Docker **worlds**. This file is a map, not the territory — it routes into the [`docs/`](docs/) corpus, where each piece of knowledge lives exactly once. When you need the *what* or the *why*, follow the link; don't expect it restated here.
+The operating system for autonomous agent worlds: compose tools, skills, and identity into **agents**, then spawn them into isolated Docker **worlds**. This file is a map, not the territory — it routes into the corpus and repeats none of it.
 
 ## Mental model
 
@@ -10,36 +10,19 @@ Three abstractions, each owning one concern:
 - **Backend** (`packages/container`) — where worlds run (Docker; labels are the source of truth).
 - **Mind** (`packages/agent`) — how an agent persists across worlds (`SOUL.md` + `playbooks/` + `journal/`).
 
-Knowledge is world-scoped, not held in the Mind. A spwn project lives **in the repo** (`./spwn/`), not in `~/.spwn/`. Full model in [Concepts](docs/02-concepts.md).
+Knowledge is world-scoped, not held in the Mind. A spwn project lives **in the repo** (`./spwn/`), not in `~/.spwn/`.
 
 ## Where knowledge lives
 
-| Task | Chapter |
-| ---- | ------- |
-| Install, first agent, project + config layout | [`docs/01-getting-started.md`](docs/01-getting-started.md) |
-| Domain model, vocabulary, IDs, evolution | [`docs/02-concepts.md`](docs/02-concepts.md) |
-| CLI grammar + command map (generated pages in `docs/cli/`) | [`docs/03-cli.md`](docs/03-cli.md) |
-| `spwn.yaml`, agents, tools, skills, hooks, commands, dep grammar | [`docs/04-primitives.md`](docs/04-primitives.md) |
-| Monorepo layout, layered dependency graph, DooD, code style | [`docs/05-architecture.md`](docs/05-architecture.md) |
-| Host-side gate: cookies, MCP routing, browser sidecar | [`docs/06-gate.md`](docs/06-gate.md) |
-| Testing strategy, layer pyramid, running the suites | [`docs/07-testing.md`](docs/07-testing.md) |
-| How a world runs, the Backend port, mounts and what persists | [`docs/08-worlds.md`](docs/08-worlds.md) |
-| Constants, laws, elements, the world context an agent reads | [`docs/09-physics.md`](docs/09-physics.md) |
-| Identity, skills, memory; Dream, Sleep, versioning a Mind | [`docs/10-mind.md`](docs/10-mind.md) |
-| The web UI and the API behind it | [`docs/11-observatory.md`](docs/11-observatory.md) |
-| Why a choice was made | [`docs/decisions/`](docs/decisions/README.md) |
-| Automations (cron + fs triggers) | [`docs/automations.md`](docs/automations.md) |
-| Worked examples | [`docs/recipes.md`](docs/recipes.md) |
-| Built-in `spwn:*` catalog | [`docs/dependency-catalog.md`](docs/dependency-catalog.md) |
-| Release runbook, self-update system | [`docs/contributing/`](docs/contributing/) |
-| Deep test-suite reference + simulators | [`tests/ARCHITECTURE.md`](tests/ARCHITECTURE.md) |
+Everything this repository knows about itself is a chapter of [`docs/`](docs/), and the one address to start from is the map: [`docs/README.md`](docs/README.md). It carries one row per chapter — the architecture, how a change is made, what proves it, how a release ships, then the product's own subjects. Follow a row; do not expect it restated here.
+
+Two corpora sit beside it and answer different questions: [`tests/ARCHITECTURE.md`](tests/ARCHITECTURE.md) is the deep reference for the suites and the simulators, and [`README.md`](README.md) is the vitrine — what spwn is, and the quickstart.
 
 ## Working in this repo
 
 - **Single entry point is the `Makefile`.** `make` (no args) lists every target. CI is [`.github/workflows/validate.yaml`](.github/workflows/validate.yaml) — the workflow *is* the aggregate; there is no `test-pr` meta-target.
-- **Common gates:** `make lint` · `make test` (Go unit) · `make test-contracts` · `make test-cli` (Docker). Full matrix in [Testing](docs/07-testing.md).
-- **Layers flow downward**, enforced by depguard in [`.golangci.yml`](.golangci.yml) (the mechanical source of truth) — see [Architecture](docs/05-architecture.md) before moving code between packages.
+- **Common gates:** `make lint` · `make test` (Go unit) · `make test-contracts` · `make test-cli` (Docker). The loop and the full matrix are [`docs/02-developing.md`](docs/02-developing.md) and [`docs/03-testing.md`](docs/03-testing.md).
+- **Layers flow downward**, enforced by depguard in [`.golangci.yml`](.golangci.yml) (the mechanical source of truth) — read [`docs/01-architecture.md`](docs/01-architecture.md) before moving code between packages.
 - **Spec-first:** the test suite is the specification. A discovery grows a guard (test / check / runtime error) in the same change.
-- Contributor setup: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 `CLAUDE.md` is a symlink to this file.

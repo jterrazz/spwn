@@ -3,8 +3,8 @@
 Five real use cases. Each one is a working project you can paste into
 your shell. The README has the concept pitch; this page is the how.
 
-For the CLI surface see [`cli/spwn.md`](cli/spwn.md); for the list of
-built-in dependencies see [`dependency-catalog.md`](dependency-catalog.md).
+For the CLI surface see [`reference/spwn.md`](reference/spwn.md); for the list of
+built-in dependencies see [`15-dependency-catalog.md`](15-dependency-catalog.md).
 
 ---
 

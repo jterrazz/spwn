@@ -29,7 +29,7 @@ var lsCmd = &cobra.Command{
 		entries := collectAutomations(p)
 		if len(entries) == 0 {
 			fmt.Fprintln(cmd.OutOrStdout(), "no automations declared in this project")
-			fmt.Fprintln(cmd.OutOrStdout(), "see docs/automations.md to add one under worlds.<name>.automations")
+			fmt.Fprintln(cmd.OutOrStdout(), "see docs/13-automations.md to add one under worlds.<name>.automations")
 			return nil
 		}
 

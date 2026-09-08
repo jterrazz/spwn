@@ -4,7 +4,7 @@ The Observatory is the web face of spwn: every active world and agent at a glanc
 
 ## Shape
 
-A Next.js application ([`apps/web`](../apps/web)) backed by a Go API server ([`apps/api`](../apps/api)) that reads and writes the spwn filesystem directly and calls the same domain packages the CLI consumes, behind HTTP. Where those two sit in the layer graph is [Architecture](05-architecture.md).
+A Next.js application ([`apps/web`](../apps/web)) backed by a Go API server ([`apps/api`](../apps/api)) that reads and writes the spwn filesystem directly and calls the same domain packages the CLI consumes, behind HTTP. Where those two sit in the layer graph is [Architecture](01-architecture.md).
 
 ## Design principles
 
@@ -19,5 +19,5 @@ The long-term target is an isometric, real-time visualisation of worlds and the 
 
 ## Related
 
-- [CLI](03-cli.md) — the other operator surface.
-- [Architecture](05-architecture.md) — `apps/web` and `apps/api` in the monorepo layout.
+- [CLI](06-cli.md) — the other operator surface.
+- [Architecture](01-architecture.md) — `apps/web` and `apps/api` in the monorepo layout.

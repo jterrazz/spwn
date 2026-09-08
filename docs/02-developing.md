@@ -2,7 +2,7 @@
 
 spwn is the operating system for autonomous agent worlds: compose tools, skills, and identity into agents, then spawn them into isolated Docker worlds where they wake up, find their tools, and get to work. A spwn project lives **in your repo**, not in a SaaS — every agent is a folder you commit, review, and diff like any other code.
 
-This chapter gets you from install to a running agent. For the model behind the words (Agent, World, Architect, Mind…) read [Concepts](02-concepts.md); for the CLI surface read [CLI](03-cli.md).
+This chapter gets you from install to a running agent. For the model behind the words (Agent, World, Architect, Mind…) read [Concepts](05-concepts.md); for the CLI surface read [CLI](06-cli.md).
 
 ## Install
 
@@ -64,7 +64,7 @@ my-project/
 - **`spwn.yaml`** declares project-wide `dependencies:`, an optional `runtime.backend` default, and the inline `worlds:` map (each world names its agents, workspace mounts, optional `knowledge:` path, and optional tool overrides). Worlds are inline map entries — there is no `spwn/worlds/` directory.
 - **`agent.yaml`** declares one agent's `dependencies:` list and `runtime.backend`. Its deps are **unioned** with the project-wide pool — an agent cannot remove a project-level dep, only add to it.
 
-The union of project-wide and agent-specific dependencies is exactly what materializes inside that agent's container. Full field reference and the dependency grammar are in [Primitives](04-primitives.md).
+The union of project-wide and agent-specific dependencies is exactly what materializes inside that agent's container. Full field reference and the dependency grammar are in [Primitives](07-primitives.md).
 
 ## Everyday workflow
 
@@ -77,11 +77,11 @@ spwn ls              # agent-centric status (running / stopped / orphan)
 spwn down            # stop every world
 ```
 
-`spwn build --tree-only` renders the project tree to `./dist` for preview/debug without building an image. The complete command surface is in [CLI](03-cli.md).
+`spwn build --tree-only` renders the project tree to `./dist` for preview/debug without building an image. The complete command surface is in [CLI](06-cli.md).
 
 ## Related
 
-- [Concepts](02-concepts.md) — the world/agent model and vocabulary.
-- [Primitives](04-primitives.md) — `spwn.yaml`, agents, tools, skills, hooks, commands.
-- [Automations](automations.md) — waking agents on cron or filesystem triggers.
-- [Recipes](recipes.md) — worked examples.
+- [Concepts](05-concepts.md) — the world/agent model and vocabulary.
+- [Primitives](07-primitives.md) — `spwn.yaml`, agents, tools, skills, hooks, commands.
+- [Automations](13-automations.md) — waking agents on cron or filesystem triggers.
+- [Recipes](14-recipes.md) — worked examples.

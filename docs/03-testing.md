@@ -57,10 +57,10 @@ The test suite has its own detailed reference, co-located with the tests:
 
 - [`../tests/ARCHITECTURE.md`](../tests/ARCHITECTURE.md) — the full layer breakdown, the `spec` harness cookbook, contracts/governance, simulators, and fixtures.
 - [`../tests/README.md`](../tests/README.md) — how to run each layer and its conventions.
-- [`notes/test-architecture-rationale.md`](notes/test-architecture-rationale.md) — original design rationale and open issues.
+- [`03-testing.md`](03-testing.md) — original design rationale and open issues.
 - [`qa/`](qa/) — manual QA passes that complement the automated suite.
 
 ## Related
 
-- [Architecture](05-architecture.md) — the layers the pyramid covers.
+- [Architecture](01-architecture.md) — the layers the pyramid covers.
 - [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — contributor setup.

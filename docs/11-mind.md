@@ -1,6 +1,6 @@
 # The Mind
 
-An agent is three layers — identity, skills, memory — and the whole point of drawing the line between them is how they behave over time. This chapter is that design: what each layer holds, what Sleep and Fork do to it, and how an agent's memory is versioned. The on-disk shape of the files is [Primitives](04-primitives.md); the vocabulary is [Concepts](02-concepts.md).
+An agent is three layers — identity, skills, memory — and the whole point of drawing the line between them is how they behave over time. This chapter is that design: what each layer holds, what Sleep and Fork do to it, and how an agent's memory is versioned. The on-disk shape of the files is [Primitives](07-primitives.md); the vocabulary is [Concepts](05-concepts.md).
 
 ## The three layers
 
@@ -10,7 +10,7 @@ An agent is three layers — identity, skills, memory — and the whole point of
 
 The profile is mounted into every world the agent enters; without one, every world starts from zero. Identity is what keeps the accumulation coherent — an agent that evolves long enough without one drifts out of its purpose.
 
-Security constraints never live in any of these layers. They belong to the world ([Physics](09-physics.md)).
+Security constraints never live in any of these layers. They belong to the world ([Physics](10-physics.md)).
 
 ### What each layer defines
 
@@ -54,7 +54,7 @@ Because Claude Code is the runtime spawned inside the world ([ADR-004](decisions
 
 The Architect creates a world, mounts the agent's profile into it, and generates the world's physics and faculties; the container-side gate spawns the agent CLI. The agent reads identity, skills, and knowledge to know who it is, then physics and faculties to know what is possible, and works — following playbooks, invoking skills, appending to the journal — until the world is destroyed.
 
-The profile outlives the world. The mount is read-write: the agent writes knowledge as it learns, appends to the journal, and creates a playbook when it finds a repeatable procedure ([Worlds](08-worlds.md) for the mount mechanics).
+The profile outlives the world. The mount is read-write: the agent writes knowledge as it learns, appends to the journal, and creates a playbook when it finds a repeatable procedure ([Worlds](09-worlds.md) for the mount mechanics).
 
 ## Dream — learning from one task
 
@@ -115,6 +115,6 @@ A fourth memory type — instincts, the implicit patterns that emerge from repea
 
 ## Related
 
-- [Concepts](02-concepts.md) — Soul, Memory, Dream, Sleep, Fork in one line each.
-- [Primitives](04-primitives.md) — the agent directory and `agent.yaml`.
-- [Worlds](08-worlds.md) — how the profile is mounted and what persists.
+- [Concepts](05-concepts.md) — Soul, Memory, Dream, Sleep, Fork in one line each.
+- [Primitives](07-primitives.md) — the agent directory and `agent.yaml`.
+- [Worlds](09-worlds.md) — how the profile is mounted and what persists.

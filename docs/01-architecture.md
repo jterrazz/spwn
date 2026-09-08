@@ -88,7 +88,7 @@ Two modes:
 - **Local CLI (direct)** — `spwn up` calls Docker directly from the host; no Architect container needed.
 - **Hosted Architect (containerized)** — `spwn architect start` launches the Architect in a long-lived socket-mounted container that creates and manages world containers as siblings. Channels connect here.
 
-The [gate](06-gate.md) is a separate long-running host container that owns cookie-bearing tools and the shared browser primitive.
+The [gate](08-gate.md) is a separate long-running host container that owns cookie-bearing tools and the shared browser primitive.
 
 ## Key invariants
 
@@ -107,10 +107,10 @@ The boundaries are as load-bearing as the layers:
 
 - **It does not implement agent reasoning.** The runtime does the thinking, planning, and tool use; spwn creates the reality it operates in.
 - **It does not run inference.** No model call happens in the machinery — the runtime manages its own.
-- **It does not schedule work.** Worlds are created on demand, by an operator or by a declared trigger ([Automations](automations.md)).
+- **It does not schedule work.** Worlds are created on demand, by an operator or by a declared trigger ([Automations](13-automations.md)).
 - **It does not network worlds together.** Each world is isolated; anything between two worlds goes through the host.
 - **It does not persist worlds.** The Soul and the Mind persist; worlds are disposable.
-- **It does not restrict behaviour through rules.** What an agent cannot do, it cannot do because the capability is absent from the image ([Physics](09-physics.md)).
+- **It does not restrict behaviour through rules.** What an agent cannot do, it cannot do because the capability is absent from the image ([Physics](10-physics.md)).
 
 ## Planned surfaces
 
@@ -127,8 +127,8 @@ The runtime stack has further designed-but-unshipped layers, each with its own r
 
 ## Related
 
-- [Concepts](02-concepts.md) — the abstractions these packages implement.
-- [Gate](06-gate.md) — the host-side broker container.
-- [Testing](07-testing.md) — how the layers are covered.
-- [Decisions](decisions/README.md) — why the stack, the layering, and the container model are what they are.
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) · [`contributing/releasing.md`](contributing/releasing.md) · [`contributing/update-system.md`](contributing/update-system.md) — contributor runbooks.
+- [Concepts](05-concepts.md) — the abstractions these packages implement.
+- [Gate](08-gate.md) — the host-side broker container.
+- [Testing](03-testing.md) — how the layers are covered.
+- [Decisions](decisions/) — why the stack, the layering, and the container model are what they are.
+- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) · [`04-operating.md`](04-operating.md) · [`16-update-system.md`](16-update-system.md) — contributor runbooks.
