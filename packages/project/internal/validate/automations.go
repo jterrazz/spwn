@@ -94,7 +94,7 @@ func ruleAutomations(in Input) []Issue {
 					Level:   LevelError,
 					Path:    pathPrefix + ".on",
 					Message: "trigger missing — set `on.cron` or `on.fs`",
-					Hint:    "see docs/automations.md for the supported triggers",
+					Hint:    "see docs/13-automations.md for the supported triggers",
 				})
 			}
 

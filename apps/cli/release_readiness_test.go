@@ -1097,7 +1097,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if !strings.Contains(stdout+stderr, "SOUL.md") {
 			t.Fatalf("agent create --help missing SOUL.md")
 		}
-		docPath := findDocPath(t, "docs/cli/spwn_agent_create.md")
+		docPath := findDocPath(t, "docs/reference/spwn_agent_create.md")
 		body := readFile(t, docPath)
 		if !strings.Contains(body, "SOUL.md") {
 			t.Fatalf("doc %s missing SOUL.md", docPath)

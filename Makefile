@@ -42,18 +42,25 @@ uninstall:  ## Remove the installed spwn
 clean:  ## rm -rf .artifacts/
 	rm -rf .artifacts/
 
-docs:  ## Regenerate docs/cli from Cobra
-	cd apps/cli && go run ./cmd/gen-docs ../../docs/cli
+docs: generate  ## Regenerate docs/reference from Cobra
+	cd apps/cli && go run ./cmd/gen-docs ../../docs/reference
 
 ##@ Lint
 
-.PHONY: lint
-lint: generate  ## go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip)
+.PHONY: lint docs-layout
+lint: generate docs-layout  ## go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip) + docs layout
 	@for mod in $(GO_MODS); do \
 		echo "==> go vet $$mod"; \
 		(cd $$mod && go vet ./...) || exit 1; \
 	done
 	@pnpm -r lint
+
+# pnpm, not npx: npm's ephemeral install dies on `edgesOut` of null when it
+# resolves this package on the CI runner, with or without --package=. The lint
+# job already sets pnpm up for the workspace half, so there is nothing to add.
+docs-layout:  ## Check docs/ against the estate's manual spine
+	@echo "==> docs layout"
+	@pnpm --package=@jterrazz/typescript@9.2.1 dlx typescript docs-layout .
 
 ##@ Test — fast (no Docker)
 
