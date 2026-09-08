@@ -47,13 +47,17 @@ docs: generate  ## Regenerate docs/reference from Cobra
 
 ##@ Lint
 
-.PHONY: lint
-lint: generate  ## go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip)
+.PHONY: lint docs-layout
+lint: generate docs-layout  ## go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip) + docs layout
 	@for mod in $(GO_MODS); do \
 		echo "==> go vet $$mod"; \
 		(cd $$mod && go vet ./...) || exit 1; \
 	done
 	@pnpm -r lint
+
+docs-layout:  ## Check docs/ against the estate's manual spine
+	@echo "==> docs layout"
+	@npx --yes @jterrazz/typescript@9.2.0 docs-layout .
 
 ##@ Test — fast (no Docker)
 
