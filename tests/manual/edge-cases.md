@@ -366,7 +366,7 @@ new world has stale role.md but otherwise fine.
 ## Execution plan
 
 1. Script-runnable (majority): pipe into a bash harness similar to
-   `../cli-scenarios/harness.sh`.
+   `./harness.sh`.
 2. Docker-reliant: separate group; run serially to avoid daemon
    contention.
 3. Agent-talk-reliant (few): run only when auth is live, batch them.

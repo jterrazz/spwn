@@ -7,14 +7,14 @@
 > i.e. the agent actually sees, reads, and acts on what spwn claims to have
 > configured.
 >
-> These cannot be run by the script harness in `../cli-scenarios/harness.sh` (which
+> These cannot be run by the script harness in `./harness.sh` (which
 > uses mock-claude). A human runs each scenario, interacts with the live agent
 > via `spwn agent talk`, and verifies the responses match the PASS criteria.
 
 ## Prerequisites
 
 - `spwn auth` shows a connected Anthropic provider (OAuth or token).
-- `make build` + `make build-test-image` completed once.
+- `make build` + `make test-image` completed once.
 - A scratch project dir per scenario under `$TMP/agentqa/sNN/` (commit it to
   a disposable git repo if you want diffs).
 - The agent runs claude-code natively; don't set `SPWN_BASE_IMAGE` unless a
@@ -1031,7 +1031,7 @@ in parallel.
 
 ## Delta from previous pass
 
-- `../cli-scenarios/scenarios.md` (the script harness suite) tests the **CLI**
+- `./cli-scenarios.md` (the script harness suite) tests the **CLI**
   surface: exit codes, file outputs, JSON shape. Zero agent integration.
 - **This** suite tests the **agent perception** surface: does the injected
   prompt actually land? Does the agent behave according to the configured

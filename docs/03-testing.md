@@ -68,6 +68,12 @@ Ten rules govern every layer of the pyramid. They are what the suite is built to
 
 Rule 1 is the one with a gate behind it. `make test-contracts` reads the registry in `tests/_contracts/` and refuses a surface that declared no proof: every runtime needs its renderer/tool/spawn tests, every API route its route contract, every CLI command at least help coverage plus one behaviour spec or a declared exemption, every catalog entry its manifest validation, every web route its component or Playwright cover. Without it a contributor can add a command, a route or a tool and nothing anywhere notices that it is unproven.
 
+## The manual passes
+
+Three scenario catalogs sit outside the pyramid, at [`../tests/manual/`](../tests/manual/README.md): 50 CLI command sequences driven by a bash harness, 50 agent-behaviour scenarios that need a live authenticated runtime, and 72 edge cases covering concurrency, partial failure and filesystem edges. They test whole-system coherence — the bug where two correct subsystems produce wrong behaviour together — which the automated suite cannot reach because it tests subsystems in isolation.
+
+None of them runs in `make test`, and none of them is a gate. What a pass finds becomes a fix plus the automated guard that would have caught it, which is principle 2 above: manual is a debt with a stated path to automation, never a standing exemption.
+
 ## Deeper reference
 
 The test suite has its own detailed reference, co-located with the tests:

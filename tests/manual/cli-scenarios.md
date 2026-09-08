@@ -14,7 +14,7 @@ outcome (exit code, file existence, substring in output).
 ```bash
 # Prereqs
 make -C /path/to/spwn/spwn build               # produces .artifacts/go/spwn
-make -C /path/to/spwn/spwn build-test-image    # produces spwn-test:latest
+make -C /path/to/spwn/spwn test-image    # produces spwn-test:latest
 
 # Point harness at the binary (defaults to the path used on this machine)
 SPWN=/path/to/spwn/spwn/.artifacts/go/spwn \
@@ -339,7 +339,7 @@ spwn check                                   # → exit 0
 ## Group D — Real Docker: spawn + destroy + mounts (31–40)
 
 These need `SPWN_BASE_IMAGE=spwn-test:latest` — the mock-claude test image built
-by `make build-test-image`. Without it, each `spwn up` burns ~5 minutes building
+by `make test-image`. Without it, each `spwn up` burns ~5 minutes building
 a real production image.
 
 ### 31. matrix scaffold spawns; `spwn ls` shows running
@@ -564,7 +564,7 @@ Both shipped in commit `da978c1c`.
 cd /path/to/spwn/spwn
 git pull
 make build                                   # rebuild .artifacts/go/spwn
-make build-test-image                        # rebuild spwn-test:latest
+make test-image                        # rebuild spwn-test:latest
 bash ./harness.sh
 # Expect: "RESULTS: 98 passed, 0 failed"
 ```
