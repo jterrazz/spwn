@@ -96,7 +96,7 @@ Four things land in the same commit as the change that makes them true:
 
 A decision this repository alone took is written to [`decisions/`](decisions/) as `NNN-kebab.md`, cut from [`decisions/_template.md`](decisions/_template.md). The status is `Proposed` until the owner writes `Accepted` — an agent never accepts its own record.
 
-Numbers are historical and never reused, which is why 003 is absent: *security as physics* is a decision about the product rather than about this codebase, and it lives in spwn's product knowledge outside this repository. A decision spanning two repositories is recorded in the corpus that spans them, and linked from here.
+The sequence runs `001` to the latest with no gap: a record that moves or is removed shifts the ones after it down rather than leaving a hole. The record that once held 003 — *security as physics*, a decision about the product rather than about this codebase — was withdrawn to spwn's product knowledge outside this repository, and the sequence closed the gap on 2026-09-09.
 
 ## Related
 

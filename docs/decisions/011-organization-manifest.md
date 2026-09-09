@@ -1,4 +1,4 @@
-# ADR-012: Universe Manifest (`org.yaml`)
+# ADR-011: Universe Manifest (`org.yaml`)
 
 **Status:** Accepted
 **Date:** 2026-03-29

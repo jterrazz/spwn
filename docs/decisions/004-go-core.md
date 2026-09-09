@@ -1,11 +1,11 @@
-# ADR-005: Go for Core Library
+# ADR-004: Go for Core Library
 
 **Date:** 2026-02-28
 **Status:** Accepted
 
 ## Context
 
-Spwn needs a core implementation language for the business logic: lifecycle management, Mind management, physics generation, element bridging, and backend orchestration. The original design used TypeScript, then briefly Rust. With the pivot to Claude Code as the agent runtime (ADR-004), the primary workload is Docker orchestration + CLI — not performance-critical computation.
+Spwn needs a core implementation language for the business logic: lifecycle management, Mind management, physics generation, element bridging, and backend orchestration. The original design used TypeScript, then briefly Rust. With the pivot to Claude Code as the agent runtime (ADR-003), the primary workload is Docker orchestration + CLI — not performance-critical computation.
 
 This is infrastructure glue. The right language for Docker orchestration is the one the Docker ecosystem is built in.
 

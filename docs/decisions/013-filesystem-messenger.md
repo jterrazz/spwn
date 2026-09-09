@@ -1,4 +1,4 @@
-# ADR-014: Filesystem-Based Agent Messaging
+# ADR-013: Filesystem-Based Agent Messaging
 
 **Status:** Accepted
 **Date:** 2026-03-31

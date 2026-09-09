@@ -1,4 +1,4 @@
-# ADR-016: codex as a first-class runtime
+# ADR-015: codex as a first-class runtime
 
 **Status:** Proposed
 **Date:** 2026-09-09
@@ -46,7 +46,7 @@ and the `Spawner` interface grows the two pieces of dialect the CLI had
 inlined, `OneShotFlags` (the flags that tell a CLI to print and exit) and
 `ParseOneShotResult` (the text and session id read back out).
 
-This is [ADR-011](011-ports-and-adapters.md) applied to a port that had one
+This is [ADR-010](010-ports-and-adapters.md) applied to a port that had one
 implementation and had therefore stopped being one. A second runtime is the
 only thing that can prove a runtime port is a port, which is why the promotion
 is a decision and not a feature: it fixes a boundary, and adding a third

@@ -1,4 +1,4 @@
-# ADR-006: Agent Client Protocol Inside the Container
+# ADR-005: Agent Client Protocol Inside the Container
 
 **Date:** 2026-03-01
 **Status:** Accepted

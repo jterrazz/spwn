@@ -1,4 +1,4 @@
-# ADR-004: Claude Code CLI as Agent Runtime
+# ADR-003: Claude Code CLI as Agent Runtime
 
 **Date:** 2026-02-28
 **Status:** Accepted

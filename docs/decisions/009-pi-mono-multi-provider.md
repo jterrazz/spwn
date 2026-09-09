@@ -1,4 +1,4 @@
-# ADR-010: Pi-mono as the Primary Multi-Provider Runtime
+# ADR-009: Pi-mono as the Primary Multi-Provider Runtime
 
 **Status:** Accepted
 **Date:** 2026-03-29

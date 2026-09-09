@@ -48,7 +48,7 @@ The Soul is the identity layer: purpose, values, bonds. The Mind is everything t
 | During Fork  | Shared across all forks          | Each fork gets its own copy              |
 | During Merge | No conflict possible             | Needs conflict resolution                |
 
-Because Claude Code is the runtime spawned inside the world ([ADR-004](decisions/004-claude-code-as-runtime.md)), these files are read natively as markdown: `SOUL.md` and `AGENTS.md` shape identity the way `.claude/agents/` does, `playbooks/` the way `.claude/skills/` does. There is no custom loader.
+Because Claude Code is the runtime spawned inside the world ([ADR-003](decisions/003-claude-code-as-runtime.md)), these files are read natively as markdown: `SOUL.md` and `AGENTS.md` shape identity the way `.claude/agents/` does, `playbooks/` the way `.claude/skills/` does. There is no custom loader.
 
 ## Lifecycle and mount
 

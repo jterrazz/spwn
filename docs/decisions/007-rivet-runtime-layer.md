@@ -1,4 +1,4 @@
-# ADR-008: Rivet Sandbox Agent SDK as the Runtime Normalization Layer
+# ADR-007: Rivet Sandbox Agent SDK as the Runtime Normalization Layer
 
 **Status:** Accepted
 **Date:** 2026-03-29
