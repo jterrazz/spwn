@@ -1,4 +1,4 @@
-# ADR-011: Ports & Adapters (Trait-Driven Architecture)
+# ADR-010: Ports & Adapters (Trait-Driven Architecture)
 
 **Status:** Accepted
 **Date:** 2026-03-29

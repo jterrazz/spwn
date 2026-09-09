@@ -1,4 +1,4 @@
-# ADR-015: Lint-Enforced Layered Imports
+# ADR-014: Lint-Enforced Layered Imports
 
 **Date:** 2026-04-16
 **Status:** Accepted

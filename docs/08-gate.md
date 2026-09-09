@@ -93,4 +93,4 @@ Undecided — whether two worlds should be able to reach each other. No direct c
 - [Primitives](07-primitives.md) — the `gate:` block on a `tool.yaml`.
 - [Physics](10-physics.md) — why a bridged capability is modelled as an element.
 - [Architecture](01-architecture.md) — where the gate sits relative to worlds.
-- [ADR-001](decisions/001-gate-over-socket.md) · [ADR-006](decisions/006-acp-inside-container.md) · [ADR-007](decisions/007-rust-container-gate.md) — the transport abstraction and the two-sided design that preceded the shipped host broker.
+- [ADR-001](decisions/001-gate-over-socket.md) · [ADR-005](decisions/005-acp-inside-container.md) · [ADR-006](decisions/006-rust-container-gate.md) — the transport abstraction and the two-sided design that preceded the shipped host broker.

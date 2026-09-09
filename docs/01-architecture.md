@@ -73,7 +73,7 @@ compile.Tree           →  world.Spawn        →  running container + synced a
 
 ## Container architecture: Docker-outside-of-Docker (DooD)
 
-spwn uses **DooD**, not DinD ([ADR-013](decisions/013-dood-over-dind.md)). The host's Docker daemon is shared via socket mount (`/var/run/docker.sock`); every container is a **sibling** on the same daemon — no nesting, no privilege escalation, no performance overhead.
+spwn uses **DooD**, not DinD ([ADR-012](decisions/012-dood-over-dind.md)). The host's Docker daemon is shared via socket mount (`/var/run/docker.sock`); every container is a **sibling** on the same daemon — no nesting, no privilege escalation, no performance overhead.
 
 ```
 Host machine
@@ -99,7 +99,7 @@ The [gate](08-gate.md) is a separate long-running host container that owns cooki
 - **Labels are truth.** World state comes from Docker labels, not on-disk state.
 - **Compile is deterministic.** Same input → same output, covered by golden tests.
 - **Layers flow downward.** Enforced by depguard; no upward imports.
-- **External systems sit behind ports.** Every dependency on the outside world is a Go interface defined in the domain that uses it, with the adapter injected at startup — no domain package names a concrete backend ([ADR-011](decisions/011-ports-and-adapters.md)).
+- **External systems sit behind ports.** Every dependency on the outside world is a Go interface defined in the domain that uses it, with the adapter injected at startup — no domain package names a concrete backend ([ADR-010](decisions/010-ports-and-adapters.md)).
 
 ## What the architecture does not do
 
@@ -116,7 +116,7 @@ The boundaries are as load-bearing as the layers:
 
 Thin SDKs are designed, not shipped: language wrappers (TypeScript first, then Python) over the same domain APIs the CLI consumes, so code can act as an operator — spawn a world, assign a task, collect the result — without shelling out. Today the shipped operator surfaces are the CLI and the web UI.
 
-The runtime stack has further designed-but-unshipped layers, each with its own record: a runtime normalization layer inside worlds ([ADR-008](decisions/008-rivet-runtime-layer.md)), multi-provider and subscription auth behind it ([ADR-010](decisions/010-pi-mono-multi-provider.md)), and the Architect's messaging channels ([ADR-009](decisions/009-zeroclaw-as-claw.md), [ADR-012](decisions/012-organization-manifest.md)).
+The runtime stack has further designed-but-unshipped layers, each with its own record: a runtime normalization layer inside worlds ([ADR-007](decisions/007-rivet-runtime-layer.md)), multi-provider and subscription auth behind it ([ADR-009](decisions/009-pi-mono-multi-provider.md)), and the Architect's messaging channels ([ADR-008](decisions/008-zeroclaw-as-claw.md), [ADR-011](decisions/011-organization-manifest.md)).
 
 ## Related
 

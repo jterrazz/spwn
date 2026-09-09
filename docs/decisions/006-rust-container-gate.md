@@ -1,4 +1,4 @@
-# ADR-007: Rust for the Container-Side Gate
+# ADR-006: Rust for the Container-Side Gate
 
 **Date:** 2026-03-01
 **Status:** Accepted

@@ -15,7 +15,7 @@ A Next.js application ([`apps/web`](../apps/web)) backed by a Go API server ([`a
 
 ## Designed, not shipped
 
-The long-term target is an isometric, real-time visualisation of worlds and the agents working inside them, fed by runtime event streaming ([ADR-008](decisions/008-rivet-runtime-layer.md)). Today the dashboard is the flat web UI described above.
+The long-term target is an isometric, real-time visualisation of worlds and the agents working inside them, fed by runtime event streaming ([ADR-007](decisions/007-rivet-runtime-layer.md)). Today the dashboard is the flat web UI described above.
 
 ## Related
 

@@ -11,7 +11,7 @@ A world is a Docker container started from the project image, and everything an 
 
 ## The Backend port
 
-The machinery programs against an interface — provision, exec, mount, destroy, ensure-image — never against Docker itself ([`packages/container`](../packages/container) is the adapter, and [ADR-011](decisions/011-ports-and-adapters.md) the rule). Nothing above the port names Docker, which keeps the door open for stronger isolation backends without changing agent-facing behaviour.
+The machinery programs against an interface — provision, exec, mount, destroy, ensure-image — never against Docker itself ([`packages/container`](../packages/container) is the adapter, and [ADR-010](decisions/010-ports-and-adapters.md) the rule). Nothing above the port names Docker, which keeps the door open for stronger isolation backends without changing agent-facing behaviour.
 
 Docker is the default and, today, the only adapter. Designed, not shipped: edge deployment — ephemeral agents on lightweight infrastructure — as a second adapter behind the same port.
 

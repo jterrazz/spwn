@@ -1,4 +1,4 @@
-# ADR-009: ZeroClaw as the Architect Daemon
+# ADR-008: ZeroClaw as the Architect Daemon
 
 **Status:** Accepted
 **Date:** 2026-03-29

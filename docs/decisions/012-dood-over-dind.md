@@ -1,4 +1,4 @@
-# ADR-013: Docker-out-of-Docker (DooD) over Docker-in-Docker (DinD)
+# ADR-012: Docker-out-of-Docker (DooD) over Docker-in-Docker (DinD)
 
 **Status:** Accepted
 **Date:** 2026-04-01
