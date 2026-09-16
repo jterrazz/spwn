@@ -272,7 +272,7 @@ func TestEdge_LockfileConsistent_ProjectDepsMissing(t *testing.T) {
 		if strings.Contains(iss.Message, "spwn:git") {
 			sawGit = true
 		}
-		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "spwn:unix") {
+		if strings.Contains(iss.Message, "spwn:unix") {
 			t.Error("spwn:unix is in lockfile, should not be flagged")
 		}
 	}
@@ -295,11 +295,6 @@ dependencies:
 		lower := strings.ToLower(iss.Message)
 		if strings.Contains(lower, "plugin") {
 			t.Errorf("message should not say 'plugin': %q", iss.Message)
-		}
-		// "package" appears in the conflict rule message, check that base
-		// existence messages use "dependency" terminology.
-		if strings.Contains(iss.Message, "dependency") || strings.Contains(iss.Message, "does not exist") {
-			// OK - contains "dependency" wording
 		}
 	}
 	if len(issues) == 0 {
@@ -371,9 +366,6 @@ dependencies:
 		}
 		if strings.Contains(iss.Hint, "spwn plugin install") {
 			t.Errorf("hint should not say 'spwn plugin install': %q", iss.Hint)
-		}
-		if strings.Contains(iss.Hint, "spwn install") {
-			// Good - correct hint wording.
 		}
 	}
 

@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"unicode"
 
 	"gopkg.in/yaml.v3"
 	"spwn.sh/packages/dependency/internal/manifest"
@@ -337,7 +338,18 @@ func deriveTitle(slug string, s *manifest.Schema) string {
 	if s != nil && s.Title != "" {
 		return s.Title
 	}
-	return strings.Title(strings.ReplaceAll(slug, "-", " "))
+	return titleWords(strings.ReplaceAll(slug, "-", " "))
+}
+
+// titleWords upper-cases the first rune of every word. strings.Title is
+// deprecated and x/text/cases is a dependency a slug does not justify.
+func titleWords(s string) string {
+	words := strings.Fields(s)
+	for i, w := range words {
+		runes := []rune(w)
+		words[i] = string(unicode.ToUpper(runes[0])) + string(runes[1:])
+	}
+	return strings.Join(words, " ")
 }
 
 // copyDirFS recursively copies a directory from the embedded FS onto

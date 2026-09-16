@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -127,7 +128,11 @@ func parseEntry(dir, filename string) (*Entry, error) {
 			entry.Outcome = strings.TrimSpace(strings.TrimPrefix(line, "- **Outcome:**"))
 		}
 		if strings.HasPrefix(line, "- **Exit Code:**") {
-			fmt.Sscanf(strings.TrimPrefix(line, "- **Exit Code:**"), "%d", &entry.ExitCode)
+			// A line whose code does not parse leaves ExitCode at zero,
+			// which reads as "completed" — the same as an absent line.
+			if code, err := strconv.Atoi(strings.TrimSpace(strings.TrimPrefix(line, "- **Exit Code:**"))); err == nil {
+				entry.ExitCode = code
+			}
 		}
 		if strings.HasPrefix(line, "- **Duration:**") {
 			entry.Duration, _ = time.ParseDuration(strings.TrimSpace(strings.TrimPrefix(line, "- **Duration:**")))

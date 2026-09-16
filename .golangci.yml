@@ -1,120 +1,124 @@
+version: "2"
 run:
-  timeout: 5m
   modules-download-mode: readonly
-
 linters:
   enable:
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
     - depguard
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-
-  depguard:
-    # Layer architecture enforcement.
-    #
-    # L1 Foundation  →  (nothing)         paths
-    # L2 Platform    →  L1                activity, auth, upgrade
-    # L3 Domain      →  L1-L2             deps, agent
-    # L4 Project     →  L1-L3             project
-    # L5 Build       →  L1-L4             compile, image
-    # L6 Runtime     →  L1-L5             world
-    # L7 Surface     →  anything          apps/cli, api
-    #
-    # Each rule denies imports from layers above it.
+  settings:
+    depguard:
+      # Layer architecture enforcement.
+      #
+      # L1 Foundation  →  (nothing)         paths
+      # L2 Platform    →  L1                activity, auth, upgrade
+      # L3 Domain      →  L1-L2             deps, agent
+      # L4 Project     →  L1-L3             project
+      # L5 Build       →  L1-L4             compile, image
+      # L6 Runtime     →  L1-L5             world
+      # L7 Surface     →  anything          apps/cli, api
+      #
+      # Each rule denies imports from the layers above it.
+      rules:
+        build-compile:
+          files:
+            - '**/packages/compile/**'
+          deny:
+            - pkg: spwn.sh/packages/world
+              desc: L5 (build) must not import L6 (runtime)
+        domain-agent:
+          files:
+            - '**/packages/agent/**'
+          deny:
+            - pkg: spwn.sh/packages/project
+              desc: L3 (domain) must not import L4 (project)
+            - pkg: spwn.sh/packages/compile
+              desc: L3 (domain) must not import L5 (build)
+            - pkg: spwn.sh/packages/compile
+              desc: L3 (domain) must not import L5 (build)
+            - pkg: spwn.sh/packages/world
+              desc: L3 (domain) must not import L6 (runtime)
+        domain-deps:
+          files:
+            - '**/packages/dependency/**'
+          deny:
+            - pkg: spwn.sh/packages/project
+              desc: L3 (domain) must not import L4 (project)
+            - pkg: spwn.sh/packages/compile
+              desc: L3 (domain) must not import L5 (build)
+            - pkg: spwn.sh/packages/compile
+              desc: L3 (domain) must not import L5 (build)
+            - pkg: spwn.sh/packages/world
+              desc: L3 (domain) must not import L6 (runtime)
+        platform:
+          files:
+            - '**/packages/platform/**'
+          deny:
+            - pkg: spwn.sh/packages/dependency
+            - pkg: spwn.sh/packages/agent
+            - pkg: spwn.sh/packages/project
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/world
+        platform-activity:
+          files:
+            - '**/packages/activity/**'
+          deny:
+            - pkg: spwn.sh/packages/dependency
+            - pkg: spwn.sh/packages/agent
+            - pkg: spwn.sh/packages/project
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/world
+        platform-auth:
+          files:
+            - '**/packages/auth/**'
+          deny:
+            - pkg: spwn.sh/packages/dependency
+            - pkg: spwn.sh/packages/agent
+            - pkg: spwn.sh/packages/project
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/world
+        platform-upgrade:
+          files:
+            - '**/packages/upgrade/**'
+          deny:
+            - pkg: spwn.sh/packages/dependency
+            - pkg: spwn.sh/packages/agent
+            - pkg: spwn.sh/packages/project
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/compile
+            - pkg: spwn.sh/packages/world
+        project-layer:
+          files:
+            - '**/packages/project/**'
+          deny:
+            - pkg: spwn.sh/packages/compile
+              desc: L4 (project) must not import L5 (build)
+            - pkg: spwn.sh/packages/compile
+              desc: L4 (project) must not import L5 (build)
+            - pkg: spwn.sh/packages/world
+              desc: L4 (project) must not import L6 (runtime)
+    errcheck:
+      check-type-assertions: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      # L3: Domain — must not import L4+ (project, compile, image, world).
-      domain-deps:
-        files: ["**/packages/dependency/**"]
-        deny:
-          - pkg: "spwn.sh/packages/project"
-            desc: "L3 (domain) must not import L4 (project)"
-          - pkg: "spwn.sh/packages/compile"
-            desc: "L3 (domain) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/compile"
-            desc: "L3 (domain) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/world"
-            desc: "L3 (domain) must not import L6 (runtime)"
-
-      domain-agent:
-        files: ["**/packages/agent/**"]
-        deny:
-          - pkg: "spwn.sh/packages/project"
-            desc: "L3 (domain) must not import L4 (project)"
-          - pkg: "spwn.sh/packages/compile"
-            desc: "L3 (domain) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/compile"
-            desc: "L3 (domain) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/world"
-            desc: "L3 (domain) must not import L6 (runtime)"
-
-      # L4: Project — must not import L5+ (compile, image, world).
-      project-layer:
-        files: ["**/packages/project/**"]
-        deny:
-          - pkg: "spwn.sh/packages/compile"
-            desc: "L4 (project) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/compile"
-            desc: "L4 (project) must not import L5 (build)"
-          - pkg: "spwn.sh/packages/world"
-            desc: "L4 (project) must not import L6 (runtime)"
-
-      # L5: Build — must not import L6 (world).
-      build-compile:
-        files: ["**/packages/compile/**"]
-        deny:
-          - pkg: "spwn.sh/packages/world"
-            desc: "L5 (build) must not import L6 (runtime)"
-
-      # L1/L2: Platform — may not import any domain or higher.
-      platform:
-        files: ["**/packages/platform/**"]
-        deny:
-          - pkg: "spwn.sh/packages/dependency"
-          - pkg: "spwn.sh/packages/agent"
-          - pkg: "spwn.sh/packages/project"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/world"
-
-      platform-activity:
-        files: ["**/packages/activity/**"]
-        deny:
-          - pkg: "spwn.sh/packages/dependency"
-          - pkg: "spwn.sh/packages/agent"
-          - pkg: "spwn.sh/packages/project"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/world"
-
-      platform-auth:
-        files: ["**/packages/auth/**"]
-        deny:
-          - pkg: "spwn.sh/packages/dependency"
-          - pkg: "spwn.sh/packages/agent"
-          - pkg: "spwn.sh/packages/project"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/world"
-
-      platform-upgrade:
-        files: ["**/packages/upgrade/**"]
-        deny:
-          - pkg: "spwn.sh/packages/dependency"
-          - pkg: "spwn.sh/packages/agent"
-          - pkg: "spwn.sh/packages/project"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/compile"
-          - pkg: "spwn.sh/packages/world"
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
+      - linters:
+          - errcheck
+        path: _test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -34,10 +34,6 @@ func detectGoogle() []*Credential {
 	return out
 }
 
-func resolveGoogle() *Credential {
-	return pickByPref(ProviderGoogle, detectGoogle())
-}
-
 func validateGoogle(ctx context.Context, cred *Credential) *ProviderStatus {
 	status := &ProviderStatus{
 		Provider: ProviderGoogle,

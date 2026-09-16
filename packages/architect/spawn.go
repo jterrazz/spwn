@@ -138,6 +138,14 @@ func (w *firstWriteNotifier) Write(p []byte) (int, error) {
 	return w.inner.Write(p)
 }
 
+// rollback tears down the container a failed spawn left behind. What the
+// caller must see is the spawn's own error, so a cleanup that fails in
+// turn stays silent rather than burying it.
+func (a *Architect) rollback(ctx context.Context, containerID string) {
+	_ = a.backend.Stop(ctx, containerID)
+	_ = a.backend.Remove(ctx, containerID)
+}
+
 // Spawn creates a new world.
 func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, error) {
 	if err := opts.Validate(); err != nil {
@@ -585,7 +593,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	if err := a.backend.Start(ctx, containerID); err != nil {
-		a.backend.Remove(ctx, containerID)
+		a.rollback(ctx, containerID)
 		return nil, fmt.Errorf("start container: %w", err)
 	}
 	opts.progress("container_created", id)
@@ -597,8 +605,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// shutdown (see Destroy → syncAgentsOutOf).
 	agentHomes := agentHomesForSpawn(opts)
 	if err := deploy.SyncIn(ctx, a.backend, containerID, agentHomes); err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
+		a.rollback(ctx, containerID)
 		return nil, fmt.Errorf("sync agent homes into container: %w", err)
 	}
 
@@ -628,8 +635,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// built the image decide what must be present at runtime.
 	verifiedTools, err := a.probeTools(ctx, containerID, resolvedTools)
 	if err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
+		a.rollback(ctx, containerID)
 		return nil, err
 	}
 	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
@@ -655,13 +661,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	tree, err := transpile.Compile(opts.runtimeName(), compileInput)
 	if err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
+		a.rollback(ctx, containerID)
 		return nil, fmt.Errorf("compile world: %w", err)
 	}
 	if err := deploy.MaterialiseTree(ctx, a.backend, containerID, tree, worldStateDir); err != nil {
-		a.backend.Stop(ctx, containerID)
-		a.backend.Remove(ctx, containerID)
+		a.rollback(ctx, containerID)
 		return nil, fmt.Errorf("materialise world tree: %w", err)
 	}
 	opts.progress("world_state_written", "per-agent "+runtimePromptFile(opts.runtimeName()))
@@ -673,8 +677,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	// as root:root regardless of source; this pass repairs that.
 	if len(agentHomes) > 0 {
 		if err := deploy.ChownAgentHomes(ctx, a.backend, containerID, agentHomes); err != nil {
-			a.backend.Stop(ctx, containerID)
-			a.backend.Remove(ctx, containerID)
+			a.rollback(ctx, containerID)
 			return nil, fmt.Errorf("chown agent homes: %w", err)
 		}
 	}

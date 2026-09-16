@@ -24,9 +24,8 @@ type SidecarBrowser struct {
 	healthz string   // e.g. "http://127.0.0.1:9001/healthz"
 	logger  *log.Logger
 
-	mu      sync.Mutex
-	proc    *exec.Cmd
-	stopped bool
+	mu   sync.Mutex
+	proc *exec.Cmd
 }
 
 // NewSidecarBrowser builds a supervisor for the in-image
@@ -99,7 +98,9 @@ func (s *SidecarBrowser) waitHealthy(ctx context.Context) error {
 		}
 		resp, err := client.Get(s.healthz)
 		if err == nil {
-			io.Copy(io.Discard, resp.Body)
+			// Drain so the connection can be reused; a probe that cannot
+			// be drained is retried by the loop either way.
+			_, _ = io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
 			if resp.StatusCode == 200 {
 				return nil

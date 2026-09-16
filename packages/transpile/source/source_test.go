@@ -100,13 +100,6 @@ func TestToCompileInputMissingWorld(t *testing.T) {
 	}
 }
 
-func keys(m map[string][]byte) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	return out
-}
 
 func equalStrings(a, b []string) bool {
 	if len(a) != len(b) {

@@ -179,14 +179,14 @@ func validateWorldFilter(name string) error {
 func printEvent(e coreactivity.Event) {
 	ts := e.Timestamp.Local().Format("15:04:05")
 	color := ui.Faint
-	switch {
-	case e.Type == coreactivity.TypeWorldSpawned || e.Type == coreactivity.TypeArchitectStarted:
+	switch e.Type {
+	case coreactivity.TypeWorldSpawned, coreactivity.TypeArchitectStarted:
 		color = ui.Green
-	case e.Type == coreactivity.TypeWorldDestroyed || e.Type == coreactivity.TypeAgentDeleted || e.Type == coreactivity.TypeArchitectStopped:
+	case coreactivity.TypeWorldDestroyed, coreactivity.TypeAgentDeleted, coreactivity.TypeArchitectStopped:
 		color = ui.Red
-	case e.Type == coreactivity.TypeAgentDreamed || e.Type == coreactivity.TypeAgentSlept:
+	case coreactivity.TypeAgentDreamed, coreactivity.TypeAgentSlept:
 		color = ui.Yellow
-	case e.Type == coreactivity.TypeAgentJoined || e.Type == coreactivity.TypeAgentCreated || e.Type == coreactivity.TypeAgentForked:
+	case coreactivity.TypeAgentJoined, coreactivity.TypeAgentCreated, coreactivity.TypeAgentForked:
 		color = ui.Cyan
 	}
 

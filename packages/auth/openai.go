@@ -51,10 +51,6 @@ func detectOpenAI() []*Credential {
 	return out
 }
 
-func resolveOpenAI() *Credential {
-	return pickByPref(ProviderOpenAI, detectOpenAI())
-}
-
 func validateOpenAI(ctx context.Context, cred *Credential) *ProviderStatus {
 	status := &ProviderStatus{
 		Provider: ProviderOpenAI,

@@ -3,7 +3,6 @@ package catalog_test
 import (
 	"spwn.sh/packages/dependency"
 	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -238,7 +237,7 @@ func TestCatalogBundles(t *testing.T) {
 			}
 
 			if t.Failed() {
-				t.Log(fmt.Sprintf("tip: re-run with UPDATE_GOLDEN=1 to regenerate %s", expectedDir))
+				t.Logf("tip: re-run with UPDATE_GOLDEN=1 to regenerate %s", expectedDir)
 			}
 		})
 	}

@@ -131,8 +131,3 @@ func countAutomations(p *project.Project) int {
 	}
 	return n
 }
-
-// countAutomationsTyped is reserved for future external callers
-// (e.g. a status server) that may want to import this helper without
-// pulling in the cliproject package. Forwards to countAutomations.
-func countAutomationsTyped(p *project.Project) int { return countAutomations(p) }

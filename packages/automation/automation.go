@@ -142,10 +142,11 @@ type Engine struct {
 	cronParser cron.Parser
 	registered []*registered
 
-	// agentLocks serialises Dispatch per (world, agent) pair. We use
-	// sync.Map only as a lock-free key→mutex registry; the muxes
-	// themselves do the actual locking.
-	agentLocks sync.Map
+	// agentLocks serialises Dispatch per (world, agent) pair. The registry
+	// hands out one mutex per key under agentLocksMu; the handed-out mutex
+	// is what a dispatch actually holds.
+	agentLocksMu sync.Mutex
+	agentLocks   map[agentLockKey]*sync.Mutex
 
 	mu      sync.Mutex
 	started bool
@@ -789,11 +790,17 @@ type agentLockKey struct {
 // (world, agent) pair. Lazy-allocated.
 func (e *Engine) lockForAgent(world, agent string) *sync.Mutex {
 	key := agentLockKey{world: world, agent: agent}
-	if m, ok := e.agentLocks.Load(key); ok {
-		return m.(*sync.Mutex)
+	e.agentLocksMu.Lock()
+	defer e.agentLocksMu.Unlock()
+	if e.agentLocks == nil {
+		e.agentLocks = map[agentLockKey]*sync.Mutex{}
 	}
-	m, _ := e.agentLocks.LoadOrStore(key, &sync.Mutex{})
-	return m.(*sync.Mutex)
+	if m, ok := e.agentLocks[key]; ok {
+		return m
+	}
+	m := &sync.Mutex{}
+	e.agentLocks[key] = m
+	return m
 }
 
 // catchUpIterCap bounds catch-up math iterations across both

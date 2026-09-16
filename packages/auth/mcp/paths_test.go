@@ -14,9 +14,8 @@ import (
 // other and "logged in on the host" silently fails inside the world.
 func TestProviderKey_MatchesMcp2cli(t *testing.T) {
 	url := "https://mcp.notion.com/mcp"
-	want := hex.EncodeToString(sha256.New().Sum(nil)) // dummy; replaced below
 	h := sha256.Sum256([]byte(url))
-	want = hex.EncodeToString(h[:])[:16]
+	want := hex.EncodeToString(h[:])[:16]
 	got := providerKey(url)
 	if got != want {
 		t.Fatalf("providerKey(%q)=%q; want %q (mcp2cli hash)", url, got, want)

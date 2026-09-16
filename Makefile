@@ -16,6 +16,12 @@
 # thing needed to bring it under CI coverage — no Makefile edits.
 GO_MODS := $(shell go work edit -json 2>/dev/null | jq -r '.Use[].DiskPath')
 
+# The Go linter is pinned: an unpinned `@latest` makes a green run a fact about
+# the day it ran. Bump this line, read what the new release finds, land both
+# together.
+GOLANGCI_VERSION := v2.13.2
+GOLANGCI         := $(shell go env GOPATH)/bin/golangci-lint
+
 .PHONY: help
 help:  ## Show this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} \
@@ -48,10 +54,12 @@ docs: generate  ## Regenerate docs/reference from Cobra
 ##@ Lint
 
 .PHONY: lint docs-layout
-lint: generate docs-layout  ## go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip) + docs layout
+lint: generate docs-layout  ## golangci-lint across go.work + pnpm -r lint (oxlint + oxfmt + knip) + docs layout
+	@$(GOLANGCI) --version 2>/dev/null | grep -q "$(GOLANGCI_VERSION:v%=%)" || \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	@for mod in $(GO_MODS); do \
-		echo "==> go vet $$mod"; \
-		(cd $$mod && go vet ./...) || exit 1; \
+		echo "==> golangci-lint $$mod"; \
+		(cd $$mod && $(GOLANGCI) run ./...) || exit 1; \
 	done
 	@pnpm -r lint
 
@@ -60,7 +68,7 @@ lint: generate docs-layout  ## go vet across go.work + pnpm -r lint (oxlint + ox
 # job already sets pnpm up for the workspace half, so there is nothing to add.
 docs-layout:  ## Check docs/ against the estate's manual spine
 	@echo "==> docs layout"
-	@pnpm --package=@jterrazz/typescript@9.2.1 dlx typescript docs-layout .
+	@pnpm --package=@jterrazz/typescript@10.1.6 dlx typescript docs-layout .
 
 ##@ Test — fast (no Docker)
 

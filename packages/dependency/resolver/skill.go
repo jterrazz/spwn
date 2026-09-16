@@ -54,7 +54,7 @@ func generateSkillIndex(toolNames []string) []byte {
 	var sb strings.Builder
 	sb.WriteString("# Installed Skills\n\n")
 	for _, name := range toolNames {
-		sb.WriteString(fmt.Sprintf("- [%s](./%s/SKILL.md)\n", name, name))
+		fmt.Fprintf(&sb, "- [%s](./%s/SKILL.md)\n", name, name)
 	}
 	return []byte(sb.String())
 }

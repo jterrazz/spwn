@@ -279,7 +279,7 @@ func assertTreeMatchesDir(t *testing.T, tree *transpile.Tree, outputDir string) 
 	}
 
 	if t.Failed() {
-		t.Log(fmt.Sprintf("tip: re-run with UPDATE_GOLDEN=<runtime> (or UPDATE_GOLDEN=all) to regenerate %s", outputDir))
+		t.Logf("tip: re-run with UPDATE_GOLDEN=<runtime> (or UPDATE_GOLDEN=all) to regenerate %s", outputDir)
 	}
 }
 

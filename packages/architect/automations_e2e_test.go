@@ -96,13 +96,6 @@ func (c *captureLog) Warnf(format string, args ...any) {
 	defer c.mu.Unlock()
 	c.msgs = append(c.msgs, fmt.Sprintf(format, args...))
 }
-func (c *captureLog) snapshot() []string {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	out := make([]string, len(c.msgs))
-	copy(out, c.msgs)
-	return out
-}
 
 // seedRunningWorld registers a world with the mock backend so
 // architect.List finds it. configName is the manifest key the
@@ -120,16 +113,6 @@ func (f *e2eFixture) seedRunningWorld(configName string, agents ...string) {
 		w.Agents = append(w.Agents, models.AgentRecord{Name: a})
 	}
 	seedWorld(f.mb, w)
-}
-
-// writeCommandFile creates spwn/commands/<name>.md with the given
-// body so command refs resolve.
-func (f *e2eFixture) writeCommandFile(name, body string) {
-	f.t.Helper()
-	path := filepath.Join(f.root, "spwn", "commands", name+".md")
-	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
-		f.t.Fatal(err)
-	}
 }
 
 // startEngine constructs an engine via architect.NewAutomationEngine,

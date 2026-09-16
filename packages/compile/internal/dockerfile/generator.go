@@ -103,7 +103,7 @@ func (o GenerateOpts) home() string {
 func writeRunCommand(sb *strings.Builder, cmd string) {
 	trimmed := strings.TrimRight(cmd, "\n")
 	if !strings.ContainsRune(trimmed, '\n') {
-		sb.WriteString(fmt.Sprintf("RUN %s\n", trimmed))
+		fmt.Fprintf(sb, "RUN %s\n", trimmed)
 		return
 	}
 	// Multi-line cmd — tool.yaml authored as a YAML `|` block scalar,
@@ -133,7 +133,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 
 	// Version label
 	if imageVersion != "" {
-		sb.WriteString(fmt.Sprintf("LABEL sh.spwn.image-version=%q\n\n", imageVersion))
+		fmt.Fprintf(&sb, "LABEL sh.spwn.image-version=%q\n\n", imageVersion)
 	}
 
 	// Collect apt packages across tools (deduplicated). New
@@ -157,7 +157,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		sb.WriteString("# Packages (merged from all tools)\n")
 		sb.WriteString("RUN apt-get update && apt-get install -y \\\n")
 		for _, pkg := range allAptPackages {
-			sb.WriteString(fmt.Sprintf("    %s \\\n", pkg))
+			fmt.Fprintf(&sb, "    %s \\\n", pkg)
 		}
 		sb.WriteString("    && rm -rf /var/lib/apt/lists/*\n\n")
 	}
@@ -169,7 +169,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 			continue
 		}
 
-		sb.WriteString(fmt.Sprintf("# %s\n", t.Name))
+		fmt.Fprintf(&sb, "# %s\n", t.Name)
 
 		// Sort env keys for deterministic output (Go map iteration
 		// order is randomized; content-addressed image hashing
@@ -180,7 +180,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		}
 		sort.Strings(envKeys)
 		for _, k := range envKeys {
-			sb.WriteString(fmt.Sprintf("ENV %s=%s\n", k, t.Env[k]))
+			fmt.Fprintf(&sb, "ENV %s=%s\n", k, t.Env[k])
 		}
 
 		if len(t.Files) > 0 {
@@ -191,7 +191,7 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 			sort.Strings(paths)
 			for _, p := range paths {
 				contextPath := fmt.Sprintf("tools/%s%s", t.Name, p)
-				sb.WriteString(fmt.Sprintf("COPY %s %s\n", contextPath, p))
+				fmt.Fprintf(&sb, "COPY %s %s\n", contextPath, p)
 			}
 		}
 
@@ -205,11 +205,11 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 		// that consults this file.
 		if t.Policy != nil && (len(t.Policy.Allow) > 0 || len(t.Policy.Deny) > 0) && t.Policy.Short != "" {
 			policyJSON := encodePolicyJSON(t.Policy)
-			sb.WriteString(fmt.Sprintf(
+			fmt.Fprintf(&sb,
 				"RUN mkdir -p /etc/spwn/policy && printf '%%s' '%s' > /etc/spwn/policy/%s.json\n",
 				escapeSingleQuoteForShell(policyJSON),
 				t.Policy.Short,
-			))
+			)
 		}
 
 		sb.WriteString("\n")
@@ -225,9 +225,9 @@ func Generate(baseDockerfile []byte, tools []ToolInput, imageVersion string, opt
 
 		// Fix ownership before switching user
 		sb.WriteString("# Final setup\n")
-		sb.WriteString(fmt.Sprintf("RUN chown -R %s:%s %s\n", user, user, home))
-		sb.WriteString(fmt.Sprintf("USER %s\n", user))
-		sb.WriteString(fmt.Sprintf("WORKDIR %s\n", home))
+		fmt.Fprintf(&sb, "RUN chown -R %s:%s %s\n", user, user, home)
+		fmt.Fprintf(&sb, "USER %s\n", user)
+		fmt.Fprintf(&sb, "WORKDIR %s\n", home)
 
 		// No VOLUME declaration. /world and /workspaces/<name> are
 		// bind-mounted by the spawner at container creation time;

@@ -53,7 +53,9 @@ func Dream(mindPath string) (*ReflexionResult, error) {
 
 	// 3. Write reflexion summary to playbooks
 	playbooksDir := filepath.Join(mindPath, "playbooks")
-	os.MkdirAll(playbooksDir, 0755)
+	if err := os.MkdirAll(playbooksDir, 0755); err != nil {
+		return nil, fmt.Errorf("creating the playbooks layer: %w", err)
+	}
 
 	summary := formatReflexionSummary(result, entries)
 	outPath := filepath.Join(playbooksDir, "auto-reflexion.md")
@@ -96,13 +98,13 @@ type ReflexionResult struct {
 func formatReflexionSummary(r *ReflexionResult, entries []journal.Entry) string {
 	var b strings.Builder
 	b.WriteString("# Reflexion Summary\n\n")
-	b.WriteString(fmt.Sprintf("Generated: %s\n\n", r.Timestamp.Format(time.RFC3339)))
+	fmt.Fprintf(&b, "Generated: %s\n\n", r.Timestamp.Format(time.RFC3339))
 	b.WriteString("## Statistics\n\n")
-	b.WriteString(fmt.Sprintf("- Entries analyzed: %d\n", r.EntriesAnalyzed))
-	b.WriteString(fmt.Sprintf("- Completed: %d\n", r.CompletedTasks))
-	b.WriteString(fmt.Sprintf("- Failed: %d\n", r.FailedTasks))
-	b.WriteString(fmt.Sprintf("- Destroyed: %d\n", r.DestroyedTasks))
-	b.WriteString(fmt.Sprintf("- Success rate: %.0f%%\n\n", r.SuccessRate*100))
+	fmt.Fprintf(&b, "- Entries analyzed: %d\n", r.EntriesAnalyzed)
+	fmt.Fprintf(&b, "- Completed: %d\n", r.CompletedTasks)
+	fmt.Fprintf(&b, "- Failed: %d\n", r.FailedTasks)
+	fmt.Fprintf(&b, "- Destroyed: %d\n", r.DestroyedTasks)
+	fmt.Fprintf(&b, "- Success rate: %.0f%%\n\n", r.SuccessRate*100)
 
 	// List recent sessions. Skip entries whose WorldID is empty —
 	// without this guard, stray journal files leak in as phantom
@@ -118,7 +120,7 @@ func formatReflexionSummary(r *ReflexionResult, entries []journal.Entry) string 
 		} else if e.ExitCode > 0 {
 			outcome = fmt.Sprintf("failed (exit %d)", e.ExitCode)
 		}
-		b.WriteString(fmt.Sprintf("- %s: %s (%s)\n", e.WorldID, outcome, e.Duration))
+		fmt.Fprintf(&b, "- %s: %s (%s)\n", e.WorldID, outcome, e.Duration)
 	}
 
 	return b.String()

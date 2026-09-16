@@ -299,7 +299,7 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("install @spwn/node should fail, got exit 0.\nstdout=%s", stdout)
 		}
 		combined := stdout + stderr
-		if !(strings.Contains(combined, "does not exist") || strings.Contains(combined, "unsupported") || strings.Contains(combined, "malformed")) {
+		if !strings.Contains(combined, "does not exist") && !strings.Contains(combined, "unsupported") && !strings.Contains(combined, "malformed") {
 			t.Fatalf("expected malformed/unsupported error, got:\n%s", combined)
 		}
 	})

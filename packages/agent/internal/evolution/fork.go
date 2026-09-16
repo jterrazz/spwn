@@ -44,7 +44,10 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 		src := filepath.Join(sourceDir, layer)
 		dst := filepath.Join(targetDir, layer)
 		if _, err := os.Stat(src); os.IsNotExist(err) {
-			os.MkdirAll(dst, 0755) // create empty layer
+			// The source has no such layer: the fork gets an empty one.
+			if err := os.MkdirAll(dst, 0755); err != nil {
+				return nil, fmt.Errorf("creating %s layer: %w", layer, err)
+			}
 			continue
 		}
 		if err := copyDir(src, dst); err != nil {
@@ -68,9 +71,14 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	// directory mismatch on the freshly forked agent.
 	sourceManifest := filepath.Join(sourceDir, "agent.yaml")
 	if _, err := os.Stat(sourceManifest); err == nil {
-		data, _ := os.ReadFile(sourceManifest)
+		data, err := os.ReadFile(sourceManifest)
+		if err != nil {
+			return nil, fmt.Errorf("reading %s: %w", sourceManifest, err)
+		}
 		data = rewriteAgentName(data, targetName)
-		os.WriteFile(filepath.Join(targetDir, "agent.yaml"), data, 0644)
+		if err := os.WriteFile(filepath.Join(targetDir, "agent.yaml"), data, 0644); err != nil {
+			return nil, fmt.Errorf("writing the forked agent.yaml: %w", err)
+		}
 	}
 
 	// Copy AGENTS.md if it exists. Without this, `spwn check` reports
@@ -78,8 +86,13 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	// requires it at the agent root.
 	sourceEntry := filepath.Join(sourceDir, "AGENTS.md")
 	if _, err := os.Stat(sourceEntry); err == nil {
-		data, _ := os.ReadFile(sourceEntry)
-		os.WriteFile(filepath.Join(targetDir, "AGENTS.md"), data, 0644)
+		data, err := os.ReadFile(sourceEntry)
+		if err != nil {
+			return nil, fmt.Errorf("reading %s: %w", sourceEntry, err)
+		}
+		if err := os.WriteFile(filepath.Join(targetDir, "AGENTS.md"), data, 0644); err != nil {
+			return nil, fmt.Errorf("writing the forked AGENTS.md: %w", err)
+		}
 	}
 
 	// Emit activity event
@@ -144,7 +157,9 @@ func copyFile(src, dst string) error {
 	}
 	defer in.Close()
 
-	os.MkdirAll(filepath.Dir(dst), 0755)
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
 	out, err := os.Create(dst)
 	if err != nil {
 		return err

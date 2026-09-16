@@ -26,7 +26,7 @@ type ColonyAgentSpec struct {
 func GenerateRoster(worldID string, agents []ColonyAgentSpec, knowledgeMounted bool) string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("# Roster - %s\n\n", worldID))
+	fmt.Fprintf(&b, "# Roster - %s\n\n", worldID)
 	if len(agents) == 0 {
 		b.WriteString("This world has no agents currently deployed.\n")
 		return b.String()
@@ -39,7 +39,7 @@ func GenerateRoster(worldID string, agents []ColonyAgentSpec, knowledgeMounted b
 		if role == "" {
 			role = "worker"
 		}
-		b.WriteString(fmt.Sprintf("- **%s** (%s)\n", a.Name, role))
+		fmt.Fprintf(&b, "- **%s** (%s)\n", a.Name, role)
 	}
 	b.WriteString("\n")
 

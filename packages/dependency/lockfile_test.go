@@ -98,7 +98,7 @@ func TestSave_deterministicOrder(t *testing.T) {
 	alpha := strings.Index(content, "spwn:alpha")
 	mango := strings.Index(content, "spwn:mango")
 	zebra := strings.Index(content, "spwn:zebra")
-	if !(alpha < mango && mango < zebra) {
+	if alpha >= mango || mango >= zebra {
 		t.Errorf("keys not sorted:\n%s", content)
 	}
 }

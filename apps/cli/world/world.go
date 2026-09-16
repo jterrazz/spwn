@@ -599,7 +599,7 @@ func credentialDetail(cred *auth.Credential) string {
 // When Docker is not running.
 func dockerHint(err error) error {
 	if strings.Contains(err.Error(), "cannot connect to Docker") {
-		return fmt.Errorf("Docker is not running")
+		return fmt.Errorf("cannot reach Docker — is Docker Desktop or OrbStack running?")
 	}
 	return err
 }

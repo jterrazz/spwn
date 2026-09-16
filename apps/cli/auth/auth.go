@@ -91,10 +91,9 @@ func runStatus() error {
 	// Kick off every provider's methods in parallel. Each job returns
 	// A single rendered row plus any follow-up action hint.
 	type providerBlock struct {
-		name    auth.Provider
-		title   string
-		rows    []dashboardRow
-		active  string // human-readable active-method line when multi-valid
+		title  string
+		rows   []dashboardRow
+		active string // human-readable active-method line when multi-valid
 	}
 
 	blocks := make([]providerBlock, 0, len(providers))
@@ -231,17 +230,15 @@ func renderDashboardRow(w io.Writer, row dashboardRow) {
 // Method note. Parallelises the method probes so the whole block
 // Finishes in max(one API call) rather than sum(all).
 func renderProviderBlock(ctx context.Context, p auth.Provider) struct {
-	name   auth.Provider
 	title  string
 	rows   []dashboardRow
 	active string
 } {
 	result := struct {
-		name   auth.Provider
 		title  string
 		rows   []dashboardRow
 		active string
-	}{name: p, title: providerTitle(p)}
+	}{title: providerTitle(p)}
 
 	methods := auth.MethodCatalog(p)
 	if len(methods) == 0 {

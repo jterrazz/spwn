@@ -129,7 +129,7 @@ dependencies:
 		if strings.Contains(iss.Message, "spwn:mempalace") {
 			sawMempalace = true
 		}
-		if strings.Contains(iss.Message, "spwn:unix") || strings.Contains(iss.Message, "spwn:unix") {
+		if strings.Contains(iss.Message, "spwn:unix") {
 			sawUnix = true
 		}
 	}

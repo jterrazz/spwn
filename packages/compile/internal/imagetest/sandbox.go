@@ -59,7 +59,9 @@ func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 	}
 
 	if err := docker.Start(ctx, containerID); err != nil {
-		docker.Remove(ctx, containerID)
+		// The start error is what the test must read; a failed cleanup
+		// would only bury it.
+		_ = docker.Remove(ctx, containerID)
 		t.Fatalf("start container: %v", err)
 	}
 

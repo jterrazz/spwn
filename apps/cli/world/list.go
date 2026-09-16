@@ -96,7 +96,9 @@ func renderDeclared(ctx context.Context, s *ui.Stepper, proj *project.Project, c
 			for _, w := range ws {
 				// Skip stale entries whose containers no longer exist.
 				if w.ContainerID != "" && !containerExists(w.ContainerID) {
-					arc.Destroy(ctx, w.ID)
+					// Best-effort sweep of a record whose container is gone:
+					// A failure leaves the stale record for the next list.
+					_, _ = arc.Destroy(ctx, w.ID)
 					continue
 				}
 				if w.Status != world.StatusRunning && w.Status != world.StatusIdle {
@@ -209,7 +211,8 @@ func renderRunningOnly(ctx context.Context, s *ui.Stepper, cmd *cobra.Command) e
 	var liveWorlds []world.World
 	for _, w := range worlds {
 		if w.ContainerID != "" && !containerExists(w.ContainerID) {
-			arc.Destroy(ctx, w.ID)
+			// Best-effort sweep, as above: the listing drops it either way.
+			_, _ = arc.Destroy(ctx, w.ID)
 			continue
 		}
 		liveWorlds = append(liveWorlds, w)

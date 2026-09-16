@@ -36,10 +36,14 @@ func Sleep(mindPath string) (*SleepResult, error) {
 
 	// 3. Write sleep log
 	journalDir := filepath.Join(mindPath, "journal")
-	os.MkdirAll(journalDir, 0755)
+	if err := os.MkdirAll(journalDir, 0755); err != nil {
+		return nil, fmt.Errorf("creating the journal layer: %w", err)
+	}
 	logPath := filepath.Join(journalDir, fmt.Sprintf("sleep-%s.md", time.Now().Format("2006-01-02")))
 	summary := formatSleepSummary(result)
-	os.WriteFile(logPath, []byte(summary), 0644)
+	if err := os.WriteFile(logPath, []byte(summary), 0644); err != nil {
+		return nil, fmt.Errorf("writing the sleep log: %w", err)
+	}
 
 	// Emit activity event
 	agentName := filepath.Base(mindPath)
@@ -91,7 +95,9 @@ func archiveStaleFiles(mindPath, layer string, maxAge time.Duration) (int, error
 		}
 
 		if info.ModTime().Before(cutoff) {
-			os.MkdirAll(archiveDir, 0755)
+			if err := os.MkdirAll(archiveDir, 0755); err != nil {
+				return count, fmt.Errorf("creating the archive layer: %w", err)
+			}
 			src := filepath.Join(layerDir, e.Name())
 			dst := filepath.Join(archiveDir, e.Name())
 			if err := os.Rename(src, dst); err != nil {
@@ -135,8 +141,8 @@ func pruneOldSessions(mindPath string, maxAge time.Duration) (int, error) {
 func formatSleepSummary(r *SleepResult) string {
 	var b strings.Builder
 	b.WriteString("# Sleep Cycle\n\n")
-	b.WriteString(fmt.Sprintf("Date: %s\n\n", r.Timestamp.Format(time.RFC3339)))
-	b.WriteString(fmt.Sprintf("- Archived playbooks: %d\n", r.ArchivedPlaybooks))
-	b.WriteString(fmt.Sprintf("- Pruned sessions: %d\n", r.PrunedSessions))
+	fmt.Fprintf(&b, "Date: %s\n\n", r.Timestamp.Format(time.RFC3339))
+	fmt.Fprintf(&b, "- Archived playbooks: %d\n", r.ArchivedPlaybooks)
+	fmt.Fprintf(&b, "- Pruned sessions: %d\n", r.PrunedSessions)
 	return b.String()
 }

@@ -277,7 +277,7 @@ func findAgentContainer(agentName, worldID string) (string, string, *world.World
 	arc, err := architect.NewFromEnv()
 	if err != nil {
 		if strings.Contains(err.Error(), "cannot connect to Docker") {
-			return "", "", nil, nil, fmt.Errorf("Docker is not running")
+			return "", "", nil, nil, fmt.Errorf("cannot reach Docker — is Docker Desktop or OrbStack running?")
 		}
 		return "", "", nil, nil, err
 	}

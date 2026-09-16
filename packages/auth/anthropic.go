@@ -98,23 +98,6 @@ func detectAnthropic() []*Credential {
 	return out
 }
 
-// resolveAnthropic picks the single credential the runtime should use
-// For Anthropic. Selection is:
-//   - user explicitly disabled the provider → none
-//   - user set ActiveMethod → first detection matching that method
-//   - otherwise → first detection in discovery order
-//
-// Previously this function also mirrored the winning keychain token
-// Into ~/.spwn/.auth-token as a side-effect. That mirror has been
-// Removed — claude's own store (keychain on macOS,
-// ~/.claude/.credentials.json on Linux) is the source of truth, and
-// Spwn no longer maintains a second copy that could drift out of
-// Sync. Existing `.auth-token` files stay readable via detectAnthropic
-// For back-compat, but we no longer WRITE them here.
-func resolveAnthropic() *Credential {
-	return pickByPref(ProviderAnthropic, detectAnthropic())
-}
-
 // readKeychainAnthropic pulls the Claude Code-credentials entry
 // from the macOS keychain. Returns nil when unavailable (non-darwin,
 // no entry, SPWN_SKIP_KEYCHAIN set for tests).

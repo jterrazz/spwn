@@ -125,7 +125,7 @@ func (d *Docker) Remove(ctx context.Context, containerID string) error {
 
 // Exec runs a command inside a container and returns the exit code.
 func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (int, error) {
-	execCfg := types.ExecConfig{
+	execCfg := containerTypes.ExecOptions{
 		Cmd:          cfg.Cmd,
 		Env:          cfg.Env,
 		Tty:          cfg.TTY,
@@ -139,7 +139,7 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 		return -1, fmt.Errorf("exec create: %w", err)
 	}
 
-	resp, err := d.client.ContainerExecAttach(ctx, execID.ID, types.ExecStartCheck{Tty: cfg.TTY})
+	resp, err := d.client.ContainerExecAttach(ctx, execID.ID, containerTypes.ExecAttachOptions{Tty: cfg.TTY})
 	if err != nil {
 		return -1, fmt.Errorf("exec attach: %w", err)
 	}
@@ -160,13 +160,17 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 	if cfg.TTY {
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 		if err == nil {
-			defer term.Restore(int(os.Stdin.Fd()), oldState)
+			// A terminal we cannot hand back is one the session is
+			// leaving anyway; the exit code below is what matters.
+			defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }()
 		}
-		go io.Copy(resp.Conn, os.Stdin)
-		io.Copy(stdout, resp.Reader)
+		// Both pumps end when the exec's connection does. Their errors
+		// are the disconnection itself, which the exit code reports.
+		go func() { _, _ = io.Copy(resp.Conn, os.Stdin) }()
+		_, _ = io.Copy(stdout, resp.Reader)
 	} else {
-		go io.Copy(resp.Conn, os.Stdin)
-		stdcopy.StdCopy(stdout, stderr, resp.Reader)
+		go func() { _, _ = io.Copy(resp.Conn, os.Stdin) }()
+		_, _ = stdcopy.StdCopy(stdout, stderr, resp.Reader)
 	}
 
 	inspect, err := d.client.ContainerExecInspect(ctx, execID.ID)
@@ -178,7 +182,7 @@ func (d *Docker) Exec(ctx context.Context, containerID string, cfg ExecConfig) (
 
 // ExecOutput runs a command inside a container and returns its stdout as a string.
 func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []string) (string, error) {
-	execCfg := types.ExecConfig{
+	execCfg := containerTypes.ExecOptions{
 		Cmd:          cmd,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -189,14 +193,16 @@ func (d *Docker) ExecOutput(ctx context.Context, containerID string, cmd []strin
 		return "", fmt.Errorf("exec create: %w", err)
 	}
 
-	resp, err := d.client.ContainerExecAttach(ctx, execID.ID, types.ExecStartCheck{})
+	resp, err := d.client.ContainerExecAttach(ctx, execID.ID, containerTypes.ExecAttachOptions{})
 	if err != nil {
 		return "", fmt.Errorf("exec attach: %w", err)
 	}
 	defer resp.Close()
 
 	var buf bytes.Buffer
-	stdcopy.StdCopy(&buf, io.Discard, resp.Reader)
+	// A demultiplexing failure leaves buf with what did arrive; the exit
+	// code inspected below decides whether that output is trusted.
+	_, _ = stdcopy.StdCopy(&buf, io.Discard, resp.Reader)
 	output := strings.TrimSpace(buf.String())
 
 	// Check exit code
@@ -228,7 +234,7 @@ func (d *Docker) CopyTo(ctx context.Context, containerID string, destPath string
 	}
 	tw.Close()
 
-	return d.client.CopyToContainer(ctx, containerID, "/", &buf, types.CopyToContainerOptions{})
+	return d.client.CopyToContainer(ctx, containerID, "/", &buf, containerTypes.CopyToContainerOptions{})
 }
 
 // CopyDirTo tar-streams the contents of hostSrcDir into destDir
@@ -328,7 +334,7 @@ func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir stri
 		return fmt.Errorf("dependency %s: %w", hostSrcDir, walkErr)
 	}
 
-	return d.client.CopyToContainer(ctx, containerID, "/", &buf, types.CopyToContainerOptions{})
+	return d.client.CopyToContainer(ctx, containerID, "/", &buf, containerTypes.CopyToContainerOptions{})
 }
 
 // CopyDirFrom streams a directory out of the container into a host
@@ -375,7 +381,8 @@ func (d *Docker) CopyDirFrom(ctx context.Context, containerID string, srcDir str
 			if err := os.MkdirAll(target, os.FileMode(hdr.Mode)&0o777); err != nil {
 				return fmt.Errorf("mkdir %s: %w", target, err)
 			}
-		case tar.TypeReg, tar.TypeRegA:
+		// The reader normalises the old TypeRegA ('\x00') to TypeReg.
+		case tar.TypeReg:
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return fmt.Errorf("mkdir parent of %s: %w", target, err)
 			}
@@ -489,7 +496,9 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 			if d != "." && !dirs[d] {
 				dirs[d] = true
 				dirHdr := &tar.Header{Name: d + "/", Typeflag: tar.TypeDir, Mode: 0755}
-				tw.WriteHeader(dirHdr)
+				if err := tw.WriteHeader(dirHdr); err != nil {
+					return false, fmt.Errorf("tar header %s: %w", d, err)
+				}
 			}
 		}
 	}
@@ -541,7 +550,7 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 }
 
 func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error {
-	execCfg := types.ExecConfig{
+	execCfg := containerTypes.ExecOptions{
 		Cmd:          cfg.Cmd,
 		Env:          cfg.Env,
 		Tty:          cfg.TTY,
@@ -556,7 +565,7 @@ func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecC
 		return fmt.Errorf("exec create: %w", err)
 	}
 
-	return d.client.ContainerExecStart(ctx, execID.ID, types.ExecStartCheck{Detach: true})
+	return d.client.ContainerExecStart(ctx, execID.ID, containerTypes.ExecStartOptions{Detach: true})
 }
 
 func (d *Docker) Commit(ctx context.Context, containerID string, imageTag string) error {

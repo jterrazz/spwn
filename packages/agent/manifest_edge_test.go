@@ -130,10 +130,8 @@ dependencies: []
 	if err != nil {
 		t.Fatalf("LoadManifest: %v", err)
 	}
-	if m.Deps == nil {
-		// YAML `deps: []` should unmarshal as non-nil empty slice or
-		// nil — either is acceptable but the length must be zero.
-	}
+	// YAML `deps: []` may unmarshal as a nil or as an empty slice —
+	// either is acceptable, the length is what the contract fixes.
 	if len(m.Deps) != 0 {
 		t.Errorf("expected 0 deps, got %d: %v", len(m.Deps), m.Deps)
 	}

@@ -139,7 +139,9 @@ func BuildFromBase(ctx context.Context, cli DockerImageBuilder, req BuildFromBas
 		}
 		// Skip anything that's not a regular file — trees are flat
 		// today, but be defensive.
-		if hdr.Typeflag != tar.TypeReg && hdr.Typeflag != tar.TypeRegA {
+		// The reader normalises the old TypeRegA ('\x00') to TypeReg, so
+		// one comparison covers both spellings of "regular file".
+		if hdr.Typeflag != tar.TypeReg {
 			continue
 		}
 		data, err := io.ReadAll(reader)

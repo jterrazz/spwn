@@ -96,9 +96,12 @@ func CheckLatestVersion(maxAge time.Duration) string {
 	}
 	latest := rest[start : start+end]
 
-	os.MkdirAll(cacheDir, 0755)
-	cacheContent := time.Now().UTC().Format(time.RFC3339) + "\n" + latest
-	os.WriteFile(cachePath, []byte(cacheContent), 0644)
+	// The cache is an optimisation: when it cannot be written, the next
+	// call simply asks the registry again.
+	if err := os.MkdirAll(cacheDir, 0755); err == nil {
+		cacheContent := time.Now().UTC().Format(time.RFC3339) + "\n" + latest
+		_ = os.WriteFile(cachePath, []byte(cacheContent), 0644)
+	}
 
 	return latest
 }

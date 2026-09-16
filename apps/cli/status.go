@@ -55,13 +55,19 @@ func visibleLen(s string) int {
 	return utf8.RuneCountInString(stripAnsi(s))
 }
 
+// isASCIILetter reports whether b terminates a CSI escape sequence: the
+// Final byte of one is always an ASCII letter.
+func isASCIILetter(b byte) bool {
+	return (b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z')
+}
+
 func stripAnsi(s string) string {
 	var out strings.Builder
 	i := 0
 	for i < len(s) {
 		if s[i] == '\x1b' && i+1 < len(s) && s[i+1] == '[' {
 			j := i + 2
-			for j < len(s) && !((s[j] >= 'A' && s[j] <= 'Z') || (s[j] >= 'a' && s[j] <= 'z')) {
+			for j < len(s) && !isASCIILetter(s[j]) {
 				j++
 			}
 			if j < len(s) {

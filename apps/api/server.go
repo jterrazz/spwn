@@ -83,13 +83,16 @@ func cors(next http.HandlerFunc) http.HandlerFunc {
 func jsonError(w http.ResponseWriter, msg string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	// A failed write means the client hung up mid-response: the status line is
+	// already on the wire and there is nothing left to tell anyone.
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
 }
 
 // jsonOK writes a JSON success response.
 func jsonOK(w http.ResponseWriter, v interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(v)
+	// Same as jsonError: the only reachable failure is a client that left.
+	_ = json.NewEncoder(w).Encode(v)
 }
 
 // requireArch checks that the architect is available (non-read-only mode).
@@ -189,7 +192,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{
+			// Same as jsonError: the only reachable failure is a client that left.
+			_ = json.NewEncoder(w).Encode(map[string]string{
 				"name":      "spwn spwn API",
 				"version":   upgrade.CLIVersion,
 				"docs":      "/api/health",
@@ -957,7 +961,9 @@ func (s *Server) handleSnapshot(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Name string `json:"name"`
 	}
-	json.NewDecoder(r.Body).Decode(&body) // optional body
+	// The body is optional: with none, or with one this shape cannot read,
+	// `body` keeps its zero value and Snapshot names the tag itself.
+	_ = json.NewDecoder(r.Body).Decode(&body)
 
 	tag, err := s.arch.Snapshot(r.Context(), worldID, body.Name)
 	if err != nil {
@@ -1144,7 +1150,9 @@ func (s *Server) handleTalk(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	cmd.Wait()
+	// The stream above IS the answer; a non-zero exit has already surfaced in
+	// it. Wait only reaps the process.
+	_ = cmd.Wait()
 	fmt.Fprintf(w, "data: [DONE]\n\n")
 	if flusher != nil {
 		flusher.Flush()
@@ -1527,7 +1535,9 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	cmd.Wait()
+	// The stream above IS the answer; a non-zero exit has already surfaced in
+	// it. Wait only reaps the process.
+	_ = cmd.Wait()
 	fmt.Fprintf(w, "data: [DONE]\n\n")
 	if flusher != nil {
 		flusher.Flush()
@@ -1644,11 +1654,17 @@ func (s *Server) handleWorldKnowledgeList(w http.ResponseWriter, r *http.Request
 		if len(parts) < 3 {
 			continue
 		}
-		var size int64
-		fmt.Sscanf(parts[1], "%d", &size)
-		// Parse epoch timestamp to RFC3339
-		var epoch float64
-		fmt.Sscanf(parts[2], "%f", &epoch)
+		// A row whose size or mtime does not parse is a row the shell did not
+		// produce: skipped, like the short ones above, rather than reported as
+		// an empty file from 1970.
+		size, err := strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			continue
+		}
+		epoch, err := strconv.ParseFloat(parts[2], 64)
+		if err != nil {
+			continue
+		}
 		modified := time.Unix(int64(epoch), 0).Format(time.RFC3339)
 
 		files = append(files, fileEntry{

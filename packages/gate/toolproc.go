@@ -98,7 +98,9 @@ func NewToolSupervisor(tools []Tool, logger *log.Logger) *ToolSupervisor {
 				logger.Printf("tool %q upstream error: %v", name, err)
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusServiceUnavailable)
-				io.WriteString(w, fmt.Sprintf(`{"error":"tool %q not ready"}`, name))
+				// The status is already on the wire; a failed body write
+				// means the caller hung up.
+				_, _ = fmt.Fprintf(w, `{"error":"tool %q not ready"}`, name)
 			}
 		}(t.Name)
 		s.elements[t.Name] = el
@@ -203,7 +205,9 @@ func waitToolHealthy(ctx context.Context, port int) error {
 		}
 		resp, err := client.Get(addr)
 		if err == nil {
-			io.Copy(io.Discard, resp.Body)
+			// Drain so the connection can be reused; a probe that cannot
+			// be drained is retried by the loop either way.
+			_, _ = io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
 			if resp.StatusCode == 200 {
 				return nil
