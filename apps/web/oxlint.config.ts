@@ -1,15 +1,4 @@
-import { oxlint } from '@jterrazz/typescript';
-import { defineConfig } from 'oxlint';
+import { testing } from '@jterrazz/test/oxlint';
+import { compose, defineConfig, next } from '@jterrazz/typescript/oxlint';
 
-export default defineConfig({
-    extends: [oxlint.next],
-    rules: {
-        // Next.js page components commonly intersperse helper consts with
-        // The default export; requiring exports-last would force large
-        // Reorderings that hurt readability.
-        'import/exports-last': 'off',
-        // Shadcn-generated ui components use `import * as React`; converting
-        // Them to named imports would make shadcn sync noisier than it's worth.
-        'import/no-namespace': 'off',
-    },
-});
+export default defineConfig(compose(next, testing));

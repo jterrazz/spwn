@@ -1,25 +1,24 @@
 import { testing } from '@jterrazz/test/oxlint';
-import { compose, node } from '@jterrazz/typescript/oxlint';
-import { defineConfig } from 'oxlint';
+import { compose, defineConfig, node } from '@jterrazz/typescript/oxlint';
 
 /*
- * Node preset + the @jterrazz/test conventions plugin (the 38+ rule
- * catalogue). Fixtures and expected-output snapshots are committed
- * verbatim and must not be linted.
+ * Node preset + the @jterrazz/test conventions plugin. The vitest trees this
+ * member owns are all source — the CLI specs, the smoke test, the contract
+ * asserter. What is not source, `_fixtures/` inputs and `_expected/` goldens,
+ * the profile already ignores; the Go catalog tests and the shell simulators
+ * hold nothing oxlint reads.
  */
 export default defineConfig(
     compose(node, testing, {
         ignorePatterns: [
-            'node_modules',
-            'dist',
-            'web',
-            '_smoke',
-            '_catalog',
-            '_contracts',
-            '_simulators',
-            'specs/_fixtures/**',
-            'specs/cli/**/_expected/**',
-            'specs/cli/**/_fixtures/**',
+            /*
+             * reason: `tests/web/` is a Playwright suite, not a vitest one, and its
+             * files carry the same `*.spec.ts` name. The rulebook reads that name as
+             * a vitest spec: `vitest/prefer-importing-vitest-globals` auto-fixes each
+             * file with `import { expect, test } from 'vitest'`, shadowing the
+             * Playwright fixtures the file imports and breaking the suite at run time.
+             */
+            'web/**',
         ],
     }),
 );

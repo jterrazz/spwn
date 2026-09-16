@@ -1,26 +1,16 @@
-import { oxfmt } from '@jterrazz/typescript';
-import { defineConfig } from 'oxfmt';
+import { base, defineConfig } from '@jterrazz/typescript/oxfmt';
 
 export default defineConfig({
-    ...oxfmt,
-    /*
-     * Committed fixture trees and expected-output snapshots are byte-for-byte
-     * significant — they lock in spwn's CLI output and YAML/project fixtures —
-     * so the formatter must leave them alone. A `<case>.spec.yaml` document
-     * carries its expected streams in the same way: the formatter would rewrite
-     * a golden line that ends on a space, which is output, not style. Its shape
-     * is checked by the @jterrazz/test conventions checker instead.
-     */
+    ...base,
     ignorePatterns: [
-        ...(oxfmt.ignorePatterns ?? []),
-        'specs/_fixtures/**',
+        ...(base.ignorePatterns ?? []),
+        // reason: a literate spec carries the CLI's expected streams inside a
+        // `stdout: |+` block, where a trailing space IS output — the formatter
+        // strips it and silently rewrites the assertion. The document's shape is
+        // checked by the @jterrazz/test conventions checker instead.
         'specs/cli/**/*.spec.yaml',
-        'specs/cli/**/_expected/**',
-        'specs/cli/**/_fixtures/**',
-        'web/**',
-        '_smoke/**',
-        '_catalog/**',
-        '_contracts/**',
-        '_simulators/**',
+        // reason: Go's own golden convention — `testdata/` holds the catalog
+        // tests' byte-for-byte inputs and expected bundles, compared verbatim.
+        '_catalog/testdata/**',
     ],
 });
