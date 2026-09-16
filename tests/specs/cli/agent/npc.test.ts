@@ -32,7 +32,7 @@ describe('agent --ephemeral (NPC)', () => {
             Config?: { Labels?: Record<string, string> };
         };
         const worldID = inspectData.Config?.Labels?.['sh.spwn.world.id'];
-        expect(worldID).toBe(true);
+        expect(worldID).toMatch(/^world-/u);
 
         // When - an ephemeral is dispatched against the live world
         await using dispatch = await cli
@@ -60,7 +60,7 @@ describe('agent --ephemeral (NPC)', () => {
             (up.container('neo').inspect.value as { Config?: { Labels?: Record<string, string> } })
                 .Config?.Labels ?? {};
         const worldID = labels['sh.spwn.world.id'];
-        expect(worldID).toBe(true);
+        expect(worldID).toMatch(/^world-/u);
 
         // When - an ephemeral is dispatched and agents are listed in the same run
         await using after = await cli

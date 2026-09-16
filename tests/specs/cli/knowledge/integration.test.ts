@@ -24,7 +24,7 @@ describe('world knowledge integration', () => {
 
         const worldId = (neo.inspect.value as { Config?: { Labels?: Record<string, string> } })
             .Config?.Labels?.['sh.spwn.world.id'];
-        expect(worldId).toBe(true);
+        expect(worldId).toMatch(/^world-/u);
 
         // When - the knowledge dir is seeded inside the container (simulates the agent writing)
         const seed = await neo.exec(

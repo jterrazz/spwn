@@ -23,7 +23,7 @@ describe('full agent lifecycle', () => {
         expect(neo.running).toBe(true);
         const worldId = (neo.inspect.value as { Config?: { Labels?: Record<string, string> } })
             .Config?.Labels?.['sh.spwn.world.id'];
-        expect(worldId).toBe(true);
+        expect(worldId).toMatch(/^world-/u);
 
         // When - agent ls reports neo as running
         await using agentLs = await cli.fixture('$FIXTURES/docker-pilot/').exec('agent ls --json');
