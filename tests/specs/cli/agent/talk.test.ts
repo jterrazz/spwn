@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { required } from '../../_support/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -107,7 +108,7 @@ describe('agent talk', () => {
         // Then - neo is reported running under a project-mode roster (scalpel: structural probe over dynamic runtime status)
         expect(result.exitCode).toBe(0);
         const report = result.json.value as {
-            agents: Array<{ name: string; status: string; world?: string }>;
+            agents: { name: string; status: string; world?: string }[];
             mode: string;
         };
         expect(report.mode).toBe('project');
@@ -126,12 +127,13 @@ describe('agent talk', () => {
         expect(result.exitCode).toBe(0);
         const list = result.json.value as {
             mode: string;
-            worlds: Array<{ agents: string[]; name: string; status: string }>;
+            worlds: { agents: string[]; name: string; status: string }[];
         };
         expect(list.mode).toBe('project');
         expect(list.worlds).toHaveLength(1);
-        expect(list.worlds[0].agents).toContain('neo');
-        expect(list.worlds[0].status).toBe('running');
+        const world = required(list.worlds[0], 'the running project world');
+        expect(world.agents).toContain('neo');
+        expect(world.status).toBe('running');
     });
 
     test('after down, agent ls shows neo as unattached', async () => {
@@ -143,7 +145,7 @@ describe('agent talk', () => {
         // Then - neo is no longer reported running (scalpel: structural probe over dynamic status)
         expect(result.exitCode).toBe(0);
         const report = result.json.value as {
-            agents: Array<{ name: string; status: string }>;
+            agents: { name: string; status: string }[];
         };
         const neo = report.agents.find((a) => a.name === 'neo');
         expect(neo).toBeDefined();

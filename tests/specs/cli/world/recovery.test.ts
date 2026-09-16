@@ -58,7 +58,7 @@ describe('error recovery', () => {
         expect(listResult.exitCode).toBe(0);
         const list = listResult.json.value as {
             mode: string;
-            worlds: Array<{ name: string; status: string }>;
+            worlds: { name: string; status: string }[];
         };
         expect(list.mode).toBe('project');
     });

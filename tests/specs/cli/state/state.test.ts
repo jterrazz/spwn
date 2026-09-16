@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { required } from '../../_support/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -32,11 +33,11 @@ describe('state tracking', () => {
         expect(list.exitCode).toBe(0);
         const report = list.json.value as {
             mode: string;
-            worlds: Array<{ agents: string[]; name: string; status: string }>;
+            worlds: { agents: string[]; name: string; status: string }[];
         };
         expect(report.mode).toBe('project');
         expect(report.worlds).toHaveLength(1);
-        expect(report.worlds[0]).toEqual({
+        expect(report.worlds[0]).toStrictEqual({
             agents: ['neo'],
             name: 'neo',
             status: 'running',
@@ -58,7 +59,7 @@ describe('state tracking', () => {
         expect(list.exitCode).toBe(0);
         const report = list.json.value as {
             mode: string;
-            worlds: Array<{ name: string; status: string }>;
+            worlds: { name: string; status: string }[];
         };
         expect(report.mode).toBe('project');
         expect(report.worlds.every((w) => w.status !== 'running')).toBe(true);
@@ -74,10 +75,12 @@ describe('state tracking', () => {
         expect(first.container('neo').running).toBe(true);
 
         const firstList = first.json.value as {
-            worlds: Array<{ agents: string[]; name: string; status: string }>;
+            worlds: { agents: string[]; name: string; status: string }[];
         };
         expect(firstList.worlds).toHaveLength(1);
-        expect(firstList.worlds[0].status).toBe('running');
+        expect(required(firstList.worlds[0], 'the world of the first snapshot').status).toBe(
+            'running',
+        );
 
         // When - a second list runs while the first container is still live under the label
         await using second = await cli.fixture('$FIXTURES/docker-pilot/').exec('world list --json');
@@ -85,9 +88,9 @@ describe('state tracking', () => {
         // Then - the second snapshot matches the first
         expect(second.exitCode).toBe(0);
         const secondList = second.json.value as {
-            worlds: Array<{ agents: string[]; name: string; status: string }>;
+            worlds: { agents: string[]; name: string; status: string }[];
         };
         expect(secondList.worlds).toHaveLength(1);
-        expect(secondList.worlds[0]).toEqual(firstList.worlds[0]);
+        expect(secondList.worlds[0]).toStrictEqual(firstList.worlds[0]);
     });
 });

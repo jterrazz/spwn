@@ -29,10 +29,7 @@ test('subscribed hooks land in .claude/settings.json and the commands run inside
     expect(neo.file('/agents/neo/.claude/settings.json').exists).toBe(true);
     const settingsRaw = neo.file('/agents/neo/.claude/settings.json').content;
     const settings = JSON.parse(settingsRaw) as {
-        hooks?: Record<
-            string,
-            Array<{ hooks: Array<{ command: string; type: string }>; matcher?: string }>
-        >;
+        hooks?: Record<string, { hooks: { command: string; type: string }[]; matcher?: string }[]>;
     };
 
     // SessionStart has no matcher on the source hook; the emitter writes the "*" fan-in matcher

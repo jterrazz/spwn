@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { required } from '../../_support/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -45,14 +46,15 @@ describe('colony multi-agent', () => {
         expect(result.exitCode).toBe(0);
         const list = result.json.value as {
             mode: string;
-            worlds: Array<{ agents: string[]; name: string; status: string }>;
+            worlds: { agents: string[]; name: string; status: string }[];
         };
         expect(list.mode).toBe('project');
         expect(list.worlds).toHaveLength(1);
-        expect(list.worlds[0].name).toBe('neo');
-        expect(list.worlds[0].status).toBe('running');
-        expect(list.worlds[0].agents).toEqual(expect.arrayContaining(['neo', 'morpheus']));
-        expect(list.worlds[0].agents).toHaveLength(2);
+        const world = required(list.worlds[0], 'the running colony world');
+        expect(world.name).toBe('neo');
+        expect(world.status).toBe('running');
+        expect(world.agents).toStrictEqual(expect.arrayContaining(['neo', 'morpheus']));
+        expect(world.agents).toHaveLength(2);
         expect(result.container('neo').running).toBe(true);
     });
 

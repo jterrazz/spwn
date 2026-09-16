@@ -29,12 +29,21 @@ class SpwnAPI {
     async post<T = unknown>(path: string, body?: unknown): Promise<T> {
         const res = await fetch(`${this.baseUrl}${path}`, {
             method: 'POST',
-            headers: body ? { 'Content-Type': 'application/json' } : {},
-            body: body ? JSON.stringify(body) : undefined,
+            // A bodyless POST carries neither a body nor a content type: under
+            // `exactOptionalPropertyTypes` an explicit `undefined` is not the
+            // same as an absent key.
+            ...(body === undefined
+                ? {}
+                : {
+                      body: JSON.stringify(body),
+                      headers: { 'Content-Type': 'application/json' },
+                  }),
         });
         if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(`POST ${path}: ${res.status} ${(err as any).error ?? ''}`);
+            const err: unknown = await res.json().catch(() => ({}));
+            const detail =
+                typeof err === 'object' && err !== null && 'error' in err ? String(err.error) : '';
+            throw new Error(`POST ${path}: ${res.status} ${detail}`);
         }
         return res.json() as T;
     }
@@ -168,7 +177,7 @@ export const test = base.extend<{
     api: SpwnAPI;
     app: SpwnPage;
 }>({
-    // eslint-disable-next-line no-empty-pattern -- Playwright requires destructured fixtures param
+    // oxlint-disable-next-line no-empty-pattern -- Playwright only injects a fixture when the worker function destructures its first argument
     api: async ({}, use) => {
         const api = new SpwnAPI(API_BASE);
         await use(api);

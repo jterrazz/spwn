@@ -8,13 +8,9 @@ requiredBehaviorSpecs:
           ]
     - command: spwn check
       tests:
-          [
-              tests/specs/cli/check/valid-project.spec.yaml,
-              tests/specs/cli/check/json-report.test.ts,
-          ]
+          [tests/specs/cli/check/valid-project.spec.yaml, tests/specs/cli/check/json-report.test.ts]
     - command: spwn build
-      tests:
-          [tests/specs/cli/build/build.test.ts, tests/specs/cli/build/tree-only.test.ts]
+      tests: [tests/specs/cli/build/build.test.ts, tests/specs/cli/build/tree-only.test.ts]
     - command: spwn up
       tests: [tests/specs/cli/world/up-down.test.ts]
     - command: spwn down
@@ -32,4 +28,4 @@ requiredBehaviorSpecs:
               tests/specs/cli/dependency/scoped-refs.test.ts,
           ]
     - command: spwn auth
-      tests: [tests/specs/cli/auth/auth.test.ts]
+      tests: [tests/specs/cli/authentication/authentication.test.ts]

@@ -54,13 +54,16 @@ function spwn(cmd: string, opts: { timeout?: number } = {}): string {
 
 function container(): string {
     // One world -> one container tagged with our test label.
-    const out = execSync(`docker ps -q --filter "label=sh.spwn.test.run=${TEST_LABEL}"`, {
+    const [first] = execSync(`docker ps -q --filter "label=sh.spwn.test.run=${TEST_LABEL}"`, {
         encoding: 'utf8',
-    }).trim();
-    if (!out) {
+    })
+        .trim()
+        .split('\n');
+    if (first === undefined || first === '') {
         throw new Error(`no container found for test label ${TEST_LABEL}`);
     }
-    return out.split('\n')[0];
+
+    return first;
 }
 
 function exec(cid: string, shellCmd: string): string {

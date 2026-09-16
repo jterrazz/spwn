@@ -10,8 +10,8 @@ import { describe, expect, test } from 'vitest';
  * facet whose specs drive the product binary.
  *
  * K1 note: the ideal home for a source-shape guard is a static lint rule. The
- * pinned oxlint (1.60.0) does not yet implement `no-restricted-syntax`, so
- * neither guard can be expressed as a single oxlint selector rule today; they
+ * oxlint @jterrazz/typescript carries does not implement `no-restricted-syntax`,
+ * so neither guard can be expressed as a single oxlint selector rule today; they
  * stay meta-tests until oxlint ships it, at which point the /api/-fetch guard
  * moves into apps/web/oxlint.config.ts as a no-restricted-syntax rule.
  */
@@ -39,10 +39,7 @@ describe('repo regression guards', () => {
 
         // Then - zero hits. Grep returns status 1 when there are no
         // Matches, which is the happy path for this guard.
-        expect(
-            matches.length,
-            `Found ${matches.length} relative /api/ fetch(es):\n${matches.join('\n')}`,
-        ).toBe(0);
+        expect(matches).toHaveLength(0);
     });
 
     test("no references to 'God' or 'god' role remain in source (rename regression)", () => {
@@ -69,9 +66,6 @@ describe('repo regression guards', () => {
         const matches = (result.stdout ?? '').split('\n').filter((line) => line.trim().length > 0);
 
         // Then - zero surviving references outside the tests tree.
-        expect(
-            matches.length,
-            `Found ${matches.length} remaining 'God' references:\n${matches.join('\n')}`,
-        ).toBe(0);
+        expect(matches).toHaveLength(0);
     });
 });

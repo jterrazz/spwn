@@ -32,6 +32,7 @@ For **how to run** tests, see [README.md](README.md). For the strategy this suit
 │     Go *_test.go (next to source) + web vitest + gate vitest     │
 │     ⏱  ~1s    📦  None (t.TempDir, mocks for vendor SDKs only)   │
 │     ▶  make test, make test-web-unit, make test-gate-node        │
+
 ├──────────────────────────────────────────────────────────────────┤
 │ L2  Contract & Golden                                            │
 │     Runtime renderer goldens, CLI JSON fixtures, scaffold trees, │
@@ -43,6 +44,7 @@ For **how to run** tests, see [README.md](README.md). For the strategy this suit
 │     API via production Handler() · Web via MSW · Gate over HTTP  │
 │     ⏱  ~10s  📦  In-process httptest / local servers             │
 │     ▶  make test, make test-web-unit, make test-gate-node        │
+
 ├──────────────────────────────────────────────────────────────────┤
 │ L4  Docker E2E                                                   │
 │     L4a Go: packages/world/tests/e2e (//go:build e2e)            │
@@ -55,6 +57,7 @@ For **how to run** tests, see [README.md](README.md). For the strategy this suit
 │     Isolated SPWN_HOME + SPWN_PROJECT + SPWN_TEST_LABEL          │
 │     ⏱  ~2m   📦  Docker + browser                                │
 │     ▶  make test-web                                             │
+
 ├──────────────────────────────────────────────────────────────────┤
 │ L6  Real-runtime Smoke                                           │
 │     Real Claude/Codex CLIs against real provider APIs            │
@@ -87,21 +90,18 @@ spwn/
 │   │   ├── vitest.config.mjs
 │   │   └── sdk/
 │   │       └── index.test.mjs     ← SDK + sidecar tests (local HTTP server)
+
 │   └── web/
 │       ├── vitest.config.ts
 │       └── src/
-│           ├── lib/__tests__/
-│           │   └── stream-chat.test.ts   ← Network behaviour via MSW
-│           └── test/
-│               ├── msw/
-│               │   ├── handlers.ts
-│               │   └── server.ts
-│               └── setup.ts              ← MSW startup, beforeEach reset
-│
+│           └── api/__tests__/
+│               └── stream-chat.test.ts   ← Network behaviour via MSW, server per file
+
 ├── packages/
 │   ├── <module>/
 │   │   ├── *_test.go              ← L1 unit tests (alongside source)
 │   │   └── internal/<sub>/*_test.go
+
 │   ├── runtimes/
 │   │   ├── claudecode/render_test.go
 │   │   ├── codex/render_test.go
@@ -114,6 +114,7 @@ spwn/
 │   │       │       ├── AGENTS.md  (codex) or CLAUDE.md (claude)
 │   │       │       ├── .codex/    or .claude/
 │   │       │       └── …
+
 │   ├── world/
 │   │   └── tests/e2e/             ← L4a Docker E2E (//go:build e2e)
 │   │       ├── setup/
@@ -124,11 +125,11 @@ spwn/
 │   └── compile/
 │       ├── e2e/                   ← L4 image-build E2E
 │       └── builder_from_base_test.go   ← L2 cache-invariants
-│
+
 ├── tests/                         ← TypeScript E2E + Web E2E + governance
 │   ├── README.md                  ← How to run, and how to write a spec
 │   ├── ARCHITECTURE.md            ← This file
-│   │
+
 │   ├── specs/                     ← L4b CLI E2E, one folder per domain
 │   │   ├── cli/
 │   │   │   ├── cli.specification.ts   ← The single runner (`cli`), docker-aware
@@ -143,7 +144,7 @@ spwn/
 │   │   │   └── docker-pilot/, codex-pilot/, single-agent/, empty/, …
 │   │   └── lint/
 │   │       └── guards/            ← Repo-wide source guards (plain vitest, no runner)
-│   │
+
 │   ├── web/                       ← L5 Playwright (one folder per feature)
 │   │   ├── playwright.config.ts
 │   │   ├── _setup/
@@ -152,7 +153,7 @@ spwn/
 │   │   ├── _fixtures/
 │   │   │   └── app.ts             ← Playwright `test` extended with api + app helpers
 │   │   ├── agents/, examples/, navigation/, system/, worlds/
-│   │
+
 │   ├── _contracts/                ← L0 governance (the registry)
 │   │   ├── api-routes.yaml
 │   │   ├── runtimes.yaml
@@ -161,24 +162,24 @@ spwn/
 │   │   ├── web-routes.yaml
 │   │   ├── node-packages.yaml
 │   │   └── assert-contracts.mjs   ← One script that fails CI on drift
-│   │
+
 │   ├── _simulators/               ← Runtime simulators (vendor CLI stubs)
 │   │   ├── Dockerfile.test        ← Builds spwn-test:latest
 │   │   ├── claude/mock.sh         ← `claude` simulator inside test image
 │   │   └── codex/mock.sh          ← `codex` simulator
-│   │
+
 │   ├── _fixtures/                 ← Shared seed dirs the GO E2E suite reads
 │   │   └── testdata/              ← Looked up by setup.TestdataDir()
-│   │
+
 │   ├── _smoke/                    ← Real-build cross-cutting smoke tests
 │   ├── _catalog/                  ← Catalog-bundle goldens (Go module)
-│   │
+
 │   ├── vitest.config.ts           ← One project + the literate() plugin
 │   ├── vitest.smoke.config.ts
 │   ├── package.json, tsconfig.json
 │   ├── oxfmt.config.ts, oxlint.config.ts
 │   └── node_modules/
-│
+
 └── .github/workflows/
     ├── validate.yaml              ← lint, test, contracts, web-unit, gate-node, e2e
     └── release.yaml
@@ -189,9 +190,9 @@ spwn/
 - **CLI tree** is one folder per DOMAIN of the CLI (`specs/cli/agent/`, `specs/cli/world/`, `specs/cli/check/`), and inside it one file per scenario: `specs/cli/agent/forked-agent.spec.yaml` reads like the session it describes. The folder holds its scenarios, the chains that need code, and — only where those chains need them — a `_fixtures/` overlay and an `_expected/` golden.
 - **Ground carries a leading underscore.** Under `specs/`, what a spec STANDS ON is `_fixtures/` and `_expected/`; a spec's own folder never is, so a domain and its material can never be mistaken for each other. The framework resolves no other name, and `c13-underscored-ground` fails a bare one.
 - **The pool is what SEVERAL leaves share.** A directory of `specs/_fixtures/` reached from exactly one spec folder belongs beside that folder as `<leaf>/_fixtures/<name>/`, because a one-reader fixture parked in the pool reads as shared ground nobody dares change; `c14-pool-fixture-shared` names it and `jterrazz-test-check --fix` moves it.
-- **Web tree** mirrors web's UI grouping: `tests/web/<domain>/<feature>/<feature>.spec.ts` reads like the surface ("worlds/list", "agents/detail", "navigation/sidebar"). One feature = one folder = one spec file.
+- **Web tree** mirrors web's UI grouping: `web/<domain>/<feature>/<feature>.spec.ts` reads like the surface ("worlds/list", "agents/detail", "navigation/sidebar"). One feature = one folder = one spec file.
 - **No false symmetry.** CLI features (`build`, `check`, `auth`, `gate`) often have no web counterpart, and vice versa. The trees don't pretend otherwise; the contract registry (`_contracts/`) is what ties them together when an underlying surface has both.
-- **Underscore-prefixed infrastructure.** `_contracts/`, `_simulators/`, `_fixtures/`, `_smoke/`, `_catalog/` sort above feature folders alphabetically and are visually distinct so no one mistakes them for a domain. The convention the TS suite adopted by hand at the `tests/` root is the same one the framework now enforces inside `specs/`; the `tests/_fixtures/` at this level is unrelated to the CLI pool and holds only the seed dirs the GO E2E suite reads.
+- **Underscore-prefixed infrastructure.** `_contracts/`, `_simulators/`, `_fixtures/`, `_smoke/`, `_catalog/` sort above feature folders alphabetically and are visually distinct so no one mistakes them for a domain. The convention the TS suite adopted by hand at the `tests/` root is the same one the framework now enforces inside `specs/`; the `_fixtures/` at this level is unrelated to the CLI pool and holds only the seed dirs the GO E2E suite reads.
 
 ---
 
@@ -199,7 +200,7 @@ spwn/
 
 The governance layer. Catches drift between code and tests _before_ anything runs.
 
-### Test contracts: `tests/_contracts/`
+### Test contracts: `_contracts/`
 
 YAML registries declare every "test-bearing surface" in the codebase:
 
@@ -208,9 +209,9 @@ YAML registries declare every "test-bearing surface" in the codebase:
 - **cli-commands.yaml** — every `spwn` Cobra command → help snapshot + at least one behavior spec.
 - **catalog.yaml** — every catalog entry → manifest parses, dependencies resolve, smoke test exists.
 - **web-routes.yaml** — every Next.js route → Playwright spec or component test.
-- **node-packages.yaml** — `apps/web` and `apps/gate` → has a `test` script wired into make.
+- **node-packages.yaml** — `../apps/web` and `../apps/gate` → has a `test` script wired into make.
 
-`tests/_contracts/assert-contracts.mjs` walks each YAML and fails CI if:
+`_contracts/assert-contracts.mjs` walks each YAML and fails CI if:
 
 - a referenced test/doc file doesn't exist on disk
 - a runtime's `adapter.go` lacks the declared facet (`Tool:`, `Render:`, `Spawn:`)
@@ -235,7 +236,7 @@ L6 world, architect             → L1-L5
 L7 apps/cli, apps/api           → anything
 ```
 
-Adding `import "spwn.sh/packages/world"` from `packages/agent/` fails `make lint`.
+Adding `import "spwn.sh/packages/world"` from `../packages/agent/` fails `make lint`.
 
 ### Lint: `make lint`
 
@@ -313,9 +314,9 @@ The automation engine is intentionally testable without Docker, fsnotify, or rea
 
 Lock the byte-level shape of outputs that users (or other systems) depend on.
 
-### Runtime golden tests: `packages/runtimes/golden_test.go`
+### Runtime golden tests: `../packages/runtimes/golden_test.go`
 
-For each subdirectory under `packages/runtimes/testdata/<case>/`, the test:
+For each subdirectory under `../packages/runtimes/testdata/<case>/`, the test:
 
 1. Loads `input/spwn.yaml` + `input/agents/<name>/agent.yaml`
 2. Runs the adapter's `Render()` for every facet (claude-code, codex, gemini)
@@ -328,6 +329,7 @@ packages/runtimes/testdata/minimal-single-agent/
 │   └── agents/neo/
 │       ├── agent.yaml
 │       └── SOUL.md
+
 ├── output_claude_code/
 │   ├── CLAUDE.md
 │   └── .claude/
@@ -346,7 +348,7 @@ Regenerate goldens with `JTERRAZZ_TEST_UPDATE=1 go test ./packages/runtimes/...`
 
 Most CLI output is goldened INSIDE the spec document that produced it — `stdout:` and `stderr:` are byte-exact block scalars in the `<case>.spec.yaml`, regenerated with `TEST_UPDATE=1` (see L4b). A sibling `_expected/` survives only for the assertions a document cannot carry: `_expected/<name>.json` for the structural `result.json` comparisons under `check/`, `agent/` and `world/`.
 
-### Compile cache invariants: `packages/compile/builder_from_base_test.go`
+### Compile cache invariants: `../packages/compile/builder_from_base_test.go`
 
 Builds the tar context that goes to Docker without actually running Docker. Asserts:
 
@@ -360,7 +362,7 @@ Builds the tar context that goes to Docker without actually running Docker. Asse
 
 Real subsystems wired together, but vendor APIs are simulated at the network boundary.
 
-### API: `apps/api/server_test.go`
+### API: `../apps/api/server_test.go`
 
 The pivot is that **tests share the production handler**:
 
@@ -382,7 +384,7 @@ A new route is added by editing `registerRoutes` — _both_ production and tests
 
 ### Web client: MSW
 
-`apps/web/src/test/msw/server.ts` starts an MSW server in `setupFiles` and resets handlers between tests. Network-behavior tests (SSE streams, JSON fallback, HTTP errors, network errors, fallback URLs) all go through real `fetch` and an HTTP-level interceptor.
+`../apps/web/src/api/__tests__/stream-chat.test.ts` stands up its own MSW server with `setupServer()` from `msw/node`, listens with `onUnhandledRequest: 'error'`, and resets handlers between tests. Network-behavior tests (SSE streams, JSON fallback, HTTP errors, network errors, fallback URLs) all go through real `fetch` and an HTTP-level interceptor.
 
 ### Gate: local `http.createServer`
 
@@ -392,7 +394,7 @@ Gate sidecar tests stand up a real HTTP server in-process to exercise the SDK's 
 
 ## Layer 4 — Docker E2E
 
-### L4a · Go: `packages/world/tests/e2e/`
+### L4a · Go: `../packages/world/tests/e2e/`
 
 Build tag `//go:build e2e`. Excluded from `make test`; runs only via `make test-go-e2e`.
 
@@ -426,18 +428,18 @@ func TestSpawn_CreatesRunningContainer(t *testing.T) {
 }
 ```
 
-**Setup primitives** (`packages/world/tests/e2e/setup/`):
+**Setup primitives** (`../packages/world/tests/e2e/setup/`):
 
 - `NewTestContext(t)` — creates `t.TempDir()` SPWN_HOME, registers `t.Cleanup()` to destroy every world, attaches a unique label so parallel runs cannot collide.
 - `SpawnBuilder` — fluent DSL.
 - `ContainerAssertion`, `MindAssertion`, `MockAssertion`, `JournalAssertion`, etc. — every observable surface has its own assertion type.
 - `WaitFor(t, timeout, interval, desc, cond)` — replaces `time.Sleep`.
 
-The simulator inside `spwn-test:latest` writes its observations as JSON to `/tmp/claude-mock.json` so `MockAssertion` can read it back: `m.SawMind()`, `m.SawClaudeMD()`, `m.SawSkill("focus")`. The shared seed dirs live at `tests/_fixtures/testdata/<case>/` and are looked up by `setup.TestdataDir()`.
+The simulator inside `spwn-test:latest` writes its observations as JSON to `/tmp/claude-mock.json` so `MockAssertion` can read it back: `m.SawMind()`, `m.SawClaudeMD()`, `m.SawSkill("focus")`. The shared seed dirs live at `_fixtures/testdata/<case>/` and are looked up by `setup.TestdataDir()`.
 
-### L4b · TypeScript: `tests/specs/cli/<domain>/`
+### L4b · TypeScript: `specs/cli/<domain>/`
 
-Exercise the compiled `.artifacts/go/spwn` from a user's perspective through one runner, `tests/specs/cli/cli.specification.ts` (`cli`), which is docker-aware and carries the `env` registry a document names by bare word.
+Exercise the compiled `.artifacts/go/spwn` from a user's perspective through one runner, `specs/cli/cli.specification.ts` (`cli`), which is docker-aware and carries the `env` registry a document names by bare word.
 
 A spec is written in one of two forms, and the first is the default.
 
@@ -525,7 +527,7 @@ tests/web/<domain>/<feature>/<feature>.spec.ts
 - `<feature>` is one cohesive surface inside it (`list`, `detail`, `lifecycle`, `gallery`, `sidebar`, `command-palette`, `api-health`).
 - The folder is symmetric with the CLI tree: feature-named files inside a feature-named folder. If a feature ever needs its own seeds or fixtures, they sit beside the spec without restructuring.
 
-### Isolation: `tests/web/playwright.config.ts`
+### Isolation: `web/playwright.config.ts`
 
 Every run gets:
 
@@ -539,7 +541,7 @@ The fixture project is hydrated from `catalog/matrix/` and `catalog/startup/` so
 
 The Playwright config sets `testDir: '.'` with `testMatch: ['**/*.spec.ts']` and `testIgnore: ['_setup/**', '_fixtures/**']` so adding a new feature folder requires zero config change.
 
-### Fixture: `tests/web/_fixtures/app.ts`
+### Fixture: `web/_fixtures/app.ts`
 
 Extends Playwright's `test` with two helpers:
 
@@ -559,7 +561,7 @@ test('selecting a planet shows agent details', async ({ page, api, app }) => {
 - `await using` is implicit: the fixture's teardown destroys every world it spawned.
 - Spec import path: `import { expect, test } from '../../_fixtures/app.js';` (from the feature folder, `../../` reaches the web root).
 
-### Cleanup: `tests/web/_setup/global-teardown.ts`
+### Cleanup: `web/_setup/global-teardown.ts`
 
 Removes only containers that match `SPWN_TEST_LABEL`. The dev's local containers (and the always-on `spwn-gate`) are never touched.
 
@@ -576,8 +578,8 @@ Removes only containers that match `SPWN_TEST_LABEL`. The dev's local containers
 
 Real Claude/Codex CLIs, real provider APIs. Currently:
 
-- `make test-smoke` — `tests/_smoke/init-up` and `tests/_smoke/upgrade` exercise `spwn init` → `spwn up` against a live build (no live LLM call).
-- **Planned** (Phase 9 of the test architecture plan): `tests/real-runtime/` with `SPWN_REAL_RUNTIME=1` opt-in for live `spwn agent talk` against Claude/Codex/Gemini APIs, with hard timeout + cleanup.
+- `make test-smoke` — `specs/cli/smoke/init-up.test.ts` and `_smoke/upgrade/` exercise `spwn init` → `spwn up` against a live build (no live LLM call).
+- **Planned** (Phase 9 of the test architecture plan): `real-runtime/` with `SPWN_REAL_RUNTIME=1` opt-in for live `spwn agent talk` against Claude/Codex/Gemini APIs, with hard timeout + cleanup.
 
 ---
 
@@ -587,20 +589,20 @@ The Makefile is the source of truth. CI calls Make targets — never raw `go tes
 
 ### Targets
 
-| Target                     | Layer    | What it runs                                                       |
-| -------------------------- | -------- | ------------------------------------------------------------------ |
-| `make lint`                | L0       | `go vet` + `pnpm -r lint` (oxlint + oxfmt + knip)                  |
-| `make test`                | L1+L2+L3 | `go test ./...` across every workspace module                      |
-| `make test-contracts`      | L0       | `node tests/_contracts/assert-contracts.mjs`                       |
-| `make test-web-unit`       | L1+L3    | `pnpm -C apps/web test` (vitest + MSW)                             |
-| `make test-gate-node`      | L1+L3    | `pnpm -C apps/gate test`                                           |
-| `make test-cli`            | L4b      | `pnpm -C tests exec vitest run` (full CLI E2E)                     |
-| `make test-go-e2e`         | L4a      | Go world E2E with `//go:build e2e`                                 |
-| `make test-compile-e2e`    | L4       | Image-build E2E in `packages/compile/e2e`                          |
-| `make test-web`            | L5       | Playwright (depends on `make build` + `make test-image`)           |
-| `make test-smoke`          | L6       | Real-build init→up→probe                                           |
-| `make test-pkg PKG=<name>` | L1       | Verbose go test for one module                                     |
-| `make test-image`          | infra    | Builds `spwn-test:latest` from `tests/_simulators/Dockerfile.test` |
+| Target                     | Layer    | What it runs                                                 |
+| -------------------------- | -------- | ------------------------------------------------------------ |
+| `make lint`                | L0       | `go vet` + `pnpm -r lint` (oxlint + oxfmt + knip)            |
+| `make test`                | L1+L2+L3 | `go test ./...` across every workspace module                |
+| `make test-contracts`      | L0       | `node tests/_contracts/assert-contracts.mjs`                 |
+| `make test-web-unit`       | L1+L3    | `pnpm -C apps/web test` (vitest + MSW)                       |
+| `make test-gate-node`      | L1+L3    | `pnpm -C apps/gate test`                                     |
+| `make test-cli`            | L4b      | `pnpm -C tests exec vitest run` (full CLI E2E)               |
+| `make test-go-e2e`         | L4a      | Go world E2E with `//go:build e2e`                           |
+| `make test-compile-e2e`    | L4       | Image-build E2E in `../packages/compile/e2e`                 |
+| `make test-web`            | L5       | Playwright (depends on `make build` + `make test-image`)     |
+| `make test-smoke`          | L6       | Real-build init→up→probe                                     |
+| `make test-pkg PKG=<name>` | L1       | Verbose go test for one module                               |
+| `make test-image`          | infra    | Builds `spwn-test:latest` from `_simulators/Dockerfile.test` |
 
 ### CI: `.github/workflows/validate.yaml`
 
@@ -616,9 +618,9 @@ Push to main:   + test-smoke, test-web
 
 ## Runtime Simulators (Mock Vendors)
 
-E2E tests cannot call real Claude/Codex on every PR — too slow, costs money, can flake. Instead, the test image (`spwn-test:latest`) ships **simulators** under `tests/_simulators/` that follow the same protocol as the real CLIs.
+E2E tests cannot call real Claude/Codex on every PR — too slow, costs money, can flake. Instead, the test image (`spwn-test:latest`) ships **simulators** under `_simulators/` that follow the same protocol as the real CLIs.
 
-### `tests/_simulators/claude/mock.sh`
+### `_simulators/claude/mock.sh`
 
 Installed as `/usr/local/bin/claude` inside the test image. Behavior:
 
@@ -628,7 +630,7 @@ Installed as `/usr/local/bin/claude` inside the test image. Behavior:
 4. Optionally writes to `/workspaces/workspace0/mock-output.txt` to prove write access.
 5. Supports `--exit-code` and `--sleep` for failure/timeout testing.
 
-### `tests/_simulators/codex/mock.sh`
+### `_simulators/codex/mock.sh`
 
 Same idea for Codex. Accepts `codex exec --json`, `codex exec resume <session-id>`, and writes session IDs to a file the architect can resume from. Supports `AGENTS.md`/`.codex/config.toml` introspection.
 
@@ -649,67 +651,67 @@ These scripts are protocol contracts. If the real Codex CLI changes its resume s
 
 ### Add a Go E2E test
 
-1. Create `tests/e2e/your_feature_test.go` with `//go:build e2e` at the top.
+1. Create `your_feature_test.go` under `../packages/world/tests/e2e/` with `//go:build e2e` at the top.
 2. Use `setup.NewSpawnBuilder(t)` to spawn a world.
 3. Follow GIVEN/WHEN/THEN comment structure.
 4. Run `make test-go-e2e`.
 
 ### Add a CLI E2E test
 
-1. Pick a folder: `tests/specs/cli/<domain>/`.
+1. Pick a folder: `specs/cli/<domain>/`.
 2. Write a document, `<case>.spec.yaml`: the ground (`fixture:`, `env:`), the `runs:`, and any `files:` assertion.
 3. `TEST_UPDATE=1 pnpm -C tests exec vitest run <path>` fills in the exit codes and the streams; read the result, tokenise what stayed literal, and run it again clean.
 4. Reach for a chain (`<aspect>.test.ts`) only for what the format cannot state — containers, structural JSON, an absence, a count, two runs compared, a host shell-out. Open the file with the reason, use `await using` if any container might spawn, and put the session in a document called through `cli.run()` when only one assertion needs code.
-5. Add the command to `tests/_contracts/cli-commands.yaml`.
+5. Add the command to `_contracts/cli-commands.yaml`.
 
 ### Add a Web E2E test
 
-1. Pick a folder: `tests/web/<domain>/<feature>/`. Create it if the feature is new.
+1. Pick a folder: `web/<domain>/<feature>/`. Create it if the feature is new.
 2. Create `<feature>.spec.ts` inside.
 3. Import the fixture: `import { expect, test } from '../../_fixtures/app.js';`
 4. Use `api.*` for setup (faster than UI) and `app.*` page-object methods for UI assertions.
-5. Add the route to `tests/_contracts/web-routes.yaml`.
+5. Add the route to `_contracts/web-routes.yaml`.
 
 ### Add a runtime adapter
 
-1. Create `packages/runtimes/<runtime>/` with `adapter.go`, `render.go`, `spawn.go`, `tool.go`.
+1. Create `../packages/runtimes/<runtime>/` with `adapter.go`, `render.go`, `spawn.go`, `tool.go`.
 2. Add unit tests next to source: `render_test.go`, `spawn_test.go`, `<runtime>_test.go`.
-3. For each test case in `packages/runtimes/testdata/<case>/`, generate `output_<runtime>/` (regenerate with `JTERRAZZ_TEST_UPDATE=1`).
-4. Update `packages/runtimes/README.md`.
-5. Add the runtime to `tests/_contracts/runtimes.yaml` with its facets, tests, docs, and golden output dir.
+3. For each test case in `../packages/runtimes/testdata/<case>/`, generate `output_<runtime>/` (regenerate with `JTERRAZZ_TEST_UPDATE=1`).
+4. Update `../packages/runtimes/README.md`.
+5. Add the runtime to `_contracts/runtimes.yaml` with its facets, tests, docs, and golden output dir.
 6. `make test-contracts` will now require all of the above to exist.
 
 ### Add an API route
 
 1. Add `mux.HandleFunc("METHOD /api/path", cors(s.handleX))` in `apps/api/server.go#registerRoutes`.
-2. Add a handler test in `apps/api/server_test.go` using `httptest.NewServer(server.Handler())`.
-3. Optionally add a Playwright spec under `tests/web/<domain>/<feature>/`.
-4. Add the route to `tests/_contracts/api-routes.yaml`.
+2. Add a handler test in `../apps/api/server_test.go` using `httptest.NewServer(server.Handler())`.
+3. Optionally add a Playwright spec under `web/<domain>/<feature>/`.
+4. Add the route to `_contracts/api-routes.yaml`.
 
 ### Add a CLI command
 
-1. Add the Cobra command under `apps/cli/<noun>/<verb>.go`.
-2. Add a behaviour spec under `tests/specs/cli/<domain>/<case>.spec.yaml`, and its `--help` page under `tests/specs/cli/help/`.
-3. Add it to `tests/_contracts/cli-commands.yaml` (with `--help` snapshot path).
+1. Add the Cobra command under `../apps/cli/<noun>/<verb>.go`.
+2. Add a behaviour spec under `specs/cli/<domain>/<case>.spec.yaml`, and its `--help` page under `specs/cli/help/`.
+3. Add it to `_contracts/cli-commands.yaml` (with `--help` snapshot path).
 4. Generated docs under `docs/reference/spwn_<noun>_<verb>.md` are checked into the repo.
 
 ### Add a catalog entry
 
 1. Create `catalog/<slug>/spwn.yaml` (+ optional `agents/`, `skills/`, `tools/`, `hooks/`).
-2. Add it to `tests/_contracts/catalog.yaml` with declared smoke coverage.
+2. Add it to `_contracts/catalog.yaml` with declared smoke coverage.
 3. The contract checker verifies the manifest parses and dependencies resolve.
 
 ### Add a runtime simulator
 
-1. Create `tests/_simulators/<runtime>/mock.sh` that follows the vendor CLI's protocol.
-2. Update `tests/_simulators/Dockerfile.test` to `COPY <runtime>/mock.sh /usr/local/bin/<runtime>`.
-3. Add a contract test under `packages/runtimes/<runtime>/` that exercises the simulator over the real entry points (json mode, resume, prompt files, exit codes).
+1. Create `_simulators/<runtime>/mock.sh` that follows the vendor CLI's protocol.
+2. Update `_simulators/Dockerfile.test` to `COPY <runtime>/mock.sh /usr/local/bin/<runtime>`.
+3. Add a contract test under `../packages/runtimes/<runtime>/` that exercises the simulator over the real entry points (json mode, resume, prompt files, exit codes).
 
 ### Add a web route
 
-1. Create the page under `apps/web/src/app/<route>/page.tsx`.
-2. Add either a component test (vitest) or a Playwright spec under `tests/web/<domain>/<feature>/<feature>.spec.ts`.
-3. Add the route to `tests/_contracts/web-routes.yaml`.
+1. Create the page under `../apps/web/src/app/<route>/page.tsx`.
+2. Add either a component test (vitest) or a Playwright spec under `web/<domain>/<feature>/<feature>.spec.ts`.
+3. Add the route to `_contracts/web-routes.yaml`.
 
 ---
 
@@ -724,7 +726,7 @@ These will fail CI or get caught in review:
 - **Testing internals via reflection.** Test the contract documented in the package's `README.md` instead.
 - **Hardcoded counts that break when the catalog grows** (`expect(examples).toHaveLength(5)`). Use `>=` or `toContain`.
 - **Casing-sensitive assertions on user-facing text without checking what the UI actually renders.** Read the page snapshot in the failure first.
-- **Adding a new runtime/route/command/catalog entry without updating `tests/_contracts/`.** `make test-contracts` will fail.
+- **Adding a new runtime/route/command/catalog entry without updating `_contracts/`.** `make test-contracts` will fail.
 - **Bundling multiple features into one web spec file.** Split into `<domain>/<feature>/<feature>.spec.ts` so each feature owns its proof.
 - **Hand-written CI commands.** CI calls Make targets. The validate.yaml workflow IS the aggregate; if you want a new gate, add a job there, not a meta-target in the Makefile.
 
@@ -733,11 +735,11 @@ These will fail CI or get caught in review:
 ## Glossary
 
 - **Layer** — A horizontal slice of the test pyramid (L0 governance, L1 unit, …, L6 real-runtime smoke).
-- **Surface** — Anything users or other systems depend on: an API route, a CLI command, a runtime adapter, a catalog entry, a web route. Every surface must declare its tests in `tests/_contracts/`.
+- **Surface** — Anything users or other systems depend on: an API route, a CLI command, a runtime adapter, a catalog entry, a web route. Every surface must declare its tests in `_contracts/`.
 - **Contract** — A registry entry in `tests/_contracts/*.yaml` that names a surface and lists the proofs it requires.
 - **Golden** — A byte-level expected output committed to the repo. For Go, regenerate with `JTERRAZZ_TEST_UPDATE=1`; for the CLI E2E documents, with `TEST_UPDATE=1`.
-- **Simulator** — An executable protocol contract for an external CLI (under `tests/_simulators/`). Not a loose mock — a contract test guards the protocol shape.
-- **`cli`** — The single CLI E2E runner exported from `tests/specs/cli/cli.specification.ts`.
+- **Simulator** — An executable protocol contract for an external CLI (under `_simulators/`). Not a loose mock — a contract test guards the protocol shape.
+- **`cli`** — The single CLI E2E runner exported from `specs/cli/cli.specification.ts`.
 - **Document** — A `<case>.spec.yaml` stating one terminal session: the ground, the `runs:`, the streams and `files:`. The default form for a CLI E2E spec.
 - **Chain** — A `<aspect>.test.ts` for what a document cannot state. Its docblock opens with the reason.
 - **Test label** — `SPWN_TEST_LABEL` (e.g. `web-e2e-<ts>-<rand>`) attached to every container created by a test run, so cleanup never affects unrelated containers.

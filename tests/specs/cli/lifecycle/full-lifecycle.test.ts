@@ -23,7 +23,7 @@ describe('full agent lifecycle', () => {
         expect(neo.running).toBe(true);
         const worldId = (neo.inspect.value as { Config?: { Labels?: Record<string, string> } })
             .Config?.Labels?.['sh.spwn.world.id'];
-        expect(worldId).toBeTruthy();
+        expect(worldId).toBe(true);
 
         // When - agent ls reports neo as running
         await using agentLs = await cli.fixture('$FIXTURES/docker-pilot/').exec('agent ls --json');
@@ -31,7 +31,7 @@ describe('full agent lifecycle', () => {
         // Then - the project-mode report lists neo running
         expect(agentLs.exitCode).toBe(0);
         const agentReport = agentLs.json.value as {
-            agents: Array<{ name: string; status: string }>;
+            agents: { name: string; status: string }[];
             mode: string;
         };
         expect(agentReport.mode).toBe('project');
@@ -48,11 +48,15 @@ describe('full agent lifecycle', () => {
         expect(worldLs.exitCode).toBe(0);
         const worldReport = worldLs.json.value as {
             mode: string;
-            worlds: Array<{ agents: string[]; name: string; status: string }>;
+            worlds: { agents: string[]; name: string; status: string }[];
         };
         expect(worldReport.mode).toBe('project');
         expect(worldReport.worlds).toHaveLength(1);
-        expect(worldReport.worlds[0]).toEqual({ agents: ['neo'], name: 'neo', status: 'running' });
+        expect(worldReport.worlds[0]).toStrictEqual({
+            agents: ['neo'],
+            name: 'neo',
+            status: 'running',
+        });
 
         // When - world inspect <id> renders stable field headers
         await using inspect = await cli

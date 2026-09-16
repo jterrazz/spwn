@@ -35,7 +35,7 @@ describe('world destroy', () => {
         expect(result.exitCode).toBe(0);
         const list = result.json.value as {
             mode: string;
-            worlds: Array<{ name: string; status: string }>;
+            worlds: { name: string; status: string }[];
         };
         expect(list.mode).toBe('project');
         expect(list.worlds.every((world) => world.status !== 'running')).toBe(true);

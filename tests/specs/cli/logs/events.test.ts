@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { required } from '../../_support/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -50,11 +51,12 @@ describe('activity event emissions', () => {
             (e) => e.type === 'agent.created',
         );
         expect(created).toHaveLength(1);
-        expect(created[0].actor).toBe('user');
-        expect(created[0].verb).toBe('created');
-        expect(created[0].target).toBe('neo');
-        expect(created[0].agent_id).toBe('neo');
-        expect(created[0].phrase).toBe('You created neo');
+        const event = required(created[0], 'the agent.created event');
+        expect(event.actor).toBe('user');
+        expect(event.verb).toBe('created');
+        expect(event.target).toBe('neo');
+        expect(event.agent_id).toBe('neo');
+        expect(event.phrase).toBe('You created neo');
     });
 
     test('agent deletion emits an agent.deleted event', async () => {
@@ -67,9 +69,10 @@ describe('activity event emissions', () => {
             (e) => e.type === 'agent.deleted',
         );
         expect(deleted).toHaveLength(1);
-        expect(deleted[0].verb).toBe('deleted');
-        expect(deleted[0].target).toBe('neo');
-        expect(deleted[0].phrase).toBe('neo was deleted');
+        const event = required(deleted[0], 'the agent.deleted event');
+        expect(event.verb).toBe('deleted');
+        expect(event.target).toBe('neo');
+        expect(event.phrase).toBe('neo was deleted');
     });
 
     test('agent fork emits an agent.forked event', async () => {
@@ -82,12 +85,13 @@ describe('activity event emissions', () => {
             (e) => e.type === 'agent.forked',
         );
         expect(forked).toHaveLength(1);
-        expect(forked[0].verb).toBe('forked');
-        expect(forked[0].target).toBe('trinity');
-        expect(forked[0].agent_id).toBe('trinity');
-        expect(forked[0].phrase).toBe('trinity forked from neo');
-        expect(forked[0].metadata).toBeDefined();
-        expect(forked[0].metadata).toHaveProperty('source', 'neo');
+        const event = required(forked[0], 'the agent.forked event');
+        expect(event.verb).toBe('forked');
+        expect(event.target).toBe('trinity');
+        expect(event.agent_id).toBe('trinity');
+        expect(event.phrase).toBe('trinity forked from neo');
+        expect(event.metadata).toBeDefined();
+        expect(event.metadata).toHaveProperty('source', 'neo');
     });
 
     test('agent sleep emits an agent.slept event', async () => {
@@ -100,9 +104,10 @@ describe('activity event emissions', () => {
             (e) => e.type === 'agent.slept',
         );
         expect(slept).toHaveLength(1);
-        expect(slept[0].actor).toBe('neo');
-        expect(slept[0].verb).toBe('slept');
-        expect(slept[0].agent_id).toBe('neo');
+        const event = required(slept[0], 'the agent.slept event');
+        expect(event.actor).toBe('neo');
+        expect(event.verb).toBe('slept');
+        expect(event.agent_id).toBe('neo');
     });
 
     test('event has an id, timestamp, and required fields', async () => {
@@ -113,14 +118,13 @@ describe('activity event emissions', () => {
         expect(result.exitCode).toBe(0);
         const events = parseActivity(result.file(ACTIVITY_PATH).content);
         expect(events.length).toBeGreaterThan(0);
-        const event = events[0];
-        expect(event.id).toBeTruthy();
+        const event = required(events[0], 'the first activity event');
         expect(event.id.length).toBeGreaterThan(10);
         expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
-        expect(event.type).toBeTruthy();
-        expect(event.actor).toBeTruthy();
-        expect(event.verb).toBeTruthy();
-        expect(event.phrase).toBeTruthy();
+        expect(event.type.length).toBeGreaterThan(0);
+        expect(event.actor.length).toBeGreaterThan(0);
+        expect(event.verb.length).toBeGreaterThan(0);
+        expect(event.phrase.length).toBeGreaterThan(0);
     });
 
     test('events are appended in chronological order', async () => {
@@ -137,11 +141,8 @@ describe('activity event emissions', () => {
             (e) => e.type === 'agent.created',
         );
         expect(creations).toHaveLength(3);
-        for (let i = 1; i < creations.length; i += 1) {
-            const prev = new Date(creations[i - 1].timestamp).getTime();
-            const curr = new Date(creations[i].timestamp).getTime();
-            expect(curr).toBeGreaterThanOrEqual(prev);
-        }
+        const emittedAt = creations.map((e) => new Date(e.timestamp).getTime());
+        expect(emittedAt.toSorted((a, b) => a - b)).toStrictEqual(emittedAt);
     });
 
     test('event ids are unique', async () => {

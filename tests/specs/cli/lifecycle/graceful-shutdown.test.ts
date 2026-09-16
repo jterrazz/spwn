@@ -31,7 +31,7 @@ describe('graceful shutdown', () => {
         expect(result.exitCode).toBe(0);
         const report = result.json.value as {
             mode: string;
-            worlds: Array<{ name: string; status: string }>;
+            worlds: { name: string; status: string }[];
         };
         expect(report.mode).toBe('project');
         expect(report.worlds.every((w) => w.status !== 'running')).toBe(true);

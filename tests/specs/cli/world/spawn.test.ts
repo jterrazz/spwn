@@ -38,7 +38,7 @@ describe('world spawn', () => {
         // The container carries a valid world id plus config/kind labels
         const inspectData = neo.inspect.value as {
             Config?: { Labels?: Record<string, string> };
-            Mounts?: Array<{ Destination: string }>;
+            Mounts?: { Destination: string }[];
         };
         const labels = inspectData.Config?.Labels ?? {};
         expect(labels['sh.spwn.world.id']).toMatch(/^world-[a-z0-9-]+-[0-9a-f]{5}$/);
@@ -100,11 +100,11 @@ describe('world spawn', () => {
         expect(result.exitCode).toBe(0);
         const list = result.json.value as {
             mode: string;
-            worlds: Array<{ agents: string[]; name: string; status: string }>;
+            worlds: { agents: string[]; name: string; status: string }[];
         };
         expect(list.mode).toBe('project');
         expect(list.worlds).toHaveLength(1);
-        expect(list.worlds[0]).toEqual({
+        expect(list.worlds[0]).toStrictEqual({
             agents: ['neo'],
             name: 'neo',
             status: 'running',

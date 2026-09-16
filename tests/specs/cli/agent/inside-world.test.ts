@@ -55,7 +55,7 @@ describe('agent inside world', () => {
         // Then - neo is reported running under a project-mode roster (scalpel: structural probe over dynamic status)
         expect(result.exitCode).toBe(0);
         const report = result.json.value as {
-            agents: Array<{ name: string; status: string; world?: string }>;
+            agents: { name: string; status: string; world?: string }[];
             mode: string;
         };
         expect(report.mode).toBe('project');

@@ -18,7 +18,7 @@ test.describe('API health', () => {
     test('API examples endpoint returns the gallery', async ({ api }) => {
         const data = await api.get<{ examples: Array<{ slug: string }> }>('/api/examples');
         expect(data.examples.length).toBeGreaterThanOrEqual(2);
-        expect(data.examples[0].slug).toBe('startup');
+        expect(data.examples[0]?.slug).toBe('startup');
         expect(data.examples.map((e) => e.slug)).toContain('matrix');
     });
 

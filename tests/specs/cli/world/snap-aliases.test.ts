@@ -54,8 +54,8 @@ describe('world snap', () => {
             Config?: { Labels?: Record<string, string> };
         };
         const worldId = inspectData.Config?.Labels?.['sh.spwn.world.id'];
-        expect(worldId).toBeTruthy();
-        expect(typeof worldId).toBe('string');
+        expect(worldId).toBe(true);
+        expect(worldId).toBeTypeOf('string');
 
         // When - a snapshot is saved by id
         await using save = await cli

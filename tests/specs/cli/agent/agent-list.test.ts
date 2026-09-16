@@ -22,7 +22,7 @@ const extractAgentLsHeader = (txt: string) =>
         .split('\n')
         .find((l) => /\bAGENT\b/.test(l) && /\bSTATUS\b/.test(l))
         ?.trim()
-        .replace(/\s+/g, ' ');
+        .replaceAll(/\s+/g, ' ');
 
 describe('agent ls --json', () => {
     test('reports declared agents with their world for a project', async () => {
@@ -86,6 +86,6 @@ describe('agent ls --json', () => {
         const projectHeader = extractAgentLsHeader(project.stderr.text);
         expect(globalHeader).toBeDefined();
         expect(projectHeader).toBeDefined();
-        expect(globalHeader).toEqual(projectHeader);
+        expect(globalHeader).toStrictEqual(projectHeader);
     });
 });

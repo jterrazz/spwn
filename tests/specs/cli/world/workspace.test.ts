@@ -21,7 +21,7 @@ test('workspace is bind-mounted read-write and syncs between host and container'
     expect(neo.running).toBe(true);
 
     const inspectData = neo.inspect.value as {
-        Mounts?: Array<{ Destination: string; RW?: boolean; Source: string }>;
+        Mounts?: { Destination: string; RW?: boolean; Source: string }[];
     };
     const mounts = inspectData.Mounts ?? [];
     const mount = mounts.find((entry) => entry.Destination.startsWith('/workspaces/'));
@@ -30,7 +30,7 @@ test('workspace is bind-mounted read-write and syncs between host and container'
         throw new Error('workspace mount not found');
     }
     expect(mount.RW).toBe(true);
-    expect(mount.Source).toBeTruthy();
+    expect(mount.Source).toBe(true);
 
     // Host project files are visible inside the container
     expect(neo.file(`${mount.Destination}/spwn.yaml`).exists).toBe(true);

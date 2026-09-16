@@ -16,14 +16,14 @@ make test-pkg PKG=apps/cli       # path-form also works
 
 Examples:
 
-- `packages/platform/paths_test.go` - path resolution logic
-- `packages/agent/agent_test.go` - agent lifecycle
-- `packages/world/manifest/manifest_test.go` - YAML parsing
-- `apps/cli/cli_test.go` - flag parsing + help output
+- `../packages/platform/paths_test.go` - path resolution logic
+- `../packages/agent/agent_test.go` - agent lifecycle
+- `../packages/project/internal/manifest/manifest_edge_test.go` - YAML parsing
+- `../apps/cli/cli_test.go` - flag parsing + help output
 
 ### 2. Go E2E Tests
 
-Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with the runtime simulators in `tests/_simulators/` replacing the real Claude/Codex CLIs). Located in `packages/world/tests/e2e/`.
+Integration tests that spawn real Docker containers using the `spwn-test:latest` image (a mock environment with the runtime simulators in `_simulators/` replacing the real Claude/Codex CLIs). Located in `../packages/world/tests/e2e/`.
 
 ```bash
 make test-go-e2e              # builds test image, then runs the world E2E suite
@@ -34,7 +34,7 @@ These tests use the build tag `//go:build e2e` and are excluded from `make test`
 
 ### 3. TypeScript E2E Tests
 
-Behavioral specs that exercise the compiled `spwn` CLI binary end-to-end. Located in `tests/specs/cli/<domain>/`. They spawn processes, interact with Docker, and assert on CLI output.
+Behavioral specs that exercise the compiled `spwn` CLI binary end-to-end. Located in `specs/cli/<domain>/`. They spawn processes, interact with Docker, and assert on CLI output.
 
 Most of them are **documents** — a `<case>.spec.yaml` stating one terminal session — and the rest are chains in `<aspect>.test.ts`. Which is which, and why, is [TypeScript E2E Setup](#typescript-e2e-setup-testsspecscli) below.
 
@@ -49,16 +49,16 @@ cd tests && npx tsc --noEmit     # type-check only
 - **Docker**: Required for all E2E tests (both Go and TypeScript).
 - **Go 1.25+**: Required for Go tests.
 - **Node.js 20+**: Required for TypeScript E2E tests.
-- **Test image**: Run `make test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `tests/_simulators/Dockerfile.test`.
+- **Test image**: Run `make test-image` before E2E tests. This builds the `spwn-test:latest` Docker image from `_simulators/Dockerfile.test`.
 - **Binary**: TypeScript E2E tests require `.artifacts/go/spwn`. Run `make build` first.
 
 ## How runtime simulators work
 
 E2E tests do not call the real Claude Code or Codex CLIs. Instead, they use protocol-faithful **simulators** that ship inside the test image:
 
-- `tests/_simulators/claude/mock.sh` — installed as `/usr/local/bin/claude`
-- `tests/_simulators/codex/mock.sh` — installed as `/usr/local/bin/codex`
-- `tests/_simulators/Dockerfile.test` — builds `spwn-test:latest` with both pre-installed
+- `_simulators/claude/mock.sh` — installed as `/usr/local/bin/claude`
+- `_simulators/codex/mock.sh` — installed as `/usr/local/bin/codex`
+- `_simulators/Dockerfile.test` — builds `spwn-test:latest` with both pre-installed
 
 The Claude simulator:
 
@@ -72,7 +72,7 @@ The Go E2E framework reads this JSON via `TestContext.ReadMockOutput()` and expo
 
 ## Test Infrastructure
 
-### Go E2E Setup (`packages/world/tests/e2e/setup/`)
+### Go E2E Setup (`../packages/world/tests/e2e/setup/`)
 
 | File            | Purpose                                                                                                                                                   |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -106,7 +106,7 @@ Key design points:
 - `SpawnBuilder.Execute()` returns an `AssertionChain` for fluent assertions.
 - `WaitFor(t, timeout, interval, desc, conditionFn)` polls a condition instead of using `time.Sleep`.
 
-### TypeScript E2E Setup (`tests/specs/cli/`)
+### TypeScript E2E Setup (`specs/cli/`)
 
 All TypeScript E2E specs run under `@jterrazz/test` against one
 specification runner:
@@ -202,7 +202,7 @@ file that does says so in its own header; the reasons in this suite are:
 | **a count**                | the same file — exactly one list entry after a repeated install                                                          |
 | **two runs compared**      | `agent/agent-list.test.ts` — the same header from two separate invocations                                               |
 | **a host shell-out**       | `agent/export.test.ts` (`tar tzf`), `build/build.test.ts` (`docker run`)                                                 |
-| **host-dependent output**  | `auth/auth.test.ts` — the dashboard reads the operator's keychain                                                        |
+| **host-dependent output**  | `authentication/authentication.test.ts` — the dashboard reads the operator's keychain                                    |
 | **a long-running process** | `web/web.test.ts` — `.exec(…, { waitFor })` plus a `pgrep` orphan check                                                  |
 
 When only ONE assertion needs code, the session still belongs in a
@@ -274,7 +274,7 @@ test('up provisions a running world', async () => {
 
 ### Go E2E Test
 
-1. Create `your_feature_test.go` in `packages/world/tests/e2e/`.
+1. Create `your_feature_test.go` in `../packages/world/tests/e2e/`.
 2. Add `//go:build e2e` build tag at the top.
 3. Use `setup.NewSpawnBuilder(t)` to create test infrastructure.
 4. Follow GIVEN/WHEN/THEN comment structure.
@@ -285,7 +285,7 @@ test('up provisions a running world', async () => {
 Write a **document** unless the spec needs one of the reasons listed
 under [the chain](#the-chain--aspecttestts).
 
-1. Create `tests/specs/cli/<domain>/<case>.spec.yaml` — `<case>` in
+1. Create `specs/cli/<domain>/<case>.spec.yaml` — `<case>` in
    kebab-case, naming the scenario, never the bare folder name and never
    carrying the words `test`, `spec` or `cli` the suffix already does.
 2. State the ground (`fixture:`, `env:`), then `runs:` with a `command:`
@@ -298,7 +298,7 @@ under [the chain](#the-chain--aspecttestts).
 
 For a chain instead:
 
-1. Create `tests/specs/cli/<domain>/<aspect>.test.ts` and open its
+1. Create `specs/cli/<domain>/<aspect>.test.ts` and open its
    docblock with the reason the format cannot carry it.
 2. Import `cli` from `../cli.specification.js`.
 3. If only one ASSERTION needs code, put the session in a document and
@@ -309,12 +309,12 @@ For a chain instead:
 
 ## Test File Naming Conventions
 
-| Layer       | Pattern                                       | Example                   |
-| ----------- | --------------------------------------------- | ------------------------- |
-| Go unit     | `*_test.go` (next to source)                  | `manifest_test.go`        |
-| Go E2E      | `*_test.go` (in `tests/e2e/`)                 | `spawn_test.go`           |
-| TS document | `<case>.spec.yaml` (in `specs/cli/<domain>/`) | `valid-project.spec.yaml` |
-| TS chain    | `<aspect>.test.ts` (in `specs/cli/<domain>/`) | `json-report.test.ts`     |
+| Layer       | Pattern                                         | Example                   |
+| ----------- | ----------------------------------------------- | ------------------------- |
+| Go unit     | `*_test.go` (next to source)                    | `manifest_test.go`        |
+| Go E2E      | `*_test.go` (in `../packages/world/tests/e2e/`) | `spawn_test.go`           |
+| TS document | `<case>.spec.yaml` (in `specs/cli/<domain>/`)   | `valid-project.spec.yaml` |
+| TS chain    | `<aspect>.test.ts` (in `specs/cli/<domain>/`)   | `json-report.test.ts`     |
 
 Under `specs/`, what a spec STANDS ON carries a leading underscore —
 `_fixtures/` and `_expected/` — while a spec's own folder never does, and
@@ -334,7 +334,7 @@ only one spec folder reaches for belongs beside that folder as
 
 ## Vitest Configuration
 
-`tests/vitest.config.ts` is one project over `specs/cli/**` and
+`vitest.config.ts` is one project over `specs/cli/**` and
 `specs/lint/**`, with the `literate()` plugin adding
 `specs/cli/**/*.spec.yaml` to the include and binding every document to
 `specs/cli/cli.specification.ts`.

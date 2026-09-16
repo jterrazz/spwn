@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 
+import { required } from '../../_support/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -42,12 +43,12 @@ test('--deep --json tags compile issues with source=compile', async () => {
     // Then - the report flags a compile-sourced issue (scalpel: the compile issue set is dynamic)
     expect(result.exitCode).toBe(1);
     const report = result.json.value as {
-        issues: Array<{ level: string; message: string; source?: string }>;
+        issues: { level: string; message: string; source?: string }[];
         summary: { errors: number };
         valid: boolean;
     };
     expect(report.valid).toBe(false);
     const compileIssues = report.issues.filter((issue) => issue.source === 'compile');
     expect(compileIssues.length).toBeGreaterThan(0);
-    expect(compileIssues[0].message).toContain('agent prompt');
+    expect(required(compileIssues[0], 'the first compile issue').message).toContain('agent prompt');
 });

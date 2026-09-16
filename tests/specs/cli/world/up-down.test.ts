@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { required } from '../../_support/required.js';
 import { cli } from '../cli.specification.js';
 
 /**
@@ -32,11 +33,11 @@ describe('world up/down (docker pilot)', () => {
         // Then - exactly one running neo world (no duplicate)
         expect(result.exitCode).toBe(0);
         const list = result.json.value as {
-            worlds: Array<{ name: string; status: string }>;
+            worlds: { name: string; status: string }[];
         };
         const neoWorlds = list.worlds.filter((world) => world.name === 'neo');
         expect(neoWorlds).toHaveLength(1);
-        expect(neoWorlds[0].status).toBe('running');
+        expect(required(neoWorlds[0], 'the neo world').status).toBe('running');
     });
 
     test('spwn up is repeatable without host-side cleanup', async () => {

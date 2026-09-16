@@ -30,7 +30,9 @@ describe('cli stress tests', () => {
         const names = ['alpha', 'bravo', 'charlie', 'delta', 'echo'];
 
         // Then - every parallel run exits zero with no panic (scalpel: crash-signal absence)
-        const outcomes = await Promise.all(names.map((name) => createInIsolatedHome(name)));
+        const outcomes = await Promise.all(
+            names.map(async (name) => await createInIsolatedHome(name)),
+        );
         for (const outcome of outcomes) {
             expect(outcome.exitCode).toBe(0);
             expect(outcome.stderr).not.toContain('panic:');
