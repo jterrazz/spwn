@@ -4,7 +4,7 @@ import { IconSearch } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { GLASS_PILL_CLASS, GLASS_PILL_HEIGHT } from '@/components/glass-pill';
-import { cn } from '@/lib/utils';
+import { cn } from '@/styles/class-names';
 
 const COLLAPSED_WIDTH = GLASS_PILL_HEIGHT;
 const EXPAND_EASING = 'cubic-bezier(0.32, 0.72, 0.24, 1)'; // Apple-style soft-out
@@ -13,7 +13,7 @@ const EXPAND_EASING = 'cubic-bezier(0.32, 0.72, 0.24, 1)'; // Apple-style soft-o
 // Expand animation and h-[42px] for the canonical height.
 const baseClass = cn(
     GLASS_PILL_CLASS,
-    'relative shrink-0 h-[42px] overflow-hidden hover:text-foreground',
+    'hover:text-foreground relative h-[42px] shrink-0 overflow-hidden',
 );
 
 interface ExpandingSearchProps {
@@ -79,7 +79,7 @@ export function ExpandingSearch({
             className={cn(
                 baseClass,
                 !shouldShow &&
-                    'cursor-pointer hover:bg-foreground/[0.07] dark:hover:bg-white/[0.08]',
+                    'hover:bg-foreground/[0.07] cursor-pointer dark:hover:bg-white/[0.08]',
                 className,
             )}
             onClick={() => {
@@ -106,7 +106,7 @@ export function ExpandingSearch({
           border). This makes the icon position totally independent of
           outer width - it always sits at the geometric center (21, 21)
           of the 42px pill whether collapsed, expanded, or mid-animation. */}
-            <span className="absolute top-0 left-0 w-10 h-10 flex items-center justify-center pointer-events-none">
+            <span className="pointer-events-none absolute top-0 left-0 flex h-10 w-10 items-center justify-center">
                 <IconSearch className="translate-y-[0.5px]" size={16} stroke={2.4} />
             </span>
             {/* Input: filling the padding box from x=40 to the right edge.
@@ -115,7 +115,7 @@ export function ExpandingSearch({
             <input
                 aria-hidden={!shouldShow}
                 className={cn(
-                    'absolute top-0 bottom-0 left-10 right-0 pl-1 pr-4 bg-transparent text-sm leading-10 text-foreground/85 placeholder:text-muted-foreground/30 focus:outline-none',
+                    'text-foreground/85 placeholder:text-muted-foreground/30 absolute top-0 right-0 bottom-0 left-10 bg-transparent pr-4 pl-1 text-sm leading-10 focus:outline-none',
                     !shouldShow && 'pointer-events-none',
                 )}
                 onBlur={() => {

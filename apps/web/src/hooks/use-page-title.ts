@@ -12,7 +12,7 @@ export function usePageTitle(...parts: (null | string | undefined)[]) {
     const title = useMemo(() => {
         const filtered = parts.filter(Boolean) as string[];
         return filtered.length === 0 ? 'spwn' : [...filtered, 'spwn'].join(' · ');
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- rest params change identity every call; we intentionally key on the joined string
+        // oxlint-disable-next-line react-hooks/exhaustive-deps -- rest params change identity every call; we intentionally key on the joined string
     }, [parts.join(',')]);
 
     useEffect(() => {

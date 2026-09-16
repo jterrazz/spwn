@@ -14,7 +14,7 @@ import {
 } from '@tabler/icons-react';
 import { useState } from 'react';
 
-import type { ActivityBlock, ActivityMessage } from '@/lib/activity-types';
+import type { ActivityBlock, ActivityMessage } from '@/activity/blocks';
 
 // ── Tool icon mapping ──
 
@@ -53,17 +53,17 @@ function CollapsibleBlock({
     const [open, setOpen] = useState(defaultOpen);
 
     return (
-        <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-white/[0.06] bg-white/[0.02]">
             <button
-                className={`w-full flex items-center gap-2 px-3 py-1.5 text-[11px] font-mono ${accent} hover:bg-white/[0.03] transition-colors`}
+                className={`flex w-full items-center gap-2 px-3 py-1.5 font-mono text-[11px] ${accent} transition-colors hover:bg-white/[0.03]`}
                 onClick={() => setOpen(!open)}
             >
                 {open ? <IconChevronDown size={12} /> : <IconChevronRight size={12} />}
                 <span className="opacity-60">{icon}</span>
-                <span className="flex-1 text-left truncate">{label}</span>
+                <span className="flex-1 truncate text-left">{label}</span>
             </button>
             {open && (
-                <div className="border-t border-white/[0.04] px-3 py-2 text-[11px] font-mono text-muted-foreground/50 max-h-[300px] overflow-auto">
+                <div className="text-muted-foreground/50 max-h-[300px] overflow-auto border-t border-white/[0.04] px-3 py-2 font-mono text-[11px]">
                     {children}
                 </div>
             )}
@@ -80,7 +80,7 @@ function ThinkingBlockView({ block }: { block: { content: string } }) {
             icon={<IconBrain size={13} />}
             label="Thinking..."
         >
-            <pre className="whitespace-pre-wrap break-words leading-relaxed text-purple-300/40">
+            <pre className="leading-relaxed break-words whitespace-pre-wrap text-purple-300/40">
                 {block.content}
             </pre>
         </CollapsibleBlock>
@@ -92,7 +92,7 @@ function ToolUseBlockView({
     result,
 }: {
     block: { tool: string; input: Record<string, unknown>; id: string };
-    result?: { content: string; isError: boolean };
+    result?: undefined | { content: string; isError: boolean };
 }) {
     // Build a concise label from the tool input
     const inputSummary = getToolInputSummary(block.tool, block.input);
@@ -125,9 +125,9 @@ function ToolUseBlockView({
             {/* Result */}
             {result && (
                 <>
-                    <div className="border-t border-white/[0.04] my-2" />
+                    <div className="my-2 border-t border-white/[0.04]" />
                     <pre
-                        className={`whitespace-pre-wrap break-words leading-relaxed ${
+                        className={`leading-relaxed break-words whitespace-pre-wrap ${
                             result.isError ? 'text-red-400/60' : 'text-green-400/40'
                         }`}
                     >
@@ -141,7 +141,7 @@ function ToolUseBlockView({
 
 function TextBlockView({ block }: { block: { content: string } }) {
     return (
-        <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed text-foreground/70">
+        <pre className="text-foreground/70 font-mono text-xs leading-relaxed break-words whitespace-pre-wrap">
             {block.content}
         </pre>
     );
@@ -150,8 +150,8 @@ function TextBlockView({ block }: { block: { content: string } }) {
 function ErrorBlockView({ block }: { block: { content: string } }) {
     return (
         <div className="flex items-start gap-2 rounded-lg border border-red-500/15 bg-red-500/[0.06] px-3 py-2">
-            <IconAlertTriangle className="text-red-400/60 shrink-0 mt-0.5" size={14} />
-            <pre className="text-[11px] font-mono whitespace-pre-wrap break-words text-red-400/70">
+            <IconAlertTriangle className="mt-0.5 shrink-0 text-red-400/60" size={14} />
+            <pre className="font-mono text-[11px] break-words whitespace-pre-wrap text-red-400/70">
                 {block.content}
             </pre>
         </div>
@@ -172,8 +172,8 @@ function StatusBlockView({ block }: { block: { status: string; tool?: string } }
 
     return (
         <div className="flex items-center gap-2 py-1">
-            <div className="w-2 h-2 rounded-full bg-foreground/30 animate-pulse" />
-            <span className="text-[11px] text-muted-foreground/40">
+            <div className="bg-foreground/30 h-2 w-2 animate-pulse rounded-full" />
+            <span className="text-muted-foreground/40 text-[11px]">
                 {labels[block.status] || block.status}
             </span>
         </div>
@@ -254,7 +254,7 @@ export function ActivityMessageView({ message }: { message: ActivityMessage }) {
             .join('');
 
         return (
-            <pre className="text-xs font-mono whitespace-pre-wrap break-words leading-relaxed">
+            <pre className="font-mono text-xs leading-relaxed break-words whitespace-pre-wrap">
                 {text || '...'}
             </pre>
         );
@@ -265,7 +265,7 @@ export function ActivityMessageView({ message }: { message: ActivityMessage }) {
         <div className="space-y-2">
             <ActivityBlocksRenderer blocks={message.blocks} />
             {message.cost !== undefined && (
-                <div className="flex items-center gap-3 text-[9px] font-mono text-muted-foreground/20 pt-1">
+                <div className="text-muted-foreground/20 flex items-center gap-3 pt-1 font-mono text-[9px]">
                     {message.duration !== undefined && (
                         <span>{(message.duration / 1000).toFixed(1)}s</span>
                     )}
@@ -308,7 +308,7 @@ function getToolInputSummary(tool: string, input: Record<string, unknown>): stri
 }
 
 function truncateOneLine(text: string, max: number): string {
-    const line = text.split('\n')[0];
+    const line = text.split('\n')[0] ?? '';
     return line.length > max ? `${line.slice(0, max)}...` : line;
 }
 

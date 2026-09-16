@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { apiGet } from '@/lib/api-client';
+import { apiGet } from '@/api/client';
 
 const VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 

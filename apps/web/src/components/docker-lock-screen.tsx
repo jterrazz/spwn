@@ -86,7 +86,7 @@ export function DockerLockScreen() {
                 <div className="flex flex-wrap items-center justify-center gap-2">
                     {showInstallCta && (
                         <a
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-medium text-foreground/90 transition-colors hover:bg-white/[0.1]"
+                            className="text-foreground/90 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-medium transition-colors hover:bg-white/[0.1]"
                             href={installUrl}
                             rel="noreferrer"
                             target="_blank"
@@ -120,8 +120,8 @@ function LockShell({
     icon: React.ReactNode;
     title: string;
     subtitle: string;
-    hint?: string;
-    error?: string;
+    hint?: string | undefined;
+    error?: string | undefined;
     primaryAction: React.ReactNode;
     secondsAgo: number;
 }) {
@@ -130,36 +130,36 @@ function LockShell({
             {/* Ambient radial wash matching the Docker accent */}
             <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 bg-gradient-radial from-red-500/20 via-transparent to-transparent"
+                className="bg-gradient-radial pointer-events-none absolute inset-0 from-red-500/20 via-transparent to-transparent"
             />
 
             <div className="relative z-10 w-full max-w-md">
-                <div className="rounded-2xl border border-white/[0.08] bg-black/30 px-8 py-9 text-center backdrop-blur-md shadow-2xl">
+                <div className="rounded-2xl border border-white/[0.08] bg-black/30 px-8 py-9 text-center shadow-2xl backdrop-blur-md">
                     <div className="mb-5 flex justify-center">{icon}</div>
-                    <h1 className="font-heading text-xl tracking-wide text-foreground/95">
+                    <h1 className="font-heading text-foreground/95 text-xl tracking-wide">
                         {title}
                     </h1>
-                    <p className="mx-auto mt-2 max-w-sm text-[12px] leading-relaxed text-muted-foreground/70">
+                    <p className="text-muted-foreground/70 mx-auto mt-2 max-w-sm text-[12px] leading-relaxed">
                         {subtitle}
                     </p>
 
                     {(error || hint) && (
                         <div className="mt-5 space-y-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-left">
                             {error && (
-                                <p className="font-mono text-[10.5px] leading-snug text-muted-foreground/70 break-words">
+                                <p className="text-muted-foreground/70 font-mono text-[10.5px] leading-snug break-words">
                                     {error}
                                 </p>
                             )}
-                            {hint && <p className="text-[11px] text-foreground/70">{hint}</p>}
+                            {hint && <p className="text-foreground/70 text-[11px]">{hint}</p>}
                         </div>
                     )}
 
                     <div className="mt-6">{primaryAction}</div>
 
-                    <div className="mt-5 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground/40">
+                    <div className="text-muted-foreground/40 mt-5 flex items-center justify-center gap-1.5 text-[10px] tracking-wider uppercase">
                         <span className="relative flex h-1.5 w-1.5">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-foreground/40 opacity-75" />
-                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-muted-foreground/60" />
+                            <span className="bg-muted-foreground/40 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                            <span className="bg-muted-foreground/60 relative inline-flex h-1.5 w-1.5 rounded-full" />
                         </span>
                         Checking every 3s · last check {secondsAgo}s ago
                     </div>
@@ -200,7 +200,7 @@ function DockerPulse() {
 function RetryButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
     return (
         <button
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-medium text-foreground/90 transition-colors hover:bg-white/[0.1] disabled:opacity-60"
+            className="text-foreground/90 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-medium transition-colors hover:bg-white/[0.1] disabled:opacity-60"
             disabled={loading}
             onClick={onClick}
             type="button"

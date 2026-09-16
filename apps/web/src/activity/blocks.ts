@@ -55,9 +55,9 @@ export interface ActivityMessage {
     blocks: ActivityBlock[];
     timestamp: Date;
     /** Cost in USD (from result event) */
-    cost?: number;
+    cost?: number | undefined;
     /** Duration in ms (from result event) */
-    duration?: number;
+    duration?: number | undefined;
 }
 
 // ── Stream event types (Claude Code + Codex) ──
@@ -108,13 +108,13 @@ function parseAssistantEvent(event: StreamJsonEvent): ActivityBlock[] | null {
     const message = event.message as
         | undefined
         | {
-              content?: Array<{
+              content?: {
                   type: string;
                   text?: string;
                   name?: string;
                   id?: string;
                   input?: Record<string, unknown>;
-              }>;
+              }[];
           };
 
     if (!message?.content) {
@@ -145,12 +145,12 @@ function parseUserEvent(event: StreamJsonEvent): ActivityBlock[] | null {
     const message = event.message as
         | undefined
         | {
-              content?: Array<{
+              content?: {
                   type: string;
                   content?: string;
                   tool_use_id?: string;
                   is_error?: boolean;
-              }>;
+              }[];
           };
 
     if (!message?.content) {

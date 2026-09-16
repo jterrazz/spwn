@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
+import { apiGet } from '@/api/client';
 import {
     Command,
     CommandDialog,
@@ -21,8 +22,7 @@ import {
     CommandList,
     CommandSeparator,
 } from '@/components/ui/command';
-import { apiGet } from '@/lib/api-client';
-import type { World } from '@/lib/types';
+import type { World } from '@/domain/model';
 
 interface AgentListItem {
     name: string;
@@ -34,8 +34,8 @@ function extractName(id: null | string | undefined): string {
     if (!id) {
         return '';
     }
-    const parts = id.split('-');
-    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
+    const [, middle] = id.split('-');
+    return middle ? middle.charAt(0).toUpperCase() + middle.slice(1) : id;
 }
 
 export function CommandPalette() {
@@ -80,7 +80,7 @@ export function CommandPalette() {
 
     return (
         <CommandDialog onOpenChange={setOpen} open={open}>
-            <Command className="rounded-xl border border-white/[0.08] bg-popover/95 backdrop-blur-md">
+            <Command className="bg-popover/95 rounded-xl border border-white/[0.08] backdrop-blur-md">
                 <CommandInput placeholder="Search worlds, agents, commands..." />
                 <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
@@ -98,7 +98,7 @@ export function CommandPalette() {
                                         size={14}
                                     />
                                     <span>{extractName(world.id)}</span>
-                                    <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/30">
+                                    <span className="text-muted-foreground/30 -mr-6 flex-1 text-right font-mono text-[10px]">
                                         {world.agents.length} agents · {world.status}
                                     </span>
                                 </CommandItem>
@@ -130,12 +130,12 @@ export function CommandPalette() {
                                             />
                                             <span>{agent.name}</span>
                                             {agentWorld && (
-                                                <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/30">
+                                                <span className="text-muted-foreground/30 -mr-6 flex-1 text-right font-mono text-[10px]">
                                                     in {extractName(agentWorld.id)}
                                                 </span>
                                             )}
                                             {!agentWorld && (
-                                                <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/20">
+                                                <span className="text-muted-foreground/20 -mr-6 flex-1 text-right font-mono text-[10px]">
                                                     limbo
                                                 </span>
                                             )}
@@ -185,7 +185,7 @@ export function CommandPalette() {
                         >
                             <IconRocket className="text-muted-foreground/50" size={14} />
                             <span>Spawn World</span>
-                            <span className="flex-1 text-right -mr-6 text-[10px] font-mono text-muted-foreground/20">
+                            <span className="text-muted-foreground/20 -mr-6 flex-1 text-right font-mono text-[10px]">
                                 ⌘N
                             </span>
                         </CommandItem>

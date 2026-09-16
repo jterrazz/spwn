@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react';
 
 import { Planet as PlanetGlobe } from '@/components/planet';
-import type { World } from '@/lib/types';
+import type { World } from '@/domain/model';
 
 // The placeholder "new world" record PlanetGlobe checks for via its id.
 // When id === "w-new-00000" it renders a centered "+" glyph instead of
@@ -51,7 +51,7 @@ export function NewWorldCard({
 
     return (
         <div
-            className="group/new-world relative flex flex-col items-center shrink-0 cursor-pointer"
+            className="group/new-world relative flex shrink-0 cursor-pointer flex-col items-center"
             onClick={onClick}
             onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
@@ -73,7 +73,7 @@ export function NewWorldCard({
             {/* Soft colored halo that blooms on hover */}
             <span
                 aria-hidden
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl opacity-0 group-hover/new-world:opacity-100 transition-opacity duration-500 ease-out"
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 blur-2xl transition-opacity duration-500 ease-out group-hover/new-world:opacity-100"
                 style={{
                     width: 180,
                     height: 180,

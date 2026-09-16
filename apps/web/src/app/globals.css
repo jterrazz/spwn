@@ -160,7 +160,7 @@
         background: #2a2a2a;
     }
     body {
-        @apply bg-transparent text-foreground antialiased;
+        @apply text-foreground bg-transparent antialiased;
     }
 }
 

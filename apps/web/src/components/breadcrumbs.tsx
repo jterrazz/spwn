@@ -4,8 +4,8 @@ import { IconChevronRight } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 
 function extractWorldName(id: string): string {
-    const parts = id.split('-');
-    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : id;
+    const [, middle] = id.split('-');
+    return middle ? middle.charAt(0).toUpperCase() + middle.slice(1) : id;
 }
 
 interface Crumb {
@@ -45,9 +45,9 @@ export function Breadcrumbs() {
     } else if (pathname.startsWith('/agents/')) {
         const agentName = decodeURIComponent(pathname.split('/')[2] ?? '');
         const worldIdParam =
-            typeof globalThis !== 'undefined'
-                ? new URLSearchParams(globalThis.location.search).get('world')
-                : null;
+            typeof globalThis === 'undefined'
+                ? null
+                : new URLSearchParams(globalThis.location.search).get('world');
         if (worldIdParam) {
             crumbs.push({ label: extractWorldName(worldIdParam), href: `/world/${worldIdParam}` });
         } else {
@@ -72,13 +72,13 @@ export function Breadcrumbs() {
                     {i > 0 && <IconChevronRight className="text-muted-foreground/20" size={12} />}
                     {i < crumbs.length - 1 ? (
                         <a
-                            className="text-[11px] font-mono text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+                            className="text-muted-foreground/40 hover:text-muted-foreground/70 font-mono text-[11px] transition-colors"
                             href={crumb.href}
                         >
                             {crumb.label}
                         </a>
                     ) : (
-                        <span className="text-[11px] font-mono text-muted-foreground/60">
+                        <span className="text-muted-foreground/60 font-mono text-[11px]">
                             {crumb.label}
                         </span>
                     )}

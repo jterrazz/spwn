@@ -23,26 +23,26 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         return { hasError: true, error };
     }
 
-    render() {
+    override render() {
         if (this.state.hasError) {
             if (this.props.fallback) {
                 return this.props.fallback;
             }
 
             return (
-                <div className="flex flex-col items-center justify-center py-16 px-8">
-                    <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                <div className="flex flex-col items-center justify-center px-8 py-16">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10">
                         <IconAlertTriangle className="text-red-400" size={24} />
                     </div>
-                    <h2 className="text-lg font-heading text-foreground/80 mb-2">
+                    <h2 className="font-heading text-foreground/80 mb-2 text-lg">
                         Something went wrong
                     </h2>
-                    <p className="text-sm text-muted-foreground/40 font-mono mb-4 max-w-md text-center">
+                    <p className="text-muted-foreground/40 mb-4 max-w-md text-center font-mono text-sm">
                         {this.state.error?.message || 'An unexpected error occurred'}
                     </p>
                     <button
-                        className="px-4 py-2 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
-                        // eslint-disable-next-line react/no-set-state -- class-based ErrorBoundary has no hook alternative for resetting its own state
+                        className="text-foreground/60 hover:text-foreground/80 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 py-2 text-sm transition-all hover:bg-white/[0.08]"
+                        // oxlint-disable-next-line react/no-set-state -- class-based ErrorBoundary has no hook alternative for resetting its own state
                         onClick={() => this.setState({ hasError: false, error: null })}
                     >
                         Try again

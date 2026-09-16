@@ -1,4 +1,4 @@
-import type { World } from '@/lib/types';
+import type { World } from '@/domain/model';
 
 // Deterministic hue from world id - same world reads as the same color
 // Wherever it's rendered (sidebar hero, switcher pill, world page title).
@@ -39,7 +39,7 @@ export function WorldPlanet({ world, size = 'md', className = '' }: WorldPlanetP
     if (size === 'sm') {
         return (
             <span
-                className={`block w-3 h-3 rounded-full shrink-0 ${className}`}
+                className={`block h-3 w-3 shrink-0 rounded-full ${className}`}
                 style={{
                     background: gradient,
                     boxShadow: 'inset 0 -1px 1px rgba(0,0,0,0.35)',

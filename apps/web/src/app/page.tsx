@@ -25,6 +25,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
 import { useRefetch } from '@/components/app-shell';
 import {
@@ -43,11 +44,11 @@ import { Planet as PlanetGlobe } from '@/components/planet';
 import { ProgressShimmer } from '@/components/progress-shimmer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WorldPlanet } from '@/components/world-planet';
+import { AVAILABLE_CONFIGS, getWorldName } from '@/domain/model';
+import type { World } from '@/domain/model';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { useProgressMessages } from '@/hooks/use-progress-messages';
-import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '@/lib/api-client';
-import { AVAILABLE_CONFIGS, getWorldName, type World } from '@/lib/types';
 
 interface AgentListItem {
     name: string;
@@ -116,7 +117,10 @@ export default function UniverseMapPage() {
                     s === null ? worlds.length - 1 : (s - 1 + worlds.length) % worlds.length,
                 );
             } else if (e.key === 'Enter' && selected !== null) {
-                router.push(`/world/${worlds[selected].id}`);
+                const world = worlds[selected];
+                if (world) {
+                    router.push(`/world/${world.id}`);
+                }
             } else if (e.key === 'Escape' && selected !== null) {
                 setSelected(null);
             }
@@ -251,7 +255,12 @@ export default function UniverseMapPage() {
         }
         const move = (e: MouseEvent) => onDragMove(e.clientX);
         const up = () => onDragEnd();
-        const tmove = (e: TouchEvent) => onDragMove(e.touches[0].clientX);
+        const tmove = (e: TouchEvent) => {
+            const touch = e.touches[0];
+            if (touch) {
+                onDragMove(touch.clientX);
+            }
+        };
         const tend = () => onDragEnd();
         globalThis.addEventListener('mousemove', move);
         globalThis.addEventListener('mouseup', up);
@@ -321,7 +330,7 @@ export default function UniverseMapPage() {
     );
 
     return (
-        <Page className="flex flex-col h-full">
+        <Page className="flex h-full flex-col">
             <PageHeader
                 actions={
                     <DashboardHeaderStats
@@ -336,7 +345,7 @@ export default function UniverseMapPage() {
             />
 
             {loading && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {[1, 2, 3].map((i) => (
                         <Skeleton className="h-32 rounded-lg" key={i} />
                     ))}
@@ -356,22 +365,27 @@ export default function UniverseMapPage() {
                     {/* Worlds */}
                     {worlds.length > 0 ? (
                         <div
-                            className="relative flex-1 min-h-[320px] -mx-6 md:-mx-8 overflow-hidden"
+                            className="relative -mx-6 min-h-[320px] flex-1 overflow-hidden md:-mx-8"
                             onClick={(e) => {
                                 if (e.target === e.currentTarget && selected !== null) {
                                     setSelected(null);
                                 }
                             }}
                         >
-                            <div className="h-full flex items-center pb-24">
+                            <div className="flex h-full items-center pb-24">
                                 {/* Planets - full width scrollable */}
                                 <div
-                                    className="flex gap-10 items-center will-change-transform select-none"
+                                    className="flex items-center gap-10 will-change-transform select-none"
                                     onMouseDown={(e) => {
                                         e.preventDefault();
                                         onDragStart(e.clientX);
                                     }}
-                                    onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
+                                    onTouchStart={(e) => {
+                                        const touch = e.touches[0];
+                                        if (touch) {
+                                            onDragStart(touch.clientX);
+                                        }
+                                    }}
                                     ref={scrollRef}
                                     style={{
                                         transform: `translateX(${totalTx}px)`,
@@ -386,7 +400,7 @@ export default function UniverseMapPage() {
                                         const hasSelection = selected !== null;
                                         return (
                                             <div
-                                                className="flex flex-col items-center shrink-0 cursor-pointer"
+                                                className="flex shrink-0 cursor-pointer flex-col items-center"
                                                 key={world.id}
                                                 onClick={() => {
                                                     if (!wasDragging.current) {
@@ -431,8 +445,8 @@ export default function UniverseMapPage() {
                                     {/* New world - same card, same animations */}
                                     <NewWorldCard
                                         onClick={() => setShowSpawn(true)}
-                                        opacity={selected !== null ? 0.2 : 0.5}
-                                        scale={selected !== null ? 0.85 : 1}
+                                        opacity={selected === null ? 0.5 : 0.2}
+                                        scale={selected === null ? 1 : 0.85}
                                         tint="creating"
                                     />
                                 </div>
@@ -448,21 +462,21 @@ export default function UniverseMapPage() {
                                     const name = getWorldName(w);
                                     const isRunning = w.status === 'running' || w.status === 'idle';
                                     return (
-                                        <div className="absolute inset-y-0 right-6 md:right-8 w-[340px] z-10 flex items-center pb-24 pointer-events-none">
+                                        <div className="pointer-events-none absolute inset-y-0 right-6 z-10 flex w-[340px] items-center pb-24 md:right-8">
                                             <div
-                                                className="w-full rounded-2xl overflow-hidden border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] pointer-events-auto animate-in fade-in slide-in-from-right-12 duration-500 ease-out"
+                                                className="border-foreground/[0.08] bg-foreground/[0.04] animate-in fade-in slide-in-from-right-12 pointer-events-auto w-full overflow-hidden rounded-2xl border shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md duration-500 ease-out dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]"
                                                 ref={panelRef}
                                             >
-                                                <div className="p-5 space-y-5">
+                                                <div className="space-y-5 p-5">
                                                     {/* Header */}
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3 min-w-0">
+                                                        <div className="flex min-w-0 items-center gap-3">
                                                             <WorldPlanet size="md" world={w} />
                                                             <div className="min-w-0">
-                                                                <h3 className="text-sm font-mono font-bold text-foreground/95 truncate">
+                                                                <h3 className="text-foreground/95 truncate font-mono text-sm font-bold">
                                                                     {name}
                                                                 </h3>
-                                                                <p className="text-[10px] font-mono text-muted-foreground/35 truncate">
+                                                                <p className="text-muted-foreground/35 truncate font-mono text-[10px]">
                                                                     {w.config} ·{' '}
                                                                     <StatusDot
                                                                         className="inline-block align-middle"
@@ -473,7 +487,7 @@ export default function UniverseMapPage() {
                                                             </div>
                                                         </div>
                                                         <button
-                                                            className="w-7 h-7 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground/70 transition-colors shrink-0"
+                                                            className="text-muted-foreground/30 hover:text-foreground/70 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors"
                                                             onClick={() => setSelected(null)}
                                                         >
                                                             <IconX size={14} />
@@ -577,7 +591,7 @@ export default function UniverseMapPage() {
                                                     {/* Actions */}
                                                     <div className="flex items-center gap-2">
                                                         <button
-                                                            className="flex-1 flex items-center justify-center gap-2 h-9 rounded-full text-xs font-mono font-medium bg-white/[0.06] text-foreground/70 hover:text-foreground/95 hover:bg-white/[0.1] border border-white/[0.06] hover:border-white/[0.12] transition-all"
+                                                            className="text-foreground/70 hover:text-foreground/95 flex h-9 flex-1 items-center justify-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.06] font-mono text-xs font-medium transition-all hover:border-white/[0.12] hover:bg-white/[0.1]"
                                                             onClick={() =>
                                                                 router.push(`/world/${w.id}`)
                                                             }
@@ -587,7 +601,7 @@ export default function UniverseMapPage() {
                                                         </button>
                                                         {isRunning && (
                                                             <button
-                                                                className="h-9 px-3.5 rounded-full text-[11px] font-mono text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/[0.06] border border-transparent hover:border-red-500/15 transition-all"
+                                                                className="text-muted-foreground/30 h-9 rounded-full border border-transparent px-3.5 font-mono text-[11px] transition-all hover:border-red-500/15 hover:bg-red-500/[0.06] hover:text-red-400"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     apiDelete(
@@ -629,38 +643,38 @@ export default function UniverseMapPage() {
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         onClick={() => !destroyingAll && setShowDestroyAll(false)}
                     />
-                    <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-red-500/30 shadow-2xl p-6">
+                    <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-sm rounded-2xl border border-red-500/30 p-6 shadow-2xl backdrop-blur-md">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10">
                                 <IconAlertTriangle className="text-red-400" size={28} />
                             </div>
-                            <h2 className="text-lg font-heading text-red-300 mb-2">
+                            <h2 className="font-heading mb-2 text-lg text-red-300">
                                 Destroy All Worlds?
                             </h2>
-                            <p className="text-xs text-red-300/60 mb-1">
+                            <p className="mb-1 text-xs text-red-300/60">
                                 This will permanently destroy{' '}
                                 <span className="font-mono font-bold">{worlds.length}</span> world
-                                {worlds.length !== 1 ? 's' : ''} and all their agents.
+                                {worlds.length === 1 ? '' : 's'} and all their agents.
                             </p>
-                            <p className="text-xs text-red-300/40 mb-6">
+                            <p className="mb-6 text-xs text-red-300/40">
                                 This action cannot be undone.
                             </p>
-                            <div className="flex gap-3 w-full">
+                            <div className="flex w-full gap-3">
                                 <button
-                                    className="flex-1 px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors disabled:opacity-30"
+                                    className="text-muted-foreground/50 hover:text-foreground/70 flex-1 rounded-xl px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-30"
                                     disabled={destroyingAll}
                                     onClick={() => setShowDestroyAll(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className="flex-1 px-4 py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 transition-colors disabled:opacity-50"
+                                    className="flex-1 rounded-xl border border-red-500/30 bg-red-500/20 px-4 py-2.5 text-sm text-red-300 transition-colors hover:bg-red-500/30 disabled:opacity-50"
                                     disabled={destroyingAll}
                                     onClick={handleDestroyAll}
                                 >
                                     {destroyingAll ? (
                                         <span className="flex items-center justify-center gap-2">
-                                            <span className="w-3.5 h-3.5 border-2 border-red-300/30 border-t-red-300/70 rounded-full animate-spin" />
+                                            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-300/30 border-t-red-300/70" />
                                             Destroying...
                                         </span>
                                     ) : (
@@ -757,16 +771,16 @@ function DashboardHeaderStats({
                         <span
                             className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center self-center ${item.iconWrapClass}`}
                         >
-                            <span className="block leading-none translate-y-[0.5px]">
+                            <span className="block translate-y-[0.5px] leading-none">
                                 {item.icon}
                             </span>
                         </span>
                         <span className="flex items-baseline gap-1.5 self-center whitespace-nowrap">
-                            <span className="text-[12px] font-mono font-medium leading-none">
+                            <span className="font-mono text-[12px] leading-none font-medium">
                                 {item.value}
                             </span>
                             <span
-                                className={`text-[9px] uppercase font-medium leading-none ${item.labelClass}`}
+                                className={`text-[9px] leading-none font-medium uppercase ${item.labelClass}`}
                                 style={{
                                     opacity: expanded ? 1 : 0,
                                     transform: expanded ? 'translateX(0)' : 'translateX(-6px)',
@@ -860,19 +874,19 @@ function EmptyWorldsView({
     };
 
     return (
-        <div className="flex-1 min-h-[400px] flex items-start justify-center pt-12 pb-16 px-4">
+        <div className="flex min-h-[400px] flex-1 items-start justify-center px-4 pt-12 pb-16">
             <div className="w-full max-w-5xl">
-                <div className="text-center mb-10">
-                    <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground/70">
+                <div className="mb-10 text-center">
+                    <div className="text-muted-foreground/70 mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] tracking-wider uppercase">
                         <IconSparkles size={11} />
                         Start from a template
                     </div>
-                    <h2 className="font-heading text-2xl tracking-wide text-foreground/90">
+                    <h2 className="font-heading text-foreground/90 text-2xl tracking-wide">
                         {hasAgents
                             ? 'Give your agents a world to work in'
                             : 'Pick a template and spawn in one click'}
                     </h2>
-                    <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground/60">
+                    <p className="text-muted-foreground/60 mx-auto mt-2 max-w-lg text-sm">
                         {hasAgents
                             ? `You have ${agents.length} agent${agents.length > 1 ? 's' : ''} installed. Pick a template to put one to work, or build your own world from scratch.`
                             : 'Each template ships a full world config + pre-written agents with profiles. Clicking Install & spawn copies the files into ~/.spwn, creates a container and drops you straight into a conversation.'}
@@ -887,7 +901,7 @@ function EmptyWorldsView({
                     </div>
                 )}
                 {gallery !== null && gallery.length === 0 && (
-                    <p className="text-center text-sm text-muted-foreground/60">
+                    <p className="text-muted-foreground/60 text-center text-sm">
                         No examples bundled in this build.
                     </p>
                 )}
@@ -900,7 +914,7 @@ function EmptyWorldsView({
                                 example={ex}
                                 featured={i === 0}
                                 key={ex.slug}
-                                onInstall={() => handleInstallAndSpawn(ex)}
+                                onInstall={async () => await handleInstallAndSpawn(ex)}
                             />
                         ))}
                     </div>
@@ -912,13 +926,13 @@ function EmptyWorldsView({
 
                 <div className="mt-10 flex flex-col items-center gap-2">
                     <button
-                        className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground/50 hover:text-foreground/80 transition-colors"
+                        className="text-muted-foreground/50 hover:text-foreground/80 inline-flex items-center gap-2 text-[11px] tracking-wider uppercase transition-colors"
                         onClick={onSpawn}
                     >
                         <IconRocket size={12} />
                         Or build your own world from scratch
                     </button>
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground/30 font-mono">
+                    <div className="text-muted-foreground/30 flex items-center gap-2 font-mono text-[10px]">
                         <IconTerminal2 size={11} />
                         <span>spwn example list</span>
                     </div>
@@ -990,15 +1004,15 @@ function GalleryCard({
                     <span className={theme.accent}>{theme.icon}</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                    <h3 className="font-heading text-sm tracking-wide text-foreground/95">
+                    <h3 className="font-heading text-foreground/95 text-sm tracking-wide">
                         {example.name}
                     </h3>
-                    <p className="text-[11px] text-muted-foreground/60">{example.tagline}</p>
+                    <p className="text-muted-foreground/60 text-[11px]">{example.tagline}</p>
                 </div>
             </div>
 
             <p
-                className={`mt-3 text-[11px] leading-relaxed text-muted-foreground/70 ${featured ? 'line-clamp-4' : 'line-clamp-3'}`}
+                className={`text-muted-foreground/70 mt-3 text-[11px] leading-relaxed ${featured ? 'line-clamp-4' : 'line-clamp-3'}`}
             >
                 {firstParagraph}
             </p>
@@ -1006,7 +1020,7 @@ function GalleryCard({
             <div className="mt-3 flex flex-wrap gap-1.5">
                 {example.agents.map((a) => (
                     <span
-                        className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-muted-foreground/70"
+                        className="text-muted-foreground/70 inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 font-mono text-[10px]"
                         key={a}
                     >
                         <IconUser className="opacity-50" size={9} />
@@ -1016,8 +1030,8 @@ function GalleryCard({
             </div>
 
             {example.command && (
-                <div className="mt-3 rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-1.5">
-                    <code className="text-[10px] font-mono text-muted-foreground/50 leading-relaxed">
+                <div className="mt-3 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5">
+                    <code className="text-muted-foreground/50 font-mono text-[10px] leading-relaxed">
                         $ {example.command.split('\n')[0]}
                     </code>
                 </div>
@@ -1028,8 +1042,8 @@ function GalleryCard({
             <button
                 className={`mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
                     featured
-                        ? 'border-white/[0.15] bg-white/[0.08] text-foreground/95 hover:border-white/[0.25] hover:bg-white/[0.14]'
-                        : 'border-white/[0.10] bg-white/[0.06] text-foreground/90 hover:border-white/[0.18] hover:bg-white/[0.10]'
+                        ? 'text-foreground/95 border-white/[0.15] bg-white/[0.08] hover:border-white/[0.25] hover:bg-white/[0.14]'
+                        : 'text-foreground/90 border-white/[0.10] bg-white/[0.06] hover:border-white/[0.18] hover:bg-white/[0.10]'
                 }`}
                 disabled={disabled || busy}
                 onClick={onInstall}
@@ -1099,7 +1113,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
         setError('');
         const effectiveWorkspace =
             workspace.trim() ||
-            `/tmp/spwn-${agentName.trim()}-${Math.random().toString(36).substring(2, 6)}`;
+            `/tmp/spwn-${agentName.trim()}-${Math.random().toString(36).slice(2, 6)}`;
         try {
             const res = await fetch(goApiUrl('/api/worlds'), {
                 method: 'POST',
@@ -1135,20 +1149,20 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
     ];
 
     return (
-        <div className="w-full max-w-lg mx-auto px-4">
+        <div className="mx-auto w-full max-w-lg px-4">
             {/* Header */}
-            <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/[0.08] flex items-center justify-center mx-auto mb-4">
+            <div className="mb-8 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-gradient-to-br from-blue-500/20 to-purple-500/20">
                     <IconSparkles className="text-blue-400/60" size={28} />
                 </div>
-                <h2 className="text-xl font-heading text-foreground/90">Get started</h2>
-                <p className="text-xs text-muted-foreground/40 mt-1 font-mono">
+                <h2 className="font-heading text-foreground/90 text-xl">Get started</h2>
+                <p className="text-muted-foreground/40 mt-1 font-mono text-xs">
                     Create an agent, give it a purpose, and spawn a world.
                 </p>
             </div>
 
             {/* Step indicators */}
-            <div className="flex items-center justify-center gap-2 mb-8">
+            <div className="mb-8 flex items-center justify-center gap-2">
                 {steps.map((s, i) => {
                     let stepClass: string;
                     if (step > s.num) {
@@ -1162,7 +1176,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                     return (
                         <div className="flex items-center gap-2" key={s.num}>
                             <div
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-mono transition-all ${stepClass}`}
+                                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] transition-all ${stepClass}`}
                             >
                                 {step > s.num ? <IconCheck size={10} /> : s.icon}
                                 {s.label}
@@ -1176,16 +1190,16 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
             </div>
 
             {/* Step content */}
-            <div className="glass-subtle rounded-2xl p-6 space-y-4">
+            <div className="glass-subtle space-y-4 rounded-2xl p-6">
                 {step === 1 && (
                     <>
                         <div>
-                            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">
+                            <label className="text-muted-foreground/40 mb-2 block text-[10px] tracking-widest uppercase">
                                 Agent name
                             </label>
                             <input
                                 autoFocus
-                                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-4 py-3 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                                 onChange={(e) => setAgentName(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
@@ -1195,17 +1209,17 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                                 placeholder="e.g. atlas, neo, morpheus..."
                                 value={agentName}
                             />
-                            <p className="text-[10px] text-muted-foreground/25 mt-2">
+                            <p className="text-muted-foreground/25 mt-2 text-[10px]">
                                 Agents are autonomous AI entities that work inside worlds
                             </p>
                         </div>
                         <button
-                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="text-foreground/70 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30"
                             disabled={!agentName.trim() || working}
                             onClick={handleCreateAgent}
                         >
                             {working ? (
-                                <div className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                                <div className="border-foreground/30 border-t-foreground/70 h-3.5 w-3.5 animate-spin rounded-full border-2" />
                             ) : (
                                 <IconArrowRight size={16} />
                             )}
@@ -1217,12 +1231,12 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 {step === 2 && (
                     <>
                         <div>
-                            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">
+                            <label className="text-muted-foreground/40 mb-2 block text-[10px] tracking-widest uppercase">
                                 What should {agentName} do?
                             </label>
                             <textarea
                                 autoFocus
-                                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-4 py-3 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors resize-none"
+                                className="text-foreground/80 placeholder:text-muted-foreground/25 w-full resize-none rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                                 onChange={(e) => setPurpose(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1234,12 +1248,12 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                                 rows={3}
                                 value={purpose}
                             />
-                            <p className="text-[10px] text-muted-foreground/25 mt-2">
+                            <p className="text-muted-foreground/25 mt-2 text-[10px]">
                                 Optional - you can always change this later
                             </p>
                         </div>
                         <button
-                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all"
+                            className="text-foreground/70 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1]"
                             onClick={handleSetPurpose}
                         >
                             <IconArrowRight size={16} />
@@ -1251,12 +1265,12 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 {step === 3 && (
                     <>
                         <div>
-                            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">
+                            <label className="text-muted-foreground/40 mb-2 block text-[10px] tracking-widest uppercase">
                                 Workspace path
                             </label>
                             <input
                                 autoFocus
-                                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-4 py-3 text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 font-mono text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                                 onChange={(e) => setWorkspace(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
@@ -1266,17 +1280,17 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                                 placeholder={`/tmp/spwn-${agentName.trim() || 'agent'}`}
                                 value={workspace}
                             />
-                            <p className="text-[10px] text-muted-foreground/25 mt-2">
+                            <p className="text-muted-foreground/25 mt-2 text-[10px]">
                                 The directory where {agentName} will work - leave empty for default
                             </p>
                         </div>
 
                         {/* Preview */}
-                        <div className="rounded-lg bg-white/[0.02] border border-white/[0.05] px-3 py-3">
-                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-1">
+                        <div className="rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-3">
+                            <p className="text-muted-foreground/30 mb-1 text-[10px] tracking-widest uppercase">
                                 Summary
                             </p>
-                            <div className="text-[11px] text-muted-foreground/40 space-y-0.5">
+                            <div className="text-muted-foreground/40 space-y-0.5 text-[11px]">
                                 <p>
                                     → Agent:{' '}
                                     <span className="text-foreground/60 font-mono">
@@ -1291,7 +1305,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                                 )}
                                 <p>
                                     → Workspace:{' '}
-                                    <span className="font-mono text-foreground/60">
+                                    <span className="text-foreground/60 font-mono">
                                         {workspace || `/tmp/spwn-${agentName.trim()}`}
                                     </span>
                                 </p>
@@ -1299,13 +1313,13 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                         </div>
 
                         <button
-                            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed ${working ? 'animate-pulse' : ''}`}
+                            className={`text-foreground/70 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30 ${working ? 'animate-pulse' : ''}`}
                             disabled={working}
                             onClick={handleSpawnWorld}
                         >
                             {working ? (
                                 <>
-                                    <div className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                                    <div className="border-foreground/30 border-t-foreground/70 h-3.5 w-3.5 animate-spin rounded-full border-2" />
                                     Spawning...
                                 </>
                             ) : (
@@ -1320,7 +1334,7 @@ function QuickStartWizard({ onComplete }: { onComplete: () => void }) {
                 )}
 
                 {error && (
-                    <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-xs text-red-400 font-mono">
+                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 font-mono text-xs text-red-400">
                         {error}
                     </div>
                 )}
@@ -1382,7 +1396,7 @@ function SpawnWorldDialog({
     // Agent's name when one exists, else a generic suffix.
     const defaultWorkspacePath = useMemo(() => {
         const first = [...selectedAgents][0];
-        const rand = Math.random().toString(36).substring(2, 6);
+        const rand = Math.random().toString(36).slice(2, 6);
         return first ? `/tmp/spwn-${first}-${rand}` : `/tmp/spwn-workspace-${rand}`;
     }, [selectedAgents]);
 
@@ -1480,10 +1494,10 @@ function SpawnWorldDialog({
             />
 
             {/* Dialog */}
-            <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl overflow-hidden">
+            <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
                 {/* Top shimmer bar */}
                 {spawning && (
-                    <div className="w-full h-0.5 overflow-hidden bg-white/[0.04]">
+                    <div className="h-0.5 w-full overflow-hidden bg-white/[0.04]">
                         <div
                             className="h-full w-1/3 rounded-full bg-emerald-500/30"
                             style={{ animation: 'progressSlide 1.5s ease-in-out infinite' }}
@@ -1491,15 +1505,15 @@ function SpawnWorldDialog({
                     </div>
                 )}
                 {/* Header */}
-                <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+                <div className="flex items-center justify-between px-6 pt-6 pb-4">
                     <div>
-                        <h2 className="text-lg font-heading text-foreground/90">New World</h2>
-                        <p className="text-[11px] text-muted-foreground/40 mt-0.5">
+                        <h2 className="font-heading text-foreground/90 text-lg">New World</h2>
+                        <p className="text-muted-foreground/40 mt-0.5 text-[11px]">
                             Create a new isolated world for your agent
                         </p>
                     </div>
                     <button
-                        className="text-muted-foreground/40 hover:text-foreground/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="text-muted-foreground/40 hover:text-foreground/60 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
                         disabled={spawning}
                         onClick={onClose}
                     >
@@ -1508,17 +1522,17 @@ function SpawnWorldDialog({
                 </div>
 
                 {/* Form */}
-                <div className="px-6 pb-6 space-y-4">
+                <div className="space-y-4 px-6 pb-6">
                     {/* World name (optional) */}
                     <div>
-                        <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                        <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                             Name{' '}
-                            <span className="text-muted-foreground/25 normal-case tracking-normal">
+                            <span className="text-muted-foreground/25 tracking-normal normal-case">
                                 (optional)
                             </span>
                         </label>
                         <input
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                            className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                             onChange={(e) => setWorldName(e.target.value)}
                             placeholder="My Project"
                             value={worldName}
@@ -1527,10 +1541,10 @@ function SpawnWorldDialog({
 
                     {/* Agents - checkable list, optional (0 = empty world) */}
                     <div>
-                        <div className="flex items-baseline justify-between mb-1.5">
-                            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40">
+                        <div className="mb-1.5 flex items-baseline justify-between">
+                            <label className="text-muted-foreground/40 text-[10px] tracking-widest uppercase">
                                 Agents{' '}
-                                <span className="text-muted-foreground/25 normal-case tracking-normal">
+                                <span className="text-muted-foreground/25 tracking-normal normal-case">
                                     (
                                     {selectedAgents.size === 0
                                         ? 'none - empty world'
@@ -1540,7 +1554,7 @@ function SpawnWorldDialog({
                             </label>
                             {selectedAgents.size > 0 && (
                                 <button
-                                    className="text-[10px] text-muted-foreground/40 hover:text-foreground/70 transition-colors"
+                                    className="text-muted-foreground/40 hover:text-foreground/70 text-[10px] transition-colors"
                                     onClick={() => setSelectedAgents(new Set())}
                                     type="button"
                                 >
@@ -1548,9 +1562,9 @@ function SpawnWorldDialog({
                                 </button>
                             )}
                         </div>
-                        <div className="rounded-lg bg-white/[0.02] border border-white/[0.08] max-h-44 overflow-y-auto">
+                        <div className="max-h-44 overflow-y-auto rounded-lg border border-white/[0.08] bg-white/[0.02]">
                             {availableAgents.length === 0 ? (
-                                <p className="text-[11px] text-muted-foreground/40 px-3 py-2.5">
+                                <p className="text-muted-foreground/40 px-3 py-2.5 text-[11px]">
                                     No agents yet - create one below or skip to spawn an empty
                                     world.
                                 </p>
@@ -1560,15 +1574,15 @@ function SpawnWorldDialog({
                                         const checked = selectedAgents.has(a.name);
                                         return (
                                             <li key={a.name}>
-                                                <label className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-white/[0.03] transition-colors">
+                                                <label className="flex cursor-pointer items-center gap-2.5 px-3 py-2 transition-colors hover:bg-white/[0.03]">
                                                     <input
                                                         checked={checked}
-                                                        className="w-3.5 h-3.5 rounded border-white/[0.15] bg-white/[0.04] accent-foreground cursor-pointer"
+                                                        className="accent-foreground h-3.5 w-3.5 cursor-pointer rounded border-white/[0.15] bg-white/[0.04]"
                                                         onChange={() => toggleAgent(a.name)}
                                                         type="checkbox"
                                                     />
                                                     <span
-                                                        className={`text-sm font-mono ${checked ? 'text-foreground/90' : 'text-foreground/60'}`}
+                                                        className={`font-mono text-sm ${checked ? 'text-foreground/90' : 'text-foreground/60'}`}
                                                     >
                                                         {a.name}
                                                     </span>
@@ -1579,9 +1593,9 @@ function SpawnWorldDialog({
                                 </ul>
                             )}
                             {/* Inline "add new" row */}
-                            <div className="flex gap-2 px-3 py-2 border-t border-white/[0.06]">
+                            <div className="flex gap-2 border-t border-white/[0.06] px-3 py-2">
                                 <input
-                                    className="flex-1 bg-transparent text-xs text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none"
+                                    className="text-foreground/80 placeholder:text-muted-foreground/30 flex-1 bg-transparent text-xs focus:outline-none"
                                     onChange={(e) => setNewAgentName(e.target.value)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
@@ -1592,7 +1606,7 @@ function SpawnWorldDialog({
                                     value={newAgentName}
                                 />
                                 <button
-                                    className="shrink-0 px-2.5 py-1 rounded text-[11px] bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="text-foreground/70 shrink-0 rounded border border-white/[0.08] bg-white/[0.06] px-2.5 py-1 text-[11px] transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30"
                                     disabled={!newAgentName.trim() || creatingAgent}
                                     onClick={handleCreateInlineAgent}
                                     type="button"
@@ -1605,17 +1619,17 @@ function SpawnWorldDialog({
 
                     {/* Workspaces */}
                     <div>
-                        <div className="flex items-baseline justify-between mb-1.5">
-                            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40">
+                        <div className="mb-1.5 flex items-baseline justify-between">
+                            <label className="text-muted-foreground/40 text-[10px] tracking-widest uppercase">
                                 Workspaces{' '}
                                 {workspaces.length === 0 && (
-                                    <span className="text-muted-foreground/25 normal-case tracking-normal">
+                                    <span className="text-muted-foreground/25 tracking-normal normal-case">
                                         (ephemeral)
                                     </span>
                                 )}
                             </label>
                             <button
-                                className="text-[10px] text-muted-foreground/50 hover:text-foreground/80 transition-colors"
+                                className="text-muted-foreground/50 hover:text-foreground/80 text-[10px] transition-colors"
                                 onClick={() =>
                                     setWorkspaces((prev) => [
                                         ...prev,
@@ -1633,7 +1647,7 @@ function SpawnWorldDialog({
                         </div>
                         {workspaces.length === 0 ? (
                             <button
-                                className="w-full text-left px-3 py-2.5 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.08] text-[11px] text-muted-foreground/40 hover:text-foreground/60 hover:border-white/[0.15] transition-colors"
+                                className="text-muted-foreground/40 hover:text-foreground/60 w-full rounded-lg border border-dashed border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left text-[11px] transition-colors hover:border-white/[0.15]"
                                 onClick={() => setWorkspaces([newWorkspaceDraft()])}
                                 type="button"
                             >
@@ -1642,9 +1656,9 @@ function SpawnWorldDialog({
                         ) : (
                             <div className="space-y-2">
                                 {workspaces.map((ws, idx) => (
-                                    <div className="flex gap-1.5 items-center" key={ws.id}>
+                                    <div className="flex items-center gap-1.5" key={ws.id}>
                                         <input
-                                            className="w-24 shrink-0 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2.5 py-2 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                            className="text-foreground/80 placeholder:text-muted-foreground/25 w-24 shrink-0 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
                                             onChange={(e) =>
                                                 setWorkspaces((prev) =>
                                                     prev.map((w, i) =>
@@ -1658,7 +1672,7 @@ function SpawnWorldDialog({
                                             value={ws.name}
                                         />
                                         <input
-                                            className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2.5 py-2 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                            className="text-foreground/80 placeholder:text-muted-foreground/25 min-w-0 flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-2 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
                                             onChange={(e) =>
                                                 setWorkspaces((prev) =>
                                                     prev.map((w, i) =>
@@ -1674,7 +1688,7 @@ function SpawnWorldDialog({
                                             value={ws.path}
                                         />
                                         <button
-                                            className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-[10px] font-mono transition-colors ${ws.readonly ? 'bg-amber-500/15 border border-amber-500/25 text-amber-300' : 'bg-white/[0.03] border border-white/[0.08] text-muted-foreground/40 hover:text-foreground/70'}`}
+                                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-[10px] transition-colors ${ws.readonly ? 'border border-amber-500/25 bg-amber-500/15 text-amber-300' : 'text-muted-foreground/40 hover:text-foreground/70 border border-white/[0.08] bg-white/[0.03]'}`}
                                             onClick={() =>
                                                 setWorkspaces((prev) =>
                                                     prev.map((w, i) =>
@@ -1690,7 +1704,7 @@ function SpawnWorldDialog({
                                             ro
                                         </button>
                                         <button
-                                            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                            className="text-muted-foreground/30 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-red-500/10 hover:text-red-400"
                                             onClick={() =>
                                                 setWorkspaces((prev) =>
                                                     prev.filter((_, i) => i !== idx),
@@ -1709,11 +1723,11 @@ function SpawnWorldDialog({
                     {/* Config + Role row */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                            <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                                 Config
                             </label>
                             <select
-                                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                                 onChange={(e) => setConfig(e.target.value)}
                                 value={config}
                             >
@@ -1725,11 +1739,11 @@ function SpawnWorldDialog({
                             </select>
                         </div>
                         <div>
-                            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                            <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                                 Agent Role
                             </label>
                             <select
-                                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                                 onChange={(e) => setRole(e.target.value)}
                                 value={role}
                             >
@@ -1752,15 +1766,15 @@ function SpawnWorldDialog({
                                 ? agentList.map((n) => `-a ${n}`).join(' ')
                                 : '--no-agent';
                         return (
-                            <div className="rounded-lg bg-white/[0.02] border border-white/[0.05] px-3 py-3 space-y-2">
-                                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30 mb-1">
+                            <div className="space-y-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-3">
+                                <p className="text-muted-foreground/30 mb-1 text-[10px] tracking-widest uppercase">
                                     Preview
                                 </p>
-                                <div className="font-mono text-[11px] text-muted-foreground/35 break-all">
+                                <div className="text-muted-foreground/35 font-mono text-[11px] break-all">
                                     spwn up {agentFlags} --role {role} --config {config}
                                     {wsFlags ? ` ${wsFlags}` : ' (ephemeral)'}
                                 </div>
-                                <div className="text-[10px] text-muted-foreground/25 space-y-0.5">
+                                <div className="text-muted-foreground/25 space-y-0.5 text-[10px]">
                                     <p>→ Creates isolated Docker container</p>
                                     {agentList.length === 0 ? (
                                         <p>→ Empty world (no agents deployed)</p>
@@ -1795,20 +1809,20 @@ function SpawnWorldDialog({
 
                     {/* Error display */}
                     {error && (
-                        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-xs text-red-400 font-mono">
+                        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 font-mono text-xs text-red-400">
                             {error}
                         </div>
                     )}
 
                     {/* Spawn button */}
                     <button
-                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] hover:text-foreground/90 border border-white/[0.08] transition-all disabled:opacity-30 disabled:cursor-not-allowed ${spawning ? 'animate-pulse' : ''}`}
+                        className={`text-foreground/70 hover:text-foreground/90 flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] py-3 text-sm font-medium transition-all hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-30 ${spawning ? 'animate-pulse' : ''}`}
                         disabled={spawning}
                         onClick={handleSpawn}
                     >
                         {spawning ? (
                             <>
-                                <div className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                                <div className="border-foreground/30 border-t-foreground/70 h-3.5 w-3.5 animate-spin rounded-full border-2" />
                                 Spawning...
                             </>
                         ) : (

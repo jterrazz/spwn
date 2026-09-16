@@ -1,18 +1,19 @@
 'use client';
 
 import { IconPlus, IconTrash, IconX } from '@tabler/icons-react';
-import { type Edge, Handle, type Node, type NodeProps, Position, ReactFlow } from '@xyflow/react';
+import { Handle, Position, ReactFlow } from '@xyflow/react';
+import type { Edge, Node, NodeProps } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import '@xyflow/react/dist/style.css';
+import { apiDelete, apiGet, apiPost } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
 import { KeyValue, SectionHeader, Separator, SubLabel } from '@/components/ds';
 import { Page } from '@/components/page';
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Organization, OrganizationRole } from '@/domain/model';
 import { usePageTitle } from '@/hooks/use-page-title';
-import { apiDelete, apiGet, apiPost } from '@/lib/api-client';
-import type { Organization, OrganizationRole } from '@/lib/types';
 
 // ── Role colors by level ──────────────────────────────────────────
 const LEVEL_COLORS: Record<number, { border: string; text: string; bg: string; glow: string }> = {
@@ -54,38 +55,38 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
 
     return (
         <div
-            className={`border ${c.border} bg-[#0a0a0c]/90 backdrop-blur-sm rounded-xl px-6 py-4 min-w-[220px] text-center ${c.glow} transition-shadow hover:border-opacity-60`}
+            className={`border ${c.border} min-w-[220px] rounded-xl bg-[#0a0a0c]/90 px-6 py-4 text-center backdrop-blur-sm ${c.glow} hover:border-opacity-60 transition-shadow`}
         >
             {/* Handles for edges */}
             {!isFirst && (
                 <Handle
-                    className="!bg-white/[0.15] !border-0 !w-1.5 !h-1.5"
+                    className="!h-1.5 !w-1.5 !border-0 !bg-white/[0.15]"
                     position={Position.Top}
                     type="target"
                 />
             )}
             {!isLast && (
                 <Handle
-                    className="!bg-white/[0.15] !border-0 !w-1.5 !h-1.5"
+                    className="!h-1.5 !w-1.5 !border-0 !bg-white/[0.15]"
                     position={Position.Bottom}
                     type="source"
                 />
             )}
 
             {/* Role name */}
-            <p className={`text-sm font-mono font-bold uppercase tracking-[0.06em] ${c.text}`}>
+            <p className={`font-mono text-sm font-bold tracking-[0.06em] uppercase ${c.text}`}>
                 {role.name}
             </p>
 
             {/* Level + constraints */}
-            <div className="flex items-center justify-center gap-1.5 mt-2">
+            <div className="mt-2 flex items-center justify-center gap-1.5">
                 <span
-                    className={`px-2 py-0.5 text-[9px] font-mono rounded-full ${c.bg} ${c.text} border ${c.border}`}
+                    className={`rounded-full px-2 py-0.5 font-mono text-[9px] ${c.bg} ${c.text} border ${c.border}`}
                 >
                     Level {role.level}
                 </span>
                 {role.max_per_world != null && role.max_per_world > 0 && (
-                    <span className="px-2 py-0.5 text-[9px] font-mono rounded-full bg-white/[0.03] text-muted-foreground/40 border border-white/[0.06]">
+                    <span className="text-muted-foreground/40 rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 font-mono text-[9px]">
                         max {role.max_per_world}
                     </span>
                 )}
@@ -93,10 +94,10 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
 
             {/* Permissions */}
             {role.permissions && role.permissions.length > 0 && (
-                <div className="flex flex-wrap items-center justify-center gap-1 mt-3">
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-1">
                     {role.permissions.map((p) => (
                         <span
-                            className="px-1.5 py-0.5 text-[8px] font-mono bg-white/[0.03] border border-white/[0.05] rounded text-muted-foreground/40"
+                            className="text-muted-foreground/40 rounded border border-white/[0.05] bg-white/[0.03] px-1.5 py-0.5 font-mono text-[8px]"
                             key={p}
                         >
                             {p}
@@ -109,13 +110,13 @@ function RoleNodeComponent({ data }: NodeProps<Node<RoleNodeData>>) {
             {(role.reports_to || (role.can_command && role.can_command.length > 0)) && (
                 <div className="mt-2.5 space-y-0.5">
                     {role.reports_to && (
-                        <p className="text-[8px] font-mono text-muted-foreground/25">
+                        <p className="text-muted-foreground/25 font-mono text-[8px]">
                             reports to{' '}
                             <span className="text-muted-foreground/40">{role.reports_to}</span>
                         </p>
                     )}
                     {role.can_command && role.can_command.length > 0 && (
-                        <p className="text-[8px] font-mono text-muted-foreground/25">
+                        <p className="text-muted-foreground/25 font-mono text-[8px]">
                             commands{' '}
                             <span className="text-muted-foreground/40">
                                 {role.can_command.join(', ')}
@@ -154,14 +155,12 @@ function buildFlowElements(roles: OrganizationRole[]): {
     const sortedLevels = [...levels.keys()].sort((a, b) => a - b);
     let y = 0;
 
-    for (let li = 0; li < sortedLevels.length; li++) {
-        const level = sortedLevels[li];
-        const rolesAtLevel = levels.get(level)!;
+    for (const [li, level] of sortedLevels.entries()) {
+        const rolesAtLevel = levels.get(level) ?? [];
         const totalWidth = rolesAtLevel.length * NODE_WIDTH + (rolesAtLevel.length - 1) * 40;
         const startX = -totalWidth / 2 + NODE_WIDTH / 2;
 
-        for (let ri = 0; ri < rolesAtLevel.length; ri++) {
-            const role = rolesAtLevel[ri];
+        for (const [ri, role] of rolesAtLevel.entries()) {
             nodes.push({
                 id: role.name,
                 type: 'roleNode',
@@ -192,8 +191,13 @@ function buildFlowElements(roles: OrganizationRole[]): {
     // If no reports_to defined, connect by level order
     if (edges.length === 0 && sortedLevels.length > 1) {
         for (let i = 0; i < sortedLevels.length - 1; i++) {
-            const parents = levels.get(sortedLevels[i])!;
-            const children = levels.get(sortedLevels[i + 1])!;
+            const parentLevel = sortedLevels[i];
+            const childLevel = sortedLevels[i + 1];
+            if (parentLevel === undefined || childLevel === undefined) {
+                continue;
+            }
+            const parents = levels.get(parentLevel) ?? [];
+            const children = levels.get(childLevel) ?? [];
             for (const p of parents) {
                 for (const c of children) {
                     edges.push({
@@ -304,8 +308,8 @@ function CreateOrganizationDialog({
         const slug = name
             .trim()
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '');
+            .replaceAll(/[^a-z0-9]+/g, '-')
+            .replaceAll(/^-|-$/g, '');
         const body: Organization = {
             slug,
             name: name.trim(),
@@ -347,13 +351,13 @@ function CreateOrganizationDialog({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-lg mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl max-h-[85vh] flex flex-col">
-                <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
+            <div className="bg-popover/95 relative z-10 mx-4 flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
+                <div className="flex shrink-0 items-center justify-between px-6 pt-6 pb-4">
                     <div>
-                        <h2 className="text-lg font-heading text-foreground/90">
+                        <h2 className="font-heading text-foreground/90 text-lg">
                             New Organization
                         </h2>
-                        <p className="text-[11px] text-muted-foreground/40 mt-0.5">
+                        <p className="text-muted-foreground/40 mt-0.5 text-[11px]">
                             Define a role structure for organizing agents
                         </p>
                     </div>
@@ -365,24 +369,24 @@ function CreateOrganizationDialog({
                     </button>
                 </div>
 
-                <div className="px-6 pb-6 space-y-4 overflow-y-auto min-h-0">
+                <div className="min-h-0 space-y-4 overflow-y-auto px-6 pb-6">
                     <div>
-                        <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                        <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                             Name <span className="text-red-400/60">*</span>
                         </label>
                         <input
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                            className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Military Chain"
                             value={name}
                         />
                     </div>
                     <div>
-                        <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                        <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                             Description
                         </label>
                         <input
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                            className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.15] focus:outline-none"
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="A strict top-down command structure"
                             value={description}
@@ -390,23 +394,23 @@ function CreateOrganizationDialog({
                     </div>
 
                     <div>
-                        <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-2">
+                        <label className="text-muted-foreground/40 mb-2 block text-[10px] tracking-widest uppercase">
                             Roles
                         </label>
                         <div className="space-y-3">
                             {roles.map((role, idx) => (
                                 <div
-                                    className="border border-white/[0.06] rounded-lg p-3 bg-white/[0.01] space-y-2"
+                                    className="space-y-2 rounded-lg border border-white/[0.06] bg-white/[0.01] p-3"
                                     key={role.id}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[9px] font-mono text-muted-foreground/30">
+                                        <span className="text-muted-foreground/30 font-mono text-[9px]">
                                             #{idx + 1}
                                         </span>
                                         <div className="flex-1" />
                                         {roles.length > 1 && (
                                             <button
-                                                className="text-muted-foreground/30 hover:text-red-400/70 transition-colors"
+                                                className="text-muted-foreground/30 transition-colors hover:text-red-400/70"
                                                 onClick={() => removeRole(idx)}
                                             >
                                                 <IconX size={14} />
@@ -415,7 +419,7 @@ function CreateOrganizationDialog({
                                     </div>
                                     <div className="grid grid-cols-[1fr_60px] gap-2">
                                         <input
-                                            className="bg-white/[0.03] border border-white/[0.08] rounded px-2.5 py-1.5 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                            className="text-foreground/80 placeholder:text-muted-foreground/25 rounded border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
                                             onChange={(e) =>
                                                 updateRole(idx, { name: e.target.value })
                                             }
@@ -423,10 +427,10 @@ function CreateOrganizationDialog({
                                             value={role.name}
                                         />
                                         <input
-                                            className="bg-white/[0.03] border border-white/[0.08] rounded px-2.5 py-1.5 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors text-center"
+                                            className="text-foreground/80 placeholder:text-muted-foreground/25 rounded border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 text-center font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
                                             onChange={(e) =>
                                                 updateRole(idx, {
-                                                    level: parseInt(e.target.value) || 0,
+                                                    level: Number.parseInt(e.target.value) || 0,
                                                 })
                                             }
                                             placeholder="Lvl"
@@ -436,11 +440,11 @@ function CreateOrganizationDialog({
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
-                                            <span className="text-[8px] font-mono text-muted-foreground/25 uppercase block mb-0.5">
+                                            <span className="text-muted-foreground/25 mb-0.5 block font-mono text-[8px] uppercase">
                                                 Reports to
                                             </span>
                                             <select
-                                                className="w-full bg-white/[0.03] border border-white/[0.08] rounded px-2 py-1.5 text-xs font-mono text-foreground/80 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                                className="text-foreground/80 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
                                                 onChange={(e) =>
                                                     updateRole(idx, { reports_to: e.target.value })
                                                 }
@@ -457,11 +461,11 @@ function CreateOrganizationDialog({
                                             </select>
                                         </div>
                                         <div>
-                                            <span className="text-[8px] font-mono text-muted-foreground/25 uppercase block mb-0.5">
+                                            <span className="text-muted-foreground/25 mb-0.5 block font-mono text-[8px] uppercase">
                                                 Can command
                                             </span>
                                             <input
-                                                className="w-full bg-white/[0.03] border border-white/[0.08] rounded px-2 py-1.5 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                                className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
                                                 onChange={(e) =>
                                                     updateRole(idx, { can_command: e.target.value })
                                                 }
@@ -471,11 +475,11 @@ function CreateOrganizationDialog({
                                         </div>
                                     </div>
                                     <div>
-                                        <span className="text-[8px] font-mono text-muted-foreground/25 uppercase block mb-0.5">
+                                        <span className="text-muted-foreground/25 mb-0.5 block font-mono text-[8px] uppercase">
                                             Permissions
                                         </span>
                                         <input
-                                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded px-2 py-1.5 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-white/[0.15] transition-colors"
+                                            className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 font-mono text-xs transition-colors focus:border-white/[0.15] focus:outline-none"
                                             onChange={(e) =>
                                                 updateRole(idx, { permissions: e.target.value })
                                             }
@@ -487,7 +491,7 @@ function CreateOrganizationDialog({
                             ))}
                         </div>
                         <button
-                            className="mt-2 flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground/50 hover:text-foreground/70 transition-colors"
+                            className="text-muted-foreground/50 hover:text-foreground/70 mt-2 flex items-center gap-1.5 font-mono text-[10px] transition-colors"
                             onClick={() => setRoles((prev) => [...prev, emptyRoleDraft()])}
                         >
                             <IconPlus size={12} /> Add Role
@@ -496,22 +500,22 @@ function CreateOrganizationDialog({
 
                     {errorMessage && <p className="text-xs text-red-400/80">{errorMessage}</p>}
 
-                    <div className="flex gap-3 justify-end pt-2">
+                    <div className="flex justify-end gap-3 pt-2">
                         <button
-                            className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                            className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                             disabled={creating}
                             onClick={onClose}
                         >
                             Cancel
                         </button>
                         <button
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/20 transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/20 px-4 py-2 text-sm text-emerald-300 transition-colors hover:bg-emerald-500/30 disabled:opacity-50"
                             disabled={creating}
                             onClick={handleCreate}
                         >
                             {creating ? (
                                 <>
-                                    <div className="w-3 h-3 border-2 border-emerald-300/40 border-t-emerald-300 rounded-full animate-spin" />
+                                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-300/40 border-t-emerald-300" />
                                     Creating...
                                 </>
                             ) : (
@@ -556,31 +560,31 @@ function DeleteOrganizationDialog({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
-                <h3 className="text-lg font-heading text-foreground/90 mb-2">
+            <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-sm rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
+                <h3 className="font-heading text-foreground/90 mb-2 text-lg">
                     Delete Organization
                 </h3>
-                <p className="text-sm text-muted-foreground/50 mb-6">
+                <p className="text-muted-foreground/50 mb-6 text-sm">
                     Are you sure you want to delete{' '}
-                    <span className="font-mono text-foreground/70">{organization.name}</span>?
+                    <span className="text-foreground/70 font-mono">{organization.name}</span>?
                 </p>
-                {errorMessage && <p className="text-xs text-red-400/80 mb-3">{errorMessage}</p>}
-                <div className="flex gap-3 justify-end">
+                {errorMessage && <p className="mb-3 text-xs text-red-400/80">{errorMessage}</p>}
+                <div className="flex justify-end gap-3">
                     <button
-                        className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                        className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                         disabled={deleting}
                         onClick={onClose}
                     >
                         Cancel
                     </button>
                     <button
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/20 transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/20 px-4 py-2 text-sm text-red-300 transition-colors hover:bg-red-500/30 disabled:opacity-50"
                         disabled={deleting}
                         onClick={handleDelete}
                     >
                         {deleting ? (
                             <>
-                                <div className="w-3 h-3 border-2 border-red-300/40 border-t-red-300 rounded-full animate-spin" />
+                                <div className="h-3 w-3 animate-spin rounded-full border-2 border-red-300/40 border-t-red-300" />
                                 Deleting...
                             </>
                         ) : (
@@ -643,11 +647,11 @@ export default function OrganizationsPage() {
             )}
             {!loading && organizations.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <p className="text-sm text-muted-foreground/50">
+                    <p className="text-muted-foreground/50 text-sm">
                         No organizations defined yet.
                     </p>
                     <button
-                        className="mt-3 text-xs font-mono text-muted-foreground/40 hover:text-foreground/60 transition-colors underline underline-offset-2"
+                        className="text-muted-foreground/40 hover:text-foreground/60 mt-3 font-mono text-xs underline underline-offset-2 transition-colors"
                         onClick={() => setShowCreate(true)}
                     >
                         Create your first organization
@@ -658,11 +662,11 @@ export default function OrganizationsPage() {
                 <div className="space-y-10">
                     {organizations.map((h, idx) => (
                         <div key={h.slug}>
-                            <div className="flex items-center gap-3 mb-6">
-                                <SectionHeader className="flex-1 mb-0">{h.name}</SectionHeader>
+                            <div className="mb-6 flex items-center gap-3">
+                                <SectionHeader className="mb-0 flex-1">{h.name}</SectionHeader>
                                 {h.slug !== 'default' && (
                                     <button
-                                        className="text-muted-foreground/20 hover:text-red-400/70 transition-colors p-1"
+                                        className="text-muted-foreground/20 p-1 transition-colors hover:text-red-400/70"
                                         onClick={() => setDeleteTarget(h)}
                                         title="Delete organization"
                                     >
@@ -671,14 +675,14 @@ export default function OrganizationsPage() {
                                 )}
                             </div>
 
-                            <div className="flex flex-col lg:flex-row gap-8">
+                            <div className="flex flex-col gap-8 lg:flex-row">
                                 {/* React Flow visualization */}
-                                <div className="flex-1 min-w-0">
+                                <div className="min-w-0 flex-1">
                                     <OrganizationFlow organization={h} />
                                 </div>
 
                                 {/* Metadata sidebar */}
-                                <div className="lg:w-52 shrink-0 space-y-2">
+                                <div className="shrink-0 space-y-2 lg:w-52">
                                     <SubLabel>Details</SubLabel>
                                     <KeyValue label="Slug" value={h.slug} />
                                     {h.description && (

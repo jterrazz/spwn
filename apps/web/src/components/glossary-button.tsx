@@ -75,7 +75,7 @@ export function GlossaryButton() {
         <>
             <button
                 aria-label="Open glossary"
-                className="fixed bottom-4 left-4 z-50 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 text-muted-foreground/70 backdrop-blur-md transition-colors hover:border-white/20 hover:text-foreground"
+                className="text-muted-foreground/70 hover:text-foreground fixed bottom-4 left-4 z-50 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 backdrop-blur-md transition-colors hover:border-white/20"
                 onClick={() => setOpen(true)}
                 title="Glossary"
                 type="button"
@@ -97,14 +97,14 @@ export function GlossaryButton() {
                                 key={t.word}
                             >
                                 <dt className="flex items-baseline gap-2">
-                                    <span className="text-sm font-medium text-foreground/95">
+                                    <span className="text-foreground/95 text-sm font-medium">
                                         {t.word}
                                     </span>
-                                    <span className="text-[11px] text-muted-foreground/60">
+                                    <span className="text-muted-foreground/60 text-[11px]">
                                         {t.short}
                                     </span>
                                 </dt>
-                                <dd className="mt-1 text-[11px] leading-relaxed text-muted-foreground/70">
+                                <dd className="text-muted-foreground/70 mt-1 text-[11px] leading-relaxed">
                                     {t.long}
                                 </dd>
                             </div>

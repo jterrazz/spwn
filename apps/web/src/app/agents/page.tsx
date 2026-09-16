@@ -4,6 +4,7 @@ import { IconCheck, IconPlus, IconUser, IconUsers, IconX } from '@tabler/icons-r
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { apiAction, apiGet, goApiUrl } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
 import { useRefetch } from '@/components/app-shell';
 import { DataTable, SectionLabel, StatusDot } from '@/components/ds';
@@ -11,10 +12,10 @@ import { ExpandingSearch } from '@/components/expanding-search';
 import { Page } from '@/components/page';
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getWorldName } from '@/domain/model';
+import type { Team, World } from '@/domain/model';
 import { usePageTitle } from '@/hooks/use-page-title';
-import { apiAction, apiGet, goApiUrl } from '@/lib/api-client';
-import { ROLE_BADGE } from '@/lib/status';
-import { getWorldName, type Team, type World } from '@/lib/types';
+import { ROLE_BADGE } from '@/styles/status-colors';
 
 interface AgentListItem {
     name: string;
@@ -28,10 +29,10 @@ interface AgentListItem {
 interface EnrichedAgent {
     name: string;
     role: string;
-    team?: string; // Team slug
+    team?: string | undefined; // Team slug
     status: string; // Running/waiting/idle/sleeping/stopped/limbo
-    worldID?: string;
-    worldName?: string;
+    worldID?: string | undefined;
+    worldName?: string | undefined;
     journalEntries: number;
     sessionsCount: number;
 }
@@ -45,7 +46,7 @@ const AGENT_COLUMNS = [
         label: 'Name',
         width: '1fr',
         render: (a: EnrichedAgent) => (
-            <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>
+            <span className="text-foreground/85 truncate font-mono text-[13px]">{a.name}</span>
         ),
     },
     {
@@ -56,7 +57,7 @@ const AGENT_COLUMNS = [
             const badge = ROLE_BADGE[a.role] ?? ROLE_BADGE.default;
             return (
                 <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}
+                    className={`rounded border px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${badge}`}
                 >
                     {a.role}
                 </span>
@@ -70,7 +71,7 @@ const AGENT_COLUMNS = [
         render: (a: EnrichedAgent) => (
             <span className="flex items-center gap-1.5">
                 <StatusDot status={a.status === 'limbo' ? 'stopped' : a.status} />
-                <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">
+                <span className="text-muted-foreground/50 font-mono text-[11px] capitalize">
                     {a.status}
                 </span>
             </span>
@@ -82,11 +83,11 @@ const AGENT_COLUMNS = [
         width: '120px',
         render: (a: EnrichedAgent) =>
             a.worldName ? (
-                <span className="text-[11px] font-mono text-foreground/60 truncate">
+                <span className="text-foreground/60 truncate font-mono text-[11px]">
                     {a.worldName}
                 </span>
             ) : (
-                <span className="text-[11px] font-mono text-muted-foreground/25">-</span>
+                <span className="text-muted-foreground/25 font-mono text-[11px]">-</span>
             ),
     },
 ];
@@ -360,20 +361,20 @@ export default function AgentsPage() {
             />
 
             {/* Filter */}
-            <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-1 glass-pill px-1 py-1">
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="glass-pill flex items-center gap-1 px-1 py-1">
                     {(['all', 'deployed', 'limbo'] as StatusFilter[]).map((f) => (
                         <button
-                            className={`px-3 py-1 rounded-full text-xs capitalize transition-colors ${
+                            className={`rounded-full px-3 py-1 text-xs capitalize transition-colors ${
                                 filter === f
-                                    ? 'bg-white/[0.1] text-foreground/90'
+                                    ? 'text-foreground/90 bg-white/[0.1]'
                                     : 'text-muted-foreground/50 hover:text-foreground/70'
                             }`}
                             key={f}
                             onClick={() => setFilter(f)}
                         >
                             {f}{' '}
-                            <span className="text-[10px] font-mono text-muted-foreground/40 ml-1">
+                            <span className="text-muted-foreground/40 ml-1 font-mono text-[10px]">
                                 {counts[f]}
                             </span>
                         </button>
@@ -391,10 +392,10 @@ export default function AgentsPage() {
             )}
             {!loading && filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
                         <IconUser className="text-muted-foreground/30" size={24} />
                     </div>
-                    <p className="text-sm text-muted-foreground/50">
+                    <p className="text-muted-foreground/50 text-sm">
                         {query
                             ? 'No agents match your search'
                             : 'No agents yet. Create one to get started.'}
@@ -406,26 +407,26 @@ export default function AgentsPage() {
                     {grouped.map(({ team: t, agents: groupAgents }) => (
                         <div key={t?.slug ?? 'solo'}>
                             {/* Team header */}
-                            <div className="flex items-center gap-2 mb-3">
+                            <div className="mb-3 flex items-center gap-2">
                                 {t ? (
                                     <>
                                         <button
-                                            className="hover:underline underline-offset-2 transition-colors"
+                                            className="underline-offset-2 transition-colors hover:underline"
                                             onClick={() => openTeamDialog(t)}
                                             style={t.color ? { color: t.color } : undefined}
                                         >
                                             <SectionLabel className="mb-0">{t.name}</SectionLabel>
                                         </button>
-                                        <span className="text-[10px] text-muted-foreground/30 font-mono">
+                                        <span className="text-muted-foreground/30 font-mono text-[10px]">
                                             {groupAgents.length}
                                         </span>
                                     </>
                                 ) : (
                                     <>
-                                        <SectionLabel className="mb-0 text-muted-foreground/30">
+                                        <SectionLabel className="text-muted-foreground/30 mb-0">
                                             No team
                                         </SectionLabel>
-                                        <span className="text-[10px] text-muted-foreground/20 font-mono">
+                                        <span className="text-muted-foreground/20 font-mono text-[10px]">
                                             {groupAgents.length}
                                         </span>
                                     </>
@@ -454,14 +455,14 @@ export default function AgentsPage() {
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         onClick={() => !creating && setShowNew(false)}
                     />
-                    <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
-                        <h3 className="text-lg font-heading text-foreground/90 mb-1">New Agent</h3>
-                        <p className="text-sm text-muted-foreground/50 mb-5">
+                    <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
+                        <h3 className="font-heading text-foreground/90 mb-1 text-lg">New Agent</h3>
+                        <p className="text-muted-foreground/50 mb-5 text-sm">
                             Creates a new agent identity in limbo. Deploy it to a world when ready.
                         </p>
                         <input
                             autoFocus
-                            className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+                            className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 font-mono text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                             disabled={creating}
                             onChange={(e) => setNewName(e.target.value)}
                             onKeyDown={(e) => {
@@ -475,14 +476,14 @@ export default function AgentsPage() {
                             placeholder="e.g. atlas, morpheus, neo…"
                             value={newName}
                         />
-                        <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mt-4 mb-1.5">
+                        <label className="text-muted-foreground/40 mt-4 mb-1.5 block text-[10px] tracking-widest uppercase">
                             Team{' '}
-                            <span className="text-muted-foreground/25 normal-case tracking-normal">
+                            <span className="text-muted-foreground/25 tracking-normal normal-case">
                                 (optional)
                             </span>
                         </label>
                         <select
-                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+                            className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                             disabled={creating}
                             onChange={(e) => setNewTeam(e.target.value)}
                             value={newTeam}
@@ -495,24 +496,24 @@ export default function AgentsPage() {
                             ))}
                         </select>
                         {createError && (
-                            <p className="text-xs text-red-400/80 mt-3">{createError}</p>
+                            <p className="mt-3 text-xs text-red-400/80">{createError}</p>
                         )}
-                        <div className="flex gap-3 justify-end mt-6">
+                        <div className="mt-6 flex justify-end gap-3">
                             <button
-                                className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                                className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                 disabled={creating}
                                 onClick={() => setShowNew(false)}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-white/[0.1] text-foreground/90 hover:bg-white/[0.16] border border-white/[0.08] transition-colors disabled:opacity-50"
+                                className="text-foreground/90 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.1] px-4 py-2 text-sm transition-colors hover:bg-white/[0.16] disabled:opacity-50"
                                 disabled={creating || !newName.trim()}
                                 onClick={handleCreate}
                             >
                                 {creating ? (
                                     <>
-                                        <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/80 rounded-full animate-spin" />
+                                        <div className="border-foreground/30 border-t-foreground/80 h-3 w-3 animate-spin rounded-full border-2" />
                                         Creating…
                                     </>
                                 ) : (
@@ -525,7 +526,7 @@ export default function AgentsPage() {
                         </div>
                         <button
                             aria-label="Close"
-                            className="absolute top-4 right-4 text-muted-foreground/30 hover:text-foreground/60 transition-colors disabled:opacity-30"
+                            className="text-muted-foreground/30 hover:text-foreground/60 absolute top-4 right-4 transition-colors disabled:opacity-30"
                             disabled={creating}
                             onClick={() => !creating && setShowNew(false)}
                         >
@@ -541,23 +542,23 @@ export default function AgentsPage() {
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         onClick={() => !savingTeam && setShowTeamDialog(false)}
                     />
-                    <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
-                        <h3 className="text-lg font-heading text-foreground/90 mb-1">
+                    <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
+                        <h3 className="font-heading text-foreground/90 mb-1 text-lg">
                             {editingTeam ? 'Edit Team' : 'New Team'}
                         </h3>
-                        <p className="text-sm text-muted-foreground/50 mb-5">
+                        <p className="text-muted-foreground/50 mb-5 text-sm">
                             {editingTeam
                                 ? `Editing ${editingTeam.name}`
                                 : 'Create a new team to group agents together.'}
                         </p>
                         <div className="space-y-3">
                             <div>
-                                <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                                <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                                     Name
                                 </label>
                                 <input
                                     autoFocus
-                                    className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                                    className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none"
                                     onChange={(e) => setTeamName(e.target.value)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
@@ -569,36 +570,36 @@ export default function AgentsPage() {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                                <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                                     Color
                                 </label>
                                 <input
-                                    className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm font-mono text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                                    className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 font-mono text-sm transition-colors focus:border-white/[0.16] focus:outline-none"
                                     onChange={(e) => setTeamColor(e.target.value)}
                                     placeholder="#8B5CF6 or purple"
                                     value={teamColor}
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] uppercase tracking-widest text-muted-foreground/40 block mb-1.5">
+                                <label className="text-muted-foreground/40 mb-1.5 block text-[10px] tracking-widest uppercase">
                                     Description{' '}
-                                    <span className="text-muted-foreground/25 normal-case tracking-normal">
+                                    <span className="text-muted-foreground/25 tracking-normal normal-case">
                                         (optional)
                                     </span>
                                 </label>
                                 <input
-                                    className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors"
+                                    className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none"
                                     onChange={(e) => setTeamDesc(e.target.value)}
                                     placeholder="What this team does…"
                                     value={teamDesc}
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center justify-between mt-6">
+                        <div className="mt-6 flex items-center justify-between">
                             <div>
                                 {editingTeam && (
                                     <button
-                                        className="text-[11px] text-red-400/60 hover:text-red-400 transition-colors"
+                                        className="text-[11px] text-red-400/60 transition-colors hover:text-red-400"
                                         onClick={() => {
                                             handleDeleteTeam(editingTeam.slug);
                                             setShowTeamDialog(false);
@@ -610,14 +611,14 @@ export default function AgentsPage() {
                             </div>
                             <div className="flex gap-3">
                                 <button
-                                    className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                                    className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                     disabled={savingTeam}
                                     onClick={() => setShowTeamDialog(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-white/[0.1] text-foreground/90 hover:bg-white/[0.16] border border-white/[0.08] transition-colors disabled:opacity-50"
+                                    className="text-foreground/90 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.1] px-4 py-2 text-sm transition-colors hover:bg-white/[0.16] disabled:opacity-50"
                                     disabled={savingTeam || !teamName.trim()}
                                     onClick={handleSaveTeam}
                                 >
@@ -632,7 +633,7 @@ export default function AgentsPage() {
                         </div>
                         <button
                             aria-label="Close"
-                            className="absolute top-4 right-4 text-muted-foreground/30 hover:text-foreground/60 transition-colors"
+                            className="text-muted-foreground/30 hover:text-foreground/60 absolute top-4 right-4 transition-colors"
                             disabled={savingTeam}
                             onClick={() => !savingTeam && setShowTeamDialog(false)}
                         >

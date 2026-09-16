@@ -1,9 +1,11 @@
 'use client';
 
 import createGlobe from 'cobe';
+import type { Globe } from 'cobe';
 import { useEffect, useRef, useState } from 'react';
 
-import { getWorldName, type World } from '@/lib/types';
+import { getWorldName } from '@/domain/model';
+import type { World } from '@/domain/model';
 
 interface PlanetProps {
     world: World;
@@ -145,8 +147,7 @@ export function Planet({
     hideLabels,
 }: PlanetProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const globeRef = useRef<any>(null);
+    const globeRef = useRef<Globe | null>(null);
     const phiRef = useRef((hashCode(world.id) % 628) / 100); // Unique starting angle
     const config = getPlanetConfig(world.id, world.status);
     const name = getWorldName(world);
@@ -295,7 +296,7 @@ export function Planet({
 
     return (
         <div
-            className="relative flex items-center justify-center focus:outline-none cursor-pointer will-change-transform"
+            className="relative flex cursor-pointer items-center justify-center will-change-transform focus:outline-none"
             onClick={onClick}
             role="button"
             style={{ width: size, height: size }}
@@ -336,7 +337,7 @@ export function Planet({
                 )}
                 {(world.agents ?? []).map((a) => (
                     <div
-                        className="absolute pointer-events-none"
+                        className="pointer-events-none absolute"
                         key={`glow-${a.name}`}
                         ref={(el) => {
                             if (el) {
@@ -362,7 +363,7 @@ export function Planet({
             {/* ── Name (absolute, above globe) ── */}
             {!hideLabels && (
                 <p
-                    className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-heading tracking-wider text-center pointer-events-none"
+                    className="font-heading pointer-events-none absolute left-1/2 -translate-x-1/2 text-center tracking-wider whitespace-nowrap"
                     style={{
                         bottom: `calc(100% + ${GAP}px)`,
                         color: isSelected ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.5)',

@@ -235,7 +235,7 @@ apps/web/src-tauri/tauri.conf.json        # updater endpoint + pubkey
 apps/web/src-tauri/Cargo.toml             # tauri-plugin-updater dep
 apps/web/src-tauri/src/lib.rs             # plugin registration
 apps/web/src-tauri/capabilities/default.json  # updater:default
-apps/web/src/lib/tauri-updater.ts         # frontend check + dialog
+apps/web/src/tauri/updater.ts         # frontend check + dialog
 apps/web/src/components/app-shell.tsx     # startup hook
 docs/16-update-system.md      # this file
 docs/04-operating.md          # release runbook

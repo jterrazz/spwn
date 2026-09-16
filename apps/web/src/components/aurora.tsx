@@ -1,13 +1,13 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/styles/class-names';
 
 export function Aurora({ className }: { className?: string }) {
     return (
         <div
             aria-hidden
             className={cn(
-                'pointer-events-none fixed inset-0 z-[1] overflow-hidden [transform:translateZ(0)]',
+                'pointer-events-none fixed inset-0 z-[1] [transform:translateZ(0)] overflow-hidden',
                 className,
             )}
         >
@@ -15,7 +15,7 @@ export function Aurora({ className }: { className?: string }) {
                 className={cn(
                     'absolute -inset-[10px]',
                     'opacity-[0.06] blur-[18px] will-change-transform',
-                    'dark:invert-0 invert filter',
+                    'invert filter dark:invert-0',
 
                     // Aurora gradient - slightly varied angles to break parallelism
                     '[--aurora:repeating-linear-gradient(100deg,rgba(255,255,255,0.15)_10%,rgba(180,180,180,0.1)_15%,rgba(220,220,220,0.12)_20%,rgba(150,150,150,0.08)_25%,rgba(200,200,200,0.1)_30%)]',

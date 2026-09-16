@@ -2,9 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import type { ActivityBlock } from '@/lib/activity-types';
-import { apiGet, goApiUrl } from '@/lib/api-client';
-import { streamChat } from '@/lib/stream-chat';
+import type { ActivityBlock } from '@/activity/blocks';
+import { apiGet, goApiUrl } from '@/api/client';
+import { streamChat } from '@/api/stream-chat';
 
 // ── Types ──
 
@@ -26,9 +26,9 @@ export interface ChatMessage {
     content: string;
     blocks: ActivityBlock[];
     timestamp: Date;
-    error?: boolean;
-    cost?: number;
-    duration?: number;
+    error?: boolean | undefined;
+    cost?: number | undefined;
+    duration?: number | undefined;
 }
 
 // ── Context ──
@@ -98,6 +98,9 @@ export function ArchitectChatProvider({ children }: { children: React.ReactNode 
                 const historyMsgs: ChatMessage[] = [];
                 for (let si = 0; si < data.sessions.length; si++) {
                     const session = data.sessions[si];
+                    if (session === undefined) {
+                        continue;
+                    }
                     if (si > 0) {
                         historyMsgs.push({
                             role: 'architect',

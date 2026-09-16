@@ -3,12 +3,8 @@
  * Parses Claude Code stream-json events into ActivityBlocks.
  */
 
-import {
-    type ActivityBlock,
-    deduplicateBlocks,
-    parseStreamEvent,
-    type StreamJsonEvent,
-} from './activity-types';
+import { deduplicateBlocks, parseStreamEvent } from '@/activity/blocks';
+import type { ActivityBlock, StreamJsonEvent } from '@/activity/blocks';
 
 export interface StreamChatOptions {
     /** Primary URL (Go API) */
@@ -22,7 +18,7 @@ export interface StreamChatOptions {
     /** Called with raw text chunks (for non-structured responses) */
     onText?: (text: string) => void;
     /** Called when the stream completes */
-    onDone: (meta: { cost?: number; duration?: number }) => void;
+    onDone: (meta: { cost?: number | undefined; duration?: number | undefined }) => void;
     /** Called on error */
     onError: (error: string) => void;
     /** AbortSignal for cancellation */
@@ -35,7 +31,7 @@ async function consumeSSEStream(
     res: Response,
     onBlocks: (blocks: ActivityBlock[]) => void,
     onText?: (text: string) => void,
-): Promise<{ cost?: number; duration?: number }> {
+): Promise<{ cost?: number | undefined; duration?: number | undefined }> {
     const contentType = res.headers.get('content-type') || '';
 
     // If JSON response (non-streaming fallback), extract text
@@ -55,7 +51,7 @@ async function consumeSSEStream(
 
     const decoder = new TextDecoder();
     let buffer = '';
-    const meta: { cost?: number; duration?: number } = {};
+    const meta: { cost?: number | undefined; duration?: number | undefined } = {};
     const allBlocks: ActivityBlock[] = [];
 
     while (true) {

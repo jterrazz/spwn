@@ -10,7 +10,8 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import { Chat, type ChatBubble } from '@/components/chat';
+import { Chat } from '@/components/chat';
+import type { ChatBubble } from '@/components/chat';
 import { useArchitectChat } from '@/contexts/architect-chat-context';
 
 function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive: boolean }) {
@@ -29,7 +30,7 @@ function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive:
             {isRunning && isActive ? (
                 <>
                     <IconHexagonFilled
-                        className="absolute inset-0 m-auto blur-[6px] opacity-70 text-pink-400"
+                        className="absolute inset-0 m-auto text-pink-400 opacity-70 blur-[6px]"
                         size={14}
                         style={{ animation: 'architect-rainbow-hue 3s linear infinite' }}
                     />
@@ -40,7 +41,7 @@ function ArchitectGlyph({ isRunning, isActive }: { isRunning: boolean; isActive:
                     />
                 </>
             ) : (
-                <span className="block leading-none translate-y-[0.5px]">
+                <span className="block translate-y-[0.5px] leading-none">
                     <IconHexagonFilled className="text-muted-foreground/45" size={14} />
                 </span>
             )}
@@ -109,17 +110,17 @@ export function ArchitectChatWidget() {
     if (expanded) {
         return (
             <div
-                className="fixed bottom-4 right-4 z-[200] w-[420px] h-[540px] flex flex-col rounded-2xl border border-white/[0.08] bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/30 animate-in slide-in-from-bottom-4 fade-in duration-200 overflow-hidden"
+                className="bg-background/95 animate-in slide-in-from-bottom-4 fade-in fixed right-4 bottom-4 z-[200] flex h-[540px] w-[420px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-black/30 backdrop-blur-xl duration-200"
                 ref={panelRef}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-                    <div className="flex items-center gap-1 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] backdrop-blur-md">
+                <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
+                    <div className="border-foreground/[0.08] bg-foreground/[0.04] flex items-center gap-1 rounded-full border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]">
                         <ArchitectGlyph isActive={sending} isRunning={isRunning} />
                     </div>
                     <div className="flex items-center gap-1">
                         <button
-                            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-foreground/60 transition-colors"
+                            className="text-muted-foreground/30 hover:text-foreground/60 flex h-7 w-7 items-center justify-center rounded-md transition-colors"
                             onClick={() => {
                                 setExpanded(false);
                                 router.push('/architect');
@@ -129,7 +130,7 @@ export function ArchitectChatWidget() {
                             <IconMaximize size={14} />
                         </button>
                         <button
-                            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground/30 hover:text-foreground/60 transition-colors"
+                            className="text-muted-foreground/30 hover:text-foreground/60 flex h-7 w-7 items-center justify-center rounded-md transition-colors"
                             onClick={() => setExpanded(false)}
                             title="Minimize"
                         >
@@ -150,14 +151,14 @@ export function ArchitectChatWidget() {
                                 className="text-muted-foreground/15 mb-2"
                                 size={24}
                             />
-                            <p className="text-xs text-muted-foreground/30">
+                            <p className="text-muted-foreground/30 text-xs">
                                 Talk to the Architect
                             </p>
-                            <p className="text-[10px] text-muted-foreground/20 mt-1 max-w-[260px]">
+                            <p className="text-muted-foreground/20 mt-1 max-w-[260px] text-[10px]">
                                 Ask anything - create agents, manage worlds, or check status.
                             </p>
                             {!isRunning && (
-                                <p className="text-[9px] text-yellow-400/40 mt-2 font-mono">
+                                <p className="mt-2 font-mono text-[9px] text-yellow-400/40">
                                     Architect is offline - start it from the Architect page
                                 </p>
                             )}
@@ -180,14 +181,14 @@ export function ArchitectChatWidget() {
     // When offline: show a compact button to navigate to architect page
     if (!isRunning) {
         return (
-            <div className="fixed bottom-4 right-4 z-[200] animate-in fade-in duration-200">
+            <div className="animate-in fade-in fixed right-4 bottom-4 z-[200] duration-200">
                 <button
-                    className="flex items-center gap-2.5 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] px-4 py-2.5 hover:bg-white/[0.08] transition-colors"
+                    className="border-foreground/[0.08] bg-foreground/[0.04] flex items-center gap-2.5 rounded-full border px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md transition-colors hover:bg-white/[0.08] dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]"
                     onClick={() => router.push('/architect')}
                     title="Architect is offline - click to start"
                 >
                     <ArchitectGlyph isActive={false} isRunning={false} />
-                    <span className="text-[12px] text-muted-foreground/35">Architect offline</span>
+                    <span className="text-muted-foreground/35 text-[12px]">Architect offline</span>
                 </button>
             </div>
         );
@@ -195,17 +196,17 @@ export function ArchitectChatWidget() {
 
     return (
         <>
-            <div className="fixed bottom-4 right-4 z-[200] animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 rounded-full border border-foreground/[0.08] dark:border-white/[0.1] bg-foreground/[0.04] dark:bg-white/[0.05] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] px-2.5 py-1.5 w-[300px]">
+            <div className="animate-in fade-in fixed right-4 bottom-4 z-[200] duration-200">
+                <div className="border-foreground/[0.08] bg-foreground/[0.04] flex w-[300px] items-center gap-2 rounded-full border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.05] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)]">
                     <button
-                        className="flex h-[30px] items-center justify-center rounded-full border border-transparent px-2 shrink-0"
+                        className="flex h-[30px] shrink-0 items-center justify-center rounded-full border border-transparent px-2"
                         onClick={() => setExpanded(true)}
                         title="Architect alive"
                     >
                         <ArchitectGlyph isActive={sending} isRunning={isRunning} />
                     </button>
                     <input
-                        className="flex-1 bg-transparent text-[13px] text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none min-w-0"
+                        className="text-foreground/80 placeholder:text-muted-foreground/25 min-w-0 flex-1 bg-transparent text-[13px] focus:outline-none"
                         disabled={sending}
                         onChange={(e) => setChatInput(e.target.value)}
                         onFocus={() => setExpanded(true)}
@@ -223,7 +224,7 @@ export function ArchitectChatWidget() {
                     />
                     {chatInput.trim() ? (
                         <button
-                            className="p-1.5 rounded-full bg-white/[0.08] text-foreground/70 hover:bg-white/[0.12] transition-all shrink-0"
+                            className="text-foreground/70 shrink-0 rounded-full bg-white/[0.08] p-1.5 transition-all hover:bg-white/[0.12]"
                             onClick={() => {
                                 handleSend();
                                 setExpanded(true);

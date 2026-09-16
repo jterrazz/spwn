@@ -2,7 +2,7 @@ packages:
     - path: apps/web
       scripts: [test, build]
       tests:
-          - apps/web/src/lib/__tests__/stream-chat.test.ts
+          - apps/web/src/api/__tests__/stream-chat.test.ts
     - path: apps/gate
       scripts: [test]
       tests:

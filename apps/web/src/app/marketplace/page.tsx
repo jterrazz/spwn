@@ -3,11 +3,11 @@
 import { IconDownload, IconExternalLink, IconPackage } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
+import { goApiUrl } from '@/api/client';
 import { Page } from '@/components/page';
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePageTitle } from '@/hooks/use-page-title';
-import { goApiUrl } from '@/lib/api-client';
 
 interface Dependency {
     name: string;
@@ -23,7 +23,7 @@ export default function MarketplacePage() {
 
     useEffect(() => {
         fetch(goApiUrl('/api/dependencies'))
-            .then((r) => r.json())
+            .then(async (r) => await r.json())
             .then((data) => {
                 setPackages(data.dependencies ?? []);
                 if (data.error) {
@@ -42,7 +42,7 @@ export default function MarketplacePage() {
             <PageHeader
                 actions={
                     <a
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
+                        className="text-foreground/60 hover:text-foreground/80 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 py-2 text-sm transition-all hover:bg-white/[0.08]"
                         href="https://spwn.sh/marketplace"
                         rel="noopener noreferrer"
                         target="_blank"
@@ -59,8 +59,8 @@ export default function MarketplacePage() {
             {loading && (
                 <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
-                        <div className="glass-subtle p-5 flex items-center gap-4" key={i}>
-                            <Skeleton className="w-10 h-10 rounded-lg" />
+                        <div className="glass-subtle flex items-center gap-4 p-5" key={i}>
+                            <Skeleton className="h-10 w-10 rounded-lg" />
                             <div className="flex-1 space-y-2">
                                 <Skeleton className="h-4 w-40" />
                                 <Skeleton className="h-3 w-64" />
@@ -74,36 +74,36 @@ export default function MarketplacePage() {
             {/* Installed dependencies */}
             {!loading && packages.length > 0 && (
                 <div>
-                    <h2 className="text-sm font-heading uppercase tracking-widest text-muted-foreground/40 mb-4">
+                    <h2 className="font-heading text-muted-foreground/40 mb-4 text-sm tracking-widest uppercase">
                         Installed ({packages.length})
                     </h2>
                     <div className="space-y-2">
                         {packages.map((pkg) => (
                             <div
-                                className="glass-subtle p-5 flex items-center gap-4"
+                                className="glass-subtle flex items-center gap-4 p-5"
                                 key={pkg.name}
                             >
-                                <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]">
                                     <IconPackage className="text-muted-foreground/40" size={20} />
                                 </div>
-                                <div className="flex-1 min-w-0">
+                                <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-mono text-foreground/80">
+                                        <p className="text-foreground/80 font-mono text-sm">
                                             {pkg.name}
                                         </p>
                                         {pkg.version && (
-                                            <span className="text-[10px] font-mono text-muted-foreground/30 px-1.5 py-0.5 rounded bg-white/[0.04]">
+                                            <span className="text-muted-foreground/30 rounded bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px]">
                                                 v{pkg.version}
                                             </span>
                                         )}
                                     </div>
                                     {pkg.description && (
-                                        <p className="text-xs text-muted-foreground/40 mt-0.5 truncate">
+                                        <p className="text-muted-foreground/40 mt-0.5 truncate text-xs">
                                             {pkg.description}
                                         </p>
                                     )}
                                 </div>
-                                <button className="px-3 py-1.5 rounded-lg text-[11px] text-red-400/50 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                                <button className="rounded-lg px-3 py-1.5 text-[11px] text-red-400/50 transition-colors hover:bg-red-500/10 hover:text-red-400">
                                     Uninstall
                                 </button>
                             </div>
@@ -114,20 +114,20 @@ export default function MarketplacePage() {
 
             {/* Empty state */}
             {!loading && packages.length === 0 && (
-                <div className="text-center py-20">
-                    <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-6">
+                <div className="py-20 text-center">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
                         <IconPackage className="text-muted-foreground/20" size={32} />
                     </div>
-                    <h2 className="text-lg font-heading text-muted-foreground/50 mb-2">
+                    <h2 className="font-heading text-muted-foreground/50 mb-2 text-lg">
                         No dependencies installed
                     </h2>
-                    <p className="text-sm text-muted-foreground/30 mb-6 max-w-md mx-auto">
+                    <p className="text-muted-foreground/30 mx-auto mb-6 max-w-md text-sm">
                         Browse the marketplace to discover configs, agents, playbooks, and
                         extensions for your universe.
                     </p>
-                    <div className="flex gap-3 justify-center">
+                    <div className="flex justify-center gap-3">
                         <a
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm bg-white/[0.06] text-foreground/70 hover:bg-white/[0.1] hover:text-foreground/90 border border-white/[0.08] transition-all"
+                            className="text-foreground/70 hover:text-foreground/90 flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.06] px-5 py-2.5 text-sm transition-all hover:bg-white/[0.1]"
                             href="https://spwn.sh/marketplace"
                             rel="noopener noreferrer"
                             target="_blank"
@@ -136,7 +136,7 @@ export default function MarketplacePage() {
                             Browse Marketplace
                         </a>
                         <button
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm text-muted-foreground/40 hover:text-foreground/60 hover:bg-white/[0.04] transition-all"
+                            className="text-muted-foreground/40 hover:text-foreground/60 flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm transition-all hover:bg-white/[0.04]"
                             disabled
                         >
                             <IconDownload size={16} />
@@ -144,11 +144,11 @@ export default function MarketplacePage() {
                         </button>
                     </div>
                     {error && (
-                        <p className="text-[11px] font-mono text-muted-foreground/25 mt-6">
+                        <p className="text-muted-foreground/25 mt-6 font-mono text-[11px]">
                             CLI: {error}
                         </p>
                     )}
-                    <div className="mt-8 glass-subtle inline-block px-4 py-2.5 font-mono text-[11px] text-muted-foreground/30">
+                    <div className="glass-subtle text-muted-foreground/30 mt-8 inline-block px-4 py-2.5 font-mono text-[11px]">
                         spwn install &lt;package&gt;
                     </div>
                 </div>

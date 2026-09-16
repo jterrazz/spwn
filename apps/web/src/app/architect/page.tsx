@@ -10,8 +10,10 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { goApiUrl } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
-import { Chat, type ChatBubble } from '@/components/chat';
+import { Chat } from '@/components/chat';
+import type { ChatBubble } from '@/components/chat';
 import { MetricGrid } from '@/components/ds';
 import { Page } from '@/components/page';
 import { PageHeader } from '@/components/page-header';
@@ -20,7 +22,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useArchitectChat } from '@/contexts/architect-chat-context';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { useProgressMessages } from '@/hooks/use-progress-messages';
-import { goApiUrl } from '@/lib/api-client';
 
 // ── Architect States ────────────────────────────────────────────────────
 
@@ -53,22 +54,22 @@ function describeState(s: ArchitectState): string {
 
 function OfflineView({ onStart, disabled }: { onStart: () => void; disabled: boolean }) {
     return (
-        <div className="flex-1 flex items-center justify-center -mt-12">
-            <div className="flex flex-col items-center text-center max-w-md">
-                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-6">
+        <div className="-mt-12 flex flex-1 items-center justify-center">
+            <div className="flex max-w-md flex-col items-center text-center">
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
                     <IconHexagonFilled className="text-muted-foreground/20" size={28} />
                 </div>
 
-                <h2 className="text-lg font-heading tracking-wide text-foreground/70 mb-2">
+                <h2 className="font-heading text-foreground/70 mb-2 text-lg tracking-wide">
                     Architect is offline
                 </h2>
-                <p className="text-sm text-muted-foreground/40 mb-8 leading-relaxed">
+                <p className="text-muted-foreground/40 mb-8 text-sm leading-relaxed">
                     The Architect runs in the background and manages everything for you: creating
                     agents, spawning worlds, and keeping track of tasks. Start it to begin working.
                 </p>
 
                 <button
-                    className="group flex items-center gap-3 px-6 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] hover:bg-white/[0.10] hover:border-white/[0.16] transition-all duration-200 disabled:opacity-40"
+                    className="group flex items-center gap-3 rounded-xl border border-white/[0.10] bg-white/[0.06] px-6 py-3 transition-all duration-200 hover:border-white/[0.16] hover:bg-white/[0.10] disabled:opacity-40"
                     disabled={disabled}
                     onClick={onStart}
                 >
@@ -76,12 +77,12 @@ function OfflineView({ onStart, disabled }: { onStart: () => void; disabled: boo
                         className="text-green-400/80 group-hover:text-green-400"
                         size={18}
                     />
-                    <span className="text-sm font-medium text-foreground/70 group-hover:text-foreground/90">
+                    <span className="text-foreground/70 group-hover:text-foreground/90 text-sm font-medium">
                         Start Architect
                     </span>
                 </button>
 
-                <div className="mt-6 flex items-center gap-2 text-[11px] text-muted-foreground/25 font-mono">
+                <div className="text-muted-foreground/25 mt-6 flex items-center gap-2 font-mono text-[11px]">
                     <IconTerminal2 size={13} />
                     <span>spwn architect start</span>
                 </div>
@@ -126,7 +127,7 @@ function describeProgress(p: null | SpawnProgress): string {
     if (!p) {
         return 'Sending start signal…';
     }
-    const label = PROGRESS_LABELS[p.event] ?? p.event.replace(/_/g, ' ');
+    const label = PROGRESS_LABELS[p.event] ?? p.event.replaceAll('_', ' ');
     if (p.detail) {
         return `${label} - ${p.detail}`;
     }
@@ -149,37 +150,37 @@ function StartingView({
     const errored = Boolean(progress?.error);
 
     return (
-        <div className="flex-1 flex items-center justify-center -mt-12 px-4">
-            <div className="flex flex-col items-center text-center max-w-lg w-full">
+        <div className="-mt-12 flex flex-1 items-center justify-center px-4">
+            <div className="flex w-full max-w-lg flex-col items-center text-center">
                 <div
-                    className={`w-16 h-16 rounded-2xl border flex items-center justify-center mb-6 relative ${
+                    className={`relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border ${
                         errored
-                            ? 'bg-red-500/[0.06] border-red-400/30'
-                            : 'bg-white/[0.04] border-white/[0.08]'
+                            ? 'border-red-400/30 bg-red-500/[0.06]'
+                            : 'border-white/[0.08] bg-white/[0.04]'
                     }`}
                 >
                     <IconHexagonFilled
-                        className={errored ? 'text-red-400/60' : 'text-yellow-400/40 animate-pulse'}
+                        className={errored ? 'text-red-400/60' : 'animate-pulse text-yellow-400/40'}
                         size={28}
                     />
                 </div>
 
-                <h2 className="text-lg font-heading tracking-wide text-foreground/70 mb-2">
+                <h2 className="font-heading text-foreground/70 mb-2 text-lg tracking-wide">
                     {errored ? 'Architect failed to start' : 'Starting Architect'}
                 </h2>
                 <p
-                    className={`text-sm leading-relaxed mb-4 ${errored ? 'text-red-300/70' : 'text-muted-foreground/50'}`}
+                    className={`mb-4 text-sm leading-relaxed ${errored ? 'text-red-300/70' : 'text-muted-foreground/50'}`}
                 >
                     {errored ? progress?.error : message}
                 </p>
 
                 {!errored && (
-                    <div className="w-48 mb-3">
+                    <div className="mb-3 w-48">
                         <ProgressShimmer active message="" />
                     </div>
                 )}
 
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground/40">
+                <div className="text-muted-foreground/40 flex items-center gap-2 text-[10px] tracking-wider uppercase">
                     <span>{elapsed}s elapsed</span>
                     <span className="opacity-30">·</span>
                     <button
@@ -192,7 +193,7 @@ function StartingView({
                 </div>
 
                 {showLogs && progress?.logTail && (
-                    <pre className="mt-4 w-full max-h-64 overflow-auto rounded-lg border border-white/[0.06] bg-black/40 px-3 py-2 text-left text-[10px] leading-snug font-mono text-muted-foreground/70">
+                    <pre className="text-muted-foreground/70 mt-4 max-h-64 w-full overflow-auto rounded-lg border border-white/[0.06] bg-black/40 px-3 py-2 text-left font-mono text-[10px] leading-snug">
                         {progress.logTail}
                     </pre>
                 )}
@@ -384,10 +385,10 @@ export default function ArchitectPage() {
             {/* Feedback toast */}
             {feedback && (
                 <div
-                    className={`px-4 py-2 rounded-lg text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-200 ${
+                    className={`animate-in fade-in slide-in-from-top-2 rounded-lg px-4 py-2 font-mono text-xs duration-200 ${
                         feedback.startsWith('Error')
-                            ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-                            : 'bg-green-500/10 border border-green-500/20 text-green-400'
+                            ? 'border border-red-500/20 bg-red-500/10 text-red-400'
+                            : 'border border-green-500/20 bg-green-500/10 text-green-400'
                     }`}
                 >
                     {feedback}
@@ -411,9 +412,9 @@ export default function ArchitectPage() {
 
             {/* ── Stopping ── */}
             {state === 'stopping' && (
-                <div className="flex-1 flex items-center justify-center -mt-12">
+                <div className="-mt-12 flex flex-1 items-center justify-center">
                     <div className="flex flex-col items-center text-center">
-                        <p className="text-sm text-muted-foreground/50 mb-4">
+                        <p className="text-muted-foreground/50 mb-4 text-sm">
                             {stopProgressMessage}
                         </p>
                         <div className="w-48">
@@ -425,7 +426,7 @@ export default function ArchitectPage() {
 
             {/* ── Loading (initial) ── */}
             {loading && state === 'offline' && (
-                <div className="flex-1 flex items-center justify-center -mt-12">
+                <div className="-mt-12 flex flex-1 items-center justify-center">
                     <div className="flex flex-col items-center gap-4">
                         <Skeleton className="h-16 w-16 rounded-2xl" />
                         <Skeleton className="h-4 w-40" />
@@ -450,7 +451,7 @@ export default function ArchitectPage() {
                     {/* Chat - fills remaining page height, input sticks to the bottom */}
                     <Chat
                         autoFocus
-                        className="flex-1 min-h-[320px]"
+                        className="min-h-[320px] flex-1"
                         disabled={sending}
                         emptyState={
                             <div className="flex flex-col items-center justify-center text-center">
@@ -458,8 +459,8 @@ export default function ArchitectPage() {
                                     className="text-muted-foreground/15 mb-3"
                                     size={28}
                                 />
-                                <p className="text-sm text-muted-foreground/30">Ask anything</p>
-                                <p className="text-[11px] text-muted-foreground/20 mt-1 max-w-sm">
+                                <p className="text-muted-foreground/30 text-sm">Ask anything</p>
+                                <p className="text-muted-foreground/20 mt-1 max-w-sm text-[11px]">
                                     &quot;Create an agent for the API project&quot;,
                                     &quot;What&apos;s running?&quot;, &quot;Spawn a world for the
                                     frontend repo&quot;

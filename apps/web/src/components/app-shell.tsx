@@ -3,15 +3,15 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
+import { apiGet } from '@/api/client';
 import { AppSidebar } from '@/components/app-sidebar';
 import { DockerLockScreen } from '@/components/docker-lock-screen';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { GlossaryButton } from '@/components/glossary-button';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { DockerProvider, useDocker } from '@/contexts/docker-context';
-import { apiGet } from '@/lib/api-client';
-import { checkForUpdatesOnStartup } from '@/lib/tauri-updater';
-import type { World } from '@/lib/types';
+import type { World } from '@/domain/model';
+import { checkForUpdatesOnStartup } from '@/tauri/updater';
 
 // ── Refetch context: allows any child to trigger an immediate data refetch ──
 const RefetchContext = createContext<() => void>(() => {});
@@ -63,12 +63,12 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             .catch(() => {
                 /* API not reachable - render normally */
             });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps -- the first-run gate fires once on mount; keying it on `isWelcome` would re-poll onboarding on every navigation
     }, []);
 
     // Track the last-visited world so the sidebar remembers the selection
     // Across page navigations (e.g. going from /world/w-x to /agents).
-    const worldMatch = pathname.match(/^\/world\/(?<id>[^/]+)/);
+    const worldMatch = /^\/world\/(?<id>[^/]+)/.exec(pathname);
     const urlWorldId = worldMatch?.groups?.id;
     const [lastWorldId, setLastWorldId] = useState<string | undefined>(urlWorldId);
 
@@ -113,7 +113,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                 {/* Drag region for window movement - stays interactive even
             while the rest of the app is locked. */}
                 <div
-                    className="tauri-drag-region fixed top-0 left-0 right-0 h-[32px] z-[100]"
+                    className="tauri-drag-region fixed top-0 right-0 left-0 z-[100] h-[32px]"
                     data-tauri-drag-region="true"
                     style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
                 />

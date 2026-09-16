@@ -41,7 +41,7 @@ export function DockerStatusPill() {
     return (
         <button
             aria-label={`Docker status: ${label}`}
-            className="group inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[10px] uppercase tracking-wider text-muted-foreground/50 transition-colors hover:bg-white/[0.04] hover:text-foreground/80"
+            className="group text-muted-foreground/50 hover:text-foreground/80 inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[10px] tracking-wider uppercase transition-colors hover:bg-white/[0.04]"
             onClick={() => void refresh()}
             title={title}
             type="button"

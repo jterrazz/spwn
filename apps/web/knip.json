@@ -19,16 +19,16 @@
         "@/*": ["src/*"]
     },
     "ignore": [
-        "src/lib/__tests__/**",
+        "src/api/__tests__/**",
         "next-env.d.ts",
         "src/components/ui/**",
         "src/components/breadcrumbs.tsx",
         "src/components/live-status.tsx",
         "src/components/recent-activity.tsx",
-        "src/lib/spwn-data.ts",
-        "src/lib/status.ts",
-        "src/lib/types.ts",
-        "src/lib/api-client.ts",
+        "src/filesystem/spwn-home.ts",
+        "src/styles/status-colors.ts",
+        "src/domain/model.ts",
+        "src/api/client.ts",
         "src/components/knowledge-browser.tsx",
         "src/components/activity-blocks.tsx"
     ],

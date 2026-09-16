@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import type { AgentProfile, LimboAgent, World } from './types';
+import type { AgentProfile, LimboAgent, World } from '@/domain/model';
 
 // ── Paths ──
 
@@ -71,7 +71,7 @@ function rawToWorld(raw: RawWorld): World {
     }
 
     // Prefer the new `workspaces` array; migrate legacy `workspace` string.
-    let workspaces = raw.workspaces;
+    let { workspaces } = raw;
     if ((!workspaces || workspaces.length === 0) && raw.workspace) {
         workspaces = [{ name: 'default', path: raw.workspace }];
     }
@@ -211,7 +211,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     // Read core identity files for purpose/profile
     let purpose = '';
     let profileText = '';
-    const coreFiles = info.layers['core'] ?? [];
+    const coreFiles = info.layers.core ?? [];
     for (const file of coreFiles) {
         if (file.endsWith('.md')) {
             try {
@@ -220,16 +220,17 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
                     'utf8',
                 );
                 // Extract purpose from content
-                const purposeMatch = content.match(
-                    /## (?:Purpose|Your Identity)\n(?<body>[\s\S]*?)(?:\n##|$)/,
-                );
+                const purposeMatch =
+                    /## (?:Purpose|Your Identity)\n(?<body>[\s\S]*?)(?:\n##|$)/.exec(content);
                 if (purposeMatch) {
                     purpose = purposeMatch.groups!.body!.trim().slice(0, 200);
                 }
                 // Use first paragraph as profile text
-                const lines = content.split('\n').filter((l) => l.trim() && !l.startsWith('#'));
-                if (lines.length > 0) {
-                    profileText = lines[0].trim();
+                const [firstLine] = content
+                    .split('\n')
+                    .filter((l) => l.trim() && !l.startsWith('#'));
+                if (firstLine) {
+                    profileText = firstLine.trim();
                 }
             } catch {
                 // Ignore read errors
@@ -238,7 +239,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     }
 
     // Read journal entries
-    const journalFiles = (info.layers['journal'] ?? []).filter((f) => f.endsWith('.md'));
+    const journalFiles = (info.layers.journal ?? []).filter((f) => f.endsWith('.md'));
     const journal: { date: string; summary: string }[] = [];
     for (const file of journalFiles.slice(-10).toReversed()) {
         try {
@@ -247,7 +248,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
                 'utf8',
             );
             // Extract date from filename (e.g., 2026-04-01_w-titan.md)
-            const dateMatch = file.match(/^(?<date>\d{4}-\d{2}-\d{2})/);
+            const dateMatch = /^(?<date>\d{4}-\d{2}-\d{2})/.exec(file);
             const date = dateMatch ? dateMatch.groups!.date! : file.replace(/\.md$/, '');
             // Use first non-header line as summary
             const summaryLine = content
@@ -263,7 +264,7 @@ export async function getAgentProfile(name: string): Promise<AgentProfile | null
     }
 
     // Build skills list from skills/ directory
-    const skills = (info.layers['skills'] ?? []).map((f) => f.replace(/\.md$/, ''));
+    const skills = (info.layers.skills ?? []).map((f) => f.replace(/\.md$/, ''));
 
     return {
         name,

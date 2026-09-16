@@ -19,6 +19,7 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '@/api/client';
 import { ActionButton } from '@/components/action-button';
 import { useRefetch } from '@/components/app-shell';
 import {
@@ -33,11 +34,11 @@ import { ProgressShimmer } from '@/components/progress-shimmer';
 import { useToast } from '@/components/toast-provider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WorldPlanet } from '@/components/world-planet';
+import { getWorkspaceSummary, getWorldName } from '@/domain/model';
+import type { Agent, World } from '@/domain/model';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { useProgressMessages } from '@/hooks/use-progress-messages';
-import { apiAction, apiDelete, apiGet, apiPost, goApiUrl } from '@/lib/api-client';
-import { ROLE_BADGE } from '@/lib/status';
-import { type Agent, getWorkspaceSummary, getWorldName, type World } from '@/lib/types';
+import { ROLE_BADGE } from '@/styles/status-colors';
 
 function timeAgo(iso: string): string {
     const d = Date.now() - new Date(iso).getTime();
@@ -68,7 +69,7 @@ const AGENT_COLUMNS = [
         label: 'Name',
         width: '1fr',
         render: (a: Agent) => (
-            <span className="text-[13px] font-mono text-foreground/85 truncate">{a.name}</span>
+            <span className="text-foreground/85 truncate font-mono text-[13px]">{a.name}</span>
         ),
     },
     {
@@ -79,7 +80,7 @@ const AGENT_COLUMNS = [
             const badge = ROLE_BADGE[a.role] ?? ROLE_BADGE.default;
             return (
                 <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}
+                    className={`rounded border px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${badge}`}
                 >
                     {a.role}
                 </span>
@@ -93,7 +94,7 @@ const AGENT_COLUMNS = [
         render: (a: Agent) => (
             <span className="flex items-center gap-1.5">
                 <DSStatusDot status={a.status} />
-                <span className="text-[11px] font-mono text-muted-foreground/50 capitalize">
+                <span className="text-muted-foreground/50 font-mono text-[11px] capitalize">
                     {a.status}
                 </span>
             </span>
@@ -218,12 +219,12 @@ export default function WorldDashboard() {
                     throw new Error('Failed to fetch events');
                 }
                 const data = await res.json();
-                const events = (data.events ?? []) as Array<{
+                const events = (data.events ?? []) as {
                     timestamp: string;
                     type: string;
                     phrase: string;
                     actor: string;
-                }>;
+                }[];
                 setLogs(
                     events.map((e) => ({
                         timestamp: e.timestamp,
@@ -250,9 +251,9 @@ export default function WorldDashboard() {
 
     if (loading) {
         return (
-            <div className="p-8 space-y-8">
+            <div className="space-y-8 p-8">
                 <div className="flex items-center gap-4">
-                    <Skeleton className="w-2.5 h-2.5 rounded-full" />
+                    <Skeleton className="h-2.5 w-2.5 rounded-full" />
                     <div className="space-y-2">
                         <Skeleton className="h-7 w-32" />
                         <Skeleton className="h-3 w-48" />
@@ -261,7 +262,7 @@ export default function WorldDashboard() {
                 <div className="flex gap-10">
                     {[1, 2, 3, 4].map((i) => (
                         <div key={i}>
-                            <Skeleton className="h-3 w-14 mb-2" />
+                            <Skeleton className="mb-2 h-3 w-14" />
                             <Skeleton className="h-7 w-10" />
                         </div>
                     ))}
@@ -291,7 +292,7 @@ export default function WorldDashboard() {
     return (
         <div className="flex h-[calc(100vh-1px)] overflow-hidden">
             {/* Main content */}
-            <div className="flex-1 overflow-y-auto px-6 md:px-8 pt-6 md:pt-8 pb-12 space-y-6 md:space-y-8">
+            <div className="flex-1 space-y-6 overflow-y-auto px-6 pt-6 pb-12 md:space-y-8 md:px-8 md:pt-8">
                 <PageHeader
                     actions={
                         <>
@@ -353,11 +354,11 @@ export default function WorldDashboard() {
                             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                             onClick={() => !renaming && setShowRenameDialog(false)}
                         />
-                        <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
-                            <h3 className="text-lg font-heading text-foreground/90 mb-1">
+                        <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
+                            <h3 className="font-heading text-foreground/90 mb-1 text-lg">
                                 Rename World
                             </h3>
-                            <p className="text-sm text-muted-foreground/50 mb-5">
+                            <p className="text-muted-foreground/50 mb-5 text-sm">
                                 Leave empty to fall back to the auto-generated name (
                                 <span className="font-mono">
                                     {world.id.split('-')[1] ?? world.id}
@@ -366,7 +367,7 @@ export default function WorldDashboard() {
                             </p>
                             <input
                                 autoFocus
-                                className="w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-foreground/80 placeholder:text-muted-foreground/30 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+                                className="text-foreground/80 placeholder:text-muted-foreground/30 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                                 disabled={renaming}
                                 onChange={(e) => setRenameInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -378,22 +379,22 @@ export default function WorldDashboard() {
                                 type="text"
                                 value={renameInput}
                             />
-                            <div className="flex gap-3 justify-end mt-6">
+                            <div className="mt-6 flex justify-end gap-3">
                                 <button
-                                    className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                                    className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                     disabled={renaming}
                                     onClick={() => setShowRenameDialog(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-white/[0.1] text-foreground/90 hover:bg-white/[0.16] border border-white/[0.08] transition-colors disabled:opacity-50"
+                                    className="text-foreground/90 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.1] px-4 py-2 text-sm transition-colors hover:bg-white/[0.16] disabled:opacity-50"
                                     disabled={renaming}
                                     onClick={handleRename}
                                 >
                                     {renaming ? (
                                         <>
-                                            <div className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/80 rounded-full animate-spin" />
+                                            <div className="border-foreground/30 border-t-foreground/80 h-3 w-3 animate-spin rounded-full border-2" />
                                             Saving…
                                         </>
                                     ) : (
@@ -409,12 +410,12 @@ export default function WorldDashboard() {
                 {showDestroyConfirm && (
                     <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
                         <div className="flex items-start gap-3">
-                            <IconAlertTriangle className="text-red-400 shrink-0 mt-0.5" size={20} />
+                            <IconAlertTriangle className="mt-0.5 shrink-0 text-red-400" size={20} />
                             <div className="flex-1">
-                                <h3 className="text-sm font-heading text-red-300">
+                                <h3 className="font-heading text-sm text-red-300">
                                     Destroy World?
                                 </h3>
-                                <p className="text-xs text-red-300/60 mt-1">
+                                <p className="mt-1 text-xs text-red-300/60">
                                     This will permanently destroy{' '}
                                     <span className="font-mono">{world.id}</span> and all its
                                     agents. This action cannot be undone.
@@ -426,9 +427,9 @@ export default function WorldDashboard() {
                                         message={destroyProgressMessage}
                                     />
                                 )}
-                                <div className="flex gap-2 mt-4">
+                                <div className="mt-4 flex gap-2">
                                     <button
-                                        className="px-4 py-2 rounded-lg text-xs bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 transition-colors disabled:opacity-30"
+                                        className="rounded-lg border border-red-500/30 bg-red-500/20 px-4 py-2 text-xs text-red-300 transition-colors hover:bg-red-500/30 disabled:opacity-30"
                                         disabled={actionLoading !== null}
                                         onClick={async () => {
                                             setActionLoading('destroy');
@@ -448,7 +449,7 @@ export default function WorldDashboard() {
                                     >
                                         {actionLoading === 'destroy' ? (
                                             <span className="flex items-center gap-2">
-                                                <span className="w-3 h-3 border-2 border-red-300/40 border-t-red-300 rounded-full animate-spin" />
+                                                <span className="h-3 w-3 animate-spin rounded-full border-2 border-red-300/40 border-t-red-300" />
                                                 {destroyProgressMessage}
                                             </span>
                                         ) : (
@@ -456,7 +457,7 @@ export default function WorldDashboard() {
                                         )}
                                     </button>
                                     <button
-                                        className="px-4 py-2 rounded-lg text-xs text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                                        className="text-muted-foreground/50 hover:text-foreground/70 rounded-lg px-4 py-2 text-xs transition-colors hover:bg-white/[0.04]"
                                         onClick={() => setShowDestroyConfirm(false)}
                                     >
                                         Cancel
@@ -469,7 +470,7 @@ export default function WorldDashboard() {
 
                 {/* Action feedback toast */}
                 {actionFeedback && (
-                    <div className="px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="animate-in fade-in slide-in-from-top-2 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-2 font-mono text-xs text-green-400 duration-200">
                         {actionFeedback}
                     </div>
                 )}
@@ -496,7 +497,7 @@ export default function WorldDashboard() {
                             <div className="flex flex-wrap gap-1.5">
                                 {world.manifest.elements.map((el) => (
                                     <span
-                                        className="px-2.5 py-1 text-[11px] font-mono text-foreground/60 bg-white/[0.04] border border-white/[0.06]"
+                                        className="text-foreground/60 border border-white/[0.06] bg-white/[0.04] px-2.5 py-1 font-mono text-[11px]"
                                         key={el}
                                     >
                                         {el}
@@ -510,11 +511,11 @@ export default function WorldDashboard() {
 
                 {/* Agents */}
                 <div>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="mb-3 flex items-center justify-between">
                         <SectionHeader className="mb-0">Agents</SectionHeader>
                         {world.agents.length > 0 && (
                             <button
-                                className="text-[10px] font-mono text-muted-foreground/35 hover:text-foreground/70 transition-colors"
+                                className="text-muted-foreground/35 hover:text-foreground/70 font-mono text-[10px] transition-colors"
                                 onClick={() => router.push('/agents')}
                             >
                                 + Deploy
@@ -539,9 +540,9 @@ export default function WorldDashboard() {
 
             {/* ── Side panel for Logs/Snapshots ── */}
             {activePanel && (
-                <div className="hidden md:flex w-96 border-l border-border/30 flex-col shrink-0 overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border/30 flex items-center justify-between shrink-0">
-                        <h2 className="text-sm font-heading text-foreground/80 capitalize">
+                <div className="border-border/30 hidden w-96 shrink-0 flex-col overflow-hidden border-l md:flex">
+                    <div className="border-border/30 flex shrink-0 items-center justify-between border-b px-5 py-4">
+                        <h2 className="font-heading text-foreground/80 text-sm capitalize">
                             {activePanel}
                         </h2>
                         <button
@@ -554,29 +555,29 @@ export default function WorldDashboard() {
 
                     <div className="flex-1 overflow-y-auto">
                         {activePanel === 'logs' && (
-                            <div className="p-4 space-y-0.5 font-mono text-[11px]">
+                            <div className="space-y-0.5 p-4 font-mono text-[11px]">
                                 {logsLoading && logs.length === 0 && (
-                                    <div className="flex items-center gap-2 text-muted-foreground/30 py-8 justify-center">
-                                        <div className="w-3 h-3 border-2 border-foreground/20 border-t-foreground/50 rounded-full animate-spin" />
+                                    <div className="text-muted-foreground/30 flex items-center justify-center gap-2 py-8">
+                                        <div className="border-foreground/20 border-t-foreground/50 h-3 w-3 animate-spin rounded-full border-2" />
                                         <span className="text-sm">Connecting to log stream...</span>
                                     </div>
                                 )}
                                 {!logsLoading && logs.length === 0 && (
-                                    <div className="text-center py-8">
-                                        <p className="text-sm text-muted-foreground/30">
+                                    <div className="py-8 text-center">
+                                        <p className="text-muted-foreground/30 text-sm">
                                             No logs available
                                         </p>
-                                        <p className="text-[10px] text-muted-foreground/20 font-mono mt-1">
+                                        <p className="text-muted-foreground/20 mt-1 font-mono text-[10px]">
                                             Use the CLI: spwn logs {worldId}
                                         </p>
                                     </div>
                                 )}
                                 {logs.map((log) => (
                                     <div
-                                        className="flex gap-2 py-1.5 border-b border-border/10 last:border-0"
+                                        className="border-border/10 flex gap-2 border-b py-1.5 last:border-0"
                                         key={`${log.timestamp}-${log.source}-${log.message}`}
                                     >
-                                        <span className="text-muted-foreground/25 shrink-0 w-14">
+                                        <span className="text-muted-foreground/25 w-14 shrink-0">
                                             {new Date(log.timestamp).toLocaleTimeString([], {
                                                 hour: '2-digit',
                                                 minute: '2-digit',
@@ -584,11 +585,11 @@ export default function WorldDashboard() {
                                             })}
                                         </span>
                                         <span
-                                            className={`shrink-0 w-10 uppercase ${LOG_LEVEL_COLORS[log.level]}`}
+                                            className={`w-10 shrink-0 uppercase ${LOG_LEVEL_COLORS[log.level]}`}
                                         >
                                             {log.level}
                                         </span>
-                                        <span className="text-muted-foreground/40 shrink-0 w-16">
+                                        <span className="text-muted-foreground/40 w-16 shrink-0">
                                             {log.source}
                                         </span>
                                         <span className="text-foreground/60 break-all">
@@ -601,29 +602,29 @@ export default function WorldDashboard() {
                         )}
 
                         {activePanel === 'snapshots' && (
-                            <div className="p-4 space-y-3">
+                            <div className="space-y-3 p-4">
                                 {snapshots.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground/30 text-center py-8">
+                                    <p className="text-muted-foreground/30 py-8 text-center text-sm">
                                         No snapshots
                                     </p>
                                 ) : (
                                     snapshots.map((snap) => (
                                         <div className="glass-subtle p-4" key={snap.id}>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="text-xs font-mono text-foreground/70">
+                                            <div className="mb-2 flex items-center justify-between">
+                                                <span className="text-foreground/70 font-mono text-xs">
                                                     {snap.name}
                                                 </span>
-                                                <span className="text-[10px] font-mono text-muted-foreground/30">
+                                                <span className="text-muted-foreground/30 font-mono text-[10px]">
                                                     {snap.size}
                                                 </span>
                                             </div>
-                                            <p className="text-[10px] font-mono text-muted-foreground/40 mb-3">
+                                            <p className="text-muted-foreground/40 mb-3 font-mono text-[10px]">
                                                 {timeAgo(snap.created_at)} · {snap.agents} agent
-                                                {snap.agents !== 1 ? 's' : ''}
+                                                {snap.agents === 1 ? '' : 's'}
                                             </p>
                                             <div className="flex gap-2">
                                                 <button
-                                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                                                    className="text-muted-foreground/50 hover:text-foreground/70 flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] transition-colors hover:bg-white/[0.04]"
                                                     onClick={() =>
                                                         showFeedback(`Restoring "${snap.name}"...`)
                                                     }
@@ -632,14 +633,14 @@ export default function WorldDashboard() {
                                                     Restore
                                                 </button>
                                                 <button
-                                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                                                    className="text-muted-foreground/50 hover:text-foreground/70 flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] transition-colors hover:bg-white/[0.04]"
                                                     onClick={() => showFeedback('Downloading...')}
                                                 >
                                                     <IconDownload size={12} />
                                                     Export
                                                 </button>
                                                 <button
-                                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] text-red-400/50 hover:text-red-400 hover:bg-red-500/10 transition-colors ml-auto"
+                                                    className="ml-auto flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] text-red-400/50 transition-colors hover:bg-red-500/10 hover:text-red-400"
                                                     onClick={() => showFeedback('Snapshot deleted')}
                                                 >
                                                     <IconTrash size={12} />
@@ -751,8 +752,8 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                     <IconUserPlus className="text-blue-400/80" size={16} />
                 </div>
                 <div className="min-w-0">
-                    <h3 className="text-sm font-medium text-foreground/95">This world is empty</h3>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground/60">
+                    <h3 className="text-foreground/95 text-sm font-medium">This world is empty</h3>
+                    <p className="text-muted-foreground/60 mt-0.5 text-[11px]">
                         Pick one of your agents to deploy here, or install a fresh one from the
                         gallery. Deployment is hot - no container restart.
                     </p>
@@ -770,7 +771,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                 </div>
             )}
             {!isLoading && noInstalled && (
-                <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[11px] text-muted-foreground/60">
+                <div className="text-muted-foreground/60 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[11px]">
                     You don&apos;t have any agents installed yet. Pick one from the gallery below to
                     install and deploy in one click.
                 </div>
@@ -782,24 +783,24 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                             className="group flex items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left transition-colors hover:border-white/[0.16] hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={busy !== null}
                             key={a.name}
-                            onClick={() => deploy(a.name)}
+                            onClick={async () => await deploy(a.name)}
                             type="button"
                         >
                             <div className="min-w-0">
-                                <div className="truncate text-[12px] font-mono text-foreground/90">
+                                <div className="text-foreground/90 truncate font-mono text-[12px]">
                                     {a.name}
                                 </div>
-                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground/40">
+                                <div className="text-muted-foreground/40 text-[10px] tracking-wider uppercase">
                                     worker
                                 </div>
                             </div>
                             {busy === a.name ? (
                                 <IconLoader2
-                                    className="shrink-0 animate-spin text-muted-foreground/60"
+                                    className="text-muted-foreground/60 shrink-0 animate-spin"
                                     size={13}
                                 />
                             ) : (
-                                <span className="inline-flex shrink-0 items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground/40 group-hover:text-foreground/80">
+                                <span className="text-muted-foreground/40 group-hover:text-foreground/80 inline-flex shrink-0 items-center gap-1 text-[10px] tracking-wider uppercase">
                                     Deploy
                                     <IconArrowRight size={11} />
                                 </span>
@@ -812,7 +813,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
             {/* ── Gallery toggle / panel ──────────────────────────────── */}
             <div className="mt-5">
                 <button
-                    className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground/50 hover:text-foreground/80 transition-colors"
+                    className="text-muted-foreground/50 hover:text-foreground/80 inline-flex items-center gap-1.5 text-[11px] tracking-wider uppercase transition-colors"
                     onClick={() => setShowGallery((v) => !v)}
                     type="button"
                 >
@@ -836,7 +837,7 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                                     className="group flex items-start gap-2.5 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-left transition-colors hover:border-white/[0.16] hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
                                     disabled={busy !== null}
                                     key={ex.slug}
-                                    onClick={() => installAndDeploy(ex)}
+                                    onClick={async () => await installAndDeploy(ex)}
                                     type="button"
                                 >
                                     <IconWorld
@@ -844,16 +845,16 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                                         size={14}
                                     />
                                     <div className="min-w-0 flex-1">
-                                        <div className="truncate text-[12px] font-medium text-foreground/95">
+                                        <div className="text-foreground/95 truncate text-[12px] font-medium">
                                             {ex.name}
                                         </div>
-                                        <div className="truncate text-[10px] text-muted-foreground/60">
+                                        <div className="text-muted-foreground/60 truncate text-[10px]">
                                             {ex.tagline}
                                         </div>
                                         <div className="mt-1 flex flex-wrap gap-1">
                                             {ex.agents.slice(0, 3).map((a) => (
                                                 <span
-                                                    className="rounded border border-white/[0.06] bg-white/[0.03] px-1 py-0.5 text-[9px] font-mono text-muted-foreground/60"
+                                                    className="text-muted-foreground/60 rounded border border-white/[0.06] bg-white/[0.03] px-1 py-0.5 font-mono text-[9px]"
                                                     key={a}
                                                 >
                                                     {a}
@@ -863,14 +864,14 @@ function EmptyAgentsView({ worldId, onDeployed }: { worldId: string; onDeployed:
                                     </div>
                                     {busy === ex.slug && (
                                         <IconLoader2
-                                            className="shrink-0 animate-spin text-muted-foreground/60"
+                                            className="text-muted-foreground/60 shrink-0 animate-spin"
                                             size={12}
                                         />
                                     )}
                                 </button>
                             ))
                         ) : (
-                            <p className="col-span-full text-[11px] text-muted-foreground/60">
+                            <p className="text-muted-foreground/60 col-span-full text-[11px]">
                                 No examples bundled in this build.
                             </p>
                         )}

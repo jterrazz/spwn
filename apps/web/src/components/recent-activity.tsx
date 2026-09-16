@@ -16,7 +16,7 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
-import { apiGet } from '@/lib/api-client';
+import { apiGet } from '@/api/client';
 
 type ActivityType =
     | 'agent.created'
@@ -144,7 +144,7 @@ export function RecentActivity() {
         return (
             <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                    <div className="h-14 rounded-xl bg-white/[0.02] animate-pulse" key={i} />
+                    <div className="h-14 animate-pulse rounded-xl bg-white/[0.02]" key={i} />
                 ))}
             </div>
         );
@@ -152,7 +152,7 @@ export function RecentActivity() {
 
     if (events.length === 0) {
         return (
-            <p className="text-xs text-muted-foreground/30 px-4 py-6 text-center">
+            <p className="text-muted-foreground/30 px-4 py-6 text-center text-xs">
                 No activity yet - spawn a world to get started
             </p>
         );
@@ -174,23 +174,23 @@ export function RecentActivity() {
 
                 return (
                     <div
-                        className="group flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/[0.03] transition-all"
+                        className="group flex items-center gap-4 rounded-xl px-4 py-3 transition-all hover:bg-white/[0.03]"
                         key={event.id}
                     >
                         <div
-                            className={`w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0`}
+                            className={`h-8 w-8 rounded-lg ${cfg.bg} flex shrink-0 items-center justify-center`}
                         >
                             <Icon className={cfg.color} size={14} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-xs text-foreground/70 truncate">{event.phrase}</p>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-foreground/70 truncate text-xs">{event.phrase}</p>
                             {meta.length > 0 && (
-                                <p className="text-[10px] font-mono text-muted-foreground/25 mt-0.5">
+                                <p className="text-muted-foreground/25 mt-0.5 font-mono text-[10px]">
                                     {meta.join(' · ')}
                                 </p>
                             )}
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground/20 shrink-0">
+                        <span className="text-muted-foreground/20 shrink-0 font-mono text-[10px]">
                             {timeAgo(event.timestamp)}
                         </span>
                     </div>

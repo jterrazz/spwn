@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 
 interface Toast {
     id: number;
@@ -49,10 +50,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <ToastContext.Provider value={contextValue}>
             {children}
             {/* Toast container */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none">
+            <div className="pointer-events-none fixed right-6 bottom-6 z-50 flex flex-col gap-2">
                 {toasts.map((t) => (
                     <div
-                        className={`pointer-events-auto px-4 py-2.5 rounded-lg text-xs font-mono border backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-200 ${toastClass(t.type)}`}
+                        className={`animate-in fade-in slide-in-from-bottom-2 pointer-events-auto rounded-lg border px-4 py-2.5 font-mono text-xs backdrop-blur-sm duration-200 ${toastClass(t.type)}`}
                         key={t.id}
                     >
                         {t.message}

@@ -15,24 +15,24 @@ export default function WorldError({
     }, [error]);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center">
             <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10">
                     <span className="text-xl">🌍</span>
                 </div>
-                <h2 className="text-lg font-heading text-foreground/80 mb-2">World unavailable</h2>
-                <p className="text-sm text-muted-foreground/40 font-mono mb-6 max-w-sm">
+                <h2 className="font-heading text-foreground/80 mb-2 text-lg">World unavailable</h2>
+                <p className="text-muted-foreground/40 mb-6 max-w-sm font-mono text-sm">
                     {error.message || 'Failed to load world data'}
                 </p>
-                <div className="flex items-center gap-3 justify-center">
+                <div className="flex items-center justify-center gap-3">
                     <button
-                        className="px-5 py-2.5 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
+                        className="text-foreground/60 hover:text-foreground/80 rounded-xl border border-white/[0.06] bg-white/[0.04] px-5 py-2.5 text-sm transition-all hover:bg-white/[0.08]"
                         onClick={reset}
                     >
                         Retry
                     </button>
                     <Link
-                        className="px-5 py-2.5 rounded-xl text-sm text-muted-foreground/40 hover:text-foreground/60 transition-colors"
+                        className="text-muted-foreground/40 hover:text-foreground/60 rounded-xl px-5 py-2.5 text-sm transition-colors"
                         href="/"
                     >
                         Back to worlds

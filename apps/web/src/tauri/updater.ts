@@ -9,7 +9,7 @@
  * Safe to call in the browser - it is a no-op outside the Tauri runtime.
  */
 
-import { isTauri } from './tauri';
+import { isTauri } from './runtime';
 
 interface UpdateDescriptor {
     available: boolean;
@@ -37,7 +37,7 @@ function getTauri(): null | TauriGlobal {
     if (!isTauri()) {
         return null;
     }
-    return (globalThis as unknown as { __TAURI__: TauriGlobal })['__TAURI__'];
+    return (globalThis as unknown as { __TAURI__: TauriGlobal }).__TAURI__;
 }
 
 /**

@@ -16,8 +16,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
+import { apiAction, apiGet, apiPost } from '@/api/client';
 import { usePageTitle } from '@/hooks/use-page-title';
-import { apiAction, apiGet, apiPost } from '@/lib/api-client';
 
 interface DockerStatus {
     installed: boolean;
@@ -145,14 +145,14 @@ export default function WelcomePage() {
         <div className="min-h-full overflow-y-auto px-6 py-10">
             <div className="mx-auto max-w-3xl">
                 <header className="mb-10 text-center">
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground/70">
+                    <div className="text-muted-foreground/70 mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] tracking-wider uppercase">
                         <IconRocket size={11} />
                         First-run setup
                     </div>
-                    <h1 className="font-heading text-3xl tracking-wide text-foreground/90">
+                    <h1 className="font-heading text-foreground/90 text-3xl tracking-wide">
                         Welcome to spwn
                     </h1>
-                    <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground/70">
+                    <p className="text-muted-foreground/70 mx-auto mt-2 max-w-lg text-sm">
                         The control plane for AI agents. Four quick steps and you&apos;re ready to
                         spawn your first world.
                     </p>
@@ -206,7 +206,7 @@ export default function WelcomePage() {
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] tabular-nums text-muted-foreground/40">
+                                            <span className="text-muted-foreground/40 text-[10px] tabular-nums">
                                                 {String(idx + 1).padStart(2, '0')}
                                             </span>
                                             <span
@@ -219,11 +219,11 @@ export default function WelcomePage() {
                                                 {step.title}
                                             </span>
                                         </div>
-                                        <p className="mt-0.5 text-xs text-muted-foreground/60">
+                                        <p className="text-muted-foreground/60 mt-0.5 text-xs">
                                             {step.subtitle}
                                         </p>
                                     </div>
-                                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground/40">
+                                    <span className="text-muted-foreground/40 text-[10px] tracking-wider uppercase">
                                         {statusLabel}
                                     </span>
                                 </button>
@@ -246,14 +246,14 @@ export default function WelcomePage() {
 
                 <div className="mt-8 flex items-center justify-between border-t border-white/[0.06] pt-6">
                     <button
-                        className="text-xs text-muted-foreground/60 hover:text-foreground/80"
+                        className="text-muted-foreground/60 hover:text-foreground/80 text-xs"
                         onClick={() => router.replace('/')}
                         type="button"
                     >
                         Skip for now
                     </button>
                     <button
-                        className="inline-flex items-center gap-2 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-medium text-emerald-100 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.02] disabled:text-muted-foreground/40"
+                        className="disabled:text-muted-foreground/40 inline-flex items-center gap-2 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-medium text-emerald-100 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.02]"
                         disabled={!allDone || finishing}
                         onClick={handleFinish}
                         type="button"
@@ -353,7 +353,7 @@ function DockerStep({
                 <div className="flex flex-wrap items-center gap-2">
                     {!docker?.installed && (
                         <a
-                            className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-foreground/90 hover:bg-white/[0.08]"
+                            className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
                             href={installUrl}
                             rel="noreferrer"
                             target="_blank"
@@ -363,7 +363,7 @@ function DockerStep({
                         </a>
                     )}
                     <button
-                        className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-foreground/90 hover:bg-white/[0.08] disabled:opacity-50"
+                        className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08] disabled:opacity-50"
                         disabled={refreshing}
                         onClick={onRefresh}
                     >
@@ -375,7 +375,7 @@ function DockerStep({
 
             {ok && (
                 <button
-                    className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-foreground/90 hover:bg-white/[0.08]"
+                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
                     onClick={onAdvance}
                 >
                     Continue <IconArrowRight size={11} />
@@ -406,12 +406,12 @@ function AuthStep({
 
     return (
         <div className="space-y-3">
-            <p className="text-[11px] text-muted-foreground/60">
+            <p className="text-muted-foreground/60 text-[11px]">
                 spwn supports subscription sign-in (Anthropic / Codex) and API keys via env vars.
             </p>
             <div className="space-y-1.5">
                 {providers === null && (
-                    <div className="rounded-md border border-white/[0.06] bg-white/[0.015] px-3 py-2 text-[11px] text-muted-foreground/50">
+                    <div className="text-muted-foreground/50 rounded-md border border-white/[0.06] bg-white/[0.015] px-3 py-2 text-[11px]">
                         Loading providers…
                     </div>
                 )}
@@ -426,25 +426,25 @@ function AuthStep({
                                     p.connected ? 'bg-emerald-400' : 'bg-muted-foreground/30'
                                 }`}
                             />
-                            <span className="text-xs font-medium capitalize text-foreground/90">
+                            <span className="text-foreground/90 text-xs font-medium capitalize">
                                 {p.provider}
                             </span>
                             {p.source && (
-                                <span className="text-[10px] text-muted-foreground/40">
+                                <span className="text-muted-foreground/40 text-[10px]">
                                     {p.source}
                                 </span>
                             )}
                         </div>
                         {!p.connected && (
                             <button
-                                className="text-[11px] text-foreground/70 hover:text-foreground"
-                                onClick={() => reconnect(p.provider)}
+                                className="text-foreground/70 hover:text-foreground text-[11px]"
+                                onClick={async () => await reconnect(p.provider)}
                             >
                                 Connect
                             </button>
                         )}
                         {p.connected && (
-                            <span className="text-[10px] uppercase tracking-wider text-emerald-300/80">
+                            <span className="text-[10px] tracking-wider text-emerald-300/80 uppercase">
                                 Connected
                             </span>
                         )}
@@ -453,7 +453,7 @@ function AuthStep({
             </div>
             {status?.hasAuth && (
                 <button
-                    className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-foreground/90 hover:bg-white/[0.08]"
+                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
                     onClick={onAdvance}
                 >
                     Continue <IconArrowRight size={11} />
@@ -472,14 +472,14 @@ function WorldStep({
 }) {
     return (
         <div className="space-y-3">
-            <p className="text-[11px] text-muted-foreground/60">
+            <p className="text-muted-foreground/60 text-[11px]">
                 Open the worlds page and click{' '}
                 <span className="text-foreground/80">Spawn world</span>. We&apos;ll detect it as
                 soon as a world is created.
             </p>
             <div className="flex items-center gap-2">
                 <Link
-                    className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-foreground/90 hover:bg-white/[0.08]"
+                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
                     href="/"
                 >
                     Open worlds
@@ -494,7 +494,7 @@ function WorldStep({
             </div>
             {status?.hasWorlds && (
                 <button
-                    className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-foreground/90 hover:bg-white/[0.08]"
+                    className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
                     onClick={onAdvance}
                 >
                     Continue <IconArrowRight size={11} />
@@ -507,12 +507,12 @@ function WorldStep({
 function ChatStep() {
     return (
         <div className="space-y-3">
-            <p className="text-[11px] text-muted-foreground/60">
+            <p className="text-muted-foreground/60 text-[11px]">
                 Open any world from the sidebar and send a message in the chat panel. Once you
                 finish here, click <span className="text-foreground/80">Finish setup</span> below.
             </p>
             <Link
-                className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-foreground/90 hover:bg-white/[0.08]"
+                className="text-foreground/90 inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium hover:bg-white/[0.08]"
                 href="/"
             >
                 Go to worlds <IconArrowRight size={11} />
@@ -541,5 +541,5 @@ function completed(step: StepId, status: OnboardingStatus): boolean {
 function nextStep(step: StepId): StepId {
     const order: StepId[] = ['docker', 'auth', 'world', 'chat'];
     const i = order.indexOf(step);
-    return order[Math.min(i + 1, order.length - 1)];
+    return order[Math.min(i + 1, order.length - 1)] ?? step;
 }

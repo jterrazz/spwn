@@ -23,7 +23,7 @@ export interface World {
     runtime?: string;
     status: 'creating' | 'error' | 'idle' | 'running' | 'stopped';
     created_at: string;
-    workspaces?: Workspace[];
+    workspaces?: undefined | Workspace[];
     manifest?: WorldManifest;
 }
 
@@ -36,8 +36,9 @@ export function getWorkspaceSummary(world: Pick<World, 'workspaces'>): string {
     if (!ws || ws.length === 0) {
         return 'ephemeral';
     }
-    if (ws.length === 1) {
-        return ws[0].path;
+    const [only] = ws;
+    if (ws.length === 1 && only) {
+        return only.path;
     }
     return `${ws.length} workspaces`;
 }
@@ -50,8 +51,8 @@ export function getWorldName(world: Pick<World, 'id' | 'name'>): string {
     if (world.name && world.name.trim()) {
         return world.name.trim();
     }
-    const parts = world.id.split('-');
-    return parts.length >= 2 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : world.id;
+    const [, middle] = world.id.split('-');
+    return middle ? middle.charAt(0).toUpperCase() + middle.slice(1) : world.id;
 }
 
 export interface LimboAgent {
@@ -125,15 +126,15 @@ export const AVAILABLE_ROLES = ['chief', 'manager', 'worker'] as const;
 export interface OrganizationRole {
     name: string;
     level: number;
-    can_command?: string[];
-    reports_to?: string;
-    max_per_world?: number;
-    permissions?: string[];
+    can_command?: string[] | undefined;
+    reports_to?: string | undefined;
+    max_per_world?: number | undefined;
+    permissions?: string[] | undefined;
 }
 
 export interface Organization {
     slug: string;
     name: string;
-    description?: string;
+    description?: string | undefined;
     roles: OrganizationRole[];
 }

@@ -3,8 +3,8 @@
  * The Go API is the sole backend - no fallback to Next.js API routes.
  */
 
-import { getTauriApiBase, initTauriApiPort, isTauri } from './tauri';
-import type { AgentProfile, World } from './types';
+import type { AgentProfile, World } from '@/domain/model';
+import { getTauriApiBase, initTauriApiPort, isTauri } from '@/tauri/runtime';
 
 // Dynamic API base - Tauri app uses a random port, browser defaults to 3001
 let goApiBase: null | string = null;
@@ -13,7 +13,7 @@ function browserApiBase(): null | string {
     if (process.env.NEXT_PUBLIC_API_URL) {
         return process.env.NEXT_PUBLIC_API_URL;
     }
-    if (typeof globalThis.location === 'undefined' || !globalThis.location.hostname) {
+    if (globalThis.location === undefined || !globalThis.location.hostname) {
         return null;
     }
     return `http://${globalThis.location.hostname}:3001`;
@@ -62,7 +62,7 @@ export function setApiBase(base: string) {
 // Callers (goApiUrl) get the right value as soon as possible. The promise
 // Is fire-and-forget - by the time a user interaction triggers a fetch,
 // The port will be cached.
-if (typeof globalThis.location !== 'undefined' || isTauri()) {
+if (globalThis.location !== undefined || isTauri()) {
     void resolveGoApiBase();
 }
 
@@ -130,7 +130,7 @@ interface RawWorld extends Omit<World, 'agent' | 'agents' | 'status' | 'workspac
     agent?: string;
     agents?: World['agents'];
     status?: World['status'];
-    workspaces?: World['workspaces'];
+    workspaces?: undefined | World['workspaces'];
     workspace?: string; // Legacy single-workspace field
 }
 
@@ -168,8 +168,7 @@ function normalizeWorlds(data: RawWorld[]): World[] {
  */
 function normalizeAgent(data: Partial<AgentProfile> & { name: string }): AgentProfile {
     return {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        role: (data as any).role || 'worker',
+        role: data.role || 'worker',
         engine: '',
         provider: '',
         purpose: '',
@@ -202,7 +201,7 @@ export async function apiGet<T>(goPath: string): Promise<T> {
     }
     // Normalize agent profile data from Go API
     if (
-        goPath.match(/^\/api\/agents\/[^/]+$/) &&
+        /^\/api\/agents\/[^/]+$/.exec(goPath) &&
         data &&
         typeof data === 'object' &&
         'name' in (data as object)
@@ -216,10 +215,10 @@ export async function apiGet<T>(goPath: string): Promise<T> {
  * POST to Go API.
  */
 export async function apiPost<T>(goPath: string, body?: unknown): Promise<T> {
-    return apiFetch<T>(goPath, {
+    return await apiFetch<T>(goPath, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined,
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
 }
 
@@ -227,10 +226,10 @@ export async function apiPost<T>(goPath: string, body?: unknown): Promise<T> {
  * PUT to Go API.
  */
 export async function apiPut<T>(goPath: string, body?: unknown): Promise<T> {
-    return apiFetch<T>(goPath, {
+    return await apiFetch<T>(goPath, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined,
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
 }
 
@@ -253,7 +252,7 @@ export async function apiAction(
         const res = await fetch(`${base}${goPath}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: body ? JSON.stringify(body) : undefined,
+            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
             signal: AbortSignal.timeout(10_000),
         });
         const data = await res.json();

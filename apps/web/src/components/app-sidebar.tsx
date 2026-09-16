@@ -21,6 +21,13 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import {
+    apiGet,
+    getConnectionStatus,
+    isGoApiAvailable,
+    onConnectionStatusChange,
+} from '@/api/client';
+import type { ConnectionStatus } from '@/api/client';
 import { DockerStatusPill } from '@/components/docker-status-pill';
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
@@ -36,15 +43,9 @@ import {
 } from '@/components/ui/sidebar';
 import { UpgradeBanner } from '@/components/upgrade-banner';
 import { WorldPlanet } from '@/components/world-planet';
+import { getWorldName } from '@/domain/model';
+import type { Team, World } from '@/domain/model';
 import { useVersion } from '@/hooks/use-version';
-import {
-    apiGet,
-    type ConnectionStatus,
-    getConnectionStatus,
-    isGoApiAvailable,
-    onConnectionStatusChange,
-} from '@/lib/api-client';
-import { getWorldName, type Team, type World } from '@/lib/types';
 
 interface StatusData {
     worlds: number;
@@ -53,17 +54,26 @@ interface StatusData {
 }
 interface AppSidebarProps {
     worlds: World[];
-    currentWorldId?: string;
-    loading?: boolean;
-    statusData?: null | StatusData;
+    currentWorldId?: string | undefined;
+    loading?: boolean | undefined;
+    statusData?: null | StatusData | undefined;
 }
 
-const AGENT_ICON: Record<string, { icon: typeof IconBoltFilled; color: string; dim: boolean }> = {
+type AgentIcon = { icon: typeof IconBoltFilled; color: string; dim: boolean };
+
+/** What an unknown status renders as — also the `stopped` entry below. */
+const AGENT_ICON_STOPPED: AgentIcon = {
+    icon: IconCircleFilled,
+    color: 'text-zinc-500/30',
+    dim: true,
+};
+
+const AGENT_ICON: Record<string, AgentIcon> = {
     running: { icon: IconBoltFilled, color: 'text-green-400', dim: false },
     waiting: { icon: IconMessageFilled, color: 'text-amber-400 animate-pulse', dim: false },
     sleeping: { icon: IconMoonFilled, color: 'text-purple-400', dim: false },
     idle: { icon: IconCircleFilled, color: 'text-amber-400/50', dim: true },
-    stopped: { icon: IconCircleFilled, color: 'text-zinc-500/30', dim: true },
+    stopped: AGENT_ICON_STOPPED,
 };
 
 export function AppSidebar({
@@ -115,26 +125,26 @@ export function AppSidebar({
             {/* ── Header ── */}
             <SidebarHeader className="gap-0 pt-4 pb-4">
                 <div className="flex items-center justify-between gap-2 px-2">
-                    <div className="group/logo flex items-center flex-1 min-w-0">
+                    <div className="group/logo flex min-w-0 flex-1 items-center">
                         <Link className="flex items-center gap-1.5" href="/">
                             <span
-                                className={`text-base font-heading transition-colors ${connectionStatus === 'connected' ? 'text-green-500' : 'text-red-400'}`}
+                                className={`font-heading text-base transition-colors ${connectionStatus === 'connected' ? 'text-green-500' : 'text-red-400'}`}
                             >
                                 ⬡
                             </span>
-                            <span className="text-base tracking-[0.12em] font-heading text-foreground">
+                            <span className="font-heading text-foreground text-base tracking-[0.12em]">
                                 spwn
                             </span>
                         </Link>
                         <span
-                            className={`ml-auto text-[10px] font-mono uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity ${connectionStatus === 'connected' ? 'text-green-500/60' : 'text-red-400/60'}`}
+                            className={`ml-auto font-mono text-[10px] tracking-wider uppercase opacity-0 transition-opacity group-hover/logo:opacity-100 ${connectionStatus === 'connected' ? 'text-green-500/60' : 'text-red-400/60'}`}
                         >
                             {connectionStatus}
                         </span>
                     </div>
                     <button
                         aria-label="Search (⌘K)"
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors shrink-0"
+                        className="text-muted-foreground/30 hover:text-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors"
                         onClick={() =>
                             globalThis.dispatchEvent(
                                 new KeyboardEvent('keydown', {
@@ -177,7 +187,7 @@ export function AppSidebar({
 
                 {/* ── Universe ── */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-sidebar-foreground/30">
+                    <SidebarGroupLabel className="text-sidebar-foreground/30 text-[10px] tracking-widest uppercase">
                         Universe
                     </SidebarGroupLabel>
                     <SidebarMenu>
@@ -223,15 +233,15 @@ export function AppSidebar({
                 {/* ── Quick start hint ── */}
                 {!loading && worlds.length === 0 && (
                     <SidebarGroup>
-                        <div className="mx-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-3 space-y-2">
-                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/30">
+                        <div className="mx-2 space-y-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-3">
+                            <p className="text-muted-foreground/30 text-[10px] tracking-widest uppercase">
                                 Getting started
                             </p>
-                            <div className="space-y-1.5 text-[11px] text-muted-foreground/40 leading-relaxed">
+                            <div className="text-muted-foreground/40 space-y-1.5 text-[11px] leading-relaxed">
                                 <p>
                                     <span className="text-foreground/50 font-mono">1.</span> Go to{' '}
                                     <button
-                                        className="text-foreground/60 hover:text-foreground/80 underline underline-offset-2 decoration-white/10"
+                                        className="text-foreground/60 hover:text-foreground/80 underline decoration-white/10 underline-offset-2"
                                         onClick={() => router.push('/providers')}
                                     >
                                         Settings
@@ -242,7 +252,7 @@ export function AppSidebar({
                                     <span className="text-foreground/50 font-mono">2.</span> Create
                                     an{' '}
                                     <button
-                                        className="text-foreground/60 hover:text-foreground/80 underline underline-offset-2 decoration-white/10"
+                                        className="text-foreground/60 hover:text-foreground/80 underline decoration-white/10 underline-offset-2"
                                         onClick={() => router.push('/agents')}
                                     >
                                         Agent
@@ -251,7 +261,7 @@ export function AppSidebar({
                                 <p>
                                     <span className="text-foreground/50 font-mono">3.</span> Spawn a{' '}
                                     <button
-                                        className="text-foreground/60 hover:text-foreground/80 underline underline-offset-2 decoration-white/10"
+                                        className="text-foreground/60 hover:text-foreground/80 underline decoration-white/10 underline-offset-2"
                                         onClick={() => router.push('/')}
                                     >
                                         World
@@ -265,18 +275,18 @@ export function AppSidebar({
                 {/* ── Worlds ── */}
                 <SidebarGroup>
                     {worlds.length > 0 && selectedWorld ? (
-                        <div className="px-1 space-y-1.5">
+                        <div className="space-y-1.5 px-1">
                             {/* Hero: current world */}
                             <button
-                                className="w-full flex items-center gap-3 px-2 py-2 rounded-md bg-sidebar-accent/50 hover:bg-sidebar-accent transition-colors text-left"
+                                className="bg-sidebar-accent/50 hover:bg-sidebar-accent flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors"
                                 onClick={() => router.push(`/world/${selectedWorld.id}`)}
                             >
                                 <WorldPlanet size="md" world={selectedWorld} />
                                 <span className="min-w-0 flex-1">
-                                    <span className="block text-sm font-medium text-foreground truncate">
+                                    <span className="text-foreground block truncate text-sm font-medium">
                                         {getWorldName(selectedWorld)}
                                     </span>
-                                    <span className="block text-[10px] uppercase tracking-widest text-muted-foreground/40">
+                                    <span className="text-muted-foreground/40 block text-[10px] tracking-widest uppercase">
                                         {selectedWorld.status} · {selectedWorld.agents.length} agent
                                         {selectedWorld.agents.length === 1 ? '' : 's'}
                                     </span>
@@ -315,12 +325,12 @@ export function AppSidebar({
 
                                 const renderPill = (world: (typeof others)[number]) => (
                                     <button
-                                        className="group/switch shrink-0 flex items-center gap-1.5 h-6 pl-1 pr-2 rounded-md text-xs text-muted-foreground/50 hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
+                                        className="group/switch text-muted-foreground/50 hover:text-foreground hover:bg-sidebar-accent/40 flex h-6 shrink-0 items-center gap-1.5 rounded-md pr-2 pl-1 text-xs transition-colors"
                                         key={world.id}
                                         onClick={() => router.push(`/world/${world.id}`)}
                                     >
                                         <WorldPlanet
-                                            className="opacity-80 group-hover/switch:opacity-100 transition-opacity"
+                                            className="opacity-80 transition-opacity group-hover/switch:opacity-100"
                                             size="sm"
                                             world={world}
                                         />
@@ -333,7 +343,7 @@ export function AppSidebar({
                                         aria-label={
                                             worldsExpanded ? 'Collapse worlds' : 'Show all worlds'
                                         }
-                                        className="shrink-0 flex items-center justify-center h-6 min-w-6 px-1.5 rounded-md text-[11px] font-medium text-muted-foreground/40 hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
+                                        className="text-muted-foreground/40 hover:text-foreground hover:bg-sidebar-accent/40 flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md px-1.5 text-[11px] font-medium transition-colors"
                                         onClick={() => setWorldsExpanded((v) => !v)}
                                     >
                                         {label}
@@ -346,7 +356,7 @@ export function AppSidebar({
                                             worldsExpanded
                                                 ? 'flex flex-wrap'
                                                 : 'flex items-center overflow-hidden'
-                                        } gap-1 -mx-1 px-1`}
+                                        } -mx-1 gap-1 px-1`}
                                     >
                                         {inlineItems.map(renderPill)}
                                         {!worldsExpanded &&
@@ -358,7 +368,7 @@ export function AppSidebar({
                             })()}
                         </div>
                     ) : (
-                        <p className="px-2 py-1.5 text-xs text-muted-foreground/25">
+                        <p className="text-muted-foreground/25 px-2 py-1.5 text-xs">
                             No worlds running
                         </p>
                     )}
@@ -418,7 +428,7 @@ export function AppSidebar({
                                 const renderAgent = (
                                     agent: (typeof selectedWorld.agents)[number],
                                 ) => {
-                                    const s = AGENT_ICON[agent.status] ?? AGENT_ICON.stopped;
+                                    const s = AGENT_ICON[agent.status] ?? AGENT_ICON_STOPPED;
                                     const StatusIcon = s.icon;
                                     return (
                                         <SidebarMenuItem key={agent.name}>
@@ -437,7 +447,7 @@ export function AppSidebar({
                                                     )
                                                 }
                                             >
-                                                <span className="w-[20px] h-[20px] -mx-[2px] -translate-x-[0.5px] rounded-full flex items-center justify-center shrink-0 bg-white/[0.15]">
+                                                <span className="-mx-[2px] flex h-[20px] w-[20px] shrink-0 -translate-x-[0.5px] items-center justify-center rounded-full bg-white/[0.15]">
                                                     <StatusIcon
                                                         className={`!size-[12px] ${s.color}`}
                                                     />
@@ -452,7 +462,7 @@ export function AppSidebar({
 
                                 if (selectedWorld.agents.length === 0) {
                                     return (
-                                        <p className="px-2 py-1.5 text-xs text-muted-foreground/25">
+                                        <p className="text-muted-foreground/25 px-2 py-1.5 text-xs">
                                             No agents deployed
                                         </p>
                                     );
@@ -468,7 +478,7 @@ export function AppSidebar({
                                     <>
                                         {[...grouped.values()].map(({ team, agents }) => (
                                             <div className="mt-1" key={team!.slug}>
-                                                <p className="px-2 py-1 text-[9px] uppercase tracking-[0.12em] text-sidebar-foreground/25 flex items-center gap-1.5">
+                                                <p className="text-sidebar-foreground/25 flex items-center gap-1.5 px-2 py-1 text-[9px] tracking-[0.12em] uppercase">
                                                     <span
                                                         style={
                                                             team!.color
@@ -485,7 +495,7 @@ export function AppSidebar({
                                         {soloAgents.length > 0 && (
                                             <div className="mt-1">
                                                 {grouped.size > 0 && (
-                                                    <p className="px-2 py-1 text-[9px] uppercase tracking-[0.12em] text-sidebar-foreground/20">
+                                                    <p className="text-sidebar-foreground/20 px-2 py-1 text-[9px] tracking-[0.12em] uppercase">
                                                         No team
                                                     </p>
                                                 )}
@@ -512,7 +522,7 @@ export function AppSidebar({
                 <div className="flex items-center gap-1 px-1.5 pb-1">
                     <a
                         aria-label="Docs"
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors"
+                        className="text-muted-foreground/30 hover:text-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                         href="https://spwn.sh/docs"
                         target="_blank"
                     >
@@ -520,7 +530,7 @@ export function AppSidebar({
                     </a>
                     <a
                         aria-label="GitHub"
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors"
+                        className="text-muted-foreground/30 hover:text-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                         href="https://github.com/jterrazz/spwn"
                         target="_blank"
                     >
@@ -528,7 +538,7 @@ export function AppSidebar({
                     </a>
                     <a
                         aria-label="Feedback"
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground/30 hover:text-foreground transition-colors"
+                        className="text-muted-foreground/30 hover:text-foreground flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                         href="https://github.com/jterrazz/spwn/issues/new"
                         target="_blank"
                     >

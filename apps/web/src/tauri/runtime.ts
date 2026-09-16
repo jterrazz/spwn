@@ -23,7 +23,7 @@ export async function initTauriApiPort(): Promise<null | number> {
         return cachedPort;
     }
     if (initPromise) {
-        return initPromise;
+        return await initPromise;
     }
 
     initPromise = (async () => {
@@ -32,7 +32,7 @@ export async function initTauriApiPort(): Promise<null | number> {
                 globalThis as unknown as {
                     __TAURI__: { core: { invoke: (cmd: string) => Promise<number> } };
                 }
-            )['__TAURI__'].core;
+            ).__TAURI__.core;
             cachedPort = await invoke('get_api_port');
             return cachedPort;
         } catch {
@@ -40,7 +40,7 @@ export async function initTauriApiPort(): Promise<null | number> {
         }
     })();
 
-    return initPromise;
+    return await initPromise;
 }
 
 export function getTauriApiBase(): null | string {

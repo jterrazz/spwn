@@ -12,11 +12,11 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
+import { goApiUrl } from '@/api/client';
 import { Page } from '@/components/page';
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePageTitle } from '@/hooks/use-page-title';
-import { goApiUrl } from '@/lib/api-client';
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -127,14 +127,14 @@ function UsageBar({
     return (
         <div className="space-y-1">
             <div className="flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground/40">{label}</span>
-                <span className="text-[10px] font-mono text-muted-foreground/50">
+                <span className="text-muted-foreground/40 text-[10px]">{label}</span>
+                <span className="text-muted-foreground/50 font-mono text-[10px]">
                     {suffix
                         ? `${suffix}${used.toFixed(2)} / ${suffix}${limit.toFixed(2)}`
                         : `${pct.toFixed(0)}%`}
                 </span>
             </div>
-            <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
                 <div
                     className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                     style={{ width: `${pct}%` }}
@@ -167,50 +167,50 @@ function ProviderRow({
         envKey: '',
         oauthNote: '',
     };
-    const connected = provider.connected;
+    const { connected } = provider;
     const cred = credLabel(provider.credentialType);
 
     return (
-        <div className="py-5 space-y-3">
+        <div className="space-y-3 py-5">
             {/* Main row */}
             <div className="flex items-center gap-4">
                 {/* Icon */}
                 <div
-                    className={`w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-base shrink-0 ${meta.color}`}
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04] text-base ${meta.color}`}
                 >
                     {meta.icon}
                 </div>
 
                 {/* Name + status */}
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2.5">
-                        <span className="text-sm font-mono font-medium text-foreground/80">
+                        <span className="text-foreground/80 font-mono text-sm font-medium">
                             {meta.name}
                         </span>
-                        {connected && <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />}
+                        {connected && <span className="h-1.5 w-1.5 rounded-full bg-green-400/70" />}
                         {!connected && provider.error && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-red-400/70" />
                         )}
                         {!connected && !provider.error && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-white/15" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-white/15" />
                         )}
                         {/* Credential type badge */}
                         {cred.label && (
                             <span
-                                className={`flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border ${cred.color}`}
+                                className={`flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[9px] ${cred.color}`}
                             >
                                 {cred.icon}
                                 {cred.label}
                             </span>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="mt-0.5 flex items-center gap-2">
                         {connected ? (
-                            <span className="text-[10px] font-mono text-muted-foreground/30">
+                            <span className="text-muted-foreground/30 font-mono text-[10px]">
                                 {provider.source ?? 'Connected'}
                             </span>
                         ) : (
-                            <span className="text-[10px] font-mono text-muted-foreground/20">
+                            <span className="text-muted-foreground/20 font-mono text-[10px]">
                                 Not configured
                             </span>
                         )}
@@ -219,23 +219,23 @@ function ProviderRow({
 
                 {/* Plan badge */}
                 {provider.plan && (
-                    <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border bg-white/[0.03] text-muted-foreground/35 border-white/[0.06]">
+                    <span className="text-muted-foreground/35 rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 font-mono text-[9px] tracking-wider uppercase">
                         {provider.plan}
                     </span>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex shrink-0 items-center gap-1">
                     {!connected && (
                         <>
                             <button
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-white/[0.05] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.08] transition-all"
+                                className="text-foreground/60 hover:text-foreground/80 flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.05] px-3 py-1.5 text-[11px] font-medium transition-all hover:bg-white/[0.08]"
                                 onClick={onReconnect}
                             >
                                 Reconnect
                             </button>
                             <button
-                                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-all"
+                                className="text-muted-foreground/30 hover:text-foreground/60 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-white/[0.04]"
                                 onClick={onConfigure}
                             >
                                 How to connect
@@ -245,24 +245,24 @@ function ProviderRow({
                     {connected && (
                         <>
                             <button
-                                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-all disabled:opacity-40"
+                                className="text-muted-foreground/30 hover:text-foreground/60 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-white/[0.04] disabled:opacity-40"
                                 disabled={checking}
                                 onClick={onCheck}
                             >
                                 {checking ? (
-                                    <span className="w-3 h-3 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin inline-block" />
+                                    <span className="border-foreground/30 border-t-foreground/70 inline-block h-3 w-3 animate-spin rounded-full border-2" />
                                 ) : (
                                     'Verify'
                                 )}
                             </button>
                             <button
-                                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/30 hover:text-foreground/60 hover:bg-white/[0.04] transition-all"
+                                className="text-muted-foreground/30 hover:text-foreground/60 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-white/[0.04]"
                                 onClick={onConfigure}
                             >
                                 Change
                             </button>
                             <button
-                                className="px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground/20 hover:text-red-400/60 hover:bg-red-500/[0.04] transition-all"
+                                className="text-muted-foreground/20 rounded-lg px-2.5 py-1.5 text-[11px] transition-all hover:bg-red-500/[0.04] hover:text-red-400/60"
                                 onClick={onReset}
                             >
                                 <IconX size={12} />
@@ -274,9 +274,9 @@ function ProviderRow({
 
             {/* Error */}
             {provider.error && (
-                <div className="ml-13 rounded-lg bg-red-500/8 border border-red-500/12 px-3 py-2 flex items-start gap-2">
-                    <IconAlertTriangle className="text-red-400/50 mt-0.5 shrink-0" size={12} />
-                    <p className="text-[10px] text-red-400/50 font-mono leading-relaxed">
+                <div className="ml-13 flex items-start gap-2 rounded-lg border border-red-500/12 bg-red-500/8 px-3 py-2">
+                    <IconAlertTriangle className="mt-0.5 shrink-0 text-red-400/50" size={12} />
+                    <p className="font-mono text-[10px] leading-relaxed text-red-400/50">
                         {provider.error}
                     </p>
                 </div>
@@ -284,7 +284,7 @@ function ProviderRow({
 
             {/* Usage bars */}
             {provider.usage && (
-                <div className="ml-13 space-y-2 max-w-xs">
+                <div className="ml-13 max-w-xs space-y-2">
                     {provider.usage.session && (
                         <UsageBar
                             label={`Session (${provider.usage.session.label})`}
@@ -319,13 +319,13 @@ function ConfigureModal({ provider, onClose }: { provider: string; onClose: () =
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
-                <div className="flex items-center justify-between mb-5">
-                    <h3 className="text-sm font-heading tracking-wide text-foreground/80">
+            <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
+                <div className="mb-5 flex items-center justify-between">
+                    <h3 className="font-heading text-foreground/80 text-sm tracking-wide">
                         Connect {meta?.name ?? provider}
                     </h3>
                     <button
-                        className="p-1 text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
+                        className="text-muted-foreground/30 hover:text-muted-foreground/60 p-1 transition-colors"
                         onClick={onClose}
                     >
                         <IconX size={16} />
@@ -333,14 +333,14 @@ function ConfigureModal({ provider, onClose }: { provider: string; onClose: () =
                 </div>
 
                 <div className="space-y-4">
-                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 space-y-3">
-                        <p className="text-xs text-muted-foreground/50 leading-relaxed">
+                    <div className="space-y-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
+                        <p className="text-muted-foreground/50 text-xs leading-relaxed">
                             Sign in via the runtime CLI on your host machine. Spwn detects
                             credentials from your system keychain and shares them with all
                             containers automatically.
                         </p>
                         {meta?.oauthNote && (
-                            <div className="flex items-center gap-2 text-[11px] font-mono text-foreground/50 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2">
+                            <div className="text-foreground/50 flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 font-mono text-[11px]">
                                 <IconTerminal2
                                     className="text-muted-foreground/30 shrink-0"
                                     size={13}
@@ -348,14 +348,14 @@ function ConfigureModal({ provider, onClose }: { provider: string; onClose: () =
                                 <span>{meta.oauthNote}</span>
                             </div>
                         )}
-                        <p className="text-[10px] text-muted-foreground/25">
+                        <p className="text-muted-foreground/25 text-[10px]">
                             After signing in, click Reconnect in the settings to pick up the new
                             credentials.
                         </p>
                     </div>
 
                     <button
-                        className="w-full px-4 py-2.5 rounded-xl text-sm text-muted-foreground/50 hover:text-foreground/70 hover:bg-white/[0.04] transition-colors"
+                        className="text-muted-foreground/50 hover:text-foreground/70 w-full rounded-xl px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.04]"
                         onClick={onClose}
                     >
                         Done
@@ -482,16 +482,16 @@ export default function ProvidersPage() {
             {/* Feedback toast */}
             {feedback && (
                 <div
-                    className={`px-4 py-2 rounded-lg text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-200 ${
+                    className={`animate-in fade-in slide-in-from-top-2 rounded-lg px-4 py-2 font-mono text-xs duration-200 ${
                         feedback.type === 'success'
-                            ? 'bg-green-500/10 border border-green-500/20 text-green-400'
-                            : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                            ? 'border border-green-500/20 bg-green-500/10 text-green-400'
+                            : 'border border-red-500/20 bg-red-500/10 text-red-400'
                     }`}
                 >
                     {feedback.type === 'success' ? (
-                        <IconCheck className="inline mr-1.5" size={12} />
+                        <IconCheck className="mr-1.5 inline" size={12} />
                     ) : (
-                        <IconAlertTriangle className="inline mr-1.5" size={12} />
+                        <IconAlertTriangle className="mr-1.5 inline" size={12} />
                     )}
                     {feedback.message}
                 </div>
@@ -499,9 +499,9 @@ export default function ProvidersPage() {
 
             {/* Error */}
             {errorMessage && !loading && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/15 px-4 py-3 flex items-start gap-2">
-                    <IconAlertTriangle className="text-red-400/60 mt-0.5 shrink-0" size={14} />
-                    <p className="text-xs text-red-400/70 font-mono">{errorMessage}</p>
+                <div className="flex items-start gap-2 rounded-lg border border-red-500/15 bg-red-500/10 px-4 py-3">
+                    <IconAlertTriangle className="mt-0.5 shrink-0 text-red-400/60" size={14} />
+                    <p className="font-mono text-xs text-red-400/70">{errorMessage}</p>
                 </div>
             )}
 
@@ -510,10 +510,10 @@ export default function ProvidersPage() {
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
                         <div className="flex items-center gap-4 py-5" key={i}>
-                            <Skeleton className="w-9 h-9 rounded-lg" />
+                            <Skeleton className="h-9 w-9 rounded-lg" />
                             <div className="flex-1">
                                 <Skeleton className="h-4 w-28" />
-                                <Skeleton className="h-2.5 w-20 mt-1.5" />
+                                <Skeleton className="mt-1.5 h-2.5 w-20" />
                             </div>
                             <Skeleton className="h-7 w-20 rounded-lg" />
                         </div>
@@ -521,19 +521,19 @@ export default function ProvidersPage() {
                 </div>
             )}
             {!loading && providers.length === 0 && !errorMessage && (
-                <div className="flex-1 flex items-center justify-center -mt-12">
-                    <div className="flex flex-col items-center text-center max-w-md">
-                        <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-6">
+                <div className="-mt-12 flex flex-1 items-center justify-center">
+                    <div className="flex max-w-md flex-col items-center text-center">
+                        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
                             <IconPlugConnected className="text-muted-foreground/20" size={28} />
                         </div>
-                        <h2 className="text-lg font-heading tracking-wide text-foreground/70 mb-2">
+                        <h2 className="font-heading text-foreground/70 mb-2 text-lg tracking-wide">
                             No providers detected
                         </h2>
-                        <p className="text-sm text-muted-foreground/40 mb-6 leading-relaxed">
+                        <p className="text-muted-foreground/40 mb-6 text-sm leading-relaxed">
                             Agents need an AI provider to think. Add an API key or sign in with a
                             subscription.
                         </p>
-                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/25 font-mono">
+                        <div className="text-muted-foreground/25 flex items-center gap-2 font-mono text-[11px]">
                             <IconTerminal2 size={13} />
                             <span>export ANTHROPIC_API_KEY=sk-...</span>
                         </div>
@@ -546,10 +546,10 @@ export default function ProvidersPage() {
                         <ProviderRow
                             checking={checking === provider.provider}
                             key={provider.provider}
-                            onCheck={() => handleCheck(provider.provider)}
+                            onCheck={async () => await handleCheck(provider.provider)}
                             onConfigure={() => setConfiguring(provider.provider)}
-                            onReconnect={() => handleReconnect(provider.provider)}
-                            onReset={() => handleReset(provider.provider)}
+                            onReconnect={async () => await handleReconnect(provider.provider)}
+                            onReset={async () => await handleReset(provider.provider)}
                             provider={provider}
                         />
                     ))}

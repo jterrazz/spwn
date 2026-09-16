@@ -61,13 +61,13 @@ export default function RootLayout({
                     }}
                 />
             </head>
-            <body className="h-svh overflow-hidden relative">
-                <div className="flex flex-col h-full">
+            <body className="relative h-svh overflow-hidden">
+                <div className="flex h-full flex-col">
                     <ThemeProvider>
                         <TooltipProvider>
                             <ToastProvider>
                                 <Aurora />
-                                <div className="relative z-10 flex-1 min-h-0 h-full">
+                                <div className="relative z-10 h-full min-h-0 flex-1">
                                     <ArchitectChatProvider>
                                         <AppShell>{children}</AppShell>
                                         <ArchitectChatWidget />

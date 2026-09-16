@@ -23,9 +23,12 @@ import {
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 
+import { apiAction, apiDelete, apiGet, apiPut, encPath, goApiUrl } from '@/api/client';
+import { streamChat } from '@/api/stream-chat';
 import { ActionButton } from '@/components/action-button';
 import { useRefetch } from '@/components/app-shell';
-import { Chat, type ChatBubble, ChatSuggestions } from '@/components/chat';
+import { Chat, ChatSuggestions } from '@/components/chat';
+import type { ChatBubble } from '@/components/chat';
 import {
     ItemList,
     KeyValue,
@@ -40,19 +43,11 @@ import { InlineEdit, InlineTagsEdit } from '@/components/inline-edit';
 import { PageHeader } from '@/components/page-header';
 import { ProgressShimmer } from '@/components/progress-shimmer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AVAILABLE_ROLES, getWorldName } from '@/domain/model';
+import type { AgentProfile, Organization, Team, World } from '@/domain/model';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { useProgressMessages } from '@/hooks/use-progress-messages';
-import { apiAction, apiDelete, apiGet, apiPut, encPath, goApiUrl } from '@/lib/api-client';
-import { ROLE_BADGE } from '@/lib/status';
-import { streamChat } from '@/lib/stream-chat';
-import {
-    type AgentProfile,
-    AVAILABLE_ROLES,
-    getWorldName,
-    type Organization,
-    type Team,
-    type World,
-} from '@/lib/types';
+import { ROLE_BADGE } from '@/styles/status-colors';
 
 export default function AgentProfilePageWrapper() {
     return (
@@ -222,9 +217,9 @@ function AgentProfilePage() {
 
     if (loading) {
         return (
-            <div className="p-8 space-y-6 max-w-3xl">
+            <div className="max-w-3xl space-y-6 p-8">
                 <div className="flex items-center gap-4">
-                    <Skeleton className="w-12 h-12 rounded-xl" />
+                    <Skeleton className="h-12 w-12 rounded-xl" />
                     <div className="space-y-2">
                         <Skeleton className="h-6 w-32" />
                         <Skeleton className="h-3 w-48" />
@@ -244,18 +239,18 @@ function AgentProfilePage() {
 
     if (!profile) {
         return (
-            <div className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
-                <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
+            <div className="flex min-h-[60vh] flex-col items-center justify-center p-8">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
                     <IconUser className="text-muted-foreground/20" size={28} />
                 </div>
-                <p className="text-muted-foreground/50 text-lg font-heading">
+                <p className="text-muted-foreground/50 font-heading text-lg">
                     Agent &quot;{agentName}&quot; not found
                 </p>
-                <p className="text-xs text-muted-foreground/30 mt-2 font-mono">
+                <p className="text-muted-foreground/30 mt-2 font-mono text-xs">
                     Create this agent with: spwn agent create {agentName}
                 </p>
                 <button
-                    className="mt-6 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm bg-white/[0.04] text-foreground/60 hover:text-foreground/80 hover:bg-white/[0.08] border border-white/[0.06] transition-all"
+                    className="text-foreground/60 hover:text-foreground/80 mt-6 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 py-2.5 text-sm transition-all hover:bg-white/[0.08]"
                     onClick={() => {
                         apiAction('/api/agents', { name: agentName }).then((result) => {
                             if (result.ok) {
@@ -280,7 +275,7 @@ function AgentProfilePage() {
     const worldName = worldData ? getWorldName(worldData) : undefined;
 
     const mainContent = (
-        <div className="flex-1 min-w-0 p-4 md:p-8 space-y-6 md:space-y-8">
+        <div className="min-w-0 flex-1 space-y-6 p-4 md:space-y-8 md:p-8">
             <PageHeader
                 actions={
                     <>
@@ -364,10 +359,10 @@ function AgentProfilePage() {
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         onClick={() => !deploying && setShowDeployDialog(false)}
                     />
-                    <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl overflow-hidden">
+                    <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
                         {/* Top shimmer bar */}
                         {deploying && (
-                            <div className="w-full h-0.5 overflow-hidden bg-white/[0.04]">
+                            <div className="h-0.5 w-full overflow-hidden bg-white/[0.04]">
                                 <div
                                     className="h-full w-1/3 rounded-full bg-emerald-500/30"
                                     style={{ animation: 'progressSlide 1.5s ease-in-out infinite' }}
@@ -375,23 +370,23 @@ function AgentProfilePage() {
                             </div>
                         )}
                         <div className="p-6">
-                            <h3 className="text-lg font-heading text-foreground/90 mb-1">
+                            <h3 className="font-heading text-foreground/90 mb-1 text-lg">
                                 Deploy to World
                             </h3>
-                            <p className="text-sm text-muted-foreground/50 mb-5">
+                            <p className="text-muted-foreground/50 mb-5 text-sm">
                                 Add{' '}
-                                <span className="font-mono text-foreground/70">{agentName}</span> to
+                                <span className="text-foreground/70 font-mono">{agentName}</span> to
                                 a running world.
                             </p>
-                            <label className="block text-[10px] uppercase tracking-[0.15em] text-muted-foreground/40 mb-2">
+                            <label className="text-muted-foreground/40 mb-2 block text-[10px] tracking-[0.15em] uppercase">
                                 Select World
                             </label>
                             {availableWorlds.length === 0 ? (
-                                <p className="text-[11px] text-muted-foreground/40 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                                <p className="text-muted-foreground/40 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[11px]">
                                     No running worlds. Spawn one first from the Worlds page.
                                 </p>
                             ) : (
-                                <div className="rounded-lg bg-white/[0.02] border border-white/[0.08] max-h-48 overflow-y-auto">
+                                <div className="max-h-48 overflow-y-auto rounded-lg border border-white/[0.08] bg-white/[0.02]">
                                     {availableWorlds.map((w) => {
                                         const wName = getWorldName(w);
                                         const isSelected = deployTargetWorld === w.id;
@@ -408,7 +403,7 @@ function AgentProfilePage() {
                                         }
                                         return (
                                             <button
-                                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${stateClass}`}
+                                                className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${stateClass}`}
                                                 disabled={alreadyDeployed}
                                                 key={w.id}
                                                 onClick={() =>
@@ -416,17 +411,17 @@ function AgentProfilePage() {
                                                 }
                                             >
                                                 <span
-                                                    className={`w-2 h-2 rounded-full shrink-0 ${
+                                                    className={`h-2 w-2 shrink-0 rounded-full ${
                                                         isSelected
                                                             ? 'bg-emerald-400'
                                                             : 'bg-white/[0.15]'
                                                     }`}
                                                 />
-                                                <span className="flex-1 min-w-0">
-                                                    <span className="text-sm text-foreground/80 truncate block">
+                                                <span className="min-w-0 flex-1">
+                                                    <span className="text-foreground/80 block truncate text-sm">
                                                         {wName}
                                                     </span>
-                                                    <span className="text-[10px] text-muted-foreground/35 font-mono">
+                                                    <span className="text-muted-foreground/35 font-mono text-[10px]">
                                                         {w.agents.length} agent
                                                         {w.agents.length === 1 ? '' : 's'}
                                                         {alreadyDeployed && ' · already deployed'}
@@ -438,11 +433,11 @@ function AgentProfilePage() {
                                 </div>
                             )}
                             {/* Role selector */}
-                            <label className="block text-[10px] uppercase tracking-[0.15em] text-muted-foreground/40 mt-4 mb-2">
+                            <label className="text-muted-foreground/40 mt-4 mb-2 block text-[10px] tracking-[0.15em] uppercase">
                                 Role
                             </label>
                             <select
-                                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.16] transition-colors disabled:opacity-50"
+                                className="text-foreground/80 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm transition-colors focus:border-white/[0.16] focus:outline-none disabled:opacity-50"
                                 disabled={deploying}
                                 onChange={(e) => setDeployRole(e.target.value)}
                                 value={deployRole}
@@ -473,24 +468,24 @@ function AgentProfilePage() {
                                 })()}
                             </select>
                             {deployError && (
-                                <p className="text-xs text-red-400/80 mt-3">{deployError}</p>
+                                <p className="mt-3 text-xs text-red-400/80">{deployError}</p>
                             )}
-                            <div className="flex gap-3 justify-end mt-6">
+                            <div className="mt-6 flex justify-end gap-3">
                                 <button
-                                    className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors disabled:opacity-50"
+                                    className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04] disabled:opacity-50"
                                     disabled={deploying}
                                     onClick={() => setShowDeployDialog(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/20 transition-colors disabled:opacity-50"
+                                    className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/20 px-4 py-2 text-sm text-emerald-300 transition-colors hover:bg-emerald-500/30 disabled:opacity-50"
                                     disabled={deploying || !deployTargetWorld}
                                     onClick={handleDeploy}
                                 >
                                     {deploying ? (
                                         <>
-                                            <div className="w-3 h-3 border-2 border-emerald-300/40 border-t-emerald-300 rounded-full animate-spin" />
+                                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-300/40 border-t-emerald-300" />
                                             Deploying…
                                         </>
                                     ) : (
@@ -514,30 +509,30 @@ function AgentProfilePage() {
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         onClick={() => setShowDeleteConfirm(false)}
                     />
-                    <div className="relative z-10 w-full max-w-sm mx-4 rounded-2xl bg-popover/95 backdrop-blur-md border border-white/[0.08] shadow-2xl p-6">
-                        <h3 className="text-lg font-heading text-foreground/90 mb-2">
+                    <div className="bg-popover/95 relative z-10 mx-4 w-full max-w-sm rounded-2xl border border-white/[0.08] p-6 shadow-2xl backdrop-blur-md">
+                        <h3 className="font-heading text-foreground/90 mb-2 text-lg">
                             Delete Agent
                         </h3>
-                        <p className="text-sm text-muted-foreground/50 mb-6">
+                        <p className="text-muted-foreground/50 mb-6 text-sm">
                             Are you sure you want to delete{' '}
-                            <span className="font-mono text-foreground/70">{agentName}</span>? This
+                            <span className="text-foreground/70 font-mono">{agentName}</span>? This
                             will permanently remove all mind files, memories, and identity data.
                         </p>
-                        <div className="flex gap-3 justify-end">
+                        <div className="flex justify-end gap-3">
                             <button
-                                className="px-4 py-2 rounded-lg text-sm text-muted-foreground/60 hover:text-foreground/80 hover:bg-white/[0.04] transition-colors"
+                                className="text-muted-foreground/60 hover:text-foreground/80 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-white/[0.04]"
                                 onClick={() => setShowDeleteConfirm(false)}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="px-4 py-2 rounded-lg text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/20 transition-colors disabled:opacity-50"
+                                className="rounded-lg border border-red-500/20 bg-red-500/20 px-4 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
                                 disabled={deleting}
                                 onClick={handleDelete}
                             >
                                 {deleting ? (
                                     <span className="flex items-center gap-2">
-                                        <span className="w-3 h-3 border-2 border-red-400/40 border-t-red-400 rounded-full animate-spin" />
+                                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-red-400/40 border-t-red-400" />
                                         Deleting...
                                     </span>
                                 ) : (
@@ -551,18 +546,18 @@ function AgentProfilePage() {
 
             {/* Get Started Wizard Banner */}
             {showWizard && profile && !profile.purpose && (
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-start justify-between mb-3">
+                <div className="animate-in fade-in slide-in-from-top-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 duration-300">
+                    <div className="mb-3 flex items-start justify-between">
                         <div>
-                            <h3 className="text-sm font-heading text-emerald-300">
+                            <h3 className="font-heading text-sm text-emerald-300">
                                 Set up {agentName}&apos;s identity
                             </h3>
-                            <p className="text-[11px] text-emerald-300/50 mt-1">
+                            <p className="mt-1 text-[11px] text-emerald-300/50">
                                 Give this agent a purpose so it knows what to focus on.
                             </p>
                         </div>
                         <button
-                            className="text-emerald-300/30 hover:text-emerald-300/60 transition-colors"
+                            className="text-emerald-300/30 transition-colors hover:text-emerald-300/60"
                             onClick={() => setShowWizard(false)}
                         >
                             <IconX size={16} />
@@ -570,11 +565,11 @@ function AgentProfilePage() {
                     </div>
                     <div className="space-y-3">
                         <div>
-                            <label className="text-[10px] uppercase tracking-widest text-emerald-300/40 block mb-1.5">
+                            <label className="mb-1.5 block text-[10px] tracking-widest text-emerald-300/40 uppercase">
                                 Purpose
                             </label>
                             <input
-                                className="w-full bg-white/[0.03] border border-emerald-500/15 rounded-lg px-3 py-2.5 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                                className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-emerald-500/15 bg-white/[0.03] px-3 py-2.5 text-sm transition-colors focus:border-emerald-500/30 focus:outline-none"
                                 onKeyDown={async (e) => {
                                     if (e.key === 'Enter') {
                                         const val = (e.target as HTMLInputElement).value.trim();
@@ -589,11 +584,11 @@ function AgentProfilePage() {
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[10px] uppercase tracking-widest text-emerald-300/40 block mb-1.5">
+                                <label className="mb-1.5 block text-[10px] tracking-widest text-emerald-300/40 uppercase">
                                     Profile
                                 </label>
                                 <input
-                                    className="w-full bg-white/[0.03] border border-emerald-500/15 rounded-lg px-3 py-2 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                                    className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-emerald-500/15 bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-emerald-500/30 focus:outline-none"
                                     onKeyDown={async (e) => {
                                         if (e.key === 'Enter') {
                                             const val = (e.target as HTMLInputElement).value.trim();
@@ -606,11 +601,11 @@ function AgentProfilePage() {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] uppercase tracking-widest text-emerald-300/40 block mb-1.5">
+                                <label className="mb-1.5 block text-[10px] tracking-widest text-emerald-300/40 uppercase">
                                     Traits
                                 </label>
                                 <input
-                                    className="w-full bg-white/[0.03] border border-emerald-500/15 rounded-lg px-3 py-2 text-sm text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-emerald-500/30 transition-colors"
+                                    className="text-foreground/80 placeholder:text-muted-foreground/25 w-full rounded-lg border border-emerald-500/15 bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-emerald-500/30 focus:outline-none"
                                     onKeyDown={async (e) => {
                                         if (e.key === 'Enter') {
                                             const val = (e.target as HTMLInputElement).value.trim();
@@ -627,7 +622,7 @@ function AgentProfilePage() {
                                 />
                             </div>
                         </div>
-                        <p className="text-[10px] text-emerald-300/30 font-mono">
+                        <p className="font-mono text-[10px] text-emerald-300/30">
                             Press Enter in any field to save. Fill purpose to dismiss this banner.
                         </p>
                     </div>
@@ -637,10 +632,10 @@ function AgentProfilePage() {
             {/* Tab switcher */}
             <div className="flex gap-1 border-b border-white/[0.06] pb-px">
                 <button
-                    className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px flex items-center gap-1.5 ${
+                    className={`-mb-px flex items-center gap-1.5 border-b-2 px-4 py-2 text-xs font-medium transition-colors ${
                         activeTab === 'chat'
                             ? 'border-foreground/50 text-foreground/80'
-                            : 'border-transparent text-muted-foreground/40 hover:text-muted-foreground/60'
+                            : 'text-muted-foreground/40 hover:text-muted-foreground/60 border-transparent'
                     }`}
                     onClick={() => setActiveTab('chat')}
                 >
@@ -648,20 +643,20 @@ function AgentProfilePage() {
                     Chat
                 </button>
                 <button
-                    className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+                    className={`-mb-px border-b-2 px-4 py-2 text-xs font-medium transition-colors ${
                         activeTab === 'profile'
                             ? 'border-foreground/50 text-foreground/80'
-                            : 'border-transparent text-muted-foreground/40 hover:text-muted-foreground/60'
+                            : 'text-muted-foreground/40 hover:text-muted-foreground/60 border-transparent'
                     }`}
                     onClick={() => setActiveTab('profile')}
                 >
                     Profile
                 </button>
                 <button
-                    className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+                    className={`-mb-px border-b-2 px-4 py-2 text-xs font-medium transition-colors ${
                         activeTab === 'files'
                             ? 'border-foreground/50 text-foreground/80'
-                            : 'border-transparent text-muted-foreground/40 hover:text-muted-foreground/60'
+                            : 'text-muted-foreground/40 hover:text-muted-foreground/60 border-transparent'
                     }`}
                     onClick={() => setActiveTab('files')}
                 >
@@ -672,10 +667,10 @@ function AgentProfilePage() {
             {/* Feedback toast */}
             {feedback && (
                 <div
-                    className={`px-4 py-2 rounded-lg text-xs font-mono animate-in fade-in slide-in-from-top-2 duration-200 ${
+                    className={`animate-in fade-in slide-in-from-top-2 rounded-lg px-4 py-2 font-mono text-xs duration-200 ${
                         feedback.startsWith('Error')
-                            ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-                            : 'bg-green-500/10 border border-green-500/20 text-green-400'
+                            ? 'border border-red-500/20 bg-red-500/10 text-red-400'
+                            : 'border border-green-500/20 bg-green-500/10 text-green-400'
                     }`}
                 >
                     {feedback}
@@ -702,7 +697,7 @@ function AgentProfilePage() {
                     <div className="flex items-center justify-between">
                         <SubLabel>Team</SubLabel>
                         <select
-                            className="bg-transparent text-sm font-mono text-foreground/80 focus:outline-none cursor-pointer text-right"
+                            className="text-foreground/80 cursor-pointer bg-transparent text-right font-mono text-sm focus:outline-none"
                             onChange={async (e) => {
                                 const ok = await saveIdentityField('team', e.target.value);
                                 if (ok) {
@@ -722,7 +717,7 @@ function AgentProfilePage() {
 
                     {/* Deployment History */}
                     {(() => {
-                        const journalFiles = mindTree['journal'] ?? [];
+                        const journalFiles = mindTree.journal ?? [];
                         const worldIds = journalFiles
                             .filter((f) => f.endsWith('.json'))
                             .map((f) => f.replace('.json', ''));
@@ -737,11 +732,12 @@ function AgentProfilePage() {
                                     <ItemList
                                         items={worldIds.map((wid) => {
                                             const parts = wid.split('-');
+                                            const second = parts[1];
                                             const wName =
-                                                parts.length >= 2
-                                                    ? parts[1].charAt(0).toUpperCase() +
-                                                      parts[1].slice(1)
-                                                    : wid;
+                                                second === undefined
+                                                    ? wid
+                                                    : second.charAt(0).toUpperCase() +
+                                                      second.slice(1);
                                             return {
                                                 name: wName,
                                                 detail: wid,
@@ -763,9 +759,9 @@ function AgentProfilePage() {
                         <div className="mb-4">
                             <SubLabel className="mb-1.5">Purpose</SubLabel>
                             <InlineEdit
-                                className="text-sm text-foreground/75 leading-relaxed"
+                                className="text-foreground/75 text-sm leading-relaxed"
                                 multiline
-                                onSave={(v) => saveIdentityField('purpose', v)}
+                                onSave={async (v) => await saveIdentityField('purpose', v)}
                                 placeholder="Define this agent's purpose..."
                                 value={profile.purpose || ''}
                             />
@@ -774,9 +770,9 @@ function AgentProfilePage() {
                         <div className="mb-4">
                             <SubLabel className="mb-1.5">Profile</SubLabel>
                             <InlineEdit
-                                className="text-sm text-foreground/60 leading-relaxed italic"
+                                className="text-foreground/60 text-sm leading-relaxed italic"
                                 multiline
-                                onSave={(v) => saveIdentityField('profile', v)}
+                                onSave={async (v) => await saveIdentityField('profile', v)}
                                 placeholder="Describe the agent's profile..."
                                 value={profile.profile || ''}
                             />
@@ -807,7 +803,7 @@ function AgentProfilePage() {
                                 <div className="flex flex-wrap gap-1.5">
                                     {(profile.skills ?? []).map((skill) => (
                                         <span
-                                            className="px-2.5 py-1 text-[11px] font-mono text-foreground/60 bg-white/[0.04] border border-white/[0.06]"
+                                            className="text-foreground/60 border border-white/[0.06] bg-white/[0.04] px-2.5 py-1 font-mono text-[11px]"
                                             key={skill}
                                         >
                                             {skill}
@@ -828,7 +824,7 @@ function AgentProfilePage() {
                                     {(profile.journal ?? []).map((entry) => (
                                         <div key={entry.date}>
                                             <SubLabel className="mb-1">{entry.date}</SubLabel>
-                                            <p className="text-xs text-foreground/60 leading-relaxed">
+                                            <p className="text-foreground/60 text-xs leading-relaxed">
                                                 {entry.summary}
                                             </p>
                                         </div>
@@ -850,10 +846,10 @@ function AgentProfilePage() {
 
     return (
         <div className="flex h-[calc(100vh-1px)] overflow-hidden">
-            <div className="flex-1 min-w-0 overflow-y-auto">{mainContent}</div>
+            <div className="min-w-0 flex-1 overflow-y-auto">{mainContent}</div>
             {/* ── Right: Quick info panel ── */}
-            <div className="w-72 border-l border-border/30 overflow-y-auto shrink-0 hidden lg:block">
-                <div className="p-5 space-y-6">
+            <div className="border-border/30 hidden w-72 shrink-0 overflow-y-auto border-l lg:block">
+                <div className="space-y-6 p-5">
                     <SectionHeader>Diagnostics</SectionHeader>
 
                     {/* Identity */}
@@ -868,7 +864,7 @@ function AgentProfilePage() {
                                     const badge = ROLE_BADGE[role] ?? ROLE_BADGE.default;
                                     return (
                                         <span
-                                            className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${badge}`}
+                                            className={`rounded border px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${badge}`}
                                         >
                                             {role}
                                         </span>
@@ -880,7 +876,7 @@ function AgentProfilePage() {
                                     <SubLabel>Status</SubLabel>
                                     <div className="flex items-center gap-1.5">
                                         <StatusDot status={deployedAgent.status} />
-                                        <span className="text-xs font-mono font-medium text-foreground/80 capitalize">
+                                        <span className="text-foreground/80 font-mono text-xs font-medium capitalize">
                                             {deployedAgent.status}
                                         </span>
                                     </div>
@@ -922,7 +918,7 @@ function AgentProfilePage() {
                                         <SubLabel>Status</SubLabel>
                                         <div className="flex items-center gap-1.5">
                                             <StatusDot status={worldData.status} />
-                                            <span className="text-xs font-mono font-medium text-foreground/80 capitalize">
+                                            <span className="text-foreground/80 font-mono text-xs font-medium capitalize">
                                                 {worldData.status}
                                             </span>
                                         </div>
@@ -948,7 +944,7 @@ function AgentProfilePage() {
 
 /* ── Agent Chat ── */
 
-function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string }) {
+function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string | undefined }) {
     const [messages, setMessages] = useState<ChatBubble[]>([]);
     const [sending, setSending] = useState(false);
 
@@ -1086,12 +1082,12 @@ function AgentChat({ agentName, worldId }: { agentName: string; worldId?: string
             emptyState={
                 <div className="flex flex-col items-center justify-center text-center">
                     <IconTerminal className="text-muted-foreground/15 mb-3" size={28} />
-                    <p className="text-sm text-muted-foreground/30">Chat with {agentName}</p>
-                    <p className="text-[11px] text-muted-foreground/20 mt-1 mb-4">
+                    <p className="text-muted-foreground/30 text-sm">Chat with {agentName}</p>
+                    <p className="text-muted-foreground/20 mt-1 mb-4 text-[11px]">
                         Send messages directly to this agent in real-time
                     </p>
                     <ChatSuggestions
-                        onPick={(s) => handleSend(s)}
+                        onPick={async (s) => await handleSend(s)}
                         suggestions={[
                             'What are you working on?',
                             'Show me the project structure',
@@ -1191,10 +1187,10 @@ function MindFileViewer({
 
     if (sortedLayers.length === 0) {
         return (
-            <div className="text-center py-12">
-                <IconFolder className="mx-auto text-muted-foreground/15 mb-3" size={32} />
+            <div className="py-12 text-center">
+                <IconFolder className="text-muted-foreground/15 mx-auto mb-3" size={32} />
                 <p className="text-muted-foreground/40 text-sm">No mind files found</p>
-                <p className="text-muted-foreground/25 text-xs mt-1 font-mono">
+                <p className="text-muted-foreground/25 mt-1 font-mono text-xs">
                     Create files with: spwn agent dream {agentName}
                 </p>
             </div>
@@ -1212,7 +1208,7 @@ function MindFileViewer({
                     <div className="glass-subtle overflow-hidden" key={layer}>
                         {/* Layer header */}
                         <button
-                            className="w-full flex items-center gap-2.5 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
+                            className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-white/[0.02]"
                             onClick={() => toggleLayer(layer)}
                         >
                             {isExpanded ? (
@@ -1231,10 +1227,10 @@ function MindFileViewer({
                             ) : (
                                 <LayerIcon className="text-foreground/40 shrink-0" size={16} />
                             )}
-                            <span className="text-xs font-mono text-foreground/70 flex-1">
+                            <span className="text-foreground/70 flex-1 font-mono text-xs">
                                 {layer}/
                             </span>
-                            <span className="text-[10px] font-mono text-muted-foreground/30">
+                            <span className="text-muted-foreground/30 font-mono text-[10px]">
                                 {files.length} files
                             </span>
                         </button>
@@ -1251,8 +1247,8 @@ function MindFileViewer({
                                     return (
                                         <div key={file}>
                                             <button
-                                                className="w-full flex items-center gap-2.5 px-4 py-2 pl-10 text-left hover:bg-white/[0.02] transition-colors"
-                                                onClick={() => toggleFile(layer, file)}
+                                                className="flex w-full items-center gap-2.5 px-4 py-2 pl-10 text-left transition-colors hover:bg-white/[0.02]"
+                                                onClick={async () => await toggleFile(layer, file)}
                                             >
                                                 {isFileExpanded ? (
                                                     <IconChevronDown
@@ -1269,21 +1265,21 @@ function MindFileViewer({
                                                     className="text-muted-foreground/30 shrink-0"
                                                     size={13}
                                                 />
-                                                <span className="text-[11px] font-mono text-foreground/60">
+                                                <span className="text-foreground/60 font-mono text-[11px]">
                                                     {file}
                                                 </span>
                                             </button>
 
                                             {/* File content */}
                                             {isFileExpanded && (
-                                                <div className="px-4 py-3 pl-16 border-t border-white/[0.03] bg-white/[0.01]">
+                                                <div className="border-t border-white/[0.03] bg-white/[0.01] px-4 py-3 pl-16">
                                                     {isLoading ? (
-                                                        <div className="flex items-center gap-2 text-muted-foreground/30 text-xs">
-                                                            <div className="w-3 h-3 border-2 border-foreground/20 border-t-foreground/50 rounded-full animate-spin" />
+                                                        <div className="text-muted-foreground/30 flex items-center gap-2 text-xs">
+                                                            <div className="border-foreground/20 border-t-foreground/50 h-3 w-3 animate-spin rounded-full border-2" />
                                                             Loading...
                                                         </div>
                                                     ) : (
-                                                        <pre className="text-[11px] font-mono text-foreground/50 whitespace-pre-wrap leading-relaxed overflow-x-auto max-h-96 overflow-y-auto">
+                                                        <pre className="text-foreground/50 max-h-96 overflow-x-auto overflow-y-auto font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
                                                             {content ?? 'No content'}
                                                         </pre>
                                                     )}

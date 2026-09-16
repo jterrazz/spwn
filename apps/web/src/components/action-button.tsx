@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 
 import { GLASS_PILL_CLASS } from '@/components/glass-pill';
-import { cn } from '@/lib/utils';
+import { cn } from '@/styles/class-names';
 
 // Icon-only round variant and icon+text pill variant share the same base
 // Glass chrome. See components/glass-pill.ts for the canonical styling.
 const baseClass = cn(
     GLASS_PILL_CLASS,
-    'shrink-0 flex items-center justify-center gap-2 transition-colors',
-    'hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed',
+    'flex shrink-0 items-center justify-center gap-2 transition-colors',
+    'hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
 );
 
 interface ActionButtonProps {
@@ -43,11 +43,11 @@ export function ActionButton({
                 aria-label={label}
                 className={cn(
                     GLASS_PILL_CLASS,
-                    'group/btn shrink-0 relative h-[42px] overflow-hidden',
+                    'group/btn relative h-[42px] shrink-0 overflow-hidden',
                     danger
-                        ? 'text-red-400/60 hover:text-red-400 hover:border-red-500/25'
+                        ? 'text-red-400/60 hover:border-red-500/25 hover:text-red-400'
                         : 'hover:text-foreground',
-                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'disabled:cursor-not-allowed disabled:opacity-50',
                     className,
                 )}
                 disabled={disabled}
@@ -64,10 +64,10 @@ export function ActionButton({
                 }}
                 type="button"
             >
-                <span className="absolute top-0 left-0 w-10 h-10 flex items-center justify-center pointer-events-none">
+                <span className="pointer-events-none absolute top-0 left-0 flex h-10 w-10 items-center justify-center">
                     {icon}
                 </span>
-                <span className="absolute top-0 bottom-0 left-[42px] flex items-center whitespace-nowrap pr-4 text-sm">
+                <span className="absolute top-0 bottom-0 left-[42px] flex items-center pr-4 text-sm whitespace-nowrap">
                     {label}
                 </span>
             </button>
@@ -79,7 +79,7 @@ export function ActionButton({
             className={cn(
                 baseClass,
                 'h-[42px] px-5 text-sm',
-                danger && 'hover:text-red-400 hover:border-red-500/25',
+                danger && 'hover:border-red-500/25 hover:text-red-400',
                 className,
             )}
             disabled={disabled}

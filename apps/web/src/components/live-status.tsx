@@ -2,12 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import {
-    type ConnectionStatus,
-    getConnectionStatus,
-    isGoApiAvailable,
-    onConnectionStatusChange,
-} from '@/lib/api-client';
+import { getConnectionStatus, isGoApiAvailable, onConnectionStatusChange } from '@/api/client';
+import type { ConnectionStatus } from '@/api/client';
 
 const STATUS_CONFIG: Record<
     ConnectionStatus,
@@ -50,11 +46,11 @@ export function LiveStatus() {
 
     return (
         <div
-            className="h-8 flex items-center gap-1.5 rounded-full bg-foreground/[0.06] dark:bg-white/[0.08] backdrop-blur-md border border-foreground/[0.08] dark:border-white/[0.1] px-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]"
+            className="bg-foreground/[0.06] border-foreground/[0.08] flex h-8 items-center gap-1.5 rounded-full border px-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.05)] backdrop-blur-md dark:border-white/[0.1] dark:bg-white/[0.08] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]"
             title={config.title}
         >
-            <div className={`w-2 h-2 rounded-full transition-colors ${config.dot}`} />
-            <span className={`text-[10px] font-mono uppercase tracking-wider ${config.labelColor}`}>
+            <div className={`h-2 w-2 rounded-full transition-colors ${config.dot}`} />
+            <span className={`font-mono text-[10px] tracking-wider uppercase ${config.labelColor}`}>
                 {config.label}
             </span>
         </div>

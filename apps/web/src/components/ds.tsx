@@ -8,7 +8,7 @@
 
 import type { ReactNode } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/styles/class-names';
 
 // ── Section Header ──────────────────────────────────────────────────
 // Left accent bar + bold uppercase mono label.
@@ -24,11 +24,11 @@ export function SectionHeader({ children, className }: SectionHeaderProps) {
     return (
         <p
             className={cn(
-                'text-xs font-mono font-bold uppercase tracking-[0.04em] text-foreground/90 mb-3 flex items-center gap-2',
+                'text-foreground/90 mb-3 flex items-center gap-2 font-mono text-xs font-bold tracking-[0.04em] uppercase',
                 className,
             )}
         >
-            <span className="w-0.5 h-4 bg-foreground/90 rounded-full shrink-0" />
+            <span className="bg-foreground/90 h-4 w-0.5 shrink-0 rounded-full" />
             {children}
         </p>
     );
@@ -49,7 +49,7 @@ export function SectionLabel({ children, className }: SectionLabelProps) {
     return (
         <p
             className={cn(
-                'text-[10px] font-mono font-bold uppercase tracking-[0.04em] text-foreground/90 mb-3',
+                'text-foreground/90 mb-3 font-mono text-[10px] font-bold tracking-[0.04em] uppercase',
                 className,
             )}
         >
@@ -72,7 +72,7 @@ export function SubLabel({ children, className }: SubLabelProps) {
     return (
         <p
             className={cn(
-                'text-[9px] font-mono uppercase tracking-[0.03em] text-muted-foreground/35',
+                'text-muted-foreground/35 font-mono text-[9px] tracking-[0.03em] uppercase',
                 className,
             )}
         >
@@ -119,7 +119,7 @@ export function MetricGrid({ items, columns = 2, className }: MetricGridProps) {
             {items.map(({ label, value }) => (
                 <div key={label}>
                     <SubLabel>{label}</SubLabel>
-                    <p className="text-xl font-mono font-bold text-foreground/90 mt-0.5">{value}</p>
+                    <p className="text-foreground/90 mt-0.5 font-mono text-xl font-bold">{value}</p>
                 </div>
             ))}
         </div>
@@ -144,8 +144,8 @@ export function KeyValue({ label, value, dot, className }: KeyValueProps) {
         <div className={cn('flex items-center justify-between', className)}>
             <SubLabel>{label}</SubLabel>
             <div className="flex items-center gap-1.5">
-                {dot && <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />}
-                <span className="text-xs font-mono font-medium text-foreground/80">{value}</span>
+                {dot && <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />}
+                <span className="text-foreground/80 font-mono text-xs font-medium">{value}</span>
             </div>
         </div>
     );
@@ -174,12 +174,12 @@ export function ItemList({ items, className }: ItemListProps) {
             {items.map((item) => {
                 const content = (
                     <>
-                        <span className="w-[6px] h-[6px] rounded-full bg-foreground/80 shrink-0" />
-                        <span className="text-xs font-mono font-bold text-foreground/90 flex-1 truncate">
+                        <span className="bg-foreground/80 h-[6px] w-[6px] shrink-0 rounded-full" />
+                        <span className="text-foreground/90 flex-1 truncate font-mono text-xs font-bold">
                             {item.name}
                         </span>
                         {item.detail && (
-                            <span className="text-[10px] font-mono text-foreground/80 shrink-0">
+                            <span className="text-foreground/80 shrink-0 font-mono text-[10px]">
                                 {item.detail}
                             </span>
                         )}
@@ -188,7 +188,7 @@ export function ItemList({ items, className }: ItemListProps) {
                 if (item.href) {
                     return (
                         <a
-                            className="group flex items-center gap-2 hover:text-foreground transition-colors"
+                            className="group hover:text-foreground flex items-center gap-2 transition-colors"
                             href={item.href}
                             key={item.name}
                         >
@@ -222,13 +222,13 @@ export function ProgressBar({ label, value, className }: ProgressBarProps) {
     const clamped = Math.max(0, Math.min(100, value));
     return (
         <div className={cn('', className)}>
-            <div className="flex items-center justify-between mb-2">
+            <div className="mb-2 flex items-center justify-between">
                 <SubLabel>{label}</SubLabel>
-                <span className="text-xs font-mono font-bold text-foreground/90">
+                <span className="text-foreground/90 font-mono text-xs font-bold">
                     {Math.round(clamped)}%
                 </span>
             </div>
-            <div className="h-2 w-full flex rounded-[1px] overflow-hidden">
+            <div className="flex h-2 w-full overflow-hidden rounded-[1px]">
                 <div
                     className="bg-foreground/90 transition-all duration-500"
                     style={{ width: `${clamped}%` }}
@@ -315,14 +315,14 @@ export function DataTable<T>({
     const gridTemplate = showArrow && rowHref ? `${gridCols} 28px` : gridCols;
 
     if (rows.length === 0 && emptyText) {
-        return <p className="text-xs text-muted-foreground/30 font-mono py-4">{emptyText}</p>;
+        return <p className="text-muted-foreground/30 py-4 font-mono text-xs">{emptyText}</p>;
     }
 
     return (
-        <div className={cn('border border-white/[0.06] rounded-lg overflow-hidden', className)}>
+        <div className={cn('overflow-hidden rounded-lg border border-white/[0.06]', className)}>
             {/* Header */}
             <div
-                className="items-center gap-3 px-3 py-2 border-b border-white/[0.06] bg-white/[0.02] hidden sm:grid"
+                className="hidden items-center gap-3 border-b border-white/[0.06] bg-white/[0.02] px-3 py-2 sm:grid"
                 style={{ gridTemplateColumns: gridTemplate }}
             >
                 {columns.map((col) => (
@@ -343,7 +343,7 @@ export function DataTable<T>({
                         ))}
                         {showArrow && rowHref && (
                             <svg
-                                className="text-muted-foreground/15 group-hover:text-foreground/50 transition-colors shrink-0"
+                                className="text-muted-foreground/15 group-hover:text-foreground/50 shrink-0 transition-colors"
                                 fill="none"
                                 height="12"
                                 stroke="currentColor"

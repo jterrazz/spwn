@@ -33,7 +33,7 @@ function stream(chunks: string[]): ReadableStream<Uint8Array> {
     });
 }
 
-function sse(chunks: string[]): HttpResponse {
+function sse(chunks: string[]): HttpResponse<ReadableStream<Uint8Array>> {
     return new HttpResponse(stream(chunks), {
         headers: { 'Content-Type': 'text/event-stream' },
     });
@@ -43,7 +43,7 @@ function callbacks() {
     const blocks: unknown[][] = [];
     const texts: string[] = [];
     const errors: string[] = [];
-    const dones: Array<{ cost?: number; duration?: number }> = [];
+    const dones: { cost?: number | undefined; duration?: number | undefined }[] = [];
 
     return {
         blocks,
@@ -52,7 +52,8 @@ function callbacks() {
         dones,
         onBlocks: (value: unknown[]) => blocks.push(value),
         onText: (value: string) => texts.push(value),
-        onDone: (value: { cost?: number; duration?: number }) => dones.push(value),
+        onDone: (value: { cost?: number | undefined; duration?: number | undefined }) =>
+            dones.push(value),
         onError: (value: string) => errors.push(value),
     };
 }
@@ -112,7 +113,7 @@ describe('streamChat', () => {
         const cb = callbacks();
         await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
 
-        expect(cb.dones).toEqual([{ cost: 0.05, duration: 1234 }]);
+        expect(cb.dones).toStrictEqual([{ cost: 0.05, duration: 1234 }]);
     });
 
     test('handles plain text streams', async () => {
@@ -170,7 +171,7 @@ describe('streamChat', () => {
         const cb = callbacks();
         await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
 
-        expect(cb.errors).toEqual(['Internal server error']);
+        expect(cb.errors).toStrictEqual(['Internal server error']);
     });
 
     test('uses fallbackUrl when the primary URL fails', async () => {

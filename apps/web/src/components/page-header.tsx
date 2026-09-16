@@ -17,19 +17,19 @@ export function PageHeader({ title, description, actions, leading }: PageHeaderP
     return (
         <div className="flex items-start justify-between gap-4 overflow-visible">
             <div
-                className={`flex items-center min-w-0 overflow-visible ${leading ? 'gap-5 md:gap-6' : 'gap-3'}`}
+                className={`flex min-w-0 items-center overflow-visible ${leading ? 'gap-5 md:gap-6' : 'gap-3'}`}
             >
                 {leading}
                 <div className="min-w-0">
-                    <h1 className="text-2xl font-heading tracking-wide text-foreground/90">
+                    <h1 className="font-heading text-foreground/90 text-2xl tracking-wide">
                         {title}
                     </h1>
                     {description && (
-                        <p className="text-xs text-muted-foreground/40 mt-1">{description}</p>
+                        <p className="text-muted-foreground/40 mt-1 text-xs">{description}</p>
                     )}
                 </div>
             </div>
-            {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+            {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
     );
 }

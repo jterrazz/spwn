@@ -73,7 +73,7 @@ export function InlineEdit({
             <div className={`flex items-start gap-2 ${editClassName}`}>
                 {multiline ? (
                     <textarea
-                        className="flex-1 bg-white/[0.03] border border-white/[0.12] rounded-lg px-3 py-2 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.2] transition-colors resize-none"
+                        className="text-foreground/80 flex-1 resize-none rounded-lg border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-white/[0.2] focus:outline-none"
                         onChange={(e) => setDraft(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
@@ -83,7 +83,7 @@ export function InlineEdit({
                     />
                 ) : (
                     <input
-                        className="flex-1 bg-white/[0.03] border border-white/[0.12] rounded-lg px-3 py-2 text-sm text-foreground/80 focus:outline-none focus:border-white/[0.2] transition-colors"
+                        className="text-foreground/80 flex-1 rounded-lg border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-sm transition-colors focus:border-white/[0.2] focus:outline-none"
                         onChange={(e) => setDraft(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
@@ -92,18 +92,18 @@ export function InlineEdit({
                     />
                 )}
                 <button
-                    className="p-1.5 rounded-lg text-green-400/70 hover:text-green-400 hover:bg-green-500/10 transition-colors disabled:opacity-30"
+                    className="rounded-lg p-1.5 text-green-400/70 transition-colors hover:bg-green-500/10 hover:text-green-400 disabled:opacity-30"
                     disabled={saving}
                     onClick={handleSave}
                 >
                     {saving ? (
-                        <div className="w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground/70 rounded-full animate-spin" />
+                        <div className="border-foreground/30 border-t-foreground/70 h-3.5 w-3.5 animate-spin rounded-full border-2" />
                     ) : (
                         <IconCheck size={14} />
                     )}
                 </button>
                 <button
-                    className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground/60 hover:bg-white/[0.04] transition-colors"
+                    className="text-muted-foreground/40 hover:text-foreground/60 rounded-lg p-1.5 transition-colors hover:bg-white/[0.04]"
                     onClick={handleCancel}
                 >
                     <IconX size={14} />
@@ -114,14 +114,14 @@ export function InlineEdit({
 
     return (
         <div
-            className={`group cursor-pointer relative ${className}`}
+            className={`group relative cursor-pointer ${className}`}
             onClick={() => setEditing(true)}
         >
             <span className={value ? '' : 'text-muted-foreground/30 italic'}>
                 {value || placeholder}
             </span>
             <IconPencil
-                className="inline-block ml-2 opacity-0 group-hover:opacity-40 transition-opacity"
+                className="ml-2 inline-block opacity-0 transition-opacity group-hover:opacity-40"
                 size={12}
             />
         </div>
@@ -171,18 +171,18 @@ export function InlineTagsEdit({
     };
 
     return (
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2">
             {tags.map((tag) => (
                 <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-mono border ${color} ${editing ? 'pr-1.5' : ''}`}
+                    className={`rounded-full border px-2.5 py-1 font-mono text-[11px] ${color} ${editing ? 'pr-1.5' : ''}`}
                     key={tag}
                 >
                     {tag}
                     {editing && (
                         <button
-                            className="ml-1.5 text-red-400/60 hover:text-red-400 transition-colors"
+                            className="ml-1.5 text-red-400/60 transition-colors hover:text-red-400"
                             disabled={saving}
-                            onClick={() => handleRemove(tag)}
+                            onClick={async () => await handleRemove(tag)}
                         >
                             <IconX size={10} />
                         </button>
@@ -192,7 +192,7 @@ export function InlineTagsEdit({
             {editing ? (
                 <div className="flex items-center gap-1">
                     <input
-                        className="w-24 bg-white/[0.03] border border-white/[0.12] rounded-full px-2.5 py-1 text-[11px] font-mono text-foreground/70 focus:outline-none focus:border-white/[0.2] transition-colors"
+                        className="text-foreground/70 w-24 rounded-full border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] transition-colors focus:border-white/[0.2] focus:outline-none"
                         onChange={(e) => setNewTag(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -208,7 +208,7 @@ export function InlineTagsEdit({
                         value={newTag}
                     />
                     <button
-                        className="p-1 text-muted-foreground/40 hover:text-foreground/60 transition-colors"
+                        className="text-muted-foreground/40 hover:text-foreground/60 p-1 transition-colors"
                         onClick={() => setEditing(false)}
                     >
                         <IconCheck size={12} />
@@ -216,7 +216,7 @@ export function InlineTagsEdit({
                 </div>
             ) : (
                 <button
-                    className="px-2.5 py-1 rounded-full text-[11px] font-mono border border-dashed border-white/[0.1] text-muted-foreground/30 hover:text-muted-foreground/50 hover:border-white/[0.2] transition-colors"
+                    className="text-muted-foreground/30 hover:text-muted-foreground/50 rounded-full border border-dashed border-white/[0.1] px-2.5 py-1 font-mono text-[11px] transition-colors hover:border-white/[0.2]"
                     onClick={() => setEditing(true)}
                 >
                     + add

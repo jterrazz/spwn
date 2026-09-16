@@ -10,7 +10,7 @@ import {
     useState,
 } from 'react';
 
-import { apiGet } from '@/lib/api-client';
+import { apiGet } from '@/api/client';
 
 export interface DockerStatus {
     installed: boolean;
@@ -75,9 +75,7 @@ export function DockerProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         mounted.current = true;
-        // Refresh() is async - setState only fires inside the resolved promise,
-        // Never synchronously, so this does not cause a cascading render.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+        // oxlint-disable-next-line react-hooks/set-state-in-effect -- refresh() is async: it sets state only inside the resolved promise, never synchronously, so no render cascade
         void refresh();
         const id = setInterval(() => {
             void refresh();

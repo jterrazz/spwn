@@ -1,10 +1,11 @@
 'use client';
 
 import { IconArrowUp } from '@tabler/icons-react';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
+import type { ActivityBlock } from '@/activity/blocks';
 import { ActivityMessageView } from '@/components/activity-blocks';
-import type { ActivityBlock } from '@/lib/activity-types';
 
 /**
  * ChatBubble is the minimal shape any caller must provide. The chat does
@@ -15,9 +16,9 @@ export interface ChatBubble {
     blocks: ActivityBlock[];
     content: string;
     timestamp: Date;
-    error?: boolean;
-    cost?: number;
-    duration?: number;
+    error?: boolean | undefined;
+    cost?: number | undefined;
+    duration?: number | undefined;
 }
 
 interface ChatProps {
@@ -99,10 +100,10 @@ export function Chat({
     };
 
     return (
-        <div className={`flex flex-col min-h-0 flex-1 ${className}`}>
+        <div className={`flex min-h-0 flex-1 flex-col ${className}`}>
             {/* Messages area - grows, scrolls. Bottom padding leaves room for the
           floating input dock so the last bubble isn't hidden under it. */}
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2 pr-1 space-y-3">
+            <div className="min-h-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto py-2 pr-1">
                 {messages.length === 0 && emptyState && (
                     <div className="flex h-full items-center justify-center">{emptyState}</div>
                 )}
@@ -137,11 +138,11 @@ export function Chat({
                                         }}
                                     />
                                 ) : (
-                                    <p className="text-xs whitespace-pre-wrap break-words leading-relaxed">
+                                    <p className="text-xs leading-relaxed break-words whitespace-pre-wrap">
                                         {msg.content || (msg.role === 'assistant' ? '…' : '')}
                                     </p>
                                 )}
-                                <p className="text-[9px] text-muted-foreground/25 mt-1">
+                                <p className="text-muted-foreground/25 mt-1 text-[9px]">
                                     {msg.role === 'assistant' ? assistantLabel : userLabel}
                                     {' · '}
                                     {msg.timestamp.toLocaleTimeString([], {
@@ -156,23 +157,23 @@ export function Chat({
                 })}
                 {disabled && typingText && (
                     <div className="flex items-start">
-                        <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] px-3.5 py-2.5">
+                        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5">
                             <div className="flex items-center gap-2">
                                 <div className="flex gap-1">
                                     <span
-                                        className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce"
+                                        className="bg-foreground/30 h-1.5 w-1.5 animate-bounce rounded-full"
                                         style={{ animationDelay: '0ms' }}
                                     />
                                     <span
-                                        className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce"
+                                        className="bg-foreground/30 h-1.5 w-1.5 animate-bounce rounded-full"
                                         style={{ animationDelay: '150ms' }}
                                     />
                                     <span
-                                        className="w-1.5 h-1.5 rounded-full bg-foreground/30 animate-bounce"
+                                        className="bg-foreground/30 h-1.5 w-1.5 animate-bounce rounded-full"
                                         style={{ animationDelay: '300ms' }}
                                     />
                                 </div>
-                                <span className="text-xs text-muted-foreground/40">
+                                <span className="text-muted-foreground/40 text-xs">
                                     {typingText}
                                 </span>
                             </div>
@@ -185,9 +186,9 @@ export function Chat({
             {/* Input dock - anchored to the bottom of the flex column, styled
           as a pill so it reads like a messaging-app composer. */}
             <div className="shrink-0 pt-3">
-                <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-md px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] focus-within:border-white/[0.14] focus-within:bg-white/[0.06] transition-colors">
+                <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.18)] backdrop-blur-md transition-colors focus-within:border-white/[0.14] focus-within:bg-white/[0.06]">
                     <input
-                        className="flex-1 min-w-0 bg-transparent px-1 text-sm text-foreground/85 placeholder:text-muted-foreground/30 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-foreground/85 placeholder:text-muted-foreground/30 min-w-0 flex-1 bg-transparent px-1 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={disabled}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => {
@@ -202,7 +203,7 @@ export function Chat({
                     />
                     <button
                         aria-label="Send"
-                        className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-all disabled:opacity-20 disabled:cursor-not-allowed ${
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all disabled:cursor-not-allowed disabled:opacity-20 ${
                             trimmed
                                 ? 'bg-foreground/90 text-background hover:bg-foreground'
                                 : 'text-muted-foreground/40'
@@ -232,10 +233,10 @@ export function ChatSuggestions({
     onPick: (text: string) => void;
 }) {
     return (
-        <div className="flex gap-2 flex-wrap justify-center max-w-sm">
+        <div className="flex max-w-sm flex-wrap justify-center gap-2">
             {suggestions.map((s) => (
                 <button
-                    className="px-3 py-1.5 rounded-full text-[11px] text-muted-foreground/40 bg-white/[0.03] border border-white/[0.06] hover:text-foreground/70 hover:bg-white/[0.06] transition-colors"
+                    className="text-muted-foreground/40 hover:text-foreground/70 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] transition-colors hover:bg-white/[0.06]"
                     key={s}
                     onClick={() => onPick(s)}
                 >
