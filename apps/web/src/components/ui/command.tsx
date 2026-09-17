@@ -43,14 +43,18 @@ function CommandDialog({
 }) {
     return (
         <Dialog {...props}>
-            <DialogHeader className="sr-only">
-                <DialogTitle>{title}</DialogTitle>
-                <DialogDescription>{description}</DialogDescription>
-            </DialogHeader>
             <DialogContent
                 className={cn('top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0', className)}
                 showCloseButton={showCloseButton}
             >
+                {/* Radix reads the dialog's accessible name and description
+                    from these two nodes, so they belong INSIDE the content:
+                    outside it they render whether the palette is open or
+                    not, leaving the title on the page of a closed dialog. */}
+                <DialogHeader className="sr-only">
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
+                </DialogHeader>
                 {children}
             </DialogContent>
         </Dialog>
