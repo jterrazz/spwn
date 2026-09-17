@@ -32,8 +32,6 @@ linters:
               desc: L3 (domain) must not import L4 (project)
             - pkg: spwn.sh/packages/compile
               desc: L3 (domain) must not import L5 (build)
-            - pkg: spwn.sh/packages/compile
-              desc: L3 (domain) must not import L5 (build)
             - pkg: spwn.sh/packages/world
               desc: L3 (domain) must not import L6 (runtime)
         domain-deps:
@@ -42,8 +40,6 @@ linters:
           deny:
             - pkg: spwn.sh/packages/project
               desc: L3 (domain) must not import L4 (project)
-            - pkg: spwn.sh/packages/compile
-              desc: L3 (domain) must not import L5 (build)
             - pkg: spwn.sh/packages/compile
               desc: L3 (domain) must not import L5 (build)
             - pkg: spwn.sh/packages/world
@@ -56,7 +52,6 @@ linters:
             - pkg: spwn.sh/packages/agent
             - pkg: spwn.sh/packages/project
             - pkg: spwn.sh/packages/compile
-            - pkg: spwn.sh/packages/compile
             - pkg: spwn.sh/packages/world
         platform-activity:
           files:
@@ -65,7 +60,6 @@ linters:
             - pkg: spwn.sh/packages/dependency
             - pkg: spwn.sh/packages/agent
             - pkg: spwn.sh/packages/project
-            - pkg: spwn.sh/packages/compile
             - pkg: spwn.sh/packages/compile
             - pkg: spwn.sh/packages/world
         platform-auth:
@@ -76,7 +70,6 @@ linters:
             - pkg: spwn.sh/packages/agent
             - pkg: spwn.sh/packages/project
             - pkg: spwn.sh/packages/compile
-            - pkg: spwn.sh/packages/compile
             - pkg: spwn.sh/packages/world
         platform-upgrade:
           files:
@@ -86,14 +79,11 @@ linters:
             - pkg: spwn.sh/packages/agent
             - pkg: spwn.sh/packages/project
             - pkg: spwn.sh/packages/compile
-            - pkg: spwn.sh/packages/compile
             - pkg: spwn.sh/packages/world
         project-layer:
           files:
             - '**/packages/project/**'
           deny:
-            - pkg: spwn.sh/packages/compile
-              desc: L4 (project) must not import L5 (build)
             - pkg: spwn.sh/packages/compile
               desc: L4 (project) must not import L5 (build)
             - pkg: spwn.sh/packages/world
