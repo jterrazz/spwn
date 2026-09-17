@@ -23,6 +23,6 @@ test.describe('Agents list', () => {
 
         await page.getByRole('main').getByText('neo', { exact: true }).first().click();
 
-        await expect(page).toHaveURL(/agents/, { timeout: 5000 });
+        await expect(page).toHaveURL(/agents/u, { timeout: 5000 });
     });
 });

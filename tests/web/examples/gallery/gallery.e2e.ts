@@ -26,7 +26,7 @@ test.describe('Example gallery', () => {
     });
 
     test('offers one card per bundled example', async ({ api }) => {
-        const gallery = await api.get<{ examples: Array<{ name: string; slug: string }> }>(
+        const gallery = await api.get<{ examples: { name: string; slug: string }[] }>(
             '/api/examples',
         );
 
@@ -39,7 +39,7 @@ test.describe('Example gallery', () => {
     test('installing an example lands its agents in the home', async ({ api }) => {
         await api.installExample('startup');
 
-        const agents = await api.get<Array<{ name: string }>>('/api/agents');
+        const agents = await api.get<{ name: string }[]>('/api/agents');
 
         expect(agents.map((agent) => agent.name)).toEqual(
             expect.arrayContaining(['analyst', 'ceo', 'devops']),

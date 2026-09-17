@@ -1,11 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 
-const currentDir = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(currentDir, '../..');
+const REPO_ROOT = resolve(import.meta.dirname, '../..');
 const BIN = resolve(REPO_ROOT, '.artifacts/go/spwn');
 const SPWN_HOME = process.env.SPWN_WEB_E2E_HOME ?? mkdtempSync(resolve(tmpdir(), 'spwn-web-e2e-'));
 const SPWN_PROJECT =
@@ -105,7 +103,7 @@ const testEnv: Record<string, string> = {
     SPWN_SKIP_AUTH_VALIDATION: '1',
     SPWN_TEST_CONFIG,
 };
-if (!process.env.SPWNE2E_REAL_IMAGE) {
+if (process.env.SPWNE2E_REAL_IMAGE === undefined) {
     testEnv.SPWN_BASE_IMAGE = 'spwn-test:latest';
 }
 
@@ -121,7 +119,7 @@ if (!process.env.SPWNE2E_REAL_IMAGE) {
  */
 export default defineConfig({
     testDir: '.',
-    testMatch: ['**/*.spec.ts'],
+    testMatch: ['**/*.e2e.ts'],
     testIgnore: ['_setup/**', '_fixtures/**'],
     timeout: 60_000,
     expect: { timeout: 10_000 },
@@ -155,7 +153,7 @@ export default defineConfig({
             cwd: SPWN_PROJECT,
             port: 9877,
             timeout: 15_000,
-            reuseExistingServer: !process.env.CI,
+            reuseExistingServer: process.env.CI === undefined,
             env: testEnv,
         },
         {
@@ -163,7 +161,7 @@ export default defineConfig({
             cwd: resolve(REPO_ROOT, 'apps/web'),
             port: 1420,
             timeout: 30_000,
-            reuseExistingServer: !process.env.CI,
+            reuseExistingServer: process.env.CI === undefined,
             env: {
                 ...testEnv,
                 NEXT_PUBLIC_API_URL: 'http://localhost:9877',

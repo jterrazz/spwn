@@ -16,7 +16,7 @@ test.describe('World lifecycle (requires Docker)', () => {
     }) => {
         const result = await api.spawnWorld('matrix', 'neo');
         const worldId = result.World.id;
-        expect(worldId).toMatch(/^world-/);
+        expect(worldId).toMatch(/^world-/u);
 
         await page.goto('/');
         await app.waitForClient();
@@ -73,7 +73,7 @@ test.describe('World lifecycle (requires Docker)', () => {
 
         await page.goto(`/world/${worldId}`);
 
-        await expect(page.getByText(/Neo|matrix|running|idle/i).first()).toBeVisible({
+        await expect(page.getByText(/Neo|matrix|running|idle/iu).first()).toBeVisible({
             timeout: 10_000,
         });
     });

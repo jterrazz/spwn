@@ -11,4 +11,4 @@ packages:
       scripts: [test, test:contracts, test:web]
       tests:
           - tests/specs/cli/agent/talk.test.ts
-          - tests/web/navigation/sidebar/sidebar.spec.ts
+          - tests/web/navigation/sidebar/sidebar.e2e.ts

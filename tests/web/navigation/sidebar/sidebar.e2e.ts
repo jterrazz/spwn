@@ -7,9 +7,11 @@ test.describe('Sidebar', () => {
     });
 
     test('shows navigation items', async ({ page }) => {
-        for (const name of ['Architect', 'Settings', 'Worlds', 'Agents', 'Tools']) {
-            await expect(page.getByRole('button', { name, exact: true }).first()).toBeVisible();
-        }
+        await Promise.all(
+            ['Architect', 'Settings', 'Worlds', 'Agents', 'Tools'].map(async (name) => {
+                await expect(page.getByRole('button', { exact: true, name }).first()).toBeVisible();
+            }),
+        );
     });
 
     test('navigation changes page content', async ({ page, app }) => {
@@ -22,7 +24,7 @@ test.describe('Sidebar', () => {
     });
 
     test('Docker version is visible', async ({ page }) => {
-        await expect(page.getByRole('button', { name: /Docker status/ })).toBeVisible({
+        await expect(page.getByRole('button', { name: /Docker status/u })).toBeVisible({
             timeout: 5000,
         });
     });

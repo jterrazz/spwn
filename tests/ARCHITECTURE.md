@@ -190,7 +190,7 @@ spwn/
 - **CLI tree** is one folder per DOMAIN of the CLI (`specs/cli/agent/`, `specs/cli/world/`, `specs/cli/check/`), and inside it one file per scenario: `specs/cli/agent/forked-agent.spec.yaml` reads like the session it describes. The folder holds its scenarios, the chains that need code, and — only where those chains need them — a `_fixtures/` overlay and an `_expected/` golden.
 - **Ground carries a leading underscore.** Under `specs/`, what a spec STANDS ON is `_fixtures/` and `_expected/`; a spec's own folder never is, so a domain and its material can never be mistaken for each other. The framework resolves no other name, and `c13-underscored-ground` fails a bare one.
 - **The pool is what SEVERAL leaves share.** A directory of `specs/_fixtures/` reached from exactly one spec folder belongs beside that folder as `<leaf>/_fixtures/<name>/`, because a one-reader fixture parked in the pool reads as shared ground nobody dares change; `c14-pool-fixture-shared` names it and `jterrazz-test-check --fix` moves it.
-- **Web tree** mirrors web's UI grouping: `web/<domain>/<feature>/<feature>.spec.ts` reads like the surface ("worlds/list", "agents/detail", "navigation/sidebar"). One feature = one folder = one spec file.
+- **Web tree** mirrors web's UI grouping: `web/<domain>/<feature>/<feature>.e2e.ts` reads like the surface ("worlds/list", "agents/detail", "navigation/sidebar"). One feature = one folder = one spec file.
 - **No false symmetry.** CLI features (`build`, `check`, `auth`, `gate`) often have no web counterpart, and vice versa. The trees don't pretend otherwise; the contract registry (`_contracts/`) is what ties them together when an underlying surface has both.
 - **Underscore-prefixed infrastructure.** `_contracts/`, `_simulators/`, `_fixtures/`, `_smoke/`, `_catalog/` sort above feature folders alphabetically and are visually distinct so no one mistakes them for a domain. The convention the TS suite adopted by hand at the `tests/` root is the same one the framework now enforces inside `specs/`; the `_fixtures/` at this level is unrelated to the CLI pool and holds only the seed dirs the GO E2E suite reads.
 
@@ -520,7 +520,7 @@ End-to-end via real Chromium against real Next.js + real Go API + real Docker.
 Each feature owns a folder that holds exactly one spec file:
 
 ```
-tests/web/<domain>/<feature>/<feature>.spec.ts
+tests/web/<domain>/<feature>/<feature>.e2e.ts
 ```
 
 - `<domain>` is the high-level slice of the UI (`worlds`, `agents`, `examples`, `navigation`, `system`).
@@ -539,7 +539,7 @@ Every run gets:
 
 The fixture project is hydrated from `catalog/matrix/` and `catalog/startup/` so the API has agents and inline `spwn.yaml#worlds` to spawn from.
 
-The Playwright config sets `testDir: '.'` with `testMatch: ['**/*.spec.ts']` and `testIgnore: ['_setup/**', '_fixtures/**']` so adding a new feature folder requires zero config change.
+The Playwright config sets `testDir: '.'` with `testMatch: ['**/*.e2e.ts']` and `testIgnore: ['_setup/**', '_fixtures/**']` so adding a new feature folder requires zero config change. The `.e2e.ts` suffix is what separates a Playwright file from a vitest one: the rulebook reads every `*.spec.ts` as a vitest spec, and used to rewrite these files with `import { expect, test } from 'vitest'`.
 
 ### Fixture: `web/_fixtures/app.ts`
 
@@ -667,7 +667,7 @@ These scripts are protocol contracts. If the real Codex CLI changes its resume s
 ### Add a Web E2E test
 
 1. Pick a folder: `web/<domain>/<feature>/`. Create it if the feature is new.
-2. Create `<feature>.spec.ts` inside.
+2. Create `<feature>.e2e.ts` inside.
 3. Import the fixture: `import { expect, test } from '../../_fixtures/app.js';`
 4. Use `api.*` for setup (faster than UI) and `app.*` page-object methods for UI assertions.
 5. Add the route to `_contracts/web-routes.yaml`.
@@ -710,7 +710,7 @@ These scripts are protocol contracts. If the real Codex CLI changes its resume s
 ### Add a web route
 
 1. Create the page under `../apps/web/src/app/<route>/page.tsx`.
-2. Add either a component test (vitest) or a Playwright spec under `web/<domain>/<feature>/<feature>.spec.ts`.
+2. Add either a component test (vitest) or a Playwright spec under `web/<domain>/<feature>/<feature>.e2e.ts`.
 3. Add the route to `_contracts/web-routes.yaml`.
 
 ---
@@ -727,7 +727,7 @@ These will fail CI or get caught in review:
 - **Hardcoded counts that break when the catalog grows** (`expect(examples).toHaveLength(5)`). Use `>=` or `toContain`.
 - **Casing-sensitive assertions on user-facing text without checking what the UI actually renders.** Read the page snapshot in the failure first.
 - **Adding a new runtime/route/command/catalog entry without updating `_contracts/`.** `make test-contracts` will fail.
-- **Bundling multiple features into one web spec file.** Split into `<domain>/<feature>/<feature>.spec.ts` so each feature owns its proof.
+- **Bundling multiple features into one web spec file.** Split into `<domain>/<feature>/<feature>.e2e.ts` so each feature owns its proof.
 - **Hand-written CI commands.** CI calls Make targets. The validate.yaml workflow IS the aggregate; if you want a new gate, add a job there, not a meta-target in the Makefile.
 
 ---

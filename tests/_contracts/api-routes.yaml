@@ -1,6 +1,6 @@
 routes:
     - route: GET /api/health
-      tests: [apps/api/server_test.go, tests/web/system/api-health/api-health.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/system/api-health/api-health.e2e.ts]
     - route: GET /api/status
       tests: [apps/api/server_test.go]
     - route: GET /api/version
@@ -12,15 +12,15 @@ routes:
     - route: POST /api/system/onboarding/complete
       tests: [apps/api/server_test.go]
     - route: GET /api/examples
-      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.e2e.ts]
     - route: GET /api/examples/{slug}
-      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.e2e.ts]
     - route: POST /api/examples/{slug}/install
-      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/examples/gallery/gallery.e2e.ts]
     - route: GET /api/worlds
-      tests: [apps/api/server_test.go, tests/web/worlds/list/list.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/worlds/list/list.e2e.ts]
     - route: GET /api/agents
-      tests: [apps/api/server_test.go, tests/web/agents/list/list.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/agents/list/list.e2e.ts]
     - route: GET /api/agents/{name}
       tests: [apps/api/server_test.go]
     - route: GET /api/agents/{name}/journal
@@ -30,15 +30,15 @@ routes:
     - route: GET /api/agents/{name}/files/{path...}
       tests: [apps/api/server_test.go]
     - route: POST /api/worlds
-      tests: [apps/api/create_world_body_test.go, tests/web/worlds/lifecycle/lifecycle.spec.ts]
+      tests: [apps/api/create_world_body_test.go, tests/web/worlds/lifecycle/lifecycle.e2e.ts]
     - route: PATCH /api/worlds/{id}
       tests: [apps/api/server_test.go]
     - route: DELETE /api/worlds/{id}
-      tests: [apps/api/server_test.go, tests/web/worlds/lifecycle/lifecycle.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/worlds/lifecycle/lifecycle.e2e.ts]
     - route: POST /api/worlds/{id}/snapshot
       tests: [apps/api/server_test.go]
     - route: POST /api/agents
-      tests: [apps/api/server_test.go, tests/web/agents/list/list.spec.ts]
+      tests: [apps/api/server_test.go, tests/web/agents/list/list.e2e.ts]
     - route: DELETE /api/agents/{name}
       tests: [apps/api/server_test.go]
     - route: POST /api/agents/{name}/dream
@@ -48,7 +48,7 @@ routes:
     - route: POST /api/agents/{name}/fork
       tests: [apps/api/server_test.go]
     - route: POST /api/worlds/{id}/agents
-      tests: [apps/api/deploy_agent_test.go, tests/web/worlds/lifecycle/lifecycle.spec.ts]
+      tests: [apps/api/deploy_agent_test.go, tests/web/worlds/lifecycle/lifecycle.e2e.ts]
     - route: POST /api/worlds/{id}/talk
       tests: [apps/api/talk_agent_test.go]
     - route: POST /api/agents/{name}/export
