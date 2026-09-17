@@ -1,16 +1,14 @@
 import { expect, test } from '../../_fixtures/app.js';
 
 test.describe('World detail', () => {
-    test('selecting a planet shows agent details', async ({ page, api }) => {
-        await api.installExample('matrix');
-        await api.spawnWorld('matrix', 'Neo');
+    test('selecting a planet shows agent details', async ({ app, page }) => {
         await page.goto('/');
-        await expect(page.getByRole('button', { name: 'New World' })).toBeVisible({
-            timeout: 10_000,
-        });
+        await app.waitForClient();
 
-        await page.keyboard.press('ArrowRight');
+        await app.selectFirstWorld();
 
-        await expect(page.getByText('Neo').first()).toBeVisible({ timeout: 5000 });
+        const panel = page.getByRole('main');
+        await expect(panel.getByText('matrix ·')).toBeVisible({ timeout: 5000 });
+        await expect(panel.getByText('neo', { exact: true })).toBeVisible();
     });
 });

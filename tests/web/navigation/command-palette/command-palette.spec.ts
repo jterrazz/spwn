@@ -3,7 +3,7 @@ import { expect, test } from '../../_fixtures/app.js';
 test.describe('Command palette', () => {
     test.beforeEach(async ({ page, app }) => {
         await page.goto('/');
-        await app.waitForWorlds();
+        await app.waitForClient();
     });
 
     test('opens with Cmd+K', async ({ page }) => {

@@ -7,6 +7,12 @@ test.describe('Header', () => {
     });
 
     test('shows stats buttons', async ({ page }) => {
-        await expect(page.locator('button:has-text("WORLDS")')).toBeVisible({ timeout: 5000 });
+        // Each stat reads "<count> <noun>"; the noun alone also names a
+        // sidebar entry, so the count is what tells the two apart.
+        for (const noun of ['worlds', 'alive', 'sleeping']) {
+            await expect(
+                page.getByRole('button', { name: new RegExp(`^\\d+ ${noun}$`) }),
+            ).toBeVisible({ timeout: 5000 });
+        }
     });
 });

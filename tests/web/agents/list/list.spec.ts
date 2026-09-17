@@ -11,7 +11,9 @@ test.describe('Agents list', () => {
         await app.waitForWorlds();
         await app.goToAgents();
 
-        await expect(page.getByText('Neo')).toBeVisible({ timeout: 5000 });
+        await expect(page.getByRole('main').getByText('neo', { exact: true })).toBeVisible({
+            timeout: 5000,
+        });
     });
 
     test('clicking an agent navigates to their detail', async ({ page, app }) => {
@@ -19,7 +21,7 @@ test.describe('Agents list', () => {
         await app.waitForWorlds();
         await app.goToAgents();
 
-        await page.getByText('Neo').first().click();
+        await page.getByRole('main').getByText('neo', { exact: true }).first().click();
 
         await expect(page).toHaveURL(/agents/, { timeout: 5000 });
     });

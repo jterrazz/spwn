@@ -34,7 +34,12 @@ function prepareProject(root: string) {
         join(REPO_ROOT, 'catalog', 'matrix', 'agents', 'neo'),
         join(root, 'spwn', 'agents', 'neo'),
     );
-    for (const agent of ['ceo', 'devops', 'analyst']) {
+    // `devops` is the one agent of the startup example this project
+    // leaves out: it carries spwn:docker-cli, whose probe (`command -v
+    // docker`) the mock base image cannot answer, so a world holding
+    // it never spawns here. Installing the example through the API
+    // brings it in — which is what the gallery spec proves.
+    for (const agent of ['ceo', 'analyst']) {
         copyDir(
             join(REPO_ROOT, 'catalog', 'startup', 'agents', agent),
             join(root, 'spwn', 'agents', agent),
@@ -68,7 +73,7 @@ worlds:
     workspaces: [.]
     knowledge: ./spwn/knowledge
   startup:
-    agents: [ceo, devops, analyst]
+    agents: [ceo, analyst]
     workspaces: [.]
     knowledge: ./spwn/knowledge
 `,

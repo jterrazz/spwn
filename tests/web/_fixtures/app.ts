@@ -55,9 +55,20 @@ class SpwnAPI {
         }
     }
 
-    /** List running worlds */
+    /**
+     * List the project's worlds. In a project (which the web e2e
+     * harness always is) the API answers with the worlds the manifest
+     * DECLARES — known by `name`, carrying their agents as plain
+     * names, and `stopped` until a container backs them. Only a world
+     * that runs has an `id`.
+     */
     async worlds(): Promise<
-        Array<{ id: string; status: string; agent: string; agents: Array<{ name: string }> }>
+        Array<{
+            agents: Array<string | { name: string }>;
+            id?: string;
+            name?: string;
+            status: string;
+        }>
     > {
         return this.get('/api/worlds');
     }
@@ -88,10 +99,13 @@ class SpwnAPI {
         return this.delete(`/api/worlds/${id}`);
     }
 
-    /** Destroy all worlds (cleanup) */
+    /** Destroy every world that runs — a declared one has nothing to destroy. */
     async destroyAll() {
         const worlds = await this.worlds();
         for (const w of worlds) {
+            if (w.id === undefined) {
+                continue;
+            }
             try {
                 await this.destroyWorld(w.id);
             } catch {
@@ -141,6 +155,42 @@ class SpwnPage {
     async selectWorld(name: string) {
         await this.page.getByRole('button', { name }).click();
         await expect(this.page.getByText(name).first()).toBeVisible();
+    }
+
+    /**
+     * Wait until the client has taken over the page. The Docker pill
+     * reads `checking` in the server-rendered markup and only carries
+     * a version once the browser's own fetch has come back — the first
+     * moment an effect-bound handler, like the ⌘K listener, is
+     * attached.
+     */
+    async waitForClient() {
+        await expect(this.page.getByRole('button', { name: /Docker status: v/ })).toBeVisible({
+            timeout: 15_000,
+        });
+    }
+
+    /**
+     * The planet a world is drawn as. The sidebar carries a world
+     * switcher of the same name, so the carousel is reached through
+     * the main region.
+     */
+    planet(name: string) {
+        return this.page.getByRole('main').getByRole('button', { exact: true, name });
+    }
+
+    /**
+     * Select the first world of the carousel. Arrow keys are the
+     * selection gesture the page binds to the window; the worlds
+     * arrive in name order, so walking them is deterministic.
+     */
+    async selectFirstWorld() {
+        await this.page.keyboard.press('ArrowRight');
+    }
+
+    /** Walk the carousel one world further. */
+    async selectNextWorld() {
+        await this.page.keyboard.press('ArrowRight');
     }
 
     /** Wait for worlds to load (not skeleton) */

@@ -1,51 +1,56 @@
 import { expect, test } from '../../_fixtures/app.js';
 
+/**
+ * The bundled gallery reaches a user two ways, and only one of them
+ * is reachable here. `spwn web` inside a PROJECT answers `/api/worlds`
+ * with the worlds the manifest declares, so the landing page always
+ * has planets to draw and never falls back to the install-a-template
+ * cards — that empty state belongs to a home with no project, which
+ * this harness (a project, by construction) cannot produce. What the
+ * gallery is FOR is proven here instead: the catalog each card would
+ * describe, and the install that a click performs.
+ */
 test.describe('Example gallery', () => {
-    test.beforeEach(async ({ page, api }) => {
-        await api.destroyAll();
+    test('describes every bundled example', async ({ api }) => {
+        const startup = await api.get<{
+            agents: string[];
+            command: string;
+            name: string;
+            worlds: string[];
+        }>('/api/examples/startup');
+
+        expect(startup.name).toBe('Startup');
+        expect(startup.command).toBe('spwn up startup');
+        expect(startup.agents).toEqual(['analyst', 'ceo', 'devops']);
+        expect(startup.worlds).toEqual(['startup']);
+    });
+
+    test('offers one card per bundled example', async ({ api }) => {
+        const gallery = await api.get<{ examples: Array<{ name: string; slug: string }> }>(
+            '/api/examples',
+        );
+
+        expect(gallery.examples.map((example) => example.slug)).toContain('matrix');
+        for (const example of gallery.examples) {
+            expect(example.name).not.toBe('');
+        }
+    });
+
+    test('installing an example lands its agents in the home', async ({ api }) => {
+        await api.installExample('startup');
+
+        const agents = await api.get<Array<{ name: string }>>('/api/agents');
+
+        expect(agents.map((agent) => agent.name)).toEqual(
+            expect.arrayContaining(['analyst', 'ceo', 'devops']),
+        );
+    });
+
+    test('the declared worlds of the project are the landing page', async ({ app, page }) => {
         await page.goto('/');
-        await expect(page.getByRole('heading', { name: 'Worlds', level: 1 })).toBeVisible();
-    });
 
-    test('shows bundled examples when no worlds running', async ({ page }) => {
-        // Gallery shows example cards with h3 headings
-        await expect(page.getByRole('heading', { name: 'Startup', level: 3 })).toBeVisible({
-            timeout: 10_000,
-        });
-        await expect(page.getByRole('heading', { name: 'The Matrix', level: 3 })).toBeVisible();
-    });
-
-    test('shows Install & spawn buttons', async ({ page }) => {
-        const buttons = page.getByRole('button', { name: 'Install & spawn' });
-        await expect(buttons.first()).toBeVisible({ timeout: 10_000 });
-        // Should have one per example
-        await expect(buttons).toHaveCount(5, { timeout: 5000 });
-    });
-
-    test('shows agent badges on cards', async ({ page }) => {
-        // Startup card should show ceo, devops, analyst
-        await expect(page.getByText('ceo').first()).toBeVisible({ timeout: 10_000 });
-    });
-
-    test('shows CLI command preview', async ({ page }) => {
-        await expect(page.getByText(/\$ spwn up startup/)).toBeVisible({ timeout: 10_000 });
-    });
-
-    test('install & spawn creates a world', async ({ page, api }) => {
-        const buttons = page.getByRole('button', { name: /Install & spawn/ });
-        await buttons.first().click();
-
-        await expect
-            .poll(
-                async () => {
-                    const worlds = await api.worlds();
-                    return worlds.length;
-                },
-                {
-                    timeout: 30_000,
-                    message: 'world count after Install & spawn',
-                },
-            )
-            .toBeGreaterThan(0);
+        await expect(page.getByRole('heading', { level: 1, name: 'Worlds' })).toBeVisible();
+        await expect(app.planet('matrix')).toBeVisible({ timeout: 10_000 });
+        await expect(app.planet('startup')).toBeVisible();
     });
 });

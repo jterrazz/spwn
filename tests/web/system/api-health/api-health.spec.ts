@@ -26,7 +26,9 @@ test.describe('API health', () => {
         await api.installExample('matrix');
         const agents = await api.get<Array<{ name: string }>>('/api/agents');
         const names = agents.map((a) => a.name);
-        expect(names).toContain('Neo');
+        // An agent is named by its own agent.yaml, which the catalog
+        // writes in lower case (catalog/matrix/agents/neo/agent.yaml).
+        expect(names).toContain('neo');
     });
 
     test('Docker is detected as running', async ({ api }) => {
