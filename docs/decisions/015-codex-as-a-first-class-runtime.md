@@ -1,6 +1,6 @@
 # ADR-015: codex as a first-class runtime
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-09
 
 Written 2026-09-09 from the change audit `docs/notes/codex-as-first-class-runtime.md`
