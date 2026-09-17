@@ -3,7 +3,7 @@
  * The Go API is the sole backend - no fallback to Next.js API routes.
  */
 
-import type { AgentProfile, World } from '@/domain/model';
+import type { Agent, AgentProfile, Workspace, World } from '@/domain/model';
 import { getTauriApiBase, initTauriApiPort, isTauri } from '@/tauri/runtime';
 
 // Dynamic API base - Tauri app uses a random port, browser defaults to 3001
@@ -125,39 +125,86 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
 // ── Data normalization ──
 
-/** Raw world data from the Go API (may have `agent` string instead of `agents` array). */
-interface RawWorld extends Omit<World, 'agent' | 'agents' | 'status' | 'workspaces'> {
+/** One agent as a world lists it: a bare name, or a record of its own. */
+type RawAgent = {
+    name: string;
+    role?: string;
+    status?: string;
+};
+
+/**
+ * One world as the Go API hands it over. Two shapes arrive on
+ * `/api/worlds`: a world that RUNS carries its container id, its
+ * config name, its creation stamp and agent records; a world the
+ * project only DECLARES carries its manifest name and lists its
+ * agents and workspaces as plain strings (`declaredWorldItem` in
+ * apps/api). `agent` and `workspace` are the older single-valued
+ * fields some routes still emit.
+ */
+interface RawWorld extends Omit<
+    World,
+    'agent' | 'agents' | 'config' | 'created_at' | 'id' | 'status' | 'workspaces'
+> {
     agent?: string;
-    agents?: World['agents'];
+    agents?: (RawAgent | string)[];
+    config?: string;
+    created_at?: string;
+    id?: string;
     status?: World['status'];
-    workspaces?: undefined | World['workspaces'];
-    workspace?: string; // Legacy single-workspace field
+    workspace?: string;
+    workspaces?: (string | Workspace)[];
+}
+
+/** A world lists an agent either by name alone or in full. */
+function normalizeWorldAgent(entry: RawAgent | string, worldStatus: World['status']): Agent {
+    if (typeof entry === 'string') {
+        return { name: entry, role: 'worker', status: worldStatus };
+    }
+    return {
+        name: entry.name,
+        role: entry.role ?? 'worker',
+        status: entry.status ?? worldStatus,
+    };
+}
+
+/**
+ * A declared workspace is a bare path, a mounted one carries its
+ * name, and the legacy single `workspace` field is one unnamed mount.
+ */
+function normalizeWorkspaces(
+    declared: (string | Workspace)[] | undefined,
+    legacy: string | undefined,
+): undefined | Workspace[] {
+    if (declared !== undefined && declared.length > 0) {
+        return declared.map((entry) =>
+            typeof entry === 'string' ? { name: entry, path: entry } : entry,
+        );
+    }
+    if (legacy === undefined || legacy === '') {
+        return undefined;
+    }
+    return [{ name: 'default', path: legacy }];
 }
 
 /**
  * Normalize Go API world data to match frontend World interface.
- * Go returns `agent` (string), frontend expects `agents` (array).
- * Also migrates legacy `workspace` string into `workspaces` array.
+ * A declared world has no container, so its manifest name stands in
+ * for the id and for the config it would be spawned from; its agents
+ * inherit the world's own status.
  */
 function normalizeWorlds(data: RawWorld[]): World[] {
     return data.map(({ agent: _agent, workspace: _legacyWs, workspaces, ...w }) => {
-        let wsList = workspaces;
-        if ((!wsList || wsList.length === 0) && _legacyWs) {
-            wsList = [{ name: 'default', path: _legacyWs }];
-        }
+        const status = w.status ?? 'idle';
+        const agents = w.agents ?? (_agent === undefined ? [] : [_agent]);
         return {
             ...w,
             agent: _agent ?? '',
-            status: w.status || 'idle',
-            agents: (
-                w.agents ??
-                (_agent ? [{ name: _agent, role: 'worker', status: w.status || 'idle' }] : [])
-            ).map((a) => ({
-                name: a.name,
-                role: a.role || 'worker',
-                status: a.status,
-            })),
-            workspaces: wsList,
+            agents: agents.map((entry) => normalizeWorldAgent(entry, status)),
+            config: w.config ?? w.name ?? '',
+            created_at: w.created_at ?? '',
+            id: w.id ?? w.name ?? '',
+            status,
+            workspaces: normalizeWorkspaces(workspaces, _legacyWs),
         };
     });
 }
