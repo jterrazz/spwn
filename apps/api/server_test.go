@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/world/runtimestate"
 )
 
@@ -1328,3 +1329,50 @@ func TestWorldHistory_MissingID(t *testing.T) {
 
 // Ensure unused import of fmt is used
 var _ = fmt.Sprintf
+
+// TestListWorlds_DeclaredOrderIsStable pins the answer's order. The
+// manifest holds worlds in a map, and the web UI selects one by its
+// position in this list, so a randomised range would move the user's
+// selection between two polls.
+func TestListWorlds_DeclaredOrderIsStable(t *testing.T) {
+	_, mux := newTestServer(t)
+
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, "spwn.yaml"), `version: 1
+name: ordering
+
+worlds:
+  zulu:
+    agents: [neo]
+  alpha:
+    agents: [neo]
+  mike:
+    agents: [neo]
+`)
+	platform.SetProjectRoot(root)
+	t.Cleanup(func() { platform.SetProjectRoot("") })
+
+	want := []string{"alpha", "mike", "zulu"}
+	for attempt := range 8 {
+		req := httptest.NewRequest("GET", "/api/worlds", nil)
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, req)
+
+		if w.Code != 200 {
+			t.Fatalf("attempt %d: expected 200, got %d", attempt, w.Code)
+		}
+		var body []struct {
+			Name string `json:"name"`
+		}
+		if err := json.NewDecoder(w.Body).Decode(&body); err != nil {
+			t.Fatalf("attempt %d: decode: %v", attempt, err)
+		}
+		got := make([]string, 0, len(body))
+		for _, item := range body {
+			got = append(got, item.Name)
+		}
+		if strings.Join(got, ",") != strings.Join(want, ",") {
+			t.Fatalf("attempt %d: got %v, want %v", attempt, got, want)
+		}
+	}
+}

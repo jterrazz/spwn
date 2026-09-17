@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -384,6 +385,11 @@ func (s *Server) handleListWorlds(w http.ResponseWriter, r *http.Request) {
 				Status:     status,
 			})
 		}
+		// The manifest holds its worlds in a map, whose range order Go
+		// randomises. The web UI selects a world by its POSITION in
+		// this list and re-reads the list every few seconds, so an
+		// unsorted answer moves the user's selection under them.
+		sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 		jsonOK(w, out)
 		return
 	}
