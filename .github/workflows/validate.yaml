@@ -29,8 +29,6 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -61,8 +59,6 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -89,8 +85,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -103,8 +97,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -131,8 +123,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -163,8 +153,6 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -196,8 +184,6 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -236,8 +222,6 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -269,8 +253,6 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -302,8 +284,6 @@ jobs:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -330,8 +310,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
