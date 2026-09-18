@@ -1,0 +1,9 @@
+{
+    "extends": ["//"],
+    "tasks": {
+        // next.config.ts sends both build modes under .artifacts/next.
+        "build": {
+            "outputs": [".artifacts/next/**"]
+        }
+    }
+}

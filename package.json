@@ -1,0 +1,15 @@
+{
+    "name": "spwn",
+    "private": true,
+    "packageManager": "pnpm@9.15.9",
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "version": "9.15.9",
+            "onFail": "download"
+        }
+    },
+    "devDependencies": {
+        "turbo": "2.11.1"
+    }
+}

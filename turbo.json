@@ -1,0 +1,39 @@
+{
+    "$schema": "https://turborepo.dev/schema.json",
+    // Both toolchains are one graph: `experimentalGoWorkspaces` reads go.work
+    // and turns every module into a package, beside the pnpm workspace's own.
+    // `experimentalTaskCommand` is what lets `lint` be golangci-lint instead of
+    // the `go vet` Turborepo would default to.
+    "futureFlags": {
+        "experimentalGoWorkspaces": true,
+        "experimentalTaskCommand": true
+    },
+    // Artefacts have one root in this repository; the cache obeys it.
+    "cacheDir": ".artifacts/turbo",
+    "tasks": {
+        // No `^build` anywhere: spwn.sh/packages/world and
+        // spwn.sh/packages/transpile require each other, which Go permits and
+        // Turborepo rejects as a cyclic task dependency. Go resolves the order
+        // itself through go.work, so nothing is lost.
+        "build": {
+            "dependsOn": ["dependency#generate"]
+        },
+        "lint": {
+            "dependsOn": ["dependency#generate"],
+            // golangci-lint, not `go vet`: the default would silently drop
+            // every rule .golangci.yml adds, layering included.
+            // `--allow-parallel-runners` is what makes it safe under a task
+            // graph — golangci-lint otherwise refuses to start beside itself.
+            "command": {
+                "go": ["golangci-lint", "run", "--allow-parallel-runners", "./..."]
+            },
+            // The rulebook and the pinned linter version are both inputs; a
+            // bump of either has to invalidate every lint result.
+            "env": ["GOLANGCI_VERSION"],
+            "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.golangci.yml"]
+        },
+        "test": {
+            "dependsOn": ["dependency#generate"]
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "extends": ["//"],
+    "tasks": {
+        // The binary keeps the path the installer, goreleaser and every E2E
+        // suite already expect, which means a `-o` flag, which means the
+        // command is written out rather than inferred. Go's own inference
+        // would drop it at apps/cli/spwn.
+        "build": {
+            "cache": true,
+            "command": ["go", "build", "-o", "../../.artifacts/go/spwn", "./cmd/spwn"],
+            "outputs": ["$TURBO_ROOT$/.artifacts/go/spwn"]
+        }
+    }
+}
