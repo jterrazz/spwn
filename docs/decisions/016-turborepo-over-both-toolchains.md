@@ -46,7 +46,7 @@ Turborepo invents a package, `go-workspace`, that depends on every module and ow
 
 `cacheDir` sends the cache to `.artifacts/turbo`, where this repository keeps every artefact. The per-task log Turborepo drops at `<package>/.turbo/turbo-<task>.log` has no such setting, and an unignored one is its own input: the first run writes it, the second hashes it and misses the cache it just filled — measured at 1 of 21 tasks cached instead of 21.
 
-So the root `.gitignore` names `**/.turbo/`. `@jterrazz/typescript` 10.1.6 rules that `.turbo`'s home is `.artifacts/turbo/` and fails a `.gitignore` that says otherwise; it reads a pattern carrying a slash as anchored to its own file and lets this one through. That is a gap in the gate, not a permission — the toolchain owner should decide whether the rule gains an exception for a path its tool cannot relocate.
+So the root `.gitignore` names `.turbo/`, plainly. `@jterrazz/typescript` 10.1.6 ruled that `.turbo`'s only home was `.artifacts/turbo/` and failed that line, which this branch first escaped with a wildcard spelling the gate reads as anchored and never judges — the rule unenforced rather than held. 10.1.10 puts `.turbo` on the gate's closed exception list: the plain line passes, and a tracked file under `.turbo/` still fails. The grant is the toolchain's own, ADR-008 of the jterrazz engineering corpus, and this repository asks for nothing beyond it.
 
 ## Consequences
 
