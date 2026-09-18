@@ -23,15 +23,15 @@ Thumbs.db
 # Local state a run leaves on this checkout — never a build's output:
 # Claude Code's harness folder, spwn's own runtime state, the chief-mode
 # test agent dir, and the project an e2e run scaffolds when it is given
-# `tests/` as its cwd. Every one is anchored to the repository root:
+# `specs/` as its cwd. Every one is anchored to the repository root:
 # unanchored, `.claude/` and `.spwn/` also swallowed the committed golden
-# fixtures under packages/runtimes/testdata/ and tests/specs/, and four
+# fixtures under packages/runtimes/testdata/ and specs/, and four
 # `!` lines had to rescue them.
 /.claude/
 /.spwn/
 /spwn/agents/
-/tests/spwn/
-/tests/spwn.yaml
+/specs/spwn/
+/specs/spwn.yaml
 
 # Archives (agent exports etc.)
 *.tar.gz

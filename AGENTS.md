@@ -16,7 +16,7 @@ Knowledge is world-scoped, not held in the Mind. A spwn project lives **in the r
 
 Everything this repository knows about itself is a chapter of [`docs/`](docs/), and the one address to start from is the map: [`docs/README.md`](docs/README.md). It carries one row per chapter — the architecture, how a change is made, what proves it, how a release ships, then the product's own subjects. Follow a row; do not expect it restated here.
 
-Two corpora sit beside it and answer different questions: [`tests/ARCHITECTURE.md`](tests/ARCHITECTURE.md) is the deep reference for the suites and the simulators, and [`README.md`](README.md) is the vitrine — what spwn is, and the quickstart.
+Two corpora sit beside it and answer different questions: [`specs/ARCHITECTURE.md`](specs/ARCHITECTURE.md) is the deep reference for the suites and the simulators, and [`README.md`](README.md) is the vitrine — what spwn is, and the quickstart.
 
 ## Working in this repo
 

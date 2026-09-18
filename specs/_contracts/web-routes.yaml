@@ -1,0 +1,25 @@
+routes:
+    - path: /
+      tests: [specs/web/navigation/sidebar/sidebar.e2e.ts]
+    - path: /agents
+      tests: [specs/web/agents/list/list.e2e.ts]
+    - path: /agents/[name]
+      tests: [specs/web/agents/detail/detail.e2e.ts]
+    - path: /architect
+      tests: [specs/web/navigation/sidebar/sidebar.e2e.ts]
+    - path: /marketplace
+      tests: [specs/web/examples/gallery/gallery.e2e.ts]
+    - path: /organizations
+      tests: [specs/web/navigation/sidebar/sidebar.e2e.ts]
+    - path: /providers
+      tests: [specs/web/navigation/sidebar/sidebar.e2e.ts]
+    - path: /tools
+      tests: [specs/web/navigation/sidebar/sidebar.e2e.ts]
+    - path: /tools/[slug]
+      tests: [specs/web/examples/gallery/gallery.e2e.ts]
+    - path: /welcome
+      tests: [specs/web/navigation/sidebar/sidebar.e2e.ts]
+    - path: /world/[id]
+      tests: [specs/web/worlds/lifecycle/lifecycle.e2e.ts]
+    - path: /world/[id]/knowledge
+      tests: [specs/web/worlds/lifecycle/lifecycle.e2e.ts]

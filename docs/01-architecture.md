@@ -24,7 +24,7 @@ spwn/
 │   ├── gate/                        #   host-side gate logic
 │   ├── world/  architect/           #   runtime (container lifecycle/labels; orchestration daemon)
 ├── catalog/                         # shipped example worlds + block bundles (spwn:* entries)
-├── tests/                           # TypeScript vitest E2E + Playwright + governance (see 03-testing)
+├── specs/                           # TypeScript vitest E2E + Playwright + governance (see 03-testing)
 ├── docs/                            # this corpus (+ generated reference/ man pages)
 ├── go.work · pnpm-workspace.yaml · Makefile
 ```

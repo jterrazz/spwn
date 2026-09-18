@@ -58,7 +58,7 @@ docs: generate  ## Regenerate docs/reference from Cobra
 ##@ Lint
 
 .PHONY: lint docs-layout
-lint: docs-layout  ## golangci-lint across go.work + the web/tests quality gates + docs layout
+lint: docs-layout  ## golangci-lint across go.work + the web/specs quality gates + docs layout
 	@$(GOLANGCI) --version 2>/dev/null | grep -q "$(GOLANGCI_VERSION:v%=%)" || \
 		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	@$(TURBO) run lint --filter='!go-workspace'
@@ -87,7 +87,7 @@ test-pkg: generate  ## Verbose go test for one package — usage: make test-pkg 
 	else echo "no such package: $(PKG)" >&2; exit 1; fi
 
 test-contracts:  ## Static checks that every surface declared its tests
-	@node tests/_contracts/assert-contracts.mjs
+	@node specs/_contracts/assert-contracts.mjs
 
 test-web-unit:  ## apps/web vitest (MSW-mocked network, ~1s)
 	@$(TURBO) run test --filter=web
@@ -100,7 +100,7 @@ test-gate-node:  ## apps/gate vitest (sidecar + SDK, ~1s)
 .PHONY: test-image test-go-e2e test-compile-e2e test-cli test-smoke test-web test-web-headed
 
 test-image:  ## Build spwn-test:latest (mock Claude/Codex runtimes)
-	docker build -t spwn-test:latest -f tests/_simulators/Dockerfile.test ./tests/_simulators
+	docker build -t spwn-test:latest -f specs/_simulators/Dockerfile.test ./specs/_simulators
 
 test-go-e2e: generate test-image  ## Go world E2E (//go:build e2e) — Architect/world/container
 	cd packages/world && go test -v -tags=e2e -timeout=30m ./tests/e2e/...
@@ -109,16 +109,16 @@ test-compile-e2e: generate  ## Go image-build E2E (compile + Dockerfile renderin
 	cd packages/compile && go test -v -tags=e2e -timeout=15m ./e2e/...
 
 test-cli: build test-image  ## TypeScript CLI E2E against the compiled binary (vitest)
-	pnpm -C tests test
+	pnpm -C specs test
 
 test-smoke: build  ## Real-build smoke: spwn init → up → tool probe (~10min cold)
-	pnpm -C tests test:smoke
+	pnpm -C specs test:smoke
 
 test-web: build test-image  ## Playwright web E2E (real Next.js + Go API + Chromium)
-	pnpm -C tests test:web
+	pnpm -C specs test:web
 
 test-web-headed: build  ## Playwright in headed mode (visual debugging)
-	pnpm -C tests test:web:headed
+	pnpm -C specs test:web:headed
 
 ##@ Web (apps/web)
 

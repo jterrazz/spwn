@@ -1,0 +1,19 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "entry": [
+        "cli/cli.specification.ts",
+        "cli/**/*.test.ts",
+        "web/playwright.config.ts",
+        "web/**/*.e2e.ts",
+        "web/_setup/global-setup.ts",
+        "web/_setup/global-teardown.ts",
+        "vitest.config.ts",
+        "vitest.smoke.config.ts",
+        "oxlint.config.ts",
+        "oxfmt.config.ts"
+    ],
+    "ignoreBinaries": ["make", "pgrep"],
+    "ignoreDependencies": ["hono", "@hono/node-server"],
+    "project": ["**/*.ts"],
+    "ignore": ["_fixtures/**", "cli/**/_fixtures/**", "cli/**/_expected/**"]
+}

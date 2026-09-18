@@ -15,10 +15,10 @@ spwn is built **spec-first**: the test suite is the living specification of what
 | ----- | -------- | ----- | ----- |
 | **Unit** | `*_test.go` next to source files | ~1s | none |
 | **E2E (Go)** | `packages/world/tests/e2e/`, `packages/compile/e2e/` | ~30s | Docker |
-| **E2E (TS)** | `tests/specs/cli/`, `tests/_smoke/` | ~2–5min | built binary |
-| **Web E2E** | `tests/web/` | varies | Playwright + real Next.js + Go API |
+| **E2E (TS)** | `specs/cli/` | ~2–5min | built binary |
+| **Web E2E** | `specs/web/` | varies | Playwright + real Next.js + Go API |
 
-Each domain tests only its own contract. Cross-domain flows (spawn world + agent → verify journal) are the CLI's responsibility, exercised by the TypeScript E2E suite against the compiled `.artifacts/go/spwn`. The TS E2E suite uses [`@jterrazz/test`](https://github.com/jterrazz/package-test); runtime simulators in `tests/_simulators/` (mock Claude/Codex CLIs, baked into `spwn-test:latest`) stand in for the real runtimes.
+Each domain tests only its own contract. Cross-domain flows (spawn world + agent → verify journal) are the CLI's responsibility, exercised by the TypeScript E2E suite against the compiled `.artifacts/go/spwn`. The TS E2E suite uses [`@jterrazz/test`](https://github.com/jterrazz/package-test); runtime simulators in `specs/_simulators/` (mock Claude/Codex CLIs, baked into `spwn-test:latest`) stand in for the real runtimes.
 
 ### Two forms, one runner
 
@@ -26,14 +26,14 @@ Most CLI E2E specs are **documents**: a `<case>.spec.yaml` beside its siblings, 
 
 The rest are **chains**, `<aspect>.test.ts`, for what the format cannot state: a container read back with `.container(name)`, JSON judged by shape, an ABSENCE (`files:` says what a file contains, never what it does not), a count, two runs compared to each other, a host shell-out, output that varies with the operator's machine, a long-running process. Every chain file opens with the reason it is one; when only a single assertion needs code, the session still lives in a document and `cli.run('<case>.spec.yaml')` asserts it whole.
 
-Both forms bind to the same runner, `tests/specs/cli/cli.specification.ts`. The full grammar and the `TEST_UPDATE=1` workflow are in [`../tests/README.md`](../tests/README.md#typescript-e2e-setup-testsspecscli).
+Both forms bind to the same runner, `specs/cli/cli.specification.ts`. The full grammar and the `TEST_UPDATE=1` workflow are in [`../specs/README.md`](../specs/README.md#typescript-e2e-setup-cli).
 
 ## Running the suites
 
 All gates run through the `Makefile` (single entry point; CI mirrors it in `.github/workflows/validate.yaml`):
 
 ```bash
-make lint                # golangci-lint across go.work + the web/tests quality gates
+make lint                # golangci-lint across go.work + the web/specs quality gates
 make test                # Go unit tests across the workspace (~5s)
 make test-pkg PKG=agent  # verbose go test for one package
 make test-contracts      # static governance: every surface declared its tests
@@ -66,20 +66,20 @@ Ten rules govern every layer of the pyramid. They are what the suite is built to
 9. **Coverage is a signal, not a goal.** A threshold is added where it makes architectural sense, and nowhere else.
 10. **Regression surfaces get golden or contract tests.** Runtime render output, CLI output, generated docs, API schemas and catalog manifests are machine-compared.
 
-Rule 1 is the one with a gate behind it. `make test-contracts` reads the registry in `tests/_contracts/` and refuses a surface that declared no proof: every runtime needs its renderer/tool/spawn tests, every API route its route contract, every CLI command at least help coverage plus one behaviour spec or a declared exemption, every catalog entry its manifest validation, every web route its component or Playwright cover. Without it a contributor can add a command, a route or a tool and nothing anywhere notices that it is unproven.
+Rule 1 is the one with a gate behind it. `make test-contracts` reads the registry in `specs/_contracts/` and refuses a surface that declared no proof: every runtime needs its renderer/tool/spawn tests, every API route its route contract, every CLI command at least help coverage plus one behaviour spec or a declared exemption, every catalog entry its manifest validation, every web route its component or Playwright cover. Without it a contributor can add a command, a route or a tool and nothing anywhere notices that it is unproven.
 
 ## The manual passes
 
-Three scenario catalogs sit outside the pyramid, at [`../tests/manual/`](../tests/manual/README.md): 50 CLI command sequences driven by a bash harness, 50 agent-behaviour scenarios that need a live authenticated runtime, and 72 edge cases covering concurrency, partial failure and filesystem edges. They test whole-system coherence — the bug where two correct subsystems produce wrong behaviour together — which the automated suite cannot reach because it tests subsystems in isolation.
+Three scenario catalogs sit outside the pyramid, at [`../specs/_manual/`](../specs/_manual/README.md): 50 CLI command sequences driven by a bash harness, 50 agent-behaviour scenarios that need a live authenticated runtime, and 72 edge cases covering concurrency, partial failure and filesystem edges. They test whole-system coherence — the bug where two correct subsystems produce wrong behaviour together — which the automated suite cannot reach because it tests subsystems in isolation.
 
 None of them runs in `make test`, and none of them is a gate. What a pass finds becomes a fix plus the automated guard that would have caught it, which is principle 2 above: manual is a debt with a stated path to automation, never a standing exemption.
 
 ## Deeper reference
 
-The test suite has its own detailed reference, co-located with the tests:
+The test suite has its own detailed reference, co-located with the specs:
 
-- [`../tests/ARCHITECTURE.md`](../tests/ARCHITECTURE.md) — the full layer breakdown, the `spec` harness cookbook, contracts/governance, simulators, and fixtures.
-- [`../tests/README.md`](../tests/README.md) — how to run each layer and its conventions.
+- [`../specs/ARCHITECTURE.md`](../specs/ARCHITECTURE.md) — the full layer breakdown, the `spec` harness cookbook, contracts/governance, simulators, and fixtures.
+- [`../specs/README.md`](../specs/README.md) — how to run each layer and its conventions.
 
 ## Related
 
