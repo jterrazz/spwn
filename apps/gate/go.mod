@@ -1,4 +1,4 @@
-module spwn.sh/apps/gate
+module spwn.sh/apps/gatehouse
 
 go 1.25.0
 
