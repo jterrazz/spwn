@@ -1,10 +1,10 @@
 # Build, test and lint artefacts — one root, one `rm -rf`. Turborepo's cache
-# obeys it through `cacheDir` in turbo.json; the per-task log it drops beside
-# every package does not — the path `<package>/.turbo/turbo-<task>.log` is not
-# configurable, and an unignored one feeds its own hash back into the next run,
-# so a second `turbo run` never hits the cache.
+# obeys it through `cacheDir` in turbo.json; the per-task log it drops at
+# `<package>/.turbo/turbo-<task>.log` is not configurable, and an unignored one
+# feeds its own hash back into the next run, so a second `turbo run` never hits
+# the cache.
 .artifacts/
-**/.turbo/
+.turbo/
 
 # Dependencies
 node_modules/
