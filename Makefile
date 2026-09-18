@@ -13,14 +13,18 @@
 
 # Go modules are the single source of truth: every entry in go.work
 # gets linted and tested. Adding a new module to go.work is the only
-# thing needed to bring it under CI coverage — no Makefile edits.
-GO_MODS := $(shell go work edit -json 2>/dev/null | jq -r '.Use[].DiskPath')
-
-# The Go linter is pinned: an unpinned `@latest` makes a green run a fact about
-# the day it ran. Bump this line, read what the new release finds, land both
-# together.
+# thing needed to bring it under CI coverage — Turborepo reads go.work
+# itself and turns each module into a package, so no Makefile edits.
+#
+# One task graph spans both toolchains: `turbo` runs the Go modules and
+# the pnpm workspace together, caches every result under .artifacts/turbo,
+# and skips what has not changed. `turbo.json` holds the wiring.
+# `go-workspace` is Turborepo's synthetic scope for the workspace as a
+# whole; it owns no directory, so a command-carrying task must exclude it.
 GOLANGCI_VERSION := v2.13.2
 GOLANGCI         := $(shell go env GOPATH)/bin/golangci-lint
+TURBO            := GOLANGCI_VERSION=$(GOLANGCI_VERSION) PATH="$(shell go env GOPATH)/bin:$$PATH" pnpm exec turbo
+GO_PACKAGES      := 'go-workspace...'
 
 .PHONY: help
 help:  ## Show this help
@@ -33,10 +37,10 @@ help:  ## Show this help
 .PHONY: build install uninstall clean generate docs
 
 generate:  ## Run every //go:generate directive (refreshes the embedded catalog)
-	@cd packages/dependency && go generate ./...
+	@$(TURBO) run generate --filter=dependency
 
-build: generate  ## Build .artifacts/go/spwn
-	cd apps/cli && go build -o ../../.artifacts/go/spwn ./cmd/spwn
+build:  ## Build .artifacts/go/spwn
+	@$(TURBO) run build --filter=cli
 
 install: build  ## Build and install to ~/.local/bin
 	@scripts/install.sh
@@ -45,7 +49,7 @@ uninstall:  ## Remove the installed spwn
 	@rm -f $${INSTALL_DIR:-$$HOME/.local/bin}/spwn
 	@echo "  ✓ spwn removed"
 
-clean:  ## rm -rf .artifacts/
+clean:  ## rm -rf .artifacts/ (the turbo cache lives there too)
 	rm -rf .artifacts/
 
 docs: generate  ## Regenerate docs/reference from Cobra
@@ -54,14 +58,10 @@ docs: generate  ## Regenerate docs/reference from Cobra
 ##@ Lint
 
 .PHONY: lint docs-layout
-lint: generate docs-layout  ## golangci-lint across go.work + pnpm -r lint (oxlint + oxfmt + knip) + docs layout
+lint: docs-layout  ## golangci-lint across go.work + the web/tests quality gates + docs layout
 	@$(GOLANGCI) --version 2>/dev/null | grep -q "$(GOLANGCI_VERSION:v%=%)" || \
 		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
-	@for mod in $(GO_MODS); do \
-		echo "==> golangci-lint $$mod"; \
-		(cd $$mod && $(GOLANGCI) run ./...) || exit 1; \
-	done
-	@pnpm -r lint
+	@$(TURBO) run lint --filter='!go-workspace'
 
 # pnpm, not npx: npm's ephemeral install dies on `edgesOut` of null when it
 # resolves this package on the CI runner, with or without --package=. The lint
@@ -74,11 +74,8 @@ docs-layout:  ## Check docs/ against the estate's manual spine
 
 .PHONY: test test-pkg test-contracts test-web-unit test-gate-node
 
-test: generate  ## Go unit tests across the workspace (~5s)
-	@for mod in $(GO_MODS); do \
-		echo "==> go test $$mod"; \
-		(cd $$mod && go test ./...) || exit 1; \
-	done
+test:  ## Go unit tests across the workspace (~5s)
+	@$(TURBO) run test --filter=$(GO_PACKAGES)
 
 test-pkg: generate  ## Verbose go test for one package — usage: make test-pkg PKG=agent
 	@if [ -z "$(PKG)" ]; then \
@@ -93,10 +90,10 @@ test-contracts:  ## Static checks that every surface declared its tests
 	@node tests/_contracts/assert-contracts.mjs
 
 test-web-unit:  ## apps/web vitest (MSW-mocked network, ~1s)
-	@pnpm -C apps/web test
+	@$(TURBO) run test --filter=web
 
 test-gate-node:  ## apps/gate vitest (sidecar + SDK, ~1s)
-	@pnpm -C apps/gate test
+	@$(TURBO) run test --filter=spwn-gate
 
 ##@ Test — Docker required
 
@@ -128,7 +125,7 @@ test-web-headed: build  ## Playwright in headed mode (visual debugging)
 .PHONY: web-build web-dev
 
 web-build:  ## Production Next.js build
-	@pnpm -C apps/web build
+	@$(TURBO) run build --filter=web
 
 web-dev:  ## Next.js dev server
 	@pnpm -C apps/web dev
