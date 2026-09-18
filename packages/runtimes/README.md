@@ -60,5 +60,5 @@ The spwn-opinionated world content (physics, faculties, roster, architect identi
 
 ## Related
 
-- **Imported by** — `apps/cli`, `apps/api`, `packages/architect`, `tests/_catalog`
+- **Imported by** — `apps/cli`, `apps/api`, `packages/architect`, `specs/_catalog`
 - **Imports** — `packages/dependency` (tool interface), `packages/transpile` (render + Runtime interface)

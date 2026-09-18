@@ -94,7 +94,7 @@ importers:
         specifier: ^4.0.0
         version: 4.1.4(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@7.0.2))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
 
-  tests:
+  specs:
     dependencies:
       yaml:
         specifier: ^2.8.3

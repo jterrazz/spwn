@@ -1,6 +1,6 @@
 packages:
   - "apps/*"
-  - "tests"
+  - "specs"
 
 minimumReleaseAgeExclude:
   - "@jterrazz/*"

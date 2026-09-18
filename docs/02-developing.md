@@ -25,7 +25,7 @@ make build              # .artifacts/go/spwn
 The `Makefile` is the single entry point for both toolchains, and CI calls its targets directly — [`.github/workflows/validate.yaml`](../.github/workflows/validate.yaml) *is* the aggregate, so there is no `test-pr` meta-target to keep in sync. Run `make` with no arguments for the annotated list; the four gates a change runs locally before it is pushed are:
 
 ```bash
-make lint            # golangci-lint across go.work + the web/tests quality gates
+make lint            # golangci-lint across go.work + the web/specs quality gates
 make test            # Go unit tests across the workspace (~5s)
 make test-contracts  # every surface declared the proof it needs
 make test-cli        # the TypeScript CLI E2E against the compiled binary (Docker)

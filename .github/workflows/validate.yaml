@@ -276,7 +276,7 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -C tests exec playwright install --with-deps chromium
+      - run: pnpm -C specs exec playwright install --with-deps chromium
       - uses: actions/cache/restore@v4
         id: turbo
         with:

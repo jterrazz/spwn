@@ -62,7 +62,7 @@ runtime is now an adapter rather than a sweep.
   never the same file: the source stays at `spwn/agents/<name>/AGENTS.md` on
   the host, the projection lands at `/agents/<name>/AGENTS.md` in the
   container.
-- A second runtime doubles the test surface. `tests/_simulators/codex`
+- A second runtime doubles the test surface. `specs/_simulators/codex`
   stands in for the real CLI so no E2E hits OpenAI, and every golden case
   under `packages/runtimes/testdata/` carries a codex output tree beside its
   claude-code one — 31 of them today, regenerated with `UPDATE_GOLDEN=1`.

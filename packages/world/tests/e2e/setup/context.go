@@ -214,12 +214,12 @@ func (tc *TestContext) TryReadMockOutput(containerID string) *MockOutput {
 	return &mock
 }
 
-// TestdataDir returns the absolute path to tests/_fixtures/testdata/ in the repo.
+// TestdataDir returns the absolute path to specs/_fixtures/testdata/ in the repo.
 func TestdataDir() string {
 	dir, _ := os.Getwd()
 	for {
 		if _, err := os.Stat(filepath.Join(dir, "go.work")); err == nil {
-			return filepath.Join(dir, "tests", "_fixtures", "testdata")
+			return filepath.Join(dir, "specs", "_fixtures", "testdata")
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
@@ -227,5 +227,5 @@ func TestdataDir() string {
 		}
 		dir = parent
 	}
-	return filepath.Join("tests", "_fixtures", "testdata")
+	return filepath.Join("specs", "_fixtures", "testdata")
 }
