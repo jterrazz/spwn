@@ -1,6 +1,6 @@
 # ADR-016: Turborepo over both toolchains
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-18
 
 ## Context
