@@ -68,7 +68,7 @@ lint: docs-layout  ## golangci-lint across go.work + the web/specs quality gates
 # job already sets pnpm up for the workspace half, so there is nothing to add.
 docs-layout:  ## Check docs/ against the estate's manual spine
 	@echo "==> docs layout"
-	@pnpm --package=@jterrazz/typescript@10.1.6 dlx typescript docs-layout .
+	@pnpm --package=@jterrazz/typescript@10.1.10 dlx typescript docs-layout .
 
 ##@ Test — fast (no Docker)
 
