@@ -9,6 +9,7 @@ How spwn is changed: the toolchain a clone needs, the loop a change runs through
 | **Go 1.25+** | Every domain package and the `spwn` binary; wired by `go.work` |
 | **Docker**   | Worlds are containers, and every E2E layer needs a daemon     |
 | **Node 20+** | The TypeScript E2E suites and the web UI, driven by pnpm      |
+| **Turbo 2**  | One task graph over both toolchains; a pnpm dev dependency, never installed by hand |
 | **Rust**     | Only `apps/web/src-tauri`, the desktop shell                  |
 
 ```bash
@@ -24,13 +25,15 @@ make build              # .artifacts/go/spwn
 The `Makefile` is the single entry point for both toolchains, and CI calls its targets directly — [`.github/workflows/validate.yaml`](../.github/workflows/validate.yaml) *is* the aggregate, so there is no `test-pr` meta-target to keep in sync. Run `make` with no arguments for the annotated list; the four gates a change runs locally before it is pushed are:
 
 ```bash
-make lint            # go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip)
+make lint            # golangci-lint across go.work + the web/tests quality gates
 make test            # Go unit tests across the workspace (~5s)
 make test-contracts  # every surface declared the proof it needs
 make test-cli        # the TypeScript CLI E2E against the compiled binary (Docker)
 ```
 
-Adding a module to `go.work` is the only thing needed to bring it under lint and test coverage: `GO_MODS` is read from `go work edit -json`, so the Makefile never lists a package.
+Adding a module to `go.work` is the only thing needed to bring it under lint and test coverage: Turborepo reads `go.work` itself and turns every module into a package of the same graph the pnpm workspace feeds, so the Makefile never lists a package.
+
+Every gate above delegates to `turbo run`, which hashes each package's inputs and replays a cached result when nothing changed — a second `make lint` over an untouched tree finishes in about a second. The cache is a directory, `.artifacts/turbo`, so `make clean` is also how it is thrown away. What the wiring relies on, and what it cost, are [ADR-016](decisions/016-turborepo-over-both-toolchains.md)'s.
 
 ## Which file a change opens
 
