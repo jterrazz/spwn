@@ -8,6 +8,7 @@
     "jsdoc/check-tag-names": 1,
     "jterrazz/b4-given-then": 84,
     "jterrazz/d8w-text-bypass": 1,
+    "jterrazz/i2-sibling-test-naming": 63,
     "jterrazz/j2-no-sleep-in-specs": 1,
     "promise/avoid-new": 1,
     "typescript/consistent-type-definitions": 2,

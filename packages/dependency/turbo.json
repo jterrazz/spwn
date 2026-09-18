@@ -1,0 +1,12 @@
+{
+    "extends": ["//"],
+    "tasks": {
+        // The embedded catalog: //go:embed cannot walk out of the module, so
+        // the directive mirrors /catalog/ in here before anything compiles.
+        "generate": {
+            "command": ["go", "generate", "./..."],
+            "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/catalog/**"],
+            "outputs": ["internal/adapters/spwn/content/**"]
+        }
+    }
+}
