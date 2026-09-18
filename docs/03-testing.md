@@ -33,7 +33,7 @@ Both forms bind to the same runner, `tests/specs/cli/cli.specification.ts`. The 
 All gates run through the `Makefile` (single entry point; CI mirrors it in `.github/workflows/validate.yaml`):
 
 ```bash
-make lint                # go vet across go.work + pnpm -r lint (oxlint + oxfmt + knip)
+make lint                # golangci-lint across go.work + the web/tests quality gates
 make test                # Go unit tests across the workspace (~5s)
 make test-pkg PKG=agent  # verbose go test for one package
 make test-contracts      # static governance: every surface declared its tests
