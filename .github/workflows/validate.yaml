@@ -6,10 +6,18 @@ on:
   push:
     branches: [main]
 
-# Every job sets up Go + pnpm/node (for the `pnpm -r lint` step inside
-# `make lint`) then calls a Makefile target. The source of truth for
-# What gets linted/tested/built is go.work + pnpm-workspace.yaml. If
-# This workflow ever drifts from local `make ...`, it's a bug.
+# Every job sets up Go + pnpm/node then calls a Makefile target. The
+# source of truth for what gets linted/tested/built is go.work +
+# pnpm-workspace.yaml, which Turborepo reads to build one task graph
+# across both toolchains — so a job that runs any Makefile target needs
+# pnpm even when the work it triggers is pure Go. If this workflow ever
+# drifts from local `make ...`, it's a bug.
+#
+# Each job restores and saves the Turborepo cache at `.artifacts/turbo`:
+# one entry per run so the cache tracks HEAD, restored by prefix — this
+# branch's newest run, then any branch on this lockfile, then any. The
+# key is per job because two jobs saving one key race, and a job only
+# ever replays the tasks it ran.
 
 jobs:
   lint:
@@ -28,7 +36,21 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-lint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-lint-${{ runner.os }}-
       - run: make lint
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   test:
     runs-on: ubuntu-latest
@@ -38,7 +60,29 @@ jobs:
         with:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-test-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-test-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-test-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-test-${{ runner.os }}-
       - run: make test
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   contracts:
     runs-on: ubuntu-latest
@@ -66,7 +110,21 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-web-unit-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-web-unit-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-web-unit-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-web-unit-${{ runner.os }}-
       - run: make test-web-unit
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   gate-node:
     runs-on: ubuntu-latest
@@ -80,7 +138,21 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-gate-node-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-gate-node-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-gate-node-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-gate-node-${{ runner.os }}-
       - run: make test-gate-node
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   e2e:
     runs-on: ubuntu-latest
@@ -98,7 +170,21 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-e2e-${{ runner.os }}-
       - run: make test-cli
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   docker-e2e:
     runs-on: ubuntu-latest
@@ -109,8 +195,30 @@ jobs:
         with:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-docker-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-docker-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-docker-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-docker-e2e-${{ runner.os }}-
       - run: make test-go-e2e
       - run: make test-compile-e2e
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   # Real-build smoke tests: spwn init (default + every catalog example)
   # -> spwn up -> tool probe. Exercises the actual image build path
@@ -135,7 +243,21 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-smoke-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-smoke-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-smoke-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-smoke-${{ runner.os }}-
       - run: make test-smoke
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   web-e2e:
     runs-on: ubuntu-latest
@@ -155,7 +277,21 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm -C tests exec playwright install --with-deps chromium
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-web-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-web-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-web-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-web-e2e-${{ runner.os }}-
       - run: make test-web
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   build:
     runs-on: ubuntu-latest
@@ -165,7 +301,29 @@ jobs:
         with:
           go-version: '1.25'
           cache-dependency-path: apps/cli/go.sum
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-build-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-build-${{ runner.os }}-
       - run: make build
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
 
   web:
     runs-on: ubuntu-latest
@@ -179,4 +337,18 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        id: turbo
+        with:
+          path: .artifacts/turbo
+          key: turbo-web-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}
+          restore-keys: |
+            turbo-web-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.ref_name }}-
+            turbo-web-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            turbo-web-${{ runner.os }}-
       - run: make web-build
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .artifacts/turbo
+          key: ${{ steps.turbo.outputs.cache-primary-key }}-${{ github.run_id }}
