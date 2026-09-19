@@ -6,6 +6,7 @@
     "eslint/no-promise-executor-return": 1,
     "eslint/require-unicode-regexp": 53,
     "jsdoc/check-tag-names": 1,
+    "jterrazz-check/f8": 1,
     "jterrazz/b4-given-then": 84,
     "jterrazz/d8w-text-bypass": 1,
     "jterrazz/j2-no-sleep-in-specs": 1,
