@@ -68,7 +68,7 @@ importers:
     devDependencies:
       '@jterrazz/test':
         specifier: file:/private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz
-        version: file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))
+        version: file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))
       '@jterrazz/typescript':
         specifier: ^10.1.10
         version: 10.1.10(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)
@@ -84,15 +84,12 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
-      msw:
-        specifier: ^2.12.4
-        version: 2.13.4(@types/node@20.19.39)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4
         version: 4.2.2
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
+        version: 4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
 
   specs:
     dependencies:
@@ -6039,7 +6036,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@jterrazz/test@file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))':
+  '@jterrazz/test@file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))':
     dependencies:
       better-sqlite3: 12.11.1
       mockdate: 3.0.5
@@ -6047,8 +6044,8 @@ snapshots:
       pg: 8.22.0
       redis: 6.1.0
       testcontainers: 12.0.4
-      vitest: 4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
-      vitest-mock-extended: 5.0.0(typescript@6.0.3)(vitest@4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))
+      vitest: 4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
+      vitest-mock-extended: 5.0.0(typescript@6.0.3)(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))
       yaml: 2.9.0
     optionalDependencies:
       playwright: 1.59.1
@@ -7209,13 +7206,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.10(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))':
+  '@vitest/mocker@4.1.10(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.10
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      msw: 2.13.4(@types/node@20.19.39)(typescript@6.0.3)
+      msw: 2.15.0(@types/node@20.19.39)(typescript@6.0.3)
       vite: 8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)
 
   '@vitest/mocker@4.1.10(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3))':
@@ -10206,11 +10203,11 @@ snapshots:
       jiti: 2.7.0
       yaml: 2.9.0
 
-  vitest-mock-extended@5.0.0(typescript@6.0.3)(vitest@4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))):
+  vitest-mock-extended@5.0.0(typescript@6.0.3)(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))):
     dependencies:
       ts-essentials: 10.1.1(typescript@6.0.3)
       typescript: 6.0.3
-      vitest: 4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
+      vitest: 4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
 
   vitest-mock-extended@5.0.0(typescript@7.0.2)(vitest@4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3))):
     dependencies:
@@ -10218,10 +10215,10 @@ snapshots:
       typescript: 7.0.2
       vitest: 4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3))
 
-  vitest@4.1.10(@types/node@20.19.39)(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)):
+  vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.10
-      '@vitest/mocker': 4.1.10(msw@2.13.4(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
+      '@vitest/mocker': 4.1.10(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.10
       '@vitest/runner': 4.1.10
       '@vitest/snapshot': 4.1.10
