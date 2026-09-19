@@ -1,43 +1,13 @@
-import { http, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { defineContracts, http, intercept } from '@jterrazz/test';
+import { describe, expect, test } from 'vitest';
 
 import { streamChat } from '../stream-chat';
 
 const primaryUrl = 'http://spwn.test/api/worlds/w-1/talk';
 const fallbackUrl = 'http://fallback.test/api/architect/talk';
 
-const server = setupServer();
-
-beforeAll(() => {
-    server.listen({ onUnhandledRequest: 'error' });
-});
-
-afterEach(() => {
-    server.resetHandlers();
-});
-
-afterAll(() => {
-    server.close();
-});
-
-function stream(chunks: string[]): ReadableStream<Uint8Array> {
-    const encoder = new TextEncoder();
-    return new ReadableStream({
-        start(controller) {
-            for (const chunk of chunks) {
-                controller.enqueue(encoder.encode(chunk));
-            }
-            controller.close();
-        },
-    });
-}
-
-function sse(chunks: string[]): HttpResponse<ReadableStream<Uint8Array>> {
-    return new HttpResponse(stream(chunks), {
-        headers: { 'Content-Type': 'text/event-stream' },
-    });
-}
+/** The frame that closes a Claude Code stream. */
+const done = { data: '[DONE]' };
 
 function callbacks() {
     const blocks: unknown[][] = [];
@@ -60,13 +30,18 @@ function callbacks() {
 
 describe('streamChat', () => {
     test('parses assistant text from an SSE response', async () => {
-        server.use(
-            http.post(primaryUrl, () =>
-                sse([
-                    'data: {"type":"assistant","message":{"content":[{"type":"text","text":"hello world"}]}}\n\n',
-                    'data: [DONE]\n\n',
-                ]),
-            ),
+        // Given - one assistant event, then the closing frame
+        await using _ = await intercept(
+            http.post(primaryUrl),
+            http.sse([
+                {
+                    data: {
+                        message: { content: [{ text: 'hello world', type: 'text' }] },
+                        type: 'assistant',
+                    },
+                },
+                done,
+            ]),
         );
 
         const cb = callbacks();
@@ -78,13 +53,27 @@ describe('streamChat', () => {
     });
 
     test('parses tool_use blocks from an SSE response', async () => {
-        server.use(
-            http.post(primaryUrl, () =>
-                sse([
-                    'data: {"type":"assistant","message":{"content":[{"type":"tool_use","name":"bash","id":"t1","input":{"command":"ls"}}]}}\n\n',
-                    'data: [DONE]\n\n',
-                ]),
-            ),
+        // Given - an assistant event whose only content is a tool call
+        await using _ = await intercept(
+            http.post(primaryUrl),
+            http.sse([
+                {
+                    data: {
+                        message: {
+                            content: [
+                                {
+                                    id: 't1',
+                                    input: { command: 'ls' },
+                                    name: 'bash',
+                                    type: 'tool_use',
+                                },
+                            ],
+                        },
+                        type: 'assistant',
+                    },
+                },
+                done,
+            ]),
         );
 
         const cb = callbacks();
@@ -100,14 +89,26 @@ describe('streamChat', () => {
     });
 
     test('extracts cost and duration metadata from result events', async () => {
-        server.use(
-            http.post(primaryUrl, () =>
-                sse([
-                    'data: {"type":"assistant","message":{"content":[{"type":"text","text":"done"}]}}\n\n',
-                    'data: {"type":"result","subtype":"success","total_cost_usd":0.05,"duration_ms":1234}\n\n',
-                    'data: [DONE]\n\n',
-                ]),
-            ),
+        // Given - a reply followed by the result event that prices it
+        await using _ = await intercept(
+            http.post(primaryUrl),
+            http.sse([
+                {
+                    data: {
+                        message: { content: [{ text: 'done', type: 'text' }] },
+                        type: 'assistant',
+                    },
+                },
+                {
+                    data: {
+                        duration_ms: 1234,
+                        subtype: 'success',
+                        total_cost_usd: 0.05,
+                        type: 'result',
+                    },
+                },
+                done,
+            ]),
         );
 
         const cb = callbacks();
@@ -117,14 +118,12 @@ describe('streamChat', () => {
     });
 
     test('handles plain text streams', async () => {
-        server.use(
-            http.post(
-                primaryUrl,
-                () =>
-                    new HttpResponse(stream(['Hello plain response.\n', 'Second line.\n']), {
-                        headers: { 'Content-Type': 'text/plain' },
-                    }),
-            ),
+        // Given - a body that is not SSE at all, arriving in two pieces
+        await using _ = await intercept(
+            http.post(primaryUrl),
+            http.stream(['Hello plain response.\n', 'Second line.\n'], {
+                contentType: 'text/plain',
+            }),
         );
 
         const cb = callbacks();
@@ -136,8 +135,10 @@ describe('streamChat', () => {
     });
 
     test('handles JSON responses', async () => {
-        server.use(
-            http.post(primaryUrl, () => HttpResponse.json({ response: 'JSON fallback response' })),
+        // Given - a backend that answered in one serialised body
+        await using _ = await intercept(
+            http.post(primaryUrl),
+            http.json({ response: 'JSON fallback response' }),
         );
 
         const cb = callbacks();
@@ -152,7 +153,8 @@ describe('streamChat', () => {
     });
 
     test('reports network errors from the primary URL', async () => {
-        server.use(http.post(primaryUrl, () => HttpResponse.error()));
+        // Given - nothing answering at the primary URL
+        await using _ = await intercept(http.post(primaryUrl), http.unreachable());
 
         const cb = callbacks();
         await streamChat({ url: primaryUrl, body: { message: 'hi' }, ...cb });
@@ -162,10 +164,10 @@ describe('streamChat', () => {
     });
 
     test('reports JSON error payloads from non-2xx responses', async () => {
-        server.use(
-            http.post(primaryUrl, () =>
-                HttpResponse.json({ error: 'Internal server error' }, { status: 500 }),
-            ),
+        // Given - a backend that said no, and said why
+        await using _ = await intercept(
+            http.post(primaryUrl),
+            http.error(500, { error: 'Internal server error' }),
         );
 
         const cb = callbacks();
@@ -175,13 +177,22 @@ describe('streamChat', () => {
     });
 
     test('uses fallbackUrl when the primary URL fails', async () => {
-        server.use(
-            http.post(primaryUrl, () => HttpResponse.error()),
-            http.post(fallbackUrl, () =>
-                sse([
-                    'data: {"type":"assistant","message":{"content":[{"type":"text","text":"fallback response"}]}}\n\n',
-                    'data: [DONE]\n\n',
-                ]),
+        // Given - a dead primary and a fallback that streams
+        await using _ = await intercept(
+            defineContracts(
+                { request: http.post(primaryUrl), response: http.unreachable() },
+                {
+                    request: http.post(fallbackUrl),
+                    response: http.sse([
+                        {
+                            data: {
+                                message: { content: [{ text: 'fallback response', type: 'text' }] },
+                                type: 'assistant',
+                            },
+                        },
+                        done,
+                    ]),
+                },
             ),
         );
 
@@ -194,9 +205,12 @@ describe('streamChat', () => {
     });
 
     test('reports the primary error when primary and fallback both fail', async () => {
-        server.use(
-            http.post(primaryUrl, () => HttpResponse.error()),
-            http.post(fallbackUrl, () => HttpResponse.error()),
+        // Given - neither URL answers
+        await using _ = await intercept(
+            defineContracts(
+                { request: http.post(primaryUrl), response: http.unreachable() },
+                { request: http.post(fallbackUrl), response: http.unreachable() },
+            ),
         );
 
         const cb = callbacks();
@@ -206,14 +220,21 @@ describe('streamChat', () => {
     });
 
     test('parses thinking and result error events', async () => {
-        server.use(
-            http.post(primaryUrl, () =>
-                sse([
-                    'data: {"type":"assistant","message":{"content":[{"type":"thinking","text":"Let me think"}]}}\n\n',
-                    'data: {"type":"result","subtype":"error","result":"Rate limit exceeded"}\n\n',
-                    'data: [DONE]\n\n',
-                ]),
-            ),
+        // Given - a thought, then a result event that carries a failure
+        await using _ = await intercept(
+            http.post(primaryUrl),
+            http.sse([
+                {
+                    data: {
+                        message: { content: [{ text: 'Let me think', type: 'thinking' }] },
+                        type: 'assistant',
+                    },
+                },
+                {
+                    data: { result: 'Rate limit exceeded', subtype: 'error', type: 'result' },
+                },
+                done,
+            ]),
         );
 
         const cb = callbacks();
