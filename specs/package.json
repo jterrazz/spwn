@@ -19,8 +19,8 @@
     },
     "devDependencies": {
         "@hono/node-server": "^1.0.0",
-        "@jterrazz/test": "^15.1.1",
-        "@jterrazz/typescript": "^10.1.10",
+        "@jterrazz/test": "^15.3.0",
+        "@jterrazz/typescript": "^10.2.1",
         "@playwright/test": "^1.59.1",
         "@types/node": "^25.5.0",
         "hono": "^4.0.0",

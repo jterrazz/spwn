@@ -67,11 +67,11 @@ importers:
         version: 1.4.0
     devDependencies:
       '@jterrazz/test':
-        specifier: file:/private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz
-        version: file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))
+        specifier: ^15.3.0
+        version: 15.3.0(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))
       '@jterrazz/typescript':
-        specifier: ^10.1.10
-        version: 10.1.10(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)
+        specifier: ^10.2.1
+        version: 10.2.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.2
@@ -101,11 +101,11 @@ importers:
         specifier: ^1.0.0
         version: 1.19.14(hono@4.12.14)
       '@jterrazz/test':
-        specifier: ^15.1.1
-        version: 15.1.1(@types/node@25.6.0)(playwright@1.59.1)(typescript@7.0.2)(vitest@4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3)))
+        specifier: ^15.3.0
+        version: 15.3.0(@types/node@25.6.0)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@7.0.2)(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3))(vitest@4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3)))
       '@jterrazz/typescript':
-        specifier: ^10.1.10
-        version: 10.1.10(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)
+        specifier: ^10.2.1
+        version: 10.2.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)
       '@playwright/test':
         specifier: ^1.59.1
         version: 1.59.1
@@ -687,26 +687,8 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@jterrazz/test@15.1.1':
-    resolution: {integrity: sha512-me94yZ1lGAJLnn3ExpgifwoAikCtf3PDm7eRFEbiLm/xAXfd/s199s20gsLNYbKk66EZ3wJ+NhB1B0ZIP6nkMA==}
-    engines: {node: '>=20'}
-    hasBin: true
-    peerDependencies:
-      appium: ^3.0.0
-      playwright: ^1.49.0
-      vitest: ^4.1.10
-      webdriverio: ^9.30.0
-    peerDependenciesMeta:
-      appium:
-        optional: true
-      playwright:
-        optional: true
-      webdriverio:
-        optional: true
-
-  '@jterrazz/test@file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz':
-    resolution: {integrity: sha512-wPZpjPFoOdypcESHsm/tYYYjgA+7Ytije2OmRZCQ4SxaPfmyxbfzrFTKAGzxo0QMtWvZJnpzM1ibM4jg+MIqXA==, tarball: file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz}
-    version: 15.2.0
+  '@jterrazz/test@15.3.0':
+    resolution: {integrity: sha512-3h/V8ofgKziso2vdTBMbJqvi+nKSmYojnYqvtLgpNVU1PP5unijrSuCbJwPiVoEdyE9CEfuw9lX0YmDigBID0g==}
     engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
@@ -737,8 +719,8 @@ packages:
       webdriverio:
         optional: true
 
-  '@jterrazz/typescript@10.1.10':
-    resolution: {integrity: sha512-GF+oo4DJu8Tlb1YxFF57tPWEg0Y9u1p8Po9MqbPHNle6IhDBvg0W7nJJFgQR9T7ttGN0aeujyauguc1AZNl18Q==}
+  '@jterrazz/typescript@10.2.1':
+    resolution: {integrity: sha512-vvjg6Byq6xUQ5SC/FS1qTvw28ImENsIopX615jWEbM0KggzyY1KwzrE3T4ipxcx1Z4XV8xuAEPhGkk5uAR1x9w==}
     engines: {node: '>=24.0.0'}
     hasBin: true
 
@@ -6012,31 +5994,7 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@jterrazz/test@15.1.1(@types/node@25.6.0)(playwright@1.59.1)(typescript@7.0.2)(vitest@4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3)))':
-    dependencies:
-      better-sqlite3: 12.11.1
-      mockdate: 3.0.5
-      msw: 2.15.0(@types/node@25.6.0)(typescript@7.0.2)
-      pg: 8.22.0
-      redis: 6.1.0
-      testcontainers: 12.0.4
-      vitest: 4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3))
-      vitest-mock-extended: 5.0.0(typescript@7.0.2)(vitest@4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3)))
-      yaml: 2.9.0
-    optionalDependencies:
-      playwright: 1.59.1
-    transitivePeerDependencies:
-      - '@node-rs/xxhash'
-      - '@opentelemetry/api'
-      - '@types/node'
-      - bare-abort-controller
-      - bare-buffer
-      - pg-native
-      - react-native-b4a
-      - supports-color
-      - typescript
-
-  '@jterrazz/test@file:../../../../../../../../../../private/tmp/claude-501/-Users-jterrazz-Developer-jterrazz-jterrazz-os/84eba0c9-ec61-45d1-a086-d85bcf32df6b/scratchpad/jterrazz-test-15.2.0.tgz(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))':
+  '@jterrazz/test@15.3.0(@types/node@20.19.39)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.10(@types/node@20.19.39)(msw@2.15.0(@types/node@20.19.39)(typescript@6.0.3))(vite@8.0.8(@types/node@20.19.39)(jiti@2.7.0)(yaml@2.9.0)))':
     dependencies:
       better-sqlite3: 12.11.1
       mockdate: 3.0.5
@@ -6063,7 +6021,34 @@ snapshots:
       - supports-color
       - typescript
 
-  '@jterrazz/typescript@10.1.10(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)':
+  '@jterrazz/test@15.3.0(@types/node@25.6.0)(playwright@1.59.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@7.0.2)(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3))(vitest@4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3)))':
+    dependencies:
+      better-sqlite3: 12.11.1
+      mockdate: 3.0.5
+      msw: 2.15.0(@types/node@25.6.0)(typescript@7.0.2)
+      pg: 8.22.0
+      redis: 6.1.0
+      testcontainers: 12.0.4
+      vitest: 4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3))
+      vitest-mock-extended: 5.0.0(typescript@7.0.2)(vitest@4.1.10(@types/node@25.6.0)(msw@2.15.0(@types/node@25.6.0)(typescript@7.0.2))(vite@8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3)))
+      yaml: 2.9.0
+    optionalDependencies:
+      playwright: 1.59.1
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      vite: 8.0.8(@types/node@25.6.0)(jiti@2.7.0)(yaml@2.8.3)
+    transitivePeerDependencies:
+      - '@node-rs/xxhash'
+      - '@opentelemetry/api'
+      - '@types/node'
+      - bare-abort-controller
+      - bare-buffer
+      - pg-native
+      - react-native-b4a
+      - supports-color
+      - typescript
+
+  '@jterrazz/typescript@10.2.1(@arethetypeswrong/core@0.18.5)(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@volar/typescript@2.4.28)(eslint@10.2.0(jiti@2.7.0))(oxc-resolver@11.24.2)(unrun@0.2.36)':
     dependencies:
       '@arethetypeswrong/cli': 0.18.5
       dependency-cruiser: 18.3.1
