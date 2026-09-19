@@ -1,34 +1,28 @@
-import { http, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { http, intercept } from '@jterrazz/test';
+import { beforeAll, describe, expect, test } from 'vitest';
 
 import type { World } from '@/domain/model';
 
 import { apiGet, setApiBase } from './client';
 
-const server = setupServer();
-
 beforeAll(() => {
     setApiBase('http://spwn.test');
-    server.listen({ onUnhandledRequest: 'error' });
 });
 
-afterEach(() => {
-    server.resetHandlers();
-});
-
-afterAll(() => {
-    server.close();
-});
-
-function worldsAnswer(payload: Record<string, unknown>[]) {
-    server.use(http.get('http://spwn.test/api/worlds', () => HttpResponse.json(payload)));
+/**
+ * The route declared in PATH FORM: it matches the path on any origin, so the
+ * base the client was given does not have to be repeated here.
+ */
+async function worldsAnswer(payload: Record<string, unknown>[]) {
+    return await intercept(http.get('/api/worlds'), http.json(payload));
 }
 
 describe('the worlds route', () => {
     test('a declared world is known by its manifest name', async () => {
         // Given - a project that declares a world no container backs
-        worldsAnswer([{ agents: ['neo'], name: 'matrix', status: 'stopped', workspaces: ['.'] }]);
+        await using _ = await worldsAnswer([
+            { agents: ['neo'], name: 'matrix', status: 'stopped', workspaces: ['.'] },
+        ]);
 
         const [world] = await apiGet<World[]>('/api/worlds');
 
@@ -47,7 +41,7 @@ describe('the worlds route', () => {
 
     test('a running world keeps the container identity it was given', async () => {
         // Given - a world with a container behind it
-        worldsAnswer([
+        await using _ = await worldsAnswer([
             {
                 agents: [{ name: 'neo', role: 'chief', status: 'running' }],
                 config: 'matrix',
@@ -71,7 +65,7 @@ describe('the worlds route', () => {
 
     test('the single-valued agent and workspace fields still resolve', async () => {
         // Given - the older shape, one agent and one mount
-        worldsAnswer([
+        await using _ = await worldsAnswer([
             {
                 agent: 'neo',
                 config: 'matrix',
