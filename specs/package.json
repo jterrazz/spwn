@@ -19,11 +19,11 @@
     },
     "devDependencies": {
         "@hono/node-server": "^1.0.0",
-        "@jterrazz/test": "^15.3.0",
-        "@jterrazz/typescript": "^10.2.1",
+        "@jterrazz/test": "^16.0.0",
+        "@jterrazz/typescript": "^10.3.0",
         "@playwright/test": "^1.59.1",
         "@types/node": "^25.5.0",
         "hono": "^4.0.0",
-        "vitest": "^4.1.10"
+        "vitest": "^5.0.1"
     }
 }
